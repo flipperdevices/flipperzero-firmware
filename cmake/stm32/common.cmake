@@ -5,7 +5,7 @@ set(STM32_SUPPORTED_FAMILIES_LONG_NAME
     STM32L0 STM32L1 STM32L4 STM32L5
     STM32U5
     STM32WB_M4 STM32WL_M4 STM32WL_M0PLUS
-    STM32MP1 )
+    STM32MP1_M4 )
 
 foreach(FAMILY ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
     # append short names (F0, F1, H7_M4, ...) to STM32_SUPPORTED_FAMILIES_SHORT_NAME
@@ -160,6 +160,8 @@ function(stm32_get_cores CORES)
             set(${CORES} M4 PARENT_SCOPE)
         elseif(${ARG_FAMILY} STREQUAL "WL")
             set(${CORES} M4 M0PLUS PARENT_SCOPE)
+        elseif(${ARG_FAMILY} STREQUAL "MP1")
+            set(${CORES} M4 PARENT_SCOPE)
         else()
             set(${CORES} "" PARENT_SCOPE)
         endif()
@@ -173,6 +175,8 @@ function(stm32_get_cores CORES)
         stm32h7_get_device_cores(${ARG_DEVICE} ${ARG_TYPE} CORE_LIST)
     elseif(${ARG_FAMILY} STREQUAL "WB")
         # note STM32WB have an M0 core but in current state of the art it runs ST stacks and is not needed/allowed to build for customer
+        set(CORE_LIST M4)
+    elseif(${ARG_FAMILY} STREQUAL "MP1")
         set(CORE_LIST M4)
     elseif(${ARG_FAMILY} STREQUAL "WL")
         stm32wl_get_device_cores(${ARG_DEVICE} ${ARG_TYPE} CORE_LIST)

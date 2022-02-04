@@ -24,6 +24,11 @@ if(STM32WL IN_LIST CMSIS_FIND_COMPONENTS)
     list(APPEND CMSIS_FIND_COMPONENTS STM32WL_M4 STM32WL_M0PLUS)
 endif()
 
+if(STM32MP1 IN_LIST CMSIS_FIND_COMPONENTS)
+    list(REMOVE_ITEM CMSIS_FIND_COMPONENTS STM32MP1)
+    list(APPEND CMSIS_FIND_COMPONENTS STM32MP1_M4)
+endif()
+
 list(REMOVE_DUPLICATES CMSIS_FIND_COMPONENTS)
 
 # This section fills the RTOS or family components list
@@ -218,9 +223,17 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS_FAMILIES})
         stm32_get_chip_type(${FAMILY} ${DEVICE} TYPE)
         string(TOLOWER ${DEVICE} DEVICE_L)
         string(TOLOWER ${TYPE} TYPE_L)
+
+        set(STARTUP_NAMES startup_stm32${TYPE_L}.s startup_stm32${TYPE_L}${CORE_Ucm}.s)
+        if(${FAMILY} STREQUAL "MP1")
+            # There are stm32mp15?axx.s and stm32mp15?cxx.s files but no stm32mp15?dxx.s nor stm32mp15?fxx.s. No idea why.
+            # I think that stm32mp15xx.s should be compatible with all stm32mp15 devices anyway.
+            # This might need refinement if devices other stm32mp15 are released.
+            list(APPEND STARTUP_NAMES startup_stm32mp15xx.s)
+        endif()
         
         find_file(CMSIS_${FAMILY}${CORE_U}_${TYPE}_STARTUP
-            NAMES startup_stm32${TYPE_L}.s startup_stm32${TYPE_L}${CORE_Ucm}.s
+            NAMES ${STARTUP_NAMES}
             PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Source/Templates/gcc"
             NO_DEFAULT_PATH
         )
