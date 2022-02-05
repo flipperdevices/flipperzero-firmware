@@ -11,7 +11,7 @@
 //https://phreakerclub.com/forum/showthread.php?t=274&highlight=magicar
 //!!!  https://phreakerclub.com/forum/showthread.php?t=489&highlight=magicar&page=5
 
-#define TAG "SubGhzProtocolSomfyTelis"
+#define TAG "SubGhzProtocolScherKhan"
 
 static const SubGhzBlockConst subghz_protocol_scher_khan_const = {
     .te_short = 750,
@@ -91,7 +91,6 @@ void subghz_protocol_decoder_scher_khan_reset(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderScherKhan* instance = context;
     instance->decoder.parser_step = ScherKhanDecoderStepReset;
-    instance->protocol_name = "";
 }
 
 void subghz_protocol_decoder_scher_khan_feed(void* context, bool level, uint32_t duration) {

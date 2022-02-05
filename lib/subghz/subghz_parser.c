@@ -12,7 +12,7 @@
 //include "protocols/subghz_protocol_ido.h"
 //#include "protocols/subghz_protocol_faac_slh.h"
 //#include "protocols/subghz_protocol_nero_sketch.h"
-#include "protocols/subghz_protocol_star_line.h"
+// #include "protocols/subghz_protocol_star_line.h"
 // #include "protocols/subghz_protocol_nero_radio.h"
 // #include "protocols/subghz_protocol_scher_khan.h"
 //#include "protocols/subghz_protocol_kia.h"
@@ -40,7 +40,7 @@ typedef enum {
     //SubGhzProtocolTypeIDo,
     //SubGhzProtocolTypeFaacSLH,
     //SubGhzProtocolTypeNeroSketch,
-    SubGhzProtocolTypeStarLine,
+    // SubGhzProtocolTypeStarLine,
     // SubGhzProtocolTypeNeroRadio,
     // SubGhzProtocolTypeScherKhan,
     // SubGhzProtocolTypeKIA,
@@ -111,8 +111,8 @@ SubGhzParser* subghz_parser_alloc() {
     //     (SubGhzProtocolCommon*)subghz_protocol_faac_slh_alloc();
     // instance->protocols[SubGhzProtocolTypeNeroSketch] =
     //     (SubGhzProtocolCommon*)subghz_protocol_nero_sketch_alloc();
-    instance->protocols[SubGhzProtocolTypeStarLine] =
-        (SubGhzProtocolCommon*)subghz_protocol_star_line_alloc(instance->keystore);
+    // instance->protocols[SubGhzProtocolTypeStarLine] =
+    //     (SubGhzProtocolCommon*)subghz_protocol_star_line_alloc(instance->keystore);
     // instance->protocols[SubGhzProtocolTypeNeroRadio] =
     //     (SubGhzProtocolCommon*)subghz_protocol_nero_radio_alloc();
     //  instance->protocols[SubGhzProtocolTypeScherKhan] =
@@ -154,8 +154,8 @@ void subghz_parser_free(SubGhzParser* instance) {
     //     (SubGhzProtocolFaacSLH*)instance->protocols[SubGhzProtocolTypeFaacSLH]);
     // subghz_protocol_nero_sketch_free(
     //     (SubGhzProtocolNeroSketch*)instance->protocols[SubGhzProtocolTypeNeroSketch]);
-    subghz_protocol_star_line_free(
-        (SubGhzProtocolStarLine*)instance->protocols[SubGhzProtocolTypeStarLine]);
+    // subghz_protocol_star_line_free(
+    //     (SubGhzProtocolStarLine*)instance->protocols[SubGhzProtocolTypeStarLine]);
     // subghz_protocol_nero_radio_free(
     //     (SubGhzProtocolNeroRadio*)instance->protocols[SubGhzProtocolTypeNeroRadio]);
     // subghz_protocol_scher_khan_free(
@@ -259,8 +259,8 @@ void subghz_parser_reset(SubGhzParser* instance) {
     //     (SubGhzProtocolFaacSLH*)instance->protocols[SubGhzProtocolTypeFaacSLH]);
     // subghz_protocol_nero_sketch_reset(
     //     (SubGhzProtocolNeroSketch*)instance->protocols[SubGhzProtocolTypeNeroSketch]);
-    subghz_protocol_star_line_reset(
-        (SubGhzProtocolStarLine*)instance->protocols[SubGhzProtocolTypeStarLine]);
+    // subghz_protocol_star_line_reset(
+    //     (SubGhzProtocolStarLine*)instance->protocols[SubGhzProtocolTypeStarLine]);
     // subghz_protocol_nero_radio_reset(
     //     (SubGhzProtocolNeroRadio*)instance->protocols[SubGhzProtocolTypeNeroRadio]);
     // subghz_protocol_scher_khan_reset(
@@ -311,8 +311,8 @@ void subghz_parser_parse(SubGhzParser* instance, bool level, uint32_t duration) 
     //     (SubGhzProtocolNeroSketch*)instance->protocols[SubGhzProtocolTypeNeroSketch],
     //     level,
     //     duration);
-    subghz_protocol_star_line_parse(
-        (SubGhzProtocolStarLine*)instance->protocols[SubGhzProtocolTypeStarLine], level, duration);
+    // subghz_protocol_star_line_parse(
+    //     (SubGhzProtocolStarLine*)instance->protocols[SubGhzProtocolTypeStarLine], level, duration);
     // subghz_protocol_nero_radio_parse(
     //     (SubGhzProtocolNeroRadio*)instance->protocols[SubGhzProtocolTypeNeroRadio],
     //     level,
