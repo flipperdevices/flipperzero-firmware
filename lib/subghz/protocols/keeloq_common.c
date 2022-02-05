@@ -1,4 +1,4 @@
-#include "subghz_protocol_keeloq_common.h"
+#include "keeloq_common.h"
 
 #include <furi.h>
 
@@ -8,7 +8,7 @@
 /** Simple Learning Encrypt
  * @param data - 0xBSSSCCCC, B(4bit) key, S(10bit) serial&0x3FF, C(16bit) counter
  * @param key - manufacture (64bit)
- * @return keelog encrypt data
+ * @return keeloq encrypt data
  */
 inline uint32_t subghz_protocol_keeloq_common_encrypt(const uint32_t data, const uint64_t key) {
     uint32_t x = data, r;

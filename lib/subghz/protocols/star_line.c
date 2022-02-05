@@ -1,5 +1,5 @@
 #include "star_line.h"
-#include "subghz_protocol_keeloq_common.h"
+#include "keeloq_common.h"
 
 #include "../subghz_keystore.h"
 #include <m-string.h>
@@ -129,7 +129,8 @@ void subghz_protocol_decoder_star_line_feed(void* context, bool level, uint32_t 
         break;
     case StarLineDecoderStepSaveDuration:
         if(level) {
-            if(duration >= (subghz_protocol_star_line_const.te_long + subghz_protocol_star_line_const.te_delta)) {
+            if(duration >= (subghz_protocol_star_line_const.te_long +
+                            subghz_protocol_star_line_const.te_delta)) {
                 instance->decoder.parser_step = StarLineDecoderStepReset;
                 if(instance->decoder.decode_count_bit >=
                    subghz_protocol_star_line_const.min_count_bit_for_found) {
@@ -137,7 +138,7 @@ void subghz_protocol_decoder_star_line_feed(void* context, bool level, uint32_t 
                         instance->generic.data = instance->decoder.decode_data;
                         instance->generic.data_count_bit = instance->decoder.decode_count_bit;
                         if(instance->base.callback)
-                        instance->base.callback(&instance->base, instance->base.context);
+                            instance->base.callback(&instance->base, instance->base.context);
                     }
                 }
                 instance->decoder.decode_data = 0;
@@ -157,13 +158,15 @@ void subghz_protocol_decoder_star_line_feed(void* context, bool level, uint32_t 
         if(!level) {
             if((DURATION_DIFF(instance->decoder.te_last, subghz_protocol_star_line_const.te_short) <
                 subghz_protocol_star_line_const.te_delta) &&
-               (DURATION_DIFF(duration, subghz_protocol_star_line_const.te_short) < subghz_protocol_star_line_const.te_delta)) {
+               (DURATION_DIFF(duration, subghz_protocol_star_line_const.te_short) <
+                subghz_protocol_star_line_const.te_delta)) {
                 subghz_protocol_blocks_add_bit(&instance->decoder, 0);
                 instance->decoder.parser_step = StarLineDecoderStepSaveDuration;
             } else if(
                 (DURATION_DIFF(instance->decoder.te_last, subghz_protocol_star_line_const.te_long) <
                  subghz_protocol_star_line_const.te_delta) &&
-                (DURATION_DIFF(duration, subghz_protocol_star_line_const.te_long) < subghz_protocol_star_line_const.te_delta)) {
+                (DURATION_DIFF(duration, subghz_protocol_star_line_const.te_long) <
+                 subghz_protocol_star_line_const.te_delta)) {
                 subghz_protocol_blocks_add_bit(&instance->decoder, 1);
                 instance->decoder.parser_step = StarLineDecoderStepSaveDuration;
             } else {
@@ -176,9 +179,6 @@ void subghz_protocol_decoder_star_line_feed(void* context, bool level, uint32_t 
     }
 }
 
-
-
-
 // const char* subghz_protocol_star_line_find_and_get_manufacture_name(void* context) {
 //     SubGhzProtocolStarLine* instance = context;
 //     subghz_protocol_star_line_check_remote_controller(instance);
@@ -190,15 +190,13 @@ void subghz_protocol_decoder_star_line_feed(void* context, bool level, uint32_t 
 //     return instance->manufacture_name;
 // }
 
-
-static inline bool subghz_protocol_star_line_decrypt(
+static inline bool subghz_protocol_star_line_check_decrypt(
     SubGhzBlockGeneric* instance,
     uint32_t decrypt,
     uint8_t btn,
     uint32_t end_serial) {
     furi_assert(instance);
-    if((decrypt >> 24 == btn) &&
-                   ((((uint16_t)(decrypt >> 16)) & 0x00FF) == end_serial)) {
+    if((decrypt >> 24 == btn) && ((((uint16_t)(decrypt >> 16)) & 0x00FF) == end_serial)) {
         instance->cnt = decrypt & 0x0000FFFF;
         return true;
     }
@@ -215,7 +213,9 @@ static inline bool subghz_protocol_star_line_decrypt(
 static uint8_t subghz_protocol_star_line_check_remote_controller_selector(
     SubGhzBlockGeneric* instance,
     uint32_t fix,
-    uint32_t hop, SubGhzKeystore* keystore, const char** manufacture_name) {
+    uint32_t hop,
+    SubGhzKeystore* keystore,
+    const char** manufacture_name) {
     uint16_t end_serial = (uint16_t)(fix & 0xFF);
     uint8_t btn = (uint8_t)(fix >> 24);
     uint32_t decrypt = 0;
@@ -227,7 +227,7 @@ static uint8_t subghz_protocol_star_line_check_remote_controller_selector(
             case KEELOQ_LEARNING_SIMPLE:
                 //Simple Learning
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, manufacture_code->key);
-                if(subghz_protocol_star_line_decrypt(instance, decrypt, btn, end_serial)) {
+                if(subghz_protocol_star_line_check_decrypt(instance, decrypt, btn, end_serial)) {
                     *manufacture_name = string_get_cstr(manufacture_code->name);
                     return 1;
                 }
@@ -238,7 +238,7 @@ static uint8_t subghz_protocol_star_line_check_remote_controller_selector(
                 man_normal_learning =
                     subghz_protocol_keeloq_common_normal_learning(fix, manufacture_code->key);
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man_normal_learning);
-               if(subghz_protocol_star_line_decrypt(instance, decrypt, btn, end_serial)) {
+                if(subghz_protocol_star_line_check_decrypt(instance, decrypt, btn, end_serial)) {
                     *manufacture_name = string_get_cstr(manufacture_code->name);
                     return 1;
                 }
@@ -246,7 +246,7 @@ static uint8_t subghz_protocol_star_line_check_remote_controller_selector(
             case KEELOQ_LEARNING_UNKNOWN:
                 // Simple Learning
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, manufacture_code->key);
-                if(subghz_protocol_star_line_decrypt(instance, decrypt, btn, end_serial)) {
+                if(subghz_protocol_star_line_check_decrypt(instance, decrypt, btn, end_serial)) {
                     *manufacture_name = string_get_cstr(manufacture_code->name);
                     return 1;
                 }
@@ -258,7 +258,7 @@ static uint8_t subghz_protocol_star_line_check_remote_controller_selector(
                     man_rev = man_rev | man_rev_byte << (56 - i);
                 }
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man_rev);
-                if(subghz_protocol_star_line_decrypt(instance, decrypt, btn, end_serial)) {
+                if(subghz_protocol_star_line_check_decrypt(instance, decrypt, btn, end_serial)) {
                     *manufacture_name = string_get_cstr(manufacture_code->name);
                     return 1;
                 }
@@ -268,13 +268,13 @@ static uint8_t subghz_protocol_star_line_check_remote_controller_selector(
                 man_normal_learning =
                     subghz_protocol_keeloq_common_normal_learning(fix, manufacture_code->key);
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man_normal_learning);
-                if(subghz_protocol_star_line_decrypt(instance, decrypt, btn, end_serial)) {
+                if(subghz_protocol_star_line_check_decrypt(instance, decrypt, btn, end_serial)) {
                     *manufacture_name = string_get_cstr(manufacture_code->name);
                     return 1;
                 }
                 man_normal_learning = subghz_protocol_keeloq_common_normal_learning(fix, man_rev);
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man_normal_learning);
-                if(subghz_protocol_star_line_decrypt(instance, decrypt, btn, end_serial)) {
+                if(subghz_protocol_star_line_check_decrypt(instance, decrypt, btn, end_serial)) {
                     *manufacture_name = string_get_cstr(manufacture_code->name);
                     return 1;
                 }
@@ -292,13 +292,16 @@ static uint8_t subghz_protocol_star_line_check_remote_controller_selector(
  * 
  * @param instance SubGhzProtocolStarLine instance
  */
-static void subghz_protocol_star_line_check_remote_controller(SubGhzBlockGeneric* instance,  SubGhzKeystore* keystore, const char** manufacture_name) {
-    uint64_t key = subghz_protocol_blocks_reverse_key(
-        instance->data, instance->data_count_bit);
+static void subghz_protocol_star_line_check_remote_controller(
+    SubGhzBlockGeneric* instance,
+    SubGhzKeystore* keystore,
+    const char** manufacture_name) {
+    uint64_t key = subghz_protocol_blocks_reverse_key(instance->data, instance->data_count_bit);
     uint32_t key_fix = key >> 32;
     uint32_t key_hop = key & 0x00000000ffffffff;
 
-    subghz_protocol_star_line_check_remote_controller_selector(instance, key_fix, key_hop, keystore, manufacture_name);
+    subghz_protocol_star_line_check_remote_controller_selector(
+        instance, key_fix, key_hop, keystore, manufacture_name);
 
     instance->serial = key_fix & 0x00FFFFFF;
     instance->btn = key_fix >> 24;
@@ -308,15 +311,17 @@ void subghz_protocol_decoder_star_line_serialization(void* context, string_t out
     furi_assert(context);
     SubGhzProtocolDecoderStarLine* instance = context;
 
-    subghz_protocol_star_line_check_remote_controller(&instance->generic, instance->keystore, &instance->manufacture_name);
+    subghz_protocol_star_line_check_remote_controller(
+        &instance->generic, instance->keystore, &instance->manufacture_name);
+
     uint32_t code_found_hi = instance->generic.data >> 32;
     uint32_t code_found_lo = instance->generic.data & 0x00000000ffffffff;
 
     uint64_t code_found_reverse = subghz_protocol_blocks_reverse_key(
         instance->generic.data, instance->generic.data_count_bit);
-
     uint32_t code_found_reverse_hi = code_found_reverse >> 32;
     uint32_t code_found_reverse_lo = code_found_reverse & 0x00000000ffffffff;
+
     string_cat_printf(
         output,
         "%s %dbit\r\n"
