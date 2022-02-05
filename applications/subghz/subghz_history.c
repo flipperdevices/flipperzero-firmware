@@ -1,5 +1,5 @@
 #include "subghz_history.h"
-#include <lib/subghz/protocols/subghz_protocol_keeloq.h>
+//#include <lib/subghz/protocols/subghz_protocol_keeloq.h>
 //#include <lib/subghz/protocols/subghz_protocol_star_line.h>
 #include <lib/subghz/protocols/subghz_protocol_princeton.h>
 // #include <lib/subghz/protocols/subghz_protocol_somfy_keytis.h>
@@ -155,13 +155,14 @@ bool subghz_history_add_to_history(
     instance->history[instance->last_index_write].name = protocol->name;
     instance->history[instance->last_index_write].code_count_bit = protocol->code_last_count_bit;
     instance->history[instance->last_index_write].code_found = protocol->code_last_found;
-    if(strcmp(protocol->name, "KeeLoq") == 0) {
-        instance->history[instance->last_index_write].manufacture_name =
-            subghz_protocol_keeloq_find_and_get_manufacture_name(protocol);
+    // if(strcmp(protocol->name, "KeeLoq") == 0) {
+    //     instance->history[instance->last_index_write].manufacture_name =
+    //         subghz_protocol_keeloq_find_and_get_manufacture_name(protocol);
     // } else if(strcmp(protocol->name, "Star Line") == 0) {
     //     instance->history[instance->last_index_write].manufacture_name =
     //         subghz_protocol_star_line_find_and_get_manufacture_name(protocol);
-    } else if(strcmp(protocol->name, "Princeton") == 0) {
+    //} else 
+    if(strcmp(protocol->name, "Princeton") == 0) {
         instance->history[instance->last_index_write].data1 =
             subghz_protocol_princeton_get_te(protocol);
     }//  else if(strcmp(protocol->name, "Somfy Keytis") == 0) {

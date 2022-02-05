@@ -149,7 +149,7 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     SubGhzEnvironment* environment = subghz_environment_alloc();
     subghz_environment_load_keystore(environment, "/ext/subghz/keeloq_mfcodes");
 
-    SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, "Nero Radio");
+    SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, "KeeLoq");
     subghz_transmitter_load(transmitter, key, 24, repeat); // TODO: serialize, deserialize
 
     furi_hal_subghz_reset();
