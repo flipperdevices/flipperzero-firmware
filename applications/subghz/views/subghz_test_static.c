@@ -7,7 +7,7 @@
 #include <furi_hal.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
-#include <lib/subghz/protocols/subghz_protocol_princeton.h>
+#include <lib/subghz/protocols/princeton_for_testing.h>
 
 #define TAG "SubGhzTestStatic"
 
@@ -105,21 +105,21 @@ bool subghz_test_static_input(InputEvent* event, void* context) {
 
                         FURI_LOG_I(TAG, "TX Start");
 
-                        subghz_encoder_princeton_set(
+                        subghz_encoder_princeton_for_testing_set(
                             instance->encoder,
                             subghz_test_static_keys[model->button],
                             10000,
                             subghz_frequencies_testing[model->frequency]);
 
                         furi_hal_subghz_start_async_tx(
-                            subghz_encoder_princeton_yield, instance->encoder);
+                            subghz_encoder_princeton_for_testing_yield, instance->encoder);
                         instance->satus_tx = SubGhzTestStaticStatusTX;
                     }
                 } else if(event->type == InputTypeRelease) {
                     if(instance->satus_tx == SubGhzTestStaticStatusTX) {
                         FURI_LOG_I(TAG, "TX Stop");
-                        subghz_encoder_princeton_stop(instance->encoder, millis());
-                        subghz_encoder_princeton_print_log(instance->encoder);
+                        subghz_encoder_princeton_for_testing_stop(instance->encoder, millis());
+                        subghz_encoder_princeton_for_testing_print_log(instance->encoder);
                         furi_hal_subghz_stop_async_tx();
                         notification_message(notification, &sequence_reset_red);
                     }
@@ -172,14 +172,14 @@ SubGhzTestStatic* subghz_test_static_alloc() {
     view_set_enter_callback(instance->view, subghz_test_static_enter);
     view_set_exit_callback(instance->view, subghz_test_static_exit);
 
-    instance->encoder = subghz_encoder_princeton_alloc();
+    instance->encoder = subghz_encoder_princeton_for_testing_alloc();
 
     return instance;
 }
 
 void subghz_test_static_free(SubGhzTestStatic* instance) {
     furi_assert(instance);
-    subghz_encoder_princeton_free(instance->encoder);
+    subghz_encoder_princeton_for_testing_free(instance->encoder);
     view_free(instance->view);
     free(instance);
 }

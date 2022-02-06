@@ -1,4 +1,5 @@
 #pragma once
+
 #include "base.h"
 
 #define SUBGHZ_PROTOCOL_CAME_NAME "CAME"

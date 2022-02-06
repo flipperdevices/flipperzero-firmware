@@ -6,7 +6,7 @@
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
-#include <lib/subghz/protocols/subghz_protocol_princeton.h>
+//#include <lib/subghz/protocols/subghz_protocol_princeton.h>
 
 #include <assets_icons.h>
 #define SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE 100

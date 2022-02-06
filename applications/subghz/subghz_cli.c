@@ -8,7 +8,7 @@
 #include <lib/subghz/subghz_parser.h>
 #include <lib/subghz/subghz_keystore.h>
 #include <lib/subghz/protocols/subghz_protocol_common.h>
-#include <lib/subghz/protocols/subghz_protocol_princeton.h>
+//#include <lib/subghz/protocols/subghz_protocol_princeton.h>
 
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
@@ -149,7 +149,7 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     SubGhzEnvironment* environment = subghz_environment_alloc();
     subghz_environment_load_keystore(environment, "/ext/subghz/keeloq_mfcodes");
 
-    SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, "KeeLoq");
+    SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, "Princeton");
     subghz_transmitter_load(transmitter, key, 24, repeat); // TODO: serialize, deserialize
 
     furi_hal_subghz_reset();
