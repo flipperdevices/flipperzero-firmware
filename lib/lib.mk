@@ -105,7 +105,9 @@ CPP_SOURCES		+= $(wildcard $(LIB_DIR)/app-scened-template/*/*.cpp)
 
 # Toolbox
 C_SOURCES		+= $(wildcard $(LIB_DIR)/toolbox/*.c)
+C_SOURCES		+= $(wildcard $(LIB_DIR)/toolbox/*/*.c)
 CPP_SOURCES		+= $(wildcard $(LIB_DIR)/toolbox/*.cpp)
+CPP_SOURCES		+= $(wildcard $(LIB_DIR)/toolbox/*/*.cpp)
 
 # USB Stack
 CFLAGS			+= -I$(LIB_DIR)/libusb_stm32/inc
