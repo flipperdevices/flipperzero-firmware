@@ -73,6 +73,103 @@ const SubGhzProtocol subghz_protocol_nice_flor_s = {
     .encoder = &subghz_protocol_nice_flor_s_encoder,
 };
 
+/** Read bytes from rainbow table
+ * 
+ * @param instance - SubGhzProtocolNiceFlorS* instance
+ * @param address  - address byte
+ * @return byte data
+ */
+static uint8_t
+    subghz_protocol_nice_flor_s_get_byte_in_file(const char* file_name, uint32_t address) {
+    if(!file_name) return 0;
+
+    uint8_t buffer[1] = {0};
+    if(subghz_keystore_raw_get_data(file_name, address, buffer, sizeof(uint8_t))) {
+        return buffer[0];
+    } else {
+        return 0;
+    }
+}
+
+static inline void subghz_protocol_decoder_nice_flor_s_magic_xor(uint8_t* p, uint8_t k) {
+    for(uint8_t i = 1; i < 6; i++) {
+        p[i] ^= k;
+    }
+}
+
+static uint64_t
+    subghz_protocol_nice_flor_s_encrypt(uint64_t data, const char* file_name) {
+    uint8_t* p = (uint8_t*)&data;
+
+    uint8_t k = 0;
+    for(uint8_t y = 0; y < 2; y++) {
+        k = subghz_protocol_nice_flor_s_get_byte_in_file(file_name, p[0] & 0x1f);
+        subghz_protocol_decoder_nice_flor_s_magic_xor(p, k);
+
+        p[5] &= 0x0f;
+        p[0] ^= k & 0xe0;
+        k = subghz_protocol_nice_flor_s_get_byte_in_file(file_name, p[0] >> 3) + 0x25;
+        subghz_protocol_decoder_nice_flor_s_magic_xor(p, k);
+
+        p[5] &= 0x0f;
+        p[0] ^= k & 0x7;
+        if(y == 0) {
+            k = p[0];
+            p[0] = p[1];
+            p[1] = k;
+        }
+    }
+
+    p[5] = ~p[5] & 0x0f;
+    k = ~p[4];
+    p[4] = ~p[0];
+    p[0] = ~p[2];
+    p[2] = k;
+    k = ~p[3];
+    p[3] = ~p[1];
+    p[1] = k;
+
+    return data;
+}
+
+static uint64_t
+    subghz_protocol_nice_flor_s_decrypt(SubGhzBlockGeneric* instance, const char* file_name) {
+    furi_assert(instance);
+    uint64_t data = instance->data;
+    uint8_t* p = (uint8_t*)&data;
+
+    uint8_t k = 0;
+
+    k = ~p[4];
+    p[5] = ~p[5];
+    p[4] = ~p[2];
+    p[2] = ~p[0];
+    p[0] = k;
+    k = ~p[3];
+    p[3] = ~p[1];
+    p[1] = k;
+
+    for(uint8_t y = 0; y < 2; y++) {
+        k = subghz_protocol_nice_flor_s_get_byte_in_file(file_name, p[0] >> 3) + 0x25;
+        subghz_protocol_decoder_nice_flor_s_magic_xor(p, k);
+
+        p[5] &= 0x0f;
+        p[0] ^= k & 0x7;
+        k = subghz_protocol_nice_flor_s_get_byte_in_file(file_name, p[0] & 0x1f);
+        subghz_protocol_decoder_nice_flor_s_magic_xor(p, k);
+
+        p[5] &= 0x0f;
+        p[0] ^= k & 0xe0;
+
+        if(y == 0) {
+            k = p[0];
+            p[0] = p[1];
+            p[1] = k;
+        }
+    }
+    return data;
+}
+
 void* subghz_protocol_decoder_nice_flor_s_alloc(SubGhzEnvironment* environment) {
     SubGhzProtocolDecoderNiceFlorS* instance = furi_alloc(sizeof(SubGhzProtocolDecoderNiceFlorS));
     instance->base.protocol = &subghz_protocol_nice_flor_s;
@@ -178,24 +275,6 @@ void subghz_protocol_decoder_nice_flor_s_feed(void* context, bool level, uint32_
     }
 }
 
-/** Read bytes from rainbow table
- * 
- * @param instance - SubGhzProtocolNiceFlorS* instance
- * @param address  - address byte
- * @return byte data
- */
-static uint8_t
-    subghz_protocol_nice_flor_s_get_byte_in_file(const char* file_name, uint32_t address) {
-    if(!file_name) return 0;
-
-    uint8_t buffer[1] = {0};
-    if(subghz_keystore_raw_get_data(file_name, address, buffer, sizeof(uint8_t))) {
-        return buffer[0];
-    } else {
-        return 0;
-    }
-}
-
 /** Decrypt protocol Nice Flor S
  * 
  * @param instance - SubGhzProtocolNiceFlorS* instance
@@ -208,9 +287,10 @@ static void subghz_protocol_nice_flor_s_remote_controller(
     * P0 (4-bit)    - button positional code - 1:0x1, 2:0x2, 3:0x4, 4:0x8;
     * P1 (4-bit)    - batch repetition number, calculated by the formula:
     * P1 = 0xF ^ P0 ^ n; where n changes from 1 to 15, then 0, and then in a circle
-    * key 1: {0xF,0xC,0xD,0xA,0xB,0x8,0x9,0x6,0x7,0x4,0x5,0x2,0x3,0x0,0x1,0xE};
-    * key 2: {0xC,0xF,0xE,0x9,0x8,0xB,0xA,0x5,0x4,0x7,0x6,0x1,0x0,0x3,0x2,0xD};
-    * key 3: {0xA,0x9,0x8,0xF,0xE,0xD,0xC,0x3,0x2,0x1,0x0,0x7,0x6,0x5,0x4,0xB};
+    * key 1: {0xE,0xF,0xC,0xD,0xA,0xB,0x8,0x9,0x6,0x7,0x4,0x5,0x2,0x3,0x0,0x1};
+    * key 2: {0xD,0xC,0xF,0xE,0x9,0x8,0xB,0xA,0x5,0x4,0x7,0x6,0x1,0x0,0x3,0x2};
+    * key 3: {0xB,0xA,0x9,0x8,0xF,0xE,0xD,0xC,0x3,0x2,0x1,0x0,0x7,0x6,0x5,0x4};
+    * key 4: {0x7,0x6,0x5,0x4,0x3,0x2,0x1,0x0,0xF,0xE,0xD,0xC,0xB,0xA,0x9,0x8};
     * P2 (4-bit)    - part of the serial number, P2 = (K ^ S3) & 0xF;
     * P3 (byte)     - the major part of the encrypted index
     * P4 (byte)     - the low-order part of the encrypted index
@@ -219,21 +299,16 @@ static void subghz_protocol_nice_flor_s_remote_controller(
     * P7 (byte)     - part of the serial number, P7 = K ^ S0;
     * K (byte)      - depends on P3 and P4, K = Fk(P3, P4);
     * S3,S2,S1,S0   - serial number of the console 28 bit.
+    *
+    * data    => 0x1c5783607f7b3     key  serial  cnt
+    * decrypt => 0x10436c6820444 => 0x1  0436c682 0444
+    * 
     */
 
-    uint16_t p3p4 = (uint16_t)(instance->data >> 24);
-    instance->cnt = subghz_protocol_nice_flor_s_get_byte_in_file(file_name, p3p4 * 2) << 8 |
-                    subghz_protocol_nice_flor_s_get_byte_in_file(file_name, p3p4 * 2 + 1);
-    uint8_t k = (uint8_t)(p3p4 & 0x00FF) ^ subghz_protocol_nice_flor_s_get_byte_in_file(
-                                               file_name, (0x20000 | (instance->cnt & 0x00ff)));
-
-    uint8_t s3 = ((uint8_t)(instance->data >> 40) ^ k) & 0x0f;
-    uint8_t s2 = ((uint8_t)(instance->data >> 16) ^ k);
-    uint8_t s1 = ((uint8_t)(instance->data >> 8) ^ k);
-    uint8_t s0 = ((uint8_t)(instance->data) ^ k);
-    instance->serial = s3 << 24 | s2 << 16 | s1 << 8 | s0;
-
-    instance->btn = (instance->data >> 48) & 0x0f;
+    uint64_t decrypt=subghz_protocol_nice_flor_s_decrypt(instance, file_name);
+    instance->cnt = decrypt & 0xFFFF;
+    instance->serial = (decrypt >> 16) & 0xFFFFFFF;
+    instance->btn = (decrypt >> 48) & 0xF;
 }
 
 void subghz_protocol_decoder_nice_flor_s_serialization(void* context, string_t output) {

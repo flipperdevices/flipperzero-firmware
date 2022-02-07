@@ -251,7 +251,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     SubGhzEnvironment* environment = subghz_environment_alloc();
     subghz_environment_load_keystore(environment, "/ext/subghz/keeloq_mfcodes");
     subghz_environment_set_came_atomo_rainbow_table_file_name(environment, "/ext/subghz/came_atomo");
-    subghz_environment_set_nice_flor_s_rainbow_table_file_name(environment, "/ext/subghz/nice_flor_s_rx");
+    subghz_environment_set_nice_flor_s_rainbow_table_file_name(environment, "/ext/subghz/nice_flor_s");
 
     SubGhzReceiver* receiver = subghz_receiver_alloc(environment);
     subghz_receiver_set_rx_callback(receiver, subghz_cli_command_rx_callback, instance);
