@@ -126,7 +126,7 @@ bool string_stream_seek(StringStream* stream, int32_t offset, StringStreamOffset
     return result;
 }
 
-size_t string_stream_read(StringStream* stream, uint8_t* data, size_t count) {
+size_t string_stream_read(StringStream* stream, char* data, size_t count) {
     size_t write_index = 0;
     const char* cstr = string_get_cstr(stream->string);
 
@@ -145,26 +145,23 @@ size_t string_stream_read(StringStream* stream, uint8_t* data, size_t count) {
 }
 
 size_t string_stream_insert(StringStream* stream, const char* data, size_t size) {
-    size_t stream_size_before = stream_size(stream);
+    size_t was_written = 0;
 
     do {
         string_t right;
         string_init_set(right, &string_get_cstr(stream->string)[stream->index]);
-
-        if(!string_stream_delete(stream, string_stream_size(stream))) break;
-        if(string_stream_write(stream, data, size) != size) break;
-
+        string_stream_delete(stream, string_stream_size(stream));
+        was_written = string_stream_write(stream, data, size);
         string_cat(stream->string, right);
         string_clear(right);
 
-        result = true;
     } while(false);
 
-    return stream_size(stream) - stream_size_before;
+    return was_written;
 }
 
 size_t string_stream_delete(StringStream* stream, size_t size) {
-    size_t stream_size_before = stream_size(stream);
+    size_t stream_size_before = string_stream_size(stream);
 
     do {
         if(string_stream_eof(stream)) break;
@@ -174,5 +171,5 @@ size_t string_stream_delete(StringStream* stream, size_t size) {
         string_replace_at(stream->string, stream->index, remain_size, "");
     } while(false);
 
-    return stream_size_before - stream_size(stream);
+    return stream_size_before - string_stream_size(stream);
 }

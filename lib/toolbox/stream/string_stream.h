@@ -123,7 +123,7 @@ size_t string_stream_write_vaformat(StringStream* stream, const char* format, va
  * @param count size of data to be read
  * @return size_t how many bytes was read
  */
-size_t string_stream_read(StringStream* stream, const char* data, size_t count);
+size_t string_stream_read(StringStream* stream, char* data, size_t count);
 
 /**
  * Insert N chars to the stream, starting at the current pointer.
