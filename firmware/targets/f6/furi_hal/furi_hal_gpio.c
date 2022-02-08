@@ -68,7 +68,7 @@ void hal_gpio_init_ex(
     uint32_t exti_line = GET_EXTI_LINE(gpio->pin);
 
     // Configure gpio with interrupts disabled
-    __disable_irq();
+    FURI_CRITICAL_ENTER();
     // Set gpio speed
     if(speed == GpioSpeedLow) {
         LL_GPIO_SetPinSpeed(gpio->port, gpio->pin, LL_GPIO_SPEED_FREQ_LOW);
@@ -142,51 +142,51 @@ void hal_gpio_init_ex(
         }
     }
 
-    __enable_irq();
+    FURI_CRITICAL_EXIT();
 }
 
 void hal_gpio_add_int_callback(const GpioPin* gpio, GpioExtiCallback cb, void* ctx) {
     furi_assert(gpio);
     furi_assert(cb);
 
-    __disable_irq();
+    FURI_CRITICAL_ENTER();
     uint8_t pin_num = hal_gpio_get_pin_num(gpio);
     furi_assert(gpio_interrupt[pin_num].callback == NULL);
     gpio_interrupt[pin_num].callback = cb;
     gpio_interrupt[pin_num].context = ctx;
     gpio_interrupt[pin_num].ready = true;
-    __enable_irq();
+    FURI_CRITICAL_EXIT();
 }
 
 void hal_gpio_enable_int_callback(const GpioPin* gpio) {
     furi_assert(gpio);
 
-    __disable_irq();
+    FURI_CRITICAL_ENTER();
     uint8_t pin_num = hal_gpio_get_pin_num(gpio);
     if(gpio_interrupt[pin_num].callback) {
         gpio_interrupt[pin_num].ready = true;
     }
-    __enable_irq();
+    FURI_CRITICAL_EXIT();
 }
 
 void hal_gpio_disable_int_callback(const GpioPin* gpio) {
     furi_assert(gpio);
 
-    __disable_irq();
+    FURI_CRITICAL_ENTER();
     uint8_t pin_num = hal_gpio_get_pin_num(gpio);
     gpio_interrupt[pin_num].ready = false;
-    __enable_irq();
+    FURI_CRITICAL_EXIT();
 }
 
 void hal_gpio_remove_int_callback(const GpioPin* gpio) {
     furi_assert(gpio);
 
-    __disable_irq();
+    FURI_CRITICAL_ENTER();
     uint8_t pin_num = hal_gpio_get_pin_num(gpio);
     gpio_interrupt[pin_num].callback = NULL;
     gpio_interrupt[pin_num].context = NULL;
     gpio_interrupt[pin_num].ready = false;
-    __enable_irq();
+    FURI_CRITICAL_EXIT();
 }
 
 static void hal_gpio_int_call(uint16_t pin_num) {
