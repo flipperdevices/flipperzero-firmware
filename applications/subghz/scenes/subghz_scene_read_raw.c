@@ -1,7 +1,8 @@
 #include "../subghz_i.h"
 #include "../views/subghz_read_raw.h"
 #include <dolphin/dolphin.h>
-#include <lib/subghz/protocols/subghz_protocol_raw.h>
+#include <lib/subghz/protocols/raw.h>
+//#include "lib/subghz/protocols/subghz_protocol_raw.h"
 #include <lib/subghz/subghz_parser.h>
 #include <lib/toolbox/path.h>
 
@@ -88,14 +89,18 @@ void subghz_scene_read_raw_on_enter(void* context) {
     }
 
     subghz_scene_read_raw_update_statusbar(subghz);
+
+    //set callback view raw
     subghz_read_raw_set_callback(subghz->subghz_read_raw, subghz_scene_read_raw_callback, subghz);
 
     subghz->txrx->protocol_result = subghz_parser_get_by_name(subghz->txrx->parser, "RAW");
     furi_assert(subghz->txrx->protocol_result);
 
-    subghz_worker_set_pair_callback(
-        subghz->txrx->worker, (SubGhzWorkerPairCallback)subghz_parser_raw_parse);
-
+    // //set callback feed
+    // subghz_worker_set_pair_callback(
+    //     subghz->txrx->worker, (SubGhzWorkerPairCallback)subghz_parser_raw_parse);
+    
+    //set callback end tx
     subghz_protocol_raw_file_encoder_worker_set_callback_end(
         (SubGhzProtocolRAW*)subghz->txrx->protocol_result,
         subghz_scene_read_raw_callback_end_tx,

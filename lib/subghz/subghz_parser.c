@@ -16,7 +16,7 @@
 // #include "protocols/subghz_protocol_nero_radio.h"
 // #include "protocols/subghz_protocol_scher_khan.h"
 //#include "protocols/subghz_protocol_kia.h"
-#include "protocols/subghz_protocol_raw.h"
+//#include "protocols/subghz_protocol_raw.h"
 // #include "protocols/subghz_protocol_hormann.h"
 // #include "protocols/subghz_protocol_somfy_telis.h"
 // #include "protocols/subghz_protocol_somfy_keytis.h"
@@ -44,7 +44,7 @@ typedef enum {
     // SubGhzProtocolTypeNeroRadio,
     // SubGhzProtocolTypeScherKhan,
     // SubGhzProtocolTypeKIA,
-    SubGhzProtocolTypeRAW,
+    //SubGhzProtocolTypeRAW,
     // SubGhzProtocolTypeHormann,
     // SubGhzProtocolTypeSomfyTelis,
     // SubGhzProtocolTypeSomfyKeytis,
@@ -66,15 +66,15 @@ struct SubGhzParser {
 static void subghz_parser_text_rx_callback(SubGhzProtocolCommon* parser, void* context) {
     SubGhzParser* instance = context;
 
-    string_t output;
-    string_init(output);
-    subghz_protocol_common_to_str((SubGhzProtocolCommon*)parser, output);
-    if(instance->text_callback) {
-        instance->text_callback(output, instance->text_callback_context);
-    } else {
-        printf("%s", string_get_cstr(output));
-    }
-    string_clear(output);
+    // string_t output;
+    // string_init(output);
+    // subghz_protocol_common_to_str((SubGhzProtocolCommon*)parser, output);
+    // if(instance->text_callback) {
+    //     instance->text_callback(output, instance->text_callback_context);
+    // } else {
+    //     printf("%s", string_get_cstr(output));
+    // }
+    // string_clear(output);
 }
 
 static void subghz_parser_parser_rx_callback(SubGhzProtocolCommon* parser, void* context) {
@@ -119,8 +119,8 @@ SubGhzParser* subghz_parser_alloc() {
     //      (SubGhzProtocolCommon*)subghz_protocol_scher_khan_alloc();
     // instance->protocols[SubGhzProtocolTypeKIA] =
     //     (SubGhzProtocolCommon*)subghz_protocol_kia_alloc();
-    instance->protocols[SubGhzProtocolTypeRAW] =
-        (SubGhzProtocolCommon*)subghz_protocol_raw_alloc();
+    // instance->protocols[SubGhzProtocolTypeRAW] =
+    //     (SubGhzProtocolCommon*)subghz_protocol_raw_alloc();
     // instance->protocols[SubGhzProtocolTypeHormann] =
     //     (SubGhzProtocolCommon*)subghz_protocol_hormann_alloc();
     // instance->protocols[SubGhzProtocolTypeSomfyTelis] =
@@ -161,7 +161,7 @@ void subghz_parser_free(SubGhzParser* instance) {
     // subghz_protocol_scher_khan_free(
     //     (SubGhzProtocolScherKhan*)instance->protocols[SubGhzProtocolTypeScherKhan]);
     // subghz_protocol_kia_free((SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA]);
-    subghz_protocol_raw_free((SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW]);
+    //subghz_protocol_raw_free((SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW]);
     // subghz_protocol_hormann_free(
     //     (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann]);
     // subghz_protocol_somfy_telis_free(
@@ -177,14 +177,14 @@ void subghz_parser_free(SubGhzParser* instance) {
 SubGhzProtocolCommon* subghz_parser_get_by_name(SubGhzParser* instance, const char* name) {
     SubGhzProtocolCommon* result = NULL;
 
-    for(size_t i = 0; i < SubGhzProtocolTypeMax; i++) {
-        if(strcmp(instance->protocols[i]->name, name) == 0) {
-            result = instance->protocols[i];
-            break;
-        }
-    }
+    // for(size_t i = 0; i < SubGhzProtocolTypeMax; i++) {
+    //     if(strcmp(instance->protocols[i]->name, name) == 0) {
+    //         result = instance->protocols[i];
+    //         break;
+    //     }
+    // }
 
-    return result;
+    // return result;
 }
 
 void subghz_parser_enable_dump_text(
@@ -193,28 +193,28 @@ void subghz_parser_enable_dump_text(
     void* context) {
     furi_assert(instance);
 
-    for(size_t i = 0; i < SubGhzProtocolTypeMax; i++) {
-        subghz_protocol_common_set_callback(
-            instance->protocols[i], subghz_parser_text_rx_callback, instance);
-    }
+    // for(size_t i = 0; i < SubGhzProtocolTypeMax; i++) {
+    //     subghz_protocol_common_set_callback(
+    //         instance->protocols[i], subghz_parser_text_rx_callback, instance);
+    // }
 
-    instance->text_callback = callback;
-    instance->text_callback_context = context;
+    // instance->text_callback = callback;
+    // instance->text_callback_context = context;
 }
 
 void subghz_parser_enable_dump(
     SubGhzParser* instance,
     SubGhzProtocolCommonCallbackDump callback,
     void* context) {
-    furi_assert(instance);
+    // furi_assert(instance);
 
-    for(size_t i = 0; i < SubGhzProtocolTypeMax; i++) {
-        subghz_protocol_common_set_callback(
-            instance->protocols[i], subghz_parser_parser_rx_callback, instance);
-    }
+    // for(size_t i = 0; i < SubGhzProtocolTypeMax; i++) {
+    //     subghz_protocol_common_set_callback(
+    //         instance->protocols[i], subghz_parser_parser_rx_callback, instance);
+    // }
 
-    instance->parser_callback = callback;
-    instance->parser_callback_context = context;
+    // instance->parser_callback = callback;
+    // instance->parser_callback_context = context;
 }
 
 // void subghz_parser_load_nice_flor_s_file(SubGhzParser* instance, const char* file_name) {
@@ -228,14 +228,14 @@ void subghz_parser_enable_dump(
 // }
 
 bool subghz_parser_load_keeloq_file(SubGhzParser* instance, const char* file_name) {
-    bool ret = false;
-    if(subghz_keystore_load(instance->keystore, file_name)) {
-        FURI_LOG_I(SUBGHZ_PARSER_TAG, "Successfully loaded keeloq keys from %s", file_name);
-        ret = true;
-    } else {
-        FURI_LOG_W(SUBGHZ_PARSER_TAG, "Failed to load keeloq keysfrom %s", file_name);
-    }
-    return ret;
+    // bool ret = false;
+    // if(subghz_keystore_load(instance->keystore, file_name)) {
+    //     FURI_LOG_I(SUBGHZ_PARSER_TAG, "Successfully loaded keeloq keys from %s", file_name);
+    //     ret = true;
+    // } else {
+    //     FURI_LOG_W(SUBGHZ_PARSER_TAG, "Failed to load keeloq keysfrom %s", file_name);
+    // }
+    // return ret;
 }
 
 void subghz_parser_reset(SubGhzParser* instance) {
@@ -266,7 +266,7 @@ void subghz_parser_reset(SubGhzParser* instance) {
     // subghz_protocol_scher_khan_reset(
     //     (SubGhzProtocolScherKhan*)instance->protocols[SubGhzProtocolTypeScherKhan]);
     // subghz_protocol_kia_reset((SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA]);
-    subghz_protocol_raw_reset((SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW]);
+    //subghz_protocol_raw_reset((SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW]);
     // subghz_protocol_hormann_reset(
     //     (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann]);
     // subghz_protocol_somfy_telis_reset(
@@ -276,8 +276,8 @@ void subghz_parser_reset(SubGhzParser* instance) {
 }
 
 void subghz_parser_raw_parse(SubGhzParser* instance, bool level, uint32_t duration) {
-    subghz_protocol_raw_parse(
-        (SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW], level, duration);
+    // subghz_protocol_raw_parse(
+    //     (SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW], level, duration);
 }
 
 void subghz_parser_parse(SubGhzParser* instance, bool level, uint32_t duration) {

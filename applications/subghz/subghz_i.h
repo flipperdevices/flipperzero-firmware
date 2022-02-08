@@ -27,7 +27,11 @@
 #include <lib/subghz/subghz_worker.h>
 
 #include <lib/subghz/subghz_parser.h>
+
 #include <lib/subghz/protocols/subghz_protocol_common.h>
+#include <lib/subghz/receiver.h>
+#include <lib/subghz/transmitter.h>
+
 #include "subghz_history.h"
 
 #include <gui/modules/variable_item_list.h>
