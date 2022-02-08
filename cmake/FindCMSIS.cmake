@@ -77,21 +77,27 @@ function(cmsis_generate_default_linker_script FAMILY DEVICE CORE)
     stm32_get_memory_info(FAMILY ${FAMILY} DEVICE ${DEVICE} CORE ${CORE} HEAP SIZE HEAP_SIZE)
     stm32_get_memory_info(FAMILY ${FAMILY} DEVICE ${DEVICE} CORE ${CORE} STACK SIZE STACK_SIZE)
     
-    add_custom_command(OUTPUT "${OUTPUT_LD_FILE}"
-        COMMAND ${CMAKE_COMMAND} 
-            -DFLASH_ORIGIN="${FLASH_ORIGIN}" 
-            -DRAM_ORIGIN="${RAM_ORIGIN}" 
-            -DCCRAM_ORIGIN="${CCRAM_ORIGIN}" 
-            -DRAM_SHARE_ORIGIN="${RAM_SHARE_ORIGIN}" 
-            -DFLASH_SIZE="${FLASH_SIZE}" 
-            -DRAM_SIZE="${RAM_SIZE}" 
-            -DCCRAM_SIZE="${CCRAM_SIZE}"
-            -DRAM_SHARE_SIZE="${RAM_SHARE_SIZE}" 
-            -DSTACK_SIZE="${STACK_SIZE}" 
-            -DHEAP_SIZE="${HEAP_SIZE}" 
-            -DLINKER_SCRIPT="${OUTPUT_LD_FILE}"
-            -P "${STM32_CMAKE_DIR}/stm32/linker_ld.cmake"
-    )
+    if(${FAMILY} STREQUAL MP1)
+        add_custom_command(OUTPUT "${OUTPUT_LD_FILE}"
+            COMMAND ${CMAKE_COMMAND}
+                -E copy ${CMAKE_CURRENT_LIST_DIR}/mp15xx.ld ${OUTPUT_LD_FILE})
+    else()
+        add_custom_command(OUTPUT "${OUTPUT_LD_FILE}"
+            COMMAND ${CMAKE_COMMAND} 
+                -DFLASH_ORIGIN="${FLASH_ORIGIN}" 
+                -DRAM_ORIGIN="${RAM_ORIGIN}" 
+                -DCCRAM_ORIGIN="${CCRAM_ORIGIN}" 
+                -DRAM_SHARE_ORIGIN="${RAM_SHARE_ORIGIN}" 
+                -DFLASH_SIZE="${FLASH_SIZE}" 
+                -DRAM_SIZE="${RAM_SIZE}" 
+                -DCCRAM_SIZE="${CCRAM_SIZE}"
+                -DRAM_SHARE_SIZE="${RAM_SHARE_SIZE}" 
+                -DSTACK_SIZE="${STACK_SIZE}" 
+                -DHEAP_SIZE="${HEAP_SIZE}" 
+                -DLINKER_SCRIPT="${OUTPUT_LD_FILE}"
+                -P "${STM32_CMAKE_DIR}/stm32/linker_ld.cmake"
+        )
+    endif()
     add_custom_target(CMSIS_LD_${DEVICE}${CORE_U} DEPENDS "${OUTPUT_LD_FILE}")
     add_dependencies(CMSIS::STM32::${DEVICE}${CORE_C} CMSIS_LD_${DEVICE}${CORE_U})
     stm32_add_linker_script(CMSIS::STM32::${DEVICE}${CORE_C} INTERFACE "${OUTPUT_LD_FILE}")
