@@ -64,7 +64,9 @@ const SubGhzProtocolEncoder subghz_protocol_nice_flo_encoder = {
 
 const SubGhzProtocol subghz_protocol_nice_flo = {
     .name = SUBGHZ_PROTOCOL_NICE_FLO_NAME,
-    .type = SubGhzProtocolCommonTypeStatic_,
+    .type = SubGhzProtocolTypeStatic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_AM |
+            SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_nice_flo_decoder,
     .encoder = &subghz_protocol_nice_flo_encoder,

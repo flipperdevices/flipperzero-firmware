@@ -64,7 +64,9 @@ const SubGhzProtocolEncoder subghz_protocol_somfy_telis_encoder = {
 
 const SubGhzProtocol subghz_protocol_somfy_telis = {
     .name = SUBGHZ_PROTOCOL_SOMFY_TELIS_NAME,
-    .type = SubGhzProtocolCommonTypeDynamic_,
+    .type = SubGhzProtocolTypeDynamic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_AM |
+            SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_somfy_telis_decoder,
     .encoder = &subghz_protocol_somfy_telis_encoder,
@@ -95,7 +97,6 @@ void subghz_protocol_decoder_somfy_telis_reset(void* context) {
         &instance->manchester_saved_state,
         NULL);
 }
-
 
 static uint8_t subghz_protocol_somfy_telis_crc(uint64_t data) {
     uint8_t crc = 0;
@@ -228,8 +229,7 @@ void subghz_protocol_decoder_somfy_telis_feed(void* context, bool level, uint32_
  * 
  * @param instance SubGhzProtocolSomfyTelis instance
  */
-static void subghz_protocol_somfy_telis_check_remote_controller(
-    SubGhzBlockGeneric* instance) {
+static void subghz_protocol_somfy_telis_check_remote_controller(SubGhzBlockGeneric* instance) {
     //https://pushstack.wordpress.com/somfy-rts-protocol/
     /*
  *                                                  604 us
@@ -319,11 +319,10 @@ static const char* subghz_protocol_somfy_telis_get_name_button(uint8_t btn) {
     return btn <= 0xf ? name_btn[btn] : name_btn[0];
 }
 
-
 void subghz_protocol_decoder_somfy_telis_serialization(void* context, string_t output) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyTelis* instance = context;
-    
+
     subghz_protocol_somfy_telis_check_remote_controller(&instance->generic);
 
     string_cat_printf(

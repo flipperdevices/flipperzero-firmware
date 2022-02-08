@@ -13,6 +13,7 @@ ARRAY_DEF(SubGhzReceiverSlotArray, SubGhzReceiverSlot, M_POD_OPLIST);
 
 struct SubGhzReceiver {
     SubGhzReceiverSlotArray_t slots;
+    SubGhzProtocolFlag filter;
 
     SubGhzReceiverCallback callback;
     void* context;
@@ -60,7 +61,9 @@ void subghz_receiver_decode(SubGhzReceiver* instance, bool level, uint32_t durat
 
     for
         M_EACH(slot, instance->slots, SubGhzReceiverSlotArray_t) {
-            slot->base->protocol->decoder->feed(slot->base, level, duration);
+            if((slot->base->protocol->flag & instance->filter) == instance->filter) {
+                slot->base->protocol->decoder->feed(slot->base, level, duration);
+            }
         }
 }
 
@@ -95,4 +98,9 @@ void subghz_receiver_set_rx_callback(
 
     instance->callback = callback;
     instance->context = context;
+}
+
+void subghz_receiver_set_filter(SubGhzReceiver* instance, SubGhzProtocolFlag filter) {
+    furi_assert(instance);
+    instance->filter = filter;
 }

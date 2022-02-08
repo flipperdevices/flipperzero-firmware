@@ -71,7 +71,9 @@ const SubGhzProtocolEncoder subghz_protocol_keeloq_encoder = {
 
 const SubGhzProtocol subghz_protocol_keeloq = {
     .name = SUBGHZ_PROTOCOL_KEELOQ_NAME,
-    .type = SubGhzProtocolCommonTypeDynamic_,
+    .type = SubGhzProtocolTypeDynamic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_315 |
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_keeloq_decoder,
     .encoder = &subghz_protocol_keeloq_encoder,
@@ -280,42 +282,42 @@ void subghz_protocol_decoder_keeloq_feed(void* context, bool level, uint32_t dur
     SubGhzProtocolDecoderKeeloq* instance = context;
 
     switch(instance->decoder.parser_step) {
-        case KeeloqDecoderStepReset:
-            if((level) && DURATION_DIFF(duration, subghz_protocol_keeloq_const.te_short) <
-                              subghz_protocol_keeloq_const.te_delta) {
+    case KeeloqDecoderStepReset:
+        if((level) && DURATION_DIFF(duration, subghz_protocol_keeloq_const.te_short) <
+                          subghz_protocol_keeloq_const.te_delta) {
             instance->decoder.parser_step = KeeloqDecoderStepCheckPreambula;
             instance->header_count++;
-            }
-            break;
-        case KeeloqDecoderStepCheckPreambula:
-            if((!level) && (DURATION_DIFF(duration, subghz_protocol_keeloq_const.te_short) <
-                            subghz_protocol_keeloq_const.te_delta)) {
+        }
+        break;
+    case KeeloqDecoderStepCheckPreambula:
+        if((!level) && (DURATION_DIFF(duration, subghz_protocol_keeloq_const.te_short) <
+                        subghz_protocol_keeloq_const.te_delta)) {
             instance->decoder.parser_step = KeeloqDecoderStepReset;
             break;
-            }
-            if((instance->header_count > 2) &&
-               (DURATION_DIFF(duration, subghz_protocol_keeloq_const.te_short * 10) <
-                subghz_protocol_keeloq_const.te_delta * 10)) {
-                // Found header
+        }
+        if((instance->header_count > 2) &&
+           (DURATION_DIFF(duration, subghz_protocol_keeloq_const.te_short * 10) <
+            subghz_protocol_keeloq_const.te_delta * 10)) {
+            // Found header
             instance->decoder.parser_step = KeeloqDecoderStepSaveDuration;
             instance->decoder.decode_data = 0;
             instance->decoder.decode_count_bit = 0;
-            } else {
+        } else {
             instance->decoder.parser_step = KeeloqDecoderStepReset;
             instance->header_count = 0;
-            }
-            break;
-        case KeeloqDecoderStepSaveDuration:
-            if(level) {
-                instance->decoder.te_last = duration;
+        }
+        break;
+    case KeeloqDecoderStepSaveDuration:
+        if(level) {
+            instance->decoder.te_last = duration;
             instance->decoder.parser_step = KeeloqDecoderStepCheckDuration;
-            }
-            break;
-        case KeeloqDecoderStepCheckDuration:
-            if(!level) {
-                if(duration >= (subghz_protocol_keeloq_const.te_short * 2 +
-                                subghz_protocol_keeloq_const.te_delta)) {
-                    // Found end TX
+        }
+        break;
+    case KeeloqDecoderStepCheckDuration:
+        if(!level) {
+            if(duration >= (subghz_protocol_keeloq_const.te_short * 2 +
+                            subghz_protocol_keeloq_const.te_delta)) {
+                // Found end TX
                 instance->decoder.parser_step = KeeloqDecoderStepReset;
                 if(instance->decoder.decode_count_bit >=
                    subghz_protocol_keeloq_const.min_count_bit_for_found) {
@@ -330,38 +332,36 @@ void subghz_protocol_decoder_keeloq_feed(void* context, bool level, uint32_t dur
                     instance->header_count = 0;
                 }
                 break;
-                } else if(
-                    (DURATION_DIFF(
-                         instance->decoder.te_last, subghz_protocol_keeloq_const.te_short) <
-                     subghz_protocol_keeloq_const.te_delta) &&
-                    (DURATION_DIFF(duration, subghz_protocol_keeloq_const.te_long) <
-                     subghz_protocol_keeloq_const.te_delta)) {
-                    if(instance->decoder.decode_count_bit <
-                       subghz_protocol_keeloq_const.min_count_bit_for_found) {
-                        subghz_protocol_blocks_add_bit(&instance->decoder, 1);
-                    }
+            } else if(
+                (DURATION_DIFF(instance->decoder.te_last, subghz_protocol_keeloq_const.te_short) <
+                 subghz_protocol_keeloq_const.te_delta) &&
+                (DURATION_DIFF(duration, subghz_protocol_keeloq_const.te_long) <
+                 subghz_protocol_keeloq_const.te_delta)) {
+                if(instance->decoder.decode_count_bit <
+                   subghz_protocol_keeloq_const.min_count_bit_for_found) {
+                    subghz_protocol_blocks_add_bit(&instance->decoder, 1);
+                }
                 instance->decoder.parser_step = KeeloqDecoderStepSaveDuration;
-                } else if(
-                    (DURATION_DIFF(
-                         instance->decoder.te_last, subghz_protocol_keeloq_const.te_long) <
-                     subghz_protocol_keeloq_const.te_delta) &&
-                    (DURATION_DIFF(duration, subghz_protocol_keeloq_const.te_short) <
-                     subghz_protocol_keeloq_const.te_delta)) {
-                    if(instance->decoder.decode_count_bit <
-                       subghz_protocol_keeloq_const.min_count_bit_for_found) {
-                        subghz_protocol_blocks_add_bit(&instance->decoder, 0);
-                    }
+            } else if(
+                (DURATION_DIFF(instance->decoder.te_last, subghz_protocol_keeloq_const.te_long) <
+                 subghz_protocol_keeloq_const.te_delta) &&
+                (DURATION_DIFF(duration, subghz_protocol_keeloq_const.te_short) <
+                 subghz_protocol_keeloq_const.te_delta)) {
+                if(instance->decoder.decode_count_bit <
+                   subghz_protocol_keeloq_const.min_count_bit_for_found) {
+                    subghz_protocol_blocks_add_bit(&instance->decoder, 0);
+                }
                 instance->decoder.parser_step = KeeloqDecoderStepSaveDuration;
-                } else {
+            } else {
                 instance->decoder.parser_step = KeeloqDecoderStepReset;
                 instance->header_count = 0;
-                }
-            } else {
+            }
+        } else {
             instance->decoder.parser_step = KeeloqDecoderStepReset;
             instance->header_count = 0;
-            }
-            break;
         }
+        break;
+    }
 }
 
 static inline bool subghz_protocol_keeloq_check_decrypt(
@@ -528,8 +528,7 @@ static void subghz_protocol_keeloq_check_remote_controller(
     SubGhzBlockGeneric* instance,
     SubGhzKeystore* keystore,
     const char** manufacture_name) {
-    uint64_t key = subghz_protocol_blocks_reverse_key(
-        instance->data, instance->data_count_bit);
+    uint64_t key = subghz_protocol_blocks_reverse_key(instance->data, instance->data_count_bit);
     uint32_t key_fix = key >> 32;
     uint32_t key_hop = key & 0x00000000ffffffff;
     // Check key AN-Motors

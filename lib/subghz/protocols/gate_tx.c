@@ -59,7 +59,8 @@ const SubGhzProtocolEncoder subghz_protocol_gate_tx_encoder = {
 
 const SubGhzProtocol subghz_protocol_gate_tx = {
     .name = SUBGHZ_PROTOCOL_GATE_TX_NAME,
-    .type = SubGhzProtocolCommonTypeStatic_,
+    .type = SubGhzProtocolTypeStatic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_gate_tx_decoder,
     .encoder = &subghz_protocol_gate_tx_encoder,
@@ -247,14 +248,13 @@ void subghz_protocol_decoder_gate_tx_feed(void* context, bool level, uint32_t du
     }
 }
 
-static void subghz_protocol_gate_tx_check_remote_controller(
-    SubGhzBlockGeneric* instance) {
-    uint32_t code_found_reverse = subghz_protocol_blocks_reverse_key(
-        instance->data, instance->data_count_bit);
+static void subghz_protocol_gate_tx_check_remote_controller(SubGhzBlockGeneric* instance) {
+    uint32_t code_found_reverse =
+        subghz_protocol_blocks_reverse_key(instance->data, instance->data_count_bit);
 
     instance->serial = (code_found_reverse & 0xFF) << 12 |
-                               ((code_found_reverse >> 8) & 0xFF) << 4 |
-                               ((code_found_reverse >> 20) & 0x0F);
+                       ((code_found_reverse >> 8) & 0xFF) << 4 |
+                       ((code_found_reverse >> 20) & 0x0F);
     instance->btn = ((code_found_reverse >> 16) & 0x0F);
 }
 

@@ -61,7 +61,8 @@ const SubGhzProtocolEncoder subghz_protocol_kia_encoder = {
 
 const SubGhzProtocol subghz_protocol_kia = {
     .name = SUBGHZ_PROTOCOL_KIA_NAME,
-    .type = SubGhzProtocolCommonTypeDynamic_,
+    .type = SubGhzProtocolTypeDynamic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_FM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_kia_decoder,
     .encoder = &subghz_protocol_kia_encoder,
@@ -90,11 +91,11 @@ void subghz_protocol_decoder_kia_reset(void* context) {
 void subghz_protocol_decoder_kia_feed(void* context, bool level, uint32_t duration) {
     furi_assert(context);
     SubGhzProtocolDecoderKIA* instance = context;
-    
+
     switch(instance->decoder.parser_step) {
     case KIADecoderStepReset:
-        if((!level) &&
-           (DURATION_DIFF(duration, subghz_protocol_kia_const.te_short) < subghz_protocol_kia_const.te_delta)) {
+        if((!level) && (DURATION_DIFF(duration, subghz_protocol_kia_const.te_short) <
+                        subghz_protocol_kia_const.te_delta)) {
             instance->decoder.parser_step = KIADecoderStepCheckPreambula;
             instance->decoder.te_last = duration;
             instance->header_count = 0;
@@ -102,21 +103,25 @@ void subghz_protocol_decoder_kia_feed(void* context, bool level, uint32_t durati
         break;
     case KIADecoderStepCheckPreambula:
         if(!level) {
-            if((DURATION_DIFF(duration, subghz_protocol_kia_const.te_short) < subghz_protocol_kia_const.te_delta) ||
-               (DURATION_DIFF(duration, subghz_protocol_kia_const.te_long) < subghz_protocol_kia_const.te_delta)) {
+            if((DURATION_DIFF(duration, subghz_protocol_kia_const.te_short) <
+                subghz_protocol_kia_const.te_delta) ||
+               (DURATION_DIFF(duration, subghz_protocol_kia_const.te_long) <
+                subghz_protocol_kia_const.te_delta)) {
                 instance->decoder.te_last = duration;
             } else {
                 instance->decoder.parser_step = KIADecoderStepReset;
             }
         } else if(
-            (DURATION_DIFF(duration, subghz_protocol_kia_const.te_short) < subghz_protocol_kia_const.te_delta) &&
+            (DURATION_DIFF(duration, subghz_protocol_kia_const.te_short) <
+             subghz_protocol_kia_const.te_delta) &&
             (DURATION_DIFF(instance->decoder.te_last, subghz_protocol_kia_const.te_short) <
              subghz_protocol_kia_const.te_delta)) {
             // Found header
             instance->header_count++;
             break;
         } else if(
-            (DURATION_DIFF(duration, subghz_protocol_kia_const.te_long) < subghz_protocol_kia_const.te_delta) &&
+            (DURATION_DIFF(duration, subghz_protocol_kia_const.te_long) <
+             subghz_protocol_kia_const.te_delta) &&
             (DURATION_DIFF(instance->decoder.te_last, subghz_protocol_kia_const.te_long) <
              subghz_protocol_kia_const.te_delta)) {
             // Found start bit
@@ -134,7 +139,8 @@ void subghz_protocol_decoder_kia_feed(void* context, bool level, uint32_t durati
         break;
     case KIADecoderStepSaveDuration:
         if(!level) {
-            if(duration >= (subghz_protocol_kia_const.te_long + subghz_protocol_kia_const.te_delta * 2)) {
+            if(duration >=
+               (subghz_protocol_kia_const.te_long + subghz_protocol_kia_const.te_delta * 2)) {
                 //Found stop bit
                 instance->decoder.parser_step = KIADecoderStepReset;
                 if(instance->decoder.decode_count_bit >=
@@ -160,13 +166,15 @@ void subghz_protocol_decoder_kia_feed(void* context, bool level, uint32_t durati
         if(level) {
             if((DURATION_DIFF(instance->decoder.te_last, subghz_protocol_kia_const.te_short) <
                 subghz_protocol_kia_const.te_delta) &&
-               (DURATION_DIFF(duration, subghz_protocol_kia_const.te_short) < subghz_protocol_kia_const.te_delta)) {
+               (DURATION_DIFF(duration, subghz_protocol_kia_const.te_short) <
+                subghz_protocol_kia_const.te_delta)) {
                 subghz_protocol_blocks_add_bit(&instance->decoder, 0);
                 instance->decoder.parser_step = KIADecoderStepSaveDuration;
             } else if(
                 (DURATION_DIFF(instance->decoder.te_last, subghz_protocol_kia_const.te_long) <
                  subghz_protocol_kia_const.te_delta) &&
-                (DURATION_DIFF(duration, subghz_protocol_kia_const.te_long) < subghz_protocol_kia_const.te_delta)) {
+                (DURATION_DIFF(duration, subghz_protocol_kia_const.te_long) <
+                 subghz_protocol_kia_const.te_delta)) {
                 subghz_protocol_blocks_add_bit(&instance->decoder, 1);
                 instance->decoder.parser_step = KIADecoderStepSaveDuration;
             } else {
@@ -178,7 +186,6 @@ void subghz_protocol_decoder_kia_feed(void* context, bool level, uint32_t durati
         break;
     }
 }
-
 
 static uint8_t subghz_protocol_kia_crc8(uint8_t* data, size_t len) {
     uint8_t crc = 0x08;
@@ -199,8 +206,7 @@ static uint8_t subghz_protocol_kia_crc8(uint8_t* data, size_t len) {
  * 
  * @param instance SubGhzProtocolKIA instance
  */
-static void subghz_protocol_kia_check_remote_controller(
-    SubGhzBlockGeneric* instance) {
+static void subghz_protocol_kia_check_remote_controller(SubGhzBlockGeneric* instance) {
     /*
     *   0x0F 0112 43B04EC 1 7D
     *   0x0F 0113 43B04EC 1 DF
@@ -231,7 +237,7 @@ void subghz_protocol_decoder_kia_serialization(void* context, string_t output) {
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         code_found_hi,
-        code_found_lo, 
+        code_found_lo,
         instance->generic.serial,
         instance->generic.btn,
         instance->generic.cnt);

@@ -61,7 +61,9 @@ const SubGhzProtocolEncoder subghz_protocol_hormann_encoder = {
 
 const SubGhzProtocol subghz_protocol_hormann = {
     .name = SUBGHZ_PROTOCOL_HORMANN_HSM_NAME,
-    .type = SubGhzProtocolCommonTypeStatic_,
+    .type = SubGhzProtocolTypeStatic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_AM |
+            SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_hormann_decoder,
     .encoder = &subghz_protocol_hormann_encoder,

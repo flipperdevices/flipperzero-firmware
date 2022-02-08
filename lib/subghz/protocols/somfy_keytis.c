@@ -65,7 +65,9 @@ const SubGhzProtocolEncoder subghz_protocol_somfy_keytis_encoder = {
 
 const SubGhzProtocol subghz_protocol_somfy_keytis = {
     .name = SUBGHZ_PROTOCOL_SOMFY_KEYTIS_NAME,
-    .type = SubGhzProtocolCommonTypeDynamic_,
+    .type = SubGhzProtocolTypeDynamic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_AM |
+            SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_somfy_keytis_decoder,
     .encoder = &subghz_protocol_somfy_keytis_encoder,
@@ -233,8 +235,7 @@ void subghz_protocol_decoder_somfy_keytis_feed(void* context, bool level, uint32
  * 
  * @param instance SubGhzProtocolSomfyKeytis instance
  */
-static void subghz_protocol_somfy_keytis_check_remote_controller(
-    SubGhzBlockGeneric* instance) {
+static void subghz_protocol_somfy_keytis_check_remote_controller(SubGhzBlockGeneric* instance) {
     //https://pushstack.wordpress.com/somfy-rts-protocol/
     /*
  *                                                  604 us

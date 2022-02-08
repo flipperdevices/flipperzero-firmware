@@ -90,7 +90,8 @@ const SubGhzProtocolEncoder subghz_protocol_came_twee_encoder = {
 
 const SubGhzProtocol subghz_protocol_came_twee = {
     .name = SUBGHZ_PROTOCOL_CAME_TWEE_NAME,
-    .type = SubGhzProtocolCommonTypeStatic_,
+    .type = SubGhzProtocolTypeStatic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_came_twee_decoder,
     .encoder = &subghz_protocol_came_twee_encoder,
@@ -183,8 +184,7 @@ static void subghz_protocol_came_twee_encoder_get_upload(SubGhzProtocolEncoderCa
  * 
  * @param instance SubGhzProtocolCameTwee instance
  */
-static void
-    subghz_protocol_came_twee_remote_controller(SubGhzBlockGeneric* instance) {
+static void subghz_protocol_came_twee_remote_controller(SubGhzBlockGeneric* instance) {
     /*      Came Twee 54 bit, rolling code 15 parcels with
     *       a decreasing counter from 0xE to 0x0
     *       with originally coded dip switches on the console 10 bit code
@@ -396,7 +396,6 @@ void subghz_protocol_decoder_came_twee_feed(void* context, bool level, uint32_t 
     }
 }
 
-
 void subghz_protocol_decoder_came_twee_serialization(void* context, string_t output) {
     furi_assert(context);
     SubGhzProtocolDecoderCameTwee* instance = context;
@@ -409,7 +408,7 @@ void subghz_protocol_decoder_came_twee_serialization(void* context, string_t out
         "%s %dbit\r\n"
         "Key:0x%lX%08lX\r\n"
         "Btn:%lX\r\n"
-        "DIP:" DIP_PATTERN"\r\n",
+        "DIP:" DIP_PATTERN "\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         code_found_hi,

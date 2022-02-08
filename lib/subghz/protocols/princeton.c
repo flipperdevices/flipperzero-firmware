@@ -68,7 +68,9 @@ const SubGhzProtocolEncoder subghz_protocol_princeton_encoder = {
 
 const SubGhzProtocol subghz_protocol_princeton = {
     .name = SUBGHZ_PROTOCOL_PRINCETON_NAME,
-    .type = SubGhzProtocolCommonTypeStatic_,
+    .type = SubGhzProtocolTypeStatic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_315 |
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_princeton_decoder,
     .encoder = &subghz_protocol_princeton_encoder,

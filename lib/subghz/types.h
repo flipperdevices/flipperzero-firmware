@@ -9,6 +9,20 @@
 
 #include "environment.h"
 
+
+#define SUBGHZ_APP_FOLDER "/any/subghz"
+#define SUBGHZ_APP_PATH_FOLDER "/any/subghz/saved"
+#define SUBGHZ_RAW_FOLDER "/ext/subghz"
+#define SUBGHZ_RAW_PATH_FOLDER "/ext/subghz/saved"
+#define SUBGHZ_APP_EXTENSION ".sub"
+
+#define SUBGHZ_PARSER_TAG "SubGhzParser"
+#define SUBGHZ_KEY_FILE_VERSION 1
+#define SUBGHZ_KEY_FILE_TYPE "Flipper SubGhz Key File"
+
+#define SUBGHZ_RAW_FILE_VERSION 1
+#define SUBGHZ_RAW_FILE_TYPE "Flipper SubGhz RAW File"
+
 //
 // Abstract method types
 //
@@ -57,16 +71,26 @@ typedef struct {
 } SubGhzProtocolEncoder;
 
 typedef enum {
-    SubGhzProtocolCommonTypeUnknown_ = 0,
-    SubGhzProtocolCommonTypeStatic_,
-    SubGhzProtocolCommonTypeDynamic_,
-    SubGhzProtocolCommonTypeRAW_,
-    //.....
-} SubGhzProtocolCommonType_;
+    SubGhzProtocolTypeUnknown = 0,
+    SubGhzProtocolTypeStatic,
+    SubGhzProtocolTypeDynamic,
+    SubGhzProtocolTypeRAW,
+} SubGhzProtocolType;
+
+typedef enum {
+    SubGhzProtocolFlag_RAW = (1 << 0),
+    SubGhzProtocolFlag_Decodable =(1 << 1),
+    SubGhzProtocolFlag_315 = (1 << 2),
+    SubGhzProtocolFlag_433 = (1 << 3),
+    SubGhzProtocolFlag_868 = (1 << 4),
+    SubGhzProtocolFlag_AM = (1 << 5),
+    SubGhzProtocolFlag_FM = (1 << 6),
+} SubGhzProtocolFlag;
 
 typedef struct {
     const char* name;
-    SubGhzProtocolCommonType_ type;
+    SubGhzProtocolType type;
+    SubGhzProtocolFlag flag;
 
     const SubGhzProtocolEncoder* encoder;
     const SubGhzProtocolDecoder* decoder;

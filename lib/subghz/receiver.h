@@ -22,3 +22,5 @@ void subghz_receiver_set_rx_callback(
     SubGhzReceiver* instance,
     SubGhzReceiverCallback callback,
     void* context);
+    
+void subghz_receiver_set_filter(SubGhzReceiver* instance, SubGhzProtocolFlag filter);

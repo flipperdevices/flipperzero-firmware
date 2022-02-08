@@ -98,137 +98,137 @@ void subghz_protocol_common_set_callback(
     common->context = context;
 }
 
-void subghz_protocol_common_to_str(SubGhzProtocolCommon* instance, string_t output) {
-    if(instance->to_string) {
-        instance->to_string(instance, output);
-    } else {
-        uint32_t code_found_hi = instance->code_found >> 32;
-        uint32_t code_found_lo = instance->code_found & 0x00000000ffffffff;
+// void subghz_protocol_common_to_str(SubGhzProtocolCommon* instance, string_t output) {
+//     if(instance->to_string) {
+//         instance->to_string(instance, output);
+//     } else {
+//         uint32_t code_found_hi = instance->code_found >> 32;
+//         uint32_t code_found_lo = instance->code_found & 0x00000000ffffffff;
 
-        uint64_t code_found_reverse =
-            subghz_protocol_common_reverse_key(instance->code_found, instance->code_count_bit);
+//         uint64_t code_found_reverse =
+//             subghz_protocol_common_reverse_key(instance->code_found, instance->code_count_bit);
 
-        uint32_t code_found_reverse_hi = code_found_reverse >> 32;
-        uint32_t code_found_reverse_lo = code_found_reverse & 0x00000000ffffffff;
+//         uint32_t code_found_reverse_hi = code_found_reverse >> 32;
+//         uint32_t code_found_reverse_lo = code_found_reverse & 0x00000000ffffffff;
 
-        if(code_found_hi > 0) {
-            string_cat_printf(
-                output,
-                "Protocol %s, %d Bit\r\n"
-                " KEY:0x%lX%08lX\r\n"
-                " YEK:0x%lX%08lX\r\n"
-                " SN:0x%05lX BTN:%02X\r\n",
-                instance->name,
-                instance->code_count_bit,
-                code_found_hi,
-                code_found_lo,
-                code_found_reverse_hi,
-                code_found_reverse_lo,
-                instance->serial,
-                instance->btn);
-        } else {
-            string_cat_printf(
-                output,
-                "Protocol %s, %d Bit\r\n"
-                " KEY:0x%lX%lX\r\n"
-                " YEK:0x%lX%lX\r\n"
-                " SN:0x%05lX BTN:%02X\r\n",
-                instance->name,
-                instance->code_count_bit,
-                code_found_hi,
-                code_found_lo,
-                code_found_reverse_hi,
-                code_found_reverse_lo,
-                instance->serial,
-                instance->btn);
-        }
-    }
-}
+//         if(code_found_hi > 0) {
+//             string_cat_printf(
+//                 output,
+//                 "Protocol %s, %d Bit\r\n"
+//                 " KEY:0x%lX%08lX\r\n"
+//                 " YEK:0x%lX%08lX\r\n"
+//                 " SN:0x%05lX BTN:%02X\r\n",
+//                 instance->name,
+//                 instance->code_count_bit,
+//                 code_found_hi,
+//                 code_found_lo,
+//                 code_found_reverse_hi,
+//                 code_found_reverse_lo,
+//                 instance->serial,
+//                 instance->btn);
+//         } else {
+//             string_cat_printf(
+//                 output,
+//                 "Protocol %s, %d Bit\r\n"
+//                 " KEY:0x%lX%lX\r\n"
+//                 " YEK:0x%lX%lX\r\n"
+//                 " SN:0x%05lX BTN:%02X\r\n",
+//                 instance->name,
+//                 instance->code_count_bit,
+//                 code_found_hi,
+//                 code_found_lo,
+//                 code_found_reverse_hi,
+//                 code_found_reverse_lo,
+//                 instance->serial,
+//                 instance->btn);
+//         }
+//     }
+// }
 
-bool subghz_protocol_common_read_hex(string_t str, uint8_t* buff, uint16_t len) {
-    string_strim(str);
-    uint8_t nibble_high = 0;
-    uint8_t nibble_low = 0;
-    bool parsed = true;
+// bool subghz_protocol_common_read_hex(string_t str, uint8_t* buff, uint16_t len) {
+//     string_strim(str);
+//     uint8_t nibble_high = 0;
+//     uint8_t nibble_low = 0;
+//     bool parsed = true;
 
-    for(uint16_t i = 0; i < len; i++) {
-        if(hex_char_to_hex_nibble(string_get_char(str, 0), &nibble_high) &&
-           hex_char_to_hex_nibble(string_get_char(str, 1), &nibble_low)) {
-            buff[i] = (nibble_high << 4) | nibble_low;
-            if(string_size(str) > 2) {
-                string_right(str, 2);
-            } else if(i < len - 1) {
-                parsed = false;
-                break;
-            };
-        } else {
-            parsed = false;
-            break;
-        }
-    }
-    return parsed;
-}
+//     for(uint16_t i = 0; i < len; i++) {
+//         if(hex_char_to_hex_nibble(string_get_char(str, 0), &nibble_high) &&
+//            hex_char_to_hex_nibble(string_get_char(str, 1), &nibble_low)) {
+//             buff[i] = (nibble_high << 4) | nibble_low;
+//             if(string_size(str) > 2) {
+//                 string_right(str, 2);
+//             } else if(i < len - 1) {
+//                 parsed = false;
+//                 break;
+//             };
+//         } else {
+//             parsed = false;
+//             break;
+//         }
+//     }
+//     return parsed;
+// }
 
-bool subghz_protocol_common_to_save_file(SubGhzProtocolCommon* instance, FlipperFile* flipper_file) {
-    furi_assert(instance);
-    furi_assert(flipper_file);
-    bool res = false;
-    do {
-        if(!flipper_file_write_string_cstr(flipper_file, "Protocol", instance->name)) {
-            FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unable to add Protocol");
-            break;
-        }
-        uint32_t temp = instance->code_last_count_bit;
-        if(!flipper_file_write_uint32(flipper_file, "Bit", &temp, 1)) {
-            FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unable to add Bit");
-            break;
-        }
+// bool subghz_protocol_common_to_save_file(SubGhzProtocolCommon* instance, FlipperFile* flipper_file) {
+//     furi_assert(instance);
+//     furi_assert(flipper_file);
+//     bool res = false;
+//     do {
+//         if(!flipper_file_write_string_cstr(flipper_file, "Protocol", instance->name)) {
+//             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unable to add Protocol");
+//             break;
+//         }
+//         uint32_t temp = instance->code_last_count_bit;
+//         if(!flipper_file_write_uint32(flipper_file, "Bit", &temp, 1)) {
+//             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unable to add Bit");
+//             break;
+//         }
 
-        uint8_t key_data[sizeof(uint64_t)] = {0};
-        for(size_t i = 0; i < sizeof(uint64_t); i++) {
-            key_data[sizeof(uint64_t) - i - 1] = (instance->code_last_found >> i * 8) & 0xFF;
-        }
+//         uint8_t key_data[sizeof(uint64_t)] = {0};
+//         for(size_t i = 0; i < sizeof(uint64_t); i++) {
+//             key_data[sizeof(uint64_t) - i - 1] = (instance->code_last_found >> i * 8) & 0xFF;
+//         }
 
-        if(!flipper_file_write_hex(flipper_file, "Key", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unable to add Key");
-            break;
-        }
-        res = true;
-    } while(false);
+//         if(!flipper_file_write_hex(flipper_file, "Key", key_data, sizeof(uint64_t))) {
+//             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unable to add Key");
+//             break;
+//         }
+//         res = true;
+//     } while(false);
 
-    return res;
-}
+//     return res;
+// }
 
-bool subghz_protocol_common_to_load_protocol_from_file(
-    SubGhzProtocolCommon* instance,
-    FlipperFile* flipper_file) {
-    furi_assert(instance);
-    furi_assert(flipper_file);
-    bool loaded = false;
-    string_t temp_str;
-    string_init(temp_str);
-    uint32_t temp_data = 0;
+// bool subghz_protocol_common_to_load_protocol_from_file(
+//     SubGhzProtocolCommon* instance,
+//     FlipperFile* flipper_file) {
+//     furi_assert(instance);
+//     furi_assert(flipper_file);
+//     bool loaded = false;
+//     string_t temp_str;
+//     string_init(temp_str);
+//     uint32_t temp_data = 0;
 
-    do {
-        if(!flipper_file_read_uint32(flipper_file, "Bit", (uint32_t*)&temp_data, 1)) {
-            FURI_LOG_E(SUBGHZ_PARSER_TAG, "Missing Bit");
-            break;
-        }
-        instance->code_last_count_bit = (uint8_t)temp_data;
+//     do {
+//         if(!flipper_file_read_uint32(flipper_file, "Bit", (uint32_t*)&temp_data, 1)) {
+//             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Missing Bit");
+//             break;
+//         }
+//         instance->code_last_count_bit = (uint8_t)temp_data;
 
-        uint8_t key_data[sizeof(uint64_t)] = {0};
-        if(!flipper_file_read_hex(flipper_file, "Key", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(SUBGHZ_PARSER_TAG, "Missing Key");
-            break;
-        }
-        for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
-            instance->code_last_found = instance->code_last_found << 8 | key_data[i];
-        }
+//         uint8_t key_data[sizeof(uint64_t)] = {0};
+//         if(!flipper_file_read_hex(flipper_file, "Key", key_data, sizeof(uint64_t))) {
+//             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Missing Key");
+//             break;
+//         }
+//         for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
+//             instance->code_last_found = instance->code_last_found << 8 | key_data[i];
+//         }
 
-        loaded = true;
-    } while(0);
+//         loaded = true;
+//     } while(0);
 
-    string_clear(temp_str);
+//     string_clear(temp_str);
 
-    return loaded;
-}
+//     return loaded;
+// }

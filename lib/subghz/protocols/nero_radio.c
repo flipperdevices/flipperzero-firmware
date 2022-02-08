@@ -61,7 +61,8 @@ const SubGhzProtocolEncoder subghz_protocol_nero_radio_encoder = {
 
 const SubGhzProtocol subghz_protocol_nero_radio = {
     .name = SUBGHZ_PROTOCOL_NERO_RADIO_NAME,
-    .type = SubGhzProtocolCommonTypeStatic_,
+    .type = SubGhzProtocolTypeStatic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_nero_radio_decoder,
     .encoder = &subghz_protocol_nero_radio_encoder,

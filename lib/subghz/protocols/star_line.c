@@ -68,7 +68,8 @@ const SubGhzProtocolEncoder subghz_protocol_star_line_encoder = {
 
 const SubGhzProtocol subghz_protocol_star_line = {
     .name = SUBGHZ_PROTOCOL_STAR_LINE_NAME,
-    .type = SubGhzProtocolCommonTypeDynamic_,
+    .type = SubGhzProtocolTypeDynamic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_star_line_decoder,
     .encoder = &subghz_protocol_star_line_encoder,

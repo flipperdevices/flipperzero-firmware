@@ -66,7 +66,8 @@ const SubGhzProtocolEncoder subghz_protocol_nero_sketch_encoder = {
 
 const SubGhzProtocol subghz_protocol_nero_sketch = {
     .name = SUBGHZ_PROTOCOL_NERO_SKETCH_NAME,
-    .type = SubGhzProtocolCommonTypeStatic_,
+    .type = SubGhzProtocolTypeStatic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_nero_sketch_decoder,
     .encoder = &subghz_protocol_nero_sketch_encoder,

@@ -62,7 +62,8 @@ const SubGhzProtocolEncoder subghz_protocol_came_atomo_encoder = {
 
 const SubGhzProtocol subghz_protocol_came_atomo = {
     .name = SUBGHZ_PROTOCOL_CAME_ATOMO_NAME,
-    .type = SubGhzProtocolCommonTypeDynamic_,
+    .type = SubGhzProtocolTypeDynamic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_came_atomo_decoder,
     .encoder = &subghz_protocol_came_atomo_encoder,

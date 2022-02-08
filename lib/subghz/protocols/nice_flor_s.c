@@ -67,7 +67,9 @@ const SubGhzProtocolEncoder subghz_protocol_nice_flor_s_encoder = {
 
 const SubGhzProtocol subghz_protocol_nice_flor_s = {
     .name = SUBGHZ_PROTOCOL_NICE_FLOR_S_NAME,
-    .type = SubGhzProtocolCommonTypeDynamic_,
+    .type = SubGhzProtocolTypeDynamic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_AM |
+            SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_nice_flor_s_decoder,
     .encoder = &subghz_protocol_nice_flor_s_encoder,
@@ -97,8 +99,7 @@ static inline void subghz_protocol_decoder_nice_flor_s_magic_xor(uint8_t* p, uin
     }
 }
 
-static uint64_t
-    subghz_protocol_nice_flor_s_encrypt(uint64_t data, const char* file_name) {
+static uint64_t subghz_protocol_nice_flor_s_encrypt(uint64_t data, const char* file_name) {
     uint8_t* p = (uint8_t*)&data;
 
     uint8_t k = 0;
@@ -305,7 +306,7 @@ static void subghz_protocol_nice_flor_s_remote_controller(
     * 
     */
 
-    uint64_t decrypt=subghz_protocol_nice_flor_s_decrypt(instance, file_name);
+    uint64_t decrypt = subghz_protocol_nice_flor_s_decrypt(instance, file_name);
     instance->cnt = decrypt & 0xFFFF;
     instance->serial = (decrypt >> 16) & 0xFFFFFFF;
     instance->btn = (decrypt >> 48) & 0xF;

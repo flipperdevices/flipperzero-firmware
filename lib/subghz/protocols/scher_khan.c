@@ -67,7 +67,8 @@ const SubGhzProtocolEncoder subghz_protocol_scher_khan_encoder = {
 
 const SubGhzProtocol subghz_protocol_scher_khan = {
     .name = SUBGHZ_PROTOCOL_SCHER_KHAN_NAME,
-    .type = SubGhzProtocolCommonTypeDynamic_,
+    .type = SubGhzProtocolTypeDynamic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_FM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_scher_khan_decoder,
     .encoder = &subghz_protocol_scher_khan_encoder,

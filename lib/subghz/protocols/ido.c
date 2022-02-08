@@ -59,7 +59,8 @@ const SubGhzProtocolEncoder subghz_protocol_ido_encoder = {
 
 const SubGhzProtocol subghz_protocol_ido = {
     .name = SUBGHZ_PROTOCOL_IDO_NAME,
-    .type = SubGhzProtocolCommonTypeDynamic_,
+    .type = SubGhzProtocolTypeDynamic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &subghz_protocol_ido_decoder,
     .encoder = &subghz_protocol_ido_encoder,
@@ -88,7 +89,7 @@ void subghz_protocol_decoder_ido_reset(void* context) {
 void subghz_protocol_decoder_ido_feed(void* context, bool level, uint32_t duration) {
     furi_assert(context);
     SubGhzProtocolDecoderIDo* instance = context;
-    
+
     switch(instance->decoder.parser_step) {
     case IDoDecoderStepReset:
         if((level) && (DURATION_DIFF(duration, subghz_protocol_ido_const.te_short * 10) <
@@ -109,12 +110,13 @@ void subghz_protocol_decoder_ido_feed(void* context, bool level, uint32_t durati
         break;
     case IDoDecoderStepSaveDuration:
         if(level) {
-            if(duration >= (subghz_protocol_ido_const.te_short * 5 + subghz_protocol_ido_const.te_delta)) {
+            if(duration >=
+               (subghz_protocol_ido_const.te_short * 5 + subghz_protocol_ido_const.te_delta)) {
                 instance->decoder.parser_step = IDoDecoderStepFoundPreambula;
-                if(instance->decoder.decode_count_bit>=
+                if(instance->decoder.decode_count_bit >=
                    subghz_protocol_ido_const.min_count_bit_for_found) {
                     instance->generic.data = instance->decoder.decode_data;
-                    instance->generic.data_count_bit  = instance->decoder.decode_count_bit;
+                    instance->generic.data_count_bit = instance->decoder.decode_count_bit;
                     if(instance->base.callback)
                         instance->base.callback(&instance->base, instance->base.context);
                 }
@@ -141,7 +143,8 @@ void subghz_protocol_decoder_ido_feed(void* context, bool level, uint32_t durati
             } else if(
                 (DURATION_DIFF(instance->decoder.te_last, subghz_protocol_ido_const.te_short) <
                  subghz_protocol_ido_const.te_delta * 3) &&
-                (DURATION_DIFF(duration, subghz_protocol_ido_const.te_short) < subghz_protocol_ido_const.te_delta)) {
+                (DURATION_DIFF(duration, subghz_protocol_ido_const.te_short) <
+                 subghz_protocol_ido_const.te_delta)) {
                 subghz_protocol_blocks_add_bit(&instance->decoder, 1);
                 instance->decoder.parser_step = IDoDecoderStepSaveDuration;
             } else {
@@ -154,19 +157,14 @@ void subghz_protocol_decoder_ido_feed(void* context, bool level, uint32_t durati
     }
 }
 
-
-static void subghz_protocol_ido_check_remote_controller(
-    SubGhzBlockGeneric* instance) {
-
-    uint64_t code_found_reverse = subghz_protocol_blocks_reverse_key(
-        instance->data, instance->data_count_bit);
+static void subghz_protocol_ido_check_remote_controller(SubGhzBlockGeneric* instance) {
+    uint64_t code_found_reverse =
+        subghz_protocol_blocks_reverse_key(instance->data, instance->data_count_bit);
     uint32_t code_fix = code_found_reverse & 0xFFFFFF;
 
     instance->serial = code_fix & 0xFFFFF;
     instance->btn = (code_fix >> 20) & 0x0F;
 }
-
-
 
 void subghz_protocol_decoder_ido_serialization(void* context, string_t output) {
     furi_assert(context);

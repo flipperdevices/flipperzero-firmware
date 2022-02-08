@@ -14,26 +14,26 @@
 #define SUBGHZ_TX_PIN_LOW()
 #define DURATION_DIFF(x, y) ((x < y) ? (y - x) : (x - y))
 
-#define SUBGHZ_APP_FOLDER "/any/subghz"
-#define SUBGHZ_APP_PATH_FOLDER "/any/subghz/saved"
-#define SUBGHZ_RAW_FOLDER "/ext/subghz"
-#define SUBGHZ_RAW_PATH_FOLDER "/ext/subghz/saved"
-#define SUBGHZ_APP_EXTENSION ".sub"
+// #define SUBGHZ_APP_FOLDER "/any/subghz"
+// #define SUBGHZ_APP_PATH_FOLDER "/any/subghz/saved"
+// #define SUBGHZ_RAW_FOLDER "/ext/subghz"
+// #define SUBGHZ_RAW_PATH_FOLDER "/ext/subghz/saved"
+// #define SUBGHZ_APP_EXTENSION ".sub"
 #define SUBGHZ_ENCODER_UPLOAD_MAX_SIZE 2048
 
-#define SUBGHZ_PARSER_TAG "SubGhzParser"
-#define SUBGHZ_KEY_FILE_VERSION 1
-#define SUBGHZ_KEY_FILE_TYPE "Flipper SubGhz Key File"
+// #define SUBGHZ_PARSER_TAG "SubGhzParser"
+// #define SUBGHZ_KEY_FILE_VERSION 1
+// #define SUBGHZ_KEY_FILE_TYPE "Flipper SubGhz Key File"
 
-#define SUBGHZ_RAW_FILE_VERSION 1
-#define SUBGHZ_RAW_FILE_TYPE "Flipper SubGhz RAW File"
+// #define SUBGHZ_RAW_FILE_VERSION 1
+// #define SUBGHZ_RAW_FILE_TYPE "Flipper SubGhz RAW File"
 
-typedef enum {
-    SubGhzProtocolCommonTypeUnknown,
-    SubGhzProtocolCommonTypeStatic,
-    SubGhzProtocolCommonTypeDynamic,
-    SubGhzProtocolCommonTypeRAW,
-} SubGhzProtocolCommonType;
+// typedef enum {
+//     SubGhzProtocolCommonTypeUnknown,
+//     SubGhzProtocolCommonTypeStatic,
+//     SubGhzProtocolCommonTypeDynamic,
+//     SubGhzProtocolCommonTypeRAW,
+// } SubGhzProtocolCommonType;
 
 typedef struct SubGhzProtocolCommon SubGhzProtocolCommon;
 typedef struct SubGhzProtocolCommonEncoder SubGhzProtocolCommonEncoder;
@@ -74,7 +74,7 @@ struct SubGhzProtocolCommon {
     uint8_t code_min_count_bit_for_found;
     uint8_t btn;
     uint8_t header_count;
-    SubGhzProtocolCommonType type_protocol;
+    //SubGhzProtocolCommonType type_protocol;
     uint32_t te_last;
     uint32_t serial;
     uint32_t parser_step;
@@ -191,36 +191,36 @@ void subghz_protocol_common_set_callback(
     SubGhzProtocolCommonCallback callback,
     void* context);
 
-/** outputting information from the parser
- * 
- * @param instance - SubGhzProtocolCommon* instance
- * @param output   - output string
- */
-void subghz_protocol_common_to_str(SubGhzProtocolCommon* instance, string_t output);
+// /** outputting information from the parser
+//  * 
+//  * @param instance - SubGhzProtocolCommon* instance
+//  * @param output   - output string
+//  */
+// void subghz_protocol_common_to_str(SubGhzProtocolCommon* instance, string_t output);
 
-/** Converting a string to a HEX array
- * 
- * @param str - string data
- * @param buff - uint8_t* buff
- * @param len - size buff
- * @return bool
- */
-bool subghz_protocol_common_read_hex(string_t str, uint8_t* buff, uint16_t len);
+// /** Converting a string to a HEX array
+//  * 
+//  * @param str - string data
+//  * @param buff - uint8_t* buff
+//  * @param len - size buff
+//  * @return bool
+//  */
+// bool subghz_protocol_common_read_hex(string_t str, uint8_t* buff, uint16_t len);
 
-/** Adding data to a file
- * 
- * @param instance  - SubGhzProtocolCommon instance
- * @param flipper_file - FlipperFile 
- * @return bool
- */
-bool subghz_protocol_common_to_save_file(SubGhzProtocolCommon* instance, FlipperFile* flipper_file);
+// /** Adding data to a file
+//  * 
+//  * @param instance  - SubGhzProtocolCommon instance
+//  * @param flipper_file - FlipperFile 
+//  * @return bool
+//  */
+// bool subghz_protocol_common_to_save_file(SubGhzProtocolCommon* instance, FlipperFile* flipper_file);
 
-/** Loading data to a file
- * 
- * @param instance  - SubGhzProtocolCommon instance
- * @param flipper_file - FlipperFile 
- * @return bool
- */
-bool subghz_protocol_common_to_load_protocol_from_file(
-    SubGhzProtocolCommon* instance,
-    FlipperFile* flipper_file);
+// /** Loading data to a file
+//  * 
+//  * @param instance  - SubGhzProtocolCommon instance
+//  * @param flipper_file - FlipperFile 
+//  * @return bool
+//  */
+// bool subghz_protocol_common_to_load_protocol_from_file(
+//     SubGhzProtocolCommon* instance,
+//     FlipperFile* flipper_file);
