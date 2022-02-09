@@ -93,12 +93,7 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuDelete:
-            if(selected->is_app) {
-                archive_app_delete_file(browser, name);
-            } else {
-                archive_delete_file(browser, "%s", name);
-            }
-            archive_show_file_menu(browser, false);
+            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneDelete);
             consumed = true;
             break;
         case ArchiveBrowserEventEnterDir:
