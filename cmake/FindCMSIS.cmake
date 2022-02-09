@@ -80,7 +80,7 @@ function(cmsis_generate_default_linker_script FAMILY DEVICE CORE)
     if(${FAMILY} STREQUAL MP1)
         add_custom_command(OUTPUT "${OUTPUT_LD_FILE}"
             COMMAND ${CMAKE_COMMAND}
-                -E copy ${CMAKE_CURRENT_LIST_DIR}/mp15xx.ld ${OUTPUT_LD_FILE})
+                -E copy ${STM32_CMAKE_DIR}/stm32/mp15xx.ld ${OUTPUT_LD_FILE})
     else()
         add_custom_command(OUTPUT "${OUTPUT_LD_FILE}"
             COMMAND ${CMAKE_COMMAND} 
