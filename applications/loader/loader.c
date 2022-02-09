@@ -10,7 +10,7 @@
 static Loader* loader_instance = NULL;
 
 static bool
-    loader_start_appliaction(const FlipperApplication* application, const char* arguments) {
+    loader_start_application(const FlipperApplication* application, const char* arguments) {
     loader_instance->application = application;
 
     furi_assert(loader_instance->application_arguments == NULL);
@@ -48,7 +48,7 @@ static void loader_menu_callback(void* _ctx, uint32_t index) {
         return;
     }
 
-    loader_start_appliaction(application, NULL);
+    loader_start_application(application, NULL);
 }
 
 static void loader_submenu_callback(void* context, uint32_t index) {
@@ -108,7 +108,7 @@ void loader_cli_open(Cli* cli, string_t args, Loader* instance) {
         }
 
         string_strim(args);
-        if(!loader_start_appliaction(application, string_get_cstr(args))) {
+        if(!loader_start_application(application, string_get_cstr(args))) {
             printf("Can't start, furi application is running");
             return;
         } else {
@@ -186,7 +186,7 @@ LoaderStatus loader_start(Loader* instance, const char* name, const char* args) 
         return LoaderStatusErrorAppStarted;
     }
 
-    if(!loader_start_appliaction(application, args)) {
+    if(!loader_start_application(application, args)) {
         return LoaderStatusErrorInternal;
     }
 
