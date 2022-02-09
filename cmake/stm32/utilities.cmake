@@ -102,7 +102,7 @@ function(stm32_fetch_cube)
         string(TOLOWER ${CUBE_NAME} CUBE_NAME_L)
         
         if(STM32_CUBE_${FAMILY}_PATH)
-            message(INFO "STM32_CUBE_${FAMILY}_PATH specified, skipping fetch for ${CUBE_NAME}")
+            message(VERBOSE "STM32_CUBE_${FAMILY}_PATH specified, skipping fetch for ${CUBE_NAME}")
             continue()
         endif()
         

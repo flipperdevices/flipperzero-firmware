@@ -5,6 +5,10 @@ if(NOT TEST_FAMILIES)
     set(TEST_FAMILIES F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 U5 WB WL)
 endif()
 
+if("MP1" IN_LIST TEST_FAMILIES)
+    message(WARNING "CMSIS for MP1 devices requires HAL, this test is expected to fail for the MP1 family")
+endif()
+
 project(cmsis-test C ASM)
 
 if(FETCH_ST_SOURCES)
