@@ -1,7 +1,7 @@
 #pragma once
 
-typedef enum {
-    DesktopMainSceneStateUnlocked,
-    DesktopMainSceneStateLockedWithPin,
-    DesktopMainSceneStateLockedNoPin,
-} DesktopMainSceneState;
+// dbg_
+//typedef enum {
+//    DesktopLockedSceneStateLocked,
+//    DesktopLockedSceneStateLockedWithPin,
+//} DesktopLockedSceneState;

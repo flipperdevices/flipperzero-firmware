@@ -1,6 +1,7 @@
 #include "../desktop_settings_app.h"
 #include "applications.h"
 #include "desktop_settings_scene.h"
+#include "gui/scene_manager.h"
 
 static void desktop_settings_scene_pincode_menu_submenu_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
@@ -12,7 +13,7 @@ void desktop_settings_scene_pincode_menu_on_enter(void* context) {
     Submenu* submenu = app->submenu;
     submenu_reset(submenu);
 
-    if(!app->settings.pincode.length) {
+    if(!app->settings.pin_code.length) {
         submenu_add_item(
             submenu,
             "Set Pin",
@@ -48,21 +49,17 @@ bool desktop_settings_scene_pincode_menu_on_event(void* context, SceneManagerEve
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case CodeEventsSetPin:
-            scene_manager_set_scene_state(
-                app->scene_manager, DesktopSettingsAppScenePinCodeInput, event.event);
-            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinCodeInput);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinSetupHowto);
             consumed = true;
             break;
         case CodeEventsChangePin:
-            scene_manager_set_scene_state(
-                app->scene_manager, DesktopSettingsAppScenePinCodeInput, event.event);
-            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinCodeInput);
+            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppScenePinAuth, SCENE_PIN_AUTH_STATE_CHANGE_PIN);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinAuth);
             consumed = true;
             break;
         case CodeEventsDisablePin:
-            scene_manager_set_scene_state(
-                app->scene_manager, DesktopSettingsAppScenePinCodeInput, event.event);
-            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinCodeInput);
+            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppScenePinAuth, SCENE_PIN_AUTH_STATE_DISABLE);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinAuth);
             consumed = true;
             break;
         default:

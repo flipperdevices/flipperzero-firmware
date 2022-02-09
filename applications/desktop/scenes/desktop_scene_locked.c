@@ -1,0 +1,133 @@
+#include "desktop/desktop.h"
+#include "desktop/views/locked.h"
+#include <furi/common_defines.h>
+#include <furi_hal_rtc.h>
+#include <gui/scene_manager.h>
+#include <gui/view_stack.h>
+#include <stdint.h>
+#include <portmacro.h>
+
+#include "desktop/animations/animation_manager.h"
+#include "desktop/views/desktop_events.h"
+#include "desktop/desktop_i.h"
+#include "desktop/views/desktop_main.h"
+#include "desktop/views/pin_input.h"
+#include "desktop_scene.h"
+#include "desktop_scene_i.h"
+#include "../desktop_helpers.h"
+
+#define WRONG_PIN_HEADER_TIMEOUT 3000
+#define INPUT_PIN_VIEW_TIMEOUT 15000
+
+static const uint8_t desktop_scene_helpers_fails_timeout[] = {
+    0,
+    0,
+    0,
+    0,
+    30,
+    60,
+    90,
+    120,
+    150,
+    180,
+    /* +60 for every next fail */
+};
+
+static uint32_t get_pin_fail_timeout(uint32_t pin_fails) {
+    uint32_t pin_timeout = 0;
+    uint32_t max_index = COUNT_OF(desktop_scene_helpers_fails_timeout);
+    if (pin_fails <= max_index) {
+        pin_timeout = desktop_scene_helpers_fails_timeout[pin_fails];
+    } else {
+        pin_timeout = desktop_scene_helpers_fails_timeout[max_index] + (pin_fails - max_index) * 60;
+    }
+
+    return pin_timeout;
+}
+
+static void desktop_scene_locked_callback(DesktopEvent event, void* context) {
+    Desktop* desktop = (Desktop*)context;
+    view_dispatcher_send_custom_event(desktop->view_dispatcher, event);
+}
+
+static void desktop_scene_locked_new_idle_animation_callback(void* context) {
+    furi_assert(context);
+    Desktop* desktop = context;
+    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopAnimationEventNewIdleAnimation);
+}
+
+void desktop_scene_locked_on_enter(void* context) {
+    Desktop* desktop = (Desktop*)context;
+
+    // callbacks for 1-st layer
+    animation_manager_set_new_idle_callback(
+        desktop->animation_manager, desktop_scene_locked_new_idle_animation_callback);
+    animation_manager_set_check_callback(
+        desktop->animation_manager, NULL);
+    animation_manager_set_interact_callback(
+        desktop->animation_manager, NULL);
+
+    // callbacks for 2-nd layer
+    desktop_view_locked_set_callback(desktop->locked_view, desktop_scene_locked_callback, desktop);
+
+    bool switch_to_timeout_scene = false;
+    bool pin_locked = furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock);
+    desktop_helpers_lock_system(desktop, pin_locked);
+    if(pin_locked) {
+        uint32_t pin_fails = furi_hal_rtc_get_pin_fails();
+        uint32_t pin_timeout = get_pin_fail_timeout(pin_fails);
+        if (pin_timeout) {
+            scene_manager_set_scene_state(desktop->scene_manager, DesktopScenePinTimeout, pin_timeout);
+            switch_to_timeout_scene = true;
+        } else {
+            LOAD_DESKTOP_SETTINGS(&desktop->settings);
+            desktop_view_locked_lock(desktop->locked_view, true);
+        }
+    } else {
+        desktop_view_locked_lock(desktop->locked_view, false);
+    }
+    uint32_t state = scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLocked);
+    if (state == SCENE_LOCKED_LOCK_DOORS) {
+        desktop_view_locked_close_doors(desktop->locked_view);
+        scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_SILENT_ENTER);
+    }
+
+    if (switch_to_timeout_scene) {
+        scene_manager_next_scene(desktop->scene_manager, DesktopScenePinTimeout);
+    } else {
+        view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewIdLocked);
+    }
+}
+
+bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
+    Desktop* desktop = (Desktop*)context;
+    bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        switch(event.event) {
+        case DesktopLockedEventUnlocked:
+            desktop_helpers_unlock_system(desktop);
+            scene_manager_search_and_switch_to_previous_scene(desktop->scene_manager, DesktopSceneMain);
+            consumed = true;
+            break;
+        case DesktopLockedEventUpdate:
+            desktop_view_locked_update(desktop->locked_view);
+            consumed = true;
+            break;
+        case DesktopLockedEventShowPinInput:
+            scene_manager_next_scene(desktop->scene_manager, DesktopScenePinInput);
+            consumed = true;
+            break;
+        case DesktopAnimationEventNewIdleAnimation:
+            animation_manager_new_idle_process(desktop->animation_manager);
+            consumed = true;
+            break;
+        }
+    }
+
+    return consumed;
+}
+
+void desktop_scene_locked_on_exit(void* context) {
+}
+

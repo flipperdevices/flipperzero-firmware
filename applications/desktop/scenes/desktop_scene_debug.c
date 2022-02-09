@@ -17,7 +17,7 @@ void desktop_scene_debug_on_enter(void* context) {
     desktop_debug_get_dolphin_data(desktop->debug_view);
 
     desktop_debug_set_callback(desktop->debug_view, desktop_scene_debug_callback, desktop);
-    view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewDebug);
+    view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewIdDebug);
 }
 
 bool desktop_scene_debug_on_event(void* context, SceneManagerEvent event) {

@@ -10,6 +10,12 @@ typedef enum {
 } DesktopSettingsAppScene;
 #undef ADD_SCENE
 
+#define SCENE_PIN_AUTH_STATE_DISABLE    (0)
+#define SCENE_PIN_AUTH_STATE_CHANGE_PIN (1)
+
+#define SCENE_PIN_ERROR_MISMATCH        (0)
+#define SCENE_PIN_ERROR_WRONG           (1)
+
 extern const SceneManagerHandlers desktop_settings_scene_handlers;
 
 // Generate scene on_enter handlers declaration

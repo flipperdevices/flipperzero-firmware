@@ -10,6 +10,9 @@ typedef enum {
 } DesktopScene;
 #undef ADD_SCENE
 
+#define SCENE_LOCKED_SILENT_ENTER   0
+#define SCENE_LOCKED_LOCK_DOORS     1
+
 extern const SceneManagerHandlers desktop_scene_handlers;
 
 // Generate scene on_enter handlers declaration

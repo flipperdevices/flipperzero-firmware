@@ -1,4 +1,7 @@
 #include "elements.h"
+#include <assets_icons.h>
+#include "furi_hal_resources.h"
+#include <furi_hal.h>
 #include "gui/canvas.h"
 
 #include <gui/icon_i.h>
@@ -699,3 +702,4 @@ void elements_text_box(
     }
     canvas_set_font(canvas, FontSecondary);
 }
+
