@@ -147,12 +147,9 @@ bool subghz_tx_start(SubGhz* subghz) {
     furi_assert(subghz);
 
     bool ret = false;
-    subghz->txrx->encoder = subghz_protocol_encoder_common_alloc();
-    subghz->txrx->encoder->repeat = 200; //max repeat with the button held down
-    //get upload
-    if(subghz->txrx->protocol_result->get_upload_protocol) {
-        if(subghz->txrx->protocol_result->get_upload_protocol(
-               subghz->txrx->protocol_result, subghz->txrx->encoder)) {
+    subghz->txrx->transmitter = subghz_transmitter_alloc_init(subghz->txrx->environment, "RAW");
+    if(subghz->txrx->transmitter) {
+        if(subghz_transmitter_load(subghz->txrx->transmitter, 0x445533, 24, 10)) {
             if(subghz->txrx->preset) {
                 subghz_begin(subghz, subghz->txrx->preset);
             } else {
@@ -163,16 +160,15 @@ bool subghz_tx_start(SubGhz* subghz) {
             } else {
                 ret = subghz_tx(subghz, 433920000);
             }
-
             if(ret) {
                 //Start TX
                 furi_hal_subghz_start_async_tx(
-                    subghz_protocol_encoder_common_yield, subghz->txrx->encoder);
+                    subghz_transmitter_yield, subghz->txrx->transmitter);
             }
         }
     }
     if(!ret) {
-        subghz_protocol_encoder_common_free(subghz->txrx->encoder);
+        subghz_transmitter_free(subghz->txrx->transmitter);
         subghz_idle(subghz);
     }
     return ret;
@@ -183,13 +179,14 @@ void subghz_tx_stop(SubGhz* subghz) {
     furi_assert(subghz->txrx->txrx_state == SubGhzTxRxStateTx);
     //Stop TX
     furi_hal_subghz_stop_async_tx();
-    subghz_protocol_encoder_common_free(subghz->txrx->encoder);
-    subghz_idle(subghz);
+    subghz_transmitter_stop(subghz->txrx->transmitter);
+    subghz_transmitter_free(subghz->txrx->transmitter);
     //if protocol dynamic then we save the last upload
-    // if((subghz->txrx->protocol_result->type_protocol == SubGhzProtocolCommonTypeDynamic) &&
-    //    (strcmp(subghz->file_name, ""))) {
-    //     subghz_save_protocol_to_file(subghz, subghz->file_name);
-    // }
+    // // if((subghz->txrx->protocol_result->type_protocol == SubGhzProtocolCommonTypeDynamic) &&
+    // //    (strcmp(subghz->file_name, ""))) {
+    // //     subghz_save_protocol_to_file(subghz, subghz->file_name);
+    // // }
+    subghz_idle(subghz);
     notification_message(subghz->notifications, &sequence_reset_red);
 }
 

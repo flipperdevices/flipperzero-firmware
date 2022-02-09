@@ -24,3 +24,5 @@ void subghz_receiver_set_rx_callback(
     void* context);
     
 void subghz_receiver_set_filter(SubGhzReceiver* instance, SubGhzProtocolFlag filter);
+SubGhzProtocolDecoderBase*
+    subghz_receiver_search_decoder_base_by_name(SubGhzReceiver* instance, const char* decoder_name);

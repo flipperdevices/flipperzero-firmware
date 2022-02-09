@@ -21,9 +21,6 @@ static const SubGhzBlockConst subghz_protocol_raw_const = {
 struct SubGhzProtocolDecoderRAW {
     SubGhzProtocolDecoderBase base;
 
-    //SubGhzBlockDecoder decoder;
-    //SubGhzBlockGeneric generic;
-
     int32_t* upload_raw;
     uint16_t ind_write;
     Storage* storage;
@@ -37,13 +34,9 @@ struct SubGhzProtocolDecoderRAW {
 struct SubGhzProtocolEncoderRAW {
     SubGhzProtocolEncoderBase base;
 
-    //SubGhzProtocolBlockEncoder encoder;
-    //SubGhzBlockGeneric generic;
     bool is_runing;
     string_t file_name;
     SubGhzFileEncoderWorker* file_worker_encoder;
-    SubGhzProtocolEncoderRAWCallbackEnd callback_end;
-    void* context_end;
 };
 
 typedef enum {
@@ -98,7 +91,9 @@ bool subghz_protocol_raw_save_to_file_init(
     const char* preset) {
     furi_assert(instance);
 
-    //instance->flipper_file = flipper_file_alloc(instance->storage);
+    instance->storage = furi_record_open("storage");
+    instance->flipper_file = flipper_file_alloc(instance->storage);
+
     string_t dev_file_name;
     string_init(dev_file_name);
     bool init = false;
@@ -186,9 +181,11 @@ void subghz_protocol_raw_save_to_file_stop(SubGhzProtocolDecoderRAW* instance) {
     if(instance->file_is_open != RAWFileIsOpenClose) {
         free(instance->upload_raw);
         instance->upload_raw = NULL;
+        flipper_file_close(instance->flipper_file);
+        flipper_file_free(instance->flipper_file);
+        furi_record_close("storage");
     }
 
-    flipper_file_close(instance->flipper_file);
     instance->file_is_open = RAWFileIsOpenClose;
 }
 
@@ -201,11 +198,7 @@ void* subghz_protocol_decoder_raw_alloc(SubGhzEnvironment* environment) {
     instance->base.protocol = &subghz_protocol_raw;
     instance->upload_raw = NULL;
     instance->ind_write = 0;
-
     instance->last_level = false;
-
-    instance->storage = furi_record_open("storage");
-    instance->flipper_file = flipper_file_alloc(instance->storage);
     instance->file_is_open = RAWFileIsOpenClose;
     string_init(instance->file_name);
 
@@ -216,9 +209,6 @@ void subghz_protocol_decoder_raw_free(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
     string_clear(instance->file_name);
-
-    flipper_file_free(instance->flipper_file);
-    furi_record_close("storage");
     free(instance);
 }
 
@@ -269,9 +259,6 @@ void* subghz_protocol_encoder_raw_alloc(SubGhzEnvironment* environment) {
     SubGhzProtocolEncoderRAW* instance = furi_alloc(sizeof(SubGhzProtocolEncoderRAW));
 
     instance->base.protocol = &subghz_protocol_raw;
-    //instance->encoder.repeat = 10;
-    //instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
-    //instance->encoder.upload = furi_alloc(instance->encoder.size_upload * sizeof(LevelDuration));
     string_init(instance->file_name);
     instance->is_runing = false;
     return instance;
@@ -294,51 +281,29 @@ void subghz_protocol_encoder_raw_free(void* context) {
     free(instance);
 }
 
-void subghz_protocol_raw_file_encoder_worker_callback_end(void* context) {
-    furi_assert(context);
-    SubGhzProtocolEncoderRAW* instance = context;
-    if(instance->callback_end) instance->callback_end(instance->context_end);
-}
-
 void subghz_protocol_raw_file_encoder_worker_set_callback_end(
     SubGhzProtocolEncoderRAW* instance,
     SubGhzProtocolEncoderRAWCallbackEnd callback_end,
     void* context_end) {
     furi_assert(instance);
     furi_assert(callback_end);
-    instance->callback_end = callback_end;
-    instance->context_end = context_end;
+    subghz_file_encoder_worker_callback_end(
+        instance->file_worker_encoder, callback_end, context_end);
 }
 
 static bool subghz_protocol_raw_encoder_worker_init(SubGhzProtocolEncoderRAW* instance) {
     furi_assert(instance);
 
-    bool loaded = false;
-
     instance->file_worker_encoder = subghz_file_encoder_worker_alloc();
-
     if(subghz_file_encoder_worker_start(
            instance->file_worker_encoder, string_get_cstr(instance->file_name))) {
         //the worker needs a file in order to open and read part of the file
         osDelay(100);
         instance->is_runing = true;
-        // //Forwarding UPLOAD to common encoder
-        // subghz_protocol_encoder_common_set_callback(
-        //     encoder, subghz_file_encoder_worker_get_level_duration, instance->file_worker_encoder);
-        //forced stop of transmission
-        // subghz_protocol_encoder_common_set_callback_end(
-        //     encoder, subghz_protocol_raw_file_encoder_worker_stop, instance);
-        //file transfer complete callback
-        subghz_file_encoder_worker_callback_end(
-            instance->file_worker_encoder,
-            subghz_protocol_raw_file_encoder_worker_callback_end,
-            instance);
-
-        loaded = true;
     } else {
         subghz_protocol_encoder_raw_stop(instance);
     }
-    return loaded;
+    return instance->is_runing;
 }
 
 void subghz_protocol_encoder_raw_set_file_name(
@@ -354,6 +319,7 @@ bool subghz_protocol_encoder_raw_load(
     size_t repeat) {
     furi_assert(context);
     SubGhzProtocolEncoderRAW* instance = context;
+    string_set(instance->file_name, "/ext/subghz/saved/Raw_signal_9.sub");
     subghz_protocol_raw_encoder_worker_init(instance);
     return true;
 }
@@ -364,61 +330,3 @@ LevelDuration subghz_protocol_encoder_raw_yield(void* context) {
     if(!instance->is_runing) return level_duration_reset();
     return subghz_file_encoder_worker_get_level_duration(instance->file_worker_encoder);
 }
-
-// struct SubGhzProtocolDecoderRAW {
-//     //SubGhzProtocolCommon common;
-//     const char* name;
-//     uint16_t te_long;
-//     uint16_t te_short;
-//     //uint8_t code_min_count_bit_for_found;
-//     //uint16_t te_delta;
-
-//     int32_t* upload_raw;
-//     uint16_t ind_write;
-//     Storage* storage;
-//     FlipperFile* flipper_file;
-//     SubGhzFileEncoderWorker* file_worker_encoder;
-//     SubGhzProtocolDecoderRAWCallbackEnd callback_end;
-//     void* context_end;
-//     uint32_t file_is_open;
-//     string_t file_name;
-//     size_t sample_write;
-//     bool last_level;
-
-// };
-
-// typedef enum {
-//     RAWFileIsOpenClose = 0,
-//     RAWFileIsOpenWrite,
-//     RAWFileIsOpenRead,
-// } RAWFilIsOpen;
-
-// void* subghz_protocol_raw_alloc(void) {
-//     SubGhzProtocolDecoderRAW* instance = furi_alloc(sizeof(SubGhzProtocolDecoderRAW));
-
-//     instance->upload_raw = NULL;
-//     instance->ind_write = 0;
-
-//     instance->last_level = false;
-
-//     instance->storage = furi_record_open("storage");
-//     instance->flipper_file = flipper_file_alloc(instance->storage);
-//     instance->file_is_open = RAWFileIsOpenClose;
-//     string_init(instance->file_name);
-
-//     instance->name = "RAW";
-//     //instance->common.code_min_count_bit_for_found = 0;
-//     instance->te_short = 80;
-//     instance->te_long = 32700;
-//     //instance->common.te_delta = 0;
-//     //instance->common.type_protocol = SubGhzProtocolCommonTypeRAW;
-//     // instance->common.to_load_protocol_from_file =
-//     //     (SubGhzProtocolCommonLoadFromFile)subghz_protocol_raw_to_load_protocol_from_file;
-//     // instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_raw_to_str;
-//     // //instance->common.to_load_protocol =
-//     // //    (SubGhzProtocolCommonLoadFromRAW)subghz_decoder_raw_to_load_protocol;
-//     // instance->common.get_upload_protocol =
-//     //     (SubGhzProtocolCommonEncoderGetUpLoad)subghz_protocol_raw_send_key;
-
-//     return instance;
-// }

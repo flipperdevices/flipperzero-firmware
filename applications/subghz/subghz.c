@@ -185,12 +185,17 @@ SubGhz* subghz_alloc() {
     subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
     subghz->txrx->history = subghz_history_alloc();
     subghz->txrx->worker = subghz_worker_alloc();
-    subghz->txrx->parser = subghz_parser_alloc();
+    subghz->txrx->parser = subghz_parser_alloc(); //todo delete
+
+    subghz->txrx->environment = subghz_environment_alloc();
+    subghz->txrx->receiver = subghz_receiver_alloc(subghz->txrx->environment);
+    subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_Decodable);
+
     subghz_worker_set_overrun_callback(
-        subghz->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_parser_reset);
+        subghz->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_receiver_reset);
     subghz_worker_set_pair_callback(
-        subghz->txrx->worker, (SubGhzWorkerPairCallback)subghz_parser_parse);
-    subghz_worker_set_context(subghz->txrx->worker, subghz->txrx->parser);
+        subghz->txrx->worker, (SubGhzWorkerPairCallback)subghz_receiver_decode);
+    subghz_worker_set_context(subghz->txrx->worker, subghz->txrx->receiver);
 
     //Init Error_str
     string_init(subghz->error_str);
@@ -263,7 +268,9 @@ void subghz_free(SubGhz* subghz) {
     subghz->gui = NULL;
 
     //Worker & Protocol & History
-    subghz_parser_free(subghz->txrx->parser);
+    subghz_parser_free(subghz->txrx->parser); //tedo delete
+    subghz_receiver_free(subghz->txrx->receiver);
+    subghz_environment_free(subghz->txrx->environment);
     subghz_worker_free(subghz->txrx->worker);
     subghz_history_free(subghz->txrx->history);
     free(subghz->txrx);
@@ -284,8 +291,16 @@ int32_t subghz_app(void* p) {
 
     //Load database
     bool load_database =
-        subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes");
-    subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes_user");
+        subghz_environment_load_keystore(subghz->txrx->environment, "/ext/subghz/keeloq_mfcodes");
+    subghz_environment_load_keystore(subghz->txrx->environment, "/ext/subghz/keeloq_mfcodes_user");
+    subghz_environment_set_came_atomo_rainbow_table_file_name(
+        subghz->txrx->environment, "/ext/subghz/came_atomo");
+    subghz_environment_set_nice_flor_s_rainbow_table_file_name(
+        subghz->txrx->environment, "/ext/subghz/nice_flor_s");
+
+    //todo delete
+    //    subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes");
+    //subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes_user");
     //subghz_parser_load_nice_flor_s_file(subghz->txrx->parser, "/ext/subghz/nice_flor_s_rx");
     //subghz_parser_load_came_atomo_file(subghz->txrx->parser, "/ext/subghz/came_atomo");
 

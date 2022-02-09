@@ -23,19 +23,28 @@ void subghz_transmitter_free(SubGhzTransmitter* instance) {
     free(instance);
 }
 
-void subghz_transmitter_stop(SubGhzTransmitter* instance) {
+bool subghz_transmitter_stop(SubGhzTransmitter* instance) {
     furi_assert(instance);
-    instance->protocol->encoder->stop(instance->protocol_instance);
+    bool ret = false;
+    if(instance->protocol && instance->protocol->encoder && instance->protocol->encoder->stop) {
+        instance->protocol->encoder->stop(instance->protocol_instance);
+        ret = true;
+    }
+    return ret;
 }
 
-void subghz_transmitter_load(
+bool subghz_transmitter_load(
     SubGhzTransmitter* instance,
     uint64_t key,
     uint8_t count_bit,
     size_t repeat) {
     furi_assert(instance);
-
-    instance->protocol->encoder->load(instance->protocol_instance, key, count_bit, repeat);
+    bool ret = false;
+    if(instance->protocol && instance->protocol->encoder && instance->protocol->encoder->load) {
+        ret =
+            instance->protocol->encoder->load(instance->protocol_instance, key, count_bit, repeat);
+    }
+    return ret;
 }
 
 LevelDuration subghz_transmitter_yield(void* context) {

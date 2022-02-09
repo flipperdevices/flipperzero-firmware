@@ -104,3 +104,18 @@ void subghz_receiver_set_filter(SubGhzReceiver* instance, SubGhzProtocolFlag fil
     furi_assert(instance);
     instance->filter = filter;
 }
+
+SubGhzProtocolDecoderBase* subghz_receiver_search_decoder_base_by_name(
+    SubGhzReceiver* instance,
+    const char* decoder_name) {
+    SubGhzProtocolDecoderBase* result = NULL;
+
+    for
+        M_EACH(slot, instance->slots, SubGhzReceiverSlotArray_t) {
+            if(strcmp(slot->base->protocol->name, decoder_name) == 0) {
+                result = (SubGhzProtocolDecoderBase*)slot->base;
+                break;
+            }
+        }
+    return result;
+}

@@ -16,9 +16,9 @@ SubGhzTransmitter*
 
 void subghz_transmitter_free(SubGhzTransmitter* instance);
 
-void subghz_transmitter_stop(SubGhzTransmitter* instance);
+bool subghz_transmitter_stop(SubGhzTransmitter* instance);
 
-void subghz_transmitter_load(
+bool subghz_transmitter_load(
     SubGhzTransmitter* instance,
     uint64_t key,
     uint8_t count_bit,

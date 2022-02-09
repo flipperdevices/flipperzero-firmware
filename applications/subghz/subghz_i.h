@@ -83,9 +83,16 @@ typedef enum {
 
 struct SubGhzTxRx {
     SubGhzWorker* worker;
-    SubGhzParser* parser;
-    SubGhzProtocolCommon* protocol_result;
-    SubGhzProtocolCommonEncoder* encoder;
+    SubGhzParser* parser; //todo delete
+    SubGhzProtocolCommon* protocol_result; //todo delete
+
+    SubGhzEnvironment* environment;
+    SubGhzReceiver* receiver;
+    SubGhzTransmitter* transmitter;
+    SubGhzProtocolDecoderBase* decoder_result;
+
+    SubGhzProtocolCommonEncoder* encoder; //todo delete
+
     uint32_t frequency;
     FuriHalSubGhzPreset preset;
     SubGhzHistory* history;

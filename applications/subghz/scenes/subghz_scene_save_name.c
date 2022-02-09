@@ -65,7 +65,7 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                 if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
                    SubGhzCustomEventManagerSet) {
                     subghz_protocol_raw_set_last_file_name(
-                        (SubGhzProtocolRAW*)subghz->txrx->protocol_result, subghz->file_name);
+                        (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result, subghz->file_name);
                     scene_manager_set_scene_state(
                         subghz->scene_manager, SubGhzSceneReadRAW, SubGhzCustomEventManagerNoSet);
                 } else {
