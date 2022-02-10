@@ -5,6 +5,8 @@
 #include "../helpers/archive_browser.h"
 #include "../views/archive_browser_view.h"
 
+#define TAG "ArchiveSceneBrowser"
+
 static const char* flipper_app_name[] = {
     [ArchiveFileTypeIButton] = "iButton",
     [ArchiveFileTypeNFC] = "NFC",
@@ -18,11 +20,16 @@ static const char* flipper_app_name[] = {
 static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selected) {
     Loader* loader = furi_record_open("loader");
 
+    LoaderStatus status;
     if(selected->is_app) {
         char* param = strrchr(string_get_cstr(selected->name), '/');
-        loader_start(loader, flipper_app_name[selected->type], param + 1);
+        status = loader_start(loader, flipper_app_name[selected->type], param + 1);
     } else {
-        loader_start(loader, flipper_app_name[selected->type], string_get_cstr(selected->name));
+        status = loader_start(loader, flipper_app_name[selected->type], string_get_cstr(selected->name));
+    }
+
+    if(status != LoaderStatusOk) {
+        FURI_LOG_E(TAG, "loader_start failed: %d", status);
     }
 
     furi_record_close("loader");
