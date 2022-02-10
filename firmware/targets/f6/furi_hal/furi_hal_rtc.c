@@ -171,4 +171,3 @@ void furi_hal_rtc_set_pin_fails(uint32_t value) {
 uint32_t furi_hal_rtc_get_pin_fails() {
     return furi_hal_rtc_get_register(FuriHalRtcRegisterPinFails);
 }
-
