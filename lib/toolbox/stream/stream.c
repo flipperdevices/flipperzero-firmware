@@ -53,9 +53,9 @@ int32_t stream_delete_and_insert(
 
 /********************************** Some random helpers starts here **********************************/
 
-void stream_rewind(Stream* stream) {
+bool stream_rewind(Stream* stream) {
     furi_assert(stream);
-    stream_seek(stream, 0, StreamOffsetFromStart);
+    return stream_seek(stream, 0, StreamOffsetFromStart);
 }
 
 size_t stream_write_char(Stream* stream, char c) {

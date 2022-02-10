@@ -100,7 +100,7 @@ int32_t stream_delete_and_insert(
  * Moves the rw pointer to the start
  * @param stream Stream instance
  */
-void stream_rewind(Stream* stream);
+bool stream_rewind(Stream* stream);
 
 /**
  * Write char to the stream
