@@ -378,6 +378,7 @@ foreach(COMP ${HAL_FIND_COMPONENTS_FAMILIES})
                                                     STM32::${FAMILY}${CORE_C} 
                                                     CMSIS::STM32::${FAMILY}${CORE_C})
         target_include_directories(HAL::STM32::${FAMILY}${CORE_C} INTERFACE "${HAL_${FAMILY}${CORE_U}_INCLUDE}")
+        target_compile_definitions(HAL::STM32::${FAMILY}${CORE_C} INTERFACE USE_HAL_DRIVER)
         target_sources(HAL::STM32::${FAMILY}${CORE_C} INTERFACE "${HAL_${FAMILY}${CORE_U}_SOURCE}")
     endif()
     

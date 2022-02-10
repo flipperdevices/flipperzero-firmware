@@ -22,5 +22,5 @@ stm32_util_create_family_targets(MP1 M4)
 
 target_compile_options(STM32::MP1::M4 INTERFACE -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard)
 target_link_options(STM32::MP1::M4 INTERFACE -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard)
-target_compile_definitions(STM32::MP1::M4 INTERFACE -DCORE_CM4)
+target_compile_definitions(STM32::MP1::M4 INTERFACE CORE_CM4)
 

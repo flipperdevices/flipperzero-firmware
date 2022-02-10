@@ -31,6 +31,7 @@ foreach(FAMILY ${TEST_FAMILIES})
     endif()
     
     add_executable(hal-test-${FAMILY} ${SOURCES})
+    target_compile_definitions(hal-test-${FAMILY} PRIVATE USE_FULL_LL_DRIVER)
     
     foreach(DRIVER ${HAL_DRIVERS_${FAMILY}})
         string(TOUPPER ${DRIVER} DRIVER)
