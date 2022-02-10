@@ -10,6 +10,8 @@
 #include "desktop_scene.h"
 #include "desktop_scene_i.h"
 
+#define TAG "DesktopSrv"
+
 static void desktop_scene_main_app_started_callback(const void* message, void* context) {
     furi_assert(context);
     Desktop* desktop = context;
@@ -123,10 +125,12 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
                 Loader* loader = furi_record_open("loader");
                 LoaderStatus status =
                     loader_start(loader, FLIPPER_APPS[desktop->settings.favorite].name, NULL);
-                furi_check(status == LoaderStatusOk);
+                if(status != LoaderStatusOk) {
+                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                }
                 furi_record_close("loader");
             } else {
-                FURI_LOG_E("DesktopSrv", "Can't find favorite application");
+                FURI_LOG_E(TAG, "Can't find favorite application");
             }
             consumed = true;
             break;
