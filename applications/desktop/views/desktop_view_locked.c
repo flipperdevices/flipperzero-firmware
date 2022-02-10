@@ -187,7 +187,7 @@ DesktopViewLocked* desktop_view_locked_alloc() {
     DesktopViewLocked* locked_view = furi_alloc(sizeof(DesktopViewLocked));
     locked_view->view = view_alloc();
     locked_view->timer =
-        xTimerCreate("Locked view", 1000 / 16, pdTRUE, locked_view, locked_view_timer_callback);
+        xTimerCreate(NULL, 1000 / 16, pdTRUE, locked_view, locked_view_timer_callback);
 
     locked_view->view = view_alloc();
     view_allocate_model(locked_view->view, ViewModelTypeLocking, sizeof(DesktopViewLockedModel));

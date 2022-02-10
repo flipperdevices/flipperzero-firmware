@@ -192,7 +192,7 @@ DesktopViewPinInput* desktop_view_pin_input_alloc(void) {
     view_set_draw_callback(pin_input->view, desktop_view_pin_input_draw);
     view_set_input_callback(pin_input->view, desktop_view_pin_input_input);
     pin_input->timer = xTimerCreate(
-        "",
+        NULL,
         pdMS_TO_TICKS(NO_ACTIVITY_TIMEOUT),
         pdFALSE,
         pin_input,

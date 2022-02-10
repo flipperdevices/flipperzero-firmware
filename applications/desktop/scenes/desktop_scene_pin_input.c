@@ -82,7 +82,7 @@ void desktop_scene_pin_input_on_enter(void* context) {
 
     DesktopScenePinInputState* state = furi_alloc(sizeof(DesktopScenePinInputState));
     state->timer =
-        xTimerCreate("", 10000, pdFALSE, desktop, desktop_scene_pin_input_timer_callback);
+        xTimerCreate(NULL, 10000, pdFALSE, desktop, desktop_scene_pin_input_timer_callback);
     scene_manager_set_scene_state(desktop->scene_manager, DesktopScenePinInput, (uint32_t)state);
 
     desktop_view_pin_input_hide_pin(desktop->pin_input_view, true);

@@ -45,7 +45,7 @@ static void desktop_view_pin_timeout_timer_callback(TimerHandle_t timer) {
     view_commit_model(instance->view, true);
 
     if(stop) {
-        xTimerStop(instance->timer, 0);
+        xTimerStop(instance->timer, portMAX_DELAY);
         instance->callback(instance->context);
     }
 }
@@ -79,7 +79,7 @@ void desktop_view_pin_timeout_free(DesktopViewPinTimeout* instance) {
 DesktopViewPinTimeout* desktop_view_pin_timeout_alloc(void) {
     DesktopViewPinTimeout* instance = furi_alloc(sizeof(DesktopViewPinTimeout));
     instance->timer = xTimerCreate(
-        "", pdMS_TO_TICKS(1000), pdTRUE, instance, desktop_view_pin_timeout_timer_callback);
+        NULL, pdMS_TO_TICKS(1000), pdTRUE, instance, desktop_view_pin_timeout_timer_callback);
 
     instance->view = view_alloc();
     view_allocate_model(instance->view, ViewModelTypeLockFree, sizeof(DesktopViewPinTimeoutModel));
