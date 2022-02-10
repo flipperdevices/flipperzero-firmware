@@ -44,13 +44,11 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
     BadUsbApp* app = furi_alloc(sizeof(BadUsbApp));
 
     if(arg != NULL) {
-        if(*arg != '\0') {
-            string_t filename;
-            string_init(filename);
-            path_extract_filename_no_ext(arg, filename);
-            strncpy(app->file_name, string_get_cstr(filename), BAD_USB_FILE_NAME_LEN);
-            string_clear(filename);
-        }
+        string_t filename;
+        string_init(filename);
+        path_extract_filename_no_ext(arg, filename);
+        strncpy(app->file_name, string_get_cstr(filename), BAD_USB_FILE_NAME_LEN);
+        string_clear(filename);
     }
 
     app->gui = furi_record_open("gui");
