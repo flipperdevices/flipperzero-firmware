@@ -122,10 +122,14 @@ See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 /* Normal assert() semantics without relying on the provision of an assert.h
 header file. */
 #include <furi/check.h>
+#ifdef DEBUG
 #define configASSERT(x)                \
     if((x) == 0) {                     \
         furi_crash("FreeRTOS Assert"); \
     }
+#else
+#define configASSERT(x) ((void)(0))
+#endif 
 
 /* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
 standard names. */
