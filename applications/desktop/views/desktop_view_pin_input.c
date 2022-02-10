@@ -1,11 +1,12 @@
-#include "desktop/desktop_settings/desktop_settings.h"
-#include "gui/canvas.h"
-#include "portmacro.h"
+#include <gui/canvas.h>
 #include <furi.h>
 #include <gui/view.h>
 #include <gui/elements.h>
-#include "pin_input.h"
 #include <stdint.h>
+#include <portmacro.h>
+
+#include "desktop_view_pin_input.h"
+#include "../desktop_settings/desktop_settings.h"
 
 #define NO_ACTIVITY_TIMEOUT 15000
 
@@ -140,7 +141,6 @@ static void desktop_view_pin_input_draw_cells(Canvas* canvas, DesktopViewPinInpu
 static void desktop_view_pin_input_draw(Canvas* canvas, void* context) {
     furi_assert(canvas);
     furi_assert(context);
-//    canvas_clear(canvas);    // dbg_
 
     canvas_set_font(canvas, FontSecondary);
     DesktopViewPinInputModel* model = context;
@@ -206,6 +206,13 @@ DesktopViewPinInput* desktop_view_pin_input_alloc(void) {
 
 void desktop_view_pin_input_free(DesktopViewPinInput* pin_input) {
     furi_assert(pin_input);
+
+    xTimerStop(pin_input->timer, portMAX_DELAY);
+    while (xTimerIsTimerActive(pin_input->timer)) {
+        delay(1);
+    }
+    xTimerDelete(pin_input->timer, portMAX_DELAY);
+
     view_free(pin_input->view);
     free(pin_input);
 }

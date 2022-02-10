@@ -1,10 +1,10 @@
-#include "../desktop_settings_app.h"
-#include "desktop_settings_scene.h"
-#include "../views/pin_setup_howto.h"
-#include "../views/pin_setup_howto2.h"
-#include "furi/check.h"
-#include "gui/scene_manager.h"
+#include <furi.h>
+#include <gui/scene_manager.h>
 #include <stdint.h>
+
+#include "desktop_settings_scene.h"
+#include "../desktop_settings_app.h"
+#include "../views/desktop_settings_view_pin_setup_howto2.h"
 
 #define SCENE_EXIT_EVENT (0U)
 #define SCENE_DONE_EVENT (1U)
@@ -41,7 +41,7 @@ bool desktop_settings_scene_pin_setup_howto2_on_event(void* context, SceneManage
         }
         case SCENE_EXIT_EVENT: {
             bool scene_found = false;
-            scene_found = scene_manager_search_and_switch_to_previous_scene(app->scene_manager, DesktopSettingsAppScenePinCodeMenu);
+            scene_found = scene_manager_search_and_switch_to_previous_scene(app->scene_manager, DesktopSettingsAppScenePinMenu);
             if (!scene_found) {
                 view_dispatcher_stop(app->view_dispatcher);
             }

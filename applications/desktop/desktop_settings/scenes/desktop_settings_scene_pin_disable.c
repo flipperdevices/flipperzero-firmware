@@ -1,12 +1,12 @@
-#include "../desktop_settings_app.h"
-#include "desktop/desktop_settings/desktop_settings.h"
-#include "desktop/views/pin_input.h"
-#include "desktop_settings_scene.h"
-#include "gui/modules/popup.h"
 #include <stdint.h>
 #include <furi/check.h>
 #include <gui/scene_manager.h>
+#include <gui/modules/popup.h>
+
+#include "../desktop_settings_app.h"
 #include "../desktop_settings.h"
+#include "desktop/desktop_settings/desktop_settings.h"
+#include "desktop_settings_scene.h"
 
 #define SCENE_EVENT_EXIT (0U)
 
@@ -39,7 +39,7 @@ bool desktop_settings_scene_pin_disable_on_event(void* context, SceneManagerEven
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case SCENE_EVENT_EXIT:
-            scene_manager_search_and_switch_to_previous_scene(app->scene_manager, DesktopSettingsAppScenePinCodeMenu);
+            scene_manager_search_and_switch_to_previous_scene(app->scene_manager, DesktopSettingsAppScenePinMenu);
             consumed = true;
             break;
 

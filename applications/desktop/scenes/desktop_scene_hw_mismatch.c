@@ -1,5 +1,5 @@
 #include <gui/scene_manager.h>
-#include <furi_hal_version.h>
+#include <furi_hal.h>
 
 #include "desktop_scene.h"
 #include "../desktop_i.h"

@@ -1,11 +1,10 @@
-#include "desktop_settings_app.h"
-#include "desktop/views/pin_input.h"
-#include "gui/modules/popup.h"
-#include "gui/scene_manager.h"
-#include "views/pin_setup_howto.h"
-#include "views/pin_setup_howto2.h"
 #include <furi.h>
+#include <gui/modules/popup.h>
+#include <gui/scene_manager.h>
+
+#include "desktop_settings_app.h"
 #include "scenes/desktop_settings_scene.h"
+#include "../views/desktop_view_pin_input.h"
 
 static bool desktop_settings_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);

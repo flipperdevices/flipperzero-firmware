@@ -1,11 +1,13 @@
-#include "../desktop_settings_app.h"
-#include "desktop/desktop_settings/desktop_settings.h"
-#include "desktop/views/pin_input.h"
-#include "desktop_settings_scene.h"
-#include "../../desktop_helpers.h"
 #include <stdint.h>
 #include <furi/check.h>
 #include <gui/scene_manager.h>
+
+#include "desktop/desktop_settings/desktop_settings.h"
+#include "desktop/views/desktop_view_pin_input.h"
+#include "desktop_settings_scene.h"
+#include "desktop_settings_scene_i.h"
+#include "../../desktop_helpers.h"
+#include "../desktop_settings_app.h"
 
 #define SCENE_EVENT_EXIT (0U)
 
@@ -30,9 +32,9 @@ void desktop_settings_scene_pin_error_on_enter(void* context) {
     desktop_view_pin_input_set_done_callback(app->pin_input_view, pin_error_done_callback);
 
     uint32_t state = scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppScenePinError);
-    if (state == SCENE_PIN_ERROR_MISMATCH) {
+    if (state == SCENE_STATE_PIN_ERROR_MISMATCH) {
         desktop_view_pin_input_set_label_primary(app->pin_input_view, 29, 8, "PIN mismatch!");
-    } else if (state == SCENE_PIN_ERROR_WRONG) {
+    } else if (state == SCENE_STATE_PIN_ERROR_WRONG) {
         desktop_view_pin_input_set_label_primary(app->pin_input_view, 35, 8, "Wrong PIN!");
     } else {
         furi_assert(0);

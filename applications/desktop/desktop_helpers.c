@@ -34,9 +34,9 @@ void desktop_helpers_emit_error_notification() {
 }
 
 void desktop_helpers_lock_system(Desktop* desktop, bool hard_lock) {
-    furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
     view_port_enabled_set(desktop->lock_viewport, true);
     if (hard_lock) {
+        furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
         furi_hal_usb_disable();
     }
 
@@ -46,7 +46,6 @@ void desktop_helpers_lock_system(Desktop* desktop, bool hard_lock) {
 }
 
 void desktop_helpers_unlock_system(Desktop* desktop) {
-    furi_hal_rtc_set_pin_fails(0);      // dbg_
     furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
     furi_hal_usb_enable();
     view_port_enabled_set(desktop->lock_viewport, false);

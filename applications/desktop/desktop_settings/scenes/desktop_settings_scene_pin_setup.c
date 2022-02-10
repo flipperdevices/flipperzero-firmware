@@ -1,10 +1,12 @@
-#include "../desktop_settings_app.h"
-#include "desktop/desktop_settings/desktop_settings.h"
-#include "desktop/views/pin_input.h"
-#include "desktop_settings_scene.h"
 #include <stdint.h>
 #include <furi/check.h>
 #include <gui/scene_manager.h>
+
+#include "../desktop_settings_app.h"
+#include "desktop/desktop_settings/desktop_settings.h"
+#include "desktop/views/desktop_view_pin_input.h"
+#include "desktop_settings_scene.h"
+#include "desktop_settings_scene_i.h"
 
 #define SCENE_EVENT_EXIT (0U)
 #define SCENE_EVENT_1ST_PIN_ENTERED (1U)
@@ -65,7 +67,7 @@ bool desktop_settings_scene_pin_setup_on_event(void* context, SceneManagerEvent 
             consumed = true;
             break;
         case SCENE_EVENT_PINS_DIFFERENT:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppScenePinError, SCENE_PIN_ERROR_MISMATCH);
+            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppScenePinError, SCENE_STATE_PIN_ERROR_MISMATCH);
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinError);
             consumed = true;
             break;
@@ -75,7 +77,7 @@ bool desktop_settings_scene_pin_setup_on_event(void* context, SceneManagerEvent 
             break;
         case SCENE_EVENT_EXIT: {
             uint32_t scene_found;
-            scene_found = scene_manager_search_and_switch_to_previous_scene(app->scene_manager, DesktopSettingsAppScenePinCodeMenu);
+            scene_found = scene_manager_search_and_switch_to_previous_scene(app->scene_manager, DesktopSettingsAppScenePinMenu);
             if (!scene_found) {
                 view_dispatcher_stop(app->view_dispatcher);
             }

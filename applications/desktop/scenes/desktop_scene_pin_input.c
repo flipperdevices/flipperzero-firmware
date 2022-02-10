@@ -1,7 +1,5 @@
-#include "desktop/desktop.h"
-#include "desktop/views/locked.h"
-#include <furi/common_defines.h>
-#include <furi_hal_rtc.h>
+#include <furi.h>
+#include <furi_hal.h>
 #include <gui/scene_manager.h>
 #include <gui/view_stack.h>
 #include <stdint.h>
@@ -9,14 +7,14 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
-#include "desktop/animations/animation_manager.h"
-#include "desktop/views/desktop_events.h"
-#include "desktop/desktop_i.h"
-#include "desktop/views/desktop_main.h"
-#include "desktop/views/pin_input.h"
+#include "../desktop.h"
+#include "../desktop_i.h"
+#include "../animations/animation_manager.h"
+#include "../views/desktop_events.h"
+#include "../views/desktop_view_pin_input.h"
+#include "../desktop_helpers.h"
 #include "desktop_scene.h"
 #include "desktop_scene_i.h"
-#include "../desktop_helpers.h"
 
 #define WRONG_PIN_HEADER_TIMEOUT 3000
 #define INPUT_PIN_VIEW_TIMEOUT 15000
@@ -123,8 +121,11 @@ bool desktop_scene_pin_input_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case DesktopPinInputEventUnlockFailed:
             pin_fails = furi_hal_rtc_get_pin_fails();
+            pin_fails++;
+            furi_hal_rtc_set_pin_fails(pin_fails);
             uint32_t pin_timeout = get_pin_fail_timeout(pin_fails);
             if (pin_timeout > 0) {
+                desktop_helpers_emit_error_notification();
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopScenePinTimeout, pin_timeout);
                 scene_manager_next_scene(desktop->scene_manager, DesktopScenePinTimeout);
             } else {
@@ -134,8 +135,6 @@ bool desktop_scene_pin_input_on_event(void* context, SceneManagerEvent event) {
                 desktop_scene_pin_input_set_timer(desktop, true, WRONG_PIN_HEADER_TIMEOUT);
                 desktop_view_pin_input_reset_pin(desktop->pin_input_view);
             }
-            pin_fails++;
-            furi_hal_rtc_set_pin_fails(pin_fails);
             consumed = true;
             break;
         case DesktopPinInputEventResetWrongPinLabel:
@@ -171,5 +170,6 @@ void desktop_scene_pin_input_on_exit(void* context) {
         delay(1);
     }
     xTimerDelete(state->timer, portMAX_DELAY);
+    free(state);
 }
 

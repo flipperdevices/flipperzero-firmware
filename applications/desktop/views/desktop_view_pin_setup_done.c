@@ -8,7 +8,7 @@
 #include <dolphin/dolphin.h>
 
 #include "../desktop_i.h"
-#include "pin_setup_done.h"
+#include "desktop_view_pin_setup_done.h"
 
 struct DesktopViewPinSetupDone {
     View* view;

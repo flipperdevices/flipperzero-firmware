@@ -7,15 +7,9 @@
 #include <gui/modules/submenu.h>
 
 #include "desktop_settings.h"
-#include "desktop/views/pin_input.h"
-#include "views/pin_setup_howto.h"
-#include "views/pin_setup_howto2.h"
-
-typedef enum {
-    CodeEventsSetPin,
-    CodeEventsChangePin,
-    CodeEventsDisablePin,
-} CodeEventsEnum;
+#include "desktop/views/desktop_view_pin_input.h"
+#include "views/desktop_settings_view_pin_setup_howto.h"
+#include "views/desktop_settings_view_pin_setup_howto2.h"
 
 typedef enum {
     DesktopSettingsAppViewMenu,
@@ -33,12 +27,12 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
     Popup* popup;
-
-    PinCode pincode_buffer;
-    bool pincode_buffer_filled;
     DesktopViewPinInput* pin_input_view;
     DesktopSettingsViewPinSetupHowto* pin_setup_howto_view;
     DesktopSettingsViewPinSetupHowto2* pin_setup_howto2_view;
+
+    PinCode pincode_buffer;
+    bool pincode_buffer_filled;
 
     uint8_t menu_idx;
 

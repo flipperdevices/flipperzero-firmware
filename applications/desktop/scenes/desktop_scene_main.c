@@ -1,16 +1,14 @@
-#include "desktop/views/desktop_events.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <applications.h>
 #include <assets_icons.h>
 #include <loader/loader.h>
 
-#include "desktop/desktop_i.h"
-#include "desktop/views/desktop_main.h"
+#include "../desktop_i.h"
+#include "../views/desktop_events.h"
+#include "../views/desktop_view_main.h"
 #include "desktop_scene.h"
 #include "desktop_scene_i.h"
-
-#define MAIN_VIEW_DEFAULT (0UL)
 
 static void desktop_scene_main_app_started_callback(const void* message, void* context) {
     furi_assert(context);
@@ -71,8 +69,6 @@ void desktop_scene_main_callback(DesktopEvent event, void* context) {
 void desktop_scene_main_on_enter(void* context) {
     Desktop* desktop = (Desktop*)context;
     DesktopMainView* main_view = desktop->main_view;
-
-    FURI_LOG_W("DSKTP", "enter %s", __func__);
 
     animation_manager_set_context(desktop->animation_manager, desktop);
     animation_manager_set_new_idle_callback(
@@ -162,7 +158,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         default:
-            furi_crash("unknown message to scene Main");
             break;
         }
     }
@@ -187,6 +182,4 @@ void desktop_scene_main_on_exit(void* context) {
     animation_manager_set_check_callback(desktop->animation_manager, NULL);
     animation_manager_set_interact_callback(desktop->animation_manager, NULL);
     animation_manager_set_context(desktop->animation_manager, desktop);
-    scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneMain, MAIN_VIEW_DEFAULT);
-    FURI_LOG_W("DSKTP", "exit %s", __func__);
 }

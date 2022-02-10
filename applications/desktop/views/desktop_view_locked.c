@@ -1,15 +1,14 @@
-#include "projdefs.h"
+#include <projdefs.h>
+#include <stdint.h>
+#include <furi.h>
+#include <gui/elements.h>
 #include <gui/icon.h>
 #include <gui/view.h>
 #include <portmacro.h>
-#include <furi.h>
-#include <gui/gui_i.h>
-#include <gui/elements.h>
-#include <stdint.h>
 
-#include "desktop/desktop_settings/desktop_settings.h"
-#include "locked.h"
+#include "../desktop_settings/desktop_settings.h"
 #include "../desktop_i.h"
+#include "desktop_view_locked.h"
 
 #define DOOR_MOVING_INTERVAL_MS (1000 / 16)
 #define UNLOCKED_HINT_TIMEOUT_MS (2000)
@@ -170,7 +169,6 @@ static bool desktop_view_locked_input(InputEvent* event, void* context) {
             if(locked_view->lock_count == UNLOCK_CNT) {
                 desktop_view_locked_unlock(locked_view);
                 locked_view->callback(DesktopLockedEventUnlocked, locked_view->context);
-                FURI_LOG_W("DSKTP", "send DesktopLockedEventUnlocked (%d)", DesktopLockedEventUnlocked);
             }
         } else {
             locked_view->lock_count = 0;

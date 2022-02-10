@@ -1,10 +1,12 @@
-#include "../desktop_settings_app.h"
-#include "desktop/desktop_settings/desktop_settings.h"
-#include "desktop/views/pin_input.h"
-#include "desktop_settings_scene.h"
 #include <stdint.h>
 #include <furi/check.h>
 #include <gui/scene_manager.h>
+
+#include "../desktop_settings_app.h"
+#include "desktop/desktop_settings/desktop_settings.h"
+#include "desktop/views/desktop_view_pin_input.h"
+#include "desktop_settings_scene.h"
+#include "desktop_settings_scene_i.h"
 
 #define SCENE_EVENT_EXIT (0U)
 #define SCENE_EVENT_PINS_EQUAL (1U)
@@ -52,15 +54,15 @@ bool desktop_settings_scene_pin_auth_on_event(void* context, SceneManagerEvent e
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case SCENE_EVENT_PINS_DIFFERENT:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppScenePinError, SCENE_PIN_ERROR_WRONG);
+            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppScenePinError, SCENE_STATE_PIN_ERROR_WRONG);
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinError);
             consumed = true;
             break;
         case SCENE_EVENT_PINS_EQUAL: {
             uint32_t state = scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppScenePinAuth);
-            if (state == SCENE_PIN_AUTH_STATE_CHANGE_PIN) {
+            if (state == SCENE_STATE_PIN_AUTH_CHANGE_PIN) {
                 scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinSetupHowto);
-            } else if (state == SCENE_PIN_AUTH_STATE_DISABLE) {
+            } else if (state == SCENE_STATE_PIN_AUTH_DISABLE) {
                 scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinDisable);
             } else {
                 furi_assert(0);
@@ -69,7 +71,7 @@ bool desktop_settings_scene_pin_auth_on_event(void* context, SceneManagerEvent e
             break;
         }
         case SCENE_EVENT_EXIT:
-            scene_manager_search_and_switch_to_previous_scene(app->scene_manager, DesktopSettingsAppScenePinCodeMenu);
+            scene_manager_search_and_switch_to_previous_scene(app->scene_manager, DesktopSettingsAppScenePinMenu);
             consumed = true;
             break;
 

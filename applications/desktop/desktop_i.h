@@ -2,13 +2,13 @@
 
 #include "desktop.h"
 #include "animations/animation_manager.h"
-#include "desktop/views/pin_timeout.h"
-#include "views/pin_input.h"
-#include "views/locked.h"
-#include "views/desktop_main.h"
-#include "views/desktop_first_start.h"
-#include "views/desktop_lock_menu.h"
-#include "views/desktop_debug.h"
+#include "views/desktop_view_pin_timeout.h"
+#include "views/desktop_view_pin_input.h"
+#include "views/desktop_view_locked.h"
+#include "views/desktop_view_main.h"
+#include "views/desktop_view_first_start.h"
+#include "views/desktop_view_lock_menu.h"
+#include "views/desktop_view_debug.h"
 #include "desktop/desktop_settings/desktop_settings.h"
 
 #include <furi.h>

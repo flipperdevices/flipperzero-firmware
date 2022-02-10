@@ -1,7 +1,5 @@
 #pragma once
 
-// dbg_
-//typedef enum {
-//    DesktopLockedSceneStateLocked,
-//    DesktopLockedSceneStateLockedWithPin,
-//} DesktopLockedSceneState;
+#define SCENE_LOCKED_FIRST_ENTER    0
+#define SCENE_LOCKED_REPEAT_ENTER   1
+

@@ -1,5 +1,4 @@
-#include "desktop/desktop_settings/desktop_settings.h"
-#include "gui/scene_manager.h"
+#include <gui/scene_manager.h>
 #include <applications.h>
 #include <furi_hal.h>
 #include <toolbox/saved_struct.h>
@@ -7,7 +6,8 @@
 #include <loader/loader.h>
 
 #include "../desktop_i.h"
-#include "../views/desktop_lock_menu.h"
+#include "../desktop_settings/desktop_settings.h"
+#include "../views/desktop_view_lock_menu.h"
 #include "desktop_scene_i.h"
 #include "desktop_scene.h"
 
@@ -23,6 +23,7 @@ void desktop_scene_lock_menu_on_enter(void* context) {
     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
     desktop_lock_menu_set_callback(desktop->lock_menu, desktop_scene_lock_menu_callback, desktop);
     desktop_lock_menu_pin_set(desktop->lock_menu, desktop->settings.pin_code.length > 0);
+    desktop_lock_menu_set_idx(desktop->lock_menu, 0);
 
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewIdLockMenu);
 }
@@ -44,14 +45,14 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case DesktopLockMenuEventLock:
             scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
-            scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_LOCK_DOORS);
+            scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
             consumed = true;
             break;
         case DesktopLockMenuEventPinLock:
             if(desktop->settings.pin_code.length > 0) {
                 furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
-                scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_LOCK_DOORS);
+                scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
                 scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
             } else {
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 1);

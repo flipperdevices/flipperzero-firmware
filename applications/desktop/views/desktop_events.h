@@ -18,12 +18,17 @@ typedef enum {
     DesktopPinInputEventUnlocked,
     DesktopPinInputEventUnlockFailed,
     DesktopPinInputEventBack,
+
+    DesktopPinTimeoutExit,
+
     DesktopDebugEventDeed,
     DesktopDebugEventWrongDeed,
     DesktopDebugEventSaveState,
     DesktopDebugEventExit,
+
     DesktopFirstStartCompleted,
     DesktopFirstStartPoweroff,
+
     DesktopLockMenuEventLock,
     DesktopLockMenuEventPinLock,
     DesktopLockMenuEventExit,

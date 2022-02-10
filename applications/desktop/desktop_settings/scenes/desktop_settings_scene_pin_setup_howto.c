@@ -1,9 +1,10 @@
-#include "../desktop_settings_app.h"
-#include "desktop_settings_scene.h"
-#include "../views/pin_setup_howto.h"
-#include "furi/check.h"
-#include "gui/scene_manager.h"
+#include <furi.h>
+#include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
+
+#include "desktop_settings_scene.h"
+#include "../desktop_settings_app.h"
+#include "../views/desktop_settings_view_pin_setup_howto.h"
 
 #define SCENE_EXIT_EVENT (0U)
 

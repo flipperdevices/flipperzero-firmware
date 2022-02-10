@@ -2,7 +2,7 @@
 #include <storage/storage.h>
 
 #include "../desktop_i.h"
-#include "../views/desktop_first_start.h"
+#include "../views/desktop_view_first_start.h"
 #include "../views/desktop_events.h"
 
 void desktop_scene_first_start_callback(DesktopEvent event, void* context) {

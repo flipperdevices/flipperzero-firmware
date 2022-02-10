@@ -1,7 +1,7 @@
 #pragma once
 
-#include "desktop/desktop_settings/desktop_settings.h"
-#include "desktop/views/desktop_events.h"
+#include "../desktop_settings/desktop_settings.h"
+#include "../views/desktop_events.h"
 #include <gui/view.h>
 
 typedef struct DesktopViewLocked DesktopViewLocked;

@@ -1,13 +1,14 @@
-#include "../desktop_settings_app.h"
-#include "desktop/desktop_settings/desktop_settings.h"
-#include "desktop/views/pin_input.h"
-#include "furi/check.h"
-#include "gui/scene_manager.h"
-#include "desktop_settings_scene.h"
-#include "gui/view_dispatcher.h"
+#include <furi.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <stdint.h>
+#include <gui/scene_manager.h>
+#include <gui/view_dispatcher.h>
+
+#include "../desktop_settings_app.h"
+#include "desktop/desktop_settings/desktop_settings.h"
+#include "desktop/views/desktop_view_pin_input.h"
+#include "desktop_settings_scene.h"
 
 #define SCENE_EVENT_DONE (0U)
 
@@ -48,7 +49,7 @@ bool desktop_settings_scene_pin_setup_done_on_event(void* context, SceneManagerE
         switch(event.event) {
         case SCENE_EVENT_DONE: {
             bool scene_found = false;
-            scene_found = scene_manager_search_and_switch_to_previous_scene(app->scene_manager, DesktopSettingsAppScenePinCodeMenu);
+            scene_found = scene_manager_search_and_switch_to_previous_scene(app->scene_manager, DesktopSettingsAppScenePinMenu);
             if (!scene_found) {
                 view_dispatcher_stop(app->view_dispatcher);
             }

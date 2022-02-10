@@ -1,13 +1,3 @@
-#include "animations/animation_manager.h"
-#include "desktop/scenes/desktop_scene.h"
-#include "desktop/scenes/desktop_scene_i.h"
-#include "desktop/views/locked.h"
-#include "desktop/views/pin_input.h"
-#include "desktop/views/pin_timeout.h"
-#include "desktop_i.h"
-#include "desktop_helpers.h"
-
-#include "furi_hal_rtc.h"
 #include <storage/storage.h>
 #include <assets_icons.h>
 #include <gui/view_stack.h>
@@ -15,6 +5,15 @@
 #include <furi_hal.h>
 #include <portmacro.h>
 #include <stdint.h>
+
+#include "animations/animation_manager.h"
+#include "desktop/scenes/desktop_scene.h"
+#include "desktop/scenes/desktop_scene_i.h"
+#include "desktop/views/desktop_view_locked.h"
+#include "desktop/views/desktop_view_pin_input.h"
+#include "desktop/views/desktop_view_pin_timeout.h"
+#include "desktop_i.h"
+#include "desktop_helpers.h"
 
 static void desktop_lock_icon_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
@@ -176,7 +175,7 @@ int32_t desktop_srv(void* p) {
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
         if(desktop->settings.pin_code.length > 0) {
-            scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_LOCK_DOORS);
+            scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
         } else {
             furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
@@ -200,4 +199,3 @@ int32_t desktop_srv(void* p) {
 
     return 0;
 }
-

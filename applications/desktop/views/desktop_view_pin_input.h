@@ -1,7 +1,7 @@
 #pragma once
 
-#include "desktop/desktop_settings/desktop_settings.h"
 #include <gui/view.h>
+#include "desktop/desktop_settings/desktop_settings.h"
 
 typedef void (*DesktopViewPinInputCallback)(void*);
 typedef void (*DesktopViewPinInputDoneCallback)(const PinCode* pin_code, void*);

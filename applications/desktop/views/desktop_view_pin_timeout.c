@@ -1,5 +1,5 @@
 
-#include "furi/check.h"
+#include <furi.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <FreeRTOS.h>
@@ -9,7 +9,7 @@
 #include <gui/canvas.h>
 #include <gui/view.h>
 
-#include "pin_timeout.h"
+#include "desktop_view_pin_timeout.h"
 
 struct DesktopViewPinTimeout {
     View* view;

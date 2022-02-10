@@ -7,7 +7,7 @@
 #include <dolphin/helpers/dolphin_state.h>
 #include <dolphin/dolphin.h>
 
-#include "pin_setup_howto.h"
+#include "desktop_settings_view_pin_setup_howto.h"
 
 struct DesktopSettingsViewPinSetupHowto {
     View* view;
