@@ -57,7 +57,6 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
 
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
-    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     app->scene_manager = scene_manager_alloc(&bad_usb_scene_handlers, app);
 
@@ -77,6 +76,8 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
     app->bad_usb_view = bad_usb_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, BadUsbAppViewWork, bad_usb_get_view(app->bad_usb_view));
+
+    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     if(*app->file_name != '\0') {
         scene_manager_next_scene(app->scene_manager, BadUsbSceneWork);
