@@ -28,7 +28,8 @@ static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selec
         }
         status = loader_start(loader, flipper_app_name[selected->type], param);
     } else {
-        status = loader_start(loader, flipper_app_name[selected->type], string_get_cstr(selected->name));
+        status = loader_start(
+            loader, flipper_app_name[selected->type], string_get_cstr(selected->name));
     }
 
     if(status != LoaderStatusOk) {
