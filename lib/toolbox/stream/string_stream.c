@@ -1,97 +1,67 @@
+#include "stream.h"
+#include "stream_i.h"
 #include "string_stream.h"
 #include <furi/common_defines.h>
 
-struct StringStream {
+typedef struct {
+    Stream stream_base;
     string_t string;
     size_t index;
+} StringStream;
+
+static void string_stream_free(StringStream* stream);
+static bool string_stream_eof(StringStream* stream);
+static void string_stream_clean(StringStream* stream);
+static bool string_stream_seek(StringStream* stream, int32_t offset, StreamOffset offset_type);
+static size_t string_stream_tell(StringStream* stream);
+static size_t string_stream_size(StringStream* stream);
+static size_t string_stream_write_char(StringStream* stream, char c);
+static size_t string_stream_write(StringStream* stream, const char* data, size_t size);
+static size_t string_stream_read(StringStream* stream, char* data, size_t count);
+static int32_t string_stream_delete_and_insert(
+    StringStream* stream,
+    size_t delete_size,
+    StreamWriteCB write_callback,
+    const void* ctx);
+
+const StreamVTable string_stream_vtable = {
+    .free = (StreamFreeFn)string_stream_free,
+    .eof = (StreamEOFFn)string_stream_eof,
+    .clean = (StreamCleanFn)string_stream_clean,
+    .seek = (StreamSeekFn)string_stream_seek,
+    .tell = (StreamTellFn)string_stream_tell,
+    .size = (StreamSizeFn)string_stream_size,
+    .write = (StreamWriteFn)string_stream_write,
+    .read = (StreamReadFn)string_stream_read,
+    .delete_and_insert = (StreamDeleteAndInsertFn)string_stream_delete_and_insert,
 };
 
-StringStream* string_stream_alloc() {
+Stream* string_stream_alloc() {
     StringStream* stream = malloc(sizeof(StringStream));
     string_init(stream->string);
     stream->index = 0;
-    return stream;
+    stream->stream_base.vtable = &string_stream_vtable;
+    return (Stream*)stream;
 }
 
-void string_stream_free(StringStream* stream) {
+static void string_stream_free(StringStream* stream) {
     string_clear(stream->string);
     free(stream);
 }
 
-void string_stream_clean(StringStream* stream) {
-    string_stream_rewind(stream);
-    string_reset(stream->string);
-}
-
-void string_stream_rewind(StringStream* stream) {
-    stream->index = 0;
-}
-
-bool string_stream_eof(StringStream* stream) {
+static bool string_stream_eof(StringStream* stream) {
     return (string_stream_tell(stream) >= string_stream_size(stream));
 }
 
-size_t string_stream_size(StringStream* stream) {
-    return string_size(stream->string);
+static void string_stream_clean(StringStream* stream) {
+    stream->index = 0;
+    string_reset(stream->string);
 }
 
-size_t string_stream_tell(StringStream* stream) {
-    return stream->index;
-}
-
-size_t string_stream_write(StringStream* stream, const char* data, size_t size) {
-    // TODO: can be optimized for edge cases
-    size_t i;
-    for(i = 0; i < size; i++) {
-        string_stream_write_char(stream, data[i]);
-    }
-
-    return i;
-}
-
-size_t string_stream_write_char(StringStream* stream, char c) {
-    if(string_stream_eof(stream)) {
-        string_push_back(stream->string, c);
-    } else {
-        string_set_char(stream->string, stream->index, c);
-    }
-    stream->index++;
-
-    return 1;
-}
-
-size_t string_stream_write_string(StringStream* stream, string_t string) {
-    return string_stream_write(stream, string_get_cstr(string), string_size(string));
-}
-
-size_t string_stream_write_cstring(StringStream* stream, const char* string) {
-    return string_stream_write(stream, string, strlen(string));
-}
-
-size_t string_stream_write_format(StringStream* stream, const char* format, ...) {
-    size_t size;
-
-    va_list args;
-    va_start(args, format);
-    size = string_stream_write_vaformat(stream, format, args);
-    va_end(args);
-
-    return size;
-}
-
-size_t string_stream_write_vaformat(StringStream* stream, const char* format, va_list args) {
-    string_t data;
-    string_init_vprintf(data, format, args);
-    size_t size = string_stream_write_string(stream, data);
-    string_clear(data);
-
-    return size;
-}
-
-bool string_stream_seek(StringStream* stream, int32_t offset, StringStreamOffset offset_type) {
+static bool string_stream_seek(StringStream* stream, int32_t offset, StreamOffset offset_type) {
     bool result = true;
     switch(offset_type) {
-    case StringStreamOffsetFromStart:
+    case StreamOffsetFromStart:
         if(offset >= 0) {
             stream->index = offset;
         } else {
@@ -99,7 +69,7 @@ bool string_stream_seek(StringStream* stream, int32_t offset, StringStreamOffset
             stream->index = 0;
         }
         break;
-    case StringStreamOffsetFromCurrent:
+    case StreamOffsetFromCurrent:
         if(((int32_t)stream->index + offset) > 0) {
             stream->index += offset;
         } else {
@@ -107,7 +77,7 @@ bool string_stream_seek(StringStream* stream, int32_t offset, StringStreamOffset
             stream->index = 0;
         }
         break;
-    case StringStreamOffsetFromEnd:
+    case StreamOffsetFromEnd:
         if(((int32_t)string_size(stream->string) + offset) > 0) {
             stream->index = string_size(stream->string) + offset;
         } else {
@@ -126,7 +96,25 @@ bool string_stream_seek(StringStream* stream, int32_t offset, StringStreamOffset
     return result;
 }
 
-size_t string_stream_read(StringStream* stream, char* data, size_t count) {
+static size_t string_stream_tell(StringStream* stream) {
+    return stream->index;
+}
+
+static size_t string_stream_size(StringStream* stream) {
+    return string_size(stream->string);
+}
+
+static size_t string_stream_write(StringStream* stream, const char* data, size_t size) {
+    // TODO: can be optimized for edge cases
+    size_t i;
+    for(i = 0; i < size; i++) {
+        string_stream_write_char(stream, data[i]);
+    }
+
+    return i;
+}
+
+static size_t string_stream_read(StringStream* stream, char* data, size_t count) {
     size_t write_index = 0;
     const char* cstr = string_get_cstr(stream->string);
 
@@ -136,7 +124,7 @@ size_t string_stream_read(StringStream* stream, char* data, size_t count) {
 
             data[write_index] = cstr[stream->index];
             write_index++;
-            string_stream_seek(stream, 1, StringStreamOffsetFromCurrent);
+            string_stream_seek(stream, 1, StreamOffsetFromCurrent);
             if(string_stream_eof(stream)) break;
         }
     }
@@ -144,32 +132,51 @@ size_t string_stream_read(StringStream* stream, char* data, size_t count) {
     return write_index;
 }
 
-size_t string_stream_insert(StringStream* stream, const char* data, size_t size) {
-    size_t was_written = 0;
+static int32_t string_stream_delete_and_insert(
+    StringStream* stream,
+    size_t delete_size,
+    StreamWriteCB write_callback,
+    const void* ctx) {
+    int32_t result = 0;
 
     do {
-        string_t right;
-        string_init_set(right, &string_get_cstr(stream->string)[stream->index]);
-        string_stream_delete(stream, string_stream_size(stream));
-        was_written = string_stream_write(stream, data, size);
-        string_cat(stream->string, right);
-        string_clear(right);
+        if(delete_size) {
+            size_t remain_size = string_stream_size(stream) - string_stream_tell(stream);
+            remain_size = MIN(delete_size, remain_size);
+
+            if(remain_size != 0) {
+                string_replace_at(stream->string, stream->index, remain_size, "");
+                result -= remain_size;
+            }
+        }
+
+        if(write_callback) {
+            string_t right;
+            string_init_set(right, &string_get_cstr(stream->string)[stream->index]);
+            string_left(stream->string, string_stream_tell(stream));
+            result += write_callback((Stream*)stream, ctx);
+            string_cat(stream->string, right);
+            string_clear(right);
+        }
 
     } while(false);
 
-    return was_written;
+    return result;
 }
 
-size_t string_stream_delete(StringStream* stream, size_t size) {
-    size_t stream_size_before = string_stream_size(stream);
+/**
+ * Write to string stream helper
+ * @param stream 
+ * @param c 
+ * @return size_t 
+ */
+static size_t string_stream_write_char(StringStream* stream, char c) {
+    if(string_stream_eof(stream)) {
+        string_push_back(stream->string, c);
+    } else {
+        string_set_char(stream->string, stream->index, c);
+    }
+    stream->index++;
 
-    do {
-        if(string_stream_eof(stream)) break;
-        size_t remain_size = string_stream_size(stream) - string_stream_tell(stream);
-        remain_size = MIN(size, remain_size);
-
-        string_replace_at(stream->string, stream->index, remain_size, "");
-    } while(false);
-
-    return stream_size_before - string_stream_size(stream);
+    return 1;
 }
