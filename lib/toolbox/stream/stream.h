@@ -94,7 +94,7 @@ int32_t stream_delete_and_insert(
     StreamWriteCB write_callback,
     const void* context);
 
-/****** Some random helpers starts here ******/
+/********************************** Some random helpers starts here **********************************/
 
 /**
  * Moves the rw pointer to the start
@@ -152,7 +152,101 @@ size_t stream_write_vaformat(Stream* stream, const char* format, va_list args);
  * @param size size of data to be inserted
  * @return size_t how many bytes was written
  */
-size_t stream_insert(Stream* stream, const char* data, size_t size);
+size_t stream_insert(Stream* stream, const uint8_t* data, size_t size);
+
+/**
+ * Insert char to the stream
+ * @param stream Stream instance
+ * @param c char value
+ * @return size_t how many bytes was written
+ */
+size_t stream_insert_char(Stream* stream, char c);
+
+/**
+ * Insert string to the stream
+ * @param stream Stream instance
+ * @param string string value
+ * @return size_t how many bytes was written
+ */
+size_t stream_insert_string(Stream* stream, string_t string);
+
+/**
+ * Insert const char* to the stream
+ * @param stream Stream instance
+ * @param string c-string value
+ * @return size_t how many bytes was written
+ */
+size_t stream_insert_cstring(Stream* stream, const char* string);
+
+/**
+ * Insert formatted string to the stream
+ * @param stream Stream instance
+ * @param format 
+ * @param ... 
+ * @return size_t how many bytes was written
+ */
+size_t stream_insert_format(Stream* stream, const char* format, ...);
+
+/**
+ * Insert formatted string to the stream, va_list version
+ * @param stream Stream instance
+ * @param format 
+ * @param args 
+ * @return size_t how many bytes was written
+ */
+size_t stream_insert_vaformat(Stream* stream, const char* format, va_list args);
+
+/**
+ * Delete N chars from the stream and insert char to the stream
+ * @param stream Stream instance
+ * @param delete_size size of data to be deleted
+ * @param c char value
+ * @return size_t how many bytes was written
+ */
+int32_t stream_delete_and_insert_char(Stream* stream, size_t delete_size, char c);
+
+/**
+ * Delete N chars from the stream and insert string to the stream
+ * @param stream Stream instance
+ * @param delete_size size of data to be deleted
+ * @param string string value
+ * @return size_t how many bytes was written
+ */
+int32_t stream_delete_and_insert_string(Stream* stream, size_t delete_size, string_t string);
+
+/**
+ * Delete N chars from the stream and insert const char* to the stream
+ * @param stream Stream instance
+ * @param delete_size size of data to be deleted
+ * @param string c-string value
+ * @return size_t how many bytes was written
+ */
+int32_t stream_delete_and_insert_cstring(Stream* stream, size_t delete_size, const char* string);
+
+/**
+ * Delete N chars from the stream and insert formatted string to the stream
+ * @param stream Stream instance
+ * @param delete_size size of data to be deleted
+ * @param format 
+ * @param ... 
+ * @return size_t how many bytes was written
+ */
+int32_t
+    stream_delete_and_insert_format(Stream* stream, size_t delete_size, const char* format, ...);
+
+/**
+ * Delete N chars from the stream and insert formatted string to the stream, va_list version
+ * @param stream Stream instance
+ * @param delete_size size of data to be deleted
+ * @param format 
+ * @param args 
+ * @return size_t how many bytes was written
+ */
+int32_t stream_delete_and_insert_vaformat(
+    Stream* stream,
+    size_t delete_size,
+    const char* format,
+    va_list args);
 
 /**
  * Remove N chars from the stream, starting at the current pointer.
