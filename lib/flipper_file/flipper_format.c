@@ -2,18 +2,21 @@
 #include <toolbox/stream/stream.h>
 #include <toolbox/stream/string_stream.h>
 #include "flipper_format.h"
+#include "flipper_format_i.h"
 #include "flipper_format_stream.h"
 
-/* Private */
+/********************************** Private **********************************/
 struct FlipperFormat {
     Stream* stream;
     bool strict_mode;
 };
 
-/********************************** Private **********************************/
-
 static const char* flipper_format_filetype_key = "Filetype";
 static const char* flipper_format_version_key = "Version";
+
+Stream* flipper_format_get_raw_stream(FlipperFormat* flipper_format) {
+    return flipper_format->stream;
+}
 
 /********************************** Public **********************************/
 
