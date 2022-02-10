@@ -23,7 +23,10 @@ static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selec
     LoaderStatus status;
     if(selected->is_app) {
         char* param = strrchr(string_get_cstr(selected->name), '/');
-        status = loader_start(loader, flipper_app_name[selected->type], param + 1);
+        if (param != NULL) {
+            param++;
+        }
+        status = loader_start(loader, flipper_app_name[selected->type], param);
     } else {
         status = loader_start(loader, flipper_app_name[selected->type], string_get_cstr(selected->name));
     }
