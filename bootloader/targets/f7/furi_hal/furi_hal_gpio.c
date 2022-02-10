@@ -112,11 +112,11 @@ void hal_gpio_init_ex(
             LL_EXTI_EnableIT_0_31(exti_line);
             LL_EXTI_EnableFallingTrig_0_31(exti_line);
         }
-        if(mode == GpioModeEventRise || mode == GpioModeInterruptRiseFall) {
+        if(mode == GpioModeEventRise || mode == GpioModeEventRiseFall) {
             LL_EXTI_EnableEvent_0_31(exti_line);
             LL_EXTI_EnableRisingTrig_0_31(exti_line);
         }
-        if(mode == GpioModeEventFall || mode == GpioModeInterruptRiseFall) {
+        if(mode == GpioModeEventFall || mode == GpioModeEventRiseFall) {
             LL_EXTI_EnableEvent_0_31(exti_line);
             LL_EXTI_EnableFallingTrig_0_31(exti_line);
         }
