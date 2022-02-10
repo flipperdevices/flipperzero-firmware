@@ -5,6 +5,14 @@ CFLAGS		+= -I$(APP_DIR)
 C_SOURCES	+= $(shell find $(APP_DIR) -name "*.c")
 CPP_SOURCES	+= $(shell find $(APP_DIR) -name "*.cpp")
 
+RAM_EXEC ?= 0
+ifeq ($(RAM_EXEC), 1)
+APP_RELEASE	= 0
+SRV_GUI 	= 1
+SRV_INPUT 	= 1
+SRV_NOTIFICATION	= 1
+SRV_STORAGE	= 1
+endif
 
 APP_RELEASE ?= 1
 ifeq ($(APP_RELEASE), 1)

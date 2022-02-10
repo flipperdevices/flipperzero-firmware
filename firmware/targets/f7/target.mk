@@ -25,7 +25,15 @@ BOOT_CFLAGS		= -DBOOT_ADDRESS=$(BOOT_ADDRESS) -DFW_ADDRESS=$(FW_ADDRESS) -DOS_OF
 MCU_FLAGS		= -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
 CFLAGS			+= $(MCU_FLAGS) $(BOOT_CFLAGS) -DSTM32WB55xx -Wall -fdata-sections -ffunction-sections
-LDFLAGS			+= $(MCU_FLAGS) -specs=nosys.specs -specs=nano.specs -u _printf_float
+LDFLAGS			+= $(MCU_FLAGS) -specs=nosys.specs -specs=nano.specs
+
+RAM_EXEC ?= 0
+ifeq ($(RAM_EXEC), 1)
+CFLAGS 			+= -DFURI_RAM_EXEC
+#LDFLAGS			+= -flto
+else
+LDFLAGS			+= -u _printf_float
+endif 
 
 CPPFLAGS		+= -fno-rtti -fno-use-cxa-atexit -fno-exceptions
 LDFLAGS			+= -Wl,--start-group -lstdc++ -lsupc++ -Wl,--end-group

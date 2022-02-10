@@ -118,6 +118,8 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         case DesktopMainEventOpenArchive:
 #ifdef APP_ARCHIVE
             desktop_switch_to_app(desktop, &FLIPPER_ARCHIVE);
+#else
+            (void)&desktop_switch_to_app; // to make it build
 #endif
             consumed = true;
             break;

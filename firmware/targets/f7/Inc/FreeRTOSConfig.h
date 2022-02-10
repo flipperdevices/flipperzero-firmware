@@ -127,8 +127,6 @@ header file. */
     if((x) == 0) {                     \
         furi_crash("FreeRTOS Assert"); \
     }
-#else
-#define configASSERT(x) ((void)(0))
 #endif 
 
 /* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
