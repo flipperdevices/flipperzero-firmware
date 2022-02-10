@@ -112,8 +112,11 @@ static void desktop_view_locked_draw(Canvas* canvas, void* model) {
             elements_multiline_text_framed(canvas, 42, 30 + STATUS_BAR_Y_SHIFT, "Locked");
         } else if((now < m->hint_icon_expire_at) && !m->pin_locked) {
             canvas_set_font(canvas, FontSecondary);
-            canvas_draw_icon(canvas, 13, 2 + STATUS_BAR_Y_SHIFT, &I_LockPopup_100x49);
+            elements_bold_rounded_frame(canvas, 14, 2 + STATUS_BAR_Y_SHIFT, 99, 48);
             elements_multiline_text(canvas, 65, 20 + STATUS_BAR_Y_SHIFT, "To unlock\npress:");
+            canvas_draw_icon(canvas, 65, 36 + STATUS_BAR_Y_SHIFT, &I_Back3_45x8);
+            canvas_draw_icon(canvas, 16, 7 + STATUS_BAR_Y_SHIFT, &I_WarningDolphin_45x42);
+            canvas_draw_dot(canvas, 17, 61);
         }
     } else {
         if(m->unlocked_hint) {
