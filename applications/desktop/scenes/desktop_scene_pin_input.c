@@ -23,20 +23,6 @@ typedef struct {
     TimerHandle_t timer;
 } DesktopScenePinInputState;
 
-static const uint8_t desktop_scene_helpers_fails_timeout[] = {
-    0,
-    0,
-    0,
-    0,
-    30,
-    60,
-    90,
-    120,
-    150,
-    180,
-    /* +60 for every next fail */
-};
-
 static void desktop_scene_locked_light_red(bool value) {
     NotificationApp* app = furi_record_open("notification");
     if(value) {
@@ -45,19 +31,6 @@ static void desktop_scene_locked_light_red(bool value) {
         notification_message(app, &sequence_reset_red);
     }
     furi_record_close("notification");
-}
-
-static uint32_t get_pin_fail_timeout(uint32_t pin_fails) {
-    uint32_t pin_timeout = 0;
-    uint32_t max_index = COUNT_OF(desktop_scene_helpers_fails_timeout);
-    if(pin_fails <= max_index) {
-        pin_timeout = desktop_scene_helpers_fails_timeout[pin_fails];
-    } else {
-        pin_timeout =
-            desktop_scene_helpers_fails_timeout[max_index] + (pin_fails - max_index) * 60;
-    }
-
-    return pin_timeout;
 }
 
 static void
@@ -132,7 +105,7 @@ bool desktop_scene_pin_input_on_event(void* context, SceneManagerEvent event) {
             pin_fails = furi_hal_rtc_get_pin_fails();
             pin_fails++;
             furi_hal_rtc_set_pin_fails(pin_fails);
-            uint32_t pin_timeout = get_pin_fail_timeout(pin_fails);
+            uint32_t pin_timeout = desktop_helpers_get_pin_fail_timeout(pin_fails);
             if(pin_timeout > 0) {
                 desktop_helpers_emit_error_notification();
                 scene_manager_set_scene_state(

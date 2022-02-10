@@ -18,33 +18,6 @@
 #define WRONG_PIN_HEADER_TIMEOUT 3000
 #define INPUT_PIN_VIEW_TIMEOUT 15000
 
-static const uint8_t desktop_scene_helpers_fails_timeout[] = {
-    0,
-    0,
-    0,
-    0,
-    30,
-    60,
-    90,
-    120,
-    150,
-    180,
-    /* +60 for every next fail */
-};
-
-static uint32_t get_pin_fail_timeout(uint32_t pin_fails) {
-    uint32_t pin_timeout = 0;
-    uint32_t max_index = COUNT_OF(desktop_scene_helpers_fails_timeout);
-    if(pin_fails <= max_index) {
-        pin_timeout = desktop_scene_helpers_fails_timeout[pin_fails];
-    } else {
-        pin_timeout =
-            desktop_scene_helpers_fails_timeout[max_index] + (pin_fails - max_index) * 60;
-    }
-
-    return pin_timeout;
-}
-
 static void desktop_scene_locked_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
     view_dispatcher_send_custom_event(desktop->view_dispatcher, event);
@@ -78,7 +51,7 @@ void desktop_scene_locked_on_enter(void* context) {
             LOAD_DESKTOP_SETTINGS(&desktop->settings);
             desktop_view_locked_lock(desktop->locked_view, true);
             uint32_t pin_fails = furi_hal_rtc_get_pin_fails();
-            uint32_t pin_timeout = get_pin_fail_timeout(pin_fails);
+            uint32_t pin_timeout = desktop_helpers_get_pin_fail_timeout(pin_fails);
             if(pin_timeout) {
                 scene_manager_set_scene_state(
                     desktop->scene_manager, DesktopScenePinTimeout, pin_timeout);

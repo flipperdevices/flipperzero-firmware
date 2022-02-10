@@ -27,6 +27,20 @@ static const NotificationSequence sequence_pin_fail = {
     NULL,
 };
 
+static const uint8_t desktop_helpers_fails_timeout[] = {
+    0,
+    0,
+    0,
+    0,
+    30,
+    60,
+    90,
+    120,
+    150,
+    180,
+    /* +60 for every next fail */
+};
+
 void desktop_helpers_emit_error_notification() {
     NotificationApp* notification = furi_record_open("notification");
     notification_message(notification, &sequence_pin_fail);
@@ -53,4 +67,16 @@ void desktop_helpers_unlock_system(Desktop* desktop) {
     Gui* gui = furi_record_open("gui");
     gui_set_lockdown(gui, false);
     furi_record_close("gui");
+}
+
+uint32_t desktop_helpers_get_pin_fail_timeout(uint32_t pin_fails) {
+    uint32_t pin_timeout = 0;
+    uint32_t max_index = COUNT_OF(desktop_helpers_fails_timeout) - 1;
+    if(pin_fails <= max_index) {
+        pin_timeout = desktop_helpers_fails_timeout[pin_fails];
+    } else {
+        pin_timeout = desktop_helpers_fails_timeout[max_index] + (pin_fails - max_index) * 60;
+    }
+
+    return pin_timeout;
 }
