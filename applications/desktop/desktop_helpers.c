@@ -35,7 +35,7 @@ void desktop_helpers_emit_error_notification() {
 
 void desktop_helpers_lock_system(Desktop* desktop, bool hard_lock) {
     view_port_enabled_set(desktop->lock_viewport, true);
-    if (hard_lock) {
+    if(hard_lock) {
         furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
         furi_hal_usb_disable();
     }
@@ -54,4 +54,3 @@ void desktop_helpers_unlock_system(Desktop* desktop) {
     gui_set_lockdown(gui, false);
     furi_record_close("gui");
 }
-

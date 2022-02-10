@@ -7,4 +7,3 @@ ADD_SCENE(desktop, fault, Fault)
 ADD_SCENE(desktop, locked, Locked)
 ADD_SCENE(desktop, pin_input, PinInput)
 ADD_SCENE(desktop, pin_timeout, PinTimeout)
-

@@ -28,8 +28,8 @@
         DESKTOP_SETTINGS_MAGIC,  \
         DESKTOP_SETTINGS_VER)
 
-#define MAX_PIN_SIZE        10
-#define MIN_PIN_SIZE        4
+#define MAX_PIN_SIZE 10
+#define MIN_PIN_SIZE 4
 
 typedef struct {
     InputKey data[MAX_PIN_SIZE];
@@ -46,7 +46,7 @@ static inline bool pins_are_equal(const PinCode* pin_code1, const PinCode* pin_c
     furi_assert(pin_code2);
     bool result = false;
 
-    if (pin_code1->length == pin_code2->length) {
+    if(pin_code1->length == pin_code2->length) {
         result = !memcmp(pin_code1->data, pin_code2->data, pin_code1->length);
     }
 

@@ -16,7 +16,8 @@ static void desktop_settings_scene_pin_lock_done_callback(void* context) {
 void desktop_settings_scene_pin_setup_howto_on_enter(void* context) {
     DesktopSettingsApp* app = context;
 
-    desktop_settings_view_pin_setup_howto_set_callback(app->pin_setup_howto_view, desktop_settings_scene_pin_lock_done_callback, app);
+    desktop_settings_view_pin_setup_howto_set_callback(
+        app->pin_setup_howto_view, desktop_settings_scene_pin_lock_done_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewIdPinSetupHowto);
 }
 

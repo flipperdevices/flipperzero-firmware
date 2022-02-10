@@ -23,8 +23,10 @@ void desktop_settings_scene_pin_setup_howto2_on_enter(void* context) {
     DesktopSettingsApp* app = context;
 
     desktop_settings_view_pin_setup_howto2_set_context(app->pin_setup_howto2_view, app);
-    desktop_settings_view_pin_setup_howto2_set_ok_callback(app->pin_setup_howto2_view, desktop_settings_scene_pin_setup_howto2_done_callback);
-    desktop_settings_view_pin_setup_howto2_set_cancel_callback(app->pin_setup_howto2_view, desktop_settings_scene_pin_setup_howto2_exit_callback);
+    desktop_settings_view_pin_setup_howto2_set_ok_callback(
+        app->pin_setup_howto2_view, desktop_settings_scene_pin_setup_howto2_done_callback);
+    desktop_settings_view_pin_setup_howto2_set_cancel_callback(
+        app->pin_setup_howto2_view, desktop_settings_scene_pin_setup_howto2_exit_callback);
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewIdPinSetupHowto2);
 }
 
@@ -41,8 +43,9 @@ bool desktop_settings_scene_pin_setup_howto2_on_event(void* context, SceneManage
         }
         case SCENE_EXIT_EVENT: {
             bool scene_found = false;
-            scene_found = scene_manager_search_and_switch_to_previous_scene(app->scene_manager, DesktopSettingsAppScenePinMenu);
-            if (!scene_found) {
+            scene_found = scene_manager_search_and_switch_to_previous_scene(
+                app->scene_manager, DesktopSettingsAppScenePinMenu);
+            if(!scene_found) {
                 view_dispatcher_stop(app->view_dispatcher);
             }
             consumed = true;

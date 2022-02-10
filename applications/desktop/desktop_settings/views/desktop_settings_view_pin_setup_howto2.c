@@ -21,10 +21,15 @@ static void desktop_settings_view_pin_setup_howto2_draw(Canvas* canvas, void* mo
     furi_assert(model);
 
     canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text_aligned(canvas, 64, 24, AlignCenter, AlignCenter,
-            "Forgotten PIN can only be\n"
-            "reset with entire device.\n"
-            "Read docs How to reset PIN.");
+    elements_multiline_text_aligned(
+        canvas,
+        64,
+        24,
+        AlignCenter,
+        AlignCenter,
+        "Forgotten PIN can only be\n"
+        "reset with entire device.\n"
+        "Read docs How to reset PIN.");
 
     elements_button_right(canvas, "OK");
     elements_button_left(canvas, "Cancel");
@@ -37,7 +42,7 @@ static bool desktop_settings_view_pin_setup_howto2_input(InputEvent* event, void
     DesktopSettingsViewPinSetupHowto2* instance = context;
     bool consumed = false;
 
-    if (event->type == InputTypeShort) {
+    if(event->type == InputTypeShort) {
         if(event->key == InputKeyRight) {
             instance->ok_callback(instance->context);
             consumed = true;
@@ -50,23 +55,30 @@ static bool desktop_settings_view_pin_setup_howto2_input(InputEvent* event, void
     return consumed;
 }
 
-void desktop_settings_view_pin_setup_howto2_set_context(DesktopSettingsViewPinSetupHowto2* instance, void* context) {
+void desktop_settings_view_pin_setup_howto2_set_context(
+    DesktopSettingsViewPinSetupHowto2* instance,
+    void* context) {
     furi_assert(instance);
     instance->context = context;
 }
 
-void desktop_settings_view_pin_setup_howto2_set_cancel_callback(DesktopSettingsViewPinSetupHowto2* instance, DesktopSettingsViewPinSetupHowto2Callback callback) {
+void desktop_settings_view_pin_setup_howto2_set_cancel_callback(
+    DesktopSettingsViewPinSetupHowto2* instance,
+    DesktopSettingsViewPinSetupHowto2Callback callback) {
     furi_assert(instance);
     instance->cancel_callback = callback;
 }
 
-void desktop_settings_view_pin_setup_howto2_set_ok_callback(DesktopSettingsViewPinSetupHowto2* instance, DesktopSettingsViewPinSetupHowto2Callback callback) {
+void desktop_settings_view_pin_setup_howto2_set_ok_callback(
+    DesktopSettingsViewPinSetupHowto2* instance,
+    DesktopSettingsViewPinSetupHowto2Callback callback) {
     furi_assert(instance);
     instance->ok_callback = callback;
 }
 
 DesktopSettingsViewPinSetupHowto2* desktop_settings_view_pin_setup_howto2_alloc() {
-    DesktopSettingsViewPinSetupHowto2* view = furi_alloc(sizeof(DesktopSettingsViewPinSetupHowto2));
+    DesktopSettingsViewPinSetupHowto2* view =
+        furi_alloc(sizeof(DesktopSettingsViewPinSetupHowto2));
     view->view = view_alloc();
     view_allocate_model(view->view, ViewModelTypeLockFree, 1);
     view_set_context(view->view, view);

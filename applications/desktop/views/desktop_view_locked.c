@@ -13,8 +13,8 @@
 #define DOOR_MOVING_INTERVAL_MS (1000 / 16)
 #define UNLOCKED_HINT_TIMEOUT_MS (2000)
 
-#define DOOR_OFFSET_START   -55
-#define DOOR_OFFSET_END     0
+#define DOOR_OFFSET_START -55
+#define DOOR_OFFSET_END 0
 
 #define DOOR_L_FINAL_POS 0
 #define DOOR_R_FINAL_POS 60
@@ -68,7 +68,7 @@ static void desktop_view_locked_doors_draw(Canvas* canvas, DesktopViewLockedMode
 
 static bool desktop_view_locked_doors_move(DesktopViewLockedModel* model) {
     bool stop = false;
-    if (model->door_offset < DOOR_OFFSET_END) {
+    if(model->door_offset < DOOR_OFFSET_END) {
         model->door_offset = CLAMP(model->door_offset + 5, DOOR_OFFSET_END, DOOR_OFFSET_START);
         stop = true;
     }

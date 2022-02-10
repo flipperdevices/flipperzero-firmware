@@ -30,19 +30,22 @@ static void desktop_scene_main_app_started_callback(const void* message, void* c
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
-    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopAnimationEventNewIdleAnimation);
+    view_dispatcher_send_custom_event(
+        desktop->view_dispatcher, DesktopAnimationEventNewIdleAnimation);
 }
 
 static void desktop_scene_main_check_animation_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
-    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopAnimationEventCheckAnimation);
+    view_dispatcher_send_custom_event(
+        desktop->view_dispatcher, DesktopAnimationEventCheckAnimation);
 }
 
 static void desktop_scene_main_interact_animation_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
-    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopAnimationEventInteractAnimation);
+    view_dispatcher_send_custom_event(
+        desktop->view_dispatcher, DesktopAnimationEventInteractAnimation);
 }
 
 static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* flipper_app) {

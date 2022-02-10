@@ -44,7 +44,10 @@ static bool desktop_settings_view_pin_setup_howto_input(InputEvent* event, void*
     return consumed;
 }
 
-void desktop_settings_view_pin_setup_howto_set_callback(DesktopSettingsViewPinSetupHowto* instance, DesktopSettingsViewPinSetupHowtoDoneCallback callback, void* context) {
+void desktop_settings_view_pin_setup_howto_set_callback(
+    DesktopSettingsViewPinSetupHowto* instance,
+    DesktopSettingsViewPinSetupHowtoDoneCallback callback,
+    void* context) {
     furi_assert(instance);
     furi_assert(callback);
     instance->callback = callback;

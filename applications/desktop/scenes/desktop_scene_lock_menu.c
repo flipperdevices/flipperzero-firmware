@@ -33,10 +33,11 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeTick) {
-        bool check_pin_changed = scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLockMenu);
-        if (check_pin_changed) {
+        bool check_pin_changed =
+            scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLockMenu);
+        if(check_pin_changed) {
             LOAD_DESKTOP_SETTINGS(&desktop->settings);
-            if (desktop->settings.pin_code.length > 0) {
+            if(desktop->settings.pin_code.length > 0) {
                 desktop_lock_menu_pin_set(desktop->lock_menu, 1);
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
             }
@@ -45,14 +46,16 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case DesktopLockMenuEventLock:
             scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
-            scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
+            scene_manager_set_scene_state(
+                desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
             consumed = true;
             break;
         case DesktopLockMenuEventPinLock:
             if(desktop->settings.pin_code.length > 0) {
                 furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
-                scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
+                scene_manager_set_scene_state(
+                    desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
                 scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
             } else {
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 1);
@@ -80,4 +83,3 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
 
 void desktop_scene_lock_menu_on_exit(void* context) {
 }
-

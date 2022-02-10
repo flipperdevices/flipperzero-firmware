@@ -21,7 +21,8 @@ static void desktop_view_pin_done_draw(Canvas* canvas, void* model) {
     furi_assert(model);
 
     canvas_set_font(canvas, FontPrimary);
-    elements_multiline_text_aligned(canvas, 64, 0, AlignCenter, AlignTop, "Prepare to use\narrows as\nPIN symbols");
+    elements_multiline_text_aligned(
+        canvas, 64, 0, AlignCenter, AlignTop, "Prepare to use\narrows as\nPIN symbols");
 
     canvas_set_font(canvas, FontSecondary);
     elements_multiline_text(canvas, 58, 24, "Prepare to use\narrows as\nPIN symbols");
@@ -45,7 +46,10 @@ static bool desktop_view_pin_done_input(InputEvent* event, void* context) {
     return consumed;
 }
 
-void desktop_view_pin_done_set_callback(DesktopViewPinSetupDone* instance, DesktopViewPinSetupDoneDoneCallback callback, void* context) {
+void desktop_view_pin_done_set_callback(
+    DesktopViewPinSetupDone* instance,
+    DesktopViewPinSetupDoneDoneCallback callback,
+    void* context) {
     furi_assert(instance);
     furi_assert(callback);
     instance->callback = callback;

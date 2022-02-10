@@ -35,10 +35,11 @@ static const uint8_t desktop_scene_helpers_fails_timeout[] = {
 static uint32_t get_pin_fail_timeout(uint32_t pin_fails) {
     uint32_t pin_timeout = 0;
     uint32_t max_index = COUNT_OF(desktop_scene_helpers_fails_timeout);
-    if (pin_fails <= max_index) {
+    if(pin_fails <= max_index) {
         pin_timeout = desktop_scene_helpers_fails_timeout[pin_fails];
     } else {
-        pin_timeout = desktop_scene_helpers_fails_timeout[max_index] + (pin_fails - max_index) * 60;
+        pin_timeout =
+            desktop_scene_helpers_fails_timeout[max_index] + (pin_fails - max_index) * 60;
     }
 
     return pin_timeout;
@@ -52,7 +53,8 @@ static void desktop_scene_locked_callback(DesktopEvent event, void* context) {
 static void desktop_scene_locked_new_idle_animation_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
-    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopAnimationEventNewIdleAnimation);
+    view_dispatcher_send_custom_event(
+        desktop->view_dispatcher, DesktopAnimationEventNewIdleAnimation);
 }
 
 void desktop_scene_locked_on_enter(void* context) {
@@ -61,17 +63,15 @@ void desktop_scene_locked_on_enter(void* context) {
     // callbacks for 1-st layer
     animation_manager_set_new_idle_callback(
         desktop->animation_manager, desktop_scene_locked_new_idle_animation_callback);
-    animation_manager_set_check_callback(
-        desktop->animation_manager, NULL);
-    animation_manager_set_interact_callback(
-        desktop->animation_manager, NULL);
+    animation_manager_set_check_callback(desktop->animation_manager, NULL);
+    animation_manager_set_interact_callback(desktop->animation_manager, NULL);
 
     // callbacks for 2-nd layer
     desktop_view_locked_set_callback(desktop->locked_view, desktop_scene_locked_callback, desktop);
 
     bool switch_to_timeout_scene = false;
     uint32_t state = scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLocked);
-    if (state == SCENE_LOCKED_FIRST_ENTER) {
+    if(state == SCENE_LOCKED_FIRST_ENTER) {
         bool pin_locked = furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock);
         desktop_helpers_lock_system(desktop, pin_locked);
         if(pin_locked) {
@@ -79,8 +79,9 @@ void desktop_scene_locked_on_enter(void* context) {
             desktop_view_locked_lock(desktop->locked_view, true);
             uint32_t pin_fails = furi_hal_rtc_get_pin_fails();
             uint32_t pin_timeout = get_pin_fail_timeout(pin_fails);
-            if (pin_timeout) {
-                scene_manager_set_scene_state(desktop->scene_manager, DesktopScenePinTimeout, pin_timeout);
+            if(pin_timeout) {
+                scene_manager_set_scene_state(
+                    desktop->scene_manager, DesktopScenePinTimeout, pin_timeout);
                 switch_to_timeout_scene = true;
             } else {
                 desktop_view_locked_close_doors(desktop->locked_view);
@@ -89,10 +90,11 @@ void desktop_scene_locked_on_enter(void* context) {
             desktop_view_locked_lock(desktop->locked_view, false);
             desktop_view_locked_close_doors(desktop->locked_view);
         }
-        scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_REPEAT_ENTER);
+        scene_manager_set_scene_state(
+            desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_REPEAT_ENTER);
     }
 
-    if (switch_to_timeout_scene) {
+    if(switch_to_timeout_scene) {
         scene_manager_next_scene(desktop->scene_manager, DesktopScenePinTimeout);
     } else {
         view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewIdLocked);
@@ -108,7 +110,8 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
         case DesktopLockedEventUnlocked:
             furi_hal_rtc_set_pin_fails(0);
             desktop_helpers_unlock_system(desktop);
-            scene_manager_search_and_switch_to_previous_scene(desktop->scene_manager, DesktopSceneMain);
+            scene_manager_search_and_switch_to_previous_scene(
+                desktop->scene_manager, DesktopSceneMain);
             consumed = true;
             break;
         case DesktopLockedEventUpdate:
@@ -131,4 +134,3 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
 
 void desktop_scene_locked_on_exit(void* context) {
 }
-

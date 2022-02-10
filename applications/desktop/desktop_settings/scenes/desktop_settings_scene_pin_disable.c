@@ -39,7 +39,8 @@ bool desktop_settings_scene_pin_disable_on_event(void* context, SceneManagerEven
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case SCENE_EVENT_EXIT:
-            scene_manager_search_and_switch_to_previous_scene(app->scene_manager, DesktopSettingsAppScenePinMenu);
+            scene_manager_search_and_switch_to_previous_scene(
+                app->scene_manager, DesktopSettingsAppScenePinMenu);
             consumed = true;
             break;
 

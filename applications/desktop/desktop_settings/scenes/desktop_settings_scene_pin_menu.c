@@ -59,12 +59,16 @@ bool desktop_settings_scene_pin_menu_on_event(void* context, SceneManagerEvent e
             consumed = true;
             break;
         case SCENE_EVENT_CHANGE_PIN:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppScenePinAuth, SCENE_STATE_PIN_AUTH_CHANGE_PIN);
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppScenePinAuth,
+                SCENE_STATE_PIN_AUTH_CHANGE_PIN);
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinAuth);
             consumed = true;
             break;
         case SCENE_EVENT_DISABLE_PIN:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppScenePinAuth, SCENE_STATE_PIN_AUTH_DISABLE);
+            scene_manager_set_scene_state(
+                app->scene_manager, DesktopSettingsAppScenePinAuth, SCENE_STATE_PIN_AUTH_DISABLE);
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinAuth);
             consumed = true;
             break;

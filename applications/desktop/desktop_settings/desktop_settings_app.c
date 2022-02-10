@@ -45,11 +45,17 @@ DesktopSettingsApp* desktop_settings_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, DesktopSettingsAppViewIdPopup, popup_get_view(app->popup));
     view_dispatcher_add_view(
-        app->view_dispatcher, DesktopSettingsAppViewIdPinInput, desktop_view_pin_input_get_view(app->pin_input_view));
+        app->view_dispatcher,
+        DesktopSettingsAppViewIdPinInput,
+        desktop_view_pin_input_get_view(app->pin_input_view));
     view_dispatcher_add_view(
-        app->view_dispatcher, DesktopSettingsAppViewIdPinSetupHowto, desktop_settings_view_pin_setup_howto_get_view(app->pin_setup_howto_view));
+        app->view_dispatcher,
+        DesktopSettingsAppViewIdPinSetupHowto,
+        desktop_settings_view_pin_setup_howto_get_view(app->pin_setup_howto_view));
     view_dispatcher_add_view(
-        app->view_dispatcher, DesktopSettingsAppViewIdPinSetupHowto2, desktop_settings_view_pin_setup_howto2_get_view(app->pin_setup_howto2_view));
+        app->view_dispatcher,
+        DesktopSettingsAppViewIdPinSetupHowto2,
+        desktop_settings_view_pin_setup_howto2_get_view(app->pin_setup_howto2_view));
     return app;
 }
 
@@ -77,7 +83,7 @@ void desktop_settings_app_free(DesktopSettingsApp* app) {
 extern int32_t desktop_settings_app(void* p) {
     DesktopSettingsApp* app = desktop_settings_app_alloc();
     LOAD_DESKTOP_SETTINGS(&app->settings);
-    if (!strcmp(p, DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG)) {
+    if(!strcmp(p, DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG)) {
         scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinSetupHowto);
     } else {
         scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneStart);
