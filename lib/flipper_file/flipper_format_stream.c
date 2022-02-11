@@ -8,12 +8,12 @@ static const char flipper_format_comment = '#';
 static const char flipper_format_eoln = '\n';
 static const char flipper_format_eolr = '\r';
 
-bool flipper_format_stream_write(Stream* stream, const void* data, size_t data_size) {
+static bool flipper_format_stream_write(Stream* stream, const void* data, size_t data_size) {
     size_t bytes_written = stream_write(stream, data, data_size);
     return bytes_written == data_size;
 }
 
-bool flipper_format_stream_write_key(Stream* stream, const char* key) {
+static bool flipper_format_stream_write_key(Stream* stream, const char* key) {
     bool result = false;
 
     do {
@@ -26,11 +26,11 @@ bool flipper_format_stream_write_key(Stream* stream, const char* key) {
     return result;
 }
 
-bool flipper_format_stream_write_eol(Stream* stream) {
+static bool flipper_format_stream_write_eol(Stream* stream) {
     return flipper_format_stream_write(stream, &flipper_format_eoln, 1);
 }
 
-bool flipper_format_stream_read_valid_key(Stream* stream, string_t key) {
+static bool flipper_format_stream_read_valid_key(Stream* stream, string_t key) {
     string_reset(key);
     uint8_t data;
     bool found = false;
@@ -91,7 +91,7 @@ bool flipper_format_stream_read_valid_key(Stream* stream, string_t key) {
     return found;
 }
 
-bool flipper_format_stream_seek_to_key(Stream* stream, const char* key, bool strict_mode) {
+static bool flipper_format_stream_seek_to_key(Stream* stream, const char* key, bool strict_mode) {
     bool found = false;
     string_t read_key;
 
@@ -115,7 +115,7 @@ bool flipper_format_stream_seek_to_key(Stream* stream, const char* key, bool str
     return found;
 }
 
-bool flipper_format_stream_read_value(Stream* stream, string_t value, bool* last) {
+static bool flipper_format_stream_read_value(Stream* stream, string_t value, bool* last) {
     string_reset(value);
     uint8_t data;
     bool result = false;
@@ -168,7 +168,7 @@ bool flipper_format_stream_read_value(Stream* stream, string_t value, bool* last
     return result;
 }
 
-bool flipper_format_stream_read_line(Stream* stream, string_t str_result) {
+static bool flipper_format_stream_read_line(Stream* stream, string_t str_result) {
     string_reset(str_result);
     uint8_t data;
 
@@ -201,7 +201,7 @@ bool flipper_format_stream_read_line(Stream* stream, string_t str_result) {
     return string_size(str_result) != 0;
 }
 
-bool flipper_format_stream_seek_to_next_line(Stream* stream) {
+static bool flipper_format_stream_seek_to_next_line(Stream* stream) {
     uint8_t data;
     bool result = false;
     bool error = false;

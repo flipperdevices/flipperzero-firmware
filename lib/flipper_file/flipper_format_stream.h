@@ -24,24 +24,26 @@ typedef struct {
     size_t data_size;
 } FlipperStreamWriteData;
 
-bool flipper_format_stream_write(Stream* stream, const void* data, size_t data_size);
-
-bool flipper_format_stream_write_key(Stream* stream, const char* key);
-
-bool flipper_format_stream_write_eol(Stream* stream);
-
-bool flipper_format_stream_read_valid_key(Stream* stream, string_t key);
-
-bool flipper_format_stream_seek_to_key(Stream* stream, const char* key, bool strict_mode);
-
-bool flipper_format_stream_read_value(Stream* stream, string_t value, bool* last);
-
-bool flipper_format_stream_read_line(Stream* stream, string_t str_result);
-
-bool flipper_format_stream_seek_to_next_line(Stream* stream);
-
+/**
+ * Writes a key/value pair to the stream.
+ * @param stream 
+ * @param write_data 
+ * @return true 
+ * @return false 
+ */
 bool flipper_format_stream_write_value_line(Stream* stream, FlipperStreamWriteData* write_data);
 
+/**
+ * Reads a value by key from a stream.
+ * @param stream 
+ * @param key 
+ * @param type 
+ * @param _data 
+ * @param data_size 
+ * @param strict_mode 
+ * @return true 
+ * @return false 
+ */
 bool flipper_format_stream_read_value_line(
     Stream* stream,
     const char* key,
@@ -50,17 +52,41 @@ bool flipper_format_stream_read_value_line(
     size_t data_size,
     bool strict_mode);
 
+/**
+ * Get the count of values by key from a stream
+ * @param stream 
+ * @param key 
+ * @param count 
+ * @param strict_mode 
+ * @return true 
+ * @return false 
+ */
 bool flipper_format_stream_get_value_count(
     Stream* stream,
     const char* key,
     uint32_t* count,
     bool strict_mode);
 
+/**
+ * Removes a key and the corresponding value string from the stream and inserts a new key/value pair
+ * @param stream 
+ * @param write_data 
+ * @param strict_mode 
+ * @return true 
+ * @return false 
+ */
 bool flipper_format_stream_delete_key_and_write(
     Stream* stream,
     FlipperStreamWriteData* write_data,
     bool strict_mode);
 
+/**
+ * Writes a comment string to the stream.
+ * @param stream 
+ * @param data 
+ * @return true 
+ * @return false 
+ */
 bool flipper_format_stream_write_comment_cstr(Stream* stream, const char* data);
 
 #ifdef __cplusplus
