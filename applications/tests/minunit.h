@@ -113,6 +113,7 @@ void minunit_print_fail(const char* error);
         if(minunit_status) {                                     \
             minunit_fail++;                                      \
             minunit_print_fail(minunit_last_message);            \
+            minunit_status = 0;                                  \
         } fflush(stdout);                                        \
         if(minunit_teardown)(*minunit_teardown)();)
 
@@ -128,6 +129,7 @@ void minunit_print_fail(const char* error);
         if(minunit_status) {                                     \
             minunit_fail++;                                      \
             minunit_print_fail(minunit_last_message);            \
+            minunit_status = 0;                                  \
         } fflush(stdout);                                        \
         if(minunit_teardown)(*minunit_teardown)();)
 
