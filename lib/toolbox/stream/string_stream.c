@@ -9,15 +9,16 @@ typedef struct {
     size_t index;
 } StringStream;
 
+static size_t string_stream_write_char(StringStream* stream, char c);
+
 static void string_stream_free(StringStream* stream);
 static bool string_stream_eof(StringStream* stream);
 static void string_stream_clean(StringStream* stream);
 static bool string_stream_seek(StringStream* stream, int32_t offset, StreamOffset offset_type);
 static size_t string_stream_tell(StringStream* stream);
 static size_t string_stream_size(StringStream* stream);
-static size_t string_stream_write_char(StringStream* stream, char c);
 static size_t string_stream_write(StringStream* stream, const char* data, size_t size);
-static size_t string_stream_read(StringStream* stream, char* data, size_t count);
+static size_t string_stream_read(StringStream* stream, char* data, size_t size);
 static int32_t string_stream_delete_and_insert(
     StringStream* stream,
     size_t delete_size,
@@ -70,7 +71,7 @@ static bool string_stream_seek(StringStream* stream, int32_t offset, StreamOffse
         }
         break;
     case StreamOffsetFromCurrent:
-        if(((int32_t)stream->index + offset) > 0) {
+        if(((int32_t)stream->index + offset) >= 0) {
             stream->index += offset;
         } else {
             result = false;
@@ -78,7 +79,7 @@ static bool string_stream_seek(StringStream* stream, int32_t offset, StreamOffse
         }
         break;
     case StreamOffsetFromEnd:
-        if(((int32_t)string_size(stream->string) + offset) > 0) {
+        if(((int32_t)string_size(stream->string) + offset) >= 0) {
             stream->index = string_size(stream->string) + offset;
         } else {
             result = false;
@@ -114,13 +115,13 @@ static size_t string_stream_write(StringStream* stream, const char* data, size_t
     return i;
 }
 
-static size_t string_stream_read(StringStream* stream, char* data, size_t count) {
+static size_t string_stream_read(StringStream* stream, char* data, size_t size) {
     size_t write_index = 0;
     const char* cstr = string_get_cstr(stream->string);
 
     if(!string_stream_eof(stream)) {
         while(true) {
-            if(write_index >= count) break;
+            if(write_index >= size) break;
 
             data[write_index] = cstr[stream->index];
             write_index++;
