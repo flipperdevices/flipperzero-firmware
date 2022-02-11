@@ -50,6 +50,7 @@ bool file_stream_open(
     FS_AccessMode access_mode,
     FS_OpenMode open_mode) {
     FileStream* stream = (FileStream*)_stream;
+    furi_check(stream->stream_base.vtable == &file_stream_vtable);
     return storage_file_open(stream->file, path, access_mode, open_mode);
 }
 
@@ -176,8 +177,7 @@ static int32_t file_stream_delete_and_insert(
         size_t size_to_copy_before = current_position;
         size_t size_to_copy_after = file_size - current_position - size_to_delete;
 
-        if(!file_stream_open(
-               scratch_stream, scratch_name, FSAM_READ | FSAM_WRITE, FSOM_CREATE_ALWAYS))
+        if(!file_stream_open(scratch_stream, scratch_name, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS))
             break;
 
         // copy file from 0 to insert position to scratchpad

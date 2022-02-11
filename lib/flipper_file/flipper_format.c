@@ -33,6 +33,10 @@ void flipper_format_free(FlipperFormat* flipper_format) {
     free(flipper_format);
 }
 
+void flipper_format_set_strict_mode(FlipperFormat* flipper_format, bool strict_mode) {
+    flipper_format->strict_mode = strict_mode;
+}
+
 bool flipper_format_rewind(FlipperFormat* flipper_format) {
     furi_assert(flipper_format);
     return stream_rewind(flipper_format->stream);

@@ -33,8 +33,8 @@ void flipper_file_set_strict_mode(FlipperFile* flipper_file, bool strict_mode) {
 
 bool flipper_file_open_existing(FlipperFile* flipper_file, const char* filename) {
     furi_assert(flipper_file);
-    bool result = storage_file_open(
-        flipper_file->file, filename, FSAM_READ | FSAM_WRITE, FSOM_OPEN_EXISTING);
+    bool result =
+        storage_file_open(flipper_file->file, filename, FSAM_READ_WRITE, FSOM_OPEN_EXISTING);
     return result;
 }
 
@@ -42,7 +42,7 @@ bool flipper_file_open_append(FlipperFile* flipper_file, const char* filename) {
     furi_assert(flipper_file);
 
     bool result =
-        storage_file_open(flipper_file->file, filename, FSAM_READ | FSAM_WRITE, FSOM_OPEN_APPEND);
+        storage_file_open(flipper_file->file, filename, FSAM_READ_WRITE, FSOM_OPEN_APPEND);
 
     // Add EOL if it is not there
     if(storage_file_size(flipper_file->file) >= 1) {
@@ -68,15 +68,15 @@ bool flipper_file_open_append(FlipperFile* flipper_file, const char* filename) {
 
 bool flipper_file_open_always(FlipperFile* flipper_file, const char* filename) {
     furi_assert(flipper_file);
-    bool result = storage_file_open(
-        flipper_file->file, filename, FSAM_READ | FSAM_WRITE, FSOM_CREATE_ALWAYS);
+    bool result =
+        storage_file_open(flipper_file->file, filename, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS);
     return result;
 }
 
 bool flipper_file_open_new(FlipperFile* flipper_file, const char* filename) {
     furi_assert(flipper_file);
     bool result =
-        storage_file_open(flipper_file->file, filename, FSAM_READ | FSAM_WRITE, FSOM_CREATE_NEW);
+        storage_file_open(flipper_file->file, filename, FSAM_READ_WRITE, FSOM_CREATE_NEW);
     return result;
 }
 
@@ -236,8 +236,7 @@ bool flipper_file_delete_key_and_call(
         const char* scratch_name = "";
         if(!flipper_file_get_scratchpad_name(&scratch_name)) break;
 
-        if(!storage_file_open(
-               scratch_file, scratch_name, FSAM_READ | FSAM_WRITE, FSOM_CREATE_ALWAYS))
+        if(!storage_file_open(scratch_file, scratch_name, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS))
             break;
 
         // copy key file before key to scratchpad
