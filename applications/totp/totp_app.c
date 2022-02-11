@@ -25,22 +25,6 @@ static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 10, "TOTP");
-}
-
-static void totp_app_input_callback(InputEvent* input_event, void* ctx) {
-    furi_assert(ctx);
-    osMessageQueueId_t event_queue = ctx;
-
-    TotpEvent event = {.type = TotpEventTypeInput, .input = *input_event};
-    osMessageQueuePut(event_queue, &event, 0, osWaitForever);
-}
-
-int32_t totp_app(void* p) {
-    osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(TotpEvent), NULL);
-    // Configure view port
-    ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, totp_app_draw_callback, NULL);
-    view_port_input_callback_set(view_port, totp_app_input_callback, event_queue);
     uint8_t hmacKey[] = {0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0xde, 0xad, 0xbe, 0xef}; // Secret key
     TOTP(hmacKey, 10, 30); // Secret key, Secret key length, Timestep (30s)
     FuriHalRtcDateTime datetime = {0};
@@ -55,6 +39,25 @@ int32_t totp_app(void* p) {
 
     uint32_t newCode = getCodeFromTimestamp(mktime(&date));
     FURI_LOG_I("TOTP", "%06ld", newCode);
+    char code_string[12] = "";
+    sprintf(code_string, "%06ld", newCode);
+    canvas_draw_str(canvas, 2, 20, code_string);
+}
+
+static void totp_app_input_callback(InputEvent* input_event, void* ctx) {
+    furi_assert(ctx);
+    osMessageQueueId_t event_queue = ctx;
+
+    TotpEvent event = {.type = TotpEventTypeInput, .input = *input_event};
+    osMessageQueuePut(event_queue, &event, 0, osWaitForever);
+}
+
+int32_t totp_app(void* p) {
+    osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(TotpEvent), NULL);
+    // Configure view port
+    ViewPort* view_port = view_port_alloc();
+    view_port_input_callback_set(view_port, totp_app_input_callback, event_queue);
+    view_port_draw_callback_set(view_port, totp_app_draw_callback, NULL);
 
     // Register view port in GUI
     Gui* gui = furi_record_open("gui");
