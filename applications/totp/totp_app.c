@@ -8,6 +8,8 @@
 
 #include <totp.h>
 
+#include <time.h>
+
 typedef enum {
     TotpEventTypeTick,
     TotpEventTypeInput,
@@ -16,6 +18,7 @@ typedef enum {
 typedef struct {
     TotpEventType type;
     InputEvent input;
+    uint32_t code;
 } TotpEvent;
 
 static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
@@ -32,14 +35,6 @@ static void totp_app_input_callback(InputEvent* input_event, void* ctx) {
     osMessageQueuePut(event_queue, &event, 0, osWaitForever);
 }
 
-static void totp_app_update(void* ctx) {
-    furi_assert(ctx);
-    osMessageQueueId_t event_queue = ctx;
-    TotpEvent event = {.type = TotpEventTypeTick};
-    // It's OK to loose this event if system overloaded
-    osMessageQueuePut(event_queue, &event, 0, 0);
-}
-
 int32_t totp_app(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(TotpEvent), NULL);
     // Configure view port
@@ -47,10 +42,19 @@ int32_t totp_app(void* p) {
     view_port_draw_callback_set(view_port, totp_app_draw_callback, NULL);
     view_port_input_callback_set(view_port, totp_app_input_callback, event_queue);
     uint8_t hmacKey[] = {0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0xde, 0xad, 0xbe, 0xef}; // Secret key
-    TOTP(hmacKey, 10, 30000); // Secret key, Secret key length, Timestep (30s)
-    setTimezone(3); // Set timezone +3 Moscow
-    uint32_t newCode = getCodeFromTimestamp(1644567912);
-    FURI_LOG_I("TOTP", "%ld", newCode);
+    TOTP(hmacKey, 10, 30); // Secret key, Secret key length, Timestep (30s)
+    FuriHalRtcDateTime datetime = {0};
+    furi_hal_rtc_get_datetime(&datetime);
+    struct tm date = {0};
+    date.tm_hour = datetime.hour - 3; // GMT+3 Moscow
+    date.tm_min = datetime.minute;
+    date.tm_sec = datetime.second;
+    date.tm_mday = datetime.day;
+    date.tm_mon = datetime.month - 1;
+    date.tm_year = datetime.year - 1900;
+
+    uint32_t newCode = getCodeFromTimestamp(mktime(&date));
+    FURI_LOG_I("TOTP", "%06ld", newCode);
 
     // Register view port in GUI
     Gui* gui = furi_record_open("gui");
