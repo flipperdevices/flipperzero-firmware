@@ -13,7 +13,8 @@ extern "C" {
  */
 Stream* file_stream_alloc(Storage* storage);
 
-/** Opens an existing file or create a new one.
+/**
+ * Opens an existing file or create a new one.
  * @param stream pointer to file stream object.
  * @param path path to file 
  * @param access_mode access mode from FS_AccessMode 
@@ -25,6 +26,14 @@ bool file_stream_open(
     const char* path,
     FS_AccessMode access_mode,
     FS_OpenMode open_mode);
+
+/**
+ * Closes the file.
+ * @param stream 
+ * @return true 
+ * @return false 
+ */
+bool file_stream_close(Stream* stream);
 
 #ifdef __cplusplus
 }

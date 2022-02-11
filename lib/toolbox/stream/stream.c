@@ -1,5 +1,6 @@
 #include "stream.h"
 #include "stream_i.h"
+#include "file_stream.h"
 #include <furi/check.h>
 #include <furi/common_defines.h>
 
@@ -231,4 +232,30 @@ size_t stream_copy(Stream* stream_from, Stream* stream_to, size_t size) {
 
     free(buffer);
     return copied;
+}
+
+size_t stream_load_from_file(Stream* stream, Storage* storage, const char* path) {
+    size_t was_written = 0;
+    Stream* file = file_stream_alloc(storage);
+
+    do {
+        if(!file_stream_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING)) break;
+        was_written = stream_copy(file, stream, stream_size(file));
+    } while(false);
+
+    stream_free(file);
+    return was_written;
+}
+
+size_t stream_save_to_file(Stream* stream, Storage* storage, const char* path, FS_OpenMode mode) {
+    size_t was_written = 0;
+    Stream* file = file_stream_alloc(storage);
+
+    do {
+        if(!file_stream_open(file, path, FSAM_WRITE, mode)) break;
+        was_written = stream_copy(stream, file, stream_size(stream));
+    } while(false);
+
+    stream_free(file);
+    return was_written;
 }

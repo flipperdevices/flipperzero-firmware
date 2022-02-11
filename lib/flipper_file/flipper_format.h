@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <mlib/m-string.h>
+#include <storage/storage.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,7 +13,36 @@ typedef struct FlipperFormat FlipperFormat;
  * Allocate FlipperFormat as string.
  * @return FlipperFormat* pointer to a FlipperFormat instance
  */
-FlipperFormat* flipper_format_alloc_as_string();
+FlipperFormat* flipper_format_string_alloc();
+
+/**
+ * Allocate FlipperFormat as file.
+ * @return FlipperFormat* pointer to a FlipperFormat instance
+ */
+FlipperFormat* flipper_format_file_alloc(Storage* storage);
+
+/**
+ * Opens the file, use only if FlipperFormat allocated as a file.
+ * @param flipper_format 
+ * @param path 
+ * @param access_mode 
+ * @param open_mode 
+ * @return true 
+ * @return false 
+ */
+bool flipper_format_file_open(
+    FlipperFormat* flipper_format,
+    const char* path,
+    FS_AccessMode access_mode,
+    FS_OpenMode open_mode);
+
+/**
+ * Closes the file, use only if FlipperFormat allocated as a file.
+ * @param flipper_format 
+ * @return true 
+ * @return false 
+ */
+bool flipper_format_file_close(FlipperFormat* flipper_format);
 
 /**
  * Free FlipperFormat.

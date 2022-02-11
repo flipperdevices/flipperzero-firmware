@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <mlib/m-string.h>
+#include <storage/storage.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -258,13 +259,32 @@ int32_t stream_delete_and_insert_vaformat(
 size_t stream_delete(Stream* stream, size_t size);
 
 /**
- * Copy data from one stream to another. Data will be copied from\to current rw pointer.
+ * Copy data from one stream to another. Data will be copied from current rw pointer and to current rw pointer.
  * @param stream_from 
  * @param stream_to 
  * @param size 
  * @return size_t 
  */
 size_t stream_copy(Stream* stream_from, Stream* stream_to, size_t size);
+
+/**
+ * Loads data to the stream from a file. RW pointer will be moved to the end of the stream.
+ * @param stream 
+ * @param storage 
+ * @param path 
+ * @return size_t 
+ */
+size_t stream_load_from_file(Stream* stream, Storage* storage, const char* path);
+
+/**
+ * Writes data from a stream to a file. RW pointer will be moved to the end of the stream.
+ * @param stream 
+ * @param storage 
+ * @param path 
+ * @param mode 
+ * @return size_t 
+ */
+size_t stream_save_to_file(Stream* stream, Storage* storage, const char* path, FS_OpenMode mode);
 
 #ifdef __cplusplus
 }

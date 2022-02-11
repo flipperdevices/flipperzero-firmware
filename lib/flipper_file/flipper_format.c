@@ -1,6 +1,7 @@
 #include <furi/check.h>
 #include <toolbox/stream/stream.h>
 #include <toolbox/stream/string_stream.h>
+#include <toolbox/stream/file_stream.h>
 #include "flipper_format.h"
 #include "flipper_format_i.h"
 #include "flipper_format_stream.h"
@@ -20,11 +21,30 @@ Stream* flipper_format_get_raw_stream(FlipperFormat* flipper_format) {
 
 /********************************** Public **********************************/
 
-FlipperFormat* flipper_format_alloc_as_string() {
+FlipperFormat* flipper_format_string_alloc() {
     FlipperFormat* flipper_format = malloc(sizeof(FlipperFormat));
     flipper_format->stream = string_stream_alloc();
     flipper_format->strict_mode = false;
     return flipper_format;
+}
+
+FlipperFormat* flipper_format_file_alloc(Storage* storage) {
+    FlipperFormat* flipper_format = malloc(sizeof(FlipperFormat));
+    flipper_format->stream = file_stream_alloc(storage);
+    flipper_format->strict_mode = false;
+    return flipper_format;
+}
+
+bool flipper_format_file_open(
+    FlipperFormat* flipper_format,
+    const char* path,
+    FS_AccessMode access_mode,
+    FS_OpenMode open_mode) {
+    return file_stream_open(flipper_format->stream, path, access_mode, open_mode);
+}
+
+bool flipper_format_file_close(FlipperFormat* flipper_format) {
+    return file_stream_close(flipper_format->stream);
 }
 
 void flipper_format_free(FlipperFormat* flipper_format) {
