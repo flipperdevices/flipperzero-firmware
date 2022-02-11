@@ -43,6 +43,7 @@ extern int32_t usb_test_app(void* p);
 extern int32_t vibro_test_app(void* p);
 extern int32_t bt_hid_app(void* p);
 extern int32_t battery_test_app(void* p);
+extern int32_t totp_app(void* p);
 
 // Plugins
 extern int32_t music_player_app(void* p);
@@ -221,6 +222,10 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 
 #ifdef APP_SNAKE_GAME
     {.app = snake_game_app, .name = "Snake Game", .stack_size = 1024, .icon = &A_Plugins_14},
+#endif
+
+#ifdef APP_TOTP
+    {.app = totp_app, .name = "TOTP", .stack_size = 4096, .icon = NULL},
 #endif
 };
 

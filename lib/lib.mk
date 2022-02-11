@@ -126,3 +126,7 @@ C_SOURCES		+= $(wildcard $(LIB_DIR)/flipper_file/*.c)
 # Micro-ECC
 CFLAGS			+= -I$(LIB_DIR)/micro-ecc
 C_SOURCES		+= $(wildcard $(LIB_DIR)/micro-ecc/*.c)
+
+#Totp
+CFLAGS			+= -I$(LIB_DIR)/TOTP-MCU
+C_SOURCES		+= $(wildcard $(LIB_DIR)/TOTP-MCU/*.c)

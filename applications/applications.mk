@@ -40,6 +40,7 @@ APP_SNAKE_GAME = 1
 
 # Debug
 APP_ACCESSOR = 1
+APP_TOTP = 1
 APP_BLINK = 1
 APP_IRDA_MONITOR = 1
 APP_KEYPAD_TEST = 1
@@ -198,6 +199,11 @@ CFLAGS		+= -DAPP_ACCESSOR
 SRV_GUI		= 1
 endif
 
+APP_TOTP ?= 0
+ifeq ($(APP_TOTP), 1)
+CFLAGS		+= -DAPP_TOTP
+SRV_GUI		= 1
+endif
 
 APP_GPIO ?= 0
 ifeq ($(APP_GPIO), 1)
