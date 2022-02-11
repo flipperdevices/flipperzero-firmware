@@ -257,6 +257,15 @@ int32_t stream_delete_and_insert_vaformat(
  */
 size_t stream_delete(Stream* stream, size_t size);
 
+/**
+ * Copy data from one stream to another. Data will be copied from\to current rw pointer.
+ * @param stream_from 
+ * @param stream_to 
+ * @param size 
+ * @return size_t 
+ */
+size_t stream_copy(Stream* stream_from, Stream* stream_to, size_t size);
+
 #ifdef __cplusplus
 }
 #endif

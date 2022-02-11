@@ -1,6 +1,7 @@
 #include "stream.h"
 #include "stream_i.h"
 #include <furi/check.h>
+#include <furi/common_defines.h>
 
 void stream_free(Stream* stream) {
     furi_assert(stream);
@@ -206,4 +207,28 @@ size_t stream_delete(Stream* stream, size_t size) {
     furi_assert(stream);
     size_t result = -stream_delete_and_insert(stream, size, NULL, NULL);
     return result;
+}
+
+size_t stream_copy(Stream* stream_from, Stream* stream_to, size_t size) {
+    const size_t buffer_size = 512;
+    uint8_t* buffer = malloc(buffer_size);
+    size_t copied = 0;
+
+    do {
+        size_t bytes_count = MIN(buffer_size, size - copied);
+        if(bytes_count <= 0) {
+            break;
+        }
+
+        uint16_t bytes_were_read = stream_read(stream_from, buffer, bytes_count);
+        if(bytes_were_read != bytes_count) break;
+
+        uint16_t bytes_were_written = stream_write(stream_to, buffer, bytes_count);
+        if(bytes_were_written != bytes_count) break;
+
+        copied += bytes_count;
+    } while(true);
+
+    free(buffer);
+    return copied;
 }
