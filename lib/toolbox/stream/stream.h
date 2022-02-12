@@ -17,7 +17,7 @@ typedef enum {
     StreamOffsetFromEnd,
 } StreamOffset;
 
-typedef size_t (*StreamWriteCB)(Stream* stream, const void* context);
+typedef bool (*StreamWriteCB)(Stream* stream, const void* context);
 
 /**
  * Free Stream
@@ -87,9 +87,10 @@ size_t stream_read(Stream* stream, uint8_t* data, size_t count);
  * @param delete_size size of data to be deleted
  * @param write_callback write callback
  * @param context write callback context
- * @return int32_t size of written data minus size of deleted data
+ * @return true if the operation was successful
+ * @return false on error
  */
-int32_t stream_delete_and_insert(
+bool stream_delete_and_insert(
     Stream* stream,
     size_t delete_size,
     StreamWriteCB write_callback,
@@ -151,78 +152,87 @@ size_t stream_write_vaformat(Stream* stream, const char* format, va_list args);
  * @param stream Stream instance
  * @param data data to be inserted
  * @param size size of data to be inserted
- * @return size_t how many bytes was written
+ * @return true if the operation was successful
+ * @return false on error
  */
-size_t stream_insert(Stream* stream, const uint8_t* data, size_t size);
+bool stream_insert(Stream* stream, const uint8_t* data, size_t size);
 
 /**
  * Insert char to the stream
  * @param stream Stream instance
  * @param c char value
- * @return size_t how many bytes was written
+ * @return true if the operation was successful
+ * @return false on error
  */
-size_t stream_insert_char(Stream* stream, char c);
+bool stream_insert_char(Stream* stream, char c);
 
 /**
  * Insert string to the stream
  * @param stream Stream instance
  * @param string string value
- * @return size_t how many bytes was written
+ * @return true if the operation was successful
+ * @return false on error
  */
-size_t stream_insert_string(Stream* stream, string_t string);
+bool stream_insert_string(Stream* stream, string_t string);
 
 /**
  * Insert const char* to the stream
  * @param stream Stream instance
  * @param string c-string value
- * @return size_t how many bytes was written
+ * @return true if the operation was successful
+ * @return false on error
  */
-size_t stream_insert_cstring(Stream* stream, const char* string);
+bool stream_insert_cstring(Stream* stream, const char* string);
 
 /**
  * Insert formatted string to the stream
  * @param stream Stream instance
  * @param format 
  * @param ... 
- * @return size_t how many bytes was written
+ * @return true if the operation was successful
+ * @return false on error
  */
-size_t stream_insert_format(Stream* stream, const char* format, ...);
+bool stream_insert_format(Stream* stream, const char* format, ...);
 
 /**
  * Insert formatted string to the stream, va_list version
  * @param stream Stream instance
  * @param format 
  * @param args 
- * @return size_t how many bytes was written
+ * @return true if the operation was successful
+ * @return false on error
  */
-size_t stream_insert_vaformat(Stream* stream, const char* format, va_list args);
+bool stream_insert_vaformat(Stream* stream, const char* format, va_list args);
 
 /**
  * Delete N chars from the stream and insert char to the stream
  * @param stream Stream instance
  * @param delete_size size of data to be deleted
  * @param c char value
- * @return size_t how many bytes was written
+ * @return true if the operation was successful
+ * @return false on error
  */
-int32_t stream_delete_and_insert_char(Stream* stream, size_t delete_size, char c);
+bool stream_delete_and_insert_char(Stream* stream, size_t delete_size, char c);
 
 /**
  * Delete N chars from the stream and insert string to the stream
  * @param stream Stream instance
  * @param delete_size size of data to be deleted
  * @param string string value
- * @return size_t how many bytes was written
+ * @return true if the operation was successful
+ * @return false on error
  */
-int32_t stream_delete_and_insert_string(Stream* stream, size_t delete_size, string_t string);
+bool stream_delete_and_insert_string(Stream* stream, size_t delete_size, string_t string);
 
 /**
  * Delete N chars from the stream and insert const char* to the stream
  * @param stream Stream instance
  * @param delete_size size of data to be deleted
  * @param string c-string value
- * @return size_t how many bytes was written
+ * @return true if the operation was successful
+ * @return false on error
  */
-int32_t stream_delete_and_insert_cstring(Stream* stream, size_t delete_size, const char* string);
+bool stream_delete_and_insert_cstring(Stream* stream, size_t delete_size, const char* string);
 
 /**
  * Delete N chars from the stream and insert formatted string to the stream
@@ -230,10 +240,10 @@ int32_t stream_delete_and_insert_cstring(Stream* stream, size_t delete_size, con
  * @param delete_size size of data to be deleted
  * @param format 
  * @param ... 
- * @return size_t how many bytes was written
+ * @return true if the operation was successful
+ * @return false on error
  */
-int32_t
-    stream_delete_and_insert_format(Stream* stream, size_t delete_size, const char* format, ...);
+bool stream_delete_and_insert_format(Stream* stream, size_t delete_size, const char* format, ...);
 
 /**
  * Delete N chars from the stream and insert formatted string to the stream, va_list version
@@ -241,9 +251,10 @@ int32_t
  * @param delete_size size of data to be deleted
  * @param format 
  * @param args 
- * @return size_t how many bytes was written
+ * @return true if the operation was successful
+ * @return false on error
  */
-int32_t stream_delete_and_insert_vaformat(
+bool stream_delete_and_insert_vaformat(
     Stream* stream,
     size_t delete_size,
     const char* format,
@@ -254,9 +265,10 @@ int32_t stream_delete_and_insert_vaformat(
  * The size may be larger than stream size, the stream will be cleared from current rw pointer to the end.
  * @param stream Stream instance
  * @param size how many chars need to be deleted
- * @return size_t size of deletions in bytes
+ * @return true if the operation was successful
+ * @return false on error
  */
-size_t stream_delete(Stream* stream, size_t size);
+bool stream_delete(Stream* stream, size_t size);
 
 /**
  * Copy data from one stream to another. Data will be copied from current rw pointer and to current rw pointer.
@@ -268,8 +280,16 @@ size_t stream_delete(Stream* stream, size_t size);
 size_t stream_copy(Stream* stream_from, Stream* stream_to, size_t size);
 
 /**
- * Loads data to the stream from a file. RW pointer will be moved to the end of the stream.
- * @param stream 
+ * Copy data from one stream to another. Data will be copied from start of one stream and to start of other stream.
+ * @param stream_from 
+ * @param stream_to 
+ * @return size_t 
+ */
+size_t stream_copy_full(Stream* stream_from, Stream* stream_to);
+
+/**
+ * Loads data to the stream from a file. Data will be loaded to the current RW pointer. RW pointer will be moved to the end of the stream.
+ * @param stream Stream instance 
  * @param storage 
  * @param path 
  * @return size_t 
@@ -277,14 +297,20 @@ size_t stream_copy(Stream* stream_from, Stream* stream_to, size_t size);
 size_t stream_load_from_file(Stream* stream, Storage* storage, const char* path);
 
 /**
- * Writes data from a stream to a file. RW pointer will be moved to the end of the stream.
- * @param stream 
+ * Writes data from a stream to a file. Data will be saved starting from the current RW pointer. RW pointer will be moved to the end of the stream.
+ * @param stream Stream instance 
  * @param storage 
  * @param path 
  * @param mode 
  * @return size_t 
  */
 size_t stream_save_to_file(Stream* stream, Storage* storage, const char* path, FS_OpenMode mode);
+
+/**
+ * Dump stream inner data (size, RW positiot, content)
+ * @param stream Stream instance 
+ */
+void stream_dump_data(Stream* stream);
 
 #ifdef __cplusplus
 }

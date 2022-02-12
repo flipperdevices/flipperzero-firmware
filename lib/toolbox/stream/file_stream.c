@@ -17,7 +17,7 @@ static size_t file_stream_tell(FileStream* stream);
 static size_t file_stream_size(FileStream* stream);
 static size_t file_stream_write(FileStream* stream, const uint8_t* data, size_t size);
 static size_t file_stream_read(FileStream* stream, uint8_t* data, size_t size);
-static int32_t file_stream_delete_and_insert(
+static bool file_stream_delete_and_insert(
     FileStream* stream,
     size_t delete_size,
     StreamWriteCB write_callback,
@@ -162,12 +162,12 @@ static bool file_stream_get_scratchpad_name(const char** name) {
     return true;
 }
 
-static int32_t file_stream_delete_and_insert(
+static bool file_stream_delete_and_insert(
     FileStream* _stream,
     size_t delete_size,
     StreamWriteCB write_callback,
     const void* ctx) {
-    int32_t result = 0;
+    bool result = false;
     Stream* stream = (Stream*)_stream;
 
     // open scratchpad
@@ -189,35 +189,36 @@ static int32_t file_stream_delete_and_insert(
             break;
 
         // copy file from 0 to insert position to scratchpad
-        if(!stream_seek(stream, 0, StreamOffsetFromStart)) break;
+        if(!stream_rewind(stream)) break;
         if(stream_copy(stream, scratch_stream, size_to_copy_before) != size_to_copy_before) break;
 
         if(write_callback) {
-            result += write_callback(scratch_stream, ctx);
+            if(!write_callback(scratch_stream, ctx)) break;
         }
+        size_t new_position = stream_tell(scratch_stream);
 
         // copy key file after insert position + size_to_delete to scratchpad
         if(!stream_seek(stream, size_to_delete, StreamOffsetFromCurrent)) break;
         if(stream_copy(stream, scratch_stream, size_to_copy_after) != size_to_copy_after) break;
 
         size_t new_file_size = stream_size(scratch_stream);
-        if(new_file_size != (size_to_copy_before + size_to_copy_after + result)) break;
 
         // copy whole scratchpad file to the original file
-        if(!stream_seek(stream, 0, StreamOffsetFromStart)) break;
-        if(!stream_seek(scratch_stream, 0, StreamOffsetFromStart)) break;
+        if(!stream_rewind(stream)) break;
+        if(!stream_rewind(scratch_stream)) break;
         if(stream_copy(scratch_stream, stream, new_file_size) != new_file_size) break;
 
         // and truncate original file
         if(!storage_file_truncate(_stream->file)) break;
 
         // move seek pointer at insert end
-        if(!stream_seek(stream, current_position + result, StreamOffsetFromStart)) break;
+        if(!stream_seek(stream, new_position, StreamOffsetFromStart)) break;
 
-        result -= size_to_delete;
+        result = true;
     } while(false);
 
-    storage_simply_remove(_stream->storage, scratch_name);
     stream_free(scratch_stream);
+    storage_simply_remove(_stream->storage, scratch_name);
+
     return result;
 }

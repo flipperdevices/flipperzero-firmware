@@ -17,7 +17,7 @@ typedef size_t (*StreamTellFn)(Stream* stream);
 typedef size_t (*StreamSizeFn)(Stream* stream);
 typedef size_t (*StreamWriteFn)(Stream* stream, const uint8_t* data, size_t size);
 typedef size_t (*StreamReadFn)(Stream* stream, uint8_t* data, size_t count);
-typedef int32_t (*StreamDeleteAndInsertFn)(
+typedef bool (*StreamDeleteAndInsertFn)(
     Stream* stream,
     size_t delete_size,
     StreamWriteCB write_cb,

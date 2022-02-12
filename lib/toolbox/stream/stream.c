@@ -44,7 +44,7 @@ size_t stream_read(Stream* stream, uint8_t* data, size_t size) {
     return stream->vtable->read(stream, data, size);
 }
 
-int32_t stream_delete_and_insert(
+bool stream_delete_and_insert(
     Stream* stream,
     size_t delete_size,
     StreamWriteCB write_callback,
@@ -100,114 +100,97 @@ typedef struct {
     size_t size;
 } StreamWriteData;
 
-static size_t stream_write_struct(Stream* stream, const void* context) {
+static bool stream_write_struct(Stream* stream, const void* context) {
     furi_assert(stream);
     furi_assert(context);
     const StreamWriteData* write_data = context;
-    return stream_write(stream, write_data->data, write_data->size);
+    return (stream_write(stream, write_data->data, write_data->size) == write_data->size);
 }
 
-size_t stream_insert(Stream* stream, const uint8_t* data, size_t size) {
+bool stream_insert(Stream* stream, const uint8_t* data, size_t size) {
     furi_assert(stream);
-    size_t was_written = 0;
     StreamWriteData write_data = {.data = data, .size = size};
-    was_written = stream_delete_and_insert(stream, 0, stream_write_struct, &write_data);
-    return was_written;
+    return stream_delete_and_insert(stream, 0, stream_write_struct, &write_data);
 }
 
-size_t stream_insert_char(Stream* stream, char c) {
+bool stream_insert_char(Stream* stream, char c) {
     furi_assert(stream);
-    size_t was_written = 0;
-    was_written = stream_delete_and_insert_char(stream, 0, c);
-    return was_written;
+    return stream_delete_and_insert_char(stream, 0, c);
 }
 
-size_t stream_insert_string(Stream* stream, string_t string) {
+bool stream_insert_string(Stream* stream, string_t string) {
     furi_assert(stream);
-    size_t was_written = stream_delete_and_insert_string(stream, 0, string);
-    return was_written;
+    return stream_delete_and_insert_string(stream, 0, string);
 }
 
-size_t stream_insert_cstring(Stream* stream, const char* string) {
+bool stream_insert_cstring(Stream* stream, const char* string) {
     furi_assert(stream);
-    size_t was_written = stream_delete_and_insert_cstring(stream, 0, string);
-    return was_written;
+    return stream_delete_and_insert_cstring(stream, 0, string);
 }
 
-size_t stream_insert_format(Stream* stream, const char* format, ...) {
+bool stream_insert_format(Stream* stream, const char* format, ...) {
     furi_assert(stream);
     va_list args;
     va_start(args, format);
-    size_t was_written = stream_insert_vaformat(stream, format, args);
+    bool result = stream_insert_vaformat(stream, format, args);
     va_end(args);
 
-    return was_written;
+    return result;
 }
 
-size_t stream_insert_vaformat(Stream* stream, const char* format, va_list args) {
+bool stream_insert_vaformat(Stream* stream, const char* format, va_list args) {
     furi_assert(stream);
-    size_t was_written = stream_delete_and_insert_vaformat(stream, 0, format, args);
-    return was_written;
+    return stream_delete_and_insert_vaformat(stream, 0, format, args);
 }
 
-int32_t stream_delete_and_insert_char(Stream* stream, size_t delete_size, char c) {
+bool stream_delete_and_insert_char(Stream* stream, size_t delete_size, char c) {
     furi_assert(stream);
-    int32_t was_written;
     StreamWriteData write_data = {.data = (uint8_t*)&c, .size = 1};
-    was_written = stream_delete_and_insert(stream, delete_size, stream_write_struct, &write_data);
-    return was_written;
+    return stream_delete_and_insert(stream, delete_size, stream_write_struct, &write_data);
 }
 
-int32_t stream_delete_and_insert_string(Stream* stream, size_t delete_size, string_t string) {
+bool stream_delete_and_insert_string(Stream* stream, size_t delete_size, string_t string) {
     furi_assert(stream);
-    int32_t was_written;
     StreamWriteData write_data = {
         .data = (uint8_t*)string_get_cstr(string), .size = string_size(string)};
-    was_written = stream_delete_and_insert(stream, delete_size, stream_write_struct, &write_data);
-    return was_written;
+    return stream_delete_and_insert(stream, delete_size, stream_write_struct, &write_data);
 }
 
-int32_t stream_delete_and_insert_cstring(Stream* stream, size_t delete_size, const char* string) {
+bool stream_delete_and_insert_cstring(Stream* stream, size_t delete_size, const char* string) {
     furi_assert(stream);
-    int32_t was_written;
     StreamWriteData write_data = {.data = (uint8_t*)string, .size = strlen(string)};
-    was_written = stream_delete_and_insert(stream, delete_size, stream_write_struct, &write_data);
-    return was_written;
+    return stream_delete_and_insert(stream, delete_size, stream_write_struct, &write_data);
 }
 
-int32_t
-    stream_delete_and_insert_format(Stream* stream, size_t delete_size, const char* format, ...) {
+bool stream_delete_and_insert_format(Stream* stream, size_t delete_size, const char* format, ...) {
     furi_assert(stream);
-    int32_t was_written;
     va_list args;
     va_start(args, format);
-    was_written = stream_delete_and_insert_vaformat(stream, delete_size, format, args);
+    bool result = stream_delete_and_insert_vaformat(stream, delete_size, format, args);
     va_end(args);
 
-    return was_written;
+    return result;
 }
 
-int32_t stream_delete_and_insert_vaformat(
+bool stream_delete_and_insert_vaformat(
     Stream* stream,
     size_t delete_size,
     const char* format,
     va_list args) {
     furi_assert(stream);
-    size_t was_written = 0;
     string_t data;
     string_init_vprintf(data, format, args);
     StreamWriteData write_data = {
         .data = (uint8_t*)string_get_cstr(data), .size = string_size(data)};
-    was_written = stream_delete_and_insert(stream, 0, stream_write_struct, &write_data);
+    bool result = stream_delete_and_insert(stream, 0, stream_write_struct, &write_data);
     string_clear(data);
 
-    return was_written;
+    return result;
 }
 
-size_t stream_delete(Stream* stream, size_t size) {
+bool stream_delete(Stream* stream, size_t size) {
     furi_assert(stream);
-    size_t result = -stream_delete_and_insert(stream, size, NULL, NULL);
-    return result;
+    return stream_delete_and_insert(stream, size, NULL, NULL);
 }
 
 size_t stream_copy(Stream* stream_from, Stream* stream_to, size_t size) {
@@ -234,6 +217,18 @@ size_t stream_copy(Stream* stream_from, Stream* stream_to, size_t size) {
     return copied;
 }
 
+size_t stream_copy_full(Stream* stream_from, Stream* stream_to) {
+    size_t was_written = 0;
+
+    do {
+        if(!stream_seek(stream_from, 0, StreamOffsetFromStart)) break;
+        if(!stream_seek(stream_to, 0, StreamOffsetFromStart)) break;
+        was_written = stream_copy(stream_from, stream_to, stream_size(stream_from));
+    } while(false);
+
+    return was_written;
+}
+
 size_t stream_load_from_file(Stream* stream, Storage* storage, const char* path) {
     size_t was_written = 0;
     Stream* file = file_stream_alloc(storage);
@@ -258,4 +253,29 @@ size_t stream_save_to_file(Stream* stream, Storage* storage, const char* path, F
 
     stream_free(file);
     return was_written;
+}
+
+void stream_dump_data(Stream* stream) {
+    size_t size = stream_size(stream);
+    size_t tell = stream_tell(stream);
+    printf("stream %p\r\n", stream);
+    printf("size = %u\r\n", size);
+    printf("tell = %u\r\n", tell);
+    printf("START\r\n");
+    const size_t data_size = 512;
+    uint8_t* data = malloc(data_size);
+    stream_rewind(stream);
+
+    while(true) {
+        size_t was_read = stream_read(stream, data, data_size);
+        if(was_read == 0) break;
+
+        for(size_t i = 0; i < was_read; i++) {
+            printf("%c", data[i]);
+        }
+    }
+
+    free(data);
+    printf("\r\nEND\r\n");
+    stream_seek(stream, tell, StreamOffsetFromStart);
 }

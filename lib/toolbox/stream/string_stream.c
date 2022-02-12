@@ -19,7 +19,7 @@ static size_t string_stream_tell(StringStream* stream);
 static size_t string_stream_size(StringStream* stream);
 static size_t string_stream_write(StringStream* stream, const char* data, size_t size);
 static size_t string_stream_read(StringStream* stream, char* data, size_t size);
-static int32_t string_stream_delete_and_insert(
+static bool string_stream_delete_and_insert(
     StringStream* stream,
     size_t delete_size,
     StreamWriteCB write_callback,
@@ -133,12 +133,12 @@ static size_t string_stream_read(StringStream* stream, char* data, size_t size) 
     return write_index;
 }
 
-static int32_t string_stream_delete_and_insert(
+static bool string_stream_delete_and_insert(
     StringStream* stream,
     size_t delete_size,
     StreamWriteCB write_callback,
     const void* ctx) {
-    int32_t result = 0;
+    bool result = true;
 
     do {
         if(delete_size) {
@@ -147,7 +147,6 @@ static int32_t string_stream_delete_and_insert(
 
             if(remain_size != 0) {
                 string_replace_at(stream->string, stream->index, remain_size, "");
-                result -= remain_size;
             }
         }
 
