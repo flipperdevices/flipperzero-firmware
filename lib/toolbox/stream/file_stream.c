@@ -130,6 +130,7 @@ static size_t file_stream_size(FileStream* stream) {
 }
 
 static size_t file_stream_write(FileStream* stream, const uint8_t* data, size_t size) {
+    // TODO cache
     size_t need_to_write = size;
     while(need_to_write > 0) {
         uint16_t was_written =
@@ -143,6 +144,7 @@ static size_t file_stream_write(FileStream* stream, const uint8_t* data, size_t 
 }
 
 static size_t file_stream_read(FileStream* stream, uint8_t* data, size_t size) {
+    // TODO cache
     size_t need_to_read = size;
     while(need_to_read > 0) {
         uint16_t was_read =

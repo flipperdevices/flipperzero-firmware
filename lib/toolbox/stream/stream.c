@@ -55,6 +55,18 @@ bool stream_delete_and_insert(
 
 /********************************** Some random helpers starts here **********************************/
 
+typedef struct {
+    const uint8_t* data;
+    size_t size;
+} StreamWriteData;
+
+static bool stream_write_struct(Stream* stream, const void* context) {
+    furi_assert(stream);
+    furi_assert(context);
+    const StreamWriteData* write_data = context;
+    return (stream_write(stream, write_data->data, write_data->size) == write_data->size);
+}
+
 bool stream_rewind(Stream* stream) {
     furi_assert(stream);
     return stream_seek(stream, 0, StreamOffsetFromStart);
@@ -93,18 +105,6 @@ size_t stream_write_vaformat(Stream* stream, const char* format, va_list args) {
     string_clear(data);
 
     return size;
-}
-
-typedef struct {
-    const uint8_t* data;
-    size_t size;
-} StreamWriteData;
-
-static bool stream_write_struct(Stream* stream, const void* context) {
-    furi_assert(stream);
-    furi_assert(context);
-    const StreamWriteData* write_data = context;
-    return (stream_write(stream, write_data->data, write_data->size) == write_data->size);
 }
 
 bool stream_insert(Stream* stream, const uint8_t* data, size_t size) {
@@ -261,7 +261,7 @@ void stream_dump_data(Stream* stream) {
     printf("stream %p\r\n", stream);
     printf("size = %u\r\n", size);
     printf("tell = %u\r\n", tell);
-    printf("START\r\n");
+    printf("DATA START\r\n");
     const size_t data_size = 512;
     uint8_t* data = malloc(data_size);
     stream_rewind(stream);
@@ -276,6 +276,7 @@ void stream_dump_data(Stream* stream) {
     }
 
     free(data);
-    printf("\r\nEND\r\n");
+    printf("\r\n");
+    printf("DATA END\r\n");
     stream_seek(stream, tell, StreamOffsetFromStart);
 }
