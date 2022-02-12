@@ -1,6 +1,4 @@
 #include <furi.h>
-#include <flipper_file/flipper_format.h>
-#include <flipper_file/flipper_format_i.h>
 #include <toolbox/stream/stream.h>
 #include <toolbox/stream/string_stream.h>
 #include <toolbox/stream/file_stream.h>

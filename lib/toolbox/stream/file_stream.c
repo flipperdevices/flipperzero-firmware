@@ -1,7 +1,6 @@
 #include "stream.h"
 #include "stream_i.h"
 #include "file_stream.h"
-#include <flipper_file/file_helper.h>
 
 typedef struct {
     Stream stream_base;
