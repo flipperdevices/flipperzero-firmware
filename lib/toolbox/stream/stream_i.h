@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-static const size_t stream_cache_size = 512;
+#define STREAM_CACHE_SIZE 512
 
 typedef struct StreamVTable StreamVTable;
 
