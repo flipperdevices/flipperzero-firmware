@@ -230,57 +230,64 @@ static bool flipper_format_stream_seek_to_next_line(Stream* stream) {
 
 bool flipper_format_stream_write_value_line(Stream* stream, FlipperStreamWriteData* write_data) {
     bool result = false;
-    string_t value;
-    string_init(value);
 
-    do {
-        if(!flipper_format_stream_write_key(stream, write_data->key)) break;
-
-        if(write_data->type == FlipperStreamValueStr) write_data->data_size = 1;
-
-        bool cycle_error = false;
-        for(uint16_t i = 0; i < write_data->data_size; i++) {
-            switch(write_data->type) {
-            case FlipperStreamValueStr: {
-                const char* data = write_data->data;
-                string_printf(value, "%s", data);
-            }; break;
-            case FlipperStreamValueHex: {
-                const uint8_t* data = write_data->data;
-                string_printf(value, "%02X", data[i]);
-            }; break;
-            case FlipperStreamValueFloat: {
-                const float* data = write_data->data;
-                string_printf(value, "%f", data[i]);
-            }; break;
-            case FlipperStreamValueInt32: {
-                const int32_t* data = write_data->data;
-                string_printf(value, "%" PRIi32, data[i]);
-            }; break;
-            case FlipperStreamValueUint32: {
-                const uint32_t* data = write_data->data;
-                string_printf(value, "%" PRId32, data[i]);
-            }; break;
-            default:
-                furi_crash("Unknown FF type");
-            }
-
-            if((i + 1) < write_data->data_size) {
-                string_cat(value, " ");
-            }
-
-            if(!flipper_format_stream_write(stream, string_get_cstr(value), string_size(value))) {
-                cycle_error = true;
-                break;
-            }
-        }
-        if(cycle_error) break;
-
-        if(!flipper_format_stream_write_eol(stream)) break;
+    if(write_data->type == FlipperStreamValueIgnore) {
         result = true;
-    } while(false);
+    } else {
+        string_t value;
+        string_init(value);
 
-    string_clear(value);
+        do {
+            if(!flipper_format_stream_write_key(stream, write_data->key)) break;
+
+            if(write_data->type == FlipperStreamValueStr) write_data->data_size = 1;
+
+            bool cycle_error = false;
+            for(uint16_t i = 0; i < write_data->data_size; i++) {
+                switch(write_data->type) {
+                case FlipperStreamValueStr: {
+                    const char* data = write_data->data;
+                    string_printf(value, "%s", data);
+                }; break;
+                case FlipperStreamValueHex: {
+                    const uint8_t* data = write_data->data;
+                    string_printf(value, "%02X", data[i]);
+                }; break;
+                case FlipperStreamValueFloat: {
+                    const float* data = write_data->data;
+                    string_printf(value, "%f", data[i]);
+                }; break;
+                case FlipperStreamValueInt32: {
+                    const int32_t* data = write_data->data;
+                    string_printf(value, "%" PRIi32, data[i]);
+                }; break;
+                case FlipperStreamValueUint32: {
+                    const uint32_t* data = write_data->data;
+                    string_printf(value, "%" PRId32, data[i]);
+                }; break;
+                default:
+                    furi_crash("Unknown FF type");
+                }
+
+                if((i + 1) < write_data->data_size) {
+                    string_cat(value, " ");
+                }
+
+                if(!flipper_format_stream_write(
+                       stream, string_get_cstr(value), string_size(value))) {
+                    cycle_error = true;
+                    break;
+                }
+            }
+            if(cycle_error) break;
+
+            if(!flipper_format_stream_write_eol(stream)) break;
+            result = true;
+        } while(false);
+
+        string_clear(value);
+    }
+
     return result;
 }
 
@@ -384,9 +391,6 @@ bool flipper_format_stream_get_value_count(
     uint32_t position = stream_tell(stream);
     do {
         if(!flipper_format_stream_seek_to_key(stream, key, strict_mode)) break;
-
-        // Balance between speed and memory consumption
-        // I prefer lower speed but less memory consumption
         *count = 0;
 
         result = true;

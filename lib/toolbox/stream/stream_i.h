@@ -7,6 +7,8 @@
 extern "C" {
 #endif
 
+static const size_t stream_cache_size = 512;
+
 typedef struct StreamVTable StreamVTable;
 
 typedef void (*StreamFreeFn)(Stream* stream);

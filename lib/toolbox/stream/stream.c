@@ -194,12 +194,11 @@ bool stream_delete(Stream* stream, size_t size) {
 }
 
 size_t stream_copy(Stream* stream_from, Stream* stream_to, size_t size) {
-    const size_t buffer_size = 512;
-    uint8_t* buffer = malloc(buffer_size);
+    uint8_t* buffer = malloc(stream_cache_size);
     size_t copied = 0;
 
     do {
-        size_t bytes_count = MIN(buffer_size, size - copied);
+        size_t bytes_count = MIN(stream_cache_size, size - copied);
         if(bytes_count <= 0) {
             break;
         }
@@ -262,12 +261,11 @@ void stream_dump_data(Stream* stream) {
     printf("size = %u\r\n", size);
     printf("tell = %u\r\n", tell);
     printf("DATA START\r\n");
-    const size_t data_size = 512;
-    uint8_t* data = malloc(data_size);
+    uint8_t* data = malloc(stream_cache_size);
     stream_rewind(stream);
 
     while(true) {
-        size_t was_read = stream_read(stream, data, data_size);
+        size_t was_read = stream_read(stream, data, stream_cache_size);
         if(was_read == 0) break;
 
         for(size_t i = 0; i < was_read; i++) {
