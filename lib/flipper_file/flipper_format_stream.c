@@ -2,11 +2,7 @@
 #include <toolbox/hex.h>
 #include <furi/check.h>
 #include "flipper_format_stream.h"
-
-static const char flipper_format_delimiter = ':';
-static const char flipper_format_comment = '#';
-static const char flipper_format_eoln = '\n';
-static const char flipper_format_eolr = '\r';
+#include "flipper_format_stream_i.h"
 
 static bool flipper_format_stream_write(Stream* stream, const void* data, size_t data_size) {
     size_t bytes_written = stream_write(stream, data, data_size);
@@ -26,7 +22,7 @@ static bool flipper_format_stream_write_key(Stream* stream, const char* key) {
     return result;
 }
 
-static bool flipper_format_stream_write_eol(Stream* stream) {
+bool flipper_format_stream_write_eol(Stream* stream) {
     return flipper_format_stream_write(stream, &flipper_format_eoln, 1);
 }
 
@@ -440,7 +436,7 @@ bool flipper_format_stream_delete_key_and_write(
 
         // get value end position
         if(!flipper_format_stream_seek_to_next_line(stream)) break;
-        uint64_t end_position = stream_tell(stream);
+        size_t end_position = stream_tell(stream);
         // newline symbol
         if(end_position < size) {
             end_position += 1;

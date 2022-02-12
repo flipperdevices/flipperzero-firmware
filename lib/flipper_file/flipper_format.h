@@ -1,3 +1,98 @@
+/**
+ * @file flipper_format.h
+ * Flipper File Format helper library.
+ * 
+ * Flipper File Format is a fairly simple format for storing data in a file.
+ * 
+ * Flipper file structure:
+ * 
+ * ~~~~~~~~~~~~~~~~~~~~~
+ * # Commentary
+ * Field name: field value
+ * ~~~~~~~~~~~~~~~~~~~~~
+ * 
+ * Lines starting with the # character are ignored (considered as comments). The separator between the name of the value and the value itself is the string ": ".
+ *
+ * Currently supported types:
+ * 
+ * ~~~~~~~~~~~~~~~~~~~~~
+ * String: text
+ * Int32: 1 2 -3 4
+ * Uint32: 1 2 3 4
+ * Float: 1.0 1234.654
+ * Hex: A4 B3 C2 D1 12 FF
+ * ~~~~~~~~~~~~~~~~~~~~~
+ * 
+ * End of line is LF when writing, but CR is supported when reading.
+ * 
+ * The library is designed in such a way that comments and field values are completely ignored when searching for keys, that is, they do not consume memory.
+ * 
+ * File example: 
+ * 
+ * ~~~~~~~~~~~~~~~~~~~~~
+ * Filetype: Flipper Test File
+ * Version: 1
+ * # Just test file
+ * String: String value
+ * UINT: 1234
+ * Hex: 00 01 FF A3
+ * ~~~~~~~~~~~~~~~~~~~~~
+ * 
+ * Writing:
+ * 
+ * ~~~~~~~~~~~~~~~~~~~~~
+ * FlipperFormat format = flipper_format_file_alloc(storage);
+ * 
+ * do {
+ *     const uint32_t version = 1;
+ *     const char* string_value = "String value";
+ *     const uint32_t uint32_value = 1234;
+ *     const uint16_t array_size = 4;
+ *     const uint8_t* array[array_size] = {0x00, 0x01, 0xFF, 0xA3};
+ *     
+ *     if(!flipper_format_file_open_new(format, "/ext/flipper_format_test")) break;
+ *     if(!flipper_format_write_header_cstr(format, "Flipper Test File", version)) break;
+ *     if(!flipper_format_write_comment_cstr(format, "Just test file")) break;
+ *     if(!flipper_format_write_string_cstr(format, "String", string_value)) break;
+ *     if(!flipper_format_write_uint32(format, "UINT", &uint32_value, 1)) break;
+ *     if(!flipper_format_write_hex(format, "Hex Array", array, array_size)) break;
+ *     
+ *     // signal that the file was written successfully
+ * } while(0);
+ * 
+ * flipper_format_free(file);
+ * ~~~~~~~~~~~~~~~~~~~~~
+ * 
+ * Reading:
+ * 
+ * ~~~~~~~~~~~~~~~~~~~~~
+ * FlipperFormat file = flipper_format_file_alloc(storage);
+ * 
+ * do {
+ *     uint32_t version = 1;
+ *     string_t file_type;
+ *     string_t string_value;
+ *     uint32_t uint32_value = 1;
+ *     uint16_t array_size = 4;
+ *     uint8_t* array[array_size] = {0};
+ *     string_init(file_type);
+ *     string_init(string_value);
+ *     
+ *     if(!flipper_format_open_existing(file, "/ext/flipper_format_test")) break;
+ *     if(!flipper_format_read_header(file, file_type, &version)) break;
+ *     if(!flipper_format_read_string(file, "String", string_value)) break;
+ *     if(!flipper_format_read_uint32(file, "UINT", &uint32_value, 1)) break;
+ *     if(!flipper_format_read_hex(file, "Hex Array", array, array_size)) break;
+ *     
+ *     // signal that the file was read successfully
+ * } while(0);
+ * 
+ * flipper_format_close(file);
+ * flipper_format_free(file);
+ * ~~~~~~~~~~~~~~~~~~~~~
+ * 
+ */
+
 #pragma once
 #include <stdint.h>
 #include <mlib/m-string.h>
@@ -22,19 +117,40 @@ FlipperFormat* flipper_format_string_alloc();
 FlipperFormat* flipper_format_file_alloc(Storage* storage);
 
 /**
- * Opens the file, use only if FlipperFormat allocated as a file.
- * @param flipper_format 
- * @param path 
- * @param access_mode 
- * @param open_mode 
- * @return true 
- * @return false 
+ * Open existing file. 
+ * Use only if FlipperFormat allocated as a file.
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @param path File path
+ * @return True on success
  */
-bool flipper_format_file_open(
-    FlipperFormat* flipper_format,
-    const char* path,
-    FS_AccessMode access_mode,
-    FS_OpenMode open_mode);
+bool flipper_format_file_open_existing(FlipperFormat* flipper_format, const char* path);
+
+/**
+ * Open existing file for writing and add values to the end of file. 
+ * Use only if FlipperFormat allocated as a file.
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @param path File path
+ * @return True on success
+ */
+bool flipper_format_file_open_append(FlipperFormat* flipper_format, const char* path);
+
+/**
+ * Open file. Creates a new file, or deletes the contents of the file if it already exists. 
+ * Use only if FlipperFormat allocated as a file.
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @param path File path
+ * @return True on success
+ */
+bool flipper_format_file_open_always(FlipperFormat* flipper_format, const char* path);
+
+/**
+ * Open file. Creates a new file, fails if file already exists.
+ * Use only if FlipperFormat allocated as a file.
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @param path File path
+ * @return True on success
+ */
+bool flipper_format_file_open_new(FlipperFormat* flipper_format, const char* path);
 
 /**
  * Closes the file, use only if FlipperFormat allocated as a file.

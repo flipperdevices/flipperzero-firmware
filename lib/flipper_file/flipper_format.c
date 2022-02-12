@@ -5,6 +5,7 @@
 #include "flipper_format.h"
 #include "flipper_format_i.h"
 #include "flipper_format_stream.h"
+#include "flipper_format_stream_i.h"
 
 /********************************** Private **********************************/
 struct FlipperFormat {
@@ -35,15 +36,54 @@ FlipperFormat* flipper_format_file_alloc(Storage* storage) {
     return flipper_format;
 }
 
-bool flipper_format_file_open(
-    FlipperFormat* flipper_format,
-    const char* path,
-    FS_AccessMode access_mode,
-    FS_OpenMode open_mode) {
-    return file_stream_open(flipper_format->stream, path, access_mode, open_mode);
+bool flipper_format_file_open_existing(FlipperFormat* flipper_format, const char* path) {
+    furi_assert(flipper_format);
+    return file_stream_open(flipper_format->stream, path, FSAM_READ_WRITE, FSOM_OPEN_EXISTING);
+}
+
+bool flipper_format_file_open_append(FlipperFormat* flipper_format, const char* path) {
+    furi_assert(flipper_format);
+
+    bool result =
+        file_stream_open(flipper_format->stream, path, FSAM_READ_WRITE, FSOM_OPEN_APPEND);
+
+    // Add EOL if it is not there
+    if(stream_size(flipper_format->stream) >= 1) {
+        do {
+            char last_char;
+            result = false;
+
+            if(!stream_seek(flipper_format->stream, -1, StreamOffsetFromEnd)) break;
+
+            uint16_t bytes_were_read =
+                stream_read(flipper_format->stream, (uint8_t*)&last_char, 1);
+            if(bytes_were_read != 1) break;
+
+            if(last_char != flipper_format_eoln) {
+                if(!flipper_format_stream_write_eol(flipper_format->stream)) break;
+            }
+
+            result = true;
+        } while(false);
+    } else {
+        stream_seek(flipper_format->stream, 0, StreamOffsetFromEnd);
+    }
+
+    return result;
+}
+
+bool flipper_format_file_open_always(FlipperFormat* flipper_format, const char* path) {
+    furi_assert(flipper_format);
+    return file_stream_open(flipper_format->stream, path, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS);
+}
+
+bool flipper_format_file_open_new(FlipperFormat* flipper_format, const char* path) {
+    furi_assert(flipper_format);
+    return file_stream_open(flipper_format->stream, path, FSAM_READ_WRITE, FSOM_CREATE_NEW);
 }
 
 bool flipper_format_file_close(FlipperFormat* flipper_format) {
+    furi_assert(flipper_format);
     return file_stream_close(flipper_format->stream);
 }
 

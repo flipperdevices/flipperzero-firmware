@@ -53,7 +53,7 @@ bool flipper_format_stream_read_value_line(
     bool strict_mode);
 
 /**
- * Get the count of values by key from a stream
+ * Get the count of values by key from a stream.
  * @param stream 
  * @param key 
  * @param count 
@@ -68,7 +68,7 @@ bool flipper_format_stream_get_value_count(
     bool strict_mode);
 
 /**
- * Removes a key and the corresponding value string from the stream and inserts a new key/value pair
+ * Removes a key and the corresponding value string from the stream and inserts a new key/value pair.
  * @param stream 
  * @param write_data 
  * @param strict_mode 
