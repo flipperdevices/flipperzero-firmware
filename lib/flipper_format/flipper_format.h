@@ -78,7 +78,7 @@
  *     string_init(file_type);
  *     string_init(string_value);
  *     
- *     if(!flipper_format_open_existing(file, "/ext/flipper_format_test")) break;
+ *     if(!flipper_format_file_open_existing(file, "/ext/flipper_format_test")) break;
  *     if(!flipper_format_read_header(file, file_type, &version)) break;
  *     if(!flipper_format_read_string(file, "String", string_value)) break;
  *     if(!flipper_format_read_uint32(file, "UINT", &uint32_value, 1)) break;
@@ -87,7 +87,6 @@
  *     // signal that the file was read successfully
  * } while(0);
  * 
- * flipper_format_close(file);
  * flipper_format_free(file);
  * ~~~~~~~~~~~~~~~~~~~~~
  * 

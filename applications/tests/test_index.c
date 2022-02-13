@@ -13,7 +13,6 @@
 int run_minunit();
 int run_minunit_test_irda_decoder_encoder();
 int run_minunit_test_rpc();
-int run_minunit_test_flipper_file();
 int run_minunit_test_flipper_format();
 int run_minunit_test_flipper_format_string();
 int run_minunit_test_stream();
@@ -56,7 +55,6 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
         test_result |= run_minunit();
         test_result |= run_minunit_test_irda_decoder_encoder();
         test_result |= run_minunit_test_rpc();
-        test_result |= run_minunit_test_flipper_file();
         test_result |= run_minunit_test_stream();
         test_result |= run_minunit_test_flipper_format();
         test_result |= run_minunit_test_flipper_format_string();
