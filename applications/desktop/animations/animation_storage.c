@@ -1,6 +1,6 @@
 
 #include <stdint.h>
-#include <flipper_file.h>
+#include <flipper_format/flipper_format.h>
 #include <furi.h>
 #include <furi/dangerous_defines.h>
 #include <storage/storage.h>
@@ -30,41 +30,41 @@ static bool animation_storage_load_single_manifest_info(
 
     bool result = false;
     Storage* storage = furi_record_open("storage");
-    FlipperFile* file = flipper_file_alloc(storage);
-    flipper_file_set_strict_mode(file, true);
+    FlipperFormat* file = flipper_format_file_alloc(storage);
+    flipper_format_set_strict_mode(file, true);
     string_t read_string;
     string_init(read_string);
 
     do {
         uint32_t u32value;
         if(FSE_OK != storage_sd_status(storage)) break;
-        if(!flipper_file_open_existing(file, ANIMATION_MANIFEST_FILE)) break;
+        if(!flipper_format_file_open_existing(file, ANIMATION_MANIFEST_FILE)) break;
 
-        if(!flipper_file_read_header(file, read_string, &u32value)) break;
+        if(!flipper_format_read_header(file, read_string, &u32value)) break;
         if(string_cmp_str(read_string, "Flipper Animation Manifest")) break;
 
         manifest_info->name = NULL;
 
         /* skip other animation names */
-        flipper_file_set_strict_mode(file, false);
-        while(flipper_file_read_string(file, "Name", read_string) &&
+        flipper_format_set_strict_mode(file, false);
+        while(flipper_format_read_string(file, "Name", read_string) &&
               string_cmp_str(read_string, name))
             ;
         if(string_cmp_str(read_string, name)) break;
-        flipper_file_set_strict_mode(file, true);
+        flipper_format_set_strict_mode(file, true);
 
         manifest_info->name = furi_alloc(string_size(read_string) + 1);
         strcpy((char*)manifest_info->name, string_get_cstr(read_string));
 
-        if(!flipper_file_read_uint32(file, "Min butthurt", &u32value, 1)) break;
+        if(!flipper_format_read_uint32(file, "Min butthurt", &u32value, 1)) break;
         manifest_info->min_butthurt = u32value;
-        if(!flipper_file_read_uint32(file, "Max butthurt", &u32value, 1)) break;
+        if(!flipper_format_read_uint32(file, "Max butthurt", &u32value, 1)) break;
         manifest_info->max_butthurt = u32value;
-        if(!flipper_file_read_uint32(file, "Min level", &u32value, 1)) break;
+        if(!flipper_format_read_uint32(file, "Min level", &u32value, 1)) break;
         manifest_info->min_level = u32value;
-        if(!flipper_file_read_uint32(file, "Max level", &u32value, 1)) break;
+        if(!flipper_format_read_uint32(file, "Max level", &u32value, 1)) break;
         manifest_info->max_level = u32value;
-        if(!flipper_file_read_uint32(file, "Weight", &u32value, 1)) break;
+        if(!flipper_format_read_uint32(file, "Weight", &u32value, 1)) break;
         manifest_info->weight = u32value;
         result = true;
     } while(0);
@@ -73,8 +73,7 @@ static bool animation_storage_load_single_manifest_info(
         free((void*)manifest_info->name);
     }
     string_clear(read_string);
-    flipper_file_close(file);
-    flipper_file_free(file);
+    flipper_format_free(file);
 
     furi_record_close("storage");
 
@@ -86,9 +85,9 @@ void animation_storage_fill_animation_list(StorageAnimationList_t* animation_lis
     furi_assert(!StorageAnimationList_size(*animation_list));
 
     Storage* storage = furi_record_open("storage");
-    FlipperFile* file = flipper_file_alloc(storage);
+    FlipperFormat* file = flipper_format_file_alloc(storage);
     /* Forbid skipping fields */
-    flipper_file_set_strict_mode(file, true);
+    flipper_format_set_strict_mode(file, true);
     string_t read_string;
     string_init(read_string);
 
@@ -97,8 +96,8 @@ void animation_storage_fill_animation_list(StorageAnimationList_t* animation_lis
         StorageAnimation* storage_animation = NULL;
 
         if(FSE_OK != storage_sd_status(storage)) break;
-        if(!flipper_file_open_existing(file, ANIMATION_MANIFEST_FILE)) break;
-        if(!flipper_file_read_header(file, read_string, &u32value)) break;
+        if(!flipper_format_file_open_existing(file, ANIMATION_MANIFEST_FILE)) break;
+        if(!flipper_format_read_header(file, read_string, &u32value)) break;
         if(string_cmp_str(read_string, "Flipper Animation Manifest")) break;
         do {
             storage_animation = furi_alloc(sizeof(StorageAnimation));
@@ -106,19 +105,19 @@ void animation_storage_fill_animation_list(StorageAnimationList_t* animation_lis
             storage_animation->animation = NULL;
             storage_animation->manifest_info.name = NULL;
 
-            if(!flipper_file_read_string(file, "Name", read_string)) break;
+            if(!flipper_format_read_string(file, "Name", read_string)) break;
             storage_animation->manifest_info.name = furi_alloc(string_size(read_string) + 1);
             strcpy((char*)storage_animation->manifest_info.name, string_get_cstr(read_string));
 
-            if(!flipper_file_read_uint32(file, "Min butthurt", &u32value, 1)) break;
+            if(!flipper_format_read_uint32(file, "Min butthurt", &u32value, 1)) break;
             storage_animation->manifest_info.min_butthurt = u32value;
-            if(!flipper_file_read_uint32(file, "Max butthurt", &u32value, 1)) break;
+            if(!flipper_format_read_uint32(file, "Max butthurt", &u32value, 1)) break;
             storage_animation->manifest_info.max_butthurt = u32value;
-            if(!flipper_file_read_uint32(file, "Min level", &u32value, 1)) break;
+            if(!flipper_format_read_uint32(file, "Min level", &u32value, 1)) break;
             storage_animation->manifest_info.min_level = u32value;
-            if(!flipper_file_read_uint32(file, "Max level", &u32value, 1)) break;
+            if(!flipper_format_read_uint32(file, "Max level", &u32value, 1)) break;
             storage_animation->manifest_info.max_level = u32value;
-            if(!flipper_file_read_uint32(file, "Weight", &u32value, 1)) break;
+            if(!flipper_format_read_uint32(file, "Weight", &u32value, 1)) break;
             storage_animation->manifest_info.weight = u32value;
 
             StorageAnimationList_push_back(*animation_list, storage_animation);
@@ -128,8 +127,7 @@ void animation_storage_fill_animation_list(StorageAnimationList_t* animation_lis
     } while(0);
 
     string_clear(read_string);
-    flipper_file_close(file);
-    flipper_file_free(file);
+    flipper_format_free(file);
 
     // add hard-coded animations
     for(int i = 0; i < dolphin_internal_size; ++i) {
@@ -348,7 +346,7 @@ static bool animation_storage_load_frames(
     return frames_ok;
 }
 
-static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFile* ff) {
+static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFormat* ff) {
     uint32_t u32value;
     string_t str;
     string_init(str);
@@ -356,7 +354,7 @@ static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFi
     furi_assert(!animation->frame_bubble_sequences);
 
     do {
-        if(!flipper_file_read_uint32(ff, "Bubble slots", &u32value, 1)) break;
+        if(!flipper_format_read_uint32(ff, "Bubble slots", &u32value, 1)) break;
         if(u32value > 20) break;
         animation->frame_bubble_sequences_count = u32value;
         if(animation->frame_bubble_sequences_count == 0) {
@@ -376,7 +374,7 @@ static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFi
         const FrameBubble* bubble = animation->frame_bubble_sequences[0];
         int8_t index = -1;
         for(;;) {
-            if(!flipper_file_read_uint32(ff, "Slot", &current_slot, 1)) break;
+            if(!flipper_format_read_uint32(ff, "Slot", &current_slot, 1)) break;
             if((current_slot != 0) && (index == -1)) break;
 
             if(current_slot == index) {
@@ -392,12 +390,12 @@ static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFi
             }
             if(index >= animation->frame_bubble_sequences_count) break;
 
-            if(!flipper_file_read_uint32(ff, "X", &u32value, 1)) break;
+            if(!flipper_format_read_uint32(ff, "X", &u32value, 1)) break;
             FURI_CONST_ASSIGN(bubble->bubble.x, u32value);
-            if(!flipper_file_read_uint32(ff, "Y", &u32value, 1)) break;
+            if(!flipper_format_read_uint32(ff, "Y", &u32value, 1)) break;
             FURI_CONST_ASSIGN(bubble->bubble.y, u32value);
 
-            if(!flipper_file_read_string(ff, "Text", str)) break;
+            if(!flipper_format_read_string(ff, "Text", str)) break;
             if(string_size(str) > 100) break;
 
             string_replace_all_str(str, "\\n", "\n");
@@ -405,14 +403,14 @@ static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFi
             FURI_CONST_ASSIGN_PTR(bubble->bubble.text, furi_alloc(string_size(str) + 1));
             strcpy((char*)bubble->bubble.text, string_get_cstr(str));
 
-            if(!flipper_file_read_string(ff, "AlignH", str)) break;
+            if(!flipper_format_read_string(ff, "AlignH", str)) break;
             if(!animation_storage_cast_align(str, (Align*)&bubble->bubble.align_h)) break;
-            if(!flipper_file_read_string(ff, "AlignV", str)) break;
+            if(!flipper_format_read_string(ff, "AlignV", str)) break;
             if(!animation_storage_cast_align(str, (Align*)&bubble->bubble.align_v)) break;
 
-            if(!flipper_file_read_uint32(ff, "StartFrame", &u32value, 1)) break;
+            if(!flipper_format_read_uint32(ff, "StartFrame", &u32value, 1)) break;
             FURI_CONST_ASSIGN(bubble->start_frame, u32value);
-            if(!flipper_file_read_uint32(ff, "EndFrame", &u32value, 1)) break;
+            if(!flipper_format_read_uint32(ff, "EndFrame", &u32value, 1)) break;
             FURI_CONST_ASSIGN(bubble->end_frame, u32value);
         }
         success = (index + 1) == animation->frame_bubble_sequences_count;
@@ -437,9 +435,9 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
     uint32_t width = 0;
     uint32_t* u32array = NULL;
     Storage* storage = furi_record_open("storage");
-    FlipperFile* ff = flipper_file_alloc(storage);
+    FlipperFormat* ff = flipper_format_file_alloc(storage);
     /* Forbid skipping fields */
-    flipper_file_set_strict_mode(ff, true);
+    flipper_format_set_strict_mode(ff, true);
     string_t str;
     string_init(str);
     animation->frame_bubble_sequences = NULL;
@@ -451,27 +449,27 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
         if(FSE_OK != storage_sd_status(storage)) break;
 
         string_printf(str, ANIMATION_DIR "/%s/" ANIMATION_META_FILE, name);
-        if(!flipper_file_open_existing(ff, string_get_cstr(str))) break;
-        if(!flipper_file_read_header(ff, str, &u32value)) break;
+        if(!flipper_format_file_open_existing(ff, string_get_cstr(str))) break;
+        if(!flipper_format_read_header(ff, str, &u32value)) break;
         if(string_cmp_str(str, "Flipper Animation")) break;
 
-        if(!flipper_file_read_uint32(ff, "Width", &width, 1)) break;
-        if(!flipper_file_read_uint32(ff, "Height", &height, 1)) break;
+        if(!flipper_format_read_uint32(ff, "Width", &width, 1)) break;
+        if(!flipper_format_read_uint32(ff, "Height", &height, 1)) break;
 
-        if(!flipper_file_read_uint32(ff, "Passive frames", &u32value, 1)) break;
+        if(!flipper_format_read_uint32(ff, "Passive frames", &u32value, 1)) break;
         animation->passive_frames = u32value;
-        if(!flipper_file_read_uint32(ff, "Active frames", &u32value, 1)) break;
+        if(!flipper_format_read_uint32(ff, "Active frames", &u32value, 1)) break;
         animation->active_frames = u32value;
 
         uint8_t frames = animation->passive_frames + animation->active_frames;
         uint32_t count = 0;
-        if(!flipper_file_get_value_count(ff, "Frames order", &count)) break;
+        if(!flipper_format_get_value_count(ff, "Frames order", &count)) break;
         if(count != frames) {
             FURI_LOG_E(TAG, "Error loading animation: frames order");
             break;
         }
         u32array = furi_alloc(sizeof(uint32_t) * frames);
-        if(!flipper_file_read_uint32(ff, "Frames order", u32array, frames)) break;
+        if(!flipper_format_read_uint32(ff, "Frames order", u32array, frames)) break;
         animation->frame_order = furi_alloc(sizeof(uint8_t) * frames);
         for(int i = 0; i < frames; ++i) {
             FURI_CONST_ASSIGN(animation->frame_order[i], u32array[i]);
@@ -481,13 +479,13 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
         if(!animation_storage_load_frames(storage, name, animation, u32array, width, height))
             break;
 
-        if(!flipper_file_read_uint32(ff, "Active cycles", &u32value, 1)) break;
+        if(!flipper_format_read_uint32(ff, "Active cycles", &u32value, 1)) break;
         animation->active_cycles = u32value;
-        if(!flipper_file_read_uint32(ff, "Frame rate", &u32value, 1)) break;
+        if(!flipper_format_read_uint32(ff, "Frame rate", &u32value, 1)) break;
         FURI_CONST_ASSIGN(animation->icon_animation.frame_rate, u32value);
-        if(!flipper_file_read_uint32(ff, "Duration", &u32value, 1)) break;
+        if(!flipper_format_read_uint32(ff, "Duration", &u32value, 1)) break;
         animation->duration = u32value;
-        if(!flipper_file_read_uint32(ff, "Active cooldown", &u32value, 1)) break;
+        if(!flipper_format_read_uint32(ff, "Active cooldown", &u32value, 1)) break;
         animation->active_cooldown = u32value;
 
         if(!animation_storage_load_bubbles(animation, ff)) break;
@@ -495,8 +493,7 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
     } while(0);
 
     string_clear(str);
-    flipper_file_close(ff);
-    flipper_file_free(ff);
+    flipper_format_free(ff);
     if(u32array) {
         free(u32array);
     }
