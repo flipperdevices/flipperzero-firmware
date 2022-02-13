@@ -156,10 +156,10 @@ static size_t file_stream_read(FileStream* stream, uint8_t* data, size_t size) {
     return size - need_to_read;
 }
 
-static const char* flipper_file_scratchpad = "/any/.scratch.pad";
+static const char* flipper_scratchpad = "/any/.scratch.pad";
 static bool file_stream_get_scratchpad_name(const char** name) {
     // TODO do not rewrite existing file
-    *name = flipper_file_scratchpad;
+    *name = flipper_scratchpad;
     return true;
 }
 

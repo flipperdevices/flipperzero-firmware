@@ -67,6 +67,42 @@ static bool stream_write_struct(Stream* stream, const void* context) {
     return (stream_write(stream, write_data->data, write_data->size) == write_data->size);
 }
 
+bool stream_read_line(Stream* stream, string_t str_result) {
+    string_reset(str_result);
+    const uint8_t buffer_size = 32;
+    uint8_t buffer[buffer_size];
+
+    do {
+        uint16_t bytes_were_read = stream_read(stream, buffer, buffer_size);
+        // TODO process EOF
+        if(bytes_were_read == 0) break;
+
+        bool result = false;
+        bool error = false;
+        for(uint16_t i = 0; i < bytes_were_read; i++) {
+            if(buffer[i] == '\n') {
+                if(!stream_seek(stream, i - bytes_were_read, StreamOffsetFromCurrent)) {
+                    error = true;
+                    break;
+                }
+
+                result = true;
+                break;
+            } else if(buffer[i] == '\r') {
+                // Ignore
+            } else {
+                string_push_back(str_result, buffer[i]);
+            }
+        }
+
+        if(result || error) {
+            break;
+        }
+    } while(true);
+
+    return string_size(str_result) != 0;
+}
+
 bool stream_rewind(Stream* stream) {
     furi_assert(stream);
     return stream_seek(stream, 0, StreamOffsetFromStart);
@@ -74,17 +110,17 @@ bool stream_rewind(Stream* stream) {
 
 size_t stream_write_char(Stream* stream, char c) {
     furi_assert(stream);
-    return stream_write(stream, (uint8_t*)&c, 1);
+    return stream_write(stream, (const uint8_t*)&c, 1);
 }
 
 size_t stream_write_string(Stream* stream, string_t string) {
     furi_assert(stream);
-    return stream_write(stream, (uint8_t*)string_get_cstr(string), string_size(string));
+    return stream_write(stream, (const uint8_t*)string_get_cstr(string), string_size(string));
 }
 
 size_t stream_write_cstring(Stream* stream, const char* string) {
     furi_assert(stream);
-    return stream_write(stream, (uint8_t*)string, strlen(string));
+    return stream_write(stream, (const uint8_t*)string, strlen(string));
 }
 
 size_t stream_write_format(Stream* stream, const char* format, ...) {

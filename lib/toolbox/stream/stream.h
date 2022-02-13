@@ -99,6 +99,15 @@ bool stream_delete_and_insert(
 /********************************** Some random helpers starts here **********************************/
 
 /**
+ * Read line from a stream (supports LF and CRLF line endings)
+ * @param stream 
+ * @param str_result 
+ * @return true 
+ * @return false 
+ */
+bool stream_read_line(Stream* stream, string_t str_result);
+
+/**
  * Moves the rw pointer to the start
  * @param stream Stream instance
  */
