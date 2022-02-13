@@ -23,9 +23,13 @@ void subghz_scene_save_name_on_enter(void* context) {
         dev_name_empty = true;
     } else {
         strcpy(subghz->file_name_tmp, subghz->file_name);
-        if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
-           SubghzCustomEventManagerSet) {
+        if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
+           SubghzCustomEventManagerNoSet) {
             subghz_get_next_name_file(subghz);
+            if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
+               SubghzCustomEventManagerSetRAW) {
+                dev_name_empty = true;
+            }
         }
     }
 
@@ -39,7 +43,7 @@ void subghz_scene_save_name_on_enter(void* context) {
         dev_name_empty);
 
     ValidatorIsFile* validator_is_file =
-        validator_is_file_alloc_init(SUBGHZ_APP_PATH_FOLDER, SUBGHZ_APP_EXTENSION);
+        validator_is_file_alloc_init(SUBGHZ_APP_FOLDER, SUBGHZ_APP_EXTENSION);
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTextInput);
@@ -62,8 +66,8 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                     subghz_save_protocol_to_file(subghz, subghz->file_name);
                 }
 
-                if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
-                   SubghzCustomEventManagerSet) {
+                if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
+                   SubghzCustomEventManagerNoSet) {
                     subghz_protocol_raw_set_last_file_name(
                         (SubGhzProtocolRAW*)subghz->txrx->protocol_result, subghz->file_name);
                     scene_manager_set_scene_state(
