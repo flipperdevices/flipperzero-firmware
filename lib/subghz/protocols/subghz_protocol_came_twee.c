@@ -327,16 +327,16 @@ void subghz_protocol_came_twee_to_str(SubGhzProtocolCameTwee* instance, string_t
 
 bool subghz_protocol_came_twee_to_save_file(
     SubGhzProtocolCameTwee* instance,
-    FlipperFile* flipper_file) {
-    return subghz_protocol_common_to_save_file((SubGhzProtocolCommon*)instance, flipper_file);
+    FlipperFormat* flipper_format) {
+    return subghz_protocol_common_to_save_file((SubGhzProtocolCommon*)instance, flipper_format);
 }
 
 bool subghz_protocol_came_twee_to_load_protocol_from_file(
-    FlipperFile* flipper_file,
+    FlipperFormat* flipper_format,
     SubGhzProtocolCameTwee* instance,
     const char* file_path) {
     if(subghz_protocol_common_to_load_protocol_from_file(
-           (SubGhzProtocolCommon*)instance, flipper_file)) {
+           (SubGhzProtocolCommon*)instance, flipper_format)) {
         subghz_protocol_came_twee_remote_controller(instance);
         return true;
     }

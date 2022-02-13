@@ -167,16 +167,16 @@ void subghz_protocol_came_to_str(SubGhzProtocolCame* instance, string_t output) 
         code_found_reverse_lo);
 }
 
-bool subghz_protocol_came_to_save_file(SubGhzProtocolCame* instance, FlipperFile* flipper_file) {
-    return subghz_protocol_common_to_save_file((SubGhzProtocolCommon*)instance, flipper_file);
+bool subghz_protocol_came_to_save_file(SubGhzProtocolCame* instance, FlipperFormat* flipper_format) {
+    return subghz_protocol_common_to_save_file((SubGhzProtocolCommon*)instance, flipper_format);
 }
 
 bool subghz_protocol_came_to_load_protocol_from_file(
-    FlipperFile* flipper_file,
+    FlipperFormat* flipper_format,
     SubGhzProtocolCame* instance,
     const char* file_path) {
     return subghz_protocol_common_to_load_protocol_from_file(
-        (SubGhzProtocolCommon*)instance, flipper_file);
+        (SubGhzProtocolCommon*)instance, flipper_format);
 }
 
 void subghz_decoder_came_to_load_protocol(SubGhzProtocolCame* instance, void* context) {
