@@ -259,7 +259,7 @@ static void animation_storage_free_frames(BubbleAnimation* animation) {
         }
     }
 
-    free(icon->frames);
+    free((void*)icon->frames);
 }
 
 static bool animation_storage_load_frames(
@@ -315,7 +315,7 @@ static bool animation_storage_load_frames(
             break;
         }
 
-        icon->frames[i] = furi_alloc(file_info.size);
+        FURI_CONST_ASSIGN_PTR(icon->frames[i], furi_alloc(file_info.size));
         if(storage_file_read(file, (void*)icon->frames[i], file_info.size) != file_info.size) {
             FURI_LOG_E(TAG, "Read failed: \'%s\'", string_get_cstr(filename));
             break;
