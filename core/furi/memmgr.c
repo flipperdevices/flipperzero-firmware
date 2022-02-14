@@ -1,10 +1,30 @@
 #include "memmgr.h"
 #include <string.h>
 
+#include <stm32wbxx.h>
+
 extern void* pvPortMalloc(size_t xSize);
 extern void vPortFree(void* pv);
 extern size_t xPortGetFreeHeapSize(void);
 extern size_t xPortGetMinimumEverFreeHeapSize(void);
+
+void* memset(void* b, int c, size_t len) {
+    // In order to catch more memory issue
+    // We will limit memory range usable with memset
+    furi_assert((size_t)b >= SRAM_BASE);
+    furi_assert((size_t)b < SRAM_BASE + 1024 * 256);
+    furi_assert(len < 1024 * 256);
+    furi_assert(len >= 0);
+
+    uint8_t* tmp = b;
+    while(len > 0) {
+        *(int8_t*)tmp = c;
+        len--;
+        tmp++;
+    }
+
+    return b;
+}
 
 void* malloc(size_t size) {
     return pvPortMalloc(size);
