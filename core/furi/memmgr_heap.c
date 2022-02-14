@@ -38,6 +38,7 @@
 #include "check.h"
 #include <stdlib.h>
 #include <cmsis_os2.h>
+#include <stm32wbxx.h>
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
 all the API functions to use the MPU wrappers.  That should only be done when
@@ -384,6 +385,11 @@ void vPortFree(void* pv) {
 
                 vTaskSuspendAll();
                 {
+                    furi_assert((size_t)pv >= SRAM_BASE);
+                    furi_assert((size_t)pv < SRAM_BASE + 1024 * 256);
+                    furi_assert((pxLink->xBlockSize - xHeapStructSize) < 1024 * 256);
+                    furi_assert((pxLink->xBlockSize - xHeapStructSize) >= 0);
+
                     /* Add this block to the list of free blocks. */
                     xFreeBytesRemaining += pxLink->xBlockSize;
                     traceFREE(pv, pxLink->xBlockSize);
