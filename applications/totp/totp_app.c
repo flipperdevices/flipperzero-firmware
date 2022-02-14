@@ -8,6 +8,7 @@
 
 #include <totp.h>
 
+#include <base32.h>
 #include <time.h>
 
 typedef enum {
@@ -25,7 +26,12 @@ static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 10, "TOTP");
-    uint8_t hmacKey[] = {0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0xde, 0xad, 0xbe, 0xef}; // Secret key
+    uint8_t hmacKey[10];
+    uint8_t* base32key = (unsigned char*)"JBSWY3DPEHPK3PXP";
+    FURI_LOG_I("TOTP", "key is %s", base32key);
+    int len = base32_decode(base32key, hmacKey, 10);
+    FURI_LOG_I("TOTP", "len = %d", len);
+    //uint8_t hmacKey[] = {0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0xde, 0xad, 0xbe, 0xef}; // Secret key
     TOTP(hmacKey, 10, 30); // Secret key, Secret key length, Timestep (30s)
     FuriHalRtcDateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
