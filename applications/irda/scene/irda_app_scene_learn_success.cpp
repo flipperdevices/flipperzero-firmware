@@ -91,6 +91,11 @@ bool IrdaAppSceneLearnSuccess::on_event(IrdaApp* app, IrdaAppEvent* event) {
         }
     }
 
+    if(event->type == IrdaAppEvent::Type::Back) {
+        app->switch_to_next_scene(IrdaApp::Scene::AskBack);
+        consumed = true;
+    }
+
     return consumed;
 }
 
@@ -98,5 +103,9 @@ void IrdaAppSceneLearnSuccess::on_exit(IrdaApp* app) {
     IrdaAppViewManager* view_manager = app->get_view_manager();
     DialogEx* dialog_ex = view_manager->get_dialog_ex();
     dialog_ex_set_center_button_text(dialog_ex, nullptr);
+    dialog_ex_set_left_button_text(dialog_ex, nullptr);
+    dialog_ex_set_right_button_text(dialog_ex, nullptr);
+    dialog_ex_set_header(dialog_ex, nullptr, 0, 0, AlignCenter, AlignCenter);
+    dialog_ex_set_text(dialog_ex, nullptr, 0, 0, AlignCenter, AlignCenter);
     app->notify_green_off();
 }
