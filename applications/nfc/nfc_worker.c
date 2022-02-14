@@ -15,11 +15,10 @@ NfcWorker* nfc_worker_alloc() {
     nfc_worker->callback = NULL;
     nfc_worker->context = NULL;
     // Initialize rfal
-    if(!furi_hal_nfc_is_busy()) {
-        nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
-    } else {
-        nfc_worker_change_state(nfc_worker, NfcWorkerStateBroken);
+    while(furi_hal_nfc_is_busy()) {
+        osDelay(10);
     }
+    nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
 
     return nfc_worker;
 }
@@ -41,7 +40,7 @@ void nfc_worker_start(
     void* context) {
     furi_assert(nfc_worker);
     furi_assert(dev_data);
-    while(nfc_worker->state != NfcWorkerStateReady) {
+    while(furi_hal_nfc_is_busy()) {
         osDelay(10);
     }
 
