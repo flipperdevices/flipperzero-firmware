@@ -10,6 +10,10 @@ static const char* stream_test_data = "I write differently from what I speak, "
                                       "I think differently from the way I ought to think, "
                                       "and so it all proceeds into deepest darkness.";
 
+static const char* stream_test_left_data = "There are two cardinal human sins ";
+static const char* stream_test_right_data =
+    "from which all others derive: impatience and indolence.";
+
 MU_TEST_1(stream_composite_subtest, Stream* stream) {
     const size_t data_size = 128;
     uint8_t data[data_size];
@@ -325,9 +329,50 @@ MU_TEST(stream_write_read_save_load_test) {
     furi_record_close("storage");
 }
 
+MU_TEST_1(stream_split_subtest, Stream* stream) {
+    stream_clean(stream);
+    stream_write_cstring(stream, stream_test_left_data);
+    stream_write_cstring(stream, stream_test_right_data);
+
+    Stream* stream_left = string_stream_alloc();
+    Stream* stream_right = string_stream_alloc();
+
+    mu_check(stream_seek(stream, strlen(stream_test_left_data), StreamOffsetFromStart));
+    mu_check(stream_split(stream, stream_left, stream_right));
+
+    uint8_t data[256] = {0};
+    mu_check(stream_rewind(stream_left));
+    mu_assert_int_eq(strlen(stream_test_left_data), stream_read(stream_left, data, 256));
+    mu_assert_string_eq(stream_test_left_data, (const char*)data);
+
+    mu_check(stream_rewind(stream_right));
+    mu_assert_int_eq(strlen(stream_test_right_data), stream_read(stream_right, data, 256));
+    mu_assert_string_eq(stream_test_right_data, (const char*)data);
+
+    stream_free(stream_right);
+    stream_free(stream_left);
+}
+
+MU_TEST(stream_split_test) {
+    // test string stream
+    Stream* stream;
+    stream = string_stream_alloc();
+    MU_RUN_TEST_1(stream_split_subtest, stream);
+    stream_free(stream);
+
+    // test file stream
+    Storage* storage = furi_record_open("storage");
+    stream = file_stream_alloc(storage);
+    mu_check(file_stream_open(stream, "/ext/filestream.str", FSAM_READ_WRITE, FSOM_CREATE_ALWAYS));
+    MU_RUN_TEST_1(stream_split_subtest, stream);
+    stream_free(stream);
+    furi_record_close("storage");
+}
+
 MU_TEST_SUITE(stream_suite) {
     MU_RUN_TEST(stream_write_read_save_load_test);
     MU_RUN_TEST(stream_composite_test);
+    MU_RUN_TEST(stream_split_test);
 }
 
 int run_minunit_test_stream() {

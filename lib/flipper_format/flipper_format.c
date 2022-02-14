@@ -13,8 +13,8 @@ struct FlipperFormat {
     bool strict_mode;
 };
 
-static const char* flipper_format_filetype_key = "Filetype";
-static const char* flipper_format_version_key = "Version";
+static const char* const flipper_format_filetype_key = "Filetype";
+static const char* const flipper_format_version_key = "Version";
 
 Stream* flipper_format_get_raw_stream(FlipperFormat* flipper_format) {
     return flipper_format->stream;

@@ -297,6 +297,16 @@ size_t stream_copy(Stream* stream_from, Stream* stream_to, size_t size);
 size_t stream_copy_full(Stream* stream_from, Stream* stream_to);
 
 /**
+ * Splits one stream into two others. The original stream will remain untouched.
+ * @param stream 
+ * @param stream_left 
+ * @param stream_right 
+ * @return true 
+ * @return false 
+ */
+bool stream_split(Stream* stream, Stream* stream_left, Stream* stream_right);
+
+/**
  * Loads data to the stream from a file. Data will be loaded to the current RW pointer. RW pointer will be moved to the end of the stream.
  * @param stream Stream instance 
  * @param storage 

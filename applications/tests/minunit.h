@@ -108,7 +108,7 @@ void minunit_print_fail(const char* error);
             minunit_proc_timer = mu_timer_cpu();                 \
         } if(minunit_setup) (*minunit_setup)();                  \
         minunit_status = 0;                                      \
-        printf(#test "\r\n");                                    \
+        printf(#test "()\r\n");                                  \
         test();                                                  \
         minunit_run++;                                           \
         if(minunit_status) {                                     \
@@ -125,6 +125,7 @@ void minunit_print_fail(const char* error);
             minunit_proc_timer = mu_timer_cpu();                 \
         } if(minunit_setup) (*minunit_setup)();                  \
         minunit_status = 0;                                      \
+        printf(#test "(" #arg_1 ")\r\n");                        \
         test(arg_1);                                             \
         minunit_run++;                                           \
         if(minunit_status) {                                     \

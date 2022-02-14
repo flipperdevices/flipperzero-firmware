@@ -264,6 +264,27 @@ size_t stream_copy_full(Stream* stream_from, Stream* stream_to) {
     return was_written;
 }
 
+bool stream_split(Stream* stream, Stream* stream_left, Stream* stream_right) {
+    bool result = false;
+    size_t size = stream_size(stream);
+    size_t tell = stream_tell(stream);
+
+    do {
+        // copy right
+        if(stream_copy(stream, stream_right, size - tell) != (size - tell)) break;
+
+        // copy left
+        if(!stream_rewind(stream)) break;
+        if(stream_copy(stream, stream_left, tell) != tell) break;
+
+        // restore RW pointer
+        if(!stream_seek(stream, tell, StreamOffsetFromStart)) break;
+        result = true;
+    } while(false);
+
+    return result;
+}
+
 size_t stream_load_from_file(Stream* stream, Storage* storage, const char* path) {
     size_t was_written = 0;
     Stream* file = file_stream_alloc(storage);
