@@ -241,6 +241,7 @@ void memmgr_heap_printf_free_blocks() {
 void* pvPortMalloc(size_t xWantedSize) {
     BlockLink_t *pxBlock, *pxPreviousBlock, *pxNewBlockLink;
     void* pvReturn = NULL;
+    size_t to_wipe = xWantedSize;
 
     vTaskSuspendAll();
     {
@@ -357,6 +358,9 @@ void* pvPortMalloc(size_t xWantedSize) {
 #endif
 
     configASSERT((((size_t)pvReturn) & (size_t)portBYTE_ALIGNMENT_MASK) == 0);
+
+    furi_check(pvReturn);
+    pvReturn = memset(pvReturn, 0, to_wipe);
     return pvReturn;
 }
 /*-----------------------------------------------------------*/

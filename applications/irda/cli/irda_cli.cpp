@@ -142,7 +142,7 @@ void irda_cli_start_ir_tx(Cli* cli, string_t args, void* context) {
     uint32_t frequency;
     float duty_cycle;
     uint32_t timings_cnt = MAX_TIMINGS_AMOUNT;
-    uint32_t* timings = (uint32_t*)furi_alloc(sizeof(uint32_t) * timings_cnt);
+    uint32_t* timings = (uint32_t*)malloc(sizeof(uint32_t) * timings_cnt);
 
     if(parse_message(str, &message)) {
         irda_send(&message, 1);

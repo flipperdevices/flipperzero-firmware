@@ -12,7 +12,7 @@ typedef enum {
 } GateTXDecoderStep;
 
 SubGhzProtocolGateTX* subghz_protocol_gate_tx_alloc(void) {
-    SubGhzProtocolGateTX* instance = furi_alloc(sizeof(SubGhzProtocolGateTX));
+    SubGhzProtocolGateTX* instance = malloc(sizeof(SubGhzProtocolGateTX));
 
     instance->common.name = "GateTX";
     instance->common.code_min_count_bit_for_found = 24;

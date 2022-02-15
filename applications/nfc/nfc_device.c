@@ -8,7 +8,7 @@ static const char* nfc_file_header = "Flipper NFC device";
 static const uint32_t nfc_file_version = 2;
 
 NfcDevice* nfc_device_alloc() {
-    NfcDevice* nfc_dev = furi_alloc(sizeof(NfcDevice));
+    NfcDevice* nfc_dev = malloc(sizeof(NfcDevice));
     nfc_dev->storage = furi_record_open("storage");
     nfc_dev->dialogs = furi_record_open("dialogs");
     return nfc_dev;

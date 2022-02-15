@@ -4,12 +4,12 @@
 SceneManager* scene_manager_alloc(const SceneManagerHandlers* app_scene_handlers, void* context) {
     furi_assert(context);
 
-    SceneManager* scene_manager = furi_alloc(sizeof(SceneManager));
+    SceneManager* scene_manager = malloc(sizeof(SceneManager));
     // Set SceneManager context and scene handlers
     scene_manager->context = context;
     scene_manager->scene_handlers = app_scene_handlers;
     // Allocate all scenes
-    scene_manager->scene = furi_alloc(sizeof(AppScene) * app_scene_handlers->scene_num);
+    scene_manager->scene = malloc(sizeof(AppScene) * app_scene_handlers->scene_num);
     // Initialize ScaneManager array for navigation
     SceneManagerIdStack_init(scene_manager->scene_id_stack);
 

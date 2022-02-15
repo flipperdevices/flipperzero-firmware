@@ -8,7 +8,7 @@
 /***************************** NFC Worker API *******************************/
 
 NfcWorker* nfc_worker_alloc() {
-    NfcWorker* nfc_worker = furi_alloc(sizeof(NfcWorker));
+    NfcWorker* nfc_worker = malloc(sizeof(NfcWorker));
     // Worker thread attributes
     nfc_worker->thread_attr.name = "NfcWorker";
     nfc_worker->thread_attr.stack_size = 8192;

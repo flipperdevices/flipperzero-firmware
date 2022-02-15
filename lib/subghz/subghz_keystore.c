@@ -31,7 +31,7 @@ struct SubGhzKeystore {
 };
 
 SubGhzKeystore* subghz_keystore_alloc() {
-    SubGhzKeystore* instance = furi_alloc(sizeof(SubGhzKeystore));
+    SubGhzKeystore* instance = malloc(sizeof(SubGhzKeystore));
 
     SubGhzKeyArray_init(instance->data);
 
@@ -110,8 +110,8 @@ static bool subghz_keystore_read_file(SubGhzKeystore* instance, Stream* stream, 
     bool result = true;
     uint8_t buffer[FILE_BUFFER_SIZE];
 
-    char* decrypted_line = furi_alloc(SUBGHZ_KEYSTORE_FILE_DECRYPTED_LINE_SIZE);
-    char* encrypted_line = furi_alloc(SUBGHZ_KEYSTORE_FILE_ENCRYPTED_LINE_SIZE);
+    char* decrypted_line = malloc(SUBGHZ_KEYSTORE_FILE_DECRYPTED_LINE_SIZE);
+    char* encrypted_line = malloc(SUBGHZ_KEYSTORE_FILE_ENCRYPTED_LINE_SIZE);
     size_t encrypted_line_cursor = 0;
 
     if(iv) furi_hal_crypto_store_load_key(SUBGHZ_KEYSTORE_FILE_ENCRYPTION_KEY_SLOT, iv);
@@ -239,8 +239,8 @@ bool subghz_keystore_save(SubGhzKeystore* instance, const char* file_name, uint8
     bool result = false;
 
     Storage* storage = furi_record_open("storage");
-    char* decrypted_line = furi_alloc(SUBGHZ_KEYSTORE_FILE_DECRYPTED_LINE_SIZE);
-    char* encrypted_line = furi_alloc(SUBGHZ_KEYSTORE_FILE_ENCRYPTED_LINE_SIZE);
+    char* decrypted_line = malloc(SUBGHZ_KEYSTORE_FILE_DECRYPTED_LINE_SIZE);
+    char* encrypted_line = malloc(SUBGHZ_KEYSTORE_FILE_ENCRYPTED_LINE_SIZE);
 
     FlipperFormat* flipper_format = flipper_format_file_alloc(storage);
     do {
@@ -346,7 +346,7 @@ bool subghz_keystore_raw_encrypted_save(
 
     Storage* storage = furi_record_open("storage");
 
-    char* encrypted_line = furi_alloc(SUBGHZ_KEYSTORE_FILE_ENCRYPTED_LINE_SIZE);
+    char* encrypted_line = malloc(SUBGHZ_KEYSTORE_FILE_ENCRYPTED_LINE_SIZE);
 
     FlipperFormat* input_flipper_format = flipper_format_file_alloc(storage);
     do {
@@ -483,7 +483,7 @@ bool subghz_keystore_raw_get_data(const char* file_name, size_t offset, uint8_t*
     string_init(str_temp);
 
     Storage* storage = furi_record_open("storage");
-    char* decrypted_line = furi_alloc(SUBGHZ_KEYSTORE_FILE_DECRYPTED_LINE_SIZE);
+    char* decrypted_line = malloc(SUBGHZ_KEYSTORE_FILE_DECRYPTED_LINE_SIZE);
 
     FlipperFormat* flipper_format = flipper_format_file_alloc(storage);
     do {

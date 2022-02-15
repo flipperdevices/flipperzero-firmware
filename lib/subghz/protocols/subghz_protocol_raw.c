@@ -28,7 +28,7 @@ typedef enum {
 } RAWFilIsOpen;
 
 SubGhzProtocolRAW* subghz_protocol_raw_alloc(void) {
-    SubGhzProtocolRAW* instance = furi_alloc(sizeof(SubGhzProtocolRAW));
+    SubGhzProtocolRAW* instance = malloc(sizeof(SubGhzProtocolRAW));
 
     instance->upload_raw = NULL;
     instance->ind_write = 0;
@@ -214,7 +214,7 @@ bool subghz_protocol_raw_save_to_file_init(
             break;
         }
 
-        instance->upload_raw = furi_alloc(SUBGHZ_DOWNLOAD_MAX_SIZE * sizeof(int32_t));
+        instance->upload_raw = malloc(SUBGHZ_DOWNLOAD_MAX_SIZE * sizeof(int32_t));
         instance->file_is_open = RAWFileIsOpenWrite;
         instance->sample_write = 0;
         init = true;

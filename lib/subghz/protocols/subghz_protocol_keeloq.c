@@ -21,7 +21,7 @@ typedef enum {
 } KeeloqDecoderStep;
 
 SubGhzProtocolKeeloq* subghz_protocol_keeloq_alloc(SubGhzKeystore* keystore) {
-    SubGhzProtocolKeeloq* instance = furi_alloc(sizeof(SubGhzProtocolKeeloq));
+    SubGhzProtocolKeeloq* instance = malloc(sizeof(SubGhzProtocolKeeloq));
 
     instance->keystore = keystore;
 
