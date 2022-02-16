@@ -12,7 +12,7 @@
 #define USB_RECONNECT_DELAY 500
 
 typedef struct {
-    osThreadId_t thread;
+    FuriThread* thread;
     osTimerId_t tmr;
     bool enabled;
     bool connected;
@@ -45,6 +45,7 @@ static const struct usb_string_descriptor dev_lang_desc = USB_ARRAY_DESC(USB_LAN
 static uint32_t ubuf[0x20];
 usbd_device udev;
 
+static int32_t usb_srv(void* context);
 static usbd_respond usb_descriptor_get(usbd_ctlreq* req, void** address, uint16_t* length);
 static void reset_evt(usbd_device* dev, uint8_t event, uint8_t ep);
 static void susp_evt(usbd_device* dev, uint8_t event, uint8_t ep);
@@ -78,6 +79,12 @@ void furi_hal_usb_init(void) {
     HAL_NVIC_SetPriority(USB_LP_IRQn, 5, 0);
     NVIC_EnableIRQ(USB_LP_IRQn);
 
+    usb.thread = furi_thread_alloc();
+    furi_thread_set_name(usb.thread, "UsbSrv");
+    furi_thread_set_stack_size(usb.thread, 1024);
+    furi_thread_set_callback(usb.thread, usb_srv);
+    furi_thread_start(usb.thread);
+
     FURI_LOG_I(TAG, "Init OK");
 }
 
@@ -88,7 +95,7 @@ void furi_hal_usb_set_config(FuriHalUsbInterface* new_if) {
         return;
     }
     furi_assert(usb.thread);
-    osThreadFlagsSet(usb.thread, EventModeChange);
+    osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventModeChange);
 }
 
 FuriHalUsbInterface* furi_hal_usb_get_config() {
@@ -97,21 +104,21 @@ FuriHalUsbInterface* furi_hal_usb_get_config() {
 
 void furi_hal_usb_disable() {
     furi_assert(usb.thread);
-    osThreadFlagsSet(usb.thread, EventDisable);
+    osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventDisable);
 }
 
 void furi_hal_usb_enable() {
-    osThreadFlagsSet(usb.thread, EventEnable);
+    osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventEnable);
 }
 
 void furi_hal_usb_reinit() {
     furi_assert(usb.thread);
-    osThreadFlagsSet(usb.thread, EventReinit);
+    osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventReinit);
 }
 
 static void furi_hal_usb_tmr_cb(void* context) {
     furi_assert(usb.thread);
-    osThreadFlagsSet(usb.thread, EventModeChangeStart);
+    osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventModeChangeStart);
 }
 
 /* Get device / configuration descriptors */
@@ -124,7 +131,7 @@ static usbd_respond usb_descriptor_get(usbd_ctlreq* req, void** address, uint16_
 
     switch(dtype) {
     case USB_DTYPE_DEVICE:
-        osThreadFlagsSet(usb.thread, EventRequest);
+        osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventRequest);
         if(usb.callback != NULL) {
             usb.callback(FuriHalUsbStateEventDescriptorRequest, usb.cb_ctx);
         }
@@ -165,7 +172,7 @@ void furi_hal_usb_set_state_callback(FuriHalUsbStateCallback cb, void* ctx) {
 }
 
 static void reset_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
-    osThreadFlagsSet(usb.thread, EventReset);
+    osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventReset);
     if(usb.callback != NULL) {
         usb.callback(FuriHalUsbStateEventReset, usb.cb_ctx);
     }
@@ -195,15 +202,14 @@ static void wkup_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
     }
 }
 
-int32_t usb_srv(void* p) {
-    usb.thread = osThreadGetId();
+static int32_t usb_srv(void* context) {
     usb.tmr = osTimerNew(furi_hal_usb_tmr_cb, osTimerOnce, NULL, NULL);
 
     bool usb_request_pending = false;
     uint8_t usb_wait_time = 0;
 
     if(usb.if_next != NULL) {
-        osThreadFlagsSet(usb.thread, EventModeChange);
+        osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventModeChange);
     }
 
     while(true) {

@@ -115,10 +115,6 @@ const FlipperApplication FLIPPER_SERVICES[] = {
     {.app = power_srv, .name = "PowerSrv", .stack_size = 1024, .icon = NULL},
 #endif
 
-#ifdef SRV_USB
-    {.app = usb_srv, .name = "UsbSrv", .stack_size = 1024, .icon = NULL},
-#endif
-
 #ifdef SRV_STORAGE
     {.app = storage_srv, .name = "StorageSrv", .stack_size = 3072, .icon = NULL},
 #endif
