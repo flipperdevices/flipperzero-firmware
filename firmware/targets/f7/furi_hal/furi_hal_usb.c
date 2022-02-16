@@ -259,6 +259,7 @@ int32_t usb_srv(void* p) {
                     susp_evt(&udev, 0, 0);
                     usbd_connect(&udev, false);
                     usb.enabled = false;
+                    usb_request_pending = false;
                     FURI_LOG_I(TAG, "USB Disable");
                 }
             }
