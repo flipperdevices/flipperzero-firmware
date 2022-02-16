@@ -45,7 +45,7 @@ static const struct usb_string_descriptor dev_lang_desc = USB_ARRAY_DESC(USB_LAN
 static uint32_t ubuf[0x20];
 usbd_device udev;
 
-static int32_t usb_srv(void* context);
+static int32_t furi_hal_usb_thread(void* context);
 static usbd_respond usb_descriptor_get(usbd_ctlreq* req, void** address, uint16_t* length);
 static void reset_evt(usbd_device* dev, uint8_t event, uint8_t ep);
 static void susp_evt(usbd_device* dev, uint8_t event, uint8_t ep);
@@ -82,7 +82,7 @@ void furi_hal_usb_init(void) {
     usb.thread = furi_thread_alloc();
     furi_thread_set_name(usb.thread, "UsbDriver");
     furi_thread_set_stack_size(usb.thread, 1024);
-    furi_thread_set_callback(usb.thread, usb_srv);
+    furi_thread_set_callback(usb.thread, furi_hal_usb_thread);
     furi_thread_start(usb.thread);
 
     FURI_LOG_I(TAG, "Init OK");
@@ -202,7 +202,7 @@ static void wkup_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
     }
 }
 
-static int32_t usb_srv(void* context) {
+static int32_t furi_hal_usb_thread(void* context) {
     usb.tmr = osTimerNew(furi_hal_usb_tmr_cb, osTimerOnce, NULL, NULL);
 
     bool usb_request_pending = false;
