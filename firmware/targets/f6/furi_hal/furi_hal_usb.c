@@ -34,7 +34,9 @@ typedef enum {
     EventModeChangeStart = (1 << 6),
 } UsbEvent;
 
-#define USB_SRV_ALL_EVENTS (EventModeChange | EventEnable | EventDisable | EventReinit | EventReset | EventRequest | EventModeChangeStart)
+#define USB_SRV_ALL_EVENTS                                                                    \
+    (EventModeChange | EventEnable | EventDisable | EventReinit | EventReset | EventRequest | \
+     EventModeChangeStart)
 
 static UsbSrv usb;
 
@@ -81,7 +83,7 @@ void furi_hal_usb_init(void) {
 
 void furi_hal_usb_set_config(FuriHalUsbInterface* new_if) {
     usb.if_next = new_if;
-    if (usb.thread == NULL) {
+    if(usb.thread == NULL) {
         // Service thread hasn't started yet, so just save interface mode
         return;
     }
@@ -200,16 +202,16 @@ int32_t usb_srv(void* p) {
     bool usb_request_pending = false;
     uint8_t usb_wait_time = 0;
 
-    if (usb.if_next != NULL) {
+    if(usb.if_next != NULL) {
         osThreadFlagsSet(usb.thread, EventModeChange);
     }
 
     while(true) {
         uint32_t flags = osThreadFlagsWait(USB_SRV_ALL_EVENTS, osFlagsWaitAny, 500);
         if((flags & osFlagsError) == 0) {
-            if (flags & EventModeChange) {
-                if (usb.if_next != usb.if_cur) {
-                    if (usb.enabled) { // Disable current interface
+            if(flags & EventModeChange) {
+                if(usb.if_next != usb.if_cur) {
+                    if(usb.enabled) { // Disable current interface
                         susp_evt(&udev, 0, 0);
                         usbd_connect(&udev, false);
                         usb.enabled = false;
@@ -219,7 +221,7 @@ int32_t usb_srv(void* p) {
                     }
                 }
             }
-            if (flags & EventReinit) {
+            if(flags & EventReinit) {
                 // Temporary disable callback to avoid getting false reset events
                 usbd_reg_event(&udev, usbd_evt_reset, NULL);
                 FURI_LOG_I(TAG, "USB Reinit");
@@ -233,7 +235,7 @@ int32_t usb_srv(void* p) {
                 usb.if_next = usb.if_cur;
                 osTimerStart(usb.tmr, USB_RECONNECT_DELAY);
             }
-            if (flags & EventModeChangeStart) { // Second stage of mode change process
+            if(flags & EventModeChangeStart) { // Second stage of mode change process
                 if(usb.if_cur != NULL) {
                     usb.if_cur->deinit(&udev);
                 }
@@ -245,14 +247,14 @@ int32_t usb_srv(void* p) {
                     usb.if_cur = usb.if_next;
                 }
             }
-            if (flags & EventEnable) {
+            if(flags & EventEnable) {
                 if((!usb.enabled) && (usb.if_cur != NULL)) {
                     usbd_connect(&udev, true);
                     usb.enabled = true;
                     FURI_LOG_I(TAG, "USB Enable");
                 }
             }
-            if (flags & EventDisable) {
+            if(flags & EventDisable) {
                 if(usb.enabled) {
                     susp_evt(&udev, 0, 0);
                     usbd_connect(&udev, false);

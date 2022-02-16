@@ -78,7 +78,7 @@ static int32_t vcp_worker(void* context) {
     bool tx_idle = false;
     size_t missed_rx = 0;
     uint8_t last_tx_pkt_len = 0;
-    
+
     furi_hal_usb_set_config(&usb_cdc_single);
     furi_hal_cdc_set_callbacks(VCP_IF_NUM, &cdc_cb, NULL);
 
