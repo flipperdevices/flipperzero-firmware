@@ -22,19 +22,26 @@ typedef struct {
     uint32_t code;
 } TotpEvent;
 
+uint8_t keyId = 0;
+
 static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
+    osMessageQueueId_t event_queue = ctx;
+    TotpEvent event;
+    osMessageQueueGet(event_queue, &event, NULL, osWaitForever);
+
     uint8_t hmacKey[20];
     //uint8_t* base32key = (unsigned char*)"DM72NP6URDCNCHLW";
     uint8_t* base32key[] = {
         (unsigned char*)"JBSWY3DPEHPK3PXP", (unsigned char*)"AMOGUSYOBABOBAAA"};
+    const char* keyNames[] = {"Test Key 1", "Test Key 2"};
+
     uint8_t keyLength = 10;
-    uint8_t keyId = 0;
+    int timezone = -3;
 
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 10, "TOTP");
-    canvas_draw_str(canvas, 2, 30, "Press any button");
-    canvas_draw_str(canvas, 2, 40, "to update");
+    canvas_draw_str(canvas, 2, 30, keyNames[keyId]);
 
     FURI_LOG_I("TOTP", "key is %s", base32key[keyId]);
 
@@ -48,7 +55,7 @@ static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
     furi_hal_rtc_get_datetime(&datetime);
 
     struct tm date = {0};
-    date.tm_hour = datetime.hour - 3; // GMT+3 Moscow
+    date.tm_hour = datetime.hour + timezone;
     date.tm_min = datetime.minute;
     date.tm_sec = datetime.second;
     date.tm_mday = datetime.day;
@@ -58,9 +65,22 @@ static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
 
     uint32_t newCode = getCodeFromTimestamp(mktime(&date));
     FURI_LOG_I("TOTP", "%06ld", newCode);
-    char code_string[12] = "";
+    char code_string[100] = "";
     sprintf(code_string, "%06ld", newCode);
     canvas_draw_str(canvas, 2, 20, code_string);
+    sprintf(code_string, "%d seconds left", 29 - date.tm_sec % 30);
+    canvas_draw_str(canvas, 2, 40, code_string);
+    sprintf(
+        code_string,
+        "%02d:%02d:%02d %02d-%02d-%04d",
+        datetime.hour + timezone,
+        datetime.minute,
+        datetime.second,
+        datetime.day,
+        datetime.month,
+        datetime.year);
+    canvas_draw_str(canvas, 2, 50, code_string);
+    canvas_draw_box(canvas, 0, 52, (29 - (date.tm_sec % 30)) * 4.414, 10);
 }
 
 static void totp_app_input_callback(InputEvent* input_event, void* ctx) {
@@ -101,6 +121,14 @@ int32_t totp_app(void* p) {
 
         if((event.input.type == InputTypeShort) && (event.input.key == InputKeyBack)) {
             break;
+        } else if((event.input.type == InputTypeShort) && (event.input.key == InputKeyRight)) {
+            if(keyId < 1) {
+                keyId++;
+            }
+        } else if((event.input.type == InputTypeShort) && (event.input.key == InputKeyLeft)) {
+            if(keyId > 0) {
+                keyId--;
+            }
         }
     }
 
