@@ -80,7 +80,7 @@ void furi_hal_usb_init(void) {
     NVIC_EnableIRQ(USB_LP_IRQn);
 
     usb.thread = furi_thread_alloc();
-    furi_thread_set_name(usb.thread, "UsbSrv");
+    furi_thread_set_name(usb.thread, "UsbDriver");
     furi_thread_set_stack_size(usb.thread, 1024);
     furi_thread_set_callback(usb.thread, usb_srv);
     furi_thread_start(usb.thread);

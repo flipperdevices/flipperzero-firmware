@@ -65,7 +65,7 @@ void furi_hal_vcp_init() {
     vcp->rx_stream = xStreamBufferCreate(VCP_RX_BUF_SIZE, 1);
 
     vcp->thread = furi_thread_alloc();
-    furi_thread_set_name(vcp->thread, "VcpWorker");
+    furi_thread_set_name(vcp->thread, "VcpDriver");
     furi_thread_set_stack_size(vcp->thread, 1024);
     furi_thread_set_callback(vcp->thread, vcp_worker);
     furi_thread_start(vcp->thread);

@@ -5,7 +5,7 @@
 #include <furi_hal_spi.h>
 
 static const osThreadAttr_t platform_irq_thread_attr = {
-    .name = "RfalIrqWorker",
+    .name = "RfalIrqDriver",
     .stack_size = 1024,
     .priority = osPriorityRealtime,
 };
