@@ -35,7 +35,7 @@ typedef enum {
 } PrincetonDecoderStep;
 
 SubGhzEncoderPrinceton* subghz_encoder_princeton_alloc() {
-    SubGhzEncoderPrinceton* instance = furi_alloc(sizeof(SubGhzEncoderPrinceton));
+    SubGhzEncoderPrinceton* instance = malloc(sizeof(SubGhzEncoderPrinceton));
     return instance;
 }
 
@@ -171,7 +171,7 @@ LevelDuration subghz_encoder_princeton_yield(void* context) {
 }
 
 SubGhzDecoderPrinceton* subghz_decoder_princeton_alloc(void) {
-    SubGhzDecoderPrinceton* instance = furi_alloc(sizeof(SubGhzDecoderPrinceton));
+    SubGhzDecoderPrinceton* instance = malloc(sizeof(SubGhzDecoderPrinceton));
 
     instance->te = SUBGHZ_PT_SHORT;
     instance->common.name = "Princeton";

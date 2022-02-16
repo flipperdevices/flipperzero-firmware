@@ -182,7 +182,7 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
 }
 
 SubGhzFileEncoderWorker* subghz_file_encoder_worker_alloc() {
-    SubGhzFileEncoderWorker* instance = furi_alloc(sizeof(SubGhzFileEncoderWorker));
+    SubGhzFileEncoderWorker* instance = malloc(sizeof(SubGhzFileEncoderWorker));
 
     instance->thread = furi_thread_alloc();
     furi_thread_set_name(instance->thread, "SubghzFEWorker");

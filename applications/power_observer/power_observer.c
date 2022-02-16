@@ -35,7 +35,7 @@ static void usb_state_callback(FuriHalUsbStateEvent state, void* context) {
 
 int32_t power_observer_srv(void* p) {
     NotificationApp* notifications = furi_record_open("notification");
-    PowerObserverSrv* srv = furi_alloc(sizeof(PowerObserverSrv));
+    PowerObserverSrv* srv = malloc(sizeof(PowerObserverSrv));
     srv->thread = osThreadGetId();
 
     const float overconsumption_limit = 0.03f;

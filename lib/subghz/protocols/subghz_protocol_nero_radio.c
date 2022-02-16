@@ -12,7 +12,7 @@ typedef enum {
 } NeroRadioDecoderStep;
 
 SubGhzProtocolNeroRadio* subghz_protocol_nero_radio_alloc(void) {
-    SubGhzProtocolNeroRadio* instance = furi_alloc(sizeof(SubGhzProtocolNeroRadio));
+    SubGhzProtocolNeroRadio* instance = malloc(sizeof(SubGhzProtocolNeroRadio));
 
     instance->common.name = "Nero Radio";
     instance->common.code_min_count_bit_for_found = 55;

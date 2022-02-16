@@ -68,7 +68,7 @@ bool irda_parser_read_signal(FlipperFormat* ff, IrdaAppSignal& signal, std::stri
             if(!flipper_format_read_float(ff, "duty_cycle", &duty_cycle, 1)) break;
             if(!flipper_format_get_value_count(ff, "data", &timings_cnt)) break;
             if(timings_cnt > MAX_TIMINGS_AMOUNT) break;
-            timings = (uint32_t*)furi_alloc(sizeof(uint32_t) * timings_cnt);
+            timings = (uint32_t*)malloc(sizeof(uint32_t) * timings_cnt);
             if(flipper_format_read_uint32(ff, "data", timings, timings_cnt)) {
                 signal.set_raw_signal(timings, timings_cnt, frequency, duty_cycle);
                 result = true;

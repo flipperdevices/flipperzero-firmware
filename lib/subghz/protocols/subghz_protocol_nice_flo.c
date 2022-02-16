@@ -18,7 +18,7 @@ typedef enum {
 } NiceFloDecoderStep;
 
 SubGhzProtocolNiceFlo* subghz_protocol_nice_flo_alloc() {
-    SubGhzProtocolNiceFlo* instance = furi_alloc(sizeof(SubGhzProtocolNiceFlo));
+    SubGhzProtocolNiceFlo* instance = malloc(sizeof(SubGhzProtocolNiceFlo));
 
     instance->common.name = "Nice FLO";
     instance->common.code_min_count_bit_for_found = 12;

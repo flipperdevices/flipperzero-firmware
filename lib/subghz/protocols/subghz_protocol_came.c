@@ -19,7 +19,7 @@ typedef enum {
 } CameDecoderStep;
 
 SubGhzProtocolCame* subghz_protocol_came_alloc() {
-    SubGhzProtocolCame* instance = furi_alloc(sizeof(SubGhzProtocolCame));
+    SubGhzProtocolCame* instance = malloc(sizeof(SubGhzProtocolCame));
 
     instance->common.name = "CAME";
     instance->common.code_min_count_bit_for_found = 12;

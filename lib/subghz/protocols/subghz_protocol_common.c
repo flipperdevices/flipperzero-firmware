@@ -3,8 +3,8 @@
 #include <lib/toolbox/hex.h>
 
 SubGhzProtocolCommonEncoder* subghz_protocol_encoder_common_alloc() {
-    SubGhzProtocolCommonEncoder* instance = furi_alloc(sizeof(SubGhzProtocolCommonEncoder));
-    instance->upload = furi_alloc(SUBGHZ_ENCODER_UPLOAD_MAX_SIZE * sizeof(LevelDuration));
+    SubGhzProtocolCommonEncoder* instance = malloc(sizeof(SubGhzProtocolCommonEncoder));
+    instance->upload = malloc(SUBGHZ_ENCODER_UPLOAD_MAX_SIZE * sizeof(LevelDuration));
     instance->start = true;
     instance->repeat = 10; //default number of repeat
     return instance;

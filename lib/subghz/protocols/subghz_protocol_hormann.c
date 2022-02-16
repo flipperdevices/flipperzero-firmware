@@ -15,7 +15,7 @@ typedef enum {
 } HormannDecoderStep;
 
 SubGhzProtocolHormann* subghz_protocol_hormann_alloc() {
-    SubGhzProtocolHormann* instance = furi_alloc(sizeof(SubGhzProtocolHormann));
+    SubGhzProtocolHormann* instance = malloc(sizeof(SubGhzProtocolHormann));
 
     instance->common.name = "Hormann HSM";
     instance->common.code_min_count_bit_for_found = 44;

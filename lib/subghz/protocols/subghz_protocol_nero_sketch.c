@@ -12,7 +12,7 @@ typedef enum {
 } NeroSketchDecoderStep;
 
 SubGhzProtocolNeroSketch* subghz_protocol_nero_sketch_alloc(void) {
-    SubGhzProtocolNeroSketch* instance = furi_alloc(sizeof(SubGhzProtocolNeroSketch));
+    SubGhzProtocolNeroSketch* instance = malloc(sizeof(SubGhzProtocolNeroSketch));
 
     instance->common.name = "Nero Sketch";
     instance->common.code_min_count_bit_for_found = 40;
