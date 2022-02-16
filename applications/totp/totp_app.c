@@ -23,6 +23,11 @@ typedef struct {
 } TotpEvent;
 
 uint8_t keyId = 0;
+uint8_t keys = 3;
+uint8_t* base32key[] = {
+    (unsigned char*)"JBSWY3DPEHPK3PXP",
+    (unsigned char*)"AMOGUSYOBABOBAAA",
+    (unsigned char*)"AMOGUSAAAAAAAAAA"};
 
 static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
     osMessageQueueId_t event_queue = ctx;
@@ -31,9 +36,8 @@ static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
 
     uint8_t hmacKey[20];
     //uint8_t* base32key = (unsigned char*)"DM72NP6URDCNCHLW";
-    uint8_t* base32key[] = {
-        (unsigned char*)"JBSWY3DPEHPK3PXP", (unsigned char*)"AMOGUSYOBABOBAAA"};
-    const char* keyNames[] = {"Test Key 1", "Test Key 2"};
+
+    const char* keyNames[] = {"Test Key 1", "Test Key 2", "Amogus key"};
 
     uint8_t keyLength = 10;
     int timezone = -3;
@@ -122,7 +126,7 @@ int32_t totp_app(void* p) {
         if((event.input.type == InputTypeShort) && (event.input.key == InputKeyBack)) {
             break;
         } else if((event.input.type == InputTypeShort) && (event.input.key == InputKeyRight)) {
-            if(keyId < 1) {
+            if(keyId < keys - 1) {
                 keyId++;
             }
         } else if((event.input.type == InputTypeShort) && (event.input.key == InputKeyLeft)) {
