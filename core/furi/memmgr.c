@@ -1,8 +1,6 @@
 #include "memmgr.h"
 #include <string.h>
 
-#include <stm32wbxx.h>
-
 extern void* pvPortMalloc(size_t xSize);
 extern void vPortFree(void* pv);
 extern size_t xPortGetFreeHeapSize(void);
