@@ -31,6 +31,7 @@ NfcWorker* nfc_worker_alloc() {
 
 void nfc_worker_free(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
+    furi_thread_free(nfc_worker->thread);
     free(nfc_worker);
 }
 
