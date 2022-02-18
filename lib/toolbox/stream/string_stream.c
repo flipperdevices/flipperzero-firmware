@@ -140,26 +140,23 @@ static bool string_stream_delete_and_insert(
     const void* ctx) {
     bool result = true;
 
-    do {
-        if(delete_size) {
-            size_t remain_size = string_stream_size(stream) - string_stream_tell(stream);
-            remain_size = MIN(delete_size, remain_size);
+    if(delete_size) {
+        size_t remain_size = string_stream_size(stream) - string_stream_tell(stream);
+        remain_size = MIN(delete_size, remain_size);
 
-            if(remain_size != 0) {
-                string_replace_at(stream->string, stream->index, remain_size, "");
-            }
+        if(remain_size != 0) {
+            string_replace_at(stream->string, stream->index, remain_size, "");
         }
+    }
 
-        if(write_callback) {
-            string_t right;
-            string_init_set(right, &string_get_cstr(stream->string)[stream->index]);
-            string_left(stream->string, string_stream_tell(stream));
-            result += write_callback((Stream*)stream, ctx);
-            string_cat(stream->string, right);
-            string_clear(right);
-        }
-
-    } while(false);
+    if(write_callback) {
+        string_t right;
+        string_init_set(right, &string_get_cstr(stream->string)[stream->index]);
+        string_left(stream->string, string_stream_tell(stream));
+        result &= write_callback((Stream*)stream, ctx);
+        string_cat(stream->string, right);
+        string_clear(right);
+    }
 
     return result;
 }

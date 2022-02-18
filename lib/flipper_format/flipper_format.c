@@ -107,16 +107,8 @@ bool flipper_format_read_header(
     string_t filetype,
     uint32_t* version) {
     furi_assert(flipper_format);
-    bool result = false;
-    do {
-        result = flipper_format_read_string(flipper_format, flipper_format_filetype_key, filetype);
-        if(!result) break;
-        result =
-            flipper_format_read_uint32(flipper_format, flipper_format_version_key, version, 1);
-        if(!result) break;
-    } while(false);
-
-    return result;
+    return flipper_format_read_string(flipper_format, flipper_format_filetype_key, filetype) &&
+           flipper_format_read_uint32(flipper_format, flipper_format_version_key, version, 1);
 }
 
 bool flipper_format_write_header(
@@ -124,17 +116,7 @@ bool flipper_format_write_header(
     string_t filetype,
     const uint32_t version) {
     furi_assert(flipper_format);
-    bool result = false;
-    do {
-        result =
-            flipper_format_write_string(flipper_format, flipper_format_filetype_key, filetype);
-        if(!result) break;
-        result =
-            flipper_format_write_uint32(flipper_format, flipper_format_version_key, &version, 1);
-        if(!result) break;
-    } while(false);
-
-    return result;
+    return flipper_format_write_header_cstr(flipper_format, string_get_cstr(filetype), version);
 }
 
 bool flipper_format_write_header_cstr(
@@ -142,17 +124,9 @@ bool flipper_format_write_header_cstr(
     const char* filetype,
     const uint32_t version) {
     furi_assert(flipper_format);
-    bool result = false;
-    do {
-        result = flipper_format_write_string_cstr(
-            flipper_format, flipper_format_filetype_key, filetype);
-        if(!result) break;
-        result =
-            flipper_format_write_uint32(flipper_format, flipper_format_version_key, &version, 1);
-        if(!result) break;
-    } while(false);
-
-    return result;
+    return flipper_format_write_string_cstr(
+               flipper_format, flipper_format_filetype_key, filetype) &&
+           flipper_format_write_uint32(flipper_format, flipper_format_version_key, &version, 1);
 }
 
 bool flipper_format_get_value_count(
