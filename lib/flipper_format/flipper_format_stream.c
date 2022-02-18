@@ -28,56 +28,62 @@ bool flipper_format_stream_write_eol(Stream* stream) {
 
 static bool flipper_format_stream_read_valid_key(Stream* stream, string_t key) {
     string_reset(key);
-    uint8_t data;
+    const size_t buffer_size = 32;
+    uint8_t buffer[buffer_size];
+
     bool found = false;
     bool error = false;
     bool accumulate = true;
     bool new_line = true;
 
     while(true) {
-        if(stream_read(stream, &data, 1) == 0) break;
+        size_t was_read = stream_read(stream, buffer, buffer_size);
+        if(was_read == 0) break;
 
-        if(data == flipper_format_eoln) {
-            // EOL found, clean data, start accumulating data and set the new_line flag
-            string_reset(key);
-            accumulate = true;
-            new_line = true;
-        } else if(data == flipper_format_eolr) {
-            // ignore
-        } else if(data == flipper_format_comment && new_line) {
-            // if there is a comment character and we are at the beginning of a new line
-            // do not accumulate comment data and reset the new_line flag
-            accumulate = false;
-            new_line = false;
-        } else if(data == flipper_format_delimiter) {
-            if(new_line) {
-                // we are on a "new line" and found the delimiter
-                // this can only be if we have previously found some kind of key, so
-                // clear the data, set the flag that we no longer want to accumulate data
-                // and reset the new_line flag
+        for(size_t i = 0; i < was_read; i++) {
+            uint8_t data = buffer[i];
+            if(data == flipper_format_eoln) {
+                // EOL found, clean data, start accumulating data and set the new_line flag
                 string_reset(key);
+                accumulate = true;
+                new_line = true;
+            } else if(data == flipper_format_eolr) {
+                // ignore
+            } else if(data == flipper_format_comment && new_line) {
+                // if there is a comment character and we are at the beginning of a new line
+                // do not accumulate comment data and reset the new_line flag
                 accumulate = false;
                 new_line = false;
-            } else {
-                // parse the delimiter only if we are accumulating data
-                if(accumulate) {
-                    // we found the delimiter, move the rw pointer to the delimiter location
-                    // and signal that we have found something
-                    if(!stream_seek(stream, -1, StreamOffsetFromCurrent)) {
-                        error = true;
+            } else if(data == flipper_format_delimiter) {
+                if(new_line) {
+                    // we are on a "new line" and found the delimiter
+                    // this can only be if we have previously found some kind of key, so
+                    // clear the data, set the flag that we no longer want to accumulate data
+                    // and reset the new_line flag
+                    string_reset(key);
+                    accumulate = false;
+                    new_line = false;
+                } else {
+                    // parse the delimiter only if we are accumulating data
+                    if(accumulate) {
+                        // we found the delimiter, move the rw pointer to the delimiter location
+                        // and signal that we have found something
+                        if(!stream_seek(stream, i - was_read, StreamOffsetFromCurrent)) {
+                            error = true;
+                            break;
+                        }
+
+                        found = true;
                         break;
                     }
-
-                    found = true;
-                    break;
                 }
-            }
-        } else {
-            // just new symbol, reset the new_line flag
-            new_line = false;
-            if(accumulate) {
-                // and accumulate data if we want
-                string_push_back(key, data);
+            } else {
+                // just new symbol, reset the new_line flag
+                new_line = false;
+                if(accumulate) {
+                    // and accumulate data if we want
+                    string_push_back(key, data);
+                }
             }
         }
 
@@ -113,12 +119,15 @@ static bool flipper_format_stream_seek_to_key(Stream* stream, const char* key, b
 
 static bool flipper_format_stream_read_value(Stream* stream, string_t value, bool* last) {
     string_reset(value);
-    uint8_t data;
+    const size_t buffer_size = 32;
+    uint8_t buffer[buffer_size];
     bool result = false;
     bool error = false;
 
     while(true) {
-        if(stream_read(stream, &data, 1) == 0) {
+        size_t was_read = stream_read(stream, buffer, buffer_size);
+
+        if(was_read == 0) {
             // check EOF
             if(stream_eof(stream) && string_size(value) > 0) {
                 result = true;
@@ -127,35 +136,38 @@ static bool flipper_format_stream_read_value(Stream* stream, string_t value, boo
             }
         }
 
-        if(data == flipper_format_eoln) {
-            if(string_size(value) > 0) {
-                if(!stream_seek(stream, -1, StreamOffsetFromCurrent)) {
+        for(uint16_t i = 0; i < was_read; i++) {
+            uint8_t data = buffer[i];
+            if(data == flipper_format_eoln) {
+                if(string_size(value) > 0) {
+                    if(!stream_seek(stream, i - was_read, StreamOffsetFromCurrent)) {
+                        error = true;
+                        break;
+                    }
+
+                    result = true;
+                    *last = true;
+                    break;
+                } else {
                     error = true;
+                }
+            } else if(data == ' ') {
+                if(string_size(value) > 0) {
+                    if(!stream_seek(stream, i - was_read, StreamOffsetFromCurrent)) {
+                        error = true;
+                        break;
+                    }
+
+                    result = true;
+                    *last = false;
                     break;
                 }
 
-                result = true;
-                *last = true;
-                break;
+            } else if(data == flipper_format_eolr) {
+                // Ignore
             } else {
-                error = true;
+                string_push_back(value, data);
             }
-        } else if(data == ' ') {
-            if(string_size(value) > 0) {
-                if(!stream_seek(stream, -1, StreamOffsetFromCurrent)) {
-                    error = true;
-                    break;
-                }
-
-                result = true;
-                *last = false;
-                break;
-            }
-
-        } else if(data == flipper_format_eolr) {
-            // Ignore
-        } else {
-            string_push_back(value, data);
         }
 
         if(error || result) break;
@@ -166,27 +178,31 @@ static bool flipper_format_stream_read_value(Stream* stream, string_t value, boo
 
 static bool flipper_format_stream_read_line(Stream* stream, string_t str_result) {
     string_reset(str_result);
-    uint8_t data;
+    const size_t buffer_size = 32;
+    uint8_t buffer[buffer_size];
 
     do {
-        // TODO process EOF
-        if(stream_read(stream, &data, 1) == 0) break;
+        size_t was_read = stream_read(stream, buffer, buffer_size);
+        if(was_read == 0) break;
 
         bool result = false;
         bool error = false;
 
-        if(data == flipper_format_eoln) {
-            if(!stream_seek(stream, -1, StreamOffsetFromCurrent)) {
-                error = true;
-                break;
-            }
+        for(size_t i = 0; i < was_read; i++) {
+            uint8_t data = buffer[i];
+            if(data == flipper_format_eoln) {
+                if(!stream_seek(stream, i - was_read, StreamOffsetFromCurrent)) {
+                    error = true;
+                    break;
+                }
 
-            result = true;
-            break;
-        } else if(data == flipper_format_eolr) {
-            // Ignore
-        } else {
-            string_push_back(str_result, data);
+                result = true;
+                break;
+            } else if(data == flipper_format_eolr) {
+                // Ignore
+            } else {
+                string_push_back(str_result, data);
+            }
         }
 
         if(result || error) {
@@ -198,26 +214,30 @@ static bool flipper_format_stream_read_line(Stream* stream, string_t str_result)
 }
 
 static bool flipper_format_stream_seek_to_next_line(Stream* stream) {
-    uint8_t data;
+    const size_t buffer_size = 32;
+    uint8_t buffer[buffer_size];
     bool result = false;
     bool error = false;
 
     do {
-        if(stream_read(stream, &data, 1) == 0) {
+        size_t was_read = stream_read(stream, buffer, buffer_size);
+        if(was_read == 0) {
             if(stream_eof(stream)) {
                 result = true;
                 break;
             }
         }
 
-        if(data == flipper_format_eoln) {
-            if(!stream_seek(stream, -1, StreamOffsetFromCurrent)) {
-                error = true;
+        for(size_t i = 0; i < was_read; i++) {
+            if(buffer[i] == flipper_format_eoln) {
+                if(!stream_seek(stream, i - was_read, StreamOffsetFromCurrent)) {
+                    error = true;
+                    break;
+                }
+
+                result = true;
                 break;
             }
-
-            result = true;
-            break;
         }
 
         if(result || error) {

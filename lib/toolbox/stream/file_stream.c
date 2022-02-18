@@ -84,7 +84,7 @@ static bool file_stream_seek(FileStream* stream, int32_t offset, StreamOffset of
     // calc offset and limit to bottom
     switch(offset_type) {
     case StreamOffsetFromCurrent: {
-        if(((int32_t)current_position + offset) >= 0) {
+        if((int32_t)(current_position + offset) >= 0) {
             seek_position = current_position + offset;
             result = true;
         }
@@ -96,7 +96,7 @@ static bool file_stream_seek(FileStream* stream, int32_t offset, StreamOffset of
         }
     } break;
     case StreamOffsetFromEnd: {
-        if(((int32_t)size + offset) >= 0) {
+        if((int32_t)(size + offset) >= 0) {
             seek_position = size + offset;
             result = true;
         }
@@ -105,10 +105,8 @@ static bool file_stream_seek(FileStream* stream, int32_t offset, StreamOffset of
 
     if(result) {
         // limit to top
-        int32_t diff = (seek_position - size);
-        if(diff > 0) {
-            seek_position -= diff;
-            storage_file_seek(stream->file, seek_position, true);
+        if((int32_t)(seek_position - size) > 0) {
+            storage_file_seek(stream->file, size, true);
             result = false;
         } else {
             result = storage_file_seek(stream->file, seek_position, true);
