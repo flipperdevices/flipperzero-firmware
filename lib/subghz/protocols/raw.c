@@ -104,14 +104,14 @@ bool subghz_protocol_raw_save_to_file_init(
             break;
         }
         // Create saved directory if necessary
-        if(!storage_simply_mkdir(instance->storage, SUBGHZ_RAW_PATH_FOLDER)) {
+        if(!storage_simply_mkdir(instance->storage, SUBGHZ_RAW_FOLDER)) {
             break;
         }
 
         string_set(instance->file_name, dev_name);
         // First remove subghz device file if it was saved
         string_printf(
-            dev_file_name, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, dev_name, SUBGHZ_APP_EXTENSION);
+            dev_file_name, "%s/%s%s", SUBGHZ_RAW_FOLDER, dev_name, SUBGHZ_APP_EXTENSION);
 
         if(!storage_simply_remove(instance->storage, string_get_cstr(dev_file_name))) {
             break;

@@ -147,7 +147,7 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     //subghz_protocol_princeton_send_key(protocol, transmitter);
 
     SubGhzEnvironment* environment = subghz_environment_alloc();
-    subghz_environment_load_keystore(environment, "/ext/subghz/keeloq_mfcodes");
+    subghz_environment_load_keystore(environment, "/ext/subghz/assets/keeloq_mfcodes");
 
     SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, "Princeton");
     subghz_transmitter_load(transmitter, key, 24, repeat); // TODO: serialize, deserialize
@@ -249,9 +249,9 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     // subghz_parser_load_came_atomo_file(parser, "/ext/subghz/came_atomo");
     // subghz_parser_enable_dump_text(parser, subghz_cli_command_rx_text_callback, instance);
     SubGhzEnvironment* environment = subghz_environment_alloc();
-    subghz_environment_load_keystore(environment, "/ext/subghz/keeloq_mfcodes");
-    subghz_environment_set_came_atomo_rainbow_table_file_name(environment, "/ext/subghz/came_atomo");
-    subghz_environment_set_nice_flor_s_rainbow_table_file_name(environment, "/ext/subghz/nice_flor_s");
+    subghz_environment_load_keystore(environment, "/ext/subghz/assets/keeloq_mfcodes");
+    subghz_environment_set_came_atomo_rainbow_table_file_name(environment, "/ext/subghz/assets/came_atomo");
+    subghz_environment_set_nice_flor_s_rainbow_table_file_name(environment, "/ext/subghz/assets/nice_flor_s");
 
     SubGhzReceiver* receiver = subghz_receiver_alloc(environment);
     subghz_receiver_set_filter(receiver, SubGhzProtocolFlag_Decodable);

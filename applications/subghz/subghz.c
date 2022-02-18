@@ -291,19 +291,13 @@ int32_t subghz_app(void* p) {
 
     //Load database
     bool load_database =
-        subghz_environment_load_keystore(subghz->txrx->environment, "/ext/subghz/keeloq_mfcodes");
-    subghz_environment_load_keystore(subghz->txrx->environment, "/ext/subghz/keeloq_mfcodes_user");
+        subghz_environment_load_keystore(subghz->txrx->environment, "/ext/subghz/assets/keeloq_mfcodes");
+    subghz_environment_load_keystore(subghz->txrx->environment, "/ext/subghz/assets/keeloq_mfcodes_user");
     subghz_environment_set_came_atomo_rainbow_table_file_name(
-        subghz->txrx->environment, "/ext/subghz/came_atomo");
+        subghz->txrx->environment, "/ext/subghz/assets/came_atomo");
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
-        subghz->txrx->environment, "/ext/subghz/nice_flor_s");
-
-    //todo delete
-    //    subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes");
-    //subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes_user");
-    //subghz_parser_load_nice_flor_s_file(subghz->txrx->parser, "/ext/subghz/nice_flor_s_rx");
-    //subghz_parser_load_came_atomo_file(subghz->txrx->parser, "/ext/subghz/came_atomo");
-
+        subghz->txrx->environment, "/ext/subghz/assets/nice_flor_s");
+        
     // Check argument and run corresponding scene
     if(p && subghz_key_load(subghz, p)) {
         string_t filename;

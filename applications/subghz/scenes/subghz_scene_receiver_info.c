@@ -20,6 +20,7 @@ void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, v
 
 static bool subghz_scene_receiver_info_update_parser(void* context) {
     SubGhz* subghz = context;
+    //ToDo получение имени из истоии
     subghz->txrx->protocol_result = subghz_parser_get_by_name(
         subghz->txrx->parser,
         subghz_history_get_name(subghz->txrx->history, subghz->txrx->idx_menu_chosen));

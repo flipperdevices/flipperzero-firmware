@@ -22,6 +22,7 @@
 
 
 
+
 const SubGhzProtocol* subghz_protocol_registry[] = {
     &subghz_protocol_princeton,
     &subghz_protocol_keeloq,
@@ -42,6 +43,7 @@ const SubGhzProtocol* subghz_protocol_registry[] = {
     &subghz_protocol_scher_khan,
     &subghz_protocol_gate_tx,
     &subghz_protocol_raw,
+
 };
 
 const SubGhzProtocol* subghz_protocol_registry_get_by_name(const char* name) {
