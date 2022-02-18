@@ -154,13 +154,6 @@ static size_t file_stream_read(FileStream* stream, uint8_t* data, size_t size) {
     return size - need_to_read;
 }
 
-static const char* flipper_scratchpad = "/any/.scratch.pad";
-static bool file_stream_get_scratchpad_name(const char** name) {
-    // TODO do not rewrite existing file
-    *name = flipper_scratchpad;
-    return true;
-}
-
 static bool file_stream_delete_and_insert(
     FileStream* _stream,
     size_t delete_size,
@@ -171,10 +164,20 @@ static bool file_stream_delete_and_insert(
 
     // open scratchpad
     Stream* scratch_stream = file_stream_alloc(_stream->storage);
-    const char* scratch_name = "";
-    file_stream_get_scratchpad_name(&scratch_name);
+
+    // TODO: we need something like "storage_open_tmpfile and storage_close_tmpfile"
+    string_t scratch_name;
+    string_t tmp_name;
+    string_init(tmp_name);
+    storage_get_next_filename(_stream->storage, "/any", ".scratch", ".pad", tmp_name);
+    string_init_printf(scratch_name, "/any/%s.pad", string_get_cstr(tmp_name));
+    string_clear(tmp_name);
 
     do {
+        if(!file_stream_open(
+               scratch_stream, string_get_cstr(scratch_name), FSAM_READ_WRITE, FSOM_CREATE_NEW))
+            break;
+
         size_t current_position = stream_tell(stream);
         size_t file_size = stream_size(stream);
 
@@ -183,9 +186,6 @@ static bool file_stream_delete_and_insert(
 
         size_t size_to_copy_before = current_position;
         size_t size_to_copy_after = file_size - current_position - size_to_delete;
-
-        if(!file_stream_open(scratch_stream, scratch_name, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS))
-            break;
 
         // copy file from 0 to insert position to scratchpad
         if(!stream_rewind(stream)) break;
@@ -217,7 +217,8 @@ static bool file_stream_delete_and_insert(
     } while(false);
 
     stream_free(scratch_stream);
-    storage_simply_remove(_stream->storage, scratch_name);
+    storage_common_remove(_stream->storage, string_get_cstr(scratch_name));
+    string_clear(scratch_name);
 
     return result;
 }
