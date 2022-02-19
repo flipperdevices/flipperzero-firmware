@@ -232,10 +232,10 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS_FAMILIES})
 
         set(STARTUP_NAMES startup_stm32${TYPE_L}.s startup_stm32${TYPE_L}${CORE_Ucm}.s)
         if(${FAMILY} STREQUAL "MP1")
-            # There are stm32mp15?axx.s and stm32mp15?cxx.s files but no stm32mp15?dxx.s nor stm32mp15?fxx.s. No idea why.
-            # I think that stm32mp15xx.s should be compatible with all stm32mp15 devices anyway.
-            # This might need refinement if devices other stm32mp15 are released.
-            list(APPEND STARTUP_NAMES startup_stm32mp15xx.s)
+            # stm32mp15?dxx.s uses stm32mp15?axx.s
+            # stm32mp15?fxx.s uses stm32mp15?cxx.s
+            string(REPLACE "dxx" "axx" STARTUP_NAMES ${STARTUP_NAMES})
+            string(REPLACE "fxx" "cxx" STARTUP_NAMES ${STARTUP_NAMES})
         endif()
         
         find_file(CMSIS_${FAMILY}${CORE_U}_${TYPE}_STARTUP
