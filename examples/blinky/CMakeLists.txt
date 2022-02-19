@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/stm32_gcc.cmake)
 
-option(USE_CPP_FILE "Use the blink.cpp file instead of the blink.c" OFF)
+# Configure here which STM32 target(s) to build
+option(BLINKY_F4_EXAMPLE "Compile F4 example" ON)
+option(BLINKY_F1_EXAMPLE "Compile F1 example" OFF)
+option(BLINKY_L0_EXAMPLE "Compile L0 example" OFF)
+
+option(USE_CPP_FILE "Use the .cpp example file instead of the .c one" OFF)
 
 if(USE_CPP_FILE)
     project(stm32-blinky C CXX ASM)
@@ -10,12 +15,9 @@ else()
     project(stm32-blinky C ASM)
     set(MAIN_SOURCE_FILE blinky.c)
 endif()
+
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 
-# Configure here which STM32 target(s) to build
-option(BLINKY_F4_EXAMPLE "Compile F4 example" ON)
-option(BLINKY_F1_EXAMPLE "Compile F1 example" OFF)
-option(BLINKY_L0_EXAMPLE "Compile L0 example" OFF)
 
 set(HAL_COMP_LIST RCC GPIO CORTEX)
 set(CMSIS_COMP_LIST "")
