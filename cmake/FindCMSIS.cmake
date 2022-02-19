@@ -78,9 +78,15 @@ function(cmsis_generate_default_linker_script FAMILY DEVICE CORE)
     stm32_get_memory_info(FAMILY ${FAMILY} DEVICE ${DEVICE} CORE ${CORE} STACK SIZE STACK_SIZE)
     
     if(${FAMILY} STREQUAL MP1)
+        string(TOLOWER ${FAMILY} FAMILY_L)
+        find_file(CMSIS_${FAMILY}${CORE_U}_LD_SCRIPT
+            NAMES stm32mp15xx_m4.ld
+            PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Source/Templates/gcc/linker"
+            NO_DEFAULT_PATH
+        )
         add_custom_command(OUTPUT "${OUTPUT_LD_FILE}"
             COMMAND ${CMAKE_COMMAND}
-                -E copy ${STM32_CMAKE_DIR}/stm32/mp15xx.ld ${OUTPUT_LD_FILE})
+                -E copy ${CMSIS_${FAMILY}${CORE_U}_LD_SCRIPT} ${OUTPUT_LD_FILE})
     else()
         add_custom_command(OUTPUT "${OUTPUT_LD_FILE}"
             COMMAND ${CMAKE_COMMAND} 
