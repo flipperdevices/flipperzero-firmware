@@ -29,6 +29,8 @@ uint8_t* base32key[] = {
     (unsigned char*)"AMOGUSYOBABOBAAA",
     (unsigned char*)"AMOGUSAAAAAAAAAA"};
 
+int keyLengths[] = {10, 10, 10};
+
 static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
     osMessageQueueId_t event_queue = ctx;
     TotpEvent event;
@@ -38,8 +40,6 @@ static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
     //uint8_t* base32key = (unsigned char*)"DM72NP6URDCNCHLW";
 
     const char* keyNames[] = {"Test Key 1", "Test Key 2", "Amogus key"};
-
-    uint8_t keyLength = 10;
     int timezone = -3;
 
     canvas_clear(canvas);
@@ -49,11 +49,11 @@ static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
 
     FURI_LOG_I("TOTP", "key is %s", base32key[keyId]);
 
-    int len = base32_decode(base32key[keyId], hmacKey, keyLength);
+    int len = base32_decode(base32key[keyId], hmacKey, keyLengths[keyId]);
     FURI_LOG_I("TOTP", "len = %d", len);
 
     //uint8_t hmacKey[] = {0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0xde, 0xad, 0xbe, 0xef}; // Secret key
-    TOTP(hmacKey, keyLength, 30); // Secret key, Secret key length, Timestep (30s)
+    TOTP(hmacKey, keyLengths[keyId], 30); // Secret key, Secret key length, Timestep (30s)
 
     FuriHalRtcDateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
@@ -128,10 +128,14 @@ int32_t totp_app(void* p) {
         } else if((event.input.type == InputTypeShort) && (event.input.key == InputKeyRight)) {
             if(keyId < keys - 1) {
                 keyId++;
+            } else {
+                keyId = 0;
             }
         } else if((event.input.type == InputTypeShort) && (event.input.key == InputKeyLeft)) {
             if(keyId > 0) {
                 keyId--;
+            } else {
+                keyId = keys - 1;
             }
         }
     }
