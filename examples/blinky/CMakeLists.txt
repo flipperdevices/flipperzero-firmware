@@ -1,7 +1,15 @@
 cmake_minimum_required(VERSION 3.16)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/stm32_gcc.cmake)
 
-project(stm32-blinky C ASM)
+option(USE_CPP_FILE "Use the blink.cpp file instead of the blink.c" OFF)
+
+if(USE_CPP_FILE)
+    project(stm32-blinky C CXX ASM)
+    set(MAIN_SOURCE_FILE blinky.cpp)
+else()
+    project(stm32-blinky C ASM)
+    set(MAIN_SOURCE_FILE blinky.c)
+endif()
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 
 # Configure here which STM32 target(s) to build
@@ -41,7 +49,7 @@ find_package(HAL COMPONENTS "${HAL_COMP_LIST}" REQUIRED)
 
 # STM32F4-Discovery
 if(BLINKY_F4_EXAMPLE)
-    add_executable(stm32-blinky-f4 blinky.c stm32f4xx_hal_conf.h)
+    add_executable(stm32-blinky-f4 ${MAIN_SOURCE_FILE} stm32f4xx_hal_conf.h)
     target_link_libraries(stm32-blinky-f4
         HAL::STM32::F4::RCC
         HAL::STM32::F4::GPIO
@@ -54,7 +62,7 @@ endif()
 
 # STM32VL-Discovery
 if(BLINKY_F1_EXAMPLE)
-    add_executable(stm32-blinky-f1 blinky.c stm32f1xx_hal_conf.h)
+    add_executable(stm32-blinky-f1 ${MAIN_SOURCE_FILE} stm32f1xx_hal_conf.h)
     target_link_libraries(stm32-blinky-f1
         HAL::STM32::F1::RCC
         HAL::STM32::F1::GPIO
@@ -67,7 +75,7 @@ endif()
 
 # STM32L0538-Discovery
 if(BLINKY_L0_EXAMPLE)
-    add_executable(stm32-blinky-l0 blinky.c stm32l0xx_hal_conf.h)
+    add_executable(stm32-blinky-l0 ${MAIN_SOURCE_FILE} stm32l0xx_hal_conf.h)
     target_link_libraries(stm32-blinky-l0
         HAL::STM32::L0::RCC
         HAL::STM32::L0::GPIO
