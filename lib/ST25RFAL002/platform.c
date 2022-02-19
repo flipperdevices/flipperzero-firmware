@@ -4,7 +4,12 @@
 #include <furi.h>
 #include <furi_hal_spi.h>
 
-static osThreadAttr_t platform_irq_thread_attr;
+static const osThreadAttr_t platform_irq_thread_attr = {
+    .name = "RfalIrqDriver",
+    .stack_size = 1024,
+    .priority = osPriorityRealtime,
+};
+
 static volatile osThreadId_t platform_irq_thread_id = NULL;
 static volatile PlatformIrqCallback platform_irq_callback = NULL;
 static const GpioPin pin = {ST25R_INT_PORT, ST25R_INT_PIN};
@@ -15,7 +20,7 @@ void nfc_isr(void* _ctx) {
     }
 }
 
-void platformIrqWorker() {
+void platformIrqThread() {
     while(1) {
         uint32_t flags = osThreadFlagsWait(0x1, osFlagsWaitAny, osWaitForever);
         if(flags & 0x1) {
@@ -36,10 +41,7 @@ void platformDisableIrqCallback() {
 
 void platformSetIrqCallback(PlatformIrqCallback callback) {
     platform_irq_callback = callback;
-    platform_irq_thread_attr.name = "RfalIrqWorker";
-    platform_irq_thread_attr.stack_size = 1024;
-    platform_irq_thread_attr.priority = osPriorityRealtime;
-    platform_irq_thread_id = osThreadNew(platformIrqWorker, NULL, &platform_irq_thread_attr);
+    platform_irq_thread_id = osThreadNew(platformIrqThread, NULL, &platform_irq_thread_attr);
     hal_gpio_add_int_callback(&pin, nfc_isr, NULL);
     // Disable interrupt callback as the pin is shared between 2 apps
     // It is enabled in rfalLowPowerModeStop()

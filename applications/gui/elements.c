@@ -1,4 +1,8 @@
 #include "elements.h"
+#include "m-core.h"
+#include <assets_icons.h>
+#include "furi_hal_resources.h"
+#include <furi_hal.h>
 #include "gui/canvas.h"
 
 #include <gui/icon_i.h>
@@ -33,30 +37,15 @@ void elements_progress_bar(
     furi_assert(canvas);
     furi_assert(total > 0);
     uint8_t height = 9;
-    uint8_t marker_width = 7;
-    furi_assert(width > marker_width);
 
-    uint8_t progress_length = ((float)progress / total) * (width - marker_width - 2);
+    uint8_t progress_length = roundf(((float)progress / total) * (width - 2));
 
-    // rframe doesnt work if (radius * 2) > any rect side, so write manually
-    uint8_t x_max = x + width - 1;
-    uint8_t y_max = y + height - 1;
-    canvas_draw_line(canvas, x + 3, y, x_max - 3, y);
-    canvas_draw_line(canvas, x_max - 3, y, x_max, y + 3);
-    canvas_draw_line(canvas, x_max, y + 3, x_max, y_max - 3);
-    canvas_draw_line(canvas, x_max, y_max - 3, x_max - 3, y_max);
-    canvas_draw_line(canvas, x_max - 3, y_max, x + 3, y_max);
-    canvas_draw_line(canvas, x + 3, y_max, x, y_max - 3);
-    canvas_draw_line(canvas, x, y_max - 3, x, y + 3);
-    canvas_draw_line(canvas, x, y + 3, x + 3, y);
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, x + 1, y + 1, width - 2, height - 2);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rframe(canvas, x, y, width, height, 3);
 
-    canvas_draw_rbox(canvas, x + 1, y + 1, marker_width + progress_length, height - 2, 3);
-    canvas_invert_color(canvas);
-    canvas_draw_dot(canvas, x + progress_length + 3, y + 2);
-    canvas_draw_dot(canvas, x + progress_length + 4, y + 2);
-    canvas_draw_dot(canvas, x + progress_length + 5, y + 3);
-    canvas_draw_dot(canvas, x + progress_length + 6, y + 4);
-    canvas_invert_color(canvas);
+    canvas_draw_box(canvas, x + 1, y + 1, progress_length, height - 2);
 }
 
 void elements_scrollbar_pos(
@@ -199,6 +188,48 @@ void elements_button_center(Canvas* canvas, const char* str) {
     canvas_invert_color(canvas);
 }
 
+static size_t
+    elements_get_max_chars_to_fit(Canvas* canvas, Align horizontal, const char* text, uint8_t x) {
+    const char* end = strchr(text, '\n');
+    if(end == NULL) {
+        end = text + strlen(text);
+    }
+    size_t text_size = end - text;
+    string_t str;
+    string_init_set_str(str, text);
+    string_left(str, text_size);
+    size_t result = 0;
+
+    uint16_t len_px = canvas_string_width(canvas, string_get_cstr(str));
+    uint8_t px_left = 0;
+    if(horizontal == AlignCenter) {
+        px_left = canvas_width(canvas) - (x - len_px / 2);
+    } else if(horizontal == AlignLeft) {
+        px_left = canvas_width(canvas) - x;
+    } else if(horizontal == AlignRight) {
+        px_left = x;
+    } else {
+        furi_assert(0);
+    }
+
+    if(len_px > px_left) {
+        uint8_t excess_symbols_approximately =
+            ((float)len_px - px_left) / ((float)len_px / text_size);
+        // reduce to 5 to be sure dash fit, and next line will be at least 5 symbols long
+        excess_symbols_approximately = MAX(excess_symbols_approximately, 5);
+        if(text_size > (excess_symbols_approximately + 5)) {
+            result = text_size - excess_symbols_approximately - 5;
+        } else {
+            result = text_size - 1;
+        }
+    } else {
+        result = text_size;
+    }
+
+    string_clear(str);
+    return result;
+}
+
 void elements_multiline_text_aligned(
     Canvas* canvas,
     uint8_t x,
@@ -209,64 +240,40 @@ void elements_multiline_text_aligned(
     furi_assert(canvas);
     furi_assert(text);
 
+    uint8_t lines_count = 0;
     uint8_t font_height = canvas_current_font_height(canvas);
-    string_t str;
-    string_init(str);
-    const char* start = text;
-    char* end;
+    string_t line;
 
-    // get lines count
-    uint8_t i, lines_count;
-    for(i = 0, lines_count = 0; text[i]; i++) lines_count += (text[i] == '\n');
-
-    switch(vertical) {
-    case AlignBottom:
-        y -= font_height * lines_count;
-        break;
-    case AlignCenter:
-        y -= (font_height * lines_count) / 2;
-        break;
-    case AlignTop:
-    default:
-        break;
+    /* go through text line by line and count lines */
+    for(const char* start = text; start[0];) {
+        size_t chars_fit = elements_get_max_chars_to_fit(canvas, horizontal, start, x);
+        ++lines_count;
+        start += chars_fit;
+        start += start[0] == '\n' ? 1 : 0;
     }
 
-    do {
-        end = strchr(start, '\n');
+    if(vertical == AlignBottom) {
+        y -= font_height * (lines_count - 1);
+    } else if(vertical == AlignCenter) {
+        y -= (font_height * (lines_count - 1)) / 2;
+    }
 
-        if(end) {
-            string_set_strn(str, start, end - start);
+    /* go through text line by line and print them */
+    for(const char* start = text; start[0];) {
+        size_t chars_fit = elements_get_max_chars_to_fit(canvas, horizontal, start, x);
+
+        if((start[chars_fit] == '\n') || (start[chars_fit] == 0)) {
+            string_init_printf(line, "%.*s", chars_fit, start);
         } else {
-            string_set_str(str, start);
+            string_init_printf(line, "%.*s-\n", chars_fit, start);
         }
-
-        uint16_t len_px = canvas_string_width(canvas, string_get_cstr(str));
-        uint8_t px_left =
-            canvas_width(canvas) - (x - (horizontal == AlignCenter ? len_px / 2 : 0));
-
-        // hacky
-        if(len_px > px_left) {
-            string_t buff;
-            string_init_set(buff, str);
-            size_t s_len = string_size(str);
-            uint8_t end_pos = s_len - ((len_px - px_left) / (len_px / s_len) + 5);
-
-            string_left(buff, end_pos);
-            string_cat(buff, "-");
-            string_right(str, end_pos);
-
-            canvas_draw_str_aligned(canvas, x, y, horizontal, vertical, string_get_cstr(buff));
-            string_clear(buff);
-
-            start = end + 1;
-            y += font_height;
-        }
-
-        canvas_draw_str_aligned(canvas, x, y, horizontal, vertical, string_get_cstr(str));
-        start = end + 1;
+        canvas_draw_str_aligned(canvas, x, y, horizontal, vertical, string_get_cstr(line));
+        string_clear(line);
         y += font_height;
-    } while(end);
-    string_clear(str);
+
+        start += chars_fit;
+        start += start[0] == '\n' ? 1 : 0;
+    }
 }
 
 void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, const char* text) {
@@ -335,6 +342,47 @@ void elements_slightly_rounded_box(
     uint8_t height) {
     furi_assert(canvas);
     canvas_draw_rbox(canvas, x, y, width, height, 1);
+}
+
+void elements_bold_rounded_frame(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height) {
+    furi_assert(canvas);
+
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, x + 2, y + 2, width - 3, height - 3);
+    canvas_set_color(canvas, ColorBlack);
+
+    canvas_draw_line(canvas, x + 3, y, x + width - 3, y);
+    canvas_draw_line(canvas, x + 2, y + 1, x + width - 2, y + 1);
+
+    canvas_draw_line(canvas, x, y + 3, x, y + height - 3);
+    canvas_draw_line(canvas, x + 1, y + 2, x + 1, y + height - 2);
+
+    canvas_draw_line(canvas, x + width, y + 3, x + width, y + height - 3);
+    canvas_draw_line(canvas, x + width - 1, y + 2, x + width - 1, y + height - 2);
+
+    canvas_draw_line(canvas, x + 3, y + height, x + width - 3, y + height);
+    canvas_draw_line(canvas, x + 2, y + height - 1, x + width - 2, y + height - 1);
+
+    canvas_draw_dot(canvas, x + 2, y + 2);
+    canvas_draw_dot(canvas, x + 3, y + 2);
+    canvas_draw_dot(canvas, x + 2, y + 3);
+
+    canvas_draw_dot(canvas, x + width - 2, y + 2);
+    canvas_draw_dot(canvas, x + width - 3, y + 2);
+    canvas_draw_dot(canvas, x + width - 2, y + 3);
+
+    canvas_draw_dot(canvas, x + 2, y + height - 2);
+    canvas_draw_dot(canvas, x + 3, y + height - 2);
+    canvas_draw_dot(canvas, x + 2, y + height - 3);
+
+    canvas_draw_dot(canvas, x + width - 2, y + height - 2);
+    canvas_draw_dot(canvas, x + width - 3, y + height - 2);
+    canvas_draw_dot(canvas, x + width - 2, y + height - 3);
 }
 
 void elements_bubble(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
@@ -594,7 +642,6 @@ void elements_text_box(
             line[line_num].height = line_height;
             line[line_num].descender = line_descender;
             if(total_height_min + line_leading_min > height) {
-                line_num--;
                 break;
             }
             total_height_min += line_leading_min;
@@ -640,7 +687,7 @@ void elements_text_box(
             uint8_t free_pixel_num = height - total_height_min;
             uint8_t fill_pixel = 0;
             uint8_t j = 1;
-            line[0].y = line[0].height;
+            line[0].y = y + line[0].height;
             while(fill_pixel < free_pixel_num) {
                 line[j].y = line[j - 1].y + line[j - 1].leading_min + 1;
                 fill_pixel++;

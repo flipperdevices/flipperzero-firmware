@@ -50,6 +50,7 @@ public:
     void on_enter(IrdaApp* app) final;
     bool on_event(IrdaApp* app, IrdaAppEvent* event) final;
     void on_exit(IrdaApp* app) final;
+    bool button_pressed = false;
 };
 
 class IrdaAppSceneLearnEnterName : public IrdaAppScene {
@@ -87,6 +88,13 @@ public:
 private:
     uint32_t submenu_item_selected = 0;
     std::vector<std::string> remote_names;
+};
+
+class IrdaAppSceneAskBack : public IrdaAppScene {
+public:
+    void on_enter(IrdaApp* app) final;
+    bool on_event(IrdaApp* app, IrdaAppEvent* event) final;
+    void on_exit(IrdaApp* app) final;
 };
 
 class IrdaAppSceneEdit : public IrdaAppScene {
@@ -159,7 +167,7 @@ class IrdaAppSceneUniversalTV : public IrdaAppSceneUniversalCommon {
 public:
     void on_enter(IrdaApp* app) final;
     IrdaAppSceneUniversalTV()
-        : IrdaAppSceneUniversalCommon("/ext/irda/universal/tv.ir") {
+        : IrdaAppSceneUniversalCommon("/ext/irda/assets/tv.ir") {
     }
     ~IrdaAppSceneUniversalTV() {
     }
@@ -169,7 +177,7 @@ class IrdaAppSceneUniversalAudio : public IrdaAppSceneUniversalCommon {
 public:
     void on_enter(IrdaApp* app) final;
     IrdaAppSceneUniversalAudio()
-        : IrdaAppSceneUniversalCommon("/ext/irda/universal/audio.ir") {
+        : IrdaAppSceneUniversalCommon("/ext/irda/assets/audio.ir") {
     }
     ~IrdaAppSceneUniversalAudio() {
     }

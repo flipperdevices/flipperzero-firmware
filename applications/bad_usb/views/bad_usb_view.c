@@ -115,7 +115,7 @@ static bool bad_usb_input_callback(InputEvent* event, void* context) {
 }
 
 BadUsb* bad_usb_alloc() {
-    BadUsb* bad_usb = furi_alloc(sizeof(BadUsb));
+    BadUsb* bad_usb = malloc(sizeof(BadUsb));
 
     bad_usb->view = view_alloc();
     view_allocate_model(bad_usb->view, ViewModelTypeLocking, sizeof(BadUsbModel));
@@ -144,7 +144,7 @@ void bad_usb_set_ok_callback(BadUsb* bad_usb, BadUsbOkCallback callback, void* c
         bad_usb->view, (BadUsbModel * model) {
             bad_usb->callback = callback;
             bad_usb->context = context;
-            return false;
+            return true;
         });
 }
 
@@ -153,7 +153,7 @@ void bad_usb_set_file_name(BadUsb* bad_usb, char* name) {
     with_view_model(
         bad_usb->view, (BadUsbModel * model) {
             model->file_name = name;
-            return false;
+            return true;
         });
 }
 
@@ -163,6 +163,6 @@ void bad_usb_set_state(BadUsb* bad_usb, BadUsbState* st) {
         bad_usb->view, (BadUsbModel * model) {
             memcpy(&(model->state), st, sizeof(BadUsbState));
             model->anim_frame ^= 1;
-            return false;
+            return true;
         });
 }

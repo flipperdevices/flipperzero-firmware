@@ -8,24 +8,30 @@
 /***************************** NFC Worker API *******************************/
 
 NfcWorker* nfc_worker_alloc() {
-    NfcWorker* nfc_worker = furi_alloc(sizeof(NfcWorker));
+    NfcWorker* nfc_worker = malloc(sizeof(NfcWorker));
+
     // Worker thread attributes
-    nfc_worker->thread_attr.name = "NfcWorker";
-    nfc_worker->thread_attr.stack_size = 8192;
+    nfc_worker->thread = furi_thread_alloc();
+    furi_thread_set_name(nfc_worker->thread, "NfcWorker");
+    furi_thread_set_stack_size(nfc_worker->thread, 8192);
+    furi_thread_set_callback(nfc_worker->thread, nfc_worker_task);
+    furi_thread_set_context(nfc_worker->thread, nfc_worker);
+
     nfc_worker->callback = NULL;
     nfc_worker->context = NULL;
+
     // Initialize rfal
-    if(!furi_hal_nfc_is_busy()) {
-        nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
-    } else {
-        nfc_worker_change_state(nfc_worker, NfcWorkerStateBroken);
+    while(furi_hal_nfc_is_busy()) {
+        osDelay(10);
     }
+    nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
 
     return nfc_worker;
 }
 
 void nfc_worker_free(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
+    furi_thread_free(nfc_worker->thread);
     free(nfc_worker);
 }
 
@@ -41,7 +47,7 @@ void nfc_worker_start(
     void* context) {
     furi_assert(nfc_worker);
     furi_assert(dev_data);
-    while(nfc_worker->state != NfcWorkerStateReady) {
+    while(furi_hal_nfc_is_busy()) {
         osDelay(10);
     }
 
@@ -49,7 +55,7 @@ void nfc_worker_start(
     nfc_worker->context = context;
     nfc_worker->dev_data = dev_data;
     nfc_worker_change_state(nfc_worker, state);
-    nfc_worker->thread = osThreadNew(nfc_worker_task, nfc_worker, &nfc_worker->thread_attr);
+    furi_thread_start(nfc_worker->thread);
 }
 
 void nfc_worker_stop(NfcWorker* nfc_worker) {
@@ -57,8 +63,9 @@ void nfc_worker_stop(NfcWorker* nfc_worker) {
     if(nfc_worker->state == NfcWorkerStateBroken || nfc_worker->state == NfcWorkerStateReady) {
         return;
     }
-
+    furi_hal_nfc_stop();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateStop);
+    furi_thread_join(nfc_worker->thread);
 }
 
 void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state) {
@@ -67,7 +74,7 @@ void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state) {
 
 /***************************** NFC Worker Thread *******************************/
 
-void nfc_worker_task(void* context) {
+int32_t nfc_worker_task(void* context) {
     NfcWorker* nfc_worker = context;
 
     furi_hal_power_insomnia_enter();
@@ -93,7 +100,8 @@ void nfc_worker_task(void* context) {
     furi_hal_nfc_deactivate();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
     furi_hal_power_insomnia_exit();
-    osThreadExit();
+
+    return 0;
 }
 
 void nfc_worker_detect(NfcWorker* nfc_worker) {
@@ -140,13 +148,37 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
     }
 }
 
+bool nfc_worker_emulate_uid_callback(
+    uint8_t* buff_rx,
+    uint16_t buff_rx_len,
+    uint8_t* buff_tx,
+    uint16_t* buff_tx_len,
+    uint32_t* data_type,
+    void* context) {
+    furi_assert(context);
+    NfcWorker* nfc_worker = context;
+    NfcReaderRequestData* reader_data = &nfc_worker->dev_data->reader_data;
+    reader_data->size = buff_rx_len / 8;
+    if(reader_data->size > 0) {
+        memcpy(reader_data->data, buff_rx, reader_data->size);
+        if(nfc_worker->callback) {
+            nfc_worker->callback(nfc_worker->context);
+        }
+    }
+    return true;
+}
+
 void nfc_worker_emulate(NfcWorker* nfc_worker) {
     NfcDeviceCommonData* data = &nfc_worker->dev_data->nfc_data;
     while(nfc_worker->state == NfcWorkerStateEmulate) {
-        if(furi_hal_nfc_listen(data->uid, data->uid_len, data->atqa, data->sak, false, 100)) {
-            FURI_LOG_D(TAG, "Reader detected");
-        }
-        osDelay(10);
+        furi_hal_nfc_emulate_nfca(
+            data->uid,
+            data->uid_len,
+            data->atqa,
+            data->sak,
+            nfc_worker_emulate_uid_callback,
+            nfc_worker,
+            1000);
     }
 }
 
@@ -603,65 +635,26 @@ void nfc_worker_read_mifare_ul(NfcWorker* nfc_worker) {
 }
 
 void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
-    ReturnCode err;
-    uint8_t tx_buff[255] = {};
-    uint16_t tx_len = 0;
-    uint8_t* rx_buff;
-    uint16_t* rx_len;
-    NfcDeviceData* data = nfc_worker->dev_data;
+    NfcDeviceCommonData* nfc_common = &nfc_worker->dev_data->nfc_data;
     MifareUlDevice mf_ul_emulate;
-    // Setup emulation parameters from mifare ultralight data structure
-    mf_ul_prepare_emulation(&mf_ul_emulate, &data->mf_ul_data);
+    mf_ul_prepare_emulation(&mf_ul_emulate, &nfc_worker->dev_data->mf_ul_data);
     while(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
-        // WARNING
-        // DO NOT call any blocking functions (e.g. FURI_LOG_*) in this loop,
-        // as any delay will negatively affect the stability of the emulation.
-        if(furi_hal_nfc_listen(
-               data->nfc_data.uid,
-               data->nfc_data.uid_len,
-               data->nfc_data.atqa,
-               data->nfc_data.sak,
-               true,
-               200)) {
-            if(furi_hal_nfc_get_first_frame(&rx_buff, &rx_len)) {
-                // Data exchange loop
-                while(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
-                    tx_len = mf_ul_prepare_emulation_response(
-                        rx_buff, *rx_len, tx_buff, &mf_ul_emulate);
-                    if(tx_len > 0) {
-                        if(tx_len < 8) {
-                            err = furi_hal_nfc_raw_bitstream_exchange(
-                                tx_buff, tx_len, &rx_buff, &rx_len, false);
-                            *rx_len /= 8;
-                        } else {
-                            err = furi_hal_nfc_data_exchange(
-                                tx_buff, tx_len / 8, &rx_buff, &rx_len, false);
-                        }
-                        if(err == ERR_NONE) {
-                            continue;
-                        } else {
-                            FURI_LOG_D(TAG, "Communication error: %d", err);
-                            break;
-                        }
-                    } else {
-                        furi_hal_nfc_deactivate();
-                        break;
-                    }
-                }
-            } else {
-                FURI_LOG_D(TAG, "Error in 1st data exchange");
-                furi_hal_nfc_deactivate();
-            }
-        }
+        furi_hal_nfc_emulate_nfca(
+            nfc_common->uid,
+            nfc_common->uid_len,
+            nfc_common->atqa,
+            nfc_common->sak,
+            mf_ul_prepare_emulation_response,
+            &mf_ul_emulate,
+            5000);
         // Check if data was modified
         if(mf_ul_emulate.data_changed) {
             nfc_worker->dev_data->mf_ul_data = mf_ul_emulate.data;
             if(nfc_worker->callback) {
                 nfc_worker->callback(nfc_worker->context);
             }
+            mf_ul_emulate.data_changed = false;
         }
-        FURI_LOG_D(TAG, "Can't find reader");
-        osThreadYield();
     }
 }
 

@@ -7,7 +7,7 @@ struct BankCard {
 };
 
 BankCard* bank_card_alloc() {
-    BankCard* bank_card = furi_alloc(sizeof(BankCard));
+    BankCard* bank_card = malloc(sizeof(BankCard));
     bank_card->widget = widget_alloc();
     return bank_card;
 }
@@ -25,7 +25,7 @@ View* bank_card_get_view(BankCard* bank_card) {
 
 void bank_card_clear(BankCard* bank_card) {
     furi_assert(bank_card);
-    widget_clear(bank_card->widget);
+    widget_reset(bank_card->widget);
 }
 
 void bank_card_set_name(BankCard* bank_card, char* name) {

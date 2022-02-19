@@ -258,7 +258,7 @@ static void animation_manager_replace_current_animation(
 }
 
 AnimationManager* animation_manager_alloc(void) {
-    AnimationManager* animation_manager = furi_alloc(sizeof(AnimationManager));
+    AnimationManager* animation_manager = malloc(sizeof(AnimationManager));
     animation_manager->animation_view = bubble_animation_view_alloc();
     animation_manager->view_stack = view_stack_alloc();
     View* animation_view = bubble_animation_get_view(animation_manager->animation_view);
@@ -406,6 +406,11 @@ static StorageAnimation*
 
     furi_assert(selected);
     return selected;
+}
+
+bool animation_manager_is_animation_loaded(AnimationManager* animation_manager) {
+    furi_assert(animation_manager);
+    return animation_manager->current_animation;
 }
 
 void animation_manager_unload_and_stall_animation(AnimationManager* animation_manager) {

@@ -6,7 +6,7 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <notification/notification_messages.h>
-#include <lib/flipper_file/flipper_file.h>
+#include <flipper_format/flipper_format.h>
 #include "../notification/notification.h"
 #include "views/subghz_receiver.h"
 
@@ -198,7 +198,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
     furi_assert(file_path);
 
     Storage* storage = furi_record_open("storage");
-    FlipperFile* flipper_file = flipper_file_alloc(storage);
+    FlipperFormat* flipper_format = flipper_format_file_alloc(storage);
 
     // Load device data
     bool loaded = false;
@@ -209,12 +209,12 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
     uint32_t version;
 
     do {
-        if(!flipper_file_open_existing(flipper_file, string_get_cstr(path))) {
+        if(!flipper_format_file_open_existing(flipper_format, string_get_cstr(path))) {
             FURI_LOG_E(
                 SUBGHZ_PARSER_TAG, "Unable to open file for read: %s", string_get_cstr(path));
             break;
         }
-        if(!flipper_file_read_header(flipper_file, temp_str, &version)) {
+        if(!flipper_format_read_header(flipper_format, temp_str, &version)) {
             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Missing or incorrect header");
             break;
         }
@@ -227,13 +227,13 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             break;
         }
 
-        if(!flipper_file_read_uint32(
-               flipper_file, "Frequency", (uint32_t*)&subghz->txrx->frequency, 1)) {
+        if(!flipper_format_read_uint32(
+               flipper_format, "Frequency", (uint32_t*)&subghz->txrx->frequency, 1)) {
             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Missing Frequency");
             break;
         }
 
-        if(!flipper_file_read_string(flipper_file, "Preset", temp_str)) {
+        if(!flipper_format_read_string(flipper_format, "Preset", temp_str)) {
             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Missing Preset");
             break;
         }
@@ -241,7 +241,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             break;
         }
 
-        if(!flipper_file_read_string(flipper_file, "Protocol", temp_str)) {
+        if(!flipper_format_read_string(flipper_format, "Protocol", temp_str)) {
             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Missing Protocol");
             break;
         }
@@ -253,7 +253,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             break;
         }
         if(!subghz->txrx->protocol_result->to_load_protocol_from_file(
-               flipper_file, subghz->txrx->protocol_result, string_get_cstr(path))) {
+               flipper_format, subghz->txrx->protocol_result, string_get_cstr(path))) {
             break;
         }
         loaded = true;
@@ -265,8 +265,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
     string_clear(temp_str);
     string_clear(path);
 
-    flipper_file_close(flipper_file);
-    flipper_file_free(flipper_file);
+    flipper_format_free(flipper_format);
 
     furi_record_close("storage");
 
@@ -284,7 +283,7 @@ bool subghz_get_next_name_file(SubGhz* subghz) {
     if(strcmp(subghz->file_name, "")) {
         //get the name of the next free file
         storage_get_next_filename(
-            storage, SUBGHZ_RAW_PATH_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION, temp_str);
+            storage, SUBGHZ_RAW_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION, temp_str);
 
         strcpy(subghz->file_name, string_get_cstr(temp_str));
         res = true;
@@ -301,7 +300,7 @@ bool subghz_save_protocol_to_file(SubGhz* subghz, const char* dev_name) {
     furi_assert(subghz->txrx->protocol_result);
 
     Storage* storage = furi_record_open("storage");
-    FlipperFile* flipper_file = flipper_file_alloc(storage);
+    FlipperFormat* flipper_format = flipper_format_file_alloc(storage);
     string_t dev_file_name;
     string_init(dev_file_name);
     string_t temp_str;
@@ -319,33 +318,27 @@ bool subghz_save_protocol_to_file(SubGhz* subghz, const char* dev_name) {
             dialog_message_show_storage_error(subghz->dialogs, "Cannot create\nfolder");
             break;
         }
-        // Create saved directory if necessary
-        if(!storage_simply_mkdir(storage, SUBGHZ_APP_PATH_FOLDER)) {
-            dialog_message_show_storage_error(subghz->dialogs, "Cannot create\nfolder");
-            break;
-        }
 
         // First remove subghz device file if it was saved
-        string_printf(
-            dev_file_name, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, dev_name, SUBGHZ_APP_EXTENSION);
+        string_printf(dev_file_name, "%s/%s%s", SUBGHZ_APP_FOLDER, dev_name, SUBGHZ_APP_EXTENSION);
 
         if(!storage_simply_remove(storage, string_get_cstr(dev_file_name))) {
             break;
         }
 
         // Open file
-        if(!flipper_file_open_always(flipper_file, string_get_cstr(dev_file_name))) {
+        if(!flipper_format_file_open_always(flipper_format, string_get_cstr(dev_file_name))) {
             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unable to open file for write: %s", dev_file_name);
             break;
         }
 
-        if(!flipper_file_write_header_cstr(
-               flipper_file, SUBGHZ_KEY_FILE_TYPE, SUBGHZ_KEY_FILE_VERSION)) {
+        if(!flipper_format_write_header_cstr(
+               flipper_format, SUBGHZ_KEY_FILE_TYPE, SUBGHZ_KEY_FILE_VERSION)) {
             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unable to add header");
             break;
         }
 
-        if(!flipper_file_write_uint32(flipper_file, "Frequency", &subghz->txrx->frequency, 1)) {
+        if(!flipper_format_write_uint32(flipper_format, "Frequency", &subghz->txrx->frequency, 1)) {
             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unable to add Frequency");
             break;
         }
@@ -353,13 +346,13 @@ bool subghz_save_protocol_to_file(SubGhz* subghz, const char* dev_name) {
         if(!subghz_get_preset_name(subghz, temp_str)) {
             break;
         }
-        if(!flipper_file_write_string_cstr(flipper_file, "Preset", string_get_cstr(temp_str))) {
+        if(!flipper_format_write_string_cstr(flipper_format, "Preset", string_get_cstr(temp_str))) {
             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unable to add Preset");
             break;
         }
 
         if(!subghz->txrx->protocol_result->to_save_file(
-               subghz->txrx->protocol_result, flipper_file)) {
+               subghz->txrx->protocol_result, flipper_format)) {
             break;
         }
 
@@ -369,8 +362,7 @@ bool subghz_save_protocol_to_file(SubGhz* subghz, const char* dev_name) {
     string_clear(temp_str);
     string_clear(dev_file_name);
 
-    flipper_file_close(flipper_file);
-    flipper_file_free(flipper_file);
+    flipper_format_free(flipper_format);
 
     furi_record_close("storage");
 
@@ -386,7 +378,7 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
     // Input events and views are managed by file_select
     bool res = dialog_file_select_show(
         subghz->dialogs,
-        SUBGHZ_APP_PATH_FOLDER,
+        SUBGHZ_APP_FOLDER,
         SUBGHZ_APP_EXTENSION,
         subghz->file_name,
         sizeof(subghz->file_name),
@@ -394,7 +386,7 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
 
     if(res) {
         string_printf(
-            file_name, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION);
+            file_name, "%s/%s%s", SUBGHZ_APP_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION);
 
         res = subghz_key_load(subghz, string_get_cstr(file_name));
     }
@@ -413,10 +405,10 @@ bool subghz_rename_file(SubGhz* subghz) {
     Storage* storage = furi_record_open("storage");
 
     string_init_printf(
-        old_path, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, subghz->file_name_tmp, SUBGHZ_APP_EXTENSION);
+        old_path, "%s/%s%s", SUBGHZ_APP_FOLDER, subghz->file_name_tmp, SUBGHZ_APP_EXTENSION);
 
     string_init_printf(
-        new_path, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION);
+        new_path, "%s/%s%s", SUBGHZ_APP_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION);
 
     FS_Error fs_result =
         storage_common_rename(storage, string_get_cstr(old_path), string_get_cstr(new_path));
@@ -439,7 +431,7 @@ bool subghz_delete_file(SubGhz* subghz) {
     Storage* storage = furi_record_open("storage");
     string_t file_path;
     string_init_printf(
-        file_path, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, subghz->file_name_tmp, SUBGHZ_APP_EXTENSION);
+        file_path, "%s/%s%s", SUBGHZ_APP_FOLDER, subghz->file_name_tmp, SUBGHZ_APP_EXTENSION);
     bool result = storage_simply_remove(storage, string_get_cstr(file_path));
     furi_record_close("storage");
 

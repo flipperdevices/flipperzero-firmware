@@ -16,9 +16,9 @@ static void bt_draw_statusbar_callback(Canvas* canvas, void* context) {
 
     Bt* bt = context;
     if(bt->status == BtStatusAdvertising) {
-        canvas_draw_icon(canvas, 0, 0, &I_Bluetooth_5x8);
+        canvas_draw_icon(canvas, 0, 0, &I_Bluetooth_Idle_5x8);
     } else if(bt->status == BtStatusConnected) {
-        canvas_draw_icon(canvas, 0, 0, &I_BT_Pair_9x8);
+        canvas_draw_icon(canvas, 0, 0, &I_Bluetooth_Connected_16x8);
     }
 }
 
@@ -101,7 +101,7 @@ static void bt_battery_level_changed_callback(const void* _event, void* context)
 }
 
 Bt* bt_alloc() {
-    Bt* bt = furi_alloc(sizeof(Bt));
+    Bt* bt = malloc(sizeof(Bt));
     // Init default maximum packet size
     bt->max_packet_size = FURI_HAL_BT_SERIAL_PACKET_SIZE_MAX;
     bt->profile = BtProfileSerial;
@@ -199,13 +199,18 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
         if(bt->profile == BtProfileSerial) {
             // Open RPC session
-            FURI_LOG_I(TAG, "Open RPC connection");
             bt->rpc_session = rpc_session_open(bt->rpc);
-            rpc_session_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback);
-            rpc_session_set_buffer_is_empty_callback(
-                bt->rpc_session, furi_hal_bt_serial_notify_buffer_is_empty);
-            rpc_session_set_context(bt->rpc_session, bt);
-            furi_hal_bt_serial_set_event_callback(RPC_BUFFER_SIZE, bt_serial_event_callback, bt);
+            if(bt->rpc_session) {
+                FURI_LOG_I(TAG, "Open RPC connection");
+                rpc_session_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback);
+                rpc_session_set_buffer_is_empty_callback(
+                    bt->rpc_session, furi_hal_bt_serial_notify_buffer_is_empty);
+                rpc_session_set_context(bt->rpc_session, bt);
+                furi_hal_bt_serial_set_event_callback(
+                    RPC_BUFFER_SIZE, bt_serial_event_callback, bt);
+            } else {
+                FURI_LOG_W(TAG, "RPC is busy, failed to open new session");
+            }
         }
         // Update battery level
         PowerInfo info;
@@ -257,10 +262,10 @@ static void bt_on_key_storage_change_callback(uint8_t* addr, uint16_t size, void
 
 static void bt_statusbar_update(Bt* bt) {
     if(bt->status == BtStatusAdvertising) {
-        view_port_set_width(bt->statusbar_view_port, icon_get_width(&I_Bluetooth_5x8));
+        view_port_set_width(bt->statusbar_view_port, icon_get_width(&I_Bluetooth_Idle_5x8));
         view_port_enabled_set(bt->statusbar_view_port, true);
     } else if(bt->status == BtStatusConnected) {
-        view_port_set_width(bt->statusbar_view_port, icon_get_width(&I_BT_Pair_9x8));
+        view_port_set_width(bt->statusbar_view_port, icon_get_width(&I_Bluetooth_Connected_16x8));
         view_port_enabled_set(bt->statusbar_view_port, true);
     } else {
         view_port_enabled_set(bt->statusbar_view_port, false);

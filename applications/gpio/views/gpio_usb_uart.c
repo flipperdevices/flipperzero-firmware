@@ -102,7 +102,7 @@ static bool gpio_usb_uart_input_callback(InputEvent* event, void* context) {
 }
 
 GpioUsbUart* gpio_usb_uart_alloc() {
-    GpioUsbUart* usb_uart = furi_alloc(sizeof(GpioUsbUart));
+    GpioUsbUart* usb_uart = malloc(sizeof(GpioUsbUart));
 
     usb_uart->view = view_alloc();
     view_allocate_model(usb_uart->view, ViewModelTypeLocking, sizeof(GpioUsbUartModel));
@@ -151,6 +151,6 @@ void gpio_usb_uart_update_state(GpioUsbUart* instance, UsbUartConfig* cfg, UsbUa
             model->rx_active = (model->rx_cnt != st->rx_cnt);
             model->tx_cnt = st->tx_cnt;
             model->rx_cnt = st->rx_cnt;
-            return false;
+            return true;
         });
 }

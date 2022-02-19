@@ -1,4 +1,5 @@
 #include "u2f_app_i.h"
+#include "u2f_data.h"
 #include <furi.h>
 #include <furi_hal.h>
 
@@ -21,7 +22,7 @@ static void u2f_app_tick_event_callback(void* context) {
 }
 
 U2fApp* u2f_app_alloc() {
-    U2fApp* app = furi_alloc(sizeof(U2fApp));
+    U2fApp* app = malloc(sizeof(U2fApp));
 
     app->gui = furi_record_open("gui");
     app->notifications = furi_record_open("notification");
@@ -39,11 +40,19 @@ U2fApp* u2f_app_alloc() {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
+    // Custom Widget
+    app->widget = widget_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, U2fAppViewError, widget_get_view(app->widget));
+
     app->u2f_view = u2f_view_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, U2fAppViewMain, u2f_view_get_view(app->u2f_view));
 
-    scene_manager_next_scene(app->scene_manager, U2fAppViewMain);
+    if(u2f_data_check(true)) {
+        scene_manager_next_scene(app->scene_manager, U2fSceneMain);
+    } else {
+        scene_manager_next_scene(app->scene_manager, U2fSceneError);
+    }
 
     return app;
 }
@@ -54,6 +63,10 @@ void u2f_app_free(U2fApp* app) {
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, U2fAppViewMain);
     u2f_view_free(app->u2f_view);
+
+    // Custom Widget
+    view_dispatcher_remove_view(app->view_dispatcher, U2fAppViewError);
+    widget_free(app->widget);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
