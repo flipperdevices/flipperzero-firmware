@@ -243,7 +243,7 @@ void subghz_view_receiver_exit(void* context) {
 }
 
 SubGhzViewReceiver* subghz_view_receiver_alloc() {
-    SubGhzViewReceiver* subghz_receiver = furi_alloc(sizeof(SubGhzViewReceiver));
+    SubGhzViewReceiver* subghz_receiver = malloc(sizeof(SubGhzViewReceiver));
 
     // View allocation and configuration
     subghz_receiver->view = view_alloc();
@@ -260,7 +260,7 @@ SubGhzViewReceiver* subghz_view_receiver_alloc() {
             string_init(model->frequency_str);
             string_init(model->preset_str);
             string_init(model->history_stat_str);
-            model->history = furi_alloc(sizeof(SubGhzReceiverHistory));
+            model->history = malloc(sizeof(SubGhzReceiverHistory));
             SubGhzReceiverMenuItemArray_init(model->history->data);
             return true;
         });

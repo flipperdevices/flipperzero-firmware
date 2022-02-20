@@ -75,14 +75,14 @@ const SubGhzProtocol subghz_protocol_nero_sketch = {
 
 void* subghz_protocol_encoder_nero_sketch_alloc(SubGhzEnvironment* environment) {
     SubGhzProtocolEncoderNeroSketch* instance =
-        furi_alloc(sizeof(SubGhzProtocolEncoderNeroSketch));
+        malloc(sizeof(SubGhzProtocolEncoderNeroSketch));
 
     instance->base.protocol = &subghz_protocol_nero_sketch;
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 256;
-    instance->encoder.upload = furi_alloc(instance->encoder.size_upload * sizeof(LevelDuration));
+    instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_runing = false;
     return instance;
 }
@@ -186,7 +186,7 @@ LevelDuration subghz_protocol_encoder_nero_sketch_yield(void* context) {
 
 void* subghz_protocol_decoder_nero_sketch_alloc(SubGhzEnvironment* environment) {
     SubGhzProtocolDecoderNeroSketch* instance =
-        furi_alloc(sizeof(SubGhzProtocolDecoderNeroSketch));
+        malloc(sizeof(SubGhzProtocolDecoderNeroSketch));
     instance->base.protocol = &subghz_protocol_nero_sketch;
     instance->generic.protocol_name = instance->base.protocol->name;
     return instance;
@@ -333,7 +333,7 @@ void subghz_protocol_decoder_nero_sketch_serialization(void* context, string_t o
         code_found_reverse_lo);
 }
 
-bool subghz_protocol_nero_sketch_save_file(void* context, FlipperFile* flipper_file) {
+bool subghz_protocol_nero_sketch_save_file(void* context, FlipperFormat* flipper_file) {
     furi_assert(context);
     SubGhzProtocolDecoderNeroSketch* instance = context;
     return subghz_block_generic_save_file(&instance->generic, flipper_file);
@@ -341,7 +341,7 @@ bool subghz_protocol_nero_sketch_save_file(void* context, FlipperFile* flipper_f
 
 bool subghz_protocol_nero_sketch_load_file(
     void* context,
-    FlipperFile* flipper_file,
+    FlipperFormat* flipper_file,
     const char* file_path) {
     furi_assert(context);
     SubGhzProtocolEncoderNeroSketch* instance = context;

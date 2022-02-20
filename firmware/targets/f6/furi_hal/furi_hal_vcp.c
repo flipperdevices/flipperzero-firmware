@@ -1,5 +1,5 @@
 #include <furi_hal_usb_cdc_i.h>
-#include <furi_hal_console.h>
+#include <furi_hal.h>
 #include <furi.h>
 #include <stream_buffer.h>
 
@@ -58,14 +58,14 @@ static const uint8_t ascii_soh = 0x01;
 static const uint8_t ascii_eot = 0x04;
 
 void furi_hal_vcp_init() {
-    vcp = furi_alloc(sizeof(FuriHalVcp));
+    vcp = malloc(sizeof(FuriHalVcp));
     vcp->connected = false;
 
     vcp->tx_stream = xStreamBufferCreate(VCP_TX_BUF_SIZE, 1);
     vcp->rx_stream = xStreamBufferCreate(VCP_RX_BUF_SIZE, 1);
 
     vcp->thread = furi_thread_alloc();
-    furi_thread_set_name(vcp->thread, "VcpWorker");
+    furi_thread_set_name(vcp->thread, "VcpDriver");
     furi_thread_set_stack_size(vcp->thread, 1024);
     furi_thread_set_callback(vcp->thread, vcp_worker);
     furi_thread_start(vcp->thread);
@@ -77,7 +77,9 @@ static int32_t vcp_worker(void* context) {
     bool enabled = true;
     bool tx_idle = false;
     size_t missed_rx = 0;
+    uint8_t last_tx_pkt_len = 0;
 
+    furi_hal_usb_set_config(&usb_cdc_single);
     furi_hal_cdc_set_callbacks(VCP_IF_NUM, &cdc_cb, NULL);
 
     while(1) {
@@ -184,8 +186,16 @@ static int32_t vcp_worker(void* context) {
             if(len > 0) { // Some data left in Tx buffer. Sending it now
                 tx_idle = false;
                 furi_hal_cdc_send(VCP_IF_NUM, vcp->data_buffer, len);
-            } else { // There is nothing to send. Set flag to start next transfer instantly
-                tx_idle = true;
+                last_tx_pkt_len = len;
+            } else { // There is nothing to send.
+                if(last_tx_pkt_len == 64) {
+                    // Send extra zero-length packet if last packet len is 64 to indicate transfer end
+                    furi_hal_cdc_send(VCP_IF_NUM, NULL, 0);
+                } else {
+                    // Set flag to start next transfer instantly
+                    tx_idle = true;
+                }
+                last_tx_pkt_len = 0;
             }
         }
     }
@@ -216,7 +226,7 @@ size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeo
 
         size_t len = xStreamBufferReceive(vcp->rx_stream, buffer, batch_size, timeout);
 #ifdef FURI_HAL_USB_VCP_DEBUG
-        FURI_LOG_D(TAG, "%u ", batch_size);
+        FURI_LOG_D(TAG, "rx %u ", batch_size);
 #endif
         if(len == 0) break;
         osThreadFlagsSet(furi_thread_get_thread_id(vcp->thread), VcpEvtStreamRx);
@@ -251,7 +261,7 @@ void furi_hal_vcp_tx(const uint8_t* buffer, size_t size) {
         xStreamBufferSend(vcp->tx_stream, buffer, batch_size, osWaitForever);
         osThreadFlagsSet(furi_thread_get_thread_id(vcp->thread), VcpEvtStreamTx);
 #ifdef FURI_HAL_USB_VCP_DEBUG
-        FURI_LOG_D(TAG, "%u ", batch_size);
+        FURI_LOG_D(TAG, "tx %u", batch_size);
 #endif
 
         size -= batch_size;

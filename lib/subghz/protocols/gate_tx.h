@@ -25,8 +25,8 @@ void subghz_protocol_decoder_gate_tx_free(void* context);
 void subghz_protocol_decoder_gate_tx_reset(void* context);
 void subghz_protocol_decoder_gate_tx_feed(void* context, bool level, uint32_t duration);
 void subghz_protocol_decoder_gate_tx_serialization(void* context, string_t output);
-bool subghz_protocol_gate_tx_save_file(void* context, FlipperFile* flipper_file);
+bool subghz_protocol_gate_tx_save_file(void* context, FlipperFormat* flipper_file);
 bool subghz_protocol_gate_tx_load_file(
     void* context,
-    FlipperFile* flipper_file,
+    FlipperFormat* flipper_file,
     const char* file_path);

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <lib/flipper_file/flipper_file.h>
+#include <lib/flipper_format/flipper_format.h>
 
 typedef struct SubGhzBlockGeneric SubGhzBlockGeneric;
 
@@ -18,6 +18,6 @@ struct SubGhzBlockGeneric {
 };
 
 
-bool subghz_block_generic_load_file(SubGhzBlockGeneric* instance, FlipperFile* flipper_file);
+bool subghz_block_generic_load_file(SubGhzBlockGeneric* instance, FlipperFormat* flipper_file);
 
-bool subghz_block_generic_save_file(SubGhzBlockGeneric* instance, FlipperFile* flipper_file);
+bool subghz_block_generic_save_file(SubGhzBlockGeneric* instance, FlipperFormat* flipper_file);

@@ -76,7 +76,7 @@ const SubGhzProtocol subghz_protocol_star_line = {
 };
 
 void* subghz_protocol_decoder_star_line_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolDecoderStarLine* instance = furi_alloc(sizeof(SubGhzProtocolDecoderStarLine));
+    SubGhzProtocolDecoderStarLine* instance = malloc(sizeof(SubGhzProtocolDecoderStarLine));
     instance->base.protocol = &subghz_protocol_star_line;
     instance->generic.protocol_name = instance->base.protocol->name;
     instance->keystore = subghz_environment_get_keystore(environment);

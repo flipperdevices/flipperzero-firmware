@@ -80,7 +80,7 @@ const SubGhzProtocol subghz_protocol_keeloq = {
 };
 
 void* subghz_protocol_encoder_keeloq_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolEncoderKeeloq* instance = furi_alloc(sizeof(SubGhzProtocolEncoderKeeloq));
+    SubGhzProtocolEncoderKeeloq* instance = malloc(sizeof(SubGhzProtocolEncoderKeeloq));
 
     instance->base.protocol = &subghz_protocol_keeloq;
     instance->generic.protocol_name = instance->base.protocol->name;
@@ -88,7 +88,7 @@ void* subghz_protocol_encoder_keeloq_alloc(SubGhzEnvironment* environment) {
 
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 256;
-    instance->encoder.upload = furi_alloc(instance->encoder.size_upload * sizeof(LevelDuration));
+    instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_runing = false;
     return instance;
 }
@@ -256,7 +256,7 @@ LevelDuration subghz_protocol_encoder_keeloq_yield(void* context) {
 }
 
 void* subghz_protocol_decoder_keeloq_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolDecoderKeeloq* instance = furi_alloc(sizeof(SubGhzProtocolDecoderKeeloq));
+    SubGhzProtocolDecoderKeeloq* instance = malloc(sizeof(SubGhzProtocolDecoderKeeloq));
     instance->base.protocol = &subghz_protocol_keeloq;
     instance->generic.protocol_name = instance->base.protocol->name;
     instance->keystore = subghz_environment_get_keystore(environment);
@@ -609,7 +609,7 @@ void subghz_protocol_decoder_keeloq_serialization(void* context, string_t output
         instance->generic.serial);
 }
 
-bool subghz_protocol_keeloq_save_file(void* context, FlipperFile* flipper_file) {
+bool subghz_protocol_keeloq_save_file(void* context, FlipperFormat* flipper_file) {
     furi_assert(context);
     SubGhzProtocolDecoderKeeloq* instance = context;
     return subghz_block_generic_save_file(&instance->generic, flipper_file);
@@ -617,7 +617,7 @@ bool subghz_protocol_keeloq_save_file(void* context, FlipperFile* flipper_file) 
 
 bool subghz_protocol_keeloq_load_file(
     void* context,
-    FlipperFile* flipper_file,
+    FlipperFormat* flipper_file,
     const char* file_path) {
     furi_assert(context);
     SubGhzProtocolEncoderKeeloq* instance = context;

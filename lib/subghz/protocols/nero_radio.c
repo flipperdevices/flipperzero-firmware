@@ -69,14 +69,14 @@ const SubGhzProtocol subghz_protocol_nero_radio = {
 };
 
 void* subghz_protocol_encoder_nero_radio_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolEncoderNeroRadio* instance = furi_alloc(sizeof(SubGhzProtocolEncoderNeroRadio));
+    SubGhzProtocolEncoderNeroRadio* instance = malloc(sizeof(SubGhzProtocolEncoderNeroRadio));
 
     instance->base.protocol = &subghz_protocol_nero_radio;
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 256;
-    instance->encoder.upload = furi_alloc(instance->encoder.size_upload * sizeof(LevelDuration));
+    instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_runing = false;
     return instance;
 }
@@ -189,7 +189,7 @@ LevelDuration subghz_protocol_encoder_nero_radio_yield(void* context) {
 }
 
 void* subghz_protocol_decoder_nero_radio_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolDecoderNeroRadio* instance = furi_alloc(sizeof(SubGhzProtocolDecoderNeroRadio));
+    SubGhzProtocolDecoderNeroRadio* instance = malloc(sizeof(SubGhzProtocolDecoderNeroRadio));
     instance->base.protocol = &subghz_protocol_nero_radio;
     instance->generic.protocol_name = instance->base.protocol->name;
     return instance;
@@ -345,7 +345,7 @@ void subghz_protocol_decoder_nero_radio_serialization(void* context, string_t ou
         code_found_reverse_lo);
 }
 
-bool subghz_protocol_nero_radio_save_file(void* context, FlipperFile* flipper_file) {
+bool subghz_protocol_nero_radio_save_file(void* context, FlipperFormat* flipper_file) {
     furi_assert(context);
     SubGhzProtocolDecoderNeroRadio* instance = context;
     return subghz_block_generic_save_file(&instance->generic, flipper_file);
@@ -353,7 +353,7 @@ bool subghz_protocol_nero_radio_save_file(void* context, FlipperFile* flipper_fi
 
 bool subghz_protocol_nero_radio_load_file(
     void* context,
-    FlipperFile* flipper_file,
+    FlipperFormat* flipper_file,
     const char* file_path) {
     furi_assert(context);
     SubGhzProtocolEncoderNeroRadio* instance = context;

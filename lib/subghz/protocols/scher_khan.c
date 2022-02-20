@@ -75,7 +75,7 @@ const SubGhzProtocol subghz_protocol_scher_khan = {
 };
 
 void* subghz_protocol_decoder_scher_khan_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolDecoderScherKhan* instance = furi_alloc(sizeof(SubGhzProtocolDecoderScherKhan));
+    SubGhzProtocolDecoderScherKhan* instance = malloc(sizeof(SubGhzProtocolDecoderScherKhan));
     instance->base.protocol = &subghz_protocol_scher_khan;
     instance->generic.protocol_name = instance->base.protocol->name;
 

@@ -25,8 +25,8 @@ void subghz_protocol_decoder_nice_flo_free(void* context);
 void subghz_protocol_decoder_nice_flo_reset(void* context);
 void subghz_protocol_decoder_nice_flo_feed(void* context, bool level, uint32_t duration);
 void subghz_protocol_decoder_nice_flo_serialization(void* context, string_t output);
-bool subghz_protocol_nice_flo_save_file(void* context, FlipperFile* flipper_file);
+bool subghz_protocol_nice_flo_save_file(void* context, FlipperFormat* flipper_file);
 bool subghz_protocol_nice_flo_load_file(
     void* context,
-    FlipperFile* flipper_file,
+    FlipperFormat* flipper_file,
     const char* file_path);

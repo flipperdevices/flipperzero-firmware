@@ -7,7 +7,7 @@ struct SubGhzEnvironment {
 };
 
 SubGhzEnvironment* subghz_environment_alloc() {
-    SubGhzEnvironment* instance = furi_alloc(sizeof(SubGhzEnvironment));
+    SubGhzEnvironment* instance = malloc(sizeof(SubGhzEnvironment));
 
     instance->keystore = subghz_keystore_alloc();
     instance->came_atomo_rainbow_table_file_name = NULL;

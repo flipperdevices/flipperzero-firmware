@@ -134,7 +134,7 @@ void subghz_view_transmitter_exit(void* context) {
 }
 
 SubGhzViewTransmitter* subghz_view_transmitter_alloc() {
-    SubGhzViewTransmitter* subghz_transmitter = furi_alloc(sizeof(SubGhzViewTransmitter));
+    SubGhzViewTransmitter* subghz_transmitter = malloc(sizeof(SubGhzViewTransmitter));
 
     // View allocation and configuration
     subghz_transmitter->view = view_alloc();

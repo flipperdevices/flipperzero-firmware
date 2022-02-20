@@ -70,7 +70,7 @@ const SubGhzProtocol subghz_protocol_came_atomo = {
 };
 
 void* subghz_protocol_decoder_came_atomo_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolDecoderCameAtomo* instance = furi_alloc(sizeof(SubGhzProtocolDecoderCameAtomo));
+    SubGhzProtocolDecoderCameAtomo* instance = malloc(sizeof(SubGhzProtocolDecoderCameAtomo));
     instance->base.protocol = &subghz_protocol_came_atomo;
     instance->generic.protocol_name = instance->base.protocol->name;
     instance->came_atomo_rainbow_table_file_name =

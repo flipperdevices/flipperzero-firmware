@@ -78,10 +78,10 @@ static bool one_shot_view_input(InputEvent* event, void* context) {
 }
 
 OneShotView* one_shot_view_alloc(void) {
-    OneShotView* view = furi_alloc(sizeof(OneShotView));
+    OneShotView* view = malloc(sizeof(OneShotView));
     view->view = view_alloc();
     view->update_timer =
-        xTimerCreate("Update timer", 1000, pdTRUE, view, one_shot_view_update_timer_callback);
+        xTimerCreate(NULL, 1000, pdTRUE, view, one_shot_view_update_timer_callback);
 
     view_allocate_model(view->view, ViewModelTypeLocking, sizeof(OneShotViewModel));
     view_set_context(view->view, view);

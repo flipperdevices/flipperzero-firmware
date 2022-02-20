@@ -52,7 +52,7 @@ static bool gui_widget_view_input_callback(InputEvent* event, void* context) {
 }
 
 Widget* widget_alloc() {
-    Widget* widget = furi_alloc(sizeof(Widget));
+    Widget* widget = malloc(sizeof(Widget));
     widget->view = view_alloc();
     view_set_context(widget->view, widget);
     view_allocate_model(widget->view, ViewModelTypeLocking, sizeof(GuiWidgetModel));
@@ -68,7 +68,7 @@ Widget* widget_alloc() {
     return widget;
 }
 
-void widget_clear(Widget* widget) {
+void widget_reset(Widget* widget) {
     furi_assert(widget);
 
     with_view_model(
@@ -89,7 +89,7 @@ void widget_clear(Widget* widget) {
 void widget_free(Widget* widget) {
     furi_assert(widget);
     // Free all elements
-    widget_clear(widget);
+    widget_reset(widget);
     // Free elements container
     with_view_model(
         widget->view, (GuiWidgetModel * model) {

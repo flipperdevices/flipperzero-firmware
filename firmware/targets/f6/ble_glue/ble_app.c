@@ -35,14 +35,14 @@ static void ble_app_hci_status_not_handler(HCI_TL_CmdStatus_t status);
 
 bool ble_app_init() {
     SHCI_CmdStatus_t status;
-    ble_app = furi_alloc(sizeof(BleApp));
+    ble_app = malloc(sizeof(BleApp));
     // Allocate semafore and mutex for ble command buffer access
     ble_app->hci_mtx = osMutexNew(NULL);
     ble_app->hci_sem = osSemaphoreNew(1, 0, NULL);
     ble_app->event_flags = osEventFlagsNew(NULL);
     // HCI transport layer thread to handle user asynch events
     ble_app->thread = furi_thread_alloc();
-    furi_thread_set_name(ble_app->thread, "BleHciWorker");
+    furi_thread_set_name(ble_app->thread, "BleHciDriver");
     furi_thread_set_stack_size(ble_app->thread, 1024);
     furi_thread_set_context(ble_app->thread, ble_app);
     furi_thread_set_callback(ble_app->thread, ble_app_hci_thread);

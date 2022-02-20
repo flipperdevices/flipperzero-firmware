@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <lib/flipper_file/flipper_file.h>
+#include <lib/flipper_format/flipper_format.h>
 #include <lib/toolbox/level_duration.h>
 
 #include "environment.h"
@@ -30,8 +30,8 @@ typedef void* (*SubGhzAlloc)(SubGhzEnvironment* environment);
 typedef void (*SubGhzFree)(void* context);
 
 // Load And Save
-typedef bool (*SubGhzSaveFile)(void* context, FlipperFile* flipper_file);
-typedef bool (*SubGhzLoadFile)(void* context, FlipperFile* flipper_file, const char* file_path);
+typedef bool (*SubGhzSaveFile)(void* context, FlipperFormat* flipper_file);
+typedef bool (*SubGhzLoadFile)(void* context, FlipperFormat* flipper_file, const char* file_path);
 
 // Serialize and Deserialize
 typedef void (*SubGhzSerialize)(void* decoder, string_t output);

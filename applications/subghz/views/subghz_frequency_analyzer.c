@@ -136,7 +136,7 @@ void subghz_frequency_analyzer_exit(void* context) {
 }
 
 SubGhzFrequencyAnalyzer* subghz_frequency_analyzer_alloc() {
-    SubGhzFrequencyAnalyzer* instance = furi_alloc(sizeof(SubGhzFrequencyAnalyzer));
+    SubGhzFrequencyAnalyzer* instance = malloc(sizeof(SubGhzFrequencyAnalyzer));
 
     // View allocation and configuration
     instance->view = view_alloc();

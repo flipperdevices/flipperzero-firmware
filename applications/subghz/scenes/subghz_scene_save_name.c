@@ -23,9 +23,13 @@ void subghz_scene_save_name_on_enter(void* context) {
         dev_name_empty = true;
     } else {
         strcpy(subghz->file_name_tmp, subghz->file_name);
-        if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
-           SubGhzCustomEventManagerSet) {
+        if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
+           SubGhzCustomEventManagerNoSet) {
             subghz_get_next_name_file(subghz);
+            if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
+               SubGhzCustomEventManagerSetRAW) {
+                dev_name_empty = true;
+            }
         }
     }
 
@@ -62,8 +66,8 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                     subghz_save_protocol_to_file(subghz, subghz->file_name);
                 }
 
-                if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
-                   SubGhzCustomEventManagerSet) {
+                if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
+                   SubGhzCustomEventManagerNoSet) {
                     subghz_protocol_raw_set_last_file_name(
                         (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result, subghz->file_name);
                     scene_manager_set_scene_state(

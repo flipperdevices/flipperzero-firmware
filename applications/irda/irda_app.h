@@ -33,6 +33,7 @@ public:
         LearnSuccess,
         LearnEnterName,
         LearnDone,
+        AskBack,
         Remote,
         RemoteList,
         Edit,
@@ -86,6 +87,7 @@ public:
 
     static void text_input_callback(void* context);
     static void popup_callback(void* context);
+    static void signal_sent_callback(void* context);
 
     IrdaApp();
     ~IrdaApp();
@@ -123,6 +125,7 @@ private:
         {Scene::LearnSuccess, new IrdaAppSceneLearnSuccess()},
         {Scene::LearnEnterName, new IrdaAppSceneLearnEnterName()},
         {Scene::LearnDone, new IrdaAppSceneLearnDone()},
+        {Scene::AskBack, new IrdaAppSceneAskBack()},
         {Scene::Remote, new IrdaAppSceneRemote()},
         {Scene::RemoteList, new IrdaAppSceneRemoteList()},
         {Scene::Edit, new IrdaAppSceneEdit()},

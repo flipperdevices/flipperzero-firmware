@@ -9,7 +9,7 @@ SubGhzTransmitter*
     const SubGhzProtocol* protocol = subghz_protocol_registry_get_by_name(protocol_name);
 
     if(protocol && protocol->encoder && protocol->encoder->alloc) {
-        instance = furi_alloc(sizeof(SubGhzTransmitter));
+        instance = malloc(sizeof(SubGhzTransmitter));
         instance->protocol = protocol;
         instance->protocol_instance = instance->protocol->encoder->alloc(environment);
     }

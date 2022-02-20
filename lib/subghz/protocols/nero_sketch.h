@@ -25,8 +25,8 @@ void subghz_protocol_decoder_nero_sketch_free(void* context);
 void subghz_protocol_decoder_nero_sketch_reset(void* context);
 void subghz_protocol_decoder_nero_sketch_feed(void* context, bool level, uint32_t duration);
 void subghz_protocol_decoder_nero_sketch_serialization(void* context, string_t output);
-bool subghz_protocol_nero_sketch_save_file(void* context, FlipperFile* flipper_file);
+bool subghz_protocol_nero_sketch_save_file(void* context, FlipperFormat* flipper_file);
 bool subghz_protocol_nero_sketch_load_file(
     void* context,
-    FlipperFile* flipper_file,
+    FlipperFormat* flipper_file,
     const char* file_path);

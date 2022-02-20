@@ -77,14 +77,14 @@ const SubGhzProtocol subghz_protocol_princeton = {
 };
 
 void* subghz_protocol_encoder_princeton_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolEncoderPrinceton* instance = furi_alloc(sizeof(SubGhzProtocolEncoderPrinceton));
+    SubGhzProtocolEncoderPrinceton* instance = malloc(sizeof(SubGhzProtocolEncoderPrinceton));
 
     instance->base.protocol = &subghz_protocol_princeton;
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
-    instance->encoder.upload = furi_alloc(instance->encoder.size_upload * sizeof(LevelDuration));
+    instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_runing = false;
     return instance;
 }
@@ -172,7 +172,7 @@ LevelDuration subghz_protocol_encoder_princeton_yield(void* context) {
 }
 
 void* subghz_protocol_decoder_princeton_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolDecoderPrinceton* instance = furi_alloc(sizeof(SubGhzProtocolDecoderPrinceton));
+    SubGhzProtocolDecoderPrinceton* instance = malloc(sizeof(SubGhzProtocolDecoderPrinceton));
     instance->base.protocol = &subghz_protocol_princeton;
     instance->generic.protocol_name = instance->base.protocol->name;
     return instance;
@@ -293,12 +293,12 @@ void subghz_protocol_decoder_princeton_serialization(void* context, string_t out
         instance->te);
 }
 
-bool subghz_protocol_princeton_save_file(void* context, FlipperFile* flipper_file) {
+bool subghz_protocol_princeton_save_file(void* context, FlipperFormat* flipper_file) {
     furi_assert(context);
     SubGhzProtocolDecoderPrinceton* instance = context;
     bool res = subghz_block_generic_save_file(&instance->generic, flipper_file);
     if(res) {
-        res = flipper_file_write_uint32(flipper_file, "TE", &instance->te, 1);
+        res = flipper_format_write_uint32(flipper_file, "TE", &instance->te, 1);
         if(!res) FURI_LOG_E(TAG, "Unable to add Te");
     }
     return res;
@@ -306,13 +306,13 @@ bool subghz_protocol_princeton_save_file(void* context, FlipperFile* flipper_fil
 
 bool subghz_protocol_princeton_load_file(
     void* context,
-    FlipperFile* flipper_file,
+    FlipperFormat* flipper_file,
     const char* file_path) {
     furi_assert(context);
     SubGhzProtocolEncoderPrinceton* instance = context;
     bool res = subghz_block_generic_load_file(&instance->generic, flipper_file);
     if(res) {
-        res = flipper_file_read_uint32(flipper_file, "TE", (uint32_t*)&instance->te, 1);
+        res = flipper_format_read_uint32(flipper_file, "TE", (uint32_t*)&instance->te, 1);
         if(!res) FURI_LOG_E(TAG, "Missing TE");
     }
     return res;

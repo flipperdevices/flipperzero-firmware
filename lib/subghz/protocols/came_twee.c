@@ -98,14 +98,14 @@ const SubGhzProtocol subghz_protocol_came_twee = {
 };
 
 void* subghz_protocol_encoder_came_twee_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolEncoderCameTwee* instance = furi_alloc(sizeof(SubGhzProtocolEncoderCameTwee));
+    SubGhzProtocolEncoderCameTwee* instance = malloc(sizeof(SubGhzProtocolEncoderCameTwee));
 
     instance->base.protocol = &subghz_protocol_came_twee;
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 1536; //max upload 92*14 = 1288 !!!!
-    instance->encoder.upload = furi_alloc(instance->encoder.size_upload * sizeof(LevelDuration));
+    instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_runing = false;
     return instance;
 }
@@ -278,7 +278,7 @@ LevelDuration subghz_protocol_encoder_came_twee_yield(void* context) {
 }
 
 void* subghz_protocol_decoder_came_twee_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolDecoderCameTwee* instance = furi_alloc(sizeof(SubGhzProtocolDecoderCameTwee));
+    SubGhzProtocolDecoderCameTwee* instance = malloc(sizeof(SubGhzProtocolDecoderCameTwee));
     instance->base.protocol = &subghz_protocol_came_twee;
     instance->generic.protocol_name = instance->base.protocol->name;
     return instance;
@@ -417,7 +417,7 @@ void subghz_protocol_decoder_came_twee_serialization(void* context, string_t out
         CNT_TO_DIP(instance->generic.cnt));
 }
 
-bool subghz_protocol_came_twee_save_file(void* context, FlipperFile* flipper_file) {
+bool subghz_protocol_came_twee_save_file(void* context, FlipperFormat* flipper_file) {
     furi_assert(context);
     SubGhzProtocolDecoderCameTwee* instance = context;
     return subghz_block_generic_save_file(&instance->generic, flipper_file);
@@ -425,7 +425,7 @@ bool subghz_protocol_came_twee_save_file(void* context, FlipperFile* flipper_fil
 
 bool subghz_protocol_came_twee_load_file(
     void* context,
-    FlipperFile* flipper_file,
+    FlipperFormat* flipper_file,
     const char* file_path) {
     furi_assert(context);
     SubGhzProtocolEncoderCameTwee* instance = context;

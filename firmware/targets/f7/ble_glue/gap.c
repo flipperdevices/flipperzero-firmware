@@ -463,7 +463,7 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
         return false;
     }
 
-    gap = furi_alloc(sizeof(Gap));
+    gap = malloc(sizeof(Gap));
     gap->config = config;
     srand(DWT->CYCCNT);
     // Create advertising timer
@@ -481,7 +481,7 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
 
     // Thread configuration
     gap->thread = furi_thread_alloc();
-    furi_thread_set_name(gap->thread, "BleGapWorker");
+    furi_thread_set_name(gap->thread, "BleGapDriver");
     furi_thread_set_stack_size(gap->thread, 1024);
     furi_thread_set_context(gap->thread, gap);
     furi_thread_set_callback(gap->thread, gap_app);
@@ -516,7 +516,7 @@ GapState gap_get_state() {
 
 void gap_start_scan(GapScanCallback callback, void* context) {
     furi_assert(callback);
-    gap_scan = furi_alloc(sizeof(GapScan));
+    gap_scan = malloc(sizeof(GapScan));
     gap_scan->callback = callback;
     gap_scan->context = context;
     // Scan interval 250 ms

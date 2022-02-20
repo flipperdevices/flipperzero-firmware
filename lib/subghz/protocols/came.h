@@ -62,7 +62,7 @@ void subghz_protocol_decoder_came_serialization(void* context, string_t output);
  * @param flipper_file - FlipperFile 
  * @return bool
  */
-bool subghz_protocol_came_save_file(void* context, FlipperFile* flipper_file);
+bool subghz_protocol_came_save_file(void* context, FlipperFormat* flipper_file);
 
 /** Loading protocol from file
  * 
@@ -73,7 +73,7 @@ bool subghz_protocol_came_save_file(void* context, FlipperFile* flipper_file);
  */
 bool subghz_protocol_came_load_file(
     void* context,
-    FlipperFile* flipper_file,
+    FlipperFormat* flipper_file,
     const char* file_path);
 
 // /** Loading protocol from bin data

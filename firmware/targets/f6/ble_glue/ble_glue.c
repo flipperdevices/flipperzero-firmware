@@ -64,7 +64,7 @@ void ble_glue_set_key_storage_changed_callback(
 }
 
 void ble_glue_init() {
-    ble_glue = furi_alloc(sizeof(BleGlue));
+    ble_glue = malloc(sizeof(BleGlue));
     ble_glue->status = BleGlueStatusStartup;
 
     // Configure the system Power Mode
@@ -88,7 +88,7 @@ void ble_glue_init() {
 
     // FreeRTOS system task creation
     ble_glue->thread = furi_thread_alloc();
-    furi_thread_set_name(ble_glue->thread, "BleShciWorker");
+    furi_thread_set_name(ble_glue->thread, "BleShciDriver");
     furi_thread_set_stack_size(ble_glue->thread, 1024);
     furi_thread_set_context(ble_glue->thread, ble_glue);
     furi_thread_set_callback(ble_glue->thread, ble_glue_shci_thread);
@@ -116,6 +116,7 @@ void ble_glue_init() {
 
 bool ble_glue_wait_for_fus_start(WirelessFwInfo_t* info) {
     bool ret = false;
+
     size_t countdown = 1000;
     while(countdown > 0) {
         if(ble_glue->status == BleGlueStatusFusStarted) {
@@ -125,13 +126,14 @@ bool ble_glue_wait_for_fus_start(WirelessFwInfo_t* info) {
         countdown--;
         osDelay(1);
     }
+
     if(ble_glue->status == BleGlueStatusFusStarted) {
         SHCI_GetWirelessFwInfo(info);
     } else {
         FURI_LOG_E(TAG, "Failed to start FUS");
         ble_glue->status = BleGlueStatusBroken;
     }
-    furi_hal_power_insomnia_exit();
+
     return ret;
 }
 

@@ -74,14 +74,14 @@ const SubGhzProtocol subghz_protocol_came = {
 };
 
 void* subghz_protocol_encoder_came_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolEncoderCame* instance = furi_alloc(sizeof(SubGhzProtocolEncoderCame));
+    SubGhzProtocolEncoderCame* instance = malloc(sizeof(SubGhzProtocolEncoderCame));
 
     instance->base.protocol = &subghz_protocol_came;
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
-    instance->encoder.upload = furi_alloc(instance->encoder.size_upload * sizeof(LevelDuration));
+    instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_runing = false;
     return instance;
 }
@@ -167,7 +167,7 @@ LevelDuration subghz_protocol_encoder_came_yield(void* context) {
 }
 
 void* subghz_protocol_decoder_came_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolDecoderCame* instance = furi_alloc(sizeof(SubGhzProtocolDecoderCame));
+    SubGhzProtocolDecoderCame* instance = malloc(sizeof(SubGhzProtocolDecoderCame));
     instance->base.protocol = &subghz_protocol_came;
     instance->generic.protocol_name = instance->base.protocol->name;
     return instance;
@@ -279,7 +279,7 @@ void subghz_protocol_decoder_came_serialization(void* context, string_t output) 
         code_found_reverse_lo);
 }
 
-bool subghz_protocol_came_save_file(void* context, FlipperFile* flipper_file) {
+bool subghz_protocol_came_save_file(void* context, FlipperFormat* flipper_file) {
     furi_assert(context);
     SubGhzProtocolDecoderCame* instance = context;
     return subghz_block_generic_save_file(&instance->generic, flipper_file);
@@ -287,7 +287,7 @@ bool subghz_protocol_came_save_file(void* context, FlipperFile* flipper_file) {
 
 bool subghz_protocol_came_load_file(
     void* context,
-    FlipperFile* flipper_file,
+    FlipperFormat* flipper_file,
     const char* file_path) {
     furi_assert(context);
     SubGhzProtocolEncoderCame* instance = context;

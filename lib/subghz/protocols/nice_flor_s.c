@@ -172,7 +172,7 @@ static uint64_t
 }
 
 void* subghz_protocol_decoder_nice_flor_s_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolDecoderNiceFlorS* instance = furi_alloc(sizeof(SubGhzProtocolDecoderNiceFlorS));
+    SubGhzProtocolDecoderNiceFlorS* instance = malloc(sizeof(SubGhzProtocolDecoderNiceFlorS));
     instance->base.protocol = &subghz_protocol_nice_flor_s;
     instance->generic.protocol_name = instance->base.protocol->name;
     instance->nice_flor_s_rainbow_table_file_name =

@@ -181,7 +181,7 @@ void subghz_test_carrier_rssi_timer_callback(void* context) {
 }
 
 SubGhzTestCarrier* subghz_test_carrier_alloc() {
-    SubGhzTestCarrier* subghz_test_carrier = furi_alloc(sizeof(SubGhzTestCarrier));
+    SubGhzTestCarrier* subghz_test_carrier = malloc(sizeof(SubGhzTestCarrier));
 
     // View allocation and configuration
     subghz_test_carrier->view = view_alloc();

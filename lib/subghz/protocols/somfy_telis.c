@@ -74,7 +74,7 @@ const SubGhzProtocol subghz_protocol_somfy_telis = {
 
 void* subghz_protocol_decoder_somfy_telis_alloc(SubGhzEnvironment* environment) {
     SubGhzProtocolDecoderSomfyTelis* instance =
-        furi_alloc(sizeof(SubGhzProtocolDecoderSomfyTelis));
+        malloc(sizeof(SubGhzProtocolDecoderSomfyTelis));
     instance->base.protocol = &subghz_protocol_somfy_telis;
     instance->generic.protocol_name = instance->base.protocol->name;
 

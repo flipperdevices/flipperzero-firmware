@@ -68,7 +68,7 @@ const SubGhzProtocol subghz_protocol_faac_slh = {
 };
 
 void* subghz_protocol_decoder_faac_slh_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolDecoderFaacSLH* instance = furi_alloc(sizeof(SubGhzProtocolDecoderFaacSLH));
+    SubGhzProtocolDecoderFaacSLH* instance = malloc(sizeof(SubGhzProtocolDecoderFaacSLH));
     instance->base.protocol = &subghz_protocol_faac_slh;
     instance->generic.protocol_name = instance->base.protocol->name;
     return instance;
