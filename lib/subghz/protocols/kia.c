@@ -187,7 +187,7 @@ void subghz_protocol_decoder_kia_feed(void* context, bool level, uint32_t durati
     }
 }
 
-static uint8_t subghz_protocol_kia_crc8(uint8_t* data, size_t len) {
+uint8_t subghz_protocol_kia_crc8(uint8_t* data, size_t len) {
     uint8_t crc = 0x08;
     size_t i, j;
     for(i = 0; i < len; i++) {

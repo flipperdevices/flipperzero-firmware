@@ -99,7 +99,7 @@ static inline void subghz_protocol_decoder_nice_flor_s_magic_xor(uint8_t* p, uin
     }
 }
 
-static uint64_t subghz_protocol_nice_flor_s_encrypt(uint64_t data, const char* file_name) {
+uint64_t subghz_protocol_nice_flor_s_encrypt(uint64_t data, const char* file_name) {
     uint8_t* p = (uint8_t*)&data;
 
     uint8_t k = 0;
