@@ -26,9 +26,6 @@
 
 #include <lib/subghz/subghz_worker.h>
 
-#include <lib/subghz/subghz_parser.h>
-
-#include <lib/subghz/protocols/subghz_protocol_common.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
 
@@ -83,15 +80,11 @@ typedef enum {
 
 struct SubGhzTxRx {
     SubGhzWorker* worker;
-    SubGhzParser* parser; //todo delete
-    SubGhzProtocolCommon* protocol_result; //todo delete
 
     SubGhzEnvironment* environment;
     SubGhzReceiver* receiver;
     SubGhzTransmitter* transmitter;
     SubGhzProtocolDecoderBase* decoder_result;
-
-    SubGhzProtocolCommonEncoder* encoder; //todo delete
 
     uint32_t frequency;
     FuriHalSubGhzPreset preset;

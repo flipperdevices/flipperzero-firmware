@@ -5,10 +5,7 @@
 #include <stream_buffer.h>
 
 #include <lib/toolbox/args.h>
-#include <lib/subghz/subghz_parser.h>
 #include <lib/subghz/subghz_keystore.h>
-#include <lib/subghz/protocols/subghz_protocol_common.h>
-//#include <lib/subghz/protocols/subghz_protocol_princeton.h>
 
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>

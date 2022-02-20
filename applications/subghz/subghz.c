@@ -185,7 +185,6 @@ SubGhz* subghz_alloc() {
     subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
     subghz->txrx->history = subghz_history_alloc();
     subghz->txrx->worker = subghz_worker_alloc();
-    subghz->txrx->parser = subghz_parser_alloc(); //todo delete
 
     subghz->txrx->environment = subghz_environment_alloc();
     subghz->txrx->receiver = subghz_receiver_alloc(subghz->txrx->environment);
@@ -268,7 +267,6 @@ void subghz_free(SubGhz* subghz) {
     subghz->gui = NULL;
 
     //Worker & Protocol & History
-    subghz_parser_free(subghz->txrx->parser); //tedo delete
     subghz_receiver_free(subghz->txrx->receiver);
     subghz_environment_free(subghz->txrx->environment);
     subghz_worker_free(subghz->txrx->worker);
@@ -306,15 +304,15 @@ int32_t subghz_app(void* p) {
         path_extract_filename_no_ext(p, filename);
         strcpy(subghz->file_name, string_get_cstr(filename));
         string_clear(filename);
-
-        if((!strcmp(subghz->txrx->protocol_result->name, "RAW"))) {
-            //Load Raw TX
-            subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWLoad;
-            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
-        } else {
+        //ToDo Fix
+        // if((!strcmp(subghz->txrx->protocol_result->name, "RAW"))) {
+        //     //Load Raw TX
+        //     subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWLoad;
+        //     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
+        // } else {
             //Load transmitter TX
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
-        }
+        //}
     } else {
         if(load_database) {
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);
