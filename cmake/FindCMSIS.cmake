@@ -236,16 +236,9 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS_FAMILIES})
         string(TOLOWER ${DEVICE} DEVICE_L)
         string(TOLOWER ${TYPE} TYPE_L)
 
-        set(STARTUP_NAMES startup_stm32${TYPE_L}.s startup_stm32${TYPE_L}${CORE_Ucm}.s)
-        if(${FAMILY} STREQUAL "MP1")
-            # stm32mp15?dxx.s uses stm32mp15?axx.s
-            # stm32mp15?fxx.s uses stm32mp15?cxx.s
-            string(REPLACE "dxx" "axx" STARTUP_NAMES ${STARTUP_NAMES})
-            string(REPLACE "fxx" "cxx" STARTUP_NAMES ${STARTUP_NAMES})
-        endif()
-        
         find_file(CMSIS_${FAMILY}${CORE_U}_${TYPE}_STARTUP
-            NAMES ${STARTUP_NAMES}
+            NAMES startup_stm32${TYPE_L}.s 
+                  startup_stm32${TYPE_L}${CORE_Ucm}.s
             PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Source/Templates/gcc"
             NO_DEFAULT_PATH
         )
