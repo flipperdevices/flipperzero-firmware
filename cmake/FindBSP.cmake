@@ -245,6 +245,13 @@ set(BSP_L5_SOURCES_STM32L552E_EVAL audio bus idd io lcd ospi sd sram ts usbpd_pw
 set(BSP_L5_DEVICE_STM32L562E_Discovery L562QE)
 set(BSP_L5_DEVICE_STM32L552E_EVAL L552ZE)
 
+### MP1 ###
+set(BSP_MP1_BOARDS
+    STM32MP15xx_DISCO STM32MP15xx_EVAL)
+set(BSP_MP1_COMPONENTS )
+set(BSP_MP1_SOURCES_STM32MP15xx_DISCO bus stpmic1)
+set(BSP_MP1_SOURCES_STM32MP15xx_EVAL bus stpmic1)
+
 ### WB ###
 set(BSP_WB_BOARDS
     STM32WB15CC_Nucleo STM32WB55_Nucleo STM32WB55_USBDongle STM32WB5MM_Discovery
@@ -282,6 +289,11 @@ if(STM32WL IN_LIST BSP_FIND_COMPONENTS)
     list(APPEND BSP_FIND_COMPONENTS STM32WL_M4 STM32WL_M0PLUS)
 endif()
 
+if(STM32MP1 IN_LIST BSP_FIND_COMPONENTS)
+    list(REMOVE_ITEM BSP_FIND_COMPONENTS STM32MP1)
+    list(APPEND BSP_FIND_COMPONENTS STM32MP1_M4)
+endif()
+
 list(REMOVE_DUPLICATES BSP_FIND_COMPONENTS)
 
 foreach(COMP ${BSP_FIND_COMPONENTS})
@@ -315,13 +327,9 @@ foreach(COMP ${BSP_FIND_COMPONENTS})
         set(STM32_CUBE_${FAMILY}_PATH /opt/STM32Cube${FAMILY} CACHE PATH "Path to STM32Cube${FAMILY}")
         message(STATUS "No STM32_CUBE_${FAMILY}_PATH specified using default: ${STM32_CUBE_${FAMILY}_PATH}")
     endif()
-        
-    find_path(BSP_${FAMILY}_PATH
-        NAMES Components/Common/io.h
-        PATHS "${STM32_CUBE_${FAMILY}_PATH}/Drivers/BSP"
-        NO_DEFAULT_PATH
-    )
-    if (NOT BSP_${FAMILY}_PATH)
+
+    set(BSP_${FAMILY}_PATH "${STM32_CUBE_${FAMILY}_PATH}/Drivers/BSP")
+    if(NOT EXISTS ${BSP_${FAMILY}_PATH})
         continue()
     endif()
     
@@ -346,7 +354,7 @@ foreach(COMP ${BSP_FIND_COMPONENTS})
             PATHS "${BSP_${FAMILY}_PATH}/${BOARD}" "${BSP_${FAMILY}_PATH}/${BSP_${FAMILY}_DIR_${BOARD_CANONICAL}}"
             NO_DEFAULT_PATH
         )
-        if (NOT BSP_${BOARD_CANONICAL}_PATH)
+        if (NOT EXISTS ${BSP_${BOARD_CANONICAL}_PATH})
             continue()
         endif()
         
