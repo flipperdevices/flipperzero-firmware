@@ -219,6 +219,12 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS_FAMILIES})
         string(TOLOWER ${DEVICE} DEVICE_L)
         string(TOLOWER ${TYPE} TYPE_L)
         
+        get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+        if(NOT "ASM" IN_LIST languages)
+            message(STATUS "FindCMSIS: Not generating target for startup file and linker script because ASM language is not enabled")
+            continue()
+        endif()
+
         find_file(CMSIS_${FAMILY}${CORE_U}_${TYPE}_STARTUP
             NAMES startup_stm32${TYPE_L}.s startup_stm32${TYPE_L}${CORE_Ucm}.s
             PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Source/Templates/gcc"
