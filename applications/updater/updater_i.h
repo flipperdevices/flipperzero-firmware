@@ -9,7 +9,6 @@
 #include <gui/view_stack.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/popup.h>
-#include <gui/modules/code_input.h>
 #include <gui/scene_manager.h>
 #include <storage/storage.h>
 

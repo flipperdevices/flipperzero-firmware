@@ -34,7 +34,7 @@ static void status_update_cb(const char* message, const uint8_t progress, void* 
 }
 
 Updater* updater_alloc() {
-    Updater* updater = furi_alloc(sizeof(Updater));
+    Updater* updater = malloc(sizeof(Updater));
 
     updater->storage = furi_record_open("storage");
 

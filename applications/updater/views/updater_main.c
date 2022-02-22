@@ -86,7 +86,7 @@ static void updater_main_draw_callback(Canvas* canvas, void* _model) {
 }
 
 UpdaterMainView* updater_main_alloc() {
-    UpdaterMainView* main_view = furi_alloc(sizeof(UpdaterMainView));
+    UpdaterMainView* main_view = malloc(sizeof(UpdaterMainView));
 
     main_view->view = view_alloc();
     view_allocate_model(main_view->view, ViewModelTypeLocking, sizeof(UpdaterProgressModel));
