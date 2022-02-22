@@ -14,6 +14,7 @@ extern int32_t notification_srv(void* p);
 extern int32_t power_srv(void* p);
 extern int32_t storage_srv(void* p);
 extern int32_t desktop_srv(void* p);
+extern int32_t updater_srv(void* p);
 
 // Apps
 extern int32_t accessor_app(void* p);
@@ -91,6 +92,9 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef SRV_DESKTOP
+#ifdef SRV_UPDATER
+#error SRV_UPDATER and SRV_DESKTOP are mutually exclusive!
+#endif
     {.app = desktop_srv, .name = "DesktopSrv", .stack_size = 2048, .icon = NULL},
 #endif
 
@@ -116,6 +120,13 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 
 #ifdef SRV_STORAGE
     {.app = storage_srv, .name = "StorageSrv", .stack_size = 3072, .icon = NULL},
+#endif
+
+#ifdef SRV_UPDATER
+#ifdef SRV_DESKTOP
+#error SRV_UPDATER and SRV_DESKTOP are mutually exclusive!
+#endif
+    {.app = updater_srv, .name = "UpdaterSrv", .stack_size = 1024, .icon = NULL},
 #endif
 };
 
@@ -327,3 +338,11 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
 
 const size_t FLIPPER_SETTINGS_APPS_COUNT =
     sizeof(FLIPPER_SETTINGS_APPS) / sizeof(FlipperApplication);
+
+int a(size_t test) {
+    if (test >= 0) {
+        return 42;
+    } else {
+        return 1337;
+    }
+}

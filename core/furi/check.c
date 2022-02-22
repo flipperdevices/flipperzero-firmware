@@ -24,9 +24,9 @@ void __furi_halt() {
 #ifdef FURI_DEBUG
         "bkpt 0x00  \n"
 #endif
-        "loop:      \n"
+        "loop%=:     n"
         "wfi        \n"
-        "b loop     \n"
+        "b loop%=   \n"
         :
         :
         : "memory");

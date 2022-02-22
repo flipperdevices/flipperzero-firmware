@@ -41,6 +41,7 @@ template <unsigned int N> struct STOP_EXTERNING_ME {};
 #include "furi_hal_uart.h"
 #include "furi_hal_info.h"
 #include "furi_hal_random.h"
+#include "furi_hal_crc.h"
 
 /** Init furi_hal */
 void furi_hal_init();
