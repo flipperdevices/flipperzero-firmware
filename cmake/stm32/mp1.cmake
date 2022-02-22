@@ -4,9 +4,9 @@ set(STM32_MP1_TYPES
     MP157Axx MP157Cxx)
 
 set(STM32_MP1_TYPE_MATCH
-    "MP151[AD]A.?" "MP151[CF]A.?"  
-    "MP153[AD]A.?" "MP153[CF]A.?"
-    "MP157[AD]A.?" "MP157[CF]A.?")
+    "MP151[AD](A.?)?" "MP151[CF](A.?)?"  
+    "MP153[AD](A.?)?" "MP153[CF](A.?)?"
+    "MP157[AD](A.?)?" "MP157[CF](A.?)?")
 
 set(STM32_MP1_RAM_SIZES
     384K 384K
