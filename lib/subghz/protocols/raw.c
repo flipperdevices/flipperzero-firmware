@@ -119,8 +119,7 @@ bool subghz_protocol_raw_save_to_file_init(
         }
 
         // Open file
-        if(!flipper_format_file_open_always(
-               instance->flipper_file, string_get_cstr(temp_str))) {
+        if(!flipper_format_file_open_always(instance->flipper_file, string_get_cstr(temp_str))) {
             FURI_LOG_E(TAG, "Unable to open file for write: %s", temp_str);
             break;
         }
@@ -135,10 +134,11 @@ bool subghz_protocol_raw_save_to_file_init(
             FURI_LOG_E(TAG, "Unable to add Frequency");
             break;
         }
-        if(!subghz_block_generic_get_preset_name(preset,temp_str)) {
+        if(!subghz_block_generic_get_preset_name(preset, temp_str)) {
             break;
         }
-        if(!flipper_format_write_string_cstr(instance->flipper_file, "Preset", string_get_cstr(temp_str))) {
+        if(!flipper_format_write_string_cstr(
+               instance->flipper_file, "Preset", string_get_cstr(temp_str))) {
             FURI_LOG_E(TAG, "Unable to add Preset");
             break;
         }

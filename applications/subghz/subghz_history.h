@@ -4,6 +4,8 @@
 #include <math.h>
 #include <furi.h>
 #include <furi_hal.h>
+#include <lib/flipper_format/flipper_format.h>
+//#include <lib/flipper_format/flipper_format_stream.h>
 //#include <lib/subghz/protocols/subghz_protocol_common.h>
 
 typedef struct SubGhzHistory SubGhzHistory;
@@ -27,9 +29,9 @@ void subghz_history_free(SubGhzHistory* instance);
 void subghz_history_reset(SubGhzHistory* instance);
 
 // /** Set frequency and preset to history[idx]
-//  * 
+//  *
 //  * @param instance  - SubGhzHistory instance
-//  * @param idx       - record index  
+//  * @param idx       - record index
 //  * @param frequency - frequency Hz
 //  * @param preset    - FuriHalSubGhzPreset preset
 //  */
@@ -114,4 +116,4 @@ bool subghz_history_add_to_history(
  * @param idx       - record index
  * @return SubGhzProtocolCommonLoad*
  */
-const char* subghz_history_get_raw_data(SubGhzHistory* instance, uint16_t idx);
+FlipperFormat* subghz_history_get_raw_data(SubGhzHistory* instance, uint16_t idx);

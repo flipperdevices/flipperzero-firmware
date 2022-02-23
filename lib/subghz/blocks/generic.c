@@ -63,8 +63,7 @@ bool subghz_block_generic_serialize(
             FURI_LOG_E(TAG, "Unable to add Preset");
             break;
         }
-        if(!flipper_format_write_string_cstr(
-               flipper_format, "Protocol", instance->protocol_name)) {
+        if(!flipper_format_write_string_cstr(flipper_format, "Protocol", instance->protocol_name)) {
             FURI_LOG_E(TAG, "Unable to add Protocol");
             break;
         }
@@ -86,6 +85,41 @@ bool subghz_block_generic_serialize(
         res = true;
     } while(false);
     string_clear(temp_str);
+    return res;
+}
+
+bool subghz_block_generic_deserialize(SubGhzBlockGeneric* instance, FlipperFormat* flipper_format) {
+    furi_assert(instance);
+    bool res = false;
+    string_t temp_str;
+    string_init(temp_str);
+    uint32_t temp_data = 0;
+
+    do {
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
+        if(!flipper_format_read_uint32(flipper_format, "Bit", (uint32_t*)&temp_data, 1)) {
+            FURI_LOG_E(TAG, "Missing Bit");
+            break;
+        }
+        instance->data_count_bit = (uint8_t)temp_data;
+
+        uint8_t key_data[sizeof(uint64_t)] = {0};
+        if(!flipper_format_read_hex(flipper_format, "Key", key_data, sizeof(uint64_t))) {
+            FURI_LOG_E(TAG, "Missing Key");
+            break;
+        }
+        for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
+            instance->data = instance->data << 8 | key_data[i];
+        }
+
+        res = true;
+    } while(0);
+
+    string_clear(temp_str);
+
     return res;
 }
 

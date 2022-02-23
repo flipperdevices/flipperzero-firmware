@@ -9,7 +9,7 @@ void subghz_scene_saved_on_enter(void* context) {
         //     subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWLoad;
         //     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
         // } else {
-            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSavedMenu);
+        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSavedMenu);
         // }
     } else {
         scene_manager_search_and_switch_to_previous_scene(subghz->scene_manager, SubGhzSceneStart);

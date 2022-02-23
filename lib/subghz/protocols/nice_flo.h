@@ -26,11 +26,12 @@ void subghz_protocol_decoder_nice_flo_reset(void* context);
 void subghz_protocol_decoder_nice_flo_feed(void* context, bool level, uint32_t duration);
 uint8_t subghz_protocol_decoder_nice_flo_get_hash_data(void* context);
 void subghz_protocol_decoder_nice_flo_get_string(void* context, string_t output);
-void subghz_protocol_decoder_nice_flo_serialize(
+bool subghz_protocol_decoder_nice_flo_serialize(
     void* context,
     FlipperFormat* flipper_format,
     uint32_t frequency,
     FuriHalSubGhzPreset preset);
+bool subghz_protocol_decoder_nice_flo_deserialize(void* context, FlipperFormat* flipper_format);
 bool subghz_protocol_nice_flo_save_file(void* context, FlipperFormat* flipper_file);
 bool subghz_protocol_nice_flo_load_file(
     void* context,

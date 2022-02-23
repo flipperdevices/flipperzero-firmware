@@ -25,11 +25,12 @@ void subghz_protocol_decoder_hormann_free(void* context);
 void subghz_protocol_decoder_hormann_reset(void* context);
 void subghz_protocol_decoder_hormann_feed(void* context, bool level, uint32_t duration);
 uint8_t subghz_protocol_decoder_hormann_get_hash_data(void* context);
-void subghz_protocol_decoder_hormann_serialize(
+bool subghz_protocol_decoder_hormann_serialize(
     void* context,
     FlipperFormat* flipper_format,
     uint32_t frequency,
     FuriHalSubGhzPreset preset);
+bool subghz_protocol_decoder_hormann_deserialize(void* context, FlipperFormat* flipper_format);
 void subghz_protocol_decoder_hormann_get_string(void* context, string_t output);
 bool subghz_protocol_hormann_save_file(void* context, FlipperFormat* flipper_file);
 bool subghz_protocol_hormann_load_file(

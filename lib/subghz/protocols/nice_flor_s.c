@@ -53,6 +53,7 @@ const SubGhzProtocolDecoder subghz_protocol_nice_flor_s_decoder = {
 
     .get_hash_data = subghz_protocol_decoder_nice_flor_s_get_hash_data,
     .serialize = subghz_protocol_decoder_nice_flor_s_serialize,
+    .deserialize = subghz_protocol_decoder_nice_flor_s_deserialize,
     .get_string = subghz_protocol_decoder_nice_flor_s_get_string,
     .save_file = NULL,
 };
@@ -326,14 +327,20 @@ uint8_t subghz_protocol_decoder_nice_flor_s_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-void subghz_protocol_decoder_nice_flor_s_serialize(
+bool subghz_protocol_decoder_nice_flor_s_serialize(
     void* context,
     FlipperFormat* flipper_format,
     uint32_t frequency,
     FuriHalSubGhzPreset preset) {
     furi_assert(context);
     SubGhzProtocolDecoderNiceFlorS* instance = context;
-    subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    return subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+}
+
+bool subghz_protocol_decoder_nice_flor_s_deserialize(void* context, FlipperFormat* flipper_format) {
+    furi_assert(context);
+    SubGhzProtocolDecoderNiceFlorS* instance = context;
+    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
 }
 
 void subghz_protocol_decoder_nice_flor_s_get_string(void* context, string_t output) {

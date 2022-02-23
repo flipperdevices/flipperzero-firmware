@@ -19,16 +19,14 @@ void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, v
 }
 
 static bool subghz_scene_receiver_info_update_parser(void* context) {
-    //ToDo Fix
     SubGhz* subghz = context;
-
-    // //ToDo получение имени из истоии
-
     subghz->txrx->decoder_result = subghz_receiver_search_decoder_base_by_name(
         subghz->txrx->receiver,
         subghz_history_get_protocol_name(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
     if(subghz->txrx->decoder_result) {
-        //ToDo //десериалайз
+        subghz_protocol_decoder_base_deserialize(
+            subghz->txrx->decoder_result,
+            subghz_history_get_raw_data(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
         subghz->txrx->frequency =
             subghz_history_get_frequency(subghz->txrx->history, subghz->txrx->idx_menu_chosen);
         subghz->txrx->preset =

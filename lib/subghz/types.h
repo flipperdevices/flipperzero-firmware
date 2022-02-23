@@ -35,12 +35,12 @@ typedef bool (*SubGhzSaveFile)(void* context, FlipperFormat* flipper_file);
 typedef bool (*SubGhzLoadFile)(void* context, FlipperFormat* flipper_file, const char* file_path);
 
 // Serialize and Deserialize
-typedef void (*SubGhzSerialize)(
+typedef bool (*SubGhzSerialize)(
     void* decoder,
     FlipperFormat* flipper_format,
     uint32_t frequency,
     FuriHalSubGhzPreset preset);
-typedef void (*SubGhzDeserialize)(void* decoder, string_t output);
+typedef bool (*SubGhzDeserialize)(void* decoder, FlipperFormat* flipper_format);
 
 // Decoder specific
 typedef void (*SubGhzDecoderFeed)(void* decoder, bool level, uint32_t duration);
@@ -63,6 +63,7 @@ typedef struct {
     SubGhzGetHashData get_hash_data;
     SubGhzGetString get_string;
     SubGhzSerialize serialize;
+    SubGhzDeserialize deserialize;
     SubGhzSaveFile save_file;
 } SubGhzProtocolDecoder;
 

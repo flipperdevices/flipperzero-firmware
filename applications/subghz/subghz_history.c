@@ -1,7 +1,5 @@
 #include "subghz_history.h"
 #include <lib/subghz/receiver.h>
-#include <lib/flipper_format/flipper_format.h>
-#include <lib/flipper_format/flipper_format_stream.h>
 #include <lib/subghz/protocols/came.h>
 
 #include <furi.h>
@@ -116,13 +114,14 @@ const char* subghz_history_get_protocol_name(SubGhzHistory* instance, uint16_t i
     return string_get_cstr(instance->tmp_string);
 }
 
-const char* subghz_history_get_raw_data(SubGhzHistory* instance, uint16_t idx) {
+FlipperFormat* subghz_history_get_raw_data(SubGhzHistory* instance, uint16_t idx) {
     furi_assert(instance);
-    // instance->data.code_found = instance->history[idx].code_found;
-    // instance->data.code_count_bit = instance->history[idx].code_count_bit;
-    // instance->data.param1 = instance->history[idx].data1;
-    // return &instance->data;
-    return "TODO";
+    SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
+    if(item->flipper_string) {
+        return item->flipper_string;
+    } else {
+        return NULL;
+    }
 }
 bool subghz_history_get_text_space_left(SubGhzHistory* instance, string_t output) {
     furi_assert(instance);
@@ -217,7 +216,7 @@ bool subghz_history_add_to_history(
             FURI_LOG_E(TAG, "Missing Key");
             break;
         }
-        uint64_t data=0;
+        uint64_t data = 0;
         for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
             data = (data << 8) | key_data[i];
         }

@@ -72,8 +72,9 @@ static void subghz_test_packet_rssi_timer_callback(void* context) {
                 model->rssi = furi_hal_subghz_get_rssi();
                 model->packets = instance->packet_rx;
             } else if(model->status == SubGhzTestPacketModelStatusTx) {
-                model->packets = SUBGHZ_TEST_PACKET_COUNT -
-                                 subghz_encoder_princeton_for_testing_get_repeat_left(instance->encoder);
+                model->packets =
+                    SUBGHZ_TEST_PACKET_COUNT -
+                    subghz_encoder_princeton_for_testing_get_repeat_left(instance->encoder);
             }
             return true;
         });

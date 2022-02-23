@@ -34,6 +34,10 @@ bool subghz_protocol_decoder_base_serialize(
     uint32_t frequency,
     FuriHalSubGhzPreset preset);
 
+bool subghz_protocol_decoder_base_deserialize(
+    SubGhzProtocolDecoderBase* decoder_base,
+    FlipperFormat* flipper_format);
+
 uint8_t subghz_protocol_decoder_base_get_hash_data(SubGhzProtocolDecoderBase* decoder_base);
 
 // Encoder Base

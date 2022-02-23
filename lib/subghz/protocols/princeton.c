@@ -54,6 +54,7 @@ const SubGhzProtocolDecoder subghz_protocol_princeton_decoder = {
 
     .get_hash_data = subghz_protocol_decoder_princeton_get_hash_data,
     .serialize = subghz_protocol_decoder_princeton_serialize,
+    .deserialize = subghz_protocol_decoder_princeton_deserialize,
     .get_string = subghz_protocol_decoder_princeton_get_string,
     .save_file = subghz_protocol_princeton_save_file,
 };
@@ -275,18 +276,43 @@ uint8_t subghz_protocol_decoder_princeton_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-void subghz_protocol_decoder_princeton_serialize(
+bool subghz_protocol_decoder_princeton_serialize(
     void* context,
     FlipperFormat* flipper_format,
     uint32_t frequency,
     FuriHalSubGhzPreset preset) {
     furi_assert(context);
     SubGhzProtocolDecoderPrinceton* instance = context;
-    subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
-    if(!flipper_format_write_uint32(flipper_format, "TE", &instance->te, 1)){
+    bool res =
+        subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    if(res && !flipper_format_write_uint32(flipper_format, "TE", &instance->te, 1)) {
         FURI_LOG_E(TAG, "Unable to add TE");
+        res = false;
     }
-        
+    return res;
+}
+
+bool subghz_protocol_decoder_princeton_deserialize(void* context, FlipperFormat* flipper_format) {
+    furi_assert(context);
+    SubGhzProtocolDecoderPrinceton* instance = context;
+    bool res = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            FURI_LOG_E(TAG, "Deserialize error");
+            break;
+        }
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
+        if(!flipper_format_read_uint32(flipper_format, "TE", (uint32_t*)&instance->te, 1)) {
+            FURI_LOG_E(TAG, "Missing TE");
+            break;
+        }
+        res = true;
+    } while(false);
+
+    return res;
 }
 
 void subghz_protocol_decoder_princeton_get_string(void* context, string_t output) {

@@ -51,6 +51,7 @@ const SubGhzProtocolDecoder subghz_protocol_somfy_keytis_decoder = {
 
     .get_hash_data = subghz_protocol_decoder_somfy_keytis_get_hash_data,
     .serialize = subghz_protocol_decoder_somfy_keytis_serialize,
+    .deserialize = subghz_protocol_decoder_somfy_keytis_deserialize,
     .get_string = subghz_protocol_decoder_somfy_keytis_get_string,
     .save_file = NULL,
 };
@@ -368,7 +369,6 @@ static const char* subghz_protocol_somfy_keytis_get_name_button(uint8_t btn) {
 //     return instance->press_duration_counter;
 // }
 
-
 uint8_t subghz_protocol_decoder_somfy_keytis_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyKeytis* instance = context;
@@ -376,14 +376,20 @@ uint8_t subghz_protocol_decoder_somfy_keytis_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-void subghz_protocol_decoder_somfy_keytis_serialize(
+bool subghz_protocol_decoder_somfy_keytis_serialize(
     void* context,
     FlipperFormat* flipper_format,
     uint32_t frequency,
     FuriHalSubGhzPreset preset) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyKeytis* instance = context;
-    subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    return subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+}
+
+bool subghz_protocol_decoder_somfy_keytis_deserialize(void* context, FlipperFormat* flipper_format) {
+    furi_assert(context);
+    SubGhzProtocolDecoderSomfyKeytis* instance = context;
+    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
 }
 
 void subghz_protocol_decoder_somfy_keytis_get_string(void* context, string_t output) {

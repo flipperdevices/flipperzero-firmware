@@ -54,6 +54,7 @@ const SubGhzProtocolDecoder subghz_protocol_star_line_decoder = {
 
     .get_hash_data = subghz_protocol_decoder_star_line_get_hash_data,
     .serialize = subghz_protocol_decoder_star_line_serialize,
+    .deserialize = subghz_protocol_decoder_star_line_deserialize,
     .get_string = subghz_protocol_decoder_star_line_get_string,
     .save_file = NULL,
 };
@@ -317,18 +318,39 @@ uint8_t subghz_protocol_decoder_star_line_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-void subghz_protocol_decoder_star_line_serialize(
+bool subghz_protocol_decoder_star_line_serialize(
     void* context,
     FlipperFormat* flipper_format,
     uint32_t frequency,
     FuriHalSubGhzPreset preset) {
     furi_assert(context);
     SubGhzProtocolDecoderStarLine* instance = context;
-    subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    subghz_protocol_star_line_check_remote_controller(
+        &instance->generic, instance->keystore, &instance->manufacture_name);
+    bool res =
+        subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
 
-    if(!flipper_format_write_string_cstr(flipper_format, "Manufacture", instance->manufacture_name)) {
+    if(res && !flipper_format_write_string_cstr(
+                  flipper_format, "Manufacture", instance->manufacture_name)) {
         FURI_LOG_E(TAG, "Unable to add manufacture name");
+        res = false;
     }
+    return res;
+}
+
+bool subghz_protocol_decoder_star_line_deserialize(void* context, FlipperFormat* flipper_format) {
+    furi_assert(context);
+    SubGhzProtocolDecoderStarLine* instance = context;
+    bool res = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            FURI_LOG_E(TAG, "Deserialize error");
+            break;
+        }
+        res = true;
+    } while(false);
+
+    return res;
 }
 
 void subghz_protocol_decoder_star_line_get_string(void* context, string_t output) {
