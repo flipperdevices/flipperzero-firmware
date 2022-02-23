@@ -1,8 +1,4 @@
 #include "subghz_history.h"
-//#include <lib/subghz/protocols/subghz_protocol_keeloq.h>
-//#include <lib/subghz/protocols/subghz_protocol_star_line.h>
-//#include <lib/subghz/protocols/subghz_protocol_princeton.h>
-// #include <lib/subghz/protocols/subghz_protocol_somfy_keytis.h>
 #include <lib/subghz/receiver.h>
 #include <lib/flipper_format/flipper_format.h>
 #include <lib/flipper_format/flipper_format_stream.h>
@@ -30,35 +26,17 @@ typedef struct {
     SubGhzHistoryItemArray_t data;
 } SubGhzHistoryStruct;
 
-//typedef struct SubGhzHistoryStruct SubGhzHistoryStruct;
-
-// typedef struct {
-//     const char* name;
-//     const char* manufacture_name;
-//     uint8_t type_protocol;
-//     uint8_t code_count_bit;
-//     uint64_t code_found;
-//     uint32_t data1;
-//     FuriHalSubGhzPreset preset;
-//     uint32_t real_frequency;
-// } SubGhzHistoryStruct;
-
 struct SubGhzHistory {
     uint32_t last_update_timestamp;
     uint16_t last_index_write;
     uint8_t code_last_hash_data;
     string_t tmp_string;
-    //FlipperFormat* flipper_format;
-    //Stream* stream;
     SubGhzHistoryStruct* history;
-    //SubGhzProtocolCommonLoad data;
 };
 
 SubGhzHistory* subghz_history_alloc(void) {
     SubGhzHistory* instance = malloc(sizeof(SubGhzHistory));
     string_init(instance->tmp_string);
-    //instance->flipper_format = flipper_format_string_alloc();
-
     instance->history = malloc(sizeof(SubGhzHistoryStruct));
     SubGhzHistoryItemArray_init(instance->history->data);
     return instance;
@@ -239,7 +217,7 @@ bool subghz_history_add_to_history(
             FURI_LOG_E(TAG, "Missing Key");
             break;
         }
-        uint64_t data;
+        uint64_t data=0;
         for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
             data = (data << 8) | key_data[i];
         }

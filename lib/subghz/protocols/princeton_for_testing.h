@@ -19,7 +19,9 @@ SubGhzEncoderPrinceton* subghz_encoder_princeton_for_testing_alloc();
  */
 void subghz_encoder_princeton_for_testing_free(SubGhzEncoderPrinceton* instance);
 
-void subghz_encoder_princeton_for_testing_stop(SubGhzEncoderPrinceton* instance, uint32_t time_stop);
+void subghz_encoder_princeton_for_testing_stop(
+    SubGhzEncoderPrinceton* instance,
+    uint32_t time_stop);
 
 /** Set new encoder params
  * @param instance - SubGhzEncoderPrinceton instance

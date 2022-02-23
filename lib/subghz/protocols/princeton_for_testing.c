@@ -47,7 +47,9 @@ void subghz_encoder_princeton_for_testing_free(SubGhzEncoderPrinceton* instance)
     free(instance);
 }
 
-void subghz_encoder_princeton_for_testing_stop(SubGhzEncoderPrinceton* instance, uint32_t time_stop) {
+void subghz_encoder_princeton_for_testing_stop(
+    SubGhzEncoderPrinceton* instance,
+    uint32_t time_stop) {
     instance->time_stop = time_stop;
 }
 
@@ -164,7 +166,6 @@ LevelDuration subghz_encoder_princeton_for_testing_yield(void* context) {
     return ret;
 }
 
-
 struct SubGhzDecoderPrinceton {
     const char* name;
     uint16_t te_long;
@@ -185,7 +186,6 @@ struct SubGhzDecoderPrinceton {
     SubGhzDecoderPrincetonCallback callback;
     void* context;
 };
-
 
 SubGhzDecoderPrinceton* subghz_decoder_princeton_for_testing_alloc(void) {
     SubGhzDecoderPrinceton* instance = malloc(sizeof(SubGhzDecoderPrinceton));
@@ -216,7 +216,8 @@ void subghz_decoder_princeton_for_testing_reset(SubGhzDecoderPrinceton* instance
     instance->parser_step = PrincetonDecoderStepReset;
 }
 
-static void subghz_decoder_princeton_for_testing_add_bit(SubGhzDecoderPrinceton* instance, uint8_t bit) {
+static void
+    subghz_decoder_princeton_for_testing_add_bit(SubGhzDecoderPrinceton* instance, uint8_t bit) {
     instance->code_found = instance->code_found << 1 | bit;
     instance->code_count_bit++;
 }
@@ -227,8 +228,8 @@ void subghz_decoder_princeton_for_testing_parse(
     uint32_t duration) {
     switch(instance->parser_step) {
     case PrincetonDecoderStepReset:
-        if((!level) && (DURATION_DIFF(duration, instance->te_short * 36) <
-                        instance->te_delta * 36)) {
+        if((!level) &&
+           (DURATION_DIFF(duration, instance->te_short * 36) < instance->te_delta * 36)) {
             //Found Preambula
             instance->parser_step = PrincetonDecoderStepSaveDuration;
             instance->code_found = 0;
@@ -248,8 +249,7 @@ void subghz_decoder_princeton_for_testing_parse(
         if(!level) {
             if(duration >= (instance->te_short * 10 + instance->te_delta)) {
                 instance->parser_step = PrincetonDecoderStepSaveDuration;
-                if(instance->code_count_bit ==
-                   instance->code_min_count_bit_for_found) {
+                if(instance->code_count_bit == instance->code_min_count_bit_for_found) {
                     instance->te /= (instance->code_count_bit * 4 + 1);
 
                     instance->code_last_found = instance->code_found;
@@ -257,9 +257,7 @@ void subghz_decoder_princeton_for_testing_parse(
                     instance->serial = instance->code_found >> 4;
                     instance->btn = (uint8_t)instance->code_found & 0x00000F;
 
-                    if(instance->callback)
-                        instance->callback(
-                            instance, instance->context);
+                    if(instance->callback) instance->callback(instance, instance->context);
                 }
                 instance->code_found = 0;
                 instance->code_count_bit = 0;
@@ -269,15 +267,12 @@ void subghz_decoder_princeton_for_testing_parse(
 
             instance->te += duration;
 
-            if((DURATION_DIFF(instance->te_last, instance->te_short) <
-                instance->te_delta) &&
-               (DURATION_DIFF(duration, instance->te_long) <
-                instance->te_delta * 3)) {
+            if((DURATION_DIFF(instance->te_last, instance->te_short) < instance->te_delta) &&
+               (DURATION_DIFF(duration, instance->te_long) < instance->te_delta * 3)) {
                 subghz_decoder_princeton_for_testing_add_bit(instance, 0);
                 instance->parser_step = PrincetonDecoderStepSaveDuration;
             } else if(
-                (DURATION_DIFF(instance->te_last, instance->te_long) <
-                 instance->te_delta * 3) &&
+                (DURATION_DIFF(instance->te_last, instance->te_long) < instance->te_delta * 3) &&
                 (DURATION_DIFF(duration, instance->te_short) < instance->te_delta)) {
                 subghz_decoder_princeton_for_testing_add_bit(instance, 1);
                 instance->parser_step = PrincetonDecoderStepSaveDuration;
