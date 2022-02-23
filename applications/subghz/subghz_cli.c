@@ -210,7 +210,7 @@ static void subghz_cli_command_rx_callback(
 
     string_t text;
     string_init(text);
-    subghz_protocol_decoder_base_serialize(decoder_base, text);
+    subghz_protocol_decoder_base_get_string(decoder_base, text);
     subghz_receiver_reset(receiver);
     printf("%s", string_get_cstr(text));
     string_clear(text);

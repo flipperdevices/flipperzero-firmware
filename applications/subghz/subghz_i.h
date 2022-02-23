@@ -145,8 +145,8 @@ typedef enum {
     SubGhzViewIdTestPacket,
 } SubGhzViewId;
 
-bool subghz_set_pteset(SubGhz* subghz, const char* preset);
-bool subghz_get_preset_name(SubGhz* subghz, string_t preset);
+bool subghz_set_preset(SubGhz* subghz, const char* preset);
+//bool subghz_get_preset_name(SubGhz* subghz, string_t preset);
 void subghz_get_frequency_modulation(SubGhz* subghz, string_t frequency, string_t modulation);
 void subghz_begin(SubGhz* subghz, FuriHalSubGhzPreset preset);
 uint32_t subghz_rx(SubGhz* subghz, uint32_t frequency);

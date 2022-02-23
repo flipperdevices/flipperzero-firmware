@@ -49,12 +49,20 @@ void subghz_protocol_decoder_came_reset(void* context);
  */
 void subghz_protocol_decoder_came_feed(void* context, bool level, uint32_t duration);
 
+uint8_t subghz_protocol_decoder_came_get_hash_data(void* context);
+
 /** Outputting information from the parser
  * 
  * @param instance - SubGhzProtocolCame* instance
  * @param output   - output string
  */
-void subghz_protocol_decoder_came_serialization(void* context, string_t output);
+void subghz_protocol_decoder_came_serialize(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset);
+
+void subghz_protocol_decoder_came_get_string(void* context, string_t output);
 
 /** Adding data to a file
  * 

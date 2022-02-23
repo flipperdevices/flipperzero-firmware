@@ -52,7 +52,9 @@ const SubGhzProtocolDecoder subghz_protocol_raw_decoder = {
     .feed = subghz_protocol_decoder_raw_feed,
     .reset = subghz_protocol_decoder_raw_reset,
 
-    .serialize = subghz_protocol_decoder_raw_serialization,
+    .get_hash_data = NULL,
+    .serialize = NULL,
+    .get_string = subghz_protocol_decoder_raw_get_string,
     .save_file = NULL,
 };
 
@@ -88,14 +90,14 @@ bool subghz_protocol_raw_save_to_file_init(
     SubGhzProtocolDecoderRAW* instance,
     const char* dev_name,
     uint32_t frequency,
-    const char* preset) {
+    FuriHalSubGhzPreset preset) {
     furi_assert(instance);
 
     instance->storage = furi_record_open("storage");
     instance->flipper_file = flipper_format_file_alloc(instance->storage);
 
-    string_t dev_file_name;
-    string_init(dev_file_name);
+    string_t temp_str;
+    string_init(temp_str);
     bool init = false;
 
     do {
@@ -110,16 +112,16 @@ bool subghz_protocol_raw_save_to_file_init(
 
         string_set(instance->file_name, dev_name);
         // First remove subghz device file if it was saved
-        string_printf(
-            dev_file_name, "%s/%s%s", SUBGHZ_RAW_FOLDER, dev_name, SUBGHZ_APP_EXTENSION);
+        string_printf(temp_str, "%s/%s%s", SUBGHZ_RAW_FOLDER, dev_name, SUBGHZ_APP_EXTENSION);
 
-        if(!storage_simply_remove(instance->storage, string_get_cstr(dev_file_name))) {
+        if(!storage_simply_remove(instance->storage, string_get_cstr(temp_str))) {
             break;
         }
 
         // Open file
-        if(!flipper_format_file_open_always(instance->flipper_file, string_get_cstr(dev_file_name))) {
-            FURI_LOG_E(TAG, "Unable to open file for write: %s", dev_file_name);
+        if(!flipper_format_file_open_always(
+               instance->flipper_file, string_get_cstr(temp_str))) {
+            FURI_LOG_E(TAG, "Unable to open file for write: %s", temp_str);
             break;
         }
 
@@ -133,8 +135,10 @@ bool subghz_protocol_raw_save_to_file_init(
             FURI_LOG_E(TAG, "Unable to add Frequency");
             break;
         }
-
-        if(!flipper_format_write_string_cstr(instance->flipper_file, "Preset", preset)) {
+        if(!subghz_block_generic_get_preset_name(preset,temp_str)) {
+            break;
+        }
+        if(!flipper_format_write_string_cstr(instance->flipper_file, "Preset", string_get_cstr(temp_str))) {
             FURI_LOG_E(TAG, "Unable to add Preset");
             break;
         }
@@ -151,7 +155,7 @@ bool subghz_protocol_raw_save_to_file_init(
         init = true;
     } while(0);
 
-    string_clear(dev_file_name);
+    string_clear(temp_str);
 
     return init;
 }
@@ -239,7 +243,7 @@ void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t durati
     }
 }
 
-void subghz_protocol_decoder_raw_serialization(void* context, string_t output) {
+void subghz_protocol_decoder_raw_get_string(void* context, string_t output) {
     furi_assert(context);
     //SubGhzProtocolDecoderRAW* instance = context;
     //ToDo no use

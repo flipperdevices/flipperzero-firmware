@@ -76,7 +76,7 @@ uint8_t subghz_history_get_type_protocol(SubGhzHistory* instance, uint16_t idx);
  * @param idx       - record index  
  * @return name      - const char* name protocol  
  */
-const char* subghz_history_get_name(SubGhzHistory* instance, uint16_t idx);
+const char* subghz_history_get_protocol_name(SubGhzHistory* instance, uint16_t idx);
 
 /** Get string item menu to history[idx]
  * 

@@ -8,7 +8,8 @@
 #include <lib/toolbox/level_duration.h>
 
 #include "environment.h"
-
+#include <furi.h>
+#include <furi_hal.h>
 
 #define SUBGHZ_APP_FOLDER "/any/subghz"
 #define SUBGHZ_RAW_FOLDER "/ext/subghz"
@@ -34,12 +35,18 @@ typedef bool (*SubGhzSaveFile)(void* context, FlipperFormat* flipper_file);
 typedef bool (*SubGhzLoadFile)(void* context, FlipperFormat* flipper_file, const char* file_path);
 
 // Serialize and Deserialize
-typedef void (*SubGhzSerialize)(void* decoder, string_t output);
+typedef void (*SubGhzSerialize)(
+    void* decoder,
+    FlipperFormat* flipper_format,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset);
 typedef void (*SubGhzDeserialize)(void* decoder, string_t output);
 
 // Decoder specific
 typedef void (*SubGhzDecoderFeed)(void* decoder, bool level, uint32_t duration);
 typedef void (*SubGhzDecoderReset)(void* decoder);
+typedef uint8_t (*SubGhzGetHashData)(void* decoder);
+typedef void (*SubGhzGetString)(void* decoder, string_t output);
 
 // Encoder specific
 typedef void (*SubGhzEncoderStop)(void* encoder);
@@ -53,6 +60,8 @@ typedef struct {
     SubGhzDecoderFeed feed;
     SubGhzDecoderReset reset;
 
+    SubGhzGetHashData get_hash_data;
+    SubGhzGetString get_string;
     SubGhzSerialize serialize;
     SubGhzSaveFile save_file;
 } SubGhzProtocolDecoder;
@@ -77,12 +86,15 @@ typedef enum {
 
 typedef enum {
     SubGhzProtocolFlag_RAW = (1 << 0),
-    SubGhzProtocolFlag_Decodable =(1 << 1),
+    SubGhzProtocolFlag_Decodable = (1 << 1),
     SubGhzProtocolFlag_315 = (1 << 2),
     SubGhzProtocolFlag_433 = (1 << 3),
     SubGhzProtocolFlag_868 = (1 << 4),
     SubGhzProtocolFlag_AM = (1 << 5),
     SubGhzProtocolFlag_FM = (1 << 6),
+    SubGhzProtocolFlag_Save = (1 << 7),
+    SubGhzProtocolFlag_Load = (1 << 8),
+    SubGhzProtocolFlag_Send = (1 << 9),
 } SubGhzProtocolFlag;
 
 typedef struct {

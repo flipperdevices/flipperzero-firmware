@@ -24,9 +24,17 @@ void subghz_protocol_decoder_base_set_decoder_callback(
     SubGhzProtocolDecoderBaseRxCallback callback,
     void* context);
 
-bool subghz_protocol_decoder_base_serialize(
+bool subghz_protocol_decoder_base_get_string(
     SubGhzProtocolDecoderBase* decoder_base,
     string_t output);
+
+bool subghz_protocol_decoder_base_serialize(
+    SubGhzProtocolDecoderBase* decoder_base,
+    FlipperFormat* flipper_format,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset);
+
+uint8_t subghz_protocol_decoder_base_get_hash_data(SubGhzProtocolDecoderBase* decoder_base);
 
 // Encoder Base
 typedef struct SubGhzProtocolEncoderBase SubGhzProtocolEncoderBase;

@@ -15,4 +15,10 @@ void* subghz_protocol_decoder_kia_alloc(SubGhzEnvironment* environment);
 void subghz_protocol_decoder_kia_free(void* context);
 void subghz_protocol_decoder_kia_reset(void* context);
 void subghz_protocol_decoder_kia_feed(void* context, bool level, uint32_t duration);
-void subghz_protocol_decoder_kia_serialization(void* context, string_t output);
+uint8_t subghz_protocol_decoder_kia_get_hash_data(void* context);
+void subghz_protocol_decoder_kia_serialize(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset);
+void subghz_protocol_decoder_kia_get_string(void* context, string_t output);

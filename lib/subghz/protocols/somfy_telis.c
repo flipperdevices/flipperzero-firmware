@@ -48,7 +48,9 @@ const SubGhzProtocolDecoder subghz_protocol_somfy_telis_decoder = {
     .feed = subghz_protocol_decoder_somfy_telis_feed,
     .reset = subghz_protocol_decoder_somfy_telis_reset,
 
-    .serialize = subghz_protocol_decoder_somfy_telis_serialization,
+    .get_hash_data = subghz_protocol_decoder_somfy_telis_get_hash_data,
+    .serialize = subghz_protocol_decoder_somfy_telis_serialize,
+    .get_string = subghz_protocol_decoder_somfy_telis_get_string,
     .save_file = NULL,
 };
 
@@ -73,8 +75,7 @@ const SubGhzProtocol subghz_protocol_somfy_telis = {
 };
 
 void* subghz_protocol_decoder_somfy_telis_alloc(SubGhzEnvironment* environment) {
-    SubGhzProtocolDecoderSomfyTelis* instance =
-        malloc(sizeof(SubGhzProtocolDecoderSomfyTelis));
+    SubGhzProtocolDecoderSomfyTelis* instance = malloc(sizeof(SubGhzProtocolDecoderSomfyTelis));
     instance->base.protocol = &subghz_protocol_somfy_telis;
     instance->generic.protocol_name = instance->base.protocol->name;
 
@@ -319,7 +320,24 @@ static const char* subghz_protocol_somfy_telis_get_name_button(uint8_t btn) {
     return btn <= 0xf ? name_btn[btn] : name_btn[0];
 }
 
-void subghz_protocol_decoder_somfy_telis_serialization(void* context, string_t output) {
+uint8_t subghz_protocol_decoder_somfy_telis_get_hash_data(void* context) {
+    furi_assert(context);
+    SubGhzProtocolDecoderSomfyTelis* instance = context;
+    return subghz_protocol_blocks_get_hash_data(
+        &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
+}
+
+void subghz_protocol_decoder_somfy_telis_serialize(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset) {
+    furi_assert(context);
+    SubGhzProtocolDecoderSomfyTelis* instance = context;
+    subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+}
+
+void subghz_protocol_decoder_somfy_telis_get_string(void* context, string_t output) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyTelis* instance = context;
 

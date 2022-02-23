@@ -15,4 +15,10 @@ void* subghz_protocol_decoder_scher_khan_alloc(SubGhzEnvironment* environment);
 void subghz_protocol_decoder_scher_khan_free(void* context);
 void subghz_protocol_decoder_scher_khan_reset(void* context);
 void subghz_protocol_decoder_scher_khan_feed(void* context, bool level, uint32_t duration);
-void subghz_protocol_decoder_scher_khan_serialization(void* context, string_t output);
+uint8_t subghz_protocol_decoder_scher_khan_get_hash_data(void* context);
+void subghz_protocol_decoder_scher_khan_serialize(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset);
+void subghz_protocol_decoder_scher_khan_get_string(void* context, string_t output);

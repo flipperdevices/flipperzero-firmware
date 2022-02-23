@@ -10,7 +10,7 @@
 #include "../notification/notification.h"
 #include "views/receiver.h"
 
-bool subghz_set_pteset(SubGhz* subghz, const char* preset) {
+bool subghz_set_preset(SubGhz* subghz, const char* preset) {
     if(!strcmp(preset, "FuriHalSubGhzPresetOok270Async")) {
         subghz->txrx->preset = FuriHalSubGhzPresetOok270Async;
     } else if(!strcmp(preset, "FuriHalSubGhzPresetOok650Async")) {
@@ -26,29 +26,29 @@ bool subghz_set_pteset(SubGhz* subghz, const char* preset) {
     return true;
 }
 
-bool subghz_get_preset_name(SubGhz* subghz, string_t preset) {
-    const char* preset_name;
-    switch(subghz->txrx->preset) {
-    case FuriHalSubGhzPresetOok270Async:
-        preset_name = "FuriHalSubGhzPresetOok270Async";
-        break;
-    case FuriHalSubGhzPresetOok650Async:
-        preset_name = "FuriHalSubGhzPresetOok650Async";
-        break;
-    case FuriHalSubGhzPreset2FSKDev238Async:
-        preset_name = "FuriHalSubGhzPreset2FSKDev238Async";
-        break;
-    case FuriHalSubGhzPreset2FSKDev476Async:
-        preset_name = "FuriHalSubGhzPreset2FSKDev476Async";
-        break;
-    default:
-        FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unknown preset");
-        return false;
-        break;
-    }
-    string_set(preset, preset_name);
-    return true;
-}
+// bool subghz_get_preset_name(SubGhz* subghz, string_t preset) {
+//     const char* preset_name;
+//     switch(subghz->txrx->preset) {
+//     case FuriHalSubGhzPresetOok270Async:
+//         preset_name = "FuriHalSubGhzPresetOok270Async";
+//         break;
+//     case FuriHalSubGhzPresetOok650Async:
+//         preset_name = "FuriHalSubGhzPresetOok650Async";
+//         break;
+//     case FuriHalSubGhzPreset2FSKDev238Async:
+//         preset_name = "FuriHalSubGhzPreset2FSKDev238Async";
+//         break;
+//     case FuriHalSubGhzPreset2FSKDev476Async:
+//         preset_name = "FuriHalSubGhzPreset2FSKDev476Async";
+//         break;
+//     default:
+//         FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unknown preset");
+//         return false;
+//         break;
+//     }
+//     string_set(preset, preset_name);
+//     return true;
+// }
 
 void subghz_get_frequency_modulation(SubGhz* subghz, string_t frequency, string_t modulation) {
     furi_assert(subghz);
@@ -234,7 +234,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             FURI_LOG_E(SUBGHZ_PARSER_TAG, "Missing Preset");
             break;
         }
-        if(!subghz_set_pteset(subghz, string_get_cstr(temp_str))) {
+        if(!subghz_set_preset(subghz, string_get_cstr(temp_str))) {
             break;
         }
 

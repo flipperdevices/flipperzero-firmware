@@ -237,12 +237,12 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if(subghz->txrx->rx_key_state != SubGhzRxKeyStateIDLE) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
-                subghz_get_preset_name(subghz, subghz->error_str);
+                //subghz_get_preset_name(subghz, subghz->error_str);
                 if(subghz_protocol_raw_save_to_file_init(
                        (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result,
                        RAW_FILE_NAME,
                        subghz->txrx->frequency,
-                       string_get_cstr(subghz->error_str))) {
+                       subghz->txrx->preset)) {
                     DOLPHIN_DEED(DolphinDeedSubGhzRawRec);
                     if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
                        (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {

@@ -52,7 +52,9 @@ const SubGhzProtocolDecoder subghz_protocol_princeton_decoder = {
     .feed = subghz_protocol_decoder_princeton_feed,
     .reset = subghz_protocol_decoder_princeton_reset,
 
-    .serialize = subghz_protocol_decoder_princeton_serialization,
+    .get_hash_data = subghz_protocol_decoder_princeton_get_hash_data,
+    .serialize = subghz_protocol_decoder_princeton_serialize,
+    .get_string = subghz_protocol_decoder_princeton_get_string,
     .save_file = subghz_protocol_princeton_save_file,
 };
 
@@ -266,7 +268,28 @@ void subghz_protocol_decoder_princeton_feed(void* context, bool level, uint32_t 
 //     return instance->te;
 // }
 
-void subghz_protocol_decoder_princeton_serialization(void* context, string_t output) {
+uint8_t subghz_protocol_decoder_princeton_get_hash_data(void* context) {
+    furi_assert(context);
+    SubGhzProtocolDecoderPrinceton* instance = context;
+    return subghz_protocol_blocks_get_hash_data(
+        &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
+}
+
+void subghz_protocol_decoder_princeton_serialize(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset) {
+    furi_assert(context);
+    SubGhzProtocolDecoderPrinceton* instance = context;
+    subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    if(!flipper_format_write_uint32(flipper_format, "TE", &instance->te, 1)){
+        FURI_LOG_E(TAG, "Unable to add TE");
+    }
+        
+}
+
+void subghz_protocol_decoder_princeton_get_string(void* context, string_t output) {
     furi_assert(context);
     SubGhzProtocolDecoderPrinceton* instance = context;
 

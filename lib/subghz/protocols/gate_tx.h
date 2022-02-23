@@ -24,7 +24,13 @@ void* subghz_protocol_decoder_gate_tx_alloc(SubGhzEnvironment* environment);
 void subghz_protocol_decoder_gate_tx_free(void* context);
 void subghz_protocol_decoder_gate_tx_reset(void* context);
 void subghz_protocol_decoder_gate_tx_feed(void* context, bool level, uint32_t duration);
-void subghz_protocol_decoder_gate_tx_serialization(void* context, string_t output);
+uint8_t subghz_protocol_decoder_gate_tx_get_hash_data(void* context);
+void subghz_protocol_decoder_gate_tx_serialize(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset);
+void subghz_protocol_decoder_gate_tx_get_string(void* context, string_t output);
 bool subghz_protocol_gate_tx_save_file(void* context, FlipperFormat* flipper_file);
 bool subghz_protocol_gate_tx_load_file(
     void* context,

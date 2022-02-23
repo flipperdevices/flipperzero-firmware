@@ -172,6 +172,10 @@ SubGhz* subghz_alloc() {
     subghz->txrx->worker = subghz_worker_alloc();
 
     subghz->txrx->environment = subghz_environment_alloc();
+    subghz_environment_set_came_atomo_rainbow_table_file_name(
+        subghz->txrx->environment, "/ext/subghz/assets/came_atomo");
+    subghz_environment_set_nice_flor_s_rainbow_table_file_name(
+        subghz->txrx->environment, "/ext/subghz/assets/nice_flor_s");
     subghz->txrx->receiver = subghz_receiver_alloc(subghz->txrx->environment);
     subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_Decodable);
 
@@ -273,14 +277,10 @@ int32_t subghz_app(void* p) {
     SubGhz* subghz = subghz_alloc();
 
     //Load database
-    bool load_database =
-        subghz_environment_load_keystore(subghz->txrx->environment, "/ext/subghz/assets/keeloq_mfcodes");
-    subghz_environment_load_keystore(subghz->txrx->environment, "/ext/subghz/assets/keeloq_mfcodes_user");
-    subghz_environment_set_came_atomo_rainbow_table_file_name(
-        subghz->txrx->environment, "/ext/subghz/assets/came_atomo");
-    subghz_environment_set_nice_flor_s_rainbow_table_file_name(
-        subghz->txrx->environment, "/ext/subghz/assets/nice_flor_s");
-        
+    bool load_database = subghz_environment_load_keystore(
+        subghz->txrx->environment, "/ext/subghz/assets/keeloq_mfcodes");
+    subghz_environment_load_keystore(
+        subghz->txrx->environment, "/ext/subghz/assets/keeloq_mfcodes_user");
     // Check argument and run corresponding scene
     if(p && subghz_key_load(subghz, p)) {
         string_t filename;
@@ -295,8 +295,8 @@ int32_t subghz_app(void* p) {
         //     subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWLoad;
         //     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
         // } else {
-            //Load transmitter TX
-            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
+        //Load transmitter TX
+        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
         //}
     } else {
         if(load_database) {

@@ -20,22 +20,21 @@ void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, v
 
 static bool subghz_scene_receiver_info_update_parser(void* context) {
     //ToDo Fix
-    // SubGhz* subghz = context;
-    // //ToDo получение имени из истоии
-    // subghz->txrx->protocol_result = subghz_parser_get_by_name(
-    //     subghz->txrx->parser,
-    //     subghz_history_get_name(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
+    SubGhz* subghz = context;
 
-    // if(subghz->txrx->protocol_result->to_load_protocol != NULL) {
-    //     subghz->txrx->protocol_result->to_load_protocol(
-    //         subghz->txrx->protocol_result,
-    //         subghz_history_get_raw_data(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
-    //     subghz->txrx->frequency =
-    //         subghz_history_get_frequency(subghz->txrx->history, subghz->txrx->idx_menu_chosen);
-    //     subghz->txrx->preset =
-    //         subghz_history_get_preset(subghz->txrx->history, subghz->txrx->idx_menu_chosen);
-    //     return true;
-    // }
+    // //ToDo получение имени из истоии
+
+    subghz->txrx->decoder_result = subghz_receiver_search_decoder_base_by_name(
+        subghz->txrx->receiver,
+        subghz_history_get_protocol_name(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
+    if(subghz->txrx->decoder_result) {
+        //ToDo //десериалайз
+        subghz->txrx->frequency =
+            subghz_history_get_frequency(subghz->txrx->history, subghz->txrx->idx_menu_chosen);
+        subghz->txrx->preset =
+            subghz_history_get_preset(subghz->txrx->history, subghz->txrx->idx_menu_chosen);
+        return true;
+    }
     return false;
 }
 
@@ -70,31 +69,32 @@ void subghz_scene_receiver_info_on_enter(void* context) {
             AlignTop,
             FontSecondary,
             string_get_cstr(modulation_str));
-        //ToDo Fix
-        //subghz->txrx->protocol_result->to_string(subghz->txrx->protocol_result, text);
+        subghz_protocol_decoder_base_get_string(subghz->txrx->decoder_result, text);
         widget_add_string_multiline_element(
             subghz->widget, 0, 0, AlignLeft, AlignTop, FontSecondary, string_get_cstr(text));
 
         string_clear(frequency_str);
         string_clear(modulation_str);
         string_clear(text);
-        //ToDo Fix
-        // if(subghz->txrx->protocol_result && subghz->txrx->protocol_result->to_save_file &&
-        //    strcmp(subghz->txrx->protocol_result->name, "KeeLoq")) {
-        //     widget_add_button_element(
-        //         subghz->widget,
-        //         GuiButtonTypeRight,
-        //         "Save",
-        //         subghz_scene_receiver_info_callback,
-        //         subghz);
-        //     widget_add_button_element(
-        //         subghz->widget,
-        //         GuiButtonTypeCenter,
-        //         "Send",
-        //         subghz_scene_receiver_info_callback,
-        //         subghz);
-        // }
 
+        if((subghz->txrx->decoder_result->protocol->flag == SubGhzProtocolFlag_Save) &&
+           subghz->txrx->decoder_result->protocol->decoder->save_file) {
+            widget_add_button_element(
+                subghz->widget,
+                GuiButtonTypeRight,
+                "Save",
+                subghz_scene_receiver_info_callback,
+                subghz);
+        }
+        if((subghz->txrx->decoder_result->protocol->flag == SubGhzProtocolFlag_Send) &&
+           subghz->txrx->decoder_result->protocol->encoder->load) {
+            widget_add_button_element(
+                subghz->widget,
+                GuiButtonTypeCenter,
+                "Send",
+                subghz_scene_receiver_info_callback,
+                subghz);
+        }
     } else {
         widget_add_icon_element(subghz->widget, 32, 12, &I_DolphinFirstStart7_61x51);
         widget_add_string_element(

@@ -19,7 +19,7 @@ bool subghz_protocol_raw_save_to_file_init(
     SubGhzProtocolDecoderRAW* instance,
     const char* dev_name,
     uint32_t frequency,
-    const char* preset);
+    FuriHalSubGhzPreset preset);
 
 void subghz_protocol_raw_save_to_file_stop(SubGhzProtocolDecoderRAW* instance);
 size_t subghz_protocol_raw_get_sample_write(SubGhzProtocolDecoderRAW* instance);
@@ -27,7 +27,7 @@ void* subghz_protocol_decoder_raw_alloc(SubGhzEnvironment* environment);
 void subghz_protocol_decoder_raw_free(void* context);
 void subghz_protocol_decoder_raw_reset(void* context);
 void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t duration);
-void subghz_protocol_decoder_raw_serialization(void* context, string_t output);
+void subghz_protocol_decoder_raw_get_string(void* context, string_t output);
 
 void* subghz_protocol_encoder_raw_alloc(SubGhzEnvironment* environment);
 void subghz_protocol_encoder_raw_free(void* context);

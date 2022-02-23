@@ -49,7 +49,9 @@ const SubGhzProtocolDecoder subghz_protocol_came_decoder = {
     .feed = subghz_protocol_decoder_came_feed,
     .reset = subghz_protocol_decoder_came_reset,
 
-    .serialize = subghz_protocol_decoder_came_serialization,
+    .get_hash_data = subghz_protocol_decoder_came_get_hash_data,
+    .serialize = subghz_protocol_decoder_came_serialize,
+    .get_string = subghz_protocol_decoder_came_get_string,
     .save_file = subghz_protocol_came_save_file,
 };
 
@@ -257,7 +259,24 @@ void subghz_protocol_decoder_came_feed(void* context, bool level, uint32_t durat
     }
 }
 
-void subghz_protocol_decoder_came_serialization(void* context, string_t output) {
+uint8_t subghz_protocol_decoder_came_get_hash_data(void* context) {
+    furi_assert(context);
+    SubGhzProtocolDecoderCame* instance = context;
+    return subghz_protocol_blocks_get_hash_data(
+        &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
+}
+
+void subghz_protocol_decoder_came_serialize(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset) {
+    furi_assert(context);
+    SubGhzProtocolDecoderCame* instance = context;
+    subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+}
+
+void subghz_protocol_decoder_came_get_string(void* context, string_t output) {
     furi_assert(context);
     SubGhzProtocolDecoderCame* instance = context;
 

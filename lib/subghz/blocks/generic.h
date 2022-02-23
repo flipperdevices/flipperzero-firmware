@@ -5,6 +5,8 @@
 #include <stddef.h>
 
 #include <lib/flipper_format/flipper_format.h>
+#include "furi.h"
+#include "furi_hal.h"
 
 typedef struct SubGhzBlockGeneric SubGhzBlockGeneric;
 
@@ -17,6 +19,15 @@ struct SubGhzBlockGeneric {
     uint16_t cnt;
 };
 
+bool subghz_block_generic_set_preset(const char* preset);
+
+bool subghz_block_generic_get_preset_name(FuriHalSubGhzPreset preset, string_t preset_str);
+
+bool subghz_block_generic_serialize(
+    SubGhzBlockGeneric* instance,
+    FlipperFormat* flipper_format,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset);
 
 bool subghz_block_generic_load_file(SubGhzBlockGeneric* instance, FlipperFormat* flipper_file);
 

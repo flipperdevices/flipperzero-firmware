@@ -24,7 +24,13 @@ void* subghz_protocol_decoder_nero_sketch_alloc(SubGhzEnvironment* environment);
 void subghz_protocol_decoder_nero_sketch_free(void* context);
 void subghz_protocol_decoder_nero_sketch_reset(void* context);
 void subghz_protocol_decoder_nero_sketch_feed(void* context, bool level, uint32_t duration);
-void subghz_protocol_decoder_nero_sketch_serialization(void* context, string_t output);
+uint8_t subghz_protocol_decoder_nero_sketch_get_hash_data(void* context);
+void subghz_protocol_decoder_nero_sketch_serialize(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset);
+void subghz_protocol_decoder_nero_sketch_get_string(void* context, string_t output);
 bool subghz_protocol_nero_sketch_save_file(void* context, FlipperFormat* flipper_file);
 bool subghz_protocol_nero_sketch_load_file(
     void* context,
