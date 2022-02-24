@@ -8,12 +8,7 @@ extern "C" {
 /** Loading anonymous structure */
 typedef struct Loading Loading;
 
-/** Loading result callback type
- * @warning    comes from GUI thread
- */
-typedef void (*LoadingBackCallback)(void*);
-
-/** Allocate and initialize dialog
+/** Allocate and initialize
  *
  * This View used to show system is doing some processing
  *
