@@ -21,14 +21,18 @@
     #define LED_PORT_CLK_ENABLE     __HAL_RCC_GPIOD_CLK_ENABLE
 #endif
 
-void SysTick_Handler(void)
+//This prevent name mangling for functions used in C/assembly files.
+extern "C"
 {
-    HAL_IncTick();
-
-    // 1 Hz blinking
-    if ((HAL_GetTick() % 500) == 0)
+    void SysTick_Handler(void)
     {
-        HAL_GPIO_TogglePin(LED_PORT, LED_PIN);
+        HAL_IncTick();
+
+        // 1 Hz blinking
+        if ((HAL_GetTick() % 500) == 0)
+        {
+            HAL_GPIO_TogglePin(LED_PORT, LED_PIN);
+        }
     }
 }
 

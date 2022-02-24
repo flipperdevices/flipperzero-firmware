@@ -32,7 +32,7 @@ It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3
 * `blinky` ([examples/blinky](examples/blinky)) - blink led using STM32 HAL library and SysTick.
    It will compile a project for the `F4` family by default, but you can also compile for the
    `L0` and `F1` family by passing `BLINKY_L0_EXAMPLE=ON` or `BLINKY_F1_EXAMPLE=ON` to the CMake
-   generation call.
+   generation call. Using C++ instead of C is possible using `USE_CPP_FILE=ON`.
 * `freertos` ([examples/freertos](examples/freertos)) - blink led using STM32 HAL library and FreeRTOS.
    You need to specify at least one board by passing `FREERTOS_<BOARD>_EXAMPLE=ON` to CMake.
    Currently, the example can be built for the `H743ZI` and `F407VG` board targets.
@@ -109,8 +109,8 @@ STM32WB is a multi-cores device even if the second core is not accessible by end
 CMSIS consists of three main components:
 
 * Family-specific headers, e.g. `stm32f4xx.h`
-* Device type-specific startup sources (e.g. `startup_stm32f407xx.s`)
-* Device-specific linker scripts which requires information about memory sizes
+* Device type-specific startup sources (e.g. `startup_stm32f407xx.s`) (if ASM language is enabled)
+* Device-specific linker scripts which requires information about memory sizes (if ASM language is enabled)
 
 stm32-cmake uses modern CMake features notably imported targets and target properties.
 Every CMSIS component is CMake's target (aka library), which defines compiler definitions, compiler flags, include dirs, sources, etc. to build and propagate them as dependencies. So in a simple use-case all you need is to link your executable with library `CMSIS::STM32::<device>`:
