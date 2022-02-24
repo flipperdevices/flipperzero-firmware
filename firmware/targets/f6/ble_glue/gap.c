@@ -186,7 +186,11 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
             // Generate random PIN code
             uint32_t pin = rand() % 999999;
             aci_gap_pass_key_resp(gap->service.connection_handle, pin);
-            FURI_LOG_I(TAG, "Pass key request event. Pin: %06d", pin);
+            if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
+                FURI_LOG_I(TAG, "Pass key request event. Pin: ******");
+            } else {
+                FURI_LOG_I(TAG, "Pass key request event. Pin: %06d", pin);
+            }
             GapEvent event = {.type = GapEventTypePinCodeShow, .data.pin_code = pin};
             gap->on_event_cb(event, gap->context);
         } break;
@@ -463,7 +467,7 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
         return false;
     }
 
-    gap = furi_alloc(sizeof(Gap));
+    gap = malloc(sizeof(Gap));
     gap->config = config;
     srand(DWT->CYCCNT);
     // Create advertising timer
@@ -516,7 +520,7 @@ GapState gap_get_state() {
 
 void gap_start_scan(GapScanCallback callback, void* context) {
     furi_assert(callback);
-    gap_scan = furi_alloc(sizeof(GapScan));
+    gap_scan = malloc(sizeof(GapScan));
     gap_scan->callback = callback;
     gap_scan->context = context;
     // Scan interval 250 ms

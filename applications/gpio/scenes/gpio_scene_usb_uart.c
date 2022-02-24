@@ -18,7 +18,7 @@ void gpio_scene_usb_uart_on_enter(void* context) {
     GpioApp* app = context;
     uint32_t prev_state = scene_manager_get_scene_state(app->scene_manager, GpioAppViewUsbUart);
     if(prev_state == 0) {
-        scene_usb_uart = furi_alloc(sizeof(SceneUsbUartBridge));
+        scene_usb_uart = malloc(sizeof(SceneUsbUartBridge));
         scene_usb_uart->cfg.vcp_ch = 0; // TODO: settings load
         scene_usb_uart->cfg.uart_ch = 0;
         scene_usb_uart->cfg.flow_pins = 0;
@@ -33,6 +33,7 @@ void gpio_scene_usb_uart_on_enter(void* context) {
     gpio_usb_uart_set_callback(app->gpio_usb_uart, gpio_scene_usb_uart_callback, app);
     scene_manager_set_scene_state(app->scene_manager, GpioAppViewUsbUart, 0);
     view_dispatcher_switch_to_view(app->view_dispatcher, GpioAppViewUsbUart);
+    notification_message(app->notifications, &sequence_display_lock);
 }
 
 bool gpio_scene_usb_uart_on_event(void* context, SceneManagerEvent event) {
@@ -62,4 +63,5 @@ void gpio_scene_usb_uart_on_exit(void* context) {
         usb_uart_disable(app->usb_uart_bridge);
         free(scene_usb_uart);
     }
+    notification_message(app->notifications, &sequence_display_unlock);
 }

@@ -218,7 +218,7 @@ void irda_worker_rx_set_received_signal_callback(
 }
 
 IrdaWorker* irda_worker_alloc() {
-    IrdaWorker* instance = furi_alloc(sizeof(IrdaWorker));
+    IrdaWorker* instance = malloc(sizeof(IrdaWorker));
 
     instance->thread = furi_thread_alloc();
     furi_thread_set_name(instance->thread, "IrdaWorker");
@@ -320,6 +320,7 @@ void irda_worker_rx_enable_blink_on_receiving(IrdaWorker* instance, bool enable)
 void irda_worker_tx_start(IrdaWorker* instance) {
     furi_assert(instance);
     furi_assert(instance->state == IrdaWorkerStateIdle);
+    furi_assert(instance->tx.get_signal_callback);
 
     // size have to be greater than api hal irda async tx buffer size
     xStreamBufferSetTriggerLevel(instance->stream, sizeof(IrdaWorkerTiming));
