@@ -75,7 +75,7 @@ static void test_rpc_compare_messages(PB_Main* result, PB_Main* expected);
 static void test_rpc_decode_and_compare(MsgList_t expected_msg_list);
 static void test_rpc_free_msg_list(MsgList_t msg_list);
 static void test_rpc_session_close_callback(void* context);
-static void test_rpc_session_terminate_callback(void* context);
+static void test_rpc_session_terminated_callback(void* context);
 
 static void test_rpc_setup(void) {
     furi_check(!rpc);
@@ -93,7 +93,7 @@ static void test_rpc_setup(void) {
     rpc_session_context.close_session_semaphore = xSemaphoreCreateBinary();
     rpc_session_context.terminate_semaphore = xSemaphoreCreateBinary();
     rpc_session_set_close_callback(session, test_rpc_session_close_callback);
-    rpc_session_set_terminate_callback(session, test_rpc_session_terminate_callback);
+    rpc_session_set_terminated_callback(session, test_rpc_session_terminated_callback);
     rpc_session_set_context(session, &rpc_session_context);
 }
 
@@ -136,7 +136,7 @@ static void test_rpc_session_close_callback(void* context) {
     xSemaphoreGive(callbacks_context->close_session_semaphore);
 }
 
-static void test_rpc_session_terminate_callback(void* context) {
+static void test_rpc_session_terminated_callback(void* context) {
     furi_check(context);
     RpcSessionContext* callbacks_context = context;
 

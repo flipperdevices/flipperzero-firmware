@@ -23,7 +23,7 @@ typedef void (*RpcBufferIsEmptyCallback)(void* context);
 typedef void (*RpcSessionClosedCallback)(void* context);
 /** Callback to notify transport layer that session was closed
  * and all operations were finished */
-typedef void (*RpcSessionTerminateCallback)(void* context);
+typedef void (*RpcSessionTerminatedCallback)(void* context);
 
 /** Open RPC session
  *
@@ -85,12 +85,14 @@ void rpc_session_set_buffer_is_empty_callback(
  */
 void rpc_session_set_close_callback(RpcSession* session, RpcSessionClosedCallback callback);
 
-/** Set callback to be called when RPC session was closed
+/** Set callback to be called when RPC session is closed
  *
  * @param   session     pointer to RpcSession descriptor
  * @param   callback    callback to inform about RPC session state
  */
-void rpc_session_set_terminate_callback(RpcSession* session, RpcSessionTerminateCallback callback);
+void rpc_session_set_terminated_callback(
+    RpcSession* session,
+    RpcSessionTerminatedCallback callback);
 
 /** Give bytes to RPC service to decode them and perform command
  *
