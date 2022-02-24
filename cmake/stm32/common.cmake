@@ -4,11 +4,12 @@ set(STM32_SUPPORTED_FAMILIES_LONG_NAME
     STM32H7_M4 STM32H7_M7
     STM32L0 STM32L1 STM32L4 STM32L5
     STM32U5
-    STM32WB_M4 STM32WL_M4 STM32WL_M0PLUS )
+    STM32WB_M4 STM32WL_M4 STM32WL_M0PLUS
+    STM32MP1_M4 )
 
 foreach(FAMILY ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
     # append short names (F0, F1, H7_M4, ...) to STM32_SUPPORTED_FAMILIES_SHORT_NAME
-    string(REGEX MATCH "^STM32([FGHLUW][0-9BL])_?(M0PLUS|M4|M7)?" FAMILY ${FAMILY})
+    string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])_?(M0PLUS|M4|M7)?" FAMILY ${FAMILY})
     list(APPEND STM32_SUPPORTED_FAMILIES_SHORT_NAME ${CMAKE_MATCH_1})
 endforeach()
 list(REMOVE_DUPLICATES STM32_SUPPORTED_FAMILIES_SHORT_NAME)
@@ -114,7 +115,7 @@ function(stm32_get_chip_info CHIP)
 
     string(TOUPPER ${CHIP} CHIP)
 
-    string(REGEX MATCH "^STM32([FGHLUW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z]).*$" CHIP ${CHIP})
+    string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z]).*$" CHIP ${CHIP})
 
     if((NOT CMAKE_MATCH_1) OR (NOT CMAKE_MATCH_2))
         message(FATAL_ERROR "Unknown chip ${CHIP}")
@@ -160,6 +161,8 @@ function(stm32_get_cores CORES)
             set(${CORES} M4 PARENT_SCOPE)
         elseif(${ARG_FAMILY} STREQUAL "WL")
             set(${CORES} M4 M0PLUS PARENT_SCOPE)
+        elseif(${ARG_FAMILY} STREQUAL "MP1")
+            set(${CORES} M4 PARENT_SCOPE)
         else()
             set(${CORES} "" PARENT_SCOPE)
         endif()
@@ -173,6 +176,8 @@ function(stm32_get_cores CORES)
         stm32h7_get_device_cores(${ARG_DEVICE} ${ARG_TYPE} CORE_LIST)
     elseif(${ARG_FAMILY} STREQUAL "WB")
         # note STM32WB have an M0 core but in current state of the art it runs ST stacks and is not needed/allowed to build for customer
+        set(CORE_LIST M4)
+    elseif(${ARG_FAMILY} STREQUAL "MP1")
         set(CORE_LIST M4)
     elseif(${ARG_FAMILY} STREQUAL "WL")
         stm32wl_get_device_cores(${ARG_DEVICE} ${ARG_TYPE} CORE_LIST)
@@ -196,7 +201,7 @@ function(stm32_get_memory_info)
         stm32_get_chip_type(${INFO_FAMILY} ${INFO_DEVICE} INFO_TYPE)
     endif()
 
-    string(REGEX REPLACE "^[FGHLUW][0-9BL][0-9A-Z][0-9M].([3468BCDEFGHIYZ])$" "\\1" SIZE_CODE ${INFO_DEVICE})
+    string(REGEX REPLACE "^[FGHLMUW]P?[0-9BL][0-9A-Z][0-9M].([3468ABCDEFGHIYZ])$" "\\1" SIZE_CODE ${INFO_DEVICE})
 
     if(SIZE_CODE STREQUAL "3")
         set(FLASH "8K")
@@ -255,6 +260,8 @@ function(stm32_get_memory_info)
         stm32wl_get_memory_info(${INFO_DEVICE} ${INFO_TYPE} "${INFO_CORE}" RAM FLASH_ORIGIN RAM_ORIGIN TWO_FLASH_BANKS)
     elseif(FAMILY STREQUAL "WB")
         stm32wb_get_memory_info(${INFO_DEVICE} ${INFO_TYPE} "${INFO_CORE}" RAM RAM_ORIGIN TWO_FLASH_BANKS)
+    elseif(FAMILY STREQUAL "MP1")
+        stm32mp1_get_memory_info(${INFO_DEVICE} ${INFO_TYPE} FLASH)
     endif()
     # when a device is dual core, each core uses half of total flash
     if(TWO_FLASH_BANKS)
@@ -362,3 +369,4 @@ include(stm32/l5)
 include(stm32/u5)
 include(stm32/wb)
 include(stm32/wl)
+include(stm32/mp1)

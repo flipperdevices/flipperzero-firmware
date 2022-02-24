@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        family: [F0, F1, F2, F3, F4, F7, G0, G4, H7, L0, L1, L4, L5, U5, WB, WL]
+        family: [F0, F1, F2, F3, F4, F7, G0, G4, H7, L0, L1, L4, L5, U5, WB, WL, MP1]
       fail-fast: false
 
     steps:
@@ -35,16 +35,19 @@ jobs:
 
     - name: Create build directory for tests/cmsis
       run: cmake -E make_directory ${{runner.workspace}}/tests/cmsis/build
+      if: ${{ matrix.family != 'MP1' }}
 
     - name: Configure tests/cmsis
       shell: bash
       working-directory: ${{runner.workspace}}/tests/cmsis/build
       run: cmake -DTEST_FAMILIES=${{ matrix.family }} -DFETCH_ST_SOURCES=TRUE $GITHUB_WORKSPACE/tests/cmsis/
+      if: ${{ matrix.family != 'MP1' }}
 
     - name: Build tests/cmsis
       working-directory: ${{runner.workspace}}/tests/cmsis/build
       shell: bash
       run: cmake --build . --config $BUILD_TYPE
+      if: ${{ matrix.family != 'MP1' }}
 
     - name: Create build directory for tests/hal
       run: cmake -E make_directory ${{runner.workspace}}/tests/hal/build

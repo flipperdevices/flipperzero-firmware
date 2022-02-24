@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/stm32_gcc.cmake)
 
 if(NOT TEST_FAMILIES)
-    set(TEST_FAMILIES F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 U5 WB WL)
+    set(TEST_FAMILIES F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 MP1 U5 WB WL)
 endif()
 
 project(hal-test C ASM)
@@ -31,6 +31,7 @@ foreach(FAMILY ${TEST_FAMILIES})
     endif()
     
     add_executable(hal-test-${FAMILY} ${SOURCES})
+    target_compile_definitions(hal-test-${FAMILY} PRIVATE USE_FULL_LL_DRIVER)
     
     foreach(DRIVER ${HAL_DRIVERS_${FAMILY}})
         string(TOUPPER ${DRIVER} DRIVER)

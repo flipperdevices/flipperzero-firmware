@@ -44,7 +44,7 @@ endif()
 # This section fills the family and ports components list
 foreach(COMP ${FreeRTOS_FIND_COMPONENTS})
     string(TOUPPER ${COMP} COMP)
-    string(REGEX MATCH "^STM32([FGHLUW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" FAMILY_COMP ${COMP})
+    string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" FAMILY_COMP ${COMP})
     # Valid family component, so add it (e.g. STM32H7)
     if(CMAKE_MATCH_1)
         list(APPEND FreeRTOS_FIND_COMPONENTS_FAMILIES ${FAMILY_COMP})
@@ -207,7 +207,7 @@ else()
         string(TOLOWER ${COMP} COMP_L)
         string(TOUPPER ${COMP} COMP)
         
-        string(REGEX MATCH "^STM32([FGHLUW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP ${COMP})
+        string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP ${COMP})
         
         if((NOT CMAKE_MATCH_1) AND (NOT CMAKE_MATCH_2))
             message(FATAL_ERROR "Unknown FreeRTOS component: ${COMP}")
