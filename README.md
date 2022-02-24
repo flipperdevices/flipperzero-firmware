@@ -109,8 +109,8 @@ STM32WB is a multi-cores device even if the second core is not accessible by end
 CMSIS consists of three main components:
 
 * Family-specific headers, e.g. `stm32f4xx.h`
-* Device type-specific startup sources (e.g. `startup_stm32f407xx.s`)
-* Device-specific linker scripts which requires information about memory sizes
+* Device type-specific startup sources (e.g. `startup_stm32f407xx.s`) (if ASM language is enabled)
+* Device-specific linker scripts which requires information about memory sizes (if ASM language is enabled)
 
 stm32-cmake uses modern CMake features notably imported targets and target properties.
 Every CMSIS component is CMake's target (aka library), which defines compiler definitions, compiler flags, include dirs, sources, etc. to build and propagate them as dependencies. So in a simple use-case all you need is to link your executable with library `CMSIS::STM32::<device>`:
