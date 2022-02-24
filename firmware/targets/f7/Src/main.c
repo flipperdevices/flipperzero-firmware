@@ -3,6 +3,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <flipper.h>
+#include <update.h>
 
 #define TAG "Main"
 
@@ -10,25 +11,34 @@ int main(void) {
     // Flipper critical FURI HAL
     furi_hal_init_critical();
 
-    // Initialize FURI layer
-    furi_init();
+#ifdef FURI_RAM_EXEC
+    if(false) {
+#else
+    //if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecuteUpdate)) {
+    if (true) {
+#endif
+        flipper_update_exec();
+        //...
+    } else {
+        // Initialize FURI layer
+        furi_init();
 
-    // Initialize ST HAL
-    HAL_Init();
+        // Initialize ST HAL
+        HAL_Init();
 
-    // Flipper FURI HAL
-    furi_hal_init();
+        // Flipper FURI HAL
+        furi_hal_init();
 
-    // CMSIS initialization
-    osKernelInitialize();
-    FURI_LOG_I(TAG, "KERNEL OK");
+        // CMSIS initialization
+        osKernelInitialize();
+        FURI_LOG_I(TAG, "KERNEL OK");
 
-    // Init flipper
-    flipper_init();
+        // Init flipper
+        flipper_init();
 
-    // Start kernel
-    osKernelStart();
-
+        // Start kernel
+        osKernelStart();
+    }
     while(1) {
     }
 }

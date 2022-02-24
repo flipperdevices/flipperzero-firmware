@@ -6,6 +6,7 @@
 #pragma once
 
 #include "main.h"
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,7 +14,7 @@ extern "C" {
 
 /** Init DWT
  */
-void furi_hal_delay_init(void);
+void furi_hal_delay_init(bool queuedDelay);
 
 /** Delay in milliseconds
  * @warning    Cannot be used from ISR

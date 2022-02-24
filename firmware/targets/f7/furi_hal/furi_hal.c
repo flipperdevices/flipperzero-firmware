@@ -11,9 +11,8 @@
 #define TAG "FuriHal"
 
 void furi_hal_init() {
-    furi_hal_rtc_init();
     furi_hal_interrupt_init();
-    furi_hal_delay_init();
+    furi_hal_delay_init(true);
 
     MX_GPIO_Init();
     FURI_LOG_I(TAG, "GPIO OK");
@@ -77,4 +76,5 @@ void furi_hal_init() {
 void furi_hal_init_critical() {
     furi_hal_clock_init();
     furi_hal_console_init();
+    furi_hal_rtc_init();
 }

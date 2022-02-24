@@ -338,11 +338,3 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
 
 const size_t FLIPPER_SETTINGS_APPS_COUNT =
     sizeof(FLIPPER_SETTINGS_APPS) / sizeof(FlipperApplication);
-
-int a(size_t test) {
-    if (test >= 0) {
-        return 42;
-    } else {
-        return 1337;
-    }
-}
