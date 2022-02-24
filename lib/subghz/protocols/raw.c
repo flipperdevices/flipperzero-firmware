@@ -62,7 +62,7 @@ const SubGhzProtocolEncoder subghz_protocol_raw_encoder = {
     .alloc = subghz_protocol_encoder_raw_alloc,
     .free = subghz_protocol_encoder_raw_free,
 
-    .load = subghz_protocol_encoder_raw_load,
+    .deserialize = subghz_protocol_encoder_raw_deserialize,
     .stop = subghz_protocol_encoder_raw_stop,
     .yield = subghz_protocol_encoder_raw_yield,
     .load_file = NULL,
@@ -72,7 +72,8 @@ const SubGhzProtocol subghz_protocol_raw = {
     .name = SUBGHZ_PROTOCOL_RAW_NAME,
     .type = SubGhzProtocolTypeRAW,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_315 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_FM | SubGhzProtocolFlag_RAW,
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_FM | SubGhzProtocolFlag_RAW |
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_raw_decoder,
     .encoder = &subghz_protocol_raw_encoder,
@@ -316,17 +317,41 @@ void subghz_protocol_encoder_raw_set_file_name(
     string_printf(instance->file_name, "%s", name);
 }
 
-bool subghz_protocol_encoder_raw_load(
-    void* context,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat) {
+bool subghz_protocol_encoder_raw_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderRAW* instance = context;
-    string_set(instance->file_name, "/ext/subghz/saved/Raw_signal_9.sub");
-    subghz_protocol_raw_encoder_worker_init(instance);
-    return true;
+    bool res = false;
+    // do {
+    //     if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+    //         FURI_LOG_E(TAG, "Deserialize error");
+    //         break;
+    //     }
+
+    //     //optional parameter parameter
+    //     flipper_format_read_uint32(
+    //         flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
+
+    //     subghz_protocol_encoder_came_get_upload(instance);
+    //     instance->encoder.is_runing = true;
+
+    //     res = true;
+    // } while(false);
+
+    return res;
 }
+
+
+// bool subghz_protocol_encoder_raw_load(
+//     void* context,
+//     uint64_t key,
+//     uint8_t count_bit,
+//     size_t repeat) {
+//     furi_assert(context);
+//     SubGhzProtocolEncoderRAW* instance = context;
+//     string_set(instance->file_name, "/ext/subghz/saved/Raw_signal_9.sub");
+//     subghz_protocol_raw_encoder_worker_init(instance);
+//     return true;
+// }
 
 LevelDuration subghz_protocol_encoder_raw_yield(void* context) {
     SubGhzProtocolEncoderRAW* instance = context;

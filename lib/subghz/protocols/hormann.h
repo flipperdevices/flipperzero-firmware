@@ -13,11 +13,7 @@ extern const SubGhzProtocol subghz_protocol_hormann;
 
 void* subghz_protocol_encoder_hormann_alloc(SubGhzEnvironment* environment);
 void subghz_protocol_encoder_hormann_free(void* context);
-bool subghz_protocol_encoder_hormann_load(
-    void* context,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat);
+bool subghz_protocol_encoder_hormann_deserialize(void* context, FlipperFormat* flipper_format);
 void subghz_protocol_encoder_hormann_stop(void* context);
 LevelDuration subghz_protocol_encoder_hormann_yield(void* context);
 void* subghz_protocol_decoder_hormann_alloc(SubGhzEnvironment* environment);

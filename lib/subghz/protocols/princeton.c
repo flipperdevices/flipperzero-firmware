@@ -63,7 +63,7 @@ const SubGhzProtocolEncoder subghz_protocol_princeton_encoder = {
     .alloc = subghz_protocol_encoder_princeton_alloc,
     .free = subghz_protocol_encoder_princeton_free,
 
-    .load = subghz_protocol_encoder_princeton_load,
+    .deserialize = subghz_protocol_encoder_princeton_deserialize,
     .stop = subghz_protocol_encoder_princeton_stop,
     .yield = subghz_protocol_encoder_princeton_yield,
     .load_file = subghz_protocol_princeton_load_file,
@@ -73,7 +73,8 @@ const SubGhzProtocol subghz_protocol_princeton = {
     .name = SUBGHZ_PROTOCOL_PRINCETON_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_315 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
+            SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_princeton_decoder,
     .encoder = &subghz_protocol_princeton_encoder,
@@ -100,7 +101,7 @@ void subghz_protocol_encoder_princeton_free(void* context) {
 }
 
 static bool
-    subghz_protocol_princeton_encoder_get_upload(SubGhzProtocolEncoderPrinceton* instance) {
+    subghz_protocol_encoder_princeton_get_upload(SubGhzProtocolEncoderPrinceton* instance) {
     furi_assert(instance);
 
     size_t index = 0;
@@ -135,20 +136,33 @@ static bool
     return true;
 }
 
-bool subghz_protocol_encoder_princeton_load(
-    void* context,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat) {
+bool subghz_protocol_encoder_princeton_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderPrinceton* instance = context;
-    instance->te = 400;
-    instance->generic.data = key;
-    instance->generic.data_count_bit = 24;
-    instance->encoder.repeat = repeat;
-    subghz_protocol_princeton_encoder_get_upload(instance);
-    instance->encoder.is_runing = true;
-    return true;
+    bool res = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            FURI_LOG_E(TAG, "Deserialize error");
+            break;
+        }
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
+        if(!flipper_format_read_uint32(flipper_format, "TE", (uint32_t*)&instance->te, 1)) {
+            FURI_LOG_E(TAG, "Missing TE");
+            break;
+        }
+        //optional parameter parameter
+        flipper_format_read_uint32(flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
+
+        subghz_protocol_encoder_princeton_get_upload(instance);
+        instance->encoder.is_runing = true;
+
+        res = true;
+    } while(false);
+
+    return res;
 }
 
 void subghz_protocol_encoder_princeton_stop(void* context) {

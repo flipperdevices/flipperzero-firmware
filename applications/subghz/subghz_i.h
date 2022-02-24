@@ -152,7 +152,7 @@ void subghz_begin(SubGhz* subghz, FuriHalSubGhzPreset preset);
 uint32_t subghz_rx(SubGhz* subghz, uint32_t frequency);
 void subghz_rx_end(SubGhz* subghz);
 void subghz_sleep(SubGhz* subghz);
-bool subghz_tx_start(SubGhz* subghz);
+bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format);
 void subghz_tx_stop(SubGhz* subghz);
 bool subghz_key_load(SubGhz* subghz, const char* file_path);
 bool subghz_get_next_name_file(SubGhz* subghz);

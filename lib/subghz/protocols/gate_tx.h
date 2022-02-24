@@ -13,11 +13,7 @@ extern const SubGhzProtocol subghz_protocol_gate_tx;
 
 void* subghz_protocol_encoder_gate_tx_alloc(SubGhzEnvironment* environment);
 void subghz_protocol_encoder_gate_tx_free(void* context);
-bool subghz_protocol_encoder_gate_tx_load(
-    void* context,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat);
+bool subghz_protocol_encoder_gate_tx_deserialize(void* context, FlipperFormat* flipper_format);
 void subghz_protocol_encoder_gate_tx_stop(void* context);
 LevelDuration subghz_protocol_encoder_gate_tx_yield(void* context);
 void* subghz_protocol_decoder_gate_tx_alloc(SubGhzEnvironment* environment);

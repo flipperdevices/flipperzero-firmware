@@ -13,6 +13,7 @@
 #include "helpers/subghz_chat.h"
 
 #include <notification/notification_messages.h>
+#include <flipper_format/flipper_format_i.h>
 
 #define SUBGHZ_FREQUENCY_RANGE_STR \
     "299999755...348000000 or 386999938...464000000 or 778999847...928000000"
@@ -142,12 +143,26 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     // transmitter->repeat = repeat;
 
     //subghz_protocol_princeton_send_key(protocol, transmitter);
+    string_t flipper_format_string;
+    string_init_printf(
+        flipper_format_string,
+        "Frequency: 433920000\n"
+        "Preset: FuriHalSubGhzPresetOok650Async\n"
+        "Protocol: Princeton\n"
+        "Bit: 24\n"
+        "Key: 0070ECD2\n"
+        "Te: 403\n"
+        "Repeat: 200\n");
+    FlipperFormat* flipper_format = flipper_format_string_alloc();
+    Stream* stream = flipper_format_get_raw_stream(flipper_format);
+    stream_clean(stream);
+    stream_write_cstring(stream, string_get_cstr(flipper_format_string));
 
     SubGhzEnvironment* environment = subghz_environment_alloc();
     subghz_environment_load_keystore(environment, "/ext/subghz/assets/keeloq_mfcodes");
 
     SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, "Princeton");
-    subghz_transmitter_load(transmitter, key, 24, repeat); // TODO: serialize, deserialize
+    subghz_transmitter_deserialize(transmitter, flipper_format);
 
     furi_hal_subghz_reset();
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
@@ -170,6 +185,7 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
 
     //subghz_decoder_princeton_free(protocol);
     //subghz_transmitter_common_free(transmitter);
+    flipper_format_free(flipper_format);
     subghz_transmitter_free(transmitter);
     subghz_environment_free(environment);
 }
@@ -247,8 +263,10 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     // subghz_parser_enable_dump_text(parser, subghz_cli_command_rx_text_callback, instance);
     SubGhzEnvironment* environment = subghz_environment_alloc();
     subghz_environment_load_keystore(environment, "/ext/subghz/assets/keeloq_mfcodes");
-    subghz_environment_set_came_atomo_rainbow_table_file_name(environment, "/ext/subghz/assets/came_atomo");
-    subghz_environment_set_nice_flor_s_rainbow_table_file_name(environment, "/ext/subghz/assets/nice_flor_s");
+    subghz_environment_set_came_atomo_rainbow_table_file_name(
+        environment, "/ext/subghz/assets/came_atomo");
+    subghz_environment_set_nice_flor_s_rainbow_table_file_name(
+        environment, "/ext/subghz/assets/nice_flor_s");
 
     SubGhzReceiver* receiver = subghz_receiver_alloc(environment);
     subghz_receiver_set_filter(receiver, SubGhzProtocolFlag_Decodable);

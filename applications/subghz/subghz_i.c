@@ -10,6 +10,8 @@
 #include "../notification/notification.h"
 #include "views/receiver.h"
 
+#define TAG "SubGhz"
+
 bool subghz_set_preset(SubGhz* subghz, const char* preset) {
     if(!strcmp(preset, "FuriHalSubGhzPresetOok270Async")) {
         subghz->txrx->preset = FuriHalSubGhzPresetOok270Async;
@@ -20,7 +22,7 @@ bool subghz_set_preset(SubGhz* subghz, const char* preset) {
     } else if(!strcmp(preset, "FuriHalSubGhzPreset2FSKDev476Async")) {
         subghz->txrx->preset = FuriHalSubGhzPreset2FSKDev476Async;
     } else {
-        FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unknown preset");
+        FURI_LOG_E(TAG, "Unknown preset");
         return false;
     }
     return true;
@@ -143,34 +145,57 @@ void subghz_sleep(SubGhz* subghz) {
     subghz->txrx->txrx_state = SubGhzTxRxStateSleep;
 }
 
-bool subghz_tx_start(SubGhz* subghz) {
+bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
     furi_assert(subghz);
 
     bool ret = false;
-    subghz->txrx->transmitter = subghz_transmitter_alloc_init(subghz->txrx->environment, "RAW");
-    if(subghz->txrx->transmitter) {
-        if(subghz_transmitter_load(subghz->txrx->transmitter, 0x445533, 24, 10)) {
-            if(subghz->txrx->preset) {
-                subghz_begin(subghz, subghz->txrx->preset);
-            } else {
-                subghz_begin(subghz, FuriHalSubGhzPresetOok270Async);
-            }
-            if(subghz->txrx->frequency) {
-                ret = subghz_tx(subghz, subghz->txrx->frequency);
-            } else {
-                ret = subghz_tx(subghz, 433920000);
-            }
-            if(ret) {
-                //Start TX
-                furi_hal_subghz_start_async_tx(
-                    subghz_transmitter_yield, subghz->txrx->transmitter);
+    string_t temp_str;
+    string_init(temp_str);
+    //uint32_t repeat = 200;
+    do {
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
+        if(!flipper_format_read_string(flipper_format, "Protocol", temp_str)) {
+            FURI_LOG_E(TAG, "Missing Protocol");
+            break;
+        }
+        //ToDo FIX
+        // if(!flipper_format_write_uint32(flipper_format, "Repeat", &repeat, 1)) {
+        //     FURI_LOG_E(TAG, "Unable Repeat");
+        //     break;
+        // }
+
+        subghz->txrx->transmitter =
+            subghz_transmitter_alloc_init(subghz->txrx->environment, string_get_cstr(temp_str));
+
+        if(subghz->txrx->transmitter) {
+            if(subghz_transmitter_deserialize(subghz->txrx->transmitter, flipper_format)) {
+                if(subghz->txrx->preset) {
+                    subghz_begin(subghz, subghz->txrx->preset);
+                } else {
+                    subghz_begin(subghz, FuriHalSubGhzPresetOok270Async);
+                }
+                if(subghz->txrx->frequency) {
+                    ret = subghz_tx(subghz, subghz->txrx->frequency);
+                } else {
+                    ret = subghz_tx(subghz, 433920000);
+                }
+                if(ret) {
+                    //Start TX
+                    furi_hal_subghz_start_async_tx(
+                        subghz_transmitter_yield, subghz->txrx->transmitter);
+                }
             }
         }
-    }
-    if(!ret) {
-        subghz_transmitter_free(subghz->txrx->transmitter);
-        subghz_idle(subghz);
-    }
+        if(!ret) {
+            subghz_transmitter_free(subghz->txrx->transmitter);
+            subghz_idle(subghz);
+        }
+
+    } while(false);
+    string_clear(temp_str);
     return ret;
 }
 
@@ -207,12 +232,11 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
 
     do {
         if(!flipper_format_file_open_existing(flipper_format, string_get_cstr(path))) {
-            FURI_LOG_E(
-                SUBGHZ_PARSER_TAG, "Unable to open file for read: %s", string_get_cstr(path));
+            FURI_LOG_E(TAG, "Unable to open file for read: %s", string_get_cstr(path));
             break;
         }
         if(!flipper_format_read_header(flipper_format, temp_str, &version)) {
-            FURI_LOG_E(SUBGHZ_PARSER_TAG, "Missing or incorrect header");
+            FURI_LOG_E(TAG, "Missing or incorrect header");
             break;
         }
 
@@ -220,18 +244,18 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             (!strcmp(string_get_cstr(temp_str), SUBGHZ_RAW_FILE_TYPE))) &&
            version == SUBGHZ_KEY_FILE_VERSION) {
         } else {
-            FURI_LOG_E(SUBGHZ_PARSER_TAG, "Type or version mismatch");
+            FURI_LOG_E(TAG, "Type or version mismatch");
             break;
         }
 
         if(!flipper_format_read_uint32(
                flipper_format, "Frequency", (uint32_t*)&subghz->txrx->frequency, 1)) {
-            FURI_LOG_E(SUBGHZ_PARSER_TAG, "Missing Frequency");
+            FURI_LOG_E(TAG, "Missing Frequency");
             break;
         }
 
         if(!flipper_format_read_string(flipper_format, "Preset", temp_str)) {
-            FURI_LOG_E(SUBGHZ_PARSER_TAG, "Missing Preset");
+            FURI_LOG_E(TAG, "Missing Preset");
             break;
         }
         if(!subghz_set_preset(subghz, string_get_cstr(temp_str))) {
@@ -239,7 +263,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
         }
 
         if(!flipper_format_read_string(flipper_format, "Protocol", temp_str)) {
-            FURI_LOG_E(SUBGHZ_PARSER_TAG, "Missing Protocol");
+            FURI_LOG_E(TAG, "Missing Protocol");
             break;
         }
         //ToDo Fix

@@ -13,11 +13,7 @@ extern const SubGhzProtocol subghz_protocol_keeloq;
 
 void* subghz_protocol_encoder_keeloq_alloc(SubGhzEnvironment* environment);
 void subghz_protocol_encoder_keeloq_free(void* context);
-bool subghz_protocol_encoder_keeloq_load(
-    void* context,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat);
+bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format);
 void subghz_protocol_encoder_keeloq_stop(void* context);
 LevelDuration subghz_protocol_encoder_keeloq_yield(void* context);
 void* subghz_protocol_decoder_keeloq_alloc(SubGhzEnvironment* environment);

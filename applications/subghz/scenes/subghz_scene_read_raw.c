@@ -193,7 +193,8 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 }
                 if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
                    (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
-                    if(!subghz_tx_start(subghz)) {
+                       //ToDo FIX
+                    if(!subghz_tx_start(subghz, NULL)) {
                         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
                     } else {
                         DOLPHIN_DEED(DolphinDeedSubGhzSend);

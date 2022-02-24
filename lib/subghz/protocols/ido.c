@@ -54,7 +54,7 @@ const SubGhzProtocolEncoder subghz_protocol_ido_encoder = {
     .alloc = NULL,
     .free = NULL,
 
-    .load = NULL,
+    .deserialize = NULL,
     .stop = NULL,
     .yield = NULL,
     .load_file = NULL,

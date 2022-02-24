@@ -60,7 +60,7 @@ const SubGhzProtocolEncoder subghz_protocol_came_encoder = {
     .alloc = subghz_protocol_encoder_came_alloc,
     .free = subghz_protocol_encoder_came_free,
 
-    .load = subghz_protocol_encoder_came_load,
+    .deserialize = subghz_protocol_encoder_came_deserialize,
     .stop = subghz_protocol_encoder_came_stop,
     .yield = subghz_protocol_encoder_came_yield,
     .load_file = subghz_protocol_came_load_file,
@@ -70,7 +70,8 @@ const SubGhzProtocol subghz_protocol_came = {
     .name = SUBGHZ_PROTOCOL_CAME_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_AM |
-            SubGhzProtocolFlag_Decodable,
+            SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save |
+            SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_came_decoder,
     .encoder = &subghz_protocol_came_encoder,
@@ -96,7 +97,7 @@ void subghz_protocol_encoder_came_free(void* context) {
     free(instance);
 }
 
-static bool subghz_protocol_came_encoder_get_upload(SubGhzProtocolEncoderCame* instance) {
+static bool subghz_protocol_encoder_came_get_upload(SubGhzProtocolEncoderCame* instance) {
     furi_assert(instance);
     size_t index = 0;
     size_t size_upload = (instance->generic.data_count_bit * 2) + 2;
@@ -131,19 +132,27 @@ static bool subghz_protocol_came_encoder_get_upload(SubGhzProtocolEncoderCame* i
     return true;
 }
 
-bool subghz_protocol_encoder_came_load(
-    void* context,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat) {
+bool subghz_protocol_encoder_came_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderCame* instance = context;
-    instance->generic.data = key;
-    instance->generic.data_count_bit = count_bit;
-    instance->encoder.repeat = repeat;
-    subghz_protocol_came_encoder_get_upload(instance);
-    instance->encoder.is_runing = true;
-    return true;
+    bool res = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            FURI_LOG_E(TAG, "Deserialize error");
+            break;
+        }
+
+        //optional parameter parameter
+        flipper_format_read_uint32(
+            flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
+
+        subghz_protocol_encoder_came_get_upload(instance);
+        instance->encoder.is_runing = true;
+
+        res = true;
+    } while(false);
+
+    return res;
 }
 
 void subghz_protocol_encoder_came_stop(void* context) {

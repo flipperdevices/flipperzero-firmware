@@ -15,11 +15,7 @@ void* subghz_protocol_encoder_came_alloc(SubGhzEnvironment* environment);
 
 void subghz_protocol_encoder_came_free(void* context);
 
-bool subghz_protocol_encoder_came_load(
-    void* context,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat);
+bool subghz_protocol_encoder_came_deserialize(void* context, FlipperFormat* flipper_format);
 
 void subghz_protocol_encoder_came_stop(void* context);
 

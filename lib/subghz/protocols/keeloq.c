@@ -66,7 +66,7 @@ const SubGhzProtocolEncoder subghz_protocol_keeloq_encoder = {
     .alloc = subghz_protocol_encoder_keeloq_alloc,
     .free = subghz_protocol_encoder_keeloq_free,
 
-    .load = subghz_protocol_encoder_keeloq_load,
+    .deserialize = subghz_protocol_encoder_keeloq_deserialize,
     .stop = subghz_protocol_encoder_keeloq_stop,
     .yield = subghz_protocol_encoder_keeloq_yield,
     .load_file = subghz_protocol_keeloq_load_file,
@@ -76,11 +76,17 @@ const SubGhzProtocol subghz_protocol_keeloq = {
     .name = SUBGHZ_PROTOCOL_KEELOQ_NAME,
     .type = SubGhzProtocolTypeDynamic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_315 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
+            SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_keeloq_decoder,
     .encoder = &subghz_protocol_keeloq_encoder,
 };
+
+static void subghz_protocol_keeloq_check_remote_controller(
+    SubGhzBlockGeneric* instance,
+    SubGhzKeystore* keystore,
+    const char** manufacture_name);
 
 void* subghz_protocol_encoder_keeloq_alloc(SubGhzEnvironment* environment) {
     SubGhzProtocolEncoderKeeloq* instance = malloc(sizeof(SubGhzProtocolEncoderKeeloq));
@@ -153,7 +159,7 @@ static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instanc
 }
 
 static bool
-    subghz_protocol_keeloq_encoder_get_upload(SubGhzProtocolEncoderKeeloq* instance, uint8_t btn) {
+    subghz_protocol_encoder_keeloq_get_upload(SubGhzProtocolEncoderKeeloq* instance, uint8_t btn) {
     furi_assert(instance);
 
     //gen new key
@@ -216,24 +222,68 @@ static bool
     return true;
 }
 
-bool subghz_protocol_encoder_keeloq_load(
-    void* context,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat) {
+bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderKeeloq* instance = context;
-    instance->generic.data = 0x65AB6CED8329BE24;
-    instance->generic.serial = 0x47D94C1;
-    instance->generic.btn = 0x02;
-    instance->generic.cnt = 0x0319;
-    instance->generic.data_count_bit = 64;
-    instance->encoder.repeat = repeat;
-    instance->manufacture_name = "DoorHan";
-    subghz_protocol_keeloq_encoder_get_upload(instance, instance->generic.btn);
-    instance->encoder.is_runing = true;
-    return true;
+    bool res = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            FURI_LOG_E(TAG, "Deserialize error");
+            break;
+        }
+
+        subghz_protocol_keeloq_check_remote_controller(
+            &instance->generic, instance->keystore, &instance->manufacture_name);
+
+        if(strcmp(instance->manufacture_name, "DoorHan")) {
+            break;
+        }
+
+        //optional parameter parameter
+        flipper_format_read_uint32(
+            flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
+            
+        subghz_protocol_encoder_keeloq_get_upload(instance, instance->generic.btn);
+
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
+        uint8_t key_data[sizeof(uint64_t)] = {0};
+        for(size_t i = 0; i < sizeof(uint64_t); i++) {
+            key_data[sizeof(uint64_t) - i - 1] = (instance->generic.data >> i * 8) & 0xFF;
+        }
+        if(!flipper_format_update_hex(flipper_format, "Key", key_data, sizeof(uint64_t))) {
+            FURI_LOG_E(TAG, "Unable to add Key");
+            break;
+        }
+
+        instance->encoder.is_runing = true;
+
+        res = true;
+    } while(false);
+
+    return res;
 }
+
+// bool subghz_protocol_encoder_keeloq_load(
+//     void* context,
+//     uint64_t key,
+//     uint8_t count_bit,
+//     size_t repeat) {
+//     furi_assert(context);
+//     SubGhzProtocolEncoderKeeloq* instance = context;
+//     instance->generic.data = 0x65AB6CED8329BE24;
+//     instance->generic.serial = 0x47D94C1;
+//     instance->generic.btn = 0x02;
+//     instance->generic.cnt = 0x0319;
+//     instance->generic.data_count_bit = 64;
+//     instance->encoder.repeat = repeat;
+//     instance->manufacture_name = "DoorHan";
+//     subghz_protocol_keeloq_encoder_get_upload(instance, instance->generic.btn);
+//     instance->encoder.is_runing = true;
+//     return true;
+// }
 
 void subghz_protocol_encoder_keeloq_stop(void* context) {
     SubGhzProtocolEncoderKeeloq* instance = context;

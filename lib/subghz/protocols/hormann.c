@@ -56,7 +56,7 @@ const SubGhzProtocolEncoder subghz_protocol_hormann_encoder = {
     .alloc = subghz_protocol_encoder_hormann_alloc,
     .free = subghz_protocol_encoder_hormann_free,
 
-    .load = subghz_protocol_encoder_hormann_load,
+    .deserialize = subghz_protocol_encoder_hormann_deserialize,
     .stop = subghz_protocol_encoder_hormann_stop,
     .yield = subghz_protocol_encoder_hormann_yield,
     .load_file = subghz_protocol_hormann_load_file,
@@ -66,7 +66,8 @@ const SubGhzProtocol subghz_protocol_hormann = {
     .name = SUBGHZ_PROTOCOL_HORMANN_HSM_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_AM |
-            SubGhzProtocolFlag_Decodable,
+            SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save |
+            SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_hormann_decoder,
     .encoder = &subghz_protocol_hormann_encoder,
@@ -92,7 +93,7 @@ void subghz_protocol_encoder_hormann_free(void* context) {
     free(instance);
 }
 
-static bool subghz_protocol_hormann_encoder_get_upload(SubGhzProtocolEncoderHormann* instance) {
+static bool subghz_protocol_encoder_hormann_get_upload(SubGhzProtocolEncoderHormann* instance) {
     furi_assert(instance);
 
     size_t index = 0;
@@ -140,19 +141,27 @@ static bool subghz_protocol_hormann_encoder_get_upload(SubGhzProtocolEncoderHorm
     return true;
 }
 
-bool subghz_protocol_encoder_hormann_load(
-    void* context,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat) {
+bool subghz_protocol_encoder_hormann_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderHormann* instance = context;
-    instance->generic.data = key;
-    instance->generic.data_count_bit = 44;
-    instance->encoder.repeat = repeat;
-    subghz_protocol_hormann_encoder_get_upload(instance);
-    instance->encoder.is_runing = true;
-    return true;
+    bool res = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            FURI_LOG_E(TAG, "Deserialize error");
+            break;
+        }
+
+        //optional parameter parameter
+        flipper_format_read_uint32(
+            flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
+
+        subghz_protocol_encoder_hormann_get_upload(instance);
+        instance->encoder.is_runing = true;
+
+        res = true;
+    } while(false);
+
+    return res;
 }
 
 void subghz_protocol_encoder_hormann_stop(void* context) {

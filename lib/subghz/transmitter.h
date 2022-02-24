@@ -18,10 +18,6 @@ void subghz_transmitter_free(SubGhzTransmitter* instance);
 
 bool subghz_transmitter_stop(SubGhzTransmitter* instance);
 
-bool subghz_transmitter_load(
-    SubGhzTransmitter* instance,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat);
+bool subghz_transmitter_deserialize(SubGhzTransmitter* instance, FlipperFormat* flipper_format);
 
 LevelDuration subghz_transmitter_yield(void* context);

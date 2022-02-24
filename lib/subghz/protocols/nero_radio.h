@@ -13,11 +13,7 @@ extern const SubGhzProtocol subghz_protocol_nero_radio;
 
 void* subghz_protocol_encoder_nero_radio_alloc(SubGhzEnvironment* environment);
 void subghz_protocol_encoder_nero_radio_free(void* context);
-bool subghz_protocol_encoder_nero_radio_load(
-    void* context,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat);
+bool subghz_protocol_encoder_nero_radio_deserialize(void* context, FlipperFormat* flipper_format);
 void subghz_protocol_encoder_nero_radio_stop(void* context);
 LevelDuration subghz_protocol_encoder_nero_radio_yield(void* context);
 void* subghz_protocol_decoder_nero_radio_alloc(SubGhzEnvironment* environment);

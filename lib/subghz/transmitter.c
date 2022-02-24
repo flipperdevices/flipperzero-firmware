@@ -33,16 +33,12 @@ bool subghz_transmitter_stop(SubGhzTransmitter* instance) {
     return ret;
 }
 
-bool subghz_transmitter_load(
-    SubGhzTransmitter* instance,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat) {
+bool subghz_transmitter_deserialize(SubGhzTransmitter* instance, FlipperFormat* flipper_format) {
     furi_assert(instance);
     bool ret = false;
-    if(instance->protocol && instance->protocol->encoder && instance->protocol->encoder->load) {
+    if(instance->protocol && instance->protocol->encoder && instance->protocol->encoder->deserialize) {
         ret =
-            instance->protocol->encoder->load(instance->protocol_instance, key, count_bit, repeat);
+            instance->protocol->encoder->deserialize(instance->protocol_instance, flipper_format);
     }
     return ret;
 }

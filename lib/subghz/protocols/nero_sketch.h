@@ -13,11 +13,7 @@ extern const SubGhzProtocol subghz_protocol_nero_sketch;
 
 void* subghz_protocol_encoder_nero_sketch_alloc(SubGhzEnvironment* environment);
 void subghz_protocol_encoder_nero_sketch_free(void* context);
-bool subghz_protocol_encoder_nero_sketch_load(
-    void* context,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat);
+bool subghz_protocol_encoder_nero_sketch_deserialize(void* context, FlipperFormat* flipper_format);
 void subghz_protocol_encoder_nero_sketch_stop(void* context);
 LevelDuration subghz_protocol_encoder_nero_sketch_yield(void* context);
 void* subghz_protocol_decoder_nero_sketch_alloc(SubGhzEnvironment* environment);

@@ -75,7 +75,8 @@ void subghz_scene_receiver_info_on_enter(void* context) {
         string_clear(modulation_str);
         string_clear(text);
 
-        if((subghz->txrx->decoder_result->protocol->flag == SubGhzProtocolFlag_Save) &&
+        if(((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Save) ==
+            SubGhzProtocolFlag_Save) &&
            subghz->txrx->decoder_result->protocol->decoder->save_file) {
             widget_add_button_element(
                 subghz->widget,
@@ -84,8 +85,10 @@ void subghz_scene_receiver_info_on_enter(void* context) {
                 subghz_scene_receiver_info_callback,
                 subghz);
         }
-        if((subghz->txrx->decoder_result->protocol->flag == SubGhzProtocolFlag_Send) &&
-           subghz->txrx->decoder_result->protocol->encoder->load) {
+        if(((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Send) ==
+            SubGhzProtocolFlag_Send) &&
+           subghz->txrx->decoder_result->protocol->encoder->deserialize && 
+           subghz->txrx->decoder_result->protocol->type == SubGhzProtocolTypeStatic) {
             widget_add_button_element(
                 subghz->widget,
                 GuiButtonTypeCenter,
@@ -118,7 +121,10 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             }
             if(subghz->txrx->txrx_state == SubGhzTxRxStateIDLE ||
                subghz->txrx->txrx_state == SubGhzTxRxStateSleep) {
-                if(!subghz_tx_start(subghz)) {
+                if(!subghz_tx_start(
+                       subghz,
+                       subghz_history_get_raw_data(
+                           subghz->txrx->history, subghz->txrx->idx_menu_chosen))) {
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
                 } else {
                     subghz->state_notifications = SubGhzNotificationStateTX;

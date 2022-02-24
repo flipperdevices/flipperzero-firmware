@@ -85,7 +85,7 @@ const SubGhzProtocolEncoder subghz_protocol_came_twee_encoder = {
     .alloc = subghz_protocol_encoder_came_twee_alloc,
     .free = subghz_protocol_encoder_came_twee_free,
 
-    .load = subghz_protocol_encoder_came_twee_load,
+    .deserialize = subghz_protocol_encoder_came_twee_deserialize,
     .stop = subghz_protocol_encoder_came_twee_stop,
     .yield = subghz_protocol_encoder_came_twee_yield,
     .load_file = subghz_protocol_came_twee_load_file,
@@ -94,7 +94,8 @@ const SubGhzProtocolEncoder subghz_protocol_came_twee_encoder = {
 const SubGhzProtocol subghz_protocol_came_twee = {
     .name = SUBGHZ_PROTOCOL_CAME_TWEE_NAME,
     .type = SubGhzProtocolTypeStatic,
-    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable |
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_came_twee_decoder,
     .encoder = &subghz_protocol_came_twee_encoder,
@@ -149,7 +150,7 @@ static LevelDuration
     return level_duration_make(data.level, data.duration);
 }
 
-static void subghz_protocol_came_twee_encoder_get_upload(SubGhzProtocolEncoderCameTwee* instance) {
+static void subghz_protocol_encoder_came_twee_get_upload(SubGhzProtocolEncoderCameTwee* instance) {
     furi_assert(instance);
     size_t index = 0;
 
@@ -235,27 +236,50 @@ static void subghz_protocol_came_twee_remote_controller(SubGhzBlockGeneric* inst
     instance->cnt = data >> 6;
 }
 
-bool subghz_protocol_encoder_came_twee_load(
-    void* context,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat) {
-    //    subghz->txrx->protocol_result->code_last_count_bit = 54;
-    //                 key = (key & 0x0FFFFFF0);
-    //                 subghz->txrx->protocol_result->code_last_found = 0x003FFF7200000000 |
-    //                                                                  (key ^ 0xE0E0E0EE);
+bool subghz_protocol_encoder_came_twee_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderCameTwee* instance = context;
+    bool res = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            FURI_LOG_E(TAG, "Deserialize error");
+            break;
+        }
 
-    instance->generic.data = 0x003FFF7200000000 | (0x03F22FF0 ^ 0xE0E0E0EE);
-    subghz_protocol_came_twee_remote_controller(&instance->generic);
+        //optional parameter parameter
+        flipper_format_read_uint32(flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-    instance->generic.data_count_bit = 54;
-    instance->encoder.repeat = repeat;
-    subghz_protocol_came_twee_encoder_get_upload(instance);
-    instance->encoder.is_runing = true;
-    return true;
+        subghz_protocol_came_twee_remote_controller(&instance->generic);
+        subghz_protocol_encoder_came_twee_get_upload(instance);
+        instance->encoder.is_runing = true;
+
+        res = true;
+    } while(false);
+
+    return res;
 }
+
+// bool subghz_protocol_encoder_came_twee_load(
+//     void* context,
+//     uint64_t key,
+//     uint8_t count_bit,
+//     size_t repeat) {
+//     //    subghz->txrx->protocol_result->code_last_count_bit = 54;
+//     //                 key = (key & 0x0FFFFFF0);
+//     //                 subghz->txrx->protocol_result->code_last_found = 0x003FFF7200000000 |
+//     //                                                                  (key ^ 0xE0E0E0EE);
+//     furi_assert(context);
+//     SubGhzProtocolEncoderCameTwee* instance = context;
+
+//     instance->generic.data = 0x003FFF7200000000 | (0x03F22FF0 ^ 0xE0E0E0EE);
+//     subghz_protocol_came_twee_remote_controller(&instance->generic);
+
+//     instance->generic.data_count_bit = 54;
+//     instance->encoder.repeat = repeat;
+//     subghz_protocol_came_twee_encoder_get_upload(instance);
+//     instance->encoder.is_runing = true;
+//     return true;
+// }
 
 void subghz_protocol_encoder_came_twee_stop(void* context) {
     SubGhzProtocolEncoderCameTwee* instance = context;

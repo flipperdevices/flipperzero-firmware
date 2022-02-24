@@ -61,7 +61,7 @@ const SubGhzProtocolEncoder subghz_protocol_nero_sketch_encoder = {
     .alloc = subghz_protocol_encoder_nero_sketch_alloc,
     .free = subghz_protocol_encoder_nero_sketch_free,
 
-    .load = subghz_protocol_encoder_nero_sketch_load,
+    .deserialize = subghz_protocol_encoder_nero_sketch_deserialize,
     .stop = subghz_protocol_encoder_nero_sketch_stop,
     .yield = subghz_protocol_encoder_nero_sketch_yield,
     .load_file = subghz_protocol_nero_sketch_load_file,
@@ -70,7 +70,8 @@ const SubGhzProtocolEncoder subghz_protocol_nero_sketch_encoder = {
 const SubGhzProtocol subghz_protocol_nero_sketch = {
     .name = SUBGHZ_PROTOCOL_NERO_SKETCH_NAME,
     .type = SubGhzProtocolTypeStatic,
-    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable |
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_nero_sketch_decoder,
     .encoder = &subghz_protocol_nero_sketch_encoder,
@@ -96,7 +97,7 @@ void subghz_protocol_encoder_nero_sketch_free(void* context) {
     free(instance);
 }
 
-static bool subghz_protocol_came_encoder_get_upload(SubGhzProtocolEncoderNeroSketch* instance) {
+static bool subghz_protocol_encoder_nero_sketch_get_upload(SubGhzProtocolEncoderNeroSketch* instance) {
     furi_assert(instance);
 
     size_t index = 0;
@@ -148,19 +149,27 @@ static bool subghz_protocol_came_encoder_get_upload(SubGhzProtocolEncoderNeroSke
     return true;
 }
 
-bool subghz_protocol_encoder_nero_sketch_load(
-    void* context,
-    uint64_t key,
-    uint8_t count_bit,
-    size_t repeat) {
+bool subghz_protocol_encoder_nero_sketch_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderNeroSketch* instance = context;
-    instance->generic.data = key;
-    instance->generic.data_count_bit = 40;
-    instance->encoder.repeat = repeat;
-    subghz_protocol_came_encoder_get_upload(instance);
-    instance->encoder.is_runing = true;
-    return true;
+    bool res = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            FURI_LOG_E(TAG, "Deserialize error");
+            break;
+        }
+
+        //optional parameter parameter
+        flipper_format_read_uint32(
+            flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
+
+        subghz_protocol_encoder_nero_sketch_get_upload(instance);
+        instance->encoder.is_runing = true;
+
+        res = true;
+    } while(false);
+
+    return res;
 }
 
 void subghz_protocol_encoder_nero_sketch_stop(void* context) {

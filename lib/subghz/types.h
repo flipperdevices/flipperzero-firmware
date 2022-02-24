@@ -15,7 +15,7 @@
 #define SUBGHZ_RAW_FOLDER "/ext/subghz"
 #define SUBGHZ_APP_EXTENSION ".sub"
 
-#define SUBGHZ_PARSER_TAG "SubGhzParser"
+//#define SUBGHZ_PARSER_TAG "SubGhzParser"
 #define SUBGHZ_KEY_FILE_VERSION 1
 #define SUBGHZ_KEY_FILE_TYPE "Flipper SubGhz Key File"
 
@@ -36,11 +36,11 @@ typedef bool (*SubGhzLoadFile)(void* context, FlipperFormat* flipper_file, const
 
 // Serialize and Deserialize
 typedef bool (*SubGhzSerialize)(
-    void* decoder,
+    void* context,
     FlipperFormat* flipper_format,
     uint32_t frequency,
     FuriHalSubGhzPreset preset);
-typedef bool (*SubGhzDeserialize)(void* decoder, FlipperFormat* flipper_format);
+typedef bool (*SubGhzDeserialize)(void* context, FlipperFormat* flipper_format);
 
 // Decoder specific
 typedef void (*SubGhzDecoderFeed)(void* decoder, bool level, uint32_t duration);
@@ -50,7 +50,6 @@ typedef void (*SubGhzGetString)(void* decoder, string_t output);
 
 // Encoder specific
 typedef void (*SubGhzEncoderStop)(void* encoder);
-typedef bool (*SubGhzEncoderLoad)(void* encoder, uint64_t key, uint8_t count_bit, size_t repeat);
 typedef LevelDuration (*SubGhzEncoderYield)(void* context);
 
 typedef struct {
@@ -71,7 +70,7 @@ typedef struct {
     SubGhzAlloc alloc;
     SubGhzFree free;
 
-    SubGhzEncoderLoad load;
+    SubGhzDeserialize deserialize;
     SubGhzEncoderStop stop;
     SubGhzEncoderYield yield;
 
