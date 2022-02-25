@@ -32,8 +32,10 @@ void InfraredAppSceneLearnSuccess::on_enter(InfraredApp* app) {
 
     if(!signal.is_raw()) {
         auto message = &signal.get_message();
-        uint8_t adr_digits = ROUND_UP_TO(infrared_get_protocol_address_length(message->protocol), 4);
-        uint8_t cmd_digits = ROUND_UP_TO(infrared_get_protocol_command_length(message->protocol), 4);
+        uint8_t adr_digits =
+            ROUND_UP_TO(infrared_get_protocol_address_length(message->protocol), 4);
+        uint8_t cmd_digits =
+            ROUND_UP_TO(infrared_get_protocol_command_length(message->protocol), 4);
         uint8_t max_digits = MAX(adr_digits, cmd_digits);
         max_digits = MIN(max_digits, 7);
         size_t label_x_offset = 63 + (7 - max_digits) * 3;
@@ -108,7 +110,8 @@ bool InfraredAppSceneLearnSuccess::on_event(InfraredApp* app, InfraredAppEvent* 
                         signal.get_raw_signal().timings,
                         signal.get_raw_signal().timings_cnt);
                 } else {
-                    infrared_worker_set_decoded_signal(app->get_infrared_worker(), &signal.get_message());
+                    infrared_worker_set_decoded_signal(
+                        app->get_infrared_worker(), &signal.get_message());
                 }
 
                 infrared_worker_tx_start(app->get_infrared_worker());

@@ -47,8 +47,10 @@ void infrared_encoder_nec_reset(void* encoder_ptr, const InfraredMessage* messag
 void infrared_encoder_nec_free(void* encoder_ptr);
 bool infrared_decoder_nec_interpret(InfraredCommonDecoder* decoder);
 InfraredStatus infrared_decoder_nec_decode_repeat(InfraredCommonDecoder* decoder);
-InfraredStatus
-    infrared_encoder_nec_encode_repeat(InfraredCommonEncoder* encoder, uint32_t* duration, bool* level);
+InfraredStatus infrared_encoder_nec_encode_repeat(
+    InfraredCommonEncoder* encoder,
+    uint32_t* duration,
+    bool* level);
 const InfraredProtocolSpecification* infrared_nec_get_spec(InfraredProtocol protocol);
 
 extern const InfraredCommonProtocolSpec protocol_nec;
@@ -94,7 +96,8 @@ void infrared_decoder_samsung32_reset(void* decoder);
 void infrared_decoder_samsung32_free(void* decoder);
 InfraredMessage* infrared_decoder_samsung32_check_ready(void* ctx);
 InfraredMessage* infrared_decoder_samsung32_decode(void* decoder, bool level, uint32_t duration);
-InfraredStatus infrared_encoder_samsung32_encode(void* encoder_ptr, uint32_t* duration, bool* level);
+InfraredStatus
+    infrared_encoder_samsung32_encode(void* encoder_ptr, uint32_t* duration, bool* level);
 void infrared_encoder_samsung32_reset(void* encoder_ptr, const InfraredMessage* message);
 void* infrared_encoder_samsung32_alloc(void);
 void infrared_encoder_samsung32_free(void* encoder_ptr);
@@ -151,8 +154,10 @@ void infrared_encoder_rc6_reset(void* encoder_ptr, const InfraredMessage* messag
 void infrared_encoder_rc6_free(void* decoder);
 InfraredStatus infrared_encoder_rc6_encode(void* encoder_ptr, uint32_t* duration, bool* polarity);
 bool infrared_decoder_rc6_interpret(InfraredCommonDecoder* decoder);
-InfraredStatus
-    infrared_decoder_rc6_decode_manchester(InfraredCommonDecoder* decoder, bool level, uint32_t timing);
+InfraredStatus infrared_decoder_rc6_decode_manchester(
+    InfraredCommonDecoder* decoder,
+    bool level,
+    uint32_t timing);
 InfraredStatus infrared_encoder_rc6_encode_manchester(
     InfraredCommonEncoder* encoder_ptr,
     uint32_t* duration,
@@ -256,7 +261,9 @@ void infrared_encoder_sirc_free(void* decoder);
 InfraredStatus infrared_encoder_sirc_encode(void* encoder_ptr, uint32_t* duration, bool* polarity);
 bool infrared_decoder_sirc_interpret(InfraredCommonDecoder* decoder);
 const InfraredProtocolSpecification* infrared_sirc_get_spec(InfraredProtocol protocol);
-InfraredStatus
-    infrared_encoder_sirc_encode_repeat(InfraredCommonEncoder* encoder, uint32_t* duration, bool* level);
+InfraredStatus infrared_encoder_sirc_encode_repeat(
+    InfraredCommonEncoder* encoder,
+    uint32_t* duration,
+    bool* level);
 
 extern const InfraredCommonProtocolSpec protocol_sirc;

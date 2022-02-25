@@ -113,9 +113,11 @@ static const InfraredEncoderDecoder infrared_encoder_decoder[] = {
 };
 
 static int infrared_find_index_by_protocol(InfraredProtocol protocol);
-static const InfraredProtocolSpecification* infrared_get_spec_by_protocol(InfraredProtocol protocol);
+static const InfraredProtocolSpecification*
+    infrared_get_spec_by_protocol(InfraredProtocol protocol);
 
-const InfraredMessage* infrared_decode(InfraredDecoderHandler* handler, bool level, uint32_t duration) {
+const InfraredMessage*
+    infrared_decode(InfraredDecoderHandler* handler, bool level, uint32_t duration) {
     furi_assert(handler);
 
     InfraredMessage* message = NULL;
@@ -266,7 +268,8 @@ InfraredProtocol infrared_get_protocol_by_name(const char* protocol_name) {
     return InfraredProtocolUnknown;
 }
 
-static const InfraredProtocolSpecification* infrared_get_spec_by_protocol(InfraredProtocol protocol) {
+static const InfraredProtocolSpecification*
+    infrared_get_spec_by_protocol(InfraredProtocol protocol) {
     int index = infrared_find_index_by_protocol(protocol);
     const InfraredProtocolSpecification* spec = NULL;
     if(index >= 0) {

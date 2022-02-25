@@ -13,7 +13,8 @@ void InfraredAppSceneRemoteList::on_enter(InfraredApp* app) {
     auto last_selected_remote = remote_manager->get_remote_name();
     const char* last_selected_remote_name =
         last_selected_remote.size() ? last_selected_remote.c_str() : nullptr;
-    auto filename_ts = std::make_unique<TextStore>(InfraredAppRemoteManager::max_remote_name_length);
+    auto filename_ts =
+        std::make_unique<TextStore>(InfraredAppRemoteManager::max_remote_name_length);
 
     InfraredAppViewManager* view_manager = app->get_view_manager();
     ButtonMenu* button_menu = view_manager->get_button_menu();

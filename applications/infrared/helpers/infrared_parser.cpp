@@ -130,7 +130,10 @@ bool infrared_parser_is_parsed_signal_valid(const InfraredMessage* signal) {
     return result;
 }
 
-bool infrared_parser_is_raw_signal_valid(uint32_t frequency, float duty_cycle, uint32_t timings_cnt) {
+bool infrared_parser_is_raw_signal_valid(
+    uint32_t frequency,
+    float duty_cycle,
+    uint32_t timings_cnt) {
     bool result = true;
 
     if((frequency > INFRARED_MAX_FREQUENCY) || (frequency < INFRARED_MIN_FREQUENCY)) {

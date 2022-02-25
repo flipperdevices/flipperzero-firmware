@@ -116,7 +116,8 @@ static InfraredStatus infrared_common_decode_bits(InfraredCommonDecoder* decoder
 }
 
 /* Pulse Distance-Width Modulation */
-InfraredStatus infrared_common_decode_pdwm(InfraredCommonDecoder* decoder, bool level, uint32_t timing) {
+InfraredStatus
+    infrared_common_decode_pdwm(InfraredCommonDecoder* decoder, bool level, uint32_t timing) {
     furi_assert(decoder);
 
     InfraredStatus status = InfraredStatusOk;
@@ -149,7 +150,8 @@ InfraredStatus infrared_common_decode_pdwm(InfraredCommonDecoder* decoder, bool 
 }
 
 /* level switch detection goes in middle of time-quant */
-InfraredStatus infrared_common_decode_manchester(InfraredCommonDecoder* decoder, bool level, uint32_t timing) {
+InfraredStatus
+    infrared_common_decode_manchester(InfraredCommonDecoder* decoder, bool level, uint32_t timing) {
     furi_assert(decoder);
     uint16_t bit = decoder->protocol->timings.bit1_mark;
     uint16_t tolerance = decoder->protocol->timings.bit_tolerance;
@@ -216,7 +218,8 @@ InfraredMessage* infrared_common_decoder_check_ready(InfraredCommonDecoder* deco
     return message;
 }
 
-InfraredMessage* infrared_common_decode(InfraredCommonDecoder* decoder, bool level, uint32_t duration) {
+InfraredMessage*
+    infrared_common_decode(InfraredCommonDecoder* decoder, bool level, uint32_t duration) {
     furi_assert(decoder);
 
     InfraredMessage* message = 0;

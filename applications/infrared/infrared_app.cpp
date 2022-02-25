@@ -83,7 +83,8 @@ void InfraredApp::switch_to_next_scene_without_saving(Scene next_scene) {
     }
 }
 
-void InfraredApp::search_and_switch_to_previous_scene(const std::initializer_list<Scene>& scenes_list) {
+void InfraredApp::search_and_switch_to_previous_scene(
+    const std::initializer_list<Scene>& scenes_list) {
     Scene previous_scene = Scene::Start;
     bool scene_found = false;
 

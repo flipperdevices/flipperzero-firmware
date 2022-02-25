@@ -50,7 +50,16 @@ void InfraredAppSceneUniversalTV::on_enter(InfraredApp* app) {
     brute_force.add_record(i, "VOL+");
     ++i;
     button_panel_add_item(
-        button_panel, i, 1, 1, 36, 66, &I_Up_25x27, &I_Up_hvr_25x27, infrared_app_item_callback, app);
+        button_panel,
+        i,
+        1,
+        1,
+        36,
+        66,
+        &I_Up_25x27,
+        &I_Up_hvr_25x27,
+        infrared_app_item_callback,
+        app);
     brute_force.add_record(i, "CH+");
     ++i;
     button_panel_add_item(

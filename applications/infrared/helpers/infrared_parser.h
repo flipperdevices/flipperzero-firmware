@@ -42,4 +42,7 @@ bool infrared_parser_is_parsed_signal_valid(const InfraredMessage* signal);
  * @signal - signal to validate
  * @retval true if valid, false otherwise
  */
-bool infrared_parser_is_raw_signal_valid(uint32_t frequency, float duty_cycle, uint32_t timings_cnt);
+bool infrared_parser_is_raw_signal_valid(
+    uint32_t frequency,
+    float duty_cycle,
+    uint32_t timings_cnt);

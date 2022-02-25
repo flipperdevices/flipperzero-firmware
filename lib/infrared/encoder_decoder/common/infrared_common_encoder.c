@@ -33,8 +33,10 @@ static InfraredStatus
  *   0     1     2 | 3  4 |
  * _____-------_____---___
 */
-InfraredStatus
-    infrared_common_encode_manchester(InfraredCommonEncoder* encoder, uint32_t* duration, bool* level) {
+InfraredStatus infrared_common_encode_manchester(
+    InfraredCommonEncoder* encoder,
+    uint32_t* duration,
+    bool* level) {
     furi_assert(encoder);
     furi_assert(duration);
     furi_assert(level);
@@ -55,7 +57,8 @@ InfraredStatus
     return InfraredStatusOk;
 }
 
-InfraredStatus infrared_common_encode_pdwm(InfraredCommonEncoder* encoder, uint32_t* duration, bool* level) {
+InfraredStatus
+    infrared_common_encode_pdwm(InfraredCommonEncoder* encoder, uint32_t* duration, bool* level) {
     furi_assert(encoder);
     furi_assert(duration);
     furi_assert(level);
@@ -79,7 +82,8 @@ InfraredStatus infrared_common_encode_pdwm(InfraredCommonEncoder* encoder, uint3
     return InfraredStatusOk;
 }
 
-InfraredStatus infrared_common_encode(InfraredCommonEncoder* encoder, uint32_t* duration, bool* level) {
+InfraredStatus
+    infrared_common_encode(InfraredCommonEncoder* encoder, uint32_t* duration, bool* level) {
     furi_assert(encoder);
     furi_assert(duration);
     furi_assert(level);

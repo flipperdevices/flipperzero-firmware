@@ -20,9 +20,9 @@
 #define INFRARED_WORKER_TX_FILL_BUFFER 0x10
 #define INFRARED_WORKER_TX_MESSAGE_SENT 0x20
 
-#define INFRARED_WORKER_ALL_RX_EVENTS                                                      \
-    (INFRARED_WORKER_RX_RECEIVED | INFRARED_WORKER_RX_TIMEOUT_RECEIVED | INFRARED_WORKER_OVERRUN | \
-     INFRARED_WORKER_EXIT)
+#define INFRARED_WORKER_ALL_RX_EVENTS                                    \
+    (INFRARED_WORKER_RX_RECEIVED | INFRARED_WORKER_RX_TIMEOUT_RECEIVED | \
+     INFRARED_WORKER_OVERRUN | INFRARED_WORKER_EXIT)
 
 #define INFRARED_WORKER_ALL_TX_EVENTS \
     (INFRARED_WORKER_TX_FILL_BUFFER | INFRARED_WORKER_TX_MESSAGE_SENT | INFRARED_WORKER_EXIT)
@@ -117,7 +117,8 @@ static void infrared_worker_rx_callback(void* context, bool level, uint32_t dura
 static void infrared_worker_process_timeout(InfraredWorker* instance) {
     if(instance->signal.timings_cnt < 2) return;
 
-    const InfraredMessage* message_decoded = infrared_check_decoder_ready(instance->infrared_decoder);
+    const InfraredMessage* message_decoded =
+        infrared_check_decoder_ready(instance->infrared_decoder);
     if(message_decoded) {
         instance->signal.message = *message_decoded;
         instance->signal.timings_cnt = 0;
@@ -130,8 +131,10 @@ static void infrared_worker_process_timeout(InfraredWorker* instance) {
             instance->rx.received_signal_context, &instance->signal);
 }
 
-static void infrared_worker_process_timings(InfraredWorker* instance, uint32_t duration, bool level) {
-    const InfraredMessage* message_decoded = infrared_decode(instance->infrared_decoder, level, duration);
+static void
+    infrared_worker_process_timings(InfraredWorker* instance, uint32_t duration, bool level) {
+    const InfraredMessage* message_decoded =
+        infrared_decode(instance->infrared_decoder, level, duration);
     if(message_decoded) {
         instance->signal.message = *message_decoded;
         instance->signal.timings_cnt = 0;
@@ -163,7 +166,8 @@ static int32_t infrared_worker_rx_thread(void* thread_context) {
     TickType_t last_blink_time = 0;
 
     while(1) {
-        events = osEventFlagsWait(instance->events, INFRARED_WORKER_ALL_RX_EVENTS, 0, osWaitForever);
+        events =
+            osEventFlagsWait(instance->events, INFRARED_WORKER_ALL_RX_EVENTS, 0, osWaitForever);
         furi_check(events & INFRARED_WORKER_ALL_RX_EVENTS); /* at least one caught */
 
         if(events & INFRARED_WORKER_RX_RECEIVED) {
@@ -264,7 +268,8 @@ void infrared_worker_rx_start(InfraredWorker* instance) {
     furi_thread_start(instance->thread);
 
     furi_hal_infrared_async_rx_set_capture_isr_callback(infrared_worker_rx_callback, instance);
-    furi_hal_infrared_async_rx_set_timeout_isr_callback(infrared_worker_rx_timeout_callback, instance);
+    furi_hal_infrared_async_rx_set_timeout_isr_callback(
+        infrared_worker_rx_timeout_callback, instance);
     furi_hal_infrared_async_rx_start();
     furi_hal_infrared_async_rx_set_timeout(INFRARED_WORKER_RX_TIMEOUT);
 
@@ -330,7 +335,8 @@ void infrared_worker_tx_start(InfraredWorker* instance) {
 
     instance->tx.steady_signal_sent = false;
     instance->tx.need_reinitialization = false;
-    furi_hal_infrared_async_tx_set_data_isr_callback(infrared_worker_furi_hal_data_isr_callback, instance);
+    furi_hal_infrared_async_tx_set_data_isr_callback(
+        infrared_worker_furi_hal_data_isr_callback, instance);
     furi_hal_infrared_async_tx_set_signal_sent_isr_callback(
         infrared_worker_furi_hal_message_sent_isr_callback, instance);
 
@@ -382,7 +388,8 @@ static bool infrared_get_new_signal(InfraredWorker* instance) {
         float new_tx_duty_cycle = 0;
         if(instance->signal.decoded) {
             new_tx_frequency = infrared_get_protocol_frequency(instance->signal.message.protocol);
-            new_tx_duty_cycle = infrared_get_protocol_duty_cycle(instance->signal.message.protocol);
+            new_tx_duty_cycle =
+                infrared_get_protocol_duty_cycle(instance->signal.message.protocol);
         } else {
             furi_assert(instance->signal.timings_cnt > 1);
             new_tx_frequency = INFRARED_COMMON_CARRIER_FREQUENCY;
@@ -501,8 +508,8 @@ static int32_t infrared_worker_tx_thread(void* thread_context) {
 
             break;
         case InfraredWorkerStateRunTx:
-            events =
-                osEventFlagsWait(instance->events, INFRARED_WORKER_ALL_TX_EVENTS, 0, osWaitForever);
+            events = osEventFlagsWait(
+                instance->events, INFRARED_WORKER_ALL_TX_EVENTS, 0, osWaitForever);
             furi_check(events & INFRARED_WORKER_ALL_TX_EVENTS); /* at least one caught */
 
             if(events & INFRARED_WORKER_EXIT) {
@@ -575,7 +582,10 @@ void infrared_worker_set_decoded_signal(InfraredWorker* instance, const Infrared
     instance->signal.message = *message;
 }
 
-void infrared_worker_set_raw_signal(InfraredWorker* instance, const uint32_t* timings, size_t timings_cnt) {
+void infrared_worker_set_raw_signal(
+    InfraredWorker* instance,
+    const uint32_t* timings,
+    size_t timings_cnt) {
     furi_assert(instance);
     furi_assert(timings);
     furi_assert(timings_cnt > 0);
@@ -591,8 +601,8 @@ void infrared_worker_set_raw_signal(InfraredWorker* instance, const uint32_t* ti
 InfraredWorkerGetSignalResponse
     infrared_worker_tx_get_signal_steady_callback(void* context, InfraredWorker* instance) {
     InfraredWorkerGetSignalResponse response = instance->tx.steady_signal_sent ?
-                                               InfraredWorkerGetSignalResponseSame :
-                                               InfraredWorkerGetSignalResponseNew;
+                                                   InfraredWorkerGetSignalResponseSame :
+                                                   InfraredWorkerGetSignalResponseNew;
     instance->tx.steady_signal_sent = true;
     return response;
 }

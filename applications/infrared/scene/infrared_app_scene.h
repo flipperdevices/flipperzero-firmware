@@ -303,4 +303,3 @@ public:
     ~InfraredAppSceneUniversalTV() {
     }
 };
-

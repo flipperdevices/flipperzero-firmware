@@ -30,7 +30,8 @@ typedef InfraredWorkerGetSignalResponse (
 typedef void (*InfraredWorkerMessageSentCallback)(void* context);
 
 /** Callback type to call by InfraredWorker thread when new signal is received */
-typedef void (*InfraredWorkerReceivedSignalCallback)(void* context, InfraredWorkerSignal* received_signal);
+typedef void (
+    *InfraredWorkerReceivedSignalCallback)(void* context, InfraredWorkerSignal* received_signal);
 
 /** Allocate InfraredWorker
  *
@@ -164,7 +165,10 @@ void infrared_worker_set_decoded_signal(InfraredWorker* instance, const Infrared
  * @param[in]   timings - array of raw timings
  * @param[in]   timings_cnt - size of array of raw timings
  */
-void infrared_worker_set_raw_signal(InfraredWorker* instance, const uint32_t* timings, size_t timings_cnt);
+void infrared_worker_set_raw_signal(
+    InfraredWorker* instance,
+    const uint32_t* timings,
+    size_t timings_cnt);
 
 #ifdef __cplusplus
 }

@@ -16,7 +16,8 @@
 static const std::string default_remote_name = "remote";
 
 std::string InfraredAppRemoteManager::make_full_name(const std::string& remote_name) const {
-    return std::string("") + InfraredApp::infrared_directory + "/" + remote_name + InfraredApp::infrared_extension;
+    return std::string("") + InfraredApp::infrared_directory + "/" + remote_name +
+           InfraredApp::infrared_extension;
 }
 
 std::string InfraredAppRemoteManager::find_vacant_remote_name(const std::string& name) {

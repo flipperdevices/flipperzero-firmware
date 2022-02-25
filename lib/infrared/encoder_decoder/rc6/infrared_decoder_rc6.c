@@ -54,8 +54,10 @@ bool infrared_decoder_rc6_interpret(InfraredCommonDecoder* decoder) {
  * it separately and than pass decoding for other bits to
  * common manchester decode function.
  */
-InfraredStatus
-    infrared_decoder_rc6_decode_manchester(InfraredCommonDecoder* decoder, bool level, uint32_t timing) {
+InfraredStatus infrared_decoder_rc6_decode_manchester(
+    InfraredCommonDecoder* decoder,
+    bool level,
+    uint32_t timing) {
     // 4th bit lasts 2x times more
     InfraredStatus status = InfraredStatusError;
     uint16_t bit = decoder->protocol->timings.bit1_mark;

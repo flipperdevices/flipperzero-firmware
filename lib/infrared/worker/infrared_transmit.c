@@ -49,7 +49,8 @@ void infrared_send_raw_ext(
     infrared_tx_raw_timings_index = 0;
     infrared_tx_raw_timings_number = timings_cnt;
     infrared_tx_raw_add_silence = start_from_mark;
-    furi_hal_infrared_async_tx_set_data_isr_callback(infrared_get_raw_data_callback, (void*)timings);
+    furi_hal_infrared_async_tx_set_data_isr_callback(
+        infrared_get_raw_data_callback, (void*)timings);
     furi_hal_infrared_async_tx_start(frequency, duty_cycle);
     furi_hal_infrared_async_tx_wait_termination();
 
@@ -65,7 +66,8 @@ void infrared_send_raw(const uint32_t timings[], uint32_t timings_cnt, bool star
         INFRARED_COMMON_DUTY_CYCLE);
 }
 
-FuriHalInfraredTxGetDataState infrared_get_data_callback(void* context, uint32_t* duration, bool* level) {
+FuriHalInfraredTxGetDataState
+    infrared_get_data_callback(void* context, uint32_t* duration, bool* level) {
     FuriHalInfraredTxGetDataState state = FuriHalInfraredTxGetDataStateLastDone;
     InfraredEncoderHandler* handler = context;
     InfraredStatus status = InfraredStatusError;

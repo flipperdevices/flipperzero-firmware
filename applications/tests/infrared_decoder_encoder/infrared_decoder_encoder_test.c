@@ -109,7 +109,8 @@ static void run_encoder(
     mu_assert(j == expected_timings_len, "encoded less timings than expected");
 }
 
-static void run_encoder_decoder(const InfraredMessage input_messages[], uint32_t input_messages_len) {
+static void
+    run_encoder_decoder(const InfraredMessage input_messages[], uint32_t input_messages_len) {
     uint32_t* timings = 0;
     uint32_t timings_len = 200;
     bool level = false;

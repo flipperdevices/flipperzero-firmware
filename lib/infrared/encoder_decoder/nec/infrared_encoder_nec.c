@@ -7,7 +7,8 @@
 #include <furi.h>
 
 static const uint32_t repeat_timings[] = {
-    INFRARED_NEC_REPEAT_PERIOD - INFRARED_NEC_REPEAT_MARK - INFRARED_NEC_REPEAT_SPACE - INFRARED_NEC_BIT1_MARK,
+    INFRARED_NEC_REPEAT_PERIOD - INFRARED_NEC_REPEAT_MARK - INFRARED_NEC_REPEAT_SPACE -
+        INFRARED_NEC_BIT1_MARK,
     INFRARED_NEC_REPEAT_MARK,
     INFRARED_NEC_REPEAT_SPACE,
     INFRARED_NEC_BIT1_MARK,
@@ -54,8 +55,10 @@ void infrared_encoder_nec_reset(void* encoder_ptr, const InfraredMessage* messag
     }
 }
 
-InfraredStatus
-    infrared_encoder_nec_encode_repeat(InfraredCommonEncoder* encoder, uint32_t* duration, bool* level) {
+InfraredStatus infrared_encoder_nec_encode_repeat(
+    InfraredCommonEncoder* encoder,
+    uint32_t* duration,
+    bool* level) {
     furi_assert(encoder);
 
     /* space + 2 timings preambule + payload + stop bit */

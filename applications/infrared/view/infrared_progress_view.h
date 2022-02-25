@@ -48,7 +48,9 @@ bool infrared_progress_view_increase_progress(InfraredProgressView* instance);
  * @param instance - view module
  * @param progress_max - maximum value of progress
  */
-void infrared_progress_view_set_progress_total(InfraredProgressView* instance, uint16_t progress_max);
+void infrared_progress_view_set_progress_total(
+    InfraredProgressView* instance,
+    uint16_t progress_max);
 
 /** Set back button callback
  *

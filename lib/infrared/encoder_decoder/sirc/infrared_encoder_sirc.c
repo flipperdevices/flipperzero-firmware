@@ -32,8 +32,10 @@ void infrared_encoder_sirc_reset(void* encoder_ptr, const InfraredMessage* messa
     }
 }
 
-InfraredStatus
-    infrared_encoder_sirc_encode_repeat(InfraredCommonEncoder* encoder, uint32_t* duration, bool* level) {
+InfraredStatus infrared_encoder_sirc_encode_repeat(
+    InfraredCommonEncoder* encoder,
+    uint32_t* duration,
+    bool* level) {
     furi_assert(encoder);
 
     furi_assert(encoder->timings_encoded == (1 + 2 + encoder->bits_to_encode * 2 - 1));

@@ -68,7 +68,8 @@ InfraredDecoderHandler* infrared_alloc_decoder(void);
  *              up to next infrared_free_decoder(), infrared_reset_decoder(),
  *              infrared_decode(), infrared_check_decoder_ready() calls.
  */
-const InfraredMessage* infrared_decode(InfraredDecoderHandler* handler, bool level, uint32_t duration);
+const InfraredMessage*
+    infrared_decode(InfraredDecoderHandler* handler, bool level, uint32_t duration);
 
 /**
  * Check whether decoder is ready.

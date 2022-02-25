@@ -12,7 +12,8 @@ typedef struct InfraredCommonEncoder InfraredCommonEncoder;
 typedef InfraredStatus (*InfraredCommonDecode)(InfraredCommonDecoder*, bool, uint32_t);
 typedef InfraredStatus (*InfraredCommonDecodeRepeat)(InfraredCommonDecoder*);
 typedef bool (*InfraredCommonInterpret)(InfraredCommonDecoder*);
-typedef InfraredStatus (*InfraredCommonEncode)(InfraredCommonEncoder* encoder, uint32_t* out, bool* polarity);
+typedef InfraredStatus (
+    *InfraredCommonEncode)(InfraredCommonEncoder* encoder, uint32_t* out, bool* polarity);
 
 typedef struct {
     InfraredTimings timings;
@@ -64,18 +65,25 @@ struct InfraredCommonEncoder {
     uint8_t data[];
 };
 
-InfraredMessage* infrared_common_decode(InfraredCommonDecoder* decoder, bool level, uint32_t duration);
-InfraredStatus infrared_common_decode_pdwm(InfraredCommonDecoder* decoder, bool level, uint32_t timing);
-InfraredStatus infrared_common_decode_manchester(InfraredCommonDecoder* decoder, bool level, uint32_t timing);
+InfraredMessage*
+    infrared_common_decode(InfraredCommonDecoder* decoder, bool level, uint32_t duration);
+InfraredStatus
+    infrared_common_decode_pdwm(InfraredCommonDecoder* decoder, bool level, uint32_t timing);
+InfraredStatus
+    infrared_common_decode_manchester(InfraredCommonDecoder* decoder, bool level, uint32_t timing);
 void* infrared_common_decoder_alloc(const InfraredCommonProtocolSpec* protocol);
 void infrared_common_decoder_free(InfraredCommonDecoder* decoder);
 void infrared_common_decoder_reset(InfraredCommonDecoder* decoder);
 InfraredMessage* infrared_common_decoder_check_ready(InfraredCommonDecoder* decoder);
 
-InfraredStatus infrared_common_encode(InfraredCommonEncoder* encoder, uint32_t* duration, bool* polarity);
-InfraredStatus infrared_common_encode_pdwm(InfraredCommonEncoder* encoder, uint32_t* duration, bool* polarity);
 InfraredStatus
-    infrared_common_encode_manchester(InfraredCommonEncoder* encoder, uint32_t* duration, bool* polarity);
+    infrared_common_encode(InfraredCommonEncoder* encoder, uint32_t* duration, bool* polarity);
+InfraredStatus
+    infrared_common_encode_pdwm(InfraredCommonEncoder* encoder, uint32_t* duration, bool* polarity);
+InfraredStatus infrared_common_encode_manchester(
+    InfraredCommonEncoder* encoder,
+    uint32_t* duration,
+    bool* polarity);
 void* infrared_common_encoder_alloc(const InfraredCommonProtocolSpec* protocol);
 void infrared_common_encoder_free(InfraredCommonEncoder* encoder);
 void infrared_common_encoder_reset(InfraredCommonEncoder* encoder);

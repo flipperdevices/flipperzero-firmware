@@ -105,7 +105,8 @@ int32_t infrared_monitor_app(void* p) {
     infrared_monitor->view_port = view_port_alloc();
     Gui* gui = furi_record_open("gui");
 
-    view_port_draw_callback_set(infrared_monitor->view_port, infrared_monitor_draw_callback, infrared_monitor);
+    view_port_draw_callback_set(
+        infrared_monitor->view_port, infrared_monitor_draw_callback, infrared_monitor);
     view_port_input_callback_set(
         infrared_monitor->view_port, infrared_monitor_input_callback, infrared_monitor);
 

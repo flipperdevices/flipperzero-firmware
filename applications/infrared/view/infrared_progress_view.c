@@ -63,7 +63,9 @@ static void infrared_progress_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_draw_str(canvas, x + 30, y + height - 6, "= stop");
 }
 
-void infrared_progress_view_set_progress_total(InfraredProgressView* progress, uint16_t progress_total) {
+void infrared_progress_view_set_progress_total(
+    InfraredProgressView* progress,
+    uint16_t progress_total) {
     furi_assert(progress);
     InfraredProgressViewModel* model = view_get_model(progress->view);
     model->progress = 0;
