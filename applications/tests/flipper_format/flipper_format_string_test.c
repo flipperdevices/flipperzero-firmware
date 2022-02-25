@@ -59,7 +59,34 @@ MU_TEST_1(flipper_format_read_and_update_test, FlipperFormat* flipper_format) {
 
     uint32_t count;
 
+    size_t position_before = stream_tell(flipper_format_get_raw_stream(flipper_format));
+    mu_check(flipper_format_key_exist(flipper_format, test_hex_key));
+    mu_assert_int_eq(position_before, stream_tell(flipper_format_get_raw_stream(flipper_format)));
+
+    mu_check(!flipper_format_key_exist(flipper_format, "invalid key"));
+    mu_assert_int_eq(position_before, stream_tell(flipper_format_get_raw_stream(flipper_format)));
+
+    mu_check(flipper_format_seek_to_end(flipper_format));
+    mu_assert_int_eq(
+        stream_size(flipper_format_get_raw_stream(flipper_format)),
+        stream_tell(flipper_format_get_raw_stream(flipper_format)));
+
+    position_before = stream_tell(flipper_format_get_raw_stream(flipper_format));
+    mu_check(flipper_format_key_exist(flipper_format, test_hex_key));
+    mu_assert_int_eq(position_before, stream_tell(flipper_format_get_raw_stream(flipper_format)));
+
+    mu_check(!flipper_format_key_exist(flipper_format, "invalid key"));
+    mu_assert_int_eq(position_before, stream_tell(flipper_format_get_raw_stream(flipper_format)));
+
     mu_check(flipper_format_rewind(flipper_format));
+
+    position_before = stream_tell(flipper_format_get_raw_stream(flipper_format));
+    mu_check(flipper_format_key_exist(flipper_format, test_hex_key));
+    mu_assert_int_eq(position_before, stream_tell(flipper_format_get_raw_stream(flipper_format)));
+
+    mu_check(!flipper_format_key_exist(flipper_format, "invalid key"));
+    mu_assert_int_eq(position_before, stream_tell(flipper_format_get_raw_stream(flipper_format)));
+
     string_init(tmpstr);
 
     mu_check(flipper_format_read_header(flipper_format, tmpstr, &version));

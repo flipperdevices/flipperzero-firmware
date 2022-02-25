@@ -180,6 +180,22 @@ void flipper_format_set_strict_mode(FlipperFormat* flipper_format, bool strict_m
 bool flipper_format_rewind(FlipperFormat* flipper_format);
 
 /**
+ * Move the RW pointer at the end. Can be useful if you want to add some data after reading.
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @return True on success
+ */
+bool flipper_format_seek_to_end(FlipperFormat* flipper_format);
+
+/**
+ * Check if the key exists.
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @param key Key
+ * @return true key exists
+ * @return false key is not exists
+ */
+bool flipper_format_key_exist(FlipperFormat* flipper_format, const char* key);
+
+/**
  * Read the header (file type and version).
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param filetype File type string

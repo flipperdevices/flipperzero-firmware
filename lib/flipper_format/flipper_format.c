@@ -102,6 +102,20 @@ bool flipper_format_rewind(FlipperFormat* flipper_format) {
     return stream_rewind(flipper_format->stream);
 }
 
+bool flipper_format_seek_to_end(FlipperFormat* flipper_format) {
+    furi_assert(flipper_format);
+    return stream_seek(flipper_format->stream, 0, StreamOffsetFromEnd);
+}
+
+bool flipper_format_key_exist(FlipperFormat* flipper_format, const char* key) {
+    size_t pos = stream_tell(flipper_format->stream);
+    stream_seek(flipper_format->stream, 0, StreamOffsetFromStart);
+    bool result = flipper_format_stream_seek_to_key(flipper_format->stream, key, false);
+    stream_seek(flipper_format->stream, pos, StreamOffsetFromStart);
+
+    return result;
+}
+
 bool flipper_format_read_header(
     FlipperFormat* flipper_format,
     string_t filetype,
