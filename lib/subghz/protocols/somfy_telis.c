@@ -52,7 +52,6 @@ const SubGhzProtocolDecoder subghz_protocol_somfy_telis_decoder = {
     .serialize = subghz_protocol_decoder_somfy_telis_serialize,
     .deserialize = subghz_protocol_decoder_somfy_telis_deserialize,
     .get_string = subghz_protocol_decoder_somfy_telis_get_string,
-    .save_file = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_somfy_telis_encoder = {
@@ -62,7 +61,6 @@ const SubGhzProtocolEncoder subghz_protocol_somfy_telis_encoder = {
     .deserialize = NULL,
     .stop = NULL,
     .yield = NULL,
-    .load_file = NULL,
 };
 
 const SubGhzProtocol subghz_protocol_somfy_telis = {
@@ -366,12 +364,3 @@ void subghz_protocol_decoder_somfy_telis_get_string(void* context, string_t outp
         instance->generic.cnt,
         subghz_protocol_somfy_telis_get_name_button(instance->generic.btn));
 }
-
-// void subghz_decoder_somfy_telis_to_load_protocol(SubGhzProtocolSomfyTelis* instance, void* context) {
-//     furi_assert(context);
-//     furi_assert(instance);
-//     SubGhzProtocolCommonLoad* data = context;
-//     instance->generic.data = data->code_found;
-//     instance->generic.data_count_bit = data->code_count_bit;
-//     subghz_protocol_somfy_telis_remote_controller(instance);
-// }

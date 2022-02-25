@@ -170,6 +170,7 @@ SubGhz* subghz_alloc() {
     subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
     subghz->txrx->history = subghz_history_alloc();
     subghz->txrx->worker = subghz_worker_alloc();
+    subghz->txrx->fff_data = flipper_format_string_alloc();
 
     subghz->txrx->environment = subghz_environment_alloc();
     subghz_environment_set_came_atomo_rainbow_table_file_name(
@@ -259,6 +260,7 @@ void subghz_free(SubGhz* subghz) {
     subghz_receiver_free(subghz->txrx->receiver);
     subghz_environment_free(subghz->txrx->environment);
     subghz_worker_free(subghz->txrx->worker);
+    flipper_format_free(subghz->txrx->fff_data);
     subghz_history_free(subghz->txrx->history);
     free(subghz->txrx);
 

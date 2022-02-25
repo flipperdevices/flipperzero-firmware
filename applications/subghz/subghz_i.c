@@ -10,6 +10,9 @@
 #include "../notification/notification.h"
 #include "views/receiver.h"
 
+#include <flipper_format/flipper_format_i.h>
+#include "lib/toolbox/stream/stream.h"
+
 #define TAG "SubGhz"
 
 bool subghz_set_preset(SubGhz* subghz, const char* preset) {
@@ -151,7 +154,7 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
     bool ret = false;
     string_t temp_str;
     string_init(temp_str);
-    //uint32_t repeat = 200;
+    uint32_t repeat = 200;
     do {
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
@@ -162,10 +165,12 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
             break;
         }
         //ToDo FIX
-        // if(!flipper_format_write_uint32(flipper_format, "Repeat", &repeat, 1)) {
-        //     FURI_LOG_E(TAG, "Unable Repeat");
-        //     break;
-        // }
+        if(!flipper_format_insert_or_update_uint32(flipper_format, "Repeat", &repeat, 1)) {
+            FURI_LOG_E(TAG, "Unable Repeat");
+            break;
+        }
+        // Stream* stream = flipper_format_get_raw_stream(flipper_format);
+        // stream_dump_data(stream);
 
         subghz->txrx->transmitter =
             subghz_transmitter_alloc_init(subghz->txrx->environment, string_get_cstr(temp_str));
@@ -220,7 +225,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
     furi_assert(file_path);
 
     Storage* storage = furi_record_open("storage");
-    FlipperFormat* flipper_format = flipper_format_file_alloc(storage);
+    Stream* fff_data_stream = flipper_format_get_raw_stream(subghz->txrx->fff_data);
 
     // Load device data
     bool loaded = false;
@@ -231,11 +236,16 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
     uint32_t version;
 
     do {
-        if(!flipper_format_file_open_existing(flipper_format, string_get_cstr(path))) {
-            FURI_LOG_E(TAG, "Unable to open file for read: %s", string_get_cstr(path));
+        stream_clean(fff_data_stream);
+        stream_load_from_file(fff_data_stream, storage, string_get_cstr(path));
+        stream_dump_data(fff_data_stream);
+
+        if(!flipper_format_rewind(subghz->txrx->fff_data)) {
+            FURI_LOG_E(TAG, "Rewind error");
             break;
         }
-        if(!flipper_format_read_header(flipper_format, temp_str, &version)) {
+
+        if(!flipper_format_read_header(subghz->txrx->fff_data, temp_str, &version)) {
             FURI_LOG_E(TAG, "Missing or incorrect header");
             break;
         }
@@ -249,12 +259,12 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
         }
 
         if(!flipper_format_read_uint32(
-               flipper_format, "Frequency", (uint32_t*)&subghz->txrx->frequency, 1)) {
+               subghz->txrx->fff_data, "Frequency", (uint32_t*)&subghz->txrx->frequency, 1)) {
             FURI_LOG_E(TAG, "Missing Frequency");
             break;
         }
 
-        if(!flipper_format_read_string(flipper_format, "Preset", temp_str)) {
+        if(!flipper_format_read_string(subghz->txrx->fff_data, "Preset", temp_str)) {
             FURI_LOG_E(TAG, "Missing Preset");
             break;
         }
@@ -262,9 +272,16 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             break;
         }
 
-        if(!flipper_format_read_string(flipper_format, "Protocol", temp_str)) {
+        if(!flipper_format_read_string(subghz->txrx->fff_data, "Protocol", temp_str)) {
             FURI_LOG_E(TAG, "Missing Protocol");
             break;
+        }
+
+        subghz->txrx->decoder_result = subghz_receiver_search_decoder_base_by_name(
+            subghz->txrx->receiver, string_get_cstr(temp_str));
+        if(subghz->txrx->decoder_result) {
+            subghz_protocol_decoder_base_deserialize(
+                subghz->txrx->decoder_result, subghz->txrx->fff_data);
         }
         //ToDo Fix
         // subghz->txrx->protocol_result =
@@ -286,7 +303,85 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
     string_clear(temp_str);
     string_clear(path);
 
-    flipper_format_free(flipper_format);
+    //flipper_format_free(flipper_format);
+
+    // Storage* storage = furi_record_open("storage");
+    // FlipperFormat* flipper_format = flipper_format_file_alloc(storage);
+
+    // // Load device data
+    // bool loaded = false;
+    // string_t path;
+    // string_init_set_str(path, file_path);
+    // string_t temp_str;
+    // string_init(temp_str);
+    // uint32_t version;
+
+    // do {
+    //     if(!flipper_format_file_open_existing(flipper_format, string_get_cstr(path))) {
+    //         FURI_LOG_E(TAG, "Unable to open file for read: %s", string_get_cstr(path));
+    //         break;
+    //     }
+    //     if(!flipper_format_read_header(flipper_format, temp_str, &version)) {
+    //         FURI_LOG_E(TAG, "Missing or incorrect header");
+    //         break;
+    //     }
+
+    //     if(((!strcmp(string_get_cstr(temp_str), SUBGHZ_KEY_FILE_TYPE)) ||
+    //         (!strcmp(string_get_cstr(temp_str), SUBGHZ_RAW_FILE_TYPE))) &&
+    //        version == SUBGHZ_KEY_FILE_VERSION) {
+    //     } else {
+    //         FURI_LOG_E(TAG, "Type or version mismatch");
+    //         break;
+    //     }
+
+    //     if(!flipper_format_read_uint32(
+    //            flipper_format, "Frequency", (uint32_t*)&subghz->txrx->frequency, 1)) {
+    //         FURI_LOG_E(TAG, "Missing Frequency");
+    //         break;
+    //     }
+
+    //     if(!flipper_format_read_string(flipper_format, "Preset", temp_str)) {
+    //         FURI_LOG_E(TAG, "Missing Preset");
+    //         break;
+    //     }
+    //     if(!subghz_set_preset(subghz, string_get_cstr(temp_str))) {
+    //         break;
+    //     }
+
+    //     if(!flipper_format_read_string(flipper_format, "Protocol", temp_str)) {
+    //         FURI_LOG_E(TAG, "Missing Protocol");
+    //         break;
+    //     }
+
+    //     subghz->txrx->decoder_result = subghz_receiver_search_decoder_base_by_name(
+    //         subghz->txrx->receiver,
+    //         string_get_cstr(temp_str));
+    //     if(subghz->txrx->decoder_result) {
+    //         subghz_protocol_decoder_base_deserialize(
+    //             subghz->txrx->decoder_result,
+    //             flipper_format);
+    //     }
+    //     //ToDo Fix
+    //     // subghz->txrx->protocol_result =
+    //     //     subghz_parser_get_by_name(subghz->txrx->parser, string_get_cstr(temp_str));
+    //     // if(subghz->txrx->protocol_result == NULL) {
+    //     //     FURI_LOG_E(SUBGHZ_PARSER_TAG, "This type of protocol was not found");
+    //     //     break;
+    //     // }
+    //     // if(!subghz->txrx->protocol_result->to_load_protocol_from_file(
+    //     //        flipper_file, subghz->txrx->protocol_result, string_get_cstr(path))) {
+    //     //     break;
+    //     // }
+    //     loaded = true;
+    // } while(0);
+
+    // if(!loaded) {
+    //     dialog_message_show_storage_error(subghz->dialogs, "Cannot parse\nfile");
+    // }
+    // string_clear(temp_str);
+    // string_clear(path);
+
+    // flipper_format_free(flipper_format);
 
     furi_record_close("storage");
 
@@ -316,8 +411,50 @@ bool subghz_get_next_name_file(SubGhz* subghz) {
     return res;
 }
 
-bool subghz_save_protocol_to_file(SubGhz* subghz, const char* dev_name) {
+bool subghz_save_protocol_to_file(
+    SubGhz* subghz,
+    FlipperFormat* flipper_format,
+    const char* dev_name) {
     furi_assert(subghz);
+    furi_assert(flipper_format);
+    furi_assert(dev_name);
+
+    Storage* storage = furi_record_open("storage");
+    Stream* flipper_format_stream = flipper_format_get_raw_stream(flipper_format);
+
+    string_t dev_file_name;
+    string_init(dev_file_name);
+    bool saved = false;
+
+    do {
+        //removing additional fields
+        flipper_format_delete_key(flipper_format, "Repeat");
+        flipper_format_delete_key(flipper_format, "Manufacture");
+
+        // Create subghz folder directory if necessary
+        if(!storage_simply_mkdir(storage, SUBGHZ_APP_FOLDER)) {
+            dialog_message_show_storage_error(subghz->dialogs, "Cannot create\nfolder");
+            break;
+        }
+
+        // First remove subghz device file if it was saved
+        string_printf(dev_file_name, "%s/%s%s", SUBGHZ_APP_FOLDER, dev_name, SUBGHZ_APP_EXTENSION);
+
+        if(!storage_simply_remove(storage, string_get_cstr(dev_file_name))) {
+            break;
+        }
+        //ToDo check Write
+        stream_seek(flipper_format_stream, 0, StreamOffsetFromStart);
+        stream_save_to_file(
+            flipper_format_stream, storage, string_get_cstr(dev_file_name), FSOM_CREATE_ALWAYS);
+
+        saved = true;
+    } while(0);
+
+    string_clear(dev_file_name);
+    furi_record_close("storage");
+    return saved;
+
     //furi_assert(subghz->txrx->protocol_result);
     //ToDo Fix
     // Storage* storage = furi_record_open("storage");
@@ -390,7 +527,7 @@ bool subghz_save_protocol_to_file(SubGhz* subghz, const char* dev_name) {
     // furi_record_close("storage");
 
     //return saved;
-    return false;
+    //return false;
 }
 
 bool subghz_load_protocol_from_file(SubGhz* subghz) {

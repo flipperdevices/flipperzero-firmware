@@ -75,9 +75,8 @@ void subghz_scene_receiver_info_on_enter(void* context) {
         string_clear(modulation_str);
         string_clear(text);
 
-        if(((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Save) ==
-            SubGhzProtocolFlag_Save) &&
-           subghz->txrx->decoder_result->protocol->decoder->save_file) {
+        if((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Save) ==
+           SubGhzProtocolFlag_Save) {
             widget_add_button_element(
                 subghz->widget,
                 GuiButtonTypeRight,
@@ -159,12 +158,12 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             if(!subghz_scene_receiver_info_update_parser(subghz)) {
                 return false;
             }
-            //ToDo Fix
-            // if(subghz->txrx->protocol_result && subghz->txrx->protocol_result->to_save_file &&
-            //    strcmp(subghz->txrx->protocol_result->name, "KeeLoq")) {
-            //     subghz_file_name_clear(subghz);
-            //     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
-            // }
+
+            if((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Save) ==
+               SubGhzProtocolFlag_Save) {
+                subghz_file_name_clear(subghz);
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
+            }
             return true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {

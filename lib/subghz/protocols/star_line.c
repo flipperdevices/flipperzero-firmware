@@ -56,7 +56,6 @@ const SubGhzProtocolDecoder subghz_protocol_star_line_decoder = {
     .serialize = subghz_protocol_decoder_star_line_serialize,
     .deserialize = subghz_protocol_decoder_star_line_deserialize,
     .get_string = subghz_protocol_decoder_star_line_get_string,
-    .save_file = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_star_line_encoder = {
@@ -66,7 +65,6 @@ const SubGhzProtocolEncoder subghz_protocol_star_line_encoder = {
     .deserialize = NULL,
     .stop = NULL,
     .yield = NULL,
-    .load_file = NULL,
 };
 
 const SubGhzProtocol subghz_protocol_star_line = {
@@ -387,12 +385,3 @@ void subghz_protocol_decoder_star_line_get_string(void* context, string_t output
         instance->manufacture_name,
         instance->generic.serial);
 }
-
-// void subghz_decoder_star_line_to_load_protocol(SubGhzProtocolStarLine* instance, void* context) {
-//     furi_assert(context);
-//     furi_assert(instance);
-//     SubGhzProtocolCommonLoad* data = context;
-//     instance->generic.data = data->code_found;
-//     instance->generic.data_count_bit = data->code_count_bit;
-//     subghz_protocol_star_line_check_remote_controller(instance);
-// }

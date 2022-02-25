@@ -47,7 +47,6 @@ const SubGhzProtocolDecoder subghz_protocol_gate_tx_decoder = {
     .serialize = subghz_protocol_decoder_gate_tx_serialize,
     .deserialize = subghz_protocol_decoder_gate_tx_deserialize,
     .get_string = subghz_protocol_decoder_gate_tx_get_string,
-    .save_file = subghz_protocol_gate_tx_save_file,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_gate_tx_encoder = {
@@ -57,7 +56,6 @@ const SubGhzProtocolEncoder subghz_protocol_gate_tx_encoder = {
     .deserialize = subghz_protocol_encoder_gate_tx_deserialize,
     .stop = subghz_protocol_encoder_gate_tx_stop,
     .yield = subghz_protocol_encoder_gate_tx_yield,
-    .load_file = subghz_protocol_gate_tx_load_file,
 };
 
 const SubGhzProtocol subghz_protocol_gate_tx = {
@@ -308,27 +306,3 @@ void subghz_protocol_decoder_gate_tx_get_string(void* context, string_t output) 
         instance->generic.serial,
         instance->generic.btn);
 }
-
-bool subghz_protocol_gate_tx_save_file(void* context, FlipperFormat* flipper_file) {
-    furi_assert(context);
-    SubGhzProtocolDecoderGateTx* instance = context;
-    return subghz_block_generic_save_file(&instance->generic, flipper_file);
-}
-
-bool subghz_protocol_gate_tx_load_file(
-    void* context,
-    FlipperFormat* flipper_file,
-    const char* file_path) {
-    furi_assert(context);
-    SubGhzProtocolEncoderGateTx* instance = context;
-    return subghz_block_generic_load_file(&instance->generic, flipper_file);
-}
-
-// void subghz_decoder_gate_tx_to_load_protocol(SubGhzProtocolGateTX* instance, void* context) {
-//     furi_assert(context);
-//     furi_assert(instance);
-//     SubGhzProtocolCommonLoad* data = context;
-//     instance->generic.data = data->code_found;
-//     instance->generic.data_count_bit = data->code_count_bit;
-//     subghz_protocol_gate_tx_check_remote_controller(instance);
-// }

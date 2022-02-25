@@ -49,7 +49,6 @@ const SubGhzProtocolDecoder subghz_protocol_hormann_decoder = {
     .serialize = subghz_protocol_decoder_hormann_serialize,
     .deserialize = subghz_protocol_decoder_hormann_deserialize,
     .get_string = subghz_protocol_decoder_hormann_get_string,
-    .save_file = subghz_protocol_hormann_save_file,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_hormann_encoder = {
@@ -59,7 +58,6 @@ const SubGhzProtocolEncoder subghz_protocol_hormann_encoder = {
     .deserialize = subghz_protocol_encoder_hormann_deserialize,
     .stop = subghz_protocol_encoder_hormann_stop,
     .yield = subghz_protocol_encoder_hormann_yield,
-    .load_file = subghz_protocol_hormann_load_file,
 };
 
 const SubGhzProtocol subghz_protocol_hormann = {
@@ -331,26 +329,3 @@ void subghz_protocol_decoder_hormann_get_string(void* context, string_t output) 
         (uint32_t)instance->generic.data,
         instance->generic.btn);
 }
-
-bool subghz_protocol_hormann_save_file(void* context, FlipperFormat* flipper_file) {
-    furi_assert(context);
-    SubGhzProtocolDecoderHormann* instance = context;
-    return subghz_block_generic_save_file(&instance->generic, flipper_file);
-}
-
-bool subghz_protocol_hormann_load_file(
-    void* context,
-    FlipperFormat* flipper_file,
-    const char* file_path) {
-    furi_assert(context);
-    SubGhzProtocolEncoderHormann* instance = context;
-    return subghz_block_generic_load_file(&instance->generic, flipper_file);
-}
-
-// void subghz_decoder_hormann_to_load_protocol(SubGhzProtocolHormann* instance, void* context) {
-//     furi_assert(context);
-//     furi_assert(instance);
-//     SubGhzProtocolCommonLoad* data = context;
-//     instance->generic.data = data->code_found;
-//     instance->generic.data_count_bit = data->code_count_bit;
-// }

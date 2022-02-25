@@ -11,43 +11,39 @@ void subghz_scene_transmitter_callback(SubGhzCustomEvent event, void* context) {
 
 bool subghz_scene_transmitter_update_data_show(void* context) {
     //ToDo Fix
-    // SubGhz* subghz = context;
+    SubGhz* subghz = context;
 
-    // if(subghz->txrx->protocol_result && subghz->txrx->protocol_result->get_upload_protocol) {
-    //     string_t key_str;
-    //     string_t frequency_str;
-    //     string_t modulation_str;
+    if(subghz->txrx->decoder_result) {
+        string_t key_str;
+        string_t frequency_str;
+        string_t modulation_str;
 
-    //     string_init(key_str);
-    //     string_init(frequency_str);
-    //     string_init(modulation_str);
-    //     uint8_t show_button = 0;
-    //     subghz->txrx->protocol_result->to_string(subghz->txrx->protocol_result, key_str);
+        string_init(key_str);
+        string_init(frequency_str);
+        string_init(modulation_str);
+        uint8_t show_button = 0;
 
-    //     // if((!strcmp(subghz->txrx->protocol_result->name, "KeeLoq")) &&
-    //     //    (!strcmp(
-    //     //        subghz_protocol_keeloq_get_manufacture_name(subghz->txrx->protocol_result),
-    //     //        "Unknown"))) {
-    //     //     show_button = 0;
-    //     // } else {
-    //     //     show_button = 1;
-    //     // }
-    //     show_button = 1;
+        subghz_protocol_decoder_base_get_string(subghz->txrx->decoder_result, key_str);
 
-    //     subghz_get_frequency_modulation(subghz, frequency_str, modulation_str);
-    //     subghz_view_transmitter_add_data_to_show(
-    //         subghz->subghz_transmitter,
-    //         string_get_cstr(key_str),
-    //         string_get_cstr(frequency_str),
-    //         string_get_cstr(modulation_str),
-    //         show_button);
+        if((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Send) ==
+           SubGhzProtocolFlag_Send) {
+            show_button = 1;
+        }
 
-    //     string_clear(frequency_str);
-    //     string_clear(modulation_str);
-    //     string_clear(key_str);
+        subghz_get_frequency_modulation(subghz, frequency_str, modulation_str);
+        subghz_view_transmitter_add_data_to_show(
+            subghz->subghz_transmitter,
+            string_get_cstr(key_str),
+            string_get_cstr(frequency_str),
+            string_get_cstr(modulation_str),
+            show_button);
 
-    //     return true;
-    // }
+        string_clear(frequency_str);
+        string_clear(modulation_str);
+        string_clear(key_str);
+
+        return true;
+    }
     return false;
 }
 
@@ -76,8 +72,7 @@ bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent event) {
             }
             if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
                (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
-                //ToDo FIX
-                if(!subghz_tx_start(subghz, NULL)) {
+                if(!subghz_tx_start(subghz, subghz->txrx->fff_data)) {
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
                 } else {
                     subghz->state_notifications = SubGhzNotificationStateTX;

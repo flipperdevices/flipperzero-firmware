@@ -55,7 +55,6 @@ const SubGhzProtocolDecoder subghz_protocol_raw_decoder = {
     .get_hash_data = NULL,
     .serialize = NULL,
     .get_string = subghz_protocol_decoder_raw_get_string,
-    .save_file = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_raw_encoder = {
@@ -65,7 +64,6 @@ const SubGhzProtocolEncoder subghz_protocol_raw_encoder = {
     .deserialize = subghz_protocol_encoder_raw_deserialize,
     .stop = subghz_protocol_encoder_raw_stop,
     .yield = subghz_protocol_encoder_raw_yield,
-    .load_file = NULL,
 };
 
 const SubGhzProtocol subghz_protocol_raw = {

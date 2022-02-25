@@ -31,8 +31,7 @@ void subghz_scene_delete_on_enter(void* context) {
         AlignTop,
         FontSecondary,
         string_get_cstr(modulation_str));
-    //ToDo Fix
-    //subghz->txrx->protocol_result->to_string(subghz->txrx->protocol_result, text);
+    subghz_protocol_decoder_base_get_string(subghz->txrx->decoder_result, text);
     widget_add_string_multiline_element(
         subghz->widget, 0, 0, AlignLeft, AlignTop, FontSecondary, string_get_cstr(text));
 

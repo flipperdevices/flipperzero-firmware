@@ -47,7 +47,6 @@ const SubGhzProtocolDecoder subghz_protocol_ido_decoder = {
     .deserialize = subghz_protocol_decoder_ido_deserialize,
     .serialize = subghz_protocol_decoder_ido_serialize,
     .get_string = subghz_protocol_decoder_ido_get_string,
-    .save_file = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_ido_encoder = {
@@ -57,7 +56,6 @@ const SubGhzProtocolEncoder subghz_protocol_ido_encoder = {
     .deserialize = NULL,
     .stop = NULL,
     .yield = NULL,
-    .load_file = NULL,
 };
 
 const SubGhzProtocol subghz_protocol_ido = {
@@ -218,12 +216,3 @@ void subghz_protocol_decoder_ido_get_string(void* context, string_t output) {
         instance->generic.serial,
         instance->generic.btn);
 }
-
-// void subghz_decoder_ido_to_load_protocol(SubGhzProtocolIDo* instance, void* context) {
-//     furi_assert(context);
-//     furi_assert(instance);
-//     SubGhzProtocolCommonLoad* data = context;
-//     instance->common.code_last_found = data->code_found;
-//     instance->common.code_last_count_bit = data->code_count_bit;
-//     subghz_protocol_ido_check_remote_controller(instance);
-// }

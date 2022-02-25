@@ -28,8 +28,3 @@ bool subghz_protocol_decoder_nice_flo_serialize(
     uint32_t frequency,
     FuriHalSubGhzPreset preset);
 bool subghz_protocol_decoder_nice_flo_deserialize(void* context, FlipperFormat* flipper_format);
-bool subghz_protocol_nice_flo_save_file(void* context, FlipperFormat* flipper_file);
-bool subghz_protocol_nice_flo_load_file(
-    void* context,
-    FlipperFormat* flipper_file,
-    const char* file_path);

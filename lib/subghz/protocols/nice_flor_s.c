@@ -55,7 +55,6 @@ const SubGhzProtocolDecoder subghz_protocol_nice_flor_s_decoder = {
     .serialize = subghz_protocol_decoder_nice_flor_s_serialize,
     .deserialize = subghz_protocol_decoder_nice_flor_s_deserialize,
     .get_string = subghz_protocol_decoder_nice_flor_s_get_string,
-    .save_file = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_nice_flor_s_encoder = {
@@ -65,7 +64,6 @@ const SubGhzProtocolEncoder subghz_protocol_nice_flor_s_encoder = {
     .deserialize = NULL,
     .stop = NULL,
     .yield = NULL,
-    .load_file = NULL,
 };
 
 const SubGhzProtocol subghz_protocol_nice_flor_s = {
@@ -366,12 +364,3 @@ void subghz_protocol_decoder_nice_flor_s_get_string(void* context, string_t outp
         instance->generic.cnt,
         instance->generic.btn);
 }
-
-// void subghz_decoder_nice_flor_s_to_load_protocol(SubGhzProtocolNiceFlorS* instance, void* context) {
-//     furi_assert(context);
-//     furi_assert(instance);
-//     SubGhzProtocolCommonLoad* data = context;
-//     instance->generic.data = data->code_found;
-//     instance->generic.data_count_bit = data->code_count_bit;
-//     subghz_nice_flor_s_decoder_decrypt(instance);
-// }

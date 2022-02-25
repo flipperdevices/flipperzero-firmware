@@ -53,7 +53,6 @@ const SubGhzProtocolDecoder subghz_protocol_somfy_keytis_decoder = {
     .serialize = subghz_protocol_decoder_somfy_keytis_serialize,
     .deserialize = subghz_protocol_decoder_somfy_keytis_deserialize,
     .get_string = subghz_protocol_decoder_somfy_keytis_get_string,
-    .save_file = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_somfy_keytis_encoder = {
@@ -63,7 +62,6 @@ const SubGhzProtocolEncoder subghz_protocol_somfy_keytis_encoder = {
     .deserialize = NULL,
     .stop = NULL,
     .yield = NULL,
-    .load_file = NULL,
 };
 
 const SubGhzProtocol subghz_protocol_somfy_keytis = {
@@ -415,15 +413,3 @@ void subghz_protocol_decoder_somfy_keytis_get_string(void* context, string_t out
         instance->generic.cnt,
         subghz_protocol_somfy_keytis_get_name_button(instance->generic.btn));
 }
-
-// void subghz_decoder_somfy_keytis_to_load_protocol(
-//     SubGhzProtocolSomfyKeytis* instance,
-//     void* context) {
-//     furi_assert(context);
-//     furi_assert(instance);
-//     SubGhzProtocolCommonLoad* data = context;
-//     instance->generic.data = data->code_found;
-//     instance->generic.data_count_bit = data->code_count_bit;
-//     instance->press_duration_counter = data->param1;
-//     subghz_protocol_somfy_keytis_remote_controller(instance);
-// }

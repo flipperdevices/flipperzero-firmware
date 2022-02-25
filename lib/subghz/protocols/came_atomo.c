@@ -50,7 +50,6 @@ const SubGhzProtocolDecoder subghz_protocol_came_atomo_decoder = {
     .serialize = subghz_protocol_decoder_came_atomo_serialize,
     .deserialize = subghz_protocol_decoder_came_atomo_deserialize,
     .get_string = subghz_protocol_decoder_came_atomo_get_string,
-    .save_file = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_came_atomo_encoder = {
@@ -60,7 +59,6 @@ const SubGhzProtocolEncoder subghz_protocol_came_atomo_encoder = {
     .deserialize = NULL,
     .stop = NULL,
     .yield = NULL,
-    .load_file = NULL,
 };
 
 const SubGhzProtocol subghz_protocol_came_atomo = {
@@ -338,12 +336,3 @@ void subghz_protocol_decoder_came_atomo_get_string(void* context, string_t outpu
         instance->generic.btn,
         instance->generic.cnt);
 }
-
-// void subghz_decoder_came_atomo_to_load_protocol(SubGhzProtocolCameAtomo* instance, void* context) {
-//     furi_assert(context);
-//     furi_assert(instance);
-//     SubGhzProtocolCommonLoad* data = context;
-//     instance->common.code_last_found = data->code_found;
-//     instance->common.code_last_count_bit = data->code_count_bit;
-//     subghz_protocol_came_atomo_remote_controller(instance);
-// }

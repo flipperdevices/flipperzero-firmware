@@ -49,7 +49,6 @@ const SubGhzProtocolDecoder subghz_protocol_nero_radio_decoder = {
     .serialize = subghz_protocol_decoder_nero_radio_serialize,
     .deserialize = subghz_protocol_decoder_nero_radio_deserialize,
     .get_string = subghz_protocol_decoder_nero_radio_get_string,
-    .save_file = subghz_protocol_nero_radio_save_file,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_nero_radio_encoder = {
@@ -59,7 +58,6 @@ const SubGhzProtocolEncoder subghz_protocol_nero_radio_encoder = {
     .deserialize = subghz_protocol_encoder_nero_radio_deserialize,
     .stop = subghz_protocol_encoder_nero_radio_stop,
     .yield = subghz_protocol_encoder_nero_radio_yield,
-    .load_file = subghz_protocol_nero_radio_load_file,
 };
 
 const SubGhzProtocol subghz_protocol_nero_radio = {
@@ -379,26 +377,3 @@ void subghz_protocol_decoder_nero_radio_get_string(void* context, string_t outpu
         code_found_reverse_hi,
         code_found_reverse_lo);
 }
-
-bool subghz_protocol_nero_radio_save_file(void* context, FlipperFormat* flipper_file) {
-    furi_assert(context);
-    SubGhzProtocolDecoderNeroRadio* instance = context;
-    return subghz_block_generic_save_file(&instance->generic, flipper_file);
-}
-
-bool subghz_protocol_nero_radio_load_file(
-    void* context,
-    FlipperFormat* flipper_file,
-    const char* file_path) {
-    furi_assert(context);
-    SubGhzProtocolEncoderNeroRadio* instance = context;
-    return subghz_block_generic_load_file(&instance->generic, flipper_file);
-}
-
-// void subghz_decoder_nero_radio_to_load_protocol(SubGhzProtocolNeroRadio* instance, void* context) {
-//     furi_assert(context);
-//     furi_assert(instance);
-//     SubGhzProtocolCommonLoad* data = context;
-//     instance->generic.data = data->code_found;
-//     instance->generic.data_count_bit = data->code_count_bit;
-// }

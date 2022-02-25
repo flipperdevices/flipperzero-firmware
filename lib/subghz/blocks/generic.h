@@ -30,7 +30,3 @@ bool subghz_block_generic_serialize(
     FuriHalSubGhzPreset preset);
 
 bool subghz_block_generic_deserialize(SubGhzBlockGeneric* instance, FlipperFormat* flipper_format);
-
-bool subghz_block_generic_load_file(SubGhzBlockGeneric* instance, FlipperFormat* flipper_file);
-
-bool subghz_block_generic_save_file(SubGhzBlockGeneric* instance, FlipperFormat* flipper_file);

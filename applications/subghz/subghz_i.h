@@ -85,6 +85,7 @@ struct SubGhzTxRx {
     SubGhzReceiver* receiver;
     SubGhzTransmitter* transmitter;
     SubGhzProtocolDecoderBase* decoder_result;
+    FlipperFormat* fff_data;
 
     uint32_t frequency;
     FuriHalSubGhzPreset preset;
@@ -156,7 +157,10 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format);
 void subghz_tx_stop(SubGhz* subghz);
 bool subghz_key_load(SubGhz* subghz, const char* file_path);
 bool subghz_get_next_name_file(SubGhz* subghz);
-bool subghz_save_protocol_to_file(SubGhz* subghz, const char* dev_name);
+bool subghz_save_protocol_to_file(
+    SubGhz* subghz,
+    FlipperFormat* flipper_format,
+    const char* dev_name);
 bool subghz_load_protocol_from_file(SubGhz* subghz);
 bool subghz_rename_file(SubGhz* subghz);
 bool subghz_delete_file(SubGhz* subghz);

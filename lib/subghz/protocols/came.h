@@ -61,30 +61,3 @@ bool subghz_protocol_decoder_came_serialize(
 bool subghz_protocol_decoder_came_deserialize(void* context, FlipperFormat* flipper_format);
 
 void subghz_protocol_decoder_came_get_string(void* context, string_t output);
-
-/** Adding data to a file
- * 
- * @param instance  - SubGhzProtocolCame instance
- * @param flipper_file - FlipperFile 
- * @return bool
- */
-bool subghz_protocol_came_save_file(void* context, FlipperFormat* flipper_file);
-
-/** Loading protocol from file
- * 
- * @param flipper_file - FlipperFile 
- * @param instance - SubGhzProtocolCame instance
- * @param file_path - file path
- * @return bool
- */
-bool subghz_protocol_came_load_file(
-    void* context,
-    FlipperFormat* flipper_file,
-    const char* file_path);
-
-// /** Loading protocol from bin data
-//  *
-//  * @param instance - SubGhzProtocolCame instance
-//  * @param context - SubGhzProtocolCommonLoad context
-//  */
-// void subghz_decoder_came_to_load_protocol(SubGhzProtocolCame* instance, void* context);

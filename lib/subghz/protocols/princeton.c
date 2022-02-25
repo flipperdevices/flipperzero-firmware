@@ -56,7 +56,6 @@ const SubGhzProtocolDecoder subghz_protocol_princeton_decoder = {
     .serialize = subghz_protocol_decoder_princeton_serialize,
     .deserialize = subghz_protocol_decoder_princeton_deserialize,
     .get_string = subghz_protocol_decoder_princeton_get_string,
-    .save_file = subghz_protocol_princeton_save_file,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_princeton_encoder = {
@@ -66,7 +65,6 @@ const SubGhzProtocolEncoder subghz_protocol_princeton_encoder = {
     .deserialize = subghz_protocol_encoder_princeton_deserialize,
     .stop = subghz_protocol_encoder_princeton_stop,
     .yield = subghz_protocol_encoder_princeton_yield,
-    .load_file = subghz_protocol_princeton_load_file,
 };
 
 const SubGhzProtocol subghz_protocol_princeton = {
@@ -356,39 +354,3 @@ void subghz_protocol_decoder_princeton_get_string(void* context, string_t output
         instance->generic.btn,
         instance->te);
 }
-
-bool subghz_protocol_princeton_save_file(void* context, FlipperFormat* flipper_file) {
-    furi_assert(context);
-    SubGhzProtocolDecoderPrinceton* instance = context;
-    bool res = subghz_block_generic_save_file(&instance->generic, flipper_file);
-    if(res) {
-        res = flipper_format_write_uint32(flipper_file, "TE", &instance->te, 1);
-        if(!res) FURI_LOG_E(TAG, "Unable to add Te");
-    }
-    return res;
-}
-
-bool subghz_protocol_princeton_load_file(
-    void* context,
-    FlipperFormat* flipper_file,
-    const char* file_path) {
-    furi_assert(context);
-    SubGhzProtocolEncoderPrinceton* instance = context;
-    bool res = subghz_block_generic_load_file(&instance->generic, flipper_file);
-    if(res) {
-        res = flipper_format_read_uint32(flipper_file, "TE", (uint32_t*)&instance->te, 1);
-        if(!res) FURI_LOG_E(TAG, "Missing TE");
-    }
-    return res;
-}
-
-// void subghz_decoder_princeton_to_load_protocol(SubGhzDecoderPrinceton* instance, void* context) {
-//     furi_assert(context);
-//     furi_assert(instance);
-//     SubGhzProtocolCommonLoad* data = context;
-//     instance->generic.data = data->code_found;
-//     instance->generic.data_count_bit = data->code_count_bit;
-//     instance->te = data->param1;
-//     instance->common.serial = instance->generic.data >> 4;
-//     instance->common.btn = (uint8_t)instance->generic.data & 0x00000F;
-// }

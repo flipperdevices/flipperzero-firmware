@@ -30,10 +30,6 @@
 typedef void* (*SubGhzAlloc)(SubGhzEnvironment* environment);
 typedef void (*SubGhzFree)(void* context);
 
-// Load And Save
-typedef bool (*SubGhzSaveFile)(void* context, FlipperFormat* flipper_file);
-typedef bool (*SubGhzLoadFile)(void* context, FlipperFormat* flipper_file, const char* file_path);
-
 // Serialize and Deserialize
 typedef bool (*SubGhzSerialize)(
     void* context,
@@ -63,7 +59,6 @@ typedef struct {
     SubGhzGetString get_string;
     SubGhzSerialize serialize;
     SubGhzDeserialize deserialize;
-    SubGhzSaveFile save_file;
 } SubGhzProtocolDecoder;
 
 typedef struct {
@@ -73,8 +68,6 @@ typedef struct {
     SubGhzDeserialize deserialize;
     SubGhzEncoderStop stop;
     SubGhzEncoderYield yield;
-
-    SubGhzLoadFile load_file;
 } SubGhzProtocolEncoder;
 
 typedef enum {
