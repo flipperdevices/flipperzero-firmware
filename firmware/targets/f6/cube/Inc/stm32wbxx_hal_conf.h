@@ -40,7 +40,7 @@ extern "C" {
 #define HAL_HSEM_MODULE_ENABLED
 /*#define HAL_I2C_MODULE_ENABLED   */
 /*#define HAL_IPCC_MODULE_ENABLED   */
-/*#define HAL_IRDA_MODULE_ENABLED   */
+/*#define HAL_INFRARED_MODULE_ENABLED   */
 /*#define HAL_IWDG_MODULE_ENABLED   */
 /*#define HAL_LCD_MODULE_ENABLED   */
 /*#define HAL_LPTIM_MODULE_ENABLED   */
@@ -70,7 +70,7 @@ extern "C" {
 #define USE_HAL_COMP_REGISTER_CALLBACKS 0u
 #define USE_HAL_CRYP_REGISTER_CALLBACKS 0u
 #define USE_HAL_I2C_REGISTER_CALLBACKS 0u
-#define USE_HAL_IRDA_REGISTER_CALLBACKS 0u
+#define USE_HAL_INFRARED_REGISTER_CALLBACKS 0u
 #define USE_HAL_LPTIM_REGISTER_CALLBACKS 0u
 #define USE_HAL_PCD_REGISTER_CALLBACKS 0u
 #define USE_HAL_PKA_REGISTER_CALLBACKS 0u
@@ -248,9 +248,9 @@ extern "C" {
 #include "stm32wbxx_hal_ipcc.h"
 #endif /* HAL_IPCC_MODULE_ENABLED */
 
-#ifdef HAL_IRDA_MODULE_ENABLED
-#include "stm32wbxx_hal_irda.h"
-#endif /* HAL_IRDA_MODULE_ENABLED */
+#ifdef HAL_INFRARED_MODULE_ENABLED
+#include "stm32wbxx_hal_infrared.h"
+#endif /* HAL_INFRARED_MODULE_ENABLED */
 
 #ifdef HAL_IWDG_MODULE_ENABLED
 #include "stm32wbxx_hal_iwdg.h"
