@@ -321,25 +321,24 @@ bool subghz_protocol_encoder_raw_deserialize(void* context, FlipperFormat* flipp
     furi_assert(context);
     SubGhzProtocolEncoderRAW* instance = context;
     bool res = false;
-    // do {
-    //     if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
-    //         FURI_LOG_E(TAG, "Deserialize error");
-    //         break;
-    //     }
+    do {
+        // if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+        //     FURI_LOG_E(TAG, "Deserialize error");
+        //     break;
+        // }
 
-    //     //optional parameter parameter
-    //     flipper_format_read_uint32(
-    //         flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
+        // //optional parameter parameter
+        // flipper_format_read_uint32(
+        //     flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-    //     subghz_protocol_encoder_came_get_upload(instance);
-    //     instance->encoder.is_runing = true;
+        subghz_protocol_raw_encoder_worker_init(instance);
+        //instance->encoder.is_runing = true;
 
-    //     res = true;
-    // } while(false);
+        res = true;
+    } while(false);
 
     return res;
 }
-
 
 // bool subghz_protocol_encoder_raw_load(
 //     void* context,

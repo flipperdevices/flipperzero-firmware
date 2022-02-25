@@ -309,9 +309,7 @@ bool subghz_protocol_decoder_came_atomo_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
 }
 
-bool subghz_protocol_decoder_came_atomo_deserialize(
-    void* context,
-    FlipperFormat* flipper_format) {
+bool subghz_protocol_decoder_came_atomo_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderCameAtomo* instance = context;
     return subghz_block_generic_deserialize(&instance->generic, flipper_format);

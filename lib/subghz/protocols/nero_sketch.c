@@ -97,7 +97,8 @@ void subghz_protocol_encoder_nero_sketch_free(void* context) {
     free(instance);
 }
 
-static bool subghz_protocol_encoder_nero_sketch_get_upload(SubGhzProtocolEncoderNeroSketch* instance) {
+static bool
+    subghz_protocol_encoder_nero_sketch_get_upload(SubGhzProtocolEncoderNeroSketch* instance) {
     furi_assert(instance);
 
     size_t index = 0;

@@ -242,7 +242,7 @@ bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* fl
         //optional parameter parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
-            
+
         subghz_protocol_encoder_keeloq_get_upload(instance, instance->generic.btn);
 
         if(!flipper_format_rewind(flipper_format)) {

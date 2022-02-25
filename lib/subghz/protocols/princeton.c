@@ -154,7 +154,8 @@ bool subghz_protocol_encoder_princeton_deserialize(void* context, FlipperFormat*
             break;
         }
         //optional parameter parameter
-        flipper_format_read_uint32(flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
+        flipper_format_read_uint32(
+            flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         subghz_protocol_encoder_princeton_get_upload(instance);
         instance->encoder.is_runing = true;

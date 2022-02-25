@@ -178,7 +178,7 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
         //         //     subghz->txrx->protocol_result->code_last_found =
         //         //         subghz_protocol_keeloq_gen_key(subghz->txrx->protocol_result);
         //         //     generated_protocol = true;
-        //         // } else 
+        //         // } else
         //         {
         //             generated_protocol = false;
         //             string_set(

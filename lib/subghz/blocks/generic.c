@@ -85,7 +85,7 @@ bool subghz_block_generic_serialize(
         res = true;
     } while(false);
     string_clear(temp_str);
-    return res;  
+    return res;
 }
 
 bool subghz_block_generic_deserialize(SubGhzBlockGeneric* instance, FlipperFormat* flipper_format) {

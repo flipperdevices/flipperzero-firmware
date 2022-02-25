@@ -247,7 +247,8 @@ bool subghz_protocol_encoder_came_twee_deserialize(void* context, FlipperFormat*
         }
 
         //optional parameter parameter
-        flipper_format_read_uint32(flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
+        flipper_format_read_uint32(
+            flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         subghz_protocol_came_twee_remote_controller(&instance->generic);
         subghz_protocol_encoder_came_twee_get_upload(instance);
