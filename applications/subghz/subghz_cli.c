@@ -135,31 +135,24 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
         key,
         repeat);
 
-    // SubGhzDecoderPrinceton* protocol = subghz_decoder_princeton_alloc();
-    // protocol->common.code_last_found = key;
-    // protocol->common.code_last_count_bit = 24;
-
-    // SubGhzProtocolCommonEncoder* transmitter = subghz_transmitter_common_alloc();
-    // transmitter->repeat = repeat;
-
-    //subghz_protocol_princeton_send_key(protocol, transmitter);
     string_t flipper_format_string;
     string_init_printf(
         flipper_format_string,
-        "Frequency: 433920000\n"
-        "Preset: FuriHalSubGhzPresetOok650Async\n"
         "Protocol: Princeton\n"
         "Bit: 24\n"
-        "Key: 0070ECD2\n"
-        "Te: 403\n"
-        "Repeat: 200\n");
+        "Key: 00 00 00 00 00 %X %X %X\n"
+        "TE: 403\n"
+        "Repeat: %d\n",
+        (uint8_t)((key >> 16) & 0xFF),
+        (uint8_t)((key >> 8) & 0xFF),
+        (uint8_t)(key & 0xFF),
+        repeat);
     FlipperFormat* flipper_format = flipper_format_string_alloc();
     Stream* stream = flipper_format_get_raw_stream(flipper_format);
     stream_clean(stream);
     stream_write_cstring(stream, string_get_cstr(flipper_format_string));
 
     SubGhzEnvironment* environment = subghz_environment_alloc();
-    subghz_environment_load_keystore(environment, "/ext/subghz/assets/keeloq_mfcodes");
 
     SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, "Princeton");
     subghz_transmitter_deserialize(transmitter, flipper_format);
@@ -170,7 +163,6 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
 
     furi_hal_power_suppress_charge_enter();
 
-    //furi_hal_subghz_start_async_tx(subghz_transmitter_common_yield, transmitter);
     furi_hal_subghz_start_async_tx(subghz_transmitter_yield, transmitter);
 
     while(!(furi_hal_subghz_is_async_tx_complete() || cli_cmd_interrupt_received(cli))) {
@@ -183,8 +175,6 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
 
     furi_hal_power_suppress_charge_exit();
 
-    //subghz_decoder_princeton_free(protocol);
-    //subghz_transmitter_common_free(transmitter);
     flipper_format_free(flipper_format);
     subghz_transmitter_free(transmitter);
     subghz_environment_free(environment);
@@ -210,12 +200,6 @@ static void subghz_cli_command_rx_capture_callback(bool level, uint32_t duration
     if(sizeof(LevelDuration) != ret) instance->overrun = true;
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
-
-// static void subghz_cli_command_rx_text_callback(string_t text, void* context) {
-//     SubGhzCliCommandRx* instance = context;
-//     instance->packet_count++;
-//     printf("%s", string_get_cstr(text));
-// }
 
 static void subghz_cli_command_rx_callback(
     SubGhzReceiver* receiver,
@@ -255,12 +239,6 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     instance->stream = xStreamBufferCreate(sizeof(LevelDuration) * 1024, sizeof(LevelDuration));
     furi_check(instance->stream);
 
-    // SubGhzParser* parser = subghz_parser_alloc();
-    // subghz_parser_load_keeloq_file(parser, "/ext/subghz/keeloq_mfcodes");
-    // subghz_parser_load_keeloq_file(parser, "/ext/subghz/keeloq_mfcodes_user");
-    // subghz_parser_load_nice_flor_s_file(parser, "/ext/subghz/nice_flor_s_rx");
-    // subghz_parser_load_came_atomo_file(parser, "/ext/subghz/came_atomo");
-    // subghz_parser_enable_dump_text(parser, subghz_cli_command_rx_text_callback, instance);
     SubGhzEnvironment* environment = subghz_environment_alloc();
     subghz_environment_load_keystore(environment, "/ext/subghz/assets/keeloq_mfcodes");
     subghz_environment_set_came_atomo_rainbow_table_file_name(
@@ -292,12 +270,10 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
         if(ret == sizeof(LevelDuration)) {
             if(level_duration_is_reset(level_duration)) {
                 printf(".");
-                //subghz_parser_reset(parser);
                 subghz_receiver_reset(receiver);
             } else {
                 bool level = level_duration_get_level(level_duration);
                 uint32_t duration = level_duration_get_duration(level_duration);
-                //subghz_parser_parse(parser, level, duration);
                 subghz_receiver_decode(receiver, level, duration);
             }
         }
@@ -312,7 +288,6 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     printf("\r\nPackets recieved %u\r\n", instance->packet_count);
 
     // Cleanup
-    //subghz_parser_free(parser);
     subghz_receiver_free(receiver);
     subghz_environment_free(environment);
     vStreamBufferDelete(instance->stream);
