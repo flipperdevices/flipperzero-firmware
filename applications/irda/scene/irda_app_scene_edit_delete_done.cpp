@@ -12,7 +12,7 @@ void IrdaAppSceneEditDeleteDone::on_enter(IrdaApp* app) {
     popup_set_timeout(popup, 1500);
     popup_enable_timeout(popup);
 
-    view_manager->switch_to(IrdaAppViewManager::ViewType::Popup);
+    view_manager->switch_to(IrdaAppViewManager::ViewId::Popup);
 }
 
 bool IrdaAppSceneEditDeleteDone::on_event(IrdaApp* app, IrdaAppEvent* event) {

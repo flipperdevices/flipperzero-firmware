@@ -83,7 +83,7 @@ void IrdaAppSceneUniversalTV::on_enter(IrdaApp* app) {
     button_panel_add_label(button_panel, 9, 64, FontSecondary, "Vol");
     button_panel_add_label(button_panel, 43, 64, FontSecondary, "Ch");
 
-    view_manager->switch_to(IrdaAppViewManager::ViewType::UniversalRemote);
+    view_manager->switch_to(IrdaAppViewManager::ViewId::UniversalRemote);
 
     auto stack_view = app->get_view_manager()->get_universal_view_stack();
     auto loading_view = app->get_view_manager()->get_loading();

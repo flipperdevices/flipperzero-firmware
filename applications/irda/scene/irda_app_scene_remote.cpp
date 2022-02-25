@@ -60,7 +60,7 @@ void IrdaAppSceneRemote::on_enter(IrdaApp* app) {
         button_menu_set_selected_item(button_menu, buttonmenu_item_selected);
         buttonmenu_item_selected = ButtonIndexNA;
     }
-    view_manager->switch_to(IrdaAppViewManager::ViewType::ButtonMenu);
+    view_manager->switch_to(IrdaAppViewManager::ViewId::ButtonMenu);
 }
 
 bool IrdaAppSceneRemote::on_event(IrdaApp* app, IrdaAppEvent* event) {

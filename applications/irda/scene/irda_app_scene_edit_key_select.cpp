@@ -30,7 +30,7 @@ void IrdaAppSceneEditKeySelect::on_enter(IrdaApp* app) {
         app->set_current_button(IrdaApp::ButtonNA);
     }
 
-    view_manager->switch_to(IrdaAppViewManager::ViewType::Submenu);
+    view_manager->switch_to(IrdaAppViewManager::ViewId::Submenu);
 }
 
 bool IrdaAppSceneEditKeySelect::on_event(IrdaApp* app, IrdaAppEvent* event) {

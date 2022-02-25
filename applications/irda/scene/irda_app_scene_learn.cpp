@@ -41,7 +41,7 @@ void IrdaAppSceneLearn::on_enter(IrdaApp* app) {
         popup, "Point the remote at IR port\nand push the button", 5, 10, AlignLeft, AlignCenter);
     popup_set_callback(popup, NULL);
 
-    view_manager->switch_to(IrdaAppViewManager::ViewType::Popup);
+    view_manager->switch_to(IrdaAppViewManager::ViewId::Popup);
 }
 
 bool IrdaAppSceneLearn::on_event(IrdaApp* app, IrdaAppEvent* event) {

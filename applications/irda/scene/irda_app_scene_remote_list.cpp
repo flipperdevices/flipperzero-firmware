@@ -18,7 +18,7 @@ void IrdaAppSceneRemoteList::on_enter(IrdaApp* app) {
     IrdaAppViewManager* view_manager = app->get_view_manager();
     ButtonMenu* button_menu = view_manager->get_button_menu();
     button_menu_reset(button_menu);
-    view_manager->switch_to(IrdaAppViewManager::ViewType::ButtonMenu);
+    view_manager->switch_to(IrdaAppViewManager::ViewId::ButtonMenu);
 
     file_select_result = file_worker.file_select(
         IrdaApp::irda_directory,

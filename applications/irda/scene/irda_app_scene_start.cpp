@@ -28,7 +28,7 @@ void IrdaAppSceneStart::on_enter(IrdaApp* app) {
     submenu_set_selected_item(submenu, submenu_item_selected);
     submenu_item_selected = 0;
 
-    view_manager->switch_to(IrdaAppViewManager::ViewType::Submenu);
+    view_manager->switch_to(IrdaAppViewManager::ViewId::Submenu);
 }
 
 bool IrdaAppSceneStart::on_event(IrdaApp* app, IrdaAppEvent* event) {

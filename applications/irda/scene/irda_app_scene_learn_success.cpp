@@ -64,7 +64,7 @@ void IrdaAppSceneLearnSuccess::on_enter(IrdaApp* app) {
     dialog_ex_set_context(dialog_ex, app);
     dialog_ex_enable_extended_events(dialog_ex);
 
-    view_manager->switch_to(IrdaAppViewManager::ViewType::DialogEx);
+    view_manager->switch_to(IrdaAppViewManager::ViewId::DialogEx);
 }
 
 bool IrdaAppSceneLearnSuccess::on_event(IrdaApp* app, IrdaAppEvent* event) {

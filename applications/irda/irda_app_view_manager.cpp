@@ -32,12 +32,12 @@ IrdaAppViewManager::IrdaAppViewManager() {
     view_stack_add_view(universal_view_stack, button_panel_get_view(button_panel));
     view_set_orientation(view_stack_get_view(universal_view_stack), ViewOrientationVertical);
 
-    add_view(ViewType::UniversalRemote, view_stack_get_view(universal_view_stack));
-    add_view(ViewType::ButtonMenu, button_menu_get_view(button_menu));
-    add_view(ViewType::Submenu, submenu_get_view(submenu));
-    add_view(ViewType::Popup, popup_get_view(popup));
-    add_view(ViewType::DialogEx, dialog_ex_get_view(dialog_ex));
-    add_view(ViewType::TextInput, text_input_get_view(text_input));
+    add_view(ViewId::UniversalRemote, view_stack_get_view(universal_view_stack));
+    add_view(ViewId::ButtonMenu, button_menu_get_view(button_menu));
+    add_view(ViewId::Submenu, submenu_get_view(submenu));
+    add_view(ViewId::Popup, popup_get_view(popup));
+    add_view(ViewId::DialogEx, dialog_ex_get_view(dialog_ex));
+    add_view(ViewId::TextInput, text_input_get_view(text_input));
 
     view_set_previous_callback(view_stack_get_view(universal_view_stack), callback);
     view_set_previous_callback(button_menu_get_view(button_menu), callback);
@@ -49,17 +49,17 @@ IrdaAppViewManager::IrdaAppViewManager() {
 
 IrdaAppViewManager::~IrdaAppViewManager() {
     view_dispatcher_remove_view(
-        view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewType::UniversalRemote));
+        view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewId::UniversalRemote));
     view_dispatcher_remove_view(
-        view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewType::ButtonMenu));
+        view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewId::ButtonMenu));
     view_dispatcher_remove_view(
-        view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewType::TextInput));
+        view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewId::TextInput));
     view_dispatcher_remove_view(
-        view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewType::DialogEx));
+        view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewId::DialogEx));
     view_dispatcher_remove_view(
-        view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewType::Submenu));
+        view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewId::Submenu));
     view_dispatcher_remove_view(
-        view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewType::Popup));
+        view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewId::Popup));
 
     view_stack_remove_view(universal_view_stack, button_panel_get_view(button_panel));
     view_stack_free(universal_view_stack);
@@ -77,7 +77,7 @@ IrdaAppViewManager::~IrdaAppViewManager() {
     osMessageQueueDelete(event_queue);
 }
 
-void IrdaAppViewManager::switch_to(ViewType type) {
+void IrdaAppViewManager::switch_to(ViewId type) {
     view_dispatcher_switch_to_view(view_dispatcher, static_cast<uint32_t>(type));
 }
 
@@ -158,6 +158,6 @@ uint32_t IrdaAppViewManager::previous_view_callback(void* context) {
     return VIEW_IGNORE;
 }
 
-void IrdaAppViewManager::add_view(ViewType view_type, View* view) {
+void IrdaAppViewManager::add_view(ViewId view_type, View* view) {
     view_dispatcher_add_view(view_dispatcher, static_cast<uint32_t>(view_type), view);
 }

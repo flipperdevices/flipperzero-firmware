@@ -33,7 +33,7 @@ void IrdaAppSceneAskBack::on_enter(IrdaApp* app) {
     dialog_ex_set_result_callback(dialog_ex, dialog_result_callback);
     dialog_ex_set_context(dialog_ex, app);
 
-    view_manager->switch_to(IrdaAppViewManager::ViewType::DialogEx);
+    view_manager->switch_to(IrdaAppViewManager::ViewId::DialogEx);
 }
 
 bool IrdaAppSceneAskBack::on_event(IrdaApp* app, IrdaAppEvent* event) {

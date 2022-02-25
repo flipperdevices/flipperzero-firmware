@@ -31,7 +31,7 @@ static void irda_progress_back_callback(void* context) {
     app->get_view_manager()->send_event(&irda_event);
 }
 
-void IrdaAppSceneUniversalCommon::remove_popup(IrdaApp* app) {
+void IrdaAppSceneUniversalCommon::hide_popup(IrdaApp* app) {
     auto stack_view = app->get_view_manager()->get_universal_view_stack();
     auto progress_view = app->get_view_manager()->get_progress();
     view_stack_remove_view(stack_view, irda_progress_view_get_view(progress_view));
@@ -65,13 +65,13 @@ bool IrdaAppSceneUniversalCommon::on_event(IrdaApp* app, IrdaAppEvent* event) {
             if(!result) {
                 brute_force.stop_bruteforce();
                 brute_force_started = false;
-                remove_popup(app);
+                hide_popup(app);
             }
             consumed = true;
         } else if(event->type == IrdaAppEvent::Type::Back) {
             brute_force_started = false;
             brute_force.stop_bruteforce();
-            remove_popup(app);
+            hide_popup(app);
             consumed = true;
         }
     } else {
