@@ -181,17 +181,6 @@ void subghz_protocol_decoder_star_line_feed(void* context, bool level, uint32_t 
     }
 }
 
-// const char* subghz_protocol_star_line_find_and_get_manufacture_name(void* context) {
-//     SubGhzProtocolStarLine* instance = context;
-//     subghz_protocol_star_line_check_remote_controller(instance);
-//     return instance->manufacture_name;
-// }
-
-// const char* subghz_protocol_star_line_get_manufacture_name(void* context) {
-//     SubGhzProtocolStarLine* instance = context;
-//     return instance->manufacture_name;
-// }
-
 static inline bool subghz_protocol_star_line_check_decrypt(
     SubGhzBlockGeneric* instance,
     uint32_t decrypt,

@@ -1,25 +1,7 @@
 #include "generic.h"
+#include "../types.h"
 
 #define TAG "SubGhzBlockGeneric"
-
-#define SUBGHZ_KEY_FILE_VERSION 1
-#define SUBGHZ_KEY_FILE_TYPE "Flipper SubGhz Key File"
-
-// bool subghz_block_generic_set_preset(const char* preset) {
-//     if(!strcmp(preset, "FuriHalSubGhzPresetOok270Async")) {
-//         subghz->txrx->preset = FuriHalSubGhzPresetOok270Async;
-//     } else if(!strcmp(preset, "FuriHalSubGhzPresetOok650Async")) {
-//         subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
-//     } else if(!strcmp(preset, "FuriHalSubGhzPreset2FSKDev238Async")) {
-//         subghz->txrx->preset = FuriHalSubGhzPreset2FSKDev238Async;
-//     } else if(!strcmp(preset, "FuriHalSubGhzPreset2FSKDev476Async")) {
-//         subghz->txrx->preset = FuriHalSubGhzPreset2FSKDev476Async;
-//     } else {
-//         FURI_LOG_E(TAG, "Unknown preset");
-//         return false;
-//     }
-//     return true;
-// }
 
 bool subghz_block_generic_get_preset_name(FuriHalSubGhzPreset preset, string_t preset_str) {
     const char* preset_name;

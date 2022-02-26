@@ -6,9 +6,9 @@
 
 #include <lib/toolbox/level_duration.h>
 
-typedef LevelDuration (*SubGhzProtocolCommonEncoderCallback)(void* context);
+//typedef LevelDuration (*SubGhzProtocolCommonEncoderCallback)(void* context);
 
-typedef void (*SubGhzProtocolCommonEncoderCallbackEnd)(void* context);
+//typedef void (*SubGhzProtocolCommonEncoderCallbackEnd)(void* context);
 
 typedef struct {
     bool is_runing;

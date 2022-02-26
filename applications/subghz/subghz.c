@@ -291,15 +291,14 @@ int32_t subghz_app(void* p) {
         path_extract_filename_no_ext(p, filename);
         strcpy(subghz->file_name, string_get_cstr(filename));
         string_clear(filename);
-        //ToDo Fix
-        // if((!strcmp(subghz->txrx->protocol_result->name, "RAW"))) {
-        //     //Load Raw TX
-        //     subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWLoad;
-        //     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
-        // } else {
-        //Load transmitter TX
-        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
-        //}
+        if((!strcmp(subghz->txrx->decoder_result->protocol->name, "RAW"))) {
+            //Load Raw TX
+            subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWLoad;
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
+        } else {
+            //Load transmitter TX
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
+        }
     } else {
         if(load_database) {
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);

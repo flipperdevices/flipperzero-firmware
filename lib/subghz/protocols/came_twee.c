@@ -258,28 +258,6 @@ bool subghz_protocol_encoder_came_twee_deserialize(void* context, FlipperFormat*
     return res;
 }
 
-// bool subghz_protocol_encoder_came_twee_load(
-//     void* context,
-//     uint64_t key,
-//     uint8_t count_bit,
-//     size_t repeat) {
-//     //    subghz->txrx->protocol_result->code_last_count_bit = 54;
-//     //                 key = (key & 0x0FFFFFF0);
-//     //                 subghz->txrx->protocol_result->code_last_found = 0x003FFF7200000000 |
-//     //                                                                  (key ^ 0xE0E0E0EE);
-//     furi_assert(context);
-//     SubGhzProtocolEncoderCameTwee* instance = context;
-
-//     instance->generic.data = 0x003FFF7200000000 | (0x03F22FF0 ^ 0xE0E0E0EE);
-//     subghz_protocol_came_twee_remote_controller(&instance->generic);
-
-//     instance->generic.data_count_bit = 54;
-//     instance->encoder.repeat = repeat;
-//     subghz_protocol_came_twee_encoder_get_upload(instance);
-//     instance->encoder.is_runing = true;
-//     return true;
-// }
-
 void subghz_protocol_encoder_came_twee_stop(void* context) {
     SubGhzProtocolEncoderCameTwee* instance = context;
     instance->encoder.is_runing = false;

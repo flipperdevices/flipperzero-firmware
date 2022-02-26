@@ -19,8 +19,6 @@ struct SubGhzBlockGeneric {
     uint16_t cnt;
 };
 
-bool subghz_block_generic_set_preset(const char* preset);
-
 bool subghz_block_generic_get_preset_name(FuriHalSubGhzPreset preset, string_t preset_str);
 
 bool subghz_block_generic_serialize(

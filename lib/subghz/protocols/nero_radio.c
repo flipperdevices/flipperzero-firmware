@@ -103,10 +103,6 @@ static bool
     }
 
     //Send header
-    // instance->encoder.upload[index++] =
-    //     level_duration_make(true, (uint32_t)subghz_protocol_nero_radio_const.te_short);
-    // instance->encoder.upload[index++] =
-    //     level_duration_make(false, (uint32_t)subghz_protocol_nero_radio_const.te_short * 37);
     for(uint8_t i = 0; i < 49; i++) {
         instance->encoder.upload[index++] =
             level_duration_make(true, (uint32_t)subghz_protocol_nero_radio_const.te_short);

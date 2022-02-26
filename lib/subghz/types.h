@@ -15,7 +15,6 @@
 #define SUBGHZ_RAW_FOLDER "/ext/subghz"
 #define SUBGHZ_APP_EXTENSION ".sub"
 
-//#define SUBGHZ_PARSER_TAG "SubGhzParser"
 #define SUBGHZ_KEY_FILE_VERSION 1
 #define SUBGHZ_KEY_FILE_TYPE "Flipper SubGhz Key File"
 

@@ -264,25 +264,6 @@ bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* fl
     return res;
 }
 
-// bool subghz_protocol_encoder_keeloq_load(
-//     void* context,
-//     uint64_t key,
-//     uint8_t count_bit,
-//     size_t repeat) {
-//     furi_assert(context);
-//     SubGhzProtocolEncoderKeeloq* instance = context;
-//     instance->generic.data = 0x65AB6CED8329BE24;
-//     instance->generic.serial = 0x47D94C1;
-//     instance->generic.btn = 0x02;
-//     instance->generic.cnt = 0x0319;
-//     instance->generic.data_count_bit = 64;
-//     instance->encoder.repeat = repeat;
-//     instance->manufacture_name = "DoorHan";
-//     subghz_protocol_keeloq_encoder_get_upload(instance, instance->generic.btn);
-//     instance->encoder.is_runing = true;
-//     return true;
-// }
-
 void subghz_protocol_encoder_keeloq_stop(void* context) {
     SubGhzProtocolEncoderKeeloq* instance = context;
     instance->encoder.is_runing = false;
@@ -598,33 +579,6 @@ static void subghz_protocol_keeloq_check_remote_controller(
     instance->serial = key_fix & 0x0FFFFFFF;
     instance->btn = key_fix >> 28;
 }
-
-// const char* subghz_protocol_keeloq_find_and_get_manufacture_name(void* context) {
-//     SubGhzProtocolKeeloq* instance = context;
-//     subghz_protocol_keeloq_check_remote_controller(instance);
-//     return instance->manufacture_name;
-// }
-
-// const char* subghz_protocol_keeloq_get_manufacture_name(void* context) {
-//     SubGhzProtocolKeeloq* instance = context;
-//     return instance->manufacture_name;
-// }
-
-// bool subghz_protocol_keeloq_set_manufacture_name(void* context, const char* manufacture_name) {
-//     SubGhzProtocolKeeloq* instance = context;
-//     instance->manufacture_name = manufacture_name;
-//     int res = 0;
-//         for
-//             M_EACH(
-//                 manufacture_code,
-//                 *subghz_keystore_get_data(instance->keystore),
-//                 SubGhzKeyArray_t) {
-//                 res = strcmp(string_get_cstr(manufacture_code->name), instance->manufacture_name);
-//                 if(res == 0) return true;
-//             }
-//         instance->manufacture_name = "Unknown";
-//         return false;
-// }
 
 uint8_t subghz_protocol_decoder_keeloq_get_hash_data(void* context) {
     furi_assert(context);

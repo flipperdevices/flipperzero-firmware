@@ -1,6 +1,5 @@
 #include "../subghz_i.h"
 #include "../views/transmitter.h"
-//#include <lib/subghz/protocols/subghz_protocol_keeloq.h>
 #include <dolphin/dolphin.h>
 
 void subghz_scene_transmitter_callback(SubGhzCustomEvent event, void* context) {

@@ -362,11 +362,6 @@ static const char* subghz_protocol_somfy_keytis_get_name_button(uint8_t btn) {
     return btn <= 0xf ? name_btn[btn] : name_btn[0];
 }
 
-// uint32_t subghz_protocol_somfy_keytis_get_press_duration(void* context) {
-//     SubGhzProtocolSomfyKeytis* instance = context;
-//     return instance->press_duration_counter;
-// }
-
 uint8_t subghz_protocol_decoder_somfy_keytis_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyKeytis* instance = context;
@@ -381,13 +376,41 @@ bool subghz_protocol_decoder_somfy_keytis_serialize(
     FuriHalSubGhzPreset preset) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyKeytis* instance = context;
-    return subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    bool res =
+        subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    if(res && !flipper_format_write_uint32(
+                  flipper_format, "Duration_Counter", &instance->press_duration_counter, 1)) {
+        FURI_LOG_E(TAG, "Unable to add Duration_Counter");
+        res = false;
+    }
+    return res;
 }
 
 bool subghz_protocol_decoder_somfy_keytis_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyKeytis* instance = context;
-    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    bool res = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            FURI_LOG_E(TAG, "Deserialize error");
+            break;
+        }
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
+        if(!flipper_format_read_uint32(
+               flipper_format,
+               "Duration_Counter",
+               (uint32_t*)&instance->press_duration_counter,
+               1)) {
+            FURI_LOG_E(TAG, "Missing Duration_Counter");
+            break;
+        }
+        res = true;
+    } while(false);
+
+    return res;
 }
 
 void subghz_protocol_decoder_somfy_keytis_get_string(void* context, string_t output) {

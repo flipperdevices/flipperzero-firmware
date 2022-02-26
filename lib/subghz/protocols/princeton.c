@@ -277,11 +277,6 @@ void subghz_protocol_decoder_princeton_feed(void* context, bool level, uint32_t 
     }
 }
 
-// uint16_t subghz_protocol_princeton_get_te(void* context) {
-//     SubGhzDecoderPrinceton* instance = context;
-//     return instance->te;
-// }
-
 uint8_t subghz_protocol_decoder_princeton_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderPrinceton* instance = context;
