@@ -42,7 +42,6 @@ SubGhzHistory* subghz_history_alloc(void) {
 
 void subghz_history_free(SubGhzHistory* instance) {
     furi_assert(instance);
-    //flipper_format_free(instance->flipper_format);
     string_clear(instance->tmp_string);
     for
         M_EACH(item, instance->history->data, SubGhzHistoryItemArray_t) {
@@ -54,17 +53,6 @@ void subghz_history_free(SubGhzHistory* instance) {
     free(instance->history);
     free(instance);
 }
-
-// void subghz_history_set_frequency_preset(
-//     SubGhzHistory* instance,
-//     uint16_t idx,
-//     uint32_t frequency,
-//     FuriHalSubGhzPreset preset) {
-//     furi_assert(instance);
-//     if(instance->last_index_write >= SUBGHZ_HISTORY_MAX) return;
-//     instance->history[idx].preset = preset;
-//     instance->history[idx].real_frequency = frequency;
-// }
 
 uint32_t subghz_history_get_frequency(SubGhzHistory* instance, uint16_t idx) {
     furi_assert(instance);
@@ -138,18 +126,6 @@ void subghz_history_get_text_item_menu(SubGhzHistory* instance, string_t output,
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
     string_set(output, item->item_str);
 }
-
-// void subghz_history_get_text_decoder(SubGhzHistory* instance, string_t output, uint16_t idx) {
-//     SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
-//     if(flipper_format_read_string(item->flipper_string, "Protocol", instance->tmp_string)) {
-//         subghz_protocol_decoder_base_serialize( subghz_protocol_decoder, text);
-
-//         FURI_LOG_E(TAG, "Missing Protocol");
-//         string_reset(instance->tmp_string);
-//     }
-
-//     string_set(output, item->item_str);
-// }
 
 bool subghz_history_add_to_history(
     SubGhzHistory* instance,
@@ -235,56 +211,8 @@ bool subghz_history_add_to_history(
                 (uint32_t)(data & 0xFFFFFFFF));
         }
     } while(false);
+
     string_clear(text);
-
-    //string_init_set_str(item->item_str, string_get_cstr(text));
-
-    //printf("%s", string_get_cstr(text));
-
-    // subghz_protocol_decoder_base_serialize(decoder_base, text);
-
-    // //subghz_protocol_came_save_file(decoder_base, instance->flipper_format, frequency, preset);
-    // subghz_protocol_came_load_file(decoder_base, instance->flipper_format, "");
-
-    // SubGhzHistoryItem* item = SubGhzHistoryItemArray_push_raw(instance->history->data);
-    // item->flipper_format = flipper_format_string_alloc();
-    // string_init_set_str(item->item_str, string_get_cstr(text));
-    // item->type = decoder_base->protocol->type;
-
-    // if(instance->last_index_write >= SUBGHZ_HISTORY_MAX) return false;
-    // if((instance->code_last_found == (protocol->code_last_found & 0xFFFF0FFFFFFFFFFF)) &&
-    //    ((millis() - instance->last_update_timestamp) < 500)) {
-    //     instance->last_update_timestamp = millis();
-    //     return false;
-    // }
-
-    // instance->code_last_found = protocol->code_last_found & 0xFFFF0FFFFFFFFFFF;
-    // instance->last_update_timestamp = millis();
-
-    // instance->history[instance->last_index_write].real_frequency = frequency;
-    // instance->history[instance->last_index_write].preset = preset;
-    // instance->history[instance->last_index_write].data1 = 0;
-    // instance->history[instance->last_index_write].manufacture_name = NULL;
-    // instance->history[instance->last_index_write].name = protocol->name;
-    // instance->history[instance->last_index_write].code_count_bit = protocol->code_last_count_bit;
-    // instance->history[instance->last_index_write].code_found = protocol->code_last_found;
-    // if(strcmp(protocol->name, "KeeLoq") == 0) {
-    //     instance->history[instance->last_index_write].manufacture_name =
-    //         subghz_protocol_keeloq_find_and_get_manufacture_name(protocol);
-    // } else if(strcmp(protocol->name, "Star Line") == 0) {
-    //     instance->history[instance->last_index_write].manufacture_name =
-    //         subghz_protocol_star_line_find_and_get_manufacture_name(protocol);
-    //} else
-    // if(strcmp(protocol->name, "Princeton") == 0) {
-    //     instance->history[instance->last_index_write].data1 =
-    //         subghz_protocol_princeton_get_te(protocol);
-    // }  else if(strcmp(protocol->name, "Somfy Keytis") == 0) {
-    //     instance->history[instance->last_index_write].data1 =
-    //         subghz_protocol_somfy_keytis_get_press_duration(protocol);
-    // }
-
-    //instance->history[instance->last_index_write].type_protocol = protocol->type_protocol;
-
     instance->last_index_write++;
     return true;
 }

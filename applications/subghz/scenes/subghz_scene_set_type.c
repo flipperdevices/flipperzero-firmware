@@ -195,27 +195,27 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
                 generated_protocol = true;
             }
             break;
-        case SubmenuIndexDoorHan:
-        //ToDo FIX
-            // if(subghz_scene_set_type_submenu_gen_data_protocol(subghz, "KeeLoq")) {
-            //     subghz->txrx->protocol_result->code_last_count_bit = 64;
-            //     subghz->txrx->protocol_result->serial = key & 0x0FFFFFFF;
-            //     subghz->txrx->protocol_result->btn = 0x2; //btn 0x1, 0x2, 0x4, 0x8
-            //     subghz->txrx->protocol_result->cnt = 0x0003;
-            //     // if(subghz_protocol_keeloq_set_manufacture_name(
-            //     //        subghz->txrx->protocol_result, "DoorHan")) {
-            //     //     subghz->txrx->protocol_result->code_last_found =
-            //     //         subghz_protocol_keeloq_gen_key(subghz->txrx->protocol_result);
-            //     //     generated_protocol = true;
-            //     // } else
-            //     {
-            //         generated_protocol = false;
-            //         string_set(
-            //             subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
-            //         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
-            //     }
-            // }
-            break;
+        // case SubmenuIndexDoorHan:
+        // //ToDo FIX
+        //     // if(subghz_scene_set_type_submenu_gen_data_protocol(subghz, "KeeLoq")) {
+        //     //     subghz->txrx->protocol_result->code_last_count_bit = 64;
+        //     //     subghz->txrx->protocol_result->serial = key & 0x0FFFFFFF;
+        //     //     subghz->txrx->protocol_result->btn = 0x2; //btn 0x1, 0x2, 0x4, 0x8
+        //     //     subghz->txrx->protocol_result->cnt = 0x0003;
+        //     //     // if(subghz_protocol_keeloq_set_manufacture_name(
+        //     //     //        subghz->txrx->protocol_result, "DoorHan")) {
+        //     //     //     subghz->txrx->protocol_result->code_last_found =
+        //     //     //         subghz_protocol_keeloq_gen_key(subghz->txrx->protocol_result);
+        //     //     //     generated_protocol = true;
+        //     //     // } else
+        //     //     {
+        //     //         generated_protocol = false;
+        //     //         string_set(
+        //     //             subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
+        //     //         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
+        //     //     }
+        //     // }
+        //     break;
         default:
             return false;
             break;
