@@ -43,7 +43,7 @@ int base32_decode(const uint8_t* encoded, uint8_t* result, int bufSize) {
         }
 
         // Look up one base32 digit
-        FURI_LOG_I("B32", "Digit is %c", ch);
+        //FURI_LOG_I("B32", "Digit is %c", ch);
         if((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')) {
             ch = (ch & 0x1F) - 1;
         } else if(ch >= '2' && ch <= '7') {

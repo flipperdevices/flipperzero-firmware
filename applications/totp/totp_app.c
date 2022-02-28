@@ -7,9 +7,16 @@
 #include <notification/notification_messages.h>
 
 #include <totp.h>
+#include "totp_app.h"
 
 #include <base32.h>
 #include <time.h>
+
+#include <toolbox/path.h>
+#include <flipper_format/flipper_format.h>
+
+static const char* totp_file_header = "Flipper TOTP storage";
+static const uint32_t totp_file_version = 1;
 
 typedef enum {
     TotpEventTypeTick,
@@ -28,6 +35,7 @@ uint8_t* base32key[] = {
     (unsigned char*)"JBSWY3DPEHPK3PXP",
     (unsigned char*)"AMOGUSYOBABOBAAA",
     (unsigned char*)"AMOGUSAAAAAAAAAA"};
+const char* keyNames[] = {"Test Key 1", "Test Key 2", "Amogus key"};
 
 int keyLengths[] = {10, 10, 10};
 
@@ -37,9 +45,7 @@ static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
     osMessageQueueGet(event_queue, &event, NULL, osWaitForever);
 
     uint8_t hmacKey[20];
-    //uint8_t* base32key = (unsigned char*)"DM72NP6URDCNCHLW";
 
-    const char* keyNames[] = {"Test Key 1", "Test Key 2", "Amogus key"};
     int timezone = -3;
 
     canvas_clear(canvas);
@@ -47,10 +53,10 @@ static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 2, 10, "TOTP");
     canvas_draw_str(canvas, 2, 30, keyNames[keyId]);
 
-    FURI_LOG_I("TOTP", "key is %s", base32key[keyId]);
+    //FURI_LOG_I("TOTP", "key is %s", base32key[keyId]);
 
-    int len = base32_decode(base32key[keyId], hmacKey, keyLengths[keyId]);
-    FURI_LOG_I("TOTP", "len = %d", len);
+    base32_decode(base32key[keyId], hmacKey, keyLengths[keyId]);
+    //FURI_LOG_I("TOTP", "len = %d", len);
 
     //uint8_t hmacKey[] = {0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0xde, 0xad, 0xbe, 0xef}; // Secret key
     TOTP(hmacKey, keyLengths[keyId], 30); // Secret key, Secret key length, Timestep (30s)
@@ -68,7 +74,7 @@ static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
     // god i hate these 5 lines
 
     uint32_t newCode = getCodeFromTimestamp(mktime(&date));
-    FURI_LOG_I("TOTP", "%06ld", newCode);
+    //FURI_LOG_I("TOTP", "%06ld", newCode);
     char code_string[100] = "";
     sprintf(code_string, "%06ld", newCode);
     canvas_draw_str(canvas, 2, 20, code_string);
@@ -103,6 +109,55 @@ void totp_app_update(void* ctx) {
 }
 
 int32_t totp_app(void* p) {
+    bool saved = false;
+    Storage* storage = furi_record_open("storage");
+    FlipperFormat* file = flipper_format_file_alloc(storage);
+    string_t temp_str;
+    char key_name[50] = "";
+    string_init(temp_str);
+
+    do {
+        // Create nfc directory if necessary
+        if(!storage_simply_mkdir(storage, TOTP_APP_FOLDER)) break;
+        // Open file
+        string_printf(temp_str, "%s/%s%s", "/ext/totp", "keys", ".totp");
+        // Open file
+        if(!flipper_format_file_open_always(file, string_get_cstr(temp_str))) break;
+        // Write header
+        if(!flipper_format_write_header_cstr(file, totp_file_header, totp_file_version)) break;
+        // Write nfc device type
+        //nfc_device_prepare_format_string(dev, temp_str);
+
+        for(int key = 0; key < keys; key++) {
+            string_printf(temp_str, "%s", base32key[key]);
+            sprintf(key_name, "%s", keyNames[key]);
+
+            if(!flipper_format_write_string(file, key_name, temp_str)) break;
+        }
+        //if(!flipper_format_write_hex(file, "Totp key 1", base32key[0], sizeof(base32key[0])))
+        //    break;
+        // Write UID, ATQA, SAK
+        //if(!flipper_format_write_comment_cstr(file, "UID, ATQA and SAK are common for all formats"))
+        //    break;
+        //if(!flipper_format_write_hex(file, "UID", data->uid, data->uid_len)) break;
+        //if(!flipper_format_write_hex(file, "ATQA", data->atqa, 2)) break;
+        //if(!flipper_format_write_hex(file, "SAK", &data->sak, 1)) break;
+        // Save more data if necessary
+        //if(dev->format == NfcDeviceSaveFormatMifareUl) {
+        //    if(!nfc_device_save_mifare_ul_data(file, dev)) break;
+        //} else if(dev->format == NfcDeviceSaveFormatBankCard) {
+        //    if(!nfc_device_save_bank_card_data(file, dev)) break;
+        //}
+        saved = true;
+    } while(0);
+    if(saved) {
+        flipper_format_free(file);
+        furi_record_close("storage");
+    } else {
+        flipper_format_free(file);
+        furi_record_close("storage");
+    }
+
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(TotpEvent), NULL);
     // Configure view port
     ViewPort* view_port = view_port_alloc();
