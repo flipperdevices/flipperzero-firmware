@@ -22,6 +22,8 @@ bool subghz_scene_transmitter_update_data_show(void* context) {
         string_init(modulation_str);
         uint8_t show_button = 0;
 
+        subghz_protocol_decoder_base_deserialize(
+            subghz->txrx->decoder_result, subghz->txrx->fff_data);
         subghz_protocol_decoder_base_get_string(subghz->txrx->decoder_result, key_str);
 
         if((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Send) ==

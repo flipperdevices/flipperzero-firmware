@@ -1,9 +1,9 @@
 #include "../subghz_i.h"
-//#include "../lib/subghz/protocols/subghz_protocol_keeloq.h"
-#include "lib/subghz/blocks/math.h"
+#include <lib/subghz/protocols/keeloq.h>
+#include <lib/subghz/blocks/math.h>
 #include <dolphin/dolphin.h>
 #include <flipper_format/flipper_format_i.h>
-#include "lib/toolbox/stream/stream.h"
+#include <lib/toolbox/stream/stream.h>
 
 #define TAG "SubGhzSetType"
 
@@ -195,27 +195,30 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
                 generated_protocol = true;
             }
             break;
-        // case SubmenuIndexDoorHan:
-        // //ToDo FIX
-        //     // if(subghz_scene_set_type_submenu_gen_data_protocol(subghz, "KeeLoq")) {
-        //     //     subghz->txrx->protocol_result->code_last_count_bit = 64;
-        //     //     subghz->txrx->protocol_result->serial = key & 0x0FFFFFFF;
-        //     //     subghz->txrx->protocol_result->btn = 0x2; //btn 0x1, 0x2, 0x4, 0x8
-        //     //     subghz->txrx->protocol_result->cnt = 0x0003;
-        //     //     // if(subghz_protocol_keeloq_set_manufacture_name(
-        //     //     //        subghz->txrx->protocol_result, "DoorHan")) {
-        //     //     //     subghz->txrx->protocol_result->code_last_found =
-        //     //     //         subghz_protocol_keeloq_gen_key(subghz->txrx->protocol_result);
-        //     //     //     generated_protocol = true;
-        //     //     // } else
-        //     //     {
-        //     //         generated_protocol = false;
-        //     //         string_set(
-        //     //             subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
-        //     //         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
-        //     //     }
-        //     // }
-        //     break;
+        case SubmenuIndexDoorHan:
+            subghz->txrx->transmitter =
+                subghz_transmitter_alloc_init(subghz->txrx->environment, "KeeLoq");
+            if(subghz->txrx->transmitter) {
+                subghz_protocol_keeloq_create_data(
+                    subghz->txrx->transmitter->protocol_instance,
+                    subghz->txrx->fff_data,
+                    key & 0x0FFFFFFF,
+                    0x2,
+                    0x0003,
+                    "DoorHan",
+                    subghz_frequencies[subghz_frequencies_433_92],
+                    FuriHalSubGhzPresetOok650Async);
+                generated_protocol = true;
+            } else {
+                generated_protocol = false;
+            }
+            subghz_transmitter_free(subghz->txrx->transmitter);
+            if(!generated_protocol) {
+                string_set(
+                    subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
+            }
+            break;
         default:
             return false;
             break;

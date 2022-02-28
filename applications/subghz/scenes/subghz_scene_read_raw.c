@@ -5,30 +5,31 @@
 #include <lib/toolbox/path.h>
 
 #define RAW_FILE_NAME "Raw_signal_"
+#define TAG "SubGhzSceneReadRAW"
 
 bool subghz_scene_read_raw_update_filename(SubGhz* subghz) {
     bool ret = false;
     //set the path to read the file
-    if(strcmp(
-           subghz_protocol_raw_get_last_file_name(
-               (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result),
-           "")) {
-        string_t temp_str;
-        string_init_printf(
-            temp_str,
-            "%s",
-            subghz_protocol_raw_get_last_file_name(
-                (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result));
+    string_t temp_str;
+    string_init(temp_str);
+    do {
+        if(!flipper_format_rewind(subghz->txrx->fff_data)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
+
+        if(!flipper_format_read_string(subghz->txrx->fff_data, "File_name", temp_str)) {
+            FURI_LOG_E(TAG, "Missing File_name");
+            break;
+        }
+
         path_extract_filename_no_ext(string_get_cstr(temp_str), temp_str);
         strcpy(subghz->file_name, string_get_cstr(temp_str));
-        string_printf(
-            temp_str, "%s/%s%s", SUBGHZ_APP_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION);
 
-        subghz_protocol_raw_set_last_file_name(
-            (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result, string_get_cstr(temp_str));
-        string_clear(temp_str);
         ret = true;
-    }
+    } while(false);
+
+    string_clear(temp_str);
     return ret;
 }
 
@@ -185,6 +186,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case SubGhzCustomEventViewReadRAWSendStart:
+
             if(subghz_scene_read_raw_update_filename(subghz)) {
                 //start send
                 subghz->state_notifications = SubGhzNotificationStateIDLE;
@@ -194,7 +196,8 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
                    (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
                     //ToDo FIX
-                    if(!subghz_tx_start(subghz, NULL)) {
+
+                    if(!subghz_tx_start(subghz, subghz->txrx->fff_data)) {
                         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
                     } else {
                         DOLPHIN_DEED(DolphinDeedSubGhzSend);
@@ -227,6 +230,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             };
             subghz_protocol_raw_save_to_file_stop(
                 (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result);
+            subghz_protocol_raw_gen_fff_data(subghz->txrx->fff_data, RAW_FILE_NAME);
             subghz->state_notifications = SubGhzNotificationStateIDLE;
 
             subghz->txrx->rx_key_state = SubGhzRxKeyStateAddKey;

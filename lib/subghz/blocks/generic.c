@@ -1,5 +1,7 @@
 #include "generic.h"
 #include "../types.h"
+#include <lib/toolbox/stream/stream.h>
+#include <lib/flipper_format/flipper_format_i.h>
 
 #define TAG "SubGhzBlockGeneric"
 
@@ -37,6 +39,7 @@ bool subghz_block_generic_serialize(
     string_t temp_str;
     string_init(temp_str);
     do {
+        stream_clean(flipper_format_get_raw_stream(flipper_format));
         if(!flipper_format_write_header_cstr(
                flipper_format, SUBGHZ_KEY_FILE_TYPE, SUBGHZ_KEY_FILE_VERSION)) {
             FURI_LOG_E(TAG, "Unable to add header");

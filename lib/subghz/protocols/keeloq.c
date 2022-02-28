@@ -156,6 +156,29 @@ static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instanc
     }
 }
 
+bool subghz_protocol_keeloq_create_data(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t serial,
+    uint8_t btn,
+    uint16_t cnt,
+    const char* manufacture_name,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset) {
+    furi_assert(context);
+    SubGhzProtocolEncoderKeeloq* instance = context;
+    instance->generic.serial = serial;
+    instance->generic.cnt = cnt;
+    instance->manufacture_name = manufacture_name;
+    instance->generic.data_count_bit = 64;
+    bool res = subghz_protocol_keeloq_gen_data(instance, btn);
+    if(res) {
+        res =
+            subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    }
+    return res;
+}
+
 static bool
     subghz_protocol_encoder_keeloq_get_upload(SubGhzProtocolEncoderKeeloq* instance, uint8_t btn) {
     furi_assert(instance);

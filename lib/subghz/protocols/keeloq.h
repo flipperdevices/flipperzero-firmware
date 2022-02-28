@@ -13,6 +13,15 @@ extern const SubGhzProtocol subghz_protocol_keeloq;
 
 void* subghz_protocol_encoder_keeloq_alloc(SubGhzEnvironment* environment);
 void subghz_protocol_encoder_keeloq_free(void* context);
+bool subghz_protocol_keeloq_create_data(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t serial,
+    uint8_t btn,
+    uint16_t cnt,
+    const char* manufacture_name,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset);
 bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format);
 void subghz_protocol_encoder_keeloq_stop(void* context);
 LevelDuration subghz_protocol_encoder_keeloq_yield(void* context);

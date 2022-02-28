@@ -37,8 +37,6 @@ void subghz_protocol_raw_file_encoder_worker_set_callback_end(
     SubGhzProtocolEncoderRAW* instance,
     SubGhzProtocolEncoderRAWCallbackEnd callback_end,
     void* context_end);
-void subghz_protocol_encoder_raw_set_file_name(
-    SubGhzProtocolEncoderRAW* instance,
-    const char* name);
+void subghz_protocol_raw_gen_fff_data(FlipperFormat* flipper_format, const char* file_name);
 bool subghz_protocol_encoder_raw_deserialize(void* context, FlipperFormat* flipper_format);
 LevelDuration subghz_protocol_encoder_raw_yield(void* context);
