@@ -46,6 +46,6 @@ else()
 
 endif()
 
-if(DEFINED MD5_ENABLED)
-    target_compile_definitions(${target} PRIVATE -DMD5_ENABLED=${MD5_ENABLED})
+if(DEFINED MD5_ENABLED OR CONFIG_SERIAL_FLASHER_MD5_ENABLED)
+    target_compile_definitions(${target} PUBLIC -DMD5_ENABLED=1)
 endif()

@@ -1,0 +1,7 @@
+menu "ESP serial flasher"
+    config SERIAL_FLASHER_MD5_ENABLED
+        bool "Enable MD5 check"
+        default y
+        help
+            Select this option to enable MD5 hashsum check after flashing.
+endmenu
