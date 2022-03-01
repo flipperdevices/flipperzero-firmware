@@ -115,6 +115,7 @@ map<target_chip_t, uint32_t> chip_magic_value = {
     {ESP8266_CHIP,  0xfff0c101},
     {ESP32_CHIP,    0x00f01d83},
     {ESP32S2_CHIP,  0x000007c6},
+    {ESP32C2_CHIP,  0x6f51306f},
     {ESP32C3_CHIP,  0x6921506f},
     {ESP32S3_CHIP,  0x00000009},
 };
@@ -192,6 +193,12 @@ TEST_CASE( "Can detect attached target" )
         queue_connect_response(ESP32S2_CHIP);
         REQUIRE_SUCCESS( esp_loader_connect(&connect_config) );
         REQUIRE( esp_loader_get_target() == ESP32S2_CHIP );
+    }
+
+    SECTION( "Can detect ESP32C2" ) {
+        queue_connect_response(ESP32C2_CHIP);
+        REQUIRE_SUCCESS( esp_loader_connect(&connect_config) );
+        REQUIRE( esp_loader_get_target() == ESP32C2_CHIP );
     }
 
     SECTION( "Can detect ESP32C3" ) {

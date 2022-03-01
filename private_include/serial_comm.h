@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-esp_loader_error_t loader_flash_begin_cmd(uint32_t offset, uint32_t erase_size, uint32_t block_size, uint32_t blocks_to_write, target_chip_t target);
+esp_loader_error_t loader_flash_begin_cmd(uint32_t offset, uint32_t erase_size, uint32_t block_size, uint32_t blocks_to_write, bool encryption);
 
 esp_loader_error_t loader_flash_data_cmd(const uint8_t *data, uint32_t size);
 
