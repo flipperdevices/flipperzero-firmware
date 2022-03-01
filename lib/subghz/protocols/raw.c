@@ -80,14 +80,6 @@ const SubGhzProtocol subghz_protocol_raw = {
     .encoder = &subghz_protocol_raw_encoder,
 };
 
-const char* subghz_protocol_raw_get_last_file_name(SubGhzProtocolDecoderRAW* instance) {
-    return string_get_cstr(instance->file_name);
-}
-
-void subghz_protocol_raw_set_last_file_name(SubGhzProtocolDecoderRAW* instance, const char* name) {
-    string_printf(instance->file_name, "%s", name);
-}
-
 bool subghz_protocol_raw_save_to_file_init(
     SubGhzProtocolDecoderRAW* instance,
     const char* dev_name,

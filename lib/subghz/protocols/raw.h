@@ -13,8 +13,6 @@ extern const SubGhzProtocolDecoder subghz_protocol_raw_decoder;
 extern const SubGhzProtocolEncoder subghz_protocol_raw_encoder;
 extern const SubGhzProtocol subghz_protocol_raw;
 
-const char* subghz_protocol_raw_get_last_file_name(SubGhzProtocolDecoderRAW* instance);
-void subghz_protocol_raw_set_last_file_name(SubGhzProtocolDecoderRAW* instance, const char* name);
 bool subghz_protocol_raw_save_to_file_init(
     SubGhzProtocolDecoderRAW* instance,
     const char* dev_name,
