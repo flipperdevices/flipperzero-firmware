@@ -249,8 +249,10 @@ esp_loader_error_t esp_loader_flash_start(uint32_t offset, uint32_t image_size, 
 
     init_md5(offset, image_size);
 
+    bool encryption_in_cmd = encryption_in_begin_flash_cmd(s_target);
+
     loader_port_start_timer(timeout_per_mb(erase_size, ERASE_REGION_TIMEOUT_PER_MB));
-    return loader_flash_begin_cmd(offset, erase_size, block_size, blocks_to_write, s_target);
+    return loader_flash_begin_cmd(offset, erase_size, block_size, blocks_to_write, encryption_in_cmd);
 }
 
 

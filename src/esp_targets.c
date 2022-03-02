@@ -25,6 +25,7 @@ typedef struct {
     uint32_t efuse_base;
     uint32_t chip_magic_value[MAX_MAGIC_VALUES];
     read_spi_config_t read_spi_config;
+    bool encryption_in_begin_flash_cmd;
 } esp_target_t;
 
 // This ROM address has a different value on each chip model
@@ -32,8 +33,7 @@ typedef struct {
 
 #define ESP8266_SPI_REG_BASE 0x60000200
 #define ESP32S2_SPI_REG_BASE 0x3f402000
-#define ESP32C3_SPI_REG_BASE 0x60002000
-#define ESP32S3_SPI_REG_BASE 0x60002000
+#define ESP32xx_SPI_REG_BASE 0x60002000
 #define ESP32_SPI_REG_BASE   0x3ff42000
 
 static esp_loader_error_t spi_config_esp32(uint32_t efuse_base, uint32_t *spi_config);
@@ -92,13 +92,13 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
     // ESP32C3
     {
         .regs = {
-            .cmd  = ESP32C3_SPI_REG_BASE + 0x00,
-            .usr  = ESP32C3_SPI_REG_BASE + 0x18,
-            .usr1 = ESP32C3_SPI_REG_BASE + 0x1c,
-            .usr2 = ESP32C3_SPI_REG_BASE + 0x20,
-            .w0   = ESP32C3_SPI_REG_BASE + 0x58,
-            .mosi_dlen = ESP32C3_SPI_REG_BASE + 0x24,
-            .miso_dlen = ESP32C3_SPI_REG_BASE + 0x28,
+            .cmd  = ESP32xx_SPI_REG_BASE + 0x00,
+            .usr  = ESP32xx_SPI_REG_BASE + 0x18,
+            .usr1 = ESP32xx_SPI_REG_BASE + 0x1c,
+            .usr2 = ESP32xx_SPI_REG_BASE + 0x20,
+            .w0   = ESP32xx_SPI_REG_BASE + 0x58,
+            .mosi_dlen = ESP32xx_SPI_REG_BASE + 0x24,
+            .miso_dlen = ESP32xx_SPI_REG_BASE + 0x28,
         },
         .efuse_base = 0x60008800,
         .chip_magic_value = { 0x6921506f, 0x1b31506f },
@@ -108,17 +108,33 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
     // ESP32S3
     {
         .regs = {
-            .cmd  = ESP32C3_SPI_REG_BASE + 0x00,
-            .usr  = ESP32C3_SPI_REG_BASE + 0x18,
-            .usr1 = ESP32C3_SPI_REG_BASE + 0x1c,
-            .usr2 = ESP32C3_SPI_REG_BASE + 0x20,
-            .w0   = ESP32C3_SPI_REG_BASE + 0x58,
-            .mosi_dlen = ESP32C3_SPI_REG_BASE + 0x24,
-            .miso_dlen = ESP32C3_SPI_REG_BASE + 0x28,
+            .cmd  = ESP32xx_SPI_REG_BASE + 0x00,
+            .usr  = ESP32xx_SPI_REG_BASE + 0x18,
+            .usr1 = ESP32xx_SPI_REG_BASE + 0x1c,
+            .usr2 = ESP32xx_SPI_REG_BASE + 0x20,
+            .w0   = ESP32xx_SPI_REG_BASE + 0x58,
+            .mosi_dlen = ESP32xx_SPI_REG_BASE + 0x24,
+            .miso_dlen = ESP32xx_SPI_REG_BASE + 0x28,
         },
         .efuse_base = 0x60007000,
         .chip_magic_value = { 0x00000009, 0 },
-        .read_spi_config = spi_config_esp32xx, // !
+        .read_spi_config = spi_config_esp32xx,
+    },
+
+    // ESP32C2
+    {
+        .regs = {
+            .cmd  = ESP32xx_SPI_REG_BASE + 0x00,
+            .usr  = ESP32xx_SPI_REG_BASE + 0x18,
+            .usr1 = ESP32xx_SPI_REG_BASE + 0x1c,
+            .usr2 = ESP32xx_SPI_REG_BASE + 0x20,
+            .w0   = ESP32xx_SPI_REG_BASE + 0x58,
+            .mosi_dlen = ESP32xx_SPI_REG_BASE + 0x24,
+            .miso_dlen = ESP32xx_SPI_REG_BASE + 0x28,
+        },
+        .efuse_base = 0x60008800,
+        .chip_magic_value = { 0x6f51306f, 0 },
+        .read_spi_config = spi_config_esp32xx,
     },
 };
 
@@ -209,4 +225,9 @@ static esp_loader_error_t spi_config_esp32xx(uint32_t efuse_base, uint32_t *spi_
 
     *spi_config = pins;
     return ESP_LOADER_SUCCESS;
+}
+
+bool encryption_in_begin_flash_cmd(target_chip_t target)
+{
+    return target == ESP32_CHIP || target == ESP8266_CHIP;
 }
