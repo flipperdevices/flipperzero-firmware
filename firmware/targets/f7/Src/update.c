@@ -9,8 +9,6 @@
 
 #include <updater/util/update_manifest.h>
 
-#define TAG "Main"
-
 static FATFS fs;
 
 static const char FS_ROOT_PATH[] = "/";
@@ -68,8 +66,11 @@ static bool flipper_update_load_stage(UpdateManifest* manifest) {
     string_init_printf(
         loader_img_path, "/update/%s", string_get_cstr(manifest->staged_loader_file));
 
-    CHECK_FRESULT(f_stat(string_get_cstr(loader_img_path), &stat));
-    CHECK_FRESULT(f_open(&file, string_get_cstr(loader_img_path), FA_OPEN_EXISTING | FA_READ));
+    if((f_stat(string_get_cstr(loader_img_path), &stat) != FR_OK) ||
+       (f_open(&file, string_get_cstr(loader_img_path), FA_OPEN_EXISTING | FA_READ) != FR_OK)) {
+        string_clear(loader_img_path);
+        return false;
+    }
 
     void* img = malloc(stat.fsize);
     uint32_t bytes_read = 0;
@@ -77,7 +78,9 @@ static bool flipper_update_load_stage(UpdateManifest* manifest) {
     uint32_t crc = 0;
     do {
         uint16_t size_read = 0;
-        CHECK_FRESULT(f_read(&file, img + bytes_read, MAX_READ, &size_read));
+        if(f_read(&file, img + bytes_read, MAX_READ, &size_read) != FR_OK) {
+            break;
+        }
         crc = furi_hal_crc_feed(img + bytes_read, size_read);
         bytes_read += size_read;
     } while(bytes_read == MAX_READ);
@@ -92,6 +95,7 @@ static bool flipper_update_load_stage(UpdateManifest* manifest) {
             break;
         }
 
+        /* point of no return */
         FURI_CRITICAL_ENTER();
         memmove((void*)(SRAM1_BASE), img, stat.fsize);
         __HAL_SYSCFG_REMAPMEMORY_SRAM();
@@ -102,6 +106,7 @@ static bool flipper_update_load_stage(UpdateManifest* manifest) {
         return true;
     } while(false);
 
+    free(img);
     string_clear(loader_img_path);
     return false;
 }
@@ -109,8 +114,6 @@ static bool flipper_update_load_stage(UpdateManifest* manifest) {
 static UpdateManifest* flipper_update_process_manifest() {
     FIL file;
     FILINFO stat;
-
-    furi_hal_crc_reset();
 
     CHECK_FRESULT(f_stat(CONFIG_PATH, &stat));
     CHECK_FRESULT(f_open(&file, CONFIG_PATH, FA_OPEN_EXISTING | FA_READ));
@@ -121,20 +124,24 @@ static UpdateManifest* flipper_update_process_manifest() {
 
     do {
         uint16_t size_read = 0;
-        CHECK_FRESULT(f_read(&file, manifest_data + bytes_read, MAX_READ, &size_read));
+        if(f_read(&file, manifest_data + bytes_read, MAX_READ, &size_read) != FR_OK) {
+            break;
+        }
         bytes_read += size_read;
     } while(bytes_read == MAX_READ);
 
-    if(bytes_read != stat.fsize) {
-        return false;
-    }
+    UpdateManifest* manifest = NULL;
+    do {
+        if(bytes_read != stat.fsize) {
+            break;
+        }
 
-    UpdateManifest* manifest = update_manifest_alloc();
-    if(!update_manifest_init_mem(manifest, manifest_data, bytes_read)) {
-        free(manifest_data);
-        update_manifest_free(manifest);
-        return NULL;
-    }
+        manifest = update_manifest_alloc();
+        if(!update_manifest_init_mem(manifest, manifest_data, bytes_read)) {
+            update_manifest_free(manifest);
+            manifest = NULL;
+        }
+    } while(false);
 
     free(manifest_data);
     return manifest;
@@ -152,6 +159,6 @@ void flipper_update_exec() {
     }
 
     if(!flipper_update_load_stage(manifest)) {
-        return;
+        update_manifest_free(manifest);
     }
 }
