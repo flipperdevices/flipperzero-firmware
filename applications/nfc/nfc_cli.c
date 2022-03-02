@@ -105,5 +105,7 @@ void nfc_on_system_start() {
     Cli* cli = furi_record_open("cli");
     cli_add_command(cli, "nfc", CliCommandFlagDefault, nfc_cli, NULL);
     furi_record_close("cli");
+#else
+    (void)&nfc_cli;
 #endif
 }

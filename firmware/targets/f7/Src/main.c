@@ -18,6 +18,9 @@ int main(void) {
     if (true) {
 #endif
         flipper_update_exec();
+        // if things go nice, we shouldn't reach this point
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagExecuteUpdate);
+        NVIC_SystemReset();
         //...
     } else {
         // Initialize FURI layer

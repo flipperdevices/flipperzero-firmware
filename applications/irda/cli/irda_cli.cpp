@@ -192,5 +192,7 @@ extern "C" void irda_on_system_start() {
     Cli* cli = (Cli*)furi_record_open("cli");
     cli_add_command(cli, "ir", CliCommandFlagDefault, irda_cli_start_ir, NULL);
     furi_record_close("cli");
+#else
+    (void)&irda_cli_start_ir;
 #endif
 }
