@@ -16,9 +16,12 @@ struct UpdaterMainView {
     void* context;
 };
 
+static const uint8_t PROGRESS_RENDER_STEP = 3; /* percent, to limit rendering rate */
+
 typedef struct {
     string_t status;
     uint8_t progress;
+    uint8_t rendered_progress;
 } UpdaterProgressModel;
 
 void updater_main_model_set_state(
@@ -29,7 +32,12 @@ void updater_main_model_set_state(
         main_view->view, (UpdaterProgressModel * model) {
             model->progress = progress;
             string_set(model->status, message);
-            return true;
+            if((model->rendered_progress > progress) ||
+               ((progress - model->rendered_progress) > PROGRESS_RENDER_STEP)) {
+                model->rendered_progress = progress;
+                return true;
+            }
+            return false;
         });
 }
 

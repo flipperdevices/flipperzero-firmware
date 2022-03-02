@@ -71,6 +71,7 @@ static bool flipper_update_load_stage(UpdateManifest* manifest) {
         string_clear(loader_img_path);
         return false;
     }
+    string_clear(loader_img_path);
 
     void* img = malloc(stat.fsize);
     uint32_t bytes_read = 0;
@@ -107,7 +108,6 @@ static bool flipper_update_load_stage(UpdateManifest* manifest) {
     } while(false);
 
     free(img);
-    string_clear(loader_img_path);
     return false;
 }
 

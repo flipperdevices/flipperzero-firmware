@@ -14,6 +14,7 @@ typedef struct {
     uint32_t staged_loader_crc;
     string_t firmware_dfu_image;
     string_t radio_image;
+    uint32_t radio_address;
     bool valid;
 } UpdateManifest;
 

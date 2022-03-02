@@ -214,10 +214,19 @@ static const DfuValidationParams flipper_dfu_params = {
     .vendor = 0x0483,
 };
 
+static bool page_task_compare_flash(
+    const uint8_t i_page,
+    const uint8_t* update_block,
+    uint16_t update_block_len) {
+    const size_t page_addr = furi_hal_flash_get_base() + furi_hal_flash_get_page_size() * i_page;
+    return (memcmp(update_block, (void*)page_addr, update_block_len) == 0);
+}
+
 /* Verifies a flash operation address for fitting into writable memory
  */
 static bool check_address_boundaries(const size_t address, bool allow_bl_region) {
-    size_t min_allowed_address = allow_bl_region ? furi_hal_flash_get_base() : FW_ADDRESS;
+    //size_t min_allowed_address = allow_bl_region ? furi_hal_flash_get_base() : FW_ADDRESS;
+    size_t min_allowed_address = furi_hal_flash_get_base();
     size_t max_allowed_address = (size_t)furi_hal_flash_get_free_end_address();
     return ((address >= min_allowed_address) && (address < max_allowed_address));
 }
@@ -241,33 +250,49 @@ static int32_t update_task_worker(void* context) {
     DfuUpdateTask page_task = {
         .address_cb = &validate_main_fw_address,
         .progress_cb = &update_task_dfu_progress,
-        //.task_cb = &furi_hal_flash_program_page,
-        .task_cb = &dummy_hal_flash_program_page,
+        .task_cb = &furi_hal_flash_program_page,
+        //.task_cb = &dummy_hal_flash_program_page,
         .context = update_task,
     };
 
     do {
         CHECK_RESULT(update_task_parse_manifest(update_task));
-        update_task_set_progress(update_task, UpdateTaskStageValidateDFUImage, 0);
-        CHECK_RESULT(
-            update_task_open_file(update_task, update_task->manifest->firmware_dfu_image));
-        CHECK_RESULT(
-            dfu_file_validate_crc(update_task->file, &update_task_dfu_progress, update_task));
 
-        const uint8_t valid_targets =
-            dfu_file_validate_headers(update_task->file, &flipper_dfu_params);
-        if(valid_targets == 0) {
-            break;
+        if(!string_empty_p(update_task->manifest->firmware_dfu_image)) {
+            update_task_set_progress(update_task, UpdateTaskStageValidateDFUImage, 0);
+            CHECK_RESULT(
+                update_task_open_file(update_task, update_task->manifest->firmware_dfu_image));
+            CHECK_RESULT(
+                dfu_file_validate_crc(update_task->file, &update_task_dfu_progress, update_task));
+
+            const uint8_t valid_targets =
+                dfu_file_validate_headers(update_task->file, &flipper_dfu_params);
+            if(valid_targets == 0) {
+                break;
+            }
+
+            update_task_set_progress(update_task, UpdateTaskStageFlashWrite, 0);
+            if(!dfu_file_process_targets(&page_task, update_task->file, valid_targets)) {
+                break;
+            }
+
+            page_task.task_cb = &page_task_compare_flash;
+
+            update_task_set_progress(update_task, UpdateTaskStageFlashValidate, 0);
+            if(!dfu_file_process_targets(&page_task, update_task->file, valid_targets)) {
+                break;
+            }
         }
 
-        update_task_set_progress(update_task, UpdateTaskStageFlashWrite, 0);
-        if(!dfu_file_process_targets(&page_task, update_task->file, valid_targets)) {
-            break;
-        }
-
-        update_task_set_progress(update_task, UpdateTaskStageFlashValidate, 0);
-        if(!dfu_file_process_targets(&page_task, update_task->file, valid_targets)) {
-            break;
+        if(!string_empty_p(update_task->manifest->firmware_dfu_image)) {
+            // TODO: work with FUS
+            update_task_set_progress(update_task, UpdateTaskStageRadioWrite, 0);
+            osDelay(4000);
+            update_task_set_progress(update_task, UpdateTaskStageRadioWrite, 100);
+            osDelay(1000);
+            update_task_set_progress(update_task, UpdateTaskStageRadioCommit, 0);
+            osDelay(4000);
+            update_task_set_progress(update_task, UpdateTaskStageRadioCommit, 100);
         }
 
         update_task_set_progress(update_task, UpdateTaskStageComplete, 100);

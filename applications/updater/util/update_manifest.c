@@ -31,39 +31,23 @@ static bool
     string_t filetype;
     uint32_t version = 0;
 
+    // TODO: compare filetype?
     string_init(filetype);
-    update_manifest->valid = false;
+    update_manifest->valid =
+        flipper_format_read_header(flipper_file, filetype, &version) &&
+        flipper_format_read_uint32(flipper_file, "Target", &update_manifest->target, 1) &&
+        flipper_format_read_string(flipper_file, "Loader", update_manifest->staged_loader_file) &&
+        flipper_format_read_hex(
+            flipper_file,
+            "Loader CRC",
+            (uint8_t*)&update_manifest->staged_loader_crc,
+            sizeof(uint32_t));
 
-    do {
-        if(!flipper_format_read_header(flipper_file, filetype, &version)) {
-            break;
-        }
-
-        if(!flipper_format_read_uint32(flipper_file, "Target", &update_manifest->target, 1)) {
-            break;
-        }
-
-        if(!flipper_format_read_string(
-               flipper_file, "Loader", update_manifest->staged_loader_file)) {
-            break;
-        }
-
-        if(!flipper_format_read_uint32(
-               flipper_file, "Loader CRC", &update_manifest->staged_loader_crc, 1)) {
-            break;
-        }
-
-        if(!flipper_format_read_string(
-               flipper_file, "Firmware", update_manifest->firmware_dfu_image)) {
-            break;
-        }
-
-        if(!flipper_format_read_string(flipper_file, "Radio", update_manifest->radio_image)) {
-            break;
-        }
-
-        update_manifest->valid = true;
-    } while(false);
+    /* Optional fields - we can have dfu, radio, or both */
+    flipper_format_read_string(flipper_file, "Firmware", update_manifest->firmware_dfu_image);
+    flipper_format_read_string(flipper_file, "Radio", update_manifest->radio_image);
+    flipper_format_read_hex(
+        flipper_file, "Radio address", (uint8_t*)&update_manifest->radio_address, sizeof(uint32_t));
 
     return update_manifest->valid;
 }
