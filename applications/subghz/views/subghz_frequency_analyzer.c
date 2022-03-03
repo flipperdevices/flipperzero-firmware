@@ -76,7 +76,7 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel
 
 bool subghz_frequency_analyzer_input(InputEvent* event, void* context) {
     furi_assert(context);
-    
+
     if(event->key == InputKeyBack) {
         return false;
     }
