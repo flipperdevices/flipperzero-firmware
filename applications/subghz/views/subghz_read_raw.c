@@ -6,7 +6,6 @@
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
-//#include <lib/subghz/protocols/subghz_protocol_princeton.h>
 
 #include <assets_icons.h>
 #define SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE 100
@@ -62,7 +61,6 @@ void subghz_read_raw_add_data_rssi(SubGhzReadRAW* instance, float rssi) {
     } else {
         u_rssi = (uint8_t)((rssi + 90) / 2.7);
     }
-    //if(u_rssi > 34) u_rssi = 34;
 
     with_view_model(
         instance->view, (SubGhzReadRAWModel * model) {

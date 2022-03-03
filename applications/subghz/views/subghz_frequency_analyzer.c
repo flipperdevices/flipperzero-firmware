@@ -6,7 +6,6 @@
 #include <furi_hal.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
-//#include <lib/subghz/protocols/subghz_protocol_princeton.h>
 #include "../helpers/subghz_frequency_analyzer_worker.h"
 
 #include <assets_icons.h>
@@ -77,8 +76,7 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel
 
 bool subghz_frequency_analyzer_input(InputEvent* event, void* context) {
     furi_assert(context);
-    //SubGhzFrequencyAnalyzer* instance = context;
-
+    
     if(event->key == InputKeyBack) {
         return false;
     }

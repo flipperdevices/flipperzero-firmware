@@ -125,12 +125,10 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
 
 void subghz_view_transmitter_enter(void* context) {
     furi_assert(context);
-    // SubGhzViewTransmitter* subghz_transmitter = context;
 }
 
 void subghz_view_transmitter_exit(void* context) {
     furi_assert(context);
-    // SubGhzViewTransmitter* subghz_transmitter = context;
 }
 
 SubGhzViewTransmitter* subghz_view_transmitter_alloc() {
