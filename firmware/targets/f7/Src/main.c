@@ -14,14 +14,15 @@ int main(void) {
 #ifdef FURI_RAM_EXEC
     if(false) {
 #else
-    //if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecuteUpdate)) {
-    if (true) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecuteUpdate)) {
+        //if (true) {
 #endif
         flipper_update_exec();
-        // if things go nice, we shouldn't reach this point
+        // if things go nice, we shouldn't reach this point.
+        // But if we do, abandon
         furi_hal_rtc_reset_flag(FuriHalRtcFlagExecuteUpdate);
-        NVIC_SystemReset();
-        //...
+        furi_hal_rtc_set_flag(FuriHalRtcFlagExecutePostUpdate);
+        furi_hal_power_reset();
     } else {
         // Initialize FURI layer
         furi_init();

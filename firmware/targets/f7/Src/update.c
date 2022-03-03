@@ -12,7 +12,7 @@
 static FATFS fs;
 
 static const char FS_ROOT_PATH[] = "/";
-static const char CONFIG_PATH[] = "/update/update.cfg";
+static const char CONFIG_PATH[] = UPDATE_MAINFEST_DEFAULT_PATH;
 
 #define CHECK_FRESULT(result)   \
     {                           \

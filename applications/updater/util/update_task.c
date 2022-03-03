@@ -235,14 +235,6 @@ static bool validate_main_fw_address(const size_t address) {
     return check_address_boundaries(address, false);
 }
 
-static bool dummy_hal_flash_program_page(
-    const uint8_t i_page,
-    const uint8_t* update_block,
-    uint16_t update_block_len) {
-    osDelay(200);
-    return true;
-}
-
 static int32_t update_task_worker(void* context) {
     furi_assert(context);
     UpdateTask* update_task = context;
@@ -272,37 +264,42 @@ static int32_t update_task_worker(void* context) {
             }
 
             update_task_set_progress(update_task, UpdateTaskStageFlashWrite, 0);
-            if(!dfu_file_process_targets(&page_task, update_task->file, valid_targets)) {
-                break;
-            }
+            CHECK_RESULT(dfu_file_process_targets(&page_task, update_task->file, valid_targets));
 
             page_task.task_cb = &page_task_compare_flash;
 
             update_task_set_progress(update_task, UpdateTaskStageFlashValidate, 0);
-            if(!dfu_file_process_targets(&page_task, update_task->file, valid_targets)) {
-                break;
-            }
+            CHECK_RESULT(dfu_file_process_targets(&page_task, update_task->file, valid_targets));
         }
 
-        if(!string_empty_p(update_task->manifest->firmware_dfu_image)) {
-            // TODO: work with FUS
-            update_task_set_progress(update_task, UpdateTaskStageRadioWrite, 0);
-            osDelay(4000);
-            update_task_set_progress(update_task, UpdateTaskStageRadioWrite, 100);
-            osDelay(1000);
-            update_task_set_progress(update_task, UpdateTaskStageRadioCommit, 0);
-            osDelay(4000);
-            update_task_set_progress(update_task, UpdateTaskStageRadioCommit, 100);
-        }
+        //if(!string_empty_p(update_task->manifest->firmware_dfu_image)) {
+        //    // TODO: work with FUS
+        //    update_task_set_progress(update_task, UpdateTaskStageRadioWrite, 0);
+        //    osDelay(4000);
+        //    update_task_set_progress(update_task, UpdateTaskStageRadioWrite, 100);
+        //    osDelay(1000);
+        //    update_task_set_progress(update_task, UpdateTaskStageRadioCommit, 0);
+        //    osDelay(4000);
+        //    update_task_set_progress(update_task, UpdateTaskStageRadioCommit, 100);
+        //}
 
         update_task_set_progress(update_task, UpdateTaskStageComplete, 100);
         success = true;
-    } while(0);
+    } while(false);
 
     if(!success) {
         update_task_set_progress(update_task, UpdateTaskStageError, update_task->state.progress);
-        return -1;
+        osDelay(15000);
+        //return -1;
     }
+
+    // TODO: move out of worker code?
+
+    furi_hal_rtc_reset_flag(FuriHalRtcFlagExecuteUpdate);
+    furi_hal_rtc_set_flag(FuriHalRtcFlagExecutePostUpdate);
+
+    osDelay(2000);
+    furi_hal_power_reset();
 
     //update_task_set_progress(update_task, UpdateTaskStageReadManifest, 50);
     //osDelay(400);

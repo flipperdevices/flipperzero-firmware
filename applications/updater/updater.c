@@ -87,9 +87,6 @@ void updater_free(Updater* updater) {
     updater->storage = NULL;
 
     //furi_thread_free(updater->scene_thread);
-
-    furi_record_close("menu");
-
     free(updater);
 }
 

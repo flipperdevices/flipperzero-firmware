@@ -26,8 +26,6 @@ typedef enum {
 } UpdaterEvent;
 
 typedef struct {
-    // Scene
-    FuriThread* updater_thread;
     // GUI
     Gui* gui;
     SceneManager* scene_manager;

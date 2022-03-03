@@ -59,6 +59,7 @@ extern void storage_on_system_start();
 extern void subghz_on_system_start();
 extern void power_on_system_start();
 extern void unit_tests_on_system_start();
+extern void updater_on_system_start();
 
 // Settings
 extern int32_t notification_settings_app(void* p);
@@ -209,6 +210,10 @@ const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
 
 #ifdef APP_UNIT_TESTS
     unit_tests_on_system_start,
+#endif
+
+#ifdef APP_UPDATE
+    updater_on_system_start,
 #endif
 };
 

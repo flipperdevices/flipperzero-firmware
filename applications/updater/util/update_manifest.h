@@ -8,6 +8,10 @@ extern "C" {
 #include <stdbool.h>
 #include <m-string.h>
 
+/* Paths don't include /ext -- because at startup SD card is mounted as root */
+#define UPDATE_DIR_DEFAULT_PATH "/update"
+#define UPDATE_MAINFEST_DEFAULT_PATH UPDATE_DIR_DEFAULT_PATH "/update.cfg"
+
 typedef struct {
     uint32_t target;
     string_t staged_loader_file;
@@ -24,7 +28,10 @@ void update_manifest_free(UpdateManifest* update_manifest);
 
 bool update_manifest_init(UpdateManifest* update_manifest, const char* manifest_filename);
 
-bool update_manifest_init_mem(UpdateManifest* update_manifest, const uint8_t* manifest_data, const uint16_t length);
+bool update_manifest_init_mem(
+    UpdateManifest* update_manifest,
+    const uint8_t* manifest_data,
+    const uint16_t length);
 
 #ifdef __cplusplus
 }
