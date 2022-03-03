@@ -128,3 +128,7 @@ C_SOURCES		+= $(wildcard $(LIB_DIR)/flipper_format/*.c)
 # Micro-ECC
 CFLAGS			+= -I$(LIB_DIR)/micro-ecc
 C_SOURCES		+= $(wildcard $(LIB_DIR)/micro-ecc/*.c)
+
+# microtar
+CFLAGS			+= -I$(LIB_DIR)/microtar/src
+C_SOURCES		+= $(wildcard $(LIB_DIR)/microtar/src/*.c)

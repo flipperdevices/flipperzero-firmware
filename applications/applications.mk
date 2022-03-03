@@ -41,6 +41,7 @@ APP_NFC		= 1
 APP_SUBGHZ	= 1
 APP_ABOUT	= 1
 APP_PASSPORT = 1
+APP_UPDATE  = 1
 
 # Plugins
 APP_MUSIC_PLAYER = 1
@@ -232,6 +233,11 @@ CFLAGS		+= -DAPP_IBUTTON
 SRV_GUI		= 1
 endif
 
+APP_UPDATE ?= 0
+ifeq ($(APP_UPDATE), 1)
+CFLAGS		+= -DAPP_UPDATE
+#SRV_GUI		= 1
+endif
 
 # Services
 # that will start with OS
