@@ -185,9 +185,7 @@ static bool
 
     //gen new key
     if(subghz_protocol_keeloq_gen_data(instance, btn)) {
-        //ToDo Update display data
-        // if(instance->common.callback)
-        //     instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
+        //ToDo if you need to add a callback to automatically update the data on the display
     } else {
         return false;
     }
