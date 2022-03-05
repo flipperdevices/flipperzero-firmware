@@ -11,7 +11,6 @@ struct SubGhzTransmitter {
     SubGhzProtocolEncoderBase* protocol_instance;
 };
 
-
 /**
  * Allocate and init SubGhzTransmitter.
  * @param environment Pointer to a SubGhzEnvironment instance

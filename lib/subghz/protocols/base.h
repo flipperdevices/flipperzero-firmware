@@ -53,7 +53,6 @@ bool subghz_protocol_decoder_base_serialize(
     uint32_t frequency,
     FuriHalSubGhzPreset preset);
 
-
 /**
  * Deserialize data SubGhzProtocolDecoderBase.
  * @param decoder_base Pointer to a SubGhzProtocolDecoderBase instance

@@ -27,7 +27,6 @@ struct SubGhzBlockGeneric {
  */
 bool subghz_block_generic_get_preset_name(FuriHalSubGhzPreset preset, string_t preset_str);
 
-
 /**
  * Serialize data SubGhzBlockGeneric.
  * @param instance Pointer to a SubGhzBlockGeneric instance
@@ -41,7 +40,6 @@ bool subghz_block_generic_serialize(
     FlipperFormat* flipper_format,
     uint32_t frequency,
     FuriHalSubGhzPreset preset);
-
 
 /**
  * Deserialize data SubGhzBlockGeneric.
