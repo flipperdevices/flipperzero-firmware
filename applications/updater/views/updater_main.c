@@ -32,9 +32,9 @@ void updater_main_model_set_state(
         main_view->view, (UpdaterProgressModel * model) {
             model->progress = progress;
             if(string_cmp_str(model->status, message)) {
-                model->rendered_progress = 101; // to force view update
+                model->rendered_progress = 101; /* to force view update */
+                string_set(model->status, message);
             }
-            string_set(model->status, message);
             if((model->rendered_progress > progress) ||
                ((progress - model->rendered_progress) > PROGRESS_RENDER_STEP)) {
                 model->rendered_progress = progress;

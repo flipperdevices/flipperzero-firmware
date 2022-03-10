@@ -8,6 +8,8 @@
 #include <cli/cli.h>
 #include <storage/storage.h>
 
+#include "../util/tar_archive.h"
+
 static void updater_cli_apply(Cli* cli, string_t args, void* context) {
     const char update_dir_path[] = "/ext" UPDATE_DIR_DEFAULT_PATH;
     const char update_manifest_path[] = "/ext" UPDATE_MAINFEST_DEFAULT_PATH;
@@ -72,12 +74,32 @@ static void updater_cli_apply(Cli* cli, string_t args, void* context) {
     update_manifest_free(manifest);
 }
 
+static void updater_cli_backup(Cli* cli, string_t args, void* context) {
+    printf("Backup\r\n");
+    Storage* storage = furi_record_open("storage");
+    bool success = storage_int_backup(storage, "/ext/backup.tar") == FSE_OK;
+    furi_record_close("storage");
+    printf("Result = %d\r\n", success);
+}
+
+static void updater_cli_restore(Cli* cli, string_t args, void* context) {
+    printf("Restore\r\n");
+    Storage* storage = furi_record_open("storage");
+    bool success = storage_int_restore(storage, "/ext/backup.tar") == FSE_OK;
+    furi_record_close("storage");
+    printf("Result = %d\r\n", success);
+}
+
 void updater_on_system_start() {
 #ifdef SRV_CLI
     Cli* cli = (Cli*)furi_record_open("cli");
     cli_add_command(cli, "update", CliCommandFlagDefault, updater_cli_apply, NULL);
+    cli_add_command(cli, "backup", CliCommandFlagDefault, updater_cli_backup, NULL);
+    cli_add_command(cli, "restore", CliCommandFlagDefault, updater_cli_restore, NULL);
     furi_record_close("cli");
 #else
     (void)&updater_cli_apply;
+    (void)&updater_cli_backup;
+    (void)&updater_cli_restore;
 #endif
 }
