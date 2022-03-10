@@ -250,7 +250,7 @@ static bool nfc_device_save_file(
         if(!flipper_format_write_header_cstr(file, nfc_file_header, nfc_file_version)) break;
         // Write nfc device type
         if(!flipper_format_write_comment_cstr(
-               file, "Nfc device type can be UID, Mifare Ultralight, Bank card"))
+               file, "Nfc device type can be UID, Mifare Ultralight, Bank card, NTAG215"))
             break;
         nfc_device_prepare_format_string(dev, temp_str);
         if(!flipper_format_write_string(file, "Device type", temp_str)) break;
