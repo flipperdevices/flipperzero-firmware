@@ -199,7 +199,7 @@ static bool ducky_altstring(const char* param) {
 
 static bool ducky_string(const char* param) {
     uint32_t i = 0;
-    while(param[i] != '\0') { // TODO:check for none
+    while(param[i] != '\0') {
         uint16_t keycode = HID_ASCII_TO_KEY(param[i]);
         if(keycode != KEY_NONE) {
             furi_hal_hid_kb_press(keycode);
