@@ -513,7 +513,7 @@ void furi_hal_subghz_rx() {
 }
 
 bool furi_hal_subghz_tx() {
-    if(furi_hal_subghz_regulation != SubGhzRegulationTxRx) return false;
+    //if(furi_hal_subghz_regulation != SubGhzRegulationTxRx) return false;
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_switch_to_tx(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
@@ -544,12 +544,6 @@ uint8_t furi_hal_subghz_get_lqi() {
 }
 
 bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
-    if(!(value >= 299999755 && value <= 348000335) &&
-       !(value >= 386999938 && value <= 464000000) &&
-       !(value >= 778999847 && value <= 928000000)) {
-        return false;
-    }
-
     return true;
 }
 
@@ -575,7 +569,7 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
     if(furi_hal_subghz_is_tx_allowed(value)) {
         furi_hal_subghz_regulation = SubGhzRegulationTxRx;
     } else {
-        furi_hal_subghz_regulation = SubGhzRegulationOnlyRx;
+        furi_hal_subghz_regulation = SubGhzRegulationTxRx;
     }
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
