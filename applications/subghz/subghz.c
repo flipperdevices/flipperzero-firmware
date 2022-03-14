@@ -32,7 +32,6 @@ const char* const subghz_frequencies_text[] = {
 const uint32_t subghz_frequencies[] = {
     300000000,
     315000000,
-    315000000,
     348000000,
 
     /* 387 - 464 */
@@ -40,12 +39,8 @@ const uint32_t subghz_frequencies[] = {
     387000000,
 
     433075000, /* LPD433 first */
-    433075000, /* LPD433 first */
-    433420000,
     433420000,
     433920000, /* LPD433 mid */
-    433920000, /* LPD433 mid */
-    434420000,
     434420000,
     434775000, /* LPD433 last channels */
     438900000,
@@ -55,17 +50,35 @@ const uint32_t subghz_frequencies[] = {
     779000000,
 
     868350000,
-    868350000,
-    915000000,
     915000000,
     925000000,
     928000000,
 };
 
 const uint32_t subghz_hopper_frequencies[] = {
+    300000000,
     315000000,
-    433920000,
+    348000000,
+
+    /* 387 - 464 */
+    /* 387 - 464 */
+    387000000,
+
+    433075000, /* LPD433 first */
+    433420000,
+    433920000, /* LPD433 mid */
+    434420000,
+    434775000, /* LPD433 last channels */
+    438900000,
+    464000000,
+    /* 779 - 928 */
+    /* 779 - 928 */
+    779000000,
+    
     868350000,
+    915000000,
+    925000000,
+    928000000,
 };
 
 const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(uint32_t);
