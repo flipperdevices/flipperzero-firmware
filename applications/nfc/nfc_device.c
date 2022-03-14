@@ -16,6 +16,7 @@ NfcDevice* nfc_device_alloc() {
 
 void nfc_device_free(NfcDevice* nfc_dev) {
     furi_assert(nfc_dev);
+    nfc_device_clear(nfc_dev);
     furi_record_close("storage");
     furi_record_close("dialogs");
     free(nfc_dev);
@@ -389,9 +390,16 @@ bool nfc_file_select(NfcDevice* dev) {
     return res;
 }
 
+void nfc_device_data_clear(NfcDeviceData* dev_data) {
+    if(dev_data->nfc_data.protocol == NfcDeviceProtocolMifareDesfire) {
+        mf_df_clear(&dev_data->mf_df_data);
+    }
+}
+
 void nfc_device_clear(NfcDevice* dev) {
     furi_assert(dev);
 
+    nfc_device_data_clear(&dev->dev_data);
     memset(&dev->dev_data, 0, sizeof(dev->dev_data));
     dev->format = NfcDeviceSaveFormatUid;
 }
