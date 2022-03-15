@@ -125,7 +125,7 @@ const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperA
 const FlipperApplication FLIPPER_APPS[] = {
 
 #ifdef APP_SUBGHZ
-    {.app = subghz_app, .name = "Sub-GHz Unlocked", .stack_size = 2048, .icon = &A_Sub1ghz_14},
+    {.app = subghz_app, .name = "Sub-GHz Turbo+", .stack_size = 2048, .icon = &A_Sub1ghz_14},
 #endif
 
 #ifdef APP_LF_RFID
