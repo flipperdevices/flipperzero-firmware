@@ -450,8 +450,7 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
                     break;
                 } else {
                     /* Save disconnect flag and continue reading buffer */
-                    osThreadFlagsSet(
-                        furi_thread_get_thread_id(session->thread), RpcEvtDisconnect);
+                    osThreadFlagsSet(furi_thread_get_thread_id(session->thread), RpcEvtDisconnect);
                 }
             } else if(flags & RpcEvtNewData) {
                 // Just wake thread up
@@ -648,7 +647,6 @@ void rpc_session_close(RpcSession* session) {
 }
 
 int32_t rpc_srv(void* p) {
-
     Rpc* rpc = malloc(sizeof(Rpc));
 
     rpc->busy_mutex = osMutexNew(NULL);
