@@ -151,8 +151,6 @@ static void rpc_system_gui_virtual_display_render_callback(Canvas* canvas, void*
     furi_assert(context);
 
     RpcGuiSystem* rpc_gui = context;
-    RpcSession* session = rpc_gui->session;
-    furi_assert(session);
 
     if(!rpc_gui->virtual_display_not_empty) {
         canvas_set_font(canvas, FontPrimary);
@@ -246,6 +244,8 @@ static void rpc_system_gui_virtual_display_frame_process(const PB_Main* request,
         buffer_size);
     rpc_gui->virtual_display_not_empty = true;
     view_port_update(rpc_gui->virtual_display_view_port);
+
+    (void)session;
 }
 
 void* rpc_system_gui_alloc(RpcSession* session) {

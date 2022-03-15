@@ -162,6 +162,8 @@ static void rpc_system_system_factory_reset_process(const PB_Main* request, void
 
     furi_hal_rtc_set_flag(FuriHalRtcFlagFactoryReset);
     power_reboot(PowerBootModeNormal);
+
+    (void)session;
 }
 
 static void
