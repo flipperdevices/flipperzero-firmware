@@ -5,6 +5,7 @@
 
 const char* const subghz_frequencies_text[] = {
     "300.00",
+    "303.88",
     "315.00",
     "318.00",
     "348.00",
@@ -36,6 +37,7 @@ const char* const subghz_frequencies_text[] = {
 
 const uint32_t subghz_frequencies[] = {
     300000000,
+    303875000,
     315000000,
     318000000,
     348000000,
@@ -67,6 +69,7 @@ const uint32_t subghz_frequencies[] = {
 
 const uint32_t subghz_hopper_frequencies[] = {
     300000000,
+    303875000,
     315000000,
     318000000,
     348000000,
