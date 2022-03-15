@@ -12,6 +12,10 @@
 #include <gui/scene_manager.h>
 #include <storage/storage.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     UpdaterViewMain,
     UpdaterViewComplete,
@@ -44,3 +48,7 @@ typedef struct {
 Updater* updater_alloc();
 
 void updater_free(Updater* updater);
+
+#ifdef __cplusplus
+}
+#endif

@@ -31,6 +31,7 @@ typedef enum {
     FuriHalRtcFlagLock = (1 << 2),
     FuriHalRtcFlagExecuteUpdate = (1 << 3),
     FuriHalRtcFlagExecutePostUpdate = (1 << 4),
+    FuriHalRtcFlagExecutePreUpdate = (1 << 5),
 } FuriHalRtcFlag;
 
 typedef enum {
@@ -41,6 +42,8 @@ typedef enum {
     FuriHalRtcRegisterLfsFingerprint,
     FuriHalRtcRegisterFaultData,
     FuriHalRtcRegisterPinFails,
+    /* Index of FS directory entry corresponding to FW update to be applied */
+    FuriHalRtcRegisterUpdateFolderFSIndex,
 } FuriHalRtcRegister;
 
 /** Initialize RTC subsystem */

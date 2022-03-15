@@ -12,6 +12,7 @@ typedef struct TarArchive TarArchive;
 typedef enum {
     TAR_OPEN_MODE_READ = 'r',
     TAR_OPEN_MODE_WRITE = 'w',
+    TAR_OPEN_MODE_STDOUT = 's' /* to be implemented */
 } TarOpenMode;
 
 TarArchive* tar_archive_alloc();
