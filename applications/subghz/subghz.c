@@ -18,6 +18,7 @@ const char* const subghz_frequencies_text[] = {
     "405.00",
     "406.00",
 
+    "418.00",
     "433.08",
     "433.42",
     "433.92",
@@ -47,6 +48,7 @@ const uint32_t subghz_frequencies[] = {
     405000000,
     406000000,
 
+    418000000,
     433075000, /* LPD433 first */
     433420000,
     433920000, /* LPD433 mid */
@@ -76,6 +78,7 @@ const uint32_t subghz_hopper_frequencies[] = {
     405000000,
     406000000,
 
+    418000000,
     433075000, /* LPD433 first */
     433420000,
     433920000, /* LPD433 mid */
