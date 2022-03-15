@@ -6,20 +6,12 @@
 const char* const subghz_frequencies_text[] = {
     "300.00",
     "303.88",
+    "304.25",
     "315.00",
     "318.00",
     "348.00",
     "387.00",
     "390.00",
-
-    // MICS
-    "401.00",
-    "402.00",
-    "403.00",
-    "404.00",
-    "405.00",
-    "406.00",
-
     "418.00",
     "433.08",
     "433.42",
@@ -38,20 +30,12 @@ const char* const subghz_frequencies_text[] = {
 const uint32_t subghz_frequencies[] = {
     300000000,
     303875000,
+    304250000,
     315000000,
     318000000,
     348000000,
     387000000,
     390000000,
-
-    // MICS
-    401000000,
-    402000000,
-    403000000,
-    404000000,
-    405000000,
-    406000000,
-
     418000000,
     433075000, /* LPD433 first */
     433420000,
@@ -70,20 +54,12 @@ const uint32_t subghz_frequencies[] = {
 const uint32_t subghz_hopper_frequencies[] = {
     300000000,
     303875000,
+    304250000,
     315000000,
     318000000,
     348000000,
     387000000,
     390000000,
-
-    // MICS
-    401000000,
-    402000000,
-    403000000,
-    404000000,
-    405000000,
-    406000000,
-
     418000000,
     433075000, /* LPD433 first */
     433420000,
@@ -103,7 +79,7 @@ const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(ui
 const uint32_t subghz_hopper_frequencies_count =
     sizeof(subghz_hopper_frequencies) / sizeof(uint32_t);
 
-const uint32_t subghz_frequencies_433_92 = 6;
+const uint32_t subghz_frequencies_433_92 = 0;
 
 bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
