@@ -68,7 +68,6 @@ static void rpc_system_system_device_info_callback(
     furi_assert(key);
     furi_assert(value);
     RpcSystemSystemDeviceInfoContext* ctx = context;
-    //TODO: session unlock
 
     char* str_key = strdup(key);
     char* str_value = strdup(value);
@@ -96,7 +95,6 @@ static void rpc_system_system_device_info_process(const PB_Main* request, void* 
         .session = session,
         .response = response,
     };
-    //TODO: session lock
     furi_hal_info_get(rpc_system_system_device_info_callback, &device_info_context);
 
     free(response);

@@ -170,16 +170,12 @@ static void test_rpc_session_close_callback(void* context) {
     furi_check(context);
     RpcSessionContext* callbacks_context = context;
 
-    FURI_LOG_E("", "close_cb");
-
     xSemaphoreGive(callbacks_context->close_session_semaphore);
 }
 
 static void test_rpc_session_terminated_callback(void* context) {
     furi_check(context);
     RpcSessionContext* callbacks_context = context;
-
-    FURI_LOG_E("", "term_cb");
 
     xSemaphoreGive(callbacks_context->terminate_semaphore);
 }
@@ -1438,7 +1434,7 @@ MU_TEST_SUITE(test_rpc_storage) {
     MU_RUN_TEST(test_storage_mkdir);
     MU_RUN_TEST(test_storage_md5sum);
     MU_RUN_TEST(test_storage_rename);
-    // TODO: repair test
+
     DISABLE_TEST(MU_RUN_TEST(test_storage_interrupt_continuous_same_system););
     MU_RUN_TEST(test_storage_interrupt_continuous_another_system);
 }
