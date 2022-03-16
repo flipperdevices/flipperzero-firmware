@@ -89,7 +89,7 @@ void nfc_cli_field(Cli* cli, string_t args) {
     furi_hal_nfc_exit_sleep();
     furi_hal_nfc_field_on();
 
-    printf("Field is on\r\n");
+    printf("Field is on. Don't leave device in this mode for too long.\r\n");
     printf("Press Ctrl+C to abort\r\n");
 
     while(!cli_cmd_interrupt_received(cli)) {
