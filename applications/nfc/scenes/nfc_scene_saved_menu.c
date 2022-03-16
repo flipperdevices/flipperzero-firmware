@@ -74,7 +74,11 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneDelete);
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);
+            if(nfc->dev->format == NfcDeviceSaveFormatMifareDesfire) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareDesfireSuccess);
+            } else {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);
+            }
             consumed = true;
         } else if(event.event == SubmenuIndexRestoreOriginal) {
             if(!nfc_device_restore(nfc->dev)) {
