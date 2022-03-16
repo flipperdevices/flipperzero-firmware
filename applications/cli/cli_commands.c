@@ -149,10 +149,10 @@ void cli_command_vibro(Cli* cli, string_t args, void* context) {
 void cli_command_debug(Cli* cli, string_t args, void* context) {
     if(!string_cmp(args, "0")) {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
-        cli_print_usage("Debug enabled.");
+        printf("Debug disabled.");
     } else if(!string_cmp(args, "1")) {
         furi_hal_rtc_set_flag(FuriHalRtcFlagDebug);
-        cli_print_usage("Debug disabled.");
+        printf("Debug enabled.");
     } else {
         cli_print_usage("debug", "<1|0>", string_get_cstr(args));
     }
