@@ -162,6 +162,9 @@ bool nfc_scene_device_info_on_event(void* context, SceneManagerEvent event) {
                     nfc->scene_manager, NfcSceneDeviceInfo, NfcSceneDeviceInfoData);
                 view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewBankCard);
                 consumed = true;
+            } else if(nfc->dev->format == NfcDeviceSaveFormatMifareDesfire) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareDesfireSuccess);
+                consumed = true;
             }
         } else if(state == NfcSceneDeviceInfoData && event.event == NfcCustomEventViewExit) {
             scene_manager_set_scene_state(

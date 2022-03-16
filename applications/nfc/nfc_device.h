@@ -34,6 +34,7 @@ typedef enum {
     NfcDeviceSaveFormatUid,
     NfcDeviceSaveFormatBankCard,
     NfcDeviceSaveFormatMifareUl,
+    NfcDeviceSaveFormatMifareDesfire,
 } NfcDeviceSaveFormat;
 
 typedef struct {

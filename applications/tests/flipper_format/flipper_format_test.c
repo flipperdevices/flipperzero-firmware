@@ -138,8 +138,7 @@ static bool test_read(const char* file_name) {
         if(!flipper_format_get_value_count(file, test_bool_key, &uint32_value)) break;
         if(uint32_value != COUNT_OF(test_bool_data)) break;
         if(!flipper_format_read_bool(file, test_bool_key, scratchpad, uint32_value)) break;
-        if(memcmp(scratchpad, test_bool_data, sizeof(bool) * COUNT_OF(test_bool_data)) != 0)
-            break;
+        if(memcmp(scratchpad, test_bool_data, sizeof(bool) * COUNT_OF(test_bool_data)) != 0) break;
 
         if(!flipper_format_get_value_count(file, test_hex_key, &uint32_value)) break;
         if(uint32_value != COUNT_OF(test_hex_data)) break;
