@@ -128,8 +128,10 @@ void cli_command_date(Cli* cli, string_t args, void* context) {
 void cli_command_log(Cli* cli, string_t args, void* context) {
     furi_stdglue_set_global_stdout_callback(cli_stdout_callback);
     printf("Press any key to stop...\r\n");
+    furi_log_set_puts((FuriLogPuts)printf);
     cli_getc(cli);
     furi_stdglue_set_global_stdout_callback(NULL);
+    furi_log_set_puts(furi_hal_console_puts);
 }
 
 void cli_command_vibro(Cli* cli, string_t args, void* context) {
