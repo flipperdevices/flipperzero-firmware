@@ -19,7 +19,7 @@ const char* const subghz_frequencies_text[] = {
     "434.42",
     "434.78",
     "438.90",
-    
+
     "868.35",
     "915.00",
     "925.00",
