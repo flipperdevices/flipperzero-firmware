@@ -34,6 +34,16 @@ void power_cli_5v(Cli* cli, string_t args) {
     }
 }
 
+void power_cli_3v3(Cli* cli, string_t args) {
+    if(!string_cmp(args, "0")) {
+        furi_hal_power_disable_external_3_3v();
+    } else if(!string_cmp(args, "1")) {
+        furi_hal_power_enable_external_3_3v();
+    } else {
+        cli_print_usage("power_ext", "<1|0>", string_get_cstr(args));
+    }
+}
+
 static void power_cli_command_print_usage() {
     printf("Usage:\r\n");
     printf("power <cmd> <args>\r\n");
@@ -44,6 +54,9 @@ static void power_cli_command_print_usage() {
     printf("\treboot2dfu\t - reboot to dfu bootloader\r\n");
     printf("\tdebug\t - show debug information\r\n");
     printf("\t5v <0 or 1>\t - enable or disable 5v ext\r\n");
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) { 
+        printf("\t3v3 <0 or 1>\t - enable or disable 3v3 ext\r\n");
+    }
 }
 
 void power_cli(Cli* cli, string_t args, void* context) {
@@ -79,6 +92,13 @@ void power_cli(Cli* cli, string_t args, void* context) {
         if(string_cmp_str(cmd, "5v") == 0) {
             power_cli_5v(cli, args);
             break;
+        }
+
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) { 
+            if(string_cmp_str(cmd, "3v3") == 0) {
+                power_cli_3v3(cli, args);
+                break;
+            }
         }
 
         power_cli_command_print_usage();
