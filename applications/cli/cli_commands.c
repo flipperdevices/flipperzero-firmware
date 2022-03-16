@@ -146,6 +146,18 @@ void cli_command_vibro(Cli* cli, string_t args, void* context) {
     }
 }
 
+void cli_command_debug(Cli* cli, string_t args, void* context) {
+    if(!string_cmp(args, "0")) {
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
+        cli_print_usage("Debug enabled.");
+    } else if(!string_cmp(args, "1")) {
+        furi_hal_rtc_set_flag(FuriHalRtcFlagDebug);
+        cli_print_usage("Debug disabled.");
+    } else {
+        cli_print_usage("debug", "<1|0>", string_get_cstr(args));
+    }
+}
+
 void cli_command_led(Cli* cli, string_t args, void* context) {
     // Get first word as light name
     NotificationMessage notification_led_message;
@@ -348,6 +360,7 @@ void cli_commands_init(Cli* cli) {
 
     cli_add_command(cli, "date", CliCommandFlagParallelSafe, cli_command_date, NULL);
     cli_add_command(cli, "log", CliCommandFlagParallelSafe, cli_command_log, NULL);
+    cli_add_command(cli, "debug", CliCommandFlagDefault, cli_command_debug, NULL);
     cli_add_command(cli, "ps", CliCommandFlagParallelSafe, cli_command_ps, NULL);
     cli_add_command(cli, "free", CliCommandFlagParallelSafe, cli_command_free, NULL);
     cli_add_command(cli, "free_blocks", CliCommandFlagParallelSafe, cli_command_free_blocks, NULL);
