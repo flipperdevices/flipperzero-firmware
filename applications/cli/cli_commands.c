@@ -5,6 +5,7 @@
 #include <task_control_block.h>
 #include <time.h>
 #include <notification/notification_messages.h>
+#include <loader/loader.h>
 
 // Close to ISO, `date +'%Y-%m-%d %H:%M:%S %u'`
 #define CLI_DATE_FORMAT "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %d"
@@ -149,9 +150,11 @@ void cli_command_vibro(Cli* cli, string_t args, void* context) {
 void cli_command_debug(Cli* cli, string_t args, void* context) {
     if(!string_cmp(args, "0")) {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
+        loader_update_menu();
         printf("Debug disabled.");
     } else if(!string_cmp(args, "1")) {
         furi_hal_rtc_set_flag(FuriHalRtcFlagDebug);
+        loader_update_menu();
         printf("Debug enabled.");
     } else {
         cli_print_usage("debug", "<1|0>", string_get_cstr(args));
