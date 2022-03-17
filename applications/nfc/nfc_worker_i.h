@@ -18,6 +18,8 @@
 
 struct NfcWorker {
     FuriThread* thread;
+    Storage* storage;
+    File* dict_file;
 
     NfcDeviceData* dev_data;
 
@@ -45,4 +47,8 @@ void nfc_worker_field(NfcWorker* nfc_worker);
 
 void nfc_worker_read_mifare_ul(NfcWorker* nfc_worker);
 
+void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker);
+
 void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker);
+
+void nfc_worker_emulate_mifare_classic(NfcWorker* nfc_worker);
