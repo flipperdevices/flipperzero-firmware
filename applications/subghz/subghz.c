@@ -6,8 +6,9 @@
 const char* const subghz_frequencies_text[] = {
     "300.00",
     "303.88",
-    "310.00",
     "304.25",
+    "310.00",
+    "313.85",
     "315.00",
     "318.00",
     "348.00",
@@ -31,8 +32,9 @@ const char* const subghz_frequencies_text[] = {
 const uint32_t subghz_frequencies[] = {
     300000000,
     303875000,
-    310000000,
     304250000,
+    310000000,
+    313850000, /* 2007 Honda Key */
     315000000,
     318000000,
     348000000,
@@ -56,8 +58,9 @@ const uint32_t subghz_frequencies[] = {
 const uint32_t subghz_hopper_frequencies[] = {
     300000000,
     303875000,
-    310000000,
     304250000,
+    310000000,
+    313850000, /* 2007 Honda Key */
     315000000,
     318000000,
     348000000,
@@ -82,7 +85,7 @@ const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(ui
 const uint32_t subghz_hopper_frequencies_count =
     sizeof(subghz_hopper_frequencies) / sizeof(uint32_t);
 
-const uint32_t subghz_frequencies_433_92 = 12;
+const uint32_t subghz_frequencies_433_92 = 13;
 
 bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
