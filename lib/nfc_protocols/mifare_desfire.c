@@ -4,6 +4,14 @@
 
 void mf_df_clear(MifareDesfireData* data) {
     free(data->free_memory);
+    if(data->master_key_settings) {
+        MifareDesfireKeyVersion* key_version = data->master_key_settings->key_version_head;
+        while(key_version) {
+            MifareDesfireKeyVersion* next_key_version = key_version->next;
+            free(key_version);
+            key_version = next_key_version;
+        }
+    }
     free(data->master_key_settings);
     MifareDesfireApplication* app = data->app_head;
     while(app) {
