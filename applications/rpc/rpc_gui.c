@@ -35,9 +35,8 @@ static void
 
     RpcGuiSystem* rpc_gui = (RpcGuiSystem*)context;
     uint8_t* buffer = rpc_gui->transmit_frame->content.gui_screen_frame.data->bytes;
-    size_t buffer_size = rpc_gui->transmit_frame->content.gui_screen_frame.data->size;
 
-    furi_assert(size == buffer_size);
+    furi_assert(size == rpc_gui->transmit_frame->content.gui_screen_frame.data->size);
 
     memcpy(buffer, data, size);
 

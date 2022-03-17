@@ -448,9 +448,12 @@ Gui* gui_alloc() {
     }
     // Drawing canvas
     gui->canvas = canvas_init();
+    CanvasCallbackPairArray_init(gui->canvas_callback_pair);
+
     // Input
     gui->input_queue = osMessageQueueNew(8, sizeof(InputEvent), NULL);
     gui->input_events = furi_record_open("input_events");
+
     furi_check(gui->input_events);
     furi_pubsub_subscribe(gui->input_events, gui_input_events_callback, gui);
 
