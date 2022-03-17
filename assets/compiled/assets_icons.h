@@ -108,6 +108,7 @@ extern const Icon A_Sub1ghz_14;
 extern const Icon A_Tamagotchi_14;
 extern const Icon A_U2F_14;
 extern const Icon A_iButton_14;
+extern const Icon I_MuddledBox_128x52;
 extern const Icon I_Detailed_chip_17x13;
 extern const Icon I_Medium_chip_22x21;
 extern const Icon I_Pin_arrow_down_7x9;
