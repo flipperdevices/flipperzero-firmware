@@ -28,6 +28,16 @@ void nfc_scene_mifare_desfire_app_on_enter(void* context) {
     Submenu* submenu = nfc->submenu;
     MifareDesfireApplication* app = nfc_scene_mifare_desfire_app_get_app(nfc);
     if(!app) {
+        popup_set_icon(nfc->popup, 5, 5, &I_WarningDolphin_45x42);
+        popup_set_header(nfc->popup, "Internal Error!", 55, 12, AlignLeft, AlignBottom);
+        popup_set_text(
+            nfc->popup,
+            "No app selected.\nThis should\nnever happen,\nplease file a bug.",
+            55,
+            15,
+            AlignLeft,
+            AlignTop);
+        view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
         FURI_LOG_E(TAG, "Bad state. No app selected?");
         return;
     }
