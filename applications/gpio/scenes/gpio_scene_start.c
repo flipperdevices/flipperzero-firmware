@@ -86,7 +86,11 @@ bool gpio_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(app->scene_manager, GpioSceneTest);
         } else if(event.event == GpioStartEventUsbUart) {
             scene_manager_set_scene_state(app->scene_manager, GpioSceneStart, GpioItemUsbUart);
-            scene_manager_next_scene(app->scene_manager, GpioSceneUsbUart);
+            if(usb_uart_is_usb_unlocked()) {
+                scene_manager_next_scene(app->scene_manager, GpioSceneUsbUart);
+            } else {
+                scene_manager_next_scene(app->scene_manager, GpioSceneUsbUartCloseRpc);
+            }
         }
         consumed = true;
     }

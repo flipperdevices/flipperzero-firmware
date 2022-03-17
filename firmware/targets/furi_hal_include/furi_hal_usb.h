@@ -41,14 +41,23 @@ void furi_hal_usb_init();
 /** Set USB device configuration
  *
  * @param      mode new USB device mode
+ * @return     true - mode switch started, false - mode switch is locked
  */
-void furi_hal_usb_set_config(FuriHalUsbInterface* new_if);
+bool furi_hal_usb_set_config(FuriHalUsbInterface* new_if);
 
 /** Get USB device configuration
  *
  * @return    current USB device mode
  */
 FuriHalUsbInterface* furi_hal_usb_get_config();
+
+/** Lock USB device mode switch
+ */
+void furi_hal_usb_lock();
+
+/** Unlock USB device mode switch
+ */
+void furi_hal_usb_unlock();
 
 /** Disable USB device
  */

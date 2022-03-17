@@ -1,7 +1,7 @@
 #include "../bad_usb_app_i.h"
 
 typedef enum {
-    SubghzCustomEventErrorBack,
+    BadUsbCustomEventErrorBack,
 } BadUsbCustomEvent;
 
 static void
@@ -10,7 +10,7 @@ static void
     BadUsbApp* app = context;
 
     if((result == GuiButtonTypeLeft) && (type == InputTypeShort)) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, SubghzCustomEventErrorBack);
+        view_dispatcher_send_custom_event(app->view_dispatcher, BadUsbCustomEventErrorBack);
     }
 }
 
@@ -39,7 +39,7 @@ bool bad_usb_scene_error_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubghzCustomEventErrorBack) {
+        if(event.event == BadUsbCustomEventErrorBack) {
             view_dispatcher_stop(app->view_dispatcher);
             consumed = true;
         }

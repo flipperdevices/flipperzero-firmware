@@ -16,6 +16,8 @@ typedef struct {
     osTimerId_t tmr;
     bool enabled;
     bool connected;
+    bool mode_lock;
+    osMutexId_t lock_mutex;
     FuriHalUsbInterface* if_cur;
     FuriHalUsbInterface* if_next;
     FuriHalUsbStateCallback callback;
@@ -79,6 +81,8 @@ void furi_hal_usb_init(void) {
     HAL_NVIC_SetPriority(USB_LP_IRQn, 5, 0);
     NVIC_EnableIRQ(USB_LP_IRQn);
 
+    usb.lock_mutex = osMutexNew(NULL);
+
     usb.thread = furi_thread_alloc();
     furi_thread_set_name(usb.thread, "UsbDriver");
     furi_thread_set_stack_size(usb.thread, 1024);
@@ -88,18 +92,39 @@ void furi_hal_usb_init(void) {
     FURI_LOG_I(TAG, "Init OK");
 }
 
-void furi_hal_usb_set_config(FuriHalUsbInterface* new_if) {
+bool furi_hal_usb_set_config(FuriHalUsbInterface* new_if) {
+    if(usb.mode_lock) {
+        return false;
+    }
+
     usb.if_next = new_if;
     if(usb.thread == NULL) {
         // Service thread hasn't started yet, so just save interface mode
-        return;
+        return true;
     }
     furi_assert(usb.thread);
     osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventModeChange);
+    return true;
 }
 
 FuriHalUsbInterface* furi_hal_usb_get_config() {
     return usb.if_cur;
+}
+
+void furi_hal_usb_lock() {
+    furi_assert(usb.lock_mutex);
+    FURI_LOG_I(TAG, "Mode lock");
+    osMutexAcquire(usb.lock_mutex, osWaitForever);
+    usb.mode_lock = true;
+    osMutexRelease(usb.lock_mutex);
+}
+
+void furi_hal_usb_unlock() {
+    furi_assert(usb.lock_mutex);
+    FURI_LOG_I(TAG, "Mode unlock");
+    osMutexAcquire(usb.lock_mutex, osWaitForever);
+    usb.mode_lock = false;
+    osMutexRelease(usb.lock_mutex);
 }
 
 void furi_hal_usb_disable() {
@@ -108,6 +133,7 @@ void furi_hal_usb_disable() {
 }
 
 void furi_hal_usb_enable() {
+    furi_assert(usb.thread);
     osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventEnable);
 }
 

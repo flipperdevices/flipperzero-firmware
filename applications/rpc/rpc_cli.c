@@ -29,9 +29,11 @@ static void rpc_session_close_callback(void* context) {
 void rpc_cli_command_start_session(Cli* cli, string_t args, void* context) {
     Rpc* rpc = context;
 
+    furi_hal_usb_lock();
     RpcSession* rpc_session = rpc_session_open(rpc);
     if(rpc_session == NULL) {
         printf("Session start error\r\n");
+        furi_hal_usb_unlock();
         return;
     }
 
@@ -58,4 +60,5 @@ void rpc_cli_command_start_session(Cli* cli, string_t args, void* context) {
 
     rpc_session_close(rpc_session);
     free(buffer);
+    furi_hal_usb_unlock();
 }

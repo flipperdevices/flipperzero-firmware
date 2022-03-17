@@ -116,7 +116,8 @@ void bad_usb_app_free(BadUsbApp* app) {
 
 int32_t bad_usb_app(void* p) {
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
-    furi_hal_usb_set_config(&usb_hid);
+    furi_hal_usb_unlock();
+    furi_check(furi_hal_usb_set_config(&usb_hid) == true);
 
     BadUsbApp* bad_usb_app = bad_usb_app_alloc((char*)p);
 
