@@ -86,6 +86,7 @@ const uint32_t subghz_hopper_frequencies_count =
     sizeof(subghz_hopper_frequencies) / sizeof(uint32_t);
 
 const uint32_t subghz_frequencies_433_92 = 13;
+const uint32_t subghz_frequencies_315_00 = 5;
 
 bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -224,7 +225,7 @@ SubGhz* subghz_alloc() {
         subghz->txrx->environment, "/ext/subghz/assets/came_atomo");
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
         subghz->txrx->environment, "/ext/subghz/assets/nice_flor_s");
-    subghz->txrx->receiver = subghz_receiver_alloc(subghz->txrx->environment);
+    subghz->txrx->receiver = subghz_receiver_alloc_init(subghz->txrx->environment);
     subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_Decodable);
 
     subghz_worker_set_overrun_callback(
