@@ -4,13 +4,15 @@
 #include <lib/toolbox/path.h>
 
 const char* const subghz_frequencies_text[] = {
-
     "300.00",
     "303.88",
     "304.25",
+    "310.00",
+    "313.85",
     "315.00",
     "318.00",
-
+    "348.00",
+    "387.00",
     "390.00",
     "418.00",
     "433.08",
@@ -19,22 +21,24 @@ const char* const subghz_frequencies_text[] = {
     "434.42",
     "434.78",
     "438.90",
-
+    "464.00",
+    "779.00",
     "868.35",
     "915.00",
     "925.00",
+    "928.00",
 };
 
 const uint32_t subghz_frequencies[] = {
-
-    /* 300 - 348 */
     300000000,
     303875000,
     304250000,
+    310000000,
+    313850000, /* 2007 Honda Key */
     315000000,
     318000000,
-
-    /* 387 - 464 */
+    348000000,
+    387000000,
     390000000,
     418000000,
     433075000, /* LPD433 first */
@@ -43,27 +47,46 @@ const uint32_t subghz_frequencies[] = {
     434420000,
     434775000, /* LPD433 last channels */
     438900000,
-
-    /* 779 - 928 */
+    464000000,
+    779000000,
     868350000,
     915000000,
     925000000,
-
+    928000000,
 };
 
 const uint32_t subghz_hopper_frequencies[] = {
+    300000000,
+    303875000,
+    304250000,
+    310000000,
+    313850000, /* 2007 Honda Key */
     315000000,
     318000000,
+    348000000,
+    387000000,
     390000000,
-    433920000,
+    418000000,
+    433075000, /* LPD433 first */
+    433420000,
+    433920000, /* LPD433 mid */
+    434420000,
+    434775000, /* LPD433 last channels */
+    438900000,
+    464000000,
+    779000000,
     868350000,
+    915000000,
+    925000000,
+    928000000,
 };
 
 const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(uint32_t);
 const uint32_t subghz_hopper_frequencies_count =
     sizeof(subghz_hopper_frequencies) / sizeof(uint32_t);
-const uint32_t subghz_frequencies_433_92 = 9;
-const uint32_t subghz_frequencies_315_00 = 3;
+
+const uint32_t subghz_frequencies_433_92 = 13;
+const uint32_t subghz_frequencies_315_00 = 5;
 
 bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);

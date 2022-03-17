@@ -25,6 +25,33 @@ static DialogMessageButton product_screen(DialogsApp* dialogs, DialogMessage* me
     return result;
 }
 
+static DialogMessageButton muddled_logo_screen(DialogsApp* dialogs, DialogMessage* message) {
+    DialogMessageButton result;
+
+    dialog_message_set_icon(message, &I_MuddledBox_128x52, 0, 0);
+    result = dialog_message_show(dialogs, message);
+    dialog_message_set_icon(message, NULL, 0, 0);
+
+    return result;
+}
+
+static DialogMessageButton muddled_info_screen(DialogsApp* dialogs, DialogMessage* message) {
+    DialogMessageButton result;
+
+    const char* screen_header = "MuddledBox Edition\n"
+                                "Unlocks TX Globally!\n";
+    const char* screen_text = "Please do not abuse for illegal\n"
+                              "activities or I will find you!";
+
+    dialog_message_set_header(message, screen_header, 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_text(message, screen_text, 0, 26, AlignLeft, AlignTop);
+    result = dialog_message_show(dialogs, message);
+    dialog_message_set_header(message, NULL, 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_text(message, NULL, 0, 0, AlignLeft, AlignTop);
+
+    return result;
+}
+
 static DialogMessageButton address_screen(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
 
@@ -166,6 +193,8 @@ static DialogMessageButton bootloader_version_screen(DialogsApp* dialogs, Dialog
 }
 
 const AboutDialogScreen about_screens[] = {
+    muddled_logo_screen,
+    muddled_info_screen,
     product_screen,
     compliance_screen,
     address_screen,
