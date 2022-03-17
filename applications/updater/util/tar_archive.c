@@ -8,6 +8,9 @@
 #define MAX_NAME_LEN 255
 #define FILE_BLOCK_SIZE 512
 
+#define FILE_OPEN_NTRIES 10
+#define FILE_OPEN_RETRY_DELAY 25
+
 typedef struct TarArchive {
     Storage* storage;
     mtar_t tar;
@@ -160,8 +163,17 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
     uint8_t* readbuf = malloc(TAR_READ_BUF_SZ);
 
     bool failed = false;
+    uint8_t n_tries = FILE_OPEN_NTRIES;
     do {
-        if(!storage_file_open(out_file, string_get_cstr(fname), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        while(
+            (n_tries-- > 0) &&
+            !storage_file_open(out_file, string_get_cstr(fname), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+            FURI_LOG_W(TAG, "Failed to open '%s', reties: %d", string_get_cstr(fname), n_tries);
+            osDelay(FILE_OPEN_RETRY_DELAY);
+            continue;
+        }
+
+        if(!storage_file_is_open(out_file)) {
             failed = true;
             break;
         }
@@ -187,6 +199,9 @@ bool tar_archive_unpack_to(TarArchive* archive, const char* destination) {
         .archive = archive,
         .work_dir = destination,
     };
+
+    FURI_LOG_I(TAG, "Restoring '%s'", destination);
+
     return (mtar_foreach(&archive->tar, archive_extract_foreach_cb, &param) == MTAR_ESUCCESS);
 };
 
@@ -199,8 +214,16 @@ bool tar_archive_add_file(
     uint8_t* file_buffer = malloc(FILE_BLOCK_SIZE);
     bool success = false;
     File* src_file = storage_file_alloc(archive->storage);
+    uint8_t n_tries = FILE_OPEN_NTRIES;
     do {
-        if(!storage_file_open(src_file, fs_file_path, FSAM_READ, FSOM_OPEN_EXISTING) ||
+        while((n_tries-- > 0) &&
+              !storage_file_open(src_file, fs_file_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+            FURI_LOG_W(TAG, "Failed to open '%s', reties: %d", fs_file_path, n_tries);
+            osDelay(FILE_OPEN_RETRY_DELAY);
+            continue;
+        }
+
+        if(!storage_file_is_open(src_file) ||
            !tar_archive_file_add_header(archive, archive_fname, file_size)) {
             break;
         }
@@ -221,14 +244,14 @@ bool tar_archive_add_file(
     return success;
 }
 
-bool
-    tar_archive_add_dir(TarArchive* archive, const char* fs_full_path, const char* path_prefix) {
+bool tar_archive_add_dir(TarArchive* archive, const char* fs_full_path, const char* path_prefix) {
     furi_assert(archive);
     furi_check(path_prefix);
     File* directory = storage_file_alloc(archive->storage);
     FileInfo file_info;
-    char* name = malloc(MAX_NAME_LEN);
 
+    FURI_LOG_I(TAG, "Backing up '%s', '%s'", fs_full_path, path_prefix);
+    char* name = malloc(MAX_NAME_LEN);
     bool success = false;
 
     do {

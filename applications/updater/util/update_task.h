@@ -19,6 +19,8 @@ typedef enum {
     UpdateTaskStageFlashValidate,
     UpdateTaskStageRadioWrite,
     UpdateTaskStageRadioCommit,
+    UpdateTaskStageLfsBackup,
+    UpdateTaskStageLfsRestore,
     UpdateTaskStageComplete,
     UpdateTaskStageError,
 } UpdateTaskStage;

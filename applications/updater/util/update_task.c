@@ -1,5 +1,6 @@
 #include "update_task.h"
 #include "dfu_file.h"
+#include "lfs_backup.h"
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -25,11 +26,14 @@ static const char* update_task_stage_descr[] = {
     [UpdateTaskStageFlashValidate] = "Validating",
     [UpdateTaskStageRadioWrite] = "Writing radio stack",
     [UpdateTaskStageRadioCommit] = "Applying radio stack",
+    [UpdateTaskStageLfsBackup] = "Backing up LFS",
+    [UpdateTaskStageLfsRestore] = "Restoring LFS",
     [UpdateTaskStageComplete] = "Complete",
     [UpdateTaskStageError] = "Error",
 };
 
-static int32_t update_task_worker(void* context);
+static int32_t update_task_worker_ram(void* context);
+static int32_t update_task_worker_flash(void* context);
 
 static void update_task_set_status(UpdateTask* update_task, const char* status) {
     if(!status) {
@@ -113,7 +117,13 @@ UpdateTask* update_task_alloc() {
     furi_thread_set_name(thread, "UpdateWorker");
     furi_thread_set_stack_size(thread, 2048);
     furi_thread_set_context(thread, update_task);
-    furi_thread_set_callback(thread, update_task_worker);
+#ifdef FURI_RAM_EXEC
+    (void)update_task_worker_flash;
+    furi_thread_set_callback(thread, update_task_worker_ram);
+#else
+    (void)update_task_worker_ram;
+    furi_thread_set_callback(thread, update_task_worker_flash);
+#endif
 
     return update_task;
 }
@@ -235,7 +245,7 @@ static bool validate_main_fw_address(const size_t address) {
     return check_address_boundaries(address, false);
 }
 
-static int32_t update_task_worker(void* context) {
+static int32_t update_task_worker_ram(void* context) {
     furi_assert(context);
     UpdateTask* update_task = context;
     bool success = false;
@@ -297,6 +307,44 @@ static int32_t update_task_worker(void* context) {
 
     furi_hal_rtc_reset_flag(FuriHalRtcFlagExecuteUpdate);
     furi_hal_rtc_set_flag(FuriHalRtcFlagExecutePostUpdate);
+
+    osDelay(2000);
+    furi_hal_power_reset();
+
+    //update_task_set_progress(update_task, UpdateTaskStageReadManifest, 50);
+    //osDelay(400);
+    return 0;
+}
+
+static int32_t update_task_worker_flash(void* context) {
+    furi_assert(context);
+    UpdateTask* update_task = context;
+    bool success = false;
+
+    do {
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePreUpdate)) {
+            update_task_set_progress(update_task, UpdateTaskStageLfsBackup, 0);
+            furi_hal_rtc_reset_flag(FuriHalRtcFlagExecutePreUpdate);
+            if((success = lfs_backup_create())) {
+                furi_hal_rtc_set_flag(FuriHalRtcFlagExecuteUpdate);
+            }
+
+        } else if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePostUpdate)) {
+            update_task_set_progress(update_task, UpdateTaskStageLfsRestore, 0);
+            furi_hal_rtc_reset_flag(FuriHalRtcFlagExecutePostUpdate);
+            success = lfs_backup_unpack();
+        }
+
+        update_task_set_progress(update_task, UpdateTaskStageComplete, 100);
+        success = true;
+    } while(false);
+
+    if(!success) {
+        update_task_set_progress(update_task, UpdateTaskStageError, update_task->state.progress);
+        osDelay(15000);
+        //return -1;
+    }
+
 
     osDelay(2000);
     furi_hal_power_reset();

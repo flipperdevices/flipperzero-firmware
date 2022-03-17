@@ -133,6 +133,17 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 
 const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperApplication);
 
+const FlipperApplication FLIPPER_SYSTEM_APPS[] = {
+#ifdef APP_UPDATER
+#ifdef SRV_UPDATER
+#error APP_UPDATER and SRV_UPDATER are mutually exclusive!
+#endif
+    {.app = updater_srv, .name = "UpdaterApp", .stack_size = 1024, .icon = NULL},
+#endif
+};
+
+const size_t FLIPPER_SYSTEM_APPS_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperApplication);
+
 // Main menu APP
 const FlipperApplication FLIPPER_APPS[] = {
 
@@ -212,7 +223,7 @@ const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
     unit_tests_on_system_start,
 #endif
 
-#ifdef APP_UPDATE
+#ifdef APP_UPDATER
     updater_on_system_start,
 #endif
 };

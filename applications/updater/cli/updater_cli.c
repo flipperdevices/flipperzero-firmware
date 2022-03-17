@@ -9,6 +9,8 @@
 #include <storage/storage.h>
 
 #include "../util/tar_archive.h"
+#include <loader/loader.h>
+#include "../util/lfs_backup.h"
 
 static void updater_cli_apply(Cli* cli, string_t args, void* context) {
     const char update_dir_path[] = "/ext" UPDATE_DIR_DEFAULT_PATH;
@@ -68,7 +70,8 @@ static void updater_cli_apply(Cli* cli, string_t args, void* context) {
 
         printf("OK.\r\nRestarting to apply update. BRB\r\n");
         osDelay(1000);
-        furi_hal_rtc_set_flag(FuriHalRtcFlagExecuteUpdate);
+        //furi_hal_rtc_set_flag(FuriHalRtcFlagExecuteUpdate);
+        furi_hal_rtc_set_flag(FuriHalRtcFlagExecutePreUpdate);
         furi_hal_power_reset();
     }
     update_manifest_free(manifest);
@@ -76,18 +79,39 @@ static void updater_cli_apply(Cli* cli, string_t args, void* context) {
 
 static void updater_cli_backup(Cli* cli, string_t args, void* context) {
     printf("Backup\r\n");
-    Storage* storage = furi_record_open("storage");
-    bool success = storage_int_backup(storage, "/ext/backup.tar") == FSE_OK;
-    furi_record_close("storage");
+    bool success = lfs_backup_unpack();
     printf("Result = %d\r\n", success);
 }
 
 static void updater_cli_restore(Cli* cli, string_t args, void* context) {
     printf("Restore\r\n");
-    Storage* storage = furi_record_open("storage");
-    bool success = storage_int_restore(storage, "/ext/backup.tar") == FSE_OK;
-    furi_record_close("storage");
+    bool success = lfs_backup_unpack();
     printf("Result = %d\r\n", success);
+}
+
+static int32_t updater_spawner_thread_worker(void* arg) {
+    Loader* loader = furi_record_open("loader");
+    loader_start(loader, "UpdaterApp", NULL);
+    furi_record_close("loader");
+    return 0;
+}
+
+static void updater_start_app() {
+    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePreUpdate) &&
+       !furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePostUpdate)) {
+        return;
+    }
+
+    /* We need to spawn a separate thread, because these callbacks are executed 
+     * inside loader process, at startup. 
+     * So, accessing its record would cause a deadlock 
+     */
+    FuriThread* thread = furi_thread_alloc();
+
+    furi_thread_set_name(thread, "UpdateAppSpawner");
+    furi_thread_set_stack_size(thread, 2048);
+    furi_thread_set_callback(thread, updater_spawner_thread_worker);
+    furi_thread_start(thread);
 }
 
 void updater_on_system_start() {
@@ -101,5 +125,10 @@ void updater_on_system_start() {
     (void)&updater_cli_apply;
     (void)&updater_cli_backup;
     (void)&updater_cli_restore;
+#endif
+#ifndef FURI_RAM_EXEC
+    updater_start_app();
+#else
+    (void)updater_start_app;
 #endif
 }
