@@ -892,7 +892,7 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
                     continue;
                 }
                 if(!mf_df_parse_read_data_response(rx_buff, rx_len, file)) {
-                    FURI_LOG_W(TAG, "Bad response reading file %d\r\n", file->id);
+                    FURI_LOG_W(TAG, "Bad response reading file %d", file->id);
                     continue;
                 }
             }
