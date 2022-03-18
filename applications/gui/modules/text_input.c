@@ -263,7 +263,7 @@ static void text_input_handle_up(TextInput* text_input) {
                 if(model->selected_column > get_row_size(model->selected_row) - 6) {
                     model->selected_column = model->selected_column + 1;
                 }
-            }
+            } 
             return true;
         });
 }
@@ -305,11 +305,15 @@ static void text_input_handle_right(TextInput* text_input) {
         });
 }
 
-static void text_input_handle_ok(TextInput* text_input) {
+static void text_input_handle_ok(TextInput* text_input, bool shift) {
     with_view_model(
         text_input->view, (TextInputModel * model) {
             char selected = get_selected_char(model);
             uint8_t text_length = strlen(model->text_buffer);
+
+            if (shift) {
+                selected = char_to_uppercase(selected);
+            }
 
             if(selected == ENTER_KEY) {
                 if(model->validator_callback && (!model->validator_callback(
@@ -372,14 +376,14 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
             consumed = true;
             break;
         case InputKeyOk:
-            text_input_handle_ok(text_input);
+            text_input_handle_ok(text_input, false);
             consumed = true;
             break;
         default:
             break;
         }
-    }
-
+    } 
+    
     if((event->type == InputTypeLong || event->type == InputTypeRepeat) &&
        event->key == InputKeyBack) {
         with_view_model(
@@ -393,6 +397,29 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
             });
 
         consumed = true;
+    }
+
+    // Allow shift key on long press
+    if (event->type == InputTypeLong && event->key == InputKeyOk) {
+        with_view_model(
+            text_input->view, (TextInputModel * model) {
+                if(model->valadator_message_visible) {
+                    if(event->key == InputKeyBack) {
+                        consumed = true;
+                    }
+                }
+                model->valadator_message_visible = false;
+                return false;
+            });
+
+        switch(event->key) {
+        case InputKeyOk:
+            text_input_handle_ok(text_input, true);
+            consumed = true;
+            break;
+        default:
+            break;
+        }
     }
 
     return consumed;
