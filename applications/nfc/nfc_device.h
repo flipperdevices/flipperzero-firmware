@@ -65,11 +65,11 @@ typedef struct {
 
 typedef struct {
     NfcDeviceCommonData nfc_data;
+    NfcReaderRequestData reader_data;
     union {
         NfcEmvData emv_data;
         MifareUlData mf_ul_data;
         MifareDesfireData mf_df_data;
-        NfcReaderRequestData reader_data;
     };
 } NfcDeviceData;
 
