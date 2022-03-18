@@ -202,11 +202,13 @@ void mf_df_cat_file(MifareDesfireFile* file, string_t out) {
         break;
     }
     uint8_t* data = file->contents;
-    for(int rec = 0; rec < num; rec++) {
-        for(int ch = 0; ch < size; ch++) {
-            string_cat_printf(out, "%02x", data[rec * size + ch]);
+    if(data) {
+        for(int rec = 0; rec < num; rec++) {
+            for(int ch = 0; ch < size; ch++) {
+                string_cat_printf(out, "%02x", data[rec * size + ch]);
+            }
+            string_cat_printf(out, " \n");
         }
-        string_cat_printf(out, " \n");
     }
 }
 

@@ -323,8 +323,10 @@ static bool nfc_device_save_mifare_df_app(FlipperFormat* file, MifareDesfireAppl
                     break;
                 size = f->settings.record.size * f->settings.record.cur;
             }
-            string_printf(key, "%s File %d", string_get_cstr(prefix), f->id);
-            if(!flipper_format_write_hex(file, string_get_cstr(key), f->contents, size)) break;
+            if(f->contents) {
+                string_printf(key, "%s File %d", string_get_cstr(prefix), f->id);
+                if(!flipper_format_write_hex(file, string_get_cstr(key), f->contents, size)) break;
+            }
             saved_files = true;
         }
         if(!saved_files) {
@@ -418,10 +420,12 @@ bool nfc_device_load_mifare_df_app(FlipperFormat* file, MifareDesfireApplication
                     break;
             }
             string_printf(key, "%s File %d", string_get_cstr(prefix), f->id);
-            uint32_t size;
-            if(!flipper_format_get_value_count(file, string_get_cstr(key), &size)) break;
-            f->contents = malloc(size);
-            if(!flipper_format_read_hex(file, string_get_cstr(key), f->contents, size)) break;
+            if(flipper_format_key_exist(file, string_get_cstr(key))) {
+                uint32_t size;
+                if(!flipper_format_get_value_count(file, string_get_cstr(key), &size)) break;
+                f->contents = malloc(size);
+                if(!flipper_format_read_hex(file, string_get_cstr(key), f->contents, size)) break;
+            }
             *file_head = f;
             file_head = &f->next;
             f = NULL;
