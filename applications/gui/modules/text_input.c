@@ -131,7 +131,13 @@ static const bool char_is_lowercase(char letter) {
 }
 
 static const char char_to_uppercase(const char letter) {
-    return (letter - 0x20);
+    if (isalpha(letter)) {
+        return (letter - 0x20);
+    }
+    else {
+        return letter;
+    }
+
 }
 
 static void text_input_backspace_cb(TextInputModel* model) {
@@ -347,7 +353,7 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
     furi_assert(text_input);
     bool consumed = false;
 
-    if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
+    if(event->type == InputTypeShort) {
         with_view_model(
             text_input->view, (TextInputModel * model) {
                 if(model->valadator_message_visible) {
