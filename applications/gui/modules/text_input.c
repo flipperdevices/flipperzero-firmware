@@ -131,13 +131,11 @@ static const bool char_is_lowercase(char letter) {
 }
 
 static const char char_to_uppercase(const char letter) {
-    if (isalpha(letter)) {
+    if(isalpha(letter)) {
         return (letter - 0x20);
-    }
-    else {
+    } else {
         return letter;
     }
-
 }
 
 static void text_input_backspace_cb(TextInputModel* model) {
@@ -317,7 +315,7 @@ static void text_input_handle_ok(TextInput* text_input, bool shift) {
             char selected = get_selected_char(model);
             uint8_t text_length = strlen(model->text_buffer);
 
-            if (shift) {
+            if(shift) {
                 selected = char_to_uppercase(selected);
             }
 
@@ -406,7 +404,7 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
     }
 
     // Allow shift key on long press
-    if (event->type == InputTypeLong && event->key == InputKeyOk) {
+    if(event->type == InputTypeLong && event->key == InputKeyOk) {
         with_view_model(
             text_input->view, (TextInputModel * model) {
                 if(model->valadator_message_visible) {
