@@ -387,7 +387,7 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
             break;
         }
     }
-    
+
     if((event->type == InputTypeLong || event->type == InputTypeRepeat) &&
        event->key == InputKeyBack) {
         with_view_model(
