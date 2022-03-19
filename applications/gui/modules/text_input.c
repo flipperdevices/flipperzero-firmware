@@ -267,7 +267,7 @@ static void text_input_handle_up(TextInput* text_input) {
                 if(model->selected_column > get_row_size(model->selected_row) - 6) {
                     model->selected_column = model->selected_column + 1;
                 }
-            } 
+            }
             return true;
         });
 }
@@ -386,7 +386,7 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
         default:
             break;
         }
-    } 
+    }
     
     if((event->type == InputTypeLong || event->type == InputTypeRepeat) &&
        event->key == InputKeyBack) {
