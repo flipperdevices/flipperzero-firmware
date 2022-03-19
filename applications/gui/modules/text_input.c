@@ -130,10 +130,6 @@ static const bool char_is_lowercase(char letter) {
     return (letter >= 0x61 && letter <= 0x7A);
 }
 
-static const bool char_is_uppercase(char letter) {
-    return (letter >= 0x41 && letter <= 0x5A);
-}
-
 static const char char_to_uppercase(const char letter) {
     if (isalpha(letter)) {
         return (letter - 0x20);
@@ -141,6 +137,7 @@ static const char char_to_uppercase(const char letter) {
     else {
         return letter;
     }
+
 }
 
 static void text_input_backspace_cb(TextInputModel* model) {
@@ -237,13 +234,6 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
 
                 if(text_length == 0 && char_is_lowercase(keys[column].text)) {
                     canvas_draw_glyph(
-                        canvas,
-                        keyboard_origin_x + keys[column].x,
-                        keyboard_origin_y + keys[column].y,
-                        char_to_uppercase(keys[column].text));
-                } else if (char_is_uppercase(keys[column].text)) {
-                    // If "shift" longpress detected, make the whole keyboard large!
-                        canvas_draw_glyph(
                         canvas,
                         keyboard_origin_x + keys[column].x,
                         keyboard_origin_y + keys[column].y,
