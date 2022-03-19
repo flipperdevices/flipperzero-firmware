@@ -28,6 +28,7 @@ bool nfc_mf_classic_dict_get_next_key(File* dict_file, uint64_t* key) {
     char key_str[NFC_MF_CLASSIC_LINE_LEN];
     *key = 0;
     uint8_t key_byte = 0;
+    // TODO rework with correctly file comments processing
     uint16_t read_bytes = storage_file_read(dict_file, (void*)key_str, NFC_MF_CLASSIC_LINE_LEN);
     if(read_bytes != NFC_MF_CLASSIC_LINE_LEN) {
         return false;
