@@ -138,13 +138,14 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
             gap->state = GapStateConnected;
             gap->service.connection_handle = connection_complete_event->Connection_Handle;
             GapConnectionParams* params = &gap->config->conn_param;
-            if(aci_l2cap_connection_parameter_update_req(
-                   gap->service.connection_handle,
-                   params->conn_int_min,
-                   params->conn_int_max,
-                   params->slave_latency,
-                   params->supervisor_timeout)) {
-                FURI_LOG_W(TAG, "Failed to request connection parameters update");
+            ret = aci_l2cap_connection_parameter_update_req(
+                gap->service.connection_handle,
+                params->conn_int_min,
+                params->conn_int_max,
+                params->slave_latency,
+                params->supervisor_timeout);
+            if(ret) {
+                FURI_LOG_W(TAG, "Failed to request connection parameters update: %02x", ret);
             }
 
             // Start pairing by sending security request
