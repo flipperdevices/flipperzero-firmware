@@ -334,93 +334,88 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
     // Acquire model
     TextInputModel* model = view_get_model(text_input->view);
 
-    do {
-        if(model->valadator_message_visible) {
-            model->valadator_message_visible = false;
+    if(model->valadator_message_visible) {
+        model->valadator_message_visible = false;
+        consumed = true;
+    } else if(event->type == InputTypeShort) {
+        switch(event->key) {
+        case InputKeyUp:
+            text_input_handle_up(text_input, model);
             consumed = true;
             break;
+        case InputKeyDown:
+            text_input_handle_down(text_input, model);
+            consumed = true;
+            break;
+        case InputKeyLeft:
+            text_input_handle_left(text_input, model);
+            consumed = true;
+            break;
+        case InputKeyRight:
+            text_input_handle_right(text_input, model);
+            consumed = true;
+            break;
+        case InputKeyOk:
+            text_input_handle_ok(text_input, model, false);
+            consumed = true;
+            break;
+        default:
+            break;
         }
-
-        if(event->type == InputTypeShort) {
-            switch(event->key) {
-            case InputKeyUp:
-                text_input_handle_up(text_input, model);
-                consumed = true;
-                break;
-            case InputKeyDown:
-                text_input_handle_down(text_input, model);
-                consumed = true;
-                break;
-            case InputKeyLeft:
-                text_input_handle_left(text_input, model);
-                consumed = true;
-                break;
-            case InputKeyRight:
-                text_input_handle_right(text_input, model);
-                consumed = true;
-                break;
-            case InputKeyOk:
-                text_input_handle_ok(text_input, model, false);
-                consumed = true;
-                break;
-            default:
-                break;
-            }
-        } else if(event->type == InputTypeLong) {
-            switch(event->key) {
-            case InputKeyUp:
-                text_input_handle_up(text_input, model);
-                consumed = true;
-                break;
-            case InputKeyDown:
-                text_input_handle_down(text_input, model);
-                consumed = true;
-                break;
-            case InputKeyLeft:
-                text_input_handle_left(text_input, model);
-                consumed = true;
-                break;
-            case InputKeyRight:
-                text_input_handle_right(text_input, model);
-                consumed = true;
-                break;
-            case InputKeyOk:
-                text_input_handle_ok(text_input, model, true);
-                consumed = true;
-            case InputKeyBack:
-                text_input_backspace_cb(model);
-                consumed = true;
-                break;
-            default:
-                break;
-            }
-        } else if(event->type == InputTypeRepeat) {
-            switch(event->key) {
-            case InputKeyUp:
-                text_input_handle_up(text_input, model);
-                consumed = true;
-                break;
-            case InputKeyDown:
-                text_input_handle_down(text_input, model);
-                consumed = true;
-                break;
-            case InputKeyLeft:
-                text_input_handle_left(text_input, model);
-                consumed = true;
-                break;
-            case InputKeyRight:
-                text_input_handle_right(text_input, model);
-                consumed = true;
-                break;
-            case InputKeyBack:
-                text_input_backspace_cb(model);
-                consumed = true;
-                break;
-            default:
-                break;
-            }
+    } else if(event->type == InputTypeLong) {
+        switch(event->key) {
+        case InputKeyUp:
+            text_input_handle_up(text_input, model);
+            consumed = true;
+            break;
+        case InputKeyDown:
+            text_input_handle_down(text_input, model);
+            consumed = true;
+            break;
+        case InputKeyLeft:
+            text_input_handle_left(text_input, model);
+            consumed = true;
+            break;
+        case InputKeyRight:
+            text_input_handle_right(text_input, model);
+            consumed = true;
+            break;
+        case InputKeyOk:
+            text_input_handle_ok(text_input, model, true);
+            consumed = true;
+        case InputKeyBack:
+            text_input_backspace_cb(model);
+            consumed = true;
+            break;
+        default:
+            break;
         }
-    } while(0);
+    } else if(event->type == InputTypeRepeat) {
+        switch(event->key) {
+        case InputKeyUp:
+            text_input_handle_up(text_input, model);
+            consumed = true;
+            break;
+        case InputKeyDown:
+            text_input_handle_down(text_input, model);
+            consumed = true;
+            break;
+        case InputKeyLeft:
+            text_input_handle_left(text_input, model);
+            consumed = true;
+            break;
+        case InputKeyRight:
+            text_input_handle_right(text_input, model);
+            consumed = true;
+            break;
+        case InputKeyBack:
+            text_input_backspace_cb(model);
+            consumed = true;
+            break;
+        default:
+            break;
+        }
+    }
 
     // Commit model
     view_commit_model(text_input->view, consumed);
