@@ -338,81 +338,71 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
         model->valadator_message_visible = false;
         consumed = true;
     } else if(event->type == InputTypeShort) {
+        consumed = true;
         switch(event->key) {
         case InputKeyUp:
             text_input_handle_up(text_input, model);
-            consumed = true;
             break;
         case InputKeyDown:
             text_input_handle_down(text_input, model);
-            consumed = true;
             break;
         case InputKeyLeft:
             text_input_handle_left(text_input, model);
-            consumed = true;
             break;
         case InputKeyRight:
             text_input_handle_right(text_input, model);
-            consumed = true;
             break;
         case InputKeyOk:
             text_input_handle_ok(text_input, model, false);
-            consumed = true;
             break;
         default:
+            consumed = false;
             break;
         }
     } else if(event->type == InputTypeLong) {
+        consumed = true;
         switch(event->key) {
         case InputKeyUp:
             text_input_handle_up(text_input, model);
-            consumed = true;
             break;
         case InputKeyDown:
             text_input_handle_down(text_input, model);
-            consumed = true;
             break;
         case InputKeyLeft:
             text_input_handle_left(text_input, model);
-            consumed = true;
             break;
         case InputKeyRight:
             text_input_handle_right(text_input, model);
-            consumed = true;
             break;
         case InputKeyOk:
             text_input_handle_ok(text_input, model, true);
-            consumed = true;
         case InputKeyBack:
             text_input_backspace_cb(model);
-            consumed = true;
             break;
         default:
+            consumed = false;
             break;
         }
     } else if(event->type == InputTypeRepeat) {
+        consumed = true;
         switch(event->key) {
         case InputKeyUp:
             text_input_handle_up(text_input, model);
-            consumed = true;
             break;
         case InputKeyDown:
             text_input_handle_down(text_input, model);
-            consumed = true;
             break;
         case InputKeyLeft:
             text_input_handle_left(text_input, model);
-            consumed = true;
             break;
         case InputKeyRight:
             text_input_handle_right(text_input, model);
-            consumed = true;
             break;
         case InputKeyBack:
             text_input_backspace_cb(model);
-            consumed = true;
             break;
         default:
+            consumed = false;
             break;
         }
     }
