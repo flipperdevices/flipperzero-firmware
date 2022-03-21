@@ -466,11 +466,6 @@ static FS_Error storage_ext_common_remove(void* ctx, const char* path) {
     return storage_ext_parse_error(result);
 }
 
-static FS_Error storage_ext_common_rename(void* ctx, const char* old_path, const char* new_path) {
-    SDError result = f_rename(old_path, new_path);
-    return storage_ext_parse_error(result);
-}
-
 static FS_Error storage_ext_common_mkdir(void* ctx, const char* path) {
     SDError result = f_mkdir(path);
     return storage_ext_parse_error(result);
@@ -537,7 +532,6 @@ void storage_ext_init(StorageData* storage) {
 
     storage->fs_api.common.stat = storage_ext_common_stat;
     storage->fs_api.common.mkdir = storage_ext_common_mkdir;
-    storage->fs_api.common.rename = storage_ext_common_rename;
     storage->fs_api.common.remove = storage_ext_common_remove;
     storage->fs_api.common.fs_info = storage_ext_common_fs_info;
 

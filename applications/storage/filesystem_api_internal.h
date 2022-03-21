@@ -141,12 +141,6 @@ typedef struct {
  *      @param path path to file/directory
  *      @return FS_Error error info
  * 
- *  @var FS_Common_Api::rename
- *      @brief Rename file/directory,
- *          file/directory must not be opened
- *      @param path path to file/directory
- *      @return FS_Error error info
- * 
  *  @var FS_Common_Api::mkdir
  *      @brief Create new directory
  *      @param path path to new directory
@@ -162,7 +156,6 @@ typedef struct {
 typedef struct {
     FS_Error (*stat)(void* context, const char* path, FileInfo* fileinfo);
     FS_Error (*remove)(void* context, const char* path);
-    FS_Error (*rename)(void* context, const char* old_path, const char* new_path);
     FS_Error (*mkdir)(void* context, const char* path);
     FS_Error (
         *fs_info)(void* context, const char* fs_path, uint64_t* total_space, uint64_t* free_space);
