@@ -3,6 +3,7 @@
 #include "storage.h"
 #include "storage_i.h"
 #include "storage_message.h"
+#include <toolbox/stream/file_stream.h>
 
 #define MAX_NAME_LENGTH 256
 
@@ -259,31 +260,33 @@ FS_Error storage_common_remove(Storage* storage, const char* path) {
 }
 
 FS_Error storage_common_rename(Storage* storage, const char* old_path, const char* new_path) {
-    S_API_PROLOGUE;
+    FS_Error error = storage_common_copy(storage, old_path, new_path);
+    if(error == FSE_OK) {
+        error = storage_common_remove(storage, old_path);
+    }
 
-    SAData data = {
-        .cpaths = {
-            .old = old_path,
-            .new = new_path,
-        }};
-
-    S_API_MESSAGE(StorageCommandCommonRename);
-    S_API_EPILOGUE;
-    return S_RETURN_ERROR;
+    return error;
 }
 
 FS_Error storage_common_copy(Storage* storage, const char* old_path, const char* new_path) {
-    S_API_PROLOGUE;
+    FS_Error error;
+    Stream* stream_from = file_stream_alloc(storage);
+    Stream* stream_to = file_stream_alloc(storage);
 
-    SAData data = {
-        .cpaths = {
-            .old = old_path,
-            .new = new_path,
-        }};
+    do {
+        if(!file_stream_open(stream_from, old_path, FSAM_READ, FSOM_OPEN_EXISTING)) break;
+        if(!file_stream_open(stream_to, new_path, FSAM_WRITE, FSOM_CREATE_NEW)) break;
+        stream_copy_full(stream_from, stream_to);
+    } while(false);
 
-    S_API_MESSAGE(StorageCommandCommonCopy);
-    S_API_EPILOGUE;
-    return S_RETURN_ERROR;
+    error = file_stream_get_error(stream_from);
+    if(error == FSE_OK) {
+        error = file_stream_get_error(stream_to);
+    }
+
+    stream_free(stream_from);
+    stream_free(stream_to);
+    return error;
 }
 
 FS_Error storage_common_mkdir(Storage* storage, const char* path) {
