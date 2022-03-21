@@ -334,7 +334,8 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
     // Acquire model
     TextInputModel* model = view_get_model(text_input->view);
 
-    if(model->valadator_message_visible) {
+    if((!(event->type == InputTypePress) && !(event->type == InputTypeRelease)) &&
+       model->valadator_message_visible) {
         model->valadator_message_visible = false;
         consumed = true;
     } else if(event->type == InputTypeShort) {
@@ -376,6 +377,7 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
             break;
         case InputKeyOk:
             text_input_handle_ok(text_input, model, true);
+            break;
         case InputKeyBack:
             text_input_backspace_cb(model);
             break;
