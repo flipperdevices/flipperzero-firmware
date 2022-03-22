@@ -133,6 +133,11 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
                        dev->dev.nfca.sensRes.platformInfo,
                        dev->dev.nfca.selRes.sak)) {
                     result->protocol = NfcDeviceProtocolMifareUl;
+                } else if(mf_classic_check_card_type(
+                              dev->dev.nfca.sensRes.anticollisionInfo,
+                              dev->dev.nfca.sensRes.platformInfo,
+                              dev->dev.nfca.selRes.sak)) {
+                    result->protocol = NfcDeviceProtocolMifareClassic;
                 } else if(dev->rfInterface == RFAL_NFC_INTERFACE_ISODEP) {
                     result->protocol = NfcDeviceProtocolEMV;
                 } else {
@@ -693,7 +698,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
     while(nfc_worker->state == NfcWorkerStateReadMifareClassic) {
         if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 300, false)) {
             dev = &dev_list[0];
-            if(mf_classic_check_card_init_reader(
+            if(mf_classic_get_type(
                    dev->nfcid,
                    dev->nfcidLen,
                    dev->dev.nfca.sensRes.anticollisionInfo,
@@ -718,7 +723,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
     if(nfc_worker->state == NfcWorkerStateReadMifareClassic) {
         // Seek for mifare classic keys
         for(curr_sector = 0; curr_sector < total_sectors; curr_sector++) {
-            FURI_LOG_D(TAG, "Sector: %d ...", curr_sector);
+            FURI_LOG_I(TAG, "Sector: %d ...", curr_sector);
             event = NfcWorkerEventNewSector;
             nfc_worker->callback(event, nfc_worker->context);
             mf_classic_auth_init_context(&auth_ctx, reader.cuid, curr_sector);

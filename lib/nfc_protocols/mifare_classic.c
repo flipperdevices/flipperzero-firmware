@@ -34,7 +34,17 @@ uint8_t mf_classic_get_total_sectors_num(MfClassicReader* reader) {
     }
 }
 
-bool mf_classic_check_card_init_reader(
+bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
+    if((ATQA0 == 0x44 || ATQA0 == 0x04) && (SAK == 0x08)) {
+        return true;
+    } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool mf_classic_get_type(
     uint8_t* uid,
     uint8_t uid_len,
     uint8_t ATQA0,
