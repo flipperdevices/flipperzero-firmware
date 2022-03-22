@@ -459,7 +459,7 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx) {
         state = rfalNfcGetState();
         ret = rfalNfcDataExchangeGetStatus();
         if(ret == ERR_BUSY) {
-            if(DWT->CYCCNT - start > 10 * clocks_in_ms) {
+            if(DWT->CYCCNT - start > 4 * clocks_in_ms) {
                 return false;
             }
             continue;
