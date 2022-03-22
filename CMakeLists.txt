@@ -13,7 +13,8 @@ if (DEFINED ESP_PLATFORM)
     if ("${IDF_VERSION_MAJOR}.${IDF_VERSION_MINOR}" VERSION_GREATER "4.0")
         idf_component_register(SRCS ${srcs}
                                INCLUDE_DIRS include port
-                               PRIV_INCLUDE_DIRS private_include)
+                               PRIV_INCLUDE_DIRS private_include
+                               PRIV_REQUIRES driver)
         set(target ${COMPONENT_LIB})
         component_compile_options(-Wstrict-prototypes)
     else()
