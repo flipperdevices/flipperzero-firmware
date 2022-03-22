@@ -50,8 +50,6 @@ void furi_hal_rfid_pins_reset() {
     hal_gpio_init(&gpio_rfid_pull, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_rfid_pull, true);
 
-    hal_gpio_init_simple(&gpio_rfid_carrier, GpioModeAnalog);
-
     hal_gpio_init(&gpio_rfid_data_in, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
@@ -67,9 +65,6 @@ void furi_hal_rfid_pins_emulate() {
     // pull rfid antenna from carrier side
     hal_gpio_init(&gpio_rfid_carrier_out, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_rfid_carrier_out, false);
-
-    hal_gpio_init_ex(
-        &gpio_rfid_carrier, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn2TIM2);
 }
 
 void furi_hal_rfid_pins_read() {
