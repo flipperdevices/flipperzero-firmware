@@ -27,8 +27,8 @@ void furi_hal_init() {
     FURI_LOG_I(TAG, "TIM1 OK");
     MX_TIM2_Init();
     FURI_LOG_I(TAG, "TIM2 OK");
-    MX_TIM16_Init();
-    FURI_LOG_I(TAG, "TIM16 OK");
+    furi_hal_speaker_init();
+    FURI_LOG_I(TAG, "Speaker OK");
     MX_COMP1_Init();
     FURI_LOG_I(TAG, "COMP1 OK");
 
