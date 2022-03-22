@@ -1,5 +1,4 @@
 PROJECT_ROOT	= $(abspath $(dir $(abspath $(firstword $(MAKEFILE_LIST))))..)
-PROJECT			= firmware
 
 include 		$(PROJECT_ROOT)/make/base.mk
 include 		$(PROJECT_ROOT)/make/freertos-heap.mk
@@ -15,6 +14,12 @@ CPPFLAGS		+= -Werror
 include			$(PROJECT_ROOT)/make/defaults.mk
 TARGET_DIR		= targets/$(TARGET)
 include			$(TARGET_DIR)/target.mk
+
+ifeq ($(RAM_EXEC), 0)
+PROJECT			= firmware
+else
+PROJECT			= updater
+endif
 
 include			$(PROJECT_ROOT)/make/git.mk
 include			$(PROJECT_ROOT)/make/toolchain.mk

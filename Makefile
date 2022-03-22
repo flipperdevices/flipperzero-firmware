@@ -3,8 +3,6 @@ COPRO_DIR := $(PROJECT_ROOT)/lib/STM32CubeWB/Projects/STM32WB_Copro_Wireless_Bin
 
 PROJECT_SOURCE_DIRECTORIES := \
 	$(PROJECT_ROOT)/applications \
-	$(PROJECT_ROOT)/bootloader/src \
-	$(PROJECT_ROOT)/bootloader/targets \
 	$(PROJECT_ROOT)/core \
 	$(PROJECT_ROOT)/firmware/targets \
 	$(PROJECT_ROOT)/lib/app-template \
@@ -34,18 +32,18 @@ endif
 include	$(PROJECT_ROOT)/make/defaults.mk
 
 .PHONY: all
-all: bootloader_all firmware_all
+all: firmware_all firmware_flasher
 	@$(PROJECT_ROOT)/scripts/dist.sh
 
 .PHONY: whole
-whole: flash_radio bootloader_flash firmware_flash
+whole: flash_radio firmware_flash
 
 .PHONY: clean
-clean: bootloader_clean firmware_clean
+clean: firmware_clean firmware_flasher_clean
 	@rm -rf $(PROJECT_ROOT)/dist/$(TARGET)
 
 .PHONY: flash
-flash: bootloader_flash firmware_flash
+flash: firmware_flash
 
 .PHONY: debug
 debug:
@@ -60,28 +58,30 @@ wipe:
 	@$(PROJECT_ROOT)/scripts/flash.py wipe
 	@$(PROJECT_ROOT)/scripts/ob.py set
 
-.PHONY: bootloader_all
-bootloader_all:
-	@$(MAKE) -C $(PROJECT_ROOT)/bootloader -j$(NPROCS) all
+#.PHONY: bootloader_all
+#bootloader_all:
+#	@$(MAKE) -C $(PROJECT_ROOT)/bootloader -j$(NPROCS) all
 
 .PHONY: firmware_all
 firmware_all:
+	echo @$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) all
 	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) all
 
-.PHONY: bootloader_clean
-bootloader_clean:
-	@$(MAKE) -C $(PROJECT_ROOT)/bootloader -j$(NPROCS) clean
+.PHONY: firmware_flasher
+firmware_flasher:
+	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) RAM_EXEC=1 all
+
+#.PHONY: bootloader_clean
+#bootloader_clean:
+#	@$(MAKE) -C $(PROJECT_ROOT)/bootloader -j$(NPROCS) clean
 
 .PHONY: firmware_clean
 firmware_clean:
 	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) clean
 
-.PHONY: bootloader_flash
-bootloader_flash:
-ifeq ($(FORCE), 1)
-	@rm $(PROJECT_ROOT)/bootloader/.obj/f*/flash || true
-endif
-	@$(MAKE) -C $(PROJECT_ROOT)/bootloader -j$(NPROCS) flash
+.PHONY: firmware_flasher_clean
+firmware_flasher_clean:
+	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) RAM_EXEC=1 clean
 
 .PHONY: firmware_flash
 firmware_flash:

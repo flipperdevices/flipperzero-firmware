@@ -1,4 +1,4 @@
-OBJ_DIR := $(OBJ_DIR)/$(TARGET)
+OBJ_DIR := $(OBJ_DIR)/$(TARGET)-$(PROJECT)
 
 # Include source folder paths to virtual paths
 VPATH = $(sort $(dir $(C_SOURCES)) $(dir $(ASM_SOURCES)) $(dir $(CPP_SOURCES)))
@@ -18,6 +18,7 @@ endif
 $(shell test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR))
 
 BUILD_FLAGS_SHELL=\
+	echo $(OBJ_DIR) ;\
 	echo "$(CFLAGS)" > $(OBJ_DIR)/BUILD_FLAGS.tmp; \
 	diff -u $(OBJ_DIR)/BUILD_FLAGS $(OBJ_DIR)/BUILD_FLAGS.tmp 2>&1 > /dev/null \
 		&& ( echo "CFLAGS ok"; rm $(OBJ_DIR)/BUILD_FLAGS.tmp) \
@@ -43,7 +44,7 @@ $(OBJ_DIR)/$(PROJECT).elf: $(OBJECTS)
 $(OBJ_DIR)/$(PROJECT).hex: $(OBJ_DIR)/$(PROJECT).elf
 	@echo "\tHEX\t" $@
 	@$(HEX) $< $@
-	
+
 $(OBJ_DIR)/$(PROJECT).bin: $(OBJ_DIR)/$(PROJECT).elf
 	@echo "\tBIN\t" $@
 	@$(BIN) $< $@

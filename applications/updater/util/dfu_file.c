@@ -34,6 +34,7 @@ bool dfu_file_validate_crc(File* dfuf, const DfuPageTaskProgressCb progress_cb, 
         file_crc = furi_hal_crc_feed(data_buffer, data_buffer_valid_len);
     }
     free(data_buffer);
+    furi_hal_crc_reset();
 
     // Last 4 bytes of DFU file = CRC of previous file contents, inverted
     // If we calculate whole file CRC32, incl. embedded CRC,

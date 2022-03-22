@@ -86,6 +86,8 @@ static bool flipper_update_load_stage(UpdateManifest* manifest) {
         bytes_read += size_read;
     } while(bytes_read == MAX_READ);
 
+    furi_hal_crc_reset();
+
     do {
         //if(crc == 0) {
         if(crc != manifest->staged_loader_crc) {
