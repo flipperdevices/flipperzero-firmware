@@ -5,6 +5,7 @@
 
 #include <furi.h>
 #include <stdbool.h>
+#include <lib/toolbox/stream/file_stream.h>
 
 #include <rfal_analogConfig.h>
 #include <rfal_rf.h>
@@ -19,7 +20,7 @@
 struct NfcWorker {
     FuriThread* thread;
     Storage* storage;
-    File* dict_file;
+    Stream* dict_stream;
 
     NfcDeviceData* dev_data;
 
