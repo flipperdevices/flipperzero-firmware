@@ -627,7 +627,7 @@ static bool nfc_device_save_mifare_classic(FlipperFormat* file, NfcDevice* dev) 
         if(!flipper_format_write_comment_cstr(file, "Mifare Classic blocks")) break;
 
         bool block_saved = true;
-        for(uint8_t i = 0; i < blocks; i++) {
+        for(size_t i = 0; i < blocks; i++) {
             string_printf(temp_str, "Block %d", i);
             if(!flipper_format_write_hex(
                    file, string_get_cstr(temp_str), data->block[i].value, 16)) {
