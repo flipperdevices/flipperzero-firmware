@@ -24,7 +24,7 @@ extern "C" {
      (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_REMV | (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_AUTO | \
      (uint32_t)RFAL_TXRX_FLAGS_NFCV_FLAG_AUTO)
 
-#define FURI_HAL_NFC_TX_DEFAULT_RX_NO_CRC                                                         \
+#define FURI_HAL_NFC_TX_DEFAULT_RX_NO_CRC                                            \
     ((uint32_t)RFAL_TXRX_FLAGS_CRC_TX_AUTO | (uint32_t)RFAL_TXRX_FLAGS_CRC_RX_KEEP | \
      (uint32_t)RFAL_TXRX_FLAGS_NFCIP1_OFF | (uint32_t)RFAL_TXRX_FLAGS_AGC_ON |       \
      (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_REMV | (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_AUTO | \

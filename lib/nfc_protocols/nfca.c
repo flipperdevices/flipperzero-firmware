@@ -23,7 +23,8 @@ uint16_t nfca_get_crc16(uint8_t* buff, uint16_t len) {
         byte = buff[i];
         byte ^= (uint8_t)(crc & 0xff);
         byte ^= byte << 4;
-        crc = (crc >> 8) ^ (((uint16_t)byte) << 8) ^ (((uint16_t)byte) << 3) ^ (((uint16_t)byte) >> 4);
+        crc = (crc >> 8) ^ (((uint16_t)byte) << 8) ^ (((uint16_t)byte) << 3) ^
+              (((uint16_t)byte) >> 4);
     }
 
     return crc;
@@ -31,8 +32,8 @@ uint16_t nfca_get_crc16(uint8_t* buff, uint16_t len) {
 
 void nfca_append_crc16(uint8_t* buff, uint16_t len) {
     uint16_t crc = nfca_get_crc16(buff, len);
-    buff[len] = (uint8_t) crc;
-    buff[len + 1] = (uint8_t) (crc >> 8);
+    buff[len] = (uint8_t)crc;
+    buff[len + 1] = (uint8_t)(crc >> 8);
 }
 
 bool nfca_emulation_handler(

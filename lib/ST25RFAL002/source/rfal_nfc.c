@@ -725,14 +725,9 @@ ReturnCode rfalNfcDataExchangeCustomStart(
         {
         /*******************************************************************************/
         case RFAL_NFC_INTERFACE_RF:
-            ctx.rxBuf = gNfcDev.rxBuf.rfBuf,
-            ctx.rxBufLen = sizeof(gNfcDev.rxBuf.rfBuf),
-            ctx.rxRcvdLen = &gNfcDev.rxLen,
-            ctx.txBuf = txData,
-            ctx.txBufLen = txDataLen,
-            ctx.flags = flags,
-            ctx.fwt = fwt,
-            *rxData = (uint8_t*)gNfcDev.rxBuf.rfBuf;
+            ctx.rxBuf = gNfcDev.rxBuf.rfBuf, ctx.rxBufLen = sizeof(gNfcDev.rxBuf.rfBuf),
+            ctx.rxRcvdLen = &gNfcDev.rxLen, ctx.txBuf = txData, ctx.txBufLen = txDataLen,
+            ctx.flags = flags, ctx.fwt = fwt, *rxData = (uint8_t*)gNfcDev.rxBuf.rfBuf;
             *rvdLen = (uint16_t*)&gNfcDev.rxLen;
             err = rfalStartTransceive(&ctx);
             break;
