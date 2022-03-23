@@ -735,6 +735,8 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
     }
 
     if(nfc_worker->state == NfcWorkerStateReadMifareClassic) {
+        bool card_removed_notified = false;
+        bool card_found_notified = false;
         // Seek for mifare classic keys
         for(curr_sector = 0; curr_sector < total_sectors; curr_sector++) {
             FURI_LOG_I(TAG, "Sector: %d ...", curr_sector);
@@ -745,6 +747,16 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
             while(nfc_mf_classic_dict_get_next_key(nfc_worker->dict_stream, &curr_key)) {
                 furi_hal_nfc_deactivate();
                 if(furi_hal_nfc_activate_nfca(300, &reader.cuid)) {
+                    if(!card_found_notified) {
+                        if(reader.type == MfClassicType1k) {
+                            event = NfcWorkerEventDetectedClassic1k;
+                        } else {
+                            event = NfcWorkerEventDetectedClassic4k;
+                        }
+                        nfc_worker->callback(event, nfc_worker->context);
+                        card_found_notified = true;
+                        card_removed_notified = false;
+                    }
                     FURI_LOG_D(
                         TAG,
                         "Try to auth to sector %d with key %04lx%08lx",
@@ -760,8 +772,12 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
                 } else {
                     // Notify that no tag is availalble
                     FURI_LOG_D(TAG, "Can't find tags");
-                    event = NfcWorkerEventNoCardDetected;
-                    nfc_worker->callback(event, nfc_worker->context);
+                    if(!card_removed_notified) {
+                        event = NfcWorkerEventNoCardDetected;
+                        nfc_worker->callback(event, nfc_worker->context);
+                        card_removed_notified = true;
+                        card_found_notified = false;
+                    }
                 }
                 if(nfc_worker->state != NfcWorkerStateReadMifareClassic) break;
             }

@@ -32,16 +32,17 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
     DictAttackViewModel* m = model;
     if(m->state == DictAttackStateSearchCard) {
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 64, 2, AlignCenter, AlignTop, "Detecting Mf Classic");
+        canvas_draw_str_aligned(
+            canvas, 64, 32, AlignCenter, AlignCenter, "Detecting Mifare Classic");
     } else if(m->state == DictAttackStateCardRemoved) {
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 64, 2, AlignCenter, AlignTop, "Reading was paused");
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 64, 2, AlignCenter, AlignTop, "Return card");
+        canvas_draw_str_aligned(
+            canvas, 64, 32, AlignCenter, AlignTop, "Place card back to flipper");
     } else {
         char draw_str[32];
         if(m->state == DictAttackStateSearchKeys) {
-            snprintf(draw_str, sizeof(draw_str), "Reading sector %d", m->current_sector);
+            snprintf(
+                draw_str, sizeof(draw_str), "Searching keys for sector %d", m->current_sector);
             canvas_draw_str_aligned(canvas, 64, 2, AlignCenter, AlignTop, draw_str);
         } else if(m->state == DictAttackStateSuccess) {
             canvas_draw_str_aligned(canvas, 64, 2, AlignCenter, AlignTop, "Complete!");
@@ -147,7 +148,11 @@ void dict_attack_card_removed(DictAttack* dict_attack) {
     furi_assert(dict_attack);
     with_view_model(
         dict_attack->view, (DictAttackViewModel * model) {
-            model->state = DictAttackStateSearchCard;
+            if(model->state == DictAttackStateSearchKeys) {
+                model->state = DictAttackStateCardRemoved;
+            } else {
+                model->state = DictAttackStateSearchCard;
+            }
             return true;
         });
 }

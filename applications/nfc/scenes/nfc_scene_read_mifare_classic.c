@@ -2,6 +2,11 @@
 
 #define TAG "MfReadScene"
 
+enum {
+    NfcSceneReadMifareClassicStateInProgress,
+    NfcSceneReadMifareClassicStateDone,
+};
+
 void nfc_read_mifare_classic_worker_callback(NfcWorkerEvent event, void* context) {
     furi_assert(context);
     Nfc* nfc = context;
@@ -21,6 +26,8 @@ void nfc_scene_read_mifare_classic_on_enter(void* context) {
     memset(&nfc->dev->dev_data.mf_classic_data, 0, sizeof(MfClassicData));
     dict_attack_set_result_callback(
         nfc->dict_attack, nfc_read_mifare_classic_dict_attack_result_callback, nfc);
+    scene_manager_set_scene_state(
+        nfc->scene_manager, NfcSceneReadMifareClassic, NfcSceneReadMifareClassicStateInProgress);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewDictAttack);
     nfc_worker_start(
         nfc->worker,
@@ -34,8 +41,11 @@ bool nfc_scene_read_mifare_classic_on_event(void* context, SceneManagerEvent eve
     Nfc* nfc = context;
     bool consumed = false;
 
+    uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneReadMifareClassic);
     if(event.type == SceneManagerEventTypeTick) {
-        notification_message(nfc->notifications, &sequence_blink_blue_10);
+        if(state == NfcSceneReadMifareClassicStateInProgress) {
+            notification_message(nfc->notifications, &sequence_blink_blue_10);
+        }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventDictAttackDone) {
@@ -60,10 +70,15 @@ bool nfc_scene_read_mifare_classic_on_event(void* context, SceneManagerEvent eve
             dict_attack_card_removed(nfc->dict_attack);
             consumed = true;
         } else if(event.event == NfcWorkerEventSuccess) {
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneReadMifareClassic, NfcSceneReadMifareClassicStateDone);
+            notification_message(nfc->notifications, &sequence_success);
             nfc->dev->format = NfcDeviceSaveFormatMifareClassic;
             dict_attack_set_result(nfc->dict_attack, true);
             consumed = true;
         } else if(event.event == NfcWorkerEventFail) {
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneReadMifareClassic, NfcSceneReadMifareClassicStateDone);
             dict_attack_set_result(nfc->dict_attack, false);
             consumed = true;
         } else if(event.event == NfcWorkerEventNoDictFound) {
