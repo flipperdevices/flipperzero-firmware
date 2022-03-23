@@ -1,7 +1,5 @@
 #include "../nfc_i.h"
 
-#define TAG "MfReadScene"
-
 enum {
     NfcSceneReadMifareClassicStateInProgress,
     NfcSceneReadMifareClassicStateDone,

@@ -619,7 +619,7 @@ static bool nfc_device_save_mifare_classic_data(FlipperFormat* file, NfcDevice* 
     string_init(temp_str);
     uint16_t blocks = 0;
 
-    // Save Mifare Ultralight specific data
+    // Save Mifare Classic specific data
     do {
         if(!flipper_format_write_comment_cstr(file, "Mifare Classic specific data")) break;
         if(data->type == MfClassicType1k) {
@@ -667,6 +667,7 @@ static bool nfc_device_load_mifare_classic_data(FlipperFormat* file, NfcDevice* 
         } else {
             break;
         }
+        // Read Mifare Classic blocks
         bool block_read = true;
         for(size_t i = 0; i < data_blocks; i++) {
             string_printf(temp_str, "Block %d", i);

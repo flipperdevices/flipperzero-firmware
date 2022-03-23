@@ -101,6 +101,13 @@ bool furi_hal_nfc_detect(
     uint32_t timeout,
     bool deactivate);
 
+/** Activate NFC-A tag
+ *
+ * @param      timeout      timeout in ms
+ * @param      cuid         pointer to 32bit uid
+ *
+ * @return     true on succeess
+ */
 bool furi_hal_nfc_activate_nfca(uint32_t timeout, uint32_t* cuid);
 
 /** NFC listen
@@ -157,6 +164,12 @@ ReturnCode furi_hal_nfc_data_exchange(
     uint16_t** rx_len,
     bool deactivate);
 
+/** NFC data exchange
+ *
+ * @param       tx_rx_ctx   FuriHalNfcTxRxContext instance
+ *
+ * @return      true on success
+ */
 bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx);
 
 /** NFC deactivate and start sleep
