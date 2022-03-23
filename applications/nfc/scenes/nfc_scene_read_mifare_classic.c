@@ -66,6 +66,9 @@ bool nfc_scene_read_mifare_classic_on_event(void* context, SceneManagerEvent eve
         } else if(event.event == NfcWorkerEventFail) {
             dict_attack_set_result(nfc->dict_attack, false);
             consumed = true;
+        } else if(event.event == NfcWorkerEventNoDictFound) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);
+            consumed = true;
         }
     }
     return consumed;
