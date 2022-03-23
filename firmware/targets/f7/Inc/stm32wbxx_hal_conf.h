@@ -185,7 +185,9 @@ extern "C" {
   * @brief Uncomment the line below to expanse the "assert_param" macro in the
   *        HAL drivers code
   */
+#ifdef APP_UNIT_TESTS
 #define USE_FULL_ASSERT 1U
+#endif
 
 /* ################## SPI peripheral configuration ########################## */
 
