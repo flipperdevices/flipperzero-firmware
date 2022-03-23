@@ -77,3 +77,13 @@ const char* nfc_mf_ul_type(MfUltralightType type, bool full_name) {
         return "Mifare Ultralight";
     }
 }
+
+const char* nfc_mf_classic_type(MfClassicType type) {
+    if(type == MfClassicType1k) {
+        return "Mifare Classic 1K";
+    } else if(type == MfClassicType4k) {
+        return "Mifare Classic 4K";
+    } else {
+        return "Mifare Classic";
+    }
+}
