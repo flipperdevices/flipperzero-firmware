@@ -5,7 +5,7 @@
 typedef struct FuriHalUsbInterface FuriHalUsbInterface;
 
 struct FuriHalUsbInterface {
-    void (*init)(usbd_device* dev, FuriHalUsbInterface* intf);
+    void (*init)(usbd_device* dev, FuriHalUsbInterface* intf, void* ctx);
     void (*deinit)(usbd_device* dev);
     void (*wakeup)(usbd_device* dev);
     void (*suspend)(usbd_device* dev);
@@ -41,9 +41,10 @@ void furi_hal_usb_init();
 /** Set USB device configuration
  *
  * @param      mode new USB device mode
+ * @param      ctx context passed to device mode init function
  * @return     true - mode switch started, false - mode switch is locked
  */
-bool furi_hal_usb_set_config(FuriHalUsbInterface* new_if);
+void furi_hal_usb_set_config(FuriHalUsbInterface* new_if, void* ctx);
 
 /** Get USB device configuration
  *
