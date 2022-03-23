@@ -7,6 +7,7 @@
 
 #include <lib/nfc_protocols/mifare_ultralight.h>
 #include <lib/nfc_protocols/mifare_classic.h>
+#include <lib/nfc_protocols/mifare_desfire.h>
 
 #define NFC_DEV_NAME_MAX_LEN 22
 #define NFC_FILE_NAME_MAX_LEN 120
@@ -28,6 +29,7 @@ typedef enum {
     NfcDeviceProtocolEMV,
     NfcDeviceProtocolMifareUl,
     NfcDeviceProtocolMifareClassic,
+    NfcDeviceProtocolMifareDesfire,
 } NfcProtocol;
 
 typedef enum {
@@ -35,6 +37,7 @@ typedef enum {
     NfcDeviceSaveFormatBankCard,
     NfcDeviceSaveFormatMifareUl,
     NfcDeviceSaveFormatMifareClassic,
+    NfcDeviceSaveFormatMifareDesfire,
 } NfcDeviceSaveFormat;
 
 typedef struct {
@@ -65,11 +68,12 @@ typedef struct {
 
 typedef struct {
     NfcDeviceCommonData nfc_data;
+    NfcReaderRequestData reader_data;
     union {
         NfcEmvData emv_data;
         MifareUlData mf_ul_data;
         MfClassicData mf_classic_data;
-        NfcReaderRequestData reader_data;
+        MifareDesfireData mf_df_data;
     };
 } NfcDeviceData;
 
@@ -96,6 +100,8 @@ bool nfc_device_save_shadow(NfcDevice* dev, const char* dev_name);
 bool nfc_device_load(NfcDevice* dev, const char* file_path);
 
 bool nfc_file_select(NfcDevice* dev);
+
+void nfc_device_data_clear(NfcDeviceData* dev);
 
 void nfc_device_clear(NfcDevice* dev);
 

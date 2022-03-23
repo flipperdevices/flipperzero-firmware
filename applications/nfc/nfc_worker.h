@@ -19,6 +19,7 @@ typedef enum {
     NfcWorkerStateReadMifareUl,
     NfcWorkerStateEmulateMifareUl,
     NfcWorkerStateReadMifareClassic,
+    NfcWorkerStateReadMifareDesfire,
     // Transition
     NfcWorkerStateStop,
 } NfcWorkerState;

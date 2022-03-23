@@ -55,6 +55,8 @@ const char* nfc_guess_protocol(NfcProtocol protocol) {
         return "Mifare Ultral/NTAG";
     } else if(protocol == NfcDeviceProtocolMifareClassic) {
         return "Mifare Classic";
+    } else if(protocol == NfcDeviceProtocolMifareDesfire) {
+        return "Mifare DESFire";
     } else {
         return "Unrecognized";
     }
