@@ -52,7 +52,7 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
         }
         uint16_t keys_found = m->keys_a_found + m->keys_b_found;
         uint16_t keys_total = m->keys_a_total + m->keys_b_total;
-        float progress = (float)(keys_found) / (float)(keys_total);
+        float progress = (float)(m->current_sector) / (float)(m->total_sectors);
         elements_progress_bar(canvas, 5, 12, 120, progress);
         canvas_set_font(canvas, FontSecondary);
         snprintf(draw_str, sizeof(draw_str), "Total keys found: %d/%d", keys_found, keys_total);
