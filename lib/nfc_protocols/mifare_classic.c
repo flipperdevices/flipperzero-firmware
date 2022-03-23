@@ -1,7 +1,8 @@
 #include "mifare_classic.h"
 #include "nfca.h"
-
 #include "nfc_util.h"
+
+// Algorithm from https://github.com/RfidResearchGroup/proxmark3.git
 
 #define TAG "MfClassic"
 
