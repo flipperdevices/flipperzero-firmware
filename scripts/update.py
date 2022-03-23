@@ -37,20 +37,27 @@ class Main(App):
 
     def generate(self):
         meta = {}
+
+        shutil.copyfile(self.args.stage, join(self.args.directory, basename(self.args.stage)))
+        shutil.copyfile(self.args.dfu, join(self.args.directory, basename(self.args.dfu)))
+
         file = FlipperFormatFile()
         file.setHeader("Flipper firmware upgrade configuration", 1)
         file.writeKey("Target", self.args.target[1:]) # dirty 'f' strip
-        shutil.copyfile(self.args.stage, join(self.args.directory, basename(self.args.stage)))
         file.writeKey("Loader", basename(self.args.stage))
         file.writeComment("little-endian hex!")
-        crc = self.crc(self.args.stage)
-        file.writeKey("Loader CRC", list(self.batch(crc,2))[::-1])
-        shutil.copyfile(self.args.dfu, join(self.args.directory, basename(self.args.dfu)))
+        file.writeKey("Loader CRC", self.int2ffhex(self.crc(self.args.stage)))
         file.writeKey("Firmware", basename(self.args.dfu))
         file.writeKey("Radio", self.args.radiobin or "")
-        file.writeKey("Radio address", self.args.radioaddr or 0)
+        file.writeKey("Radio address", self.int2ffhex(self.args.radioaddr or 0))
         file.save("%s/update.cfg" % self.args.directory)
+
         return 0
+
+    @staticmethod
+    def int2ffhex(value: int):
+        hexstr = "%08X" % value
+        return ' '.join(list(Main.batch(hexstr,2))[::-1])
 
     @staticmethod
     def crc(fileName):
@@ -58,7 +65,7 @@ class Main(App):
         with open(fileName,"rb") as file:
             for eachLine in file:
                 prev = zlib.crc32(eachLine, prev)
-        return "%08X" % (prev & 0xFFFFFFFF)
+        return (prev & 0xFFFFFFFF)
 
     @staticmethod
     def batch(iterable, n=1):
