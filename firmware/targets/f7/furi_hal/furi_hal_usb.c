@@ -120,6 +120,10 @@ void furi_hal_usb_unlock() {
     usb.mode_lock = false;
 }
 
+bool furi_hal_usb_is_locked() {
+    return usb.mode_lock;
+}
+
 void furi_hal_usb_disable() {
     furi_assert(usb.thread);
     osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventDisable);

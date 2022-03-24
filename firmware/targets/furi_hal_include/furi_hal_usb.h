@@ -60,6 +60,12 @@ void furi_hal_usb_lock();
  */
 void furi_hal_usb_unlock();
 
+/** Check if USB device mode switch locked
+ * 
+ * @return    lock state
+ */
+bool furi_hal_usb_is_locked();
+
 /** Disable USB device
  */
 void furi_hal_usb_disable();

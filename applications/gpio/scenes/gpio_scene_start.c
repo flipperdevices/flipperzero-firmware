@@ -1,5 +1,6 @@
 #include "../gpio_app_i.h"
 #include "furi_hal_power.h"
+#include "furi_hal_usb.h"
 
 enum GpioItem {
     GpioItemUsbUart,
@@ -86,7 +87,7 @@ bool gpio_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(app->scene_manager, GpioSceneTest);
         } else if(event.event == GpioStartEventUsbUart) {
             scene_manager_set_scene_state(app->scene_manager, GpioSceneStart, GpioItemUsbUart);
-            if(usb_uart_is_usb_unlocked()) {
+            if(!furi_hal_usb_is_locked()) {
                 scene_manager_next_scene(app->scene_manager, GpioSceneUsbUart);
             } else {
                 scene_manager_next_scene(app->scene_manager, GpioSceneUsbUartCloseRpc);
