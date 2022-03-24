@@ -31,30 +31,10 @@ static void sd_mount_callback(const void* message, void* context) {
 void updater_scene_main_on_enter(void* context) {
     Updater* updater = (Updater*)context;
     UpdaterMainView* main_view = updater->main_view;
-    //main_view->
-
+    
     FuriPubSubSubscription* sub =
         furi_pubsub_subscribe(storage_get_pubsub(updater->storage), &sd_mount_callback, updater);
     updater_main_set_storage_pubsub(main_view, sub);
-
-    //updater_main_set_callback(main_view, updater_scene_main_callback, updater);
-
-    //UpdaterMainSceneState state =
-    //    scene_manager_get_scene_state(updater->scene_manager, UpdaterSceneMain);
-    //if(state == UpdaterMainSceneStateLockedNoPin) {
-    //    updater_locked_lock(updater->locked_view);
-    //    view_port_enabled_set(updater->lock_viewport, true);
-    //} else if(state == UpdaterMainSceneStateLockedWithPin) {
-    //    LOAD_DESKTOP_SETTINGS(&updater->settings);
-    //    furi_assert(updater->settings.pincode.length > 0);
-    //    updater_locked_lock_pincode(updater->locked_view, updater->settings.pincode);
-    //    view_port_enabled_set(updater->lock_viewport, true);
-    //    furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
-    //    furi_hal_usb_disable();
-    //} else {
-    //    furi_assert(state == UpdaterMainSceneStateUnlocked);
-    //    view_port_enabled_set(updater->lock_viewport, false);
-    //}
 
     view_dispatcher_switch_to_view(updater->view_dispatcher, UpdaterViewMain);
 }

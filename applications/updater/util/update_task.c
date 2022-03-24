@@ -6,6 +6,9 @@
 #include <furi_hal.h>
 #include <storage/storage.h>
 
+#define DELAY_OPERATION_OK 600
+#define DELAY_OPERATION_ERROR 20000
+
 typedef struct UpdateTask {
     UpdateTaskState state;
     string_t update_path;
@@ -235,9 +238,8 @@ static bool page_task_compare_flash(
 /* Verifies a flash operation address for fitting into writable memory
  */
 static bool check_address_boundaries(const size_t address, bool allow_bl_region) {
-    //size_t min_allowed_address = allow_bl_region ? furi_hal_flash_get_base() : FW_ADDRESS;
-    size_t min_allowed_address = furi_hal_flash_get_base();
-    size_t max_allowed_address = (size_t)furi_hal_flash_get_free_end_address();
+    const size_t min_allowed_address = furi_hal_flash_get_base();
+    const size_t max_allowed_address = (size_t)furi_hal_flash_get_free_end_address();
     return ((address >= min_allowed_address) && (address < max_allowed_address));
 }
 
@@ -253,7 +255,6 @@ static int32_t update_task_worker_ram(void* context) {
         .address_cb = &validate_main_fw_address,
         .progress_cb = &update_task_dfu_progress,
         .task_cb = &furi_hal_flash_program_page,
-        //.task_cb = &dummy_hal_flash_program_page,
         .context = update_task,
     };
 
@@ -282,24 +283,13 @@ static int32_t update_task_worker_ram(void* context) {
             CHECK_RESULT(dfu_file_process_targets(&page_task, update_task->file, valid_targets));
         }
 
-        //if(!string_empty_p(update_task->manifest->firmware_dfu_image)) {
-        //    // TODO: work with FUS
-        //    update_task_set_progress(update_task, UpdateTaskStageRadioWrite, 0);
-        //    osDelay(4000);
-        //    update_task_set_progress(update_task, UpdateTaskStageRadioWrite, 100);
-        //    osDelay(1000);
-        //    update_task_set_progress(update_task, UpdateTaskStageRadioCommit, 0);
-        //    osDelay(4000);
-        //    update_task_set_progress(update_task, UpdateTaskStageRadioCommit, 100);
-        //}
-
         update_task_set_progress(update_task, UpdateTaskStageComplete, 100);
         success = true;
     } while(false);
 
     if(!success) {
         update_task_set_progress(update_task, UpdateTaskStageError, update_task->state.progress);
-        osDelay(15000);
+        osDelay(DELAY_OPERATION_ERROR);
         //return -1;
     }
 
@@ -308,11 +298,9 @@ static int32_t update_task_worker_ram(void* context) {
     furi_hal_rtc_reset_flag(FuriHalRtcFlagExecuteUpdate);
     furi_hal_rtc_set_flag(FuriHalRtcFlagExecutePostUpdate);
 
-    osDelay(2000);
+    osDelay(DELAY_OPERATION_OK);
     furi_hal_power_reset();
 
-    //update_task_set_progress(update_task, UpdateTaskStageReadManifest, 50);
-    //osDelay(400);
     return 0;
 }
 
@@ -341,15 +329,12 @@ static int32_t update_task_worker_flash(void* context) {
 
     if(!success) {
         update_task_set_progress(update_task, UpdateTaskStageError, update_task->state.progress);
-        osDelay(15000);
+        osDelay(DELAY_OPERATION_ERROR);
         //return -1;
     }
 
-
-    osDelay(2000);
+    osDelay(DELAY_OPERATION_OK);
     furi_hal_power_reset();
 
-    //update_task_set_progress(update_task, UpdateTaskStageReadManifest, 50);
-    //osDelay(400);
     return 0;
 }

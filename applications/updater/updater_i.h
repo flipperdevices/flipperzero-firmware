@@ -35,14 +35,9 @@ typedef struct {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     Storage* storage;
-    //NotificationApp* notifications;
 
-    //Popup* hw_mismatch_popup;
-
-    //ViewStack* main_view_stack;
     UpdaterMainView* main_view;
     UpdateTask* update_task;
-    //FuriPubSubSubscription* app_start_stop_subscription;
 } Updater;
 
 Updater* updater_alloc();

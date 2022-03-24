@@ -1,17 +1,10 @@
 #pragma once
 
 #include <gui/view.h>
-//#include "updater_events.h"
 
 typedef struct UpdaterMainView UpdaterMainView;
 typedef struct FuriPubSubSubscription FuriPubSubSubscription;
 
-//typedef void (*UpdaterMainViewCallback)(UpdaterEvent event, void* context);
-
-//void updater_main_set_callback(
-//    UpdaterMainView* main_view,
-//    UpdaterMainViewCallback callback,
-//    void* context);
 
 View* updater_main_get_view(UpdaterMainView* main_view);
 

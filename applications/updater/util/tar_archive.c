@@ -84,7 +84,6 @@ bool tar_archive_open(TarArchive* archive, const char* path, TarOpenMode mode) {
 void tar_archive_free(TarArchive* archive) {
     furi_assert(archive);
     mtar_close(&archive->tar);
-    //storage_file_free(archive->tar.stream);
     furi_record_close("storage");
 }
 
@@ -155,7 +154,6 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
         FURI_LOG_W(TAG, "not extracting unsupported type \"%s\"", header->name);
         return 0;
     }
-    //string_init(fname);
 
     string_init_printf(fname, "%s/%s", op_params->work_dir, header->name);
     FURI_LOG_I(TAG, "Extracting %d bytes to '%s'", header->size, header->name);

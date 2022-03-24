@@ -3,7 +3,6 @@
 #include "updater_i.h"
 
 #include <storage/storage.h>
-//#include <gui/view_stack.h>
 #include <gui/view_dispatcher.h>
 #include <furi.h>
 #include <furi_hal.h>
@@ -39,7 +38,6 @@ Updater* updater_alloc() {
     updater->storage = furi_record_open("storage");
 
     updater->gui = furi_record_open("gui");
-    //updater->scene_thread = furi_thread_alloc();
     updater->view_dispatcher = view_dispatcher_alloc();
     updater->scene_manager = scene_manager_alloc(&updater_scene_handlers, updater);
 
@@ -76,8 +74,6 @@ void updater_free(Updater* updater) {
 
     view_dispatcher_free(updater->view_dispatcher);
     scene_manager_free(updater->scene_manager);
-
-    //view_stack_free(updater->main_view_stack);
     updater_main_free(updater->main_view);
 
     furi_record_close("gui");
@@ -85,20 +81,11 @@ void updater_free(Updater* updater) {
 
     furi_record_close("storage");
     updater->storage = NULL;
-
-    //furi_thread_free(updater->scene_thread);
     free(updater);
 }
 
 int32_t updater_srv(void* p) {
     Updater* updater = updater_alloc();
-
-    //if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecuteUpdate)) {
-    //    //furi_hal_usb_disable();
-    //    // TODO: restart
-    //    //scene_manager_set_scene_state(
-    //    //    updater->scene_manager, UpdaterSceneMain, UpdaterMainSceneStateLockedWithPin);
-    //}
 
     scene_manager_next_scene(updater->scene_manager, UpdaterSceneMain);
 
