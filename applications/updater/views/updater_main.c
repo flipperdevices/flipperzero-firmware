@@ -87,7 +87,7 @@ bool updater_main_input(InputEvent* event, void* context) {
 
 static void updater_main_draw_callback(Canvas* canvas, void* _model) {
     UpdaterProgressModel* model = _model;
-    
+
     canvas_set_font(canvas, FontPrimary);
 
     canvas_draw_str_aligned(

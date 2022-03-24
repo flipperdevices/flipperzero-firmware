@@ -238,7 +238,6 @@ FS_Error storage_sd_info(Storage* api, SDInfo* info);
  */
 FS_Error storage_sd_status(Storage* api);
 
-
 /******************* Internal LFS Functions *******************/
 
 /** Backs up internal storage to a tar archive

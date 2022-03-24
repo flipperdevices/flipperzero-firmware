@@ -189,7 +189,6 @@ FS_Error sd_card_info(StorageData* storage, SDInfo* sd_info) {
         sd_info->cluster_size = fs->csize;
         sd_info->sector_size = sector_size;
 #endif
-
     }
 
     return storage_ext_parse_error(error);
@@ -525,7 +524,6 @@ static FS_Error storage_ext_common_fs_info(
     const char* fs_path,
     uint64_t* total_space,
     uint64_t* free_space) {
-
 #ifdef FURI_RAM_EXEC
     return FSE_NOT_READY;
 #else

@@ -31,7 +31,7 @@ static void sd_mount_callback(const void* message, void* context) {
 void updater_scene_main_on_enter(void* context) {
     Updater* updater = (Updater*)context;
     UpdaterMainView* main_view = updater->main_view;
-    
+
     FuriPubSubSubscription* sub =
         furi_pubsub_subscribe(storage_get_pubsub(updater->storage), &sd_mount_callback, updater);
     updater_main_set_storage_pubsub(main_view, sub);
@@ -47,7 +47,7 @@ bool updater_scene_main_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case UpdaterEventSdMounted:
-            string_init_set(update_path, "/ext"UPDATE_DIR_DEFAULT_PATH);
+            string_init_set(update_path, "/ext" UPDATE_DIR_DEFAULT_PATH);
             if(update_task_init(updater->update_task, update_path)) {
                 update_task_start(updater->update_task);
             }

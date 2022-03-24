@@ -6,7 +6,6 @@ extern "C" {
 
 void flipper_update_exec();
 
-
 #ifdef __cplusplus
 }
 #endif

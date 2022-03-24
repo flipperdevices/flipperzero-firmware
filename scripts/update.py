@@ -52,12 +52,12 @@ class Main(App):
     @staticmethod
     def int2ffhex(value: int):
         hexstr = "%08X" % value
-        return " ".join(list(Main.batch(hexstr,2))[::-1])
+        return " ".join(list(Main.batch(hexstr, 2))[::-1])
 
     @staticmethod
     def crc(fileName):
         prev = 0
-        with open(fileName,"rb") as file:
+        with open(fileName, "rb") as file:
             for eachLine in file:
                 prev = zlib.crc32(eachLine, prev)
         return prev & 0xFFFFFFFF

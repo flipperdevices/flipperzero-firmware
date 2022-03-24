@@ -244,7 +244,7 @@ void bt_on_system_start() {
     cli_add_command(cli, "bt", CliCommandFlagDefault, bt_cli, NULL);
     furi_record_close("bt");
     furi_record_close("cli");
-#else  
+#else
     (void)&bt_cli; // to make it build
 #endif
 }
