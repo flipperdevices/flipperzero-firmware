@@ -188,10 +188,15 @@ void furi_hal_infrared_async_rx_start(void) {
 
 void furi_hal_infrared_async_rx_stop(void) {
     furi_assert(furi_hal_infrared_state == InfraredStateAsyncRx);
+
+    FURI_CRITICAL_ENTER();
+
     LL_TIM_DeInit(TIM2);
     furi_hal_interrupt_set_timer_isr(TIM2, NULL);
     LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_TIM2);
     furi_hal_infrared_state = InfraredStateIdle;
+
+    FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_infrared_async_rx_set_timeout(uint32_t timeout_us) {
