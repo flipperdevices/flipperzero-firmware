@@ -14,6 +14,8 @@ void furi_hal_init() {
     furi_hal_interrupt_init();
     furi_hal_delay_init(true);
 
+    furi_hal_flash_init();
+
     MX_GPIO_Init();
     FURI_LOG_I(TAG, "GPIO OK");
 

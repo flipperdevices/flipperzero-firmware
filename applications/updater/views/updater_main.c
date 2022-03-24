@@ -93,7 +93,7 @@ static void updater_main_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_draw_str_aligned(
         canvas, 128 / 2, 13, AlignCenter, AlignTop, string_get_cstr(model->status));
-    elements_progress_bar(canvas, 14, 35, 100, model->progress);
+    elements_progress_bar(canvas, 14, 35, 100, (float)model->progress / 100);
 }
 
 UpdaterMainView* updater_main_alloc() {

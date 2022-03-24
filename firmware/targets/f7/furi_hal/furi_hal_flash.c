@@ -62,6 +62,11 @@ size_t furi_hal_flash_get_free_page_count() {
     return (end - page_start) / FURI_HAL_FLASH_PAGE_SIZE;
 }
 
+void furi_hal_flash_init() {
+    // Errata 2.2.9, Flash OPTVERR flag is always set after system reset
+    __HAL_FLASH_CLEAR_FLAG(FLASH_SR_OPTVERR /*FLASH_FLAG_ALL_ERRORS*/);
+}
+
 static void furi_hal_flash_unlock() {
     /* verify Flash is locked */
     furi_check(READ_BIT(FLASH->CR, FLASH_CR_LOCK) != 0U);
@@ -362,4 +367,4 @@ int16_t furi_hal_flash_get_page_number(size_t address) {
     }
 
     return (address - flash_base) / FURI_HAL_FLASH_PAGE_SIZE;
-} 
+}
