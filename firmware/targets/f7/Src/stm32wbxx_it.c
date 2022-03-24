@@ -16,7 +16,9 @@ void SysTick_Handler(void) {
 }
 
 void USB_LP_IRQHandler(void) {
+#ifndef FURI_RAM_EXEC
     usbd_poll(&udev);
+#endif
 }
 
 void TIM1_TRG_COM_TIM17_IRQHandler(void) {
