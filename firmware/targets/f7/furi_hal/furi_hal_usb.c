@@ -17,7 +17,6 @@ typedef struct {
     bool enabled;
     bool connected;
     bool mode_lock;
-    osMutexId_t lock_mutex;
     FuriHalUsbInterface* if_cur;
     FuriHalUsbInterface* if_next;
     void* if_ctx;
@@ -82,8 +81,6 @@ void furi_hal_usb_init(void) {
     HAL_NVIC_SetPriority(USB_LP_IRQn, 5, 0);
     NVIC_EnableIRQ(USB_LP_IRQn);
 
-    usb.lock_mutex = osMutexNew(NULL);
-
     usb.thread = furi_thread_alloc();
     furi_thread_set_name(usb.thread, "UsbDriver");
     furi_thread_set_stack_size(usb.thread, 1024);
@@ -114,19 +111,13 @@ FuriHalUsbInterface* furi_hal_usb_get_config() {
 }
 
 void furi_hal_usb_lock() {
-    furi_assert(usb.lock_mutex);
     FURI_LOG_I(TAG, "Mode lock");
-    osMutexAcquire(usb.lock_mutex, osWaitForever);
     usb.mode_lock = true;
-    osMutexRelease(usb.lock_mutex);
 }
 
 void furi_hal_usb_unlock() {
-    furi_assert(usb.lock_mutex);
     FURI_LOG_I(TAG, "Mode unlock");
-    osMutexAcquire(usb.lock_mutex, osWaitForever);
     usb.mode_lock = false;
-    osMutexRelease(usb.lock_mutex);
 }
 
 void furi_hal_usb_disable() {

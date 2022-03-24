@@ -44,7 +44,7 @@ void furi_hal_usb_init();
  * @param      ctx context passed to device mode init function
  * @return     true - mode switch started, false - mode switch is locked
  */
-void furi_hal_usb_set_config(FuriHalUsbInterface* new_if, void* ctx);
+bool furi_hal_usb_set_config(FuriHalUsbInterface* new_if, void* ctx);
 
 /** Get USB device configuration
  *

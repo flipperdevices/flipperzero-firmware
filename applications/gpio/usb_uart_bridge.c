@@ -356,5 +356,5 @@ void usb_uart_get_state(UsbUartBridge* usb_uart, UsbUartState* st) {
 }
 
 bool usb_uart_is_usb_unlocked() {
-    return furi_hal_usb_set_config(&usb_cdc_single);
+    return furi_hal_usb_set_config(&usb_cdc_single, NULL);
 }
