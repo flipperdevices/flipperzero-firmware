@@ -7,6 +7,7 @@ from os.path import basename, join
 import shutil
 import zlib
 
+
 class Main(App):
     def init(self):
         self.subparsers = self.parser.add_subparsers(help="sub-command help")
@@ -17,33 +18,27 @@ class Main(App):
         )
 
         self.parser_generate.add_argument("-d", dest="directory", required=True)
-        self.parser_generate.add_argument(
-            "-t", dest="target", required=True
-        )
-        self.parser_generate.add_argument(
-            "-dfu", dest="dfu", required=True
-        )
-        self.parser_generate.add_argument(
-            "-stage", dest="stage", required=True
-        )
-        self.parser_generate.add_argument(
-            "-radio", dest="radiobin", required=False
-        )
-        self.parser_generate.add_argument(
-            "-radioaddr", dest="radioaddr", required=False
-        )
+        self.parser_generate.add_argument("-t", dest="target", required=True)
+        self.parser_generate.add_argument("-dfu", dest="dfu", required=True)
+        self.parser_generate.add_argument("-stage", dest="stage", required=True)
+        self.parser_generate.add_argument("-radio", dest="radiobin", required=False)
+        self.parser_generate.add_argument("-radioaddr", dest="radioaddr", required=False)
 
         self.parser_generate.set_defaults(func=self.generate)
 
     def generate(self):
         meta = {}
 
-        shutil.copyfile(self.args.stage, join(self.args.directory, basename(self.args.stage)))
-        shutil.copyfile(self.args.dfu, join(self.args.directory, basename(self.args.dfu)))
+        shutil.copyfile(
+            self.args.stage, join(self.args.directory, basename(self.args.stage))
+        )
+        shutil.copyfile(
+            self.args.dfu, join(self.args.directory, basename(self.args.dfu))
+        )
 
         file = FlipperFormatFile()
         file.setHeader("Flipper firmware upgrade configuration", 1)
-        file.writeKey("Target", self.args.target[1:]) # dirty 'f' strip
+        file.writeKey("Target", self.args.target[1:])  # dirty 'f' strip
         file.writeKey("Loader", basename(self.args.stage))
         file.writeComment("little-endian hex!")
         file.writeKey("Loader CRC", self.int2ffhex(self.crc(self.args.stage)))
@@ -57,7 +52,7 @@ class Main(App):
     @staticmethod
     def int2ffhex(value: int):
         hexstr = "%08X" % value
-        return ' '.join(list(Main.batch(hexstr,2))[::-1])
+        return " ".join(list(Main.batch(hexstr,2))[::-1])
 
     @staticmethod
     def crc(fileName):
@@ -65,13 +60,14 @@ class Main(App):
         with open(fileName,"rb") as file:
             for eachLine in file:
                 prev = zlib.crc32(eachLine, prev)
-        return (prev & 0xFFFFFFFF)
+        return prev & 0xFFFFFFFF
 
     @staticmethod
     def batch(iterable, n=1):
         l = len(iterable)
         for ndx in range(0, l, n):
-            yield iterable[ndx:min(ndx + n, l)]
+            yield iterable[ndx : min(ndx + n, l)]
+
 
 if __name__ == "__main__":
     Main()()
