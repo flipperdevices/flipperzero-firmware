@@ -128,7 +128,7 @@ header file. */
     if((x) == 0) {                     \
         furi_crash("FreeRTOS Assert"); \
     }
-#endif 
+#endif
 
 /* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
 standard names. */

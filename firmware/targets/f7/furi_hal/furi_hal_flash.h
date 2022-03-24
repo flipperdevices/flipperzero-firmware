@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-
 /** Init flash, applying necessary workarounds
  */
 void furi_hal_flash_init();

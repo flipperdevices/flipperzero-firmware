@@ -22,7 +22,9 @@ class Main(App):
         self.parser_generate.add_argument("-dfu", dest="dfu", required=True)
         self.parser_generate.add_argument("-stage", dest="stage", required=True)
         self.parser_generate.add_argument("-radio", dest="radiobin", required=False)
-        self.parser_generate.add_argument("-radioaddr", dest="radioaddr", required=False)
+        self.parser_generate.add_argument(
+            "-radioaddr", dest="radioaddr", required=False
+        )
 
         self.parser_generate.set_defaults(func=self.generate)
 
