@@ -12,8 +12,6 @@
 // #define FURI_HAL_SPEAKER_NEW_VOLUME
 
 void furi_hal_speaker_init() {
-    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM16);
-
     FURI_CRITICAL_ENTER();
     LL_TIM_DeInit(FURI_HAL_SPEAKER_TIMER);
     FURI_CRITICAL_EXIT();

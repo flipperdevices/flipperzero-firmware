@@ -19,12 +19,12 @@ void PulseSequencer::start() {
     pin_state = !pin_state;
 
     hal_gpio_init(&ibutton_gpio, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedVeryHigh);
-    furi_hal_onewire_emulate_start(
+    furi_hal_ibutton_emulate_start(
         periods[period_index], PulseSequencer::timer_elapsed_callback, this);
 }
 
 void PulseSequencer::stop() {
-    furi_hal_onewire_emulate_stop();
+    furi_hal_ibutton_emulate_stop();
 }
 
 PulseSequencer::~PulseSequencer() {
@@ -34,7 +34,7 @@ PulseSequencer::~PulseSequencer() {
 void PulseSequencer::timer_elapsed_callback(void* context) {
     PulseSequencer* self = static_cast<PulseSequencer*>(context);
 
-    furi_hal_onewire_emulate_set_next(self->periods[self->period_index]);
+    furi_hal_ibutton_emulate_set_next(self->periods[self->period_index]);
 
     if(self->period_index == 0) {
         self->pin_state = self->pin_start_state;
