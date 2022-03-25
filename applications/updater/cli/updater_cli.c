@@ -1,16 +1,16 @@
 #include "updater_cli.h"
 
 #include "../util/update_manifest.h"
+#include "../util/tar_archive.h"
+#include "../util/lfs_backup.h"
 
 #include <furi.h>
 #include <furi_hal.h>
 #include <m-string.h>
 #include <cli/cli.h>
 #include <storage/storage.h>
-
-#include "../util/tar_archive.h"
 #include <loader/loader.h>
-#include "../util/lfs_backup.h"
+
 
 static void updater_cli_apply(Cli* cli, string_t args, void* context) {
     const char update_dir_path[] = "/ext" UPDATE_DIR_DEFAULT_REL_PATH;
@@ -67,8 +67,7 @@ static void updater_cli_apply(Cli* cli, string_t args, void* context) {
         }
 
         printf("OK.\r\nRestarting to apply update. BRB\r\n");
-        osDelay(1000);
-        //furi_hal_rtc_set_flag(FuriHalRtcFlagExecuteUpdate);
+        osDelay(100);
         furi_hal_rtc_set_flag(FuriHalRtcFlagExecutePreUpdate);
         furi_hal_power_reset();
     }

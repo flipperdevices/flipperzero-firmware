@@ -29,9 +29,9 @@ typedef enum {
     FuriHalRtcFlagDebug = (1 << 0),
     FuriHalRtcFlagFactoryReset = (1 << 1),
     FuriHalRtcFlagLock = (1 << 2),
-    FuriHalRtcFlagExecuteUpdate = (1 << 3),
-    FuriHalRtcFlagExecutePostUpdate = (1 << 4),
-    FuriHalRtcFlagExecutePreUpdate = (1 << 5),
+    FuriHalRtcFlagExecutePreUpdate = (1 << 3),
+    FuriHalRtcFlagExecuteUpdate = (1 << 4),
+    FuriHalRtcFlagExecutePostUpdate = (1 << 5),
 } FuriHalRtcFlag;
 
 typedef enum {

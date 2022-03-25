@@ -57,8 +57,6 @@ static bool flipper_update_load_stage(UpdateManifest* manifest) {
     FIL file;
     FILINFO stat;
 
-    furi_hal_crc_reset();
-
     string_t loader_img_path;
     string_init_printf(
         loader_img_path, "/update/%s", string_get_cstr(manifest->staged_loader_file));
@@ -73,6 +71,8 @@ static bool flipper_update_load_stage(UpdateManifest* manifest) {
     void* img = malloc(stat.fsize);
     uint32_t bytes_read = 0;
     const uint16_t MAX_READ = 0xFFFF;
+
+    furi_hal_crc_reset();
     uint32_t crc = 0;
     do {
         uint16_t size_read = 0;
@@ -82,16 +82,10 @@ static bool flipper_update_load_stage(UpdateManifest* manifest) {
         crc = furi_hal_crc_feed(img + bytes_read, size_read);
         bytes_read += size_read;
     } while(bytes_read == MAX_READ);
-
     furi_hal_crc_reset();
 
     do {
-        //if(crc == 0) {
-        if(crc != manifest->staged_loader_crc) {
-            break;
-        }
-
-        if(bytes_read != stat.fsize) {
+        if((bytes_read != stat.fsize) || (crc != manifest->staged_loader_crc)) {
             break;
         }
 

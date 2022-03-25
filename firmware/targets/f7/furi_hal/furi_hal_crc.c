@@ -80,5 +80,6 @@ uint32_t furi_hal_crc_feed(void* data, uint16_t length) {
 }
 
 bool furi_hal_crc_acquire(uint32_t timeout) {
+    furi_assert(hal_crc_control.mtx);
     return osMutexAcquire(hal_crc_control.mtx, timeout) == osOK;
 }

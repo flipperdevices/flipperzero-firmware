@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 /** Init DWT
+ * @param queuedDelay whether to use RTOS sync (true) or dumb loop (false)
  */
 void furi_hal_delay_init(bool queuedDelay);
 
