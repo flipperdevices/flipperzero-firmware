@@ -11,7 +11,6 @@
 #include <storage/storage.h>
 #include <loader/loader.h>
 
-
 static void updater_cli_apply(Cli* cli, string_t args, void* context) {
     const char update_dir_path[] = "/ext" UPDATE_DIR_DEFAULT_REL_PATH;
     const char update_manifest_path[] = "/ext" UPDATE_MAINFEST_DEFAULT_PATH;
