@@ -202,6 +202,59 @@ static void rpc_system_system_protobuf_version_process(const PB_Main* request, v
     free(response);
 }
 
+static void rpc_system_system_update_request_process(const PB_Main* request, void* context) {
+    furi_assert(request);
+    furi_assert(request->which_content == PB_Main_system_update_request_tag);
+
+    RpcSession* session = (RpcSession*)context;
+    furi_assert(session);
+
+    PB_Main* response = malloc(sizeof(PB_Main));
+    response->command_id = request->command_id;
+    response->has_next = false;
+    response->command_status = PB_CommandStatus_OK;
+    //response->which_content = PB_Main_system_protobuf_version_response_tag;
+    //response->content.system_protobuf_version_response.major = PROTOBUF_MAJOR_VERSION;
+
+    rpc_send_and_release(session, response);
+    free(response);
+}
+static void rpc_system_system_backup_create_process(const PB_Main* request, void* context) {
+    furi_assert(request);
+    furi_assert(request->which_content == PB_Main_system_backup_create_request_tag);
+
+    RpcSession* session = (RpcSession*)context;
+    furi_assert(session);
+
+    PB_Main* response = malloc(sizeof(PB_Main));
+    response->command_id = request->command_id;
+    response->has_next = false;
+    response->command_status = PB_CommandStatus_OK;
+    //response->which_content = PB_Main_system_protobuf_version_response_tag;
+    //response->content.system_protobuf_version_response.major = PROTOBUF_MAJOR_VERSION;
+
+    rpc_send_and_release(session, response);
+    free(response);
+}
+
+static void rpc_system_system_backup_restore_process(const PB_Main* request, void* context) {
+    furi_assert(request);
+    furi_assert(request->which_content == PB_Main_system_backup_restore_request_tag);
+
+    RpcSession* session = (RpcSession*)context;
+    furi_assert(session);
+
+    PB_Main* response = malloc(sizeof(PB_Main));
+    response->command_id = request->command_id;
+    response->has_next = false;
+    response->command_status = PB_CommandStatus_OK;
+    //response->which_content = PB_Main_system_protobuf_version_response_tag;
+    //response->content.system_protobuf_version_response.major = PROTOBUF_MAJOR_VERSION;
+
+    rpc_send_and_release(session, response);
+    free(response);
+}
+
 void* rpc_system_system_alloc(RpcSession* session) {
     RpcHandler rpc_handler = {
         .message_handler = NULL,
@@ -232,6 +285,15 @@ void* rpc_system_system_alloc(RpcSession* session) {
 
     rpc_handler.message_handler = rpc_system_system_protobuf_version_process;
     rpc_add_handler(session, PB_Main_system_protobuf_version_request_tag, &rpc_handler);
+
+    rpc_handler.message_handler = rpc_system_system_update_request_process;
+    rpc_add_handler(session, PB_Main_system_update_request_tag, &rpc_handler);
+
+    rpc_handler.message_handler = rpc_system_system_backup_create_process;
+    rpc_add_handler(session, PB_Main_system_backup_create_request_tag, &rpc_handler);
+
+    rpc_handler.message_handler = rpc_system_system_backup_restore_process;
+    rpc_add_handler(session, PB_Main_system_backup_restore_request_tag, &rpc_handler);
 
     return NULL;
 }
