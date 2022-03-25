@@ -27,9 +27,6 @@ static bool flipper_update_init() {
 
     MX_GPIO_Init();
 
-    //furi_hal_bootloader_init();
-    //furi_hal_version_init();
-
     furi_hal_spi_init();
     furi_hal_crc_init(false);
 
@@ -101,7 +98,7 @@ static bool flipper_update_load_stage(UpdateManifest* manifest) {
         /* point of no return */
         FURI_CRITICAL_ENTER();
         memmove((void*)(SRAM1_BASE), img, stat.fsize);
-        __HAL_SYSCFG_REMAPMEMORY_SRAM();
+        LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SRAM);
         flipper_update_target_switch((void*)SRAM1_BASE);
         /* unreachable -- but makes compiler happy */
         FURI_CRITICAL_EXIT();
