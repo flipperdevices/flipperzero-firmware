@@ -4,12 +4,8 @@
 #include <furi_hal_resources.h>
 #include <furi.h>
 
-#include <tim.h>
 #include <stm32wbxx_ll_tim.h>
 #include <stm32wbxx_ll_comp.h>
-
-#define LFRFID_READ_TIM htim1
-#define LFRFID_READ_CHANNEL TIM_CHANNEL_1
 
 #define FURI_HAL_RFID_READ_TIMER TIM1
 #define FURI_HAL_RFID_READ_TIMER_CHANNEL LL_TIM_CHANNEL_CH1
@@ -119,77 +115,30 @@ void furi_hal_rfid_pin_pull_pulldown() {
 }
 
 void furi_hal_rfid_tim_read(float freq, float duty_cycle) {
-    // TODO LL init
-    uint32_t period = (uint32_t)((SystemCoreClock) / freq) - 1;
+    FURI_CRITICAL_ENTER();
+    LL_TIM_DeInit(FURI_HAL_RFID_READ_TIMER);
+    FURI_CRITICAL_EXIT();
 
-    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-    TIM_MasterConfigTypeDef sMasterConfig = {0};
-    TIM_OC_InitTypeDef sConfigOC = {0};
-    TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+    LL_TIM_InitTypeDef TIM_InitStruct = {0};
+    TIM_InitStruct.Autoreload = (SystemCoreClock / freq) - 1;
+    LL_TIM_Init(FURI_HAL_RFID_READ_TIMER, &TIM_InitStruct);
+    LL_TIM_DisableARRPreload(FURI_HAL_RFID_READ_TIMER);
 
-    // basic PWM setup with needed freq and internal clock
-    LFRFID_READ_TIM.Init.Prescaler = 0;
-    LFRFID_READ_TIM.Init.CounterMode = TIM_COUNTERMODE_UP;
-    LFRFID_READ_TIM.Init.Period = period;
-    LFRFID_READ_TIM.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    LFRFID_READ_TIM.Init.RepetitionCounter = 0;
-    LFRFID_READ_TIM.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-    if(HAL_TIM_Base_Init(&LFRFID_READ_TIM) != HAL_OK) {
-        Error_Handler();
-    }
-    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-    if(HAL_TIM_ConfigClockSource(&LFRFID_READ_TIM, &sClockSourceConfig) != HAL_OK) {
-        Error_Handler();
-    }
-    if(HAL_TIM_PWM_Init(&LFRFID_READ_TIM) != HAL_OK) {
-        Error_Handler();
-    }
+    LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
+    TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
+    TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_ENABLE;
+    TIM_OC_InitStruct.CompareValue = TIM_InitStruct.Autoreload * duty_cycle;
+    LL_TIM_OC_Init(FURI_HAL_RFID_READ_TIMER, FURI_HAL_RFID_READ_TIMER_CHANNEL, &TIM_OC_InitStruct);
 
-    // no master-slave mode
-    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-    sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
-    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-    if(HAL_TIMEx_MasterConfigSynchronization(&LFRFID_READ_TIM, &sMasterConfig) != HAL_OK) {
-        Error_Handler();
-    }
-
-    // pwm config
-    sConfigOC.OCMode = TIM_OCMODE_PWM1;
-    sConfigOC.Pulse = (uint32_t)(LFRFID_READ_TIM.Init.Period * duty_cycle);
-    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-    sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-    sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-    sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-    if(HAL_TIM_PWM_ConfigChannel(&LFRFID_READ_TIM, &sConfigOC, LFRFID_READ_CHANNEL) != HAL_OK) {
-        Error_Handler();
-    }
-
-    // no deadtime
-    sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
-    sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
-    sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-    sBreakDeadTimeConfig.DeadTime = 0;
-    sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-    sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
-    sBreakDeadTimeConfig.BreakFilter = 0;
-    sBreakDeadTimeConfig.BreakAFMode = TIM_BREAK_AFMODE_INPUT;
-    sBreakDeadTimeConfig.Break2State = TIM_BREAK2_DISABLE;
-    sBreakDeadTimeConfig.Break2Polarity = TIM_BREAK2POLARITY_HIGH;
-    sBreakDeadTimeConfig.Break2Filter = 0;
-    sBreakDeadTimeConfig.Break2AFMode = TIM_BREAK_AFMODE_INPUT;
-    sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
-    if(HAL_TIMEx_ConfigBreakDeadTime(&LFRFID_READ_TIM, &sBreakDeadTimeConfig) != HAL_OK) {
-        Error_Handler();
-    }
+    LL_TIM_EnableCounter(FURI_HAL_RFID_READ_TIMER);
 }
 
 void furi_hal_rfid_tim_read_start() {
-    HAL_TIMEx_PWMN_Start(&LFRFID_READ_TIM, LFRFID_READ_CHANNEL);
+    LL_TIM_EnableAllOutputs(FURI_HAL_RFID_READ_TIMER);
 }
 
 void furi_hal_rfid_tim_read_stop() {
-    HAL_TIMEx_PWMN_Stop(&LFRFID_READ_TIM, LFRFID_READ_CHANNEL);
+    LL_TIM_DisableAllOutputs(FURI_HAL_RFID_READ_TIMER);
 }
 
 void furi_hal_rfid_tim_emulate(float freq) {

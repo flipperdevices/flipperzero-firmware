@@ -1,7 +1,5 @@
 #include "rfid_timer_emulator.h"
 
-extern TIM_HandleTypeDef htim1;
-
 RfidTimerEmulator::RfidTimerEmulator() {
 }
 
