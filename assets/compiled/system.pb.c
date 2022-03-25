@@ -45,5 +45,14 @@ PB_BIND(PB_System_ProtobufVersionRequest, PB_System_ProtobufVersionRequest, AUTO
 PB_BIND(PB_System_ProtobufVersionResponse, PB_System_ProtobufVersionResponse, AUTO)
 
 
+PB_BIND(PB_System_UpdateRequest, PB_System_UpdateRequest, AUTO)
+
+
+PB_BIND(PB_System_BackupCreateRequest, PB_System_BackupCreateRequest, AUTO)
+
+
+PB_BIND(PB_System_BackupRestoreRequest, PB_System_BackupRestoreRequest, AUTO)
+
+
 
 
