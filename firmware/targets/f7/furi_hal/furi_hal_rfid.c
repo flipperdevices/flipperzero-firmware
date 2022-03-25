@@ -7,12 +7,16 @@
 #include <stm32wbxx_ll_tim.h>
 #include <stm32wbxx_ll_comp.h>
 
-#define LFRFID_TIM htim1
-#define LFRFID_CH TIM_CHANNEL_1
 #define LFRFID_READ_TIM htim1
 #define LFRFID_READ_CHANNEL TIM_CHANNEL_1
+
 #define LFRFID_EMULATE_TIM htim2
 #define LFRFID_EMULATE_CHANNEL TIM_CHANNEL_3
+
+#define FURI_HAL_RFID_READ_TIMER TIM1
+#define FURI_HAL_RFID_READ_TIMER_CHANNEL LL_TIM_CHANNEL_CH1
+#define FURI_HAL_RFID_EMULATE_TIMER TIM2
+#define FURI_HAL_RFID_EMULATE_TIMER_CHANNEL LL_TIM_CHANNEL_CH3
 
 void furi_hal_rfid_init() {
     furi_hal_rfid_pins_reset();
@@ -182,10 +186,6 @@ void furi_hal_rfid_tim_emulate(float freq) {
     // TODO LL init
     // uint32_t prescaler = (uint32_t)((SystemCoreClock) / freq) - 1;
 
-    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-    TIM_MasterConfigTypeDef sMasterConfig = {0};
-    TIM_OC_InitTypeDef sConfigOC = {0};
-
     // basic PWM setup with needed freq and internal clock
     LFRFID_EMULATE_TIM.Init.Prescaler = 0;
     LFRFID_EMULATE_TIM.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -196,6 +196,8 @@ void furi_hal_rfid_tim_emulate(float freq) {
     if(HAL_TIM_Base_Init(&LFRFID_EMULATE_TIM) != HAL_OK) {
         Error_Handler();
     }
+
+    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
 
     sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_ETRMODE2;
     sClockSourceConfig.ClockPolarity = TIM_ETRPOLARITY_INVERTED;
@@ -252,9 +254,9 @@ void furi_hal_rfid_tim_reset() {
     FURI_CRITICAL_ENTER();
 
     HAL_TIM_Base_DeInit(&LFRFID_READ_TIM);
-    LL_TIM_DeInit(TIM1);
+    LL_TIM_DeInit(FURI_HAL_RFID_READ_TIMER);
     HAL_TIM_Base_DeInit(&LFRFID_EMULATE_TIM);
-    LL_TIM_DeInit(TIM2);
+    LL_TIM_DeInit(FURI_HAL_RFID_EMULATE_TIMER);
 
     FURI_CRITICAL_EXIT();
 }
@@ -264,51 +266,27 @@ bool furi_hal_rfid_is_tim_emulate(TIM_HandleTypeDef* hw) {
 }
 
 void furi_hal_rfid_set_emulate_period(uint32_t period) {
-    LFRFID_EMULATE_TIM.Instance->ARR = period;
+    LL_TIM_SetAutoReload(FURI_HAL_RFID_EMULATE_TIMER, period);
 }
 
 void furi_hal_rfid_set_emulate_pulse(uint32_t pulse) {
-    switch(LFRFID_EMULATE_CHANNEL) {
-    case TIM_CHANNEL_1:
-        LFRFID_EMULATE_TIM.Instance->CCR1 = pulse;
-        break;
-    case TIM_CHANNEL_2:
-        LFRFID_EMULATE_TIM.Instance->CCR2 = pulse;
-        break;
-    case TIM_CHANNEL_3:
-        LFRFID_EMULATE_TIM.Instance->CCR3 = pulse;
-        break;
-    case TIM_CHANNEL_4:
-        LFRFID_EMULATE_TIM.Instance->CCR4 = pulse;
-        break;
-    default:
-        furi_crash(NULL);
-        break;
-    }
+#if FURI_HAL_RFID_EMULATE_TIMER_CHANNEL == LL_TIM_CHANNEL_CH3
+    LL_TIM_OC_SetCompareCH3(FURI_HAL_RFID_EMULATE_TIMER, pulse);
+#else
+    #error Update this code. Would you kindly?
+#endif
 }
 
 void furi_hal_rfid_set_read_period(uint32_t period) {
-    LFRFID_TIM.Instance->ARR = period;
+    LL_TIM_SetAutoReload(FURI_HAL_RFID_READ_TIMER, period);
 }
 
 void furi_hal_rfid_set_read_pulse(uint32_t pulse) {
-    switch(LFRFID_READ_CHANNEL) {
-    case TIM_CHANNEL_1:
-        LFRFID_TIM.Instance->CCR1 = pulse;
-        break;
-    case TIM_CHANNEL_2:
-        LFRFID_TIM.Instance->CCR2 = pulse;
-        break;
-    case TIM_CHANNEL_3:
-        LFRFID_TIM.Instance->CCR3 = pulse;
-        break;
-    case TIM_CHANNEL_4:
-        LFRFID_TIM.Instance->CCR4 = pulse;
-        break;
-    default:
-        furi_crash(NULL);
-        break;
-    }
+#if FURI_HAL_RFID_READ_TIMER_CHANNEL == LL_TIM_CHANNEL_CH1
+    LL_TIM_OC_SetCompareCH1(FURI_HAL_RFID_READ_TIMER, pulse);
+#else
+    #error Update this code. Would you kindly?
+#endif
 }
 
 void furi_hal_rfid_change_read_config(float freq, float duty_cycle) {
