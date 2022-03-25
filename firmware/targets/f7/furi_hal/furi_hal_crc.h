@@ -11,11 +11,9 @@ extern "C" {
  */
 void furi_hal_crc_init(bool synchronize);
 
-
-/** Blocking call to get control of CRC block. Mandatory wile RTOS is running
+/** Blocking call to get control of CRC block. Mandatory while RTOS is running
  */
 bool furi_hal_crc_acquire(uint32_t timeout);
-
 
 /** Reset current calculation state
  */
