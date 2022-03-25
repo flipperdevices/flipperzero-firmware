@@ -1,7 +1,13 @@
 #include "nfc_worker_i.h"
 #include <furi_hal.h>
-#include "nfc_protocols/emv_decoder.h"
-#include "nfc_protocols/mifare_ultralight.h"
+
+#include <lib/nfc_protocols/nfc_util.h>
+#include <lib/nfc_protocols/emv_decoder.h>
+#include <lib/nfc_protocols/mifare_ultralight.h>
+#include <lib/nfc_protocols/mifare_classic.h>
+#include <lib/nfc_protocols/mifare_desfire.h>
+
+#include "helpers/nfc_mf_classic_dict.h"
 
 #define TAG "NfcWorker"
 
@@ -19,6 +25,7 @@ NfcWorker* nfc_worker_alloc() {
 
     nfc_worker->callback = NULL;
     nfc_worker->context = NULL;
+    nfc_worker->storage = furi_record_open("storage");
 
     // Initialize rfal
     while(furi_hal_nfc_is_busy()) {
@@ -32,6 +39,7 @@ NfcWorker* nfc_worker_alloc() {
 void nfc_worker_free(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
     furi_thread_free(nfc_worker->thread);
+    furi_record_close("storage");
     free(nfc_worker);
 }
 
@@ -94,6 +102,10 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_read_mifare_ul(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
         nfc_worker_emulate_mifare_ul(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateReadMifareClassic) {
+        nfc_worker_mifare_classic_dict_attack(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateReadMifareDesfire) {
+        nfc_worker_read_mifare_desfire(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateField) {
         nfc_worker_field(nfc_worker);
     }
@@ -108,6 +120,7 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
     rfalNfcDevice* dev_list;
     rfalNfcDevice* dev;
     uint8_t dev_cnt;
+    nfc_device_data_clear(nfc_worker->dev_data);
     NfcDeviceCommonData* result = &nfc_worker->dev_data->nfc_data;
 
     while(nfc_worker->state == NfcWorkerStateDetect) {
@@ -126,6 +139,16 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
                        dev->dev.nfca.sensRes.platformInfo,
                        dev->dev.nfca.selRes.sak)) {
                     result->protocol = NfcDeviceProtocolMifareUl;
+                } else if(mf_classic_check_card_type(
+                              dev->dev.nfca.sensRes.anticollisionInfo,
+                              dev->dev.nfca.sensRes.platformInfo,
+                              dev->dev.nfca.selRes.sak)) {
+                    result->protocol = NfcDeviceProtocolMifareClassic;
+                } else if(mf_df_check_card_type(
+                              dev->dev.nfca.sensRes.anticollisionInfo,
+                              dev->dev.nfca.sensRes.platformInfo,
+                              dev->dev.nfca.selRes.sak)) {
+                    result->protocol = NfcDeviceProtocolMifareDesfire;
                 } else if(dev->rfInterface == RFAL_NFC_INTERFACE_ISODEP) {
                     result->protocol = NfcDeviceProtocolEMV;
                 } else {
@@ -140,7 +163,7 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
             }
             // Notify caller and exit
             if(nfc_worker->callback) {
-                nfc_worker->callback(nfc_worker->context);
+                nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
             }
             break;
         }
@@ -162,7 +185,7 @@ bool nfc_worker_emulate_uid_callback(
     if(reader_data->size > 0) {
         memcpy(reader_data->data, buff_rx, reader_data->size);
         if(nfc_worker->callback) {
-            nfc_worker->callback(nfc_worker->context);
+            nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
         }
     }
     return true;
@@ -192,6 +215,7 @@ void nfc_worker_read_emv_app(NfcWorker* nfc_worker) {
     uint8_t* rx_buff;
     uint16_t* rx_len;
     NfcDeviceData* result = nfc_worker->dev_data;
+    nfc_device_data_clear(result);
 
     while(nfc_worker->state == NfcWorkerStateReadEMVApp) {
         memset(&emv_app, 0, sizeof(emv_app));
@@ -221,7 +245,7 @@ void nfc_worker_read_emv_app(NfcWorker* nfc_worker) {
                     result->emv_data.aid_len = emv_app.aid_len;
                     memcpy(result->emv_data.aid, emv_app.aid, emv_app.aid_len);
                     if(nfc_worker->callback) {
-                        nfc_worker->callback(nfc_worker->context);
+                        nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
                     }
                     break;
                 } else {
@@ -253,6 +277,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
     uint8_t* rx_buff;
     uint16_t* rx_len;
     NfcDeviceData* result = nfc_worker->dev_data;
+    nfc_device_data_clear(result);
 
     while(nfc_worker->state == NfcWorkerStateReadEMV) {
         memset(&emv_app, 0, sizeof(emv_app));
@@ -318,7 +343,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                     memcpy(result->emv_data.number, emv_app.card_number, emv_app.card_number_len);
                     // Notify caller and exit
                     if(nfc_worker->callback) {
-                        nfc_worker->callback(nfc_worker->context);
+                        nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
                     }
                     break;
                 } else {
@@ -367,7 +392,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                         }
                         // Notify caller and exit
                         if(nfc_worker->callback) {
-                            nfc_worker->callback(nfc_worker->context);
+                            nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
                         }
                         break;
                     } else {
@@ -516,6 +541,7 @@ void nfc_worker_read_mifare_ul(NfcWorker* nfc_worker) {
     uint16_t* rx_len;
     MifareUlDevice mf_ul_read;
     NfcDeviceData* result = nfc_worker->dev_data;
+    nfc_device_data_clear(result);
 
     while(nfc_worker->state == NfcWorkerStateReadMifareUl) {
         furi_hal_nfc_deactivate();
@@ -621,7 +647,7 @@ void nfc_worker_read_mifare_ul(NfcWorker* nfc_worker) {
 
                 // Notify caller and exit
                 if(nfc_worker->callback) {
-                    nfc_worker->callback(nfc_worker->context);
+                    nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
                 }
                 break;
             } else {
@@ -651,10 +677,399 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
         if(mf_ul_emulate.data_changed) {
             nfc_worker->dev_data->mf_ul_data = mf_ul_emulate.data;
             if(nfc_worker->callback) {
-                nfc_worker->callback(nfc_worker->context);
+                nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
             }
             mf_ul_emulate.data_changed = false;
         }
+    }
+}
+
+void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
+    furi_assert(nfc_worker->callback);
+    rfalNfcDevice* dev_list;
+    rfalNfcDevice* dev;
+    NfcDeviceCommonData* nfc_common;
+    uint8_t dev_cnt = 0;
+    FuriHalNfcTxRxContext tx_rx_ctx = {};
+    MfClassicAuthContext auth_ctx = {};
+    MfClassicReader reader = {};
+    uint64_t curr_key = 0;
+    uint16_t curr_sector = 0;
+    uint8_t total_sectors = 0;
+    NfcWorkerEvent event;
+
+    // Open dictionary
+    nfc_worker->dict_stream = file_stream_alloc(nfc_worker->storage);
+    if(!nfc_mf_classic_dict_open_file(nfc_worker->dict_stream)) {
+        event = NfcWorkerEventNoDictFound;
+        nfc_worker->callback(event, nfc_worker->context);
+        nfc_mf_classic_dict_close_file(nfc_worker->dict_stream);
+        stream_free(nfc_worker->dict_stream);
+        return;
+    }
+
+    // Detect Mifare Classic card
+    while(nfc_worker->state == NfcWorkerStateReadMifareClassic) {
+        if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 300, false)) {
+            dev = &dev_list[0];
+            if(mf_classic_get_type(
+                   dev->nfcid,
+                   dev->nfcidLen,
+                   dev->dev.nfca.sensRes.anticollisionInfo,
+                   dev->dev.nfca.sensRes.platformInfo,
+                   dev->dev.nfca.selRes.sak,
+                   &reader)) {
+                total_sectors = mf_classic_get_total_sectors_num(&reader);
+                if(reader.type == MfClassicType1k) {
+                    event = NfcWorkerEventDetectedClassic1k;
+                } else {
+                    event = NfcWorkerEventDetectedClassic4k;
+                }
+                nfc_worker->callback(event, nfc_worker->context);
+                break;
+            }
+        } else {
+            event = NfcWorkerEventNoCardDetected;
+            nfc_worker->callback(event, nfc_worker->context);
+        }
+    }
+
+    if(nfc_worker->state == NfcWorkerStateReadMifareClassic) {
+        bool card_removed_notified = false;
+        bool card_found_notified = false;
+        // Seek for mifare classic keys
+        for(curr_sector = 0; curr_sector < total_sectors; curr_sector++) {
+            FURI_LOG_I(TAG, "Sector: %d ...", curr_sector);
+            event = NfcWorkerEventNewSector;
+            nfc_worker->callback(event, nfc_worker->context);
+            mf_classic_auth_init_context(&auth_ctx, reader.cuid, curr_sector);
+            bool sector_key_found = false;
+            while(nfc_mf_classic_dict_get_next_key(nfc_worker->dict_stream, &curr_key)) {
+                furi_hal_nfc_deactivate();
+                if(furi_hal_nfc_activate_nfca(300, &reader.cuid)) {
+                    if(!card_found_notified) {
+                        if(reader.type == MfClassicType1k) {
+                            event = NfcWorkerEventDetectedClassic1k;
+                        } else {
+                            event = NfcWorkerEventDetectedClassic4k;
+                        }
+                        nfc_worker->callback(event, nfc_worker->context);
+                        card_found_notified = true;
+                        card_removed_notified = false;
+                    }
+                    FURI_LOG_D(
+                        TAG,
+                        "Try to auth to sector %d with key %04lx%08lx",
+                        curr_sector,
+                        (uint32_t)(curr_key >> 32),
+                        (uint32_t)curr_key);
+                    if(mf_classic_auth_attempt(&tx_rx_ctx, &auth_ctx, curr_key)) {
+                        sector_key_found = true;
+                        if((auth_ctx.key_a != MF_CLASSIC_NO_KEY) &&
+                           (auth_ctx.key_b != MF_CLASSIC_NO_KEY))
+                            break;
+                    }
+                } else {
+                    // Notify that no tag is availalble
+                    FURI_LOG_D(TAG, "Can't find tags");
+                    if(!card_removed_notified) {
+                        event = NfcWorkerEventNoCardDetected;
+                        nfc_worker->callback(event, nfc_worker->context);
+                        card_removed_notified = true;
+                        card_found_notified = false;
+                    }
+                }
+                if(nfc_worker->state != NfcWorkerStateReadMifareClassic) break;
+            }
+            if(nfc_worker->state != NfcWorkerStateReadMifareClassic) break;
+            if(sector_key_found) {
+                // Notify that keys were found
+                if(auth_ctx.key_a != MF_CLASSIC_NO_KEY) {
+                    FURI_LOG_I(
+                        TAG,
+                        "Sector %d key A: %04lx%08lx",
+                        curr_sector,
+                        (uint32_t)(auth_ctx.key_a >> 32),
+                        (uint32_t)auth_ctx.key_a);
+                    event = NfcWorkerEventFoundKeyA;
+                    nfc_worker->callback(event, nfc_worker->context);
+                }
+                if(auth_ctx.key_b != MF_CLASSIC_NO_KEY) {
+                    FURI_LOG_I(
+                        TAG,
+                        "Sector %d key B: %04lx%08lx",
+                        curr_sector,
+                        (uint32_t)(auth_ctx.key_b >> 32),
+                        (uint32_t)auth_ctx.key_b);
+                    event = NfcWorkerEventFoundKeyB;
+                    nfc_worker->callback(event, nfc_worker->context);
+                }
+                // Add sectors to read sequence
+                mf_classic_reader_add_sector(&reader, curr_sector, auth_ctx.key_a, auth_ctx.key_b);
+            }
+            nfc_mf_classic_dict_reset(nfc_worker->dict_stream);
+        }
+    }
+
+    if(nfc_worker->state == NfcWorkerStateReadMifareClassic) {
+        FURI_LOG_I(TAG, "Found keys to %d sectors. Start reading sectors", reader.sectors_to_read);
+        uint8_t sectors_read =
+            mf_classic_read_card(&tx_rx_ctx, &reader, &nfc_worker->dev_data->mf_classic_data);
+        if(sectors_read) {
+            dev = &dev_list[0];
+            nfc_common = &nfc_worker->dev_data->nfc_data;
+            nfc_common->uid_len = dev->dev.nfca.nfcId1Len;
+            nfc_common->atqa[0] = dev->dev.nfca.sensRes.anticollisionInfo;
+            nfc_common->atqa[1] = dev->dev.nfca.sensRes.platformInfo;
+            nfc_common->sak = dev->dev.nfca.selRes.sak;
+            nfc_common->protocol = NfcDeviceProtocolMifareClassic;
+            memcpy(nfc_common->uid, dev->dev.nfca.nfcId1, nfc_common->uid_len);
+            event = NfcWorkerEventSuccess;
+            FURI_LOG_I(TAG, "Successfully read %d sectors", sectors_read);
+        } else {
+            event = NfcWorkerEventFail;
+            FURI_LOG_W(TAG, "Failed to read any sector");
+        }
+        nfc_worker->callback(event, nfc_worker->context);
+    }
+
+    nfc_mf_classic_dict_close_file(nfc_worker->dict_stream);
+    stream_free(nfc_worker->dict_stream);
+}
+
+ReturnCode nfc_exchange_full(
+    uint8_t* tx_buff,
+    uint16_t tx_len,
+    uint8_t* rx_buff,
+    uint16_t rx_cap,
+    uint16_t* rx_len) {
+    ReturnCode err;
+    uint8_t* part_buff;
+    uint16_t* part_len;
+
+    err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &part_buff, &part_len, false);
+    if(*part_len > rx_cap) {
+        return ERR_OVERRUN;
+    }
+    memcpy(rx_buff, part_buff, *part_len);
+    *rx_len = *part_len;
+    while(err == ERR_NONE && rx_buff[0] == 0xAF) {
+        err = furi_hal_nfc_data_exchange(rx_buff, 1, &part_buff, &part_len, false);
+        if(*part_len > rx_cap - *rx_len) {
+            return ERR_OVERRUN;
+        }
+        if(*part_len == 0) {
+            return ERR_PROTO;
+        }
+        memcpy(rx_buff + *rx_len, part_buff + 1, *part_len - 1);
+        *rx_buff = *part_buff;
+        *rx_len += *part_len - 1;
+    }
+
+    return err;
+}
+
+void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
+    ReturnCode err;
+    rfalNfcDevice* dev_list;
+    uint8_t dev_cnt = 0;
+    uint8_t tx_buff[64] = {};
+    uint16_t tx_len = 0;
+    uint8_t rx_buff[512] = {};
+    uint16_t rx_len;
+    NfcDeviceData* result = nfc_worker->dev_data;
+    nfc_device_data_clear(result);
+    MifareDesfireData* data = &result->mf_df_data;
+
+    while(nfc_worker->state == NfcWorkerStateReadMifareDesfire) {
+        furi_hal_nfc_deactivate();
+        if(!furi_hal_nfc_detect(&dev_list, &dev_cnt, 300, false)) {
+            osDelay(100);
+            continue;
+        }
+        memset(data, 0, sizeof(MifareDesfireData));
+        if(dev_list[0].type != RFAL_NFC_LISTEN_TYPE_NFCA ||
+           !mf_df_check_card_type(
+               dev_list[0].dev.nfca.sensRes.anticollisionInfo,
+               dev_list[0].dev.nfca.sensRes.platformInfo,
+               dev_list[0].dev.nfca.selRes.sak)) {
+            FURI_LOG_D(TAG, "Tag is not DESFire");
+            osDelay(100);
+            continue;
+        }
+
+        FURI_LOG_D(TAG, "Found DESFire tag");
+
+        // Fill non-DESFire result data
+        result->nfc_data.uid_len = dev_list[0].dev.nfca.nfcId1Len;
+        result->nfc_data.atqa[0] = dev_list[0].dev.nfca.sensRes.anticollisionInfo;
+        result->nfc_data.atqa[1] = dev_list[0].dev.nfca.sensRes.platformInfo;
+        result->nfc_data.sak = dev_list[0].dev.nfca.selRes.sak;
+        result->nfc_data.device = NfcDeviceNfca;
+        result->nfc_data.protocol = NfcDeviceProtocolMifareDesfire;
+        memcpy(result->nfc_data.uid, dev_list[0].dev.nfca.nfcId1, result->nfc_data.uid_len);
+
+        // Get DESFire version
+        tx_len = mf_df_prepare_get_version(tx_buff);
+        err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+        if(err != ERR_NONE) {
+            FURI_LOG_W(TAG, "Bad exchange getting version, err: %d", err);
+            continue;
+        }
+        if(!mf_df_parse_get_version_response(rx_buff, rx_len, &data->version)) {
+            FURI_LOG_W(TAG, "Bad DESFire GET_VERSION response");
+            continue;
+        }
+
+        tx_len = mf_df_prepare_get_free_memory(tx_buff);
+        err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+        if(err == ERR_NONE) {
+            data->free_memory = malloc(sizeof(MifareDesfireFreeMemory));
+            memset(data->free_memory, 0, sizeof(MifareDesfireFreeMemory));
+            if(!mf_df_parse_get_free_memory_response(rx_buff, rx_len, data->free_memory)) {
+                FURI_LOG_D(TAG, "Bad DESFire GET_FREE_MEMORY response (normal for pre-EV1 cards)");
+                free(data->free_memory);
+                data->free_memory = NULL;
+            }
+        }
+
+        tx_len = mf_df_prepare_get_key_settings(tx_buff);
+        err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+        if(err != ERR_NONE) {
+            FURI_LOG_D(TAG, "Bad exchange getting key settings, err: %d", err);
+        } else {
+            data->master_key_settings = malloc(sizeof(MifareDesfireKeySettings));
+            memset(data->master_key_settings, 0, sizeof(MifareDesfireKeySettings));
+            if(!mf_df_parse_get_key_settings_response(rx_buff, rx_len, data->master_key_settings)) {
+                FURI_LOG_W(TAG, "Bad DESFire GET_KEY_SETTINGS response");
+                free(data->master_key_settings);
+                data->master_key_settings = NULL;
+            }
+
+            MifareDesfireKeyVersion** key_version_head =
+                &data->master_key_settings->key_version_head;
+            for(uint8_t key_id = 0; key_id < data->master_key_settings->max_keys; key_id++) {
+                tx_len = mf_df_prepare_get_key_version(tx_buff, key_id);
+                err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+                if(err != ERR_NONE) {
+                    FURI_LOG_W(TAG, "Bad exchange getting key version, err: %d", err);
+                    continue;
+                }
+                MifareDesfireKeyVersion* key_version = malloc(sizeof(MifareDesfireKeyVersion));
+                memset(key_version, 0, sizeof(MifareDesfireKeyVersion));
+                key_version->id = key_id;
+                if(!mf_df_parse_get_key_version_response(rx_buff, rx_len, key_version)) {
+                    FURI_LOG_W(TAG, "Bad DESFire GET_KEY_VERSION response");
+                    free(key_version);
+                    continue;
+                }
+                *key_version_head = key_version;
+                key_version_head = &key_version->next;
+            }
+        }
+
+        tx_len = mf_df_prepare_get_application_ids(tx_buff);
+        err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+        if(err != ERR_NONE) {
+            FURI_LOG_W(TAG, "Bad exchange getting application IDs, err: %d", err);
+        } else {
+            if(!mf_df_parse_get_application_ids_response(rx_buff, rx_len, &data->app_head)) {
+                FURI_LOG_W(TAG, "Bad DESFire GET_APPLICATION_IDS response");
+            }
+        }
+
+        for(MifareDesfireApplication* app = data->app_head; app; app = app->next) {
+            tx_len = mf_df_prepare_select_application(tx_buff, app->id);
+            err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+            if(!mf_df_parse_select_application_response(rx_buff, rx_len)) {
+                FURI_LOG_W(TAG, "Bad exchange selecting application, err: %d", err);
+                continue;
+            }
+            tx_len = mf_df_prepare_get_key_settings(tx_buff);
+            err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+            if(err != ERR_NONE) {
+                FURI_LOG_W(TAG, "Bad exchange getting key settings, err: %d", err);
+            } else {
+                app->key_settings = malloc(sizeof(MifareDesfireKeySettings));
+                memset(app->key_settings, 0, sizeof(MifareDesfireKeySettings));
+                if(!mf_df_parse_get_key_settings_response(rx_buff, rx_len, app->key_settings)) {
+                    FURI_LOG_W(TAG, "Bad DESFire GET_KEY_SETTINGS response");
+                    free(app->key_settings);
+                    app->key_settings = NULL;
+                }
+
+                MifareDesfireKeyVersion** key_version_head = &app->key_settings->key_version_head;
+                for(uint8_t key_id = 0; key_id < app->key_settings->max_keys; key_id++) {
+                    tx_len = mf_df_prepare_get_key_version(tx_buff, key_id);
+                    err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+                    if(err != ERR_NONE) {
+                        FURI_LOG_W(TAG, "Bad exchange getting key version, err: %d", err);
+                        continue;
+                    }
+                    MifareDesfireKeyVersion* key_version = malloc(sizeof(MifareDesfireKeyVersion));
+                    memset(key_version, 0, sizeof(MifareDesfireKeyVersion));
+                    key_version->id = key_id;
+                    if(!mf_df_parse_get_key_version_response(rx_buff, rx_len, key_version)) {
+                        FURI_LOG_W(TAG, "Bad DESFire GET_KEY_VERSION response");
+                        free(key_version);
+                        continue;
+                    }
+                    *key_version_head = key_version;
+                    key_version_head = &key_version->next;
+                }
+            }
+
+            tx_len = mf_df_prepare_get_file_ids(tx_buff);
+            err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+            if(err != ERR_NONE) {
+                FURI_LOG_W(TAG, "Bad exchange getting file IDs, err: %d", err);
+            } else {
+                if(!mf_df_parse_get_file_ids_response(rx_buff, rx_len, &app->file_head)) {
+                    FURI_LOG_W(TAG, "Bad DESFire GET_FILE_IDS response");
+                }
+            }
+
+            for(MifareDesfireFile* file = app->file_head; file; file = file->next) {
+                tx_len = mf_df_prepare_get_file_settings(tx_buff, file->id);
+                err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+                if(err != ERR_NONE) {
+                    FURI_LOG_W(TAG, "Bad exchange getting file settings, err: %d", err);
+                    continue;
+                }
+                if(!mf_df_parse_get_file_settings_response(rx_buff, rx_len, file)) {
+                    FURI_LOG_W(TAG, "Bad DESFire GET_FILE_SETTINGS response");
+                    continue;
+                }
+                switch(file->type) {
+                case MifareDesfireFileTypeStandard:
+                case MifareDesfireFileTypeBackup:
+                    tx_len = mf_df_prepare_read_data(tx_buff, file->id, 0, 0);
+                    break;
+                case MifareDesfireFileTypeValue:
+                    tx_len = mf_df_prepare_get_value(tx_buff, file->id);
+                    break;
+                case MifareDesfireFileTypeLinearRecord:
+                case MifareDesfireFileTypeCyclicRecord:
+                    tx_len = mf_df_prepare_read_records(tx_buff, file->id, 0, 0);
+                    break;
+                }
+                err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+                if(err != ERR_NONE) {
+                    FURI_LOG_W(TAG, "Bad exchange reading file %d, err: %d", file->id, err);
+                    continue;
+                }
+                if(!mf_df_parse_read_data_response(rx_buff, rx_len, file)) {
+                    FURI_LOG_W(TAG, "Bad response reading file %d", file->id);
+                    continue;
+                }
+            }
+        }
+
+        // Notify caller and exit
+        if(nfc_worker->callback) {
+            nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
+        }
+        break;
     }
 }
 
