@@ -202,6 +202,7 @@ static void rpc_system_system_protobuf_version_process(const PB_Main* request, v
     free(response);
 }
 
+#ifdef APP_UPDATER
 static void rpc_system_system_update_request_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_system_update_request_tag);
@@ -254,6 +255,7 @@ static void rpc_system_system_backup_restore_process(const PB_Main* request, voi
     rpc_send_and_release(session, response);
     free(response);
 }
+#endif
 
 void* rpc_system_system_alloc(RpcSession* session) {
     RpcHandler rpc_handler = {
@@ -286,6 +288,7 @@ void* rpc_system_system_alloc(RpcSession* session) {
     rpc_handler.message_handler = rpc_system_system_protobuf_version_process;
     rpc_add_handler(session, PB_Main_system_protobuf_version_request_tag, &rpc_handler);
 
+#ifdef APP_UPDATER
     rpc_handler.message_handler = rpc_system_system_update_request_process;
     rpc_add_handler(session, PB_Main_system_update_request_tag, &rpc_handler);
 
@@ -294,6 +297,7 @@ void* rpc_system_system_alloc(RpcSession* session) {
 
     rpc_handler.message_handler = rpc_system_system_backup_restore_process;
     rpc_add_handler(session, PB_Main_system_backup_restore_request_tag, &rpc_handler);
+#endif
 
     return NULL;
 }

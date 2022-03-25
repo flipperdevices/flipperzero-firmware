@@ -9,13 +9,15 @@ extern "C" {
 
 typedef struct TarArchive TarArchive;
 
+typedef struct Storage Storage;
+
 typedef enum {
     TAR_OPEN_MODE_READ = 'r',
     TAR_OPEN_MODE_WRITE = 'w',
     TAR_OPEN_MODE_STDOUT = 's' /* to be implemented */
 } TarOpenMode;
 
-TarArchive* tar_archive_alloc();
+TarArchive* tar_archive_alloc(Storage* storage);
 
 bool tar_archive_open(TarArchive* archive, const char* path, TarOpenMode mode);
 

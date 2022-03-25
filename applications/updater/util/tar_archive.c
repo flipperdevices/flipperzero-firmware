@@ -44,9 +44,10 @@ const struct mtar_ops filesystem_ops = {
     .close = mtar_storage_file_close,
 };
 
-TarArchive* tar_archive_alloc() {
+TarArchive* tar_archive_alloc(Storage* storage) {
+    furi_check(storage);
     TarArchive* archive = malloc(sizeof(TarArchive));
-    archive->storage = furi_record_open("storage");
+    archive->storage = storage;
     return archive;
 }
 
@@ -84,7 +85,6 @@ bool tar_archive_open(TarArchive* archive, const char* path, TarOpenMode mode) {
 void tar_archive_free(TarArchive* archive) {
     furi_assert(archive);
     mtar_close(&archive->tar);
-    furi_record_close("storage");
 }
 
 bool tar_archive_dir_add_element(TarArchive* archive, const char* dirpath) {
