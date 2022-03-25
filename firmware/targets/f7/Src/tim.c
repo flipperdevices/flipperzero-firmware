@@ -143,8 +143,5 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle) {
 void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle) {
     if(tim_baseHandle->Instance == TIM1) {
         HAL_NVIC_DisableIRQ(TIM1_TRG_COM_TIM17_IRQn);
-    } else if(tim_baseHandle->Instance == TIM2) {
-        HAL_GPIO_DeInit(IR_RX_GPIO_Port, IR_RX_Pin);
-        HAL_NVIC_DisableIRQ(TIM2_IRQn);
     }
 }
