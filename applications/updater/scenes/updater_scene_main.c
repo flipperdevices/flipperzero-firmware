@@ -47,7 +47,7 @@ bool updater_scene_main_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case UpdaterEventSdMounted:
-            string_init_set(update_path, "/ext" UPDATE_DIR_DEFAULT_PATH);
+            string_init_set(update_path, "/ext" UPDATE_DIR_DEFAULT_REL_PATH);
             if(update_task_init(updater->update_task, update_path)) {
                 update_task_start(updater->update_task);
             }

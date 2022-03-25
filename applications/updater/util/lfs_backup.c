@@ -3,26 +3,30 @@
 #include "tar_archive.h"
 #include <storage/storage.h>
 
-#define BACKUP_FILE_LOCATION "/ext/backup.tar"
+const char* DEFAULT_BACKUP_LOCATION = "/ext/backup.tar";
 
-bool lfs_backup_create() {
+bool lfs_backup_create(const char* destination) {
+    const char* final_destination = destination && strlen(destination) ? destination :
+                                                                         DEFAULT_BACKUP_LOCATION;
     Storage* storage = furi_record_open("storage");
-    bool success = storage_int_backup(storage, BACKUP_FILE_LOCATION) == FSE_OK;
+    bool success = storage_int_backup(storage, final_destination) == FSE_OK;
     furi_record_close("storage");
     return success;
 }
 
-bool lfs_backup_exists() {
+bool lfs_backup_exists(const char* source) {
+    const char* final_source = source && strlen(source) ? source : DEFAULT_BACKUP_LOCATION;
     FileInfo fi;
     Storage* storage = furi_record_open("storage");
-    bool success = storage_common_stat(storage, BACKUP_FILE_LOCATION, &fi) == FSE_OK;
+    bool success = storage_common_stat(storage, final_source, &fi) == FSE_OK;
     furi_record_close("storage");
     return success;
 }
 
-bool lfs_backup_unpack() {
+bool lfs_backup_unpack(const char* source) {
+    const char* final_source = source && strlen(source) ? source : DEFAULT_BACKUP_LOCATION;
     Storage* storage = furi_record_open("storage");
-    bool success = storage_int_restore(storage, BACKUP_FILE_LOCATION) == FSE_OK;
+    bool success = storage_int_restore(storage, final_source) == FSE_OK;
     furi_record_close("storage");
     return success;
 }

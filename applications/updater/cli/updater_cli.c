@@ -13,7 +13,7 @@
 #include "../util/lfs_backup.h"
 
 static void updater_cli_apply(Cli* cli, string_t args, void* context) {
-    const char update_dir_path[] = "/ext" UPDATE_DIR_DEFAULT_PATH;
+    const char update_dir_path[] = "/ext" UPDATE_DIR_DEFAULT_REL_PATH;
     const char update_manifest_path[] = "/ext" UPDATE_MAINFEST_DEFAULT_PATH;
 
     printf(
@@ -79,13 +79,13 @@ static void updater_cli_apply(Cli* cli, string_t args, void* context) {
 
 static void updater_cli_backup(Cli* cli, string_t args, void* context) {
     printf("Backup\r\n");
-    bool success = lfs_backup_unpack();
+    bool success = lfs_backup_unpack(string_get_cstr(args));
     printf("Result = %d\r\n", success);
 }
 
 static void updater_cli_restore(Cli* cli, string_t args, void* context) {
     printf("Restore\r\n");
-    bool success = lfs_backup_unpack();
+    bool success = lfs_backup_unpack(string_get_cstr(args));
     printf("Result = %d\r\n", success);
 }
 

@@ -3,6 +3,7 @@
 #include <power/power_service/power.h>
 #include <notification/notification_messages.h>
 #include <protobuf_version.h>
+#include <updater/util/update_hl.h>
 
 #include "rpc_i.h"
 
@@ -210,48 +211,14 @@ static void rpc_system_system_update_request_process(const PB_Main* request, voi
     RpcSession* session = (RpcSession*)context;
     furi_assert(session);
 
-    PB_Main* response = malloc(sizeof(PB_Main));
-    response->command_id = request->command_id;
-    response->has_next = false;
-    response->command_status = PB_CommandStatus_OK;
-    //response->which_content = PB_Main_system_protobuf_version_response_tag;
-    //response->content.system_protobuf_version_response.major = PROTOBUF_MAJOR_VERSION;
-
-    rpc_send_and_release(session, response);
-    free(response);
-}
-static void rpc_system_system_backup_create_process(const PB_Main* request, void* context) {
-    furi_assert(request);
-    furi_assert(request->which_content == PB_Main_system_backup_create_request_tag);
-
-    RpcSession* session = (RpcSession*)context;
-    furi_assert(session);
+    bool update_prepare_result =
+        update_hl_prepare(request->content.system_update_request.update_folder);
 
     PB_Main* response = malloc(sizeof(PB_Main));
     response->command_id = request->command_id;
     response->has_next = false;
-    response->command_status = PB_CommandStatus_OK;
-    //response->which_content = PB_Main_system_protobuf_version_response_tag;
-    //response->content.system_protobuf_version_response.major = PROTOBUF_MAJOR_VERSION;
-
-    rpc_send_and_release(session, response);
-    free(response);
-}
-
-static void rpc_system_system_backup_restore_process(const PB_Main* request, void* context) {
-    furi_assert(request);
-    furi_assert(request->which_content == PB_Main_system_backup_restore_request_tag);
-
-    RpcSession* session = (RpcSession*)context;
-    furi_assert(session);
-
-    PB_Main* response = malloc(sizeof(PB_Main));
-    response->command_id = request->command_id;
-    response->has_next = false;
-    response->command_status = PB_CommandStatus_OK;
-    //response->which_content = PB_Main_system_protobuf_version_response_tag;
-    //response->content.system_protobuf_version_response.major = PROTOBUF_MAJOR_VERSION;
-
+    response->command_status = update_prepare_result ? PB_CommandStatus_OK :
+                                                       PB_CommandStatus_ERROR_INVALID_PARAMETERS;
     rpc_send_and_release(session, response);
     free(response);
 }
@@ -291,12 +258,6 @@ void* rpc_system_system_alloc(RpcSession* session) {
 #ifdef APP_UPDATER
     rpc_handler.message_handler = rpc_system_system_update_request_process;
     rpc_add_handler(session, PB_Main_system_update_request_tag, &rpc_handler);
-
-    rpc_handler.message_handler = rpc_system_system_backup_create_process;
-    rpc_add_handler(session, PB_Main_system_backup_create_request_tag, &rpc_handler);
-
-    rpc_handler.message_handler = rpc_system_system_backup_restore_process;
-    rpc_add_handler(session, PB_Main_system_backup_restore_request_tag, &rpc_handler);
 #endif
 
     return NULL;

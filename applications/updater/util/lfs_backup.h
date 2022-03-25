@@ -6,9 +6,11 @@
 extern "C" {
 #endif
 
-bool lfs_backup_create();
-bool lfs_backup_exists();
-bool lfs_backup_unpack();
+extern const char* DEFAULT_BACKUP_LOCATION;
+
+bool lfs_backup_create(const char* destination);
+bool lfs_backup_exists(const char* source);
+bool lfs_backup_unpack(const char* source);
 
 #ifdef __cplusplus
 }
