@@ -79,12 +79,18 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    if(*app->file_name != '\0') {
-        scene_manager_next_scene(app->scene_manager, BadUsbSceneWork);
-    } else if(bad_usb_check_assets()) {
-        scene_manager_next_scene(app->scene_manager, BadUsbSceneFileSelect);
-    } else {
+    if(furi_hal_usb_is_locked()) {
+        app->error = BadUsbAppErrorCloseRpc;
         scene_manager_next_scene(app->scene_manager, BadUsbSceneError);
+    } else {
+        if(*app->file_name != '\0') {
+            scene_manager_next_scene(app->scene_manager, BadUsbSceneWork);
+        } else if(bad_usb_check_assets()) {
+            scene_manager_next_scene(app->scene_manager, BadUsbSceneFileSelect);
+        } else {
+            app->error = BadUsbAppErrorNoFiles;
+            scene_manager_next_scene(app->scene_manager, BadUsbSceneError);
+        }
     }
 
     return app;
@@ -115,15 +121,10 @@ void bad_usb_app_free(BadUsbApp* app) {
 }
 
 int32_t bad_usb_app(void* p) {
-    FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
-    furi_hal_usb_set_config(&usb_hid);
-
     BadUsbApp* bad_usb_app = bad_usb_app_alloc((char*)p);
 
     view_dispatcher_run(bad_usb_app->view_dispatcher);
 
-    furi_hal_usb_set_config(usb_mode_prev);
     bad_usb_app_free(bad_usb_app);
-
     return 0;
 }
