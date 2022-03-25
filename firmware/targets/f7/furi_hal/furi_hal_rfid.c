@@ -8,7 +8,9 @@
 #include <stm32wbxx_ll_comp.h>
 
 #define FURI_HAL_RFID_READ_TIMER TIM1
-#define FURI_HAL_RFID_READ_TIMER_CHANNEL LL_TIM_CHANNEL_CH1
+#define FURI_HAL_RFID_READ_TIMER_CHANNEL LL_TIM_CHANNEL_CH1N
+// We can't use N channel for LL_TIM_OC_Init, so...
+#define FURI_HAL_RFID_READ_TIMER_CHANNEL_CONFIG LL_TIM_CHANNEL_CH1
 
 #define FURI_HAL_RFID_EMULATE_TIMER TIM2
 #define FURI_HAL_RFID_EMULATE_TIMER_IRQ TIM2_IRQn
@@ -126,9 +128,10 @@ void furi_hal_rfid_tim_read(float freq, float duty_cycle) {
 
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
     TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
-    TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_ENABLE;
+    TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_ENABLE;
     TIM_OC_InitStruct.CompareValue = TIM_InitStruct.Autoreload * duty_cycle;
-    LL_TIM_OC_Init(FURI_HAL_RFID_READ_TIMER, FURI_HAL_RFID_READ_TIMER_CHANNEL, &TIM_OC_InitStruct);
+    LL_TIM_OC_Init(
+        FURI_HAL_RFID_READ_TIMER, FURI_HAL_RFID_READ_TIMER_CHANNEL_CONFIG, &TIM_OC_InitStruct);
 
     LL_TIM_EnableCounter(FURI_HAL_RFID_READ_TIMER);
 }
@@ -232,7 +235,7 @@ void furi_hal_rfid_set_read_period(uint32_t period) {
 }
 
 void furi_hal_rfid_set_read_pulse(uint32_t pulse) {
-#if FURI_HAL_RFID_READ_TIMER_CHANNEL == LL_TIM_CHANNEL_CH1
+#if FURI_HAL_RFID_READ_TIMER_CHANNEL == LL_TIM_CHANNEL_CH1N
     LL_TIM_OC_SetCompareCH1(FURI_HAL_RFID_READ_TIMER, pulse);
 #else
 #error Update this code. Would you kindly?
