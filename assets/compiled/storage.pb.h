@@ -17,11 +17,11 @@ typedef enum _PB_Storage_File_FileType {
 
 /* Struct definitions */
 typedef struct _PB_Storage_BackupCreateRequest { 
-    pb_callback_t archive_path; 
+    char *archive_path; 
 } PB_Storage_BackupCreateRequest;
 
 typedef struct _PB_Storage_BackupRestoreRequest { 
-    pb_callback_t archive_path; 
+    char *archive_path; 
 } PB_Storage_BackupRestoreRequest;
 
 typedef struct _PB_Storage_InfoRequest { 
@@ -122,8 +122,8 @@ extern "C" {
 #define PB_Storage_Md5sumRequest_init_default    {NULL}
 #define PB_Storage_Md5sumResponse_init_default   {""}
 #define PB_Storage_RenameRequest_init_default    {NULL, NULL}
-#define PB_Storage_BackupCreateRequest_init_default {{{NULL}, NULL}}
-#define PB_Storage_BackupRestoreRequest_init_default {{{NULL}, NULL}}
+#define PB_Storage_BackupCreateRequest_init_default {NULL}
+#define PB_Storage_BackupRestoreRequest_init_default {NULL}
 #define PB_Storage_File_init_zero                {_PB_Storage_File_FileType_MIN, NULL, 0, NULL}
 #define PB_Storage_InfoRequest_init_zero         {NULL}
 #define PB_Storage_InfoResponse_init_zero        {0, 0}
@@ -139,8 +139,8 @@ extern "C" {
 #define PB_Storage_Md5sumRequest_init_zero       {NULL}
 #define PB_Storage_Md5sumResponse_init_zero      {""}
 #define PB_Storage_RenameRequest_init_zero       {NULL, NULL}
-#define PB_Storage_BackupCreateRequest_init_zero {{{NULL}, NULL}}
-#define PB_Storage_BackupRestoreRequest_init_zero {{{NULL}, NULL}}
+#define PB_Storage_BackupCreateRequest_init_zero {NULL}
+#define PB_Storage_BackupRestoreRequest_init_zero {NULL}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define PB_Storage_BackupCreateRequest_archive_path_tag 1
@@ -256,13 +256,13 @@ X(a, POINTER,  SINGULAR, STRING,   new_path,          2)
 #define PB_Storage_RenameRequest_DEFAULT NULL
 
 #define PB_Storage_BackupCreateRequest_FIELDLIST(X, a) \
-X(a, CALLBACK, SINGULAR, STRING,   archive_path,      1)
-#define PB_Storage_BackupCreateRequest_CALLBACK pb_default_field_callback
+X(a, POINTER,  SINGULAR, STRING,   archive_path,      1)
+#define PB_Storage_BackupCreateRequest_CALLBACK NULL
 #define PB_Storage_BackupCreateRequest_DEFAULT NULL
 
 #define PB_Storage_BackupRestoreRequest_FIELDLIST(X, a) \
-X(a, CALLBACK, SINGULAR, STRING,   archive_path,      1)
-#define PB_Storage_BackupRestoreRequest_CALLBACK pb_default_field_callback
+X(a, POINTER,  SINGULAR, STRING,   archive_path,      1)
+#define PB_Storage_BackupRestoreRequest_CALLBACK NULL
 #define PB_Storage_BackupRestoreRequest_DEFAULT NULL
 
 extern const pb_msgdesc_t PB_Storage_File_msg;

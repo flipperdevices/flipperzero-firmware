@@ -50,7 +50,7 @@ typedef struct _PB_System_ProtobufVersionRequest {
 } PB_System_ProtobufVersionRequest;
 
 typedef struct _PB_System_UpdateRequest { 
-    pb_callback_t update_folder; 
+    char *update_folder; 
 } PB_System_UpdateRequest;
 
 typedef struct _PB_System_DateTime { 
@@ -109,7 +109,7 @@ extern "C" {
 #define PB_System_PlayAudiovisualAlertRequest_init_default {0}
 #define PB_System_ProtobufVersionRequest_init_default {0}
 #define PB_System_ProtobufVersionResponse_init_default {0, 0}
-#define PB_System_UpdateRequest_init_default     {{{NULL}, NULL}}
+#define PB_System_UpdateRequest_init_default     {NULL}
 #define PB_System_PingRequest_init_zero          {NULL}
 #define PB_System_PingResponse_init_zero         {NULL}
 #define PB_System_RebootRequest_init_zero        {_PB_System_RebootRequest_RebootMode_MIN}
@@ -123,7 +123,7 @@ extern "C" {
 #define PB_System_PlayAudiovisualAlertRequest_init_zero {0}
 #define PB_System_ProtobufVersionRequest_init_zero {0}
 #define PB_System_ProtobufVersionResponse_init_zero {0, 0}
-#define PB_System_UpdateRequest_init_zero        {{{NULL}, NULL}}
+#define PB_System_UpdateRequest_init_zero        {NULL}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define PB_System_DeviceInfoResponse_key_tag     1
@@ -221,8 +221,8 @@ X(a, STATIC,   SINGULAR, UINT32,   minor,             2)
 #define PB_System_ProtobufVersionResponse_DEFAULT NULL
 
 #define PB_System_UpdateRequest_FIELDLIST(X, a) \
-X(a, CALLBACK, SINGULAR, STRING,   update_folder,     1)
-#define PB_System_UpdateRequest_CALLBACK pb_default_field_callback
+X(a, POINTER,  SINGULAR, STRING,   update_folder,     1)
+#define PB_System_UpdateRequest_CALLBACK NULL
 #define PB_System_UpdateRequest_DEFAULT NULL
 
 extern const pb_msgdesc_t PB_System_PingRequest_msg;
