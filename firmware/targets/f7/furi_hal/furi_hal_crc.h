@@ -1,18 +1,21 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** Enable CRC module clock + configure for CRC32 calculation 
+/** Configure for CRC32 calculation 
  */
-void furi_hal_crc_init();
+void furi_hal_crc_init(bool synchronize);
 
-/** Disable CRC module clock 
+
+/** Blocking call to get control of CRC block. Mandatory wile RTOS is running
  */
-void furi_hal_crc_deinit();
+bool furi_hal_crc_acquire(uint32_t timeout);
+
 
 /** Reset current calculation state
  */

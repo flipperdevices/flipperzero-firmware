@@ -31,7 +31,7 @@ static bool flipper_update_init() {
     //furi_hal_version_init();
 
     furi_hal_spi_init();
-    furi_hal_crc_init();
+    furi_hal_crc_init(false);
 
     MX_FATFS_Init();
     if(!hal_sd_detect()) {

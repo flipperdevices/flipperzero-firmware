@@ -38,8 +38,7 @@ bool update_hl_prepare(const char* manifest_dir_path) {
                 break;
             }
 
-            furi_hal_crc_init();
-            furi_hal_crc_reset();
+            furi_hal_crc_acquire(osWaitForever);
 
             uint16_t bytes_read = 0;
             do {
@@ -47,7 +46,7 @@ bool update_hl_prepare(const char* manifest_dir_path) {
                 crc = furi_hal_crc_feed(read_buffer, bytes_read);
             } while(bytes_read == READ_BLOCK);
 
-            furi_hal_crc_deinit();
+            furi_hal_crc_reset();
         } while(false);
 
         string_clear(abs_path);

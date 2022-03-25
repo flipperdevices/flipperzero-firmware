@@ -20,6 +20,8 @@ bool dfu_file_validate_crc(File* dfuf, const DfuPageTaskProgressCb progress_cb, 
 
     uint32_t file_size = storage_file_size(dfuf);
     // Feed file contents per sector into CRC calc
+
+    furi_hal_crc_acquire(osWaitForever);
     for(uint32_t fptr = 0; fptr < file_size;) {
         data_buffer_valid_len = storage_file_read(dfuf, data_buffer, DFU_DATA_BUFFER_MAX_LEN);
         if(data_buffer_valid_len == 0) {
@@ -33,8 +35,8 @@ bool dfu_file_validate_crc(File* dfuf, const DfuPageTaskProgressCb progress_cb, 
 
         file_crc = furi_hal_crc_feed(data_buffer, data_buffer_valid_len);
     }
-    free(data_buffer);
     furi_hal_crc_reset();
+    free(data_buffer);
 
     // Last 4 bytes of DFU file = CRC of previous file contents, inverted
     // If we calculate whole file CRC32, incl. embedded CRC,

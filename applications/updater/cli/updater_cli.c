@@ -43,16 +43,14 @@ static void updater_cli_apply(Cli* cli, string_t args, void* context) {
                 break;
             }
 
-            furi_hal_crc_init();
-            furi_hal_crc_reset();
+            furi_hal_crc_acquire(osWaitForever);
 
             uint16_t bytes_read = 0;
             do {
                 bytes_read = storage_file_read(file, read_buffer, READ_BLOCK);
                 crc = furi_hal_crc_feed(read_buffer, bytes_read);
             } while(bytes_read == READ_BLOCK);
-
-            furi_hal_crc_deinit();
+            furi_hal_crc_reset();
 
             printf("CRC %08lx ", crc);
         } while(false);

@@ -12,7 +12,7 @@
 #define FURI_HAL_FLASH_WRITE_BLOCK 8
 #define FURI_HAL_FLASH_PAGE_SIZE 4096
 #define FURI_HAL_FLASH_CYCLES_COUNT 10000
-#define FURI_HAL_FLASH_N_PAGES 256
+#define FURI_HAL_FLASH_TOTAL_PAGES 256
 
 /* Free flash space borders, exported by linker */
 extern const void __free_flash_start__;
@@ -64,7 +64,8 @@ size_t furi_hal_flash_get_free_page_count() {
 
 void furi_hal_flash_init() {
     // Errata 2.2.9, Flash OPTVERR flag is always set after system reset
-    __HAL_FLASH_CLEAR_FLAG(FLASH_SR_OPTVERR /*FLASH_FLAG_ALL_ERRORS*/);
+    WRITE_REG(FLASH->SR, FLASH_SR_OPTVERR);
+    //__HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_OPTVERR);
 }
 
 static void furi_hal_flash_unlock() {
@@ -364,7 +365,7 @@ bool furi_hal_flash_program_page(const uint8_t page, const uint8_t* data, uint16
 int16_t furi_hal_flash_get_page_number(size_t address) {
     const size_t flash_base = furi_hal_flash_get_base();
     if((address < flash_base) ||
-       (address > flash_base + FURI_HAL_FLASH_N_PAGES * FURI_HAL_FLASH_PAGE_SIZE)) {
+       (address > flash_base + FURI_HAL_FLASH_TOTAL_PAGES * FURI_HAL_FLASH_PAGE_SIZE)) {
         return -1;
     }
 
