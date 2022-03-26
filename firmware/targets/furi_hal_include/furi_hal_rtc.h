@@ -48,6 +48,7 @@ typedef enum {
 
 /** Initialize RTC subsystem */
 void furi_hal_rtc_init();
+void furi_hal_rtc_minimal_init();
 
 uint32_t furi_hal_rtc_get_register(FuriHalRtcRegister reg);
 

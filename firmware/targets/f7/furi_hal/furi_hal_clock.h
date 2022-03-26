@@ -1,6 +1,7 @@
 #pragma once
 
 /** Initialize clocks */
+void furi_hal_clock_minimal_init();
 void furi_hal_clock_init();
 
 /** Switch to HSI clock */

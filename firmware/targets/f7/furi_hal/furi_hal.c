@@ -77,7 +77,6 @@ void furi_hal_init() {
 }
 
 void furi_hal_init_critical() {
-    furi_hal_clock_init();
-    furi_hal_console_init();
-    furi_hal_rtc_init();
+    furi_hal_clock_minimal_init();
+    furi_hal_rtc_minimal_init();
 }

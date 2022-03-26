@@ -1,10 +1,13 @@
 #include <furi_hal_rtc.h>
 #include <stm32wbxx_ll_rcc.h>
 #include <stm32wbxx_ll_rtc.h>
+#include <stm32wbxx_ll_utils.h>
 
 #include <furi.h>
 
 #define TAG "FuriHalRtc"
+
+#define RTC_CLOCK_IS_READY() (LL_RCC_LSE_IsReady() && LL_RCC_LSI1_IsReady())
 
 typedef struct {
     uint8_t log_level : 4;
@@ -14,6 +17,36 @@ typedef struct {
 } DeveloperReg;
 
 _Static_assert(sizeof(DeveloperReg) == 4, "DeveloperReg size mismatch");
+
+void furi_hal_rtc_minimal_init() {
+    // LSE and RTC
+    LL_PWR_EnableBkUpAccess();
+    if(!RTC_CLOCK_IS_READY()) {
+        // Start LSI1 needed for CSS
+        LL_RCC_LSI1_Enable();
+        // Try to start LSE normal way
+        LL_RCC_LSE_SetDriveCapability(LL_RCC_LSEDRIVE_HIGH);
+        LL_RCC_LSE_Enable();
+        uint32_t c = 0;
+        while(!RTC_CLOCK_IS_READY() && c < 200) {
+            LL_mDelay(10);
+            c++;
+        }
+        // Plan B: reset backup domain
+        if(!RTC_CLOCK_IS_READY()) {
+            LL_RCC_ForceBackupDomainReset();
+            LL_RCC_ReleaseBackupDomainReset();
+            NVIC_SystemReset();
+        }
+        // Set RTC domain clock to LSE
+        LL_RCC_SetRTCClockSource(LL_RCC_RTC_CLKSOURCE_LSE);
+        // Enable LSE CSS
+        LL_RCC_LSE_EnableCSS();
+    }
+    // Enable clocking
+    LL_RCC_EnableRTC();
+    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_RTCAPB);
+}
 
 void furi_hal_rtc_init() {
     if(LL_RCC_GetRTCClockSource() != LL_RCC_RTC_CLKSOURCE_LSE) {

@@ -21,6 +21,8 @@ static const char CONFIG_PATH[] = UPDATE_MAINFEST_DEFAULT_PATH;
     }
 
 static bool flipper_update_init() {
+    furi_hal_clock_init();
+    furi_hal_rtc_init();
     furi_hal_interrupt_init();
     furi_hal_delay_init(false);
 

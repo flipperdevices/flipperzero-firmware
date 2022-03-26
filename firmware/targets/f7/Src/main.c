@@ -27,6 +27,9 @@ int main(void) {
         furi_hal_rtc_set_flag(FuriHalRtcFlagExecutePostUpdate);
         furi_hal_power_reset();
     } else {
+        furi_hal_clock_init();
+        furi_hal_console_init();
+        furi_hal_rtc_init();
         // Initialize FURI layer
         furi_init();
 
