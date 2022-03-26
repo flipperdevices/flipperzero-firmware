@@ -20,6 +20,7 @@ extern int32_t accessor_app(void* p);
 extern int32_t archive_app(void* p);
 extern int32_t bad_usb_app(void* p);
 extern int32_t u2f_app(void* p);
+extern int32_t mass_storage_app(void* p);
 extern int32_t uart_echo_app(void* p);
 extern int32_t blink_test_app(void* p);
 extern int32_t bt_debug_app(void* p);
@@ -216,6 +217,10 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 
 #ifdef APP_SNAKE_GAME
     {.app = snake_game_app, .name = "Snake Game", .stack_size = 1024, .icon = &A_Plugins_14},
+#endif
+
+#ifdef APP_MASS_STORAGE
+    {.app = mass_storage_app, .name = "Mass Storage", .stack_size = 1024, .icon = NULL},
 #endif
 };
 

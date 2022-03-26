@@ -20,6 +20,7 @@
 - `lfrfid`              - LF RFID application
 - `lfrfid_debug`        - LF RFID debug tool
 - `loader`              - Application loader service
+- `mass_storage`        - USB Mass Storage application
 - `music_player`        - Music player app (demo)
 - `nfc`                 - NFC application, HF rfid, EMV and etc
 - `notification`        - Notification service 
