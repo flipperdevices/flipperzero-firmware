@@ -12,11 +12,20 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
     Submenu* submenu = app->submenu;
     submenu_reset(submenu);
 
+    size_t n = 0;
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         submenu_add_item(
             submenu,
             FLIPPER_APPS[i].name,
-            i,
+            n++,
+            desktop_settings_scene_favorite_submenu_callback,
+            app);
+    }
+    for(size_t i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
+        submenu_add_item(
+            submenu,
+            FLIPPER_PLUGINS[i].name,
+            n++,
             desktop_settings_scene_favorite_submenu_callback,
             app);
     }

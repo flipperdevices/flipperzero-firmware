@@ -126,17 +126,25 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
 
         case DesktopMainEventOpenFavorite:
             LOAD_DESKTOP_SETTINGS(&desktop->settings);
+            Loader* loader = furi_record_open("loader");
             if(desktop->settings.favorite < FLIPPER_APPS_COUNT) {
-                Loader* loader = furi_record_open("loader");
                 LoaderStatus status =
                     loader_start(loader, FLIPPER_APPS[desktop->settings.favorite].name, NULL);
                 if(status != LoaderStatusOk) {
                     FURI_LOG_E(TAG, "loader_start failed: %d", status);
                 }
-                furi_record_close("loader");
+            } else if(desktop->settings.favorite - FLIPPER_APPS_COUNT < FLIPPER_PLUGINS_COUNT) {
+                LoaderStatus status = loader_start(
+                    loader,
+                    FLIPPER_PLUGINS[desktop->settings.favorite - FLIPPER_APPS_COUNT].name,
+                    NULL);
+                if(status != LoaderStatusOk) {
+                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                }
             } else {
                 FURI_LOG_E(TAG, "Can't find favorite application");
             }
+            furi_record_close("loader");
             consumed = true;
             break;
 
