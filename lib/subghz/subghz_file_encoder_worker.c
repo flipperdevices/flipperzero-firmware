@@ -146,8 +146,7 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
         size_t stream_free_byte = xStreamBufferSpacesAvailable(instance->stream);
         if((stream_free_byte / sizeof(int32_t)) >= SUBGHZ_FILE_ENCODER_LOAD) {
             if(stream_read_line(stream, instance->str_data)) {
-                //skip the end of the previous line "\n"
-                stream_seek(stream, 1, StreamOffsetFromCurrent);
+                string_strim(instance->str_data);
                 if(!subghz_file_encoder_worker_data_parse(
                        instance,
                        string_get_cstr(instance->str_data),
@@ -185,7 +184,7 @@ SubGhzFileEncoderWorker* subghz_file_encoder_worker_alloc() {
     SubGhzFileEncoderWorker* instance = malloc(sizeof(SubGhzFileEncoderWorker));
 
     instance->thread = furi_thread_alloc();
-    furi_thread_set_name(instance->thread, "SubghzFEWorker");
+    furi_thread_set_name(instance->thread, "SubGhzFEWorker");
     furi_thread_set_stack_size(instance->thread, 2048);
     furi_thread_set_context(instance->thread, instance);
     furi_thread_set_callback(instance->thread, subghz_file_encoder_worker_thread);

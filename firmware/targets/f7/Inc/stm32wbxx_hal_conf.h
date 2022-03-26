@@ -35,7 +35,7 @@ extern "C" {
 #define HAL_MODULE_ENABLED
 /*#define HAL_ADC_MODULE_ENABLED    */
 #define HAL_CRYP_MODULE_ENABLED
-#define HAL_COMP_MODULE_ENABLED
+/*#define HAL_COMP_MODULE_ENABLED   */
 /*#define HAL_CRC_MODULE_ENABLED    */
 #define HAL_HSEM_MODULE_ENABLED
 /*#define HAL_I2C_MODULE_ENABLED    */
@@ -53,7 +53,7 @@ extern "C" {
 /*#define HAL_SMBUS_MODULE_ENABLED  */
 /*#define HAL_SMARTCARD_MODULE_ENABLED   */
 /*#define HAL_SPI_MODULE_ENABLED    */
-#define HAL_TIM_MODULE_ENABLED
+/*#define HAL_TIM_MODULE_ENABLED    */
 /*#define HAL_TSC_MODULE_ENABLED    */
 /*#define HAL_UART_MODULE_ENABLED   */
 /*#define HAL_USART_MODULE_ENABLED  */
@@ -185,7 +185,9 @@ extern "C" {
   * @brief Uncomment the line below to expanse the "assert_param" macro in the
   *        HAL drivers code
   */
+#ifdef APP_UNIT_TESTS
 #define USE_FULL_ASSERT 1U
+#endif
 
 /* ################## SPI peripheral configuration ########################## */
 
