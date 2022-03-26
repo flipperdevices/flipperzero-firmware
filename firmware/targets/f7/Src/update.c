@@ -1,8 +1,7 @@
-#include "update.h"
-
 #include <furi.h>
 #include <furi_hal.h>
 #include <flipper.h>
+#include <alt_boot.h>
 
 #include <fatfs.h>
 #include <flipper_format/flipper_format.h>
@@ -41,16 +40,6 @@ static bool flipper_update_init() {
 
     CHECK_FRESULT(f_mount(&fs, FS_ROOT_PATH, 1));
     return true;
-}
-
-static inline void flipper_update_target_switch(void* offset) {
-    asm volatile("ldr    r3, [%0]    \n"
-                 "msr    msp, r3     \n"
-                 "ldr    r3, [%1]    \n"
-                 "mov    pc, r3      \n"
-                 :
-                 : "r"(offset), "r"(offset + 0x4)
-                 : "r3");
 }
 
 static bool flipper_update_load_stage(UpdateManifest* manifest) {
@@ -93,7 +82,7 @@ static bool flipper_update_load_stage(UpdateManifest* manifest) {
         FURI_CRITICAL_ENTER();
         memmove((void*)(SRAM1_BASE), img, stat.fsize);
         LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SRAM);
-        flipper_update_target_switch((void*)SRAM1_BASE);
+        flipper_boot_target_switch((void*)SRAM1_BASE);
         /* unreachable -- but makes compiler happy */
         FURI_CRITICAL_EXIT();
 
@@ -140,7 +129,7 @@ static UpdateManifest* flipper_update_process_manifest() {
     return manifest;
 }
 
-void flipper_update_exec() {
+void flipper_boot_update_exec() {
     if(!flipper_update_init()) {
         return;
     }

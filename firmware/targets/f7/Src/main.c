@@ -3,7 +3,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <flipper.h>
-#include <update.h>
+#include <alt_boot.h>
 
 #define TAG "Main"
 
@@ -14,10 +14,13 @@ int main(void) {
 #ifdef FURI_RAM_EXEC
     if(false) {
 #else
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecuteUpdate)) {
-        //if (true) {
+    if(furi_hal_bootloader_get_mode() == FuriHalBootloaderModeDFU) {
+        furi_hal_bootloader_set_mode(FuriHalBootloaderModeNormal);
+        flipper_boot_dfu_exec();
+        furi_hal_power_reset();
+    } else if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecuteUpdate)) {
 #endif
-        flipper_update_exec();
+        flipper_boot_update_exec();
         // if things go nice, we shouldn't reach this point.
         // But if we do, abandon
         furi_hal_rtc_reset_flag(FuriHalRtcFlagExecuteUpdate);

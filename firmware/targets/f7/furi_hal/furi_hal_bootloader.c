@@ -23,3 +23,13 @@ void furi_hal_bootloader_set_mode(FuriHalBootloaderMode mode) {
         furi_hal_rtc_set_register(FuriHalRtcRegisterBoot, BOOT_REQUEST_DFU);
     }
 }
+
+FuriHalBootloaderMode furi_hal_bootloader_get_mode() {
+    uint32_t bootraw = furi_hal_rtc_get_register(FuriHalRtcRegisterBoot);
+    switch(bootraw) {
+    case BOOT_REQUEST_DFU:
+        return FuriHalBootloaderModeDFU;
+    default:
+        return FuriHalBootloaderModeNormal;
+    }
+}

@@ -24,6 +24,12 @@ void furi_hal_bootloader_init();
  */
 void furi_hal_bootloader_set_mode(FuriHalBootloaderMode mode);
 
+/** Get bootloader mode
+ *
+ * @return[out]  mode  FuriHalBootloaderMode
+ */
+FuriHalBootloaderMode furi_hal_bootloader_get_mode();
+
 #ifdef __cplusplus
 }
 #endif

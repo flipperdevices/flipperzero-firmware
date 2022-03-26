@@ -41,6 +41,7 @@ void furi_hal_crc_reset() {
 
 static uint32_t furi_hal_crc_handle_8(uint8_t pBuffer[], uint32_t BufferLength) {
     uint32_t i; /* input data buffer index */
+    hal_crc_control.state = CRC_State_Busy;
     /* Processing time optimization: 4 bytes are entered in a row with a single word write,
      * last bytes must be carefully fed to the CRC calculator to ensure a correct type
      * handling by the peripheral */
@@ -64,11 +65,13 @@ static uint32_t furi_hal_crc_handle_8(uint8_t pBuffer[], uint32_t BufferLength) 
         }
     }
 
+    hal_crc_control.state = CRC_State_Ready;
     /* Return the CRC computed value */
     return LL_CRC_ReadData32(CRC);
 }
 
 static uint32_t furi_hal_crc_accumulate(uint32_t pBuffer[], uint32_t BufferLength) {
+    furi_check(hal_crc_control.state == CRC_State_Ready);
     if(hal_crc_control.mtx) {
         furi_check(osMutexGetOwner(hal_crc_control.mtx) != NULL);
     }
