@@ -11,9 +11,7 @@
 #define BOOT_USB_DP_PIN LL_GPIO_PIN_12
 #define BOOT_USB_PIN (BOOT_USB_DM_PIN | BOOT_USB_DP_PIN)
 
-extern const uint8_t* const _I_DFU_128x50;
-
-static void flipper_boot_setup_usb() {
+static void flipper_boot_dfu_setup_usb() {
     // USB D+
     LL_GPIO_SetPinMode(BOOT_USB_PORT, BOOT_USB_DP_PIN, LL_GPIO_MODE_OUTPUT);
     LL_GPIO_SetPinSpeed(BOOT_USB_PORT, BOOT_USB_DP_PIN, LL_GPIO_SPEED_FREQ_VERY_HIGH);
@@ -45,9 +43,9 @@ void flipper_boot_dfu_show_splash() {
     u8g2_Setup_st756x_flipper(fb, U8G2_R0, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
     u8g2_InitDisplay(fb);
     u8g2_SetDrawColor(fb, 0x01);
-    uint8_t* splash_data = NULL;
-    furi_hal_compress_icon_decode(icon_get_data(&I_DFU_128x50), &splash_data);
-    u8g2_DrawXBM(fb, 0, 64 - 50, 128, 50, splash_data);
+    //uint8_t* splash_data = NULL;
+    //furi_hal_compress_icon_decode(icon_get_data(&I_DFU_128x50), &splash_data);
+    //u8g2_DrawXBM(fb, 0, 64 - 50, 128, 50, splash_data);
     u8g2_SetFont(fb, u8g2_font_helvB08_tr);
     u8g2_DrawStr(fb, 2, 8, "Update & Recovery Mode");
     u8g2_DrawStr(fb, 2, 21, "DFU started");
@@ -56,14 +54,15 @@ void flipper_boot_dfu_show_splash() {
 }
 
 void flipper_boot_dfu_exec() {
-    flipper_boot_dfu_init();
-    flipper_boot_dfu_show_splash();
+    //flipper_boot_dfu_init();
+    //flipper_boot_dfu_show_splash();
 
     // Errata 2.2.9, Flash OPTVERR flag is always set after system reset
     //__HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
     WRITE_REG(FLASH->SR, FLASH_SR_OPTVERR);
 
-    flipper_boot_setup_usb();
+    flipper_boot_dfu_usb_wire_reset();
+    flipper_boot_dfu_setup_usb();
     flipper_boot_dfu_usb_wire_reset();
     // Mark system as tainted, it will be soon
     //LL_RTC_BAK_SetRegister(RTC, LL_RTC_BKP_DR0, BOOT_REQUEST_TAINTED);
