@@ -29,7 +29,10 @@ static void flipper_update_init() {
 void flipper_boot_dfu_exec() {
     flipper_update_init();
 
-    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
+    // Errata 2.2.9, Flash OPTVERR flag is always set after system reset
+    //__HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
+    WRITE_REG(FLASH->SR, FLASH_SR_OPTVERR);
+
     target_usb_wire_reset();
     // Mark system as tainted, it will be soon
     //LL_RTC_BAK_SetRegister(RTC, LL_RTC_BKP_DR0, BOOT_REQUEST_TAINTED);
