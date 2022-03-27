@@ -10,9 +10,9 @@ void ibutton_cli(Cli* cli, string_t args, void* context);
 void onewire_cli(Cli* cli, string_t args, void* context);
 
 // app cli function
-extern "C" void ibutton_on_system_start() {
+void ibutton_on_system_start() {
 #ifdef SRV_CLI
-    Cli* cli = static_cast<Cli*>(furi_record_open("cli"));
+    Cli* cli = furi_record_open("cli");
     cli_add_command(cli, "ikey", CliCommandFlagDefault, ibutton_cli, cli);
     cli_add_command(cli, "onewire", CliCommandFlagDefault, onewire_cli, cli);
     furi_record_close("cli");
@@ -22,7 +22,8 @@ extern "C" void ibutton_on_system_start() {
 void ibutton_cli_print_usage() {
     printf("Usage:\r\n");
     printf("ikey read\r\n");
-    printf("ikey <write | emulate> <key_type> <key_data>\r\n");
+    printf("ikey emulate <key_type> <key_data>\r\n");
+    printf("ikey write Dallas <key_data>\r\n");
     printf("\t<key_type> choose from:\r\n");
     printf("\tDallas (8 bytes key_data)\r\n");
     printf("\tCyfral (2 bytes key_data)\r\n");
@@ -59,11 +60,11 @@ void ibutton_cli_print_key_data(iButtonKey* key) {
     printf("\r\n");
 }
 
-#define EVENT_FLAG_IBUTTON_READ (1 << 0)
+#define EVENT_FLAG_IBUTTON_COMPLETE (1 << 0)
 
 static void ibutton_cli_worker_read_cb(void* context) {
     osEventFlagsId_t event = context;
-    osEventFlagsSet(event, EVENT_FLAG_IBUTTON_READ);
+    osEventFlagsSet(event, EVENT_FLAG_IBUTTON_COMPLETE);
 }
 
 void ibutton_cli_read(Cli* cli) {
@@ -76,90 +77,114 @@ void ibutton_cli_read(Cli* cli) {
 
     ibutton_worker_read_start(worker, key);
     while(true) {
-        uint32_t flags = osEventFlagsWait(event, EVENT_FLAG_IBUTTON_READ, osFlagsWaitAny, 100);
-        if(cli_cmd_interrupt_received(cli)) break;
+        uint32_t flags = osEventFlagsWait(event, EVENT_FLAG_IBUTTON_COMPLETE, osFlagsWaitAny, 100);
 
-        if(flags & EVENT_FLAG_IBUTTON_READ) {
+        if(flags & EVENT_FLAG_IBUTTON_COMPLETE) {
             ibutton_cli_print_key_data(key);
 
-            if(!ibutton_key_dallas_crc_is_valid(key)) {
-                printf("Warning: invalid CRC\r\n");
-            }
+            if(ibutton_key_get_type(key) == iButtonKeyDS1990) {
+                if(!ibutton_key_dallas_crc_is_valid(key)) {
+                    printf("Warning: invalid CRC\r\n");
+                }
 
-            if(!ibutton_key_dallas_is_1990_key(key)) {
-                printf("Warning: not a key\r\n");
+                if(!ibutton_key_dallas_is_1990_key(key)) {
+                    printf("Warning: not a key\r\n");
+                }
             }
             break;
         }
+
+        if(cli_cmd_interrupt_received(cli)) break;
     }
     ibutton_worker_stop(worker);
 
-    osEventFlagsDelete(event);
     ibutton_worker_stop_thread(worker);
     ibutton_worker_free(worker);
     ibutton_key_free(key);
+
+    osEventFlagsDelete(event);
 };
 
-void ibutton_cli_write(Cli* cli, string_t args){
-    // iButtonKey key;
-    // iButtonKeyType type;
-    // std::unique_ptr<KeyWorker> worker(new KeyWorker(&ibutton_gpio));
+typedef struct {
+    osEventFlagsId_t event;
+    iButtonWorkerWriteResult result;
+} iButtonWriteContext;
 
-    // bool exit = false;
-    // string_t data;
-    // string_init(data);
+static void ibutton_cli_worker_write_cb(void* context, iButtonWorkerWriteResult result) {
+    iButtonWriteContext* write_context = (iButtonWriteContext*)context;
+    write_context->result = result;
+    osEventFlagsSet(write_context->event, EVENT_FLAG_IBUTTON_COMPLETE);
+}
 
-    // if(!args_read_string_and_trim(args, data)) {
-    //     ibutton_cli_print_usage();
-    //     string_clear(data);
-    //     return;
-    // }
+void ibutton_cli_write(Cli* cli, string_t args) {
+    iButtonKey* key = ibutton_key_alloc();
+    iButtonWorker* worker = ibutton_worker_alloc();
+    iButtonKeyType type;
+    iButtonWriteContext write_context;
+    uint8_t key_data[IBUTTON_KEY_DATA_SIZE];
+    string_t data;
 
-    // if(!ibutton_cli_get_key_type(data, &type)) {
-    //     ibutton_cli_print_usage();
-    //     string_clear(data);
-    //     return;
-    // }
+    write_context.event = osEventFlagsNew(NULL);
 
-    // key.set_type(type);
+    string_init(data);
+    ibutton_worker_start_thread(worker);
+    ibutton_worker_write_set_callback(worker, ibutton_cli_worker_write_cb, &write_context);
 
-    // if(!args_read_hex_bytes(args, key.get_data(), key.get_type_data_size())) {
-    //     ibutton_cli_print_usage();
-    //     string_clear(data);
-    //     return;
-    // }
+    do {
+        if(!args_read_string_and_trim(args, data)) {
+            ibutton_cli_print_usage();
+            break;
+        }
 
-    // printf("Writing key ");
-    // ibutton_cli_print_key_data(&key);
-    // printf("Press Ctrl+C to abort\r\n");
+        if(!ibutton_cli_get_key_type(data, &type)) {
+            ibutton_cli_print_usage();
+            break;
+        }
 
-    // worker->start_write();
+        if(type != iButtonKeyDS1990) {
+            ibutton_cli_print_usage();
+            break;
+        }
 
-    // while(!exit) {
-    //     exit = cli_cmd_interrupt_received(cli);
+        if(!args_read_hex_bytes(args, key_data, ibutton_key_get_size_by_type(type))) {
+            ibutton_cli_print_usage();
+            break;
+        }
 
-    //     KeyWriter::Error result = worker->write(&key);
+        ibutton_key_set_type(key, type);
+        ibutton_key_set_data(key, key_data, ibutton_key_get_size_by_type(type));
 
-    //     switch(result) {
-    //     case KeyWriter::Error::SAME_KEY:
-    //     case KeyWriter::Error::OK:
-    //         printf("Write success\r\n");
-    //         exit = true;
-    //         break;
-    //     case KeyWriter::Error::NO_DETECT:
-    //         break;
-    //     case KeyWriter::Error::CANNOT_WRITE:
-    //         printf("Write fail\r\n");
-    //         exit = true;
-    //         break;
-    //     }
+        printf("Writing key ");
+        ibutton_cli_print_key_data(key);
+        printf("Press Ctrl+C to abort\r\n");
 
-    //     delay(100);
-    // };
+        ibutton_worker_write_start(worker, key);
+        while(true) {
+            uint32_t flags = osEventFlagsWait(
+                write_context.event, EVENT_FLAG_IBUTTON_COMPLETE, osFlagsWaitAny, 100);
 
-    // worker->stop_write();
+            if(flags & EVENT_FLAG_IBUTTON_COMPLETE) {
+                if(write_context.result == iButtonWorkerWriteSameKey ||
+                   write_context.result == iButtonWorkerWriteOK) {
+                    printf("Write success\r\n");
+                    break;
+                } else if(write_context.result == iButtonWorkerWriteCannotWrite) {
+                    printf("Write fail\r\n");
+                    break;
+                }
+            }
 
-    // string_clear(data);
+            if(cli_cmd_interrupt_received(cli)) break;
+        }
+        ibutton_worker_stop(worker);
+    } while(false);
+
+    string_clear(data);
+    ibutton_worker_stop_thread(worker);
+    ibutton_worker_free(worker);
+    ibutton_key_free(key);
+
+    osEventFlagsDelete(write_context.event);
 };
 
 void ibutton_cli_emulate(Cli* cli, string_t args) {

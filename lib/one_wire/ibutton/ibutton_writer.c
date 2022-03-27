@@ -265,7 +265,7 @@ void ibutton_writer_free(iButtonWriter* writer) {
 }
 
 iButtonWriterResult ibutton_writer_write(iButtonWriter* writer, iButtonKey* key) {
-    iButtonWriterResult result = iButtonWriterCannotWrite;
+    iButtonWriterResult result = iButtonWriterNoDetect;
 
     osKernelLock();
     bool blank_present = onewire_host_reset(writer->host);
