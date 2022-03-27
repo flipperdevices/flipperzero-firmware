@@ -1,8 +1,6 @@
 #include <furi.h>
+#include <maxim_crc.h>
 #include "ibutton_key.h"
-
-#define IBUTTON_KEY_DATA_SIZE 8
-#define IBUTTON_KEY_NAME_SIZE 22
 
 struct iButtonKey {
     uint8_t data[IBUTTON_KEY_DATA_SIZE];
@@ -112,4 +110,12 @@ uint8_t ibutton_key_get_size_by_type(iButtonKeyType key_type) {
 
 uint8_t ibutton_key_get_max_size() {
     return IBUTTON_KEY_DATA_SIZE;
+}
+
+bool ibutton_key_dallas_crc_is_valid(iButtonKey* key) {
+    return (maxim_crc8(key->data, 8, MAXIM_CRC8_INIT) == 0);
+}
+
+bool ibutton_key_dallas_is_1990_key(iButtonKey* key) {
+    return (key->data[0] == 0x01);
 }

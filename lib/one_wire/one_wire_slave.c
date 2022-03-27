@@ -184,7 +184,7 @@ bool onewire_slave_bus_start(OneWireSlave* bus) {
     if(bus->device == NULL) {
         result = false;
     } else {
-        __disable_irq();
+        FURI_CRITICAL_ENTER();
         furi_hal_ibutton_start_drive_in_isr();
         bus->error = NO_ERROR;
 
@@ -198,7 +198,7 @@ bool onewire_slave_bus_start(OneWireSlave* bus) {
         }
 
         furi_hal_ibutton_start_interrupt_in_isr();
-        __enable_irq();
+        FURI_CRITICAL_EXIT();
     }
 
     return result;

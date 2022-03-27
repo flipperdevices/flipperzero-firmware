@@ -109,14 +109,13 @@ void ibutton_worker_stop(iButtonWorker* worker) {
 
 void ibutton_worker_free(iButtonWorker* worker) {
     pulse_decoder_free(worker->pulse_decoder);
+    protocol_metakom_free(worker->protocol_metakom);
     protocol_cyfral_free(worker->protocol_cyfral);
 
     ibutton_writer_free(worker->writer);
 
-    onewire_slave_stop(worker->slave);
     onewire_slave_free(worker->slave);
 
-    onewire_host_stop(worker->host);
     onewire_host_free(worker->host);
     onewire_device_free(worker->device);
 
@@ -164,13 +163,13 @@ static int32_t ibutton_worker_thread(void* thread_context) {
         if(status == osOK) {
             switch(message.type) {
             case iButtonMessageEnd:
-                ibutton_worker_set_key_p(worker, NULL);
                 ibutton_worker_switch_mode(worker, iButtonWorkerIdle);
+                ibutton_worker_set_key_p(worker, NULL);
                 running = false;
                 break;
             case iButtonMessageStop:
-                ibutton_worker_set_key_p(worker, NULL);
                 ibutton_worker_switch_mode(worker, iButtonWorkerIdle);
+                ibutton_worker_set_key_p(worker, NULL);
                 break;
             case iButtonMessageRead:
                 ibutton_worker_set_key_p(worker, message.data.key);

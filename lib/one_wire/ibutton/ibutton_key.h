@@ -13,6 +13,9 @@
 extern "C" {
 #endif
 
+#define IBUTTON_KEY_DATA_SIZE 8
+#define IBUTTON_KEY_NAME_SIZE 22
+
 typedef enum {
     iButtonKeyDS1990,
     iButtonKeyCyfral,
@@ -123,6 +126,22 @@ uint8_t ibutton_key_get_size_by_type(iButtonKeyType key_type);
  * @return uint8_t 
  */
 uint8_t ibutton_key_get_max_size();
+
+/**
+ * Check if CRC for onewire key is valid
+ * @param key 
+ * @return true 
+ * @return false 
+ */
+bool ibutton_key_dallas_crc_is_valid(iButtonKey* key);
+
+/**
+ * Check if onewire key is a DS1990 key
+ * @param key 
+ * @return true 
+ * @return false 
+ */
+bool ibutton_key_dallas_is_1990_key(iButtonKey* key);
 
 #ifdef __cplusplus
 }

@@ -119,7 +119,7 @@ bool ibutton_worker_read_dallas(iButtonWorker* worker) {
     bool result = false;
     onewire_host_start(worker->host);
     delay(100);
-    __disable_irq();
+    FURI_CRITICAL_ENTER();
     if(onewire_host_search(worker->host, worker->key_data, NORMAL_SEARCH)) {
         onewire_host_reset_search(worker->host);
 
@@ -146,7 +146,7 @@ bool ibutton_worker_read_dallas(iButtonWorker* worker) {
         onewire_host_reset_search(worker->host);
     }
     onewire_host_stop(worker->host);
-    __enable_irq();
+    FURI_CRITICAL_EXIT();
     return result;
 }
 
@@ -245,7 +245,7 @@ void ibutton_worker_emulate_timer_start(iButtonWorker* worker) {
         encoder_metakom_set_data(worker->encoder_metakom, key_id, key_size);
         break;
     }
-    
+
     furi_hal_ibutton_start_drive();
     furi_hal_ibutton_emulate_start(0, ibutton_worker_emulate_timer_cb, worker);
 }
