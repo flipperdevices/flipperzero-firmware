@@ -59,37 +59,28 @@ void ibutton_worker_mode_idle_stop(iButtonWorker* worker) {
 
 /*********************** READ ***********************/
 
-extern COMP_HandleTypeDef hcomp1;
-
-void ibutton_worker_comparator_callback(void* hcomp, void* context) {
+void ibutton_worker_comparator_callback(bool level, void* context) {
     iButtonWorker* worker = context;
 
-    if(hcomp == &hcomp1) {
-        uint32_t current_dwt_value = DWT->CYCCNT;
+    uint32_t current_dwt_value = DWT->CYCCNT;
 
-        pulse_decoder_process_pulse(
-            worker->pulse_decoder,
-            hal_gpio_get_rfid_in_level(),
-            current_dwt_value - worker->last_dwt_value);
+    pulse_decoder_process_pulse(
+        worker->pulse_decoder, level, current_dwt_value - worker->last_dwt_value);
 
-        worker->last_dwt_value = current_dwt_value;
-    }
+    worker->last_dwt_value = current_dwt_value;
 }
 
 bool ibutton_worker_read_comparator(iButtonWorker* worker) {
     bool result = false;
 
     pulse_decoder_reset(worker->pulse_decoder);
-    hal_gpio_init(&gpio_rfid_pull, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
-    hal_gpio_write(&gpio_rfid_pull, false);
 
-    hal_gpio_init(&gpio_rfid_carrier_out, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
-    hal_gpio_write(&gpio_rfid_carrier_out, false);
-
-    api_interrupt_add(ibutton_worker_comparator_callback, InterruptTypeComparatorTrigger, worker);
-
+    furi_hal_rfid_pins_reset();
+    // pulldown pull pin, we sense the signal through the analog part of the RFID schematic
+    furi_hal_rfid_pin_pull_pulldown();
+    furi_hal_rfid_comp_set_callback(ibutton_worker_comparator_callback, worker);
     worker->last_dwt_value = DWT->CYCCNT;
-    HAL_COMP_Start(&hcomp1);
+    furi_hal_rfid_comp_start();
 
     // TODO: rework with thread events, "pulse_decoder_get_decoded_index_with_timeout"
     delay(100);
@@ -117,8 +108,8 @@ bool ibutton_worker_read_comparator(iButtonWorker* worker) {
         break;
     }
 
-    HAL_COMP_Stop(&hcomp1);
-    api_interrupt_remove(ibutton_worker_comparator_callback, InterruptTypeComparatorTrigger);
+    furi_hal_rfid_comp_stop();
+    furi_hal_rfid_comp_set_callback(NULL, NULL);
     furi_hal_rfid_pins_reset();
 
     return result;
@@ -209,32 +200,28 @@ void ibutton_worker_emulate_dallas_stop(iButtonWorker* worker) {
     onewire_slave_detach(worker->slave);
 }
 
-void ibutton_worker_emulate_timer_cb(void* hw, void* context) {
-    TIM_HandleTypeDef* htim = (TIM_HandleTypeDef*)(hw);
+void ibutton_worker_emulate_timer_cb(void* context) {
+    furi_assert(context);
+    iButtonWorker* worker = context;
 
-    if(htim->Instance == TIM1) {
-        furi_assert(context);
-        iButtonWorker* worker = context;
+    bool polarity;
+    uint32_t length;
 
-        bool polarity;
-        uint32_t length;
+    switch(worker->emulate_mode) {
+    case iButtonEmulateModeCyfral:
+        encoder_cyfral_get_pulse(worker->encoder_cyfral, &polarity, &length);
+        break;
+    case iButtonEmulateModeMetakom:
+        encoder_metakom_get_pulse(worker->encoder_metakom, &polarity, &length);
+        break;
+    }
 
-        switch(worker->emulate_mode) {
-        case iButtonEmulateModeCyfral:
-            encoder_cyfral_get_pulse(worker->encoder_cyfral, &polarity, &length);
-            break;
-        case iButtonEmulateModeMetakom:
-            encoder_metakom_get_pulse(worker->encoder_metakom, &polarity, &length);
-            break;
-        }
+    furi_hal_ibutton_emulate_set_next(length);
 
-        htim->Instance->ARR = length;
-
-        if(polarity) {
-            furi_hal_ibutton_pin_high();
-        } else {
-            furi_hal_ibutton_pin_low();
-        }
+    if(polarity) {
+        furi_hal_ibutton_pin_high();
+    } else {
+        furi_hal_ibutton_pin_low();
     }
 }
 
@@ -258,37 +245,13 @@ void ibutton_worker_emulate_timer_start(iButtonWorker* worker) {
         encoder_metakom_set_data(worker->encoder_metakom, key_id, key_size);
         break;
     }
-
-    api_interrupt_add(ibutton_worker_emulate_timer_cb, InterruptTypeTimerUpdate, worker);
-
-    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-
-    htim1.Instance = TIM1;
-    htim1.Init.Prescaler = 0;
-    htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim1.Init.Period = 0;
-    htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    htim1.Init.RepetitionCounter = 0;
-    htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-    if(HAL_TIM_Base_Init(&htim1) != HAL_OK) {
-        Error_Handler();
-    }
-    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-    if(HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK) {
-        Error_Handler();
-    }
-    HAL_NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn);
-
-    hal_gpio_init(&ibutton_gpio, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
+    
     furi_hal_ibutton_start_drive();
-
-    HAL_TIM_Base_Start_IT(&htim1);
+    furi_hal_ibutton_emulate_start(0, ibutton_worker_emulate_timer_cb, worker);
 }
 
 void ibutton_worker_emulate_timer_stop(iButtonWorker* worker) {
-    HAL_TIM_Base_Stop_IT(&htim1);
-
-    api_interrupt_remove(ibutton_worker_emulate_timer_cb, InterruptTypeTimerUpdate);
+    furi_hal_ibutton_emulate_stop();
 }
 
 void ibutton_worker_mode_emulate_start(iButtonWorker* worker) {
