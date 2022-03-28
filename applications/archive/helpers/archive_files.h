@@ -1,7 +1,7 @@
 #pragma once
 #include "file_worker.h"
 
-#define MAX_FILES 100 //temp
+#define MAX_FILES 800 //temp
 
 typedef enum {
     ArchiveFileTypeIButton,
