@@ -26,7 +26,7 @@ static bool writer_compare_key_ds1990(iButtonWriter* writer, iButtonKey* key) {
     bool result = false;
 
     if(ibutton_key_get_type(key) == iButtonKeyDS1990) {
-        __disable_irq();
+        FURI_CRITICAL_ENTER();
         bool presence = onewire_host_reset(writer->host);
 
         if(presence) {
@@ -41,7 +41,7 @@ static bool writer_compare_key_ds1990(iButtonWriter* writer, iButtonKey* key) {
             }
         }
 
-        __enable_irq();
+        FURI_CRITICAL_EXIT();
     }
 
     return result;
@@ -52,7 +52,7 @@ static bool writer_write_TM2004(iButtonWriter* writer, iButtonKey* key) {
     bool result = true;
 
     if(ibutton_key_get_type(key) == iButtonKeyDS1990) {
-        __disable_irq();
+        FURI_CRITICAL_ENTER();
 
         // write rom, addr is 0x0000
         onewire_host_reset(writer->host);
@@ -87,7 +87,7 @@ static bool writer_write_TM2004(iButtonWriter* writer, iButtonKey* key) {
 
         onewire_host_reset(writer->host);
 
-        __enable_irq();
+        FURI_CRITICAL_EXIT();
     } else {
         result = false;
     }
@@ -99,7 +99,7 @@ static bool writer_write_1990_1(iButtonWriter* writer, iButtonKey* key) {
     bool result = false;
 
     if(ibutton_key_get_type(key) == iButtonKeyDS1990) {
-        __disable_irq();
+        FURI_CRITICAL_ENTER();
 
         // unlock
         onewire_host_reset(writer->host);
@@ -120,7 +120,7 @@ static bool writer_write_1990_1(iButtonWriter* writer, iButtonKey* key) {
         onewire_host_write(writer->host, RW1990_1_CMD_WRITE_RECORD_FLAG);
         writer_write_one_bit(writer, 1, 10000);
 
-        __enable_irq();
+        FURI_CRITICAL_EXIT();
 
         if(writer_compare_key_ds1990(writer, key)) {
             result = true;
@@ -134,7 +134,7 @@ static bool writer_write_1990_2(iButtonWriter* writer, iButtonKey* key) {
     bool result = false;
 
     if(ibutton_key_get_type(key) == iButtonKeyDS1990) {
-        __disable_irq();
+        FURI_CRITICAL_ENTER();
 
         // unlock
         onewire_host_reset(writer->host);
@@ -154,7 +154,7 @@ static bool writer_write_1990_2(iButtonWriter* writer, iButtonKey* key) {
         onewire_host_write(writer->host, RW1990_2_CMD_WRITE_RECORD_FLAG);
         writer_write_one_bit(writer, 0, 10000);
 
-        __enable_irq();
+        FURI_CRITICAL_EXIT();
 
         if(writer_compare_key_ds1990(writer, key)) {
             result = true;
@@ -173,50 +173,54 @@ static bool writer_write_TM01(
     uint8_t key_length) {
     bool result = true;
 
-    // TODO test and encoding
-    __disable_irq();
+    {
+        // TODO test and encoding
+        FURI_CRITICAL_ENTER();
 
-    // unlock
-    onewire_host_reset(writer->host);
-    onewire_host_write(writer->host, TM01::CMD_WRITE_RECORD_FLAG);
-    onewire_write_one_bit(1, 10000);
+        // unlock
+        onewire_host_reset(writer->host);
+        onewire_host_write(writer->host, TM01::CMD_WRITE_RECORD_FLAG);
+        onewire_write_one_bit(1, 10000);
 
-    // write key
-    onewire_host_reset(writer->host);
-    onewire_host_write(writer->host, TM01::CMD_WRITE_ROM);
+        // write key
+        onewire_host_reset(writer->host);
+        onewire_host_write(writer->host, TM01::CMD_WRITE_ROM);
 
-    // TODO: key types
-    //if(type == KEY_METAKOM || type == KEY_CYFRAL) {
-    //} else {
-    for(uint8_t i = 0; i < key->get_type_data_size(); i++) {
-        write_byte_ds1990(key->get_data()[i]);
-        delay_us(10000);
+        // TODO: key types
+        //if(type == KEY_METAKOM || type == KEY_CYFRAL) {
+        //} else {
+        for(uint8_t i = 0; i < key->get_type_data_size(); i++) {
+            write_byte_ds1990(key->get_data()[i]);
+            delay_us(10000);
+        }
+        //}
+
+        // lock
+        onewire_host_write(writer->host, TM01::CMD_WRITE_RECORD_FLAG);
+        onewire_write_one_bit(0, 10000);
+
+        FURI_CRITICAL_EXIT();
     }
-    //}
-
-    // lock
-    onewire_host_write(writer->host, TM01::CMD_WRITE_RECORD_FLAG);
-    onewire_write_one_bit(0, 10000);
-
-    __enable_irq();
 
     if(!compare_key_ds1990(key)) {
         result = false;
     }
 
-    __disable_irq();
+    {
+        FURI_CRITICAL_ENTER();
 
-    if(key->get_key_type() == iButtonKeyType::KeyMetakom ||
-       key->get_key_type() == iButtonKeyType::KeyCyfral) {
-        onewire_host_reset(writer->host);
-        if(key->get_key_type() == iButtonKeyType::KeyCyfral)
-            onewire_host_write(writer->host, TM01::CMD_SWITCH_TO_CYFRAL);
-        else
-            onewire_host_write(writer->host, TM01::CMD_SWITCH_TO_METAKOM);
-        onewire_write_one_bit(1);
+        if(key->get_key_type() == iButtonKeyType::KeyMetakom ||
+           key->get_key_type() == iButtonKeyType::KeyCyfral) {
+            onewire_host_reset(writer->host);
+            if(key->get_key_type() == iButtonKeyType::KeyCyfral)
+                onewire_host_write(writer->host, TM01::CMD_SWITCH_TO_CYFRAL);
+            else
+                onewire_host_write(writer->host, TM01::CMD_SWITCH_TO_METAKOM);
+            onewire_write_one_bit(1);
+        }
+
+        FURI_CRITICAL_EXIT();
     }
-
-    __enable_irq();
 
     return result;
 }
