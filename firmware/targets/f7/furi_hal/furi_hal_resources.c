@@ -52,14 +52,14 @@ const GpioPin gpio_spi_r_miso = {.port = SPI_R_MISO_GPIO_Port, .pin = SPI_R_MISO
 const GpioPin gpio_spi_r_mosi = {.port = SPI_R_MOSI_GPIO_Port, .pin = SPI_R_MOSI_Pin};
 const GpioPin gpio_spi_r_sck = {.port = SPI_R_SCK_GPIO_Port, .pin = SPI_R_SCK_Pin};
 
-const GpioPin gpio_ext_pc0 = {.port = GPIOC, .pin = GPIO_PIN_0};
-const GpioPin gpio_ext_pc1 = {.port = GPIOC, .pin = GPIO_PIN_1};
-const GpioPin gpio_ext_pc3 = {.port = GPIOC, .pin = GPIO_PIN_3};
-const GpioPin gpio_ext_pb2 = {.port = GPIOB, .pin = GPIO_PIN_2};
-const GpioPin gpio_ext_pb3 = {.port = GPIOB, .pin = GPIO_PIN_3};
-const GpioPin gpio_ext_pa4 = {.port = GPIOA, .pin = GPIO_PIN_4};
-const GpioPin gpio_ext_pa6 = {.port = GPIOA, .pin = GPIO_PIN_6};
-const GpioPin gpio_ext_pa7 = {.port = GPIOA, .pin = GPIO_PIN_7};
+const GpioPin gpio_ext_pc0 = {.port = GPIOC, .pin = LL_GPIO_PIN_0};
+const GpioPin gpio_ext_pc1 = {.port = GPIOC, .pin = LL_GPIO_PIN_1};
+const GpioPin gpio_ext_pc3 = {.port = GPIOC, .pin = LL_GPIO_PIN_3};
+const GpioPin gpio_ext_pb2 = {.port = GPIOB, .pin = LL_GPIO_PIN_2};
+const GpioPin gpio_ext_pb3 = {.port = GPIOB, .pin = LL_GPIO_PIN_3};
+const GpioPin gpio_ext_pa4 = {.port = GPIOA, .pin = LL_GPIO_PIN_4};
+const GpioPin gpio_ext_pa6 = {.port = GPIOA, .pin = LL_GPIO_PIN_6};
+const GpioPin gpio_ext_pa7 = {.port = GPIOA, .pin = LL_GPIO_PIN_7};
 
 const GpioPin gpio_rfid_pull = {.port = RFID_PULL_GPIO_Port, .pin = RFID_PULL_Pin};
 const GpioPin gpio_rfid_carrier_out = {.port = RFID_OUT_GPIO_Port, .pin = RFID_OUT_Pin};

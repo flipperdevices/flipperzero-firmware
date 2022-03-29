@@ -3,6 +3,7 @@
 #include "furi_hal_usb.h"
 #include "furi_hal_vcp.h"
 #include <furi_hal_power.h>
+#include <stm32wbxx_ll_pwr.h>
 #include <furi.h>
 
 #include "usb.h"

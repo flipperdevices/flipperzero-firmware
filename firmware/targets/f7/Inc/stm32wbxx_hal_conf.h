@@ -25,6 +25,8 @@
 extern "C" {
 #endif
 
+#include "stm32wbxx_hal_def.h"
+
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 
@@ -59,11 +61,11 @@ extern "C" {
 /*#define HAL_USART_MODULE_ENABLED  */
 /*#define HAL_WWDG_MODULE_ENABLED   */
 /*#define HAL_EXTI_MODULE_ENABLED   */
-//#define HAL_CORTEX_MODULE_ENABLED
-#define HAL_DMA_MODULE_ENABLED
+/*#define HAL_CORTEX_MODULE_ENABLED */
+/*#define HAL_DMA_MODULE_ENABLED    */
 /*#define HAL_FLASH_MODULE_ENABLED  */
-#define HAL_GPIO_MODULE_ENABLED
-#define HAL_PWR_MODULE_ENABLED
+/*#define HAL_GPIO_MODULE_ENABLED   */
+/*#define HAL_PWR_MODULE_ENABLED    */
 /*#define HAL_RCC_MODULE_ENABLED    */
 
 #define USE_HAL_ADC_REGISTER_CALLBACKS 0u
