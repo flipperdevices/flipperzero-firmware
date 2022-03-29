@@ -480,6 +480,38 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx) {
     return true;
 }
 
+ReturnCode furi_hal_nfc_exchange_full(
+    uint8_t* tx_buff,
+    uint16_t tx_len,
+    uint8_t* rx_buff,
+    uint16_t rx_cap,
+    uint16_t* rx_len) {
+    ReturnCode err;
+    uint8_t* part_buff;
+    uint16_t* part_len;
+
+    err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &part_buff, &part_len, false);
+    if(*part_len > rx_cap) {
+        return ERR_OVERRUN;
+    }
+    memcpy(rx_buff, part_buff, *part_len);
+    *rx_len = *part_len;
+    while(err == ERR_NONE && rx_buff[0] == 0xAF) {
+        err = furi_hal_nfc_data_exchange(rx_buff, 1, &part_buff, &part_len, false);
+        if(*part_len > rx_cap - *rx_len) {
+            return ERR_OVERRUN;
+        }
+        if(*part_len == 0) {
+            return ERR_PROTO;
+        }
+        memcpy(rx_buff + *rx_len, part_buff + 1, *part_len - 1);
+        *rx_buff = *part_buff;
+        *rx_len += *part_len - 1;
+    }
+
+    return err;
+}
+
 void furi_hal_nfc_deactivate() {
     rfalNfcDeactivate(false);
     rfalLowPowerModeStart();

@@ -836,38 +836,6 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
     stream_free(nfc_worker->dict_stream);
 }
 
-ReturnCode nfc_exchange_full(
-    uint8_t* tx_buff,
-    uint16_t tx_len,
-    uint8_t* rx_buff,
-    uint16_t rx_cap,
-    uint16_t* rx_len) {
-    ReturnCode err;
-    uint8_t* part_buff;
-    uint16_t* part_len;
-
-    err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &part_buff, &part_len, false);
-    if(*part_len > rx_cap) {
-        return ERR_OVERRUN;
-    }
-    memcpy(rx_buff, part_buff, *part_len);
-    *rx_len = *part_len;
-    while(err == ERR_NONE && rx_buff[0] == 0xAF) {
-        err = furi_hal_nfc_data_exchange(rx_buff, 1, &part_buff, &part_len, false);
-        if(*part_len > rx_cap - *rx_len) {
-            return ERR_OVERRUN;
-        }
-        if(*part_len == 0) {
-            return ERR_PROTO;
-        }
-        memcpy(rx_buff + *rx_len, part_buff + 1, *part_len - 1);
-        *rx_buff = *part_buff;
-        *rx_len += *part_len - 1;
-    }
-
-    return err;
-}
-
 void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
     ReturnCode err;
     rfalNfcDevice* dev_list;
@@ -910,7 +878,7 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
 
         // Get DESFire version
         tx_len = mf_df_prepare_get_version(tx_buff);
-        err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+        err = furi_hal_nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
         if(err != ERR_NONE) {
             FURI_LOG_W(TAG, "Bad exchange getting version, err: %d", err);
             continue;
@@ -921,7 +889,7 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
         }
 
         tx_len = mf_df_prepare_get_free_memory(tx_buff);
-        err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+        err = furi_hal_nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
         if(err == ERR_NONE) {
             data->free_memory = malloc(sizeof(MifareDesfireFreeMemory));
             memset(data->free_memory, 0, sizeof(MifareDesfireFreeMemory));
@@ -933,7 +901,7 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
         }
 
         tx_len = mf_df_prepare_get_key_settings(tx_buff);
-        err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+        err = furi_hal_nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
         if(err != ERR_NONE) {
             FURI_LOG_D(TAG, "Bad exchange getting key settings, err: %d", err);
         } else {
@@ -949,7 +917,8 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
                 &data->master_key_settings->key_version_head;
             for(uint8_t key_id = 0; key_id < data->master_key_settings->max_keys; key_id++) {
                 tx_len = mf_df_prepare_get_key_version(tx_buff, key_id);
-                err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+                err =
+                    furi_hal_nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
                 if(err != ERR_NONE) {
                     FURI_LOG_W(TAG, "Bad exchange getting key version, err: %d", err);
                     continue;
@@ -968,7 +937,7 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
         }
 
         tx_len = mf_df_prepare_get_application_ids(tx_buff);
-        err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+        err = furi_hal_nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
         if(err != ERR_NONE) {
             FURI_LOG_W(TAG, "Bad exchange getting application IDs, err: %d", err);
         } else {
@@ -979,13 +948,13 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
 
         for(MifareDesfireApplication* app = data->app_head; app; app = app->next) {
             tx_len = mf_df_prepare_select_application(tx_buff, app->id);
-            err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+            err = furi_hal_nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
             if(!mf_df_parse_select_application_response(rx_buff, rx_len)) {
                 FURI_LOG_W(TAG, "Bad exchange selecting application, err: %d", err);
                 continue;
             }
             tx_len = mf_df_prepare_get_key_settings(tx_buff);
-            err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+            err = furi_hal_nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
             if(err != ERR_NONE) {
                 FURI_LOG_W(TAG, "Bad exchange getting key settings, err: %d", err);
             } else {
@@ -1000,7 +969,8 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
                 MifareDesfireKeyVersion** key_version_head = &app->key_settings->key_version_head;
                 for(uint8_t key_id = 0; key_id < app->key_settings->max_keys; key_id++) {
                     tx_len = mf_df_prepare_get_key_version(tx_buff, key_id);
-                    err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+                    err = furi_hal_nfc_exchange_full(
+                        tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
                     if(err != ERR_NONE) {
                         FURI_LOG_W(TAG, "Bad exchange getting key version, err: %d", err);
                         continue;
@@ -1019,7 +989,7 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
             }
 
             tx_len = mf_df_prepare_get_file_ids(tx_buff);
-            err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+            err = furi_hal_nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
             if(err != ERR_NONE) {
                 FURI_LOG_W(TAG, "Bad exchange getting file IDs, err: %d", err);
             } else {
@@ -1030,7 +1000,8 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
 
             for(MifareDesfireFile* file = app->file_head; file; file = file->next) {
                 tx_len = mf_df_prepare_get_file_settings(tx_buff, file->id);
-                err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+                err =
+                    furi_hal_nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
                 if(err != ERR_NONE) {
                     FURI_LOG_W(TAG, "Bad exchange getting file settings, err: %d", err);
                     continue;
@@ -1052,7 +1023,8 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
                     tx_len = mf_df_prepare_read_records(tx_buff, file->id, 0, 0);
                     break;
                 }
-                err = nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
+                err =
+                    furi_hal_nfc_exchange_full(tx_buff, tx_len, rx_buff, sizeof(rx_buff), &rx_len);
                 if(err != ERR_NONE) {
                     FURI_LOG_W(TAG, "Bad exchange reading file %d, err: %d", file->id, err);
                     continue;

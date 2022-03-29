@@ -172,6 +172,23 @@ ReturnCode furi_hal_nfc_data_exchange(
  */
 bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx);
 
+/** NFC data full exhange
+ *
+ * @param      tx_buff     transmit buffer
+ * @param      tx_len      transmit buffer length
+ * @param      rx_buff     receive buffer
+ * @param      rx_cap      receive buffer capacity
+ * @param      rx_len      receive buffer length
+ *
+ * @return     ST ReturnCode
+ */
+ReturnCode furi_hal_nfc_exchange_full(
+    uint8_t* tx_buff,
+    uint16_t tx_len,
+    uint8_t* rx_buff,
+    uint16_t rx_cap,
+    uint16_t* rx_len);
+
 /** NFC deactivate and start sleep
  */
 void furi_hal_nfc_deactivate();
