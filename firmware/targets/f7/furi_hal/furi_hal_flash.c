@@ -98,7 +98,8 @@ static void furi_hal_flash_begin_with_core2(bool erase_flag) {
     if(erase_flag) SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_ON);
 
     // 64mHz 5us core2 flag protection
-    for (volatile uint32_t i = 0; i < 35; i++);
+    for(volatile uint32_t i = 0; i < 35; i++)
+        ;
 
     while(true) {
         // Wait till flash controller become usable
