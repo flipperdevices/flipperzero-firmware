@@ -42,6 +42,9 @@ typedef enum {
     // Comp
     FuriHalInterruptIdCOMP,
 
+    // HSEM
+    FuriHalInterruptIdHsem,
+
     // Service value
     FuriHalInterruptIdMax,
 } FuriHalInterruptId;

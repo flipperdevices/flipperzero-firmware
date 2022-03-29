@@ -87,8 +87,8 @@ static void furi_hal_flash_lock(void) {
 
 static void furi_hal_flash_begin_with_core2(bool erase_flag) {
     // Take flash controller ownership
-    while(HAL_HSEM_FastTake(CFG_HW_FLASH_SEMID) != HAL_OK) {
-        taskYIELD();
+    while(LL_HSEM_1StepLock(HSEM, CFG_HW_FLASH_SEMID) != 0) {
+        osThreadYield();
     }
 
     // Unlock flash operation
@@ -100,21 +100,21 @@ static void furi_hal_flash_begin_with_core2(bool erase_flag) {
     while(true) {
         // Wait till flash controller become usable
         while(LL_FLASH_IsActiveFlag_OperationSuspended()) {
-            taskYIELD();
+            osThreadYield();
         };
 
         // Just a little more love
         FURI_CRITICAL_ENTER();
 
         // Actually we already have mutex for it, but specification is specification
-        if(HAL_HSEM_IsSemTaken(CFG_HW_BLOCK_FLASH_REQ_BY_CPU1_SEMID)) {
+        if(LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_BLOCK_FLASH_REQ_BY_CPU1_SEMID)) {
             FURI_CRITICAL_EXIT();
             continue;
         }
 
         // Take sempahopre and prevent core2 from anyting funky
-        if(!HAL_HSEM_IsSemTaken(CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID)) {
-            if(HAL_HSEM_FastTake(CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID) != HAL_OK) {
+        if(!LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID)) {
+            if(LL_HSEM_1StepLock(HSEM, CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID) != 0) {
                 FURI_CRITICAL_EXIT();
                 continue;
             }
@@ -138,14 +138,14 @@ static void furi_hal_flash_begin(bool erase_flag) {
 
 static void furi_hal_flash_end_with_core2(bool erase_flag) {
     // Funky ops are ok at this point
-    HAL_HSEM_Release(CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID, 0);
+    LL_HSEM_ReleaseLock(HSEM, CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID, 0);
 
     // Task switching is ok
     taskEXIT_CRITICAL();
 
     // Doesn't make much sense, does it?
     while(__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY)) {
-        taskYIELD();
+        osThreadYield();
     }
 
     // Erase activity over, core2 can continue
@@ -155,7 +155,7 @@ static void furi_hal_flash_end_with_core2(bool erase_flag) {
     furi_hal_flash_lock();
 
     // Release flash controller ownership
-    HAL_HSEM_Release(CFG_HW_FLASH_SEMID, 0);
+    LL_HSEM_ReleaseLock(HSEM, CFG_HW_FLASH_SEMID, 0);
 }
 
 static void furi_hal_flash_end(bool erase_flag) {

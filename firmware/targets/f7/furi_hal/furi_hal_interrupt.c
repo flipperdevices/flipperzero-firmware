@@ -47,7 +47,11 @@ const IRQn_Type furi_hal_interrupt_irqn[FuriHalInterruptIdMax] = {
     // RCC
     [FuriHalInterruptIdRcc] = RCC_IRQn,
 
+    // COMP
     [FuriHalInterruptIdCOMP] = COMP_IRQn,
+
+    // HSEM
+    [FuriHalInterruptIdHsem] = HSEM_IRQn,
 };
 
 __attribute__((always_inline)) static inline void
@@ -192,6 +196,11 @@ void DMA2_Channel7_IRQHandler(void) {
     furi_hal_interrupt_call(FuriHalInterruptIdDma2Ch7);
 }
 
+void HSEM_IRQHandler(void) {
+     furi_hal_interrupt_call(FuriHalInterruptIdHsem);
+}
+
+
 void TAMP_STAMP_LSECSS_IRQHandler(void) {
     if(LL_RCC_IsActiveFlag_LSECSS()) {
         LL_RCC_ClearFlag_LSECSS();
@@ -248,10 +257,6 @@ void SysTick_Handler(void) {
 
 void USB_LP_IRQHandler(void) {
     usbd_poll(&udev);
-}
-
-void HSEM_IRQHandler(void) {
-    HAL_HSEM_IRQHandler();
 }
 
 void IPCC_C1_TX_IRQHandler(void) {
