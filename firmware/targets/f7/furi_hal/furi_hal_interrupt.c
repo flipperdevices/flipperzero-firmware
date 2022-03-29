@@ -197,9 +197,8 @@ void DMA2_Channel7_IRQHandler(void) {
 }
 
 void HSEM_IRQHandler(void) {
-     furi_hal_interrupt_call(FuriHalInterruptIdHsem);
+    furi_hal_interrupt_call(FuriHalInterruptIdHsem);
 }
-
 
 void TAMP_STAMP_LSECSS_IRQHandler(void) {
     if(LL_RCC_IsActiveFlag_LSECSS()) {
