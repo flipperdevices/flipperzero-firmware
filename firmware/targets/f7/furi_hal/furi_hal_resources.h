@@ -52,6 +52,7 @@ extern const GpioPin gpio_display_cs;
 extern const GpioPin gpio_display_rst;
 extern const GpioPin gpio_display_di;
 extern const GpioPin gpio_sdcard_cs;
+extern const GpioPin gpio_sdcard_cd;
 extern const GpioPin gpio_nfc_cs;
 
 extern const GpioPin gpio_spi_d_miso;
@@ -84,6 +85,8 @@ extern const GpioPin gpio_i2c_power_sda;
 extern const GpioPin gpio_i2c_power_scl;
 
 extern const GpioPin gpio_speaker;
+
+extern const GpioPin periph_power;
 
 #ifdef __cplusplus
 }

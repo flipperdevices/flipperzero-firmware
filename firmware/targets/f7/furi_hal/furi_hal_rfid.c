@@ -196,7 +196,7 @@ void furi_hal_rfid_tim_emulate_start(FuriHalRfidEmulateCallback callback, void* 
 
     // TODO make api for interrupts priority
     for(size_t i = WWDG_IRQn; i <= DMAMUX1_OVR_IRQn; i++) {
-        HAL_NVIC_SetPriority(i, 15, 0);
+        NVIC_SetPriority(i, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
     }
 
     furi_hal_interrupt_set_timer_isr(FURI_HAL_RFID_EMULATE_TIMER, furi_hal_rfid_emulate_isr);

@@ -5,7 +5,6 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <cmsis_os2.h>
-#include <gpio.h>
 #include "timer.h"
 #include "math.h"
 #include "main.h"

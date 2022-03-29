@@ -44,7 +44,7 @@ static void furi_hal_usart_init(uint32_t baud) {
 
     LL_USART_EnableIT_RXNE_RXFNE(USART1);
     LL_USART_EnableIT_IDLE(USART1);
-    HAL_NVIC_SetPriority(USART1_IRQn, 5, 0);
+    NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
 }
 
 static void furi_hal_lpuart_init(uint32_t baud) {
