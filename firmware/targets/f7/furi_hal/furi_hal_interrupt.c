@@ -70,12 +70,14 @@ __attribute__((always_inline)) static inline void
 }
 
 void furi_hal_interrupt_init() {
-    NVIC_SetPriority(RCC_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
-    NVIC_EnableIRQ(RCC_IRQn);
-
     NVIC_SetPriority(
         TAMP_STAMP_LSECSS_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
     NVIC_EnableIRQ(TAMP_STAMP_LSECSS_IRQn);
+
+    NVIC_SetPriority(PendSV_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
+
+    NVIC_SetPriority(HSEM_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
+    HAL_NVIC_EnableIRQ(HSEM_IRQn);
 
     FURI_LOG_I(TAG, "Init OK");
 }
@@ -231,4 +233,31 @@ void UsageFault_Handler(void) {
 }
 
 void DebugMon_Handler(void) {
+}
+
+#include "usbd_core.h"
+
+extern usbd_device udev;
+
+extern void HW_IPCC_Tx_Handler();
+extern void HW_IPCC_Rx_Handler();
+
+void SysTick_Handler(void) {
+    HAL_IncTick();
+}
+
+void USB_LP_IRQHandler(void) {
+    usbd_poll(&udev);
+}
+
+void HSEM_IRQHandler(void) {
+    HAL_HSEM_IRQHandler();
+}
+
+void IPCC_C1_TX_IRQHandler(void) {
+    HW_IPCC_Tx_Handler();
+}
+
+void IPCC_C1_RX_IRQHandler(void) {
+    HW_IPCC_Rx_Handler();
 }
