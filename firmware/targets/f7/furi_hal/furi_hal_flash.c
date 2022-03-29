@@ -97,6 +97,9 @@ static void furi_hal_flash_begin_with_core2(bool erase_flag) {
     // Erase activity notification
     if(erase_flag) SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_ON);
 
+    // 64mHz 5us core2 flag protection
+    for (volatile uint32_t i = 0; i < 35; i++);
+
     while(true) {
         // Wait till flash controller become usable
         while(LL_FLASH_IsActiveFlag_OperationSuspended()) {
@@ -104,18 +107,18 @@ static void furi_hal_flash_begin_with_core2(bool erase_flag) {
         };
 
         // Just a little more love
-        FURI_CRITICAL_ENTER();
+        taskENTER_CRITICAL();
 
         // Actually we already have mutex for it, but specification is specification
         if(LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_BLOCK_FLASH_REQ_BY_CPU1_SEMID)) {
-            FURI_CRITICAL_EXIT();
+            taskEXIT_CRITICAL();
             continue;
         }
 
         // Take sempahopre and prevent core2 from anyting funky
         if(!LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID)) {
             if(LL_HSEM_1StepLock(HSEM, CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID) != 0) {
-                FURI_CRITICAL_EXIT();
+                taskEXIT_CRITICAL();
                 continue;
             }
         }
