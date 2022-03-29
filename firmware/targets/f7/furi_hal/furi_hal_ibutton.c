@@ -33,10 +33,6 @@ static void furi_hal_ibutton_emulate_isr() {
 void furi_hal_ibutton_init() {
     furi_hal_ibutton = malloc(sizeof(FuriHalIbutton));
     furi_hal_ibutton->state = FuriHalIbuttonStateIdle;
-
-    NVIC_SetPriority(
-        FURI_HAL_IBUTTON_TIMER_IRQ, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
-    NVIC_EnableIRQ(FURI_HAL_IBUTTON_TIMER_IRQ);
 }
 
 void furi_hal_ibutton_emulate_start(
@@ -50,7 +46,9 @@ void furi_hal_ibutton_emulate_start(
     furi_hal_ibutton->callback = callback;
     furi_hal_ibutton->context = context;
 
-    furi_hal_interrupt_set_timer_isr(FURI_HAL_IBUTTON_TIMER, furi_hal_ibutton_emulate_isr);
+    FURI_CRITICAL_ENTER();
+    LL_TIM_DeInit(FURI_HAL_IBUTTON_TIMER);
+    FURI_CRITICAL_EXIT();
 
     furi_hal_interrupt_set_timer_isr(FURI_HAL_IBUTTON_TIMER, furi_hal_ibutton_emulate_isr);
     NVIC_SetPriority(
@@ -91,10 +89,6 @@ void furi_hal_ibutton_emulate_stop() {
 
         furi_hal_ibutton->callback = NULL;
         furi_hal_ibutton->context = NULL;
-
-        FURI_CRITICAL_ENTER();
-        LL_TIM_DeInit(FURI_HAL_IBUTTON_TIMER);
-        FURI_CRITICAL_EXIT();
     }
 }
 

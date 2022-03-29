@@ -1,8 +1,5 @@
 /**
  * @file encoder_cyfral.h
- * @author Sergey Gavrilov (who.just.the.doctor@gmail.com)
- * @version 1.0
- * @date 2021-11-18
  * 
  * Cyfral pulse format encoder
  */

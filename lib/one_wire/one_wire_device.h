@@ -1,8 +1,5 @@
 /**
  * @file one_wire_device.h
- * @author Sergey Gavrilov (who.just.the.doctor@gmail.com)
- * @version 0.5
- * @date 2021-11-18
  * 
  * 1-Wire slave library, device interface. Currently it can only emulate ID.
  */
