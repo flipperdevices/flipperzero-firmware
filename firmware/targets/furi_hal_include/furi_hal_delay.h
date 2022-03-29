@@ -17,6 +17,17 @@ extern uint32_t instructions_per_us;
  */
 void furi_hal_delay_init(void);
 
+/** Increase tick counter.
+ *  Should be called from SysTick ISR
+ */
+void furi_hal_tick(void);
+
+/** Get current tick counter
+ *
+ * @return     Current tick
+ */
+uint32_t furi_hal_get_tick(void);
+
 /** Delay in milliseconds
  * @warning    Cannot be used from ISR
  *

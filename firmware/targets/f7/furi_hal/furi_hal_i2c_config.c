@@ -1,6 +1,8 @@
 #include "furi_hal_i2c_config.h"
 #include <furi_hal_resources.h>
 #include <furi_hal_version.h>
+#include <stm32wbxx_ll_bus.h>
+#include <stm32wbxx_ll_rcc.h>
 
 /** Timing register value is computed with the STM32CubeMX Tool,
   * Standard Mode @100kHz with I2CCLK = 64 MHz,

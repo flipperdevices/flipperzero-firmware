@@ -14,7 +14,7 @@ int main(void) {
     furi_init();
 
     // Initialize ST HAL
-    HAL_Init();
+    //HAL_Init();
 
     // Flipper FURI HAL
     furi_hal_init();

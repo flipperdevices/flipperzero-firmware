@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stm32wbxx_ll_lpuart.h>
 #include <stm32wbxx_ll_usart.h>
+#include <stm32wbxx_ll_rcc.h>
 #include <furi_hal_resources.h>
 
 #include <furi.h>
@@ -81,7 +82,7 @@ static void furi_hal_lpuart_init(uint32_t baud) {
 
     LL_LPUART_EnableIT_RXNE_RXFNE(LPUART1);
     LL_LPUART_EnableIT_IDLE(LPUART1);
-    HAL_NVIC_SetPriority(LPUART1_IRQn, 5, 0);
+    NVIC_SetPriority(LPUART1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
 }
 
 void furi_hal_uart_init(FuriHalUartId ch, uint32_t baud) {

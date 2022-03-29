@@ -32,7 +32,7 @@ extern "C" {
 /**
   * @brief This is the list of modules to be used in the HAL driver
   */
-#define HAL_MODULE_ENABLED
+/*#define HAL_MODULE_ENABLED        */
 /*#define HAL_ADC_MODULE_ENABLED    */
 /*#define HAL_CRYP_MODULE_ENABLED   */
 /*#define HAL_COMP_MODULE_ENABLED   */
@@ -59,12 +59,12 @@ extern "C" {
 /*#define HAL_USART_MODULE_ENABLED  */
 /*#define HAL_WWDG_MODULE_ENABLED   */
 /*#define HAL_EXTI_MODULE_ENABLED   */
-#define HAL_CORTEX_MODULE_ENABLED
+//#define HAL_CORTEX_MODULE_ENABLED
 #define HAL_DMA_MODULE_ENABLED
-#define HAL_FLASH_MODULE_ENABLED
+/*#define HAL_FLASH_MODULE_ENABLED  */
 #define HAL_GPIO_MODULE_ENABLED
 #define HAL_PWR_MODULE_ENABLED
-#define HAL_RCC_MODULE_ENABLED
+/*#define HAL_RCC_MODULE_ENABLED    */
 
 #define USE_HAL_ADC_REGISTER_CALLBACKS 0u
 #define USE_HAL_COMP_REGISTER_CALLBACKS 0u

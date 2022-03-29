@@ -162,11 +162,9 @@ void APPD_Init(void) {
     gpio_config.Mode = GPIO_MODE_ANALOG;
 
     gpio_config.Pin = GPIO_PIN_15 | GPIO_PIN_14 | GPIO_PIN_13;
-    __HAL_RCC_GPIOA_CLK_ENABLE();
     HAL_GPIO_Init(GPIOA, &gpio_config);
 
     gpio_config.Pin = GPIO_PIN_4 | GPIO_PIN_3;
-    __HAL_RCC_GPIOB_CLK_ENABLE();
     HAL_GPIO_Init(GPIOB, &gpio_config);
 
     HAL_DBGMCU_DisableDBGSleepMode();
@@ -259,24 +257,21 @@ static void APPD_SetCPU2GpioConfig(void) {
 
     if(gpioa_pin_list != 0) {
         gpio_config.Pin = gpioa_pin_list;
-        __HAL_RCC_GPIOA_CLK_ENABLE();
-        __HAL_RCC_C2GPIOA_CLK_ENABLE();
+        LL_C2_AHB2_GRP1_EnableClock(LL_C2_AHB2_GRP1_PERIPH_GPIOA);
         HAL_GPIO_Init(GPIOA, &gpio_config);
         HAL_GPIO_WritePin(GPIOA, gpioa_pin_list, GPIO_PIN_RESET);
     }
 
     if(gpiob_pin_list != 0) {
         gpio_config.Pin = gpiob_pin_list;
-        __HAL_RCC_GPIOB_CLK_ENABLE();
-        __HAL_RCC_C2GPIOB_CLK_ENABLE();
+        LL_C2_AHB2_GRP1_EnableClock(LL_C2_AHB2_GRP1_PERIPH_GPIOB);
         HAL_GPIO_Init(GPIOB, &gpio_config);
         HAL_GPIO_WritePin(GPIOB, gpiob_pin_list, GPIO_PIN_RESET);
     }
 
     if(gpioc_pin_list != 0) {
         gpio_config.Pin = gpioc_pin_list;
-        __HAL_RCC_GPIOC_CLK_ENABLE();
-        __HAL_RCC_C2GPIOC_CLK_ENABLE();
+        LL_C2_AHB2_GRP1_EnableClock(LL_C2_AHB2_GRP1_PERIPH_GPIOC);
         HAL_GPIO_Init(GPIOC, &gpio_config);
         HAL_GPIO_WritePin(GPIOC, gpioc_pin_list, GPIO_PIN_RESET);
     }
@@ -320,15 +315,13 @@ static void APPD_BleDtbCfg(void) {
 
     if(gpioa_pin_list != 0) {
         gpio_config.Pin = gpioa_pin_list;
-        __HAL_RCC_GPIOA_CLK_ENABLE();
-        __HAL_RCC_C2GPIOA_CLK_ENABLE();
+        LL_C2_AHB2_GRP1_EnableClock(LL_C2_AHB2_GRP1_PERIPH_GPIOA);
         HAL_GPIO_Init(GPIOA, &gpio_config);
     }
 
     if(gpiob_pin_list != 0) {
         gpio_config.Pin = gpiob_pin_list;
-        __HAL_RCC_GPIOB_CLK_ENABLE();
-        __HAL_RCC_C2GPIOB_CLK_ENABLE();
+        LL_C2_AHB2_GRP1_EnableClock(LL_C2_AHB2_GRP1_PERIPH_GPIOB);
         HAL_GPIO_Init(GPIOB, &gpio_config);
     }
 #endif

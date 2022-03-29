@@ -5,6 +5,7 @@
 
 #define TAG "FuriHalDelay"
 uint32_t instructions_per_us;
+static uint32_t tick_cnt = 0;
 
 void furi_hal_delay_init(void) {
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
@@ -12,6 +13,18 @@ void furi_hal_delay_init(void) {
     DWT->CYCCNT = 0U;
     instructions_per_us = SystemCoreClock / 1000000.0f;
     FURI_LOG_I(TAG, "Init OK");
+}
+
+void furi_hal_tick(void) {
+    tick_cnt++;
+}
+
+uint32_t furi_hal_get_tick(void) {
+    return tick_cnt;
+}
+
+uint32_t millis(void) {
+    return furi_hal_get_tick();
 }
 
 void delay_us(float microseconds) {
@@ -28,8 +41,4 @@ void delay(float milliseconds) {
     osStatus_t result = osDelay(ticks);
     (void)result;
     furi_assert(result == osOK);
-}
-
-uint32_t millis(void) {
-    return HAL_GetTick();
 }
