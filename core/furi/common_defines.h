@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <cmsis_os2.h>
 
 #ifndef MAX
@@ -91,20 +92,21 @@
 #endif
 
 #ifndef FURI_CRITICAL_ENTER
-#define FURI_CRITICAL_ENTER()                 \
-    uint32_t isrm = 0;                        \
-    if(FURI_IS_ISR() != 0U) {                 \
-        isrm = taskENTER_CRITICAL_FROM_ISR(); \
-    } else {                                  \
-        taskENTER_CRITICAL();                 \
+#define FURI_CRITICAL_ENTER()                   \
+    uint32_t __isrm = 0;                        \
+    bool __from_isr = FURI_IS_ISR();            \
+    if(__from_isr) {                            \
+        __isrm = taskENTER_CRITICAL_FROM_ISR(); \
+    } else {                                    \
+        taskENTER_CRITICAL();                   \
     }
 #endif
 
 #ifndef FURI_CRITICAL_EXIT
-#define FURI_CRITICAL_EXIT()              \
-    if(FURI_IS_ISR() != 0U) {             \
-        taskEXIT_CRITICAL_FROM_ISR(isrm); \
-    } else {                              \
-        taskEXIT_CRITICAL();              \
+#define FURI_CRITICAL_EXIT()                \
+    if(__from_isr) {                        \
+        taskEXIT_CRITICAL_FROM_ISR(__isrm); \
+    } else {                                \
+        taskEXIT_CRITICAL();                \
     }
 #endif
