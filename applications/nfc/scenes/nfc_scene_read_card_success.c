@@ -7,13 +7,15 @@ void nfc_scene_read_card_success_widget_callback(
     void* context) {
     furi_assert(context);
     Nfc* nfc = context;
+
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
     }
 }
 
 void nfc_scene_read_card_success_on_enter(void* context) {
-    Nfc* nfc = (Nfc*)context;
+    Nfc* nfc = context;
+
     string_t data_str;
     string_t uid_str;
     string_init(data_str);
@@ -66,7 +68,7 @@ void nfc_scene_read_card_success_on_enter(void* context) {
 }
 
 bool nfc_scene_read_card_success_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = (Nfc*)context;
+    Nfc* nfc = context;
     NfcDeviceCommonData* data = &nfc->dev->dev_data.nfc_data;
     bool consumed = false;
 
@@ -84,6 +86,8 @@ bool nfc_scene_read_card_success_on_event(void* context, SceneManagerEvent event
 }
 
 void nfc_scene_read_card_success_on_exit(void* context) {
-    Nfc* nfc = (Nfc*)context;
+    Nfc* nfc = context;
+
+    // Clear view
     widget_reset(nfc->widget);
 }

@@ -43,6 +43,7 @@ bool nfc_scene_read_mifare_ul_on_event(void* context, SceneManagerEvent event) {
 
 void nfc_scene_read_mifare_ul_on_exit(void* context) {
     Nfc* nfc = context;
+
     // Stop worker
     nfc_worker_stop(nfc->worker);
     // Clear view
