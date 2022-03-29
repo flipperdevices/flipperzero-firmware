@@ -106,8 +106,6 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_mifare_classic_dict_attack(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateReadMifareDesfire) {
         nfc_worker_read_mifare_desfire(nfc_worker);
-    } else if(nfc_worker->state == NfcWorkerStateField) {
-        nfc_worker_field(nfc_worker);
     }
     furi_hal_nfc_deactivate();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
@@ -1072,12 +1070,4 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
         }
         break;
     }
-}
-
-void nfc_worker_field(NfcWorker* nfc_worker) {
-    furi_hal_nfc_field_on();
-    while(nfc_worker->state == NfcWorkerStateField) {
-        osDelay(50);
-    }
-    furi_hal_nfc_field_off();
 }
