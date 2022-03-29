@@ -1,6 +1,6 @@
 #include "ibutton_scene_read_not_key_error.h"
 #include "../ibutton_app.h"
-#include <maxim_crc.h>
+#include <one_wire/maxim_crc.h>
 
 static void dialog_ex_callback(DialogExResult result, void* context) {
     iButtonApp* app = static_cast<iButtonApp*>(context);

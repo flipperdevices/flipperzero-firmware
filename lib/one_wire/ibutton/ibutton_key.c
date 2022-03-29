@@ -1,5 +1,5 @@
 #include <furi.h>
-#include <maxim_crc.h>
+#include <one_wire/maxim_crc.h>
 #include "ibutton_key.h"
 
 struct iButtonKey {

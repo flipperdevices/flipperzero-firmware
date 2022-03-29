@@ -22,7 +22,7 @@
 #include "scene/ibutton_scene_select_key.h"
 #include "scene/ibutton_scene_add_type.h"
 #include "scene/ibutton_scene_add_value.h"
-#include <lib/one_wire/ibutton/ibutton_worker.h>
+#include <one_wire/ibutton/ibutton_worker.h>
 #include <notification/notification_messages.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>

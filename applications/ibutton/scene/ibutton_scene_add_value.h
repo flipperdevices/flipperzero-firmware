@@ -1,6 +1,6 @@
 #pragma once
 #include "ibutton_scene_generic.h"
-#include <lib/one_wire/ibutton/ibutton_key.h>
+#include <one_wire/ibutton/ibutton_key.h>
 
 class iButtonSceneAddValue : public iButtonScene {
 public:

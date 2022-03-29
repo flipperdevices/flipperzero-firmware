@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <onewire/maxim_crc.h>
+#include "maxim_crc.h"
 #include "one_wire_device.h"
 #include "one_wire_slave.h"
 #include "one_wire_slave_i.h"

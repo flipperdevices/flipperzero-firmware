@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/widget.h>
-#include <lib/one_wire/ibutton/ibutton_worker.h>
+#include <one_wire/ibutton/ibutton_worker.h>
 
 class iButtonApp;
 

@@ -3,8 +3,8 @@
 #include <stdarg.h>
 #include <cli/cli.h>
 #include <lib/toolbox/args.h>
-#include <lib/one_wire/ibutton/ibutton_worker.h>
-#include <lib/one_wire/one_wire_host.h>
+#include <one_wire/ibutton/ibutton_worker.h>
+#include <one_wire/one_wire_host.h>
 
 void ibutton_cli(Cli* cli, string_t args, void* context);
 void onewire_cli(Cli* cli, string_t args, void* context);
