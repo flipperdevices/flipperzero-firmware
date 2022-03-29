@@ -122,3 +122,4 @@ C_SOURCES		+= $(wildcard $(LIB_DIR)/micro-ecc/*.c)
 # iButton and OneWire
 C_SOURCES		+= $(wildcard $(LIB_DIR)/one_wire/*.c)
 C_SOURCES		+= $(wildcard $(LIB_DIR)/one_wire/*/*.c)
+C_SOURCES		+= $(wildcard $(LIB_DIR)/one_wire/*/*/*.c)
