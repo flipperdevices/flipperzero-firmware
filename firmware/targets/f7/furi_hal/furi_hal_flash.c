@@ -98,7 +98,7 @@ static void furi_hal_flash_lock(void) {
 
 static void furi_hal_flash_begin_with_core2(bool erase_flag) {
     // Take flash controller ownership
-    while(LL_HSEM_1StepLock(HSEM, CFG_HW_FLASH_SEMID) != HAL_OK) {
+    while(LL_HSEM_1StepLock(HSEM, CFG_HW_FLASH_SEMID)) {
         taskYIELD();
     }
 
@@ -205,7 +205,7 @@ static void furi_hal_flush_cache(void) {
     }
 }
 
-HAL_StatusTypeDef furi_hal_flash_wait_last_operation(uint32_t timeout) {
+bool furi_hal_flash_wait_last_operation(uint32_t timeout) {
     uint32_t error = 0;
     uint32_t countdown = 0;
 
@@ -218,7 +218,7 @@ HAL_StatusTypeDef furi_hal_flash_wait_last_operation(uint32_t timeout) {
             countdown--;
         }
         if(countdown == 0) {
-            return HAL_TIMEOUT;
+            return false;
         }
     }
 
@@ -246,11 +246,10 @@ HAL_StatusTypeDef furi_hal_flash_wait_last_operation(uint32_t timeout) {
             countdown--;
         }
         if(countdown == 0) {
-            return HAL_TIMEOUT;
+            return false;
         }
     }
-
-    return HAL_OK;
+    return true;
 }
 
 bool furi_hal_flash_erase(uint8_t page) {
@@ -260,14 +259,14 @@ bool furi_hal_flash_erase(uint8_t page) {
     furi_check(FLASH->SR == 0);
 
     /* Verify that next operation can be proceed */
-    furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT) == HAL_OK);
+    furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT));
 
     /* Select page and start operation */
     MODIFY_REG(
         FLASH->CR, FLASH_CR_PNB, ((page << FLASH_CR_PNB_Pos) | FLASH_CR_PER | FLASH_CR_STRT));
 
     /* Wait for last operation to be completed */
-    furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT) == HAL_OK);
+    furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT));
 
     /* If operation is completed or interrupted, disable the Page Erase Bit */
     CLEAR_BIT(FLASH->CR, (FLASH_CR_PER | FLASH_CR_PNB));
@@ -304,7 +303,7 @@ bool furi_hal_flash_write_dword(size_t address, uint64_t data) {
     *(uint32_t*)(address + 4U) = (uint32_t)(data >> 32U);
 
     /* Wait for last operation to be completed */
-    furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT) == HAL_OK);
+    furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT));
 
     /* If the program operation is completed, disable the PG or FSTPG Bit */
     CLEAR_BIT(FLASH->CR, FLASH_CR_PG);

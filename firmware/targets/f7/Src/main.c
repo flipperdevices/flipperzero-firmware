@@ -13,9 +13,6 @@ int main(void) {
     // Initialize FURI layer
     furi_init();
 
-    // Initialize ST HAL
-    //HAL_Init();
-
     // Flipper FURI HAL
     furi_hal_init();
 

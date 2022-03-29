@@ -57,6 +57,14 @@
 #define ALIGN(n) __attribute__((aligned(n)))
 #endif
 
+#ifndef __weak
+#define __weak __attribute__((weak))
+#endif
+
+#ifndef UNUSED
+#define UNUSED(X) (void)(X)
+#endif
+
 #ifndef STRINGIFY
 #define STRINGIFY(x) #x
 #endif

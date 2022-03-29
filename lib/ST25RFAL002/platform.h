@@ -17,7 +17,7 @@ void platformSetIrqCallback(PlatformIrqCallback cb);
 void platformEnableIrqCallback();
 void platformDisableIrqCallback();
 
-HAL_StatusTypeDef platformSpiTxRx(const uint8_t* txBuf, uint8_t* rxBuf, uint16_t len);
+bool platformSpiTxRx(const uint8_t* txBuf, uint8_t* rxBuf, uint16_t len);
 void platformProtectST25RComm();
 void platformUnprotectST25RComm();
 

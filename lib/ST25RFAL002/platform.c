@@ -48,7 +48,7 @@ void platformSetIrqCallback(PlatformIrqCallback callback) {
     hal_gpio_disable_int_callback(&pin);
 }
 
-HAL_StatusTypeDef platformSpiTxRx(const uint8_t* txBuf, uint8_t* rxBuf, uint16_t len) {
+bool platformSpiTxRx(const uint8_t* txBuf, uint8_t* rxBuf, uint16_t len) {
     bool ret = false;
     if(txBuf && rxBuf) {
         ret =
@@ -59,11 +59,7 @@ HAL_StatusTypeDef platformSpiTxRx(const uint8_t* txBuf, uint8_t* rxBuf, uint16_t
         ret = furi_hal_spi_bus_rx(&furi_hal_spi_bus_handle_nfc, (uint8_t*)rxBuf, len, 1000);
     }
 
-    if(!ret) {
-        return HAL_ERROR;
-    } else {
-        return HAL_OK;
-    }
+    return ret;
 }
 
 void platformProtectST25RComm() {

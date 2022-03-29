@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-#include "stm32wbxx_hal.h"
+#include <furi/common_defines.h>
 #include <furi_hal_gpio.h>
 
 void Error_Handler(void);

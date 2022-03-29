@@ -9,6 +9,7 @@
 
 #define TAG "FuriHalClock"
 
+#define TICK_INT_PRIORITY 0U
 #define HS_CLOCK_IS_READY() (LL_RCC_HSE_IsReady() && LL_RCC_HSI_IsReady())
 #define LS_CLOCK_IS_READY() (LL_RCC_LSE_IsReady() && LL_RCC_LSI1_IsReady())
 
