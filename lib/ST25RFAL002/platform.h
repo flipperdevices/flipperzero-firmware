@@ -88,15 +88,12 @@ void platformUnprotectST25RComm();
     platformUnprotectST25RComm() /*!< Unprotect the IRQ status var - IRQ enable on a single thread environment (MCU) ; Mutex unlock on a multi thread environment         */
 
 #define platformGpioSet(port, pin) \
-    HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET) /*!< Turns the given GPIO High                   */
+    hal_gpio_write_port_pin(port, pin, true) /*!< Turns the given GPIO High                   */
 #define platformGpioClear(port, pin) \
-    HAL_GPIO_WritePin(               \
-        port, pin, GPIO_PIN_RESET) /*!< Turns the given GPIO Low                    */
-#define platformGpioToogle(port, pin) \
-    HAL_GPIO_TogglePin(port, pin) /*!< Toogles the given GPIO                      */
+    hal_gpio_write_port_pin(port, pin, false) /*!< Turns the given GPIO Low                    */
+
 #define platformGpioIsHigh(port, pin) \
-    (HAL_GPIO_ReadPin(port, pin) ==   \
-     GPIO_PIN_SET) /*!< Checks if the given LED is High             */
+    (hal_gpio_read_port_pin(port, pin) == true) /*!< Checks if the given LED is High             */
 #define platformGpioIsLow(port, pin) \
     (!platformGpioIsHigh(port, pin)) /*!< Checks if the given LED is Low              */
 

@@ -32,8 +32,7 @@ typedef enum {
 } Light;
 
 typedef struct {
-    const GPIO_TypeDef* port;
-    const uint16_t pin;
+    const GpioPin gpio;
     const InputKey key;
     const bool inverted;
     const char* name;
