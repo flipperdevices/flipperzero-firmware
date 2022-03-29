@@ -117,11 +117,14 @@ static void furi_hal_flash_begin_with_core2(bool erase_flag) {
         }
 
         // Take sempahopre and prevent core2 from anyting funky
-        if(!LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID)) {
-            if(LL_HSEM_1StepLock(HSEM, CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID) != 0) {
-                taskEXIT_CRITICAL();
-                continue;
-            }
+        if(LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID)) {
+            taskEXIT_CRITICAL();
+            continue;
+        }
+
+        if(LL_HSEM_1StepLock(HSEM, CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID) != 0) {
+            taskEXIT_CRITICAL();
+            continue;
         }
 
         break;
