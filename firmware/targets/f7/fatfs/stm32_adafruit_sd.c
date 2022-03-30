@@ -279,47 +279,47 @@ static uint8_t SD_ReadData(void);
 /* Private functions ---------------------------------------------------------*/
 
 void SD_SPI_Bus_To_Down_State() {
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         furi_hal_sd_spi_handle->miso,
         GpioModeOutputPushPull,
         GpioPullNo,
         GpioSpeedVeryHigh,
         GpioAltFnUnused);
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         furi_hal_sd_spi_handle->mosi,
         GpioModeOutputPushPull,
         GpioPullNo,
         GpioSpeedVeryHigh,
         GpioAltFnUnused);
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         furi_hal_sd_spi_handle->sck,
         GpioModeOutputPushPull,
         GpioPullNo,
         GpioSpeedVeryHigh,
         GpioAltFnUnused);
 
-    hal_gpio_write(furi_hal_sd_spi_handle->cs, false);
-    hal_gpio_write(furi_hal_sd_spi_handle->miso, false);
-    hal_gpio_write(furi_hal_sd_spi_handle->mosi, false);
-    hal_gpio_write(furi_hal_sd_spi_handle->sck, false);
+    furi_hal_gpio_write(furi_hal_sd_spi_handle->cs, false);
+    furi_hal_gpio_write(furi_hal_sd_spi_handle->miso, false);
+    furi_hal_gpio_write(furi_hal_sd_spi_handle->mosi, false);
+    furi_hal_gpio_write(furi_hal_sd_spi_handle->sck, false);
 }
 
 void SD_SPI_Bus_To_Normal_State() {
-    hal_gpio_write(furi_hal_sd_spi_handle->cs, true);
+    furi_hal_gpio_write(furi_hal_sd_spi_handle->cs, true);
 
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         furi_hal_sd_spi_handle->miso,
         GpioModeAltFunctionPushPull,
         GpioPullUp,
         GpioSpeedVeryHigh,
         GpioAltFn5SPI2);
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         furi_hal_sd_spi_handle->mosi,
         GpioModeAltFunctionPushPull,
         GpioPullUp,
         GpioSpeedVeryHigh,
         GpioAltFn5SPI2);
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         furi_hal_sd_spi_handle->sck,
         GpioModeAltFunctionPushPull,
         GpioPullUp,

@@ -12,13 +12,13 @@ static void (*irq_cb[2])(uint8_t ev, uint8_t data, void* context);
 static void* irq_ctx[2];
 
 static void furi_hal_usart_init(uint32_t baud) {
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         &gpio_usart_tx,
         GpioModeAltFunctionPushPull,
         GpioPullUp,
         GpioSpeedVeryHigh,
         GpioAltFn7USART1);
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         &gpio_usart_rx,
         GpioModeAltFunctionPushPull,
         GpioPullUp,
@@ -49,13 +49,13 @@ static void furi_hal_usart_init(uint32_t baud) {
 }
 
 static void furi_hal_lpuart_init(uint32_t baud) {
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         &gpio_ext_pc0,
         GpioModeAltFunctionPushPull,
         GpioPullUp,
         GpioSpeedVeryHigh,
         GpioAltFn8LPUART1);
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         &gpio_ext_pc1,
         GpioModeAltFunctionPushPull,
         GpioPullUp,
@@ -127,12 +127,12 @@ void furi_hal_uart_deinit(FuriHalUartId ch) {
     furi_hal_uart_set_irq_cb(ch, NULL, NULL);
     if(ch == FuriHalUartIdUSART1) {
         LL_USART_Disable(USART1);
-        hal_gpio_init(&gpio_usart_tx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-        hal_gpio_init(&gpio_usart_rx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(&gpio_usart_tx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(&gpio_usart_rx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     } else if(ch == FuriHalUartIdLPUART1) {
         LL_LPUART_Disable(LPUART1);
-        hal_gpio_init(&gpio_ext_pc0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-        hal_gpio_init(&gpio_ext_pc1, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(&gpio_ext_pc0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(&gpio_ext_pc1, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     }
 }
 

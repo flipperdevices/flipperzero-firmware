@@ -1,35 +1,5 @@
 #include <furi_hal_resources.h>
-#include "main.h"
 #include <furi.h>
-
-const InputPin input_pins[] = {
-    {.gpio = {.port = BUTTON_UP_GPIO_Port, .pin = BUTTON_UP_Pin},
-     .key = InputKeyUp,
-     .inverted = true,
-     .name = "Up"},
-    {.gpio = {.port = BUTTON_DOWN_GPIO_Port, .pin = BUTTON_DOWN_Pin},
-     .key = InputKeyDown,
-     .inverted = true,
-     .name = "Down"},
-    {.gpio = {.port = BUTTON_RIGHT_GPIO_Port, .pin = BUTTON_RIGHT_Pin},
-     .key = InputKeyRight,
-     .inverted = true,
-     .name = "Right"},
-    {.gpio = {.port = BUTTON_LEFT_GPIO_Port, .pin = BUTTON_LEFT_Pin},
-     .key = InputKeyLeft,
-     .inverted = true,
-     .name = "Left"},
-    {.gpio = {.port = BUTTON_OK_GPIO_Port, .pin = BUTTON_OK_Pin},
-     .key = InputKeyOk,
-     .inverted = false,
-     .name = "Ok"},
-    {.gpio = {.port = BUTTON_BACK_GPIO_Port, .pin = BUTTON_BACK_Pin},
-     .key = InputKeyBack,
-     .inverted = true,
-     .name = "Back"},
-};
-
-const size_t input_pins_count = sizeof(input_pins) / sizeof(InputPin);
 
 const GpioPin vibro_gpio = {.port = VIBRO_GPIO_Port, .pin = VIBRO_Pin};
 const GpioPin ibutton_gpio = {.port = iBTN_GPIO_Port, .pin = iBTN_Pin};
@@ -44,6 +14,13 @@ const GpioPin gpio_display_di = {.port = DISPLAY_DI_GPIO_Port, .pin = DISPLAY_DI
 const GpioPin gpio_sdcard_cs = {.port = SD_CS_GPIO_Port, .pin = SD_CS_Pin};
 const GpioPin gpio_sdcard_cd = {.port = SD_CD_GPIO_Port, .pin = SD_CD_Pin};
 const GpioPin gpio_nfc_cs = {.port = NFC_CS_GPIO_Port, .pin = NFC_CS_Pin};
+
+const GpioPin gpio_button_up = {.port = GPIOB, .pin = LL_GPIO_PIN_10};
+const GpioPin gpio_button_down = {.port = GPIOC, .pin = LL_GPIO_PIN_6};
+const GpioPin gpio_button_right = {.port = GPIOB, .pin = LL_GPIO_PIN_12};
+const GpioPin gpio_button_left = {.port = GPIOB, .pin = LL_GPIO_PIN_11};
+const GpioPin gpio_button_ok = {.port = GPIOH, .pin = LL_GPIO_PIN_3};
+const GpioPin gpio_button_back = {.port = GPIOC, .pin = LL_GPIO_PIN_13};
 
 const GpioPin gpio_spi_d_miso = {.port = SPI_D_MISO_GPIO_Port, .pin = SPI_D_MISO_Pin};
 const GpioPin gpio_spi_d_mosi = {.port = SPI_D_MOSI_GPIO_Port, .pin = SPI_D_MOSI_Pin};
@@ -78,3 +55,14 @@ const GpioPin gpio_i2c_power_scl = {.port = GPIOA, .pin = LL_GPIO_PIN_9};
 const GpioPin gpio_speaker = {.port = GPIOB, .pin = LL_GPIO_PIN_8};
 
 const GpioPin periph_power = {.port = PERIPH_POWER_GPIO_Port, .pin = PERIPH_POWER_Pin};
+
+const InputPin input_pins[] = {
+    {.gpio = &gpio_button_up, .key = InputKeyUp, .inverted = true, .name = "Up"},
+    {.gpio = &gpio_button_down, .key = InputKeyDown, .inverted = true, .name = "Down"},
+    {.gpio = &gpio_button_right, .key = InputKeyRight, .inverted = true, .name = "Right"},
+    {.gpio = &gpio_button_left, .key = InputKeyLeft, .inverted = true, .name = "Left"},
+    {.gpio = &gpio_button_ok, .key = InputKeyOk, .inverted = false, .name = "Ok"},
+    {.gpio = &gpio_button_back, .key = InputKeyBack, .inverted = true, .name = "Back"},
+};
+
+const size_t input_pins_count = sizeof(input_pins) / sizeof(InputPin);

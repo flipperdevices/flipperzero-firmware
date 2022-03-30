@@ -2,7 +2,6 @@
 #include "furi_hal_delay.h"
 
 #include <furi.h>
-#include <main.h>
 
 #include <stm32wbxx.h>
 #include <stm32wbxx_ll_tim.h>

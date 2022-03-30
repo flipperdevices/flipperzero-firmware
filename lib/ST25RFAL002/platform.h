@@ -7,7 +7,6 @@
 #include <cmsis_os2.h>
 #include "timer.h"
 #include "math.h"
-#include "main.h"
 #include <furi_hal_gpio.h>
 #include <furi_hal_light.h>
 #include <furi_hal_spi.h>
@@ -87,12 +86,15 @@ void platformUnprotectST25RComm();
     platformUnprotectST25RComm() /*!< Unprotect the IRQ status var - IRQ enable on a single thread environment (MCU) ; Mutex unlock on a multi thread environment         */
 
 #define platformGpioSet(port, pin) \
-    hal_gpio_write_port_pin(port, pin, true) /*!< Turns the given GPIO High                   */
+    furi_hal_gpio_write_port_pin(  \
+        port, pin, true) /*!< Turns the given GPIO High                   */
 #define platformGpioClear(port, pin) \
-    hal_gpio_write_port_pin(port, pin, false) /*!< Turns the given GPIO Low                    */
+    furi_hal_gpio_write_port_pin(    \
+        port, pin, false) /*!< Turns the given GPIO Low                    */
 
-#define platformGpioIsHigh(port, pin) \
-    (hal_gpio_read_port_pin(port, pin) == true) /*!< Checks if the given LED is High             */
+#define platformGpioIsHigh(port, pin)          \
+    (furi_hal_gpio_read_port_pin(port, pin) == \
+     true) /*!< Checks if the given LED is High             */
 #define platformGpioIsLow(port, pin) \
     (!platformGpioIsHigh(port, pin)) /*!< Checks if the given LED is Low              */
 

@@ -141,8 +141,8 @@ void subghz_test_static_enter(void* context) {
     furi_hal_subghz_reset();
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
 
-    hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    hal_gpio_write(&gpio_cc1101_g0, false);
+    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_write(&gpio_cc1101_g0, false);
     instance->satus_tx = SubGhzTestStaticStatusIDLE;
 
     with_view_model(

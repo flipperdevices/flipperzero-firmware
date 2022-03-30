@@ -3,6 +3,12 @@
 #include <stdbool.h>
 #include <cmsis_os2.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <cmsis_compiler.h>
+
 #ifndef MAX
 #define MAX(a, b)               \
     ({                          \
@@ -117,4 +123,8 @@
     } else {                                \
         taskEXIT_CRITICAL();                \
     }
+#endif
+
+#ifdef __cplusplus
+}
 #endif
