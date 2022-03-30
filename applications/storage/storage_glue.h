@@ -53,7 +53,7 @@ LIST_DEF(
      CLEAR(API_2(storage_file_clear))))
 
 struct StorageData {
-    FS_Api fs_api;
+    const FS_Api* fs_api;
     StorageApi api;
     void* data;
     osMutexId_t mutex;

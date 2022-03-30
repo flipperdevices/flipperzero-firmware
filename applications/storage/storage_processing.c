@@ -5,7 +5,7 @@
 
 #define FS_CALL(_storage, _fn)   \
     storage_data_lock(_storage); \
-    ret = _storage->fs_api._fn;  \
+    ret = _storage->fs_api->_fn;  \
     storage_data_unlock(_storage);
 
 #define ST_CALL(_storage, _fn)   \

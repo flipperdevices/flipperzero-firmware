@@ -1,5 +1,6 @@
 #pragma once
-#include <furi.h>
+#include <stdint.h>
+#include <m-string.h>
 #include "filesystem_api_defines.h"
 #include "storage_sd_api.h"
 
