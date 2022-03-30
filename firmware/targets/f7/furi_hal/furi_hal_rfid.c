@@ -13,7 +13,7 @@
 #define FURI_HAL_RFID_READ_TIMER_CHANNEL_CONFIG LL_TIM_CHANNEL_CH1
 
 #define FURI_HAL_RFID_EMULATE_TIMER TIM2
-#define FURI_HAL_RFID_EMULATE_TIMER_IRQ TIM2_IRQn
+#define FURI_HAL_RFID_EMULATE_TIMER_IRQ FuriHalInterruptIdTIM2
 #define FURI_HAL_RFID_EMULATE_TIMER_CHANNEL LL_TIM_CHANNEL_CH3
 
 typedef struct {
@@ -22,6 +22,13 @@ typedef struct {
 } FuriHalRfid;
 
 FuriHalRfid* furi_hal_rfid = NULL;
+
+#define LFRFID_LL_READ_TIM TIM1
+#define LFRFID_LL_READ_CONFIG_CHANNEL LL_TIM_CHANNEL_CH1
+#define LFRFID_LL_READ_CHANNEL LL_TIM_CHANNEL_CH1N
+
+#define LFRFID_LL_EMULATE_TIM TIM2
+#define LFRFID_LL_EMULATE_CHANNEL LL_TIM_CHANNEL_CH3
 
 void furi_hal_rfid_init() {
     furi_assert(furi_hal_rfid == NULL);
@@ -72,7 +79,7 @@ void furi_hal_rfid_pins_reset() {
 
 void furi_hal_rfid_pins_emulate() {
     // ibutton low
-    furi_hal_ibutton_start();
+    furi_hal_ibutton_start_drive();
     furi_hal_ibutton_pin_low();
 
     // pull pin to timer out
@@ -89,7 +96,7 @@ void furi_hal_rfid_pins_emulate() {
 
 void furi_hal_rfid_pins_read() {
     // ibutton low
-    furi_hal_ibutton_start();
+    furi_hal_ibutton_start_drive();
     furi_hal_ibutton_pin_low();
 
     // dont pull rfid antenna
@@ -187,16 +194,7 @@ void furi_hal_rfid_tim_emulate_start(FuriHalRfidEmulateCallback callback, void* 
     furi_hal_rfid->callback = callback;
     furi_hal_rfid->context = context;
 
-    // TODO make api for interrupts priority
-    for(size_t i = WWDG_IRQn; i <= DMAMUX1_OVR_IRQn; i++) {
-        HAL_NVIC_SetPriority(i, 15, 0);
-    }
-
-    furi_hal_interrupt_set_timer_isr(FURI_HAL_RFID_EMULATE_TIMER, furi_hal_rfid_emulate_isr);
-
-    NVIC_SetPriority(
-        FURI_HAL_RFID_EMULATE_TIMER_IRQ, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
-    NVIC_EnableIRQ(FURI_HAL_RFID_EMULATE_TIMER_IRQ);
+    furi_hal_interrupt_set_isr(FURI_HAL_RFID_EMULATE_TIMER_IRQ, furi_hal_rfid_emulate_isr, NULL);
 
     LL_TIM_EnableIT_UPDATE(FURI_HAL_RFID_EMULATE_TIMER);
     LL_TIM_EnableAllOutputs(FURI_HAL_RFID_EMULATE_TIMER);
@@ -204,9 +202,9 @@ void furi_hal_rfid_tim_emulate_start(FuriHalRfidEmulateCallback callback, void* 
 }
 
 void furi_hal_rfid_tim_emulate_stop() {
-    furi_hal_interrupt_set_timer_isr(FURI_HAL_RFID_EMULATE_TIMER, NULL);
     LL_TIM_DisableCounter(FURI_HAL_RFID_EMULATE_TIMER);
     LL_TIM_DisableAllOutputs(FURI_HAL_RFID_EMULATE_TIMER);
+    furi_hal_interrupt_set_isr(FURI_HAL_RFID_EMULATE_TIMER_IRQ, NULL, NULL);
 }
 
 void furi_hal_rfid_tim_reset() {

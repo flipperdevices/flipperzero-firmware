@@ -722,19 +722,13 @@ void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void*
     LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_FILTER_FDIV32_N8);
 
     // ISR setup
-    furi_hal_interrupt_set_timer_isr(TIM2, furi_hal_subghz_capture_ISR);
-    NVIC_SetPriority(TIM2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
-    NVIC_EnableIRQ(TIM2_IRQn);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, furi_hal_subghz_capture_ISR, NULL);
 
     // Interrupts and channels
     LL_TIM_EnableIT_CC1(TIM2);
     LL_TIM_EnableIT_CC2(TIM2);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH1);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
-
-    // Enable NVIC
-    NVIC_SetPriority(TIM2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
-    NVIC_EnableIRQ(TIM2_IRQn);
 
     // Start timer
     LL_TIM_SetCounter(TIM2, 0);
@@ -754,7 +748,7 @@ void furi_hal_subghz_stop_async_rx() {
     FURI_CRITICAL_ENTER();
     LL_TIM_DeInit(TIM2);
     FURI_CRITICAL_EXIT();
-    furi_hal_interrupt_set_timer_isr(TIM2, NULL);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
 
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
@@ -891,8 +885,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
     dma_config.Priority = LL_DMA_MODE_NORMAL;
     LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config);
-    furi_hal_interrupt_set_dma_channel_isr(
-        DMA1, LL_DMA_CHANNEL_1, furi_hal_subghz_async_tx_dma_isr);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, furi_hal_subghz_async_tx_dma_isr, NULL);
     LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
@@ -918,7 +911,8 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     LL_TIM_OC_DisableFast(TIM2, LL_TIM_CHANNEL_CH2);
     LL_TIM_DisableMasterSlaveMode(TIM2);
 
-    furi_hal_interrupt_set_timer_isr(TIM2, furi_hal_subghz_async_tx_timer_isr);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, furi_hal_subghz_async_tx_timer_isr, NULL);
+
     LL_TIM_EnableIT_UPDATE(TIM2);
     LL_TIM_EnableDMAReq_UPDATE(TIM2);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
@@ -929,10 +923,6 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     hal_gpio_write(&FURI_HAL_SUBGHZ_TX_GPIO, true);
 #endif
     furi_hal_subghz_tx();
-
-    // Enable NVIC
-    NVIC_SetPriority(TIM2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
-    NVIC_EnableIRQ(TIM2_IRQn);
 
     LL_TIM_SetCounter(TIM2, 0);
     LL_TIM_EnableCounter(TIM2);
@@ -958,11 +948,12 @@ void furi_hal_subghz_stop_async_tx() {
     // Deinitialize Timer
     FURI_CRITICAL_ENTER();
     LL_TIM_DeInit(TIM2);
-    furi_hal_interrupt_set_timer_isr(TIM2, NULL);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
 
     // Deinitialize DMA
     LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_1);
-    furi_hal_interrupt_set_dma_channel_isr(DMA1, LL_DMA_CHANNEL_1, NULL);
+
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, NULL, NULL);
 
     // Deinitialize GPIO
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
