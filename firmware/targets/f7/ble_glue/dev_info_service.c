@@ -24,7 +24,7 @@ static const char dev_info_serial_num[] = "1.0";
 static const char dev_info_firmware_rev_num[] = TOSTRING(TARGET);
 static const char dev_info_software_rev_num[] = GIT_COMMIT " " GIT_BRANCH " " GIT_BRANCH_NUM
                                                            " " BUILD_DATE;
-static const char dev_info_rpc_version[] = TOSTRING(PROTOBUF_MAJOR_VERSION.PROTOBUF_MINOR_VERSIONg);
+static const char dev_info_rpc_version[] = TOSTRING(PROTOBUF_MAJOR_VERSION.PROTOBUF_MINOR_VERSION);
 
 static const uint8_t dev_info_rpc_version_uuid[] =
     {0x33, 0xa9, 0xb5, 0x3e, 0x87, 0x5d, 0x1a, 0x8e, 0xc8, 0x47, 0x5e, 0xae, 0x6d, 0x66, 0xf6, 0x03};
