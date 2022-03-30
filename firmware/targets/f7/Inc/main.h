@@ -9,7 +9,6 @@ extern "C" {
 
 void Error_Handler(void);
 
-#define BUTTON_BACK_EXTI_IRQn EXTI15_10_IRQn
 #define BUTTON_BACK_GPIO_Port GPIOC
 #define BUTTON_BACK_Pin LL_GPIO_PIN_13
 #define BUTTON_DOWN_EXTI_IRQn EXTI6_IRQn
