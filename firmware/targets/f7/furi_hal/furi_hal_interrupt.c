@@ -81,9 +81,6 @@ void furi_hal_interrupt_init() {
 
     NVIC_SetPriority(PendSV_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
 
-    NVIC_SetPriority(HSEM_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
-    NVIC_EnableIRQ(HSEM_IRQn);
-
     FURI_LOG_I(TAG, "Init OK");
 }
 

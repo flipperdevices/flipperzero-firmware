@@ -20,7 +20,7 @@
 #define CRYPTO_KEYSIZE_256B (AES_CR_KEYSIZE)
 #define CRYPTO_AES_CBC (AES_CR_CHMOD_0)
 
-static osMutexId_t crypto_mutex = NULL;
+static osMutexId_t furi_hal_crypto_mutex = NULL;
 
 static const uint8_t enclave_signature_iv[ENCLAVE_FACTORY_KEY_SLOTS][16] = {
     {0xac, 0x5d, 0x68, 0xb8, 0x79, 0x74, 0xfc, 0x7f, 0x45, 0x02, 0x82, 0xf1, 0x48, 0x7e, 0x75, 0x8a},
@@ -62,7 +62,7 @@ static const uint8_t enclave_signature_expected[ENCLAVE_FACTORY_KEY_SLOTS][ENCLA
 };
 
 void furi_hal_crypto_init() {
-    crypto_mutex = osMutexNew(NULL);
+    furi_hal_crypto_mutex = osMutexNew(NULL);
     FURI_LOG_I(TAG, "Init OK");
 }
 
@@ -139,7 +139,7 @@ bool furi_hal_crypto_store_add_key(FuriHalCryptoKey* key, uint8_t* slot) {
     furi_assert(key);
     furi_assert(slot);
 
-    furi_check(osMutexAcquire(crypto_mutex, osWaitForever) == osOK);
+    furi_check(osMutexAcquire(furi_hal_crypto_mutex, osWaitForever) == osOK);
 
     if(!furi_hal_bt_is_alive()) {
         return false;
@@ -172,7 +172,7 @@ bool furi_hal_crypto_store_add_key(FuriHalCryptoKey* key, uint8_t* slot) {
     memcpy(pParam.KeyData, key->data, key_data_size);
 
     SHCI_CmdStatus_t shci_state = SHCI_C2_FUS_StoreUsrKey(&pParam, slot);
-    furi_check(osMutexRelease(crypto_mutex) == osOK);
+    furi_check(osMutexRelease(furi_hal_crypto_mutex) == osOK);
     return (shci_state == SHCI_Success);
 }
 
@@ -242,8 +242,8 @@ static bool crypto_process_block(uint32_t* in, uint32_t* out, uint8_t blk_len) {
 
 bool furi_hal_crypto_store_load_key(uint8_t slot, const uint8_t* iv) {
     furi_assert(slot > 0 && slot <= 100);
-    furi_assert(crypto_mutex);
-    furi_check(osMutexAcquire(crypto_mutex, osWaitForever) == osOK);
+    furi_assert(furi_hal_crypto_mutex);
+    furi_check(osMutexAcquire(furi_hal_crypto_mutex, osWaitForever) == osOK);
 
     if(!furi_hal_bt_is_alive()) {
         return false;
@@ -255,7 +255,7 @@ bool furi_hal_crypto_store_load_key(uint8_t slot, const uint8_t* iv) {
         return true;
     } else {
         crypto_disable();
-        furi_check(osMutexRelease(crypto_mutex) == osOK);
+        furi_check(osMutexRelease(furi_hal_crypto_mutex) == osOK);
         return false;
     }
 }
@@ -268,7 +268,7 @@ bool furi_hal_crypto_store_unload_key(uint8_t slot) {
     crypto_disable();
 
     SHCI_CmdStatus_t shci_state = SHCI_C2_FUS_UnloadUsrKey(slot);
-    furi_check(osMutexRelease(crypto_mutex) == osOK);
+    furi_check(osMutexRelease(furi_hal_crypto_mutex) == osOK);
     return (shci_state == SHCI_Success);
 }
 

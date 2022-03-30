@@ -24,7 +24,9 @@ void furi_hal_tick(void);
 
 /** Get current tick counter
  *
- * @return     Current tick
+ * System uptime, may overflow.
+ *
+ * @return     Current ticks in milliseconds
  */
 uint32_t furi_hal_get_tick(void);
 
@@ -33,21 +35,13 @@ uint32_t furi_hal_get_tick(void);
  *
  * @param[in]  milliseconds  milliseconds to wait
  */
-void delay(float milliseconds);
+void furi_hal_delay_ms(float milliseconds);
 
 /** Delay in microseconds
  *
  * @param[in]  microseconds  microseconds to wait
  */
-void delay_us(float microseconds);
-
-/** Get current millisecond
- * 
- * System uptime, pProvided by HAL, may overflow.
- *
- * @return     Current milliseconds
- */
-uint32_t millis(void);
+void furi_hal_delay_us(float microseconds);
 
 #ifdef __cplusplus
 }

@@ -8,10 +8,10 @@ uint8_t u8g2_gpio_and_delay_stm32(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, vo
         /* HAL initialization contains all what we need so we can skip this part. */
         break;
     case U8X8_MSG_DELAY_MILLI:
-        delay(arg_int);
+        furi_hal_delay_ms(arg_int);
         break;
     case U8X8_MSG_DELAY_10MICRO:
-        delay_us(10);
+        furi_hal_delay_us(10);
         break;
     case U8X8_MSG_DELAY_100NANO:
         asm("nop");

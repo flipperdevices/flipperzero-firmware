@@ -193,6 +193,8 @@ extern const GpioPin periph_power;
 #define NFC_IRQ_Pin RFID_PULL_Pin
 #define NFC_IRQ_GPIO_Port RFID_PULL_GPIO_Port
 
+void furi_hal_resources_init(void);
+
 #ifdef __cplusplus
 }
 #endif

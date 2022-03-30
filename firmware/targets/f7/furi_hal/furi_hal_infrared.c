@@ -603,9 +603,9 @@ void furi_hal_infrared_async_tx_start(uint32_t freq, float duty_cycle) {
     LL_TIM_ClearFlag_UPDATE(TIM1);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
-    delay_us(5);
+    furi_hal_delay_us(5);
     LL_TIM_GenerateEvent_UPDATE(TIM1); /* DMA -> TIMx_RCR */
-    delay_us(5);
+    furi_hal_delay_us(5);
     LL_GPIO_ResetOutputPin(
         gpio_infrared_tx.port, gpio_infrared_tx.pin); /* when disable it prevents false pulse */
     furi_hal_gpio_init_ex(

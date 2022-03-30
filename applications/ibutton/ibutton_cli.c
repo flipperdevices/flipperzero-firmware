@@ -222,7 +222,7 @@ void ibutton_cli_emulate(Cli* cli, string_t args) {
 
         ibutton_worker_emulate_start(worker, key);
         while(!cli_cmd_interrupt_received(cli)) {
-            delay(100);
+            furi_hal_delay_ms(100);
         };
         ibutton_worker_stop(worker);
     } while(false);
@@ -283,7 +283,7 @@ void onewire_cli_search(Cli* cli) {
             }
             printf("\r\n");
         }
-        delay(100);
+        furi_hal_delay_ms(100);
     }
 
     furi_hal_power_disable_otg();

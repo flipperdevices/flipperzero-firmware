@@ -495,7 +495,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                     subghz_chat,
                     (uint8_t*)string_get_cstr(input),
                     strlen(string_get_cstr(input)))) {
-                    delay(10);
+                    furi_hal_delay_ms(10);
                 }
 
                 string_printf(input, "%s", string_get_cstr(name));
@@ -547,7 +547,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                     subghz_chat,
                     (uint8_t*)string_get_cstr(sysmsg),
                     strlen(string_get_cstr(sysmsg)));
-                delay(10);
+                furi_hal_delay_ms(10);
                 exit = true;
                 break;
             default:

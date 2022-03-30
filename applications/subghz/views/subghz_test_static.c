@@ -118,7 +118,8 @@ bool subghz_test_static_input(InputEvent* event, void* context) {
                 } else if(event->type == InputTypeRelease) {
                     if(instance->satus_tx == SubGhzTestStaticStatusTX) {
                         FURI_LOG_I(TAG, "TX Stop");
-                        subghz_encoder_princeton_for_testing_stop(instance->encoder, millis());
+                        subghz_encoder_princeton_for_testing_stop(
+                            instance->encoder, furi_hal_get_tick());
                         subghz_encoder_princeton_for_testing_print_log(instance->encoder);
                         furi_hal_subghz_stop_async_tx();
                         notification_message(notification, &sequence_reset_red);
