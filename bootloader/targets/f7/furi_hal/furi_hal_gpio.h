@@ -1,5 +1,6 @@
 #pragma once
 #include "stdbool.h"
+#include "main.h"
 #include <stm32wbxx_ll_gpio.h>
 #include <stm32wbxx_ll_system.h>
 #include <stm32wbxx_ll_exti.h>
