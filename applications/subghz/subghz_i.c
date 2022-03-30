@@ -97,7 +97,9 @@ static bool subghz_tx(SubGhz* subghz, uint32_t frequency) {
     furi_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_cc1101_g0, true);
-    bool ret = furi_hal_subghz_tx();
+    //ToDo check double call furi_hal_subghz_tx();
+    bool ret = true;
+   // furi_hal_subghz_tx();
     subghz->txrx->txrx_state = SubGhzTxRxStateTx;
     return ret;
 }
@@ -116,7 +118,8 @@ void subghz_rx_end(SubGhz* subghz) {
         subghz_worker_stop(subghz->txrx->worker);
         furi_hal_subghz_stop_async_rx();
     }
-    furi_hal_subghz_idle();
+    //ToDo check double call furi_hal_subghz_idle();
+    //furi_hal_subghz_idle();
     subghz->txrx->txrx_state = SubGhzTxRxStateIDLE;
 }
 
@@ -193,7 +196,8 @@ void subghz_tx_stop(SubGhz* subghz) {
        (strcmp(subghz->file_name, ""))) {
         subghz_save_protocol_to_file(subghz, subghz->txrx->fff_data, subghz->file_name);
     }
-    subghz_idle(subghz);
+
+    //subghz_idle(subghz);
     notification_message(subghz->notifications, &sequence_reset_red);
 }
 
