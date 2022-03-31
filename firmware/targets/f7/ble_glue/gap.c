@@ -128,8 +128,11 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
                 (hci_le_connection_complete_event_rp0*)meta_evt->data;
             FURI_LOG_I(
                 TAG,
-                "Connection complete for connection handle 0x%x",
-                connection_complete_event->Connection_Handle);
+                "Connection complete. Handle: 0x%x, Connection interval: %d, latency: %d, supervision timeout: %d",
+                connection_complete_event->Connection_Handle,
+                connection_complete_event->Conn_Interval,
+                connection_complete_event->Conn_Latency,
+                connection_complete_event->Supervision_Timeout);
 
             // Stop advertising as connection completed
             osTimerStop(gap->advertise_timer);
