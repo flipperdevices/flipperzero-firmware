@@ -50,9 +50,14 @@
 #define FILE_OPENED 1
 #define FILE_CLOSED 0
 
+#define EVENT_FLAG_STORAGE_
+
+typedef enum {
+    StorageEventFlagFileClose = (1 << 0),
+} StorageEventFlag;
 /****************** FILE ******************/
 
-bool storage_file_open(
+static bool storage_file_open_internal(
     File* file,
     const char* path,
     FS_AccessMode access_mode,
@@ -74,6 +79,41 @@ bool storage_file_open(
     S_API_EPILOGUE;
 
     return S_RETURN_BOOL;
+}
+
+static void storage_file_close_callback(const void* message, void* context) {
+    const StorageEvent* storage_event = message;
+
+    if(storage_event->type == StorageEventTypeFileClose) {
+        furi_assert(context);
+        osEventFlagsId_t event = context;
+        osEventFlagsSet(event, StorageEventFlagFileClose);
+    }
+}
+
+bool storage_file_open(
+    File* file,
+    const char* path,
+    FS_AccessMode access_mode,
+    FS_OpenMode open_mode) {
+    bool result;
+    osEventFlagsId_t event = osEventFlagsNew(NULL);
+    FuriPubSubSubscription* subscription = furi_pubsub_subscribe(
+        storage_get_pubsub(file->storage), storage_file_close_callback, event);
+
+    do {
+        result = storage_file_open_internal(file, path, access_mode, open_mode);
+
+        if(!result && file->error_id == FSE_ALREADY_OPEN) {
+            osEventFlagsWait(event, StorageEventFlagFileClose, osFlagsWaitAny, osWaitForever);
+        } else {
+            break;
+        }
+    } while(true);
+
+    furi_pubsub_unsubscribe(storage_get_pubsub(file->storage), subscription);
+    osEventFlagsDelete(event);
+    return result;
 }
 
 bool storage_file_close(File* file) {
