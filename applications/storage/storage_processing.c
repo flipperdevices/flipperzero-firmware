@@ -5,7 +5,7 @@
 
 #define FS_CALL(_storage, _fn)   \
     storage_data_lock(_storage); \
-    ret = _storage->fs_api->_fn;  \
+    ret = _storage->fs_api->_fn; \
     storage_data_unlock(_storage);
 
 #define ST_CALL(_storage, _fn)   \
@@ -127,6 +127,9 @@ bool storage_process_file_close(Storage* app, File* file) {
     } else {
         FS_CALL(storage, file.close(storage, file));
         storage_pop_storage_file(file, storage);
+
+        StorageEvent event = {.type = StorageEventTypeFileClose};
+        furi_pubsub_publish(app->pubsub, &event);
     }
 
     return ret;

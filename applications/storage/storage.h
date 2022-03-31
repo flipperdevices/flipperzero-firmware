@@ -19,6 +19,17 @@ File* storage_file_alloc(Storage* storage);
  */
 void storage_file_free(File* file);
 
+typedef enum {
+    StorageEventTypeCardMount,
+    StorageEventTypeCardUnmount,
+    StorageEventTypeCardMountError,
+    StorageEventTypeFileClose,
+} StorageEventType;
+
+typedef struct {
+    StorageEventType type;
+} StorageEvent;
+
 FuriPubSub* storage_get_pubsub(Storage* storage);
 
 /******************* File Functions *******************/
