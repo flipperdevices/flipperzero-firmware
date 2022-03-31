@@ -44,8 +44,8 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                     .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
                     .conn_param =
                         {
-                            .conn_int_min = 0x08,
-                            .conn_int_max = 0x18,
+                            .conn_int_min = 0x18, // 30 ms
+                            .conn_int_max = 0x24, // 45 ms
                             .slave_latency = 0,
                             .supervisor_timeout = 0,
                         },
@@ -62,13 +62,12 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                     .bonding_mode = true,
                     .pairing_method = GapPairingPinCodeVerifyYesNo,
                     .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
-                    // TODO optimize
                     .conn_param =
                         {
-                            .conn_int_min = 0x12,
-                            .conn_int_max = 0x1e,
-                            .slave_latency = 6,
-                            .supervisor_timeout = 700,
+                            .conn_int_min = 0x18, // 30 ms
+                            .conn_int_max = 0x24, // 45 ms
+                            .slave_latency = 0,
+                            .supervisor_timeout = 0,
                         },
                 },
         },
@@ -82,8 +81,8 @@ void furi_hal_bt_init() {
     }
 
     // Explicitly tell that we are in charge of CLK48 domain
-    if(!HAL_HSEM_IsSemTaken(CFG_HW_CLK48_CONFIG_SEMID)) {
-        HAL_HSEM_FastTake(CFG_HW_CLK48_CONFIG_SEMID);
+    if(!LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_CLK48_CONFIG_SEMID)) {
+        furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
     }
 
     // Start Core2
@@ -124,8 +123,8 @@ bool furi_hal_bt_start_radio_stack() {
     osMutexAcquire(furi_hal_bt_core2_mtx, osWaitForever);
 
     // Explicitly tell that we are in charge of CLK48 domain
-    if(!HAL_HSEM_IsSemTaken(CFG_HW_CLK48_CONFIG_SEMID)) {
-        HAL_HSEM_FastTake(CFG_HW_CLK48_CONFIG_SEMID);
+    if(!LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_CLK48_CONFIG_SEMID)) {
+        furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
     }
 
     do {
@@ -283,13 +282,13 @@ void furi_hal_bt_set_key_storage_change_callback(
 }
 
 void furi_hal_bt_nvm_sram_sem_acquire() {
-    while(HAL_HSEM_FastTake(CFG_HW_BLE_NVM_SRAM_SEMID) != HAL_OK) {
-        osDelay(1);
+    while(LL_HSEM_1StepLock(HSEM, CFG_HW_BLE_NVM_SRAM_SEMID)) {
+        osThreadYield();
     }
 }
 
 void furi_hal_bt_nvm_sram_sem_release() {
-    HAL_HSEM_Release(CFG_HW_BLE_NVM_SRAM_SEMID, 0);
+    LL_HSEM_ReleaseLock(HSEM, CFG_HW_BLE_NVM_SRAM_SEMID, 0);
 }
 
 bool furi_hal_bt_clear_white_list() {

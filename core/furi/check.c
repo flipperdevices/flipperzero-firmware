@@ -1,11 +1,13 @@
 #include "check.h"
-#include "furi_hal_task.h"
+#include "common_defines.h"
+
 #include <furi_hal_console.h>
+#include <furi_hal_power.h>
 #include <furi_hal_rtc.h>
 #include <stdio.h>
 
 void __furi_print_name() {
-    if(task_is_isr_context()) {
+    if(FURI_IS_ISR()) {
         furi_hal_console_puts("[ISR] ");
     } else {
         const char* name = osThreadGetName(osThreadGetId());
@@ -50,7 +52,7 @@ void furi_crash(const char* message) {
     furi_hal_rtc_set_fault_data((uint32_t)message);
     furi_hal_console_puts("\r\nRebooting system.\r\n");
     furi_hal_console_puts("\033[0m\r\n");
-    NVIC_SystemReset();
+    furi_hal_power_reset();
 #endif
 }
 
