@@ -7,20 +7,28 @@
 bool si446x_wait_cts_spi(FuriHalSpiBusHandle* handle) {
     uint8_t buff_tx[2] = {SI446X_CMD_READ_CMD_BUFF, 0xFF};
     uint8_t buff_rx[2] = {0};
-    //ToDo add TIMEOUT
-    while(buff_rx[1] != SI446X_CTS_OK) {
+    uint8_t timeout = 40;
+    while((buff_rx[1] != SI446X_CTS_OK) && timeout) {
         furi_hal_spi_acquire(handle);
         furi_hal_spi_bus_trx(handle, buff_tx, (uint8_t*)buff_rx, 2, SI446X_TIMEOUT);
         furi_hal_spi_release(handle);
+        timeout--;
+        delay(1);
+        if(!timeout) {
+            return false;
+        }
     }
     return true;
 }
 
 bool si446x_write_data(FuriHalSpiBusHandle* handle, const uint8_t* data, uint8_t size) {
-    si446x_wait_cts_spi(handle);
+    bool ret = false;
     furi_hal_spi_acquire(handle);
-    bool ret = furi_hal_spi_bus_tx(handle, (uint8_t*)data, size, SI446X_TIMEOUT);
+    ret = furi_hal_spi_bus_tx(handle, (uint8_t*)data, size, SI446X_TIMEOUT);
     furi_hal_spi_release(handle);
+    if(!ret) {
+        ret = si446x_wait_cts_spi(handle);
+    }
     return ret;
 }
 
@@ -119,7 +127,11 @@ bool si446x_switch_to_start_tx(
     uint8_t len_package_tx) {
     uint8_t buff_tx[] = {
         SI446X_CMD_START_TX, channel, (uint8_t)(state_on_tx_finish << 4), 0, len_package_tx, 0, 0};
-    return si446x_write_data(handle, &buff_tx[0], sizeof(buff_tx));
+    //no need to poll CTS
+    furi_hal_spi_acquire(handle);
+    bool ret = furi_hal_spi_bus_tx(handle, &buff_tx[0], sizeof(buff_tx), SI446X_TIMEOUT);
+    furi_hal_spi_release(handle);
+    return ret;
 }
 
 bool si446x_switch_to_start_rx(
@@ -131,23 +143,21 @@ bool si446x_switch_to_start_rx(
         SI446X_CMD_START_RX,
         channel,
         0, //condition
-        0, //rx lrn hi package
-        len_package_rx, //rx lrn lo package
+        0, //rx len hi package
+        len_package_rx, //rx len lo package
         SI446X_STATE_NOCHANGE, // RX Timeout
-        SI446X_STATE_NOCHANGE, //SI446X_STATE_RX, // RX Valid
+        state_on_tx_finish, //SI446X_STATE_RX, // RX Valid
         state_on_tx_finish // IDLE_STATE // RX Invalid (using SI446X_STATE_SLEEP for the INVALID_SYNC fix)
     };
-    return si446x_write_data(handle, &buff_tx[0], sizeof(buff_tx));
+    //no need to poll CTS
+    furi_hal_spi_acquire(handle);
+    bool ret = furi_hal_spi_bus_tx(handle, &buff_tx[0], sizeof(buff_tx), SI446X_TIMEOUT);
+    furi_hal_spi_release(handle);
+    return ret;
 }
 
 bool si446x_switch_to_idle(FuriHalSpiBusHandle* handle) {
-    // uint8_t buff_tx[] = {SI446X_CMD_CHANGE_STATE, SI446X_STATE_READY};
-    // furi_hal_spi_acquire(handle);
-    // bool ret = furi_hal_spi_bus_tx(handle, (uint8_t*)buff_tx, sizeof(buff_tx), SI446X_TIMEOUT);
-    // furi_hal_spi_release(handle);
-
     return si446x_set_state(handle, SI446X_STATE_READY);
-    //return ret;
 }
 
 bool si446x_write_gpio(FuriHalSpiBusHandle* handle, SI446X_GPIO_t pin, uint8_t gpio_mode) {
@@ -177,7 +187,7 @@ bool si446x_set_properties(
     SI446X_Prop_t prop,
     uint8_t* data,
     uint8_t size) {
-    if(size>12) {
+    if(size > 12) {
         return false;
     }
     uint8_t buff_tx[16] = {SI446X_CMD_SET_PROPERTY, (uint8_t)(prop >> 8), size, (uint8_t)prop};
@@ -233,19 +243,20 @@ uint32_t si446x_set_frequency_and_step_channel(
     uint32_t n = ((uint32_t)(freq_hz / f_pfd)) - 1;
     float ratio = freq_hz / (float)f_pfd;
     float rest = ratio - (float)n;
-    uint32_t m = (uint32_t)(rest * 524288UL);
-    uint8_t m2 = m / 0x10000;
-    uint8_t m1 = (m - m2 * 0x10000) / 0x100;
-    uint8_t m0 = (m - m2 * 0x10000 - m1 * 0x100);
-
-    uint32_t channel_increment = 524288UL * outdiv * step_channel_hz / (2 * SI446X_QUARTZ);
-    uint8_t c1 = channel_increment / 0x100;
-    uint8_t c0 = channel_increment - (0x100 * c1);
-
-    uint8_t freq_control[] = {(uint8_t)n, m2, m1, m0, c1, c0};
+    uint32_t m = (uint32_t)(rest * 0x80000UL);
+    uint32_t channel_increment = 0x80000UL * outdiv * step_channel_hz / (2 * SI446X_QUARTZ);
+    uint8_t freq_control[] = {
+        (uint8_t)n,
+        (m >> 16) & 0xFF,
+        (m >> 8) & 0xff,
+        m & 0xff,
+        (channel_increment >> 8) & 0xFF,
+        channel_increment & 0xFF};
     if(!si446x_set_properties(
            handle, SI446X_PROP_FREQ_CONTROL_INTE, &freq_control[0], sizeof(freq_control))) {
         return 0;
     }
-    return (uint32_t)((float)((uint32_t)m2 << 16 | m1 << 8 | m0) / 524288UL + n) * f_pfd;
+    //ToDo check!
+    return (m / 0x80000UL + n) * f_pfd;
+
 }

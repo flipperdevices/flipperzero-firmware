@@ -64,7 +64,7 @@ static volatile FuriHalSubGhzPreset furi_hal_subghz_preset = FuriHalSubGhzPreset
 
 //tx
 #define RF_POWER_UP 0x02, 0x01, 0x00, 0x01, 0xC9, 0xC3, 0x80
-#define RF_GPIO_PIN_CFG 0x13, 0x04, 0x04, 0x21, 0x20, 0x67, 0x4B, 0x00
+#define RF_GPIO_PIN_CFG 0x13, 0x08, 0x04, 0x21, 0x20, 0x67, 0x4B, 0x00
 #define GLOBAL_2_0 0x11, 0x00, 0x04, 0x00, 0x52, 0x00, 0x18, 0x30
 #define MODEM_2_0 \
     0x11, 0x20, 0x0C, 0x00, 0x0B, 0x00, 0x07, 0x02, 0x71, 0x00, 0x05, 0xC9, 0xC3, 0x80, 0x00, 0x00
@@ -177,9 +177,24 @@ static const uint8_t config[] = RADIO_CONFIGURATION_DATA_ARRAY;
 // Apply the radio configuration
 void furi_hal_subghz_load_config(void) {
     uint8_t buff[17];
+    uint8_t buff_tx[2] = {SI446X_CMD_READ_CMD_BUFF, 0xFF};
+    uint8_t buff_rx[2] = {0};
     for(uint16_t i = 0; i < sizeof(config); i++) {
         memcpy(buff, &config[i], sizeof(buff));
-        si446x_write_data(&furi_hal_spi_bus_handle_subghz, &buff[1], buff[0]);
+        //si446x_write_data(&furi_hal_spi_bus_handle_subghz, &buff[1], buff[0]);
+
+        furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+        furi_hal_spi_bus_tx(&furi_hal_spi_bus_handle_subghz, &buff[1], buff[0], SI446X_TIMEOUT);
+        furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+
+        buff_rx[1] = 0;
+        while(buff_rx[1] != SI446X_CTS_OK) {
+            furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+            furi_hal_spi_bus_trx(
+                &furi_hal_spi_bus_handle_subghz, buff_tx, (uint8_t*)buff_rx, 2, SI446X_TIMEOUT);
+            furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+        }
+
         i += buff[0];
     }
 }
@@ -197,8 +212,8 @@ void furi_hal_subghz_init() {
     hal_gpio_write(&gpio_rf_sw_0, false); //nSDN DOWN
 
     //wait CTS
-     while(hal_gpio_read(&gpio_cc1101_g0) == false)
-         ;
+    while(hal_gpio_read(&gpio_cc1101_g0) == false)
+        ;
 
 #ifdef FURI_HAL_SUBGHZ_TX_GPIO
     hal_gpio_init(&FURI_HAL_SUBGHZ_TX_GPIO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -210,7 +225,7 @@ void furi_hal_subghz_init() {
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     //ToDo think about where to tie
-    si446x_set_pa(&furi_hal_spi_bus_handle_subghz, 0x5f);
+    si446x_set_pa(&furi_hal_spi_bus_handle_subghz, 0x1f);
     uint8_t modem_mod[] = {
         (SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_TYPE_ASYNCHRONOUS |
          SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_GPIO1 |
@@ -228,9 +243,11 @@ void furi_hal_subghz_init() {
 
 void furi_hal_subghz_sleep() {
     furi_assert(furi_hal_subghz_state == SubGhzStateIdle);
-    si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_INPUT);
-    si446x_set_state(&furi_hal_spi_bus_handle_subghz, SI446X_STATE_SLEEP);
-    hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    //ToDo sometimes freezes when exiting sleep mode
+    // si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_INPUT);
+    // si446x_clear_interrupt_status(&furi_hal_spi_bus_handle_subghz);
+    // si446x_set_state(&furi_hal_spi_bus_handle_subghz, SI446X_STATE_SLEEP);
+    // hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_subghz_preset = FuriHalSubGhzPresetIDLE;
 }
 
@@ -239,6 +256,7 @@ void furi_hal_subghz_dump_state() {
         "[furi_hal_subghz] si446x chip %X, version %X\r\n",
         si446x_get_partnumber(&furi_hal_spi_bus_handle_subghz),
         si446x_get_version(&furi_hal_spi_bus_handle_subghz));
+    si446x_clear_interrupt_status(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
@@ -348,14 +366,18 @@ void furi_hal_subghz_reset() {
     // furi_hal_subghz_state = SubGhzStateInit;
     // furi_hal_subghz_init();
     //ToDo reset si446x????
-    hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    si446x_wait_cts_spi(&furi_hal_spi_bus_handle_subghz);
+    // hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    // si446x_wait_cts_spi(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_idle() {
     //si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_INPUT);
     //si446x_clear_interrupt_status(&furi_hal_spi_bus_handle_subghz);
+    //ToDo crutch, GO0 should be low at the time of disengagement
+    hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullDown, GpioSpeedLow);
+    hal_gpio_write(&gpio_cc1101_g0, false); //DOWN
     si446x_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
+    si446x_clear_interrupt_status(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_rx() {
