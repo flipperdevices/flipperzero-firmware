@@ -66,7 +66,7 @@ static void gap_verify_connection_parameters(Gap* gap) {
 
     FURI_LOG_I(
         TAG,
-        "Connection parameters: Connection Interval: %d (%d ms), Slave Latency: %d, Suoervision Timeout: %d",
+        "Connection parameters: Connection Interval: %d (%d ms), Slave Latency: %d, Supervision Timeout: %d",
         gap->connection_params.conn_interval,
         GAP_INTERVAL_TO_MS(gap->connection_params.conn_interval),
         gap->connection_params.slave_latency,
