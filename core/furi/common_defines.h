@@ -1,5 +1,14 @@
 #pragma once
 
+#include <stdbool.h>
+#include <cmsis_os2.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <cmsis_compiler.h>
+
 #ifndef MAX
 #define MAX(a, b)               \
     ({                          \
@@ -57,6 +66,14 @@
 #define ALIGN(n) __attribute__((aligned(n)))
 #endif
 
+#ifndef __weak
+#define __weak __attribute__((weak))
+#endif
+
+#ifndef UNUSED
+#define UNUSED(X) (void)(X)
+#endif
+
 #ifndef STRINGIFY
 #define STRINGIFY(x) #x
 #endif
@@ -75,12 +92,39 @@
 #define FURI_BIT(x, n) ((x) >> (n)&1)
 #endif
 
+#ifndef FURI_IS_IRQ_MASKED
+#define FURI_IS_IRQ_MASKED() (__get_PRIMASK() != 0U)
+#endif
+
+#ifndef FURI_IS_IRQ_MODE
+#define FURI_IS_IRQ_MODE() (__get_IPSR() != 0U)
+#endif
+
+#ifndef FURI_IS_ISR
+#define FURI_IS_ISR() \
+    (FURI_IS_IRQ_MODE() || (FURI_IS_IRQ_MASKED() && (osKernelGetState() == osKernelRunning)))
+#endif
+
 #ifndef FURI_CRITICAL_ENTER
-#define FURI_CRITICAL_ENTER()               \
-    uint32_t primask_bit = __get_PRIMASK(); \
-    __disable_irq()
+#define FURI_CRITICAL_ENTER()                   \
+    uint32_t __isrm = 0;                        \
+    bool __from_isr = FURI_IS_ISR();            \
+    if(__from_isr) {                            \
+        __isrm = taskENTER_CRITICAL_FROM_ISR(); \
+    } else {                                    \
+        taskENTER_CRITICAL();                   \
+    }
 #endif
 
 #ifndef FURI_CRITICAL_EXIT
-#define FURI_CRITICAL_EXIT() __set_PRIMASK(primask_bit)
+#define FURI_CRITICAL_EXIT()                \
+    if(__from_isr) {                        \
+        taskEXIT_CRITICAL_FROM_ISR(__isrm); \
+    } else {                                \
+        taskEXIT_CRITICAL();                \
+    }
+#endif
+
+#ifdef __cplusplus
+}
 #endif
