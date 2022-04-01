@@ -183,6 +183,7 @@ UpdatePrepareResult update_hl_prepare(const char* manifest_file_path) {
 
         if(crc == manifest->staged_loader_crc) {
             furi_hal_rtc_set_flag(FuriHalRtcFlagExecutePreUpdate);
+            update_hl_persist_package_index(update_index);
             result = UpdatePrepareResultOK;
         }
     }
