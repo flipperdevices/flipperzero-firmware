@@ -50,8 +50,6 @@
 #define FILE_OPENED 1
 #define FILE_CLOSED 0
 
-#define EVENT_FLAG_STORAGE_
-
 typedef enum {
     StorageEventFlagFileClose = (1 << 0),
 } StorageEventFlag;
