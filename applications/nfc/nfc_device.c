@@ -789,6 +789,7 @@ static bool nfc_device_load_data(NfcDevice* dev, string_t path) {
         if(!nfc_device_parse_format_string(dev, temp_str)) break;
         // Read and parse UID, ATQA and SAK
         if(!flipper_format_get_value_count(file, "UID", &data_cnt)) break;
+        if(!(data_cnt == 4 || data_cnt == 7)) break;
         data->uid_len = data_cnt;
         if(!flipper_format_read_hex(file, "UID", data->uid, data->uid_len)) break;
         if(!flipper_format_read_hex(file, "ATQA", data->atqa, 2)) break;
