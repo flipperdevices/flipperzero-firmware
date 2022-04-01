@@ -28,7 +28,7 @@ static int32_t storage_file_locker(void* ctx) {
     File* file = storage_file_alloc(storage);
     furi_check(storage_file_open(file, STORAGE_LOCKED_FILE, FSAM_READ_WRITE, FSOM_OPEN_EXISTING));
     osSemaphoreRelease(semaphore);
-    delay(1000);
+    furi_hal_delay_ms(1000);
 
     furi_check(storage_file_close(file));
     furi_record_close("storage");
