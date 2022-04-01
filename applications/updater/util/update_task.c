@@ -1,10 +1,12 @@
 #include "update_task.h"
 #include "dfu_file.h"
 #include "lfs_backup.h"
+#include "update_hl.h"
 
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
+#include <lib/toolbox/path.h>
 
 #define DELAY_OPERATION_OK 600
 #define DELAY_OPERATION_ERROR 20000
@@ -81,8 +83,8 @@ static void update_task_close_file(UpdateTask* update_task) {
 static bool update_task_check_file_exists(UpdateTask* update_task, string_t filename) {
     furi_assert(update_task);
     string_t tmp_path;
-    string_init_printf(
-        tmp_path, "%s/%s", string_get_cstr(update_task->update_path), string_get_cstr(filename));
+    string_init_set(tmp_path, update_task->update_path);
+    path_append(tmp_path, string_get_cstr(filename));
     bool exists =
         (storage_common_stat(update_task->storage, string_get_cstr(tmp_path), NULL) == FSE_OK);
     string_clear(tmp_path);
@@ -94,8 +96,8 @@ static bool update_task_open_file(UpdateTask* update_task, string_t filename) {
     update_task_close_file(update_task);
 
     string_t tmp_path;
-    string_init_printf(
-        tmp_path, "%s/%s", string_get_cstr(update_task->update_path), string_get_cstr(filename));
+    string_init_set(tmp_path, update_task->update_path);
+    path_append(tmp_path, string_get_cstr(filename));
     bool open_success = storage_file_open(
         update_task->file, string_get_cstr(tmp_path), FSAM_READ, FSOM_OPEN_EXISTING);
     string_clear(tmp_path);
@@ -147,24 +149,30 @@ void update_task_free(UpdateTask* update_task) {
     free(update_task);
 }
 
-bool update_task_init(UpdateTask* update_task, string_t update_folder_path) {
+bool update_task_init(UpdateTask* update_task) {
     furi_assert(update_task);
-    string_init_set(update_task->update_path, update_folder_path);
+    string_init(update_task->update_path);
     return true;
 }
 
 bool update_task_parse_manifest(UpdateTask* update_task) {
     furi_assert(update_task);
-    // TODO: load & parse manifest & ensure everything exists
     update_task_set_progress(update_task, UpdateTaskStageReadManifest, 0);
-    string_t manifest_path;
-    string_init_set(manifest_path, update_task->update_path);
-    string_cat_str(manifest_path, "/" UPDATE_MANIFEST_DEFAULT_NAME);
-
-    //update_task_set_progress(update_task, UpdateTaskStageReadManifest, 0);
     bool result = false;
+    string_t manifest_path;
+    string_init(manifest_path);
+
     do {
         update_task_set_progress(update_task, UpdateTaskStageProgress, 10);
+        if(!update_hl_get_current_package_path(update_task->storage, update_task->update_path)) {
+            break;
+        }
+
+        path_concat(
+            string_get_cstr(update_task->update_path),
+            UPDATE_MANIFEST_DEFAULT_NAME,
+            manifest_path);
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 30);
         if(!update_manifest_init(update_task->manifest, string_get_cstr(manifest_path))) {
             break;
         }

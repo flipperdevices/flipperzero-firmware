@@ -1,13 +1,14 @@
+#include "updater/updater_i.h"
+#include "updater_scene.h"
+//#include "updater_scene_i.h"
+#include "../util/update_hl.h"
+
 #include <furi.h>
 #include <furi_hal.h>
 #include <applications.h>
 #include <assets_icons.h>
 #include <loader/loader.h>
 #include <storage/storage.h>
-
-#include "updater/updater_i.h"
-#include "updater_scene.h"
-//#include "updater_scene_i.h"
 
 #define TAG "UpdaterSrv"
 
@@ -21,7 +22,8 @@ void updater_scene_loadcfg_apply_callback(GuiButtonType result, InputType type, 
     if((result == GuiButtonTypeRight)) {
         view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventApplyUpdate);
     } else if((result == GuiButtonTypeLeft)) {
-        view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventCancelUpdate);
+        view_dispatcher_send_custom_event(
+            updater->view_dispatcher, UpdaterCustomEventCancelUpdate);
     }
 }
 
@@ -31,13 +33,24 @@ void updater_scene_loadcfg_on_enter(void* context) {
         malloc(sizeof(UpdaterManifestProcessingState));
     pending_upd->manifest = update_manifest_alloc();
 
-    if(update_manifest_init(pending_upd->manifest, updater->startup_arg)) {
+    if(update_manifest_init(pending_upd->manifest, string_get_cstr(updater->startup_arg))) {
         //if (false) {
-        string_init_printf(
-            pending_upd->message,
-            "Install '%s'?",
-            //string_get_cstr(pending_upd->manifest->version)
-            "UPDATE");
+        widget_add_string_element(
+            updater->widget, 64, 12, AlignCenter, AlignCenter, FontPrimary, "Update");
+        //string_init_printf(
+        //    pending_upd->message, "Install  %s?", string_get_cstr(pending_upd->manifest->version));
+
+        widget_add_string_multiline_element(
+            updater->widget,
+            64,
+            32,
+            AlignCenter,
+            AlignCenter,
+            FontSecondary,
+            //"alloetoti");
+            //string_get_cstr(pending_upd->message));
+            string_get_cstr(pending_upd->manifest->version));
+
         widget_add_button_element(
             updater->widget,
             GuiButtonTypeRight,
@@ -45,7 +58,8 @@ void updater_scene_loadcfg_on_enter(void* context) {
             updater_scene_loadcfg_apply_callback,
             updater);
     } else {
-        string_init_set(pending_upd->message, "Invalid update manifest");
+        widget_add_string_element(
+            updater->widget, 64, 24, AlignCenter, AlignCenter, FontPrimary, "Invalid manifest");
     }
 
     widget_add_button_element(
@@ -54,16 +68,6 @@ void updater_scene_loadcfg_on_enter(void* context) {
         "Cancel",
         updater_scene_loadcfg_apply_callback,
         updater);
-
-    widget_add_string_multiline_element(
-        updater->widget,
-        64,
-        13,
-        AlignCenter,
-        AlignCenter,
-        FontSecondary,
-        //"alloetoti");
-        string_get_cstr(pending_upd->message));
 
     view_dispatcher_switch_to_view(updater->view_dispatcher, UpdaterViewWidget);
 }
@@ -81,7 +85,13 @@ bool updater_scene_loadcfg_on_event(void* context, SceneManagerEvent event) {
         case UpdaterCustomEventApplyUpdate:
             // TODO: implement
             //scene_manager_previous_scene(updater->scene_manager);
-            view_dispatcher_stop(updater->view_dispatcher);
+            updater->preparation_result = update_hl_prepare(string_get_cstr(updater->startup_arg));
+            if(updater->preparation_result == UpdatePrepareResultOK) {
+                furi_hal_power_reset();
+            } else {
+                scene_manager_next_scene(updater->scene_manager, UpdaterSceneError);
+            }
+            //view_dispatcher_stop(updater->view_dispatcher);
             return true;
         case UpdaterCustomEventCancelUpdate:
             view_dispatcher_stop(updater->view_dispatcher);

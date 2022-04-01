@@ -3,6 +3,7 @@
 #include "../util/update_manifest.h"
 #include "../util/tar_archive.h"
 #include "../util/lfs_backup.h"
+#include "../util/update_hl.h"
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -10,69 +11,20 @@
 #include <cli/cli.h>
 #include <storage/storage.h>
 #include <loader/loader.h>
+#include <lib/toolbox/path.h>
 
-static void updater_cli_apply(Cli* cli, string_t args, void* context) {
-    const char update_dir_path[] = "/ext" UPDATE_DIR_DEFAULT_REL_PATH;
-    const char update_manifest_path[] = "/ext" UPDATE_MAINFEST_DEFAULT_PATH;
 
-    printf(
-        "Verifying update package at '%s' (manifest '%s')\r\n",
-        update_dir_path,
-        update_manifest_path);
+static void updater_cli_apply(Cli* cli, string_t manifest_path, void* context) {
+    printf("Verifying update package at '%s'\r\n", string_get_cstr(manifest_path));
 
-    UpdateManifest* manifest = update_manifest_alloc();
-    if(!update_manifest_init(manifest, update_manifest_path)) {
-        printf("Error: Failed to load update manifest\r\n");
-    } else {
-        printf(
-            "Version: %s\r\nManifest OK.\r\nChecking Stage2 integrity... ",
-            string_get_cstr(manifest->version));
-
-        Storage* storage = furi_record_open("storage");
-        File* file = storage_file_alloc(storage);
-
-        string_t abs_path;
-        string_init_printf(
-            abs_path, "%s/%s", update_dir_path, string_get_cstr(manifest->staged_loader_file));
-
-        const uint16_t READ_BLOCK = 0x1000;
-        uint8_t* read_buffer = malloc(READ_BLOCK);
-        uint32_t crc = 0;
-        do {
-            if(!storage_file_open(file, string_get_cstr(abs_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-                printf("failed to open '%s'. ", string_get_cstr(abs_path));
-                break;
-            }
-
-            furi_hal_crc_acquire(osWaitForever);
-
-            uint16_t bytes_read = 0;
-            do {
-                bytes_read = storage_file_read(file, read_buffer, READ_BLOCK);
-                crc = furi_hal_crc_feed(read_buffer, bytes_read);
-            } while(bytes_read == READ_BLOCK);
-            furi_hal_crc_reset();
-
-            printf("CRC %08lx ", crc);
-        } while(false);
-
-        string_clear(abs_path);
-        free(read_buffer);
-        storage_file_free(file);
-        furi_record_close("storage");
-
-        if(crc != manifest->staged_loader_crc) {
-            printf("MISmatched (ref %08lx). Stopping update.\r\n", manifest->staged_loader_crc);
-            update_manifest_free(manifest);
-            return;
-        }
-
-        printf("OK.\r\nRestarting to apply update. BRB\r\n");
-        osDelay(100);
-        furi_hal_rtc_set_flag(FuriHalRtcFlagExecutePreUpdate);
-        furi_hal_power_reset();
+    UpdatePrepareResult result = update_hl_prepare(string_get_cstr(manifest_path));
+    if(result != UpdatePrepareResultOK) {
+        printf("Error: %s. Stopping update.\r\n", update_hl_describe_preparation_result(result));
+        return;
     }
-    update_manifest_free(manifest);
+    printf("OK.\r\nRestarting to apply update. BRB\r\n");
+    osDelay(100);
+    furi_hal_power_reset();
 }
 
 static void updater_cli_backup(Cli* cli, string_t args, void* context) {

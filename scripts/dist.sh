@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
 set -e
-export
-set
 
 suffix="${DIST_SUFFIX:=local}"
 targetdir="dist/${TARGET}"

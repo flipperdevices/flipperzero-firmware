@@ -127,7 +127,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef SRV_DESKTOP
 #error SRV_UPDATER and SRV_DESKTOP are mutually exclusive!
 #endif
-    {.app = updater_srv, .name = "UpdaterSrv", .stack_size = 1024, .icon = NULL},
+    {.app = updater_srv, .name = "UpdaterSrv", .stack_size = 2048, .icon = NULL},
 #endif
 };
 
@@ -138,7 +138,7 @@ const FlipperApplication FLIPPER_SYSTEM_APPS[] = {
 #ifdef SRV_UPDATER
 #error APP_UPDATER and SRV_UPDATER are mutually exclusive!
 #endif
-    {.app = updater_srv, .name = "UpdaterApp", .stack_size = 1024, .icon = NULL},
+    {.app = updater_srv, .name = "UpdaterApp", .stack_size = 2048, .icon = NULL},
 #endif
 };
 

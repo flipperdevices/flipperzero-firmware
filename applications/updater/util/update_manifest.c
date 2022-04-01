@@ -45,7 +45,7 @@ static bool
             "Loader CRC",
             (uint8_t*)&update_manifest->staged_loader_crc,
             sizeof(uint32_t));
-        true;
+        //true;
     string_clear(filetype);
 
     /* Optional fields - we can have dfu, radio, or both */
@@ -67,7 +67,6 @@ bool update_manifest_init(UpdateManifest* update_manifest, const char* manifest_
     flipper_format_free(flipper_file);
     furi_record_close("storage");
 
-    update_manifest->valid = true;
     return update_manifest->valid;
 }
 

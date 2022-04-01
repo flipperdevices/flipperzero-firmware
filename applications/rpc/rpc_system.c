@@ -212,7 +212,8 @@ static void rpc_system_system_update_request_process(const PB_Main* request, voi
     furi_assert(session);
 
     bool update_prepare_result =
-        update_hl_prepare(request->content.system_update_request.update_folder);
+        update_hl_prepare(request->content.system_update_request.update_folder) ==
+        UpdatePrepareResultOK;
 
     PB_Main* response = malloc(sizeof(PB_Main));
     response->command_id = request->command_id;

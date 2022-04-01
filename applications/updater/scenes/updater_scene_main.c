@@ -42,16 +42,13 @@ void updater_scene_main_on_enter(void* context) {
 bool updater_scene_main_on_event(void* context, SceneManagerEvent event) {
     Updater* updater = (Updater*)context;
     bool consumed = false;
-    string_t update_path;
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case UpdaterCustomEventSdMounted:
-            string_init_set(update_path, "/ext" UPDATE_DIR_DEFAULT_REL_PATH);
-            if(update_task_init(updater->update_task, update_path)) {
+            if(update_task_init(updater->update_task)) {
                 update_task_start(updater->update_task);
             }
-            string_clear(update_path);
 
             break;
         case UpdaterCustomEventSdUnmounted:

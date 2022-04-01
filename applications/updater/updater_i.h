@@ -4,6 +4,7 @@
 #include "views/updater_main.h"
 //#include "views/updater_loadcfg.h"
 #include "util/update_task.h"
+#include "util/update_hl.h"
 
 #include <furi.h>
 #include <gui/gui.h>
@@ -52,10 +53,11 @@ typedef struct {
 
     //UpdaterLoadCfgView* loadcfg_view;
     UpdaterManifestProcessingState* pending_update;
+    UpdatePrepareResult preparation_result;
 
     UpdateTask* update_task;
     Widget* widget;
-    const char* startup_arg;
+    string_t startup_arg;
 } Updater;
 
 Updater* updater_alloc(const char* arg);

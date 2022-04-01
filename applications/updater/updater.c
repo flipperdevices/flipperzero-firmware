@@ -34,7 +34,12 @@ static void status_update_cb(const char* message, const uint8_t progress, void* 
 
 Updater* updater_alloc(const char* arg) {
     Updater* updater = malloc(sizeof(Updater));
-    updater->startup_arg = arg;
+    if (arg) {
+        string_init_set_str(updater->startup_arg, arg);
+        string_replace_str(updater->startup_arg, "/any/", "/ext/");
+    } else {
+        string_init(updater->startup_arg);
+    }
 
     updater->storage = furi_record_open("storage");
 
@@ -86,6 +91,7 @@ Updater* updater_alloc(const char* arg) {
 void updater_free(Updater* updater) {
     furi_assert(updater);
 
+    string_clear(updater->startup_arg);
     if(updater->update_task) {
         update_task_set_progress_cb(updater->update_task, NULL, NULL);
         update_task_free(updater->update_task);
