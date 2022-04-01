@@ -32,6 +32,7 @@ static int32_t storage_file_locker(void* ctx) {
 
     furi_check(storage_file_close(file));
     furi_record_close("storage");
+    storage_file_free(file);
     return 0;
 }
 
@@ -61,6 +62,7 @@ MU_TEST(storage_file_open_lock) {
     furi_thread_free(locker_thread);
 
     // clean data
+    storage_file_free(file);
     furi_record_close("storage");
 
     mu_assert(result, "cannot open locked file");
