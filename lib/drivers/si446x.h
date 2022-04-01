@@ -23,6 +23,7 @@ SI446X_State_t si446x_get_state(FuriHalSpiBusHandle* handle);
 SI446X_State_t si446x_get_current_channel(FuriHalSpiBusHandle* handle);
 uint8_t si446x_get_fast_reg(FuriHalSpiBusHandle* handle, uint8_t reg);
 uint8_t si446x_get_get_rssi(FuriHalSpiBusHandle* handle);
+bool si446x_set_rssi_threshold(FuriHalSpiBusHandle* handle, int rssi_dbi);
 uint8_t si446x_get_get_lqi(FuriHalSpiBusHandle* handle);
 bool si446x_switch_to_start_tx(
     FuriHalSpiBusHandle* handle,
@@ -52,6 +53,9 @@ uint32_t si446x_set_frequency_and_step_channel(
     FuriHalSpiBusHandle* handle,
     uint32_t freq_hz,
     uint32_t step_channel_hz);
+bool si446x_set_deviation(FuriHalSpiBusHandle* handle, uint32_t freq_hz, uint32_t deviation_hz);
+bool si446x_set_bps(FuriHalSpiBusHandle* handle, uint32_t freq_hz, uint32_t bps);
+
 
 #ifdef __cplusplus
 }

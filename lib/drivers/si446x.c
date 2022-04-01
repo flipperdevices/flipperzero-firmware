@@ -112,6 +112,13 @@ uint8_t si446x_get_get_rssi(FuriHalSpiBusHandle* handle) {
     return buff_rx[2];
 }
 
+bool si446x_set_rssi_threshold(FuriHalSpiBusHandle* handle, int rssi_dbi) {
+    if(rssi_dbi < -134 || rssi_dbi > -6) return false;
+    uint8_t rssi[1] = {0};
+    rssi[0] = (uint8_t)(2 * (rssi_dbi + 134)) & 0xFF;
+    return si446x_set_properties(handle, SI446X_PROP_MODEM_RSSI_THRESH, &rssi[0], sizeof(rssi));
+}
+
 uint8_t si446x_get_get_lqi(FuriHalSpiBusHandle* handle) {
     uint8_t buff_tx[] = {SI446X_CMD_GET_MODEM_STATUS};
     uint8_t buff_rx[4] = {0};
@@ -210,28 +217,37 @@ bool si446x_set_pa(FuriHalSpiBusHandle* handle, uint8_t pa_level) {
     return si446x_set_properties(handle, SI446X_PROP_PA_PWR_LVL, &buff_tx[0], sizeof(buff_tx));
 }
 
+static bool si446x_get_outdiv_and_band(uint32_t freq_hz, uint8_t* outdiv, uint8_t* band) {
+    // See Si446x Data Sheet section 5.3.1
+    // Also the Si446x PLL Synthesizer / VCO_CNT Calculator Rev 0.4
+    //ToDo It is necessary to check for different chips different frequencies and different coefficients
+    if(freq_hz <= 1050000000 && freq_hz >= 850000000) {
+        outdiv[0] = 4, band[0] = 0;
+    } else if(freq_hz <= 525000000 && freq_hz >= 420000000) {
+        outdiv[0] = 8, band[0] = 2;
+    } else if(freq_hz < 420000000 && freq_hz >= 350000000) {
+        outdiv[0] = 10, band[0] = 1;
+    } else if(freq_hz < 350000000 && freq_hz >= 284000000) {
+        outdiv[0] = 12, band[0] = 3;
+    } else if(freq_hz <= 175000000 && freq_hz >= 142000000) {
+        outdiv[0] = 24, band[0] = 5;
+    } else {
+        return false;
+    }
+    return true;
+}
+
 uint32_t si446x_set_frequency_and_step_channel(
     FuriHalSpiBusHandle* handle,
     uint32_t freq_hz,
     uint32_t step_channel_hz) {
-    // See Si446x Data Sheet section 5.3.1
-    // Also the Si446x PLL Synthesizer / VCO_CNT Calculator Rev 0.4
     uint8_t outdiv;
     uint8_t band;
 
-    if(freq_hz <= 1050000000 && freq_hz >= 850000000) {
-        outdiv = 4, band = 0;
-    } else if(freq_hz <= 525000000 && freq_hz >= 420000000) {
-        outdiv = 8, band = 2;
-    } else if(freq_hz < 420000000 && freq_hz >= 350000000) {
-        outdiv = 10, band = 1;
-    } else if(freq_hz < 350000000 && freq_hz >= 284000000) {
-        outdiv = 12, band = 3;
-    } else if(freq_hz <= 175000000 && freq_hz >= 142000000) {
-        outdiv = 24, band = 5;
-    } else {
+    if(!si446x_get_outdiv_and_band(freq_hz, &outdiv, &band)) {
         return 0;
     }
+
     uint8_t sy_sel = 8;
     uint8_t modem_clkgen[] = {sy_sel | band};
     if(!si446x_set_properties(
@@ -258,5 +274,46 @@ uint32_t si446x_set_frequency_and_step_channel(
     }
     //ToDo check!
     return (m / 0x80000UL + n) * f_pfd;
+}
 
+bool si446x_set_deviation(FuriHalSpiBusHandle* handle, uint32_t freq_hz, uint32_t deviation_hz) {
+    //sy_sel set => NPRESC=2
+    //look datasheet API MODEM_FREQ_DEV
+    uint8_t outdiv;
+    uint8_t band;
+    if(!si446x_get_outdiv_and_band(freq_hz, &outdiv, &band)) {
+        return false;
+    }
+    uint32_t modem_freq_dev =
+        (uint32_t)((0x80000UL * outdiv * deviation_hz) / (2 * SI446X_QUARTZ));
+    uint8_t modem_freq_dev_buff[] = {
+        (modem_freq_dev >> 16) & 0xFF, (modem_freq_dev >> 8) & 0xFF, modem_freq_dev & 0xFF};
+    return si446x_set_properties(
+        handle, SI446X_PROP_MODEM_FREQ_DEV_2, &modem_freq_dev_buff[0], sizeof(modem_freq_dev_buff));
+}
+
+bool si446x_set_bps(FuriHalSpiBusHandle* handle, uint32_t freq_hz, uint32_t bps) {
+    //Fxtal for DR > 200kbps, and Fxtal/10 for DR ≥ 200kbps
+    //Fxtal or Fxtal/10 (e.g., 0x1C9C380 = 30M decimal, or 0x02DC6C0 =3M decimal, assuming the crystal frequency is 30 MHz).
+    uint8_t div = 0;
+    if(bps > 200000) {
+        div = 1;
+    } else {
+        div = 10;
+    }
+    bps *= div;
+
+    //ToDo TXOSR = 0, 10x if 2GFSK or 4GFS is required see API datasheet MODEM_TX_NCO_MODE
+    uint8_t txosr = 0;
+    uint32_t ncomod = SI446X_QUARTZ / div;
+    uint8_t modem_bps_buff[] = {
+        (bps >> 16) & 0xFF,
+        (bps >> 8) & 0xFF,
+        bps & 0xFF,
+        ((ncomod >> 24) & 0xFF) | txosr,
+        (ncomod >> 16) & 0xFF,
+        (ncomod >> 8) & 0xFF,
+        ncomod & 0xFF};
+    return si446x_set_properties(
+        handle, SI446X_PROP_MODEM_DATA_RATE_2, &modem_bps_buff[0], sizeof(modem_bps_buff));
 }
