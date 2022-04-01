@@ -32,8 +32,9 @@ static void status_update_cb(const char* message, const uint8_t progress, void* 
     updater_main_model_set_state(main_view, message, progress);
 }
 
-Updater* updater_alloc() {
+Updater* updater_alloc(const char* arg) {
     Updater* updater = malloc(sizeof(Updater));
+    updater->startup_arg = arg;
 
     updater->storage = furi_record_open("storage");
 
@@ -42,8 +43,6 @@ Updater* updater_alloc() {
     updater->scene_manager = scene_manager_alloc(&updater_scene_handlers, updater);
 
     view_dispatcher_enable_queue(updater->view_dispatcher);
-    view_dispatcher_attach_to_gui(
-        updater->view_dispatcher, updater->gui, ViewDispatcherTypeWindow);
 
     view_dispatcher_set_event_callback_context(updater->view_dispatcher, updater);
     view_dispatcher_set_custom_event_callback(
@@ -53,13 +52,33 @@ Updater* updater_alloc() {
     view_dispatcher_set_tick_event_callback(
         updater->view_dispatcher, updater_tick_event_callback, 500);
 
+    view_dispatcher_attach_to_gui(
+        updater->view_dispatcher,
+        updater->gui,
+        arg ? ViewDispatcherTypeFullscreen : ViewDispatcherTypeWindow);
+
     updater->main_view = updater_main_alloc();
-
-    updater->update_task = update_task_alloc();
-    update_task_set_progress_cb(updater->update_task, status_update_cb, updater->main_view);
-
     view_dispatcher_add_view(
         updater->view_dispatcher, UpdaterViewMain, updater_main_get_view(updater->main_view));
+
+    //#ifndef FURI_RAM_EXEC
+    //#endif
+    updater->widget = widget_alloc();
+    view_dispatcher_add_view(
+        updater->view_dispatcher, UpdaterViewWidget, widget_get_view(updater->widget));
+
+#ifdef FURI_RAM_EXEC
+    if(true) {
+#else
+    if(!arg) {
+#endif
+        updater->update_task = update_task_alloc();
+        update_task_set_progress_cb(updater->update_task, status_update_cb, updater->main_view);
+
+        scene_manager_next_scene(updater->scene_manager, UpdaterSceneMain);
+    } else {
+        scene_manager_next_scene(updater->scene_manager, UpdaterSceneLoadCfg);
+    }
 
     return updater;
 }
@@ -67,28 +86,30 @@ Updater* updater_alloc() {
 void updater_free(Updater* updater) {
     furi_assert(updater);
 
-    update_task_set_progress_cb(updater->update_task, NULL, NULL);
-    update_task_free(updater->update_task);
+    if(updater->update_task) {
+        update_task_set_progress_cb(updater->update_task, NULL, NULL);
+        update_task_free(updater->update_task);
+    }
 
     view_dispatcher_remove_view(updater->view_dispatcher, UpdaterViewMain);
+    updater_main_free(updater->main_view);
+
+    view_dispatcher_remove_view(updater->view_dispatcher, UpdaterViewWidget);
+    widget_free(updater->widget);
 
     view_dispatcher_free(updater->view_dispatcher);
     scene_manager_free(updater->scene_manager);
-    updater_main_free(updater->main_view);
 
     furi_record_close("gui");
-    updater->gui = NULL;
-
     furi_record_close("storage");
-    updater->storage = NULL;
+
     free(updater);
 }
 
 int32_t updater_srv(void* p) {
-    Updater* updater = updater_alloc();
+    const char* cfgpath = p;
 
-    scene_manager_next_scene(updater->scene_manager, UpdaterSceneMain);
-
+    Updater* updater = updater_alloc(cfgpath);
     view_dispatcher_run(updater->view_dispatcher);
     updater_free(updater);
 

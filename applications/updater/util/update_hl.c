@@ -15,7 +15,8 @@ bool update_hl_prepare(const char* manifest_dir_path) {
                                               "/ext" UPDATE_DIR_DEFAULT_REL_PATH;
 
     string_t full_manifest_path;
-    string_init_printf(full_manifest_path, "%s/update.cfg", final_manifest_dir_path);
+    string_init_printf(
+        full_manifest_path, "%s/%s", final_manifest_dir_path, UPDATE_MANIFEST_DEFAULT_NAME);
 
     bool result = false;
     UpdateManifest* manifest = update_manifest_alloc();

@@ -14,7 +14,7 @@
 
 #define MAIN_VIEW_DEFAULT (0UL)
 
-//void updater_scene_main_callback(UpdaterEvent event, void* context) {
+//void updater_scene_main_callback(UpdaterCustomEvent event, void* context) {
 //    Updater* updater = (Updater*)context;
 //    view_dispatcher_send_custom_event(updater->view_dispatcher, event);
 //}
@@ -25,7 +25,7 @@ static void sd_mount_callback(const void* message, void* context) {
 
     view_dispatcher_send_custom_event(
         updater->view_dispatcher,
-        *new_status == StorageStatusOK ? UpdaterEventSdMounted : UpdaterEventSdUnmounted);
+        *new_status == StorageStatusOK ? UpdaterCustomEventSdMounted : UpdaterCustomEventSdUnmounted);
 }
 
 void updater_scene_main_on_enter(void* context) {
@@ -46,7 +46,7 @@ bool updater_scene_main_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case UpdaterEventSdMounted:
+        case UpdaterCustomEventSdMounted:
             string_init_set(update_path, "/ext" UPDATE_DIR_DEFAULT_REL_PATH);
             if(update_task_init(updater->update_task, update_path)) {
                 update_task_start(updater->update_task);
@@ -54,11 +54,8 @@ bool updater_scene_main_on_event(void* context, SceneManagerEvent event) {
             string_clear(update_path);
 
             break;
-        case UpdaterEventSdUnmounted:
+        case UpdaterCustomEventSdUnmounted:
             // TODO: error out, stop worker (it's probably dead actually)
-            break;
-        case UpdaterEventProgressUpdate:
-
             break;
         default:
             break;

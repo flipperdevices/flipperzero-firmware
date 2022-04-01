@@ -4,7 +4,6 @@
 #include <gui/canvas.h>
 #include <furi.h>
 #include <input/input.h>
-#include <dolphin/dolphin.h>
 
 #include "../updater_i.h"
 #include "updater_main.h"

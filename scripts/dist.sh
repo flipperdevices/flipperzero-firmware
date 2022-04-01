@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 set -e
+export
+set
 
 suffix="${DIST_SUFFIX:=local}"
 targetdir="dist/${TARGET}"
@@ -30,6 +32,7 @@ done
 
 ./scripts/update.py generate \
     -d "${updatedir}" \
+    -v "${VERSION_STRING}" \
     -t "${TARGET}" \
     -dfu "dist/${TARGET}/flipper-z-${TARGET}-firmware-${suffix}.dfu" \
     -stage "dist/${TARGET}/flipper-z-${TARGET}-updater-${suffix}.bin"

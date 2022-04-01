@@ -18,6 +18,7 @@ class Main(App):
         )
 
         self.parser_generate.add_argument("-d", dest="directory", required=True)
+        self.parser_generate.add_argument("-v", dest="version", required=True)
         self.parser_generate.add_argument("-t", dest="target", required=True)
         self.parser_generate.add_argument("-dfu", dest="dfu", required=True)
         self.parser_generate.add_argument("-stage", dest="stage", required=True)
@@ -40,6 +41,7 @@ class Main(App):
 
         file = FlipperFormatFile()
         file.setHeader("Flipper firmware upgrade configuration", 1)
+        file.writeKey("Info", self.args.version)
         file.writeKey("Target", self.args.target[1:])  # dirty 'f' strip
         file.writeKey("Loader", basename(self.args.stage))
         file.writeComment("little-endian hex!")
@@ -47,7 +49,7 @@ class Main(App):
         file.writeKey("Firmware", basename(self.args.dfu))
         file.writeKey("Radio", self.args.radiobin or "")
         file.writeKey("Radio address", self.int2ffhex(self.args.radioaddr or 0))
-        file.save("%s/update.cfg" % self.args.directory)
+        file.save("%s/update.fuf" % self.args.directory)
 
         return 0
 

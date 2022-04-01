@@ -6,6 +6,7 @@
 
 UpdateManifest* update_manifest_alloc() {
     UpdateManifest* update_manifest = malloc(sizeof(UpdateManifest));
+    string_init(update_manifest->version);
     string_init(update_manifest->firmware_dfu_image);
     string_init(update_manifest->radio_image);
     string_init(update_manifest->staged_loader_file);
@@ -16,6 +17,7 @@ UpdateManifest* update_manifest_alloc() {
 
 void update_manifest_free(UpdateManifest* update_manifest) {
     furi_assert(update_manifest);
+    string_clear(update_manifest->version);
     string_clear(update_manifest->firmware_dfu_image);
     string_clear(update_manifest->radio_image);
     string_clear(update_manifest->staged_loader_file);
@@ -35,6 +37,7 @@ static bool
     string_init(filetype);
     update_manifest->valid =
         flipper_format_read_header(flipper_file, filetype, &version) &&
+        flipper_format_read_string(flipper_file, "Info", update_manifest->version) &&
         flipper_format_read_uint32(flipper_file, "Target", &update_manifest->target, 1) &&
         flipper_format_read_string(flipper_file, "Loader", update_manifest->staged_loader_file) &&
         flipper_format_read_hex(
@@ -42,6 +45,8 @@ static bool
             "Loader CRC",
             (uint8_t*)&update_manifest->staged_loader_crc,
             sizeof(uint32_t));
+        true;
+    string_clear(filetype);
 
     /* Optional fields - we can have dfu, radio, or both */
     flipper_format_read_string(flipper_file, "Firmware", update_manifest->firmware_dfu_image);
@@ -62,6 +67,7 @@ bool update_manifest_init(UpdateManifest* update_manifest, const char* manifest_
     flipper_format_free(flipper_file);
     furi_record_close("storage");
 
+    update_manifest->valid = true;
     return update_manifest->valid;
 }
 

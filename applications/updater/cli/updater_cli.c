@@ -24,7 +24,9 @@ static void updater_cli_apply(Cli* cli, string_t args, void* context) {
     if(!update_manifest_init(manifest, update_manifest_path)) {
         printf("Error: Failed to load update manifest\r\n");
     } else {
-        printf("Manifest OK.\r\nChecking Stage2 integrity... ");
+        printf(
+            "Version: %s\r\nManifest OK.\r\nChecking Stage2 integrity... ",
+            string_get_cstr(manifest->version));
 
         Storage* storage = furi_record_open("storage");
         File* file = storage_file_alloc(storage);

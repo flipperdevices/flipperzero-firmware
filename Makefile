@@ -1,4 +1,7 @@
 PROJECT_ROOT := $(abspath $(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
+
+include			$(PROJECT_ROOT)/make/git.mk
+
 COPRO_DIR := $(PROJECT_ROOT)/lib/STM32CubeWB/Projects/STM32WB_Copro_Wireless_Binaries/STM32WB5x
 
 PROJECT_SOURCE_DIRECTORIES := \

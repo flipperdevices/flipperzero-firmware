@@ -159,7 +159,7 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
     update_task_set_progress(update_task, UpdateTaskStageReadManifest, 0);
     string_t manifest_path;
     string_init_set(manifest_path, update_task->update_path);
-    string_cat_str(manifest_path, "/update.cfg");
+    string_cat_str(manifest_path, "/" UPDATE_MANIFEST_DEFAULT_NAME);
 
     //update_task_set_progress(update_task, UpdateTaskStageReadManifest, 0);
     bool result = false;
