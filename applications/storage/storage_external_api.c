@@ -310,22 +310,33 @@ FS_Error storage_common_rename(Storage* storage, const char* old_path, const cha
 
 FS_Error storage_common_copy(Storage* storage, const char* old_path, const char* new_path) {
     FS_Error error;
-    Stream* stream_from = file_stream_alloc(storage);
-    Stream* stream_to = file_stream_alloc(storage);
 
-    do {
-        if(!file_stream_open(stream_from, old_path, FSAM_READ, FSOM_OPEN_EXISTING)) break;
-        if(!file_stream_open(stream_to, new_path, FSAM_WRITE, FSOM_CREATE_NEW)) break;
-        stream_copy_full(stream_from, stream_to);
-    } while(false);
+    FileInfo fileinfo;
+    error = storage_common_stat(storage, old_path, &fileinfo);
 
-    error = file_stream_get_error(stream_from);
     if(error == FSE_OK) {
-        error = file_stream_get_error(stream_to);
+        if(fileinfo.flags & FSF_DIRECTORY) {
+            error = storage_common_mkdir(storage, new_path);
+        } else {
+            Stream* stream_from = file_stream_alloc(storage);
+            Stream* stream_to = file_stream_alloc(storage);
+
+            do {
+                if(!file_stream_open(stream_from, old_path, FSAM_READ, FSOM_OPEN_EXISTING)) break;
+                if(!file_stream_open(stream_to, new_path, FSAM_WRITE, FSOM_CREATE_NEW)) break;
+                stream_copy_full(stream_from, stream_to);
+            } while(false);
+
+            error = file_stream_get_error(stream_from);
+            if(error == FSE_OK) {
+                error = file_stream_get_error(stream_to);
+            }
+
+            stream_free(stream_from);
+            stream_free(stream_to);
+        }
     }
 
-    stream_free(stream_from);
-    stream_free(stream_to);
     return error;
 }
 
