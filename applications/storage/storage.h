@@ -30,6 +30,12 @@ typedef struct {
     StorageEventType type;
 } StorageEvent;
 
+/**
+ * Get storage pubsub.
+ * Storage will send StorageEvent messages.
+ * @param storage 
+ * @return FuriPubSub* 
+ */
 FuriPubSub* storage_get_pubsub(Storage* storage);
 
 /******************* File Functions *******************/
