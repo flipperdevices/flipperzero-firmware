@@ -1,5 +1,4 @@
 #include "scenes/updater_scene.h"
-//#include "scenes/updater_scene_i.h"
 #include "updater_i.h"
 
 #include <storage/storage.h>
