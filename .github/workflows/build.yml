@@ -108,7 +108,7 @@ jobs:
           do
             BUNDLE_NAME=`echo $UPDATEBUNDLE | cut -d'/' -f2`
             echo Packaging ${BUNDLE_NAME}
-            tar czpf artifacts/flipper-z-${BUNDLE_NAME}-${{steps.names.outputs.suffix}}.tgz -C artifacts ${BUNDLE_NAME}
+            tar czpf artifacts/flipper-z-${BUNDLE_NAME}.tgz -C artifacts ${BUNDLE_NAME}
           done
 
       - name: 'Bundle resources'
