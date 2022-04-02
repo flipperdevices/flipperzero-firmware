@@ -23,7 +23,7 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeInfrared] = &I_ir_10px,
     [ArchiveFileTypeBadUsb] = &I_badusb_10px,
     [ArchiveFileTypeU2f] = &I_u2f_10px,
-    [ArchiveFileTypeUpdateManifest] = &I_badusb_10px, // TODO: get own icon
+    [ArchiveFileTypeUpdateManifest] = &I_update_10px,
     [ArchiveFileTypeFolder] = &I_dir_10px,
     [ArchiveFileTypeUnknown] = &I_unknown_10px,
 };
