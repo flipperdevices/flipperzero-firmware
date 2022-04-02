@@ -9,7 +9,7 @@ const char* DEFAULT_BACKUP_LOCATION = "/ext/backup.tar";
 bool lfs_backup_create(Storage* storage, const char* destination) {
     const char* final_destination = destination && strlen(destination) ? destination :
                                                                          DEFAULT_BACKUP_LOCATION;
-    return storage_int_backup(storage, final_destination) == FSE_OK;;
+    return storage_int_backup(storage, final_destination) == FSE_OK;
 }
 
 bool lfs_backup_exists(Storage* storage, const char* source) {
