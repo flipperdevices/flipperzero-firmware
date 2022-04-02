@@ -35,12 +35,8 @@ class Main(App):
         stage_basename = basename(self.args.stage)
         dfu_basename = basename(self.args.dfu)
 
-        shutil.copyfile(
-            self.args.stage, join(self.args.directory, stage_basename)
-        )
-        shutil.copyfile(
-            self.args.dfu, join(self.args.directory, dfu_basename)
-        )
+        shutil.copyfile(self.args.stage, join(self.args.directory, stage_basename))
+        shutil.copyfile(self.args.dfu, join(self.args.directory, dfu_basename))
 
         file = FlipperFormatFile()
         file.setHeader("Flipper firmware upgrade configuration", 1)

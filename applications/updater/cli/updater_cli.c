@@ -13,7 +13,6 @@
 #include <loader/loader.h>
 #include <lib/toolbox/path.h>
 
-
 static void updater_cli_apply(Cli* cli, string_t manifest_path, void* context) {
     printf("Verifying update package at '%s'\r\n", string_get_cstr(manifest_path));
 

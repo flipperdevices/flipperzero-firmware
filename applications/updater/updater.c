@@ -33,7 +33,7 @@ static void status_update_cb(const char* message, const uint8_t progress, void* 
 
 Updater* updater_alloc(const char* arg) {
     Updater* updater = malloc(sizeof(Updater));
-    if (arg) {
+    if(arg) {
         string_init_set_str(updater->startup_arg, arg);
         string_replace_str(updater->startup_arg, "/any/", "/ext/");
     } else {
