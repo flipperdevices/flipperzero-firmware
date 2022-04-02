@@ -9,7 +9,7 @@
 #include <updater/util/update_manifest.h>
 #include <lib/toolbox/path.h>
 
-static FATFS* pfs;
+static FATFS* pfs = NULL;
 
 static const char FS_ROOT_PATH[] = "/";
 
@@ -26,7 +26,7 @@ static bool flipper_update_init() {
     furi_hal_interrupt_init();
     furi_hal_delay_init(false);
 
-    MX_GPIO_Init();
+    //MX_GPIO_Init();
 
     furi_hal_spi_init();
     furi_hal_crc_init(false);

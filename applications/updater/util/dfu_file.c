@@ -3,7 +3,6 @@
 
 #define VALID_WHOLE_FILE_CRC 0xFFFFFFFF
 #define DFU_SUFFIX_VERSION 0x011A
-#define FLASH_PAGE_ALIGNMENT_MASK (FLASH_PAGE_SIZE - 1)
 
 bool dfu_file_validate_crc(File* dfuf, const DfuPageTaskProgressCb progress_cb, void* context) {
     if(!storage_file_is_open(dfuf)) {
@@ -104,6 +103,8 @@ static DfuUpdateBlockResult dfu_file_perform_task_for_update_pages(
     furi_assert(task);
     furi_assert(header);
     task->progress_cb(0, task->context);
+    const size_t FLASH_PAGE_SIZE = furi_hal_flash_get_page_size();
+    const size_t FLASH_PAGE_ALIGNMENT_MASK = FLASH_PAGE_SIZE - 1;
     if((header->dwElementAddress & FLASH_PAGE_ALIGNMENT_MASK) != 0) {
         // start address is not aligned by page boundary -- we don't support that. Yet.
         return UpdateBlockResult_Failed;

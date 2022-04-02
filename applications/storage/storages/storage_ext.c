@@ -84,7 +84,7 @@ static bool sd_mount_card(StorageData* storage, bool notify) {
         }
 
         if(!result) {
-            delay(1000);
+            furi_hal_delay_ms(1000);
             FURI_LOG_E(
                 TAG, "init cycle %d, error: %s", counter, storage_data_status_text(storage));
             counter--;
@@ -184,6 +184,24 @@ FS_Error sd_card_info(StorageData* storage, SDInfo* sd_info) {
         sd_info->sector_size = sector_size;
 #else
         sd_info->fs_type = fs->fs_type;
+        switch(fs->fs_type) {
+        case FS_FAT12:
+            sd_info->fs_type = FST_FAT12;
+            break;
+        case FS_FAT16:
+            sd_info->fs_type = FST_FAT16;
+            break;
+        case FS_FAT32:
+            sd_info->fs_type = FST_FAT32;
+            break;
+        case FS_EXFAT:
+            sd_info->fs_type = FST_EXFAT;
+            break;
+        default:
+            sd_info->fs_type = FST_UNKNOWN;
+            break;
+        }
+
         sd_info->kb_total = total_sectors / 1024 * sector_size;
         sd_info->kb_free = free_sectors / 1024 * sector_size;
         sd_info->cluster_size = fs->csize;
@@ -501,15 +519,6 @@ static FS_Error storage_ext_common_remove(void* ctx, const char* path) {
 #endif
 }
 
-static FS_Error storage_ext_common_rename(void* ctx, const char* old_path, const char* new_path) {
-#ifdef FURI_RAM_EXEC
-    return FSE_NOT_READY;
-#else
-    SDError result = f_rename(old_path, new_path);
-    return storage_ext_parse_error(result);
-#endif
-}
-
 static FS_Error storage_ext_common_mkdir(void* ctx, const char* path) {
 #ifdef FURI_RAM_EXEC
     return FSE_NOT_READY;
@@ -557,6 +566,35 @@ static FS_Error storage_ext_common_fs_info(
 }
 
 /******************* Init Storage *******************/
+static const FS_Api fs_api = {
+    .file =
+        {
+            .open = storage_ext_file_open,
+            .close = storage_ext_file_close,
+            .read = storage_ext_file_read,
+            .write = storage_ext_file_write,
+            .seek = storage_ext_file_seek,
+            .tell = storage_ext_file_tell,
+            .truncate = storage_ext_file_truncate,
+            .size = storage_ext_file_size,
+            .sync = storage_ext_file_sync,
+            .eof = storage_ext_file_eof,
+        },
+    .dir =
+        {
+            .open = storage_ext_dir_open,
+            .close = storage_ext_dir_close,
+            .read = storage_ext_dir_read,
+            .rewind = storage_ext_dir_rewind,
+        },
+    .common =
+        {
+            .stat = storage_ext_common_stat,
+            .mkdir = storage_ext_common_mkdir,
+            .remove = storage_ext_common_remove,
+            .fs_info = storage_ext_common_fs_info,
+        },
+};
 
 void storage_ext_init(StorageData* storage) {
     SDData* sd_data = malloc(sizeof(SDData));
@@ -566,27 +604,7 @@ void storage_ext_init(StorageData* storage) {
 
     storage->data = sd_data;
     storage->api.tick = storage_ext_tick;
-    storage->fs_api.file.open = storage_ext_file_open;
-    storage->fs_api.file.close = storage_ext_file_close;
-    storage->fs_api.file.read = storage_ext_file_read;
-    storage->fs_api.file.write = storage_ext_file_write;
-    storage->fs_api.file.seek = storage_ext_file_seek;
-    storage->fs_api.file.tell = storage_ext_file_tell;
-    storage->fs_api.file.truncate = storage_ext_file_truncate;
-    storage->fs_api.file.size = storage_ext_file_size;
-    storage->fs_api.file.sync = storage_ext_file_sync;
-    storage->fs_api.file.eof = storage_ext_file_eof;
-
-    storage->fs_api.dir.open = storage_ext_dir_open;
-    storage->fs_api.dir.close = storage_ext_dir_close;
-    storage->fs_api.dir.read = storage_ext_dir_read;
-    storage->fs_api.dir.rewind = storage_ext_dir_rewind;
-
-    storage->fs_api.common.stat = storage_ext_common_stat;
-    storage->fs_api.common.mkdir = storage_ext_common_mkdir;
-    storage->fs_api.common.rename = storage_ext_common_rename;
-    storage->fs_api.common.remove = storage_ext_common_remove;
-    storage->fs_api.common.fs_info = storage_ext_common_fs_info;
+    storage->fs_api = &fs_api;
 
     hal_sd_detect_init();
 

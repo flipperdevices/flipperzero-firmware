@@ -30,8 +30,8 @@ static void flipper_boot_dfu_init() {
     // Screen init
     furi_hal_spi_init();
     // Prepare gpio
-    hal_gpio_init_simple(&gpio_display_rst, GpioModeOutputPushPull);
-    hal_gpio_init_simple(&gpio_display_di, GpioModeOutputPushPull);
+    furi_hal_gpio_init_simple(&gpio_display_rst, GpioModeOutputPushPull);
+    furi_hal_gpio_init_simple(&gpio_display_di, GpioModeOutputPushPull);
 
     furi_hal_compress_icon_init();
 }

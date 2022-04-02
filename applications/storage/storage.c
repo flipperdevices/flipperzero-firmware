@@ -11,6 +11,8 @@
 #define ICON_SD_MOUNTED &I_SDcardMounted_11x8
 #define ICON_SD_ERROR &I_SDcardFail_11x8
 
+#define TAG "Storage"
+
 static void storage_app_sd_icon_draw_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
     furi_assert(context);
@@ -43,7 +45,7 @@ Storage* storage_app_alloc() {
 #endif
     storage_ext_init(&app->storage[ST_EXT]);
 
-    app->prev_ext_storage_status = StorageStatusNotReady;
+    //app->prev_ext_storage_status = StorageStatusNotReady;
     // sd icon gui
     app->sd_gui.enabled = false;
     app->sd_gui.view_port = view_port_alloc();
@@ -66,15 +68,14 @@ void storage_tick(Storage* app) {
         }
     }
 
-    if(app->storage[ST_EXT].status != app->prev_ext_storage_status) {
-        app->prev_ext_storage_status = app->storage[ST_EXT].status;
-        furi_pubsub_publish(app->pubsub, &app->storage[ST_EXT].status);
-    }
-
     // storage not enabled but was enabled (sd card unmount)
     if(app->storage[ST_EXT].status == StorageStatusNotReady && app->sd_gui.enabled == true) {
         app->sd_gui.enabled = false;
         view_port_enabled_set(app->sd_gui.view_port, false);
+
+        FURI_LOG_I(TAG, "SD card unmount");
+        StorageEvent event = {.type = StorageEventTypeCardUnmount};
+        furi_pubsub_publish(app->pubsub, &event);
     }
 
     // storage enabled (or in error state) but was not enabled (sd card mount)
@@ -86,6 +87,16 @@ void storage_tick(Storage* app) {
        app->sd_gui.enabled == false) {
         app->sd_gui.enabled = true;
         view_port_enabled_set(app->sd_gui.view_port, true);
+
+        if(app->storage[ST_EXT].status == StorageStatusOK) {
+            FURI_LOG_I(TAG, "SD card mount");
+            StorageEvent event = {.type = StorageEventTypeCardMount};
+            furi_pubsub_publish(app->pubsub, &event);
+        } else {
+            FURI_LOG_I(TAG, "SD card mount error");
+            StorageEvent event = {.type = StorageEventTypeCardMountError};
+            furi_pubsub_publish(app->pubsub, &event);
+        }
     }
 }
 

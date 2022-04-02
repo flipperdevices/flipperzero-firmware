@@ -21,11 +21,18 @@
 
 static void sd_mount_callback(const void* message, void* context) {
     Updater* updater = context;
-    const StorageStatus* new_status = message;
+    const StorageEvent* new_event = message;
 
-    view_dispatcher_send_custom_event(
-        updater->view_dispatcher,
-        *new_status == StorageStatusOK ? UpdaterCustomEventSdMounted : UpdaterCustomEventSdUnmounted);
+    switch(new_event->type) {
+    case StorageEventTypeCardMount:
+        view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventSdMounted);
+        break;
+    case StorageEventTypeCardUnmount:
+        view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventSdUnmounted);
+        break;
+    default:
+        break;
+    }
 }
 
 void updater_scene_main_on_enter(void* context) {

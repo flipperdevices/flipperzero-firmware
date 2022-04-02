@@ -1,5 +1,3 @@
-#include "main.h"
-
 #include <furi.h>
 #include <furi_hal.h>
 #include <flipper.h>
@@ -32,9 +30,6 @@ int main(void) {
         furi_hal_rtc_init();
         // Initialize FURI layer
         furi_init();
-
-        // Initialize ST HAL
-        HAL_Init();
 
         // Flipper FURI HAL
         furi_hal_init();
