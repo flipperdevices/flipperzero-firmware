@@ -65,11 +65,11 @@ Updater* updater_alloc(const char* arg) {
     view_dispatcher_add_view(
         updater->view_dispatcher, UpdaterViewMain, updater_main_get_view(updater->main_view));
 
-    //#ifndef FURI_RAM_EXEC
-    //#endif
+#ifndef FURI_RAM_EXEC
     updater->widget = widget_alloc();
     view_dispatcher_add_view(
         updater->view_dispatcher, UpdaterViewWidget, widget_get_view(updater->widget));
+#endif
 
 #ifdef FURI_RAM_EXEC
     if(true) {
@@ -81,7 +81,9 @@ Updater* updater_alloc(const char* arg) {
 
         scene_manager_next_scene(updater->scene_manager, UpdaterSceneMain);
     } else {
+#ifndef FURI_RAM_EXEC
         scene_manager_next_scene(updater->scene_manager, UpdaterSceneLoadCfg);
+#endif
     }
 
     return updater;
@@ -99,8 +101,10 @@ void updater_free(Updater* updater) {
     view_dispatcher_remove_view(updater->view_dispatcher, UpdaterViewMain);
     updater_main_free(updater->main_view);
 
+#ifndef FURI_RAM_EXEC
     view_dispatcher_remove_view(updater->view_dispatcher, UpdaterViewWidget);
     widget_free(updater->widget);
+#endif
 
     view_dispatcher_free(updater->view_dispatcher);
     scene_manager_free(updater->scene_manager);

@@ -89,7 +89,9 @@ bool updater_scene_loadcfg_on_event(void* context, SceneManagerEvent event) {
             if(updater->preparation_result == UpdatePrepareResultOK) {
                 furi_hal_power_reset();
             } else {
+#ifndef FURI_RAM_EXEC
                 scene_manager_next_scene(updater->scene_manager, UpdaterSceneError);
+#endif
             }
             //view_dispatcher_stop(updater->view_dispatcher);
             return true;
