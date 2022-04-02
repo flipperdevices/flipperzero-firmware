@@ -1,16 +1,6 @@
 #include "updater/updater_i.h"
 #include "updater_scene.h"
-//#include "updater_scene_i.h"
 #include "../util/update_hl.h"
-
-#include <furi.h>
-#include <furi_hal.h>
-#include <applications.h>
-#include <assets_icons.h>
-#include <loader/loader.h>
-#include <storage/storage.h>
-
-#define TAG "UpdaterSrv"
 
 void updater_scene_error_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
@@ -52,13 +42,13 @@ bool updater_scene_error_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeBack) {
         view_dispatcher_stop(updater->view_dispatcher);
-        return true;
-    } else if(event.type == SceneManagerEventTypeTick) {
+        consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case UpdaterCustomEventCancelUpdate:
             view_dispatcher_stop(updater->view_dispatcher);
-            return true;
+            consumed = true;
+            break;
         default:
             break;
         }

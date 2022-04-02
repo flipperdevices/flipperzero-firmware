@@ -18,8 +18,8 @@ bool dfu_file_validate_crc(File* dfuf, const DfuPageTaskProgressCb progress_cb, 
     uint16_t data_buffer_valid_len;
 
     uint32_t file_size = storage_file_size(dfuf);
-    // Feed file contents per sector into CRC calc
 
+    /* Feed file contents per sector into CRC calc */
     furi_hal_crc_acquire(osWaitForever);
     for(uint32_t fptr = 0; fptr < file_size;) {
         data_buffer_valid_len = storage_file_read(dfuf, data_buffer, DFU_DATA_BUFFER_MAX_LEN);
@@ -37,9 +37,10 @@ bool dfu_file_validate_crc(File* dfuf, const DfuPageTaskProgressCb progress_cb, 
     furi_hal_crc_reset();
     free(data_buffer);
 
-    // Last 4 bytes of DFU file = CRC of previous file contents, inverted
-    // If we calculate whole file CRC32, incl. embedded CRC,
-    // that should give us 0xFFFFFFFF
+    /* Last 4 bytes of DFU file = CRC of previous file contents, inverted
+     * If we calculate whole file CRC32, incl. embedded CRC,
+     * that should give us 0xFFFFFFFF 
+     */
     return file_crc == VALID_WHOLE_FILE_CRC;
 }
 
@@ -83,7 +84,7 @@ uint8_t dfu_file_validate_headers(File* dfuf, const DfuValidationParams* referen
     if((dfu_suffix.bLength != sizeof(DfuSuffix)) || (dfu_suffix.bcdDFU != DFU_SUFFIX_VERSION)) {
         return 0;
     }
-    // TODO: check DfuSignature?..
+    /* TODO: check DfuSignature?.. */
 
     if((dfu_suffix.idVendor != reference_params->vendor) ||
        (dfu_suffix.idProduct != reference_params->product) ||
@@ -106,7 +107,7 @@ static DfuUpdateBlockResult dfu_file_perform_task_for_update_pages(
     const size_t FLASH_PAGE_SIZE = furi_hal_flash_get_page_size();
     const size_t FLASH_PAGE_ALIGNMENT_MASK = FLASH_PAGE_SIZE - 1;
     if((header->dwElementAddress & FLASH_PAGE_ALIGNMENT_MASK) != 0) {
-        // start address is not aligned by page boundary -- we don't support that. Yet.
+        /* start address is not aligned by page boundary -- we don't support that. Yet. */
         return UpdateBlockResult_Failed;
     }
 
@@ -145,7 +146,6 @@ static DfuUpdateBlockResult dfu_file_perform_task_for_update_pages(
         task->progress_cb(element_offs * 100 / header->dwElementSize, task->context);
     }
 
-    //task->progress_cb(100, task->context);
     free(fw_block);
     return (element_offs == header->dwElementSize) ? UpdateBlockResult_OK :
                                                      UpdateBlockResult_Failed;
@@ -164,7 +164,7 @@ bool dfu_file_process_targets(const DfuUpdateTask* task, File* dfuf, const uint8
             return UpdateBlockResult_Failed;
         }
 
-        // TODO: look into TargetPrefix and validate/filter?..
+        /* TODO: look into TargetPrefix and validate/filter?.. */
         for(uint32_t i_element = 0; i_element < target_prefix.dwNbElements; ++i_element) {
             bytes_read = storage_file_read(dfuf, &image_element, sizeof(ImageElementHeader));
             if(bytes_read != sizeof(ImageElementHeader)) {

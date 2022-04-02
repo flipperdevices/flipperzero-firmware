@@ -11,6 +11,11 @@
 #define DELAY_OPERATION_OK 600
 #define DELAY_OPERATION_ERROR 20000
 
+#define CHECK_RESULT(x) \
+    if(!(x)) {          \
+        break;          \
+    }
+
 typedef struct UpdateTask {
     UpdateTaskState state;
     string_t update_path;
@@ -115,7 +120,6 @@ UpdateTask* update_task_alloc() {
     update_task->storage = furi_record_open("storage");
     update_task->file = storage_file_alloc(update_task->storage);
     update_task->status_change_cb = NULL;
-    //update_task->update_path = NULL;
 
     FuriThread* thread = update_task->thread = furi_thread_alloc();
 
@@ -222,13 +226,6 @@ static void update_task_dfu_progress(const uint8_t progress, void* context) {
     update_task_set_progress(update_task, UpdateTaskStageProgress, progress);
 }
 
-//static void
-
-#define CHECK_RESULT(x) \
-    if(!(x)) {          \
-        break;          \
-    }
-
 static const DfuValidationParams flipper_dfu_params = {
     .device = 0xFFFF,
     .product = 0xDF11,
@@ -330,14 +327,15 @@ static int32_t update_task_worker_flash(void* context) {
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePreUpdate)) {
             update_task_set_progress(update_task, UpdateTaskStageLfsBackup, 0);
             furi_hal_rtc_reset_flag(FuriHalRtcFlagExecutePreUpdate);
-            if((success = lfs_backup_create(string_get_cstr(backup_file_path)))) {
+            if((success =
+                    lfs_backup_create(update_task->storage, string_get_cstr(backup_file_path)))) {
                 furi_hal_rtc_set_flag(FuriHalRtcFlagExecuteUpdate);
             }
 
         } else if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePostUpdate)) {
             update_task_set_progress(update_task, UpdateTaskStageLfsRestore, 0);
             furi_hal_rtc_reset_flag(FuriHalRtcFlagExecutePostUpdate);
-            success = lfs_backup_unpack(string_get_cstr(backup_file_path));
+            success = lfs_backup_unpack(update_task->storage, string_get_cstr(backup_file_path));
         }
 
         update_task_set_progress(update_task, UpdateTaskStageComplete, 100);

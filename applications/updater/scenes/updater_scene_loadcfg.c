@@ -1,16 +1,8 @@
 #include "updater/updater_i.h"
 #include "updater_scene.h"
-//#include "updater_scene_i.h"
 #include "../util/update_hl.h"
 
-#include <furi.h>
 #include <furi_hal.h>
-#include <applications.h>
-#include <assets_icons.h>
-#include <loader/loader.h>
-#include <storage/storage.h>
-
-#define TAG "UpdaterSrv"
 
 void updater_scene_loadcfg_apply_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
@@ -34,11 +26,8 @@ void updater_scene_loadcfg_on_enter(void* context) {
     pending_upd->manifest = update_manifest_alloc();
 
     if(update_manifest_init(pending_upd->manifest, string_get_cstr(updater->startup_arg))) {
-        //if (false) {
         widget_add_string_element(
             updater->widget, 64, 12, AlignCenter, AlignCenter, FontPrimary, "Update");
-        //string_init_printf(
-        //    pending_upd->message, "Install  %s?", string_get_cstr(pending_upd->manifest->version));
 
         widget_add_string_multiline_element(
             updater->widget,
@@ -47,7 +36,6 @@ void updater_scene_loadcfg_on_enter(void* context) {
             AlignCenter,
             AlignCenter,
             FontSecondary,
-            //"alloetoti");
             //string_get_cstr(pending_upd->message));
             string_get_cstr(pending_upd->manifest->version));
 
@@ -78,13 +66,10 @@ bool updater_scene_loadcfg_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeBack) {
         view_dispatcher_stop(updater->view_dispatcher);
-        return true;
-    } else if(event.type == SceneManagerEventTypeTick) {
+        consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case UpdaterCustomEventApplyUpdate:
-            // TODO: implement
-            //scene_manager_previous_scene(updater->scene_manager);
             updater->preparation_result = update_hl_prepare(string_get_cstr(updater->startup_arg));
             if(updater->preparation_result == UpdatePrepareResultOK) {
                 furi_hal_power_reset();
@@ -93,11 +78,12 @@ bool updater_scene_loadcfg_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(updater->scene_manager, UpdaterSceneError);
 #endif
             }
-            //view_dispatcher_stop(updater->view_dispatcher);
-            return true;
+            consumed = true;
+            break;
         case UpdaterCustomEventCancelUpdate:
             view_dispatcher_stop(updater->view_dispatcher);
-            return true;
+            consumed = true;
+            break;
         default:
             break;
         }

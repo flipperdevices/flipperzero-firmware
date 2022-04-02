@@ -10,7 +10,6 @@
 
 struct UpdaterMainView {
     View* view;
-    //UpdaterMainViewCallback callback;
     FuriPubSubSubscription* subscription;
     void* context;
 };
@@ -43,16 +42,6 @@ void updater_main_model_set_state(
         });
 }
 
-void updater_main_set_callback(
-    UpdaterMainView* main_view,
-    //UpdaterMainViewCallback callback,
-    void* context) {
-    furi_assert(main_view);
-    //furi_assert(callback);
-    //main_view->callback = callback;
-    main_view->context = context;
-}
-
 View* updater_main_get_view(UpdaterMainView* main_view) {
     furi_assert(main_view);
     return main_view->view;
@@ -62,25 +51,7 @@ bool updater_main_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
 
-    //UpdaterMainView* main_view = context;
-
-    //if(event->type == InputTypeShort) {
-    //    if(event->key == InputKeyOk) {
-    //        main_view->callback(UpdaterMainEventOpenMenu, main_view->context);
-    //    } else if(event->key == InputKeyUp) {
-    //        main_view->callback(UpdaterMainEventOpenLockMenu, main_view->context);
-    //    } else if(event->key == InputKeyDown) {
-    //        main_view->callback(UpdaterMainEventOpenArchive, main_view->context);
-    //    } else if(event->key == InputKeyLeft) {
-    //        main_view->callback(UpdaterMainEventOpenFavorite, main_view->context);
-    //    } else if(event->key == InputKeyRight) {
-    //        main_view->callback(UpdaterMainEventRightShort, main_view->context);
-    //    }
-    //} else if(event->type == InputTypeLong) {
-    //    if(event->key == InputKeyDown) {
-    //        main_view->callback(UpdaterMainEventOpenDebug, main_view->context);
-    //    }
-    //}
+    /* TODO: handle retry on failure? */
     return true;
 }
 

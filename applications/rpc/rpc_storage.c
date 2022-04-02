@@ -550,9 +550,14 @@ static void rpc_system_storage_backup_create_process(const PB_Main* request, voi
     PB_Main* response = malloc(sizeof(PB_Main));
     response->command_id = request->command_id;
     response->has_next = false;
+
+    Storage* fs_api = furi_record_open("storage");
+
     bool backup_ok =
-        lfs_backup_create(request->content.storage_backup_create_request.archive_path);
+        lfs_backup_create(fs_api, request->content.storage_backup_create_request.archive_path);
     response->command_status = backup_ok ? PB_CommandStatus_OK : PB_CommandStatus_ERROR;
+
+    furi_record_close("storage");
 
     rpc_send_and_release(session, response);
     free(response);
@@ -570,9 +575,13 @@ static void rpc_system_storage_backup_restore_process(const PB_Main* request, vo
     response->has_next = false;
     response->command_status = PB_CommandStatus_OK;
 
+    Storage* fs_api = furi_record_open("storage");
+
     bool backup_ok =
-        lfs_backup_unpack(request->content.storage_backup_restore_request.archive_path);
+        lfs_backup_unpack(fs_api, request->content.storage_backup_restore_request.archive_path);
     response->command_status = backup_ok ? PB_CommandStatus_OK : PB_CommandStatus_ERROR;
+
+    furi_record_close("storage");
 
     rpc_send_and_release(session, response);
     free(response);

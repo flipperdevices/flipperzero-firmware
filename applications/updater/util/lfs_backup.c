@@ -6,28 +6,19 @@
 const char* DEFAULT_BACKUP_FILENAME = "backup.tar";
 const char* DEFAULT_BACKUP_LOCATION = "/ext/backup.tar";
 
-bool lfs_backup_create(const char* destination) {
+bool lfs_backup_create(Storage* storage, const char* destination) {
     const char* final_destination = destination && strlen(destination) ? destination :
                                                                          DEFAULT_BACKUP_LOCATION;
-    Storage* storage = furi_record_open("storage");
-    bool success = storage_int_backup(storage, final_destination) == FSE_OK;
-    furi_record_close("storage");
-    return success;
+    return storage_int_backup(storage, final_destination) == FSE_OK;;
 }
 
-bool lfs_backup_exists(const char* source) {
+bool lfs_backup_exists(Storage* storage, const char* source) {
     const char* final_source = source && strlen(source) ? source : DEFAULT_BACKUP_LOCATION;
     FileInfo fi;
-    Storage* storage = furi_record_open("storage");
-    bool success = storage_common_stat(storage, final_source, &fi) == FSE_OK;
-    furi_record_close("storage");
-    return success;
+    return storage_common_stat(storage, final_source, &fi) == FSE_OK;
 }
 
-bool lfs_backup_unpack(const char* source) {
+bool lfs_backup_unpack(Storage* storage, const char* source) {
     const char* final_source = source && strlen(source) ? source : DEFAULT_BACKUP_LOCATION;
-    Storage* storage = furi_record_open("storage");
-    bool success = storage_int_restore(storage, final_source) == FSE_OK;
-    furi_record_close("storage");
-    return success;
+    return storage_int_restore(storage, final_source) == FSE_OK;
 }

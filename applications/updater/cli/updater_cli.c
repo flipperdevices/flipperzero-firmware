@@ -25,15 +25,19 @@ static void updater_cli_apply(Cli* cli, string_t manifest_path, void* context) {
 }
 
 static void updater_cli_backup(Cli* cli, string_t args, void* context) {
-    printf("Backup\r\n");
-    bool success = lfs_backup_unpack(string_get_cstr(args));
-    printf("Result = %d\r\n", success);
+    printf("Backup to '%s'\r\n", string_get_cstr(args));
+    Storage* storage = furi_record_open("storage");
+    bool success = lfs_backup_unpack(storage, string_get_cstr(args));
+    furi_record_close("storage");
+    printf("Result: %s\r\n", success ? "OK" : "FAIL");
 }
 
 static void updater_cli_restore(Cli* cli, string_t args, void* context) {
-    printf("Restore\r\n");
-    bool success = lfs_backup_unpack(string_get_cstr(args));
-    printf("Result = %d\r\n", success);
+    printf("Restore to '%s'\r\n", string_get_cstr(args));
+    Storage* storage = furi_record_open("storage");
+    bool success = lfs_backup_unpack(storage, string_get_cstr(args));
+    furi_record_close("storage");
+    printf("Result: %s\r\n", success ? "OK" : "FAIL");
 }
 
 static int32_t updater_spawner_thread_worker(void* arg) {

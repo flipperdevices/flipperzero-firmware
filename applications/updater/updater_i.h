@@ -21,9 +21,7 @@ extern "C" {
 
 typedef enum {
     UpdaterViewMain,
-    //UpdaterViewLoadCfg,
     UpdaterViewWidget,
-    //UpdaterViewTotal,
 } UpdaterViewEnum;
 
 typedef enum {
@@ -36,7 +34,6 @@ typedef enum {
 } UpdaterCustomEvent;
 
 typedef struct UpdaterManifestProcessingState {
-    //const char* manifest_path;
     UpdateManifest* manifest;
     string_t message;
     bool ready_to_be_applied;
@@ -51,7 +48,6 @@ typedef struct {
 
     UpdaterMainView* main_view;
 
-    //UpdaterLoadCfgView* loadcfg_view;
     UpdaterManifestProcessingState* pending_update;
     UpdatePrepareResult preparation_result;
 
