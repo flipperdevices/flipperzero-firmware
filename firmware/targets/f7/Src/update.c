@@ -81,8 +81,17 @@ static bool flipper_update_load_stage(const string_t work_dir, UpdateManifest* m
             break;
         }
 
-        /* point of no return */
+        /* Point of no return. Literally
+         *
+         * NB: we MUST disable IRQ, otherwise handlers from flash
+         * will change global variables (like tick count) 
+         * that are located in .data. And we move staged loader 
+         * to the same memory region. So, IRQ handlers will mess up 
+         * memmove'd .text section and ruin the day. 
+         * We don't want that to happen.
+         */
         __disable_irq();
+
         memmove((void*)(SRAM1_BASE), img, stat.fsize);
         LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SRAM);
         flipper_boot_target_switch((void*)SRAM1_BASE);
@@ -109,7 +118,7 @@ static bool flipper_update_get_work_directory(string_t out_dir) {
 
     while(f_readdir(&dir, &fno) == FR_OK) {
         entry_idx++;
-        if(fno.fname[0] == 0) {
+        if(fno.fname[0] == '\0') {
             return false;
         }
         if(entry_idx == update_index) {
