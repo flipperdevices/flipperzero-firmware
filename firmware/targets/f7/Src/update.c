@@ -82,14 +82,12 @@ static bool flipper_update_load_stage(const string_t work_dir, UpdateManifest* m
         }
 
         /* point of no return */
-        FURI_CRITICAL_ENTER();
+        __disable_irq();
         memmove((void*)(SRAM1_BASE), img, stat.fsize);
         LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SRAM);
         flipper_boot_target_switch((void*)SRAM1_BASE);
-        /* unreachable -- but makes compiler happy */
-        FURI_CRITICAL_EXIT();
-
         return true;
+
     } while(false);
 
     free(img);
