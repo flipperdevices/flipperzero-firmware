@@ -4,7 +4,7 @@ set -e
 
 suffix="${DIST_SUFFIX:=local}"
 targetdir="dist/${TARGET}"
-updatedir="${targetdir}/update"
+updatedir="${targetdir}/update-${TARGET}-${suffix}"
 
 rm -rf "${targetdir}"
 mkdir -p "${targetdir}"

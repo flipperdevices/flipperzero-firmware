@@ -1,5 +1,3 @@
-#include "updater_cli.h"
-
 #include "../util/update_manifest.h"
 #include "../util/tar_archive.h"
 #include "../util/lfs_backup.h"
