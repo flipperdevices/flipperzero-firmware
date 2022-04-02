@@ -3,6 +3,7 @@
 #include "tar_archive.h"
 #include <storage/storage.h>
 
+const char* DEFAULT_BACKUP_FILENAME = "backup.tar";
 const char* DEFAULT_BACKUP_LOCATION = "/ext/backup.tar";
 
 bool lfs_backup_create(const char* destination) {

@@ -316,25 +316,35 @@ static int32_t update_task_worker_flash(void* context) {
     furi_assert(context);
     UpdateTask* update_task = context;
     bool success = false;
+    string_t backup_file_path;
+    string_init(backup_file_path);
 
     do {
+        if(!update_hl_get_current_package_path(update_task->storage, update_task->update_path)) {
+            break;
+        }
+
+        path_concat(
+            string_get_cstr(update_task->update_path), DEFAULT_BACKUP_FILENAME, backup_file_path);
+
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePreUpdate)) {
             update_task_set_progress(update_task, UpdateTaskStageLfsBackup, 0);
             furi_hal_rtc_reset_flag(FuriHalRtcFlagExecutePreUpdate);
-            if((success = lfs_backup_create(NULL))) {
+            if((success = lfs_backup_create(string_get_cstr(backup_file_path)))) {
                 furi_hal_rtc_set_flag(FuriHalRtcFlagExecuteUpdate);
             }
 
         } else if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePostUpdate)) {
             update_task_set_progress(update_task, UpdateTaskStageLfsRestore, 0);
             furi_hal_rtc_reset_flag(FuriHalRtcFlagExecutePostUpdate);
-            success = lfs_backup_unpack(NULL);
+            success = lfs_backup_unpack(string_get_cstr(backup_file_path));
         }
 
         update_task_set_progress(update_task, UpdateTaskStageComplete, 100);
         success = true;
     } while(false);
 
+    string_clear(backup_file_path);
     if(!success) {
         update_task_set_progress(update_task, UpdateTaskStageError, update_task->state.progress);
         osDelay(DELAY_OPERATION_ERROR);

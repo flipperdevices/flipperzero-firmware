@@ -32,21 +32,24 @@ class Main(App):
     def generate(self):
         meta = {}
 
+        stage_basename = basename(self.args.stage)
+        dfu_basename = basename(self.args.dfu)
+
         shutil.copyfile(
-            self.args.stage, join(self.args.directory, basename(self.args.stage))
+            self.args.stage, join(self.args.directory, stage_basename)
         )
         shutil.copyfile(
-            self.args.dfu, join(self.args.directory, basename(self.args.dfu))
+            self.args.dfu, join(self.args.directory, dfu_basename)
         )
 
         file = FlipperFormatFile()
         file.setHeader("Flipper firmware upgrade configuration", 1)
         file.writeKey("Info", self.args.version)
         file.writeKey("Target", self.args.target[1:])  # dirty 'f' strip
-        file.writeKey("Loader", basename(self.args.stage))
+        file.writeKey("Loader", stage_basename)
         file.writeComment("little-endian hex!")
         file.writeKey("Loader CRC", self.int2ffhex(self.crc(self.args.stage)))
-        file.writeKey("Firmware", basename(self.args.dfu))
+        file.writeKey("Firmware", dfu_basename)
         file.writeKey("Radio", self.args.radiobin or "")
         file.writeKey("Radio address", self.int2ffhex(self.args.radioaddr or 0))
         file.save("%s/update.fuf" % self.args.directory)

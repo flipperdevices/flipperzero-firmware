@@ -6,6 +6,7 @@
 extern "C" {
 #endif
 
+extern const char* DEFAULT_BACKUP_FILENAME;
 extern const char* DEFAULT_BACKUP_LOCATION;
 
 bool lfs_backup_create(const char* destination);
