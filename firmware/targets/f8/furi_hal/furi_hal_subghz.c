@@ -1,4 +1,5 @@
 #include "furi_hal_subghz.h"
+#include "furi_hal_subghz_config.h"
 #include "furi_hal_version.h"
 #include "furi_hal_rtc.h"
 #include "furi_hal_delay.h"
@@ -20,168 +21,14 @@ static volatile SubGhzState furi_hal_subghz_state = SubGhzStateInit;
 static volatile SubGhzRegulation furi_hal_subghz_regulation = SubGhzRegulationTxRx;
 static volatile FuriHalSubGhzPreset furi_hal_subghz_preset = FuriHalSubGhzPresetIDLE;
 
-/*
-#define RF_POWER_UP 0x02, 0x01, 0x00, 0x01, 0xC9, 0xC3, 0x80
-#define RF_GPIO_PIN_CFG 0x13, 0x04, 0x15, 0x21, 0x20, 0x67, 0x4B, 0x00
-#define GLOBAL_2_0 0x11, 0x00, 0x04, 0x00, 0x52, 0x00, 0x18, 0x30
-#define INT_CTL_2_0 0x11, 0x01, 0x01, 0x00, 0x00
-#define FRR_CTL_2_0 0x11, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00
-#define PREAMBLE_2_0 0x11, 0x10, 0x05, 0x00, 0x00, 0x14, 0x00, 0x0F, 0x11
-#define SYNC_2_0 0x11, 0x11, 0x05, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00
-#define PKT_2_0 0x11, 0x12, 0x07, 0x00, 0x04, 0x00, 0x30, 0xFF, 0xFF, 0x20, 0x02
-#define PKT_2_1 0x11, 0x12, 0x05, 0x0E, 0x07, 0x04, 0x80, 0x00, 0x80
-#define MODEM_2_0 0x11, 0x20, 0x06, 0x00, 0x01, 0x00, 0x07, 0x01, 0x86, 0xA0
-#define MODEM_2_1 0x11, 0x20, 0x02, 0x0B, 0x00, 0x00
-#define MODEM_2_2 \
-    0x11, 0x20, 0x0C, 0x18, 0x00, 0x00, 0x08, 0x03, 0x80, 0x00, 0x0A, 0x30, 0x00, 0xE8, 0x00, 0x5E
-#define MODEM_2_3 \
-    0x11, 0x20, 0x0C, 0x24, 0x05, 0x76, 0x1A, 0x02, 0xB9, 0x02, 0xC0, 0x00, 0x00, 0x12, 0x00, 0x57
-#define MODEM_2_4 0x11, 0x20, 0x06, 0x30, 0x26, 0xFA, 0xA0, 0x00, 0x00, 0x62
-#define MODEM_2_5 \
-    0x11, 0x20, 0x0B, 0x39, 0x15, 0x15, 0x80, 0x02, 0xFF, 0xFF, 0x00, 0x28, 0x0C, 0xA4, 0x20
-#define MODEM_2_6 0x11, 0x20, 0x09, 0x45, 0x03, 0x07, 0xFF, 0x01, 0x00, 0xFF, 0x08, 0x00, 0x18
-#define MODEM_2_7 0x11, 0x20, 0x02, 0x50, 0x94, 0x0A
-#define MODEM_2_8 0x11, 0x20, 0x02, 0x54, 0x03, 0x07
-#define MODEM_2_9 0x11, 0x20, 0x05, 0x5B, 0x40, 0x04, 0x0F, 0x78, 0x20
-#define MODEM_CHFLT_2_0 \
-    0x11, 0x21, 0x0C, 0x00, 0xA2, 0x81, 0x26, 0xAF, 0x3F, 0xEE, 0xC8, 0xC7, 0xDB, 0xF2, 0x02, 0x08
-#define MODEM_CHFLT_2_1 \
-    0x11, 0x21, 0x0C, 0x0C, 0x07, 0x03, 0x15, 0xFC, 0x0F, 0x00, 0xA2, 0x81, 0x26, 0xAF, 0x3F, 0xEE
-#define MODEM_CHFLT_2_2 \
-    0x11, 0x21, 0x0B, 0x18, 0xC8, 0xC7, 0xDB, 0xF2, 0x02, 0x08, 0x07, 0x03, 0x15, 0xFC, 0x0F
-#define FREQ_CONTROL_2_0 0x11, 0x40, 0x08, 0x00, 0x38, 0x0E, 0xD9, 0x16, 0x44, 0x44, 0x20, 0xFE
-
-#define RADIO_CONFIGURATION_DATA_ARRAY                                                           \
-    {                                                                                            \
-        0x07, RF_POWER_UP, 0x08, RF_GPIO_PIN_CFG, 0x08, GLOBAL_2_0, 0x05, INT_CTL_2_0, 0x07,     \
-            FRR_CTL_2_0, 0x09, PREAMBLE_2_0, 0x09, SYNC_2_0, 0x0B, PKT_2_0, 0x09, PKT_2_1, 0x0A, \
-            MODEM_2_0, 0x06, MODEM_2_1, 0x10, MODEM_2_2, 0x10, MODEM_2_3, 0x0A, MODEM_2_4, 0x0F, \
-            MODEM_2_5, 0x0D, MODEM_2_6, 0x06, MODEM_2_7, 0x06, MODEM_2_8, 0x09, MODEM_2_9, 0x10, \
-            MODEM_CHFLT_2_0, 0x10, MODEM_CHFLT_2_1, 0x0F, MODEM_CHFLT_2_2, 0x0C,                 \
-            FREQ_CONTROL_2_0,                                                                    \
-    }
-*/
-
-//tx
-#define RF_POWER_UP 0x02, 0x01, 0x00, 0x01, 0xC9, 0xC3, 0x80
-#define RF_GPIO_PIN_CFG 0x13, 0x08, 0x04, 0x21, 0x20, 0x67, 0x4B, 0x00
-#define GLOBAL_2_0 0x11, 0x00, 0x04, 0x00, 0x52, 0x00, 0x18, 0x30
-#define MODEM_2_0 \
-    0x11, 0x20, 0x0C, 0x00, 0x0B, 0x00, 0x07, 0x02, 0x71, 0x00, 0x05, 0xC9, 0xC3, 0x80, 0x00, 0x00
-#define MODEM_2_1 0x11, 0x20, 0x01, 0x0C, 0x46
-#define MODEM_2_2 \
-    0x11, 0x20, 0x0C, 0x1C, 0x80, 0x00, 0xB0, 0x10, 0x0C, 0xE8, 0x00, 0x4E, 0x06, 0x8D, 0xB9, 0x00
-#define MODEM_2_3 \
-    0x11, 0x20, 0x0A, 0x28, 0x00, 0x02, 0xC0, 0x08, 0x00, 0x12, 0x00, 0x23, 0x01, 0x5C
-#define MODEM_2_4 \
-    0x11, 0x20, 0x0B, 0x39, 0x11, 0x11, 0x80, 0x1A, 0x20, 0x00, 0x00, 0x28, 0x0C, 0xA4, 0x23
-#define MODEM_2_5 0x11, 0x20, 0x09, 0x45, 0x03, 0x00, 0x85, 0x01, 0x00, 0xFF, 0x06, 0x09, 0x10
-#define MODEM_2_6 0x11, 0x20, 0x02, 0x50, 0x94, 0x0A
-#define MODEM_2_7 0x11, 0x20, 0x02, 0x54, 0x03, 0x07
-#define MODEM_2_8 0x11, 0x20, 0x05, 0x5B, 0x40, 0x04, 0x04, 0x78, 0x20
-#define MODEM_CHFLT_2_0 \
-    0x11, 0x21, 0x0C, 0x00, 0x7E, 0x64, 0x1B, 0xBA, 0x58, 0x0B, 0xDD, 0xCE, 0xD6, 0xE6, 0xF6, 0x00
-#define MODEM_CHFLT_2_1 \
-    0x11, 0x21, 0x0C, 0x0C, 0x03, 0x03, 0x15, 0xF0, 0x3F, 0x00, 0x7E, 0x64, 0x1B, 0xBA, 0x58, 0x0B
-#define MODEM_CHFLT_2_2 \
-    0x11, 0x21, 0x0B, 0x18, 0xDD, 0xCE, 0xD6, 0xE6, 0xF6, 0x00, 0x03, 0x03, 0x15, 0xF0, 0x3F
-#define PA_2_0 0x11, 0x22, 0x01, 0x03, 0x1F
-#define FREQ_CONTROL_2_0 0x11, 0x40, 0x08, 0x00, 0x37, 0x09, 0x00, 0x00, 0x44, 0x44, 0x20, 0xFE
-#define RF_START_RX 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-#define RF_IRCAL 0x17, 0x56, 0x10, 0xCA, 0xF0
-#define RF_IRCAL_1 0x17, 0x13, 0x10, 0xCA, 0xF0
-#define INT_CTL_5_0 0x11, 0x01, 0x01, 0x00, 0x00
-#define FRR_CTL_5_0 0x11, 0x02, 0x04, 0x00, 0x0A, 0x09, 0x04, 0x05
-#define PREAMBLE_5_0 0x11, 0x10, 0x05, 0x00, 0x00, 0x14, 0x00, 0x0F, 0x11
-#define SYNC_5_0 0x11, 0x11, 0x05, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00
-#define PKT_5_0 0x11, 0x12, 0x07, 0x00, 0x04, 0x01, 0x08, 0xFF, 0xFF, 0x20, 0x40
-#define PKT_5_1 0x11, 0x12, 0x06, 0x0E, 0x01, 0x06, 0xC2, 0x00, 0x80, 0x02
-#define PKT_5_2 0x11, 0x12, 0x05, 0x22, 0x01, 0x06, 0xC2, 0x07, 0xFF
-#define MODEM_5_0 0x11, 0x20, 0x07, 0x00, 0x09, 0x00, 0x07, 0x00, 0x5D, 0xC0, 0x01
-#define MODEM_5_1 0x11, 0x20, 0x01, 0x0C, 0x00
-#define MODEM_5_2 \
-    0x11, 0x20, 0x0C, 0x18, 0x00, 0x80, 0x08, 0x03, 0x80, 0x00, 0x0A, 0x30, 0x0C, 0xE8, 0x01, 0x87
-#define MODEM_5_3 \
-    0x11, 0x20, 0x0C, 0x24, 0x01, 0x4F, 0x8B, 0x00, 0xA8, 0x00, 0xC2, 0x00, 0x54, 0x23, 0x00, 0x15
-#define MODEM_5_4 0x11, 0x20, 0x06, 0x30, 0x54, 0x2F, 0x80, 0x00, 0x00, 0x62
-#define MODEM_5_5 \
-    0x11, 0x20, 0x0B, 0x39, 0x56, 0x56, 0x80, 0x02, 0xFF, 0xFF, 0x00, 0x2A, 0x0C, 0x84, 0x21
-#define MODEM_5_6 0x11, 0x20, 0x09, 0x45, 0x8D, 0x00, 0xCC, 0x01, 0x00, 0x80, 0x08, 0x02, 0x18
-#define MODEM_5_7 0x11, 0x20, 0x01, 0x5D, 0x0D
-#define MODEM_CHFLT_5_0 \
-    0x11, 0x21, 0x0C, 0x00, 0xA2, 0x81, 0x26, 0xAF, 0x3F, 0xEE, 0xC8, 0xC7, 0xDB, 0xF2, 0x02, 0x08
-#define MODEM_CHFLT_5_1 \
-    0x11, 0x21, 0x0C, 0x0C, 0x07, 0x03, 0x15, 0xFC, 0x0F, 0x00, 0xA2, 0x81, 0x26, 0xAF, 0x3F, 0xEE
-#define MODEM_CHFLT_5_2 \
-    0x11, 0x21, 0x0B, 0x18, 0xC8, 0xC7, 0xDB, 0xF2, 0x02, 0x08, 0x07, 0x03, 0x15, 0xFC, 0x0F
-#define PA_5_0 0x11, 0x22, 0x01, 0x03, 0x5F
-#define FREQ_CONTROL_5_0 0x11, 0x40, 0x04, 0x00, 0x38, 0x0E, 0xD9, 0x16
-
-#define RADIO_CONFIGURATION_DATA_ARRAY                                                           \
-    {                                                                                            \
-        0x07, RF_POWER_UP, 0x08, RF_GPIO_PIN_CFG, 0x08, GLOBAL_2_0, 0x10, MODEM_2_0, 0x05,       \
-            MODEM_2_1, 0x10, MODEM_2_2, 0x0E, MODEM_2_3, 0x0F, MODEM_2_4, 0x0D, MODEM_2_5, 0x06, \
-            MODEM_2_6, 0x06, MODEM_2_7, 0x09, MODEM_2_8, 0x10, MODEM_CHFLT_2_0, 0x10,            \
-            MODEM_CHFLT_2_1, 0x0F, MODEM_CHFLT_2_2, 0x05, PA_2_0, 0x0C, FREQ_CONTROL_2_0, 0x08,  \
-            RF_START_RX, 0x05, RF_IRCAL, 0x05, RF_IRCAL_1, 0x05, INT_CTL_5_0, 0x08, FRR_CTL_5_0, \
-            0x09, PREAMBLE_5_0, 0x09, SYNC_5_0, 0x0B, PKT_5_0, 0x0A, PKT_5_1, 0x09, PKT_5_2,     \
-            0x0B, MODEM_5_0, 0x05, MODEM_5_1, 0x10, MODEM_5_2, 0x10, MODEM_5_3, 0x0A, MODEM_5_4, \
-            0x0F, MODEM_5_5, 0x0D, MODEM_5_6, 0x05, MODEM_5_7, 0x10, MODEM_CHFLT_5_0, 0x10,      \
-            MODEM_CHFLT_5_1, 0x0F, MODEM_CHFLT_5_2, 0x05, PA_5_0, 0x08, FREQ_CONTROL_5_0,        \
-    }
-
-/*
-//TX
-#define RF_POWER_UP 0x02, 0x01, 0x00, 0x01, 0xC9, 0xC3, 0x80
-#define RF_GPIO_PIN_CFG 0x13, 0x15, 0x04, 0x21, 0x20, 0x67, 0x4B, 0x00
-#define GLOBAL_2_0 0x11, 0x00, 0x04, 0x00, 0x52, 0x00, 0x18, 0x30
-#define INT_CTL_2_0 0x11, 0x01, 0x01, 0x00, 0x00
-#define FRR_CTL_2_0 0x11, 0x02, 0x04, 0x00, 0x0A, 0x09, 0x04, 0x05
-#define PREAMBLE_2_0 0x11, 0x10, 0x05, 0x00, 0x00, 0x14, 0x00, 0x0F, 0x11
-#define SYNC_2_0 0x11, 0x11, 0x05, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00
-#define PKT_2_0 0x11, 0x12, 0x06, 0x00, 0x04, 0x01, 0x08, 0xFF, 0xFF, 0x20
-#define PKT_2_1 0x11, 0x12, 0x06, 0x0E, 0x01, 0x06, 0xC2, 0x00, 0x80, 0x02
-#define PKT_2_2 0x11, 0x12, 0x05, 0x22, 0x01, 0x06, 0xC2, 0x07, 0xFF
-#define MODEM_2_0 0x11, 0x20, 0x06, 0x00, 0x09, 0x00, 0x07, 0x00, 0x5D, 0xC0
-#define MODEM_2_1 0x11, 0x20, 0x02, 0x0B, 0x00, 0x00
-#define MODEM_2_2 \
-    0x11, 0x20, 0x0C, 0x18, 0x00, 0x80, 0x08, 0x03, 0x80, 0x00, 0x1A, 0x20, 0x0C, 0xE8, 0x00, 0x62
-#define MODEM_2_3 \
-    0x11, 0x20, 0x0C, 0x24, 0x05, 0x3E, 0x2D, 0x02, 0x9D, 0x00, 0xC2, 0x00, 0x54, 0x23, 0x00, 0x15
-#define MODEM_2_4 0x11, 0x20, 0x06, 0x30, 0x36, 0x23, 0x80, 0x00, 0x00, 0x60
-#define MODEM_2_5 \
-    0x11, 0x20, 0x0B, 0x39, 0x15, 0x15, 0x80, 0x02, 0xFF, 0xFF, 0x00, 0x28, 0x0C, 0x84, 0x21
-#define MODEM_2_6 0x11, 0x20, 0x09, 0x45, 0x8C, 0x01, 0x99, 0x01, 0x00, 0xFF, 0x06, 0x01, 0x18
-#define MODEM_2_7 0x11, 0x20, 0x02, 0x50, 0x94, 0x0A
-#define MODEM_2_8 0x11, 0x20, 0x02, 0x54, 0x03, 0x07
-#define MODEM_2_9 0x11, 0x20, 0x05, 0x5B, 0x40, 0x04, 0x10, 0x78, 0x20
-#define MODEM_CHFLT_2_0 \
-    0x11, 0x21, 0x0C, 0x01, 0xC4, 0x30, 0x7F, 0xF5, 0xB5, 0xB8, 0xDE, 0x05, 0x17, 0x16, 0x0C, 0x03
-#define MODEM_CHFLT_2_1 0x11, 0x21, 0x05, 0x0D, 0x00, 0x15, 0xFF, 0x00, 0x00
-#define PA_2_0 0x11, 0x22, 0x01, 0x03, 0x5F
-#define FREQ_CONTROL_2_0 0x11, 0x40, 0x08, 0x00, 0x38, 0x0E, 0xD9, 0x16, 0x44, 0x44, 0x20, 0xFE
-
-#define RADIO_CONFIGURATION_DATA_ARRAY                                                           \
-    {                                                                                            \
-        0x07, RF_POWER_UP, 0x08, RF_GPIO_PIN_CFG, 0x08, GLOBAL_2_0, 0x05, INT_CTL_2_0, 0x08,     \
-            FRR_CTL_2_0, 0x09, PREAMBLE_2_0, 0x09, SYNC_2_0, 0x0A, PKT_2_0, 0x0A, PKT_2_1, 0x09, \
-            PKT_2_2, 0x0A, MODEM_2_0, 0x06, MODEM_2_1, 0x10, MODEM_2_2, 0x10, MODEM_2_3, 0x0A,   \
-            MODEM_2_4, 0x0F, MODEM_2_5, 0x0D, MODEM_2_6, 0x06, MODEM_2_7, 0x06, MODEM_2_8, 0x09, \
-            MODEM_2_9, 0x10, MODEM_CHFLT_2_0, 0x09, MODEM_CHFLT_2_1, 0x05, PA_2_0, 0x0C,         \
-            FREQ_CONTROL_2_0,                                                                    \
-    }
-*/
-
-static const uint8_t config[] = RADIO_CONFIGURATION_DATA_ARRAY;
-
 // Apply the radio configuration
-void furi_hal_subghz_load_config(void) {
+static void furi_hal_subghz_load_config(const uint8_t config[]) {
     uint8_t buff[17];
     uint8_t buff_tx[2] = {SI446X_CMD_READ_CMD_BUFF, 0xFF};
     uint8_t buff_rx[2] = {0};
-    for(uint16_t i = 0; i < sizeof(config); i++) {
+    uint16_t i = 0;
+    while(config[i]) {
         memcpy(buff, &config[i], sizeof(buff));
-        //si446x_write_data(&furi_hal_spi_bus_handle_subghz, &buff[1], buff[0]);
 
         furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
         furi_hal_spi_bus_tx(&furi_hal_spi_bus_handle_subghz, &buff[1], buff[0], SI446X_TIMEOUT);
@@ -196,7 +43,50 @@ void furi_hal_subghz_load_config(void) {
         }
 
         i += buff[0];
+        i++;
     }
+    si446x_clear_interrupt_status(&furi_hal_spi_bus_handle_subghz);
+}
+
+static void furi_hal_subghz_mod_gpio_for_async(SI446X_Prop_Modem_Mod_Type_t modulation) {
+    //ASYNC	1	Direct mode operates in asynchronous mode, applies to TX only. GFSK is not supported.
+    uint8_t modem_mod[1] = {0};
+
+    switch(modulation) {
+    case SI446X_MODEM_MOD_TYPE_MOD_TYPE_CW:
+        modem_mod[0] =
+            (SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_TYPE_ASYNCHRONOUS |
+             SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_GPIO1 |
+             SI446X_MODEM_MOD_TYPE_MOD_SOURCE_DIRECT_MODE | SI446X_MODEM_MOD_TYPE_MOD_TYPE_CW);
+        break;
+    case SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK:
+        modem_mod[0] =
+            (SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_TYPE_ASYNCHRONOUS |
+             SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_GPIO1 |
+             SI446X_MODEM_MOD_TYPE_MOD_SOURCE_DIRECT_MODE | SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
+        break;
+    case SI446X_MODEM_MOD_TYPE_MOD_TYPE_2FSK:
+        modem_mod[0] =
+            (SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_TYPE_ASYNCHRONOUS |
+             SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_GPIO1 |
+             SI446X_MODEM_MOD_TYPE_MOD_SOURCE_DIRECT_MODE | SI446X_MODEM_MOD_TYPE_MOD_TYPE_2FSK);
+        break;
+        break;
+    case SI446X_MODEM_MOD_TYPE_MOD_TYPE_4FSK:
+        modem_mod[0] =
+            (SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_TYPE_ASYNCHRONOUS |
+             SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_GPIO1 |
+             SI446X_MODEM_MOD_TYPE_MOD_SOURCE_DIRECT_MODE | SI446X_MODEM_MOD_TYPE_MOD_TYPE_4FSK);
+        break;
+    default:
+        furi_crash(NULL);
+        break;
+    }
+    si446x_set_properties(
+        &furi_hal_spi_bus_handle_subghz,
+        SI446X_PROP_MODEM_MOD_TYPE,
+        &modem_mod[0],
+        sizeof(modem_mod));
 }
 
 void furi_hal_subghz_init() {
@@ -204,37 +94,19 @@ void furi_hal_subghz_init() {
     furi_hal_subghz_state = SubGhzStateIdle;
     furi_hal_subghz_preset = FuriHalSubGhzPresetIDLE;
 
-    hal_gpio_init(&gpio_rf_sw_0, GpioModeOutputPushPull, GpioPullDown, GpioSpeedLow);
-    hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow); //active go0
-    // Reset
-    hal_gpio_write(&gpio_rf_sw_0, true); //nSDN UP
-    delay_us(10000);
-    hal_gpio_write(&gpio_rf_sw_0, false); //nSDN DOWN
-
-    //wait CTS
-    while(hal_gpio_read(&gpio_cc1101_g0) == false)
-        ;
+    furi_hal_subghz_reset();
 
 #ifdef FURI_HAL_SUBGHZ_TX_GPIO
     hal_gpio_init(&FURI_HAL_SUBGHZ_TX_GPIO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 #endif
 
-    furi_hal_subghz_load_config();
-    si446x_clear_interrupt_status(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_650khz_async_regs);
     furi_hal_subghz_dump_state();
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     //ToDo think about where to tie
-    si446x_set_pa(&furi_hal_spi_bus_handle_subghz, 0x1f);
-    uint8_t modem_mod[] = {
-        (SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_TYPE_ASYNCHRONOUS |
-         SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_GPIO1 |
-         SI446X_MODEM_MOD_TYPE_MOD_SOURCE_DIRECT_MODE | SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK)};
-    si446x_set_properties(
-        &furi_hal_spi_bus_handle_subghz,
-        SI446X_PROP_MODEM_MOD_TYPE,
-        &modem_mod[0],
-        sizeof(modem_mod));
+    si446x_set_pa(&furi_hal_spi_bus_handle_subghz, SI446X_SET_MAX_PA);
+    furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
 
     furi_hal_subghz_sleep();
 
@@ -242,13 +114,14 @@ void furi_hal_subghz_init() {
 }
 
 void furi_hal_subghz_sleep() {
-    furi_assert(furi_hal_subghz_state == SubGhzStateIdle);
+    //furi_assert(furi_hal_subghz_state == SubGhzStateIdle);
     //ToDo sometimes freezes when exiting sleep mode
     // si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_INPUT);
     // si446x_clear_interrupt_status(&furi_hal_spi_bus_handle_subghz);
     // si446x_set_state(&furi_hal_spi_bus_handle_subghz, SI446X_STATE_SLEEP);
     // hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    furi_hal_subghz_preset = FuriHalSubGhzPresetIDLE;
+    //furi_hal_subghz_preset = FuriHalSubGhzPresetIDLE;
+    furi_hal_subghz_shutdown();
 }
 
 void furi_hal_subghz_dump_state() {
@@ -260,28 +133,34 @@ void furi_hal_subghz_dump_state() {
 }
 
 void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
-    // if(preset == FuriHalSubGhzPresetOok650Async) {
-    //     furi_hal_subghz_load_registers(furi_hal_subghz_preset_ook_650khz_async_regs);
-    //     furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
-    // } else if(preset == FuriHalSubGhzPresetOok270Async) {
-    //     furi_hal_subghz_load_registers(furi_hal_subghz_preset_ook_270khz_async_regs);
-    //     furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
-    // } else if(preset == FuriHalSubGhzPreset2FSKDev238Async) {
-    //     furi_hal_subghz_load_registers(furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs);
-    //     furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
-    // } else if(preset == FuriHalSubGhzPreset2FSKDev476Async) {
-    //     furi_hal_subghz_load_registers(furi_hal_subghz_preset_2fsk_dev4_76khz_async_regs);
-    //     furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
-    // } else if(preset == FuriHalSubGhzPresetMSK99_97KbAsync) {
-    //     furi_hal_subghz_load_registers(furi_hal_subghz_preset_msk_99_97kb_async_regs);
-    //     furi_hal_subghz_load_patable(furi_hal_subghz_preset_msk_async_patable);
-    // } else if(preset == FuriHalSubGhzPresetGFSK9_99KbAsync) {
-    //     furi_hal_subghz_load_registers(furi_hal_subghz_preset_gfsk_9_99kb_async_regs);
-    //     furi_hal_subghz_load_patable(furi_hal_subghz_preset_gfsk_async_patable);
-    // } else {
-    //     furi_crash(NULL);
-    // }
+    //ToDo need Reset?
+    //download with evaluation takes 200ms without calibration 20ms
+    if(furi_hal_subghz_preset == preset) return;
+    if(preset == FuriHalSubGhzPresetOok650Async) {
+        furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_650khz_async_regs);
+        furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
+    } else if(preset == FuriHalSubGhzPresetOok270Async) {
+        furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_270khz_async_regs);
+        furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
+    } else if(preset == FuriHalSubGhzPreset2FSKDev238Async) {
+        furi_hal_subghz_load_config(furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs);
+        furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_2FSK);
+    } else if(preset == FuriHalSubGhzPreset2FSKDev476Async) {
+        furi_hal_subghz_load_config(furi_hal_subghz_preset_2fsk_dev4_76khz_async_regs);
+        furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_2FSK);
+        // } else if(preset == FuriHalSubGhzPresetMSK99_97KbAsync) {
+        //     furi_hal_subghz_load_registers(furi_hal_subghz_preset_msk_99_97kb_async_regs);
+        //     furi_hal_subghz_load_patable(furi_hal_subghz_preset_msk_async_patable);
+        // } else if(preset == FuriHalSubGhzPresetGFSK9_99KbAsync) {
+        //     furi_hal_subghz_load_registers(furi_hal_subghz_preset_gfsk_9_99kb_async_regs);
+        //     furi_hal_subghz_load_patable(furi_hal_subghz_preset_gfsk_async_patable);
+    } else {
+        furi_crash(NULL);
+    }
+    si446x_set_pa(&furi_hal_spi_bus_handle_subghz, SI446X_SET_MAX_PA);
+
     furi_hal_subghz_preset = preset;
+    furi_hal_subghz_state = SubGhzStateIdle;
 }
 
 void furi_hal_subghz_load_registers(const uint8_t data[][2]) {
@@ -363,21 +242,27 @@ void furi_hal_subghz_shutdown() {
 }
 
 void furi_hal_subghz_reset() {
-    // furi_hal_subghz_state = SubGhzStateInit;
-    // furi_hal_subghz_init();
-    //ToDo reset si446x????
-    // hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    // si446x_wait_cts_spi(&furi_hal_spi_bus_handle_subghz);
+    hal_gpio_init(&gpio_rf_sw_0, GpioModeOutputPushPull, GpioPullDown, GpioSpeedLow);
+    hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow); //active go0
+    // Reset
+    hal_gpio_write(&gpio_rf_sw_0, true); //nSDN UP
+    delay_us(SI446X_TIMEOUT_NSDN);
+    hal_gpio_write(&gpio_rf_sw_0, false); //nSDN DOWN
+
+    //wait CTS
+    while(hal_gpio_read(&gpio_cc1101_g0) == false)
+        ;
+    furi_hal_subghz_state = SubGhzStateInit;
+    furi_hal_subghz_preset = FuriHalSubGhzPresetIDLE;
 }
 
 void furi_hal_subghz_idle() {
-    //si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_INPUT);
-    //si446x_clear_interrupt_status(&furi_hal_spi_bus_handle_subghz);
     //ToDo crutch, GO0 should be low at the time of disengagement
     hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullDown, GpioSpeedLow);
     hal_gpio_write(&gpio_cc1101_g0, false); //DOWN
     si446x_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
     si446x_clear_interrupt_status(&furi_hal_spi_bus_handle_subghz);
+    //si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_INPUT);
 }
 
 void furi_hal_subghz_rx() {
@@ -452,7 +337,8 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
                 if((value >= 304100000 && value <= 321950000) &&
                    ((furi_hal_subghz_preset == FuriHalSubGhzPresetOok270Async) ||
                     (furi_hal_subghz_preset == FuriHalSubGhzPresetOok650Async))) {
-                    //furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable_au);
+                    //ToDo set maximum transmit power for australia
+                    //si446x_set_pa(&furi_hal_spi_bus_handle_subghz, SI446X_SET_MAX_PA);
                 }
             }
             is_allowed = true;
@@ -483,6 +369,7 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
     uint32_t real_frequency =
         si446x_set_frequency_and_step_channel(&furi_hal_spi_bus_handle_subghz, value, 250000);
     //ToDo calibration????
+    FURI_LOG_I("freq", "%d", real_frequency);
     return real_frequency;
     //return 433920000;
 }

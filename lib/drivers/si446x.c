@@ -178,14 +178,14 @@ bool si446x_write_gpio(FuriHalSpiBusHandle* handle, SI446X_GPIO_t pin, uint8_t g
         SI446X_SDO_MODE_DONOTHING, //SI446X_SDO_Mode_t
         SI446X_GPIO_DRV_HIGH};
     buff_tx[pin + 1] = gpio_mode;
-    return si446x_write_data(handle, &buff_tx[0], sizeof(buff_tx));
+    return si446x_write_data(handle, &buff_tx[0], pin + 2);
 }
 
 bool si446x_read_gpio(FuriHalSpiBusHandle* handle, SI446X_GPIO_t pin) {
     uint8_t buff_tx[] = {SI446X_CMD_GPIO_PIN_CFG};
     uint8_t buff_rx[7] = {0};
     si446x_write_data(handle, &buff_tx[0], sizeof(buff_tx));
-    si446x_read_data(handle, &buff_rx[0], sizeof(buff_rx));
+    si446x_read_data(handle, &buff_rx[0], pin + 2);
     return (buff_rx[pin] & 0x80);
 }
 
@@ -254,7 +254,7 @@ uint32_t si446x_set_frequency_and_step_channel(
            handle, SI446X_PROP_MODEM_CLKGEN_BAND, &modem_clkgen[0], sizeof(modem_clkgen))) {
         return 0;
     }
-
+    //sy_sel set => NPRESC=2
     uint32_t f_pfd = 2 * SI446X_QUARTZ / outdiv;
     uint32_t n = ((uint32_t)(freq_hz / f_pfd)) - 1;
     float ratio = freq_hz / (float)f_pfd;
@@ -273,7 +273,7 @@ uint32_t si446x_set_frequency_and_step_channel(
         return 0;
     }
     //ToDo check!
-    return (m / 0x80000UL + n) * f_pfd;
+    return (uint32_t)((float)m / 0x80000UL + n) * f_pfd;
 }
 
 bool si446x_set_deviation(FuriHalSpiBusHandle* handle, uint32_t freq_hz, uint32_t deviation_hz) {
