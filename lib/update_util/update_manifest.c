@@ -27,7 +27,6 @@ void update_manifest_free(UpdateManifest* update_manifest) {
 static bool
     update_manifest_init_from_ff(UpdateManifest* update_manifest, FlipperFormat* flipper_file) {
     furi_assert(update_manifest);
-    furi_assert(!update_manifest->valid);
     furi_assert(flipper_file);
 
     string_t filetype;
