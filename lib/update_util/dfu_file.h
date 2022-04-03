@@ -1,19 +1,9 @@
 #pragma once
 
 #include "dfu_headers.h"
-//#include "fsfile.h"
+
+#include <stdbool.h>
 #include <storage/storage.h>
-#include "stdbool.h"
-#include "stdint.h"
-
-#define DFU_DATA_BUFFER_MAX_LEN 512
-
-#define CHECK_FRESULT(result) \
-    {                         \
-        if(!(result)) {       \
-            return false;     \
-        }                     \
-    }
 
 typedef enum {
     UpdateBlockResult_Unknown,

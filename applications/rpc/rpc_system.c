@@ -3,7 +3,7 @@
 #include <power/power_service/power.h>
 #include <notification/notification_messages.h>
 #include <protobuf_version.h>
-#include <updater/util/update_hl.h>
+#include <update_util/update_hl.h>
 
 #include "rpc_i.h"
 

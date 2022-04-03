@@ -1,7 +1,7 @@
 #include <furi/record.h>
 #include <m-string.h>
 #include "storage.h"
-#include <updater/util/tar_archive.h>
+#include <toolbox/tar/tar_archive.h>
 
 #define INT_PATH "/int"
 

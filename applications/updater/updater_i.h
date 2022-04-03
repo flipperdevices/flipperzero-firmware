@@ -1,10 +1,7 @@
 #pragma once
 
-//#include "updater.h"
 #include "views/updater_main.h"
-//#include "views/updater_loadcfg.h"
 #include "util/update_task.h"
-#include "util/update_hl.h"
 
 #include <furi.h>
 #include <gui/gui.h>
@@ -14,6 +11,7 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/widget.h>
 #include <storage/storage.h>
+#include <update_util/update_hl.h>
 
 #ifdef __cplusplus
 extern "C" {

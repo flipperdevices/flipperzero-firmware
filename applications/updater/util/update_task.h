@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-#include "update_manifest.h"
+#include <update_util/update_manifest.h>
 
 #include <stdint.h>
 #include <stdbool.h>

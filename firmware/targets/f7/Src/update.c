@@ -6,7 +6,7 @@
 #include <fatfs.h>
 #include <flipper_format/flipper_format.h>
 
-#include <updater/util/update_manifest.h>
+#include <update_util/update_manifest.h>
 #include <lib/toolbox/path.h>
 
 static FATFS* pfs = NULL;

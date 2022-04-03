@@ -10,7 +10,7 @@
 #include "storage/storage.h"
 #include <stdint.h>
 #include <lib/toolbox/md5.h>
-#include <updater/util/lfs_backup.h>
+#include <update_util/lfs_backup.h>
 
 #define RPC_TAG "RPC_STORAGE"
 #define MAX_NAME_LENGTH 255

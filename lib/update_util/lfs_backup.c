@@ -1,6 +1,6 @@
 #include "lfs_backup.h"
 
-#include "tar_archive.h"
+#include <toolbox/tar/tar_archive.h>
 #include <storage/storage.h>
 
 const char* DEFAULT_BACKUP_FILENAME = "backup.tar";

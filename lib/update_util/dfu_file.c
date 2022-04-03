@@ -3,6 +3,15 @@
 
 #define VALID_WHOLE_FILE_CRC 0xFFFFFFFF
 #define DFU_SUFFIX_VERSION 0x011A
+#define DFU_DATA_BUFFER_MAX_LEN 512
+
+#define CHECK_FRESULT(result) \
+    {                         \
+        if(!(result)) {       \
+            return false;     \
+        }                     \
+    }
+
 
 bool dfu_file_validate_crc(File* dfuf, const DfuPageTaskProgressCb progress_cb, void* context) {
     if(!storage_file_is_open(dfuf)) {

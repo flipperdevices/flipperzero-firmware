@@ -1,6 +1,6 @@
 #include "updater/updater_i.h"
 #include "updater_scene.h"
-#include "../util/update_hl.h"
+#include <update_util/update_hl.h>
 
 void updater_scene_error_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);

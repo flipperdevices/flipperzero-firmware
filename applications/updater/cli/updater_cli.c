@@ -1,7 +1,3 @@
-#include "../util/update_manifest.h"
-#include "../util/tar_archive.h"
-#include "../util/lfs_backup.h"
-#include "../util/update_hl.h"
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -9,7 +5,11 @@
 #include <cli/cli.h>
 #include <storage/storage.h>
 #include <loader/loader.h>
-#include <lib/toolbox/path.h>
+#include <toolbox/path.h>
+#include <toolbox/tar/tar_archive.h>
+#include <update_util/update_manifest.h>
+#include <update_util/lfs_backup.h>
+#include <update_util/update_hl.h>
 
 static void updater_cli_apply(Cli* cli, string_t manifest_path, void* context) {
     printf("Verifying update package at '%s'\r\n", string_get_cstr(manifest_path));

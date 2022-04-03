@@ -1,12 +1,13 @@
 #include "update_task.h"
-#include "dfu_file.h"
-#include "lfs_backup.h"
-#include "update_hl.h"
 
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
-#include <lib/toolbox/path.h>
+#include <toolbox/path.h>
+#include <update_util/dfu_file.h>
+#include <update_util/lfs_backup.h>
+#include <update_util/update_hl.h>
+
 
 #define DELAY_OPERATION_OK 600
 #define DELAY_OPERATION_ERROR 20000
