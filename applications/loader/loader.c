@@ -152,7 +152,7 @@ void loader_cli_list(Cli* cli, string_t args, Loader* instance) {
     }
 }
 
-void loader_cli(Cli* cli, string_t args, void* _ctx) {
+static void loader_cli(Cli* cli, string_t args, void* _ctx) {
     furi_assert(_ctx);
     Loader* instance = _ctx;
 
@@ -293,6 +293,8 @@ static Loader* loader_alloc() {
 #ifdef SRV_CLI
     instance->cli = furi_record_open("cli");
     cli_add_command(instance->cli, "loader", CliCommandFlagDefault, loader_cli, instance);
+#else
+    UNUSED(loader_cli);
 #endif
 
     instance->loader_thread = osThreadGetId();

@@ -10,11 +10,13 @@ extern "C" {
 #include <stdbool.h>
 #include <m-string.h>
 
+#define UPDATE_DELAY_OPERATION_OK 600
+#define UPDATE_DELAY_OPERATION_ERROR 20000
+
 typedef enum {
     UpdateTaskStageProgress,
     UpdateTaskStageReadManifest,
     UpdateTaskStageValidateDFUImage,
-    UpdateTaskStageFlashErase,
     UpdateTaskStageFlashWrite,
     UpdateTaskStageFlashValidate,
     UpdateTaskStageRadioWrite,
@@ -33,7 +35,8 @@ typedef struct {
 
 typedef struct UpdateTask UpdateTask;
 
-typedef void (*updateProgressCb)(const char* status, const uint8_t stage_pct, void* state);
+typedef void (
+    *updateProgressCb)(const char* status, const uint8_t stage_pct, bool failed, void* state);
 
 UpdateTask* update_task_alloc();
 
@@ -44,6 +47,8 @@ bool update_task_init(UpdateTask* update_task);
 void update_task_set_progress_cb(UpdateTask* update_task, updateProgressCb cb, void* state);
 
 bool update_task_start(UpdateTask* update_task);
+
+bool update_task_is_running(UpdateTask* update_task);
 
 UpdateTaskState const* update_task_get_state(UpdateTask* update_task);
 

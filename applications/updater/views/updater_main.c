@@ -10,6 +10,7 @@
 
 struct UpdaterMainView {
     View* view;
+    ViewDispatcher* view_dispatcher;
     FuriPubSubSubscription* subscription;
     void* context;
 };
@@ -20,14 +21,17 @@ typedef struct {
     string_t status;
     uint8_t progress;
     uint8_t rendered_progress;
+    bool failed;
 } UpdaterProgressModel;
 
 void updater_main_model_set_state(
     UpdaterMainView* main_view,
     const char* message,
-    uint8_t progress) {
+    uint8_t progress,
+    bool failed) {
     with_view_model(
         main_view->view, (UpdaterProgressModel * model) {
+            model->failed = failed;
             model->progress = progress;
             if(string_cmp_str(model->status, message)) {
                 model->rendered_progress = 101; /* to force view update */
@@ -51,7 +55,23 @@ bool updater_main_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
 
-    /* TODO: handle retry on failure? */
+    UpdaterMainView* main_view = context;
+    if(!main_view->view_dispatcher) {
+        return true;
+    }
+
+    if(event->type != InputTypeShort) {
+        return true;
+    }
+
+    if(event->key == InputKeyOk) {
+        view_dispatcher_send_custom_event(
+            main_view->view_dispatcher, UpdaterCustomEventRetryUpdate);
+    } else if(event->key == InputKeyBack) {
+        view_dispatcher_send_custom_event(
+            main_view->view_dispatcher, UpdaterCustomEventCancelUpdate);
+    }
+
     return true;
 }
 
@@ -60,8 +80,14 @@ static void updater_main_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_set_font(canvas, FontPrimary);
 
+    uint16_t y_offset = model->failed ? 5 : 13;
     canvas_draw_str_aligned(
-        canvas, 128 / 2, 13, AlignCenter, AlignTop, string_get_cstr(model->status));
+        canvas, 128 / 2, y_offset, AlignCenter, AlignTop, string_get_cstr(model->status));
+    if(model->failed) {
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(
+            canvas, 128 / 2, 20, AlignCenter, AlignTop, "[OK] to retry, [Back] to abort");
+    }
     elements_progress_bar(canvas, 14, 35, 100, (float)model->progress / 100);
 }
 
@@ -101,4 +127,8 @@ void updater_main_set_storage_pubsub(UpdaterMainView* main_view, FuriPubSubSubsc
 
 FuriPubSubSubscription* updater_main_get_storage_pubsub(UpdaterMainView* main_view) {
     return main_view->subscription;
+}
+
+void updater_main_set_view_dispatcher(UpdaterMainView* main_view, ViewDispatcher* view_dispatcher) {
+    main_view->view_dispatcher = view_dispatcher;
 }

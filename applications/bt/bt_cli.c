@@ -245,6 +245,6 @@ void bt_on_system_start() {
     furi_record_close("bt");
     furi_record_close("cli");
 #else
-    (void)&bt_cli; // to make it build
+    UNUSED(bt_cli);
 #endif
 }

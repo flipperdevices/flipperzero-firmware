@@ -17,6 +17,8 @@
 extern "C" {
 #endif
 
+#define UPDATER_APP_TICK 500
+
 typedef enum {
     UpdaterViewMain,
     UpdaterViewWidget,
@@ -24,11 +26,10 @@ typedef enum {
 
 typedef enum {
     UpdaterCustomEventUnknown,
-    UpdaterCustomEventSdMounted,
-    UpdaterCustomEventSdUnmounted,
-    UpdaterCustomEventLoadManifest,
-    UpdaterCustomEventApplyUpdate,
+    UpdaterCustomEventStartUpdate,
+    UpdaterCustomEventRetryUpdate,
     UpdaterCustomEventCancelUpdate,
+    UpdaterCustomEventSdUnmounted,
 } UpdaterCustomEvent;
 
 typedef struct UpdaterManifestProcessingState {
@@ -52,6 +53,7 @@ typedef struct {
     UpdateTask* update_task;
     Widget* widget;
     string_t startup_arg;
+    int32_t idle_ticks;
 } Updater;
 
 Updater* updater_alloc(const char* arg);

@@ -199,6 +199,8 @@ bool update_hl_is_armed() {
 
 void update_hl_disarm() {
     furi_hal_rtc_reset_flag(FuriHalRtcFlagExecutePreUpdate);
+    furi_hal_rtc_reset_flag(FuriHalRtcFlagExecuteUpdate);
+    furi_hal_rtc_reset_flag(FuriHalRtcFlagExecutePostUpdate);
     furi_hal_rtc_set_register(FuriHalRtcRegisterUpdateFolderFSIndex, 0);
 }
 

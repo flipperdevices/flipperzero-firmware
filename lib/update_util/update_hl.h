@@ -41,17 +41,24 @@ typedef struct Storage Storage;
  */
 int32_t update_hl_get_package_index(Storage* storage, const char* update_package_dir);
 
-/* Gets filesystem path for current update package 
+/* Gets filesystem path for current update package
  * @param storage Storage API
  * @param out_path Path to directory with manifest & related files. Must be initialized
  * @return true if path was restored successfully
  */
 bool update_hl_get_current_package_path(Storage* storage, string_t out_path);
 
+/* Stores given update index in RTC registers
+ * @param index Value to store
+ */
 void update_hl_persist_package_index(uint32_t index);
 
+/* Sets up update operation to be performed on reset
+ */
 bool update_hl_is_armed();
 
+/* Cancels pending update operation
+ */
 void update_hl_disarm();
 
 #ifdef __cplusplus

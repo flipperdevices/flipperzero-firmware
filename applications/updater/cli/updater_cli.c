@@ -73,9 +73,9 @@ void updater_on_system_start() {
     cli_add_command(cli, "restore", CliCommandFlagDefault, updater_cli_restore, NULL);
     furi_record_close("cli");
 #else
-    (void)&updater_cli_apply;
-    (void)&updater_cli_backup;
-    (void)&updater_cli_restore;
+    UNUSED(updater_cli_apply);
+    UNUSED(updater_cli_backup);
+    UNUSED(updater_cli_restore);
 #endif
 #ifndef FURI_RAM_EXEC
     updater_start_app();

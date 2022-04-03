@@ -26,9 +26,10 @@ static bool updater_back_event_callback(void* context) {
     return scene_manager_handle_back_event(updater->scene_manager);
 }
 
-static void status_update_cb(const char* message, const uint8_t progress, void* context) {
+static void
+    status_update_cb(const char* message, const uint8_t progress, bool failed, void* context) {
     UpdaterMainView* main_view = context;
-    updater_main_model_set_state(main_view, message, progress);
+    updater_main_model_set_state(main_view, message, progress, failed);
 }
 
 Updater* updater_alloc(const char* arg) {
@@ -54,7 +55,7 @@ Updater* updater_alloc(const char* arg) {
     view_dispatcher_set_navigation_event_callback(
         updater->view_dispatcher, updater_back_event_callback);
     view_dispatcher_set_tick_event_callback(
-        updater->view_dispatcher, updater_tick_event_callback, 500);
+        updater->view_dispatcher, updater_tick_event_callback, UPDATER_APP_TICK);
 
     view_dispatcher_attach_to_gui(
         updater->view_dispatcher,

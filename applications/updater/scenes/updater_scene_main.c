@@ -13,7 +13,7 @@ static void sd_mount_callback(const void* message, void* context) {
 
     switch(new_event->type) {
     case StorageEventTypeCardMount:
-        view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventSdMounted);
+        view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventStartUpdate);
         break;
     case StorageEventTypeCardUnmount:
         view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventSdUnmounted);
@@ -31,21 +31,57 @@ void updater_scene_main_on_enter(void* context) {
         furi_pubsub_subscribe(storage_get_pubsub(updater->storage), &sd_mount_callback, updater);
     updater_main_set_storage_pubsub(main_view, sub);
 
+    // If (somehow) we started after SD card is mounted, initiate update immediately
+    //if(storage_sd_status(updater->storage) == FSE_OK) {
+    //    view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventStartUpdate);
+    //}
+
+    updater_main_set_view_dispatcher(main_view, updater->view_dispatcher);
     view_dispatcher_switch_to_view(updater->view_dispatcher, UpdaterViewMain);
+}
+
+static void updater_scene_restart_to_postupdate() {
+    furi_hal_rtc_reset_flag(FuriHalRtcFlagExecuteUpdate);
+    furi_hal_rtc_set_flag(FuriHalRtcFlagExecutePostUpdate);
+    furi_hal_power_reset();
 }
 
 bool updater_scene_main_on_event(void* context, SceneManagerEvent event) {
     Updater* updater = (Updater*)context;
     bool consumed = false;
 
-    if(event.type == SceneManagerEventTypeCustom) {
+    if(event.type == SceneManagerEventTypeTick) {
+        if(!update_task_is_running(updater->update_task)) {
+            if(updater->idle_ticks++ >= (UPDATE_DELAY_OPERATION_ERROR / UPDATER_APP_TICK)) {
+                updater_scene_restart_to_postupdate();
+            }
+        } else {
+            updater->idle_ticks = 0;
+        }
+    } else if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case UpdaterCustomEventSdMounted:
-            if(update_task_init(updater->update_task)) {
+        case UpdaterCustomEventStartUpdate:
+            if(!update_task_is_running(updater->update_task) &&
+               update_task_init(updater->update_task)) {
                 update_task_start(updater->update_task);
             }
-
+            consumed = true;
             break;
+
+        case UpdaterCustomEventRetryUpdate:
+            if(!update_task_is_running(updater->update_task) &&
+               (update_task_get_state(updater->update_task)->stage != UpdateTaskStageComplete))
+                update_task_start(updater->update_task);
+            consumed = true;
+            break;
+
+        case UpdaterCustomEventCancelUpdate:
+            if(!update_task_is_running(updater->update_task)) {
+                updater_scene_restart_to_postupdate();
+            }
+            consumed = true;
+            break;
+
         case UpdaterCustomEventSdUnmounted:
             // TODO: error out, stop worker (it's probably dead actually)
             break;

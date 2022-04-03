@@ -45,7 +45,6 @@ Storage* storage_app_alloc() {
 #endif
     storage_ext_init(&app->storage[ST_EXT]);
 
-    //app->prev_ext_storage_status = StorageStatusNotReady;
     // sd icon gui
     app->sd_gui.enabled = false;
     app->sd_gui.view_port = view_port_alloc();

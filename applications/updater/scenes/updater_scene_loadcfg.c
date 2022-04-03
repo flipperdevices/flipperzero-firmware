@@ -12,7 +12,7 @@ void updater_scene_loadcfg_apply_callback(GuiButtonType result, InputType type, 
     }
 
     if((result == GuiButtonTypeRight)) {
-        view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventApplyUpdate);
+        view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventStartUpdate);
     } else if((result == GuiButtonTypeLeft)) {
         view_dispatcher_send_custom_event(
             updater->view_dispatcher, UpdaterCustomEventCancelUpdate);
@@ -69,7 +69,7 @@ bool updater_scene_loadcfg_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case UpdaterCustomEventApplyUpdate:
+        case UpdaterCustomEventStartUpdate:
             updater->preparation_result = update_hl_prepare(string_get_cstr(updater->startup_arg));
             if(updater->preparation_result == UpdatePrepareResultOK) {
                 furi_hal_power_reset();
