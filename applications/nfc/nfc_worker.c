@@ -2,7 +2,7 @@
 #include <furi_hal.h>
 
 #include <lib/nfc_protocols/nfc_util.h>
-#include <lib/nfc_protocols/emv_decoder.h>
+#include <lib/nfc_protocols/emv.h>
 #include <lib/nfc_protocols/mifare_common.h>
 #include <lib/nfc_protocols/mifare_ultralight.h>
 #include <lib/nfc_protocols/mifare_classic.h>

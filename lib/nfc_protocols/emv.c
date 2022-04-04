@@ -1,4 +1,4 @@
-#include "emv_decoder.h"
+#include "emv.h"
 
 const PDOLValue pdol_term_info = {0x9F59, {0xC8, 0x80, 0x00}}; // Terminal transaction information
 const PDOLValue pdol_term_type = {0x9F5A, {0x00}}; // Terminal transaction type
