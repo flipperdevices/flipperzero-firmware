@@ -57,8 +57,15 @@ typedef enum {
     FuriHalNfcTypeV,
 } FuriHalNfcType;
 
+typedef enum {
+    FuriHalNfcInterfaceRf,
+    FuriHalNfcInterfaceIsoDep,
+    FuriHalNfcInterfaceNfcDep,
+} FuriHalNfcInterface;
+
 typedef struct {
     FuriHalNfcType type;
+    FuriHalNfcInterface interface;
     uint8_t uid_len;
     uint8_t uid[10];
     uint32_t cuid;
@@ -111,7 +118,7 @@ void furi_hal_nfc_exit_sleep();
  *
  * @return     true on success
  */
-bool furi_hal_nfc_detect(rfalNfcDevice** dev_list, uint8_t* dev_cnt, uint32_t timeout);
+bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout);
 
 /** Activate NFC-A tag
  *

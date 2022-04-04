@@ -22,26 +22,20 @@ void nfc_cli_detect(Cli* cli, string_t args) {
         printf("Nfc is busy\r\n");
         return;
     }
-    rfalNfcDevice* dev_list;
-    uint8_t dev_cnt = 0;
+
+    FuriHalNfcDevData dev_data = {};
     bool cmd_exit = false;
     furi_hal_nfc_exit_sleep();
     printf("Detecting nfc...\r\nPress Ctrl+C to abort\r\n");
     while(!cmd_exit) {
         cmd_exit |= cli_cmd_interrupt_received(cli);
-        if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 400)) {
-            printf("Found %d devices\r\n", dev_cnt);
-            for(uint8_t i = 0; i < dev_cnt; i++) {
-                printf("%d found: %s ", i + 1, nfc_get_rfal_type(dev_list[i].type));
-                if(dev_list[i].type == RFAL_NFC_LISTEN_TYPE_NFCA) {
-                    printf("type: %s, ", nfc_get_nfca_type(dev_list[i].dev.nfca.type));
-                }
-                printf("UID length: %d, UID:", dev_list[i].nfcidLen);
-                for(uint8_t j = 0; j < dev_list[i].nfcidLen; j++) {
-                    printf("%02X", dev_list[i].nfcid[j]);
-                }
-                printf("\r\n");
+        if(furi_hal_nfc_detect(&dev_data, 400)) {
+            printf("found: %s ", nfc_get_dev_type(dev_data.type));
+            printf("UID length: %d, UID:", dev_data.uid_len);
+            for(size_t i = 0; i < dev_data.uid_len; i++) {
+                printf("%02X", dev_data.uid[i]);
             }
+            printf("\r\n");
             break;
         }
         furi_hal_nfc_sleep();
