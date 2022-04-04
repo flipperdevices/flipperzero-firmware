@@ -28,7 +28,7 @@ void nfc_emulate_uid_textbox_callback(void* context) {
 
 // Add widget with device name or inform that data received
 static void nfc_scene_emulate_uid_widget_config(Nfc* nfc, bool data_received) {
-    NfcDeviceCommonData* data = &nfc->dev->dev_data.nfc_data;
+    FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
     Widget* widget = nfc->widget;
     widget_reset(widget);
     string_t info_str;

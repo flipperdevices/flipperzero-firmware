@@ -18,7 +18,7 @@ void nfc_scene_delete_on_enter(void* context) {
         nfc->widget, GuiButtonTypeLeft, "Back", nfc_scene_delete_widget_callback, nfc);
     widget_add_button_element(
         nfc->widget, GuiButtonTypeRight, "Delete", nfc_scene_delete_widget_callback, nfc);
-    NfcDeviceCommonData* data = &nfc->dev->dev_data.nfc_data;
+    FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
     if(data->uid_len == 4) {
         snprintf(
             temp_str,
@@ -44,9 +44,10 @@ void nfc_scene_delete_on_enter(void* context) {
     widget_add_string_element(nfc->widget, 64, 23, AlignCenter, AlignTop, FontSecondary, temp_str);
 
     const char* protocol_name = NULL;
-    if(data->protocol == NfcDeviceProtocolEMV) {
-        protocol_name = nfc_guess_protocol(data->protocol);
-    } else if(data->protocol == NfcDeviceProtocolMifareUl) {
+    NfcProtocol protocol = nfc->dev->dev_data.protocol;
+    if(protocol == NfcDeviceProtocolEMV) {
+        protocol_name = nfc_guess_protocol(protocol);
+    } else if(protocol == NfcDeviceProtocolMifareUl) {
         protocol_name = nfc_mf_ul_type(nfc->dev->dev_data.mf_ul_data.type, false);
     }
     if(protocol_name) {

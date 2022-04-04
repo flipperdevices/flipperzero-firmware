@@ -22,7 +22,7 @@ void nfc_scene_read_mifare_ul_success_on_enter(void* context) {
     notification_message(nfc->notifications, &sequence_success);
 
     // Setup dialog view
-    NfcDeviceCommonData* data = &nfc->dev->dev_data.nfc_data;
+    FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
     MifareUlData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
     DialogEx* dialog_ex = nfc->dialog_ex;
     dialog_ex_set_left_button_text(dialog_ex, "Retry");

@@ -50,6 +50,22 @@ typedef bool (*FuriHalNfcEmulateCallback)(
     uint32_t* flags,
     void* context);
 
+typedef enum {
+    FuriHalNfcTypeA,
+    FuriHalNfcTypeB,
+    FuriHalNfcTypeF,
+    FuriHalNfcTypeV,
+} FuriHalNfcType;
+
+typedef struct {
+    FuriHalNfcType type;
+    uint8_t uid_len;
+    uint8_t uid[10];
+    uint32_t cuid;
+    uint8_t atqa[2];
+    uint8_t sak;
+} FuriHalNfcDevData;
+
 typedef struct {
     uint8_t tx_data[FURI_HAL_NFC_DATA_BUFF_SIZE];
     uint8_t tx_parity[FURI_HAL_NFC_PARITY_BUFF_SIZE];

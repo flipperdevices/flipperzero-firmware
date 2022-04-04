@@ -14,7 +14,7 @@ void nfc_scene_read_emv_app_success_on_enter(void* context) {
     DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
 
     // Setup view
-    NfcDeviceCommonData* nfc_data = &nfc->dev->dev_data.nfc_data;
+    FuriHalNfcDevData* nfc_data = &nfc->dev->dev_data.nfc_data;
     NfcEmvData* emv_data = &nfc->dev->dev_data.emv_data;
     Widget* widget = nfc->widget;
     widget_add_button_element(

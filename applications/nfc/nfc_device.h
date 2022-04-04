@@ -5,6 +5,7 @@
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
 
+#include <furi_hal_nfc.h>
 #include <lib/nfc_protocols/mifare_ultralight.h>
 #include <lib/nfc_protocols/mifare_classic.h>
 #include <lib/nfc_protocols/mifare_desfire.h>
@@ -16,13 +17,6 @@
 #define NFC_APP_FOLDER "/any/nfc"
 #define NFC_APP_EXTENSION ".nfc"
 #define NFC_APP_SHADOW_EXTENSION ".shd"
-
-typedef enum {
-    NfcDeviceNfca,
-    NfcDeviceNfcb,
-    NfcDeviceNfcf,
-    NfcDeviceNfcv,
-} NfcDeviceType;
 
 typedef enum {
     NfcDeviceProtocolUnknown,
@@ -39,15 +33,6 @@ typedef enum {
     NfcDeviceSaveFormatMifareClassic,
     NfcDeviceSaveFormatMifareDesfire,
 } NfcDeviceSaveFormat;
-
-typedef struct {
-    uint8_t uid_len;
-    uint8_t uid[10];
-    uint8_t atqa[2];
-    uint8_t sak;
-    NfcDeviceType device;
-    NfcProtocol protocol;
-} NfcDeviceCommonData;
 
 typedef struct {
     char name[32];
@@ -67,7 +52,8 @@ typedef struct {
 } NfcReaderRequestData;
 
 typedef struct {
-    NfcDeviceCommonData nfc_data;
+    FuriHalNfcDevData nfc_data;
+    NfcProtocol protocol;
     NfcReaderRequestData reader_data;
     union {
         NfcEmvData emv_data;

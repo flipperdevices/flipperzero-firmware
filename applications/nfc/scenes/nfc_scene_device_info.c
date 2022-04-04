@@ -44,7 +44,7 @@ void nfc_scene_device_info_on_enter(void* context) {
             nfc->widget, GuiButtonTypeRight, "Data", nfc_scene_device_info_widget_callback, nfc);
     }
     char temp_str[32];
-    NfcDeviceCommonData* data = &nfc->dev->dev_data.nfc_data;
+    FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
     if(data->uid_len == 4) {
         snprintf(
             temp_str,
@@ -70,12 +70,12 @@ void nfc_scene_device_info_on_enter(void* context) {
     widget_add_string_element(nfc->widget, 64, 21, AlignCenter, AlignTop, FontSecondary, temp_str);
 
     const char* protocol_name = NULL;
-    if(data->protocol == NfcDeviceProtocolEMV ||
-       data->protocol == NfcDeviceProtocolMifareDesfire) {
-        protocol_name = nfc_guess_protocol(data->protocol);
-    } else if(data->protocol == NfcDeviceProtocolMifareUl) {
+    NfcProtocol protocol = nfc->dev->dev_data.protocol;
+    if(protocol == NfcDeviceProtocolEMV || protocol == NfcDeviceProtocolMifareDesfire) {
+        protocol_name = nfc_guess_protocol(protocol);
+    } else if(protocol == NfcDeviceProtocolMifareUl) {
         protocol_name = nfc_mf_ul_type(nfc->dev->dev_data.mf_ul_data.type, false);
-    } else if(data->protocol == NfcDeviceProtocolMifareClassic) {
+    } else if(protocol == NfcDeviceProtocolMifareClassic) {
         protocol_name = nfc_mf_classic_type(nfc->dev->dev_data.mf_classic_data.type);
     }
     if(protocol_name) {

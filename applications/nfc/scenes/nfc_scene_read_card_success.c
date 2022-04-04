@@ -26,9 +26,9 @@ void nfc_scene_read_card_success_on_enter(void* context) {
     notification_message(nfc->notifications, &sequence_success);
 
     // Setup view
-    NfcDeviceCommonData* data = &nfc->dev->dev_data.nfc_data;
+    FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
     Widget* widget = nfc->widget;
-    string_set_str(data_str, nfc_get_dev_type(data->device));
+    string_set_str(data_str, nfc_get_dev_type(data->type));
     string_set_str(uid_str, "UID:");
     for(uint8_t i = 0; i < data->uid_len; i++) {
         string_cat_printf(uid_str, " %02X", data->uid[i]);
@@ -36,7 +36,7 @@ void nfc_scene_read_card_success_on_enter(void* context) {
 
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Retry", nfc_scene_read_card_success_widget_callback, nfc);
-    if(data->device == NfcDeviceNfca) {
+    if(data->type == FuriHalNfcTypeA) {
         widget_add_button_element(
             widget, GuiButtonTypeRight, "More", nfc_scene_read_card_success_widget_callback, nfc);
         widget_add_icon_element(widget, 8, 13, &I_Medium_chip_22x21);
@@ -46,7 +46,7 @@ void nfc_scene_read_card_success_on_enter(void* context) {
         string_printf(
             data_str,
             "%s\nATQA: %02X%02X SAK: %02X",
-            nfc_guess_protocol(data->protocol),
+            nfc_guess_protocol(nfc->dev->dev_data.protocol),
             data->atqa[0],
             data->atqa[1],
             data->sak);
@@ -69,13 +69,13 @@ void nfc_scene_read_card_success_on_enter(void* context) {
 
 bool nfc_scene_read_card_success_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
-    NfcDeviceCommonData* data = &nfc->dev->dev_data.nfc_data;
+    FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
             consumed = scene_manager_previous_scene(nfc->scene_manager);
-        } else if(data->device == NfcDeviceNfca && event.event == GuiButtonTypeRight) {
+        } else if(data->type == FuriHalNfcTypeA && event.event == GuiButtonTypeRight) {
             // Clear device name
             nfc_device_set_name(nfc->dev, "");
             scene_manager_next_scene(nfc->scene_manager, NfcSceneCardMenu);

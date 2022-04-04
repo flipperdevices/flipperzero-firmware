@@ -120,45 +120,45 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
     rfalNfcDevice* dev;
     uint8_t dev_cnt;
     nfc_device_data_clear(nfc_worker->dev_data);
-    NfcDeviceCommonData* result = &nfc_worker->dev_data->nfc_data;
+    NfcDeviceData* dev_data = nfc_worker->dev_data;
 
     while(nfc_worker->state == NfcWorkerStateDetect) {
         if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 1000, true)) {
             // Process first found device
             dev = &dev_list[0];
-            result->uid_len = dev->nfcidLen;
-            memcpy(result->uid, dev->nfcid, dev->nfcidLen);
+            dev_data->nfc_data.uid_len = dev->nfcidLen;
+            memcpy(dev_data->nfc_data.uid, dev->nfcid, dev->nfcidLen);
             if(dev->type == RFAL_NFC_LISTEN_TYPE_NFCA) {
-                result->device = NfcDeviceNfca;
-                result->atqa[0] = dev->dev.nfca.sensRes.anticollisionInfo;
-                result->atqa[1] = dev->dev.nfca.sensRes.platformInfo;
-                result->sak = dev->dev.nfca.selRes.sak;
+                dev_data->nfc_data.type = FuriHalNfcTypeA;
+                dev_data->nfc_data.atqa[0] = dev->dev.nfca.sensRes.anticollisionInfo;
+                dev_data->nfc_data.atqa[1] = dev->dev.nfca.sensRes.platformInfo;
+                dev_data->nfc_data.sak = dev->dev.nfca.selRes.sak;
                 if(mf_ul_check_card_type(
                        dev->dev.nfca.sensRes.anticollisionInfo,
                        dev->dev.nfca.sensRes.platformInfo,
                        dev->dev.nfca.selRes.sak)) {
-                    result->protocol = NfcDeviceProtocolMifareUl;
+                    dev_data->protocol = NfcDeviceProtocolMifareUl;
                 } else if(mf_classic_check_card_type(
                               dev->dev.nfca.sensRes.anticollisionInfo,
                               dev->dev.nfca.sensRes.platformInfo,
                               dev->dev.nfca.selRes.sak)) {
-                    result->protocol = NfcDeviceProtocolMifareClassic;
+                    dev_data->protocol = NfcDeviceProtocolMifareClassic;
                 } else if(mf_df_check_card_type(
                               dev->dev.nfca.sensRes.anticollisionInfo,
                               dev->dev.nfca.sensRes.platformInfo,
                               dev->dev.nfca.selRes.sak)) {
-                    result->protocol = NfcDeviceProtocolMifareDesfire;
+                    dev_data->protocol = NfcDeviceProtocolMifareDesfire;
                 } else if(dev->rfInterface == RFAL_NFC_INTERFACE_ISODEP) {
-                    result->protocol = NfcDeviceProtocolEMV;
+                    dev_data->protocol = NfcDeviceProtocolEMV;
                 } else {
-                    result->protocol = NfcDeviceProtocolUnknown;
+                    dev_data->protocol = NfcDeviceProtocolUnknown;
                 }
             } else if(dev->type == RFAL_NFC_LISTEN_TYPE_NFCB) {
-                result->device = NfcDeviceNfcb;
+                dev_data->nfc_data.type = FuriHalNfcTypeB;
             } else if(dev->type == RFAL_NFC_LISTEN_TYPE_NFCF) {
-                result->device = NfcDeviceNfcf;
+                dev_data->nfc_data.type = FuriHalNfcTypeF;
             } else if(dev->type == RFAL_NFC_LISTEN_TYPE_NFCV) {
-                result->device = NfcDeviceNfcv;
+                dev_data->nfc_data.type = FuriHalNfcTypeV;
             }
             // Notify caller and exit
             if(nfc_worker->callback) {
@@ -191,7 +191,7 @@ bool nfc_worker_emulate_uid_callback(
 }
 
 void nfc_worker_emulate(NfcWorker* nfc_worker) {
-    NfcDeviceCommonData* data = &nfc_worker->dev_data->nfc_data;
+    FuriHalNfcDevData* data = &nfc_worker->dev_data->nfc_data;
     while(nfc_worker->state == NfcWorkerStateEmulate) {
         furi_hal_nfc_emulate_nfca(
             data->uid,
@@ -227,7 +227,7 @@ void nfc_worker_read_emv_app(NfcWorker* nfc_worker) {
                 result->nfc_data.sak = dev_list[0].dev.nfca.selRes.sak;
                 memcpy(
                     result->nfc_data.uid, dev_list[0].dev.nfca.nfcId1, result->nfc_data.uid_len);
-                result->nfc_data.protocol = NfcDeviceProtocolEMV;
+                result->protocol = NfcDeviceProtocolEMV;
 
                 FURI_LOG_D(TAG, "Send select PPSE command");
                 tx_len = emv_prepare_select_ppse(tx_buff);
@@ -289,7 +289,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                 result->nfc_data.sak = dev_list[0].dev.nfca.selRes.sak;
                 memcpy(
                     result->nfc_data.uid, dev_list[0].dev.nfca.nfcId1, result->nfc_data.uid_len);
-                result->nfc_data.protocol = NfcDeviceProtocolEMV;
+                result->protocol = NfcDeviceProtocolEMV;
 
                 FURI_LOG_D(TAG, "Send select PPSE command");
                 tx_len = emv_prepare_select_ppse(tx_buff);
@@ -419,13 +419,12 @@ void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
     uint16_t tx_len = 0;
     uint8_t* rx_buff;
     uint16_t* rx_len;
-    NfcDeviceCommonData params = {
+    FuriHalNfcDevData params = {
         .uid = {0xCF, 0x72, 0xd4, 0x40},
         .uid_len = 4,
         .atqa = {0x00, 0x04},
         .sak = 0x20,
-        .device = NfcDeviceNfca,
-        .protocol = NfcDeviceProtocolEMV,
+        .type = FuriHalNfcTypeA,
     };
     // Test RX data
     const uint8_t debug_rx[] = {
@@ -639,7 +638,7 @@ void nfc_worker_read_mifare_ul(NfcWorker* nfc_worker) {
                 result->nfc_data.atqa[0] = dev_list[0].dev.nfca.sensRes.anticollisionInfo;
                 result->nfc_data.atqa[1] = dev_list[0].dev.nfca.sensRes.platformInfo;
                 result->nfc_data.sak = dev_list[0].dev.nfca.selRes.sak;
-                result->nfc_data.protocol = NfcDeviceProtocolMifareUl;
+                result->protocol = NfcDeviceProtocolMifareUl;
                 memcpy(
                     result->nfc_data.uid, dev_list[0].dev.nfca.nfcId1, result->nfc_data.uid_len);
                 result->mf_ul_data = mf_ul_read.data;
@@ -660,7 +659,7 @@ void nfc_worker_read_mifare_ul(NfcWorker* nfc_worker) {
 }
 
 void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
-    NfcDeviceCommonData* nfc_common = &nfc_worker->dev_data->nfc_data;
+    FuriHalNfcDevData* nfc_common = &nfc_worker->dev_data->nfc_data;
     MifareUlDevice mf_ul_emulate;
     mf_ul_prepare_emulation(&mf_ul_emulate, &nfc_worker->dev_data->mf_ul_data);
     while(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
@@ -687,7 +686,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker->callback);
     rfalNfcDevice* dev_list;
     rfalNfcDevice* dev;
-    NfcDeviceCommonData* nfc_common;
+    FuriHalNfcDevData* nfc_common;
     uint8_t dev_cnt = 0;
     FuriHalNfcTxRxContext tx_rx_ctx = {};
     MfClassicAuthContext auth_ctx = {};
@@ -822,9 +821,9 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
             nfc_common->atqa[0] = dev->dev.nfca.sensRes.anticollisionInfo;
             nfc_common->atqa[1] = dev->dev.nfca.sensRes.platformInfo;
             nfc_common->sak = dev->dev.nfca.selRes.sak;
-            nfc_common->protocol = NfcDeviceProtocolMifareClassic;
             memcpy(nfc_common->uid, dev->dev.nfca.nfcId1, nfc_common->uid_len);
             event = NfcWorkerEventSuccess;
+            nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareClassic;
             FURI_LOG_I(TAG, "Successfully read %d sectors", sectors_read);
         } else {
             event = NfcWorkerEventFail;
@@ -873,8 +872,8 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
         result->nfc_data.atqa[0] = dev_list[0].dev.nfca.sensRes.anticollisionInfo;
         result->nfc_data.atqa[1] = dev_list[0].dev.nfca.sensRes.platformInfo;
         result->nfc_data.sak = dev_list[0].dev.nfca.selRes.sak;
-        result->nfc_data.device = NfcDeviceNfca;
-        result->nfc_data.protocol = NfcDeviceProtocolMifareDesfire;
+        result->nfc_data.type = FuriHalNfcTypeA;
+        result->protocol = NfcDeviceProtocolMifareDesfire;
         memcpy(result->nfc_data.uid, dev_list[0].dev.nfca.nfcId1, result->nfc_data.uid_len);
 
         // Get DESFire version

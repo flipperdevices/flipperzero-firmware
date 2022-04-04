@@ -60,13 +60,12 @@ void nfc_cli_emulate(Cli* cli, string_t args) {
     printf("Emulating NFC-A Type: T2T UID: 36 9C E7 B1 0A C1 34 SAK: 00 ATQA: 00/44\r\n");
     printf("Press Ctrl+C to abort\r\n");
 
-    NfcDeviceCommonData params = {
+    FuriHalNfcDevData params = {
         .uid = {0x36, 0x9C, 0xe7, 0xb1, 0x0A, 0xC1, 0x34},
         .uid_len = 7,
         .atqa = {0x44, 0x00},
         .sak = 0x00,
-        .device = NfcDeviceNfca,
-        .protocol = NfcDeviceProtocolMifareUl,
+        .type = FuriHalNfcTypeA,
     };
 
     while(!cli_cmd_interrupt_received(cli)) {

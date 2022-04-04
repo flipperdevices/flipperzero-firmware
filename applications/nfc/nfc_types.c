@@ -18,14 +18,14 @@ const char* nfc_get_rfal_type(rfalNfcDevType type) {
     }
 }
 
-const char* nfc_get_dev_type(NfcDeviceType type) {
-    if(type == NfcDeviceNfca) {
+const char* nfc_get_dev_type(FuriHalNfcType type) {
+    if(type == FuriHalNfcTypeA) {
         return "NFC-A";
-    } else if(type == NfcDeviceNfcb) {
+    } else if(type == FuriHalNfcTypeB) {
         return "NFC-B";
-    } else if(type == NfcDeviceNfcf) {
+    } else if(type == FuriHalNfcTypeF) {
         return "NFC-F";
-    } else if(type == NfcDeviceNfcv) {
+    } else if(type == FuriHalNfcTypeV) {
         return "NFC-V";
     } else {
         return "Unknown";
