@@ -97,9 +97,7 @@ static bool subghz_tx(SubGhz* subghz, uint32_t frequency) {
     furi_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_cc1101_g0, true);
-    //ToDo check double call furi_hal_subghz_tx();
-    bool ret = true;
-    // furi_hal_subghz_tx();
+    bool ret = furi_hal_subghz_tx();
     subghz->txrx->txrx_state = SubGhzTxRxStateTx;
     return ret;
 }
