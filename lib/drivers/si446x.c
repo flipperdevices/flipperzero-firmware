@@ -13,7 +13,7 @@ bool si446x_wait_cts_spi(FuriHalSpiBusHandle* handle) {
         furi_hal_spi_bus_trx(handle, buff_tx, (uint8_t*)buff_rx, 2, SI446X_TIMEOUT);
         furi_hal_spi_release(handle);
         timeout--;
-        delay(1);
+        furi_hal_delay_ms(1);
         if(!timeout) {
             return false;
         }

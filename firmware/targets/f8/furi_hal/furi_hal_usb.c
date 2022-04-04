@@ -3,6 +3,7 @@
 #include "furi_hal_usb.h"
 #include "furi_hal_vcp.h"
 #include <furi_hal_power.h>
+#include <stm32wbxx_ll_pwr.h>
 #include <furi.h>
 
 #include "usb.h"
@@ -13,7 +14,6 @@
 
 typedef struct {
     FuriThread* thread;
-    osTimerId_t tmr;
     bool enabled;
     bool connected;
     bool mode_lock;
@@ -53,8 +53,6 @@ static void reset_evt(usbd_device* dev, uint8_t event, uint8_t ep);
 static void susp_evt(usbd_device* dev, uint8_t event, uint8_t ep);
 static void wkup_evt(usbd_device* dev, uint8_t event, uint8_t ep);
 
-static void furi_hal_usb_tmr_cb(void* context);
-
 /* Low-level init */
 void furi_hal_usb_init(void) {
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -78,7 +76,7 @@ void furi_hal_usb_init(void) {
 
     usb.enabled = false;
     usb.if_cur = NULL;
-    HAL_NVIC_SetPriority(USB_LP_IRQn, 5, 0);
+    NVIC_SetPriority(USB_LP_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
     NVIC_EnableIRQ(USB_LP_IRQn);
 
     usb.thread = furi_thread_alloc();
@@ -137,11 +135,6 @@ void furi_hal_usb_enable() {
 void furi_hal_usb_reinit() {
     furi_assert(usb.thread);
     osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventReinit);
-}
-
-static void furi_hal_usb_tmr_cb(void* context) {
-    furi_assert(usb.thread);
-    osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventModeChangeStart);
 }
 
 /* Get device / configuration descriptors */
@@ -226,10 +219,10 @@ static void wkup_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
 }
 
 static int32_t furi_hal_usb_thread(void* context) {
-    usb.tmr = osTimerNew(furi_hal_usb_tmr_cb, osTimerOnce, NULL, NULL);
-
     bool usb_request_pending = false;
     uint8_t usb_wait_time = 0;
+    FuriHalUsbInterface* if_new = NULL;
+    FuriHalUsbInterface* if_ctx_new = NULL;
 
     if(usb.if_next != NULL) {
         osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventModeChange);
@@ -240,14 +233,15 @@ static int32_t furi_hal_usb_thread(void* context) {
         if((flags & osFlagsError) == 0) {
             if(flags & EventModeChange) {
                 if(usb.if_next != usb.if_cur) {
+                    if_new = usb.if_next;
+                    if_ctx_new = usb.if_ctx;
                     if(usb.enabled) { // Disable current interface
                         susp_evt(&udev, 0, 0);
                         usbd_connect(&udev, false);
                         usb.enabled = false;
-                        osTimerStart(usb.tmr, USB_RECONNECT_DELAY);
-                    } else {
-                        flags |= EventModeChangeStart;
+                        osDelay(USB_RECONNECT_DELAY);
                     }
+                    flags |= EventModeChangeStart;
                 }
             }
             if(flags & EventReinit) {
@@ -261,19 +255,20 @@ static int32_t furi_hal_usb_thread(void* context) {
                 usbd_enable(&udev, false);
                 usbd_enable(&udev, true);
 
-                usb.if_next = usb.if_cur;
-                osTimerStart(usb.tmr, USB_RECONNECT_DELAY);
+                if_new = usb.if_cur;
+                osDelay(USB_RECONNECT_DELAY);
+                flags |= EventModeChangeStart;
             }
             if(flags & EventModeChangeStart) { // Second stage of mode change process
                 if(usb.if_cur != NULL) {
                     usb.if_cur->deinit(&udev);
                 }
-                if(usb.if_next != NULL) {
-                    usb.if_next->init(&udev, usb.if_next, usb.if_ctx);
+                if(if_new != NULL) {
+                    if_new->init(&udev, if_new, if_ctx_new);
                     usbd_reg_event(&udev, usbd_evt_reset, reset_evt);
                     FURI_LOG_I(TAG, "USB Mode change done");
                     usb.enabled = true;
-                    usb.if_cur = usb.if_next;
+                    usb.if_cur = if_new;
                 }
             }
             if(flags & EventEnable) {
@@ -293,8 +288,10 @@ static int32_t furi_hal_usb_thread(void* context) {
                 }
             }
             if(flags & EventReset) {
-                usb_request_pending = true;
-                usb_wait_time = 0;
+                if(usb.enabled) {
+                    usb_request_pending = true;
+                    usb_wait_time = 0;
+                }
             }
             if(flags & EventRequest) {
                 usb_request_pending = false;

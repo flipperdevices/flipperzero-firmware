@@ -9,7 +9,7 @@ extern "C" {
 /** Preset for ST25R916 */
 extern const LL_SPI_InitTypeDef furi_hal_spi_preset_2edge_low_8m;
 
-// /** Preset for SI446X */
+/** Preset for SI446x*/
 extern const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_8m;
 
 /** Preset for ST7567 (Display) */
@@ -21,13 +21,13 @@ extern const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_16m;
 /** Preset for SdCard in slow mode */
 extern const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_2m;
 
-/** Furi Hal Spi Bus R (Radio: SI446X, Nfc, External)*/
+/** Furi Hal Spi Bus R (Radio: SI446x, Nfc, External)*/
 extern FuriHalSpiBus furi_hal_spi_bus_r;
 
 /** Furi Hal Spi Bus D (Display, SdCard) */
 extern FuriHalSpiBus furi_hal_spi_bus_d;
 
-/** SI446X on `furi_hal_spi_bus_r` */
+/** SI446x on `furi_hal_spi_bus_r` */
 extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_subghz;
 
 /** ST25R3916 on `furi_hal_spi_bus_r` */
