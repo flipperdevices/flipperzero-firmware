@@ -3,6 +3,7 @@
 #include <microtar.h>
 #include <storage/storage.h>
 #include <furi.h>
+#include <toolbox/path.h>
 
 #define TAG "TarArch"
 #define MAX_NAME_LEN 255
@@ -142,7 +143,8 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
     const int TAR_READ_BUF_SZ = 512;
 
     if(header->type == MTAR_TDIR) {
-        string_init_printf(fname, "%s/%s", op_params->work_dir, header->name);
+        string_init(fname);
+        path_concat(op_params->work_dir, header->name, fname);
 
         bool create_res =
             storage_simply_mkdir(op_params->archive->storage, string_get_cstr(fname));
@@ -155,7 +157,8 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
         return 0;
     }
 
-    string_init_printf(fname, "%s/%s", op_params->work_dir, header->name);
+    string_init(fname);
+    path_concat(op_params->work_dir, header->name, fname);
     FURI_LOG_I(TAG, "Extracting %d bytes to '%s'", header->size, header->name);
     File* out_file = storage_file_alloc(op_params->archive->storage);
     uint8_t* readbuf = malloc(TAR_READ_BUF_SZ);
@@ -259,14 +262,16 @@ bool tar_archive_add_dir(TarArchive* archive, const char* fs_full_path, const ch
 
         while(true) {
             if(!storage_dir_read(directory, &file_info, name, MAX_NAME_LEN)) {
-                success = true; // empty dir / no more files
+                success = true; /* empty dir / no more files */
                 break;
             }
 
             string_t element_name, element_fs_abs_path;
-            string_init_printf(element_fs_abs_path, "%s/%s", fs_full_path, name);
+            string_init(element_name);
+            string_init(element_fs_abs_path);
+            path_concat(fs_full_path, name, element_fs_abs_path);
             if(strlen(path_prefix)) {
-                string_init_printf(element_name, "%s/%s", path_prefix, name);
+                path_concat(path_prefix, name, element_name);
             } else {
                 string_init_set(element_name, name);
             }

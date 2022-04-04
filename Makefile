@@ -11,7 +11,6 @@ PROJECT_SOURCE_DIRECTORIES := \
 	$(PROJECT_ROOT)/lib/app-template \
 	$(PROJECT_ROOT)/lib/app-scened-template \
 	$(PROJECT_ROOT)/lib/common-api \
-	$(PROJECT_ROOT)/lib/cyfral \
 	$(PROJECT_ROOT)/lib/drivers \
 	$(PROJECT_ROOT)/lib/flipper_file \
 	$(PROJECT_ROOT)/lib/infrared \
@@ -61,10 +60,6 @@ wipe:
 	@$(PROJECT_ROOT)/scripts/flash.py wipe
 	@$(PROJECT_ROOT)/scripts/ob.py set
 
-#.PHONY: bootloader_all
-#bootloader_all:
-#	@$(MAKE) -C $(PROJECT_ROOT)/bootloader -j$(NPROCS) all
-
 .PHONY: firmware_all
 firmware_all:
 	echo @$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) all
@@ -73,10 +68,6 @@ firmware_all:
 .PHONY: firmware_flasher
 firmware_flasher:
 	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) RAM_EXEC=1 all
-
-#.PHONY: bootloader_clean
-#bootloader_clean:
-#	@$(MAKE) -C $(PROJECT_ROOT)/bootloader -j$(NPROCS) clean
 
 .PHONY: firmware_clean
 firmware_clean:
