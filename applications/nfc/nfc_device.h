@@ -6,6 +6,7 @@
 #include <dialogs/dialogs.h>
 
 #include <furi_hal_nfc.h>
+#include <lib/nfc_protocols/emv.h>
 #include <lib/nfc_protocols/mifare_ultralight.h>
 #include <lib/nfc_protocols/mifare_classic.h>
 #include <lib/nfc_protocols/mifare_desfire.h>
@@ -33,18 +34,6 @@ typedef enum {
     NfcDeviceSaveFormatMifareClassic,
     NfcDeviceSaveFormatMifareDesfire,
 } NfcDeviceSaveFormat;
-
-typedef struct {
-    char name[32];
-    uint8_t aid[16];
-    uint16_t aid_len;
-    uint8_t number[10];
-    uint8_t number_len;
-    uint8_t exp_mon;
-    uint8_t exp_year;
-    uint16_t country_code;
-    uint16_t currency_code;
-} NfcEmvData;
 
 typedef struct {
     uint8_t data[NFC_READER_DATA_MAX_SIZE];
