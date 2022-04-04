@@ -19,8 +19,8 @@ static const uint8_t PROGRESS_RENDER_STEP = 3; /* percent, to limit rendering ra
 
 typedef struct {
     string_t status;
-    uint8_t progress;
-    uint8_t rendered_progress;
+    uint8_t progress, rendered_progress;
+    uint8_t idx_stage, total_stages;
     bool failed;
 } UpdaterProgressModel;
 
@@ -28,10 +28,14 @@ void updater_main_model_set_state(
     UpdaterMainView* main_view,
     const char* message,
     uint8_t progress,
+    uint8_t idx_stage,
+    uint8_t total_stages,
     bool failed) {
     with_view_model(
         main_view->view, (UpdaterProgressModel * model) {
             model->failed = failed;
+            model->idx_stage = idx_stage;
+            model->total_stages = total_stages;
             model->progress = progress;
             if(string_cmp_str(model->status, message)) {
                 model->rendered_progress = 101; /* to force view update */
@@ -81,8 +85,20 @@ static void updater_main_draw_callback(Canvas* canvas, void* _model) {
     canvas_set_font(canvas, FontPrimary);
 
     uint16_t y_offset = model->failed ? 5 : 13;
+    string_t status_text;
+    if(!model->failed && (model->idx_stage != 0) && (model->idx_stage <= model->total_stages)) {
+        string_init_printf(
+            status_text,
+            "[%d/%d] %s",
+            model->idx_stage,
+            model->total_stages,
+            string_get_cstr(model->status));
+    } else {
+        string_init_set(status_text, model->status);
+    }
     canvas_draw_str_aligned(
-        canvas, 128 / 2, y_offset, AlignCenter, AlignTop, string_get_cstr(model->status));
+        canvas, 128 / 2, y_offset, AlignCenter, AlignTop, string_get_cstr(status_text));
+    string_clear(status_text);
     if(model->failed) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(

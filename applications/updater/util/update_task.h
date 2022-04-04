@@ -11,7 +11,7 @@ extern "C" {
 #include <m-string.h>
 
 #define UPDATE_DELAY_OPERATION_OK 600
-#define UPDATE_DELAY_OPERATION_ERROR 20000
+#define UPDATE_DELAY_OPERATION_ERROR INT_MAX
 
 typedef enum {
     UpdateTaskStageProgress,
@@ -30,13 +30,20 @@ typedef enum {
 typedef struct {
     UpdateTaskStage stage;
     uint8_t progress;
+    uint8_t current_stage_idx;
+    uint8_t total_stages;
     string_t status;
 } UpdateTaskState;
 
 typedef struct UpdateTask UpdateTask;
 
-typedef void (
-    *updateProgressCb)(const char* status, const uint8_t stage_pct, bool failed, void* state);
+typedef void (*updateProgressCb)(
+    const char* status,
+    const uint8_t stage_pct,
+    const uint8_t idx_stage,
+    const uint8_t total_stages,
+    bool failed,
+    void* state);
 
 UpdateTask* update_task_alloc();
 

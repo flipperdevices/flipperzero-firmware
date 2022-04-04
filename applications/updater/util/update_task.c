@@ -12,8 +12,8 @@
 static const char* update_task_stage_descr[] = {
     [UpdateTaskStageProgress] = "...",
     [UpdateTaskStageReadManifest] = "Loading update manifest",
-    [UpdateTaskStageValidateDFUImage] = "Validating DFU file",
-    [UpdateTaskStageFlashWrite] = "Writing flash memory",
+    [UpdateTaskStageValidateDFUImage] = "Checking DFU file",
+    [UpdateTaskStageFlashWrite] = "Writing flash",
     [UpdateTaskStageFlashValidate] = "Validating",
     [UpdateTaskStageRadioWrite] = "Writing radio stack",
     [UpdateTaskStageRadioCommit] = "Applying radio stack",
@@ -37,6 +37,7 @@ static void update_task_set_status(UpdateTask* update_task, const char* status) 
 void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, uint8_t progress) {
     if(stage != UpdateTaskStageProgress) {
         update_task->state.stage = stage;
+        update_task->state.current_stage_idx++;
         update_task_set_status(update_task, NULL);
     }
 
@@ -49,6 +50,8 @@ void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, ui
         (update_task->status_change_cb)(
             string_get_cstr(update_task->state.status),
             progress,
+            update_task->state.current_stage_idx,
+            update_task->state.total_stages,
             update_task->state.stage == UpdateTaskStageError,
             update_task->status_change_cb_state);
     }
@@ -123,11 +126,11 @@ UpdateTask* update_task_alloc() {
     furi_thread_set_state_callback(thread, update_task_worker_thread_cb);
     furi_thread_set_state_context(thread, update_task);
 #ifdef FURI_RAM_EXEC
-    UNUSED(update_task_worker_flash);
-    furi_thread_set_callback(thread, update_task_worker_ram);
+    UNUSED(update_task_worker_backup_restore);
+    furi_thread_set_callback(thread, update_task_worker_flash_writer);
 #else
-    UNUSED(update_task_worker_ram);
-    furi_thread_set_callback(thread, update_task_worker_flash);
+    UNUSED(update_task_worker_flash_writer);
+    furi_thread_set_callback(thread, update_task_worker_backup_restore);
 #endif
 
     return update_task;

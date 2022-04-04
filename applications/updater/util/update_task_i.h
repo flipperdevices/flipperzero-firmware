@@ -20,5 +20,5 @@ void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, ui
 bool update_task_parse_manifest(UpdateTask* update_task);
 bool update_task_open_file(UpdateTask* update_task, string_t filename);
 
-int32_t update_task_worker_ram(void* context);
-int32_t update_task_worker_flash(void* context);
+int32_t update_task_worker_flash_writer(void* context);
+int32_t update_task_worker_backup_restore(void* context);

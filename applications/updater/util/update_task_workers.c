@@ -45,7 +45,7 @@ static bool validate_main_fw_address(const size_t address) {
     return check_address_boundaries(address, false);
 }
 
-int32_t update_task_worker_ram(void* context) {
+int32_t update_task_worker_flash_writer(void* context) {
     furi_assert(context);
     UpdateTask* update_task = context;
     bool success = false;
@@ -55,6 +55,9 @@ int32_t update_task_worker_ram(void* context) {
         .task_cb = &furi_hal_flash_program_page,
         .context = update_task,
     };
+
+    update_task->state.current_stage_idx = 0;
+    update_task->state.total_stages = 4;
 
     do {
         CHECK_RESULT(update_task_parse_manifest(update_task));
@@ -96,13 +99,15 @@ int32_t update_task_worker_ram(void* context) {
     return success ? UPDATE_TASK_NOERR : UPDATE_TASK_FAILED;
 }
 
-int32_t update_task_worker_flash(void* context) {
+int32_t update_task_worker_backup_restore(void* context) {
     furi_assert(context);
     UpdateTask* update_task = context;
     bool success = false;
     string_t backup_file_path;
     string_init(backup_file_path);
 
+    update_task->state.current_stage_idx = 0;
+    update_task->state.total_stages = 1;
     do {
         if(!update_hl_get_current_package_path(update_task->storage, update_task->update_path)) {
             break;
