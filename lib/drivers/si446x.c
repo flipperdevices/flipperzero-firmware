@@ -257,7 +257,7 @@ uint32_t si446x_set_frequency_and_step_channel(
     //sy_sel set => NPRESC=2
     uint32_t f_pfd = 2 * SI446X_QUARTZ / outdiv;
     uint32_t n = ((uint32_t)(freq_hz / f_pfd)) - 1;
-    float ratio = freq_hz / (float)f_pfd;
+    float ratio = (float)freq_hz / (float)f_pfd;
     float rest = ratio - (float)n;
     uint32_t m = (uint32_t)(rest * 0x80000UL);
     uint32_t channel_increment = 0x80000UL * outdiv * step_channel_hz / (2 * SI446X_QUARTZ);
@@ -272,8 +272,7 @@ uint32_t si446x_set_frequency_and_step_channel(
            handle, SI446X_PROP_FREQ_CONTROL_INTE, &freq_control[0], sizeof(freq_control))) {
         return 0;
     }
-    //ToDo check!
-    return (uint32_t)((float)m / 0x80000UL + n) * f_pfd;
+    return (uint32_t)(((float)m / 0x80000 + n) * f_pfd);
 }
 
 bool si446x_set_deviation(FuriHalSpiBusHandle* handle, uint32_t freq_hz, uint32_t deviation_hz) {

@@ -368,10 +368,7 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
     }
     uint32_t real_frequency =
         si446x_set_frequency_and_step_channel(&furi_hal_spi_bus_handle_subghz, value, 250000);
-    //ToDo calibration????
-    FURI_LOG_I("freq", "%d", real_frequency);
     return real_frequency;
-    //return 433920000;
 }
 
 void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
