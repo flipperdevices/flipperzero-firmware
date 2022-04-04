@@ -29,8 +29,7 @@ void nfc_cli_detect(Cli* cli, string_t args) {
     printf("Detecting nfc...\r\nPress Ctrl+C to abort\r\n");
     while(!cmd_exit) {
         cmd_exit |= cli_cmd_interrupt_received(cli);
-        cmd_exit |= furi_hal_nfc_detect(&dev_list, &dev_cnt, 400, true);
-        if(dev_cnt > 0) {
+        if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 400)) {
             printf("Found %d devices\r\n", dev_cnt);
             for(uint8_t i = 0; i < dev_cnt; i++) {
                 printf("%d found: %s ", i + 1, nfc_get_rfal_type(dev_list[i].type));
@@ -43,10 +42,12 @@ void nfc_cli_detect(Cli* cli, string_t args) {
                 }
                 printf("\r\n");
             }
+            break;
         }
+        furi_hal_nfc_sleep();
         osDelay(50);
     }
-    furi_hal_nfc_deactivate();
+    furi_hal_nfc_sleep();
 }
 
 void nfc_cli_emulate(Cli* cli, string_t args) {
@@ -71,11 +72,11 @@ void nfc_cli_emulate(Cli* cli, string_t args) {
     while(!cli_cmd_interrupt_received(cli)) {
         if(furi_hal_nfc_listen(params.uid, params.uid_len, params.atqa, params.sak, false, 100)) {
             printf("Reader detected\r\n");
-            furi_hal_nfc_deactivate();
+            furi_hal_nfc_sleep();
         }
         osDelay(50);
     }
-    furi_hal_nfc_deactivate();
+    furi_hal_nfc_sleep();
 }
 
 void nfc_cli_field(Cli* cli, string_t args) {
@@ -96,7 +97,7 @@ void nfc_cli_field(Cli* cli, string_t args) {
     }
 
     furi_hal_nfc_field_off();
-    furi_hal_nfc_deactivate();
+    furi_hal_nfc_sleep();
 }
 
 static void nfc_cli(Cli* cli, string_t args, void* context) {

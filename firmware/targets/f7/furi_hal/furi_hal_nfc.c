@@ -48,11 +48,7 @@ void furi_hal_nfc_exit_sleep() {
     rfalLowPowerModeStop();
 }
 
-bool furi_hal_nfc_detect(
-    rfalNfcDevice** dev_list,
-    uint8_t* dev_cnt,
-    uint32_t timeout,
-    bool deactivate) {
+bool furi_hal_nfc_detect(rfalNfcDevice** dev_list, uint8_t* dev_cnt, uint32_t timeout) {
     furi_assert(dev_list);
     furi_assert(dev_cnt);
 
@@ -96,10 +92,6 @@ bool furi_hal_nfc_detect(
         osThreadYield();
     }
     rfalNfcGetDevicesFound(dev_list, dev_cnt);
-    if(deactivate) {
-        rfalNfcDeactivate(false);
-        rfalLowPowerModeStart();
-    }
     return true;
 }
 
@@ -512,7 +504,7 @@ ReturnCode furi_hal_nfc_exchange_full(
     return err;
 }
 
-void furi_hal_nfc_deactivate() {
+void furi_hal_nfc_sleep() {
     rfalNfcDeactivate(false);
     rfalLowPowerModeStart();
 }

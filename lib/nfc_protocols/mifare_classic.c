@@ -178,7 +178,7 @@ bool mf_classic_auth_attempt(
     }
 
     if(need_halt) {
-        furi_hal_nfc_deactivate();
+        furi_hal_nfc_sleep();
         furi_hal_nfc_activate_nfca(300, &auth_ctx->cuid);
     }
 
@@ -248,7 +248,7 @@ bool mf_classic_read_sector(
     uint8_t first_block;
     bool sector_read = false;
 
-    furi_hal_nfc_deactivate();
+    furi_hal_nfc_sleep();
     do {
         // Activate card
         if(!furi_hal_nfc_activate_nfca(200, &cuid)) break;

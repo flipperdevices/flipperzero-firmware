@@ -108,7 +108,7 @@ int32_t nfc_worker_task(void* context) {
     } else if(nfc_worker->state == NfcWorkerStateReadMifareDesfire) {
         nfc_worker_read_mifare_desfire(nfc_worker);
     }
-    furi_hal_nfc_deactivate();
+    furi_hal_nfc_sleep();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
     furi_hal_power_insomnia_exit();
 
@@ -123,7 +123,7 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
     NfcDeviceData* dev_data = nfc_worker->dev_data;
 
     while(nfc_worker->state == NfcWorkerStateDetect) {
-        if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 1000, true)) {
+        if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 1000)) {
             // Process first found device
             dev = &dev_list[0];
             dev_data->nfc_data.uid_len = dev->nfcidLen;
@@ -166,6 +166,7 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
             }
             break;
         }
+        furi_hal_nfc_sleep();
         osDelay(100);
     }
 }
@@ -218,7 +219,7 @@ void nfc_worker_read_emv_app(NfcWorker* nfc_worker) {
 
     while(nfc_worker->state == NfcWorkerStateReadEMVApp) {
         memset(&emv_app, 0, sizeof(emv_app));
-        if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 1000, false)) {
+        if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 1000)) {
             // Card was found. Check that it supports EMV
             if(dev_list[0].rfInterface == RFAL_NFC_INTERFACE_ISODEP) {
                 result->nfc_data.uid_len = dev_list[0].dev.nfca.nfcId1Len;
@@ -234,7 +235,7 @@ void nfc_worker_read_emv_app(NfcWorker* nfc_worker) {
                 err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
                 if(err != ERR_NONE) {
                     FURI_LOG_D(TAG, "Error during selection PPSE request: %d", err);
-                    furi_hal_nfc_deactivate();
+                    furi_hal_nfc_sleep();
                     continue;
                 }
                 FURI_LOG_D(TAG, "Select PPSE response received. Start parsing response");
@@ -249,18 +250,18 @@ void nfc_worker_read_emv_app(NfcWorker* nfc_worker) {
                     break;
                 } else {
                     FURI_LOG_D(TAG, "Can't find pay application");
-                    furi_hal_nfc_deactivate();
+                    furi_hal_nfc_sleep();
                     continue;
                 }
             } else {
                 // Can't find EMV card
                 FURI_LOG_W(TAG, "Card doesn't support EMV");
-                furi_hal_nfc_deactivate();
+                furi_hal_nfc_sleep();
             }
         } else {
             // Can't find EMV card
             FURI_LOG_D(TAG, "Can't find any cards");
-            furi_hal_nfc_deactivate();
+            furi_hal_nfc_sleep();
         }
         osDelay(20);
     }
@@ -280,7 +281,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
 
     while(nfc_worker->state == NfcWorkerStateReadEMV) {
         memset(&emv_app, 0, sizeof(emv_app));
-        if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 1000, false)) {
+        if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 1000)) {
             // Card was found. Check that it supports EMV
             if(dev_list[0].rfInterface == RFAL_NFC_INTERFACE_ISODEP) {
                 result->nfc_data.uid_len = dev_list[0].dev.nfca.nfcId1Len;
@@ -296,7 +297,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                 err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
                 if(err != ERR_NONE) {
                     FURI_LOG_D(TAG, "Error during selection PPSE request: %d", err);
-                    furi_hal_nfc_deactivate();
+                    furi_hal_nfc_sleep();
                     continue;
                 }
                 FURI_LOG_D(TAG, "Select PPSE response received. Start parsing response");
@@ -306,7 +307,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                     memcpy(result->emv_data.aid, emv_app.aid, emv_app.aid_len);
                 } else {
                     FURI_LOG_D(TAG, "Can't find pay application");
-                    furi_hal_nfc_deactivate();
+                    furi_hal_nfc_sleep();
                     continue;
                 }
                 FURI_LOG_D(TAG, "Starting application ...");
@@ -314,7 +315,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                 err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
                 if(err != ERR_NONE) {
                     FURI_LOG_D(TAG, "Error during application selection request: %d", err);
-                    furi_hal_nfc_deactivate();
+                    furi_hal_nfc_sleep();
                     continue;
                 }
                 FURI_LOG_D(TAG, "Select application response received. Start parsing response");
@@ -325,7 +326,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                     FURI_LOG_D(TAG, "Can't find card name, but PDOL is present.");
                 } else {
                     FURI_LOG_D(TAG, "Can't find card name or PDOL");
-                    furi_hal_nfc_deactivate();
+                    furi_hal_nfc_sleep();
                     continue;
                 }
                 FURI_LOG_D(TAG, "Starting Get Processing Options command ...");
@@ -333,7 +334,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                 err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
                 if(err != ERR_NONE) {
                     FURI_LOG_D(TAG, "Error during Get Processing Options command: %d", err);
-                    furi_hal_nfc_deactivate();
+                    furi_hal_nfc_sleep();
                     continue;
                 }
                 if(emv_decode_get_proc_opt(rx_buff, *rx_len, &emv_app)) {
@@ -397,17 +398,17 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                     } else {
                         FURI_LOG_D(TAG, "Can't read card number");
                     }
-                    furi_hal_nfc_deactivate();
+                    furi_hal_nfc_sleep();
                 }
             } else {
                 // Can't find EMV card
                 FURI_LOG_W(TAG, "Card doesn't support EMV");
-                furi_hal_nfc_deactivate();
+                furi_hal_nfc_sleep();
             }
         } else {
             // Can't find EMV card
             FURI_LOG_D(TAG, "Can't find any cards");
-            furi_hal_nfc_deactivate();
+            furi_hal_nfc_sleep();
         }
         osDelay(20);
     }
@@ -474,7 +475,7 @@ void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
                 FURI_LOG_D(TAG, "Received Select PPSE");
             } else {
                 FURI_LOG_D(TAG, "Error in 1st data exchange: select PPSE");
-                furi_hal_nfc_deactivate();
+                furi_hal_nfc_sleep();
                 continue;
             }
             FURI_LOG_D(TAG, "Transive SELECT PPSE ANS");
@@ -484,7 +485,7 @@ void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
                 FURI_LOG_D(TAG, "Received Select APP");
             } else {
                 FURI_LOG_D(TAG, "Error in 2nd data exchange: select APP");
-                furi_hal_nfc_deactivate();
+                furi_hal_nfc_sleep();
                 continue;
             }
 
@@ -495,7 +496,7 @@ void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
                 FURI_LOG_D(TAG, "Received PDOL");
             } else {
                 FURI_LOG_D(TAG, "Error in 3rd data exchange: receive PDOL");
-                furi_hal_nfc_deactivate();
+                furi_hal_nfc_sleep();
                 continue;
             }
 
@@ -506,7 +507,7 @@ void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
                 FURI_LOG_D(TAG, "Transive PDOL ANS");
             } else {
                 FURI_LOG_D(TAG, "Error in 4rd data exchange: Transive PDOL ANS");
-                furi_hal_nfc_deactivate();
+                furi_hal_nfc_sleep();
                 continue;
             }
 
@@ -521,7 +522,7 @@ void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
                     FURI_LOG_D(TAG, "Transive Debug message");
                 }
             }
-            furi_hal_nfc_deactivate();
+            furi_hal_nfc_sleep();
         } else {
             FURI_LOG_D(TAG, "Can't find reader");
         }
@@ -542,9 +543,9 @@ void nfc_worker_read_mifare_ul(NfcWorker* nfc_worker) {
     nfc_device_data_clear(result);
 
     while(nfc_worker->state == NfcWorkerStateReadMifareUl) {
-        furi_hal_nfc_deactivate();
+        furi_hal_nfc_sleep();
         memset(&mf_ul_read, 0, sizeof(mf_ul_read));
-        if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 300, false)) {
+        if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 300)) {
             if(dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCA &&
                mf_ul_check_card_type(
                    dev_list[0].dev.nfca.sensRes.anticollisionInfo,
@@ -576,8 +577,8 @@ void nfc_worker_read_mifare_ul(NfcWorker* nfc_worker) {
                     err = ERR_NONE;
                     mf_ul_set_default_version(&mf_ul_read);
                     // Reinit device
-                    furi_hal_nfc_deactivate();
-                    if(!furi_hal_nfc_detect(&dev_list, &dev_cnt, 300, false)) {
+                    furi_hal_nfc_sleep();
+                    if(!furi_hal_nfc_detect(&dev_list, &dev_cnt, 300)) {
                         FURI_LOG_D(TAG, "Lost connection. Restarting search");
                         continue;
                     }
@@ -708,7 +709,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
 
     // Detect Mifare Classic card
     while(nfc_worker->state == NfcWorkerStateReadMifareClassic) {
-        if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 300, false)) {
+        if(furi_hal_nfc_detect(&dev_list, &dev_cnt, 300)) {
             dev = &dev_list[0];
             if(mf_classic_get_type(
                    dev->nfcid,
@@ -743,7 +744,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
             mf_classic_auth_init_context(&auth_ctx, reader.cuid, curr_sector);
             bool sector_key_found = false;
             while(nfc_mf_classic_dict_get_next_key(nfc_worker->dict_stream, &curr_key)) {
-                furi_hal_nfc_deactivate();
+                furi_hal_nfc_sleep();
                 if(furi_hal_nfc_activate_nfca(300, &reader.cuid)) {
                     if(!card_found_notified) {
                         if(reader.type == MfClassicType1k) {
@@ -849,8 +850,8 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
     MifareDesfireData* data = &result->mf_df_data;
 
     while(nfc_worker->state == NfcWorkerStateReadMifareDesfire) {
-        furi_hal_nfc_deactivate();
-        if(!furi_hal_nfc_detect(&dev_list, &dev_cnt, 300, false)) {
+        furi_hal_nfc_sleep();
+        if(!furi_hal_nfc_detect(&dev_list, &dev_cnt, 300)) {
             osDelay(100);
             continue;
         }

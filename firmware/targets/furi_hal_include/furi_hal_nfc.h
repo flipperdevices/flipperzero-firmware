@@ -111,11 +111,7 @@ void furi_hal_nfc_exit_sleep();
  *
  * @return     true on success
  */
-bool furi_hal_nfc_detect(
-    rfalNfcDevice** dev_list,
-    uint8_t* dev_cnt,
-    uint32_t timeout,
-    bool deactivate);
+bool furi_hal_nfc_detect(rfalNfcDevice** dev_list, uint8_t* dev_cnt, uint32_t timeout);
 
 /** Activate NFC-A tag
  *
@@ -207,7 +203,7 @@ ReturnCode furi_hal_nfc_exchange_full(
 
 /** NFC deactivate and start sleep
  */
-void furi_hal_nfc_deactivate();
+void furi_hal_nfc_sleep();
 
 void furi_hal_nfc_stop();
 
