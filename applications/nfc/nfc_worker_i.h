@@ -4,18 +4,7 @@
 #include "nfc_worker.h"
 
 #include <furi.h>
-#include <stdbool.h>
 #include <lib/toolbox/stream/file_stream.h>
-
-#include <rfal_analogConfig.h>
-#include <rfal_rf.h>
-#include <rfal_nfc.h>
-#include <rfal_nfca.h>
-#include <rfal_nfcb.h>
-#include <rfal_nfcf.h>
-#include <rfal_nfcv.h>
-#include <st25r3916.h>
-#include <st25r3916_irq.h>
 
 struct NfcWorker {
     FuriThread* thread;

@@ -355,12 +355,6 @@ bool furi_hal_nfc_emulate_nfca(
     return true;
 }
 
-bool furi_hal_nfc_get_first_frame(uint8_t** rx_buff, uint16_t** rx_len) {
-    ReturnCode ret =
-        rfalNfcDataExchangeStart(NULL, 0, rx_buff, rx_len, 0, RFAL_TXRX_FLAGS_DEFAULT);
-    return ret == ERR_NONE;
-}
-
 ReturnCode furi_hal_nfc_data_exchange(
     uint8_t* tx_buff,
     uint16_t tx_len,

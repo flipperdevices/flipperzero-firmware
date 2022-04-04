@@ -157,15 +157,6 @@ bool furi_hal_nfc_emulate_nfca(
     void* context,
     uint32_t timeout);
 
-/** Get first command from reader after activation in emulation mode
- *
- * @param      rx_buff  pointer to receive buffer
- * @param      rx_len   receive buffer length
- *
- * @return     true on success
- */
-bool furi_hal_nfc_get_first_frame(uint8_t** rx_buff, uint16_t** rx_len);
-
 /** NFC data exchange
  *
  * @param      tx_buff     transmit buffer
