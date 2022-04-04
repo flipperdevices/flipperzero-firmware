@@ -1,13 +1,6 @@
 #pragma once
 
-#include "st_errno.h"
-#include "rfal_nfc.h"
-
 #include "nfc_device.h"
-
-const char* nfc_get_rfal_type(rfalNfcDevType type);
-
-const char* nfc_get_nfca_type(rfalNfcaListenDeviceType type);
 
 const char* nfc_get_dev_type(FuriHalNfcType type);
 
