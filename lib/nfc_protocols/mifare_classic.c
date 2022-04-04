@@ -116,7 +116,7 @@ static bool mf_classic_auth(
             tx_rx->tx_data[0] = MF_CLASSIC_AUTH_KEY_B_CMD;
         }
         tx_rx->tx_data[1] = block;
-        tx_rx->tx_rx_type = FURI_HAL_NFC_TX_DEFAULT_RX_NO_CRC;
+        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRxNoCrc; 
         tx_rx->tx_bits = 2 * 8;
         if(!furi_hal_nfc_tx_rx(tx_rx)) break;
 
@@ -140,7 +140,7 @@ static bool mf_classic_auth(
                 (((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(nt & 0xff)) & 0x01)
                  << (7 - i));
         }
-        tx_rx->tx_rx_type = FURI_HAL_NFC_TXRX_RAW;
+        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
         tx_rx->tx_bits = 8 * 8;
         if(!furi_hal_nfc_tx_rx(tx_rx)) break;
         if(tx_rx->rx_bits == 32) {
@@ -220,7 +220,7 @@ bool mf_classic_read_block(
             ((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(plain_cmd[i])) & 0x01) << (7 - i);
     }
     tx_rx->tx_bits = 4 * 9;
-    tx_rx->tx_rx_type = FURI_HAL_NFC_TXRX_RAW;
+    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
 
     if(furi_hal_nfc_tx_rx(tx_rx)) {
         if(tx_rx->rx_bits == 8 * 18) {

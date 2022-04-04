@@ -20,27 +20,26 @@ extern "C" {
 
 #define FURI_HAL_NFC_TXRX_DEFAULT                                                    \
     ((uint32_t)RFAL_TXRX_FLAGS_CRC_TX_AUTO | (uint32_t)RFAL_TXRX_FLAGS_CRC_RX_REMV | \
-     (uint32_t)RFAL_TXRX_FLAGS_NFCIP1_OFF | (uint32_t)RFAL_TXRX_FLAGS_AGC_ON |       \
-     (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_REMV | (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_AUTO | \
-     (uint32_t)RFAL_TXRX_FLAGS_NFCV_FLAG_AUTO)
+     (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_REMV | (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_AUTO)
 
 #define FURI_HAL_NFC_TX_DEFAULT_RX_NO_CRC                                            \
     ((uint32_t)RFAL_TXRX_FLAGS_CRC_TX_AUTO | (uint32_t)RFAL_TXRX_FLAGS_CRC_RX_KEEP | \
-     (uint32_t)RFAL_TXRX_FLAGS_NFCIP1_OFF | (uint32_t)RFAL_TXRX_FLAGS_AGC_ON |       \
-     (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_REMV | (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_AUTO | \
-     (uint32_t)RFAL_TXRX_FLAGS_NFCV_FLAG_AUTO)
+     (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_REMV | (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_AUTO)
 
 #define FURI_HAL_NFC_TXRX_WITH_PAR                                                     \
     ((uint32_t)RFAL_TXRX_FLAGS_CRC_TX_MANUAL | (uint32_t)RFAL_TXRX_FLAGS_CRC_RX_KEEP | \
-     (uint32_t)RFAL_TXRX_FLAGS_NFCIP1_OFF | (uint32_t)RFAL_TXRX_FLAGS_AGC_ON |         \
-     (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_KEEP | (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_AUTO |   \
-     (uint32_t)RFAL_TXRX_FLAGS_NFCV_FLAG_AUTO)
+     (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_KEEP | (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_AUTO)
 
 #define FURI_HAL_NFC_TXRX_RAW                                                          \
     ((uint32_t)RFAL_TXRX_FLAGS_CRC_TX_MANUAL | (uint32_t)RFAL_TXRX_FLAGS_CRC_RX_KEEP | \
-     (uint32_t)RFAL_TXRX_FLAGS_NFCIP1_OFF | (uint32_t)RFAL_TXRX_FLAGS_AGC_ON |         \
-     (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_KEEP | (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_NONE |   \
-     (uint32_t)RFAL_TXRX_FLAGS_NFCV_FLAG_AUTO)
+     (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_KEEP | (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_NONE)
+
+typedef enum {
+    FuriHalNfcTxRxTypeDefault,
+    FuriHalNfcTxRxTypeRxNoCrc,
+    FuriHalNfcTxRxTypeRxKeepPar,
+    FuriHalNfcTxRxTypeRaw,
+} FuriHalNfcTxRxType;
 
 typedef bool (*FuriHalNfcEmulateCallback)(
     uint8_t* buff_rx,
@@ -80,7 +79,7 @@ typedef struct {
     uint8_t rx_data[FURI_HAL_NFC_DATA_BUFF_SIZE];
     uint8_t rx_parity[FURI_HAL_NFC_PARITY_BUFF_SIZE];
     uint16_t rx_bits;
-    uint32_t tx_rx_type;
+    FuriHalNfcTxRxType tx_rx_type;
 } FuriHalNfcTxRxContext;
 
 /** Init nfc

@@ -393,6 +393,22 @@ ReturnCode furi_hal_nfc_data_exchange(
     return ret;
 }
 
+static uint32_t furi_hal_nfc_tx_rx_get_flag(FuriHalNfcTxRxType type) {
+    uint32_t flags = 0;
+
+    if(type == FuriHalNfcTxRxTypeRxNoCrc) {
+        flags = RFAL_TXRX_FLAGS_CRC_RX_KEEP;
+    } else if(type == FuriHalNfcTxRxTypeRxKeepPar) {
+        flags = RFAL_TXRX_FLAGS_CRC_TX_MANUAL | RFAL_TXRX_FLAGS_CRC_RX_KEEP |
+                RFAL_TXRX_FLAGS_PAR_RX_KEEP;
+    } else if(type == FuriHalNfcTxRxTypeRaw) {
+        flags = RFAL_TXRX_FLAGS_CRC_TX_MANUAL | RFAL_TXRX_FLAGS_CRC_RX_KEEP |
+                RFAL_TXRX_FLAGS_PAR_RX_KEEP | RFAL_TXRX_FLAGS_PAR_TX_NONE;
+    }
+
+    return flags;
+}
+
 static uint16_t furi_hal_nfc_data_and_parity_to_bitstream(
     uint8_t* data,
     uint16_t len,
@@ -454,16 +470,12 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx) {
     uint16_t* temp_rx_bits = NULL;
 
     // Prepare data for FIFO if necessary
-    if(tx_rx_ctx->tx_rx_type == FURI_HAL_NFC_TXRX_RAW) {
+    uint32_t flags = furi_hal_nfc_tx_rx_get_flag(tx_rx_ctx->tx_rx_type);
+    if(tx_rx_ctx->tx_rx_type == FuriHalNfcTxRxTypeRaw) {
         temp_tx_bits = furi_hal_nfc_data_and_parity_to_bitstream(
             tx_rx_ctx->tx_data, tx_rx_ctx->tx_bits / 8, tx_rx_ctx->tx_parity, temp_tx_buff);
         ret = rfalNfcDataExchangeCustomStart(
-            temp_tx_buff,
-            temp_tx_bits,
-            &temp_rx_buff,
-            &temp_rx_bits,
-            RFAL_FWT_NONE,
-            tx_rx_ctx->tx_rx_type);
+            temp_tx_buff, temp_tx_bits, &temp_rx_buff, &temp_rx_bits, RFAL_FWT_NONE, flags);
     } else {
         ret = rfalNfcDataExchangeCustomStart(
             tx_rx_ctx->tx_data,
@@ -471,7 +483,7 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx) {
             &temp_rx_buff,
             &temp_rx_bits,
             RFAL_FWT_NONE,
-            tx_rx_ctx->tx_rx_type);
+            flags);
     }
     if(ret != ERR_NONE) {
         return false;
@@ -492,7 +504,7 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx) {
         taskYIELD();
     }
 
-    if(tx_rx_ctx->tx_rx_type == FURI_HAL_NFC_TXRX_RAW) {
+    if(tx_rx_ctx->tx_rx_type == FuriHalNfcTxRxTypeRaw) {
         tx_rx_ctx->rx_bits =
             8 * furi_hal_nfc_bitstream_to_data_and_parity(
                     temp_rx_buff, *temp_rx_bits, tx_rx_ctx->rx_data, tx_rx_ctx->rx_parity);
