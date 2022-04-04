@@ -87,7 +87,7 @@ static bool flipper_update_load_stage(const string_t work_dir, UpdateManifest* m
          * will change global variables (like tick count) 
          * that are located in .data. And we move staged loader 
          * to the same memory region. So, IRQ handlers will mess up 
-         * memmove'd .text section and ruin the day. 
+         * memmove'd .text section and ruin your day. 
          * We don't want that to happen.
          */
         __disable_irq();
