@@ -4,7 +4,7 @@
 
 Our goal for 0.x.x branch is to build stable usable apps and API.
 First public release that we support in this branch is 0.43.1. Your device most likely came with this version.
-You can develop applications but keep in mind that API is not fixed yet. 
+You can develop applications but keep in mind that API is not final yet.
 
 ## What's already implemented
 
@@ -27,7 +27,7 @@ You can develop applications but keep in mind that API is not fixed yet.
 **System and HAL**
 
 - Furi Core
-- Furi HAL - hardware abstraction layer that 
+- Furi HAL 
 
 # Where we're going (Version 1)
 
@@ -39,7 +39,7 @@ Main goal for 1.0.0 is to provide first stable version for both Users and Develo
 - Loading applications from SD (tested as PoC, work scheduled for Q2)
 - More protocols (gathering feedback)
 - User documentation (work in progress)
-- FuriCore: replace CMSIS API, replace hard real time timers, improve stability and performance (work in progress)
+- FuriCore: get rid of CMSIS API, replace hard real time timers, improve stability and performance (work in progress)
 - FuriHal: deep sleep mode, stable API, examples, documentation (work in progress)
 - Application improvements (a ton of things that we want to add and improve that are too numerous to list here)
 
