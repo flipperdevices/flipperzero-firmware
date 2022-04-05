@@ -47,6 +47,13 @@ static int32_t updater_spawner_thread_worker(void* arg) {
     return 0;
 }
 
+static void updater_spawner_thread_cleanup(FuriThreadState state, void* context) {
+    FuriThread* thread = context;
+    if(state == FuriThreadStateStopped) {
+        furi_thread_free(thread);
+    }
+}
+
 static void updater_start_app() {
     if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePreUpdate) &&
        !furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePostUpdate)) {
@@ -60,8 +67,10 @@ static void updater_start_app() {
     FuriThread* thread = furi_thread_alloc();
 
     furi_thread_set_name(thread, "UpdateAppSpawner");
-    furi_thread_set_stack_size(thread, 2048);
+    furi_thread_set_stack_size(thread, 768);
     furi_thread_set_callback(thread, updater_spawner_thread_worker);
+    furi_thread_set_state_callback(thread, updater_spawner_thread_cleanup);
+    furi_thread_set_state_context(thread, thread);
     furi_thread_start(thread);
 }
 
