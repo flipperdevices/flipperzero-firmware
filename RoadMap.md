@@ -12,7 +12,7 @@ You can develop applications but keep in mind that API is not fixed yet.
 
 - SubGhz: all most common protocols, RAW for everything else
 - 125kHz RFID: all most common protocols
-- NFC: Mifare Ultralight read/emulate, MiFare Classic and DESFire read, basic EMV, basic NFC-B,F,V
+- NFC: Mifare ultralight read/emulate, MiFare Classic read, basic EMV, basic NFC-*
 - Infrared: all most common RC protocols, RAW format for everything else
 - GPIO: UART bridge, basic gpio controls
 - iButton: DS1990, Cyfral, Metacom
@@ -33,7 +33,7 @@ You can develop applications but keep in mind that API is not fixed yet.
 
 Main goal for 1.0.0 is to provide first stable version for both Users ans Developers.
 
-## What we plannig to implement for 1.0.0
+## What we planning to implement for 1.0.0
 
 - Update from SD (work in progress, almost done)
 - Loading applications from SD (tested as PoC, work scheduled for Q2)
@@ -41,7 +41,7 @@ Main goal for 1.0.0 is to provide first stable version for both Users ans Develo
 - User documentation (work in progress)
 - FuriCore: replace CMSIS API, replace hard realtime timers, improve stability and performance (work in progress)
 - FuriHal: deep sleep mode, stable API, examples, documentation (work in progress)
-- Application improvments (there are a lot of things that we want to add and improve)
+- Application improvements (there are a lot of things that we want to add and improve)
 
 ## When it will happen and where I can see progress
 
