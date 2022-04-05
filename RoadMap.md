@@ -12,7 +12,7 @@ You can develop applications but keep in mind that API is not fixed yet.
 
 - SubGhz: all most common protocols, RAW for everything else
 - 125kHz RFID: all most common protocols
-- NFC: Mifare ultralight read/emulate, MiFare Classic read, basic EMV, basic NFC-*
+- NFC: Mifare Ultralight read/emulate, MiFare Classic and DESFire read, basic EMV, basic NFC-B,F,V
 - Infrared: all most common RC protocols, RAW format for everything else
 - GPIO: UART bridge, basic gpio controls
 - iButton: DS1990, Cyfral, Metacom
