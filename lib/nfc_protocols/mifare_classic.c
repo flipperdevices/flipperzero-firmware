@@ -118,7 +118,7 @@ static bool mf_classic_auth(
         tx_rx->tx_data[1] = block;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRxNoCrc; 
         tx_rx->tx_bits = 2 * 8;
-        if(!furi_hal_nfc_tx_rx(tx_rx)) break;
+        if(!furi_hal_nfc_tx_rx(tx_rx, 4)) break;
 
         uint32_t nt = (uint32_t)nfc_util_bytes2num(tx_rx->rx_data, 4);
         crypto1_init(crypto, key);
@@ -142,7 +142,7 @@ static bool mf_classic_auth(
         }
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
         tx_rx->tx_bits = 8 * 8;
-        if(!furi_hal_nfc_tx_rx(tx_rx)) break;
+        if(!furi_hal_nfc_tx_rx(tx_rx, 4)) break;
         if(tx_rx->rx_bits == 32) {
             crypto1_word(crypto, 0, 0);
             auth_success = true;
@@ -222,7 +222,7 @@ bool mf_classic_read_block(
     tx_rx->tx_bits = 4 * 9;
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
 
-    if(furi_hal_nfc_tx_rx(tx_rx)) {
+    if(furi_hal_nfc_tx_rx(tx_rx, 4)) {
         if(tx_rx->rx_bits == 8 * 18) {
             for(uint8_t i = 0; i < 18; i++) {
                 block->value[i] = crypto1_byte(crypto, 0, 0) ^ tx_rx->rx_data[i];

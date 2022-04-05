@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 #define FURI_HAL_NFC_UID_MAX_LEN 10
-#define FURI_HAL_NFC_DATA_BUFF_SIZE (64)
+#define FURI_HAL_NFC_DATA_BUFF_SIZE (128)
 #define FURI_HAL_NFC_PARITY_BUFF_SIZE (FURI_HAL_NFC_DATA_BUFF_SIZE / 8)
 
 #define FURI_HAL_NFC_TXRX_DEFAULT                                                    \
@@ -179,7 +179,7 @@ ReturnCode furi_hal_nfc_data_exchange(
  *
  * @return      true on success
  */
-bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx);
+bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx, uint16_t timeout_ms);
 
 /** NFC data full exhange
  *

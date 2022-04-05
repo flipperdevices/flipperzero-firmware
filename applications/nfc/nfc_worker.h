@@ -16,7 +16,7 @@ typedef enum {
     NfcWorkerStateReadEMV,
     NfcWorkerStateEmulateApdu,
     NfcWorkerStateField,
-    NfcWorkerStateReadMifareUl,
+    NfcWorkerStateReadMifareUltralight,
     NfcWorkerStateEmulateMifareUl,
     NfcWorkerStateReadMifareClassic,
     NfcWorkerStateReadMifareDesfire,

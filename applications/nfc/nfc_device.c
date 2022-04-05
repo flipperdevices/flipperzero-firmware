@@ -73,7 +73,7 @@ static bool nfc_device_parse_format_string(NfcDevice* dev, string_t format_strin
 
 static bool nfc_device_save_mifare_ul_data(FlipperFormat* file, NfcDevice* dev) {
     bool saved = false;
-    MifareUlData* data = &dev->dev_data.mf_ul_data;
+    MfUltralightData* data = &dev->dev_data.mf_ul_data;
     string_t temp_str;
     string_init(temp_str);
 
@@ -122,7 +122,7 @@ static bool nfc_device_save_mifare_ul_data(FlipperFormat* file, NfcDevice* dev) 
 
 bool nfc_device_load_mifare_ul_data(FlipperFormat* file, NfcDevice* dev) {
     bool parsed = false;
-    MifareUlData* data = &dev->dev_data.mf_ul_data;
+    MfUltralightData* data = &dev->dev_data.mf_ul_data;
     string_t temp_str;
     string_init(temp_str);
 

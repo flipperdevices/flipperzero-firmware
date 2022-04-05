@@ -99,8 +99,8 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_read_emv(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateEmulateApdu) {
         nfc_worker_emulate_apdu(nfc_worker);
-    } else if(nfc_worker->state == NfcWorkerStateReadMifareUl) {
-        nfc_worker_read_mifare_ul(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateReadMifareUltralight) {
+        nfc_worker_read_mifare_ultralight(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
         nfc_worker_emulate_mifare_ul(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateReadMifareClassic) {
@@ -495,145 +495,62 @@ void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
     }
 }
 
-void nfc_worker_read_mifare_ul(NfcWorker* nfc_worker) {
-    ReturnCode err;
-    uint8_t tx_buff[255] = {};
-    uint16_t tx_len = 0;
-    uint8_t* rx_buff;
-    uint16_t* rx_len;
-    MifareUlDevice mf_ul_read;
+void nfc_worker_read_mifare_ultralight(NfcWorker* nfc_worker) {
+    FuriHalNfcTxRxContext tx_rx = {};
+    MfUltralightReader reader = {};
+    MfUltralightData data = {};
     NfcDeviceData* result = nfc_worker->dev_data;
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    nfc_device_data_clear(result);
 
-    while(nfc_worker->state == NfcWorkerStateReadMifareUl) {
-        furi_hal_nfc_sleep();
-        memset(&mf_ul_read, 0, sizeof(mf_ul_read));
+    while(nfc_worker->state == NfcWorkerStateReadMifareUltralight) {
         if(furi_hal_nfc_detect(nfc_data, 300)) {
             if(nfc_data->type == FuriHalNfcTypeA &&
                mf_ul_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
-                // Get Mifare Ultralight version
-                FURI_LOG_D(TAG, "Found Mifare Ultralight tag. Reading tag version");
-                tx_len = mf_ul_prepare_get_version(tx_buff);
-                err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
-                if(err == ERR_NONE) {
-                    mf_ul_parse_get_version_response(rx_buff, &mf_ul_read);
-                    FURI_LOG_D(
-                        TAG,
-                        "Mifare Ultralight Type: %d, Pages: %d",
-                        mf_ul_read.data.type,
-                        mf_ul_read.pages_to_read);
-                    FURI_LOG_D(TAG, "Reading signature ...");
-                    tx_len = mf_ul_prepare_read_signature(tx_buff);
-                    if(furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false)) {
-                        FURI_LOG_D(TAG, "Failed reading signature");
-                        memset(mf_ul_read.data.signature, 0, sizeof(mf_ul_read.data.signature));
-                    } else {
-                        mf_ul_parse_read_signature_response(rx_buff, &mf_ul_read);
+                FURI_LOG_D(TAG, "Found Mifare Ultralight tag. Start reading");
+                if(mf_ul_read_card(&tx_rx, &reader, &data)) {
+                    result->protocol = NfcDeviceProtocolMifareUl;
+                    result->mf_ul_data = data;
+                    // Notify caller and exit
+                    if(nfc_worker->callback) {
+                        nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
                     }
-                } else if(err == ERR_TIMEOUT) {
-                    FURI_LOG_D(
-                        TAG,
-                        "Card doesn't respond to GET VERSION command. Setting default read parameters");
-                    err = ERR_NONE;
-                    mf_ul_set_default_version(&mf_ul_read);
-                    // Reinit device
-                    furi_hal_nfc_sleep();
-                    if(!furi_hal_nfc_detect(nfc_data, 300)) {
-                        FURI_LOG_D(TAG, "Lost connection. Restarting search");
-                        continue;
-                    }
+                    break;
                 } else {
-                    FURI_LOG_D(
-                        TAG, "Error getting Mifare Ultralight version. Error code: %d", err);
-                    continue;
+                    FURI_LOG_D(TAG, "Failed reading Mifare Ultralight");
                 }
-
-                if(mf_ul_read.support_fast_read) {
-                    FURI_LOG_D(TAG, "Reading pages ...");
-                    tx_len = mf_ul_prepare_fast_read(tx_buff, 0x00, mf_ul_read.pages_to_read - 1);
-                    if(furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false)) {
-                        FURI_LOG_D(TAG, "Failed reading pages");
-                        continue;
-                    } else {
-                        mf_ul_parse_fast_read_response(
-                            rx_buff, 0x00, mf_ul_read.pages_to_read - 1, &mf_ul_read);
-                    }
-
-                    FURI_LOG_D(TAG, "Reading 3 counters ...");
-                    for(uint8_t i = 0; i < 3; i++) {
-                        tx_len = mf_ul_prepare_read_cnt(tx_buff, i);
-                        if(furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false)) {
-                            FURI_LOG_W(TAG, "Failed reading Counter %d", i);
-                            mf_ul_read.data.counter[i] = 0;
-                        } else {
-                            mf_ul_parse_read_cnt_response(rx_buff, i, &mf_ul_read);
-                        }
-                    }
-
-                    FURI_LOG_D(TAG, "Checking tearing flags ...");
-                    for(uint8_t i = 0; i < 3; i++) {
-                        tx_len = mf_ul_prepare_check_tearing(tx_buff, i);
-                        if(furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false)) {
-                            FURI_LOG_D(TAG, "Error checking tearing flag %d", i);
-                            mf_ul_read.data.tearing[i] = MF_UL_TEARING_FLAG_DEFAULT;
-                        } else {
-                            mf_ul_parse_check_tearing_response(rx_buff, i, &mf_ul_read);
-                        }
-                    }
-                } else {
-                    // READ card with READ command (4 pages at a time)
-                    for(uint8_t page = 0; page < mf_ul_read.pages_to_read; page += 4) {
-                        FURI_LOG_D(TAG, "Reading pages %d - %d ...", page, page + 3);
-                        tx_len = mf_ul_prepare_read(tx_buff, page);
-                        if(furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false)) {
-                            FURI_LOG_D(TAG, "Read pages %d - %d failed", page, page + 3);
-                            continue;
-                        } else {
-                            mf_ul_parse_read_response(rx_buff, page, &mf_ul_read);
-                        }
-                    }
-                }
-
-                result->protocol = NfcDeviceProtocolMifareUl;
-                result->mf_ul_data = mf_ul_read.data;
-                // Notify caller and exit
-                if(nfc_worker->callback) {
-                    nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
-                }
-                break;
             } else {
-                FURI_LOG_W(TAG, "Tag does not support Mifare Ultralight");
+                FURI_LOG_W(TAG, "Tag is not Mifare Ultralight");
             }
         } else {
             FURI_LOG_D(TAG, "Can't find any tags");
         }
+        furi_hal_nfc_sleep();
         osDelay(100);
     }
 }
 
 void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
-    FuriHalNfcDevData* nfc_common = &nfc_worker->dev_data->nfc_data;
-    MifareUlDevice mf_ul_emulate;
-    mf_ul_prepare_emulation(&mf_ul_emulate, &nfc_worker->dev_data->mf_ul_data);
-    while(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
-        furi_hal_nfc_emulate_nfca(
-            nfc_common->uid,
-            nfc_common->uid_len,
-            nfc_common->atqa,
-            nfc_common->sak,
-            mf_ul_prepare_emulation_response,
-            &mf_ul_emulate,
-            5000);
-        // Check if data was modified
-        if(mf_ul_emulate.data_changed) {
-            nfc_worker->dev_data->mf_ul_data = mf_ul_emulate.data;
-            if(nfc_worker->callback) {
-                nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
-            }
-            mf_ul_emulate.data_changed = false;
-        }
-    }
+    // FuriHalNfcDevData* nfc_common = &nfc_worker->dev_data->nfc_data;
+    // MfUltralightReader mf_ul_emulate;
+    // mf_ul_prepare_emulation(&mf_ul_emulate, &nfc_worker->dev_data->mf_ul_data);
+    // while(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
+    //     furi_hal_nfc_emulate_nfca(
+    //         nfc_common->uid,
+    //         nfc_common->uid_len,
+    //         nfc_common->atqa,
+    //         nfc_common->sak,
+    //         mf_ul_prepare_emulation_response,
+    //         &mf_ul_emulate,
+    //         5000);
+    //     // Check if data was modified
+    //     if(mf_ul_emulate.data_changed) {
+    //         nfc_worker->dev_data->mf_ul_data = mf_ul_emulate.data;
+    //         if(nfc_worker->callback) {
+    //             nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
+    //         }
+    //         mf_ul_emulate.data_changed = false;
+    //     }
+    // }
 }
 
 void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {

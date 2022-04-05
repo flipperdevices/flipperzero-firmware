@@ -97,7 +97,7 @@ void nfc_scene_device_info_on_enter(void* context) {
         dialog_ex_set_context(dialog_ex, nfc);
         dialog_ex_set_result_callback(dialog_ex, nfc_scene_device_info_dialog_callback);
     } else if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
-        MifareUlData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
+        MfUltralightData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
         TextBox* text_box = nfc->text_box;
         text_box_set_font(text_box, TextBoxFontHex);
         for(uint16_t i = 0; i < mf_ul_data->data_size; i += 2) {

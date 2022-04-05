@@ -459,7 +459,7 @@ uint16_t furi_hal_nfc_bitstream_to_data_and_parity(
     return curr_byte;
 }
 
-bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx) {
+bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx, uint16_t timeout_ms) {
     furi_assert(tx_rx_ctx);
 
     ReturnCode ret;
@@ -494,7 +494,7 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx) {
         state = rfalNfcGetState();
         ret = rfalNfcDataExchangeGetStatus();
         if(ret == ERR_BUSY) {
-            if(DWT->CYCCNT - start > 4 * clocks_in_ms) {
+            if(DWT->CYCCNT - start > timeout_ms * clocks_in_ms) {
                 return false;
             }
             continue;
@@ -510,6 +510,7 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx) {
                     temp_rx_buff, *temp_rx_bits, tx_rx_ctx->rx_data, tx_rx_ctx->rx_parity);
     } else {
         memcpy(tx_rx_ctx->rx_data, temp_rx_buff, *temp_rx_bits / 8);
+        tx_rx_ctx->rx_bits = *temp_rx_bits;
     }
 
     return true;
