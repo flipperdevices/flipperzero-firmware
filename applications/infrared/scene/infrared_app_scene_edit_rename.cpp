@@ -22,7 +22,7 @@ void InfraredAppSceneEditRename::on_enter(InfraredApp* app) {
         text_input_set_header_text(text_input, "Name the remote");
 
         ValidatorIsFile* validator_is_file =
-            validator_is_file_alloc_init(app->infrared_directory, app->infrared_extension);
+            validator_is_file_alloc_init(app->infrared_directory, app->infrared_extension, NULL);
         text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
     }
 
