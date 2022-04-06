@@ -232,7 +232,7 @@ void archive_delete_file(void* context, const char* format, ...) {
 
     bool res = false;
 
-    if (fileinfo.flags & FSF_DIRECTORY) {
+    if(fileinfo.flags & FSF_DIRECTORY) {
         res = storage_simply_remove_recursive(fs_api, string_get_cstr(filename));
     } else {
         res = (storage_common_remove(fs_api, string_get_cstr(filename)) == FSE_OK);
