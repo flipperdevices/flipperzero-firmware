@@ -200,52 +200,47 @@ bool mf_ul_read_card(
     return card_read;
 }
 
-void mf_ul_protect_auth_data_on_read_command(
+// TODO rework
+static void mf_ul_protect_auth_data_on_read_command(
     uint8_t* tx_buff,
     uint8_t start_page,
     uint8_t end_page,
-    MfUltralightReader* mf_ul_emulate) {
-    // if(mf_ul_emulate->data.type >= MfUltralightTypeNTAG213) {
-    //     uint8_t pwd_page = (mf_ul_emulate->data.data_size / 4) - 2;
-    //     uint8_t pack_page = pwd_page + 1;
-    //     if((start_page <= pwd_page) && (end_page >= pwd_page)) {
-    //         memset(&tx_buff[(pwd_page - start_page) * 4], 0, 4);
-    //     }
-    //     if((start_page <= pack_page) && (end_page >= pack_page)) {
-    //         memset(&tx_buff[(pack_page - start_page) * 4], 0, 2);
-    //     }
-    // }
+    MfUltralightEmulator* emulator) {
+    if(emulator->data.type >= MfUltralightTypeNTAG213) {
+        uint8_t pwd_page = (emulator->data.data_size / 4) - 2;
+        uint8_t pack_page = pwd_page + 1;
+        if((start_page <= pwd_page) && (end_page >= pwd_page)) {
+            memset(&tx_buff[(pwd_page - start_page) * 4], 0, 4);
+        }
+        if((start_page <= pack_page) && (end_page >= pack_page)) {
+            memset(&tx_buff[(pack_page - start_page) * 4], 0, 2);
+        }
+    }
 }
 
-void mf_ul_prepare_emulation(MfUltralightReader* mf_ul_emulate, MfUltralightData* data) {
-    // mf_ul_emulate->data = *data;
-    // mf_ul_emulate->auth_data = NULL;
-    // mf_ul_emulate->data_changed = false;
-    // mf_ul_emulate->comp_write_cmd_started = false;
-    // if(data->version.storage_size == 0) {
-    //     mf_ul_emulate->data.type = MfUltralightTypeUnknown;
-    //     mf_ul_emulate->support_fast_read = false;
-    // } else if(data->version.storage_size == 0x0B) {
-    //     mf_ul_emulate->data.type = MfUltralightTypeUL11;
-    //     mf_ul_emulate->support_fast_read = true;
-    // } else if(data->version.storage_size == 0x0E) {
-    //     mf_ul_emulate->data.type = MfUltralightTypeUL21;
-    //     mf_ul_emulate->support_fast_read = true;
-    // } else if(data->version.storage_size == 0x0F) {
-    //     mf_ul_emulate->data.type = MfUltralightTypeNTAG213;
-    //     mf_ul_emulate->support_fast_read = true;
-    // } else if(data->version.storage_size == 0x11) {
-    //     mf_ul_emulate->data.type = MfUltralightTypeNTAG215;
-    //     mf_ul_emulate->support_fast_read = true;
-    // } else if(data->version.storage_size == 0x13) {
-    //     mf_ul_emulate->data.type = MfUltralightTypeNTAG216;
-    //     mf_ul_emulate->support_fast_read = true;
-    // }
+void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* data) {
+    emulator->data = *data;
+    emulator->auth_data = NULL;
+    emulator->data_changed = false;
+    emulator->comp_write_cmd_started = false;
+    if(data->type == MfUltralightTypeUnknown) {
+        emulator->support_fast_read = false;
+    } else if(data->type == MfUltralightTypeUL11) {
+        emulator->support_fast_read = true;
+    } else if(data->type == MfUltralightTypeUL21) {
+        emulator->support_fast_read = true;
+    } else if(data->type == MfUltralightTypeNTAG213) {
+        emulator->support_fast_read = false;
+    } else if(data->type == MfUltralightTypeNTAG215) {
+        emulator->support_fast_read = false;
+    } else if(data->type == MfUltralightTypeNTAG216) {
+        emulator->support_fast_read = false;
+    }
 
-    // if(mf_ul_emulate->data.type >= MfUltralightTypeNTAG213) {
-    //     uint16_t pwd_page = (data->data_size / 4) - 2;
-    //     mf_ul_emulate->auth_data = (MfUltralightAuth*)&data->data[pwd_page * 4];
-    // }
+    if(data->type >= MfUltralightTypeNTAG213) {
+        uint16_t pwd_page = (data->data_size / 4) - 2;
+        emulator->auth_data = (MfUltralightAuth*)&data->data[pwd_page * 4];
+    }
 }
 
 bool mf_ul_prepare_emulation_response(
@@ -255,159 +250,154 @@ bool mf_ul_prepare_emulation_response(
     uint16_t* buff_tx_len,
     uint32_t* data_type,
     void* context) {
-    // furi_assert(context);
-    // MfUltralightReader* mf_ul_emulate = context;
-    // uint8_t cmd = buff_rx[0];
-    // uint16_t page_num = mf_ul_emulate->data.data_size / 4;
-    // uint16_t tx_bytes = 0;
-    // uint16_t tx_bits = 0;
-    // bool command_parsed = false;
+    furi_assert(context);
+    MfUltralightEmulator* emulator = context;
+    uint8_t cmd = buff_rx[0];
+    uint16_t page_num = emulator->data.data_size / 4;
+    uint16_t tx_bytes = 0;
+    uint16_t tx_bits = 0;
+    bool command_parsed = false;
 
-    // // Check composite commands
-    // if(mf_ul_emulate->comp_write_cmd_started) {
-    //     // Compatibility write is the only one composit command
-    //     if(buff_rx_len == 16) {
-    //         memcpy(&mf_ul_emulate->data.data[mf_ul_emulate->comp_write_page_addr * 4], buff_rx, 4);
-    //         mf_ul_emulate->data_changed = true;
-    //         // Send ACK message
-    //         buff_tx[0] = 0x0A;
-    //         tx_bits = 4;
-    //         *data_type = FURI_HAL_NFC_TXRX_RAW;
-    //         command_parsed = true;
-    //     }
-    //     mf_ul_emulate->comp_write_cmd_started = false;
-    // } else if(cmd == MF_UL_GET_VERSION_CMD) {
-    //     if(mf_ul_emulate->data.type != MfUltralightTypeUnknown) {
-    //         tx_bytes = sizeof(mf_ul_emulate->data.version);
-    //         memcpy(buff_tx, &mf_ul_emulate->data.version, tx_bytes);
-    //         *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-    //         command_parsed = true;
-    //     }
-    // } else if(cmd == MF_UL_READ_CMD) {
-    //     uint8_t start_page = buff_rx[1];
-    //     if(start_page < page_num) {
-    //         tx_bytes = 16;
-    //         if(start_page + 4 > page_num) {
-    //             // Handle roll-over mechanism
-    //             uint8_t end_pages_num = page_num - start_page;
-    //             memcpy(buff_tx, &mf_ul_emulate->data.data[start_page * 4], end_pages_num * 4);
-    //             memcpy(
-    //                 &buff_tx[end_pages_num * 4],
-    //                 mf_ul_emulate->data.data,
-    //                 (4 - end_pages_num) * 4);
-    //         } else {
-    //             memcpy(buff_tx, &mf_ul_emulate->data.data[start_page * 4], tx_bytes);
-    //         }
-    //         mf_ul_protect_auth_data_on_read_command(
-    //             buff_tx, start_page, (start_page + 4), mf_ul_emulate);
-    //         *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-    //         command_parsed = true;
-    //     }
-    // } else if(cmd == MF_UL_FAST_READ_CMD) {
-    //     if(mf_ul_emulate->support_fast_read) {
-    //         uint8_t start_page = buff_rx[1];
-    //         uint8_t end_page = buff_rx[2];
-    //         if((start_page < page_num) && (end_page < page_num) && (start_page < (end_page + 1))) {
-    //             tx_bytes = ((end_page + 1) - start_page) * 4;
-    //             memcpy(buff_tx, &mf_ul_emulate->data.data[start_page * 4], tx_bytes);
-    //             mf_ul_protect_auth_data_on_read_command(
-    //                 buff_tx, start_page, end_page, mf_ul_emulate);
-    //             *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-    //             command_parsed = true;
-    //         }
-    //     }
-    // } else if(cmd == MF_UL_WRITE) {
-    //     uint8_t write_page = buff_rx[1];
-    //     if((write_page > 1) && (write_page < page_num - 2)) {
-    //         memcpy(&mf_ul_emulate->data.data[write_page * 4], &buff_rx[2], 4);
-    //         mf_ul_emulate->data_changed = true;
-    //         // ACK
-    //         buff_tx[0] = 0x0A;
-    //         tx_bits = 4;
-    //         *data_type = FURI_HAL_NFC_TXRX_RAW;
-    //         command_parsed = true;
-    //     }
-    // } else if(cmd == MF_UL_COMP_WRITE) {
-    //     uint8_t write_page = buff_rx[1];
-    //     if((write_page > 1) && (write_page < page_num - 2)) {
-    //         mf_ul_emulate->comp_write_cmd_started = true;
-    //         mf_ul_emulate->comp_write_page_addr = write_page;
-    //         // ACK
-    //         buff_tx[0] = 0x0A;
-    //         tx_bits = 4;
-    //         *data_type = FURI_HAL_NFC_TXRX_RAW;
-    //         command_parsed = true;
-    //     }
-    // } else if(cmd == MF_UL_READ_CNT) {
-    //     uint8_t cnt_num = buff_rx[1];
-    //     if(cnt_num < 3) {
-    //         buff_tx[0] = mf_ul_emulate->data.counter[cnt_num] >> 16;
-    //         buff_tx[1] = mf_ul_emulate->data.counter[cnt_num] >> 8;
-    //         buff_tx[2] = mf_ul_emulate->data.counter[cnt_num];
-    //         tx_bytes = 3;
-    //         *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-    //         command_parsed = true;
-    //     }
-    // } else if(cmd == MF_UL_INC_CNT) {
-    //     uint8_t cnt_num = buff_rx[1];
-    //     uint32_t inc = (buff_rx[2] | (buff_rx[3] << 8) | (buff_rx[4] << 16));
-    //     if((cnt_num < 3) && (mf_ul_emulate->data.counter[cnt_num] + inc < 0x00FFFFFF)) {
-    //         mf_ul_emulate->data.counter[cnt_num] += inc;
-    //         mf_ul_emulate->data_changed = true;
-    //         // ACK
-    //         buff_tx[0] = 0x0A;
-    //         tx_bits = 4;
-    //         *data_type = FURI_HAL_NFC_TXRX_RAW;
-    //         command_parsed = true;
-    //     }
-    // } else if(cmd == MF_UL_AUTH) {
-    //     if(mf_ul_emulate->data.type >= MfUltralightTypeNTAG213) {
-    //         if(memcmp(&buff_rx[1], mf_ul_emulate->auth_data->pwd, 4) == 0) {
-    //             buff_tx[0] = mf_ul_emulate->auth_data->pack.raw[0];
-    //             buff_tx[1] = mf_ul_emulate->auth_data->pack.raw[1];
-    //             tx_bytes = 2;
-    //             *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-    //             command_parsed = true;
-    //         } else if(!mf_ul_emulate->auth_data->pack.value) {
-    //             buff_tx[0] = 0x80;
-    //             buff_tx[1] = 0x80;
-    //             tx_bytes = 2;
-    //             *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-    //             command_parsed = true;
-    //         }
-    //     }
-    // } else if(cmd == MF_UL_READ_SIG) {
-    //     // Check 2nd byte = 0x00 - RFU
-    //     if(buff_rx[1] == 0x00) {
-    //         tx_bytes = sizeof(mf_ul_emulate->data.signature);
-    //         memcpy(buff_tx, mf_ul_emulate->data.signature, tx_bytes);
-    //         *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-    //         command_parsed = true;
-    //     }
-    // } else if(cmd == MF_UL_CHECK_TEARING) {
-    //     uint8_t cnt_num = buff_rx[1];
-    //     if(cnt_num < 3) {
-    //         buff_tx[0] = mf_ul_emulate->data.tearing[cnt_num];
-    //         tx_bytes = 1;
-    //         *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-    //         command_parsed = true;
-    //     }
-    // } else if(cmd == MF_UL_HALT_START) {
-    //     tx_bits = 0;
-    //     command_parsed = true;
-    // }
+    // Check composite commands
+    if(emulator->comp_write_cmd_started) {
+        // Compatibility write is the only one composit command
+        if(buff_rx_len == 16) {
+            memcpy(&emulator->data.data[emulator->comp_write_page_addr * 4], buff_rx, 4);
+            emulator->data_changed = true;
+            // Send ACK message
+            buff_tx[0] = 0x0A;
+            tx_bits = 4;
+            *data_type = FURI_HAL_NFC_TXRX_RAW;
+            command_parsed = true;
+        }
+        emulator->comp_write_cmd_started = false;
+    } else if(cmd == MF_UL_GET_VERSION_CMD) {
+        if(emulator->data.type != MfUltralightTypeUnknown) {
+            tx_bytes = sizeof(emulator->data.version);
+            memcpy(buff_tx, &emulator->data.version, tx_bytes);
+            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+            command_parsed = true;
+        }
+    } else if(cmd == MF_UL_READ_CMD) {
+        uint8_t start_page = buff_rx[1];
+        if(start_page < page_num) {
+            tx_bytes = 16;
+            if(start_page + 4 > page_num) {
+                // Handle roll-over mechanism
+                uint8_t end_pages_num = page_num - start_page;
+                memcpy(buff_tx, &emulator->data.data[start_page * 4], end_pages_num * 4);
+                memcpy(&buff_tx[end_pages_num * 4], emulator->data.data, (4 - end_pages_num) * 4);
+            } else {
+                memcpy(buff_tx, &emulator->data.data[start_page * 4], tx_bytes);
+            }
+            mf_ul_protect_auth_data_on_read_command(
+                buff_tx, start_page, (start_page + 4), emulator);
+            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+            command_parsed = true;
+        }
+    } else if(cmd == MF_UL_FAST_READ_CMD) {
+        if(emulator->support_fast_read) {
+            uint8_t start_page = buff_rx[1];
+            uint8_t end_page = buff_rx[2];
+            if((start_page < page_num) && (end_page < page_num) && (start_page < (end_page + 1))) {
+                tx_bytes = ((end_page + 1) - start_page) * 4;
+                memcpy(buff_tx, &emulator->data.data[start_page * 4], tx_bytes);
+                mf_ul_protect_auth_data_on_read_command(buff_tx, start_page, end_page, emulator);
+                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                command_parsed = true;
+            }
+        }
+    } else if(cmd == MF_UL_WRITE) {
+        uint8_t write_page = buff_rx[1];
+        if((write_page > 1) && (write_page < page_num - 2)) {
+            memcpy(&emulator->data.data[write_page * 4], &buff_rx[2], 4);
+            emulator->data_changed = true;
+            // ACK
+            buff_tx[0] = 0x0A;
+            tx_bits = 4;
+            *data_type = FURI_HAL_NFC_TXRX_RAW;
+            command_parsed = true;
+        }
+    } else if(cmd == MF_UL_COMP_WRITE) {
+        uint8_t write_page = buff_rx[1];
+        if((write_page > 1) && (write_page < page_num - 2)) {
+            emulator->comp_write_cmd_started = true;
+            emulator->comp_write_page_addr = write_page;
+            // ACK
+            buff_tx[0] = 0x0A;
+            tx_bits = 4;
+            *data_type = FURI_HAL_NFC_TXRX_RAW;
+            command_parsed = true;
+        }
+    } else if(cmd == MF_UL_READ_CNT) {
+        uint8_t cnt_num = buff_rx[1];
+        if(cnt_num < 3) {
+            buff_tx[0] = emulator->data.counter[cnt_num] >> 16;
+            buff_tx[1] = emulator->data.counter[cnt_num] >> 8;
+            buff_tx[2] = emulator->data.counter[cnt_num];
+            tx_bytes = 3;
+            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+            command_parsed = true;
+        }
+    } else if(cmd == MF_UL_INC_CNT) {
+        uint8_t cnt_num = buff_rx[1];
+        uint32_t inc = (buff_rx[2] | (buff_rx[3] << 8) | (buff_rx[4] << 16));
+        if((cnt_num < 3) && (emulator->data.counter[cnt_num] + inc < 0x00FFFFFF)) {
+            emulator->data.counter[cnt_num] += inc;
+            emulator->data_changed = true;
+            // ACK
+            buff_tx[0] = 0x0A;
+            tx_bits = 4;
+            *data_type = FURI_HAL_NFC_TXRX_RAW;
+            command_parsed = true;
+        }
+    } else if(cmd == MF_UL_AUTH) {
+        if(emulator->data.type >= MfUltralightTypeNTAG213) {
+            if(memcmp(&buff_rx[1], emulator->auth_data->pwd, 4) == 0) {
+                buff_tx[0] = emulator->auth_data->pack.raw[0];
+                buff_tx[1] = emulator->auth_data->pack.raw[1];
+                tx_bytes = 2;
+                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                command_parsed = true;
+            } else if(!emulator->auth_data->pack.value) {
+                buff_tx[0] = 0x80;
+                buff_tx[1] = 0x80;
+                tx_bytes = 2;
+                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                command_parsed = true;
+            }
+        }
+    } else if(cmd == MF_UL_READ_SIG) {
+        // Check 2nd byte = 0x00 - RFU
+        if(buff_rx[1] == 0x00) {
+            tx_bytes = sizeof(emulator->data.signature);
+            memcpy(buff_tx, emulator->data.signature, tx_bytes);
+            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+            command_parsed = true;
+        }
+    } else if(cmd == MF_UL_CHECK_TEARING) {
+        uint8_t cnt_num = buff_rx[1];
+        if(cnt_num < 3) {
+            buff_tx[0] = emulator->data.tearing[cnt_num];
+            tx_bytes = 1;
+            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+            command_parsed = true;
+        }
+    } else if(cmd == MF_UL_HALT_START) {
+        tx_bits = 0;
+        command_parsed = true;
+    }
 
-    // if(!command_parsed) {
-    //     // Send NACK
-    //     buff_tx[0] = 0x00;
-    //     tx_bits = 4;
-    //     *data_type = FURI_HAL_NFC_TXRX_RAW;
-    // }
-    // // Return tx buffer size in bits
-    // if(tx_bytes) {
-    //     tx_bits = tx_bytes * 8;
-    // }
-    // *buff_tx_len = tx_bits;
-    // return tx_bits > 0;
-    return true;
+    if(!command_parsed) {
+        // Send NACK
+        buff_tx[0] = 0x00;
+        tx_bits = 4;
+        *data_type = FURI_HAL_NFC_TXRX_RAW;
+    }
+    // Return tx buffer size in bits
+    if(tx_bytes) {
+        tx_bits = tx_bytes * 8;
+    }
+    *buff_tx_len = tx_bits;
+    return tx_bits > 0;
 }

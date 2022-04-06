@@ -74,11 +74,16 @@ typedef struct {
     uint8_t pages_to_read;
     uint8_t pages_read;
     bool support_fast_read;
+} MfUltralightReader;
+
+typedef struct {
+    MfUltralightData data;
+    bool support_fast_read;
     bool data_changed;
-    MfUltralightAuth* auth_data;
     bool comp_write_cmd_started;
     uint8_t comp_write_page_addr;
-} MfUltralightReader;
+    MfUltralightAuth* auth_data;
+} MfUltralightEmulator;
 
 bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
@@ -108,7 +113,8 @@ bool mf_ul_read_card(
     MfUltralightReader* reader,
     MfUltralightData* data);
 
-void mf_ul_prepare_emulation(MfUltralightReader* mf_ul_emulate, MfUltralightData* data);
+void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* data);
+
 bool mf_ul_prepare_emulation_response(
     uint8_t* buff_rx,
     uint16_t buff_rx_len,

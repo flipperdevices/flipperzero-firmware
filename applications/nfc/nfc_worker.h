@@ -17,7 +17,7 @@ typedef enum {
     NfcWorkerStateEmulateApdu,
     NfcWorkerStateField,
     NfcWorkerStateReadMifareUltralight,
-    NfcWorkerStateEmulateMifareUl,
+    NfcWorkerStateEmulateMifareUltralight,
     NfcWorkerStateReadMifareClassic,
     NfcWorkerStateReadMifareDesfire,
     // Transition

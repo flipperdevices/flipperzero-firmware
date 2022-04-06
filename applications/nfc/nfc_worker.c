@@ -101,7 +101,7 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_emulate_apdu(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateReadMifareUltralight) {
         nfc_worker_read_mifare_ultralight(nfc_worker);
-    } else if(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
+    } else if(nfc_worker->state == NfcWorkerStateEmulateMifareUltralight) {
         nfc_worker_emulate_mifare_ul(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateReadMifareClassic) {
         nfc_worker_mifare_classic_dict_attack(nfc_worker);
@@ -530,27 +530,27 @@ void nfc_worker_read_mifare_ultralight(NfcWorker* nfc_worker) {
 }
 
 void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
-    // FuriHalNfcDevData* nfc_common = &nfc_worker->dev_data->nfc_data;
-    // MfUltralightReader mf_ul_emulate;
-    // mf_ul_prepare_emulation(&mf_ul_emulate, &nfc_worker->dev_data->mf_ul_data);
-    // while(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
-    //     furi_hal_nfc_emulate_nfca(
-    //         nfc_common->uid,
-    //         nfc_common->uid_len,
-    //         nfc_common->atqa,
-    //         nfc_common->sak,
-    //         mf_ul_prepare_emulation_response,
-    //         &mf_ul_emulate,
-    //         5000);
-    //     // Check if data was modified
-    //     if(mf_ul_emulate.data_changed) {
-    //         nfc_worker->dev_data->mf_ul_data = mf_ul_emulate.data;
-    //         if(nfc_worker->callback) {
-    //             nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
-    //         }
-    //         mf_ul_emulate.data_changed = false;
-    //     }
-    // }
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    MfUltralightEmulator emulator = {};
+    mf_ul_prepare_emulation(&emulator, &nfc_worker->dev_data->mf_ul_data);
+    while(nfc_worker->state == NfcWorkerStateEmulateMifareUltralight) {
+        furi_hal_nfc_emulate_nfca(
+            nfc_data->uid,
+            nfc_data->uid_len,
+            nfc_data->atqa,
+            nfc_data->sak,
+            mf_ul_prepare_emulation_response,
+            &emulator,
+            5000);
+        // Check if data was modified
+        if(emulator.data_changed) {
+            nfc_worker->dev_data->mf_ul_data = emulator.data;
+            if(nfc_worker->callback) {
+                nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
+            }
+            emulator.data_changed = false;
+        }
+    }
 }
 
 void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
