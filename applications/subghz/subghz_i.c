@@ -283,7 +283,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
     return loaded;
 }
 
-bool subghz_get_next_name_file(SubGhz* subghz) {
+bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len) {
     furi_assert(subghz);
 
     Storage* storage = furi_record_open("storage");
@@ -294,7 +294,7 @@ bool subghz_get_next_name_file(SubGhz* subghz) {
     if(strcmp(subghz->file_name, "")) {
         //get the name of the next free file
         storage_get_next_filename(
-            storage, SUBGHZ_RAW_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION, temp_str);
+            storage, SUBGHZ_RAW_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION, temp_str, max_len);
 
         strcpy(subghz->file_name, string_get_cstr(temp_str));
         res = true;

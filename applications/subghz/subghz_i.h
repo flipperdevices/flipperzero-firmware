@@ -156,7 +156,7 @@ void subghz_sleep(SubGhz* subghz);
 bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format);
 void subghz_tx_stop(SubGhz* subghz);
 bool subghz_key_load(SubGhz* subghz, const char* file_path);
-bool subghz_get_next_name_file(SubGhz* subghz);
+bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len);
 bool subghz_save_protocol_to_file(
     SubGhz* subghz,
     FlipperFormat* flipper_format,

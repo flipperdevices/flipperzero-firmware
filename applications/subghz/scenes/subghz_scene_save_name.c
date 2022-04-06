@@ -4,6 +4,8 @@
 #include <lib/subghz/protocols/raw.h>
 #include <gui/modules/validators.h>
 
+#define SUBGHZ_MAX_LEN_NAME 21
+
 void subghz_scene_save_name_text_input_callback(void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
@@ -25,7 +27,7 @@ void subghz_scene_save_name_on_enter(void* context) {
         strcpy(subghz->file_name_tmp, subghz->file_name);
         if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
            SubGhzCustomEventManagerNoSet) {
-            subghz_get_next_name_file(subghz);
+            subghz_get_next_name_file(subghz, SUBGHZ_MAX_LEN_NAME);
             if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
                SubGhzCustomEventManagerSetRAW) {
                 dev_name_empty = true;
@@ -39,7 +41,7 @@ void subghz_scene_save_name_on_enter(void* context) {
         subghz_scene_save_name_text_input_callback,
         subghz,
         subghz->file_name,
-        22, //Max len name
+        SUBGHZ_MAX_LEN_NAME + 1, //Max len name
         dev_name_empty);
 
     ValidatorIsFile* validator_is_file =
