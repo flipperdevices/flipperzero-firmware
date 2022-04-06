@@ -231,7 +231,8 @@ inline static void furi_hal_spi_bus_r_handle_event_callback1(
 static void furi_hal_spi_bus_handle_subghz_event_callback(
     FuriHalSpiBusHandle* handle,
     FuriHalSpiBusHandleEvent event) {
-    furi_hal_spi_bus_r_handle_event_callback(handle, event, &furi_hal_spi_preset_1edge_low_8m);
+    //furi_hal_spi_bus_r_handle_event_callback(handle, event, &furi_hal_spi_preset_1edge_low_8m);
+    furi_hal_spi_bus_r_handle_event_callback1(handle, event, &furi_hal_spi_preset_1edge_low_2m);
 }
 
 FuriHalSpiBusHandle furi_hal_spi_bus_handle_subghz = {
@@ -246,8 +247,7 @@ FuriHalSpiBusHandle furi_hal_spi_bus_handle_subghz = {
 static void furi_hal_spi_bus_handle_nfc_event_callback(
     FuriHalSpiBusHandle* handle,
     FuriHalSpiBusHandleEvent event) {
-    //furi_hal_spi_bus_r_handle_event_callback(handle, event, &furi_hal_spi_preset_2edge_low_8m);
-    furi_hal_spi_bus_r_handle_event_callback1(handle, event, &furi_hal_spi_preset_1edge_low_2m);
+    furi_hal_spi_bus_r_handle_event_callback(handle, event, &furi_hal_spi_preset_2edge_low_8m);
 }
 
 FuriHalSpiBusHandle furi_hal_spi_bus_handle_nfc = {

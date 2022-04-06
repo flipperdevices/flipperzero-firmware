@@ -26,7 +26,7 @@ bool si446x_write_data(FuriHalSpiBusHandle* handle, const uint8_t* data, uint8_t
     furi_hal_spi_acquire(handle);
     ret = furi_hal_spi_bus_tx(handle, (uint8_t*)data, size, SI446X_TIMEOUT);
     furi_hal_spi_release(handle);
-    if(!ret) {
+    if(ret) {
         ret = si446x_wait_cts_spi(handle);
     }
     return ret;
@@ -94,17 +94,22 @@ SI446X_State_t si446x_get_current_channel(FuriHalSpiBusHandle* handle) {
 }
 
 uint8_t si446x_get_fast_reg(FuriHalSpiBusHandle* handle, uint8_t reg) {
-    uint8_t buff_rx[1] = {0};
-    si446x_write_data(handle, &reg, 1);
-    si446x_read_data(handle, &buff_rx[0], sizeof(buff_rx));
-    return buff_rx[0];
+    
+    uint8_t buff_trx[] = {reg,0,0,0,0};
+    // furi_hal_spi_acquire(handle);
+    // furi_hal_spi_bus_tx(handle, &reg, 1, SI446X_TIMEOUT);
+    // furi_hal_spi_release(handle);
+    furi_hal_spi_acquire(handle);
+    furi_hal_spi_bus_trx(handle, buff_trx, (uint8_t*)buff_trx, sizeof(buff_trx), SI446X_TIMEOUT);
+    furi_hal_spi_release(handle);
+    //si446x_read_data(handle, &buff_rx[0], sizeof(buff_rx));
+    return buff_trx[1];
 }
 
 uint8_t si446x_get_get_rssi(FuriHalSpiBusHandle* handle) {
     //ToDo add fast reg, need setting config
-    // uint8_t rssi;
-    // rssi = si446x_get_fast_reg(handle, SI446X_CMD_FRR_A_READ);
-    // return rssi;
+    //return si446x_get_fast_reg(handle, SI446X_CMD_FRR_A_READ);
+
     uint8_t buff_tx[] = {SI446X_CMD_GET_MODEM_STATUS};
     uint8_t buff_rx[4] = {0};
     si446x_write_data(handle, &buff_tx[0], sizeof(buff_tx));
