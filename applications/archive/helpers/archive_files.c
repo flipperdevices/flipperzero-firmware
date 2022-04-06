@@ -225,10 +225,20 @@ void archive_delete_file(void* context, const char* format, ...) {
     va_end(args);
 
     ArchiveBrowserView* browser = context;
-    FileWorker* file_worker = file_worker_alloc(true);
+    Storage* fs_api = furi_record_open("storage");
 
-    bool res = file_worker_remove(file_worker, string_get_cstr(filename));
-    file_worker_free(file_worker);
+    FileInfo fileinfo;
+    storage_common_stat(fs_api, string_get_cstr(filename), &fileinfo);
+
+    bool res = false;
+
+    if (fileinfo.flags & FSF_DIRECTORY) {
+        res = storage_simply_remove_recursive(fs_api, string_get_cstr(filename));
+    } else {
+        res = (storage_common_remove(fs_api, string_get_cstr(filename)) == FSE_OK);
+    }
+
+    furi_record_close("storage");
 
     if(archive_is_favorite("%s", string_get_cstr(filename))) {
         archive_favorites_delete("%s", string_get_cstr(filename));
