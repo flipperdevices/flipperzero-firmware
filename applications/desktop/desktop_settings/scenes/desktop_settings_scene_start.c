@@ -1,4 +1,5 @@
 #include <applications.h>
+#include <lib/toolbox/value_index.h>
 
 #include "../desktop_settings_app.h"
 #include "desktop_settings_scene.h"
@@ -18,20 +19,6 @@ const char* const auto_lock_delay_text[AUTO_LOCK_DELAY_COUNT] = {
 };
 
 const uint32_t auto_lock_delay_value[AUTO_LOCK_DELAY_COUNT] = {0, 30000, 60000, 120000, 300000, 600000};
-
-// TODO: Move this function to value_index.h,c in toolbox (along with its 2 other copies)
-static uint8_t uint32_value_index(const uint32_t value, const uint32_t values[], uint8_t values_count) {
-    int64_t last_value = INT64_MIN;
-    uint8_t index = 0;
-    for(uint8_t i = 0; i < values_count; i++) {
-        if((value >= last_value) && (value <= values[i])) {
-            index = i;
-            break;
-        }
-        last_value = values[i];
-    }
-    return index;
-}
 
 static void desktop_settings_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
@@ -80,7 +67,7 @@ void desktop_settings_scene_start_on_enter(void* context) {
 
     variable_item_list_set_enter_callback(
         variable_item_list, desktop_settings_scene_start_var_list_enter_callback, app);
-    value_index = uint32_value_index(
+    value_index = value_index_uint32(
         app->settings.auto_lock_delay_ms, auto_lock_delay_value, AUTO_LOCK_DELAY_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, auto_lock_delay_text[value_index]);
