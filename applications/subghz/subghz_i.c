@@ -208,7 +208,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
     bool loaded = false;
     string_t temp_str;
     string_init(temp_str);
-    uint32_t version;
+    uint32_t temp_data32;
 
     do {
         stream_clean(fff_data_stream);
@@ -217,24 +217,30 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             break;
         }
 
-        if(!flipper_format_read_header(fff_data_file, temp_str, &version)) {
+        if(!flipper_format_read_header(fff_data_file, temp_str, &temp_data32)) {
             FURI_LOG_E(TAG, "Missing or incorrect header");
             break;
         }
 
         if(((!strcmp(string_get_cstr(temp_str), SUBGHZ_KEY_FILE_TYPE)) ||
             (!strcmp(string_get_cstr(temp_str), SUBGHZ_RAW_FILE_TYPE))) &&
-           version == SUBGHZ_KEY_FILE_VERSION) {
+           temp_data32 == SUBGHZ_KEY_FILE_VERSION) {
         } else {
             FURI_LOG_E(TAG, "Type or version mismatch");
             break;
         }
 
         if(!flipper_format_read_uint32(
-               fff_data_file, "Frequency", (uint32_t*)&subghz->txrx->frequency, 1)) {
+               fff_data_file, "Frequency", (uint32_t*)&temp_data32, 1)) {
             FURI_LOG_E(TAG, "Missing Frequency");
             break;
         }
+
+        if(!furi_hal_subghz_is_frequency_valid(temp_data32)){
+            FURI_LOG_E(TAG, "Frequency not supported");
+            break;
+        }
+        subghz->txrx->frequency = temp_data32;
 
         if(!flipper_format_read_string(fff_data_file, "Preset", temp_str)) {
             FURI_LOG_E(TAG, "Missing Preset");
@@ -267,6 +273,9 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
         if(subghz->txrx->decoder_result) {
             subghz_protocol_decoder_base_deserialize(
                 subghz->txrx->decoder_result, subghz->txrx->fff_data);
+        } else {
+            FURI_LOG_E(TAG, "Protocol not found");
+            break;
         }
 
         loaded = true;
