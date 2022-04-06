@@ -572,8 +572,7 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     //checking regional settings
     bool is_allowed = false;
-    //switch(furi_hal_version_get_hw_region()) {
-        switch(FuriHalVersionRegionJp) {
+    switch(furi_hal_version_get_hw_region()) {
     case FuriHalVersionRegionEuRu:
         //433,05..434,79; 868,15..868,55
         if(!(value >= 433050000 && value <= 434790000) &&
