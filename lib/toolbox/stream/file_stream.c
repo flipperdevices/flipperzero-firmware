@@ -61,6 +61,13 @@ bool file_stream_close(Stream* _stream) {
     return storage_file_close(stream->file);
 }
 
+FS_Error file_stream_get_error(Stream* _stream) {
+    furi_assert(_stream);
+    FileStream* stream = (FileStream*)_stream;
+    furi_check(stream->stream_base.vtable == &file_stream_vtable);
+    return storage_file_get_error(stream->file);
+}
+
 static void file_stream_free(FileStream* stream) {
     storage_file_free(stream->file);
     free(stream);
@@ -169,7 +176,7 @@ static bool file_stream_delete_and_insert(
     string_t scratch_name;
     string_t tmp_name;
     string_init(tmp_name);
-    storage_get_next_filename(_stream->storage, "/any", ".scratch", ".pad", tmp_name);
+    storage_get_next_filename(_stream->storage, "/any", ".scratch", ".pad", tmp_name, 255);
     string_init_printf(scratch_name, "/any/%s.pad", string_get_cstr(tmp_name));
     string_clear(tmp_name);
 

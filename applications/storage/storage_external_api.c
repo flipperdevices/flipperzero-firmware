@@ -3,6 +3,7 @@
 #include "storage.h"
 #include "storage_i.h"
 #include "storage_message.h"
+#include <toolbox/stream/file_stream.h>
 
 #define MAX_NAME_LENGTH 256
 
@@ -46,12 +47,16 @@
 #define S_RETURN_ERROR (return_data.error_value);
 #define S_RETURN_CSTRING (return_data.cstring_value);
 
-#define FILE_OPENED 1
+#define FILE_OPENED_FILE 1
+#define FILE_OPENED_DIR 2
 #define FILE_CLOSED 0
 
+typedef enum {
+    StorageEventFlagFileClose = (1 << 0),
+} StorageEventFlag;
 /****************** FILE ******************/
 
-bool storage_file_open(
+static bool storage_file_open_internal(
     File* file,
     const char* path,
     FS_AccessMode access_mode,
@@ -67,12 +72,48 @@ bool storage_file_open(
             .open_mode = open_mode,
         }};
 
-    file->file_id = FILE_OPENED;
+    file->file_id = FILE_OPENED_FILE;
 
     S_API_MESSAGE(StorageCommandFileOpen);
     S_API_EPILOGUE;
 
     return S_RETURN_BOOL;
+}
+
+static void storage_file_close_callback(const void* message, void* context) {
+    const StorageEvent* storage_event = message;
+
+    if(storage_event->type == StorageEventTypeFileClose ||
+       storage_event->type == StorageEventTypeDirClose) {
+        furi_assert(context);
+        osEventFlagsId_t event = context;
+        osEventFlagsSet(event, StorageEventFlagFileClose);
+    }
+}
+
+bool storage_file_open(
+    File* file,
+    const char* path,
+    FS_AccessMode access_mode,
+    FS_OpenMode open_mode) {
+    bool result;
+    osEventFlagsId_t event = osEventFlagsNew(NULL);
+    FuriPubSubSubscription* subscription = furi_pubsub_subscribe(
+        storage_get_pubsub(file->storage), storage_file_close_callback, event);
+
+    do {
+        result = storage_file_open_internal(file, path, access_mode, open_mode);
+
+        if(!result && file->error_id == FSE_ALREADY_OPEN) {
+            osEventFlagsWait(event, StorageEventFlagFileClose, osFlagsWaitAny, osWaitForever);
+        } else {
+            break;
+        }
+    } while(true);
+
+    furi_pubsub_unsubscribe(storage_get_pubsub(file->storage), subscription);
+    osEventFlagsDelete(event);
+    return result;
 }
 
 bool storage_file_close(File* file) {
@@ -183,7 +224,7 @@ bool storage_file_eof(File* file) {
 
 /****************** DIR ******************/
 
-bool storage_dir_open(File* file, const char* path) {
+static bool storage_dir_open_internal(File* file, const char* path) {
     S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
 
@@ -193,11 +234,32 @@ bool storage_dir_open(File* file, const char* path) {
             .path = path,
         }};
 
-    file->file_id = FILE_OPENED;
+    file->file_id = FILE_OPENED_DIR;
 
     S_API_MESSAGE(StorageCommandDirOpen);
     S_API_EPILOGUE;
     return S_RETURN_BOOL;
+}
+
+bool storage_dir_open(File* file, const char* path) {
+    bool result;
+    osEventFlagsId_t event = osEventFlagsNew(NULL);
+    FuriPubSubSubscription* subscription = furi_pubsub_subscribe(
+        storage_get_pubsub(file->storage), storage_file_close_callback, event);
+
+    do {
+        result = storage_dir_open_internal(file, path);
+
+        if(!result && file->error_id == FSE_ALREADY_OPEN) {
+            osEventFlagsWait(event, StorageEventFlagFileClose, osFlagsWaitAny, osWaitForever);
+        } else {
+            break;
+        }
+    } while(true);
+
+    furi_pubsub_unsubscribe(storage_get_pubsub(file->storage), subscription);
+    osEventFlagsDelete(event);
+    return result;
 }
 
 bool storage_dir_close(File* file) {
@@ -259,31 +321,44 @@ FS_Error storage_common_remove(Storage* storage, const char* path) {
 }
 
 FS_Error storage_common_rename(Storage* storage, const char* old_path, const char* new_path) {
-    S_API_PROLOGUE;
+    FS_Error error = storage_common_copy(storage, old_path, new_path);
+    if(error == FSE_OK) {
+        error = storage_common_remove(storage, old_path);
+    }
 
-    SAData data = {
-        .cpaths = {
-            .old = old_path,
-            .new = new_path,
-        }};
-
-    S_API_MESSAGE(StorageCommandCommonRename);
-    S_API_EPILOGUE;
-    return S_RETURN_ERROR;
+    return error;
 }
 
 FS_Error storage_common_copy(Storage* storage, const char* old_path, const char* new_path) {
-    S_API_PROLOGUE;
+    FS_Error error;
 
-    SAData data = {
-        .cpaths = {
-            .old = old_path,
-            .new = new_path,
-        }};
+    FileInfo fileinfo;
+    error = storage_common_stat(storage, old_path, &fileinfo);
 
-    S_API_MESSAGE(StorageCommandCommonCopy);
-    S_API_EPILOGUE;
-    return S_RETURN_ERROR;
+    if(error == FSE_OK) {
+        if(fileinfo.flags & FSF_DIRECTORY) {
+            error = storage_common_mkdir(storage, new_path);
+        } else {
+            Stream* stream_from = file_stream_alloc(storage);
+            Stream* stream_to = file_stream_alloc(storage);
+
+            do {
+                if(!file_stream_open(stream_from, old_path, FSAM_READ, FSOM_OPEN_EXISTING)) break;
+                if(!file_stream_open(stream_to, new_path, FSAM_WRITE, FSOM_CREATE_NEW)) break;
+                stream_copy_full(stream_from, stream_to);
+            } while(false);
+
+            error = file_stream_get_error(stream_from);
+            if(error == FSE_OK) {
+                error = file_stream_get_error(stream_to);
+            }
+
+            stream_free(stream_from);
+            stream_free(stream_to);
+        }
+    }
+
+    return error;
 }
 
 FS_Error storage_common_mkdir(Storage* storage, const char* path) {
@@ -383,9 +458,17 @@ bool storage_file_is_open(File* file) {
     return (file->file_id != FILE_CLOSED);
 }
 
+bool storage_file_is_dir(File* file) {
+    return (file->file_id == FILE_OPENED_DIR);
+}
+
 void storage_file_free(File* file) {
     if(storage_file_is_open(file)) {
-        storage_file_close(file);
+        if(storage_file_is_dir(file)) {
+            storage_dir_close(file);
+        } else {
+            storage_file_close(file);
+        }
     }
 
     free(file);
@@ -473,7 +556,8 @@ void storage_get_next_filename(
     const char* dirname,
     const char* filename,
     const char* fileextension,
-    string_t nextfilename) {
+    string_t nextfilename,
+    uint8_t max_len) {
     string_t temp_str;
     uint16_t num = 0;
 
@@ -483,8 +567,7 @@ void storage_get_next_filename(
         num++;
         string_printf(temp_str, "%s/%s%d%s", dirname, filename, num, fileextension);
     }
-
-    if(num) {
+    if(num && (max_len > strlen(filename))) {
         string_printf(nextfilename, "%s%d", filename, num);
     } else {
         string_printf(nextfilename, "%s", filename);

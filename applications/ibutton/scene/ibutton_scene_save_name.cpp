@@ -3,6 +3,7 @@
 #include <lib/toolbox/random_name.h>
 
 static void text_input_callback(void* context) {
+    furi_assert(context);
     iButtonApp* app = static_cast<iButtonApp*>(context);
     iButtonEvent event;
 
@@ -34,7 +35,7 @@ void iButtonSceneSaveName::on_enter(iButtonApp* app) {
         key_name_empty);
 
     ValidatorIsFile* validator_is_file =
-        validator_is_file_alloc_init(app->app_folder, app->app_extension);
+        validator_is_file_alloc_init(app->app_folder, app->app_extension, key_name);
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewTextInput);
