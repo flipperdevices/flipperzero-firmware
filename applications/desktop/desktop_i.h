@@ -19,6 +19,7 @@
 #include <gui/scene_manager.h>
 
 #include <loader/loader.h>
+#include <notification/notification_app.h>
 
 #define STATUS_BAR_Y_SHIFT 13
 
@@ -59,8 +60,14 @@ struct Desktop {
     ViewPort* lock_viewport;
 
     AnimationManager* animation_manager;
+
     Loader* loader;
+    NotificationApp *notification;
+
     FuriPubSubSubscription* app_start_stop_subscription;
+    FuriPubSub* input_events_pubsub;
+    FuriPubSubSubscription* input_events_subscription;
+    osTimerId_t auto_lock_timer;
 };
 
 Desktop* desktop_alloc();

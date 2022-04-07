@@ -1,6 +1,9 @@
 #include <storage/storage.h>
 #include <assets_icons.h>
+#include <gui/gui.h>
 #include <gui/view_stack.h>
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
 #include <furi.h>
 #include <furi_hal.h>
 
@@ -12,6 +15,19 @@
 #include "desktop/views/desktop_view_pin_timeout.h"
 #include "desktop_i.h"
 #include "desktop_helpers.h"
+
+static void desktop_start_auto_lock_timer(Desktop *desktop) {
+    const uint32_t auto_lock_delay_ms = desktop->settings.auto_lock_delay_ms;
+    if(auto_lock_delay_ms) {
+        osTimerStart(desktop->auto_lock_timer, furi_hal_ms_to_ticks(auto_lock_delay_ms));
+    } else if(osTimerIsRunning(desktop->auto_lock_timer)) {
+        osTimerStop(desktop->auto_lock_timer);
+    }
+}
+
+static void desktop_stop_auto_lock_timer(Desktop *desktop) {
+    osTimerStop(desktop->auto_lock_timer);
+}
 
 static void desktop_loader_callback(const void* message, void* context) {
     furi_assert(context);
@@ -37,9 +53,18 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
     switch(event) {
     case DesktopGlobalBeforeAppStarted:
         animation_manager_unload_and_stall_animation(desktop->animation_manager);
+        desktop_stop_auto_lock_timer(desktop);
         return true;
     case DesktopGlobalAfterAppFinished:
         animation_manager_load_and_continue_animation(desktop->animation_manager);
+        desktop_start_auto_lock_timer(desktop);
+        return true;
+    case DesktopGlobalAutoLock:
+        if(!loader_is_locked(desktop->loader)) {
+            scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
+            scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
+            notification_message(desktop->notification, &sequence_display_off);
+        }
         return true;
     }
 
@@ -56,6 +81,18 @@ static void desktop_tick_event_callback(void* context) {
     furi_assert(context);
     Desktop* app = context;
     scene_manager_handle_tick_event(app->scene_manager);
+}
+
+static void desktop_input_event_callback(const void* value, void* context) {
+    furi_assert(context);
+    Desktop *desktop = context;
+    desktop_start_auto_lock_timer(desktop);
+}
+
+static void desktop_auto_lock_timer_callback(void *context) {
+    furi_assert(context);
+    Desktop *desktop = context;
+    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalAutoLock);
 }
 
 Desktop* desktop_alloc() {
@@ -146,8 +183,16 @@ Desktop* desktop_alloc() {
        animation_manager_is_animation_loaded(desktop->animation_manager)) {
         animation_manager_unload_and_stall_animation(desktop->animation_manager);
     }
+
+    desktop->notification = furi_record_open("notification");
     desktop->app_start_stop_subscription = furi_pubsub_subscribe(
         loader_get_pubsub(desktop->loader), desktop_loader_callback, desktop);
+
+    desktop->input_events_pubsub = furi_record_open("input_events");
+    desktop->input_events_subscription = furi_pubsub_subscribe(
+        desktop->input_events_pubsub, desktop_input_event_callback, desktop);
+
+    desktop->auto_lock_timer = osTimerNew(desktop_auto_lock_timer_callback, osTimerOnce, desktop, NULL);
 
     return desktop;
 }
@@ -157,8 +202,15 @@ void desktop_free(Desktop* desktop) {
 
     furi_pubsub_unsubscribe(
         loader_get_pubsub(desktop->loader), desktop->app_start_stop_subscription);
+
+    furi_pubsub_unsubscribe(
+        desktop->input_events_pubsub, desktop->input_events_subscription);
+
     desktop->loader = NULL;
+    desktop->input_events_pubsub = NULL;
     furi_record_close("loader");
+    furi_record_close("notification");
+    furi_record_close("input_events");
 
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdMain);
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdLockMenu);
@@ -190,6 +242,8 @@ void desktop_free(Desktop* desktop) {
     furi_thread_free(desktop->scene_thread);
 
     furi_record_close("menu");
+
+    osTimerDelete(desktop->auto_lock_timer);
 
     free(desktop);
 }
@@ -235,6 +289,8 @@ int32_t desktop_srv(void* p) {
     if(furi_hal_rtc_get_fault_data()) {
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneFault);
     }
+
+    desktop_start_auto_lock_timer(desktop);
 
     view_dispatcher_run(desktop->view_dispatcher);
     desktop_free(desktop);
