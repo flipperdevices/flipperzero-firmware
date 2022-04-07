@@ -77,6 +77,9 @@ static void rpc_system_system_device_info_callback(
     ctx->response->content.system_device_info_response.value = str_value;
 
     rpc_send_and_release(ctx->session, ctx->response);
+
+    free(str_key);
+    free(str_value);
 }
 
 static void rpc_system_system_device_info_process(const PB_Main* request, void* context) {
@@ -219,6 +222,9 @@ static void rpc_system_system_power_info_callback(
     ctx->response->content.system_device_info_response.value = str_value;
 
     rpc_send_and_release(ctx->session, ctx->response);
+
+    free(str_key);
+    free(str_value);
 }
 
 static void rpc_system_system_get_power_info_process(const PB_Main* request, void* context) {
