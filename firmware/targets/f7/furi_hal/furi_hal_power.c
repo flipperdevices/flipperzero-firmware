@@ -433,13 +433,14 @@ void furi_hal_power_info_get(FuriHalPowerInfoCallback out, void* context) {
     }
     out("charge_state", string_get_cstr(value), false, context);
 
-    uint16_t val =
+    uint16_t voltage =
         (uint16_t)(furi_hal_power_get_battery_voltage(FuriHalPowerICFuelGauge) * 1000.f);
-    string_printf(value, "%u", val);
+    string_printf(value, "%u", voltage);
     out("battery_voltage", string_get_cstr(value), false, context);
 
-    val = (uint16_t)(furi_hal_power_get_battery_current(FuriHalPowerICFuelGauge) * 1000.f);
-    string_printf(value, "%u", val);
+    int16_t current =
+        (int16_t)(furi_hal_power_get_battery_current(FuriHalPowerICFuelGauge) * 1000.f);
+    string_printf(value, "%d", current);
     out("battery_current", string_get_cstr(value), false, context);
 
     int16_t temperature = (int16_t)furi_hal_power_get_battery_temperature(FuriHalPowerICFuelGauge);

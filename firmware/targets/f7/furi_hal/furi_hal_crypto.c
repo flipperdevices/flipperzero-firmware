@@ -180,16 +180,8 @@ bool furi_hal_crypto_store_add_key(FuriHalCryptoKey* key, uint8_t* slot) {
     return (shci_state == SHCI_Success);
 }
 
-static void crypto_enable() {
-    SET_BIT(AES1->CR, AES_CR_EN);
-}
-
-static void crypto_disable() {
-    CLEAR_BIT(AES1->CR, AES_CR_EN);
-}
-
 static void crypto_key_init(uint32_t* key, uint32_t* iv) {
-    crypto_disable();
+    CLEAR_BIT(AES1->CR, AES_CR_EN);
     MODIFY_REG(
         AES1->CR,
         AES_CR_DATATYPE | AES_CR_KEYSIZE | AES_CR_CHMOD,
@@ -259,7 +251,7 @@ bool furi_hal_crypto_store_load_key(uint8_t slot, const uint8_t* iv) {
     if(SHCI_C2_FUS_LoadUsrKey(slot) == SHCI_Success) {
         return true;
     } else {
-        crypto_disable();
+        CLEAR_BIT(AES1->CR, AES_CR_EN);
         furi_check(osMutexRelease(furi_hal_crypto_mutex) == osOK);
         return false;
     }
@@ -270,13 +262,16 @@ bool furi_hal_crypto_store_unload_key(uint8_t slot) {
         return false;
     }
 
-    crypto_disable();
+    CLEAR_BIT(AES1->CR, AES_CR_EN);
+
+    SHCI_CmdStatus_t shci_state = SHCI_C2_FUS_UnloadUsrKey(slot);
+    furi_assert(shci_state == SHCI_Success);
+
     FURI_CRITICAL_ENTER();
     LL_AHB2_GRP1_ForceReset(LL_AHB2_GRP1_PERIPH_AES1);
     LL_AHB2_GRP1_ReleaseReset(LL_AHB2_GRP1_PERIPH_AES1);
     FURI_CRITICAL_EXIT();
 
-    SHCI_CmdStatus_t shci_state = SHCI_C2_FUS_UnloadUsrKey(slot);
     furi_check(osMutexRelease(furi_hal_crypto_mutex) == osOK);
     return (shci_state == SHCI_Success);
 }
@@ -284,7 +279,7 @@ bool furi_hal_crypto_store_unload_key(uint8_t slot) {
 bool furi_hal_crypto_encrypt(const uint8_t* input, uint8_t* output, size_t size) {
     bool state = false;
 
-    crypto_enable();
+    SET_BIT(AES1->CR, AES_CR_EN);
 
     MODIFY_REG(AES1->CR, AES_CR_MODE, CRYPTO_MODE_ENCRYPT);
 
@@ -299,7 +294,7 @@ bool furi_hal_crypto_encrypt(const uint8_t* input, uint8_t* output, size_t size)
         }
     }
 
-    crypto_disable();
+    CLEAR_BIT(AES1->CR, AES_CR_EN);
 
     return state;
 }
@@ -310,7 +305,7 @@ bool furi_hal_crypto_decrypt(const uint8_t* input, uint8_t* output, size_t size)
     if(!furi_hal_crypto_mode_init_done) {
         MODIFY_REG(AES1->CR, AES_CR_MODE, CRYPTO_MODE_INIT);
 
-        crypto_enable();
+        SET_BIT(AES1->CR, AES_CR_EN);
 
         uint32_t countdown = CRYPTO_TIMEOUT;
         while(!READ_BIT(AES1->SR, AES_SR_CCF)) {
@@ -328,7 +323,7 @@ bool furi_hal_crypto_decrypt(const uint8_t* input, uint8_t* output, size_t size)
     }
 
     MODIFY_REG(AES1->CR, AES_CR_MODE, CRYPTO_MODE_DECRYPT);
-    crypto_enable();
+    SET_BIT(AES1->CR, AES_CR_EN);
 
     for(size_t i = 0; i < size; i += CRYPTO_BLK_LEN) {
         size_t blk_len = size - i;
@@ -341,7 +336,7 @@ bool furi_hal_crypto_decrypt(const uint8_t* input, uint8_t* output, size_t size)
         }
     }
 
-    crypto_disable();
+    CLEAR_BIT(AES1->CR, AES_CR_EN);
 
     return state;
 }
