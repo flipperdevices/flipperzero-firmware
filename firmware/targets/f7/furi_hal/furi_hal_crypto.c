@@ -307,7 +307,7 @@ bool furi_hal_crypto_encrypt(const uint8_t* input, uint8_t* output, size_t size)
 bool furi_hal_crypto_decrypt(const uint8_t* input, uint8_t* output, size_t size) {
     bool state = false;
 
-    if (!furi_hal_crypto_mode_init_done) {
+    if(!furi_hal_crypto_mode_init_done) {
         MODIFY_REG(AES1->CR, AES_CR_MODE, CRYPTO_MODE_INIT);
 
         crypto_enable();
@@ -325,8 +325,8 @@ bool furi_hal_crypto_decrypt(const uint8_t* input, uint8_t* output, size_t size)
         SET_BIT(AES1->CR, AES_CR_CCFC);
 
         furi_hal_crypto_mode_init_done = true;
-    }  
-        
+    }
+
     MODIFY_REG(AES1->CR, AES_CR_MODE, CRYPTO_MODE_DECRYPT);
     crypto_enable();
 
