@@ -230,13 +230,12 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             break;
         }
 
-        if(!flipper_format_read_uint32(
-               fff_data_file, "Frequency", (uint32_t*)&temp_data32, 1)) {
+        if(!flipper_format_read_uint32(fff_data_file, "Frequency", (uint32_t*)&temp_data32, 1)) {
             FURI_LOG_E(TAG, "Missing Frequency");
             break;
         }
 
-        if(!furi_hal_subghz_is_frequency_valid(temp_data32)){
+        if(!furi_hal_subghz_is_frequency_valid(temp_data32)) {
             FURI_LOG_E(TAG, "Frequency not supported");
             break;
         }
@@ -305,7 +304,7 @@ bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len) {
         storage_get_next_filename(
             storage, SUBGHZ_RAW_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION, temp_str, max_len);
 
-        strcpy(subghz->file_name, string_get_cstr(temp_str));
+        strncpy(subghz->file_name, string_get_cstr(temp_str), SUBGHZ_MAX_LEN_NAME);
         res = true;
     }
 
