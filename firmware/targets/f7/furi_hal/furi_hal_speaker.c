@@ -62,6 +62,6 @@ void furi_hal_speaker_start(float frequency, float volume) {
 }
 
 void furi_hal_speaker_stop() {
-    LL_TIM_CC_DisableChannel(FURI_HAL_SPEAKER_TIMER, FURI_HAL_SPEAKER_CHANNEL);
+    LL_TIM_DisableAllOutputs(FURI_HAL_SPEAKER_TIMER);
     LL_TIM_DisableCounter(FURI_HAL_SPEAKER_TIMER);
 }
