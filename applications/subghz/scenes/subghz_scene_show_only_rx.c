@@ -30,12 +30,7 @@ const bool subghz_scene_show_only_rx_on_event(void* context, SceneManagerEvent e
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubGhzCustomEventSceneShowOnlyRX) {
-            if(scene_manager_search_and_switch_to_previous_scene(
-                   subghz->scene_manager, SubGhzSceneReadRAW)) {
-                scene_manager_previous_scene(subghz->scene_manager);
-            } else {
-                scene_manager_previous_scene(subghz->scene_manager);
-            }
+            scene_manager_previous_scene(subghz->scene_manager);
             return true;
         }
     }
