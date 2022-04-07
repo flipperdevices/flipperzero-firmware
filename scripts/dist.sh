@@ -10,8 +10,8 @@ rm -rf "${targetdir}"
 mkdir -p "${targetdir}"
 mkdir -p "${updatedir}"
 
-for PROJECT in firmware updater
-do
+function copy_project_files() {
+    local PROJECT=$1
     # copy build outputs
     cp firmware/.obj/${TARGET}-${PROJECT}/${PROJECT}.elf \
         dist/${TARGET}/flipper-z-${TARGET}-${PROJECT}-${suffix}.elf
@@ -21,24 +21,12 @@ do
         dist/${TARGET}/flipper-z-${TARGET}-${PROJECT}-${suffix}.dfu
     cp firmware/.obj/${TARGET}-${PROJECT}/${PROJECT}.json \
         dist/${TARGET}/flipper-z-${TARGET}-${PROJECT}-${suffix}.json
-done
+}
 
-# generate full.json
-#./scripts/meta.py merge \
-#    -i dist/${TARGET}/flipper-z-${TARGET}-${PROJECT}-${suffix}.json \
-#    >dist/${TARGET}/flipper-z-${TARGET}-full-${suffix}.json
-
-./scripts/update.py generate \
-    -d "${updatedir}" \
-    -v "${VERSION_STRING}" \
-    -t "${TARGET}" \
-    -dfu "dist/${TARGET}/flipper-z-${TARGET}-firmware-${suffix}.dfu" \
-    -stage "dist/${TARGET}/flipper-z-${TARGET}-updater-${suffix}.bin"
-
+copy_project_files firmware
 
 echo "Firmware binaries can be found at:"
 echo -e "\t$(pwd)/dist/${TARGET}"
 echo "Use this file to flash your Flipper:"
 echo -e "\tflipper-z-${TARGET}-full-${suffix}.dfu"
-echo "Use this directory to self-update your Flipper:"
-echo -e "\t${updatedir}"
+

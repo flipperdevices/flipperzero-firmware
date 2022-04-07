@@ -34,7 +34,7 @@ endif
 include	$(PROJECT_ROOT)/make/defaults.mk
 
 .PHONY: all
-all: firmware_all firmware_flasher
+all: firmware_all
 	@$(PROJECT_ROOT)/scripts/dist.sh
 
 .PHONY: whole
@@ -59,6 +59,10 @@ blackmagic:
 wipe:
 	@$(PROJECT_ROOT)/scripts/flash.py wipe
 	@$(PROJECT_ROOT)/scripts/ob.py set
+
+.PHONY: update_package
+update_package: firmware firmware_flasher
+	@$(PROJECT_ROOT)/scripts/dist_update.sh
 
 .PHONY: firmware_all
 firmware_all:
