@@ -55,6 +55,7 @@ void flipper_boot_dfu_show_splash() {
 
 void flipper_boot_dfu_exec() {
     (void)flipper_boot_dfu_init;
+    // This remains commented out until core init is fixed & stops breaking DFU.
     //flipper_boot_dfu_init();
     //flipper_boot_dfu_show_splash();
 
