@@ -11,15 +11,15 @@ struct Version {
 
 /* version of current running firmware (bootloader/flipper) */
 static const Version version = {
-    .git_hash = GIT_COMMIT
+    .git_hash = GIT_COMMIT,
+    .git_branch = GIT_BRANCH,
+    .git_branch_num = GIT_BRANCH_NUM,
+    .build_date = BUILD_DATE,
+    .version = VERSION
 #ifdef FURI_RAM_EXEC
     " (RAM)"
 #endif
     ,
-    .git_branch = GIT_BRANCH,
-    .git_branch_num = GIT_BRANCH_NUM,
-    .build_date = BUILD_DATE,
-    .version = VERSION,
     .target = TARGET,
 };
 
