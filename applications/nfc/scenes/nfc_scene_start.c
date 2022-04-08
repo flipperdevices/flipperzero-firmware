@@ -26,8 +26,7 @@ void nfc_scene_start_on_enter(void* context) {
         SubmenuIndexRunScript,
         nfc_scene_start_submenu_callback,
         nfc);
-    submenu_add_item(
-        submenu, "Saved", SubmenuIndexSaved, nfc_scene_start_submenu_callback, nfc);
+    submenu_add_item(submenu, "Saved", SubmenuIndexSaved, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(
         submenu, "Add Manually", SubmenuIndexAddManualy, nfc_scene_start_submenu_callback, nfc);
 
