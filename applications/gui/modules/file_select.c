@@ -68,7 +68,7 @@ static void file_select_draw_callback(Canvas* canvas, void* _model) {
             string_clear(string_buff);
         }
     } else {
-        canvas_draw_str(canvas, 27, item_height, "Nothing saved yet.");
+        canvas_draw_str(canvas, 6, item_height, "Empty Folder");
     }
     elements_scrollbar(canvas, model->first_file_index + model->position, model->file_count);
 }
