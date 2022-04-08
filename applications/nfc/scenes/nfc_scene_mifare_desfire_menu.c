@@ -16,7 +16,7 @@ void nfc_scene_mifare_desfire_menu_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "Name and save",
+        "Save",
         SubmenuIndexSave,
         nfc_scene_mifare_desfire_menu_submenu_callback,
         nfc);
