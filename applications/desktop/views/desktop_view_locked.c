@@ -11,6 +11,7 @@
 #include "desktop_view_locked.h"
 
 #define DOOR_MOVING_INTERVAL_MS (1000 / 16)
+#define LOCKED_HINT_TIMEOUT_MS (1000)
 #define UNLOCKED_HINT_TIMEOUT_MS (2000)
 
 #define DOOR_OFFSET_START -55
@@ -34,6 +35,7 @@ struct DesktopViewLocked {
 
 typedef struct {
     uint32_t hint_icon_expire_at;
+    bool locked_hint;
     bool unlocked_hint;
     bool locked;
     bool pin_locked;
@@ -79,7 +81,9 @@ static bool desktop_view_locked_doors_move(DesktopViewLockedModel* model) {
 static void desktop_view_locked_update_hint_icon_timeout(DesktopViewLocked* locked_view) {
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
     model->hint_icon_expire_at = osKernelGetTickCount() + osKernelGetTickFreq();
+    model->locked_hint = true;
     view_commit_model(locked_view->view, true);
+    xTimerChangePeriod(locked_view->timer, pdMS_TO_TICKS(LOCKED_HINT_TIMEOUT_MS), portMAX_DELAY);
 }
 
 void desktop_view_locked_update(DesktopViewLocked* locked_view) {
@@ -87,8 +91,15 @@ void desktop_view_locked_update(DesktopViewLocked* locked_view) {
 
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
     if(model->locked) {
-        model->doors_closing = desktop_view_locked_doors_move(model);
-        stop_timer = !model->doors_closing;
+        if(model->locked_hint) {
+            stop_timer = true;
+            model->locked_hint = false;
+            locked_view->callback(DesktopLockedEventHintClosed, locked_view->context);
+
+        } else {
+            model->doors_closing = desktop_view_locked_doors_move(model);
+            stop_timer = !model->doors_closing;
+        }
     } else {
         model->unlocked_hint = false;
         stop_timer = true;
@@ -189,7 +200,6 @@ DesktopViewLocked* desktop_view_locked_alloc() {
     locked_view->timer =
         xTimerCreate(NULL, 1000 / 16, pdTRUE, locked_view, locked_view_timer_callback);
 
-    locked_view->view = view_alloc();
     view_allocate_model(locked_view->view, ViewModelTypeLocking, sizeof(DesktopViewLockedModel));
     view_set_context(locked_view->view, locked_view);
     view_set_draw_callback(locked_view->view, desktop_view_locked_draw);
@@ -227,6 +237,7 @@ void desktop_view_locked_unlock(DesktopViewLocked* locked_view) {
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
     model->locked = false;
     model->pin_locked = false;
+    model->locked_hint = false;
     model->unlocked_hint = true;
     view_commit_model(locked_view->view, true);
     xTimerChangePeriod(locked_view->timer, pdMS_TO_TICKS(UNLOCKED_HINT_TIMEOUT_MS), portMAX_DELAY);
