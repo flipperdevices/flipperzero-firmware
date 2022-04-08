@@ -31,7 +31,6 @@ static void desktop_settings_scene_start_auto_lock_delay_changed(VariableItem *i
 
     variable_item_set_current_value_text(item, auto_lock_delay_text[index]);
     app->settings.auto_lock_delay_ms = auto_lock_delay_value[index];
-    // TODO: Update the setting immediately
 }
 
 void desktop_settings_scene_start_on_enter(void* context) {

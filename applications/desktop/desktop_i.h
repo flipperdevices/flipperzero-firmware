@@ -73,3 +73,5 @@ struct Desktop {
 Desktop* desktop_alloc();
 
 void desktop_free(Desktop* desktop);
+void desktop_lock(Desktop* desktop);
+void desktop_unlock(Desktop* desktop);
