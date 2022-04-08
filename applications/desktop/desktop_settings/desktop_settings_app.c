@@ -44,7 +44,9 @@ DesktopSettingsApp* desktop_settings_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, DesktopSettingsAppViewMenu, submenu_get_view(app->submenu));
     view_dispatcher_add_view(
-        app->view_dispatcher, DesktopSettingsAppViewVarItemList, variable_item_list_get_view(app->variable_item_list));
+        app->view_dispatcher,
+        DesktopSettingsAppViewVarItemList,
+        variable_item_list_get_view(app->variable_item_list));
     view_dispatcher_add_view(
         app->view_dispatcher, DesktopSettingsAppViewIdPopup, popup_get_view(app->popup));
     view_dispatcher_add_view(

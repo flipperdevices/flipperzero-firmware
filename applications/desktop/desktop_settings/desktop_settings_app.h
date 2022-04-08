@@ -27,7 +27,7 @@ typedef struct {
     Gui* gui;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
-    VariableItemList *variable_item_list;
+    VariableItemList* variable_item_list;
     Submenu* submenu;
     Popup* popup;
     DesktopViewPinInput* pin_input_view;

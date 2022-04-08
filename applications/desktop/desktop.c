@@ -78,37 +78,37 @@ static void desktop_tick_event_callback(void* context) {
 static void desktop_input_event_callback(const void* value, void* context) {
     furi_assert(value);
     furi_assert(context);
-    const InputEvent *event = value;
-    Desktop *desktop = context;
+    const InputEvent* event = value;
+    Desktop* desktop = context;
     if(event->type == InputTypePress) {
         desktop_start_auto_lock_timer(desktop);
     }
 }
 
-static void desktop_auto_lock_timer_callback(void *context) {
+static void desktop_auto_lock_timer_callback(void* context) {
     furi_assert(context);
-    Desktop *desktop = context;
+    Desktop* desktop = context;
     view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalAutoLock);
 }
 
-static void desktop_start_auto_lock_timer(Desktop *desktop) {
-    osTimerStart(desktop->auto_lock_timer,
-        furi_hal_ms_to_ticks(desktop->settings.auto_lock_delay_ms));
+static void desktop_start_auto_lock_timer(Desktop* desktop) {
+    osTimerStart(
+        desktop->auto_lock_timer, furi_hal_ms_to_ticks(desktop->settings.auto_lock_delay_ms));
 }
 
-static void desktop_stop_auto_lock_timer(Desktop *desktop) {
+static void desktop_stop_auto_lock_timer(Desktop* desktop) {
     osTimerStop(desktop->auto_lock_timer);
 }
 
-static void desktop_auto_lock_arm(Desktop *desktop) {
+static void desktop_auto_lock_arm(Desktop* desktop) {
     if(desktop->settings.auto_lock_delay_ms) {
-        desktop->input_events_subscription =
-            furi_pubsub_subscribe(desktop->input_events_pubsub, desktop_input_event_callback, desktop);
+        desktop->input_events_subscription = furi_pubsub_subscribe(
+            desktop->input_events_pubsub, desktop_input_event_callback, desktop);
         desktop_start_auto_lock_timer(desktop);
     }
 }
 
-static void desktop_auto_lock_inhibit(Desktop *desktop) {
+static void desktop_auto_lock_inhibit(Desktop* desktop) {
     desktop_stop_auto_lock_timer(desktop);
     if(desktop->input_events_subscription) {
         furi_pubsub_unsubscribe(desktop->input_events_pubsub, desktop->input_events_subscription);
@@ -116,14 +116,15 @@ static void desktop_auto_lock_inhibit(Desktop *desktop) {
     }
 }
 
-void desktop_lock(Desktop *desktop) {
+void desktop_lock(Desktop* desktop) {
     desktop_auto_lock_inhibit(desktop);
-    scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
+    scene_manager_set_scene_state(
+        desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
     notification_message(desktop->notification, &sequence_display_off);
 }
 
-void desktop_unlock(Desktop *desktop) {
+void desktop_unlock(Desktop* desktop) {
     furi_hal_rtc_set_pin_fails(0);
     desktop_helpers_unlock_system(desktop);
     scene_manager_search_and_switch_to_previous_scene(desktop->scene_manager, DesktopSceneMain);
@@ -226,7 +227,8 @@ Desktop* desktop_alloc() {
     desktop->input_events_pubsub = furi_record_open("input_events");
     desktop->input_events_subscription = NULL;
 
-    desktop->auto_lock_timer = osTimerNew(desktop_auto_lock_timer_callback, osTimerOnce, desktop, NULL);
+    desktop->auto_lock_timer =
+        osTimerNew(desktop_auto_lock_timer_callback, osTimerOnce, desktop, NULL);
 
     return desktop;
 }
@@ -238,8 +240,7 @@ void desktop_free(Desktop* desktop) {
         loader_get_pubsub(desktop->loader), desktop->app_start_stop_subscription);
 
     if(desktop->input_events_subscription) {
-        furi_pubsub_unsubscribe(
-            desktop->input_events_pubsub, desktop->input_events_subscription);
+        furi_pubsub_unsubscribe(desktop->input_events_pubsub, desktop->input_events_subscription);
         desktop->input_events_subscription = NULL;
     }
 

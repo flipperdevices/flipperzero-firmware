@@ -18,15 +18,16 @@ const char* const auto_lock_delay_text[AUTO_LOCK_DELAY_COUNT] = {
     "10min",
 };
 
-const uint32_t auto_lock_delay_value[AUTO_LOCK_DELAY_COUNT] = {0, 30000, 60000, 120000, 300000, 600000};
+const uint32_t auto_lock_delay_value[AUTO_LOCK_DELAY_COUNT] =
+    {0, 30000, 60000, 120000, 300000, 600000};
 
 static void desktop_settings_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-static void desktop_settings_scene_start_auto_lock_delay_changed(VariableItem *item) {
-   DesktopSettingsApp* app = variable_item_get_context(item);
+static void desktop_settings_scene_start_auto_lock_delay_changed(VariableItem* item) {
+    DesktopSettingsApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, auto_lock_delay_text[index]);
@@ -35,34 +36,21 @@ static void desktop_settings_scene_start_auto_lock_delay_changed(VariableItem *i
 
 void desktop_settings_scene_start_on_enter(void* context) {
     DesktopSettingsApp* app = context;
-    VariableItemList *variable_item_list = app->variable_item_list;
+    VariableItemList* variable_item_list = app->variable_item_list;
 
     VariableItem* item;
     uint8_t value_index;
 
-    variable_item_list_add(
-        variable_item_list,
-        "Favorite App",
-        1,
-        NULL,
-        NULL
-    );
+    variable_item_list_add(variable_item_list, "Favorite App", 1, NULL, NULL);
 
-    variable_item_list_add(
-        variable_item_list,
-        "PIN Setup",
-        1,
-        NULL,
-        NULL
-    );
+    variable_item_list_add(variable_item_list, "PIN Setup", 1, NULL, NULL);
 
     item = variable_item_list_add(
         variable_item_list,
         "Auto Lock Time",
         AUTO_LOCK_DELAY_COUNT,
         desktop_settings_scene_start_auto_lock_delay_changed,
-        app
-    );
+        app);
 
     variable_item_list_set_enter_callback(
         variable_item_list, desktop_settings_scene_start_var_list_enter_callback, app);

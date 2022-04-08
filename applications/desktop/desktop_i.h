@@ -62,7 +62,7 @@ struct Desktop {
     AnimationManager* animation_manager;
 
     Loader* loader;
-    NotificationApp *notification;
+    NotificationApp* notification;
 
     FuriPubSubSubscription* app_start_stop_subscription;
     FuriPubSub* input_events_pubsub;
