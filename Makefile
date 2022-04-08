@@ -61,7 +61,7 @@ wipe:
 	@$(PROJECT_ROOT)/scripts/ob.py set
 
 .PHONY: update_package
-update_package: firmware firmware_flasher
+update_package: firmware_all firmware_flasher
 	@$(PROJECT_ROOT)/scripts/dist_update.sh
 
 .PHONY: firmware_all
