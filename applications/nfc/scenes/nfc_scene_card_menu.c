@@ -20,14 +20,14 @@ void nfc_scene_card_menu_on_enter(void* context) {
     if(nfc->dev->dev_data.nfc_data.protocol > NfcDeviceProtocolUnknown) {
         submenu_add_item(
             submenu,
-            "Run compatible app",
+            "Run Compatible App",
             SubmenuIndexRunApp,
             nfc_scene_card_menu_submenu_callback,
             nfc);
     }
     submenu_add_item(
         submenu,
-        "Additional Reading Scripts",
+        "Additional reading scripts",
         SubmenuIndexChooseScript,
         nfc_scene_card_menu_submenu_callback,
         nfc);
