@@ -14,10 +14,15 @@
         break;          \
     }
 
+#define STM_DFU_VENDOR_ID 0x0483
+#define STM_DFU_PRODUCT_ID 0xDF11
+/* Written into DFU file by build pipeline */
+#define FLIPPER_ZERO_DFU_DEVICE_CODE 0xFFFF
+
 static const DfuValidationParams flipper_dfu_params = {
-    .device = 0xFFFF,
-    .product = 0xDF11,
-    .vendor = 0x0483,
+    .device = FLIPPER_ZERO_DFU_DEVICE_CODE,
+    .product = STM_DFU_PRODUCT_ID,
+    .vendor = STM_DFU_VENDOR_ID,
 };
 
 static void update_task_dfu_progress(const uint8_t progress, void* context) {
