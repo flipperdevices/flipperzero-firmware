@@ -36,7 +36,6 @@ void updater_scene_loadcfg_on_enter(void* context) {
             AlignCenter,
             AlignCenter,
             FontSecondary,
-            //string_get_cstr(pending_upd->message));
             string_get_cstr(pending_upd->manifest->version));
 
         widget_add_button_element(

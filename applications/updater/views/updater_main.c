@@ -38,8 +38,9 @@ void updater_main_model_set_state(
             model->total_stages = total_stages;
             model->progress = progress;
             if(string_cmp_str(model->status, message)) {
-                model->rendered_progress = 101; /* to force view update */
                 string_set(model->status, message);
+                model->rendered_progress = progress;
+                return true;
             }
             if((model->rendered_progress > progress) ||
                ((progress - model->rendered_progress) > PROGRESS_RENDER_STEP)) {

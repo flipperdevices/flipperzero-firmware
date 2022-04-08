@@ -5,20 +5,11 @@
 #define DFU_SUFFIX_VERSION 0x011A
 #define DFU_DATA_BUFFER_MAX_LEN 512
 
-#define CHECK_FRESULT(result) \
-    {                         \
-        if(!(result)) {       \
-            return false;     \
-        }                     \
-    }
-
-
 bool dfu_file_validate_crc(File* dfuf, const DfuPageTaskProgressCb progress_cb, void* context) {
-    if(!storage_file_is_open(dfuf)) {
+    if(!storage_file_is_open(dfuf) || !storage_file_seek(dfuf, 0, true)) {
         return false;
     }
 
-    CHECK_FRESULT(storage_file_seek(dfuf, 0, true));
     furi_hal_crc_reset();
 
     uint32_t file_crc = 0;
@@ -60,11 +51,9 @@ uint8_t dfu_file_validate_headers(File* dfuf, const DfuValidationParams* referen
     DfuSuffix dfu_suffix = {0};
     uint16_t bytes_read = 0;
 
-    if(!storage_file_is_open(dfuf)) {
+    if(!storage_file_is_open(dfuf) || !storage_file_seek(dfuf, 0, true)) {
         return 0;
     }
-
-    CHECK_FRESULT(storage_file_seek(dfuf, 0, true));
 
     const uint32_t dfu_suffix_offset = storage_file_size(dfuf) - sizeof(DfuSuffix);
 
@@ -83,7 +72,9 @@ uint8_t dfu_file_validate_headers(File* dfuf, const DfuValidationParams* referen
         return 0;
     }
 
-    CHECK_FRESULT(storage_file_seek(dfuf, dfu_suffix_offset, true));
+    if(!storage_file_seek(dfuf, dfu_suffix_offset, true)) {
+        return 0;
+    }
 
     bytes_read = storage_file_read(dfuf, &dfu_suffix, sizeof(DfuSuffix));
     if(bytes_read != sizeof(DfuSuffix)) {
@@ -165,7 +156,9 @@ bool dfu_file_process_targets(const DfuUpdateTask* task, File* dfuf, const uint8
     ImageElementHeader image_element = {0};
     uint16_t bytes_read = 0;
 
-    CHECK_FRESULT(storage_file_seek(dfuf, sizeof(DfuPrefix), true));
+    if(!storage_file_seek(dfuf, sizeof(DfuPrefix), true)) {
+        return UpdateBlockResult_Failed;
+    };
 
     for(uint8_t i_target = 0; i_target < n_targets; ++i_target) {
         bytes_read = storage_file_read(dfuf, &target_prefix, sizeof(TargetPrefix));

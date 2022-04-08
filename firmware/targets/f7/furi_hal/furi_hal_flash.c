@@ -341,8 +341,6 @@ bool furi_hal_flash_program_page(const uint8_t page, const uint8_t* data, uint16
     uint16_t length = _length;
     furi_check(length <= FURI_HAL_FLASH_PAGE_SIZE);
 
-    //return true;
-
     furi_hal_flash_erase(page);
 
     furi_hal_flash_begin(false);

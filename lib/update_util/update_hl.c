@@ -5,7 +5,6 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <m-string.h>
-#include <storage/storage.h>
 #include <loader/loader.h>
 #include <lib/toolbox/path.h>
 

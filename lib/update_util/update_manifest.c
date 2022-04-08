@@ -44,7 +44,6 @@ static bool
             "Loader CRC",
             (uint8_t*)&update_manifest->staged_loader_crc,
             sizeof(uint32_t));
-    //true;
     string_clear(filetype);
 
     /* Optional fields - we can have dfu, radio, or both */

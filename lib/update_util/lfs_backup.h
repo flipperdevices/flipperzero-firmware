@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <storage/storage.h>
 
 #ifdef __cplusplus
 extern "C" {

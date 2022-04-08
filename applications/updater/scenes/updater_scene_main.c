@@ -32,9 +32,9 @@ void updater_scene_main_on_enter(void* context) {
     updater_main_set_storage_pubsub(main_view, sub);
 
     // If (somehow) we started after SD card is mounted, initiate update immediately
-    //if(storage_sd_status(updater->storage) == FSE_OK) {
-    //    view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventStartUpdate);
-    //}
+    if(storage_sd_status(updater->storage) == FSE_OK) {
+        view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventStartUpdate);
+    }
 
     updater_main_set_view_dispatcher(main_view, updater->view_dispatcher);
     view_dispatcher_switch_to_view(updater->view_dispatcher, UpdaterViewMain);

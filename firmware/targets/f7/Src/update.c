@@ -26,8 +26,6 @@ static bool flipper_update_init() {
     furi_hal_interrupt_init();
     furi_hal_delay_init(false);
 
-    //MX_GPIO_Init();
-
     furi_hal_spi_init();
     furi_hal_crc_init(false);
 
