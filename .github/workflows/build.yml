@@ -86,7 +86,7 @@ jobs:
             set -e
             for TARGET in ${TARGETS}
             do
-              make TARGET=${TARGET} ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
+              make update_package TARGET=${TARGET} ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
             done
 
       - name: 'Move upload files'
