@@ -69,7 +69,7 @@ void subghz_begin(SubGhz* subghz, FuriHalSubGhzPreset preset) {
 uint32_t subghz_rx(SubGhz* subghz, uint32_t frequency) {
     furi_assert(subghz);
     if(!furi_hal_subghz_is_frequency_valid(frequency)) {
-        furi_crash("SugGhz: Incorrect received frequency.");
+        furi_crash("SugGhz: Incorrect RX frequency.");
     }
     furi_assert(
         subghz->txrx->txrx_state != SubGhzTxRxStateRx &&
@@ -90,7 +90,7 @@ uint32_t subghz_rx(SubGhz* subghz, uint32_t frequency) {
 static bool subghz_tx(SubGhz* subghz, uint32_t frequency) {
     furi_assert(subghz);
     if(!furi_hal_subghz_is_frequency_valid(frequency)) {
-        furi_crash("SugGhz: Transmission frequency is incorrect.");
+        furi_crash("SugGhz: Incorrect TX frequency.");
     }
     furi_assert(subghz->txrx->txrx_state != SubGhzTxRxStateSleep);
     furi_hal_subghz_idle();
@@ -309,22 +309,19 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
     switch(load_key_state) {
     case SubGhzLoadKeyStateParseErr:
         dialog_message_show_storage_error(subghz->dialogs, "Cannot parse\nfile");
-        break;
+        return false;
 
     case SubGhzLoadKeyStateOnlyRx:
         subghz_dialog_message_show_only_rx(subghz);
-        break;
+        return false;
 
     case SubGhzLoadKeyStateOK:
         return true;
-        break;
 
     default:
-        furi_crash("SubGhz: Load key state unknown.");
-        break;
+        furi_crash("SubGhz: Unknown load_key_state.");
+        return false;
     }
-
-    return false;
 }
 
 bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len) {
