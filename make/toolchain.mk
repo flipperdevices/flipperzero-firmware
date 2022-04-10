@@ -4,7 +4,7 @@ OS := $(shell uname -s)
 ifeq ($(TOOLCHAIN), arm)
 PREFIX = arm-none-eabi-
 ifdef GCC_PATH
-PREFIX = $(GCC_PATH)/$(PREFIX)
+PREFIX := $(GCC_PATH)/$(PREFIX)
 endif
 endif
 
