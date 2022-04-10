@@ -40,14 +40,10 @@ static bool page_task_compare_flash(
 
 /* Verifies a flash operation address for fitting into writable memory
  */
-static bool check_address_boundaries(const size_t address, bool allow_bl_region) {
+static bool check_address_boundaries(const size_t address) {
     const size_t min_allowed_address = furi_hal_flash_get_base();
     const size_t max_allowed_address = (size_t)furi_hal_flash_get_free_end_address();
     return ((address >= min_allowed_address) && (address < max_allowed_address));
-}
-
-static bool validate_main_fw_address(const size_t address) {
-    return check_address_boundaries(address, false);
 }
 
 int32_t update_task_worker_flash_writer(void* context) {
@@ -55,7 +51,7 @@ int32_t update_task_worker_flash_writer(void* context) {
     UpdateTask* update_task = context;
     bool success = false;
     DfuUpdateTask page_task = {
-        .address_cb = &validate_main_fw_address,
+        .address_cb = &check_address_boundaries,
         .progress_cb = &update_task_dfu_progress,
         .task_cb = &furi_hal_flash_program_page,
         .context = update_task,
@@ -128,18 +124,16 @@ int32_t update_task_worker_backup_restore(void* context) {
                     lfs_backup_create(update_task->storage, string_get_cstr(backup_file_path)))) {
                 furi_hal_rtc_set_flag(FuriHalRtcFlagExecuteUpdate);
             }
-
         } else if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePostUpdate)) {
             update_task_set_progress(update_task, UpdateTaskStageLfsRestore, 0);
             furi_hal_rtc_reset_flag(FuriHalRtcFlagExecutePostUpdate);
             success = lfs_backup_unpack(update_task->storage, string_get_cstr(backup_file_path));
         }
-
-        update_task_set_progress(update_task, UpdateTaskStageComplete, 100);
-        success = true;
     } while(false);
 
-    if(!success) {
+    if(success) {
+        update_task_set_progress(update_task, UpdateTaskStageComplete, 100);
+    } else {
         update_task_set_progress(update_task, UpdateTaskStageError, update_task->state.progress);
     }
 

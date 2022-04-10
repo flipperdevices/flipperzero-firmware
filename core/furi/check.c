@@ -21,7 +21,7 @@ void __furi_print_name() {
     }
 }
 
-void __furi_halt() {
+static FURI_NORETURN void __furi_halt() {
     asm volatile(
 #ifdef FURI_DEBUG
         "bkpt 0x00  \n"
@@ -32,9 +32,10 @@ void __furi_halt() {
         :
         :
         : "memory");
+    __builtin_unreachable();
 }
 
-void furi_crash(const char* message) {
+FURI_NORETURN void furi_crash(const char* message) {
     __disable_irq();
 
     if(message == NULL) {
@@ -54,9 +55,10 @@ void furi_crash(const char* message) {
     furi_hal_console_puts("\033[0m\r\n");
     furi_hal_power_reset();
 #endif
+    __builtin_unreachable();
 }
 
-void furi_halt(const char* message) {
+FURI_NORETURN void furi_halt(const char* message) {
     __disable_irq();
 
     if(message == NULL) {

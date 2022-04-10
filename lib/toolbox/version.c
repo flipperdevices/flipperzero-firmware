@@ -47,6 +47,6 @@ const char* version_get_version(const Version* v) {
     return v ? v->version : version.version;
 }
 
-const uint8_t version_get_target(const Version* v) {
+uint8_t version_get_target(const Version* v) {
     return v ? v->target : version.target;
 }

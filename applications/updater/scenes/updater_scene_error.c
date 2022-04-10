@@ -9,7 +9,7 @@ void updater_scene_error_callback(GuiButtonType result, InputType type, void* co
         return;
     }
 
-    if((result == GuiButtonTypeLeft)) {
+    if(result == GuiButtonTypeLeft) {
         view_dispatcher_send_custom_event(
             updater->view_dispatcher, UpdaterCustomEventCancelUpdate);
     }

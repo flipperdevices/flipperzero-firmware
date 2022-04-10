@@ -11,9 +11,9 @@ void updater_scene_loadcfg_apply_callback(GuiButtonType result, InputType type, 
         return;
     }
 
-    if((result == GuiButtonTypeRight)) {
+    if(result == GuiButtonTypeRight) {
         view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventStartUpdate);
-    } else if((result == GuiButtonTypeLeft)) {
+    } else if(result == GuiButtonTypeLeft) {
         view_dispatcher_send_custom_event(
             updater->view_dispatcher, UpdaterCustomEventCancelUpdate);
     }
