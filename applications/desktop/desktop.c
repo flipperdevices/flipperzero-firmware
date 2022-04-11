@@ -127,6 +127,7 @@ void desktop_lock(Desktop* desktop) {
 void desktop_unlock(Desktop* desktop) {
     furi_hal_rtc_set_pin_fails(0);
     desktop_helpers_unlock_system(desktop);
+    desktop_view_locked_unlock(desktop->locked_view);
     scene_manager_search_and_switch_to_previous_scene(desktop->scene_manager, DesktopSceneMain);
     desktop_auto_lock_arm(desktop);
 }
@@ -306,14 +307,17 @@ int32_t desktop_srv(void* p) {
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
-        if(desktop->settings.pin_code.length > 0) {
-            scene_manager_set_scene_state(
-                desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
-            scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
-        } else {
-            furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock) &&
+       !desktop->settings.pin_code.length) {
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
+    }
+
+    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
+        if(!loader_is_locked(desktop->loader)) {
+            desktop_auto_lock_arm(desktop);
         }
+    } else {
+        desktop_lock(desktop);
     }
 
     if(desktop_is_first_start()) {
@@ -326,10 +330,6 @@ int32_t desktop_srv(void* p) {
 
     if(furi_hal_rtc_get_fault_data()) {
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneFault);
-    }
-
-    if(!loader_is_locked(desktop->loader)) {
-        desktop_auto_lock_arm(desktop);
     }
 
     view_dispatcher_run(desktop->view_dispatcher);

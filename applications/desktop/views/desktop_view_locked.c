@@ -181,7 +181,6 @@ static bool desktop_view_locked_input(InputEvent* event, void* context) {
             locked_view->lock_lastpress = press_time;
             locked_view->lock_count++;
             if(locked_view->lock_count == UNLOCK_CNT) {
-                desktop_view_locked_unlock(locked_view);
                 locked_view->callback(DesktopLockedEventUnlocked, locked_view->context);
             }
         } else {

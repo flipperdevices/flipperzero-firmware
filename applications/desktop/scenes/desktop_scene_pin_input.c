@@ -129,7 +129,6 @@ bool desktop_scene_pin_input_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case DesktopPinInputEventUnlocked:
-            desktop_view_locked_unlock(desktop->locked_view);
             desktop_unlock(desktop);
             consumed = true;
             break;
