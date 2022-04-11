@@ -408,11 +408,11 @@ static void subghz_cli_command_print_usage() {
     printf(
         "\ttx <3 byte Key: in hex> <frequency: in Hz> <repeat: count>\t - Transmitting key\r\n");
     printf("\trx <frequency:in Hz>\t - Reception key\r\n");
+    printf("\tdecode_raw <file_name: path_RAW_file>\t - Testing\r\n");
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         printf("\r\n");
         printf("  debug cmd:\r\n");
-        printf("\tdecode_raw <file_name: path_RAW_file>\t - Testing\r\n");
         printf("\ttx_carrier <frequency:in Hz>\t - Transmit carrier\r\n");
         printf("\trx_carrier <frequency:in Hz>\t - Receiv carrier\r\n");
         printf(
@@ -702,12 +702,12 @@ void subghz_cli_command(Cli* cli, string_t args, void* context) {
             break;
         }
 
-        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-            if(string_cmp_str(cmd, "decode_raw") == 0) {
-                subghz_cli_command_decode_raw(cli, args, context);
-                break;
-            }
+        if(string_cmp_str(cmd, "decode_raw") == 0) {
+            subghz_cli_command_decode_raw(cli, args, context);
+            break;
+        }
 
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
             if(string_cmp_str(cmd, "encrypt_keeloq") == 0) {
                 subghz_cli_command_encrypt_keeloq(cli, args);
                 break;
