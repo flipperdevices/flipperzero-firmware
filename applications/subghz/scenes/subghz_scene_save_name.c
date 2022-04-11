@@ -22,10 +22,10 @@ void subghz_scene_save_name_on_enter(void* context) {
         //highlighting the entire filename by default
         dev_name_empty = true;
     } else {
-        strcpy(subghz->file_name_tmp, subghz->file_name);
+        strncpy(subghz->file_name_tmp, subghz->file_name, SUBGHZ_MAX_LEN_NAME);
         if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
            SubGhzCustomEventManagerNoSet) {
-            subghz_get_next_name_file(subghz);
+            subghz_get_next_name_file(subghz, SUBGHZ_MAX_LEN_NAME);
             if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
                SubGhzCustomEventManagerSetRAW) {
                 dev_name_empty = true;
@@ -39,11 +39,13 @@ void subghz_scene_save_name_on_enter(void* context) {
         subghz_scene_save_name_text_input_callback,
         subghz,
         subghz->file_name,
-        22, //Max len name
+        SUBGHZ_MAX_LEN_NAME + 1, // buffer size
         dev_name_empty);
 
-    ValidatorIsFile* validator_is_file =
-        validator_is_file_alloc_init(SUBGHZ_APP_FOLDER, SUBGHZ_APP_EXTENSION);
+    ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
+        SUBGHZ_APP_FOLDER,
+        SUBGHZ_APP_EXTENSION,
+        (dev_name_empty) ? (NULL) : (subghz->file_name_tmp));
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdTextInput);
@@ -52,7 +54,7 @@ void subghz_scene_save_name_on_enter(void* context) {
 bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeBack) {
-        strcpy(subghz->file_name, subghz->file_name_tmp);
+        strncpy(subghz->file_name, subghz->file_name_tmp, SUBGHZ_MAX_LEN_NAME);
         scene_manager_previous_scene(subghz->scene_manager);
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {
