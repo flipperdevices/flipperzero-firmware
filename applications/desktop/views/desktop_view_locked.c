@@ -34,7 +34,6 @@ struct DesktopViewLocked {
 };
 
 typedef struct {
-    uint32_t hint_icon_expire_at;
     bool locked_hint;
     bool unlocked_hint;
     bool locked;
@@ -80,7 +79,6 @@ static bool desktop_view_locked_doors_move(DesktopViewLockedModel* model) {
 
 static void desktop_view_locked_update_hint_icon_timeout(DesktopViewLocked* locked_view) {
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
-    model->hint_icon_expire_at = osKernelGetTickCount() + osKernelGetTickFreq();
     model->locked_hint = true;
     view_commit_model(locked_view->view, true);
     xTimerChangePeriod(locked_view->timer, pdMS_TO_TICKS(LOCKED_HINT_TIMEOUT_MS), portMAX_DELAY);
@@ -113,7 +111,6 @@ void desktop_view_locked_update(DesktopViewLocked* locked_view) {
 
 static void desktop_view_locked_draw(Canvas* canvas, void* model) {
     DesktopViewLockedModel* m = model;
-    uint32_t now = osKernelGetTickCount();
     canvas_set_color(canvas, ColorBlack);
 
     if(m->locked) {
@@ -121,7 +118,7 @@ static void desktop_view_locked_draw(Canvas* canvas, void* model) {
             desktop_view_locked_doors_draw(canvas, m);
             canvas_set_font(canvas, FontPrimary);
             elements_multiline_text_framed(canvas, 42, 30 + STATUS_BAR_Y_SHIFT, "Locked");
-        } else if((now < m->hint_icon_expire_at) && !m->pin_locked) {
+        } else if(m->locked_hint && !m->pin_locked) {
             canvas_set_font(canvas, FontSecondary);
             elements_bold_rounded_frame(canvas, 14, 2 + STATUS_BAR_Y_SHIFT, 99, 48);
             elements_multiline_text(canvas, 65, 20 + STATUS_BAR_Y_SHIFT, "To unlock\npress:");
