@@ -208,6 +208,12 @@ const NotificationSequence sequence_display_unlock = {
     NULL,
 };
 
+const NotificationSequence sequence_display_off_delay_1000 = {
+    &message_delay_1000,
+    &message_display_off,
+    NULL,
+};
+
 // Charging
 const NotificationSequence sequence_charging = {
     &message_red_255,
