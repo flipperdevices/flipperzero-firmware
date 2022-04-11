@@ -69,5 +69,5 @@ void flipper_boot_dfu_exec() {
     // Remap memory to system bootloader
     LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SYSTEMFLASH);
     // Jump
-    flipper_boot_target_switch(0x0);
+    furi_hal_boot_switch(0x0);
 }

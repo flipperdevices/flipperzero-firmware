@@ -5,19 +5,42 @@
 
 #define TAG "Main"
 
-int main(void) {
+__attribute__((always_inline)) inline void main_ram() {
+    // Flipper critical FURI HAL
+    furi_hal_init_critical();
+    furi_hal_clock_init();
+    furi_hal_console_init();
+    furi_hal_rtc_init();
+
+    // Initialize FURI layer
+    furi_init();
+
+    // Flipper FURI HAL
+    furi_hal_init();
+
+    // CMSIS initialization
+    osKernelInitialize();
+    FURI_LOG_I(TAG, "KERNEL OK");
+
+    // Init flipper
+    flipper_init();
+
+    // Start kernel
+    osKernelStart();
+
+    while(1) {
+    }
+}
+
+__attribute__((always_inline)) inline void main_normal() {
     // Flipper critical FURI HAL
     furi_hal_init_critical();
 
-#ifdef FURI_RAM_EXEC
-    if(false) {
-#else
     if(furi_hal_boot_get_mode() == FuriHalBootModeDFU) {
         furi_hal_boot_set_mode(FuriHalBootModeNormal);
         flipper_boot_dfu_exec();
         furi_hal_power_reset();
     } else if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecuteUpdate)) {
-#endif
         flipper_boot_update_exec();
         // if things go nice, we shouldn't reach this point.
         // But if we do, abandon
@@ -44,8 +67,17 @@ int main(void) {
         // Start kernel
         osKernelStart();
     }
+
     while(1) {
     }
+}
+
+int main(void) {
+#ifdef FURI_RAM_EXEC
+    main_ram();
+#else
+    main_normal();
+#endif
 }
 
 void Error_Handler(void) {

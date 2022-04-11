@@ -92,7 +92,7 @@ static bool flipper_update_load_stage(const string_t work_dir, UpdateManifest* m
 
         memmove((void*)(SRAM1_BASE), img, stat.fsize);
         LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SRAM);
-        flipper_boot_target_switch((void*)SRAM1_BASE);
+        furi_hal_boot_switch((void*)SRAM1_BASE);
         return true;
 
     } while(false);
