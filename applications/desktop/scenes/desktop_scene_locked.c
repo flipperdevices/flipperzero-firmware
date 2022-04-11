@@ -85,15 +85,14 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case DesktopLockedEventUpdate:
+            if(desktop_view_locked_is_locked_hint_visible(desktop->locked_view)) {
+                notification_message(desktop->notification, &sequence_display_off);
+            }
             desktop_view_locked_update(desktop->locked_view);
             consumed = true;
             break;
         case DesktopLockedEventShowPinInput:
             scene_manager_next_scene(desktop->scene_manager, DesktopScenePinInput);
-            consumed = true;
-            break;
-        case DesktopLockedEventHintClosed:
-            notification_message(desktop->notification, &sequence_display_off);
             consumed = true;
             break;
         case DesktopAnimationEventNewIdleAnimation:

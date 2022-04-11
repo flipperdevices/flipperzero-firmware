@@ -100,7 +100,6 @@ void desktop_view_locked_update(DesktopViewLocked* locked_view) {
         model->view_state = DesktopViewLockedStateLocked;
     } else if(view_state == DesktopViewLockedStateLockedHintShown) {
         model->view_state = DesktopViewLockedStateLocked;
-        locked_view->callback(DesktopLockedEventHintClosed, locked_view->context);
     } else if(view_state == DesktopViewLockedStateUnlockedHintShown) {
         model->view_state = DesktopViewLockedStateUnlocked;
     }
@@ -219,12 +218,18 @@ void desktop_view_locked_lock(DesktopViewLocked* locked_view, bool pin_locked) {
 }
 
 void desktop_view_locked_unlock(DesktopViewLocked* locked_view) {
-    furi_assert(locked_view);
-
     locked_view->lock_count = 0;
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
     model->view_state = DesktopViewLockedStateUnlockedHintShown;
     model->pin_locked = false;
     view_commit_model(locked_view->view, true);
     xTimerChangePeriod(locked_view->timer, pdMS_TO_TICKS(UNLOCKED_HINT_TIMEOUT_MS), portMAX_DELAY);
+}
+
+bool desktop_view_locked_is_locked_hint_visible(DesktopViewLocked* locked_view)
+{
+    DesktopViewLockedModel* model = view_get_model(locked_view->view);
+    const DesktopViewLockedState view_state = model->view_state;
+    view_commit_model(locked_view->view, false);
+    return view_state == DesktopViewLockedStateLockedHintShown;
 }
