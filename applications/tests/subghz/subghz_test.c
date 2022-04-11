@@ -196,7 +196,7 @@ MU_TEST(subghz_decoder_gate_tx_test) {
 
 MU_TEST(subghz_decoder_hormann_hsm_test) {
     mu_assert(
-        subghz_decode_test(TEST_DIR_NAME, SUBGHZ_PROTOCOL_HORMANN_HSM_NAME),
+        subghz_decode_test("/ext/tests/resources/subghz/hormann_hsm_raw.sub", SUBGHZ_PROTOCOL_HORMANN_HSM_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_HORMANN_HSM_NAME " error\r\n");
 }
 
