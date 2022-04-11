@@ -9,21 +9,21 @@
 #define BOOT_REQUEST_CLEAN 0xDADEDADE
 #define BOOT_REQUEST_DFU 0xDF00B000
 
+void furi_hal_boot_init() {
+#ifndef DEBUG
+    furi_hal_rtc_set_register(FuriHalRtcRegisterBoot, BOOT_REQUEST_TAINTED);
+#endif
+    FURI_LOG_I(TAG, "Init OK");
+}
+
 void furi_hal_boot_switch(void* address) {
     asm volatile("ldr    r3, [%0]    \n"
                  "msr    msp, r3     \n"
                  "ldr    r3, [%1]    \n"
                  "mov    pc, r3      \n"
                  :
-                 : "r"(offset), "r"(offset + 0x4)
+                 : "r"(address), "r"(address + 0x4)
                  : "r3");
-}
-
-void furi_hal_boot_init() {
-#ifndef DEBUG
-    furi_hal_rtc_set_register(FuriHalRtcRegisterBoot, BOOT_REQUEST_TAINTED);
-#endif
-    FURI_LOG_I(TAG, "Init OK");
 }
 
 void furi_hal_boot_set_mode(FuriHalBootMode mode) {

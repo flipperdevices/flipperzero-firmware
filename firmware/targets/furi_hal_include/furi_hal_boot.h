@@ -18,7 +18,6 @@ typedef enum { FuriHalBootModeNormal, FuriHalBootModeDFU } FuriHalBootMode;
  */
 void furi_hal_boot_init();
 
-
 /** Transfer execution to address
  *
  * @param[in]  address  pointer to new executable
