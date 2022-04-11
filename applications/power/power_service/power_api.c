@@ -2,7 +2,7 @@
 
 #include <furi.h>
 #include "furi_hal_power.h"
-#include "furi_hal_bootloader.h"
+#include "furi_hal_boot.h"
 
 void power_off(Power* power) {
     furi_hal_power_off();
@@ -15,9 +15,9 @@ void power_off(Power* power) {
 
 void power_reboot(PowerBootMode mode) {
     if(mode == PowerBootModeNormal) {
-        furi_hal_bootloader_set_mode(FuriHalBootloaderModeNormal);
+        furi_hal_boot_set_mode(FuriHalBootModeNormal);
     } else if(mode == PowerBootModeDfu) {
-        furi_hal_bootloader_set_mode(FuriHalBootloaderModeDFU);
+        furi_hal_boot_set_mode(FuriHalBootModeDFU);
     }
     furi_hal_power_reset();
 }

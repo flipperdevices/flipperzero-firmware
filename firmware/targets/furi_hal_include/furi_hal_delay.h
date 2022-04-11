@@ -12,12 +12,11 @@
 extern "C" {
 #endif
 
-extern uint32_t instructions_per_us;
+/** Init Delay subsystem */
+void furi_hal_delay_init();
 
-/** Init DWT
- * @param queuedDelay whether to use RTOS sync (true) or dumb loop (false)
- */
-void furi_hal_delay_init(bool queuedDelay);
+/** Get instructions per microsecond count */
+uint32_t furi_hal_delay_instructions_per_microsecond();
 
 /** Increase tick counter.
  *  Should be called from SysTick ISR

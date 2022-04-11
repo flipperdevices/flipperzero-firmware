@@ -12,8 +12,8 @@ int main(void) {
 #ifdef FURI_RAM_EXEC
     if(false) {
 #else
-    if(furi_hal_bootloader_get_mode() == FuriHalBootloaderModeDFU) {
-        furi_hal_bootloader_set_mode(FuriHalBootloaderModeNormal);
+    if(furi_hal_boot_get_mode() == FuriHalBootModeDFU) {
+        furi_hal_boot_set_mode(FuriHalBootModeNormal);
         flipper_boot_dfu_exec();
         furi_hal_power_reset();
     } else if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecuteUpdate)) {

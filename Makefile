@@ -41,7 +41,7 @@ all: firmware_all
 whole: flash_radio firmware_flash
 
 .PHONY: clean
-clean: firmware_clean firmware_flasher_clean
+clean: firmware_clean updater_clean
 	@rm -rf $(PROJECT_ROOT)/dist/$(TARGET)
 
 .PHONY: flash
@@ -60,33 +60,35 @@ wipe:
 	@$(PROJECT_ROOT)/scripts/flash.py wipe
 	@$(PROJECT_ROOT)/scripts/ob.py set
 
-.PHONY: update_package
-update_package: firmware_all firmware_flasher
-	@$(PROJECT_ROOT)/scripts/dist_update.sh
-
 .PHONY: firmware_all
 firmware_all:
-	echo @$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) all
 	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) all
-
-.PHONY: firmware_flasher
-firmware_flasher:
-	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) RAM_EXEC=1 all
 
 .PHONY: firmware_clean
 firmware_clean:
 	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) clean
-
-.PHONY: firmware_flasher_clean
-firmware_flasher_clean:
-	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) RAM_EXEC=1 clean
 
 .PHONY: firmware_flash
 firmware_flash:
 ifeq ($(FORCE), 1)
 	@rm $(PROJECT_ROOT)/firmware/.obj/f*/flash || true
 endif
-	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) flash
+
+.PHONY: updater
+updater:
+	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) RAM_EXEC=1 all
+
+.PHONY: updater_clean
+updater_clean:
+	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) RAM_EXEC=1 clean
+
+.PHONY: updater_debug
+updater_debug:
+	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) RAM_EXEC=1 debug
+
+.PHONY: updater_package
+updater_package: firmware_all updater
+	@$(PROJECT_ROOT)/scripts/dist_update.sh
 
 .PHONY: flash_radio
 flash_radio:

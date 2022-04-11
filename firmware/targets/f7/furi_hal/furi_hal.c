@@ -8,14 +8,14 @@
 
 void furi_hal_init() {
     furi_hal_interrupt_init();
-    furi_hal_delay_init(true);
+    furi_hal_delay_init();
 
     furi_hal_flash_init();
 
     furi_hal_resources_init();
     FURI_LOG_I(TAG, "GPIO OK");
 
-    furi_hal_bootloader_init();
+    furi_hal_boot_init();
     furi_hal_version_init();
 
     furi_hal_spi_init();
