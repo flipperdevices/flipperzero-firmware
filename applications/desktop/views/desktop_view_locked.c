@@ -143,19 +143,21 @@ static bool desktop_view_locked_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
 
+    bool is_changed = false;
     const uint32_t press_time = xTaskGetTickCount();
     DesktopViewLocked* locked_view = context;
-
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
+    if(model->view_state == DesktopViewLockedStateUnlockedHintShown && event->type == InputTypePress) {
+        model->view_state = DesktopViewLockedStateUnlocked;
+        is_changed = true;
+    }
     const DesktopViewLockedState view_state = model->view_state;
-    view_commit_model(locked_view->view, false);
+    const bool pin_locked = model->pin_locked;
+    view_commit_model(locked_view->view, is_changed);
 
-    const bool consumed = view_state != DesktopViewLockedStateUnlocked &&
-                          view_state != DesktopViewLockedStateUnlockedHintShown;
-
-    if(event->type != InputTypePress) {
-        return consumed;
-    } else if(view_state == DesktopViewLockedStateLocked && model->pin_locked) {
+    if(view_state == DesktopViewLockedStateUnlocked || event->type != InputTypeShort) {
+        return view_state != DesktopViewLockedStateUnlocked;
+    } else if(view_state == DesktopViewLockedStateLocked && pin_locked) {
         locked_view->callback(DesktopLockedEventShowPinInput, locked_view->context);
     } else if(
         view_state == DesktopViewLockedStateLocked ||
@@ -180,7 +182,7 @@ static bool desktop_view_locked_input(InputEvent* event, void* context) {
         locked_view->lock_lastpress = press_time;
     }
 
-    return consumed;
+    return true;
 }
 
 DesktopViewLocked* desktop_view_locked_alloc() {
