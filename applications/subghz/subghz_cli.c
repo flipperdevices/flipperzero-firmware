@@ -392,8 +392,8 @@ void subghz_cli_command_decode_raw(Cli* cli, string_t args, void* context) {
 
         if(subghz_file_encoder_worker_is_running(file_worker_encoder)) {
             subghz_file_encoder_worker_stop(file_worker_encoder);
-            subghz_file_encoder_worker_free(file_worker_encoder);
         }
+        subghz_file_encoder_worker_free(file_worker_encoder);
         free(instance);
     }
     string_clear(file_name);
