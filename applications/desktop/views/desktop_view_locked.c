@@ -83,7 +83,8 @@ static bool desktop_view_locked_doors_move(DesktopViewLockedModel* model) {
 
 static void desktop_view_locked_update_hint_icon_timeout(DesktopViewLocked* locked_view) {
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
-    const bool change_state = (model->view_state == DesktopViewLockedStateLocked) && !model->pin_locked;
+    const bool change_state = (model->view_state == DesktopViewLockedStateLocked) &&
+                              !model->pin_locked;
     if(change_state) {
         model->view_state = DesktopViewLockedStateLockedHintShown;
     }
@@ -156,8 +157,9 @@ static bool desktop_view_locked_input(InputEvent* event, void* context) {
         return consumed;
     } else if(view_state == DesktopViewLockedStateLocked && model->pin_locked) {
         locked_view->callback(DesktopLockedEventShowPinInput, locked_view->context);
-    } else if(view_state == DesktopViewLockedStateLocked ||
-       view_state == DesktopViewLockedStateLockedHintShown) {
+    } else if(
+        view_state == DesktopViewLockedStateLocked ||
+        view_state == DesktopViewLockedStateLockedHintShown) {
         if(press_time - locked_view->lock_lastpress > UNLOCK_RST_TIMEOUT) {
             locked_view->lock_lastpress = press_time;
             locked_view->lock_count = 0;
@@ -228,8 +230,7 @@ void desktop_view_locked_unlock(DesktopViewLocked* locked_view) {
     xTimerChangePeriod(locked_view->timer, pdMS_TO_TICKS(UNLOCKED_HINT_TIMEOUT_MS), portMAX_DELAY);
 }
 
-bool desktop_view_locked_is_locked_hint_visible(DesktopViewLocked* locked_view)
-{
+bool desktop_view_locked_is_locked_hint_visible(DesktopViewLocked* locked_view) {
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
     const DesktopViewLockedState view_state = model->view_state;
     view_commit_model(locked_view->view, false);

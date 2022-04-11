@@ -307,8 +307,7 @@ int32_t desktop_srv(void* p) {
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock) &&
-       !desktop->settings.pin_code.length) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock) && !desktop->settings.pin_code.length) {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
     }
 
