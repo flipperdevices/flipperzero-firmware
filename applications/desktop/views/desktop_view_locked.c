@@ -147,7 +147,8 @@ static bool desktop_view_locked_input(InputEvent* event, void* context) {
     const uint32_t press_time = xTaskGetTickCount();
     DesktopViewLocked* locked_view = context;
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
-    if(model->view_state == DesktopViewLockedStateUnlockedHintShown && event->type == InputTypePress) {
+    if(model->view_state == DesktopViewLockedStateUnlockedHintShown &&
+       event->type == InputTypePress) {
         model->view_state = DesktopViewLockedStateUnlocked;
         is_changed = true;
     }
