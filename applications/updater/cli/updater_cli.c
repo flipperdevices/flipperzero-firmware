@@ -27,7 +27,7 @@ static void updater_cli_apply(Cli* cli, string_t manifest_path, void* context) {
 static void updater_cli_backup(Cli* cli, string_t args, void* context) {
     printf("Backup /int to '%s'\r\n", string_get_cstr(args));
     Storage* storage = furi_record_open("storage");
-    bool success = lfs_backup_unpack(storage, string_get_cstr(args));
+    bool success = lfs_backup_create(storage, string_get_cstr(args));
     furi_record_close("storage");
     printf("Result: %s\r\n", success ? "OK" : "FAIL");
 }
