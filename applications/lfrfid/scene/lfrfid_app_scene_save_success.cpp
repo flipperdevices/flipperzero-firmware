@@ -8,7 +8,7 @@ void LfRfidAppSceneSaveSuccess::on_enter(LfRfidApp* app, bool need_restore) {
 
     DOLPHIN_DEED(DolphinDeedRfidSave);
     popup->set_icon(32, 5, &I_DolphinNice_96x59);
-    popup->set_text("Saved!", 13, 22, AlignLeft, AlignBottom);
+    popup->set_header("Saved!", 5, 7, AlignLeft, AlignTop);
     popup->set_context(app);
     popup->set_callback(LfRfidAppSceneSaveSuccess::timeout_callback);
     popup->set_timeout(1500);

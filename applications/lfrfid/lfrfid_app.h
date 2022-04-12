@@ -27,12 +27,16 @@ public:
         GENERIC_EVENT_ENUM_VALUES,
         Next,
         MenuSelected,
+        Stay,
+        Retry,
     };
 
     enum class SceneType : uint8_t {
         GENERIC_SCENE_ENUM_VALUES,
         Read,
         ReadSuccess,
+        RetryConfirm,
+        ExitConfirm,
         ReadedMenu,
         Write,
         WriteSuccess,

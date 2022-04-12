@@ -38,7 +38,7 @@ bool LfRfidAppSceneReadedMenu::on_event(LfRfidApp* app, LfRfidApp::Event* event)
         }
         consumed = true;
     } else if(event->type == LfRfidApp::EventType::Back) {
-        app->scene_controller.search_and_switch_to_previous_scene({LfRfidApp::SceneType::Start});
+        app->scene_controller.switch_to_previous_scene();
         consumed = true;
     }
 

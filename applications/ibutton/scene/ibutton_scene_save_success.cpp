@@ -16,7 +16,7 @@ void iButtonSceneSaveSuccess::on_enter(iButtonApp* app) {
     DOLPHIN_DEED(DolphinDeedIbuttonSave);
 
     popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
-    popup_set_text(popup, "Saved!", 13, 22, AlignLeft, AlignBottom);
+    popup_set_header(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
 
     popup_set_callback(popup, popup_callback);
     popup_set_context(popup, app);

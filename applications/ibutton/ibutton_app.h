@@ -9,6 +9,8 @@
 #include "scene/ibutton_scene_read_crc_error.h"
 #include "scene/ibutton_scene_read_not_key_error.h"
 #include "scene/ibutton_scene_read_success.h"
+#include "scene/ibutton_scene_retry_confirm.h"
+#include "scene/ibutton_scene_exit_confirm.h"
 #include "scene/ibutton_scene_readed_key_menu.h"
 #include "scene/ibutton_scene_write.h"
 #include "scene/ibutton_scene_write_success.h"
@@ -42,6 +44,8 @@ public:
         SceneReadNotKeyError,
         SceneReadCRCError,
         SceneReadSuccess,
+        SceneRetryConfirm,
+        SceneExitConfirm,
         SceneReadedKeyMenu,
         SceneWrite,
         SceneWriteSuccess,
@@ -105,6 +109,8 @@ private:
         {Scene::SceneReadCRCError, new iButtonSceneReadCRCError()},
         {Scene::SceneReadNotKeyError, new iButtonSceneReadNotKeyError()},
         {Scene::SceneReadSuccess, new iButtonSceneReadSuccess()},
+        {Scene::SceneRetryConfirm, new iButtonSceneRetryConfirm()},
+        {Scene::SceneExitConfirm, new iButtonSceneExitConfirm()},
         {Scene::SceneReadedKeyMenu, new iButtonSceneReadedKeyMenu()},
         {Scene::SceneWrite, new iButtonSceneWrite()},
         {Scene::SceneWriteSuccess, new iButtonSceneWriteSuccess()},

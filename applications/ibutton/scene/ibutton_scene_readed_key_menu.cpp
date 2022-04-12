@@ -5,7 +5,6 @@ typedef enum {
     SubmenuIndexWrite,
     SubmenuIndexEmulate,
     SubmenuIndexSave,
-    SubmenuIndexReadNewKey,
 } SubmenuIndex;
 
 static void submenu_callback(void* context, uint32_t index) {
@@ -28,7 +27,6 @@ void iButtonSceneReadedKeyMenu::on_enter(iButtonApp* app) {
     }
     submenu_add_item(submenu, "Save", SubmenuIndexSave, submenu_callback, app);
     submenu_add_item(submenu, "Emulate", SubmenuIndexEmulate, submenu_callback, app);
-    submenu_add_item(submenu, "Read new key", SubmenuIndexReadNewKey, submenu_callback, app);
     submenu_set_selected_item(submenu, submenu_item_selected);
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewSubmenu);
@@ -49,13 +47,10 @@ bool iButtonSceneReadedKeyMenu::on_event(iButtonApp* app, iButtonEvent* event) {
         case SubmenuIndexSave:
             app->switch_to_next_scene(iButtonApp::Scene::SceneSaveName);
             break;
-        case SubmenuIndexReadNewKey:
-            app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneRead});
-            break;
         }
         consumed = true;
     } else if(event->type == iButtonEvent::Type::EventTypeBack) {
-        app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
+        app->switch_to_previous_scene();
         consumed = true;
     }
 

@@ -87,6 +87,12 @@ bool LfRfidAppSceneReadSuccess::on_event(LfRfidApp* app, LfRfidApp::Event* event
     if(event->type == LfRfidApp::EventType::Next) {
         app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::ReadedMenu);
         consumed = true;
+    } else if(event->type == LfRfidApp::EventType::Retry) {
+        app->scene_controller.switch_to_next_scene({LfRfidApp::SceneType::RetryConfirm});
+        consumed = true;
+    } else if(event->type == LfRfidApp::EventType::Back) {
+        app->scene_controller.switch_to_next_scene({LfRfidApp::SceneType::ExitConfirm});
+        consumed = true;
     }
 
     return consumed;
@@ -103,7 +109,7 @@ void LfRfidAppSceneReadSuccess::on_exit(LfRfidApp* app) {
 void LfRfidAppSceneReadSuccess::back_callback(void* context) {
     LfRfidApp* app = static_cast<LfRfidApp*>(context);
     LfRfidApp::Event event;
-    event.type = LfRfidApp::EventType::Back;
+    event.type = LfRfidApp::EventType::Retry;
     app->view_controller.send_event(&event);
 }
 

@@ -2,6 +2,8 @@
 #include "scene/lfrfid_app_scene_start.h"
 #include "scene/lfrfid_app_scene_read.h"
 #include "scene/lfrfid_app_scene_read_success.h"
+#include "scene/lfrfid_app_scene_retry_confirm.h"
+#include "scene/lfrfid_app_scene_exit_confirm.h"
 #include "scene/lfrfid_app_scene_readed_menu.h"
 #include "scene/lfrfid_app_scene_write.h"
 #include "scene/lfrfid_app_scene_write_success.h"
@@ -48,6 +50,8 @@ void LfRfidApp::run(void* _args) {
     } else {
         scene_controller.add_scene(SceneType::Start, new LfRfidAppSceneStart());
         scene_controller.add_scene(SceneType::Read, new LfRfidAppSceneRead());
+        scene_controller.add_scene(SceneType::RetryConfirm, new LfRfidAppSceneRetryConfirm());
+        scene_controller.add_scene(SceneType::ExitConfirm, new LfRfidAppSceneExitConfirm());
         scene_controller.add_scene(SceneType::ReadSuccess, new LfRfidAppSceneReadSuccess());
         scene_controller.add_scene(SceneType::ReadedMenu, new LfRfidAppSceneReadedMenu());
         scene_controller.add_scene(SceneType::Write, new LfRfidAppSceneWrite());
