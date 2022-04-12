@@ -90,7 +90,7 @@ updater_debug:
 
 .PHONY: updater_package
 updater_package: firmware_all updater
-	@$(PROJECT_ROOT)/scripts/dist.py copy -t $(TARGET) -p firmware updater -s $(DIST_SUFFIX) --bundlever $(VERSION_STRING)
+	@$(PROJECT_ROOT)/scripts/dist.py copy -t $(TARGET) -p firmware updater -s $(DIST_SUFFIX) --bundlever "$(VERSION_STRING)"
 
 .PHONY: flash_radio
 flash_radio:

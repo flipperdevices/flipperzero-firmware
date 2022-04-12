@@ -8,7 +8,7 @@ GIT_DIRTY_BUILD := $(shell git diff --quiet ; echo $$?)
 
 GIT_DIRTY_SUFFIX :=
 ifeq ($(GIT_DIRTY_BUILD), 1)
-	GIT_DIRTY_SUFFIX := '-dirty'
+	GIT_DIRTY_SUFFIX := -dirty
 endif
 
 CFLAGS += \
@@ -28,5 +28,5 @@ else
 endif
 
 #VERSION_STRING  :=  $(VERSION) ($(GIT_BRANCH) @ $(GIT_COMMIT)), built $(BUILD_DATE) $(BUILD_TIME)
-VERSION_STRING  :=  $(DIST_SUFFIX), $(GIT_BRANCH) @ $(GIT_COMMIT)
+VERSION_STRING  := $(DIST_SUFFIX), $(GIT_BRANCH)
 
