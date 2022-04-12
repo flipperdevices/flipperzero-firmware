@@ -18,8 +18,19 @@ class Main(App):
         self.parser_copy.add_argument("-t", dest="target", required=True)
         self.parser_copy.add_argument("-p", dest="projects", nargs="+", required=True)
         self.parser_copy.add_argument("-s", dest="suffix", required=True)
-        self.parser_copy.add_argument("--bundlever", dest="version", help="If set, bundle update package for self-update", required=False)
-        self.parser_copy.add_argument("--noclean", dest="noclean", action="store_false", help="Don't clean output directory", required=False)
+        self.parser_copy.add_argument(
+            "--bundlever",
+            dest="version",
+            help="If set, bundle update package for self-update",
+            required=False,
+        )
+        self.parser_copy.add_argument(
+            "--noclean",
+            dest="noclean",
+            action="store_false",
+            help="Don't clean output directory",
+            required=False,
+        )
         self.parser_copy.set_defaults(func=self.copy)
 
     def get_project_filename(self, project, filetype):
@@ -33,8 +44,10 @@ class Main(App):
         obj_directory = join("firmware", ".obj", target_project)
 
         for filetype in ("elf", "bin", "dfu", "json"):
-            shutil.copyfile(join(obj_directory, f"{project}.{filetype}"),
-                self.get_dist_filepath(self.get_project_filename(project, filetype)))
+            shutil.copyfile(
+                join(obj_directory, f"{project}.{filetype}"),
+                self.get_dist_filepath(self.get_project_filename(project, filetype)),
+            )
 
     def copy(self):
         self.output_dir_path = join("dist", self.args.target)
@@ -47,16 +60,29 @@ class Main(App):
         for project in self.args.projects:
             self.copy_single_project(project)
 
-        self.logger.info(f"Firmware binaries can be found at:\n\t{self.output_dir_path}")
+        self.logger.info(
+            f"Firmware binaries can be found at:\n\t{self.output_dir_path}"
+        )
         if self.args.version:
-            bundle_dir = join(self.output_dir_path, f"update-{self.args.target}-{self.args.suffix}")
-            bundle_args = ["generate",
-            "-d", bundle_dir,
-            "-v", self.args.version,
-            "-t", self.args.target,
-            "-dfu", self.get_dist_filepath(self.get_project_filename("firmware", "dfu")),
-            "-stage", self.get_dist_filepath(self.get_project_filename("updater", "bin"))]
-            self.logger.info(f"Use this directory to self-update your Flipper:\n\t{bundle_dir}")
+            bundle_dir = join(
+                self.output_dir_path, f"update-{self.args.target}-{self.args.suffix}"
+            )
+            bundle_args = [
+                "generate",
+                "-d",
+                bundle_dir,
+                "-v",
+                self.args.version,
+                "-t",
+                self.args.target,
+                "-dfu",
+                self.get_dist_filepath(self.get_project_filename("firmware", "dfu")),
+                "-stage",
+                self.get_dist_filepath(self.get_project_filename("updater", "bin")),
+            ]
+            self.logger.info(
+                f"Use this directory to self-update your Flipper:\n\t{bundle_dir}"
+            )
             UpdateMain()(bundle_args)
 
         return 0
