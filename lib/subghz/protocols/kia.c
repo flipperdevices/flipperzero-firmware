@@ -96,7 +96,7 @@ void subghz_protocol_decoder_kia_feed(void* context, bool level, uint32_t durati
     switch(instance->decoder.parser_step) {
     case KIADecoderStepReset:
         if((level) && (DURATION_DIFF(duration, subghz_protocol_kia_const.te_short) <
-                        subghz_protocol_kia_const.te_delta)) {
+                       subghz_protocol_kia_const.te_delta)) {
             instance->decoder.parser_step = KIADecoderStepCheckPreambula;
             instance->decoder.te_last = duration;
             instance->header_count = 0;
