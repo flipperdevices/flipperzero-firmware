@@ -71,8 +71,10 @@ firmware_clean:
 .PHONY: firmware_flash
 firmware_flash:
 ifeq ($(FORCE), 1)
-	@rm $(PROJECT_ROOT)/firmware/.obj/f*/flash || true
+	@rm $(PROJECT_ROOT)/firmware/.obj/f*-firmware/flash || true
 endif
+	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) flash
+
 
 .PHONY: updater
 updater:
