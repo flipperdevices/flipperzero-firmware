@@ -4,6 +4,7 @@
 #define VALID_WHOLE_FILE_CRC 0xFFFFFFFF
 #define DFU_SUFFIX_VERSION 0x011A
 #define DFU_DATA_BUFFER_MAX_LEN 512
+#define DFU_SIGNATURE "DfuSe"
 
 bool dfu_file_validate_crc(File* dfuf, const DfuPageTaskProgressCb progress_cb, void* context) {
     if(!storage_file_is_open(dfuf) || !storage_file_seek(dfuf, 0, true)) {
@@ -61,8 +62,6 @@ uint8_t dfu_file_validate_headers(File* dfuf, const DfuValidationParams* referen
     if(bytes_read != sizeof(DfuPrefix)) {
         return 0;
     }
-
-    const char DFU_SIGNATURE[] = "DfuSe";
 
     if(memcmp(dfu_prefix.szSignature, DFU_SIGNATURE, sizeof(dfu_prefix.szSignature))) {
         return 0;

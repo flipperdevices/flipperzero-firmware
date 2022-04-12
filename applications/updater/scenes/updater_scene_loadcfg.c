@@ -1,7 +1,7 @@
 #include "updater/updater_i.h"
 #include "updater_scene.h"
 
-#include <update_util/update_hl.h>
+#include <update_util/update_operation.h>
 #include <furi_hal.h>
 
 void updater_scene_loadcfg_apply_callback(GuiButtonType result, InputType type, void* context) {
@@ -69,7 +69,8 @@ bool updater_scene_loadcfg_on_event(void* context, SceneManagerEvent event) {
     } else if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case UpdaterCustomEventStartUpdate:
-            updater->preparation_result = update_hl_prepare(string_get_cstr(updater->startup_arg));
+            updater->preparation_result =
+                update_operation_prepare(string_get_cstr(updater->startup_arg));
             if(updater->preparation_result == UpdatePrepareResultOK) {
                 furi_hal_power_reset();
             } else {

@@ -7,7 +7,7 @@
 #include <toolbox/path.h>
 #include <update_util/dfu_file.h>
 #include <update_util/lfs_backup.h>
-#include <update_util/update_hl.h>
+#include <update_util/update_operation.h>
 
 static const char* update_task_stage_descr[] = {
     [UpdateTaskStageProgress] = "...",
@@ -167,7 +167,7 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
 
     do {
         update_task_set_progress(update_task, UpdateTaskStageProgress, 10);
-        if(!update_hl_get_current_package_path(update_task->storage, update_task->update_path)) {
+        if(!update_operation_get_current_package_path(update_task->storage, update_task->update_path)) {
             break;
         }
 

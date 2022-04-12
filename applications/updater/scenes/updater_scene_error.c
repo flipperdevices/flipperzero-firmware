@@ -1,6 +1,6 @@
 #include "updater/updater_i.h"
 #include "updater_scene.h"
-#include <update_util/update_hl.h>
+#include <update_util/update_operation.h>
 
 void updater_scene_error_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
@@ -31,7 +31,7 @@ void updater_scene_error_on_enter(void* context) {
         AlignCenter,
         AlignCenter,
         FontPrimary,
-        update_hl_describe_preparation_result(updater->preparation_result));
+        update_operation_describe_preparation_result(updater->preparation_result));
 
     view_dispatcher_switch_to_view(updater->view_dispatcher, UpdaterViewWidget);
 }

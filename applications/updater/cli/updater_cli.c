@@ -9,14 +9,16 @@
 #include <toolbox/tar/tar_archive.h>
 #include <update_util/update_manifest.h>
 #include <update_util/lfs_backup.h>
-#include <update_util/update_hl.h>
+#include <update_util/update_operation.h>
 
 static void updater_cli_apply(Cli* cli, string_t manifest_path, void* context) {
     printf("Verifying update package at '%s'\r\n", string_get_cstr(manifest_path));
 
-    UpdatePrepareResult result = update_hl_prepare(string_get_cstr(manifest_path));
+    UpdatePrepareResult result = update_operation_prepare(string_get_cstr(manifest_path));
     if(result != UpdatePrepareResultOK) {
-        printf("Error: %s. Stopping update.\r\n", update_hl_describe_preparation_result(result));
+        printf(
+            "Error: %s. Stopping update.\r\n",
+            update_operation_describe_preparation_result(result));
         return;
     }
     printf("OK.\r\nRestarting to apply update. BRB\r\n");

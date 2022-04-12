@@ -140,8 +140,6 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
     TarArchiveDirectoryOpParams* op_params = param;
     string_t fname;
 
-    const int TAR_READ_BUF_SZ = 512;
-
     if(header->type == MTAR_TDIR) {
         string_init(fname);
         path_concat(op_params->work_dir, header->name, fname);
@@ -161,7 +159,7 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
     path_concat(op_params->work_dir, header->name, fname);
     FURI_LOG_I(TAG, "Extracting %d bytes to '%s'", header->size, header->name);
     File* out_file = storage_file_alloc(op_params->archive->storage);
-    uint8_t* readbuf = malloc(TAR_READ_BUF_SZ);
+    uint8_t* readbuf = malloc(FILE_BLOCK_SIZE);
 
     bool failed = false;
     uint8_t n_tries = FILE_OPEN_NTRIES;
@@ -180,7 +178,7 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
         }
 
         while(!mtar_eof_data(tar)) {
-            int32_t readcnt = mtar_read_data(tar, readbuf, TAR_READ_BUF_SZ);
+            int32_t readcnt = mtar_read_data(tar, readbuf, FILE_BLOCK_SIZE);
             if(!readcnt || !storage_file_write(out_file, readbuf, readcnt)) {
                 failed = true;
                 break;

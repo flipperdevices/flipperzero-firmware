@@ -7,7 +7,7 @@
 #include <toolbox/path.h>
 #include <update_util/dfu_file.h>
 #include <update_util/lfs_backup.h>
-#include <update_util/update_hl.h>
+#include <update_util/update_operation.h>
 
 #define CHECK_RESULT(x) \
     if(!(x)) {          \
@@ -110,12 +110,15 @@ int32_t update_task_worker_backup_restore(void* context) {
     update_task->state.current_stage_idx = 0;
     update_task->state.total_stages = 1;
     do {
-        if(!update_hl_get_current_package_path(update_task->storage, update_task->update_path)) {
+        if(!update_operation_get_current_package_path(
+               update_task->storage, update_task->update_path)) {
             break;
         }
 
         path_concat(
-            string_get_cstr(update_task->update_path), DEFAULT_BACKUP_FILENAME, backup_file_path);
+            string_get_cstr(update_task->update_path),
+            LFS_BACKUP_DEFAULT_FILENAME,
+            backup_file_path);
 
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePreUpdate)) {
             update_task_set_progress(update_task, UpdateTaskStageLfsBackup, 0);

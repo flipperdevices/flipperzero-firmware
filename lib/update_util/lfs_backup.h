@@ -3,12 +3,11 @@
 #include <stdbool.h>
 #include <storage/storage.h>
 
+#define LFS_BACKUP_DEFAULT_FILENAME "backup.tar"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-extern const char* DEFAULT_BACKUP_FILENAME;
-extern const char* DEFAULT_BACKUP_LOCATION;
 
 bool lfs_backup_create(Storage* storage, const char* destination);
 bool lfs_backup_exists(Storage* storage, const char* source);

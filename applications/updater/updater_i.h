@@ -11,7 +11,7 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/widget.h>
 #include <storage/storage.h>
-#include <update_util/update_hl.h>
+#include <update_util/update_operation.h>
 
 #ifdef __cplusplus
 extern "C" {
