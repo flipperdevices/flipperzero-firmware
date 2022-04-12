@@ -40,7 +40,7 @@ struct File {
  *      @param file pointer to file object
  *      @param buff pointer to buffer for writing
  *      @param bytes_to_read how many bytes to write, must be smaller or equal to buffer size 
- *      @return how many bytes actually has been writed
+ *      @return how many bytes actually has been written
  * 
  *  @var FS_File_Api::seek
  *      @brief Move r/w pointer 

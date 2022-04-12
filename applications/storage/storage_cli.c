@@ -185,9 +185,9 @@ static void storage_cli_write(Cli* cli, string_t path) {
                 uint16_t write_size = read_index % buffer_size;
 
                 if(write_size > 0) {
-                    uint16_t writed_size = storage_file_write(file, buffer, write_size);
+                    uint16_t written_size = storage_file_write(file, buffer, write_size);
 
-                    if(writed_size != write_size) {
+                    if(written_size != write_size) {
                         storage_cli_print_error(storage_file_get_error(file));
                     }
                     break;
@@ -200,9 +200,9 @@ static void storage_cli_write(Cli* cli, string_t path) {
             read_index++;
 
             if(((read_index % buffer_size) == 0)) {
-                uint16_t writed_size = storage_file_write(file, buffer, buffer_size);
+                uint16_t written_size = storage_file_write(file, buffer, buffer_size);
 
-                if(writed_size != buffer_size) {
+                if(written_size != buffer_size) {
                     storage_cli_print_error(storage_file_get_error(file));
                     break;
                 }
@@ -277,9 +277,9 @@ static void storage_cli_write_chunk(Cli* cli, string_t path, string_t args) {
                 buffer[i] = cli_getc(cli);
             }
 
-            uint16_t writed_size = storage_file_write(file, buffer, buffer_size);
+            uint16_t written_size = storage_file_write(file, buffer, buffer_size);
 
-            if(writed_size != buffer_size) {
+            if(written_size != buffer_size) {
                 storage_cli_print_error(storage_file_get_error(file));
             }
 
