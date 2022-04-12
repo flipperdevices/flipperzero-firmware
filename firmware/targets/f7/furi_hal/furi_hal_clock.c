@@ -13,7 +13,7 @@
 #define HS_CLOCK_IS_READY() (LL_RCC_HSE_IsReady() && LL_RCC_HSI_IsReady())
 #define LS_CLOCK_IS_READY() (LL_RCC_LSE_IsReady() && LL_RCC_LSI1_IsReady())
 
-void furi_hal_clock_minimal_init() {
+void furi_hal_clock_init_early() {
     LL_Init1msTick(4000000);
     LL_SetSystemCoreClock(4000000);
 

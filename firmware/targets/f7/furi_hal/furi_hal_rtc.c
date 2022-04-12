@@ -20,7 +20,7 @@ typedef struct {
 
 _Static_assert(sizeof(DeveloperReg) == 4, "DeveloperReg size mismatch");
 
-void furi_hal_rtc_minimal_init() {
+void furi_hal_rtc_init_early() {
     // LSE and RTC
     LL_PWR_EnableBkUpAccess();
     if(!RTC_CLOCK_IS_READY()) {

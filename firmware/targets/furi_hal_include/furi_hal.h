@@ -45,8 +45,7 @@ template <unsigned int N> struct STOP_EXTERNING_ME {};
 /** Init furi_hal */
 void furi_hal_init();
 
-/**
- * Init critical parts of furi_hal
+/** Init critical parts of furi_hal
  * That code should not use memory allocations
  */
-void furi_hal_init_critical();
+void furi_hal_init_early();

@@ -7,7 +7,7 @@
 
 __attribute__((always_inline)) inline void main_ram() {
     // Flipper critical FURI HAL
-    furi_hal_init_critical();
+    furi_hal_init_early();
     furi_hal_clock_init();
     furi_hal_console_init();
     furi_hal_rtc_init();
@@ -18,15 +18,10 @@ __attribute__((always_inline)) inline void main_ram() {
     // Flipper FURI HAL
     furi_hal_init();
 
-    // CMSIS initialization
-    osKernelInitialize();
-    FURI_LOG_I(TAG, "KERNEL OK");
-
     // Init flipper
     flipper_init();
 
-    // Start kernel
-    osKernelStart();
+    furi_run();
 
     while(1) {
     }
@@ -34,7 +29,7 @@ __attribute__((always_inline)) inline void main_ram() {
 
 __attribute__((always_inline)) inline void main_normal() {
     // Flipper critical FURI HAL
-    furi_hal_init_critical();
+    furi_hal_init_early();
 
     if(furi_hal_boot_get_mode() == FuriHalBootModeDFU) {
         furi_hal_boot_set_mode(FuriHalBootModeNormal);
@@ -57,15 +52,10 @@ __attribute__((always_inline)) inline void main_normal() {
         // Flipper FURI HAL
         furi_hal_init();
 
-        // CMSIS initialization
-        osKernelInitialize();
-        FURI_LOG_I(TAG, "KERNEL OK");
-
         // Init flipper
         flipper_init();
 
-        // Start kernel
-        osKernelStart();
+        furi_run();
     }
 
     while(1) {

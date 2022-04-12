@@ -6,6 +6,11 @@
 
 #define TAG "FuriHal"
 
+void furi_hal_init_early() {
+    furi_hal_clock_init_early();
+    furi_hal_rtc_init_early();
+}
+
 void furi_hal_init() {
     furi_hal_interrupt_init();
     furi_hal_delay_init();
@@ -66,9 +71,4 @@ void furi_hal_init() {
             LL_MPU_ACCESS_CACHEABLE | LL_MPU_ACCESS_SHAREABLE | LL_MPU_TEX_LEVEL1 |
             LL_MPU_INSTRUCTION_ACCESS_ENABLE);
     LL_MPU_Enable(LL_MPU_CTRL_PRIVILEGED_DEFAULT);
-}
-
-void furi_hal_init_critical() {
-    furi_hal_clock_minimal_init();
-    furi_hal_rtc_minimal_init();
 }
