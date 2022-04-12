@@ -164,7 +164,7 @@ MU_TEST(subghz_keystore_test) {
 
 MU_TEST(subghz_decoder_came_atomo_test) {
     mu_assert(
-        subghz_decode_test(TEST_DIR_NAME, SUBGHZ_PROTOCOL_CAME_ATOMO_NAME),
+        subghz_decode_test("/ext/tests/resources/subghz/came_atomo_raw.sub", SUBGHZ_PROTOCOL_CAME_ATOMO_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_CAME_ATOMO_NAME " error\r\n");
 }
 
@@ -176,7 +176,7 @@ MU_TEST(subghz_decoder_came_test) {
 
 MU_TEST(subghz_decoder_came_twee_test) {
     mu_assert(
-        subghz_decode_test(TEST_DIR_NAME, SUBGHZ_PROTOCOL_CAME_TWEE_NAME),
+        subghz_decode_test("/ext/tests/resources/subghz/came_twee_raw.sub", SUBGHZ_PROTOCOL_CAME_TWEE_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_CAME_TWEE_NAME " error\r\n");
 }
 
