@@ -1,22 +1,13 @@
 TOOLCHAIN = arm
 
-BOOT_ADDRESS	= 0x08000000
-FW_ADDRESS		= 0x08000000
-OS_OFFSET		= 0x00000000
 FLASH_ADDRESS	= 0x08000000
-CFLAGS			+= -DNO_BOOTLOADER
 
 RAM_EXEC ?= 0
 ifeq ($(RAM_EXEC), 1)
-BOOT_ADDRESS	= 0x20000000
-FW_ADDRESS		= 0x20000000
-OS_OFFSET		= 0
-CFLAGS 			+= -DFURI_RAM_EXEC -DVECT_TAB_SRAM -DNO_BOOTLOADER -DFLIPPER_STREAM_LITE
+CFLAGS 			+= -DFURI_RAM_EXEC -DVECT_TAB_SRAM -DFLIPPER_STREAM_LITE
 else
 LDFLAGS			+= -u _printf_float
 endif
-
-
 
 DEBUG_RTOS_THREADS ?= 1
 ifeq ($(DEBUG_RTOS_THREADS), 1)
@@ -25,10 +16,9 @@ else
 OPENOCD_OPTS	= -f interface/stlink.cfg -c "transport select hla_swd" -f ../debug/stm32wbx.cfg -c "init"
 endif
 
-BOOT_CFLAGS		= -DBOOT_ADDRESS=$(BOOT_ADDRESS) -DFW_ADDRESS=$(FW_ADDRESS) -DOS_OFFSET=$(OS_OFFSET)
 MCU_FLAGS		= -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
-CFLAGS			+= $(MCU_FLAGS) $(BOOT_CFLAGS) -DSTM32WB55xx -Wall -fdata-sections -ffunction-sections
+CFLAGS			+= $(MCU_FLAGS) -DSTM32WB55xx -Wall -fdata-sections -ffunction-sections
 LDFLAGS			+= $(MCU_FLAGS) -specs=nosys.specs -specs=nano.specs
 
 CPPFLAGS		+= -fno-rtti -fno-use-cxa-atexit -fno-exceptions

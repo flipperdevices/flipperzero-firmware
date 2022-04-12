@@ -280,15 +280,6 @@ const struct Version* furi_hal_version_get_firmware_version(void) {
     return version_get();
 }
 
-const struct Version* furi_hal_version_get_bootloader_version(void) {
-#ifdef NO_BOOTLOADER
-    return 0;
-#else
-    /* Backup register which points to structure in flash memory */
-    return (const struct Version*)furi_hal_rtc_get_register(FuriHalRtcRegisterBootVersion);
-#endif
-}
-
 size_t furi_hal_version_uid_size() {
     return 64 / 8;
 }

@@ -50,18 +50,6 @@ void furi_hal_info_get(FuriHalInfoValueCallback out, void* context) {
         out("hardware_name", name, false, context);
     }
 
-    // Bootloader Version
-    const Version* bootloader_version = furi_hal_version_get_bootloader_version();
-    if(bootloader_version) {
-        out("bootloader_commit", version_get_githash(bootloader_version), false, context);
-        out("bootloader_branch", version_get_gitbranch(bootloader_version), false, context);
-        out("bootloader_branch_num", version_get_gitbranchnum(bootloader_version), false, context);
-        out("bootloader_version", version_get_version(bootloader_version), false, context);
-        out("bootloader_build_date", version_get_builddate(bootloader_version), false, context);
-        string_printf(value, "%d", version_get_target(bootloader_version));
-        out("bootloader_target", string_get_cstr(value), false, context);
-    }
-
     // Firmware version
     const Version* firmware_version = furi_hal_version_get_firmware_version();
     if(firmware_version) {

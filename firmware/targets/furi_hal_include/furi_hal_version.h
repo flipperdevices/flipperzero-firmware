@@ -144,12 +144,6 @@ const char* furi_hal_version_get_ble_local_device_name_ptr();
  */
 const uint8_t* furi_hal_version_get_ble_mac();
 
-/** Get address of version structure of bootloader, stored in chip flash.
- *
- * @return     Address of boot version structure.
- */
-const struct Version* furi_hal_version_get_bootloader_version();
-
 /** Get address of version structure of firmware.
  *
  * @return     Address of firmware version structure.
