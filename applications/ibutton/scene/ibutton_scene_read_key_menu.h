@@ -1,7 +1,7 @@
 #pragma once
 #include "ibutton_scene_generic.h"
 
-class iButtonSceneReadedKeyMenu : public iButtonScene {
+class iButtonSceneReadKeyMenu : public iButtonScene {
 public:
     void on_enter(iButtonApp* app) final;
     bool on_event(iButtonApp* app, iButtonEvent* event) final;

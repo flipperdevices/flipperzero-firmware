@@ -37,7 +37,7 @@ public:
         ReadSuccess,
         RetryConfirm,
         ExitConfirm,
-        ReadedMenu,
+        ReadKeyMenu,
         Write,
         WriteSuccess,
         Emulate,

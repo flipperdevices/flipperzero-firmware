@@ -56,7 +56,7 @@ bool iButtonSceneReadSuccess::on_event(iButtonApp* app, iButtonEvent* event) {
 
     if(event->type == iButtonEvent::Type::EventTypeDialogResult) {
         if(event->payload.dialog_result == DialogExResultRight) {
-            app->switch_to_next_scene(iButtonApp::Scene::SceneReadedKeyMenu);
+            app->switch_to_next_scene(iButtonApp::Scene::SceneReadKeyMenu);
         } else {
             app->switch_to_next_scene(iButtonApp::Scene::SceneRetryConfirm);
         }

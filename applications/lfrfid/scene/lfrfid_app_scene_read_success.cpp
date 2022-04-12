@@ -85,7 +85,7 @@ bool LfRfidAppSceneReadSuccess::on_event(LfRfidApp* app, LfRfidApp::Event* event
     bool consumed = false;
 
     if(event->type == LfRfidApp::EventType::Next) {
-        app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::ReadedMenu);
+        app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::ReadKeyMenu);
         consumed = true;
     } else if(event->type == LfRfidApp::EventType::Retry) {
         app->scene_controller.switch_to_next_scene({LfRfidApp::SceneType::RetryConfirm});

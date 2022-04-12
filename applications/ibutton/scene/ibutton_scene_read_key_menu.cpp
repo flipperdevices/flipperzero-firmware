@@ -1,4 +1,4 @@
-#include "ibutton_scene_readed_key_menu.h"
+#include "ibutton_scene_read_key_menu.h"
 #include "../ibutton_app.h"
 
 typedef enum {
@@ -18,7 +18,7 @@ static void submenu_callback(void* context, uint32_t index) {
     app->get_view_manager()->send_event(&event);
 }
 
-void iButtonSceneReadedKeyMenu::on_enter(iButtonApp* app) {
+void iButtonSceneReadKeyMenu::on_enter(iButtonApp* app) {
     iButtonAppViewManager* view_manager = app->get_view_manager();
     Submenu* submenu = view_manager->get_submenu();
 
@@ -32,7 +32,7 @@ void iButtonSceneReadedKeyMenu::on_enter(iButtonApp* app) {
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewSubmenu);
 }
 
-bool iButtonSceneReadedKeyMenu::on_event(iButtonApp* app, iButtonEvent* event) {
+bool iButtonSceneReadKeyMenu::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeMenuSelected) {
@@ -57,7 +57,7 @@ bool iButtonSceneReadedKeyMenu::on_event(iButtonApp* app, iButtonEvent* event) {
     return consumed;
 }
 
-void iButtonSceneReadedKeyMenu::on_exit(iButtonApp* app) {
+void iButtonSceneReadKeyMenu::on_exit(iButtonApp* app) {
     iButtonAppViewManager* view = app->get_view_manager();
     Submenu* submenu = view->get_submenu();
 

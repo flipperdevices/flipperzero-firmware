@@ -31,7 +31,7 @@ bool iButtonSceneSaveSuccess::on_event(iButtonApp* app, iButtonEvent* event) {
 
     if(event->type == iButtonEvent::Type::EventTypeBack) {
         app->search_and_switch_to_previous_scene(
-            {iButtonApp::Scene::SceneReadedKeyMenu,
+            {iButtonApp::Scene::SceneReadKeyMenu,
              iButtonApp::Scene::SceneSavedKeyMenu,
              iButtonApp::Scene::SceneAddType});
         consumed = true;
