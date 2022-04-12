@@ -7,11 +7,18 @@
 #include <loader/loader.h>
 #include <toolbox/path.h>
 #include <toolbox/tar/tar_archive.h>
+#include <toolbox/args.h>
 #include <update_util/update_manifest.h>
 #include <update_util/lfs_backup.h>
 #include <update_util/update_operation.h>
 
-static void updater_cli_apply(Cli* cli, string_t manifest_path, void* context) {
+typedef void (*cmd_handler)(string_t args);
+typedef struct {
+    const char* command;
+    const cmd_handler handler;
+} CliSubcommand;
+
+static void updater_cli_install(string_t manifest_path) {
     printf("Verifying update package at '%s'\r\n", string_get_cstr(manifest_path));
 
     UpdatePrepareResult result = update_operation_prepare(string_get_cstr(manifest_path));
@@ -26,7 +33,7 @@ static void updater_cli_apply(Cli* cli, string_t manifest_path, void* context) {
     furi_hal_power_reset();
 }
 
-static void updater_cli_backup(Cli* cli, string_t args, void* context) {
+static void updater_cli_backup(string_t args) {
     printf("Backup /int to '%s'\r\n", string_get_cstr(args));
     Storage* storage = furi_record_open("storage");
     bool success = lfs_backup_create(storage, string_get_cstr(args));
@@ -34,12 +41,47 @@ static void updater_cli_backup(Cli* cli, string_t args, void* context) {
     printf("Result: %s\r\n", success ? "OK" : "FAIL");
 }
 
-static void updater_cli_restore(Cli* cli, string_t args, void* context) {
+static void updater_cli_restore(string_t args) {
     printf("Restore /int from '%s'\r\n", string_get_cstr(args));
     Storage* storage = furi_record_open("storage");
     bool success = lfs_backup_unpack(storage, string_get_cstr(args));
     furi_record_close("storage");
     printf("Result: %s\r\n", success ? "OK" : "FAIL");
+}
+
+static void updater_cli_help(string_t args) {
+    UNUSED(args);
+    printf("Commands:\r\n"
+           "\tinstall /ext/update/PACKAGE/update.fuf - verify & apply update package\r\n"
+           "\tbackup /ext/path/to/backup.tar - create internal storage backup\r\n"
+           "\trestore /ext/path/to/backup.tar - restore internal storage backup\r\n");
+}
+
+static const CliSubcommand update_cli_subcommands[] = {
+    {.command = "install", .handler = updater_cli_install},
+    {.command = "backup", .handler = updater_cli_backup},
+    {.command = "restore", .handler = updater_cli_restore},
+    {.command = "help", .handler = updater_cli_help},
+};
+
+static void updater_cli_ep(Cli* cli, string_t args, void* context) {
+    string_t subcommand;
+    string_init(subcommand);
+    if(!args_read_string_and_trim(args, subcommand) || string_empty_p(args)) {
+        updater_cli_help(args);
+        string_clear(subcommand);
+        return;
+    }
+    for(size_t idx = 0; idx < COUNT_OF(update_cli_subcommands); ++idx) {
+        const CliSubcommand* subcmd_def = &update_cli_subcommands[idx];
+        if(string_cmp_str(subcommand, subcmd_def->command) == 0) {
+            string_clear(subcommand);
+            subcmd_def->handler(args);
+            return;
+        }
+    }
+    string_clear(subcommand);
+    updater_cli_help(args);
 }
 
 static int32_t updater_spawner_thread_worker(void* arg) {
@@ -79,18 +121,14 @@ static void updater_start_app() {
 void updater_on_system_start() {
 #ifdef SRV_CLI
     Cli* cli = (Cli*)furi_record_open("cli");
-    cli_add_command(cli, "update", CliCommandFlagDefault, updater_cli_apply, NULL);
-    cli_add_command(cli, "backup", CliCommandFlagDefault, updater_cli_backup, NULL);
-    cli_add_command(cli, "restore", CliCommandFlagDefault, updater_cli_restore, NULL);
+    cli_add_command(cli, "update", CliCommandFlagDefault, updater_cli_ep, NULL);
     furi_record_close("cli");
 #else
-    UNUSED(updater_cli_apply);
-    UNUSED(updater_cli_backup);
-    UNUSED(updater_cli_restore);
+    UNUSED(updater_cli_ep);
 #endif
 #ifndef FURI_RAM_EXEC
     updater_start_app();
 #else
-    (void)updater_start_app;
+    UNUSED(updater_start_app);
 #endif
 }

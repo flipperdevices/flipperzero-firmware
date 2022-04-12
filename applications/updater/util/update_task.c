@@ -167,7 +167,8 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
 
     do {
         update_task_set_progress(update_task, UpdateTaskStageProgress, 10);
-        if(!update_operation_get_current_package_path(update_task->storage, update_task->update_path)) {
+        if(!update_operation_get_current_package_path(
+               update_task->storage, update_task->update_path)) {
             break;
         }
 

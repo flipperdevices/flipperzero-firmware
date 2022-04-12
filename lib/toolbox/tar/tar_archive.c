@@ -34,7 +34,9 @@ static int mtar_storage_file_seek(void* stream, unsigned offset) {
 }
 
 static int mtar_storage_file_close(void* stream) {
-    storage_file_close(stream);
+    if(stream) {
+        storage_file_close(stream);
+    }
     return MTAR_ESUCCESS;
 }
 
@@ -85,7 +87,9 @@ bool tar_archive_open(TarArchive* archive, const char* path, TarOpenMode mode) {
 
 void tar_archive_free(TarArchive* archive) {
     furi_assert(archive);
-    mtar_close(&archive->tar);
+    if(mtar_is_open(&archive->tar)) {
+        mtar_close(&archive->tar);
+    }
 }
 
 bool tar_archive_dir_add_element(TarArchive* archive, const char* dirpath) {
