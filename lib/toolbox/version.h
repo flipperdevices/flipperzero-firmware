@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,6 +72,15 @@ const char* version_get_version(const Version* v);
  * @return     build date
  */
 uint8_t version_get_target(const Version* v);
+
+/** Get flag indicating if this build is "dirty" (source code had uncommited changes)
+ *
+ * @param      v     pointer to Version data. NULL for currently running
+ *                   software.
+ *
+ * @return     build date
+ */
+bool version_get_dirty_flag(const Version* v);
 
 #ifdef __cplusplus
 }

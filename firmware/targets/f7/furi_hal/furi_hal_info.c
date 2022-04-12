@@ -54,6 +54,10 @@ void furi_hal_info_get(FuriHalInfoValueCallback out, void* context) {
     const Version* firmware_version = furi_hal_version_get_firmware_version();
     if(firmware_version) {
         out("firmware_commit", version_get_githash(firmware_version), false, context);
+        out("firmware_commit_dirty",
+            version_get_dirty_flag(firmware_version) ? "true" : "false",
+            false,
+            context);
         out("firmware_branch", version_get_gitbranch(firmware_version), false, context);
         out("firmware_branch_num", version_get_gitbranchnum(firmware_version), false, context);
         out("firmware_version", version_get_version(firmware_version), false, context);
