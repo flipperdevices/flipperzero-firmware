@@ -35,12 +35,11 @@ __attribute__((always_inline)) inline void main_normal() {
         furi_hal_boot_set_mode(FuriHalBootModeNormal);
         flipper_boot_dfu_exec();
         furi_hal_power_reset();
-    } else if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecuteUpdate)) {
+    } else if(furi_hal_rtc_get_boot_mode() == FuriHalRtcBootModeUpdate) {
         flipper_boot_update_exec();
         // if things go nice, we shouldn't reach this point.
-        // But if we do, abandon
-        furi_hal_rtc_reset_flag(FuriHalRtcFlagExecuteUpdate);
-        furi_hal_rtc_set_flag(FuriHalRtcFlagExecutePostUpdate);
+        // But if we do, abandon to avoid bootloops
+        furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeNormal);
         furi_hal_power_reset();
     } else {
         furi_hal_clock_init();

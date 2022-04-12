@@ -45,8 +45,7 @@ void updater_scene_main_on_enter(void* context) {
 }
 
 static void updater_scene_restart_to_postupdate() {
-    furi_hal_rtc_reset_flag(FuriHalRtcFlagExecuteUpdate);
-    furi_hal_rtc_set_flag(FuriHalRtcFlagExecutePostUpdate);
+    furi_hal_rtc_set_boot_mode(FuriHalRtcBootModePostUpdate);
     furi_hal_power_reset();
 }
 

@@ -15,7 +15,8 @@ typedef struct {
     uint8_t log_level : 4;
     uint8_t log_reserved : 4;
     uint8_t flags;
-    uint16_t reserved;
+    uint8_t boot_mode : 2;
+    uint16_t reserved : 14;
 } DeveloperReg;
 
 _Static_assert(sizeof(DeveloperReg) == 4, "DeveloperReg size mismatch");
@@ -110,6 +111,19 @@ bool furi_hal_rtc_is_flag_set(FuriHalRtcFlag flag) {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     DeveloperReg* data = (DeveloperReg*)&data_reg;
     return data->flags & flag;
+}
+
+void furi_hal_rtc_set_boot_mode(FuriHalRtcBootMode mode) {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    DeveloperReg* data = (DeveloperReg*)&data_reg;
+    data->boot_mode = mode;
+    furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
+}
+
+FuriHalRtcBootMode furi_hal_rtc_get_boot_mode() {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    DeveloperReg* data = (DeveloperReg*)&data_reg;
+    return (FuriHalRtcBootMode)data->boot_mode;
 }
 
 void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime) {

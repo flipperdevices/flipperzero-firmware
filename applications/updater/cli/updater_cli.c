@@ -57,8 +57,8 @@ static void updater_spawner_thread_cleanup(FuriThreadState state, void* context)
 }
 
 static void updater_start_app() {
-    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePreUpdate) &&
-       !furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePostUpdate)) {
+    FuriHalRtcBootMode mode = furi_hal_rtc_get_boot_mode();
+    if((mode != FuriHalRtcBootModePreUpdate) && (mode != FuriHalRtcBootModePostUpdate)) {
         return;
     }
 

@@ -28,10 +28,15 @@ typedef enum {
     FuriHalRtcFlagDebug = (1 << 0),
     FuriHalRtcFlagFactoryReset = (1 << 1),
     FuriHalRtcFlagLock = (1 << 2),
-    FuriHalRtcFlagExecutePreUpdate = (1 << 3),
-    FuriHalRtcFlagExecuteUpdate = (1 << 4),
-    FuriHalRtcFlagExecutePostUpdate = (1 << 5),
 } FuriHalRtcFlag;
+
+typedef enum {
+    FuriHalRtcBootModeNormal = 0,
+    FuriHalRtcBootModePreUpdate,
+    FuriHalRtcBootModeUpdate,
+    FuriHalRtcBootModePostUpdate,
+    // TODO: migrate DFU etc.
+} FuriHalRtcBootMode;
 
 typedef enum {
     FuriHalRtcRegisterBoot,
@@ -64,6 +69,10 @@ void furi_hal_rtc_set_flag(FuriHalRtcFlag flag);
 void furi_hal_rtc_reset_flag(FuriHalRtcFlag flag);
 
 bool furi_hal_rtc_is_flag_set(FuriHalRtcFlag flag);
+
+void furi_hal_rtc_set_boot_mode(FuriHalRtcBootMode mode);
+
+FuriHalRtcBootMode furi_hal_rtc_get_boot_mode();
 
 void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime);
 

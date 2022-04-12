@@ -87,8 +87,7 @@ int32_t update_task_worker_flash_writer(void* context) {
 
         update_task_set_progress(update_task, UpdateTaskStageComplete, 100);
 
-        furi_hal_rtc_reset_flag(FuriHalRtcFlagExecuteUpdate);
-        furi_hal_rtc_set_flag(FuriHalRtcFlagExecutePostUpdate);
+        furi_hal_rtc_set_boot_mode(FuriHalRtcBootModePostUpdate);
 
         success = true;
     } while(false);
@@ -104,35 +103,38 @@ int32_t update_task_worker_backup_restore(void* context) {
     furi_assert(context);
     UpdateTask* update_task = context;
     bool success = false;
-    string_t backup_file_path;
-    string_init(backup_file_path);
+
+    FuriHalRtcBootMode boot_mode = furi_hal_rtc_get_boot_mode();
+    if((boot_mode != FuriHalRtcBootModePreUpdate) && (boot_mode != FuriHalRtcBootModePostUpdate)) {
+        // no idea how we got here. Clear to normal boot
+        furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeNormal);
+        return UPDATE_TASK_NOERR;
+    }
 
     update_task->state.current_stage_idx = 0;
     update_task->state.total_stages = 1;
-    do {
-        if(!update_operation_get_current_package_path(
-               update_task->storage, update_task->update_path)) {
-            break;
-        }
 
-        path_concat(
-            string_get_cstr(update_task->update_path),
-            LFS_BACKUP_DEFAULT_FILENAME,
-            backup_file_path);
+    if(!update_operation_get_current_package_path(update_task->storage, update_task->update_path)) {
+        return UPDATE_TASK_FAILED;
+    }
 
-        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePreUpdate)) {
-            update_task_set_progress(update_task, UpdateTaskStageLfsBackup, 0);
-            furi_hal_rtc_reset_flag(FuriHalRtcFlagExecutePreUpdate);
-            if((success =
-                    lfs_backup_create(update_task->storage, string_get_cstr(backup_file_path)))) {
-                furi_hal_rtc_set_flag(FuriHalRtcFlagExecuteUpdate);
-            }
-        } else if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagExecutePostUpdate)) {
-            update_task_set_progress(update_task, UpdateTaskStageLfsRestore, 0);
-            furi_hal_rtc_reset_flag(FuriHalRtcFlagExecutePostUpdate);
-            success = lfs_backup_unpack(update_task->storage, string_get_cstr(backup_file_path));
+    string_t backup_file_path;
+    string_init(backup_file_path);
+    path_concat(
+        string_get_cstr(update_task->update_path), LFS_BACKUP_DEFAULT_FILENAME, backup_file_path);
+
+    if(boot_mode == FuriHalRtcBootModePreUpdate) {
+        update_task_set_progress(update_task, UpdateTaskStageLfsBackup, 0);
+        furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeNormal); // to avoid bootloops
+        if((success =
+                lfs_backup_create(update_task->storage, string_get_cstr(backup_file_path)))) {
+            furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeUpdate);
         }
-    } while(false);
+    } else if(boot_mode == FuriHalRtcBootModePostUpdate) {
+        update_task_set_progress(update_task, UpdateTaskStageLfsRestore, 0);
+        furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeNormal);
+        success = lfs_backup_unpack(update_task->storage, string_get_cstr(backup_file_path));
+    }
 
     if(success) {
         update_task_set_progress(update_task, UpdateTaskStageComplete, 100);
