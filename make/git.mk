@@ -4,6 +4,7 @@ GIT_BRANCH_NUM	:= $(shell git rev-list --count HEAD || echo 'nan')
 BUILD_DATE		:= $(shell date '+%d-%m-%Y' || echo 'unknown')
 BUILD_TIME		:= $(shell date '+%H:%M:%S' || echo 'unknown')
 VERSION			:= $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null || echo 'unknown')
+GIT_CLEAN_BUILD := $(shell git diff --quiet || echo '-dirty')
 
 CFLAGS += \
 	-DGIT_COMMIT=\"$(GIT_COMMIT)\" \
@@ -13,6 +14,12 @@ CFLAGS += \
 	-DVERSION=\"$(VERSION)\" \
 	-DTARGET=$(HARDWARE_TARGET)
 
+DIST_SUFFIX		:= local-$(GIT_COMMIT)$(GIT_CLEAN_BUILD)
+# if suffix is set in environment (by Github), use it
+ifdef $$DIST_SUFFIX
+	DIST_SUFFIX := $$DIST_SUFFIX
+endif
+
 #VERSION_STRING  :=  $(VERSION) ($(GIT_BRANCH) @ $(GIT_COMMIT)), built $(BUILD_DATE) $(BUILD_TIME)
-VERSION_STRING  :=  $(GIT_BRANCH) @ $(GIT_COMMIT)
-export VERSION_STRING
+VERSION_STRING  :=  $(DIST_SUFFIX), $(GIT_BRANCH) @ $(GIT_COMMIT)
+

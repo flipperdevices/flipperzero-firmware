@@ -14,8 +14,8 @@ class App:
         # Application specific initialization
         self.init()
 
-    def __call__(self):
-        self.args, _ = self.parser.parse_known_args()
+    def __call__(self, args=None):
+        self.args, _ = self.parser.parse_known_args(args=args)
         # configure log output
         self.log_level = logging.DEBUG if self.args.debug else logging.INFO
         self.logger.setLevel(self.log_level)

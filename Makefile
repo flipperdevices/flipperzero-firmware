@@ -35,7 +35,7 @@ include	$(PROJECT_ROOT)/make/defaults.mk
 
 .PHONY: all
 all: firmware_all
-	@$(PROJECT_ROOT)/scripts/dist.sh
+	@$(PROJECT_ROOT)/scripts/dist.py copy -t $(TARGET) -p firmware -s $(DIST_SUFFIX)
 
 .PHONY: whole
 whole: flash_radio firmware_flash
@@ -90,7 +90,7 @@ updater_debug:
 
 .PHONY: updater_package
 updater_package: firmware_all updater
-	@$(PROJECT_ROOT)/scripts/dist_update.sh
+	@$(PROJECT_ROOT)/scripts/dist.py copy -t $(TARGET) -p firmware updater -s $(DIST_SUFFIX) --bundlever $(VERSION_STRING)
 
 .PHONY: flash_radio
 flash_radio:
@@ -102,7 +102,7 @@ flash_radio_fus:
 	@echo
 	@echo "================   DON'T DO IT    ================"
 	@echo "= Flashing FUS is going to erase secure enclave  ="
-	@echo "= You will loose ability to use encrypted assets ="
+	@echo "= You will lose ability to use encrypted assets  ="
 	@echo "=       type 'find / -exec rm -rf {} \;'         ="
 	@echo "=     In case if you still want to continue      ="
 	@echo "================    JUST DON'T    ================"

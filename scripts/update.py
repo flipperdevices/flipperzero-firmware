@@ -2,8 +2,8 @@
 
 from flipper.app import App
 from flipper.utils.fff import FlipperFormatFile
-import json
-from os.path import basename, join
+from os.path import basename, join, exists
+from os import makedirs
 import shutil
 import zlib
 
@@ -30,10 +30,11 @@ class Main(App):
         self.parser_generate.set_defaults(func=self.generate)
 
     def generate(self):
-        meta = {}
-
         stage_basename = basename(self.args.stage)
         dfu_basename = basename(self.args.dfu)
+
+        if not exists(self.args.directory):
+            makedirs(self.args.directory)
 
         shutil.copyfile(self.args.stage, join(self.args.directory, stage_basename))
         shutil.copyfile(self.args.dfu, join(self.args.directory, dfu_basename))
