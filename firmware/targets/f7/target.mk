@@ -144,7 +144,7 @@ ifeq ($(RAM_EXEC), 1)
 LDFLAGS += -T$(MXPROJECT_DIR)/stm32wb55xx_ram_fw.ld
 else # RAM_EXEC
 # Linker options
-LDFLAGS += -T$(MXPROJECT_DIR)/stm32wb55xx_flash_cm4_no_bootloader.ld
+LDFLAGS += -T$(MXPROJECT_DIR)/stm32wb55xx_flash.ld
 endif # RAM_EXEC
 
 SVD_FILE = ../debug/STM32WB55_CM4.svd
