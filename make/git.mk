@@ -14,10 +14,11 @@ CFLAGS += \
 	-DVERSION=\"$(VERSION)\" \
 	-DTARGET=$(HARDWARE_TARGET)
 
-DIST_SUFFIX		:= local-$(GIT_COMMIT)$(GIT_CLEAN_BUILD)
 # if suffix is set in environment (by Github), use it
-ifdef $$DIST_SUFFIX
-	DIST_SUFFIX := $$DIST_SUFFIX
+ifeq (${DIST_SUFFIX},)
+	DIST_SUFFIX	:= local-$(GIT_COMMIT)$(GIT_CLEAN_BUILD)
+else
+	DIST_SUFFIX := ${DIST_SUFFIX}
 endif
 
 #VERSION_STRING  :=  $(VERSION) ($(GIT_BRANCH) @ $(GIT_COMMIT)), built $(BUILD_DATE) $(BUILD_TIME)
