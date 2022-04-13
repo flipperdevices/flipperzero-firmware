@@ -8,11 +8,11 @@
 
 #ifdef FURI_RAM_EXEC
 int main() {
-    // Flipper critical FURI HAL
-    furi_hal_init_early();
-
     // Initialize FURI layer
     furi_init();
+
+    // Flipper critical FURI HAL
+    furi_hal_init_early();
 
     // Flipper FURI HAL
     furi_hal_init();
@@ -27,6 +27,9 @@ int main() {
 }
 #else
 int main() {
+    // Initialize FURI layer
+    furi_init();
+
     // Flipper critical FURI HAL
     furi_hal_init_early();
     furi_hal_light_sequence("RGB");
@@ -49,8 +52,6 @@ int main() {
         furi_hal_power_reset();
     } else {
         furi_hal_light_sequence("rgb G");
-        // Initialize FURI layer
-        furi_init();
 
         // Flipper FURI HAL
         furi_hal_init();
