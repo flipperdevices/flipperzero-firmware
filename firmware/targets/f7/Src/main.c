@@ -32,6 +32,7 @@ int main() {
 int main() {
     // Flipper critical FURI HAL
     furi_hal_init_early();
+    furi_hal_light_sequence("RGB");
 
     // Delay is for button sampling
     furi_hal_delay_ms(100);

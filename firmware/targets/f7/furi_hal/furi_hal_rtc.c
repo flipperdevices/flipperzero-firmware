@@ -1,4 +1,6 @@
 #include <furi_hal_rtc.h>
+#include <furi_hal_light.h>
+
 #include <stm32wbxx_ll_bus.h>
 #include <stm32wbxx_ll_pwr.h>
 #include <stm32wbxx_ll_rcc.h>
@@ -37,6 +39,7 @@ void furi_hal_rtc_init_early() {
         }
         // Plan B: reset backup domain
         if(!RTC_CLOCK_IS_READY()) {
+            furi_hal_light_sequence("rgb R.r.R.r.R");
             LL_RCC_ForceBackupDomainReset();
             LL_RCC_ReleaseBackupDomainReset();
             NVIC_SystemReset();

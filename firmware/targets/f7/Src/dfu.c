@@ -25,7 +25,7 @@ void flipper_boot_dfu_show_splash() {
 }
 
 void flipper_boot_dfu_exec() {
-    // This remains commented out until core init is fixed & stops breaking DFU.
+    // Show DFU splashscreen
     furi_hal_light_sequence("WB");
     flipper_boot_dfu_show_splash();
 
