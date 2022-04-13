@@ -8,14 +8,17 @@ PREFIX := $(GCC_PATH)/$(PREFIX)
 endif
 endif
 
-CC	= $(PREFIX)gcc -std=gnu17
-CPP	= $(PREFIX)g++ -std=gnu++17
+CCACHE := $(shell which ccache)
+
+CC	= $(CCACHE) $(PREFIX)gcc -std=gnu17
+CPP	= $(CCACHE) $(PREFIX)g++ -std=gnu++17
 LD	= $(PREFIX)g++
 AS	= $(PREFIX)gcc -x assembler-with-cpp
 CP	= $(PREFIX)objcopy
 SZ	= $(PREFIX)size
 HEX	= $(CP) -O ihex
 BIN	= $(CP) -O binary -S
+
 
 ifeq ($(OS), Darwin)
 GDB	= gdb
