@@ -101,7 +101,6 @@ static void update_task_worker_thread_cb(FuriThreadState state, void* context) {
     if(op_result == UPDATE_TASK_NOERR) {
         osDelay(UPDATE_DELAY_OPERATION_OK);
         furi_hal_power_reset();
-    } else {
     }
 }
 

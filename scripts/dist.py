@@ -27,7 +27,7 @@ class Main(App):
         self.parser_copy.add_argument(
             "--noclean",
             dest="noclean",
-            action="store_false",
+            action="store_true",
             help="Don't clean output directory",
             required=False,
         )
@@ -51,7 +51,7 @@ class Main(App):
 
     def copy(self):
         self.output_dir_path = join("dist", self.args.target)
-        if exists(self.output_dir_path) and self.args.noclean:
+        if exists(self.output_dir_path) and not self.args.noclean:
             shutil.rmtree(self.output_dir_path)
 
         if not exists(self.output_dir_path):
@@ -83,7 +83,7 @@ class Main(App):
             self.logger.info(
                 f"Use this directory to self-update your Flipper:\n\t{bundle_dir}"
             )
-            UpdateMain()(bundle_args)
+            return UpdateMain(no_exit=True)(bundle_args)
 
         return 0
 
