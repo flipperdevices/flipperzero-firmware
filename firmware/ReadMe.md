@@ -10,13 +10,13 @@ What does it do?
 
 # Targets
 
-| Name      | Bootloader    | Firmware      | Reset     | DFU               |
-|           | Address       | Address       | Combo     | Combo             |
------------------------------------------------------------------------------
-| f7        | deprecated    | 0x08000000    | L+Back    | deprecated        |
+| Name      | Firmware      | Reset                   | DFU                     |
+|           | Address       | Combo                   | Combo                   |
+---------------------------------------------------------------------------------
+| f7        | 0x08000000    | L+Back, release both    | L+Back, release Back    |
 
 Also there is a "hardware" ST bootloader combo available even on a bricked or empty device: L+Ok+Back, release Back, Left.
-Target independent code and headers in `target/include` folders.
+Target independent code and headers in `target/include` folders. More details in `documentation/KeyCombo.md`
 
 # Building
 
