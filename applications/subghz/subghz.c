@@ -188,7 +188,7 @@ SubGhz* subghz_alloc() {
 
     //init setting
     subghz->setting = subghz_setting_alloc();
-    subghz_setting_load(subghz->setting);
+    subghz_setting_load(subghz->setting, "/ext/subghz/assets/setting_user");
 
     //init Worker & Protocol & History
     subghz->txrx = malloc(sizeof(SubGhzTxRx));
@@ -288,6 +288,7 @@ void subghz_free(SubGhz* subghz) {
 
     //setting
     subghz_setting_free(subghz->setting);
+    free(subghz->setting);
 
     //Worker & Protocol & History
     subghz_receiver_free(subghz->txrx->receiver);

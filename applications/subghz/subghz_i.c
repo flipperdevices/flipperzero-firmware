@@ -261,7 +261,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             load_key_state = SubGhzLoadKeyStateOnlyRx;
             break;
         }
-        \temp_data32;
+        subghz->txrx->frequency = temp_data32;
 
         if(!flipper_format_read_string(fff_data_file, "Preset", temp_str)) {
             FURI_LOG_E(TAG, "Missing Preset");
