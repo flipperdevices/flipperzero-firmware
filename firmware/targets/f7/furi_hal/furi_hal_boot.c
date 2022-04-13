@@ -17,6 +17,7 @@ void furi_hal_boot_init() {
 }
 
 void furi_hal_boot_switch(void* address) {
+    __set_BASEPRI(0);
     asm volatile("ldr    r3, [%0]    \n"
                  "msr    msp, r3     \n"
                  "ldr    r3, [%1]    \n"

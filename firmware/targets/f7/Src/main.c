@@ -2,10 +2,12 @@
 #include <furi_hal.h>
 #include <flipper.h>
 #include <alt_boot.h>
+#include <semphr.h>
 
 #define TAG "Main"
 
-__attribute__((always_inline)) inline void main_ram() {
+#ifdef FURI_RAM_EXEC
+int main() {
     // Flipper critical FURI HAL
     furi_hal_init_early();
     furi_hal_clock_init();
@@ -26,12 +28,15 @@ __attribute__((always_inline)) inline void main_ram() {
     while(1) {
     }
 }
-
-__attribute__((always_inline)) inline void main_normal() {
+#else
+int main() {
     // Flipper critical FURI HAL
     furi_hal_init_early();
 
-    if(furi_hal_boot_get_mode() == FuriHalBootModeDFU) {
+    // Delay is for button sampling
+    furi_hal_delay_ms(100);
+
+    if(furi_hal_boot_get_mode() == FuriHalBootModeDFU || !furi_hal_gpio_read(&gpio_button_left)) {
         furi_hal_boot_set_mode(FuriHalBootModeNormal);
         flipper_boot_dfu_exec();
         furi_hal_power_reset();
@@ -60,14 +65,7 @@ __attribute__((always_inline)) inline void main_normal() {
     while(1) {
     }
 }
-
-int main(void) {
-#ifdef FURI_RAM_EXEC
-    main_ram();
-#else
-    main_normal();
 #endif
-}
 
 void Error_Handler(void) {
     furi_crash("ErrorHandler");

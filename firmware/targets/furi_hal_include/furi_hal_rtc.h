@@ -53,6 +53,9 @@ typedef enum {
 /** Early initialization */
 void furi_hal_rtc_init_early();
 
+/** Early deinitialization */
+void furi_hal_rtc_deinit_early();
+
 /** Initialize RTC subsystem */
 void furi_hal_rtc_init();
 

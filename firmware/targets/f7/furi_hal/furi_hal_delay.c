@@ -12,7 +12,6 @@ void furi_hal_delay_init() {
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
     DWT->CYCCNT = 0U;
-    FURI_LOG_I(TAG, "Init OK");
 }
 
 uint32_t furi_hal_delay_instructions_per_microsecond() {

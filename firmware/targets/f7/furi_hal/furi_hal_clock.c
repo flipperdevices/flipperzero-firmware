@@ -26,6 +26,24 @@ void furi_hal_clock_init_early() {
 
     LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SPI1);
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_SPI2);
+
+    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
+    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C3);
+}
+
+void furi_hal_clock_deinit_early() {
+    LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_I2C1);
+    LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_I2C3);
+
+    LL_APB2_GRP1_DisableClock(LL_APB2_GRP1_PERIPH_SPI1);
+    LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_SPI2);
+
+    LL_AHB2_GRP1_DisableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
+    LL_AHB2_GRP1_DisableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
+    LL_AHB2_GRP1_DisableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
+    LL_AHB2_GRP1_DisableClock(LL_AHB2_GRP1_PERIPH_GPIOD);
+    LL_AHB2_GRP1_DisableClock(LL_AHB2_GRP1_PERIPH_GPIOE);
+    LL_AHB2_GRP1_DisableClock(LL_AHB2_GRP1_PERIPH_GPIOH);
 }
 
 void furi_hal_clock_init() {

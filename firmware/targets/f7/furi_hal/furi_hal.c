@@ -9,11 +9,28 @@
 void furi_hal_init_early() {
     furi_hal_clock_init_early();
     furi_hal_rtc_init_early();
+    furi_hal_delay_init();
+
+    furi_hal_resources_init_early();
+
+    furi_hal_spi_init_early();
+
+    furi_hal_i2c_init_early();
+    furi_hal_light_init();
+}
+
+void furi_hal_deinit_early() {
+    furi_hal_i2c_deinit_early();
+    furi_hal_spi_deinit_early();
+
+    furi_hal_resources_deinit_early();
+
+    furi_hal_rtc_deinit_early();
+    furi_hal_clock_deinit_early();
 }
 
 void furi_hal_init() {
     furi_hal_interrupt_init();
-    furi_hal_delay_init();
 
     furi_hal_flash_init();
 

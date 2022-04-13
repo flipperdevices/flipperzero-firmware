@@ -49,3 +49,5 @@ void furi_hal_init();
  * That code should not use memory allocations
  */
 void furi_hal_init_early();
+
+void furi_hal_deinit_early();
