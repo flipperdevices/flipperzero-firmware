@@ -65,7 +65,7 @@ class Main(App):
         )
         if self.args.version:
             bundle_dir = join(
-                self.output_dir_path, f"update-{self.args.target}-{self.args.suffix}"
+                self.output_dir_path, f"{self.args.target}-update-{self.args.suffix}"
             )
             bundle_args = [
                 "generate",
