@@ -1,8 +1,7 @@
 #include "power_i.h"
 
 #include <furi.h>
-#include "furi_hal_power.h"
-#include "furi_hal_boot.h"
+#include <furi_hal.h>
 
 void power_off(Power* power) {
     furi_hal_power_off();
@@ -15,9 +14,9 @@ void power_off(Power* power) {
 
 void power_reboot(PowerBootMode mode) {
     if(mode == PowerBootModeNormal) {
-        furi_hal_boot_set_mode(FuriHalBootModeNormal);
+        furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeNormal);
     } else if(mode == PowerBootModeDfu) {
-        furi_hal_boot_set_mode(FuriHalBootModeDFU);
+        furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeDfu);
     }
     furi_hal_power_reset();
 }

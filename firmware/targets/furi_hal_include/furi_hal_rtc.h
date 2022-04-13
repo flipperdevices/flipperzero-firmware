@@ -31,23 +31,24 @@ typedef enum {
 } FuriHalRtcFlag;
 
 typedef enum {
-    FuriHalRtcBootModeNormal = 0,
-    FuriHalRtcBootModePreUpdate,
-    FuriHalRtcBootModeUpdate,
-    FuriHalRtcBootModePostUpdate,
-    // TODO: migrate DFU etc.
+    FuriHalRtcBootModeNormal = 0, /**< Normal boot mode, default value */
+    FuriHalRtcBootModeDfu, /**< Boot to DFU (MCU bootloader by ST) */
+    FuriHalRtcBootModePreUpdate, /**< Boot to Update, pre update */
+    FuriHalRtcBootModeUpdate, /**< Boot to Update, main */
+    FuriHalRtcBootModePostUpdate, /**< Boot to Update, post update */
 } FuriHalRtcBootMode;
 
 typedef enum {
-    FuriHalRtcRegisterBoot,
-    FuriHalRtcRegisterBootVersion,
-    FuriHalRtcRegisterSystem,
-    FuriHalRtcRegisterSystemVersion,
-    FuriHalRtcRegisterLfsFingerprint,
-    FuriHalRtcRegisterFaultData,
-    FuriHalRtcRegisterPinFails,
+    FuriHalRtcRegisterHeader, /**< RTC structure header */
+    FuriHalRtcRegisterSystem, /**< Various system bits */
+    FuriHalRtcRegisterVersion, /**< Pointer to Version */
+    FuriHalRtcRegisterLfsFingerprint, /**< LFS geometry fingerprint */
+    FuriHalRtcRegisterFaultData, /**< Pointer to last fault message */
+    FuriHalRtcRegisterPinFails, /**< Failed pins count */
     /* Index of FS directory entry corresponding to FW update to be applied */
     FuriHalRtcRegisterUpdateFolderFSIndex,
+
+    FuriHalRtcRegisterMAX, /**< Service value, do not use */
 } FuriHalRtcRegister;
 
 /** Early initialization */

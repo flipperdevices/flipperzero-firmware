@@ -26,7 +26,6 @@ void flipper_boot_dfu_show_splash() {
 
 void flipper_boot_dfu_exec() {
     // Show DFU splashscreen
-    furi_hal_light_sequence("WB");
     flipper_boot_dfu_show_splash();
 
     // Errata 2.2.9, Flash OPTVERR flag is always set after system reset
@@ -38,5 +37,5 @@ void flipper_boot_dfu_exec() {
     // Remap memory to system bootloader
     LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SYSTEMFLASH);
     // Jump
-    furi_hal_boot_switch(0x0);
+    furi_hal_switch(0x0);
 }

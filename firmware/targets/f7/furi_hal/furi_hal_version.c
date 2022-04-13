@@ -192,7 +192,7 @@ void furi_hal_version_init() {
         furi_crash(NULL);
     }
 
-    furi_hal_rtc_set_register(FuriHalRtcRegisterSystemVersion, (uint32_t)version_get());
+    furi_hal_rtc_set_register(FuriHalRtcRegisterVersion, (uint32_t)version_get());
 
     FURI_LOG_I(TAG, "Init OK");
 }

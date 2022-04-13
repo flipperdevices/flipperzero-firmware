@@ -32,6 +32,10 @@ void furi_hal_deinit_early() {
 }
 
 void furi_hal_init() {
+    furi_hal_clock_init();
+    furi_hal_console_init();
+    furi_hal_rtc_init();
+
     furi_hal_interrupt_init();
 
     furi_hal_flash_init();
@@ -39,7 +43,6 @@ void furi_hal_init() {
     furi_hal_resources_init();
     FURI_LOG_I(TAG, "GPIO OK");
 
-    furi_hal_boot_init();
     furi_hal_version_init();
 
     furi_hal_spi_init();
@@ -90,4 +93,15 @@ void furi_hal_init() {
             LL_MPU_ACCESS_CACHEABLE | LL_MPU_ACCESS_SHAREABLE | LL_MPU_TEX_LEVEL1 |
             LL_MPU_INSTRUCTION_ACCESS_ENABLE);
     LL_MPU_Enable(LL_MPU_CTRL_PRIVILEGED_DEFAULT);
+}
+
+void furi_hal_switch(void* address) {
+    __set_BASEPRI(0);
+    asm volatile("ldr    r3, [%0]    \n"
+                 "msr    msp, r3     \n"
+                 "ldr    r3, [%1]    \n"
+                 "mov    pc, r3      \n"
+                 :
+                 : "r"(address), "r"(address + 0x4)
+                 : "r3");
 }

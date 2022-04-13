@@ -13,12 +13,21 @@
 
 #define RTC_CLOCK_IS_READY() (LL_RCC_LSE_IsReady() && LL_RCC_LSI1_IsReady())
 
+#define FURI_HAL_RTC_HEADER_MAGIC 0x10F1
+#define FURI_HAL_RTC_HEADER_VERSION 0
+
+typedef struct {
+    uint16_t magic;
+    uint8_t version;
+    uint8_t unused;
+} FuriHalRtcHeader;
+
 typedef struct {
     uint8_t log_level : 4;
     uint8_t log_reserved : 4;
     uint8_t flags;
-    uint8_t boot_mode : 2;
-    uint16_t reserved : 14;
+    uint8_t boot_mode : 4;
+    uint16_t reserved : 12;
 } DeveloperReg;
 
 _Static_assert(sizeof(DeveloperReg) == 4, "DeveloperReg size mismatch");
@@ -52,6 +61,19 @@ void furi_hal_rtc_init_early() {
     // Enable clocking
     LL_RCC_EnableRTC();
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_RTCAPB);
+
+    // Verify header register
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterHeader);
+    FuriHalRtcHeader* data = (FuriHalRtcHeader*)&data_reg;
+    if(data->magic != FURI_HAL_RTC_HEADER_MAGIC || data->version != FURI_HAL_RTC_HEADER_VERSION) {
+        // Reset all our registers to ensure consistency
+        for(size_t i = 0; i < FuriHalRtcRegisterMAX; i++) {
+            furi_hal_rtc_set_register(i, 0);
+        }
+        data->magic = FURI_HAL_RTC_HEADER_MAGIC;
+        data->version = FURI_HAL_RTC_HEADER_VERSION;
+        furi_hal_rtc_set_register(FuriHalRtcRegisterHeader, data_reg);
+    }
 }
 
 void furi_hal_rtc_deinit_early() {
