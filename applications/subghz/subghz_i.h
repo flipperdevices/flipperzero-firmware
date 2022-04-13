@@ -30,12 +30,13 @@
 #include <lib/subghz/transmitter.h>
 
 #include "subghz_history.h"
+#include "subghz_setting.h"
 
 #include <gui/modules/variable_item_list.h>
 
 #define SUBGHZ_MAX_LEN_NAME 21
 
-extern const char* const subghz_frequencies_text[];
+//extern const char* const subghz_frequencies_text[];
 extern const uint32_t subghz_frequencies[];
 extern const uint32_t subghz_hopper_frequencies[];
 extern const uint32_t subghz_frequencies_count;
@@ -137,6 +138,7 @@ struct SubGhz {
     SubGhzTestCarrier* subghz_test_carrier;
     SubGhzTestPacket* subghz_test_packet;
     string_t error_str;
+    SubGhzSetting* setting;
 };
 
 typedef enum {

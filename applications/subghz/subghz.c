@@ -3,27 +3,27 @@
 #include "subghz_i.h"
 #include <lib/toolbox/path.h>
 
-const char* const subghz_frequencies_text[] = {
+// const char* const subghz_frequencies_text[] = {
 
-    "300.00",
-    "303.88",
-    "304.25",
-    "315.00",
-    "318.00",
+//     "300.00",
+//     "303.88",
+//     "304.25",
+//     "315.00",
+//     "318.00",
 
-    "390.00",
-    "418.00",
-    "433.08",
-    "433.42",
-    "433.92",
-    "434.42",
-    "434.78",
-    "438.90",
+//     "390.00",
+//     "418.00",
+//     "433.08",
+//     "433.42",
+//     "433.92",
+//     "434.42",
+//     "434.78",
+//     "438.90",
 
-    "868.35",
-    "915.00",
-    "925.00",
-};
+//     "868.35",
+//     "915.00",
+//     "925.00",
+// };
 
 const uint32_t subghz_frequencies[] = {
 
@@ -186,9 +186,14 @@ SubGhz* subghz_alloc() {
         SubGhzViewIdStatic,
         subghz_test_static_get_view(subghz->subghz_test_static));
 
+    //init setting
+    subghz->setting = subghz_setting_alloc();
+    subghz_setting_load(subghz->setting);
+
     //init Worker & Protocol & History
     subghz->txrx = malloc(sizeof(SubGhzTxRx));
-    subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
+    subghz->txrx->frequency = subghz_setting_get_frequency(
+        subghz->setting, subghz_setting_get_frequency_default_index(subghz->setting));
     subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
     subghz->txrx->txrx_state = SubGhzTxRxStateSleep;
     subghz->txrx->hopper_state = SubGhzHopperStateOFF;
@@ -280,6 +285,9 @@ void subghz_free(SubGhz* subghz) {
     // GUI
     furi_record_close("gui");
     subghz->gui = NULL;
+
+    //setting
+    subghz_setting_free(subghz->setting);
 
     //Worker & Protocol & History
     subghz_receiver_free(subghz->txrx->receiver);
