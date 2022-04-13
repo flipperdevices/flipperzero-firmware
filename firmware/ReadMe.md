@@ -13,9 +13,9 @@ What does it do?
 | Name      | Bootloader    | Firmware      | Reset     | DFU               |
 |           | Address       | Address       | Combo     | Combo             |
 -----------------------------------------------------------------------------
-| f7        | deprecated    | 0x00000000    | L+Back    | L+Back, hold L    |
+| f7        | deprecated    | 0x08000000    | L+Back    | deprecated        |
 
-Also there is a ST bootloader combo available on empty device: L+Ok+Back, release Back,Left.
+Also there is a "hardware" ST bootloader combo available even on a bricked or empty device: L+Ok+Back, release Back, Left.
 Target independent code and headers in `target/include` folders.
 
 # Building
