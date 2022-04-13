@@ -3,8 +3,14 @@
 #include <power/power_service/power.h>
 #include <notification/notification_messages.h>
 #include <protobuf_version.h>
+#include <update_util/update_operation.h>
 
 #include "rpc_i.h"
+
+typedef struct {
+    RpcSession* session;
+    PB_Main* response;
+} RpcSystemContext;
 
 static void rpc_system_system_ping_process(const PB_Main* request, void* context) {
     furi_assert(request);
@@ -55,11 +61,6 @@ static void rpc_system_system_reboot_process(const PB_Main* request, void* conte
     }
 }
 
-typedef struct {
-    RpcSession* session;
-    PB_Main* response;
-} RpcSystemSystemDeviceInfoContext;
-
 static void rpc_system_system_device_info_callback(
     const char* key,
     const char* value,
@@ -67,7 +68,7 @@ static void rpc_system_system_device_info_callback(
     void* context) {
     furi_assert(key);
     furi_assert(value);
-    RpcSystemSystemDeviceInfoContext* ctx = context;
+    RpcSystemContext* ctx = context;
 
     char* str_key = strdup(key);
     char* str_value = strdup(value);
@@ -91,7 +92,7 @@ static void rpc_system_system_device_info_process(const PB_Main* request, void* 
     response->which_content = PB_Main_system_device_info_response_tag;
     response->command_status = PB_CommandStatus_OK;
 
-    RpcSystemSystemDeviceInfoContext device_info_context = {
+    RpcSystemContext device_info_context = {
         .session = session,
         .response = response,
     };
@@ -202,6 +203,68 @@ static void rpc_system_system_protobuf_version_process(const PB_Main* request, v
     free(response);
 }
 
+static void rpc_system_system_power_info_callback(
+    const char* key,
+    const char* value,
+    bool last,
+    void* context) {
+    furi_assert(key);
+    furi_assert(value);
+    RpcSystemContext* ctx = context;
+
+    char* str_key = strdup(key);
+    char* str_value = strdup(value);
+
+    ctx->response->has_next = !last;
+    ctx->response->content.system_device_info_response.key = str_key;
+    ctx->response->content.system_device_info_response.value = str_value;
+
+    rpc_send_and_release(ctx->session, ctx->response);
+}
+
+static void rpc_system_system_get_power_info_process(const PB_Main* request, void* context) {
+    furi_assert(request);
+    furi_assert(request->which_content == PB_Main_system_power_info_request_tag);
+
+    RpcSession* session = (RpcSession*)context;
+    furi_assert(session);
+
+    PB_Main* response = malloc(sizeof(PB_Main));
+    response->command_id = request->command_id;
+    response->which_content = PB_Main_system_power_info_response_tag;
+    response->command_status = PB_CommandStatus_OK;
+
+    RpcSystemContext power_info_context = {
+        .session = session,
+        .response = response,
+    };
+    furi_hal_power_info_get(rpc_system_system_power_info_callback, &power_info_context);
+
+    free(response);
+}
+
+#ifdef APP_UPDATER
+static void rpc_system_system_update_request_process(const PB_Main* request, void* context) {
+    furi_assert(request);
+    furi_assert(request->which_content == PB_Main_system_update_request_tag);
+
+    RpcSession* session = (RpcSession*)context;
+    furi_assert(session);
+
+    bool update_prepare_result =
+        update_operation_prepare(request->content.system_update_request.update_folder) ==
+        UpdatePrepareResultOK;
+
+    PB_Main* response = malloc(sizeof(PB_Main));
+    response->command_id = request->command_id;
+    response->has_next = false;
+    response->command_status = update_prepare_result ? PB_CommandStatus_OK :
+                                                       PB_CommandStatus_ERROR_INVALID_PARAMETERS;
+    rpc_send_and_release(session, response);
+    free(response);
+}
+#endif
+
 void* rpc_system_system_alloc(RpcSession* session) {
     RpcHandler rpc_handler = {
         .message_handler = NULL,
@@ -232,6 +295,14 @@ void* rpc_system_system_alloc(RpcSession* session) {
 
     rpc_handler.message_handler = rpc_system_system_protobuf_version_process;
     rpc_add_handler(session, PB_Main_system_protobuf_version_request_tag, &rpc_handler);
+
+    rpc_handler.message_handler = rpc_system_system_get_power_info_process;
+    rpc_add_handler(session, PB_Main_system_power_info_request_tag, &rpc_handler);
+
+#ifdef APP_UPDATER
+    rpc_handler.message_handler = rpc_system_system_update_request_process;
+    rpc_add_handler(session, PB_Main_system_update_request_tag, &rpc_handler);
+#endif
 
     return NULL;
 }

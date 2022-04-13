@@ -85,7 +85,7 @@ static void subghz_keystore_mess_with_iv(uint8_t* iv) {
     // Sharing them will bring some discomfort to legal owners
     // And potential legal action against you
     // While you reading this code think about your own personal responsibility
-    asm volatile("nani:                    \n"
+    asm volatile("nani%=:                  \n"
                  "ldrd  r0, r2, [%0, #0x0] \n"
                  "lsl   r1, r0, #8         \n"
                  "lsl   r3, r2, #8         \n"
@@ -187,6 +187,8 @@ bool subghz_keystore_load(SubGhzKeystore* instance, const char* file_name) {
     string_t filetype;
     string_init(filetype);
 
+    FURI_LOG_I(TAG, "Loading keystore %s", file_name);
+
     Storage* storage = furi_record_open("storage");
 
     FlipperFormat* flipper_format = flipper_format_file_alloc(storage);
@@ -224,7 +226,6 @@ bool subghz_keystore_load(SubGhzKeystore* instance, const char* file_name) {
             FURI_LOG_E(TAG, "Unknown encryption");
             break;
         }
-        FURI_LOG_I(TAG, "Loading keystore %s", file_name);
     } while(0);
     flipper_format_free(flipper_format);
 
