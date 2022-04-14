@@ -12,7 +12,8 @@ static const char* ArchiveTabNames[] = {
     [ArchiveTabInfrared] = "Infrared",
     [ArchiveTabBadUsb] = "Bad USB",
     [ArchiveTabU2f] = "U2F",
-    [ArchiveTabBrowser] = "Browser"};
+    [ArchiveTabBrowser] = "Browser",
+};
 
 static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeIButton] = &I_ibutt_10px,
@@ -22,6 +23,7 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeInfrared] = &I_ir_10px,
     [ArchiveFileTypeBadUsb] = &I_badusb_10px,
     [ArchiveFileTypeU2f] = &I_u2f_10px,
+    [ArchiveFileTypeUpdateManifest] = &I_update_10px,
     [ArchiveFileTypeFolder] = &I_dir_10px,
     [ArchiveFileTypeUnknown] = &I_unknown_10px,
     [ArchiveFileTypeLoading] = &I_unknown_10px, // TODO loading icon
@@ -52,6 +54,10 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
 
     ArchiveFile_t* selected = files_array_get(model->files, model->item_idx - model->array_offset);
 
+    if((selected->fav) || (model->tab_idx == ArchiveTabFavorites)) {
+        string_set_str(menu[1], "Unpin");
+    }
+
     if(!archive_is_known_app(selected->type)) {
         string_set_str(menu[0], "---");
         string_set_str(menu[1], "---");
@@ -63,10 +69,6 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
         } else if(selected->is_app) {
             string_set_str(menu[2], "---");
         }
-    }
-
-    if((selected->fav) || (model->tab_idx == ArchiveTabFavorites)) {
-        string_set_str(menu[1], "Unpin");
     }
 
     for(size_t i = 0; i < MENU_ITEMS; i++) {

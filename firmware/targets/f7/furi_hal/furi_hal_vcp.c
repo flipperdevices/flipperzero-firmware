@@ -12,15 +12,14 @@
 #define VCP_IF_NUM 0
 
 typedef enum {
-    VcpEvtReserved = (1 << 0), // Reserved for StreamBuffer internal event
-    VcpEvtEnable = (1 << 1),
-    VcpEvtDisable = (1 << 2),
-    VcpEvtConnect = (1 << 3),
-    VcpEvtDisconnect = (1 << 4),
-    VcpEvtStreamRx = (1 << 5),
-    VcpEvtRx = (1 << 6),
-    VcpEvtStreamTx = (1 << 7),
-    VcpEvtTx = (1 << 8),
+    VcpEvtEnable = (1 << 0),
+    VcpEvtDisable = (1 << 1),
+    VcpEvtConnect = (1 << 2),
+    VcpEvtDisconnect = (1 << 3),
+    VcpEvtStreamRx = (1 << 4),
+    VcpEvtRx = (1 << 5),
+    VcpEvtStreamTx = (1 << 6),
+    VcpEvtTx = (1 << 7),
 } WorkerEvtFlags;
 
 #define VCP_THREAD_FLAG_ALL                                                                  \
@@ -63,6 +62,11 @@ void furi_hal_vcp_init() {
 
     vcp->tx_stream = xStreamBufferCreate(VCP_TX_BUF_SIZE, 1);
     vcp->rx_stream = xStreamBufferCreate(VCP_RX_BUF_SIZE, 1);
+
+    if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
+        FURI_LOG_W(TAG, "Skipped worker init: device in special startup mode=");
+        return;
+    }
 
     vcp->thread = furi_thread_alloc();
     furi_thread_set_name(vcp->thread, "VcpDriver");

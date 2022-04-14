@@ -4,6 +4,7 @@
 
 #define TAB_RIGHT InputKeyRight //default tab swith direction
 #define FILE_LIST_BUF_LEN 100
+#define BROWSER_DEPTH_MAX 8
 
 static const char* tab_default_paths[] = {
     [ArchiveTabFavorites] = "/any/favorites",
@@ -25,6 +26,7 @@ static const char* known_ext[] = {
     [ArchiveFileTypeInfrared] = ".ir",
     [ArchiveFileTypeBadUsb] = ".txt",
     [ArchiveFileTypeU2f] = "?",
+    [ArchiveFileTypeUpdateManifest] = ".fuf",
     [ArchiveFileTypeFolder] = "?",
     [ArchiveFileTypeUnknown] = "*",
 };

@@ -95,10 +95,11 @@ void cli_motd() {
     const Version* firmware_version = furi_hal_version_get_firmware_version();
     if(firmware_version) {
         printf(
-            "Firmware version: %s %s (%s built on %s)\r\n",
+            "Firmware version: %s %s (%s%s built on %s)\r\n",
             version_get_gitbranch(firmware_version),
             version_get_version(firmware_version),
             version_get_githash(firmware_version),
+            version_get_dirty_flag(firmware_version) ? "-dirty" : "",
             version_get_builddate(firmware_version));
     }
 }
@@ -399,6 +400,8 @@ void cli_delete_command(Cli* cli, const char* name) {
 
 int32_t cli_srv(void* p) {
     Cli* cli = cli_alloc();
+
+    furi_hal_vcp_init();
 
     // Init basic cli commands
     cli_commands_init(cli);
