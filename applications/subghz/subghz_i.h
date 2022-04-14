@@ -34,7 +34,7 @@
 
 #include <gui/modules/variable_item_list.h>
 
-#define SUBGHZ_MAX_LEN_NAME 21
+#define SUBGHZ_MAX_LEN_NAME 40
 
 /** SubGhzNotification state */
 typedef enum {
