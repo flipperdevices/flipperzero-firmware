@@ -231,8 +231,7 @@ MU_TEST(subghz_decoder_faac_slh_test) {
 
 MU_TEST(subghz_decoder_gate_tx_test) {
     mu_assert(
-        subghz_decode_test(
-            "/ext/unit_tests/subghz/gate_tx_raw.sub", SUBGHZ_PROTOCOL_GATE_TX_NAME),
+        subghz_decode_test("/ext/unit_tests/subghz/gate_tx_raw.sub", SUBGHZ_PROTOCOL_GATE_TX_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_GATE_TX_NAME " error\r\n");
 }
 
@@ -245,22 +244,19 @@ MU_TEST(subghz_decoder_hormann_hsm_test) {
 
 MU_TEST(subghz_decoder_ido_test) {
     mu_assert(
-        subghz_decode_test(
-            "/ext/unit_tests/subghz/ido_117_111_raw.sub", SUBGHZ_PROTOCOL_IDO_NAME),
+        subghz_decode_test("/ext/unit_tests/subghz/ido_117_111_raw.sub", SUBGHZ_PROTOCOL_IDO_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_IDO_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_keelog_test) {
     mu_assert(
-        subghz_decode_test(
-            "/ext/unit_tests/subghz/doorhan_raw.sub", SUBGHZ_PROTOCOL_KEELOQ_NAME),
+        subghz_decode_test("/ext/unit_tests/subghz/doorhan_raw.sub", SUBGHZ_PROTOCOL_KEELOQ_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_KEELOQ_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_kia_seed_test) {
     mu_assert(
-        subghz_decode_test(
-            "/ext/unit_tests/subghz/kia_seed_raw.sub", SUBGHZ_PROTOCOL_KIA_NAME),
+        subghz_decode_test("/ext/unit_tests/subghz/kia_seed_raw.sub", SUBGHZ_PROTOCOL_KIA_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_KIA_NAME " error\r\n");
 }
 
@@ -302,8 +298,7 @@ MU_TEST(subghz_decoder_princeton_test) {
 MU_TEST(subghz_decoder_scher_khan_magic_code_test) {
     mu_assert(
         subghz_decode_test(
-            "/ext/unit_tests/subghz/scher_khan_magic_code.sub",
-            SUBGHZ_PROTOCOL_SCHER_KHAN_NAME),
+            "/ext/unit_tests/subghz/scher_khan_magic_code.sub", SUBGHZ_PROTOCOL_SCHER_KHAN_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_SCHER_KHAN_NAME " error\r\n");
 }
 
@@ -323,8 +318,7 @@ MU_TEST(subghz_decoder_somfy_telis_test) {
 
 MU_TEST(subghz_decoder_star_line_test) {
     mu_assert(
-        subghz_decode_test(
-            "/ext/unit_tests/subghz/cenmax_raw.sub", SUBGHZ_PROTOCOL_STAR_LINE_NAME),
+        subghz_decode_test("/ext/unit_tests/subghz/cenmax_raw.sub", SUBGHZ_PROTOCOL_STAR_LINE_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_STAR_LINE_NAME " error\r\n");
 }
 
