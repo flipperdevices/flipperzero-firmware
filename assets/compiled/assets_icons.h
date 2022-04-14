@@ -173,7 +173,6 @@ extern const Icon I_Connect_me_62x31;
 extern const Icon I_Connected_62x31;
 extern const Icon I_Drive_112x35;
 extern const Icon I_Error_62x31;
-extern const Icon I_DolphinExcited_64x63;
 extern const Icon I_DolphinMafia_115x62;
 extern const Icon I_DolphinNice_96x59;
 extern const Icon I_DolphinWait_61x59;
