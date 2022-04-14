@@ -226,7 +226,6 @@ void subghz_free(SubGhz* subghz) {
 
     //setting
     subghz_setting_free(subghz->setting);
-    free(subghz->setting);
 
     //Worker & Protocol & History
     subghz_receiver_free(subghz->txrx->receiver);

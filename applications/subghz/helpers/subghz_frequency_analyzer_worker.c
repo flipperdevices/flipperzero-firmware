@@ -163,8 +163,6 @@ void subghz_frequency_analyzer_worker_free(SubGhzFrequencyAnalyzerWorker* instan
 
     furi_thread_free(instance->thread);
     subghz_setting_free(instance->setting);
-    //ToDo furi_halt ????????????????
-    free(instance->setting);
     free(instance);
 }
 

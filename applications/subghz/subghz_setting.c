@@ -297,6 +297,8 @@ void subghz_setting_load(SubGhzSetting* instance, const char* file_path) {
             }
         } while(false);
     }
+    flipper_format_free(fff_data_file);
+    furi_record_close("storage");
 
     if(loading != SubGhzSettingStateOkLoad) {
         switch(furi_hal_version_get_hw_region()) {
@@ -334,21 +336,26 @@ void subghz_setting_load(SubGhzSetting* instance, const char* file_path) {
 }
 
 size_t subghz_setting_get_frequency_count(SubGhzSetting* instance) {
+    furi_assert(instance);
     return instance->frequencies_count;
 }
 
 size_t subghz_setting_get_hopper_frequency_count(SubGhzSetting* instance) {
+    furi_assert(instance);
     return instance->hopper_frequencies_count;
 }
 
 uint32_t subghz_setting_get_frequency(SubGhzSetting* instance, size_t idx) {
+    furi_assert(instance);
     return *frequencies_list_get(instance->frequencies, idx);
 }
 
 uint32_t subghz_setting_get_hopper_frequency(SubGhzSetting* instance, size_t idx) {
+    furi_assert(instance);
     return *hopper_frequencies_list_get(instance->hopper_frequencies, idx);
 }
 
 uint32_t subghz_setting_get_frequency_default_index(SubGhzSetting* instance) {
+    furi_assert(instance);
     return instance->frequency_default_index;
 }
