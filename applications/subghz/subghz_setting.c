@@ -152,7 +152,6 @@ static const uint32_t subghz_hopper_frequencies_region_jp[] = {
 };
 static const uint32_t subghz_frequency_default_index_region_jp = 9;
 
-
 LIST_DEF(frequencies_list, uint32_t)
 LIST_DEF(hopper_frequencies_list, uint32_t)
 
