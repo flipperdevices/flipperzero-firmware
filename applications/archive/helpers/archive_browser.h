@@ -26,6 +26,7 @@ static const char* known_ext[] = {
     [ArchiveFileTypeInfrared] = ".ir",
     [ArchiveFileTypeBadUsb] = ".txt",
     [ArchiveFileTypeU2f] = "?",
+    [ArchiveFileTypeUpdateManifest] = ".fuf",
     [ArchiveFileTypeFolder] = "?",
     [ArchiveFileTypeUnknown] = "*",
 };
