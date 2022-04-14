@@ -154,7 +154,7 @@ SubGhzFrequencyAnalyzerWorker* subghz_frequency_analyzer_worker_alloc() {
     furi_thread_set_callback(instance->thread, subghz_frequency_analyzer_worker_thread);
 
     instance->setting = subghz_setting_alloc();
-    subghz_setting_load(instance->setting, "/ext/subghz/assets/setting_user");
+    subghz_setting_load(instance->setting, "/ext/subghz/assets/setting_frequency_analyzer_user");
     return instance;
 }
 

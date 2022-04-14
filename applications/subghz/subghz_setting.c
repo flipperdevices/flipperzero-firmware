@@ -16,6 +16,143 @@ typedef enum {
     SubGhzSettingStateOkLoad,
 } SubGhzSettingState;
 
+static const uint32_t subghz_frequencies[] = {
+    /* 300 - 348 */
+    300000000,
+    303875000,
+    304250000,
+    315000000,
+    318000000,
+
+    /* 387 - 464 */
+    390000000,
+    418000000,
+    433075000, /* LPD433 first */
+    433420000,
+    433920000, /* LPD433 mid */
+    434420000,
+    434775000, /* LPD433 last channels */
+    438900000,
+
+    /* 779 - 928 */
+    868350000,
+    915000000,
+    925000000,
+    0,
+};
+static const uint32_t subghz_hopper_frequencies[] = {
+    315000000,
+    318000000,
+    390000000,
+    433920000,
+    868350000,
+    0,
+};
+static const uint32_t subghz_frequency_default_index = 9;
+
+static const uint32_t subghz_frequencies_region_eu_ru[] = {
+    /* 300 - 348 */
+    300000000,
+    303875000,
+    304250000,
+    315000000,
+    318000000,
+
+    /* 387 - 464 */
+    390000000,
+    418000000,
+    433075000, /* LPD433 first */
+    433420000,
+    433920000, /* LPD433 mid */
+    434420000,
+    434775000, /* LPD433 last channels */
+    438900000,
+
+    /* 779 - 928 */
+    868350000,
+    915000000,
+    925000000,
+    0,
+};
+static const uint32_t subghz_hopper_frequencies_region_eu_ru[] = {
+    315000000,
+    318000000,
+    390000000,
+    433920000,
+    868350000,
+    0,
+};
+static const uint32_t subghz_frequency_default_index_region_eu_ru = 9;
+
+static const uint32_t subghz_frequencies_region_us_ca_au[] = {
+    /* 300 - 348 */
+    300000000,
+    303875000,
+    304250000,
+    315000000,
+    318000000,
+
+    /* 387 - 464 */
+    390000000,
+    418000000,
+    433075000, /* LPD433 first */
+    433420000,
+    433920000, /* LPD433 mid */
+    434420000,
+    434775000, /* LPD433 last channels */
+    438900000,
+
+    /* 779 - 928 */
+    868350000,
+    915000000,
+    925000000,
+    0,
+};
+static const uint32_t subghz_hopper_frequencies_region_us_ca_au[] = {
+    315000000,
+    318000000,
+    390000000,
+    433920000,
+    868350000,
+    0,
+};
+static const uint32_t subghz_frequency_default_index_region_us_ca_au = 9;
+
+static const uint32_t subghz_frequencies_region_jp[] = {
+    /* 300 - 348 */
+    300000000,
+    303875000,
+    304250000,
+    315000000,
+    318000000,
+
+    /* 387 - 464 */
+    390000000,
+    418000000,
+    433075000, /* LPD433 first */
+    433420000,
+    433920000, /* LPD433 mid */
+    434420000,
+    434775000, /* LPD433 last channels */
+    438900000,
+
+    /* 779 - 928 */
+    868350000,
+    915000000,
+    925000000,
+    0,
+};
+static const uint32_t subghz_hopper_frequencies_region_jp[] = {
+    315000000,
+    318000000,
+    390000000,
+    433920000,
+    868350000,
+    0,
+};
+static const uint32_t subghz_frequency_default_index_region_jp = 9;
+
+
 LIST_DEF(frequencies_list, uint32_t)
 LIST_DEF(hopper_frequencies_list, uint32_t)
 
@@ -39,6 +176,32 @@ void subghz_setting_free(SubGhzSetting* instance) {
     frequencies_list_clear(instance->frequencies);
     hopper_frequencies_list_clear(instance->hopper_frequencies);
     free(instance);
+}
+
+void subghz_setting_load_default(
+    SubGhzSetting* instance,
+    const uint32_t frequencies[],
+    const uint32_t hopper_frequencies[],
+    const uint32_t frequency_default_index) {
+    furi_assert(instance);
+    size_t i = 0;
+    frequencies_list_clear(instance->frequencies);
+    hopper_frequencies_list_clear(instance->hopper_frequencies);
+    i = 0;
+    while(frequencies[i]) {
+        frequencies_list_push_back(instance->frequencies, frequencies[i]);
+        i++;
+    }
+    instance->frequencies_count = i;
+
+    i = 0;
+    while(hopper_frequencies[i]) {
+        hopper_frequencies_list_push_back(instance->hopper_frequencies, hopper_frequencies[i]);
+        i++;
+    }
+    instance->hopper_frequencies_count = i;
+
+    instance->frequency_default_index = frequency_default_index;
 }
 
 void subghz_setting_load(SubGhzSetting* instance, const char* file_path) {
@@ -137,19 +300,37 @@ void subghz_setting_load(SubGhzSetting* instance, const char* file_path) {
     }
 
     if(loading != SubGhzSettingStateOkLoad) {
-        frequencies_list_clear(instance->frequencies);
-        hopper_frequencies_list_clear(instance->hopper_frequencies);
-        for(i = 0; i < subghz_frequencies_count; i++) {
-            frequencies_list_push_back(instance->frequencies, subghz_frequencies[i]);
-        }
-        instance->frequencies_count = i;
+        switch(furi_hal_version_get_hw_region()) {
+        case FuriHalVersionRegionEuRu:
+            subghz_setting_load_default(
+                instance,
+                subghz_frequencies_region_eu_ru,
+                subghz_hopper_frequencies_region_eu_ru,
+                subghz_frequency_default_index_region_eu_ru);
+            break;
+        case FuriHalVersionRegionUsCaAu:
+            subghz_setting_load_default(
+                instance,
+                subghz_frequencies_region_us_ca_au,
+                subghz_hopper_frequencies_region_us_ca_au,
+                subghz_frequency_default_index_region_us_ca_au);
+            break;
+        case FuriHalVersionRegionJp:
+            subghz_setting_load_default(
+                instance,
+                subghz_frequencies_region_jp,
+                subghz_hopper_frequencies_region_jp,
+                subghz_frequency_default_index_region_jp);
+            break;
 
-        for(i = 0; i < subghz_hopper_frequencies_count; i++) {
-            hopper_frequencies_list_push_back(
-                instance->hopper_frequencies, subghz_hopper_frequencies[i]);
+        default:
+            subghz_setting_load_default(
+                instance,
+                subghz_frequencies,
+                subghz_hopper_frequencies,
+                subghz_frequency_default_index);
+            break;
         }
-        instance->hopper_frequencies_count = i;
-        instance->frequency_default_index = subghz_frequencies_433_92;
     }
 }
 
