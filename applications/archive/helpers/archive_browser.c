@@ -120,13 +120,12 @@ void archive_file_array_swap(ArchiveBrowserView* browser, int8_t dir) {
                 ArchiveFile_t_clear(&temp);
             } else if(model->item_idx == array_size && dir > 0) {
                 ArchiveFile_t_init(&temp);
-                files_array_pop_at(&temp, model->files, model->item_idx);
+                files_array_pop_at(&temp, model->files, 0);
                 files_array_push_at(model->files, array_size, temp);
                 ArchiveFile_t_clear(&temp);
             } else {
                 files_array_swap_at(model->files, model->item_idx, swap_idx);
             }
-
             return false;
         });
 }
@@ -391,6 +390,17 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
 void archive_enter_dir(ArchiveBrowserView* browser, string_t name) {
     furi_assert(browser);
     furi_assert(name);
+
+    uint8_t browser_depth = 0;
+    with_view_model(
+        browser->view, (ArchiveBrowserViewModel * model) {
+            browser_depth = idx_last_array_size(model->idx_last);
+            return false;
+        });
+
+    if(browser_depth > BROWSER_DEPTH_MAX) {
+        return;
+    }
 
     archive_dir_count_items(browser, string_get_cstr(name));
 

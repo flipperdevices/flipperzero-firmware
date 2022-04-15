@@ -252,6 +252,20 @@ const FuriHalVersionRegion furi_hal_version_get_hw_region() {
     return furi_hal_version.board_region;
 }
 
+const char* furi_hal_version_get_hw_region_name() {
+    switch(furi_hal_version_get_hw_region()) {
+    case FuriHalVersionRegionUnknown:
+        return "R00";
+    case FuriHalVersionRegionEuRu:
+        return "R01";
+    case FuriHalVersionRegionUsCaAu:
+        return "R02";
+    case FuriHalVersionRegionJp:
+        return "R03";
+    }
+    return "R??";
+}
+
 const FuriHalVersionDisplay furi_hal_version_get_hw_display() {
     return furi_hal_version.board_display;
 }
