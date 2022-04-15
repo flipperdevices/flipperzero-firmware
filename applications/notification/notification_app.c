@@ -420,9 +420,7 @@ static void input_event_callback(const void* value, void* context) {
     furi_assert(context);
     const InputEvent* event = value;
     NotificationApp* app = context;
-    if(event->type == InputTypePress) {
-        notification_message(app, &sequence_display_on);
-    }
+    notification_message(app, &sequence_display_on);
 }
 
 // App alloc
