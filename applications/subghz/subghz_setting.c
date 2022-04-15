@@ -360,3 +360,8 @@ uint32_t subghz_setting_get_frequency_default_index(SubGhzSetting* instance) {
     furi_assert(instance);
     return instance->frequency_default_index;
 }
+
+uint32_t subghz_setting_get_default_frequency(SubGhzSetting* instance) {
+    furi_assert(instance);
+    return *FrequenciesList_get(instance->frequencies, instance->frequency_default_index);
+}
