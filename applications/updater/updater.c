@@ -77,10 +77,10 @@ Updater* updater_alloc(const char* arg) {
         updater->view_dispatcher, UpdaterViewWidget, widget_get_view(updater->widget));
 #endif
 
-    FuriHalRtcBootMode boot_mode = furi_hal_rtc_get_boot_mode();
 #ifdef FURI_RAM_EXEC
     if(true) {
 #else
+    FuriHalRtcBootMode boot_mode = furi_hal_rtc_get_boot_mode();
     if(!arg && ((boot_mode == FuriHalRtcBootModePreUpdate) ||
                 (boot_mode == FuriHalRtcBootModePostUpdate))) {
 #endif
