@@ -235,8 +235,8 @@ void subghz_read_raw_draw(Canvas* canvas, SubGhzReadRAWModel* model) {
         elements_button_left(canvas, "New");
         elements_button_center(canvas, "Send");
         elements_button_right(canvas, "More");
-        elements_text_box(
-            canvas, 4, 12, 110, 44, AlignCenter, AlignCenter, string_get_cstr(model->file_name));
+         elements_text_box(
+             canvas, 4, 20, 110, 30, AlignCenter, AlignCenter, string_get_cstr(model->file_name));
         break;
 
     case SubGhzReadRAWStatusTX:

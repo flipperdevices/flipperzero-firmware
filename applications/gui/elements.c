@@ -663,7 +663,7 @@ void elements_text_box(
     }
 
     // Set vertical alignment for all lines
-    if(full_text_processed) {
+    //if(full_text_processed) {
         if(total_height_default < height) {
             if(vertical == AlignTop) {
                 line[0].y = y + line[0].height;
@@ -688,7 +688,7 @@ void elements_text_box(
                 j = j % (line_num - 1) + 1;
             }
         }
-    }
+   // }
 
     // Draw line by line
     canvas_set_font(canvas, FontSecondary);
