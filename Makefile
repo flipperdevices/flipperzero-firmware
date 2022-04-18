@@ -52,7 +52,7 @@ debug:
 	@$(MAKE) -C firmware -j$(NPROCS) debug
 
 .PHONY: debug_other
-debug:
+debug_other:
 	@$(MAKE) -C firmware -j$(NPROCS) debug_other
 
 .PHONY: blackmagic
