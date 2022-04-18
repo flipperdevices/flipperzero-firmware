@@ -10,6 +10,7 @@ UpdateManifest* update_manifest_alloc() {
     string_init(update_manifest->firmware_dfu_image);
     string_init(update_manifest->radio_image);
     string_init(update_manifest->staged_loader_file);
+    string_init(update_manifest->resource_bundle);
     update_manifest->target = 0;
     update_manifest->valid = false;
     return update_manifest;
@@ -21,6 +22,7 @@ void update_manifest_free(UpdateManifest* update_manifest) {
     string_clear(update_manifest->firmware_dfu_image);
     string_clear(update_manifest->radio_image);
     string_clear(update_manifest->staged_loader_file);
+    string_clear(update_manifest->resource_bundle);
     free(update_manifest);
 }
 
@@ -51,6 +53,7 @@ static bool
     flipper_format_read_string(flipper_file, "Radio", update_manifest->radio_image);
     flipper_format_read_hex(
         flipper_file, "Radio address", (uint8_t*)&update_manifest->radio_address, sizeof(uint32_t));
+    flipper_format_read_string(flipper_file, "Resources", update_manifest->resource_bundle);
 
     return update_manifest->valid;
 }

@@ -21,6 +21,7 @@ typedef struct {
     string_t firmware_dfu_image;
     string_t radio_image;
     uint32_t radio_address;
+    string_t resource_bundle;
     bool valid;
 } UpdateManifest;
 
