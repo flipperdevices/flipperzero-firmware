@@ -89,13 +89,18 @@ updater_debug:
 	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) RAM_EXEC=1 debug
 
 .PHONY: updater_package_bin
-updater_package: firmware_all updater
+updater_package_bin: firmware_all updater
 	@$(PROJECT_ROOT)/scripts/dist.py copy -t $(TARGET) -p firmware updater -s $(DIST_SUFFIX) --bundlever "$(VERSION_STRING)"
 
 .PHONY: updater_package
 updater_package: firmware_all updater
-	@$(PROJECT_ROOT)/scripts/assets.py manifest assets/resources
 	@$(PROJECT_ROOT)/scripts/dist.py copy -t $(TARGET) -p firmware updater -s $(DIST_SUFFIX) -a assets/resources --bundlever "$(VERSION_STRING)"
+
+.PHONY: assets_manifest
+assets_manifest:
+	@$(MAKE) -C $(PROJECT_ROOT)/assets clean
+	@$(MAKE) -C $(PROJECT_ROOT)/assets
+	@$(PROJECT_ROOT)/scripts/assets.py manifest assets/resources
 
 .PHONY: flash_radio
 flash_radio:
