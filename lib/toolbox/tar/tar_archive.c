@@ -144,6 +144,10 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
     TarArchiveDirectoryOpParams* op_params = param;
     string_t fname;
 
+    if(strcmp(header->name, ".") == 0) {
+        return 0;
+    }
+
     if(header->type == MTAR_TDIR) {
         string_init(fname);
         path_concat(op_params->work_dir, header->name, fname);
