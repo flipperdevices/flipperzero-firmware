@@ -21,7 +21,7 @@ void nfc_scene_read_emv_data_on_enter(void* context) {
     // Start worker
     nfc_worker_start(
         nfc->worker,
-        NfcWorkerStateReadEMV,
+        NfcWorkerStateReadEMVData,
         &nfc->dev->dev_data,
         nfc_read_emv_data_worker_callback,
         nfc);

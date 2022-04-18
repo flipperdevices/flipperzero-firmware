@@ -96,19 +96,6 @@ bool emv_decode_ppse_response(uint8_t* buff, uint16_t len, EmvApplication* app) 
     return app_aid_found;
 }
 
-uint16_t emv_prepare_select_ppse(uint8_t* dest) {
-    const uint8_t emv_select_ppse[] = {
-        0x00, 0xA4, // SELECT ppse
-        0x04, 0x00, // P1:By name, P2: empty
-        0x0e, // Lc: Data length
-        0x32, 0x50, 0x41, 0x59, 0x2e, 0x53, 0x59, // Data string:
-        0x53, 0x2e, 0x44, 0x44, 0x46, 0x30, 0x31, // 2PAY.SYS.DDF01 (PPSE)
-        0x00 // Le
-    };
-    memcpy(dest, emv_select_ppse, sizeof(emv_select_ppse));
-    return sizeof(emv_select_ppse);
-}
-
 bool emv_select_ppse(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
     bool app_aid_found = false;
     const uint8_t emv_select_ppse_cmd[] = {
@@ -136,6 +123,28 @@ bool emv_select_ppse(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
     }
 
     return app_aid_found;
+}
+
+static bool emv_decode_select_app_response(uint8_t* buff, uint16_t len, EmvApplication* app) {
+    uint16_t i = 0;
+    bool decode_success = false;
+
+    while(i < len) {
+        if(buff[i] == EMV_TAG_CARD_NAME) {
+            uint8_t name_len = buff[i + 1];
+            emv_parse_TLV((uint8_t*)app->name, buff, &i);
+            app->name[name_len] = '\0';
+            app->name_found = true;
+            decode_success = true;
+        } else if(((buff[i] << 8) | buff[i + 1]) == EMV_TAG_PDOL) {
+            i++;
+            app->pdol.size = emv_parse_TLV(app->pdol.data, buff, &i);
+            decode_success = true;
+        }
+        i++;
+    }
+
+    return decode_success;
 }
 
 bool emv_select_app(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
@@ -172,46 +181,6 @@ bool emv_select_app(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
     return select_app_success;
 }
 
-uint16_t emv_prepare_select_app(uint8_t* dest, EmvApplication* app) {
-    const uint8_t emv_select_header[] = {
-        0x00,
-        0xA4, // SELECT application
-        0x04,
-        0x00 // P1:By name, P2:First or only occurence
-    };
-    uint16_t size = sizeof(emv_select_header);
-    // Copy header
-    memcpy(dest, emv_select_header, size);
-    // Copy AID
-    dest[size++] = app->aid_len;
-    memcpy(&dest[size], app->aid, app->aid_len);
-    size += app->aid_len;
-    dest[size++] = 0;
-    return size;
-}
-
-bool emv_decode_select_app_response(uint8_t* buff, uint16_t len, EmvApplication* app) {
-    uint16_t i = 0;
-    bool decode_success = false;
-
-    while(i < len) {
-        if(buff[i] == EMV_TAG_CARD_NAME) {
-            uint8_t name_len = buff[i + 1];
-            emv_parse_TLV((uint8_t*)app->name, buff, &i);
-            app->name[name_len] = '\0';
-            app->name_found = true;
-            decode_success = true;
-        } else if(((buff[i] << 8) | buff[i + 1]) == EMV_TAG_PDOL) {
-            i++;
-            app->pdol.size = emv_parse_TLV(app->pdol.data, buff, &i);
-            decode_success = true;
-        }
-        i++;
-    }
-
-    return decode_success;
-}
-
 static uint16_t emv_prepare_pdol(APDU* dest, APDU* src) {
     bool tag_found;
     for(uint16_t i = 0; i < src->size; i++) {
@@ -245,25 +214,23 @@ static uint16_t emv_prepare_pdol(APDU* dest, APDU* src) {
     return dest->size;
 }
 
-uint16_t emv_prepare_get_proc_opt(uint8_t* dest, EmvApplication* app) {
-    // Get processing option header
-    const uint8_t emv_gpo_header[] = {0x80, 0xA8, 0x00, 0x00};
-    uint16_t size = sizeof(emv_gpo_header);
-    // Copy header
-    memcpy(dest, emv_gpo_header, size);
-    APDU pdol_data = {0, {0}};
-    // Prepare and copy pdol parameters
-    emv_prepare_pdol(&pdol_data, &app->pdol);
-    dest[size++] = 0x02 + pdol_data.size;
-    dest[size++] = 0x83;
-    dest[size++] = pdol_data.size;
-    memcpy(dest + size, pdol_data.data, pdol_data.size);
-    size += pdol_data.size;
-    dest[size++] = 0;
-    return size;
+static bool emv_decode_get_proc_opt(uint8_t* buff, uint16_t len, EmvApplication* app) {
+    bool card_num_read = false;
+
+    for(uint16_t i = 0; i < len; i++) {
+        if(buff[i] == EMV_TAG_CARD_NUM) {
+            app->card_number_len = 8;
+            memcpy(app->card_number, &buff[i + 2], app->card_number_len);
+            card_num_read = true;
+        } else if(buff[i] == EMV_TAG_AFL) {
+            app->afl.size = emv_parse_TLV(app->afl.data, buff, &i);
+        }
+    }
+
+    return card_num_read;
 }
 
-bool emv_get_processing_options(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
+static bool emv_get_processing_options(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
     bool card_num_read = false;
     const uint8_t emv_gpo_header[] = {0x80, 0xA8, 0x00, 0x00};
     uint16_t size = sizeof(emv_gpo_header);
@@ -294,37 +261,7 @@ bool emv_get_processing_options(FuriHalNfcTxRxContext* tx_rx, EmvApplication* ap
     return card_num_read;
 }
 
-bool emv_decode_get_proc_opt(uint8_t* buff, uint16_t len, EmvApplication* app) {
-    bool card_num_read = false;
-
-    for(uint16_t i = 0; i < len; i++) {
-        if(buff[i] == EMV_TAG_CARD_NUM) {
-            app->card_number_len = 8;
-            memcpy(app->card_number, &buff[i + 2], app->card_number_len);
-            card_num_read = true;
-        } else if(buff[i] == EMV_TAG_AFL) {
-            app->afl.size = emv_parse_TLV(app->afl.data, buff, &i);
-        }
-    }
-
-    return card_num_read;
-}
-
-uint16_t emv_prepare_read_sfi_record(uint8_t* dest, uint8_t sfi, uint8_t record_num) {
-    const uint8_t sfi_param = (sfi << 3) | (1 << 2);
-    const uint8_t emv_sfi_header[] = {
-        0x00,
-        0xB2, // READ RECORD
-        record_num,
-        sfi_param, // P1:record_number and P2:SFI
-        0x00 // Le
-    };
-    uint16_t size = sizeof(emv_sfi_header);
-    memcpy(dest, emv_sfi_header, size);
-    return size;
-}
-
-bool emv_decode_read_sfi_record(uint8_t* buff, uint16_t len, EmvApplication* app) {
+static bool emv_decode_read_sfi_record(uint8_t* buff, uint16_t len, EmvApplication* app) {
     bool pan_parsed = false;
 
     for(uint16_t i = 0; i < len; i++) {
@@ -349,7 +286,7 @@ bool emv_decode_read_sfi_record(uint8_t* buff, uint16_t len, EmvApplication* app
     return pan_parsed;
 }
 
-bool emv_read_sfi_record(
+static bool emv_read_sfi_record(
     FuriHalNfcTxRxContext* tx_rx,
     EmvApplication* app,
     uint8_t sfi,
@@ -379,7 +316,7 @@ bool emv_read_sfi_record(
     return card_num_read;
 }
 
-bool emv_read_files(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
+static bool emv_read_files(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
     bool card_num_read = false;
 
     if(app->afl.size == 0) {
@@ -399,6 +336,14 @@ bool emv_read_files(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
     }
 
     return card_num_read;
+}
+
+bool emv_search_application(FuriHalNfcTxRxContext* tx_rx, EmvApplication* emv_app) {
+    furi_assert(tx_rx);
+    furi_assert(emv_app);
+    memset(emv_app, 0, sizeof(EmvApplication));
+
+    return emv_select_ppse(tx_rx, emv_app);
 }
 
 bool emv_read_bank_card(FuriHalNfcTxRxContext* tx_rx, EmvApplication* emv_app) {

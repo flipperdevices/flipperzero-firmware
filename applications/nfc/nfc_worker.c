@@ -95,7 +95,7 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_emulate(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateReadEMVApp) {
         nfc_worker_read_emv_app(nfc_worker);
-    } else if(nfc_worker->state == NfcWorkerStateReadEMV) {
+    } else if(nfc_worker->state == NfcWorkerStateReadEMVData) {
         nfc_worker_read_emv(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateEmulateApdu) {
         nfc_worker_emulate_apdu(nfc_worker);
@@ -185,56 +185,32 @@ void nfc_worker_emulate(NfcWorker* nfc_worker) {
 }
 
 void nfc_worker_read_emv_app(NfcWorker* nfc_worker) {
-    ReturnCode err;
+    FuriHalNfcTxRxContext tx_rx = {};
     EmvApplication emv_app = {};
-    uint8_t tx_buff[255] = {};
-    uint16_t tx_len = 0;
-    uint8_t* rx_buff;
-    uint16_t* rx_len;
     NfcDeviceData* result = nfc_worker->dev_data;
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     nfc_device_data_clear(result);
 
     while(nfc_worker->state == NfcWorkerStateReadEMVApp) {
-        memset(&emv_app, 0, sizeof(emv_app));
         if(furi_hal_nfc_detect(nfc_data, 1000)) {
             // Card was found. Check that it supports EMV
             if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
                 result->protocol = NfcDeviceProtocolEMV;
-
-                FURI_LOG_D(TAG, "Send select PPSE command");
-                tx_len = emv_prepare_select_ppse(tx_buff);
-                err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
-                if(err != ERR_NONE) {
-                    FURI_LOG_D(TAG, "Error during selection PPSE request: %d", err);
-                    furi_hal_nfc_sleep();
-                    continue;
-                }
-                FURI_LOG_D(TAG, "Select PPSE response received. Start parsing response");
-                if(emv_decode_ppse_response(rx_buff, *rx_len, &emv_app)) {
-                    FURI_LOG_D(TAG, "Select PPSE responce parced");
+                if(emv_search_application(&tx_rx, &emv_app)) {
                     // Notify caller and exit
                     result->emv_data.aid_len = emv_app.aid_len;
                     memcpy(result->emv_data.aid, emv_app.aid, emv_app.aid_len);
                     if(nfc_worker->callback) {
                         nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
                     }
-                    break;
-                } else {
-                    FURI_LOG_D(TAG, "Can't find pay application");
-                    furi_hal_nfc_sleep();
-                    continue;
                 }
             } else {
-                // Can't find EMV card
                 FURI_LOG_W(TAG, "Card doesn't support EMV");
-                furi_hal_nfc_sleep();
             }
         } else {
-            // Can't find EMV card
             FURI_LOG_D(TAG, "Can't find any cards");
-            furi_hal_nfc_sleep();
         }
+        furi_hal_nfc_sleep();
         osDelay(20);
     }
 }
@@ -246,7 +222,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     nfc_device_data_clear(result);
 
-    while(nfc_worker->state == NfcWorkerStateReadEMV) {
+    while(nfc_worker->state == NfcWorkerStateReadEMVData) {
         if(furi_hal_nfc_detect(nfc_data, 1000)) {
             // Card was found. Check that it supports EMV
             if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
@@ -255,6 +231,8 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                     result->emv_data.number_len = emv_app.card_number_len;
                     memcpy(
                         result->emv_data.number, emv_app.card_number, result->emv_data.number_len);
+                    result->emv_data.aid_len = emv_app.aid_len;
+                    memcpy(result->emv_data.aid, emv_app.aid, emv_app.aid_len);
                     if(emv_app.name_found) {
                         memcpy(result->emv_data.name, emv_app.name, sizeof(emv_app.name));
                     }
