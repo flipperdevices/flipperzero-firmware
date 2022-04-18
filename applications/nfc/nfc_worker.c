@@ -156,7 +156,7 @@ void nfc_worker_emulate(NfcWorker* nfc_worker) {
     NfcReaderRequestData* reader_data = &nfc_worker->dev_data->reader_data;
 
     while(nfc_worker->state == NfcWorkerStateEmulate) {
-        if(furi_hal_nfc_listen(data->uid, data->uid_len, data->atqa, data->sak, true, 1000)) {
+        if(furi_hal_nfc_listen(data->uid, data->uid_len, data->atqa, data->sak, true, 100)) {
             if(furi_hal_nfc_tx_rx(&tx_rx, 100)) {
                 reader_data->size = tx_rx.rx_bits / 8;
                 if(reader_data->size > 0) {
