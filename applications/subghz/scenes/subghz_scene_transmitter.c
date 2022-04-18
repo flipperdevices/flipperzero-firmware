@@ -111,6 +111,5 @@ void subghz_scene_transmitter_on_exit(void* context) {
     //Restore default setting
     subghz->txrx->frequency = subghz_setting_get_default_frequency(subghz->setting);
     subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
-
     subghz->state_notifications = SubGhzNotificationStateIDLE;
 }
