@@ -548,7 +548,7 @@ bool nfc_device_load_mifare_df_data(FlipperFormat* file, NfcDevice* dev) {
 
 static bool nfc_device_save_bank_card_data(FlipperFormat* file, NfcDevice* dev) {
     bool saved = false;
-    NfcEmvData* data = &dev->dev_data.emv_data;
+    EmvData* data = &dev->dev_data.emv_data;
     uint32_t data_temp = 0;
 
     do {
@@ -577,8 +577,8 @@ static bool nfc_device_save_bank_card_data(FlipperFormat* file, NfcDevice* dev) 
 
 bool nfc_device_load_bank_card_data(FlipperFormat* file, NfcDevice* dev) {
     bool parsed = false;
-    NfcEmvData* data = &dev->dev_data.emv_data;
-    memset(data, 0, sizeof(NfcEmvData));
+    EmvData* data = &dev->dev_data.emv_data;
+    memset(data, 0, sizeof(EmvData));
     uint32_t data_cnt = 0;
     string_t temp_str;
     string_init(temp_str);

@@ -14,7 +14,7 @@ void nfc_scene_read_emv_data_success_widget_callback(
 
 void nfc_scene_read_emv_data_success_on_enter(void* context) {
     Nfc* nfc = context;
-    NfcEmvData* emv_data = &nfc->dev->dev_data.emv_data;
+    EmvData* emv_data = &nfc->dev->dev_data.emv_data;
     FuriHalNfcDevData* nfc_data = &nfc->dev->dev_data.nfc_data;
     DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
 

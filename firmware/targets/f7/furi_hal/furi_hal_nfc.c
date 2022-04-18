@@ -467,7 +467,7 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx, uint16_t timeout_ms) {
     uint8_t temp_tx_buff[FURI_HAL_NFC_DATA_BUFF_SIZE] = {};
     uint16_t temp_tx_bits = 0;
     uint8_t* temp_rx_buff = NULL;
-    uint16_t* temp_rx_bits = NULL;
+    uint16_t* temp_rx_bytes = NULL;
 
     // Prepare data for FIFO if necessary
     uint32_t flags = furi_hal_nfc_tx_rx_get_flag(tx_rx_ctx->tx_rx_type);
@@ -475,13 +475,13 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx, uint16_t timeout_ms) {
         temp_tx_bits = furi_hal_nfc_data_and_parity_to_bitstream(
             tx_rx_ctx->tx_data, tx_rx_ctx->tx_bits / 8, tx_rx_ctx->tx_parity, temp_tx_buff);
         ret = rfalNfcDataExchangeCustomStart(
-            temp_tx_buff, temp_tx_bits, &temp_rx_buff, &temp_rx_bits, RFAL_FWT_NONE, flags);
+            temp_tx_buff, temp_tx_bits, &temp_rx_buff, &temp_rx_bytes, RFAL_FWT_NONE, flags);
     } else {
         ret = rfalNfcDataExchangeCustomStart(
             tx_rx_ctx->tx_data,
             tx_rx_ctx->tx_bits,
             &temp_rx_buff,
-            &temp_rx_bits,
+            &temp_rx_bytes,
             RFAL_FWT_NONE,
             flags);
     }
@@ -509,10 +509,10 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx, uint16_t timeout_ms) {
     if(tx_rx_ctx->tx_rx_type == FuriHalNfcTxRxTypeRaw) {
         tx_rx_ctx->rx_bits =
             8 * furi_hal_nfc_bitstream_to_data_and_parity(
-                    temp_rx_buff, *temp_rx_bits, tx_rx_ctx->rx_data, tx_rx_ctx->rx_parity);
+                    temp_rx_buff, *temp_rx_bytes, tx_rx_ctx->rx_data, tx_rx_ctx->rx_parity);
     } else {
-        memcpy(tx_rx_ctx->rx_data, temp_rx_buff, *temp_rx_bits);
-        tx_rx_ctx->rx_bits = *temp_rx_bits * 8;
+        memcpy(tx_rx_ctx->rx_data, temp_rx_buff, MIN(*temp_rx_bytes, FURI_HAL_NFC_DATA_BUFF_SIZE));
+        tx_rx_ctx->rx_bits = *temp_rx_bytes * 8;
     }
 
     return true;

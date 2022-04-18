@@ -1,8 +1,6 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
+#include <furi_hal_nfc.h>
 
 #define MAX_APDU_LEN 255
 
@@ -31,7 +29,7 @@ typedef struct {
     uint8_t exp_year;
     uint16_t country_code;
     uint16_t currency_code;
-} NfcEmvData;
+} EmvData;
 
 typedef struct {
     uint16_t tag;
@@ -50,6 +48,7 @@ typedef struct {
     uint8_t aid[16];
     uint8_t aid_len;
     char name[32];
+    bool name_found;
     uint8_t card_number[10];
     uint8_t card_number_len;
     uint8_t exp_month;
@@ -60,8 +59,11 @@ typedef struct {
     APDU afl;
 } EmvApplication;
 
+bool emv_read_bank_card(FuriHalNfcTxRxContext* tx_rx, EmvApplication* emv_app);
+
 /* Terminal emulation */
 uint16_t emv_prepare_select_ppse(uint8_t* dest);
+bool emv_select_ppse(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app);
 bool emv_decode_ppse_response(uint8_t* buff, uint16_t len, EmvApplication* app);
 
 uint16_t emv_prepare_select_app(uint8_t* dest, EmvApplication* app);

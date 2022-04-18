@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 #define FURI_HAL_NFC_UID_MAX_LEN 10
-#define FURI_HAL_NFC_DATA_BUFF_SIZE (128)
+#define FURI_HAL_NFC_DATA_BUFF_SIZE (256)
 #define FURI_HAL_NFC_PARITY_BUFF_SIZE (FURI_HAL_NFC_DATA_BUFF_SIZE / 8)
 
 #define FURI_HAL_NFC_TXRX_DEFAULT                                                    \

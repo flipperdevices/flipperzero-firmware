@@ -15,7 +15,7 @@ void nfc_scene_read_emv_app_success_on_enter(void* context) {
 
     // Setup view
     FuriHalNfcDevData* nfc_data = &nfc->dev->dev_data.nfc_data;
-    NfcEmvData* emv_data = &nfc->dev->dev_data.emv_data;
+    EmvData* emv_data = &nfc->dev->dev_data.emv_data;
     Widget* widget = nfc->widget;
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Retry", nfc_scene_read_emv_app_widget_callback, nfc);

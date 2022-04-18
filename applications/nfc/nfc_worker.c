@@ -240,141 +240,47 @@ void nfc_worker_read_emv_app(NfcWorker* nfc_worker) {
 }
 
 void nfc_worker_read_emv(NfcWorker* nfc_worker) {
-    ReturnCode err;
+    FuriHalNfcTxRxContext tx_rx = {};
     EmvApplication emv_app = {};
-    uint8_t tx_buff[255] = {};
-    uint16_t tx_len = 0;
-    uint8_t* rx_buff;
-    uint16_t* rx_len;
     NfcDeviceData* result = nfc_worker->dev_data;
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     nfc_device_data_clear(result);
 
     while(nfc_worker->state == NfcWorkerStateReadEMV) {
-        memset(&emv_app, 0, sizeof(emv_app));
         if(furi_hal_nfc_detect(nfc_data, 1000)) {
             // Card was found. Check that it supports EMV
             if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
                 result->protocol = NfcDeviceProtocolEMV;
-
-                FURI_LOG_D(TAG, "Send select PPSE command");
-                tx_len = emv_prepare_select_ppse(tx_buff);
-                err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
-                if(err != ERR_NONE) {
-                    FURI_LOG_D(TAG, "Error during selection PPSE request: %d", err);
-                    furi_hal_nfc_sleep();
-                    continue;
-                }
-                FURI_LOG_D(TAG, "Select PPSE response received. Start parsing response");
-                if(emv_decode_ppse_response(rx_buff, *rx_len, &emv_app)) {
-                    FURI_LOG_D(TAG, "Select PPSE responce parced");
-                    result->emv_data.aid_len = emv_app.aid_len;
-                    memcpy(result->emv_data.aid, emv_app.aid, emv_app.aid_len);
-                } else {
-                    FURI_LOG_D(TAG, "Can't find pay application");
-                    furi_hal_nfc_sleep();
-                    continue;
-                }
-                FURI_LOG_D(TAG, "Starting application ...");
-                tx_len = emv_prepare_select_app(tx_buff, &emv_app);
-                err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
-                if(err != ERR_NONE) {
-                    FURI_LOG_D(TAG, "Error during application selection request: %d", err);
-                    furi_hal_nfc_sleep();
-                    continue;
-                }
-                FURI_LOG_D(TAG, "Select application response received. Start parsing response");
-                if(emv_decode_select_app_response(rx_buff, *rx_len, &emv_app)) {
-                    FURI_LOG_D(TAG, "Card name: %s", emv_app.name);
-                    memcpy(result->emv_data.name, emv_app.name, sizeof(emv_app.name));
-                } else if(emv_app.pdol.size > 0) {
-                    FURI_LOG_D(TAG, "Can't find card name, but PDOL is present.");
-                } else {
-                    FURI_LOG_D(TAG, "Can't find card name or PDOL");
-                    furi_hal_nfc_sleep();
-                    continue;
-                }
-                FURI_LOG_D(TAG, "Starting Get Processing Options command ...");
-                tx_len = emv_prepare_get_proc_opt(tx_buff, &emv_app);
-                err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
-                if(err != ERR_NONE) {
-                    FURI_LOG_D(TAG, "Error during Get Processing Options command: %d", err);
-                    furi_hal_nfc_sleep();
-                    continue;
-                }
-                if(emv_decode_get_proc_opt(rx_buff, *rx_len, &emv_app)) {
-                    FURI_LOG_D(TAG, "Card number parsed");
+                if(emv_read_bank_card(&tx_rx, &emv_app)) {
                     result->emv_data.number_len = emv_app.card_number_len;
-                    memcpy(result->emv_data.number, emv_app.card_number, emv_app.card_number_len);
+                    memcpy(
+                        result->emv_data.number, emv_app.card_number, result->emv_data.number_len);
+                    if(emv_app.name_found) {
+                        memcpy(result->emv_data.name, emv_app.name, sizeof(emv_app.name));
+                    }
+                    if(emv_app.exp_month) {
+                        result->emv_data.exp_mon = emv_app.exp_month;
+                        result->emv_data.exp_year = emv_app.exp_year;
+                    }
+                    if(emv_app.country_code) {
+                        result->emv_data.country_code = emv_app.country_code;
+                    }
+                    if(emv_app.currency_code) {
+                        result->emv_data.currency_code = emv_app.currency_code;
+                    }
                     // Notify caller and exit
                     if(nfc_worker->callback) {
                         nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
                     }
                     break;
-                } else {
-                    // Mastercard doesn't give PAN / card number as GPO response
-                    // Iterate over all files found in application
-                    bool pan_found = false;
-                    for(uint8_t i = 0; (i < emv_app.afl.size) && !pan_found; i += 4) {
-                        uint8_t sfi = emv_app.afl.data[i] >> 3;
-                        uint8_t record_start = emv_app.afl.data[i + 1];
-                        uint8_t record_end = emv_app.afl.data[i + 2];
-
-                        // Iterate over all records in file
-                        for(uint8_t record = record_start; record <= record_end; ++record) {
-                            tx_len = emv_prepare_read_sfi_record(tx_buff, sfi, record);
-                            err = furi_hal_nfc_data_exchange(
-                                tx_buff, tx_len, &rx_buff, &rx_len, false);
-                            if(err != ERR_NONE) {
-                                FURI_LOG_D(
-                                    TAG,
-                                    "Error reading application sfi %d, record %d",
-                                    sfi,
-                                    record);
-                            }
-                            if(emv_decode_read_sfi_record(rx_buff, *rx_len, &emv_app)) {
-                                pan_found = true;
-                                break;
-                            }
-                        }
-                    }
-                    if(pan_found) {
-                        FURI_LOG_D(TAG, "Card PAN found");
-                        result->emv_data.number_len = emv_app.card_number_len;
-                        memcpy(
-                            result->emv_data.number,
-                            emv_app.card_number,
-                            result->emv_data.number_len);
-                        if(emv_app.exp_month) {
-                            result->emv_data.exp_mon = emv_app.exp_month;
-                            result->emv_data.exp_year = emv_app.exp_year;
-                        }
-                        if(emv_app.country_code) {
-                            result->emv_data.country_code = emv_app.country_code;
-                        }
-                        if(emv_app.currency_code) {
-                            result->emv_data.currency_code = emv_app.currency_code;
-                        }
-                        // Notify caller and exit
-                        if(nfc_worker->callback) {
-                            nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
-                        }
-                        break;
-                    } else {
-                        FURI_LOG_D(TAG, "Can't read card number");
-                    }
-                    furi_hal_nfc_sleep();
                 }
             } else {
-                // Can't find EMV card
                 FURI_LOG_W(TAG, "Card doesn't support EMV");
-                furi_hal_nfc_sleep();
             }
         } else {
-            // Can't find EMV card
             FURI_LOG_D(TAG, "Can't find any cards");
-            furi_hal_nfc_sleep();
         }
+        furi_hal_nfc_sleep();
         osDelay(20);
     }
 }

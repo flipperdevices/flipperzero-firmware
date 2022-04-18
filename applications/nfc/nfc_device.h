@@ -45,7 +45,7 @@ typedef struct {
     NfcProtocol protocol;
     NfcReaderRequestData reader_data;
     union {
-        NfcEmvData emv_data;
+        EmvData emv_data;
         MfUltralightData mf_ul_data;
         MfClassicData mf_classic_data;
         MifareDesfireData mf_df_data;
