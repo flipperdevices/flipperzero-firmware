@@ -51,10 +51,14 @@ class Main(App):
         shutil.copyfile(self.args.stage, join(self.args.directory, stage_basename))
         shutil.copyfile(self.args.dfu, join(self.args.directory, dfu_basename))
         if radiobin_basename:
-            shutil.copyfile(self.args.radiobin, join(self.args.directory, radiobin_basename))
+            shutil.copyfile(
+                self.args.radiobin, join(self.args.directory, radiobin_basename)
+            )
         if self.args.assets:
             assets_basename = "assets.tar"
-            self.package_assets(self.args.assets, join(self.args.directory, assets_basename))
+            self.package_assets(
+                self.args.assets, join(self.args.directory, assets_basename)
+            )
 
         file = FlipperFormatFile()
         file.setHeader("Flipper firmware upgrade configuration", 1)
@@ -77,7 +81,9 @@ class Main(App):
         return 0
 
     def package_assets(self, srcdir: str, dst_name: str):
-        with tarfile.open(dst_name, self.ASSET_TAR_MODE, format=tarfile.USTAR_FORMAT) as tarball:
+        with tarfile.open(
+            dst_name, self.ASSET_TAR_MODE, format=tarfile.USTAR_FORMAT
+        ) as tarball:
             tarball.add(srcdir, arcname="")
 
     @staticmethod

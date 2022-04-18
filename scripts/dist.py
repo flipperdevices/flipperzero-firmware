@@ -85,7 +85,12 @@ class Main(App):
                 self.get_dist_filepath(self.get_project_filename("updater", "bin")),
             ]
             if self.args.assets:
-                bundle_args.extend(("-a", self.args.assets,))
+                bundle_args.extend(
+                    (
+                        "-a",
+                        self.args.assets,
+                    )
+                )
             self.logger.info(
                 f"Use this directory to self-update your Flipper:\n\t{bundle_dir}"
             )
