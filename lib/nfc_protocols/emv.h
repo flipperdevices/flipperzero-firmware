@@ -57,7 +57,6 @@ typedef struct {
     APDU afl;
 } EmvApplication;
 
-
 /** Read bank card data
  * @note Search EMV Application, start it, try to read AID, PAN, card name,
  * expiration date, currency and country codes
@@ -78,7 +77,11 @@ bool emv_read_bank_card(FuriHalNfcTxRxContext* tx_rx, EmvApplication* emv_app);
  */
 bool emv_search_application(FuriHalNfcTxRxContext* tx_rx, EmvApplication* emv_app);
 
-/* Card emulation */
-uint16_t emv_select_ppse_ans(uint8_t* buff);
-uint16_t emv_select_app_ans(uint8_t* buff);
-uint16_t emv_get_proc_opt_ans(uint8_t* buff);
+/** Emulate bank card
+ * @note Answer to application selection and PDOL
+ *
+ * @param tx_rx     FuriHalNfcTxRxContext instance
+ *
+ * @return true on success
+ */
+bool emv_card_emulation(FuriHalNfcTxRxContext* tx_rx);

@@ -365,17 +365,35 @@ bool emv_read_bank_card(FuriHalNfcTxRxContext* tx_rx, EmvApplication* emv_app) {
     return card_num_read;
 }
 
-uint16_t emv_select_ppse_ans(uint8_t* buff) {
-    memcpy(buff, select_ppse_ans, sizeof(select_ppse_ans));
-    return sizeof(select_ppse_ans);
-}
+bool emv_card_emulation(FuriHalNfcTxRxContext* tx_rx) {
+    furi_assert(tx_rx);
+    bool emulation_complete = false;
+    memset(tx_rx, 0, sizeof(FuriHalNfcTxRxContext));
 
-uint16_t emv_select_app_ans(uint8_t* buff) {
-    memcpy(buff, select_app_ans, sizeof(select_app_ans));
-    return sizeof(select_app_ans);
-}
+    do {
+        FURI_LOG_D(TAG, "Read select PPSE command");
+        if(!furi_hal_nfc_tx_rx(tx_rx, 300)) break;
 
-uint16_t emv_get_proc_opt_ans(uint8_t* buff) {
-    memcpy(buff, pdol_ans, sizeof(pdol_ans));
-    return sizeof(pdol_ans);
+        memcpy(tx_rx->tx_data, select_ppse_ans, sizeof(select_ppse_ans));
+        tx_rx->tx_bits = sizeof(select_ppse_ans) * 8;
+        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+        FURI_LOG_D(TAG, "Send select PPSE answer and read select App command");
+        if(!furi_hal_nfc_tx_rx(tx_rx, 300)) break;
+
+        memcpy(tx_rx->tx_data, select_app_ans, sizeof(select_app_ans));
+        tx_rx->tx_bits = sizeof(select_app_ans) * 8;
+        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+        FURI_LOG_D(TAG, "Send select App answer and read get PDOL command");
+        if(!furi_hal_nfc_tx_rx(tx_rx, 300)) break;
+
+        memcpy(tx_rx->tx_data, pdol_ans, sizeof(pdol_ans));
+        tx_rx->tx_bits = sizeof(pdol_ans) * 8;
+        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+        FURI_LOG_D(TAG, "Send get PDOL answer");
+        if(!furi_hal_nfc_tx_rx(tx_rx, 300)) break;
+
+        emulation_complete = true;
+    } while(false);
+
+    return emulation_complete;
 }
