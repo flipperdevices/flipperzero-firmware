@@ -1,6 +1,6 @@
 # Flipper firmware
 
-What it does?
+What does it do?
 
 - [x] RTOS
 - [x] FuriHAL
@@ -10,13 +10,12 @@ What it does?
 
 # Targets
 
-| Name      | Bootloader    | Firmware      | Reset     | DFU               |
-|           | Address       | Address       | Combo     | Combo             |
------------------------------------------------------------------------------
-| f7        | 0x08000000    | 0x00008000    | L+Back    | L+Back, hold L    |
+| Name      | Firmware Address  | Reset Combo           | DFU Combo             |
+|-----------|-------------------|-----------------------|-----------------------|
+| f7        | 0x08000000        | L+Back, release both  | L+Back, release Back  |
 
-Also there is a ST bootloader combo available on empty device: L+Ok+Back, release Back,Left.
-Target independent code and headers in `target/include` folders.
+Also there is a "hardware" ST bootloader combo available even on a bricked or empty device: L+Ok+Back, release Back, Left.
+Target independent code and headers in `target/include` folders. More details in `documentation/KeyCombo.md`
 
 # Building
 
@@ -31,7 +30,13 @@ Target independent code and headers in `target/include` folders.
 ## Build Options
 
 - `DEBUG` - 0/1 - enable or disable debug build. Default is 1.
+- `COMPACT` - 0/1 - enable or disable compiler optimizations. Significantly reduces binary size. Default is 0.
 - `TARGET` - string - target to build. Default is `f7`.
+- `RAM_EXEC` - 0/1 - whether to build full firmware or RAM-based stage for firmware update. 0 is default, builds firmware.
+
+# Building self-update package
+
+`make DEBUG=0 COMPACT=1 updater_package`
 
 # Flashing 
 

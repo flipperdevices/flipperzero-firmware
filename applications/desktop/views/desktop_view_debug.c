@@ -23,7 +23,7 @@ void desktop_debug_render(Canvas* canvas, void* model) {
     const Version* ver;
     char buffer[64];
 
-    static const char* headers[] = {"FW Version info:", "Boot Version info:", "Dolphin info:"};
+    static const char* headers[] = {"FW Version info:", "Dolphin info:"};
 
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
@@ -36,16 +36,16 @@ void desktop_debug_render(Canvas* canvas, void* model) {
         snprintf(
             buffer,
             sizeof(buffer),
-            "HW: %d.F%dB%dC%d %s",
+            "%d.F%dB%dC%d %s %s",
             furi_hal_version_get_hw_version(),
             furi_hal_version_get_hw_target(),
             furi_hal_version_get_hw_body(),
             furi_hal_version_get_hw_connect(),
+            furi_hal_version_get_hw_region_name(),
             my_name ? my_name : "Unknown");
         canvas_draw_str(canvas, 5, 19 + STATUS_BAR_Y_SHIFT, buffer);
 
-        ver = m->screen == DesktopViewStatsBoot ? furi_hal_version_get_bootloader_version() :
-                                                  furi_hal_version_get_firmware_version();
+        ver = furi_hal_version_get_firmware_version();
 
         if(!ver) {
             canvas_draw_str(canvas, 5, 29 + STATUS_BAR_Y_SHIFT, "No info");
@@ -63,7 +63,8 @@ void desktop_debug_render(Canvas* canvas, void* model) {
         snprintf(
             buffer,
             sizeof(buffer),
-            "%s [%s]",
+            "%s%s [%s]",
+            version_get_dirty_flag(ver) ? "[!] " : "",
             version_get_githash(ver),
             version_get_gitbranchnum(ver));
         canvas_draw_str(canvas, 5, 39 + STATUS_BAR_Y_SHIFT, buffer);
@@ -110,18 +111,15 @@ bool desktop_debug_input(InputEvent* event, void* context) {
 
     DesktopDebugView* debug_view = context;
 
-    if(event->type != InputTypeShort) return false;
+    if(event->type != InputTypeShort && event->type != InputTypeRepeat) {
+        return false;
+    }
+
     DesktopViewStatsScreens current = 0;
     with_view_model(
         debug_view->view, (DesktopDebugViewModel * model) {
-#if SRV_DOLPHIN_STATE_DEBUG == 1
-            if(event->key == InputKeyDown) {
-                model->screen = (model->screen + 1) % DesktopViewStatsTotalCount;
-            } else if(event->key == InputKeyUp) {
-                model->screen = ((model->screen - 1) + DesktopViewStatsTotalCount) %
-                                DesktopViewStatsTotalCount;
-            }
-#else
+
+#ifdef SRV_DOLPHIN_STATE_DEBUG
             if((event->key == InputKeyDown) || (event->key == InputKeyUp)) {
                 model->screen = !model->screen;
             }
@@ -130,11 +128,16 @@ bool desktop_debug_input(InputEvent* event, void* context) {
             return true;
         });
 
+    size_t count = (event->type == InputTypeRepeat) ? 10 : 1;
     if(current == DesktopViewStatsMeta) {
         if(event->key == InputKeyLeft) {
-            debug_view->callback(DesktopDebugEventWrongDeed, debug_view->context);
+            while(count-- > 0) {
+                debug_view->callback(DesktopDebugEventWrongDeed, debug_view->context);
+            }
         } else if(event->key == InputKeyRight) {
-            debug_view->callback(DesktopDebugEventDeed, debug_view->context);
+            while(count-- > 0) {
+                debug_view->callback(DesktopDebugEventDeed, debug_view->context);
+            }
         } else if(event->key == InputKeyOk) {
             debug_view->callback(DesktopDebugEventSaveState, debug_view->context);
         } else {

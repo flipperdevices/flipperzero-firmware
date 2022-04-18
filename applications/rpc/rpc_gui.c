@@ -65,39 +65,47 @@ static int32_t rpc_system_gui_screen_stream_frame_transmit_thread(void* context)
 static void rpc_system_gui_start_screen_stream_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(context);
-    RpcGuiSystem* rpc_gui = context;
 
+    FURI_LOG_D(TAG, "StartScreenStream");
+
+    RpcGuiSystem* rpc_gui = context;
     RpcSession* session = rpc_gui->session;
     furi_assert(session);
-    furi_assert(!rpc_gui->is_streaming);
 
-    rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_OK);
+    if(rpc_gui->is_streaming) {
+        rpc_send_and_release_empty(
+            session, request->command_id, PB_CommandStatus_ERROR_VIRTUAL_DISPLAY_ALREADY_STARTED);
+    } else {
+        rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_OK);
 
-    rpc_gui->is_streaming = true;
-    size_t framebuffer_size = gui_get_framebuffer_size(rpc_gui->gui);
-    // Reusable Frame
-    rpc_gui->transmit_frame = malloc(sizeof(PB_Main));
-    rpc_gui->transmit_frame->which_content = PB_Main_gui_screen_frame_tag;
-    rpc_gui->transmit_frame->command_status = PB_CommandStatus_OK;
-    rpc_gui->transmit_frame->content.gui_screen_frame.data =
-        malloc(PB_BYTES_ARRAY_T_ALLOCSIZE(framebuffer_size));
-    rpc_gui->transmit_frame->content.gui_screen_frame.data->size = framebuffer_size;
-    // Transmission thread for async TX
-    rpc_gui->transmit_thread = furi_thread_alloc();
-    furi_thread_set_name(rpc_gui->transmit_thread, "GuiRpcWorker");
-    furi_thread_set_callback(
-        rpc_gui->transmit_thread, rpc_system_gui_screen_stream_frame_transmit_thread);
-    furi_thread_set_context(rpc_gui->transmit_thread, rpc_gui);
-    furi_thread_set_stack_size(rpc_gui->transmit_thread, 1024);
-    furi_thread_start(rpc_gui->transmit_thread);
-    // GUI framebuffer callback
-    gui_add_framebuffer_callback(
-        rpc_gui->gui, rpc_system_gui_screen_stream_frame_callback, context);
+        rpc_gui->is_streaming = true;
+        size_t framebuffer_size = gui_get_framebuffer_size(rpc_gui->gui);
+        // Reusable Frame
+        rpc_gui->transmit_frame = malloc(sizeof(PB_Main));
+        rpc_gui->transmit_frame->which_content = PB_Main_gui_screen_frame_tag;
+        rpc_gui->transmit_frame->command_status = PB_CommandStatus_OK;
+        rpc_gui->transmit_frame->content.gui_screen_frame.data =
+            malloc(PB_BYTES_ARRAY_T_ALLOCSIZE(framebuffer_size));
+        rpc_gui->transmit_frame->content.gui_screen_frame.data->size = framebuffer_size;
+        // Transmission thread for async TX
+        rpc_gui->transmit_thread = furi_thread_alloc();
+        furi_thread_set_name(rpc_gui->transmit_thread, "GuiRpcWorker");
+        furi_thread_set_callback(
+            rpc_gui->transmit_thread, rpc_system_gui_screen_stream_frame_transmit_thread);
+        furi_thread_set_context(rpc_gui->transmit_thread, rpc_gui);
+        furi_thread_set_stack_size(rpc_gui->transmit_thread, 1024);
+        furi_thread_start(rpc_gui->transmit_thread);
+        // GUI framebuffer callback
+        gui_add_framebuffer_callback(
+            rpc_gui->gui, rpc_system_gui_screen_stream_frame_callback, context);
+    }
 }
 
 static void rpc_system_gui_stop_screen_stream_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(context);
+
+    FURI_LOG_D(TAG, "StopScreenStream");
 
     RpcGuiSystem* rpc_gui = context;
     RpcSession* session = rpc_gui->session;
@@ -127,6 +135,8 @@ static void
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_gui_send_input_event_request_tag);
     furi_assert(context);
+
+    FURI_LOG_D(TAG, "SendInputEvent");
 
     RpcGuiSystem* rpc_gui = context;
     RpcSession* session = rpc_gui->session;
@@ -216,6 +226,8 @@ static void rpc_system_gui_start_virtual_display_process(const PB_Main* request,
     furi_assert(request);
     furi_assert(context);
 
+    FURI_LOG_D(TAG, "StartVirtualDisplay");
+
     RpcGuiSystem* rpc_gui = context;
     RpcSession* session = rpc_gui->session;
     furi_assert(session);
@@ -255,6 +267,8 @@ static void rpc_system_gui_stop_virtual_display_process(const PB_Main* request, 
     furi_assert(request);
     furi_assert(context);
 
+    FURI_LOG_D(TAG, "StopVirtualDisplay");
+
     RpcGuiSystem* rpc_gui = context;
     RpcSession* session = rpc_gui->session;
     furi_assert(session);
@@ -277,6 +291,8 @@ static void rpc_system_gui_stop_virtual_display_process(const PB_Main* request, 
 static void rpc_system_gui_virtual_display_frame_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(context);
+
+    FURI_LOG_D(TAG, "VirtualDisplayFrame");
 
     RpcGuiSystem* rpc_gui = context;
     RpcSession* session = rpc_gui->session;

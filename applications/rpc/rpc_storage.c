@@ -10,10 +10,13 @@
 #include "storage/storage.h"
 #include <stdint.h>
 #include <lib/toolbox/md5.h>
+#include <update_util/lfs_backup.h>
 
-#define RPC_TAG "RPC_STORAGE"
+#define TAG "RpcStorage"
+
 #define MAX_NAME_LENGTH 255
-#define MAX_DATA_SIZE 512
+
+static const size_t MAX_DATA_SIZE = 512;
 
 typedef enum {
     RpcStorageStateIdle = 0,
@@ -104,6 +107,8 @@ static void rpc_system_storage_info_process(const PB_Main* request, void* contex
     furi_assert(context);
     furi_assert(request->which_content == PB_Main_storage_info_request_tag);
 
+    FURI_LOG_D(TAG, "Info");
+
     RpcStorageSystem* rpc_storage = context;
     RpcSession* session = rpc_storage->session;
     furi_assert(session);
@@ -137,6 +142,8 @@ static void rpc_system_storage_stat_process(const PB_Main* request, void* contex
     furi_assert(request);
     furi_assert(context);
     furi_assert(request->which_content == PB_Main_storage_stat_request_tag);
+
+    FURI_LOG_D(TAG, "Stat");
 
     RpcStorageSystem* rpc_storage = context;
     RpcSession* session = rpc_storage->session;
@@ -185,7 +192,7 @@ static void rpc_system_storage_list_root(const PB_Main* request, void* context) 
     };
     furi_assert(COUNT_OF(hard_coded_dirs) < COUNT_OF(response.content.storage_list_response.file));
 
-    for(int i = 0; i < COUNT_OF(hard_coded_dirs); ++i) {
+    for(uint32_t i = 0; i < COUNT_OF(hard_coded_dirs); ++i) {
         ++response.content.storage_list_response.file_count;
         response.content.storage_list_response.file[i].data = NULL;
         response.content.storage_list_response.file[i].size = 0;
@@ -202,6 +209,8 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
     furi_assert(request);
     furi_assert(context);
     furi_assert(request->which_content == PB_Main_storage_list_request_tag);
+
+    FURI_LOG_D(TAG, "List");
 
     RpcStorageSystem* rpc_storage = context;
     RpcSession* session = rpc_storage->session;
@@ -271,6 +280,8 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
     furi_assert(context);
     furi_assert(request->which_content == PB_Main_storage_read_request_tag);
 
+    FURI_LOG_D(TAG, "Read");
+
     RpcStorageSystem* rpc_storage = context;
     RpcSession* session = rpc_storage->session;
     furi_assert(session);
@@ -327,6 +338,8 @@ static void rpc_system_storage_write_process(const PB_Main* request, void* conte
     furi_assert(request);
     furi_assert(context);
     furi_assert(request->which_content == PB_Main_storage_write_request_tag);
+
+    FURI_LOG_D(TAG, "Write");
 
     RpcStorageSystem* rpc_storage = context;
     RpcSession* session = rpc_storage->session;
@@ -393,6 +406,9 @@ static void rpc_system_storage_delete_process(const PB_Main* request, void* cont
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_storage_delete_request_tag);
     furi_assert(context);
+
+    FURI_LOG_D(TAG, "Delete");
+
     RpcStorageSystem* rpc_storage = context;
     RpcSession* session = rpc_storage->session;
     furi_assert(session);
@@ -431,6 +447,9 @@ static void rpc_system_storage_mkdir_process(const PB_Main* request, void* conte
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_storage_mkdir_request_tag);
     furi_assert(context);
+
+    FURI_LOG_D(TAG, "Mkdir");
+
     RpcStorageSystem* rpc_storage = context;
     RpcSession* session = rpc_storage->session;
     furi_assert(session);
@@ -454,6 +473,9 @@ static void rpc_system_storage_md5sum_process(const PB_Main* request, void* cont
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_storage_md5sum_request_tag);
     furi_assert(context);
+
+    FURI_LOG_D(TAG, "Md5sum");
+
     RpcStorageSystem* rpc_storage = context;
     RpcSession* session = rpc_storage->session;
     furi_assert(session);
@@ -471,17 +493,17 @@ static void rpc_system_storage_md5sum_process(const PB_Main* request, void* cont
     File* file = storage_file_alloc(fs_api);
 
     if(storage_file_open(file, filename, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        const uint16_t read_size = 512;
+        const uint16_t size_to_read = 512;
         const uint8_t hash_size = 16;
-        uint8_t* data = malloc(read_size);
+        uint8_t* data = malloc(size_to_read);
         uint8_t* hash = malloc(sizeof(uint8_t) * hash_size);
         md5_context* md5_ctx = malloc(sizeof(md5_context));
 
         md5_starts(md5_ctx);
         while(true) {
-            uint16_t readed_size = storage_file_read(file, data, read_size);
-            if(readed_size == 0) break;
-            md5_update(md5_ctx, data, readed_size);
+            uint16_t read_size = storage_file_read(file, data, size_to_read);
+            if(read_size == 0) break;
+            md5_update(md5_ctx, data, read_size);
         }
         md5_finish(md5_ctx, hash);
         free(md5_ctx);
@@ -519,6 +541,9 @@ static void rpc_system_storage_rename_process(const PB_Main* request, void* cont
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_storage_rename_request_tag);
     furi_assert(context);
+
+    FURI_LOG_D(TAG, "Rename");
+
     RpcStorageSystem* rpc_storage = context;
     RpcSession* session = rpc_storage->session;
     furi_assert(session);
@@ -536,6 +561,57 @@ static void rpc_system_storage_rename_process(const PB_Main* request, void* cont
 
     furi_record_close("storage");
     rpc_send_and_release_empty(session, request->command_id, status);
+}
+
+static void rpc_system_storage_backup_create_process(const PB_Main* request, void* context) {
+    furi_assert(request);
+    furi_assert(request->which_content == PB_Main_storage_backup_create_request_tag);
+
+    FURI_LOG_D(TAG, "BackupCreate");
+
+    RpcSession* session = (RpcSession*)context;
+    furi_assert(session);
+
+    PB_Main* response = malloc(sizeof(PB_Main));
+    response->command_id = request->command_id;
+    response->has_next = false;
+
+    Storage* fs_api = furi_record_open("storage");
+
+    bool backup_ok =
+        lfs_backup_create(fs_api, request->content.storage_backup_create_request.archive_path);
+    response->command_status = backup_ok ? PB_CommandStatus_OK : PB_CommandStatus_ERROR;
+
+    furi_record_close("storage");
+
+    rpc_send_and_release(session, response);
+    free(response);
+}
+
+static void rpc_system_storage_backup_restore_process(const PB_Main* request, void* context) {
+    furi_assert(request);
+    furi_assert(request->which_content == PB_Main_storage_backup_restore_request_tag);
+
+    FURI_LOG_D(TAG, "BackupRestore");
+
+    RpcSession* session = (RpcSession*)context;
+    furi_assert(session);
+
+    PB_Main* response = malloc(sizeof(PB_Main));
+    response->command_id = request->command_id;
+    response->has_next = false;
+    response->command_status = PB_CommandStatus_OK;
+
+    Storage* fs_api = furi_record_open("storage");
+
+    bool backup_ok =
+        lfs_backup_unpack(fs_api, request->content.storage_backup_restore_request.archive_path);
+    response->command_status = backup_ok ? PB_CommandStatus_OK : PB_CommandStatus_ERROR;
+
+    furi_record_close("storage");
+
+    rpc_send_and_release(session, response);
+    free(response);
 }
 
 void* rpc_system_storage_alloc(RpcSession* session) {
@@ -578,6 +654,12 @@ void* rpc_system_storage_alloc(RpcSession* session) {
 
     rpc_handler.message_handler = rpc_system_storage_rename_process;
     rpc_add_handler(session, PB_Main_storage_rename_request_tag, &rpc_handler);
+
+    rpc_handler.message_handler = rpc_system_storage_backup_create_process;
+    rpc_add_handler(session, PB_Main_storage_backup_create_request_tag, &rpc_handler);
+
+    rpc_handler.message_handler = rpc_system_storage_backup_restore_process;
+    rpc_add_handler(session, PB_Main_storage_backup_restore_request_tag, &rpc_handler);
 
     return rpc_storage;
 }

@@ -14,6 +14,7 @@ extern int32_t notification_srv(void* p);
 extern int32_t power_srv(void* p);
 extern int32_t storage_srv(void* p);
 extern int32_t desktop_srv(void* p);
+extern int32_t updater_srv(void* p);
 
 // Apps
 extern int32_t accessor_app(void* p);
@@ -58,6 +59,7 @@ extern void storage_on_system_start();
 extern void subghz_on_system_start();
 extern void power_on_system_start();
 extern void unit_tests_on_system_start();
+extern void updater_on_system_start();
 
 // Settings
 extern int32_t notification_settings_app(void* p);
@@ -91,6 +93,9 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef SRV_DESKTOP
+#ifdef SRV_UPDATER
+#error SRV_UPDATER and SRV_DESKTOP are mutually exclusive!
+#endif
     {.app = desktop_srv, .name = "DesktopSrv", .stack_size = 2048, .icon = NULL},
 #endif
 
@@ -117,9 +122,27 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef SRV_STORAGE
     {.app = storage_srv, .name = "StorageSrv", .stack_size = 3072, .icon = NULL},
 #endif
+
+#ifdef SRV_UPDATER
+#ifdef SRV_DESKTOP
+#error SRV_UPDATER and SRV_DESKTOP are mutually exclusive!
+#endif
+    {.app = updater_srv, .name = "UpdaterSrv", .stack_size = 2048, .icon = NULL},
+#endif
 };
 
-const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperApplication);
+const size_t FLIPPER_SERVICES_COUNT = COUNT_OF(FLIPPER_SERVICES);
+
+const FlipperApplication FLIPPER_SYSTEM_APPS[] = {
+#ifdef APP_UPDATER
+#ifdef SRV_UPDATER
+#error APP_UPDATER and SRV_UPDATER are mutually exclusive!
+#endif
+    {.app = updater_srv, .name = "UpdaterApp", .stack_size = 2048, .icon = NULL},
+#endif
+};
+
+const size_t FLIPPER_SYSTEM_APPS_COUNT = COUNT_OF(FLIPPER_SYSTEM_APPS);
 
 // Main menu APP
 const FlipperApplication FLIPPER_APPS[] = {
@@ -158,7 +181,7 @@ const FlipperApplication FLIPPER_APPS[] = {
 
 };
 
-const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FlipperApplication);
+const size_t FLIPPER_APPS_COUNT = COUNT_OF(FLIPPER_APPS);
 
 // On system start hooks
 const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
@@ -199,15 +222,18 @@ const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
 #ifdef APP_UNIT_TESTS
     unit_tests_on_system_start,
 #endif
+
+#ifdef APP_UPDATER
+    updater_on_system_start,
+#endif
 };
 
-const size_t FLIPPER_ON_SYSTEM_START_COUNT =
-    sizeof(FLIPPER_ON_SYSTEM_START) / sizeof(FlipperOnStartHook);
+const size_t FLIPPER_ON_SYSTEM_START_COUNT = COUNT_OF(FLIPPER_ON_SYSTEM_START);
 
 // Plugin menu
 const FlipperApplication FLIPPER_PLUGINS[] = {
 #ifdef APP_BLE_HID
-    {.app = bt_hid_app, .name = "Bluetooth remote", .stack_size = 1024, .icon = NULL},
+    {.app = bt_hid_app, .name = "Bluetooth Remote", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef APP_MUSIC_PLAYER
@@ -219,7 +245,7 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #endif
 };
 
-const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FlipperApplication);
+const size_t FLIPPER_PLUGINS_COUNT = COUNT_OF(FLIPPER_PLUGINS);
 
 // Plugin menu
 const FlipperApplication FLIPPER_DEBUG_APPS[] = {
@@ -244,7 +270,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
 #endif
 
 #ifdef APP_USB_MOUSE
-    {.app = usb_mouse_app, .name = "USB Mouse demo", .stack_size = 1024, .icon = NULL},
+    {.app = usb_mouse_app, .name = "USB Mouse Demo", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef APP_UART_ECHO
@@ -280,7 +306,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
 #endif
 };
 
-const size_t FLIPPER_DEBUG_APPS_COUNT = sizeof(FLIPPER_DEBUG_APPS) / sizeof(FlipperApplication);
+const size_t FLIPPER_DEBUG_APPS_COUNT = COUNT_OF(FLIPPER_DEBUG_APPS);
 
 #ifdef APP_ARCHIVE
 const FlipperApplication FLIPPER_ARCHIVE =
@@ -295,7 +321,7 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
 
 #ifdef SRV_NOTIFICATION
     {.app = notification_settings_app,
-     .name = "LCD and notifications",
+     .name = "LCD and Notifications",
      .stack_size = 1024,
      .icon = NULL},
 #endif
@@ -325,5 +351,4 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
 #endif
 };
 
-const size_t FLIPPER_SETTINGS_APPS_COUNT =
-    sizeof(FLIPPER_SETTINGS_APPS) / sizeof(FlipperApplication);
+const size_t FLIPPER_SETTINGS_APPS_COUNT = COUNT_OF(FLIPPER_SETTINGS_APPS);
