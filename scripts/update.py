@@ -76,7 +76,7 @@ class Main(App):
         else:
             file.writeKey("Radio CRC", self.int2ffhex(0))
         file.writeKey("Assets", assets_basename)
-        file.save("%s/update.fuf" % self.args.directory)
+        file.save(join(self.args.directory, "update.fuf"))
 
         return 0
 
