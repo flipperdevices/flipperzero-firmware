@@ -150,37 +150,25 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
     }
 }
 
-bool nfc_worker_emulate_uid_callback(
-    uint8_t* buff_rx,
-    uint16_t buff_rx_len,
-    uint8_t* buff_tx,
-    uint16_t* buff_tx_len,
-    uint32_t* data_type,
-    void* context) {
-    furi_assert(context);
-    NfcWorker* nfc_worker = context;
-    NfcReaderRequestData* reader_data = &nfc_worker->dev_data->reader_data;
-    reader_data->size = buff_rx_len / 8;
-    if(reader_data->size > 0) {
-        memcpy(reader_data->data, buff_rx, reader_data->size);
-        if(nfc_worker->callback) {
-            nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
-        }
-    }
-    return true;
-}
-
 void nfc_worker_emulate(NfcWorker* nfc_worker) {
+    FuriHalNfcTxRxContext tx_rx = {};
     FuriHalNfcDevData* data = &nfc_worker->dev_data->nfc_data;
+    NfcReaderRequestData* reader_data = &nfc_worker->dev_data->reader_data;
+
     while(nfc_worker->state == NfcWorkerStateEmulate) {
-        furi_hal_nfc_emulate_nfca(
-            data->uid,
-            data->uid_len,
-            data->atqa,
-            data->sak,
-            nfc_worker_emulate_uid_callback,
-            nfc_worker,
-            1000);
+        if(furi_hal_nfc_listen(data->uid, data->uid_len, data->atqa, data->sak, true, 1000)) {
+            if(furi_hal_nfc_tx_rx(&tx_rx, 100)) {
+                reader_data->size = tx_rx.rx_bits / 8;
+                if(reader_data->size > 0) {
+                    memcpy(reader_data->data, tx_rx.rx_data, reader_data->size);
+                    if(nfc_worker->callback) {
+                        nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
+                    }
+                }
+            } else {
+                FURI_LOG_E(TAG, "Failed to get reader commands");
+            }
+        }
     }
 }
 

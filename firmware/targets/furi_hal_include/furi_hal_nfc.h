@@ -179,7 +179,7 @@ ReturnCode furi_hal_nfc_data_exchange(
  *
  * @return      true on success
  */
-bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx, uint16_t timeout_ms);
+bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms);
 
 /** NFC data full exhange
  *
