@@ -124,9 +124,9 @@ void desktop_lock(Desktop* desktop) {
     notification_message(desktop->notification, &sequence_display_off_delay_1000);
 }
 
-void desktop_unlock(Desktop* desktop) {
+void desktop_unlock(Desktop* desktop, bool pin_lock) {
     furi_hal_rtc_set_pin_fails(0);
-    desktop_helpers_unlock_system(desktop);
+    desktop_helpers_unlock_system(desktop, pin_lock);
     desktop_view_locked_unlock(desktop->locked_view);
     scene_manager_search_and_switch_to_previous_scene(desktop->scene_manager, DesktopSceneMain);
     desktop_auto_lock_arm(desktop);

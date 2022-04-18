@@ -81,7 +81,7 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case DesktopLockedEventUnlocked:
-            desktop_unlock(desktop);
+            desktop_unlock(desktop, false);
             consumed = true;
             break;
         case DesktopLockedEventUpdate:

@@ -8,6 +8,9 @@
 #include "desktop_helpers.h"
 #include "desktop_i.h"
 
+#include "cli/cli_vcp.h"
+#include "cli/cli.h"
+
 static const NotificationSequence sequence_pin_fail = {
     &message_display_on,
 
@@ -51,7 +54,9 @@ void desktop_helpers_lock_system(Desktop* desktop, bool hard_lock) {
     view_port_enabled_set(desktop->lock_viewport, true);
     if(hard_lock) {
         furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
-        furi_hal_usb_disable();
+        Cli* cli = furi_record_open("cli");
+        cli_session_close(cli);
+        furi_record_close("cli");
     }
 
     Gui* gui = furi_record_open("gui");
@@ -59,9 +64,13 @@ void desktop_helpers_lock_system(Desktop* desktop, bool hard_lock) {
     furi_record_close("gui");
 }
 
-void desktop_helpers_unlock_system(Desktop* desktop) {
+void desktop_helpers_unlock_system(Desktop* desktop, bool hard_lock) {
     furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
-    furi_hal_usb_enable();
+    if(hard_lock) {
+        Cli* cli = furi_record_open("cli");
+        cli_session_open(cli, &cli_vcp);
+        furi_record_close("cli");
+    }
     view_port_enabled_set(desktop->lock_viewport, false);
 
     Gui* gui = furi_record_open("gui");
