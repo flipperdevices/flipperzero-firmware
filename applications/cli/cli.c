@@ -4,6 +4,8 @@
 #include <furi_hal_version.h>
 #include <loader/loader.h>
 
+#define TAG "CliSrv"
+
 Cli* cli_alloc() {
     Cli* cli = malloc(sizeof(Cli));
 
