@@ -486,6 +486,7 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx, uint16_t timeout_ms) {
             flags);
     }
     if(ret != ERR_NONE) {
+        FURI_LOG_E(TAG, "Failed to start data exchange");
         return false;
     }
     uint32_t start = DWT->CYCCNT;
@@ -495,13 +496,14 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx, uint16_t timeout_ms) {
         ret = rfalNfcDataExchangeGetStatus();
         if(ret == ERR_BUSY) {
             if(DWT->CYCCNT - start > timeout_ms * clocks_in_ms) {
+                FURI_LOG_W(TAG, "Timeout during data exchange");
                 return false;
             }
             continue;
         } else {
             start = DWT->CYCCNT;
         }
-        taskYIELD();
+        osThreadYield();
     }
 
     if(tx_rx_ctx->tx_rx_type == FuriHalNfcTxRxTypeRaw) {
@@ -509,8 +511,8 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx_ctx, uint16_t timeout_ms) {
             8 * furi_hal_nfc_bitstream_to_data_and_parity(
                     temp_rx_buff, *temp_rx_bits, tx_rx_ctx->rx_data, tx_rx_ctx->rx_parity);
     } else {
-        memcpy(tx_rx_ctx->rx_data, temp_rx_buff, *temp_rx_bits / 8);
-        tx_rx_ctx->rx_bits = *temp_rx_bits;
+        memcpy(tx_rx_ctx->rx_data, temp_rx_buff, *temp_rx_bits);
+        tx_rx_ctx->rx_bits = *temp_rx_bits * 8;
     }
 
     return true;

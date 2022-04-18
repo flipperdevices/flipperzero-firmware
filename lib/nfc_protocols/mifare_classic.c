@@ -124,9 +124,7 @@ static bool mf_classic_auth(
         crypto1_init(crypto, key);
         crypto1_word(crypto, nt ^ cuid, 0);
         uint8_t nr[4] = {};
-        // uint8_t parity = 0;
         nfc_util_num2bytes(prng_successor(DWT->CYCCNT, 32), 4, nr);
-        // uint8_t nr_ar[8] = {};
         for(uint8_t i = 0; i < 4; i++) {
             tx_rx->tx_data[i] = crypto1_byte(crypto, nr[i], 0) ^ nr[i];
             tx_rx->tx_parity[0] |=
