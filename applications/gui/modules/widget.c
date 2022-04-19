@@ -157,8 +157,8 @@ void widget_add_text_box_element(
     const char* text,
     bool strip_to_dots) {
     furi_assert(widget);
-    WidgetElement* text_box_element =
-        widget_element_text_box_create(x, y, width, height, horizontal, vertical, text, strip_to_dots);
+    WidgetElement* text_box_element = widget_element_text_box_create(
+        x, y, width, height, horizontal, vertical, text, strip_to_dots);
     widget_add_element(widget, text_box_element);
 }
 
