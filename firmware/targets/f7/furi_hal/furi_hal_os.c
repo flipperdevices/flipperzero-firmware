@@ -96,7 +96,7 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
         return;
     }
 
-    // Limit mount of ticks to maximum that timer can count
+    // Limit amount of ticks to maximum that timer can count
     if(expected_idle_ticks > FURI_HAL_OS_MAX_SLEEP) {
         expected_idle_ticks = FURI_HAL_OS_MAX_SLEEP;
     }
