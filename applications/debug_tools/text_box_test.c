@@ -7,12 +7,13 @@
 
 static void text_box_center_top_secondary_128x22(Canvas* canvas) {
     canvas_draw_frame(canvas, 0, 0, 128, 22);
-    elements_text_box(canvas, 0, 0, 128, 22, AlignCenter, AlignTop, "secondary font test");
+    elements_text_box(canvas, 0, 0, 128, 22, AlignCenter, AlignTop, "secondary font test", false);
 }
 
 static void text_box_right_bottom_bold_128x22(Canvas* canvas) {
     canvas_draw_frame(canvas, 0, 0, 128, 22);
-    elements_text_box(canvas, 0, 0, 128, 22, AlignRight, AlignBottom, "\e#Bold font test\e#");
+    elements_text_box(
+        canvas, 0, 0, 128, 22, AlignRight, AlignBottom, "\e#Bold font test\e#", false);
 }
 
 static void text_box_left_center_mixed_80x50(Canvas* canvas) {
@@ -25,7 +26,8 @@ static void text_box_left_center_mixed_80x50(Canvas* canvas) {
         50,
         AlignLeft,
         AlignCenter,
-        "\e#Never\e# gonna give you up\n\e!Never\e! gonna let you down");
+        "\e#Never\e# gonna give you up\n\e!Never\e! gonna let you down",
+        false);
 }
 
 static void text_box_center_center_secondary_110x44(Canvas* canvas) {
@@ -33,12 +35,13 @@ static void text_box_center_center_secondary_110x44(Canvas* canvas) {
     elements_text_box(
         canvas,
         4,
-        12,
+        20,
         110,
-        44,
+        30,
         AlignCenter,
         AlignCenter,
-        "Looooooooooooooooo0000000ooooooooong file name from happy 100500 Flipper owners");
+        "Loooooooooooooo0000000ooong file name from happy 100500 Flipper 0wners",
+        true);
 }
 
 static void (*text_box_test_render[])(Canvas* canvas) = {
