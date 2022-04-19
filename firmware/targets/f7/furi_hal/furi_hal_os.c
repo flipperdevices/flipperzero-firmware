@@ -8,7 +8,7 @@
 #define TAG "FuriHalOs"
 
 #define FURI_HAL_OS_CLK_FREQUENCY 32768
-#define FURI_HAL_OS_TICK_PER_SECOND 1024
+#define FURI_HAL_OS_TICK_PER_SECOND configTICK_RATE_HZ
 #define FURI_HAL_OS_CLK_PER_TICK (FURI_HAL_OS_CLK_FREQUENCY / FURI_HAL_OS_TICK_PER_SECOND)
 #define FURI_HAL_OS_TICK_PER_EPOCH (FURI_HAL_OS_TIMER_MAX / FURI_HAL_OS_CLK_PER_TICK)
 #define FURI_HAL_OS_MAX_SLEEP (FURI_HAL_OS_TICK_PER_EPOCH - 1)
@@ -33,6 +33,8 @@ extern void xPortSysTickHandler();
 volatile uint32_t furi_hal_os_skew = 0;
 
 void furi_hal_os_init() {
+    furi_hal_os_timer_init();
+
 #ifdef FURI_HAL_OS_DEBUG
     LL_GPIO_SetPinMode(LED_SLEEP_PORT, LED_SLEEP_PIN, LL_GPIO_MODE_OUTPUT);
     LL_GPIO_SetPinMode(LED_TICK_PORT, LED_TICK_PIN, LL_GPIO_MODE_OUTPUT);
@@ -55,7 +57,6 @@ void furi_hal_os_tick() {
 
 static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
     // Stop ticks
-    furi_hal_os_timer_reset();
     LL_SYSTICK_DisableIT();
 
     // Start wakeup timer
@@ -86,8 +87,6 @@ static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
 
     // Resume ticks
     LL_SYSTICK_EnableIT();
-    furi_hal_os_timer_continuous(FURI_HAL_OS_CLK_PER_TICK);
-
     return after_tick;
 }
 

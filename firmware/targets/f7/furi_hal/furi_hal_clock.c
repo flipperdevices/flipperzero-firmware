@@ -177,7 +177,7 @@ void furi_hal_clock_init() {
 
     // APB1 GRP2
     LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_LPUART1);
-//     LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_LPTIM2);
+    LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_LPTIM2);
 
     // APB2
     // LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC);
@@ -187,6 +187,7 @@ void furi_hal_clock_init() {
     LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM16);
     LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM17);
     // LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SAI1);
+
 
     FURI_LOG_I(TAG, "Init OK");
 }

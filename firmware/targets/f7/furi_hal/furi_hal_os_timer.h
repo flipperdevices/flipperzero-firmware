@@ -11,19 +11,13 @@
 #define FURI_HAL_OS_TIMER LPTIM2
 #define FURI_HAL_OS_TIMER_IRQ LPTIM2_IRQn
 
-static inline void furi_hal_os_timer_continuous(uint32_t count) {
-    count--;
-    // Enable timer
-    LL_LPTIM_Enable(FURI_HAL_OS_TIMER);
-    while(!LL_LPTIM_IsEnabled(FURI_HAL_OS_TIMER))
-        ;
-
-    // Enable rutoreload match interrupt
-    LL_LPTIM_EnableIT_ARRM(FURI_HAL_OS_TIMER);
-
-    // Set autoreload and start counter
-    LL_LPTIM_SetAutoReload(FURI_HAL_OS_TIMER, count);
-    LL_LPTIM_StartCounter(FURI_HAL_OS_TIMER, LL_LPTIM_OPERATING_MODE_CONTINUOUS);
+static inline void furi_hal_os_timer_init() {
+    // Configure clock source
+    LL_RCC_SetLPTIMClockSource(LL_RCC_LPTIM2_CLKSOURCE_LSE);
+    // Set interrupt priority and enable them
+    NVIC_SetPriority(
+        FURI_HAL_OS_TIMER_IRQ, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
+    NVIC_EnableIRQ(FURI_HAL_OS_TIMER_IRQ);
 }
 
 static inline void furi_hal_os_timer_single(uint32_t count) {
@@ -44,8 +38,9 @@ static inline void furi_hal_os_timer_single(uint32_t count) {
 }
 
 static inline void furi_hal_os_timer_reset() {
+    NVIC_ClearPendingIRQ(FURI_HAL_OS_TIMER_IRQ);
     // Hard reset timer
-    // THE ONLY RELIABLEWAY to stop it according to errata
+    // THE ONLY RELIABLE WAY to stop it according to errata
     LL_LPTIM_DeInit(FURI_HAL_OS_TIMER);
 }
 
