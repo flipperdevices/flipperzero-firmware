@@ -116,7 +116,7 @@ static bool mf_classic_auth(
             tx_rx->tx_data[0] = MF_CLASSIC_AUTH_KEY_B_CMD;
         }
         tx_rx->tx_data[1] = block;
-        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRxNoCrc; 
+        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRxNoCrc;
         tx_rx->tx_bits = 2 * 8;
         if(!furi_hal_nfc_tx_rx(tx_rx, 4)) break;
 
