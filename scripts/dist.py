@@ -18,6 +18,7 @@ class Main(App):
         self.parser_copy.add_argument("-t", dest="target", required=True)
         self.parser_copy.add_argument("-p", dest="projects", nargs="+", required=True)
         self.parser_copy.add_argument("-s", dest="suffix", required=True)
+        self.parser_copy.add_argument("-r", dest="resources", required=False)
         self.parser_copy.add_argument(
             "--bundlever",
             dest="version",
@@ -78,11 +79,18 @@ class Main(App):
                 self.args.version,
                 "-t",
                 self.args.target,
-                "-dfu",
+                "--dfu",
                 self.get_dist_filepath(self.get_project_filename("firmware", "dfu")),
-                "-stage",
+                "--stage",
                 self.get_dist_filepath(self.get_project_filename("updater", "bin")),
             ]
+            if self.args.resources:
+                bundle_args.extend(
+                    (
+                        "-r",
+                        self.args.resources,
+                    )
+                )
             self.logger.info(
                 f"Use this directory to self-update your Flipper:\n\t{bundle_dir}"
             )

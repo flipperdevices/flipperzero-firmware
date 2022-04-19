@@ -51,6 +51,10 @@ flash: firmware_flash
 debug:
 	@$(MAKE) -C firmware -j$(NPROCS) debug
 
+.PHONY: debug_other
+debug_other:
+	@$(MAKE) -C firmware -j$(NPROCS) debug_other
+
 .PHONY: blackmagic
 blackmagic:
 	@$(MAKE) -C firmware -j$(NPROCS) blackmagic
@@ -75,7 +79,6 @@ ifeq ($(FORCE), 1)
 endif
 	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) flash
 
-
 .PHONY: updater
 updater:
 	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) RAM_EXEC=1 all
@@ -88,9 +91,21 @@ updater_clean:
 updater_debug:
 	@$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) RAM_EXEC=1 debug
 
-.PHONY: updater_package
-updater_package: firmware_all updater
+.PHONY: updater_package_bin
+updater_package_bin: firmware_all updater
 	@$(PROJECT_ROOT)/scripts/dist.py copy -t $(TARGET) -p firmware updater -s $(DIST_SUFFIX) --bundlever "$(VERSION_STRING)"
+
+.PHONY: updater_package
+updater_package: firmware_all updater assets_manifest
+	@$(PROJECT_ROOT)/scripts/dist.py copy -t $(TARGET) -p firmware updater -s $(DIST_SUFFIX) -r $(PROJECT_ROOT)/assets/resources --bundlever "$(VERSION_STRING)"
+
+.PHONY: assets_manifest
+assets_manifest:
+	@$(MAKE) -C $(PROJECT_ROOT)/assets manifest
+
+.PHONY: assets_rebuild
+assets_rebuild:
+	@$(MAKE) -C $(PROJECT_ROOT)/assets clean all
 
 .PHONY: flash_radio
 flash_radio:
@@ -110,8 +125,8 @@ flash_radio_fus:
 
 .PHONY: flash_radio_fus_please_i_m_not_going_to_complain
 flash_radio_fus_please_i_m_not_going_to_complain:
-	@$(PROJECT_ROOT)/scripts/flash.py core2fus 0x080EC000 --statement=AGREE_TO_LOOSE_FLIPPER_FEATURES_THAT_USES_CRYPTO_ENCLAVE $(COPRO_DIR)/stm32wb5x_FUS_fw_for_fus_0_5_3.bin
-	@$(PROJECT_ROOT)/scripts/flash.py core2fus 0x080EC000 --statement=AGREE_TO_LOOSE_FLIPPER_FEATURES_THAT_USES_CRYPTO_ENCLAVE $(COPRO_DIR)/stm32wb5x_FUS_fw.bin
+	@$(PROJECT_ROOT)/scripts/flash.py core2fus 0x080EC000 --statement=AGREE_TO_LOSE_FLIPPER_FEATURES_THAT_USE_CRYPTO_ENCLAVE $(COPRO_DIR)/stm32wb5x_FUS_fw_for_fus_0_5_3.bin
+	@$(PROJECT_ROOT)/scripts/flash.py core2fus 0x080EC000 --statement=AGREE_TO_LOSE_FLIPPER_FEATURES_THAT_USE_CRYPTO_ENCLAVE $(COPRO_DIR)/stm32wb5x_FUS_fw.bin
 	@$(PROJECT_ROOT)/scripts/ob.py set
 
 .PHONY: lint
