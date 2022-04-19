@@ -3,7 +3,7 @@ PROJECT_ROOT		= $(abspath $(dir $(abspath $(firstword $(MAKEFILE_LIST))))..)
 include				$(PROJECT_ROOT)/assets/assets.mk
 
 .PHONY: all
-all: icons protobuf dolphin
+all: icons protobuf dolphin manifest
 
 $(ASSETS): $(ASSETS_SOURCES) $(ASSETS_COMPILER)
 	@echo "\tASSETS\t\t" $@
@@ -28,11 +28,9 @@ $(DOLPHIN_EXTERNAL_OUTPUT_DIR): $(DOLPHIN_SOURCE_DIR)
 	@echo "\tDOLPHIN external"
 	@$(ASSETS_COMPILER) dolphin "$(DOLPHIN_SOURCE_DIR)/external" "$(DOLPHIN_EXTERNAL_OUTPUT_DIR)"
 
-$(RESOURCES_MANIFEST): $(RESOURCES_FILES)
-	$(ASSETS_COMPILER) manifest $(RESOURCES_DIR)
-
 .PHONY: manifest
-manifest: $(RESOURCES_MANIFEST)
+manifest:
+	$(ASSETS_COMPILER) manifest $(RESOURCES_DIR)
 
 .PHONY: dolphin
 dolphin: $(DOLPHIN_EXTERNAL_OUTPUT_DIR)
@@ -40,4 +38,5 @@ dolphin: $(DOLPHIN_EXTERNAL_OUTPUT_DIR)
 clean:
 	@echo "\tCLEAN\t"
 	@$(RM) $(ASSETS_COMPILED_DIR)/*
+	@$(RM) $(RESOURCES_MANIFEST)
 	@$(RM) -rf $(DOLPHIN_EXTERNAL_OUTPUT_DIR)
