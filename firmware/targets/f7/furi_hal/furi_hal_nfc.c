@@ -520,25 +520,28 @@ ReturnCode furi_hal_nfc_exchange_full(
     uint16_t* rx_len) {
     ReturnCode err;
     uint8_t* part_buff;
-    uint16_t* part_len;
+    uint16_t* part_len_bits;
+    uint16_t part_len_bytes;
 
-    err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &part_buff, &part_len, false);
-    if(*part_len > rx_cap) {
+    err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &part_buff, &part_len_bits, false);
+    part_len_bytes = *part_len_bits / 8;
+    if(part_len_bytes > rx_cap) {
         return ERR_OVERRUN;
     }
-    memcpy(rx_buff, part_buff, *part_len);
-    *rx_len = *part_len;
+    memcpy(rx_buff, part_buff, part_len_bytes);
+    *rx_len = part_len_bytes;
     while(err == ERR_NONE && rx_buff[0] == 0xAF) {
-        err = furi_hal_nfc_data_exchange(rx_buff, 1, &part_buff, &part_len, false);
-        if(*part_len > rx_cap - *rx_len) {
+        err = furi_hal_nfc_data_exchange(rx_buff, 1, &part_buff, &part_len_bits, false);
+        part_len_bytes = *part_len_bits / 8;
+        if(part_len_bytes > rx_cap - *rx_len) {
             return ERR_OVERRUN;
         }
-        if(*part_len == 0) {
+        if(part_len_bytes == 0) {
             return ERR_PROTO;
         }
-        memcpy(rx_buff + *rx_len, part_buff + 1, *part_len - 1);
+        memcpy(rx_buff + *rx_len, part_buff + 1, part_len_bytes - 1);
         *rx_buff = *part_buff;
-        *rx_len += *part_len - 1;
+        *rx_len += part_len_bytes - 1;
     }
 
     return err;
