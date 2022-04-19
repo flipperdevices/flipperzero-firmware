@@ -51,7 +51,7 @@ static bool nfc_device_parse_format_string(NfcDevice* dev, string_t format_strin
     }
     // Check Mifare Ultralight types
     for(MfUltralightType type = MfUltralightTypeUnknown; type < MfUltralightTypeNum; type++) {
-        if(string_start_with_str_p(format_string, nfc_mf_ul_type(type, true))) {
+        if(string_equal_str_p(format_string, nfc_mf_ul_type(type, true))) {
             dev->format = NfcDeviceSaveFormatMifareUl;
             dev->dev_data.protocol = NfcDeviceProtocolMifareUl;
             dev->dev_data.mf_ul_data.type = type;
