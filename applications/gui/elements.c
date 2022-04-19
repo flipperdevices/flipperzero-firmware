@@ -688,6 +688,8 @@ void elements_text_box(
                 j = j % (line_num - 1) + 1;
             }
         }
+    } else {
+        
     }
 
     // Draw line by line
