@@ -64,12 +64,14 @@ class FsNode:
             ret["children"] = [node.dump() for node in self.children.values()]
         return ret
 
+
 def walk_nodes(node: FsNode):
     yield node
     for child in node.children.values():
         yield from walk_nodes(child)
 
-#  Returns filenames: [only_in_left], [changed], [only_in_right] 
+
+#  Returns filenames: [only_in_left], [changed], [only_in_right]
 def compare_fs_trees(left: FsNode, right: FsNode):
     # import pprint
     # pprint.pprint(left.dump())
@@ -81,6 +83,12 @@ def compare_fs_trees(left: FsNode, right: FsNode):
     right_names = set(right_dict.keys())
     common_names = left_names.intersection(right_names)
 
-    return (list(left_names-right_names),
-        list(name for name in common_names if left_dict[name].data != right_dict[name].data),
-        list(right_names-left_names))
+    return (
+        list(left_names - right_names),
+        list(
+            name
+            for name in common_names
+            if left_dict[name].data != right_dict[name].data
+        ),
+        list(right_names - left_names),
+    )
