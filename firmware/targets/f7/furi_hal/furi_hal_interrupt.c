@@ -254,10 +254,6 @@ void SysTick_Handler(void) {
     furi_hal_os_tick();
 }
 
-void LPTIM2_IRQHandler(void) {
-    /* Prevent default handler from executing */
-}
-
 void USB_LP_IRQHandler(void) {
 #ifndef FURI_RAM_EXEC
     usbd_poll(&udev);

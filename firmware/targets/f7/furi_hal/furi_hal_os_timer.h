@@ -38,10 +38,11 @@ static inline void furi_hal_os_timer_single(uint32_t count) {
 }
 
 static inline void furi_hal_os_timer_reset() {
-    NVIC_ClearPendingIRQ(FURI_HAL_OS_TIMER_IRQ);
     // Hard reset timer
     // THE ONLY RELIABLE WAY to stop it according to errata
     LL_LPTIM_DeInit(FURI_HAL_OS_TIMER);
+    // Prevent IRQ handler call
+    NVIC_ClearPendingIRQ(FURI_HAL_OS_TIMER_IRQ);
 }
 
 static inline uint32_t furi_hal_os_timer_get_cnt() {
