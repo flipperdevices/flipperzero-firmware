@@ -11,15 +11,6 @@
 #define FURI_HAL_OS_TIMER LPTIM2
 #define FURI_HAL_OS_TIMER_IRQ LPTIM2_IRQn
 
-static inline void furi_hal_os_timer_init() {
-    // Configure clock source
-    LL_RCC_SetLPTIMClockSource(LL_RCC_LPTIM2_CLKSOURCE_LSE);
-    // Set interrupt priority and enable them
-    NVIC_SetPriority(
-        FURI_HAL_OS_TIMER_IRQ, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
-    NVIC_EnableIRQ(FURI_HAL_OS_TIMER_IRQ);
-}
-
 static inline void furi_hal_os_timer_continuous(uint32_t count) {
     count--;
     // Enable timer

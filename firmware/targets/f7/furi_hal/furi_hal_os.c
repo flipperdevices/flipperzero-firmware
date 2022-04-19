@@ -33,11 +33,6 @@ extern void xPortSysTickHandler();
 volatile uint32_t furi_hal_os_skew = 0;
 
 void furi_hal_os_init() {
-    LL_DBGMCU_APB1_GRP2_FreezePeriph(LL_DBGMCU_APB1_GRP2_LPTIM2_STOP);
-
-    furi_hal_os_timer_init();
-    furi_hal_os_timer_continuous(FURI_HAL_OS_CLK_PER_TICK);
-
 #ifdef FURI_HAL_OS_DEBUG
     LL_GPIO_SetPinMode(LED_SLEEP_PORT, LED_SLEEP_PIN, LL_GPIO_MODE_OUTPUT);
     LL_GPIO_SetPinMode(LED_TICK_PORT, LED_TICK_PIN, LL_GPIO_MODE_OUTPUT);
@@ -49,19 +44,12 @@ void furi_hal_os_init() {
     FURI_LOG_I(TAG, "Init OK");
 }
 
-void LPTIM2_IRQHandler(void) {
-    // Autoreload
-    if(LL_LPTIM_IsActiveFlag_ARRM(FURI_HAL_OS_TIMER)) {
-        LL_LPTIM_ClearFLAG_ARRM(FURI_HAL_OS_TIMER);
-        if(xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
+void furi_hal_os_tick() {
+    if(xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
 #ifdef FURI_HAL_OS_DEBUG
-            LL_GPIO_TogglePin(LED_TICK_PORT, LED_TICK_PIN);
+        LL_GPIO_TogglePin(LED_TICK_PORT, LED_TICK_PIN);
 #endif
-            xPortSysTickHandler();
-        }
-    }
-    if(LL_LPTIM_IsActiveFlag_CMPM(FURI_HAL_OS_TIMER)) {
-        LL_LPTIM_ClearFLAG_CMPM(FURI_HAL_OS_TIMER);
+        xPortSysTickHandler();
     }
 }
 

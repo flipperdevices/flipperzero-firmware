@@ -24,7 +24,7 @@ typedef struct {
 } FuriHalPower;
 
 static volatile FuriHalPower furi_hal_power = {
-    .insomnia = 0,
+    .insomnia = 1,
     .deep_insomnia = 1,
     .suppress_charge = 0,
 };
