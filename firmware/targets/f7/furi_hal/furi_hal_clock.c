@@ -16,8 +16,8 @@
 #define LS_CLOCK_IS_READY() (LL_RCC_LSE_IsReady() && LL_RCC_LSI1_IsReady())
 
 void furi_hal_clock_init_early() {
-    LL_Init1msTick(CPU_CLOCK_HZ_EARLY);
     LL_SetSystemCoreClock(CPU_CLOCK_HZ_EARLY);
+    LL_Init1msTick(SystemCoreClock);
 
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
@@ -121,7 +121,7 @@ void furi_hal_clock_init() {
     LL_SetSystemCoreClock(CPU_CLOCK_HZ_MAIN);
 
     /* Update the time base */
-    LL_Init1msTick(CPU_CLOCK_HZ_MAIN);
+    LL_Init1msTick(SystemCoreClock);
     LL_SYSTICK_EnableIT();
     NVIC_SetPriority(SysTick_IRQn, TICK_INT_PRIORITY);
     NVIC_EnableIRQ(SysTick_IRQn);
