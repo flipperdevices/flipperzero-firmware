@@ -1,6 +1,6 @@
 #include <furi_hal_os.h>
-#include <furi_hal_os_timer.h>
 #include <furi_hal_power.h>
+#include <furi_hal_idle_timer.h>
 #include <stm32wbxx_ll_cortex.h>
 
 #include <furi.h>
@@ -10,7 +10,7 @@
 #define FURI_HAL_OS_CLK_FREQUENCY 32768
 #define FURI_HAL_OS_TICK_PER_SECOND configTICK_RATE_HZ
 #define FURI_HAL_OS_CLK_PER_TICK (FURI_HAL_OS_CLK_FREQUENCY / FURI_HAL_OS_TICK_PER_SECOND)
-#define FURI_HAL_OS_TICK_PER_EPOCH (FURI_HAL_OS_TIMER_MAX / FURI_HAL_OS_CLK_PER_TICK)
+#define FURI_HAL_OS_TICK_PER_EPOCH (FURI_HAL_IDLE_TIMER_MAX / FURI_HAL_OS_CLK_PER_TICK)
 #define FURI_HAL_OS_MAX_SLEEP (FURI_HAL_OS_TICK_PER_EPOCH - 1)
 
 #ifdef FURI_HAL_OS_DEBUG
@@ -33,7 +33,7 @@ extern void xPortSysTickHandler();
 volatile uint32_t furi_hal_os_skew = 0;
 
 void furi_hal_os_init() {
-    furi_hal_os_timer_init();
+    furi_hal_idle_timer_init();
 
 #ifdef FURI_HAL_OS_DEBUG
     LL_GPIO_SetPinMode(LED_SLEEP_PORT, LED_SLEEP_PIN, LL_GPIO_MODE_OUTPUT);
@@ -60,7 +60,7 @@ static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
     LL_SYSTICK_DisableIT();
 
     // Start wakeup timer
-    furi_hal_os_timer_single(expected_idle_ticks * FURI_HAL_OS_CLK_PER_TICK);
+    furi_hal_idle_timer_start(expected_idle_ticks * FURI_HAL_OS_CLK_PER_TICK);
 
 #ifdef FURI_HAL_OS_DEBUG
     LL_GPIO_ResetOutputPin(LED_SLEEP_PORT, LED_SLEEP_PIN);
@@ -74,16 +74,16 @@ static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
 #endif
 
     // Calculate how much time we spent in the sleep
-    uint32_t after_cnt = furi_hal_os_timer_get_cnt() + furi_hal_os_skew;
+    uint32_t after_cnt = furi_hal_idle_timer_get_cnt() + furi_hal_os_skew;
     uint32_t after_tick = after_cnt / FURI_HAL_OS_CLK_PER_TICK;
     furi_hal_os_skew = after_cnt % FURI_HAL_OS_CLK_PER_TICK;
 
-    bool cmpm = LL_LPTIM_IsActiveFlag_CMPM(FURI_HAL_OS_TIMER);
-    bool arrm = LL_LPTIM_IsActiveFlag_ARRM(FURI_HAL_OS_TIMER);
+    bool cmpm = LL_LPTIM_IsActiveFlag_CMPM(FURI_HAL_IDLE_TIMER);
+    bool arrm = LL_LPTIM_IsActiveFlag_ARRM(FURI_HAL_IDLE_TIMER);
     if(cmpm && arrm) after_tick += expected_idle_ticks;
 
     // Prepare tick timer for new round
-    furi_hal_os_timer_reset();
+    furi_hal_idle_timer_reset();
 
     // Resume ticks
     LL_SYSTICK_EnableIT();
