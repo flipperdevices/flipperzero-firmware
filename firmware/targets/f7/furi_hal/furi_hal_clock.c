@@ -188,7 +188,6 @@ void furi_hal_clock_init() {
     LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM17);
     // LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SAI1);
 
-
     FURI_LOG_I(TAG, "Init OK");
 }
 
