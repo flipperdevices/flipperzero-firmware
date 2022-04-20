@@ -1,4 +1,5 @@
 #include <furi_hal_os.h>
+#include <furi_hal_clock.h>
 #include <furi_hal_power.h>
 #include <furi_hal_delay.h>
 #include <furi_hal_idle_timer.h>
@@ -58,7 +59,7 @@ void furi_hal_os_tick() {
 
 static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
     // Stop ticks
-    LL_SYSTICK_DisableIT();
+    furi_hal_clock_suspend_tick();
 
     // Start wakeup timer
     furi_hal_idle_timer_start(expected_idle_ticks * FURI_HAL_OS_CLK_PER_TICK);
@@ -87,7 +88,7 @@ static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
     furi_hal_idle_timer_reset();
 
     // Resume ticks
-    LL_SYSTICK_EnableIT();
+    furi_hal_clock_resume_tick();
     return after_tick;
 }
 

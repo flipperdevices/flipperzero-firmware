@@ -49,7 +49,7 @@ void furi_hal_clock_deinit_early() {
 }
 
 void furi_hal_clock_init() {
-    /* Prepare Flash memory for 64mHz system clock */
+    /* Prepare Flash memory for 64MHz system clock */
     LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
     while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3)
         ;
@@ -219,4 +219,12 @@ void furi_hal_clock_switch_to_pll() {
 
     while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
         ;
+}
+
+void furi_hal_clock_suspend_tick() {
+    CLEAR_BIT(SysTick->CTRL, SysTick_CTRL_ENABLE_Msk);
+}
+
+void furi_hal_clock_resume_tick() {
+    SET_BIT(SysTick->CTRL, SysTick_CTRL_ENABLE_Msk);
 }
