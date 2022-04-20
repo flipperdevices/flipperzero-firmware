@@ -7,7 +7,7 @@
 #define BT_KEYS_STORAGE_VERSION (0)
 #define BT_KEYS_STORAGE_MAGIC (0x18)
 
-bool bt_load_key_storage(Bt* bt) {
+bool bt_keys_storage_load(Bt* bt) {
     furi_assert(bt);
     bool file_loaded = false;
 
@@ -24,7 +24,7 @@ bool bt_load_key_storage(Bt* bt) {
     return file_loaded;
 }
 
-bool bt_save_key_storage(Bt* bt) {
+bool bt_keys_storage_save(Bt* bt) {
     furi_assert(bt);
     furi_assert(bt->bt_keys_addr_start);
     bool file_saved = false;
@@ -41,7 +41,7 @@ bool bt_save_key_storage(Bt* bt) {
     return file_saved;
 }
 
-bool bt_delete_key_storage(Bt* bt) {
+bool bt_keys_storage_delete(Bt* bt) {
     furi_assert(bt);
     bool delete_succeed = false;
     bool bt_is_active = furi_hal_bt_is_active();
