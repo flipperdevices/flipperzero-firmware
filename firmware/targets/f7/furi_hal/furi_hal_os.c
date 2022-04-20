@@ -1,5 +1,6 @@
 #include <furi_hal_os.h>
 #include <furi_hal_power.h>
+#include <furi_hal_delay.h>
 #include <furi_hal_idle_timer.h>
 #include <stm32wbxx_ll_cortex.h>
 
@@ -112,14 +113,12 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
 
     // Sleep and track how much ticks we spent sleeping
     uint32_t completed_ticks = furi_hal_os_sleep(expected_idle_ticks);
-
     // Notify system about time spent in sleep
     if(completed_ticks > 0) {
-        if(completed_ticks > expected_idle_ticks) {
-            vTaskStepTick(expected_idle_ticks);
-        } else {
+        completed_ticks = completed_ticks > expected_idle_ticks ?
+            expected_idle_ticks : completed_ticks;
+            furi_hal_step_tick(completed_ticks);
             vTaskStepTick(completed_ticks);
-        }
     }
 
     // Reenable IRQ

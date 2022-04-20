@@ -26,6 +26,10 @@ uint32_t furi_hal_get_tick(void) {
     return tick_cnt;
 }
 
+void furi_hal_step_tick(uint32_t ticks_to_jump) {
+    tick_cnt += ticks_to_jump;
+}
+
 uint32_t furi_hal_ms_to_ticks(float milliseconds) {
     return milliseconds / (1000.0f / osKernelGetTickFreq());
 }

@@ -31,6 +31,12 @@ void furi_hal_tick(void);
  */
 uint32_t furi_hal_get_tick(void);
 
+/** Advance tick counter
+ *
+ * @param[in]   ticks_to_jump  tick count to add
+ */
+void furi_hal_step_tick(uint32_t ticks_to_jump);
+
 /** Convert milliseconds to ticks
  *
  * @param[in]   milliseconds    time in milliseconds
