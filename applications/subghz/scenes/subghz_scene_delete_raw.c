@@ -21,10 +21,10 @@ void subghz_scene_delete_raw_on_enter(void* context) {
     string_init(frequency_str);
     string_init(modulation_str);
 
-    char delete_str[64];
+    char delete_str[256];
     snprintf(delete_str, sizeof(delete_str), "\e#Delete %s?\e#", subghz->file_name);
     widget_add_text_box_element(
-        subghz->widget, 0, 0, 128, 23, AlignCenter, AlignCenter, delete_str);
+        subghz->widget, 0, 0, 128, 23, AlignCenter, AlignCenter, delete_str, false);
 
     widget_add_string_element(
         subghz->widget, 38, 25, AlignLeft, AlignTop, FontSecondary, "RAW signal");

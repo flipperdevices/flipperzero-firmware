@@ -92,7 +92,7 @@ const FlipperApplication* loader_find_application_by_name(const char* name) {
         application = loader_find_application_by_name_in_list(
             name, FLIPPER_SYSTEM_APPS, FLIPPER_SYSTEM_APPS_COUNT);
     }
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && !application) {
+    if(!application) {
         application = loader_find_application_by_name_in_list(
             name, FLIPPER_DEBUG_APPS, FLIPPER_DEBUG_APPS_COUNT);
     }
@@ -455,17 +455,16 @@ void loader_update_menu() {
 }
 
 int32_t loader_srv(void* p) {
-    FURI_LOG_I(TAG, "Starting");
+    FURI_LOG_I(TAG, "Executing system start hooks");
+    for(size_t i = 0; i < FLIPPER_ON_SYSTEM_START_COUNT; i++) {
+        FLIPPER_ON_SYSTEM_START[i]();
+    }
 
+    FURI_LOG_I(TAG, "Starting");
     loader_instance = loader_alloc();
 
     loader_build_menu();
     loader_build_submenu();
-
-    // Call on start hooks
-    for(size_t i = 0; i < FLIPPER_ON_SYSTEM_START_COUNT; i++) {
-        FLIPPER_ON_SYSTEM_START[i]();
-    }
 
     FURI_LOG_I(TAG, "Started");
 
