@@ -9,11 +9,14 @@
 
 #define TAG "FuriHalOs"
 
-#define FURI_HAL_OS_CLK_FREQUENCY 32768
-#define FURI_HAL_OS_TICK_PER_SECOND configTICK_RATE_HZ
-#define FURI_HAL_OS_CLK_PER_TICK (FURI_HAL_OS_CLK_FREQUENCY / FURI_HAL_OS_TICK_PER_SECOND)
-#define FURI_HAL_OS_TICK_PER_EPOCH (FURI_HAL_IDLE_TIMER_MAX / FURI_HAL_OS_CLK_PER_TICK)
-#define FURI_HAL_OS_MAX_SLEEP (FURI_HAL_OS_TICK_PER_EPOCH - 1)
+#define FURI_HAL_IDLE_TIMER_CLK_HZ 32768
+#define FURI_HAL_OS_TICK_HZ configTICK_RATE_HZ
+
+#define FURI_HAL_OS_IDLE_CNT_TO_TICKS(x) ((x * FURI_HAL_OS_TICK_HZ) / FURI_HAL_IDLE_TIMER_CLK_HZ)
+#define FURI_HAL_OS_TICKS_TO_IDLE_CNT(x) ((x * FURI_HAL_IDLE_TIMER_CLK_HZ) / FURI_HAL_OS_TICK_HZ)
+
+#define FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH (FURI_HAL_OS_IDLE_CNT_TO_TICKS(FURI_HAL_IDLE_TIMER_MAX))
+#define FURI_HAL_OS_MAX_SLEEP (FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH - 1)
 
 #ifdef FURI_HAL_OS_DEBUG
 #include <stm32wbxx_ll_gpio.h>
@@ -42,7 +45,7 @@ void furi_hal_os_init() {
     LL_GPIO_SetPinMode(LED_TICK_PORT, LED_TICK_PIN, LL_GPIO_MODE_OUTPUT);
     LL_GPIO_SetPinMode(LED_SECOND_PORT, LED_SECOND_PIN, LL_GPIO_MODE_OUTPUT);
     osTimerId_t second_timer = osTimerNew(furi_hal_os_timer_callback, osTimerPeriodic, NULL, NULL);
-    osTimerStart(second_timer, FURI_HAL_OS_TICK_PER_SECOND);
+    osTimerStart(second_timer, FURI_HAL_OS_TICK_HZ);
 #endif
 
     FURI_LOG_I(TAG, "Init OK");
@@ -62,7 +65,7 @@ static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
     furi_hal_clock_suspend_tick();
 
     // Start wakeup timer
-    furi_hal_idle_timer_start(expected_idle_ticks * FURI_HAL_OS_CLK_PER_TICK);
+    furi_hal_idle_timer_start(FURI_HAL_OS_TICKS_TO_IDLE_CNT(expected_idle_ticks));
 
 #ifdef FURI_HAL_OS_DEBUG
     LL_GPIO_ResetOutputPin(LED_SLEEP_PORT, LED_SLEEP_PIN);
@@ -77,8 +80,8 @@ static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
 
     // Calculate how much time we spent in the sleep
     uint32_t after_cnt = furi_hal_idle_timer_get_cnt() + furi_hal_os_skew;
-    uint32_t after_tick = after_cnt / FURI_HAL_OS_CLK_PER_TICK;
-    furi_hal_os_skew = after_cnt % FURI_HAL_OS_CLK_PER_TICK;
+    uint32_t after_tick = FURI_HAL_OS_IDLE_CNT_TO_TICKS(after_cnt);
+    furi_hal_os_skew = after_cnt - (after_cnt / after_tick);
 
     bool cmpm = LL_LPTIM_IsActiveFlag_CMPM(FURI_HAL_IDLE_TIMER);
     bool arrm = LL_LPTIM_IsActiveFlag_ARRM(FURI_HAL_IDLE_TIMER);
