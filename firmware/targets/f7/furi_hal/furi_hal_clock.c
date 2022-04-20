@@ -11,7 +11,7 @@
 
 #define CPU_CLOCK_HZ_EARLY 4000000
 #define CPU_CLOCK_HZ_MAIN 64000000
-#define TICK_INT_PRIORITY 0U
+#define TICK_INT_PRIORITY 15U
 #define HS_CLOCK_IS_READY() (LL_RCC_HSE_IsReady() && LL_RCC_HSI_IsReady())
 #define LS_CLOCK_IS_READY() (LL_RCC_LSE_IsReady() && LL_RCC_LSI1_IsReady())
 
@@ -123,7 +123,8 @@ void furi_hal_clock_init() {
     /* Update the time base */
     LL_Init1msTick(SystemCoreClock);
     LL_SYSTICK_EnableIT();
-    NVIC_SetPriority(SysTick_IRQn, TICK_INT_PRIORITY);
+    NVIC_SetPriority(
+        SysTick_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), TICK_INT_PRIORITY, 0));
     NVIC_EnableIRQ(SysTick_IRQn);
 
     LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_PCLK2);
