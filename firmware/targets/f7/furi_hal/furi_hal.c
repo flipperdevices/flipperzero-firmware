@@ -21,9 +21,15 @@ void furi_hal_init_early() {
 
     furi_hal_rtc_init_early();
 
-    LL_DBGMCU_EnableDBGSleepMode();
-    LL_DBGMCU_EnableDBGStopMode();
-    LL_EXTI_EnableIT_32_63(LL_EXTI_LINE_48);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        LL_DBGMCU_EnableDBGSleepMode();
+        LL_DBGMCU_EnableDBGStopMode();
+        LL_EXTI_EnableIT_32_63(LL_EXTI_LINE_48);
+    }else {
+        LL_DBGMCU_DisableDBGSleepMode();
+        LL_DBGMCU_DisableDBGStopMode();
+        LL_DBGMCU_DisableDBGStandbyMode();
+    }
 }
 
 void furi_hal_deinit_early() {
