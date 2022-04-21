@@ -35,7 +35,7 @@ void furi_hal_os_timer_callback() {
 
 extern void xPortSysTickHandler();
 
-volatile uint32_t furi_hal_os_skew = 0;
+static volatile uint32_t furi_hal_os_skew = 0;
 
 void furi_hal_os_init() {
     furi_hal_idle_timer_init();
@@ -119,9 +119,7 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
     uint32_t completed_ticks = furi_hal_os_sleep(expected_idle_ticks);
     // Notify system about time spent in sleep
     if(completed_ticks > 0) {
-        completed_ticks = completed_ticks > expected_idle_ticks ? expected_idle_ticks :
-                                                                  completed_ticks;
-        vTaskStepTick(completed_ticks);
+        vTaskStepTick(MIN(completed_ticks, expected_idle_ticks));
     }
 
     // Reenable IRQ
