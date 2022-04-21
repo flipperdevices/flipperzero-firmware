@@ -207,6 +207,8 @@ bool furi_hal_bt_start_scan(GapScanCallback callback, void* context);
 /** Stop MAC addresses scan */
 void furi_hal_bt_stop_scan();
 
+bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode);
+
 #ifdef __cplusplus
 }
 #endif

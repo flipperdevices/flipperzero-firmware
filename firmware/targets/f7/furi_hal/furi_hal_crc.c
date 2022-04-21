@@ -21,6 +21,7 @@ void furi_hal_crc_init(bool synchronize) {
     /* initialize peripheral with default generating polynomial */
     LL_CRC_SetInputDataReverseMode(CRC, LL_CRC_INDATA_REVERSE_BYTE);
     LL_CRC_SetOutputDataReverseMode(CRC, LL_CRC_OUTDATA_REVERSE_BIT);
+    //LL_CRC_SetOutputDataReverseMode(CRC, LL_CRC_OUTDATA_REVERSE_NONE);
     LL_CRC_SetPolynomialCoef(CRC, LL_CRC_DEFAULT_CRC32_POLY);
     LL_CRC_SetPolynomialSize(CRC, LL_CRC_POLYLENGTH_32B);
     LL_CRC_SetInitialData(CRC, LL_CRC_DEFAULT_CRC_INITVALUE);
@@ -34,6 +35,7 @@ void furi_hal_crc_init(bool synchronize) {
 void furi_hal_crc_reset() {
     furi_check(hal_crc_control.state == CRC_State_Ready);
     if(hal_crc_control.mtx) {
+        furi_check(osMutexGetOwner(hal_crc_control.mtx) == osThreadGetId());
         osMutexRelease(hal_crc_control.mtx);
     }
     LL_CRC_ResetCRCCalculationUnit(CRC);
@@ -80,9 +82,14 @@ static uint32_t furi_hal_crc_accumulate(uint32_t pBuffer[], uint32_t BufferLengt
 
 uint32_t furi_hal_crc_feed(void* data, uint16_t length) {
     return ~furi_hal_crc_accumulate(data, length);
+    //return furi_hal_crc_accumulate(data, length);
 }
 
 bool furi_hal_crc_acquire(uint32_t timeout) {
     furi_assert(hal_crc_control.mtx);
-    return osMutexAcquire(hal_crc_control.mtx, timeout) == osOK;
+    if(osMutexAcquire(hal_crc_control.mtx, timeout) == osOK) {
+        LL_CRC_ResetCRCCalculationUnit(CRC);
+        return true;
+    }
+    return false;
 }

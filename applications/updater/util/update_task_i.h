@@ -3,6 +3,7 @@
 #include <storage/storage.h>
 
 #define UPDATE_TASK_NOERR 0
+#define UPDATE_TASK_CONTINUE 1
 #define UPDATE_TASK_FAILED -1
 
 typedef struct UpdateTask {

@@ -99,7 +99,7 @@ void furi_hal_bt_unlock_core2() {
     furi_check(osMutexRelease(furi_hal_bt_core2_mtx) == osOK);
 }
 
-static bool furi_hal_bt_radio_stack_is_supported(WirelessFwInfo_t* info) {
+static bool furi_hal_bt_radio_stack_is_supported(const BleGlueC2Info* info) {
     bool supported = false;
     if(info->StackType == INFO_STACK_TYPE_BLE_HCI) {
         furi_hal_bt_stack = FuriHalBtStackHciLayer;
@@ -116,6 +116,58 @@ static bool furi_hal_bt_radio_stack_is_supported(WirelessFwInfo_t* info) {
     return supported;
 }
 
+//bool furi_hal_bt_wait_fus() {
+//    WirelessFwInfo_t info = {};
+//    if(!ble_glue_wait_for_fus_start(&info)) {
+//        return false;
+//    }
+
+//    FURI_LOG_I(
+//        TAG,
+//        "Core2: FUS: %d.%d.%d, mem %d/%d/%d",
+//        info.FusVersionMajor,
+//        info.FusVersionMinor,
+//        info.FusVersionSub,
+//        info.FusMemorySizeSram2B,
+//        info.FusMemorySizeSram2A,
+//        info.FusMemorySizeFlash);
+//    FURI_LOG_I(
+//        TAG,
+//        "Core2: Stack: %d.%d.%d.%d.%d, type %d, flash %d",
+//        info.VersionMajor,
+//        info.VersionMinor,
+//        info.VersionSub,
+//        info.VersionBranch,
+//        info.VersionReleaseType,
+//        info.StackType,
+//        info.MemorySizeFlash);
+
+//    return true;
+//}
+
+static void furi_hal_bt_dump_stack_info() {
+    const BleGlueC2Info* c2_info = ble_glue_get_c2_info();
+    FURI_LOG_I(
+        TAG,
+        "Core2: FUS: %d.%d.%d, mem %d/%d/%d",
+        c2_info->FusVersionMajor,
+        c2_info->FusVersionMinor,
+        c2_info->FusVersionSub,
+        c2_info->FusMemorySizeSram2B,
+        c2_info->FusMemorySizeSram2A,
+        c2_info->FusMemorySizeFlash);
+    FURI_LOG_I(
+        TAG,
+        "Core2: Stack: %d.%d.%d.%d.%d, type %d, flash %d",
+        c2_info->VersionMajor,
+        c2_info->VersionMinor,
+        c2_info->VersionSub,
+        c2_info->VersionBranch,
+        c2_info->VersionReleaseType,
+        c2_info->StackType,
+        c2_info->MemorySizeFlash);
+}
+
 bool furi_hal_bt_start_radio_stack() {
     bool res = false;
     furi_assert(furi_hal_bt_core2_mtx);
@@ -128,21 +180,23 @@ bool furi_hal_bt_start_radio_stack() {
     }
 
     do {
-        // Wait until FUS is started or timeout
-        WirelessFwInfo_t info = {};
-        if(!ble_glue_wait_for_fus_start(&info)) {
-            FURI_LOG_E(TAG, "FUS start failed");
+        // Wait until C2 is started or timeout
+        if(!ble_glue_wait_for_c2_start()) {
+            FURI_LOG_E(TAG, "Core2 start failed");
             LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
             ble_glue_thread_stop();
             break;
         }
-        // If FUS is running, start radio stack fw
-        if(ble_glue_radio_stack_fw_launch_started()) {
-            // If FUS is running do nothing and wait for system reset
-            furi_crash("Waiting for FUS to launch radio stack firmware");
+
+        furi_hal_bt_dump_stack_info();
+        // If C2 is running, start radio stack fw
+        if(!furi_hal_bt_ensure_c2_mode(BleGlueC2ModeStack)) {
+            break;
         }
-        // Check weather we support radio stack
-        if(!furi_hal_bt_radio_stack_is_supported(&info)) {
+
+        // Check whether we support radio stack
+        const BleGlueC2Info* c2_info = ble_glue_get_c2_info();
+        if(!furi_hal_bt_radio_stack_is_supported(c2_info)) {
             FURI_LOG_E(TAG, "Unsupported radio stack");
             // Don't stop SHCI for crypto enclave support
             break;
@@ -232,7 +286,7 @@ bool furi_hal_bt_change_app(FuriHalBtProfile profile, GapEventCallback event_cb,
     ble_app_thread_stop();
     gap_thread_stop();
     FURI_LOG_I(TAG, "Reset SHCI");
-    SHCI_C2_Reinit();
+    ble_glue_reinit_c2();
     osDelay(100);
     ble_glue_thread_stop();
     FURI_LOG_I(TAG, "Start BT initialization");
@@ -403,4 +457,19 @@ void furi_hal_bt_stop_scan() {
     if(furi_hal_bt_stack == FuriHalBtStackHciLayer) {
         gap_stop_scan();
     }
+}
+
+bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
+    BleGlueCommandResult fw_start_res = ble_glue_force_c2_mode(mode);
+    if(fw_start_res == BleGlueCommandResultOK) {
+        return true;
+    } else if(fw_start_res == BleGlueCommandResultRestartPending) {
+        // If C2 is running do nothing and wait for system reset
+        osDelay(1000);
+        furi_crash("Waiting for FUS->radio stack transition");
+        return true;
+    }
+
+    FURI_LOG_E(TAG, "Failed to switch C2 mode: %d", fw_start_res);
+    return false;
 }

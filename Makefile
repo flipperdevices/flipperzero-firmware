@@ -97,7 +97,15 @@ updater_package_bin: firmware_all updater
 
 .PHONY: updater_package
 updater_package: firmware_all updater assets_manifest
-	@$(PROJECT_ROOT)/scripts/dist.py copy -t $(TARGET) -p firmware updater -s $(DIST_SUFFIX) -r $(PROJECT_ROOT)/assets/resources --bundlever "$(VERSION_STRING)"
+	@$(PROJECT_ROOT)/scripts/dist.py copy \
+	-t $(TARGET) -p firmware updater \
+	-s $(DIST_SUFFIX) -r $(PROJECT_ROOT)/assets/resources \
+	--bundlever "$(VERSION_STRING)" \
+	--radio $(COPRO_DIR)/stm32wb5x_BLE_Stack_basic_fw.bin \
+	--radioaddr 0x080D1000 --radiover 1.13.0.0.5.5
+
+	#--radio $(COPRO_DIR)/stm32wb5x_BLE_Stack_light_fw.bin \
+	#--radioaddr 0x080D7000 --radiover 1.13.0.0.5.3
 
 .PHONY: assets_manifest
 assets_manifest:

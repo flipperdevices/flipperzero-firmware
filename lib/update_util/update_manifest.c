@@ -75,8 +75,8 @@ static bool
         flipper_format_read_hex(
             flipper_file,
             MANIFEST_KEY_RADIO_VERSION,
-            (uint8_t*)&update_manifest->radio_version,
-            sizeof(uint32_t));
+            update_manifest->radio_version.raw,
+            sizeof(UpdateManifestRadioVersion));
         flipper_format_read_hex(
             flipper_file,
             MANIFEST_KEY_RADIO_CRC,

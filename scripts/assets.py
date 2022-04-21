@@ -203,13 +203,13 @@ class Main(App):
         manifest_file = os.path.join(directory_path, "Manifest")
         old_manifest = Manifest()
         if os.path.exists(manifest_file):
-            self.logger.info("old manifest is present, loading for compare")
+            self.logger.info("Manifest is present, loading to compare")
             old_manifest.load(manifest_file)
-        self.logger.info(f'Creating new Manifest for directory "{directory_path}"')
+        self.logger.info(f'Creating temporary Manifest for directory "{directory_path}"')
         new_manifest = Manifest()
         new_manifest.create(directory_path)
 
-        self.logger.info(f"Comparing new manifest with old")
+        self.logger.info(f"Comparing new manifest with existing")
         only_in_old, changed, only_in_new = Manifest.compare(old_manifest, new_manifest)
         for record in only_in_old:
             self.logger.info(f"Only in old: {record}")

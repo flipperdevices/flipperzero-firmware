@@ -13,6 +13,19 @@ extern "C" {
 #define UPDATE_MANIFEST_DEFAULT_NAME "update.fuf"
 #define UPDATE_MAINFEST_DEFAULT_PATH UPDATE_DIR_DEFAULT_REL_PATH "/" UPDATE_MANIFEST_DEFAULT_NAME
 
+typedef union {
+    uint8_t raw[6];
+    struct {
+        uint8_t major;
+        uint8_t minor;
+        uint8_t sub;
+        uint8_t branch;
+        uint8_t release;
+        uint8_t type;
+    } version;
+} UpdateManifestRadioVersion;
+_Static_assert(sizeof(UpdateManifestRadioVersion) == 6, "UpdateManifestRadioVersion size error");
+
 typedef struct {
     string_t version;
     uint32_t target;
@@ -21,7 +34,7 @@ typedef struct {
     string_t firmware_dfu_image;
     string_t radio_image;
     uint32_t radio_address;
-    uint32_t radio_version;
+    UpdateManifestRadioVersion radio_version;
     uint32_t radio_crc;
     string_t resource_bundle;
     bool valid;

@@ -7,6 +7,7 @@ import os
 import shutil
 import zlib
 import tarfile
+import math
 
 
 class Main(App):
@@ -35,7 +36,11 @@ class Main(App):
             "--radio", dest="radiobin", default="", required=False
         )
         self.parser_generate.add_argument(
-            "--radioaddr", dest="radioaddr", required=False
+            "--radioaddr",
+            dest="radioaddr",
+            type=lambda x: int(x,16),
+            default=0,
+            required=False
         )
         self.parser_generate.add_argument(
             "--radiover", dest="radioversion", required=False
@@ -44,6 +49,9 @@ class Main(App):
         self.parser_generate.set_defaults(func=self.generate)
 
     def generate(self):
+        if self.args.radiobin and not self.args.radioaddr:
+            raise ValueError("Missing --radioaddr")
+
         stage_basename = basename(self.args.stage)
         dfu_basename = basename(self.args.dfu)
         radiobin_basename = basename(self.args.radiobin)
@@ -64,6 +72,10 @@ class Main(App):
                 self.args.resources, join(self.args.directory, resources_basename)
             )
 
+        radioversion = 0
+        if self.args.radioversion:
+            radioversion =  self.version_str_to_int(self.args.radioversion)
+
         file = FlipperFormatFile()
         file.setHeader("Flipper firmware upgrade configuration", 1)
         file.writeKey("Info", self.args.version)
@@ -74,7 +86,7 @@ class Main(App):
         file.writeKey("Firmware", dfu_basename)
         file.writeKey("Radio", radiobin_basename or "")
         file.writeKey("Radio address", self.int2ffhex(self.args.radioaddr or 0))
-        file.writeKey("Radio version", self.int2ffhex(self.args.radioversion or 0))
+        file.writeKey("Radio version", self.int2ffhex(radioversion))
         if radiobin_basename:
             file.writeKey("Radio CRC", self.int2ffhex(self.crc(self.args.radiobin)))
         else:
@@ -90,9 +102,17 @@ class Main(App):
         ) as tarball:
             tarball.add(srcdir, arcname="")
 
+    #  Accepts version as: major.minor.sub.branch.release.type
+    @staticmethod
+    def version_str_to_int(value: str):
+        major, minor, sub, branch, release, stype = list(map(int, value.split(".")))
+        return major | (minor << 8) | (sub << 16) | (branch << 24) | (release << 32) | (stype << 40)
+
     @staticmethod
     def int2ffhex(value: int):
-        hexstr = "%08X" % value
+        n_hex_bytes = math.ceil(math.ceil(math.log2(value)) / 8) * 2 # max(4, math.ceil(math.ceil(math.log2(value)) / 8) * 2)
+        fmtstr = f"%0{n_hex_bytes}X"
+        hexstr = fmtstr % value
         return " ".join(list(Main.batch(hexstr, 2))[::-1])
 
     @staticmethod
