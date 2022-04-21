@@ -3,8 +3,11 @@
 #include <furi_hal_uart.h>
 #include <furi_hal_clock.h>
 #include <furi_hal_power.h>
+#include <furi_hal_gpio.h>
+#include <furi_hal_resources.h>
 #include <furi_hal_delay.h>
 #include <furi_hal_idle_timer.h>
+
 #include <stm32wbxx_ll_cortex.h>
 
 #include <furi.h>
@@ -29,15 +32,8 @@
 #ifdef FURI_HAL_OS_DEBUG
 #include <stm32wbxx_ll_gpio.h>
 
-#define LED_SLEEP_PORT GPIOA
-#define LED_SLEEP_PIN LL_GPIO_PIN_7
-#define LED_TICK_PORT GPIOA
-#define LED_TICK_PIN LL_GPIO_PIN_6
-#define LED_SECOND_PORT GPIOA
-#define LED_SECOND_PIN LL_GPIO_PIN_4
-
 void furi_hal_os_timer_callback() {
-    LL_GPIO_TogglePin(LED_SECOND_PORT, LED_SECOND_PIN);
+    furi_hal_gpio_write(&gpio_ext_pa4, !furi_hal_gpio_read(&gpio_ext_pa4));
 }
 #endif
 
@@ -49,9 +45,9 @@ void furi_hal_os_init() {
     furi_hal_idle_timer_init();
 
 #ifdef FURI_HAL_OS_DEBUG
-    LL_GPIO_SetPinMode(LED_SLEEP_PORT, LED_SLEEP_PIN, LL_GPIO_MODE_OUTPUT);
-    LL_GPIO_SetPinMode(LED_TICK_PORT, LED_TICK_PIN, LL_GPIO_MODE_OUTPUT);
-    LL_GPIO_SetPinMode(LED_SECOND_PORT, LED_SECOND_PIN, LL_GPIO_MODE_OUTPUT);
+    furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeOutputPushPull);
+    furi_hal_gpio_init_simple(&gpio_ext_pa6, GpioModeOutputPushPull);
+    furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeOutputPushPull);
     osTimerId_t second_timer = osTimerNew(furi_hal_os_timer_callback, osTimerPeriodic, NULL, NULL);
     osTimerStart(second_timer, FURI_HAL_OS_TICK_HZ);
 #endif
@@ -62,7 +58,7 @@ void furi_hal_os_init() {
 void furi_hal_os_tick() {
     if(xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
 #ifdef FURI_HAL_OS_DEBUG
-        LL_GPIO_TogglePin(LED_TICK_PORT, LED_TICK_PIN);
+        furi_hal_gpio_write(&gpio_ext_pa6, !furi_hal_gpio_read(&gpio_ext_pa6));
 #endif
         xPortSysTickHandler();
     }
@@ -97,14 +93,14 @@ static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
     furi_hal_idle_timer_start(FURI_HAL_OS_TICKS_TO_IDLE_CNT(expected_idle_ticks));
 
 #ifdef FURI_HAL_OS_DEBUG
-    LL_GPIO_ResetOutputPin(LED_SLEEP_PORT, LED_SLEEP_PIN);
+    furi_hal_gpio_write(&gpio_ext_pa7, 0);
 #endif
 
     // Go to sleep mode
     furi_hal_power_sleep();
 
 #ifdef FURI_HAL_OS_DEBUG
-    LL_GPIO_SetOutputPin(LED_SLEEP_PORT, LED_SLEEP_PIN);
+    furi_hal_gpio_write(&gpio_ext_pa7, 1);
 #endif
 
     // Calculate how much time we spent in the sleep
@@ -146,9 +142,9 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
         return;
     }
 
-    if(furi_hal_os_is_bad_interrupt_pending()) {
-        furi_crash("Bad interrupt pending before sleep");
-    }
+    // if(furi_hal_os_is_bad_interrupt_pending()) {
+    //     furi_crash("Bad interrupt pending before sleep");
+    // }
 
     // Sleep and track how much ticks we spent sleeping
     uint32_t completed_ticks = furi_hal_os_sleep(expected_idle_ticks);

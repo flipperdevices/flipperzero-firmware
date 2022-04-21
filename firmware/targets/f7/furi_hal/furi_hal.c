@@ -20,6 +20,10 @@ void furi_hal_init_early() {
     furi_hal_light_init();
 
     furi_hal_rtc_init_early();
+
+    LL_DBGMCU_EnableDBGSleepMode();
+    LL_DBGMCU_EnableDBGStopMode();
+    LL_EXTI_EnableIT_32_63(LL_EXTI_LINE_48);
 }
 
 void furi_hal_deinit_early() {

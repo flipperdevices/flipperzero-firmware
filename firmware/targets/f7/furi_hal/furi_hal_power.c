@@ -8,6 +8,7 @@
 #include <stm32wbxx_ll_hsem.h>
 #include <stm32wbxx_ll_cortex.h>
 #include <stm32wbxx_ll_gpio.h>
+#include <stm32wbxx_ll_usart.h>
 
 #include <hw_conf.h>
 #include <bq27220.h>
@@ -84,6 +85,11 @@ void furi_hal_power_init() {
     bq25896_init(&furi_hal_i2c_handle_power);
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
 
+#ifdef FURI_HAL_OS_DEBUG
+    furi_hal_gpio_init_simple(&gpio_ext_pb2, GpioModeOutputPushPull);
+    furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
+#endif
+
     FURI_LOG_I(TAG, "Init OK");
 }
 
@@ -133,7 +139,18 @@ bool furi_hal_power_sleep_available() {
 }
 
 bool furi_hal_power_deep_sleep_available() {
-    return furi_hal_bt_is_alive() && furi_hal_power.deep_insomnia == 0;
+    for(int32_t i = WWDG_IRQn; i <= DMAMUX1_OVR_IRQn; i++) {
+        if(NVIC_GetPendingIRQ(i)) {
+            FURI_LOG_D("DS", "%d", i);
+            return false;
+        }
+    }
+
+    if(!furi_hal_bt_is_alive() || furi_hal_power.deep_insomnia > 0) {
+        return false;
+    }
+
+    return true;
 }
 
 void furi_hal_power_light_sleep() {
@@ -162,6 +179,8 @@ void furi_hal_power_deep_sleep() {
     /* Release RCC semaphore */
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 
+    LL_USART_Disable(USART1);
+
     // Prepare deep sleep
     LL_PWR_SetPowerMode(LL_PWR_MODE_STOP1);
     LL_LPM_EnableDeepSleep();
@@ -172,6 +191,8 @@ void furi_hal_power_deep_sleep() {
 #endif
 
     __WFI();
+
+    LL_USART_Enable(USART1);
 
     /* Release ENTRY_STOP_MODE semaphore */
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID, 0);
@@ -188,9 +209,25 @@ void furi_hal_power_deep_sleep() {
 
 void furi_hal_power_sleep() {
     if(furi_hal_power_deep_sleep_available()) {
+#ifdef FURI_HAL_OS_DEBUG
+        furi_hal_gpio_write(&gpio_ext_pc3, 1);
+#endif
+
         furi_hal_power_deep_sleep();
+
+#ifdef FURI_HAL_OS_DEBUG
+        furi_hal_gpio_write(&gpio_ext_pc3, 0);
+#endif
     } else {
+#ifdef FURI_HAL_OS_DEBUG
+        furi_hal_gpio_write(&gpio_ext_pb2, 1);
+#endif
+
         furi_hal_power_light_sleep();
+
+#ifdef FURI_HAL_OS_DEBUG
+        furi_hal_gpio_write(&gpio_ext_pb2, 0);
+#endif
     }
 }
 
