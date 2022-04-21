@@ -8,6 +8,8 @@
 #include <furi.h>
 #include <furi_hal_delay.h>
 
+static bool furi_hal_usart_prev_enabled[2];
+
 static void (*irq_cb[2])(uint8_t ev, uint8_t data, void* context);
 static void* irq_ctx[2];
 
@@ -137,17 +139,21 @@ void furi_hal_uart_deinit(FuriHalUartId ch) {
 }
 
 void furi_hal_uart_suspend(FuriHalUartId channel) {
-    if(channel == FuriHalUartIdLPUART1) {
+    if(channel == FuriHalUartIdLPUART1 && LL_LPUART_IsEnabled(LPUART1)) {
         LL_LPUART_Disable(LPUART1);
         NVIC_ClearPendingIRQ(LPUART1_IRQn);
-    } else if(channel == FuriHalUartIdUSART1) {
+        furi_hal_usart_prev_enabled[channel] = true;
+    } else if(channel == FuriHalUartIdUSART1 && LL_USART_IsEnabled(USART1)) {
         LL_USART_Disable(USART1);
         NVIC_ClearPendingIRQ(USART1_IRQn);
+        furi_hal_usart_prev_enabled[channel] = true;
     }
 }
 
 void furi_hal_uart_resume(FuriHalUartId channel) {
-    if(channel == FuriHalUartIdLPUART1) {
+    if(!furi_hal_usart_prev_enabled[channel]) {
+        return;
+    } else if(channel == FuriHalUartIdLPUART1) {
         LL_LPUART_Enable(LPUART1);
     } else if(channel == FuriHalUartIdUSART1) {
         LL_USART_Enable(USART1);
