@@ -250,7 +250,6 @@ extern void HW_IPCC_Tx_Handler();
 extern void HW_IPCC_Rx_Handler();
 
 void SysTick_Handler(void) {
-    furi_hal_tick();
     furi_hal_os_tick();
 }
 

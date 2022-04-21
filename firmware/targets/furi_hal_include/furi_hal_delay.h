@@ -18,11 +18,6 @@ void furi_hal_delay_init();
 /** Get instructions per microsecond count */
 uint32_t furi_hal_delay_instructions_per_microsecond();
 
-/** Increase tick counter.
- *  Should be called from SysTick ISR
- */
-void furi_hal_tick(void);
-
 /** Get current tick counter
  *
  * System uptime, may overflow.
@@ -30,12 +25,6 @@ void furi_hal_tick(void);
  * @return     Current ticks in milliseconds
  */
 uint32_t furi_hal_get_tick(void);
-
-/** Advance tick counter
- *
- * @param[in]   ticks_to_jump  tick count to add
- */
-void furi_hal_step_tick(uint32_t ticks_to_jump);
 
 /** Convert milliseconds to ticks
  *

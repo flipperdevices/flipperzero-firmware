@@ -121,7 +121,6 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
     if(completed_ticks > 0) {
         completed_ticks = completed_ticks > expected_idle_ticks ? expected_idle_ticks :
                                                                   completed_ticks;
-        furi_hal_step_tick(completed_ticks);
         vTaskStepTick(completed_ticks);
     }
 
