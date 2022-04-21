@@ -15,7 +15,7 @@ MANIFEST_TEMPLATE = {
         "radio": {
             "version": {
                 "type": 3,
-                "major": 1,
+                "major": 3,
                 "minor": 13,
                 "sub": 0,
                 "branch": 0,
@@ -51,7 +51,7 @@ class Copro:
         if not cube_version or not cube_version.startswith("FW.WB"):
             raise Exception(f"Incorrect Cube package or version info")
         cube_version = cube_version.replace("FW.WB.", "", 1)
-        if cube_version != "1.13.1":
+        if cube_version != "1.13.3":
             raise Exception(f"Unknonwn cube version")
         self.version = cube_version
 
