@@ -136,6 +136,24 @@ void furi_hal_uart_deinit(FuriHalUartId ch) {
     }
 }
 
+void furi_hal_uart_suspend(FuriHalUartId channel) {
+    if(channel == FuriHalUartIdLPUART1) {
+        LL_LPUART_Disable(LPUART1);
+        NVIC_ClearPendingIRQ(LPUART1_IRQn);
+    } else if(channel == FuriHalUartIdUSART1) {
+        LL_USART_Disable(USART1);
+        NVIC_ClearPendingIRQ(USART1_IRQn);
+    }
+}
+
+void furi_hal_uart_resume(FuriHalUartId channel) {
+    if(channel == FuriHalUartIdLPUART1) {
+        LL_LPUART_Enable(LPUART1);
+    } else if(channel == FuriHalUartIdUSART1) {
+        LL_USART_Enable(USART1);
+    }
+}
+
 void furi_hal_uart_tx(FuriHalUartId ch, uint8_t* buffer, size_t buffer_size) {
     if(ch == FuriHalUartIdUSART1) {
         if(LL_USART_IsEnabled(USART1) == 0) return;

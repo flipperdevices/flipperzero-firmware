@@ -1,4 +1,6 @@
 #include <furi_hal_os.h>
+#include <furi_hal_usb.h>
+#include <furi_hal_uart.h>
 #include <furi_hal_clock.h>
 #include <furi_hal_power.h>
 #include <furi_hal_delay.h>
@@ -17,6 +19,12 @@
 
 #define FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH (FURI_HAL_OS_IDLE_CNT_TO_TICKS(FURI_HAL_IDLE_TIMER_MAX))
 #define FURI_HAL_OS_MAX_SLEEP (FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH - 1)
+
+#define FURI_HAL_OS_EXTI_IRQ_MASK_0                                                  \
+    ((1 << EXTI0_IRQn) | (1 << EXTI1_IRQn) | (1 << EXTI2_IRQn) | (1 << EXTI3_IRQn) | \
+     (1 << EXTI4_IRQn) | (1 << EXTI9_5_IRQn))
+#define FURI_HAL_OS_EXTI_IRQ_MASK_1 ((1 << (EXTI15_10_IRQn - 32)))
+#define FURI_HAL_OS_IPCC_IRQ_MASK_1 ((1 << (IPCC_C1_TX_IRQn - 32)) | (1 << (IPCC_C1_TX_IRQn - 32)))
 
 #ifdef FURI_HAL_OS_DEBUG
 #include <stm32wbxx_ll_gpio.h>
@@ -58,6 +66,27 @@ void furi_hal_os_tick() {
 #endif
         xPortSysTickHandler();
     }
+}
+
+static inline void furi_hal_os_suspend_aux_periphs() {
+    // Disable USART
+    furi_hal_uart_suspend(FuriHalUartIdUSART1);
+    furi_hal_uart_suspend(FuriHalUartIdLPUART1);
+    // Disable USB
+}
+
+static inline void furi_hal_os_resume_aux_periphs() {
+    // Re-enable USART
+    furi_hal_uart_resume(FuriHalUartIdUSART1);
+    furi_hal_uart_resume(FuriHalUartIdLPUART1);
+    // Re-enable USB
+}
+
+static inline bool furi_hal_os_is_bad_interrupt_pending() {
+    // Only EXTI and IPCC interrupts are allowed in sleep mode
+    return (NVIC->ICPR[0] & ~FURI_HAL_OS_EXTI_IRQ_MASK_0) ||
+           (NVIC->ICPR[1] & ~FURI_HAL_OS_EXTI_IRQ_MASK_1) ||
+           (NVIC->ICPR[1] & ~FURI_HAL_OS_IPCC_IRQ_MASK_1);
 }
 
 static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
@@ -106,13 +135,19 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
         expected_idle_ticks = FURI_HAL_OS_MAX_SLEEP;
     }
 
+    furi_hal_os_suspend_aux_periphs();
     // Stop IRQ handling, no one should disturb us till we finish
     __disable_irq();
 
     // Confirm OS that sleep is still possible
     if(eTaskConfirmSleepModeStatus() == eAbortSleep) {
+        furi_hal_os_resume_aux_periphs();
         __enable_irq();
         return;
+    }
+
+    if(furi_hal_os_is_bad_interrupt_pending()) {
+        furi_crash("Bad interrupt pending before sleep");
     }
 
     // Sleep and track how much ticks we spent sleeping
@@ -122,6 +157,7 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
         vTaskStepTick(MIN(completed_ticks, expected_idle_ticks));
     }
 
+    furi_hal_os_resume_aux_periphs();
     // Reenable IRQ
     __enable_irq();
 }

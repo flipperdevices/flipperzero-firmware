@@ -47,6 +47,20 @@ void furi_hal_uart_init(FuriHalUartId channel, uint32_t baud);
 void furi_hal_uart_deinit(FuriHalUartId channel);
 
 /**
+ * Suspend UART operation
+ * Disables UART hardware, settings and callbacks are preserved
+ * @param channel UART channel
+ */
+void furi_hal_uart_suspend(FuriHalUartId channel);
+
+/**
+ * Resume UART operation
+ * Resumes UART hardware from suspended state
+ * @param channel UART channel
+ */
+void furi_hal_uart_resume(FuriHalUartId channel);
+
+/**
  * Changes UART baudrate
  * @param channel UART channel
  * @param baud baudrate
