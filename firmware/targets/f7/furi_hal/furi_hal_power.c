@@ -179,10 +179,9 @@ void furi_hal_power_deep_sleep() {
     /* Release RCC semaphore */
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 
-    LL_USART_Disable(USART1);
-
     // Prepare deep sleep
     LL_PWR_SetPowerMode(LL_PWR_MODE_STOP1);
+    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_STOP1);
     LL_LPM_EnableDeepSleep();
 
 #if defined(__CC_ARM)
@@ -191,8 +190,6 @@ void furi_hal_power_deep_sleep() {
 #endif
 
     __WFI();
-
-    LL_USART_Enable(USART1);
 
     /* Release ENTRY_STOP_MODE semaphore */
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID, 0);
