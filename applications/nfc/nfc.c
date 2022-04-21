@@ -3,19 +3,19 @@
 
 bool nfc_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
-    Nfc* nfc = (Nfc*)context;
+    Nfc* nfc = context;
     return scene_manager_handle_custom_event(nfc->scene_manager, event);
 }
 
 bool nfc_back_event_callback(void* context) {
     furi_assert(context);
-    Nfc* nfc = (Nfc*)context;
+    Nfc* nfc = context;
     return scene_manager_handle_back_event(nfc->scene_manager);
 }
 
 void nfc_tick_event_callback(void* context) {
     furi_assert(context);
-    Nfc* nfc = (Nfc*)context;
+    Nfc* nfc = context;
     scene_manager_handle_tick_event(nfc->scene_manager);
 }
 
@@ -169,11 +169,16 @@ int32_t nfc_app(void* p) {
     char* args = p;
 
     // Check argument and run corresponding scene
-    if((*args != '\0') && nfc_device_load(nfc->dev, p)) {
-        if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateMifareUl);
+    if((*args != '\0')) {
+        if(nfc_device_load(nfc->dev, p)) {
+            if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateMifareUl);
+            } else {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
+            }
         } else {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
+            // Exit app
+            view_dispatcher_stop(nfc->view_dispatcher);
         }
     } else {
         scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
