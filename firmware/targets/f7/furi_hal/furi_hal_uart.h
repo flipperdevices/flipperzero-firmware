@@ -27,8 +27,6 @@ typedef enum {
  */
 typedef enum {
     UartIrqEventRXNE,
-    UartIrqEventIDLE,
-    //TODO: more events
 } UartIrqEvent;
 
 /**
