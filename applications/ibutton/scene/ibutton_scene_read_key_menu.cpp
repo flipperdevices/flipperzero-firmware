@@ -19,7 +19,7 @@ static void submenu_callback(void* context, uint32_t index) {
 }
 
 void iButtonSceneReadKeyMenu::on_enter(iButtonApp* app) {
-    iButtonAppViewManager* view_manager = app->get_view_manager(); 
+    iButtonAppViewManager* view_manager = app->get_view_manager();
     Submenu* submenu = view_manager->get_submenu();
 
     submenu_add_item(submenu, "Save", SubmenuIndexSave, submenu_callback, app);
