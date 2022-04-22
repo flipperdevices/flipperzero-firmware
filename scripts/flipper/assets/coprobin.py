@@ -4,6 +4,37 @@ import os, os.path
 import sys
 
 
+#  From STM32CubeWB\Middlewares\ST\STM32_WPAN\interface\patterns\ble_thread\shci\shci.h
+__STACK_TYPE_CODES = {
+    "BLE_FULL": 0x01,
+    "BLE_HCI": 0x02,
+    "BLE_LIGHT": 0x03,
+    "BLE_BEACON": 0x04,
+    "BLE_BASIC": 0x05,
+    "BLE_FULL_EXT_ADV": 0x06,
+    "BLE_HCI_EXT_ADV": 0x07,
+    "THREAD_FTD": 0x10,
+    "THREAD_MTD": 0x11,
+    "ZIGBEE_FFD": 0x30,
+    "ZIGBEE_RFD": 0x31,
+    "MAC": 0x40,
+    "BLE_THREAD_FTD_STATIC": 0x50,
+    "BLE_THREAD_FTD_DYAMIC": 0x51,
+    "802154_LLD_TESTS": 0x60,
+    "802154_PHY_VALID": 0x61,
+    "BLE_PHY_VALID": 0x62,
+    "BLE_LLD_TESTS": 0x63,
+    "BLE_RLV": 0x64,
+    "802154_RLV": 0x65,
+    "BLE_ZIGBEE_FFD_STATIC": 0x70,
+    "BLE_ZIGBEE_RFD_STATIC": 0x71,
+    "BLE_ZIGBEE_FFD_DYNAMIC": 0x78,
+    "BLE_ZIGBEE_RFD_DYNAMIC": 0x79,
+    "RLV": 0x80,
+    "BLE_MAC_STATIC": 0x90,
+}
+
+
 class CoproException(ValueError):
     pass
 
@@ -123,37 +154,6 @@ class CoproBinary:
         if not self.is_stack():
             raise CoproException("Not a stack image")
         return self.img_sig.get_flash_base(self.binary_size)
-
-
-#  From STM32CubeWB\Middlewares\ST\STM32_WPAN\interface\patterns\ble_thread\shci\shci.h
-__STACK_TYPE_CODES = {
-    "BLE_FULL": 0x01,
-    "BLE_HCI": 0x02,
-    "BLE_LIGHT": 0x03,
-    "BLE_BEACON": 0x04,
-    "BLE_BASIC": 0x05,
-    "BLE_FULL_EXT_ADV": 0x06,
-    "BLE_HCI_EXT_ADV": 0x07,
-    "THREAD_FTD": 0x10,
-    "THREAD_MTD": 0x11,
-    "ZIGBEE_FFD": 0x30,
-    "ZIGBEE_RFD": 0x31,
-    "MAC": 0x40,
-    "BLE_THREAD_FTD_STATIC": 0x50,
-    "BLE_THREAD_FTD_DYAMIC": 0x51,
-    "802154_LLD_TESTS": 0x60,
-    "802154_PHY_VALID": 0x61,
-    "BLE_PHY_VALID": 0x62,
-    "BLE_LLD_TESTS": 0x63,
-    "BLE_RLV": 0x64,
-    "802154_RLV": 0x65,
-    "BLE_ZIGBEE_FFD_STATIC": 0x70,
-    "BLE_ZIGBEE_RFD_STATIC": 0x71,
-    "BLE_ZIGBEE_FFD_DYNAMIC": 0x78,
-    "BLE_ZIGBEE_RFD_DYNAMIC": 0x79,
-    "RLV": 0x80,
-    "BLE_MAC_STATIC": 0x90,
-}
 
 
 def get_stack_type(typestr: str):

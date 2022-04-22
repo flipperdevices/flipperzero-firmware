@@ -50,6 +50,26 @@ class Main(App):
         self.parser_copro.add_argument("cube_dir", help="Path to Cube folder")
         self.parser_copro.add_argument("output_dir", help="Path to output folder")
         self.parser_copro.add_argument("mcu", help="MCU series as in copro folder")
+        self.parser_copro.add_argument(
+            "--cube_ver", dest="cube_ver", help="Cube version", required=True
+        )
+        self.parser_copro.add_argument(
+            "--stack_type", dest="stack_type", help="Stack type", required=True
+        )
+        self.parser_copro.add_argument(
+            "--stack_file",
+            dest="stack_file",
+            help="Stack file name in copro folder",
+            required=True,
+        )
+        self.parser_copro.add_argument(
+            "--stack_addr",
+            dest="stack_addr",
+            help="Stack flash address, as per release_notes",
+            type=lambda x: int(x, 16),
+            default=0,
+            required=False,
+        )
         self.parser_copro.set_defaults(func=self.copro)
 
         self.parser_dolphin = self.subparsers.add_parser(
@@ -235,9 +255,14 @@ class Main(App):
         self.logger.info(f"Bundling coprocessor binaries")
         copro = Copro(self.args.mcu)
         self.logger.info(f"Loading CUBE info")
-        copro.loadCubeInfo(self.args.cube_dir)
+        copro.loadCubeInfo(self.args.cube_dir, self.args.cube_ver)
         self.logger.info(f"Bundling")
-        copro.bundle(self.args.output_dir)
+        copro.bundle(
+            self.args.output_dir,
+            self.args.stack_file,
+            self.args.stack_type,
+            self.args.stack_addr,
+        )
         self.logger.info(f"Complete")
 
         return 0

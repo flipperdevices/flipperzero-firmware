@@ -67,7 +67,6 @@ bool ble_glue_start();
  */
 bool ble_glue_is_alive();
 
-
 /** Waits for C2 to reports its mode to callback
  *
  * @return     true if it reported before reaching timeout
