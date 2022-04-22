@@ -23,12 +23,6 @@
 #define FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH (FURI_HAL_OS_IDLE_CNT_TO_TICKS(FURI_HAL_IDLE_TIMER_MAX))
 #define FURI_HAL_OS_MAX_SLEEP (FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH - 1)
 
-#define FURI_HAL_OS_EXTI_IRQ_MASK_0                                                  \
-    ((1 << EXTI0_IRQn) | (1 << EXTI1_IRQn) | (1 << EXTI2_IRQn) | (1 << EXTI3_IRQn) | \
-     (1 << EXTI4_IRQn) | (1 << EXTI9_5_IRQn))
-#define FURI_HAL_OS_EXTI_IRQ_MASK_1 ((1 << (EXTI15_10_IRQn - 32)))
-#define FURI_HAL_OS_IPCC_IRQ_MASK_1 ((1 << (IPCC_C1_TX_IRQn - 32)) | (1 << (IPCC_C1_TX_IRQn - 32)))
-
 #ifdef FURI_HAL_OS_DEBUG
 #include <stm32wbxx_ll_gpio.h>
 
@@ -76,13 +70,6 @@ static inline void furi_hal_os_resume_aux_periphs() {
     furi_hal_uart_resume(FuriHalUartIdUSART1);
     furi_hal_uart_resume(FuriHalUartIdLPUART1);
     // Re-enable USB
-}
-
-static inline bool furi_hal_os_is_bad_interrupt_pending() {
-    // Only EXTI and IPCC interrupts are allowed in sleep mode
-    return (NVIC->ICPR[0] & ~FURI_HAL_OS_EXTI_IRQ_MASK_0) ||
-           (NVIC->ICPR[1] & ~FURI_HAL_OS_EXTI_IRQ_MASK_1) ||
-           (NVIC->ICPR[1] & ~FURI_HAL_OS_IPCC_IRQ_MASK_1);
 }
 
 static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
@@ -141,10 +128,6 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
         __enable_irq();
         return;
     }
-
-    // if(furi_hal_os_is_bad_interrupt_pending()) {
-    //     furi_crash("Bad interrupt pending before sleep");
-    // }
 
     // Sleep and track how much ticks we spent sleeping
     uint32_t completed_ticks = furi_hal_os_sleep(expected_idle_ticks);
