@@ -67,7 +67,6 @@ void furi_hal_usb_init(void) {
     LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     usbd_init(&udev, &usbd_hw, USB_EP0_SIZE, ubuf, sizeof(ubuf));
-    usbd_enable(&udev, true);
 
     usbd_reg_descr(&udev, usb_descriptor_get);
     usbd_reg_event(&udev, usbd_evt_susp, susp_evt);
@@ -199,7 +198,7 @@ static void susp_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
         usb.connected = false;
         usb.if_cur->suspend(&udev);
 
-        furi_hal_power_insomnia_exit();
+//         furi_hal_power_insomnia_exit();
     }
     if(usb.callback != NULL) {
         usb.callback(FuriHalUsbStateEventSuspend, usb.cb_ctx);
@@ -211,7 +210,7 @@ static void wkup_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
         usb.connected = true;
         usb.if_cur->wakeup(&udev);
 
-        furi_hal_power_insomnia_enter();
+//         furi_hal_power_insomnia_enter();
     }
     if(usb.callback != NULL) {
         usb.callback(FuriHalUsbStateEventWakeup, usb.cb_ctx);
@@ -264,16 +263,22 @@ static int32_t furi_hal_usb_thread(void* context) {
                     usb.if_cur->deinit(&udev);
                 }
                 if(if_new != NULL) {
-                    if_new->init(&udev, if_new, if_ctx_new);
+                    if(usb.if_cur != NULL) {
+                        // Previous interface was already configured
+                        if_new->init(&udev, if_new, if_ctx_new);
+                        usb.enabled = true;
+                    }
                     usbd_reg_event(&udev, usbd_evt_reset, reset_evt);
                     FURI_LOG_I(TAG, "USB Mode change done");
-                    usb.enabled = true;
                 }
                 usb.if_cur = if_new;
             }
             if(flags & EventEnable) {
                 if((!usb.enabled) && (usb.if_cur != NULL)) {
-                    usbd_connect(&udev, true);
+                    usbd_enable(&udev, true);
+                    FURI_LOG_D(TAG, "No delay");
+                    osDelay(USB_RECONNECT_DELAY);
+                    usb.if_cur->init(&udev, usb.if_cur, usb.if_ctx);
                     usb.enabled = true;
                     FURI_LOG_I(TAG, "USB Enable");
                 }
@@ -282,6 +287,7 @@ static int32_t furi_hal_usb_thread(void* context) {
                 if(usb.enabled) {
                     susp_evt(&udev, 0, 0);
                     usbd_connect(&udev, false);
+                    usbd_enable(&udev, false);
                     usb.enabled = false;
                     usb_request_pending = false;
                     FURI_LOG_I(TAG, "USB Disable");

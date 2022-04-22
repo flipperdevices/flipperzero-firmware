@@ -5,8 +5,11 @@
 #include <furi_hal.h>
 #include <gui/view_port.h>
 #include <gui/view.h>
+#include <math.h>
 
 #define POWER_OFF_TIMEOUT 90
+#define VBUS_MIN_VOLTAGE 4.0f
+#define VBUS_CHANGE_THRESHOLD 2.0f
 
 void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);
@@ -151,7 +154,7 @@ static void power_check_low_battery(Power* power) {
     }
 
     // Check battery charge and vbus voltage
-    if((power->info.charge == 0) && (power->info.voltage_vbus < 4.0f) &&
+    if((power->info.charge == 0) && (power->info.voltage_vbus < VBUS_MIN_VOLTAGE) &&
        power->show_low_bat_level_message) {
         if(!power->battery_low) {
             view_dispatcher_send_to_front(power->view_dispatcher);
@@ -184,6 +187,22 @@ static void power_check_battery_level_change(Power* power) {
     }
 }
 
+static void power_check_vbus_level_change(Power* power) {
+    if(fabsf(power->voltage_vbus - power->info.voltage_vbus)
+       >= VBUS_CHANGE_THRESHOLD) {
+        power->voltage_vbus = power->info.voltage_vbus;
+        if(power->voltage_vbus >= VBUS_MIN_VOLTAGE) {
+            furi_hal_power_insomnia_enter();
+//             furi_hal_usb_enable();
+            FURI_LOG_D("VBUS", "VBUS connected: %f v", power->voltage_vbus);
+        } else {
+//             furi_hal_usb_disable();
+            furi_hal_power_insomnia_exit();
+            FURI_LOG_D("VBUS", "VBUS disconnected: %f v", power->voltage_vbus);
+        }
+    }
+}
+
 int32_t power_srv(void* p) {
     (void)p;
     Power* power = power_alloc();
@@ -202,6 +221,9 @@ int32_t power_srv(void* p) {
 
         // Check and notify about battery level change
         power_check_battery_level_change(power);
+
+        // Check and notify about vbus level change
+        power_check_vbus_level_change(power);
 
         // Update battery view port
         if(need_refresh) view_port_update(power->battery_view_port);
