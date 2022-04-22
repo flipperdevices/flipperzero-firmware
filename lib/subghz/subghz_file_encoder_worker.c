@@ -106,6 +106,7 @@ LevelDuration subghz_file_encoder_worker_get_level_duration(void* context) {
             FURI_LOG_I(TAG, "Stop transmission");
             instance->worker_stoping = true;
         }
+        FURI_LOG_I(TAG, "%d, %d", level_duration.level, level_duration.duration);
         return level_duration;
     } else {
         FURI_LOG_E(TAG, "Slow flash read");
@@ -167,7 +168,10 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
     }
     //waiting for the end of the transfer
     FURI_LOG_I(TAG, "End read file");
-
+    while(!furi_hal_subghz_is_async_tx_complete()) {
+        osDelay(5);
+    }
+    FURI_LOG_I(TAG, "End transmission");
     while(instance->worker_running) {
         if(instance->worker_stoping) {
             if(instance->callback_end) instance->callback_end(instance->context_end);
