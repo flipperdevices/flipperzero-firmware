@@ -117,7 +117,6 @@ BleGlueCommandResult ble_glue_fus_get_status();
 
 BleGlueCommandResult ble_glue_fus_wait_operation();
 
-
 #ifdef __cplusplus
 }
 #endif

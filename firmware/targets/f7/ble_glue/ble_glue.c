@@ -140,6 +140,29 @@ static void ble_glue_update_c2_fw_info() {
     local_info->FusMemorySizeFlash = wireless_info.FusMemorySizeFlash;
 }
 
+static void ble_glue_dump_stack_info() {
+    const BleGlueC2Info* c2_info = &ble_glue->c2_info;
+    FURI_LOG_I(
+        TAG,
+        "Core2: FUS: %d.%d.%d, mem %d/%d, flash %d pages",
+        c2_info->FusVersionMajor,
+        c2_info->FusVersionMinor,
+        c2_info->FusVersionSub,
+        c2_info->FusMemorySizeSram2B,
+        c2_info->FusMemorySizeSram2A,
+        c2_info->FusMemorySizeFlash);
+    FURI_LOG_I(
+        TAG,
+        "Core2: Stack: %d.%d.%d, branch %d, reltype %d, stacktype %d, flash %d pages",
+        c2_info->VersionMajor,
+        c2_info->VersionMinor,
+        c2_info->VersionSub,
+        c2_info->VersionBranch,
+        c2_info->VersionReleaseType,
+        c2_info->StackType,
+        c2_info->MemorySizeFlash);
+}
+
 bool ble_glue_wait_for_c2_start() {
     bool started = false;
 
@@ -153,8 +176,12 @@ bool ble_glue_wait_for_c2_start() {
     } while(!started && (countdown > 0));
 
     if(started) {
-        FURI_LOG_I(TAG, "C2 boot completed");
+        FURI_LOG_I(
+            TAG,
+            "C2 boot completed, mode: %s",
+            ble_glue->c2_info.mode == BleGlueC2ModeFUS ? "FUS" : "Stack");
         ble_glue_update_c2_fw_info();
+        ble_glue_dump_stack_info();
     } else {
         FURI_LOG_E(TAG, "C2 startup failed");
         ble_glue->status = BleGlueStatusBroken;
@@ -215,6 +242,10 @@ BleGlueCommandResult ble_glue_force_c2_mode(BleGlueC2Mode desired_mode) {
     }
 
     if((ble_glue->c2_info.mode == BleGlueC2ModeFUS) && (desired_mode == BleGlueC2ModeStack)) {
+        if((ble_glue->c2_info.VersionMajor == 0) && (ble_glue->c2_info.VersionMinor == 0)) {
+            FURI_LOG_W(TAG, "Stack isn't installed!");
+            return BleGlueCommandResultError;
+        }
         SHCI_CmdStatus_t status = SHCI_C2_FUS_StartWs();
         if(status) {
             FURI_LOG_E(TAG, "Failed to start Radio Stack with status: %02X", status);
@@ -236,22 +267,6 @@ BleGlueCommandResult ble_glue_force_c2_mode(BleGlueC2Mode desired_mode) {
     }
 
     return BleGlueCommandResultError;
-    //bool ret = false;
-    //// Get FUS status
-    //SHCI_FUS_GetState_ErrorCode_t err_code = 0;
-    //uint8_t state = SHCI_C2_FUS_GetState(&err_code);
-    //if(state == FUS_STATE_VALUE_IDLE) {
-    //    // When FUS is running we can't read radio stack version correctly
-    //    // Trying to start radio stack fw, which leads to reset
-    //    FURI_LOG_W(TAG, "FUS is running. Restart to launch Radio Stack");
-    //    SHCI_CmdStatus_t status = SHCI_C2_FUS_StartWs();
-    //    if(status) {
-    //        FURI_LOG_E(TAG, "Failed to start Radio Stack with status: %02X", status);
-    //    } else {
-    //        ret = true;
-    //    }
-    //}
-    //return ret;
 }
 
 static void ble_glue_sys_status_not_callback(SHCI_TL_CmdStatus_t status) {
@@ -384,16 +399,18 @@ BleGlueCommandResult ble_glue_fus_stack_delete() {
     if(erase_stat == SHCI_Success) {
         return BleGlueCommandResultOperationOngoing;
     }
+    ble_glue_fus_get_status();
     return BleGlueCommandResultError;
 }
 
 BleGlueCommandResult ble_glue_fus_stack_install(uint32_t src_addr, uint32_t dst_addr) {
     FURI_LOG_I(TAG, "Installing stack");
-    SHCI_CmdStatus_t erase_stat = SHCI_C2_FUS_FwUpgrade(src_addr, dst_addr);
-    FURI_LOG_I(TAG, "Cmd res = %x", erase_stat);
-    if(erase_stat == SHCI_Success) {
+    SHCI_CmdStatus_t write_stat = SHCI_C2_FUS_FwUpgrade(src_addr, dst_addr);
+    FURI_LOG_I(TAG, "Cmd res = %x", write_stat);
+    if(write_stat == SHCI_Success) {
         return BleGlueCommandResultOperationOngoing;
     }
+    ble_glue_fus_get_status();
     return BleGlueCommandResultError;
 }
 

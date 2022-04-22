@@ -20,6 +20,8 @@
 #define STM_DFU_PRODUCT_ID 0xDF11
 /* Written into DFU file by build pipeline */
 #define FLIPPER_ZERO_DFU_DEVICE_CODE 0xFFFF
+/* Time, in ms, to wait for system restart by C2 before crashing */
+#define C2_MODE_SWITCH_TIMEOUT 10000
 
 #define EXT_PATH "/ext"
 #define TAG "UpdWorker"
@@ -133,17 +135,54 @@ static bool update_task_write_stack_data(UpdateTask* update_task) {
     return element_offs == stack_size;
 }
 
-//static void await_fus_op() {
-//    uint16_t fus_state = 0xFFFF;
-//    SHCI_FUS_GetState_ErrorCode_t error_code = 0;
-//    do {
-//        osDelay(100);
-//        fus_state = SHCI_C2_FUS_GetState(&error_code);
-//        FURI_LOG_I(TAG, "FUS state: %X, error = %x", fus_state, error_code);
-//    } while((fus_state != FUS_STATE_VALUE_IDLE) || (fus_state != FUS_STATE_VALUE_ERROR));
-//}
+static void update_task_wait_for_restart(UpdateTask* update_task) {
+    update_task_set_progress(update_task, UpdateTaskStageRadioBusy, 10);
+    osDelay(C2_MODE_SWITCH_TIMEOUT);
+    furi_crash("C2 timeout");
+}
 
-static bool update_task_apply_radiostack(UpdateTask* update_task) {
+static bool update_task_write_stack(UpdateTask* update_task) {
+    bool success = false;
+    do {
+        FURI_LOG_W(TAG, "Writing stack");
+        update_task_set_progress(update_task, UpdateTaskStageRadioImageValidate, 0);
+        CHECK_RESULT(update_task_open_file(update_task, update_task->manifest->radio_image));
+        CHECK_RESULT(
+            crc32_calc_file(update_task->file, &update_task_file_progress, update_task) ==
+            update_task->manifest->radio_crc);
+
+        CHECK_RESULT(update_task_write_stack_data(update_task));
+        update_task_set_progress(update_task, UpdateTaskStageRadioInstall, 0);
+        CHECK_RESULT(
+            ble_glue_fus_stack_install(update_task->manifest->radio_address, 0) !=
+            BleGlueCommandResultError);
+        update_task_set_progress(update_task, UpdateTaskStageRadioInstall, 80);
+        CHECK_RESULT(ble_glue_fus_wait_operation() == BleGlueCommandResultOK);
+        update_task_set_progress(update_task, UpdateTaskStageRadioInstall, 100);
+        // ...system will restart here.
+        update_task_wait_for_restart(update_task);
+        success = true;
+    } while(false);
+    return success;
+}
+
+static bool update_task_remove_stack(UpdateTask* update_task) {
+    bool success = false;
+    do {
+        FURI_LOG_W(TAG, "Removing stack");
+        update_task_set_progress(update_task, UpdateTaskStageRadioErase, 30);
+        CHECK_RESULT(ble_glue_fus_stack_delete() != BleGlueCommandResultError);
+        update_task_set_progress(update_task, UpdateTaskStageRadioErase, 80);
+        CHECK_RESULT(ble_glue_fus_wait_operation() == BleGlueCommandResultOK);
+        update_task_set_progress(update_task, UpdateTaskStageRadioErase, 100);
+        // ...system will restart here.
+        update_task_wait_for_restart(update_task);
+        success = true;
+    } while(false);
+    return success;
+}
+
+static bool update_task_manage_radiostack(UpdateTask* update_task) {
     bool success = false;
     do {
         CHECK_RESULT(ble_glue_wait_for_c2_start());
@@ -157,120 +196,57 @@ static bool update_task_apply_radiostack(UpdateTask* update_task) {
                                    (c2_state->VersionBranch == radio_ver->version.branch) &&
                                    (c2_state->VersionReleaseType == radio_ver->version.release);
         bool stack_missing = (c2_state->VersionMajor == 0) && (c2_state->VersionMinor == 0);
-        // Stack type is not available when we have FUS running.
+
         if(c2_state->mode == BleGlueC2ModeStack) {
-            bool full_stack_match = stack_version_match &&
-                                    (c2_state->StackType == radio_ver->version.type);
-            if(full_stack_match) {
+            // Stack type is not available when we have FUS running.
+            bool total_stack_match = stack_version_match &&
+                                     (c2_state->StackType == radio_ver->version.type);
+            if(total_stack_match) {
                 // Nothing to do.
                 FURI_LOG_W(TAG, "Stack version is up2date");
                 furi_hal_rtc_reset_flag(FuriHalRtcFlagC2Update);
                 success = true;
                 break;
             } else {
+                // Version or type mismatch. Let's boot to FUS and start updating.
                 FURI_LOG_W(TAG, "Restarting to FUS");
-                // Version mismatch. Let's boot to FUS and start updating.
                 furi_hal_rtc_set_flag(FuriHalRtcFlagC2Update);
                 CHECK_RESULT(furi_hal_bt_ensure_c2_mode(BleGlueC2ModeFUS));
                 // ...system will restart here.
+                update_task_wait_for_restart(update_task);
             }
         } else if(c2_state->mode == BleGlueC2ModeFUS) {
             // OK, we're in FUS mode.
+            update_task_set_progress(update_task, UpdateTaskStageRadioBusy, 10);
+            FURI_LOG_W(TAG, "Waiting for FUS to settle");
+            ble_glue_fus_wait_operation();
             if(stack_version_match) {
                 // We can't check StackType with FUS, but partial version matches
                 if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagC2Update)) {
-                    // This flag was set when full version was checked. So, delete it.
+                    // This flag was set when full version was checked.
+                    // And something in versions of the stack didn't match.
+                    // So, clear the flag and drop the stack.
+                    furi_hal_rtc_reset_flag(FuriHalRtcFlagC2Update);
                     FURI_LOG_W(TAG, "Forcing stack removal (match)");
-                    CHECK_RESULT(ble_glue_fus_stack_delete() != BleGlueCommandResultError);
-                    CHECK_RESULT(ble_glue_fus_wait_operation() == BleGlueCommandResultOK);
-                    // ...system will restart here.
+                    CHECK_RESULT(update_task_remove_stack(update_task));
                 } else {
-                    // We might just have the stack installed.
+                    // We might just had the stack installed.
                     // Let's start it up to check its version
                     FURI_LOG_W(TAG, "Starting stack to check full version");
+                    update_task_set_progress(update_task, UpdateTaskStageRadioBusy, 40);
                     CHECK_RESULT(furi_hal_bt_ensure_c2_mode(BleGlueC2ModeStack));
                     // ...system will restart here.
+                    update_task_wait_for_restart(update_task);
                 }
             } else {
                 if(stack_missing) {
                     // Install stack.
-                    FURI_LOG_W(TAG, "Writing stack");
-                    update_task_set_progress(update_task, UpdateTaskStageRadioImageValidate, 0);
-                    CHECK_RESULT(
-                        update_task_open_file(update_task, update_task->manifest->radio_image));
-                    CHECK_RESULT(
-                        crc32_calc_file(
-                            update_task->file, &update_task_file_progress, update_task) ==
-                        update_task->manifest->radio_crc);
-
-                    CHECK_RESULT(update_task_write_stack_data(update_task));
-                    update_task_set_progress(update_task, UpdateTaskStageRadioInstall, 0);
-                    CHECK_RESULT(
-                        ble_glue_fus_stack_install(
-                            update_task->manifest->radio_address,
-                            update_task->manifest->radio_address) != BleGlueCommandResultError);
-                    CHECK_RESULT(ble_glue_fus_wait_operation() == BleGlueCommandResultOK);
-                    // ...system will restart here.
+                    CHECK_RESULT(update_task_write_stack(update_task));
                 } else {
-                    FURI_LOG_W(TAG, "Forcing stack removal (mismatch)");
-                    CHECK_RESULT(ble_glue_fus_stack_delete() != BleGlueCommandResultError);
-                    CHECK_RESULT(ble_glue_fus_wait_operation() == BleGlueCommandResultOK);
-                    // ...system will restart here.
+                    CHECK_RESULT(update_task_remove_stack(update_task));
                 }
             }
         }
-
-        //FURI_LOG_I(TAG, "Starting FUS");
-        //CHECK_RESULT(furi_hal_bt_wait_fus());
-        //WirelessFwInfo_t info;
-        //CHECK_RESULT(SHCI_GetWirelessFwInfo(&info) == SHCI_Success);
-        //if((info.VersionMajor == radio_ver->version.major) &&
-        //   (info.VersionMinor == radio_ver->version.minor) &&
-        //   (info.VersionSub == radio_ver->version.sub) &&
-        //   (info.VersionBranch == radio_ver->version.branch) &&
-        //   (info.VersionReleaseType == radio_ver->version.release) &&
-        //   (info.StackType == radio_ver->version.type)) {
-        //    FURI_LOG_I(TAG, "Stack version matches manifest");
-        //    furi_hal_rtc_reset_flag(FuriHalRtcFlagC2Update);
-        //    success = true;
-        //    break;
-        //}
-
-        //ensure_fus_running();
-
-        //bool stack_missing = (info.VersionMajor == 0) && (info.VersionMinor == 0);
-        //FURI_LOG_I(TAG, "Stack missing: %d", stack_missing);
-        //if(!stack_missing) {
-        //    // Erase
-        //    furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeUpdate);
-        //    furi_hal_rtc_set_flag(FuriHalRtcFlagC2Update);
-        //    update_task_set_progress(update_task, UpdateTaskStageRadioErase, 0);
-        //    CHECK_RESULT(ble_glue_fus_stack_delete() == BleGlueCommandResultOperationOngoing);
-        //    CHECK_RESULT(ble_glue_fus_wait_operation() == BleGlueCommandResultOK);
-        //    FURI_LOG_I(TAG, "Erased");
-        //}
-
-        //update_task_set_progress(update_task, UpdateTaskStageRadioImageValidate, 0);
-        //CHECK_RESULT(update_task_open_file(update_task, update_task->manifest->radio_image));
-        //CHECK_RESULT(
-        //    crc32_calc_file(update_task->file, &update_task_file_progress, update_task) ==
-        //    update_task->manifest->radio_crc);
-
-        //// TODO: check SFSR
-        //CHECK_RESULT(update_task_write_stack_data(update_task));
-        //update_task_set_progress(update_task, UpdateTaskStageRadioInstall, 0);
-        ////CHECK_RESULT(
-        ////    SHCI_C2_FUS_FwUpgrade(
-        ////        update_task->manifest->radio_address, update_task->manifest->radio_address) ==
-        ////    SHCI_Success);
-        //SHCI_CmdStatus_t upgrade_stat = SHCI_C2_FUS_FwUpgrade(
-        //    update_task->manifest->radio_address, update_task->manifest->radio_address);
-        //FURI_LOG_I(TAG, "Cmd res = %x", upgrade_stat);
-        //CHECK_RESULT(upgrade_stat == SHCI_Success);
-
-        //await_fus_op();
-
-        //osDelay(6000);
 
         success = true;
     } while(false);
@@ -284,22 +260,20 @@ int32_t update_task_worker_flash_writer(void* context) {
     bool success = false;
 
     update_task->state.current_stage_idx = 0;
-    update_task->state.total_stages = 4;
+    update_task->state.total_stages = 0;
 
     do {
         CHECK_RESULT(update_task_parse_manifest(update_task));
 
         if(!string_empty_p(update_task->manifest->radio_image)) {
-            if(!update_task_apply_radiostack(update_task)) {
-                break;
-            }
+            CHECK_RESULT(update_task_manage_radiostack(update_task));
         }
 
         if(!string_empty_p(update_task->manifest->firmware_dfu_image)) {
-            if(!update_task_write_dfu(update_task)) {
-                break;
-            }
+            update_task->state.total_stages = 4;
+            CHECK_RESULT(update_task_write_dfu(update_task));
         }
+
         update_task_set_progress(update_task, UpdateTaskStageCompleted, 100);
         furi_hal_rtc_set_boot_mode(FuriHalRtcBootModePostUpdate);
         success = true;
@@ -311,11 +285,6 @@ int32_t update_task_worker_flash_writer(void* context) {
 
     return success ? UPDATE_TASK_NOERR : UPDATE_TASK_FAILED;
 }
-
-//int32_t update_task_worker_flash_writer(void* context) {
-//    furi_assert(context);
-//    UpdateTask* update_task = context;
-//}
 
 static bool update_task_pre_update(UpdateTask* update_task) {
     bool success = false;
@@ -399,6 +368,7 @@ static bool update_task_post_update(UpdateTask* update_task) {
             }
             tar_archive_free(archive);
         }
+        success = true;
     } while(false);
 
     string_clear(file_path);

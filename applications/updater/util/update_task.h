@@ -23,6 +23,7 @@ typedef enum {
     UpdateTaskStageRadioErase,
     UpdateTaskStageRadioWrite,
     UpdateTaskStageRadioInstall,
+    UpdateTaskStageRadioBusy,
     UpdateTaskStageLfsBackup,
     UpdateTaskStageLfsRestore,
     UpdateTaskStageResourcesUpdate,

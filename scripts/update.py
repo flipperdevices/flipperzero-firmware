@@ -2,6 +2,7 @@
 
 from flipper.app import App
 from flipper.utils.fff import FlipperFormatFile
+from flipper.assets.coprobin import CoproBinary, CoproException, get_stack_type
 from os.path import basename, join, exists
 import os
 import shutil
@@ -29,7 +30,7 @@ class Main(App):
         self.parser_generate.add_argument("-d", dest="directory", required=True)
         self.parser_generate.add_argument("-v", dest="version", required=True)
         self.parser_generate.add_argument("-t", dest="target", required=True)
-        self.parser_generate.add_argument("--dfu", dest="dfu", required=False)
+        self.parser_generate.add_argument("--dfu", dest="dfu", default="", required=False)
         self.parser_generate.add_argument("-r", dest="resources", required=False)
         self.parser_generate.add_argument("--stage", dest="stage", required=True)
         self.parser_generate.add_argument(
@@ -42,26 +43,40 @@ class Main(App):
             default=0,
             required=False
         )
+
         self.parser_generate.add_argument(
-            "--radiover", dest="radioversion", required=False
+            "--radiotype", dest="radiotype", required=False
         )
 
         self.parser_generate.set_defaults(func=self.generate)
 
     def generate(self):
-        if self.args.radiobin and not self.args.radioaddr:
-            raise ValueError("Missing --radioaddr")
-
         stage_basename = basename(self.args.stage)
         dfu_basename = basename(self.args.dfu)
         radiobin_basename = basename(self.args.radiobin)
         resources_basename = ""
 
+        radio_version = 0
+        radio_meta = None
+        radio_addr = self.args.radioaddr
+        if self.args.radiobin:
+            if not self.args.radiotype:
+                raise ValueError("Missing --radiotype")
+            radio_meta = CoproBinary(self.args.radiobin)
+            radio_version = self.copro_version_as_int(radio_meta, self.args.radiotype)
+            if radio_addr == 0:
+                radio_addr = radio_meta.get_flash_load_addr()
+                self.logger.info(f"Radio flash address is NOT provided, using guessed 0x{radio_addr:X}")
+                self.logger.info(f"Verify it with Release_Notes.html!")
+
         if not exists(self.args.directory):
             os.makedirs(self.args.directory)
 
         shutil.copyfile(self.args.stage, join(self.args.directory, stage_basename))
-        shutil.copyfile(self.args.dfu, join(self.args.directory, dfu_basename))
+        if self.args.dfu:
+            shutil.copyfile(
+                self.args.dfu, join(self.args.directory, dfu_basename)
+            )
         if radiobin_basename:
             shutil.copyfile(
                 self.args.radiobin, join(self.args.directory, radiobin_basename)
@@ -72,9 +87,6 @@ class Main(App):
                 self.args.resources, join(self.args.directory, resources_basename)
             )
 
-        radioversion = 0
-        if self.args.radioversion:
-            radioversion =  self.version_str_to_int(self.args.radioversion)
 
         file = FlipperFormatFile()
         file.setHeader("Flipper firmware upgrade configuration", 1)
@@ -85,8 +97,8 @@ class Main(App):
         file.writeKey("Loader CRC", self.int2ffhex(self.crc(self.args.stage)))
         file.writeKey("Firmware", dfu_basename)
         file.writeKey("Radio", radiobin_basename or "")
-        file.writeKey("Radio address", self.int2ffhex(self.args.radioaddr or 0))
-        file.writeKey("Radio version", self.int2ffhex(radioversion))
+        file.writeKey("Radio address", self.int2ffhex(radio_addr))
+        file.writeKey("Radio version", self.int2ffhex(radio_version))
         if radiobin_basename:
             file.writeKey("Radio CRC", self.int2ffhex(self.crc(self.args.radiobin)))
         else:
@@ -104,8 +116,13 @@ class Main(App):
 
     #  Accepts version as: major.minor.sub.branch.release.type
     @staticmethod
-    def version_str_to_int(value: str):
-        major, minor, sub, branch, release, stype = list(map(int, value.split(".")))
+    def copro_version_as_int(coprometa, stacktype):
+        major = coprometa.img_sig.version_major
+        minor = coprometa.img_sig.version_minor
+        sub = coprometa.img_sig.version_sub
+        branch = coprometa.img_sig.version_branch
+        release = coprometa.img_sig.version_build
+        stype = get_stack_type(stacktype)
         return major | (minor << 8) | (sub << 16) | (branch << 24) | (release << 32) | (stype << 40)
 
     @staticmethod
