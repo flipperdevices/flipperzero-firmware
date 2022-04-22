@@ -106,7 +106,6 @@ LevelDuration subghz_file_encoder_worker_get_level_duration(void* context) {
             FURI_LOG_I(TAG, "Stop transmission");
             instance->worker_stoping = true;
         }
-        FURI_LOG_I(TAG, "%d, %d", level_duration.level, level_duration.duration);
         return level_duration;
     } else {
         FURI_LOG_E(TAG, "Slow flash read");
