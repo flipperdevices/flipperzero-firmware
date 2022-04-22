@@ -141,6 +141,7 @@ bool furi_hal_power_sleep_available() {
     return furi_hal_power.insomnia == 0;
 }
 
+#ifdef FURI_HAL_OS_DEBUG
 // Find out the IRQ number while debugging
 static void furi_hal_power_nvic_dbg_trap() {
     for(int32_t i = WWDG_IRQn; i <= DMAMUX1_OVR_IRQn; i++) {
@@ -163,6 +164,7 @@ static void furi_hal_power_exti_dbg_trap(uint32_t exti, uint32_t val) {
         }
     }
 }
+#endif
 
 bool furi_hal_power_deep_sleep_available() {
     if(FURI_HAL_POWER_NVIC_IS_PENDING()) {
