@@ -36,7 +36,6 @@ void furi_hal_rtc_init_early() {
     // LSE and RTC
     LL_PWR_EnableBkUpAccess();
     if(!RTC_CLOCK_IS_READY()) {
-        // Start LSI1 needed for CSS
         LL_RCC_LSI1_Enable();
         // Try to start LSE normal way
         LL_RCC_LSE_SetDriveCapability(LL_RCC_LSEDRIVE_HIGH);
@@ -55,8 +54,6 @@ void furi_hal_rtc_init_early() {
         }
         // Set RTC domain clock to LSE
         LL_RCC_SetRTCClockSource(LL_RCC_RTC_CLKSOURCE_LSE);
-        // Enable LSE CSS
-        LL_RCC_LSE_EnableCSS();
     }
     // Enable clocking
     LL_RCC_EnableRTC();

@@ -76,10 +76,6 @@ __attribute__((always_inline)) static inline void
 }
 
 void furi_hal_interrupt_init() {
-    NVIC_SetPriority(
-        TAMP_STAMP_LSECSS_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
-    NVIC_EnableIRQ(TAMP_STAMP_LSECSS_IRQn);
-
     NVIC_SetPriority(PendSV_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
 
     NVIC_SetPriority(FPU_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
@@ -209,28 +205,11 @@ void HSEM_IRQHandler() {
     furi_hal_interrupt_call(FuriHalInterruptIdHsem);
 }
 
-void TAMP_STAMP_LSECSS_IRQHandler() {
-    if(LL_RCC_IsActiveFlag_LSECSS()) {
-        LL_RCC_ClearFlag_LSECSS();
-        if(!LL_RCC_LSE_IsReady()) {
-            FURI_LOG_E(TAG, "LSE CSS fired: resetting system");
-            NVIC_SystemReset();
-        } else {
-            FURI_LOG_E(TAG, "LSE CSS fired: but LSE is alive");
-        }
-    }
-}
-
 void RCC_IRQHandler() {
     furi_hal_interrupt_call(FuriHalInterruptIdRcc);
 }
 
 void NMI_Handler() {
-    if(LL_RCC_IsActiveFlag_HSECSS()) {
-        LL_RCC_ClearFlag_HSECSS();
-        FURI_LOG_E(TAG, "HSE CSS fired: resetting system");
-        NVIC_SystemReset();
-    }
 }
 
 void HardFault_Handler() {
