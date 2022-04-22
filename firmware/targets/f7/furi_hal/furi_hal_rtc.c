@@ -74,6 +74,16 @@ void furi_hal_rtc_init_early() {
         data->version = FURI_HAL_RTC_HEADER_VERSION;
         furi_hal_rtc_set_register(FuriHalRtcRegisterHeader, data_reg);
     }
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        LL_DBGMCU_EnableDBGSleepMode();
+        LL_DBGMCU_EnableDBGStopMode();
+        LL_EXTI_EnableIT_32_63(LL_EXTI_LINE_48);
+    } else {
+        LL_DBGMCU_DisableDBGSleepMode();
+        LL_DBGMCU_DisableDBGStopMode();
+        LL_DBGMCU_DisableDBGStandbyMode();
+    }
 }
 
 void furi_hal_rtc_deinit_early() {
@@ -126,6 +136,12 @@ void furi_hal_rtc_set_flag(FuriHalRtcFlag flag) {
     DeveloperReg* data = (DeveloperReg*)&data_reg;
     data->flags |= flag;
     furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
+
+    if(flag & FuriHalRtcFlagDebug) {
+        LL_DBGMCU_EnableDBGSleepMode();
+        LL_DBGMCU_EnableDBGStopMode();
+        LL_EXTI_EnableIT_32_63(LL_EXTI_LINE_48);
+    }
 }
 
 void furi_hal_rtc_reset_flag(FuriHalRtcFlag flag) {
@@ -133,6 +149,12 @@ void furi_hal_rtc_reset_flag(FuriHalRtcFlag flag) {
     DeveloperReg* data = (DeveloperReg*)&data_reg;
     data->flags &= ~flag;
     furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
+
+    if(flag & FuriHalRtcFlagDebug) {
+        LL_DBGMCU_DisableDBGSleepMode();
+        LL_DBGMCU_DisableDBGStopMode();
+        LL_DBGMCU_DisableDBGStandbyMode();
+    }
 }
 
 bool furi_hal_rtc_is_flag_set(FuriHalRtcFlag flag) {
