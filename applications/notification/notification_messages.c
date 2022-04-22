@@ -276,6 +276,35 @@ const NotificationSequence sequence_set_blue_255 = {
     NULL,
 };
 
+const NotificationSequence sequence_set_yellow_255 = {
+    &message_red_255,
+    &message_green_255,
+    &message_do_not_reset,
+    NULL,
+};
+
+const NotificationSequence sequence_set_cyan_255 = {
+    &message_blue_255,
+    &message_green_255,
+    &message_do_not_reset,
+    NULL,
+};
+
+const NotificationSequence sequence_set_magenta_255 = {
+    &message_blue_255,
+    &message_red_255,
+    &message_do_not_reset,
+    NULL,
+};
+
+const NotificationSequence sequence_set_white_255 = {
+    &message_red_255,
+    &message_green_255,
+    &message_blue_255,
+    &message_do_not_reset,
+    NULL,
+};
+
 // Blink
 const NotificationSequence sequence_blink_blue_10 = {
     &message_blue_255,
