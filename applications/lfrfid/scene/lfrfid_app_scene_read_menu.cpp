@@ -1,9 +1,9 @@
 #include "lfrfid_app_scene_read_menu.h"
 
 typedef enum {
-    SubmenuWrite,
     SubmenuSave,
     SubmenuEmulate,
+    SubmenuWrite,
 } SubmenuIndex;
 
 void LfRfidAppSceneReadKeyMenu::on_enter(LfRfidApp* app, bool need_restore) {

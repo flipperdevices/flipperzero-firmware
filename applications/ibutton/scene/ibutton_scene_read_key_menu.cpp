@@ -2,9 +2,9 @@
 #include "../ibutton_app.h"
 
 typedef enum {
-    SubmenuIndexWrite,
-    SubmenuIndexEmulate,
     SubmenuIndexSave,
+    SubmenuIndexEmulate,
+    SubmenuIndexWrite,
 } SubmenuIndex;
 
 static void submenu_callback(void* context, uint32_t index) {
