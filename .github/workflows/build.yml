@@ -121,9 +121,11 @@ jobs:
 
       - name: 'Bundle core2 firmware'
         if: ${{ !github.event.pull_request.head.repo.fork }}
-        run: |
-          make -C assets copro_bundle
-          tar czpf artifacts/flipper-z-any-core2_firmware-${{steps.names.outputs.suffix}}.tgz -C aassets core2_firmware
+        uses: ./.github/actions/docker
+        with:
+          run: |
+            make -C assets copro_bundle
+            tar czpf artifacts/flipper-z-any-core2_firmware-${{steps.names.outputs.suffix}}.tgz -C assets core2_firmware
 
       - name: 'Upload artifacts to update server'
         if: ${{ !github.event.pull_request.head.repo.fork }}
