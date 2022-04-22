@@ -205,7 +205,9 @@ class Main(App):
         if os.path.exists(manifest_file):
             self.logger.info("Manifest is present, loading to compare")
             old_manifest.load(manifest_file)
-        self.logger.info(f'Creating temporary Manifest for directory "{directory_path}"')
+        self.logger.info(
+            f'Creating temporary Manifest for directory "{directory_path}"'
+        )
         new_manifest = Manifest()
         new_manifest.create(directory_path)
 

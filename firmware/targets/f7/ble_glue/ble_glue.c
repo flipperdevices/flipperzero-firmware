@@ -163,17 +163,17 @@ static void ble_glue_dump_stack_info() {
         c2_info->MemorySizeFlash);
 }
 
-bool ble_glue_wait_for_c2_start() {
+bool ble_glue_wait_for_c2_start(int32_t timeout) {
     bool started = false;
 
-    size_t countdown = 1000;
     do {
+        // TODO: use mutex?
         started = ble_glue->status == BleGlueStatusC2Started;
         if(!started) {
-            countdown--;
+            timeout--;
             osDelay(1);
         }
-    } while(!started && (countdown > 0));
+    } while(!started && (timeout > 0));
 
     if(started) {
         FURI_LOG_I(

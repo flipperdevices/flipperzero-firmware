@@ -132,7 +132,7 @@ bool furi_hal_bt_start_radio_stack() {
 
     do {
         // Wait until C2 is started or timeout
-        if(!ble_glue_wait_for_c2_start()) {
+        if(!ble_glue_wait_for_c2_start(FURI_HAL_BT_C2_START_TIMEOUT)) {
             FURI_LOG_E(TAG, "Core2 start failed");
             LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
             ble_glue_thread_stop();

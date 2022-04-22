@@ -1,11 +1,11 @@
 #include "crc32_calc.h"
-#include <furi_hal.h>
 #include <littlefs/lfs_util.h>
 
 #define CRC_DATA_BUFFER_MAX_LEN 512
 
 uint32_t crc32_calc_buffer(uint32_t crc, const void* buffer, size_t size) {
-    return ~lfs_crc(~crc, buffer, size); // TODO: consider breaking depencecy
+    // TODO: consider removing dependency on LFS
+    return ~lfs_crc(~crc, buffer, size);
 }
 
 uint32_t crc32_calc_file(File* file, const FileCrcProgressCb progress_cb, void* context) {
@@ -19,7 +19,6 @@ uint32_t crc32_calc_file(File* file, const FileCrcProgressCb progress_cb, void* 
     uint32_t file_size = storage_file_size(file);
 
     /* Feed file contents per sector into CRC calc */
-    //furi_hal_crc_acquire(osWaitForever);
     for(uint32_t fptr = 0; fptr < file_size;) {
         data_buffer_valid_len = storage_file_read(file, data_buffer, CRC_DATA_BUFFER_MAX_LEN);
         if(data_buffer_valid_len == 0) {
@@ -31,10 +30,8 @@ uint32_t crc32_calc_file(File* file, const FileCrcProgressCb progress_cb, void* 
             progress_cb(fptr * 100 / file_size, context);
         }
 
-        file_crc = crc32_calc_buffer(file_crc, data_buffer, data_buffer_valid_len); 
-        //file_crc = furi_hal_crc_feed(data_buffer, data_buffer_valid_len);
+        file_crc = crc32_calc_buffer(file_crc, data_buffer, data_buffer_valid_len);
     }
-    //furi_hal_crc_reset();
     free(data_buffer);
 
     return file_crc;

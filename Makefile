@@ -101,11 +101,8 @@ updater_package: firmware_all updater assets_manifest
 	-t $(TARGET) -p firmware updater \
 	-s $(DIST_SUFFIX) -r $(PROJECT_ROOT)/assets/resources \
 	--bundlever "$(VERSION_STRING)" \
-	--radio $(COPRO_DIR)/stm32wb5x_BLE_Stack_basic_fw.bin \
-	--radioaddr 0x080D1000 --radiover 1.13.0.0.5.5
-
-	#--radio $(COPRO_DIR)/stm32wb5x_BLE_Stack_light_fw.bin \
-	#--radioaddr 0x080D7000 --radiover 1.13.0.0.5.3
+	--radio $(COPRO_DIR)/stm32wb5x_BLE_Stack_light_fw.bin \
+	--radiotype ble_light
 
 .PHONY: assets_manifest
 assets_manifest:

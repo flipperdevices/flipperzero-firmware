@@ -30,7 +30,9 @@ class Main(App):
         self.parser_generate.add_argument("-d", dest="directory", required=True)
         self.parser_generate.add_argument("-v", dest="version", required=True)
         self.parser_generate.add_argument("-t", dest="target", required=True)
-        self.parser_generate.add_argument("--dfu", dest="dfu", default="", required=False)
+        self.parser_generate.add_argument(
+            "--dfu", dest="dfu", default="", required=False
+        )
         self.parser_generate.add_argument("-r", dest="resources", required=False)
         self.parser_generate.add_argument("--stage", dest="stage", required=True)
         self.parser_generate.add_argument(
@@ -39,9 +41,9 @@ class Main(App):
         self.parser_generate.add_argument(
             "--radioaddr",
             dest="radioaddr",
-            type=lambda x: int(x,16),
+            type=lambda x: int(x, 16),
             default=0,
-            required=False
+            required=False,
         )
 
         self.parser_generate.add_argument(
@@ -66,17 +68,17 @@ class Main(App):
             radio_version = self.copro_version_as_int(radio_meta, self.args.radiotype)
             if radio_addr == 0:
                 radio_addr = radio_meta.get_flash_load_addr()
-                self.logger.info(f"Radio flash address is NOT provided, using guessed 0x{radio_addr:X}")
-                self.logger.info(f"Verify it with Release_Notes.html!")
+                self.logger.info(
+                    f"Using guessed radio address 0x{radio_addr:X}, verify with Release_Notes"
+                    " or specify --radioaddr"
+                )
 
         if not exists(self.args.directory):
             os.makedirs(self.args.directory)
 
         shutil.copyfile(self.args.stage, join(self.args.directory, stage_basename))
         if self.args.dfu:
-            shutil.copyfile(
-                self.args.dfu, join(self.args.directory, dfu_basename)
-            )
+            shutil.copyfile(self.args.dfu, join(self.args.directory, dfu_basename))
         if radiobin_basename:
             shutil.copyfile(
                 self.args.radiobin, join(self.args.directory, radiobin_basename)
@@ -86,7 +88,6 @@ class Main(App):
             self.package_resources(
                 self.args.resources, join(self.args.directory, resources_basename)
             )
-
 
         file = FlipperFormatFile()
         file.setHeader("Flipper firmware upgrade configuration", 1)
@@ -123,11 +124,18 @@ class Main(App):
         branch = coprometa.img_sig.version_branch
         release = coprometa.img_sig.version_build
         stype = get_stack_type(stacktype)
-        return major | (minor << 8) | (sub << 16) | (branch << 24) | (release << 32) | (stype << 40)
+        return (
+            major
+            | (minor << 8)
+            | (sub << 16)
+            | (branch << 24)
+            | (release << 32)
+            | (stype << 40)
+        )
 
     @staticmethod
     def int2ffhex(value: int):
-        n_hex_bytes = math.ceil(math.ceil(math.log2(value)) / 8) * 2 # max(4, math.ceil(math.ceil(math.log2(value)) / 8) * 2)
+        n_hex_bytes = math.ceil(math.ceil(math.log2(value)) / 8) * 2
         fmtstr = f"%0{n_hex_bytes}X"
         hexstr = fmtstr % value
         return " ".join(list(Main.batch(hexstr, 2))[::-1])

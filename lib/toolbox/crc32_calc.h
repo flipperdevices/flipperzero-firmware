@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-uint32_t crc32_calc_buffer(uint32_t crc, const void *buffer, size_t size);
+uint32_t crc32_calc_buffer(uint32_t crc, const void* buffer, size_t size);
 
 typedef void (*FileCrcProgressCb)(const uint8_t progress, void* context);
 

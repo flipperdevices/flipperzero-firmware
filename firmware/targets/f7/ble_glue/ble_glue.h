@@ -67,13 +67,16 @@ bool ble_glue_start();
  */
 bool ble_glue_is_alive();
 
-bool ble_glue_wait_for_c2_start();
+
+/** Waits for C2 to reports its mode to callback
+ *
+ * @return     true if it reported before reaching timeout
+ */
+bool ble_glue_wait_for_c2_start(int32_t timeout);
 
 BleGlueStatus ble_glue_get_c2_status();
 
 const BleGlueC2Info* ble_glue_get_c2_info();
-
-//bool ble_glue_wait_for_c2_start(BlueGlueC2Info* info);
 
 /** Is core2 radio stack present and ready
  *

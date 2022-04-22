@@ -185,7 +185,7 @@ static bool update_task_remove_stack(UpdateTask* update_task) {
 static bool update_task_manage_radiostack(UpdateTask* update_task) {
     bool success = false;
     do {
-        CHECK_RESULT(ble_glue_wait_for_c2_start());
+        CHECK_RESULT(ble_glue_wait_for_c2_start(FURI_HAL_BT_C2_START_TIMEOUT));
 
         const BleGlueC2Info* c2_state = ble_glue_get_c2_info();
 
