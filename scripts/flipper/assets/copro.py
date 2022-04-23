@@ -6,7 +6,7 @@ from os.path import basename
 
 import xml.etree.ElementTree as ET
 from flipper.utils import *
-from flipper.assets.coprobin import CoproBinary, CoproException, get_stack_type
+from flipper.assets.coprobin import CoproBinary, get_stack_type
 
 
 CUBE_COPRO_PATH = "Projects/STM32WB_Copro_Wireless_Binaries"
@@ -69,6 +69,7 @@ class Copro:
         manifest = dict(MANIFEST_TEMPLATE)
         manifest["manifest"]["timestamp"] = timestamp()
         copro_bin = CoproBinary(stack_file)
+        self.logger.info(f"Bundling {copro_bin.img_sig.get_version()}")
         stack_type_code = get_stack_type(stack_type)
         manifest["copro"]["radio"]["version"].update(
             {
@@ -82,7 +83,7 @@ class Copro:
         )
         if not stack_addr:
             stack_addr = copro_bin.get_flash_load_addr()
-            print(f"Using guessed flash address 0x{stack_addr:x}")
+            self.logger.info(f"Using guessed flash address 0x{stack_addr:x}")
 
         # Old FUS Update
         self.addFile(
@@ -102,7 +103,7 @@ class Copro:
         self.addFile(
             manifest["copro"]["radio"]["files"],
             stack_file_name,
-            address=hex(stack_addr),
+            address=f"0x{stack_addr:X}",
         )
         # Save manifest to
         json.dump(manifest, open(manifest_file, "w"))

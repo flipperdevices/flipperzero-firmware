@@ -1,8 +1,7 @@
 PROJECT_ROOT := $(abspath $(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
 
 include			$(PROJECT_ROOT)/make/git.mk
-
-COPRO_DIR := $(PROJECT_ROOT)/lib/STM32CubeWB/Projects/STM32WB_Copro_Wireless_Binaries/STM32WB5x
+include			$(PROJECT_ROOT)/assets/copro.mk
 
 PROJECT_SOURCE_DIRECTORIES := \
 	$(PROJECT_ROOT)/applications \
@@ -101,8 +100,8 @@ updater_package: firmware_all updater assets_manifest
 	-t $(TARGET) -p firmware updater \
 	-s $(DIST_SUFFIX) -r $(PROJECT_ROOT)/assets/resources \
 	--bundlever "$(VERSION_STRING)" \
-	--radio $(COPRO_DIR)/stm32wb5x_BLE_Stack_light_fw.bin \
-	--radiotype ble_light
+	--radio $(COPRO_STACK_BIN_PATH) \
+	--radiotype $(COPRO_STACK_TYPE)
 
 .PHONY: assets_manifest
 assets_manifest:
@@ -114,7 +113,7 @@ assets_rebuild:
 
 .PHONY: flash_radio
 flash_radio:
-	@$(PROJECT_ROOT)/scripts/flash.py core2radio 0x080D7000 $(COPRO_DIR)/stm32wb5x_BLE_Stack_light_fw.bin
+	@$(PROJECT_ROOT)/scripts/flash.py core2radio $(COPRO_STACK_BIN_PATH) --addr=$(COPRO_STACK_ADDR)
 	@$(PROJECT_ROOT)/scripts/ob.py set
 
 .PHONY: flash_radio_fus
@@ -130,8 +129,8 @@ flash_radio_fus:
 
 .PHONY: flash_radio_fus_please_i_m_not_going_to_complain
 flash_radio_fus_please_i_m_not_going_to_complain:
-	@$(PROJECT_ROOT)/scripts/flash.py core2fus 0x080EC000 --statement=AGREE_TO_LOSE_FLIPPER_FEATURES_THAT_USE_CRYPTO_ENCLAVE $(COPRO_DIR)/stm32wb5x_FUS_fw_for_fus_0_5_3.bin
-	@$(PROJECT_ROOT)/scripts/flash.py core2fus 0x080EC000 --statement=AGREE_TO_LOSE_FLIPPER_FEATURES_THAT_USE_CRYPTO_ENCLAVE $(COPRO_DIR)/stm32wb5x_FUS_fw.bin
+	@$(PROJECT_ROOT)/scripts/flash.py core2fus 0x080EC000 --statement=AGREE_TO_LOSE_FLIPPER_FEATURES_THAT_USE_CRYPTO_ENCLAVE $(COPRO_FIRMWARE_DIR)/stm32wb5x_FUS_fw_for_fus_0_5_3.bin
+	@$(PROJECT_ROOT)/scripts/flash.py core2fus 0x080EC000 --statement=AGREE_TO_LOSE_FLIPPER_FEATURES_THAT_USE_CRYPTO_ENCLAVE $(COPRO_FIRMWARE_DIR)/stm32wb5x_FUS_fw.bin
 	@$(PROJECT_ROOT)/scripts/ob.py set
 
 .PHONY: lint
