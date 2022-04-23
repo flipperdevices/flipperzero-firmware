@@ -159,7 +159,9 @@ class Main(App):
         radio_address = self.args.radio_address
         if not radio_address:
             radio_address = stack_info.get_flash_load_addr()
-            self.logger.warning(f"Radio address not provided, guessed as 0x{radio_address:X}")
+            self.logger.warning(
+                f"Radio address not provided, guessed as 0x{radio_address:X}"
+            )
         if radio_address > 0x080E0000:
             self.logger.error(f"I KNOW WHAT YOU DID LAST SUMMER")
             return 1
