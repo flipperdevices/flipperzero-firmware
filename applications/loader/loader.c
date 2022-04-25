@@ -92,7 +92,7 @@ const FlipperApplication* loader_find_application_by_name(const char* name) {
         application = loader_find_application_by_name_in_list(
             name, FLIPPER_SYSTEM_APPS, FLIPPER_SYSTEM_APPS_COUNT);
     }
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && !application) {
+    if(!application) {
         application = loader_find_application_by_name_in_list(
             name, FLIPPER_DEBUG_APPS, FLIPPER_DEBUG_APPS_COUNT);
     }
@@ -239,26 +239,11 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
         event.type = LoaderEventTypeApplicationStarted;
         furi_pubsub_publish(loader_instance->pubsub, &event);
         furi_hal_power_insomnia_enter();
-
-        // Snapshot current memory usage
-        instance->free_heap_size = memmgr_get_free_heap();
     } else if(thread_state == FuriThreadStateStopped) {
-        /*
-         * Current Leak Sanitizer assumes that memory is allocated and freed
-         * inside one thread. Timers are allocated in one task, but freed in
-         * Timer-Task thread, and xTimerDelete() just put command to queue.
-         * To avoid some bad cases there are few fixes:
-         * 1) delay for Timer to process commands
-         * 2) there are 'heap diff' which shows difference in heap before task
-         * started and after task completed. In process of leakage monitoring
-         * both values should be taken into account.
-         */
-        furi_hal_delay_ms(20);
-        int heap_diff = instance->free_heap_size - memmgr_get_free_heap();
         FURI_LOG_I(
             TAG,
-            "Application thread stopped. Heap allocation balance: %d. Thread allocation balance: %d.",
-            heap_diff,
+            "Application thread stopped. Free heap: %d. Thread allocation balance: %d.",
+            memmgr_get_free_heap(),
             furi_thread_get_heap_size(instance->application_thread));
 
         if(loader_instance->application_arguments) {
@@ -455,17 +440,16 @@ void loader_update_menu() {
 }
 
 int32_t loader_srv(void* p) {
-    FURI_LOG_I(TAG, "Starting");
+    FURI_LOG_I(TAG, "Executing system start hooks");
+    for(size_t i = 0; i < FLIPPER_ON_SYSTEM_START_COUNT; i++) {
+        FLIPPER_ON_SYSTEM_START[i]();
+    }
 
+    FURI_LOG_I(TAG, "Starting");
     loader_instance = loader_alloc();
 
     loader_build_menu();
     loader_build_submenu();
-
-    // Call on start hooks
-    for(size_t i = 0; i < FLIPPER_ON_SYSTEM_START_COUNT; i++) {
-        FLIPPER_ON_SYSTEM_START[i]();
-    }
 
     FURI_LOG_I(TAG, "Started");
 
