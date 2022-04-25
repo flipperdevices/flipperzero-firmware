@@ -238,7 +238,7 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
     if(thread_state == FuriThreadStateRunning) {
         event.type = LoaderEventTypeApplicationStarted;
         furi_pubsub_publish(loader_instance->pubsub, &event);
-        // furi_hal_power_insomnia_enter();
+        furi_hal_power_insomnia_enter();
     } else if(thread_state == FuriThreadStateStopped) {
         FURI_LOG_I(
             TAG,
@@ -251,7 +251,7 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
             loader_instance->application_arguments = NULL;
         }
 
-        // furi_hal_power_insomnia_exit();
+        furi_hal_power_insomnia_exit();
         loader_unlock(instance);
 
         event.type = LoaderEventTypeApplicationStopped;

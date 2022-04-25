@@ -198,7 +198,7 @@ static void susp_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
         usb.connected = false;
         usb.if_cur->suspend(&udev);
 
-//         furi_hal_power_insomnia_exit();
+        //         furi_hal_power_insomnia_exit();
     }
     if(usb.callback != NULL) {
         usb.callback(FuriHalUsbStateEventSuspend, usb.cb_ctx);
@@ -210,7 +210,7 @@ static void wkup_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
         usb.connected = true;
         usb.if_cur->wakeup(&udev);
 
-//         furi_hal_power_insomnia_enter();
+        //         furi_hal_power_insomnia_enter();
     }
     if(usb.callback != NULL) {
         usb.callback(FuriHalUsbStateEventWakeup, usb.cb_ctx);

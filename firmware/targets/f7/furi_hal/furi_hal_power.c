@@ -143,7 +143,7 @@ static void furi_hal_power_nvic_dbg_trap() {
         if(NVIC_GetPendingIRQ(i)) {
             (void)i;
             // Break here
-            __NOP();
+            asm volatile("bkpt 0");
         }
     }
 }
@@ -155,7 +155,7 @@ static void furi_hal_power_exti_dbg_trap(uint32_t exti, uint32_t val) {
             (void)exti;
             (void)i;
             // Break here
-            __NOP();
+            asm volatile("bkpt 0");
         }
     }
 }
@@ -217,6 +217,7 @@ void furi_hal_power_deep_sleep() {
 
     // Prepare deep sleep
     LL_PWR_SetPowerMode(LL_PWR_MODE_STOP1);
+    uint32_t c2_lpms = LL_C2_PWR_GetPowerMode();
     LL_C2_PWR_SetPowerMode(LL_PWR_MODE_STOP1);
     LL_LPM_EnableDeepSleep();
 
@@ -226,6 +227,10 @@ void furi_hal_power_deep_sleep() {
 #endif
 
     __WFI();
+
+    LL_LPM_EnableSleep();
+
+    LL_C2_PWR_SetPowerMode(c2_lpms);
 
     /* Release ENTRY_STOP_MODE semaphore */
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID, 0);
