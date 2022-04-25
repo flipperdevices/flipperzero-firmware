@@ -67,6 +67,7 @@ void furi_hal_usb_init(void) {
     LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     usbd_init(&udev, &usbd_hw, USB_EP0_SIZE, ubuf, sizeof(ubuf));
+    usbd_enable(&udev, false);
 
     usbd_reg_descr(&udev, usb_descriptor_get);
     usbd_reg_event(&udev, usbd_evt_susp, susp_evt);
@@ -248,7 +249,6 @@ static int32_t furi_hal_usb_thread(void* context) {
                 usbd_reg_event(&udev, usbd_evt_reset, NULL);
                 FURI_LOG_I(TAG, "USB Reinit");
                 susp_evt(&udev, 0, 0);
-                usbd_connect(&udev, false);
                 usb.enabled = false;
 
                 usbd_enable(&udev, false);
@@ -262,23 +262,22 @@ static int32_t furi_hal_usb_thread(void* context) {
                 if(usb.if_cur != NULL) {
                     usb.if_cur->deinit(&udev);
                 }
+                usbd_enable(&udev, false);
+                usbd_enable(&udev, true);
                 if(if_new != NULL) {
-                    if(usb.if_cur != NULL) {
-                        // Previous interface was already configured
-                        if_new->init(&udev, if_new, if_ctx_new);
-                        usb.enabled = true;
-                    }
+                    if_new->init(&udev, if_new, if_ctx_new);
                     usbd_reg_event(&udev, usbd_evt_reset, reset_evt);
                     FURI_LOG_I(TAG, "USB Mode change done");
+                    usb.enabled = true;
                 }
                 usb.if_cur = if_new;
             }
             if(flags & EventEnable) {
                 if((!usb.enabled) && (usb.if_cur != NULL)) {
                     usbd_enable(&udev, true);
-                    FURI_LOG_D(TAG, "No delay");
-                    osDelay(USB_RECONNECT_DELAY);
-                    usb.if_cur->init(&udev, usb.if_cur, usb.if_ctx);
+                    if(usb.if_cur != NULL) {
+                        usb.if_cur->init(&udev, if_new, if_ctx_new);
+                    }
                     usb.enabled = true;
                     FURI_LOG_I(TAG, "USB Enable");
                 }
