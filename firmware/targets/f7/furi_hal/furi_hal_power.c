@@ -216,8 +216,9 @@ void furi_hal_power_deep_sleep() {
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 
     // Prepare deep sleep
-    LL_PWR_SetPowerMode(LL_PWR_MODE_STOP1);
+    uint32_t c1_lpms = LL_PWR_GetPowerMode();
     uint32_t c2_lpms = LL_C2_PWR_GetPowerMode();
+    LL_PWR_SetPowerMode(LL_PWR_MODE_STOP1);
     LL_C2_PWR_SetPowerMode(LL_PWR_MODE_STOP1);
     LL_LPM_EnableDeepSleep();
 
@@ -230,6 +231,7 @@ void furi_hal_power_deep_sleep() {
 
     LL_LPM_EnableSleep();
 
+    LL_PWR_SetPowerMode(c1_lpms);
     LL_C2_PWR_SetPowerMode(c2_lpms);
 
     /* Release ENTRY_STOP_MODE semaphore */
