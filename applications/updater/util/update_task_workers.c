@@ -287,6 +287,11 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
                     (device_ob_value & ~(manifest->ob_write_mask.words[idx])) |
                     /* take all writable bits from reference value */
                     (manifest->ob_reference.words[idx] & manifest->ob_write_mask.words[idx]);
+                if(patched_value != ref_value) {
+                    // Things are so bad that fixing what we are allowed to still doesn't match 
+                    // reference value. Should we still try to write such value?
+                    // TODO: ...
+                }
                 FURI_LOG_W(TAG, "Fixing up OB byte #%d to %X", ob_idx, patched_value);
                 furi_hal_flash_ob_set_word(ob_idx, patched_value);
                 // uncomment pls
@@ -385,7 +390,8 @@ static bool update_task_post_update(UpdateTask* update_task) {
     string_t file_path;
     string_init(file_path);
 
-    update_task->state.total_stages = 2;
+    // status text is too long, too few stages to bother with a counter
+    update_task->state.total_stages = 0;
 
     do {
         CHECK_RESULT(update_task_parse_manifest(update_task));
