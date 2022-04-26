@@ -20,11 +20,13 @@ static const char* update_task_stage_descr[] = {
     [UpdateTaskStageRadioWrite] = "Writing radio stack",
     [UpdateTaskStageRadioInstall] = "Installing radio stack",
     [UpdateTaskStageRadioBusy] = "Core2 is updating",
+    [UpdateTaskStageOBValidation] = "Validating opt. bytes",
     [UpdateTaskStageLfsBackup] = "Backing up LFS",
     [UpdateTaskStageLfsRestore] = "Restoring LFS",
     [UpdateTaskStageResourcesUpdate] = "Updating resources",
     [UpdateTaskStageCompleted] = "Completed!",
     [UpdateTaskStageError] = "Error",
+    [UpdateTaskStageOBError] = "OB error, pls report",
 };
 
 static void update_task_set_status(UpdateTask* update_task, const char* status) {
@@ -40,7 +42,10 @@ static void update_task_set_status(UpdateTask* update_task, const char* status) 
 
 void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, uint8_t progress) {
     if(stage != UpdateTaskStageProgress) {
-        update_task->state.stage = stage;
+        // do not override more specific error states
+        if((update_task->state.stage < UpdateTaskStageError) || (stage < UpdateTaskStageError)) {
+            update_task->state.stage = stage;
+        }
         update_task->state.current_stage_idx++;
         update_task_set_status(update_task, NULL);
     }
@@ -56,7 +61,7 @@ void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, ui
             progress,
             update_task->state.current_stage_idx,
             update_task->state.total_stages,
-            update_task->state.stage == UpdateTaskStageError,
+            update_task->state.stage >= UpdateTaskStageError,
             update_task->status_change_cb_state);
     }
 }

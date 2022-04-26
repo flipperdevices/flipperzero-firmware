@@ -6,7 +6,8 @@
 
 #include <stm32wbxx.h>
 
-#define FURI_HAL_TAG "FuriHalFlash"
+#define TAG "FuriHalFlash"
+
 #define FURI_HAL_CRITICAL_MSG "Critical flash operation fail"
 #define FURI_HAL_FLASH_READ_BLOCK 8
 #define FURI_HAL_FLASH_WRITE_BLOCK 8
@@ -14,12 +15,16 @@
 #define FURI_HAL_FLASH_CYCLES_COUNT 10000
 #define FURI_HAL_FLASH_TIMEOUT 1000
 #define FURI_HAL_FLASH_KEY1 0x45670123U
-
 #define FURI_HAL_FLASH_KEY2 0xCDEF89ABU
 #define FURI_HAL_FLASH_TOTAL_PAGES 256
 #define FURI_HAL_FLASH_SR_ERRORS                                                               \
     (FLASH_SR_OPERR | FLASH_SR_PROGERR | FLASH_SR_WRPERR | FLASH_SR_PGAERR | FLASH_SR_SIZERR | \
      FLASH_SR_PGSERR | FLASH_SR_MISERR | FLASH_SR_FASTERR | FLASH_SR_RDERR | FLASH_SR_OPTVERR)
+
+//#define FURI_HAL_FLASH_OB_START_ADDRESS 0x1FFF8000
+#define FURI_HAL_FLASH_OPT_KEY1 0x08192A3B
+#define FURI_HAL_FLASH_OPT_KEY2 0x4C5D6E7F
+#define FURI_HAL_FLASH_OB_TOTAL_WORDS (0x80 / (sizeof(uint32_t) * 2))
 
 #define IS_ADDR_ALIGNED_64BITS(__VALUE__) (((__VALUE__)&0x7U) == (0x00UL))
 #define IS_FLASH_PROGRAM_ADDRESS(__VALUE__)                                             \
@@ -88,7 +93,7 @@ static void furi_hal_flash_unlock() {
     WRITE_REG(FLASH->KEYR, FURI_HAL_FLASH_KEY1);
     WRITE_REG(FLASH->KEYR, FURI_HAL_FLASH_KEY2);
 
-    /* verify Flash is unlock */
+    /* verify Flash is unlocked */
     furi_check(READ_BIT(FLASH->CR, FLASH_CR_LOCK) == 0U);
 }
 
@@ -386,4 +391,59 @@ int16_t furi_hal_flash_get_page_number(size_t address) {
     }
 
     return (address - flash_base) / FURI_HAL_FLASH_PAGE_SIZE;
+}
+
+uint32_t furi_hal_flash_ob_get_word(size_t word_idx, bool complementary) {
+    furi_check(word_idx <= FURI_HAL_FLASH_OB_TOTAL_WORDS);
+    const uint32_t* ob_data = (const uint32_t*)(OPTION_BYTE_BASE);
+    size_t raw_word_idx = word_idx * 2;
+    if(complementary) {
+        raw_word_idx += 1;
+    }
+    return ob_data[raw_word_idx];
+}
+
+static void furi_hal_flash_unlock_optionbytes() {
+    furi_check(READ_BIT(FLASH->CR, FLASH_CR_OPTLOCK) != 0U);
+    furi_hal_flash_begin(true);
+    WRITE_REG(FLASH->OPTKEYR, FURI_HAL_FLASH_OPT_KEY1);
+    __ISB();
+    WRITE_REG(FLASH->OPTKEYR, FURI_HAL_FLASH_OPT_KEY2);
+    /* verify OB area is unlocked */
+    furi_check(READ_BIT(FLASH->CR, FLASH_CR_OPTLOCK) == 0U);
+}
+
+static void furi_hal_flash_lock_optionbytes() {
+    furi_check(READ_BIT(FLASH->CR, FLASH_CR_OPTLOCK) == 0U);
+    SET_BIT(FLASH->CR, FLASH_CR_OPTLOCK);
+    furi_hal_flash_end(true);
+    furi_check(READ_BIT(FLASH->CR, FLASH_CR_OPTLOCK) != 0U);
+}
+
+void furi_hal_flash_ob_set_word(size_t word_idx, const uint32_t value) {
+    /* 1. Clear OPTLOCK option lock bit with the clearing sequence */
+    furi_hal_flash_unlock_optionbytes();
+
+    /* 2. Write the desired options value in the options registers */
+    uint32_t* ob_data = (uint32_t*)(OTP_AREA_BASE);
+    size_t ob_value_offs = word_idx * 2;
+    size_t ob_value_compl_offs = ob_value_offs + 1;
+    FURI_LOG_W(TAG, "WRITING %X @ %X", value, &ob_data[ob_value_offs]);
+    //uncomment pls
+    //ob_data[ob_value_offs] = value;
+    FURI_LOG_W(TAG, "WRITING %X @ %X", ~value, &ob_data[ob_value_compl_offs]);
+    //ob_data[ob_value_compl_offs] = ~value;
+
+    /* 3. Check that no Flash memory operation is on going by checking the BSY && PESD */
+    furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT));
+    while(LL_FLASH_IsActiveFlag_OperationSuspended()) {
+        osThreadYield();
+    };
+
+    /* 4. Set the Options start bit OPTSTRT */
+    SET_BIT(FLASH->CR, FLASH_CR_OPTSTRT);
+
+    /* 5. Wait for the BSY bit to be cleared. */
+    furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT));
+    furi_hal_flash_lock_optionbytes();
 }

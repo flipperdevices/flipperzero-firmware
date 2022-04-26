@@ -101,3 +101,7 @@ bool furi_hal_flash_program_page(const uint8_t page, const uint8_t* data, uint16
  */
 
 int16_t furi_hal_flash_get_page_number(size_t address);
+
+uint32_t furi_hal_flash_ob_get_word(size_t word_idx, bool complementary);
+
+void furi_hal_flash_ob_set_word(size_t word_idx, const uint32_t value);

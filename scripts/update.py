@@ -2,7 +2,8 @@
 
 from flipper.app import App
 from flipper.utils.fff import FlipperFormatFile
-from flipper.assets.coprobin import CoproBinary, CoproException, get_stack_type
+from flipper.assets.coprobin import CoproBinary, get_stack_type
+from flipper.assets.obdata import OptionBytesData
 from os.path import basename, join, exists
 import os
 import shutil
@@ -48,6 +49,10 @@ class Main(App):
 
         self.parser_generate.add_argument(
             "--radiotype", dest="radiotype", required=False
+        )
+
+        self.parser_generate.add_argument(
+            "--obdata", dest="obdata", required=False
         )
 
         self.parser_generate.set_defaults(func=self.generate)
@@ -105,6 +110,13 @@ class Main(App):
         else:
             file.writeKey("Radio CRC", self.int2ffhex(0))
         file.writeKey("Resources", resources_basename)
+        file.writeComment("NEVER EVER MESS WITH THESE VALUES, YOU WILL BRICK YOUR DEVICE")
+        if self.args.obdata:
+            obd = OptionBytesData(self.args.obdata)
+            obvalues = obd.gen_values().export()
+            file.writeKey("OB reference", self.bytes2ffhex(obvalues.reference))
+            file.writeKey("OB mask", self.bytes2ffhex(obvalues.compare_mask))
+            file.writeKey("OB write mask", self.bytes2ffhex(obvalues.write_mask))
         file.save(join(self.args.directory, self.UPDATE_MANIFEST_NAME))
 
         return 0
@@ -132,6 +144,10 @@ class Main(App):
             | (release << 32)
             | (stype << 40)
         )
+
+    @staticmethod
+    def bytes2ffhex(value: bytes):
+        return " ".join(f"{b:02X}" for b in value)
 
     @staticmethod
     def int2ffhex(value: int):

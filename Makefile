@@ -101,7 +101,8 @@ updater_package: firmware_all updater assets_manifest
 	-s $(DIST_SUFFIX) -r $(PROJECT_ROOT)/assets/resources \
 	--bundlever "$(VERSION_STRING)" \
 	--radio $(COPRO_STACK_BIN_PATH) \
-	--radiotype $(COPRO_STACK_TYPE)
+	--radiotype $(COPRO_STACK_TYPE) \
+	--obdata $(PROJECT_ROOT)/scripts/ob.data
 
 .PHONY: assets_manifest
 assets_manifest:

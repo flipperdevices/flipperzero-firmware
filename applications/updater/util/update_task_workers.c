@@ -248,10 +248,65 @@ static bool update_task_manage_radiostack(UpdateTask* update_task) {
             }
         }
 
-        success = true;
+        //success = true;
     } while(false);
 
     return success;
+}
+
+bool update_task_validate_optionbytes(UpdateTask* update_task) {
+    bool match = true;
+    const UpdateManifest* manifest = update_task->manifest;
+    update_task_set_progress(update_task, UpdateTaskStageOBValidation, 0);
+    for(size_t idx = 0; idx < UPDATE_MANIFEST_OB_SIZE_WORDS; ++idx) {
+        bool complementary = idx % 2 != 0;
+        size_t ob_idx = idx / 2;
+        const uint32_t ref_value = manifest->ob_reference.words[idx];
+        const uint32_t device_ob_value = furi_hal_flash_ob_get_word(ob_idx, complementary);
+        const uint32_t device_ob_value_masked = device_ob_value &
+                                                manifest->ob_compare_mask.words[idx];
+        if(ref_value != device_ob_value_masked) {
+            match = false;
+            FURI_LOG_E(
+                TAG,
+                "OB MISMATCH: #%d(%d): real %X != %X (exp.), full %X, mask %X",
+                ob_idx,
+                idx,
+                device_ob_value_masked,
+                ref_value,
+                device_ob_value,
+                manifest->ob_compare_mask.words[idx]);
+
+            // any bits we are allowed to write?..
+            bool can_patch =
+                ((device_ob_value_masked ^ ref_value) & manifest->ob_write_mask.words[idx]) != 0;
+            if(can_patch && !complementary) {
+                // TODO: patch & restart loop
+                const uint32_t patched_value =
+                    /* take all non-writable bits from real value */
+                    (device_ob_value & ~(manifest->ob_write_mask.words[idx])) |
+                    /* take all writable bits from reference value */
+                    (manifest->ob_reference.words[idx] & manifest->ob_write_mask.words[idx]);
+                FURI_LOG_W(TAG, "Fixing up OB byte #%d to %X", ob_idx, patched_value);
+                furi_hal_flash_ob_set_word(ob_idx, patched_value);
+                // uncomment pls
+                //match = true;
+                //idx = 0;
+            }
+        } else {
+            FURI_LOG_I(
+                TAG,
+                "OB MATCH: #%d(%d): real %X == %X (exp.)",
+                ob_idx,
+                idx,
+                device_ob_value_masked,
+                ref_value);
+        }
+    }
+    if(!match) {
+        update_task_set_progress(update_task, UpdateTaskStageOBError, 95);
+    }
+    return match;
 }
 
 int32_t update_task_worker_flash_writer(void* context) {
@@ -269,19 +324,22 @@ int32_t update_task_worker_flash_writer(void* context) {
             CHECK_RESULT(update_task_manage_radiostack(update_task));
         }
 
+        bool check_ob = update_manifest_has_obdata(update_task->manifest);
+        if(check_ob) {
+            update_task->state.total_stages++;
+        }
+
         if(!string_empty_p(update_task->manifest->firmware_dfu_image)) {
-            update_task->state.total_stages = 4;
+            update_task->state.total_stages += 4;
             CHECK_RESULT(update_task_write_dfu(update_task));
         }
+
+        CHECK_RESULT(update_task_validate_optionbytes(update_task));
 
         update_task_set_progress(update_task, UpdateTaskStageCompleted, 100);
         furi_hal_rtc_set_boot_mode(FuriHalRtcBootModePostUpdate);
         success = true;
     } while(false);
-
-    if(!success) {
-        update_task_set_progress(update_task, UpdateTaskStageError, update_task->state.progress);
-    }
 
     return success ? UPDATE_TASK_NOERR : UPDATE_TASK_FAILED;
 }

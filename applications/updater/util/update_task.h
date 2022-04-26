@@ -24,11 +24,13 @@ typedef enum {
     UpdateTaskStageRadioWrite,
     UpdateTaskStageRadioInstall,
     UpdateTaskStageRadioBusy,
+    UpdateTaskStageOBValidation,
     UpdateTaskStageLfsBackup,
     UpdateTaskStageLfsRestore,
     UpdateTaskStageResourcesUpdate,
     UpdateTaskStageCompleted,
     UpdateTaskStageError,
+    UpdateTaskStageOBError
 } UpdateTaskStage;
 
 typedef struct {
