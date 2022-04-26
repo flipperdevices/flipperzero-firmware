@@ -150,7 +150,9 @@ class Main(App):
 
     @staticmethod
     def int2ffhex(value: int):
-        n_hex_bytes = math.ceil(math.ceil(math.log2(value)) / 8) * 2
+        n_hex_bytes = 4
+        if value:
+            n_hex_bytes = math.ceil(math.ceil(math.log2(value)) / 8) * 2
         fmtstr = f"%0{n_hex_bytes}X"
         hexstr = fmtstr % value
         return " ".join(list(Main.batch(hexstr, 2))[::-1])

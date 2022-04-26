@@ -124,6 +124,7 @@ UpdateTask* update_task_alloc() {
     update_task->storage = furi_record_open("storage");
     update_task->file = storage_file_alloc(update_task->storage);
     update_task->status_change_cb = NULL;
+    string_init(update_task->update_path);
 
     FuriThread* thread = update_task->thread = furi_thread_alloc();
 
@@ -158,12 +159,6 @@ void update_task_free(UpdateTask* update_task) {
     string_clear(update_task->update_path);
 
     free(update_task);
-}
-
-bool update_task_init(UpdateTask* update_task) {
-    furi_assert(update_task);
-    string_init(update_task->update_path);
-    return true;
 }
 
 bool update_task_parse_manifest(UpdateTask* update_task) {

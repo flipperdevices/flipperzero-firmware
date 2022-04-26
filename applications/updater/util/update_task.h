@@ -55,8 +55,6 @@ UpdateTask* update_task_alloc();
 
 void update_task_free(UpdateTask* update_task);
 
-bool update_task_init(UpdateTask* update_task);
-
 void update_task_set_progress_cb(UpdateTask* update_task, updateProgressCb cb, void* state);
 
 bool update_task_start(UpdateTask* update_task);
