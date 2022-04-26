@@ -78,7 +78,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "RpcSrv",
      .stack_size = 1024 * 4,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_BT
@@ -86,7 +86,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "BtSrv",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_CLI
@@ -94,7 +94,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "CliSrv",
      .stack_size = 4096,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_DIALOGS
@@ -102,7 +102,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "DialogsSrv",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_DOLPHIN
@@ -110,7 +110,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "DolphinSrv",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_DESKTOP
@@ -121,7 +121,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "DesktopSrv",
      .stack_size = 2048,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_GUI
@@ -129,7 +129,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "GuiSrv",
      .stack_size = 2048,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_INPUT
@@ -137,7 +137,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "InputSrv",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_LOADER
@@ -145,7 +145,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "LoaderSrv",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_NOTIFICATION
@@ -153,7 +153,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "NotificationSrv",
      .stack_size = 1536,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_POWER
@@ -161,7 +161,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "PowerSrv",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_STORAGE
@@ -169,7 +169,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "StorageSrv",
      .stack_size = 3072,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_UPDATER
@@ -180,7 +180,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "UpdaterSrv",
      .stack_size = 2048,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 };
 
@@ -195,7 +195,7 @@ const FlipperApplication FLIPPER_SYSTEM_APPS[] = {
      .name = "UpdaterApp",
      .stack_size = 2048,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 };
 
@@ -209,7 +209,7 @@ const FlipperApplication FLIPPER_APPS[] = {
      .name = "Sub-GHz",
      .stack_size = 2048,
      .icon = &A_Sub1ghz_14,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_LF_RFID
@@ -217,7 +217,7 @@ const FlipperApplication FLIPPER_APPS[] = {
      .name = "125 kHz RFID",
      .stack_size = 2048,
      .icon = &A_125khz_14,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_NFC
@@ -225,7 +225,7 @@ const FlipperApplication FLIPPER_APPS[] = {
      .name = "NFC",
      .stack_size = 4096,
      .icon = &A_NFC_14,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_INFRARED
@@ -233,7 +233,7 @@ const FlipperApplication FLIPPER_APPS[] = {
      .name = "Infrared",
      .stack_size = 1024 * 3,
      .icon = &A_Infrared_14,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_GPIO
@@ -241,7 +241,7 @@ const FlipperApplication FLIPPER_APPS[] = {
      .name = "GPIO",
      .stack_size = 1024,
      .icon = &A_GPIO_14,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_IBUTTON
@@ -249,7 +249,7 @@ const FlipperApplication FLIPPER_APPS[] = {
      .name = "iButton",
      .stack_size = 2048,
      .icon = &A_iButton_14,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_BAD_USB
@@ -257,7 +257,7 @@ const FlipperApplication FLIPPER_APPS[] = {
      .name = "Bad USB",
      .stack_size = 2048,
      .icon = &A_BadUsb_14,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_U2F
@@ -265,7 +265,7 @@ const FlipperApplication FLIPPER_APPS[] = {
      .name = "U2F",
      .stack_size = 2048,
      .icon = &A_U2F_14,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 };
@@ -326,7 +326,7 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
      .name = "Bluetooth Remote",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_MUSIC_PLAYER
@@ -334,7 +334,7 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
      .name = "Music Player",
      .stack_size = 1024,
      .icon = &A_Plugins_14,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_SNAKE_GAME
@@ -342,7 +342,7 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
      .name = "Snake Game",
      .stack_size = 1024,
      .icon = &A_Plugins_14,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 };
 
@@ -355,7 +355,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Blink Test",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_VIBRO_TEST
@@ -363,7 +363,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Vibro Test",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_KEYPAD_TEST
@@ -371,7 +371,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Keypad Test",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_ACCESSOR
@@ -379,7 +379,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Accessor",
      .stack_size = 4096,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_USB_TEST
@@ -387,7 +387,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "USB Test",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_USB_MOUSE
@@ -395,7 +395,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "USB Mouse Demo",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_UART_ECHO
@@ -403,7 +403,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Uart Echo",
      .stack_size = 2048,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_INFRARED_MONITOR
@@ -411,7 +411,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Infrared Monitor",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_SCENED
@@ -419,7 +419,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Templated Scene",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_LF_RFID
@@ -427,7 +427,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "LF-RFID Debug",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_BT
@@ -435,7 +435,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Bluetooth Debug",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_UNIT_TESTS
@@ -443,7 +443,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Delay Test",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_DISPLAY_TEST
@@ -451,7 +451,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Display Test",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_BATTERY_TEST
@@ -459,7 +459,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Battery Test",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_TEXT_BOX_TEST
@@ -467,7 +467,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Text Box Test",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 };
 
@@ -479,7 +479,7 @@ const FlipperApplication FLIPPER_ARCHIVE = {
     .name = "Archive",
     .stack_size = 4096,
     .icon = &A_FileManager_14,
-    .flags = FlipperApplicationFlagDeafult};
+    .flags = FlipperApplicationFlagDefault};
 #endif
 
 // Settings menu
@@ -489,7 +489,7 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
      .name = "Bluetooth",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_NOTIFICATION
@@ -497,7 +497,7 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
      .name = "LCD and Notifications",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_STORAGE
@@ -505,7 +505,7 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
      .name = "Storage",
      .stack_size = 2048,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_POWER
@@ -521,7 +521,7 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
      .name = "Desktop",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_PASSPORT
@@ -529,7 +529,7 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
      .name = "Passport",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_GUI
@@ -537,7 +537,7 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
      .name = "System",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_ABOUT
@@ -545,7 +545,7 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
      .name = "About",
      .stack_size = 1024,
      .icon = NULL,
-     .flags = FlipperApplicationFlagDeafult},
+     .flags = FlipperApplicationFlagDefault},
 #endif
 };
 

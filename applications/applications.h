@@ -4,7 +4,7 @@
 #include <gui/icon.h>
 
 typedef enum {
-    FlipperApplicationFlagDeafult = 0,
+    FlipperApplicationFlagDefault = 0,
     FlipperApplicationFlagInsomniaSafe = (1 << 0),
 } FlipperApplicationFlag;
 
