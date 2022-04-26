@@ -51,9 +51,7 @@ class Main(App):
             "--radiotype", dest="radiotype", required=False
         )
 
-        self.parser_generate.add_argument(
-            "--obdata", dest="obdata", required=False
-        )
+        self.parser_generate.add_argument("--obdata", dest="obdata", required=False)
 
         self.parser_generate.set_defaults(func=self.generate)
 
@@ -110,7 +108,9 @@ class Main(App):
         else:
             file.writeKey("Radio CRC", self.int2ffhex(0))
         file.writeKey("Resources", resources_basename)
-        file.writeComment("NEVER EVER MESS WITH THESE VALUES, YOU WILL BRICK YOUR DEVICE")
+        file.writeComment(
+            "NEVER EVER MESS WITH THESE VALUES, YOU WILL BRICK YOUR DEVICE"
+        )
         if self.args.obdata:
             obd = OptionBytesData(self.args.obdata)
             obvalues = obd.gen_values().export()
@@ -127,7 +127,6 @@ class Main(App):
         ) as tarball:
             tarball.add(srcdir, arcname="")
 
-    #  Accepts version as: major.minor.sub.branch.release.type
     @staticmethod
     def copro_version_as_int(coprometa, stacktype):
         major = coprometa.img_sig.version_major
