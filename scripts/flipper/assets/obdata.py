@@ -175,7 +175,9 @@ class OptionBytesData:
     def __init__(self, obfname):
         self.obs = list()
         with open(obfname, "rt") as obfin:
-            self.obs = list(OptionByte(line) for line in obfin)
+            self.obs = list(
+                OptionByte(line) for line in obfin if not line.startswith("#")
+            )
 
     def gen_values(self):
         obref = ObReferenceValuesGenerator()
