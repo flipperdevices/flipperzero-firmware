@@ -288,7 +288,7 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
                     /* take all writable bits from reference value */
                     (manifest->ob_reference.words[idx] & manifest->ob_write_mask.words[idx]);
                 if(patched_value != ref_value) {
-                    // Things are so bad that fixing what we are allowed to still doesn't match 
+                    // Things are so bad that fixing what we are allowed to still doesn't match
                     // reference value. Should we still try to write such value?
                     // TODO: ...
                 }

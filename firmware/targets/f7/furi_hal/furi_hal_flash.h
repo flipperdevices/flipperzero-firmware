@@ -64,7 +64,7 @@ size_t furi_hal_flash_get_free_page_count();
 
 /** Erase Flash
  *
- * @warning    locking operation with critical section, stales execution
+ * @warning    locking operation with critical section, stalls execution
  *
  * @param      page  The page to erase
  *
@@ -74,7 +74,7 @@ bool furi_hal_flash_erase(uint8_t page);
 
 /** Write double word (64 bits)
  *
- * @warning locking operation with critical section, stales execution
+ * @warning locking operation with critical section, stalls execution
  *
  * @param      address  destination address, must be double word aligned.
  * @param      data     data to write
@@ -85,7 +85,7 @@ bool furi_hal_flash_write_dword(size_t address, uint64_t data);
 
 /** Write aligned page data (up to page size)
  *
- * @warning locking operation with critical section, stales execution
+ * @warning locking operation with critical section, stalls execution
  *
  * @param      address  destination address, must be page aligned.
  * @param      data     data to write
@@ -99,9 +99,22 @@ bool furi_hal_flash_program_page(const uint8_t page, const uint8_t* data, uint16
  *
  * @return     page number, -1 for invalid address
  */
-
 int16_t furi_hal_flash_get_page_number(size_t address);
 
+/** Reads value of OB word by its index, not counting complementary values
+ *
+ * @param      word_idx  OB word number
+ * @param      complementary     flag: true - fetch complementary (inverted) value of OB word
+ *
+ * @return     OB word value
+ */
 uint32_t furi_hal_flash_ob_get_word(size_t word_idx, bool complementary);
 
+/** Writes whole OB word (and its complementary word) values
+ *
+ * @warning locking operation with critical section, stalls execution
+ *
+ * @param      word_idx  OB word number
+ * @param      value    data to write
+ */
 void furi_hal_flash_ob_set_word(size_t word_idx, const uint32_t value);
