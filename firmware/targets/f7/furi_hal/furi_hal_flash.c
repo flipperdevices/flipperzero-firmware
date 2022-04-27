@@ -464,7 +464,12 @@ static const FuriHalFlashObMapping furi_hal_flash_ob_reg_map[FURI_HAL_FLASH_OB_T
 };
 
 void furi_hal_flash_ob_apply() {
+    furi_hal_flash_ob_unlock();
+    /* OBL_LAUNCH: When set to 1, this bit forces the option byte reloading. 
+     * It cannot be written if OPTLOCK is set */
     SET_BIT(FLASH->CR, FLASH_CR_OBL_LAUNCH);
+    furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT));
+    furi_hal_flash_ob_lock();
 }
 
 bool furi_hal_flash_ob_set_word(size_t word_idx, const uint32_t value) {
@@ -506,5 +511,5 @@ bool furi_hal_flash_ob_set_word(size_t word_idx, const uint32_t value) {
 }
 
 const FuriHalFlashRawOptionByteData* furi_hal_flash_ob_get_raw_ptr() {
-    return (const void*)OPTION_BYTE_BASE;
+    return (const FuriHalFlashRawOptionByteData*)OPTION_BYTE_BASE;
 }
