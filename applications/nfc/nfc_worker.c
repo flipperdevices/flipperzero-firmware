@@ -538,6 +538,7 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
                 FURI_LOG_W(TAG, "Bad DESFire GET_KEY_SETTINGS response");
                 free(data->master_key_settings);
                 data->master_key_settings = NULL;
+                continue;
             }
 
             MifareDesfireKeyVersion** key_version_head =
@@ -591,6 +592,7 @@ void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {
                     FURI_LOG_W(TAG, "Bad DESFire GET_KEY_SETTINGS response");
                     free(app->key_settings);
                     app->key_settings = NULL;
+                    continue;
                 }
 
                 MifareDesfireKeyVersion** key_version_head = &app->key_settings->key_version_head;

@@ -121,11 +121,11 @@ jobs:
 
       - name: 'Bundle core2 firmware'
         if: ${{ !github.event.pull_request.head.repo.fork }}
-        run: |
-          test -d core2_firmware && rm -rf core2_firmware || true
-          mkdir core2_firmware
-          ./scripts/assets.py copro lib/STM32CubeWB core2_firmware STM32WB5x
-          tar czpf artifacts/flipper-z-any-core2_firmware-${{steps.names.outputs.suffix}}.tgz core2_firmware
+        uses: ./.github/actions/docker
+        with:
+          run: |
+            make -C assets copro_bundle
+            tar czpf artifacts/flipper-z-any-core2_firmware-${{steps.names.outputs.suffix}}.tgz -C assets core2_firmware
 
       - name: 'Upload artifacts to update server'
         if: ${{ !github.event.pull_request.head.repo.fork }}
@@ -161,7 +161,7 @@ jobs:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            [Click here](https://update.flipperzero.one/?url=https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.artifacts-path}}/flipper-z-${{steps.names.outputs.default-target}}-full-${{steps.names.outputs.suffix}}.dfu&channel=${{steps.names.outputs.artifacts-path}}&version=${{steps.names.outputs.short-hash}}&target=${{steps.names.outputs.default-target}}) to flash the `${{steps.names.outputs.short-hash}}` version of this branch via WebUSB.
+            [Click here](https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.artifacts-path}}/flipper-z-${{steps.names.outputs.default-target}}-full-${{steps.names.outputs.suffix}}.dfu) for the DFU file to flash the `${{steps.names.outputs.short-hash}}` version of this branch with the [`Install from file` option in qFlipper](https://docs.flipperzero.one/basics/firmware-update).
           edit-mode: replace
 
   compact:
@@ -213,8 +213,8 @@ jobs:
         with:
           run: |
             set -e
-            make -C assets clean
-            make -C assets
+            make assets_rebuild assets_manifest
+            git diff --quiet || ( echo "Assets recompilation required."; exit 255 )
 
       - name: 'Build the firmware in docker'
         uses: ./.github/actions/docker
