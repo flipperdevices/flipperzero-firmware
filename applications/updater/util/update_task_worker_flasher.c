@@ -345,6 +345,7 @@ int32_t update_task_worker_flash_writer(void* context) {
         bool check_ob = update_manifest_has_obdata(update_task->manifest);
         if(check_ob) {
             update_task->state.total_stages++;
+            CHECK_RESULT(update_task_validate_optionbytes(update_task));
         }
 
         if(!string_empty_p(update_task->manifest->firmware_dfu_image)) {
@@ -354,7 +355,6 @@ int32_t update_task_worker_flash_writer(void* context) {
 
         furi_hal_rtc_set_boot_mode(FuriHalRtcBootModePostUpdate);
 
-        CHECK_RESULT(update_task_validate_optionbytes(update_task));
         update_task_set_progress(update_task, UpdateTaskStageCompleted, 100);
         success = true;
     } while(false);
