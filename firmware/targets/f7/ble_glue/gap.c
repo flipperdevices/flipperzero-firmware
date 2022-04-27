@@ -412,7 +412,9 @@ static void gap_advertise_start(GapState new_state) {
         // Stop advertising
         status = aci_gap_set_non_discoverable();
         if(status) {
-            FURI_LOG_E(TAG, "Stop Advertising Failed, result: %d", status);
+            FURI_LOG_E(TAG, "set_non_discoverable failed %d", status);
+        } else {
+            FURI_LOG_D(TAG, "set_non_discoverable success");
         }
     }
     // Configure advertising
@@ -429,7 +431,7 @@ static void gap_advertise_start(GapState new_state) {
         0,
         0);
     if(status) {
-        FURI_LOG_E(TAG, "Set discoverable err: %d", status);
+        FURI_LOG_E(TAG, "set_discoverable failed %d", status);
     }
     gap->state = new_state;
     GapEvent event = {.type = GapEventTypeStartAdvertising};
@@ -438,14 +440,25 @@ static void gap_advertise_start(GapState new_state) {
 }
 
 static void gap_advertise_stop() {
+    tBleStatus ret;
     if(gap->state > GapStateIdle) {
         if(gap->state == GapStateConnected) {
             // Terminate connection
-            aci_gap_terminate(gap->service.connection_handle, 0x13);
+            ret = aci_gap_terminate(gap->service.connection_handle, 0x13);
+            if(ret != BLE_STATUS_SUCCESS) {
+                FURI_LOG_E(TAG, "terminate failed %d", ret);
+            } else {
+                FURI_LOG_D(TAG, "terminate success");
+            }
         }
         // Stop advertising
         osTimerStop(gap->advertise_timer);
-        aci_gap_set_non_discoverable();
+        ret = aci_gap_set_non_discoverable();
+        if(ret != BLE_STATUS_SUCCESS) {
+            FURI_LOG_E(TAG, "set_non_discoverable failed %d", ret);
+        } else {
+            FURI_LOG_D(TAG, "set_non_discoverable success");
+        }
         gap->state = GapStateIdle;
     }
     GapEvent event = {.type = GapEventTypeStopAdvertising};

@@ -64,7 +64,9 @@ void ble_glue_init() {
     /* Initialize the CPU2 reset value before starting CPU2 with C2BOOT */
     LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
 
-    // APPD_Init();
+#ifdef BLE_GLUE_DEBUG
+    APPD_Init();
+#endif
 
     // Initialize all transport layers
     TL_MM_Config_t tl_mm_config;
@@ -290,8 +292,10 @@ static void ble_glue_sys_status_not_callback(SHCI_TL_CmdStatus_t status) {
  */
 static void ble_glue_sys_user_event_callback(void* pPayload) {
     UNUSED(pPayload);
-    /* Traces channel initialization */
-    // APPD_EnableCPU2( );
+
+#ifdef BLE_GLUE_DEBUG
+    APPD_EnableCPU2();
+#endif
 
     TL_AsynchEvt_t* p_sys_event =
         (TL_AsynchEvt_t*)(((tSHCI_UserEvtRxParam*)pPayload)->pckt->evtserial.evt.payload);

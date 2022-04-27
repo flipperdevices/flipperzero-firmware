@@ -128,6 +128,10 @@ ifeq ($(INVERT_RFID_IN), 1)
 CFLAGS += -DINVERT_RFID_IN
 endif
 
+ifeq ($(BLE_GLUE_DEBUG), 1)
+CFLAGS += -DBLE_GLUE_DEBUG
+endif
+
 FURI_HAL_DIR = $(TARGET_DIR)/furi_hal
 CFLAGS += -I$(FURI_HAL_DIR)
 C_SOURCES += $(wildcard $(FURI_HAL_DIR)/*.c)
