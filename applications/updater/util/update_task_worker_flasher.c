@@ -259,6 +259,8 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
     const UpdateManifest* manifest = update_task->manifest;
     const FuriHalFlashRawOptionByteData* device_data = furi_hal_flash_ob_get_raw_ptr();
     for(int32_t idx = 0; idx < (int32_t)FURI_HAL_FLASH_OB_TOTAL_VALUES; ++idx) {
+        update_task_set_progress(
+            update_task, UpdateTaskStageProgress, FURI_HAL_FLASH_OB_TOTAL_VALUES * 100 / idx);
         const uint32_t ref_value = manifest->ob_reference.obs[idx].values.base;
         const uint32_t device_ob_value = device_data->obs[idx].values.base;
         const uint32_t device_ob_value_masked = device_ob_value &
@@ -350,10 +352,10 @@ int32_t update_task_worker_flash_writer(void* context) {
             CHECK_RESULT(update_task_write_dfu(update_task));
         }
 
-        CHECK_RESULT(update_task_validate_optionbytes(update_task));
-
-        update_task_set_progress(update_task, UpdateTaskStageCompleted, 100);
         furi_hal_rtc_set_boot_mode(FuriHalRtcBootModePostUpdate);
+
+        CHECK_RESULT(update_task_validate_optionbytes(update_task));
+        update_task_set_progress(update_task, UpdateTaskStageCompleted, 100);
         success = true;
     } while(false);
 
