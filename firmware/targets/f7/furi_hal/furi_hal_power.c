@@ -302,6 +302,8 @@ bool furi_hal_power_is_charging() {
 }
 
 void furi_hal_power_shutdown() {
+    furi_hal_power_insomnia_enter();
+
     furi_hal_bt_reinit();
 
     while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
