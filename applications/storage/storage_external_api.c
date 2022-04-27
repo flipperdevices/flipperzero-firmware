@@ -47,10 +47,6 @@
 #define S_RETURN_ERROR (return_data.error_value);
 #define S_RETURN_CSTRING (return_data.cstring_value);
 
-#define FILE_OPENED_FILE 1
-#define FILE_OPENED_DIR 2
-#define FILE_CLOSED 0
-
 typedef enum {
     StorageEventFlagFileClose = (1 << 0),
 } StorageEventFlag;
@@ -72,7 +68,7 @@ static bool storage_file_open_internal(
             .open_mode = open_mode,
         }};
 
-    file->file_id = FILE_OPENED_FILE;
+    file->type = FileTypeOpenFile;
 
     S_API_MESSAGE(StorageCommandFileOpen);
     S_API_EPILOGUE;
@@ -124,7 +120,7 @@ bool storage_file_close(File* file) {
     S_API_MESSAGE(StorageCommandFileClose);
     S_API_EPILOGUE;
 
-    file->file_id = FILE_CLOSED;
+    file->type = FileTypeClosed;
 
     return S_RETURN_BOOL;
 }
@@ -234,7 +230,7 @@ static bool storage_dir_open_internal(File* file, const char* path) {
             .path = path,
         }};
 
-    file->file_id = FILE_OPENED_DIR;
+    file->type = FileTypeOpenDir;
 
     S_API_MESSAGE(StorageCommandDirOpen);
     S_API_EPILOGUE;
@@ -269,7 +265,7 @@ bool storage_dir_close(File* file) {
     S_API_MESSAGE(StorageCommandDirClose);
     S_API_EPILOGUE;
 
-    file->file_id = FILE_CLOSED;
+    file->type = FileTypeClosed;
 
     return S_RETURN_BOOL;
 }
@@ -448,18 +444,18 @@ FS_Error storage_sd_status(Storage* storage) {
 
 File* storage_file_alloc(Storage* storage) {
     File* file = malloc(sizeof(File));
-    file->file_id = FILE_CLOSED;
+    file->type = FileTypeClosed;
     file->storage = storage;
 
     return file;
 }
 
 bool storage_file_is_open(File* file) {
-    return (file->file_id != FILE_CLOSED);
+    return (file->type != FileTypeClosed);
 }
 
 bool storage_file_is_dir(File* file) {
-    return (file->file_id == FILE_OPENED_DIR);
+    return (file->type == FileTypeOpenDir);
 }
 
 void storage_file_free(File* file) {
