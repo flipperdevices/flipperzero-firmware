@@ -258,9 +258,9 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
     bool ob_dirty = false;
     const UpdateManifest* manifest = update_task->manifest;
     const FuriHalFlashRawOptionByteData* device_data = furi_hal_flash_ob_get_raw_ptr();
-    for(int32_t idx = 0; idx < (int32_t)FURI_HAL_FLASH_OB_TOTAL_VALUES; ++idx) {
+    for(size_t idx = 0; idx < FURI_HAL_FLASH_OB_TOTAL_VALUES; ++idx) {
         update_task_set_progress(
-            update_task, UpdateTaskStageProgress, FURI_HAL_FLASH_OB_TOTAL_VALUES * 100 / idx);
+            update_task, UpdateTaskStageProgress, idx * 100 / FURI_HAL_FLASH_OB_TOTAL_VALUES);
         const uint32_t ref_value = manifest->ob_reference.obs[idx].values.base;
         const uint32_t device_ob_value = device_data->obs[idx].values.base;
         const uint32_t device_ob_value_masked = device_ob_value &
