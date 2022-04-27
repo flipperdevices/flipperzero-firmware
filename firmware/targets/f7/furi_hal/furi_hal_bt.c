@@ -235,11 +235,14 @@ bool furi_hal_bt_change_app(FuriHalBtProfile profile, GapEventCallback event_cb,
     gap_thread_stop();
 
     FURI_LOG_I(TAG, "Reset SHCI");
-    ble_glue_reinit_c2();
+    furi_check(ble_glue_reinit_c2());
+
     osDelay(100);
     ble_glue_thread_stop();
+
     FURI_LOG_I(TAG, "Start BT initialization");
     furi_hal_bt_init();
+
     furi_hal_bt_start_radio_stack();
     ret = furi_hal_bt_start_app(profile, event_cb, context);
     if(ret) {
