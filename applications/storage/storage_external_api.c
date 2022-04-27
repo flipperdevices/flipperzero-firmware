@@ -7,6 +7,8 @@
 
 #define MAX_NAME_LENGTH 256
 
+#define TAG "StorageAPI"
+
 #define S_API_PROLOGUE                                      \
     osSemaphoreId_t semaphore = osSemaphoreNew(1, 0, NULL); \
     furi_check(semaphore != NULL);
@@ -109,6 +111,9 @@ bool storage_file_open(
 
     furi_pubsub_unsubscribe(storage_get_pubsub(file->storage), subscription);
     osEventFlagsDelete(event);
+
+    FURI_LOG_D(TAG, "File %p[%u] open", file, file->file_id);
+
     return result;
 }
 
@@ -120,6 +125,7 @@ bool storage_file_close(File* file) {
     S_API_MESSAGE(StorageCommandFileClose);
     S_API_EPILOGUE;
 
+    FURI_LOG_D(TAG, "File %p[%u] closed", file, file->file_id);
     file->type = FileTypeClosed;
 
     return S_RETURN_BOOL;
@@ -255,6 +261,9 @@ bool storage_dir_open(File* file, const char* path) {
 
     furi_pubsub_unsubscribe(storage_get_pubsub(file->storage), subscription);
     osEventFlagsDelete(event);
+
+    FURI_LOG_D(TAG, "Dir %p[%u] open", file, file->file_id);
+
     return result;
 }
 
@@ -264,6 +273,8 @@ bool storage_dir_close(File* file) {
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandDirClose);
     S_API_EPILOGUE;
+
+    FURI_LOG_D(TAG, "Dir %p[%u] closed", file, file->file_id);
 
     file->type = FileTypeClosed;
 
@@ -447,6 +458,8 @@ File* storage_file_alloc(Storage* storage) {
     file->type = FileTypeClosed;
     file->storage = storage;
 
+    FURI_LOG_D(TAG, "File/Dir %p alloc", file);
+
     return file;
 }
 
@@ -467,6 +480,7 @@ void storage_file_free(File* file) {
         }
     }
 
+    FURI_LOG_D(TAG, "File/Dir %p free", file);
     free(file);
 }
 
