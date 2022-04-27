@@ -254,7 +254,6 @@ static bool update_task_manage_radiostack(UpdateTask* update_task) {
     return success;
 }
 
-
 bool update_task_validate_optionbytes(UpdateTask* update_task) {
     update_task_set_progress(update_task, UpdateTaskStageOBValidation, 0);
 
@@ -262,7 +261,7 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
     bool ob_dirty = false;
     const UpdateManifest* manifest = update_task->manifest;
     const FuriHalFlashRawOptionByteData* device_data = furi_hal_flash_ob_get_raw_ptr();
-    for(size_t idx = 0; idx < FURI_HAL_FLASH_OB_TOTAL_VALUES; ++idx) {
+    for(int32_t idx = 0; idx < FURI_HAL_FLASH_OB_TOTAL_VALUES; ++idx) {
         const uint32_t ref_value = manifest->ob_reference.obs[idx].values.base;
         const uint32_t device_ob_value = device_data->obs[idx].values.base;
         const uint32_t device_ob_value_masked = device_ob_value &
@@ -299,8 +298,10 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
                                   manifest->ob_compare_mask.obs[idx].values.base) == ref_value);
 
                 if(is_fixed) {
+                    // restart loop
                     match = true;
-                    idx = 0;
+                    idx = -1;
+                    continue;
                 } else {
                     /* Things are so bad that fixing what we are allowed to still doesn't match
                      * reference value 
