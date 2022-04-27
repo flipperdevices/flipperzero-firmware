@@ -64,12 +64,6 @@ bool updater_scene_main_on_event(void* context, SceneManagerEvent event) {
     } else if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case UpdaterCustomEventStartUpdate:
-            if(!update_task_is_running(updater->update_task)) {
-                update_task_start(updater->update_task);
-            }
-            consumed = true;
-            break;
-
         case UpdaterCustomEventRetryUpdate:
             if(!update_task_is_running(updater->update_task) &&
                (update_task_get_state(updater->update_task)->stage != UpdateTaskStageCompleted))

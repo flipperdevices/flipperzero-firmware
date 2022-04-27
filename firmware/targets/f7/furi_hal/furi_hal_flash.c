@@ -403,7 +403,7 @@ uint32_t furi_hal_flash_ob_get_word(size_t word_idx, bool complementary) {
     return ob_data[raw_word_idx];
 }
 
-static void furi_hal_flash_unlock_optionbytes() {
+void furi_hal_flash_ob_unlock() {
     furi_check(READ_BIT(FLASH->CR, FLASH_CR_OPTLOCK) != 0U);
     furi_hal_flash_begin(true);
     WRITE_REG(FLASH->OPTKEYR, FURI_HAL_FLASH_OPT_KEY1);
@@ -413,26 +413,82 @@ static void furi_hal_flash_unlock_optionbytes() {
     furi_check(READ_BIT(FLASH->CR, FLASH_CR_OPTLOCK) == 0U);
 }
 
-static void furi_hal_flash_lock_optionbytes() {
+void furi_hal_flash_ob_lock() {
     furi_check(READ_BIT(FLASH->CR, FLASH_CR_OPTLOCK) == 0U);
     SET_BIT(FLASH->CR, FLASH_CR_OPTLOCK);
     furi_hal_flash_end(true);
     furi_check(READ_BIT(FLASH->CR, FLASH_CR_OPTLOCK) != 0U);
 }
 
-void furi_hal_flash_ob_set_word(size_t word_idx, const uint32_t value) {
+typedef enum {
+    FuriHalFlashObInvalid,
+    FuriHalFlashObRegisterUserRead,
+    FuriHalFlashObRegisterPCROP1AStart,
+    FuriHalFlashObRegisterPCROP1AEnd,
+    FuriHalFlashObRegisterWRPA,
+    FuriHalFlashObRegisterWRPB,
+    FuriHalFlashObRegisterPCROP1BStart,
+    FuriHalFlashObRegisterPCROP1BEnd,
+    FuriHalFlashObRegisterIPCCMail,
+    FuriHalFlashObRegisterSecureFlash,
+    FuriHalFlashObRegisterC2Opts,
+} FuriHalFlashObRegister;
+
+typedef struct {
+    FuriHalFlashObRegister ob_reg;
+    uint32_t* ob_register_address;
+} FuriHalFlashObMapping;
+
+#define OB_REG_DEF(INDEX, REG) \
+    { .ob_reg = INDEX, .ob_register_address = (uint32_t*)(REG) }
+
+static const FuriHalFlashObMapping furi_hal_flash_ob_reg_map[FURI_HAL_FLASH_OB_TOTAL_WORDS] = {
+    OB_REG_DEF(FuriHalFlashObRegisterUserRead, (&FLASH->OPTR)),
+    OB_REG_DEF(FuriHalFlashObRegisterPCROP1AStart, (&FLASH->PCROP1ASR)),
+    OB_REG_DEF(FuriHalFlashObRegisterPCROP1AEnd, (&FLASH->PCROP1AER)),
+    OB_REG_DEF(FuriHalFlashObRegisterWRPA, (&FLASH->WRP1AR)),
+    OB_REG_DEF(FuriHalFlashObRegisterWRPB, (&FLASH->WRP1BR)),
+    OB_REG_DEF(FuriHalFlashObRegisterPCROP1BStart, (&FLASH->PCROP1BSR)),
+    OB_REG_DEF(FuriHalFlashObRegisterPCROP1BEnd, (&FLASH->PCROP1BER)),
+
+    OB_REG_DEF(FuriHalFlashObInvalid, (NULL)),
+    OB_REG_DEF(FuriHalFlashObInvalid, (NULL)),
+    OB_REG_DEF(FuriHalFlashObInvalid, (NULL)),
+    OB_REG_DEF(FuriHalFlashObInvalid, (NULL)),
+    OB_REG_DEF(FuriHalFlashObInvalid, (NULL)),
+    OB_REG_DEF(FuriHalFlashObInvalid, (NULL)),
+
+    OB_REG_DEF(FuriHalFlashObRegisterIPCCMail, (NULL)),
+    OB_REG_DEF(FuriHalFlashObRegisterSecureFlash, (NULL)),
+    OB_REG_DEF(FuriHalFlashObRegisterC2Opts, (NULL)),
+};
+
+void furi_hal_flash_ob_apply() {
+    SET_BIT(FLASH->CR, FLASH_CR_OBL_LAUNCH);
+}
+
+bool furi_hal_flash_ob_set_word(size_t word_idx, const uint32_t value) {
+    furi_check(word_idx < FURI_HAL_FLASH_OB_TOTAL_WORDS);
+
+    const FuriHalFlashObMapping* reg_def = &furi_hal_flash_ob_reg_map[word_idx];
+    if(reg_def->ob_register_address == NULL) {
+        FURI_LOG_E(TAG, "Attempt to set RO OB word %d", word_idx);
+        return false;
+    }
+
+    FURI_LOG_W(
+        TAG,
+        "Setting OB reg %d for word %d (addr 0x%08X) to 0x%08X",
+        reg_def->ob_reg,
+        word_idx,
+        reg_def->ob_register_address,
+        value);
+
     /* 1. Clear OPTLOCK option lock bit with the clearing sequence */
-    furi_hal_flash_unlock_optionbytes();
+    furi_hal_flash_ob_unlock();
 
     /* 2. Write the desired options value in the options registers */
-    uint32_t* ob_data = (uint32_t*)(OTP_AREA_BASE);
-    size_t ob_value_offs = word_idx * 2;
-    size_t ob_value_compl_offs = ob_value_offs + 1;
-    FURI_LOG_W(TAG, "WRITING %X @ %X", value, &ob_data[ob_value_offs]);
-    //uncomment pls
-    //ob_data[ob_value_offs] = value;
-    FURI_LOG_W(TAG, "WRITING %X @ %X", ~value, &ob_data[ob_value_compl_offs]);
-    //ob_data[ob_value_compl_offs] = ~value;
+    *reg_def->ob_register_address = value;
 
     /* 3. Check that no Flash memory operation is on going by checking the BSY && PESD */
     furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT));
@@ -445,5 +501,10 @@ void furi_hal_flash_ob_set_word(size_t word_idx, const uint32_t value) {
 
     /* 5. Wait for the BSY bit to be cleared. */
     furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT));
-    furi_hal_flash_lock_optionbytes();
+    furi_hal_flash_ob_lock();
+    return true;
+}
+
+const FuriHalFlashRawOptionByteData* furi_hal_flash_ob_get_raw_ptr() {
+    return (const void*)OPTION_BYTE_BASE;
 }

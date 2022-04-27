@@ -254,55 +254,69 @@ static bool update_task_manage_radiostack(UpdateTask* update_task) {
     return success;
 }
 
+
 bool update_task_validate_optionbytes(UpdateTask* update_task) {
-    bool match = true;
-    const UpdateManifest* manifest = update_task->manifest;
     update_task_set_progress(update_task, UpdateTaskStageOBValidation, 0);
-    for(size_t idx = 0; idx < UPDATE_MANIFEST_OB_SIZE_WORDS; ++idx) {
-        bool complementary = idx % 2 != 0;
-        size_t ob_idx = idx / 2;
-        const uint32_t ref_value = manifest->ob_reference.words[idx];
-        const uint32_t device_ob_value = furi_hal_flash_ob_get_word(ob_idx, complementary);
+
+    bool match = true;
+    bool ob_dirty = false;
+    const UpdateManifest* manifest = update_task->manifest;
+    const FuriHalFlashRawOptionByteData* device_data = furi_hal_flash_ob_get_raw_ptr();
+    for(size_t idx = 0; idx < FURI_HAL_FLASH_OB_TOTAL_VALUES; ++idx) {
+        const uint32_t ref_value = manifest->ob_reference.obs[idx].values.base;
+        const uint32_t device_ob_value = device_data->obs[idx].values.base;
         const uint32_t device_ob_value_masked = device_ob_value &
-                                                manifest->ob_compare_mask.words[idx];
+                                                manifest->ob_compare_mask.obs[idx].dword;
         if(ref_value != device_ob_value_masked) {
             match = false;
             FURI_LOG_E(
                 TAG,
-                "OB MISMATCH: #%d(%d): real %X != %X (exp.), full %X, mask %X",
-                ob_idx,
+                "OB MISMATCH: #%d: real %08X != %08X (exp.), full %08X",
                 idx,
                 device_ob_value_masked,
                 ref_value,
-                device_ob_value,
-                manifest->ob_compare_mask.words[idx]);
+                device_ob_value);
 
-            // any bits we are allowed to write?..
-            bool can_patch =
-                ((device_ob_value_masked ^ ref_value) & manifest->ob_write_mask.words[idx]) != 0;
-            if(can_patch && !complementary) {
-                // TODO: patch & restart loop
+            /* any bits we are allowed to write?.. */
+            bool can_patch = ((device_ob_value_masked ^ ref_value) &
+                              manifest->ob_write_mask.obs[idx].values.base) != 0;
+
+            if(can_patch) {
+                /* patch & restart loop */
                 const uint32_t patched_value =
                     /* take all non-writable bits from real value */
-                    (device_ob_value & ~(manifest->ob_write_mask.words[idx])) |
+                    (device_ob_value & ~(manifest->ob_write_mask.obs[idx].values.base)) |
                     /* take all writable bits from reference value */
-                    (manifest->ob_reference.words[idx] & manifest->ob_write_mask.words[idx]);
-                if(patched_value != ref_value) {
-                    // Things are so bad that fixing what we are allowed to still doesn't match
-                    // reference value. Should we still try to write such value?
-                    // TODO: ...
+                    (manifest->ob_reference.obs[idx].values.base &
+                     manifest->ob_write_mask.obs[idx].values.base);
+
+                FURI_LOG_W(TAG, "Fixing up OB byte #%d to %08X", idx, patched_value);
+                ob_dirty = true;
+                bool set_success = furi_hal_flash_ob_set_word(idx, patched_value);
+
+                bool is_fixed = set_success &&
+                                ((device_data->obs[idx].values.base &
+                                  manifest->ob_compare_mask.obs[idx].values.base) == ref_value);
+
+                if(is_fixed) {
+                    match = true;
+                    idx = 0;
+                } else {
+                    /* Things are so bad that fixing what we are allowed to still doesn't match
+                     * reference value 
+                     */
+                    FURI_LOG_W(
+                        TAG,
+                        "OB #%d is FUBAR (fixed&masked %08X, not %08X)",
+                        idx,
+                        patched_value,
+                        ref_value);
                 }
-                FURI_LOG_W(TAG, "Fixing up OB byte #%d to %X", ob_idx, patched_value);
-                furi_hal_flash_ob_set_word(ob_idx, patched_value);
-                // uncomment pls
-                //match = true;
-                //idx = 0;
             }
         } else {
             FURI_LOG_I(
                 TAG,
-                "OB MATCH: #%d(%d): real %X == %X (exp.)",
-                ob_idx,
+                "OB MATCH: #%d: real %08X == %08X (exp.)",
                 idx,
                 device_ob_value_masked,
                 ref_value);
@@ -310,6 +324,11 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
     }
     if(!match) {
         update_task_set_progress(update_task, UpdateTaskStageOBError, 95);
+    }
+
+    if(ob_dirty) {
+        FURI_LOG_W(TAG, "OB were changed, applying");
+        furi_hal_flash_ob_apply();
     }
     return match;
 }

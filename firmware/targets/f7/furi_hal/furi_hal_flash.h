@@ -101,20 +101,35 @@ bool furi_hal_flash_program_page(const uint8_t page, const uint8_t* data, uint16
  */
 int16_t furi_hal_flash_get_page_number(size_t address);
 
-/** Reads value of OB word by its index, not counting complementary values
+/** Writes whole OB word
  *
- * @param      word_idx  OB word number
- * @param      complementary     flag: true - fetch complementary (inverted) value of OB word
- *
- * @return     OB word value
- */
-uint32_t furi_hal_flash_ob_get_word(size_t word_idx, bool complementary);
-
-/** Writes whole OB word (and its complementary word) values
- *
- * @warning locking operation with critical section, stalls execution
+ * @warning Requires OB to be unlocked
  *
  * @param      word_idx  OB word number
  * @param      value    data to write
+ * @return     true if value was written, false for read-only word
  */
-void furi_hal_flash_ob_set_word(size_t word_idx, const uint32_t value);
+
+bool furi_hal_flash_ob_set_word(size_t word_idx, const uint32_t value);
+
+void furi_hal_flash_ob_apply();
+
+#define FURI_HAL_FLASH_OB_RAW_SIZE_BYTES 0x80
+#define FURI_HAL_FLASH_OB_SIZE_WORDS (FURI_HAL_FLASH_OB_RAW_SIZE_BYTES / sizeof(uint32_t))
+#define FURI_HAL_FLASH_OB_TOTAL_VALUES (FURI_HAL_FLASH_OB_SIZE_WORDS / 2)
+
+typedef union {
+    uint8_t bytes[FURI_HAL_FLASH_OB_RAW_SIZE_BYTES];
+    union {
+        struct {
+            uint32_t base;
+            uint32_t complementary_value;
+        } values;
+        uint64_t dword;
+    } obs[FURI_HAL_FLASH_OB_TOTAL_VALUES];
+} FuriHalFlashRawOptionByteData;
+_Static_assert(
+    sizeof(FuriHalFlashRawOptionByteData) == FURI_HAL_FLASH_OB_RAW_SIZE_BYTES,
+    "UpdateManifestOptionByteData size error");
+
+const FuriHalFlashRawOptionByteData* furi_hal_flash_ob_get_raw_ptr();

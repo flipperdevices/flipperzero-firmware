@@ -7,14 +7,12 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 #include <m-string.h>
+#include <furi_hal_flash.h>
 
 /* Paths don't include /ext -- because at startup SD card is mounted as root */
 #define UPDATE_DIR_DEFAULT_REL_PATH "/update"
 #define UPDATE_MANIFEST_DEFAULT_NAME "update.fuf"
 #define UPDATE_MAINFEST_DEFAULT_PATH UPDATE_DIR_DEFAULT_REL_PATH "/" UPDATE_MANIFEST_DEFAULT_NAME
-
-#define UPDATE_MANIFEST_OB_SIZE_BYTES 0x80
-#define UPDATE_MANIFEST_OB_SIZE_WORDS (UPDATE_MANIFEST_OB_SIZE_BYTES / sizeof(uint32_t))
 
 typedef union {
     uint8_t raw[6];
@@ -29,13 +27,6 @@ typedef union {
 } UpdateManifestRadioVersion;
 _Static_assert(sizeof(UpdateManifestRadioVersion) == 6, "UpdateManifestRadioVersion size error");
 
-typedef union {
-    uint8_t values[UPDATE_MANIFEST_OB_SIZE_BYTES];
-    uint32_t words[UPDATE_MANIFEST_OB_SIZE_WORDS];
-} UpdateManifestOptionByteData;
-_Static_assert(sizeof(UpdateManifestOptionByteData) == UPDATE_MANIFEST_OB_SIZE_BYTES, "UpdateManifestOptionByteData size error");
-
-
 typedef struct {
     string_t version;
     uint32_t target;
@@ -47,9 +38,9 @@ typedef struct {
     UpdateManifestRadioVersion radio_version;
     uint32_t radio_crc;
     string_t resource_bundle;
-    UpdateManifestOptionByteData ob_reference;
-    UpdateManifestOptionByteData ob_compare_mask;
-    UpdateManifestOptionByteData ob_write_mask;
+    FuriHalFlashRawOptionByteData ob_reference;
+    FuriHalFlashRawOptionByteData ob_compare_mask;
+    FuriHalFlashRawOptionByteData ob_write_mask;
     bool valid;
 } UpdateManifest;
 
