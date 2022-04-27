@@ -259,3 +259,11 @@ void IPCC_C1_RX_IRQHandler() {
 void FPU_IRQHandler() {
     furi_crash("FpuFault");
 }
+
+void LPTIM1_IRQHandler() {
+    furi_crash("LPTIM1");
+}
+
+void LPTIM2_IRQHandler() {
+    furi_crash("LPTIM2");
+}

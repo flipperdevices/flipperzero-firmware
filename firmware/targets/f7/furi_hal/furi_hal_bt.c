@@ -132,7 +132,6 @@ bool furi_hal_bt_start_radio_stack() {
         WirelessFwInfo_t info = {};
         if(!ble_glue_wait_for_fus_start(&info)) {
             FURI_LOG_E(TAG, "FUS start failed");
-            LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
             ble_glue_thread_stop();
             break;
         }
@@ -150,7 +149,6 @@ bool furi_hal_bt_start_radio_stack() {
         // Starting radio stack
         if(!ble_glue_start()) {
             FURI_LOG_E(TAG, "Failed to start radio stack");
-            LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
             ble_glue_thread_stop();
             ble_app_thread_stop();
             break;
@@ -222,17 +220,19 @@ bool furi_hal_bt_change_app(FuriHalBtProfile profile, GapEventCallback event_cb,
     furi_assert(profile < FuriHalBtProfileNumber);
     bool ret = true;
 
-    FURI_LOG_I(TAG, "Stop current profile services");
-    current_profile->stop();
     FURI_LOG_I(TAG, "Disconnect and stop advertising");
     furi_hal_bt_stop_advertising();
-    FURI_LOG_I(TAG, "Shutdow 2nd core");
-    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
+
+    FURI_LOG_I(TAG, "Stop current profile services");
+    current_profile->stop();
+
     FURI_LOG_I(TAG, "Stop BLE related RTOS threads");
     ble_app_thread_stop();
     gap_thread_stop();
+
     FURI_LOG_I(TAG, "Reset SHCI");
     SHCI_C2_Reinit();
+
     osDelay(100);
     ble_glue_thread_stop();
     FURI_LOG_I(TAG, "Start BT initialization");

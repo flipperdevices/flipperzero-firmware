@@ -192,10 +192,10 @@ static void power_check_vbus_level_change(Power* power) {
         power->voltage_vbus = power->info.voltage_vbus;
         if(power->voltage_vbus >= VBUS_MIN_VOLTAGE) {
             furi_hal_power_insomnia_enter();
-            //             furi_hal_usb_enable();
+            // furi_hal_usb_enable();
             FURI_LOG_D("VBUS", "VBUS connected: %f v", power->voltage_vbus);
         } else {
-            //             furi_hal_usb_disable();
+            // furi_hal_usb_disable();
             furi_hal_power_insomnia_exit();
             FURI_LOG_D("VBUS", "VBUS disconnected: %f v", power->voltage_vbus);
         }

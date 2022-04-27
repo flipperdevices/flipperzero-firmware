@@ -115,7 +115,6 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
         if(gap->enable_adv) {
             // Restart advertising
             gap_advertise_start(GapStateAdvFast);
-            furi_hal_power_insomnia_exit();
         }
         GapEvent event = {.type = GapEventTypeDisconnected};
         gap->on_event_cb(event, gap->context);
@@ -151,8 +150,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
             }
             break;
 
-        case EVT_LE_CONN_COMPLETE:
-            furi_hal_power_insomnia_enter();
+        case EVT_LE_CONN_COMPLETE: {
             hci_le_connection_complete_event_rp0* event =
                 (hci_le_connection_complete_event_rp0*)meta_evt->data;
             gap->connection_params.conn_interval = event->Conn_Interval;
@@ -169,7 +167,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
             gap_verify_connection_parameters(gap);
             // Start pairing by sending security request
             aci_gap_slave_security_req(event->Connection_Handle);
-            break;
+        } break;
 
         case EVT_LE_ADVERTISING_REPORT: {
             if(gap_scan) {

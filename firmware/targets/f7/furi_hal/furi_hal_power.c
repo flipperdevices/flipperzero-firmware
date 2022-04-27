@@ -2,6 +2,7 @@
 #include <furi_hal_clock.h>
 #include <furi_hal_bt.h>
 #include <furi_hal_resources.h>
+#include <furi_hal_delay.h>
 
 #include <stm32wbxx_ll_rcc.h>
 #include <stm32wbxx_ll_pwr.h>
@@ -218,8 +219,8 @@ void furi_hal_power_deep_sleep() {
     // Prepare deep sleep
     uint32_t c1_lpms = LL_PWR_GetPowerMode();
     uint32_t c2_lpms = LL_C2_PWR_GetPowerMode();
-    LL_PWR_SetPowerMode(LL_PWR_MODE_STOP1);
-    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_STOP1);
+    LL_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
+    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
     LL_LPM_EnableDeepSleep();
 
 #if defined(__CC_ARM)
@@ -230,6 +231,7 @@ void furi_hal_power_deep_sleep() {
     __WFI();
 
     LL_LPM_EnableSleep();
+    LL_PWR_ClearFlag_C1STOP_C1STB();
 
     LL_PWR_SetPowerMode(c1_lpms);
     LL_C2_PWR_SetPowerMode(c2_lpms);
@@ -290,6 +292,53 @@ bool furi_hal_power_is_charging() {
     bool ret = bq25896_is_charging(&furi_hal_i2c_handle_power);
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
     return ret;
+}
+
+void furi_hal_power_shutdown() {
+    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
+        ;
+
+    if(!LL_HSEM_1StepLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID)) {
+        if(LL_PWR_IsActiveFlag_C2DS() || LL_PWR_IsActiveFlag_C2SB()) {
+            // Release ENTRY_STOP_MODE semaphore
+            LL_HSEM_ReleaseLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID, 0);
+
+            // The switch on HSI before entering Stop Mode is required
+            furi_hal_clock_switch_to_hsi();
+        }
+    } else {
+        /**
+         * The switch on HSI before entering Stop Mode is required 
+         */
+        furi_hal_clock_switch_to_hsi();
+    }
+
+    SET_BIT(PWR->PUCRB, DISPLAY_DI_Pin);
+    furi_hal_delay_us(30);
+    CLEAR_BIT(PWR->PDCRB, DISPLAY_DI_Pin);
+    furi_hal_delay_us(30);
+
+    SET_BIT(PWR->PUCRB, DISPLAY_RST_Pin);
+    furi_hal_delay_us(30);
+    CLEAR_BIT(PWR->PDCRB, DISPLAY_RST_Pin);
+    furi_hal_delay_us(30);
+
+    SET_BIT(PWR->CR3, PWR_CR3_APC);
+
+    /* Release RCC semaphore */
+    LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
+
+    // Prepare Wakeup pin
+    LL_PWR_SetWakeUpPinPolarityLow(LL_PWR_WAKEUP_PIN2);
+    LL_PWR_EnableWakeUpPin(LL_PWR_WAKEUP_PIN2);
+
+    LL_PWR_DisableBootC2();
+    LL_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
+    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
+    LL_LPM_EnableDeepSleep();
+
+    __WFI();
+    furi_crash("Core2 is insomniac");
 }
 
 void furi_hal_power_off() {
