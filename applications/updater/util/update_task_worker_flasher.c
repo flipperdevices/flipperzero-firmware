@@ -201,7 +201,7 @@ static bool update_task_manage_radiostack(UpdateTask* update_task) {
             bool total_stack_match = stack_version_match &&
                                      (c2_state->StackType == radio_ver->version.type);
             if(total_stack_match) {
-                // Nothing to do.
+                /* Nothing to do. */
                 FURI_LOG_W(TAG, "Stack version is up2date");
                 furi_hal_rtc_reset_flag(FuriHalRtcFlagC2Update);
                 success = true;
@@ -264,7 +264,7 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
         const uint32_t ref_value = manifest->ob_reference.obs[idx].values.base;
         const uint32_t device_ob_value = device_data->obs[idx].values.base;
         const uint32_t device_ob_value_masked = device_ob_value &
-                                                manifest->ob_compare_mask.obs[idx].dword;
+                                                manifest->ob_compare_mask.obs[idx].values.base;
         if(ref_value != device_ob_value_masked) {
             match = false;
             FURI_LOG_E(
