@@ -1,5 +1,6 @@
 #include <furi_hal_rtc.h>
 #include <furi_hal_light.h>
+#include <furi_hal_debug.h>
 
 #include <stm32wbxx_ll_bus.h>
 #include <stm32wbxx_ll_pwr.h>
@@ -73,13 +74,9 @@ void furi_hal_rtc_init_early() {
     }
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        LL_DBGMCU_EnableDBGSleepMode();
-        LL_DBGMCU_EnableDBGStopMode();
-        LL_EXTI_EnableIT_32_63(LL_EXTI_LINE_48);
+        furi_hal_debug_enable();
     } else {
-        LL_DBGMCU_DisableDBGSleepMode();
-        LL_DBGMCU_DisableDBGStopMode();
-        LL_DBGMCU_DisableDBGStandbyMode();
+        furi_hal_debug_disable();
     }
 }
 
@@ -135,9 +132,7 @@ void furi_hal_rtc_set_flag(FuriHalRtcFlag flag) {
     furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
 
     if(flag & FuriHalRtcFlagDebug) {
-        LL_DBGMCU_EnableDBGSleepMode();
-        LL_DBGMCU_EnableDBGStopMode();
-        LL_EXTI_EnableIT_32_63(LL_EXTI_LINE_48);
+        furi_hal_debug_enable();
     }
 }
 
@@ -148,9 +143,7 @@ void furi_hal_rtc_reset_flag(FuriHalRtcFlag flag) {
     furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
 
     if(flag & FuriHalRtcFlagDebug) {
-        LL_DBGMCU_DisableDBGSleepMode();
-        LL_DBGMCU_DisableDBGStopMode();
-        LL_DBGMCU_DisableDBGStandbyMode();
+        furi_hal_debug_disable();
     }
 }
 
