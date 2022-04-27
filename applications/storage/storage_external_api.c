@@ -112,7 +112,7 @@ bool storage_file_open(
     furi_pubsub_unsubscribe(storage_get_pubsub(file->storage), subscription);
     osEventFlagsDelete(event);
 
-    FURI_LOG_D(
+    FURI_LOG_T(
         TAG, "File %p - %p open (%s)", (uint32_t)file - SRAM_BASE, file->file_id - SRAM_BASE, path);
 
     return result;
@@ -126,7 +126,7 @@ bool storage_file_close(File* file) {
     S_API_MESSAGE(StorageCommandFileClose);
     S_API_EPILOGUE;
 
-    FURI_LOG_D(TAG, "File %p - %p closed", (uint32_t)file - SRAM_BASE, file->file_id - SRAM_BASE);
+    FURI_LOG_T(TAG, "File %p - %p closed", (uint32_t)file - SRAM_BASE, file->file_id - SRAM_BASE);
     file->type = FileTypeClosed;
 
     return S_RETURN_BOOL;
@@ -263,7 +263,7 @@ bool storage_dir_open(File* file, const char* path) {
     furi_pubsub_unsubscribe(storage_get_pubsub(file->storage), subscription);
     osEventFlagsDelete(event);
 
-    FURI_LOG_D(
+    FURI_LOG_T(
         TAG, "Dir %p - %p open (%s)", (uint32_t)file - SRAM_BASE, file->file_id - SRAM_BASE, path);
 
     return result;
@@ -276,7 +276,7 @@ bool storage_dir_close(File* file) {
     S_API_MESSAGE(StorageCommandDirClose);
     S_API_EPILOGUE;
 
-    FURI_LOG_D(TAG, "Dir %p - %p closed", (uint32_t)file - SRAM_BASE, file->file_id - SRAM_BASE);
+    FURI_LOG_T(TAG, "Dir %p - %p closed", (uint32_t)file - SRAM_BASE, file->file_id - SRAM_BASE);
 
     file->type = FileTypeClosed;
 
@@ -460,7 +460,7 @@ File* storage_file_alloc(Storage* storage) {
     file->type = FileTypeClosed;
     file->storage = storage;
 
-    FURI_LOG_D(TAG, "File/Dir %p alloc", (uint32_t)file - SRAM_BASE);
+    FURI_LOG_T(TAG, "File/Dir %p alloc", (uint32_t)file - SRAM_BASE);
 
     return file;
 }
@@ -482,7 +482,7 @@ void storage_file_free(File* file) {
         }
     }
 
-    FURI_LOG_D(TAG, "File/Dir %p free", (uint32_t)file - SRAM_BASE);
+    FURI_LOG_T(TAG, "File/Dir %p free", (uint32_t)file - SRAM_BASE);
     free(file);
 }
 
