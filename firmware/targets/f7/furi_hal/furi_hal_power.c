@@ -22,6 +22,12 @@
 #define FURI_HAL_POWER_EXTI_LINE_0_31 0
 #define FURI_HAL_POWER_EXTI_LINE_32_63 1
 
+#ifdef FURI_HAL_POWER_DEEP_SLEEP_ENABLED
+#define FURI_HAL_POWER_DEEP_INSOMNIA 0
+#else
+#define FURI_HAL_POWER_DEEP_INSOMNIA 1
+#endif
+
 typedef struct {
     volatile uint8_t insomnia;
     volatile uint8_t deep_insomnia;
@@ -33,7 +39,7 @@ typedef struct {
 
 static volatile FuriHalPower furi_hal_power = {
     .insomnia = 0,
-    .deep_insomnia = 0,
+    .deep_insomnia = FURI_HAL_POWER_DEEP_INSOMNIA,
     .suppress_charge = 0,
 };
 
@@ -217,8 +223,6 @@ void furi_hal_power_deep_sleep() {
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 
     // Prepare deep sleep
-    uint32_t c1_lpms = LL_PWR_GetPowerMode();
-    uint32_t c2_lpms = LL_C2_PWR_GetPowerMode();
     LL_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
     LL_C2_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
     LL_LPM_EnableDeepSleep();
@@ -231,10 +235,13 @@ void furi_hal_power_deep_sleep() {
     __WFI();
 
     LL_LPM_EnableSleep();
-    LL_PWR_ClearFlag_C1STOP_C1STB();
 
-    LL_PWR_SetPowerMode(c1_lpms);
-    LL_C2_PWR_SetPowerMode(c2_lpms);
+    // Make sure that values differ to prevent disaster on wfi
+    LL_PWR_SetPowerMode(LL_PWR_MODE_STOP0);
+    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
+
+    LL_PWR_ClearFlag_C1STOP_C1STB();
+    LL_PWR_ClearFlag_C2STOP_C2STB();
 
     /* Release ENTRY_STOP_MODE semaphore */
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID, 0);
@@ -295,6 +302,8 @@ bool furi_hal_power_is_charging() {
 }
 
 void furi_hal_power_shutdown() {
+    furi_hal_bt_reinit();
+
     while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
         ;
 
@@ -302,35 +311,16 @@ void furi_hal_power_shutdown() {
         if(LL_PWR_IsActiveFlag_C2DS() || LL_PWR_IsActiveFlag_C2SB()) {
             // Release ENTRY_STOP_MODE semaphore
             LL_HSEM_ReleaseLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID, 0);
-
-            // The switch on HSI before entering Stop Mode is required
-            furi_hal_clock_switch_to_hsi();
         }
-    } else {
-        /**
-         * The switch on HSI before entering Stop Mode is required 
-         */
-        furi_hal_clock_switch_to_hsi();
     }
-
-    SET_BIT(PWR->PUCRB, DISPLAY_DI_Pin);
-    furi_hal_delay_us(30);
-    CLEAR_BIT(PWR->PDCRB, DISPLAY_DI_Pin);
-    furi_hal_delay_us(30);
-
-    SET_BIT(PWR->PUCRB, DISPLAY_RST_Pin);
-    furi_hal_delay_us(30);
-    CLEAR_BIT(PWR->PDCRB, DISPLAY_RST_Pin);
-    furi_hal_delay_us(30);
-
-    SET_BIT(PWR->CR3, PWR_CR3_APC);
-
-    /* Release RCC semaphore */
-    LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 
     // Prepare Wakeup pin
     LL_PWR_SetWakeUpPinPolarityLow(LL_PWR_WAKEUP_PIN2);
     LL_PWR_EnableWakeUpPin(LL_PWR_WAKEUP_PIN2);
+    LL_C2_PWR_EnableWakeUpPin(LL_PWR_WAKEUP_PIN2);
+
+    /* Release RCC semaphore */
+    LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 
     LL_PWR_DisableBootC2();
     LL_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
@@ -338,7 +328,7 @@ void furi_hal_power_shutdown() {
     LL_LPM_EnableDeepSleep();
 
     __WFI();
-    furi_crash("Core2 is insomniac");
+    furi_crash("Insomniac core2");
 }
 
 void furi_hal_power_off() {

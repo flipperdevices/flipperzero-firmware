@@ -219,11 +219,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
     return ret;
 }
 
-bool furi_hal_bt_change_app(FuriHalBtProfile profile, GapEventCallback event_cb, void* context) {
-    furi_assert(event_cb);
-    furi_assert(profile < FuriHalBtProfileNumber);
-    bool ret = true;
-
+void furi_hal_bt_reinit() {
     FURI_LOG_I(TAG, "Disconnect and stop advertising");
     furi_hal_bt_stop_advertising();
 
@@ -247,6 +243,15 @@ bool furi_hal_bt_change_app(FuriHalBtProfile profile, GapEventCallback event_cb,
     furi_hal_bt_init();
 
     furi_hal_bt_start_radio_stack();
+}
+
+bool furi_hal_bt_change_app(FuriHalBtProfile profile, GapEventCallback event_cb, void* context) {
+    furi_assert(event_cb);
+    furi_assert(profile < FuriHalBtProfileNumber);
+    bool ret = true;
+
+    furi_hal_bt_reinit();
+
     ret = furi_hal_bt_start_app(profile, event_cb, context);
     if(ret) {
         current_profile = &profile_config[profile];
