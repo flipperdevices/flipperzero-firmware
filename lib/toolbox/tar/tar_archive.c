@@ -38,6 +38,7 @@ static int mtar_storage_file_seek(void* stream, unsigned offset) {
 static int mtar_storage_file_close(void* stream) {
     if(stream) {
         storage_file_close(stream);
+        storage_file_free(stream);
     }
     return MTAR_ESUCCESS;
 }
