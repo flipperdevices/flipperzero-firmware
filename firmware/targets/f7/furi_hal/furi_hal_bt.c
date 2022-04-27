@@ -230,6 +230,9 @@ bool furi_hal_bt_change_app(FuriHalBtProfile profile, GapEventCallback event_cb,
     FURI_LOG_I(TAG, "Stop current profile services");
     current_profile->stop();
 
+    // Magic happens here
+    hci_reset();
+
     FURI_LOG_I(TAG, "Stop BLE related RTOS threads");
     ble_app_thread_stop();
     gap_thread_stop();
