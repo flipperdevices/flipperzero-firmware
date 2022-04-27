@@ -94,6 +94,7 @@ void tar_archive_free(TarArchive* archive) {
     if(mtar_is_open(&archive->tar)) {
         mtar_close(&archive->tar);
     }
+    free(archive);
 }
 
 void tar_archive_set_file_callback(TarArchive* archive, tar_unpack_file_cb callback, void* context) {
