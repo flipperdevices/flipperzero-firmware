@@ -3,6 +3,7 @@
 #include <furi_hal_bt.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_delay.h>
+#include <furi_hal_uart.h>
 
 #include <stm32wbxx_ll_rcc.h>
 #include <stm32wbxx_ll_pwr.h>
@@ -126,21 +127,17 @@ uint16_t furi_hal_power_insomnia_level() {
 }
 
 void furi_hal_power_insomnia_enter() {
-    FURI_CRITICAL_ENTER();
-    furi_assert(furi_hal_power.insomnia < UINT8_MAX);
-    furi_hal_power.insomnia++;
-    FURI_CRITICAL_EXIT();
+//     FURI_CRITICAL_ENTER();
+//     furi_assert(furi_hal_power.insomnia < UINT8_MAX);
+//     furi_hal_power.insomnia++;
+//     FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_power_insomnia_exit() {
-    FURI_CRITICAL_ENTER();
-    furi_assert(furi_hal_power.insomnia > 0);
-    furi_hal_power.insomnia--;
-    FURI_CRITICAL_EXIT();
-}
-
-bool furi_hal_power_sleep_available() {
-    return furi_hal_power.insomnia == 0;
+//     FURI_CRITICAL_ENTER();
+//     furi_assert(furi_hal_power.insomnia > 0);
+//     furi_hal_power.insomnia--;
+//     FURI_CRITICAL_EXIT();
 }
 
 #ifdef FURI_HAL_OS_DEBUG
@@ -150,7 +147,7 @@ static void furi_hal_power_nvic_dbg_trap() {
         if(NVIC_GetPendingIRQ(i)) {
             (void)i;
             // Break here
-            asm volatile("bkpt 0");
+//             asm volatile("bkpt 0");
         }
     }
 }
@@ -162,13 +159,13 @@ static void furi_hal_power_exti_dbg_trap(uint32_t exti, uint32_t val) {
             (void)exti;
             (void)i;
             // Break here
-            asm volatile("bkpt 0");
+//             asm volatile("bkpt 0");
         }
     }
 }
 #endif
 
-bool furi_hal_power_deep_sleep_available() {
+bool furi_hal_power_sleep_available() {
     if(FURI_HAL_POWER_NVIC_IS_PENDING()) {
 #ifdef FURI_HAL_OS_DEBUG
         furi_hal_power_nvic_dbg_trap();
@@ -189,18 +186,34 @@ bool furi_hal_power_deep_sleep_available() {
         return false;
     }
 
-    if(!furi_hal_bt_is_alive() || furi_hal_power.deep_insomnia > 0) {
-        return false;
-    }
+    return furi_hal_power.insomnia == 0;
+}
 
-    return true;
+bool furi_hal_power_deep_sleep_available() {
+   return furi_hal_bt_is_alive() && furi_hal_power.deep_insomnia == 0;
 }
 
 void furi_hal_power_light_sleep() {
     __WFI();
 }
 
+static inline void furi_hal_power_suspend_aux_periphs() {
+    // Disable USART
+    furi_hal_uart_suspend(FuriHalUartIdUSART1);
+    furi_hal_uart_suspend(FuriHalUartIdLPUART1);
+    // TODO: Disable USB
+}
+
+static inline void furi_hal_power_resume_aux_periphs() {
+    // Re-enable USART
+    furi_hal_uart_resume(FuriHalUartIdUSART1);
+    furi_hal_uart_resume(FuriHalUartIdLPUART1);
+    // TODO: Re-enable USB
+}
+
 void furi_hal_power_deep_sleep() {
+    furi_hal_power_suspend_aux_periphs();
+
     while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
         ;
 
@@ -254,6 +267,8 @@ void furi_hal_power_deep_sleep() {
     }
 
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
+
+    furi_hal_power_resume_aux_periphs();
 }
 
 void furi_hal_power_sleep() {

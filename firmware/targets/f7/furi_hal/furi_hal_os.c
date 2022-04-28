@@ -58,20 +58,6 @@ void furi_hal_os_tick() {
     }
 }
 
-// static inline void furi_hal_os_suspend_aux_periphs() {
-//     // Disable USART
-//     furi_hal_uart_suspend(FuriHalUartIdUSART1);
-//     furi_hal_uart_suspend(FuriHalUartIdLPUART1);
-//     // Disable USB
-// }
-//
-// static inline void furi_hal_os_resume_aux_periphs() {
-//     // Re-enable USART
-//     furi_hal_uart_resume(FuriHalUartIdUSART1);
-//     furi_hal_uart_resume(FuriHalUartIdLPUART1);
-//     // Re-enable USB
-// }
-
 static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
     // Stop ticks
     furi_hal_clock_suspend_tick();
@@ -93,7 +79,7 @@ static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
     // Calculate how much time we spent in the sleep
     uint32_t after_cnt = furi_hal_idle_timer_get_cnt() + furi_hal_os_skew;
     uint32_t after_tick = FURI_HAL_OS_IDLE_CNT_TO_TICKS(after_cnt);
-    furi_hal_os_skew = after_cnt - (after_cnt / after_tick);
+    furi_hal_os_skew = after_cnt - FURI_HAL_OS_TICKS_TO_IDLE_CNT(after_tick);
 
     bool cmpm = LL_LPTIM_IsActiveFlag_CMPM(FURI_HAL_IDLE_TIMER);
     bool arrm = LL_LPTIM_IsActiveFlag_ARRM(FURI_HAL_IDLE_TIMER);
