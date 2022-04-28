@@ -212,6 +212,7 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
                 break;
             }
             FURI_LOG_W(TAG, "Failed to open '%s', reties: %d", string_get_cstr(fname), n_tries);
+            storage_file_close(out_file);
             osDelay(FILE_OPEN_RETRY_DELAY);
         }
 
@@ -263,6 +264,7 @@ bool tar_archive_add_file(
                 break;
             }
             FURI_LOG_W(TAG, "Failed to open '%s', reties: %d", fs_file_path, n_tries);
+            storage_file_close(src_file);
             osDelay(FILE_OPEN_RETRY_DELAY);
         }
 
