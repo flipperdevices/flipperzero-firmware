@@ -37,7 +37,6 @@ struct Power {
     bool show_low_bat_level_message;
     uint8_t battery_level;
     uint8_t power_off_timeout;
-    float voltage_vbus;
 
     osMutexId_t api_mtx;
 };

@@ -58,19 +58,19 @@ void furi_hal_os_tick() {
     }
 }
 
-static inline void furi_hal_os_suspend_aux_periphs() {
-    // Disable USART
-    furi_hal_uart_suspend(FuriHalUartIdUSART1);
-    furi_hal_uart_suspend(FuriHalUartIdLPUART1);
-    // Disable USB
-}
-
-static inline void furi_hal_os_resume_aux_periphs() {
-    // Re-enable USART
-    furi_hal_uart_resume(FuriHalUartIdUSART1);
-    furi_hal_uart_resume(FuriHalUartIdLPUART1);
-    // Re-enable USB
-}
+// static inline void furi_hal_os_suspend_aux_periphs() {
+//     // Disable USART
+//     furi_hal_uart_suspend(FuriHalUartIdUSART1);
+//     furi_hal_uart_suspend(FuriHalUartIdLPUART1);
+//     // Disable USB
+// }
+//
+// static inline void furi_hal_os_resume_aux_periphs() {
+//     // Re-enable USART
+//     furi_hal_uart_resume(FuriHalUartIdUSART1);
+//     furi_hal_uart_resume(FuriHalUartIdLPUART1);
+//     // Re-enable USB
+// }
 
 static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
     // Stop ticks
@@ -118,13 +118,11 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
         expected_idle_ticks = FURI_HAL_OS_MAX_SLEEP;
     }
 
-    furi_hal_os_suspend_aux_periphs();
     // Stop IRQ handling, no one should disturb us till we finish
     __disable_irq();
 
     // Confirm OS that sleep is still possible
     if(eTaskConfirmSleepModeStatus() == eAbortSleep) {
-        furi_hal_os_resume_aux_periphs();
         __enable_irq();
         return;
     }
@@ -136,7 +134,6 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
         vTaskStepTick(MIN(completed_ticks, expected_idle_ticks));
     }
 
-    furi_hal_os_resume_aux_periphs();
     // Reenable IRQ
     __enable_irq();
 }
