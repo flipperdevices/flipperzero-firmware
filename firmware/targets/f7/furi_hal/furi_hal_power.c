@@ -19,9 +19,6 @@
 #include <furi.h>
 
 #define TAG "FuriHalPower"
-#define FURI_HAL_POWER_NVIC_IS_PENDING() (NVIC->ISPR[0] || NVIC->ISPR[1])
-#define FURI_HAL_POWER_EXTI_LINE_0_31 0
-#define FURI_HAL_POWER_EXTI_LINE_32_63 1
 
 #ifdef FURI_HAL_POWER_DEEP_SLEEP_ENABLED
 #define FURI_HAL_POWER_DEEP_INSOMNIA 0
@@ -140,57 +137,12 @@ void furi_hal_power_insomnia_exit() {
 //     FURI_CRITICAL_EXIT();
 }
 
-#ifdef FURI_HAL_OS_DEBUG
-// Find out the IRQ number while debugging
-static void furi_hal_power_nvic_dbg_trap() {
-    for(int32_t i = WWDG_IRQn; i <= DMAMUX1_OVR_IRQn; i++) {
-        if(NVIC_GetPendingIRQ(i)) {
-            (void)i;
-            // Break here
-            __NOP();
-        }
-    }
-}
-
-// Find out the EXTI line number while debugging
-static void furi_hal_power_exti_dbg_trap(uint32_t exti, uint32_t val) {
-    for(uint32_t i = 0; val; val >>= 1U, ++i) {
-        if(val & 1U) {
-            (void)exti;
-            (void)i;
-            // Break here
-            __NOP();
-        }
-    }
-}
-#endif
-
 bool furi_hal_power_sleep_available() {
-    if(FURI_HAL_POWER_NVIC_IS_PENDING()) {
-#ifdef FURI_HAL_OS_DEBUG
-        furi_hal_power_nvic_dbg_trap();
-#endif
-        return false;
-    }
-
-    uint32_t exti_lines_active;
-    if((exti_lines_active = LL_EXTI_ReadFlag_0_31(LL_EXTI_LINE_ALL_0_31))) {
-#ifdef FURI_HAL_OS_DEBUG
-        furi_hal_power_exti_dbg_trap(FURI_HAL_POWER_EXTI_LINE_0_31, exti_lines_active);
-#endif
-        return false;
-    } else if((exti_lines_active = LL_EXTI_ReadFlag_32_63(LL_EXTI_LINE_ALL_32_63))) {
-#ifdef FURI_HAL_OS_DEBUG
-        furi_hal_power_exti_dbg_trap(FURI_HAL_POWER_EXTI_LINE_32_63, exti_lines_active);
-#endif
-        return false;
-    }
-
     return furi_hal_power.insomnia == 0;
 }
 
 bool furi_hal_power_deep_sleep_available() {
-   return furi_hal_bt_is_alive() && furi_hal_power.deep_insomnia == 0;
+    return furi_hal_bt_is_alive() && furi_hal_power.deep_insomnia == 0;
 }
 
 void furi_hal_power_light_sleep() {

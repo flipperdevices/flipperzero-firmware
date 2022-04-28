@@ -1,11 +1,9 @@
 #include <furi_hal_os.h>
-#include <furi_hal_usb.h>
 #include <furi_hal_uart.h>
 #include <furi_hal_clock.h>
 #include <furi_hal_power.h>
 #include <furi_hal_gpio.h>
 #include <furi_hal_resources.h>
-#include <furi_hal_delay.h>
 #include <furi_hal_idle_timer.h>
 
 #include <stm32wbxx_ll_cortex.h>
@@ -23,6 +21,10 @@
 #define FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH (FURI_HAL_OS_IDLE_CNT_TO_TICKS(FURI_HAL_IDLE_TIMER_MAX))
 #define FURI_HAL_OS_MAX_SLEEP (FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH - 1)
 
+#define FURI_HAL_OS_NVIC_IS_PENDING() (NVIC->ISPR[0] || NVIC->ISPR[1])
+#define FURI_HAL_OS_EXTI_LINE_0_31 0
+#define FURI_HAL_OS_EXTI_LINE_32_63 1
+
 // Arbitrary (but small) number for better tick consistency
 #define FURI_HAL_OS_EXTRA_CNT 3
 
@@ -36,7 +38,7 @@ void furi_hal_os_timer_callback() {
 
 extern void xPortSysTickHandler();
 
-static volatile uint32_t furi_hal_os_skew = 0;
+static volatile uint32_t furi_hal_os_skew;
 
 void furi_hal_os_init() {
     furi_hal_idle_timer_init();
@@ -59,6 +61,55 @@ void furi_hal_os_tick() {
 #endif
         xPortSysTickHandler();
     }
+}
+
+#ifdef FURI_HAL_OS_DEBUG
+// Find out the IRQ number while debugging
+static void furi_hal_os_nvic_dbg_trap() {
+    for(int32_t i = WWDG_IRQn; i <= DMAMUX1_OVR_IRQn; i++) {
+        if(NVIC_GetPendingIRQ(i)) {
+            (void)i;
+            // Break here
+            __NOP();
+        }
+    }
+}
+
+// Find out the EXTI line number while debugging
+static void furi_hal_os_exti_dbg_trap(uint32_t exti, uint32_t val) {
+    for(uint32_t i = 0; val; val >>= 1U, ++i) {
+        if(val & 1U) {
+            (void)exti;
+            (void)i;
+            // Break here
+            __NOP();
+        }
+    }
+}
+#endif
+
+static inline bool furi_hal_os_is_pending_irq() {
+    if(FURI_HAL_OS_NVIC_IS_PENDING()) {
+#ifdef FURI_HAL_OS_DEBUG
+        furi_hal_os_nvic_dbg_trap();
+#endif
+        return true;
+    }
+
+    uint32_t exti_lines_active;
+    if((exti_lines_active = LL_EXTI_ReadFlag_0_31(LL_EXTI_LINE_ALL_0_31))) {
+#ifdef FURI_HAL_OS_DEBUG
+        furi_hal_os_exti_dbg_trap(FURI_HAL_OS_EXTI_LINE_0_31, exti_lines_active);
+#endif
+        return true;
+    } else if((exti_lines_active = LL_EXTI_ReadFlag_32_63(LL_EXTI_LINE_ALL_32_63))) {
+#ifdef FURI_HAL_OS_DEBUG
+        furi_hal_os_exti_dbg_trap(FURI_HAL_OS_EXTI_LINE_32_63, exti_lines_active);
+#endif
+        return true;
+    }
+
+    return false;
 }
 
 static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
@@ -111,7 +162,7 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
     __disable_irq();
 
     // Confirm OS that sleep is still possible
-    if(eTaskConfirmSleepModeStatus() == eAbortSleep) {
+    if(eTaskConfirmSleepModeStatus() == eAbortSleep || furi_hal_os_is_pending_irq()) {
         __enable_irq();
         return;
     }
