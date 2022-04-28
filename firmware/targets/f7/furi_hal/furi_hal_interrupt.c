@@ -248,6 +248,9 @@ void USB_LP_IRQHandler() {
 #endif
 }
 
+void USB_HP_IRQHandler() {
+}
+
 void IPCC_C1_TX_IRQHandler() {
     HW_IPCC_Tx_Handler();
 }
