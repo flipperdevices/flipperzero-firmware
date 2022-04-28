@@ -23,6 +23,9 @@
 #define FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH (FURI_HAL_OS_IDLE_CNT_TO_TICKS(FURI_HAL_IDLE_TIMER_MAX))
 #define FURI_HAL_OS_MAX_SLEEP (FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH - 1)
 
+// Arbitrary (but small) number for better tick consistency
+#define FURI_HAL_OS_EXTRA_CNT 3
+
 #ifdef FURI_HAL_OS_DEBUG
 #include <stm32wbxx_ll_gpio.h>
 
@@ -77,7 +80,7 @@ static inline uint32_t furi_hal_os_sleep(TickType_t expected_idle_ticks) {
 #endif
 
     // Calculate how much time we spent in the sleep
-    uint32_t after_cnt = furi_hal_idle_timer_get_cnt() + furi_hal_os_skew;
+    uint32_t after_cnt = furi_hal_idle_timer_get_cnt() + furi_hal_os_skew + FURI_HAL_OS_EXTRA_CNT;
     uint32_t after_tick = FURI_HAL_OS_IDLE_CNT_TO_TICKS(after_cnt);
     furi_hal_os_skew = after_cnt - FURI_HAL_OS_TICKS_TO_IDLE_CNT(after_tick);
 

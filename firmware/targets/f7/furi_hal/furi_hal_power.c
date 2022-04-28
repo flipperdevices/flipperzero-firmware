@@ -147,7 +147,7 @@ static void furi_hal_power_nvic_dbg_trap() {
         if(NVIC_GetPendingIRQ(i)) {
             (void)i;
             // Break here
-//             asm volatile("bkpt 0");
+            __NOP();
         }
     }
 }
@@ -159,7 +159,7 @@ static void furi_hal_power_exti_dbg_trap(uint32_t exti, uint32_t val) {
             (void)exti;
             (void)i;
             // Break here
-//             asm volatile("bkpt 0");
+            __NOP();
         }
     }
 }
