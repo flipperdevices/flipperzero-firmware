@@ -122,17 +122,17 @@ uint16_t furi_hal_power_insomnia_level() {
 }
 
 void furi_hal_power_insomnia_enter() {
-//     FURI_CRITICAL_ENTER();
-//     furi_assert(furi_hal_power.insomnia < UINT8_MAX);
-//     furi_hal_power.insomnia++;
-//     FURI_CRITICAL_EXIT();
+    FURI_CRITICAL_ENTER();
+    furi_assert(furi_hal_power.insomnia < UINT8_MAX);
+    furi_hal_power.insomnia++;
+    FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_power_insomnia_exit() {
-//     FURI_CRITICAL_ENTER();
-//     furi_assert(furi_hal_power.insomnia > 0);
-//     furi_hal_power.insomnia--;
-//     FURI_CRITICAL_EXIT();
+    FURI_CRITICAL_ENTER();
+    furi_assert(furi_hal_power.insomnia > 0);
+    furi_hal_power.insomnia--;
+    FURI_CRITICAL_EXIT();
 }
 
 bool furi_hal_power_sleep_available() {
