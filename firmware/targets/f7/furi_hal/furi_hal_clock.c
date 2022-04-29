@@ -62,6 +62,7 @@ void furi_hal_clock_init() {
     LL_RCC_HSI_Enable();
     while(!HS_CLOCK_IS_READY())
         ;
+    LL_RCC_HSE_EnableCSS();
 
     /* LSE and LSI1 configuration and activation */
     LL_PWR_EnableBkUpAccess();
@@ -73,6 +74,8 @@ void furi_hal_clock_init() {
     LL_EXTI_EnableIT_0_31(
         LL_EXTI_LINE_18); /* Why? Because that's why. See RM0434, Table 61. CPU1 vector table. */
     LL_EXTI_EnableRisingTrig_0_31(LL_EXTI_LINE_18);
+    LL_RCC_EnableIT_LSECSS();
+    LL_RCC_LSE_EnableCSS();
 
     /* Main PLL configuration and activation */
     LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_2, 8, LL_RCC_PLLR_DIV_2);
