@@ -53,11 +53,17 @@ iButton *ibutton_alloc() {
     ibutton->submenu = submenu_alloc();
     view_dispatcher_add_view(ibutton->view_dispatcher, iButtonViewSubmenu, submenu_get_view(ibutton->submenu));
 
+    ibutton->byte_input = byte_input_alloc();
+    view_dispatcher_add_view(ibutton->view_dispatcher, iButtonViewByteInput, byte_input_get_view(ibutton->byte_input));
+
     return ibutton;
 }
 
 void ibutton_free(iButton* ibutton) {
     furi_assert(ibutton);
+
+    view_dispatcher_remove_view(ibutton->view_dispatcher, iButtonViewByteInput);
+    byte_input_free(ibutton->byte_input);
 
     view_dispatcher_remove_view(ibutton->view_dispatcher, iButtonViewSubmenu);
     submenu_free(ibutton->submenu);

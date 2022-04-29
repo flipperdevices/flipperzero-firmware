@@ -2,11 +2,11 @@
 
 #include "ibutton.h"
 
+// #include <cli/cli.h>
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
-// #include <cli/cli.h>
 #include <notification/notification_messages.h>
 
 #include <one_wire/ibutton/ibutton_worker.h>
@@ -16,10 +16,11 @@
 #include <gui/modules/submenu.h>
 // #include <gui/modules/popup.h>
 // #include <gui/modules/text_input.h>
-// #include <gui/modules/byte_input.h>
+#include <gui/modules/byte_input.h>
 // #include <gui/modules/text_box.h>
 // #include <gui/modules/widget.h>
 
+#include "ibutton_custom_event.h"
 #include "scenes/ibutton_scene.h"
 
 #define IBUTTON_FILE_NAME_SIZE 100
@@ -38,15 +39,18 @@ struct iButton {
     iButtonKey* key;
 
     char file_name[IBUTTON_FILE_NAME_SIZE];
+    uint8_t new_key_data[IBUTTON_KEY_DATA_SIZE];
 //     char text_store[IBUTTON_TEXT_STORE_SIZE + 1];
 //     string_t text_box_store;
 
     // Common Views
     Submenu* submenu;
+    ByteInput* byte_input;
 };
 
 typedef enum {
     iButtonViewSubmenu,
+    iButtonViewByteInput,
 } iButtonView;
 
 iButton* ibutton_alloc();
