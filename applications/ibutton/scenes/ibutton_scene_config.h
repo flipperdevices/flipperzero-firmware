@@ -1,1 +1,6 @@
 ADD_SCENE(ibutton, start, Start)
+ADD_SCENE(ibutton, read, Read)
+ADD_SCENE(ibutton, select_key, SelectKey)
+ADD_SCENE(ibutton, add_type, AddType)
+ADD_SCENE(ibutton, add_value, AddValue)
+ADD_SCENE(ibutton, saved_menu, SavedMenu)

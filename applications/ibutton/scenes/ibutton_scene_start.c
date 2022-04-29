@@ -1,10 +1,10 @@
 #include "../ibutton_i.h"
 
-typedef enum {
+enum SubmenuIndex {
     SubmenuIndexRead,
     SubmenuIndexSaved,
     SubmenuIndexAdd,
-} SubmenuIndex;
+};
 
 void ibutton_scene_start_submenu_callback(void* context, uint32_t index) {
     iButton* ibutton = context;
@@ -25,8 +25,21 @@ void ibutton_scene_start_on_enter(void *context) {
 }
 
 bool ibutton_scene_start_on_event(void *context, SceneManagerEvent event) {
-//     iButton* ibutton = context;
-    return false;
+    iButton* ibutton = context;
+
+    if(event.type != SceneManagerEventTypeCustom) {
+        return false;
+    } else if(event.event == SubmenuIndexRead) {
+        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneRead);
+    } else if(event.event == SubmenuIndexSaved) {
+        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSelectKey);
+    } else if(event.event == SubmenuIndexAdd) {
+        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddType);
+    } else {
+        return false;
+    }
+
+    return true;
 }
 
 void ibutton_scene_start_on_exit(void *context) {
