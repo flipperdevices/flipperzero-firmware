@@ -25,6 +25,7 @@ static void sd_mount_callback(const void* message, void* context) {
 
 void updater_scene_main_on_enter(void* context) {
     Updater* updater = (Updater*)context;
+    updater->notification->settings.display_off_delay_ms = UINT_MAX;
     UpdaterMainView* main_view = updater->main_view;
 
     FuriPubSubSubscription* sub =
