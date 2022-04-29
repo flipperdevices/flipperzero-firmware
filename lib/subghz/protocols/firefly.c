@@ -43,10 +43,9 @@ struct SubGhzProtocolEncoderFirefly {
 };
 
 typedef enum {
-    Firefly300DecoderStepReset = 0,
-    Firefly300DecoderStepFoundStartBit,
-    Firefly300DecoderStepSaveDuration,
-    Firefly300DecoderStepCheckDuration,
+    FireflyDecoderStepReset = 0,
+    FireflyDecoderStepSaveDuration,
+    FireflyDecoderStepCheckDuration,
 } FireflyDecoderStep;
 
 const SubGhzProtocolDecoder subghz_protocol_firefly_decoder = {
@@ -215,34 +214,34 @@ void subghz_protocol_decoder_firefly_free(void* context) {
 void subghz_protocol_decoder_firefly_reset(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderFirefly* instance = context;
-    instance->decoder.parser_step = Firefly300DecoderStepReset;
+    instance->decoder.parser_step = FireflyDecoderStepReset;
 }
 
 void subghz_protocol_decoder_firefly_feed(void* context, bool level, uint32_t duration) {
     furi_assert(context);
     SubGhzProtocolDecoderFirefly* instance = context;
     switch(instance->decoder.parser_step) {
-    case Firefly300DecoderStepReset:
+    case FireflyDecoderStepReset:
         if((!level) && (DURATION_DIFF(duration, subghz_protocol_firefly_const.te_short * 42) <
                         subghz_protocol_firefly_const.te_delta * 20)) {
             //Found header Firefly
             instance->decoder.decode_data = 0;
             instance->decoder.decode_count_bit = 0;
-            instance->decoder.parser_step = Firefly300DecoderStepSaveDuration;
+            instance->decoder.parser_step = FireflyDecoderStepSaveDuration;
         }
         break;
-    case Firefly300DecoderStepSaveDuration:
+    case FireflyDecoderStepSaveDuration:
         if(level) {
             instance->decoder.te_last = duration;
-            instance->decoder.parser_step = Firefly300DecoderStepCheckDuration;
+            instance->decoder.parser_step = FireflyDecoderStepCheckDuration;
         } else {
-            instance->decoder.parser_step = Firefly300DecoderStepReset;
+            instance->decoder.parser_step = FireflyDecoderStepReset;
         }
         break;
-    case Firefly300DecoderStepCheckDuration:
+    case FireflyDecoderStepCheckDuration:
         if(!level) { //save interval
             if(duration >= (subghz_protocol_firefly_const.te_short * 5)) {
-                instance->decoder.parser_step = Firefly300DecoderStepReset;
+                instance->decoder.parser_step = FireflyDecoderStepReset;
                 //checking that the duration matches the guardtime
                 if((DURATION_DIFF(duration, subghz_protocol_firefly_const.te_short * 42) >
                     subghz_protocol_firefly_const.te_delta * 20)) {
@@ -277,20 +276,20 @@ void subghz_protocol_decoder_firefly_feed(void* context, bool level, uint32_t du
                (DURATION_DIFF(duration, subghz_protocol_firefly_const.te_long) <
                 subghz_protocol_firefly_const.te_delta)) {
                 subghz_protocol_blocks_add_bit(&instance->decoder, 0);
-                instance->decoder.parser_step = Firefly300DecoderStepSaveDuration;
+                instance->decoder.parser_step = FireflyDecoderStepSaveDuration;
             } else if(
                 (DURATION_DIFF(instance->decoder.te_last, subghz_protocol_firefly_const.te_long) <
                  subghz_protocol_firefly_const.te_delta) &&
                 (DURATION_DIFF(duration, subghz_protocol_firefly_const.te_short) <
                  subghz_protocol_firefly_const.te_delta)) {
                 subghz_protocol_blocks_add_bit(&instance->decoder, 1);
-                instance->decoder.parser_step = Firefly300DecoderStepSaveDuration;
+                instance->decoder.parser_step = FireflyDecoderStepSaveDuration;
             } else {
-                instance->decoder.parser_step = Firefly300DecoderStepReset;
+                instance->decoder.parser_step = FireflyDecoderStepReset;
             }
 
         } else {
-            instance->decoder.parser_step = Firefly300DecoderStepReset;
+            instance->decoder.parser_step = FireflyDecoderStepReset;
         }
         break;
     }
