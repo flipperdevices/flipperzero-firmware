@@ -1,4 +1,4 @@
-#include "Firefly.h"
+#include "firefly.h"
 
 #include "../blocks/const.h"
 #include "../blocks/decoder.h"
