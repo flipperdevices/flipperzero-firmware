@@ -16,6 +16,7 @@
 
 #define FURI_HAL_BT_STACK_VERSION_MAJOR (1)
 #define FURI_HAL_BT_STACK_VERSION_MINOR (13)
+#define FURI_HAL_BT_C2_START_TIMEOUT 1000
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,6 +67,12 @@ FuriHalBtStack furi_hal_bt_get_radio_stack();
  * @return          true on success
 */
 bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, void* context);
+
+/** Reinitialize core2
+ * 
+ * Also can be used to prepare core2 for stop modes
+ */
+void furi_hal_bt_reinit();
 
 /** Change BLE app
  * Restarts 2nd core
@@ -206,6 +213,12 @@ bool furi_hal_bt_start_scan(GapScanCallback callback, void* context);
 
 /** Stop MAC addresses scan */
 void furi_hal_bt_stop_scan();
+
+/** Check & switch C2 to given mode
+ *
+ * @param[in]  mode  mode to switch into
+ */
+bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode);
 
 #ifdef __cplusplus
 }
