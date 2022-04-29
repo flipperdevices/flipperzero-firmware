@@ -298,7 +298,6 @@ void notification_process_notification_message(
             need_minimal_delay = true;
         }
 
-        led_active = false;
         notification_apply_notification_leds(app, led_values);
         reset_mask |= reset_red_mask;
         reset_mask |= reset_green_mask;

@@ -122,15 +122,15 @@ static const TextInputKey* get_row(uint8_t row_index) {
     return row;
 }
 
-static const char get_selected_char(TextInputModel* model) {
+static char get_selected_char(TextInputModel* model) {
     return get_row(model->selected_row)[model->selected_column].text;
 }
 
-static const bool char_is_lowercase(char letter) {
+static bool char_is_lowercase(char letter) {
     return (letter >= 0x61 && letter <= 0x7A);
 }
 
-static const char char_to_uppercase(const char letter) {
+static char char_to_uppercase(const char letter) {
     if(isalpha(letter)) {
         return (letter - 0x20);
     } else {

@@ -148,7 +148,7 @@ static int32_t vcp_worker(void* context) {
                 if(len > 0) {
                     furi_check(
                         xStreamBufferSend(vcp->rx_stream, vcp->data_buffer, len, osWaitForever) ==
-                        len);
+                        (size_t)len);
                 }
             } else {
 #ifdef CLI_VCP_DEBUG

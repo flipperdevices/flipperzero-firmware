@@ -204,7 +204,6 @@ bool mf_classic_read_block(
     MfClassicBlock* block) {
     furi_assert(tx_rx);
     furi_assert(crypto);
-    furi_assert(block_num < MF_CLASSIC_TOTAL_BLOCKS_MAX);
     furi_assert(block);
 
     bool read_block_success = false;

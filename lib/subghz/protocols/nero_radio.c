@@ -278,7 +278,7 @@ void subghz_protocol_decoder_nero_radio_feed(void* context, bool level, uint32_t
         break;
     case NeroRadioDecoderStepCheckDuration:
         if(!level) {
-            if(duration >= (subghz_protocol_nero_radio_const.te_short * 10 +
+            if(duration >= ((uint32_t)subghz_protocol_nero_radio_const.te_short * 10 +
                             subghz_protocol_nero_radio_const.te_delta * 2)) {
                 //Found stop bit
                 if(DURATION_DIFF(

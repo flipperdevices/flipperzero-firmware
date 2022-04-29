@@ -236,7 +236,7 @@ void subghz_protocol_decoder_princeton_feed(void* context, bool level, uint32_t 
         break;
     case PrincetonDecoderStepCheckDuration:
         if(!level) {
-            if(duration >= (subghz_protocol_princeton_const.te_short * 10 +
+            if(duration >= ((uint32_t)subghz_protocol_princeton_const.te_short * 10 +
                             subghz_protocol_princeton_const.te_delta)) {
                 instance->decoder.parser_step = PrincetonDecoderStepSaveDuration;
                 if(instance->decoder.decode_count_bit ==
