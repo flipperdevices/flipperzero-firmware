@@ -106,8 +106,7 @@ void subghz_protocol_encoder_firefly_free(void* context) {
  * @param instance Pointer to a SubGhzProtocolEncoderFirefly instance
  * @return true On success
  */
-static bool
-    subghz_protocol_encoder_firefly_get_upload(SubGhzProtocolEncoderFirefly* instance) {
+static bool subghz_protocol_encoder_firefly_get_upload(SubGhzProtocolEncoderFirefly* instance) {
     furi_assert(instance);
     size_t index = 0;
     size_t size_upload = (instance->generic.data_count_bit * 2);
@@ -122,16 +121,16 @@ static bool
     for(uint8_t i = instance->generic.data_count_bit; i > 1; i--) {
         if(bit_read(instance->generic.data, i - 1)) {
             //send bit 1
-            instance->encoder.upload[index++] = level_duration_make(
-                true, (uint32_t)subghz_protocol_firefly_const.te_short * 3);
+            instance->encoder.upload[index++] =
+                level_duration_make(true, (uint32_t)subghz_protocol_firefly_const.te_short * 3);
             instance->encoder.upload[index++] =
                 level_duration_make(false, (uint32_t)subghz_protocol_firefly_const.te_short);
         } else {
             //send bit 0
             instance->encoder.upload[index++] =
                 level_duration_make(true, (uint32_t)subghz_protocol_firefly_const.te_short);
-            instance->encoder.upload[index++] = level_duration_make(
-                false, (uint32_t)subghz_protocol_firefly_const.te_short * 3);
+            instance->encoder.upload[index++] =
+                level_duration_make(false, (uint32_t)subghz_protocol_firefly_const.te_short * 3);
         }
     }
     //Send end bit
@@ -273,16 +272,14 @@ void subghz_protocol_decoder_firefly_feed(void* context, bool level, uint32_t du
                 break;
             }
 
-            if((DURATION_DIFF(
-                    instance->decoder.te_last, subghz_protocol_firefly_const.te_short) <
+            if((DURATION_DIFF(instance->decoder.te_last, subghz_protocol_firefly_const.te_short) <
                 subghz_protocol_firefly_const.te_delta) &&
                (DURATION_DIFF(duration, subghz_protocol_firefly_const.te_long) <
                 subghz_protocol_firefly_const.te_delta)) {
                 subghz_protocol_blocks_add_bit(&instance->decoder, 0);
                 instance->decoder.parser_step = Firefly300DecoderStepSaveDuration;
             } else if(
-                (DURATION_DIFF(
-                     instance->decoder.te_last, subghz_protocol_firefly_const.te_long) <
+                (DURATION_DIFF(instance->decoder.te_last, subghz_protocol_firefly_const.te_long) <
                  subghz_protocol_firefly_const.te_delta) &&
                 (DURATION_DIFF(duration, subghz_protocol_firefly_const.te_short) <
                  subghz_protocol_firefly_const.te_delta)) {
