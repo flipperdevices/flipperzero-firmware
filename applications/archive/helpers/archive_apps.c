@@ -16,6 +16,7 @@ ArchiveAppTypeEnum archive_get_app_type(const char* path) {
 }
 
 bool archive_app_is_available(void* context, const char* path) {
+    UNUSED(context);
     furi_assert(path);
 
     ArchiveAppTypeEnum app = archive_get_app_type(path);

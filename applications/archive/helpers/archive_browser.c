@@ -249,6 +249,7 @@ void archive_set_tab(ArchiveBrowserView* browser, ArchiveTabEnum tab) {
         });
 }
 void archive_set_last_tab(ArchiveBrowserView* browser, ArchiveTabEnum tab) {
+    UNUSED(tab); // FIXME?
     furi_assert(browser);
 
     with_view_model(

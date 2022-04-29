@@ -70,6 +70,7 @@ static void text_box_test_input_callback(InputEvent* input_event, void* ctx) {
 }
 
 int32_t text_box_test_app(void* p) {
+    UNUSED(p);
     osMessageQueueId_t event_queue = osMessageQueueNew(32, sizeof(InputEvent), NULL);
     furi_check(event_queue);
 
