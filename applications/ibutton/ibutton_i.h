@@ -14,7 +14,7 @@
 #include <dialogs/dialogs.h>
 
 #include <gui/modules/submenu.h>
-// #include <gui/modules/popup.h>
+#include <gui/modules/popup.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
 // #include <gui/modules/text_box.h>
@@ -51,12 +51,14 @@ struct iButton {
     Submenu* submenu;
     ByteInput* byte_input;
     TextInput* text_input;
+    Popup* popup;
 };
 
 typedef enum {
     iButtonViewSubmenu,
     iButtonViewByteInput,
     iButtonViewTextInput,
+    iButtonViewPopup,
 } iButtonView;
 
 iButton* ibutton_alloc();
@@ -65,3 +67,7 @@ bool ibutton_file_select(iButton* ibutton);
 bool ibutton_save_key(iButton* ibutton, const char* key_name);
 void ibutton_text_store_set(iButton* ibutton, const char* text, ...);
 void ibutton_text_store_clear(iButton* ibutton);
+void ibutton_switch_to_previous_scene_one_of(
+    iButton* ibutton,
+    const uint32_t* scene_ids,
+    size_t scene_ids_size);

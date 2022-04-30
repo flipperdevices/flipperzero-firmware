@@ -125,11 +125,18 @@ iButton* ibutton_alloc() {
     view_dispatcher_add_view(
         ibutton->view_dispatcher, iButtonViewTextInput, text_input_get_view(ibutton->text_input));
 
+    ibutton->popup = popup_alloc();
+    view_dispatcher_add_view(
+        ibutton->view_dispatcher, iButtonViewPopup, popup_get_view(ibutton->popup));
+
     return ibutton;
 }
 
 void ibutton_free(iButton* ibutton) {
     furi_assert(ibutton);
+
+    view_dispatcher_remove_view(ibutton->view_dispatcher, iButtonViewPopup);
+    popup_free(ibutton->popup);
 
     view_dispatcher_remove_view(ibutton->view_dispatcher, iButtonViewTextInput);
     text_input_free(ibutton->text_input);
@@ -269,4 +276,20 @@ int32_t ibutton_app(void* p) {
 
     ibutton_free(ibutton);
     return 0;
+}
+
+void ibutton_switch_to_previous_scene_one_of(
+    iButton* ibutton,
+    const uint32_t* scene_ids,
+    size_t scene_ids_size) {
+    furi_assert(scene_ids_size);
+    SceneManager* scene_manager = ibutton->scene_manager;
+
+    for(size_t i = 0; i < scene_ids_size; ++i) {
+        const uint32_t scene_id = scene_ids[i];
+        if(scene_manager_has_previous_scene(scene_manager, scene_id)) {
+            scene_manager_search_and_switch_to_previous_scene(scene_manager, scene_id);
+            return;
+        }
+    }
 }
