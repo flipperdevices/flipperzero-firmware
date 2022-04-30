@@ -11,22 +11,6 @@ static void ibutton_make_app_folder(iButton* ibutton) {
     }
 }
 
-static bool ibutton_delete_key(iButton* ibutton) {
-    string_t file_name;
-    bool result = false;
-
-    string_init_printf(
-        file_name,
-        "%s/%s%s",
-        IBUTTON_APP_FOLDER,
-        ibutton_key_get_name_p(ibutton->key),
-        IBUTTON_APP_EXTENSION);
-    result = storage_simply_remove(ibutton->storage, string_get_cstr(file_name));
-    string_clear(file_name);
-
-    return result;
-}
-
 static bool ibutton_load_key_data(iButton* ibutton, string_t key_path) {
     FlipperFormat* file = flipper_format_file_alloc(ibutton->storage);
     bool result = false;
@@ -262,6 +246,22 @@ bool ibutton_save_key(iButton* ibutton, const char* key_name) {
     return result;
 }
 
+bool ibutton_delete_key(iButton* ibutton) {
+    string_t file_name;
+    bool result = false;
+
+    string_init_printf(
+        file_name,
+        "%s/%s%s",
+        IBUTTON_APP_FOLDER,
+        ibutton_key_get_name_p(ibutton->key),
+        IBUTTON_APP_EXTENSION);
+    result = storage_simply_remove(ibutton->storage, string_get_cstr(file_name));
+    string_clear(file_name);
+
+    return result;
+}
+
 void ibutton_text_store_set(iButton* ibutton, const char* text, ...) {
     va_list args;
     va_start(args, text);
@@ -273,16 +273,6 @@ void ibutton_text_store_set(iButton* ibutton, const char* text, ...) {
 
 void ibutton_text_store_clear(iButton* ibutton) {
     memset(ibutton->text_store, 0, IBUTTON_TEXT_STORE_SIZE);
-}
-
-int32_t ibutton_app(void* p) {
-    iButton* ibutton = ibutton_alloc();
-
-    scene_manager_next_scene(ibutton->scene_manager, iButtonSceneStart);
-    view_dispatcher_run(ibutton->view_dispatcher);
-
-    ibutton_free(ibutton);
-    return 0;
 }
 
 void ibutton_switch_to_previous_scene_one_of(
@@ -299,4 +289,14 @@ void ibutton_switch_to_previous_scene_one_of(
             return;
         }
     }
+}
+
+int32_t ibutton_app(void* p) {
+    iButton* ibutton = ibutton_alloc();
+
+    scene_manager_next_scene(ibutton->scene_manager, iButtonSceneStart);
+    view_dispatcher_run(ibutton->view_dispatcher);
+
+    ibutton_free(ibutton);
+    return 0;
 }
