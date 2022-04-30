@@ -18,7 +18,7 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
 // #include <gui/modules/text_box.h>
-// #include <gui/modules/widget.h>
+#include <gui/modules/widget.h>
 
 #include "ibutton_custom_event.h"
 #include "scenes/ibutton_scene.h"
@@ -52,6 +52,7 @@ struct iButton {
     ByteInput* byte_input;
     TextInput* text_input;
     Popup* popup;
+    Widget* widget;
 };
 
 typedef enum {
@@ -59,6 +60,7 @@ typedef enum {
     iButtonViewByteInput,
     iButtonViewTextInput,
     iButtonViewPopup,
+    iButtonViewWidget,
 } iButtonView;
 
 iButton* ibutton_alloc();
