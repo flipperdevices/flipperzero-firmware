@@ -11,20 +11,23 @@ void ibutton_scene_add_type_submenu_callback(void* context, uint32_t index) {
     view_dispatcher_send_custom_event(ibutton->view_dispatcher, index);
 }
 
-void ibutton_scene_add_type_on_enter(void *context) {
+void ibutton_scene_add_type_on_enter(void* context) {
     iButton* ibutton = context;
     Submenu* submenu = ibutton->submenu;
 
-    submenu_add_item(submenu, "Cyfral", SubmenuIndexCyfral, ibutton_scene_add_type_submenu_callback, ibutton);
-    submenu_add_item(submenu, "Dallas", SubmenuIndexDallas, ibutton_scene_add_type_submenu_callback, ibutton);
-    submenu_add_item(submenu, "Metakom", SubmenuIndexMetakom, ibutton_scene_add_type_submenu_callback, ibutton);
+    submenu_add_item(
+        submenu, "Cyfral", SubmenuIndexCyfral, ibutton_scene_add_type_submenu_callback, ibutton);
+    submenu_add_item(
+        submenu, "Dallas", SubmenuIndexDallas, ibutton_scene_add_type_submenu_callback, ibutton);
+    submenu_add_item(
+        submenu, "Metakom", SubmenuIndexMetakom, ibutton_scene_add_type_submenu_callback, ibutton);
 
     submenu_set_selected_item(submenu, SubmenuIndexCyfral);
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewSubmenu);
 }
 
-bool ibutton_scene_add_type_on_event(void *context, SceneManagerEvent event) {
+bool ibutton_scene_add_type_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
     iButtonKey* key = ibutton->key;
 
@@ -47,7 +50,7 @@ bool ibutton_scene_add_type_on_event(void *context, SceneManagerEvent event) {
     return true;
 }
 
-void ibutton_scene_add_type_on_exit(void *context) {
+void ibutton_scene_add_type_on_exit(void* context) {
     iButton* ibutton = context;
     submenu_reset(ibutton->submenu);
 }
