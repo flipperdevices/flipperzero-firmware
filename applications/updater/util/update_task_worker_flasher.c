@@ -332,9 +332,6 @@ int32_t update_task_worker_flash_writer(void* context) {
     UpdateTask* update_task = context;
     bool success = false;
 
-    update_task->state.current_stage_idx = 0;
-    update_task->state.total_stages = 0;
-
     do {
         CHECK_RESULT(update_task_parse_manifest(update_task));
 
@@ -344,12 +341,10 @@ int32_t update_task_worker_flash_writer(void* context) {
 
         bool check_ob = update_manifest_has_obdata(update_task->manifest);
         if(check_ob) {
-            update_task->state.total_stages++;
             CHECK_RESULT(update_task_validate_optionbytes(update_task));
         }
 
         if(!string_empty_p(update_task->manifest->firmware_dfu_image)) {
-            update_task->state.total_stages += 4;
             CHECK_RESULT(update_task_write_dfu(update_task));
         }
 
@@ -359,5 +354,10 @@ int32_t update_task_worker_flash_writer(void* context) {
         success = true;
     } while(false);
 
-    return success ? UPDATE_TASK_NOERR : UPDATE_TASK_FAILED;
+    if(!success) {
+        update_task_set_progress(update_task, UpdateTaskStageError, 0);
+        return UPDATE_TASK_FAILED;
+    }
+
+    return UPDATE_TASK_NOERR;
 }

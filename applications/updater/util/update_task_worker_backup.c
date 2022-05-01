@@ -27,7 +27,6 @@ static bool update_task_pre_update(UpdateTask* update_task) {
     path_concat(
         string_get_cstr(update_task->update_path), LFS_BACKUP_DEFAULT_FILENAME, backup_file_path);
 
-    update_task->state.total_stages = 1;
     update_task_set_progress(update_task, UpdateTaskStageLfsBackup, 0);
     /* to avoid bootloops */
     furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeNormal);
@@ -61,9 +60,6 @@ static bool update_task_post_update(UpdateTask* update_task) {
 
     string_t file_path;
     string_init(file_path);
-
-    /* status text is too long, too few stages to bother with a counter */
-    update_task->state.total_stages = 0;
 
     do {
         CHECK_RESULT(update_task_parse_manifest(update_task));
@@ -120,14 +116,13 @@ int32_t update_task_worker_backup_restore(void* context) {
         return UPDATE_TASK_NOERR;
     }
 
-    update_task->state.current_stage_idx = 0;
-
     if(!update_operation_get_current_package_path(update_task->storage, update_task->update_path)) {
         return UPDATE_TASK_FAILED;
     }
 
     /* Waiting for BT service to 'start', so we don't race for boot mode */
     furi_record_open("bt");
+    furi_record_close("bt");
 
     if(boot_mode == FuriHalRtcBootModePreUpdate) {
         success = update_task_pre_update(update_task);
@@ -135,13 +130,11 @@ int32_t update_task_worker_backup_restore(void* context) {
         success = update_task_post_update(update_task);
     }
 
-    furi_record_close("bt");
-
-    if(success) {
-        update_task_set_progress(update_task, UpdateTaskStageCompleted, 100);
-    } else {
-        update_task_set_progress(update_task, UpdateTaskStageError, update_task->state.progress);
+    if(!success) {
+        update_task_set_progress(update_task, UpdateTaskStageError, 0);
+        return UPDATE_TASK_FAILED;
     }
 
-    return success ? UPDATE_TASK_NOERR : UPDATE_TASK_FAILED;
+    update_task_set_progress(update_task, UpdateTaskStageCompleted, 100);
+    return UPDATE_TASK_NOERR;
 }

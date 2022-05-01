@@ -29,12 +29,10 @@ static bool updater_back_event_callback(void* context) {
 static void status_update_cb(
     const char* message,
     const uint8_t progress,
-    const uint8_t idx_stage,
-    const uint8_t total_stages,
     bool failed,
     void* context) {
     UpdaterMainView* main_view = context;
-    updater_main_model_set_state(main_view, message, progress, idx_stage, total_stages, failed);
+    updater_main_model_set_state(main_view, message, progress, failed);
 }
 
 Updater* updater_alloc(const char* arg) {
@@ -66,7 +64,8 @@ Updater* updater_alloc(const char* arg) {
     view_dispatcher_attach_to_gui(
         updater->view_dispatcher,
         updater->gui,
-        arg ? ViewDispatcherTypeFullscreen : ViewDispatcherTypeWindow);
+        ViewDispatcherTypeFullscreen);
+        //arg ? ViewDispatcherTypeFullscreen : ViewDispatcherTypeWindow);
 
     updater->main_view = updater_main_alloc();
     view_dispatcher_add_view(

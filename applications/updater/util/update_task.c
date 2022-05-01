@@ -15,52 +15,159 @@ static const char* update_task_stage_descr[] = {
     [UpdateTaskStageValidateDFUImage] = "Checking DFU file",
     [UpdateTaskStageFlashWrite] = "Writing flash",
     [UpdateTaskStageFlashValidate] = "Validating",
-    [UpdateTaskStageRadioImageValidate] = "Checking radio image",
-    [UpdateTaskStageRadioErase] = "Removing radio stack",
-    [UpdateTaskStageRadioWrite] = "Writing radio stack",
-    [UpdateTaskStageRadioInstall] = "Installing radio stack",
+    [UpdateTaskStageRadioImageValidate] = "Checking radio FW",
+    [UpdateTaskStageRadioErase] = "Uninstalling radio FW",
+    [UpdateTaskStageRadioWrite] = "Writing radio FW",
+    [UpdateTaskStageRadioInstall] = "Installing radio FW",
     [UpdateTaskStageRadioBusy] = "Core2 is updating",
-    [UpdateTaskStageOBValidation] = "Validating opt. bytes",
+    [UpdateTaskStageOBValidation] = "Validating OBs",
     [UpdateTaskStageLfsBackup] = "Backing up LFS",
     [UpdateTaskStageLfsRestore] = "Restoring LFS",
     [UpdateTaskStageResourcesUpdate] = "Updating resources",
-    [UpdateTaskStageCompleted] = "Completed!",
+    [UpdateTaskStageCompleted] = "Restarting...",
     [UpdateTaskStageError] = "Error",
     [UpdateTaskStageOBError] = "OB error, pls report",
 };
 
-static void update_task_set_status(UpdateTask* update_task, const char* status) {
-    if(!status) {
-        if(update_task->state.stage >= COUNT_OF(update_task_stage_descr)) {
-            status = "...";
-        } else {
-            status = update_task_stage_descr[update_task->state.stage];
-        }
+typedef struct {
+    UpdateTaskStageGroup group;
+    uint8_t weight;
+} UpdateTaskStageGroupMap;
+
+#define STAGE_DEF(GROUP, WEIGHT) \
+    { .group = (GROUP), .weight = (WEIGHT), }
+
+static const UpdateTaskStageGroupMap update_task_stage_progress[] = {
+    [UpdateTaskStageProgress] = STAGE_DEF(UpdateTaskStageGroupMisc, 0),
+
+    [UpdateTaskStageReadManifest] = STAGE_DEF(UpdateTaskStageGroupPreUpdate, 5),
+    [UpdateTaskStageLfsBackup] = STAGE_DEF(UpdateTaskStageGroupPreUpdate, 30),
+
+    [UpdateTaskStageRadioImageValidate] = STAGE_DEF(UpdateTaskStageGroupRadio, 30),
+    [UpdateTaskStageRadioErase] = STAGE_DEF(UpdateTaskStageGroupRadio, 50),
+    [UpdateTaskStageRadioWrite] = STAGE_DEF(UpdateTaskStageGroupRadio, 100),
+    [UpdateTaskStageRadioInstall] = STAGE_DEF(UpdateTaskStageGroupRadio, 5),
+    [UpdateTaskStageRadioBusy] = STAGE_DEF(UpdateTaskStageGroupRadio, 70),
+
+    [UpdateTaskStageOBValidation] = STAGE_DEF(UpdateTaskStageGroupOptionBytes, 10),
+
+    [UpdateTaskStageValidateDFUImage] = STAGE_DEF(UpdateTaskStageGroupFirmware, 100),
+    [UpdateTaskStageFlashWrite] = STAGE_DEF(UpdateTaskStageGroupFirmware, 200),
+    [UpdateTaskStageFlashValidate] = STAGE_DEF(UpdateTaskStageGroupFirmware, 50),
+
+    [UpdateTaskStageLfsRestore] = STAGE_DEF(UpdateTaskStageGroupPostUpdate, 30),
+
+    [UpdateTaskStageResourcesUpdate] = STAGE_DEF(UpdateTaskStageGroupResources, 255),
+
+    [UpdateTaskStageCompleted] = STAGE_DEF(UpdateTaskStageGroupMisc, 1),
+    [UpdateTaskStageError] = STAGE_DEF(UpdateTaskStageGroupMisc, 1),
+    [UpdateTaskStageOBError] = STAGE_DEF(UpdateTaskStageGroupMisc, 1),
+};
+
+static UpdateTaskStageGroup update_task_get_task_groups(UpdateTask* update_task) {
+    UpdateTaskStageGroup ret = UpdateTaskStageGroupPreUpdate | UpdateTaskStageGroupPostUpdate;
+    UpdateManifest* manifest = update_task->manifest;
+    if(!string_empty_p(manifest->radio_image)) {
+        ret |= UpdateTaskStageGroupRadio;
     }
-    string_set_str(update_task->state.status, status);
+    if(update_manifest_has_obdata(manifest)) {
+        ret |= UpdateTaskStageGroupOptionBytes;
+    }
+    if(!string_empty_p(manifest->firmware_dfu_image)) {
+        ret |= UpdateTaskStageGroupFirmware;
+    }
+    if(!string_empty_p(manifest->resource_bundle)) {
+        ret |= UpdateTaskStageGroupResources;
+    }
+    return ret;
+}
+
+//static uint32_t update_task_get_adapted_progress(
+//    UpdateTask* update_task,
+//    UpdateTaskStage stage,
+//    uint8_t progress) {
+//    UpdateTaskStageGroup groups = update_task_get_task_groups(update_task);
+//    uint32_t completed_stage_points = 0;
+//}
+
+//static void update_task_set_status(UpdateTask* update_task, const char* status) {
+//    if(!status) {
+//        if(update_task->state.stage >= COUNT_OF(update_task_stage_descr)) {
+//            status = "...";
+//        } else {
+//            status = update_task_stage_descr[update_task->state.stage];
+//        }
+//    }
+//    string_set_str(update_task->state.status, status);
+//}
+
+static void update_task_calc_completed_stages(UpdateTask* update_task) {
+    uint32_t completed_stages_points = 0;
+    for(UpdateTaskStage past_stage = UpdateTaskStageProgress;
+        past_stage < update_task->state.stage;
+        ++past_stage) {
+        const UpdateTaskStageGroupMap* grp_descr = &update_task_stage_progress[past_stage];
+        if((grp_descr->group & update_task->state.groups) == 0) {
+            continue;
+        }
+        completed_stages_points += grp_descr->weight;
+    }
+    update_task->state.completed_stages_points = completed_stages_points;
+    FURI_LOG_I(
+        "TAGU",
+        "update_task_calc_completed_stages = %d/%d",
+        completed_stages_points,
+        update_task->state.total_progress_points);
 }
 
 void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, uint8_t progress) {
     if(stage != UpdateTaskStageProgress) {
-        // do not override more specific error states
-        if((update_task->state.stage < UpdateTaskStageError) || (stage < UpdateTaskStageError)) {
-            update_task->state.stage = stage;
+        /* do not override more specific error states */
+        if((stage >= UpdateTaskStageError) && (update_task->state.stage >= UpdateTaskStageError)) {
+            return;
         }
-        update_task->state.current_stage_idx++;
-        update_task_set_status(update_task, NULL);
+        if(stage >= UpdateTaskStageError) {
+            string_printf(
+                update_task->state.status,
+                "%s #[%d]",
+                update_task_stage_descr[stage],
+                update_task->state.stage);
+        } else {
+            string_set_str(update_task->state.status, update_task_stage_descr[stage]);
+        }
+        update_task->state.stage = stage;
+        if((stage > UpdateTaskStageProgress) && (stage < UpdateTaskStageCompleted)) {
+            update_task_calc_completed_stages(update_task);
+        }
     }
 
-    if(progress > 100) {
-        progress = 100;
+    uint32_t adapted_progress = 1;
+    if(update_task->state.total_progress_points != 0) {
+        if(stage < UpdateTaskStageCompleted) {
+            adapted_progress = MIN(
+                (update_task->state.completed_stages_points +
+                 (update_task_stage_progress[update_task->state.stage].weight * progress / 100)) *
+                    100 / (update_task->state.total_progress_points),
+                100u);
+
+        } else {
+            adapted_progress = update_task->state.progress;
+        }
     }
 
-    update_task->state.progress = progress;
+    FURI_LOG_I(
+        "TAG",
+        "s %d: adapted: compl %d, total w %d, adapted prog %d",
+        stage,
+        update_task->state.completed_stages_points,
+        update_task->state.total_progress_points,
+        adapted_progress);
+
+    update_task->state.progress = adapted_progress;
     if(update_task->status_change_cb) {
         (update_task->status_change_cb)(
             string_get_cstr(update_task->state.status),
-            progress,
-            update_task->state.current_stage_idx,
-            update_task->state.total_stages,
+            adapted_progress,
             update_task->state.stage >= UpdateTaskStageError,
             update_task->status_change_cb_state);
     }
@@ -163,6 +270,10 @@ void update_task_free(UpdateTask* update_task) {
 
 bool update_task_parse_manifest(UpdateTask* update_task) {
     furi_assert(update_task);
+    update_task->state.total_progress_points = 0;
+    update_task->state.completed_stages_points = 0;
+    update_task->state.groups = 0;
+
     update_task_set_progress(update_task, UpdateTaskStageReadManifest, 0);
     bool result = false;
     string_t manifest_path;
@@ -182,6 +293,15 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
         update_task_set_progress(update_task, UpdateTaskStageProgress, 30);
         if(!update_manifest_init(update_task->manifest, string_get_cstr(manifest_path))) {
             break;
+        }
+
+        update_task->state.groups = update_task_get_task_groups(update_task);
+        for(size_t stage_counter = 0; stage_counter < COUNT_OF(update_task_stage_progress);
+            ++stage_counter) {
+            const UpdateTaskStageGroupMap* grp_descr = &update_task_stage_progress[stage_counter];
+            if((grp_descr->group & update_task->state.groups) != 0) {
+                update_task->state.total_progress_points += grp_descr->weight;
+            }
         }
 
         update_task_set_progress(update_task, UpdateTaskStageProgress, 50);

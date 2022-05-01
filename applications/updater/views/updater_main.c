@@ -2,6 +2,7 @@
 #include <gui/view.h>
 #include <gui/elements.h>
 #include <gui/canvas.h>
+#include <gui/icon_animation.h>
 #include <furi.h>
 #include <input/input.h>
 
@@ -15,27 +16,23 @@ struct UpdaterMainView {
     void* context;
 };
 
-static const uint8_t PROGRESS_RENDER_STEP = 3; /* percent, to limit rendering rate */
+static const uint8_t PROGRESS_RENDER_STEP = 1; /* percent, to limit rendering rate */
 
 typedef struct {
     string_t status;
     uint8_t progress, rendered_progress;
-    uint8_t idx_stage, total_stages;
     bool failed;
+    IconAnimation* animation;
 } UpdaterProgressModel;
 
 void updater_main_model_set_state(
     UpdaterMainView* main_view,
     const char* message,
     uint8_t progress,
-    uint8_t idx_stage,
-    uint8_t total_stages,
     bool failed) {
     with_view_model(
         main_view->view, (UpdaterProgressModel * model) {
             model->failed = failed;
-            model->idx_stage = idx_stage;
-            model->total_stages = total_stages;
             model->progress = progress;
             if(string_cmp_str(model->status, message)) {
                 string_set(model->status, message);
@@ -85,27 +82,57 @@ static void updater_main_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_set_font(canvas, FontPrimary);
 
-    uint16_t y_offset = model->failed ? 5 : 13;
-    string_t status_text;
-    if(!model->failed && (model->idx_stage != 0) && (model->idx_stage <= model->total_stages)) {
-        string_init_printf(
-            status_text,
-            "[%d/%d] %s",
-            model->idx_stage,
-            model->total_stages,
-            string_get_cstr(model->status));
-    } else {
-        string_init_set(status_text, model->status);
-    }
-    canvas_draw_str_aligned(
-        canvas, 128 / 2, y_offset, AlignCenter, AlignTop, string_get_cstr(status_text));
-    string_clear(status_text);
     if(model->failed) {
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(
-            canvas, 128 / 2, 20, AlignCenter, AlignTop, "[OK] to retry, [Back] to abort");
+        canvas_draw_str_aligned(canvas, 0, 40, AlignLeft, AlignTop, "Error");
+    } else {
+        canvas_draw_icon_animation(canvas, 128 - 67, 0, model->animation);
+        canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, string_get_cstr(model->status));
+        canvas_draw_str_aligned(canvas, 0, 40, AlignLeft, AlignTop, "Updating...");
+        elements_progress_bar(canvas, 0, 53, 70, (float)model->progress / 100);
     }
-    elements_progress_bar(canvas, 14, 35, 100, (float)model->progress / 100);
+
+    //uint16_t y_offset = model->failed ? 5 : 13;
+    //string_t status_text;
+    ////if(!model->failed && (model->idx_stage != 0) && (model->idx_stage <= model->total_stages)) {
+    ////    string_init_printf(
+    ////        status_text,
+    ////        "[%d/%d] %s",
+    ////        model->idx_stage,
+    ////        model->total_stages,
+    ////        string_get_cstr(model->status));
+    ////} else {
+    //    string_init_set(status_text, model->status);
+    ////}
+    //canvas_draw_str_aligned(
+    //    canvas, 128 / 2, y_offset, AlignCenter, AlignTop, string_get_cstr(status_text));
+    //string_clear(status_text);
+    //if(model->failed) {
+    //    canvas_set_font(canvas, FontSecondary);
+    //    canvas_draw_str_aligned(
+    //        canvas, 128 / 2, 20, AlignCenter, AlignTop, "[OK] to retry, [Back] to abort");
+    //}
+    //elements_progress_bar(canvas, 14, 35, 100, (float)model->progress / 100);
+}
+
+static void updater_main_enter_callback(void* context) {
+    furi_assert(context);
+    UpdaterMainView* instance = context;
+    UpdaterProgressModel* model = view_get_model(instance->view);
+    /* using Loading View in conjunction with several
+     * Stack View obligates to reassign
+     * Update callback, as it can be rewritten
+     */
+    view_tie_icon_animation(instance->view, model->animation);
+    icon_animation_start(model->animation);
+    view_commit_model(instance->view, false);
+}
+
+static void updater_main_exit_callback(void* context) {
+    furi_assert(context);
+    UpdaterMainView* instance = context;
+    UpdaterProgressModel* model = view_get_model(instance->view);
+    icon_animation_stop(model->animation);
+    view_commit_model(instance->view, false);
 }
 
 UpdaterMainView* updater_main_alloc() {
@@ -116,13 +143,17 @@ UpdaterMainView* updater_main_alloc() {
 
     with_view_model(
         main_view->view, (UpdaterProgressModel * model) {
-            string_init_set(model->status, "Waiting for storage");
+            string_init_set(model->status, "Waiting for SD card");
+            model->animation = icon_animation_alloc(&A_BrainOps_67x64);
+            view_tie_icon_animation(main_view->view, model->animation);
             return true;
         });
 
     view_set_context(main_view->view, main_view);
     view_set_input_callback(main_view->view, updater_main_input);
     view_set_draw_callback(main_view->view, updater_main_draw_callback);
+    view_set_enter_callback(main_view->view, updater_main_enter_callback);
+    view_set_exit_callback(main_view->view, updater_main_exit_callback);
 
     return main_view;
 }
@@ -132,6 +163,7 @@ void updater_main_free(UpdaterMainView* main_view) {
     with_view_model(
         main_view->view, (UpdaterProgressModel * model) {
             string_clear(model->status);
+            icon_animation_free(model->animation);
             return false;
         });
     view_free(main_view->view);
