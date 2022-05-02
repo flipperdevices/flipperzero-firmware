@@ -53,9 +53,14 @@ static int32_t music_player_worker_thread_callback(void* context) {
             float frequency = NOTE_C4 * powf(TWO_POW_TWELTH_ROOT, note_from_a4);
             float duration =
                 60.0 * osKernelGetTickFreq() * 4 / instance->bpm / note_block->duration;
-
-            furi_hal_speaker_start(frequency, 1);
-            osDelay(duration);
+            uint32_t next_tick = furi_hal_get_tick() + duration;
+            float volume = 1.0f;
+            furi_hal_speaker_start(frequency, volume);
+            while(furi_hal_get_tick() < next_tick) {
+                volume -= 0.01;
+                furi_hal_speaker_set_volume(volume);
+                furi_hal_delay_ms(4);
+            }
             furi_hal_speaker_stop();
 
             NoteBlockArray_next(it);
@@ -111,6 +116,15 @@ static size_t extract_number(const char* string, uint32_t* number) {
 
 static size_t extract_char(const char* string, char* symbol) {
     if(is_letter(*string)) {
+        *symbol = *string;
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+static size_t extract_sharp(const char* string, char* symbol) {
+    if(*string == '#') {
         *symbol = *string;
         return 1;
     } else {
@@ -177,7 +191,7 @@ static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const c
             // Parsing
             cursor += extract_number(cursor, &duration);
             cursor += extract_char(cursor, &note_char);
-            cursor += extract_char(cursor, &sharp_char);
+            cursor += extract_sharp(cursor, &sharp_char);
             cursor += extract_number(cursor, &octave);
 
             // Post processing
@@ -196,7 +210,14 @@ static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const c
             is_valid &= (sharp_char == '#' || sharp_char == '\0');
             is_valid &= (octave >= 0 && octave <= 16);
             if(!is_valid) {
-                FURI_LOG_D(TAG, "Invalid note definition");
+                FURI_LOG_E(TAG, "Invalid note definition");
+                FURI_LOG_E(
+                    TAG,
+                    "Parsed definition: %c%c%u %u",
+                    note_char == '\0' ? '_' : note_char,
+                    sharp_char == '\0' ? '_' : sharp_char,
+                    octave,
+                    duration);
                 result = false;
                 break;
             }
@@ -212,9 +233,23 @@ static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const c
             }
 
             if(music_player_worker_add_note(instance, semitone, duration)) {
-                FURI_LOG_D(TAG, "Added note: %u %u", semitone, duration);
+                FURI_LOG_D(
+                    TAG,
+                    "Added note: %c%c%u = %u %u",
+                    note_char == '\0' ? '_' : note_char,
+                    sharp_char == '\0' ? '_' : sharp_char,
+                    octave,
+                    semitone,
+                    duration);
             } else {
-                FURI_LOG_E(TAG, "Invalid note: %u %u", semitone, duration);
+                FURI_LOG_E(
+                    TAG,
+                    "Invalid note: %c%c%u = %u %u",
+                    note_char == '\0' ? '_' : note_char,
+                    sharp_char == '\0' ? '_' : sharp_char,
+                    octave,
+                    semitone,
+                    duration);
             }
 
             cursor += skip_till_comma(cursor);
