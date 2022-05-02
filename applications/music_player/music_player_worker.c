@@ -57,9 +57,9 @@ static int32_t music_player_worker_thread_callback(void* context) {
             float volume = 1.0f;
             furi_hal_speaker_start(frequency, volume);
             while(furi_hal_get_tick() < next_tick) {
-                volume -= 0.01;
+                volume -= 0.0054321;
                 furi_hal_speaker_set_volume(volume);
-                furi_hal_delay_ms(4);
+                furi_hal_delay_ms(2);
             }
             furi_hal_speaker_stop();
 
