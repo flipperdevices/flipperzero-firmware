@@ -33,6 +33,8 @@ struct MusicPlayerWorker {
     uint32_t duration;
     uint32_t octave;
     bool should_work;
+    float lfo_step;
+    float lfo;
 };
 
 static int32_t music_player_worker_thread_callback(void* context) {
@@ -57,7 +59,13 @@ static int32_t music_player_worker_thread_callback(void* context) {
             float volume = 1.0f;
             furi_hal_speaker_start(frequency, volume);
             while(furi_hal_get_tick() < next_tick) {
-                volume -= 0.0054321;
+                volume -= (0.000054321 * instance->lfo);
+
+                if(instance->lfo < 1.0f || instance->lfo > 200.0f)
+                    instance->lfo_step = -instance->lfo_step;
+
+                instance->lfo += instance->lfo_step;
+
                 furi_hal_speaker_set_volume(volume);
                 furi_hal_delay_ms(2);
             }
@@ -273,6 +281,9 @@ bool music_player_worker_load(MusicPlayerWorker* instance, const char* file_path
 
     Storage* storage = furi_record_open("storage");
     FlipperFormat* file = flipper_format_file_alloc(storage);
+
+    instance->lfo_step = 0.05f;
+    instance->lfo = 1.0f;
 
     do {
         if(!flipper_format_file_open_existing(file, file_path)) break;
