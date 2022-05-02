@@ -115,7 +115,7 @@ static size_t extract_number(const char* string, uint32_t* number) {
 }
 
 static size_t extract_char(const char* string, char* symbol) {
-    if(is_letter(*string)) {
+    if(*string != '\0' && is_letter(*string)) {
         *symbol = *string;
         return 1;
     } else {
@@ -124,7 +124,7 @@ static size_t extract_char(const char* string, char* symbol) {
 }
 
 static size_t extract_sharp(const char* string, char* symbol) {
-    if(*string == '#') {
+    if(*string != '\0' && *string == '#') {
         *symbol = *string;
         return 1;
     } else {
@@ -137,6 +137,9 @@ static size_t skip_till_comma(const char* string) {
     while(*string != '\0' && *string != ',') {
         string++;
         ret++;
+    }
+    if(*string != ',') {
+        ret = 0;
     }
     return ret;
 }
@@ -251,10 +254,10 @@ static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const c
                     semitone,
                     duration);
             }
-
             cursor += skip_till_comma(cursor);
         }
-        cursor++;
+
+        if(*cursor != '\0') cursor++;
     }
 
     return result;
