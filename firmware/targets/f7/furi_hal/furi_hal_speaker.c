@@ -20,12 +20,6 @@ void furi_hal_speaker_init() {
         &gpio_speaker, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn14TIM16);
 }
 
-typedef struct {
-    uint32_t autoreload;
-} FuriHalSpeaker;
-
-FuriHalSpeaker furi_hal_speaker = {0};
-
 static inline uint32_t furi_hal_speaker_calculate_autoreload(float frequency) {
     uint32_t autoreload = (SystemCoreClock / FURI_HAL_SPEAKER_PRESCALER / frequency) - 1;
     if(autoreload < 2) {
