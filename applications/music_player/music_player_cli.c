@@ -11,7 +11,7 @@ static void music_player_cli(Cli* cli, string_t args, void* context) {
             break;
         }
 
-        printf("Press CTRL+C to stop");
+        printf("Press CTRL+C to stop\r\n");
         music_player_worker_start(music_player_worker);
         while(!cli_cmd_interrupt_received(cli)) {
             osDelay(50);
