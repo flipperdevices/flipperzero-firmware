@@ -15,8 +15,8 @@
 
 #define SEMITONE_PAUSE 0xFF
 
-#define NOTE_A4 440.0f
-#define NOTE_A4_SEMITONE (4.0f * 12.0f)
+#define NOTE_C4 261.63f
+#define NOTE_C4_SEMITONE (4.0f * 12.0f)
 #define TWO_POW_TWELTH_ROOT 1.059463094359f
 
 typedef struct {
@@ -49,8 +49,8 @@ static int32_t music_player_worker_thread_callback(void* context) {
         } else {
             NoteBlock* note_block = NoteBlockArray_ref(it);
 
-            float note_from_a4 = (float)note_block->semitone - NOTE_A4_SEMITONE;
-            float frequency = NOTE_A4 * powf(TWO_POW_TWELTH_ROOT, note_from_a4);
+            float note_from_a4 = (float)note_block->semitone - NOTE_C4_SEMITONE;
+            float frequency = NOTE_C4 * powf(TWO_POW_TWELTH_ROOT, note_from_a4);
             float duration =
                 60.0 * osKernelGetTickFreq() * 4 / instance->bpm / note_block->duration;
 
@@ -138,22 +138,27 @@ static bool
     return true;
 }
 
-static uint8_t note_to_semitone(const char note) {
+static int8_t note_to_semitone(const char note) {
     switch(note) {
-    case 'A':
-        return 0;
-    case 'B':
-        return 2;
     case 'C':
-        return 3;
+        return 0;
+    // C#
     case 'D':
-        return 5;
+        return 2;
+    // D#
     case 'E':
-        return 7;
+        return 4;
     case 'F':
-        return 8;
+        return 5;
+    // F#
     case 'G':
-        return 10;
+        return 7;
+    // G#
+    case 'A':
+        return 9;
+    // A#
+    case 'B':
+        return 11;
     default:
         return 0;
     }
