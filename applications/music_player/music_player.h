@@ -67,7 +67,7 @@ typedef enum {
     A7 = 3520,
     A_7 = 3729,
     B7 = 3951,
-    // Ocatave 8 
+    // Ocatave 8
     C8 = 4186,
     C_8 = 4435,
     D8 = 4699,
@@ -79,7 +79,7 @@ typedef enum {
     G_8 = 6645,
     A8 = 7040,
     A_8 = 7459,
-B8 = 7902,
+    B8 = 7902,
 } MelodyEventNote;
 
 typedef enum {
@@ -101,226 +101,226 @@ typedef struct {
 
 const char* get_note_name(const MelodyEventRecord* note_record) {
     if(note_record == NULL) return "";
-    
+
     switch(note_record->note) {
     case N:
         return N;
         break;
     case C3:
-        return"C3-";
+        return "C3-";
         break;
     case C_3:
-        return"C#3";
+        return "C#3";
         break;
     case D3:
-        return"D3-";
+        return "D3-";
         break;
     case D_3:
-        return"D#3";
+        return "D#3";
         break;
     case E3:
-        return"E3-";
+        return "E3-";
         break;
     case F3:
-        return"F3-";
+        return "F3-";
         break;
     case F_3:
-        return"F#3";
+        return "F#3";
         break;
     case G3:
-        return"G3-";
+        return "G3-";
         break;
     case G_3:
-        return"G#3";
+        return "G#3";
         break;
     case A3:
-        return"A3-";
+        return "A3-";
         break;
     case A_3:
-        return"A#3";
+        return "A#3";
         break;
     case B3:
-        return"B3-";
+        return "B3-";
         break;
     case C4:
-        return"C4-";
+        return "C4-";
         break;
     case C_4:
-        return"C#4";
+        return "C#4";
         break;
     case D4:
-        return"D4-";
+        return "D4-";
         break;
     case D_4:
-        return"D#4";
+        return "D#4";
         break;
     case E4:
-        return"E4-";
+        return "E4-";
         break;
     case F4:
-        return"F4-";
+        return "F4-";
         break;
     case F_4:
-        return"F#4";
+        return "F#4";
         break;
     case G4:
-        return"G4-";
+        return "G4-";
         break;
     case G_4:
-        return"G#4";
+        return "G#4";
         break;
     case A4:
-        return"A4-";
+        return "A4-";
         break;
     case A_4:
-        return"A#4";
+        return "A#4";
         break;
     case B4:
-        return"B4-";
+        return "B4-";
         break;
     case C5:
-        return"C5-";
+        return "C5-";
         break;
     case C_5:
-        return"C#5";
+        return "C#5";
         break;
     case D5:
-        return"D5-";
+        return "D5-";
         break;
     case D_5:
-        return"D#5";
+        return "D#5";
         break;
     case E5:
-        return"E5-";
+        return "E5-";
         break;
     case F5:
-        return"F5-";
+        return "F5-";
         break;
     case F_5:
-        return"F#5";
+        return "F#5";
         break;
     case G5:
-        return"G5-";
+        return "G5-";
         break;
     case G_5:
-        return"G#5";
+        return "G#5";
         break;
     case A5:
-        return"A5-";
+        return "A5-";
         break;
     case A_5:
-        return"A#5";
+        return "A#5";
         break;
     case B5:
-        return"B5-";
+        return "B5-";
         break;
     case C6:
-        return"C6-";
+        return "C6-";
         break;
     case C_6:
-        return"C#6";
+        return "C#6";
         break;
     case D6:
-        return"D6-";
+        return "D6-";
         break;
     case D_6:
-        return"D#6";
+        return "D#6";
         break;
     case E6:
-        return"E6-";
+        return "E6-";
         break;
     case F6:
-        return"F6-";
+        return "F6-";
         break;
     case F_6:
-        return"F#6";
+        return "F#6";
         break;
     case G6:
-        return"G6-";
+        return "G6-";
         break;
     case G_6:
-        return"G#6";
+        return "G#6";
         break;
     case A6:
-        return"A6-";
+        return "A6-";
         break;
     case A_6:
-        return"A#6";
+        return "A#6";
         break;
     case B6:
-        return"B6-";
+        return "B6-";
         break;
     case C7:
-        return"C7-";
+        return "C7-";
         break;
     case C_7:
-        return"C#7";
+        return "C#7";
         break;
     case D7:
-        return"D7-";
+        return "D7-";
         break;
     case D_7:
-        return"D#7";
+        return "D#7";
         break;
     case E7:
-        return"E7-";
+        return "E7-";
         break;
     case F7:
-        return"F7-";
+        return "F7-";
         break;
     case F_7:
-        return"F#7";
+        return "F#7";
         break;
     case G7:
-        return"G7-";
+        return "G7-";
         break;
     case G_7:
-        return"G#7";
+        return "G#7";
         break;
     case A7:
-        return"A7-";
+        return "A7-";
         break;
     case A_7:
-        return"A#7";
+        return "A#7";
         break;
     case B7:
-        return"B7-";
+        return "B7-";
         break;
     case C8:
-        return"C8-";
+        return "C8-";
         break;
     case C_8:
-        return"C#8";
+        return "C#8";
         break;
     case D8:
-        return"D8-";
+        return "D8-";
         break;
     case D_8:
-        return"D#8";
+        return "D#8";
         break;
     case E8:
-        return"E8-";
+        return "E8-";
         break;
     case F8:
-        return"F8-";
+        return "F8-";
         break;
     case F_8:
-        return"F#8";
+        return "F#8";
         break;
     case G8:
-        return"G8-";
+        return "G8-";
         break;
     case G_8:
-        return"G#8";
+        return "G#8";
         break;
     case A8:
-        return"A8-";
+        return "A8-";
         break;
     case A_8:
-        return"A#8";
+        return "A#8";
         break;
     case B8:
-        return"B8-";
+        return "B8-";
         break;
     default:
         return "UNK";

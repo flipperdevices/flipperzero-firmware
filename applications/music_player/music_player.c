@@ -5,7 +5,6 @@
 #include <input/input.h>
 #include "./music_player.h"
 
-
 typedef struct {
     const MelodyEventRecord* record;
     int8_t loop_count;
@@ -116,7 +115,6 @@ bool is_black_note(const MelodyEventRecord* note_record, uint8_t id) {
 
     return false;
 }
-
 
 static void render_callback(Canvas* canvas, void* ctx) {
     State* state = (State*)acquire_mutex((ValueMutex*)ctx, 25);
