@@ -11,7 +11,16 @@
 #include "esp_interface.h"
 #include "a32u4_interface.h"
 #include "settings.h"
+#include "configs.h"
 
+#ifdef MARAUDER_MINI
+  #include <SwitchLib.h>
+  extern SwitchLib u_btn;
+  extern SwitchLib d_btn;
+  extern SwitchLib l_btn;
+  extern SwitchLib r_btn;
+  extern SwitchLib c_btn;
+#endif
 
 extern Display display_obj;
 extern WiFiScan wifi_scan_obj;
@@ -21,19 +30,6 @@ extern BatteryInterface battery_obj;
 extern EspInterface esp_obj;
 extern A32u4Interface a32u4_obj;
 extern Settings settings_obj;
-
-// Keypad start position, key sizes and spacing
-#define KEY_X 120 // Centre of key
-#define KEY_Y 50
-#define KEY_W 240 // Width and height
-#define KEY_H 22
-#define KEY_SPACING_X 0 // X and Y gap
-#define KEY_SPACING_Y 1
-#define KEY_TEXTSIZE 1   // Font size multiplier
-#define ICON_W 22
-#define ICON_H 22
-#define BUTTON_PADDING 22
-//#define BUTTON_ARRAY_LEN 5
 
 #define FLASH_BUTTON 0
 
@@ -106,6 +102,7 @@ struct Menu;
 
 struct MenuNode {
   String name;
+  String command;
   uint16_t color;
   int icon;
   TFT_eSPI_Button* button;
@@ -118,7 +115,7 @@ struct Menu {
   String name;
   LinkedList<MenuNode>* list;
   Menu                * parentMenu;
-  //uint8_t               selected;
+  uint8_t               selected = 0;
 };
 
 
@@ -174,7 +171,7 @@ class MenuFunctions
 
     //TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
 
-    void addNodes(Menu* menu, String name, uint16_t color, Menu* child, int place, std::function<void()> callable, bool selected = false);
+    void addNodes(Menu* menu, String name, uint16_t color, Menu* child, int place, std::function<void()> callable, bool selected = false, String command = null);
     void drawStatusBar();
     void updateStatusBar();
     void battery(bool initial = false);
@@ -183,6 +180,8 @@ class MenuFunctions
     String callSetting(String key);
     void runBoolSetting(String ley);
     void displaySetting(String key, Menu* menu, int index);
+    void buttonSelected(uint8_t b);
+    void buttonNotSelected(uint8_t b);
 
   public:
     MenuFunctions();

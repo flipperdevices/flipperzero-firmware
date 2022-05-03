@@ -431,24 +431,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   else if ((currentScanMode == BT_SCAN_ALL) ||
   (currentScanMode == BT_SCAN_SKIMMERS))
   {
-    //Serial.println("Stopping BLE scan...");
-    //pBLEScan->stop();
-    //Serial.println("BLE Scan Stopped");
-    
-    
-    //Serial.println("Clearing BLE Results...");
-    //pBLEScan->clearResults();
-    /*Serial.println("Deinitializing BT Controller...");
-    BLEDevice::deinit();
-    //Serial.println("Disable and Deinit BLE...");
-    //esp_bt_controller_disable();
-    //esp_bt_controller_deinit();
-    //Serial.println("Releasing BLE Memory...");
-    //esp_bt_controller_mem_release(ESP_BT_MODE_BLE);
-    //Serial.println("BT Controller Status: " + (String)esp_bt_controller_get_status());
-    */
     this->shutdownBLE();
-    
   }
 
   display_obj.display_buffer->clear();

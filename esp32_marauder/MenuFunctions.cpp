@@ -776,6 +776,16 @@ void ta_event_cb(lv_obj_t * ta, lv_event_t event)
   //}
 }
 
+void MenuFunctions::buttonNotSelected(uint8_t b) {
+  display_obj.tft.setFreeFont(NULL);
+  display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
+}
+
+void MenuFunctions::buttonSelected(uint8_t b) {
+  display_obj.tft.setFreeFont(NULL);
+  display_obj.key[b].drawButton(true, current_menu->list->get(b).name);
+}
+
 // Function to check menu input
 void MenuFunctions::main(uint32_t currentTime)
 {
@@ -798,9 +808,11 @@ void MenuFunctions::main(uint32_t currentTime)
     //{
     //  this->drawStatusBar();
     //}
-    if ((wifi_scan_obj.currentScanMode != LV_JOIN_WIFI) &&
-        (wifi_scan_obj.currentScanMode != LV_ADD_SSID))
-      display_obj.updateBanner(current_menu->name);
+    #ifndef MARAUDER_MINI
+      if ((wifi_scan_obj.currentScanMode != LV_JOIN_WIFI) &&
+          (wifi_scan_obj.currentScanMode != LV_ADD_SSID))
+        display_obj.updateBanner(current_menu->name);
+    #endif
   }
 
   if (currentTime != 0) {
@@ -809,10 +821,12 @@ void MenuFunctions::main(uint32_t currentTime)
       if ((wifi_scan_obj.currentScanMode != LV_JOIN_WIFI) &&
           (wifi_scan_obj.currentScanMode != LV_ADD_SSID))
         this->updateStatusBar();
+        #ifdef MARAUDER_MINI
+          display_obj.updateBanner(current_menu->name);
+        #endif
     }
   }
 
-  //this->displayCurrentMenu();
 
   boolean pressed = false;
   // This is code from bodmer's keypad example
@@ -835,15 +849,9 @@ void MenuFunctions::main(uint32_t currentTime)
 
   // getTouch causes a 10ms delay which makes beacon spam less effective
   //if (wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF)
-  pressed = display_obj.tft.getTouch(&t_x, &t_y);
-
-  //if (pressed)
-  //  Serial.println("Pressed, son");
-  //boolean pressed = false;
-
-  //Serial.print("getTouch: ");
-  //Serial.print(millis() - pre_getTouch);
-  //Serial.println("ms");
+  #ifndef MARAUDER_MINI
+    pressed = display_obj.tft.getTouch(&t_x, &t_y);
+  #endif
 
 
   // This is if there are scans/attacks going on
@@ -888,67 +896,93 @@ void MenuFunctions::main(uint32_t currentTime)
 
   // Check if any key coordinate boxes contain the touch coordinates
   // This is for when on a menu
-  if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
-      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
-      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH) &&
-      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_MIMIC) &&
-      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
-      //(wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_LIST))
-  {
-    // Need this to set all keys to false
-    for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
-      if (pressed && display_obj.key[b].contains(t_x, t_y)) {
-        display_obj.key[b].press(true);  // tell the button it is pressed
-      } else {
-        display_obj.key[b].press(false);  // tell the button it is NOT pressed
+  #ifndef MARAUDER_MINI
+    if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
+        (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
+        (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH) &&
+        (wifi_scan_obj.currentScanMode != WIFI_ATTACK_MIMIC) &&
+        (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
+        //(wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_LIST))
+    {
+      // Need this to set all keys to false
+      for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
+        if (pressed && display_obj.key[b].contains(t_x, t_y)) {
+          display_obj.key[b].press(true);  // tell the button it is pressed
+        } else {
+          display_obj.key[b].press(false);  // tell the button it is NOT pressed
+        }
+      }
+  
+      // Check if any key has changed state
+      for (uint8_t b = 0; b < current_menu->list->size(); b++) {
+        display_obj.tft.setFreeFont(MENU_FONT);
+        if (display_obj.key[b].justPressed()) {
+          //display_obj.key[b].drawButton2(current_menu->list->get(b).name, true);  // draw invert
+          //display_obj.key[b].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(b).name, true);
+          display_obj.key[b].drawButton(true, current_menu->list->get(b).name);
+          if (current_menu->list->get(b).name != "Back")
+            display_obj.tft.drawXBitmap(0,
+                                        KEY_Y + b * (KEY_H + KEY_SPACING_Y) - (ICON_H / 2),
+                                        menu_icons[current_menu->list->get(b).icon],
+                                        ICON_W,
+                                        ICON_H,
+                                        current_menu->list->get(b).color,
+                                        TFT_BLACK);
+        }
+        //else if (pressed)
+        //  display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
+  
+        // If button was just release, execute the button's function
+        if ((display_obj.key[b].justReleased()) && (!pressed))
+        {
+          //display_obj.key[b].drawButton2(current_menu->list->get(b).name);     // draw normal
+          //display_obj.key[b].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(b).name);
+          display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
+          current_menu->list->get(b).callable();
+        }
+        // This
+        else if ((display_obj.key[b].justReleased()) && (pressed)) {
+          display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
+          if (current_menu->list->get(b).name != "Back")
+            display_obj.tft.drawXBitmap(0,
+                                        KEY_Y + b * (KEY_H + KEY_SPACING_Y) - (ICON_H / 2),
+                                        menu_icons[current_menu->list->get(b).icon],
+                                        ICON_W,
+                                        ICON_H,
+                                        TFT_BLACK,
+                                        current_menu->list->get(b).color);
+        }
+  
+        display_obj.tft.setFreeFont(NULL);
       }
     }
+    x = -1;
+    y = -1;
+  #endif
 
-    // Check if any key has changed state
-    for (uint8_t b = 0; b < current_menu->list->size(); b++) {
-      display_obj.tft.setFreeFont(MENU_FONT);
-      if (display_obj.key[b].justPressed()) {
-        //display_obj.key[b].drawButton2(current_menu->list->get(b).name, true);  // draw invert
-        //display_obj.key[b].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(b).name, true);
-        display_obj.key[b].drawButton(true, current_menu->list->get(b).name);
-        if (current_menu->list->get(b).name != "Back")
-          display_obj.tft.drawXBitmap(0,
-                                      KEY_Y + b * (KEY_H + KEY_SPACING_Y) - (ICON_H / 2),
-                                      menu_icons[current_menu->list->get(b).icon],
-                                      ICON_W,
-                                      ICON_H,
-                                      current_menu->list->get(b).color,
-                                      TFT_BLACK);
+  #ifdef MARAUDER_MINI
+    if (u_btn.justPressed()){
+      if (current_menu->selected > 0) {
+        current_menu->selected--;
+        this->buttonSelected(current_menu->selected);
+        this->buttonNotSelected(current_menu->selected + 1);
+        Serial.println("Current menu index: " + (String)current_menu->selected);
       }
-      //else if (pressed)
-      //  display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
-
-      // If button was just release, execute the button's function
-      if ((display_obj.key[b].justReleased()) && (!pressed))
-      {
-        //display_obj.key[b].drawButton2(current_menu->list->get(b).name);     // draw normal
-        //display_obj.key[b].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(b).name);
-        display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
-        current_menu->list->get(b).callable();
-      }
-      // This
-      else if ((display_obj.key[b].justReleased()) && (pressed)) {
-        display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
-        if (current_menu->list->get(b).name != "Back")
-          display_obj.tft.drawXBitmap(0,
-                                      KEY_Y + b * (KEY_H + KEY_SPACING_Y) - (ICON_H / 2),
-                                      menu_icons[current_menu->list->get(b).icon],
-                                      ICON_W,
-                                      ICON_H,
-                                      TFT_BLACK,
-                                      current_menu->list->get(b).color);
-      }
-
-      display_obj.tft.setFreeFont(NULL);
     }
-  }
-  x = -1;
-  y = -1;
+    if (d_btn.justPressed()){
+      if (current_menu->selected < current_menu->list->size() - 1) {
+        current_menu->selected++;
+        this->buttonSelected(current_menu->selected);
+        this->buttonNotSelected(current_menu->selected - 1);
+        Serial.println("Current menu index: " + (String)current_menu->selected);
+      }
+    }
+    if(c_btn.justPressed()){
+      Serial.println("CENTER");
+      current_menu->list->get(current_menu->selected).callable();
+    }
+
+  #endif
 }
 
 #if BATTERY_ANALOG_ON == 1
@@ -1054,6 +1088,11 @@ void MenuFunctions::battery2(bool initial)
 void MenuFunctions::updateStatusBar()
 {
   display_obj.tft.setTextSize(1);
+  
+  #ifdef MARAUDER_MINI
+    display_obj.tft.setFreeFont(NULL);
+  #endif
+  
   uint16_t the_color; 
 
   // Draw temp info
@@ -1072,7 +1111,13 @@ void MenuFunctions::updateStatusBar()
   if (temp_obj.current_temp != temp_obj.old_temp) {
     temp_obj.old_temp = temp_obj.current_temp;
     display_obj.tft.fillRect(0, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
-    display_obj.tft.drawString((String)temp_obj.current_temp + " C", 4, 0, 2);
+    #ifndef MARAUDER_MINI
+      display_obj.tft.drawString((String)temp_obj.current_temp + " C", 4, 0, 2);
+    #endif
+
+    #ifdef MARAUDER_MINI
+      display_obj.tft.drawString((String)temp_obj.current_temp + " C", 0, 0, 1);
+    #endif
   }
   display_obj.tft.setTextColor(TFT_WHITE, STATUSBAR_COLOR);
 
@@ -1080,7 +1125,13 @@ void MenuFunctions::updateStatusBar()
   if (wifi_scan_obj.set_channel != wifi_scan_obj.old_channel) {
     wifi_scan_obj.old_channel = wifi_scan_obj.set_channel;
     display_obj.tft.fillRect(50, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
-    display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 50, 0, 2);
+    #ifndef MARAUDER_MINI
+      display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 50, 0, 2);
+    #endif
+
+    #ifdef MARAUDER_MINI
+      display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, TFT_WIDTH/4, 0, 1);
+    #endif
   }
 
   // RAM Stuff
@@ -1088,7 +1139,13 @@ void MenuFunctions::updateStatusBar()
   if (wifi_scan_obj.free_ram != wifi_scan_obj.old_free_ram) {
     wifi_scan_obj.old_free_ram = wifi_scan_obj.free_ram;
     display_obj.tft.fillRect(100, 0, 60, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
-    display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 100, 0, 2);
+    #ifndef MARAUDER_MINI
+      display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 100, 0, 2);
+    #endif
+
+    #ifdef MARAUDER_MINI
+      display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", TFT_WIDTH/1.75, 0, 1);
+    #endif
   }
 
   // Draw battery info
@@ -1100,19 +1157,28 @@ void MenuFunctions::updateStatusBar()
   else
     the_color = TFT_RED;
 
-  display_obj.tft.drawXBitmap(170,
-                              0,
-                              menu_icons[STATUS_SD],
-                              16,
-                              16,
-                              STATUSBAR_COLOR,
-                              the_color);
-  //display_obj.tft.print((String)battery_obj.battery_level + "%");
+  #ifndef MARAUDER_MINI
+    display_obj.tft.drawXBitmap(170,
+                                0,
+                                menu_icons[STATUS_SD],
+                                16,
+                                16,
+                                STATUSBAR_COLOR,
+                                the_color);
+  #endif
+
+  #ifdef MARAUDER_MINI
+    display_obj.tft.setTextColor(the_color, STATUSBAR_COLOR);
+    display_obj.tft.drawString("SD", TFT_WIDTH - 12, 0, 1);
+  #endif
 }
 
 void MenuFunctions::drawStatusBar()
 {
   display_obj.tft.setTextSize(1);
+  #ifdef MARAUDER_MINI
+    display_obj.tft.setFreeFont(NULL);
+  #endif
   display_obj.tft.fillRect(0, 0, 240, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
   //display_obj.tft.fillRect(0, STATUS_BAR_WIDTH + 1, 240, 1, TFT_DARKGREY);
   display_obj.tft.setTextColor(TFT_WHITE, STATUSBAR_COLOR);
@@ -1135,20 +1201,38 @@ void MenuFunctions::drawStatusBar()
   display_obj.tft.setTextColor(the_color, STATUSBAR_COLOR);
   temp_obj.old_temp = temp_obj.current_temp;
   display_obj.tft.fillRect(0, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
-  display_obj.tft.drawString((String)temp_obj.current_temp + " C", 4, 0, 2);
+  #ifndef MARAUDER_MINI
+    display_obj.tft.drawString((String)temp_obj.current_temp + " C", 4, 0, 2);
+  #endif
+
+  #ifdef MARAUDER_MINI
+    display_obj.tft.drawString((String)temp_obj.current_temp + " C", 0, 0, 1);
+  #endif
   display_obj.tft.setTextColor(TFT_WHITE, STATUSBAR_COLOR);
 
 
   // WiFi Channel Stuff
   wifi_scan_obj.old_channel = wifi_scan_obj.set_channel;
   display_obj.tft.fillRect(50, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
-  display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 50, 0, 2);
+  #ifndef MARAUDER_MINI
+    display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 50, 0, 2);
+  #endif
+
+  #ifdef MARAUDER_MINI
+    display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, TFT_WIDTH/4, 0, 1);
+  #endif
 
   // RAM Stuff
   wifi_scan_obj.freeRAM();
   wifi_scan_obj.old_free_ram = wifi_scan_obj.free_ram;
   display_obj.tft.fillRect(100, 0, 60, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
-  display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 100, 0, 2);
+  #ifndef MARAUDER_MINI
+    display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 100, 0, 2);
+  #endif
+
+  #ifdef MARAUDER_MINI
+    display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", TFT_WIDTH/1.75, 0, 1);
+  #endif
 
 
   MenuFunctions::battery2(true);
@@ -1159,14 +1243,20 @@ void MenuFunctions::drawStatusBar()
   else
     the_color = TFT_RED;
 
-  display_obj.tft.drawXBitmap(170,
-                              0,
-                              menu_icons[STATUS_SD],
-                              16,
-                              16,
-                              STATUSBAR_COLOR,
-                              the_color);
-  //display_obj.tft.print((String)battery_obj.battery_level + "%");
+  #ifndef MARAUDER_MINI
+    display_obj.tft.drawXBitmap(170,
+                                0,
+                                menu_icons[STATUS_SD],
+                                16,
+                                16,
+                                STATUSBAR_COLOR,
+                                the_color);
+  #endif
+
+  #ifdef MARAUDER_MINI
+    display_obj.tft.setTextColor(the_color, STATUSBAR_COLOR);
+    display_obj.tft.drawString("SD", TFT_WIDTH - 12, 0, 1);
+  #endif
 }
 
 void MenuFunctions::orientDisplay()
@@ -1178,20 +1268,17 @@ void MenuFunctions::orientDisplay()
 
   display_obj.tft.setCursor(0, 0);
 
-  //uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait
-  //uint16_t calData[5] = { 339, 3470, 237, 3438, 2 }; // tft.setRotation(0); // Portrait with DIY TFT
+  #ifndef MARAUDER_MINI
+    #ifdef TFT_SHIELD
+      uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait with TFT Shield
+      Serial.println("Using TFT Shield");
+    #else if defined(TFT_DIY)
+      uint16_t calData[5] = { 339, 3470, 237, 3438, 2 }; // tft.setRotation(0); // Portrait with DIY TFT
+      Serial.println("Using TFT DIY");
+    #endif
 
-#ifdef TFT_SHIELD
-  uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait with TFT Shield
-  Serial.println("Using TFT Shield");
-#else if defined(TFT_DIY)
-  uint16_t calData[5] = { 339, 3470, 237, 3438, 2 }; // tft.setRotation(0); // Portrait with DIY TFT
-  Serial.println("Using TFT DIY");
-#endif
-
-  display_obj.tft.setTouch(calData);
-
-  //display_obj.clearScreen();
+    display_obj.tft.setTouch(calData);
+  #endif
 
   changeMenu(current_menu);
 }
@@ -1711,10 +1798,6 @@ void MenuFunctions::showMenuList(Menu * menu, int layer)
       Serial.print(" ");
     Serial.print("Node: ");
     Serial.println(menu->list->get(i).name);
-
-    // If the current menu node points to another menu, list that menu
-    //if (menu->list->get(i).childMenu != NULL)
-    //  showMenuList(menu->list->get(i).childMenu, layer+1);
   }
   Serial.println();
 }
@@ -1763,36 +1846,42 @@ void MenuFunctions::displayCurrentMenu()
   display_obj.clearScreen();
   display_obj.tft.setTextColor(TFT_LIGHTGREY, TFT_DARKGREY);
   this->drawStatusBar();
-  //display_obj.tft.fillRect(0,0,240,16, TFT_DARKGREY);
-  //display_obj.tft.drawCentreString(" ESP32 Marauder ",120,0,2);
-  //Serial.println("Getting size...");
-  //char buf[&current_menu->parentMenu->name.length() + 1] = {};
-  //Serial.println("Got size...");
-  //current_menu->parentMenu->name.toCharArray(buf, current_menu->parentMenu->name.length() + 1);
-  //String current_name = &current_menu->parentMenu->name;
-  //Serial.println("gottem");
-  //display_obj.tft.drawCentreString(current_menu->name,120,0,2);
+
   if (current_menu->list != NULL)
   {
-    display_obj.tft.setFreeFont(MENU_FONT);
+    #ifndef MARAUDER_MINI
+      display_obj.tft.setFreeFont(MENU_FONT);
+    #endif
+
+    #ifdef MARAUDER_MINI
+      display_obj.tft.setFreeFont(NULL);
+      display_obj.tft.setTextSize(1);
+    #endif
     for (uint8_t i = 0; i < current_menu->list->size(); i++)
     {
-      //display_obj.key[i].drawButton2(current_menu->list->get(i).name);
-      //display_obj.key[i].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(i).name);
-      //display_obj.key[i].drawButton(true);
-      if (!current_menu->list->get(i).selected)
-        display_obj.key[i].drawButton(false, current_menu->list->get(i).name);
-      else
-        display_obj.key[i].drawButton(true, current_menu->list->get(i).name);
+      #ifndef MARAUDER_MINI
+        if (!current_menu->list->get(i).selected)
+          display_obj.key[i].drawButton(false, current_menu->list->get(i).name);
+        else
+          display_obj.key[i].drawButton(true, current_menu->list->get(i).name);
         
-      if (current_menu->list->get(i).name != "Back")
-        display_obj.tft.drawXBitmap(0,
-                                    KEY_Y + i * (KEY_H + KEY_SPACING_Y) - (ICON_H / 2),
-                                    menu_icons[current_menu->list->get(i).icon],
-                                    ICON_W,
-                                    ICON_H,
-                                    TFT_BLACK,
-                                    current_menu->list->get(i).color);
+        if (current_menu->list->get(i).name != "Back")
+          display_obj.tft.drawXBitmap(0,
+                                      KEY_Y + i * (KEY_H + KEY_SPACING_Y) - (ICON_H / 2),
+                                      menu_icons[current_menu->list->get(i).icon],
+                                      ICON_W,
+                                      ICON_H,
+                                      TFT_BLACK,
+                                      current_menu->list->get(i).color);
+
+      #endif
+
+      #ifdef MARAUDER_MINI
+        if (current_menu->selected != i)
+          display_obj.key[i].drawButton(false, current_menu->list->get(i).name);
+        else
+          display_obj.key[i].drawButton(true, current_menu->list->get(i).name);
+      #endif
     }
     display_obj.tft.setFreeFont(NULL);
   }

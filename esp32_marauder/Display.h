@@ -13,18 +13,9 @@
 //#include <M5Stack.h>
 #include "SPIFFS.h"
 #include "Assets.h"
+#include "configs.h"
 
 #include <TFT_eSPI.h>
-
-#define TFT_MISO 19
-#define TFT_MOSI 23
-#define TFT_SCLK 18
-#define TFT_CS 27
-#define TFT_DC 26
-#define TFT_RST 5
-#define TFT_BL 32
-#define TOUCH_CS 21
-#define SD_CS 4
 
 // WiFi stuff
 #define OTA_UPDATE 100
@@ -46,50 +37,6 @@
 #define LV_ADD_SSID 14
 #define WIFI_ATTACK_BEACON_LIST 15
 
-//#define TFT_SHIELD
-#define TFT_DIY
-#define KIT
-
-#define SCREEN_WIDTH 240
-#define SCREEN_HEIGHT 320
-#define HEIGHT_1 240
-#define WIDTH_1 320
-#define STANDARD_FONT_CHAR_LIMIT 40 // number of characters on a single line with normal font
-#define TEXT_HEIGHT 16 // Height of text to be printed and scrolled
-#define BOT_FIXED_AREA 0 // Number of lines in bottom fixed area (lines counted from bottom of screen)
-#define TOP_FIXED_AREA 48 // Number of lines in top fixed area (lines counted from top of screen)
-#define YMAX 320 // Bottom of screen area
-#define minimum(a,b)     (((a) < (b)) ? (a) : (b))
-//#define MENU_FONT NULL
-#define MENU_FONT &FreeMono9pt7b // Winner
-//#define MENU_FONT &FreeMonoBold9pt7b
-//#define MENU_FONT &FreeSans9pt7b
-//#define MENU_FONT &FreeSansBold9pt7b
-#define BUTTON_ARRAY_LEN 9
-#define STATUS_BAR_WIDTH 16
-#define LVGL_TICK_PERIOD 6
-
-#define FRAME_X 100
-#define FRAME_Y 64
-#define FRAME_W 120
-#define FRAME_H 50
-
-// Red zone size
-#define REDBUTTON_X FRAME_X
-#define REDBUTTON_Y FRAME_Y
-#define REDBUTTON_W (FRAME_W/2)
-#define REDBUTTON_H FRAME_H
-
-// Green zone size
-#define GREENBUTTON_X (REDBUTTON_X + REDBUTTON_W)
-#define GREENBUTTON_Y FRAME_Y
-#define GREENBUTTON_W (FRAME_W/2)
-#define GREENBUTTON_H FRAME_H
-
-#define STATUSBAR_COLOR 0x4A49
-
-#define KIT_LED_BUILTIN 13
-
 /*
 PROGMEM void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
 PROGMEM bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data);
@@ -103,6 +50,9 @@ PROGMEM static void keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 // lvgl stuff
 PROGMEM static lv_obj_t *kb;
 */
+
+// #define KIT
+// #define TFT_FIY
 
 class Display
 {
@@ -131,7 +81,7 @@ class Display
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    const String PROGMEM version_number = "v0.9.5";
+    const String PROGMEM version_number = MARAUDER_VERSION;
 
     bool printing = false;
     bool loading = false;

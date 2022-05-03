@@ -4,12 +4,11 @@
 #include "SD.h"
 #include "Buffer.h"
 #include "Display.h"
+#include "configs.h"
 #include <Update.h>
 
 extern Buffer buffer_obj;
 extern Display display_obj;
-
-#define SD_CS 12
 
 #ifdef KIT
   #define SD_DET 4

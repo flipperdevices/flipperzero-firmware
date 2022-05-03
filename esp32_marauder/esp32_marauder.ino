@@ -29,18 +29,16 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "esp_interface.h"
 #include "a32u4_interface.h"
 #include "settings.h"
-//#include "icons.h"
+#include "configs.h"
 
-/*
-#ifdef __cplusplus
-extern "C" {
+#ifdef MARAUDER_MINI
+  #include <SwitchLib.h>
+  SwitchLib u_btn = SwitchLib(U_BTN, 1000, true);
+  SwitchLib d_btn = SwitchLib(D_BTN, 1000, true);
+  SwitchLib l_btn = SwitchLib(L_BTN, 1000, true);
+  SwitchLib r_btn = SwitchLib(R_BTN, 1000, true);
+  SwitchLib c_btn = SwitchLib(C_BTN, 1000, true);
 #endif
-uint8_t temprature_sens_read();
-#ifdef __cplusplus
-}
-#endif
-uint8_t temprature_sens_read();
-*/
 
 Display display_obj;
 WiFiScan wifi_scan_obj;
@@ -59,11 +57,31 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(Pixels, PIN, NEO_GRB + NEO_KHZ800);
 
 uint32_t currentTime  = 0;
 
+void backlightOn() {
+  #ifdef MARAUDER_MINI
+    digitalWrite(TFT_BL, LOW);
+  #endif
+
+  #ifndef MARAUDER_MINI
+    digitalWrite(TFT_BL, HIGH);
+  #endif
+}
+
+void backlightOff() {
+  #ifdef MARAUDER_MINI
+    digitalWrite(TFT_BL, HIGH);
+  #endif
+
+  #ifndef MARAUDER_MINI
+    digitalWrite(TFT_BL, LOW);
+  #endif
+}
+
 void setup()
 {
   pinMode(FLASH_BUTTON, INPUT);
   pinMode(TFT_BL, OUTPUT);
-  digitalWrite(TFT_BL, LOW);
+  backlightOff();
 #if BATTERY_ANALOG_ON == 1
   pinMode(BATTERY_PIN, OUTPUT);
   pinMode(CHARGING_PIN, INPUT);
@@ -84,7 +102,7 @@ void setup()
   display_obj.RunSetup();
   display_obj.tft.setTextColor(TFT_WHITE, TFT_BLACK);
 
-  digitalWrite(TFT_BL, LOW);
+  backlightOff();
 
   // Draw the title screen
   display_obj.drawJpeg("/marauder3L.jpg", 0 , 0);     // 240 x 320 image
@@ -92,7 +110,7 @@ void setup()
   //showCenterText(version_number, 250);
   display_obj.tft.drawCentreString(display_obj.version_number, 120, 250, 2);
 
-  digitalWrite(TFT_BL, HIGH); // Need this
+  backlightOn(); // Need this
 
   delay(2000);
 
