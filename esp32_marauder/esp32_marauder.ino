@@ -29,6 +29,7 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "esp_interface.h"
 #include "a32u4_interface.h"
 #include "settings.h"
+#include "CommandLine.h"
 #include "configs.h"
 
 #ifdef MARAUDER_MINI
@@ -52,10 +53,13 @@ LedInterface led_obj;
 EspInterface esp_obj;
 A32u4Interface a32u4_obj;
 Settings settings_obj;
+CommandLine cli_obj;
+
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(Pixels, PIN, NEO_GRB + NEO_KHZ800);
 
 uint32_t currentTime  = 0;
+
 
 void backlightOn() {
   #ifdef MARAUDER_MINI
@@ -76,6 +80,7 @@ void backlightOff() {
     digitalWrite(TFT_BL, LOW);
   #endif
 }
+
 
 void setup()
 {
@@ -226,19 +231,17 @@ void setup()
 
   delay(2000);
 
+  cli_obj.RunSetup();
+
   menu_function_obj.RunSetup();
 }
 
 
 void loop()
 {
-  // get the current time
-  //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
   currentTime = millis();
 
   // Update all of our objects
-  //if ((!display_obj.draw_tft) &&
-  //    (wifi_scan_obj.currentScanMode != OTA_UPDATE))
   if ((!display_obj.draw_tft) && (wifi_scan_obj.currentScanMode != ESP_UPDATE))
   {
     display_obj.main(wifi_scan_obj.currentScanMode);
@@ -247,13 +250,11 @@ void loop()
     battery_obj.main(currentTime);
     temp_obj.main(currentTime);
     settings_obj.main(currentTime);
-    //esp_obj.main(currentTime);
-    //a32u4_obj.main(currentTime);
-    //led_obj.main(currentTime);
-    //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
     if ((wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR) &&
-        (wifi_scan_obj.currentScanMode != WIFI_SCAN_EAPOL))
+        (wifi_scan_obj.currentScanMode != WIFI_SCAN_EAPOL)) {
       menu_function_obj.main(currentTime);
+      cli_obj.main(currentTime);
+    }
       if (wifi_scan_obj.currentScanMode == OTA_UPDATE)
         web_obj.main();
     delay(1);
@@ -266,17 +267,7 @@ void loop()
   else if (wifi_scan_obj.currentScanMode == ESP_UPDATE) {
     display_obj.main(wifi_scan_obj.currentScanMode);
     menu_function_obj.main(currentTime);
-    //esp_obj.program();
+    cli_obj.main(currentTime);
     delay(1);
   }
-  //else
-  //{
-  //  web_obj.main();
-  //}
-
-  //Serial.println(wifi_scan_obj.currentScanMode);
-
-  //Serial.print("Run Time: ");
-  //Serial.print(millis() - currentTime);
-  //Serial.println("ms");
 }

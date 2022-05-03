@@ -804,67 +804,6 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
   initTime = millis();
 }
 
-/*
-void WiFiScan::RunRickRoll(uint8_t scan_mode, uint16_t color)
-{
-  //Serial.println("Rick Roll...");
-  display_obj.TOP_FIXED_AREA_2 = 48;
-  display_obj.tteBar = true;
-  display_obj.print_delay_1 = 15;
-  display_obj.print_delay_2 = 10;
-  //display_obj.clearScreen();
-  display_obj.initScrollValues(true);
-  display_obj.tft.setTextWrap(false);
-  display_obj.tft.setTextColor(TFT_BLACK, color);
-  display_obj.tft.fillRect(0,16,240,16, color);
-  display_obj.tft.drawCentreString(" Rick Roll Beacon ",120,16,2);
-  display_obj.touchToExit();
-  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  packets_sent = 0;
-  //esp_wifi_set_mode(WIFI_MODE_STA);
-  WiFi.mode(WIFI_AP_STA);
-  esp_wifi_start();
-  esp_wifi_set_promiscuous_filter(NULL);
-  esp_wifi_set_promiscuous(true);
-  esp_wifi_set_max_tx_power(78);
-  this->wifi_initialized = true;
-  initTime = millis();
-  //display_obj.clearScreen();
-  //Serial.println("End of func");
-}*/
-
-// Function to prepare for beacon list
-/*
-void WiFiScan::RunBeaconList(uint8_t scan_mode, uint16_t color) {
-  sd_obj.openCapture("beacon_list");
-  
-  display_obj.TOP_FIXED_AREA_2 = 48;
-  display_obj.tteBar = true;
-  display_obj.print_delay_1 = 15;
-  display_obj.print_delay_2 = 10;
-  //display_obj.clearScreen();
-  display_obj.initScrollValues(true);
-  display_obj.tft.setTextWrap(false);
-  display_obj.tft.setTextColor(TFT_BLACK, color);
-  display_obj.tft.fillRect(0,16,240,16, color);
-  display_obj.tft.drawCentreString(" Beacon Spam List ",120,16,2);
-  display_obj.touchToExit();
-  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
-  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-  esp_wifi_init(&cfg);
-  esp_wifi_set_storage(WIFI_STORAGE_RAM);
-  esp_wifi_set_mode(WIFI_AP_STA);
-  esp_wifi_start();
-  esp_wifi_set_promiscuous(true);
-  esp_wifi_set_max_tx_power(78);
-  esp_wifi_set_promiscuous_filter(&filt);
-  esp_wifi_set_promiscuous_rx_cb(&beaconListSnifferCallback);
-  esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
-  this->wifi_initialized = true;
-  initTime = millis();
-}*/
-
 
 // Function to prepare for beacon mimic
 void WiFiScan::RunMimicFlood(uint8_t scan_mode, uint16_t color) {
@@ -896,103 +835,6 @@ void WiFiScan::RunMimicFlood(uint8_t scan_mode, uint16_t color) {
   //display_obj.clearScreen();
   //Serial.println("End of func");
 }
-
-// Function to prepare for beacon spam
-/*
-void WiFiScan::RunProbeFlood(uint8_t scan_mode, uint16_t color) {
-  display_obj.TOP_FIXED_AREA_2 = 48;
-  display_obj.tteBar = true;
-  display_obj.print_delay_1 = 15;
-  display_obj.print_delay_2 = 10;
-  //display_obj.clearScreen();
-  display_obj.initScrollValues(true);
-  display_obj.tft.setTextWrap(false);
-  display_obj.tft.setTextColor(TFT_BLACK, color);
-  display_obj.tft.fillRect(0,16,240,16, color);
-  display_obj.tft.drawCentreString(" Auth Flood ",120,16,2);
-  display_obj.touchToExit();
-  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  packets_sent = 0;
-  //esp_wifi_set_mode(WIFI_MODE_STA);
-  //WiFi.mode(WIFI_AP_STA);
-  esp_wifi_init(&cfg);
-  esp_wifi_set_storage(WIFI_STORAGE_RAM);
-  //WiFi.mode(WIFI_AP_STA);
-  esp_wifi_set_mode(WIFI_AP_STA);
-  esp_wifi_start();
-  esp_wifi_set_promiscuous_filter(NULL);
-  esp_wifi_set_promiscuous(true);
-  esp_wifi_set_max_tx_power(78);
-  this->wifi_initialized = true;
-  initTime = millis();
-  //display_obj.clearScreen();
-  //Serial.println("End of func");
-}*/
-
-/*
-void WiFiScan::RunDeauthFlood(uint8_t scan_mode, uint16_t color) {
-  display_obj.TOP_FIXED_AREA_2 = 48;
-  display_obj.tteBar = true;
-  display_obj.print_delay_1 = 15;
-  display_obj.print_delay_2 = 10;
-  //display_obj.clearScreen();
-  display_obj.initScrollValues(true);
-  display_obj.tft.setTextWrap(false);
-  display_obj.tft.setTextColor(TFT_BLACK, color);
-  display_obj.tft.fillRect(0,16,240,16, color);
-  display_obj.tft.drawCentreString(" Deauth Flood ",120,16,2);
-  display_obj.touchToExit();
-  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  packets_sent = 0;
-  //esp_wifi_set_mode(WIFI_MODE_STA);
-  //WiFi.mode(WIFI_AP_STA);
-  esp_wifi_init(&cfg);
-  esp_wifi_set_storage(WIFI_STORAGE_RAM);
-  //WiFi.mode(WIFI_AP_STA);
-  esp_wifi_set_mode(WIFI_AP_STA);
-  esp_wifi_start();
-  esp_wifi_set_promiscuous_filter(NULL);
-  esp_wifi_set_promiscuous(true);
-  esp_wifi_set_max_tx_power(78);
-  this->wifi_initialized = true;
-  initTime = millis();
-  //display_obj.clearScreen();
-  //Serial.println("End of func");
-}*/
-
-// Function to prepare for beacon spam
-/*
-void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
-{
-  //Serial.println("Beacon Spam...");
-  display_obj.TOP_FIXED_AREA_2 = 48;
-  display_obj.tteBar = true;
-  display_obj.print_delay_1 = 15;
-  display_obj.print_delay_2 = 10;
-  //display_obj.clearScreen();
-  display_obj.initScrollValues(true);
-  display_obj.tft.setTextWrap(false);
-  display_obj.tft.setTextColor(TFT_BLACK, color);
-  display_obj.tft.fillRect(0,16,240,16, color);
-  display_obj.tft.drawCentreString(" Beacon Spam Random ",120,16,2);
-  display_obj.touchToExit();
-  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  packets_sent = 0;
-  //esp_wifi_set_mode(WIFI_MODE_STA);
-  //WiFi.mode(WIFI_AP_STA);
-  esp_wifi_init(&cfg);
-  esp_wifi_set_storage(WIFI_STORAGE_RAM);
-  //WiFi.mode(WIFI_AP_STA);
-  esp_wifi_set_mode(WIFI_AP_STA);
-  esp_wifi_start();
-  esp_wifi_set_promiscuous_filter(NULL);
-  esp_wifi_set_promiscuous(true);
-  esp_wifi_set_max_tx_power(78);
-  this->wifi_initialized = true;
-  initTime = millis();
-  //display_obj.clearScreen();
-  //Serial.println("End of func");
-}*/
 
 void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
 {
@@ -1123,22 +965,6 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
   display_obj.print_delay_1 = 50;
   display_obj.print_delay_2 = 20;
 
-  /*
-  esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
-  esp_err_t init_ret = esp_bt_controller_init(&bt_cfg);
-  if (init_ret != ESP_OK)
-    Serial.println("Could not initialize BT Controller: " + (String)init_ret);
-  
-  //esp_bt_controller_enable(ESP_BT_MODE_CLASSIC_BT);
-  //esp_bt_controller_disable();
-  
-  
-  esp_err_t ret = esp_bt_controller_enable(ESP_BT_MODE_BTDM);
-  if (ret != ESP_OK)
-    Serial.println("Could not enable BT Controller: " + (String)ret);
-
-  Serial.println("BT Controller Status: " + (String)esp_bt_controller_get_status());
-  */
   NimBLEDevice::setScanFilterMode(CONFIG_BTDM_SCAN_DUPL_TYPE_DEVICE);
   NimBLEDevice::setScanDuplicateCacheSize(200);
   NimBLEDevice::init("");

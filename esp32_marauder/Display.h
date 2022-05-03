@@ -52,7 +52,7 @@ PROGMEM static lv_obj_t *kb;
 */
 
 // #define KIT
-// #define TFT_FIY
+// #define TFT_DIY
 
 class Display
 {

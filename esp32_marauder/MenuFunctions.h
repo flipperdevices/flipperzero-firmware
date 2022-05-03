@@ -171,8 +171,7 @@ class MenuFunctions
 
     //TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
 
-    void addNodes(Menu* menu, String name, uint16_t color, Menu* child, int place, std::function<void()> callable, bool selected = false, String command = null);
-    void drawStatusBar();
+    void addNodes(Menu* menu, String name, uint16_t color, Menu* child, int place, std::function<void()> callable, bool selected = false, String command = "");
     void updateStatusBar();
     void battery(bool initial = false);
     void battery2(bool initial = false);
@@ -205,6 +204,7 @@ class MenuFunctions
 
     void buildButtons(Menu* menu);
     void changeMenu(Menu* menu);
+    void drawStatusBar();
     void displayCurrentMenu();
     void main(uint32_t currentTime);
     void RunSetup();
