@@ -31,6 +31,10 @@ struct MusicPlayerWorker {
     FuriThread* thread;
     bool should_work;
 
+    MusicPlayerWorkerCallback callback;
+    void* callback_context;
+
+    float volume;
     uint32_t bpm;
     uint32_t duration;
     uint32_t octave;
@@ -63,7 +67,18 @@ static int32_t music_player_worker_thread_callback(void* context) {
                 note_block->dots--;
             }
             uint32_t next_tick = furi_hal_get_tick() + duration;
-            float volume = 1.0f;
+            float volume = instance->volume;
+
+            if(instance->callback) {
+                instance->callback(
+                    note_block->semitone,
+                    note_block->dots,
+                    note_block->duration,
+                    0.0,
+                    instance->callback_context);
+            }
+
+            furi_hal_speaker_stop();
             furi_hal_speaker_start(frequency, volume);
             while(furi_hal_get_tick() < next_tick) {
                 volume -= (0.000054321 * instance->lfo);
@@ -76,11 +91,11 @@ static int32_t music_player_worker_thread_callback(void* context) {
                 furi_hal_speaker_set_volume(volume);
                 furi_hal_delay_ms(2);
             }
-            furi_hal_speaker_stop();
-
             NoteBlockArray_next(it);
         }
     }
+
+    furi_hal_speaker_stop();
 
     return 0;
 }
@@ -105,7 +120,7 @@ MusicPlayerWorker* music_player_worker_alloc() {
 void music_player_worker_free(MusicPlayerWorker* instance) {
     furi_assert(instance);
     furi_thread_free(instance->thread);
-    NoteBlockArray_reset(instance->notes);
+    NoteBlockArray_clear(instance->notes);
     free(instance);
 }
 
@@ -306,6 +321,19 @@ bool music_player_worker_load(MusicPlayerWorker* instance, const char* file_path
     furi_assert(instance);
     furi_assert(file_path);
 
+    bool ret = false;
+    if(strcasestr(file_path, ".fmf")) {
+        ret = music_player_worker_load_fmf_from_file(instance, file_path);
+    } else {
+        ret = music_player_worker_load_rtttl_from_file(instance, file_path);
+    }
+    return ret;
+}
+
+bool music_player_worker_load_fmf_from_file(MusicPlayerWorker* instance, const char* file_path) {
+    furi_assert(instance);
+    furi_assert(file_path);
+
     bool result = false;
     string_t temp_str;
     string_init(temp_str);
@@ -363,7 +391,50 @@ bool music_player_worker_load(MusicPlayerWorker* instance, const char* file_path
     return result;
 }
 
-bool music_player_worker_load_rtttl(MusicPlayerWorker* instance, const char* string) {
+bool music_player_worker_load_rtttl_from_file(MusicPlayerWorker* instance, const char* file_path) {
+    furi_assert(instance);
+    furi_assert(file_path);
+
+    bool result = false;
+    string_t content;
+    string_init(content);
+    Storage* storage = furi_record_open("storage");
+    File* file = storage_file_alloc(storage);
+
+    do {
+        if(!storage_file_open(file, file_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+            FURI_LOG_E(TAG, "Unable to open file");
+            break;
+        };
+
+        uint16_t ret = 0;
+        do {
+            uint8_t buffer[65] = {0};
+            ret = storage_file_read(file, buffer, sizeof(buffer) - 1);
+            if(ret) string_cat_str(content, (char*)buffer);
+        } while(ret > 0);
+
+        if(!string_size(content)) {
+            FURI_LOG_E(TAG, "Empty file");
+            break;
+        }
+
+        if(!music_player_worker_load_rtttl_from_string(instance, string_get_cstr(content))) {
+            FURI_LOG_E(TAG, "Invalid file content");
+            break;
+        }
+
+        result = true;
+    } while(0);
+
+    storage_file_free(file);
+    furi_record_close("storage");
+    string_clear(content);
+
+    return result;
+}
+
+bool music_player_worker_load_rtttl_from_string(MusicPlayerWorker* instance, const char* string) {
     furi_assert(instance);
 
     const char* cursor = string;
@@ -409,6 +480,20 @@ bool music_player_worker_load_rtttl(MusicPlayerWorker* instance, const char* str
     }
 
     return true;
+}
+
+void music_player_worker_set_callback(
+    MusicPlayerWorker* instance,
+    MusicPlayerWorkerCallback callback,
+    void* context) {
+    furi_assert(instance);
+    instance->callback = callback;
+    instance->callback_context = context;
+}
+
+void music_player_worker_set_volume(MusicPlayerWorker* instance, float volume) {
+    furi_assert(instance);
+    instance->volume = volume;
 }
 
 void music_player_worker_start(MusicPlayerWorker* instance) {

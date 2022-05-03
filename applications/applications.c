@@ -337,7 +337,7 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #ifdef APP_MUSIC_PLAYER
     {.app = music_player_app,
      .name = "Music Player",
-     .stack_size = 1024,
+     .stack_size = 2048,
      .icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
 #endif

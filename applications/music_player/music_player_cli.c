@@ -14,7 +14,8 @@ static void music_player_cli(Cli* cli, string_t args, void* context) {
                 break;
             }
         } else {
-            if(!music_player_worker_load_rtttl(music_player_worker, string_get_cstr(args))) {
+            if(!music_player_worker_load_rtttl_from_string(
+                   music_player_worker, string_get_cstr(args))) {
                 printf("Argument is not a file or RTTTL\r\n");
                 break;
             }
