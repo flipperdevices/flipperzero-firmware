@@ -225,14 +225,12 @@ static void music_player_worker_callback(
     MusicPlayer* music_player = context;
     furi_check(osMutexAcquire(music_player->model_mutex, osWaitForever) == osOK);
 
-    memcpy(
-        music_player->model->duration_history + 1,
-        music_player->model->duration_history,
-        MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - 1);
-    memcpy(
-        music_player->model->semitone_history + 1,
-        music_player->model->semitone_history,
-        MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - 1);
+    for(size_t i = 0; i < MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - 1; i++) {
+        music_player->model->duration_history[MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - i - 1] =
+            music_player->model->duration_history[MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - i];
+        music_player->model->semitone_history[MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - i - 1] =
+            music_player->model->semitone_history[MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - i];
+    }
 
     semitone = semitone == 0xFF ? 0xFF : semitone % 12;
 

@@ -411,9 +411,12 @@ bool music_player_worker_load_rtttl_from_file(MusicPlayerWorker* instance, const
         do {
             uint8_t buffer[65] = {0};
             ret = storage_file_read(file, buffer, sizeof(buffer) - 1);
-            if(ret) string_cat_str(content, (char*)buffer);
+            for(size_t i = 0; i < ret; i++) {
+                string_push_back(content, buffer[i]);
+            }
         } while(ret > 0);
 
+        string_strim(content);
         if(!string_size(content)) {
             FURI_LOG_E(TAG, "Empty file");
             break;
