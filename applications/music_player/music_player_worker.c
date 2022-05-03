@@ -22,17 +22,20 @@
 typedef struct {
     uint8_t semitone;
     uint8_t duration;
+    uint8_t dots;
 } NoteBlock;
 
 ARRAY_DEF(NoteBlockArray, NoteBlock, M_POD_OPLIST);
 
 struct MusicPlayerWorker {
-    NoteBlockArray_t notes;
     FuriThread* thread;
+    bool should_work;
+
     uint32_t bpm;
     uint32_t duration;
     uint32_t octave;
-    bool should_work;
+    NoteBlockArray_t notes;
+
     float lfo_step;
     float lfo;
 };
@@ -55,6 +58,10 @@ static int32_t music_player_worker_thread_callback(void* context) {
             float frequency = NOTE_C4 * powf(TWO_POW_TWELTH_ROOT, note_from_a4);
             float duration =
                 60.0 * osKernelGetTickFreq() * 4 / instance->bpm / note_block->duration;
+            while(note_block->dots > 0) {
+                duration += duration / 2;
+                note_block->dots--;
+            }
             uint32_t next_tick = furi_hal_get_tick() + duration;
             float volume = 1.0f;
             furi_hal_speaker_start(frequency, volume);
@@ -89,6 +96,9 @@ MusicPlayerWorker* music_player_worker_alloc() {
     furi_thread_set_context(instance->thread, instance);
     furi_thread_set_callback(instance->thread, music_player_worker_thread_callback);
 
+    instance->lfo_step = 0.0f;
+    instance->lfo = 100.0f;
+
     return instance;
 }
 
@@ -113,7 +123,7 @@ static bool is_space(const char c) {
 
 static size_t extract_number(const char* string, uint32_t* number) {
     size_t ret = 0;
-    while(*string != '\0' && is_digit(*string)) {
+    while(is_digit(*string)) {
         *number *= 10;
         *number += (*string - '0');
         string++;
@@ -122,8 +132,18 @@ static size_t extract_number(const char* string, uint32_t* number) {
     return ret;
 }
 
+static size_t extract_dots(const char* string, uint32_t* number) {
+    size_t ret = 0;
+    while(*string == '.') {
+        *number += 1;
+        string++;
+        ret++;
+    }
+    return ret;
+}
+
 static size_t extract_char(const char* string, char* symbol) {
-    if(*string != '\0' && is_letter(*string)) {
+    if(is_letter(*string)) {
         *symbol = *string;
         return 1;
     } else {
@@ -132,31 +152,36 @@ static size_t extract_char(const char* string, char* symbol) {
 }
 
 static size_t extract_sharp(const char* string, char* symbol) {
-    if(*string != '\0' && *string == '#') {
-        *symbol = *string;
+    if(*string == '#' || *string == '_') {
+        *symbol = '#';
         return 1;
     } else {
         return 0;
     }
 }
 
-static size_t skip_till_comma(const char* string) {
+static size_t skip_till(const char* string, const char symbol) {
     size_t ret = 0;
-    while(*string != '\0' && *string != ',') {
+    while(*string != '\0' && *string != symbol) {
         string++;
         ret++;
     }
-    if(*string != ',') {
+    if(*string != symbol) {
         ret = 0;
     }
     return ret;
 }
 
-static bool
-    music_player_worker_add_note(MusicPlayerWorker* instance, uint8_t semitone, uint8_t duration) {
+static bool music_player_worker_add_note(
+    MusicPlayerWorker* instance,
+    uint8_t semitone,
+    uint8_t duration,
+    uint8_t dots) {
     NoteBlock note_block;
+
     note_block.semitone = semitone;
     note_block.duration = duration;
+    note_block.dots = dots;
 
     NoteBlockArray_push_back(instance->notes, note_block);
 
@@ -189,7 +214,8 @@ static int8_t note_to_semitone(const char note) {
     }
 }
 
-static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const char* cursor) {
+static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const char* string) {
+    const char* cursor = string;
     bool result = true;
 
     while(*cursor != '\0') {
@@ -198,12 +224,14 @@ static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const c
             char note_char = '\0';
             char sharp_char = '\0';
             uint32_t octave = 0;
+            uint32_t dots = 0;
 
             // Parsing
             cursor += extract_number(cursor, &duration);
             cursor += extract_char(cursor, &note_char);
             cursor += extract_sharp(cursor, &sharp_char);
             cursor += extract_number(cursor, &octave);
+            cursor += extract_dots(cursor, &dots);
 
             // Post processing
             note_char = toupper(note_char);
@@ -220,15 +248,16 @@ static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const c
             is_valid &= ((note_char >= 'A' && note_char <= 'G') || note_char == 'P');
             is_valid &= (sharp_char == '#' || sharp_char == '\0');
             is_valid &= (octave >= 0 && octave <= 16);
+            is_valid &= (dots >= 0 && dots <= 16);
             if(!is_valid) {
-                FURI_LOG_E(TAG, "Invalid note definition");
                 FURI_LOG_E(
                     TAG,
-                    "Parsed definition: %c%c%u %u",
+                    "Invalid note: %u%c%c%u.%u",
+                    duration,
                     note_char == '\0' ? '_' : note_char,
                     sharp_char == '\0' ? '_' : sharp_char,
                     octave,
-                    duration);
+                    dots);
                 result = false;
                 break;
             }
@@ -243,26 +272,28 @@ static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const c
                 semitone += sharp_char == '#' ? 1 : 0;
             }
 
-            if(music_player_worker_add_note(instance, semitone, duration)) {
+            if(music_player_worker_add_note(instance, semitone, duration, dots)) {
                 FURI_LOG_D(
                     TAG,
-                    "Added note: %c%c%u = %u %u",
+                    "Added note: %c%c%u.%u = %u %u",
                     note_char == '\0' ? '_' : note_char,
                     sharp_char == '\0' ? '_' : sharp_char,
                     octave,
+                    dots,
                     semitone,
                     duration);
             } else {
                 FURI_LOG_E(
                     TAG,
-                    "Invalid note: %c%c%u = %u %u",
+                    "Invalid note: %c%c%u.%u = %u %u",
                     note_char == '\0' ? '_' : note_char,
                     sharp_char == '\0' ? '_' : sharp_char,
                     octave,
+                    dots,
                     semitone,
                     duration);
             }
-            cursor += skip_till_comma(cursor);
+            cursor += skip_till(cursor, ',');
         }
 
         if(*cursor != '\0') cursor++;
@@ -281,9 +312,6 @@ bool music_player_worker_load(MusicPlayerWorker* instance, const char* file_path
 
     Storage* storage = furi_record_open("storage");
     FlipperFormat* file = flipper_format_file_alloc(storage);
-
-    instance->lfo_step = 0.05f;
-    instance->lfo = 1.0f;
 
     do {
         if(!flipper_format_file_open_existing(file, file_path)) break;
@@ -307,6 +335,15 @@ bool music_player_worker_load(MusicPlayerWorker* instance, const char* file_path
             FURI_LOG_E(TAG, "Octave is missing");
             break;
         }
+
+        if(flipper_format_key_exist(file, "LFO")) {
+            flipper_format_read_float(file, "LFO", &instance->lfo, 1);
+        }
+
+        if(flipper_format_key_exist(file, "LFO_step")) {
+            flipper_format_read_float(file, "LFO_step", &instance->lfo_step, 1);
+        }
+
         if(!flipper_format_read_string(file, "Notes", temp_str)) {
             FURI_LOG_E(TAG, "Notes is missing");
             break;
@@ -324,6 +361,54 @@ bool music_player_worker_load(MusicPlayerWorker* instance, const char* file_path
     string_clear(temp_str);
 
     return result;
+}
+
+bool music_player_worker_load_rtttl(MusicPlayerWorker* instance, const char* string) {
+    furi_assert(instance);
+
+    const char* cursor = string;
+
+    // Skip name
+    cursor += skip_till(cursor, ':');
+    if(*cursor != ':') {
+        return false;
+    }
+
+    // Duration
+    cursor += skip_till(cursor, '=');
+    if(*cursor != '=') {
+        return false;
+    }
+    cursor++;
+    cursor += extract_number(cursor, &instance->duration);
+
+    // Octave
+    cursor += skip_till(cursor, '=');
+    if(*cursor != '=') {
+        return false;
+    }
+    cursor++;
+    cursor += extract_number(cursor, &instance->octave);
+
+    // BPM
+    cursor += skip_till(cursor, '=');
+    if(*cursor != '=') {
+        return false;
+    }
+    cursor++;
+    cursor += extract_number(cursor, &instance->bpm);
+
+    // Notes
+    cursor += skip_till(cursor, ':');
+    if(*cursor != ':') {
+        return false;
+    }
+    cursor++;
+    if(!music_player_worker_parse_notes(instance, cursor)) {
+        return false;
+    }
+
+    return true;
 }
 
 void music_player_worker_start(MusicPlayerWorker* instance) {

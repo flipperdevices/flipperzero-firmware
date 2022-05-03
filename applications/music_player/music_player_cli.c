@@ -1,14 +1,23 @@
 #include <furi.h>
 #include <cli/cli.h>
+#include <storage/storage.h>
 #include "music_player_worker.h"
 
 static void music_player_cli(Cli* cli, string_t args, void* context) {
     MusicPlayerWorker* music_player_worker = music_player_worker_alloc();
+    Storage* storage = furi_record_open("storage");
 
     do {
-        if(!music_player_worker_load(music_player_worker, string_get_cstr(args))) {
-            printf("Failed to open file %s", string_get_cstr(args));
-            break;
+        if(storage_common_stat(storage, string_get_cstr(args), NULL) == FSE_OK) {
+            if(!music_player_worker_load(music_player_worker, string_get_cstr(args))) {
+                printf("Failed to open file %s\r\n", string_get_cstr(args));
+                break;
+            }
+        } else {
+            if(!music_player_worker_load_rtttl(music_player_worker, string_get_cstr(args))) {
+                printf("Argument is not a file or RTTTL\r\n");
+                break;
+            }
         }
 
         printf("Press CTRL+C to stop\r\n");
@@ -19,6 +28,7 @@ static void music_player_cli(Cli* cli, string_t args, void* context) {
         music_player_worker_stop(music_player_worker);
     } while(0);
 
+    furi_record_close("storage");
     music_player_worker_free(music_player_worker);
 }
 
