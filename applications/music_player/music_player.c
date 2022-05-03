@@ -3,42 +3,8 @@
 
 #include <gui/gui.h>
 #include <input/input.h>
+#include "./music_player.h"
 
-// TODO float note freq
-typedef enum {
-    // Delay
-    N = 0,
-    // Octave 4
-    B4 = 494,
-    // Octave 5
-    C5 = 523,
-    D5 = 587,
-    E5 = 659,
-    F_5 = 740,
-    G5 = 784,
-    A5 = 880,
-    B5 = 988,
-    // Octave 6
-    C6 = 1046,
-    D6 = 1175,
-    E6 = 1319,
-} MelodyEventNote;
-
-typedef enum {
-    L1 = 1,
-    L2 = 2,
-    L4 = 4,
-    L8 = 8,
-    L16 = 16,
-    L32 = 32,
-    L64 = 64,
-    L128 = 128,
-} MelodyEventLength;
-
-typedef struct {
-    MelodyEventNote note;
-    MelodyEventLength length;
-} MelodyEventRecord;
 
 typedef struct {
     const MelodyEventRecord* record;
@@ -151,84 +117,6 @@ bool is_black_note(const MelodyEventRecord* note_record, uint8_t id) {
     return false;
 }
 
-const char* get_note_name(const MelodyEventRecord* note_record) {
-    if(note_record == NULL) return "";
-
-    switch(note_record->note) {
-    case N:
-        return "---";
-        break;
-    case B4:
-        return "B4-";
-        break;
-    case C5:
-        return "C5-";
-        break;
-    case D5:
-        return "D5-";
-        break;
-    case E5:
-        return "E5-";
-        break;
-    case F_5:
-        return "F#5";
-        break;
-    case G5:
-        return "G5-";
-        break;
-    case A5:
-        return "A5-";
-        break;
-    case B5:
-        return "B5-";
-        break;
-    case C6:
-        return "C6-";
-        break;
-    case D6:
-        return "D6-";
-        break;
-    case E6:
-        return "E6-";
-        break;
-    default:
-        return "UNK";
-        break;
-    }
-}
-const char* get_note_len_name(const MelodyEventRecord* note_record) {
-    if(note_record == NULL) return "";
-
-    switch(note_record->length) {
-    case L1:
-        return "1-";
-        break;
-    case L2:
-        return "2-";
-        break;
-    case L4:
-        return "4-";
-        break;
-    case L8:
-        return "8-";
-        break;
-    case L16:
-        return "16";
-        break;
-    case L32:
-        return "32";
-        break;
-    case L64:
-        return "64";
-        break;
-    case L128:
-        return "1+";
-        break;
-    default:
-        return "--";
-        break;
-    }
-}
 
 static void render_callback(Canvas* canvas, void* ctx) {
     State* state = (State*)acquire_mutex((ValueMutex*)ctx, 25);
