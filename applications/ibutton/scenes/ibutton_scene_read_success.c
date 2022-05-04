@@ -52,8 +52,8 @@ bool ibutton_scene_read_success_on_event(void* context, SceneManagerEvent event)
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == DialogExResultRight) {
             scene_manager_next_scene(scene_manager, iButtonSceneReadMenu);
-        } else {
-            //scene_manager_next_scene(scene_manager, iButtonSceneRetryConfirm);
+        } else if(event.event == DialogExResultLeft) {
+            scene_manager_next_scene(scene_manager, iButtonSceneRetryConfirm);
         }
     } else if(event.type == SceneManagerEventTypeBack) {
         scene_manager_next_scene(scene_manager, iButtonSceneExitConfirm);
