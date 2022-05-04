@@ -56,7 +56,7 @@ bool ibutton_scene_read_success_on_event(void* context, SceneManagerEvent event)
             //scene_manager_next_scene(scene_manager, iButtonSceneRetryConfirm);
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        //scene_manager_next_scene(scene_manager, iButtonSceneExitConfirm);
+        scene_manager_next_scene(scene_manager, iButtonSceneExitConfirm);
     } else {
         return false;
     }
