@@ -26,7 +26,7 @@ void ibutton_scene_read_on_enter(void* context) {
 
 bool ibutton_scene_read_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
-    //SceneManager* scene_manager = ibutton->scene_manager;
+    SceneManager* scene_manager = ibutton->scene_manager;
 
     if((event.type == SceneManagerEventTypeCustom) &&
        (event.event == iButtonCustomEventWorkerRead)) {
@@ -49,7 +49,7 @@ bool ibutton_scene_read_on_event(void* context, SceneManagerEvent event) {
             ibutton_notification_message(ibutton, iButtonNotificationMessageSuccess);
             ibutton_notification_message(ibutton, iButtonNotificationMessageGreenOn);
             DOLPHIN_DEED(DolphinDeedIbuttonReadSuccess);
-            //scene_manager_next_scene(scene_manager, iButtonSceneReadSuccess);
+            scene_manager_next_scene(scene_manager, iButtonSceneReadSuccess);
         }
 
     } else if(event.type == SceneManagerEventTypeTick) {

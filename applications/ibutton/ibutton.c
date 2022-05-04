@@ -128,11 +128,18 @@ iButton* ibutton_alloc() {
     view_dispatcher_add_view(
         ibutton->view_dispatcher, iButtonViewWidget, widget_get_view(ibutton->widget));
 
+    ibutton->dialog_ex = dialog_ex_alloc();
+    view_dispatcher_add_view(
+        ibutton->view_dispatcher, iButtonViewDialogEx, dialog_ex_get_view(ibutton->dialog_ex));
+
     return ibutton;
 }
 
 void ibutton_free(iButton* ibutton) {
     furi_assert(ibutton);
+
+    view_dispatcher_remove_view(ibutton->view_dispatcher, iButtonViewDialogEx);
+    dialog_ex_free(ibutton->dialog_ex);
 
     view_dispatcher_remove_view(ibutton->view_dispatcher, iButtonViewWidget);
     widget_free(ibutton->widget);
