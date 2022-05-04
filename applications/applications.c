@@ -21,6 +21,7 @@ extern int32_t accessor_app(void* p);
 extern int32_t archive_app(void* p);
 extern int32_t bad_usb_app(void* p);
 extern int32_t u2f_app(void* p);
+extern int32_t wav_player_app(void* p);
 extern int32_t uart_echo_app(void* p);
 extern int32_t blink_test_app(void* p);
 extern int32_t bt_debug_app(void* p);
@@ -61,6 +62,7 @@ extern void subghz_on_system_start();
 extern void power_on_system_start();
 extern void unit_tests_on_system_start();
 extern void updater_on_system_start();
+extern void synth_on_system_start();
 
 // Settings
 extern int32_t notification_settings_app(void* p);
@@ -268,6 +270,11 @@ const FlipperApplication FLIPPER_APPS[] = {
      .flags = FlipperApplicationFlagDefault},
 #endif
 
+    {.app = wav_player_app,
+     .name = "Wav Player",
+     .stack_size = 4096,
+     .icon = &A_Games_14,
+     .flags = FlipperApplicationFlagDefault},
 };
 
 const size_t FLIPPER_APPS_COUNT = COUNT_OF(FLIPPER_APPS);
