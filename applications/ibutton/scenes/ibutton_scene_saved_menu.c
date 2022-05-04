@@ -49,7 +49,7 @@ bool ibutton_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
     if(event.type != SceneManagerEventTypeCustom) {
         return false;
     } else if(event.event == SubmenuIndexEmulate) {
-        //         scene_manager_next_scene(ibutton->scene_manager, iButtonSceneEmulate);
+        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneEmulate);
     } else if(event.event == SubmenuIndexWrite) {
         //         scene_manager_next_scene(ibutton->scene_manager, iButtonSceneWrite);
     } else if(event.event == SubmenuIndexEdit) {

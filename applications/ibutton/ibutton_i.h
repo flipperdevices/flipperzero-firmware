@@ -62,6 +62,18 @@ typedef enum {
     iButtonViewWidget,
 } iButtonView;
 
+typedef enum {
+    iButtonNotificationMessageError,
+    iButtonNotificationMessageSuccess,
+    iButtonNotificationMessageRead,
+    iButtonNotificationMessageEmulate,
+    iButtonNotificationMessageYellowBlink,
+    iButtonNotificationMessageRedOn,
+    iButtonNotificationMessageRedOff,
+    iButtonNotificationMessageGreenOn,
+    iButtonNotificationMessageGreenOff,
+} iButtonNotificationMessage;
+
 iButton* ibutton_alloc();
 
 bool ibutton_file_select(iButton* ibutton);
@@ -74,3 +86,4 @@ void ibutton_switch_to_previous_scene_one_of(
     iButton* ibutton,
     const uint32_t* scene_ids,
     size_t scene_ids_size);
+void ibutton_notification_message(iButton* ibutton, uint32_t message);
