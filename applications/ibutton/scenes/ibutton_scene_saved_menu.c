@@ -51,7 +51,7 @@ bool ibutton_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
     } else if(event.event == SubmenuIndexEmulate) {
         scene_manager_next_scene(ibutton->scene_manager, iButtonSceneEmulate);
     } else if(event.event == SubmenuIndexWrite) {
-        //         scene_manager_next_scene(ibutton->scene_manager, iButtonSceneWrite);
+        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneWrite);
     } else if(event.event == SubmenuIndexEdit) {
         scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddValue);
     } else if(event.event == SubmenuIndexDelete) {

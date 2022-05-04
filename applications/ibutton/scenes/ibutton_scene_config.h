@@ -1,5 +1,6 @@
 ADD_SCENE(ibutton, start, Start)
 ADD_SCENE(ibutton, emulate, Emulate)
+ADD_SCENE(ibutton, write, Write)
 ADD_SCENE(ibutton, info, Info)
 ADD_SCENE(ibutton, read, Read)
 ADD_SCENE(ibutton, read_menu, ReadMenu)

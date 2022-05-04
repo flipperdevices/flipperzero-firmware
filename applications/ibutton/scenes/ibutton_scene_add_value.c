@@ -12,7 +12,8 @@ void ibutton_scene_add_value_on_enter(void* context) {
     iButtonKey* key = ibutton->key;
     uint8_t* new_key_data = malloc(IBUTTON_KEY_DATA_SIZE);
 
-    scene_manager_set_scene_state(ibutton->scene_manager, iButtonSceneAddValue, (uint32_t)new_key_data);
+    scene_manager_set_scene_state(
+        ibutton->scene_manager, iButtonSceneAddValue, (uint32_t)new_key_data);
     memcpy(new_key_data, ibutton_key_get_data_p(key), ibutton_key_get_data_size(key));
 
     byte_input_set_result_callback(
@@ -29,7 +30,8 @@ void ibutton_scene_add_value_on_enter(void* context) {
 
 bool ibutton_scene_add_value_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
-    uint8_t* new_key_data = (uint8_t*)scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneAddValue);
+    uint8_t* new_key_data =
+        (uint8_t*)scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneAddValue);
 
     if(event.type != SceneManagerEventTypeCustom) {
         return false;
@@ -46,7 +48,8 @@ bool ibutton_scene_add_value_on_event(void* context, SceneManagerEvent event) {
 
 void ibutton_scene_add_value_on_exit(void* context) {
     iButton* ibutton = context;
-    uint8_t* new_key_data = (uint8_t*)scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneAddValue);
+    uint8_t* new_key_data =
+        (uint8_t*)scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneAddValue);
 
     byte_input_set_result_callback(ibutton->byte_input, NULL, NULL, NULL, NULL, 0);
     byte_input_set_header_text(ibutton->byte_input, NULL);

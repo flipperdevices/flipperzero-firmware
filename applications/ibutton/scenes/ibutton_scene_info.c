@@ -30,8 +30,7 @@ void ibutton_scene_info_on_enter(void* context) {
 
     case iButtonKeyMetakom:
         ibutton_text_store_set(
-            ibutton,
-            "%02X %02X %02X %02X", key_data[0], key_data[1], key_data[2], key_data[3]);
+            ibutton, "%02X %02X %02X %02X", key_data[0], key_data[1], key_data[2], key_data[3]);
         widget_add_string_element(
             widget, 64, 51, AlignCenter, AlignBottom, FontSecondary, "Metakom");
         break;

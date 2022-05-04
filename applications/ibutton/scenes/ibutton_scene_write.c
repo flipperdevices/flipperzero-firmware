@@ -1,28 +1,29 @@
 #include "../ibutton_i.h"
-#include <dolphin/dolphin.h>
 
-static void ibutton_scene_emulate_callback(void* context, bool emulated) {
+typedef enum {
+    iButtonSceneWriteStateDefault,
+    iButtonSceneWriteStateBlinkYellow,
+} iButtonSceneWriteState;
+
+static void ibutton_scene_write_callback(void* context, iButtonWorkerWriteResult result) {
     iButton* ibutton = context;
-    if(emulated) {
-        view_dispatcher_send_custom_event(
-            ibutton->view_dispatcher, iButtonCustomEventWorkerEmulated);
-    }
+    view_dispatcher_send_custom_event(ibutton->view_dispatcher, result);
 }
 
-void ibutton_scene_emulate_on_enter(void* context) {
+void ibutton_scene_write_on_enter(void* context) {
     iButton* ibutton = context;
     Popup* popup = ibutton->popup;
     iButtonKey* key = ibutton->key;
+    iButtonWorker* worker = ibutton->key_worker;
 
     const uint8_t* key_data = ibutton_key_get_data_p(key);
     const char* key_name = ibutton_key_get_name_p(key);
 
     uint8_t line_count = 2;
-    DOLPHIN_DEED(DolphinDeedIbuttonEmulate);
 
     // check that stored key has name
     if(strcmp(key_name, "") != 0) {
-        ibutton_text_store_set(ibutton, "emulating\n%s", key_name);
+        ibutton_text_store_set(ibutton, "writing\n%s", key_name);
         line_count = 2;
     } else {
         // if not, show key data
@@ -30,7 +31,7 @@ void ibutton_scene_emulate_on_enter(void* context) {
         case iButtonKeyDS1990:
             ibutton_text_store_set(
                 ibutton,
-                "emulating\n%02X %02X %02X %02X\n%02X %02X %02X %02X",
+                "writing\n%02X %02X %02X %02X\n%02X %02X %02X %02X",
                 key_data[0],
                 key_data[1],
                 key_data[2],
@@ -42,13 +43,13 @@ void ibutton_scene_emulate_on_enter(void* context) {
             line_count = 3;
             break;
         case iButtonKeyCyfral:
-            ibutton_text_store_set(ibutton, "emulating\n%02X %02X", key_data[0], key_data[1]);
+            ibutton_text_store_set(ibutton, "writing\n%02X %02X", key_data[0], key_data[1]);
             line_count = 2;
             break;
         case iButtonKeyMetakom:
             ibutton_text_store_set(
                 ibutton,
-                "emulating\n%02X %02X %02X %02X",
+                "writing\n%02X %02X %02X %02X",
                 key_data[0],
                 key_data[1],
                 key_data[2],
@@ -72,21 +73,39 @@ void ibutton_scene_emulate_on_enter(void* context) {
 
     popup_set_icon(popup, 2, 10, &I_iButtonKey_49x44);
 
+    scene_manager_set_scene_state(
+        ibutton->scene_manager, iButtonSceneWrite, iButtonSceneWriteStateDefault);
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewPopup);
 
-    ibutton_worker_emulate_set_callback(
-        ibutton->key_worker, ibutton_scene_emulate_callback, ibutton);
-    ibutton_worker_emulate_start(ibutton->key_worker, key);
+    ibutton_worker_write_set_callback(worker, ibutton_scene_write_callback, ibutton);
+    ibutton_worker_write_start(worker, key);
 }
 
-bool ibutton_scene_emulate_on_event(void* context, SceneManagerEvent event) {
+bool ibutton_scene_write_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
+    SceneManager* scene_manager = ibutton->scene_manager;
 
-    if((event.type == SceneManagerEventTypeCustom) &&
-       (event.event == iButtonCustomEventWorkerEmulated)) {
-        ibutton_notification_message(ibutton, iButtonNotificationMessageYellowBlink);
+    if(event.type == SceneManagerEventTypeCustom) {
+        if((event.event == iButtonWorkerWriteOK) || (event.event == iButtonWorkerWriteSameKey)) {
+            //             scene_manager_next_scene(scene_manager, iButtonSceneWriteSuccess);
+        } else if(event.event == iButtonWorkerWriteNoDetect) {
+            scene_manager_set_scene_state(
+                scene_manager, iButtonSceneWrite, iButtonSceneWriteStateDefault);
+        } else if(event.event == iButtonWorkerWriteCannotWrite) {
+            scene_manager_set_scene_state(
+                scene_manager, iButtonSceneWrite, iButtonSceneWriteStateBlinkYellow);
+        } else {
+            return false;
+        }
+
     } else if(event.type == SceneManagerEventTypeTick) {
-        ibutton_notification_message(ibutton, iButtonNotificationMessageEmulate);
+        if(scene_manager_get_scene_state(scene_manager, iButtonSceneWrite) ==
+           iButtonSceneWriteStateBlinkYellow) {
+            ibutton_notification_message(ibutton, iButtonNotificationMessageYellowBlink);
+        } else {
+            ibutton_notification_message(ibutton, iButtonNotificationMessageEmulate);
+        }
+
     } else {
         return false;
     }
@@ -94,7 +113,7 @@ bool ibutton_scene_emulate_on_event(void* context, SceneManagerEvent event) {
     return true;
 }
 
-void ibutton_scene_emulate_on_exit(void* context) {
+void ibutton_scene_write_on_exit(void* context) {
     iButton* ibutton = context;
     Popup* popup = ibutton->popup;
     ibutton_worker_stop(ibutton->key_worker);

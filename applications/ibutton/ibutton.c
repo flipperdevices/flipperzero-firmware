@@ -14,8 +14,7 @@ static const NotificationSequence* ibutton_notification_sequences[] = {
     &sequence_set_red_255,
     &sequence_reset_red,
     &sequence_set_green_255,
-    &sequence_reset_green
-};
+    &sequence_reset_green};
 
 static void ibutton_make_app_folder(iButton* ibutton) {
     if(!storage_simply_mkdir(ibutton->storage, IBUTTON_APP_FOLDER)) {
@@ -319,7 +318,7 @@ void ibutton_switch_to_previous_scene_one_of(
 }
 
 void ibutton_notification_message(iButton* ibutton, uint32_t message) {
-    furi_assert(message < sizeof(ibutton_notification_sequences)/sizeof(NotificationSequence*));
+    furi_assert(message < sizeof(ibutton_notification_sequences) / sizeof(NotificationSequence*));
     notification_message(ibutton->notifications, ibutton_notification_sequences[message]);
 }
 

@@ -1,6 +1,9 @@
 #include "../ibutton_i.h"
 
-static void ibutton_scene_delete_confirm_widget_callback(GuiButtonType result, InputType type, void* context) {
+static void ibutton_scene_delete_confirm_widget_callback(
+    GuiButtonType result,
+    InputType type,
+    void* context) {
     iButton* ibutton = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(ibutton->view_dispatcher, result);
@@ -16,8 +19,14 @@ void ibutton_scene_delete_confirm_on_enter(void* context) {
     ibutton_text_store_set(ibutton, "\e#Delete %s?\e#", ibutton_key_get_name_p(key));
     widget_add_text_box_element(
         widget, 0, 0, 128, 27, AlignCenter, AlignCenter, ibutton->text_store, false);
-    widget_add_button_element(widget, GuiButtonTypeLeft, "Cancel", ibutton_scene_delete_confirm_widget_callback, ibutton);
-    widget_add_button_element(widget, GuiButtonTypeRight, "Delete", ibutton_scene_delete_confirm_widget_callback, ibutton);
+    widget_add_button_element(
+        widget, GuiButtonTypeLeft, "Cancel", ibutton_scene_delete_confirm_widget_callback, ibutton);
+    widget_add_button_element(
+        widget,
+        GuiButtonTypeRight,
+        "Delete",
+        ibutton_scene_delete_confirm_widget_callback,
+        ibutton);
 
     switch(ibutton_key_get_type(key)) {
     case iButtonKeyDS1990:
