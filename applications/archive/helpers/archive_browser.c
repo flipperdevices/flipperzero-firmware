@@ -80,6 +80,7 @@ void archive_set_item_count(ArchiveBrowserView* browser, uint32_t count) {
             model->item_idx = CLAMP(model->item_idx, model->item_cnt - 1, 0);
             return false;
         });
+    archive_update_offset(browser);
 }
 
 void archive_file_array_rm_selected(ArchiveBrowserView* browser) {
