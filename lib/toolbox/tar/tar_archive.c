@@ -38,6 +38,7 @@ static int mtar_storage_file_seek(void* stream, unsigned offset) {
 static int mtar_storage_file_close(void* stream) {
     if(stream) {
         storage_file_close(stream);
+        storage_file_free(stream);
     }
     return MTAR_ESUCCESS;
 }
@@ -93,6 +94,7 @@ void tar_archive_free(TarArchive* archive) {
     if(mtar_is_open(&archive->tar)) {
         mtar_close(&archive->tar);
     }
+    free(archive);
 }
 
 void tar_archive_set_file_callback(TarArchive* archive, tar_unpack_file_cb callback, void* context) {
@@ -204,12 +206,14 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
     bool failed = false;
     uint8_t n_tries = FILE_OPEN_NTRIES;
     do {
-        while(
-            (n_tries-- > 0) &&
-            !storage_file_open(out_file, string_get_cstr(fname), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        while(n_tries-- > 0) {
+            if(storage_file_open(
+                   out_file, string_get_cstr(fname), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                break;
+            }
             FURI_LOG_W(TAG, "Failed to open '%s', reties: %d", string_get_cstr(fname), n_tries);
+            storage_file_close(out_file);
             osDelay(FILE_OPEN_RETRY_DELAY);
-            continue;
         }
 
         if(!storage_file_is_open(out_file)) {
@@ -255,11 +259,13 @@ bool tar_archive_add_file(
     File* src_file = storage_file_alloc(archive->storage);
     uint8_t n_tries = FILE_OPEN_NTRIES;
     do {
-        while((n_tries-- > 0) &&
-              !storage_file_open(src_file, fs_file_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        while(n_tries-- > 0) {
+            if(storage_file_open(src_file, fs_file_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+                break;
+            }
             FURI_LOG_W(TAG, "Failed to open '%s', reties: %d", fs_file_path, n_tries);
+            storage_file_close(src_file);
             osDelay(FILE_OPEN_RETRY_DELAY);
-            continue;
         }
 
         if(!storage_file_is_open(src_file) ||

@@ -60,7 +60,7 @@ static ViewPort* bt_pin_code_view_port_alloc(Bt* bt) {
 
 static void bt_pin_code_show(Bt* bt, uint32_t pin_code) {
     bt->pin_code = pin_code;
-    notification_message(bt->notification, &sequence_display_on);
+    notification_message(bt->notification, &sequence_display_backlight_on);
     gui_view_port_send_to_front(bt->gui, bt->pin_code_view_port);
     view_port_enabled_set(bt->pin_code_view_port, true);
 }
@@ -74,7 +74,7 @@ static void bt_pin_code_hide(Bt* bt) {
 
 static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     furi_assert(bt);
-    notification_message(bt->notification, &sequence_display_on);
+    notification_message(bt->notification, &sequence_display_backlight_on);
     string_t pin_str;
     dialog_message_set_icon(bt->dialog_message, &I_BLE_Pairing_128x64, 0, 0);
     string_init_printf(pin_str, "Verify code\n%06d", pin);
@@ -318,6 +318,13 @@ static void bt_change_profile(Bt* bt, BtMessage* message) {
 
 int32_t bt_srv() {
     Bt* bt = bt_alloc();
+
+    if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
+        FURI_LOG_W(TAG, "Skipped BT init: device in special startup mode");
+        ble_glue_wait_for_c2_start(FURI_HAL_BT_C2_START_TIMEOUT);
+        furi_record_create("bt", bt);
+        return 0;
+    }
 
     // Read keys
     if(!bt_keys_storage_load(bt)) {
