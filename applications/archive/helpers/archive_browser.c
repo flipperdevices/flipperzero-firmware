@@ -397,8 +397,6 @@ void archive_enter_dir(ArchiveBrowserView* browser, string_t name) {
         return;
     }
 
-    archive_dir_count_items(browser, string_get_cstr(name));
-
     if(string_cmp(browser->path, name) != 0) {
         with_view_model(
             browser->view, (ArchiveBrowserViewModel * model) {
@@ -411,6 +409,7 @@ void archive_enter_dir(ArchiveBrowserView* browser, string_t name) {
         string_set(browser->path, name);
     }
 
+    archive_dir_count_items(browser, string_get_cstr(name));
     archive_switch_dir(browser, string_get_cstr(browser->path));
 }
 
