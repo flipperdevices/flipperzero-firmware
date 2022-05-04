@@ -35,7 +35,7 @@ bool ibutton_scene_read_on_event(void* context, SceneManagerEvent event) {
 
         if(ibutton_key_get_type(key) == iButtonKeyDS1990) {
             if(!ibutton_key_dallas_crc_is_valid(key)) {
-                //scene_manager_next_scene(scene_manager, iButtonSceneReadCRCError);
+                scene_manager_next_scene(scene_manager, iButtonSceneReadCRCError);
             } else if(!ibutton_key_dallas_is_1990_key(key)) {
                 //scene_manager_next_scene(scene_manager, iButtonSceneReadNotKeyError);
             } else {
