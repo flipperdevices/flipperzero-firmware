@@ -14,7 +14,8 @@ static const NotificationSequence* ibutton_notification_sequences[] = {
     &sequence_set_red_255,
     &sequence_reset_red,
     &sequence_set_green_255,
-    &sequence_reset_green};
+    &sequence_reset_green,
+};
 
 static void ibutton_make_app_folder(iButton* ibutton) {
     if(!storage_simply_mkdir(ibutton->storage, IBUTTON_APP_FOLDER)) {

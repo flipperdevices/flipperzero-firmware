@@ -1,7 +1,8 @@
 #include "../ibutton_i.h"
 #include <one_wire/maxim_crc.h>
 
-static void ibutton_scene_read_not_key_error_dialog_ex_callback(DialogExResult result, void* context) {
+static void
+    ibutton_scene_read_not_key_error_dialog_ex_callback(DialogExResult result, void* context) {
     iButton* ibutton = context;
     view_dispatcher_send_custom_event(ibutton->view_dispatcher, result);
 }

@@ -18,7 +18,6 @@
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
-// #include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
 
 #include "ibutton_custom_event.h"
@@ -45,7 +44,6 @@ struct iButton {
 
     char file_name[IBUTTON_FILE_NAME_SIZE];
     char text_store[IBUTTON_TEXT_STORE_SIZE + 1];
-    //     string_t text_box_store;
 
     // Common Views
     Submenu* submenu;

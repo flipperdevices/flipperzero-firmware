@@ -1,6 +1,9 @@
 #include "../ibutton_i.h"
 
-static void ibutton_scene_retry_confirm_widget_callback(GuiButtonType result, InputType type, void* context) {
+static void ibutton_scene_retry_confirm_widget_callback(
+    GuiButtonType result,
+    InputType type,
+    void* context) {
     iButton* ibutton = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(ibutton->view_dispatcher, result);
@@ -11,8 +14,10 @@ void ibutton_scene_retry_confirm_on_enter(void* context) {
     iButton* ibutton = context;
     Widget* widget = ibutton->widget;
 
-    widget_add_button_element(widget, GuiButtonTypeLeft, "Exit", ibutton_scene_retry_confirm_widget_callback, ibutton);
-    widget_add_button_element(widget, GuiButtonTypeRight, "Stay", ibutton_scene_retry_confirm_widget_callback, ibutton);
+    widget_add_button_element(
+        widget, GuiButtonTypeLeft, "Exit", ibutton_scene_retry_confirm_widget_callback, ibutton);
+    widget_add_button_element(
+        widget, GuiButtonTypeRight, "Stay", ibutton_scene_retry_confirm_widget_callback, ibutton);
     widget_add_string_element(
         widget, 64, 19, AlignCenter, AlignBottom, FontPrimary, "Return to reading?");
     widget_add_string_element(

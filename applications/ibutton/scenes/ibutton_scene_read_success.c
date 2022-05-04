@@ -31,7 +31,12 @@ void ibutton_scene_read_success_on_enter(void* context) {
         break;
     case iButtonKeyMetakom:
         ibutton_text_store_set(
-            ibutton, "Metakom\n%02X %02X %02X %02X", key_data[0], key_data[1], key_data[2], key_data[3]);
+            ibutton,
+            "Metakom\n%02X %02X %02X %02X",
+            key_data[0],
+            key_data[1],
+            key_data[2],
+            key_data[3]);
         break;
     }
 
