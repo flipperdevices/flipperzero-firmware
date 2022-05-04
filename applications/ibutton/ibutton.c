@@ -185,6 +185,21 @@ bool ibutton_file_select(iButton* ibutton) {
     return success;
 }
 
+bool ibutton_load_key(iButton* ibutton, const char* key_name) {
+    string_t key_path;
+    string_init_set_str(key_path, key_name);
+
+    const bool success = ibutton_load_key_data(ibutton, key_path);
+
+    if(success) {
+        path_extract_filename_no_ext(key_name, key_path);
+        ibutton_key_set_name(ibutton->key, string_get_cstr(key_path));
+    }
+
+    string_clear(key_path);
+    return success;
+}
+
 bool ibutton_save_key(iButton* ibutton, const char* key_name) {
     // Create ibutton directory if necessary
     ibutton_make_app_folder(ibutton);
@@ -294,7 +309,15 @@ void ibutton_switch_to_previous_scene_one_of(
 int32_t ibutton_app(void* p) {
     iButton* ibutton = ibutton_alloc();
 
-    scene_manager_next_scene(ibutton->scene_manager, iButtonSceneStart);
+    ibutton_make_app_folder(ibutton);
+
+    if(p && ibutton_load_key(ibutton, (const char*)p)) {
+        // TODO: Display an error if the key from p could not be loaded
+        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneEmulate);
+    } else {
+        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneStart);
+    }
+
     view_dispatcher_run(ibutton->view_dispatcher);
 
     ibutton_free(ibutton);
