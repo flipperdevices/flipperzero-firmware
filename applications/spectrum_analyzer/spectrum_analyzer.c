@@ -8,18 +8,18 @@
 void spectrum_analyzer_draw_scale(Canvas* canvas, const SpectrumAnalyzerModel* model) {
 
 #define FREQ_BOTTOM_Y 50
-#define FREQ_START_X 0
-#define FREQ_LENGTH_X 127
+#define FREQ_START_X 14
+#define FREQ_LENGTH_X 102
 
     // Draw line
     canvas_draw_line(canvas, FREQ_START_X, FREQ_BOTTOM_Y, FREQ_START_X + FREQ_LENGTH_X, FREQ_BOTTOM_Y);
 
     // Draw minor scale
-    for(int i = FREQ_START_X; i < FREQ_START_X + FREQ_LENGTH_X ; i += 4) {
+    for(int i = FREQ_START_X; i < FREQ_START_X + FREQ_LENGTH_X ; i += 5) {
         canvas_draw_line(canvas, i, FREQ_BOTTOM_Y, i, FREQ_BOTTOM_Y + 2);
     }
     // Draw major scale
-    for(int i = FREQ_START_X; i < FREQ_START_X + FREQ_LENGTH_X ; i += 16) {
+    for(int i = FREQ_START_X; i < FREQ_START_X + FREQ_LENGTH_X ; i += 25) {
         canvas_draw_line(canvas, i, FREQ_BOTTOM_Y, i, FREQ_BOTTOM_Y + 4);
     }
 
@@ -47,11 +47,11 @@ void spectrum_analyzer_draw_scale(Canvas* canvas, const SpectrumAnalyzerModel* m
 
     canvas_set_font(canvas, FontSecondary);
     snprintf(temp_str, 18, "%u", tag_left);
-    canvas_draw_str_aligned(canvas, 0, 63, AlignLeft, AlignBottom, temp_str);
+    canvas_draw_str_aligned(canvas, FREQ_START_X, 63, AlignCenter, AlignBottom, temp_str);
     snprintf(temp_str, 18, "%u", tag_center);
     canvas_draw_str_aligned(canvas, 128/2, 63, AlignCenter, AlignBottom, temp_str);
     snprintf(temp_str, 18, "%u", tag_right);
-    canvas_draw_str_aligned(canvas, 127, 63, AlignRight, AlignBottom, temp_str);
+    canvas_draw_str_aligned(canvas, FREQ_START_X + FREQ_LENGTH_X - 1, 63, AlignCenter, AlignBottom, temp_str);
 }
 
 static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
@@ -64,9 +64,9 @@ static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
     spectrum_analyzer_draw_scale(canvas, model);
     
     ; 
-    for (uint8_t channel = 0; channel < FREQ_START_X + FREQ_LENGTH_X; channel++) { 
+    for (uint8_t column = 0; column < 128; column++) { 
     
-        uint8_t ss = model->chan_table[channel].ss;
+        uint8_t ss = model->chan_table[column + 2].ss;
         uint8_t s;
 
         if(height == VERTICAL_TALL){
@@ -76,7 +76,12 @@ static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
         }
 
         uint8_t y =  (FREQ_BOTTOM_Y - s); // bar height
-        canvas_draw_line(canvas, channel, FREQ_BOTTOM_Y, channel, y + 2);    
+
+        // if (model->chan_table[column + 2].frequency == 430002400 ||
+        //     model->chan_table[column + 2].frequency == 450197552)
+        //     y = 0;
+
+        canvas_draw_line(canvas, column, FREQ_BOTTOM_Y, column, y + 2);    
     }
 
     release_mutex((ValueMutex*)ctx, model);
@@ -97,6 +102,8 @@ static void spectrum_analyzer_model_init(SpectrumAnalyzerModel* const model) {
 /* freq in Hz */
 void calibrate_freq(SpectrumAnalyzerModel* model, uint32_t freq, uint8_t ch) {
     model->chan_table[ch].frequency = freq;
+
+    FURI_LOG_T("Spectrum", "calibrate_freq ch[%u]: %lu", ch, freq);
 }
 
 /* set the center frequency in MHz */
@@ -222,7 +229,8 @@ uint16_t set_center_freq(SpectrumAnalyzerModel* model, uint16_t freq) {
 		hz -= spacing;
 	}
 
-    FURI_LOG_D("Spectrum", "set_center_freq - max_hz: %u - min_hz: %u - spacing: %u", max_hz, min_hz, spacing);
+    FURI_LOG_D("Spectrum", "set_center_freq - max_hz: %u - min_hz: %u - spacing: %u Hz", max_hz, min_hz, spacing);
+    FURI_LOG_D("Spectrum", "ch[0]: %lu - ch[%u]: %lu", model->chan_table[0].frequency, NUM_CHANNELS - 1, model->chan_table[NUM_CHANNELS - 1].frequency);
 
 	center_freq = freq;
 

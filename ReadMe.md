@@ -7,11 +7,13 @@
 Welcome to [Flipper Zero](https://flipperzero.one/)'s Firmware repo!
 Our goal is to create nice and clean code with good documentation, to make it a pleasure for everyone to work with.
 
-The work on this fork is based on ![EA SmartResponse Hack](https://github.com/ea/srxe_cc1101)
+The work on this fork is based on [EA SmartResponse Hack](https://github.com/ea/srxe_cc1101)
 
 # To Do
 
-- Graph seems to be skewed to the right a few Mhz
+- Graph seems to be skewed to the right a few Mhz (132 channels vs 128 pixels?)
+- Fix model init (not only [0])
+- Need to update variables when changing bandwidth
 - Filter needs to be dinamycally adjusted based on Channel width
 - Help for keys?
 - Sometimes plugin can't be restarted
