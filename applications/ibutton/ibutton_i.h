@@ -43,7 +43,6 @@ struct iButton {
     iButtonKey* key;
 
     char file_name[IBUTTON_FILE_NAME_SIZE];
-    uint8_t new_key_data[IBUTTON_KEY_DATA_SIZE];
     char text_store[IBUTTON_TEXT_STORE_SIZE + 1];
     //     string_t text_box_store;
 
