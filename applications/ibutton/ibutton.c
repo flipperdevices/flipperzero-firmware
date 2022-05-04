@@ -6,8 +6,8 @@
 #include <flipper_format/flipper_format.h>
 
 static const NotificationSequence* ibutton_notification_sequences[] = {
-    &sequence_success,
     &sequence_error,
+    &sequence_success,
     &sequence_blink_cyan_10,
     &sequence_blink_magenta_10,
     &sequence_blink_yellow_10,

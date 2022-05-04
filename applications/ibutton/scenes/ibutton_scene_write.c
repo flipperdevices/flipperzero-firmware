@@ -87,7 +87,7 @@ bool ibutton_scene_write_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if((event.event == iButtonWorkerWriteOK) || (event.event == iButtonWorkerWriteSameKey)) {
-            //             scene_manager_next_scene(scene_manager, iButtonSceneWriteSuccess);
+            scene_manager_next_scene(scene_manager, iButtonSceneWriteSuccess);
         } else if(event.event == iButtonWorkerWriteNoDetect) {
             scene_manager_set_scene_state(
                 scene_manager, iButtonSceneWrite, iButtonSceneWriteStateDefault);
