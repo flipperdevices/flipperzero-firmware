@@ -21,8 +21,8 @@ static bool open_wav_stream(Storage* storage, Stream* stream) {
     string_t path;
     string_init(path);
 
-    bool ret = dialog_file_select_show(
-        dialogs, "/ext/wav_player", ".wav", name_buffer, name_size, NULL);
+    bool ret =
+        dialog_file_select_show(dialogs, "/ext/wav_player", ".wav", name_buffer, name_size, NULL);
     furi_record_close("dialogs");
 
     if(ret) {
@@ -156,6 +156,7 @@ static bool fill_data(WavPlayerApp* app, size_t index) {
         data /= UINT8_MAX / 2; // scale -1..1
 
         data *= app->volume; // volume
+        data = tanhf(data); // hyperbolic tangent limiter
 
         data *= UINT8_MAX / 2; // scale -128..127
         data += UINT8_MAX / 2; // to unsigned
