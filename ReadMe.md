@@ -7,6 +7,18 @@
 Welcome to [Flipper Zero](https://flipperzero.one/)'s Firmware repo!
 Our goal is to create nice and clean code with good documentation, to make it a pleasure for everyone to work with.
 
+The work on this fork is based on ![EA SmartResponse Hack](https://github.com/ea/srxe_cc1101)
+
+# To Do
+
+- Graph seems to be skewed to the right a few Mhz
+- Filter needs to be dinamycally adjusted based on Channel width
+- Help for keys?
+- Sometimes plugin can't be restarted
+- Move to Furi threads?
+- Store maximum
+- Clean up code 
+
 # Update firmware
 
 [Get Latest Firmware from Update Server](https://update.flipperzero.one/)

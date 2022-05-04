@@ -48,6 +48,7 @@ extern int32_t text_box_test_app(void* p);
 // Plugins
 extern int32_t music_player_app(void* p);
 extern int32_t snake_game_app(void* p);
+extern int32_t spectrum_analyzer_app(void* p);
 
 // On system start hooks declaration
 extern void bt_on_system_start();
@@ -343,6 +344,14 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
      .stack_size = 1024,
      .icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
+#endif
+
+#ifdef APP_SPECTRUM_ANALYZER
+    {.app = spectrum_analyzer_app, 
+    .name = "Spectrum Analyzer", 
+    .stack_size = 1024, 
+    .icon = &A_Plugins_14,
+    .flags = FlipperApplicationFlagDefault},
 #endif
 };
 
