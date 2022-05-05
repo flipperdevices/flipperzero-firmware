@@ -63,10 +63,7 @@ Updater* updater_alloc(const char* arg) {
         updater->view_dispatcher, updater_tick_event_callback, UPDATER_APP_TICK);
 
     view_dispatcher_attach_to_gui(
-        updater->view_dispatcher,
-        updater->gui,
-        ViewDispatcherTypeFullscreen);
-        //arg ? ViewDispatcherTypeFullscreen : ViewDispatcherTypeWindow);
+        updater->view_dispatcher, updater->gui, ViewDispatcherTypeFullscreen);
 
     updater->main_view = updater_main_alloc();
     view_dispatcher_add_view(

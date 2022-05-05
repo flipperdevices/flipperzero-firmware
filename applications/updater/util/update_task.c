@@ -82,25 +82,6 @@ static UpdateTaskStageGroup update_task_get_task_groups(UpdateTask* update_task)
     return ret;
 }
 
-//static uint32_t update_task_get_adapted_progress(
-//    UpdateTask* update_task,
-//    UpdateTaskStage stage,
-//    uint8_t progress) {
-//    UpdateTaskStageGroup groups = update_task_get_task_groups(update_task);
-//    uint32_t completed_stage_points = 0;
-//}
-
-//static void update_task_set_status(UpdateTask* update_task, const char* status) {
-//    if(!status) {
-//        if(update_task->state.stage >= COUNT_OF(update_task_stage_descr)) {
-//            status = "...";
-//        } else {
-//            status = update_task_stage_descr[update_task->state.stage];
-//        }
-//    }
-//    string_set_str(update_task->state.status, status);
-//}
-
 static void update_task_calc_completed_stages(UpdateTask* update_task) {
     uint32_t completed_stages_points = 0;
     for(UpdateTaskStage past_stage = UpdateTaskStageProgress;
@@ -165,14 +146,6 @@ void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, ui
         }
     }
     update_task->state.overall_progress = adapted_progress;
-
-    FURI_LOG_I(
-        "TAG",
-        "s %d: adapted: compl %d, total w %d, adapted prog %d",
-        stage,
-        update_task->state.completed_stages_points,
-        update_task->state.total_progress_points,
-        adapted_progress);
 
     if(update_task->status_change_cb) {
         (update_task->status_change_cb)(
