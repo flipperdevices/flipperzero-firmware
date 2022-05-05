@@ -220,7 +220,6 @@ bool subghz_view_receiver_input(InputEvent* event, void* context) {
 
 void subghz_view_receiver_enter(void* context) {
     furi_assert(context);
-    //SubGhzViewReceiver* subghz_receiver = context;
 }
 
 void subghz_view_receiver_exit(void* context) {

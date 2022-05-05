@@ -330,6 +330,8 @@ void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
                 return;
             }
         }
+#else
+        UNUSED(cli);
 #endif
 
         LL_GPIO_SetPinMode(gpio[num].port, gpio[num].pin, LL_GPIO_MODE_OUTPUT);
