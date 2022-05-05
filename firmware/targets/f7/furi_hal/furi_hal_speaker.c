@@ -9,7 +9,7 @@
 #define FURI_HAL_SPEAKER_PRESCALER 500
 #define FURI_HAL_SPEAKER_MAX_VOLUME 60
 
-#define FURI_HAL_SPEAKER_NEW_VOLUME
+// #define FURI_HAL_SPEAKER_NEW_VOLUME
 
 void furi_hal_speaker_init() {
     FURI_CRITICAL_ENTER();

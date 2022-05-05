@@ -39,9 +39,6 @@ struct MusicPlayerWorker {
     uint32_t duration;
     uint32_t octave;
     NoteBlockArray_t notes;
-
-    float lfo_step;
-    float lfo;
 };
 
 static int32_t music_player_worker_thread_callback(void* context) {
@@ -80,14 +77,8 @@ static int32_t music_player_worker_thread_callback(void* context) {
 
             furi_hal_speaker_stop();
             furi_hal_speaker_start(frequency, volume);
-            while(furi_hal_get_tick() < next_tick) {
-                volume -= (0.000054321 * instance->lfo);
-
-                if(instance->lfo < 1.0f || instance->lfo > 200.0f)
-                    instance->lfo_step = -instance->lfo_step;
-
-                instance->lfo += instance->lfo_step;
-
+            while(instance->should_work && furi_hal_get_tick() < next_tick) {
+                volume *= 0.9945679;
                 furi_hal_speaker_set_volume(volume);
                 furi_hal_delay_ms(2);
             }
@@ -110,9 +101,6 @@ MusicPlayerWorker* music_player_worker_alloc() {
     furi_thread_set_stack_size(instance->thread, 1024);
     furi_thread_set_context(instance->thread, instance);
     furi_thread_set_callback(instance->thread, music_player_worker_thread_callback);
-
-    instance->lfo_step = 0.0f;
-    instance->lfo = 100.0f;
 
     return instance;
 }
@@ -362,14 +350,6 @@ bool music_player_worker_load_fmf_from_file(MusicPlayerWorker* instance, const c
         if(!flipper_format_read_uint32(file, "Octave", &instance->octave, 1)) {
             FURI_LOG_E(TAG, "Octave is missing");
             break;
-        }
-
-        if(flipper_format_key_exist(file, "LFO")) {
-            flipper_format_read_float(file, "LFO", &instance->lfo, 1);
-        }
-
-        if(flipper_format_key_exist(file, "LFO_step")) {
-            flipper_format_read_float(file, "LFO_step", &instance->lfo_step, 1);
         }
 
         if(!flipper_format_read_string(file, "Notes", temp_str)) {

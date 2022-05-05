@@ -10,7 +10,7 @@
 #define MUSIC_PLAYER_APP_PATH_FOLDER "/any/music_player"
 #define MUSIC_PLAYER_APP_EXTENSION "*"
 
-#define MUSIC_PLAYER_SEMITONE_HISTORY_SIZE 8
+#define MUSIC_PLAYER_SEMITONE_HISTORY_SIZE 4
 
 typedef struct {
     uint8_t semitone_history[MUSIC_PLAYER_SEMITONE_HISTORY_SIZE];
@@ -226,13 +226,12 @@ static void music_player_worker_callback(
     furi_check(osMutexAcquire(music_player->model_mutex, osWaitForever) == osOK);
 
     for(size_t i = 0; i < MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - 1; i++) {
-        music_player->model->duration_history[MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - i - 1] =
-            music_player->model->duration_history[MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - i];
-        music_player->model->semitone_history[MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - i - 1] =
-            music_player->model->semitone_history[MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - i];
+        size_t r = MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - 1 - i;
+        music_player->model->duration_history[r] = music_player->model->duration_history[r - 1];
+        music_player->model->semitone_history[r] = music_player->model->semitone_history[r - 1];
     }
 
-    semitone = semitone == 0xFF ? 0xFF : semitone % 12;
+    semitone = (semitone == 0xFF) ? 0xFF : semitone % 12;
 
     music_player->model->semitone = semitone;
     music_player->model->dots = dots;
