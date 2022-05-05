@@ -66,13 +66,12 @@ static bool subghz_decode_test(const char* path, const char* name_decoder) {
 
             LevelDuration level_duration;
             while(furi_hal_get_tick() - test_start < TEST_TIMEOUT) {
-                furi_hal_delay_us(
-                    500); //you need to have time to read from the file from the SD card
                 level_duration =
                     subghz_file_encoder_worker_get_level_duration(file_worker_encoder_handler);
                 if(!level_duration_is_reset(level_duration)) {
                     bool level = level_duration_get_level(level_duration);
                     uint32_t duration = level_duration_get_duration(level_duration);
+                    furi_hal_delay_us(duration);
                     decoder->protocol->decoder->feed(decoder, level, duration);
                 } else {
                     break;
@@ -106,12 +105,12 @@ static bool subghz_decode_ramdom_test(const char* path) {
 
         LevelDuration level_duration;
         while(furi_hal_get_tick() - test_start < TEST_TIMEOUT * 10) {
-            furi_hal_delay_us(500); //you need to have time to read from the file from the SD card
             level_duration =
                 subghz_file_encoder_worker_get_level_duration(file_worker_encoder_handler);
             if(!level_duration_is_reset(level_duration)) {
                 bool level = level_duration_get_level(level_duration);
                 uint32_t duration = level_duration_get_duration(level_duration);
+                furi_hal_delay_us(duration);
                 subghz_receiver_decode(receiver_handler, level, duration);
             } else {
                 break;
