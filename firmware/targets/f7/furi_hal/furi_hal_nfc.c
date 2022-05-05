@@ -240,6 +240,7 @@ void rfal_interrupt_callback_handler() {
 }
 
 void rfal_state_changed_callback(void* context) {
+    UNUSED(context);
     osEventFlagsSet(event, EVENT_FLAG_STATE_CHANGED);
 }
 

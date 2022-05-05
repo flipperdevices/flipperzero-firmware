@@ -488,6 +488,7 @@ static NotificationApp* notification_app_alloc() {
 
 // App
 int32_t notification_srv(void* p) {
+    UNUSED(p);
     NotificationApp* app = notification_app_alloc();
 
     if(!notification_load_settings(app)) {

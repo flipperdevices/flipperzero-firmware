@@ -497,6 +497,7 @@ static bool storage_ext_dir_rewind(void* ctx, File* file) {
 /******************* Common FS Functions *******************/
 
 static FS_Error storage_ext_common_stat(void* ctx, const char* path, FileInfo* fileinfo) {
+    UNUSED(ctx);
     SDFileInfo _fileinfo;
     SDError result = f_stat(path, &_fileinfo);
 
@@ -511,6 +512,7 @@ static FS_Error storage_ext_common_stat(void* ctx, const char* path, FileInfo* f
 }
 
 static FS_Error storage_ext_common_remove(void* ctx, const char* path) {
+    UNUSED(ctx);
 #ifdef FURI_RAM_EXEC
     return FSE_NOT_READY;
 #else
@@ -520,6 +522,7 @@ static FS_Error storage_ext_common_remove(void* ctx, const char* path) {
 }
 
 static FS_Error storage_ext_common_mkdir(void* ctx, const char* path) {
+    UNUSED(ctx);
 #ifdef FURI_RAM_EXEC
     return FSE_NOT_READY;
 #else
@@ -533,6 +536,7 @@ static FS_Error storage_ext_common_fs_info(
     const char* fs_path,
     uint64_t* total_space,
     uint64_t* free_space) {
+    UNUSED(fs_path);
 #ifdef FURI_RAM_EXEC
     return FSE_NOT_READY;
 #else

@@ -178,5 +178,7 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
 }
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName) {
+    UNUSED(xTask);
+    UNUSED(pcTaskName); // TODO: log to console?
     furi_crash("StackOverflow");
 }

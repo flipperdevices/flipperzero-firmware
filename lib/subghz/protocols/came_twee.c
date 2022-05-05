@@ -103,6 +103,7 @@ const SubGhzProtocol subghz_protocol_came_twee = {
 };
 
 void* subghz_protocol_encoder_came_twee_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
     SubGhzProtocolEncoderCameTwee* instance = malloc(sizeof(SubGhzProtocolEncoderCameTwee));
 
     instance->base.protocol = &subghz_protocol_came_twee;
@@ -289,6 +290,7 @@ LevelDuration subghz_protocol_encoder_came_twee_yield(void* context) {
 }
 
 void* subghz_protocol_decoder_came_twee_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
     SubGhzProtocolDecoderCameTwee* instance = malloc(sizeof(SubGhzProtocolDecoderCameTwee));
     instance->base.protocol = &subghz_protocol_came_twee;
     instance->generic.protocol_name = instance->base.protocol->name;

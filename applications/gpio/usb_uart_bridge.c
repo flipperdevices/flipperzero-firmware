@@ -101,6 +101,7 @@ static void usb_uart_vcp_init(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
 }
 
 static void usb_uart_vcp_deinit(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
+    UNUSED(usb_uart);
     furi_hal_cdc_set_callbacks(vcp_ch, NULL, NULL);
     FURI_LOG_I("", "Deinit %d", vcp_ch);
     if(vcp_ch != 0) {
@@ -120,6 +121,7 @@ static void usb_uart_serial_init(UsbUartBridge* usb_uart, uint8_t uart_ch) {
 }
 
 static void usb_uart_serial_deinit(UsbUartBridge* usb_uart, uint8_t uart_ch) {
+    UNUSED(usb_uart);
     furi_hal_uart_set_irq_cb(uart_ch, NULL, NULL);
     if(uart_ch == FuriHalUartIdUSART1)
         furi_hal_console_enable();
@@ -316,14 +318,18 @@ static void vcp_on_cdc_rx(void* context) {
 }
 
 static void vcp_state_callback(void* context, uint8_t state) {
+    UNUSED(context);
+    UNUSED(state);
 }
 
 static void vcp_on_cdc_control_line(void* context, uint8_t state) {
+    UNUSED(state);
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
     osThreadFlagsSet(furi_thread_get_thread_id(usb_uart->thread), WorkerEvtCtrlLineSet);
 }
 
 static void vcp_on_line_config(void* context, struct usb_cdc_line_coding* config) {
+    UNUSED(config);
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
     osThreadFlagsSet(furi_thread_get_thread_id(usb_uart->thread), WorkerEvtLineCfgSet);
 }

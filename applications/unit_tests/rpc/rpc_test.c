@@ -217,6 +217,8 @@ static void test_rpc_print_message_list(MsgList_t msg_list) {
             rpc_print_message(msg);
         }
     MsgList_reverse(msg_list);
+#else
+    UNUSED(msg_list);
 #endif
 }
 
@@ -1551,6 +1553,7 @@ MU_TEST_SUITE(test_rpc_app) {
 
 static void
     test_send_rubbish(RpcSession* session, const char* pattern, size_t pattern_size, size_t size) {
+    UNUSED(session);
     uint8_t* buf = malloc(size);
     for(size_t i = 0; i < size; ++i) {
         buf[i] = pattern[i % pattern_size];

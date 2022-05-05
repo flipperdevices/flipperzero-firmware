@@ -647,6 +647,7 @@ void rpc_session_close(RpcSession* session) {
 }
 
 int32_t rpc_srv(void* p) {
+    UNUSED(p);
     Rpc* rpc = malloc(sizeof(Rpc));
 
     rpc->busy_mutex = osMutexNew(NULL);
