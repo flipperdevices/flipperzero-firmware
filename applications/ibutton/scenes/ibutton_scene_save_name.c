@@ -45,7 +45,7 @@ bool ibutton_scene_save_name_on_event(void* context, SceneManagerEvent event) {
         scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSaveSuccess);
     } else {
         const uint32_t possible_scenes[] = {
-            iButtonSceneReadMenu, iButtonSceneSavedMenu, iButtonSceneAddType};
+            iButtonSceneReadKeyMenu, iButtonSceneSavedKeyMenu, iButtonSceneAddType};
         ibutton_switch_to_previous_scene_one_of(
             ibutton, possible_scenes, sizeof(possible_scenes) / sizeof(uint32_t));
     }

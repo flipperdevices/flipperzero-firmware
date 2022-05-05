@@ -7,7 +7,7 @@ void ibutton_scene_select_key_on_enter(void* context) {
         scene_manager_search_and_switch_to_previous_scene(
             ibutton->scene_manager, iButtonSceneStart);
     } else {
-        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSavedMenu);
+        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSavedKeyMenu);
     }
 }
 

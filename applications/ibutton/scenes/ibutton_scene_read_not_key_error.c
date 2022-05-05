@@ -46,7 +46,7 @@ bool ibutton_scene_read_not_key_error_on_event(void* context, SceneManagerEvent 
     if(event.type != SceneManagerEventTypeCustom) {
         return false;
     } else if(event.event == DialogExResultRight) {
-        scene_manager_next_scene(scene_manager, iButtonSceneReadMenu);
+        scene_manager_next_scene(scene_manager, iButtonSceneReadKeyMenu);
     } else if(event.event == DialogExResultLeft) {
         scene_manager_previous_scene(scene_manager);
     }

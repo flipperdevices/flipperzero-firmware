@@ -8,12 +8,12 @@ enum SubmenuIndex {
     SubmenuIndexInfo,
 };
 
-void ibutton_scene_saved_menu_submenu_callback(void* context, uint32_t index) {
+void ibutton_scene_saved_key_menu_submenu_callback(void* context, uint32_t index) {
     iButton* ibutton = context;
     view_dispatcher_send_custom_event(ibutton->view_dispatcher, index);
 }
 
-void ibutton_scene_saved_menu_on_enter(void* context) {
+void ibutton_scene_saved_key_menu_on_enter(void* context) {
     iButton* ibutton = context;
     Submenu* submenu = ibutton->submenu;
 
@@ -21,29 +21,29 @@ void ibutton_scene_saved_menu_on_enter(void* context) {
         submenu,
         "Emulate",
         SubmenuIndexEmulate,
-        ibutton_scene_saved_menu_submenu_callback,
+        ibutton_scene_saved_key_menu_submenu_callback,
         ibutton);
     if(ibutton_key_get_type(ibutton->key) == iButtonKeyDS1990) {
         submenu_add_item(
             submenu,
             "Write",
             SubmenuIndexWrite,
-            ibutton_scene_saved_menu_submenu_callback,
+            ibutton_scene_saved_key_menu_submenu_callback,
             ibutton);
     }
     submenu_add_item(
-        submenu, "Edit", SubmenuIndexEdit, ibutton_scene_saved_menu_submenu_callback, ibutton);
+        submenu, "Edit", SubmenuIndexEdit, ibutton_scene_saved_key_menu_submenu_callback, ibutton);
     submenu_add_item(
-        submenu, "Delete", SubmenuIndexDelete, ibutton_scene_saved_menu_submenu_callback, ibutton);
+        submenu, "Delete", SubmenuIndexDelete, ibutton_scene_saved_key_menu_submenu_callback, ibutton);
     submenu_add_item(
-        submenu, "Info", SubmenuIndexInfo, ibutton_scene_saved_menu_submenu_callback, ibutton);
+        submenu, "Info", SubmenuIndexInfo, ibutton_scene_saved_key_menu_submenu_callback, ibutton);
 
     submenu_set_selected_item(submenu, SubmenuIndexEmulate);
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewSubmenu);
 }
 
-bool ibutton_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
+bool ibutton_scene_saved_key_menu_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
 
     if(event.type != SceneManagerEventTypeCustom) {
@@ -65,7 +65,7 @@ bool ibutton_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
     return true;
 }
 
-void ibutton_scene_saved_menu_on_exit(void* context) {
+void ibutton_scene_saved_key_menu_on_exit(void* context) {
     iButton* ibutton = context;
     submenu_reset(ibutton->submenu);
 }
