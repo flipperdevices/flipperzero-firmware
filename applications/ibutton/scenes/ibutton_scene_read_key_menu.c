@@ -18,10 +18,18 @@ void ibutton_scene_read_key_menu_on_enter(void* context) {
     submenu_add_item(
         submenu, "Save", SubmenuIndexSave, ibutton_scene_read_key_menu_submenu_callback, ibutton);
     submenu_add_item(
-        submenu, "Emulate", SubmenuIndexEmulate, ibutton_scene_read_key_menu_submenu_callback, ibutton);
+        submenu,
+        "Emulate",
+        SubmenuIndexEmulate,
+        ibutton_scene_read_key_menu_submenu_callback,
+        ibutton);
     if(ibutton_key_get_type(ibutton->key) == iButtonKeyDS1990) {
         submenu_add_item(
-            submenu, "Write", SubmenuIndexWrite, ibutton_scene_read_key_menu_submenu_callback, ibutton);
+            submenu,
+            "Write",
+            SubmenuIndexWrite,
+            ibutton_scene_read_key_menu_submenu_callback,
+            ibutton);
     }
 
     submenu_set_selected_item(submenu, SubmenuIndexSave);

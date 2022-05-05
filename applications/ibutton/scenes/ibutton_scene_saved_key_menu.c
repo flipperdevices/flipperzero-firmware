@@ -34,7 +34,11 @@ void ibutton_scene_saved_key_menu_on_enter(void* context) {
     submenu_add_item(
         submenu, "Edit", SubmenuIndexEdit, ibutton_scene_saved_key_menu_submenu_callback, ibutton);
     submenu_add_item(
-        submenu, "Delete", SubmenuIndexDelete, ibutton_scene_saved_key_menu_submenu_callback, ibutton);
+        submenu,
+        "Delete",
+        SubmenuIndexDelete,
+        ibutton_scene_saved_key_menu_submenu_callback,
+        ibutton);
     submenu_add_item(
         submenu, "Info", SubmenuIndexInfo, ibutton_scene_saved_key_menu_submenu_callback, ibutton);
 
