@@ -29,19 +29,20 @@ void ibutton_scene_retry_confirm_on_enter(void* context) {
 bool ibutton_scene_retry_confirm_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
     SceneManager* scene_manager = ibutton->scene_manager;
+    bool consumed = false;
 
-    if(event.type == SceneManagerEventTypeCustom) {
+    if(event.type == SceneManagerEventTypeBack) {
+        consumed = true; // Ignore Back button presses
+    } else if(event.type == SceneManagerEventTypeCustom) {
+        consumed = true;
         if(event.event == GuiButtonTypeLeft) {
             scene_manager_search_and_switch_to_previous_scene(scene_manager, iButtonSceneRead);
         } else if(event.event == GuiButtonTypeRight) {
             scene_manager_previous_scene(scene_manager);
         }
-
-    } else if(event.type != SceneManagerEventTypeBack) {
-        return false;
     }
 
-    return true;
+    return consumed;
 }
 
 void ibutton_scene_retry_confirm_on_exit(void* context) {

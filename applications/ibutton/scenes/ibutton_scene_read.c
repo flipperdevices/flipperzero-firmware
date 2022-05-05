@@ -27,38 +27,39 @@ void ibutton_scene_read_on_enter(void* context) {
 bool ibutton_scene_read_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
     SceneManager* scene_manager = ibutton->scene_manager;
+    bool consumed = false;
 
-    if((event.type == SceneManagerEventTypeCustom) &&
-       (event.event == iButtonCustomEventWorkerRead)) {
-        bool success = false;
-        iButtonKey* key = ibutton->key;
+    if(event.type == SceneManagerEventTypeTick) {
+        consumed = true;
+        ibutton_notification_message(ibutton, iButtonNotificationMessageRead);
+    } else if(event.type == SceneManagerEventTypeCustom) {
+        consumed = true;
+        if(event.event == iButtonCustomEventWorkerRead) {
+            bool success = false;
+            iButtonKey* key = ibutton->key;
 
-        if(ibutton_key_get_type(key) == iButtonKeyDS1990) {
-            if(!ibutton_key_dallas_crc_is_valid(key)) {
-                scene_manager_next_scene(scene_manager, iButtonSceneReadCRCError);
-            } else if(!ibutton_key_dallas_is_1990_key(key)) {
-                scene_manager_next_scene(scene_manager, iButtonSceneReadNotKeyError);
+            if(ibutton_key_get_type(key) == iButtonKeyDS1990) {
+                if(!ibutton_key_dallas_crc_is_valid(key)) {
+                    scene_manager_next_scene(scene_manager, iButtonSceneReadCRCError);
+                } else if(!ibutton_key_dallas_is_1990_key(key)) {
+                    scene_manager_next_scene(scene_manager, iButtonSceneReadNotKeyError);
+                } else {
+                    success = true;
+                }
             } else {
                 success = true;
             }
-        } else {
-            success = true;
-        }
 
-        if(success) {
-            ibutton_notification_message(ibutton, iButtonNotificationMessageSuccess);
-            ibutton_notification_message(ibutton, iButtonNotificationMessageGreenOn);
-            DOLPHIN_DEED(DolphinDeedIbuttonReadSuccess);
-            scene_manager_next_scene(scene_manager, iButtonSceneReadSuccess);
+            if(success) {
+                ibutton_notification_message(ibutton, iButtonNotificationMessageSuccess);
+                ibutton_notification_message(ibutton, iButtonNotificationMessageGreenOn);
+                DOLPHIN_DEED(DolphinDeedIbuttonReadSuccess);
+                scene_manager_next_scene(scene_manager, iButtonSceneReadSuccess);
+            }
         }
-
-    } else if(event.type == SceneManagerEventTypeTick) {
-        ibutton_notification_message(ibutton, iButtonNotificationMessageRead);
-    } else {
-        return false;
     }
 
-    return true;
+    return consumed;
 }
 
 void ibutton_scene_read_on_exit(void* context) {

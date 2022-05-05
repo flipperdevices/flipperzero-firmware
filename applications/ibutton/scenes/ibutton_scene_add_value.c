@@ -32,18 +32,18 @@ bool ibutton_scene_add_value_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
     uint8_t* new_key_data =
         (uint8_t*)scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneAddValue);
+    bool consumed = false;
 
-    if(event.type != SceneManagerEventTypeCustom) {
-        return false;
-    } else if(event.event == iButtonCustomEventByteEditResult) {
-        ibutton_key_set_data(ibutton->key, new_key_data, IBUTTON_KEY_DATA_SIZE);
-        DOLPHIN_DEED(DolphinDeedIbuttonAdd);
-        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSaveName);
-    } else {
-        return false;
+    if(event.type == SceneManagerEventTypeCustom) {
+        consumed = true;
+        if(event.event == iButtonCustomEventByteEditResult) {
+            ibutton_key_set_data(ibutton->key, new_key_data, IBUTTON_KEY_DATA_SIZE);
+            DOLPHIN_DEED(DolphinDeedIbuttonAdd);
+            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSaveName);
+        }
     }
 
-    return true;
+    return consumed;
 }
 
 void ibutton_scene_add_value_on_exit(void* context) {

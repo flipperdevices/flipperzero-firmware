@@ -37,20 +37,23 @@ void ibutton_scene_save_name_on_enter(void* context) {
 
 bool ibutton_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
+    bool consumed = false;
 
-    if((event.type != SceneManagerEventTypeCustom) ||
-       (event.event != iButtonCustomEventTextEditResult)) {
-        return false;
-    } else if(ibutton_save_key(ibutton, ibutton->text_store)) {
-        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSaveSuccess);
-    } else {
-        const uint32_t possible_scenes[] = {
-            iButtonSceneReadKeyMenu, iButtonSceneSavedKeyMenu, iButtonSceneAddType};
-        ibutton_switch_to_previous_scene_one_of(
-            ibutton, possible_scenes, sizeof(possible_scenes) / sizeof(uint32_t));
+    if(event.type == SceneManagerEventTypeCustom) {
+        consumed = true;
+        if(event.event == iButtonCustomEventTextEditResult) {
+            if(ibutton_save_key(ibutton, ibutton->text_store)) {
+                scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSaveSuccess);
+            } else {
+                const uint32_t possible_scenes[] = {
+                    iButtonSceneReadKeyMenu, iButtonSceneSavedKeyMenu, iButtonSceneAddType};
+                ibutton_switch_to_previous_scene_one_of(
+                    ibutton, possible_scenes, sizeof(possible_scenes) / sizeof(uint32_t));
+            }
+        }
     }
 
-    return true;
+    return consumed;
 }
 
 void ibutton_scene_save_name_on_exit(void* context) {

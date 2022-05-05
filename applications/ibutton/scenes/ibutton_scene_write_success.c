@@ -25,12 +25,15 @@ void ibutton_scene_write_success_on_enter(void* context) {
 
 bool ibutton_scene_write_success_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
-    const bool consumed = (event.type == SceneManagerEventTypeCustom) &&
-                          (event.event == iButtonCustomEventBack);
-    if(consumed) {
-        const uint32_t possible_scenes[] = {iButtonSceneReadKeyMenu, iButtonSceneStart};
-        ibutton_switch_to_previous_scene_one_of(
-            ibutton, possible_scenes, sizeof(possible_scenes) / sizeof(uint32_t));
+    bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        consumed = true;
+        if(event.event == iButtonCustomEventBack) {
+            const uint32_t possible_scenes[] = { iButtonSceneReadKeyMenu, iButtonSceneStart };
+            ibutton_switch_to_previous_scene_one_of(
+                ibutton, possible_scenes, sizeof(possible_scenes) / sizeof(uint32_t));
+        }
     }
 
     return consumed;

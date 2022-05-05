@@ -84,8 +84,10 @@ void ibutton_scene_write_on_enter(void* context) {
 bool ibutton_scene_write_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
     SceneManager* scene_manager = ibutton->scene_manager;
+    bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
+        consumed = true;
         if((event.event == iButtonWorkerWriteOK) || (event.event == iButtonWorkerWriteSameKey)) {
             scene_manager_next_scene(scene_manager, iButtonSceneWriteSuccess);
         } else if(event.event == iButtonWorkerWriteNoDetect) {
@@ -94,23 +96,19 @@ bool ibutton_scene_write_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == iButtonWorkerWriteCannotWrite) {
             scene_manager_set_scene_state(
                 scene_manager, iButtonSceneWrite, iButtonSceneWriteStateBlinkYellow);
-        } else {
-            return false;
         }
 
     } else if(event.type == SceneManagerEventTypeTick) {
+        consumed = true;
         if(scene_manager_get_scene_state(scene_manager, iButtonSceneWrite) ==
            iButtonSceneWriteStateBlinkYellow) {
             ibutton_notification_message(ibutton, iButtonNotificationMessageYellowBlink);
         } else {
             ibutton_notification_message(ibutton, iButtonNotificationMessageEmulate);
         }
-
-    } else {
-        return false;
     }
 
-    return true;
+    return consumed;
 }
 
 void ibutton_scene_write_on_exit(void* context) {

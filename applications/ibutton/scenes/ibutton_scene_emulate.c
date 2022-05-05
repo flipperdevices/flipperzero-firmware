@@ -81,17 +81,19 @@ void ibutton_scene_emulate_on_enter(void* context) {
 
 bool ibutton_scene_emulate_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
+    bool consumed = false;
 
-    if((event.type == SceneManagerEventTypeCustom) &&
-       (event.event == iButtonCustomEventWorkerEmulated)) {
-        ibutton_notification_message(ibutton, iButtonNotificationMessageYellowBlink);
-    } else if(event.type == SceneManagerEventTypeTick) {
+    if(event.type == SceneManagerEventTypeTick) {
+        consumed = true;
         ibutton_notification_message(ibutton, iButtonNotificationMessageEmulate);
-    } else {
-        return false;
+    } else if(event.type == SceneManagerEventTypeCustom) {
+        consumed = true;
+        if(event.event == iButtonCustomEventWorkerEmulated) {
+            ibutton_notification_message(ibutton, iButtonNotificationMessageYellowBlink);
+        }
     }
 
-    return true;
+    return consumed;
 }
 
 void ibutton_scene_emulate_on_exit(void* context) {

@@ -66,17 +66,22 @@ void ibutton_scene_delete_confirm_on_enter(void* context) {
 
 bool ibutton_scene_delete_confirm_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
+    SceneManager* scene_manager = ibutton->scene_manager;
+    bool consumed = false;
 
-    if(event.type != SceneManagerEventTypeCustom) {
-        return false;
-    } else if((event.event == GuiButtonTypeRight) && (ibutton_delete_key(ibutton))) {
-        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneDeleteSuccess);
-        //TODO: What if the key could not be deleted?
-    } else {
-        scene_manager_previous_scene(ibutton->scene_manager);
+    if(event.type == SceneManagerEventTypeCustom) {
+        consumed = true;
+        if(event.event == GuiButtonTypeRight) {
+            if(ibutton_delete_key(ibutton)) {
+                scene_manager_next_scene(scene_manager, iButtonSceneDeleteSuccess);
+            }
+            //TODO: What if the key could not be deleted?
+        } else if(event.event == GuiButtonTypeLeft) {
+            scene_manager_previous_scene(scene_manager);
+        }
     }
 
-    return true;
+    return consumed;
 }
 
 void ibutton_scene_delete_confirm_on_exit(void* context) {

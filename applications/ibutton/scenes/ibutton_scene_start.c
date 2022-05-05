@@ -29,20 +29,20 @@ void ibutton_scene_start_on_enter(void* context) {
 
 bool ibutton_scene_start_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
+    bool consumed = false;
 
-    if(event.type != SceneManagerEventTypeCustom) {
-        return false;
-    } else if(event.event == SubmenuIndexRead) {
-        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneRead);
-    } else if(event.event == SubmenuIndexSaved) {
-        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSelectKey);
-    } else if(event.event == SubmenuIndexAdd) {
-        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddType);
-    } else {
-        return false;
+    if(event.type == SceneManagerEventTypeCustom) {
+        consumed = true;
+        if(event.event == SubmenuIndexRead) {
+            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneRead);
+        } else if(event.event == SubmenuIndexSaved) {
+            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSelectKey);
+        } else if(event.event == SubmenuIndexAdd) {
+            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddType);
+        }
     }
 
-    return true;
+    return consumed;
 }
 
 void ibutton_scene_start_on_exit(void* context) {

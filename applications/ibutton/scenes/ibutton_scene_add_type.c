@@ -30,24 +30,26 @@ void ibutton_scene_add_type_on_enter(void* context) {
 bool ibutton_scene_add_type_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
     iButtonKey* key = ibutton->key;
+    bool consumed = false;
 
-    if(event.type != SceneManagerEventTypeCustom) {
-        return false;
-    } else if(event.event == SubmenuIndexCyfral) {
-        ibutton_key_set_type(key, iButtonKeyCyfral);
-    } else if(event.event == SubmenuIndexDallas) {
-        ibutton_key_set_type(key, iButtonKeyDS1990);
-    } else if(event.event == SubmenuIndexMetakom) {
-        ibutton_key_set_type(key, iButtonKeyMetakom);
-    } else {
-        return false;
+    if(event.type == SceneManagerEventTypeCustom) {
+        consumed = true;
+        if(event.event == SubmenuIndexCyfral) {
+            ibutton_key_set_type(key, iButtonKeyCyfral);
+        } else if(event.event == SubmenuIndexDallas) {
+            ibutton_key_set_type(key, iButtonKeyDS1990);
+        } else if(event.event == SubmenuIndexMetakom) {
+            ibutton_key_set_type(key, iButtonKeyMetakom);
+        } else {
+            furi_crash("Unknown key type");
+        }
+
+        ibutton_key_set_name(key, "");
+        ibutton_key_clear_data(key);
+        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddValue);
     }
 
-    ibutton_key_set_name(key, "");
-    ibutton_key_clear_data(key);
-    scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddValue);
-
-    return true;
+    return consumed;
 }
 
 void ibutton_scene_add_type_on_exit(void* context) {

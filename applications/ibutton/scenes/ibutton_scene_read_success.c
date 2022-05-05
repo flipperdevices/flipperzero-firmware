@@ -53,20 +53,21 @@ void ibutton_scene_read_success_on_enter(void* context) {
 bool ibutton_scene_read_success_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
     SceneManager* scene_manager = ibutton->scene_manager;
+    bool consumed = false;
 
-    if(event.type == SceneManagerEventTypeCustom) {
+    if(event.type == SceneManagerEventTypeBack) {
+        consumed = true;
+        scene_manager_next_scene(scene_manager, iButtonSceneExitConfirm);
+    } else if(event.type == SceneManagerEventTypeCustom) {
+        consumed = true;
         if(event.event == DialogExResultRight) {
             scene_manager_next_scene(scene_manager, iButtonSceneReadKeyMenu);
         } else if(event.event == DialogExResultLeft) {
             scene_manager_next_scene(scene_manager, iButtonSceneRetryConfirm);
         }
-    } else if(event.type == SceneManagerEventTypeBack) {
-        scene_manager_next_scene(scene_manager, iButtonSceneExitConfirm);
-    } else {
-        return false;
     }
 
-    return true;
+    return consumed;
 }
 
 void ibutton_scene_read_success_on_exit(void* context) {

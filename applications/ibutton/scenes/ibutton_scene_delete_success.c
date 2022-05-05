@@ -22,11 +22,14 @@ void ibutton_scene_delete_success_on_enter(void* context) {
 
 bool ibutton_scene_delete_success_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
-    const bool consumed = (event.type == SceneManagerEventTypeCustom) &&
-                          (event.event == iButtonCustomEventBack);
-    if(consumed) {
-        scene_manager_search_and_switch_to_previous_scene(
-            ibutton->scene_manager, iButtonSceneSelectKey);
+    bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        consumed = true;
+        if(event.event == iButtonCustomEventBack) {
+            scene_manager_search_and_switch_to_previous_scene(
+                ibutton->scene_manager, iButtonSceneSelectKey);
+        }
     }
 
     return consumed;
