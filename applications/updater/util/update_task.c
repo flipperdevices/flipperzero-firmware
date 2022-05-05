@@ -300,7 +300,7 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
         update_task_set_progress(update_task, UpdateTaskStageProgress, 70);
         if((update_task->state.groups & UpdateTaskStageGroupRadio) &&
                (!update_task_check_file_exists(update_task, update_task->manifest->radio_image) || 
-               (update_task->manifest->radio_version.version.type == 0)) {
+               (update_task->manifest->radio_version.version.type == 0))) {
             break;
         }
 
