@@ -86,7 +86,7 @@ static InfraredStatus infrared_common_decode_bits(InfraredCommonDecoder* decoder
             if(timing > timings->min_split_time) {
                 /* long low timing - check if we're ready for any of protocol modification */
                 for(size_t i = 0; decoder->protocol->databit_len[i] &&
-                               (i < COUNT_OF(decoder->protocol->databit_len));
+                                  (i < COUNT_OF(decoder->protocol->databit_len));
                     ++i) {
                     if(decoder->protocol->databit_len[i] == decoder->databit_cnt) {
                         return InfraredStatusReady;
