@@ -522,14 +522,6 @@ bool furi_hal_subghz_tx() {
     return true;
 }
 
-uint8_t furi_hal_subghz_get_rssi_dec() {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    uint8_t rssi_dec = cc1101_get_rssi(&furi_hal_spi_bus_handle_subghz);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
-
-    return rssi_dec;
-}
-
 float furi_hal_subghz_get_rssi() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     int32_t rssi_dec = cc1101_get_rssi(&furi_hal_spi_bus_handle_subghz);

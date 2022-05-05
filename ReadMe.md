@@ -13,13 +13,15 @@ The work on this fork is based on [EA SmartResponse Hack](https://github.com/ea/
 
 - Graph seems to be skewed to the right a few Mhz (132 channels vs 128 pixels?)
 - Fix model init (not only [0])
-- Need to update variables when changing bandwidth
 - Filter needs to be dinamycally adjusted based on Channel width
 - Help for keys?
 - Sometimes plugin can't be restarted
 - Move to Furi threads?
-- Store maximum
 - Clean up code 
+- ~Update variables when changing bandwidth~
+- ~Display peak/maximum~
+- ~Revert furi_hal_subghz_get_rssi_dec~
+
 
 # Update firmware
 

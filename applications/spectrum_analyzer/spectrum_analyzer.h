@@ -10,19 +10,13 @@
 #define NARROW 1
 #define ULTRAWIDE 2
 
-/*
- * short mode (default): displays RSSI >> 2
- * tall mode: displays RSSI
- */
-#define VERTICAL_SHORT 0
-#define VERTICAL_TALL 1
-
 /* vertical scrolling */
 #define VERTICAL_SHORT_STEP  16
 #define VERTICAL_TALL_STEP   4
-// #define MAX_VSCROLL 120
-#define MAX_VSCROLL 48
+
+#define MAX_VSCROLL 120
 #define MIN_VSCROLL 0
+#define DEFAULT_VSCROLL 48
 
 /* frequencies in MHz */
 #define DEFAULT_FREQ     440
@@ -74,9 +68,6 @@
 #define UPPER(a, b, c)  ((((a) - (b) + ((c) / 2)) / (c)) * (c))
 #define LOWER(a, b, c)  ((((a) + (b)) / (c)) * (c))
 
-
-
-
 typedef enum {
     EventTypeTick,
     EventTypeKey,
@@ -88,34 +79,22 @@ typedef struct {
 } SpectrumAnalyzerEvent;
 
 typedef struct {
-	/* frequency setting */
+    /* frequency setting */
     uint32_t frequency;
 
-	/* signal strength */
-	uint8_t ss;
-
-	// uint8_t ss[PERSIST];
-
-	// uint8_t freq2;
-	// uint8_t freq1;
-	// uint8_t freq0;
-	
-	// /* frequency calibration */
-	// uint8_t fscal3;
-	// uint8_t fscal2;
-	// uint8_t fscal1;
-
-	// uint8_t max;
-	// uint8_t last_drawn;
+    /* signal strength */
+    uint8_t ss;
 } ChannelInfo;
 
 #define NUM_CHANNELS 132
-
 typedef struct {
+    float		max_rssi;
+    uint8_t		max_rssi_dec;
+    uint8_t		max_rssi_channel;
     ChannelInfo chan_table[NUM_CHANNELS];
 } SpectrumAnalyzerModel; 
 
-uint16_t center_freq;
+bool update_values_flag;
 uint16_t user_freq;
 uint8_t band;
 uint8_t width;
@@ -125,17 +104,16 @@ uint8_t vscroll;
 uint8_t min_chan;
 uint8_t max_chan;
 
-
 typedef struct {
     ValueMutex* model_mutex;
     osMessageQueueId_t event_queue;
 } SpectrumAnalyzerContext;
 
 static const uint8_t radio_config[][2] = {
-	{CC1101_FSCTRL1,0x12},
-	{CC1101_FSCTRL0,0x00},
+    {CC1101_FSCTRL1,0x12},
+    {CC1101_FSCTRL0,0x00},
 
-	{CC1101_AGCCTRL2, 0xC0},
+    {CC1101_AGCCTRL2, 0xC0},
     
     {CC1101_MDMCFG4, 0x6C},
     {CC1101_TEST2, 0x88},

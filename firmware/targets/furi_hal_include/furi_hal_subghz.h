@@ -144,12 +144,6 @@ void furi_hal_subghz_rx();
  */
 bool furi_hal_subghz_tx();
 
-/** Get RSSI value in decimal
- *
- * @return     RSSI value
- */
-uint8_t furi_hal_subghz_get_rssi_dec();
-
 /** Get RSSI value in dBm
  *
  * @return     RSSI value
