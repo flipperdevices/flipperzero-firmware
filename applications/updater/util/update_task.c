@@ -14,7 +14,7 @@ static const char* update_task_stage_descr[] = {
     [UpdateTaskStageReadManifest] = "Loading update manifest",
     [UpdateTaskStageValidateDFUImage] = "Checking DFU file",
     [UpdateTaskStageFlashWrite] = "Writing flash",
-    [UpdateTaskStageFlashValidate] = "Validating",
+    [UpdateTaskStageFlashValidate] = "Validating flash",
     [UpdateTaskStageRadioImageValidate] = "Checking radio FW",
     [UpdateTaskStageRadioErase] = "Uninstalling radio FW",
     [UpdateTaskStageRadioWrite] = "Writing radio FW",
@@ -26,7 +26,7 @@ static const char* update_task_stage_descr[] = {
     [UpdateTaskStageResourcesUpdate] = "Updating resources",
     [UpdateTaskStageCompleted] = "Restarting...",
     [UpdateTaskStageError] = "Error",
-    [UpdateTaskStageOBError] = "OB Error, report",
+    [UpdateTaskStageOBError] = "OB Err, report",
 };
 
 typedef struct {
@@ -151,9 +151,7 @@ void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, ui
         (update_task->status_change_cb)(
             string_get_cstr(update_task->state.status),
             adapted_progress,
-            update_task_stage_progress[update_task->state.stage].group ==
-                UpdateTaskStageGroupRadio,
-            update_task->state.stage >= UpdateTaskStageError,
+            update_stage_is_error(update_task->state.stage),
             update_task->status_change_cb_state);
     }
 }
@@ -278,7 +276,9 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
             UPDATE_MANIFEST_DEFAULT_NAME,
             manifest_path);
         update_task_set_progress(update_task, UpdateTaskStageProgress, 30);
-        if(!update_manifest_init(update_task->manifest, string_get_cstr(manifest_path))) {
+
+        UpdateManifest* manifest = update_task->manifest;
+        if(!update_manifest_init(manifest, string_get_cstr(manifest_path))) {
             break;
         }
 
@@ -293,14 +293,14 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
 
         update_task_set_progress(update_task, UpdateTaskStageProgress, 50);
         if((update_task->state.groups & UpdateTaskStageGroupFirmware) &&
-           !update_task_check_file_exists(update_task, update_task->manifest->firmware_dfu_image)) {
+           !update_task_check_file_exists(update_task, manifest->firmware_dfu_image)) {
             break;
         }
 
         update_task_set_progress(update_task, UpdateTaskStageProgress, 70);
         if((update_task->state.groups & UpdateTaskStageGroupRadio) &&
-               (!update_task_check_file_exists(update_task, update_task->manifest->radio_image) || 
-               (update_task->manifest->radio_version.version.type == 0))) {
+           (!update_task_check_file_exists(update_task, manifest->radio_image) ||
+            (manifest->radio_version.version.type == 0))) {
             break;
         }
 

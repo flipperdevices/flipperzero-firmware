@@ -61,6 +61,7 @@ static bool update_task_post_update(UpdateTask* update_task) {
     string_t file_path;
     string_init(file_path);
 
+    TarArchive* archive = tar_archive_alloc(update_task->storage);
     do {
         CHECK_RESULT(update_task_parse_manifest(update_task));
         path_concat(
@@ -84,20 +85,19 @@ static bool update_task_post_update(UpdateTask* update_task) {
                 string_get_cstr(update_task->manifest->resource_bundle),
                 file_path);
 
-            TarArchive* archive = tar_archive_alloc(update_task->storage);
             tar_archive_set_file_callback(archive, update_task_resource_unpack_cb, &progress);
-            success = tar_archive_open(archive, string_get_cstr(file_path), TAR_OPEN_MODE_READ);
-            if(success) {
-                progress.total_files = tar_archive_get_entries_count(archive);
-                if(progress.total_files > 0) {
-                    tar_archive_unpack_to(archive, EXT_PATH);
-                }
+            CHECK_RESULT(
+                tar_archive_open(archive, string_get_cstr(file_path), TAR_OPEN_MODE_READ));
+
+            progress.total_files = tar_archive_get_entries_count(archive);
+            if(progress.total_files > 0) {
+                CHECK_RESULT(tar_archive_unpack_to(archive, EXT_PATH));
             }
-            tar_archive_free(archive);
         }
         success = true;
     } while(false);
 
+    tar_archive_free(archive);
     string_clear(file_path);
     return success;
 }

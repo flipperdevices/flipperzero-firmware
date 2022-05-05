@@ -111,19 +111,13 @@ static bool update_task_write_stack_data(UpdateTask* update_task) {
         }
 
         bytes_read = storage_file_read(update_task->file, fw_block, n_bytes_to_read);
-        if(bytes_read == 0) {
-            break;
-        }
+        CHECK_RESULT(bytes_read != 0);
 
         int16_t i_page =
             furi_hal_flash_get_page_number(update_task->manifest->radio_address + element_offs);
-        if(i_page < 0) {
-            break;
-        }
+        CHECK_RESULT(i_page >= 0);
 
-        if(!furi_hal_flash_program_page(i_page, fw_block, bytes_read)) {
-            break;
-        }
+        CHECK_RESULT(furi_hal_flash_program_page(i_page, fw_block, bytes_read));
 
         element_offs += bytes_read;
         update_task_set_progress(
@@ -142,19 +136,19 @@ static void update_task_wait_for_restart(UpdateTask* update_task) {
 
 static bool update_task_write_stack(UpdateTask* update_task) {
     bool success = false;
+    UpdateManifest* manifest = update_task->manifest;
     do {
         FURI_LOG_W(TAG, "Writing stack");
         update_task_set_progress(update_task, UpdateTaskStageRadioImageValidate, 0);
-        CHECK_RESULT(update_task_open_file(update_task, update_task->manifest->radio_image));
+        CHECK_RESULT(update_task_open_file(update_task, manifest->radio_image));
         CHECK_RESULT(
             crc32_calc_file(update_task->file, &update_task_file_progress, update_task) ==
-            update_task->manifest->radio_crc);
+            manifest->radio_crc);
 
         CHECK_RESULT(update_task_write_stack_data(update_task));
         update_task_set_progress(update_task, UpdateTaskStageRadioInstall, 0);
         CHECK_RESULT(
-            ble_glue_fus_stack_install(update_task->manifest->radio_address, 0) !=
-            BleGlueCommandResultError);
+            ble_glue_fus_stack_install(manifest->radio_address, 0) != BleGlueCommandResultError);
         update_task_set_progress(update_task, UpdateTaskStageRadioInstall, 80);
         CHECK_RESULT(ble_glue_fus_wait_operation() == BleGlueCommandResultOK);
         update_task_set_progress(update_task, UpdateTaskStageRadioInstall, 100);

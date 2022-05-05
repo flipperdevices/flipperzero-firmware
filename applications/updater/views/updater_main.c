@@ -2,7 +2,6 @@
 #include <gui/view.h>
 #include <gui/elements.h>
 #include <gui/canvas.h>
-#include <gui/icon_animation.h>
 #include <furi.h>
 #include <input/input.h>
 
@@ -21,21 +20,18 @@ static const uint8_t PROGRESS_RENDER_STEP = 1; /* percent, to limit rendering ra
 typedef struct {
     string_t status;
     uint8_t progress, rendered_progress;
-    bool is_radio, failed;
-    IconAnimation* animation;
+    bool failed;
 } UpdaterProgressModel;
 
 void updater_main_model_set_state(
     UpdaterMainView* main_view,
     const char* message,
     uint8_t progress,
-    bool is_radio,
     bool failed) {
     with_view_model(
         main_view->view, (UpdaterProgressModel * model) {
             model->failed = failed;
             model->progress = progress;
-            model->is_radio = is_radio;
             if(string_cmp_str(model->status, message)) {
                 string_set(model->status, message);
                 model->rendered_progress = progress;
@@ -81,47 +77,24 @@ static void updater_main_draw_callback(Canvas* canvas, void* _model) {
     canvas_set_font(canvas, FontPrimary);
 
     if(model->failed) {
-        canvas_draw_str_aligned(canvas, 7, 16, AlignLeft, AlignTop, "Update Failed!");
+        canvas_draw_str_aligned(canvas, 42, 16, AlignLeft, AlignTop, "Update Failed!");
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(
-            canvas, 7, 32, AlignLeft, AlignTop, string_get_cstr(model->status));
-        canvas_draw_icon(canvas, 128 - 38, 16, &I_Warning_30x23);
+            canvas, 42, 32, AlignLeft, AlignTop, string_get_cstr(model->status));
+
+        canvas_draw_icon(canvas, 7, 16, &I_Warning_30x23);
         canvas_draw_str_aligned(
-            canvas, 16, 52, AlignLeft, AlignTop, "to retry, hold          to abort");
-        canvas_draw_icon(canvas, 5, 51, &I_Ok_btn_9x9);
+            canvas, 16, 51, AlignLeft, AlignTop, "to retry, hold          to abort");
+        canvas_draw_icon(canvas, 5, 50, &I_Ok_btn_9x9);
         canvas_draw_icon(canvas, 73, 50, &I_Back_15x10);
     } else {
-        if(model->is_radio) {
-            canvas_draw_icon(canvas, 128 - 81, 0, &I_Parrot_81x64);
-        } else {
-            canvas_draw_icon_animation(canvas, 128 - 67, 0, model->animation);
-        }
-
-        canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, string_get_cstr(model->status));
-        canvas_draw_str_aligned(canvas, 0, 40, AlignLeft, AlignTop, "Updating...");
-        elements_progress_bar(canvas, 0, 53, 70, (float)model->progress / 100);
+        canvas_draw_str_aligned(canvas, 55, 14, AlignLeft, AlignTop, "UPDATING");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(
+            canvas, 64, 51, AlignCenter, AlignTop, string_get_cstr(model->status));
+        canvas_draw_icon(canvas, 4, 5, &I_Updating_32x40);
+        elements_progress_bar(canvas, 42, 29, 80, (float)model->progress / 100);
     }
-}
-
-static void updater_main_enter_callback(void* context) {
-    furi_assert(context);
-    UpdaterMainView* instance = context;
-    UpdaterProgressModel* model = view_get_model(instance->view);
-    /* using Loading View in conjunction with several
-     * Stack View obligates to reassign
-     * Update callback, as it can be rewritten
-     */
-    view_tie_icon_animation(instance->view, model->animation);
-    icon_animation_start(model->animation);
-    view_commit_model(instance->view, false);
-}
-
-static void updater_main_exit_callback(void* context) {
-    furi_assert(context);
-    UpdaterMainView* instance = context;
-    UpdaterProgressModel* model = view_get_model(instance->view);
-    icon_animation_stop(model->animation);
-    view_commit_model(instance->view, false);
 }
 
 UpdaterMainView* updater_main_alloc() {
@@ -133,16 +106,12 @@ UpdaterMainView* updater_main_alloc() {
     with_view_model(
         main_view->view, (UpdaterProgressModel * model) {
             string_init_set(model->status, "Waiting for SD card");
-            model->animation = icon_animation_alloc(&A_BrainOps_67x64);
-            view_tie_icon_animation(main_view->view, model->animation);
             return true;
         });
 
     view_set_context(main_view->view, main_view);
     view_set_input_callback(main_view->view, updater_main_input);
     view_set_draw_callback(main_view->view, updater_main_draw_callback);
-    view_set_enter_callback(main_view->view, updater_main_enter_callback);
-    view_set_exit_callback(main_view->view, updater_main_exit_callback);
 
     return main_view;
 }
@@ -152,7 +121,6 @@ void updater_main_free(UpdaterMainView* main_view) {
     with_view_model(
         main_view->view, (UpdaterProgressModel * model) {
             string_clear(model->status);
-            icon_animation_free(model->animation);
             return false;
         });
     view_free(main_view->view);
