@@ -28,7 +28,6 @@ extern int32_t delay_test_app(void* p);
 extern int32_t display_test_app(void* p);
 extern int32_t gpio_app(void* p);
 extern int32_t ibutton_app(void* p);
-extern int32_t ibutton_app_old(void* p); //TODO: Delet dis
 extern int32_t infrared_app(void* p);
 extern int32_t infrared_monitor_app(void* p);
 extern int32_t keypad_test_app(void* p);
@@ -251,10 +250,6 @@ const FlipperApplication FLIPPER_APPS[] = {
      .stack_size = 2048,
      .icon = &A_iButton_14,
      .flags = FlipperApplicationFlagDefault},
-#endif
-
-#ifdef APP_IBUTTON
-    {.app = ibutton_app_old, .name = "iButton.old", .stack_size = 2048, .icon = &A_iButton_14},
 #endif
 
 #ifdef APP_BAD_USB
