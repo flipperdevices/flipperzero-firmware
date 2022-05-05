@@ -40,6 +40,10 @@ typedef enum {
     UpdateTaskStageMAX
 } UpdateTaskStage;
 
+inline bool update_stage_is_error(const UpdateTaskStage stage) {
+    return stage >= UpdateTaskStageError;
+}
+
 typedef enum {
     UpdateTaskStageGroupMisc = 0,
     UpdateTaskStageGroupPreUpdate = 1 << 1,
@@ -52,7 +56,7 @@ typedef enum {
 
 typedef struct {
     UpdateTaskStage stage;
-    uint8_t progress;
+    uint8_t overall_progress, stage_progress;
     string_t status;
     UpdateTaskStageGroup groups;
     uint32_t total_progress_points;
@@ -64,6 +68,7 @@ typedef struct UpdateTask UpdateTask;
 typedef void (*updateProgressCb)(
     const char* status,
     const uint8_t stage_pct,
+    bool is_raido,
     bool failed,
     void* state);
 

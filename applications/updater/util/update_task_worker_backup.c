@@ -66,14 +66,12 @@ static bool update_task_post_update(UpdateTask* update_task) {
         path_concat(
             string_get_cstr(update_task->update_path), LFS_BACKUP_DEFAULT_FILENAME, file_path);
 
-        bool unpack_resources = !string_empty_p(update_task->manifest->resource_bundle);
-
         update_task_set_progress(update_task, UpdateTaskStageLfsRestore, 0);
-        furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeNormal);
+        update_operation_disarm();
 
         CHECK_RESULT(lfs_backup_unpack(update_task->storage, string_get_cstr(file_path)));
 
-        if(unpack_resources) {
+        if(update_task->state.groups & UpdateTaskStageGroupResources) {
             TarUnpackProgress progress = {
                 .update_task = update_task,
                 .total_files = 0,
@@ -112,7 +110,7 @@ int32_t update_task_worker_backup_restore(void* context) {
     FuriHalRtcBootMode boot_mode = furi_hal_rtc_get_boot_mode();
     if((boot_mode != FuriHalRtcBootModePreUpdate) && (boot_mode != FuriHalRtcBootModePostUpdate)) {
         /* no idea how we got here. Clear to normal boot */
-        furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeNormal);
+        update_operation_disarm();
         return UPDATE_TASK_NOERR;
     }
 
@@ -120,7 +118,7 @@ int32_t update_task_worker_backup_restore(void* context) {
         return UPDATE_TASK_FAILED;
     }
 
-    /* Waiting for BT service to 'start', so we don't race for boot mode */
+    /* Waiting for BT service to 'start', so we don't race for boot mode flag */
     furi_record_open("bt");
     furi_record_close("bt");
 

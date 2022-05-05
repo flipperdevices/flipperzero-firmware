@@ -17,6 +17,7 @@ void updater_main_model_set_state(
     UpdaterMainView* main_view,
     const char* message,
     uint8_t progress,
+    bool is_radio,
     bool failed);
 
 void updater_main_set_storage_pubsub(UpdaterMainView* main_view, FuriPubSubSubscription* sub);

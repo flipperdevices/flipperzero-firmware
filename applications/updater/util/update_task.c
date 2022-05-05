@@ -26,7 +26,7 @@ static const char* update_task_stage_descr[] = {
     [UpdateTaskStageResourcesUpdate] = "Updating resources",
     [UpdateTaskStageCompleted] = "Restarting...",
     [UpdateTaskStageError] = "Error",
-    [UpdateTaskStageOBError] = "OB error, pls report",
+    [UpdateTaskStageOBError] = "OB Error, report",
 };
 
 typedef struct {
@@ -126,21 +126,31 @@ void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, ui
         if((stage >= UpdateTaskStageError) && (update_task->state.stage >= UpdateTaskStageError)) {
             return;
         }
+        /* Build error message with code "[stage_idx-stage_percent]" */
         if(stage >= UpdateTaskStageError) {
             string_printf(
                 update_task->state.status,
-                "%s #[%d]",
+                "%s #[%d-%d]",
                 update_task_stage_descr[stage],
-                update_task->state.stage);
+                update_task->state.stage,
+                update_task->state.stage_progress);
         } else {
             string_set_str(update_task->state.status, update_task_stage_descr[stage]);
         }
+        /* Store stage update */
         update_task->state.stage = stage;
+        /* If we are still alive, sum completed stages weights */
         if((stage > UpdateTaskStageProgress) && (stage < UpdateTaskStageCompleted)) {
             update_task_calc_completed_stages(update_task);
         }
     }
 
+    /* Store stage progress for all non-error updates - to provide details on error state */
+    if(!update_stage_is_error(stage)) {
+        update_task->state.stage_progress = progress;
+    }
+
+    /* Calculate "overall" progress, based on stage weights */
     uint32_t adapted_progress = 1;
     if(update_task->state.total_progress_points != 0) {
         if(stage < UpdateTaskStageCompleted) {
@@ -151,9 +161,10 @@ void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, ui
                 100u);
 
         } else {
-            adapted_progress = update_task->state.progress;
+            adapted_progress = update_task->state.overall_progress;
         }
     }
+    update_task->state.overall_progress = adapted_progress;
 
     FURI_LOG_I(
         "TAG",
@@ -163,11 +174,12 @@ void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, ui
         update_task->state.total_progress_points,
         adapted_progress);
 
-    update_task->state.progress = adapted_progress;
     if(update_task->status_change_cb) {
         (update_task->status_change_cb)(
             string_get_cstr(update_task->state.status),
             adapted_progress,
+            update_task_stage_progress[update_task->state.stage].group ==
+                UpdateTaskStageGroupRadio,
             update_task->state.stage >= UpdateTaskStageError,
             update_task->status_change_cb_state);
     }
@@ -213,8 +225,7 @@ static void update_task_worker_thread_cb(FuriThreadState state, void* context) {
         return;
     }
 
-    int32_t op_result = furi_thread_get_return_code(update_task->thread);
-    if(op_result == UPDATE_TASK_NOERR) {
+    if(furi_thread_get_return_code(update_task->thread) == UPDATE_TASK_NOERR) {
         osDelay(UPDATE_DELAY_OPERATION_OK);
         furi_hal_power_reset();
     }
@@ -224,7 +235,8 @@ UpdateTask* update_task_alloc() {
     UpdateTask* update_task = malloc(sizeof(UpdateTask));
 
     update_task->state.stage = UpdateTaskStageProgress;
-    update_task->state.progress = 0;
+    update_task->state.stage_progress = 0;
+    update_task->state.overall_progress = 0;
     string_init(update_task->state.status);
 
     update_task->manifest = update_manifest_alloc();
@@ -270,6 +282,8 @@ void update_task_free(UpdateTask* update_task) {
 
 bool update_task_parse_manifest(UpdateTask* update_task) {
     furi_assert(update_task);
+    update_task->state.stage_progress = 0;
+    update_task->state.overall_progress = 0;
     update_task->state.total_progress_points = 0;
     update_task->state.completed_stages_points = 0;
     update_task->state.groups = 0;

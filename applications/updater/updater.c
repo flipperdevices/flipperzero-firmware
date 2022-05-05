@@ -29,10 +29,11 @@ static bool updater_back_event_callback(void* context) {
 static void status_update_cb(
     const char* message,
     const uint8_t progress,
+    bool is_radio,
     bool failed,
     void* context) {
     UpdaterMainView* main_view = context;
-    updater_main_model_set_state(main_view, message, progress, failed);
+    updater_main_model_set_state(main_view, message, progress, is_radio, failed);
 }
 
 Updater* updater_alloc(const char* arg) {

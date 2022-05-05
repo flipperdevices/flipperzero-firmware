@@ -280,7 +280,6 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
                               manifest->ob_write_mask.obs[idx].values.base) != 0;
 
             if(can_patch) {
-                /* patch & restart loop */
                 const uint32_t patched_value =
                     /* take all non-writable bits from real value */
                     (device_ob_value & ~(manifest->ob_write_mask.obs[idx].values.base)) |
@@ -297,8 +296,7 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
 
                 if(!is_fixed) {
                     /* Things are so bad that fixing what we are allowed to still doesn't match
-                     * reference value 
-                     */
+                     * reference value */
                     FURI_LOG_W(
                         TAG,
                         "OB #%d is FUBAR (fixed&masked %08X, not %08X)",
@@ -317,11 +315,11 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
         }
     }
     if(!match) {
-        update_task_set_progress(update_task, UpdateTaskStageOBError, 95);
+        update_task_set_progress(update_task, UpdateTaskStageOBError, 0);
     }
 
     if(ob_dirty) {
-        FURI_LOG_W(TAG, "OB were changed, applying");
+        FURI_LOG_W(TAG, "OBs were changed, applying");
         furi_hal_flash_ob_apply();
     }
     return match;
@@ -335,16 +333,15 @@ int32_t update_task_worker_flash_writer(void* context) {
     do {
         CHECK_RESULT(update_task_parse_manifest(update_task));
 
-        if(!string_empty_p(update_task->manifest->radio_image)) {
+        if(update_task->state.groups & UpdateTaskStageGroupRadio) {
             CHECK_RESULT(update_task_manage_radiostack(update_task));
         }
 
-        bool check_ob = update_manifest_has_obdata(update_task->manifest);
-        if(check_ob) {
+        if(update_task->state.groups & UpdateTaskStageGroupOptionBytes) {
             CHECK_RESULT(update_task_validate_optionbytes(update_task));
         }
 
-        if(!string_empty_p(update_task->manifest->firmware_dfu_image)) {
+        if(update_task->state.groups & UpdateTaskStageGroupFirmware) {
             CHECK_RESULT(update_task_write_dfu(update_task));
         }
 

@@ -21,7 +21,7 @@ static const uint8_t PROGRESS_RENDER_STEP = 1; /* percent, to limit rendering ra
 typedef struct {
     string_t status;
     uint8_t progress, rendered_progress;
-    bool failed;
+    bool is_radio, failed;
     IconAnimation* animation;
 } UpdaterProgressModel;
 
@@ -29,11 +29,13 @@ void updater_main_model_set_state(
     UpdaterMainView* main_view,
     const char* message,
     uint8_t progress,
+    bool is_radio,
     bool failed) {
     with_view_model(
         main_view->view, (UpdaterProgressModel * model) {
             model->failed = failed;
             model->progress = progress;
+            model->is_radio = is_radio;
             if(string_cmp_str(model->status, message)) {
                 string_set(model->status, message);
                 model->rendered_progress = progress;
@@ -62,14 +64,10 @@ bool updater_main_input(InputEvent* event, void* context) {
         return true;
     }
 
-    if(event->type != InputTypeShort) {
-        return true;
-    }
-
-    if(event->key == InputKeyOk) {
+    if((event->type == InputTypeShort) && (event->key == InputKeyOk)) {
         view_dispatcher_send_custom_event(
             main_view->view_dispatcher, UpdaterCustomEventRetryUpdate);
-    } else if(event->key == InputKeyBack) {
+    } else if((event->type == InputTypeLong) && (event->key == InputKeyBack)) {
         view_dispatcher_send_custom_event(
             main_view->view_dispatcher, UpdaterCustomEventCancelUpdate);
     }
@@ -83,35 +81,26 @@ static void updater_main_draw_callback(Canvas* canvas, void* _model) {
     canvas_set_font(canvas, FontPrimary);
 
     if(model->failed) {
-        canvas_draw_str_aligned(canvas, 0, 40, AlignLeft, AlignTop, "Error");
+        canvas_draw_str_aligned(canvas, 7, 16, AlignLeft, AlignTop, "Update Failed!");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(
+            canvas, 7, 32, AlignLeft, AlignTop, string_get_cstr(model->status));
+        canvas_draw_icon(canvas, 128 - 38, 16, &I_Warning_30x23);
+        canvas_draw_str_aligned(
+            canvas, 16, 52, AlignLeft, AlignTop, "to retry, hold          to abort");
+        canvas_draw_icon(canvas, 5, 51, &I_Ok_btn_9x9);
+        canvas_draw_icon(canvas, 73, 50, &I_Back_15x10);
     } else {
-        canvas_draw_icon_animation(canvas, 128 - 67, 0, model->animation);
+        if(model->is_radio) {
+            canvas_draw_icon(canvas, 128 - 81, 0, &I_Parrot_81x64);
+        } else {
+            canvas_draw_icon_animation(canvas, 128 - 67, 0, model->animation);
+        }
+
         canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, string_get_cstr(model->status));
         canvas_draw_str_aligned(canvas, 0, 40, AlignLeft, AlignTop, "Updating...");
         elements_progress_bar(canvas, 0, 53, 70, (float)model->progress / 100);
     }
-
-    //uint16_t y_offset = model->failed ? 5 : 13;
-    //string_t status_text;
-    ////if(!model->failed && (model->idx_stage != 0) && (model->idx_stage <= model->total_stages)) {
-    ////    string_init_printf(
-    ////        status_text,
-    ////        "[%d/%d] %s",
-    ////        model->idx_stage,
-    ////        model->total_stages,
-    ////        string_get_cstr(model->status));
-    ////} else {
-    //    string_init_set(status_text, model->status);
-    ////}
-    //canvas_draw_str_aligned(
-    //    canvas, 128 / 2, y_offset, AlignCenter, AlignTop, string_get_cstr(status_text));
-    //string_clear(status_text);
-    //if(model->failed) {
-    //    canvas_set_font(canvas, FontSecondary);
-    //    canvas_draw_str_aligned(
-    //        canvas, 128 / 2, 20, AlignCenter, AlignTop, "[OK] to retry, [Back] to abort");
-    //}
-    //elements_progress_bar(canvas, 14, 35, 100, (float)model->progress / 100);
 }
 
 static void updater_main_enter_callback(void* context) {
