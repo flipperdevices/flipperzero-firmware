@@ -292,14 +292,15 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
         }
 
         update_task_set_progress(update_task, UpdateTaskStageProgress, 50);
-        if(!string_empty_p(update_task->manifest->firmware_dfu_image) &&
+        if((update_task->state.groups & UpdateTaskStageGroupFirmware) &&
            !update_task_check_file_exists(update_task, update_task->manifest->firmware_dfu_image)) {
             break;
         }
 
         update_task_set_progress(update_task, UpdateTaskStageProgress, 70);
-        if(!string_empty_p(update_task->manifest->radio_image) &&
-           !update_task_check_file_exists(update_task, update_task->manifest->radio_image)) {
+        if((update_task->state.groups & UpdateTaskStageGroupRadio) &&
+               (!update_task_check_file_exists(update_task, update_task->manifest->radio_image) || 
+               (update_task->manifest->radio_version.version.type == 0)) {
             break;
         }
 
