@@ -2,7 +2,6 @@
 
 #include "ibutton.h"
 
-// #include <cli/cli.h>
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
@@ -45,7 +44,6 @@ struct iButton {
     char file_name[IBUTTON_FILE_NAME_SIZE];
     char text_store[IBUTTON_TEXT_STORE_SIZE + 1];
 
-    // Common Views
     Submenu* submenu;
     ByteInput* byte_input;
     TextInput* text_input;
@@ -74,8 +72,6 @@ typedef enum {
     iButtonNotificationMessageGreenOn,
     iButtonNotificationMessageGreenOff,
 } iButtonNotificationMessage;
-
-iButton* ibutton_alloc();
 
 bool ibutton_file_select(iButton* ibutton);
 bool ibutton_load_key(iButton* ibutton, const char* key_name);
