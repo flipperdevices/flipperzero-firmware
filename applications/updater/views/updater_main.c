@@ -84,9 +84,9 @@ static void updater_main_draw_callback(Canvas* canvas, void* _model) {
 
         canvas_draw_icon(canvas, 7, 16, &I_Warning_30x23);
         canvas_draw_str_aligned(
-            canvas, 16, 51, AlignLeft, AlignTop, "to retry, hold          to abort");
-        canvas_draw_icon(canvas, 5, 50, &I_Ok_btn_9x9);
-        canvas_draw_icon(canvas, 73, 50, &I_Back_15x10);
+            canvas, 18, 51, AlignLeft, AlignTop, "to retry, hold       to abort");
+        canvas_draw_icon(canvas, 7, 50, &I_Ok_btn_9x9);
+        canvas_draw_icon(canvas, 75, 51, &I_Pin_back_arrow_10x8);
     } else {
         canvas_draw_str_aligned(canvas, 55, 14, AlignLeft, AlignTop, "UPDATING");
         canvas_set_font(canvas, FontSecondary);
