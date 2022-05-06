@@ -309,27 +309,33 @@ void spectrum_analyzer_thread(void* p) {
     };
 
     while(1) {
-        furi_hal_delay_ms(50);
 
-        SpectrumAnalyzerModel* model = (SpectrumAnalyzerModel*)acquire_mutex(context->model_mutex, 25);
+        float		local_max_rssi;
+        uint8_t		local_max_rssi_dec;
+        uint8_t		local_max_rssi_channel;
+        ChannelInfo local_chan_table[NUM_CHANNELS];
+
+        furi_hal_delay_ms(50);
 
         // Thread hangs if using FURI_LOG_X...
         // FURI_LOG_D("Spectrum", "spectrum_analyzer_thread: mutex acquired");
 
         furi_hal_subghz_idle();
         furi_hal_subghz_load_registers(radio_config);
-
-        uint8_t ch = 0; 
-
+        
+        // Generate local copy
+        SpectrumAnalyzerModel* model = (SpectrumAnalyzerModel*)acquire_mutex(context->model_mutex, 25);
         if (model->update_values_flag == true){
             model->freq = setup_frequencies(model);
             model->update_values_flag = false;
         }
+        memcpy(&local_chan_table, model->chan_table, sizeof(ChannelInfo) * NUM_CHANNELS);
+        release_mutex(context->model_mutex, model);
 
-        model->max_rssi_dec = 0;
-    
-        for (ch = 0; ch < NUM_CHANNELS-1; ch++) { 
-            furi_hal_subghz_set_frequency(model->chan_table[ch].frequency);
+        local_max_rssi_dec = 0;
+
+        for (uint8_t ch = 0; ch < NUM_CHANNELS-1; ch++) { 
+            furi_hal_subghz_set_frequency(local_chan_table[ch].frequency);
 
             furi_hal_subghz_rx();
             furi_hal_delay_ms(3);
@@ -339,17 +345,23 @@ void spectrum_analyzer_thread(void* p) {
             //max_ss = 255 -> -74.5
             //max_ss = 128 -> -138
 
-            model->chan_table[ch].ss = (furi_hal_subghz_get_rssi() + 138) * 2 ;
+            local_chan_table[ch].ss = (furi_hal_subghz_get_rssi() + 138) * 2 ;
 
-            if (model->chan_table[ch].ss > model->max_rssi_dec) {
-                model->max_rssi_dec = model->chan_table[ch].ss;
-                model->max_rssi = (model->chan_table[ch].ss / 2) - 138;
-                model->max_rssi_channel = ch;
+            if (local_chan_table[ch].ss > local_max_rssi_dec) {
+                local_max_rssi_dec = local_chan_table[ch].ss;
+                local_max_rssi = (local_chan_table[ch].ss / 2) - 138;
+                local_max_rssi_channel = ch;
             }
 
             furi_hal_subghz_idle();
         }  
 
+        // Update Model
+        model = (SpectrumAnalyzerModel*)acquire_mutex(context->model_mutex, 25);
+        memcpy(model->chan_table, &local_chan_table, sizeof(ChannelInfo) * NUM_CHANNELS);
+        model->max_rssi = local_max_rssi;
+        model->max_rssi_dec = local_max_rssi_dec;
+        model->max_rssi_channel = local_max_rssi_channel;
         release_mutex(context->model_mutex, model);
     }
 }
@@ -381,7 +393,7 @@ int32_t spectrum_analyzer_app(void* p) {
     setup_frequencies(model);
 
     // start scan thread
-    osThreadAttr_t thread_attr = {.name = "spectrum_analyzer_thread", .stack_size = 1024};
+    osThreadAttr_t thread_attr = {.name = "spectrum_analyzer_thread", .stack_size = 2048};
     SpectrumAnalyzerContext context = {.model_mutex = &model_mutex, .event_queue = event_queue};
     osThreadId_t analyzer_thread = osThreadNew(spectrum_analyzer_thread, &context, &thread_attr);
 
