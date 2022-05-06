@@ -197,6 +197,6 @@ void update_operation_disarm() {
 }
 
 void update_operation_persist_package_index(int32_t index) {
-    furi_check(index => 0);
+    furi_check(index >= 0);
     furi_hal_rtc_set_register(FuriHalRtcRegisterUpdateFolderFSIndex, index);
 }
