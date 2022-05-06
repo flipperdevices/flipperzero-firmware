@@ -18,7 +18,10 @@ endif
 
 MCU_FLAGS		= -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
-CFLAGS			+= $(MCU_FLAGS) -DSTM32WB55xx -Wall -Wextra -fdata-sections -ffunction-sections
+# Warnings configuration
+CFLAGS			+= -Wall -Wextra -Wredundant-decls
+
+CFLAGS			+= $(MCU_FLAGS) -DSTM32WB55xx -fdata-sections -ffunction-sections
 LDFLAGS			+= $(MCU_FLAGS) -specs=nosys.specs -specs=nano.specs
 
 CPPFLAGS		+= -fno-rtti -fno-use-cxa-atexit -fno-exceptions
