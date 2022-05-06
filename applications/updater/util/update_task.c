@@ -19,8 +19,8 @@ static const char* update_task_stage_descr[] = {
     [UpdateTaskStageRadioErase] = "Uninstalling radio FW",
     [UpdateTaskStageRadioWrite] = "Writing radio FW",
     [UpdateTaskStageRadioInstall] = "Installing radio FW",
-    [UpdateTaskStageRadioBusy] = "Core2 is updating",
-    [UpdateTaskStageOBValidation] = "Validating OBs",
+    [UpdateTaskStageRadioBusy] = "Radio is updating",
+    [UpdateTaskStageOBValidation] = "Validating opt. bytes",
     [UpdateTaskStageLfsBackup] = "Backing up LFS",
     [UpdateTaskStageLfsRestore] = "Restoring LFS",
     [UpdateTaskStageResourcesUpdate] = "Updating resources",
@@ -94,11 +94,6 @@ static void update_task_calc_completed_stages(UpdateTask* update_task) {
         completed_stages_points += grp_descr->weight;
     }
     update_task->state.completed_stages_points = completed_stages_points;
-    FURI_LOG_I(
-        "TAGU",
-        "update_task_calc_completed_stages = %d/%d",
-        completed_stages_points,
-        update_task->state.total_progress_points);
 }
 
 void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, uint8_t progress) {
