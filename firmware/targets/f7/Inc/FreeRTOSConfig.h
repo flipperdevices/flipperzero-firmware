@@ -2,7 +2,7 @@
 
 #if defined(__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__)
 #include <stdint.h>
-extern uint32_t SystemCoreClock;
+//extern uint32_t SystemCoreClock;
 #endif
 
 #ifndef CMSIS_device_header
