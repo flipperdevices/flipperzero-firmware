@@ -22,7 +22,7 @@ uint8_t ProtocolIndala40134::get_encoded_data_size() {
 }
 
 uint8_t ProtocolIndala40134::get_decoded_data_size() {
-    return 3;
+    return 4;
 }
 
 void ProtocolIndala40134::encode(
@@ -69,17 +69,6 @@ void ProtocolIndala40134::encode(
     set_bit(((fc_and_card >> 1) & 1), 50, &card_data);
     set_bit(((fc_and_card >> 0) & 1), 41, &card_data);
 
-    // checksum
-    uint8_t checksum = 0;
-    checksum += ((fc_and_card >> 14) & 1);
-    checksum += ((fc_and_card >> 12) & 1);
-    checksum += ((fc_and_card >> 9) & 1);
-    checksum += ((fc_and_card >> 8) & 1);
-    checksum += ((fc_and_card >> 6) & 1);
-    checksum += ((fc_and_card >> 5) & 1);
-    checksum += ((fc_and_card >> 2) & 1);
-    checksum += ((fc_and_card >> 0) & 1);
-
     // wiegand parity bits
     // even parity sum calculation (high 12 bits of data)
     uint8_t even_parity_sum = 0;
@@ -104,13 +93,8 @@ void ProtocolIndala40134::encode(
     set_bit((odd_parity_sum % 2), 38, &card_data);
 
     // checksum
-    if((checksum & 1) == 1) {
-        set_bit(0, 62, &card_data);
-        set_bit(1, 63, &card_data);
-    } else {
-        set_bit(1, 62, &card_data);
-        set_bit(0, 63, &card_data);
-    }
+    set_bit((decoded_data[3] >> 1) & 1, 62, &card_data);
+    set_bit(decoded_data[3] & 1, 63, &card_data);
 
     memcpy(encoded_data, &card_data, get_encoded_data_size());
 }
@@ -172,6 +156,7 @@ void ProtocolIndala40134::decode(
     decoded_data[0] = fc;
     decoded_data[1] = card >> 8;
     decoded_data[2] = card;
+    decoded_data[3] = get_bit(62, card_data) << 1 | get_bit(63, card_data);
 }
 
 bool ProtocolIndala40134::can_be_decoded(
@@ -189,25 +174,6 @@ bool ProtocolIndala40134::can_be_decoded(
 
         // data
         const uint32_t fc_and_card = get_fc(card_data) << 16 | get_cn(card_data);
-
-        // checksum
-        const uint8_t checksum = get_bit(62, card_data) << 1 | get_bit(63, card_data);
-        uint8_t checksum_sum = 0;
-        checksum_sum += ((fc_and_card >> 14) & 1);
-        checksum_sum += ((fc_and_card >> 12) & 1);
-        checksum_sum += ((fc_and_card >> 9) & 1);
-        checksum_sum += ((fc_and_card >> 8) & 1);
-        checksum_sum += ((fc_and_card >> 6) & 1);
-        checksum_sum += ((fc_and_card >> 5) & 1);
-        checksum_sum += ((fc_and_card >> 2) & 1);
-        checksum_sum += ((fc_and_card >> 0) & 1);
-        checksum_sum = checksum_sum & 0b1;
-
-        if(checksum_sum == 1 && checksum == 0b01) {
-        } else if(checksum_sum == 0 && checksum == 0b10) {
-        } else {
-            break;
-        }
 
         // wiegand parity bits
         // even parity sum calculation (high 12 bits of data)

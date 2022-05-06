@@ -58,7 +58,7 @@ uint8_t lfrfid_key_get_type_data_count(LfrfidKeyType type) {
         return 3;
         break;
     case LfrfidKeyType::KeyI40134:
-        return 3;
+        return 4;
         break;
     }
 
