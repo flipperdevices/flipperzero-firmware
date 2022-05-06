@@ -3,6 +3,7 @@
 #include <flipper.h>
 #include <alt_boot.h>
 #include <semphr.h>
+#include <update_util/update_operation.h>
 
 #define TAG "Main"
 
@@ -47,7 +48,7 @@ int main() {
         flipper_boot_update_exec();
         // if things go nice, we shouldn't reach this point.
         // But if we do, abandon to avoid bootloops
-        furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeNormal);
+        update_operation_disarm();
         furi_hal_power_reset();
     } else {
         furi_hal_light_sequence("rgb G");
@@ -68,16 +69,3 @@ void Error_Handler(void) {
 void abort() {
     furi_crash("AbortHandler");
 }
-
-#ifdef USE_FULL_ASSERT
-/**
-    * @brief  Reports the name of the source file and the source line number
-    *         where the assert_param error has occurred.
-    * @param  file: pointer to the source file name
-    * @param  line: assert_param error line source number
-    * @retval None
-    */
-void assert_failed(uint8_t* file, uint32_t line) {
-    furi_crash("HAL assert failed");
-}
-#endif /* USE_FULL_ASSERT */
