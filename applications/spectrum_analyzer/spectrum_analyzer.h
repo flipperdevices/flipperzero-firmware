@@ -3,12 +3,18 @@
 #define NUM_CHANNELS 132
 
 /*
- * wide mode (default): 44 MHz on screen, 333 kHz per channel
- * narrow mode: 6.6 MHz on screen, 50 kHz per channel
+ * ultrawide mode: 80 MHz on screen, 784 kHz per channel
+ * wide mode (default): 20 MHz on screen, 196 kHz per channel
+ * narrow mode: 4 MHz on screen, 39 kHz per channel
  */
 #define WIDE 0
 #define NARROW 1
 #define ULTRAWIDE 2
+
+/* channel spacing in Hz */
+#define WIDE_SPACING      196078
+#define NARROW_SPACING    39215
+#define ULTRAWIDE_SPACING 784313
 
 /* vertical scrolling */
 #define VERTICAL_SHORT_STEP  16
@@ -52,11 +58,6 @@
 #define MID_400  424000000
 #define MID_900  848000000
 
-/* channel spacing in Hz */
-#define WIDE_SPACING      199952
-#define NARROW_SPACING    49988
-#define ULTRAWIDE_SPACING 666504
-
 /* display peaks long enough to be seen (don't set higher than 20) */
 // #define PERSIST 8
 #define PERSIST 1
@@ -67,6 +68,8 @@
 
 #define UPPER(a, b, c)  ((((a) - (b) + ((c) / 2)) / (c)) * (c))
 #define LOWER(a, b, c)  ((((a) + (b)) / (c)) * (c))
+
+#define PEAK_THRESHOLD -85
 
 typedef enum {
     EventTypeTick,
@@ -122,7 +125,3 @@ static const uint8_t radio_config[][2] = {
     /* End  */
     {0, 0},
 };
-
-
-
-

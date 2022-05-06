@@ -13,7 +13,6 @@ void spectrum_analyzer_draw_scale(Canvas* canvas, const SpectrumAnalyzerModel* m
 
     // Draw line
     canvas_draw_line(canvas, FREQ_START_X, FREQ_BOTTOM_Y, FREQ_START_X + FREQ_LENGTH_X, FREQ_BOTTOM_Y);
-
     // Draw minor scale
     for(int i = FREQ_START_X; i < FREQ_START_X + FREQ_LENGTH_X ; i += 5) {
         canvas_draw_line(canvas, i, FREQ_BOTTOM_Y, i, FREQ_BOTTOM_Y + 2);
@@ -73,21 +72,28 @@ static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
         uint8_t s = MAX((ss - vscroll)>>2,0);
         uint8_t y = FREQ_BOTTOM_Y - s; // bar height
 
+        // Draw each bar
         canvas_draw_line(canvas, column, FREQ_BOTTOM_Y, column, y);    
     }
 
-    // Compress height to max of 64 values (255>>2)
-    uint8_t max_y = MAX((model->max_rssi_dec - vscroll)>>2,0);
-    max_y =  (FREQ_BOTTOM_Y - max_y);
+    // Draw cross and label
+    if (model->max_rssi > PEAK_THRESHOLD) {
+        // Compress height to max of 64 values (255>>2)
+        uint8_t max_y = MAX((model->max_rssi_dec - vscroll)>>2,0);
+        max_y =  (FREQ_BOTTOM_Y - max_y);
 
-    canvas_draw_line(canvas, model->max_rssi_channel - 2 - 2 , max_y - 2, model->max_rssi_channel - 2 + 2, max_y + 2);    
-    canvas_draw_line(canvas, model->max_rssi_channel - 2 + 2 , max_y - 2, model->max_rssi_channel - 2 - 2, max_y + 2);    
+        // Cross
+        canvas_draw_line(canvas, model->max_rssi_channel - 2 - 2 , max_y - 2, model->max_rssi_channel - 2 + 2, max_y + 2);    
+        canvas_draw_line(canvas, model->max_rssi_channel - 2 + 2 , max_y - 2, model->max_rssi_channel - 2 - 2, max_y + 2);    
 
-    // FURI_LOG_D("Spectrum", "max_ss %u -  %d", max_ss, max_rssi);
+        // Label
+        char temp_str[36];
+        snprintf(temp_str, 36, "Peak: %3.2f Mhz %3.1f dbm", ((float)model->chan_table[model->max_rssi_channel].frequency / 1000000), model->max_rssi);
+        canvas_draw_str_aligned(canvas, 127, 0, AlignRight, AlignTop, temp_str);
 
-    char temp_str[18];
-    snprintf(temp_str, 18, "Max: %3.1f dbm", model->max_rssi);
-    canvas_draw_str_aligned(canvas, 127, 0, AlignRight, AlignTop, temp_str);
+        // FURI_LOG_D("Spectrum", "max_ss %u -  %d", max_ss, max_rssi);
+
+    }
 
     release_mutex((ValueMutex*)ctx, model);
     FURI_LOG_T("Spectrum", "mutex released");
@@ -101,16 +107,40 @@ static void spectrum_analyzer_input_callback(InputEvent* input_event, osMessageQ
 }
 
 static void spectrum_analyzer_model_init(SpectrumAnalyzerModel* const model) {
-    model->chan_table[0].ss = 0;
+    uint8_t ch = 0; 
+
+    for (ch = 0; ch < NUM_CHANNELS-1; ch++) { 
+        model->chan_table[ch].ss = 0;
+    }
+
+    model->max_rssi_dec = 0;
+    model->max_rssi_channel = 0;
+    model->max_rssi = 0;
 } 
 
-/* freq in Hz */
-void calibrate_freq(SpectrumAnalyzerModel* model, uint32_t freq, uint8_t ch) {
-    model->chan_table[ch].frequency = freq;
-    model->max_rssi = -200.0;
-    model->max_rssi_dec = 0;
+/* set the channel bandwidth */
+void set_filter() {
 
-    FURI_LOG_T("Spectrum", "calibrate_freq ch[%u]: %lu", ch, freq);
+    uint8_t filter_config[2][2] = {
+        {CC1101_MDMCFG4, 0},
+        {0, 0},
+    };
+
+	/* channel spacing should fit within 80% of channel filter bandwidth */
+	switch (width) {
+	case NARROW:
+        filter_config[0][1] = 0xFC; /* 39.2 kHz / .8 = 49 kHz --> 58 kHz */
+		break;
+	case ULTRAWIDE:
+        filter_config[0][1] = 0x0C; /* 784 kHz / .8 = 980 kHz --> 812 kHz */
+		break;
+	default:
+        filter_config[0][1] = 0x6C; /* 196 kHz / .8 = 245 kHz --> 270 kHz */
+		break;
+	}
+
+    furi_hal_subghz_load_registers(filter_config);
+
 }
 
 /* set the center frequency in MHz */
@@ -218,10 +248,11 @@ uint16_t set_center_freq(SpectrumAnalyzerModel* model, uint16_t freq) {
     hz = freq * 1000000;
     max_chan = NUM_CHANNELS / 2;
     while (hz <= max_hz && max_chan < NUM_CHANNELS) {
-        calibrate_freq(model, hz, max_chan);
+        model->chan_table[max_chan].frequency = hz;
+
+        FURI_LOG_T("Spectrum", "calibrate_freq ch[%u]: %lu", max_chan, hz);
+
         hz += spacing;
-        // for (i = 0; i < persistence; i++)
-        // 	model->chan_table[max_chan].ss[i] = 0;
         max_chan++;
     }
 
@@ -230,16 +261,22 @@ uint16_t set_center_freq(SpectrumAnalyzerModel* model, uint16_t freq) {
     min_chan = NUM_CHANNELS / 2;
     while (hz >= min_hz && min_chan > 0) {
         min_chan--;
-        calibrate_freq(model, hz, min_chan);
-        // for (i = 0; i < persistence; i++)
-        // 	model->chan_table[min_chan].ss[i] = 0;
+        model->chan_table[min_chan].frequency = hz;
+
+        FURI_LOG_T("Spectrum", "calibrate_freq ch[%u]: %lu", min_chan, hz);
+
         hz -= spacing;
     }
+
+    model->max_rssi = -200.0;
+    model->max_rssi_dec = 0;
 
     FURI_LOG_D("Spectrum", "set_center_freq - max_hz: %u - min_hz: %u - spacing: %u Hz", max_hz, min_hz, spacing);
     FURI_LOG_D("Spectrum", "ch[0]: %lu - ch[%u]: %lu", model->chan_table[0].frequency, NUM_CHANNELS - 1, model->chan_table[NUM_CHANNELS - 1].frequency);
 
     // center_freq = freq;
+
+    set_filter();
 
     return freq;
 }
@@ -255,7 +292,7 @@ void spectrum_analyzer_thread(void* p) {
     furi_hal_subghz_rx();
 
     while(1) {
-        furi_hal_delay_ms(10);
+        furi_hal_delay_ms(50);
 
         SpectrumAnalyzerModel* model = (SpectrumAnalyzerModel*)acquire_mutex(context->model_mutex, 25);
 
@@ -393,14 +430,14 @@ int32_t spectrum_analyzer_app(void* p) {
                         {
                             switch (width) {
                                 case WIDE:
-                                    width = ULTRAWIDE;
+                                    width = NARROW;
                                     break;
                                 case NARROW:
-                                    width = WIDE;
+                                    width = ULTRAWIDE;
                                     break;
                                 case ULTRAWIDE:
                                 default:
-                                    width = NARROW;
+                                    width = WIDE;
                             }
                         }
                         update_values_flag = true;
