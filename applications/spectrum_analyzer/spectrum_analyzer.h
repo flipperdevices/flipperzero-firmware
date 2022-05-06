@@ -2,6 +2,14 @@
 
 #define NUM_CHANNELS 132
 
+// Screen coordinates
+#define FREQ_BOTTOM_Y 50
+#define FREQ_START_X 14
+// How many channels displayed on the scale (On screen still 218)
+#define FREQ_LENGTH_X 102
+// dBm threshold to show peak value
+#define PEAK_THRESHOLD -85
+
 /*
  * ultrawide mode: 80 MHz on screen, 784 kHz per channel
  * wide mode (default): 20 MHz on screen, 196 kHz per channel
@@ -18,8 +26,6 @@
 
 /* vertical scrolling */
 #define VERTICAL_SHORT_STEP  16
-#define VERTICAL_TALL_STEP   4
-
 #define MAX_VSCROLL 120
 #define MIN_VSCROLL 0
 #define DEFAULT_VSCROLL 48
@@ -58,18 +64,8 @@
 #define MID_400  424000000
 #define MID_900  848000000
 
-/* display peaks long enough to be seen (don't set higher than 20) */
-// #define PERSIST 8
-#define PERSIST 1
-
-/* power button debouncing for wake from sleep */
-#define DEBOUNCE_COUNT  4
-#define DEBOUNCE_PERIOD 50
-
 #define UPPER(a, b, c)  ((((a) - (b) + ((c) / 2)) / (c)) * (c))
 #define LOWER(a, b, c)  ((((a) + (b)) / (c)) * (c))
-
-#define PEAK_THRESHOLD -85
 
 typedef enum {
     EventTypeTick,
@@ -89,39 +85,25 @@ typedef struct {
     uint8_t ss;
 } ChannelInfo;
 
-#define NUM_CHANNELS 132
 typedef struct {
+    bool update_values_flag;
+    uint16_t freq;
+
+    uint8_t band;
+    uint8_t width;
+    char max_hold;
+    char height;
+    uint8_t vscroll;
+    uint8_t min_chan;
+    uint8_t max_chan;
+    
     float		max_rssi;
     uint8_t		max_rssi_dec;
     uint8_t		max_rssi_channel;
     ChannelInfo chan_table[NUM_CHANNELS];
 } SpectrumAnalyzerModel; 
 
-bool update_values_flag;
-uint16_t user_freq;
-uint8_t band;
-uint8_t width;
-char max_hold;
-char height;
-uint8_t vscroll;
-uint8_t min_chan;
-uint8_t max_chan;
-
 typedef struct {
     ValueMutex* model_mutex;
     osMessageQueueId_t event_queue;
 } SpectrumAnalyzerContext;
-
-static const uint8_t radio_config[][2] = {
-    {CC1101_FSCTRL1,0x12},
-    {CC1101_FSCTRL0,0x00},
-
-    {CC1101_AGCCTRL2, 0xC0},
-    
-    {CC1101_MDMCFG4, 0x6C},
-    {CC1101_TEST2, 0x88},
-    {CC1101_TEST1, 0x31},
-    {CC1101_TEST0, 0x09},
-    /* End  */
-    {0, 0},
-};

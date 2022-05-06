@@ -7,10 +7,6 @@
 
 void spectrum_analyzer_draw_scale(Canvas* canvas, const SpectrumAnalyzerModel* model) {
 
-    #define FREQ_BOTTOM_Y 50
-    #define FREQ_START_X 14
-    #define FREQ_LENGTH_X 102
-
     // Draw line
     canvas_draw_line(canvas, FREQ_START_X, FREQ_BOTTOM_Y, FREQ_START_X + FREQ_LENGTH_X, FREQ_BOTTOM_Y);
     // Draw minor scale
@@ -28,20 +24,20 @@ void spectrum_analyzer_draw_scale(Canvas* canvas, const SpectrumAnalyzerModel* m
     uint16_t tag_right;
     char temp_str[18];
 
-    tag_center = user_freq;
+    tag_center = model->freq;
 
-    switch (width) {
+    switch (model->width) {
         case NARROW:
-            tag_left = user_freq - 2;
-            tag_right = user_freq + 2;
+            tag_left = model->freq - 2;
+            tag_right = model->freq + 2;
             break;
         case ULTRAWIDE:
-            tag_left = user_freq - 40;
-            tag_right = user_freq + 40;
+            tag_left = model->freq - 40;
+            tag_right = model->freq + 40;
             break;
         default:
-            tag_left = user_freq - 10;
-            tag_right = user_freq + 10;
+            tag_left = model->freq - 10;
+            tag_right = model->freq + 10;
     }
 
     canvas_set_font(canvas, FontSecondary);
@@ -62,14 +58,11 @@ static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
     
     spectrum_analyzer_draw_scale(canvas, model);
     
-    // uint8_t max_ss = 0; 
-    // uint8_t max_x = 0; 
-    // uint8_t max_y = 0; 
     for (uint8_t column = 0; column < 128; column++) { 
      
         uint8_t ss = model->chan_table[column + 2].ss;
         // Compress height to max of 64 values (255>>2)
-        uint8_t s = MAX((ss - vscroll)>>2,0);
+        uint8_t s = MAX((ss - model->vscroll)>>2,0);
         uint8_t y = FREQ_BOTTOM_Y - s; // bar height
 
         // Draw each bar
@@ -79,7 +72,7 @@ static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
     // Draw cross and label
     if (model->max_rssi > PEAK_THRESHOLD) {
         // Compress height to max of 64 values (255>>2)
-        uint8_t max_y = MAX((model->max_rssi_dec - vscroll)>>2,0);
+        uint8_t max_y = MAX((model->max_rssi_dec - model->vscroll)>>2,0);
         max_y =  (FREQ_BOTTOM_Y - max_y);
 
         // Cross
@@ -116,10 +109,20 @@ static void spectrum_analyzer_model_init(SpectrumAnalyzerModel* const model) {
     model->max_rssi_dec = 0;
     model->max_rssi_channel = 0;
     model->max_rssi = 0;
+
+    model->update_values_flag = false;
+
+    model->freq = DEFAULT_FREQ;
+    model->band = BAND_400;
+    model->width = WIDE;
+    model->vscroll = DEFAULT_VSCROLL;
+    model->min_chan = 0;
+    model->max_chan = NUM_CHANNELS - 1;
+
 } 
 
 /* set the channel bandwidth */
-void set_filter() {
+void set_filter(SpectrumAnalyzerModel* model) {
 
     uint8_t filter_config[2][2] = {
         {CC1101_MDMCFG4, 0},
@@ -127,7 +130,7 @@ void set_filter() {
     };
 
 	/* channel spacing should fit within 80% of channel filter bandwidth */
-	switch (width) {
+	switch (model->width) {
 	case NARROW:
         filter_config[0][1] = 0xFC; /* 39.2 kHz / .8 = 49 kHz --> 58 kHz */
 		break;
@@ -144,7 +147,7 @@ void set_filter() {
 }
 
 /* set the center frequency in MHz */
-uint16_t set_center_freq(SpectrumAnalyzerModel* model, uint16_t freq) {
+uint16_t setup_frequencies(SpectrumAnalyzerModel* model) {
 
     uint8_t new_band;
     uint32_t spacing;
@@ -161,7 +164,7 @@ uint16_t set_center_freq(SpectrumAnalyzerModel* model, uint16_t freq) {
     uint8_t next_band_down;
     // uint8_t i;
 
-    switch (width) {
+    switch (model->width) {
         case NARROW:
             margin = NARROW_MARGIN;
             step = NARROW_STEP;
@@ -173,7 +176,7 @@ uint16_t set_center_freq(SpectrumAnalyzerModel* model, uint16_t freq) {
             spacing = ULTRAWIDE_SPACING;
 
             /* nearest 20 MHz step */
-            freq = ((freq + 10) / 20) * 20;
+            model->freq = ((model->freq + 10) / 20) * 20;
             break;
         default:
             margin = WIDE_MARGIN;
@@ -181,12 +184,12 @@ uint16_t set_center_freq(SpectrumAnalyzerModel* model, uint16_t freq) {
             spacing = WIDE_SPACING;
 
             /* nearest 5 MHz step */
-            freq = ((freq + 2) / 5) * 5;
+            model->freq = ((model->freq + 2) / 5) * 5;
             break;
     }
 
     /* handle cases near edges of bands */
-    if (freq > EDGE_900) {
+    if (model->freq > EDGE_900) {
         new_band = BAND_900;
         upper_limit = UPPER(MAX_900, margin, step);
         lower_limit = LOWER(MIN_900, margin, step);
@@ -194,7 +197,7 @@ uint16_t set_center_freq(SpectrumAnalyzerModel* model, uint16_t freq) {
         next_down = UPPER(MAX_400, margin, step);
         next_band_up = BAND_300;
         next_band_down = BAND_400;
-    } else if (freq > EDGE_400) {
+    } else if (model->freq > EDGE_400) {
         new_band = BAND_400;
         upper_limit = UPPER(MAX_400, margin, step);
         lower_limit = LOWER(MIN_400, margin, step);
@@ -212,58 +215,58 @@ uint16_t set_center_freq(SpectrumAnalyzerModel* model, uint16_t freq) {
         next_band_down = BAND_900;
     }
 
-    if (freq > upper_limit) {
-        freq = upper_limit;
-        if (new_band == band) {
+    if (model->freq > upper_limit) {
+        model->freq = upper_limit;
+        if (new_band == model->band) {
             new_band = next_band_up;
-            freq = next_up;
+            model->freq = next_up;
         }
-    } else if (freq < lower_limit) {
-        freq = lower_limit;
-        if (new_band == band) {
+    } else if (model->freq < lower_limit) {
+        model->freq = lower_limit;
+        if (new_band == model->band) {
             new_band = next_band_down;
-            freq = next_down;
+            model->freq = next_down;
         }
     }
 
-    band = new_band;
+    model->band = new_band;
 
     /* doing everything in Hz from here on */
-    switch (band) {
-    case BAND_400:
-        min_hz = MIN_400 * 1000000;
-        max_hz = MAX_400 * 1000000;
-        break;
-    case BAND_300:
-        min_hz = MIN_300 * 1000000;
-        max_hz = MAX_300 * 1000000;
-        break;
-    default:
-        min_hz = MIN_900 * 1000000;
-        max_hz = MAX_900 * 1000000;
-        break;
+    switch (model->band) {
+        case BAND_400:
+            min_hz = MIN_400 * 1000000;
+            max_hz = MAX_400 * 1000000;
+            break;
+        case BAND_300:
+            min_hz = MIN_300 * 1000000;
+            max_hz = MAX_300 * 1000000;
+            break;
+        default:
+            min_hz = MIN_900 * 1000000;
+            max_hz = MAX_900 * 1000000;
+            break;
     }
 
     /* calibrate upper channels */
-    hz = freq * 1000000;
-    max_chan = NUM_CHANNELS / 2;
-    while (hz <= max_hz && max_chan < NUM_CHANNELS) {
-        model->chan_table[max_chan].frequency = hz;
+    hz = model->freq * 1000000;
+    model->max_chan = NUM_CHANNELS / 2;
+    while (hz <= max_hz && model->max_chan < NUM_CHANNELS) {
+        model->chan_table[model->max_chan].frequency = hz;
 
-        FURI_LOG_T("Spectrum", "calibrate_freq ch[%u]: %lu", max_chan, hz);
+        FURI_LOG_T("Spectrum", "calibrate_freq ch[%u]: %lu", model->max_chan, hz);
 
         hz += spacing;
-        max_chan++;
+        model->max_chan++;
     }
 
     /* calibrate lower channels */
-    hz = freq * 1000000 - spacing;
-    min_chan = NUM_CHANNELS / 2;
-    while (hz >= min_hz && min_chan > 0) {
-        min_chan--;
-        model->chan_table[min_chan].frequency = hz;
+    hz = model->freq * 1000000 - spacing;
+    model->min_chan = NUM_CHANNELS / 2;
+    while (hz >= min_hz && model->min_chan > 0) {
+        model->min_chan--;
+        model->chan_table[model->min_chan].frequency = hz;
 
-        FURI_LOG_T("Spectrum", "calibrate_freq ch[%u]: %lu", min_chan, hz);
+        FURI_LOG_T("Spectrum", "calibrate_freq ch[%u]: %lu", model->min_chan, hz);
 
         hz -= spacing;
     }
@@ -271,14 +274,14 @@ uint16_t set_center_freq(SpectrumAnalyzerModel* model, uint16_t freq) {
     model->max_rssi = -200.0;
     model->max_rssi_dec = 0;
 
-    FURI_LOG_D("Spectrum", "set_center_freq - max_hz: %u - min_hz: %u - spacing: %u Hz", max_hz, min_hz, spacing);
+    FURI_LOG_D("Spectrum", "setup_frequencies - max_hz: %u - min_hz: %u - spacing: %u Hz", max_hz, min_hz, spacing);
     FURI_LOG_D("Spectrum", "ch[0]: %lu - ch[%u]: %lu", model->chan_table[0].frequency, NUM_CHANNELS - 1, model->chan_table[NUM_CHANNELS - 1].frequency);
 
-    // center_freq = freq;
+    // center_freq = model->freq;
 
-    set_filter();
+    set_filter(model);
 
-    return freq;
+    return model->freq;
 }
 
 void spectrum_analyzer_thread(void* p) {
@@ -290,6 +293,20 @@ void spectrum_analyzer_thread(void* p) {
     furi_hal_subghz_set_frequency(433920000);
     furi_hal_subghz_flush_rx();
     furi_hal_subghz_rx();
+
+    static const uint8_t radio_config[][2] = {
+        {CC1101_FSCTRL1,0x12},
+        {CC1101_FSCTRL0,0x00},
+
+        {CC1101_AGCCTRL2, 0xC0},
+        
+        {CC1101_MDMCFG4, 0x6C},
+        {CC1101_TEST2, 0x88},
+        {CC1101_TEST1, 0x31},
+        {CC1101_TEST0, 0x09},
+        /* End  */
+        {0, 0},
+    };
 
     while(1) {
         furi_hal_delay_ms(50);
@@ -304,19 +321,18 @@ void spectrum_analyzer_thread(void* p) {
 
         uint8_t ch = 0; 
 
-        if (update_values_flag == true){
-            user_freq = set_center_freq(model, user_freq);
-            update_values_flag = false;
+        if (model->update_values_flag == true){
+            model->freq = setup_frequencies(model);
+            model->update_values_flag = false;
         }
 
         model->max_rssi_dec = 0;
     
         for (ch = 0; ch < NUM_CHANNELS-1; ch++) { 
-            // tune(ch);
             furi_hal_subghz_set_frequency(model->chan_table[ch].frequency);
 
             furi_hal_subghz_rx();
-            osDelay(3);
+            furi_hal_delay_ms(3);
             
             //max_ss = 127 -> -10.5
             //max_ss = 0 -> -74
@@ -339,6 +355,8 @@ void spectrum_analyzer_thread(void* p) {
 }
 
 int32_t spectrum_analyzer_app(void* p) { 
+    UNUSED(p);
+
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(SpectrumAnalyzerEvent), NULL); 
     
     SpectrumAnalyzerModel* model = malloc(sizeof(SpectrumAnalyzerModel));
@@ -360,16 +378,7 @@ int32_t spectrum_analyzer_app(void* p) {
     Gui* gui = furi_record_open("gui"); 
     gui_add_view_port(gui, view_port, GuiLayerFullscreen); 
 
-    update_values_flag = false;
-
-    user_freq = DEFAULT_FREQ;
-    band = BAND_400;
-    width = WIDE;
-    vscroll = DEFAULT_VSCROLL;
-    min_chan = 0;
-    max_chan = NUM_CHANNELS - 1;
-
-    set_center_freq(model, user_freq);
+    setup_frequencies(model);
 
     // start scan thread
     osThreadAttr_t thread_attr = {.name = "spectrum_analyzer_thread", .stack_size = 1024};
@@ -392,7 +401,7 @@ int32_t spectrum_analyzer_app(void* p) {
 
             uint8_t vstep = VERTICAL_SHORT_STEP;
             uint8_t hstep;
-            switch (width) {
+            switch (model->width) {
             case NARROW:
                 hstep = NARROW_STEP;
                 break;
@@ -409,39 +418,39 @@ int32_t spectrum_analyzer_app(void* p) {
                 if(event.input.type == InputTypePress) {  
                     switch(event.input.key) {
                     case InputKeyUp: 
-                        vscroll = MAX(vscroll - vstep, MIN_VSCROLL);
-                        FURI_LOG_D("Spectrum", "Vscroll: %u", vscroll);
+                        model->vscroll = MAX(model->vscroll - vstep, MIN_VSCROLL);
+                        FURI_LOG_D("Spectrum", "Vscroll: %u", model->vscroll);
                         break; 
                     case InputKeyDown: 
-                        vscroll = MIN(vscroll + vstep, MAX_VSCROLL);
-                        FURI_LOG_D("Spectrum", "Vscroll: %u", vscroll);
+                        model->vscroll = MIN(model->vscroll + vstep, MAX_VSCROLL);
+                        FURI_LOG_D("Spectrum", "Vscroll: %u", model->vscroll);
                         break; 
                     case InputKeyRight: 
-                        user_freq += hstep;
-                        FURI_LOG_D("Spectrum", "user_freq: %lu", user_freq);
-                        update_values_flag = true;
+                        model->freq += hstep;
+                        FURI_LOG_D("Spectrum", "freq: %lu", model->freq);
+                        model->update_values_flag = true;
                         break; 
                     case InputKeyLeft:  
-                        user_freq -= hstep;
-                        FURI_LOG_D("Spectrum", "user_freq: %lu", user_freq);
-                        update_values_flag = true;
+                        model->freq -= hstep;
+                        FURI_LOG_D("Spectrum", "freq: %lu", model->freq);
+                        model->update_values_flag = true;
                         break; 
                     case InputKeyOk: 
                         {
-                            switch (width) {
+                            switch (model->width) {
                                 case WIDE:
-                                    width = NARROW;
+                                    model->width = NARROW;
                                     break;
                                 case NARROW:
-                                    width = ULTRAWIDE;
+                                    model->width = ULTRAWIDE;
                                     break;
                                 case ULTRAWIDE:
                                 default:
-                                    width = WIDE;
+                                    model->width = WIDE;
                             }
                         }
-                        update_values_flag = true;
-                        FURI_LOG_D("Spectrum", "Width: %u", width);
+                        model->update_values_flag = true;
+                        FURI_LOG_D("Spectrum", "Width: %u", model->width);
                         break;
                     case InputKeyBack: 
                         processing = false;
@@ -453,8 +462,8 @@ int32_t spectrum_analyzer_app(void* p) {
             FURI_LOG_T("spectrum", "osMessageQueue: event timeout");
             // event timeout
         }
-        view_port_update(view_port);
         release_mutex(&model_mutex, model);
+        view_port_update(view_port);
     }
     
     view_port_enabled_set(view_port, false);
