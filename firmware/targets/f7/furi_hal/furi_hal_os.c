@@ -1,5 +1,6 @@
 #include <furi_hal_os.h>
 #include <furi_hal_clock.h>
+#include <furi_hal_console.h>
 #include <furi_hal_power.h>
 #include <furi_hal_gpio.h>
 #include <furi_hal_resources.h>
