@@ -49,6 +49,8 @@ void ibutton_scene_info_on_enter(void* context) {
 }
 
 bool ibutton_scene_info_on_event(void* context, SceneManagerEvent event) {
+    UNUSED(context);
+    UNUSED(event);
     return false;
 }
 
