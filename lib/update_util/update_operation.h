@@ -8,8 +8,7 @@
 extern "C" {
 #endif
 
-#define UPDATE_OPERATION_MISSING_PACKAGE_INDEX 0
-#define UPDATE_OPERATION_ROOT_DIR_PACKAGE_MAGIC 0x1337228
+#define UPDATE_OPERATION_ROOT_DIR_PACKAGE_MAGIC 0
 
 /* 
  * Checks if supplied full manifest path is valid

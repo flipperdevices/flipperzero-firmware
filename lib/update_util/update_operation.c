@@ -193,7 +193,7 @@ bool update_operation_is_armed() {
 void update_operation_disarm() {
     furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeNormal);
     furi_hal_rtc_set_register(
-        FuriHalRtcRegisterUpdateFolderFSIndex, UPDATE_OPERATION_MISSING_PACKAGE_INDEX);
+        FuriHalRtcRegisterUpdateFolderFSIndex, UINT_MAX);
 }
 
 void update_operation_persist_package_index(int32_t index) {
