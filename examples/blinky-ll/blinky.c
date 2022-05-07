@@ -53,8 +53,7 @@ int main(void)
     SystemCoreClockUpdate();
     SysTick_Config(SystemCoreClock / 1000);
 
-    for (;;)
-        __WFI();
+    while(1);
 
     return 0;
 }
