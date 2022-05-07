@@ -14,549 +14,510 @@ MenuFunctions::MenuFunctions()
 // LVGL Stuff
 /* Interrupt driven periodic handler */
 
-void MenuFunctions::lv_tick_handler()
-{
-  lv_tick_inc(LVGL_TICK_PERIOD);
-}
-
-/* Display flushing */
-void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
-{
-  extern Display display_obj;
-  uint16_t c;
-
-  display_obj.tft.startWrite();
-  display_obj.tft.setAddrWindow(area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1));
-  for (int y = area->y1; y <= area->y2; y++) {
-    for (int x = area->x1; x <= area->x2; x++) {
-      c = color_p->full;
-      display_obj.tft.writeColor(c, 1);
-      color_p++;
-    }
-  }
-  display_obj.tft.endWrite();
-  lv_disp_flush_ready(disp);
-}
-
-
-bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data)
-{
-  extern Display display_obj;
-  
-  uint16_t touchX, touchY;
-
-  bool touched = display_obj.tft.getTouch(&touchX, &touchY, 600);
-
-  if(!touched)
+#ifndef MARAUDER_MINI
+  void MenuFunctions::lv_tick_handler()
   {
+    lv_tick_inc(LVGL_TICK_PERIOD);
+  }
+  
+  /* Display flushing */
+  void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
+  {
+    extern Display display_obj;
+    uint16_t c;
+  
+    display_obj.tft.startWrite();
+    display_obj.tft.setAddrWindow(area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1));
+    for (int y = area->y1; y <= area->y2; y++) {
+      for (int x = area->x1; x <= area->x2; x++) {
+        c = color_p->full;
+        display_obj.tft.writeColor(c, 1);
+        color_p++;
+      }
+    }
+    display_obj.tft.endWrite();
+    lv_disp_flush_ready(disp);
+  }
+  
+  
+  bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data)
+  {
+    extern Display display_obj;
+    
+    uint16_t touchX, touchY;
+  
+    bool touched = display_obj.tft.getTouch(&touchX, &touchY, 600);
+  
+    if(!touched)
+    {
+      return false;
+    }
+  
+    if(touchX>WIDTH_1 || touchY > HEIGHT_1)
+    {
+      Serial.println("Y or y outside of expected parameters..");
+      Serial.print("y:");
+      Serial.print(touchX);
+      Serial.print(" x:");
+      Serial.print(touchY);
+    }
+    else
+    {
+  
+      data->state = touched ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL; 
+  
+      //if(data->state == LV_INDEV_STATE_PR) touchpad_get_xy(&last_x, &last_y);
+     
+      data->point.x = touchX;
+      data->point.y = touchY;
+  
+      //Serial.print("Data x");
+      //Serial.println(touchX);
+      
+      //Serial.print("Data y");
+      //Serial.println(touchY);
+  
+    }
+  
     return false;
   }
-
-  if(touchX>WIDTH_1 || touchY > HEIGHT_1)
-  {
-    Serial.println("Y or y outside of expected parameters..");
-    Serial.print("y:");
-    Serial.print(touchX);
-    Serial.print(" x:");
-    Serial.print(touchY);
-  }
-  else
-  {
-
-    data->state = touched ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL; 
-
-    //if(data->state == LV_INDEV_STATE_PR) touchpad_get_xy(&last_x, &last_y);
-   
-    data->point.x = touchX;
-    data->point.y = touchY;
-
-    //Serial.print("Data x");
-    //Serial.println(touchX);
+  
+  void MenuFunctions::initLVGL() {
+    tick.attach_ms(LVGL_TICK_PERIOD, lv_tick_handler);
     
-    //Serial.print("Data y");
-    //Serial.println(touchY);
-
-  }
-
-  return false;
-}
-
-void MenuFunctions::initLVGL() {
-  tick.attach_ms(LVGL_TICK_PERIOD, lv_tick_handler);
+    lv_init();
   
-  lv_init();
-
-  lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * 10);
-
-  lv_disp_drv_t disp_drv;
-  lv_disp_drv_init(&disp_drv);
-  disp_drv.hor_res = WIDTH_1;
-  disp_drv.ver_res = HEIGHT_1;
-  disp_drv.flush_cb = my_disp_flush;
-  disp_drv.buffer = &disp_buf;
-  lv_disp_drv_register(&disp_drv);
-
-  lv_indev_drv_t indev_drv;
-  lv_indev_drv_init(&indev_drv);             
-  indev_drv.type = LV_INDEV_TYPE_POINTER;    
-  indev_drv.read_cb = my_touchpad_read;      
-  lv_indev_drv_register(&indev_drv);         
-}
-
-
-void MenuFunctions::deinitLVGL() {
-  Serial.println(F("Deinit LVGL"));
-  //lv_deinit();
-}
-
-void MenuFunctions::writeBadUSB(){
-  // Create a keyboard and apply the styles
-  kb = lv_keyboard_create(lv_scr_act(), NULL);
-  lv_obj_set_size(kb, LV_HOR_RES, LV_VER_RES / 2);
-  lv_obj_set_event_cb(kb, write_bad_usb_keyboard_event_cb);
-
-  // Create one text area
-  // Store all SSIDs
-  ta1 = lv_textarea_create(lv_scr_act(), NULL);
-  lv_textarea_set_cursor_hidden(ta1, false);
-  lv_textarea_set_one_line(ta1, false);
-  lv_obj_set_width(ta1, LV_HOR_RES);
-  lv_obj_set_height(ta1, (LV_VER_RES / 2) - 35);
-  lv_obj_set_pos(ta1, 5, 20);
-  lv_textarea_set_cursor_hidden(ta1, true);
-  lv_obj_align(ta1, NULL, LV_ALIGN_IN_TOP_MID, NULL, NULL);
-  lv_textarea_set_text(ta1, "");
-  lv_textarea_set_placeholder_text(ta1, "Ducky script");
-
-  if (sd_obj.supported) {
-    // Create load button
-    lv_obj_t * label;
-    lv_obj_t * load_btn = lv_btn_create(lv_scr_act(), NULL);
-    lv_obj_set_event_cb(load_btn, load_btn_cb);
-    lv_obj_set_height(load_btn, 35);
-    lv_obj_set_width(load_btn, LV_HOR_RES / 3);
-    lv_obj_align(load_btn, ta1, LV_ALIGN_IN_TOP_RIGHT, NULL, (LV_VER_RES / 2) - 35); // align to text area
-    label = lv_label_create(load_btn, NULL);
-    lv_label_set_text(label, "Load");
+    lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * 10);
   
-    // Create Save As button
-    lv_obj_t * label2;
-    lv_obj_t * save_as_btn = lv_btn_create(lv_scr_act(), NULL);
-    lv_obj_set_event_cb(save_as_btn, load_btn_cb);
-    lv_obj_set_height(save_as_btn, 35);
-    lv_obj_set_width(save_as_btn, LV_HOR_RES / 3);
-    lv_obj_align(save_as_btn, ta1, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35); // align to text area
-    label2 = lv_label_create(save_as_btn, NULL);
-    lv_label_set_text(label2, "Save As");
+    lv_disp_drv_t disp_drv;
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.hor_res = WIDTH_1;
+    disp_drv.ver_res = HEIGHT_1;
+    disp_drv.flush_cb = my_disp_flush;
+    disp_drv.buffer = &disp_buf;
+    lv_disp_drv_register(&disp_drv);
+  
+    lv_indev_drv_t indev_drv;
+    lv_indev_drv_init(&indev_drv);             
+    indev_drv.type = LV_INDEV_TYPE_POINTER;    
+    indev_drv.read_cb = my_touchpad_read;      
+    lv_indev_drv_register(&indev_drv);         
   }
   
-  // Focus it on one of the text areas to start
-  lv_keyboard_set_textarea(kb, ta1);
-  lv_keyboard_set_cursor_manage(kb, true);
-}
-
-// Event handler for settings drop down menus
-void setting_dropdown_cb(lv_obj_t * obj, lv_event_t event) {
-  //lv_event_code_t code = lv_event_get_code(event);
-  //lv_obj_t * obj = lv_event_get_target(event);
-  //lv_obj_t * list1 = lv_obj_get_parent(lv_obj_get_parent(obj));
-  //if(event == LV_EVENT_CLICKED) {
-  //    LV_LOG_USER("Clicked: %s", lv_list_get_btn_text(list1, obj));
-  //}
-}
-
-void settings_list_cb(lv_obj_t * btn, lv_event_t event) {
-  extern Settings settings_obj;
-  extern MenuFunctions menu_function_obj;
-
-  String btn_text = lv_list_get_btn_text(btn);
-  String display_string = "";
   
-  if (event == LV_EVENT_CLICKED) {
-    if (btn_text == "Exit") {
-      Serial.println("Exiting...");
-      lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(btn)));
-
-      printf("LV_EVENT_CANCEL\n");
-      Serial.println("Potato");
-      //menu_function_obj.deinitLVGL();
-      //wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
-      //display_obj.exit_draw = true; // set everything back to normal
-    }
-    else {
-      // Build base obj to host buttons
-      Serial.println("Creating base object...");
-      lv_obj_t * obj;
-      obj = lv_obj_create(lv_scr_act(), NULL);
-      lv_obj_set_size(obj, LV_HOR_RES, LV_VER_RES);
-      
-      lv_obj_t * exit_btn;
-
+  void MenuFunctions::deinitLVGL() {
+    Serial.println(F("Deinit LVGL"));
+    //lv_deinit();
+  }
+  
+  void MenuFunctions::writeBadUSB(){
+    // Create a keyboard and apply the styles
+    kb = lv_keyboard_create(lv_scr_act(), NULL);
+    lv_obj_set_size(kb, LV_HOR_RES, LV_VER_RES / 2);
+    lv_obj_set_event_cb(kb, write_bad_usb_keyboard_event_cb);
+  
+    // Create one text area
+    // Store all SSIDs
+    ta1 = lv_textarea_create(lv_scr_act(), NULL);
+    lv_textarea_set_cursor_hidden(ta1, false);
+    lv_textarea_set_one_line(ta1, false);
+    lv_obj_set_width(ta1, LV_HOR_RES);
+    lv_obj_set_height(ta1, (LV_VER_RES / 2) - 35);
+    lv_obj_set_pos(ta1, 5, 20);
+    lv_textarea_set_cursor_hidden(ta1, true);
+    lv_obj_align(ta1, NULL, LV_ALIGN_IN_TOP_MID, NULL, NULL);
+    lv_textarea_set_text(ta1, "");
+    lv_textarea_set_placeholder_text(ta1, "Ducky script");
+  
+    if (sd_obj.supported) {
+      // Create load button
       lv_obj_t * label;
-      
-      // Build the generic Exit button
-      exit_btn = lv_btn_create(obj, NULL);
-      lv_obj_set_event_cb(exit_btn, settings_list_cb);
-      lv_label_set_text(label, "Exit");
-      //lv_obj_center(label);
-
-      label = lv_label_create(exit_btn, NULL);
-
-      // Create the type specific device
-      if (settings_obj.getSettingType(btn_text) == "bool") {
-        lv_obj_t * sw = lv_switch_create(obj, NULL);
-        lv_obj_align(sw, NULL, LV_ALIGN_CENTER, 0, 0);
-      }
-    }
-  }
-
-  /*
-  if (event == LV_EVENT_VALUE_CHANGED) {      
-    if (lv_btn_get_state(btn) == LV_BTN_STATE_CHECKED_RELEASED) {
-      //Serial.print("Toggle on: ");
-      //Serial.println(btn_text);
-      for (int i = 0; i < access_points->size(); i++) {
-        if (access_points->get(i).essid == btn_text) {
-          Serial.println("Adding AP: " + (String)access_points->get(i).essid);
-          AccessPoint ap = access_points->get(i);
-          ap.selected = true;
-          access_points->set(i, ap);
-        }
-      }
-    }
-    else {
-      //Serial.print("Toggle off: ");
-      //Serial.println(btn_text);
-      for (int i = 0; i < access_points->size(); i++) {
-        if (access_points->get(i).essid == btn_text) {
-          Serial.println("Removing AP: " + (String)access_points->get(i).essid);
-          AccessPoint ap = access_points->get(i);
-          ap.selected = false;
-          access_points->set(i, ap);
-        }
-      }
-    }
-  }*/
-}
-
-void MenuFunctions::displaySettingsGFX(){
-  extern Settings settings_obj;
-
-  DynamicJsonDocument json(1024); // ArduinoJson v6
-
-  if (deserializeJson(json, settings_obj.getSettingsString())) {
-    Serial.println("\nCould not parse json");
-  }
-  
-  lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
-  lv_obj_set_size(list1, 160, 200);
-  lv_obj_set_width(list1, LV_HOR_RES);
-  lv_obj_align(list1, NULL, LV_ALIGN_CENTER, 0, 0);
-
-  lv_obj_t * list_btn;
-
-  lv_obj_t * label;
-
-  lv_obj_t * sw;
-
-  list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Exit");
-  lv_obj_set_event_cb(list_btn, ap_list_cb);
-
-  for (int i = 0; i < json["Settings"].size(); i++) {
-    char buf[json["Settings"][i]["name"].as<String>().length() + 1] = {};
-    json["Settings"][i]["name"].as<String>().toCharArray(buf, json["Settings"][i]["name"].as<String>().length() + 1);
+      lv_obj_t * load_btn = lv_btn_create(lv_scr_act(), NULL);
+      lv_obj_set_event_cb(load_btn, load_btn_cb);
+      lv_obj_set_height(load_btn, 35);
+      lv_obj_set_width(load_btn, LV_HOR_RES / 3);
+      lv_obj_align(load_btn, ta1, LV_ALIGN_IN_TOP_RIGHT, NULL, (LV_VER_RES / 2) - 35); // align to text area
+      label = lv_label_create(load_btn, NULL);
+      lv_label_set_text(label, "Load");
     
-    list_btn = lv_list_add_btn(list1, LV_SYMBOL_WIFI, buf);
-    lv_btn_set_checkable(list_btn, false);
-    lv_obj_set_event_cb(list_btn, settings_list_cb);
-
-    //lv_list_add_text(list1, buf);
-
-    // Create the dropdown menu
-    /*lv_obj_t * dd = lv_dropdown_create(list1, NULL);
-    lv_dropdown_set_options(dd, "Apple\n"
-                                "Banana\n"
-                                "Orange\n"
-                                "Cherry\n"
-                                "Grape\n"
-                                "Raspberry\n"
-                                "Melon\n"
-                                "Orange\n"
-                                "Lemon\n"
-                                "Nuts");
-
-    //lv_obj_align(dd, LV_ALIGN_IN_RIGHT_MID, 0, 20);
-    lv_obj_align(dd, NULL, LV_ALIGN_IN_RIGHT_MID, 0, 0);
-    lv_obj_set_width(dd, LV_HOR_RES / 3);
-    lv_obj_set_event_cb(dd, setting_dropdown_cb);
-    //lv_obj_add_event_cb(dd, setting_dropdown_cb, LV_EVENT_ALL, NULL);*/
+      // Create Save As button
+      lv_obj_t * label2;
+      lv_obj_t * save_as_btn = lv_btn_create(lv_scr_act(), NULL);
+      lv_obj_set_event_cb(save_as_btn, load_btn_cb);
+      lv_obj_set_height(save_as_btn, 35);
+      lv_obj_set_width(save_as_btn, LV_HOR_RES / 3);
+      lv_obj_align(save_as_btn, ta1, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35); // align to text area
+      label2 = lv_label_create(save_as_btn, NULL);
+      lv_label_set_text(label2, "Save As");
+    }
     
-    //if (access_points->get(i).selected)
-    //  lv_btn_toggle(list_btn);
-
-    //lv_obj_t * btn1 = lv_btn_create(list_btn, NULL);
-    //lv_obj_set_event_cb(btn1, ap_list_cb);
-    //lv_obj_align(btn1, NULL, LV_ALIGN_CENTER, 0, 0);
-    //lv_btn_set_checkable(btn1, true);
-  }
-}
-
-// GFX Function to build a list showing all APs scanned
-void MenuFunctions::addAPGFX(){
-  extern LinkedList<AccessPoint>* access_points;
-
-  lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
-  lv_obj_set_size(list1, 160, 200);
-  lv_obj_set_width(list1, LV_HOR_RES);
-  lv_obj_align(list1, NULL, LV_ALIGN_CENTER, 0, 0);
-
-  lv_obj_t * list_btn;
-
-  lv_obj_t * label;
-
-  list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Exit");
-  lv_obj_set_event_cb(list_btn, ap_list_cb);
-
-  for (int i = 0; i < access_points->size(); i++) {
-    char buf[access_points->get(i).essid.length() + 1] = {};
-    access_points->get(i).essid.toCharArray(buf, access_points->get(i).essid.length() + 1);
-    
-    list_btn = lv_list_add_btn(list1, LV_SYMBOL_WIFI, buf);
-    lv_btn_set_checkable(list_btn, true);
-    lv_obj_set_event_cb(list_btn, ap_list_cb);
-
-    if (access_points->get(i).selected)
-      lv_btn_toggle(list_btn);
-
-    //lv_obj_t * btn1 = lv_btn_create(list_btn, NULL);
-    //lv_obj_set_event_cb(btn1, ap_list_cb);
-    //lv_obj_align(btn1, NULL, LV_ALIGN_CENTER, 0, 0);
-    //lv_btn_set_checkable(btn1, true);
-
-    //label = lv_label_create(btn1, NULL);
-    //lv_label_set_text(label, buf);
-  }
-}
-
-
-
-void ap_list_cb(lv_obj_t * btn, lv_event_t event) {
-  extern LinkedList<AccessPoint>* access_points;
-  extern MenuFunctions menu_function_obj;
-
-  String btn_text = lv_list_get_btn_text(btn);
-  String display_string = "";
-  
-  if (event == LV_EVENT_CLICKED) {
-    if (btn_text != "Exit") {
-      //lv_list_focus_btn(lv_obj_get_parent(lv_obj_get_parent(btn)), btn);
-    }
-    else {
-      Serial.println("Exiting...");
-      lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(btn)));
-
-      for (int i = 0; i < access_points->size(); i++) {
-        if (access_points->get(i).selected) {
-          Serial.println("Selected: " + (String)access_points->get(i).essid);
-        }
-      }
-
-      printf("LV_EVENT_CANCEL\n");
-      menu_function_obj.deinitLVGL();
-      wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
-      display_obj.exit_draw = true; // set everything back to normal
-    }
+    // Focus it on one of the text areas to start
+    lv_keyboard_set_textarea(kb, ta1);
+    lv_keyboard_set_cursor_manage(kb, true);
   }
   
-  if (event == LV_EVENT_VALUE_CHANGED) {      
-    if (lv_btn_get_state(btn) == LV_BTN_STATE_CHECKED_RELEASED) {
-      //Serial.print("Toggle on: ");
-      //Serial.println(btn_text);
-      for (int i = 0; i < access_points->size(); i++) {
-        if (access_points->get(i).essid == btn_text) {
-          Serial.println("Adding AP: " + (String)access_points->get(i).essid);
-          AccessPoint ap = access_points->get(i);
-          ap.selected = true;
-          access_points->set(i, ap);
-        }
-      }
-    }
-    else {
-      //Serial.print("Toggle off: ");
-      //Serial.println(btn_text);
-      for (int i = 0; i < access_points->size(); i++) {
-        if (access_points->get(i).essid == btn_text) {
-          Serial.println("Removing AP: " + (String)access_points->get(i).essid);
-          AccessPoint ap = access_points->get(i);
-          ap.selected = false;
-          access_points->set(i, ap);
-        }
-      }
-    }
+  // Event handler for settings drop down menus
+  void setting_dropdown_cb(lv_obj_t * obj, lv_event_t event) {
+    //lv_event_code_t code = lv_event_get_code(event);
+    //lv_obj_t * obj = lv_event_get_target(event);
+    //lv_obj_t * list1 = lv_obj_get_parent(lv_obj_get_parent(obj));
+    //if(event == LV_EVENT_CLICKED) {
+    //    LV_LOG_USER("Clicked: %s", lv_list_get_btn_text(list1, obj));
+    //}
   }
-}
-
-void MenuFunctions::addSSIDGFX(){
-  extern LinkedList<ssid>* ssids;
   
-  String display_string = "";
-  // Create a keyboard and apply the styles
-  kb = lv_keyboard_create(lv_scr_act(), NULL);
-  lv_obj_set_size(kb, LV_HOR_RES, LV_VER_RES / 2);
-  lv_obj_set_event_cb(kb, add_ssid_keyboard_event_cb);
-
-  // Create one text area
-  // Store all SSIDs
-  ta1 = lv_textarea_create(lv_scr_act(), NULL);
-  lv_textarea_set_one_line(ta1, false);
-  lv_obj_set_width(ta1, LV_HOR_RES);
-  lv_obj_set_height(ta1, (LV_VER_RES / 2) - 35);
-  lv_obj_set_pos(ta1, 5, 20);
-  lv_textarea_set_cursor_hidden(ta1, true);
-  lv_obj_align(ta1, NULL, LV_ALIGN_IN_TOP_MID, NULL, NULL);
-  lv_textarea_set_placeholder_text(ta1, "SSID List");
-
-  // Create second text area
-  // Add SSIDs
-  ta2 = lv_textarea_create(lv_scr_act(), ta1);
-  lv_textarea_set_cursor_hidden(ta2, false);
-  lv_textarea_set_one_line(ta2, true);
-  lv_obj_align(ta2, NULL, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35);
-  lv_textarea_set_text(ta2, "");
-  lv_textarea_set_placeholder_text(ta2, "Add SSIDs");
-
-  // After generating text areas, add text to first text box
-  for (int i = 0; i < ssids->size(); i++)
-    display_string.concat((String)ssids->get(i).essid + "\n");
-    
-  lv_textarea_set_text(ta1, display_string.c_str());
-
-  // Focus it on one of the text areas to start
-  lv_keyboard_set_textarea(kb, ta2);
-  lv_keyboard_set_cursor_manage(kb, true);
+  void settings_list_cb(lv_obj_t * btn, lv_event_t event) {
+    extern Settings settings_obj;
+    extern MenuFunctions menu_function_obj;
   
-}
-
-void MenuFunctions::joinWiFiGFX(){
-
-  // Create one text area
-  ta1 = lv_textarea_create(lv_scr_act(), NULL);
-  lv_textarea_set_one_line(ta1, true);
-  lv_obj_set_width(ta1, LV_HOR_RES / 2 - 20);
-  lv_obj_set_pos(ta1, 5, 20);
-  //lv_ta_set_cursor_type(ta, LV_CURSOR_BLOCK);
-  lv_textarea_set_text(ta1, "");
-  lv_obj_set_event_cb(ta1, ta_event_cb);
-
-  // Create first label
-  lv_obj_t * ssid_label = lv_label_create(lv_scr_act(), NULL);
-  lv_label_set_text(ssid_label, "SSID:");
-  lv_obj_align(ssid_label, ta1, LV_ALIGN_OUT_TOP_LEFT, 0, 0);
-
-  // Create second text area
-  ta2 = lv_textarea_create(lv_scr_act(), ta1);
-  //lv_textarea_set_pwd_mode(ta2, true); // This shit makes it so backspace does not work
-  //lv_textarea_set_pwd_show_time(ta2, 1000);
-  lv_textarea_set_cursor_hidden(ta2, true);
-  lv_obj_align(ta2, NULL, LV_ALIGN_IN_TOP_RIGHT, -5, 20);
-
-  // Create second label
-  lv_obj_t * pw_label = lv_label_create(lv_scr_act(), NULL);
-  lv_label_set_text(pw_label, "Password:");
-  lv_obj_align(pw_label, ta2, LV_ALIGN_OUT_TOP_LEFT, 0, 0);
-
-  // Create a keyboard and apply the styles
-  kb = lv_keyboard_create(lv_scr_act(), NULL);
-  lv_obj_set_size(kb, LV_HOR_RES, LV_VER_RES / 2);
-  lv_obj_set_event_cb(kb, join_wifi_keyboard_event_cb);
-
-  // Focus it on one of the text areas to start
-  lv_keyboard_set_textarea(kb, ta1);
-  lv_keyboard_set_cursor_manage(kb, true);
-  
-}
-
-// Function to create keyboard for saving file name
-void save_as_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event) {
-  extern MenuFunctions menu_function_obj;
-
-  lv_keyboard_def_event_cb(save_as_kb, event);
-
-  // User canceled so we will get rid of the keyboard and text box
-  if (event == LV_EVENT_CANCEL) {
-    lv_obj_del_async(save_as_kb);
-    lv_obj_del_async(save_name);
-  }
-
-  // Save content from ta1 to file name in save_name
-  else if(event == LV_EVENT_APPLY){
-      String display_string = "";
-      printf("LV_EVENT_APPLY\n");
-
-      // Get ducky script
-      String content = lv_textarea_get_text(ta1);
-
-      String target_file_name = "/SCRIPTS/" + (String)lv_textarea_get_text(save_name);
-
-      Serial.println("Writing to target file: " + (String)target_file_name);
-
-      // Open file with the given name
-      File script = SD.open(target_file_name, FILE_WRITE);
-
-      if (script) {
-        menu_function_obj.loaded_file = target_file_name;
-
-        Serial.println("Writing content: ");
-        Serial.println(content);
-
-        script.print(content);
-
-        script.close();
-      }
-
-      lv_obj_del_async(save_as_kb);
-      lv_obj_del_async(save_name);
-
-      // Create Save button
-      lv_obj_t * save_label;
-      lv_obj_t * save_btn = lv_btn_create(lv_scr_act(), NULL);
-      lv_obj_set_event_cb(save_btn, load_btn_cb);
-      lv_obj_set_height(save_btn, 35);
-      lv_obj_set_width(save_btn, LV_HOR_RES / 3);
-      lv_obj_align(save_btn, ta1, LV_ALIGN_IN_TOP_LEFT, NULL, (LV_VER_RES / 2) - 35); // align to text area
-      save_label = lv_label_create(save_btn, NULL);
-      lv_label_set_text(save_label, "Save");
-  }
-}
-
-
-void test_btn_cb(lv_obj_t * btn, lv_event_t event) {
-  extern MenuFunctions menu_function_obj;
-  
-  if (event == LV_EVENT_CLICKED) {
     String btn_text = lv_list_get_btn_text(btn);
     String display_string = "";
-    //printf("Clicked: %s\n", btn_text);
-    Serial.print("Clicked: ");
-    Serial.println(btn_text);
-
-    // Get file content and send to text area
-    if (btn_text != "Cancel") {
-      File script = SD.open(btn_text);
-
-      if (script) {
-        while (script.available()) {
-          display_string.concat((char)script.read());
-        }
-        script.close();
-
-        Serial.println(display_string);
-
-        char buf[display_string.length() + 1] = {};
-        display_string.toCharArray(buf, display_string.length() + 1);
+    
+    if (event == LV_EVENT_CLICKED) {
+      if (btn_text == "Exit") {
+        Serial.println("Exiting...");
+        lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(btn)));
+  
+        printf("LV_EVENT_CANCEL\n");
+        Serial.println("Potato");
+        //menu_function_obj.deinitLVGL();
+        //wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+        //display_obj.exit_draw = true; // set everything back to normal
+      }
+      else {
+        // Build base obj to host buttons
+        Serial.println("Creating base object...");
+        lv_obj_t * obj;
+        obj = lv_obj_create(lv_scr_act(), NULL);
+        lv_obj_set_size(obj, LV_HOR_RES, LV_VER_RES);
         
-        lv_textarea_set_text(ta1, buf);
-
+        lv_obj_t * exit_btn;
+  
+        lv_obj_t * label;
+        
+        // Build the generic Exit button
+        exit_btn = lv_btn_create(obj, NULL);
+        lv_obj_set_event_cb(exit_btn, settings_list_cb);
+        lv_label_set_text(label, "Exit");
+        //lv_obj_center(label);
+  
+        label = lv_label_create(exit_btn, NULL);
+  
+        // Create the type specific device
+        if (settings_obj.getSettingType(btn_text) == "bool") {
+          lv_obj_t * sw = lv_switch_create(obj, NULL);
+          lv_obj_align(sw, NULL, LV_ALIGN_CENTER, 0, 0);
+        }
+      }
+    }
+  
+    /*
+    if (event == LV_EVENT_VALUE_CHANGED) {      
+      if (lv_btn_get_state(btn) == LV_BTN_STATE_CHECKED_RELEASED) {
+        //Serial.print("Toggle on: ");
+        //Serial.println(btn_text);
+        for (int i = 0; i < access_points->size(); i++) {
+          if (access_points->get(i).essid == btn_text) {
+            Serial.println("Adding AP: " + (String)access_points->get(i).essid);
+            AccessPoint ap = access_points->get(i);
+            ap.selected = true;
+            access_points->set(i, ap);
+          }
+        }
+      }
+      else {
+        //Serial.print("Toggle off: ");
+        //Serial.println(btn_text);
+        for (int i = 0; i < access_points->size(); i++) {
+          if (access_points->get(i).essid == btn_text) {
+            Serial.println("Removing AP: " + (String)access_points->get(i).essid);
+            AccessPoint ap = access_points->get(i);
+            ap.selected = false;
+            access_points->set(i, ap);
+          }
+        }
+      }
+    }*/
+  }
+  
+  void MenuFunctions::displaySettingsGFX(){
+    extern Settings settings_obj;
+  
+    DynamicJsonDocument json(1024); // ArduinoJson v6
+  
+    if (deserializeJson(json, settings_obj.getSettingsString())) {
+      Serial.println("\nCould not parse json");
+    }
+    
+    lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
+    lv_obj_set_size(list1, 160, 200);
+    lv_obj_set_width(list1, LV_HOR_RES);
+    lv_obj_align(list1, NULL, LV_ALIGN_CENTER, 0, 0);
+  
+    lv_obj_t * list_btn;
+  
+    lv_obj_t * label;
+  
+    lv_obj_t * sw;
+  
+    list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Exit");
+    lv_obj_set_event_cb(list_btn, ap_list_cb);
+  
+    for (int i = 0; i < json["Settings"].size(); i++) {
+      char buf[json["Settings"][i]["name"].as<String>().length() + 1] = {};
+      json["Settings"][i]["name"].as<String>().toCharArray(buf, json["Settings"][i]["name"].as<String>().length() + 1);
+      
+      list_btn = lv_list_add_btn(list1, LV_SYMBOL_WIFI, buf);
+      lv_btn_set_checkable(list_btn, false);
+      lv_obj_set_event_cb(list_btn, settings_list_cb);
+  
+      //lv_list_add_text(list1, buf);
+  
+      // Create the dropdown menu
+      /*lv_obj_t * dd = lv_dropdown_create(list1, NULL);
+      lv_dropdown_set_options(dd, "Apple\n"
+                                  "Banana\n"
+                                  "Orange\n"
+                                  "Cherry\n"
+                                  "Grape\n"
+                                  "Raspberry\n"
+                                  "Melon\n"
+                                  "Orange\n"
+                                  "Lemon\n"
+                                  "Nuts");
+  
+      //lv_obj_align(dd, LV_ALIGN_IN_RIGHT_MID, 0, 20);
+      lv_obj_align(dd, NULL, LV_ALIGN_IN_RIGHT_MID, 0, 0);
+      lv_obj_set_width(dd, LV_HOR_RES / 3);
+      lv_obj_set_event_cb(dd, setting_dropdown_cb);
+      //lv_obj_add_event_cb(dd, setting_dropdown_cb, LV_EVENT_ALL, NULL);*/
+      
+      //if (access_points->get(i).selected)
+      //  lv_btn_toggle(list_btn);
+  
+      //lv_obj_t * btn1 = lv_btn_create(list_btn, NULL);
+      //lv_obj_set_event_cb(btn1, ap_list_cb);
+      //lv_obj_align(btn1, NULL, LV_ALIGN_CENTER, 0, 0);
+      //lv_btn_set_checkable(btn1, true);
+    }
+  }
+  
+  // GFX Function to build a list showing all APs scanned
+  void MenuFunctions::addAPGFX(){
+    extern LinkedList<AccessPoint>* access_points;
+  
+    lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
+    lv_obj_set_size(list1, 160, 200);
+    lv_obj_set_width(list1, LV_HOR_RES);
+    lv_obj_align(list1, NULL, LV_ALIGN_CENTER, 0, 0);
+  
+    lv_obj_t * list_btn;
+  
+    lv_obj_t * label;
+  
+    list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Exit");
+    lv_obj_set_event_cb(list_btn, ap_list_cb);
+  
+    for (int i = 0; i < access_points->size(); i++) {
+      char buf[access_points->get(i).essid.length() + 1] = {};
+      access_points->get(i).essid.toCharArray(buf, access_points->get(i).essid.length() + 1);
+      
+      list_btn = lv_list_add_btn(list1, LV_SYMBOL_WIFI, buf);
+      lv_btn_set_checkable(list_btn, true);
+      lv_obj_set_event_cb(list_btn, ap_list_cb);
+  
+      if (access_points->get(i).selected)
+        lv_btn_toggle(list_btn);
+  
+      //lv_obj_t * btn1 = lv_btn_create(list_btn, NULL);
+      //lv_obj_set_event_cb(btn1, ap_list_cb);
+      //lv_obj_align(btn1, NULL, LV_ALIGN_CENTER, 0, 0);
+      //lv_btn_set_checkable(btn1, true);
+  
+      //label = lv_label_create(btn1, NULL);
+      //lv_label_set_text(label, buf);
+    }
+  }
+  
+  
+  
+  void ap_list_cb(lv_obj_t * btn, lv_event_t event) {
+    extern LinkedList<AccessPoint>* access_points;
+    extern MenuFunctions menu_function_obj;
+  
+    String btn_text = lv_list_get_btn_text(btn);
+    String display_string = "";
+    
+    if (event == LV_EVENT_CLICKED) {
+      if (btn_text != "Exit") {
+        //lv_list_focus_btn(lv_obj_get_parent(lv_obj_get_parent(btn)), btn);
+      }
+      else {
+        Serial.println("Exiting...");
+        lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(btn)));
+  
+        for (int i = 0; i < access_points->size(); i++) {
+          if (access_points->get(i).selected) {
+            Serial.println("Selected: " + (String)access_points->get(i).essid);
+          }
+        }
+  
+        printf("LV_EVENT_CANCEL\n");
+        menu_function_obj.deinitLVGL();
+        wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+        display_obj.exit_draw = true; // set everything back to normal
+      }
+    }
+    
+    if (event == LV_EVENT_VALUE_CHANGED) {      
+      if (lv_btn_get_state(btn) == LV_BTN_STATE_CHECKED_RELEASED) {
+        //Serial.print("Toggle on: ");
+        //Serial.println(btn_text);
+        for (int i = 0; i < access_points->size(); i++) {
+          if (access_points->get(i).essid == btn_text) {
+            Serial.println("Adding AP: " + (String)access_points->get(i).essid);
+            AccessPoint ap = access_points->get(i);
+            ap.selected = true;
+            access_points->set(i, ap);
+          }
+        }
+      }
+      else {
+        //Serial.print("Toggle off: ");
+        //Serial.println(btn_text);
+        for (int i = 0; i < access_points->size(); i++) {
+          if (access_points->get(i).essid == btn_text) {
+            Serial.println("Removing AP: " + (String)access_points->get(i).essid);
+            AccessPoint ap = access_points->get(i);
+            ap.selected = false;
+            access_points->set(i, ap);
+          }
+        }
+      }
+    }
+  }
+  
+  void MenuFunctions::addSSIDGFX(){
+    extern LinkedList<ssid>* ssids;
+    
+    String display_string = "";
+    // Create a keyboard and apply the styles
+    kb = lv_keyboard_create(lv_scr_act(), NULL);
+    lv_obj_set_size(kb, LV_HOR_RES, LV_VER_RES / 2);
+    lv_obj_set_event_cb(kb, add_ssid_keyboard_event_cb);
+  
+    // Create one text area
+    // Store all SSIDs
+    ta1 = lv_textarea_create(lv_scr_act(), NULL);
+    lv_textarea_set_one_line(ta1, false);
+    lv_obj_set_width(ta1, LV_HOR_RES);
+    lv_obj_set_height(ta1, (LV_VER_RES / 2) - 35);
+    lv_obj_set_pos(ta1, 5, 20);
+    lv_textarea_set_cursor_hidden(ta1, true);
+    lv_obj_align(ta1, NULL, LV_ALIGN_IN_TOP_MID, NULL, NULL);
+    lv_textarea_set_placeholder_text(ta1, "SSID List");
+  
+    // Create second text area
+    // Add SSIDs
+    ta2 = lv_textarea_create(lv_scr_act(), ta1);
+    lv_textarea_set_cursor_hidden(ta2, false);
+    lv_textarea_set_one_line(ta2, true);
+    lv_obj_align(ta2, NULL, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35);
+    lv_textarea_set_text(ta2, "");
+    lv_textarea_set_placeholder_text(ta2, "Add SSIDs");
+  
+    // After generating text areas, add text to first text box
+    for (int i = 0; i < ssids->size(); i++)
+      display_string.concat((String)ssids->get(i).essid + "\n");
+      
+    lv_textarea_set_text(ta1, display_string.c_str());
+  
+    // Focus it on one of the text areas to start
+    lv_keyboard_set_textarea(kb, ta2);
+    lv_keyboard_set_cursor_manage(kb, true);
+    
+  }
+  
+  void MenuFunctions::joinWiFiGFX(){
+  
+    // Create one text area
+    ta1 = lv_textarea_create(lv_scr_act(), NULL);
+    lv_textarea_set_one_line(ta1, true);
+    lv_obj_set_width(ta1, LV_HOR_RES / 2 - 20);
+    lv_obj_set_pos(ta1, 5, 20);
+    //lv_ta_set_cursor_type(ta, LV_CURSOR_BLOCK);
+    lv_textarea_set_text(ta1, "");
+    lv_obj_set_event_cb(ta1, ta_event_cb);
+  
+    // Create first label
+    lv_obj_t * ssid_label = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(ssid_label, "SSID:");
+    lv_obj_align(ssid_label, ta1, LV_ALIGN_OUT_TOP_LEFT, 0, 0);
+  
+    // Create second text area
+    ta2 = lv_textarea_create(lv_scr_act(), ta1);
+    //lv_textarea_set_pwd_mode(ta2, true); // This shit makes it so backspace does not work
+    //lv_textarea_set_pwd_show_time(ta2, 1000);
+    lv_textarea_set_cursor_hidden(ta2, true);
+    lv_obj_align(ta2, NULL, LV_ALIGN_IN_TOP_RIGHT, -5, 20);
+  
+    // Create second label
+    lv_obj_t * pw_label = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(pw_label, "Password:");
+    lv_obj_align(pw_label, ta2, LV_ALIGN_OUT_TOP_LEFT, 0, 0);
+  
+    // Create a keyboard and apply the styles
+    kb = lv_keyboard_create(lv_scr_act(), NULL);
+    lv_obj_set_size(kb, LV_HOR_RES, LV_VER_RES / 2);
+    lv_obj_set_event_cb(kb, join_wifi_keyboard_event_cb);
+  
+    // Focus it on one of the text areas to start
+    lv_keyboard_set_textarea(kb, ta1);
+    lv_keyboard_set_cursor_manage(kb, true);
+    
+  }
+  
+  // Function to create keyboard for saving file name
+  void save_as_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event) {
+    extern MenuFunctions menu_function_obj;
+  
+    lv_keyboard_def_event_cb(save_as_kb, event);
+  
+    // User canceled so we will get rid of the keyboard and text box
+    if (event == LV_EVENT_CANCEL) {
+      lv_obj_del_async(save_as_kb);
+      lv_obj_del_async(save_name);
+    }
+  
+    // Save content from ta1 to file name in save_name
+    else if(event == LV_EVENT_APPLY){
+        String display_string = "";
+        printf("LV_EVENT_APPLY\n");
+  
+        // Get ducky script
+        String content = lv_textarea_get_text(ta1);
+  
+        String target_file_name = "/SCRIPTS/" + (String)lv_textarea_get_text(save_name);
+  
+        Serial.println("Writing to target file: " + (String)target_file_name);
+  
+        // Open file with the given name
+        File script = SD.open(target_file_name, FILE_WRITE);
+  
+        if (script) {
+          menu_function_obj.loaded_file = target_file_name;
+  
+          Serial.println("Writing content: ");
+          Serial.println(content);
+  
+          script.print(content);
+  
+          script.close();
+        }
+  
+        lv_obj_del_async(save_as_kb);
+        lv_obj_del_async(save_name);
+  
         // Create Save button
         lv_obj_t * save_label;
         lv_obj_t * save_btn = lv_btn_create(lv_scr_act(), NULL);
@@ -566,215 +527,258 @@ void test_btn_cb(lv_obj_t * btn, lv_event_t event) {
         lv_obj_align(save_btn, ta1, LV_ALIGN_IN_TOP_LEFT, NULL, (LV_VER_RES / 2) - 35); // align to text area
         save_label = lv_label_create(save_btn, NULL);
         lv_label_set_text(save_label, "Save");
-      }
     }
-
-    // Delete the file list obj
-    lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(btn)));
-    menu_function_obj.loaded_file = btn_text;
   }
-}
-
-void load_btn_cb(lv_obj_t * load_btn, lv_event_t event) {
-  extern SDInterface sd_obj;
-  extern MenuFunctions menu_function_obj;
-
-  String btn_text = lv_list_get_btn_text(load_btn);
-
-  if (btn_text == "Load") {
-    if (event == LV_EVENT_CLICKED)
-      Serial.println("Load button pressed");
-    else if (event == LV_EVENT_RELEASED) {
-      Serial.println("Load button released");
-      /*Create a list*/
-      lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
-      lv_obj_set_size(list1, 160, 200);
-      lv_obj_set_width(list1, LV_HOR_RES);
-      lv_obj_align(list1, NULL, LV_ALIGN_CENTER, 0, 0);
-      //lv_list_set_anim_time(list1, 0);
   
-      // Load file names into buttons
-      File scripts = SD.open("/SCRIPTS");
   
-      // Build list of files from the SD card
-      lv_obj_t * list_btn;
-
-      list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Cancel");
-      lv_obj_set_event_cb(list_btn, test_btn_cb);
+  void test_btn_cb(lv_obj_t * btn, lv_event_t event) {
+    extern MenuFunctions menu_function_obj;
+    
+    if (event == LV_EVENT_CLICKED) {
+      String btn_text = lv_list_get_btn_text(btn);
+      String display_string = "";
+      //printf("Clicked: %s\n", btn_text);
+      Serial.print("Clicked: ");
+      Serial.println(btn_text);
   
-      while (true) {
-        File entity = scripts.openNextFile();
+      // Get file content and send to text area
+      if (btn_text != "Cancel") {
+        File script = SD.open(btn_text);
   
-        if (!entity)
-          break;
+        if (script) {
+          while (script.available()) {
+            display_string.concat((char)script.read());
+          }
+          script.close();
   
-        if (!entity.isDirectory()) {
-          String file_name = entity.name();
+          Serial.println(display_string);
   
-          // Fancy button text time
-          char buf[file_name.length() + 1] = {};
-          file_name.toCharArray(buf, file_name.length() + 1);
+          char buf[display_string.length() + 1] = {};
+          display_string.toCharArray(buf, display_string.length() + 1);
           
-          list_btn = lv_list_add_btn(list1, LV_SYMBOL_FILE, buf);
-          lv_obj_set_event_cb(list_btn, test_btn_cb);
+          lv_textarea_set_text(ta1, buf);
+  
+          // Create Save button
+          lv_obj_t * save_label;
+          lv_obj_t * save_btn = lv_btn_create(lv_scr_act(), NULL);
+          lv_obj_set_event_cb(save_btn, load_btn_cb);
+          lv_obj_set_height(save_btn, 35);
+          lv_obj_set_width(save_btn, LV_HOR_RES / 3);
+          lv_obj_align(save_btn, ta1, LV_ALIGN_IN_TOP_LEFT, NULL, (LV_VER_RES / 2) - 35); // align to text area
+          save_label = lv_label_create(save_btn, NULL);
+          lv_label_set_text(save_label, "Save");
         }
-  
-        entity.close();
       }
   
-      scripts.close();
+      // Delete the file list obj
+      lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(btn)));
+      menu_function_obj.loaded_file = btn_text;
     }
   }
-
-  // Save current text bod content to new file
-  else if (btn_text == "Save As") {
-    if (event == LV_EVENT_CLICKED)
-      Serial.println("Save button pressed");
-    else if (event == LV_EVENT_RELEASED) {
-      Serial.println("Save button released");
-
-      save_name = lv_textarea_create(lv_scr_act(), ta2);
-      lv_textarea_set_cursor_hidden(save_name, false);
-      lv_textarea_set_one_line(save_name, true);
-      lv_obj_align(save_name, NULL, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35);
-      lv_textarea_set_text(save_name, "");
-      lv_textarea_set_placeholder_text(save_name, "File Name");
-
-      // Create a keyboard and apply the styles
-      save_as_kb = lv_keyboard_create(lv_scr_act(), NULL);
-      lv_obj_set_size(save_as_kb, LV_HOR_RES, LV_VER_RES / 2);
-      lv_obj_set_event_cb(save_as_kb, save_as_keyboard_event_cb);
-
-      lv_keyboard_set_textarea(save_as_kb, save_name);
-      lv_keyboard_set_cursor_manage(save_as_kb, true);
+  
+  void load_btn_cb(lv_obj_t * load_btn, lv_event_t event) {
+    extern SDInterface sd_obj;
+    extern MenuFunctions menu_function_obj;
+  
+    String btn_text = lv_list_get_btn_text(load_btn);
+  
+    if (btn_text == "Load") {
+      if (event == LV_EVENT_CLICKED)
+        Serial.println("Load button pressed");
+      else if (event == LV_EVENT_RELEASED) {
+        Serial.println("Load button released");
+        /*Create a list*/
+        lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
+        lv_obj_set_size(list1, 160, 200);
+        lv_obj_set_width(list1, LV_HOR_RES);
+        lv_obj_align(list1, NULL, LV_ALIGN_CENTER, 0, 0);
+        //lv_list_set_anim_time(list1, 0);
+    
+        // Load file names into buttons
+        File scripts = SD.open("/SCRIPTS");
+    
+        // Build list of files from the SD card
+        lv_obj_t * list_btn;
+  
+        list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Cancel");
+        lv_obj_set_event_cb(list_btn, test_btn_cb);
+    
+        while (true) {
+          File entity = scripts.openNextFile();
+    
+          if (!entity)
+            break;
+    
+          if (!entity.isDirectory()) {
+            String file_name = entity.name();
+    
+            // Fancy button text time
+            char buf[file_name.length() + 1] = {};
+            file_name.toCharArray(buf, file_name.length() + 1);
+            
+            list_btn = lv_list_add_btn(list1, LV_SYMBOL_FILE, buf);
+            lv_obj_set_event_cb(list_btn, test_btn_cb);
+          }
+    
+          entity.close();
+        }
+    
+        scripts.close();
+      }
     }
-  }
-
-  // Save current text box content to current loaded file
-  else if (btn_text == "Save") {
-    if (event == LV_EVENT_CLICKED)
-      Serial.println("Save button pressed");
-    else if (event == LV_EVENT_RELEASED) {
-      Serial.println("Save button released");
-
-      Serial.println("Writing to file: " + (String)menu_function_obj.loaded_file);
-
-      File script = SD.open(menu_function_obj.loaded_file, FILE_WRITE);
-
-      // Write data to file
-      if (script) {
-        String content = lv_textarea_get_text(ta1);
-
-        Serial.println("Writing content:");
-        Serial.println(content);
-        Serial.println("to file: " + (String)menu_function_obj.loaded_file);
-        script.print(lv_textarea_get_text(ta1));
-        script.close();
+  
+    // Save current text bod content to new file
+    else if (btn_text == "Save As") {
+      if (event == LV_EVENT_CLICKED)
+        Serial.println("Save button pressed");
+      else if (event == LV_EVENT_RELEASED) {
+        Serial.println("Save button released");
+  
+        save_name = lv_textarea_create(lv_scr_act(), ta2);
+        lv_textarea_set_cursor_hidden(save_name, false);
+        lv_textarea_set_one_line(save_name, true);
+        lv_obj_align(save_name, NULL, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35);
+        lv_textarea_set_text(save_name, "");
+        lv_textarea_set_placeholder_text(save_name, "File Name");
+  
+        // Create a keyboard and apply the styles
+        save_as_kb = lv_keyboard_create(lv_scr_act(), NULL);
+        lv_obj_set_size(save_as_kb, LV_HOR_RES, LV_VER_RES / 2);
+        lv_obj_set_event_cb(save_as_kb, save_as_keyboard_event_cb);
+  
+        lv_keyboard_set_textarea(save_as_kb, save_name);
+        lv_keyboard_set_cursor_manage(save_as_kb, true);
+      }
+    }
+  
+    // Save current text box content to current loaded file
+    else if (btn_text == "Save") {
+      if (event == LV_EVENT_CLICKED)
+        Serial.println("Save button pressed");
+      else if (event == LV_EVENT_RELEASED) {
+        Serial.println("Save button released");
+  
+        Serial.println("Writing to file: " + (String)menu_function_obj.loaded_file);
+  
+        File script = SD.open(menu_function_obj.loaded_file, FILE_WRITE);
+  
+        // Write data to file
+        if (script) {
+          String content = lv_textarea_get_text(ta1);
+  
+          Serial.println("Writing content:");
+          Serial.println(content);
+          Serial.println("to file: " + (String)menu_function_obj.loaded_file);
+          script.print(lv_textarea_get_text(ta1));
+          script.close();
+        }
       }
     }
   }
-}
-
-void write_bad_usb_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event) {
-  extern Display display_obj;
-  extern MenuFunctions menu_function_obj;
-  extern A32u4Interface a32u4_obj;
-  extern WiFiScan wifi_scan_obj;
   
-  lv_keyboard_def_event_cb(kb, event);
-  if(event == LV_EVENT_APPLY){
+  void write_bad_usb_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event) {
+    extern Display display_obj;
+    extern MenuFunctions menu_function_obj;
+    extern A32u4Interface a32u4_obj;
+    extern WiFiScan wifi_scan_obj;
+    
+    lv_keyboard_def_event_cb(kb, event);
+    if(event == LV_EVENT_APPLY){
+        String display_string = "";
+        printf("LV_EVENT_APPLY\n");
+  
+      String ta1_text = lv_textarea_get_text(ta1);
+    
+      Serial.println(ta1_text);
+    
+      a32u4_obj.runScript(ta1_text);
+    }
+    else if(event == LV_EVENT_CANCEL) {
+      printf("LV_EVENT_CANCEL\n");
+      menu_function_obj.deinitLVGL();
+      wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+      display_obj.exit_draw = true; // set everything back to normal
+    }
+  }
+  
+  // Keyboard callback dedicated to joining wifi
+  void add_ssid_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event){
+    extern Display display_obj;
+    extern MenuFunctions menu_function_obj;
+    extern WiFiScan wifi_scan_obj;
+    extern LinkedList<ssid>* ssids;
+    
+    lv_keyboard_def_event_cb(kb, event);
+  
+    // User has applied text box
+    if(event == LV_EVENT_APPLY){
       String display_string = "";
       printf("LV_EVENT_APPLY\n");
-
-    String ta1_text = lv_textarea_get_text(ta1);
   
-    Serial.println(ta1_text);
+      // Get text from SSID text box
+      String ta2_text = lv_textarea_get_text(ta2);
+      //Serial.println(ta1_text);
+      Serial.println(ta2_text);
   
-    a32u4_obj.runScript(ta1_text);
-  }
-  else if(event == LV_EVENT_CANCEL) {
-    printf("LV_EVENT_CANCEL\n");
-    menu_function_obj.deinitLVGL();
-    wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
-    display_obj.exit_draw = true; // set everything back to normal
-  }
-}
-
-// Keyboard callback dedicated to joining wifi
-void add_ssid_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event){
-  extern Display display_obj;
-  extern MenuFunctions menu_function_obj;
-  extern WiFiScan wifi_scan_obj;
-  extern LinkedList<ssid>* ssids;
+      // Add text box text to list of SSIDs
+      wifi_scan_obj.addSSID(ta2_text);
   
-  lv_keyboard_def_event_cb(kb, event);
-
-  // User has applied text box
-  if(event == LV_EVENT_APPLY){
-    String display_string = "";
-    printf("LV_EVENT_APPLY\n");
-
-    // Get text from SSID text box
-    String ta2_text = lv_textarea_get_text(ta2);
-    //Serial.println(ta1_text);
-    Serial.println(ta2_text);
-
-    // Add text box text to list of SSIDs
-    wifi_scan_obj.addSSID(ta2_text);
-
-    // Update large text box with ssid
-    for (int i = 0; i < ssids->size(); i++)
-      display_string.concat((String)ssids->get(i).essid + "\n");
-    lv_textarea_set_text(ta1, display_string.c_str());
-
-    lv_textarea_set_text(ta2, "");
-  }else if(event == LV_EVENT_CANCEL){
-    printf("LV_EVENT_CANCEL\n");
-    //lv_textarea_set_text(lv_keyboard_get_textarea(kb), "");
-    menu_function_obj.deinitLVGL();
-    //wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
-    display_obj.exit_draw = true; // set everything back to normal
+      // Update large text box with ssid
+      for (int i = 0; i < ssids->size(); i++)
+        display_string.concat((String)ssids->get(i).essid + "\n");
+      lv_textarea_set_text(ta1, display_string.c_str());
+  
+      lv_textarea_set_text(ta2, "");
+    }else if(event == LV_EVENT_CANCEL){
+      printf("LV_EVENT_CANCEL\n");
+      //lv_textarea_set_text(lv_keyboard_get_textarea(kb), "");
+      menu_function_obj.deinitLVGL();
+      //wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+      display_obj.exit_draw = true; // set everything back to normal
+    }
   }
-}
-
-// Keyboard callback dedicated to joining wifi
-void join_wifi_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event){
-  extern Display display_obj;
-  extern MenuFunctions menu_function_obj;
-  extern WiFiScan wifi_scan_obj;
-  lv_keyboard_def_event_cb(kb, event);
-  if(event == LV_EVENT_APPLY){
-    printf("LV_EVENT_APPLY\n");
-    //String ta1_text = lv_textarea_get_text(lv_keyboard_get_textarea(kb));
-    String ta1_text = lv_textarea_get_text(ta1);
-    String ta2_text = lv_textarea_get_text(ta2);
-    Serial.println(ta1_text);
-    Serial.println(ta2_text);
-    wifi_scan_obj.joinWiFi(ta1_text, ta2_text);
-  }else if(event == LV_EVENT_CANCEL){
-    printf("LV_EVENT_CANCEL\n");
-    //lv_textarea_set_text(lv_keyboard_get_textarea(kb), "");
-    menu_function_obj.deinitLVGL();
-    //wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
-    display_obj.exit_draw = true; // set everything back to normal
+  
+  // Keyboard callback dedicated to joining wifi
+  void join_wifi_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event){
+    extern Display display_obj;
+    extern MenuFunctions menu_function_obj;
+    extern WiFiScan wifi_scan_obj;
+    lv_keyboard_def_event_cb(kb, event);
+    if(event == LV_EVENT_APPLY){
+      printf("LV_EVENT_APPLY\n");
+      //String ta1_text = lv_textarea_get_text(lv_keyboard_get_textarea(kb));
+      String ta1_text = lv_textarea_get_text(ta1);
+      String ta2_text = lv_textarea_get_text(ta2);
+      Serial.println(ta1_text);
+      Serial.println(ta2_text);
+      wifi_scan_obj.joinWiFi(ta1_text, ta2_text);
+    }else if(event == LV_EVENT_CANCEL){
+      printf("LV_EVENT_CANCEL\n");
+      //lv_textarea_set_text(lv_keyboard_get_textarea(kb), "");
+      menu_function_obj.deinitLVGL();
+      //wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+      display_obj.exit_draw = true; // set everything back to normal
+    }
   }
-}
-
-
-void ta_event_cb(lv_obj_t * ta, lv_event_t event)
-{
-  if(event == LV_EVENT_CLICKED) {
-    if(kb != NULL)
-      lv_keyboard_set_textarea(kb, ta);
+  
+  
+  void ta_event_cb(lv_obj_t * ta, lv_event_t event)
+  {
+    if(event == LV_EVENT_CLICKED) {
+      if(kb != NULL)
+        lv_keyboard_set_textarea(kb, ta);
+    }
+  
+    //else if(event == LV_EVENT_INSERT) {
+    //  const char * str = lv_event_get_data();
+    //  if(str[0] == '\n') {
+    //    printf("Ready\n");
+    //  }
+    //}
   }
 
-  //else if(event == LV_EVENT_INSERT) {
-  //  const char * str = lv_event_get_data();
-  //  if(str[0] == '\n') {
-  //    printf("Ready\n");
-  //  }
-  //}
-}
+#endif
+//// END LV_ARDUINO STUFF
 
 void MenuFunctions::buttonNotSelected(uint8_t b) {
   display_obj.tft.setFreeFont(NULL);
@@ -816,7 +820,7 @@ void MenuFunctions::main(uint32_t currentTime)
   }
 
   if (currentTime != 0) {
-    if (currentTime - initTime >= 100) {
+    if (currentTime - initTime >= BANNER_TIME) {
       this->initTime = millis();
       if ((wifi_scan_obj.currentScanMode != LV_JOIN_WIFI) &&
           (wifi_scan_obj.currentScanMode != LV_ADD_SSID))
@@ -1333,8 +1337,10 @@ void MenuFunctions::displaySetting(String key, Menu* menu, int index) {
 // Function to build the menus
 void MenuFunctions::RunSetup()
 {
-  this->initLVGL();
-  
+  #ifndef MARAUDER_MINI
+    this->initLVGL();
+  #endif
+   
   // root menu stuff
   mainMenu.list = new LinkedList<MenuNode>(); // Get list in first menu ready
 
@@ -1519,12 +1525,14 @@ void MenuFunctions::RunSetup()
   addNodes(&wifiGeneralMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
     changeMenu(wifiGeneralMenu.parentMenu);
   });
-  addNodes(&wifiGeneralMenu, "Join WiFi", TFT_DARKCYAN, NULL, JOIN_WIFI, [this](){
-    display_obj.clearScreen(); 
-    wifi_scan_obj.currentScanMode = LV_JOIN_WIFI; 
-    wifi_scan_obj.StartScan(LV_JOIN_WIFI, TFT_YELLOW); 
-    joinWiFiGFX();
-  });
+  #ifndef MARAUDER_MINI
+    addNodes(&wifiGeneralMenu, "Join WiFi", TFT_DARKCYAN, NULL, JOIN_WIFI, [this](){
+      display_obj.clearScreen(); 
+      wifi_scan_obj.currentScanMode = LV_JOIN_WIFI; 
+      wifi_scan_obj.StartScan(LV_JOIN_WIFI, TFT_YELLOW); 
+      joinWiFiGFX();
+    });
+  #endif
   addNodes(&wifiGeneralMenu, "Shutdown WiFi", TFT_CYAN, NULL, SHUTDOWN, [this]() {
     changeMenu(&shutdownWiFiMenu);
     wifi_scan_obj.RunShutdownWiFi();
@@ -1533,12 +1541,14 @@ void MenuFunctions::RunSetup()
     changeMenu(&generateSSIDsMenu);
     wifi_scan_obj.RunGenerateSSIDs();
   });
-  addNodes(&wifiGeneralMenu, "Add SSID", TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
-    display_obj.clearScreen(); 
-    //wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
-    wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_YELLOW); 
-    addSSIDGFX();
-  });
+  #ifndef MARAUDER_MINI
+    addNodes(&wifiGeneralMenu, "Add SSID", TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
+      display_obj.clearScreen(); 
+      //wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
+      wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_YELLOW); 
+      addSSIDGFX();
+    });
+  #endif
   addNodes(&wifiGeneralMenu, "Clear SSIDs", TFT_SILVER, NULL, CLEAR_ICO, [this]() {
     changeMenu(&clearSSIDsMenu);
     wifi_scan_obj.RunClearSSIDs();
@@ -1547,12 +1557,14 @@ void MenuFunctions::RunSetup()
     changeMenu(&clearAPsMenu);
     wifi_scan_obj.RunClearAPs();
   });
-  addNodes(&wifiGeneralMenu, "Select APs", TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
-    display_obj.clearScreen(); 
-    wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
-    wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_RED);  
-    addAPGFX();
-  });
+  #ifndef MARAUDER_MINI
+    addNodes(&wifiGeneralMenu, "Select APs", TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
+      display_obj.clearScreen(); 
+      wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
+      wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_RED);  
+      addAPGFX();
+    });
+  #endif
 
   // Build shutdown wifi menu
   shutdownWiFiMenu.parentMenu = &wifiGeneralMenu;
@@ -1638,12 +1650,14 @@ void MenuFunctions::RunSetup()
   addNodes(&badusbMenu, "Test BadUSB", TFT_PURPLE, NULL, TEST_BAD_USB_ICO, [this]() {
     a32u4_obj.test();
   });
-  addNodes(&badusbMenu, "Run Ducky Script", TFT_RED, NULL, BAD_USB_ICO, [this](){
-    display_obj.clearScreen(); 
-    wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
-    wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_RED); 
-    writeBadUSB();
-  });
+  #ifndef MARAUDER_MINI
+    addNodes(&badusbMenu, "Run Ducky Script", TFT_RED, NULL, BAD_USB_ICO, [this](){
+      display_obj.clearScreen(); 
+      wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
+      wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_RED); 
+      writeBadUSB();
+    });
+  #endif
 
   // General apps menu
   generalMenu.parentMenu = &mainMenu;

@@ -24,7 +24,7 @@ void CommandLine::parseCommand(String input) {
   if (input != "")
     Serial.println("#" + input);
 
-  if (input == "stopscan") {
+  if (input == STOPSCAN_CMD) {
     wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
 
     // If we don't do this, the text and button coordinates will be off
@@ -34,13 +34,13 @@ void CommandLine::parseCommand(String input) {
     menu_function_obj.changeMenu(menu_function_obj.current_menu);
   }
     
-  else if (input == "scanap") {
+  else if (input == SCANAP_CMD) {
     display_obj.clearScreen();
     menu_function_obj.drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_TARGET_AP, TFT_MAGENTA);
   }
 
-  else if (input == "clearap") {
+  else if (input == CLEARAP_CMD) {
     wifi_scan_obj.RunClearAPs();
   }
 }

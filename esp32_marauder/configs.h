@@ -2,8 +2,8 @@
 
   #define configs_h
 
-//  #define MARAUDER_MINI
-  #define MARAUDER_V4
+  #define MARAUDER_MINI
+//  #define MARAUDER_V4
 
   #define MARAUDER_VERSION "v0.9.6"
 
@@ -138,6 +138,8 @@
 
   //// MENU DEFINITIONS
   #ifdef MARAUDER_V4
+    #define BANNER_TIME 100
+    
     #define COMMAND_PREFIX "!"
     
     // Keypad start position, key sizes and spacing
@@ -155,13 +157,15 @@
   #endif
   
   #ifdef MARAUDER_MINI
+    #define BANNER_TIME 50
+    
     #define COMMAND_PREFIX "!"
     
     // Keypad start position, key sizes and spacing
     #define KEY_X (TFT_WIDTH/2) // Centre of key
     #define KEY_Y (TFT_HEIGHT/4.5)
     #define KEY_W TFT_WIDTH // Width and height
-    #define KEY_H (TFT_HEIGHT/10)
+    #define KEY_H (TFT_HEIGHT/12.8)
     #define KEY_SPACING_X 0 // X and Y gap
     #define KEY_SPACING_Y 1
     #define KEY_TEXTSIZE 1   // Font size multiplier
