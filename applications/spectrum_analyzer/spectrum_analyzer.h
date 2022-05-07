@@ -1,5 +1,3 @@
-#include <lib/drivers/cc1101_regs.h>
-
 #define NUM_CHANNELS 132
 
 // Screen coordinates
@@ -66,44 +64,3 @@
 
 #define UPPER(a, b, c)  ((((a) - (b) + ((c) / 2)) / (c)) * (c))
 #define LOWER(a, b, c)  ((((a) + (b)) / (c)) * (c))
-
-typedef enum {
-    EventTypeTick,
-    EventTypeKey,
-} EventType;
-
-typedef struct {
-    EventType type;
-    InputEvent input;
-} SpectrumAnalyzerEvent;
-
-typedef struct {
-    /* frequency setting */
-    uint32_t frequency;
-
-    /* signal strength */
-    uint8_t ss;
-} ChannelInfo;
-
-typedef struct {
-    bool update_values_flag;
-    uint16_t freq;
-
-    uint8_t band;
-    uint8_t width;
-    char max_hold;
-    char height;
-    uint8_t vscroll;
-    uint8_t min_chan;
-    uint8_t max_chan;
-    
-    float		max_rssi;
-    uint8_t		max_rssi_dec;
-    uint8_t		max_rssi_channel;
-    ChannelInfo chan_table[NUM_CHANNELS];
-} SpectrumAnalyzerModel; 
-
-typedef struct {
-    ValueMutex* model_mutex;
-    osMessageQueueId_t event_queue;
-} SpectrumAnalyzerContext;
