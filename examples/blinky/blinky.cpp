@@ -57,8 +57,6 @@ int main(void)
     // 1kHz ticks
     HAL_SYSTICK_Config(SystemCoreClock / 1000);
 
-    for (;;)
-        __WFI();
-
+    while(1);
     return 0;
 }
