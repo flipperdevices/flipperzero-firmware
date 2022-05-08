@@ -19,7 +19,6 @@ struct SubGhzFileEncoderWorker {
     volatile bool worker_running;
     volatile bool worker_stoping;
     bool level;
-    int32_t duration;
     string_t str_data;
     string_t file_path;
 
@@ -42,20 +41,16 @@ void subghz_file_encoder_worker_add_livel_duration(
     int32_t duration) {
     bool res = true;
     if(duration < 0 && !instance->level) {
-        instance->duration += duration;
         res = false;
     } else if(duration > 0 && instance->level) {
-        instance->duration += duration;
         res = false;
-    } else if(duration == 0) {
-        instance->duration = 0;
     }
 
     if(res) {
         instance->level = !instance->level;
-        instance->duration += duration;
-        xStreamBufferSend(instance->stream, &instance->duration, sizeof(int32_t), 10);
-        instance->duration = 0;
+        xStreamBufferSend(instance->stream, &duration, sizeof(int32_t), 100);
+    } else {
+        FURI_LOG_E(TAG, "Invalid level in the stream");
     }
 }
 
