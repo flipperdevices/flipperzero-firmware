@@ -36,7 +36,7 @@ void subghz_file_encoder_worker_callback_end(
     instance->context_end = context_end;
 }
 
-void subghz_file_encoder_worker_add_livel_duration(
+void subghz_file_encoder_worker_add_level_duration(
     SubGhzFileEncoderWorker* instance,
     int32_t duration) {
     bool res = true;
@@ -75,7 +75,7 @@ bool subghz_file_encoder_worker_data_parse(
               ind_start))) { //check that there is still an element in the line and that it has not gone beyond the line
             str1 = strchr(str1, ' ');
             str1 += 1; //if found, shift the pointer by next element per line
-            subghz_file_encoder_worker_add_livel_duration(instance, atoi(str1));
+            subghz_file_encoder_worker_add_level_duration(instance, atoi(str1));
         }
         res = true;
     }
@@ -147,14 +147,14 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
                        string_get_cstr(instance->str_data),
                        strlen(string_get_cstr(instance->str_data)))) {
                     //to stop DMA correctly
-                    subghz_file_encoder_worker_add_livel_duration(instance, LEVEL_DURATION_RESET);
-                    subghz_file_encoder_worker_add_livel_duration(instance, LEVEL_DURATION_RESET);
+                    subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
+                    subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
 
                     break;
                 }
             } else {
-                subghz_file_encoder_worker_add_livel_duration(instance, LEVEL_DURATION_RESET);
-                subghz_file_encoder_worker_add_livel_duration(instance, LEVEL_DURATION_RESET);
+                subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
+                subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
                 break;
             }
         }
