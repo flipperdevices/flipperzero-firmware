@@ -56,9 +56,5 @@ bool subghz_transmitter_deserialize(SubGhzTransmitter* instance, FlipperFormat* 
 
 LevelDuration subghz_transmitter_yield(void* context) {
     SubGhzTransmitter* instance = context;
-
-    LevelDuration level_duration = instance->protocol->encoder->yield(instance->protocol_instance);
-    instance->samples_processed++;
-
-    return level_duration;
+    return instance->protocol->encoder->yield(instance->protocol_instance);
 }
