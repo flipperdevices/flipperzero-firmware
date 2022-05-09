@@ -54,7 +54,7 @@ static void subghz_test_deinit(void) {
     subghz_environment_free(environment_handler);
 }
 
-static bool subghz_decode_test(const char* path, const char* name_decoder) {
+static bool subghz_decoder_test(const char* path, const char* name_decoder) {
     subghz_test_decoder_count = 0;
     uint32_t test_start = furi_hal_get_tick();
 
@@ -97,7 +97,7 @@ static bool subghz_decode_test(const char* path, const char* name_decoder) {
     }
 }
 
-static bool subghz_decode_ramdom_test(const char* path) {
+static bool subghz_decode_random_test(const char* path) {
     subghz_test_decoder_count = 0;
     subghz_receiver_reset(receiver_handler);
     uint32_t test_start = furi_hal_get_tick();
@@ -138,7 +138,7 @@ static bool subghz_decode_ramdom_test(const char* path) {
     }
 }
 
-static bool subghz_ecode_test(const char* path) {
+static bool subghz_encoder_test(const char* path) {
     subghz_test_decoder_count = 0;
     uint32_t test_start = furi_hal_get_tick();
     string_t temp_str;
@@ -208,162 +208,163 @@ MU_TEST(subghz_keystore_test) {
 
 MU_TEST(subghz_decoder_came_atomo_test) {
     mu_assert(
-        subghz_decode_test(
+        subghz_decoder_test(
             "/ext/unit_tests/subghz/came_atomo_raw.sub", SUBGHZ_PROTOCOL_CAME_ATOMO_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_CAME_ATOMO_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_came_test) {
     mu_assert(
-        subghz_decode_test("/ext/unit_tests/subghz/came_raw.sub", SUBGHZ_PROTOCOL_CAME_NAME),
+        subghz_decoder_test("/ext/unit_tests/subghz/came_raw.sub", SUBGHZ_PROTOCOL_CAME_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_CAME_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_came_twee_test) {
     mu_assert(
-        subghz_decode_test(
+        subghz_decoder_test(
             "/ext/unit_tests/subghz/came_twee_raw.sub", SUBGHZ_PROTOCOL_CAME_TWEE_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_CAME_TWEE_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_faac_slh_test) {
     mu_assert(
-        subghz_decode_test(
+        subghz_decoder_test(
             "/ext/unit_tests/subghz/faac_slh_raw.sub", SUBGHZ_PROTOCOL_FAAC_SLH_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_FAAC_SLH_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_gate_tx_test) {
     mu_assert(
-        subghz_decode_test("/ext/unit_tests/subghz/gate_tx_raw.sub", SUBGHZ_PROTOCOL_GATE_TX_NAME),
+        subghz_decoder_test("/ext/unit_tests/subghz/gate_tx_raw.sub", SUBGHZ_PROTOCOL_GATE_TX_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_GATE_TX_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_hormann_hsm_test) {
     mu_assert(
-        subghz_decode_test(
+        subghz_decoder_test(
             "/ext/unit_tests/subghz/hormann_hsm_raw.sub", SUBGHZ_PROTOCOL_HORMANN_HSM_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_HORMANN_HSM_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_ido_test) {
     mu_assert(
-        subghz_decode_test("/ext/unit_tests/subghz/ido_117_111_raw.sub", SUBGHZ_PROTOCOL_IDO_NAME),
+        subghz_decoder_test("/ext/unit_tests/subghz/ido_117_111_raw.sub", SUBGHZ_PROTOCOL_IDO_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_IDO_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_keelog_test) {
     mu_assert(
-        subghz_decode_test("/ext/unit_tests/subghz/doorhan_raw.sub", SUBGHZ_PROTOCOL_KEELOQ_NAME),
+        subghz_decoder_test("/ext/unit_tests/subghz/doorhan_raw.sub", SUBGHZ_PROTOCOL_KEELOQ_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_KEELOQ_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_kia_seed_test) {
     mu_assert(
-        subghz_decode_test("/ext/unit_tests/subghz/kia_seed_raw.sub", SUBGHZ_PROTOCOL_KIA_NAME),
+        subghz_decoder_test("/ext/unit_tests/subghz/kia_seed_raw.sub", SUBGHZ_PROTOCOL_KIA_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_KIA_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_nero_radio_test) {
     mu_assert(
-        subghz_decode_test(
+        subghz_decoder_test(
             "/ext/unit_tests/subghz/nero_radio_raw.sub", SUBGHZ_PROTOCOL_NERO_RADIO_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_NERO_RADIO_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_nero_sketch_test) {
     mu_assert(
-        subghz_decode_test(
+        subghz_decoder_test(
             "/ext/unit_tests/subghz/nero_sketch_raw.sub", SUBGHZ_PROTOCOL_NERO_SKETCH_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_NERO_SKETCH_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_nice_flo_test) {
     mu_assert(
-        subghz_decode_test(
+        subghz_decoder_test(
             "/ext/unit_tests/subghz/nice_flo_raw.sub", SUBGHZ_PROTOCOL_NICE_FLO_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_NICE_FLO_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_nice_flor_s_test) {
     mu_assert(
-        subghz_decode_test(
+        subghz_decoder_test(
             "/ext/unit_tests/subghz/nice_flor_s_raw.sub", SUBGHZ_PROTOCOL_NICE_FLOR_S_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_NICE_FLOR_S_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_princeton_test) {
     mu_assert(
-        subghz_decode_test(
+        subghz_decoder_test(
             "/ext/unit_tests/subghz/Princeton_raw.sub", SUBGHZ_PROTOCOL_PRINCETON_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_PRINCETON_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_scher_khan_magic_code_test) {
     mu_assert(
-        subghz_decode_test(
+        subghz_decoder_test(
             "/ext/unit_tests/subghz/scher_khan_magic_code.sub", SUBGHZ_PROTOCOL_SCHER_KHAN_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_SCHER_KHAN_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_somfy_keytis_test) {
     mu_assert(
-        subghz_decode_test(
+        subghz_decoder_test(
             "/ext/unit_tests/subghz/Somfy_keytis_raw.sub", SUBGHZ_PROTOCOL_SOMFY_KEYTIS_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_SOMFY_KEYTIS_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_somfy_telis_test) {
     mu_assert(
-        subghz_decode_test(
+        subghz_decoder_test(
             "/ext/unit_tests/subghz/somfy_telis_raw.sub", SUBGHZ_PROTOCOL_SOMFY_TELIS_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_SOMFY_TELIS_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_star_line_test) {
     mu_assert(
-        subghz_decode_test("/ext/unit_tests/subghz/cenmax_raw.sub", SUBGHZ_PROTOCOL_STAR_LINE_NAME),
+        subghz_decoder_test(
+            "/ext/unit_tests/subghz/cenmax_raw.sub", SUBGHZ_PROTOCOL_STAR_LINE_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_STAR_LINE_NAME " error\r\n");
 }
 
-MU_TEST(subghz_ecoder_princeton_test) {
+MU_TEST(subghz_encoder_princeton_test) {
     mu_assert(
-        subghz_ecode_test("/ext/unit_tests/subghz/princeton.sub"),
+        subghz_encoder_test("/ext/unit_tests/subghz/princeton.sub"),
         "Test encoder " SUBGHZ_PROTOCOL_PRINCETON_NAME " error\r\n");
 }
 
-MU_TEST(subghz_ecoder_came_test) {
+MU_TEST(subghz_encoder_came_test) {
     mu_assert(
-        subghz_ecode_test("/ext/unit_tests/subghz/came.sub"),
+        subghz_encoder_test("/ext/unit_tests/subghz/came.sub"),
         "Test encoder " SUBGHZ_PROTOCOL_CAME_NAME " error\r\n");
 }
 
-MU_TEST(subghz_ecoder_came_twee_test) {
+MU_TEST(subghz_encoder_came_twee_test) {
     mu_assert(
-        subghz_ecode_test("/ext/unit_tests/subghz/came_twee.sub"),
+        subghz_encoder_test("/ext/unit_tests/subghz/came_twee.sub"),
         "Test encoder " SUBGHZ_PROTOCOL_CAME_TWEE_NAME " error\r\n");
 }
 
-MU_TEST(subghz_ecoder_gate_tx_test) {
+MU_TEST(subghz_encoder_gate_tx_test) {
     mu_assert(
-        subghz_ecode_test("/ext/unit_tests/subghz/gate_tx.sub"),
+        subghz_encoder_test("/ext/unit_tests/subghz/gate_tx.sub"),
         "Test encoder " SUBGHZ_PROTOCOL_GATE_TX_NAME " error\r\n");
 }
 
-MU_TEST(subghz_ecoder_nice_flo_test) {
+MU_TEST(subghz_encoder_nice_flo_test) {
     mu_assert(
-        subghz_ecode_test("/ext/unit_tests/subghz/nice_flo.sub"),
+        subghz_encoder_test("/ext/unit_tests/subghz/nice_flo.sub"),
         "Test encoder " SUBGHZ_PROTOCOL_NICE_FLO_NAME " error\r\n");
 }
 
-MU_TEST(subghz_ecoder_keelog_test) {
+MU_TEST(subghz_encoder_keelog_test) {
     mu_assert(
-        subghz_ecode_test("/ext/unit_tests/subghz/doorhan.sub"),
+        subghz_encoder_test("/ext/unit_tests/subghz/doorhan.sub"),
         "Test encoder " SUBGHZ_PROTOCOL_KEELOQ_NAME " error\r\n");
 }
 
 MU_TEST(subghz_random_test) {
-    mu_assert(subghz_decode_ramdom_test(TEST_RANDOM_DIR_NAME), "Random test error\r\n");
+    mu_assert(subghz_decode_random_test(TEST_RANDOM_DIR_NAME), "Random test error\r\n");
 }
 
 MU_TEST_SUITE(subghz) {
@@ -389,12 +390,12 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_somfy_telis_test);
     MU_RUN_TEST(subghz_decoder_star_line_test);
 
-    MU_RUN_TEST(subghz_ecoder_princeton_test);
-    MU_RUN_TEST(subghz_ecoder_came_test);
-    MU_RUN_TEST(subghz_ecoder_came_twee_test);
-    MU_RUN_TEST(subghz_ecoder_gate_tx_test);
-    MU_RUN_TEST(subghz_ecoder_nice_flo_test);
-    MU_RUN_TEST(subghz_ecoder_keelog_test);
+    MU_RUN_TEST(subghz_encoder_princeton_test);
+    MU_RUN_TEST(subghz_encoder_came_test);
+    MU_RUN_TEST(subghz_encoder_came_twee_test);
+    MU_RUN_TEST(subghz_encoder_gate_tx_test);
+    MU_RUN_TEST(subghz_encoder_nice_flo_test);
+    MU_RUN_TEST(subghz_encoder_keelog_test);
 
     MU_RUN_TEST(subghz_random_test);
     subghz_test_deinit();
