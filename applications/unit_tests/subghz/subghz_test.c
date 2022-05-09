@@ -333,19 +333,22 @@ MU_TEST(subghz_decoder_firefly_test) {
 
 MU_TEST(subghz_decoder_megacode_test) {
     mu_assert(
-        subghz_decode_test("/ext/unit_tests/subghz/megacode_raw.sub", SUBGHZ_PROTOCOL_MEGACODE_NAME),
+        subghz_decode_test(
+            "/ext/unit_tests/subghz/megacode_raw.sub", SUBGHZ_PROTOCOL_MEGACODE_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_MEGACODE_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_secplus_v1_test) {
     mu_assert(
-        subghz_decode_test("/ext/unit_tests/subghz/security_pls_1_0_raw.sub", SUBGHZ_PROTOCOL_SECPLUS_V1_NAME),
+        subghz_decode_test(
+            "/ext/unit_tests/subghz/security_pls_1_0_raw.sub", SUBGHZ_PROTOCOL_SECPLUS_V1_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_SECPLUS_V1_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_secplus_v2_test) {
     mu_assert(
-        subghz_decode_test("/ext/unit_tests/subghz/security_pls_2_0_raw.sub", SUBGHZ_PROTOCOL_SECPLUS_V2_NAME),
+        subghz_decode_test(
+            "/ext/unit_tests/subghz/security_pls_2_0_raw.sub", SUBGHZ_PROTOCOL_SECPLUS_V2_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_SECPLUS_V2_NAME " error\r\n");
 }
 
