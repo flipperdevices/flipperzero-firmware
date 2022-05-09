@@ -32,7 +32,7 @@ static void subghz_test_rx_callback(
     string_init(text);
     subghz_protocol_decoder_base_get_string(decoder_base, text);
     subghz_receiver_reset(receiver_handler);
-    FURI_LOG_I(TAG, "\r\n%s", string_get_cstr(text));
+    FURI_LOG_T(TAG, "\r\n%s", string_get_cstr(text));
     string_clear(text);
     subghz_test_decoder_count++;
 }
@@ -64,7 +64,7 @@ static bool subghz_decode_test(const char* path, const char* name_decoder) {
     if(decoder) {
         file_worker_encoder_handler = subghz_file_encoder_worker_alloc();
         if(subghz_file_encoder_worker_start(file_worker_encoder_handler, path)) {
-            //the worker needs a file in order to open and read part of the file
+            // the worker needs a file in order to open and read part of the file
             osDelay(100);
 
             LevelDuration level_duration;
@@ -74,7 +74,8 @@ static bool subghz_decode_test(const char* path, const char* name_decoder) {
                 if(!level_duration_is_reset(level_duration)) {
                     bool level = level_duration_get_level(level_duration);
                     uint32_t duration = level_duration_get_duration(level_duration);
-                    furi_hal_delay_us(duration);
+                    // Yield, to load data inside the worker
+                    osThreadYield();
                     decoder->protocol->decoder->feed(decoder, level, duration);
                 } else {
                     break;
@@ -87,7 +88,7 @@ static bool subghz_decode_test(const char* path, const char* name_decoder) {
         }
         subghz_file_encoder_worker_free(file_worker_encoder_handler);
     }
-    FURI_LOG_I(TAG, "\r\n Decoder count parse \033[0;33m%d\033[0m ", subghz_test_decoder_count);
+    FURI_LOG_T(TAG, "\r\n Decoder count parse \033[0;33m%d\033[0m ", subghz_test_decoder_count);
     if(furi_hal_get_tick() - test_start > TEST_TIMEOUT) {
         printf("\033[0;31mTest decoder %s ERROR TimeOut\033[0m\r\n", name_decoder);
         return false;
@@ -103,7 +104,7 @@ static bool subghz_decode_ramdom_test(const char* path) {
 
     file_worker_encoder_handler = subghz_file_encoder_worker_alloc();
     if(subghz_file_encoder_worker_start(file_worker_encoder_handler, path)) {
-        //the worker needs a file in order to open and read part of the file
+        // the worker needs a file in order to open and read part of the file
         osDelay(100);
 
         LevelDuration level_duration;
@@ -113,7 +114,8 @@ static bool subghz_decode_ramdom_test(const char* path) {
             if(!level_duration_is_reset(level_duration)) {
                 bool level = level_duration_get_level(level_duration);
                 uint32_t duration = level_duration_get_duration(level_duration);
-                furi_hal_delay_us(duration);
+                // Yield, to load data inside the worker
+                osThreadYield();
                 subghz_receiver_decode(receiver_handler, level, duration);
             } else {
                 break;
@@ -125,7 +127,7 @@ static bool subghz_decode_ramdom_test(const char* path) {
         }
         subghz_file_encoder_worker_free(file_worker_encoder_handler);
     }
-    FURI_LOG_I(TAG, "\r\n Decoder count parse \033[0;33m%d\033[0m ", subghz_test_decoder_count);
+    FURI_LOG_T(TAG, "\r\n Decoder count parse \033[0;33m%d\033[0m ", subghz_test_decoder_count);
     if(furi_hal_get_tick() - test_start > TEST_TIMEOUT * 10) {
         printf("\033[0;31mRandom test ERROR TimeOut\033[0m\r\n");
         return false;
@@ -188,7 +190,7 @@ static bool subghz_ecode_test(const char* path) {
         subghz_transmitter_free(transmitter);
     }
     flipper_format_free(fff_data_file);
-    FURI_LOG_I(TAG, "\r\n Decoder count parse \033[0;33m%d\033[0m ", subghz_test_decoder_count);
+    FURI_LOG_T(TAG, "\r\n Decoder count parse \033[0;33m%d\033[0m ", subghz_test_decoder_count);
     if(furi_hal_get_tick() - test_start > TEST_TIMEOUT) {
         printf("\033[0;31mTest encoder %s ERROR TimeOut\033[0m\r\n", string_get_cstr(temp_str));
         subghz_test_decoder_count = 0;
@@ -365,8 +367,6 @@ MU_TEST(subghz_random_test) {
 }
 
 MU_TEST_SUITE(subghz) {
-    //MU_SUITE_CONFIGURE(&subghz_test_init, &subghz_test_deinit);
-
     subghz_test_init();
     MU_RUN_TEST(subghz_keystore_test);
 
