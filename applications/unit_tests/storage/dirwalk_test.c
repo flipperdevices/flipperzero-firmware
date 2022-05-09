@@ -1,5 +1,6 @@
 #include "../minunit.h"
 #include <furi.h>
+#include <m-dict.h>
 #include <toolbox/dir_walk.h>
 
 static const char* const storage_test_dirwalk_paths[] = {
@@ -18,66 +19,98 @@ static const char* const storage_test_dirwalk_paths[] = {
 static const char* const storage_test_dirwalk_files[] = {
     "file1.test",
     "file2.test",
-    "file3.test",
+    "file3.ext_test",
     "1/file1.test",
     "111/22/33/file1.test",
     "111/22/33/file2.test",
-    "111/22/33/file3.test",
-    "111/22/33/file4.test",
+    "111/22/33/file3.ext_test",
+    "111/22/33/file4.ext_test",
 };
 
 typedef struct {
-    const char* path;
+    const char* const path;
+    bool is_dir;
+} StorageTestPathDesc;
+
+const StorageTestPathDesc storage_test_dirwalk_full[] = {
+    {.path = "1", .is_dir = true},
+    {.path = "11", .is_dir = true},
+    {.path = "111", .is_dir = true},
+    {.path = "1/2", .is_dir = true},
+    {.path = "1/22", .is_dir = true},
+    {.path = "1/222", .is_dir = true},
+    {.path = "11/2", .is_dir = true},
+    {.path = "111/2", .is_dir = true},
+    {.path = "111/22", .is_dir = true},
+    {.path = "111/22/33", .is_dir = true},
+    {.path = "file1.test", .is_dir = false},
+    {.path = "file2.test", .is_dir = false},
+    {.path = "file3.ext_test", .is_dir = false},
+    {.path = "1/file1.test", .is_dir = false},
+    {.path = "111/22/33/file1.test", .is_dir = false},
+    {.path = "111/22/33/file2.test", .is_dir = false},
+    {.path = "111/22/33/file3.ext_test", .is_dir = false},
+    {.path = "111/22/33/file4.ext_test", .is_dir = false},
+};
+
+const StorageTestPathDesc storage_test_dirwalk_no_recursive[] = {
+    {.path = "1", .is_dir = true},
+    {.path = "11", .is_dir = true},
+    {.path = "111", .is_dir = true},
+    {.path = "file1.test", .is_dir = false},
+    {.path = "file2.test", .is_dir = false},
+    {.path = "file3.ext_test", .is_dir = false},
+};
+
+const StorageTestPathDesc storage_test_dirwalk_filter[] = {
+    {.path = "file1.test", .is_dir = false},
+    {.path = "file2.test", .is_dir = false},
+    {.path = "1/file1.test", .is_dir = false},
+    {.path = "111/22/33/file1.test", .is_dir = false},
+    {.path = "111/22/33/file2.test", .is_dir = false},
+};
+
+typedef struct {
     bool is_dir;
     bool visited;
 } StorageTestPath;
 
-static StorageTestPath** storage_test_paths_alloc() {
-    size_t path_count =
-        COUNT_OF(storage_test_dirwalk_paths) + COUNT_OF(storage_test_dirwalk_files);
-    StorageTestPath** data = malloc(sizeof(StorageTestPath*) * path_count);
+DICT_DEF2(StorageTestPathDict, string_t, STRING_OPLIST, StorageTestPath, M_POD_OPLIST)
 
-    for(size_t i = 0; i < COUNT_OF(storage_test_dirwalk_paths); i++) {
-        data[i] = malloc(sizeof(StorageTestPath));
-        data[i]->path = storage_test_dirwalk_paths[i];
-        data[i]->is_dir = true;
-        data[i]->visited = false;
-    }
+static StorageTestPathDict_t*
+    storage_test_paths_alloc(const StorageTestPathDesc paths[], size_t paths_count) {
+    StorageTestPathDict_t* data = malloc(sizeof(StorageTestPathDict_t));
+    StorageTestPathDict_init(*data);
 
-    for(size_t i = 0; i < COUNT_OF(storage_test_dirwalk_files); i++) {
-        data[i + COUNT_OF(storage_test_dirwalk_paths)] = malloc(sizeof(StorageTestPath));
-        data[i + COUNT_OF(storage_test_dirwalk_paths)]->path = storage_test_dirwalk_files[i];
-        data[i + COUNT_OF(storage_test_dirwalk_paths)]->is_dir = false;
-        data[i + COUNT_OF(storage_test_dirwalk_paths)]->visited = false;
+    for(size_t i = 0; i < paths_count; i++) {
+        string_t key;
+        string_init_set(key, paths[i].path);
+        StorageTestPath value = {
+            .is_dir = paths[i].is_dir,
+            .visited = false,
+        };
+
+        StorageTestPathDict_set_at(*data, key, value);
+        string_clear(key);
     }
 
     return data;
 }
 
-static void storage_test_paths_free(StorageTestPath** data) {
-    size_t path_count =
-        COUNT_OF(storage_test_dirwalk_paths) + COUNT_OF(storage_test_dirwalk_files);
-
-    for(size_t i = 0; i < path_count; i++) {
-        free(data[i]);
-    }
-
+static void storage_test_paths_free(StorageTestPathDict_t* data) {
+    StorageTestPathDict_clear(*data);
     free(data);
 }
 
-static bool storage_test_paths_mark(StorageTestPath** data, const char* path, bool is_dir) {
-    size_t path_count =
-        COUNT_OF(storage_test_dirwalk_paths) + COUNT_OF(storage_test_dirwalk_files);
+static bool storage_test_paths_mark(StorageTestPathDict_t* data, string_t path, bool is_dir) {
     bool found = false;
 
-    for(size_t i = 0; i < path_count; i++) {
-        if(strcmp(path, data[i]->path) == 0) {
-            if(is_dir == data[i]->is_dir) {
-                if(data[i]->visited == false) {
-                    data[i]->visited = true;
-                    found = true;
-                    break;
-                }
+    StorageTestPath* record = StorageTestPathDict_get(*data, path);
+    if(record) {
+        if(is_dir == record->is_dir) {
+            if(record->visited == false) {
+                record->visited = true;
+                found = true;
             }
         }
     }
@@ -85,13 +118,15 @@ static bool storage_test_paths_mark(StorageTestPath** data, const char* path, bo
     return found;
 }
 
-static bool storage_test_paths_check(StorageTestPath** data) {
-    size_t path_count =
-        COUNT_OF(storage_test_dirwalk_paths) + COUNT_OF(storage_test_dirwalk_files);
+static bool storage_test_paths_check(StorageTestPathDict_t* data) {
     bool error = false;
 
-    for(size_t i = 0; i < path_count; i++) {
-        if(data[i]->visited == false) {
+    StorageTestPathDict_it_t it;
+    for(StorageTestPathDict_it(it, *data); !StorageTestPathDict_end_p(it);
+        StorageTestPathDict_next(it)) {
+        const StorageTestPathDict_itref_t* itref = StorageTestPathDict_cref(it);
+
+        if(itref->value.visited == false) {
             error = true;
             break;
         }
@@ -131,19 +166,82 @@ static void storage_dirs_create(Storage* storage, const char* base) {
     string_clear(path);
 }
 
-MU_TEST_1(test_dirwalk, Storage* storage) {
-    StorageTestPath** paths = storage_test_paths_alloc();
-
-    DirWalk* dir_walk = dir_walk_alloc(storage);
+MU_TEST_1(test_dirwalk_full, Storage* storage) {
     string_t path;
     string_init(path);
     FileInfo fileinfo;
 
+    StorageTestPathDict_t* paths =
+        storage_test_paths_alloc(storage_test_dirwalk_full, COUNT_OF(storage_test_dirwalk_full));
+
+    DirWalk* dir_walk = dir_walk_alloc(storage);
     mu_check(dir_walk_open(dir_walk, "/ext/dirwalk"));
+
     while(dir_walk_read(dir_walk, path, &fileinfo) == DirWalkOK) {
         string_right(path, strlen("/ext/dirwalk/"));
-        mu_check(storage_test_paths_mark(
-            paths, string_get_cstr(path), (fileinfo.flags & FSF_DIRECTORY)));
+        mu_check(storage_test_paths_mark(paths, path, (fileinfo.flags & FSF_DIRECTORY)));
+    }
+
+    dir_walk_free(dir_walk);
+    string_clear(path);
+
+    mu_check(storage_test_paths_check(paths) == false);
+
+    storage_test_paths_free(paths);
+}
+
+MU_TEST_1(test_dirwalk_no_recursive, Storage* storage) {
+    string_t path;
+    string_init(path);
+    FileInfo fileinfo;
+
+    StorageTestPathDict_t* paths = storage_test_paths_alloc(
+        storage_test_dirwalk_no_recursive, COUNT_OF(storage_test_dirwalk_no_recursive));
+
+    DirWalk* dir_walk = dir_walk_alloc(storage);
+    dir_walk_set_recursive(dir_walk, false);
+    mu_check(dir_walk_open(dir_walk, "/ext/dirwalk"));
+
+    while(dir_walk_read(dir_walk, path, &fileinfo) == DirWalkOK) {
+        string_right(path, strlen("/ext/dirwalk/"));
+        mu_check(storage_test_paths_mark(paths, path, (fileinfo.flags & FSF_DIRECTORY)));
+    }
+
+    dir_walk_free(dir_walk);
+    string_clear(path);
+
+    mu_check(storage_test_paths_check(paths) == false);
+
+    storage_test_paths_free(paths);
+}
+
+static bool test_dirwalk_filter_no_folder_ext(const char* name, FileInfo* fileinfo, void* ctx) {
+    // only files
+    if(!(fileinfo->flags & FSF_DIRECTORY)) {
+        // with ".test" in name
+        if(strstr(name, ".test") != NULL) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+MU_TEST_1(test_dirwalk_filter, Storage* storage) {
+    string_t path;
+    string_init(path);
+    FileInfo fileinfo;
+
+    StorageTestPathDict_t* paths = storage_test_paths_alloc(
+        storage_test_dirwalk_filter, COUNT_OF(storage_test_dirwalk_filter));
+
+    DirWalk* dir_walk = dir_walk_alloc(storage);
+    dir_walk_set_filter_cb(dir_walk, test_dirwalk_filter_no_folder_ext, NULL);
+    mu_check(dir_walk_open(dir_walk, "/ext/dirwalk"));
+
+    while(dir_walk_read(dir_walk, path, &fileinfo) == DirWalkOK) {
+        string_right(path, strlen("/ext/dirwalk/"));
+        mu_check(storage_test_paths_mark(paths, path, (fileinfo.flags & FSF_DIRECTORY)));
     }
 
     dir_walk_free(dir_walk);
@@ -158,7 +256,9 @@ MU_TEST_SUITE(test_dirwalk_suite) {
     Storage* storage = furi_record_open("storage");
     storage_dirs_create(storage, "/ext/dirwalk");
 
-    MU_RUN_TEST_1(test_dirwalk, storage);
+    MU_RUN_TEST_1(test_dirwalk_full, storage);
+    MU_RUN_TEST_1(test_dirwalk_no_recursive, storage);
+    MU_RUN_TEST_1(test_dirwalk_filter, storage);
 
     storage_simply_remove_recursive(storage, "/ext/dirwalk");
     furi_record_close("storage");
