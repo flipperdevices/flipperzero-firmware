@@ -45,7 +45,7 @@ typedef enum {
 #define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
 const NotificationSequence sequence_notification = {
-    &message_display_on,
+    &message_display_backlight_on,
     &message_green_255,
     &message_delay_10,
     NULL,
@@ -80,11 +80,13 @@ static void uart_echo_view_draw_callback(Canvas* canvas, void* _model) {
 }
 
 static bool uart_echo_view_input_callback(InputEvent* event, void* context) {
-    bool consumed = false;
-    return consumed;
+    UNUSED(event);
+    UNUSED(context);
+    return false;
 }
 
 static uint32_t uart_echo_exit(void* context) {
+    UNUSED(context);
     return VIEW_NONE;
 }
 
@@ -170,7 +172,10 @@ static int32_t uart_echo_worker(void* context) {
 
             notification_message(app->notification, &sequence_notification);
             with_view_model(
-                app->view, (UartDumpModel * model) { return true; });
+                app->view, (UartDumpModel * model) {
+                    UNUSED(model);
+                    return true;
+                });
         }
     }
 
@@ -261,6 +266,7 @@ static void uart_echo_app_free(UartEchoApp* app) {
 }
 
 int32_t uart_echo_app(void* p) {
+    UNUSED(p);
     UartEchoApp* app = uart_echo_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     uart_echo_app_free(app);

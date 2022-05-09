@@ -26,15 +26,10 @@ static bool updater_back_event_callback(void* context) {
     return scene_manager_handle_back_event(updater->scene_manager);
 }
 
-static void status_update_cb(
-    const char* message,
-    const uint8_t progress,
-    const uint8_t idx_stage,
-    const uint8_t total_stages,
-    bool failed,
-    void* context) {
+static void
+    status_update_cb(const char* message, const uint8_t progress, bool failed, void* context) {
     UpdaterMainView* main_view = context;
-    updater_main_model_set_state(main_view, message, progress, idx_stage, total_stages, failed);
+    updater_main_model_set_state(main_view, message, progress, failed);
 }
 
 Updater* updater_alloc(const char* arg) {
@@ -47,6 +42,7 @@ Updater* updater_alloc(const char* arg) {
     }
 
     updater->storage = furi_record_open("storage");
+    updater->notification = furi_record_open("notification");
 
     updater->gui = furi_record_open("gui");
     updater->view_dispatcher = view_dispatcher_alloc();
@@ -63,9 +59,7 @@ Updater* updater_alloc(const char* arg) {
         updater->view_dispatcher, updater_tick_event_callback, UPDATER_APP_TICK);
 
     view_dispatcher_attach_to_gui(
-        updater->view_dispatcher,
-        updater->gui,
-        arg ? ViewDispatcherTypeFullscreen : ViewDispatcherTypeWindow);
+        updater->view_dispatcher, updater->gui, ViewDispatcherTypeFullscreen);
 
     updater->main_view = updater_main_alloc();
     view_dispatcher_add_view(
@@ -119,6 +113,7 @@ void updater_free(Updater* updater) {
 
     furi_record_close("gui");
     furi_record_close("storage");
+    furi_record_close("notification");
 
     free(updater);
 }

@@ -6,7 +6,8 @@
 bool archive_is_item_in_array(ArchiveBrowserViewModel* model, uint32_t idx) {
     size_t array_size = files_array_size(model->files);
 
-    if((idx >= model->array_offset + array_size) || (idx < model->array_offset)) {
+    if((idx >= (uint32_t)model->array_offset + array_size) ||
+       (idx < (uint32_t)model->array_offset)) {
         return false;
     }
 
@@ -20,12 +21,14 @@ void archive_update_offset(ArchiveBrowserView* browser) {
         browser->view, (ArchiveBrowserViewModel * model) {
             uint16_t bounds = model->item_cnt > 3 ? 2 : model->item_cnt;
 
-            if(model->item_cnt > 3 && model->item_idx >= model->item_cnt - 1) {
+            if((model->item_cnt > 3u) && (model->item_idx >= ((int32_t)model->item_cnt - 1))) {
                 model->list_offset = model->item_idx - 3;
             } else if(model->list_offset < model->item_idx - bounds) {
-                model->list_offset = CLAMP(model->item_idx - 2, model->item_cnt - bounds, 0);
+                model->list_offset =
+                    CLAMP(model->item_idx - 2, (int32_t)model->item_cnt - bounds, 0);
             } else if(model->list_offset > model->item_idx - bounds) {
-                model->list_offset = CLAMP(model->item_idx - 1, model->item_cnt - bounds, 0);
+                model->list_offset =
+                    CLAMP(model->item_idx - 1, (int32_t)model->item_cnt - bounds, 0);
             }
 
             return true;
@@ -77,9 +80,10 @@ void archive_set_item_count(ArchiveBrowserView* browser, uint32_t count) {
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
             model->item_cnt = count;
-            model->item_idx = CLAMP(model->item_idx, model->item_cnt - 1, 0);
+            model->item_idx = CLAMP(model->item_idx, (int32_t)model->item_cnt - 1, 0);
             return false;
         });
+    archive_update_offset(browser);
 }
 
 void archive_file_array_rm_selected(ArchiveBrowserView* browser) {
@@ -93,7 +97,7 @@ void archive_file_array_rm_selected(ArchiveBrowserView* browser) {
                 model->item_idx - model->array_offset,
                 model->item_idx - model->array_offset + 1);
             model->item_cnt--;
-            model->item_idx = CLAMP(model->item_idx, model->item_cnt - 1, 0);
+            model->item_idx = CLAMP(model->item_idx, (int32_t)model->item_cnt - 1, 0);
             items_cnt = model->item_cnt;
             return false;
         });
@@ -112,14 +116,14 @@ void archive_file_array_swap(ArchiveBrowserView* browser, int8_t dir) {
         browser->view, (ArchiveBrowserViewModel * model) {
             ArchiveFile_t temp;
             size_t array_size = files_array_size(model->files) - 1;
-            uint8_t swap_idx = CLAMP(model->item_idx + dir, array_size, 0);
+            uint8_t swap_idx = CLAMP((size_t)(model->item_idx + dir), array_size, 0u);
 
             if(model->item_idx == 0 && dir < 0) {
                 ArchiveFile_t_init(&temp);
                 files_array_pop_at(&temp, model->files, array_size);
                 files_array_push_at(model->files, model->item_idx, temp);
                 ArchiveFile_t_clear(&temp);
-            } else if(model->item_idx == array_size && dir > 0) {
+            } else if(((uint32_t)model->item_idx == array_size) && (dir > 0)) {
                 ArchiveFile_t_init(&temp);
                 files_array_pop_at(&temp, model->files, 0);
                 files_array_push_at(model->files, array_size, temp);
@@ -156,7 +160,7 @@ bool archive_file_array_load(ArchiveBrowserView* browser, int8_t dir) {
                 } else {
                     offset_new = model->item_idx - FILE_LIST_BUF_LEN / 4 * 1;
                 }
-                offset_new = CLAMP(offset_new, model->item_cnt - FILE_LIST_BUF_LEN, 0);
+                offset_new = CLAMP(offset_new, (int32_t)model->item_cnt - FILE_LIST_BUF_LEN, 0);
             }
             return false;
         });
@@ -195,7 +199,7 @@ ArchiveFile_t* archive_get_file_at(ArchiveBrowserView* browser, size_t idx) {
 
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
-            idx = CLAMP(idx - model->array_offset, files_array_size(model->files), 0);
+            idx = CLAMP(idx - model->array_offset, files_array_size(model->files), 0u);
             selected = files_array_size(model->files) ? files_array_get(model->files, idx) : NULL;
             return false;
         });
@@ -246,6 +250,7 @@ void archive_set_tab(ArchiveBrowserView* browser, ArchiveTabEnum tab) {
         });
 }
 void archive_set_last_tab(ArchiveBrowserView* browser, ArchiveTabEnum tab) {
+    UNUSED(tab); // FIXME?
     furi_assert(browser);
 
     with_view_model(
@@ -396,8 +401,6 @@ void archive_enter_dir(ArchiveBrowserView* browser, string_t name) {
         return;
     }
 
-    archive_dir_count_items(browser, string_get_cstr(name));
-
     if(string_cmp(browser->path, name) != 0) {
         with_view_model(
             browser->view, (ArchiveBrowserViewModel * model) {
@@ -410,6 +413,7 @@ void archive_enter_dir(ArchiveBrowserView* browser, string_t name) {
         string_set(browser->path, name);
     }
 
+    archive_dir_count_items(browser, string_get_cstr(name));
     archive_switch_dir(browser, string_get_cstr(browser->path));
 }
 

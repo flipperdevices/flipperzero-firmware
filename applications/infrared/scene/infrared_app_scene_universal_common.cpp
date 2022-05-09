@@ -25,6 +25,7 @@ static void infrared_progress_back_callback(void* context) {
     auto app = static_cast<InfraredApp*>(context);
 
     InfraredAppEvent infrared_event = {
+        .payload = {.dummy = 0},
         .type = InfraredAppEvent::Type::Back,
     };
     app->get_view_manager()->clear_events();
@@ -56,7 +57,11 @@ bool InfraredAppSceneUniversalCommon::on_event(InfraredApp* app, InfraredAppEven
     if(brute_force_started) {
         if(event->type == InfraredAppEvent::Type::Tick) {
             auto view_manager = app->get_view_manager();
-            InfraredAppEvent tick_event = {.type = InfraredAppEvent::Type::Tick};
+            app->notify_blink_send();
+            InfraredAppEvent tick_event = {
+                .payload = {.dummy = 0},
+                .type = InfraredAppEvent::Type::Tick,
+            };
             view_manager->send_event(&tick_event);
             bool result = brute_force.send_next_bruteforce();
             if(result) {
@@ -81,6 +86,7 @@ bool InfraredAppSceneUniversalCommon::on_event(InfraredApp* app, InfraredAppEven
                 DOLPHIN_DEED(DolphinDeedIrBruteForce);
                 brute_force_started = true;
                 show_popup(app, record_amount);
+                app->notify_blink_send();
             } else {
                 app->switch_to_previous_scene();
             }

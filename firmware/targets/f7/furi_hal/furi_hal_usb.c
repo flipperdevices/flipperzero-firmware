@@ -1,7 +1,6 @@
 #include "furi_hal_version.h"
 #include "furi_hal_usb_i.h"
 #include "furi_hal_usb.h"
-#include "furi_hal_vcp.h"
 #include <furi_hal_power.h>
 #include <stm32wbxx_ll_pwr.h>
 #include <furi.h>
@@ -77,7 +76,9 @@ void furi_hal_usb_init(void) {
     usb.enabled = false;
     usb.if_cur = NULL;
     NVIC_SetPriority(USB_LP_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
+    NVIC_SetPriority(USB_HP_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
     NVIC_EnableIRQ(USB_LP_IRQn);
+    NVIC_EnableIRQ(USB_HP_IRQn);
 
     usb.thread = furi_thread_alloc();
     furi_thread_set_name(usb.thread, "UsbDriver");
@@ -188,6 +189,9 @@ void furi_hal_usb_set_state_callback(FuriHalUsbStateCallback cb, void* ctx) {
 }
 
 static void reset_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
+    UNUSED(dev);
+    UNUSED(event);
+    UNUSED(ep);
     osThreadFlagsSet(furi_thread_get_thread_id(usb.thread), EventReset);
     if(usb.callback != NULL) {
         usb.callback(FuriHalUsbStateEventReset, usb.cb_ctx);
@@ -195,6 +199,9 @@ static void reset_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
 }
 
 static void susp_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
+    UNUSED(dev);
+    UNUSED(event);
+    UNUSED(ep);
     if((usb.if_cur != NULL) && (usb.connected == true)) {
         usb.connected = false;
         usb.if_cur->suspend(&udev);
@@ -207,6 +214,9 @@ static void susp_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
 }
 
 static void wkup_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
+    UNUSED(dev);
+    UNUSED(event);
+    UNUSED(ep);
     if((usb.if_cur != NULL) && (usb.connected == false)) {
         usb.connected = true;
         usb.if_cur->wakeup(&udev);
@@ -219,6 +229,7 @@ static void wkup_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
 }
 
 static int32_t furi_hal_usb_thread(void* context) {
+    UNUSED(context);
     bool usb_request_pending = false;
     uint8_t usb_wait_time = 0;
     FuriHalUsbInterface* if_new = NULL;

@@ -28,7 +28,7 @@ static void battery_test_battery_info_update_model(void* context) {
         .health = app->info.health,
     };
     battery_info_set_data(app->batery_info, &battery_info_data);
-    notification_message(app->notifications, &sequence_display_on);
+    notification_message(app->notifications, &sequence_display_backlight_on);
 }
 
 BatteryTestApp* battery_test_alloc() {
@@ -89,6 +89,7 @@ void battery_test_free(BatteryTestApp* app) {
 }
 
 int32_t battery_test_app(void* p) {
+    UNUSED(p);
     BatteryTestApp* app = battery_test_alloc();
     // Disable battery low level notification
     power_enable_low_battery_level_notification(app->power, false);

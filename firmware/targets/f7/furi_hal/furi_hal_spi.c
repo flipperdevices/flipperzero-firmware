@@ -1,5 +1,6 @@
 #include "furi_hal_spi.h"
 #include "furi_hal_resources.h"
+#include <furi_hal_power.h>
 
 #include <stdbool.h>
 #include <string.h>
@@ -55,6 +56,8 @@ void furi_hal_spi_bus_handle_deinit(FuriHalSpiBusHandle* handle) {
 void furi_hal_spi_acquire(FuriHalSpiBusHandle* handle) {
     furi_assert(handle);
 
+    furi_hal_power_insomnia_enter();
+
     handle->bus->callback(handle->bus, FuriHalSpiBusEventLock);
     handle->bus->callback(handle->bus, FuriHalSpiBusEventActivate);
 
@@ -75,9 +78,12 @@ void furi_hal_spi_release(FuriHalSpiBusHandle* handle) {
     // Bus events
     handle->bus->callback(handle->bus, FuriHalSpiBusEventDeactivate);
     handle->bus->callback(handle->bus, FuriHalSpiBusEventUnlock);
+
+    furi_hal_power_insomnia_exit();
 }
 
 static void furi_hal_spi_bus_end_txrx(FuriHalSpiBusHandle* handle, uint32_t timeout) {
+    UNUSED(timeout); // FIXME
     while(LL_SPI_GetTxFIFOLevel(handle->bus->spi) != LL_SPI_TX_FIFO_EMPTY)
         ;
     while(LL_SPI_IsActiveFlag_BSY(handle->bus->spi))

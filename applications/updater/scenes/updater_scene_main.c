@@ -25,6 +25,7 @@ static void sd_mount_callback(const void* message, void* context) {
 
 void updater_scene_main_on_enter(void* context) {
     Updater* updater = (Updater*)context;
+    notification_message(updater->notification, &sequence_display_backlight_enforce_on);
     UpdaterMainView* main_view = updater->main_view;
 
     FuriPubSubSubscription* sub =
@@ -44,8 +45,8 @@ void updater_scene_main_on_enter(void* context) {
     view_dispatcher_switch_to_view(updater->view_dispatcher, UpdaterViewMain);
 }
 
-static void updater_scene_restart_to_postupdate() {
-    furi_hal_rtc_set_boot_mode(FuriHalRtcBootModePostUpdate);
+static void updater_scene_cancel_update() {
+    update_operation_disarm();
     furi_hal_power_reset();
 }
 
@@ -56,7 +57,7 @@ bool updater_scene_main_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeTick) {
         if(!update_task_is_running(updater->update_task)) {
             if(updater->idle_ticks++ >= (UPDATE_DELAY_OPERATION_ERROR / UPDATER_APP_TICK)) {
-                updater_scene_restart_to_postupdate();
+                updater_scene_cancel_update();
             }
         } else {
             updater->idle_ticks = 0;
@@ -73,7 +74,7 @@ bool updater_scene_main_on_event(void* context, SceneManagerEvent event) {
 
         case UpdaterCustomEventCancelUpdate:
             if(!update_task_is_running(updater->update_task)) {
-                updater_scene_restart_to_postupdate();
+                updater_scene_cancel_update();
             }
             consumed = true;
             break;
@@ -92,6 +93,7 @@ bool updater_scene_main_on_event(void* context, SceneManagerEvent event) {
 void updater_scene_main_on_exit(void* context) {
     Updater* updater = (Updater*)context;
 
+    notification_message(updater->notification, &sequence_display_backlight_enforce_auto);
     furi_pubsub_unsubscribe(
         storage_get_pubsub(updater->storage), updater_main_get_storage_pubsub(updater->main_view));
 

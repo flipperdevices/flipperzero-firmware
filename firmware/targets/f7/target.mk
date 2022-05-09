@@ -18,7 +18,10 @@ endif
 
 MCU_FLAGS		= -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
-CFLAGS			+= $(MCU_FLAGS) -DSTM32WB55xx -Wall -fdata-sections -ffunction-sections
+# Warnings configuration
+CFLAGS			+= -Wall -Wextra -Wredundant-decls
+
+CFLAGS			+= $(MCU_FLAGS) -DSTM32WB55xx -fdata-sections -ffunction-sections
 LDFLAGS			+= $(MCU_FLAGS) -specs=nosys.specs -specs=nano.specs
 
 CPPFLAGS		+= -fno-rtti -fno-use-cxa-atexit -fno-exceptions
@@ -35,6 +38,7 @@ ASM_SOURCES += $(MXPROJECT_DIR)/startup_stm32wb55xx_cm4.s
 CUBE_DIR = ../lib/STM32CubeWB
 CFLAGS += \
 	-DUSE_FULL_LL_DRIVER \
+	-DUSE_FULL_ASSERT \
 	-DHAVE_FREERTOS
 CFLAGS += \
 	-I$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Inc \
@@ -119,6 +123,10 @@ ifeq ($(FURI_HAL_USB_VCP_DEBUG), 1)
 CFLAGS += -DFURI_HAL_USB_VCP_DEBUG
 endif
 
+ifeq ($(FURI_HAL_POWER_DEEP_SLEEP_ENABLED), 1)
+CFLAGS += -DFURI_HAL_POWER_DEEP_SLEEP_ENABLED
+endif
+
 FURI_HAL_SUBGHZ_TX_GPIO ?= 0
 ifneq ($(FURI_HAL_SUBGHZ_TX_GPIO), 0)
 CFLAGS += -DFURI_HAL_SUBGHZ_TX_GPIO=$(FURI_HAL_SUBGHZ_TX_GPIO)
@@ -126,6 +134,10 @@ endif
 
 ifeq ($(INVERT_RFID_IN), 1)
 CFLAGS += -DINVERT_RFID_IN
+endif
+
+ifeq ($(BLE_GLUE_DEBUG), 1)
+CFLAGS += -DBLE_GLUE_DEBUG
 endif
 
 FURI_HAL_DIR = $(TARGET_DIR)/furi_hal

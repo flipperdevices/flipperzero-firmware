@@ -1,6 +1,6 @@
 #include "lfrfid_app_scene_write.h"
 
-void LfRfidAppSceneWrite::on_enter(LfRfidApp* app, bool need_restore) {
+void LfRfidAppSceneWrite::on_enter(LfRfidApp* app, bool /* need_restore */) {
     card_not_supported = false;
     string_init(data_string);
 
@@ -32,7 +32,7 @@ bool LfRfidAppSceneWrite::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
 
         switch(result) {
         case RfidWorker::WriteResult::Nothing:
-            notification_message(app->notification, &sequence_blink_yellow_10);
+            notification_message(app->notification, &sequence_blink_magenta_10);
             break;
         case RfidWorker::WriteResult::Ok:
             notification_message(app->notification, &sequence_success);
@@ -51,7 +51,7 @@ bool LfRfidAppSceneWrite::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
                     AlignTop);
                 card_not_supported = true;
             }
-            notification_message(app->notification, &sequence_blink_red_10);
+            notification_message(app->notification, &sequence_blink_yellow_10);
             break;
         }
     }

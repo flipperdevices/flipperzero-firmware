@@ -12,7 +12,7 @@
  *
  */
 
-#define TAG "SubGhzProtocolCAME"
+#define TAG "SubGhzProtocolPrinceton"
 
 static const SubGhzBlockConst subghz_protocol_princeton_const = {
     .te_short = 400,
@@ -28,6 +28,7 @@ struct SubGhzProtocolDecoderPrinceton {
     SubGhzBlockGeneric generic;
 
     uint32_t te;
+    uint32_t last_data;
 };
 
 struct SubGhzProtocolEncoderPrinceton {
@@ -79,6 +80,7 @@ const SubGhzProtocol subghz_protocol_princeton = {
 };
 
 void* subghz_protocol_encoder_princeton_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
     SubGhzProtocolEncoderPrinceton* instance = malloc(sizeof(SubGhzProtocolEncoderPrinceton));
 
     instance->base.protocol = &subghz_protocol_princeton;
@@ -193,6 +195,7 @@ LevelDuration subghz_protocol_encoder_princeton_yield(void* context) {
 }
 
 void* subghz_protocol_decoder_princeton_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
     SubGhzProtocolDecoderPrinceton* instance = malloc(sizeof(SubGhzProtocolDecoderPrinceton));
     instance->base.protocol = &subghz_protocol_princeton;
     instance->generic.protocol_name = instance->base.protocol->name;
@@ -209,6 +212,7 @@ void subghz_protocol_decoder_princeton_reset(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderPrinceton* instance = context;
     instance->decoder.parser_step = PrincetonDecoderStepReset;
+    instance->last_data = 0;
 }
 
 void subghz_protocol_decoder_princeton_feed(void* context, bool level, uint32_t duration) {
@@ -236,20 +240,23 @@ void subghz_protocol_decoder_princeton_feed(void* context, bool level, uint32_t 
         break;
     case PrincetonDecoderStepCheckDuration:
         if(!level) {
-            if(duration >= (subghz_protocol_princeton_const.te_short * 10 +
+            if(duration >= ((uint32_t)subghz_protocol_princeton_const.te_short * 10 +
                             subghz_protocol_princeton_const.te_delta)) {
                 instance->decoder.parser_step = PrincetonDecoderStepSaveDuration;
                 if(instance->decoder.decode_count_bit ==
                    subghz_protocol_princeton_const.min_count_bit_for_found) {
-                    instance->te /= (instance->decoder.decode_count_bit * 4 + 1);
+                    if(instance->last_data == instance->decoder.decode_data) {
+                        instance->te /= (instance->decoder.decode_count_bit * 4 + 1);
 
-                    instance->generic.data = instance->decoder.decode_data;
-                    instance->generic.data_count_bit = instance->decoder.decode_count_bit;
-                    instance->generic.serial = instance->decoder.decode_data >> 4;
-                    instance->generic.btn = (uint8_t)instance->decoder.decode_data & 0x00000F;
+                        instance->generic.data = instance->decoder.decode_data;
+                        instance->generic.data_count_bit = instance->decoder.decode_count_bit;
+                        instance->generic.serial = instance->decoder.decode_data >> 4;
+                        instance->generic.btn = (uint8_t)instance->decoder.decode_data & 0x00000F;
 
-                    if(instance->base.callback)
-                        instance->base.callback(&instance->base, instance->base.context);
+                        if(instance->base.callback)
+                            instance->base.callback(&instance->base, instance->base.context);
+                    }
+                    instance->last_data = instance->decoder.decode_data;
                 }
                 instance->decoder.decode_data = 0;
                 instance->decoder.decode_count_bit = 0;
