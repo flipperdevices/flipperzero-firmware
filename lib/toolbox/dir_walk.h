@@ -13,10 +13,7 @@ typedef enum {
     DirWalkLast, /**< Last element */
 } DirWalkResult;
 
-typedef enum {
-    DirWalkForward, /**< Forward direction (parent folder first) */
-    DirWalkBackward, /**< Backward direction (parent folder last) */
-} DirWalkMode;
+typedef bool (*DirWalkFilterCb)(const char* name, FileInfo* fileinfo, void* ctx);
 
 /**
  * Allocate DirWalk
@@ -32,14 +29,28 @@ DirWalk* dir_walk_alloc(Storage* storage);
 void dir_walk_free(DirWalk* dir_walk);
 
 /**
+ * Set recursive mode (true by default)
+ * @param dir_walk 
+ * @param recursive 
+ */
+void dir_walk_set_recursive(DirWalk* dir_walk, bool recursive);
+
+/**
+ * Set filter callback (Should return true if the data is valid)
+ * @param dir_walk 
+ * @param cb 
+ * @param context 
+ */
+void dir_walk_set_filter_cb(DirWalk* dir_walk, DirWalkFilterCb cb, void* context);
+
+/**
  * Open directory 
  * @param dir_walk 
  * @param path 
- * @param mode 
  * @return true 
  * @return false 
  */
-bool dir_walk_open(DirWalk* dir_walk, const char* path, DirWalkMode mode);
+bool dir_walk_open(DirWalk* dir_walk, const char* path);
 
 /**
  * Get error id

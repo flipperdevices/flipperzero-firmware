@@ -150,7 +150,7 @@ static void storage_cli_tree(Cli* cli, string_t path) {
         string_t name;
         string_init(name);
 
-        if(dir_walk_open(dir_walk, string_get_cstr(path), DirWalkForward)) {
+        if(dir_walk_open(dir_walk, string_get_cstr(path))) {
             FileInfo fileinfo;
             bool read_done = false;
 

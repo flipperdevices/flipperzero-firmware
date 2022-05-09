@@ -358,7 +358,7 @@ static FS_Error
     do {
         if(error != FSE_OK) break;
 
-        if(!dir_walk_open(dir_walk, old_path, DirWalkForward)) {
+        if(!dir_walk_open(dir_walk, old_path)) {
             error = dir_walk_get_error(dir_walk);
             break;
         }

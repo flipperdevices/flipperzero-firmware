@@ -132,39 +132,26 @@ static void storage_dirs_create(Storage* storage, const char* base) {
 }
 
 MU_TEST_1(test_dirwalk, Storage* storage) {
-    StorageTestPath** paths_fw = storage_test_paths_alloc();
-    StorageTestPath** paths_bw = storage_test_paths_alloc();
+    StorageTestPath** paths = storage_test_paths_alloc();
 
     DirWalk* dir_walk = dir_walk_alloc(storage);
     string_t path;
     string_init(path);
     FileInfo fileinfo;
 
-    // TODO think about how to test order
-
-    mu_check(dir_walk_open(dir_walk, "/ext/dirwalk", DirWalkForward));
+    mu_check(dir_walk_open(dir_walk, "/ext/dirwalk"));
     while(dir_walk_read(dir_walk, path, &fileinfo) == DirWalkOK) {
         string_right(path, strlen("/ext/dirwalk/"));
         mu_check(storage_test_paths_mark(
-            paths_fw, string_get_cstr(path), (fileinfo.flags & FSF_DIRECTORY)));
-    }
-    dir_walk_close(dir_walk);
-
-    mu_check(dir_walk_open(dir_walk, "/ext/dirwalk", DirWalkBackward));
-    while(dir_walk_read(dir_walk, path, &fileinfo) == DirWalkOK) {
-        string_right(path, strlen("/ext/dirwalk/"));
-        mu_check(storage_test_paths_mark(
-            paths_bw, string_get_cstr(path), (fileinfo.flags & FSF_DIRECTORY)));
+            paths, string_get_cstr(path), (fileinfo.flags & FSF_DIRECTORY)));
     }
 
     dir_walk_free(dir_walk);
     string_clear(path);
 
-    mu_check(storage_test_paths_check(paths_fw) == false);
-    mu_check(storage_test_paths_check(paths_bw) == false);
+    mu_check(storage_test_paths_check(paths) == false);
 
-    storage_test_paths_free(paths_fw);
-    storage_test_paths_free(paths_bw);
+    storage_test_paths_free(paths);
 }
 
 MU_TEST_SUITE(test_dirwalk_suite) {
