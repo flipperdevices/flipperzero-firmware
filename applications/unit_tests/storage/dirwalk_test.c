@@ -216,6 +216,8 @@ MU_TEST_1(test_dirwalk_no_recursive, Storage* storage) {
 }
 
 static bool test_dirwalk_filter_no_folder_ext(const char* name, FileInfo* fileinfo, void* ctx) {
+    UNUSED(ctx);
+
     // only files
     if(!(fileinfo->flags & FSF_DIRECTORY)) {
         // with ".test" in name
