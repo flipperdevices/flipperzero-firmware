@@ -260,22 +260,22 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
     string_init(manifest_path);
 
     do {
-        update_task_set_progress(update_task, UpdateTaskStageProgress, 10);
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 13);
+        if(!furi_hal_version_do_i_belong_here()) {
+            break;
+        }
+
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 20);
         if(!update_operation_get_current_package_manifest_path(
                update_task->storage, manifest_path)) {
             break;
         }
 
         path_extract_dirname(string_get_cstr(manifest_path), update_task->update_path);
-        update_task_set_progress(update_task, UpdateTaskStageProgress, 15);
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 30);
 
         UpdateManifest* manifest = update_task->manifest;
         if(!update_manifest_init(manifest, string_get_cstr(manifest_path))) {
-            break;
-        }
-
-        update_task_set_progress(update_task, UpdateTaskStageProgress, 30);
-        if(!furi_hal_version_do_i_belong_here()) {
             break;
         }
 
@@ -299,7 +299,7 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
             break;
         }
 
-        update_task_set_progress(update_task, UpdateTaskStageProgress, 75);
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 80);
         if((update_task->state.groups & UpdateTaskStageGroupRadio) &&
            (!update_task_check_file_exists(update_task, manifest->radio_image) ||
             (manifest->radio_version.version.type == 0))) {
