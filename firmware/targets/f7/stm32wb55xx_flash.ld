@@ -151,6 +151,7 @@ SECTIONS
     *(.bss)
     *(.bss*)
     *(COMMON)
+    *(*_DRIVER_CONTEXT)
 
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
@@ -158,7 +159,7 @@ SECTIONS
   } >RAM1
 
   /* User_heap_stack section, used to check that there is enough RAM left */
-  ._user_heap_stack :
+  ._user_heap_stack(NOLOAD):
   {
     . = ALIGN(8);
     __heap_start__ = .;
@@ -172,7 +173,7 @@ SECTIONS
   .free_flash(NOLOAD):
   {
     __free_flash_start__ = .;
-    /* . = ORIGIN(FLASH) + LENGTH(FLASH); */
+    . = ORIGIN(FLASH) + LENGTH(FLASH);
   } >FLASH 
 
   /* Remove information from the standard libraries */
