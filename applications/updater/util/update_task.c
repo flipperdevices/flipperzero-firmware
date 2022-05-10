@@ -261,19 +261,26 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
 
     do {
         update_task_set_progress(update_task, UpdateTaskStageProgress, 10);
-        if(!update_operation_get_current_package_path(
-               update_task->storage, update_task->update_path)) {
+        if(!update_operation_get_current_package_manifest_path(
+               update_task->storage, manifest_path)) {
             break;
         }
 
-        path_concat(
-            string_get_cstr(update_task->update_path),
-            UPDATE_MANIFEST_DEFAULT_NAME,
-            manifest_path);
-        update_task_set_progress(update_task, UpdateTaskStageProgress, 30);
+        path_extract_dirname(string_get_cstr(manifest_path), update_task->update_path);
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 15);
 
         UpdateManifest* manifest = update_task->manifest;
         if(!update_manifest_init(manifest, string_get_cstr(manifest_path))) {
+            break;
+        }
+
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 30); 
+        if (!furi_hal_version_do_i_belong_here()) {
+            break;
+        }
+
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 45); 
+        if (manifest->target != furi_hal_version_get_hw_target()) {
             break;
         }
 
@@ -286,13 +293,14 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
             }
         }
 
-        update_task_set_progress(update_task, UpdateTaskStageProgress, 50);
+
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 60);
         if((update_task->state.groups & UpdateTaskStageGroupFirmware) &&
            !update_task_check_file_exists(update_task, manifest->firmware_dfu_image)) {
             break;
         }
 
-        update_task_set_progress(update_task, UpdateTaskStageProgress, 70);
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 75);
         if((update_task->state.groups & UpdateTaskStageGroupRadio) &&
            (!update_task_check_file_exists(update_task, manifest->radio_image) ||
             (manifest->radio_version.version.type == 0))) {

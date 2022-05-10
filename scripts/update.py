@@ -102,7 +102,7 @@ class Main(App):
         file.writeKey("Firmware", dfu_basename)
         file.writeKey("Radio", radiobin_basename or "")
         file.writeKey("Radio address", self.int2ffhex(radio_addr))
-        file.writeKey("Radio version", self.int2ffhex(radio_version))
+        file.writeKey("Radio version", self.int2ffhex(radio_version, 12))
         if radiobin_basename:
             file.writeKey("Radio CRC", self.int2ffhex(self.crc(self.args.radiobin)))
         else:
@@ -149,11 +149,10 @@ class Main(App):
         return " ".join(f"{b:02X}" for b in value)
 
     @staticmethod
-    def int2ffhex(value: int):
-        n_hex_bytes = 4
+    def int2ffhex(value: int, n_hex_syms=8):
         if value:
-            n_hex_bytes = math.ceil(math.ceil(math.log2(value)) / 8) * 2
-        fmtstr = f"%0{n_hex_bytes}X"
+            n_hex_syms = math.ceil(math.ceil(math.log2(value)) / 8) * 2
+        fmtstr = f"%0{n_hex_syms}X"
         hexstr = fmtstr % value
         return " ".join(list(Main.batch(hexstr, 2))[::-1])
 

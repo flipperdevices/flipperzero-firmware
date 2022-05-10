@@ -172,8 +172,8 @@ SECTIONS
   .free_flash(NOLOAD):
   {
     __free_flash_start__ = .;
-    . = ORIGIN(FLASH) + LENGTH(FLASH);
-  } >FLASH
+    /* . = ORIGIN(FLASH) + LENGTH(FLASH); */
+  } >FLASH 
 
   /* Remove information from the standard libraries */
   /DISCARD/ :

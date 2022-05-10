@@ -68,7 +68,7 @@ static bool
     string_clear(filetype);
 
     if(update_manifest->valid) {
-        /* Optional fields - we can have dfu, radio, or both */
+        /* Optional fields - we can have dfu, radio, resources, or any combination */
         flipper_format_read_string(
             flipper_file, MANIFEST_KEY_DFU_FILE, update_manifest->firmware_dfu_image);
         flipper_format_read_string(

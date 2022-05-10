@@ -26,6 +26,8 @@ typedef enum {
     UpdatePrepareResultManifestInvalid,
     UpdatePrepareResultStageMissing,
     UpdatePrepareResultStageIntegrityError,
+    UpdatePrepareResultManifestPointerError,
+    UpdatePrepareResultTargetMismatch
 } UpdatePrepareResult;
 
 const char* update_operation_describe_preparation_result(const UpdatePrepareResult value);
@@ -38,26 +40,12 @@ const char* update_operation_describe_preparation_result(const UpdatePrepareResu
 UpdatePrepareResult update_operation_prepare(const char* manifest_file_path);
 
 /* 
- * Gets update package index to pass in RTC registers
- * @param storage Storage API
- * @param update_package_dir Package directory name
- * @return int32_t <=0 - error, >0 - update index value
- */
-int32_t update_operation_get_package_index(Storage* storage, const char* update_package_dir);
-
-/* 
  * Gets filesystem path for current update package
  * @param storage Storage API
- * @param out_path Path to directory with manifest & related files. Must be initialized
+ * @param out_path Path to manifest. Must be initialized
  * @return true if path was restored successfully
  */
-bool update_operation_get_current_package_path(Storage* storage, string_t out_path);
-
-/* 
- * Stores given update index in RTC registers
- * @param index Value to store
- */
-void update_operation_persist_package_index(int32_t index);
+bool update_operation_get_current_package_manifest_path(Storage* storage, string_t out_path);
 
 /* 
  * Checks if an update operation step is pending after reset

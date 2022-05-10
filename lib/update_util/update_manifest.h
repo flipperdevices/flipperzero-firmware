@@ -12,6 +12,7 @@ extern "C" {
 /* Paths don't include /ext -- because at startup SD card is mounted as root */
 #define UPDATE_DIR_DEFAULT_REL_PATH "/update"
 #define UPDATE_MANIFEST_DEFAULT_NAME "update.fuf"
+#define UPDATE_MANIFEST_POINTER_FILE_NAME ".fupdate"
 
 typedef union {
     uint8_t raw[6];
