@@ -9,6 +9,7 @@ extern "C" {
 #endif
 
 #define UPDATE_OPERATION_ROOT_DIR_PACKAGE_MAGIC 0
+#define UPDATE_OPERATION_MAX_MANIFEST_PATH_LEN 255u
 
 /* 
  * Checks if supplied full manifest path is valid

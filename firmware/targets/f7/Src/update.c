@@ -12,7 +12,6 @@
 #include <toolbox/crc32_calc.h>
 
 #define FS_ROOT_PATH "/"
-#define UPDATE_POINTER_MAX_PATH_LENGTH 255u
 #define UPDATE_POINTER_FILE_PATH FS_ROOT_PATH UPDATE_MANIFEST_POINTER_FILE_NAME
 
 static FATFS* pfs = NULL;
@@ -106,17 +105,18 @@ static bool flipper_update_get_manifest_path(string_t out_path) {
     FIL file;
     FILINFO stat;
     uint16_t size_read = 0;
-    char manifest_name_buf[UPDATE_POINTER_MAX_PATH_LENGTH] = {0};
+    char manifest_name_buf[UPDATE_OPERATION_MAX_MANIFEST_PATH_LEN] = {0};
 
     string_reset(out_path);
     CHECK_FRESULT(f_stat(UPDATE_POINTER_FILE_PATH, &stat));
     CHECK_FRESULT(f_open(&file, UPDATE_POINTER_FILE_PATH, FA_OPEN_EXISTING | FA_READ));
     do {
-        if(f_read(&file, manifest_name_buf, UPDATE_POINTER_MAX_PATH_LENGTH, &size_read) != FR_OK) {
+        if(f_read(&file, manifest_name_buf, UPDATE_OPERATION_MAX_MANIFEST_PATH_LEN, &size_read) !=
+           FR_OK) {
             break;
         }
 
-        if((size_read == 0) || (size_read == UPDATE_POINTER_MAX_PATH_LENGTH)) {
+        if((size_read == 0) || (size_read == UPDATE_OPERATION_MAX_MANIFEST_PATH_LEN)) {
             break;
         }
         string_set_str(out_path, manifest_name_buf);

@@ -12,7 +12,6 @@
 #define UPDATE_ROOT_DIR "/ext" UPDATE_DIR_DEFAULT_REL_PATH
 #define UPDATE_PREFIX "/ext" UPDATE_DIR_DEFAULT_REL_PATH "/"
 #define UPDATE_SUFFIX "/" UPDATE_MANIFEST_DEFAULT_NAME
-#define MAX_DIR_NAME_LEN 250
 
 static const char* update_prepare_result_descr[] = {
     [UpdatePrepareResultOK] = "OK",
@@ -43,13 +42,13 @@ static bool update_operation_get_current_package_path_rtc(Storage* storage, stri
     uint32_t iter_index = 0;
     File* dir = storage_file_alloc(storage);
     FileInfo fi = {0};
-    char* name_buffer = malloc(MAX_DIR_NAME_LEN);
+    char* name_buffer = malloc(UPDATE_OPERATION_MAX_MANIFEST_PATH_LEN);
     do {
         if(!storage_dir_open(dir, UPDATE_ROOT_DIR)) {
             break;
         }
 
-        while(storage_dir_read(dir, &fi, name_buffer, MAX_DIR_NAME_LEN)) {
+        while(storage_dir_read(dir, &fi, name_buffer, UPDATE_OPERATION_MAX_MANIFEST_PATH_LEN)) {
             if(++iter_index == update_index) {
                 found = true;
                 path_append(out_path, name_buffer);
@@ -114,6 +113,10 @@ static bool update_operation_persist_manifest_path(Storage* storage, const char*
     bool success = false;
     File* file = storage_file_alloc(storage);
     do {
+        if(manifest_path_len >= UPDATE_OPERATION_MAX_MANIFEST_PATH_LEN) {
+            break;
+        }
+
         if(!storage_file_open(file, UPDATE_FILE_POINTER_FN, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
             break;
         }
