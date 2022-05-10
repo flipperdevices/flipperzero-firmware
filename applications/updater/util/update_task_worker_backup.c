@@ -113,7 +113,7 @@ int32_t update_task_worker_backup_restore(void* context) {
         return UPDATE_TASK_NOERR;
     }
 
-    if (!update_task_parse_manifest(update_task)) {
+    if(!update_task_parse_manifest(update_task)) {
         return UPDATE_TASK_FAILED;
     }
 

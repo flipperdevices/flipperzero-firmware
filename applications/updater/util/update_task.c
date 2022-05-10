@@ -274,13 +274,13 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
             break;
         }
 
-        update_task_set_progress(update_task, UpdateTaskStageProgress, 30); 
-        if (!furi_hal_version_do_i_belong_here()) {
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 30);
+        if(!furi_hal_version_do_i_belong_here()) {
             break;
         }
 
-        update_task_set_progress(update_task, UpdateTaskStageProgress, 45); 
-        if (manifest->target != furi_hal_version_get_hw_target()) {
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 45);
+        if(manifest->target != furi_hal_version_get_hw_target()) {
             break;
         }
 
@@ -292,7 +292,6 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
                 update_task->state.total_progress_points += grp_descr->weight;
             }
         }
-
 
         update_task_set_progress(update_task, UpdateTaskStageProgress, 60);
         if((update_task->state.groups & UpdateTaskStageGroupFirmware) &&
