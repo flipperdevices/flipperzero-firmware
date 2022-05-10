@@ -798,7 +798,6 @@ void MenuFunctions::main(uint32_t currentTime)
     wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
     display_obj.exit_draw = false;
     this->orientDisplay();
-    //changeMenu(current_menu);
   }
   if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) ||
       (wifi_scan_obj.currentScanMode == OTA_UPDATE) ||
@@ -808,10 +807,6 @@ void MenuFunctions::main(uint32_t currentTime)
       this->orientDisplay();
       wifi_scan_obj.orient_display = false;
     }
-    //if ((display_obj.current_banner_pos <= 0) || (display_obj.current_banner_pos == SCREEN_WIDTH))
-    //{
-    //  this->drawStatusBar();
-    //}
     #ifndef MARAUDER_MINI
       if ((wifi_scan_obj.currentScanMode != LV_JOIN_WIFI) &&
           (wifi_scan_obj.currentScanMode != LV_ADD_SSID))
@@ -843,9 +838,7 @@ void MenuFunctions::main(uint32_t currentTime)
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_MIMIC) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
-      //(wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_LIST))
     display_obj.displayBuffer();
-  //Serial.println(wifi_scan_obj.freeRAM());
 
 
   // Pressed will be set true is there is a valid touch on the screen
@@ -859,44 +852,92 @@ void MenuFunctions::main(uint32_t currentTime)
 
 
   // This is if there are scans/attacks going on
-  if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) &&
-      (pressed) &&
-      (wifi_scan_obj.currentScanMode != OTA_UPDATE) &&
-      (wifi_scan_obj.currentScanMode != ESP_UPDATE) &&
-      (wifi_scan_obj.currentScanMode != SHOW_INFO))
-  {
-    // Stop the current scan
-    if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
-        (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
-        (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP) ||
-        (wifi_scan_obj.currentScanMode == WIFI_SCAN_PWN) ||
-        (wifi_scan_obj.currentScanMode == WIFI_SCAN_ESPRESSIF) ||
-        (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) ||
-        (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
-        (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
-        (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AUTH) ||
-        (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH) ||
-        (wifi_scan_obj.currentScanMode == WIFI_ATTACK_MIMIC) ||
-        (wifi_scan_obj.currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
-        (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
-        (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
-        (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
+  #ifndef MARAUDER_MINI
+    if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) &&
+        (pressed) &&
+        (wifi_scan_obj.currentScanMode != OTA_UPDATE) &&
+        (wifi_scan_obj.currentScanMode != ESP_UPDATE) &&
+        (wifi_scan_obj.currentScanMode != SHOW_INFO))
     {
-      Serial.println("Stopping scan...");
-      wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+      // Stop the current scan
+      if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_PWN) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_ESPRESSIF) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AUTH) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_MIMIC) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
+          (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
+          (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
+      {
+        Serial.println("Stopping scan...");
+        wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+  
+        // If we don't do this, the text and button coordinates will be off
+        display_obj.tft.init();
+  
+        // Take us back to the menu
+        changeMenu(current_menu);
+      }
+  
+      x = -1;
+      y = -1;
+  
+      return;
+    }
+  #endif
 
-      // If we don't do this, the text and button coordinates will be off
-      display_obj.tft.init();
+  #ifdef MARAUDER_MINI
 
-      // Take us back to the menu
-      changeMenu(current_menu);
+    bool c_btn_press = c_btn.justPressed();
+    
+    if ((c_btn_press) &&
+        (wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) &&
+        (wifi_scan_obj.currentScanMode != OTA_UPDATE) &&
+        (wifi_scan_obj.currentScanMode != ESP_UPDATE) &&
+        (wifi_scan_obj.currentScanMode != SHOW_INFO))
+    {
+      // Stop the current scan
+      if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_PWN) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_ESPRESSIF) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AUTH) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_MIMIC) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
+          (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
+          (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
+      {
+        Serial.println("Stopping scan...");
+        wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+  
+        // If we don't do this, the text and button coordinates will be off
+        display_obj.tft.init();
+  
+        // Take us back to the menu
+        changeMenu(current_menu);
+      }
+  
+      x = -1;
+      y = -1;
+  
+      return;
     }
 
-    x = -1;
-    y = -1;
+  #endif
 
-    return;
-  }
 
   // Check if any key coordinate boxes contain the touch coordinates
   // This is for when on a menu
@@ -981,7 +1022,7 @@ void MenuFunctions::main(uint32_t currentTime)
         Serial.println("Current menu index: " + (String)current_menu->selected);
       }
     }
-    if(c_btn.justPressed()){
+    if(c_btn_press){
       Serial.println("CENTER");
       current_menu->list->get(current_menu->selected).callable();
     }

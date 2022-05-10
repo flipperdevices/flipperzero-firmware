@@ -43,4 +43,10 @@ void CommandLine::parseCommand(String input) {
   else if (input == CLEARAP_CMD) {
     wifi_scan_obj.RunClearAPs();
   }
+
+  else if (input == SNIFF_BEACON_CMD) {
+    display_obj.clearScreen();
+    menu_function_obj.drawStatusBar();
+    wifi_scan_obj.StartScan(WIFI_SCAN_AP, TFT_MAGENTA);
+  }
 }
