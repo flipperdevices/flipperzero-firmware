@@ -135,6 +135,7 @@ SECTIONS
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
+    *(*_DRIVER_CONTEXT)
 
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
@@ -151,7 +152,6 @@ SECTIONS
     *(.bss)
     *(.bss*)
     *(COMMON)
-    *(*_DRIVER_CONTEXT)
 
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
