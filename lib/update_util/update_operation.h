@@ -10,6 +10,7 @@ extern "C" {
 
 #define UPDATE_OPERATION_ROOT_DIR_PACKAGE_MAGIC 0
 #define UPDATE_OPERATION_MAX_MANIFEST_PATH_LEN 255u
+#define UPDATE_OPERATION_MIN_MANIFEST_VERSION 2
 
 /* 
  * Checks if supplied full manifest path is valid
@@ -29,7 +30,8 @@ typedef enum {
     UpdatePrepareResultStageMissing,
     UpdatePrepareResultStageIntegrityError,
     UpdatePrepareResultManifestPointerError,
-    UpdatePrepareResultTargetMismatch
+    UpdatePrepareResultTargetMismatch,
+    UpdatePrepareResultOutdatedManifestVersion,
 } UpdatePrepareResult;
 
 const char* update_operation_describe_preparation_result(const UpdatePrepareResult value);

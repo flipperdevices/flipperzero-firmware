@@ -21,6 +21,7 @@ static const char* update_prepare_result_descr[] = {
     [UpdatePrepareResultStageMissing] = "Missing Stage2 loader",
     [UpdatePrepareResultStageIntegrityError] = "Corrupted Stage2 loader",
     [UpdatePrepareResultManifestPointerError] = "Failed to create update pointer file",
+    [UpdatePrepareResultOutdatedManifestVersion] = "Update package is too old",
 };
 
 const char* update_operation_describe_preparation_result(const UpdatePrepareResult value) {
@@ -146,6 +147,11 @@ UpdatePrepareResult update_operation_prepare(const char* manifest_file_path) {
 
         if(!update_manifest_init(manifest, manifest_file_path)) {
             result = UpdatePrepareResultManifestInvalid;
+            break;
+        }
+
+        if(manifest->manifest_version < UPDATE_OPERATION_MIN_MANIFEST_VERSION) {
+            result = UpdatePrepareResultOutdatedManifestVersion;
             break;
         }
 

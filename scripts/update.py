@@ -13,6 +13,7 @@ import math
 
 
 class Main(App):
+    UPDATE_MANIFEST_VERSION = 2
     UPDATE_MANIFEST_NAME = "update.fuf"
 
     #  No compression, plain tar
@@ -93,7 +94,9 @@ class Main(App):
             )
 
         file = FlipperFormatFile()
-        file.setHeader("Flipper firmware upgrade configuration", 1)
+        file.setHeader(
+            "Flipper firmware upgrade configuration", self.UPDATE_MANIFEST_VERSION
+        )
         file.writeKey("Info", self.args.version)
         file.writeKey("Target", self.args.target[1:])  # dirty 'f' strip
         file.writeKey("Loader", stage_basename)

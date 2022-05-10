@@ -28,6 +28,7 @@ typedef union {
 _Static_assert(sizeof(UpdateManifestRadioVersion) == 6, "UpdateManifestRadioVersion size error");
 
 typedef struct {
+    uint32_t manifest_version;
     string_t version;
     uint32_t target;
     string_t staged_loader_file;

@@ -279,7 +279,12 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
             break;
         }
 
-        update_task_set_progress(update_task, UpdateTaskStageProgress, 45);
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 40);
+        if(manifest->manifest_version < UPDATE_OPERATION_MIN_MANIFEST_VERSION) {
+            break;
+        }
+
+        update_task_set_progress(update_task, UpdateTaskStageProgress, 50);
         if(manifest->target != furi_hal_version_get_hw_target()) {
             break;
         }
