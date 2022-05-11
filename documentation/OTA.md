@@ -1,6 +1,6 @@
 # Executing code from RAM
 
-In Flipper firmware, we have a special boot mode that loads a specially crafted system image into RAM and transfers control to it. System image executing in RAM has full write access to whole Flipper's flash memory - something that's not possible when running main code from same flash.
+In Flipper firmware, we have a special boot mode that loads a specially crafted system image into RAM and transfers control to it. System image executing in RAM has full write access to whole Flipper's flash memory — something that's not possible when running main code from same flash.
 
 We leverage that boot mode to perform OTA firmware updates, including operations on radio stack running on second MCU core.
 
@@ -18,25 +18,25 @@ So, before taking any action upon the firmware, we back up current configuration
 
 ## 2. Performing device update
 
-For that, main firmware loads an updater image - a customized build of main Flipper firmware - into RAM and runs it. Updater performs operations on system flash that are described by an Update manifest file.
+For that, main firmware loads an updater image - a customized build of main Flipper firmware — into RAM and runs it. Updater performs operations on system flash that are described by an Update manifest file.
 
 First, if there's a Radio stack image bundled with the update, updater compares its version with currently installed one. If they don't match, updater performs stack deinstallation followed by writing and installing a new one. The installation itself is performed by proprietary software, FUS, running on Core2, and leads to a series of system restarts.
 
-Then updater validates and corrects Option Bytes - a special memory region containing low-level configuration for Flipper's MCU.
+Then updater validates and corrects Option Bytes — a special memory region containing low-level configuration for Flipper's MCU.
 
 After that, updater loads a `.dfu` file with firmware to be flashed, checks its integrity using CRC32, writes it to system flash and validates written data.
 
 
 ## 3. Restoring internal storage and updating resources
 
-After performing operations on flash memory, system restarts into newly flashed firmware. Then it performs restoration of previously backed up /int contents.
+After performing operations on flash memory, system restarts into newly flashed firmware. Then it performs restoration of previously backed up `/int` contents.
 
 If update package contains an additional resources archive, it is extracted onto SD card.
 
 
 # Update manifest
 
-Update packages come with a manifest that contains a description of its contents. The manifest is in Flipper File Format - a simple text file, comprised of key-value pairs.
+Update packages come with a manifest that contains a description of its contents. The manifest is in Flipper File Format — a simple text file, comprised of key-value pairs.
 
 ## Mandatory fields
 
