@@ -49,4 +49,10 @@ void CommandLine::parseCommand(String input) {
     menu_function_obj.drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_AP, TFT_MAGENTA);
   }
+
+  else if (input == SNIFF_DEAUTH_CMD) {
+    display_obj.clearScreen();
+    menu_function_obj.drawStatusBar();
+    wifi_scan_obj.StartScan(WIFI_SCAN_DEAUTH, TFT_RED);
+  }
 }

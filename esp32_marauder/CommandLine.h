@@ -12,6 +12,7 @@ extern Display display_obj;
 // Commands
 const char PROGMEM SCANAP_CMD[] = "scanap";
 const char PROGMEM SNIFF_BEACON_CMD[] = "sniffbeacon";
+const char PROGMEM SNIFF_DEAUTH_CMD[] = "sniffdeauth";
 const char PROGMEM STOPSCAN_CMD[] = "stopscan";
 const char PROGMEM CLEARAP_CMD[] = "clearap";
 
