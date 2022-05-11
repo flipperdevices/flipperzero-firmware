@@ -13,6 +13,9 @@ static const char* bt_cli_address_types[] = {
 };
 
 static void bt_cli_command_hci_info(Cli* cli, string_t args, void* context) {
+    UNUSED(cli);
+    UNUSED(args);
+    UNUSED(context);
     string_t buffer;
     string_init(buffer);
     furi_hal_bt_dump_state(buffer);
@@ -21,6 +24,7 @@ static void bt_cli_command_hci_info(Cli* cli, string_t args, void* context) {
 }
 
 static void bt_cli_command_carrier_tx(Cli* cli, string_t args, void* context) {
+    UNUSED(context);
     int channel = 0;
     int power = 0;
 
@@ -47,6 +51,7 @@ static void bt_cli_command_carrier_tx(Cli* cli, string_t args, void* context) {
 }
 
 static void bt_cli_command_carrier_rx(Cli* cli, string_t args, void* context) {
+    UNUSED(context);
     int channel = 0;
 
     do {
@@ -63,7 +68,7 @@ static void bt_cli_command_carrier_rx(Cli* cli, string_t args, void* context) {
 
         while(!cli_cmd_interrupt_received(cli)) {
             osDelay(250);
-            printf("RSSI: %6.1f dB\r", furi_hal_bt_get_rssi());
+            printf("RSSI: %6.1f dB\r", (double)furi_hal_bt_get_rssi());
             fflush(stdout);
         }
 
@@ -72,6 +77,7 @@ static void bt_cli_command_carrier_rx(Cli* cli, string_t args, void* context) {
 }
 
 static void bt_cli_command_packet_tx(Cli* cli, string_t args, void* context) {
+    UNUSED(context);
     int channel = 0;
     int pattern = 0;
     int datarate = 1;
@@ -115,6 +121,7 @@ static void bt_cli_command_packet_tx(Cli* cli, string_t args, void* context) {
 }
 
 static void bt_cli_command_packet_rx(Cli* cli, string_t args, void* context) {
+    UNUSED(context);
     int channel = 0;
     int datarate = 1;
 
@@ -133,11 +140,9 @@ static void bt_cli_command_packet_rx(Cli* cli, string_t args, void* context) {
         printf("Press CTRL+C to stop\r\n");
         furi_hal_bt_start_packet_rx(channel, datarate);
 
-        float rssi_raw = 0;
         while(!cli_cmd_interrupt_received(cli)) {
             osDelay(250);
-            rssi_raw = furi_hal_bt_get_rssi();
-            printf("RSSI: %03.1f dB\r", rssi_raw);
+            printf("RSSI: %03.1f dB\r", (double)furi_hal_bt_get_rssi());
             fflush(stdout);
         }
         uint16_t packets_received = furi_hal_bt_stop_packet_test();
@@ -152,6 +157,8 @@ static void bt_cli_scan_callback(GapAddress address, void* context) {
 }
 
 static void bt_cli_command_scan(Cli* cli, string_t args, void* context) {
+    UNUSED(context);
+    UNUSED(args);
     osMessageQueueId_t queue = osMessageQueueNew(20, sizeof(GapAddress), NULL);
     furi_hal_bt_start_scan(bt_cli_scan_callback, queue);
 
@@ -189,6 +196,7 @@ static void bt_cli_print_usage() {
 }
 
 static void bt_cli(Cli* cli, string_t args, void* context) {
+    UNUSED(context);
     furi_record_open("bt");
 
     string_t cmd;

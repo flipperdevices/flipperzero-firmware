@@ -52,7 +52,7 @@ static void updater_cli_restore(string_t args) {
 static void updater_cli_help(string_t args) {
     UNUSED(args);
     printf("Commands:\r\n"
-           "\tinstall /ext/update/PACKAGE/update.fuf - verify & apply update package\r\n"
+           "\tinstall /ext/path/to/update.fuf - verify & apply update package\r\n"
            "\tbackup /ext/path/to/backup.tar - create internal storage backup\r\n"
            "\trestore /ext/path/to/backup.tar - restore internal storage backup\r\n");
 }
@@ -65,6 +65,8 @@ static const CliSubcommand update_cli_subcommands[] = {
 };
 
 static void updater_cli_ep(Cli* cli, string_t args, void* context) {
+    UNUSED(cli);
+    UNUSED(context);
     string_t subcommand;
     string_init(subcommand);
     if(!args_read_string_and_trim(args, subcommand) || string_empty_p(args)) {
@@ -85,6 +87,7 @@ static void updater_cli_ep(Cli* cli, string_t args, void* context) {
 }
 
 static int32_t updater_spawner_thread_worker(void* arg) {
+    UNUSED(arg);
     Loader* loader = furi_record_open("loader");
     loader_start(loader, "UpdaterApp", NULL);
     furi_record_close("loader");

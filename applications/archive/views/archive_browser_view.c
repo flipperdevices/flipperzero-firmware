@@ -106,17 +106,17 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
     size_t array_size = files_array_size(model->files);
     bool scrollbar = model->item_cnt > 4;
 
-    for(size_t i = 0; i < MIN(model->item_cnt, MENU_ITEMS); ++i) {
+    for(uint32_t i = 0; i < MIN(model->item_cnt, MENU_ITEMS); ++i) {
         string_t str_buff;
         char cstr_buff[MAX_NAME_LEN];
-        size_t idx = CLAMP(i + model->list_offset, model->item_cnt, 0);
+        int32_t idx = CLAMP((uint32_t)(i + model->list_offset), model->item_cnt, 0u);
         uint8_t x_offset = (model->move_fav && model->item_idx == idx) ? MOVE_OFFSET : 0;
 
         ArchiveFileTypeEnum file_type = ArchiveFileTypeLoading;
 
         if(archive_is_item_in_array(model, idx)) {
-            ArchiveFile_t* file =
-                files_array_get(model->files, CLAMP(idx - model->array_offset, array_size - 1, 0));
+            ArchiveFile_t* file = files_array_get(
+                model->files, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
             strlcpy(cstr_buff, string_get_cstr(file->name), string_size(file->name) + 1);
             archive_trim_file_path(cstr_buff, archive_is_known_app(file->type));
             string_init_set_str(str_buff, cstr_buff);
@@ -161,21 +161,21 @@ static void archive_render_status_bar(Canvas* canvas, ArchiveBrowserViewModel* m
     canvas_draw_box(canvas, 107, 0, 20, 13);
 
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_frame(canvas, 1, 0, 50, 12);
-    canvas_draw_line(canvas, 0, 1, 0, 11);
-    canvas_draw_line(canvas, 1, 12, 49, 12);
-    canvas_draw_str_aligned(canvas, 26, 9, AlignCenter, AlignBottom, tab_name);
+    canvas_draw_rframe(canvas, 0, 0, 51, 13, 1); // frame
+    canvas_draw_line(canvas, 49, 1, 49, 11); // shadow right
+    canvas_draw_line(canvas, 1, 11, 49, 11); // shadow bottom
+    canvas_draw_str_aligned(canvas, 25, 9, AlignCenter, AlignBottom, tab_name);
 
-    canvas_draw_frame(canvas, 108, 0, 20, 12);
-    canvas_draw_line(canvas, 107, 1, 107, 11);
-    canvas_draw_line(canvas, 108, 12, 126, 12);
+    canvas_draw_rframe(canvas, 107, 0, 21, 13, 1);
+    canvas_draw_line(canvas, 126, 1, 126, 11);
+    canvas_draw_line(canvas, 108, 11, 126, 11);
 
     if(model->move_fav) {
-        canvas_draw_icon(canvas, 111, 4, &I_ButtonUp_7x4);
-        canvas_draw_icon(canvas, 118, 4, &I_ButtonDown_7x4);
+        canvas_draw_icon(canvas, 110, 4, &I_ButtonUp_7x4);
+        canvas_draw_icon(canvas, 117, 4, &I_ButtonDown_7x4);
     } else {
-        canvas_draw_icon(canvas, 112, 2, &I_ButtonLeft_4x7);
-        canvas_draw_icon(canvas, 120, 2, &I_ButtonRight_4x7);
+        canvas_draw_icon(canvas, 111, 2, &I_ButtonLeft_4x7);
+        canvas_draw_icon(canvas, 119, 2, &I_ButtonRight_4x7);
     }
 
     canvas_set_color(canvas, ColorWhite);
@@ -216,7 +216,7 @@ static bool is_file_list_load_required(ArchiveBrowserViewModel* model) {
     }
 
     if(((model->array_offset + array_size) < model->item_cnt) &&
-       (model->item_idx > (model->array_offset + array_size - FILE_LIST_BUF_LEN / 4))) {
+       (model->item_idx > (int32_t)(model->array_offset + array_size - FILE_LIST_BUF_LEN / 4))) {
         return true;
     }
 
@@ -347,7 +347,7 @@ ArchiveBrowserView* browser_alloc() {
     browser->view = view_alloc();
     view_allocate_model(browser->view, ViewModelTypeLocking, sizeof(ArchiveBrowserViewModel));
     view_set_context(browser->view, browser);
-    view_set_draw_callback(browser->view, (ViewDrawCallback)archive_view_render);
+    view_set_draw_callback(browser->view, archive_view_render);
     view_set_input_callback(browser->view, archive_view_input);
 
     string_init(browser->path);
