@@ -12,6 +12,7 @@
 #define MF_UL_READ_CMD (0x30)
 #define MF_UL_FAST_READ_CMD (0x3A)
 #define MF_UL_WRITE (0xA2)
+#define MF_UL_FAST_WRITE (0xA6)
 #define MF_UL_COMP_WRITE (0xA0)
 #define MF_UL_READ_CNT (0x39)
 #define MF_UL_INC_CNT (0xA5)
@@ -91,6 +92,8 @@ typedef struct {
     bool comp_write_cmd_started;
     uint8_t comp_write_page_addr;
     MfUltralightAuth* auth_data;
+    uint8_t curr_sector;
+    bool sector_select_cmd_started;
 } MfUltralightEmulator;
 
 bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);

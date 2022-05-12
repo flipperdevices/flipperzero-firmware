@@ -1,3 +1,4 @@
+#include <limits.h>
 #include "furi_hal_nfc.h"
 #include <st25r3916.h>
 #include <rfal_rf.h>
@@ -334,6 +335,9 @@ bool furi_hal_nfc_emulate_nfca(
                     break;
                 }
                 if(buff_tx_len) {
+                    if (buff_tx_len == UINT16_MAX)
+                        buff_tx_len = 0;
+
                     ReturnCode ret = rfalTransceiveBitsBlockingTx(
                         buff_tx,
                         buff_tx_len,
