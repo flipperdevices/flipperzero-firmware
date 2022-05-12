@@ -141,7 +141,7 @@ static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag_2k(
     // 481 - 482: config registers
     // 483 - 484: session registers
 
-    if(linear_address > 483) {
+    if(linear_address > 484) {
         *valid_pages = 0;
         return -1;
     } else if(linear_address >= 483) {
