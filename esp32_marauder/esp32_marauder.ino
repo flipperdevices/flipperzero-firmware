@@ -113,7 +113,13 @@ void setup()
   display_obj.drawJpeg("/marauder3L.jpg", 0 , 0);     // 240 x 320 image
 
   //showCenterText(version_number, 250);
-  display_obj.tft.drawCentreString(display_obj.version_number, 120, 250, 2);
+  #ifndef MARAUDER_MINI
+    display_obj.tft.drawCentreString(display_obj.version_number, 120, 250, 2);
+  #endif
+
+  #ifdef MARAUDER_MINI
+    display_obj.tft.drawCentreString(display_obj.version_number, TFT_WIDTH/2, TFT_HEIGHT, 1);
+  #endif
 
   backlightOn(); // Need this
 
