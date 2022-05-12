@@ -62,6 +62,38 @@ bool mf_ultralight_read_version(
             reader->support_fast_read = true;
             reader->support_tearing_flags = false;
             reader->support_counters = false;
+        } else if(version->prod_subtype == 5 && version->prod_ver_major == 2) {
+            // NTAG I2C
+            bool known = false;
+            if(version->prod_ver_minor == 1) {
+                if(version->storage_size == 0x13) {
+                    data->type = MfUltralightTypeNTAGI2C1K;
+                    reader->pages_to_read = 231;
+                    known = true;
+                } else if(version->storage_size == 0x15) {
+                    data->type = MfUltralightTypeNTAGI2C2K;
+                    reader->pages_to_read = 485;
+                    known = true;
+                }
+            } else if(version->prod_ver_minor == 2) {
+                if(version->storage_size == 0x13) {
+                    data->type = MfUltralightTypeNTAGI2CPlus1K;
+                    reader->pages_to_read = 236;
+                    known = true;
+                } else if(version->storage_size == 0x15) {
+                    data->type = MfUltralightTypeNTAGI2CPlus2K;
+                    reader->pages_to_read = 492;
+                    known = true;
+                }
+            }
+
+            if(known) {
+                reader->support_fast_read = true;
+                reader->support_tearing_flags = false;
+                reader->support_counters = false;
+            } else {
+                mf_ul_set_default_version(reader, data);
+            }
         } else if(version->storage_size == 0x13) {
             data->type = MfUltralightTypeNTAG216;
             reader->pages_to_read = 231;
@@ -78,26 +110,198 @@ bool mf_ultralight_read_version(
     return version_read;
 }
 
+static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag_1k(
+    int16_t linear_address, uint8_t* sector, int16_t* valid_pages) {
+    // 0 - 226: sector 0
+    // 227 - 228: config registers
+    // 229 - 230: session registers
+
+    if(linear_address > 230) {
+        *valid_pages = 0;
+        return -1;
+    } else if(linear_address >= 229) {
+        *sector = 3;
+        *valid_pages = 2 - (linear_address - 229);
+        return linear_address - 229 + 248;
+    } else if(linear_address >= 227) {
+        *sector = 0;
+        *valid_pages = 2 - (linear_address - 227);
+        return linear_address - 227 + 232;
+    } else {
+        *sector = 0;
+        *valid_pages = 227 - linear_address;
+        return linear_address;
+    }
+}
+
+static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag_2k(
+    int16_t linear_address, uint8_t* sector, int16_t* valid_pages) {
+    // 0 - 255: sector 0
+    // 256 - 480: sector 1
+    // 481 - 482: config registers
+    // 483 - 484: session registers
+
+    if(linear_address > 483) {
+        *valid_pages = 0;
+        return -1;
+    } else if(linear_address >= 483) {
+        *sector = 3;
+        *valid_pages = 2 - (linear_address - 483);
+        return linear_address - 483 + 248;
+    } else if(linear_address >= 481) {
+        *sector = 1;
+        *valid_pages = 2 - (linear_address - 481);
+        return linear_address - 481 + 232;
+    } else if(linear_address >= 256) {
+        *sector = 1;
+        *valid_pages = 225 - (linear_address - 256);
+        return linear_address - 256;
+    } else {
+        *sector = 0;
+        *valid_pages = 256 - linear_address;
+        return linear_address;
+    }
+}
+
+static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag_plus_1k(
+    int16_t linear_address, uint8_t* sector, int16_t* valid_pages) {
+    // 0 - 233: sector 0 + registers
+    // 234 - 235: session registers
+
+    if(linear_address > 235) {
+        *valid_pages = 0;
+        return -1;
+    } else if(linear_address >= 234) {
+        *sector = 0;
+        *valid_pages = 2 - (linear_address - 234);
+        return linear_address - 234 + 236;
+    } else {
+        *sector = 0;
+        *valid_pages = 234 - linear_address;
+        return linear_address;
+    }
+}
+
+static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag_plus_2k(
+    int16_t linear_address, uint8_t* sector, int16_t* valid_pages) {
+    // 0 - 233: sector 0 + registers
+    // 234 - 235: session registers
+    // 236 - 491: sector 1
+
+    if(linear_address > 491) {
+        *valid_pages = 0;
+        return -1;
+    } else if(linear_address >= 236) {
+        *sector = 1;
+        *valid_pages = 256 - (linear_address - 236);
+        return linear_address - 236;
+    } else if(linear_address >= 234) {
+        *sector = 0;
+        *valid_pages = 2 - (linear_address - 234);
+        return linear_address - 234 + 236;
+    } else {
+        *sector = 0;
+        *valid_pages = 234 - linear_address;
+        return linear_address;
+    }
+}
+
+static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag(
+    MfUltralightData* data,
+    MfUltralightReader* reader,
+    int16_t linear_address,
+    uint8_t* sector,
+    int16_t* valid_pages) {
+    switch(data->type) {
+    case MfUltralightTypeNTAGI2C1K:
+        return mf_ultralight_ntag_i2c_addr_lin_to_tag_1k(
+            linear_address, sector, valid_pages);
+
+    case MfUltralightTypeNTAGI2C2K:
+        return mf_ultralight_ntag_i2c_addr_lin_to_tag_2k(
+            linear_address, sector, valid_pages);
+
+    case MfUltralightTypeNTAGI2CPlus1K:
+        return mf_ultralight_ntag_i2c_addr_lin_to_tag_plus_1k(
+            linear_address, sector, valid_pages);
+
+    case MfUltralightTypeNTAGI2CPlus2K:
+        return mf_ultralight_ntag_i2c_addr_lin_to_tag_plus_2k(
+            linear_address, sector, valid_pages);
+
+    default:
+        *sector = -1;
+        *valid_pages = reader->pages_to_read - linear_address;
+        return linear_address;
+    }
+}
+
+static bool mf_ultralight_sector_select(
+    FuriHalNfcTxRxContext* tx_rx,
+    uint8_t sector
+) {
+    FURI_LOG_D(TAG, "Selecting sector %u", sector);
+    tx_rx->tx_data[0] = MF_UL_SECTOR_SELECT;
+    tx_rx->tx_data[1] = 0xff;
+    tx_rx->tx_bits = 16;
+    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+    if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
+        FURI_LOG_D(TAG, "Failed to issue sector select command");
+        return false;
+    }
+
+    tx_rx->tx_data[0] = sector;
+    tx_rx->tx_data[1] = 0;
+    tx_rx->tx_data[2] = 0;
+    tx_rx->tx_data[3] = 0;
+    tx_rx->tx_bits = 32;
+    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+    // This is NOT a typo! The tag ACKs by not sending a response within 1ms.
+    if(furi_hal_nfc_tx_rx(tx_rx, 1)) {
+        // TODO: what gets returned when an actual NAK is received?
+        FURI_LOG_D(TAG, "Sector %u select NAK'd", sector);
+        return false;
+    }
+
+    return true;
+}
+
 bool mf_ultralight_read_pages(
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
     MfUltralightData* data) {
     uint8_t pages_read_cnt = 0;
+    int8_t curr_sector_index = -1;
+    reader->pages_read = 0;
 
-    for(size_t i = 0; i < reader->pages_to_read; i += 4) {
-        FURI_LOG_D(TAG, "Reading pages %d - %d", i, i + 3);
+    for(size_t i = 0; i < reader->pages_to_read; i += pages_read_cnt) {
+        uint8_t tag_sector;
+        int16_t valid_pages;
+        int16_t tag_page = mf_ultralight_ntag_i2c_addr_lin_to_tag(
+            data, reader, (int16_t)i, &tag_sector, &valid_pages);
+
+        furi_assert(tag_page != -1);
+        if(curr_sector_index != tag_sector) {
+            if(!mf_ultralight_sector_select(tx_rx, tag_sector))
+                return false;
+            curr_sector_index = tag_sector;
+        }
+
+        FURI_LOG_D(TAG, "Reading pages %d - %d", i,
+            i + (valid_pages > 4 ? 4 : valid_pages) - 1);
         tx_rx->tx_data[0] = MF_UL_READ_CMD;
-        tx_rx->tx_data[1] = i;
+        tx_rx->tx_data[1] = tag_page;
         tx_rx->tx_bits = 16;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
         if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
-            FURI_LOG_D(TAG, "Failed to read pages %d - %d", i, i + 3);
+            FURI_LOG_D(TAG, "Failed to read pages %d - %d", i,
+                i + (valid_pages > 4 ? 4 : valid_pages) - 1);
             break;
         }
-        if(i + 4 <= reader->pages_to_read) {
+        if(valid_pages > 4) {
             pages_read_cnt = 4;
         } else {
-            pages_read_cnt = reader->pages_to_read - reader->pages_read;
+            pages_read_cnt = valid_pages;
         }
         reader->pages_read += pages_read_cnt;
         data->data_size = reader->pages_read * 4;
@@ -111,18 +315,37 @@ bool mf_ultralight_fast_read_pages(
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
     MfUltralightData* data) {
-    FURI_LOG_D(TAG, "Reading pages 0 - %d", reader->pages_to_read);
-    tx_rx->tx_data[0] = MF_UL_FAST_READ_CMD;
-    tx_rx->tx_data[1] = 0;
-    tx_rx->tx_data[2] = reader->pages_to_read - 1;
-    tx_rx->tx_bits = 24;
-    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-    if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
-        reader->pages_read = reader->pages_to_read;
-        data->data_size = reader->pages_read * 4;
-        memcpy(data->data, tx_rx->rx_data, data->data_size);
-    } else {
-        FURI_LOG_D(TAG, "Failed to read pages 0 - %d", reader->pages_to_read);
+    int8_t curr_sector_index = -1;
+    reader->pages_read = 0;
+    while(reader->pages_read < reader->pages_to_read) {
+        uint8_t tag_sector;
+        int16_t valid_pages;
+        int16_t tag_page = mf_ultralight_ntag_i2c_addr_lin_to_tag(
+            data, reader, reader->pages_read, &tag_sector, &valid_pages);
+
+        furi_assert(tag_page != -1);
+        if(curr_sector_index != tag_sector) {
+            if(!mf_ultralight_sector_select(tx_rx, tag_sector))
+                return false;
+            curr_sector_index = tag_sector;
+        }
+
+        FURI_LOG_D(TAG, "Reading pages %d - %d", reader->pages_read,
+            reader->pages_read + valid_pages - 1);
+        tx_rx->tx_data[0] = MF_UL_FAST_READ_CMD;
+        tx_rx->tx_data[1] = tag_page;
+        tx_rx->tx_data[2] = valid_pages - 1;
+        tx_rx->tx_bits = 24;
+        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+        if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
+            memcpy(&data->data[reader->pages_read * 4], tx_rx->rx_data, valid_pages * 4);
+            reader->pages_read += valid_pages;
+            data->data_size = reader->pages_read * 4;
+        } else {
+            FURI_LOG_D(TAG, "Failed to read pages %d - %d", reader->pages_read,
+                reader->pages_read + valid_pages - 1);
+            break;
+        }
     }
 
     return reader->pages_read == reader->pages_to_read;

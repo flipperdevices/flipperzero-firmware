@@ -2,7 +2,8 @@
 
 #include <furi_hal_nfc.h>
 
-#define MF_UL_MAX_DUMP_SIZE 1024
+// Largest tag is NTAG I2C Plus 2K, both data sectors plus SRAM
+#define MF_UL_MAX_DUMP_SIZE ((238 + 256 + 16) * 4)
 
 #define MF_UL_TEARING_FLAG_DEFAULT (0xBD)
 
@@ -18,6 +19,7 @@
 #define MF_UL_READ_SIG (0x3C)
 #define MF_UL_CHECK_TEARING (0x3E)
 #define MF_UL_READ_VCSL (0x4B)
+#define MF_UL_SECTOR_SELECT (0xC2)
 
 typedef enum {
     MfUltralightTypeUnknown,
@@ -26,6 +28,10 @@ typedef enum {
     MfUltralightTypeNTAG213,
     MfUltralightTypeNTAG215,
     MfUltralightTypeNTAG216,
+    MfUltralightTypeNTAGI2C1K,
+    MfUltralightTypeNTAGI2C2K,
+    MfUltralightTypeNTAGI2CPlus1K,
+    MfUltralightTypeNTAGI2CPlus2K,
 
     // Keep last for number of types calculation
     MfUltralightTypeNum,
@@ -71,8 +77,8 @@ typedef struct {
 } MfUltralightAuth;
 
 typedef struct {
-    uint8_t pages_to_read;
-    uint8_t pages_read;
+    int16_t pages_to_read;
+    int16_t pages_read;
     bool support_fast_read;
     bool support_tearing_flags;
     bool support_counters;
