@@ -27,9 +27,9 @@ typedef enum {
 
 typedef struct {
     const uint32_t quant;
-    const void (*start)(iButtonWorker* worker);
-    const void (*tick)(iButtonWorker* worker);
-    const void (*stop)(iButtonWorker* worker);
+    void (*const start) (iButtonWorker* worker);
+    void (*const tick) (iButtonWorker* worker);
+    void (*const stop) (iButtonWorker* worker);
 } iButtonWorkerModeType;
 
 typedef enum {
@@ -73,6 +73,7 @@ struct iButtonWorker {
 extern const iButtonWorkerModeType ibutton_worker_modes[];
 
 void ibutton_worker_switch_mode(iButtonWorker* worker, iButtonWorkerMode mode);
+void ibutton_worker_notify_emulate(iButtonWorker* worker);
 
 #ifdef __cplusplus
 }

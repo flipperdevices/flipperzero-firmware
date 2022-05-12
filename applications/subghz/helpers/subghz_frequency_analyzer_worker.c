@@ -44,7 +44,7 @@ static uint32_t subghz_frequency_analyzer_worker_expRunningAverageAdaptive(
     float k;
     float newValFloat = newVal;
     // the sharpness of the filter depends on the absolute value of the difference
-    if(abs(newValFloat - instance->filVal) > 500000)
+    if(fabs(newValFloat - instance->filVal) > 500000)
         k = 0.9;
     else
         k = 0.03;
@@ -71,6 +71,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
     furi_hal_subghz_set_frequency(433920000);
     furi_hal_subghz_flush_rx();
+    furi_hal_subghz_set_path(FuriHalSubGhzPathIsolate);
     furi_hal_subghz_rx();
 
     while(instance->worker_running) {

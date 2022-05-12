@@ -1,6 +1,7 @@
 #include <gui/view_stack.h>
 #include <stdint.h>
 #include <furi.h>
+#include <furi_hal.h>
 #include <m-string.h>
 #include <portmacro.h>
 #include <dolphin/dolphin.h>
@@ -364,6 +365,7 @@ static bool animation_manager_is_valid_idle_animation(
 
 static StorageAnimation*
     animation_manager_select_idle_animation(AnimationManager* animation_manager) {
+    UNUSED(animation_manager);
     StorageAnimationList_t animation_list;
     StorageAnimationList_init(animation_list);
     animation_storage_fill_animation_list(&animation_list);
@@ -390,7 +392,7 @@ static StorageAnimation*
         }
     }
 
-    uint32_t lucky_number = random() % whole_weight;
+    uint32_t lucky_number = furi_hal_random_get() % whole_weight;
     uint32_t weight = 0;
 
     StorageAnimation* selected = NULL;
