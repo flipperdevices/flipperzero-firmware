@@ -30,18 +30,28 @@ class Main(App):
             for line in f:
                 if line.strip():
                     file = line.strip()
-                    data.append({"directory": local_path, "command": flags + "-c " + file,
-                                 "file": file})
+                    data.append(
+                        {
+                            "directory": local_path,
+                            "command": flags + "-c " + file,
+                            "file": file,
+                        }
+                    )
         return data
 
     def generate(self):
         DB_SOURCE = [
-            {"name": "ASM", "source": "db.asm_source.list",
-                "flags": "db.asm_flags.list"},
-            {"name": "C", "source": "db.c_source.list",
-                "flags": "db.c_flags.list"},
-            {"name": "CPP", "source": "db.cpp_source.list",
-                "flags": "db.cpp_flags.list"},
+            {
+                "name": "ASM",
+                "source": "db.asm_source.list",
+                "flags": "db.asm_flags.list",
+            },
+            {"name": "C", "source": "db.c_source.list", "flags": "db.c_flags.list"},
+            {
+                "name": "CPP",
+                "source": "db.cpp_source.list",
+                "flags": "db.cpp_flags.list",
+            },
         ]
 
         path = self.args.path
@@ -51,8 +61,9 @@ class Main(App):
 
         for record in DB_SOURCE:
             self.logger.info(
-                f"Processing {record['name']} ({record['source']}, {record['flags']})")
-            data = self.parse_sources(path, record['source'], record['flags'])
+                f"Processing {record['name']} ({record['source']}, {record['flags']})"
+            )
+            data = self.parse_sources(path, record["source"], record["flags"])
             out_data += data
 
         self.logger.info(f"Saving")
