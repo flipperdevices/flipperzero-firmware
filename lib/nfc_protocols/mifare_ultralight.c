@@ -613,11 +613,26 @@ static void mf_ul_protect_auth_data_on_read_command_i2c(
     uint8_t end_page,
     MfUltralightEmulator* emulator) {
     if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K) {
+        // Blank out PWD and PACK
         if(start_page <= 229 && end_page >= 229) {
             uint16_t offset = (229 - start_page) * 4;
             uint8_t count = 4;
             if (end_page >= 230) count += 2;
             memset(&tx_buff[offset], 0, count);
+        }
+
+        // Handle AUTH0 for sector 0
+        if(!emulator->auth_success) {
+            uint8_t access = emulator->data.data[228 * 4];
+            if(access & 0x80) {
+                uint8_t auth0 = emulator->data.data[227 * 4 + 3];
+                if(auth0 < end_page) {
+                    // start_page is always > auth0; otherwise is NAK'd already
+                    uint8_t page_offset = auth0 - start_page;
+                    uint8_t page_count = end_page - auth0;
+                    memset(&tx_buff[page_offset * 4], 0, page_count * 4);
+                }
+            }
         }
     }
 }
@@ -672,6 +687,35 @@ static void mf_ul_ntag_i2c_fill_cross_area_read(
     }
 }
 
+static bool mf_ul_ntag_i2c_plus_check_auth(MfUltralightEmulator* emulator,
+    uint8_t start_page, bool is_write) {
+    if(!emulator->auth_success) {
+        uint8_t access = emulator->data.data[228 * 4];
+        // Check NFC_PROT
+        if(emulator->curr_sector == 0 && ((access & 0x80) || is_write)) {
+            uint8_t auth0 = emulator->data.data[227 * 4 + 3];
+            if (start_page >= auth0)
+                return false;
+        } else if(emulator->curr_sector == 1) {
+            // We don't have to specifically check for type because this is done
+            // by address translator
+            uint8_t pt_i2c = emulator->data.data[231 * 4];
+            // Check 2K_PROT
+            if(pt_i2c & 0x08)
+                return false;
+        }
+    }
+
+    if(emulator->curr_sector == 1) {
+        // Check NFC_DIS_SEC1
+        uint8_t access = emulator->data.data[228 * 4];
+        if(access & 0x20)
+            return false;
+    }
+
+    return true;
+}
+
 void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* data) {
     FURI_LOG_D(TAG, "Prepare emulation");
     emulator->data = *data;
@@ -680,7 +724,6 @@ void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* d
     emulator->comp_write_cmd_started = false;
     emulator->sector_select_cmd_started = false;
     emulator->ntag_i2c_plus_sector3_lockout = false;
-    emulator->no_response_ack_sent = false;
     if(data->type == MfUltralightTypeUnknown) {
         emulator->support_fast_read = false;
     } else if(data->type == MfUltralightTypeUL11) {
@@ -697,9 +740,11 @@ void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* d
         emulator->support_fast_read = true;
     }
 
-    if(data->type >= MfUltralightTypeNTAG213) {
+    if(data->type >= MfUltralightTypeNTAG213 && data->type < MfUltralightTypeNTAGI2C1K) {
         uint16_t pwd_page = (data->data_size / 4) - 2;
         emulator->auth_data = (MfUltralightAuth*)&data->data[pwd_page * 4];
+    } else if(data->type >= MfUltralightTypeNTAGI2CPlus1K) {
+        emulator->auth_data = (MfUltralightAuth*)&data->data[229 * 4];
     }
 }
 
@@ -783,27 +828,30 @@ bool mf_ul_prepare_emulation_response(
             start_page = mf_ultralight_ntag_i2c_addr_tag_to_lin(
                 &emulator->data, start_page, emulator->curr_sector, &valid_pages);
             if(start_page != -1) {
-                if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K
-                    && emulator->curr_sector == 3 && valid_pages == 1) {
-                    // Rewind back a sector to match behavior on a real tag
-                    --start_page;
-                    ++valid_pages;
-                }
+                if(emulator->data.type < MfUltralightTypeNTAGI2CPlus1K ||
+                    mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], false)) {
+                    if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K
+                        && emulator->curr_sector == 3 && valid_pages == 1) {
+                        // Rewind back a sector to match behavior on a real tag
+                        --start_page;
+                        ++valid_pages;
+                    }
 
-                uint16_t copy_count = (valid_pages > 4 ? 4 : valid_pages) * 4;
-                FURI_LOG_D(TAG, "NTAG I2C Emu: page valid, %02x:%02x -> %d, %d",
-                    emulator->curr_sector, buff_rx[1], start_page, valid_pages);
-                memcpy(buff_tx, &emulator->data.data[start_page * 4], copy_count);
-                // For NTAG I2C, there's no roll-over; remainder is filled by null bytes
-                if (copy_count < tx_bytes)
-                    memset(&buff_tx[copy_count], 0, tx_bytes - copy_count);
-                // Special case: NTAG I2C Plus sector 0 page 233 read crosses into page 236
-                if (start_page == 233)
-                    memcpy(&buff_tx[12], &emulator->data.data[(start_page + 1) * 4], 4);
-                mf_ul_protect_auth_data_on_read_command_i2c(buff_tx,
-                    start_page, start_page + copy_count / 4 - 1, emulator);
-                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                command_parsed = true;
+                    uint16_t copy_count = (valid_pages > 4 ? 4 : valid_pages) * 4;
+                    FURI_LOG_D(TAG, "NTAG I2C Emu: page valid, %02x:%02x -> %d, %d",
+                        emulator->curr_sector, buff_rx[1], start_page, valid_pages);
+                    memcpy(buff_tx, &emulator->data.data[start_page * 4], copy_count);
+                    // For NTAG I2C, there's no roll-over; remainder is filled by null bytes
+                    if (copy_count < tx_bytes)
+                        memset(&buff_tx[copy_count], 0, tx_bytes - copy_count);
+                    // Special case: NTAG I2C Plus sector 0 page 233 read crosses into page 236
+                    if (start_page == 233)
+                        memcpy(&buff_tx[12], &emulator->data.data[(start_page + 1) * 4], 4);
+                    mf_ul_protect_auth_data_on_read_command_i2c(buff_tx,
+                        start_page, start_page + copy_count / 4 - 1, emulator);
+                    *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                    command_parsed = true;
+                }
             } else {
                 FURI_LOG_D(TAG, "NTAG I2C Emu: page invalid, %02x:%02x",
                     emulator->curr_sector, buff_rx[1]);
@@ -839,16 +887,19 @@ bool mf_ul_prepare_emulation_response(
                     start_page = mf_ultralight_ntag_i2c_addr_tag_to_lin(
                         &emulator->data, start_page, emulator->curr_sector, &valid_pages);
                     if(start_page != -1) {
-                        uint16_t copy_count = (valid_pages > 4 ? 4 : valid_pages) * 4;
-                        memcpy(buff_tx, &emulator->data.data[start_page * 4], copy_count);
-                        if (copy_count < tx_bytes)
-                            memset(&buff_tx[copy_count], 0, tx_bytes - copy_count);
-                        mf_ul_ntag_i2c_fill_cross_area_read(buff_tx, buff_rx[1],
-                            buff_rx[2], emulator);
-                        mf_ul_protect_auth_data_on_read_command_i2c(buff_tx,
-                            start_page, start_page + copy_count / 4 - 1, emulator);
-                        *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                        command_parsed = true;
+                        if(emulator->data.type < MfUltralightTypeNTAGI2CPlus1K ||
+                            mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], false)) {
+                            uint16_t copy_count = (valid_pages > 4 ? 4 : valid_pages) * 4;
+                            memcpy(buff_tx, &emulator->data.data[start_page * 4], copy_count);
+                            if (copy_count < tx_bytes)
+                                memset(&buff_tx[copy_count], 0, tx_bytes - copy_count);
+                            mf_ul_ntag_i2c_fill_cross_area_read(buff_tx, buff_rx[1],
+                                buff_rx[2], emulator);
+                            mf_ul_protect_auth_data_on_read_command_i2c(buff_tx,
+                                start_page, start_page + copy_count / 4 - 1, emulator);
+                            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                            command_parsed = true;
+                        }
                     }
                 }
             }
@@ -861,10 +912,13 @@ bool mf_ul_prepare_emulation_response(
                 write_page, emulator->curr_sector, &valid_pages);
             if(write_page != -1
                 && (emulator->data.type >= MfUltralightTypeNTAGI2C1K || (write_page < page_num - 2))) {
-                memcpy(&emulator->data.data[write_page * 4], &buff_rx[2], 4);
-                emulator->data_changed = true;
-                send_ack = true;
-                command_parsed = true;
+                if (emulator->data.type < MfUltralightTypeNTAGI2CPlus1K ||
+                    mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], true)) {
+                    memcpy(&emulator->data.data[write_page * 4], &buff_rx[2], 4);
+                    emulator->data_changed = true;
+                    send_ack = true;
+                    command_parsed = true;
+                }
             }
         }
     } else if(cmd == MF_UL_FAST_WRITE) {
@@ -923,6 +977,7 @@ bool mf_ul_prepare_emulation_response(
                 buff_tx[1] = emulator->auth_data->pack.raw[1];
                 tx_bytes = 2;
                 *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                emulator->auth_success = true;
                 command_parsed = true;
             } else if(!emulator->auth_data->pack.value) {
                 buff_tx[0] = 0x80;
@@ -954,6 +1009,7 @@ bool mf_ul_prepare_emulation_response(
         tx_bits = 0;
         emulator->curr_sector = 0;
         emulator->ntag_i2c_plus_sector3_lockout = false;
+        emulator->auth_success = false;
         command_parsed = true;
         FURI_LOG_D(TAG, "Received HLTA");
     } else if(cmd == MF_UL_SECTOR_SELECT) {
@@ -967,7 +1023,6 @@ bool mf_ul_prepare_emulation_response(
         }
     }
 
-    emulator->no_response_ack_sent = false;
     if(!command_parsed) {
         // Send NACK
         buff_tx[0] = 0x00;
@@ -981,7 +1036,6 @@ bool mf_ul_prepare_emulation_response(
 
     if(respond_nothing) {
         *buff_tx_len = UINT16_MAX;
-        emulator->no_response_ack_sent = true;
         *data_type = FURI_HAL_NFC_TX_RAW_RX_DEFAULT;
     } else {
         // Return tx buffer size in bits

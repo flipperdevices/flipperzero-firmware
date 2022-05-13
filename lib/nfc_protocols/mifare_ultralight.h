@@ -92,10 +92,10 @@ typedef struct {
     bool comp_write_cmd_started;
     uint8_t comp_write_page_addr;
     MfUltralightAuth* auth_data;
+    bool auth_success;
     uint8_t curr_sector;
     bool sector_select_cmd_started;
     bool ntag_i2c_plus_sector3_lockout;
-    bool no_response_ack_sent;
 } MfUltralightEmulator;
 
 bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
