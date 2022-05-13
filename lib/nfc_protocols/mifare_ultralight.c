@@ -791,7 +791,7 @@ bool mf_ul_prepare_emulation_response(
         emulator->comp_write_cmd_started = false;
     } else if(emulator->sector_select_cmd_started) {
         if(buff_rx[0] <= 0xFE) {
-            emulator->curr_sector = buff_rx[0];
+            emulator->curr_sector = buff_rx[0] > 3 ? 0 : buff_rx[0];
             emulator->ntag_i2c_plus_sector3_lockout = false;
             command_parsed = true;
             respond_nothing = true;
