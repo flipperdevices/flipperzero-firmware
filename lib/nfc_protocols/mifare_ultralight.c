@@ -958,7 +958,6 @@ bool mf_ul_prepare_emulation_response(
         FURI_LOG_D(TAG, "Received HLTA");
     } else if(cmd == MF_UL_SECTOR_SELECT) {
         if(emulator->data.type >= MfUltralightTypeNTAGI2C1K) {
-            // TODO: verify when this would NAK
             if(buff_rx[1] == 0xFF) {
                 // Send ACK
                 emulator->sector_select_cmd_started = true;
@@ -973,16 +972,17 @@ bool mf_ul_prepare_emulation_response(
         // Send NACK
         buff_tx[0] = 0x00;
         tx_bits = 4;
-        *data_type = FURI_HAL_NFC_TXRX_RAW;
+        *data_type = FURI_HAL_NFC_TX_RAW_RX_DEFAULT;
     } else if(send_ack) {
         buff_tx[0] = 0x0A;
         tx_bits = 4;
-        *data_type = FURI_HAL_NFC_TXRX_RAW;
+        *data_type = FURI_HAL_NFC_TX_RAW_RX_DEFAULT;
     }
 
     if(respond_nothing) {
         *buff_tx_len = UINT16_MAX;
         emulator->no_response_ack_sent = true;
+        *data_type = FURI_HAL_NFC_TX_RAW_RX_DEFAULT;
     } else {
         // Return tx buffer size in bits
         if(tx_bytes) {
