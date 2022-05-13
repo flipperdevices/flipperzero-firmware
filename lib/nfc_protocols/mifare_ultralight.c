@@ -404,13 +404,13 @@ static bool mf_ultralight_sector_select(
     }
 
     tx_rx->tx_data[0] = sector;
-    tx_rx->tx_data[1] = 0;
-    tx_rx->tx_data[2] = 0;
-    tx_rx->tx_data[3] = 0;
+    tx_rx->tx_data[1] = 0x00;
+    tx_rx->tx_data[2] = 0x00;
+    tx_rx->tx_data[3] = 0x00;
     tx_rx->tx_bits = 32;
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
     // This is NOT a typo! The tag ACKs by not sending a response within 1ms.
-    if(furi_hal_nfc_tx_rx(tx_rx, 1)) {
+    if(furi_hal_nfc_tx_rx(tx_rx, 20)) {
         // TODO: what gets returned when an actual NAK is received?
         FURI_LOG_D(TAG, "Sector %u select NAK'd", sector);
         return false;
@@ -673,12 +673,14 @@ static void mf_ul_ntag_i2c_fill_cross_area_read(
 }
 
 void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* data) {
+    FURI_LOG_D(TAG, "Prepare emulation");
     emulator->data = *data;
     emulator->auth_data = NULL;
     emulator->data_changed = false;
     emulator->comp_write_cmd_started = false;
-    emulator->curr_sector = 0;
     emulator->sector_select_cmd_started = false;
+    emulator->ntag_i2c_plus_sector3_lockout = false;
+    emulator->no_response_ack_sent = false;
     if(data->type == MfUltralightTypeUnknown) {
         emulator->support_fast_read = false;
     } else if(data->type == MfUltralightTypeUL11) {
@@ -721,12 +723,12 @@ bool mf_ul_prepare_emulation_response(
 #ifdef FURI_DEBUG
     string_t debug_buf;
     string_init(debug_buf);
-    for(int i = 0; i < buff_rx_len; ++i) {
+    for(int i = 0; i < (buff_rx_len + 7) / 8; ++i) {
         string_cat_printf(debug_buf, "%02x ", buff_rx[i]);
     }
     string_strim(debug_buf);
-    FURI_LOG_T(TAG, "Emu RX: %s", string_get_cstr(debug_buf));
-    string_clear(debug_buf);
+    FURI_LOG_T(TAG, "Emu RX (%d): %s", buff_rx_len, string_get_cstr(debug_buf));
+    string_reset(debug_buf);
 #endif
 
     // Check composite commands
@@ -745,8 +747,10 @@ bool mf_ul_prepare_emulation_response(
     } else if(emulator->sector_select_cmd_started) {
         if(buff_rx[0] <= 0xFE) {
             emulator->curr_sector = buff_rx[0];
+            emulator->ntag_i2c_plus_sector3_lockout = false;
             command_parsed = true;
             respond_nothing = true;
+            FURI_LOG_D(TAG, "Changing sector to %d", emulator->curr_sector);
         }
         emulator->sector_select_cmd_started = false;
     } else if(cmd == MF_UL_GET_VERSION_CMD) {
@@ -779,6 +783,13 @@ bool mf_ul_prepare_emulation_response(
             start_page = mf_ultralight_ntag_i2c_addr_tag_to_lin(
                 &emulator->data, start_page, emulator->curr_sector, &valid_pages);
             if(start_page != -1) {
+                if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K
+                    && emulator->curr_sector == 3 && valid_pages == 1) {
+                    // Rewind back a sector to match behavior on a real tag
+                    --start_page;
+                    ++valid_pages;
+                }
+
                 uint16_t copy_count = (valid_pages > 4 ? 4 : valid_pages) * 4;
                 FURI_LOG_D(TAG, "NTAG I2C Emu: page valid, %02x:%02x -> %d, %d",
                     emulator->curr_sector, buff_rx[1], start_page, valid_pages);
@@ -796,6 +807,18 @@ bool mf_ul_prepare_emulation_response(
             } else {
                 FURI_LOG_D(TAG, "NTAG I2C Emu: page invalid, %02x:%02x",
                     emulator->curr_sector, buff_rx[1]);
+                if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K
+                    && emulator->curr_sector == 3
+                    && !emulator->ntag_i2c_plus_sector3_lockout) {
+                    // NTAG I2C Plus has a weird behavior where if you read sector 3
+                    // at an invalid address, it responds with zeroes then locks
+                    // the read out, while if you read the mirrored session registers,
+                    // it returns both session registers on either pages
+                    memset(buff_tx, 0, tx_bytes);
+                    *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                    command_parsed = true;
+                    emulator->ntag_i2c_plus_sector3_lockout = true;
+                }
             }
         }
     } else if(cmd == MF_UL_FAST_READ_CMD) {
@@ -930,7 +953,9 @@ bool mf_ul_prepare_emulation_response(
     } else if(cmd == MF_UL_HALT_START) {
         tx_bits = 0;
         emulator->curr_sector = 0;
+        emulator->ntag_i2c_plus_sector3_lockout = false;
         command_parsed = true;
+        FURI_LOG_D(TAG, "Received HLTA");
     } else if(cmd == MF_UL_SECTOR_SELECT) {
         if(emulator->data.type >= MfUltralightTypeNTAGI2C1K) {
             // TODO: verify when this would NAK
@@ -943,6 +968,7 @@ bool mf_ul_prepare_emulation_response(
         }
     }
 
+    emulator->no_response_ack_sent = false;
     if(!command_parsed) {
         // Send NACK
         buff_tx[0] = 0x00;
@@ -956,6 +982,7 @@ bool mf_ul_prepare_emulation_response(
 
     if(respond_nothing) {
         *buff_tx_len = UINT16_MAX;
+        emulator->no_response_ack_sent = true;
     } else {
         // Return tx buffer size in bits
         if(tx_bytes) {
@@ -963,5 +990,22 @@ bool mf_ul_prepare_emulation_response(
         }
         *buff_tx_len = tx_bits;
     }
+
+#ifdef FURI_DEBUG
+    if(*buff_tx_len == UINT16_MAX) {
+        FURI_LOG_T(TAG, "Emu TX: no reply");
+    } else if(*buff_tx_len > 0) {
+        int count = (*buff_tx_len + 7) / 8;
+        for(int i = 0; i < count; ++i) {
+            string_cat_printf(debug_buf, "%02x ", buff_tx[i]);
+        }
+        string_strim(debug_buf);
+        FURI_LOG_T(TAG, "Emu TX (%d): %s", *buff_tx_len, string_get_cstr(debug_buf));
+        string_clear(debug_buf);
+    } else {
+        FURI_LOG_T(TAG, "Emu TX: HALT");
+    }
+#endif
+
     return tx_bits > 0;
 }
