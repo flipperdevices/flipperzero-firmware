@@ -97,7 +97,7 @@ static void bt_battery_level_changed_callback(const void* _event, void* context)
         message.type = BtMessageTypeUpdateBatteryLevel;
         message.data.battery_level = event->data.battery_level;
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
-    } else if(event->type == PowerEventTypeStartCharging) {
+    } else if(event->type == PowerEventTypeStartCharging || event->type == PowerEventTypeFullyCharged) {
         message.type = BtMessageTypeUpdatePowerState;
         message.data.battery_is_charging = true;
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
