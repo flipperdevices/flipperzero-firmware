@@ -869,6 +869,7 @@ bool mf_ul_prepare_emulation_response(
                 }
             }
         }
+        if(!command_parsed) tx_bytes = 0;
     } else if(cmd == MF_UL_FAST_READ_CMD) {
         if(emulator->support_fast_read) {
             int16_t start_page = buff_rx[1];
@@ -902,6 +903,7 @@ bool mf_ul_prepare_emulation_response(
                         }
                     }
                 }
+                if(!command_parsed) tx_bytes = 0;
             }
         }
     } else if(cmd == MF_UL_WRITE) {
