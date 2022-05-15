@@ -2,8 +2,8 @@
 
   #define configs_h
 
-  #define MARAUDER_MINI
-//  #define MARAUDER_V4
+  //#define MARAUDER_MINI
+  #define MARAUDER_V4
 
   #define MARAUDER_VERSION "v0.9.6"
 
