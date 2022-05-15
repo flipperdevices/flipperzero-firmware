@@ -147,6 +147,7 @@ class MenuFunctions
     Menu settingsMenu;
     Menu specSettingMenu;
     Menu infoMenu;
+    Menu languageMenu;
 
     // WiFi menu stuff
     Menu wifiSnifferMenu;

@@ -1401,6 +1401,7 @@ void MenuFunctions::RunSetup()
   settingsMenu.list = new LinkedList<MenuNode>();
   specSettingMenu.list = new LinkedList<MenuNode>();
   infoMenu.list = new LinkedList<MenuNode>();
+  languageMenu.list = new LinkedList<MenuNode>();
 
   // WiFi menu stuff
   wifiSnifferMenu.list = new LinkedList<MenuNode>();
@@ -1429,6 +1430,7 @@ void MenuFunctions::RunSetup()
   confirmMenu.name = " Confirm Update ";
   espUpdateMenu.name = " ESP8266 Update ";
   updateMenu.name = " Update Firmware ";
+  languageMenu.name = " Language "; 
   infoMenu.name = " Device Info ";
   settingsMenu.name = " Settings ";
   bluetoothMenu.name = " Bluetooth ";
@@ -1722,6 +1724,10 @@ void MenuFunctions::RunSetup()
     wifi_scan_obj.currentScanMode = OTA_UPDATE;
     changeMenu(&whichUpdateMenu);
   });
+  addNodes(&deviceMenu, "Language", TFT_WHITE, NULL, DRAW, [this]() {
+    wifi_scan_obj.currentScanMode = SHOW_INFO;
+   changeMenu(&languageMenu);   
+  });
   addNodes(&deviceMenu, "Device Info", TFT_WHITE, NULL, DEVICE_INFO, [this]() {
     wifi_scan_obj.currentScanMode = SHOW_INFO;
     changeMenu(&infoMenu);
@@ -1822,7 +1828,12 @@ void MenuFunctions::RunSetup()
     wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
     changeMenu(infoMenu.parentMenu);
   });
-
+  //language info menu
+  languageMenu.parentMenu = &deviceMenu;
+    addNodes(&languageMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
+      wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
+      changeMenu(infoMenu.parentMenu);
+    });
   // Set the current menu to the mainMenu
   changeMenu(&mainMenu);
 
