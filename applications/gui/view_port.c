@@ -1,6 +1,7 @@
 #include "view_port_i.h"
 
 #include <furi.h>
+#include <furi_hal.h>
 
 #include "gui.h"
 #include "gui_i.h"
@@ -20,6 +21,25 @@ static void view_port_rotate_buttons(InputEvent* event) {
         break;
     case InputKeyLeft:
         event->key = InputKeyUp;
+        break;
+    default:
+        break;
+    }
+}
+
+static void view_port_flip_buttons(InputEvent* event) {
+    switch(event->key) {
+    case InputKeyUp:
+        event->key = InputKeyDown;
+        break;
+    case InputKeyDown:
+        event->key = InputKeyUp;
+        break;
+    case InputKeyRight:
+        event->key = InputKeyLeft;
+        break;
+    case InputKeyLeft:
+        event->key = InputKeyRight;
         break;
     default:
         break;
@@ -124,7 +144,10 @@ void view_port_input(ViewPort* view_port, InputEvent* event) {
     if(view_port->input_callback) {
         if(view_port_get_orientation(view_port) == ViewPortOrientationVertical) {
             view_port_rotate_buttons(event);
+        } else if (furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
+          view_port_flip_buttons(event);
         }
+
         view_port->input_callback(event, view_port->input_callback_context);
     }
 }

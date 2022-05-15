@@ -18,7 +18,11 @@ Canvas* canvas_init() {
     Canvas* canvas = malloc(sizeof(Canvas));
 
     // Setup u8g2
-    u8g2_Setup_st756x_flipper(&canvas->fb, U8G2_R0, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
+    if (furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
+      u8g2_Setup_st756x_flipper(&canvas->fb, U8G2_R2, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
+    } else {
+      u8g2_Setup_st756x_flipper(&canvas->fb, U8G2_R0, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
+    }
     canvas->orientation = CanvasOrientationHorizontal;
     // Initialize display
     u8g2_InitDisplay(&canvas->fb);
@@ -374,7 +378,11 @@ void canvas_set_orientation(Canvas* canvas, CanvasOrientation orientation) {
         canvas->orientation = orientation;
         if(canvas->orientation == CanvasOrientationHorizontal) {
             FURI_SWAP(canvas->width, canvas->height);
-            u8g2_SetDisplayRotation(&canvas->fb, U8G2_R0);
+            if (furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
+              u8g2_SetDisplayRotation(&canvas->fb, U8G2_R2);
+            } else {
+              u8g2_SetDisplayRotation(&canvas->fb, U8G2_R0);
+            }
         } else if(canvas->orientation == CanvasOrientationVertical) {
             FURI_SWAP(canvas->width, canvas->height);
             u8g2_SetDisplayRotation(&canvas->fb, U8G2_R3);
