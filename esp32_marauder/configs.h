@@ -2,6 +2,8 @@
 
   #define configs_h
 
+  #define POLISH_POTATO
+
   #define MARAUDER_MINI
 //  #define MARAUDER_V4
 
