@@ -1724,7 +1724,7 @@ void MenuFunctions::RunSetup()
     wifi_scan_obj.currentScanMode = OTA_UPDATE;
     changeMenu(&whichUpdateMenu);
   });
-  addNodes(&deviceMenu, "Language", TFT_WHITE, NULL, DRAW, [this]() {
+  addNodes(&deviceMenu, "Language", TFT_GREEN, NULL, LANGUAGE, [this]() {
     wifi_scan_obj.currentScanMode = SHOW_INFO;
    changeMenu(&languageMenu);   
   });

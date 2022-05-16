@@ -75,6 +75,7 @@ extern Settings settings_obj;
 #define ESP_UPDATE_ICO 32
 #define BAD_USB_ICO 33
 #define TEST_BAD_USB_ICO 34
+#define LANGUAGE 35
 
 PROGMEM void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
 PROGMEM bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data);
