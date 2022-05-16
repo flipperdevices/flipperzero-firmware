@@ -236,7 +236,7 @@ static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag(
         return mf_ultralight_ntag_i2c_addr_lin_to_tag_plus_2k(linear_address, sector, valid_pages);
 
     default:
-        *sector = -1;
+        *sector = 0xff;
         *valid_pages = reader->pages_to_read - linear_address;
         return linear_address;
     }
@@ -426,13 +426,8 @@ bool mf_ultralight_read_pages(
     MfUltralightReader* reader,
     MfUltralightData* data) {
     uint8_t pages_read_cnt = 0;
-    int8_t curr_sector_index = -1;
+    uint8_t curr_sector_index = 0xff;
     reader->pages_read = 0;
-
-    // Non NTAG I2C tags don't have sector select, so we'll say sector 0 is
-    // already selected
-    if(data->type < MfUltralightTypeNTAGI2C1K) curr_sector_index = 0;
-
     for(size_t i = 0; i < reader->pages_to_read; i += pages_read_cnt) {
         uint8_t tag_sector;
         int16_t valid_pages;
@@ -475,7 +470,7 @@ bool mf_ultralight_fast_read_pages(
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
     MfUltralightData* data) {
-    int8_t curr_sector_index = -1;
+    uint8_t curr_sector_index = 0xff;
     reader->pages_read = 0;
     while(reader->pages_read < reader->pages_to_read) {
         uint8_t tag_sector;
