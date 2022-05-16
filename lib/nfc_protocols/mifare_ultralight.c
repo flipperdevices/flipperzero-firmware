@@ -113,7 +113,9 @@ bool mf_ultralight_read_version(
 }
 
 static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag_1k(
-    int16_t linear_address, uint8_t* sector, int16_t* valid_pages) {
+    int16_t linear_address,
+    uint8_t* sector,
+    int16_t* valid_pages) {
     // 0 - 226: sector 0
     // 227 - 228: config registers
     // 229 - 230: session registers
@@ -137,7 +139,9 @@ static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag_1k(
 }
 
 static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag_2k(
-    int16_t linear_address, uint8_t* sector, int16_t* valid_pages) {
+    int16_t linear_address,
+    uint8_t* sector,
+    int16_t* valid_pages) {
     // 0 - 255: sector 0
     // 256 - 480: sector 1
     // 481 - 482: config registers
@@ -166,7 +170,9 @@ static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag_2k(
 }
 
 static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag_plus_1k(
-    int16_t linear_address, uint8_t* sector, int16_t* valid_pages) {
+    int16_t linear_address,
+    uint8_t* sector,
+    int16_t* valid_pages) {
     // 0 - 233: sector 0 + registers
     // 234 - 235: session registers
 
@@ -185,7 +191,9 @@ static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag_plus_1k(
 }
 
 static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag_plus_2k(
-    int16_t linear_address, uint8_t* sector, int16_t* valid_pages) {
+    int16_t linear_address,
+    uint8_t* sector,
+    int16_t* valid_pages) {
     // 0 - 233: sector 0 + registers
     // 234 - 235: session registers
     // 236 - 491: sector 1
@@ -216,20 +224,16 @@ static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag(
     int16_t* valid_pages) {
     switch(data->type) {
     case MfUltralightTypeNTAGI2C1K:
-        return mf_ultralight_ntag_i2c_addr_lin_to_tag_1k(
-            linear_address, sector, valid_pages);
+        return mf_ultralight_ntag_i2c_addr_lin_to_tag_1k(linear_address, sector, valid_pages);
 
     case MfUltralightTypeNTAGI2C2K:
-        return mf_ultralight_ntag_i2c_addr_lin_to_tag_2k(
-            linear_address, sector, valid_pages);
+        return mf_ultralight_ntag_i2c_addr_lin_to_tag_2k(linear_address, sector, valid_pages);
 
     case MfUltralightTypeNTAGI2CPlus1K:
-        return mf_ultralight_ntag_i2c_addr_lin_to_tag_plus_1k(
-            linear_address, sector, valid_pages);
+        return mf_ultralight_ntag_i2c_addr_lin_to_tag_plus_1k(linear_address, sector, valid_pages);
 
     case MfUltralightTypeNTAGI2CPlus2K:
-        return mf_ultralight_ntag_i2c_addr_lin_to_tag_plus_2k(
-            linear_address, sector, valid_pages);
+        return mf_ultralight_ntag_i2c_addr_lin_to_tag_plus_2k(linear_address, sector, valid_pages);
 
     default:
         *sector = -1;
@@ -238,8 +242,8 @@ static int16_t mf_ultralight_ntag_i2c_addr_lin_to_tag(
     }
 }
 
-static int16_t mf_ultralight_ntag_i2c_addr_tag_to_lin_1k(
-    uint8_t page, uint8_t sector, uint16_t* valid_pages) {
+static int16_t
+    mf_ultralight_ntag_i2c_addr_tag_to_lin_1k(uint8_t page, uint8_t sector, uint16_t* valid_pages) {
     bool valid = false;
     int16_t translated_page;
     if(sector == 0) {
@@ -267,8 +271,8 @@ static int16_t mf_ultralight_ntag_i2c_addr_tag_to_lin_1k(
     return translated_page;
 }
 
-static int16_t mf_ultralight_ntag_i2c_addr_tag_to_lin_2k(
-    uint8_t page, uint8_t sector, uint16_t* valid_pages) {
+static int16_t
+    mf_ultralight_ntag_i2c_addr_tag_to_lin_2k(uint8_t page, uint8_t sector, uint16_t* valid_pages) {
     bool valid = false;
     int16_t translated_page;
     if(sector == 0) {
@@ -301,7 +305,9 @@ static int16_t mf_ultralight_ntag_i2c_addr_tag_to_lin_2k(
 }
 
 static int16_t mf_ultralight_ntag_i2c_addr_tag_to_lin_plus_1k(
-    uint8_t page, uint8_t sector, uint16_t* valid_pages) {
+    uint8_t page,
+    uint8_t sector,
+    uint16_t* valid_pages) {
     bool valid = false;
     int16_t translated_page;
     if(sector == 0) {
@@ -330,7 +336,9 @@ static int16_t mf_ultralight_ntag_i2c_addr_tag_to_lin_plus_1k(
 }
 
 static int16_t mf_ultralight_ntag_i2c_addr_tag_to_lin_plus_2k(
-    uint8_t page, uint8_t sector, uint16_t* valid_pages) {
+    uint8_t page,
+    uint8_t sector,
+    uint16_t* valid_pages) {
     bool valid = false;
     int16_t translated_page;
     if(sector == 0) {
@@ -369,20 +377,16 @@ static int16_t mf_ultralight_ntag_i2c_addr_tag_to_lin(
     uint16_t* valid_pages) {
     switch(data->type) {
     case MfUltralightTypeNTAGI2C1K:
-        return mf_ultralight_ntag_i2c_addr_tag_to_lin_1k(
-            page, sector, valid_pages);
+        return mf_ultralight_ntag_i2c_addr_tag_to_lin_1k(page, sector, valid_pages);
 
     case MfUltralightTypeNTAGI2C2K:
-        return mf_ultralight_ntag_i2c_addr_tag_to_lin_2k(
-            page, sector, valid_pages);
+        return mf_ultralight_ntag_i2c_addr_tag_to_lin_2k(page, sector, valid_pages);
 
     case MfUltralightTypeNTAGI2CPlus1K:
-        return mf_ultralight_ntag_i2c_addr_tag_to_lin_plus_1k(
-            page, sector, valid_pages);
+        return mf_ultralight_ntag_i2c_addr_tag_to_lin_plus_1k(page, sector, valid_pages);
 
     case MfUltralightTypeNTAGI2CPlus2K:
-        return mf_ultralight_ntag_i2c_addr_tag_to_lin_plus_2k(
-            page, sector, valid_pages);
+        return mf_ultralight_ntag_i2c_addr_tag_to_lin_plus_2k(page, sector, valid_pages);
 
     default:
         *valid_pages = data->data_size / 4 - page;
@@ -390,9 +394,7 @@ static int16_t mf_ultralight_ntag_i2c_addr_tag_to_lin(
     }
 }
 
-static bool mf_ultralight_sector_select(
-    FuriHalNfcTxRxContext* tx_rx,
-    uint8_t sector) {
+static bool mf_ultralight_sector_select(FuriHalNfcTxRxContext* tx_rx, uint8_t sector) {
     FURI_LOG_D(TAG, "Selecting sector %u", sector);
     tx_rx->tx_data[0] = MF_UL_SECTOR_SELECT;
     tx_rx->tx_data[1] = 0xff;
@@ -429,8 +431,7 @@ bool mf_ultralight_read_pages(
 
     // Non NTAG I2C tags don't have sector select, so we'll say sector 0 is
     // already selected
-    if (data->type < MfUltralightTypeNTAGI2C1K)
-        curr_sector_index = 0;
+    if(data->type < MfUltralightTypeNTAGI2C1K) curr_sector_index = 0;
 
     for(size_t i = 0; i < reader->pages_to_read; i += pages_read_cnt) {
         uint8_t tag_sector;
@@ -440,19 +441,20 @@ bool mf_ultralight_read_pages(
 
         furi_assert(tag_page != -1);
         if(curr_sector_index != tag_sector) {
-            if(!mf_ultralight_sector_select(tx_rx, tag_sector))
-                return false;
+            if(!mf_ultralight_sector_select(tx_rx, tag_sector)) return false;
             curr_sector_index = tag_sector;
         }
 
-        FURI_LOG_D(TAG, "Reading pages %d - %d", i,
-            i + (valid_pages > 4 ? 4 : valid_pages) - 1);
+        FURI_LOG_D(TAG, "Reading pages %d - %d", i, i + (valid_pages > 4 ? 4 : valid_pages) - 1);
         tx_rx->tx_data[0] = MF_UL_READ_CMD;
         tx_rx->tx_data[1] = tag_page;
         tx_rx->tx_bits = 16;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
         if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
-            FURI_LOG_D(TAG, "Failed to read pages %d - %d", i,
+            FURI_LOG_D(
+                TAG,
+                "Failed to read pages %d - %d",
+                i,
                 i + (valid_pages > 4 ? 4 : valid_pages) - 1);
             break;
         }
@@ -483,13 +485,12 @@ bool mf_ultralight_fast_read_pages(
 
         furi_assert(tag_page != -1);
         if(curr_sector_index != tag_sector) {
-            if(!mf_ultralight_sector_select(tx_rx, tag_sector))
-                return false;
+            if(!mf_ultralight_sector_select(tx_rx, tag_sector)) return false;
             curr_sector_index = tag_sector;
         }
 
-        FURI_LOG_D(TAG, "Reading pages %d - %d", reader->pages_read,
-            reader->pages_read + valid_pages - 1);
+        FURI_LOG_D(
+            TAG, "Reading pages %d - %d", reader->pages_read, reader->pages_read + valid_pages - 1);
         tx_rx->tx_data[0] = MF_UL_FAST_READ_CMD;
         tx_rx->tx_data[1] = tag_page;
         tx_rx->tx_data[2] = valid_pages - 1;
@@ -500,7 +501,10 @@ bool mf_ultralight_fast_read_pages(
             reader->pages_read += valid_pages;
             data->data_size = reader->pages_read * 4;
         } else {
-            FURI_LOG_D(TAG, "Failed to read pages %d - %d", reader->pages_read,
+            FURI_LOG_D(
+                TAG,
+                "Failed to read pages %d - %d",
+                reader->pages_read,
                 reader->pages_read + valid_pages - 1);
             break;
         }
@@ -622,7 +626,7 @@ static void mf_ul_protect_auth_data_on_read_command_i2c(
         if(start_page <= 229 && end_page >= 229) {
             uint16_t offset = (229 - start_page) * 4;
             uint8_t count = 4;
-            if (end_page >= 230) count += 2;
+            if(end_page >= 230) count += 2;
             memset(&tx_buff[offset], 0, count);
         }
 
@@ -661,8 +665,7 @@ static void mf_ul_ntag_i2c_fill_cross_area_read(
                 page_length = 2;
                 apply = true;
             }
-        } else if(type == MfUltralightTypeNTAGI2CPlus1K
-            || type == MfUltralightTypeNTAGI2CPlus2K) {
+        } else if(type == MfUltralightTypeNTAGI2CPlus1K || type == MfUltralightTypeNTAGI2CPlus2K) {
             if(start_page <= 237 && end_page >= 236) {
                 tx_page_offset = start_page - 236;
                 data_page_offset = 234;
@@ -687,35 +690,36 @@ static void mf_ul_ntag_i2c_fill_cross_area_read(
             ++data_page_offset;
             --page_length;
         }
-        memcpy(&tx_buff[tx_page_offset * 4], &emulator->data.data[data_page_offset * 4],
+        memcpy(
+            &tx_buff[tx_page_offset * 4],
+            &emulator->data.data[data_page_offset * 4],
             page_length * 4);
     }
 }
 
-static bool mf_ul_ntag_i2c_plus_check_auth(MfUltralightEmulator* emulator,
-    uint8_t start_page, bool is_write) {
+static bool mf_ul_ntag_i2c_plus_check_auth(
+    MfUltralightEmulator* emulator,
+    uint8_t start_page,
+    bool is_write) {
     if(!emulator->auth_success) {
         uint8_t access = emulator->data.data[228 * 4];
         // Check NFC_PROT
         if(emulator->curr_sector == 0 && ((access & 0x80) || is_write)) {
             uint8_t auth0 = emulator->data.data[227 * 4 + 3];
-            if (start_page >= auth0)
-                return false;
+            if(start_page >= auth0) return false;
         } else if(emulator->curr_sector == 1) {
             // We don't have to specifically check for type because this is done
             // by address translator
             uint8_t pt_i2c = emulator->data.data[231 * 4];
             // Check 2K_PROT
-            if(pt_i2c & 0x08)
-                return false;
+            if(pt_i2c & 0x08) return false;
         }
     }
 
     if(emulator->curr_sector == 1) {
         // Check NFC_DIS_SEC1
         uint8_t access = emulator->data.data[228 * 4];
-        if(access & 0x20)
-            return false;
+        if(access & 0x20) return false;
     }
 
     return true;
@@ -819,7 +823,8 @@ bool mf_ul_prepare_emulation_response(
                     // Handle roll-over mechanism
                     uint8_t end_pages_num = page_num - start_page;
                     memcpy(buff_tx, &emulator->data.data[start_page * 4], end_pages_num * 4);
-                    memcpy(&buff_tx[end_pages_num * 4], emulator->data.data, (4 - end_pages_num) * 4);
+                    memcpy(
+                        &buff_tx[end_pages_num * 4], emulator->data.data, (4 - end_pages_num) * 4);
                 } else {
                     memcpy(buff_tx, &emulator->data.data[start_page * 4], tx_bytes);
                 }
@@ -834,35 +839,42 @@ bool mf_ul_prepare_emulation_response(
                 &emulator->data, start_page, emulator->curr_sector, &valid_pages);
             if(start_page != -1) {
                 if(emulator->data.type < MfUltralightTypeNTAGI2CPlus1K ||
-                    mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], false)) {
-                    if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K
-                        && emulator->curr_sector == 3 && valid_pages == 1) {
+                   mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], false)) {
+                    if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K &&
+                       emulator->curr_sector == 3 && valid_pages == 1) {
                         // Rewind back a sector to match behavior on a real tag
                         --start_page;
                         ++valid_pages;
                     }
 
                     uint16_t copy_count = (valid_pages > 4 ? 4 : valid_pages) * 4;
-                    FURI_LOG_D(TAG, "NTAG I2C Emu: page valid, %02x:%02x -> %d, %d",
-                        emulator->curr_sector, buff_rx[1], start_page, valid_pages);
+                    FURI_LOG_D(
+                        TAG,
+                        "NTAG I2C Emu: page valid, %02x:%02x -> %d, %d",
+                        emulator->curr_sector,
+                        buff_rx[1],
+                        start_page,
+                        valid_pages);
                     memcpy(buff_tx, &emulator->data.data[start_page * 4], copy_count);
                     // For NTAG I2C, there's no roll-over; remainder is filled by null bytes
-                    if (copy_count < tx_bytes)
+                    if(copy_count < tx_bytes)
                         memset(&buff_tx[copy_count], 0, tx_bytes - copy_count);
                     // Special case: NTAG I2C Plus sector 0 page 233 read crosses into page 236
-                    if (start_page == 233)
+                    if(start_page == 233)
                         memcpy(&buff_tx[12], &emulator->data.data[(start_page + 1) * 4], 4);
-                    mf_ul_protect_auth_data_on_read_command_i2c(buff_tx,
-                        start_page, start_page + copy_count / 4 - 1, emulator);
+                    mf_ul_protect_auth_data_on_read_command_i2c(
+                        buff_tx, start_page, start_page + copy_count / 4 - 1, emulator);
                     *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
                     command_parsed = true;
                 }
             } else {
-                FURI_LOG_D(TAG, "NTAG I2C Emu: page invalid, %02x:%02x",
-                    emulator->curr_sector, buff_rx[1]);
-                if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K
-                    && emulator->curr_sector == 3
-                    && !emulator->ntag_i2c_plus_sector3_lockout) {
+                FURI_LOG_D(
+                    TAG,
+                    "NTAG I2C Emu: page invalid, %02x:%02x",
+                    emulator->curr_sector,
+                    buff_rx[1]);
+                if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K &&
+                   emulator->curr_sector == 3 && !emulator->ntag_i2c_plus_sector3_lockout) {
                     // NTAG I2C Plus has a weird behavior where if you read sector 3
                     // at an invalid address, it responds with zeroes then locks
                     // the read out, while if you read the mirrored session registers,
@@ -884,7 +896,8 @@ bool mf_ul_prepare_emulation_response(
                 if(emulator->data.type < MfUltralightTypeNTAGI2C1K) {
                     if((start_page < page_num) && (end_page < page_num)) {
                         memcpy(buff_tx, &emulator->data.data[start_page * 4], tx_bytes);
-                        mf_ul_protect_auth_data_on_read_command(buff_tx, start_page, end_page, emulator);
+                        mf_ul_protect_auth_data_on_read_command(
+                            buff_tx, start_page, end_page, emulator);
                         *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
                         command_parsed = true;
                     }
@@ -894,15 +907,15 @@ bool mf_ul_prepare_emulation_response(
                         &emulator->data, start_page, emulator->curr_sector, &valid_pages);
                     if(start_page != -1) {
                         if(emulator->data.type < MfUltralightTypeNTAGI2CPlus1K ||
-                            mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], false)) {
+                           mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], false)) {
                             uint16_t copy_count = (valid_pages > 4 ? 4 : valid_pages) * 4;
                             memcpy(buff_tx, &emulator->data.data[start_page * 4], copy_count);
-                            if (copy_count < tx_bytes)
+                            if(copy_count < tx_bytes)
                                 memset(&buff_tx[copy_count], 0, tx_bytes - copy_count);
-                            mf_ul_ntag_i2c_fill_cross_area_read(buff_tx, buff_rx[1],
-                                buff_rx[2], emulator);
-                            mf_ul_protect_auth_data_on_read_command_i2c(buff_tx,
-                                start_page, start_page + copy_count / 4 - 1, emulator);
+                            mf_ul_ntag_i2c_fill_cross_area_read(
+                                buff_tx, buff_rx[1], buff_rx[2], emulator);
+                            mf_ul_protect_auth_data_on_read_command_i2c(
+                                buff_tx, start_page, start_page + copy_count / 4 - 1, emulator);
                             *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
                             command_parsed = true;
                         }
@@ -915,12 +928,12 @@ bool mf_ul_prepare_emulation_response(
         int16_t write_page = buff_rx[1];
         if(write_page > 1) {
             uint16_t valid_pages;
-            write_page = mf_ultralight_ntag_i2c_addr_tag_to_lin(&emulator->data,
-                write_page, emulator->curr_sector, &valid_pages);
-            if(write_page != -1
-                && (emulator->data.type >= MfUltralightTypeNTAGI2C1K || (write_page < page_num - 2))) {
-                if (emulator->data.type < MfUltralightTypeNTAGI2CPlus1K ||
-                    mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], true)) {
+            write_page = mf_ultralight_ntag_i2c_addr_tag_to_lin(
+                &emulator->data, write_page, emulator->curr_sector, &valid_pages);
+            if(write_page != -1 &&
+               (emulator->data.type >= MfUltralightTypeNTAGI2C1K || (write_page < page_num - 2))) {
+                if(emulator->data.type < MfUltralightTypeNTAGI2CPlus1K ||
+                   mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], true)) {
                     memcpy(&emulator->data.data[write_page * 4], &buff_rx[2], 4);
                     emulator->data_changed = true;
                     send_ack = true;
@@ -930,7 +943,7 @@ bool mf_ul_prepare_emulation_response(
         }
     } else if(cmd == MF_UL_FAST_WRITE) {
         if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K) {
-            if (buff_rx[1] == 0xF0 && buff_rx[2] == 0xFF) {
+            if(buff_rx[1] == 0xF0 && buff_rx[2] == 0xFF) {
                 // TODO: update when SRAM emulation implemented
                 send_ack = true;
                 command_parsed = true;
@@ -976,9 +989,9 @@ bool mf_ul_prepare_emulation_response(
             }
         }
     } else if(cmd == MF_UL_AUTH) {
-        if(emulator->data.type >= MfUltralightTypeNTAG213
-            && emulator->data.type != MfUltralightTypeNTAGI2C1K
-            && emulator->data.type != MfUltralightTypeNTAGI2C2K) {
+        if(emulator->data.type >= MfUltralightTypeNTAG213 &&
+           emulator->data.type != MfUltralightTypeNTAGI2C1K &&
+           emulator->data.type != MfUltralightTypeNTAGI2C2K) {
             if(memcmp(&buff_rx[1], emulator->auth_data->pwd, 4) == 0) {
                 buff_tx[0] = emulator->auth_data->pack.raw[0];
                 buff_tx[1] = emulator->auth_data->pack.raw[1];

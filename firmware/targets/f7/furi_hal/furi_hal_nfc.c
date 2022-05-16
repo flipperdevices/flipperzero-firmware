@@ -335,8 +335,7 @@ bool furi_hal_nfc_emulate_nfca(
                     break;
                 }
                 if(buff_tx_len) {
-                    if (buff_tx_len == UINT16_MAX)
-                        buff_tx_len = 0;
+                    if(buff_tx_len == UINT16_MAX) buff_tx_len = 0;
 
                     ReturnCode ret = rfalTransceiveBitsBlockingTx(
                         buff_tx,
