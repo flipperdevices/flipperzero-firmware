@@ -10,7 +10,7 @@
 #include "../one_wire_host.h"
 #include "../one_wire_slave.h"
 #include "../one_wire_device.h"
-#include "../pulse_protocols/pulse_decoder.h"
+#include <toolbox/pulse_protocols/pulse_decoder.h>
 #include "pulse_protocols/protocol_cyfral.h"
 #include "pulse_protocols/protocol_metakom.h"
 #include "encoder/encoder_cyfral.h"
