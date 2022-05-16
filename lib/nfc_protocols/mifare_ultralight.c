@@ -427,6 +427,11 @@ bool mf_ultralight_read_pages(
     int8_t curr_sector_index = -1;
     reader->pages_read = 0;
 
+    // Non NTAG I2C tags don't have sector select, so we'll say sector 0 is
+    // already selected
+    if (data->type < MfUltralightTypeNTAGI2C1K)
+        curr_sector_index = 0;
+
     for(size_t i = 0; i < reader->pages_to_read; i += pages_read_cnt) {
         uint8_t tag_sector;
         int16_t valid_pages;
