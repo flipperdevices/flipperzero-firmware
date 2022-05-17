@@ -11,10 +11,17 @@ if (DEFINED ESP_PLATFORM)
     # Register component to esp-idf build system
     list(APPEND srcs port/esp32_port.c)
     if ("${IDF_VERSION_MAJOR}.${IDF_VERSION_MINOR}" VERSION_GREATER "4.0")
+        # esp_timer component was introduced in v4.2
+        set(priv_requires driver)
+        if("${IDF_VERSION_MAJOR}.${IDF_VERSION_MINOR}" VERSION_GREATER "4.1")
+            list(APPEND priv_requires esp_timer)
+        endif()
+
         idf_component_register(SRCS ${srcs}
                                INCLUDE_DIRS include port
                                PRIV_INCLUDE_DIRS private_include
-                               PRIV_REQUIRES driver)
+                               PRIV_REQUIRES ${priv_requires})
+
         set(target ${COMPONENT_LIB})
         component_compile_options(-Wstrict-prototypes)
     else()
