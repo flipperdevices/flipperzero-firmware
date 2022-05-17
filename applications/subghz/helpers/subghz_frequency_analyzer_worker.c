@@ -1,4 +1,5 @@
 #include "subghz_frequency_analyzer_worker.h"
+#include <lib/drivers/cc112x_regs.h>
 #include <lib/drivers/cc1101_regs.h>
 
 #include <furi.h>
