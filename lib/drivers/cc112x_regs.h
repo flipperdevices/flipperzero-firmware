@@ -14,8 +14,10 @@ extern "C" {
 
 /* Frequency Synthesizer constants */
 #define CC112X_QUARTZ 32000000
-//#define CC112X_FMASK 0xFFFFFF
-//#define CC112X_FDIV 0x10000
+#define CC112X_EXT_REG_MASK 0x2F00
+#define CC112X_FMASK 0xFFFFFF
+#define CC112X_FDIV 0x10000
+#define CC112X_FOFFDIV 0x40000
 //#define CC112X_IFDIV 0x400
 
 /* IO Bus constants */
@@ -24,6 +26,8 @@ extern "C" {
 /* Bits and pieces */
 #define CC112X_READ (1 << 7) /** Read Bit */
 #define CC112X_BURST (1 << 6) /** Burst Bit */
+#define CC112X_READ_EXT (1 << 15) /** Read Bit */
+#define CC112X_BURST_EXT (1 << 14) /** Burst Bit */
 
 /* configuration registers */
 #define CC112X_IOCFG3 0x0000
@@ -218,20 +222,22 @@ extern "C" {
 #define CC112X_LQI_EST_BM 0x7F
 
 /* Command strobe registers */
-#define CC112X_SRES 0x30 /*  SRES    - Reset chip. */
-#define CC112X_SFSTXON 0x31 /*  SFSTXON - Enable and calibrate frequency synthesizer. */
-#define CC112X_SXOFF 0x32 /*  SXOFF   - Turn off crystal oscillator. */
-#define CC112X_SCAL 0x33 /*  SCAL    - Calibrate frequency synthesizer and turn it off. */
-#define CC112X_SRX 0x34 /*  SRX     - Enable RX. Perform calibration if enabled. */
-#define CC112X_STX 0x35 /*  STX     - Enable TX. If in RX state, only enable TX if CCA passes. */
-#define CC112X_SIDLE 0x36 /*  SIDLE   - Exit RX / TX, turn off frequency synthesizer. */
-#define CC112X_SWOR 0x38 /*  SWOR    - Start automatic RX polling sequence (Wake-on-Radio) */
-#define CC112X_SPWD 0x39 /*  SPWD    - Enter power down mode when CSn goes high. */
-#define CC112X_SFRX 0x3A /*  SFRX    - Flush the RX FIFO buffer. */
-#define CC112X_SFTX 0x3B /*  SFTX    - Flush the TX FIFO buffer. */
-#define CC112X_SWORRST 0x3C /*  SWORRST - Reset real time clock. */
-#define CC112X_SNOP 0x3D /*  SNOP    - No operation. Returns status byte. */
-#define CC112X_AFC 0x37 /*  AFC     - Automatic Frequency Correction */
+#define CC112X_STROBE_SRES 0x30 /*  SRES    - Reset chip. */
+#define CC112X_STROBE_SFSTXON 0x31 /*  SFSTXON - Enable and calibrate frequency synthesizer. */
+#define CC112X_STROBE_SXOFF 0x32 /*  SXOFF   - Turn off crystal oscillator. */
+#define CC112X_STROBE_SCAL 0x33 /*  SCAL    - Calibrate frequency synthesizer and turn it off. */
+#define CC112X_STROBE_SRX 0x34 /*  SRX     - Enable RX. Perform calibration if enabled. */
+#define CC112X_STROBE_STX \
+    0x35 /*  STX     - Enable TX. If in RX state, only enable TX if CCA passes. */
+#define CC112X_STROBE_SIDLE 0x36 /*  SIDLE   - Exit RX / TX, turn off frequency synthesizer. */
+#define CC112X_STROBE_SWOR \
+    0x38 /*  SWOR    - Start automatic RX polling sequence (Wake-on-Radio) */
+#define CC112X_STROBE_SPWD 0x39 /*  SPWD    - Enter power down mode when CSn goes high. */
+#define CC112X_STROBE_SFRX 0x3A /*  SFRX    - Flush the RX FIFO buffer. */
+#define CC112X_STROBE_SFTX 0x3B /*  SFTX    - Flush the TX FIFO buffer. */
+#define CC112X_STROBE_SWORRST 0x3C /*  SWORRST - Reset real time clock. */
+#define CC112X_STROBE_SNOP 0x3D /*  SNOP    - No operation. Returns status byte. */
+#define CC112X_STROBE_AFC 0x37 /*  AFC     - Automatic Frequency Correction */
 
 // /* Chip states returned in status byte */
 // #define CC112X_STATE_IDLE               0x00
@@ -268,70 +274,67 @@ typedef struct {
 
 /* GPIO Output Pin Mapping */
 typedef enum {
-    CC112XocfgRxFifoThreshold = 0x00,
-    CC112XocfgRxFifoThresholdOrPacket = 0x01,
-    CC112XocfgTxFifoThreshold = 0x02,
-    CC112XocfgTxFifoThresholdOrPacket = 0x03,
-    CC112XocfgRxOverflow = 0x04,
-    CC112XocfgTxUnderflow = 0x05,
-    CC112XocfgSyncRxTx = 0x06,
-    CC112XocfgCrcOk = 0x07,
-    CC112XocfgSerialClock = 0x08,
-    CC112XocfgSerialDataOutput = 0x09,
+    CC112XIocfgRxFifoThreshold = 0x00,
+    CC112XIocfgRxFifoThresholdOrPacket = 0x01,
+    CC112XIocfgTxFifoThreshold = 0x02,
+    CC112XIocfgTxFifoThresholdOrPacket = 0x03,
+    CC112XIocfgRxOverflow = 0x04,
+    CC112XIocfgTxUnderflow = 0x05,
+    CC112XIocfgSyncRxTx = 0x06,
+    CC112XIocfgCrcOk = 0x07,
+    CC112XIocfgSerialClock = 0x08,
+    CC112XIocfgSerialDataOutput = 0x09,
     /* Reserved range: 0x0A */
-    CC112XocfgPreambleReached = 0x0B,
-    CC112XocfgPreambleValid = 0x0C,
-    CC112XocfgRSSIValid = 0x0D,
-    CC112XocfgRSSIUpdateAGCUpdate = 0x0E,
-    CC112XocfgCCAStatus = 0x0F,
-    CC112XocfgCarrierSenseValid = 0x10,
-    CC112XocfgCarrierSense = 0x11,
-    CC112XocfgDSSS = 0x12,
-    CC112XocfgPkgCrcOk = 0x13,
-    CC112XocfgMcuWakeUp = 0x14,
-    CC112XocfgSyncLow0High1 = 0x15,
+    CC112XIocfgPreambleReached = 0x0B,
+    CC112XIocfgPreambleValid = 0x0C,
+    CC112XIocfgRSSIValid = 0x0D,
+    CC112XIocfgRSSIUpdateAGCUpdate = 0x0E,
+    CC112XIocfgCCAStatus = 0x0F,
+    CC112XIocfgCarrierSenseValid = 0x10,
+    CC112XIocfgCarrierSense = 0x11,
+    CC112XIocfgDSSS = 0x12,
+    CC112XIocfgPkgCrcOk = 0x13,
+    CC112XIocfgMcuWakeUp = 0x14,
+    CC112XIocfgSyncLow0High1 = 0x15,
     /* Reserved range: 0x16 */
-    CC112XocfgLnaPaRegPd = 0x17,
-    CC112XocfgLnaPd = 0x18,
-    CC112XocfgPaPd = 0x19,
-    CC112XocfgRx0Tx1Cfg = 0x1A,
+    CC112XIocfgLnaPaRegPd = 0x17,
+    CC112XIocfgLnaPd = 0x18,
+    CC112XIocfgPaPd = 0x19,
+    CC112XIocfgRx0Tx1Cfg = 0x1A,
     /* Reserved range: 0x1B */
-    CC112XocfgImageFound = 0x1C,
-    CC112XocfgClkEnCfm = 0x1D,
-    CC112XocfgCfmTxDataClk = 0x1E,
+    CC112XIocfgImageFound = 0x1C,
+    CC112XIocfgClkEnCfm = 0x1D,
+    CC112XIocfgCfmTxDataClk = 0x1E,
     /* Reserved range: 0x1F - 0x20 */
-    CC112XocfgRSSIStepFound = 0x21,
-    CC112XocfgRSSIStepEvent = 0x22,
-    CC112XocfgLock = 0x23,
-    CC112XocfgAntennaSelect = 0x24,
-    CC112XocfgMarc2PinStatus1 = 0x25,
-    CC112XocfgMarc2PinStatus0 = 0x26,
-    CC112XocfgTxFifoOverflowRxFifoUnderflow = 0x27,
-    CC112XocfgMagnChfiltRccValid = 0x28,
-    CC112XocfgCollision = 0x29,
-    CC112XocfgPaRampUp = 0x2A,
-    CC112XocfgCrcLenghAddrUartError = 0x2B,
-    CC112XocfgAgcStableGain = 0x2C,
-    CC112XocfgAgcUpdate = 0x2D,
-    CC112XocfgAdc = 0x2E,
+    CC112XIocfgRSSIStepFound = 0x21,
+    CC112XIocfgRSSIStepEvent = 0x22,
+    CC112XIocfgLock = 0x23,
+    CC112XIocfgAntennaSelect = 0x24,
+    CC112XIocfgMarc2PinStatus1 = 0x25,
+    CC112XIocfgMarc2PinStatus0 = 0x26,
+    CC112XIocfgTxFifoOverflowRxFifoUnderflow = 0x27,
+    CC112XIocfgMagnChfiltRccValid = 0x28,
+    CC112XIocfgCollision = 0x29,
+    CC112XIocfgPaRampUp = 0x2A,
+    CC112XIocfgCrcLenghAddrUartError = 0x2B,
+    CC112XIocfgAgcStableGain = 0x2C,
+    CC112XIocfgAgcUpdate = 0x2D,
+    CC112XIocfgAdc = 0x2E,
     /* Reserved range: 0x2F */
-    CC112XocfgHighz = 0x30,
-    CC112XocfgExtClock = 0x31,
-    CC112XocfgChpRdyN = 0x32,
-    CC112XocfgHW = 0x33,
+    CC112XIocfgHighz = 0x30,
+    CC112XIocfgExtClock = 0x31,
+    CC112XIocfgChpRdyN = 0x32,
+    CC112XIocfgHW = 0x33,
     /* Reserved range: 0x34 - 0x35 */
-    CC112XocfgClk32k = 0x36,
-    CC112XocfgWorEvnt0 = 0x37,
-    CC112XocfgWorEvnt1 = 0x38,
-    CC112XocfgWorEvnt2 = 0x39,
+    CC112XIocfgClk32k = 0x36,
+    CC112XIocfgWorEvnt0 = 0x37,
+    CC112XIocfgWorEvnt1 = 0x38,
+    CC112XIocfgWorEvnt2 = 0x39,
     /* Reserved range: 0x3A */
-    CC112XocfgXoscStable = 0x3B,
-    CC112XocfgExtOscEn = 0x3C,
+    CC112XIocfgXoscStable = 0x3B,
+    CC112XIocfgExtOscEn = 0x3C,
     /* Reserved range: 0x3D - 0x40 */
-} CC112Xocfg;
-
-
-
+} CC112XIocfg;
 
 // typedef union {
 //     _CC1101Status status;
@@ -348,8 +351,6 @@ typedef enum {
 //     bool RXFIFO_OVERFLOW : 1;
 // } _CC1101RxBytes;
 
-
-
 // /* Status registers, must be accessed with _CC1101_BURST, but one by one */
 // #define _CC1101_STATUS_PARTNUM 0x30 /** Chip ID Part Number */
 // #define _CC1101_STATUS_VERSION 0x31 /** Chip ID Version */
@@ -361,18 +362,14 @@ typedef enum {
 // #define _CC1101_STATUS_WORTIME0 0x37 /** Low Byte of WOR Time */
 // #define _CC1101_STATUS_PKTSTATUS 0x38 /** Current GDOx Status and Packet Status */
 // #define _CC1101_STATUS_VCO_VC_DAC 0x39 /** Current Setting from PLL Calibration Module */
-// #define _CC1101_STATUS_TXBYTES \
-//     0x3A /** Underflow and Number of Bytes, 7bit-Underflow, 6..0-Number of Bytes*/
-// #define _CC1101_STATUS_RXBYTES \
-//     0x3B /** Overflow and Number of Bytes, 7bit-Overflow*, 6..0-Number of Bytes*/
+// #define _CC1101_STATUS_TXBYTES 0x3A /** Underflow and Number of Bytes, 7bit-Underflow, 6..0-Number of Bytes*/
+// #define _CC1101_STATUS_RXBYTES 0x3B /** Overflow and Number of Bytes, 7bit-Overflow*, 6..0-Number of Bytes*/
 // #define _CC1101_STATUS_RCCTRL1_STATUS 0x3C /** Last RC Oscillator Calibration Result */
 // #define _CC1101_STATUS_RCCTRL0_STATUS 0x3D /** Last RC Oscillator Calibration Result */
 
 // /* Some special registers, use _CC1101_BURST to read/write data */
-// #define _CC1101_PATABLE \
-//     0x3E /** PATABLE register number, an 8-byte table that defines the PA control settings */
-// #define _CC1101_FIFO \
-//     0x3F /** FIFO register nunmber, can be combined with _CC1101_WRITE and/or _CC1101_BURST */
+// #define _CC1101_PATABLE 0x3E /** PATABLE register number, an 8-byte table that defines the PA control settings */
+// #define _CC1101_FIFO 0x3F /** FIFO register nunmber, can be combined with _CC1101_WRITE and/or _CC1101_BURST */
 // #define _CC1101_IOCFG_INV (1 << 6) /** IOCFG inversion */
 
 #ifdef __cplusplus

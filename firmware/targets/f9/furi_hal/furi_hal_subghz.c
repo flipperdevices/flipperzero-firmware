@@ -6,11 +6,12 @@
 #include <furi_hal_spi.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
+#include <furi_hal_delay.h>
 
 #include <stm32wbxx_ll_dma.h>
 
 #include <furi.h>
-#include <cc1101.h>
+#include <cc112x.h>
 #include <stdio.h>
 
 #define TAG "FuriHalSubGhz"
@@ -19,308 +20,224 @@ static volatile SubGhzState furi_hal_subghz_state = SubGhzStateInit;
 static volatile SubGhzRegulation furi_hal_subghz_regulation = SubGhzRegulationTxRx;
 static volatile FuriHalSubGhzPreset furi_hal_subghz_preset = FuriHalSubGhzPresetIDLE;
 
-static const uint8_t furi_hal_subghz_preset_ook_270khz_async_regs[][2] = {
-    // https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/382066/cc1101---don-t-know-the-correct-registers-configuration
+static const uint16_t furi_hal_subghz_preset_ook_270khz_async_regs[][2] = {
+    // // https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/382066/cc1101---don-t-know-the-correct-registers-configuration
 
-    /* GPIO GD0 */
-    {CC1101_IOCFG0, 0x0D}, // GD0 as async serial data output/input
+    // /* GPIO GD0 */
+    // {CC112X_IOCFG0, 0x0D}, // GD0 as async serial data output/input
 
-    /* FIFO and internals */
-    {CC1101_FIFOTHR, 0x47}, // The only important bit is ADC_RETENTION, FIFO Tx=33 Rx=32
+    // /* FIFO and internals */
+    // {cc112x_FIFOTHR, 0x47}, // The only important bit is ADC_RETENTION, FIFO Tx=33 Rx=32
 
-    /* Packet engine */
-    {CC1101_PKTCTRL0, 0x32}, // Async, continious, no whitening
+    // /* Packet engine */
+    // {cc112x_PKTCTRL0, 0x32}, // Async, continious, no whitening
 
-    /* Frequency Synthesizer Control */
-    {CC1101_FSCTRL1, 0x06}, // IF = (26*10^6) / (2^10) * 0x06 = 152343.75Hz
-
-    // Modem Configuration
-    {CC1101_MDMCFG0, 0x00}, // Channel spacing is 25kHz
-    {CC1101_MDMCFG1, 0x00}, // Channel spacing is 25kHz
-    {CC1101_MDMCFG2, 0x30}, // Format ASK/OOK, No preamble/sync
-    {CC1101_MDMCFG3, 0x32}, // Data rate is 3.79372 kBaud
-    {CC1101_MDMCFG4, 0x67}, // Rx BW filter is 270.833333kHz
-
-    /* Main Radio Control State Machine */
-    {CC1101_MCSM0, 0x18}, // Autocalibrate on idle-to-rx/tx, PO_TIMEOUT is 64 cycles(149-155us)
-
-    /* Frequency Offset Compensation Configuration */
-    {CC1101_FOCCFG,
-     0x18}, // no frequency offset compensation, POST_K same as PRE_K, PRE_K is 4K, GATE is off
-
-    /* Automatic Gain Control */
-    {CC1101_AGCCTRL0,
-     0x40}, // 01 - Low hysteresis, small asymmetric dead zone, medium gain; 00 - 8 samples agc; 00 - Normal AGC, 00 - 4dB boundary
-    {CC1101_AGCCTRL1,
-     0x00}, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
-    {CC1101_AGCCTRL2, 0x03}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 011 - MAIN_TARGET 24 dB
-
-    /* Wake on radio and timeouts control */
-    {CC1101_WORCTRL, 0xFB}, // WOR_RES is 2^15 periods (0.91 - 0.94 s) 16.5 - 17.2 hours
-
-    /* Frontend configuration */
-    {CC1101_FREND0, 0x11}, // Adjusts current TX LO buffer + high is PATABLE[1]
-    {CC1101_FREND1, 0xB6}, //
-
-    /* End  */
-    {0, 0},
-};
-
-static const uint8_t furi_hal_subghz_preset_ook_650khz_async_regs[][2] = {
-    // https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/382066/cc1101---don-t-know-the-correct-registers-configuration
-
-    /* GPIO GD0 */
-    {CC1101_IOCFG0, 0x0D}, // GD0 as async serial data output/input
-
-    /* FIFO and internals */
-    {CC1101_FIFOTHR, 0x07}, // The only important bit is ADC_RETENTION
-
-    /* Packet engine */
-    {CC1101_PKTCTRL0, 0x32}, // Async, continious, no whitening
-
-    /* Frequency Synthesizer Control */
-    {CC1101_FSCTRL1, 0x06}, // IF = (26*10^6) / (2^10) * 0x06 = 152343.75Hz
-
-    // Modem Configuration
-    {CC1101_MDMCFG0, 0x00}, // Channel spacing is 25kHz
-    {CC1101_MDMCFG1, 0x00}, // Channel spacing is 25kHz
-    {CC1101_MDMCFG2, 0x30}, // Format ASK/OOK, No preamble/sync
-    {CC1101_MDMCFG3, 0x32}, // Data rate is 3.79372 kBaud
-    {CC1101_MDMCFG4, 0x17}, // Rx BW filter is 650.000kHz
-
-    /* Main Radio Control State Machine */
-    {CC1101_MCSM0, 0x18}, // Autocalibrate on idle-to-rx/tx, PO_TIMEOUT is 64 cycles(149-155us)
-
-    /* Frequency Offset Compensation Configuration */
-    {CC1101_FOCCFG,
-     0x18}, // no frequency offset compensation, POST_K same as PRE_K, PRE_K is 4K, GATE is off
-
-    /* Automatic Gain Control */
-    // {CC1101_AGCTRL0,0x40}, // 01 - Low hysteresis, small asymmetric dead zone, medium gain; 00 - 8 samples agc; 00 - Normal AGC, 00 - 4dB boundary
-    // {CC1101_AGCTRL1,0x00}, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
-    // {CC1101_AGCCTRL2, 0x03}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 011 - MAIN_TARGET 24 dB
-    //MAGN_TARGET for RX filter BW =< 100 kHz is 0x3. For higher RX filter BW's MAGN_TARGET is 0x7.
-    {CC1101_AGCCTRL0,
-     0x91}, // 10 - Medium hysteresis, medium asymmetric dead zone, medium gain ; 01 - 16 samples agc; 00 - Normal AGC, 01 - 8dB boundary
-    {CC1101_AGCCTRL1,
-     0x0}, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
-    {CC1101_AGCCTRL2, 0x07}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 111 - MAIN_TARGET 42 dB
-
-    /* Wake on radio and timeouts control */
-    {CC1101_WORCTRL, 0xFB}, // WOR_RES is 2^15 periods (0.91 - 0.94 s) 16.5 - 17.2 hours
-
-    /* Frontend configuration */
-    {CC1101_FREND0, 0x11}, // Adjusts current TX LO buffer + high is PATABLE[1]
-    {CC1101_FREND1, 0xB6}, //
-
-    /* End  */
-    {0, 0},
-};
-static const uint8_t furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs[][2] = {
-
-    /* GPIO GD0 */
-    {CC1101_IOCFG0, 0x0D}, // GD0 as async serial data output/input
-
-    /* Frequency Synthesizer Control */
-    {CC1101_FSCTRL1, 0x06}, // IF = (26*10^6) / (2^10) * 0x06 = 152343.75Hz
-
-    /* Packet engine */
-    {CC1101_PKTCTRL0, 0x32}, // Async, continious, no whitening
-    {CC1101_PKTCTRL1, 0x04},
+    // /* Frequency Synthesizer Control */
+    // {cc112x_FSCTRL1, 0x06}, // IF = (26*10^6) / (2^10) * 0x06 = 152343.75Hz
 
     // // Modem Configuration
-    {CC1101_MDMCFG0, 0x00},
-    {CC1101_MDMCFG1, 0x02},
-    {CC1101_MDMCFG2, 0x04}, // Format 2-FSK/FM, No preamble/sync, Disable (current optimized)
-    {CC1101_MDMCFG3, 0x83}, // Data rate is 4.79794 kBaud
-    {CC1101_MDMCFG4, 0x67}, //Rx BW filter is 270.833333 kHz
-    {CC1101_DEVIATN, 0x04}, //Deviation 2.380371 kHz
+    // {cc112x_MDMCFG0, 0x00}, // Channel spacing is 25kHz
+    // {cc112x_MDMCFG1, 0x00}, // Channel spacing is 25kHz
+    // {cc112x_MDMCFG2, 0x30}, // Format ASK/OOK, No preamble/sync
+    // {cc112x_MDMCFG3, 0x32}, // Data rate is 3.79372 kBaud
+    // {cc112x_MDMCFG4, 0x67}, // Rx BW filter is 270.833333kHz
 
-    /* Main Radio Control State Machine */
-    {CC1101_MCSM0, 0x18}, // Autocalibrate on idle-to-rx/tx, PO_TIMEOUT is 64 cycles(149-155us)
+    // /* Main Radio Control State Machine */
+    // {cc112x_MCSM0, 0x18}, // Autocalibrate on idle-to-rx/tx, PO_TIMEOUT is 64 cycles(149-155us)
 
-    /* Frequency Offset Compensation Configuration */
-    {CC1101_FOCCFG,
-     0x16}, // no frequency offset compensation, POST_K same as PRE_K, PRE_K is 4K, GATE is off
+    // /* Frequency Offset Compensation Configuration */
+    // {cc112x_FOCCFG,
+    //  0x18}, // no frequency offset compensation, POST_K same as PRE_K, PRE_K is 4K, GATE is off
 
-    /* Automatic Gain Control */
-    {CC1101_AGCCTRL0,
-     0x91}, //10 - Medium hysteresis, medium asymmetric dead zone, medium gain ; 01 - 16 samples agc; 00 - Normal AGC, 01 - 8dB boundary
-    {CC1101_AGCCTRL1,
-     0x00}, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
-    {CC1101_AGCCTRL2, 0x07}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 111 - MAIN_TARGET 42 dB
+    // /* Automatic Gain Control */
+    // {cc112x_AGCCTRL0,
+    //  0x40}, // 01 - Low hysteresis, small asymmetric dead zone, medium gain; 00 - 8 samples agc; 00 - Normal AGC, 00 - 4dB boundary
+    // {cc112x_AGCCTRL1,
+    //  0x00}, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
+    // {cc112x_AGCCTRL2, 0x03}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 011 - MAIN_TARGET 24 dB
 
-    /* Wake on radio and timeouts control */
-    {CC1101_WORCTRL, 0xFB}, // WOR_RES is 2^15 periods (0.91 - 0.94 s) 16.5 - 17.2 hours
+    // /* Wake on radio and timeouts control */
+    // {cc112x_WORCTRL, 0xFB}, // WOR_RES is 2^15 periods (0.91 - 0.94 s) 16.5 - 17.2 hours
 
-    /* Frontend configuration */
-    {CC1101_FREND0, 0x10}, // Adjusts current TX LO buffer
-    {CC1101_FREND1, 0x56},
+    // /* Frontend configuration */
+    // {cc112x_FREND0, 0x11}, // Adjusts current TX LO buffer + high is PATABLE[1]
+    // {cc112x_FREND1, 0xB6}, //
 
-    /* End  */
-    {0, 0},
-};
-static const uint8_t furi_hal_subghz_preset_2fsk_dev47_6khz_async_regs[][2] = {
-
-    /* GPIO GD0 */
-    {CC1101_IOCFG0, 0x0D}, // GD0 as async serial data output/input
-
-    /* Frequency Synthesizer Control */
-    {CC1101_FSCTRL1, 0x06}, // IF = (26*10^6) / (2^10) * 0x06 = 152343.75Hz
-
-    /* Packet engine */
-    {CC1101_PKTCTRL0, 0x32}, // Async, continious, no whitening
-    {CC1101_PKTCTRL1, 0x04},
-
-    // // Modem Configuration
-    {CC1101_MDMCFG0, 0x00},
-    {CC1101_MDMCFG1, 0x02},
-    {CC1101_MDMCFG2, 0x04}, // Format 2-FSK/FM, No preamble/sync, Disable (current optimized)
-    {CC1101_MDMCFG3, 0x83}, // Data rate is 4.79794 kBaud
-    {CC1101_MDMCFG4, 0x67}, //Rx BW filter is 270.833333 kHz
-    {CC1101_DEVIATN, 0x47}, //Deviation 47.60742 kHz
-
-    /* Main Radio Control State Machine */
-    {CC1101_MCSM0, 0x18}, // Autocalibrate on idle-to-rx/tx, PO_TIMEOUT is 64 cycles(149-155us)
-
-    /* Frequency Offset Compensation Configuration */
-    {CC1101_FOCCFG,
-     0x16}, // no frequency offset compensation, POST_K same as PRE_K, PRE_K is 4K, GATE is off
-
-    /* Automatic Gain Control */
-    {CC1101_AGCCTRL0,
-     0x91}, //10 - Medium hysteresis, medium asymmetric dead zone, medium gain ; 01 - 16 samples agc; 00 - Normal AGC, 01 - 8dB boundary
-    {CC1101_AGCCTRL1,
-     0x00}, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
-    {CC1101_AGCCTRL2, 0x07}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 111 - MAIN_TARGET 42 dB
-
-    /* Wake on radio and timeouts control */
-    {CC1101_WORCTRL, 0xFB}, // WOR_RES is 2^15 periods (0.91 - 0.94 s) 16.5 - 17.2 hours
-
-    /* Frontend configuration */
-    {CC1101_FREND0, 0x10}, // Adjusts current TX LO buffer
-    {CC1101_FREND1, 0x56},
-
-    /* End  */
-    {0, 0},
-};
-static const uint8_t furi_hal_subghz_preset_msk_99_97kb_async_regs[][2] = {
-    /* GPIO GD0 */
-    {CC1101_IOCFG0, 0x06},
-
-    {CC1101_FIFOTHR, 0x07}, // The only important bit is ADC_RETENTION
-    {CC1101_SYNC1, 0x46},
-    {CC1101_SYNC0, 0x4C},
-    {CC1101_ADDR, 0x00},
-    {CC1101_PKTLEN, 0x00},
-    {CC1101_CHANNR, 0x00},
-
-    {CC1101_PKTCTRL0, 0x05},
-
-    {CC1101_FSCTRL0, 0x23},
-    {CC1101_FSCTRL1, 0x06},
-
-    {CC1101_MDMCFG0, 0xF8},
-    {CC1101_MDMCFG1, 0x22},
-    {CC1101_MDMCFG2, 0x72},
-    {CC1101_MDMCFG3, 0xF8},
-    {CC1101_MDMCFG4, 0x5B},
-    {CC1101_DEVIATN, 0x47},
-
-    {CC1101_MCSM0, 0x18},
-    {CC1101_FOCCFG, 0x16},
-
-    {CC1101_AGCCTRL0, 0xB2},
-    {CC1101_AGCCTRL1, 0x00},
-    {CC1101_AGCCTRL2, 0xC7},
-
-    {CC1101_FREND0, 0x10},
-    {CC1101_FREND1, 0x56},
-
-    {CC1101_BSCFG, 0x1C},
-    {CC1101_FSTEST, 0x59},
-
-    /* End  */
-    {0, 0},
-};
-static const uint8_t furi_hal_subghz_preset_gfsk_9_99kb_async_regs[][2] = {
-
-    {CC1101_IOCFG0, 0x06}, //GDO0 Output Pin Configuration
-    {CC1101_FIFOTHR, 0x47}, //RX FIFO and TX FIFO Thresholds
-
-    //1 : CRC calculation in TX and CRC check in RX enabled,
-    //1 : Variable packet length mode. Packet length configured by the first byte after sync word
-    {CC1101_PKTCTRL0, 0x05},
-
-    {CC1101_FSCTRL1, 0x06}, //Frequency Synthesizer Control
-
-    {CC1101_SYNC1, 0x46},
-    {CC1101_SYNC0, 0x4C},
-    {CC1101_ADDR, 0x00},
-    {CC1101_PKTLEN, 0x00},
-
-    {CC1101_MDMCFG4, 0xC8}, //Modem Configuration 9.99
-    {CC1101_MDMCFG3, 0x93}, //Modem Configuration
-    {CC1101_MDMCFG2, 0x12}, // 2: 16/16 sync word bits detected
-
-    {CC1101_DEVIATN, 0x34}, //Deviation = 19.042969
-    {CC1101_MCSM0, 0x18}, //Main Radio Control State Machine Configuration
-    {CC1101_FOCCFG, 0x16}, //Frequency Offset Compensation Configuration
-
-    {CC1101_AGCCTRL2, 0x43}, //AGC Control
-    {CC1101_AGCCTRL1, 0x40},
-    {CC1101_AGCCTRL0, 0x91},
-
-    {CC1101_WORCTRL, 0xFB}, //Wake On Radio Control
-    /* End  */
-    {0, 0},
+    // /* End  */
+    // {0, 0},
 };
 
-static const uint8_t furi_hal_subghz_preset_ook_async_patable[8] = {
-    0x00,
-    0xC0, // 12dBm 0xC0, 10dBm 0xC5, 7dBm 0xCD, 5dBm 0x86, 0dBm 0x50, -6dBm 0x37, -10dBm 0x26, -15dBm 0x1D, -20dBm 0x17, -30dBm 0x03
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00};
-static const uint8_t furi_hal_subghz_preset_ook_async_patable_au[8] = {
-    0x00,
-    0x37, // 12dBm 0xC0, 10dBm 0xC5, 7dBm 0xCD, 5dBm 0x86, 0dBm 0x50, -6dBm 0x37, -10dBm 0x26, -15dBm 0x1D, -20dBm 0x17, -30dBm 0x03
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00};
-static const uint8_t furi_hal_subghz_preset_2fsk_async_patable[8] = {
-    0xC0, // 10dBm 0xC0, 7dBm 0xC8, 5dBm 0x84, 0dBm 0x60, -10dBm 0x34, -15dBm 0x1D, -20dBm 0x0E, -30dBm 0x12
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00};
-static const uint8_t furi_hal_subghz_preset_msk_async_patable[8] = {
-    0xC0, // 10dBm 0xC0, 7dBm 0xC8, 5dBm 0x84, 0dBm 0x60, -10dBm 0x34, -15dBm 0x1D, -20dBm 0x0E, -30dBm 0x12
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00};
-static const uint8_t furi_hal_subghz_preset_gfsk_async_patable[8] = {
-    0xC0, // 10dBm 0xC0, 7dBm 0xC8, 5dBm 0x84, 0dBm 0x60, -10dBm 0x34, -15dBm 0x1D, -20dBm 0x0E, -30dBm 0x12
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00};
+static const uint16_t furi_hal_subghz_preset_ook_650khz_async_regs[][2] = {
+//        	//{CC112X_IOCFG3              , 0xB0, // GPIO3 IO Pin Configuration
+{CC112X_IOCFG2              , CC112XIocfgHW }, // GPIO2 IO Pin Configuration
+{CC112X_IOCFG1              , 0xB0}, // GPIO1 IO Pin Configuration
+{CC112X_IOCFG0              , 0x09}, // GPIO0 IO Pin Configuration
+{CC112X_SYNC1               , 0x00}, // Sync Word Configuration [15:8]
+{CC112X_SYNC0               , 0b01111010}, // 7A Sync Word Configuration [7:0]
+{CC112X_SYNC_CFG0           , 0b00001000}, //  8 Sync Word Length Configuration Reg. 0
+{CC112X_DEVIATION_M         , 0x26}, // Frequency Deviation Configuration
+{CC112X_MODCFG_DEV_E        , 0b00011101}, // 0x1D Modulation Format and Frequency Deviation Config.
+{CC112X_DCFILT_CFG          , 0x13},  // Digital DC Removal Configuration
+{CC112X_PREAMBLE_CFG1       , 0b00000000},// 0 Preamble Length Configuration Reg. 1
+{CC112X_PREAMBLE_CFG0       , 0b00010011}, // 13 Preamble Detection Configuration Reg. 0
+{CC112X_IQIC                , 0x00}, // Digital Image Channel Compensation Configuration
+//{CC112X_CHAN_BW             , 0b11000001}, // Channel Filter Configuration - Configurazione storica
+{CC112X_CHAN_BW             , 0b01000001}, //0x01}, //   Channel Filter Configuration - Configurazione storica
+{CC112X_MDMCFG1             , 0b00000110}, // 6 General Modem Parameter Configuration Reg. 1
+{CC112X_MDMCFG0             , 0b01000001}, // 41 General Modem Parameter Configuration Reg. 0
+        {CC112X_SYMBOL_RATE2,       0xA9 },  //0x5F },   //Symbol Rate Configuration Exponent and Mantissa [1..
+        {CC112X_SYMBOL_RATE1,       0x99 },//0x21 },   //Symbol Rate Configuration Mantissa [15:8]
+        {CC112X_SYMBOL_RATE0,       0x9A },//0x2D },   //Symbol Rate Configuration Mantissa [7:0]
+{CC112X_AGC_REF             , 0x30},  // AGC Reference Level Configuration
+{CC112X_AGC_CS_THR          , 0xEC},  // Carrier Sense Threshold Configuration
+{CC112X_AGC_CFG3            , 0b11100000}, //0b10100000},  // C0 Automatic Gain Control Configuration Reg. 3.
+{CC112X_AGC_CFG2            , 0b11000000}, //0b00100000},  // 20 Automatic Gain Control Configuration Reg. 2
+{CC112X_AGC_CFG1            , 0b00010111}, // 0b00001010},  // A Automatic Gain Control Configuration Reg. 1
+{CC112X_AGC_CFG0            , 0b00111111}, //0b10011111},  // 9F Automatic Gain Control Configuration Reg. 0 (1..0 - количеств выборок для 1\0)
+{CC112X_FS_CFG              , 0x14},  // Frequency Synthesizer Configuration
+{CC112X_PKT_CFG2            , 0b00000111}, // 7 Packet Configuration Reg. 2
+{CC112X_PKT_CFG1            , 0b00000000}, // Packet Configuration Reg. 1
+{CC112X_PKT_CFG0            , 0b00000000}, // Packet Configuration Reg. 0
+{CC112X_PA_CFG2             , 0x3C},  // Power Amplifier Configuration Reg. 2
+{CC112X_PA_CFG0             , 0x7E},  // Power Amplifier Configuration Reg. 0
+{CC112X_PKT_LEN             , 0x09},  // Packet Length Configuration. 7:0 PACKET_LENGTH
+{CC112X_FREQOFF_CFG         , 0b00100011}, //0x22},  // Frequency Offset Correction Configuration
+{CC112X_TOC_CFG             , 0x0A},  // Timing Offset Correction Configuration
+{CC112X_FREQ2,              0x6C },   //Frequency Configuration [23:16]
+{CC112X_FREQ1,              0x7A },   //Frequency Configuration [15:8]
+{CC112X_FREQ0,              0xE1 },   //Frequency Configuration [7:0]
+{CC112X_FS_DIG1             , 0x00},  // Frequency Synthesizer Digital Reg. 1
+{CC112X_FS_DIG0             , 0x5F},  // Frequency Synthesizer Digital Reg. 0
+{CC112X_FS_CAL1             , 0x40},  // Frequency Synthesizer Calibration Reg. 1
+{CC112X_FS_CAL0             , 0x0E},  // Frequency Synthesizer Calibration Reg. 0
+{CC112X_FS_DIVTWO           , 0x03},  // Frequency Synthesizer Divide by 2
+{CC112X_FS_DSM0             , 0x33},  // FS Digital Synthesizer Module Configuration Reg. 0
+{CC112X_FS_DVC0             , 0x17},  // Frequency Synthesizer Divider Chain Configuration ..
+{CC112X_FS_PFD              , 0x50},  // Frequency Synthesizer Phase Frequency Detector Con..
+{CC112X_FS_PRE              , 0x6E},  // Frequency Synthesizer Prescaler Configuration
+{CC112X_FS_REG_DIV_CML      , 0x14},  // Frequency Synthesizer Divider Regulator Configurat..
+{CC112X_FS_SPARE            , 0xAC},  // Frequency Synthesizer Spare
+{CC112X_FS_VCO0             , 0xB4},  // FS Voltage Controlled Oscillator Configuration Reg..
+{CC112X_XOSC5               , 0x0E},  // Crystal Oscillator Configuration Reg. 5
+{CC112X_XOSC1               , 0x03},  // Crystal Oscillator Configuration Reg. 1
+{CC112X_SERIAL_STATUS       , 0x08},  // Serial Status
+
+// //        	//{CC112X_IOCFG3              , 0xB0, // GPIO3 IO Pin Configuration
+// {CC112X_IOCFG2              , CC112XIocfgHW }, // GPIO2 IO Pin Configuration
+// {CC112X_IOCFG1              , 0xB0}, // GPIO1 IO Pin Configuration
+// {CC112X_IOCFG0              , 0x09}, // GPIO0 IO Pin Configuration
+// {CC112X_SYNC1               , 0x00}, // Sync Word Configuration [15:8]
+// {CC112X_SYNC0               , 0b01111010}, // 7A Sync Word Configuration [7:0]
+// {CC112X_SYNC_CFG0           , 0b00001000}, //  8 Sync Word Length Configuration Reg. 0
+// {CC112X_DEVIATION_M         , 0x26}, // Frequency Deviation Configuration
+// {CC112X_MODCFG_DEV_E        , 0b00011101}, // 0x1D Modulation Format and Frequency Deviation Config.
+// {CC112X_DCFILT_CFG          , 0x13},  // Digital DC Removal Configuration
+// {CC112X_PREAMBLE_CFG1       , 0b00000000},// 0 Preamble Length Configuration Reg. 1
+// {CC112X_PREAMBLE_CFG0       , 0b00010011}, // 13 Preamble Detection Configuration Reg. 0
+// {CC112X_IQIC                , 0x00}, // Digital Image Channel Compensation Configuration
+// //{CC112X_CHAN_BW             , 0b11000001}, // Channel Filter Configuration - Configurazione storica
+// {CC112X_CHAN_BW             , 0b01000001}, //0x01}, //   Channel Filter Configuration - Configurazione storica
+// {CC112X_MDMCFG1             , 0b00000110}, // 6 General Modem Parameter Configuration Reg. 1
+// {CC112X_MDMCFG0             , 0b01000001}, // 41 General Modem Parameter Configuration Reg. 0
+//         {CC112X_SYMBOL_RATE2,       0x43 },  //0x5F },   //Symbol Rate Configuration Exponent and Mantissa [1..
+//         {CC112X_SYMBOL_RATE1,       0xA9 },//0x21 },   //Symbol Rate Configuration Mantissa [15:8]
+//         {CC112X_SYMBOL_RATE0,       0x2A },//0x2D },   //Symbol Rate Configuration Mantissa [7:0]
+// {CC112X_AGC_REF             , 0x30},  // AGC Reference Level Configuration
+// {CC112X_AGC_CS_THR          , 0xEC},  // Carrier Sense Threshold Configuration
+// {CC112X_AGC_CFG3            , 0b11100000}, //0b10100000},  // C0 Automatic Gain Control Configuration Reg. 3.
+// {CC112X_AGC_CFG2            , 0b11000000}, //0b00100000},  // 20 Automatic Gain Control Configuration Reg. 2
+// {CC112X_AGC_CFG1            , 0b00010111}, // 0b00001010},  // A Automatic Gain Control Configuration Reg. 1
+// {CC112X_AGC_CFG0            , 0b00111111}, //0b10011111},  // 9F Automatic Gain Control Configuration Reg. 0 (1..0 - количеств выборок для 1\0)
+// {CC112X_FS_CFG              , 0x14},  // Frequency Synthesizer Configuration
+// {CC112X_PKT_CFG2            , 0b00000111}, // 7 Packet Configuration Reg. 2
+// {CC112X_PKT_CFG1            , 0b00000000}, // Packet Configuration Reg. 1
+// {CC112X_PKT_CFG0            , 0b00000000}, // Packet Configuration Reg. 0
+// {CC112X_PA_CFG2             , 0x3C},  // Power Amplifier Configuration Reg. 2
+// {CC112X_PA_CFG0             , 0x7E},  // Power Amplifier Configuration Reg. 0
+// {CC112X_PKT_LEN             , 0x09},  // Packet Length Configuration. 7:0 PACKET_LENGTH
+// {CC112X_FREQOFF_CFG         , 0x22},  // Frequency Offset Correction Configuration
+// {CC112X_TOC_CFG             , 0x0A},  // Timing Offset Correction Configuration
+// {CC112X_FREQ2,              0x6C },   //Frequency Configuration [23:16]
+// {CC112X_FREQ1,              0x7A },   //Frequency Configuration [15:8]
+// {CC112X_FREQ0,              0xE1 },   //Frequency Configuration [7:0]
+// {CC112X_FS_DIG1             , 0x00},  // Frequency Synthesizer Digital Reg. 1
+// {CC112X_FS_DIG0             , 0x5F},  // Frequency Synthesizer Digital Reg. 0
+// {CC112X_FS_CAL1             , 0x40},  // Frequency Synthesizer Calibration Reg. 1
+// {CC112X_FS_CAL0             , 0x0E},  // Frequency Synthesizer Calibration Reg. 0
+// {CC112X_FS_DIVTWO           , 0x03},  // Frequency Synthesizer Divide by 2
+// {CC112X_FS_DSM0             , 0x33},  // FS Digital Synthesizer Module Configuration Reg. 0
+// {CC112X_FS_DVC0             , 0x17},  // Frequency Synthesizer Divider Chain Configuration ..
+// {CC112X_FS_PFD              , 0x50},  // Frequency Synthesizer Phase Frequency Detector Con..
+// {CC112X_FS_PRE              , 0x6E},  // Frequency Synthesizer Prescaler Configuration
+// {CC112X_FS_REG_DIV_CML      , 0x14},  // Frequency Synthesizer Divider Regulator Configurat..
+// {CC112X_FS_SPARE            , 0xAC},  // Frequency Synthesizer Spare
+// {CC112X_FS_VCO0             , 0xB4},  // FS Voltage Controlled Oscillator Configuration Reg..
+// {CC112X_XOSC5               , 0x0E},  // Crystal Oscillator Configuration Reg. 5
+// {CC112X_XOSC1               , 0x03},  // Crystal Oscillator Configuration Reg. 1
+// {CC112X_SERIAL_STATUS       , 0x08},  // Serial Status
+
+        // //{CC112X_IOCFG3,             0xB0 },   //GPIO3 IO Pin Configuration
+        // {CC112X_IOCFG2,             0xB0 },   //GPIO2 IO Pin Configuration
+        // {CC112X_IOCFG1,             0xB0 },   //GPIO1 IO Pin Configuration
+        // {CC112X_IOCFG0,             CC112XIocfgSerialDataOutput },   //GPIO0 IO Pin Configuration
+        // {CC112X_SYNC_CFG1,          0x0B },   //Sync Word Detection Configuration Reg. 1
+        // {CC112X_SYNC_CFG0,          0x03 },   //Sync Word Length Configuration Reg. 0
+        // {CC112X_MODCFG_DEV_E,       0x1B },   //Modulation Format and Frequency Deviation Configur..
+        // {CC112X_DCFILT_CFG,         0x1C },   //Digital DC Removal Configuration
+        // {CC112X_PREAMBLE_CFG1,      0x00 },   //Preamble Length Configuration Reg. 1
+        // {CC112X_IQIC,               0x46 },   //Digital Image Channel Compensation Configuration
+        // {CC112X_CHAN_BW,            0x01 },   //Channel Filter Configuration
+        // {CC112X_MDMCFG1,            0x06 },   //General Modem Parameter Configuration Reg. 1
+        // {CC112X_MDMCFG0,            0x65 },   //General Modem Parameter Configuration Reg. 0
+        // {CC112X_SYMBOL_RATE2,       0x5F },   //Symbol Rate Configuration Exponent and Mantissa [1..
+        // {CC112X_SYMBOL_RATE1,       0x21 },   //Symbol Rate Configuration Mantissa [15:8]
+        // {CC112X_SYMBOL_RATE0,       0x2D },   //Symbol Rate Configuration Mantissa [7:0]
+        // {CC112X_AGC_REF,            0x20 },   //AGC Reference Level Configuration
+        // {CC112X_AGC_CS_THR,         0x19 },   //Carrier Sense Threshold Configuration
+        // {CC112X_AGC_CFG1,           0xA9 },   //Automatic Gain Control Configuration Reg. 1
+        // {CC112X_AGC_CFG0,           0xCF },   //Automatic Gain Control Configuration Reg. 0
+        // {CC112X_FIFO_CFG,           0x00 },   //FIFO Configuration
+        // {CC112X_FS_CFG,             0x14 },   //Frequency Synthesizer Configuration
+        // {CC112X_PKT_CFG2,           0x07 },   //Packet Configuration Reg. 2
+        // {CC112X_PKT_CFG0,           0x20 },   //Packet Configuration Reg. 0
+        // {CC112X_PA_CFG2,            0x3C },   //Power Amplifier Configuration Reg. 2
+        // {CC112X_PA_CFG0,            0x7E },   //Power Amplifier Configuration Reg. 0
+        // {CC112X_PKT_LEN,            0xFF },   //Packet Length Configuration
+        // {CC112X_IF_MIX_CFG,         0x00 },   //IF Mix Configuration
+        // {CC112X_FREQOFF_CFG,        0x22 },   //Frequency Offset Correction Configuration
+        // {CC112X_FREQ2,              0x6C },   //Frequency Configuration [23:16]
+        // {CC112X_FREQ1,              0x7A },   //Frequency Configuration [15:8]
+        // {CC112X_FREQ0,              0xE1 },   //Frequency Configuration [7:0]
+		// {CC112X_FS_DIG1,            0x00 },   //Frequency Synthesizer Digital Reg. 1
+        // {CC112X_FS_DIG0,            0x5F },   //Frequency Synthesizer Digital Reg. 0
+        // {CC112X_FS_CAL1,            0x40 },   //Frequency Synthesizer Calibration Reg. 1
+        // {CC112X_FS_CAL0,            0x0E },   //Frequency Synthesizer Calibration Reg. 0
+        // {CC112X_FS_DIVTWO,          0x03 },   //Frequency Synthesizer Divide by 2
+        // {CC112X_FS_DSM0,            0x33 },   //FS Digital Synthesizer Module Configuration Reg. 0
+        // {CC112X_FS_DVC0,            0x17 },   //Frequency Synthesizer Divider Chain Configuration ..
+        // {CC112X_FS_PFD,             0x50 },   //Frequency Synthesizer Phase Frequency Detector Con..
+        // {CC112X_FS_PRE,             0x6E },   //Frequency Synthesizer Prescaler Configuration
+        // {CC112X_FS_REG_DIV_CML,     0x14 },   //Frequency Synthesizer Divider Regulator Configurat..
+        // {CC112X_FS_SPARE,           0xAC },   //Frequency Synthesizer Spare
+        // {CC112X_FS_VCO0,            0xB4 },   //FS Voltage Controlled Oscillator Configuration Reg..
+        // {CC112X_XOSC5,              0x0E },   //Crystal Oscillator Configuration Reg. 5
+        // {CC112X_XOSC1,              0x03 },   //Crystal Oscillator Configuration Reg. 1
+        // {CC112X_SERIAL_STATUS       , 0x08},  // Serial Status
+            /* End  */
+    {0, 0},
+};
+static const uint16_t furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs[][2] = {
+
+};
+static const uint16_t furi_hal_subghz_preset_2fsk_dev47_6khz_async_regs[][2] = {
+
+};
+static const uint16_t furi_hal_subghz_preset_msk_99_97kb_async_regs[][2] = {
+
+};
+static const uint16_t furi_hal_subghz_preset_gfsk_9_99kb_async_regs[][2] = {
+
+};
 
 void furi_hal_subghz_init() {
     furi_assert(furi_hal_subghz_state == SubGhzStateInit);
@@ -333,37 +250,47 @@ void furi_hal_subghz_init() {
     furi_hal_gpio_init(&FURI_HAL_SUBGHZ_TX_GPIO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 #endif
 
+    // Reset PIN
+    furi_hal_gpio_init(&gpio_rf_sw_0, GpioModeOutputPushPull, GpioPullDown, GpioSpeedLow);
+    furi_hal_gpio_write(&gpio_rf_sw_0, false); //cc1120 reset pin down
+    furi_hal_delay_us(100);
+    furi_hal_gpio_write(&gpio_rf_sw_0, true); //cc1120 reset pin up
+
     // Reset
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    cc1101_reset(&furi_hal_spi_bus_handle_subghz);
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHighImpedance);
+    cc112x_reset(&furi_hal_spi_bus_handle_subghz);
+
+    cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, CC112X_IOCFG0, CC112XIocfgHighz);
 
     // Prepare GD0 for power on self test
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
     // GD0 low
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHW);
+    cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, CC112X_IOCFG0, CC112XIocfgHW);
     while(furi_hal_gpio_read(&gpio_cc1101_g0) != false)
         ;
 
     // GD0 high
-    cc1101_write_reg(
-        &furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHW | CC1101_IOCFG_INV);
+    cc112x_write_reg(
+        &furi_hal_spi_bus_handle_subghz, CC112X_IOCFG0, CC112XIocfgHW | CC112X_IOCFG_INV);
     while(furi_hal_gpio_read(&gpio_cc1101_g0) != true)
         ;
 
     // Reset GD0 to floating state
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHighImpedance);
+    cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, CC112X_IOCFG0, CC112XIocfgHighz);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     // RF switches
-    furi_hal_gpio_init(&gpio_rf_sw_0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW);
+    //furi_hal_gpio_init(&gpio_rf_sw_0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, CC112X_IOCFG2, CC112XIocfgHW);
+    cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, CC112X_IOCFG3, CC112XIocfgHW);
 
-    // Go to sleep
-    cc1101_shutdown(&furi_hal_spi_bus_handle_subghz);
+    // // Go to sleep
+    // cc112x_shutdown(&furi_hal_spi_bus_handle_subghz);
 
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+
+    furi_hal_subghz_dump_state();
     FURI_LOG_I(TAG, "Init OK");
 }
 
@@ -371,12 +298,12 @@ void furi_hal_subghz_sleep() {
     furi_assert(furi_hal_subghz_state == SubGhzStateIdle);
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
 
-    cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
+    cc112x_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
 
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHighImpedance);
+    cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, CC112X_IOCFG0, CC112XIocfgHighz);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
-    cc1101_shutdown(&furi_hal_spi_bus_handle_subghz);
+    cc112x_shutdown(&furi_hal_spi_bus_handle_subghz);
 
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 
@@ -386,43 +313,43 @@ void furi_hal_subghz_sleep() {
 void furi_hal_subghz_dump_state() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     printf(
-        "[furi_hal_subghz] cc1101 chip %d, version %d\r\n",
-        cc1101_get_partnumber(&furi_hal_spi_bus_handle_subghz),
-        cc1101_get_version(&furi_hal_spi_bus_handle_subghz));
+        "[furi_hal_subghz] cc112x chip (CC1121-0x40, CC1120-0x48, CC1125-0x58, CC1175-0x5A):  0x%X, version 0x%X\r\n",
+        cc112x_get_partnumber(&furi_hal_spi_bus_handle_subghz),
+        cc112x_get_version(&furi_hal_spi_bus_handle_subghz));
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
     if(preset == FuriHalSubGhzPresetOok650Async) {
         furi_hal_subghz_load_registers(furi_hal_subghz_preset_ook_650khz_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
+        //furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
     } else if(preset == FuriHalSubGhzPresetOok270Async) {
         furi_hal_subghz_load_registers(furi_hal_subghz_preset_ook_270khz_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
+        //furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
     } else if(preset == FuriHalSubGhzPreset2FSKDev238Async) {
         furi_hal_subghz_load_registers(furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
+        //furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
     } else if(preset == FuriHalSubGhzPreset2FSKDev476Async) {
         furi_hal_subghz_load_registers(furi_hal_subghz_preset_2fsk_dev47_6khz_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
+        //furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
     } else if(preset == FuriHalSubGhzPresetMSK99_97KbAsync) {
         furi_hal_subghz_load_registers(furi_hal_subghz_preset_msk_99_97kb_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_msk_async_patable);
+        // furi_hal_subghz_load_patable(furi_hal_subghz_preset_msk_async_patable);
     } else if(preset == FuriHalSubGhzPresetGFSK9_99KbAsync) {
         furi_hal_subghz_load_registers(furi_hal_subghz_preset_gfsk_9_99kb_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_gfsk_async_patable);
+        //furi_hal_subghz_load_patable(furi_hal_subghz_preset_gfsk_async_patable);
     } else {
         furi_crash("SugGhz: Missing config.");
     }
     furi_hal_subghz_preset = preset;
 }
 
-void furi_hal_subghz_load_registers(const uint8_t data[][2]) {
+void furi_hal_subghz_load_registers(const uint16_t data[][2]) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_reset(&furi_hal_spi_bus_handle_subghz);
+    cc112x_reset(&furi_hal_spi_bus_handle_subghz);
     uint32_t i = 0;
     while(data[i][0]) {
-        cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, data[i][0], data[i][1]);
+        cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, data[i][0], (uint8_t)data[i][1]);
         i++;
     }
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
@@ -430,48 +357,49 @@ void furi_hal_subghz_load_registers(const uint8_t data[][2]) {
 
 void furi_hal_subghz_load_patable(const uint8_t data[8]) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_set_pa_table(&furi_hal_spi_bus_handle_subghz, data);
+    cc112x_set_pa_table(&furi_hal_spi_bus_handle_subghz, data);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_write_packet(const uint8_t* data, uint8_t size) {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_flush_tx(&furi_hal_spi_bus_handle_subghz);
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_FIFO, size);
-    cc1101_write_fifo(&furi_hal_spi_bus_handle_subghz, data, size);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    // furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    // cc112x_flush_tx(&furi_hal_spi_bus_handle_subghz);
+    // cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, CC112X_FIFO, size);
+    // cc112x_write_fifo(&furi_hal_spi_bus_handle_subghz, data, size);
+    // furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_flush_rx() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_flush_rx(&furi_hal_spi_bus_handle_subghz);
+    cc112x_flush_rx(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_flush_tx() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_flush_tx(&furi_hal_spi_bus_handle_subghz);
+    cc112x_flush_tx(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
 bool furi_hal_subghz_rx_pipe_not_empty() {
-    CC1101RxBytes status[1];
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_read_reg(
-        &furi_hal_spi_bus_handle_subghz, (CC1101_STATUS_RXBYTES) | CC1101_BURST, (uint8_t*)status);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
-    // TODO: you can add a buffer overflow flag if needed
-    if(status->NUM_RXBYTES > 0) {
-        return true;
-    } else {
-        return false;
-    }
+    // CC112XRxBytes status[1];
+    // furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    // cc112x_read_reg(
+    //     &furi_hal_spi_bus_handle_subghz, (CC112X_STATUS_RXBYTES) | CC112X_BURST, (uint8_t*)status);
+    // furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    // // TODO: you can add a buffer overflow flag if needed
+    // if(status->NUM_RXBYTES > 0) {
+    //     return true;
+    // } else {
+    //     return false;
+    // }
+    return 0;
 }
 
 bool furi_hal_subghz_is_rx_data_crc_valid() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     uint8_t data[1];
-    cc1101_read_reg(&furi_hal_spi_bus_handle_subghz, CC1101_STATUS_LQI | CC1101_BURST, data);
+    cc112x_read_reg(&furi_hal_spi_bus_handle_subghz, CC112X_LQI_VAL | CC112X_BURST, data);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
     if(((data[0] >> 7) & 0x01)) {
         return true;
@@ -482,65 +410,75 @@ bool furi_hal_subghz_is_rx_data_crc_valid() {
 
 void furi_hal_subghz_read_packet(uint8_t* data, uint8_t* size) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_read_fifo(&furi_hal_spi_bus_handle_subghz, data, size);
+    cc112x_read_fifo(&furi_hal_spi_bus_handle_subghz, data, size);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_shutdown() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     // Reset and shutdown
-    cc1101_shutdown(&furi_hal_spi_bus_handle_subghz);
+    cc112x_shutdown(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_reset() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
-    cc1101_reset(&furi_hal_spi_bus_handle_subghz);
-    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHighImpedance);
+    cc112x_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
+    cc112x_reset(&furi_hal_spi_bus_handle_subghz);
+    cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, CC112X_IOCFG0, CC112XIocfgHighz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_idle() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
+    cc112x_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_rx() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
+    cc112x_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
 bool furi_hal_subghz_tx() {
     if(furi_hal_subghz_regulation != SubGhzRegulationTxRx) return false;
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_switch_to_tx(&furi_hal_spi_bus_handle_subghz);
+    //cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, CC112X_IOCFG0, CC112XIocfgHighz);
+    cc112x_switch_to_tx(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
     return true;
 }
 
 float furi_hal_subghz_get_rssi() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    int32_t rssi_dec = cc1101_get_rssi(&furi_hal_spi_bus_handle_subghz);
+    //int32_t rssi_dec = (int32_t)cc112x_get_rssi(&furi_hal_spi_bus_handle_subghz);
+    uint8_t rssi1=0;
+    cc112x_read_reg(&furi_hal_spi_bus_handle_subghz, CC112X_RSSI1 | CC112X_READ_EXT, &rssi1);
+    uint8_t rssi0=0;
+    cc112x_read_reg(&furi_hal_spi_bus_handle_subghz, CC112X_RSSI0 | CC112X_READ_EXT, &rssi0);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    
+    //uint16_t rssi_ = rssi1[0];
 
-    float rssi = rssi_dec;
-    if(rssi_dec >= 128) {
-        rssi = ((rssi - 256.0f) / 2.0f) - 74.0f;
-    } else {
-        rssi = (rssi / 2.0f) - 74.0f;
+    float rssi = (float)(((uint16_t)rssi1<<4) | ((rssi0>>3) & 0b01111)) * 0.0625f; 
+    //float rssi = rssi_dec;
+    // if(rssi_dec >= 128) {
+    //     rssi = ((rssi - 256.0f) / 2.0f) - 74.0f;
+    // } else {
+    //     rssi = (rssi / 2.0f) - 74.0f;
+    // }
+    if(rssi0&0x1){
+        return rssi;
     }
-
-    return rssi;
+    return 0;
 }
 
 uint8_t furi_hal_subghz_get_lqi() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     uint8_t data[1];
-    cc1101_read_reg(&furi_hal_spi_bus_handle_subghz, CC1101_STATUS_LQI | CC1101_BURST, data);
+    cc112x_read_reg(&furi_hal_spi_bus_handle_subghz, CC112X_LQI_VAL | CC112X_BURST, data);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
     return data[0] & 0x7F;
 }
@@ -557,16 +495,17 @@ bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
 
 uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     value = furi_hal_subghz_set_frequency(value);
-    if(value >= 299999755 && value <= 348000335) {
-        furi_hal_subghz_set_path(FuriHalSubGhzPath315);
-    } else if(value >= 386999938 && value <= 464000000) {
-        furi_hal_subghz_set_path(FuriHalSubGhzPath433);
-    } else if(value >= 778999847 && value <= 928000000) {
-        furi_hal_subghz_set_path(FuriHalSubGhzPath868);
-    } else {
-        furi_crash("SugGhz: Incorrect frequency during set.");
-    }
-    return value;
+    // if(value >= 299999755 && value <= 348000335) {
+    //     furi_hal_subghz_set_path(FuriHalSubGhzPath315);
+    // } else if(value >= 386999938 && value <= 464000000) {
+    //     furi_hal_subghz_set_path(FuriHalSubGhzPath433);
+    // } else if(value >= 778999847 && value <= 928000000) {
+    //     furi_hal_subghz_set_path(FuriHalSubGhzPath868);
+    // } else {
+    //     furi_crash("SugGhz: Incorrect frequency during set.");
+    // }
+    // return value;
+    return 433920000;
 }
 
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
@@ -591,7 +530,7 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
                 if((value >= 304100000 && value <= 321950000) &&
                    ((furi_hal_subghz_preset == FuriHalSubGhzPresetOok270Async) ||
                     (furi_hal_subghz_preset == FuriHalSubGhzPresetOok650Async))) {
-                    furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable_au);
+                    //furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable_au);
                 }
             }
             is_allowed = true;
@@ -621,12 +560,12 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
     }
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    uint32_t real_frequency = cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, value);
-    cc1101_calibrate(&furi_hal_spi_bus_handle_subghz);
+    uint32_t real_frequency = cc112x_set_frequency(&furi_hal_spi_bus_handle_subghz, value);
+    //cc112x_calibrate(&furi_hal_spi_bus_handle_subghz);
 
     while(true) {
-        CC1101Status status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
-        if(status.STATE == CC1101StateIDLE) break;
+        CC112XStatus status = cc112x_get_status(&furi_hal_spi_bus_handle_subghz);
+        if(status.STATE == CC112XStateIDLE) break;
     }
 
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
@@ -636,19 +575,25 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
 void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     if(path == FuriHalSubGhzPath433) {
-        furi_hal_gpio_write(&gpio_rf_sw_0, 0);
-        cc1101_write_reg(
-            &furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
+        //furi_hal_gpio_write(&gpio_rf_sw_0, 0);
+        cc112x_write_reg(
+            &furi_hal_spi_bus_handle_subghz, CC112X_IOCFG3, CC112XIocfgHW | CC112X_IOCFG_INV);
+        cc112x_write_reg(
+            &furi_hal_spi_bus_handle_subghz, CC112X_IOCFG2, CC112XIocfgHW | CC112X_IOCFG_INV);
     } else if(path == FuriHalSubGhzPath315) {
-        furi_hal_gpio_write(&gpio_rf_sw_0, 1);
-        cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW);
+        //furi_hal_gpio_write(&gpio_rf_sw_0, 1);
+        cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, CC112X_IOCFG3, CC112XIocfgHW);
+        cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, CC112X_IOCFG2, CC112XIocfgHW);
     } else if(path == FuriHalSubGhzPath868) {
-        furi_hal_gpio_write(&gpio_rf_sw_0, 1);
-        cc1101_write_reg(
-            &furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
+        //furi_hal_gpio_write(&gpio_rf_sw_0, 1);
+        cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, CC112X_IOCFG3, CC112XIocfgHW);
+        cc112x_write_reg(
+            &furi_hal_spi_bus_handle_subghz, CC112X_IOCFG2, CC112XIocfgHW | CC112X_IOCFG_INV);
     } else if(path == FuriHalSubGhzPathIsolate) {
-        furi_hal_gpio_write(&gpio_rf_sw_0, 0);
-        cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW);
+        //furi_hal_gpio_write(&gpio_rf_sw_0, 0);
+        cc112x_write_reg(
+            &furi_hal_spi_bus_handle_subghz, CC112X_IOCFG3, CC112XIocfgHW | CC112X_IOCFG_INV);
+        cc112x_write_reg(&furi_hal_spi_bus_handle_subghz, CC112X_IOCFG2, CC112XIocfgHW);
     } else {
         furi_crash("SubGhz: Incorrect path during set.");
     }
@@ -872,7 +817,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     furi_hal_subghz_async_tx_refill(
         furi_hal_subghz_async_tx.buffer, API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL);
 
-    // Connect CC1101_GD0 to TIM2 as output
+    // Connect cc112x_GD0 to TIM2 as output
     furi_hal_gpio_init_ex(
         &gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullDown, GpioSpeedLow, GpioAltFn1TIM2);
 
