@@ -136,7 +136,7 @@ static bool cc112x_get_lodiv_and_band(uint32_t freq_hz, uint8_t* lodiv, uint8_t*
         lodiv[0] = 12, band[0] = 0b0110;
     } else if(freq_hz < 240000000 && freq_hz >= 205000000) {
         lodiv[0] = 16, band[0] = 0b1000;
-    } else if(freq_hz <= 194000000 && freq_hz >= 164000000) {
+    } else if(freq_hz <= 192000000 && freq_hz >= 164000000) {
         lodiv[0] = 20, band[0] = 0b1010;
     } else if(freq_hz <= 160000000 && freq_hz >= 136700000) {
         lodiv[0] = 24, band[0] = 0b1011;
@@ -167,11 +167,6 @@ uint32_t cc112x_set_frequency(FuriHalSpiBusHandle* handle, uint32_t value) {
     uint64_t fvco = value * lodiv;
     uint64_t freq = (fvco << 16) / CC112X_QUARTZ;
 
-    // volatile uint64_t fvco =
-    //     (((((uint64_t)freq_off_1) << 8 | freq_off_0) / CC112X_FOFFDIV) * CC112X_QUARTZ) +
-    //      ((value / CC112X_FDIV) * CC112X_QUARTZ);
-    //  volatile uint64_t real_freq = fvco / lodiv;
-    // Sanity check
     assert((freq & CC112X_FMASK) == freq);
 
     cc112x_write_reg(handle, CC112X_FREQ2, (freq >> 16) & 0xFF);
