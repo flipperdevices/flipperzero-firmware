@@ -117,6 +117,8 @@ void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t len, ui
     furi_assert(data);
     furi_assert(parity);
 
+    nfca_signal->tx_signal->edge_cnt = 0;
+    nfca_signal->tx_signal->start_level = false;
     // Start of frame
     digital_signal_append(nfca_signal->tx_signal, nfca_signal->one);
     for(size_t i = 0; i < len; i++) {

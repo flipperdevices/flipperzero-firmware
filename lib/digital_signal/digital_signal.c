@@ -18,6 +18,7 @@ DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     signal->start_level = true;
     signal->edges_max_cnt = max_edges_cnt;
     signal->edge_timings = malloc(max_edges_cnt * sizeof(float));
+    signal->edge_cnt = 0;
 
     return signal;
 }
