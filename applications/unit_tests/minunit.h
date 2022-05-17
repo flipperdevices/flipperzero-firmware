@@ -410,6 +410,22 @@ void minunit_print_fail(const char* error);
             return;                                                                   \
         } else { minunit_print_progress(); })
 
+#define mu_assert_mem_eq(expected, result, size)                                  \
+    MU__SAFE_BLOCK(                                                               \
+        const void* minunit_tmp_e = expected; const void* minunit_tmp_r = result; \
+        minunit_assert++;                                                         \
+        if(memcmp(minunit_tmp_e, minunit_tmp_r, size)) {                          \
+            snprintf(                                                             \
+                minunit_last_message,                                             \
+                MINUNIT_MESSAGE_LEN,                                              \
+                "%s failed:\n\t%s:%d: mem not equal",                             \
+                __func__,                                                         \
+                __FILE__,                                                         \
+                __LINE__);                                                        \
+            minunit_status = 1;                                                   \
+            return;                                                               \
+        } else { minunit_print_progress(); })
+
 #define mu_assert_null(result)                                                    \
     MU__SAFE_BLOCK(                                                               \
         minunit_assert++; if(result == NULL) { minunit_print_progress(); } else { \
