@@ -6,7 +6,12 @@
 
 #include <furi_hal_gpio.h>
 
-typedef struct DigitalSignal DigitalSignal;
+typedef struct {
+    bool start_level;
+    uint32_t edge_cnt;
+    uint32_t edges_max_cnt;
+    float* edge_timings;
+} DigitalSignal;
 
 DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt);
 
