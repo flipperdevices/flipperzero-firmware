@@ -321,13 +321,30 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
     furi_hal_nfc_tx_rx(tx_rx, 300);
 
-    uint64_t key_a = 0xa0a1a2a3a4a5;
+    // TODO support all commands
+    uint8_t cmd = tx_rx->rx_data[0];
+    if(!(cmd == 0x60 || cmd == 0x61)) {
+        FURI_LOG_E(TAG, "Unsupported command");
+        return false;
+    }
+    uint8_t block = tx_rx->rx_data[1];
+    uint64_t key = 0;
+    // TODO Now works only for 1k!!!
+    uint8_t sector_trailer_block = block | 0x03;
+    MfClassicSectorTrailer* sector_trailer =
+        (MfClassicSectorTrailer*)emulator->data.block[sector_trailer_block].value;
+    if(cmd & 0x01) {
+        key = nfc_util_bytes2num(sector_trailer->key_b, 6);
+    } else {
+        key = nfc_util_bytes2num(sector_trailer->key_a, 6);
+    }
+
     uint32_t nonce = prng_successor(DWT->CYCCNT, 32);
     uint8_t nt[4];
     uint8_t nt_keystream[4];
     nfc_util_num2bytes(nonce, 4, nt);
     nfc_util_num2bytes(nonce ^ emulator->cuid, 4, nt_keystream);
-    crypto1_init(&emulator->crypto, key_a);
+    crypto1_init(&emulator->crypto, key);
     crypto1_word(&emulator->crypto, emulator->cuid ^ nonce, 0);
 
     memcpy(tx_rx->tx_data, nt, sizeof(nt));
