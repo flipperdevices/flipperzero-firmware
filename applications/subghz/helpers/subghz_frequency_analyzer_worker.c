@@ -5,7 +5,7 @@
 
 #include "../subghz_i.h"
 
-#define TAG "FA"
+#define TAG "SubghzFrequencyAnalyzerWorker"
 
 #define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -95.0f
 
@@ -25,7 +25,7 @@ struct SubGhzFrequencyAnalyzerWorker {
     FuriThread* thread;
 
     volatile bool worker_running;
-    uint8_t count_repet;
+    uint8_t sample_hold_counter;
     FrequencyRSSI frequency_rssi_buf;
     SubGhzSetting* setting;
 
@@ -111,6 +111,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
         furi_hal_subghz_idle();
         subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_650khz);
 
+        // First stage: coarse scan
         for(size_t i = 0; i < subghz_setting_get_frequency_count(instance->setting); i++) {
             if(furi_hal_subghz_is_frequency_valid(
                    subghz_setting_get_frequency(instance->setting, i))) {
@@ -145,7 +146,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
             }
         }
 
-        FURI_LOG_D(
+        FURI_LOG_T(
             TAG,
             "RSSI: avg %f, max %f at %u, min %f",
             (double)(rssi_avg / rssi_avg_samples),
@@ -153,6 +154,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
             frequency_rssi.frequency,
             (double)rssi_min);
 
+        // Second stage: fine scan
         if(frequency_rssi.rssi > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
             FURI_LOG_D(TAG, "~:%u:%f", frequency_rssi.frequency, (double)frequency_rssi.rssi);
 
@@ -188,21 +190,24 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
             }
         }
 
+        // Deliver results
         if(frequency_rssi.rssi > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
-            FURI_LOG_D(TAG, ">:%u:%f", frequency_rssi.frequency, (double)frequency_rssi.rssi);
-            instance->count_repet = 20;
+            FURI_LOG_D(TAG, "=:%u:%f", frequency_rssi.frequency, (double)frequency_rssi.rssi);
+
+            instance->sample_hold_counter = 20;
             if(instance->filVal) {
                 frequency_rssi.frequency =
                     subghz_frequency_analyzer_worker_expRunningAverageAdaptive(
                         instance, frequency_rssi.frequency);
             }
-            if(instance->pair_callback)
+            // Deliver callback
+            if(instance->pair_callback) {
                 instance->pair_callback(
                     instance->context, frequency_rssi.frequency, frequency_rssi.rssi);
-
+            }
         } else {
-            if(instance->count_repet > 0) {
-                instance->count_repet--;
+            if(instance->sample_hold_counter > 0) {
+                instance->sample_hold_counter--;
             } else {
                 instance->filVal = 0;
                 if(instance->pair_callback) instance->pair_callback(instance->context, 0, 0);
