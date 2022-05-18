@@ -128,7 +128,8 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
                 cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
                 furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 
-                furi_hal_delay_ms(1);
+                // delay will be in range between 1 and 2ms
+                osDelay(2);
 
                 rssi = furi_hal_subghz_get_rssi();
 
@@ -175,11 +176,10 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
                     cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
                     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 
-                    furi_hal_delay_ms(1);
+                    // delay will be in range between 1 and 2ms
+                    osDelay(2);
 
                     rssi = furi_hal_subghz_get_rssi();
-                    FURI_LOG_T(TAG, "=:%u:%f", frequency, (double)rssi);
-
                     if(frequency_rssi.rssi < rssi) {
                         frequency_rssi.rssi = rssi;
                         frequency_rssi.frequency = frequency;
