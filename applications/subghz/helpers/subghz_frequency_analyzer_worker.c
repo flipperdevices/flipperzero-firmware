@@ -5,22 +5,26 @@
 
 #include "../subghz_i.h"
 
+#define TAG "FA"
+
 #define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -90.0f
 
 static const uint8_t subghz_preset_ook_58khz[][2] = {
-    {CC1101_FIFOTHR, 0x47}, // The only important bit is ADC_RETENTION, FIFO Tx=33 Rx=32
-    {CC1101_MDMCFG4, 0xF5}, // Rx BW filter is 58.035714kHz
-    {CC1101_TEST2, 0x81}, // FIFOTHR ADC_RETENTION=1 matched value
-    {CC1101_TEST1, 0x35}, // FIFOTHR ADC_RETENTION=1 matched value
+    {CC1101_FIFOTHR, 0b01000111}, // The only important bit is ADC_RETENTION, FIFO Tx=33 Rx=32
+    {CC1101_MDMCFG4, 0b11111111}, // Rx BW filter is 58.035714kHz
+    {CC1101_MDMCFG3, 0b11111111}, // max symbol rate
+    {CC1101_TEST2, 0b10000001}, // FIFOTHR ADC_RETENTION=1 matched value
+    {CC1101_TEST1, 0b00110101}, // FIFOTHR ADC_RETENTION=1 matched value
     /* End  */
     {0, 0},
 };
 
-static const uint8_t subghz_preset_ook_650khz[][2] = {
-    {CC1101_FIFOTHR, 0x07}, // The only important bit is ADC_RETENTION
-    {CC1101_MDMCFG4, 0x17}, // Rx BW filter is 650.000kHz
-    {CC1101_TEST2, 0x88},
-    {CC1101_TEST1, 0x31},
+static const uint8_t subghz_preset_ook_812khz[][2] = {
+    {CC1101_FIFOTHR, 0b01000111}, // The only important bit is ADC_RETENTION
+    {CC1101_MDMCFG4, 0b00001111}, // Rx BW filter is 812.000kHz
+    {CC1101_MDMCFG3, 0b11111111}, // max symbol rate
+    {CC1101_TEST2, 0b10000001}, // FIFOTHR ADC_RETENTION=1 matched value
+    {CC1101_TEST1, 0b00110101}, // FIFOTHR ADC_RETENTION=1 matched value
     /* End  */
     {0, 0},
 };
@@ -41,7 +45,7 @@ struct SubGhzFrequencyAnalyzerWorker {
 
 static void subghz_frequency_analyzer_worker_load_registers(const uint8_t data[][2]) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    uint32_t i = 0;
+    size_t i = 0;
     while(data[i][0]) {
         cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, data[i][0], data[i][1]);
         i++;
@@ -74,9 +78,9 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
     SubGhzFrequencyAnalyzerWorker* instance = context;
 
     FrequencyRSSI frequency_rssi = {.frequency = 0, .rssi = 0};
-    float rssi;
-    uint32_t frequency;
-    uint32_t frequency_start;
+    float rssi = 0;
+    uint32_t frequency = 0;
+    uint32_t frequency_start = 0;
     CC1101Status status;
 
     //Start CC1101
@@ -89,15 +93,15 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
     cc1101_write_reg(
         &furi_hal_spi_bus_handle_subghz,
         CC1101_AGCCTRL2,
-        0b0000111); // 00 - DVGA all; 000 - MAX LNA+LNA2; 111 - MAIN_TARGET 42 dB
+        0b00000000); // 00 - DVGA all; 000 - MAX LNA+LNA2; 111 - MAIN_TARGET 24 dB
     cc1101_write_reg(
         &furi_hal_spi_bus_handle_subghz,
         CC1101_AGCCTRL1,
-        0b00000000); // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
+        0b00001000); // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 1000 - Absolute carrier sense threshold disabled
     cc1101_write_reg(
         &furi_hal_spi_bus_handle_subghz,
         CC1101_AGCCTRL0,
-        0b00000001); // 00 - No hysteresis, medium asymmetric dead zone, medium gain ; 00 - 8 samples agc; 00 - Normal AGC, 01 - 8dB boundary
+        0b00000000); // 00 - No hysteresis, medium asymmetric dead zone, medium gain ; 00 - 8 samples agc; 00 - Normal AGC, 01 - 4dB boundary
 
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 
@@ -107,7 +111,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
         osDelay(10);
         frequency_rssi.rssi = -127.0f;
         furi_hal_subghz_idle();
-        subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_650khz);
+        subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_812khz);
 
         for(size_t i = 0; i < subghz_setting_get_frequency_count(instance->setting); i++) {
             if(furi_hal_subghz_is_frequency_valid(
@@ -136,37 +140,38 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
         }
 
         if(frequency_rssi.rssi > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
-            //  -0.5 ... 433.92 ... +0.5
-            frequency_start = frequency_rssi.frequency - 500000;
-            frequency_rssi.rssi = -127.0;
-            furi_hal_subghz_idle();
-            subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_58khz);
-            //step 10KHz
-            for(uint32_t i = frequency_start; i < frequency_start + 500000; i += 10000) {
-                if(furi_hal_subghz_is_frequency_valid(i)) {
-                    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-                    cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
-                    frequency = cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, i);
+            if(frequency_rssi.rssi > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
+                //  -0.5 ... 433.92 ... +0.5
+                frequency_start = frequency_rssi.frequency - 500000;
+                frequency_rssi.rssi = -127.0;
+                furi_hal_subghz_idle();
+                subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_58khz);
+                //step 10KHz
+                for(uint32_t i = frequency_start; i < frequency_start + 500000; i += 10000) {
+                    if(furi_hal_subghz_is_frequency_valid(i)) {
+                        furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+                        cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
+                        frequency = cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, i);
 
-                    cc1101_calibrate(&furi_hal_spi_bus_handle_subghz);
-                    do {
-                        status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
-                    } while(status.STATE != CC1101StateIDLE);
+                        cc1101_calibrate(&furi_hal_spi_bus_handle_subghz);
+                        do {
+                            status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
+                        } while(status.STATE != CC1101StateIDLE);
 
-                    cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
-                    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+                        cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
+                        furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 
-                    osDelay(5);
-                    rssi = furi_hal_subghz_get_rssi();
-                    if(frequency_rssi.rssi < rssi) {
-                        frequency_rssi.rssi = rssi;
-                        frequency_rssi.frequency = frequency;
+                        osDelay(5);
+                        rssi = furi_hal_subghz_get_rssi();
+
+                        if(frequency_rssi.rssi < rssi) {
+                            frequency_rssi.rssi = rssi;
+                            frequency_rssi.frequency = frequency;
+                        }
                     }
                 }
             }
-        }
 
-        if(frequency_rssi.rssi > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
             instance->count_repet = 20;
             if(instance->filVal) {
                 frequency_rssi.frequency =
