@@ -83,10 +83,10 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
     cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHW);
     cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_MDMCFG3,
                      0b11111111); // symbol rate
-    // cc1101_write_reg(
-    //     &furi_hal_spi_bus_handle_subghz,
-    //     CC1101_AGCCTRL2,
-    //     0b00000000); // 00 - DVGA all; 000 - MAX LNA+LNA2; 111 - MAIN_TARGET 24 dB
+    cc1101_write_reg(
+        &furi_hal_spi_bus_handle_subghz,
+        CC1101_AGCCTRL2,
+        0b00000111); // 00 - DVGA all; 000 - MAX LNA+LNA2; 111 - MAGN_TARGET 42 dB
     cc1101_write_reg(
         &furi_hal_spi_bus_handle_subghz,
         CC1101_AGCCTRL1,
@@ -102,6 +102,11 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
 
     while(instance->worker_running) {
         osDelay(10);
+
+        float rssi_min = 26.0f;
+        float rssi_avg = 0;
+        size_t rssi_avg_samples = 0;
+
         frequency_rssi.rssi = -127.0f;
         furi_hal_subghz_idle();
         subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_650khz);
@@ -124,7 +129,14 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
                 furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 
                 osDelay(2);
+
                 rssi = furi_hal_subghz_get_rssi();
+
+                rssi_avg += rssi;
+                rssi_avg_samples++;
+
+                if(rssi < rssi_min) rssi_min = rssi;
+
                 if(frequency_rssi.rssi < rssi) {
                     frequency_rssi.rssi = rssi;
                     frequency_rssi.frequency = frequency;
@@ -132,13 +144,24 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
             }
         }
 
+        FURI_LOG_D(
+            TAG,
+            "RSSI: avg %f, max %f at %u, min %f",
+            (double)(rssi_avg / rssi_avg_samples),
+            (double)frequency_rssi.rssi,
+            frequency_rssi.frequency,
+            (double)rssi_min);
+
         if(frequency_rssi.rssi > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
-            //  
+            FURI_LOG_D(TAG, "~:%u:%f", frequency_rssi.frequency, (double)frequency_rssi.rssi);
+
             frequency_rssi.rssi = -127.0;
             furi_hal_subghz_idle();
             subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_58khz);
             //-0.3 ... 433.92 ... +0.3 step 10KHz
-            for(uint32_t i = frequency_rssi.frequency - 300000; i < frequency_rssi.frequency + 300000; i += 20000) {
+            for(uint32_t i = frequency_rssi.frequency - 300000;
+                i < frequency_rssi.frequency + 300000;
+                i += 20000) {
                 if(furi_hal_subghz_is_frequency_valid(i)) {
                     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
                     cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
@@ -153,7 +176,9 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
                     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 
                     osDelay(2);
+
                     rssi = furi_hal_subghz_get_rssi();
+                    FURI_LOG_T(TAG, "=:%u:%f", frequency, (double)rssi);
 
                     if(frequency_rssi.rssi < rssi) {
                         frequency_rssi.rssi = rssi;
