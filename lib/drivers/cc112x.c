@@ -177,6 +177,8 @@ uint32_t cc112x_set_frequency(FuriHalSpiBusHandle* handle, uint32_t value) {
 }
 
 uint32_t cc112x_set_intermediate_frequency(FuriHalSpiBusHandle* handle, uint32_t value) {
+    UNUSED(handle);
+    UNUSED(value);
     // uint64_t real_value = value * CC112X_IFDIV / CC112X_QUARTZ;
     // assert((real_value & 0xFF) == real_value);
 
@@ -189,6 +191,8 @@ uint32_t cc112x_set_intermediate_frequency(FuriHalSpiBusHandle* handle, uint32_t
 }
 
 void cc112x_set_pa_table(FuriHalSpiBusHandle* handle, const uint8_t value[8]) {
+    UNUSED(handle);
+    UNUSED(value);
     // uint8_t tx[9] = {CC112X_PATABLE | CC112X_BURST};
     // CC112XStatus rx[9] = {0};
 
@@ -202,6 +206,9 @@ void cc112x_set_pa_table(FuriHalSpiBusHandle* handle, const uint8_t value[8]) {
 }
 
 uint8_t cc112x_write_fifo(FuriHalSpiBusHandle* handle, const uint8_t* data, uint8_t size) {
+    UNUSED(handle);
+    UNUSED(data);
+    UNUSED(size);
     // uint8_t buff_tx[64];
     // uint8_t buff_rx[64];
     // buff_tx[0] = CC112X_FIFO | CC112X_BURST;
@@ -219,6 +226,9 @@ uint8_t cc112x_write_fifo(FuriHalSpiBusHandle* handle, const uint8_t* data, uint
 }
 
 uint8_t cc112x_read_fifo(FuriHalSpiBusHandle* handle, uint8_t* data, uint8_t* size) {
+    UNUSED(handle);
+    UNUSED(data);
+    UNUSED(size);
     // uint8_t buff_tx[64];
     // buff_tx[0] = CC112X_FIFO | CC112X_READ | CC112X_BURST;
     // uint8_t buff_rx[2];
