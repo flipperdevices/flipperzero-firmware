@@ -44,7 +44,7 @@ CC112XStatus cc112x_write_reg(FuriHalSpiBusHandle* handle, uint16_t reg, uint8_t
 CC112XStatus cc112x_read_reg(FuriHalSpiBusHandle* handle, uint16_t reg, uint8_t* data) {
     assert(sizeof(CC112XStatus) == 1);
     uint8_t tx[3] = {0};
-    CC112XStatus rx[2] = {0};
+    CC112XStatus rx[3] = {0};
 
     if((reg & CC112X_EXT_REG_MASK) == CC112X_EXT_REG_MASK) {
         tx[0] = ((reg >> 8) & 0xFF) | CC112X_READ;
