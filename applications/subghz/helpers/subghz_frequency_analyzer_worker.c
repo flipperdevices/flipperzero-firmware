@@ -5,9 +5,7 @@
 
 #include "../subghz_i.h"
 
-#define TAG "FA"
-
-#define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -90.0f
+#define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -70.0f
 
 static const uint8_t subghz_preset_ook_58khz[][2] = {
     {CC1101_FIFOTHR, 0b01000111}, // The only important bit is ADC_RETENTION, FIFO Tx=33 Rx=32
@@ -101,7 +99,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
     cc1101_write_reg(
         &furi_hal_spi_bus_handle_subghz,
         CC1101_AGCCTRL0,
-        0b00000000); // 00 - No hysteresis, medium asymmetric dead zone, medium gain ; 00 - 8 samples agc; 00 - Normal AGC, 01 - 4dB boundary
+        0b00000000); // 00 - No hysteresis, medium asymmetric dead zone, medium gain ; 00 - 8 samples agc; 00 - Normal AGC, 00 - 4dB boundary
 
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 
@@ -140,34 +138,32 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
         }
 
         if(frequency_rssi.rssi > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
-            if(frequency_rssi.rssi > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
-                //  -0.5 ... 433.92 ... +0.5
-                frequency_start = frequency_rssi.frequency - 500000;
-                frequency_rssi.rssi = -127.0;
-                furi_hal_subghz_idle();
-                subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_58khz);
-                //step 10KHz
-                for(uint32_t i = frequency_start; i < frequency_start + 500000; i += 10000) {
-                    if(furi_hal_subghz_is_frequency_valid(i)) {
-                        furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-                        cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
-                        frequency = cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, i);
+            //  -0.5 ... 433.92 ... +0.5
+            frequency_start = frequency_rssi.frequency - 500000;
+            frequency_rssi.rssi = -127.0;
+            furi_hal_subghz_idle();
+            subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_58khz);
+            //step 10KHz
+            for(uint32_t i = frequency_start; i < frequency_start + 500000; i += 10000) {
+                if(furi_hal_subghz_is_frequency_valid(i)) {
+                    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+                    cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
+                    frequency = cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, i);
 
-                        cc1101_calibrate(&furi_hal_spi_bus_handle_subghz);
-                        do {
-                            status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
-                        } while(status.STATE != CC1101StateIDLE);
+                    cc1101_calibrate(&furi_hal_spi_bus_handle_subghz);
+                    do {
+                        status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
+                    } while(status.STATE != CC1101StateIDLE);
 
-                        cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
-                        furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+                    cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
+                    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 
-                        osDelay(5);
-                        rssi = furi_hal_subghz_get_rssi();
+                    osDelay(5);
+                    rssi = furi_hal_subghz_get_rssi();
 
-                        if(frequency_rssi.rssi < rssi) {
-                            frequency_rssi.rssi = rssi;
-                            frequency_rssi.frequency = frequency;
-                        }
+                    if(frequency_rssi.rssi < rssi) {
+                        frequency_rssi.rssi = rssi;
+                        frequency_rssi.frequency = frequency;
                     }
                 }
             }
