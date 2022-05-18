@@ -59,9 +59,10 @@ static int32_t music_player_worker_thread_callback(void* context) {
             float frequency = NOTE_C4 * powf(TWO_POW_TWELTH_ROOT, note_from_a4);
             float duration =
                 60.0 * osKernelGetTickFreq() * 4 / instance->bpm / note_block->duration;
-            while(note_block->dots > 0) {
+            uint32_t dots = note_block->dots;
+            while(dots > 0) {
                 duration += duration / 2;
-                note_block->dots--;
+                dots--;
             }
             uint32_t next_tick = furi_hal_get_tick() + duration;
             float volume = instance->volume;
@@ -101,6 +102,8 @@ MusicPlayerWorker* music_player_worker_alloc() {
     furi_thread_set_stack_size(instance->thread, 1024);
     furi_thread_set_context(instance->thread, instance);
     furi_thread_set_callback(instance->thread, music_player_worker_thread_callback);
+
+    instance->volume = 1.0f;
 
     return instance;
 }
