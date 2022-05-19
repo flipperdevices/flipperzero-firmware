@@ -313,13 +313,13 @@ uint8_t mf_classic_read_card(
 }
 
 static void print_rx(uint8_t* rx_data, uint16_t rx_bytes) {
-    // UNUSED(rx_data);
-    // UNUSED(rx_bytes);
-    FURI_LOG_D(TAG, "Rx %d bytes:", rx_bytes);
-    for(size_t i = 0; i < rx_bytes; i++) {
-        printf("%02X ", rx_data[i]);
-    }
-    printf("\r\n");
+    UNUSED(rx_data);
+    UNUSED(rx_bytes);
+    // FURI_LOG_D(TAG, "Rx %d bytes:", rx_bytes);
+    // for(size_t i = 0; i < rx_bytes; i++) {
+    //     printf("%02X ", rx_data[i]);
+    // }
+    // printf("\r\n");
 }
 
 // static void print_rx_context(FuriHalNfcTxRxContext* tx_rx) {
@@ -361,7 +361,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
         }
         if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
-            FURI_LOG_W(
+            FURI_LOG_D(
                 TAG, "Error in tx rx. Tx :%d bits, Rx: %d bits", tx_rx->tx_bits, tx_rx->rx_bits);
             break;
         }
@@ -400,7 +400,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 crypto1_word(&emulator->crypto, emulator->cuid ^ nonce, 0);
                 memcpy(tx_rx->tx_data, nt, sizeof(nt));
                 tx_rx->tx_bits = sizeof(nt) * 8;
-                tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRxRaw;
+                tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             } else {
                 tx_rx->tx_parity[0] = 0;
                 for(uint8_t i = 0; i < 4; i++) {
@@ -412,15 +412,15 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                          << (7 - (i & 0x0007)));
                 }
                 tx_rx->tx_bits = sizeof(nt) * 8;
-                tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRxRaw;
+                tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             }
             if(!furi_hal_nfc_tx_rx(tx_rx, 500)) {
-                FURI_LOG_E(TAG, "Error in 1st data exchange");
+                FURI_LOG_E(TAG, "Error in NT exchange");
                 return false;
             }
 
             if(tx_rx->rx_bits != 64) {
-                FURI_LOG_E(TAG, "Incorrect nr + ar");
+                FURI_LOG_W(TAG, "Incorrect nr + ar");
                 return false;
             }
 
@@ -429,7 +429,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             crypto1_word(&emulator->crypto, nr, 1);
             uint32_t cardRr = ar ^ crypto1_word(&emulator->crypto, 0, 0);
             if(cardRr != prng_successor(nonce, 64)) {
-                FURI_LOG_E(TAG, "Wrong AUTH! %08X != %08X", cardRr, prng_successor(nonce, 64));
+                FURI_LOG_T(TAG, "Wrong AUTH! %08X != %08X", cardRr, prng_successor(nonce, 64));
                 // Don't send NACK, as tag don't send it
                 return false;
             }

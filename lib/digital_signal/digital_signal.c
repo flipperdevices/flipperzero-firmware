@@ -38,15 +38,18 @@ bool digital_signal_append(DigitalSignal* signal_a, DigitalSignal* signal_b) {
         return false;
     }
 
-    bool end_level = signal_a->start_level ^ !(signal_a->edge_cnt % 2);
+    bool end_level = signal_a->start_level;
+    if(signal_a->edge_cnt) {
+        end_level = signal_a->start_level ^ !(signal_a->edge_cnt % 2);
+    }
     uint8_t start_copy = 0;
     if(end_level == signal_b->start_level) {
         if(signal_a->edge_cnt) {
             signal_a->edge_timings[signal_a->edge_cnt - 1] += signal_b->edge_timings[0];
+            start_copy += 1;
         } else {
             signal_a->edge_timings[signal_a->edge_cnt] += signal_b->edge_timings[0];
         }
-        start_copy += 1;
     }
     memcpy(
         &signal_a->edge_timings[signal_a->edge_cnt],
