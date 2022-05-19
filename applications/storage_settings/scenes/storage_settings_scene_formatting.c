@@ -49,7 +49,7 @@ void storage_settings_scene_formatting_on_enter(void* context) {
     } else {
         dialog_ex_set_header(dialog_ex, "Format complete!", 64, 32, AlignCenter, AlignCenter);
     }
-    dialog_ex_set_center_button_text(dialog_ex, "Ok");
+    dialog_ex_set_center_button_text(dialog_ex, "OK");
 }
 
 bool storage_settings_scene_formatting_on_event(void* context, SceneManagerEvent event) {

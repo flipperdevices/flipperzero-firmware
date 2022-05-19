@@ -12,7 +12,7 @@ void storage_settings_scene_unmounted_on_enter(void* context) {
     FS_Error error = storage_sd_unmount(app->fs_api);
     DialogEx* dialog_ex = app->dialog_ex;
 
-    dialog_ex_set_center_button_text(dialog_ex, "Ok");
+    dialog_ex_set_center_button_text(dialog_ex, "OK");
 
     if(error == FSE_OK) {
         dialog_ex_set_header(dialog_ex, "SD card unmounted", 64, 10, AlignCenter, AlignCenter);
