@@ -312,116 +312,151 @@ uint8_t mf_classic_read_card(
     return sectors_read;
 }
 
+static void print_rx(uint8_t* rx_data, uint16_t rx_bytes) {
+    UNUSED(rx_data);
+    UNUSED(rx_bytes);
+    // FURI_LOG_D(TAG, "Rx %d bytes:", rx_bytes);
+    // for(size_t i = 0; i < rx_bytes; i++) {
+    //     printf("%02X ", rx_data[i]);
+    // }
+    // printf("\r\n");
+}
+
+// static void print_rx_context(FuriHalNfcTxRxContext* tx_rx) {
+//     print_rx(tx_rx->rx_data, tx_rx->rx_bits / 8);
+// }
+
+void mf_crypto1_decrypt(
+    Crypto1* crypto,
+    uint8_t* encrypted_data,
+    uint16_t encrypted_data_bits,
+    uint8_t* decrypted_data) {
+    if(encrypted_data_bits < 8) {
+        uint8_t decrypted_byte = 0;
+        decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_data[0], 0)) << 0;
+        decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_data[0], 1)) << 1;
+        decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_data[0], 2)) << 2;
+        decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_data[0], 3)) << 3;
+        decrypted_data[0] = decrypted_byte;
+    } else {
+        for(size_t i = 0; i < encrypted_data_bits / 8; i++) {
+            decrypted_data[i] = crypto1_byte(crypto, 0, 0) ^ encrypted_data[i];
+        }
+    }
+}
+
 bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(emulator);
     furi_assert(tx_rx);
+    bool processed = true;
+    bool is_encrypted = false;
+    uint8_t plain_data[MF_CLASSIC_MAX_DATA_SIZE];
+    uint16_t plain_data_bytes = 0;
 
-    // Get first frame
-    tx_rx->tx_bits = 0;
-    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-    furi_hal_nfc_tx_rx(tx_rx, 300);
+    // Read command
+    while(processed) {
+        if(!is_encrypted) {
+            // Read first frame
+            tx_rx->tx_bits = 0;
+            tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+        }
+        if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
+            FURI_LOG_W(
+                TAG, "Error in tx rx. Tx :%d bits, Rx: %d bits", tx_rx->tx_bits, tx_rx->rx_bits);
+            break;
+        }
+        if(!is_encrypted) {
+            memcpy(plain_data, tx_rx->rx_data, tx_rx->rx_bits / 8);
+        } else {
+            mf_crypto1_decrypt(&emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
+        }
+        plain_data_bytes = tx_rx->rx_bits / 8;
+        print_rx(plain_data, plain_data_bytes);
+        // TODO Check crc
 
-    // TODO support all commands
-    uint8_t cmd = tx_rx->rx_data[0];
-    if(!(cmd == 0x60 || cmd == 0x61)) {
-        FURI_LOG_E(TAG, "Unsupported command");
-        return false;
-    }
-    uint8_t block = tx_rx->rx_data[1];
-    uint64_t key = 0;
-    // TODO Now works only for 1k!!!
-    uint8_t sector_trailer_block = block | 0x03;
-    MfClassicSectorTrailer* sector_trailer =
-        (MfClassicSectorTrailer*)emulator->data.block[sector_trailer_block].value;
-    if(cmd & 0x01) {
-        key = nfc_util_bytes2num(sector_trailer->key_b, 6);
-    } else {
-        key = nfc_util_bytes2num(sector_trailer->key_a, 6);
-    }
+        if(plain_data[0] == 0x50 && plain_data[1] == 00) {
+            FURI_LOG_T(TAG, "Halt received");
+            break;
+        } else if(plain_data[0] == 0x60 || plain_data[0] == 0x61) {
+            uint8_t block = plain_data[1];
+            uint64_t key = 0;
+            // TODO Now works only for 1k!!!
+            uint8_t sector_trailer_block = block | 0x03;
+            MfClassicSectorTrailer* sector_trailer =
+                (MfClassicSectorTrailer*)emulator->data.block[sector_trailer_block].value;
+            if(plain_data[0] == 0x61) {
+                key = nfc_util_bytes2num(sector_trailer->key_b, 6);
+            } else {
+                key = nfc_util_bytes2num(sector_trailer->key_a, 6);
+            }
 
-    uint32_t nonce = prng_successor(DWT->CYCCNT, 32);
-    uint8_t nt[4];
-    uint8_t nt_keystream[4];
-    nfc_util_num2bytes(nonce, 4, nt);
-    nfc_util_num2bytes(nonce ^ emulator->cuid, 4, nt_keystream);
-    crypto1_init(&emulator->crypto, key);
-    crypto1_word(&emulator->crypto, emulator->cuid ^ nonce, 0);
+            uint32_t nonce = prng_successor(DWT->CYCCNT, 32);
+            uint8_t nt[4];
+            uint8_t nt_keystream[4];
+            nfc_util_num2bytes(nonce, 4, nt);
+            nfc_util_num2bytes(nonce ^ emulator->cuid, 4, nt_keystream);
+            crypto1_init(&emulator->crypto, key);
+            crypto1_word(&emulator->crypto, emulator->cuid ^ nonce, 0);
 
-    memcpy(tx_rx->tx_data, nt, sizeof(nt));
-    tx_rx->tx_bits = sizeof(nt) * 8;
-    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRxRaw;
-    if(!furi_hal_nfc_tx_rx(tx_rx, 500)) {
-        FURI_LOG_E(TAG, "Error in 1st data exchange");
-        return false;
-    }
+            memcpy(tx_rx->tx_data, nt, sizeof(nt));
+            tx_rx->tx_bits = sizeof(nt) * 8;
+            tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRxRaw;
+            if(!furi_hal_nfc_tx_rx(tx_rx, 500)) {
+                FURI_LOG_E(TAG, "Error in 1st data exchange");
+                return false;
+            }
 
-    if(tx_rx->rx_bits != 64) {
-        FURI_LOG_E(TAG, "Incorrect nr + ar");
-        return false;
-    }
+            if(tx_rx->rx_bits != 64) {
+                FURI_LOG_E(TAG, "Incorrect nr + ar");
+                return false;
+            }
 
-    uint32_t nr = nfc_util_bytes2num(tx_rx->rx_data, 4);
-    uint32_t ar = nfc_util_bytes2num(&tx_rx->rx_data[4], 4);
-    crypto1_word(&emulator->crypto, nr, 1);
-    uint32_t cardRr = ar ^ crypto1_word(&emulator->crypto, 0, 0);
-    if(cardRr != prng_successor(nonce, 64)) {
-        FURI_LOG_E(TAG, "Wrong AUTH! %08X != %08X", cardRr, prng_successor(nonce, 64));
-        // Don't send NACK, as tag don't send it
-        return false;
-    }
+            uint32_t nr = nfc_util_bytes2num(tx_rx->rx_data, 4);
+            uint32_t ar = nfc_util_bytes2num(&tx_rx->rx_data[4], 4);
+            crypto1_word(&emulator->crypto, nr, 1);
+            uint32_t cardRr = ar ^ crypto1_word(&emulator->crypto, 0, 0);
+            if(cardRr != prng_successor(nonce, 64)) {
+                FURI_LOG_E(TAG, "Wrong AUTH! %08X != %08X", cardRr, prng_successor(nonce, 64));
+                // Don't send NACK, as tag don't send it
+                return false;
+            }
 
-    uint32_t ans = prng_successor(nonce, 96);
-    uint8_t responce[4] = {};
-    nfc_util_num2bytes(ans, 4, responce);
-    tx_rx->tx_parity[0] = 0;
-    for(uint8_t i = 0; i < 4; i++) {
-        tx_rx->tx_data[i] = crypto1_byte(&emulator->crypto, 0, 0) ^ responce[i];
-        tx_rx->tx_parity[0] |=
-            (((crypto1_filter(emulator->crypto.odd) ^ nfc_util_odd_parity8(responce[i])) & 0x01)
-             << (7 - (i & 0x0007)));
-    }
+            uint32_t ans = prng_successor(nonce, 96);
+            uint8_t responce[4] = {};
+            nfc_util_num2bytes(ans, 4, responce);
+            tx_rx->tx_parity[0] = 0;
+            for(uint8_t i = 0; i < 4; i++) {
+                tx_rx->tx_data[i] = crypto1_byte(&emulator->crypto, 0, 0) ^ responce[i];
+                tx_rx->tx_parity[0] |=
+                    (((crypto1_filter(emulator->crypto.odd) ^ nfc_util_odd_parity8(responce[i])) &
+                      0x01)
+                     << (7 - (i & 0x0007)));
+            }
 
-    tx_rx->tx_bits = 8 * 4;
-    tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
+            tx_rx->tx_bits = 8 * 4;
+            tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
 
-    if(!furi_hal_nfc_tx_rx(tx_rx, 500)) {
-        FURI_LOG_E(TAG, "Error in 2nd data exchange");
-        return false;
-    }
+            is_encrypted = true;
+        } else if(plain_data[0] == 0x30) {
+            uint8_t block = plain_data[1];
+            uint8_t block_data[18] = {};
+            memcpy(block_data, emulator->data.block[block].value, MF_CLASSIC_BLOCK_SIZE);
+            nfca_append_crc16(block_data, 16);
+            tx_rx->tx_parity[0] = 0;
+            tx_rx->tx_parity[1] = 0;
+            tx_rx->tx_parity[2] = 0;
 
-    uint8_t decrypted_cmd[4] = {};
-    for(uint8_t i = 0; i < 4; i++) {
-        decrypted_cmd[i] = crypto1_byte(&emulator->crypto, 0, 0) ^ tx_rx->rx_data[i];
-    }
+            for(uint8_t i = 0; i < 18; i++) {
+                tx_rx->tx_data[i] = crypto1_byte(&emulator->crypto, 0, 0) ^ block_data[i];
+                tx_rx->tx_parity[i >> 3] |=
+                    (((crypto1_filter(emulator->crypto.odd) ^ nfc_util_odd_parity8(block_data[i])) &
+                      0x01)
+                     << (7 - (i & 0x0007)));
+            }
 
-    // FURI_LOG_I(TAG, "Decrypted: %02X %02X", decrypted_cmd[0], decrypted_cmd[1]);
-    if(decrypted_cmd[0] != 0x30) {
-        FURI_LOG_W(TAG, "Not read command");
-        return false;
-    }
-    uint16_t block_num = decrypted_cmd[1];
-
-    // Send 0 block
-    uint8_t block_data[18] = {};
-    memcpy(block_data, emulator->data.block[block_num].value, MF_CLASSIC_BLOCK_SIZE);
-    nfca_append_crc16(block_data, 16);
-    tx_rx->tx_parity[0] = 0;
-    tx_rx->tx_parity[1] = 0;
-    tx_rx->tx_parity[2] = 0;
-
-    for(uint8_t i = 0; i < 18; i++) {
-        tx_rx->tx_data[i] = crypto1_byte(&emulator->crypto, 0, 0) ^ block_data[i];
-        tx_rx->tx_parity[i >> 3] |=
-            (((crypto1_filter(emulator->crypto.odd) ^ nfc_util_odd_parity8(block_data[i])) & 0x01)
-             << (7 - (i & 0x0007)));
-    }
-
-    tx_rx->tx_bits = 18 * 8;
-    tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
-
-    if(!furi_hal_nfc_tx_rx(tx_rx, 500)) {
-        FURI_LOG_E(TAG, "Error in Block emulation data exchange");
-        return false;
+            tx_rx->tx_bits = 18 * 8;
+            tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
+        }
     }
 
     return false;

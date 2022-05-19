@@ -13,6 +13,7 @@
 #define MF_CLASSIC_BLOCKS_IN_SECTOR_MAX (16)
 
 #define MF_CLASSIC_NO_KEY (0xFFFFFFFFFFFFFFFF)
+#define MF_CLASSIC_MAX_DATA_SIZE (16)
 
 typedef enum {
     MfClassicType1k,
