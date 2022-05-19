@@ -12,7 +12,7 @@ void storage_settings_scene_unmounted_on_enter(void* context) {
     FS_Error error = storage_sd_unmount(app->fs_api);
     DialogEx* dialog_ex = app->dialog_ex;
 
-    dialog_ex_set_left_button_text(dialog_ex, "Back");
+    dialog_ex_set_center_button_text(dialog_ex, "Ok");
 
     if(error == FSE_OK) {
         dialog_ex_set_header(dialog_ex, "SD card unmounted", 64, 10, AlignCenter, AlignCenter);
@@ -39,14 +39,13 @@ bool storage_settings_scene_unmounted_on_event(void* context, SceneManagerEvent 
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case DialogExResultLeft:
+        case DialogExResultCenter:
             consumed = scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, StorageSettingsStart);
             break;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        consumed = scene_manager_search_and_switch_to_previous_scene(
-            app->scene_manager, StorageSettingsStart);
+        consumed = true;
     }
 
     return consumed;
