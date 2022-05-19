@@ -313,13 +313,13 @@ uint8_t mf_classic_read_card(
 }
 
 static void print_rx(uint8_t* rx_data, uint16_t rx_bytes) {
-    UNUSED(rx_data);
-    UNUSED(rx_bytes);
-    // FURI_LOG_D(TAG, "Rx %d bytes:", rx_bytes);
-    // for(size_t i = 0; i < rx_bytes; i++) {
-    //     printf("%02X ", rx_data[i]);
-    // }
-    // printf("\r\n");
+    // UNUSED(rx_data);
+    // UNUSED(rx_bytes);
+    FURI_LOG_D(TAG, "Rx %d bytes:", rx_bytes);
+    for(size_t i = 0; i < rx_bytes; i++) {
+        printf("%02X ", rx_data[i]);
+    }
+    printf("\r\n");
 }
 
 // static void print_rx_context(FuriHalNfcTxRxContext* tx_rx) {
@@ -396,11 +396,24 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             nfc_util_num2bytes(nonce, 4, nt);
             nfc_util_num2bytes(nonce ^ emulator->cuid, 4, nt_keystream);
             crypto1_init(&emulator->crypto, key);
-            crypto1_word(&emulator->crypto, emulator->cuid ^ nonce, 0);
-
-            memcpy(tx_rx->tx_data, nt, sizeof(nt));
-            tx_rx->tx_bits = sizeof(nt) * 8;
-            tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRxRaw;
+            if(!is_encrypted) {
+                crypto1_word(&emulator->crypto, emulator->cuid ^ nonce, 0);
+                memcpy(tx_rx->tx_data, nt, sizeof(nt));
+                tx_rx->tx_bits = sizeof(nt) * 8;
+                tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRxRaw;
+            } else {
+                tx_rx->tx_parity[0] = 0;
+                for(uint8_t i = 0; i < 4; i++) {
+                    tx_rx->tx_data[i] = crypto1_byte(&emulator->crypto, nt_keystream[i], 0) ^
+                                        nt[i];
+                    tx_rx->tx_parity[0] |=
+                        (((crypto1_filter(emulator->crypto.odd) ^ nfc_util_odd_parity8(nt[i])) &
+                          0x01)
+                         << (7 - (i & 0x0007)));
+                }
+                tx_rx->tx_bits = sizeof(nt) * 8;
+                tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRxRaw;
+            }
             if(!furi_hal_nfc_tx_rx(tx_rx, 500)) {
                 FURI_LOG_E(TAG, "Error in 1st data exchange");
                 return false;
