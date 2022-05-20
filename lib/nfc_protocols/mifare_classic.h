@@ -42,6 +42,8 @@ typedef struct {
 
 typedef struct {
     MfClassicType type;
+    uint64_t key_a_mask;
+    uint64_t key_b_mask;
     MfClassicBlock block[MF_CLASSIC_TOTAL_BLOCKS_MAX];
 } MfClassicData;
 

@@ -296,6 +296,8 @@ uint8_t mf_classic_read_card(
 
     uint8_t sectors_read = 0;
     data->type = reader->type;
+    data->key_a_mask = 0;
+    data->key_b_mask = 0;
     MfClassicSector temp_sector = {};
     for(uint8_t i = 0; i < reader->sectors_to_read; i++) {
         if(mf_classic_read_sector(
@@ -304,6 +306,12 @@ uint8_t mf_classic_read_card(
                 mf_classic_get_first_block_num_of_sector(reader->sector_reader[i].sector_num);
             for(uint8_t j = 0; j < temp_sector.total_blocks; j++) {
                 data->block[first_block + j] = temp_sector.block[j];
+            }
+            if(reader->sector_reader[i].key_a != MF_CLASSIC_NO_KEY) {
+                data->key_a_mask |= 1 << reader->sector_reader[i].sector_num;
+            }
+            if(reader->sector_reader[i].key_b != MF_CLASSIC_NO_KEY) {
+                data->key_b_mask |= 1 << reader->sector_reader[i].sector_num;
             }
             sectors_read++;
         }
