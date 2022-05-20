@@ -78,6 +78,36 @@ bool mf_ultralight_read_version(
     return version_read;
 }
 
+bool mf_ultralight_authenticate(
+    FuriHalNfcTxRxContext* tx_rx,
+    uint8_t* key) {
+    bool authenticated = false;
+
+    do {
+        FURI_LOG_D(TAG, "Authenticating");
+        tx_rx->tx_data[0] = MF_UL_AUTH;
+        tx_rx->tx_data[1] = key[0];
+        tx_rx->tx_data[2] = key[1];
+        tx_rx->tx_data[3] = key[2];
+        tx_rx->tx_data[4] = key[3];
+        tx_rx->tx_bits = 40;
+        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+        if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
+            FURI_LOG_D(TAG, "Tag did not respond to authentication");
+            break;
+        }
+
+        if (tx_rx->tx_data[0] <= 0x09) {
+            FURI_LOG_D(TAG, "Authentication failed");
+            break;
+        }
+
+        authenticated = true;
+    } while(false);
+
+    return authenticated;
+}
+
 bool mf_ultralight_read_pages(
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
@@ -94,6 +124,25 @@ bool mf_ultralight_read_pages(
             FURI_LOG_D(TAG, "Failed to read pages %d - %d", i, i + 3);
             break;
         }
+
+        if(tx_rx->rx_bits == 4 && tx_rx->rx_data[0] >> 4 == 0x00) {
+            // This page is locked by a password
+            // We need to reset NFC and authenticate
+            i -= 4;
+
+            furi_hal_nfc_sleep();
+            furi_hal_nfc_activate_nfca(300, NULL);
+
+            uint8_t key[] = {0x00, 0x00, 0x00, 0x00};
+            if(!mf_ultralight_authenticate(tx_rx, key)) {
+                FURI_LOG_D(TAG, "Failed to read pages %d - %d", i, i + 3);
+                FURI_LOG_D(TAG, "Failed to authenticate");
+                break;
+            } else {
+                continue;
+            }
+        }
+
         if(i + 4 <= reader->pages_to_read) {
             pages_read_cnt = 4;
         } else {
