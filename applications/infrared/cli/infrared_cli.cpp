@@ -177,7 +177,7 @@ static void infrared_cli_start_ir(Cli* cli, string_t args, void* context) {
                 break;
             }
             if(string_get_cstr(args)[size] == ' ') {
-                string_right(args, size+1);
+                string_right(args, size + 1);
                 break;
             }
         }
