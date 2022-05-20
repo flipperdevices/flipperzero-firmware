@@ -24,6 +24,18 @@ static uint8_t mf_classic_get_blocks_num_in_sector(uint8_t sector) {
     return sector < 32 ? 4 : 16;
 }
 
+static uint8_t mf_classic_get_sector_trailer(uint8_t block) {
+    if(block < 128) {
+        return block | 0x03;
+    } else {
+        return block | 0x0f;
+    }
+}
+
+static bool mf_classic_is_sector_trailer(uint8_t block) {
+    return block == mf_classic_get_sector_trailer(block);
+}
+
 uint8_t mf_classic_get_total_sectors_num(MfClassicReader* reader) {
     furi_assert(reader);
     if(reader->type == MfClassicType1k) {
@@ -412,8 +424,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
         } else if(plain_data[0] == 0x60 || plain_data[0] == 0x61) {
             uint8_t block = plain_data[1];
             uint64_t key = 0;
-            // TODO Now works only for 1k!!!
-            uint8_t sector_trailer_block = block | 0x03;
+            uint8_t sector_trailer_block = mf_classic_get_sector_trailer(block);
             MfClassicSectorTrailer* sector_trailer =
                 (MfClassicSectorTrailer*)emulator->data.block[sector_trailer_block].value;
             if(plain_data[0] == 0x61) {
@@ -482,6 +493,11 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             uint8_t block = plain_data[1];
             uint8_t block_data[18] = {};
             memcpy(block_data, emulator->data.block[block].value, MF_CLASSIC_BLOCK_SIZE);
+            if(mf_classic_is_sector_trailer(block)) {
+                // Hide keys
+                memset(block_data, 0, 6);
+                memset(&block_data[10], 0, 6);
+            }
             nfca_append_crc16(block_data, 16);
 
             mf_crypto1_encrypt(

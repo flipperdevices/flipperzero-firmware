@@ -489,7 +489,7 @@ void nfc_worker_emulate_mifare_classic(NfcWorker* nfc_worker) {
 
     while(nfc_worker->state == NfcWorkerStateEmulateMifareClassic) {
         if(furi_hal_nfc_listen(
-               nfc_data->uid, nfc_data->uid_len, nfc_data->atqa, nfc_data->sak, true, 4000)) {
+               nfc_data->uid, nfc_data->uid_len, nfc_data->atqa, nfc_data->sak, true, 300)) {
             mf_classic_emulator(&emulator, &tx_rx);
         }
     }
