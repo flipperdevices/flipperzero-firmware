@@ -160,52 +160,53 @@ static void protocol_1_encoder_reset(Protocol1Data* data) {
 }
 
 /*********************** PROTOCOLS DESCRIPTION ***********************/
+static const ProtocolBase protocol_0 = {
+    .alloc = (ProtocolAlloc)protocol_0_alloc,
+    .free = (ProtocolFree)protocol_0_free,
+    .set_data = (ProtocolSetData)protocol_0_set_data,
+    .get_data = (ProtocolGetData)protocol_0_get_data,
+    .get_data_size = (ProtocolGetDataSize)protocol_0_get_data_size,
+    .get_name = (ProtocolGetName)protocol_0_get_name,
+    .get_manufacturer = (ProtocolGetManufacturer)protocol_0_get_manufacturer,
+    .decoder =
+        {
+            .start = (ProtocolDecoderStart)protocol_0_decoder_start,
+            .feed = (ProtocolDecoderFeed)protocol_0_decoder_feed,
+            .reset = (ProtocolDecoderReset)protocol_0_decoder_reset,
+        },
+    .encoder =
+        {
+            .start = (ProtocolEncoderStart)protocol_0_encoder_start,
+            .yield = (ProtocolEncoderYield)protocol_0_encoder_yield,
+            .reset = (ProtocolEncoderReset)protocol_0_encoder_reset,
+        },
+};
 
-const ProtocolBase test_protocols_base[] = {
-    [TestDictProtocol0] =
+static const ProtocolBase protocol_1 = {
+    .alloc = (ProtocolAlloc)protocol_1_alloc,
+    .free = (ProtocolFree)protocol_1_free,
+    .set_data = (ProtocolSetData)protocol_1_set_data,
+    .get_data = (ProtocolGetData)protocol_1_get_data,
+    .get_data_size = (ProtocolGetDataSize)protocol_1_get_data_size,
+    .get_name = (ProtocolGetName)protocol_1_get_name,
+    .get_manufacturer = (ProtocolGetManufacturer)protocol_1_get_manufacturer,
+    .decoder =
         {
-            .alloc = (ProtocolAlloc)protocol_0_alloc,
-            .free = (ProtocolFree)protocol_0_free,
-            .set_data = (ProtocolSetData)protocol_0_set_data,
-            .get_data = (ProtocolGetData)protocol_0_get_data,
-            .get_data_size = (ProtocolGetDataSize)protocol_0_get_data_size,
-            .get_name = (ProtocolGetName)protocol_0_get_name,
-            .get_manufacturer = (ProtocolGetManufacturer)protocol_0_get_manufacturer,
-            .decoder =
-                {
-                    .start = (ProtocolDecoderStart)protocol_0_decoder_start,
-                    .feed = (ProtocolDecoderFeed)protocol_0_decoder_feed,
-                    .reset = (ProtocolDecoderReset)protocol_0_decoder_reset,
-                },
-            .encoder =
-                {
-                    .start = (ProtocolEncoderStart)protocol_0_encoder_start,
-                    .yield = (ProtocolEncoderYield)protocol_0_encoder_yield,
-                    .reset = (ProtocolEncoderReset)protocol_0_encoder_reset,
-                },
+            .start = (ProtocolDecoderStart)protocol_1_decoder_start,
+            .feed = (ProtocolDecoderFeed)protocol_1_decoder_feed,
+            .reset = (ProtocolDecoderReset)protocol_1_decoder_reset,
         },
-    [TestDictProtocol1] =
+    .encoder =
         {
-            .alloc = (ProtocolAlloc)protocol_1_alloc,
-            .free = (ProtocolFree)protocol_1_free,
-            .set_data = (ProtocolSetData)protocol_1_set_data,
-            .get_data = (ProtocolGetData)protocol_1_get_data,
-            .get_data_size = (ProtocolGetDataSize)protocol_1_get_data_size,
-            .get_name = (ProtocolGetName)protocol_1_get_name,
-            .get_manufacturer = (ProtocolGetManufacturer)protocol_1_get_manufacturer,
-            .decoder =
-                {
-                    .start = (ProtocolDecoderStart)protocol_1_decoder_start,
-                    .feed = (ProtocolDecoderFeed)protocol_1_decoder_feed,
-                    .reset = (ProtocolDecoderReset)protocol_1_decoder_reset,
-                },
-            .encoder =
-                {
-                    .start = (ProtocolEncoderStart)protocol_1_encoder_start,
-                    .yield = (ProtocolEncoderYield)protocol_1_encoder_yield,
-                    .reset = (ProtocolEncoderReset)protocol_1_encoder_reset,
-                },
+            .start = (ProtocolEncoderStart)protocol_1_encoder_start,
+            .yield = (ProtocolEncoderYield)protocol_1_encoder_yield,
+            .reset = (ProtocolEncoderReset)protocol_1_encoder_reset,
         },
+};
+
+static const ProtocolBase* test_protocols_base[] = {
+    [TestDictProtocol0] = &protocol_0,
+    [TestDictProtocol1] = &protocol_1,
 };
 
 MU_TEST(test_protocol_dict) {

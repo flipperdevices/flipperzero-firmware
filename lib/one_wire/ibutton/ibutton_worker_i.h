@@ -10,26 +10,18 @@
 #include "../one_wire_host.h"
 #include "../one_wire_slave.h"
 #include "../one_wire_device.h"
-#include <toolbox/pulse_protocols/pulse_decoder.h>
-#include "pulse_protocols/protocol_cyfral.h"
-#include "pulse_protocols/protocol_metakom.h"
-#include "encoder/encoder_cyfral.h"
-#include "encoder/encoder_metakom.h"
+#include <toolbox/protocols/protocol_dict.h>
+#include "protocols/ibutton_protocols.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum {
-    PulseProtocolCyfral,
-    PulseProtocolMetakom,
-} PulseProtocols;
-
 typedef struct {
     const uint32_t quant;
-    void (*const start) (iButtonWorker* worker);
-    void (*const tick) (iButtonWorker* worker);
-    void (*const stop) (iButtonWorker* worker);
+    void (*const start)(iButtonWorker* worker);
+    void (*const tick)(iButtonWorker* worker);
+    void (*const stop)(iButtonWorker* worker);
 } iButtonWorkerModeType;
 
 typedef enum {
@@ -38,11 +30,6 @@ typedef enum {
     iButtonWorkerWrite = 2,
     iButtonWorkerEmulate = 3,
 } iButtonWorkerMode;
-
-typedef enum {
-    iButtonEmulateModeCyfral,
-    iButtonEmulateModeMetakom,
-} iButtonEmulateMode;
 
 struct iButtonWorker {
     iButtonKey* key_p;
@@ -55,19 +42,13 @@ struct iButtonWorker {
     osMessageQueueId_t messages;
     FuriThread* thread;
 
-    PulseDecoder* pulse_decoder;
-    ProtocolCyfral* protocol_cyfral;
-    ProtocolMetakom* protocol_metakom;
-    uint32_t last_dwt_value;
-
     iButtonWorkerReadCallback read_cb;
     iButtonWorkerWriteCallback write_cb;
     iButtonWorkerEmulateCallback emulate_cb;
     void* cb_ctx;
 
-    EncoderCyfral* encoder_cyfral;
-    EncoderMetakom* encoder_metakom;
-    iButtonEmulateMode emulate_mode;
+    ProtocolDict* protocols;
+    iButtonProtocol protocol_to_encode;
 };
 
 extern const iButtonWorkerModeType ibutton_worker_modes[];
