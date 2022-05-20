@@ -112,7 +112,7 @@ void nfca_signal_free(NfcaSignal* nfca_signal) {
     free(nfca_signal);
 }
 
-void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t len, uint8_t* parity) {
+void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t bits, uint8_t* parity) {
     furi_assert(nfca_signal);
     furi_assert(data);
     furi_assert(parity);
@@ -121,7 +121,18 @@ void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t len, ui
     nfca_signal->tx_signal->start_level = true;
     // Start of frame
     digital_signal_append(nfca_signal->tx_signal, nfca_signal->one);
-    for(size_t i = 0; i < len; i++) {
-        nfca_add_byte(nfca_signal, data[i], parity[i / 8] & (1 << (7 - (i & 0x07))));
+
+    if(bits < 8) {
+        for(size_t i = 0; i < bits; i++) {
+            if(FURI_BIT(data[0], i)) {
+                digital_signal_append(nfca_signal->tx_signal, nfca_signal->one);
+            } else {
+                digital_signal_append(nfca_signal->tx_signal, nfca_signal->zero);
+            }
+        }
+    } else {
+        for(size_t i = 0; i < bits / 8; i++) {
+            nfca_add_byte(nfca_signal, data[i], parity[i / 8] & (1 << (7 - (i & 0x07))));
+        }
     }
 }
