@@ -333,13 +333,13 @@ uint8_t mf_classic_read_card(
 }
 
 static void print_rx(uint8_t* rx_data, uint16_t rx_bytes) {
-    UNUSED(rx_data);
-    UNUSED(rx_bytes);
-    // FURI_LOG_D(TAG, "Rx %d bytes:", rx_bytes);
-    // for(size_t i = 0; i < rx_bytes; i++) {
-    //     printf("%02X ", rx_data[i]);
-    // }
-    // printf("\r\n");
+    // UNUSED(rx_data);
+    // UNUSED(rx_bytes);
+    FURI_LOG_D(TAG, "Rx %d bytes:", rx_bytes);
+    for(size_t i = 0; i < rx_bytes; i++) {
+        printf("%02X ", rx_data[i]);
+    }
+    printf("\r\n");
 }
 
 // static void print_rx_context(FuriHalNfcTxRxContext* tx_rx) {
@@ -443,7 +443,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 crypto1_word(&emulator->crypto, emulator->cuid ^ nonce, 0);
                 memcpy(tx_rx->tx_data, nt, sizeof(nt));
                 tx_rx->tx_bits = sizeof(nt) * 8;
-                tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
+                tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRxRaw;
             } else {
                 mf_crypto1_encrypt(
                     &emulator->crypto,
@@ -509,6 +509,12 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 tx_rx->tx_parity);
             tx_rx->tx_bits = 18 * 8;
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
+        } else {
+            // Send NACK
+            uint8_t nack = 0x04;
+            mf_crypto1_encrypt(
+                &emulator->crypto, NULL, &nack, 4, tx_rx->tx_data, tx_rx->tx_parity);
+            tx_rx->tx_bits = 4;
         }
     }
 
