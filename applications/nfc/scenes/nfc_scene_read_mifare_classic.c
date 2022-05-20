@@ -71,7 +71,6 @@ bool nfc_scene_read_mifare_classic_on_event(void* context, SceneManagerEvent eve
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneReadMifareClassic, NfcSceneReadMifareClassicStateDone);
             notification_message(nfc->notifications, &sequence_success);
-            nfc->dev->format = NfcDeviceSaveFormatMifareClassic;
             dict_attack_set_result(nfc->dict_attack, true);
             consumed = true;
         } else if(event.event == NfcWorkerEventFail) {

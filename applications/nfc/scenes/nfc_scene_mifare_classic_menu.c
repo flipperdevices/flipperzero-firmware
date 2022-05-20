@@ -37,7 +37,7 @@ bool nfc_scene_mifare_classic_menu_on_event(void* context, SceneManagerEvent eve
         if(event.event == SubmenuIndexSave) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneMifareUlMenu, SubmenuIndexSave);
-            nfc->dev->format = NfcDeviceSaveFormatMifareUl;
+            nfc->dev->format = NfcDeviceSaveFormatMifareClassic;
             // Clear device name
             nfc_device_set_name(nfc->dev, "");
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
