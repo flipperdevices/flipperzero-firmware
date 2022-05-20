@@ -10,7 +10,7 @@
 #define NFCA_F_SIG (13560000.0)
 #define NFCA_T_SIG (1.0 / NFCA_F_SIG)
 
-#define NFCA_SIGNAL_MAX_EDGES (1500)
+#define NFCA_SIGNAL_MAX_EDGES (1350)
 
 typedef struct {
     uint8_t cmd;
