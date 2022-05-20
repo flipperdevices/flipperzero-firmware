@@ -345,6 +345,30 @@ void mf_crypto1_decrypt(
     }
 }
 
+void mf_crypto1_encrypt(
+    Crypto1* crypto,
+    uint8_t* keystream,
+    uint8_t* plain_data,
+    uint16_t plain_data_bits,
+    uint8_t* encrypted_data,
+    uint8_t* encrypted_parity) {
+    if(plain_data_bits < 8) {
+        encrypted_data[0] = 0;
+        for(size_t i = 0; i < plain_data_bits; i++) {
+            encrypted_data[0] |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(plain_data[0], i)) << i;
+        }
+    } else {
+        memset(encrypted_parity, 0, plain_data_bits / 8 + 1);
+        for(uint8_t i = 0; i < plain_data_bits / 8; i++) {
+            encrypted_data[i] = crypto1_byte(crypto, keystream ? keystream[i] : 0, 0) ^
+                                plain_data[i];
+            encrypted_parity[i / 8] |=
+                (((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(plain_data[i])) & 0x01)
+                 << (7 - (i & 0x0007)));
+        }
+    }
+}
+
 bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(emulator);
     furi_assert(tx_rx);
@@ -402,15 +426,13 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 tx_rx->tx_bits = sizeof(nt) * 8;
                 tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             } else {
-                tx_rx->tx_parity[0] = 0;
-                for(uint8_t i = 0; i < 4; i++) {
-                    tx_rx->tx_data[i] = crypto1_byte(&emulator->crypto, nt_keystream[i], 0) ^
-                                        nt[i];
-                    tx_rx->tx_parity[0] |=
-                        (((crypto1_filter(emulator->crypto.odd) ^ nfc_util_odd_parity8(nt[i])) &
-                          0x01)
-                         << (7 - (i & 0x0007)));
-                }
+                mf_crypto1_encrypt(
+                    &emulator->crypto,
+                    nt_keystream,
+                    nt,
+                    sizeof(nt) * 8,
+                    tx_rx->tx_data,
+                    tx_rx->tx_parity);
                 tx_rx->tx_bits = sizeof(nt) * 8;
                 tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             }
@@ -437,16 +459,14 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             uint32_t ans = prng_successor(nonce, 96);
             uint8_t responce[4] = {};
             nfc_util_num2bytes(ans, 4, responce);
-            tx_rx->tx_parity[0] = 0;
-            for(uint8_t i = 0; i < 4; i++) {
-                tx_rx->tx_data[i] = crypto1_byte(&emulator->crypto, 0, 0) ^ responce[i];
-                tx_rx->tx_parity[0] |=
-                    (((crypto1_filter(emulator->crypto.odd) ^ nfc_util_odd_parity8(responce[i])) &
-                      0x01)
-                     << (7 - (i & 0x0007)));
-            }
-
-            tx_rx->tx_bits = 8 * 4;
+            mf_crypto1_encrypt(
+                &emulator->crypto,
+                NULL,
+                responce,
+                sizeof(responce) * 8,
+                tx_rx->tx_data,
+                tx_rx->tx_parity);
+            tx_rx->tx_bits = sizeof(responce) * 8;
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
 
             is_encrypted = true;
@@ -455,18 +475,14 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             uint8_t block_data[18] = {};
             memcpy(block_data, emulator->data.block[block].value, MF_CLASSIC_BLOCK_SIZE);
             nfca_append_crc16(block_data, 16);
-            tx_rx->tx_parity[0] = 0;
-            tx_rx->tx_parity[1] = 0;
-            tx_rx->tx_parity[2] = 0;
 
-            for(uint8_t i = 0; i < 18; i++) {
-                tx_rx->tx_data[i] = crypto1_byte(&emulator->crypto, 0, 0) ^ block_data[i];
-                tx_rx->tx_parity[i >> 3] |=
-                    (((crypto1_filter(emulator->crypto.odd) ^ nfc_util_odd_parity8(block_data[i])) &
-                      0x01)
-                     << (7 - (i & 0x0007)));
-            }
-
+            mf_crypto1_encrypt(
+                &emulator->crypto,
+                NULL,
+                block_data,
+                sizeof(block_data) * 8,
+                tx_rx->tx_data,
+                tx_rx->tx_parity);
             tx_rx->tx_bits = 18 * 8;
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
         }
