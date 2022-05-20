@@ -483,6 +483,7 @@ void nfc_worker_emulate_mifare_classic(NfcWorker* nfc_worker) {
     MfClassicEmulator emulator = {
         .cuid = nfc_util_bytes2num(&nfc_data->uid[nfc_data->uid_len - 4], 4),
         .data = nfc_worker->dev_data->mf_classic_data,
+        .data_changed = false,
     };
     NfcaSignal* nfca_signal = nfca_signal_alloc();
     tx_rx.nfca_signal = nfca_signal;
@@ -492,6 +493,13 @@ void nfc_worker_emulate_mifare_classic(NfcWorker* nfc_worker) {
                nfc_data->uid, nfc_data->uid_len, nfc_data->atqa, nfc_data->sak, true, 300)) {
             mf_classic_emulator(&emulator, &tx_rx);
         }
+    }
+    if(emulator.data_changed) {
+        nfc_worker->dev_data->mf_classic_data = emulator.data;
+        if(nfc_worker->callback) {
+            nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
+        }
+        emulator.data_changed = false;
     }
 
     nfca_signal_free(nfca_signal);

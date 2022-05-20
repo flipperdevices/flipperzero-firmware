@@ -72,6 +72,7 @@ typedef struct {
     uint32_t cuid;
     Crypto1 crypto;
     MfClassicData data;
+    bool data_changed;
 } MfClassicEmulator;
 
 bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);

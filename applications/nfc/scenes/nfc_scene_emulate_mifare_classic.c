@@ -9,7 +9,7 @@ void nfc_emulate_mifare_classic_worker_callback(NfcWorkerEvent event, void* cont
     Nfc* nfc = context;
 
     scene_manager_set_scene_state(
-        nfc->scene_manager, NfcSceneEmulateMifareUl, NFC_MF_CLASSIC_DATA_CHANGED);
+        nfc->scene_manager, NfcSceneEmulateMifareClassic, NFC_MF_CLASSIC_DATA_CHANGED);
 }
 
 void nfc_scene_emulate_mifare_classic_on_enter(void* context) {
@@ -45,10 +45,10 @@ bool nfc_scene_emulate_mifare_classic_on_event(void* context, SceneManagerEvent 
         // Stop worker
         nfc_worker_stop(nfc->worker);
         // Check if data changed and save in shadow file
-        if(scene_manager_get_scene_state(nfc->scene_manager, NfcSceneEmulateMifareUl) ==
+        if(scene_manager_get_scene_state(nfc->scene_manager, NfcSceneEmulateMifareClassic) ==
            NFC_MF_CLASSIC_DATA_CHANGED) {
             scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneEmulateMifareUl, NFC_MF_CLASSIC_DATA_NOT_CHANGED);
+                nfc->scene_manager, NfcSceneEmulateMifareClassic, NFC_MF_CLASSIC_DATA_NOT_CHANGED);
             nfc_device_save_shadow(nfc->dev, nfc->dev->dev_name);
         }
         consumed = false;
