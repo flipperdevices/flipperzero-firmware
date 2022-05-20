@@ -20,6 +20,7 @@
 - `lfrfid`              - LF RFID application
 - `lfrfid_debug`        - LF RFID debug tool
 - `loader`              - Application loader service
+- `mouse_mover`         - USB mouse mover app
 - `music_player`        - Music player app (demo)
 - `nfc`                 - NFC application, HF rfid, EMV and etc
 - `notification`        - Notification service 
