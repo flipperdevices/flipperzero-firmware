@@ -76,18 +76,18 @@ END_TEST
 START_TEST(test_minmea_check)
 {
     for (const char **sentence=valid_sentences_nochecksum; *sentence; sentence++) {
-        ck_assert_msg(minmea_check(*sentence, false) == true, *sentence);
-        ck_assert_msg(minmea_check(*sentence, true) == false, *sentence);
+        ck_assert_msg(minmea_check(*sentence, false) == true, "%s", *sentence);
+        ck_assert_msg(minmea_check(*sentence, true) == false, "%s", *sentence);
     }
 
     for (const char **sentence=valid_sentences_checksum; *sentence; sentence++) {
-        ck_assert_msg(minmea_check(*sentence, false) == true, *sentence);
-        ck_assert_msg(minmea_check(*sentence, true) == true, *sentence);
+        ck_assert_msg(minmea_check(*sentence, false) == true, "%s", *sentence);
+        ck_assert_msg(minmea_check(*sentence, true) == true, "%s", *sentence);
     }
 
     for (const char **sentence=invalid_sentences; *sentence; sentence++) {
-        ck_assert_msg(minmea_check(*sentence, false) == false, *sentence);
-        ck_assert_msg(minmea_check(*sentence, true) == false, *sentence);
+        ck_assert_msg(minmea_check(*sentence, false) == false, "%s", *sentence);
+        ck_assert_msg(minmea_check(*sentence, true) == false, "%s", *sentence);
     }
 }
 END_TEST
