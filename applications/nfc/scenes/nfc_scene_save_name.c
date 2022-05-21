@@ -43,7 +43,7 @@ bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventTextInputDone) {
             if(strcmp(nfc->dev->dev_name, "")) {
-                nfc_device_delete(nfc->dev);
+                nfc_device_delete(nfc->dev, true);
             }
             if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSetUid)) {
                 nfc->dev->dev_data.nfc_data = nfc->dev_edit_data;
