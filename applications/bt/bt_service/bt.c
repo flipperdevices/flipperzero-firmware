@@ -167,11 +167,11 @@ static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t byt
     furi_assert(context);
     Bt* bt = context;
 
-    osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_ALL & (~BT_RPC_EVENT_DISCONNECTED));
     if(osEventFlagsGet(bt->rpc_event) & BT_RPC_EVENT_DISCONNECTED) {
         // Early stop from sending if we're already disconnected
         return;
     }
+    osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_ALL & (~BT_RPC_EVENT_DISCONNECTED));
     size_t bytes_sent = 0;
     while(bytes_sent < bytes_len) {
         size_t bytes_remain = bytes_len - bytes_sent;
