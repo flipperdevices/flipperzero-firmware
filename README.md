@@ -19,12 +19,13 @@ systems.
 
 ## Supported sentences
 
-* ``RMC`` (Recommended Minimum: position, velocity, time)
+* ``GBS`` (Satellite Fault Detection)
 * ``GGA`` (Fix Data)
-* ``GSA`` (DOP and active satellites)
 * ``GLL`` (Geographic Position: Latitude/Longitude)
+* ``GSA`` (DOP and active satellites)
 * ``GST`` (Pseudorange Noise Statistics)
 * ``GSV`` (Satellites in view)
+* ``RMC`` (Recommended Minimum: position, velocity, time)
 * ``VTG`` (Track made good and Ground speed)
 * ``ZDA`` (Time & Date - UTC, day, month, year and local time zone)
 
