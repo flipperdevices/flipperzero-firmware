@@ -167,7 +167,11 @@ static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t byt
     furi_assert(context);
     Bt* bt = context;
 
-    osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_ALL);
+    osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_ALL & (~BT_RPC_EVENT_DISCONNECTED));
+    if(osEventFlagsGet(bt->rpc_event) & BT_RPC_EVENT_DISCONNECTED) {
+        // Early stop from sending if we're already disconnected
+        return;
+    }
     size_t bytes_sent = 0;
     while(bytes_sent < bytes_len) {
         size_t bytes_remain = bytes_len - bytes_sent;
@@ -178,10 +182,14 @@ static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t byt
             furi_hal_bt_serial_tx(&bytes[bytes_sent], bytes_remain);
             bytes_sent += bytes_remain;
         }
-        uint32_t event_flag =
-            osEventFlagsWait(bt->rpc_event, BT_RPC_EVENT_ALL, osFlagsWaitAny, osWaitForever);
+        // We want BT_RPC_EVENT_DISCONNECTED to stick, so don't clear
+        uint32_t event_flag = osEventFlagsWait(
+            bt->rpc_event, BT_RPC_EVENT_ALL, osFlagsWaitAny | osFlagsNoClear, osWaitForever);
         if(event_flag & BT_RPC_EVENT_DISCONNECTED) {
             break;
+        } else {
+            // If we didn't get BT_RPC_EVENT_DISCONNECTED, then clear everything else
+            osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_ALL & (~BT_RPC_EVENT_DISCONNECTED));
         }
     }
 }
@@ -195,6 +203,8 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
     if(event.type == GapEventTypeConnected) {
         // Update status bar
         bt->status = BtStatusConnected;
+        // Clear BT_RPC_EVENT_DISCONNECTED because it might be set from previous session
+        osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
         BtMessage message = {.type = BtMessageTypeUpdateStatus};
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
         if(bt->profile == BtProfileSerial) {
