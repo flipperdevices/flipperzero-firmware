@@ -793,9 +793,7 @@ static bool nfc_device_load_data(NfcDevice* dev, string_t path) {
 
     do {
         // Check existance of shadow file
-        size_t ext_start = string_search_str(path, NFC_APP_EXTENSION);
-        string_set_n(temp_str, path, 0, ext_start);
-        string_cat_printf(temp_str, "%s", NFC_APP_SHADOW_EXTENSION);
+        nfc_device_get_shadow_path(path, temp_str);
         dev->shadow_file_exist =
             storage_common_stat(dev->storage, string_get_cstr(temp_str), NULL) == FSE_OK;
         // Open shadow file if it exists. If not - open original
