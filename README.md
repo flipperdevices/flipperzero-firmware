@@ -1,6 +1,7 @@
 # minmea, a lightweight GPS NMEA 0183 parser library
 
-[![Build Status](https://travis-ci.org/kosma/minmea.svg?branch=master)](https://travis-ci.org/kosma/minmea)
+[![C/C++ 
+CI](https://github.com/kosma/minmea/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/kosma/minmea/actions/workflows/c-cpp.yml)
 
 Minmea is a minimalistic GPS parser library written in pure C intended for
 resource-constrained platforms, especially microcontrollers and other embedded
