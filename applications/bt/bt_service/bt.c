@@ -203,10 +203,10 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
     if(event.type == GapEventTypeConnected) {
         // Update status bar
         bt->status = BtStatusConnected;
-        // Clear BT_RPC_EVENT_DISCONNECTED because it might be set from previous session
-        osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
         BtMessage message = {.type = BtMessageTypeUpdateStatus};
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
+        // Clear BT_RPC_EVENT_DISCONNECTED because it might be set from previous session
+        osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
         if(bt->profile == BtProfileSerial) {
             // Open RPC session
             bt->rpc_session = rpc_session_open(bt->rpc);
