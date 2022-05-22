@@ -21,6 +21,7 @@ static const uint32_t subghz_frequencies[] = {
     300000000,
     303875000,
     304250000,
+    310000000,
     315000000,
     318000000,
 
@@ -41,6 +42,7 @@ static const uint32_t subghz_frequencies[] = {
     0,
 };
 static const uint32_t subghz_hopper_frequencies[] = {
+    310000000,
     315000000,
     318000000,
     390000000,
@@ -48,13 +50,14 @@ static const uint32_t subghz_hopper_frequencies[] = {
     868350000,
     0,
 };
-static const uint32_t subghz_frequency_default_index = 9;
+static const uint32_t subghz_frequency_default_index = 10;
 
 static const uint32_t subghz_frequencies_region_eu_ru[] = {
     /* 300 - 348 */
     300000000,
     303875000,
     304250000,
+    310000000,
     315000000,
     318000000,
 
@@ -75,6 +78,7 @@ static const uint32_t subghz_frequencies_region_eu_ru[] = {
     0,
 };
 static const uint32_t subghz_hopper_frequencies_region_eu_ru[] = {
+    310000000,
     315000000,
     318000000,
     390000000,
@@ -82,13 +86,14 @@ static const uint32_t subghz_hopper_frequencies_region_eu_ru[] = {
     868350000,
     0,
 };
-static const uint32_t subghz_frequency_default_index_region_eu_ru = 9;
+static const uint32_t subghz_frequency_default_index_region_eu_ru = 10;
 
 static const uint32_t subghz_frequencies_region_us_ca_au[] = {
     /* 300 - 348 */
     300000000,
     303875000,
     304250000,
+    310000000,
     315000000,
     318000000,
 
@@ -109,6 +114,7 @@ static const uint32_t subghz_frequencies_region_us_ca_au[] = {
     0,
 };
 static const uint32_t subghz_hopper_frequencies_region_us_ca_au[] = {
+    310000000,
     315000000,
     318000000,
     390000000,
@@ -116,13 +122,14 @@ static const uint32_t subghz_hopper_frequencies_region_us_ca_au[] = {
     868350000,
     0,
 };
-static const uint32_t subghz_frequency_default_index_region_us_ca_au = 9;
+static const uint32_t subghz_frequency_default_index_region_us_ca_au = 10;
 
 static const uint32_t subghz_frequencies_region_jp[] = {
     /* 300 - 348 */
     300000000,
     303875000,
     304250000,
+    310000000,
     315000000,
     318000000,
 
@@ -143,6 +150,7 @@ static const uint32_t subghz_frequencies_region_jp[] = {
     0,
 };
 static const uint32_t subghz_hopper_frequencies_region_jp[] = {
+    310000000,
     315000000,
     318000000,
     390000000,
@@ -150,7 +158,7 @@ static const uint32_t subghz_hopper_frequencies_region_jp[] = {
     868350000,
     0,
 };
-static const uint32_t subghz_frequency_default_index_region_jp = 9;
+static const uint32_t subghz_frequency_default_index_region_jp = 10;
 
 LIST_DEF(FrequenciesList, uint32_t)
 
