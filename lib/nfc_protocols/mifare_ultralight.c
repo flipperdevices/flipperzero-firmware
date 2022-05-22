@@ -18,6 +18,7 @@ static void mf_ul_set_default_version(MfUltralightReader* reader, MfUltralightDa
     reader->support_fast_read = false;
     reader->support_tearing_flags = false;
     reader->support_counters = false;
+    reader->support_signature = false;
 }
 
 bool mf_ultralight_read_version(
@@ -46,24 +47,28 @@ bool mf_ultralight_read_version(
             reader->support_fast_read = true;
             reader->support_tearing_flags = true;
             reader->support_counters = true;
+            reader->support_signature = true;
         } else if(version->storage_size == 0x0E) {
             data->type = MfUltralightTypeUL21;
             reader->pages_to_read = 41;
             reader->support_fast_read = true;
             reader->support_tearing_flags = true;
             reader->support_counters = true;
+            reader->support_signature = true;
         } else if(version->storage_size == 0x0F) {
             data->type = MfUltralightTypeNTAG213;
             reader->pages_to_read = 45;
             reader->support_fast_read = true;
             reader->support_tearing_flags = false;
             reader->support_counters = false;
+            reader->support_signature = true;
         } else if(version->storage_size == 0x11) {
             data->type = MfUltralightTypeNTAG215;
             reader->pages_to_read = 135;
             reader->support_fast_read = true;
             reader->support_tearing_flags = false;
             reader->support_counters = false;
+            reader->support_signature = true;
         } else if(version->prod_subtype == 5 && version->prod_ver_major == 2) {
             // NTAG I2C
             bool known = false;
@@ -71,20 +76,24 @@ bool mf_ultralight_read_version(
                 if(version->storage_size == 0x13) {
                     data->type = MfUltralightTypeNTAGI2C1K;
                     reader->pages_to_read = 231;
+                    reader->support_signature = false;
                     known = true;
                 } else if(version->storage_size == 0x15) {
                     data->type = MfUltralightTypeNTAGI2C2K;
                     reader->pages_to_read = 485;
+                    reader->support_signature = false;
                     known = true;
                 }
             } else if(version->prod_ver_minor == 2) {
                 if(version->storage_size == 0x13) {
                     data->type = MfUltralightTypeNTAGI2CPlus1K;
                     reader->pages_to_read = 236;
+                    reader->support_signature = true;
                     known = true;
                 } else if(version->storage_size == 0x15) {
                     data->type = MfUltralightTypeNTAGI2CPlus2K;
                     reader->pages_to_read = 492;
+                    reader->support_signature = true;
                     known = true;
                 }
             }
@@ -102,6 +111,7 @@ bool mf_ultralight_read_version(
             reader->support_fast_read = true;
             reader->support_tearing_flags = false;
             reader->support_counters = false;
+            reader->support_signature = true;
         } else {
             mf_ul_set_default_version(reader, data);
             break;
@@ -579,8 +589,10 @@ bool mf_ul_read_card(
 
     // Read Mifare Ultralight version
     if(mf_ultralight_read_version(tx_rx, reader, data)) {
-        // Read Signature
-        mf_ultralight_read_signature(tx_rx, data);
+        if(reader->support_signature) {
+            // Read Signature
+            mf_ultralight_read_signature(tx_rx, data);
+        }
     }
     if(reader->support_counters) {
         mf_ultralight_read_counters(tx_rx, data);
@@ -631,7 +643,7 @@ static void mf_ul_protect_auth_data_on_read_command_i2c(
             if(access & 0x80) {
                 uint8_t auth0 = emulator->data.data[227 * 4 + 3];
                 if(auth0 < end_page) {
-                    // start_page is always > auth0; otherwise is NAK'd already
+                    // start_page is always < auth0; otherwise is NAK'd already
                     uint8_t page_offset = auth0 - start_page;
                     uint8_t page_count = end_page - auth0;
                     memset(&tx_buff[page_offset * 4], 0, page_count * 4);
@@ -1003,12 +1015,15 @@ bool mf_ul_prepare_emulation_response(
             }
         }
     } else if(cmd == MF_UL_READ_SIG) {
-        // Check 2nd byte = 0x00 - RFU
-        if(buff_rx[1] == 0x00) {
-            tx_bytes = sizeof(emulator->data.signature);
-            memcpy(buff_tx, emulator->data.signature, tx_bytes);
-            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-            command_parsed = true;
+        if(emulator->data.type != MfUltralightTypeNTAGI2C1K &&
+           emulator->data.type != MfUltralightTypeNTAGI2C2K) {
+            // Check 2nd byte = 0x00 - RFU
+            if(buff_rx[1] == 0x00) {
+                tx_bytes = sizeof(emulator->data.signature);
+                memcpy(buff_tx, emulator->data.signature, tx_bytes);
+                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                command_parsed = true;
+            }
         }
     } else if(cmd == MF_UL_CHECK_TEARING) {
         if(emulator->data.type < MfUltralightTypeNTAGI2C1K) {

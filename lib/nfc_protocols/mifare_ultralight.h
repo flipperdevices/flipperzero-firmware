@@ -83,6 +83,7 @@ typedef struct {
     bool support_fast_read;
     bool support_tearing_flags;
     bool support_counters;
+    bool support_signature;
 } MfUltralightReader;
 
 typedef struct {
