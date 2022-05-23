@@ -109,6 +109,7 @@ void nfca_signal_free(NfcaSignal* nfca_signal) {
 
     digital_signal_free(nfca_signal->one);
     digital_signal_free(nfca_signal->zero);
+    digital_signal_free(nfca_signal->tx_signal);
     free(nfca_signal);
 }
 
