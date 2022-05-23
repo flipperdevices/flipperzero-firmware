@@ -144,10 +144,12 @@ typing ``make``.
   action is to build with ``-Dtimegm=mktime`` which will work correctly as long
   the system runs in the default ``UTC`` timezone.
 
-## Bugs
+## Contributing
 
-There are plenty. Report them on GitHub, or - even better - open a pull request.
-Please write unit tests for any new functions you add - it's fun!
+1. Use the GitHub pull request system.
+2. Make sure to follow to existing style (naming, indentation, etc.)
+3. Write unit tests for any new functionality you add.
+4. Be aware you're submitting your work under the repository's license.
 
 ## Licensing
 
