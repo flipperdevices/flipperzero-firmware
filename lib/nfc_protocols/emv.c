@@ -106,7 +106,7 @@ static bool emv_decode_response(uint8_t* buff, uint16_t len, EmvApplication* app
         if((first_byte & 32) == 32) { // "Constructed" -- contains more TLV data to parse
             FURI_LOG_T(TAG, "Constructed TLV %x", tag);
             if(!emv_decode_response(&buff[i], tlen, app)) {
-                FURI_LOG_T(tag, "Failed to decode response for %x", tag);
+                FURI_LOG_T(TAG, "Failed to decode response for %x", tag);
                 // return false;
             } else {
                 success = true;
