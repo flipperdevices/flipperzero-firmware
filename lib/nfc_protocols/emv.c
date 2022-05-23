@@ -79,13 +79,13 @@ static void emv_trace(FuriHalNfcTxRxContext* tx_rx, const char* message) {
 
 static bool emv_decode_response(uint8_t* buff, uint16_t len, EmvApplication* app) {
     uint16_t i = 0;
-    uint16_t tag = 0, fb = 0;
+    uint16_t tag = 0, first_byte = 0;
     uint16_t tlen = 0;
     bool success = false;
 
     while(i < len) {
-        fb = buff[i]; // first byte
-        if((fb & 31) == 31) { // 2-byte tag
+        first_byte = buff[i];
+        if((first_byte & 31) == 31) { // 2-byte tag
             tag = buff[i] << 8 | buff[i + 1];
             i++;
             FURI_LOG_T(TAG, " 2-byte TLV EMV tag: %x", tag);
@@ -103,10 +103,10 @@ static bool emv_decode_response(uint8_t* buff, uint16_t len, EmvApplication* app
             FURI_LOG_T(TAG, " 1-byte TLV length: %d", tlen);
         }
         i++;
-        if((fb & 32) == 32) { // "Constructed" -- contains more TLV data to parse
+        if((first_byte & 32) == 32) { // "Constructed" -- contains more TLV data to parse
             FURI_LOG_T(TAG, "Constructed TLV %x", tag);
             if(!emv_decode_response(&buff[i], tlen, app)) {
-                printf("Failed to decode response for %x \r\n", tag);
+                FURI_LOG_T(tag,"Failed to decode response for %x", tag);
                 // return false;
             } else {
                 success = true;
