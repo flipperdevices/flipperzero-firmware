@@ -531,7 +531,6 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
     bool is_encrypted = false;
     uint8_t plain_data[MF_CLASSIC_MAX_DATA_SIZE];
     MfClassicKey access_key = MfClassicKeyA;
-    ;
 
     // Read command
     while(!command_processed) {
