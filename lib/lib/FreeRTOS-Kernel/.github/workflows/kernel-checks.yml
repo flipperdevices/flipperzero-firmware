@@ -1,0 +1,72 @@
+name: Kernel-Checker
+
+on: [push, pull_request]
+
+jobs:
+  kernel-checker:
+    name: FreeRTOS Kernel Header Checks
+    runs-on: ubuntu-latest
+    steps:
+      # Install python 3
+      - name: Tool Setup
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7.10
+          architecture:   x64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # There is shared code, hosted by FreeRTOS/FreeRTOS, with deps needed by header checker
+      - name: Checkout FreeRTOS Tools
+        uses: actions/checkout@v2
+        with:
+          repository: FreeRTOS/FreeRTOS
+          ref:  main
+          path: tools
+
+      # Checkout user pull request changes
+      - name: Checkout Pull Request
+        uses: actions/checkout@v2
+        with:
+          ref:  ${{ github.event.pull_request.head.sha }}
+          path: inspect
+
+      # Collect all affected files
+      - name: Collecting changed files
+        uses: lots0logs/gh-action-get-changed-files@2.1.4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Run checks
+      - name: Check File Headers
+        run: |
+          mv tools/.github/scripts/common inspect/.github/scripts
+          pip install -r inspect/.github/scripts/common/requirements.txt
+          cd inspect
+          .github/scripts/kernel_checker.py --json ${HOME}/files_modified.json ${HOME}/files_added.json ${HOME}/files_renamed.json
+          exit $?
+  build-checker:
+    name: FreeRTOS Posix Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the parent repository
+        uses: actions/checkout@v2
+        with:
+          ref: main
+          repository: FreeRTOS/FreeRTOS
+          submodules: 'recursive'
+          fetch-depth: 1
+          path: ./workspace
+      - name: Checkout the current repository
+        uses: actions/checkout@v2
+        with:
+          path: ./workspace/FreeRTOS/Source
+      - name: Posix Build Checker
+        run: |
+              bash workspace/.github/scripts/posix_build_checker.sh workspace
+      - name: Install lib pcap dev
+        run: |
+          sudo apt-get install libpcap-dev
+      - name: Posix Network Build Checker
+        run: |
+          bash workspace/.github/scripts/posix_network_build_checker.sh workspace

@@ -1,0 +1,6 @@
+[submodule "ThirdParty/FreeRTOS-Kernel-Partner-Supported-Ports"]
+	path = portable/ThirdParty/Partner-Supported-Ports
+	url = https://github.com/FreeRTOS/FreeRTOS-Kernel-Partner-Supported-Ports
+[submodule "ThirdParty/FreeRTOS-Kernel-Community-Supported-Ports"]
+	path = portable/ThirdParty/Community-Supported-Ports
+	url = https://github.com/FreeRTOS/FreeRTOS-Kernel-Community-Supported-Ports

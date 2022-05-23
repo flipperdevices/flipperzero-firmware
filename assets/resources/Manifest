@@ -1,5 +1,5 @@
 V:0
-T:1653334495
+T:1653340298
 D:badusb
 D:dolphin
 D:infrared
@@ -229,14 +229,16 @@ D:nfc/assets
 F:81dc04c7b181f94b644079a71476dff4:4742:nfc/assets/aid.nfc
 F:86efbebdf41bb6bf15cc51ef88f069d5:2565:nfc/assets/country_code.nfc
 F:41b4f08774249014cb8d3dffa5f5c07d:1757:nfc/assets/currency_code.nfc
-F:c60e862919731b0bd538a1001bbc1098:17453:nfc/assets/mf_classic_dict.nfc
+F:e4fb0fdeae67b0787a239ba96bac410a:50387:nfc/assets/mf_classic_dict.nfc
 D:subghz/assets
 F:dda1ef895b8a25fde57c874feaaef997:650:subghz/assets/came_atomo
 F:610a0ffa2479a874f2060eb2348104c5:2712:subghz/assets/keeloq_mfcodes
 F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
-F:00e967e5c558e44a0651bb821d5cf1d0:414:subghz/assets/setting_frequency_analyzer_user
-F:16e8c7cb4a13f26ea55b2b0a59f9cc7a:554:subghz/assets/setting_user
+F:35851dab442aa3e18722fcaaf2ce070e:666:subghz/assets/setting_frequency_analyzer_user
+F:d209a6ffc2d5a9cb369b5bfe19401e1e:889:subghz/assets/setting_user
+F:e7199dcdbc7910508b1ef3fddf3fe219:255:subghz/assets/touchtunes_map
+F:994284c5e4796c3c292d5ceabde55fe4:384:subghz/assets/universal_rf_map
 D:u2f/assets
 F:7e11e688e39034bbb9d88410044795e1:365:u2f/assets/cert.der
 F:f60b88c20ed479ed9684e249f7134618:264:u2f/assets/cert_key.u2f

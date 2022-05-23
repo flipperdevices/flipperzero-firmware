@@ -84,6 +84,10 @@ const FlipperApplication* loader_find_application_by_name(const char* name) {
     application = loader_find_application_by_name_in_list(name, FLIPPER_APPS, FLIPPER_APPS_COUNT);
     if(!application) {
         application =
+            loader_find_application_by_name_in_list(name, FLIPPER_GAMES, FLIPPER_GAMES_COUNT);
+    }
+    if(!application) {
+        application =
             loader_find_application_by_name_in_list(name, FLIPPER_PLUGINS, FLIPPER_PLUGINS_COUNT);
     }
     if(!application) {
@@ -148,6 +152,11 @@ void loader_cli_list(Cli* cli, string_t args, Loader* instance) {
     printf("Applications:\r\n");
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_APPS[i].name);
+    }
+
+    printf("Games:\r\n");
+    for(size_t i = 0; i < FLIPPER_GAMES_COUNT; i++) {
+        printf("\t%s\r\n", FLIPPER_GAMES[i].name);
     }
 
     printf("Plugins:\r\n");
@@ -312,6 +321,13 @@ static Loader* loader_alloc() {
     view_set_previous_callback(menu_get_view(instance->primary_menu), loader_hide_menu);
     view_dispatcher_add_view(
         instance->view_dispatcher, LoaderMenuViewPrimary, menu_get_view(instance->primary_menu));
+    // Games menu
+    instance->games_menu = submenu_alloc();
+    view_set_context(submenu_get_view(instance->games_menu), instance->games_menu);
+    view_set_previous_callback(
+        submenu_get_view(instance->games_menu), loader_back_to_primary_menu);
+    view_dispatcher_add_view(
+        instance->view_dispatcher, LoaderMenuViewGames, submenu_get_view(instance->games_menu));
     // Plugins menu
     instance->plugins_menu = submenu_alloc();
     view_set_context(submenu_get_view(instance->plugins_menu), instance->plugins_menu);
@@ -356,6 +372,8 @@ static void loader_free(Loader* instance) {
 
     menu_free(loader_instance->primary_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPrimary);
+    submenu_free(loader_instance->games_menu);
+    view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewGames);
     submenu_free(loader_instance->plugins_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPlugins);
     submenu_free(loader_instance->debug_menu);
@@ -381,6 +399,15 @@ static void loader_build_menu() {
             i,
             loader_menu_callback,
             (void*)&FLIPPER_APPS[i]);
+    }
+    if(FLIPPER_GAMES_COUNT != 0) {
+        menu_add_item(
+            loader_instance->primary_menu,
+            "Games",
+            &A_Games_14,
+            i++,
+            loader_submenu_callback,
+            (void*)LoaderMenuViewGames);
     }
     if(FLIPPER_PLUGINS_COUNT != 0) {
         menu_add_item(
@@ -410,8 +437,18 @@ static void loader_build_menu() {
 }
 
 static void loader_build_submenu() {
-    FURI_LOG_I(TAG, "Building plugins menu");
+    FURI_LOG_I(TAG, "Building games menu");
     size_t i;
+    for(i = 0; i < FLIPPER_GAMES_COUNT; i++) {
+        submenu_add_item(
+            loader_instance->games_menu,
+            FLIPPER_GAMES[i].name,
+            i,
+            loader_menu_callback,
+            (void*)&FLIPPER_GAMES[i]);
+    }
+
+    FURI_LOG_I(TAG, "Building plugins menu");
     for(i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
         submenu_add_item(
             loader_instance->plugins_menu,

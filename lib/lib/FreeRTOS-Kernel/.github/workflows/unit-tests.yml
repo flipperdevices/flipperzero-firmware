@@ -1,0 +1,56 @@
+name: CMock Unit Tests
+on: [push, pull_request]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Parent Repository
+      uses: actions/checkout@v2
+      with:
+        ref: main
+        repository: FreeRTOS/FreeRTOS
+        submodules: 'recursive'
+        fetch-depth: 1
+    - name: Clone This Repo
+      uses: actions/checkout@v2
+      with:
+        path: ./FreeRTOS/Source
+
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+
+    - name: Install packages
+      run: |
+          sudo apt-get install lcov cflow ruby doxygen build-essential
+    - name: Run Unit Tests with ENABLE_SANITIZER=1
+      run: |
+          make -C FreeRTOS/Test/CMock clean
+          make -C FreeRTOS/Test/CMock ENABLE_SANITIZER=1 run_col_formatted
+    - name: Run Unit Tests for coverage
+      run: |
+          make -C FreeRTOS/Test/CMock clean
+          make -C FreeRTOS/Test/CMock lcovhtml
+          lcov --config-file FreeRTOS/Test/CMock/lcovrc --summary FreeRTOS/Test/CMock/build/cmock_test.info > FreeRTOS/Test/CMock/build/cmock_test_summary.txt
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        files: FreeRTOS/Test/CMock/build/cmock_test.info
+        working-directory: .
+        root_dir: FreeRTOS/Source
+        flags: unittests
+        fail_ci_if_error: false
+        path_to_write_report: coverage/codecov_report.txt
+        verbose: false
+    - name: Archive code coverage data
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage-data
+        path: FreeRTOS/Test/CMock/build/cmock_test*
+    - name: Archive code coverage html report
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage-report
+        path: FreeRTOS/Test/CMock/build/coverage
