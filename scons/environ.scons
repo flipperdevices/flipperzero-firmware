@@ -1,0 +1,74 @@
+from SCons.Subst import quote_spaces
+from SCons.Platform import TempFileMunge
+
+import SCons
+import os
+import sys
+import re
+
+env = Environment(
+    tools=["gcc", "g++", "ar", "gnulink"],
+    # CC="arm-none-eabi-gcc",
+    # CXX="arm-none-eabi-g++",
+    # LINK="arm-none-eabi-g++",
+    # CCFLAGS=[],
+    # LINKFLAGS=[],
+    TEMPFILE=TempFileMunge,
+    MAXLINELENGTH=2048,
+    PROGSUFFIX=".elf",
+    ENV={"PATH": os.environ["PATH"]},
+)
+
+
+# Setting up temp file parameters
+
+WINPATHSEP_RE = re.compile(r"\\([^\"'\\]|$)")
+
+
+def tempfile_arg_esc_func(arg):
+    arg = quote_spaces(arg)
+    if sys.platform != "win32":
+        return arg
+    # GCC requires double Windows slashes, let's use UNIX separator
+    return WINPATHSEP_RE.sub(r"/\1", arg)
+
+
+env["TEMPFILEARGESCFUNC"] = tempfile_arg_esc_func
+
+# Set up cross-compile tools
+toolchain_prefix = "arm-none-eabi-"
+for binary in [
+    "AR",
+    # "AS",
+    "CC",
+    "CXX",
+    # "LINK",
+    # "RANLIB",
+    # "OBJCOPY",
+    # "OBJDUMP",
+    # "OBJSYMBOLS",
+]:
+    env[binary] = toolchain_prefix + env[binary]
+
+# Commandline length limit hack
+env["LINKCOM"] = '${TEMPFILE("' + env["LINKCOM"] + '","$LINKCOMSTR")}'
+
+# Recursive glob
+def GlobRecursive(pattern, node=".", exclude=None):
+    results = []
+    for f in Glob(str(node) + "/*", source=True, exclude=exclude):
+        if type(f) is SCons.Node.FS.Dir:
+            # print(f"recursing into {f}")
+            results += GlobRecursive(pattern, f, exclude)
+    current_node_str = str(node) + "/"
+    results += Glob(
+        current_node_str + pattern,
+        source=True,
+        exclude=exclude and current_node_str + exclude or exclude,
+    )
+    return results
+
+
+env.GlobRecursive = GlobRecursive
+
+Export("env")

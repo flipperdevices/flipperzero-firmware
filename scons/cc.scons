@@ -1,0 +1,70 @@
+Import("env")
+
+
+env.Append(
+    CCFLAGS=[
+        "-O2",
+        "-g",
+        "-DNDEBUG",
+        "-DFURI_NDEBUG",
+        "-DTARGET=7",
+    ]
+)
+
+env.Append(
+    CFLAGS=[
+        "-std=gnu17",
+    ],
+    CCFLAGS=[
+        "--specs=nosys.specs",
+        "--specs=nano.specs",
+        "-mcpu=cortex-m4",
+        "-mfloat-abi=hard",
+        "-mfpu=fpv4-sp-d16",
+        "-MMD",
+        "-MP",
+        "-mthumb",
+        "-Wall",
+        # "-Werror",
+        "-Wextra",
+        "-Wno-address-of-packed-member",
+        "-Wredundant-decls",
+        "-fdata-sections",
+        "-ffunction-sections",
+        "-fno-diagnostics-show-caret",
+        "-fno-math-errno",
+        "-fstack-usage",
+        "-D_GNU_SOURCE",
+        # STM32WB
+        "-D__STM32WB55_SUBFAMILY",
+        "-D__STM32WBxx_FAMILY",
+        "-DSTM32WB",
+        "-DSTM32WB55xx",
+    ],
+)
+
+
+env.Append(
+    LINKFLAGS=[
+        "-u _printf_float",
+        "-Wl,--wrap,_malloc_r",
+        "-Wl,--wrap,_free_r",
+        "-Wl,--wrap,_calloc_r",
+        "-Wl,--wrap,_realloc_r",
+        "-mcpu=cortex-m4",
+        "-mfloat-abi=hard",
+        "-mfpu=fpv4-sp-d16",
+        "-mlittle-endian",
+        "-mthumb",
+        "-specs=nano.specs",
+        "-specs=nosys.specs",
+        "-Wl,--start-group",
+        "-lstdc++",
+        "-lsupc++",
+        "-Wl,--end-group",
+        "-Tfirmware/targets/f7/stm32wb55xx_flash.ld",
+        "-Wl,--gc-sections",
+        "-Wl,--undefined=uxTopUsedPriority",
+        "-n",
+    ]
+)

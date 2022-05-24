@@ -1,0 +1,141 @@
+Import("env")
+SConscript("lib/lib.scons")
+
+env.Append(FLIPPER_TARGET="f7")
+
+env.Append(
+    CCFLAGS=[
+        "-DAPP_ABOUT",
+        "-DAPP_ACCESSOR",
+        "-DAPP_ARCHIVE",
+        "-DAPP_BAD_USB",
+        "-DAPP_BLE_HID",
+        "-DAPP_BLINK",
+        "-DAPP_DISPLAY_TEST",
+        "-DAPP_GPIO",
+        "-DAPP_IBUTTON",
+        "-DAPP_INFRARED",
+        "-DAPP_INFRARED_MONITOR",
+        "-DAPP_KEYPAD_TEST",
+        "-DAPP_LF_RFID",
+        "-DAPP_MUSIC_PLAYER",
+        "-DAPP_NFC",
+        "-DAPP_PASSPORT",
+        "-DAPP_SNAKE_GAME",
+        "-DAPP_SUBGHZ",
+        "-DAPP_U2F",
+        "-DAPP_UART_ECHO",
+        "-DAPP_UPDATER",
+        "-DAPP_USB_MOUSE",
+        "-DAPP_USB_TEST",
+        "-DAPP_VIBRO_TEST",
+        "-DSRV_BT",
+        "-DSRV_CLI",
+        "-DSRV_DESKTOP",
+        "-DSRV_DIALOGS",
+        "-DSRV_DOLPHIN",
+        "-DSRV_GUI",
+        "-DSRV_INPUT",
+        "-DSRV_LOADER",
+        "-DSRV_NOTIFICATION",
+        "-DSRV_POWER",
+        "-DSRV_RPC",
+        "-DSRV_STORAGE",
+    ]
+)
+
+env.Append(
+    CPPPATH=[
+        ".",
+        "./applications",
+        "./assets/compiled",
+        "./core",
+        "./firmware/targets/${FLIPPER_TARGET}/ble_glue",
+        "./firmware/targets/${FLIPPER_TARGET}/fatfs",
+        "./firmware/targets/${FLIPPER_TARGET}/furi_hal",
+        "./firmware/targets/${FLIPPER_TARGET}/Inc",
+        "./firmware/targets/furi_hal_include",
+    ]
+)
+
+
+sources = env.GlobRecursive("*.c", "core")
+sources += env.GlobRecursive("*.c", "firmware")
+sources += env.GlobRecursive("*.c*", "applications")
+
+libs_recurse = [
+    "assets/compiled",
+    "lib/app-scened-template",
+    "lib/drivers",
+    "lib/flipper_format",
+    "lib/nfc_protocols",
+    "lib/microtar/src",
+    "lib/update_util",
+    "lib/subghz",
+    "lib/toolbox",
+    "lib/micro-ecc",
+    "lib/one_wire",
+    "lib/infrared",
+    "lib/ST25RFAL002/source",
+    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/utilities/",
+    "lib/u8g2",
+]
+
+for lib in libs_recurse:
+    sources += env.GlobRecursive("*.c*", lib)
+
+
+libs_plain = [
+    "lib/fatfs",
+    "lib/heatshrink",
+    "lib/littlefs",
+    "lib/nanopb",
+    "lib/libusb_stm32/src",
+    "lib/ST25RFAL002",
+]
+
+for lib in libs_plain:
+    sources += Glob(lib + "/*.c*", source=True)
+
+
+sources += [
+    "lib/fatfs/option/unicode.c",
+    "lib/STM32CubeWB/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c",
+]
+
+sources += Glob(
+    "lib/STM32CubeWB/Middlewares/Third_Party/FreeRTOS/Source/*.c", source=True
+)
+sources += Glob(
+    "lib/STM32CubeWB/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/*.c",
+    source=True,
+)
+
+
+sources += env.GlobRecursive(
+    "*_ll_*.c", "lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Src/", exclude="*usb.c"
+)
+
+sources += Glob(
+    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/shci/*.c",
+    source=True,
+)
+sources += Glob(
+    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl/*_tl*.c",
+    source=True,
+)
+
+sources += [
+    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl/tl_mbox.c",
+    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/svc/Src/svc_ctl.c",
+    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_gap_aci.c",
+    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_gatt_aci.c",
+    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_hal_aci.c",
+    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_hci_le.c",
+    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_l2cap_aci.c",
+    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/template/osal.c",
+]
+
+sources += ["firmware/targets/${FLIPPER_TARGET}/startup_stm32wb55xx_cm4.s"]
+
+env.Program("flipperfw", sources)
