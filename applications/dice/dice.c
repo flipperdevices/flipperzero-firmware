@@ -36,39 +36,39 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     canvas_set_color(canvas, ColorBlack);
     ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
     char strings[1][25];
-	if (letsRoll) {
-  	    if(diceSelect==0) {
-			sprintf(diceType[0], "%s", "d2");
-      	    diceRoll = rand() % 2;
-  	    } else if(diceSelect==1) {
-			sprintf(diceType[0], "%s", "d3");
-      	    diceRoll = rand() % 3;
-  	    } else if(diceSelect==2) {
-			sprintf(diceType[0], "%s", "d4");
-      	    diceRoll = rand() % 4;
-  	    } else if(diceSelect==3) {
-			sprintf(diceType[0], "%s", "d6");
-      	    diceRoll = rand() % 6;
-  	    } else if(diceSelect==4) {
-			sprintf(diceType[0], "%s", "d8");
-      	    diceRoll = rand() % 8;
-  	    } else if(diceSelect==5) {
-			sprintf(diceType[0], "%s", "d10");
-   	  	    diceRoll = rand() % 10;
-  	    } else if(diceSelect==6) {
-			sprintf(diceType[0], "%s", "d12");
-   	  	    diceRoll = rand() % 12;
-  	    } else if(diceSelect==7) {
-			sprintf(diceType[0], "%s", "d20");
-   	  	    diceRoll = rand() % 20;
-  	    } else if(diceSelect==8) {
-			sprintf(diceType[0], "%s", "d100");
-  	        diceRoll = rand() % 100;
-  	    }
-  	 	diceRoll = diceRoll + 1;
-		sprintf(rollTime[0], "%.2d:%.2d:%.2d", state->datetime.hour, state->datetime.minute, state->datetime.second);
-		letsRoll=false;
-	}
+    if (letsRoll) {
+        if(diceSelect==0) {
+            sprintf(diceType[0], "%s", "d2");
+            diceRoll = rand() % 2;
+        } else if(diceSelect==1) {
+            sprintf(diceType[0], "%s", "d3");
+            diceRoll = rand() % 3;
+        } else if(diceSelect==2) {
+            sprintf(diceType[0], "%s", "d4");
+            diceRoll = rand() % 4;
+        } else if(diceSelect==3) {
+            sprintf(diceType[0], "%s", "d6");
+            diceRoll = rand() % 6;
+        } else if(diceSelect==4) {
+            sprintf(diceType[0], "%s", "d8");
+            diceRoll = rand() % 8;
+        } else if(diceSelect==5) {
+            sprintf(diceType[0], "%s", "d10");
+            diceRoll = rand() % 10;
+        } else if(diceSelect==6) {
+            sprintf(diceType[0], "%s", "d12");
+            diceRoll = rand() % 12;
+        } else if(diceSelect==7) {
+            sprintf(diceType[0], "%s", "d20");
+            diceRoll = rand() % 20;
+        } else if(diceSelect==8) {
+            sprintf(diceType[0], "%s", "d100");
+            diceRoll = rand() % 100;
+        }
+        diceRoll = diceRoll + 1;
+        sprintf(rollTime[0], "%.2d:%.2d:%.2d", state->datetime.hour, state->datetime.minute, state->datetime.second);
+        letsRoll=false;
+    }
     if(diceRoll!=0) sprintf(strings[0], "%s: %d at %s", diceType[0], diceRoll, rollTime[0]);
     release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontSecondary);
@@ -92,8 +92,8 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     } else if(diceSelect==7) {
         elements_button_right(canvas, "d20");
     } else if(diceSelect==8) {
-	    elements_button_right(canvas, "d100");
-	}
+        elements_button_right(canvas, "d100");
+    }
 }
 
 static void dice_tick(void* ctx) {
@@ -105,7 +105,7 @@ static void dice_tick(void* ctx) {
 
 int32_t dice_app(void* p) {
     UNUSED(p);
-	letsRoll = false;
+    letsRoll = false;
     diceSelect=7;
     diceRoll=0;
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(PluginEvent), NULL);
@@ -159,7 +159,7 @@ int32_t dice_app(void* p) {
                     case InputKeyLeft:
                         break;
                     case InputKeyOk: 
-					    letsRoll=true;
+                        letsRoll=true;
                         break;
                     case InputKeyBack:
                         processing = false;
