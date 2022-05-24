@@ -34,6 +34,7 @@ static void dice_input_callback(InputEvent* input_event, osMessageQueueId_t even
 static void dice_render_callback(Canvas* const canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontSecondary);
     ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
     char strings[1][25];
     if (letsRoll) {
@@ -69,11 +70,11 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         sprintf(rollTime[0], "%.2d:%.2d:%.2d", state->datetime.hour, state->datetime.minute, state->datetime.second);
         letsRoll=false;
     }
-    if(diceRoll!=0) sprintf(strings[0], "%s: %d at %s", diceType[0], diceRoll, rollTime[0]);
+	sprintf(strings[0], "%s: %d at %s", diceType[0], diceRoll, rollTime[0]);
+    if(diceRoll!=0) {
+        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[0]);
+	}
     release_mutex((ValueMutex*)ctx, state);
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[0]);
-    canvas_set_font(canvas, FontSecondary);
     elements_button_center(canvas, "Roll");
     if(diceSelect==0) {
         elements_button_right(canvas, "d2");
@@ -105,7 +106,7 @@ static void dice_tick(void* ctx) {
 
 int32_t dice_app(void* p) {
     UNUSED(p);
-    letsRoll = false;
+    letsRoll=false;
     diceSelect=7;
     diceRoll=0;
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(PluginEvent), NULL);
