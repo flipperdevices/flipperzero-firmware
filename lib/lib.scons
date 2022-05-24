@@ -8,6 +8,7 @@ env.Append(
         "./lib/app-template",
         "./lib/callback-connector",
         "./lib/common-api",
+        "./lib/digital_signal",
         "./lib/drivers",
         "./lib/file_reader",
         "./lib/flipper_format",

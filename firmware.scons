@@ -71,19 +71,20 @@ sources += env.GlobRecursive("*.c*", "applications")
 libs_recurse = [
     "assets/compiled",
     "lib/app-scened-template",
+    "lib/digital_signal",
     "lib/drivers",
     "lib/flipper_format",
-    "lib/nfc_protocols",
-    "lib/microtar/src",
-    "lib/update_util",
-    "lib/subghz",
-    "lib/toolbox",
-    "lib/micro-ecc",
-    "lib/one_wire",
     "lib/infrared",
+    "lib/micro-ecc",
+    "lib/microtar/src",
+    "lib/nfc_protocols",
+    "lib/one_wire",
     "lib/ST25RFAL002/source",
     "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/utilities/",
+    "lib/subghz",
+    "lib/toolbox",
     "lib/u8g2",
+    "lib/update_util",
 ]
 
 for lib in libs_recurse:
@@ -93,9 +94,9 @@ for lib in libs_recurse:
 libs_plain = [
     "lib/fatfs",
     "lib/heatshrink",
+    "lib/libusb_stm32/src",
     "lib/littlefs",
     "lib/nanopb",
-    "lib/libusb_stm32/src",
     "lib/ST25RFAL002",
 ]
 
@@ -142,6 +143,7 @@ sources += [
 ]
 
 print(env.Dump())
+env.CompilationDatabase()
 env.Program("flipperfw", sources)
 env.HEXBuilder("flipperfw")
 env.BINBuilder("flipperfw")
