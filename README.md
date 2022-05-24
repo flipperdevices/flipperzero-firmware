@@ -5,10 +5,11 @@
 ****This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.**
 
 Latest Updates:
-- Pulled latest DEV changes from 5f7ee1b3
+- Pulled DEV changes from #1262 (This fixes issues with f6384116)
+- Pulled DEV changes from f6384116
+- Pulled latest DEV changes from 4b45746b
+- Added Dice Roller "game" created by me
 - Added Zombie game placeholder/demo/POC
-- Added Games menu and resorted menus
-- Still dev f6384116 changes on FreqAnalyzer file and Megacode are reverted. It breaks Frequency Analyzer. Hopefully this gets fixed.
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -36,7 +37,8 @@ Special shout out to these libraries for giving us more fun:
 - https://github.com/UberGuidoZ/Flipper-IRDB
 
 Plugins:
-- [Clock/Stopwatch (By CompaqDisc, Stopwatch & sound alert by me)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)
+- [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)
+- [Dice Roller (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/dice/dice.c)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)
 - [Menu Changes and Icons (By Redlink)]( https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
 - [RF Remix (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix)
