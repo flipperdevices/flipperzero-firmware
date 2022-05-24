@@ -3,8 +3,6 @@
 
 #include <furi.h>
 
-#include "../subghz_i.h"
-
 #define TAG "SubghzFrequencyAnalyzerWorker"
 
 #define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -95.0f
@@ -225,7 +223,8 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
     return 0;
 }
 
-SubGhzFrequencyAnalyzerWorker* subghz_frequency_analyzer_worker_alloc() {
+SubGhzFrequencyAnalyzerWorker* subghz_frequency_analyzer_worker_alloc(SubGhzSetting* setting) {
+    furi_assert(setting);
     SubGhzFrequencyAnalyzerWorker* instance = malloc(sizeof(SubGhzFrequencyAnalyzerWorker));
 
     instance->thread = furi_thread_alloc();
@@ -234,8 +233,9 @@ SubGhzFrequencyAnalyzerWorker* subghz_frequency_analyzer_worker_alloc() {
     furi_thread_set_context(instance->thread, instance);
     furi_thread_set_callback(instance->thread, subghz_frequency_analyzer_worker_thread);
 
-    instance->setting = subghz_setting_alloc();
-    subghz_setting_load(instance->setting, "/ext/subghz/assets/setting_frequency_analyzer_user");
+    // instance->setting = subghz_setting_alloc();
+    // subghz_setting_load(instance->setting, "/ext/subghz/assets/setting_frequency_analyzer_user");
+    instance->setting = setting;
     return instance;
 }
 
@@ -243,7 +243,7 @@ void subghz_frequency_analyzer_worker_free(SubGhzFrequencyAnalyzerWorker* instan
     furi_assert(instance);
 
     furi_thread_free(instance->thread);
-    subghz_setting_free(instance->setting);
+    //subghz_setting_free(instance->setting);
     free(instance);
 }
 
