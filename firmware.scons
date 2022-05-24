@@ -159,7 +159,7 @@ sources += [
 cdb = env.CompilationDatabase("compile_database.json")
 Alias("cdb", cdb)
 
-env.Program("flipperfw", sources)
-env.HEXBuilder("flipperfw")
-env.BINBuilder("flipperfw")
-env.DFUBuilder("flipperfw")
+env.Program("${FIRMWARE_BUILD_CFG}", sources)
+env.HEXBuilder("${FIRMWARE_BUILD_CFG}")
+env.BINBuilder("${FIRMWARE_BUILD_CFG}")
+env.DFUBuilder("${FIRMWARE_BUILD_CFG}")
