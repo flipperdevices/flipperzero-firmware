@@ -1,14 +1,17 @@
-#include "furi_hal_random.h"
 #include <furi.h>
 #include <furi_hal.h>
+#include "furi_hal_random.h"
 #include <gui/elements.h>
 #include <gui/gui.h>
 #include <input/input.h>
+
 #define TAG "Dice Roller"
-uint8_t diceSelect=7;
+uint8_t diceSelect=20;
+uint8_t diceQty=1;
 uint8_t diceRoll=0;
 char rollTime[1][12];
 char diceType[1][5];
+char strings[2][45];
 bool letsRoll=false;
 
 typedef enum {
@@ -35,70 +38,72 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    char strings[2][25];
+
+    ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
     if (letsRoll) {
-        if(diceSelect==0) {
-            sprintf(diceType[0], "%s", "d2");
-            diceRoll = rand() % 2;
-        } else if(diceSelect==1) {
-            sprintf(diceType[0], "%s", "d3");
-            diceRoll = rand() % 3;
-        } else if(diceSelect==2) {
-            sprintf(diceType[0], "%s", "d4");
-            diceRoll = rand() % 4;
-        } else if(diceSelect==3) {
-            sprintf(diceType[0], "%s", "d6");
-            diceRoll = rand() % 6;
-        } else if(diceSelect==4) {
-            sprintf(diceType[0], "%s", "d8");
-            diceRoll = rand() % 8;
-        } else if(diceSelect==5) {
-            sprintf(diceType[0], "%s", "d10");
-            diceRoll = rand() % 10;
-        } else if(diceSelect==6) {
-            sprintf(diceType[0], "%s", "d12");
-            diceRoll = rand() % 12;
-        } else if(diceSelect==7) {
-            sprintf(diceType[0], "%s", "d20");
-            diceRoll = rand() % 20;
-        } else if(diceSelect==8) {
-            sprintf(diceType[0], "%s", "d100");
-            diceRoll = rand() % 100;
-        }
-        diceRoll = diceRoll + 1;
-        ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
+        diceRoll= ((rand() % diceSelect)+1);
+        sprintf(diceType[0], "%s%d", "d", diceSelect);
         sprintf(rollTime[0], "%.2d:%.2d:%.2d", state->datetime.hour, state->datetime.minute, state->datetime.second);
-        release_mutex((ValueMutex*)ctx, state);
+        sprintf(strings[0], "%d%s at %s", diceQty, diceType[0], rollTime[0]);
+        if(diceQty==1) {
+            sprintf(strings[1], "%d",diceRoll);
+        } else if(diceQty==2) {
+            sprintf(strings[1], "%d %d",diceRoll, ((rand() % diceSelect)+1));
+        } else if(diceQty==3) {
+            sprintf(strings[1], "%d %d %d",diceRoll, ((rand() % diceSelect)+1), ((rand() % diceSelect)+1));
+        } else if(diceQty==4) {
+            sprintf(strings[1], "%d %d %d %d",diceRoll, ((rand() % diceSelect)+1), ((rand() % diceSelect)+1), ((rand() % diceSelect)+1));
+        } else if(diceQty==5) {
+            sprintf(strings[1], "%d %d %d %d %d",diceRoll, ((rand() % diceSelect)+1), ((rand() % diceSelect)+1), ((rand() % diceSelect)+1), ((rand() % diceSelect)+1));
+        } else if(diceQty==6) {
+            sprintf(strings[1], "%d %d %d %d %d %d",diceRoll, ((rand() % diceSelect)+1), ((rand() % diceSelect)+1), ((rand() % diceSelect)+1), ((rand() % diceSelect)+1), ((rand() % diceSelect)+1));
+        }
         letsRoll=false;
     }
-    sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
-    sprintf(strings[1], "%d", diceRoll);
+    release_mutex((ValueMutex*)ctx, state);
     if(diceRoll!=0) {
-        canvas_set_font(canvas, FontBigNumbers);
+        canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, strings[1]);
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[0]);
     }
     elements_button_center(canvas, "Roll");
-    if(diceSelect==0) {
+    if(diceSelect==2) {
         elements_button_right(canvas, "d2");
-    } else if(diceSelect==1) {
-        elements_button_right(canvas, "d3");
-    } else if(diceSelect==2) {
-        elements_button_right(canvas, "d4");
     } else if(diceSelect==3) {
-        elements_button_right(canvas, "d6");
+        elements_button_right(canvas, "d3");
     } else if(diceSelect==4) {
-        elements_button_right(canvas, "d8");
-    } else if(diceSelect==5) {
-        elements_button_right(canvas, "d10");
+        elements_button_right(canvas, "d4");
     } else if(diceSelect==6) {
-        elements_button_right(canvas, "d12");
-    } else if(diceSelect==7) {
-        elements_button_right(canvas, "d20");
+        elements_button_right(canvas, "d6");
     } else if(diceSelect==8) {
+        elements_button_right(canvas, "d8");
+    } else if(diceSelect==10) {
+        elements_button_right(canvas, "d10");
+    } else if(diceSelect==12) {
+        elements_button_right(canvas, "d12");
+    } else if(diceSelect==20) {
+        elements_button_right(canvas, "d20");
+    } else if(diceSelect==59) {
+        elements_button_right(canvas, "d59");
+    } else if(diceSelect==69) {
+        elements_button_right(canvas, "d69");
+    } else if(diceSelect==100) {
         elements_button_right(canvas, "d100");
     }
+    if(diceQty==1) {
+        elements_button_left(canvas, "x1");
+    } else if(diceQty==2) {
+        elements_button_left(canvas, "x2");
+    } else if(diceQty==3) {
+        elements_button_left(canvas, "x3");
+    } else if(diceQty==4) {
+        elements_button_left(canvas, "x4");
+    } else if(diceQty==5) {
+        elements_button_left(canvas, "x5");
+    } else if(diceQty==6) {
+        elements_button_left(canvas, "x6");
+    } 
 }
 
 static void diceclock_state_init(ClockState* const state) {
@@ -115,7 +120,8 @@ static void dice_tick(void* ctx) {
 int32_t dice_app(void* p) {
     UNUSED(p);
     letsRoll=false;
-    diceSelect=7;
+    diceSelect=20;
+    diceQty=1;
     diceRoll=0;
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(PluginEvent), NULL);
     ClockState* plugin_state = malloc(sizeof(ClockState));
@@ -146,27 +152,36 @@ int32_t dice_app(void* p) {
                     case InputKeyDown:
                         break;
                     case InputKeyRight:
-                        if(diceSelect==0) {
-                            diceSelect=1;
-                        } else if(diceSelect==1)  {
-                            diceSelect=2;
-                        } else if(diceSelect==2)  {
+                        if(diceSelect==2) {
                             diceSelect=3;
                         } else if(diceSelect==3)  {
                             diceSelect=4;
                         } else if(diceSelect==4)  {
-                            diceSelect=5;
-                        } else if(diceSelect==5)  {
                             diceSelect=6;
                         } else if(diceSelect==6)  {
-                            diceSelect=7;
-                        } else if(diceSelect==7)  {
                             diceSelect=8;
+                        } else if(diceSelect==8)  {
+                            diceSelect=10;
+                        } else if(diceSelect==10)  {
+                            diceSelect=12;
+                        } else if(diceSelect==12)  {
+                            diceSelect=20;
+                        } else if(diceSelect==20)  {
+                            diceSelect=59;
+                        } else if(diceSelect==59)  {
+                            diceSelect=69;
+                        } else if(diceSelect==69)  {
+                            diceSelect=100;
                         } else {
-                            diceSelect=0;
+                            diceSelect=2;
                         }
                         break;
                     case InputKeyLeft:
+                        if(diceQty<=5) {
+                            diceQty=diceQty+1;
+                        } else {
+                            diceQty=1;
+                        }
                         break;
                     case InputKeyOk: 
                         letsRoll=true;
