@@ -9,7 +9,6 @@ env.Append(
     CPPDEFINES=[
         "NDEBUG",
         "FURI_NDEBUG",
-        ("TARGET", "7"),
     ],
 )
 

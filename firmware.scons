@@ -62,6 +62,7 @@ env.Append(
 
 sources = env.GlobRecursive("*.c", "core")
 sources += env.GlobRecursive("*.c", "firmware")
+sources += ["firmware/targets/f${FLIPPER_TARGET}/startup_stm32wb55xx_cm4.s"]
 sources += env.GlobRecursive("*.c*", "applications")
 
 libs_recurse = [
@@ -136,7 +137,5 @@ sources += [
     "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_l2cap_aci.c",
     "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/template/osal.c",
 ]
-
-sources += ["firmware/targets/f${FLIPPER_TARGET}/startup_stm32wb55xx_cm4.s"]
 
 env.Program("flipperfw", sources)
