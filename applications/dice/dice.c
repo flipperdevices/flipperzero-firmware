@@ -35,7 +35,6 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
     char strings[1][25];
     if (letsRoll) {
         if(diceSelect==0) {
@@ -67,14 +66,15 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             diceRoll = rand() % 100;
         }
         diceRoll = diceRoll + 1;
+        ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
         sprintf(rollTime[0], "%.2d:%.2d:%.2d", state->datetime.hour, state->datetime.minute, state->datetime.second);
+        release_mutex((ValueMutex*)ctx, state);
         letsRoll=false;
     }
 	sprintf(strings[0], "%s: %d at %s", diceType[0], diceRoll, rollTime[0]);
     if(diceRoll!=0) {
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[0]);
 	}
-    release_mutex((ValueMutex*)ctx, state);
     elements_button_center(canvas, "Roll");
     if(diceSelect==0) {
         elements_button_right(canvas, "d2");
@@ -97,6 +97,10 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     }
 }
 
+static void diceclock_state_init(ClockState* const state) {
+    furi_hal_rtc_get_datetime(&state->datetime);
+}
+
 static void dice_tick(void* ctx) {
     furi_assert(ctx);
     osMessageQueueId_t event_queue = ctx;
@@ -111,6 +115,7 @@ int32_t dice_app(void* p) {
     diceRoll=0;
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(PluginEvent), NULL);
     ClockState* plugin_state = malloc(sizeof(ClockState));
+    diceclock_state_init(plugin_state);
     ValueMutex state_mutex;
     if (!init_mutex(&state_mutex, plugin_state, sizeof(ClockState))) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
