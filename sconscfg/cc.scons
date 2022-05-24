@@ -5,15 +5,20 @@ env.Append(
     CCFLAGS=[
         "-O2",
         "-g",
-        "-DNDEBUG",
-        "-DFURI_NDEBUG",
-        "-DTARGET=7",
-    ]
+    ],
+    CPPDEFINES=[
+        "NDEBUG",
+        "FURI_NDEBUG",
+        ("TARGET", "7"),
+    ],
 )
 
 env.Append(
     CFLAGS=[
         "-std=gnu17",
+    ],
+    CXXFLAGS=[
+        "-std=c++17",
     ],
     CCFLAGS=[
         "--specs=nosys.specs",
@@ -34,12 +39,14 @@ env.Append(
         "-fno-diagnostics-show-caret",
         "-fno-math-errno",
         "-fstack-usage",
-        "-D_GNU_SOURCE",
+    ],
+    CPPDEFINES=[
+        "_GNU_SOURCE",
         # STM32WB
-        "-D__STM32WB55_SUBFAMILY",
-        "-D__STM32WBxx_FAMILY",
-        "-DSTM32WB",
-        "-DSTM32WB55xx",
+        "__STM32WB55_SUBFAMILY",
+        "__STM32WBxx_FAMILY",
+        "STM32WB",
+        "STM32WB55xx",
     ],
 )
 

@@ -1,46 +1,47 @@
 Import("env")
 SConscript("lib/lib.scons")
 
-env.Append(FLIPPER_TARGET="f7")
+env.Append(FLIPPER_TARGET="7")
 
 env.Append(
-    CCFLAGS=[
-        "-DAPP_ABOUT",
-        "-DAPP_ACCESSOR",
-        "-DAPP_ARCHIVE",
-        "-DAPP_BAD_USB",
-        "-DAPP_BLE_HID",
-        "-DAPP_BLINK",
-        "-DAPP_DISPLAY_TEST",
-        "-DAPP_GPIO",
-        "-DAPP_IBUTTON",
-        "-DAPP_INFRARED",
-        "-DAPP_INFRARED_MONITOR",
-        "-DAPP_KEYPAD_TEST",
-        "-DAPP_LF_RFID",
-        "-DAPP_MUSIC_PLAYER",
-        "-DAPP_NFC",
-        "-DAPP_PASSPORT",
-        "-DAPP_SNAKE_GAME",
-        "-DAPP_SUBGHZ",
-        "-DAPP_U2F",
-        "-DAPP_UART_ECHO",
-        "-DAPP_UPDATER",
-        "-DAPP_USB_MOUSE",
-        "-DAPP_USB_TEST",
-        "-DAPP_VIBRO_TEST",
-        "-DSRV_BT",
-        "-DSRV_CLI",
-        "-DSRV_DESKTOP",
-        "-DSRV_DIALOGS",
-        "-DSRV_DOLPHIN",
-        "-DSRV_GUI",
-        "-DSRV_INPUT",
-        "-DSRV_LOADER",
-        "-DSRV_NOTIFICATION",
-        "-DSRV_POWER",
-        "-DSRV_RPC",
-        "-DSRV_STORAGE",
+    CPPDEFINES=[
+        ("TARGET", "${FLIPPER_TARGET}"),
+        "APP_ABOUT",
+        "APP_ACCESSOR",
+        "APP_ARCHIVE",
+        "APP_BAD_USB",
+        "APP_BLE_HID",
+        "APP_BLINK",
+        "APP_DISPLAY_TEST",
+        "APP_GPIO",
+        "APP_IBUTTON",
+        "APP_INFRARED",
+        "APP_INFRARED_MONITOR",
+        "APP_KEYPAD_TEST",
+        "APP_LF_RFID",
+        "APP_MUSIC_PLAYER",
+        "APP_NFC",
+        "APP_PASSPORT",
+        "APP_SNAKE_GAME",
+        "APP_SUBGHZ",
+        "APP_U2F",
+        "APP_UART_ECHO",
+        "APP_UPDATER",
+        "APP_USB_MOUSE",
+        "APP_USB_TEST",
+        "APP_VIBRO_TEST",
+        "SRV_BT",
+        "SRV_CLI",
+        "SRV_DESKTOP",
+        "SRV_DIALOGS",
+        "SRV_DOLPHIN",
+        "SRV_GUI",
+        "SRV_INPUT",
+        "SRV_LOADER",
+        "SRV_NOTIFICATION",
+        "SRV_POWER",
+        "SRV_RPC",
+        "SRV_STORAGE",
     ]
 )
 
@@ -50,10 +51,10 @@ env.Append(
         "./applications",
         "./assets/compiled",
         "./core",
-        "./firmware/targets/${FLIPPER_TARGET}/ble_glue",
-        "./firmware/targets/${FLIPPER_TARGET}/fatfs",
-        "./firmware/targets/${FLIPPER_TARGET}/furi_hal",
-        "./firmware/targets/${FLIPPER_TARGET}/Inc",
+        "./firmware/targets/f${FLIPPER_TARGET}/ble_glue",
+        "./firmware/targets/f${FLIPPER_TARGET}/fatfs",
+        "./firmware/targets/f${FLIPPER_TARGET}/furi_hal",
+        "./firmware/targets/f${FLIPPER_TARGET}/Inc",
         "./firmware/targets/furi_hal_include",
     ]
 )
@@ -136,6 +137,6 @@ sources += [
     "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/template/osal.c",
 ]
 
-sources += ["firmware/targets/${FLIPPER_TARGET}/startup_stm32wb55xx_cm4.s"]
+sources += ["firmware/targets/f${FLIPPER_TARGET}/startup_stm32wb55xx_cm4.s"]
 
 env.Program("flipperfw", sources)

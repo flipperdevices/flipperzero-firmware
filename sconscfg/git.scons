@@ -1,0 +1,13 @@
+Import("env")
+
+
+env.Append(
+    CPPDEFINES=[
+        ("GIT_COMMIT", '\\"DUMMY\\"'),
+        ("GIT_BRANCH", '\\"unknown\\"'),
+        ("GIT_BRANCH_NUM", '\\"1337\\"'),
+        ("VERSION", '\\"unknown\\"'),
+        ("BUILD_DATE", '\\"2021-06)-28\\"'),
+        ("BUILD_DIRTY", "1"),
+    ]
+)
