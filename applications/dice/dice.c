@@ -73,10 +73,10 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     }
 	sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
 	sprintf(strings[1], "%d", diceRoll);
-    canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, strings[1]);
-    canvas_set_font(canvas, FontSecondary);
     if(diceRoll!=0) {
+        canvas_set_font(canvas, FontBigNumbers);
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, strings[1]);
+        canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[0]);
 	}
     elements_button_center(canvas, "Roll");
