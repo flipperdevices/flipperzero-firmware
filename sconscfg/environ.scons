@@ -5,10 +5,19 @@ import SCons
 import os
 import sys
 import re
+import multiprocessing
 
 TOOLCHAIN_PREFIX = "arm-none-eabi-"
 
+vars = Variables(None, ARGUMENTS)
+vars.Add(BoolVariable("DEBUG", help="Enable debug build", default=1))
+vars.Add(BoolVariable("COMPACT", help="Optimize for size", default=0))
+vars.Add(
+    BoolVariable("RAM_EXEC", help="Build updater image for RAM exection", default=0)
+)
+
 env = Environment(
+    variables=vars,
     tools=["gcc", "g++", "ar", "gnulink", "python", "compilation_db"],
     # CC="arm-none-eabi-gcc",
     # CXX="arm-none-eabi-g++",
@@ -16,7 +25,7 @@ env = Environment(
     # CCFLAGS=[],
     # LINKFLAGS=[],
     OBJCOPY="objcopy",
-    PYTHON3="python",
+    PYTHON3="python3",
     TEMPFILE=TempFileMunge,
     MAXLINELENGTH=2048,
     PROGSUFFIX=".elf",
@@ -25,6 +34,11 @@ env = Environment(
         "PATH": os.environ["PATH"],
     },
 )
+Help(vars.GenerateHelpText(env))
+
+# Default value for -j
+
+SetOption("num_jobs", multiprocessing.cpu_count())
 
 
 # Setting up temp file parameters

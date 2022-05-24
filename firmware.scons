@@ -1,52 +1,65 @@
 Import("env")
 SConscript("lib/lib.scons")
 
-env.Append(
-    FLIPPER_TARGET="7",
-    IMAGE_BASE_ADDRESS="0x8000000",
-)
 
 env.Append(
     CPPDEFINES=[
         ("TARGET", "${FLIPPER_TARGET}"),
-        "APP_ABOUT",
-        "APP_ACCESSOR",
-        "APP_ARCHIVE",
-        "APP_BAD_USB",
-        "APP_BLE_HID",
-        "APP_BLINK",
-        "APP_DISPLAY_TEST",
-        "APP_GPIO",
-        "APP_IBUTTON",
-        "APP_INFRARED",
-        "APP_INFRARED_MONITOR",
-        "APP_KEYPAD_TEST",
-        "APP_LF_RFID",
-        "APP_MUSIC_PLAYER",
-        "APP_NFC",
-        "APP_PASSPORT",
-        "APP_SNAKE_GAME",
-        "APP_SUBGHZ",
-        "APP_U2F",
-        "APP_UART_ECHO",
-        "APP_UPDATER",
-        "APP_USB_MOUSE",
-        "APP_USB_TEST",
-        "APP_VIBRO_TEST",
-        "SRV_BT",
-        "SRV_CLI",
-        "SRV_DESKTOP",
-        "SRV_DIALOGS",
-        "SRV_DOLPHIN",
-        "SRV_GUI",
-        "SRV_INPUT",
-        "SRV_LOADER",
-        "SRV_NOTIFICATION",
-        "SRV_POWER",
-        "SRV_RPC",
-        "SRV_STORAGE",
     ]
 )
+
+if env["FIRMWARE_BUILD_CFG"] == "updater":
+    env.Append(
+        CPPDEFINES=[
+            "SRV_GUI",
+            "SRV_INPUT",
+            "SRV_NOTIFICATION",
+            "SRV_STORAGE",
+            "SRV_UPDATER",
+        ]
+    )
+else:
+    env.Append(
+        CPPDEFINES=[
+            "APP_ABOUT",
+            "APP_ACCESSOR",
+            "APP_ARCHIVE",
+            "APP_BAD_USB",
+            "APP_BLE_HID",
+            "APP_BLINK",
+            "APP_DISPLAY_TEST",
+            "APP_GPIO",
+            "APP_IBUTTON",
+            "APP_INFRARED",
+            "APP_INFRARED_MONITOR",
+            "APP_KEYPAD_TEST",
+            "APP_LF_RFID",
+            "APP_MUSIC_PLAYER",
+            "APP_NFC",
+            "APP_PASSPORT",
+            "APP_SNAKE_GAME",
+            "APP_SUBGHZ",
+            "APP_U2F",
+            "APP_UART_ECHO",
+            "APP_UPDATER",
+            "APP_USB_MOUSE",
+            "APP_USB_TEST",
+            "APP_VIBRO_TEST",
+            "SRV_BT",
+            "SRV_CLI",
+            "SRV_DESKTOP",
+            "SRV_DIALOGS",
+            "SRV_DOLPHIN",
+            "SRV_GUI",
+            "SRV_INPUT",
+            "SRV_LOADER",
+            "SRV_NOTIFICATION",
+            "SRV_POWER",
+            "SRV_RPC",
+            "SRV_STORAGE",
+        ]
+    )
+
 
 env.Append(
     CPPPATH=[
@@ -142,8 +155,10 @@ sources += [
     "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/template/osal.c",
 ]
 
-print(env.Dump())
-env.CompilationDatabase()
+# print(env.Dump())
+cdb = env.CompilationDatabase("compile_database.json")
+Alias("cdb", cdb)
+
 env.Program("flipperfw", sources)
 env.HEXBuilder("flipperfw")
 env.BINBuilder("flipperfw")

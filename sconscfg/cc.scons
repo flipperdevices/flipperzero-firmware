@@ -2,17 +2,6 @@ Import("env")
 
 
 env.Append(
-    CCFLAGS=[
-        "-O2",
-        "-g",
-    ],
-    CPPDEFINES=[
-        "NDEBUG",
-        "FURI_NDEBUG",
-    ],
-)
-
-env.Append(
     CFLAGS=[
         "-std=gnu17",
     ],
@@ -68,7 +57,6 @@ env.Append(
         "-lstdc++",
         "-lsupc++",
         "-Wl,--end-group",
-        "-Tfirmware/targets/f7/stm32wb55xx_flash.ld",
         "-Wl,--gc-sections",
         "-Wl,--undefined=uxTopUsedPriority",
         "-n",
