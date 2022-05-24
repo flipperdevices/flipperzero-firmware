@@ -35,7 +35,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    char strings[1][25];
+    char strings[2][25];
     if (letsRoll) {
         if(diceSelect==0) {
             sprintf(diceType[0], "%s", "d2");
@@ -71,7 +71,11 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         release_mutex((ValueMutex*)ctx, state);
         letsRoll=false;
     }
-	sprintf(strings[0], "%s: %d at %s", diceType[0], diceRoll, rollTime[0]);
+	sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
+	sprintf(strings[1], "%d", diceRoll);
+    canvas_set_font(canvas, FontBigNumbers);
+    canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
+    canvas_set_font(canvas, FontSecondary);
     if(diceRoll!=0) {
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[0]);
 	}
