@@ -1,4 +1,5 @@
 #include "../infrared_app.h"
+#include "assets_icons.h"
 #include "infrared/infrared_app_event.h"
 #include <text_store.h>
 

@@ -1,4 +1,6 @@
 #include "nfc_device.h"
+#include "assets_icons.h"
+#include "m-string.h"
 #include "nfc_types.h"
 
 #include <toolbox/path.h>
@@ -728,8 +730,7 @@ static bool nfc_device_save_file(
             // Create nfc directory if necessary
             if(!storage_simply_mkdir(dev->storage, string_get_cstr(temp_str))) break;
             // Make path to file to save
-            nfc_device_get_path_without_ext(dev->load_path, temp_str);
-            string_cat_str(temp_str, extension);
+            string_cat_printf(temp_str, "/%s%s", dev_name, extension);
         } else {
             // Create nfc directory if necessary
             if(!storage_simply_mkdir(dev->storage, NFC_APP_FOLDER)) break;
@@ -867,23 +868,19 @@ bool nfc_device_load(NfcDevice* dev, const char* file_path) {
 bool nfc_file_select(NfcDevice* dev) {
     furi_assert(dev);
 
-    // Input events and views are managed by file_select
-    bool res = dialog_file_select_show(
-        dev->dialogs,
-        NFC_APP_FOLDER,
-        NFC_APP_EXTENSION,
-        dev->file_name,
-        sizeof(dev->file_name),
-        dev->dev_name);
+    // Input events and views are managed by file_browser
+    bool res = dialog_file_browser_show(
+        dev->dialogs, &dev->load_path, &dev->load_path, NFC_APP_EXTENSION, true, &I_Nfc_10px, true);
     if(res) {
-        string_t dev_str;
-        // Get key file path
-        string_init_printf(dev_str, "%s/%s%s", NFC_APP_FOLDER, dev->file_name, NFC_APP_EXTENSION);
-        res = nfc_device_load_data(dev, dev_str);
+        string_t filename;
+        string_init(filename);
+        path_extract_filename(dev->load_path, filename, true);
+        strncpy(dev->dev_name, string_get_cstr(filename), NFC_DEV_NAME_MAX_LEN);
+        res = nfc_device_load_data(dev, dev->load_path);
         if(res) {
-            nfc_device_set_name(dev, dev->file_name);
+            nfc_device_set_name(dev, dev->dev_name);
         }
-        string_clear(dev_str);
+        string_clear(filename);
     }
 
     return res;
@@ -901,7 +898,7 @@ void nfc_device_clear(NfcDevice* dev) {
     nfc_device_data_clear(&dev->dev_data);
     memset(&dev->dev_data, 0, sizeof(dev->dev_data));
     dev->format = NfcDeviceSaveFormatUid;
-    string_set_str(dev->load_path, "");
+    string_set_str(dev->load_path, NFC_APP_FOLDER);
 }
 
 bool nfc_device_delete(NfcDevice* dev, bool use_load_path) {

@@ -1,6 +1,7 @@
 #pragma once
 #include <furi.h>
 #include <gui/canvas.h>
+#include "m-string.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,6 +30,28 @@ bool dialog_file_select_show(
     char* result,
     uint8_t result_size,
     const char* preselected_filename);
+
+/****************** FILE BROWSER ******************/
+
+/**
+ * Shows and processes the file browser dialog
+ * @param context api pointer
+ * @param result_path selected file path string pointer
+ * @param path preselected file path string pointer
+ * @param extension file extension to be offered for selection
+ * @param skip_assets true - do not show assets folders
+ * @param icon file icon pointer, NULL for default icon
+ * @param hide_ext true - hide extensions for files
+ * @return bool whether a file was selected
+ */
+bool dialog_file_browser_show(
+    DialogsApp* context,
+    string_t* result_path,
+    string_t* path,
+    const char* extension,
+    bool skip_assets,
+    const Icon* icon,
+    bool hide_ext);
 
 /****************** MESSAGE ******************/
 

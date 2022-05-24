@@ -10,6 +10,7 @@
 #include <m-array.h>
 #include <gui/elements.h>
 #include <furi.h>
+#include "toolbox/path.h"
 
 #define LIST_ITEMS 5u
 #define MAX_LEN_PX 110
@@ -60,7 +61,7 @@ ARRAY_DEF(
 struct FileBrowser {
     View* view;
     BrowserWorker* worker;
-    char* ext_filter;
+    const char* ext_filter;
     bool skip_assets;
 
     FileBrowserCallback callback;
@@ -140,7 +141,7 @@ View* file_browser_get_view(FileBrowser* browser) {
 
 void file_browser_configure(
     FileBrowser* browser,
-    char* extension,
+    const char* extension,
     bool skip_assets,
     const Icon* file_icon,
     bool hide_ext) {
@@ -250,6 +251,7 @@ static void
 
     with_view_model(
         browser->view, (FileBrowserModel * model) {
+            items_array_reset(model->items);
             if(is_root) {
                 model->item_cnt = item_cnt;
                 model->item_idx = (file_idx > 0) ? file_idx : 0;
@@ -383,7 +385,7 @@ static void browser_draw_list(Canvas* canvas, FileBrowserModel* model) {
             BrowserItem_t* item = items_array_get(
                 model->items, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
             item_type = item->type;
-            file_browser_worker_get_filename(
+            path_extract_filename(
                 item->path, filename, (model->hide_ext) && (item_type == BrowserItemTypeFile));
         } else {
             string_set_str(filename, "---");
@@ -507,7 +509,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                 } else if(selected_item->type == BrowserItemTypeFile) {
                     string_set(*(browser->result_path), selected_item->path);
                     if(browser->callback) {
-                        browser->callback(browser->context, true);
+                        browser->callback(browser->context);
                     }
                 }
             }
