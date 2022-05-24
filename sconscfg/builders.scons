@@ -1,0 +1,25 @@
+Import("env")
+
+
+def generate_hex(source, target, env, for_signature):
+    return "$OBJCOPY -O ihex %s %s" % (source[0], target[0])
+
+
+def generate_bin(source, target, env, for_signature):
+    return "$OBJCOPY -O binary -S '%s' '%s'" % (source[0], target[0])
+
+
+env.Append(
+    BUILDERS={
+        "HEXBuilder": Builder(
+            generator=generate_hex,
+            suffix=".hex",
+            src_suffix=".elf",
+        ),
+        "BINBuilder": Builder(
+            generator=generate_bin,
+            suffix=".bin",
+            src_suffix=".elf",
+        ),
+    }
+)

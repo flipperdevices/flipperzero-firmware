@@ -6,6 +6,8 @@ import os
 import sys
 import re
 
+TOOLCHAIN_PREFIX = "arm-none-eabi-"
+
 env = Environment(
     tools=["gcc", "g++", "ar", "gnulink"],
     # CC="arm-none-eabi-gcc",
@@ -13,10 +15,13 @@ env = Environment(
     # LINK="arm-none-eabi-g++",
     # CCFLAGS=[],
     # LINKFLAGS=[],
+    OBJCOPY="objcopy",
     TEMPFILE=TempFileMunge,
     MAXLINELENGTH=2048,
     PROGSUFFIX=".elf",
-    ENV={"PATH": os.environ["PATH"]},
+    ENV={
+        "PATH": os.environ["PATH"],
+    },
 )
 
 
@@ -36,7 +41,6 @@ def tempfile_arg_esc_func(arg):
 env["TEMPFILEARGESCFUNC"] = tempfile_arg_esc_func
 
 # Set up cross-compile tools
-toolchain_prefix = "arm-none-eabi-"
 for binary in [
     "AR",
     # "AS",
@@ -44,11 +48,11 @@ for binary in [
     "CXX",
     # "LINK",
     # "RANLIB",
-    # "OBJCOPY",
+    "OBJCOPY",
     # "OBJDUMP",
     # "OBJSYMBOLS",
 ]:
-    env[binary] = toolchain_prefix + env[binary]
+    env[binary] = TOOLCHAIN_PREFIX + env[binary]
 
 # Commandline length limit hack
 env["LINKCOM"] = '${TEMPFILE("' + env["LINKCOM"] + '","$LINKCOMSTR")}'

@@ -138,4 +138,7 @@ sources += [
     "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/template/osal.c",
 ]
 
+# print(dir(env))
 env.Program("flipperfw", sources)
+env.HEXBuilder(target="flipperfw.hex", source="flipperfw.elf")
+env.BINBuilder(target="flipperfw.bin", source="flipperfw.elf")

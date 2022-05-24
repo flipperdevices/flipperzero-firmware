@@ -1,5 +1,6 @@
 SConscript("sconscfg/environ.scons")
 SConscript("sconscfg/cc.scons")
 SConscript("sconscfg/git.scons")
+SConscript("sconscfg/builders.scons")
 # Import("env")
 SConscript("firmware.scons", variant_dir="build", duplicate=0)
