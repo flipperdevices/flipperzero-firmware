@@ -60,6 +60,7 @@ extern int32_t zombiez_app(void* p);
 extern int32_t jukebox_app(void *p);
 extern int32_t universal_rf_remote_app(void *p);
 extern int32_t unirfremix_app(void *p);
+extern int32_t dice_app(void *p);
 
 // On system start hooks declaration
 extern void bt_on_system_start();
@@ -313,6 +314,14 @@ const FlipperApplication FLIPPER_GAMES[] = {
 //      .icon = &A_Plugins_14,
 //      .flags = FlipperApplicationFlagDefault},
 // #endif
+
+#ifdef APP_DICE
+    {.app = dice_app, 
+	.name = "Dice Roller", 
+	.stack_size = 1024, 
+	.icon = &A_Plugins_14
+	},
+#endif
 
 #ifdef APP_FLAPPY_GAME
     {.app = flappy_game_app, 
