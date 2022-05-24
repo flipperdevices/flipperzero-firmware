@@ -1,6 +1,13 @@
+# Clone the Repository
+
+You should clone with 
+```shell
+$ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
+```
+
 # [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME
+
 - FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE
-# with some [MuddleBox](https://github.com/MuddledBox/flipperzero-firmware)/[Unleashed](https://github.com/Eng1n33r/flipperzero-firmware) changes + plugins.
 
 ****This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.**
 
@@ -48,3 +55,5 @@ Plugins:
 - [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player)
 - [Zombiez (By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
+
+Thank you, [MuddleBox](https://github.com/MuddledBox/flipperzero-firmware), [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & of course, most of all [Flipper Devices](https://github.com/flipperdevices/flipperzero-firmware)!
