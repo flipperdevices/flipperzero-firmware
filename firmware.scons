@@ -1,7 +1,10 @@
 Import("env")
 SConscript("lib/lib.scons")
 
-env.Append(FLIPPER_TARGET="7")
+env.Append(
+    FLIPPER_TARGET="7",
+    IMAGE_BASE_ADDRESS="0x8000000",
+)
 
 env.Append(
     CPPDEFINES=[
@@ -138,7 +141,8 @@ sources += [
     "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/template/osal.c",
 ]
 
-# print(dir(env))
+print(env.Dump())
 env.Program("flipperfw", sources)
-env.HEXBuilder(target="flipperfw.hex", source="flipperfw.elf")
-env.BINBuilder(target="flipperfw.bin", source="flipperfw.elf")
+env.HEXBuilder("flipperfw")
+env.BINBuilder("flipperfw")
+env.DFUBuilder("flipperfw")

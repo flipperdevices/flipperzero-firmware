@@ -9,13 +9,14 @@ import re
 TOOLCHAIN_PREFIX = "arm-none-eabi-"
 
 env = Environment(
-    tools=["gcc", "g++", "ar", "gnulink"],
+    tools=["gcc", "g++", "ar", "gnulink", "python"],
     # CC="arm-none-eabi-gcc",
     # CXX="arm-none-eabi-g++",
     # LINK="arm-none-eabi-g++",
     # CCFLAGS=[],
     # LINKFLAGS=[],
     OBJCOPY="objcopy",
+    PYTHON3="python",
     TEMPFILE=TempFileMunge,
     MAXLINELENGTH=2048,
     PROGSUFFIX=".elf",
