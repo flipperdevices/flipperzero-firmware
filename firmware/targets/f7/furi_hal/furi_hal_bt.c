@@ -284,9 +284,9 @@ void furi_hal_bt_update_battery_level(uint8_t battery_level) {
     }
 }
 
-void furi_hal_bt_update_power_state(bool battery_is_charging) {
+void furi_hal_bt_update_power_state() {
     if(battery_svc_is_started()) {
-        battery_svc_update_power_state(battery_is_charging);
+        battery_svc_update_power_state();
     }
 }
 

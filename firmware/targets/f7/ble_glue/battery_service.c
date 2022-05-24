@@ -3,6 +3,7 @@
 #include "ble.h"
 
 #include <furi.h>
+#include <furi_hal_power.h>
 
 #define TAG "BtBatterySvc"
 
@@ -87,6 +88,8 @@ void battery_svc_start() {
     if(status) {
         FURI_LOG_E(TAG, "Failed to add Battery level characteristic: %d", status);
     }
+    // Update power state charachteristic
+    battery_svc_update_power_state();
 }
 
 void battery_svc_stop() {
@@ -132,7 +135,7 @@ bool battery_svc_update_level(uint8_t battery_charge) {
     return result != BLE_STATUS_SUCCESS;
 }
 
-bool battery_svc_update_power_state(bool is_charging) {
+bool battery_svc_update_power_state() {
     // Check if service was started
     if(battery_svc == NULL) {
         return false;
@@ -142,7 +145,7 @@ bool battery_svc_update_power_state(bool is_charging) {
         .level = BatterySvcPowerStateUnsupported,
         .present = BatterySvcPowerStateBatteryPresent,
     };
-    if(is_charging) {
+    if(furi_hal_power_is_charging()) {
         power_state.charging = BatterySvcPowerStateCharging;
         power_state.discharging = BatterySvcPowerStateNotDischarging;
     } else {
@@ -157,7 +160,7 @@ bool battery_svc_update_power_state(bool is_charging) {
         1,
         (uint8_t*)&power_state);
     if(result) {
-        FURI_LOG_E(TAG, "Failed updating RX characteristic: %d", result);
+        FURI_LOG_E(TAG, "Failed updating Power state characteristic: %d", result);
     }
     return result != BLE_STATUS_SUCCESS;
 }
