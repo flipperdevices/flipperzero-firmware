@@ -138,7 +138,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, strings[1]);
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[0]);
-        if(diceSelect==231) {
+        if(diceSelect==231 && !(playerOneScore==0 && playerTwoScore==0)) {
             canvas_set_font(canvas, FontSecondary);
             sprintf(theScores[0], "%d                                   %d", playerOneScore, playerTwoScore);
             canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, theScores[0]);
@@ -245,6 +245,8 @@ int32_t dice_app(void* p) {
                         } else if(diceSelect==100)  {
                             diceSelect=230;
                         } else if(diceSelect==230)  {
+                            playerOneScore=0;
+                            playerTwoScore=0;
                             diceSelect=231;
                         } else if(diceSelect==231)  {
                             diceSelect=59;
