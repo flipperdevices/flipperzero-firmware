@@ -124,7 +124,7 @@ static DialogMessageButton fw_version_screen(DialogsApp* dialogs, DialogMessage*
             version_get_githash(ver),
             version_get_gitbranchnum(ver),
             version_get_target(ver),
-            version_get_gitbranch(ver));
+            "dev");
     }
 
     dialog_message_set_header(message, "FW Version info:", 0, 0, AlignLeft, AlignTop);
