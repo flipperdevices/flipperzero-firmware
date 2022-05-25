@@ -60,23 +60,23 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
             const char* diceOne[] = {
                 "Nibble", "Fondle", "Massage", "Touch",
-                "Suck", "Lick", "Blow", "Kiss", "???",
+                "Suck", "Lick", "Blow", "Kiss", "???"
             };
             const char* diceTwo[] = {
                 "Navel", "Ears", "Lips", "Neck",
-                "Thigh", "Hand", "Breasts", "Genitals",
+                "Thigh", "Hand", "Breasts", "Genitals"
             };
             const char* deckOne[] = {
-                "2S", "2D", "2C", "2H", "3S", "3D", "3C", "3H", "4S", "4D", "4C", "4H", 
-                "5S", "5D", "5C", "5H", "6S", "6D", "6C", "6H", "7S", "7D", "7C", "7H", 
-                "8S", "8D", "8C", "8H", "9S", "9D", "9C", "9H", "10S", "10D", "10C", "10H", 
-                "JS", "JD", "JC", "JH", "KS", "KD", "KC", "KH", "QS", "QD", "QC", "QH", "AS", "AD", "AC", "AH"
+                "2H", "2C", "2D", "2S", "3H", "3C", "3D", "3S", "4H", "4C", "4D", "4S", 
+                "5H", "5C", "5D", "5S", "6H", "6C", "6D", "6S", "7H", "7C", "7D", "7S", 
+                "8H", "8C", "8D", "8S", "9H", "9C", "9D", "9S", "10H", "10C", "10D", "10S", 
+                "JH", "JC", "JD", "JS", "QH", "QC", "QD", "QS", "KH", "KC", "KD", "KS", "AH", "AC", "AD", "AS"
             };
             char* deckTwo[] = {
-                "2S", "2D", "2C", "2H", "3S", "3D", "3C", "3H", "4S", "4D", "4C", "4H", 
-                "5S", "5D", "5C", "5H", "6S", "6D", "6C", "6H", "7S", "7D", "7C", "7H", 
-                "8S", "8D", "8C", "8H", "9S", "9D", "9C", "9H", "10S", "10D", "10C", "10H", 
-                "JS", "JD", "JC", "JH", "KS", "KD", "KC", "KH", "QS", "QD", "QC", "QH", "AS", "AD", "AC"
+                "2H", "2C", "2D", "2S", "3H", "3C", "3D", "3S", "4H", "4C", "4D", "4S", 
+                "5H", "5C", "5D", "5S", "6H", "6C", "6D", "6S", "7H", "7C", "7D", "7S", 
+                "8H", "8C", "8D", "8S", "9H", "9C", "9D", "9S", "10H", "10C", "10D", "10S", 
+                "JH", "JC", "JD", "JS", "QH", "QC", "QD", "QS", "KH", "KC", "KD", "KS", "AH", "AC", "AD"
             }; // ONE LESS SINCE ONE WILL BE REMOVED
     if (letsRoll) {
         static bool rand_generator_inited = false;
