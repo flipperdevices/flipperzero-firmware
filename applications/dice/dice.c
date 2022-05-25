@@ -15,7 +15,7 @@ uint8_t playerTwoScore=0;
 char rollTime[1][12];
 char diceType[1][5];
 char strings[2][45];
-char theScores[2][45];
+char theScores[1][45];
 bool letsRoll=false;
 
 typedef enum {
