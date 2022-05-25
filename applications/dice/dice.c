@@ -58,6 +58,14 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         } 
     }
     ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
+    if (letsRoll) {
+        static bool rand_generator_inited = false;
+        if(!rand_generator_inited) {
+            srand(DWT->CYCCNT);
+            rand_generator_inited = true;
+        }
+        sprintf(rollTime[0], "%.2d:%.2d:%.2d", state->datetime.hour, state->datetime.minute, state->datetime.second);
+        if(diceSelect==230) {
             const char* diceOne[] = {
                 "Nibble", "Fondle", "Massage", "Touch",
                 "Suck", "Lick", "Blow", "Kiss", "???"
@@ -66,6 +74,13 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "Navel", "Ears", "Lips", "Neck",
                 "Thigh", "Hand", "Breasts", "Genitals"
             };
+            diceRoll= ((rand() % diceSelect)+1); // JUST TO GET IT GOING? AND FIX BUG
+            sprintf(diceType[0], "%s", "SEX?");
+            sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
+            uint8_t d1_i = rand() % COUNT_OF(diceOne);
+            uint8_t d2_i = rand() % COUNT_OF(diceTwo);
+            sprintf(strings[1], "%s %s", diceOne[d1_i], diceTwo[d2_i]);
+        } else if(diceSelect==231) {
             const char* deckOne[] = {
                 "2H", "2C", "2D", "2S", "3H", "3C", "3D", "3S", "4H", "4C", "4D", "4S", 
                 "5H", "5C", "5D", "5S", "6H", "6C", "6D", "6S", "7H", "7C", "7D", "7S", 
@@ -78,21 +93,6 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "8H", "8C", "8D", "8S", "9H", "9C", "9D", "9S", "10H", "10C", "10D", "10S", 
                 "JH", "JC", "JD", "JS", "QH", "QC", "QD", "QS", "KH", "KC", "KD", "KS", "AH", "AC", "AD"
             }; // ONE LESS SINCE ONE WILL BE REMOVED
-    if (letsRoll) {
-        static bool rand_generator_inited = false;
-        if(!rand_generator_inited) {
-            srand(DWT->CYCCNT);
-            rand_generator_inited = true;
-        }
-        sprintf(rollTime[0], "%.2d:%.2d:%.2d", state->datetime.hour, state->datetime.minute, state->datetime.second);
-        if(diceSelect==230) {
-            diceRoll= ((rand() % diceSelect)+1); // JUST TO GET IT GOING? AND FIX BUG
-            sprintf(diceType[0], "%s", "SEX?");
-            sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
-            uint8_t d1_i = rand() % COUNT_OF(diceOne);
-            uint8_t d2_i = rand() % COUNT_OF(diceTwo);
-            sprintf(strings[1], "%s %s", diceOne[d1_i], diceTwo[d2_i]);
-        } else if(diceSelect==231) {
             diceRoll= ((rand() % diceSelect)+1); // JUST TO GET IT GOING? AND FIX BUG
             sprintf(diceType[0], "%s", "WAR!");
             sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
@@ -108,10 +108,11 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             uint8_t d2_i = rand() % COUNT_OF(deckTwo);
             if(d1_i>d2_i) {
                 playerOneScore++;
+                sprintf(strings[1], "%s > %s", deckOne[d1_i], deckTwo[d2_i]);
             } else {
                 playerTwoScore++;
+                sprintf(strings[1], "%s < %s", deckOne[d1_i], deckTwo[d2_i]);
             }
-            sprintf(strings[1], "%s <> %s", deckOne[d1_i], deckTwo[d2_i]);
         } else {
             diceRoll= ((rand() % diceSelect)+1);
             sprintf(diceType[0], "%s%d", "d", diceSelect);
