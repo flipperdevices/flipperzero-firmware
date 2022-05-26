@@ -12,6 +12,10 @@ $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlu
 ****This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.**
 
 Latest Updates:
+- Latest updates from DEV 533f12a
+- Update for Tetris from creator
+- Update to git settings to remove -dirty 
+- Volume default on music player changed to .25 instead of .75
 - Latest changes to Unleashed 05/25 as of release
 - Added Up To x6 Dice For Dice Roller, and WAR! and SEX?
 - Pulled DEV changes from #1262 (This fixes issues with f6384116)
