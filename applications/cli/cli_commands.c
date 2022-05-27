@@ -293,197 +293,138 @@ static bool pin_name_to_int(string_t pin_name, uint8_t* result) {
     }
 
     *result = num;
-
     return pin_found;
 }
 
-static void print_valid_pins(void) {
+static void gpio_print_pins(void) {
     printf("Wrong pin name. Available pins: ");
     for(uint8_t i = 0; i < sizeof(pin_names) / sizeof(char*); i++) {
         printf("%s ", pin_names[i]);
     }
 }
 
-void cli_command_gpio_ctl(Cli* cli, string_t args, void* context) {
-    UNUSED(context);
-    typedef enum GpioCtlAction_Enum {
-        mode,
-        set,
-        read
-    } GpioCtlAction;
+typedef enum { OK, ERR_CMD_SYNTAX, ERR_PIN, ERR_VALUE } GpioParseError;
 
-    uint8_t num = 0;
-
+static GpioParseError gpio_command_parse(string_t args, uint8_t* pin_num, uint8_t* value) {
     string_t pin_name;
-    string_t action;
-
     string_init(pin_name);
-    string_init(action);
 
     size_t ws = string_search_char(args, ' ');
     if(ws == STRING_FAILURE) {
-        cli_print_usage("gpio", "<pin_name> <mode|set|read> [<0|1>]", string_get_cstr(args));
-        goto cli_command_gpio_ctl_cleanup;
+        return ERR_CMD_SYNTAX;
     }
 
-    // set args to "<mode|set|read> [<0|1>]"
     string_set_n(pin_name, args, 0, ws);
     string_right(args, ws);
     string_strim(args);
 
-    if(!pin_name_to_int(pin_name, &num)) {
-        print_valid_pins();
-        goto cli_command_gpio_ctl_cleanup;
+    if(!pin_name_to_int(pin_name, pin_num)) {
+        string_clear(pin_name);
+        return ERR_PIN;
     }
 
-    string_set_n(action, args, 0, 4);
-    string_strim(action);
-
-    string_right(args, 4);
-    string_strim(args);
-
-    GpioCtlAction pin_action;
-    if(!string_cmp(action, "mode")) {
-        pin_action = mode;
-    } else if(!string_cmp(action, "set")) {
-        pin_action = set;
-    } else if(!string_cmp(action, "read")) {
-        pin_action = read;
-    } else {
-        printf("Wrong 2nd argument (%s). Use \"mode\" to change the pin mode, \"set\" to set the value of an output pin or \"read\" to read the value of an input pin.", string_get_cstr(action));
-        goto cli_command_gpio_ctl_cleanup;
-    }
-
-    uint8_t value = 0;
-    bool requires_val = (pin_action == set) || (pin_action == mode);
-
-    if (requires_val) {
-        if(!string_cmp(args, "0")) {
-            value = 0;
-        } else if(!string_cmp(args, "1")) {
-            value = 1;
-        } else if(pin_action == set) {
-            printf("Wrong 3rd argument. Use \"0\" to set to low. Use \"1\" to set to high.");
-        } else {
-            printf("Wrong 3rd argument. Use \"0\" to set pin as output. Use \"1\" to set as input.");
-        }
-    }
-
-    if(pin_action == mode) {
-        if(value == 0) { // output
-            LL_GPIO_SetPinMode(gpio[num].port, gpio[num].pin, LL_GPIO_MODE_OUTPUT);
-            LL_GPIO_SetPinOutputType(gpio[num].port, gpio[num].pin, LL_GPIO_OUTPUT_PUSHPULL);
-            LL_GPIO_ResetOutputPin(gpio[num].port, gpio[num].pin);
-            printf("Pin is output");
-        } else { // input
-            LL_GPIO_SetPinMode(gpio[num].port, gpio[num].pin, LL_GPIO_MODE_INPUT);
-            LL_GPIO_SetPinPull(gpio[num].port, gpio[num].pin, LL_GPIO_PULL_DOWN);
-            printf("Pin is input");
-        }
-    } else if(pin_action == set) {
-        uint32_t actual_pin_mode = LL_GPIO_GetPinMode(gpio[num].port, gpio[num].pin);
-        UNUSED(actual_pin_mode);
-
-        if(actual_pin_mode != LL_GPIO_MODE_OUTPUT) {
-            printf("Trying to set the value of the pin, but it is not in output mode");
-            goto cli_command_gpio_ctl_cleanup;
-        }
-
-        if(value) {
-#ifdef FURI_DEBUG
-            if(num == 8) { // PA0
-                printf(
-                        "Setting PA0 pin HIGH with TSOP connected can damage IR receiver. Are you sure you want to continue? (y/n)?\r\n");
-                char c = cli_getc(cli);
-                if(c != 'y' && c != 'Y') {
-                    printf("Cancelled.\r\n");
-                    goto cli_command_gpio_ctl_cleanup;
-                }
-            }
-#else
-            UNUSED(cli);
-#endif
-            LL_GPIO_SetOutputPin(gpio[num].port, gpio[num].pin);
-            printf("Pin is high");
-        } else {
-            LL_GPIO_ResetOutputPin(gpio[num].port, gpio[num].pin);
-            printf("Pin is low");
-        }
-    } else {
-        // must be read
-        uint32_t actual_pin_mode = LL_GPIO_GetPinMode(gpio[num].port, gpio[num].pin);
-        UNUSED(actual_pin_mode);
-
-        if(actual_pin_mode != LL_GPIO_MODE_INPUT) {
-            printf("Trying to read the value of the pin, but it is not in input mode");
-            goto cli_command_gpio_ctl_cleanup;
-        }
-
-        if(LL_GPIO_IsInputPinSet(gpio[num].port, gpio[num].pin)) {
-            printf("1");
-        } else {
-            printf("0");
-        }
-    }
-
-// TODO: no other goto in the code base
-// except in /lib. Is this not allowed?
-cli_command_gpio_ctl_cleanup:
     string_clear(pin_name);
-    string_clear(action);
+
+    if(!string_cmp(args, "0")) {
+        *value = 0;
+    } else if(!string_cmp(args, "1")) {
+        *value = 1;
+    } else {
+        return ERR_VALUE;
+    }
+
+    return OK;
+}
+
+void cli_command_gpio_mode(Cli* cli, string_t args, void* context) {
+    UNUSED(cli);
+    UNUSED(context);
+
+    uint8_t num = 0;
+    uint8_t value = 255;
+
+    GpioParseError err = gpio_command_parse(args, &num, &value);
+
+    if(ERR_CMD_SYNTAX == err) {
+        cli_print_usage("gpio_mode", "<pin_name> <0|1>", string_get_cstr(args));
+        return;
+    } else if(ERR_PIN == err) {
+        gpio_print_pins();
+        return;
+    } else if(ERR_VALUE == err) {
+        printf("Value is invalid. Enter 1 for input or 0 for output");
+        return;
+    }
+
+    if(value == 0) { // output
+        furi_hal_gpio_init_simple(gpio + num, GpioModeOutputPushPull);
+        furi_hal_gpio_write(gpio + num, false);
+        printf("Pin %s is now an output (low)", pin_names[num]);
+    } else { // input
+        furi_hal_gpio_init_simple(gpio + num, GpioModeInput);
+        printf("Pin %s is now an input", pin_names[num]);
+    }
+}
+
+void cli_command_gpio_read(Cli* cli, string_t args, void* context) {
+    UNUSED(cli);
+    UNUSED(context);
+
+    uint8_t num = 0;
+    if(!pin_name_to_int(args, &num)) {
+        gpio_print_pins();
+        return;
+    }
+
+    if(LL_GPIO_MODE_INPUT != LL_GPIO_GetPinMode(gpio[num].port, gpio[num].pin)) {
+        printf("Err: pin %s is not set as an input.", pin_names[num]);
+        return;
+    }
+
+    uint8_t val = !!furi_hal_gpio_read(&gpio[num]);
+
+    printf("Pin %s <= %u", pin_names[num], val);
 }
 
 void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
     UNUSED(context);
+
     uint8_t num = 0;
+    uint8_t value = 0;
+    GpioParseError err = gpio_command_parse(args, &num, &value);
 
-    // Get first word as pin name
-    string_t pin_name;
-    string_init(pin_name);
-    size_t ws = string_search_char(args, ' ');
-    if(ws == STRING_FAILURE) {
+    if(ERR_CMD_SYNTAX == err) {
         cli_print_usage("gpio_set", "<pin_name> <0|1>", string_get_cstr(args));
-        string_clear(pin_name);
         return;
-    } else {
-        string_set_n(pin_name, args, 0, ws);
-        string_right(args, ws);
-        string_strim(args);
+    } else if(ERR_PIN == err) {
+        gpio_print_pins();
+        return;
+    } else if(ERR_VALUE == err) {
+        printf("Value is invalid. Enter 1 for high or 0 for low");
+        return;
     }
 
-    if(!pin_name_to_int(pin_name, &num)) {
-        print_valid_pins();
-        string_clear(pin_name);
+    if(LL_GPIO_MODE_OUTPUT != LL_GPIO_GetPinMode(gpio[num].port, gpio[num].pin)) {
+        printf("Err: pin %s is not set as an output.", pin_names[num]);
         return;
     }
-    string_clear(pin_name);
-    // Read "0" or "1" as second argument to set or reset pin
-    if(!string_cmp(args, "0")) {
-        LL_GPIO_SetPinMode(gpio[num].port, gpio[num].pin, LL_GPIO_MODE_OUTPUT);
-        LL_GPIO_SetPinOutputType(gpio[num].port, gpio[num].pin, LL_GPIO_OUTPUT_PUSHPULL);
-        LL_GPIO_ResetOutputPin(gpio[num].port, gpio[num].pin);
-    } else if(!string_cmp(args, "1")) {
+
 #ifdef FURI_DEBUG
-        if(num == 8) { // PA0
-            printf(
-                "Setting PA0 pin HIGH with TSOP connected can damage IR receiver. Are you sure you want to continue? (y/n)?\r\n");
-            char c = cli_getc(cli);
-            if(c != 'y' && c != 'Y') {
-                printf("Cancelled.\r\n");
-                return;
-            }
+    if(value && num == 8) { // PA0
+        printf(
+            "Setting PA0 pin HIGH with TSOP connected can damage IR receiver. Are you sure you want to continue? (y/n)?\r\n");
+        char c = cli_getc(cli);
+        if(c != 'y' && c != 'Y') {
+            printf("Cancelled.\r\n");
+            return;
         }
+    }
 #else
-        UNUSED(cli);
+    UNUSED(cli);
 #endif
 
-        LL_GPIO_SetPinMode(gpio[num].port, gpio[num].pin, LL_GPIO_MODE_OUTPUT);
-        LL_GPIO_SetPinOutputType(gpio[num].port, gpio[num].pin, LL_GPIO_OUTPUT_PUSHPULL);
-        LL_GPIO_SetOutputPin(gpio[num].port, gpio[num].pin);
-    } else {
-        printf("Wrong 2nd argument. Use \"1\" to set, \"0\" to reset");
-    }
-    return;
+    furi_hal_gpio_write(gpio + num, !!value);
+    printf("Pin %s => %u", pin_names[num], !!value);
 }
 
 void cli_command_ps(Cli* cli, string_t args, void* context) {
@@ -567,7 +508,8 @@ void cli_commands_init(Cli* cli) {
 
     cli_add_command(cli, "vibro", CliCommandFlagDefault, cli_command_vibro, NULL);
     cli_add_command(cli, "led", CliCommandFlagDefault, cli_command_led, NULL);
+    cli_add_command(cli, "gpio_mode", CliCommandFlagDefault, cli_command_gpio_mode, NULL);
+    cli_add_command(cli, "gpio_read", CliCommandFlagDefault, cli_command_gpio_read, NULL);
     cli_add_command(cli, "gpio_set", CliCommandFlagDefault, cli_command_gpio_set, NULL);
-    cli_add_command(cli, "gpio", CliCommandFlagDefault, cli_command_gpio_ctl, NULL);
     cli_add_command(cli, "i2c", CliCommandFlagDefault, cli_command_i2c, NULL);
 }
