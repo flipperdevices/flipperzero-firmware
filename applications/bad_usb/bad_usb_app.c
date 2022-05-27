@@ -42,13 +42,21 @@ static bool bad_usb_check_assets() {
 
 BadUsbApp* bad_usb_app_alloc(char* arg) {
     BadUsbApp* app = malloc(sizeof(BadUsbApp));
-
+    
     if(arg != NULL) {
-        string_t filename;
-        string_init(filename);
-        path_extract_filename_no_ext(arg, filename);
-        strncpy(app->file_name, string_get_cstr(filename), BAD_USB_FILE_NAME_LEN);
-        string_clear(filename);
+      string_t filename;
+      string_init(filename);
+
+      string_t subdirnames;
+      string_init(subdirnames);
+
+      path_extract_subdirnames(arg, subdirnames);
+      path_extract_filename_no_ext(arg, filename);
+      
+      snprintf(app->file_name, BAD_USB_FILE_NAME_LEN, "%s/%s", string_get_cstr(subdirnames), string_get_cstr(filename));
+      
+      string_clear(filename);
+      string_clear(subdirnames);
     }
 
     app->gui = furi_record_open("gui");

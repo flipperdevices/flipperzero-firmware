@@ -31,6 +31,14 @@ void path_extract_basename(const char* path, string_t basename);
 void path_extract_dirname(const char* path, string_t dirname);
 
 /**
+ * @brief Extract all sub directory names after initial root directory
+ *
+ * @param path path string
+ * @param subdirname output string. Must be initialized before.
+ */
+void path_extract_subdirnames(const char* path, string_t subdirnames);
+    
+/**
  * @brief Appends new component to path, adding path delimiter
  * 
  * @param path path string
