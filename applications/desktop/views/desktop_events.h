@@ -7,7 +7,7 @@ typedef enum {
     DesktopMainEventOpenMenu,
     DesktopMainEventOpenDebug,
     DesktopMainEventOpenPassport, /**< Broken, don't use it */
-    DesktopMainEventOpenPowerOff,
+    DesktopMainEventPowerOff,
 
     DesktopLockedEventUnlocked,
     DesktopLockedEventUpdate,

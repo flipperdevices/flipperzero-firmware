@@ -3,6 +3,7 @@
 #include <applications.h>
 #include <assets_icons.h>
 #include <loader/loader.h>
+#include <power/power_service/power.h>
 
 #include "../desktop_i.h"
 #include "../views/desktop_events.h"
@@ -103,14 +104,10 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
 
-        case DesktopMainEventOpenPowerOff: {
-            LoaderStatus status = loader_start(desktop->loader, "Power", "off");
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
+        case DesktopMainEventPowerOff:
+            power_off(furi_record_open("power"));
             consumed = true;
             break;
-        }
 
         case DesktopMainEventOpenFavorite:
             LOAD_DESKTOP_SETTINGS(&desktop->settings);
