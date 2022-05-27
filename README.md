@@ -15,7 +15,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ****This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.**
 
 Latest Updates:
-- WAV Player broken on this build due to latest DEV update
+- WAV Player fix by atmanos
 - Added 8BALL 'DICE' and new options for 'SEX' dice
 - Latest updates up to DEV 67fbefbe
 - Latest changes to Unleashed 05/25 as of release
@@ -56,7 +56,7 @@ Plugins:
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer)
 - [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
 - [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
-- [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player)
+- [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) With Fix From Atmanos
 - [Zombiez (By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
 
 Thank you, [MuddleBox](https://github.com/MuddledBox/flipperzero-firmware), [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & of course, most of all [Flipper Devices](https://github.com/flipperdevices/flipperzero-firmware)!
