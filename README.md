@@ -1,3 +1,8 @@
+# [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME
+- ****This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.**
+- FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE
+- BUILD WITH COMPACT FLAG SINCE IT IS TOO LARGE
+
 # Clone the Repository
 
 You should clone with 
@@ -6,13 +11,6 @@ $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlu
 $ docker-compose up -d
 $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
-
-# [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME
-
-- FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE
-- BUILD WITH COMPACT FLAG SINCE IT IS TOO LARGE
-
-****This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.**
 
 Latest Updates:
 - WAV Player fix by atmanos
