@@ -73,7 +73,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "Don't count on it", "Outlook not so good", "My sources say no", "Very doubtful", "My reply is no"
             };
             diceRoll= ((rand() % diceSelect)+1); // JUST TO GET IT GOING? AND FIX BUG
-            sprintf(diceType[0], "%s", "8-BALL");
+            sprintf(diceType[0], "%s", "8BALL");
             sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
             uint8_t d1_i = rand() % COUNT_OF(eightBall);
             sprintf(strings[1], "%s", eightBall[d1_i]);
@@ -187,7 +187,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     } else if(diceSelect==100) {
         elements_button_right(canvas, "d100");
     } else if(diceSelect==229) {
-        elements_button_right(canvas, "8-BALL");
+        elements_button_right(canvas, "8BALL");
     } else if(diceSelect==230) {
         elements_button_right(canvas, "SEX");
     } else if(diceSelect==231) {
