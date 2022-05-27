@@ -96,7 +96,7 @@ bool LfRfidApp::load_key_from_file_select(bool need_restore) {
     }
 
     bool result = dialog_file_browser_show(
-        dialogs, &file_path, &file_path, app_extension, true, &I_125_10px, true);
+        dialogs, file_path, file_path, app_extension, true, &I_125_10px, true);
 
     if(result) {
         result = load_key_data(file_path, &worker.key);

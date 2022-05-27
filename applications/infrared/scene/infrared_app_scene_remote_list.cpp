@@ -18,8 +18,8 @@ void InfraredAppSceneRemoteList::on_enter(InfraredApp* app) {
 
     file_select_result = dialog_file_browser_show(
         dialogs,
-        &app->file_path,
-        &app->file_path,
+        app->file_path,
+        app->file_path,
         InfraredApp::infrared_extension,
         true,
         &I_ir_10px,

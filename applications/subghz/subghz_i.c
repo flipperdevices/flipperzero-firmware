@@ -417,8 +417,8 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
     // Input events and views are managed by file_select
     bool res = dialog_file_browser_show(
         subghz->dialogs,
-        &subghz->file_path,
-        &subghz->file_path,
+        subghz->file_path,
+        subghz->file_path,
         SUBGHZ_APP_EXTENSION,
         true,
         &I_sub1_10px,

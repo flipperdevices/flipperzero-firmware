@@ -67,7 +67,7 @@ struct FileBrowser {
     FileBrowserCallback callback;
     void* context;
 
-    string_t* result_path;
+    string_ptr result_path;
 };
 
 typedef struct {
@@ -101,7 +101,7 @@ static void browser_list_load_cb(void* context, uint32_t list_load_offset);
 static void browser_list_item_cb(void* context, string_t item_path, bool is_folder, bool is_last);
 static void browser_long_load_cb(void* context);
 
-FileBrowser* file_browser_alloc(string_t* result_path) {
+FileBrowser* file_browser_alloc(string_ptr result_path) {
     furi_assert(result_path);
     FileBrowser* browser = malloc(sizeof(FileBrowser));
     browser->view = view_alloc();
@@ -507,7 +507,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                     file_browser_worker_folder_enter(
                         browser->worker, selected_item->path, select_index);
                 } else if(selected_item->type == BrowserItemTypeFile) {
-                    string_set(*(browser->result_path), selected_item->path);
+                    string_set(browser->result_path, selected_item->path);
                     if(browser->callback) {
                         browser->callback(browser->context);
                     }

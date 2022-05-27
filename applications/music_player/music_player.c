@@ -305,8 +305,8 @@ int32_t music_player_app(void* p) {
             DialogsApp* dialogs = furi_record_open("dialogs");
             bool res = dialog_file_browser_show(
                 dialogs,
-                &file_path,
-                &file_path,
+                file_path,
+                file_path,
                 MUSIC_PLAYER_APP_EXTENSION,
                 true,
                 &I_music_10px,

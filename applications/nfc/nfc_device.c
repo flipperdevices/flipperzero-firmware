@@ -907,7 +907,7 @@ bool nfc_file_select(NfcDevice* dev) {
 
     // Input events and views are managed by file_browser
     bool res = dialog_file_browser_show(
-        dev->dialogs, &dev->load_path, &dev->load_path, NFC_APP_EXTENSION, true, &I_Nfc_10px, true);
+        dev->dialogs, dev->load_path, dev->load_path, NFC_APP_EXTENSION, true, &I_Nfc_10px, true);
     if(res) {
         string_t filename;
         string_init(filename);

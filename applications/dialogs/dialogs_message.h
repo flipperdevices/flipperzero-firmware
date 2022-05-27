@@ -13,8 +13,8 @@ typedef struct {
     bool skip_assets;
     bool hide_ext;
     const Icon* file_icon;
-    string_t* result_path;
-    string_t* preselected_filename;
+    string_ptr result_path;
+    string_ptr preselected_filename;
 } DialogsAppMessageDataFileBrowser;
 
 typedef struct {

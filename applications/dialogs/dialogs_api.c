@@ -7,8 +7,8 @@
 
 bool dialog_file_browser_show(
     DialogsApp* context,
-    string_t* result_path,
-    string_t* path,
+    string_ptr result_path,
+    string_ptr path,
     const char* extension,
     bool skip_assets,
     const Icon* icon,

@@ -8,8 +8,8 @@ static bool bad_usb_file_select(BadUsbApp* bad_usb) {
     // Input events and views are managed by file_browser
     bool res = dialog_file_browser_show(
         bad_usb->dialogs,
-        &bad_usb->file_path,
-        &bad_usb->file_path,
+        bad_usb->file_path,
+        bad_usb->file_path,
         BAD_USB_APP_EXTENSION,
         true,
         &I_badusb_10px,

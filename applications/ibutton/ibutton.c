@@ -187,8 +187,8 @@ void ibutton_free(iButton* ibutton) {
 bool ibutton_file_select(iButton* ibutton) {
     bool success = dialog_file_browser_show(
         ibutton->dialogs,
-        &ibutton->file_path,
-        &ibutton->file_path,
+        ibutton->file_path,
+        ibutton->file_path,
         IBUTTON_APP_EXTENSION,
         true,
         &I_ibutt_10px,
