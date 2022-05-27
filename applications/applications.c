@@ -45,7 +45,6 @@ extern int32_t vibro_test_app(void* p);
 extern int32_t bt_hid_app(void* p);
 extern int32_t battery_test_app(void* p);
 extern int32_t text_box_test_app(void* p);
-extern int32_t file_browser_app(void* p);
 
 // Plugins
 extern int32_t music_player_app(void* p);
@@ -524,6 +523,14 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
 #ifdef APP_INFRARED_MONITOR
     {.app = infrared_monitor_app,
      .name = "Infrared Monitor",
+     .stack_size = 1024,
+     .icon = NULL,
+     .flags = FlipperApplicationFlagDefault},
+#endif
+
+#ifdef APP_SCENED
+    {.app = scened_app,
+     .name = "Templated Scene",
      .stack_size = 1024,
      .icon = NULL,
      .flags = FlipperApplicationFlagDefault},
