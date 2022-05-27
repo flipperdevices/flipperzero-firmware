@@ -9,14 +9,6 @@ extern "C" {
 #endif
 
 typedef struct {
-    const char* path;
-    const char* extension;
-    char* result;
-    uint8_t result_size;
-    const char* preselected_filename;
-} DialogsAppMessageDataFileSelect;
-
-typedef struct {
     const char* extension;
     bool skip_assets;
     bool hide_ext;
@@ -30,7 +22,6 @@ typedef struct {
 } DialogsAppMessageDataDialog;
 
 typedef union {
-    DialogsAppMessageDataFileSelect file_select;
     DialogsAppMessageDataFileBrowser file_browser;
     DialogsAppMessageDataDialog dialog;
 } DialogsAppData;
@@ -41,7 +32,6 @@ typedef union {
 } DialogsAppReturn;
 
 typedef enum {
-    DialogsAppCommandFileOpen,
     DialogsAppCommandFileBrowser,
     DialogsAppCommandDialog,
 } DialogsAppCommand;

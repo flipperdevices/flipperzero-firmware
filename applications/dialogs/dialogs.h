@@ -11,26 +11,6 @@ extern "C" {
 
 typedef struct DialogsApp DialogsApp;
 
-/****************** FILE SELECT ******************/
-
-/**
- * Shows and processes the file selection dialog
- * @param context api pointer
- * @param path path to directory
- * @param extension file extension to be offered for selection
- * @param selected_filename buffer where the selected filename will be saved
- * @param selected_filename_size and the size of this buffer
- * @param preselected_filename filename to be preselected
- * @return bool whether a file was selected
- */
-bool dialog_file_select_show(
-    DialogsApp* context,
-    const char* path,
-    const char* extension,
-    char* result,
-    uint8_t result_size,
-    const char* preselected_filename);
-
 /****************** FILE BROWSER ******************/
 
 /**

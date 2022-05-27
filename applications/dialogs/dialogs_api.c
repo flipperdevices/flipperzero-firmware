@@ -3,41 +3,6 @@
 #include "dialogs_api_lock.h"
 #include "m-string.h"
 
-/****************** File select ******************/
-
-bool dialog_file_select_show(
-    DialogsApp* context,
-    const char* path,
-    const char* extension,
-    char* result,
-    uint8_t result_size,
-    const char* preselected_filename) {
-    FuriApiLock lock = API_LOCK_INIT_LOCKED();
-    furi_check(lock != NULL);
-
-    DialogsAppData data = {
-        .file_select = {
-            .path = path,
-            .extension = extension,
-            .result = result,
-            .result_size = result_size,
-            .preselected_filename = preselected_filename,
-        }};
-
-    DialogsAppReturn return_data;
-    DialogsAppMessage message = {
-        .lock = lock,
-        .command = DialogsAppCommandFileOpen,
-        .data = &data,
-        .return_data = &return_data,
-    };
-
-    furi_check(osMessageQueuePut(context->message_queue, &message, 0, osWaitForever) == osOK);
-    API_LOCK_WAIT_UNTIL_UNLOCK_AND_FREE(lock);
-
-    return return_data.bool_value;
-}
-
 /****************** File browser ******************/
 
 bool dialog_file_browser_show(
