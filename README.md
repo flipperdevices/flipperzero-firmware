@@ -3,6 +3,8 @@
 You should clone with 
 ```shell
 $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
+$ docker-compose up -d
+$ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 # [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME
