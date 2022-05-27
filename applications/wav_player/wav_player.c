@@ -26,11 +26,9 @@ static bool open_wav_stream(Storage* storage, Stream* stream) {
                 true,
                 &I_music_10px,
                 false);
-
     furi_record_close("dialogs");
-
+    
     if(ret) {
-        string_printf(path, "%s/%s.%s", "/ext/wav_player", name_buffer, "wav");
         if(!file_stream_open(stream, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
             FURI_LOG_E(TAG, "Cannot open file \"%s\"", string_get_cstr(path));
         } else {
