@@ -13,7 +13,7 @@ uint8_t diceRoll=0;
 uint8_t playerOneScore=0;
 uint8_t playerTwoScore=0;
 char rollTime[1][12];
-char diceType[1][5];
+char diceType[1][8];
 char strings[2][45];
 char theScores[1][45];
 bool letsRoll=false;
@@ -42,7 +42,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    if(diceSelect<230) {
+    if(diceSelect<229) {
         if(diceQty==1) {
             elements_button_left(canvas, "x1");
         } else if(diceQty==2) {
@@ -65,14 +65,26 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             rand_generator_inited = true;
         }
         sprintf(rollTime[0], "%.2d:%.2d:%.2d", state->datetime.hour, state->datetime.minute, state->datetime.second);
-        if(diceSelect==230) {
+        if(diceSelect==229) {
+            const char* eightBall[] = {
+                "It is certain", "Without a doubt", "You may rely on it", "Yes definitely", "It is decidedly so", 
+                "As I see it, yes", "Most likely", "Yes", "Outlook good", "Signs point to yes", "Reply hazy try again", 
+                "Better not tell you now", "Ask again later", "Cannot predict now", "Concentrate and ask again", 
+                "Don't count on it", "Outlook not so good", "My sources say no", "Very doubtful", "My reply is no"
+            };
+            diceRoll= ((rand() % diceSelect)+1); // JUST TO GET IT GOING? AND FIX BUG
+            sprintf(diceType[0], "%s", "8-BALL");
+            sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
+            uint8_t d1_i = rand() % COUNT_OF(eightBall);
+            sprintf(strings[1], "%s", eightBall[d1_i]);
+        } else if(diceSelect==230) {
             const char* diceOne[] = {
-                "Nibble", "Fondle", "Massage", "Touch",
-                "Suck", "Lick", "Blow", "Kiss", "???"
+                "Nibble", "Massage", "Touch", "Caress", "Pet",
+                "Fondle", "Suck", "Lick", "Blow", "Kiss", "???"
             };
             const char* diceTwo[] = {
-                "Navel", "Ears", "Lips", "Neck",
-                "Thigh", "Hand", "Breasts", "Genitals"
+                "Navel", "Ears", "Lips", "Neck", "Hand",
+                "Thigh", "Nipple", "Breasts", "???", "Genitals"
             };
             diceRoll= ((rand() % diceSelect)+1); // JUST TO GET IT GOING? AND FIX BUG
             sprintf(diceType[0], "%s", "SEX?");
@@ -145,7 +157,9 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, theScores[0]);
         }
     }
-    if(diceSelect==231) {
+    if(diceSelect==229) {
+        elements_button_center(canvas, "Shake");
+    } else if(diceSelect==231) {
         elements_button_center(canvas, "Draw");
     } else {
         elements_button_center(canvas, "Roll");
@@ -172,6 +186,8 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         elements_button_right(canvas, "d69");
     } else if(diceSelect==100) {
         elements_button_right(canvas, "d100");
+    } else if(diceSelect==229) {
+        elements_button_right(canvas, "8-BALL");
     } else if(diceSelect==230) {
         elements_button_right(canvas, "SEX");
     } else if(diceSelect==231) {
@@ -250,6 +266,8 @@ int32_t dice_app(void* p) {
                             playerTwoScore=0;
                             diceSelect=231;
                         } else if(diceSelect==231)  {
+                            diceSelect=229;
+                        } else if(diceSelect==229)  {
                             diceSelect=59;
                         } else if(diceSelect==59)  {
                             diceSelect=69;

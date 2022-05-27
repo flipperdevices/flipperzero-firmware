@@ -15,6 +15,15 @@ extern "C" {
 void path_extract_filename_no_ext(const char* path, string_t filename);
 
 /**
+ * @brief Extract filename string from path.
+ * 
+ * @param path path string
+ * @param filename output filename string. Must be initialized before.
+ * @param trim_ext true - get filename without extension
+ */
+void path_extract_filename(string_t path, string_t filename, bool trim_ext);
+
+/**
  * @brief Extract last path component
  * 
  * @param path path string
@@ -30,14 +39,6 @@ void path_extract_basename(const char* path, string_t basename);
  */
 void path_extract_dirname(const char* path, string_t dirname);
 
-/**
- * @brief Extract all sub directory names after initial root directory
- *
- * @param path path string
- * @param subdirname output string. Must be initialized before.
- */
-void path_extract_subdirnames(const char* path, string_t subdirnames);
-    
 /**
  * @brief Appends new component to path, adding path delimiter
  * 
