@@ -1,5 +1,6 @@
 #include "../subghz_i.h"
 #include <lib/subghz/protocols/keeloq.h>
+#include <lib/subghz/protocols/secplus_v1.h>
 #include <lib/subghz/protocols/secplus_v2.h>
 #include <lib/subghz/blocks/math.h>
 #include <dolphin/dolphin.h>
@@ -22,6 +23,8 @@ enum SubmenuIndex {
     SubmenuIndexDoorHan_315_00,
     SubmenuIndexDoorHan_433_92,
     SubmenuIndexFirefly_300_00,
+    SubmenuIndexLiftMaster_315_00,
+    SubmenuIndexLiftMaster_390_00,
     SubmenuIndexSecPlus_v2_310_00,
     SubmenuIndexSecPlus_v2_315_00,
     SubmenuIndexSecPlus_v2_390_00,
@@ -43,7 +46,7 @@ bool subghz_scene_set_type_submenu_gen_data_protocol(
         subghz_receiver_search_decoder_base_by_name(subghz->txrx->receiver, protocol_name);
 
     if(subghz->txrx->decoder_result == NULL) {
-        string_set(subghz->error_str, "Protocol not found");
+        string_set_str(subghz->error_str, "Protocol not found");
         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowErrorSub);
         return false;
     }
@@ -144,6 +147,18 @@ void subghz_scene_set_type_on_enter(void* context) {
         subghz->submenu,
         "DoorHan_433",
         SubmenuIndexDoorHan_433_92,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "LiftMaster_315",
+        SubmenuIndexLiftMaster_315_00,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "LiftMaster_390",
+        SubmenuIndexLiftMaster_390_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
@@ -304,7 +319,7 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
             }
             subghz_transmitter_free(subghz->txrx->transmitter);
             if(!generated_protocol) {
-                string_set(
+                string_set_str(
                     subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
             }
@@ -328,11 +343,42 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
             }
             subghz_transmitter_free(subghz->txrx->transmitter);
             if(!generated_protocol) {
-                string_set(
+                string_set_str(
                     subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
             }
             break;
+        case SubmenuIndexLiftMaster_315_00:
+            while(!subghz_protocol_secplus_v1_check_fixed(key)) {
+                key = subghz_random_serial();
+            }
+
+            if(subghz_scene_set_type_submenu_gen_data_protocol(
+                   subghz,
+                   SUBGHZ_PROTOCOL_SECPLUS_V1_NAME,
+                   (uint64_t)key << 32 | 0xE6000000,
+                   42,
+                   315000000,
+                   FuriHalSubGhzPresetOok650Async)) {
+                generated_protocol = true;
+            }
+            break;
+        case SubmenuIndexLiftMaster_390_00:
+            while(!subghz_protocol_secplus_v1_check_fixed(key)) {
+                key = subghz_random_serial();
+            }
+
+            if(subghz_scene_set_type_submenu_gen_data_protocol(
+                   subghz,
+                   SUBGHZ_PROTOCOL_SECPLUS_V1_NAME,
+                   (uint64_t)key << 32 | 0xE6000000,
+                   42,
+                   390000000,
+                   FuriHalSubGhzPresetOok650Async)) {
+                generated_protocol = true;
+            }
+            break;
+
         case SubmenuIndexSecPlus_v2_310_00:
             subghz->txrx->transmitter = subghz_transmitter_alloc_init(
                 subghz->txrx->environment, SUBGHZ_PROTOCOL_SECPLUS_V2_NAME);
