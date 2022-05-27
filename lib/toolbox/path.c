@@ -44,6 +44,19 @@ void path_extract_dirname(const char* path, string_t dirname) {
     }
 }
 
+void path_extract_subdirnames(const char* path, string_t subdirnames) {
+    string_set(subdirnames, path);
+    path_cleanup(subdirnames);
+
+    for(int i = 0; i<3; i++) {
+      size_t pos_start = string_search_char(subdirnames, '/');
+      string_mid(subdirnames, pos_start + 1, string_size(subdirnames));
+    }
+
+    size_t pos_end = string_search_rchar(subdirnames, '/');
+    string_mid(subdirnames, 0, pos_end);
+}
+
 void path_append(string_t path, const char* suffix) {
     path_cleanup(path);
     string_t suffix_str;
