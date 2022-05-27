@@ -12,17 +12,11 @@ $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlu
 ****This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.**
 
 Latest Updates:
-- Latest updates from DEV 533f12a
-- Update for Tetris from creator
-- Update to git settings to remove -dirty 
-- Volume default on music player changed to .25 instead of .75
+- WAV Player broken on this build due to latest DEV update
+- Added 8BALL 'DICE' and new options for 'SEX' dice
+- Latest updates up to DEV 67fbefbe
 - Latest changes to Unleashed 05/25 as of release
-- Added Up To x6 Dice For Dice Roller, and WAR! and SEX?
 - Pulled DEV changes from #1262 (This fixes issues with f6384116)
-- Pulled DEV changes from f6384116
-- Pulled latest DEV changes from 4b45746b
-- Added Dice Roller "game" created by me
-- Added Zombie game placeholder/demo/POC
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -51,7 +45,7 @@ Special shout out to these libraries for giving us more fun:
 
 Plugins:
 - [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)
-- [Dice Roller (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/dice/dice.c)
+- [Dice Roller Including SEX/WAR/8BALL DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/dice/dice.c)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)
 - [Menu Changes and Icons (By Redlink)]( https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
 - [RF Remix (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix)
