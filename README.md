@@ -10,6 +10,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 # [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME
 
 - FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE
+- BUILD WITH COMPACT FLAG SINCE IT IS TOO LARGE
 
 ****This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.**
 
