@@ -273,12 +273,12 @@ void setup()
     delay(2000);
   #endif
 
-  Serial.println("CLI");
-  cli_obj.RunSetup();
-
   #ifdef HAS_SCREEN
     menu_function_obj.RunSetup();
   #endif
+
+  Serial.println("CLI");
+  cli_obj.RunSetup();
 }
 
 

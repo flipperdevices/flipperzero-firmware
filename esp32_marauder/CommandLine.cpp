@@ -4,7 +4,7 @@ CommandLine::CommandLine() {
 }
 
 void CommandLine::RunSetup() {
-  
+  Serial.print("> ");
 }
 
 String CommandLine::getSerialInput() {
@@ -13,6 +13,7 @@ String CommandLine::getSerialInput() {
   if (Serial.available() > 0)
     input = Serial.readStringUntil('\n');
 
+  input.trim();
   return input;
 }
 
@@ -20,6 +21,9 @@ void CommandLine::main(uint32_t currentTime) {
   String input = this->getSerialInput();
 
   this->runCommand(input);
+
+  if (input != "")
+    Serial.print("> ");
 }
 
 LinkedList<String> CommandLine::parseCommand(String input) {
