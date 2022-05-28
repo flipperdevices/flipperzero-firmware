@@ -8,6 +8,7 @@
 #include "system.pb.h"
 #include "application.pb.h"
 #include "gui.pb.h"
+#include "gpio.pb.h"
 
 #if PB_PROTO_HEADER_VERSION != 40
 #error Regenerate this file with the current version of nanopb generator.
@@ -39,7 +40,10 @@ typedef enum _PB_CommandStatus {
     PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED = 17, /* *< Another app is running */
     /* *< Virtual Display Errors */
     PB_CommandStatus_ERROR_VIRTUAL_DISPLAY_ALREADY_STARTED = 19, /* *< Virtual Display session can't be started twice */
-    PB_CommandStatus_ERROR_VIRTUAL_DISPLAY_NOT_STARTED = 20 /* *< Virtual Display session can't be stopped when it's not started */
+    PB_CommandStatus_ERROR_VIRTUAL_DISPLAY_NOT_STARTED = 20, /* *< Virtual Display session can't be stopped when it's not started */
+    /* *< GPIO Errors */
+    PB_CommandStatus_ERROR_GPIO_MODE_INCORRECT = 58, 
+    PB_CommandStatus_ERROR_GPIO_UNKNOWN_PIN_MODE = 59 
 } PB_CommandStatus;
 
 /* Struct definitions */
@@ -104,14 +108,21 @@ typedef struct _PB_Main {
         PB_System_PowerInfoRequest system_power_info_request;
         PB_System_PowerInfoResponse system_power_info_response;
         PB_System_UpdateResponse system_update_response;
+        PB_Gpio_SetPinMode gpio_set_pin_mode;
+        PB_Gpio_SetInputPull gpio_set_input_pull;
+        PB_Gpio_GetPinMode gpio_get_pin_mode;
+        PB_Gpio_GetPinModeResponse gpio_get_pin_mode_response;
+        PB_Gpio_ReadPin gpio_read_pin;
+        PB_Gpio_ReadPinResponse gpio_read_pin_response;
+        PB_Gpio_WritePin gpio_write_pin;
     } content; 
 } PB_Main;
 
 
 /* Helper constants for enums */
 #define _PB_CommandStatus_MIN PB_CommandStatus_OK
-#define _PB_CommandStatus_MAX PB_CommandStatus_ERROR_VIRTUAL_DISPLAY_NOT_STARTED
-#define _PB_CommandStatus_ARRAYSIZE ((PB_CommandStatus)(PB_CommandStatus_ERROR_VIRTUAL_DISPLAY_NOT_STARTED+1))
+#define _PB_CommandStatus_MAX PB_CommandStatus_ERROR_GPIO_UNKNOWN_PIN_MODE
+#define _PB_CommandStatus_ARRAYSIZE ((PB_CommandStatus)(PB_CommandStatus_ERROR_GPIO_UNKNOWN_PIN_MODE+1))
 
 
 #ifdef __cplusplus
@@ -173,6 +184,13 @@ extern "C" {
 #define PB_Main_system_power_info_request_tag    44
 #define PB_Main_system_power_info_response_tag   45
 #define PB_Main_system_update_response_tag       46
+#define PB_Main_gpio_set_pin_mode_tag            50
+#define PB_Main_gpio_set_input_pull_tag          51
+#define PB_Main_gpio_get_pin_mode_tag            52
+#define PB_Main_gpio_get_pin_mode_response_tag   53
+#define PB_Main_gpio_read_pin_tag                54
+#define PB_Main_gpio_read_pin_response_tag       55
+#define PB_Main_gpio_write_pin_tag               56
 
 /* Struct field encoding specification for nanopb */
 #define PB_Empty_FIELDLIST(X, a) \
@@ -231,7 +249,14 @@ X(a, STATIC,   ONEOF,    MSG_W_CB, (content,storage_backup_create_request,conten
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,storage_backup_restore_request,content.storage_backup_restore_request),  43) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,system_power_info_request,content.system_power_info_request),  44) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,system_power_info_response,content.system_power_info_response),  45) \
-X(a, STATIC,   ONEOF,    MSG_W_CB, (content,system_update_response,content.system_update_response),  46)
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,system_update_response,content.system_update_response),  46) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,gpio_set_pin_mode,content.gpio_set_pin_mode),  50) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,gpio_set_input_pull,content.gpio_set_input_pull),  51) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,gpio_get_pin_mode,content.gpio_get_pin_mode),  52) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,gpio_get_pin_mode_response,content.gpio_get_pin_mode_response),  53) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,gpio_read_pin,content.gpio_read_pin),  54) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,gpio_read_pin_response,content.gpio_read_pin_response),  55) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,gpio_write_pin,content.gpio_write_pin),  56)
 #define PB_Main_CALLBACK NULL
 #define PB_Main_DEFAULT NULL
 #define PB_Main_content_empty_MSGTYPE PB_Empty
@@ -277,6 +302,13 @@ X(a, STATIC,   ONEOF,    MSG_W_CB, (content,system_update_response,content.syste
 #define PB_Main_content_system_power_info_request_MSGTYPE PB_System_PowerInfoRequest
 #define PB_Main_content_system_power_info_response_MSGTYPE PB_System_PowerInfoResponse
 #define PB_Main_content_system_update_response_MSGTYPE PB_System_UpdateResponse
+#define PB_Main_content_gpio_set_pin_mode_MSGTYPE PB_Gpio_SetPinMode
+#define PB_Main_content_gpio_set_input_pull_MSGTYPE PB_Gpio_SetInputPull
+#define PB_Main_content_gpio_get_pin_mode_MSGTYPE PB_Gpio_GetPinMode
+#define PB_Main_content_gpio_get_pin_mode_response_MSGTYPE PB_Gpio_GetPinModeResponse
+#define PB_Main_content_gpio_read_pin_MSGTYPE PB_Gpio_ReadPin
+#define PB_Main_content_gpio_read_pin_response_MSGTYPE PB_Gpio_ReadPinResponse
+#define PB_Main_content_gpio_write_pin_MSGTYPE PB_Gpio_WritePin
 
 extern const pb_msgdesc_t PB_Empty_msg;
 extern const pb_msgdesc_t PB_StopSession_msg;
