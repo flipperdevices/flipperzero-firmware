@@ -1,3 +1,13 @@
+//#define MARAUDER_V4
+//#define MARAUDER_V6
+//#define MARAUDER_KIT
+//#define MARAUDER_MINI
+#define MARAUDER_FLIPPER
+
+#ifndef MARAUDER_FLIPPER
+  #define HAS_BT
+#endif
+
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WebServer.h>
@@ -5,7 +15,9 @@
 #include <Update.h>
 #include "esp_wifi.h"
 #include "esp_wifi_types.h"
-#include "esp_bt.h"
+#ifdef HAS_BT
+  #include "esp_bt.h"
+#endif
 
 #define jquery_min_js_v3_2_1_gz_len 30178
 
