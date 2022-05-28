@@ -1,6 +1,10 @@
 #ifndef MenuFunctions_h
 #define MenuFunctions_h
 
+#include "configs.h"
+
+#ifdef HAS_SCREEN
+
 #define BATTERY_ANALOG_ON 0
 
 #include "WiFiScan.h"
@@ -11,7 +15,6 @@
 #include "esp_interface.h"
 #include "a32u4_interface.h"
 #include "settings.h"
-#include "configs.h"
 
 #ifdef MARAUDER_MINI
   #include <SwitchLib.h>
@@ -214,5 +217,5 @@ class MenuFunctions
 };
 
 
-
+#endif
 #endif

@@ -1,15 +1,19 @@
 #ifndef Settings_h
 #define Settings_h
 
+#include "configs.h"
+
 #include "SPIFFS.h"
 #include <FS.h>
 #include <ArduinoJson.h>
 
 #define FORMAT_SPIFFS_IF_FAILED true
 
-#include "Display.h"
+#ifdef HAS_SCREEN
+  #include "Display.h"
 
-extern Display display_obj;
+  extern Display display_obj;
+#endif
 
 class Settings {
 

@@ -1,14 +1,19 @@
 #ifndef SDInterface_h
 #define SDInterface_h
 
+#include "configs.h"
+
 #include "SD.h"
 #include "Buffer.h"
-#include "Display.h"
-#include "configs.h"
+#ifdef HAS_SCREEN
+  #include "Display.h"
+#endif
 #include <Update.h>
 
 extern Buffer buffer_obj;
-extern Display display_obj;
+#ifdef HAS_SCREEN
+  extern Display display_obj;
+#endif
 
 #ifdef KIT
   #define SD_DET 4

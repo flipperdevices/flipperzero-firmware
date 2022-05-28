@@ -1,4 +1,5 @@
 #include "Web.h"
+#include "lang_var.h"
 
 WebServer server(80);
 
@@ -9,7 +10,6 @@ Web::Web()
 
 void Web::main()
 {
-  //Serial.println("Running the shits");
   // Notify if client has connected to the update server
 
   
@@ -44,18 +44,24 @@ void Web::onJavaScript(void) {
 void Web::setupOTAupdate()
 {
   uint8_t newMACAddress[] = {0x06, 0x07, 0x0D, 0x09, 0x0E, 0x0D};
-  
-  display_obj.tft.setTextWrap(false);
-  display_obj.tft.setFreeFont(NULL);
-  display_obj.tft.setCursor(0, 100);
-  display_obj.tft.setTextSize(1);
-  display_obj.tft.setTextColor(TFT_WHITE);
+
+  #ifdef HAS_SCREEN
+    display_obj.tft.setTextWrap(false);
+    display_obj.tft.setFreeFont(NULL);
+    display_obj.tft.setCursor(0, 100);
+    display_obj.tft.setTextSize(1);
+    display_obj.tft.setTextColor(TFT_WHITE);
+  #endif
 
   Serial.println(wifi_scan_obj.freeRAM());
-  display_obj.tft.print("Configuring update server...\n\n");  
+  #ifdef HAS_SCREEN
+    display_obj.tft.print(text_table3[0]);  
+  #endif
   Serial.println("Configuring update server...");
 
-  display_obj.tft.setTextColor(TFT_YELLOW);
+  #ifdef HAS_SCREEN
+    display_obj.tft.setTextColor(TFT_YELLOW);
+  #endif
   
   // Start WiFi AP
   Serial.println("Initializing WiFi...");
@@ -76,24 +82,15 @@ void Web::setupOTAupdate()
   Serial.println(wifi_scan_obj.freeRAM());
 
   Serial.println("Displaying settings to TFT...");
-  display_obj.tft.print("SSID: ");
-  display_obj.tft.println(ssid);
-  display_obj.tft.print("IP address: ");
-  display_obj.tft.print(WiFi.softAPIP());
-  display_obj.tft.print("\n");
+  #ifdef HAS_SCREEN
+    display_obj.tft.print(text_table1[2]);
+    display_obj.tft.println(ssid);
+    display_obj.tft.print(text_table3[1]);
+    display_obj.tft.print(WiFi.softAPIP());
+    display_obj.tft.print("\n");
+  #endif
   Serial.print("IP address: ");
   Serial.println(WiFi.softAPIP());
-
-  /*use mdns for host name resolution*/
-  /*
-  if (!MDNS.begin(host)) { //http://esp32.local
-    Serial.println("Error setting up MDNS responder!");
-    while (1) {
-      delay(1000);
-    }
-  }
-  Serial.println("mDNS responder started");
-  */
 
   // return javascript jquery
   Serial.println("Setting server behavior...");
@@ -116,11 +113,12 @@ void Web::setupOTAupdate()
   }, [this]() {
     HTTPUpload& upload = server.upload();
     if (upload.status == UPLOAD_FILE_START) {
-      display_obj.tft.setTextColor(TFT_YELLOW);
-      display_obj.tft.print("Update: ");
-      display_obj.tft.print(upload.filename.c_str());
-      display_obj.tft.print("\n");
-      //display_obj.updateBanner(menu_function_obj.current_menu->name);
+      #ifdef HAS_SCREEN
+        display_obj.tft.setTextColor(TFT_YELLOW);
+        display_obj.tft.print(text_table3[2]);
+        display_obj.tft.print(upload.filename.c_str());
+        display_obj.tft.print("\n");
+      #endif
       Serial.printf("Update: %s\n", upload.filename.c_str());
       if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
         Update.printError(Serial);
@@ -130,30 +128,23 @@ void Web::setupOTAupdate()
       if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
         Update.printError(Serial);
       }
-      //display_obj.tft.println(upload.totalSize);
-      /*
-      String display_string = "";
-      display_obj.tft.setCursor(0, 164);
-      for (int i = 0; i < 40; i++) {
-        display_string.concat(" ");
-      }
-      */
-      display_obj.tft.setTextColor(TFT_CYAN);
-      display_obj.tft.fillRect(0, 164, 240, 8, TFT_BLACK);
-      //delay(1);
-      //display_obj.tft.print(display_string);
-      display_obj.tft.setCursor(0, 164);
-      display_obj.tft.print("Bytes complete: ");
-      display_obj.tft.print(upload.totalSize);
-      display_obj.tft.print("\n");
+      #ifdef HAS_SCREEN
+        display_obj.tft.setTextColor(TFT_CYAN);
+        display_obj.tft.fillRect(0, 164, 240, 8, TFT_BLACK);
+        display_obj.tft.setCursor(0, 164);
+        display_obj.tft.print(text_table3[3]);
+        display_obj.tft.print(upload.totalSize);
+        display_obj.tft.print("\n");
+      #endif
       
-      //Serial.println(upload.totalSize);
     } else if (upload.status == UPLOAD_FILE_END) {
       if (Update.end(true)) { //true to set the size to the current progress
-        display_obj.tft.setTextColor(TFT_GREEN);
-        display_obj.tft.print("Update Success: ");
-        display_obj.tft.print(upload.totalSize);
-        display_obj.tft.print("\nRebooting...\n");
+        #ifdef HAS_SCREEN
+          display_obj.tft.setTextColor(TFT_GREEN);
+          display_obj.tft.print(text_table3[4]);
+          display_obj.tft.print(upload.totalSize);
+          display_obj.tft.print(text_table2[3]);
+        #endif
         Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
         delay(1000);
       } else {
@@ -168,8 +159,10 @@ void Web::setupOTAupdate()
   Serial.println("Starting server...");
   server.begin();
 
-  display_obj.tft.setTextColor(TFT_GREEN);
-  display_obj.tft.println("\nCompleted update server setup");
+  #ifdef HAS_SCREEN
+    display_obj.tft.setTextColor(TFT_GREEN);
+    display_obj.tft.println(text_table3[5]);
+  #endif
   Serial.println("Completed update server setup");
   Serial.println(wifi_scan_obj.freeRAM());
 }

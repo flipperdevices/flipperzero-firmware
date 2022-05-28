@@ -5,6 +5,8 @@
 Code taken from espressif ESP32 OTA Update example
 */
 
+#include "configs.h"
+
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WebServer.h>
@@ -12,10 +14,17 @@ Code taken from espressif ESP32 OTA Update example
 #include <Update.h>
 
 #include "Assets.h"
-#include "Display.h"
+
+#ifdef HAS_SCREEN
+  #include "Display.h"
+#endif
+
 #include "WiFiScan.h"
 
-extern Display display_obj;
+#ifdef HAS_SCREEN
+  extern Display display_obj;
+#endif
+
 extern WiFiScan wifi_scan_obj;
 
 class Web

@@ -1,6 +1,9 @@
 #ifndef Display_h
 #define Display_h
 
+#include "configs.h"
+
+#ifdef HAS_SCREEN
 
 #include <FS.h>
 #include <functional>
@@ -13,7 +16,6 @@
 //#include <M5Stack.h>
 #include "SPIFFS.h"
 #include "Assets.h"
-#include "configs.h"
 
 #include <TFT_eSPI.h>
 
@@ -151,4 +153,5 @@ class Display
     void twoPartDisplay(String center_text);
     void updateBanner(String msg);
 };
+#endif
 #endif

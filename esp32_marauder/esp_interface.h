@@ -1,14 +1,21 @@
 #ifndef esp_interface_h
 #define esp_interface_h
 
-#include "Display.h"
+#include "configs.h"
+
+#ifdef HAS_SCREEN
+  #include "Display.h"
+#endif
+
 #include <HardwareSerial.h>
 
 #define ESP_RST  14
 #define ESP_ZERO 13
 #define BAUD     115200
 
-extern Display display_obj;
+#ifdef HAS_SCREEN
+  extern Display display_obj;
+#endif
 
 class EspInterface {
   public:

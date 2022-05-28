@@ -25,14 +25,18 @@ void A32u4Interface::begin() {
 
   if (a32u4_rep != 0) {
     this->supported = true;
-    display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
-    display_obj.tft.println("ATmega32U4 Found!");
-    display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    #ifdef HAS_SCREEN
+      display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+      display_obj.tft.println("ATmega32U4 Found!");
+      display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    #endif
   }
   else {
-    display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
-    display_obj.tft.println("ATmega32U4 Not Found");
-    display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    #ifdef HAS_SCREEN
+      display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
+      display_obj.tft.println("ATmega32U4 Not Found");
+      display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    #endif
     Serial.print("A32U4 Said: ");
     Serial.println(a32u4_rep);
   }
@@ -62,5 +66,4 @@ void A32u4Interface::main(uint32_t current_time) {
     }
   }
 
-  //delay(1);*/
 }

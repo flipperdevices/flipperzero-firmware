@@ -1,12 +1,18 @@
 #ifndef a32u4_interface_h
 #define a32u4_interface_h
 
-#include "Display.h"
+#include "configs.h"
+
+#ifdef HAS_SCREEN
+  #include "Display.h"
+#endif
 #include <HardwareSerial.h>
 
 #define BAUD32U4 115200
 
-extern Display display_obj;
+#ifdef HAS_SCREEN
+  extern Display display_obj;
+#endif
 
 class A32u4Interface {
   public:

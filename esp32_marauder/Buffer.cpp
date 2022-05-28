@@ -1,4 +1,5 @@
 #include "Buffer.h"
+#include "lang_var.h"
 
 Buffer::Buffer(){
   bufA = (uint8_t*)malloc(BUF_SIZE);
@@ -37,7 +38,7 @@ void Buffer::close(fs::FS* fs){
   if(!writing) return;
   forceSave(fs);
   writing = false;
-  Serial.println("file closed");
+  Serial.println(text01);
 }
 
 void Buffer::addPacket(uint8_t* buf, uint32_t len){
@@ -123,7 +124,7 @@ void Buffer::save(fs::FS* fs){
 
   file = fs->open(fileName, FILE_APPEND);
   if (!file) {
-    Serial.println("Failed to open file '"+fileName+"'");
+    Serial.println(text02 + fileName+"'");
     //useSD = false;
     return;
   }
@@ -159,7 +160,7 @@ void Buffer::forceSave(fs::FS* fs){
   
   file = fs->open(fileName, FILE_APPEND);
   if (!file) {
-    Serial.println("Failed to open file '"+fileName+"'");
+    Serial.println(text02+fileName+"'");
     //useSD = false;
     return;
   }

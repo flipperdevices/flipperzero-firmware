@@ -16,7 +16,9 @@ void EspInterface::begin() {
 
   delay(100);
 
-  display_obj.tft.println("Checking for ESP8266...");
+  #ifdef HAS_SCREEN
+    display_obj.tft.println("Checking for ESP8266...");
+  #endif
 
   this->bootRunMode();
 
@@ -40,16 +42,20 @@ void EspInterface::begin() {
   Serial.println("\nDisplay string: " + (String)display_string);
   
   if (display_string == "ESP8266 Pong") {
-    display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
-    display_obj.tft.println("ESP8266 Found!");
-    display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    #ifdef HAS_SCREEN
+      display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+      display_obj.tft.println("ESP8266 Found!");
+      display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    #endif
     Serial.println("ESP8266 Found!");
     this->supported = true;
   }
   else {
-    display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
-    display_obj.tft.println("ESP8266 Not Found");
-    display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    #ifdef HAS_SCREEN
+      display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
+      display_obj.tft.println("ESP8266 Not Found");
+      display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    #endif
   }
 
   this->initTime = millis();
@@ -57,16 +63,17 @@ void EspInterface::begin() {
 
 void EspInterface::RunUpdate() {
   this->bootProgramMode();
+  #ifdef HAS_SCREEN
+    display_obj.tft.setTextWrap(true);
+    display_obj.tft.setFreeFont(NULL);
+    display_obj.tft.setCursor(0, 100);
+    display_obj.tft.setTextSize(1);
+    display_obj.tft.setTextColor(TFT_GREEN);
   
-  display_obj.tft.setTextWrap(true);
-  display_obj.tft.setFreeFont(NULL);
-  display_obj.tft.setCursor(0, 100);
-  display_obj.tft.setTextSize(1);
-  display_obj.tft.setTextColor(TFT_GREEN);
-
-  display_obj.tft.println("Waiting for serial data...");
-
-  display_obj.tft.setTextColor(TFT_WHITE);
+    display_obj.tft.println("Waiting for serial data...");
+  
+    display_obj.tft.setTextColor(TFT_WHITE);
+  #endif
 }
 
 void EspInterface::bootProgramMode() {
@@ -103,7 +110,9 @@ void EspInterface::program() {
   }
 
   if (Serial.available()) {
-    display_obj.tft.print(".");
+    #ifdef HAS_SCREEN
+      display_obj.tft.print(".");
+    #endif
     while (Serial.available()) {
       MySerial.write((uint8_t)Serial.read());
     }

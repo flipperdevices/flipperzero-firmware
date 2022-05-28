@@ -1,6 +1,8 @@
 #ifndef TemperatureInterface_h
 #define TemperatureInterface_h
 
+#include "configs.h"
+
 #include <Arduino.h>
 
 class TemperatureInterface {

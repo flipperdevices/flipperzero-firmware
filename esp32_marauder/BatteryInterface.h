@@ -3,7 +3,11 @@
 
 #include <Arduino.h>
 
-#include <Wire.h>
+#include "configs.h"
+
+#ifndef MARAUDER_FLIPPER
+  #include <Wire.h>
+#endif
 
 #define I2C_SDA 33
 #define I2C_SCL 22

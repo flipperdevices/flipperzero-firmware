@@ -1,6 +1,8 @@
 #ifndef WiFiScan_h
 #define WiFiScan_h
 
+#include "configs.h"
+
 //#include <BLEDevice.h>
 //#include <BLEUtils.h>
 //#include <BLEScan.h>
@@ -8,15 +10,20 @@
 #include <ArduinoJson.h>
 
 // Testing NimBLE
-#include <NimBLEDevice.h>
-//#include <NimBLEAdvertisedDevice.h>
+#ifdef HAS_BT
+  #include <NimBLEDevice.h>
+#endif
 
 #include <WiFi.h>
 #include <math.h>
 #include "esp_wifi.h"
 #include "esp_wifi_types.h"
-#include "esp_bt.h"
-#include "Display.h"
+#ifdef HAS_BT
+  #include "esp_bt.h"
+#endif
+#ifdef HAS_SCREEN
+  #include "Display.h"
+#endif
 #include "SDInterface.h"
 #include "Buffer.h"
 #include "BatteryInterface.h"
@@ -56,7 +63,9 @@
 
 #define MAX_CHANNEL 14
 
-extern Display display_obj;
+#ifdef HAS_SCREEN
+  extern Display display_obj;
+#endif
 extern SDInterface sd_obj;
 extern Buffer buffer_obj;
 extern BatteryInterface battery_obj;
@@ -112,7 +121,9 @@ class WiFiScan
     int bluetoothScanTime = 5;
     int packets_sent = 0;
     const wifi_promiscuous_filter_t filt = {.filter_mask=WIFI_PROMIS_FILTER_MASK_MGMT | WIFI_PROMIS_FILTER_MASK_DATA};
-    NimBLEScan* pBLEScan;
+    #ifdef HAS_BT
+      NimBLEScan* pBLEScan;
+    #endif
 
     //String connected_network = "";
     String alfa = "1234567890qwertyuiopasdfghjkklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM_";
@@ -207,7 +218,6 @@ class WiFiScan
 
     void packetMonitorMain(uint32_t currentTime);
     void eapolMonitorMain(uint32_t currentTime);
-    void changeChannel();
     void updateMidway();
     void tftDrawXScalButtons();
     void tftDrawYScaleButtons();
@@ -235,7 +245,9 @@ class WiFiScan
     void RunPacketMonitor(uint8_t scan_mode, uint16_t color);
     void RunBluetoothScan(uint8_t scan_mode, uint16_t color);
     void RunLvJoinWiFi(uint8_t scan_mode, uint16_t color);
-    static void scanCompleteCB(BLEScanResults scanResults);
+    #ifdef HAS_BT
+      static void scanCompleteCB(BLEScanResults scanResults);
+    #endif
 
     //int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3);
 
@@ -270,10 +282,12 @@ class WiFiScan
     int generateSSIDs();
     bool shutdownWiFi();
     bool shutdownBLE();
+    bool scanning();
     void joinWiFi(String ssid, String password);
     String getStaMAC();
     String getApMAC();
     String freeRAM();
+    void changeChannel();
     void RunInfo();
     void RunShutdownWiFi();
     void RunShutdownBLE();

@@ -1,4 +1,7 @@
 #include "Display.h"
+#include "lang_var.h"
+
+#ifdef HAS_SCREEN
 
 Display::Display()
 {
@@ -34,7 +37,7 @@ void Display::RunSetup()
   clearScreen();
 
   Serial.println("SPI_FREQUENCY: " + (String)SPI_FREQUENCY);
-  Serial.println("SPI_READ_FREQUENCY: " + (String)SPI_READ_FREQUENCY);
+  Serial.println("SPI_READ_FREQUENCY:" + (String)SPI_READ_FREQUENCY);
   Serial.println("SPI_TOUCH_FREQUENCY: " + (String)SPI_TOUCH_FREQUENCY);
 
   #ifdef KIT
@@ -54,7 +57,7 @@ void Display::tftDrawRedOnOffButton() {
   tft.setTextColor(TFT_WHITE);
   tft.setTextSize(2);
   tft.setTextDatum(MC_DATUM);
-  tft.drawString("ON", GREENBUTTON_X + (GREENBUTTON_W / 2), GREENBUTTON_Y + (GREENBUTTON_H / 2));
+  tft.drawString(text03, GREENBUTTON_X + (GREENBUTTON_W / 2), GREENBUTTON_Y + (GREENBUTTON_H / 2));
   this->SwitchOn = false;
 }
 
@@ -65,7 +68,7 @@ void Display::tftDrawGreenOnOffButton() {
   tft.setTextColor(TFT_WHITE);
   tft.setTextSize(2);
   tft.setTextDatum(MC_DATUM);
-  tft.drawString("OFF", REDBUTTON_X + (REDBUTTON_W / 2) + 1, REDBUTTON_Y + (REDBUTTON_H / 2));
+  tft.drawString(text04, REDBUTTON_X + (REDBUTTON_W / 2) + 1, REDBUTTON_Y + (REDBUTTON_H / 2));
   this->SwitchOn = true;
 }
 
@@ -167,7 +170,7 @@ void Display::tftDrawYScaleButtons(byte y_scale)
 void Display::tftDrawChannelScaleButtons(int set_channel)
 {
   tft.drawFastVLine(178, 0, 20, TFT_WHITE);
-  tft.setCursor(145, 21); tft.setTextColor(TFT_WHITE); tft.setTextSize(1); tft.print("Channel:"); tft.print(set_channel);
+  tft.setCursor(145, 21); tft.setTextColor(TFT_WHITE); tft.setTextSize(1); tft.print(text10); tft.print(set_channel);
 
   key[4].initButton(&tft, // channel - box
                         164,
@@ -237,7 +240,7 @@ void Display::touchToExit()
 {
   tft.setTextColor(TFT_BLACK, TFT_LIGHTGREY);
   tft.fillRect(0,32,HEIGHT_1,16, TFT_LIGHTGREY);
-  tft.drawCentreString("Touch screen to exit",120,32,2);
+  tft.drawCentreString(text11,120,32,2);
 }
 
 
@@ -763,3 +766,5 @@ void Display::main(uint8_t scan_mode)
   return;
 }
 // End SPIFFS_functions
+
+#endif
