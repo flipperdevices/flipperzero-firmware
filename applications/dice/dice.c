@@ -14,7 +14,7 @@ uint8_t playerOneScore=0;
 uint8_t playerTwoScore=0;
 char rollTime[1][12];
 char diceType[1][8];
-char strings[2][45];
+char strings[5][45];
 char theScores[1][45];
 bool letsRoll=false;
 
@@ -125,6 +125,35 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 playerTwoScore++;
                 sprintf(strings[1], "%s < %s", deckOne[d1_i], deckTwo[d2_i]);
             }
+
+        } else if(diceSelect==232) {
+            const char* diceOne[] = {
+                "You", "You choose", "Nobody",
+                "Everyone", "Nose goes", "Player to your right"
+            };
+            const char* diceTwo[] = {
+                "take a tiny toke", "just chill", "take 2 tokes",
+                "take a huge hit", "bogart it", "take a puff"
+            };
+            const char* diceThree[] = {
+                "while humming a tune", "with your eyes closed", "on your knees",
+                "while holding your nose", "while spinning in a circle", "in slow motion"
+            };
+            const char* diceFour[] = {
+                "twice", "then tell a joke", "then laugh as hard as you can",
+                "with the player to your left", "then sing a song", "then do a dance"
+            };
+            diceRoll= ((rand() % diceSelect)+1); // JUST TO GET IT GOING? AND FIX BUG
+            sprintf(diceType[0], "%s", "WEED!");
+            sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
+            uint8_t d1_i = rand() % COUNT_OF(diceOne);
+            uint8_t d2_i = rand() % COUNT_OF(diceTwo);
+            uint8_t d3_i = rand() % COUNT_OF(diceThree);
+            uint8_t d4_i = rand() % COUNT_OF(diceFour);
+            sprintf(strings[1], "%s", diceOne[d1_i]);
+            sprintf(strings[2], "%s", diceTwo[d2_i]);
+            sprintf(strings[3], "%s", diceThree[d3_i]);
+            sprintf(strings[4], "%s", diceFour[d4_i]);
         } else {
             diceRoll= ((rand() % diceSelect)+1);
             sprintf(diceType[0], "%s%d", "d", diceSelect);
@@ -147,10 +176,19 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     }
     release_mutex((ValueMutex*)ctx, state);
     if(diceRoll!=0) {
-        canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, strings[1]);
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[0]);
+        if(diceSelect==232) {
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[0]);
+            canvas_draw_str_aligned(canvas, 64, 18, AlignCenter, AlignCenter, strings[1]);
+            canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[2]);
+            canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, strings[3]);
+            canvas_draw_str_aligned(canvas, 64, 42, AlignCenter, AlignCenter, strings[4]);
+        } else {
+            canvas_set_font(canvas, FontPrimary);
+            canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, strings[1]);
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[0]);
+        }
         if(diceSelect==231 && !(playerOneScore==0 && playerTwoScore==0)) {
             canvas_set_font(canvas, FontSecondary);
             sprintf(theScores[0], "%d                                   %d", playerOneScore, playerTwoScore);
@@ -192,6 +230,8 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         elements_button_right(canvas, "SEX");
     } else if(diceSelect==231) {
         elements_button_right(canvas, "WAR");
+    } else if(diceSelect==232) {
+        elements_button_right(canvas, "WEED");
     }
 }
 
@@ -268,6 +308,8 @@ int32_t dice_app(void* p) {
                         } else if(diceSelect==231)  {
                             diceSelect=229;
                         } else if(diceSelect==229)  {
+                            diceSelect=232;
+                        } else if(diceSelect==232)  {
                             diceSelect=59;
                         } else if(diceSelect==59)  {
                             diceSelect=69;
