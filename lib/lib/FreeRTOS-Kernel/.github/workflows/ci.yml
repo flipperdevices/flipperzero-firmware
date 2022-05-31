@@ -1,0 +1,68 @@
+name: CI Checks
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  spell-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Parent Repo
+        uses: actions/checkout@v2
+        with:
+          ref: main
+          repository: aws/aws-iot-device-sdk-embedded-C
+          path: main
+      - name: Clone This Repo
+        uses: actions/checkout@v2
+        with:
+            path: ./kernel
+      - name: Install spell
+        run: |
+          sudo apt-get install spell
+          sudo apt-get install util-linux
+      - name: Check spelling
+        run: |
+          PATH=$PATH:main/tools/spell
+          # Make sure that the portable directory is not included in the spellcheck.
+          sed -i 's/find $DIRNAME/find $DIRNAME -not -path '*portable*'/g' main/tools/spell/find-unknown-comment-words
+          find-unknown-comment-words --directory kernel/ --lexicon ./kernel/.github/lexicon.txt
+          if [ "$?" = "0" ]; then
+            exit 0
+          else
+            exit 1
+          fi
+  formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Uncrustify
+        run: sudo apt-get install uncrustify
+      - name: Run Uncrustify
+        run: |
+          uncrustify --version
+          find . \( -name portable \) -prune -false -o -iname "*.[hc]" -exec uncrustify --check -c .github/uncrustify.cfg {} +
+      - name: Check For Trailing Whitespace
+        run: |
+          set +e
+          grep --exclude="README.md" --exclude-dir="portable"  -rnI -e "[[:blank:]]$" .
+          if [ "$?" = "0" ]; then
+            echo "Files have trailing whitespace."
+            exit 1
+          else
+            exit 0
+          fi
+
+  url-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone This Repo
+        uses: actions/checkout@v2
+        with:
+            path: ./kernel
+      - name: URL Checker
+        run: |
+            bash kernel/.github/actions/url_verifier.sh kernel
+

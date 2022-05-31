@@ -1,0 +1,249 @@
+;/*
+; * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+; * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+; *
+; * SPDX-License-Identifier: MIT
+; *
+; * Permission is hereby granted, free of charge, to any person obtaining a copy of
+; * this software and associated documentation files (the "Software"), to deal in
+; * the Software without restriction, including without limitation the rights to
+; * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+; * the Software, and to permit persons to whom the Software is furnished to do so,
+; * subject to the following conditions:
+; *
+; * The above copyright notice and this permission notice shall be included in all
+; * copies or substantial portions of the Software.
+; *
+; * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+; * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+; * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+; * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+; * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+; * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+; *
+; * https://www.FreeRTOS.org
+; * https://github.com/FreeRTOS
+; *
+; */
+
+#include "porthardware.h"
+
+; Declare all extern symbols here - including any ISRs that are referenced in
+; the vector table.
+
+; ISR functions
+; -------------
+EXTERN TICK_INT
+
+; Functions used by scheduler
+; ---------------------------
+EXTERN vTaskSwitchContext
+EXTERN pxCurrentTCB
+EXTERN xTaskIncrementTick
+EXTERN uxCriticalNesting
+
+; Functions implemented in this file
+; ----------------------------------
+PUBLIC vPortYield
+PUBLIC vPortYieldFromTick
+PUBLIC vPortYieldFromISR
+PUBLIC vPortStart
+
+; Interrupt vector table.
+; -----------------------
+;
+; For simplicity the RTOS tick interrupt routine uses the __task keyword.
+; As the IAR compiler does not permit a function to be declared using both
+; __task and __interrupt, the use of __task necessitates that the interrupt
+; vector table be setup manually.
+;
+; To write an ISR, implement the ISR function using the __interrupt keyword
+; but do not install the interrupt using the "#pragma vector=ABC" method.
+; Instead manually place the name of the ISR in the vector table using an
+; ORG and jmp instruction as demonstrated below.
+; You will also have to add an EXTERN statement at the top of the file.
+
+    ASEG
+
+    ORG TICK_INT_vect                   ; Vector address
+        jmp TICK_INT                    ; ISR
+
+    RSEG CODE
+
+CLR_INT MACRO  FLAG_REG, FLAG_MASK
+    st -y, r16
+    ldi r16, FLAG_MASK
+    sts FLAG_REG, r16
+    ld r16, y+
+        
+    ENDM
+
+; Saving and Restoring a Task Context and Task Switching
+; ------------------------------------------------------
+;
+; The IAR compiler does not fully support inline assembler, so saving and
+; restoring a task context has to be written in an asm file.
+;
+; vPortYield() and vPortYieldFromTick() are usually written in C.  Doing
+; so in this case would required calls to be made to portSAVE_CONTEXT() and
+; portRESTORE_CONTEXT().  This is dis-advantageous as the context switch
+; function would require two extra jump and return instructions over the
+; WinAVR equivalent.
+;
+; To avoid this I have opted to implement both vPortYield() and
+; vPortYieldFromTick() in this assembly file.  For convenience
+; portSAVE_CONTEXT and portRESTORE_CONTEXT are implemented as macros.
+
+portSAVE_CONTEXT MACRO
+    st  -y, r0          ; First save the r0 register - we need to use this.
+    in  r0, SREG        ; Obtain the SREG value so we can disable interrupts...
+    cli                 ; ... as soon as possible.
+    st  -y, r0          ; Store the SREG as it was before we disabled interrupts.
+
+    in  r0, SPL         ; Next store the hardware stack pointer.  The IAR...
+    st  -y, r0          ; ... compiler uses the hardware stack as a call stack ...
+    in  r0, SPH         ; ...  only.
+    st  -y, r0
+
+    st  -y, r1          ; Now store the rest of the registers.  Dont store the ...
+    st  -y, r2          ; ... the Y register here as it is used as the software
+    st  -y, r3          ; stack pointer and will get saved into the TCB.
+    st  -y, r4
+    st  -y, r5
+    st  -y, r6
+    st  -y, r7
+    st  -y, r8
+    st  -y, r9
+    st  -y, r10
+    st  -y, r11
+    st  -y, r12
+    st  -y, r13
+    st  -y, r14
+    st  -y, r15
+    st  -y, r16
+    st  -y, r17
+    st  -y, r18
+    st  -y, r19
+    st  -y, r20
+    st  -y, r21
+    st  -y, r22
+    st  -y, r23
+    st  -y, r24
+    st  -y, r25
+    st  -y, r26
+    st  -y, r27
+    st  -y, r30
+    st  -y, r31
+        
+    lds r0, uxCriticalNesting
+    st  -y, r0                  ; Store the critical nesting counter.
+
+    lds r26, pxCurrentTCB       ; Finally save the software stack pointer (Y ...
+    lds r27, pxCurrentTCB + 1   ; ... register) into the TCB.
+    st  x+, r28
+    st  x+, r29
+
+    ENDM
+
+
+portRESTORE_CONTEXT MACRO
+    lds r26, pxCurrentTCB
+    lds r27, pxCurrentTCB + 1       ; Restore the software stack pointer from ...
+    ld  r28, x+                     ; the TCB into the software stack pointer (...
+    ld  r29, x+                     ; ... the Y register).
+
+    ld  r0, y+
+    sts uxCriticalNesting, r0
+
+    ld  r31, y+                     ; Restore the registers down to R0.  The Y
+    ld  r30, y+                     ; register is missing from this list as it
+    ld  r27, y+                     ; has already been restored.
+    ld  r26, y+
+    ld  r25, y+
+    ld  r24, y+
+    ld  r23, y+
+    ld  r22, y+
+    ld  r21, y+
+    ld  r20, y+
+    ld  r19, y+
+    ld  r18, y+
+    ld  r17, y+
+    ld  r16, y+
+    ld  r15, y+
+    ld  r14, y+
+    ld  r13, y+
+    ld  r12, y+
+    ld  r11, y+
+    ld  r10, y+
+    ld  r9, y+
+    ld  r8, y+
+    ld  r7, y+
+    ld  r6, y+
+    ld  r5, y+
+    ld  r4, y+
+    ld  r3, y+
+    ld  r2, y+
+    ld  r1, y+
+
+    ld  r0, y+                      ; The next thing on the stack is the ...
+    out SPH, r0                     ; ... hardware stack pointer.
+    ld  r0, y+
+    out SPL, r0
+
+    ld  r0, y+                      ; Next there is the SREG register.
+    out SREG, r0
+
+    ld  r0, y+                      ; Finally we have finished with r0, so restore r0.
+
+    ENDM
+
+
+
+; vPortYield(), vPortYieldFromTick() and vPortYieldFromISR()
+; -------------------------------------
+;
+; Manual and preemptive context switch functions respectively.
+; The IAR compiler does not fully support inline assembler,
+; so these are implemented here rather than the more usually
+; place of within port.c.
+
+vPortYield:
+    portSAVE_CONTEXT                ; Save the context of the current task.
+    call vTaskSwitchContext         ; Call the scheduler.
+    portRESTORE_CONTEXT             ; Restore the context of whichever task the ...
+    ret                             ; ... scheduler decided should run.
+
+vPortYieldFromTick:
+    CLR_INT INT_FLAGS, INT_MASK     ; Clear tick interrupt flag
+ 
+    portSAVE_CONTEXT                ; Save the context of the current task.
+    call xTaskIncrementTick         ; Call the timer tick function.
+    tst r16
+    breq SkipTaskSwitch
+    call vTaskSwitchContext         ; Call the scheduler.
+
+SkipTaskSwitch:
+    portRESTORE_CONTEXT             ; Restore the context of whichever task the ...
+    reti                            ; ... scheduler decided should run.
+
+vPortYieldFromISR:
+    portSAVE_CONTEXT                ; Save the context of the current task.
+    call vTaskSwitchContext         ; Call the scheduler.
+    portRESTORE_CONTEXT             ; Restore the context of whichever task the ...
+    reti                            ; ... scheduler decided should run.
+
+; vPortStart()
+; ------------
+;
+; Again due to the lack of inline assembler, this is required
+; to get access to the portRESTORE_CONTEXT macro.
+
+vPortStart:
+        portRESTORE_CONTEXT
+        ret
+
+; Just a filler for unused interrupt vectors.
+vNoISR:
+    reti
+
+END

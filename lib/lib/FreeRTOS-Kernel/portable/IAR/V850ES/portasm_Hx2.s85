@@ -1,0 +1,351 @@
+;/*
+; * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+; * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+; *
+; * SPDX-License-Identifier: MIT
+; *
+; * Permission is hereby granted, free of charge, to any person obtaining a copy of
+; * this software and associated documentation files (the "Software"), to deal in
+; * the Software without restriction, including without limitation the rights to
+; * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+; * the Software, and to permit persons to whom the Software is furnished to do so,
+; * subject to the following conditions:
+; *
+; * The above copyright notice and this permission notice shall be included in all
+; * copies or substantial portions of the Software.
+; *
+; * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+; * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+; * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+; * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+; * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+; * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+; *
+; * https://www.FreeRTOS.org
+; * https://github.com/FreeRTOS
+; *
+; */
+; Note: Select the correct include files for the device used by the application.
+#include "FreeRTOSConfig.h"
+;------------------------------------------------------------------------------
+
+; Functions used by scheduler
+;------------------------------------------------------------------------------
+    EXTERN    vTaskSwitchContext
+    EXTERN    xTaskIncrementTick
+
+; Variables used by scheduler
+;------------------------------------------------------------------------------
+    EXTERN    pxCurrentTCB
+    EXTERN    usCriticalNesting
+
+; Functions implemented in this file
+;------------------------------------------------------------------------------
+    PUBLIC    vPortYield
+    PUBLIC    vPortStart
+
+; Security ID definition
+;------------------------------------------------------------------------------
+#define	CG_SECURITY0	0FFH
+#define	CG_SECURITY1	0FFH
+#define	CG_SECURITY2	0FFH
+#define	CG_SECURITY3	0FFH
+#define	CG_SECURITY4	0FFH
+#define	CG_SECURITY5	0FFH
+#define	CG_SECURITY6	0FFH
+#define	CG_SECURITY7	0FFH
+#define	CG_SECURITY8	0FFH
+#define	CG_SECURITY9	0FFH
+
+; Tick ISR Prototype
+;------------------------------------------------------------------------------
+        PUBWEAK `??MD_INTTM0EQ0??INTVEC 544`
+        PUBLIC MD_INTTM0EQ0
+
+MD_INTTM0EQ0        SYMBOL "MD_INTTM0EQ0"
+`??MD_INTTM0EQ0??INTVEC 544` SYMBOL "??INTVEC 544", MD_INTTM0EQ0
+
+;------------------------------------------------------------------------------
+;   portSAVE_CONTEXT MACRO
+;   Saves the context of the remaining general purpose registers
+;   and the usCriticalNesting Value of the active Task onto the task stack
+;   saves stack pointer to the TCB
+;------------------------------------------------------------------------------
+portSAVE_CONTEXT MACRO
+#if configDATA_MODE == 1                                        ; Using the Tiny data model
+    prepare {r20,r21,r22,r23,r24,r25,r26,r27,r28,r29,r30},76,sp ; save general purpose registers
+    sst.w   r19,72[ep]
+    sst.w   r18,68[ep]
+    sst.w   r17,64[ep]
+    sst.w   r16,60[ep]
+    sst.w   r15,56[ep]
+    sst.w   r14,52[ep]
+    sst.w   r13,48[ep]
+    sst.w   r12,44[ep]
+    sst.w   r11,40[ep]
+    sst.w   r10,36[ep]
+    sst.w   r9,32[ep]
+    sst.w   r8,28[ep]
+    sst.w   r7,24[ep]
+    sst.w   r6,20[ep]
+    sst.w   r5,16[ep]
+    sst.w   r4,12[ep]
+#else                                                           ; Using the Small/Large data model
+    prepare {r20,r21,r22,r23,r24,r26,r27,r28,r29,r30},72,sp     ; save general purpose registers
+    sst.w   r19,68[ep]
+    sst.w   r18,64[ep]
+    sst.w   r17,60[ep]
+    sst.w   r16,56[ep]
+    sst.w   r15,52[ep]
+    sst.w   r14,48[ep]
+    sst.w   r13,44[ep]
+    sst.w   r12,40[ep]
+    sst.w   r11,36[ep]
+    sst.w   r10,32[ep]
+    sst.w   r9,28[ep]
+    sst.w   r8,24[ep]
+    sst.w   r7,20[ep]
+    sst.w   r6,16[ep]
+    sst.w   r5,12[ep]
+#endif /* configDATA_MODE */
+    sst.w   r2,8[ep]
+    sst.w   r1,4[ep]
+    MOVHI   hi1(usCriticalNesting),r0,r1                        ; save usCriticalNesting value to stack
+    ld.w    lw1(usCriticalNesting)[r1],r2
+    sst.w   r2,0[ep]
+    MOVHI   hi1(pxCurrentTCB),r0,r1                             ; save SP to top of current TCB
+    ld.w    lw1(pxCurrentTCB)[r1],r2
+    st.w    sp,0[r2]
+    ENDM
+;------------------------------------------------------------------------------
+
+;------------------------------------------------------------------------------
+;   portRESTORE_CONTEXT MACRO
+;   Gets stack pointer from the current TCB
+;   Restores the context of the usCriticalNesting value and general purpose
+;   registers of the selected task from the task stack
+;------------------------------------------------------------------------------
+portRESTORE_CONTEXT MACRO
+    MOVHI   hi1(pxCurrentTCB),r0,r1         ; get Stackpointer address
+    ld.w    lw1(pxCurrentTCB)[r1],sp
+    MOV     sp,r1
+    ld.w    0[r1],sp                        ; load stackpointer
+    MOV     sp,ep                           ; set stack pointer to element pointer
+    sld.w   0[ep],r1                        ; load usCriticalNesting value from stack
+    MOVHI   hi1(usCriticalNesting),r0,r2
+    st.w    r1,lw1(usCriticalNesting)[r2]
+    sld.w   4[ep],r1                        ; restore general purpose registers
+    sld.w   8[ep],r2
+#if configDATA_MODE == 1                    ; Using Tiny data model
+    sld.w   12[ep],r4
+    sld.w   16[ep],r5
+    sld.w   20[ep],r6
+    sld.w   24[ep],r7
+    sld.w   28[ep],r8
+    sld.w   32[ep],r9
+    sld.w   36[ep],r10
+    sld.w   40[ep],r11
+    sld.w   44[ep],r12
+    sld.w   48[ep],r13
+    sld.w   52[ep],r14
+    sld.w   56[ep],r15
+    sld.w   60[ep],r16
+    sld.w   64[ep],r17
+    sld.w   68[ep],r18
+    sld.w   72[ep],r19
+    dispose 76,{r20,r21,r22,r23,r24,r25,r26,r27,r28,r29,r30}
+#else                                       ; Using Small/Large data model
+    sld.w   12[ep],r5
+    sld.w   16[ep],r6
+    sld.w   20[ep],r7
+    sld.w   24[ep],r8
+    sld.w   28[ep],r9
+    sld.w   32[ep],r10
+    sld.w   36[ep],r11
+    sld.w   40[ep],r12
+    sld.w   44[ep],r13
+    sld.w   48[ep],r14
+    sld.w   52[ep],r15
+    sld.w   56[ep],r16
+    sld.w   60[ep],r17
+    sld.w   64[ep],r18
+    sld.w   68[ep],r19
+    dispose 72,{r20,r21,r22,r23,r24,r26,r27,r28,r29,r30}
+#endif /* configDATA_MODE */
+    ENDM
+;------------------------------------------------------------------------------
+
+;------------------------------------------------------------------------------
+;   Restore the context of the first task that is going to run.
+;
+;   Input:  NONE
+;
+;   Call:   CALL    vPortStart
+;
+;   Output: NONE
+;------------------------------------------------------------------------------
+    RSEG CODE:CODE
+vPortStart:
+    portRESTORE_CONTEXT	                    ; Restore the context of whichever task the ...
+    ld.w    0[sp],lp
+    ldsr    lp,5                            ; restore PSW
+    DI
+    ld.w    4[sp],lp                        ; restore LP
+    ld.w    8[sp],lp                        ; restore LP
+    ADD     0x0C,sp                         ; set SP to right position
+    EI
+    jmp     [lp]
+;------------------------------------------------------------------------------
+
+;------------------------------------------------------------------------------
+;   Port Yield function to check for a Task switch in the cooperative and
+;   preemptive mode
+;
+;   Input:  NONE
+;
+;   Call:   CALL    vPortYield
+;
+;   Output: NONE
+;------------------------------------------------------------------------------
+
+	RSEG CODE:CODE
+vPortYield:
+
+    add     -0x0C,sp                          ; prepare stack to save necessary values
+    st.w    lp,8[sp]                        ; store LP to stack
+    stsr    0,r31
+    st.w    lp,4[sp]                        ; store EIPC to stack
+    stsr    1,lp
+    st.w    lp,0[sp]                        ; store EIPSW to stack
+    portSAVE_CONTEXT		            ; Save the context of the current task.
+    jarl    vTaskSwitchContext,lp           ; Call the scheduler.
+    portRESTORE_CONTEXT		            ; Restore the context of whichever task the ...
+                		            ; ... scheduler decided should run.
+	ld.w    0[sp],lp                        ; restore EIPSW from stack
+    ldsr    lp,1
+    ld.w    4[sp],lp                        ; restore EIPC from stack
+    ldsr    lp,0
+    ld.w    8[sp],lp                        ; restore LP from stack
+    add     0x0C,sp                         ; set SP to right position
+
+    RETI
+
+;------------------------------------------------------------------------------
+
+;------------------------------------------------------------------------------
+;   Perform the necessary steps of the Tick Count Increment and Task Switch
+;   depending on the chosen kernel configuration
+;
+;   Input:  NONE
+;
+;   Call:   ISR
+;
+;   Output: NONE
+;------------------------------------------------------------------------------
+#if configUSE_PREEMPTION == 1               ; use preemptive kernel mode
+
+MD_INTTM0EQ0:
+
+    add     -0x0C,sp                          ; prepare stack to save necessary values
+    st.w    lp,8[sp]                        ; store LP to stack
+    stsr    0,r31
+    st.w    lp,4[sp]                        ; store EIPC to stack
+    stsr    1,lp
+    st.w    lp,0[sp]                        ; store EIPSW to stack
+    portSAVE_CONTEXT		            ; Save the context of the current task.
+    jarl    xTaskIncrementTick,lp           ; Call the timer tick function.
+    jarl    vTaskSwitchContext,lp           ; Call the scheduler.
+    portRESTORE_CONTEXT		            ; Restore the context of whichever task the ...
+                		            ; ... scheduler decided should run.
+    ld.w    0[sp],lp                        ; restore EIPSW from stack
+    ldsr    lp,1
+    ld.w    4[sp],lp                        ; restore EIPC from stack
+    ldsr    lp,0
+    ld.w    8[sp],lp                        ; restore LP from stack
+    add     0x0C,sp                         ; set SP to right position
+
+    RETI
+;------------------------------------------------------------------------------
+#else                                       ; use cooperative kernel mode
+
+MD_INTTM0EQ0:
+    prepare {lp,ep},8,sp
+    sst.w   r1,4[ep]
+    sst.w   r5,0[ep]
+    jarl    xTaskIncrementTick,lp           ; Call the timer tick function.
+    sld.w   0[ep],r5
+    sld.w   4[ep],r1
+    dispose 8,{lp,ep}
+    RETI
+#endif /* configUSE_PREEMPTION */
+
+;------------------------------------------------------------------------------
+        COMMON INTVEC:CODE:ROOT(2)
+        ORG 544
+`??MD_INTTM0EQ0??INTVEC 544`:
+        JR MD_INTTM0EQ0
+
+        RSEG NEAR_ID:CONST:SORT:NOROOT(2)
+`?<Initializer for usCriticalNesting>`:
+        DW 10
+
+      COMMON INTVEC:CODE:ROOT(2)
+      ORG 40H
+`??vPortYield??INTVEC 40`:
+        JR vPortYield
+
+;------------------------------------------------------------------------------
+; set microcontroller security ID
+
+      COMMON INTVEC:CODE:ROOT(2)
+      ORG 70H
+`SECUID`:
+      DB CG_SECURITY0
+      DB CG_SECURITY1
+      DB CG_SECURITY2
+      DB CG_SECURITY3
+      DB CG_SECURITY4
+      DB CG_SECURITY5
+      DB CG_SECURITY6
+      DB CG_SECURITY7
+      DB CG_SECURITY8
+      DB CG_SECURITY9
+
+
+; set microcontroller Option bytes
+
+      COMMON INTVEC:CODE:ROOT(2)
+      ORG 122
+`OPTBYTES`:
+      DB 0xFD
+      DB 0xFF
+      DB 0xFF
+      DB 0xFF
+      DB 0xFF
+      DB 0xFF
+
+#if configOCD_USAGE == 1
+
+      COMMON   INTVEC:CODE:ROOT(4)
+      ORG      0x230
+      PUBLIC ROM_INT2
+ROM_INT2:
+      DB 0xff, 0xff, 0xff, 0xff
+      DB 0xff, 0xff, 0xff, 0xff
+      DB 0xff, 0xff, 0xff, 0xff
+      DB 0xff, 0xff, 0xff, 0xff
+
+
+      COMMON   INTVEC:CODE:ROOT(4)
+      ORG      0x60
+      PUBLIC   ROM_INT
+ROM_INT:
+      DB 0xff, 0xff, 0xff, 0xff
+      DB 0xff, 0xff, 0xff, 0xff
+      DB 0xff, 0xff, 0xff, 0xff
+      DB 0xff, 0xff, 0xff, 0xff
+
+#endif /* configOCD_USAGE */
+
+      END
+

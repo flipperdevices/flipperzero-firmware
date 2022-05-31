@@ -74,7 +74,7 @@ const SubGhzProtocol subghz_protocol_keeloq = {
     .name = SUBGHZ_PROTOCOL_KEELOQ_NAME,
     .type = SubGhzProtocolTypeDynamic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_315 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save |
             SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_keeloq_decoder,
@@ -127,6 +127,7 @@ static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instanc
                        instance->generic.cnt;
     uint32_t hop = 0;
     uint64_t man = 0;
+    uint64_t code_found_reverse;
     int res = 0;
 
     for
@@ -140,17 +141,25 @@ static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instanc
                     break;
                 case KEELOQ_LEARNING_NORMAL:
                     //Simple Learning
-                    man =
-                        subghz_protocol_keeloq_common_normal_learning(fix, manufacture_code->key);
+                    man = subghz_protocol_keeloq_common_normal_learning(fix, manufacture_code->key);
+                    hop = subghz_protocol_keeloq_common_encrypt(decrypt, man);
+                    break;
+                case KEELOQ_LEARNING_SECURE:
+                    //Secure Learning
+                    man = subghz_protocol_keeloq_common_secure_learning(fix, instance->generic.seed, manufacture_code->key);
                     hop = subghz_protocol_keeloq_common_encrypt(decrypt, man);
                     break;
                 case KEELOQ_LEARNING_MAGIC_XOR_TYPE_1:
+                    //Magic XOR type-1 Learning
                     man = subghz_protocol_keeloq_common_magic_xor_type1_learning(
                         instance->generic.serial, manufacture_code->key);
                     hop = subghz_protocol_keeloq_common_encrypt(decrypt, man);
                     break;
                 case KEELOQ_LEARNING_UNKNOWN:
-                    hop = 0; //todo
+                    //KeeLoq Replay Attack (sends just the captured key)
+                    code_found_reverse = subghz_protocol_blocks_reverse_key(
+                    instance->generic.data, instance->generic.data_count_bit);
+                    hop = code_found_reverse & 0x00000000ffffffff;
                     break;
                 }
                 break;
@@ -160,11 +169,8 @@ static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instanc
         uint64_t yek = (uint64_t)fix << 32 | hop;
         instance->generic.data =
             subghz_protocol_blocks_reverse_key(yek, instance->generic.data_count_bit);
-        return true;
-    } else {
-        instance->manufacture_name = "Unknown";
-        return false;
     }
+    return true;
 }
 
 bool subghz_protocol_keeloq_create_data(
@@ -176,18 +182,42 @@ bool subghz_protocol_keeloq_create_data(
     const char* manufacture_name,
     uint32_t frequency,
     FuriHalSubGhzPreset preset) {
-    furi_assert(context);
-    SubGhzProtocolEncoderKeeloq* instance = context;
-    instance->generic.serial = serial;
-    instance->generic.cnt = cnt;
-    instance->manufacture_name = manufacture_name;
-    instance->generic.data_count_bit = 64;
-    bool res = subghz_protocol_keeloq_gen_data(instance, btn);
-    if(res) {
-        res =
-            subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
-    }
-    return res;
+        furi_assert(context);
+        SubGhzProtocolEncoderKeeloq* instance = context;
+        instance->generic.serial = serial;
+        instance->generic.cnt = cnt;
+        instance->manufacture_name = manufacture_name;
+        instance->generic.data_count_bit = 64;
+        bool res = subghz_protocol_keeloq_gen_data(instance, btn);
+        if(res) {
+            res = subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+        }
+        return res;
+}
+
+bool subghz_protocol_keeloq_bft_create_data(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t serial,
+    uint8_t btn,
+    uint16_t cnt,
+    uint32_t seed,
+    const char* manufacture_name,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset) {
+        furi_assert(context);
+        SubGhzProtocolEncoderKeeloq* instance = context;
+        instance->generic.serial = serial;
+        instance->generic.btn = btn;
+        instance->generic.cnt = cnt;
+        instance->generic.seed = seed;
+        instance->manufacture_name = manufacture_name;
+        instance->generic.data_count_bit = 64;
+        bool res = subghz_protocol_keeloq_gen_data(instance, btn);
+        if(res) {
+            res = subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+        }
+        return res;
 }
 
 /**
@@ -266,13 +296,18 @@ bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* fl
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
+        uint8_t seed_data[sizeof(uint32_t)] = {0};
+        for(size_t i = 0; i < sizeof(uint32_t); i++) {
+            seed_data[sizeof(uint32_t) - i - 1] = (instance->generic.seed >> i * 8) & 0xFF;
+        }
+        if(!flipper_format_read_hex(flipper_format, "Seed", seed_data, sizeof(uint32_t))) {
+            FURI_LOG_E(TAG, "Missing Seed");
+        }
+        instance->generic.seed = seed_data[0] << 24 | seed_data[1] << 16 | seed_data[2] << 8 | seed_data[3] ; 
+        FURI_LOG_I(TAG, "encoder seed = %8X", instance->generic.seed);
 
         subghz_protocol_keeloq_check_remote_controller(
             &instance->generic, instance->keystore, &instance->manufacture_name);
-
-        if(strcmp(instance->manufacture_name, "DoorHan")) {
-            break;
-        }
 
         //optional parameter parameter
         flipper_format_read_uint32(
@@ -478,7 +513,6 @@ static uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
     uint8_t btn = (uint8_t)(fix >> 28);
     uint32_t decrypt = 0;
     uint64_t man;
-    uint32_t seed = 0;
 
     for
         M_EACH(manufacture_code, *subghz_keystore_get_data(keystore), SubGhzKeyArray_t) {
@@ -503,7 +537,7 @@ static uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
                 break;
             case KEELOQ_LEARNING_SECURE:
                 man = subghz_protocol_keeloq_common_secure_learning(
-                    fix, seed, manufacture_code->key);
+                    fix, instance->seed, manufacture_code->key);
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
                 if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
                     *manufacture_name = string_get_cstr(manufacture_code->name);
@@ -558,7 +592,7 @@ static uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
 
                 // Secure Learning
                 man = subghz_protocol_keeloq_common_secure_learning(
-                    fix, seed, manufacture_code->key);
+                    fix, instance->seed, manufacture_code->key);
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
                 if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
                     *manufacture_name = string_get_cstr(manufacture_code->name);
@@ -566,7 +600,7 @@ static uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
                 }
 
                 // Check for mirrored man
-                man = subghz_protocol_keeloq_common_secure_learning(fix, seed, man_rev);
+                man = subghz_protocol_keeloq_common_secure_learning(fix, instance->seed, man_rev);
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
                 if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
                     *manufacture_name = string_get_cstr(manufacture_code->name);
@@ -637,11 +671,12 @@ bool subghz_protocol_decoder_keeloq_serialize(
     FuriHalSubGhzPreset preset) {
     furi_assert(context);
     SubGhzProtocolDecoderKeeloq* instance = context;
-    subghz_protocol_keeloq_check_remote_controller(
-        &instance->generic, instance->keystore, &instance->manufacture_name);
 
     bool res =
         subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    
+    subghz_protocol_keeloq_check_remote_controller(
+        &instance->generic, instance->keystore, &instance->manufacture_name);
 
     if(res && !flipper_format_write_string_cstr(
                   flipper_format, "Manufacture", instance->manufacture_name)) {
@@ -660,6 +695,19 @@ bool subghz_protocol_decoder_keeloq_deserialize(void* context, FlipperFormat* fl
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
+        uint8_t seed_data[sizeof(uint32_t)] = {0};
+        for(size_t i = 0; i < sizeof(uint32_t); i++) {
+            seed_data[sizeof(uint32_t) - i - 1] = (instance->generic.seed >> i * 8) & 0xFF;
+        }
+        if(!flipper_format_read_hex(flipper_format, "Seed", seed_data, sizeof(uint32_t))) {
+            FURI_LOG_E(TAG, "Missing Seed");
+        }
+        instance->generic.seed = seed_data[0] << 24 | seed_data[1] << 16 | seed_data[2] << 8 | seed_data[3] ; 
+        FURI_LOG_I(TAG, "decoder seed = %8X", instance->generic.seed);
         res = true;
     } while(false);
 
@@ -669,6 +717,7 @@ bool subghz_protocol_decoder_keeloq_deserialize(void* context, FlipperFormat* fl
 void subghz_protocol_decoder_keeloq_get_string(void* context, string_t output) {
     furi_assert(context);
     SubGhzProtocolDecoderKeeloq* instance = context;
+    
     subghz_protocol_keeloq_check_remote_controller(
         &instance->generic, instance->keystore, &instance->manufacture_name);
 
@@ -686,8 +735,7 @@ void subghz_protocol_decoder_keeloq_get_string(void* context, string_t output) {
         "Key:%08lX%08lX\r\n"
         "Fix:0x%08lX    Cnt:%04X\r\n"
         "Hop:0x%08lX    Btn:%01lX\r\n"
-        "MF:%s\r\n"
-        "Sn:0x%07lX \r\n",
+        "MF:%s    Sn:0x%07lX \r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         code_found_hi,
