@@ -13,11 +13,8 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
-- WAV Player fix by atmanos
-- Added 8BALL 'DICE' and new options for 'SEX' dice
-- Latest updates up to DEV 67fbefbe
-- Latest changes to Unleashed 05/25 as of release
-- Pulled DEV changes from #1262 (This fixes issues with f6384116)
+- Pulled DEV changes from 66dbb689
+- Added Weed Dice
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
