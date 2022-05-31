@@ -14,5 +14,5 @@ set(CMAKE_EXECUTABLE_SUFFIX_C   .elf)
 set(CMAKE_EXECUTABLE_SUFFIX_CXX .elf)
 set(CMAKE_EXECUTABLE_SUFFIX_ASM .elf)
 
-# See: https://cmake.org/cmake/help/latest/variable/CMAKE_FIND_ROOT_PATH_MODE_PROGRAM.html
+# This should be safe to set for a bare-metal cross-compiler
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
