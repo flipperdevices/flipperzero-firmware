@@ -36,7 +36,6 @@ extern int32_t lfrfid_app(void* p);
 extern int32_t lfrfid_debug_app(void* p);
 extern int32_t nfc_app(void* p);
 extern int32_t passport_app(void* p);
-extern int32_t scened_app(void* p);
 extern int32_t storage_test_app(void* p);
 extern int32_t subghz_app(void* p);
 extern int32_t usb_mouse_app(void* p);
@@ -61,6 +60,7 @@ extern int32_t jukebox_app(void *p);
 extern int32_t universal_rf_remote_app(void *p);
 extern int32_t unirfremix_app(void *p);
 extern int32_t dice_app(void *p);
+extern int32_t hid_analyzer_app(void* p);
 
 // On system start hooks declaration
 extern void bt_on_system_start();
@@ -304,7 +304,7 @@ const size_t FLIPPER_APPS_COUNT = COUNT_OF(FLIPPER_APPS);
 const FlipperApplication FLIPPER_GAMES[] = {
 
 // #ifdef APP_RAYCAST_GAME
-//     {.app = raycast_game_app, .name = "Raycast Game", .stack_size = 4096, .icon = NULL},
+//     {.app = raycast_game_app, .name = "Raycast Game", .stack_size = 4096, .icon = NULL, .flags = FlipperApplicationFlagDefault},
 // #endif
 
 // #ifdef FLOOPPER_BLOOPPER
@@ -319,16 +319,16 @@ const FlipperApplication FLIPPER_GAMES[] = {
     {.app = dice_app, 
 	.name = "Dice Roller", 
 	.stack_size = 1024, 
-	.icon = &A_Plugins_14
-	},
+	.icon = &A_Plugins_14,
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_FLAPPY_GAME
     {.app = flappy_game_app, 
 	.name = "Flipper Flappy Bird", 
 	.stack_size = 1024, 
-	.icon = &A_Plugins_14
-	},
+	.icon = &A_Plugins_14,
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_SNAKE_GAME
@@ -417,6 +417,14 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
      .name = "Bluetooth Remote",
      .stack_size = 1024,
      .icon = NULL,
+     .flags = FlipperApplicationFlagDefault},
+#endif
+
+#ifdef APP_HID_ANALYZER
+    {.app = hid_analyzer_app,
+     .name = "HID Analyzer",
+     .stack_size = 2048,
+     .icon = &A_125khz_14,
      .flags = FlipperApplicationFlagDefault},
 #endif
 
@@ -523,14 +531,6 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
 #ifdef APP_INFRARED_MONITOR
     {.app = infrared_monitor_app,
      .name = "Infrared Monitor",
-     .stack_size = 1024,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
-#endif
-
-#ifdef APP_SCENED
-    {.app = scened_app,
-     .name = "Templated Scene",
      .stack_size = 1024,
      .icon = NULL,
      .flags = FlipperApplicationFlagDefault},
