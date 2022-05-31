@@ -564,7 +564,7 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     } else if(value >= 778999847 && value <= 928000000) {
         furi_hal_subghz_set_path(FuriHalSubGhzPath868);
     } else {
-        furi_crash("SugGhz: Incorrect frequency during set.");
+        furi_crash("SubGhz: Incorrect frequency during set.");
     }
     return value;
 }
