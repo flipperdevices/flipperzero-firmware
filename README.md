@@ -13,6 +13,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
+- Added Frequency 467750000 for restaurant (Chili's) pagers
 - Added [HID Analyzer (By Ownasaurus)](https://github.com/Ownasaurus/flipperzero-firmware/tree/hid-analyzer/applications/hid_analyzer)
 - Pulled DEV changes from 66dbb689
 - Added Weed Dice
