@@ -13,7 +13,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
-- Added [HID Analyzer](https://github.com/Ownasaurus/flipperzero-firmware/tree/hid-analyzer/applications/hid_analyzer)
+- Added [HID Analyzer (By Ownasaurus)](https://github.com/Ownasaurus/flipperzero-firmware/tree/hid-analyzer/applications/hid_analyzer)
 - Pulled DEV changes from 66dbb689
 - Added Weed Dice
 
@@ -46,7 +46,7 @@ Plugins:
 - [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)
 - [Dice Roller Including SEX/WAR/8BALL DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/dice/dice.c)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)
-- [HID Analyzer](https://github.com/Ownasaurus/flipperzero-firmware/tree/hid-analyzer/applications/hid_analyzer)
+- [HID Analyzer (By Ownasaurus)](https://github.com/Ownasaurus/flipperzero-firmware/tree/hid-analyzer/applications/hid_analyzer)
 - [Menu Changes and Icons (By Redlink)]( https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
 - [RF Remix (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix)
 - [RF Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/main/applications/universal_rf)
