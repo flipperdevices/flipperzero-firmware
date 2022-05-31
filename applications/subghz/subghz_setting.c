@@ -39,7 +39,6 @@ static const uint32_t subghz_frequency_list[] = {
     434775000, /* LPD433 last channels */
     438900000,
     464000000,
-    467750000,
     /* 779 - 928 */
     779000000,
     868350000,
