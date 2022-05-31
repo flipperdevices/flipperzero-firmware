@@ -26,6 +26,7 @@
 #include "secplus_v1.h"
 #include "megacode.h"
 #include "holtek.h"
+#include "chamberlain_code.h"
 
 /**
  * Registration by name SubGhzProtocol.
