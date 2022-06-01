@@ -34,6 +34,10 @@ const char PROGMEM SNIFF_PMKID_CMD[] = "sniffpmkid";
 const char PROGMEM STOPSCAN_CMD[] = "stopscan";
 
 // WiFi attack
+const char PROGMEM ATTACK_CMD[] = "attack";
+const char PROGMEM ATTACK_TYPE_DEAUTH[] = "deauth";
+const char PROGMEM ATTACK_TYPE_BEACON[] = "beacon";
+const char PROGMEM ATTACK_TYPE_PROBE[] = "probe";
 
 // WiFi Aux
 const char PROGMEM LIST_AP_CMD[] = "listap";
@@ -47,31 +51,31 @@ class CommandLine {
     int argSearch(LinkedList<String>* cmd_args, String key);
 
     const char* ascii_art =
-    "\n"
-    "              @@@@@@                        \n"
-    "              @@@@@@@@                      \n"
-    "              @@@@@@@@@@@                   \n"
-    "             @@@@@@  @@@@@@                 \n"
-    "          @@@@@@@      @@@@@@@              \n"
-    "        @@@@@@            @@@@@@            \n"
-    "     @@@@@@@                @@@@@@@         \n"
-    "   @@@@@@                      @@@@@@       \n"
-    "@@@@@@@              @@@@@@@@@@@@@@@@       \n"
-    "@@@@@                 @@@@@@@@@@@@@@@       \n"
-    "@@@@@                   @@@@@@@             \n"
-    "@@@@@                      @@@@@@           \n"
-    "@@@@@@                       @@@@@@@        \n"
-    "  @@@@@@                        @@@@@@@@@@@@\n"
-    "    @@@@@@@                         (@@@@@@ \n"
-    "       @@@@@@                     @@@@@@.   \n"
-    "         @@@@@@@               #@@@@@@      \n"
-    "            @@@@@@           @@@@@@         \n"
-    "              @@@@@@@     #@@@@@@           \n"
-    "                 @@@@@@ @@@@@@,             \n"
-    "                   @@@@@@@@@                \n"
-    "                      @@@@@@                \n"
-    "                        @@@@                \n"
-    "\n";
+    "\r\n"
+    "              @@@@@@                        \r\n"
+    "              @@@@@@@@                      \r\n"
+    "              @@@@@@@@@@@                   \r\n"
+    "             @@@@@@  @@@@@@                 \r\n"
+    "          @@@@@@@      @@@@@@@              \r\n"
+    "        @@@@@@            @@@@@@            \r\n"
+    "     @@@@@@@                @@@@@@@         \r\n"
+    "   @@@@@@                      @@@@@@       \r\n"
+    "@@@@@@@              @@@@@@@@@@@@@@@@       \r\n"
+    "@@@@@                 @@@@@@@@@@@@@@@       \r\n"
+    "@@@@@                   @@@@@@@             \r\n"
+    "@@@@@                      @@@@@@           \r\n"
+    "@@@@@@                       @@@@@@@        \r\n"
+    "  @@@@@@                        @@@@@@@@@@@@\r\n"
+    "    @@@@@@@                          @@@@@@ \r\n"
+    "       @@@@@@                     @@@@@@    \r\n"
+    "         @@@@@@@                @@@@@@      \r\n"
+    "            @@@@@@           @@@@@@         \r\n"
+    "              @@@@@@@      @@@@@@           \r\n"
+    "                 @@@@@@ @@@@@@              \r\n"
+    "                   @@@@@@@@@                \r\n"
+    "                      @@@@@@                \r\n"
+    "                        @@@@                \r\n"
+    "\r\n";
         
   public:
     CommandLine();

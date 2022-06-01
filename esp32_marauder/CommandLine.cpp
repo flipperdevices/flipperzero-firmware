@@ -146,7 +146,35 @@ void CommandLine::runCommand(String input) {
     else if (cmd_args.get(0) == SNIFF_PMKID_CMD) {
       wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);
     }
+
+    //// WiFi attack commands
+    // attack
+    if (cmd_args.get(0) == ATTACK_CMD) {
+      int attack_type_switch = this->argSearch(&cmd_args, "-t"); // Required
+  
+      if (attack_type_switch == -1) {
+        Serial.println("You must specify an attack type");
+        return;
+      }
+      else {
+        String attack_type = cmd_args.get(attack_type_switch + 1);
+  
+        // Branch on attack type
+        if (attack_type == ATTACK_TYPE_DEAUTH) {
+          #ifdef HAS_SCREEN
+            display_obj.clearScreen();
+            menu_function_obj.drawStatusBar();
+          #endif
+          wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH, TFT_RED);
+        }
+        else {
+          Serial.println("Attack type not properly defined");
+          return;
+        }
+      }
+    }
   }
+
 
   //// WiFi aux commands
 
