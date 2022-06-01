@@ -13,10 +13,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
-- Removed Frequency 467750000 for restaurant (Chili's) pagers since it can cause amplifyier damage
-- Added [HID Analyzer (By Ownasaurus)](https://github.com/Ownasaurus/flipperzero-firmware/tree/hid-analyzer/applications/hid_analyzer)
-- Pulled DEV changes from 66dbb689
-- Added Weed Dice
+- Pulled DEV changes from b625e84
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
