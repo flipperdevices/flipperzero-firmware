@@ -106,7 +106,7 @@ void* subghz_protocol_encoder_chamb_code_alloc(SubGhzEnvironment* environment) {
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
-    instance->encoder.size_upload = 28; //max 10bit*2 + 2 (start, stop)
+    instance->encoder.size_upload = 24;
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_runing = false;
     return instance;
@@ -119,6 +119,18 @@ void subghz_protocol_encoder_chamb_code_free(void* context) {
     free(instance);
 }
 
+static uint64_t subghz_protocol_chamb_bit_to_code(uint64_t data, uint8_t size) {
+    uint64_t data_res = 0;
+    for(uint8_t i = 0; i < size; i++) {
+        if(!(bit_read(data, size - i - 1))) {
+            data_res = data_res << 4 | CHAMBERLAIN_CODE_BIT_0;
+        } else {
+            data_res = data_res << 4 | CHAMBERLAIN_CODE_BIT_1;
+        }
+    }
+    return data_res;
+}
+
 /**
  * Generating an upload from data.
  * @param instance Pointer to a SubGhzProtocolEncoderChamb_Code instance
@@ -127,47 +139,69 @@ void subghz_protocol_encoder_chamb_code_free(void* context) {
 static bool
     subghz_protocol_encoder_chamb_code_get_upload(SubGhzProtocolEncoderChamb_Code* instance) {
     furi_assert(instance);
-    size_t index = 0;
-    size_t size_upload = (instance->generic.data_count_bit * 2);
-    if(size_upload > instance->encoder.size_upload) {
-        FURI_LOG_E(TAG, "Size upload exceeds allocated encoder buffer.");
+
+    uint64_t data = subghz_protocol_chamb_bit_to_code(
+        instance->generic.data, instance->generic.data_count_bit);
+
+    switch(instance->generic.data_count_bit) {
+    case 7:
+        data = ((data >> 4) << 16) | (data & 0xF) << 4 | CHAMBERLAIN_7_CODE_MASK_CHECK;
+        break;
+    case 8:
+        data = ((data >> 12) << 16) | (data & 0xFF) << 4 | CHAMBERLAIN_8_CODE_MASK_CHECK;
+        break;
+    case 9:
+        data = (data << 4) | CHAMBERLAIN_9_CODE_MASK_CHECK;
+        break;
+
+    default:
+        furi_crash(TAG " unknown protocol.");
         return false;
-    } else {
-        instance->encoder.size_upload = size_upload;
+        break;
+    }
+#define UPLOAD_HEX_DATA_SIZE 10
+    uint8_t upload_hex_data[UPLOAD_HEX_DATA_SIZE] = {0};
+    size_t upload_hex_count_bit = 0;
+
+    //insert guard time
+    for(uint8_t i = 0; i < 36; i++) {
+        subghz_protocol_blocks_set_bit_array(
+            0, upload_hex_data, upload_hex_count_bit++, UPLOAD_HEX_DATA_SIZE);
     }
 
-    //Send key data
-    for(uint8_t i = instance->generic.data_count_bit; i > 1; i--) {
-        if(bit_read(instance->generic.data, i - 1)) {
-            //send bit 1
-            instance->encoder.upload[index++] =
-                level_duration_make(true, (uint32_t)subghz_protocol_chamb_code_const.te_short * 3);
-            instance->encoder.upload[index++] =
-                level_duration_make(false, (uint32_t)subghz_protocol_chamb_code_const.te_short);
-        } else {
-            //send bit 0
-            instance->encoder.upload[index++] =
-                level_duration_make(true, (uint32_t)subghz_protocol_chamb_code_const.te_short);
-            instance->encoder.upload[index++] = level_duration_make(
-                false, (uint32_t)subghz_protocol_chamb_code_const.te_short * 3);
+    //insert data
+    switch(instance->generic.data_count_bit) {
+    case 7:
+    case 9:
+        for(uint8_t i = 44; i > 0; i--) {
+            if(!bit_read(data, i - 1)) {
+                subghz_protocol_blocks_set_bit_array(
+                    0, upload_hex_data, upload_hex_count_bit++, UPLOAD_HEX_DATA_SIZE);
+            } else {
+                subghz_protocol_blocks_set_bit_array(
+                    1, upload_hex_data, upload_hex_count_bit++, UPLOAD_HEX_DATA_SIZE);
+            }
         }
+        break;
+    case 8:
+        for(uint8_t i = 40; i > 0; i--) {
+            if(!bit_read(data, i - 1)) {
+                subghz_protocol_blocks_set_bit_array(
+                    0, upload_hex_data, upload_hex_count_bit++, UPLOAD_HEX_DATA_SIZE);
+            } else {
+                subghz_protocol_blocks_set_bit_array(
+                    1, upload_hex_data, upload_hex_count_bit++, UPLOAD_HEX_DATA_SIZE);
+            }
+        }
+        break;
     }
-    //Send end bit
-    if(bit_read(instance->generic.data, 0)) {
-        //send bit 1
-        instance->encoder.upload[index++] =
-            level_duration_make(true, (uint32_t)subghz_protocol_chamb_code_const.te_short * 3);
-        //Send PT_GUARD
-        instance->encoder.upload[index++] =
-            level_duration_make(false, (uint32_t)subghz_protocol_chamb_code_const.te_short * 42);
-    } else {
-        //send bit 0
-        instance->encoder.upload[index++] =
-            level_duration_make(true, (uint32_t)subghz_protocol_chamb_code_const.te_short);
-        //Send PT_GUARD
-        instance->encoder.upload[index++] =
-            level_duration_make(false, (uint32_t)subghz_protocol_chamb_code_const.te_short * 44);
-    }
+
+    instance->encoder.size_upload = subghz_protocol_blocks_get_upload(
+        upload_hex_data,
+        upload_hex_count_bit,
+        instance->encoder.upload,
+        instance->encoder.size_upload,
+        subghz_protocol_chamb_code_const.te_short);
 
     return true;
 }
@@ -275,8 +309,6 @@ static bool subghz_protocol_decoder_chamb_code_check_mask_and_parse(
         instance->decoder.decode_data &= ~CHAMBERLAIN_8_CODE_MASK;
         instance->decoder.decode_data = instance->decoder.decode_data >> 4 |
                                         CHAMBERLAIN_CODE_BIT_0 << 8; //DIP 6 no use
-        //(instance->decoder.decode_data >> 12) << 4 |
-        //((instance->decoder.decode_data >> 4) & 0xFF);
     } else if(
         (instance->decoder.decode_data & CHAMBERLAIN_9_CODE_MASK) ==
         CHAMBERLAIN_9_CODE_MASK_CHECK) {
