@@ -412,7 +412,7 @@ void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
         furi_hal_subghz_load_registers(furi_hal_subghz_preset_gfsk_9_99kb_async_regs);
         furi_hal_subghz_load_patable(furi_hal_subghz_preset_gfsk_async_patable);
     } else {
-        furi_crash("SugGhz: Missing config.");
+        furi_crash("SubGhz: Missing config.");
     }
     furi_hal_subghz_preset = preset;
 }
@@ -553,12 +553,12 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     value = furi_hal_subghz_set_frequency(value);
     if(value >= 299999755 && value <= 348000335) {
         furi_hal_subghz_set_path(FuriHalSubGhzPath315);
-    } else if(value >= 386999938 && value <= 481000000) {
+    } else if(value >= 386999938 && value <= 464000000) {
         furi_hal_subghz_set_path(FuriHalSubGhzPath433);
     } else if(value >= 778999847 && value <= 928000000) {
         furi_hal_subghz_set_path(FuriHalSubGhzPath868);
     } else {
-        furi_crash("SugGhz: Incorrect frequency during set.");
+        furi_crash("SubGhz: Incorrect frequency during set.");
     }
     return value;
 }
