@@ -38,8 +38,8 @@ bool Settings::begin() {
   DynamicJsonDocument jsonBuffer(1024);
   DeserializationError error = deserializeJson(jsonBuffer, settingsFile);
   serializeJson(jsonBuffer, json_string);
-  Serial.println("Settings: " + (String)json_string + "\n");
-  this->printJsonSettings(json_string);
+  //Serial.println("Settings: " + (String)json_string + "\n");
+  //this->printJsonSettings(json_string);
 
   this->json_settings_string = json_string;
   

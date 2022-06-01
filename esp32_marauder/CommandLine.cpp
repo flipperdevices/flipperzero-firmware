@@ -4,6 +4,14 @@ CommandLine::CommandLine() {
 }
 
 void CommandLine::RunSetup() {
+  Serial.println(this->ascii_art);
+
+  Serial.println(F("\n\n--------------------------------\n"));
+  Serial.println(F("         ESP32 Marauder      \n"));
+  Serial.println("            " + version_number + "\n");
+  Serial.println(F("       By: justcallmekoko\n"));
+  Serial.println(F("--------------------------------\n\n"));
+  
   Serial.print("> ");
 }
 
@@ -26,12 +34,12 @@ void CommandLine::main(uint32_t currentTime) {
     Serial.print("> ");
 }
 
-LinkedList<String> CommandLine::parseCommand(String input) {
+LinkedList<String> CommandLine::parseCommand(String input, char* delim) {
   LinkedList<String> cmd_args;
   
   if (input != "") {
     
-    char delim[] = " ";
+    //char delim[] = " ";
 
     char fancy[input.length() + 1] = {};
     input.toCharArray(fancy, input.length() + 1);
@@ -70,7 +78,7 @@ void CommandLine::runCommand(String input) {
   else
     return;
 
-  LinkedList<String> cmd_args = this->parseCommand(input);
+  LinkedList<String> cmd_args = this->parseCommand(input, " ");
 
   //// Admin commands
 
@@ -103,6 +111,10 @@ void CommandLine::runCommand(String input) {
     wifi_scan_obj.RunClearAPs();
   }
 
+  else if (cmd_args.get(0) == REBOOT_CMD) {
+    ESP.restart();
+  }
+
   //// WiFi Scan commands
   if (!wifi_scan_obj.scanning()) {
 
@@ -133,6 +145,51 @@ void CommandLine::runCommand(String input) {
     // PMKID sniff
     else if (cmd_args.get(0) == SNIFF_PMKID_CMD) {
       wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);
+    }
+  }
+
+  //// WiFi aux commands
+
+  // List access points
+  if (cmd_args.get(0) == LIST_AP_CMD) {
+    for (int i = 0; i < access_points->size(); i++) {
+      if (access_points->get(i).selected)
+        Serial.println("[" + (String)i + "] " + access_points->get(i).essid + " (selected)");
+      else
+        Serial.println("[" + (String)i + "] " + access_points->get(i).essid);
+    }
+  }
+  // Select access points or stations
+  else if (cmd_args.get(0) == SEL_CMD) {
+    // Get switches
+    int ap_sw = this->argSearch(&cmd_args, "-a");
+    int st_sw = this->argSearch(&cmd_args, "-s");
+
+    // Access points
+    if (ap_sw != -1) {
+      // Get list of indices
+      LinkedList<String> ap_index = this->parseCommand(cmd_args.get(ap_sw + 1), ",");
+
+      // Mark APs as selected
+      for (int i = 0; i < ap_index.size(); i++) {
+        int index = ap_index.get(i).toInt();
+        if (access_points->get(index).selected) {
+          // Unselect "selected" ap
+          AccessPoint new_ap = access_points->get(index);
+          new_ap.selected = false;
+          access_points->set(index, new_ap);
+        }
+        else {
+          // Select "unselected" ap
+          AccessPoint new_ap = access_points->get(index);
+          new_ap.selected = true;
+          access_points->set(index, new_ap);
+        }
+      }
+    }
+    // Stations
+    else if (st_sw != -1) {
+      
     }
   }
 }

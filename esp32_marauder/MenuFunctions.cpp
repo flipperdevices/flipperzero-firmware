@@ -879,7 +879,7 @@ void MenuFunctions::main(uint32_t currentTime)
           (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
       {
-        Serial.println("Stopping scan...");
+        //Serial.println("Stopping scan...");
         wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
   
         // If we don't do this, the text and button coordinates will be off
@@ -923,7 +923,7 @@ void MenuFunctions::main(uint32_t currentTime)
           (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
       {
-        Serial.println("Stopping scan...");
+        //Serial.println("Stopping scan...");
         wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
   
         // If we don't do this, the text and button coordinates will be off
@@ -1014,7 +1014,6 @@ void MenuFunctions::main(uint32_t currentTime)
         current_menu->selected--;
         this->buttonSelected(current_menu->selected);
         this->buttonNotSelected(current_menu->selected + 1);
-        Serial.println("Current menu index: " + (String)current_menu->selected);
       }
     }
     if (d_btn.justPressed()){
@@ -1022,11 +1021,9 @@ void MenuFunctions::main(uint32_t currentTime)
         current_menu->selected++;
         this->buttonSelected(current_menu->selected);
         this->buttonNotSelected(current_menu->selected - 1);
-        Serial.println("Current menu index: " + (String)current_menu->selected);
       }
     }
     if(c_btn_press){
-      Serial.println("CENTER");
       current_menu->list->get(current_menu->selected).callable();
     }
 
@@ -1309,7 +1306,6 @@ void MenuFunctions::drawStatusBar()
 
 void MenuFunctions::orientDisplay()
 {
-  Serial.println(F("orientDisplay()"));
   display_obj.tft.init();
 
   display_obj.tft.setRotation(0); // Portrait
@@ -1319,10 +1315,10 @@ void MenuFunctions::orientDisplay()
   #ifndef MARAUDER_MINI
     #ifdef TFT_SHIELD
       uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait with TFT Shield
-      Serial.println("Using TFT Shield");
+      //Serial.println("Using TFT Shield");
     #else if defined(TFT_DIY)
       uint16_t calData[5] = { 339, 3470, 237, 3438, 2 }; // tft.setRotation(0); // Portrait with DIY TFT
-      Serial.println("Using TFT DIY");
+      //Serial.println("Using TFT DIY");
     #endif
 
     display_obj.tft.setTouch(calData);
@@ -1332,7 +1328,7 @@ void MenuFunctions::orientDisplay()
 }
 
 void MenuFunctions::runBoolSetting(String key) {
-  Serial.println("Building bool setting screen...");
+  //Serial.println("Building bool setting screen...");
   display_obj.tftDrawRedOnOffButton();
   //display_obj.tftDrawGreenOnOffButton();
 }
@@ -1884,7 +1880,7 @@ void MenuFunctions::addNodes(Menu * menu, String name, uint16_t color, Menu * ch
 
 void MenuFunctions::buildButtons(Menu * menu)
 {
-  Serial.println("Bulding buttons...");
+  //Serial.println("Bulding buttons...");
   if (menu->list != NULL)
   {
     //for (int i = 0; i < sizeof(key); i++)
@@ -1913,7 +1909,7 @@ void MenuFunctions::buildButtons(Menu * menu)
 
 void MenuFunctions::displayCurrentMenu()
 {
-  Serial.println(F("Displaying current menu..."));
+  //Serial.println(F("Displaying current menu..."));
   display_obj.clearScreen();
   display_obj.tft.setTextColor(TFT_LIGHTGREY, TFT_DARKGREY);
   this->drawStatusBar();

@@ -5,7 +5,7 @@ LedInterface::LedInterface() {
 }
 
 void LedInterface::RunSetup() {
-  Serial.println("Setting neopixel to black...");
+  //Serial.println("Setting neopixel to black...");
   strip.setBrightness(0);
   strip.begin();
   strip.setPixelColor(0, strip.Color(0, 0, 0));

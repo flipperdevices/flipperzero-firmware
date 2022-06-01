@@ -250,13 +250,13 @@ int WiFiScan::generateSSIDs() {
 void WiFiScan::initWiFi(uint8_t scan_mode) {
   // Set the channel
   if (scan_mode != WIFI_SCAN_OFF) {
-    Serial.println(F("Initializing WiFi settings..."));
+    //Serial.println(F("Initializing WiFi settings..."));
     this->changeChannel();
   
     this->force_pmkid = settings_obj.loadSetting<bool>(text_table4[5]);
     this->force_probe = settings_obj.loadSetting<bool>(text_table4[6]);
     this->save_pcap = settings_obj.loadSetting<bool>(text_table4[7]);
-    Serial.println(F("Initialization complete"));
+    //Serial.println(F("Initialization complete"));
   }
 }
 
@@ -424,7 +424,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
 
   #ifdef HAS_SCREEN
     display_obj.display_buffer->clear();
-    Serial.print("display_buffer->size(): ");
+    //Serial.print("display_buffer->size(): ");
     Serial.println(display_obj.display_buffer->size());
   
     display_obj.tteBar = false;
@@ -808,10 +808,10 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
   #ifdef HAS_SCREEN
     #ifdef TFT_SHIELD
       uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield
-      Serial.println("Using TFT Shield");
+      //Serial.println("Using TFT Shield");
     #else if defined(TFT_DIY)
       uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY
-      Serial.println("Using TFT DIY");
+      //Serial.println("Using TFT DIY");
     #endif
     display_obj.tft.setTouch(calData);
   

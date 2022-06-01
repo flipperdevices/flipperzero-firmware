@@ -24,10 +24,10 @@ void Display::RunSetup()
 
     #ifdef TFT_SHIELD
       uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait with TFT Shield
-      Serial.println(F("Using TFT Shield"));
+      //Serial.println(F("Using TFT Shield"));
     #else if defined(TFT_DIY)
       uint16_t calData[5] = { 339, 3470, 237, 3438, 2 }; // tft.setRotation(0); // Portrait with DIY TFT
-      Serial.println(F("Using TFT DIY"));
+      //Serial.println(F("Using TFT DIY"));
     #endif
     tft.setTouch(calData);
 
@@ -36,9 +36,9 @@ void Display::RunSetup()
   //tft.fillScreen(TFT_BLACK);
   clearScreen();
 
-  Serial.println("SPI_FREQUENCY: " + (String)SPI_FREQUENCY);
-  Serial.println("SPI_READ_FREQUENCY:" + (String)SPI_READ_FREQUENCY);
-  Serial.println("SPI_TOUCH_FREQUENCY: " + (String)SPI_TOUCH_FREQUENCY);
+  //Serial.println("SPI_FREQUENCY: " + (String)SPI_FREQUENCY);
+  //Serial.println("SPI_READ_FREQUENCY:" + (String)SPI_READ_FREQUENCY);
+  //Serial.println("SPI_TOUCH_FREQUENCY: " + (String)SPI_TOUCH_FREQUENCY);
 
   #ifdef KIT
     pinMode(KIT_LED_BUILTIN, OUTPUT);
@@ -247,7 +247,7 @@ void Display::touchToExit()
 // Function to just draw the screen black
 void Display::clearScreen()
 {
-  Serial.println(F("clearScreen()"));
+  //Serial.println(F("clearScreen()"));
   tft.fillScreen(TFT_BLACK);
   tft.setCursor(0, 0);
 }
@@ -289,7 +289,7 @@ void Display::showCenterText(String text, int y)
 
 void Display::initScrollValues(bool tte)
 {
-  Serial.println(F("initScrollValues()"));
+  //Serial.println(F("initScrollValues()"));
   yDraw = YMAX - BOT_FIXED_AREA - TEXT_HEIGHT;
 
   xPos = 0;
@@ -345,10 +345,10 @@ int Display::scroll_line(uint32_t color) {
 
 // Function to setup hardware scroll for TFT screen
 void Display::setupScrollArea(uint16_t tfa, uint16_t bfa) {
-  Serial.println(F("setupScrollArea()"));
-  Serial.println("   tfa: " + (String)tfa);
-  Serial.println("   bfa: " + (String)bfa);
-  Serial.println("yStart: " + (String)this->yStart);
+  //Serial.println(F("setupScrollArea()"));
+  //Serial.println("   tfa: " + (String)tfa);
+  //Serial.println("   bfa: " + (String)bfa);
+  //Serial.println("yStart: " + (String)this->yStart);
   #ifndef MARAUDER_MINI
     tft.writecommand(ILI9341_VSCRDEF); // Vertical scroll definition
     tft.writedata(tfa >> 8);           // Top Fixed Area line count
@@ -399,9 +399,9 @@ void Display::drawJpeg(const char *filename, int xpos, int ypos) {
     // render the image onto the screen at given coordinates
     jpegRender(xpos, ypos);
   }
-  else {
-    Serial.println(F("Jpeg file format not supported!"));
-  }
+  //else {
+  //  Serial.println(F("Jpeg file format not supported!"));
+  //}
 }
 
 void Display::setupDraw() {
@@ -421,7 +421,7 @@ void Display::drawStylus()
   boolean pressed = tft.getTouch(&x, &y);
 
   if ((x <= 10) && (y <= 10) && (pressed)) {
-    Serial.println(F("Exit draw function"));
+    //Serial.println(F("Exit draw function"));
     this->draw_tft = false;
     this->exit_draw = true;
     return;
@@ -554,7 +554,7 @@ void Display::jpegRender(int xpos, int ypos) {
 //   Print information decoded from the Jpeg image
 //====================================================================================
 void Display::jpegInfo() {
-
+/*
   Serial.println("===============");
   Serial.println("JPEG image info");
   Serial.println("===============");
@@ -568,7 +568,7 @@ void Display::jpegInfo() {
   Serial.print  ("MCU height :"); Serial.println(JpegDec.MCUHeight);
   Serial.println("===============");
   Serial.println("");
-  
+  */
 }
 
 //====================================================================================
