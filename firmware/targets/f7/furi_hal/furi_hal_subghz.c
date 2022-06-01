@@ -553,7 +553,7 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     value = furi_hal_subghz_set_frequency(value);
     if(value >= 299999755 && value <= 348000335) {
         furi_hal_subghz_set_path(FuriHalSubGhzPath315);
-    } else if(value >= 386999938 && value <= 481000000) {
+    } else if(value >= 386999938 && value <= 464000000) {
         furi_hal_subghz_set_path(FuriHalSubGhzPath433);
     } else if(value >= 778999847 && value <= 928000000) {
         furi_hal_subghz_set_path(FuriHalSubGhzPath868);
