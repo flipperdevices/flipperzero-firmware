@@ -243,13 +243,11 @@ void subghz_protocol_decoder_linear_feed(void* context, bool level, uint32_t dur
                     subghz_protocol_linear_const.te_delta * 20)) {
                     break;
                 }
-                if(DURATION_DIFF(
-                       instance->decoder.te_last, subghz_protocol_linear_const.te_short) <
+                if(DURATION_DIFF(instance->decoder.te_last, subghz_protocol_linear_const.te_short) <
                    subghz_protocol_linear_const.te_delta) {
                     subghz_protocol_blocks_add_bit(&instance->decoder, 0);
                 } else if(
-                    DURATION_DIFF(
-                        instance->decoder.te_last, subghz_protocol_linear_const.te_long) <
+                    DURATION_DIFF(instance->decoder.te_last, subghz_protocol_linear_const.te_long) <
                     subghz_protocol_linear_const.te_delta) {
                     subghz_protocol_blocks_add_bit(&instance->decoder, 1);
                 }
