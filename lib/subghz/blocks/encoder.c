@@ -32,14 +32,14 @@ size_t subghz_protocol_blocks_get_upload(
             duration += duration_bit;
         } else {
             furi_assert(max_size_upload > size_upload);
-            upload[size_upload++] =
-                level_duration_make(subghz_protocol_blocks_get_bit_array(data_array, index_bit-1), duration);
+            upload[size_upload++] = level_duration_make(
+                subghz_protocol_blocks_get_bit_array(data_array, index_bit - 1), duration);
             last_bit = !last_bit;
             duration = duration_bit;
         }
         index_bit++;
     }
-    upload[size_upload++] =
-                level_duration_make(subghz_protocol_blocks_get_bit_array(data_array, index_bit-1), duration);
+    upload[size_upload++] = level_duration_make(
+        subghz_protocol_blocks_get_bit_array(data_array, index_bit - 1), duration);
     return size_upload;
 }
