@@ -538,6 +538,12 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
         FURI_LOG_E(TAG, "Failed to start data exchange");
         return false;
     }
+
+    if(tx_rx->sniff_tx) {
+        bool crc_dropped = !(flags & RFAL_TXRX_FLAGS_CRC_TX_MANUAL);
+        tx_rx->sniff_tx(tx_rx->tx_data, tx_rx->tx_bits, crc_dropped, tx_rx->sniff_context);
+    }
+
     uint32_t start = DWT->CYCCNT;
     while(state != RFAL_NFC_STATE_DATAEXCHANGE_DONE) {
         rfalNfcWorker();
@@ -562,6 +568,11 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
     } else {
         memcpy(tx_rx->rx_data, temp_rx_buff, MIN(*temp_rx_bits / 8, FURI_HAL_NFC_DATA_BUFF_SIZE));
         tx_rx->rx_bits = *temp_rx_bits;
+    }
+
+    if(tx_rx->sniff_rx) {
+        bool crc_dropped = !(flags & RFAL_TXRX_FLAGS_CRC_RX_KEEP);
+        tx_rx->sniff_rx(tx_rx->rx_data, tx_rx->rx_bits, crc_dropped, tx_rx->sniff_context);
     }
 
     return true;

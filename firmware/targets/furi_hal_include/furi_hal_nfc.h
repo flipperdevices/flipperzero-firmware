@@ -80,6 +80,9 @@ typedef struct {
     uint8_t sak;
 } FuriHalNfcDevData;
 
+typedef void (
+    *FuriHalNfcTxRxSniffCallback)(uint8_t* data, uint16_t bits, bool crc_dropped, void* context);
+
 typedef struct {
     uint8_t tx_data[FURI_HAL_NFC_DATA_BUFF_SIZE];
     uint8_t tx_parity[FURI_HAL_NFC_PARITY_BUFF_SIZE];
@@ -89,6 +92,10 @@ typedef struct {
     uint16_t rx_bits;
     FuriHalNfcTxRxType tx_rx_type;
     NfcaSignal* nfca_signal;
+
+    FuriHalNfcTxRxSniffCallback sniff_tx;
+    FuriHalNfcTxRxSniffCallback sniff_rx;
+    void* sniff_context;
 } FuriHalNfcTxRxContext;
 
 /** Init nfc
