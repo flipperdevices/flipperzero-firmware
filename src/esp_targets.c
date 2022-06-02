@@ -148,7 +148,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
             .miso_dlen = ESP32xx_SPI_REG_BASE + 0x28,
         },
         .efuse_base = 0x6001A000,
-        .chip_magic_value = { 0xca26cc22, 0 }, // ESP32H2-BETA1
+        .chip_magic_value = {0xca26cc22, 0x6881b06f}, // ESP32H2-BETA1, ESP32H2-BETA2
         .read_spi_config = spi_config_esp32xx,
     },
 };
