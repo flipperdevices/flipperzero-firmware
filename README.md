@@ -13,6 +13,8 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
+- Removed Universal RF since it duplicates buttons from RF Remix
+- Fixed version number on make/about
 - Pulled DEV changes from b625e84
 
 **Special Instructions:**
