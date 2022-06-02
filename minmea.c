@@ -93,6 +93,10 @@ bool minmea_scan(const char *sentence, const char *format, ...)
 {
     bool result = false;
     bool optional = false;
+
+    if (sentence == NULL)
+        return false;
+
     va_list ap;
     va_start(ap, format);
 
