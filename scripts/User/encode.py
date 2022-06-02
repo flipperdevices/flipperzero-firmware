@@ -6,9 +6,20 @@ import os
 import sys
 
 
-w = open(sys.argv[2],"wb")
+parser = argparse.ArgumentParser(description='Turn .xbm files into cooked .bm files for flipper FS')
 
-output = subprocess.check_output(["cat", sys.argv[1]])
+parser.add_argument('infile', metavar='i',
+                    help='Input file')
+parser.add_argument('outfile', metavar='o',
+                    help='File to write to')
+
+args = vars(parser.parse_args())
+
+r = open(args["infile"],"r")
+w = open(args["outfile"],"wb")
+
+
+output = subprocess.check_output(["cat", args["infile"]])
 f = io.StringIO(output.decode().strip())
 width = int(f.readline().strip().split(" ")[2])
 height = int(f.readline().strip().split(" ")[2])
