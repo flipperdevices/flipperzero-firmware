@@ -17,10 +17,6 @@ parser.add_argument('Height', metavar='H', type=int, nargs="?",  default="64",
                     help='Height of the image')
 
 args = vars(parser.parse_args())
-#print(args["infile"])
-#print(args["outfile"])
-
-
 
 r = open(args["infile"],"rb")
 w = open(args["outfile"],"w")
@@ -38,7 +34,7 @@ if(fileStream[0:2] == bytes([0x01,0x00])):
 	unpad=fileStream[4:]
 else:
 	if(fileStream[0:1] == bytes([0x00])):
-		unpad=fileStream[2:]
+		unpad=fileStream[3:]
 
 
 
