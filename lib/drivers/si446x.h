@@ -37,6 +37,12 @@ bool si446x_switch_to_start_rx(
     uint8_t len_package_rx);
 bool si446x_switch_to_idle(FuriHalSpiBusHandle* handle);
 bool si446x_write_gpio(FuriHalSpiBusHandle* handle, SI446X_GPIO_t pin, uint8_t gpio_mode);
+bool si446x_write_sw(
+    FuriHalSpiBusHandle* handle,
+    SI446X_GPIO_t sw0_pin,
+    uint8_t sw0_gpio_mode,
+    SI446X_GPIO_t sw1_pin,
+    uint8_t sw1_gpio_mode);
 bool si446x_read_gpio(FuriHalSpiBusHandle* handle, SI446X_GPIO_t pin);
 bool si446x_set_properties(
     FuriHalSpiBusHandle* handle,
@@ -55,7 +61,6 @@ uint32_t si446x_set_frequency_and_step_channel(
     uint32_t step_channel_hz);
 bool si446x_set_deviation(FuriHalSpiBusHandle* handle, uint32_t freq_hz, uint32_t deviation_hz);
 bool si446x_set_bps(FuriHalSpiBusHandle* handle, uint32_t freq_hz, uint32_t bps);
-
 
 #ifdef __cplusplus
 }

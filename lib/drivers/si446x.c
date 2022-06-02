@@ -94,8 +94,7 @@ SI446X_State_t si446x_get_current_channel(FuriHalSpiBusHandle* handle) {
 }
 
 uint8_t si446x_get_fast_reg(FuriHalSpiBusHandle* handle, uint8_t reg) {
-    
-    uint8_t buff_trx[] = {reg,0,0,0,0};
+    uint8_t buff_trx[] = {reg, 0, 0, 0, 0};
     // furi_hal_spi_acquire(handle);
     // furi_hal_spi_bus_tx(handle, &reg, 1, SI446X_TIMEOUT);
     // furi_hal_spi_release(handle);
@@ -184,6 +183,26 @@ bool si446x_write_gpio(FuriHalSpiBusHandle* handle, SI446X_GPIO_t pin, uint8_t g
         SI446X_GPIO_DRV_HIGH};
     buff_tx[pin + 1] = gpio_mode;
     return si446x_write_data(handle, &buff_tx[0], pin + 2);
+}
+
+bool si446x_write_sw(
+    FuriHalSpiBusHandle* handle,
+    SI446X_GPIO_t sw0_pin,
+    uint8_t sw0_gpio_mode,
+    SI446X_GPIO_t sw1_pin,
+    uint8_t sw1_gpio_mode) {
+    uint8_t buff_tx[] = {
+        SI446X_CMD_GPIO_PIN_CFG,
+        SI446X_GPIO_MODE_DONOTHING, //SI446X_GPIO_Mode_t
+        SI446X_GPIO_MODE_DONOTHING, //SI446X_GPIO_Mode_t
+        SI446X_GPIO_MODE_DONOTHING, //SI446X_GPIO_Mode_t
+        SI446X_GPIO_MODE_DONOTHING, //SI446X_GPIO_Mode_t
+        SI446X_NIRQ_MODE_DONOTHING, //SI446X_NIRQ_Mode_t
+        SI446X_SDO_MODE_DONOTHING, //SI446X_SDO_Mode_t
+        SI446X_GPIO_DRV_HIGH};
+    buff_tx[sw0_pin + 1] = sw0_gpio_mode;
+    buff_tx[sw1_pin + 1] = sw1_gpio_mode;
+    return si446x_write_data(handle, &buff_tx[0], sw1_pin + 2);
 }
 
 bool si446x_read_gpio(FuriHalSpiBusHandle* handle, SI446X_GPIO_t pin) {

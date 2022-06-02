@@ -142,8 +142,7 @@ void furi_hal_subghz_dump_state() {
 void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
     //ToDo need Reset?
     //download with evaluation takes 200ms without calibration 20ms
-    switch (preset)
-    {
+    switch(preset) {
     case FuriHalSubGhzPresetOok650Async:
         furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_650khz_async_regs);
         furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
@@ -163,17 +162,17 @@ void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
     case FuriHalSubGhzPresetOok650AsyncFreq:
         furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_650khz_async_for_freq_regs);
         furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
-        break;    
+        break;
     // case FuriHalSubGhzPresetMSK99_97KbAsync:
     //     furi_hal_subghz_load_config(furi_hal_subghz_preset_msk_99_97kb_async_regs);
     //     //furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
-    //     break; 
+    //     break;
     // case FuriHalSubGhzPresetGFSK9_99KbAsync:
     //     furi_hal_subghz_load_config(furi_hal_subghz_preset_gfsk_9_99kb_async_regs);
     //     //furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
-    //     break; 
+    //     break;
     default:
-    furi_crash(NULL);
+        furi_crash(NULL);
         break;
     }
 
@@ -295,7 +294,7 @@ void furi_hal_subghz_rx() {
 bool furi_hal_subghz_tx() {
     if(furi_hal_subghz_regulation != SubGhzRegulationTxRx) return false;
     si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_INPUT);
-    
+
     si446x_clear_interrupt_status(&furi_hal_spi_bus_handle_subghz);
     uint8_t channel = 0;
     return si446x_switch_to_start_tx(
@@ -393,25 +392,42 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
 }
 
 void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
-    // furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    // if(path == FuriHalSubGhzPath433) {
-    //     furi_hal_gpio_write(&gpio_rf_sw_0, 0);
-    //     cc1101_write_reg(
-    //         &furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
-    // } else if(path == FuriHalSubGhzPath315) {
-    //     furi_hal_gpio_write(&gpio_rf_sw_0, 1);
-    //     cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW);
-    // } else if(path == FuriHalSubGhzPath868) {
-    //     furi_hal_gpio_write(&gpio_rf_sw_0, 1);
-    //     cc1101_write_reg(
-    //         &furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
-    // } else if(path == FuriHalSubGhzPathIsolate) {
-    //     furi_hal_gpio_write(&gpio_rf_sw_0, 0);
-    //     cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG2, CC1101IocfgHW);
-    // } else {
-    //     furi_crash(NULL);
-    // }
-    // furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    //Path_433      sw_0-0 sw_1-1
+    //Path_315      sw_0-1 sw_1-0
+    //Path_868      sw_0-1 sw_1-1
+    //Path_Isolate  sw_0-0 sw_1-0
+
+    if(path == FuriHalSubGhzPath433) {
+        si446x_write_sw(
+            &furi_hal_spi_bus_handle_subghz,
+            SI446X_GPIO2,
+            SI446X_GPIO_MODE_DRIVE0,
+            SI446X_GPIO3,
+            SI446X_GPIO_MODE_DRIVE1);
+    } else if(path == FuriHalSubGhzPath315) {
+        si446x_write_sw(
+            &furi_hal_spi_bus_handle_subghz,
+            SI446X_GPIO2,
+            SI446X_GPIO_MODE_DRIVE1,
+            SI446X_GPIO3,
+            SI446X_GPIO_MODE_DRIVE0);
+    } else if(path == FuriHalSubGhzPath868) {
+        si446x_write_sw(
+            &furi_hal_spi_bus_handle_subghz,
+            SI446X_GPIO2,
+            SI446X_GPIO_MODE_DRIVE1,
+            SI446X_GPIO3,
+            SI446X_GPIO_MODE_DRIVE1);
+    } else if(path == FuriHalSubGhzPathIsolate) {
+        si446x_write_sw(
+            &furi_hal_spi_bus_handle_subghz,
+            SI446X_GPIO2,
+            SI446X_GPIO_MODE_DRIVE0,
+            SI446X_GPIO3,
+            SI446X_GPIO_MODE_DRIVE0);
+    } else {
+        furi_crash(NULL);
+    }
 }
 
 volatile uint32_t furi_hal_subghz_capture_delta_duration = 0;
