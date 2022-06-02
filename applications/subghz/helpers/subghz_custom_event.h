@@ -5,7 +5,7 @@ typedef enum {
     SubGhzCustomEventManagerSet,
     SubGhzCustomEventManagerSetRAW,
 
-//SubmenuIndex
+    //SubmenuIndex
     SubmenuIndexPricenton,
     SubmenuIndexNiceFlo12bit,
     SubmenuIndexNiceFlo24bit,
@@ -24,7 +24,7 @@ typedef enum {
     SubmenuIndexSecPlus_v2_315_00,
     SubmenuIndexSecPlus_v2_390_00,
 
- //SubGhzCustomEvent
+    //SubGhzCustomEvent
     SubGhzCustomEventSceneDeleteSuccess = 100,
     SubGhzCustomEventSceneDelete,
     SubGhzCustomEventSceneDeleteRAW,
