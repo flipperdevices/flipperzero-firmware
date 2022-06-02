@@ -23,7 +23,7 @@ extern "C" {
 #include <minmea_compat.h>
 #endif
 
-#define MINMEA_MAX_LENGTH 80
+#define MINMEA_MAX_SENTENCE_LENGTH 80
 
 enum minmea_sentence_id {
     MINMEA_INVALID = -1,

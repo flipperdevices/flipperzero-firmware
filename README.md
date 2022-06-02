@@ -75,7 +75,7 @@ The library doesn't perform this conversion automatically for the following reas
 ## Example
 
 ```c
-char line[MINMEA_MAX_LENGTH];
+char line[MINMEA_MAX_SENTENCE_LENGTH];
 while (fgets(line, sizeof(line), stdin) != NULL) {
     switch (minmea_sentence_id(line, false)) {
         case MINMEA_SENTENCE_RMC: {

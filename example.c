@@ -16,7 +16,7 @@
 
 int main(void)
 {
-    char line[MINMEA_MAX_LENGTH];
+    char line[MINMEA_MAX_SENTENCE_LENGTH];
     while (fgets(line, sizeof(line), stdin) != NULL) {
         printf("%s", line);
         switch (minmea_sentence_id(line, false)) {

@@ -269,7 +269,7 @@ END_TEST
 
 START_TEST(test_minmea_scan_s)
 {
-    char value[MINMEA_MAX_LENGTH];
+    char value[MINMEA_MAX_SENTENCE_LENGTH];
 
     ck_assert(minmea_scan(",bar,baz", "s", value) == true);
     ck_assert_str_eq(value, "");
@@ -402,7 +402,7 @@ START_TEST(test_minmea_scan_complex2)
     struct minmea_float bearing_true; char bearing_true_mark;
     struct minmea_float bearing_magnetic; char bearing_magnetic_mark;
     struct minmea_float distance; char distance_units;
-    char name[MINMEA_MAX_LENGTH];
+    char name[MINMEA_MAX_SENTENCE_LENGTH];
     ck_assert(minmea_scan(sentence, "tTfdfdfcfcfcs",
         type,
         &t,
