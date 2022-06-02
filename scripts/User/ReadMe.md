@@ -1,7 +1,6 @@
 #####################################
 encode.py
 decode.py
-
 A set of python3 scripts for processing the Flipper image files.
 
 #####################################
