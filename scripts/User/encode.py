@@ -6,8 +6,7 @@ import os
 import sys
 
 
-w = open(sys.argv[1]+".bm","wb")
-
+w = open(sys.argv[2],"wb")
 
 output = subprocess.check_output(["cat", sys.argv[1]])
 f = io.StringIO(output.decode().strip())
