@@ -1,0 +1,18 @@
+Import("env", "lib_flags")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/drivers",
+    ],
+    CPPDEFINES=[],
+)
+
+
+libenv = env.Clone()
+libenv.MergeFlags(lib_flags)
+
+sources = Glob("*.c", source=True)  # libenv.GlobRecursive("*.c", ".")
+
+lib = libenv.StaticLibrary("hwdrivers", sources)
+libenv.Install("#/${BUILD_DIR}/lib", lib)
+Return("lib")

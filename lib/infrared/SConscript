@@ -1,0 +1,19 @@
+Import("env", "lib_flags")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/infrared/encoder_decoder",
+        "#/lib/infrared/worker",
+    ],
+    CPPDEFINES=[],
+)
+
+
+libenv = env.Clone()
+libenv.MergeFlags(lib_flags)
+
+sources = libenv.GlobRecursive("*.c", ".")
+
+lib = libenv.StaticLibrary("infrared", sources)
+libenv.Install("#/${BUILD_DIR}/lib", lib)
+Return("lib")

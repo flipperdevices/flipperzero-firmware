@@ -18,7 +18,7 @@ vars.Add(
 
 env = Environment(
     variables=vars,
-    tools=["gcc", "g++", "ar", "gnulink", "python", "compilation_db"],
+    tools=["as", "gcc", "g++", "ar", "gnulink", "python", "compilation_db"],
     # CC="arm-none-eabi-gcc",
     # CXX="arm-none-eabi-g++",
     # LINK="arm-none-eabi-g++",
@@ -34,11 +34,17 @@ env = Environment(
         "PATH": os.environ["PATH"],
     },
 )
+
+if env["PLATFORM"] == "win32":
+    # On Windows, python 3 executable is usually just "python"
+    env["PYTHON3"] = env["PYTHON3"][:-1]
+
 Help(vars.GenerateHelpText(env))
 
 # Default value for -j
 
 SetOption("num_jobs", multiprocessing.cpu_count())
+SetOption("implicit_cache", True)
 
 
 # Setting up temp file parameters
@@ -59,7 +65,7 @@ env["TEMPFILEARGESCFUNC"] = tempfile_arg_esc_func
 # Set up cross-compile tools
 for binary in [
     "AR",
-    # "AS",
+    "AS",
     "CC",
     "CXX",
     # "LINK",
@@ -91,4 +97,59 @@ def GlobRecursive(pattern, node=".", exclude=None):
 
 env.GlobRecursive = GlobRecursive
 
-Export("env")
+
+def check_exists(path):
+    # print("checking", File(path).abspath)
+    return os.path.exists(File(path).abspath)
+
+
+def build_module(env, module):
+    print("module")
+    module_sconscript = f"{module}/SConscript"
+    if not check_exists(module_sconscript):
+        module_sconscript = f"{module}.scons"
+        if not check_exists(module_sconscript):
+            print(f"Cannot build module {module}: scons file not found")
+            Exit(2)
+
+    # # module_sconscript = os.path.join(module, "SConscript")
+    # print("check for ", module_sconscript)
+    # if not os.path.exists(module_sconscript):
+    #     module_sconscript = f"{module}.scons"
+
+    print("sub-building", module_sconscript)
+    return env.SConscript(
+        module_sconscript,
+        # variant_dir=module + "/obj",
+        # variant_dir=env["BUILD_DIR"],
+        duplicate=0,
+    )
+
+
+def BuildModules(env, modules):
+    print("build list", modules)
+    result = []
+    for module in modules:
+        build_res = build_module(env, module)
+        # print("module ", module, build_res)
+        if build_res is None:
+            continue
+        elif isinstance(build_res, list):
+            result.extend(build_res)
+        else:
+            result.append(build_res[0])  # ???
+    return result
+
+
+env.BuildModules = BuildModules
+
+lib_flags = {
+    "CCFLAGS": [
+        "-Os",
+    ],
+    "CPPDEFINES": [
+        "NDEBUG",
+    ],
+}
+
+Export("env", "lib_flags")

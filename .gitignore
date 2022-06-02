@@ -42,3 +42,9 @@ dist
 
 # SCons
 .sconsign.dblite
+
+# Build objects
+*.d
+*.o
+*.su
+*.a

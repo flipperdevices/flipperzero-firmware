@@ -1,0 +1,18 @@
+Import("env", "lib_flags")
+
+libenv = env.Clone()
+libenv.MergeFlags(lib_flags)
+
+libenv.Append(
+    CPPPATH=[
+        "#/assets/compiled",
+    ],
+)
+
+sources = libenv.GlobRecursive("*.c", "#/core")
+sources += libenv.GlobRecursive("*.c", ".")
+sources += ["targets/f${FLIPPER_TARGET}/startup_stm32wb55xx_cm4.s"]
+
+lib = libenv.Library("flipper${FLIPPER_TARGET}", sources)
+libenv.Install("#/${BUILD_DIR}/lib", lib)
+Return("lib")

@@ -64,19 +64,26 @@ class Main(App):
 
     def generate(self):
         current_info = GitVersion(self.args.sourcedir).get_version_info()
-        new_version_info_fmt = "\n".join(
-            f"#define {key} {current_info[key]}" for key in current_info
+        new_version_info_fmt = (
+            "\n".join(f"#define {key} {current_info[key]}" for key in current_info)
+            + "\n"
         )
 
         current_version_info = None
 
         try:
+            print(f"cwd: '{os.getcwd()}'")
+            print(f"path: '{self.args.output}'")
+            os.system("ls lib/toolbox/version*")
             with open(self.args.output, "r") as file:
                 current_version_info = file.read()
-        except EnvironmentError:
+        except EnvironmentError as e:
+            print(e)
             pass
 
         if current_version_info != new_version_info_fmt:
+            print("old: ", current_version_info)
+            print("new: ", new_version_info_fmt)
             with open(self.args.output, "w") as file:
                 file.write(new_version_info_fmt)
             # os.utime("../lib/toolbox/version.c", None)

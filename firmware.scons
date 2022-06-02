@@ -1,15 +1,47 @@
-Import("env")
-SConscript("lib/lib.scons")
-
+Import("env", "variant_dir_name")
 
 env.Append(
+    FLIPPER_TARGET="7",
+    BUILD_DIR=variant_dir_name,
+)
+
+env.Append(
+    LIBPATH=[
+        "#/${BUILD_DIR}/lib",
+    ],
     CPPDEFINES=[
         ("TARGET", "${FLIPPER_TARGET}"),
+    ],
+)
+
+env.Append(
+    CPPPATH=[
+        "#/core",
+        "#/applications",
+        "#/firmware/targets/f${FLIPPER_TARGET}/ble_glue",
+        "#/firmware/targets/f${FLIPPER_TARGET}/fatfs",
+        "#/firmware/targets/f${FLIPPER_TARGET}/furi_hal",
+        "#/firmware/targets/f${FLIPPER_TARGET}/Inc",
+        "#/firmware/targets/furi_hal_include",
     ]
 )
 
-if env["FIRMWARE_BUILD_CFG"] == "updater":
-    env.Append(
+depends = env.BuildModules(
+    env,
+    [
+        "#/lib",
+        "#/firmware",
+    ],
+)
+
+fwenv = env.Clone()
+Export("fwenv")
+
+SConscript("sconscfg/firmwareopts.scons")
+
+
+if fwenv["FIRMWARE_BUILD_CFG"] == "updater":
+    fwenv.Append(
         CPPDEFINES=[
             "SRV_GUI",
             "SRV_INPUT",
@@ -19,7 +51,7 @@ if env["FIRMWARE_BUILD_CFG"] == "updater":
         ]
     )
 else:
-    env.Append(
+    fwenv.Append(
         CPPDEFINES=[
             "APP_ABOUT",
             "APP_ACCESSOR",
@@ -61,105 +93,74 @@ else:
     )
 
 
-env.Append(
-    CPPPATH=[
-        ".",
-        "./applications",
-        "./assets/compiled",
-        "./core",
-        "./firmware/targets/f${FLIPPER_TARGET}/ble_glue",
-        "./firmware/targets/f${FLIPPER_TARGET}/fatfs",
-        "./firmware/targets/f${FLIPPER_TARGET}/furi_hal",
-        "./firmware/targets/f${FLIPPER_TARGET}/Inc",
-        "./firmware/targets/furi_hal_include",
-    ]
-)
+sources = fwenv.GlobRecursive("*.c*", "applications")
+sources += Glob("assets/compiled/*.c*", source=True)
 
 
-sources = env.GlobRecursive("*.c", "core")
-sources += env.GlobRecursive("*.c", "firmware")
-sources += ["firmware/targets/f${FLIPPER_TARGET}/startup_stm32wb55xx_cm4.s"]
-sources += env.GlobRecursive("*.c*", "applications")
-
-libs_recurse = [
-    "assets/compiled",
-    "lib/app-scened-template",
-    "lib/digital_signal",
-    "lib/drivers",
-    "lib/flipper_format",
-    "lib/infrared",
-    "lib/micro-ecc",
-    "lib/microtar/src",
-    "lib/nfc_protocols",
-    "lib/one_wire",
-    "lib/ST25RFAL002/source",
-    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/utilities/",
-    "lib/subghz",
-    "lib/toolbox",
-    "lib/u8g2",
-    "lib/update_util",
-]
-
-for lib in libs_recurse:
-    sources += env.GlobRecursive("*.c*", lib)
-
-
-libs_plain = [
-    "lib/fatfs",
-    "lib/heatshrink",
-    "lib/libusb_stm32/src",
-    "lib/littlefs",
-    "lib/nanopb",
-    "lib/ST25RFAL002",
-]
-
-for lib in libs_plain:
-    sources += Glob(lib + "/*.c*", source=True)
-
-
-sources += [
-    "lib/fatfs/option/unicode.c",
-    "lib/STM32CubeWB/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c",
-]
-
-sources += Glob(
-    "lib/STM32CubeWB/Middlewares/Third_Party/FreeRTOS/Source/*.c", source=True
-)
-sources += Glob(
-    "lib/STM32CubeWB/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/*.c",
-    source=True,
-)
-
-
-sources += env.GlobRecursive(
-    "*_ll_*.c", "lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Src/", exclude="*usb.c"
-)
-
-sources += Glob(
-    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/shci/*.c",
-    source=True,
-)
-sources += Glob(
-    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl/*_tl*.c",
-    source=True,
-)
-
-sources += [
-    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl/tl_mbox.c",
-    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/svc/Src/svc_ctl.c",
-    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_gap_aci.c",
-    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_gatt_aci.c",
-    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_hal_aci.c",
-    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_hci_le.c",
-    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_l2cap_aci.c",
-    "lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/template/osal.c",
-]
-
-# print(env.Dump())
-cdb = env.CompilationDatabase("compile_database.json")
+# print(fwenv.Dump())
+cdb = fwenv.CompilationDatabase("compile_database.json")
 Alias("cdb", cdb)
 
-env.Program("${FIRMWARE_BUILD_CFG}", sources)
-env.HEXBuilder("${FIRMWARE_BUILD_CFG}")
-env.BINBuilder("${FIRMWARE_BUILD_CFG}")
-env.DFUBuilder("${FIRMWARE_BUILD_CFG}")
+
+build_version = fwenv.Command(
+    "#lib/toolbox/version.inc.h",
+    [],
+    "${PYTHON3} scripts/version.py generate -o ${TARGET} --dir .",
+)
+# fwenv.AlwaysBuild(build_version)
+
+build_version_noarg = fwenv.Command(
+    [],
+    [],
+    "${PYTHON3} scripts/version .py generate -o lib/toolbox/version.inc.h --dir .",
+)
+fwenv.AlwaysBuild(build_version_noarg)
+
+
+def version_action(target, source, fwenv):
+    """
+    Generate the version file with the current version in it
+    """
+    contents = version_build_template % (fwenv["VERSION"].toString())
+    fd = open(target[0].path, "w")
+    fd.write(contents)
+    fd.close()
+    return 0
+
+
+fwenv.Append(
+    # LIBPATH=[
+    #     "#/lib",
+    # ],
+    LIBS=[
+        "flipper${FLIPPER_TARGET}",
+        "freertos",
+        "STM32CubeWB",
+        "hwdrivers",
+        "fatfs",
+        "littlefs",
+        "subghz",
+        "toolbox",
+        "usb_stm32",
+        "ST25RFAL002",
+        "flipperformat",
+        "misc",
+        "infrared",
+        "appframe",
+    ],
+)
+
+firmware_elf = fwenv.Program("${FIRMWARE_BUILD_CFG}", sources)
+# fwenv.AddPreAction(
+#     firmware_elf,
+#     Action(
+#         build_version_noarg
+#         # "${PYTHON3} scripts/version.py generate -o lib/toolbox/version.inc.h --dir .",
+#     ),
+# )
+Requires(firmware_elf, depends)
+
+
+fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
+fwenv.BINBuilder("${FIRMWARE_BUILD_CFG}")
+fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")

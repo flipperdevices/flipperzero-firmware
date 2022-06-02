@@ -1,8 +1,8 @@
-Import("env")
+Import("fwenv")
 
-env.Append(
-    FLIPPER_TARGET="7",
-)
+# fwenv.Append(
+#     FLIPPER_TARGET="7",
+# )
 
 # vars = Variables(None, ARGUMENTS)
 # vars.Add(BoolVariable("DEBUG", help="Enable debug build", default=1))
@@ -10,13 +10,13 @@ env.Append(
 # vars.Add(
 #     BoolVariable("RAM_EXEC", help="Build updater image for RAM exection", default=0)
 # )
-# env.Append(variables=vars)
+# fwenv.Append(variables=vars)
 # Help(vars.GenerateHelpText(env))
 
-print(env.Dump())
+# print(fwenv.Dump())
 
-if env["DEBUG"]:
-    env.Append(
+if fwenv["DEBUG"]:
+    fwenv.Append(
         CPPDEFINES=[
             "FURI_DEBUG",
             "NDEBUG",
@@ -26,8 +26,8 @@ if env["DEBUG"]:
             "-g",
         ],
     )
-elif env["COMPACT"]:
-    env.Append(
+elif fwenv["COMPACT"]:
+    fwenv.Append(
         CPPDEFINES=[
             "FURI_NDEBUG",
             "NDEBUG",
@@ -38,7 +38,7 @@ elif env["COMPACT"]:
         ],
     )
 else:
-    env.Append(
+    fwenv.Append(
         CPPDEFINES=[
             "FURI_NDEBUG",
             "NDEBUG",
@@ -49,8 +49,8 @@ else:
         ],
     )
 
-if env["RAM_EXEC"]:
-    env.Append(
+if fwenv["RAM_EXEC"]:
+    fwenv.Append(
         CPPDEFINES=[
             "FURI_RAM_EXEC",
             "VECT_TAB_SRAM",
@@ -63,7 +63,7 @@ if env["RAM_EXEC"]:
         FIRMWARE_BUILD_CFG="updater",
     )
 else:
-    env.Append(
+    fwenv.Append(
         IMAGE_BASE_ADDRESS="0x8000000",
         LINKFLAGS=[
             "-Tfirmware/targets/f7/stm32wb55xx_flash.ld",

@@ -1,0 +1,23 @@
+Import("env", "lib_flags")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/libusb_stm32/inc",
+    ],
+    CPPDEFINES=[
+        ("USB_PMASIZE", "0x400"),
+    ],
+)
+
+
+libenv = env.Clone()
+libenv.MergeFlags(lib_flags)
+
+sources = [
+    "libusb_stm32/src/usbd_core.c",
+    "libusb_stm32/src/usbd_stm32wb55_devfs.c",
+]
+
+lib = libenv.StaticLibrary("usb_stm32", sources)
+libenv.Install("#/${BUILD_DIR}/lib", lib)
+Return("lib")

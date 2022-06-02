@@ -1,0 +1,12 @@
+Import("env", "lib_flags")
+
+
+libenv = env.Clone()
+libenv.MergeFlags(lib_flags)
+
+sources = Glob("*.c", source=True)
+sources += ["option/unicode.c"]
+
+lib = libenv.StaticLibrary("fatfs", sources)
+libenv.Install("#/${BUILD_DIR}/lib", lib)
+Return("lib")

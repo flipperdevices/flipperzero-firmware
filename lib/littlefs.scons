@@ -1,0 +1,20 @@
+Import("env", "lib_flags")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/littlefs",
+    ],
+    CPPDEFINES=[
+        ("LFS_CONFIG", "lfs_config.h"),
+    ],
+)
+
+
+libenv = env.Clone()
+libenv.MergeFlags(lib_flags)
+
+sources = Glob("littlefs/*.c", source=True)
+
+lib = libenv.StaticLibrary("littlefs", sources)
+libenv.Install("#/${BUILD_DIR}/lib", lib)
+Return("lib")
