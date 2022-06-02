@@ -594,7 +594,7 @@ bool minmea_parse_vtg(struct minmea_sentence_vtg *frame, const char *sentence)
     char type[6];
     char c_true, c_magnetic, c_knots, c_kph, c_faa_mode;
 
-    if (!minmea_scan(sentence, "tfcfcfcfc;c",
+    if (!minmea_scan(sentence, "t;fcfcfcfcc",
             type,
             &frame->true_track_degrees,
             &c_true,
@@ -608,12 +608,15 @@ bool minmea_parse_vtg(struct minmea_sentence_vtg *frame, const char *sentence)
         return false;
     if (strcmp(type+2, "VTG"))
         return false;
-    // check chars
-    if (c_true != 'T' ||
-        c_magnetic != 'M' ||
-        c_knots != 'N' ||
-        c_kph != 'K')
-        return false;
+    // values are only valid with the accompanying characters
+    if (c_true != 'T')
+        frame->true_track_degrees.scale = 0;
+    if (c_magnetic != 'M')
+        frame->magnetic_track_degrees.scale = 0;
+    if (c_knots != 'N')
+        frame->speed_knots.scale = 0;
+    if (c_kph != 'K')
+        frame->speed_kph.scale = 0;
     frame->faa_mode = (enum minmea_faa_mode)c_faa_mode;
 
     return true;

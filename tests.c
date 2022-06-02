@@ -895,6 +895,27 @@ START_TEST(test_minmea_parse_vtg2)
 }
 END_TEST
 
+START_TEST(test_minmea_parse_vtg3)
+{
+    // https://github.com/kosma/minmea/issues/57
+    const char *sentence = "$GNVTG,,,,,,,,,N*2E";
+    // clear structs before initialization to enable use of memcmp()
+    struct minmea_sentence_vtg frame = {};
+    struct minmea_sentence_vtg expected = {};
+    expected = (struct minmea_sentence_vtg){
+        .true_track_degrees = { 0, 0 },
+        .magnetic_track_degrees = { 0, 0 },
+        .speed_knots = { 0, 0 },
+        .speed_kph = { 0, 0 },
+        .faa_mode = MINMEA_FAA_MODE_NOT_VALID,
+    };
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
+    ck_assert(minmea_parse_vtg(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
 START_TEST(test_minmea_parse_zda1)
 {
     const char *sentence = "$GPZDA,160012.71,11,03,2004,-1,00*7D";
@@ -1133,6 +1154,7 @@ static Suite *minmea_suite(void)
     tcase_add_test(tc_parse, test_minmea_parse_gsv5);
     tcase_add_test(tc_parse, test_minmea_parse_vtg1);
     tcase_add_test(tc_parse, test_minmea_parse_vtg2);
+    tcase_add_test(tc_parse, test_minmea_parse_vtg3);
     tcase_add_test(tc_parse, test_minmea_parse_zda1);
     suite_add_tcase(s, tc_parse);
 
