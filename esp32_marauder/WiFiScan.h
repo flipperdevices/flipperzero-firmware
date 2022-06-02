@@ -78,6 +78,7 @@ esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, b
 struct ssid {
   String essid;
   int bssid[6];
+  bool selected;
 };
 
 struct AccessPoint {
@@ -279,7 +280,7 @@ class WiFiScan
     int clearSSIDs();
     int clearAPs();
     bool addSSID(String essid);
-    int generateSSIDs();
+    int generateSSIDs(int count = 20);
     bool shutdownWiFi();
     bool shutdownBLE();
     bool scanning();
@@ -291,7 +292,7 @@ class WiFiScan
     void RunInfo();
     void RunShutdownWiFi();
     void RunShutdownBLE();
-    void RunGenerateSSIDs();
+    void RunGenerateSSIDs(int count = 20);
     void RunClearSSIDs();
     void RunClearAPs();
     void channelHop();

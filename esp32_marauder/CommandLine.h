@@ -17,6 +17,7 @@
 
 extern WiFiScan wifi_scan_obj;
 extern LinkedList<AccessPoint>* access_points;
+extern LinkedList<ssid>* ssids;
 extern const String PROGMEM version_number;
 
 //// Commands
@@ -40,14 +41,17 @@ const char PROGMEM ATTACK_TYPE_BEACON[] = "beacon";
 const char PROGMEM ATTACK_TYPE_PROBE[] = "probe";
 
 // WiFi Aux
-const char PROGMEM LIST_AP_CMD[] = "listap";
+const char PROGMEM LIST_AP_CMD[] = "list";
 const char PROGMEM SEL_CMD[] = "select";
+const char PROGMEM SSID_CMD[] = "ssid";
 
 class CommandLine {
   private:
     String getSerialInput();
     LinkedList<String> parseCommand(String input, char* delim);
     void runCommand(String input);
+    bool checkValueExists(LinkedList<String>* cmd_args_list, int index);
+    bool inRange(int max, int index);
     int argSearch(LinkedList<String>* cmd_args, String key);
 
     const char* ascii_art =

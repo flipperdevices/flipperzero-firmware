@@ -162,22 +162,22 @@ int WiFiScan::clearSSIDs() {
 }
 
 bool WiFiScan::addSSID(String essid) {
-  ssid s = {essid, {random(256), random(256), random(256), random(256), random(256), random(256)}};
+  ssid s = {essid, {random(256), random(256), random(256), random(256), random(256), random(256)}, false};
   ssids->add(s);
   Serial.println(ssids->get(ssids->size() - 1).essid);
 
   return true;
 }
 
-int WiFiScan::generateSSIDs() {
-  uint8_t num_gen = 20;
+int WiFiScan::generateSSIDs(int count) {
+  uint8_t num_gen = count;
   for (uint8_t x = 0; x < num_gen; x++) {
     String essid = "";
 
     for (uint8_t i = 0; i < 6; i++)
       essid.concat(alfa[random(65)]);
 
-    ssid s = {essid, {random(256), random(256), random(256), random(256), random(256), random(256)}};
+    ssid s = {essid, {random(256), random(256), random(256), random(256), random(256), random(256)}, false};
     ssids->add(s);
     Serial.println(ssids->get(ssids->size() - 1).essid);
   }
@@ -570,7 +570,7 @@ void WiFiScan::RunClearSSIDs() {
   #endif
 }
 
-void WiFiScan::RunGenerateSSIDs() {
+void WiFiScan::RunGenerateSSIDs(int count) {
   #ifdef HAS_SCREEN
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setFreeFont(NULL);
@@ -583,7 +583,7 @@ void WiFiScan::RunGenerateSSIDs() {
     display_obj.tft.println(text_table4[14] + (String)this->generateSSIDs());
     display_obj.tft.println(text_table4[15] + (String)ssids->size());
   #else
-    this->generateSSIDs();
+    this->generateSSIDs(count);
   #endif
 }
 

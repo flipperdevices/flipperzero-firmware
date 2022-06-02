@@ -4,12 +4,12 @@
 
   #define POLISH_POTATO
   
-  #define MARAUDER_MINI
+  //#define MARAUDER_MINI
   //#define MARAUDER_V4
   //#define MARAUDER_V6
   //#define MARAUDER_KIT
   //#define GENERIC_ESP32
-  //#define MARAUDER_FLIPPER
+  #define MARAUDER_FLIPPER
 
   #define MARAUDER_VERSION "v0.9.8"
 
@@ -384,6 +384,7 @@
     #define TFT_GRAY 0
     #define TFT_MAGENTA 0
     #define TFT_VIOLET 0
+    #define TFT_ORANGE 0
     #define STANDARD_FONT_CHAR_LIMIT 40
     #define FLASH_BUTTON -1
 
