@@ -612,7 +612,7 @@ bool minmea_parse_zda(struct minmea_sentence_zda *frame, const char *sentence)
   return true;
 }
 
-int minmea_getdate(struct tm *tm, const struct minmea_date *date, const struct minmea_time *time_)
+int minmea_getdatetime(struct tm *tm, const struct minmea_date *date, const struct minmea_time *time_)
 {
     if (date->year == -1 || time_->hours == -1)
         return -1;
@@ -637,7 +637,7 @@ int minmea_getdate(struct tm *tm, const struct minmea_date *date, const struct m
 int minmea_gettime(struct timespec *ts, const struct minmea_date *date, const struct minmea_time *time_)
 {
     struct tm tm;
-    if (minmea_getdate(&tm, date, time_))
+    if (minmea_getdatetime(&tm, date, time_))
         return -1;
 
     time_t timestamp = timegm(&tm); /* See README.md if your system lacks timegm(). */
