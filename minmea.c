@@ -612,24 +612,24 @@ bool minmea_parse_zda(struct minmea_sentence_zda *frame, const char *sentence)
   return true;
 }
 
-int minmea_getdate(struct tm *out, const struct minmea_date *date, const struct minmea_time *time_)
+int minmea_getdate(struct tm *tm, const struct minmea_date *date, const struct minmea_time *time_)
 {
     if (date->year == -1 || time_->hours == -1)
         return -1;
 
-    memset(out, 0, sizeof(*out));
+    memset(tm, 0, sizeof(*tm));
     if (date->year < 80) {
-        out->tm_year = 2000 + date->year - 1900; // 2000-2079
+        tm->tm_year = 2000 + date->year - 1900; // 2000-2079
     } else if (date->year >= 1900) {
-        out->tm_year = date->year - 1900;        // 4 digit year, use directly
+        tm->tm_year = date->year - 1900;        // 4 digit year, use directly
     } else {
-        out->tm_year = date->year;               // 1980-1999
+        tm->tm_year = date->year;               // 1980-1999
     }
-    out->tm_mon = date->month - 1;
-    out->tm_mday = date->day;
-    out->tm_hour = time_->hours;
-    out->tm_min = time_->minutes;
-    out->tm_sec = time_->seconds;
+    tm->tm_mon = date->month - 1;
+    tm->tm_mday = date->day;
+    tm->tm_hour = time_->hours;
+    tm->tm_min = time_->minutes;
+    tm->tm_sec = time_->seconds;
 
     return 0;
 }
