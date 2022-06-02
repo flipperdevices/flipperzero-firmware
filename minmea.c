@@ -617,7 +617,7 @@ int minmea_getdate(struct tm *out, const struct minmea_date *date, const struct 
     if (date->year == -1 || time_->hours == -1)
         return -1;
 
-    memset(out, 0, sizeof(struct tm));
+    memset(out, 0, sizeof(*out));
     if (date->year < 80) {
         out->tm_year = 2000 + date->year - 1900; // 2000-2079
     } else if (date->year >= 1900) {
