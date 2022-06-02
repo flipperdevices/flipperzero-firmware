@@ -5,6 +5,21 @@ import io
 import os
 import sys
 
+
+
+def padded_hex(i, l):
+    given_int = i
+    given_len = l
+
+    hex_result = hex(given_int)[2:] # remove '0x' from beginning of str
+    num_hex_chars = len(hex_result)
+    extra_zeros = '0' * (given_len - num_hex_chars) # may not get used..
+
+    return ('0x' + hex_result if num_hex_chars == given_len else
+            '?' * given_len if num_hex_chars > given_len else
+            '0x' + extra_zeros + hex_result if num_hex_chars < given_len else
+            None)
+
 parser = argparse.ArgumentParser(description='Turn cooked Flipper .bm files back into .xbm')
 
 parser.add_argument('infile', metavar='i',
@@ -34,18 +49,19 @@ if(fileStream[0:2] == bytes([0x01,0x00])):
 	unpad=fileStream[4:]
 else:
 	if(fileStream[0:1] == bytes([0x00])):
-		unpad=fileStream[3:]
+		unpad=fileStream[2:]
 
 
 
-#expand
+#lzss decompress
 data_decoded_str = subprocess.check_output(
     ["heatshrink", "-d","-w8","-l4"], input=unpad
 )
 
 #turn it back into xbm
+
 b=list(data_decoded_str)
-c=', '.join(hex(my_int) for my_int in b)
+c=', '.join(padded_hex(my_int,2) for my_int in b)
 
 width_out = "#define "+ filename+ "_width "+ str(imageWidth) + "\n"
 height_out = "#define "+ filename+ "_height "+ str(imageHeight) + "\n"
