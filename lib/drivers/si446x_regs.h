@@ -11,7 +11,8 @@ extern "C" {
 #endif
 
 /* Constants */
-#define SI446X_QUARTZ 30000000
+//#define SI446X_QUARTZ 30000000
+#define SI446X_QUARTZ 26000000
 #define SI446X_CTS_OK 0xFF
 #define SI446X_TIMEOUT 500
 #define SI446X_SET_MAX_PA 0x1F

@@ -115,6 +115,11 @@ void furi_hal_subghz_init() {
     si446x_set_pa(&furi_hal_spi_bus_handle_subghz, SI446X_SET_MAX_PA);
     furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
 
+    uint8_t pa_mode[1] = {0x88};
+    si446x_set_properties(
+        &furi_hal_spi_bus_handle_subghz, SI446X_PROP_PA_MODE, &pa_mode[0], sizeof(pa_mode));
+    si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO0, SI446X_GPIO_MODE_TX_STATE);
+
     furi_hal_subghz_sleep();
 
     FURI_LOG_I(TAG, "Init OK");
@@ -396,6 +401,10 @@ void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
     //Path_315      sw_0-1 sw_1-0
     //Path_868      sw_0-1 sw_1-1
     //Path_Isolate  sw_0-0 sw_1-0
+    uint8_t pa_mode[1] = {0x88};
+    si446x_set_properties(
+        &furi_hal_spi_bus_handle_subghz, SI446X_PROP_PA_MODE, &pa_mode[0], sizeof(pa_mode));
+    si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO0, SI446X_GPIO_MODE_TX_STATE);
 
     if(path == FuriHalSubGhzPath433) {
         si446x_write_sw(
