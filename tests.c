@@ -945,50 +945,76 @@ START_TEST(test_minmea_gettime)
 {
     struct minmea_date d = { 14, 2, 14 };
     struct minmea_time t = { 13, 0, 9, 123456 };
+    struct tm tm;
     struct timespec ts;
+    ck_assert(minmea_getdatetime(&tm, &d, &t) == 0);
     ck_assert(minmea_gettime(&ts, &d, &t) == 0);
+    ck_assert_int_eq(tm.tm_year, 2014-1900);
+    ck_assert_int_eq(tm.tm_mon, 1);
+    ck_assert_int_eq(tm.tm_mday, 14);
+    ck_assert_int_eq(tm.tm_hour, 13);
+    ck_assert_int_eq(tm.tm_min, 0);
+    ck_assert_int_eq(tm.tm_sec, 9);
     ck_assert_int_eq(ts.tv_sec, 1392382809);
     ck_assert_int_eq(ts.tv_nsec, 123456000);
 
     d.year = -1;
+    ck_assert(minmea_getdatetime(&tm, &d, &t) != 0);
     ck_assert(minmea_gettime(&ts, &d, &t) != 0);
     d.year = 14;
 
     t.hours = -1;
+    ck_assert(minmea_getdatetime(&tm, &d, &t) != 0);
     ck_assert(minmea_gettime(&ts, &d, &t) != 0);
     t.hours = 13;
 
     /* two digit year conversions */
     d.year = 80;
+    ck_assert(minmea_getdatetime(&tm, &d, &t) == 0);
     ck_assert(minmea_gettime(&ts, &d, &t) == 0);
+    ck_assert_int_eq(tm.tm_year, 1980-1900);
     ck_assert_int_eq(ts.tv_sec, 319381209);      /* 1980 */
     d.year = 37;
+    ck_assert(minmea_getdatetime(&tm, &d, &t) == 0);
     ck_assert(minmea_gettime(&ts, &d, &t) == 0);
+    ck_assert_int_eq(tm.tm_year, 2037-1900);
     ck_assert_int_eq(ts.tv_sec, 2118229209);     /* 2037 */
     /* skip >= 2038 tests on 32-bit time_t platforms */
     if (sizeof(time_t) == sizeof(int64_t)) {
         d.year = 79;
+        ck_assert(minmea_getdatetime(&tm, &d, &t) == 0);
         ck_assert(minmea_gettime(&ts, &d, &t) == 0);
+        ck_assert_int_eq(tm.tm_year, 2079-1900);
         ck_assert_int_eq(ts.tv_sec, 3443605209); /* 2079 */
     }
 
     /* four digit year conversions */
     d.year = 1979;
+    ck_assert(minmea_getdatetime(&tm, &d, &t) == 0);
     ck_assert(minmea_gettime(&ts, &d, &t) == 0);
+    ck_assert_int_eq(tm.tm_year, 1979-1900);
     ck_assert_int_eq(ts.tv_sec, 287845209);
     d.year = 1980;
+    ck_assert(minmea_getdatetime(&tm, &d, &t) == 0);
     ck_assert(minmea_gettime(&ts, &d, &t) == 0);
+    ck_assert_int_eq(tm.tm_year, 1980-1900);
     ck_assert_int_eq(ts.tv_sec, 319381209);
     d.year = 2037;
+    ck_assert(minmea_getdatetime(&tm, &d, &t) == 0);
     ck_assert(minmea_gettime(&ts, &d, &t) == 0);
+    ck_assert_int_eq(tm.tm_year, 2037-1900);
     ck_assert_int_eq(ts.tv_sec, 2118229209);
     /* skip >= 2038 tests on 32-bit time_t platforms */
     if (sizeof(time_t) == sizeof(int64_t)) {
         d.year = 2079;
+        ck_assert(minmea_getdatetime(&tm, &d, &t) == 0);
         ck_assert(minmea_gettime(&ts, &d, &t) == 0);
+        ck_assert_int_eq(tm.tm_year, 2079-1900);
         ck_assert_int_eq(ts.tv_sec, 3443605209);
         d.year = 2080;
+        ck_assert(minmea_getdatetime(&tm, &d, &t) == 0);
         ck_assert(minmea_gettime(&ts, &d, &t) == 0);
+        ck_assert_int_eq(tm.tm_year, 2080-1900);
         ck_assert_int_eq(ts.tv_sec, 3475141209);
     }
 }
