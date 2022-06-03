@@ -32,6 +32,7 @@ depends = env.BuildModules(
         "lib",
         "firmware",
         "assets",
+        "core",
     ],
 )
 
@@ -134,6 +135,7 @@ fwenv.Append(
     # ],
     LIBS=[
         "flipper${FLIPPER_TARGET}",
+        "core",
         "freertos",
         "STM32CubeWB",
         "hwdrivers",

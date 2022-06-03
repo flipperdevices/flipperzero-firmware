@@ -5,13 +5,12 @@ libenv.MergeFlags(lib_flags)
 
 libenv.Append(
     CPPPATH=[
-        "#/assets/compiled",
+        "#/core",
     ],
 )
 
 sources = libenv.GlobRecursive("*.c", ".")
-sources += ["targets/f${FLIPPER_TARGET}/startup_stm32wb55xx_cm4.s"]
 
-lib = libenv.Library("flipper${FLIPPER_TARGET}", sources)
+lib = libenv.Library("core", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")
