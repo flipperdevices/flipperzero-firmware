@@ -190,7 +190,7 @@ static void infrared_cli_start_ir(Cli* cli, string_t args, void* context) {
     }
 }
 
-extern "C" void infrared_on_system_start() {
+extern "C" void infrared_on_system_start_old() {
 #ifdef SRV_CLI
     Cli* cli = (Cli*)furi_record_open("cli");
     cli_add_command(cli, "ir", CliCommandFlagDefault, infrared_cli_start_ir, NULL);

@@ -5,9 +5,9 @@
 #include <gui/view_stack.h>
 
 #include "../infrared_app.h"
-#include "infrared/infrared_app_event.h"
-#include "infrared/infrared_app_view_manager.h"
-#include "infrared/scene/infrared_app_scene.h"
+#include "infrared_old/infrared_app_event.h"
+#include "infrared_old/infrared_app_view_manager.h"
+#include "infrared_old/scene/infrared_app_scene.h"
 #include "../view/infrared_progress_view.h"
 
 void InfraredAppSceneUniversalCommon::infrared_app_item_callback(void* context, uint32_t index) {

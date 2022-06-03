@@ -2,8 +2,8 @@
 #include "storage/filesystem_api_defines.h"
 #include <flipper_format/flipper_format.h>
 #include "infrared_app_remote_manager.h"
-#include "infrared/helpers/infrared_parser.h"
-#include "infrared/infrared_app_signal.h"
+#include "infrared_old/helpers/infrared_parser.h"
+#include "infrared_old/infrared_app_signal.h"
 
 #include <utility>
 

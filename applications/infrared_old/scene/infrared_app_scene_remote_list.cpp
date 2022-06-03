@@ -1,6 +1,6 @@
 #include "../infrared_app.h"
 #include "assets_icons.h"
-#include "infrared/infrared_app_event.h"
+#include "infrared_old/infrared_app_event.h"
 #include <text_store.h>
 
 void InfraredAppSceneRemoteList::on_enter(InfraredApp* app) {

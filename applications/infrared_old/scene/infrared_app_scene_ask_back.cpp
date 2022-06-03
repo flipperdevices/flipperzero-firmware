@@ -1,7 +1,7 @@
 #include "../infrared_app.h"
 #include "gui/modules/dialog_ex.h"
 #include "infrared.h"
-#include "infrared/scene/infrared_app_scene.h"
+#include "infrared_old/scene/infrared_app_scene.h"
 #include <string>
 
 static void dialog_result_callback(DialogExResult result, void* context) {

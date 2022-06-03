@@ -1,7 +1,7 @@
 
 #include "../infrared_app_signal.h"
 #include "infrared.h"
-#include "infrared/helpers/infrared_parser.h"
+#include "infrared_old/helpers/infrared_parser.h"
 #include "infrared_worker.h"
 #include "m-string.h"
 #include <flipper_format/flipper_format.h>

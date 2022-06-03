@@ -1,8 +1,8 @@
 #include <stdint.h>
 #include <gui/modules/loading.h>
 #include <gui/view_stack.h>
-#include "infrared/scene/infrared_app_scene.h"
-#include "infrared/infrared_app.h"
+#include "infrared_old/scene/infrared_app_scene.h"
+#include "infrared_old/infrared_app.h"
 
 void InfraredAppSceneUniversalTV::on_enter(InfraredApp* app) {
     InfraredAppViewManager* view_manager = app->get_view_manager();

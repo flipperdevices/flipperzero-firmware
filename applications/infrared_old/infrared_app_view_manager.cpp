@@ -6,10 +6,10 @@
 #include <furi.h>
 #include <callback-connector.h>
 
-#include "infrared/infrared_app_view_manager.h"
-#include "infrared/view/infrared_progress_view.h"
+#include "infrared_old/infrared_app_view_manager.h"
+#include "infrared_old/view/infrared_progress_view.h"
 #include "infrared_app.h"
-#include "infrared/infrared_app_event.h"
+#include "infrared_old/infrared_app_event.h"
 
 InfraredAppViewManager::InfraredAppViewManager() {
     event_queue = osMessageQueueNew(10, sizeof(InfraredAppEvent), NULL);
