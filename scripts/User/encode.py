@@ -25,8 +25,8 @@ print("Image Dimensions:")
 width = int(f.readline().strip().split(" ")[2])
 print("W: ", width)
 height = int(f.readline().strip().split(" ")[2])
-print("H: ", height)
-
+print("Height:",  height)
+print("Width: ", width)
 
 data = f.read().strip().replace("\n", "").replace(" ", "").split("=")[1][:-1]
 data_str = data[1:-1].replace(",", " ").replace("0x", "")

@@ -25,6 +25,7 @@ If you do not enter anything here it will assume 128x64. THIS WILL NOT ALWAYS BE
 ##
 Encode an .xbm file into .xb
 encode.py input_image output_image
+You will also get the image dimensions for use in meta.txt 
 That's it. 
 
 
