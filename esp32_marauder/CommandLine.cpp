@@ -91,6 +91,8 @@ void CommandLine::runCommand(String input) {
   if (cmd_args.get(0) == STOPSCAN_CMD) {
     wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
 
+    Serial.println("Stopping WiFi tran/recv");
+
     // If we don't do this, the text and button coordinates will be off
     #ifdef HAS_SCREEN
       display_obj.tft.init();
@@ -117,6 +119,7 @@ void CommandLine::runCommand(String input) {
   }
 
   else if (cmd_args.get(0) == REBOOT_CMD) {
+    Serial.println("Rebooting...");
     ESP.restart();
   }
 
@@ -125,6 +128,7 @@ void CommandLine::runCommand(String input) {
 
     // AP Scan
     if (cmd_args.get(0) == SCANAP_CMD) {
+      Serial.println("Starting AP scan. Stop with " + (String)STOPSCAN_CMD);
       #ifdef HAS_SCREEN
         display_obj.clearScreen();
         menu_function_obj.drawStatusBar();
@@ -133,6 +137,7 @@ void CommandLine::runCommand(String input) {
     }
     // Beacon sniff
     else if (cmd_args.get(0) == SNIFF_BEACON_CMD) {
+      Serial.println("Starting Beacon sniff. Stop with " + (String)STOPSCAN_CMD);
       #ifdef HAS_SCREEN
         display_obj.clearScreen();
         menu_function_obj.drawStatusBar();
@@ -141,6 +146,7 @@ void CommandLine::runCommand(String input) {
     }
     // Deauth sniff
     else if (cmd_args.get(0) == SNIFF_DEAUTH_CMD) {
+      Serial.println("Starting Deauth sniff. Stop with " + (String)STOPSCAN_CMD);
       #ifdef HAS_SCREEN
         display_obj.clearScreen();
         menu_function_obj.drawStatusBar();
@@ -149,6 +155,7 @@ void CommandLine::runCommand(String input) {
     }
     // PMKID sniff
     else if (cmd_args.get(0) == SNIFF_PMKID_CMD) {
+      Serial.println("Starting PMKID sniff. Stop with " + (String)STOPSCAN_CMD);
       wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);
     }
 
@@ -173,6 +180,7 @@ void CommandLine::runCommand(String input) {
             display_obj.clearScreen();
             menu_function_obj.drawStatusBar();
           #endif
+          Serial.println("Starting Deauthentication attack. Stop with " + (String)STOPSCAN_CMD);
           wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH, TFT_RED);
         }
         // Beacon
@@ -183,6 +191,7 @@ void CommandLine::runCommand(String input) {
               display_obj.clearScreen();
               menu_function_obj.drawStatusBar();
             #endif
+            Serial.println("Starting Beacon list spam. Stop with " + (String)STOPSCAN_CMD);
             wifi_scan_obj.StartScan(WIFI_ATTACK_BEACON_LIST, TFT_RED);
           }
           // spam with random
@@ -191,6 +200,7 @@ void CommandLine::runCommand(String input) {
               display_obj.clearScreen();
               menu_function_obj.drawStatusBar();
             #endif
+            Serial.println("Starting random Beacon spam. Stop with " + (String)STOPSCAN_CMD);
             wifi_scan_obj.StartScan(WIFI_ATTACK_BEACON_SPAM, TFT_ORANGE);
           }
           else {

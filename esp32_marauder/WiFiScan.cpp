@@ -1975,6 +1975,20 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 
   if (( (snifferPacket->payload[30] == 0x88 && snifferPacket->payload[31] == 0x8e)|| ( snifferPacket->payload[32] == 0x88 && snifferPacket->payload[33] == 0x8e) )){
     num_eapol++;
+    Serial.println("Received EAPOL:");
+
+    for (int i = 0; i < len; i++) {
+      char hexCar[4];
+      sprintf(hexCar, "%02X", snifferPacket->payload[i]);
+      Serial.print(hexCar);
+      //Serial.print(snifferPacket->payload[i], HEX);
+      if ((i + 1) % 16 == 0)
+        Serial.print("\n");
+      else
+        Serial.print(" ");
+    }
+  
+    Serial.print("\n");
   }
 
   if (save_packet)
