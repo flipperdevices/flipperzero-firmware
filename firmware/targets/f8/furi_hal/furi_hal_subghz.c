@@ -118,7 +118,6 @@ void furi_hal_subghz_init() {
     uint8_t pa_mode[1] = {0x88};
     si446x_set_properties(
         &furi_hal_spi_bus_handle_subghz, SI446X_PROP_PA_MODE, &pa_mode[0], sizeof(pa_mode));
-    si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO0, SI446X_GPIO_MODE_TX_STATE);
 
     furi_hal_subghz_sleep();
 
@@ -133,6 +132,7 @@ void furi_hal_subghz_sleep() {
     // si446x_set_state(&furi_hal_spi_bus_handle_subghz, SI446X_STATE_SLEEP);
     // furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     //furi_hal_subghz_preset = FuriHalSubGhzPresetIDLE;
+
     furi_hal_subghz_shutdown();
 }
 
@@ -290,7 +290,8 @@ void furi_hal_subghz_idle() {
 }
 
 void furi_hal_subghz_rx() {
-    si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_RX_DATA);
+    //si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_RX_DATA);
+    si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_RX_RAW_DATA);
     si446x_clear_interrupt_status(&furi_hal_spi_bus_handle_subghz);
     uint8_t channel = 0;
     si446x_switch_to_start_rx(&furi_hal_spi_bus_handle_subghz, channel, SI446X_STATE_NOCHANGE, 0);
@@ -404,7 +405,6 @@ void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
     uint8_t pa_mode[1] = {0x88};
     si446x_set_properties(
         &furi_hal_spi_bus_handle_subghz, SI446X_PROP_PA_MODE, &pa_mode[0], sizeof(pa_mode));
-    si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO0, SI446X_GPIO_MODE_TX_STATE);
 
     if(path == FuriHalSubGhzPath433) {
         si446x_write_sw(

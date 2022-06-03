@@ -330,7 +330,11 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
     furi_hal_subghz_reset();
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650AsyncFreq);
 
-    si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_RX_DATA);
+    //si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_RX_DATA);
+    uint8_t modem_rssi_thresh[1] = {0xF0};
+    si446x_set_properties(
+        &furi_hal_spi_bus_handle_subghz, SI446X_PROP_MODEM_RSSI_THRESH, &modem_rssi_thresh[0], sizeof(modem_rssi_thresh));
+    si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_CCA);
 
     while(instance->worker_running) {
         osDelay(10);
