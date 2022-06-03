@@ -31,6 +31,7 @@ NPROCS := $(shell sysctl -n hw.ncpu)
 endif
 
 include	$(PROJECT_ROOT)/make/defaults.mk
+include	$(PROJECT_ROOT)/make/python.mk
 
 .PHONY: all
 all: firmware_all
