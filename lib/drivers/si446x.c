@@ -315,7 +315,7 @@ bool si446x_set_deviation(FuriHalSpiBusHandle* handle, uint32_t freq_hz, uint32_
         handle, SI446X_PROP_MODEM_FREQ_DEV_2, &modem_freq_dev_buff[0], sizeof(modem_freq_dev_buff));
 }
 
-bool si446x_set_bps(FuriHalSpiBusHandle* handle, uint32_t freq_hz, uint32_t bps) {
+bool si446x_set_bps(FuriHalSpiBusHandle* handle, uint32_t bps) {
     //Fxtal for DR > 200kbps, and Fxtal/10 for DR ≥ 200kbps
     //Fxtal or Fxtal/10 (e.g., 0x1C9C380 = 30M decimal, or 0x02DC6C0 =3M decimal, assuming the crystal frequency is 30 MHz).
     uint8_t div = 0;

@@ -115,10 +115,6 @@ void furi_hal_subghz_init() {
     si446x_set_pa(&furi_hal_spi_bus_handle_subghz, SI446X_SET_MAX_PA);
     furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
 
-    uint8_t pa_mode[1] = {0x88};
-    si446x_set_properties(
-        &furi_hal_spi_bus_handle_subghz, SI446X_PROP_PA_MODE, &pa_mode[0], sizeof(pa_mode));
-
     furi_hal_subghz_sleep();
 
     FURI_LOG_I(TAG, "Init OK");
@@ -151,6 +147,10 @@ void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
     case FuriHalSubGhzPresetOok650Async:
         furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_650khz_async_regs);
         furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
+        // si446x_set_bps(&furi_hal_spi_bus_handle_subghz, 100000);
+        // uint8_t pa_mode[1] = {0x88};
+        // si446x_set_properties(
+        //     &furi_hal_spi_bus_handle_subghz, SI446X_PROP_PA_MODE, &pa_mode[0], sizeof(pa_mode));
         break;
     case FuriHalSubGhzPresetOok270Async:
         furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_270khz_async_regs);

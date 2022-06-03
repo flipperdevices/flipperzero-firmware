@@ -60,7 +60,7 @@ uint32_t si446x_set_frequency_and_step_channel(
     uint32_t freq_hz,
     uint32_t step_channel_hz);
 bool si446x_set_deviation(FuriHalSpiBusHandle* handle, uint32_t freq_hz, uint32_t deviation_hz);
-bool si446x_set_bps(FuriHalSpiBusHandle* handle, uint32_t freq_hz, uint32_t bps);
+bool si446x_set_bps(FuriHalSpiBusHandle* handle, uint32_t bps);
 
 #ifdef __cplusplus
 }

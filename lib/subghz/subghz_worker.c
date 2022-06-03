@@ -67,14 +67,14 @@ static int32_t subghz_worker_thread_callback(void* context) {
                     if((duration < instance->filter_duration) ||
                        (instance->filter_level_duration.level == level)) {
                         instance->filter_level_duration.duration += duration;
-
+                    
                     } else if(instance->filter_level_duration.level != level) {
                         if(instance->pair_callback)
                             instance->pair_callback(
                                 instance->context,
                                 instance->filter_level_duration.level,
                                 instance->filter_level_duration.duration);
-
+                        
                         instance->filter_level_duration.duration = duration;
                         instance->filter_level_duration.level = level;
                     }
