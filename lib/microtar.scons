@@ -3,7 +3,6 @@ Import("env", "lib_flags")
 env.Append(
     CPPPATH=[
         "#/lib/microtar/src",
-        "#/lib/toolbox",
     ],
     CPPDEFINES=[],
 )
@@ -13,9 +12,8 @@ libenv = env.Clone()
 libenv.MergeFlags(lib_flags)
 # TODO: consider adding optimization flags for microtar here
 
-sources = libenv.GlobRecursive("*.c", ".")
-sources += libenv.GlobRecursive("*.c", "../microtar/src")
+sources = libenv.GlobRecursive("*.c", "microtar/src")
 
-lib = libenv.StaticLibrary("toolbox", sources)
+lib = libenv.StaticLibrary("microtar", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

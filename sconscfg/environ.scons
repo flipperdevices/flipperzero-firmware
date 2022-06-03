@@ -95,54 +95,25 @@ def check_exists(path):
     return os.path.exists(File(path).abspath)
 
 
-def build_module1(env, module):
-    print("module")
-    module_sconscript = f"{module}/SConscript"
-    if not check_exists(module_sconscript):
-        module_sconscript = f"{module}.scons"
-        if not check_exists(module_sconscript):
-            print(f"Cannot build module {module}: scons file not found")
-            Exit(2)
-
-    # # module_sconscript = os.path.join(module, "SConscript")
-    # print("check for ", module_sconscript)
-    # if not os.path.exists(module_sconscript):
-    #     module_sconscript = f"{module}.scons"
-
-    print("sub-building", module_sconscript)
-    return env.SConscript(
-        module_sconscript,
-        # variant_dir="obj",
-        # variant_dir=env["BUILD_DIR"]+"/"+module,
-        duplicate=0,
-    )
-
-
 def build_module(env, module):
-    print("module")
-    module_sconscript = f"{module}/SConscript"
-    if not check_exists(module_sconscript):
-        module_sconscript = f"{module}.scons"
-        if not check_exists(module_sconscript):
+    # print("cwd", os.getcwd())
+    # print(type(Dir(".").srcdir), dir(Dir(".").srcdir))
+    src_dir = str(Dir(".").srcdir or os.getcwd())
+    module_sconscript = os.path.join(src_dir, module, "SConscript")
+    if not os.path.exists(module_sconscript):
+        module_sconscript = os.path.join(src_dir, f"{module}.scons")
+        if not os.path.exists(module_sconscript):
             print(f"Cannot build module {module}: scons file not found")
             Exit(2)
 
-    # # module_sconscript = os.path.join(module, "SConscript")
-    # print("check for ", module_sconscript)
-    # if not os.path.exists(module_sconscript):
-    #     module_sconscript = f"{module}.scons"
-
-    print("sub-building", module_sconscript)
     return env.SConscript(
         module_sconscript,
-        # variant_dir="obj",
-        # variant_dir=env["BUILD_DIR"]+"/"+module,
+        variant_dir=env["BUILD_DIR"] + "/" + module,
         duplicate=0,
     )
 
 
 def BuildModules(env, modules):
-    print("build list", modules)
     result = []
     for module in modules:
         build_res = build_module(env, module)

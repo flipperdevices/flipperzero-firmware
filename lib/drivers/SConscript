@@ -14,5 +14,5 @@ libenv.MergeFlags(lib_flags)
 sources = Glob("*.c", source=True)  # libenv.GlobRecursive("*.c", ".")
 
 lib = libenv.StaticLibrary("hwdrivers", sources)
-libenv.Install("#/${BUILD_DIR}/lib", lib)
+libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

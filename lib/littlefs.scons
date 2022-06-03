@@ -16,5 +16,5 @@ libenv.MergeFlags(lib_flags)
 sources = Glob("littlefs/*.c", source=True)
 
 lib = libenv.StaticLibrary("littlefs", sources)
-libenv.Install("#/${BUILD_DIR}/lib", lib)
+libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

@@ -14,5 +14,5 @@ libenv.MergeFlags(lib_flags)
 sources = libenv.GlobRecursive("*.c", ".")
 
 lib = libenv.StaticLibrary("flipperformat", sources)
-libenv.Install("#/${BUILD_DIR}/lib", lib)
+libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

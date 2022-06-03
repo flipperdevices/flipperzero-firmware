@@ -1,13 +1,13 @@
-Import("env", "variant_dir_name")
+Import("env")
 
 env.Append(
     FLIPPER_TARGET="7",
-    BUILD_DIR=variant_dir_name,
+    LIB_DIST_DIR="${BUILD_DIR}/lib",
 )
 
 env.Append(
     LIBPATH=[
-        "#/${BUILD_DIR}/lib",
+        "${LIB_DIST_DIR}",
     ],
     CPPDEFINES=[
         ("TARGET", "${FLIPPER_TARGET}"),
@@ -29,9 +29,9 @@ env.Append(
 depends = env.BuildModules(
     env,
     [
-        "#/lib",
-        "#/firmware",
-        "#/assets",
+        "lib",
+        "firmware",
+        "assets",
     ],
 )
 
@@ -95,7 +95,6 @@ else:
 
 
 sources = fwenv.GlobRecursive("*.c*", "applications")
-sources += Glob("assets/compiled/*.c*", source=True)
 
 
 print(fwenv.Dump())
@@ -142,6 +141,7 @@ fwenv.Append(
         "littlefs",
         "subghz",
         "toolbox",
+        "microtar",
         "usb_stm32",
         "ST25RFAL002",
         "flipperformat",

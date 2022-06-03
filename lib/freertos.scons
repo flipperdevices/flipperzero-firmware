@@ -23,5 +23,5 @@ sources += [
 ]
 
 lib = libenv.StaticLibrary("freertos", sources)
-libenv.Install("#/${BUILD_DIR}/lib", lib)
+libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

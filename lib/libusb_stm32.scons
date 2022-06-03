@@ -19,5 +19,5 @@ sources = [
 ]
 
 lib = libenv.StaticLibrary("usb_stm32", sources)
-libenv.Install("#/${BUILD_DIR}/lib", lib)
+libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

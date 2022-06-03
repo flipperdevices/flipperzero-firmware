@@ -26,5 +26,5 @@ for recurse_dir in recurse_dirs:
     sources += libenv.GlobRecursive("*.c*", recurse_dir)
 
 lib = libenv.StaticLibrary("appframe", sources)
-libenv.Install("#/${BUILD_DIR}/lib", lib)
+libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

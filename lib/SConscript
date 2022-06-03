@@ -43,6 +43,7 @@ libs = env.BuildModules(
     [
         "STM32CubeWB",
         "freertos",
+        "microtar",
         "toolbox",
         "ST25RFAL002",
         "libusb_stm32",
