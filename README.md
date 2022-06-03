@@ -13,11 +13,10 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
-- Merged changes from Unleashed 4ac1035
-- Pulled DEV changes from 2c4b2b8
+- Latest DEV changes
+- Merged needed changes from Unleashed 4ac1035
 - Removed Universal RF since it duplicates buttons from RF Remix
 - Fixed version number on make/about
-- Pulled DEV changes from b625e84
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
