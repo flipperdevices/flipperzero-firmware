@@ -19,6 +19,7 @@ Latest Updates:
 - Fixed version number on make/about
 
 **Special Instructions:**
+- CH0NG, CH33CH and N00BY rename your flipper.
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
 - - Note 1: If you don't have a subghz/assets folder, you should ensure you have made at least one clean flash with stock firmware and your SD card installed in order to ensure the database structure is built, otherwise it will not exist for alternative forks.
 - - Note 2: /any is a special keyword signifying either /int (internal storage) or /ext (external storage).
