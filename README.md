@@ -14,7 +14,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 
 Latest Updates:
 - Latest DEV changes
-- Merged needed changes from Unleashed 4ac1035
+- Merged needed changes from Unleashed e3fde1e
 - Removed Universal RF since it duplicates buttons from RF Remix
 - Fixed version number on make/about
 
