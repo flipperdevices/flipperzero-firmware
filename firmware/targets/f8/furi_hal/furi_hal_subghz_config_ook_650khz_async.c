@@ -750,6 +750,21 @@
 #define RF_MODEM_CHFLT_RX2_CHFLT_COE7_7_0_12_1 0x11, 0x21, 0x0C, 0x18, 0xC8, 0xC7, 0xDB, 0xF2, 0x02, 0x08, 0x07, 0x03, 0x15, 0xFC, 0x0F, 0x00
 
 /*
+// Set properties:           RF_PA_MODE_5
+// Number of properties:     5
+// Group ID:                 0x22
+// Start ID:                 0x00
+// Default values:           0x08, 0x7F, 0x00, 0x5D, 0x80, 
+// Descriptions:
+//   PA_MODE - Selects the PA operating mode, and selects resolution of PA power adjustment (i.e., step size).
+//   PA_PWR_LVL - Configuration of PA output power level.
+//   PA_BIAS_CLKDUTY - Configuration of the PA Bias and duty cycle of the TX clock source.
+//   PA_TC - Configuration of PA ramping parameters.
+//   PA_RAMP_EX - Select the time constant of the external PA ramp signal.
+*/
+#define RF_PA_MODE_5 0x11, 0x22, 0x05, 0x00, 0x88, 0x7F, 0x00, 0x1D, 0x8E
+
+/*
 // Set properties:           RF_PA_TC_1_1
 // Number of properties:     1
 // Group ID:                 0x22
@@ -851,6 +866,7 @@
         0x10, RF_MODEM_CHFLT_RX1_CHFLT_COE13_7_0_12_1, \
         0x10, RF_MODEM_CHFLT_RX1_CHFLT_COE1_7_0_12_1, \
         0x10, RF_MODEM_CHFLT_RX2_CHFLT_COE7_7_0_12_1, \
+        0x09, RF_PA_MODE_5, \
         0x05, RF_PA_TC_1_1, \
         0x0B, RF_SYNTH_PFDCP_CPFF_7_1, \
         0x0C, RF_FREQ_CONTROL_INTE_8_1, \

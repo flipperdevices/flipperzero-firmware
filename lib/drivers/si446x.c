@@ -105,7 +105,7 @@ uint8_t si446x_get_fast_reg(FuriHalSpiBusHandle* handle, uint8_t reg) {
     return buff_trx[1];
 }
 
-uint8_t si446x_get_get_rssi(FuriHalSpiBusHandle* handle) {
+uint8_t si446x_get_rssi(FuriHalSpiBusHandle* handle) {
     //ToDo add fast reg, need setting config
     //return si446x_get_fast_reg(handle, SI446X_CMD_FRR_A_READ);
 
@@ -116,6 +116,14 @@ uint8_t si446x_get_get_rssi(FuriHalSpiBusHandle* handle) {
     return buff_rx[2];
 }
 
+uint8_t si446x_set_rssi_control(FuriHalSpiBusHandle* handle) {
+    //Disable RSSI threshold check after latch.
+    //AVERAGE4	0	The RSSI value is updated at 1*Tb bit period intervals but always reflects the average value over the previous 4*Tb bit periods.
+    //RX_STATE2	4	(only with AVERAGE=0) Latches RSSI at 11*Tb after RX is enabled. (3*Tb garbage + 8*Tb)
+    uint8_t rssi_control[1] = {0b00010011};
+    return si446x_set_properties(handle, SI446X_PROP_MODEM_RSSI_CONTROL, &rssi_control[0], sizeof(rssi_control));
+}
+
 bool si446x_set_rssi_threshold(FuriHalSpiBusHandle* handle, int rssi_dbi) {
     if(rssi_dbi < -134 || rssi_dbi > -6) return false;
     uint8_t rssi[1] = {0};
@@ -123,7 +131,7 @@ bool si446x_set_rssi_threshold(FuriHalSpiBusHandle* handle, int rssi_dbi) {
     return si446x_set_properties(handle, SI446X_PROP_MODEM_RSSI_THRESH, &rssi[0], sizeof(rssi));
 }
 
-uint8_t si446x_get_get_lqi(FuriHalSpiBusHandle* handle) {
+uint8_t si446x_get_lqi(FuriHalSpiBusHandle* handle) {
     uint8_t buff_tx[] = {SI446X_CMD_GET_MODEM_STATUS};
     uint8_t buff_rx[4] = {0};
     si446x_write_data(handle, &buff_tx[0], sizeof(buff_tx));

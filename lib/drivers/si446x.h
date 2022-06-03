@@ -22,9 +22,10 @@ bool si446x_set_state(FuriHalSpiBusHandle* handle, SI446X_State_t state);
 SI446X_State_t si446x_get_state(FuriHalSpiBusHandle* handle);
 SI446X_State_t si446x_get_current_channel(FuriHalSpiBusHandle* handle);
 uint8_t si446x_get_fast_reg(FuriHalSpiBusHandle* handle, uint8_t reg);
-uint8_t si446x_get_get_rssi(FuriHalSpiBusHandle* handle);
+uint8_t si446x_get_rssi(FuriHalSpiBusHandle* handle);
+uint8_t si446x_set_rssi_control(FuriHalSpiBusHandle* handle);
 bool si446x_set_rssi_threshold(FuriHalSpiBusHandle* handle, int rssi_dbi);
-uint8_t si446x_get_get_lqi(FuriHalSpiBusHandle* handle);
+uint8_t si446x_get_lqi(FuriHalSpiBusHandle* handle);
 bool si446x_switch_to_start_tx(
     FuriHalSpiBusHandle* handle,
     uint8_t channel,
