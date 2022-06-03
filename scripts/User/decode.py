@@ -27,9 +27,9 @@ parser.add_argument('infile', metavar='i',
 parser.add_argument('outfile', metavar='o',
                     help='File to write to')
 parser.add_argument('Width', metavar='W', type=int, nargs="?", default="128",
-                    help='Width of the image')
+                    help='Width of the image. Find from meta.txt or directory name')
 parser.add_argument('Height', metavar='H', type=int, nargs="?",  default="64",
-                    help='Height of the image')
+                    help='Height of the image. Find from meta.txt or directory name')
 
 args = vars(parser.parse_args())
 
