@@ -105,6 +105,16 @@ void CommandLine::runCommand(String input) {
 
   // Stop Scan
   if (cmd_args.get(0) == STOPSCAN_CMD) {
+    if (wifi_scan_obj.currentScanMode == OTA_UPDATE) {
+      wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
+      #ifdef HAS_SCREEN
+        menu_function_obj.changeMenu(updateMenu.parentMenu);
+      #endif
+      WiFi.softAPdisconnect(true);
+      web_obj.shutdownServer();
+      return;
+    }
+    
     wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
 
     Serial.println("Stopping WiFi tran/recv");
