@@ -29,7 +29,7 @@
 #include "furi_hal_subghz_config.h"
 
 // CONFIGURATION PARAMETERS
-#define RADIO_CONFIGURATION_DATA_RADIO_XO_FREQ                     26000000L
+#define RADIO_CONFIGURATION_DATA_RADIO_XO_FREQ                     32000000L
 #define RADIO_CONFIGURATION_DATA_CHANNEL_NUMBER                    0x00
 #define RADIO_CONFIGURATION_DATA_RADIO_PACKET_LENGTH               0x00
 #define RADIO_CONFIGURATION_DATA_RADIO_STATE_AFTER_POWER_UP        0x03
@@ -42,7 +42,8 @@
 // Command:                  RF_POWER_UP
 // Description:              Command to power-up the device and select the operational mode and functionality.
 */
-#define RF_POWER_UP 0x02, 0x81, 0x00, 0x01, 0xC9, 0xC3, 0x80
+//#define RF_POWER_UP 0x02, 0x81, 0x00, 0x01, 0xC9, 0xC3, 0x80
+#define RF_POWER_UP 0x02, 0x81, 0x00, 0x01, 0xE8, 0x48, 0x00 //32000000
 
 /*
 // Command:                  RF_GPIO_PIN_CFG
@@ -610,7 +611,7 @@
 
 //ToDo Setting the quality of the received signal
 //#define RF_MODEM_AGC_WINDOW_SIZE_12_1 0x11, 0x20, 0x0C, 0x38, 0x11, 0x2B, 0x2B, 0x80, 0x02, 0xFF, 0xFF, 0x00, 0x29, 0x0C, 0x84, 0x21
-  #define RF_MODEM_AGC_WINDOW_SIZE_12_1 0x11, 0x20, 0x0C, 0x38, 0x11, 0x2B, 0x2B, 0x80, 0x02, 0xFF, 0xFF, 0x00, 0x2B, 0x30, 0x84, 0x21
+#define RF_MODEM_AGC_WINDOW_SIZE_12_1 0x11, 0x20, 0x0C, 0x38, 0x11, 0x2B, 0x2B, 0x80, 0x02, 0xFF, 0xFF, 0x00, 0x2B, 0x30, 0x84, 0x21
 
 /*
 // Set properties:           RF_MODEM_RAW_CONTROL_10
@@ -860,7 +861,7 @@
 #endif
 
 // DEFAULT VALUES FOR CONFIGURATION PARAMETERS
-#define RADIO_CONFIGURATION_DATA_RADIO_XO_FREQ_DEFAULT                     26000000L
+#define RADIO_CONFIGURATION_DATA_RADIO_XO_FREQ_DEFAULT                     32000000L
 #define RADIO_CONFIGURATION_DATA_CHANNEL_NUMBER_DEFAULT                    0x00
 #define RADIO_CONFIGURATION_DATA_RADIO_PACKET_LENGTH_DEFAULT               0x10
 #define RADIO_CONFIGURATION_DATA_RADIO_STATE_AFTER_POWER_UP_DEFAULT        0x01

@@ -1,6 +1,14 @@
 #include "subghz_testing.h"
 
 const uint32_t subghz_frequencies_testing[] = {
+
+    142000000,
+    150000000,
+    165000000,
+    175000000,
+
+    284000000,
+    290000000,
     /* 300 - 348 */
     300000000,
     304500000,
@@ -21,6 +29,8 @@ const uint32_t subghz_frequencies_testing[] = {
     434775000, /* LPD433 last channels */
     438900000,
     464000000,
+    500000000,
+    525000000,
     /* 779 - 928 */
     779000000,
     868150000,
@@ -31,6 +41,8 @@ const uint32_t subghz_frequencies_testing[] = {
     926500000,
     927950000,
     928000000,
+    1000000000,
+    1050000000,
 };
 
 const uint32_t subghz_frequencies_count_testing =

@@ -30,7 +30,7 @@
 #include "furi_hal_subghz_config.h"
 
 // CONFIGURATION PARAMETERS
-#define RADIO_CONFIGURATION_DATA_RADIO_XO_FREQ                     26000000L
+#define RADIO_CONFIGURATION_DATA_RADIO_XO_FREQ                     32000000L
 #define RADIO_CONFIGURATION_DATA_CHANNEL_NUMBER                    0x00
 #define RADIO_CONFIGURATION_DATA_RADIO_PACKET_LENGTH               0x00
 #define RADIO_CONFIGURATION_DATA_RADIO_STATE_AFTER_POWER_UP        0x03
@@ -44,7 +44,7 @@
 // Command:                  RF_POWER_UP
 // Description:              Command to power-up the device and select the operational mode and functionality.
 */
-#define RF_POWER_UP 0x02, 0x01, 0x00, 0x01, 0xC9, 0xC3, 0x80
+#define RF_POWER_UP 0x02, 0x81, 0x00, 0x01, 0xE8, 0x48, 0x00
 
 /*
 // Command:                  RF_GPIO_PIN_CFG
@@ -856,7 +856,7 @@
 #endif
 
 // DEFAULT VALUES FOR CONFIGURATION PARAMETERS
-#define RADIO_CONFIGURATION_DATA_RADIO_XO_FREQ_DEFAULT                     26000000L
+#define RADIO_CONFIGURATION_DATA_RADIO_XO_FREQ_DEFAULT                     32000000L
 #define RADIO_CONFIGURATION_DATA_CHANNEL_NUMBER_DEFAULT                    0x00
 #define RADIO_CONFIGURATION_DATA_RADIO_PACKET_LENGTH_DEFAULT               0x10
 #define RADIO_CONFIGURATION_DATA_RADIO_STATE_AFTER_POWER_UP_DEFAULT        0x01
