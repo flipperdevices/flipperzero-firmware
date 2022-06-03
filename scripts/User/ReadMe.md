@@ -7,6 +7,7 @@ A set of python3 scripts for processing the Flipper image files.
 #####################################
 PREREQUISITES
 
+
 You'll need heatshrink installed - a small embedded/RTOS compression and decompression library
 You can get that here https://github.com/atomicobject/heatshrink
 
