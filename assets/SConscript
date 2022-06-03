@@ -1,0 +1,16 @@
+Import("env", "lib_flags")
+
+libenv = env.Clone()
+libenv.MergeFlags(lib_flags)
+
+# libenv.Append(
+#     CPPPATH=[
+#         "#/assets/compiled",
+#     ],
+# )
+
+sources = Glob("compiled/*.c", source=True)
+
+lib = libenv.Library("assets", sources)
+libenv.Install("#/${BUILD_DIR}/lib", lib)
+Return("lib")

@@ -31,6 +31,7 @@ depends = env.BuildModules(
     [
         "#/lib",
         "#/firmware",
+        "#/assets",
     ],
 )
 
@@ -97,7 +98,7 @@ sources = fwenv.GlobRecursive("*.c*", "applications")
 sources += Glob("assets/compiled/*.c*", source=True)
 
 
-# print(fwenv.Dump())
+print(fwenv.Dump())
 cdb = fwenv.CompilationDatabase("compile_database.json")
 Alias("cdb", cdb)
 
@@ -147,6 +148,7 @@ fwenv.Append(
         "misc",
         "infrared",
         "appframe",
+        "assets",
     ],
 )
 
@@ -158,7 +160,8 @@ firmware_elf = fwenv.Program("${FIRMWARE_BUILD_CFG}", sources)
 #         # "${PYTHON3} scripts/version.py generate -o lib/toolbox/version.inc.h --dir .",
 #     ),
 # )
-Requires(firmware_elf, depends)
+# Requires(firmware_elf, depends)
+Depends(firmware_elf, depends)
 
 
 fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
