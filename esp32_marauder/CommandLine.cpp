@@ -77,6 +77,22 @@ bool CommandLine::inRange(int max, int index) {
   return false;
 }
 
+bool CommandLine::apSelected() {
+  for (int i = 0; i < access_points->size(); i++) {
+    if (access_points->get(i).selected)
+      return true;
+  }
+
+  return false;
+}
+
+bool CommandLine::hasSSIDs() {
+  if (ssids->size() == 0)
+    return false;
+
+  return true;
+}
+
 void CommandLine::runCommand(String input) {
   if (input != "")
     Serial.println("#" + input);
@@ -115,7 +131,14 @@ void CommandLine::runCommand(String input) {
   }
   // Clear APs
   else if (cmd_args.get(0) == CLEARAP_CMD) {
-    wifi_scan_obj.RunClearAPs();
+    int ap_sw = this->argSearch(&cmd_args, "-a"); // APs
+    int ss_sw = this->argSearch(&cmd_args, "-s"); // SSIDs
+
+    if (ap_sw != -1)
+      wifi_scan_obj.RunClearAPs();
+
+    if (ss_sw != -1)
+      wifi_scan_obj.RunClearSSIDs();
   }
 
   else if (cmd_args.get(0) == REBOOT_CMD) {
@@ -123,7 +146,7 @@ void CommandLine::runCommand(String input) {
     ESP.restart();
   }
 
-  //// WiFi Scan/Attack commands
+  //// WiFi/Bluetooth Scan/Attack commands
   if (!wifi_scan_obj.scanning()) {
 
     // AP Scan
@@ -144,6 +167,15 @@ void CommandLine::runCommand(String input) {
       #endif
       wifi_scan_obj.StartScan(WIFI_SCAN_AP, TFT_MAGENTA);
     }
+    // Probe sniff
+    else if (cmd_args.get(0) == SNIFF_PROBE_CMD) {
+      Serial.println("Starting Probe sniff. Stop with " + (String)STOPSCAN_CMD);
+      #ifdef HAS_SCREEN
+        display_obj.clearScreen();
+        menu_function_obj.drawStatusBar();
+      #endif
+      wifi_scan_obj.StartScan(WIFI_SCAN_PROBE, TFT_MAGENTA);
+    }
     // Deauth sniff
     else if (cmd_args.get(0) == SNIFF_DEAUTH_CMD) {
       Serial.println("Starting Deauth sniff. Stop with " + (String)STOPSCAN_CMD);
@@ -152,6 +184,24 @@ void CommandLine::runCommand(String input) {
         menu_function_obj.drawStatusBar();
       #endif
       wifi_scan_obj.StartScan(WIFI_SCAN_DEAUTH, TFT_RED);
+    }
+    // Pwn sniff
+    else if (cmd_args.get(0) == SNIFF_PWN_CMD) {
+      Serial.println("Starting Pwnagotchi sniff. Stop with " + (String)STOPSCAN_CMD);
+      #ifdef HAS_SCREEN
+        display_obj.clearScreen();
+        menu_function_obj.drawStatusBar();
+      #endif
+      wifi_scan_obj.StartScan(WIFI_SCAN_PWN, TFT_MAGENTA);
+    }
+    // Espressif sniff
+    else if (cmd_args.get(0) == SNIFF_ESP_CMD) {
+      Serial.println("Starting Espressif device sniff. Stop with " + (String)STOPSCAN_CMD);
+      #ifdef HAS_SCREEN
+        display_obj.clearScreen();
+        menu_function_obj.drawStatusBar();
+      #endif
+      wifi_scan_obj.StartScan(WIFI_SCAN_ESPRESSIF, TFT_MAGENTA);
     }
     // PMKID sniff
     else if (cmd_args.get(0) == SNIFF_PMKID_CMD) {
@@ -176,6 +226,10 @@ void CommandLine::runCommand(String input) {
         // Branch on attack type
         // Deauth
         if (attack_type == ATTACK_TYPE_DEAUTH) {
+          if (!this->apSelected()) {
+            Serial.println("You don't have any targets selected. Use " + (String)SEL_CMD);
+            return;
+          }
           #ifdef HAS_SCREEN
             display_obj.clearScreen();
             menu_function_obj.drawStatusBar();
@@ -187,6 +241,10 @@ void CommandLine::runCommand(String input) {
         else if (attack_type == ATTACK_TYPE_BEACON) {
           // spam by list
           if (list_beacon_sw != -1) {
+            if (!this->hasSSIDs()) {
+              Serial.println("You don't have any SSIDs in your list. Use " + (String)SSID_CMD);
+              return;
+            }
             #ifdef HAS_SCREEN
               display_obj.clearScreen();
               menu_function_obj.drawStatusBar();
@@ -207,8 +265,71 @@ void CommandLine::runCommand(String input) {
             Serial.println("You did not specify a beacon attack type");
           }
         }
+        else if (attack_type == ATTACK_TYPE_PROBE) {
+          if (!this->apSelected()) {
+            Serial.println("You don't have any targets selected. Use " + (String)SEL_CMD);
+            return;
+          }
+          Serial.println("Starting Probe spam. Stop with " + (String)STOPSCAN_CMD);
+          #ifdef HAS_SCREEN
+            display_obj.clearScreen();
+            menu_function_obj.drawStatusBar();
+          #endif
+          wifi_scan_obj.StartScan(WIFI_ATTACK_AUTH, TFT_RED);
+        }
+        else if (attack_type == ATTACK_TYPE_RR) {
+          Serial.println("Starting Rick Roll Beacon spam. Stop with " + (String)STOPSCAN_CMD);
+          #ifdef HAS_SCREEN
+            display_obj.clearScreen();
+            menu_function_obj.drawStatusBar();
+          #endif
+          wifi_scan_obj.StartScan(WIFI_ATTACK_RICK_ROLL, TFT_YELLOW);
+        }
         else {
           Serial.println("Attack type not properly defined");
+          return;
+        }
+      }
+    }
+
+    //// Bluetooth scan/attack commands
+    // Bluetooth scan
+    if (cmd_args.get(0) == BT_SNIFF_CMD) {
+      Serial.println("Starting Bluetooth scan. Stop with " + (String)STOPSCAN_CMD);
+      #ifdef HAS_SCREEN
+        display_obj.clearScreen();
+        menu_function_obj.drawStatusBar();
+      #endif
+      wifi_scan_obj.StartScan(BT_SCAN_ALL, TFT_GREEN);
+    }
+    // Bluetooth CC Skimmer scan
+    else if (cmd_args.get(0) == BT_SKIM_CMD) {
+      Serial.println("Starting Bluetooth CC Skimmer scan. Stop with " + (String)STOPSCAN_CMD);
+      #ifdef HAS_SCREEN
+        display_obj.clearScreen();
+        menu_function_obj.drawStatusBar();
+      #endif
+      wifi_scan_obj.StartScan(BT_SCAN_SKIMMERS, TFT_MAGENTA);
+    }
+
+    // Update command
+    if (cmd_args.get(0) == UPDATE_CMD) {
+      int w_sw = this->argSearch(&cmd_args, "-w"); // Web update
+      int sd_sw = this->argSearch(&cmd_args, "-s"); // SD Update
+
+      // Update via OTA
+      if (w_sw != -1) {
+        Serial.println("Starting Marauder OTA Update. Stop with " + (String)STOPSCAN_CMD);
+        wifi_scan_obj.currentScanMode = OTA_UPDATE;
+        #ifdef HAS_SCREEN
+          menu_function_obj.changeMenu(menu_function_obj.updateMenu);
+        #endif
+        web_obj.setupOTAupdate();
+      }
+      // Update via SD
+      else if (sd_sw != -1) {
+        if (!sd_obj.supported) {
+          Serial.println("SD card is not connected. Cannot perform SD Update");
           return;
         }
       }

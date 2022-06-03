@@ -385,6 +385,7 @@
     #define TFT_MAGENTA 0
     #define TFT_VIOLET 0
     #define TFT_ORANGE 0
+    #define TFT_YELLOW 0
     #define STANDARD_FONT_CHAR_LIMIT 40
     #define FLASH_BUTTON -1
 
