@@ -1,7 +1,8 @@
 #####################################  
 encode.py  
 decode.py  
-icondecode.py
+iconencode.py  
+icondecode.py  
 
 A set of python3 scripts for processing the Flipper image files.  
   
@@ -32,6 +33,11 @@ Encode an .xbm file into .xb
 encode.py input_image output_image  
 You will also get the image dimensions for use in meta.txt  
 That's it.  
+
+##  
+# iconencode
+Compress an icon asset from an XBM to a compressed char array ready to paste
+Will assume dimensions of 128x64
 
 ##  
 # icondecode  
