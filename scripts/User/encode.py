@@ -45,3 +45,5 @@ if len(data_enc) < len(data_bin) + 1:
 else:
     data = b"\x00" + data_bin
 w.write(data)
+r.close()
+w.close()
