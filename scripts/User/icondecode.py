@@ -31,7 +31,6 @@ parser.add_argument('Height', metavar='H', type=int, nargs="?",  default="64",
                     help='Height of the image. Find from meta.txt or directory name')
 parser.add_argument('Trim', metavar='T', type=int, nargs="?",  default="8",
                     help='Number of bytes off the start/header to trim. Multiples of 2 required.')
-
 args = vars(parser.parse_args())
 
 r = open(args["infile"],"r")
