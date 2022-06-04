@@ -103,6 +103,44 @@ void CommandLine::runCommand(String input) {
 
   //// Admin commands
 
+  // Help
+  if (cmd_args.get(0) == HELP_CMD) {
+    Serial.println(HELP_HEAD);
+    Serial.println(HELP_CH_CMD);
+    Serial.println(HELP_CLEARAP_CMD_A);
+    Serial.println(HELP_CLEARAP_CMD_B);
+    Serial.println(HELP_REBOOT_CMD);
+    Serial.println(HELP_UPDATE_CMD_A);
+    Serial.println(HELP_UPDATE_CMD_B);
+    
+    // WiFi sniff/scan
+    Serial.println(HELP_SCANAP_CMD);
+    Serial.println(HELP_SNIFF_BEACON_CMD);
+    Serial.println(HELP_SNIFF_PROBE_CMD);
+    Serial.println(HELP_SNIFF_PWN_CMD);
+    Serial.println(HELP_SNIFF_ESP_CMD);
+    Serial.println(HELP_SNIFF_DEAUTH_CMD);
+    Serial.println(HELP_SNIFF_PMKID_CMD);
+    Serial.println(HELP_STOPSCAN_CMD);
+    
+    // WiFi attack
+    Serial.println(HELP_ATTACK_CMD);
+    
+    // WiFi Aux
+    Serial.println(HELP_LIST_AP_CMD_A);
+    Serial.println(HELP_LIST_AP_CMD_B);
+    Serial.println(HELP_SEL_CMD_A);
+    Serial.println(HELP_SEL_CMD_B);
+    Serial.println(HELP_SSID_CMD_A);
+    Serial.println(HELP_SSID_CMD_B);
+    
+    // Bluetooth sniff/scan
+    Serial.println(HELP_BT_SNIFF_CMD);
+    Serial.println(HELP_BT_SKIM_CMD);
+    Serial.println(HELP_FOOT);
+    return;
+  }
+
   // Stop Scan
   if (cmd_args.get(0) == STOPSCAN_CMD) {
     if (wifi_scan_obj.currentScanMode == OTA_UPDATE) {
