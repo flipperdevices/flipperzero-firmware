@@ -26,7 +26,6 @@ env.Append(
 )
 
 depends = env.BuildModules(
-    env,
     [
         "lib",
         "firmware",

@@ -39,7 +39,6 @@ env.Append(
 
 
 libs = env.BuildModules(
-    env,
     [
         "STM32CubeWB",
         "freertos",

@@ -92,12 +92,12 @@ env["ARCOM"] = '${TEMPFILE("' + env["ARCOM"] + '","$ARCOMSTR")}'
 
 
 # Recursive glob
-def GlobRecursive(pattern, node=".", exclude=None):
+def GlobRecursive(env, pattern, node=".", exclude=None):
     results = []
     for f in Glob(str(node) + "/*", source=True, exclude=exclude):
         if type(f) is SCons.Node.FS.Dir:
             # print(f"recursing into {f}")
-            results += GlobRecursive(pattern, f, exclude)
+            results += env.GlobRecursive(pattern, f, exclude)
     current_node_str = str(node) + "/"
     results += Glob(
         current_node_str + pattern,
@@ -107,10 +107,7 @@ def GlobRecursive(pattern, node=".", exclude=None):
     return results
 
 
-env.GlobRecursive = GlobRecursive
-
-
-def build_module(env, module):
+def BuildModule(env, module):
     # print("cwd", os.getcwd())
     # print(type(Dir(".").srcdir), dir(Dir(".").srcdir))
     src_dir = str(Dir(".").srcdir or os.getcwd())
@@ -131,7 +128,7 @@ def build_module(env, module):
 def BuildModules(env, modules):
     result = []
     for module in modules:
-        build_res = build_module(env, module)
+        build_res = env.BuildModule(module)
         # print("module ", module, build_res)
         if build_res is None:
             continue
@@ -142,7 +139,10 @@ def BuildModules(env, modules):
     return result
 
 
-env.BuildModules = BuildModules
+env.AddMethod(GlobRecursive)
+env.AddMethod(BuildModule)
+env.AddMethod(BuildModules)
+
 
 lib_flags = {
     "CCFLAGS": [
