@@ -1,7 +1,6 @@
 Import("env")
 
 env.Append(
-    FLIPPER_TARGET="7",
     LIB_DIST_DIR="${BUILD_DIR}/lib",
 )
 
@@ -10,7 +9,7 @@ env.Append(
         "${LIB_DIST_DIR}",
     ],
     CPPDEFINES=[
-        ("TARGET", "${FLIPPER_TARGET}"),
+        ("TARGET", "${TARGET_HW}"),
     ],
 )
 
@@ -18,10 +17,10 @@ env.Append(
     CPPPATH=[
         "#/core",
         "#/applications",
-        "#/firmware/targets/f${FLIPPER_TARGET}/ble_glue",
-        "#/firmware/targets/f${FLIPPER_TARGET}/fatfs",
-        "#/firmware/targets/f${FLIPPER_TARGET}/furi_hal",
-        "#/firmware/targets/f${FLIPPER_TARGET}/Inc",
+        "#/firmware/targets/f${TARGET_HW}/ble_glue",
+        "#/firmware/targets/f${TARGET_HW}/fatfs",
+        "#/firmware/targets/f${TARGET_HW}/furi_hal",
+        "#/firmware/targets/f${TARGET_HW}/Inc",
         "#/firmware/targets/furi_hal_include",
     ]
 )
@@ -116,7 +115,7 @@ firmware_elf = fwenv.Program(
     "${FIRMWARE_BUILD_CFG}",
     sources,
     LIBS=[
-        "flipper${FLIPPER_TARGET}",
+        "flipper${TARGET_HW}",
         "core",
         "freertos",
         "STM32CubeWB",

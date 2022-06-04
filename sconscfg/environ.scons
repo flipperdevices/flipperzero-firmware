@@ -13,6 +13,16 @@ vars = Variables(None, ARGUMENTS)
 vars.Add(BoolVariable("DEBUG", help="Enable debug build", default=1))
 vars.Add(BoolVariable("COMPACT", help="Optimize for size", default=0))
 vars.Add(
+    EnumVariable(
+        "TARGET_HW",
+        help="Hardware target",
+        default="7",
+        allowed_values=[
+            "7",
+        ],
+    )
+)
+vars.Add(
     BoolVariable("RAM_EXEC", help="Build updater image for RAM exection", default=0)
 )
 

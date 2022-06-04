@@ -1,9 +1,5 @@
 Import("fwenv")
 
-# fwenv.Append(
-#     FLIPPER_TARGET="7",
-# )
-
 # vars = Variables(None, ARGUMENTS)
 # vars.Add(BoolVariable("DEBUG", help="Enable debug build", default=1))
 # vars.Add(BoolVariable("COMPACT", help="Otimize for size", default=0))

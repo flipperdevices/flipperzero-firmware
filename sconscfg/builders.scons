@@ -11,7 +11,7 @@ def generate_bin(source, target, env, for_signature):
 
 def generate_dfu(source, target, env, for_signature):
     return (
-        '${PYTHON3} ./scripts/bin2dfu.py -i "%s" -o "%s" -a ${IMAGE_BASE_ADDRESS} -l "Flipper Zero F${FLIPPER_TARGET}"'
+        '${PYTHON3} ./scripts/bin2dfu.py -i "%s" -o "%s" -a ${IMAGE_BASE_ADDRESS} -l "Flipper Zero F${TARGET_HW}"'
         % (source[0], target[0])
     )
 
