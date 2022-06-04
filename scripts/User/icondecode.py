@@ -31,6 +31,7 @@ parser.add_argument('Height', metavar='H', type=int, nargs="?",  default="64",
                     help='Height of the image. Find from meta.txt or directory name')
 parser.add_argument('Trim', metavar='T', type=int, nargs="?",  default="8",
                     help='Number of bytes off the start/header to trim. Multiples of 2 required.')
+
 args = vars(parser.parse_args())
 
 r = open(args["infile"],"r")
@@ -42,8 +43,8 @@ trimStart=args["Trim"]
 output = subprocess.check_output(["cat", args["infile"]]) #yes this is terrible.
 f = io.StringIO(output.decode().strip())
 
-data = f.read().strip().replace(";","").replace("{","").replace("}","")
-data_str = data.replace(",", "").replace("0x", "")
+data = f.read().strip()
+data_str = data[1:-1].replace(",", "").replace("0x", "")
 data_bin = bytearray.fromhex(data_str[trimStart:])
 
 data_decoded_str = subprocess.check_output(
@@ -61,4 +62,5 @@ bytes_out = "static unsigned char icon_bits[] = {"+  str(c) +  "};"
 data=width_out+height_out+bytes_out
 
 w.write(data)
+r.close()
 w.close()
