@@ -52,8 +52,12 @@ b=list(data_encoded_str)
 c=','.join(padded_hex(my_int,2) for my_int in b)
 
 # a bit ugly.
-char_out = "const uint8_t _I_"+infile+"_"+dims+"_0[] = {"+  str(c) +  ",};"
-char_out2 = "const uint8_t* const _I_" +infile+"{_I_"+infile+"};"
+
+framename="_I_"+infile+"_"+dims
+
+
+char_out = "const uint8_t "+framename+"_0[] = {"+  str(c) +  ",};"
+char_out2 = "const uint8_t "+framename+"[] = {"+framename+"_0};"
 #data=bytes_out
 print(char_out)
 print(char_out2)
