@@ -39,9 +39,10 @@ env = Environment(
         "PATH": os.environ["PATH"],
     },
 )
+# env.Decider("content-timestamp")
 
 if env["PLATFORM"] == "win32":
-    # On Windows, python 3 executable is usually just "python"
+    # On Windows, Python 3 executable is usually just "python"
     env["PYTHON3"] = env["PYTHON3"][:-1]
 
 Help(vars.GenerateHelpText(env))
@@ -51,6 +52,8 @@ Help(vars.GenerateHelpText(env))
 
 SetOption("num_jobs", multiprocessing.cpu_count())
 SetOption("implicit_cache", True)
+SetOption("implicit_deps_unchanged", True)
+SetOption("max_drift", 1)
 
 
 # Setting up temp file parameters
@@ -60,7 +63,7 @@ WINPATHSEP_RE = re.compile(r"\\([^\"'\\]|$)")
 
 def tempfile_arg_esc_func(arg):
     arg = quote_spaces(arg)
-    if sys.platform != "win32":
+    if env["PLATFORM"] != "win32":
         return arg
     # GCC requires double Windows slashes, let's use UNIX separator
     return WINPATHSEP_RE.sub(r"/\1", arg)
@@ -82,7 +85,8 @@ for binary in [
     "OBJCOPY",
     "RANLIB",
 ]:
-    env[binary] = TOOLCHAIN_PREFIX + env[binary]
+    if binary in env:
+        env[binary] = TOOLCHAIN_PREFIX + env[binary]
 
 
 # Commandline length limit hack
@@ -91,7 +95,9 @@ env["LINKCOM"] = '${TEMPFILE("' + env["LINKCOM"] + '","$LINKCOMSTR")}'
 env["ARCOM"] = '${TEMPFILE("' + env["ARCOM"] + '","$ARCOMSTR")}'
 
 
-# Recursive glob
+# Build env extensions
+
+
 def GlobRecursive(env, pattern, node=".", exclude=None):
     results = []
     for f in Glob(str(node) + "/*", source=True, exclude=exclude):
@@ -143,6 +149,8 @@ env.AddMethod(GlobRecursive)
 env.AddMethod(BuildModule)
 env.AddMethod(BuildModules)
 
+
+# Specific flags for building libraries - always do optimized builds
 
 lib_flags = {
     "CCFLAGS": [

@@ -96,10 +96,10 @@ else:
 sources = fwenv.GlobRecursive("*.c*", "applications")
 
 
-print(fwenv.Dump())
-cdb = fwenv.CompilationDatabase("compile_database.json")
-Alias("cdb", cdb)
+# Debug
+# print(fwenv.Dump())
 
+# Git Version management
 
 build_version = fwenv.Command(
     "#lib/toolbox/version.inc.h",
@@ -109,6 +109,8 @@ build_version = fwenv.Command(
 fwenv.Precious(build_version)
 fwenv.AlwaysBuild(build_version)
 
+
+# Full firmware definition
 
 firmware_elf = fwenv.Program(
     "${FIRMWARE_BUILD_CFG}",
@@ -140,3 +142,7 @@ Depends(firmware_elf, depends)
 fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
 fwenv.BINBuilder("${FIRMWARE_BUILD_CFG}")
 fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
+
+# Compile DB generation
+cdb = fwenv.CompilationDatabase("compile_database.json")
+Alias("cdb", cdb)

@@ -29,7 +29,6 @@ libenv.MergeFlags(lib_flags)
 sources = libenv.GlobRecursive(
     "*_ll_*.c", "STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Src/", exclude="*usb.c"
 )
-
 sources += Glob(
     "STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/shci/*.c",
     source=True,
