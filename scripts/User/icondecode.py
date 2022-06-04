@@ -5,8 +5,6 @@ import io
 import os
 import sys
 
-
-
 def padded_hex(i, l):
     given_int = i
     given_len = l
@@ -20,12 +18,15 @@ def padded_hex(i, l):
             '0x' + extra_zeros + hex_result if num_hex_chars < given_len else
             None)
 
-parser = argparse.ArgumentParser(description='Turn cooked Flipper .bm files back into .xbm')
+
+parser = argparse.ArgumentParser(description='Turn icon char arrays back into .xbm')
 
 parser.add_argument('infile', metavar='i',
                     help='Input file')
 parser.add_argument('outfile', metavar='o',
                     help='File to write to')
+parser.add_argument('Trim', metavar='T', type=int, nargs="?",  default="0",
+                    help='Number of bytes off the start/header to trim. Multiples of 2 required.')
 parser.add_argument('Width', metavar='W', type=int, nargs="?", default="128",
                     help='Width of the image. Find from meta.txt or directory name')
 parser.add_argument('Height', metavar='H', type=int, nargs="?",  default="64",
@@ -33,39 +34,30 @@ parser.add_argument('Height', metavar='H', type=int, nargs="?",  default="64",
 
 args = vars(parser.parse_args())
 
-r = open(args["infile"],"rb")
+r = open(args["infile"],"r")
 w = open(args["outfile"],"w")
-
-fileStream=r.read()
-filename=os.path.splitext(os.path.basename(args["outfile"]))[0]
-
-
 imageWidth=args["Width"]
 imageHeight=args["Height"]
+trimStart=args["Trim"]
 
+output = subprocess.check_output(["cat", args["infile"]]) #yes this is terrible.
+f = io.StringIO(output.decode().strip())
 
-#remove headers and padding 
-if(fileStream[0:2] == bytes([0x01,0x00])):
-	unpad=fileStream[4:]
-else:
-	if(fileStream[0:1] == bytes([0x00])):
-		unpad=fileStream[3:]
+data = f.read().strip()
+data_str = data[1:-1].replace(",", "").replace("0x", "")
+data_bin = bytearray.fromhex(data_str[trimStart:])
 
-
-
-#lzss decompress
 data_decoded_str = subprocess.check_output(
-    ["heatshrink", "-d","-w8","-l4"], input=unpad
+    ["heatshrink", "-d","-w8","-l4"], input=data_bin
 )
 
-#turn it back into xbm
-
 b=list(data_decoded_str)
+
 c=', '.join(padded_hex(my_int,2) for my_int in b)
 
-width_out = "#define "+ filename+ "_width "+ str(imageWidth) + "\n"
-height_out = "#define "+ filename+ "_height "+ str(imageHeight) + "\n"
-bytes_out = "static unsigned char "+ filename+ "_bits[] = {"+  str(c) +  "};"
+width_out = "#define icon_width "+ str(imageWidth) + "\n"
+height_out = "#define icon_height "+ str(imageHeight) + "\n"
+bytes_out = "static unsigned char icon_bits[] = {"+  str(c) +  "};"
 
 data=width_out+height_out+bytes_out
 
