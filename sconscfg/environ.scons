@@ -75,6 +75,7 @@ for binary in [
     "CXX",
     # "LINK",
     "OBJCOPY",
+    "RANLIB",
 ]:
     env[binary] = TOOLCHAIN_PREFIX + env[binary]
 
