@@ -41,8 +41,8 @@ The icons in this file have a different header format. This will need to be trim
 A value of 8 for trim appears to be correct.  
 As with regular decoding, the width and height are not listed - but can be found in code/const/variable/etc names.  
 copy just the char array. The script does not care if the curly braces or semicolon are in place.  
-i.e. the following are all acceptable and equivalent.
-{0x00,0x08,0x1C,0x3E,0x7F,};
-{0x00,0x08,0x1C,0x3E,0x7F,}
-0x00,0x08,0x1C,0x3E,0x7F
+i.e. the following are all acceptable and equivalent.  
+{0x00,0x08,0x1C,0x3E,0x7F,};  
+{0x00,0x08,0x1C,0x3E,0x7F,}  
+0x00,0x08,0x1C,0x3E,0x7F  
 
