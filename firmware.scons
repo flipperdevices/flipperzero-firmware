@@ -106,33 +106,15 @@ Alias("cdb", cdb)
 build_version = fwenv.Command(
     "#lib/toolbox/version.inc.h",
     [],
-    "${PYTHON3} scripts/version.py generate -o ${TARGET} --dir .",
+    "${PYTHON3} scripts/version.py generate -o ${TARGET} --dir ${ROOT_DIR}",
 )
-# fwenv.AlwaysBuild(build_version)
-
-build_version_noarg = fwenv.Command(
-    [],
-    [],
-    "${PYTHON3} scripts/version .py generate -o lib/toolbox/version.inc.h --dir .",
-)
-fwenv.AlwaysBuild(build_version_noarg)
+fwenv.Precious(build_version)
+fwenv.AlwaysBuild(build_version)
 
 
-def version_action(target, source, fwenv):
-    """
-    Generate the version file with the current version in it
-    """
-    contents = version_build_template % (fwenv["VERSION"].toString())
-    fd = open(target[0].path, "w")
-    fd.write(contents)
-    fd.close()
-    return 0
-
-
-fwenv.Append(
-    # LIBPATH=[
-    #     "#/lib",
-    # ],
+firmware_elf = fwenv.Program(
+    "${FIRMWARE_BUILD_CFG}",
+    sources,
     LIBS=[
         "flipper${FLIPPER_TARGET}",
         "core",
@@ -154,15 +136,6 @@ fwenv.Append(
     ],
 )
 
-firmware_elf = fwenv.Program("${FIRMWARE_BUILD_CFG}", sources)
-# fwenv.AddPreAction(
-#     firmware_elf,
-#     Action(
-#         build_version_noarg
-#         # "${PYTHON3} scripts/version.py generate -o lib/toolbox/version.inc.h --dir .",
-#     ),
-# )
-# Requires(firmware_elf, depends)
 Depends(firmware_elf, depends)
 
 

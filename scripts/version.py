@@ -72,9 +72,6 @@ class Main(App):
         current_version_info = None
 
         try:
-            print(f"cwd: '{os.getcwd()}'")
-            print(f"path: '{self.args.output}'")
-            os.system("ls lib/toolbox/version*")
             with open(self.args.output, "r") as file:
                 current_version_info = file.read()
         except EnvironmentError as e:

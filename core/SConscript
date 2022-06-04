@@ -5,7 +5,7 @@ libenv.MergeFlags(lib_flags)
 
 libenv.Append(
     CPPPATH=[
-        "#/core",
+        # "#/core",
     ],
 )
 
