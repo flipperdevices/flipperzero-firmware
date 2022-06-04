@@ -1,0 +1,27 @@
+{
+  "authors": {
+    "name": "Mark Radbourne",
+    "url": "https://os.mbed.com/users/markrad/"
+  },
+  "description": "mbed TLS Build",
+  "examples": [
+    "https://os.mbed.com/users/ritesh2094/code/Encrypt_Decrypt1/",
+    "https://os.mbed.com/users/bentor/code/mbed_blink_tls/",
+    "https://os.mbed.com/teams/Practice/code/encrypt/",
+    "https://os.mbed.com/teams/301N-November-2018/code/encrypt/"
+  ],
+  "frameworks": "*",
+  "keywords": "mbedtls",
+  "name": "mbedtls",
+  "platforms": "*",
+  "build": {
+    "flags": [],
+    "includeDir": "include",
+    "srcDir": "library"
+  },
+
+  "repository": {
+    "type": "hg",
+    "url": "https://os.mbed.com/users/markrad/code/mbedtls/"
+  }
+}
