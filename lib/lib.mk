@@ -136,3 +136,11 @@ C_SOURCES		+= $(wildcard $(LIB_DIR)/microtar/src/*.c)
 
 # Update-related common code
 C_SOURCES		+= $(wildcard $(LIB_DIR)/update_util/*.c)
+
+# loclass
+CFLAGS			+= -I$(LIB_DIR)/loclass
+C_SOURCES		+= $(wildcard $(LIB_DIR)/loclass/*.c)
+
+# mbedtls
+CFLAGS			+= -I$(LIB_DIR)/mbedtls/include
+C_SOURCES		+= $(wildcard $(LIB_DIR)/mbedtls/library/*.c)
