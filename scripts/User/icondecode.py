@@ -25,13 +25,12 @@ parser.add_argument('infile', metavar='i',
                     help='Input file')
 parser.add_argument('outfile', metavar='o',
                     help='File to write to')
-parser.add_argument('Trim', metavar='T', type=int, nargs="?",  default="0",
-                    help='Number of bytes off the start/header to trim. Multiples of 2 required.')
 parser.add_argument('Width', metavar='W', type=int, nargs="?", default="128",
                     help='Width of the image. Find from meta.txt or directory name')
 parser.add_argument('Height', metavar='H', type=int, nargs="?",  default="64",
                     help='Height of the image. Find from meta.txt or directory name')
-
+parser.add_argument('Trim', metavar='T', type=int, nargs="?",  default="8",
+                    help='Number of bytes off the start/header to trim. Multiples of 2 required.')
 args = vars(parser.parse_args())
 
 r = open(args["infile"],"r")
@@ -62,5 +61,4 @@ bytes_out = "static unsigned char icon_bits[] = {"+  str(c) +  "};"
 data=width_out+height_out+bytes_out
 
 w.write(data)
-r.close()
 w.close()
