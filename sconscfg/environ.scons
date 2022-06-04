@@ -7,7 +7,6 @@ import sys
 import re
 import multiprocessing
 
-TOOLCHAIN_PREFIX = "arm-none-eabi-"
 
 vars = Variables(None, ARGUMENTS)
 vars.Add(BoolVariable("DEBUG", help="Enable debug build", default=1))
@@ -25,6 +24,7 @@ vars.Add(
 vars.Add(
     BoolVariable("RAM_EXEC", help="Build updater image for RAM exection", default=0)
 )
+
 
 env = Environment(
     variables=vars,
@@ -45,6 +45,7 @@ if env["PLATFORM"] == "win32":
     env["PYTHON3"] = env["PYTHON3"][:-1]
 
 Help(vars.GenerateHelpText(env))
+
 
 # Default value for -j
 
@@ -67,7 +68,11 @@ def tempfile_arg_esc_func(arg):
 
 env["TEMPFILEARGESCFUNC"] = tempfile_arg_esc_func
 
+
 # Set up cross-compile tools
+
+TOOLCHAIN_PREFIX = "arm-none-eabi-"
+
 for binary in [
     "AR",
     "AS",
@@ -79,8 +84,12 @@ for binary in [
 ]:
     env[binary] = TOOLCHAIN_PREFIX + env[binary]
 
+
 # Commandline length limit hack
+
 env["LINKCOM"] = '${TEMPFILE("' + env["LINKCOM"] + '","$LINKCOMSTR")}'
+env["ARCOM"] = '${TEMPFILE("' + env["ARCOM"] + '","$ARCOMSTR")}'
+
 
 # Recursive glob
 def GlobRecursive(pattern, node=".", exclude=None):
@@ -99,11 +108,6 @@ def GlobRecursive(pattern, node=".", exclude=None):
 
 
 env.GlobRecursive = GlobRecursive
-
-
-def check_exists(path):
-    print("checking", File(path).abspath)
-    return os.path.exists(File(path).abspath)
 
 
 def build_module(env, module):

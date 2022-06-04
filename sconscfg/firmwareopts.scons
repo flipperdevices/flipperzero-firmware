@@ -1,15 +1,5 @@
 Import("fwenv")
 
-# vars = Variables(None, ARGUMENTS)
-# vars.Add(BoolVariable("DEBUG", help="Enable debug build", default=1))
-# vars.Add(BoolVariable("COMPACT", help="Otimize for size", default=0))
-# vars.Add(
-#     BoolVariable("RAM_EXEC", help="Build updater image for RAM exection", default=0)
-# )
-# fwenv.Append(variables=vars)
-# Help(vars.GenerateHelpText(env))
-
-# print(fwenv.Dump())
 
 if fwenv["DEBUG"]:
     fwenv.Append(
@@ -44,6 +34,7 @@ else:
             "-g",
         ],
     )
+
 
 if fwenv["FIRMWARE_BUILD_CFG"] == "updater":
     fwenv.Append(
