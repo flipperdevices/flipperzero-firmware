@@ -49,6 +49,7 @@ extern int32_t file_browser_app(void* p);
 // Plugins
 extern int32_t music_player_app(void* p);
 extern int32_t snake_game_app(void* p);
+extern int32_t picopass_app(void* p);
 
 // On system start hooks declaration
 extern void bt_on_system_start();
@@ -346,6 +347,14 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #ifdef APP_SNAKE_GAME
     {.app = snake_game_app,
      .name = "Snake Game",
+     .stack_size = 1024,
+     .icon = &A_Plugins_14,
+     .flags = FlipperApplicationFlagDefault},
+#endif
+
+#ifdef APP_PICOPASS
+    {.app = picopass_app,
+     .name = "PicoPass Reader",
      .stack_size = 1024,
      .icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
