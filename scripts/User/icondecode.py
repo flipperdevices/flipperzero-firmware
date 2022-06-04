@@ -42,8 +42,8 @@ trimStart=args["Trim"]
 output = subprocess.check_output(["cat", args["infile"]]) #yes this is terrible.
 f = io.StringIO(output.decode().strip())
 
-data = f.read().strip()
-data_str = data[1:-1].replace(",", "").replace("0x", "")
+data = f.read().strip().replace(";","").replace("{","").replace("}","")
+data_str = data.replace(",", "").replace("0x", "")
 data_bin = bytearray.fromhex(data_str[trimStart:])
 
 data_decoded_str = subprocess.check_output(
