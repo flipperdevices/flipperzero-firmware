@@ -1,0 +1,19 @@
+App(
+    appid="notification",
+    name="NotificationSrv",
+    apptype=FlipperAppType.SERVICE,
+    entry_point="notification_srv",
+    cdefines=["SRV_NOTIFICATION"],
+    provides=["notification_settings"],
+    stack_size=1536,
+    order=0,
+)
+
+App(
+    appid="notification_settings",
+    name="LCD and Notifications",
+    apptype=FlipperAppType.SETTINGS,
+    entry_point="notification_settings_app",
+    stack_size=1 * 1024,
+    order=0,
+)

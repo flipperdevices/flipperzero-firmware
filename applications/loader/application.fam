@@ -1,0 +1,9 @@
+App(
+    appid="loader",
+    name="LoaderSrv",
+    apptype=FlipperAppType.SERVICE,
+    entry_point="loader_srv",
+    cdefines=["SRV_LOADER"],
+    stack_size=1 * 1024,
+    order=0,
+)

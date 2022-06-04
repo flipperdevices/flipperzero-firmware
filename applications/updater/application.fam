@@ -1,0 +1,21 @@
+App(
+    appid="updater",
+    name="UpdaterSrv",
+    apptype=FlipperAppType.SERVICE,
+    cdefines=["SRV_UPDATER"],
+    conflicts=["desktop"],
+    entry_point="updater_srv",
+    stack_size=2 * 1024,
+    order=0,
+)
+
+App(
+    appid="updater_app",
+    name="UpdaterApp",
+    apptype=FlipperAppType.SYSTEM,
+    cdefines=["APP_UPDATER"],
+    conflicts=["updater"],
+    entry_point="updater_srv",
+    stack_size=2 * 1024,
+    order=0,
+)

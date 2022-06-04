@@ -1,0 +1,20 @@
+App(
+    appid="desktop",
+    name="DesktopSrv",
+    apptype=FlipperAppType.SERVICE,
+    entry_point="desktop_srv",
+    cdefines=["SRV_DESKTOP"],
+    stack_size=2 * 1024,
+    conflicts=["updater"],
+    order=0,
+)
+
+App(
+    appid="desktop_settings",
+    name="Desktop",
+    apptype=FlipperAppType.SETTINGS,
+    entry_point="desktop_settings_app",
+    requires=["desktop"],
+    stack_size=1 * 1024,
+    order=0,
+)

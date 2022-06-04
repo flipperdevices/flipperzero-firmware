@@ -55,3 +55,71 @@ else:
             "-Tfirmware/targets/f${TARGET_HW}/stm32wb55xx_flash.ld",
         ],
     )
+
+
+from dataclasses import dataclass, field
+from typing import List, Set, Dict, Tuple, Optional
+from enum import Enum
+import os
+import SCons
+
+
+class FlipperAppType(Enum):
+    SERVICE = "Service"
+    SYSTEM = "System"
+    APP = "App"
+    PLUGIN = "Plugin"
+    DEBUG = "Debug"
+    ARCHIVE = "Archive"
+    SETTINGS = "Settings"
+    STARTUP = "StartupHook"
+
+
+@dataclass
+class FlipperApplication:
+    appid: str
+    apptype: FlipperAppType
+    name: Optional[str] = None
+    entry_point: Optional[str] = None
+    flags: List[str] = field(default_factory=lambda: ["Default"])
+    cdefines: List[str] = field(default_factory=list)
+    requires: List[str] = field(default_factory=list)
+    conflicts: List[str] = field(default_factory=list)
+    provides: List[str] = field(default_factory=list)
+    stack_size: int = 2048
+    icon: Optional[str] = None
+    order: int = 0
+
+
+def LoadApplicationManifest(env, appdir):
+    # app_manifest = File("#/applications/" + appid + "/application.fam").abspath
+    app_manifest_path = appdir.File("application.fam").abspath
+    if not os.path.exists(app_manifest_path):
+        Exit(f"App manifest for '{appdir}' not found at path {app_manifest_path}")
+    # print("Loading", app_manifest_path)
+
+    app_manifests = []
+
+    def App(*args, **kw):
+        nonlocal app_manifests
+        app_manifests.append(FlipperApplication(*args, **kw))
+
+    with open(app_manifest_path, "rt") as manifest_file:
+        exec(manifest_file.read())
+
+    if len(app_manifests) == 0:
+        Exit(f"App manifest for '{appdir}' is malformed")
+
+    # print("Built", app_manifests)
+    return app_manifests
+
+
+fwenv.AddMethod(LoadApplicationManifest)
+
+manifests = []
+for entry in Glob("#/applications/*"):
+    if isinstance(entry, SCons.Node.FS.Dir):
+        manifests.extend(fwenv.LoadApplicationManifest(entry))
+
+# print(manifests)
+# Exit(1)

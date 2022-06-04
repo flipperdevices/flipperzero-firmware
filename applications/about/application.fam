@@ -1,0 +1,9 @@
+App(
+    appid="about",
+    name="About",
+    apptype=FlipperAppType.SETTINGS,
+    entry_point="about_settings_app",
+    cdefines=["APP_ABOUT"],
+    stack_size=1 * 1024,
+    order=0,
+)
