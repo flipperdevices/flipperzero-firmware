@@ -54,13 +54,13 @@ if fwenv["FIRMWARE_BUILD_CFG"] == "updater":
         ],
         IMAGE_BASE_ADDRESS="0x20000000",
         LINKFLAGS=[
-            "-Tfirmware/targets/f7/stm32wb55xx_ram_fw.ld",
+            "-Tfirmware/targets/f${TARGET_HW}/stm32wb55xx_ram_fw.ld",
         ],
     )
 else:
     fwenv.Append(
         IMAGE_BASE_ADDRESS="0x8000000",
         LINKFLAGS=[
-            "-Tfirmware/targets/f7/stm32wb55xx_flash.ld",
+            "-Tfirmware/targets/f${TARGET_HW}/stm32wb55xx_flash.ld",
         ],
     )
