@@ -45,7 +45,7 @@ else:
         ],
     )
 
-if fwenv["RAM_EXEC"]:
+if fwenv["FIRMWARE_BUILD_CFG"] == "updater":
     fwenv.Append(
         CPPDEFINES=[
             "FURI_RAM_EXEC",
@@ -56,7 +56,6 @@ if fwenv["RAM_EXEC"]:
         LINKFLAGS=[
             "-Tfirmware/targets/f7/stm32wb55xx_ram_fw.ld",
         ],
-        FIRMWARE_BUILD_CFG="updater",
     )
 else:
     fwenv.Append(
@@ -64,5 +63,4 @@ else:
         LINKFLAGS=[
             "-Tfirmware/targets/f7/stm32wb55xx_flash.ld",
         ],
-        FIRMWARE_BUILD_CFG="firmware",
     )
