@@ -1,5 +1,7 @@
 Import("env")
 
+import os
+
 env.Append(
     LIB_DIST_DIR="${BUILD_DIR}/lib",
 )
@@ -38,63 +40,80 @@ fwenv = env.Clone()
 Export("fwenv")
 
 SConscript("sconscfg/firmwareopts.scons")
+SConscript("sconscfg/appmanifests.scons")
 
 
 if fwenv["FIRMWARE_BUILD_CFG"] == "updater":
     fwenv.Append(
-        CPPDEFINES=[
-            "SRV_GUI",
-            "SRV_INPUT",
-            "SRV_NOTIFICATION",
-            "SRV_STORAGE",
-            "SRV_UPDATER",
+        APPS=[
+            "updater",
         ]
     )
 else:
     fwenv.Append(
-        CPPDEFINES=[
-            "APP_ABOUT",
-            "APP_ACCESSOR",
-            "APP_ARCHIVE",
-            "APP_BAD_USB",
-            "APP_BLE_HID",
-            "APP_BLINK",
-            "APP_DISPLAY_TEST",
-            "APP_GPIO",
-            "APP_IBUTTON",
-            "APP_INFRARED",
-            "APP_INFRARED_MONITOR",
-            "APP_KEYPAD_TEST",
-            "APP_LF_RFID",
-            "APP_MUSIC_PLAYER",
-            "APP_NFC",
-            "APP_PASSPORT",
-            "APP_SNAKE_GAME",
-            "APP_SUBGHZ",
-            "APP_U2F",
-            "APP_UART_ECHO",
-            "APP_UPDATER",
-            "APP_USB_MOUSE",
-            "APP_USB_TEST",
-            "APP_VIBRO_TEST",
-            "SRV_BT",
-            "SRV_CLI",
-            "SRV_DESKTOP",
-            "SRV_DIALOGS",
-            "SRV_DOLPHIN",
-            "SRV_GUI",
-            "SRV_INPUT",
-            "SRV_LOADER",
-            "SRV_NOTIFICATION",
-            "SRV_POWER",
-            "SRV_RPC",
-            "SRV_STORAGE",
+        APPS=[
+            "crypto_start",
+            # Svc
+            "rpc",
+            "bt",
+            "desktop",
+            "loader",
+            "power",
+            # Arch
+            "archive",
+            # Apps
+            "gpio",
+            "ibutton",
+            "infrared",
+            "lfrfid",
+            "nfc",
+            "subghz",
+            "bad_usb",
+            "u2f",
+            "updater_app",
+            # Settings
+            "passport",
+            "system_settings",
+            "about",
+            # Plugins
+            "music_player",
+            "snake_game",
+            "bt_hid",
+            # Debug
+            "blink_test",
+            "vibro_test",
+            "keypad_test",
+            "usb_test",
+            "usb_mouse",
+            "uart_echo",
+            "display_test",
+            "text_box_test",
+            "infrared_monitor",
+            "file_browser_test",
         ]
     )
 
+fwenv.LoadApplicationManifests()
+fwenv.PrepareApplicationsBuild()
 
-sources = fwenv.GlobRecursive("*.c*", "applications")
+fwenv.Append(
+    CPPDEFINES=fwenv["APPBUILD"].get_apps_cdefs(),
+)
 
+Import("build_apps_c")
+
+apps_c = fwenv.Command(
+    "applications/applications.c",
+    [],
+    action=build_apps_c,
+)
+fwenv.Precious(apps_c)
+fwenv.AlwaysBuild(apps_c)
+
+
+sources = [apps_c]
+for app_folder in fwenv["APPBUILD"].get_app_folders():
+    sources += fwenv.GlobRecursive("*.c*", os.path.join("applications", app_folder))
 
 # Debug
 # print(fwenv.Dump())
@@ -124,15 +143,18 @@ firmware_elf = fwenv.Program(
         "fatfs",
         "littlefs",
         "subghz",
+        "flipperformat",
         "toolbox",
         "microtar",
         "usb_stm32",
         "ST25RFAL002",
-        "flipperformat",
-        "misc",
         "infrared",
         "appframe",
         "assets",
+        "misc",
+        # 2nd round
+        "flipperformat",
+        "toolbox",
     ],
 )
 
