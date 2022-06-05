@@ -36,8 +36,9 @@ That's it.
 
 ##  
 # iconencode
-Compress an icon asset from an XBM to a compressed char array ready to paste
-Will assume dimensions of 128x64
+Compress an icon asset from an XBM to a compressed char array ready to paste  
+Will assume dimensions of 128x64  
+There is a small header on these I haven't determined the format of, so this won't work as is yet.  
 
 ##  
 # icondecode  
