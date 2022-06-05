@@ -57,7 +57,9 @@ static bool picopass_load_keys() {
     File* file = storage_file_alloc(storage);
 
     if(!storage_file_open(file, PICOPASS_APP_ICLASS_KEY_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        FURI_LOG_E(TAG, "Unable to open file");
+        FURI_LOG_E(TAG, "Unable to open iClass key");
+        storage_file_free(file);
+        furi_record_close("storage");
         return false;
     };
     storage_file_read(file, iclass_key, sizeof(iclass_key));
@@ -66,7 +68,9 @@ static bool picopass_load_keys() {
 
     if(!storage_file_open(
            file, PICOPASS_APP_ICLASS_DECRYPT_KEY_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        FURI_LOG_E(TAG, "Unable to open file");
+        FURI_LOG_E(TAG, "Unable to open iClass decryption key");
+        storage_file_free(file);
+        furi_record_close("storage");
         return false;
     };
     storage_file_read(file, iclass_decryptionkey, sizeof(iclass_decryptionkey));
@@ -175,7 +179,6 @@ ReturnCode parseWiegand(uint8_t* data, WiegandRecord* record) {
     }
     return ERR_NONE;
 }
-
 
 ReturnCode disable_field(ReturnCode rc) {
     st25r3916TxRxOff();
