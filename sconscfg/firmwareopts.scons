@@ -256,6 +256,7 @@ apps_buildlist = fwenv["APPMGR"].filter_apps(
         "display_test",
         "text_box_test",
         "infrared_monitor",
+        "file_browser_test",
     ]
 )
 # print("apps_buildlist", apps_buildlist.apps)

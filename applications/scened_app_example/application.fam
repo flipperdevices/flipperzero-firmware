@@ -1,9 +1,0 @@
-App(
-    appid="scened",
-    name="Templated Scene",
-    apptype=FlipperAppType.DEBUG,
-    entry_point="scened_app",
-    cdefines=["APP_SCENED"],
-    stack_size=1 * 1024,
-    order=90,
-)
