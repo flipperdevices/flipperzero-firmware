@@ -8,7 +8,7 @@ App(
     provides=["lfrfid_start"],
     icon="A_125khz_14",
     stack_size=2 * 1024,
-    order=0,
+    order=20,
 )
 
 App(
@@ -16,5 +16,5 @@ App(
     apptype=FlipperAppType.STARTUP,
     entry_point="lfrfid_on_system_start",
     requires=["lfrfid"],
-    order=0,
+    order=50,
 )

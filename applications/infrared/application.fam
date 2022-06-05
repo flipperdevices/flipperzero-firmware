@@ -8,7 +8,7 @@ App(
     provides=["infrared_start"],
     icon="A_Infrared_14",
     stack_size=3 * 1024,
-    order=0,
+    order=40,
 )
 
 App(
@@ -16,5 +16,5 @@ App(
     apptype=FlipperAppType.STARTUP,
     entry_point="infrared_on_system_start",
     requires=["infrared"],
-    order=0,
+    order=20,
 )

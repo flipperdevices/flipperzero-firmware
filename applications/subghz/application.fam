@@ -11,7 +11,7 @@ App(
     provides=["subghz_start"],
     icon="A_Sub1ghz_14",
     stack_size=2 * 1024,
-    order=0,
+    order=10,
 )
 
 App(
@@ -19,5 +19,5 @@ App(
     apptype=FlipperAppType.STARTUP,
     entry_point="subghz_on_system_start",
     requires=["subghz"],
-    order=0,
+    order=40,
 )

@@ -6,7 +6,7 @@ App(
     cdefines=["SRV_NOTIFICATION"],
     provides=["notification_settings"],
     stack_size=int(1.5 * 1024),
-    order=0,
+    order=100,
 )
 
 App(
@@ -16,5 +16,5 @@ App(
     entry_point="notification_settings_app",
     requires=["notification"],
     stack_size=1 * 1024,
-    order=0,
+    order=20,
 )

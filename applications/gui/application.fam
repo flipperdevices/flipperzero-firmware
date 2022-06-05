@@ -9,5 +9,5 @@ App(
         "notification",
     ],
     stack_size=2 * 1024,
-    order=0,
+    order=70,
 )

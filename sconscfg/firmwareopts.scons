@@ -92,16 +92,17 @@ class FlipperApplication:
     stack_size: int = 2048
     icon: Optional[str] = None
     order: int = 0
+    _appdir: Optional[str] = None
 
 
 class AppManager:
     def __init__(self):
         self.known_apps = {}
 
-    def get(self, appname):
+    def get(self, appname: str):
         return self.known_apps[appname]
 
-    def load_manifest(self, app_manifest_path):
+    def load_manifest(self, app_manifest_path: str, app_dir_name: str):
         if not os.path.exists(app_manifest_path):
             raise Exception(f"App manifest  not found at path {app_manifest_path}")
         # print("Loading", app_manifest_path)
@@ -110,7 +111,7 @@ class AppManager:
 
         def App(*args, **kw):
             nonlocal app_manifests
-            app_manifests.append(FlipperApplication(*args, **kw))
+            app_manifests.append(FlipperApplication(*args, **kw, _appdir=app_dir_name))
 
         with open(app_manifest_path, "rt") as manifest_file:
             exec(manifest_file.read())
@@ -122,23 +123,24 @@ class AppManager:
         for app in app_manifests:
             self._add_known_app(app)
 
-    def _add_known_app(self, app):
+    def _add_known_app(self, app: FlipperApplication):
         if self.known_apps.get(app.appid, None):
             raise Exception(f"Duplicate app declaration: {app.appid}")
         self.known_apps[app.appid] = app
 
-    def filter_apps(self, applist):
-        return AppBuiltset(self, applist)
+    def filter_apps(self, applist: List[str]):
+        return AppBuildset(self, applist)
 
 
-class AppBuiltset:
-    def __init__(self, appmgr, appnames):
+class AppBuildset:
+    def __init__(self, appmgr: AppManager, appnames: List[str]):
         self.appmgr = appmgr
         self.appnames = set(appnames)
         self._orig_appnames = appnames
         self._process_deps()
         self._check_conflicts()
-        # print("apps_to_build", self.appnames)
+        self._check_unsatisfied()  # unneeded?
+        self.apps = list(self.appmgr.get(appname) for appname in self.appnames)
 
     def _is_missing_dep(self, dep_name):
         return dep_name not in self.appnames
@@ -153,7 +155,7 @@ class AppBuiltset:
                         self.appmgr.get(app).provides + self.appmgr.get(app).requires,
                     )
                 )
-            print("provides round", provided)
+            # print("provides round", provided)
             if len(provided) == 0:
                 break
             self.appnames.update(provided)
@@ -187,17 +189,18 @@ class AppBuiltset:
                 f"Unsatisfied dependencies for {', '.join(f'{missing_dep[0]}: {missing_dep[1]}' for missing_dep in unsatisfied)}"
             )
 
-    def apps(self):
-        return list(self.appmgr.get(appname) for appname in self.appnames)
+    def get_apps_of_type(self, apptype: FlipperAppType):
+        return sorted(
+            filter(lambda app: app.apptype == apptype, self.apps),
+            key=lambda app: app.order,
+        )
 
 
 def LoadApplicationManifests(env):
     appmgr = env["APPMGR"] = AppManager()
     for entry in Glob("#/applications/*"):
         if isinstance(entry, SCons.Node.FS.Dir):
-            appmgr.load_manifest(
-                app_manifest_path=entry.File("application.fam").abspath
-            )
+            appmgr.load_manifest(entry.File("application.fam").abspath, entry.name)
 
     print(f"Loaded {len(appmgr.known_apps)} app definitions.")
 
@@ -205,6 +208,14 @@ def LoadApplicationManifests(env):
 fwenv.AddMethod(LoadApplicationManifests)
 fwenv.LoadApplicationManifests()
 
-# apps_buildlist = fwenv["APPMGR"].filter_apps(["updater_app", "bt", "desktop"])
-# print("apps_buildlist", apps_buildlist.apps())
+apps_buildlist = fwenv["APPMGR"].filter_apps(["updater_app", "bt", "desktop"])
+# print("apps_buildlist", apps_buildlist.apps)
+for apptype in FlipperAppType:
+    print(
+        apptype,
+        ":",
+        ", ".join(app.appid for app in apps_buildlist.get_apps_of_type(apptype)),
+    )
+    # print
+# print("svc", apps_buildlist.get_apps_of_type(FlipperAppType.SERVICE))
 # Exit(1)

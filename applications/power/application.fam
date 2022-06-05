@@ -13,7 +13,7 @@ App(
         "power_start",
     ],
     stack_size=1 * 1024,
-    order=0,
+    order=110,
 )
 
 App(
@@ -27,7 +27,7 @@ App(
     ],
     flags=["InsomniaSafe"],
     stack_size=1 * 1024,
-    order=0,
+    order=40,
 )
 
 App(
@@ -35,7 +35,7 @@ App(
     apptype=FlipperAppType.STARTUP,
     entry_point="power_on_system_start",
     requires=["power"],
-    order=0,
+    order=80,
 )
 
 App(
@@ -49,5 +49,5 @@ App(
         "power",
     ],
     stack_size=1 * 1024,
-    order=0,
+    order=130,
 )

@@ -7,7 +7,7 @@ App(
     requires=["storage_settings"],
     provides=["storage_start"],
     stack_size=3 * 1024,
-    order=0,
+    order=120,
 )
 
 App(
@@ -15,5 +15,5 @@ App(
     apptype=FlipperAppType.STARTUP,
     entry_point="storage_on_system_start",
     requires=["storage"],
-    order=0,
+    order=90,
 )

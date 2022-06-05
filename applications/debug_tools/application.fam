@@ -6,7 +6,7 @@ App(
     cdefines=["APP_BLINK"],
     requires=["gui"],
     stack_size=1 * 1024,
-    order=0,
+    order=10,
 )
 
 App(
@@ -17,7 +17,7 @@ App(
     cdefines=["APP_VIBRO_TEST"],
     requires=["gui"],
     stack_size=1 * 1024,
-    order=0,
+    order=20,
 )
 
 App(
@@ -28,7 +28,7 @@ App(
     cdefines=["APP_KEYPAD_TEST"],
     requires=["gui"],
     stack_size=1 * 1024,
-    order=0,
+    order=30,
 )
 
 App(
@@ -39,7 +39,7 @@ App(
     cdefines=["APP_USB_TEST"],
     requires=["gui"],
     stack_size=1 * 1024,
-    order=0,
+    order=50,
 )
 
 App(
@@ -50,7 +50,7 @@ App(
     cdefines=["APP_USB_MOUSE"],
     requires=["gui"],
     stack_size=1 * 1024,
-    order=0,
+    order=60,
 )
 
 App(
@@ -61,18 +61,7 @@ App(
     cdefines=["APP_UART_ECHO"],
     requires=["gui"],
     stack_size=2 * 1024,
-    order=0,
-)
-
-App(
-    appid="text_box_test",
-    name="Text Box Test",
-    apptype=FlipperAppType.DEBUG,
-    entry_point="text_box_test_app",
-    cdefines=["APP_TEXT_BOX_TEST"],
-    requires=["gui"],
-    stack_size=1 * 1024,
-    order=0,
+    order=70,
 )
 
 App(
@@ -83,5 +72,16 @@ App(
     cdefines=["APP_DISPLAY_TEST"],
     requires=["gui"],
     stack_size=1 * 1024,
-    order=0,
+    order=120,
+)
+
+App(
+    appid="text_box_test",
+    name="Text Box Test",
+    apptype=FlipperAppType.DEBUG,
+    entry_point="text_box_test_app",
+    cdefines=["APP_TEXT_BOX_TEST"],
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=140,
 )

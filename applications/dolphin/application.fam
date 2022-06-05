@@ -5,7 +5,7 @@ App(
     entry_point="dolphin_srv",
     cdefines=["SRV_DOLPHIN"],
     stack_size=1 * 1024,
-    order=0,
+    order=50,
 )
 
 App(
@@ -19,5 +19,5 @@ App(
         "dolphin",
     ],
     stack_size=1 * 1024,
-    order=0,
+    order=60,
 )

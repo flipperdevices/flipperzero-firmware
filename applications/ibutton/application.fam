@@ -8,7 +8,7 @@ App(
     provides=["ibutton_start"],
     icon="A_iButton_14",
     stack_size=2 * 1024,
-    order=0,
+    order=60,
 )
 
 App(
@@ -16,5 +16,5 @@ App(
     apptype=FlipperAppType.STARTUP,
     entry_point="ibutton_on_system_start",
     requires=["ibutton"],
-    order=0,
+    order=60,
 )

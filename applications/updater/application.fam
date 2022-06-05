@@ -10,7 +10,7 @@ App(
     conflicts=["desktop"],
     entry_point="updater_srv",
     stack_size=2 * 1024,
-    order=0,
+    order=130,
 )
 
 App(
@@ -26,7 +26,7 @@ App(
     provides=["updater_start"],
     entry_point="updater_srv",
     stack_size=2 * 1024,
-    order=0,
+    order=10,
 )
 
 App(
@@ -34,5 +34,5 @@ App(
     apptype=FlipperAppType.STARTUP,
     entry_point="updater_on_system_start",
     requires=["updater_app"],
-    order=0,
+    order=110,
 )

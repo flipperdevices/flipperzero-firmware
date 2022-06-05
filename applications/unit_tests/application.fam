@@ -4,7 +4,7 @@ App(
     entry_point="unit_tests_on_system_start",
     cdefines=["APP_UNIT_TESTS"],
     provides=["delay_test"],
-    order=0,
+    order=100,
 )
 
 App(
@@ -14,5 +14,5 @@ App(
     entry_point="delay_test_app",
     stack_size=1 * 1024,
     requires=["unit_tests"],
-    order=0,
+    order=110,
 )

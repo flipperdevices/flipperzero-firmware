@@ -12,7 +12,7 @@ App(
     provides=["desktop_settings"],
     conflicts=["updater"],
     stack_size=2 * 1024,
-    order=0,
+    order=60,
 )
 
 App(
@@ -25,5 +25,5 @@ App(
         "gui",
     ],
     stack_size=1 * 1024,
-    order=0,
+    order=50,
 )

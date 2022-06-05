@@ -6,5 +6,5 @@ App(
     cdefines=["APP_INFRARED_MONITOR"],
     requires=["gui"],
     stack_size=1 * 1024,
-    order=0,
+    order=80,
 )

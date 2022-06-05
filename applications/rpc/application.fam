@@ -8,5 +8,5 @@ App(
         "cli",
     ],
     stack_size=4 * 1024,
-    order=0,
+    order=10,
 )
