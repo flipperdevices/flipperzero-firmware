@@ -234,20 +234,8 @@ def build_apps_c(target, source, env):
     print("target_file_name", target_file_name)
 
     gen = ApplicationsCGenerator(fwenv["APPBUILD"])
-    new_apps_def = gen.generate()
-
-    current_apps_def = None
-    try:
-        with open(target_file_name, "r") as file:
-            current_apps_def = file.read()
-    except EnvironmentError as e:
-        print(e)
-
-    if current_apps_def != new_apps_def:
-        # print("Saving to ", target_file_name)
-        print("Application definitions were updated")
-        with open(target_file_name, "w") as file:
-            file.write(new_apps_def)
+    with open(target_file_name, "w") as file:
+        file.write(gen.generate())
 
 
 Export("build_apps_c")

@@ -15,6 +15,7 @@ env.Append(
     ],
 )
 
+
 env.Append(
     CPPPATH=[
         "#/core",
@@ -107,7 +108,6 @@ apps_c = fwenv.Command(
     [],
     action=build_apps_c,
 )
-fwenv.Precious(apps_c)
 fwenv.AlwaysBuild(apps_c)
 
 
