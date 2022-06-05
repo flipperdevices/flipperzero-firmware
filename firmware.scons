@@ -143,6 +143,9 @@ fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
 fwenv.BINBuilder("${FIRMWARE_BUILD_CFG}")
 fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
 
+flash = fwenv.Flasher("${FIRMWARE_BUILD_CFG}")
+Alias("flash", flash)
+
 # Compile DB generation
 cdb = fwenv.CompilationDatabase("compile_database.json")
 Alias("cdb", cdb)

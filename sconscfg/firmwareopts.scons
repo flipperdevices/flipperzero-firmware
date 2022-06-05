@@ -35,6 +35,9 @@ else:
         ],
     )
 
+fwenv.Append(
+    OPENOCD_OPTS='-f interface/stlink.cfg -c "transport select hla_swd" -f debug/stm32wbx.cfg -c "stm32wbx.cpu configure -rtos auto" -c "init"',
+)
 
 if fwenv["FIRMWARE_BUILD_CFG"] == "updater":
     fwenv.Append(

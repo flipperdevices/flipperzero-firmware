@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set +x
+
+/usr/bin/env python3 lib/scons/scripts/scons.py "$@"

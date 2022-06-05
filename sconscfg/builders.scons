@@ -15,6 +15,12 @@ def generate_dfu(source, target, env, for_signature):
         % (source[0], target[0])
     )
 
+def flash_bin(source, target, env, for_signature):
+    return (
+        'openocd ${OPENOCD_OPTS} -c "program %s reset exit ${IMAGE_BASE_ADDRESS}" && touch %s'
+        % (source[0], target[0])
+    )
+
 
 # def generate_json(source, target, env, for_signature):
 #     return '${PYTHON3} scripts/meta.py generate -p firmware ${} "%s" > "%s"' % (
@@ -38,6 +44,11 @@ env.Append(
         "DFUBuilder": Builder(
             generator=generate_dfu,
             suffix=".dfu",
+            src_suffix=".bin",
+        ),
+        "Flasher": Builder(
+            generator=flash_bin,
+            suffix=".flash",
             src_suffix=".bin",
         ),
     }
