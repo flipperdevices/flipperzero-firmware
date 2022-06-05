@@ -14,5 +14,6 @@ App(
     appid="storage_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="storage_on_system_start",
+    requires=["storage"],
     order=0,
 )

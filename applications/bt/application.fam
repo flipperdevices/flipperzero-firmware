@@ -1,5 +1,5 @@
 App(
-    appid="bt_srv",
+    appid="bt",
     name="BtSrv",
     apptype=FlipperAppType.SERVICE,
     entry_point="bt_srv",
@@ -31,11 +31,22 @@ App(
 )
 
 App(
-    appid="bt_debug_app",
+    appid="bt_debug",
     name="Bluetooth Debug",
     apptype=FlipperAppType.DEBUG,
     entry_point="bt_debug_app",
     stack_size=1 * 1024,
+    requires=["bt_srv"],
+    order=0,
+)
+
+App(
+    appid="bt_hid",
+    name="Bluetooth Remote",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="bt_hid_app",
+    stack_size=1 * 1024,
+    cdefines=["APP_BLE_HID"],
     requires=["bt_srv"],
     order=0,
 )

@@ -15,7 +15,16 @@ App(
     apptype=FlipperAppType.SYSTEM,
     cdefines=["APP_UPDATER"],
     conflicts=["updater"],
+    provides=["updater_start"],
     entry_point="updater_srv",
     stack_size=2 * 1024,
+    order=0,
+)
+
+App(
+    appid="updater_start",
+    apptype=FlipperAppType.STARTUP,
+    entry_point="updater_on_system_start",
+    requires=["updater_app"],
     order=0,
 )
