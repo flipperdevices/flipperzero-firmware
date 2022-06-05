@@ -5,7 +5,7 @@ iconencode.py
 icondecode.py  
 
 A set of python3 scripts for processing the Flipper image files.  
-These work as-is but I am rolling in improvements. 
+These work as-is but I am rolling in improvements.  
 #####################################  
 PREREQUISITES  
   
