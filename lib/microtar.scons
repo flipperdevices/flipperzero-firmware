@@ -10,7 +10,10 @@ env.Append(
 
 libenv = env.Clone()
 libenv.MergeFlags(lib_flags)
-# TODO: consider adding optimization flags for microtar here
+
+libenv.Append(
+    CPPDEFINES=["MICROTAR_DISABLE_API_CHECKS"],
+)
 
 sources = libenv.GlobRecursive("*.c", "microtar/src")
 

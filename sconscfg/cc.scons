@@ -7,6 +7,10 @@ env.Append(
     ],
     CXXFLAGS=[
         "-std=c++17",
+        "-fno-rtti",
+        "-fno-use-cxa-atexit",
+        "-fno-exceptions",
+        "-fno-threadsafe-statics",
     ],
     CCFLAGS=[
         "--specs=nosys.specs",
