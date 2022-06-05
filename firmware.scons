@@ -141,10 +141,18 @@ Depends(firmware_elf, depends)
 
 fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
 fwenv.BINBuilder("${FIRMWARE_BUILD_CFG}")
-fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
+dfu = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
+Default(dfu)
+Alias("dfu", dfu)
 
-flash = fwenv.Flasher("${FIRMWARE_BUILD_CFG}")
+
+flash = fwenv.Command(
+    target="flash",
+    source="${FIRMWARE_BUILD_CFG}.bin",
+    action='openocd ${OPENOCD_OPTS} -c "program $SOURCES reset exit ${IMAGE_BASE_ADDRESS}"',
+)
 Alias("flash", flash)
+
 
 # Compile DB generation
 cdb = fwenv.CompilationDatabase("compile_database.json")
