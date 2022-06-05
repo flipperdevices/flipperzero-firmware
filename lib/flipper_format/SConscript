@@ -11,6 +11,14 @@ env.Append(
 libenv = env.Clone()
 libenv.MergeFlags(lib_flags)
 
+if libenv["RAM_EXEC"]:
+    libenv.Append(
+        CPPDEFINES=[
+            "FLIPPER_STREAM_LITE",
+        ],
+    )
+
+
 sources = libenv.GlobRecursive("*.c", ".")
 
 lib = libenv.StaticLibrary("flipperformat", sources)

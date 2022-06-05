@@ -161,4 +161,11 @@ lib_flags = {
     ],
 }
 
+if env["RAM_EXEC"]:
+    env.Append(
+        CPPDEFINES=[
+            "FURI_RAM_EXEC",
+        ]
+    )
+
 Export("env", "lib_flags")
