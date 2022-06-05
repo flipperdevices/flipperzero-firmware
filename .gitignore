@@ -1,3 +1,5 @@
+build/
+cmake-build-*/
 *.o
 *~
 *.diff

@@ -8,6 +8,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: sudo apt-get install -y clang-tools check
+      run: sudo apt-get install -y clang-tools check cmake
     - name: make
       run: make
+    - name: cmake
+      run: "( rm -rf build && mkdir build && cd build && cmake .. && make && ./tests && echo OK )"
