@@ -91,7 +91,7 @@ class FlipperApplication:
     order: int = 0
 
 
-def LoadApplicationManifest(env, appdir):
+def LoadApplicationManifests(env, appdir):
     # app_manifest = File("#/applications/" + appid + "/application.fam").abspath
     app_manifest_path = appdir.File("application.fam").abspath
     if not os.path.exists(app_manifest_path):
@@ -114,12 +114,12 @@ def LoadApplicationManifest(env, appdir):
     return app_manifests
 
 
-fwenv.AddMethod(LoadApplicationManifest)
+fwenv.AddMethod(LoadApplicationManifests)
 
 manifests = []
 for entry in Glob("#/applications/*"):
     if isinstance(entry, SCons.Node.FS.Dir):
-        manifests.extend(fwenv.LoadApplicationManifest(entry))
+        manifests.extend(fwenv.LoadApplicationManifests(entry))
 
 # print(manifests)
 # Exit(1)

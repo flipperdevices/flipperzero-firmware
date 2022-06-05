@@ -18,6 +18,7 @@ App(
     apptype=FlipperAppType.SETTINGS,
     entry_point="power_settings_app",
     requires=["power"],
+    flags=["InsomniaSafe"],
     stack_size=1 * 1024,
     order=0,
 )
