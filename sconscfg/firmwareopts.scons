@@ -149,6 +149,7 @@ class AppBuildset:
         while True:
             provided = []
             for app in self.appnames:
+                # print(app)
                 provided.extend(
                     filter(
                         self._is_missing_dep,
@@ -163,6 +164,7 @@ class AppBuildset:
     def _check_conflicts(self):
         conflicts = []
         for app in self.appnames:
+            # print(app)
             if conflict_app_name := list(
                 filter(
                     lambda dep_name: dep_name in self.appnames,
@@ -189,6 +191,12 @@ class AppBuildset:
                 f"Unsatisfied dependencies for {', '.join(f'{missing_dep[0]}: {missing_dep[1]}' for missing_dep in unsatisfied)}"
             )
 
+    def get_apps_cdefs(self):
+        cdefs = set()
+        for app in self.apps:
+            cdefs.update(app.cdefines)
+        return sorted(list(cdefs))
+
     def get_apps_of_type(self, apptype: FlipperAppType):
         return sorted(
             filter(lambda app: app.apptype == apptype, self.apps),
@@ -208,7 +216,48 @@ def LoadApplicationManifests(env):
 fwenv.AddMethod(LoadApplicationManifests)
 fwenv.LoadApplicationManifests()
 
-apps_buildlist = fwenv["APPMGR"].filter_apps(["updater_app", "bt", "desktop"])
+# "updater_app", "bt", "desktop""
+apps_buildlist = fwenv["APPMGR"].filter_apps(
+    [
+        "crypto_start",
+        # Svc
+        "rpc",
+        "bt",
+        "desktop",
+        "loader",
+        "power",
+        # Arch
+        "archive",
+        # Apps
+        "gpio",
+        "ibutton",
+        "infrared",
+        "lfrfid",
+        "nfc",
+        "subghz",
+        "bad_usb",
+        "u2f",
+        "updater_app",
+        # Settings
+        "passport",
+        "system_settings",
+        "about",
+        # Plugins
+        "music_player",
+        "snake_game",
+        "bt_hid",
+        # Debug
+        "blink_test",
+        "vibro_test",
+        "keypad_test",
+        "usb_test",
+        "usb_mouse",
+        "uart_echo",
+        "display_test",
+        "text_box_test",
+        "infrared_monitor",
+    ]
+)
 # print("apps_buildlist", apps_buildlist.apps)
 for apptype in FlipperAppType:
     print(
@@ -216,6 +265,7 @@ for apptype in FlipperAppType:
         ":",
         ", ".join(app.appid for app in apps_buildlist.get_apps_of_type(apptype)),
     )
-    # print
+print("cdefs", apps_buildlist.get_apps_cdefs())
+# print
 # print("svc", apps_buildlist.get_apps_of_type(FlipperAppType.SERVICE))
 # Exit(1)
