@@ -4,6 +4,7 @@ App(
     apptype=FlipperAppType.APP,
     entry_point="lfrfid_app",
     cdefines=["APP_LF_RFID"],
+    requires=["gui"],
     provides=["lfrfid_start"],
     icon="A_125khz_14",
     stack_size=2 * 1024,

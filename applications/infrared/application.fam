@@ -4,6 +4,7 @@ App(
     apptype=FlipperAppType.APP,
     entry_point="infrared_app",
     cdefines=["APP_INFRARED"],
+    requires=["gui"],
     provides=["infrared_start"],
     icon="A_Infrared_14",
     stack_size=3 * 1024,

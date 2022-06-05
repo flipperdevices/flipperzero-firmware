@@ -149,7 +149,7 @@ Alias("dfu", dfu)
 flash = fwenv.Command(
     target="flash",
     source="${FIRMWARE_BUILD_CFG}.bin",
-    action='openocd ${OPENOCD_OPTS} -c "program $SOURCES reset exit ${IMAGE_BASE_ADDRESS}"',
+    action='openocd ${OPENOCD_OPTS} -c "program ${SOURCES} reset exit ${IMAGE_BASE_ADDRESS}"',
 )
 Alias("flash", flash)
 
@@ -157,3 +157,4 @@ Alias("flash", flash)
 # Compile DB generation
 cdb = fwenv.CompilationDatabase("compile_database.json")
 Alias("cdb", cdb)
+# Depends(firmware_elf, cdb)

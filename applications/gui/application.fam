@@ -4,6 +4,10 @@ App(
     apptype=FlipperAppType.SERVICE,
     entry_point="gui_srv",
     cdefines=["SRV_GUI"],
+    requires=[
+        "input",
+        "notification",
+    ],
     stack_size=2 * 1024,
     order=0,
 )

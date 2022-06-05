@@ -4,10 +4,11 @@ App(
     apptype=FlipperAppType.SERVICE,
     entry_point="bt_srv",
     cdefines=["SRV_BT"],
+    requires=["cli"],
     provides=[
         "bt_start",
         "bt_settings",
-        "bt_debug_app",
+        "bt_debug",
     ],
     stack_size=1 * 1024,
     order=0,
@@ -26,7 +27,10 @@ App(
     apptype=FlipperAppType.SETTINGS,
     entry_point="bt_settings_app",
     stack_size=1 * 1024,
-    requires=["bt_srv"],
+    requires=[
+        "bt",
+        "gui",
+    ],
     order=0,
 )
 
@@ -36,7 +40,10 @@ App(
     apptype=FlipperAppType.DEBUG,
     entry_point="bt_debug_app",
     stack_size=1 * 1024,
-    requires=["bt_srv"],
+    requires=[
+        "bt",
+        "gui",
+    ],
     order=0,
 )
 
@@ -47,6 +54,9 @@ App(
     entry_point="bt_hid_app",
     stack_size=1 * 1024,
     cdefines=["APP_BLE_HID"],
-    requires=["bt_srv"],
+    requires=[
+        "bt",
+        "gui",
+    ],
     order=0,
 )

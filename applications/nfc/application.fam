@@ -4,6 +4,7 @@ App(
     apptype=FlipperAppType.APP,
     entry_point="nfc_app",
     cdefines=["APP_NFC"],
+    requires=["gui"],
     provides=["nfc_start"],
     icon="A_NFC_14",
     stack_size=4 * 1024,

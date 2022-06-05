@@ -4,8 +4,14 @@ App(
     apptype=FlipperAppType.SERVICE,
     entry_point="desktop_srv",
     cdefines=["SRV_DESKTOP"],
-    stack_size=2 * 1024,
+    requires=[
+        "gui",
+        "dolphin",
+        "storage",
+    ],
+    provides=["desktop_settings"],
     conflicts=["updater"],
+    stack_size=2 * 1024,
     order=0,
 )
 
@@ -14,7 +20,10 @@ App(
     name="Desktop",
     apptype=FlipperAppType.SETTINGS,
     entry_point="desktop_settings_app",
-    requires=["desktop"],
+    requires=[
+        "desktop",
+        "gui",
+    ],
     stack_size=1 * 1024,
     order=0,
 )

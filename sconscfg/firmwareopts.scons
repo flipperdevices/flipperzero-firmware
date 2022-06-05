@@ -94,35 +94,117 @@ class FlipperApplication:
     order: int = 0
 
 
-def LoadApplicationManifests(env, appdir):
-    # app_manifest = File("#/applications/" + appid + "/application.fam").abspath
-    app_manifest_path = appdir.File("application.fam").abspath
-    if not os.path.exists(app_manifest_path):
-        Exit(f"App manifest for '{appdir}' not found at path {app_manifest_path}")
-    # print("Loading", app_manifest_path)
+class AppManager:
+    def __init__(self):
+        self.known_apps = {}
 
-    app_manifests = []
+    def get(self, appname):
+        return self.known_apps[appname]
 
-    def App(*args, **kw):
-        nonlocal app_manifests
-        app_manifests.append(FlipperApplication(*args, **kw))
+    def load_manifest(self, app_manifest_path):
+        if not os.path.exists(app_manifest_path):
+            raise Exception(f"App manifest  not found at path {app_manifest_path}")
+        # print("Loading", app_manifest_path)
 
-    with open(app_manifest_path, "rt") as manifest_file:
-        exec(manifest_file.read())
+        app_manifests = []
 
-    if len(app_manifests) == 0:
-        Exit(f"App manifest for '{appdir}' is malformed")
+        def App(*args, **kw):
+            nonlocal app_manifests
+            app_manifests.append(FlipperApplication(*args, **kw))
 
-    # print("Built", app_manifests)
-    return app_manifests
+        with open(app_manifest_path, "rt") as manifest_file:
+            exec(manifest_file.read())
+
+        if len(app_manifests) == 0:
+            Exit(f"App manifest '{app_manifest_path}' is malformed")
+
+        # print("Built", app_manifests)
+        for app in app_manifests:
+            self._add_known_app(app)
+
+    def _add_known_app(self, app):
+        if self.known_apps.get(app.appid, None):
+            raise Exception(f"Duplicate app declaration: {app.appid}")
+        self.known_apps[app.appid] = app
+
+    def filter_apps(self, applist):
+        return AppBuiltset(self, applist)
+
+
+class AppBuiltset:
+    def __init__(self, appmgr, appnames):
+        self.appmgr = appmgr
+        self.appnames = set(appnames)
+        self._orig_appnames = appnames
+        self._process_deps()
+        self._check_conflicts()
+        # print("apps_to_build", self.appnames)
+
+    def _is_missing_dep(self, dep_name):
+        return dep_name not in self.appnames
+
+    def _process_deps(self):
+        while True:
+            provided = []
+            for app in self.appnames:
+                provided.extend(
+                    filter(
+                        self._is_missing_dep,
+                        self.appmgr.get(app).provides + self.appmgr.get(app).requires,
+                    )
+                )
+            print("provides round", provided)
+            if len(provided) == 0:
+                break
+            self.appnames.update(provided)
+
+    def _check_conflicts(self):
+        conflicts = []
+        for app in self.appnames:
+            if conflict_app_name := list(
+                filter(
+                    lambda dep_name: dep_name in self.appnames,
+                    self.appmgr.get(app).conflicts,
+                )
+            ):
+                conflicts.append((app, conflict_app_name))
+
+        if len(conflicts):
+            raise Exception(
+                f"App conflicts for {', '.join(f'{conflict_dep[0]}: {conflict_dep[1]}' for conflict_dep in conflicts)}"
+            )
+
+    def _check_unsatisfied(self):
+        unsatisfied = []
+        for app in self.appnames:
+            if missing_dep := list(
+                filter(self._is_missing_dep, self.appmgr.get(app).requires)
+            ):
+                unsatisfied.append((app, missing_dep))
+
+        if len(unsatisfied):
+            raise Exception(
+                f"Unsatisfied dependencies for {', '.join(f'{missing_dep[0]}: {missing_dep[1]}' for missing_dep in unsatisfied)}"
+            )
+
+    def apps(self):
+        return list(self.appmgr.get(appname) for appname in self.appnames)
+
+
+def LoadApplicationManifests(env):
+    appmgr = env["APPMGR"] = AppManager()
+    for entry in Glob("#/applications/*"):
+        if isinstance(entry, SCons.Node.FS.Dir):
+            appmgr.load_manifest(
+                app_manifest_path=entry.File("application.fam").abspath
+            )
+
+    print(f"Loaded {len(appmgr.known_apps)} app definitions.")
 
 
 fwenv.AddMethod(LoadApplicationManifests)
+fwenv.LoadApplicationManifests()
 
-manifests = []
-for entry in Glob("#/applications/*"):
-    if isinstance(entry, SCons.Node.FS.Dir):
-        manifests.extend(fwenv.LoadApplicationManifests(entry))
-
-# print(manifests)
+# apps_buildlist = fwenv["APPMGR"].filter_apps(["updater_app", "bt", "desktop"])
+# print("apps_buildlist", apps_buildlist.apps())
 # Exit(1)

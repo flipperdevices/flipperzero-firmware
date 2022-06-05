@@ -4,6 +4,10 @@ App(
     apptype=FlipperAppType.APP,
     entry_point="subghz_app",
     cdefines=["APP_SUBGHZ"],
+    requires=[
+        "gui",
+        "cli",
+    ],
     provides=["subghz_start"],
     icon="A_Sub1ghz_14",
     stack_size=2 * 1024,

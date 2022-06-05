@@ -14,7 +14,10 @@ App(
     apptype=FlipperAppType.SETTINGS,
     entry_point="passport_app",
     cdefines=["APP_PASSPORT"],
-    requires=["dolphin"],
+    requires=[
+        "gui",
+        "dolphin",
+    ],
     stack_size=1 * 1024,
     order=0,
 )

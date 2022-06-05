@@ -3,6 +3,10 @@ App(
     name="UpdaterSrv",
     apptype=FlipperAppType.SERVICE,
     cdefines=["SRV_UPDATER"],
+    requires=[
+        "gui",
+        "storage",
+    ],
     conflicts=["desktop"],
     entry_point="updater_srv",
     stack_size=2 * 1024,
@@ -14,6 +18,10 @@ App(
     name="UpdaterApp",
     apptype=FlipperAppType.SYSTEM,
     cdefines=["APP_UPDATER"],
+    requires=[
+        "gui",
+        "storage",
+    ],
     conflicts=["updater"],
     provides=["updater_start"],
     entry_point="updater_srv",
