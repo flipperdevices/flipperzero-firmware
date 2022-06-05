@@ -4,7 +4,10 @@ App(
     apptype=FlipperAppType.SERVICE,
     entry_point="bt_srv",
     cdefines=["SRV_BT"],
-    requires=["cli"],
+    requires=[
+        "cli",
+        "dialogs",
+    ],
     provides=[
         "bt_start",
         "bt_settings",
@@ -43,6 +46,7 @@ App(
     requires=[
         "bt",
         "gui",
+        "dialogs",
     ],
     order=110,
 )

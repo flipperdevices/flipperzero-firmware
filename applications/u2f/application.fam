@@ -4,7 +4,10 @@ App(
     apptype=FlipperAppType.APP,
     entry_point="u2f_app",
     cdefines=["APP_U2F"],
-    requires=["gui"],
+    requires=[
+        "gui",
+        "dialogs",
+    ],
     stack_size=2 * 1024,
     icon="A_U2F_14",
     order=80,

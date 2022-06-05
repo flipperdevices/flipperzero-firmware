@@ -21,6 +21,7 @@ App(
     requires=[
         "gui",
         "storage",
+        "bt",
     ],
     conflicts=["updater"],
     provides=["updater_start"],

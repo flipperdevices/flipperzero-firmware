@@ -8,6 +8,7 @@ App(
         "gui",
         "dolphin",
         "storage",
+        "input",
     ],
     provides=["desktop_settings"],
     conflicts=["updater"],

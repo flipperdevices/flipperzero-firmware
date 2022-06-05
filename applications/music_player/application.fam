@@ -4,7 +4,10 @@ App(
     apptype=FlipperAppType.PLUGIN,
     entry_point="music_player_app",
     cdefines=["APP_MUSIC_PLAYER"],
-    requires=["gui"],
+    requires=[
+        "gui",
+        "dialogs",
+    ],
     provides=["music_player_start"],
     stack_size=2 * 1024,
     order=20,

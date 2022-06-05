@@ -4,7 +4,10 @@ App(
     apptype=FlipperAppType.APP,
     entry_point="ibutton_app",
     cdefines=["APP_IBUTTON"],
-    requires=["gui"],
+    requires=[
+        "gui",
+        "dialogs",
+    ],
     provides=["ibutton_start"],
     icon="A_iButton_14",
     stack_size=2 * 1024,
