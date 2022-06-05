@@ -176,6 +176,13 @@ ReturnCode parseWiegand(uint8_t* data, WiegandRecord* record) {
     return ERR_NONE;
 }
 
+
+ReturnCode disable_field(ReturnCode rc) {
+    st25r3916TxRxOff();
+    rfalLowPowerModeStart();
+    return rc;
+}
+
 ReturnCode picopass_read_card(ApplicationArea* AA1) {
     rfalPicoPassIdentifyRes idRes;
     rfalPicoPassSelectRes selRes;
@@ -194,37 +201,37 @@ ReturnCode picopass_read_card(ApplicationArea* AA1) {
     err = rfalPicoPassPollerInitialize();
     if(err != ERR_NONE) {
         FURI_LOG_E(TAG, "rfalPicoPassPollerInitialize error %d\n", err);
-        return err;
+        return disable_field(err);
     }
 
     err = rfalFieldOnAndStartGT();
     if(err != ERR_NONE) {
         FURI_LOG_E(TAG, "rfalFieldOnAndStartGT error %d\n", err);
-        return err;
+        return disable_field(err);
     }
 
     err = rfalPicoPassPollerCheckPresence();
     if(err != ERR_RF_COLLISION) {
         FURI_LOG_E(TAG, "rfalPicoPassPollerCheckPresence error %d\n", err);
-        return err;
+        return disable_field(err);
     }
 
     err = rfalPicoPassPollerIdentify(&idRes);
     if(err != ERR_NONE) {
         FURI_LOG_E(TAG, "rfalPicoPassPollerIdentify error %d\n", err);
-        return err;
+        return disable_field(err);
     }
 
     err = rfalPicoPassPollerSelect(idRes.CSN, &selRes);
     if(err != ERR_NONE) {
         FURI_LOG_E(TAG, "rfalPicoPassPollerSelect error %d\n", err);
-        return err;
+        return disable_field(err);
     }
 
     err = rfalPicoPassPollerReadCheck(&rcRes);
     if(err != ERR_NONE) {
         FURI_LOG_E(TAG, "rfalPicoPassPollerReadCheck error %d", err);
-        return err;
+        return disable_field(err);
     }
     memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
 
@@ -234,7 +241,7 @@ ReturnCode picopass_read_card(ApplicationArea* AA1) {
     err = rfalPicoPassPollerCheck(mac, &chkRes);
     if(err != ERR_NONE) {
         FURI_LOG_E(TAG, "rfalPicoPassPollerCheck error %d", err);
-        return err;
+        return disable_field(err);
     }
 
     for(size_t i = 0; i < 4; i++) {
@@ -242,12 +249,10 @@ ReturnCode picopass_read_card(ApplicationArea* AA1) {
         err = rfalPicoPassPollerReadBlock(i + 6, &(AA1->block[i]));
         if(err != ERR_NONE) {
             FURI_LOG_E(TAG, "rfalPicoPassPollerReadBlock error %d", err);
-            return err;
+            return disable_field(err);
         }
     }
-    st25r3916TxRxOff();
-    rfalLowPowerModeStart();
-    return ERR_NONE;
+    return disable_field(ERR_NONE);
 }
 
 int32_t picopass_app(void* p) {
