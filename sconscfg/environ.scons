@@ -54,7 +54,6 @@ if not env["VERBOSE"]:
         LINKCOMSTR="\tLINK\t${TARGET}",
         # STRIPCOMSTR="\tSTRIP\t${TARGET}",
     )
-# env.Decider("content-timestamp")
 
 if env["PLATFORM"] == "win32":
     # On Windows, Python 3 executable is usually just "python"
@@ -69,6 +68,7 @@ SetOption("num_jobs", multiprocessing.cpu_count())
 SetOption("implicit_cache", True)
 # SetOption("implicit_deps_unchanged", True)
 SetOption("max_drift", 1)
+# env.Decider("content-timestamp")
 
 
 # Setting up temp file parameters
@@ -96,7 +96,6 @@ for binary in [
     "AS",
     "CC",
     "CXX",
-    # "LINK",
     "OBJCOPY",
     "RANLIB",
     "STRIP",
@@ -165,23 +164,4 @@ env.AddMethod(GlobRecursive)
 env.AddMethod(BuildModule)
 env.AddMethod(BuildModules)
 
-
-# Specific flags for building libraries - always do optimized builds
-
-lib_flags = {
-    "CCFLAGS": [
-        "-Os",
-    ],
-    "CPPDEFINES": [
-        "NDEBUG",
-    ],
-}
-
-if env["RAM_EXEC"]:
-    env.Append(
-        CPPDEFINES=[
-            "FURI_RAM_EXEC",
-        ]
-    )
-
-Export("env", "lib_flags")
+Export("env")

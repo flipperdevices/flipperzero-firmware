@@ -41,3 +41,24 @@ env.Append(
         "-mthumb",
     ],
 )
+
+
+# Specific flags for building libraries - always do optimized builds
+
+lib_flags = {
+    "CCFLAGS": [
+        "-Os",
+    ],
+    "CPPDEFINES": [
+        "NDEBUG",
+    ],
+}
+
+if env["RAM_EXEC"]:
+    env.Append(
+        CPPDEFINES=[
+            "FURI_RAM_EXEC",
+        ]
+    )
+
+Export("lib_flags")
