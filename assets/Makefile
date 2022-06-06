@@ -2,6 +2,7 @@ PROJECT_ROOT		= $(abspath $(dir $(abspath $(firstword $(MAKEFILE_LIST))))..)
 
 include				$(PROJECT_ROOT)/assets/assets.mk
 include				$(PROJECT_ROOT)/assets/copro.mk
+include				$(PROJECT_ROOT)/make/python.mk
 
 .PHONY: all
 all: icons protobuf dolphin manifest
