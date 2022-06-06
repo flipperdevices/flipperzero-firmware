@@ -52,7 +52,7 @@ Help(vars.GenerateHelpText(env))
 
 SetOption("num_jobs", multiprocessing.cpu_count())
 SetOption("implicit_cache", True)
-SetOption("implicit_deps_unchanged", True)
+# SetOption("implicit_deps_unchanged", True)
 SetOption("max_drift", 1)
 
 
