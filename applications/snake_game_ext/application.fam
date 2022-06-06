@@ -2,7 +2,7 @@ App(
     appid="snake_game_ext",
     name="Snake Game Ext",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="_start",
+    entry_point="snake_game_app",
     requires=[],
     stack_size=1 * 1024,
 )

@@ -102,7 +102,7 @@ appenv = fwenv.Clone()
 appenv["LINKER_SCRIPT"] = "application-ext"
 appenv.Append(
     CCFLAGS=[
-        "-O0",
+        "-O2",
         "-ggdb3",
         "-mword-relocations",
         "-mlong-calls",
@@ -117,6 +117,7 @@ appenv.Append(
         "-mlong-calls",
         "-fno-common",
         "-nostdlib",
+        "-Wl,-e${APP_ENTRY}",
     ],
 )
 extapps = []
@@ -124,6 +125,7 @@ for app in fwenv["APPBUILD"].get_apps_of_type(FlipperAppType.EXTERNAL):
     app_elf = appenv.Program(
         app.appid,
         appenv.GlobRecursive("*.c*", os.path.join("applications", app._appdir)),
+        APP_ENTRY=app.entry_point,
     )
     extapps.append(app_elf)
 Alias("extapps", extapps)
