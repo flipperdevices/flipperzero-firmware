@@ -75,6 +75,17 @@ class AppManager:
 
 
 class AppBuildset:
+    BUILTIN_APP_TYPES = (
+        FlipperAppType.SERVICE,
+        FlipperAppType.SYSTEM,
+        FlipperAppType.APP,
+        FlipperAppType.PLUGIN,
+        FlipperAppType.DEBUG,
+        FlipperAppType.ARCHIVE,
+        FlipperAppType.SETTINGS,
+        FlipperAppType.STARTUP,
+    )
+
     def __init__(self, appmgr: AppManager, appnames: List[str]):
         self.appmgr = appmgr
         self.appnames = set(appnames)
@@ -83,7 +94,12 @@ class AppBuildset:
         self._check_conflicts()
         self._check_unsatisfied()  # unneeded?
         self.apps = sorted(
-            list(self.appmgr.get(appname) for appname in self.appnames),
+            list(
+                filter(
+                    lambda app: app.apptype in self.BUILTIN_APP_TYPES,
+                    map(self.appmgr.get, self.appnames),
+                )
+            ),
             key=lambda app: app.appid,
         )
 
@@ -218,7 +234,7 @@ def LoadApplicationManifests(env):
 def PrepareApplicationsBuild(env):
     apps = fwenv["APPS"]
     apps_buildlist = fwenv["APPBUILD"] = fwenv["APPMGR"].filter_apps(apps)
-    for apptype in FlipperAppType:
+    for apptype in AppBuildset.BUILTIN_APP_TYPES:
         print(
             apptype,
             ":",
