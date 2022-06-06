@@ -16,6 +16,10 @@ def generate_dfu(source, target, env, for_signature):
     )
 
 
+def strip_elf(source, target, env, for_signature):
+    return '${STRIP} ${STRIPFLAGS} "%s" -o "%s"' % (source[0], target[0])
+
+
 # def generate_json(source, target, env, for_signature):
 #     return '${PYTHON3} scripts/meta.py generate -p firmware ${} "%s" > "%s"' % (
 #         source[0],
@@ -39,6 +43,11 @@ env.Append(
             generator=generate_dfu,
             suffix=".dfu",
             src_suffix=".bin",
+        ),
+        "ELFStripper": Builder(
+            generator=strip_elf,
+            suffix=".elf",
+            src_suffix=".elf",
         ),
     }
 )

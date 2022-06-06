@@ -28,4 +28,10 @@ SECTIONS
 		*(.sbss.*)
 		*(COMMON)
 	}
+
+	/DISCARD/ :
+	{
+		*(.comment)
+		*(.comment.*)
+	}
 }

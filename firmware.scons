@@ -97,44 +97,42 @@ for app_folder in fwenv["APPBUILD"].get_builtin_app_folders():
 # Building external applications
 
 appenv = fwenv.Clone()
-appenv.VariantDir("plugins", "applications", duplicate=False)
+appenv.VariantDir("extapps", "applications", duplicate=False)
 appenv["LINKER_SCRIPT"] = "application-ext"
 appenv.Append(
     CCFLAGS=[
-        "-O2",
+        "-Os",
         "-ggdb3",
         "-mword-relocations",
         "-mlong-calls",
         "-fno-common",
         "-nostdlib",
-        # "-fvisibility=hidden",
+        "-fvisibility=hidden",
     ],
     LINKFLAGS=[
         "-r",
         "-s",
-        "-Bsymbolic",
+        # "-Bsymbolic",
         "-nostartfiles",
         "-mlong-calls",
         "-fno-common",
         "-nostdlib",
         "-Wl,--gc-sections",
-        # "-fvisibility=hidden",
+        "-Wl,--no-export-dynamic",
+        "-fvisibility=hidden",
         "-Wl,-e${APP_ENTRY}",
     ],
 )
 extapps = []
 for app in fwenv["APPBUILD"].get_apps_of_type(FlipperAppType.PLUGIN):
     app_elf = appenv.Program(
-        app.appid,
-        appenv.GlobRecursive("*.c*", os.path.join("plugins", app._appdir)),
+        os.path.join("extapps", app.appid),
+        appenv.GlobRecursive("*.c*", os.path.join("extapps", app._appdir)),
         APP_ENTRY=app.entry_point,
     )
-    extapps.append(app_elf)
+    extapps.append(appenv.ELFStripper(app.appid, app_elf))
 Alias("extapps", extapps)
 
-
-# Debug
-# print(fwenv.Dump())
 
 # Git Version management
 
@@ -150,10 +148,6 @@ fwenv.AlwaysBuild(build_version)
 # Full firmware definition
 
 fwenv.Append(
-    CCFLAGS=[
-        # "--specs=nosys.specs",
-        # "--specs=nano.specs",
-    ],
     LINKFLAGS=[
         "-specs=nano.specs",
         "-specs=nosys.specs",

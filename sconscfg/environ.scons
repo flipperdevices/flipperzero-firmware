@@ -31,6 +31,8 @@ env = Environment(
     tools=["as", "gcc", "g++", "ar", "gnulink", "python", "compilation_db"],
     OBJCOPY="objcopy",
     PYTHON3="python3",
+    STRIP="strip",
+    STRIPFLAGS="-g -S -d --strip-debug --strip-unneeded",
     TEMPFILE=TempFileMunge,
     MAXLINELENGTH=2048,
     PROGSUFFIX=".elf",
@@ -84,6 +86,7 @@ for binary in [
     # "LINK",
     "OBJCOPY",
     "RANLIB",
+    "STRIP",
 ]:
     if binary in env:
         env[binary] = TOOLCHAIN_PREFIX + env[binary]
