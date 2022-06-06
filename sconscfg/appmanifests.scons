@@ -49,7 +49,7 @@ class AppManager:
 
     def load_manifest(self, app_manifest_path: str, app_dir_name: str):
         if not os.path.exists(app_manifest_path):
-            raise Exception(f"App manifest  not found at path {app_manifest_path}")
+            raise Exception(f"App manifest not found at path {app_manifest_path}")
         # print("Loading", app_manifest_path)
 
         app_manifests = []
