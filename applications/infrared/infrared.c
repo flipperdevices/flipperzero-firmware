@@ -13,11 +13,6 @@ static void infrared_make_app_folder(Infrared* infrared) {
     }
 }
 
-static bool infrared_remote_load_file(Infrared* infrared) {
-    UNUSED(infrared);
-    return true;
-}
-
 static bool infrared_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     Infrared* infrared = context;
@@ -59,6 +54,7 @@ static Infrared* infrared_alloc() {
     infrared->notifications = furi_record_open("notification");
 
     infrared->worker = infrared_worker_alloc();
+    infrared->remote = infrared_remote_alloc();
 
     infrared->submenu = submenu_alloc();
     view_dispatcher_add_view(
@@ -123,6 +119,9 @@ static void infrared_free(Infrared* infrared) {
     view_dispatcher_free(view_dispatcher);
     scene_manager_free(infrared->scene_manager);
 
+    infrared_remote_free(infrared->remote);
+    infrared_worker_free(infrared->worker);
+
     furi_record_close("gui");
     infrared->gui = NULL;
 
@@ -153,7 +152,7 @@ bool infrared_remote_select_file(Infrared* infrared) {
         true);
 
     if(success) {
-        success = infrared_remote_load_file(infrared);
+        success = infrared_remote_load(infrared->remote, string_get_cstr(infrared->file_path));
     }
 
     return success;
@@ -186,7 +185,7 @@ int32_t infrared_app(void* p) {
 
     if(p) {
         string_set_str(infrared->file_path, (const char*)p);
-        is_remote_loaded = infrared_remote_load_file(infrared);
+        is_remote_loaded = infrared_remote_load(infrared->remote, string_get_cstr(infrared->file_path));
         if(!is_remote_loaded) {
             dialog_message_show_storage_error(infrared->dialogs, "Failed to load\nselected remote");
             return -1;

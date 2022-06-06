@@ -22,6 +22,7 @@
 #include <infrared_worker.h>
 
 #include "infrared.h"
+#include "infrared_remote.h"
 
 #include "scenes/infrared_scene.h"
 #include "views/infrared_progress_view.h"
@@ -43,6 +44,7 @@ struct Infrared {
     DialogsApp* dialogs;
     NotificationApp* notifications;
     InfraredWorker* worker;
+    InfraredRemote* remote;
 
     Submenu* submenu;
     TextInput* text_input;
