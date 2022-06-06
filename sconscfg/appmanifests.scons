@@ -16,8 +16,11 @@ class FlipperAppType(Enum):
     ARCHIVE = "Archive"
     SETTINGS = "Settings"
     STARTUP = "StartupHook"
-    EXTMODULE = "External"
+    EXTERNAL = "External"
     METAPACKAGE = "Package"
+
+
+Export("FlipperAppType")
 
 
 @dataclass
@@ -94,16 +97,11 @@ class AppBuildset:
         self._check_conflicts()
         self._check_unsatisfied()  # unneeded?
         self.apps = sorted(
-            list(
-                filter(
-                    lambda app: app.apptype in self.BUILTIN_APP_TYPES,
-                    map(self.appmgr.get, self.appnames),
-                )
-            ),
+            list(map(self.appmgr.get, self.appnames)),
             key=lambda app: app.appid,
         )
 
-    def _is_missing_dep(self, dep_name):
+    def _is_missing_dep(self, dep_name: str):
         return dep_name not in self.appnames
 
     def _process_deps(self):
@@ -164,8 +162,15 @@ class AppBuildset:
             key=lambda app: app.order,
         )
 
-    def get_app_folders(self):
-        return sorted(set(app._appdir for app in self.apps))
+    def get_builtin_app_folders(self):
+        return sorted(
+            set(
+                app._appdir
+                for app in filter(
+                    lambda app: app.apptype in self.BUILTIN_APP_TYPES, self.apps
+                )
+            )
+        )
 
 
 class ApplicationsCGenerator:
@@ -199,8 +204,10 @@ class ApplicationsCGenerator:
 
     def generate(self):
         contents = ['#include "applications.h"', "#include <assets_icons.h>"]
-        contents.extend(map(self.get_app_ep_forward, self.buildset.apps))
         for apptype in self.APP_TYPE_MAP:
+            contents.extend(
+                map(self.get_app_ep_forward, self.buildset.get_apps_of_type(apptype))
+            )
             entry_type, entry_block = self.APP_TYPE_MAP[apptype]
             contents.append(f"const {entry_type} {entry_block}[] = {{")
             contents.append(
@@ -215,8 +222,11 @@ class ApplicationsCGenerator:
 
         archive_app = self.buildset.get_apps_of_type(FlipperAppType.ARCHIVE)
         if archive_app:
-            contents.append(
-                f"const FlipperApplication FLIPPER_ARCHIVE = {self.get_app_descr(archive_app[0])};"
+            contents.extend(
+                [
+                    self.get_app_ep_forward(archive_app[0]),
+                    f"const FlipperApplication FLIPPER_ARCHIVE = {self.get_app_descr(archive_app[0])};",
+                ]
             )
 
         return "\n".join(contents)
@@ -235,7 +245,7 @@ def PrepareApplicationsBuild(env):
     apps = fwenv["APPS"]
     apps_buildlist = fwenv["APPBUILD"] = fwenv["APPMGR"].filter_apps(apps)
     print("Building firmware with modules:")
-    for apptype in AppBuildset.BUILTIN_APP_TYPES:
+    for apptype in FlipperAppType:
         app_sublist = apps_buildlist.get_apps_of_type(apptype)
         if app_sublist:
             print(

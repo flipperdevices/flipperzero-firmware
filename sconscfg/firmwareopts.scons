@@ -37,19 +37,18 @@ else:
 
 fwenv.Append(
     OPENOCD_OPTS='-f interface/stlink.cfg -c "transport select hla_swd" -f debug/stm32wbx.cfg -c "stm32wbx.cpu configure -rtos auto" -c "init"',
+    LINKFLAGS=[
+        "-Tfirmware/targets/f${TARGET_HW}/${LINKER_SCRIPT}.ld",
+    ],
 )
 
 if fwenv["FIRMWARE_BUILD_CFG"] == "updater":
     fwenv.Append(
         IMAGE_BASE_ADDRESS="0x20000000",
-        LINKFLAGS=[
-            "-Tfirmware/targets/f${TARGET_HW}/stm32wb55xx_ram_fw.ld",
-        ],
+        LINKER_SCRIPT="stm32wb55xx_ram_fw",
     )
 else:
     fwenv.Append(
         IMAGE_BASE_ADDRESS="0x8000000",
-        LINKFLAGS=[
-            "-Tfirmware/targets/f${TARGET_HW}/stm32wb55xx_flash.ld",
-        ],
+        LINKER_SCRIPT="stm32wb55xx_flash",
     )
