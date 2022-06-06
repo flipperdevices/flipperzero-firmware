@@ -8,7 +8,6 @@ ifneq ($(TOOLCHAIN_GDB_SYM),)
 	FLIPPER_PROTO_DIR := $(shell test -d $(FLIPPER_PROTO_REL_DIR) && cd $(FLIPPER_PROTO_REL_DIR) && pwd)
 	FLIPPER_IMAGEMAGICK_REL_DIR := $(TOOLCHAIN_DIR)/../image-magick/bin
 	FLIPPER_IMAGEMAGICK_DIR := $(shell test -d $(FLIPPER_IMAGEMAGICK_REL_DIR) && cd $(FLIPPER_IMAGEMAGICK_REL_DIR) && pwd)
-	image-magick
 endif
 ifneq ($(FLIPPER_PY_DIR),)
 	PATH := $(FLIPPER_PY_DIR):$(PATH)
