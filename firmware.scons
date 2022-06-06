@@ -69,8 +69,6 @@ else:
             # Debug
             "debug_apps",
             "infrared_monitor",
-            # Test
-            "snake_game_ext",
         ]
     )
 
@@ -99,6 +97,7 @@ for app_folder in fwenv["APPBUILD"].get_builtin_app_folders():
 # Building external applications
 
 appenv = fwenv.Clone()
+appenv.VariantDir("plugins", "applications", duplicate=False)
 appenv["LINKER_SCRIPT"] = "application-ext"
 appenv.Append(
     CCFLAGS=[
@@ -108,6 +107,7 @@ appenv.Append(
         "-mlong-calls",
         "-fno-common",
         "-nostdlib",
+        # "-fvisibility=hidden",
     ],
     LINKFLAGS=[
         "-r",
@@ -117,14 +117,16 @@ appenv.Append(
         "-mlong-calls",
         "-fno-common",
         "-nostdlib",
+        "-Wl,--gc-sections",
+        # "-fvisibility=hidden",
         "-Wl,-e${APP_ENTRY}",
     ],
 )
 extapps = []
-for app in fwenv["APPBUILD"].get_apps_of_type(FlipperAppType.EXTERNAL):
+for app in fwenv["APPBUILD"].get_apps_of_type(FlipperAppType.PLUGIN):
     app_elf = appenv.Program(
         app.appid,
-        appenv.GlobRecursive("*.c*", os.path.join("applications", app._appdir)),
+        appenv.GlobRecursive("*.c*", os.path.join("plugins", app._appdir)),
         APP_ENTRY=app.entry_point,
     )
     extapps.append(app_elf)

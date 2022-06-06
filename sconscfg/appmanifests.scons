@@ -45,7 +45,10 @@ class AppManager:
         self.known_apps = {}
 
     def get(self, appname: str):
-        return self.known_apps[appname]
+        try:
+            return self.known_apps[appname]
+        except KeyError as _:
+            raise Exception(f"Missing application manifest for '{appname}'")
 
     def load_manifest(self, app_manifest_path: str, app_dir_name: str):
         if not os.path.exists(app_manifest_path):
