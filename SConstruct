@@ -23,7 +23,7 @@ if env["DEBUG"]:
 if env["COMPACT"]:
     suffix += "C"
 if suffix:
-    variant_dir_name += "_" + suffix
+    variant_dir_name += "-" + suffix
 
 root_path = Dir(".").abspath
 env["ROOT_DIR"] = root_path

@@ -203,11 +203,7 @@ Default(dfu)
 Alias("dfu", dfu)
 
 
-flash = fwenv.Command(
-    target="flash",
-    source="${FIRMWARE_BUILD_CFG}.bin",
-    action='openocd ${OPENOCD_OPTS} -c "program ${SOURCES} reset exit ${IMAGE_BASE_ADDRESS}"',
-)
+flash = fwenv.Flasher("${FIRMWARE_BUILD_CFG}")
 Alias("flash", flash)
 
 
