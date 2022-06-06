@@ -142,6 +142,5 @@ CFLAGS			+= -I$(LIB_DIR)/loclass
 C_SOURCES		+= $(wildcard $(LIB_DIR)/loclass/*.c)
 
 # mbedtls
-CFLAGS			+= -DMBEDTLS_CONFIG_FILE='<mbedtls_config.h>' -I$(LIB_DIR)/mbedtls/include
-C_SOURCES		+= $(wildcard $(LIB_DIR)/mbedtls/library/*.c)
-RESULT=$(shell patch -N -p1 -d "../lib/mbedtls" < $(LIB_DIR)/mbedtls_ignore_redundant_decls.patch)
+CFLAGS			+= -I$(LIB_DIR)/mbedtls/include
+C_SOURCES   += $(LIB_DIR)/mbedtls/library/des.c $(LIB_DIR)/mbedtls/library/platform_util.c
