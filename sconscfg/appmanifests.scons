@@ -236,10 +236,12 @@ def PrepareApplicationsBuild(env):
     apps_buildlist = fwenv["APPBUILD"] = fwenv["APPMGR"].filter_apps(apps)
     print("Building firmware with modules:")
     for apptype in AppBuildset.BUILTIN_APP_TYPES:
-        print(
-            f"\n{apptype.value}:\n\t",
-            ", ".join(app.appid for app in apps_buildlist.get_apps_of_type(apptype)),
-        )
+        app_sublist = apps_buildlist.get_apps_of_type(apptype)
+        if app_sublist:
+            print(
+                f"{apptype.value}:\n\t",
+                ", ".join(app.appid for app in app_sublist),
+            )
     # print("CDefs", apps_buildlist.get_apps_cdefs())
 
 
