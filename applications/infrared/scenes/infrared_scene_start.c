@@ -39,15 +39,19 @@ void infrared_scene_start_on_enter(void* context) {
 }
 
 bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    //     Infrared* infrared = context;
+    Infrared* infrared = context;
+    SceneManager* scene_manager = infrared->scene_manager;
+
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == SubmenuIndexUniversalLibrary) {
+            scene_manager_next_scene(scene_manager, InfraredSceneUniversal);
         } else if(event.event == SubmenuIndexLearnNewRemote) {
+            scene_manager_next_scene(scene_manager, InfraredSceneLearn);
         } else if(event.event == SubmenuIndexSavedRemotes) {
+            scene_manager_next_scene(scene_manager, InfraredSceneRemoteList);
         }
     }
 
