@@ -15,6 +15,6 @@ libenv.MergeFlags(lib_flags)
 
 sources = libenv.GlobRecursive("*.c", ".")
 
-lib = libenv.StaticLibrary("ST25RFAL002", sources)
+lib = libenv.StaticLibrary("st25rfal002", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

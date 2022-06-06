@@ -3,7 +3,6 @@ Import("env", "lib_flags")
 env.Append(
     CPPPATH=[
         "#/lib/app-scened-template",
-        "#/lib/app-template",
         "#/lib/callback-connector",
         "#/assets/compiled",
     ],
@@ -19,7 +18,6 @@ sources = []
 recurse_dirs = [
     "app-scened-template",
     "callback-connector",
-    "app-template",
 ]
 
 for recurse_dir in recurse_dirs:

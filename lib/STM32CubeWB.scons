@@ -17,6 +17,8 @@ env.Append(
         "#/lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/utilities",
     ],
     CPPDEFINES=[
+        "STM32WB",
+        "STM32WB55xx",
         "USE_FULL_ASSERT",
         "USE_FULL_LL_DRIVER",
     ],
@@ -58,6 +60,6 @@ sources += [
     "STM32CubeWB/Middlewares/ST/STM32_WPAN/utilities/stm_list.c",
 ]
 
-lib = libenv.StaticLibrary("STM32CubeWB", sources)
+lib = libenv.StaticLibrary("stm32cubewb", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")
