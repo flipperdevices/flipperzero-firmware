@@ -45,7 +45,7 @@ uint8_t subghz_scene_receiver_config_next_frequency(const uint32_t value, void* 
     SubGhz* subghz = context;
     uint8_t index = 0;
     for(uint8_t i = 0; i < subghz_setting_get_frequency_count(subghz->setting); i++) {
-        if(value == subghz_setting_get_frequency(subghz->setting, i)){
+        if(value == subghz_setting_get_frequency(subghz->setting, i)) {
             index = i;
             break;
         } else {
