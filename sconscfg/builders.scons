@@ -62,7 +62,7 @@ env.Append(
             src_suffix=".bin",
         ),
         "ELFStripper": Builder(
-            generator=strip_elf,
+            action=env["STRIPCOM"],
             suffix=".elf",
             src_suffix=".elf",
         ),

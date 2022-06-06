@@ -98,7 +98,16 @@ for app_folder in fwenv["APPBUILD"].get_builtin_app_folders():
 
 appenv = fwenv.Clone()
 appenv.VariantDir("extapps", "applications", duplicate=False)
-appenv["LINKER_SCRIPT"] = "application-ext"
+appenv.Replace(
+    LINKER_SCRIPT="application-ext",
+    STRIPFLAGS=[
+        "--strip-debug",
+        "--strip-unneeded",
+        "-d",
+        "-g",
+        "-S",
+    ],
+)
 appenv.Append(
     CCFLAGS=[
         "-Os",
@@ -123,6 +132,7 @@ appenv.Append(
         "-Wl,-e${APP_ENTRY}",
     ],
 )
+
 extapps = []
 for app in fwenv["APPBUILD"].get_apps_of_type(FlipperAppType.PLUGIN):
     app_elf = appenv.Program(
@@ -165,6 +175,9 @@ fwenv.Append(
         "-n",
     ],
 )
+
+# Debug
+# print(fwenv.Dump())
 
 firmware_elf = fwenv.Program(
     "${FIRMWARE_BUILD_CFG}",
