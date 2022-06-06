@@ -13,6 +13,11 @@ static void infrared_make_app_folder(Infrared* infrared) {
     }
 }
 
+static bool infrared_remote_load_file(Infrared* infrared) {
+    UNUSED(infrared);
+    return true;
+}
+
 static bool infrared_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     Infrared* infrared = context;
@@ -135,6 +140,38 @@ static void infrared_free(Infrared* infrared) {
     free(infrared);
 }
 
+bool infrared_remote_select_file(Infrared* infrared) {
+    string_set_str(infrared->file_path, INFRARED_APP_FOLDER);
+
+    bool success = dialog_file_browser_show(
+        infrared->dialogs,
+        infrared->file_path,
+        infrared->file_path,
+        INFRARED_APP_EXTENSION,
+        true,
+        &I_ir_10px,
+        true);
+
+    if(success) {
+        success = infrared_remote_load_file(infrared);
+    }
+
+    return success;
+}
+
+void infrared_text_store_set(Infrared* infrared, uint32_t bank, const char* text, ...) {
+    va_list args;
+    va_start(args, text);
+
+    vsnprintf(infrared->text_store[bank], INFRARED_TEXT_STORE_SIZE, text, args);
+
+    va_end(args);
+}
+
+void infrared_text_store_clear(Infrared* infrared, uint32_t bank) {
+    memset(infrared->text_store[bank], 0, INFRARED_TEXT_STORE_SIZE);
+}
+
 void infrared_play_notification_message(Infrared* infrared, uint32_t message) {
     furi_assert(message < sizeof(infrared_notification_sequences) / sizeof(NotificationSequence*));
     notification_message(infrared->notifications, infrared_notification_sequences[message]);
@@ -149,11 +186,11 @@ int32_t infrared_app(void* p) {
 
     if(p) {
         string_set_str(infrared->file_path, (const char*)p);
-        //         is_remote_loaded = //Load remote function
-        //         if(!is_remote_loaded) {
-        //             dialog_message_show_storage_error(infrared->dialogs, "Failed to load\nselected remote");
-        //             return -1;
-        //         }
+        is_remote_loaded = infrared_remote_load_file(infrared);
+        if(!is_remote_loaded) {
+            dialog_message_show_storage_error(infrared->dialogs, "Failed to load\nselected remote");
+            return -1;
+        }
     }
 
     if(is_remote_loaded) {

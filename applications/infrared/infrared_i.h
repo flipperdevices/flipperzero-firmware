@@ -77,4 +77,7 @@ typedef enum {
     iButtonNotificationMessageBlinkSend,
 } InfraredNotificationMessage;
 
+bool infrared_remote_select_file(Infrared* infrared);
+void infrared_text_store_set(Infrared* infrared, uint32_t bank, const char* text, ...);
+void infrared_text_store_clear(Infrared* infrared, uint32_t bank);
 void infrared_play_notification_message(Infrared* infrared, uint32_t message);
