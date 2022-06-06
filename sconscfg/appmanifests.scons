@@ -16,6 +16,8 @@ class FlipperAppType(Enum):
     ARCHIVE = "Archive"
     SETTINGS = "Settings"
     STARTUP = "StartupHook"
+    EXTMODULE = "External"
+    METAPACKAGE = "Package"
 
 
 @dataclass

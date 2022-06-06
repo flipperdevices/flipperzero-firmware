@@ -55,42 +55,20 @@ else:
         APPS=[
             "crypto_start",
             # Svc
-            "rpc",
-            "bt",
-            "desktop",
-            "loader",
-            "power",
-            # Arch
-            "archive",
+            "basic_services",
             # Apps
-            "gpio",
-            "ibutton",
-            "infrared",
-            "lfrfid",
-            "nfc",
-            "subghz",
-            "bad_usb",
-            "u2f",
+            "basic_apps",
             "updater_app",
+            "archive",
             # Settings
             "passport",
             "system_settings",
             "about",
             # Plugins
-            "music_player",
-            "snake_game",
-            "bt_hid",
+            "basic_plugins",
             # Debug
-            "blink_test",
-            "vibro_test",
-            "keypad_test",
-            "usb_test",
-            "usb_mouse",
-            "uart_echo",
-            "display_test",
-            "text_box_test",
+            "debug_apps",
             "infrared_monitor",
-            "file_browser_test",
         ]
     )
 
