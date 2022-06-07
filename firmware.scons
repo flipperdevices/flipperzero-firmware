@@ -149,7 +149,10 @@ Alias("extapps", extapps)
 build_version = fwenv.Command(
     "#lib/toolbox/version.inc.h",
     [],
-    "${PYTHON3} scripts/version.py generate -o ${TARGET} --dir ${ROOT_DIR}",
+    Action(
+        "${PYTHON3} scripts/version.py generate -o ${TARGET} --dir ${ROOT_DIR}",
+        "${VERSIONCOMSTR}",
+    ),
 )
 fwenv.Precious(build_version)
 fwenv.AlwaysBuild(build_version)

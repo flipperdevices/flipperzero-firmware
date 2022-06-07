@@ -264,11 +264,11 @@ fwenv.AddMethod(PrepareApplicationsBuild)
 
 def build_apps_c(target, source, env):
     target_file_name = target[0].path
-    print("target_file_name", target_file_name)
 
     gen = ApplicationsCGenerator(fwenv["APPBUILD"])
     with open(target_file_name, "w") as file:
         file.write(gen.generate())
 
 
+build_apps_c = Action(build_apps_c, "${APPSCOMSTR}")
 Export("build_apps_c")

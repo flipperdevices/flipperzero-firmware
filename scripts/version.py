@@ -75,12 +75,13 @@ class Main(App):
             with open(self.args.output, "r") as file:
                 current_version_info = file.read()
         except EnvironmentError as e:
-            print(e)
-            pass
+            if self.args.debug:
+                print(e)
 
         if current_version_info != new_version_info_fmt:
-            print("old: ", current_version_info)
-            print("new: ", new_version_info_fmt)
+            if self.args.debug:
+                print("old: ", current_version_info)
+                print("new: ", new_version_info_fmt)
             with open(self.args.output, "w") as file:
                 file.write(new_version_info_fmt)
             # os.utime("../lib/toolbox/version.c", None)
