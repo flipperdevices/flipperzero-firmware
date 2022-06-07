@@ -125,6 +125,11 @@ C_SOURCES		+= $(wildcard $(LIB_DIR)/one_wire/*.c)
 C_SOURCES		+= $(wildcard $(LIB_DIR)/one_wire/*/*.c)
 C_SOURCES		+= $(wildcard $(LIB_DIR)/one_wire/*/*/*.c)
 
+# LF-RFID
+C_SOURCES		+= $(wildcard $(LIB_DIR)/lfrfid/*.c)
+C_SOURCES		+= $(wildcard $(LIB_DIR)/lfrfid/*/*.c)
+C_SOURCES		+= $(wildcard $(LIB_DIR)/lfrfid/*/*/*.c)
+
 # microtar
 CFLAGS			+= -I$(LIB_DIR)/microtar/src
 C_SOURCES		+= $(wildcard $(LIB_DIR)/microtar/src/*.c)
