@@ -107,7 +107,10 @@ static bool furi_hal_bt_radio_stack_is_supported(const BleGlueC2Info* info) {
     if(info->StackType == INFO_STACK_TYPE_BLE_HCI) {
         furi_hal_bt_stack = FuriHalBtStackHciLayer;
         supported = true;
-    } else if(info->StackType == INFO_STACK_TYPE_BLE_LIGHT) {
+    } else if(
+        info->StackType == INFO_STACK_TYPE_BLE_LIGHT ||
+        info->StackType == INFO_STACK_TYPE_BLE_FULL ||
+        info->StackType == INFO_STACK_TYPE_BLE_FULL_EXT_ADV) {
         if(info->VersionMajor >= FURI_HAL_BT_STACK_VERSION_MAJOR &&
            info->VersionMinor >= FURI_HAL_BT_STACK_VERSION_MINOR) {
             furi_hal_bt_stack = FuriHalBtStackLight;
