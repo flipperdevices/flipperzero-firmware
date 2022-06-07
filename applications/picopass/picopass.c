@@ -117,7 +117,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             char parsed[20] = {0};
             sprintf(
                 parsed,
-                "FC: %03d CN: %05d",
+                "FC: %03u CN: %05u",
                 plugin_state->pacs.record.FacilityCode,
                 plugin_state->pacs.record.CardNumber);
             canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignBottom, parsed);
