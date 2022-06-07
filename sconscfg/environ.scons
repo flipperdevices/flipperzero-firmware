@@ -50,8 +50,9 @@ if not env["VERBOSE"]:
         CXXCOMSTR="\tCPP\t${SOURCE}",
         ASCOMSTR="\tASM\t${SOURCE}",
         ARCOMSTR="\tAR\t${TARGET}",
-        RANLIBCOMSTR="\tRAN\t${TARGET}",
+        RANLIBCOMSTR="\tRANLIB\t${TARGET}",
         LINKCOMSTR="\tLINK\t${TARGET}",
+        INSTALLSTR="\tINSTALL\t${SOURCE}",
         # STRIPCOMSTR="\tSTRIP\t${TARGET}",
     )
 
