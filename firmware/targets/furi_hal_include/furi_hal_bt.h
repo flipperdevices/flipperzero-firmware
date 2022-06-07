@@ -25,7 +25,7 @@ extern "C" {
 typedef enum {
     FuriHalBtStackUnknown,
     FuriHalBtStackHciLayer,
-    FuriHalBtStackLight,
+    FuriHalBtStackBle,
 } FuriHalBtStack;
 
 typedef enum {

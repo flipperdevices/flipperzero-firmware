@@ -295,7 +295,7 @@ static void bt_show_warning(Bt* bt, const char* text) {
 
 static void bt_change_profile(Bt* bt, BtMessage* message) {
     FuriHalBtStack stack = furi_hal_bt_get_radio_stack();
-    if(stack == FuriHalBtStackLight) {
+    if(stack == FuriHalBtStackBle) {
         bt_settings_load(&bt->bt_settings);
         if(bt->profile == BtProfileSerial && bt->rpc_session) {
             FURI_LOG_I(TAG, "Close RPC connection");
@@ -357,7 +357,7 @@ int32_t bt_srv() {
         bt->status = BtStatusUnavailable;
     } else if(stack_type == FuriHalBtStackHciLayer) {
         bt->status = BtStatusUnavailable;
-    } else if(stack_type == FuriHalBtStackLight) {
+    } else if(stack_type == FuriHalBtStackBle) {
         if(!furi_hal_bt_start_app(FuriHalBtProfileSerial, bt_on_gap_event_callback, bt)) {
             FURI_LOG_E(TAG, "BLE App start failed");
         } else {

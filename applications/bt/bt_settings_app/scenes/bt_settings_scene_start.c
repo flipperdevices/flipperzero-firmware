@@ -40,7 +40,7 @@ void bt_settings_scene_start_on_enter(void* context) {
     VariableItem* item;
 
     FuriHalBtStack stack_type = furi_hal_bt_get_radio_stack();
-    if(stack_type == FuriHalBtStackLight) {
+    if(stack_type == FuriHalBtStackBle) {
         item = variable_item_list_add(
             var_item_list,
             "Bluetooth",

@@ -113,7 +113,7 @@ static bool furi_hal_bt_radio_stack_is_supported(const BleGlueC2Info* info) {
         info->StackType == INFO_STACK_TYPE_BLE_FULL_EXT_ADV) {
         if(info->VersionMajor >= FURI_HAL_BT_STACK_VERSION_MAJOR &&
            info->VersionMinor >= FURI_HAL_BT_STACK_VERSION_MINOR) {
-            furi_hal_bt_stack = FuriHalBtStackLight;
+            furi_hal_bt_stack = FuriHalBtStackBle;
             supported = true;
         }
     } else {
@@ -181,7 +181,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             FURI_LOG_E(TAG, "Can't start BLE App - radio stack did not start");
             break;
         }
-        if(furi_hal_bt_stack != FuriHalBtStackLight) {
+        if(furi_hal_bt_stack != FuriHalBtStackBle) {
             FURI_LOG_E(TAG, "Can't start Ble App - unsupported radio stack");
             break;
         }
@@ -212,7 +212,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             break;
         }
         // Start selected profile services
-        if(furi_hal_bt_stack == FuriHalBtStackLight) {
+        if(furi_hal_bt_stack == FuriHalBtStackBle) {
             profile_config[profile].start();
         }
         ret = true;
