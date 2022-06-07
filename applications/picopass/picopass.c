@@ -174,6 +174,10 @@ ReturnCode parseWiegand(uint8_t* data, WiegandRecord* record) {
         record->CardNumber = (bot >> 1) & 0xFFFF;
         record->FacilityCode = (bot >> 17) & 0xFF;
         record->valid = true;
+    } else {
+        record->CardNumber = 0;
+        record->FacilityCode = 0;
+        record->valid = false;
     }
     return ERR_NONE;
 }
