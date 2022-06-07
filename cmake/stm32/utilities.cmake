@@ -17,14 +17,12 @@ function(stm32_util_create_family_targets FAMILY)
         # -Wall: all warnings activated
         # -ffunction-sections -fdata-sections: remove unused code
         target_compile_options(STM32::${FAMILY}${CORE_C} INTERFACE 
-            --sysroot="${TOOLCHAIN_SYSROOT}"
             -mthumb -Wall -ffunction-sections -fdata-sections
         )
         # Set linker flags
         # -mthumb: Generate thumb code
         # -Wl,--gc-sections: Remove unused code
         target_link_options(STM32::${FAMILY}${CORE_C} INTERFACE 
-            --sysroot="${TOOLCHAIN_SYSROOT}"
             -mthumb -Wl,--gc-sections
         )
         target_compile_definitions(STM32::${FAMILY}${CORE_C} INTERFACE 
