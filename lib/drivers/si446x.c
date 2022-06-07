@@ -239,7 +239,7 @@ bool si446x_get_properties(
     SI446X_Prop_t prop,
     uint8_t* data,
     uint8_t size) {
-    uint8_t buff_tx[] = {SI446X_CMD_SET_PROPERTY, (uint8_t)(prop >> 8), size, (uint8_t)prop};
+    uint8_t buff_tx[] = {SI446X_CMD_GET_PROPERTY, (uint8_t)(prop >> 8), size, (uint8_t)prop};
     si446x_write_data(handle, &buff_tx[0], sizeof(buff_tx));
     return si446x_read_data(handle, &data[0], size);
 }
