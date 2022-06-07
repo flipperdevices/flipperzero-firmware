@@ -4,7 +4,8 @@ void infrared_scene_remote_list_on_enter(void* context) {
     Infrared* infrared = context;
 
     if(!infrared_remote_select_file(infrared)) {
-        scene_manager_search_and_switch_to_previous_scene(infrared->scene_manager, InfraredSceneStart);
+        scene_manager_search_and_switch_to_previous_scene(
+            infrared->scene_manager, InfraredSceneStart);
     } else {
         scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);
     }
