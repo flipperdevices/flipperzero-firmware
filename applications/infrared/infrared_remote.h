@@ -2,6 +2,8 @@
 
 #include <stdbool.h>
 
+#include "infrared_remote_button.h"
+
 typedef struct InfraredRemote InfraredRemote;
 
 InfraredRemote* infrared_remote_alloc();

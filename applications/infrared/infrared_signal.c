@@ -16,7 +16,7 @@ struct InfraredSignal {
 static void infrared_signal_clear_timings(InfraredSignal* signal) {
     if(signal->is_raw) {
         free(signal->payload.raw.timings);
-        signal->payload.raw.timings_cnt = 0;
+        signal->payload.raw.timings_size = 0;
         signal->payload.raw.timings = NULL;
     }
 }
@@ -39,20 +39,22 @@ bool infrared_signal_is_raw(InfraredSignal* signal) {
     return signal->is_raw;
 }
 
-void infrared_signal_set_raw_signal(InfraredSignal* signal, InfraredRawSignal* raw_signal) {
+void infrared_signal_set_raw_signal(
+    InfraredSignal* signal,
+    uint32_t* timings,
+    size_t timings_size,
+    uint32_t frequency,
+    float duty_cycle) {
     infrared_signal_clear_timings(signal);
 
     signal->is_raw = true;
 
-    signal->payload.raw.timings_cnt = raw_signal->timings_cnt;
-    signal->payload.raw.frequency = raw_signal->frequency;
-    signal->payload.raw.duty_cycle = raw_signal->duty_cycle;
+    signal->payload.raw.timings_size = timings_size;
+    signal->payload.raw.frequency = frequency;
+    signal->payload.raw.duty_cycle = duty_cycle;
 
-    signal->payload.raw.timings = malloc(raw_signal->timings_cnt * sizeof(uint32_t));
-    memcpy(
-        signal->payload.raw.timings,
-        raw_signal->timings,
-        raw_signal->timings_cnt * sizeof(uint32_t));
+    signal->payload.raw.timings = malloc(timings_size * sizeof(uint32_t));
+    memcpy(signal->payload.raw.timings, timings, timings_size * sizeof(uint32_t));
 }
 
 InfraredRawSignal* infrared_signal_get_raw_signal(InfraredSignal* signal) {
@@ -80,7 +82,7 @@ void infrared_signal_transmit(InfraredSignal* signal) {
         InfraredRawSignal* raw_signal = &signal->payload.raw;
         infrared_send_raw_ext(
             raw_signal->timings,
-            raw_signal->timings_cnt,
+            raw_signal->timings_size,
             true,
             raw_signal->frequency,
             raw_signal->duty_cycle);
