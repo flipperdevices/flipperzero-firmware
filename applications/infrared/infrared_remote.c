@@ -95,23 +95,24 @@ bool infrared_remote_load(InfraredRemote* remote, const char* path) {
         string_init_set_str(path_str, path);
         path_extract_filename(path_str, buf, true);
         string_clear(path_str);
+
         infrared_remote_clear_buttons(remote);
         infrared_remote_set_name(remote, string_get_cstr(buf));
 
-        do {
+        for(bool can_read = true; can_read;) {
             InfraredRemoteButton* button = infrared_remote_button_alloc();
-            success = infrared_signal_read(infrared_remote_button_get_signal(button), ff, buf);
-            if(success) {
+            can_read = infrared_signal_read(infrared_remote_button_get_signal(button), ff, buf);
+            if(can_read) {
                 infrared_remote_button_set_name(button, string_get_cstr(buf));
                 infrared_button_array_push_back(remote->buttons, button);
             } else {
                 infrared_remote_button_free(button);
             }
-        } while(success);
+        }
     }
 
     string_clear(buf);
     flipper_format_free(ff);
     furi_record_close("storage");
-    return true;
+    return success;
 }
