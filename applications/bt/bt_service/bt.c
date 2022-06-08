@@ -294,7 +294,7 @@ static void bt_show_warning(Bt* bt, const char* text) {
 }
 
 static void bt_change_profile(Bt* bt, BtMessage* message) {
-    if(furi_hal_bt_is_ble_gat_gap_supported()) {
+    if(furi_hal_bt_is_ble_gatt_gap_supported()) {
         bt_settings_load(&bt->bt_settings);
         if(bt->profile == BtProfileSerial && bt->rpc_session) {
             FURI_LOG_I(TAG, "Close RPC connection");
@@ -350,7 +350,7 @@ int32_t bt_srv() {
         FURI_LOG_E(TAG, "Radio stack start failed");
     }
 
-    if(furi_hal_bt_is_ble_gat_gap_supported()) {
+    if(furi_hal_bt_is_ble_gatt_gap_supported()) {
         if(!furi_hal_bt_start_app(FuriHalBtProfileSerial, bt_on_gap_event_callback, bt)) {
             FURI_LOG_E(TAG, "BLE App start failed");
         } else {

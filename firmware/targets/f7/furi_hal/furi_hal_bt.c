@@ -104,10 +104,7 @@ void furi_hal_bt_unlock_core2() {
 
 static bool furi_hal_bt_radio_stack_is_supported(const BleGlueC2Info* info) {
     bool supported = false;
-    if(info->StackType == INFO_STACK_TYPE_BLE_HCI) {
-        furi_hal_bt_stack = FuriHalBtStackHciLayer;
-        supported = true;
-    } else if(info->StackType == INFO_STACK_TYPE_BLE_LIGHT) {
+    if(info->StackType == INFO_STACK_TYPE_BLE_LIGHT) {
         if(info->VersionMajor >= FURI_HAL_BT_STACK_VERSION_MAJOR &&
            info->VersionMinor >= FURI_HAL_BT_STACK_VERSION_MINOR) {
             furi_hal_bt_stack = FuriHalBtStackLight;
@@ -117,12 +114,6 @@ static bool furi_hal_bt_radio_stack_is_supported(const BleGlueC2Info* info) {
         if(info->VersionMajor >= FURI_HAL_BT_STACK_VERSION_MAJOR &&
            info->VersionMinor >= FURI_HAL_BT_STACK_VERSION_MINOR) {
             furi_hal_bt_stack = FuriHalBtStackFull;
-            supported = true;
-        }
-    } else if(info->StackType == INFO_STACK_TYPE_BLE_FULL_EXT_ADV) {
-        if(info->VersionMajor >= FURI_HAL_BT_STACK_VERSION_MAJOR &&
-           info->VersionMinor >= FURI_HAL_BT_STACK_VERSION_MINOR) {
-            furi_hal_bt_stack = FuriHalBtStackFullExtAdv;
             supported = true;
         }
     } else {
@@ -180,9 +171,8 @@ FuriHalBtStack furi_hal_bt_get_radio_stack() {
     return furi_hal_bt_stack;
 }
 
-bool furi_hal_bt_is_ble_gat_gap_supported() {
-    if(furi_hal_bt_stack == FuriHalBtStackLight || furi_hal_bt_stack == FuriHalBtStackFull ||
-       furi_hal_bt_stack == FuriHalBtStackFullExtAdv) {
+bool furi_hal_bt_is_ble_gatt_gap_supported() {
+    if(furi_hal_bt_stack == FuriHalBtStackLight || furi_hal_bt_stack == FuriHalBtStackFull) {
         return true;
     } else {
         return false;
@@ -190,7 +180,7 @@ bool furi_hal_bt_is_ble_gat_gap_supported() {
 }
 
 bool furi_hal_bt_is_testing_supported() {
-    if(furi_hal_bt_stack == FuriHalBtStackHciLayer || furi_hal_bt_stack == FuriHalBtStackFull) {
+    if(furi_hal_bt_stack == FuriHalBtStackFull) {
         return true;
     } else {
         return false;
@@ -207,7 +197,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             FURI_LOG_E(TAG, "Can't start BLE App - radio stack did not start");
             break;
         }
-        if(!furi_hal_bt_is_ble_gat_gap_supported()) {
+        if(!furi_hal_bt_is_ble_gatt_gap_supported()) {
             FURI_LOG_E(TAG, "Can't start Ble App - unsupported radio stack");
             break;
         }
@@ -238,7 +228,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             break;
         }
         // Start selected profile services
-        if(furi_hal_bt_is_ble_gat_gap_supported()) {
+        if(furi_hal_bt_is_ble_gatt_gap_supported()) {
             profile_config[profile].start();
         }
         ret = true;

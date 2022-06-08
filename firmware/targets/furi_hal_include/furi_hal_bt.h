@@ -24,10 +24,8 @@ extern "C" {
 
 typedef enum {
     FuriHalBtStackUnknown,
-    FuriHalBtStackHciLayer,
     FuriHalBtStackLight,
     FuriHalBtStackFull,
-    FuriHalBtStackFullExtAdv,
 } FuriHalBtStack;
 
 typedef enum {
@@ -64,7 +62,7 @@ FuriHalBtStack furi_hal_bt_get_radio_stack();
  *
  * @return  true if supported
  */
-bool furi_hal_bt_is_ble_gat_gap_supported();
+bool furi_hal_bt_is_ble_gatt_gap_supported();
 
 /** Check if radio stack supports testing
  *
