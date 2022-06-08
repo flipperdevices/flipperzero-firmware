@@ -190,6 +190,7 @@ void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
 }
 
 void furi_hal_subghz_load_registers(const uint8_t data[][2]) {
+    UNUSED(data);
     // furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     // cc1101_reset(&furi_hal_spi_bus_handle_subghz);
     // uint32_t i = 0;
@@ -201,12 +202,15 @@ void furi_hal_subghz_load_registers(const uint8_t data[][2]) {
 }
 
 void furi_hal_subghz_load_patable(const uint8_t data[8]) {
+    UNUSED(data);
     // furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     // cc1101_set_pa_table(&furi_hal_spi_bus_handle_subghz, data);
     // furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_write_packet(const uint8_t* data, uint8_t size) {
+    UNUSED(data);
+    UNUSED(size);
     // furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     // cc1101_flush_tx(&furi_hal_spi_bus_handle_subghz);
     // cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_FIFO, size);
@@ -256,6 +260,8 @@ bool furi_hal_subghz_is_rx_data_crc_valid() {
 }
 
 void furi_hal_subghz_read_packet(uint8_t* data, uint8_t* size) {
+    UNUSED(data);
+    UNUSED(size);
     // furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     // cc1101_read_fifo(&furi_hal_spi_bus_handle_subghz, data, size);
     // furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
@@ -756,9 +762,9 @@ void furi_hal_subghz_stop_async_tx() {
     FURI_LOG_D(
         TAG,
         "Async TX Radio stats: on %0.0fus, off %0.0fus, DutyCycle: %0.0f%%",
-        (float)furi_hal_subghz_async_tx.duty_high,
-        (float)furi_hal_subghz_async_tx.duty_low,
-        duty_cycle);
+        (double)furi_hal_subghz_async_tx.duty_high,
+        (double)furi_hal_subghz_async_tx.duty_low,
+        (double)duty_cycle);
 
     furi_hal_subghz_state = SubGhzStateIdle;
 }
