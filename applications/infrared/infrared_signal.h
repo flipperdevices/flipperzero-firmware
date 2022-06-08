@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include <infrared.h>
+#include <flipper_format/flipper_format.h>
 
 typedef struct InfraredSignal InfraredSignal;
 
@@ -19,6 +20,7 @@ InfraredSignal* infrared_signal_alloc();
 void infrared_signal_free(InfraredSignal* signal);
 
 bool infrared_signal_is_raw(InfraredSignal* signal);
+bool infrared_signal_is_valid(InfraredSignal* signal);
 
 void infrared_signal_set_raw_signal(
     InfraredSignal* signal,
@@ -30,5 +32,8 @@ InfraredRawSignal* infrared_signal_get_raw_signal(InfraredSignal* signal);
 
 void infrared_signal_set_message(InfraredSignal* signal, InfraredMessage* message);
 InfraredMessage* infrared_signal_get_message(InfraredSignal* signal);
+
+bool infrared_signal_save(InfraredSignal* signal, FlipperFormat* ff, const char* name);
+bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, string_t name);
 
 void infrared_signal_transmit(InfraredSignal* signal);
