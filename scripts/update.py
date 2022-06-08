@@ -3,7 +3,7 @@
 from flipper.app import App
 from flipper.utils.fff import FlipperFormatFile
 from flipper.assets.coprobin import CoproBinary, get_stack_type
-from flipper.assets.obdata import OptionBytesData
+from flipper.assets.obdata import OptionBytesData, ObReferenceValues
 from os.path import basename, join, exists
 import os
 import shutil
@@ -114,12 +114,13 @@ class Main(App):
         file.writeComment(
             "NEVER EVER MESS WITH THESE VALUES, YOU WILL BRICK YOUR DEVICE"
         )
+        obvalues = ObReferenceValues((), (), ())
         if self.args.obdata:
             obd = OptionBytesData(self.args.obdata)
             obvalues = obd.gen_values().export()
-            file.writeKey("OB reference", self.bytes2ffhex(obvalues.reference))
-            file.writeKey("OB mask", self.bytes2ffhex(obvalues.compare_mask))
-            file.writeKey("OB write mask", self.bytes2ffhex(obvalues.write_mask))
+        file.writeKey("OB reference", self.bytes2ffhex(obvalues.reference))
+        file.writeKey("OB mask", self.bytes2ffhex(obvalues.compare_mask))
+        file.writeKey("OB write mask", self.bytes2ffhex(obvalues.write_mask))
         file.save(join(self.args.directory, self.UPDATE_MANIFEST_NAME))
 
         return 0
