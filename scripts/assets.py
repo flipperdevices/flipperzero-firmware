@@ -90,7 +90,7 @@ class Main(App):
         self.parser_dolphin.set_defaults(func=self.dolphin)
 
     def _icon2header(self, file):
-        output = subprocess.check_output(["convert", file, "xbm:-"])
+        output = subprocess.check_output(["png2xmb", file])
         assert output
         f = io.StringIO(output.decode().strip())
         width = int(f.readline().strip().split(" ")[2])
