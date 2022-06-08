@@ -17,7 +17,9 @@ InfraredRemoteButton* infrared_remote_button_alloc() {
 
 void infrared_remote_button_free(InfraredRemoteButton* button) {
     string_clear(button->name);
-    free(button->signal);
+    if(button->signal) {
+        free(button->signal);
+    }
     free(button);
 }
 
