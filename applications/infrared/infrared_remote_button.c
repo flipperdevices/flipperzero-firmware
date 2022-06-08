@@ -11,15 +11,13 @@ struct InfraredRemoteButton {
 InfraredRemoteButton* infrared_remote_button_alloc() {
     InfraredRemoteButton* button = malloc(sizeof(InfraredRemoteButton));
     string_init(button->name);
-    button->signal = NULL;
+    button->signal = infrared_signal_alloc();
     return button;
 }
 
 void infrared_remote_button_free(InfraredRemoteButton* button) {
     string_clear(button->name);
-    if(button->signal) {
-        free(button->signal);
-    }
+    free(button->signal);
     free(button);
 }
 
@@ -32,9 +30,7 @@ const char* infrared_remote_button_get_name(InfraredRemoteButton* button) {
 }
 
 void infrared_remote_button_set_signal(InfraredRemoteButton* button, InfraredSignal* signal) {
-    if(button->signal) {
-        free(button->signal);
-    }
+    free(button->signal);
     button->signal = signal;
 }
 
