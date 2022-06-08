@@ -25,7 +25,7 @@ def is_file_an_icon(filename):
 
 
 def file2image(file):
-    output = subprocess.check_output(["convert", file, "xbm:-"])
+    output = subprocess.check_output(["png2xbm", file])
     assert output
 
     # Extract data from text
