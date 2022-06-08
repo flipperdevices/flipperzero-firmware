@@ -21,6 +21,13 @@ class Main(App):
     RESOURCE_TAR_FORMAT = tarfile.USTAR_FORMAT
     RESOURCE_FILE_NAME = "resources.tar"
 
+    WHITELISTED_STACK_TYPES = set(
+        map(
+            get_stack_type,
+            ["BLE_FULL", "BLE_LIGHT", "BLE_BASIC"],
+        )
+    )
+
     def init(self):
         self.subparsers = self.parser.add_subparsers(help="sub-command help")
 
@@ -53,6 +60,9 @@ class Main(App):
         )
 
         self.parser_generate.add_argument("--obdata", dest="obdata", required=False)
+        self.parser_generate.add_argument(
+            "--I-understand-what-I-am-doing", dest="disclaimer", required=False
+        )
 
         self.parser_generate.set_defaults(func=self.generate)
 
@@ -70,6 +80,20 @@ class Main(App):
                 raise ValueError("Missing --radiotype")
             radio_meta = CoproBinary(self.args.radiobin)
             radio_version = self.copro_version_as_int(radio_meta, self.args.radiotype)
+            if (
+                get_stack_type(self.args.radiotype) not in self.WHITELISTED_STACK_TYPES
+                and self.args.disclaimer != "yes"
+            ):
+                self.logger.error(
+                    f"You are trying to bundle a non-standard stack type '{self.args.radiotype}'."
+                )
+                self.logger.error(
+                    "It might brick you device into a state in which you'd need an SWD programmer to fix it."
+                )
+                self.logger.error(
+                    "Please confirm that you REALLY want to do that with --I-understand-what-I-am-doing=yes"
+                )
+                return 1
             if radio_addr == 0:
                 radio_addr = radio_meta.get_flash_load_addr()
                 self.logger.info(
@@ -111,13 +135,13 @@ class Main(App):
         else:
             file.writeKey("Radio CRC", self.int2ffhex(0))
         file.writeKey("Resources", resources_basename)
-        file.writeComment(
-            "NEVER EVER MESS WITH THESE VALUES, YOU WILL BRICK YOUR DEVICE"
-        )
         obvalues = ObReferenceValues((), (), ())
         if self.args.obdata:
             obd = OptionBytesData(self.args.obdata)
             obvalues = obd.gen_values().export()
+            file.writeComment(
+                "NEVER EVER MESS WITH THESE VALUES, YOU WILL BRICK YOUR DEVICE"
+            )
         file.writeKey("OB reference", self.bytes2ffhex(obvalues.reference))
         file.writeKey("OB mask", self.bytes2ffhex(obvalues.compare_mask))
         file.writeKey("OB write mask", self.bytes2ffhex(obvalues.write_mask))
