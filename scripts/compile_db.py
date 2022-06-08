@@ -57,17 +57,17 @@ class Main(App):
         path = self.args.path
         out_data = []
         out_path = path + "/" + "compile_commands.json"
-        out_file = open(out_path, mode="w")
 
-        for record in DB_SOURCE:
-            self.logger.info(
-                f"Processing {record['name']} ({record['source']}, {record['flags']})"
-            )
-            data = self.parse_sources(path, record["source"], record["flags"])
-            out_data += data
+        with open(out_path, mode="w") as out_file:
+            for record in DB_SOURCE:
+                self.logger.info(
+                    f"Processing {record['name']} ({record['source']}, {record['flags']})"
+                )
+                data = self.parse_sources(path, record["source"], record["flags"])
+                out_data += data
 
-        self.logger.info(f"Saving")
-        json.dump(out_data, out_file, indent=2)
+            self.logger.info(f"Saving")
+            json.dump(out_data, out_file, indent=2)
 
         self.logger.info(f"Compilation DB written to " + out_path)
         return 0

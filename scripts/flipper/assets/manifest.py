@@ -112,20 +112,19 @@ class Manifest:
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def load(self, filename):
-        manifest = open(filename, "r")
-        for line in manifest.readlines():
-            line = line.strip()
-            if len(line) == 0:
-                continue
-            tag, line = line.split(":", 1)
-            record = MANIFEST_TAGS_RECORDS[tag].fromLine(line)
-            self.records.append(record)
+        with open(filename, "r") as manifest:
+            for line in manifest.readlines():
+                line = line.strip()
+                if len(line) == 0:
+                    continue
+                tag, line = line.split(":", 1)
+                record = MANIFEST_TAGS_RECORDS[tag].fromLine(line)
+                self.records.append(record)
 
     def save(self, filename):
-        manifest = open(filename, "w+")
-        for record in self.records:
-            manifest.write(record.toLine())
-        manifest.close()
+        with open(filename, "w+") as manifest:
+            for record in self.records:
+                manifest.write(record.toLine())
 
     def addDirectory(self, path):
         self.records.append(ManifestRecordDirectory(path))

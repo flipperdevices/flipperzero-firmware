@@ -15,8 +15,8 @@ class Image:
         self.data = data
 
     def write(self, filename):
-        file = open(filename, "wb")
-        file.write(self.data)
+        with open(filename, "wb") as file:
+            file.write(self.data)
 
 
 def is_file_an_icon(filename):
