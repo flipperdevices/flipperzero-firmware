@@ -86,10 +86,10 @@ Even if something goes wrong, Updater gives you an option to retry failed operat
 |                         |        | **50**     | Package has mismatching HW target          |
 |                         |        | **60**     | Missing DFU file                           |
 |                         |        | **80**     | Missing radio firmware file                |
-| Backing up LFS          |  **2** | **0-100**  | Block read/write error                     |
+| Backing up LFS          |  **2** | **0-100**  | FS read/write error                        |
 | Checking radio FW       |  **3** | **0-99**   | Error reading radio firmware file          |
 |                         |        | **100**    | CRC mismatch                               |
-| Uninstalling radio FW   |  **4** | **0**      | SHCI Install command error                 |
+| Uninstalling radio FW   |  **4** | **0**      | SHCI Delete command error                  |
 |                         |        | **80**     | Error awaiting command status              |
 | Writing radio FW        |  **5** | **0-100**  | Block read/write error                     |
 | Installing radio FW     |  **6** | **0**      | SHCI Install command error                 |
@@ -101,7 +101,7 @@ Even if something goes wrong, Updater gives you an option to retry failed operat
 |                         |        | **99-100** | Corrupted DFU file                         |
 | Writing flash           | **10** | **0-100**  | Block read/write error                     |
 | Validating flash        | **11** | **0-100**  | Block read/write error                     |
-| Restoring LFS           | **12** | **0-100**  | Block read/write error                     |
+| Restoring LFS           | **12** | **0-100**  | FS read/write error                        |
 | Updating resources      | **13** | **0-100**  | SD card read/write error                   |
 
 
@@ -116,13 +116,13 @@ To build a basic update package, run `make COMPACT=1 DEBUG=0 updater_package`
 ## Customizing update bundles
 
 Default update packages are built with Bluetooth Light stack. 
-You can pick a different stack, if your firmware version supports it, and build a bundle with it passing its type and binary name to `make`: 
+You can pick a different stack, if your firmware version supports it, and build a bundle with it passing stack type and binary name to `make`: 
 
 `make updater_package COMPACT=1 DEBUG=0 COPRO_OB_DATA=ob_custradio.data COPRO_STACK_BIN=stm32wb5x_BLE_Stack_full_fw.bin COPRO_STACK_TYPE=ble_full`  
 
-Note that COPRO_OB_DATA must point to a valid file corresponding to your radio stack type.
+Note that `COPRO_OB_DATA` must point to a valid file in `scripts` folder containing reference Option Byte data matching to your radio stack type.
 
-In certain cases, you might need to confirm your intentions by adding `COPRO_DISCLAIMER=...` to the build command line.
+In certain cases, you might have to confirm your intentions by adding `COPRO_DISCLAIMER=...` to the build command line.
 
 
 ## Building partial update packages
