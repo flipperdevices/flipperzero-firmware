@@ -9,7 +9,7 @@ extern const uint8_t furi_hal_subghz_preset_ook_270khz_async_regs[];
 extern const uint8_t furi_hal_subghz_preset_ook_650khz_async_regs[];
 extern const uint8_t furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs[];
 extern const uint8_t furi_hal_subghz_preset_2fsk_dev4_76khz_async_regs[];
-extern const uint8_t furi_hal_subghz_preset_ook_650khz_async_for_freq_regs[];
+//extern const uint8_t furi_hal_subghz_preset_ook_650khz_async_for_freq_regs[];
 //extern const uint8_t furi_hal_subghz_preset_msk_99_97kb_async_regs[];
 //extern const uint8_t furi_hal_subghz_preset_gfsk_9_99kb_async_regs[];
 
@@ -89,7 +89,7 @@ extern const uint8_t furi_hal_subghz_preset_ook_650khz_async_for_freq_regs[];
 0x08,0xE9,0xB9,0xAF,0xBF,0x25,0x50,0xD1,0x37, \
 0x08,0x05,0x9E,0xDB,0xDE,0x3F,0x94,0xE9,0x6B, \
 0x08,0xEC,0xC5,0x05,0xAA,0x57,0xDC,0x8A,0x5E, \
-0x08,0x05,0x70,0xDA,0x84,0x84,0xDD,0xCA,0x90, \
+0x08,0x05,0x70,0xDA,0x84,0x84,0xDD,0xCA,0x90 \
 
 #ifdef __cplusplus
 }

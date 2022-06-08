@@ -161,7 +161,8 @@ void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
         furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_2FSK);
         break;
     case FuriHalSubGhzPresetOok650AsyncFreq:
-        furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_650khz_async_for_freq_regs);
+        //furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_650khz_async_for_freq_regs);
+        furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_650khz_async_regs);
         furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
         break;
     // case FuriHalSubGhzPresetMSK99_97KbAsync:
@@ -178,10 +179,10 @@ void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
     }
 
     si446x_set_pa(&furi_hal_spi_bus_handle_subghz, SI446X_SET_MAX_PA);
-    si446x_set_rssi_control(&furi_hal_spi_bus_handle_subghz);
-    uint8_t pa_mode[1] = {0x88};
-    si446x_set_properties(
-        &furi_hal_spi_bus_handle_subghz, SI446X_PROP_PA_MODE, &pa_mode[0], sizeof(pa_mode));
+    // si446x_set_rssi_control(&furi_hal_spi_bus_handle_subghz);
+    // uint8_t pa_mode[1] = {0x88};
+    // si446x_set_properties(
+    //     &furi_hal_spi_bus_handle_subghz, SI446X_PROP_PA_MODE, &pa_mode[0], sizeof(pa_mode));
     // si446x_set_bps(&furi_hal_spi_bus_handle_subghz, 100000);
 
     furi_hal_subghz_preset = preset;
@@ -309,8 +310,8 @@ bool furi_hal_subghz_tx() {
 }
 
 float furi_hal_subghz_get_rssi() {
-    //float rssi = (float)si446x_get_rssi(&furi_hal_spi_bus_handle_subghz);
-    float rssi = (float)si446x_get_lqi(&furi_hal_spi_bus_handle_subghz);
+    float rssi = (float)si446x_get_rssi(&furi_hal_spi_bus_handle_subghz);
+    //float rssi = (float)si446x_get_lqi(&furi_hal_spi_bus_handle_subghz);
     rssi = (rssi / 2.0f) - 134.0f;
     return rssi;
 }
