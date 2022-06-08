@@ -3,7 +3,9 @@
 #include <applications/cli/cli.h>
 #include <lib/toolbox/args.h>
 
+#include "ble.h"
 #include "bt_settings.h"
+#include "bt_service/bt.h"
 
 static const char* bt_cli_address_types[] = {
     "Public Device Address",
@@ -38,7 +40,7 @@ static void bt_cli_command_carrier_tx(Cli* cli, string_t args, void* context) {
             break;
         }
 
-        furi_hal_bt_stop_advertising();
+        furi_hal_bt_reinit();
         printf("Transmitting carrier at %d channel at %d dB power\r\n", channel, power);
         printf("Press CTRL+C to stop\r\n");
         furi_hal_bt_start_tone_tx(channel, 0x19 + power);
@@ -47,6 +49,10 @@ static void bt_cli_command_carrier_tx(Cli* cli, string_t args, void* context) {
             osDelay(250);
         }
         furi_hal_bt_stop_tone_tx();
+
+        Bt* bt = furi_record_open("bt");
+        bt_set_profile(bt, BtProfileSerial);
+        furi_record_close("bt");
     } while(false);
 }
 
@@ -60,7 +66,7 @@ static void bt_cli_command_carrier_rx(Cli* cli, string_t args, void* context) {
             break;
         }
 
-        furi_hal_bt_stop_advertising();
+        furi_hal_bt_reinit();
         printf("Receiving carrier at %d channel\r\n", channel);
         printf("Press CTRL+C to stop\r\n");
 
@@ -73,6 +79,10 @@ static void bt_cli_command_carrier_rx(Cli* cli, string_t args, void* context) {
         }
 
         furi_hal_bt_stop_packet_test();
+
+        Bt* bt = furi_record_open("bt");
+        bt_set_profile(bt, BtProfileSerial);
+        furi_record_close("bt");
     } while(false);
 }
 
@@ -102,7 +112,7 @@ static void bt_cli_command_packet_tx(Cli* cli, string_t args, void* context) {
             break;
         }
 
-        furi_hal_bt_stop_advertising();
+        furi_hal_bt_reinit();
         printf(
             "Transmitting %d pattern packet at %d channel at %d M datarate\r\n",
             pattern,
@@ -117,6 +127,9 @@ static void bt_cli_command_packet_tx(Cli* cli, string_t args, void* context) {
         furi_hal_bt_stop_packet_test();
         printf("Transmitted %lu packets", furi_hal_bt_get_transmitted_packets());
 
+        Bt* bt = furi_record_open("bt");
+        bt_set_profile(bt, BtProfileSerial);
+        furi_record_close("bt");
     } while(false);
 }
 
@@ -135,7 +148,7 @@ static void bt_cli_command_packet_rx(Cli* cli, string_t args, void* context) {
             break;
         }
 
-        furi_hal_bt_stop_advertising();
+        furi_hal_bt_reinit();
         printf("Receiving packets at %d channel at %d M datarate\r\n", channel, datarate);
         printf("Press CTRL+C to stop\r\n");
         furi_hal_bt_start_packet_rx(channel, datarate);
@@ -147,6 +160,10 @@ static void bt_cli_command_packet_rx(Cli* cli, string_t args, void* context) {
         }
         uint16_t packets_received = furi_hal_bt_stop_packet_test();
         printf("Received %hu packets", packets_received);
+
+        Bt* bt = furi_record_open("bt");
+        bt_set_profile(bt, BtProfileSerial);
+        furi_record_close("bt");
     } while(false);
 }
 
@@ -159,12 +176,14 @@ static void bt_cli_scan_callback(GapAddress address, void* context) {
 static void bt_cli_command_scan(Cli* cli, string_t args, void* context) {
     UNUSED(context);
     UNUSED(args);
+
     osMessageQueueId_t queue = osMessageQueueNew(20, sizeof(GapAddress), NULL);
-    furi_hal_bt_start_scan(bt_cli_scan_callback, queue);
+
+    furi_hal_bt_reinit();
+    furi_check(furi_hal_bt_start_scan(bt_cli_scan_callback, queue));
 
     GapAddress address = {};
-    bool exit = false;
-    while(!exit) {
+    while(!cli_cmd_interrupt_received(cli)) {
         if(osMessageQueueGet(queue, &address, NULL, 250) == osOK) {
             if(address.type < sizeof(bt_cli_address_types)) {
                 printf("Found new device. Type: %s, MAC: ", bt_cli_address_types[address.type]);
@@ -174,9 +193,13 @@ static void bt_cli_command_scan(Cli* cli, string_t args, void* context) {
                 printf("%02X\r\n", address.mac[sizeof(address.mac) - 1]);
             }
         }
-        exit = cli_cmd_interrupt_received(cli);
     }
     furi_hal_bt_stop_scan();
+
+    Bt* bt = furi_record_open("bt");
+    bt_set_profile(bt, BtProfileSerial);
+    furi_record_close("bt");
+
     osMessageQueueDelete(queue);
 }
 
@@ -185,12 +208,12 @@ static void bt_cli_print_usage() {
     printf("bt <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
     printf("\thci_info\t - HCI info\r\n");
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) &&
-       furi_hal_bt_get_radio_stack() == FuriHalBtStackHciLayer) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && furi_hal_bt_is_testing_supported()) {
         printf("\ttx_carrier <channel:0-39> <power:0-6>\t - start tx carrier test\r\n");
         printf("\trx_carrier <channel:0-39>\t - start rx carrier test\r\n");
-        printf("\ttx_pt <channel:0-39> <pattern:0-5> <datarate:1-2>\t - start tx packet test\r\n");
-        printf("\trx_pt <channel:0-39> <datarate:1-2>\t - start rx packer test\r\n");
+        printf(
+            "\ttx_packet <channel:0-39> <pattern:0-5> <datarate:1-2>\t - start tx packet test\r\n");
+        printf("\trx_packet <channel:0-39> <datarate:1-2>\t - start rx packer test\r\n");
         printf("\tscan\t - start scanner\r\n");
     }
 }
@@ -213,21 +236,20 @@ static void bt_cli(Cli* cli, string_t args, void* context) {
             bt_cli_command_hci_info(cli, args, NULL);
             break;
         }
-        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) &&
-           furi_hal_bt_get_radio_stack() == FuriHalBtStackHciLayer) {
-            if(string_cmp_str(cmd, "carrier_tx") == 0) {
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && furi_hal_bt_is_testing_supported()) {
+            if(string_cmp_str(cmd, "tx_carrier") == 0) {
                 bt_cli_command_carrier_tx(cli, args, NULL);
                 break;
             }
-            if(string_cmp_str(cmd, "carrier_rx") == 0) {
+            if(string_cmp_str(cmd, "rx_carrier") == 0) {
                 bt_cli_command_carrier_rx(cli, args, NULL);
                 break;
             }
-            if(string_cmp_str(cmd, "packet_tx") == 0) {
+            if(string_cmp_str(cmd, "tx_packet") == 0) {
                 bt_cli_command_packet_tx(cli, args, NULL);
                 break;
             }
-            if(string_cmp_str(cmd, "packet_rx") == 0) {
+            if(string_cmp_str(cmd, "rx_packet") == 0) {
                 bt_cli_command_packet_rx(cli, args, NULL);
                 break;
             }
