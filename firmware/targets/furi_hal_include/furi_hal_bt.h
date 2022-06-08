@@ -220,17 +220,6 @@ float furi_hal_bt_get_rssi();
  */
 uint32_t furi_hal_bt_get_transmitted_packets();
 
-/** Start MAC addresses scan
- * @note Works only with HciLayer 2nd core firmware
- *
- * @param callback  GapScanCallback instance
- * @param context   pointer to context
- */
-bool furi_hal_bt_start_scan(GapScanCallback callback, void* context);
-
-/** Stop MAC addresses scan */
-void furi_hal_bt_stop_scan();
-
 /** Check & switch C2 to given mode
  *
  * @param[in]  mode  mode to switch into

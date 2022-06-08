@@ -7,13 +7,6 @@
 #include "bt_settings.h"
 #include "bt_service/bt.h"
 
-static const char* bt_cli_address_types[] = {
-    "Public Device Address",
-    "Random Device Address",
-    "Public Identity Address",
-    "Random (Static) Identity Address",
-};
-
 static void bt_cli_command_hci_info(Cli* cli, string_t args, void* context) {
     UNUSED(cli);
     UNUSED(args);
@@ -167,42 +160,6 @@ static void bt_cli_command_packet_rx(Cli* cli, string_t args, void* context) {
     } while(false);
 }
 
-static void bt_cli_scan_callback(GapAddress address, void* context) {
-    furi_assert(context);
-    osMessageQueueId_t queue = context;
-    osMessageQueuePut(queue, &address, 0, 250);
-}
-
-static void bt_cli_command_scan(Cli* cli, string_t args, void* context) {
-    UNUSED(context);
-    UNUSED(args);
-
-    osMessageQueueId_t queue = osMessageQueueNew(20, sizeof(GapAddress), NULL);
-
-    furi_hal_bt_reinit();
-    furi_check(furi_hal_bt_start_scan(bt_cli_scan_callback, queue));
-
-    GapAddress address = {};
-    while(!cli_cmd_interrupt_received(cli)) {
-        if(osMessageQueueGet(queue, &address, NULL, 250) == osOK) {
-            if(address.type < sizeof(bt_cli_address_types)) {
-                printf("Found new device. Type: %s, MAC: ", bt_cli_address_types[address.type]);
-                for(uint8_t i = 0; i < sizeof(address.mac) - 1; i++) {
-                    printf("%02X:", address.mac[i]);
-                }
-                printf("%02X\r\n", address.mac[sizeof(address.mac) - 1]);
-            }
-        }
-    }
-    furi_hal_bt_stop_scan();
-
-    Bt* bt = furi_record_open("bt");
-    bt_set_profile(bt, BtProfileSerial);
-    furi_record_close("bt");
-
-    osMessageQueueDelete(queue);
-}
-
 static void bt_cli_print_usage() {
     printf("Usage:\r\n");
     printf("bt <cmd> <args>\r\n");
@@ -214,7 +171,6 @@ static void bt_cli_print_usage() {
         printf(
             "\ttx_packet <channel:0-39> <pattern:0-5> <datarate:1-2>\t - start tx packet test\r\n");
         printf("\trx_packet <channel:0-39> <datarate:1-2>\t - start rx packer test\r\n");
-        printf("\tscan\t - start scanner\r\n");
     }
 }
 
@@ -251,10 +207,6 @@ static void bt_cli(Cli* cli, string_t args, void* context) {
             }
             if(string_cmp_str(cmd, "rx_packet") == 0) {
                 bt_cli_command_packet_rx(cli, args, NULL);
-                break;
-            }
-            if(string_cmp_str(cmd, "scan") == 0) {
-                bt_cli_command_scan(cli, args, NULL);
                 break;
             }
         }

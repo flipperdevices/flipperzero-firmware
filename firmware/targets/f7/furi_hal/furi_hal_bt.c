@@ -440,21 +440,6 @@ void furi_hal_bt_stop_rx() {
     aci_hal_rx_stop();
 }
 
-bool furi_hal_bt_start_scan(GapScanCallback callback, void* context) {
-    if(furi_hal_bt_is_testing_supported()) {
-        gap_start_scan(callback, context);
-        return true;
-    } else {
-        return false;
-    }
-}
-
-void furi_hal_bt_stop_scan() {
-    if(furi_hal_bt_is_testing_supported()) {
-        gap_stop_scan();
-    }
-}
-
 bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
     BleGlueCommandResult fw_start_res = ble_glue_force_c2_mode(mode);
     if(fw_start_res == BleGlueCommandResultOK) {
