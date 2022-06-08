@@ -33,7 +33,6 @@
 
 #define INFRARED_APP_FOLDER "/any/infrared"
 #define INFRARED_APP_EXTENSION ".ir"
-#define INFRARED_APP_FILE_TYPE "Flipper iButton key"
 
 struct Infrared {
     SceneManager* scene_manager;
