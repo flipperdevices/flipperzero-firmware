@@ -293,16 +293,20 @@ static void bt_show_warning(Bt* bt, const char* text) {
     dialog_message_show(bt->dialogs, bt->dialog_message);
 }
 
+static void bt_close_rpc_connection(Bt* bt) {
+    if(bt->profile == BtProfileSerial && bt->rpc_session) {
+        FURI_LOG_I(TAG, "Close RPC connection");
+        osEventFlagsSet(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
+        rpc_session_close(bt->rpc_session);
+        furi_hal_bt_serial_set_event_callback(0, NULL, NULL);
+        bt->rpc_session = NULL;
+    }
+}
+
 static void bt_change_profile(Bt* bt, BtMessage* message) {
     if(furi_hal_bt_is_ble_gatt_gap_supported()) {
         bt_settings_load(&bt->bt_settings);
-        if(bt->profile == BtProfileSerial && bt->rpc_session) {
-            FURI_LOG_I(TAG, "Close RPC connection");
-            osEventFlagsSet(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
-            rpc_session_close(bt->rpc_session);
-            furi_hal_bt_serial_set_event_callback(0, NULL, NULL);
-            bt->rpc_session = NULL;
-        }
+        bt_close_rpc_connection(bt);
 
         FuriHalBtProfile furi_profile;
         if(message->data.profile == BtProfileHidKeyboard) {
@@ -327,6 +331,11 @@ static void bt_change_profile(Bt* bt, BtMessage* message) {
         bt_show_warning(bt, "Radio stack doesn't support this app");
         *message->result = false;
     }
+    osEventFlagsSet(bt->api_event, BT_API_UNLOCK_EVENT);
+}
+
+static void bt_close_connection(Bt* bt) {
+    bt_close_rpc_connection(bt);
     osEventFlagsSet(bt->api_event, BT_API_UNLOCK_EVENT);
 }
 
@@ -388,6 +397,8 @@ int32_t bt_srv() {
             bt_keys_storage_save(bt);
         } else if(message.type == BtMessageTypeSetProfile) {
             bt_change_profile(bt, &message);
+        } else if(message.type == BtMessageTypeDisconnect) {
+            bt_close_connection(bt);
         } else if(message.type == BtMessageTypeForgetBondedDevices) {
             bt_keys_storage_delete(bt);
         }

@@ -33,6 +33,8 @@ static void bt_cli_command_carrier_tx(Cli* cli, string_t args, void* context) {
             break;
         }
 
+        Bt* bt = furi_record_open("bt");
+        bt_disconnect(bt);
         furi_hal_bt_reinit();
         printf("Transmitting carrier at %d channel at %d dB power\r\n", channel, power);
         printf("Press CTRL+C to stop\r\n");
@@ -43,7 +45,6 @@ static void bt_cli_command_carrier_tx(Cli* cli, string_t args, void* context) {
         }
         furi_hal_bt_stop_tone_tx();
 
-        Bt* bt = furi_record_open("bt");
         bt_set_profile(bt, BtProfileSerial);
         furi_record_close("bt");
     } while(false);
@@ -59,6 +60,8 @@ static void bt_cli_command_carrier_rx(Cli* cli, string_t args, void* context) {
             break;
         }
 
+        Bt* bt = furi_record_open("bt");
+        bt_disconnect(bt);
         furi_hal_bt_reinit();
         printf("Receiving carrier at %d channel\r\n", channel);
         printf("Press CTRL+C to stop\r\n");
@@ -73,7 +76,6 @@ static void bt_cli_command_carrier_rx(Cli* cli, string_t args, void* context) {
 
         furi_hal_bt_stop_packet_test();
 
-        Bt* bt = furi_record_open("bt");
         bt_set_profile(bt, BtProfileSerial);
         furi_record_close("bt");
     } while(false);
@@ -105,6 +107,8 @@ static void bt_cli_command_packet_tx(Cli* cli, string_t args, void* context) {
             break;
         }
 
+        Bt* bt = furi_record_open("bt");
+        bt_disconnect(bt);
         furi_hal_bt_reinit();
         printf(
             "Transmitting %d pattern packet at %d channel at %d M datarate\r\n",
@@ -120,7 +124,6 @@ static void bt_cli_command_packet_tx(Cli* cli, string_t args, void* context) {
         furi_hal_bt_stop_packet_test();
         printf("Transmitted %lu packets", furi_hal_bt_get_transmitted_packets());
 
-        Bt* bt = furi_record_open("bt");
         bt_set_profile(bt, BtProfileSerial);
         furi_record_close("bt");
     } while(false);
@@ -141,6 +144,8 @@ static void bt_cli_command_packet_rx(Cli* cli, string_t args, void* context) {
             break;
         }
 
+        Bt* bt = furi_record_open("bt");
+        bt_disconnect(bt);
         furi_hal_bt_reinit();
         printf("Receiving packets at %d channel at %d M datarate\r\n", channel, datarate);
         printf("Press CTRL+C to stop\r\n");
@@ -154,7 +159,6 @@ static void bt_cli_command_packet_rx(Cli* cli, string_t args, void* context) {
         uint16_t packets_received = furi_hal_bt_stop_packet_test();
         printf("Received %hu packets", packets_received);
 
-        Bt* bt = furi_record_open("bt");
         bt_set_profile(bt, BtProfileSerial);
         furi_record_close("bt");
     } while(false);
