@@ -2,6 +2,7 @@
 - ****This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.**
 - FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE
 - BUILD WITH COMPACT FLAG SINCE IT IS TOO LARGE
+- CH0NG, CH33CH and N00BY rename your flipper.
 
 # Clone the Repository
 
@@ -14,9 +15,8 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 
 Latest Updates:
 - Latest DEV changes
-- Merged needed changes from Unleashed e3fde1e
-- Removed Universal RF since it duplicates buttons from RF Remix
-- Fixed version number on make/about
+- RF Remix updates
+- Updates to assets for NFC and SubGHz
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -47,7 +47,8 @@ Plugins:
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/dice/dice.c)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)
 - [HID Analyzer (By Ownasaurus)](https://github.com/Ownasaurus/flipperzero-firmware/tree/hid-analyzer/applications/hid_analyzer)
-- [Menu Changes and Icons (By Redlink)]( https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
+- [Menu Changes and Icons (By Redlink)](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
+- [Mouse Jiggler (By Jacob-Tate)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c)
 - [RF Remix (By ESurge)(Original By jimilinuxguy)](https://github.com/ESurge/flipperzero-firmware-unirfremix)
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer)
 - [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
