@@ -1,16 +1,48 @@
 Import("env", "lib_flags")
 
-libenv = env.Clone()
-libenv.MergeFlags(lib_flags)
 
-# libenv.Append(
-#     CPPPATH=[
-#         "#/assets/compiled",
-#     ],
-# )
+assetsenv = env.Clone()
+assetsenv.MergeFlags(lib_flags)
+
+assetsenv.Append(
+    ASSETS_COMPILER="scripts/assets.py",
+)
+
+
+def icons_emitter(target, source, env):
+    print("icons_emitter", target, source)
+    target = [
+        "#assets/compiled/assets_icons.c",
+        "#assets/compiled/assets_icons.h",
+    ]
+    return target, source
+
+
+assetsenv.Append(
+    BUILDERS={
+        "IconBuilder": Builder(
+            action=Action(
+                "${PYTHON3} ${ASSETS_COMPILER} icons --debug ${SOURCE} ${TARGET.dir}",
+                "\tICONS\t${TARGET}",
+            ),
+            emitter=icons_emitter,
+        ),
+        "ProtobufBuilder": Builder(),
+    }
+)
+
+
+icons_src = assetsenv.GlobRecursive("*.png", "icons")
+icons_src += assetsenv.GlobRecursive("frame_rate", "icons")
+
+icons = assetsenv.IconBuilder(Dir("#/assets/compiled"), Dir("#/assets/icons"))
+Depends(icons, icons_src)
+Alias("icons", icons)
+
 
 sources = Glob("compiled/*.c", source=True)
 
-lib = libenv.Library("assets", sources)
-libenv.Install("${LIB_DIST_DIR}", lib)
-Return("lib")
+assetslib = assetsenv.Library("assets", sources)
+Depends(assetslib, icons)
+assetsenv.Install("${LIB_DIST_DIR}", assetslib)
+Return("assetslib")

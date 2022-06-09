@@ -87,7 +87,8 @@ class Main(App):
             # os.utime("../lib/toolbox/version.c", None)
             print("Version information updated")
         else:
-            print("Version information hasn't changed")
+            if self.args.debug:
+                print("Version information hasn't changed")
 
         return 0
 

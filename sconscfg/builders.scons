@@ -1,73 +1,48 @@
 Import("env")
 
-import os
-import posixpath
-
-
-def generate_hex(source, target, env, for_signature):
-    return '${OBJCOPY} -O ihex "%s" "%s"' % (source[0], target[0])
-
-
-def generate_bin(source, target, env, for_signature):
-    return '${OBJCOPY} -O binary -S "%s" "%s"' % (source[0], target[0])
-
-
-def generate_dfu(source, target, env, for_signature):
-    return (
-        '${PYTHON3} ./scripts/bin2dfu.py -i "%s" -o "%s" -a ${IMAGE_BASE_ADDRESS} -l "Flipper Zero F${TARGET_HW}"'
-        % (source[0], target[0])
-    )
-
-
-def strip_elf(source, target, env, for_signature):
-    return '${STRIP} ${STRIPFLAGS} "%s" -o "%s"' % (source[0], target[0])
-
-
-def flash_bin(target, source, env):
-    command = f'openocd {env["OPENOCD_OPTS"]} -c "program {source[0].path.replace(os.sep, posixpath.sep)} reset exit {env["IMAGE_BASE_ADDRESS"]}"'
-    print(command)
-    retcode = os.system(command)
-    if retcode != 0:
-        return "Failed to call openocd"
-
-    fname = target[0].abspath
-    if os.path.exists(fname):
-        os.utime(fname, None)
-    else:
-        open(fname, "a").close()
-
-
-# def generate_json(source, target, env, for_signature):
-#     return '${PYTHON3} scripts/meta.py generate -p firmware ${} "%s" > "%s"' % (
-#         source[0],
-#         target[0],
-#     )
-
 
 env.Append(
     BUILDERS={
         "HEXBuilder": Builder(
-            generator=generate_hex,
+            action=Action(
+                '${OBJCOPY} -O ihex "${SOURCE}" "${TARGET}"',
+                "\tHEX\t${TARGET}",
+            ),
             suffix=".hex",
             src_suffix=".elf",
         ),
         "BINBuilder": Builder(
-            generator=generate_bin,
+            action=Action(
+                '${OBJCOPY} -O binary -S "${SOURCE}" "${TARGET}"',
+                "\tBIN\t${TARGET}",
+            ),
             suffix=".bin",
             src_suffix=".elf",
         ),
         "DFUBuilder": Builder(
-            generator=generate_dfu,
+            action=Action(
+                '${PYTHON3} ./scripts/bin2dfu.py -i "${SOURCE}" -o "${TARGET}" -a ${IMAGE_BASE_ADDRESS} -l "Flipper Zero F${TARGET_HW}"',
+                "\tDFU\t${TARGET}",
+            ),
             suffix=".dfu",
             src_suffix=".bin",
         ),
         "ELFStripper": Builder(
-            action=env["STRIPCOM"],
+            action=Action(
+                env["STRIPCOM"],
+                "\tSTRIP\t${TARGET}",
+            ),
             suffix=".elf",
             src_suffix=".elf",
         ),
         "Flasher": Builder(
-            action=flash_bin,
+            action=[
+                Action(
+                    'openocd ${OPENOCD_OPTS} -c "program ${SOURCE.posix} reset exit ${IMAGE_BASE_ADDRESS}"',
+                    "\tFLASH\t${SOURCE}",
+                ),
+                Touch("${TARGET}"),
+            ],
             suffix=".flash",
             src_suffix=".bin",
         ),
