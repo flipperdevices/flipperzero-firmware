@@ -5,6 +5,7 @@
 #include <gui/modules/empty_screen.h>
 #include <m-string.h>
 #include <furi_hal_version.h>
+#include <furi_hal_bt.h>
 
 typedef DialogMessageButton (*AboutDialogScreen)(DialogsApp* dialogs, DialogMessage* message);
 
@@ -111,18 +112,24 @@ static DialogMessageButton fw_version_screen(DialogsApp* dialogs, DialogMessage*
     string_t buffer;
     string_init(buffer);
     const Version* ver = furi_hal_version_get_firmware_version();
+    const BleGlueC2Info* c2_ver = ble_glue_get_c2_info();
 
     if(!ver) {
         string_cat_printf(buffer, "No info\n");
     } else {
         string_cat_printf(
             buffer,
-            "%s [%s]\n%s%s [%s]\n[%d] %s",
+            "%s [%s]\n%s%s [%s] %d.%d.%d.%d.%d\n[%d] %s",
             version_get_version(ver),
             version_get_builddate(ver),
             version_get_dirty_flag(ver) ? "[!] " : "",
             version_get_githash(ver),
             version_get_gitbranchnum(ver),
+            c2_ver->VersionMajor,
+            c2_ver->VersionMinor,
+            c2_ver->VersionBranch,
+            c2_ver->VersionSub,
+            c2_ver->VersionReleaseType,
             version_get_target(ver),
             version_get_gitbranch(ver));
     }

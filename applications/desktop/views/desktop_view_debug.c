@@ -46,6 +46,7 @@ void desktop_debug_render(Canvas* canvas, void* model) {
         canvas_draw_str(canvas, 5, 19 + STATUS_BAR_Y_SHIFT, buffer);
 
         ver = furi_hal_version_get_firmware_version();
+        const BleGlueC2Info* c2_ver = ble_glue_get_c2_info();
 
         if(!ver) {
             canvas_draw_str(canvas, 5, 29 + STATUS_BAR_Y_SHIFT, "No info");
@@ -63,10 +64,15 @@ void desktop_debug_render(Canvas* canvas, void* model) {
         snprintf(
             buffer,
             sizeof(buffer),
-            "%s%s [%s]",
+            "%s%s [%s] %d.%d.%d.%d.%d",
             version_get_dirty_flag(ver) ? "[!] " : "",
             version_get_githash(ver),
-            version_get_gitbranchnum(ver));
+            version_get_gitbranchnum(ver),
+            c2_ver->VersionMajor,
+            c2_ver->VersionMinor,
+            c2_ver->VersionBranch,
+            c2_ver->VersionSub,
+            c2_ver->VersionReleaseType);
         canvas_draw_str(canvas, 5, 39 + STATUS_BAR_Y_SHIFT, buffer);
 
         snprintf(
