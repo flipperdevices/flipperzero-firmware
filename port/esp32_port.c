@@ -18,6 +18,7 @@
 #include "driver/gpio.h"
 #include "esp_timer.h"
 #include "esp_log.h"
+#include "esp_idf_version.h"
 #include <unistd.h>
 
 // #define SERIAL_DEBUG_ENABLE
@@ -75,7 +76,10 @@ esp_loader_error_t loader_port_esp32_init(const loader_esp32_config_t *config)
         .data_bits = UART_DATA_8_BITS,
         .parity    = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+        .source_clk = UART_SCLK_DEFAULT,
+#endif
     };
 
     int rx_buffer_size = config->rx_buffer_size ? config->rx_buffer_size : 400;
