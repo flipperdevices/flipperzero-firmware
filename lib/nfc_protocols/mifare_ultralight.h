@@ -38,6 +38,22 @@ typedef enum {
     MfUltralightTypeNum,
 } MfUltralightType;
 
+typedef enum {
+    MfUltralightSupportNone = 0,
+    MfUltralightSupportFastRead = 1 << 0,
+    MfUltralightSupportTearingFlags = 1 << 1,
+    MfUltralightSupportReadCounter = 1 << 2,
+    MfUltralightSupportIncrCounter = 1 << 3,
+    MfUltralightSupportSignature = 1 << 4,
+    MfUltralightSupportFastWrite = 1 << 5,
+    MfUltralightSupportCompatWrite = 1 << 6,
+    MfUltralightSupportAuth = 1 << 7,
+    MfUltralightSupportVcsl = 1 << 8,
+    MfUltralightSupportSectorSelect = 1 << 9,
+    // NTAG21x only has counter 2
+    MfUltralightSupportSingleCounter = 1 << 10,
+} MfUltralightFeatures;
+
 typedef struct {
     uint8_t header;
     uint8_t vendor_id;
@@ -80,15 +96,12 @@ typedef struct {
 typedef struct {
     uint16_t pages_to_read;
     int16_t pages_read;
-    bool support_fast_read;
-    bool support_tearing_flags;
-    bool support_counters;
-    bool support_signature;
+    MfUltralightFeatures supported_features;
 } MfUltralightReader;
 
 typedef struct {
     MfUltralightData data;
-    bool support_fast_read;
+    MfUltralightFeatures supported_features;
     bool data_changed;
     bool comp_write_cmd_started;
     uint8_t comp_write_page_addr;
