@@ -2,11 +2,15 @@
 
 #include <dolphin/dolphin.h>
 
+typedef enum {
+    LocalSceneStateIdle = 0,
+    LocalSceneStateSending = 1,
+} LocalSceneState;
+
 static void
     infrared_scene_learn_success_dialog_result_callback(DialogExResult result, void* context) {
     Infrared* infrared = context;
-    UNUSED(infrared);
-    UNUSED(result);
+    view_dispatcher_send_custom_event(infrared->view_dispatcher, result);
 }
 
 void infrared_scene_learn_success_on_enter(void* context) {
@@ -61,14 +65,56 @@ void infrared_scene_learn_success_on_enter(void* context) {
     dialog_ex_set_context(dialog_ex, context);
     dialog_ex_enable_extended_events(dialog_ex);
 
+    scene_manager_set_scene_state(
+        infrared->scene_manager, InfraredSceneLearnSuccess, LocalSceneStateIdle);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewDialogEx);
 }
 
 bool infrared_scene_learn_success_on_event(void* context, SceneManagerEvent event) {
     Infrared* infrared = context;
-    UNUSED(infrared);
-    UNUSED(event);
+    SceneManager* scene_manager = infrared->scene_manager;
+    uint32_t scene_state = scene_manager_get_scene_state(scene_manager, InfraredSceneLearnSuccess);
     bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeTick) {
+        if(scene_state == LocalSceneStateIdle) {
+            infrared_play_notification_message(infrared, InfraredNotificationMessageGreenOn);
+        }
+        consumed = true;
+    } else if(event.type == SceneManagerEventTypeBack) {
+        if(scene_state == LocalSceneStateIdle) {
+            scene_manager_next_scene(scene_manager, InfraredSceneAskBack);
+        }
+        consumed = true;
+    } else if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == DialogExResultLeft) {
+            if(scene_state == LocalSceneStateIdle) {
+                scene_manager_search_and_switch_to_previous_scene(
+                    scene_manager, InfraredSceneLearn);
+            }
+            consumed = true;
+        } else if(event.event == DialogExResultRight) {
+            if(scene_state == LocalSceneStateIdle) {
+                scene_manager_next_scene(scene_manager, InfraredSceneLearnEnterName);
+            }
+            consumed = true;
+        } else if(event.event == DialogExPressCenter) {
+            if(scene_state == LocalSceneStateIdle) {
+                scene_manager_set_scene_state(
+                    scene_manager, InfraredSceneLearnSuccess, LocalSceneStateSending);
+                infrared_tx_start_received(infrared);
+            }
+            consumed = true;
+        } else if(event.event == DialogExReleaseCenter) {
+            if(scene_state == LocalSceneStateSending) {
+                scene_manager_set_scene_state(
+                    scene_manager, InfraredSceneLearnSuccess, LocalSceneStateIdle);
+                infrared_tx_stop(infrared);
+                infrared_play_notification_message(infrared, InfraredNotificationMessageGreenOff);
+            }
+            consumed = true;
+        }
+    }
 
     return consumed;
 }

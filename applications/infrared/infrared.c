@@ -163,12 +163,7 @@ bool infrared_remote_select_file(Infrared* infrared) {
     return success;
 }
 
-void infrared_tx_start(Infrared* infrared, size_t button_index) {
-    furi_assert(button_index < infrared_remote_get_button_count(infrared->remote));
-
-    InfraredRemoteButton* button = infrared_remote_get_button(infrared->remote, button_index);
-    InfraredSignal* signal = infrared_remote_button_get_signal(button);
-
+void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal) {
     if(infrared_signal_is_raw(signal)) {
         InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
         infrared_worker_set_raw_signal(infrared->worker, raw->timings, raw->timings_size);
@@ -179,6 +174,19 @@ void infrared_tx_start(Infrared* infrared, size_t button_index) {
 
     DOLPHIN_DEED(DolphinDeedIrSend);
     infrared_worker_tx_start(infrared->worker);
+}
+
+void infrared_tx_start_button_index(Infrared* infrared, size_t button_index) {
+    furi_assert(button_index < infrared_remote_get_button_count(infrared->remote));
+
+    InfraredRemoteButton* button = infrared_remote_get_button(infrared->remote, button_index);
+    InfraredSignal* signal = infrared_remote_button_get_signal(button);
+
+    infrared_tx_start_signal(infrared, signal);
+}
+
+void infrared_tx_start_received(Infrared* infrared) {
+    infrared_tx_start_signal(infrared, infrared->received_signal);
 }
 
 void infrared_tx_stop(Infrared* infrared) {

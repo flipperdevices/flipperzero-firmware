@@ -92,7 +92,7 @@ bool infrared_scene_remote_on_event(void* context, SceneManagerEvent event) {
 
         if(custom_type == InfraredCustomEventTransmitStarted) {
             furi_assert(menu_index >= 0);
-            infrared_tx_start(infrared, menu_index);
+            infrared_tx_start_button_index(infrared, menu_index);
             consumed = true;
         } else if(custom_type == InfraredCustomEventTransmitStopped) {
             infrared_tx_stop(infrared);
