@@ -15,9 +15,8 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 
 Latest Updates:
 - Latest DEV changes
-- Merged needed changes from Unleashed e3fde1e
-- Removed Universal RF since it duplicates buttons from RF Remix
-- Fixed version number on make/about
+- RF Remix updates
+- Updates to assets for NFC and SubGHz
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
