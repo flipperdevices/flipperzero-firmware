@@ -21,7 +21,9 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
             app);
     }
 
-    submenu_set_header(app->submenu, app->setting_primary_favorite ? "Primary favorite app:" : "Secondary favorite app:");
+    submenu_set_header(
+        app->submenu,
+        app->setting_primary_favorite ? "Primary favorite app:" : "Secondary favorite app:");
     if(app->setting_primary_favorite) {
         submenu_set_selected_item(app->submenu, app->settings.favorite_primary);
     } else {
