@@ -45,7 +45,7 @@ class ImageTools:
         except ImportError as e:
             self.__pil_unavailable = True
             self.logger.info("pillow module is missing, using convert cli util")
-            return self.__png2xbm(file)
+            return self.png2xbm(file)
 
         with Image.open(file) as im:
             with io.BytesIO() as output:
@@ -65,7 +65,7 @@ class ImageTools:
         except ImportError as e:
             self.__hs2_unavailable = True
             self.logger.info("heatshrink2 module is missing, using heatshrink cli util")
-            return self.__xbm2hs(data)
+            return self.xbm2hs(data)
 
         return heatshrink2.compress(data, window_sz2=8, lookahead_sz2=4)
 
