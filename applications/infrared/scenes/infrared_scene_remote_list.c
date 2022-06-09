@@ -14,7 +14,9 @@ void infrared_scene_remote_list_on_enter(void* context) {
 bool infrared_scene_remote_list_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
-    return false;
+    bool consumed = false;
+
+    return consumed;
 }
 
 void infrared_scene_remote_list_on_exit(void* context) {

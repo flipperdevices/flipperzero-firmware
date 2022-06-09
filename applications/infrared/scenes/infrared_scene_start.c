@@ -45,13 +45,16 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        consumed = true;
         if(event.event == SubmenuIndexUniversalLibrary) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversal);
+            consumed = true;
         } else if(event.event == SubmenuIndexLearnNewRemote) {
+            // Learn new remote = true
             scene_manager_next_scene(scene_manager, InfraredSceneLearn);
+            consumed = true;
         } else if(event.event == SubmenuIndexSavedRemotes) {
             scene_manager_next_scene(scene_manager, InfraredSceneRemoteList);
+            consumed = true;
         }
     }
 

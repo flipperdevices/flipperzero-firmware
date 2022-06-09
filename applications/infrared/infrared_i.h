@@ -45,6 +45,7 @@ struct Infrared {
     NotificationApp* notifications;
     InfraredWorker* worker;
     InfraredRemote* remote;
+    InfraredSignal* received_signal;
 
     Submenu* submenu;
     TextInput* text_input;

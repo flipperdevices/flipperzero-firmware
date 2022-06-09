@@ -81,34 +81,35 @@ void infrared_scene_remote_on_enter(void* context) {
 bool infrared_scene_remote_on_event(void* context, SceneManagerEvent event) {
     Infrared* infrared = context;
     SceneManager* scene_manager = infrared->scene_manager;
+    bool consumed = false;
 
-    if(event.type != SceneManagerEventTypeCustom) {
-        return false;
-    }
+    if(event.type == SceneManagerEventTypeCustom) {
+        InfraredSceneRemoteEvent custom_event;
+        custom_event.packed_value = event.event;
 
-    InfraredSceneRemoteEvent custom_event;
-    custom_event.packed_value = event.event;
+        const uint16_t custom_type = custom_event.content.type;
+        const int16_t menu_index = custom_event.content.index;
 
-    const uint16_t custom_type = custom_event.content.type;
-    const int16_t menu_index = custom_event.content.index;
-
-    if(custom_type == InfraredCustomEventTransmitStarted) {
-        furi_assert(menu_index >= 0);
-        infrared_tx_start(infrared, menu_index);
-    } else if(custom_type == InfraredCustomEventTransmitStopped) {
-        infrared_tx_stop(infrared);
-    } else if(custom_type == InfraredCustomEventMenuSelected) {
-        furi_assert(menu_index < 0);
-        if(menu_index == ButtonIndexPlus) {
-            scene_manager_next_scene(scene_manager, InfraredSceneLearn);
-        } else if(menu_index == ButtonIndexEdit) {
-            scene_manager_next_scene(scene_manager, InfraredSceneEdit);
+        if(custom_type == InfraredCustomEventTransmitStarted) {
+            furi_assert(menu_index >= 0);
+            infrared_tx_start(infrared, menu_index);
+            consumed = true;
+        } else if(custom_type == InfraredCustomEventTransmitStopped) {
+            infrared_tx_stop(infrared);
+            consumed = true;
+        } else if(custom_type == InfraredCustomEventMenuSelected) {
+            furi_assert(menu_index < 0);
+            if(menu_index == ButtonIndexPlus) {
+                scene_manager_next_scene(scene_manager, InfraredSceneLearn);
+                consumed = true;
+            } else if(menu_index == ButtonIndexEdit) {
+                scene_manager_next_scene(scene_manager, InfraredSceneEdit);
+                consumed = true;
+            }
         }
-    } else {
-        return false;
     }
 
-    return true;
+    return consumed;
 }
 
 void infrared_scene_remote_on_exit(void* context) {

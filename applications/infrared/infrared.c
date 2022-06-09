@@ -57,6 +57,7 @@ static Infrared* infrared_alloc() {
 
     infrared->worker = infrared_worker_alloc();
     infrared->remote = infrared_remote_alloc();
+    infrared->received_signal = infrared_signal_alloc();
 
     infrared->submenu = submenu_alloc();
     view_dispatcher_add_view(
@@ -121,6 +122,7 @@ static void infrared_free(Infrared* infrared) {
     view_dispatcher_free(view_dispatcher);
     scene_manager_free(infrared->scene_manager);
 
+    infrared_signal_free(infrared->received_signal);
     infrared_remote_free(infrared->remote);
     infrared_worker_free(infrared->worker);
 
