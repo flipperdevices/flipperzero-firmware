@@ -22,7 +22,11 @@ typedef struct {
     Gui* gui;
 } BoxMover;
 
-
+void shake(void){
+        NotificationApp* notification = furi_record_open("notification");
+        notification_message(notification, &sequence_single_vibro);
+        furi_record_close("notification");
+    }
 
 void draw_callback(Canvas* canvas, void* ctx){
     BoxMover* box_mover = ctx;
@@ -92,48 +96,47 @@ int32_t box_mover_app(void* p){
                         if (box_mover->model->y >= 1)
                             box_mover->model->y-=2;
                         else{
-                            NotificationApp* notification = furi_record_open("notification");
-                            notification_message(notification, &sequence_single_vibro);
-                            furi_record_close("notification");
+                            shake();
                         }
                         break;
                     case InputKeyDown:
-                        if (box_mover->model->y <= (64-(box_mover->model->sizey+1)))
+                        if (box_mover->model->y <= (63-(box_mover->model->sizey+(box_mover->model->sizey % 2 != 0)))) // So we're trying to see if it's even or odd, to determine how much to offset the bounds check by, since we're doing this based of the square origin+its size. idk.
                             box_mover->model->y+=2;
                         else{
-                            NotificationApp* notification = furi_record_open("notification");
-                            notification_message(notification, &sequence_single_vibro);
-                            furi_record_close("notification");
+                            shake();
                         }
                         break;   
                     case InputKeyLeft:
                         if (box_mover->model->x >= 1)
                             box_mover->model->x-=2;
                         else{
-                            NotificationApp* notification = furi_record_open("notification");
-                            notification_message(notification, &sequence_single_vibro);
-                            furi_record_close("notification");
+                            shake();
                         }
                         break;
                     case InputKeyRight:
-                        if (box_mover->model->x <= (128-(box_mover->model->sizex+1)))
+                        if (box_mover->model->x <= (127-(box_mover->model->sizex+(box_mover->model->sizex % 2 != 0))))
                             box_mover->model->x+=2;
                         else{
-                            NotificationApp* notification = furi_record_open("notification");
-                            notification_message(notification, &sequence_single_vibro);
-                            furi_record_close("notification");
+                            shake();
                         }
                         break;
                     case InputKeyOk:
                         if (box_mover->model->sizex<=50 && box_mover->model->sizey<=50){
-                            box_mover->model->sizex+=1;
-                            box_mover->model->sizey+=1;
+                            if (box_mover->model->x <= (127-(box_mover->model->sizex+(box_mover->model->sizex % 2 != 0)))){
+                                if (box_mover->model->y <= (63-(box_mover->model->sizey+(box_mover->model->sizey % 2 != 0)))){
+                                    box_mover->model->sizex+=1;
+                                    box_mover->model->sizey+=1;
+                            //TODO - also check the box will not grow past boundary.
+                                    }
+                                    else
+                                    shake();
+                            }
+                            else
+                                shake();                        
                         }
-                        else{
-                            NotificationApp* notification = furi_record_open("notification");
-                            notification_message(notification, &sequence_single_vibro);
-                            furi_record_close("notification");
-                        }   
+                        else
+                            shake();
+                           
                         
                         break;
                     case InputKeyBack:
@@ -145,6 +148,7 @@ int32_t box_mover_app(void* p){
         osMutexRelease(box_mover->model_mutex);
         view_port_update(box_mover->view_port);
     }
+
 
 
     box_mover_free(box_mover);
