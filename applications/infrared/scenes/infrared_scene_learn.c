@@ -6,6 +6,9 @@ static void infrared_scene_learn_signal_received_callback(
     Infrared* infrared = context;
 
     if(infrared_worker_signal_is_decoded(received_signal)) {
+        infrared_signal_set_message(
+            infrared->received_signal, infrared_worker_get_decoded_signal(received_signal));
+    } else {
         const uint32_t* timings;
         size_t timings_size;
         infrared_worker_get_raw_signal(received_signal, &timings, &timings_size);
@@ -15,9 +18,6 @@ static void infrared_scene_learn_signal_received_callback(
             timings_size,
             INFRARED_COMMON_CARRIER_FREQUENCY,
             INFRARED_COMMON_DUTY_CYCLE);
-    } else {
-        infrared_signal_set_message(
-            infrared->received_signal, infrared_worker_get_decoded_signal(received_signal));
     }
 
     infrared_worker_rx_set_received_signal_callback(infrared->worker, NULL, NULL);
