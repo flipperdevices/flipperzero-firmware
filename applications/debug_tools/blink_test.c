@@ -17,6 +17,42 @@ typedef struct {
     InputEvent input;
 } BlinkEvent;
 
+static const NotificationSequence blink_test_sequence_hw_blink_start_red = {
+    &message_blink_start_10,
+    &message_blink_set_color_red,
+    &message_do_not_reset,
+    NULL,
+};
+
+static const NotificationSequence blink_test_sequence_hw_blink_green = {
+    &message_blink_set_color_green,
+    NULL,
+};
+
+static const NotificationSequence blink_test_sequence_hw_blink_blue = {
+    &message_blink_set_color_blue,
+    NULL,
+};
+
+static const NotificationSequence blink_test_sequence_hw_blink_stop = {
+    &message_blink_stop,
+    NULL,
+};
+
+static const NotificationSequence* blink_test_colors[] = {
+    &sequence_blink_red_100,
+    &sequence_blink_green_100,
+    &sequence_blink_blue_100,
+    &sequence_blink_yellow_100,
+    &sequence_blink_cyan_100,
+    &sequence_blink_magenta_100,
+    &sequence_blink_white_100,
+    &blink_test_sequence_hw_blink_start_red,
+    &blink_test_sequence_hw_blink_green,
+    &blink_test_sequence_hw_blink_blue,
+    &blink_test_sequence_hw_blink_stop,
+};
+
 static void blink_test_update(void* ctx) {
     furi_assert(ctx);
     osMessageQueueId_t event_queue = ctx;
@@ -57,42 +93,6 @@ int32_t blink_test_app(void* p) {
 
     NotificationApp* notifications = furi_record_open("notification");
 
-    const NotificationSequence sequence_hw_blink_start_red = {
-        &message_blink_start_10,
-        &message_blink_set_color_red,
-        &message_do_not_reset,
-        NULL,
-    };
-
-    const NotificationSequence sequence_hw_blink_green = {
-        &message_blink_set_color_green,
-        NULL,
-    };
-
-    const NotificationSequence sequence_hw_blink_blue = {
-        &message_blink_set_color_blue,
-        NULL,
-    };
-
-    const NotificationSequence sequence_hw_blink_stop = {
-        &message_blink_stop,
-        NULL,
-    };
-
-    const NotificationSequence* colors[] = {
-        &sequence_blink_red_100,
-        &sequence_blink_green_100,
-        &sequence_blink_blue_100,
-        &sequence_blink_yellow_100,
-        &sequence_blink_cyan_100,
-        &sequence_blink_magenta_100,
-        &sequence_blink_white_100,
-        &sequence_hw_blink_start_red,
-        &sequence_hw_blink_green,
-        &sequence_hw_blink_blue,
-        &sequence_hw_blink_stop,
-    };
-
     uint8_t state = 0;
     BlinkEvent event;
 
@@ -103,13 +103,15 @@ int32_t blink_test_app(void* p) {
                 break;
             }
         } else {
-            notification_message(notifications, colors[state]);
+            notification_message(notifications, blink_test_colors[state]);
             state++;
-            if(state >= COUNT_OF(colors)) {
+            if(state >= COUNT_OF(blink_test_colors)) {
                 state = 0;
             }
         }
     }
+
+    notification_message(notifications, &blink_test_sequence_hw_blink_stop);
 
     osTimerDelete(timer);
 
