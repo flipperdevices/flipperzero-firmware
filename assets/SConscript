@@ -1,16 +1,18 @@
 Import("env", "lib_flags")
 
+import os
+import subprocess
 
 assetsenv = env.Clone()
 assetsenv.MergeFlags(lib_flags)
 
 assetsenv.Append(
     ASSETS_COMPILER="scripts/assets.py",
+    NANOPB_COMPILER="lib/nanopb/generator/nanopb_generator.py",
 )
 
 
 def icons_emitter(target, source, env):
-    print("icons_emitter", target, source)
     target = [
         "#assets/compiled/assets_icons.c",
         "#assets/compiled/assets_icons.h",
@@ -18,16 +20,100 @@ def icons_emitter(target, source, env):
     return target, source
 
 
+def proto_emitter(target, source, env):
+    # target = list()
+    # print(target[0].path, source)
+    out_path = target[0].path
+    # print("out_path", out_path)
+    target = list()
+    for src in source:
+        basename = os.path.splitext(src.name)[0]
+        # print("!! ", os.path.join("#", out_path, basename + ".pb.h"))
+        target.append(File(os.path.join("#", out_path, basename + ".pb.c")))
+        target.append(File(os.path.join("#", out_path, basename + ".pb.h")))
+    # print(list(t.path for t in target))
+    return target, source
+
+
+def dolphin_emitter(target, source, env):
+    # target.append(target[0])
+    out_path = target[0].path
+    # print("dolphin_emitter", out_path)
+    asset_basename = f"assets_dolphin_{env['DOLPHIN_RES_TYPE']}"
+    target = [
+        File(os.path.join("#", out_path, asset_basename + ".c")),
+        File(os.path.join("#", out_path, asset_basename + ".h")),
+    ]
+    return target, source
+
+
+def _invoke_git(args, source_dir):
+    cmd = ["git"]
+    cmd.extend(args)
+    return (
+        subprocess.check_output(cmd, cwd=source_dir, stderr=subprocess.STDOUT)
+        .strip()
+        .decode()
+    )
+
+
+def proto_ver_generator(target, source, env):
+    target_file = target[0].abspath
+    src_dir = source[0].dir.abspath
+    try:
+        git_fetch = _invoke_git(
+            ["fetch", "--tags"],
+            source_dir=src_dir,
+        )
+    except (subprocess.CalledProcessError, EnvironmentError) as e:
+        # Not great, not terrible
+        print("Git: fetch failed")
+
+    try:
+        git_describe = _invoke_git(
+            ["describe", "--tags", "--abbrev=0"],
+            source_dir=src_dir,
+        )
+    except (subprocess.CalledProcessError, EnvironmentError) as e:
+        print("Git: describe failed")
+        Exit("git error")
+
+    # print("describe=", git_describe)
+    git_major, git_minor = git_describe.split(".")
+    version_file_data = (
+        "#pragma once",
+        f"#define PROTOBUF_MAJOR_VERSION {git_major}",
+        f"#define PROTOBUF_MINOR_VERSION {git_minor}",
+        "",
+    )
+    with open(target_file, "wt") as file:
+        file.write("\n".join(version_file_data))
+
+
 assetsenv.Append(
     BUILDERS={
         "IconBuilder": Builder(
             action=Action(
-                "${PYTHON3} ${ASSETS_COMPILER} icons --debug ${SOURCE} ${TARGET.dir}",
+                "${PYTHON3} ${ASSETS_COMPILER} icons ${SOURCE} ${TARGET.dir}",
                 "\tICONS\t${TARGET}",
             ),
             emitter=icons_emitter,
         ),
-        "ProtobufBuilder": Builder(),
+        "ProtoBuilder": Builder(
+            action=Action(
+                "${PYTHON3} ${NANOPB_COMPILER} -q -I${SOURCE.dir} -D${TARGET.dir} ${SOURCES}",
+                # "\tPROTO\t${SOURCE}",
+            ),
+            emitter=proto_emitter,
+            src_suffix=".proto",
+        ),
+        "DolphinBuilder": Builder(
+            action=Action(
+                '${PYTHON3} ${ASSETS_COMPILER} dolphin -s dolphin_${DOLPHIN_RES_TYPE} "${SOURCE}" "${TARGET.dir}"',
+                "\tDOLPHIN\t${SOURCE}",
+            ),
+            emitter=dolphin_emitter,
+        ),
     }
 )
 
@@ -40,9 +126,47 @@ Depends(icons, icons_src)
 Alias("icons", icons)
 
 
-sources = Glob("compiled/*.c", source=True)
+proto_src = Glob("protobuf/*.proto", source=True)
+proto_options = Glob("protobuf/*.options", source=True)
+proto = assetsenv.ProtoBuilder(Dir("#/assets/compiled"), proto_src)
+Depends(proto, proto_options)
+# Precious(proto)
+Alias("proto", proto)
 
+
+dolphin_internal_src = assetsenv.GlobRecursive("*", "dolphin/internal")
+dolphin_internal = assetsenv.DolphinBuilder(
+    Dir("#/assets/compiled"),
+    Dir("#/assets/dolphin/internal"),
+    DOLPHIN_RES_TYPE="internal",
+)
+Depends(dolphin_internal, dolphin_internal_src)
+Alias("dolphin_internal", dolphin_internal)
+
+
+dolphin_blocking_src = assetsenv.GlobRecursive("*", "dolphin/blocking")
+dolphin_blocking = assetsenv.DolphinBuilder(
+    Dir("#/assets/compiled"),
+    Dir("#/assets/dolphin/blocking"),
+    DOLPHIN_RES_TYPE="blocking",
+)
+Depends(dolphin_blocking, dolphin_blocking_src)
+Alias("dolphin_blocking", dolphin_blocking)
+
+proto_ver = assetsenv.Command(
+    "#/assets/compiled/protobuf_version.h",
+    "#/assets/protobuf/Changelog",
+    action=Action(
+        proto_ver_generator,
+        "\tPBVER\t${TARGET}",
+    ),
+)
+Depends(proto_ver, proto)
+Alias("proto_ver", proto_ver)
+
+
+sources = Glob("#/assets/compiled/*.c", source=True)
 assetslib = assetsenv.Library("assets", sources)
-Depends(assetslib, icons)
+Depends(assetslib, [icons, proto, dolphin_blocking, dolphin_internal, proto_ver])
 assetsenv.Install("${LIB_DIST_DIR}", assetslib)
 Return("assetslib")
