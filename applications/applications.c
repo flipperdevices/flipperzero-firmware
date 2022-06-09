@@ -50,6 +50,7 @@ extern int32_t music_player_app(void* p);
 extern int32_t snake_game_app(void* p);
 extern int32_t tetris_game_app(void *p);
 extern int32_t clock_app(void *p);
+extern int32_t box_mover_app(void* p);
 // extern int32_t floopper_bloopper(void* p);
 extern int32_t raycast_game_app(void* p);
 extern int32_t spectrum_analyzer_app(void* p);
@@ -364,6 +365,14 @@ const FlipperApplication FLIPPER_GAMES[] = {
     .stack_size = 1024,
     .icon = &A_Plugins_14,
     .flags =FlipperApplicationFlagDefault},
+#endif
+
+#ifdef APP_ZOMBIEZ
+    {.app = zombiez_app,
+     .name = "Zombiez",
+     .stack_size = 2048,
+    .icon = &A_Plugins_14,
+     .flags = FlipperApplicationFlagDefault},
 #endif
 
 };
