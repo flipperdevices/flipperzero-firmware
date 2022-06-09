@@ -89,8 +89,45 @@ class Main(App):
         )
         self.parser_dolphin.set_defaults(func=self.dolphin)
 
+    __have_no_pil = False
+
+    def __png2xbm(self, file):
+        if self.__have_no_pil:
+            return subprocess.check_output(["convert", file, "xbm:-"])
+
+        try:
+            from PIL import Image, ImageOps
+        except ImportError as e:
+            self.__have_no_pil = True
+            self.logger.info("pillow module is missing, using convert cli util")
+            return self.__png2xbm(file)
+
+        with Image.open(file) as im:
+            with io.BytesIO() as output:
+                bw = im.convert("1")
+                bw = ImageOps.invert(bw)
+                bw.save(output, format="XBM")
+                return output.getvalue()
+
+    __have_no_hs2 = False
+
+    def __xbm2hs(self, data):
+        if self.__have_no_hs2:
+            return subprocess.check_output(
+                ["heatshrink", "-e", "-w8", "-l4"], input=data
+            )
+
+        try:
+            import heatshrink2
+        except ImportError as e:
+            self.__have_no_hs2 = True
+            self.logger.info("heatshrink2 module is missing, using heatshrink cli util")
+            return self.__xbm2hs(data)
+
+        return heatshrink2.compress(data, window_sz2=8, lookahead_sz2=4)
+
     def _icon2header(self, file):
-        output = subprocess.check_output(["convert", file, "xbm:-"])
+        output = self.__png2xbm(file)
         assert output
         f = io.StringIO(output.decode().strip())
         width = int(f.readline().strip().split(" ")[2])
@@ -98,10 +135,10 @@ class Main(App):
         data = f.read().strip().replace("\n", "").replace(" ", "").split("=")[1][:-1]
         data_bin_str = data[1:-1].replace(",", " ").replace("0x", "")
         data_bin = bytearray.fromhex(data_bin_str)
+
         # Encode icon data with LZSS
-        data_encoded_str = subprocess.check_output(
-            ["heatshrink", "-e", "-w8", "-l4"], input=data_bin
-        )
+        data_encoded_str = self.__xbm2hs(data_bin)
+
         assert data_encoded_str
         data_enc = bytearray(data_encoded_str)
         data_enc = bytearray([len(data_enc) & 0xFF, len(data_enc) >> 8]) + data_enc
@@ -204,12 +241,15 @@ class Main(App):
                 )
             )
         icons_c.write("\n")
+        icons_c.close()
+
         # Create Public Header
         self.logger.debug(f"Creating header")
         icons_h = open(os.path.join(self.args.output_directory, "assets_icons.h"), "w")
         icons_h.write(ICONS_TEMPLATE_H_HEADER)
         for name, width, height, frame_rate, frame_count in icons:
             icons_h.write(ICONS_TEMPLATE_H_ICON_NAME.format(name=name))
+        icons_h.close()
         self.logger.debug(f"Done")
         return 0
 
