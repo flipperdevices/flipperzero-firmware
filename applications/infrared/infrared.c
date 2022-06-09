@@ -1,5 +1,7 @@
 #include "infrared_i.h"
 
+#include <dolphin/dolphin.h>
+
 static const NotificationSequence* infrared_notification_sequences[] = {
     &sequence_success,
     &sequence_set_only_green_255,
@@ -151,11 +153,34 @@ bool infrared_remote_select_file(Infrared* infrared) {
         &I_ir_10px,
         true);
 
+    //TODO: Show loading prompt (loading remotes takes a long time)
     if(success) {
         success = infrared_remote_load(infrared->remote, string_get_cstr(infrared->file_path));
     }
 
     return success;
+}
+
+void infrared_tx_start(Infrared* infrared, size_t button_index) {
+    furi_assert(button_index < infrared_remote_get_button_count(infrared->remote));
+
+    InfraredRemoteButton* button = infrared_remote_get_button(infrared->remote, button_index);
+    InfraredSignal* signal = infrared_remote_button_get_signal(button);
+
+    if(infrared_signal_is_raw(signal)) {
+        InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
+        infrared_worker_set_raw_signal(infrared->worker, raw->timings, raw->timings_size);
+    } else {
+        InfraredMessage* message = infrared_signal_get_message(signal);
+        infrared_worker_set_decoded_signal(infrared->worker, message);
+    }
+
+    DOLPHIN_DEED(DolphinDeedIrSend);
+    infrared_worker_tx_start(infrared->worker);
+}
+
+void infrared_tx_stop(Infrared* infrared) {
+    infrared_worker_tx_stop(infrared->worker);
 }
 
 void infrared_text_store_set(Infrared* infrared, uint32_t bank, const char* text, ...) {
@@ -174,6 +199,12 @@ void infrared_text_store_clear(Infrared* infrared, uint32_t bank) {
 void infrared_play_notification_message(Infrared* infrared, uint32_t message) {
     furi_assert(message < sizeof(infrared_notification_sequences) / sizeof(NotificationSequence*));
     notification_message(infrared->notifications, infrared_notification_sequences[message]);
+}
+
+void infrared_signal_sent_callback(void* context) {
+    furi_assert(context);
+    Infrared* infrared = context;
+    infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkSend);
 }
 
 int32_t infrared_app(void* p) {

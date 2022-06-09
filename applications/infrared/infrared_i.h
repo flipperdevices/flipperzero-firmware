@@ -23,6 +23,7 @@
 
 #include "infrared.h"
 #include "infrared_remote.h"
+#include "infrared_custom_event.h"
 
 #include "scenes/infrared_scene.h"
 #include "views/infrared_progress_view.h"
@@ -71,14 +72,18 @@ typedef enum {
 } InfraredView;
 
 typedef enum {
-    iButtonNotificationMessageSuccess,
-    iButtonNotificationMessageGreenOn,
-    iButtonNotificationMessageGreenOff,
-    iButtonNotificationMessageBlinkRead,
-    iButtonNotificationMessageBlinkSend,
+    InfraredNotificationMessageSuccess,
+    InfraredNotificationMessageGreenOn,
+    InfraredNotificationMessageGreenOff,
+    InfraredNotificationMessageBlinkRead,
+    InfraredNotificationMessageBlinkSend,
 } InfraredNotificationMessage;
 
 bool infrared_remote_select_file(Infrared* infrared);
+void infrared_tx_start(Infrared* infrared, size_t button_index);
+void infrared_tx_stop(Infrared* infrared);
 void infrared_text_store_set(Infrared* infrared, uint32_t bank, const char* text, ...);
 void infrared_text_store_clear(Infrared* infrared, uint32_t bank);
 void infrared_play_notification_message(Infrared* infrared, uint32_t message);
+
+void infrared_signal_sent_callback(void* context);

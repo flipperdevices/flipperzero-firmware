@@ -22,6 +22,7 @@ static void infrared_remote_clear_buttons(InfraredRemote* remote) {
         infrared_button_array_next(it)) {
         infrared_remote_button_free(*infrared_button_array_cref(it));
     }
+    infrared_button_array_reset(remote->buttons);
 }
 
 InfraredRemote* infrared_remote_alloc() {
@@ -42,8 +43,17 @@ void infrared_remote_set_name(InfraredRemote* remote, const char* name) {
     string_set_str(remote->name, name);
 }
 
-void infrared_remote_reset(InfraredRemote* remote) {
-    UNUSED(remote);
+const char* infrared_remote_get_name(InfraredRemote* remote) {
+    return string_get_cstr(remote->name);
+}
+
+size_t infrared_remote_get_button_count(InfraredRemote* remote) {
+    return infrared_button_array_size(remote->buttons);
+}
+
+InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t index) {
+    furi_assert(index < infrared_button_array_size(remote->buttons));
+    return *infrared_button_array_get(remote->buttons, index);
 }
 
 bool infrared_remote_store(InfraredRemote* remote, const char* path) {
