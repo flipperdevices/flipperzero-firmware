@@ -94,7 +94,7 @@ assetsenv.Append(
         "IconBuilder": Builder(
             action=Action(
                 "${PYTHON3} ${ASSETS_COMPILER} icons ${SOURCE.posix} ${TARGET.dir.posix}",
-                 "\tICONS\t${TARGET}",
+                "\tICONS\t${TARGET}",
             ),
             emitter=icons_emitter,
         ),
@@ -164,7 +164,6 @@ proto_ver = assetsenv.Command(
 Depends(proto_ver, proto)
 Alias("proto_ver", proto_ver)
 
-
 assets_parts = (icons, proto, dolphin_blocking, dolphin_internal, proto_ver)
 
 assetsenv.Install("#/assets/compiled", assets_parts)
@@ -178,5 +177,19 @@ assetslib = assetsenv.Library("assets", assets_parts)
 # )
 assetsenv.Install("${LIB_DIST_DIR}", assetslib)
 
+
+resources_src = assetsenv.GlobRecursive("*", "resources", exclude="Manifest")
+resources = assetsenv.Command(
+    "#/assets/resources/Manifest",
+    "",
+    action=Action(
+        '${PYTHON3} ${ASSETS_COMPILER} manifest "${TARGET.dir.posix}"',
+        "\tRES\t${TARGET}",
+    ),
+)
+Depends(resources, resources_src)
+Precious(resources)
+NoClean(resources)
+Alias("resources", resources)
 
 Return("assetslib")

@@ -247,7 +247,7 @@ def LoadApplicationManifests(env):
 def PrepareApplicationsBuild(env):
     apps = fwenv["APPS"]
     apps_buildlist = fwenv["APPBUILD"] = fwenv["APPMGR"].filter_apps(apps)
-    print("Building firmware with modules:")
+    print("Firmware modules configuration:")
     for apptype in FlipperAppType:
         app_sublist = apps_buildlist.get_apps_of_type(apptype)
         if app_sublist:

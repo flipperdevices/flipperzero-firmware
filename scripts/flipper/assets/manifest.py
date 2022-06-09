@@ -1,6 +1,8 @@
 import datetime
 import logging
 import os
+import posixpath
+from pathlib import Path
 
 from flipper.utils import *
 from flipper.utils.fstree import *
@@ -137,20 +139,22 @@ class Manifest:
             dirs.sort()
             files.sort()
             relative_root = root.replace(directory_path, "", 1)
+            if relative_root:
+                relative_root = Path(relative_root).as_posix()
             if relative_root.startswith("/"):
                 relative_root = relative_root[1:]
             # process directories
-            for dir in dirs:
-                relative_dir_path = os.path.join(relative_root, dir)
+            for dirname in dirs:
+                relative_dir_path = posixpath.join(relative_root, dirname)
                 self.logger.debug(f'Adding directory: "{relative_dir_path}"')
                 self.addDirectory(relative_dir_path)
             # Process files
             for file in files:
-                relative_file_path = os.path.join(relative_root, file)
+                relative_file_path = posixpath.join(relative_root, file)
                 if file in ignore_files:
                     self.logger.info(f'Skipping file "{relative_file_path}"')
                     continue
-                full_file_path = os.path.join(root, file)
+                full_file_path = posixpath.join(root, file)
                 self.logger.debug(f'Adding file: "{relative_file_path}"')
                 self.addFile(
                     relative_file_path,
