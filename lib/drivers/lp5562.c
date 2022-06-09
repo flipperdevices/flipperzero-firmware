@@ -221,9 +221,6 @@ void lp5562_execute_blink(
     uint16_t on_time,
     uint16_t period,
     uint8_t brightness) {
-    UNUSED(on_time);
-    UNUSED(period);
-
     // Temporary switch to constant value from register
     lp5562_set_channel_src(handle, ch, LP5562Direct);
 
