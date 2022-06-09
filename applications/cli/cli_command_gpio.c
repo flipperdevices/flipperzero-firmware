@@ -114,6 +114,16 @@ void cli_command_gpio_mode(Cli* cli, string_t args, void* context) {
         return;
     }
 
+    if(cli_command_gpio_pins[num].debug) {
+        printf(
+            "Changeing this pin mode may damage hardware. Are you sure you want to continue? (y/n)?\r\n");
+        char c = cli_getc(cli);
+        if(c != 'y' && c != 'Y') {
+            printf("Cancelled.\r\n");
+            return;
+        }
+    }
+
     if(value == 1) { // output
         furi_hal_gpio_write(cli_command_gpio_pins[num].pin, false);
         furi_hal_gpio_init_simple(cli_command_gpio_pins[num].pin, GpioModeOutputPushPull);
