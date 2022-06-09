@@ -14,8 +14,8 @@ assetsenv.Append(
 
 def icons_emitter(target, source, env):
     target = [
-        "#assets/compiled/assets_icons.c",
-        "#assets/compiled/assets_icons.h",
+        "assets_icons.c",
+        "assets_icons.h",
     ]
     return target, source
 
@@ -29,20 +29,19 @@ def proto_emitter(target, source, env):
     for src in source:
         basename = os.path.splitext(src.name)[0]
         # print("!! ", os.path.join("#", out_path, basename + ".pb.h"))
-        target.append(File(os.path.join("#", out_path, basename + ".pb.c")))
-        target.append(File(os.path.join("#", out_path, basename + ".pb.h")))
+        target.append(File(basename + ".pb.c"))
+        target.append(File(basename + ".pb.h"))
     # print(list(t.path for t in target))
     return target, source
 
 
 def dolphin_emitter(target, source, env):
     # target.append(target[0])
-    out_path = target[0].path
     # print("dolphin_emitter", out_path)
     asset_basename = f"assets_dolphin_{env['DOLPHIN_RES_TYPE']}"
     target = [
-        File(os.path.join("#", out_path, asset_basename + ".c")),
-        File(os.path.join("#", out_path, asset_basename + ".h")),
+        File(asset_basename + ".c"),
+        File(asset_basename + ".h"),
     ]
     return target, source
 
@@ -94,22 +93,23 @@ assetsenv.Append(
     BUILDERS={
         "IconBuilder": Builder(
             action=Action(
-                "${PYTHON3} ${ASSETS_COMPILER} icons ${SOURCE} ${TARGET.dir}",
-                "\tICONS\t${TARGET}",
+                "${PYTHON3} ${ASSETS_COMPILER} icons ${SOURCE.posix} ${TARGET.dir.posix}",
+                 "\tICONS\t${TARGET}",
             ),
             emitter=icons_emitter,
         ),
         "ProtoBuilder": Builder(
             action=Action(
-                "${PYTHON3} ${NANOPB_COMPILER} -q -I${SOURCE.dir} -D${TARGET.dir} ${SOURCES}",
-                # "\tPROTO\t${SOURCE}",
+                "${PYTHON3} ${NANOPB_COMPILER} -q -I${SOURCE.dir.posix} -D${TARGET.dir.posix} ${SOURCES.posix}",
+                "\tPROTO\t${SOURCE}",
             ),
             emitter=proto_emitter,
+            suffix=".pb.c",
             src_suffix=".proto",
         ),
         "DolphinBuilder": Builder(
             action=Action(
-                '${PYTHON3} ${ASSETS_COMPILER} dolphin -s dolphin_${DOLPHIN_RES_TYPE} "${SOURCE}" "${TARGET.dir}"',
+                '${PYTHON3} ${ASSETS_COMPILER} dolphin -s dolphin_${DOLPHIN_RES_TYPE} "${SOURCE}" "${TARGET.dir.posix}"',
                 "\tDOLPHIN\t${SOURCE}",
             ),
             emitter=dolphin_emitter,
@@ -121,14 +121,14 @@ assetsenv.Append(
 icons_src = assetsenv.GlobRecursive("*.png", "icons")
 icons_src += assetsenv.GlobRecursive("frame_rate", "icons")
 
-icons = assetsenv.IconBuilder(Dir("#/assets/compiled"), Dir("#/assets/icons"))
+icons = assetsenv.IconBuilder(Dir("compiled"), Dir("#/assets/icons"))
 Depends(icons, icons_src)
 Alias("icons", icons)
 
 
 proto_src = Glob("protobuf/*.proto", source=True)
 proto_options = Glob("protobuf/*.options", source=True)
-proto = assetsenv.ProtoBuilder(Dir("#/assets/compiled"), proto_src)
+proto = assetsenv.ProtoBuilder(Dir("compiled"), proto_src)
 Depends(proto, proto_options)
 # Precious(proto)
 Alias("proto", proto)
@@ -136,7 +136,7 @@ Alias("proto", proto)
 
 dolphin_internal_src = assetsenv.GlobRecursive("*", "dolphin/internal")
 dolphin_internal = assetsenv.DolphinBuilder(
-    Dir("#/assets/compiled"),
+    Dir("compiled"),
     Dir("#/assets/dolphin/internal"),
     DOLPHIN_RES_TYPE="internal",
 )
@@ -146,7 +146,7 @@ Alias("dolphin_internal", dolphin_internal)
 
 dolphin_blocking_src = assetsenv.GlobRecursive("*", "dolphin/blocking")
 dolphin_blocking = assetsenv.DolphinBuilder(
-    Dir("#/assets/compiled"),
+    Dir("compiled"),
     Dir("#/assets/dolphin/blocking"),
     DOLPHIN_RES_TYPE="blocking",
 )
@@ -154,7 +154,7 @@ Depends(dolphin_blocking, dolphin_blocking_src)
 Alias("dolphin_blocking", dolphin_blocking)
 
 proto_ver = assetsenv.Command(
-    "#/assets/compiled/protobuf_version.h",
+    "protobuf_version.h",
     "#/assets/protobuf/Changelog",
     action=Action(
         proto_ver_generator,
@@ -165,8 +165,18 @@ Depends(proto_ver, proto)
 Alias("proto_ver", proto_ver)
 
 
-sources = Glob("#/assets/compiled/*.c", source=True)
-assetslib = assetsenv.Library("assets", sources)
-Depends(assetslib, [icons, proto, dolphin_blocking, dolphin_internal, proto_ver])
+assets_parts = (icons, proto, dolphin_blocking, dolphin_internal, proto_ver)
+
+assetsenv.Install("#/assets/compiled", assets_parts)
+
+assetslib = assetsenv.Library("assets", assets_parts)
+
+# sources = Glob("compiled/*.c", source=True)
+# assetslib = assetsenv.Library("assets", sources)
+# assetsenv.Depends(
+#     assetslib, (icons, proto, dolphin_blocking, dolphin_internal, proto_ver)
+# )
 assetsenv.Install("${LIB_DIST_DIR}", assetslib)
+
+
 Return("assetslib")
