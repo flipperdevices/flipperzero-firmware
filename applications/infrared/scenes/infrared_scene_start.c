@@ -1,7 +1,7 @@
 #include "../infrared_i.h"
 
 enum SubmenuIndex {
-    SubmenuIndexUniversalLibrary,
+    SubmenuIndexUniversalRemotes,
     SubmenuIndexLearnNewRemote,
     SubmenuIndexSavedRemotes,
 };
@@ -17,8 +17,8 @@ void infrared_scene_start_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "Universal Library",
-        SubmenuIndexUniversalLibrary,
+        "Universal Remotes",
+        SubmenuIndexUniversalRemotes,
         infrared_scene_start_submenu_callback,
         infrared);
     submenu_add_item(
@@ -34,7 +34,7 @@ void infrared_scene_start_on_enter(void* context) {
         infrared_scene_start_submenu_callback,
         infrared);
 
-    submenu_set_selected_item(submenu, SubmenuIndexUniversalLibrary);
+    submenu_set_selected_item(submenu, SubmenuIndexUniversalRemotes);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewSubmenu);
 }
 
@@ -45,7 +45,7 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexUniversalLibrary) {
+        if(event.event == SubmenuIndexUniversalRemotes) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversal);
             consumed = true;
         } else if(event.event == SubmenuIndexLearnNewRemote) {

@@ -127,7 +127,12 @@ bool infrared_remote_load(InfraredRemote* remote, const char* path) {
     }
 
     if(success) {
-        path_extract_filename(remote->path, buf, true);
+        //TODO: Find a better way to pass a string_t
+        string_t path_str;
+        string_init_set_str(path_str, path);
+        path_extract_filename(path_str, buf, true);
+        string_clear(path_str);
+
         infrared_remote_clear_buttons(remote);
         infrared_remote_set_name(remote, string_get_cstr(buf));
         infrared_remote_set_path(remote, path);
