@@ -2,6 +2,7 @@ Import("env", "lib_flags")
 
 import os
 import subprocess
+import SCons
 
 assetsenv = env.Clone()
 assetsenv.MergeFlags(lib_flags)
@@ -21,40 +22,42 @@ def icons_emitter(target, source, env):
 
 
 def proto_emitter(target, source, env):
-    # target = list()
-    # print(target[0].path, source)
     out_path = target[0].path
-    # print("out_path", out_path)
     target = list()
     for src in source:
         basename = os.path.splitext(src.name)[0]
-        # print("!! ", os.path.join("#", out_path, basename + ".pb.h"))
         target.append(File(basename + ".pb.c"))
         target.append(File(basename + ".pb.h"))
-    # print(list(t.path for t in target))
     return target, source
 
 
 def dolphin_emitter(target, source, env):
-    fixed_root_dir = source[0].Dir(env["DOLPHIN_RES_TYPE"])
-    source = [fixed_root_dir]
+    res_root_dir = source[0].Dir(env["DOLPHIN_RES_TYPE"])
+    source = [res_root_dir]
     source.extend(
-        env.GlobRecursive("*.*", fixed_root_dir),
+        env.GlobRecursive("*.*", res_root_dir),
     )
 
+    target_base_dir = target[0]
+    env.Replace(_DOLPHIN_OUT_DIR=target[0])
+
     if env["DOLPHIN_RES_TYPE"] == "external":
-        pass
+        target = []
+        target.extend(
+            map(
+                lambda node: target_base_dir.File(
+                    res_root_dir.rel_path(node).replace(".png", ".bm")
+                ),
+                filter(lambda node: isinstance(node, SCons.Node.FS.File), source),
+            )
+        )
     else:
         asset_basename = f"assets_dolphin_{env['DOLPHIN_RES_TYPE']}"
         target = [
-            File(asset_basename + ".c"),
-            File(asset_basename + ".h"),
+            target_base_dir.File(asset_basename + ".c"),
+            target_base_dir.File(asset_basename + ".h"),
         ]
-    # print(
-    #     "dolphin_emitter OUT",
-    #     list(n.relpath for n in target),
-    #     list(n.relpath for n in source),
-    # )
+
     return target, source
 
 
@@ -121,14 +124,14 @@ assetsenv.Append(
         ),
         "DolphinSymBuilder": Builder(
             action=Action(
-                '${PYTHON3} ${ASSETS_COMPILER} dolphin -s dolphin_${DOLPHIN_RES_TYPE} "${SOURCE}" "${TARGET.dir.posix}"',
+                '${PYTHON3} ${ASSETS_COMPILER} dolphin -s dolphin_${DOLPHIN_RES_TYPE} "${SOURCE}" "${_DOLPHIN_OUT_DIR}"',
                 "\tDOLPHIN\t${DOLPHIN_RES_TYPE}",
             ),
             emitter=dolphin_emitter,
         ),
         "DolphinExtBuilder": Builder(
             action=Action(
-                '${PYTHON3} ${ASSETS_COMPILER} dolphin "${SOURCE}" "${TARGET.dir.posix}"',
+                '${PYTHON3} ${ASSETS_COMPILER} dolphin "${SOURCE}" "${_DOLPHIN_OUT_DIR}"',
                 "\tDOLPHIN\t${DOLPHIN_RES_TYPE}",
             ),
             emitter=dolphin_emitter,
@@ -180,31 +183,37 @@ Depends(proto_ver, proto)
 Alias("proto_ver", proto_ver)
 
 assets_parts = (icons, proto, dolphin_blocking, dolphin_internal, proto_ver)
-
 assetsenv.Install("#/assets/compiled", assets_parts)
 
 assetslib = assetsenv.Library("assets", assets_parts)
-
-# sources = Glob("compiled/*.c", source=True)
-# assetslib = assetsenv.Library("assets", sources)
-# assetsenv.Depends(
-#     assetslib, (icons, proto, dolphin_blocking, dolphin_internal, proto_ver)
-# )
 assetsenv.Install("${LIB_DIST_DIR}", assetslib)
 
+# Resources for SD card
 
-resources_src = assetsenv.GlobRecursive("*", "resources", exclude="Manifest")
+dolphin_external = assetsenv.DolphinExtBuilder(
+    Dir("#/assets/resources/dolphin"),
+    Dir("#/assets/dolphin"),
+    DOLPHIN_RES_TYPE="external",
+)
+NoClean(dolphin_external)
+if assetsenv["FORCE"]:
+    AlwaysBuild(dolphin_external)
+Alias("dolphin_ext", dolphin_external)
+
+
 resources = assetsenv.Command(
     "#/assets/resources/Manifest",
-    "",
+    assetsenv.GlobRecursive("*", "resources", exclude="Manifest"),
     action=Action(
         '${PYTHON3} ${ASSETS_COMPILER} manifest "${TARGET.dir.posix}"',
         "\tRES\t${TARGET}",
     ),
 )
-Depends(resources, resources_src)
+# Depends(resources, dolphin_external)
 Precious(resources)
 NoClean(resources)
+if assetsenv["FORCE"]:
+    AlwaysBuild(resources)
 Alias("resources", resources)
 
 Return("assetslib")

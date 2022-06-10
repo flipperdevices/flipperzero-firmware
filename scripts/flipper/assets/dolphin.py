@@ -227,12 +227,19 @@ class DolphinBubbleAnimation:
                 (frame, os.path.join(animation_directory, f"frame_{index}.bm"))
             )
 
-        pool = multiprocessing.Pool()
-        pool.map(_convert_image_to_bm, to_pack)
+        if ImageTools.is_processing_slow():
+            pool = multiprocessing.Pool()
+            pool.map(_convert_image_to_bm, to_pack)
+        else:
+            for image in to_pack:
+                _convert_image_to_bm(image)
 
     def process(self):
-        pool = multiprocessing.Pool()
-        self.frames = pool.map(_convert_image, self.frames)
+        if ImageTools.is_processing_slow():
+            pool = multiprocessing.Pool()
+            self.frames = pool.map(_convert_image, self.frames)
+        else:
+            self.frames = list(_convert_image(frame) for frame in self.frames)
 
 
 class DolphinManifest:

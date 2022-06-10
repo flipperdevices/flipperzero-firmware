@@ -33,6 +33,16 @@ class ImageTools:
     __pil_unavailable = False
     __hs2_unavailable = False
 
+    @staticmethod
+    def is_processing_slow():
+        try:
+            from PIL import Image, ImageOps
+            import heatshrink2
+
+            return False
+        except ImportError as e:
+            return True
+
     def __init__(self):
         self.logger = logging.getLogger()
 
