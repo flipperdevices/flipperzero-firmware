@@ -271,22 +271,6 @@ void infrared_text_store_clear(Infrared* infrared, uint32_t bank) {
     memset(infrared->text_store[bank], 0, INFRARED_TEXT_STORE_SIZE);
 }
 
-void infrared_switch_to_previous_scene_one_of(
-    Infrared* infrared,
-    const uint32_t* scene_ids,
-    size_t scene_ids_size) {
-    furi_assert(scene_ids_size);
-    SceneManager* scene_manager = infrared->scene_manager;
-
-    for(size_t i = 0; i < scene_ids_size; ++i) {
-        const uint32_t scene_id = scene_ids[i];
-        if(scene_manager_has_previous_scene(scene_manager, scene_id)) {
-            scene_manager_search_and_switch_to_previous_scene(scene_manager, scene_id);
-            return;
-        }
-    }
-}
-
 void infrared_play_notification_message(Infrared* infrared, uint32_t message) {
     furi_assert(message < sizeof(infrared_notification_sequences) / sizeof(NotificationSequence*));
     notification_message(infrared->notifications, infrared_notification_sequences[message]);

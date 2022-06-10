@@ -110,10 +110,6 @@ void infrared_tx_start_received(Infrared* infrared);
 void infrared_tx_stop(Infrared* infrared);
 void infrared_text_store_set(Infrared* infrared, uint32_t bank, const char* text, ...);
 void infrared_text_store_clear(Infrared* infrared, uint32_t bank);
-void infrared_switch_to_previous_scene_one_of(
-    Infrared* infrared,
-    const uint32_t* scene_ids,
-    size_t scene_ids_size);
 void infrared_play_notification_message(Infrared* infrared, uint32_t message);
 
 void infrared_signal_sent_callback(void* context);
