@@ -4,7 +4,6 @@ env.Append(
     CPPPATH=[
         "#/lib/microtar/src",
     ],
-    CPPDEFINES=[],
 )
 
 

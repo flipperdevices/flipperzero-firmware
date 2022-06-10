@@ -4,7 +4,6 @@ env.Append(
     CPPPATH=[
         "#/lib/flipper_format",
     ],
-    CPPDEFINES=[],
 )
 
 
@@ -19,7 +18,7 @@ if libenv["RAM_EXEC"]:
     )
 
 
-sources = libenv.GlobRecursive("*.c", ".")
+sources = libenv.GlobRecursive("*.c")
 
 lib = libenv.StaticLibrary("flipperformat", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)

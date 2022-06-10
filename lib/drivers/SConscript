@@ -4,14 +4,13 @@ env.Append(
     CPPPATH=[
         "#/lib/drivers",
     ],
-    CPPDEFINES=[],
 )
 
 
 libenv = env.Clone()
 libenv.MergeFlags(lib_flags)
 
-sources = Glob("*.c", source=True)  # libenv.GlobRecursive("*.c", ".")
+sources = Glob("*.c", source=True)
 
 lib = libenv.StaticLibrary("hwdrivers", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)

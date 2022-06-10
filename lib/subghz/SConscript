@@ -4,13 +4,12 @@ env.Append(
     CPPPATH=[
         "#/lib/subghz",
     ],
-    CPPDEFINES=[],
 )
 
 libenv = env.Clone()
 libenv.MergeFlags(lib_flags)
 
-sources = libenv.GlobRecursive("*.c*", ".")
+sources = libenv.GlobRecursive("*.c*")
 
 lib = libenv.StaticLibrary("subghz", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)

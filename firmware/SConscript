@@ -10,7 +10,7 @@ libenv.Append(
 )
 
 sources = ["targets/f${TARGET_HW}/startup_stm32wb55xx_cm4.s"]
-sources += libenv.GlobRecursive("*.c", ".")
+sources += libenv.GlobRecursive("*.c")
 
 lib = libenv.Library("flipper${TARGET_HW}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)

@@ -3,13 +3,7 @@ Import("env", "lib_flags")
 libenv = env.Clone()
 libenv.MergeFlags(lib_flags)
 
-libenv.Append(
-    CPPPATH=[
-        # "#/core",
-    ],
-)
-
-sources = libenv.GlobRecursive("*.c", ".")
+sources = libenv.GlobRecursive("*.c")
 
 lib = libenv.Library("core", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)

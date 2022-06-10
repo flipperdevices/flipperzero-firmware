@@ -6,7 +6,6 @@ env.Append(
         "#/lib/callback-connector",
         "#/assets/compiled",
     ],
-    CPPDEFINES=[],
 )
 
 

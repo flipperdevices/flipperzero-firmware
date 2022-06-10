@@ -4,21 +4,17 @@ import os
 import subprocess
 import datetime
 
-env.Append(
-    LIB_DIST_DIR="${BUILD_DIR}/lib",
-)
+
+# Building initial C environment for libs
 
 env.Append(
+    LIB_DIST_DIR="${BUILD_DIR}/lib",
     LIBPATH=[
         "${LIB_DIST_DIR}",
     ],
     CPPDEFINES=[
         ("TARGET", "${TARGET_HW}"),
     ],
-)
-
-
-env.Append(
     CPPPATH=[
         "#/core",
         "#/applications",
@@ -27,9 +23,10 @@ env.Append(
         "#/firmware/targets/f${TARGET_HW}/furi_hal",
         "#/firmware/targets/f${TARGET_HW}/Inc",
         "#/firmware/targets/furi_hal_include",
-    ]
+    ],
 )
 
+# Invoke child SCopscripts to populate global `env` + build their own part of the code
 depends = env.BuildModules(
     [
         "lib",
@@ -39,13 +36,17 @@ depends = env.BuildModules(
     ],
 )
 
+
+# Now, env is fully set up with everything to build apps src
 fwenv = env.Clone()
 Export("fwenv")
 
+# Set up additional app-specific build flags
 SConscript("sconscfg/firmwareopts.scons")
+# Prepare manifest-related env methods
 SConscript("sconscfg/appmanifests.scons")
 
-
+# Set up app configuration
 if fwenv["FIRMWARE_BUILD_CFG"] == "updater":
     fwenv.Append(
         APPS=[
@@ -77,9 +78,12 @@ else:
 fwenv.LoadApplicationManifests()
 fwenv.PrepareApplicationsBuild()
 
+# Add preprocessor definitions for current set of apps
 fwenv.Append(
     CPPDEFINES=fwenv["APPBUILD"].get_apps_cdefs(),
 )
+
+# Build applications.c for selected services & apps
 
 Import("build_apps_c", "FlipperAppType")
 
@@ -91,59 +95,12 @@ apps_c = fwenv.Command(
 )
 
 sources = [apps_c]
+# Gather sources only from selected app folders
 for app_folder in fwenv["APPBUILD"].get_builtin_app_folders():
     sources += fwenv.GlobRecursive("*.c*", os.path.join("applications", app_folder))
 
-
-# Building external applications
-
+# Clone current environment to build external apps with its current state
 appenv = fwenv.Clone()
-appenv.VariantDir("extapps", "applications", duplicate=False)
-appenv.Replace(
-    LINKER_SCRIPT="application-ext",
-    STRIPFLAGS=[
-        "--strip-debug",
-        "--strip-unneeded",
-        "-d",
-        "-g",
-        "-S",
-    ],
-)
-appenv.Append(
-    CCFLAGS=[
-        "-Os",
-        "-ggdb3",
-        "-mword-relocations",
-        "-mlong-calls",
-        "-fno-common",
-        "-nostdlib",
-        "-fvisibility=hidden",
-    ],
-    LINKFLAGS=[
-        "-r",
-        "-s",
-        # "-Bsymbolic",
-        "-nostartfiles",
-        "-mlong-calls",
-        "-fno-common",
-        "-nostdlib",
-        "-Wl,--gc-sections",
-        "-Wl,--no-export-dynamic",
-        "-fvisibility=hidden",
-        "-Wl,-e${APP_ENTRY}",
-    ],
-)
-
-extapps = []
-for app in fwenv["APPBUILD"].get_apps_of_type(FlipperAppType.PLUGIN):
-    app_elf = appenv.Program(
-        os.path.join("extapps", app.appid),
-        appenv.GlobRecursive("*.c*", os.path.join("extapps", app._appdir)),
-        APP_ENTRY=app.entry_point,
-    )
-    extapps.append(appenv.ELFStripper(app.appid, app_elf))
-Alias("extapps", extapps)
-
 
 # Git Version management
 version_depends = []
@@ -179,7 +136,6 @@ build_version = fwenv.Command(
 if not version_depends:
     fwenv.Precious(build_version)
     fwenv.AlwaysBuild(build_version)
-
 
 # Full firmware definition
 
@@ -241,7 +197,7 @@ dfu = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
 Default(dfu)
 Alias("dfu", dfu)
 
-
+# Additional FW-related pseudotargets
 flash = fwenv.Flasher("${FIRMWARE_BUILD_CFG}")
 if fwenv["FORCE"]:
     AlwaysBuild(flash)
@@ -251,4 +207,52 @@ Alias("flash", flash)
 # Compile DB generation
 cdb = fwenv.CompilationDatabase("compile_database.json")
 Alias("cdb", cdb)
-# Depends(firmware_elf, cdb)
+
+
+# Building external applications
+
+appenv.VariantDir("extapps", "applications", duplicate=False)
+appenv.Replace(
+    LINKER_SCRIPT="application-ext",
+    STRIPFLAGS=[
+        "--strip-debug",
+        "--strip-unneeded",
+        "-d",
+        "-g",
+        "-S",
+    ],
+)
+appenv.Append(
+    CCFLAGS=[
+        "-Os",
+        "-ggdb3",
+        "-mword-relocations",
+        "-mlong-calls",
+        "-fno-common",
+        "-nostdlib",
+        "-fvisibility=hidden",
+    ],
+    LINKFLAGS=[
+        "-r",
+        "-s",
+        # "-Bsymbolic",
+        "-nostartfiles",
+        "-mlong-calls",
+        "-fno-common",
+        "-nostdlib",
+        "-Wl,--gc-sections",
+        "-Wl,--no-export-dynamic",
+        "-fvisibility=hidden",
+        "-Wl,-e${APP_ENTRY}",
+    ],
+)
+
+extapps = []
+for app in fwenv["APPBUILD"].get_apps_of_type(FlipperAppType.PLUGIN):
+    app_elf = appenv.Program(
+        os.path.join("extapps", app.appid),
+        appenv.GlobRecursive("*.c*", os.path.join("extapps", app._appdir)),
+        APP_ENTRY=app.entry_point,
+    )
+    extapps.append(appenv.ELFStripper(app.appid, app_elf))
+Alias("extapps", extapps)

@@ -12,6 +12,8 @@ assetsenv.Append(
     NANOPB_COMPILER="lib/nanopb/generator/nanopb_generator.py",
 )
 
+# Setting up emitters for scripts
+
 
 def icons_emitter(target, source, env):
     target = [
@@ -23,7 +25,7 @@ def icons_emitter(target, source, env):
 
 def proto_emitter(target, source, env):
     out_path = target[0].path
-    target = list()
+    target = []
     for src in source:
         basename = os.path.splitext(src.name)[0]
         target.append(File(basename + ".pb.c"))
@@ -139,6 +141,7 @@ assetsenv.Append(
     }
 )
 
+# Gathering icons sources
 
 icons_src = assetsenv.GlobRecursive("*.png", "icons")
 icons_src += assetsenv.GlobRecursive("frame_rate", "icons")
@@ -148,6 +151,8 @@ Depends(icons, icons_src)
 Alias("icons", icons)
 
 
+# Protobuf .proto -> .c + .h
+
 proto_src = Glob("protobuf/*.proto", source=True)
 proto_options = Glob("protobuf/*.options", source=True)
 proto = assetsenv.ProtoBuilder(Dir("compiled"), proto_src)
@@ -155,6 +160,8 @@ Depends(proto, proto_options)
 # Precious(proto)
 Alias("proto", proto)
 
+
+# Internal animations
 
 dolphin_internal = assetsenv.DolphinSymBuilder(
     Dir("compiled"),
@@ -164,12 +171,17 @@ dolphin_internal = assetsenv.DolphinSymBuilder(
 Alias("dolphin_internal", dolphin_internal)
 
 
+# Blocking animations
+
 dolphin_blocking = assetsenv.DolphinSymBuilder(
     Dir("compiled"),
     Dir("#/assets/dolphin"),
     DOLPHIN_RES_TYPE="blocking",
 )
 Alias("dolphin_blocking", dolphin_blocking)
+
+
+# Protobuf version meta
 
 proto_ver = assetsenv.Command(
     "protobuf_version.h",
@@ -182,13 +194,17 @@ proto_ver = assetsenv.Command(
 Depends(proto_ver, proto)
 Alias("proto_ver", proto_ver)
 
+# Gather everything into a static lib
 assets_parts = (icons, proto, dolphin_blocking, dolphin_internal, proto_ver)
 assetsenv.Install("#/assets/compiled", assets_parts)
 
 assetslib = assetsenv.Library("assets", assets_parts)
 assetsenv.Install("${LIB_DIST_DIR}", assetslib)
 
+
 # Resources for SD card
+
+# External dolphin animations
 
 dolphin_external = assetsenv.DolphinExtBuilder(
     Dir("#/assets/resources/dolphin"),
@@ -200,6 +216,7 @@ if assetsenv["FORCE"]:
     AlwaysBuild(dolphin_external)
 Alias("dolphin_ext", dolphin_external)
 
+# Resources manifest
 
 resources = assetsenv.Command(
     "#/assets/resources/Manifest",
@@ -209,7 +226,6 @@ resources = assetsenv.Command(
         "\tRES\t${TARGET}",
     ),
 )
-# Depends(resources, dolphin_external)
 Precious(resources)
 NoClean(resources)
 if assetsenv["FORCE"]:

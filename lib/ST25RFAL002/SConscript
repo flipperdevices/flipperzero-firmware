@@ -6,14 +6,13 @@ env.Append(
         "#/lib/ST25RFAL002/include",
         "#/lib/ST25RFAL002/source/st25r3916",
     ],
-    CPPDEFINES=[],
 )
 
 
 libenv = env.Clone()
 libenv.MergeFlags(lib_flags)
 
-sources = libenv.GlobRecursive("*.c", ".")
+sources = libenv.GlobRecursive("*.c")
 
 lib = libenv.StaticLibrary("st25rfal002", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
