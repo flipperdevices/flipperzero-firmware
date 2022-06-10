@@ -145,9 +145,9 @@ void CommandLine::runCommand(String input) {
   if (cmd_args.get(0) == STOPSCAN_CMD) {
     if (wifi_scan_obj.currentScanMode == OTA_UPDATE) {
       wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
-      #ifdef HAS_SCREEN
-        menu_function_obj.changeMenu(updateMenu.parentMenu);
-      #endif
+      //#ifdef HAS_SCREEN
+      //  menu_function_obj.changeMenu(menu_function_obj.updateMenu.parentMenu);
+      //#endif
       WiFi.softAPdisconnect(true);
       web_obj.shutdownServer();
       return;
@@ -369,9 +369,9 @@ void CommandLine::runCommand(String input) {
       if (w_sw != -1) {
         Serial.println("Starting Marauder OTA Update. Stop with " + (String)STOPSCAN_CMD);
         wifi_scan_obj.currentScanMode = OTA_UPDATE;
-        #ifdef HAS_SCREEN
-          menu_function_obj.changeMenu(menu_function_obj.updateMenu);
-        #endif
+        //#ifdef HAS_SCREEN
+        //  menu_function_obj.changeMenu(menu_function_obj.updateMenu);
+        //#endif
         web_obj.setupOTAupdate();
       }
       // Update via SD
