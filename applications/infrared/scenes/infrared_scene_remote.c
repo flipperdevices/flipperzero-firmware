@@ -83,7 +83,10 @@ bool infrared_scene_remote_on_event(void* context, SceneManagerEvent event) {
     SceneManager* scene_manager = infrared->scene_manager;
     bool consumed = false;
 
-    if(event.type == SceneManagerEventTypeCustom) {
+    if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_search_and_switch_to_previous_scene(scene_manager, InfraredSceneRemoteList);
+        consumed = true;
+    } else if(event.type == SceneManagerEventTypeCustom) {
         InfraredSceneRemoteEvent custom_event;
         custom_event.packed_value = event.event;
 

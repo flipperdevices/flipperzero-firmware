@@ -288,6 +288,12 @@ void infrared_text_input_callback(void* context) {
     view_dispatcher_send_custom_event(infrared->view_dispatcher, InfraredCustomEventTextEditDone);
 }
 
+void infrared_popup_timeout_callback(void* context) {
+    furi_assert(context);
+    Infrared* infrared = context;
+    view_dispatcher_send_custom_event(infrared->view_dispatcher, InfraredCustomEventPopupTimeout);
+}
+
 int32_t infrared_app(void* p) {
     Infrared* infrared = infrared_alloc();
 
