@@ -335,7 +335,7 @@ const FlipperApplication FLIPPER_GAMES[] = {
     {.app = snake_game_app,
      .name = "Snake",
      .stack_size = 1024,
-     .icon = &A_Snake_14,
+     .icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
 #endif
 
@@ -343,7 +343,7 @@ const FlipperApplication FLIPPER_GAMES[] = {
     {.app = tetris_game_app,
      .name = "Tetris",
      .stack_size = 1024,
-     .icon = &A_Tetris_14,
+     .icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
 #endif
 
@@ -432,7 +432,7 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
     {.app = music_player_app,
      .name = "Music Player",
      .stack_size = 2048,
-     .icon = &A_MusicPlayer_14,
+     .icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
 #endif
 
@@ -440,7 +440,7 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
     {.app = spectrum_analyzer_app, 
     .name = "Spectrum Analyzer", 
     .stack_size = 1024, 
-    .icon = &A_SpectrumAnalyzer_14,
+    .icon = &A_Plugins_14,
     .flags = FlipperApplicationFlagDefault},
 #endif
 
@@ -448,14 +448,14 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
     {.app = jukebox_app,
      .name = "TouchTunes Remote",
      .stack_size = 2048,
-     .icon = &A_TouchTunes_14,
+     .icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
 #endif
 
     {.app = wav_player_app,
      .name = "Wav Player",
      .stack_size = 4096,
-     .icon = &A_MusicPlayer_14,
+     .icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
 
 };
