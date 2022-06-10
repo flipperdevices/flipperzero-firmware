@@ -160,6 +160,8 @@ typedef struct {
 
 bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
+uint16_t mf_ultralight_calc_auth_count(MfUltralightData* data);
+
 bool mf_ultralight_read_version(
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,

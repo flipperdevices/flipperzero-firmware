@@ -413,6 +413,21 @@ static MfUltralightConfigPages* mf_ultralight_get_config_pages(MfUltralightData*
     }
 }
 
+uint16_t mf_ultralight_calc_auth_count(MfUltralightData* data) {
+    if(mf_ul_get_features(data->type) & MfUltralightSupportAuth) {
+        MfUltralightConfigPages* config = mf_ultralight_get_config_pages(data);
+        uint16_t scaled_authlim = config->access.authlim;
+        // NTAG I2C Plus uses 2^AUTHLIM attempts rather than the direct number
+        if(scaled_authlim > 0 && data->type >= MfUltralightTypeNTAGI2CPlus1K &&
+           data->type <= MfUltralightTypeNTAGI2CPlus2K) {
+            scaled_authlim = 1 << scaled_authlim;
+        }
+        return scaled_authlim;
+    }
+
+    return 0;
+}
+
 // NTAG21x will NAK if NFC_CNT_EN unset, so preempt
 static bool mf_ultralight_should_read_counters(MfUltralightData* data) {
     if(data->type < MfUltralightTypeNTAG213 || data->type > MfUltralightTypeNTAG216) return true;
@@ -624,6 +639,7 @@ bool mf_ul_read_card(
         if(reader->supported_features & MfUltralightSupportTearingFlags) {
             mf_ultralight_read_tearing_flags(tx_rx, data);
         }
+        data->curr_authlim = mf_ultralight_calc_auth_count(data);
     }
 
     return card_read;
@@ -1021,12 +1037,7 @@ bool mf_ul_prepare_emulation_response(
         if(emulator->supported_features & MfUltralightSupportAuth) {
             if(buff_rx_len == (1 + 4) * 8) {
                 MfUltralightConfigPages* config = mf_ultralight_get_config_pages(&emulator->data);
-                uint16_t scaled_authlim = config->access.authlim;
-                // NTAG I2C Plus uses 2^AUTHLIM attempts rather than the direct number
-                if(scaled_authlim > 0 && emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K &&
-                   emulator->data.type <= MfUltralightTypeNTAGI2CPlus2K) {
-                    scaled_authlim = 1 << scaled_authlim;
-                }
+                uint16_t scaled_authlim = mf_ultralight_calc_auth_count(&emulator->data);
                 if(scaled_authlim != 0 && emulator->data.curr_authlim == 0) {
                     // AUTHLIM reached, always fail
                     buff_tx[0] = MF_UL_NAK_AUTHLIM_REACHED;
