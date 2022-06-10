@@ -108,11 +108,6 @@ static bool nfc_device_save_mifare_ul_data(FlipperFormat* file, NfcDevice* dev) 
             }
         }
         if(!counters_saved) break;
-        // Write authentication counter
-        uint32_t auth_counter = data->curr_authlim;
-        if(!flipper_format_write_uint32(
-               file, "Remaining authentication attempts", &auth_counter, 1))
-            break;
         // Write pages data
         uint32_t pages_total = data->data_size / 4;
         if(!flipper_format_write_uint32(file, "Pages total", &pages_total, 1)) break;
@@ -125,6 +120,13 @@ static bool nfc_device_save_mifare_ul_data(FlipperFormat* file, NfcDevice* dev) 
             }
         }
         if(!pages_saved) break;
+
+        // Write authentication counter
+        uint32_t auth_counter = data->curr_authlim;
+        if(!flipper_format_write_uint32(
+               file, "Remaining authentication attempts", &auth_counter, 1))
+            break;
+
         saved = true;
     } while(false);
 
@@ -161,11 +163,6 @@ bool nfc_device_load_mifare_ul_data(FlipperFormat* file, NfcDevice* dev) {
             }
         }
         if(!counters_parsed) break;
-        // Read authentication counter
-        // TODO: figure out migration from older format without this field
-        uint32_t auth_counter;
-        if(!flipper_format_read_uint32(file, "Remaining authentication attempts", &auth_counter, 1))
-            auth_counter = UINT32_MAX;
         // Read pages
         uint32_t pages = 0;
         if(!flipper_format_read_uint32(file, "Pages total", &pages, 1)) break;
@@ -180,7 +177,11 @@ bool nfc_device_load_mifare_ul_data(FlipperFormat* file, NfcDevice* dev) {
         }
         if(!pages_parsed) break;
 
-        // Fixup authentication counter
+        // Read authentication counter
+        uint32_t auth_counter;
+        if(!flipper_format_read_uint32(file, "Remaining authentication attempts", &auth_counter, 1))
+            auth_counter = UINT32_MAX;
+
         if(auth_counter > 256) // Max value is 256 as of NTAG I2C Plus
             data->curr_authlim = mf_ultralight_calc_auth_count(data);
         else
