@@ -32,8 +32,13 @@
 #define INFRARED_TEXT_STORE_NUM 2
 #define INFRARED_TEXT_STORE_SIZE 128
 
+#define INFRARED_MAX_BUTTON_NAME_LENGTH 22
+#define INFRARED_MAX_REMOTE_NAME_LENGTH 22
+
 #define INFRARED_APP_FOLDER "/any/infrared"
 #define INFRARED_APP_EXTENSION ".ir"
+
+#define INFRARED_DEFAULT_REMOTE_NAME "Remote"
 
 typedef enum {
     InfraredEditTargetRemote,
@@ -97,7 +102,8 @@ typedef enum {
     InfraredNotificationMessageBlinkSend,
 } InfraredNotificationMessage;
 
-bool infrared_remote_select_file(Infrared* infrared);
+bool infrared_select_remote_file(Infrared* infrared);
+bool infrared_add_remote_with_button(Infrared* infrared, const char* name, InfraredSignal* signal);
 void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal);
 void infrared_tx_start_button_index(Infrared* infrared, size_t button_index);
 void infrared_tx_start_received(Infrared* infrared);
@@ -107,3 +113,4 @@ void infrared_text_store_clear(Infrared* infrared, uint32_t bank);
 void infrared_play_notification_message(Infrared* infrared, uint32_t message);
 
 void infrared_signal_sent_callback(void* context);
+void infrared_text_input_callback(void* context);

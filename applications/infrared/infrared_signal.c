@@ -169,6 +169,17 @@ bool infrared_signal_is_valid(InfraredSignal* signal) {
                             infrared_signal_is_message_valid(&signal->payload.message);
 }
 
+void infrared_signal_set_signal(InfraredSignal* signal, const InfraredSignal* other) {
+    if(signal->is_raw) {
+        const InfraredRawSignal* raw = &other->payload.raw;
+        infrared_signal_set_raw_signal(
+            signal, raw->timings, raw->timings_size, raw->frequency, raw->duty_cycle);
+    } else {
+        const InfraredMessage* message = &other->payload.message;
+        infrared_signal_set_message(signal, message);
+    }
+}
+
 void infrared_signal_set_raw_signal(
     InfraredSignal* signal,
     const uint32_t* timings,

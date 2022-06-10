@@ -7,4 +7,5 @@ enum InfraredCustomEvent {
     InfraredCustomEventTransmitStarted,
     InfraredCustomEventTransmitStopped,
     InfraredCustomEventSignalReceived,
+    InfraredCustomEventTextEditDone,
 };

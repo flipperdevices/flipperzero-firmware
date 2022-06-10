@@ -3,7 +3,7 @@
 void infrared_scene_remote_list_on_enter(void* context) {
     Infrared* infrared = context;
 
-    if(!infrared_remote_select_file(infrared)) {
+    if(!infrared_select_remote_file(infrared)) {
         scene_manager_previous_scene(infrared->scene_manager);
     } else {
         scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);

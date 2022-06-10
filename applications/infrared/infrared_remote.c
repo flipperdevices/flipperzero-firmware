@@ -14,6 +14,7 @@ ARRAY_DEF(infrared_button_array, InfraredRemoteButton*, M_PTR_OPLIST);
 struct InfraredRemote {
     infrared_button_array_t buttons;
     string_t name;
+    string_t path;
 };
 
 static void infrared_remote_clear_buttons(InfraredRemote* remote) {
@@ -29,14 +30,22 @@ InfraredRemote* infrared_remote_alloc() {
     InfraredRemote* remote = malloc(sizeof(InfraredRemote));
     infrared_button_array_init(remote->buttons);
     string_init(remote->name);
+    string_init(remote->path);
     return remote;
 }
 
 void infrared_remote_free(InfraredRemote* remote) {
     infrared_remote_clear_buttons(remote);
     infrared_button_array_clear(remote->buttons);
+    string_clear(remote->path);
     string_clear(remote->name);
     free(remote);
+}
+
+void infrared_remote_reset(InfraredRemote* remote) {
+    infrared_remote_clear_buttons(remote);
+    string_reset(remote->name);
+    string_reset(remote->path);
 }
 
 void infrared_remote_set_name(InfraredRemote* remote, const char* name) {
@@ -45,6 +54,14 @@ void infrared_remote_set_name(InfraredRemote* remote, const char* name) {
 
 const char* infrared_remote_get_name(InfraredRemote* remote) {
     return string_get_cstr(remote->name);
+}
+
+void infrared_remote_set_path(InfraredRemote* remote, const char* path) {
+    string_set_str(remote->path, path);
+}
+
+const char* infrared_remote_get_path(InfraredRemote* remote) {
+    return string_get_cstr(remote->path);
 }
 
 size_t infrared_remote_get_button_count(InfraredRemote* remote) {
@@ -56,9 +73,19 @@ InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t 
     return *infrared_button_array_get(remote->buttons, index);
 }
 
-bool infrared_remote_store(InfraredRemote* remote, const char* path) {
+bool infrared_remote_add_button(InfraredRemote* remote, const char* name, InfraredSignal* signal) {
+    InfraredRemoteButton* button = infrared_remote_button_alloc();
+    infrared_remote_button_set_name(button, name);
+    infrared_remote_button_set_signal(button, signal);
+    infrared_button_array_push_back(remote->buttons, button);
+    return infrared_remote_store(remote);
+}
+
+bool infrared_remote_store(InfraredRemote* remote) {
     Storage* storage = furi_record_open("storage");
     FlipperFormat* ff = flipper_format_file_alloc(storage);
+    const char* path = string_get_cstr(remote->path);
+
     FURI_LOG_I(TAG, "store file: \'%s\'", path);
 
     bool success = flipper_format_file_open_always(ff, path) &&
@@ -100,14 +127,10 @@ bool infrared_remote_load(InfraredRemote* remote, const char* path) {
     }
 
     if(success) {
-        //TODO: Find a better way to pass string_t
-        string_t path_str;
-        string_init_set_str(path_str, path);
-        path_extract_filename(path_str, buf, true);
-        string_clear(path_str);
-
+        path_extract_filename(remote->path, buf, true);
         infrared_remote_clear_buttons(remote);
         infrared_remote_set_name(remote, string_get_cstr(buf));
+        infrared_remote_set_path(remote, path);
 
         for(bool can_read = true; can_read;) {
             InfraredRemoteButton* button = infrared_remote_button_alloc();

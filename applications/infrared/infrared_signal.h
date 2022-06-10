@@ -22,6 +22,8 @@ void infrared_signal_free(InfraredSignal* signal);
 bool infrared_signal_is_raw(InfraredSignal* signal);
 bool infrared_signal_is_valid(InfraredSignal* signal);
 
+void infrared_signal_set_signal(InfraredSignal* signal, const InfraredSignal* other);
+
 void infrared_signal_set_raw_signal(
     InfraredSignal* signal,
     const uint32_t* timings,

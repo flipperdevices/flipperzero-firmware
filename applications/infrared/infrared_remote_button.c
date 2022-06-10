@@ -30,8 +30,7 @@ const char* infrared_remote_button_get_name(InfraredRemoteButton* button) {
 }
 
 void infrared_remote_button_set_signal(InfraredRemoteButton* button, InfraredSignal* signal) {
-    free(button->signal);
-    button->signal = signal;
+    infrared_signal_set_signal(button->signal, signal);
 }
 
 InfraredSignal* infrared_remote_button_get_signal(InfraredRemoteButton* button) {
