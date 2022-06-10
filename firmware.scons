@@ -1,6 +1,8 @@
 Import("env")
 
 import os
+import subprocess
+import datetime
 
 env.Append(
     LIB_DIST_DIR="${BUILD_DIR}/lib",
@@ -81,13 +83,12 @@ fwenv.Append(
 
 Import("build_apps_c", "FlipperAppType")
 
+# Depends on virtual value-only node, so it only gets rebuilt when set of apps changes
 apps_c = fwenv.Command(
     "applications/applications.c",
-    [],
+    Value(fwenv["APPS"]),
     action=build_apps_c,
 )
-fwenv.AlwaysBuild(apps_c)
-
 
 sources = [apps_c]
 for app_folder in fwenv["APPBUILD"].get_builtin_app_folders():
@@ -145,17 +146,39 @@ Alias("extapps", extapps)
 
 
 # Git Version management
+version_depends = []
+try:
+    version = (
+        subprocess.check_output(
+            [
+                "git",
+                "describe",
+                "--always",
+                "--dirty",
+                "--all",
+                "--long",
+            ]
+        )
+        .strip()
+        .decode()
+    )
+    version_depends = Value((version, datetime.date.today()))
+except Exception as e:
+    print("Failed to check for git changes", e)
 
+# Only invoke version generator if preliminary check (version_depends) triggers
 build_version = fwenv.Command(
     "#lib/toolbox/version.inc.h",
-    [],
+    version_depends,
     Action(
         "${PYTHON3} scripts/version.py generate -o ${TARGET} --dir ${ROOT_DIR}",
         "${VERSIONCOMSTR}",
     ),
 )
-fwenv.Precious(build_version)
-fwenv.AlwaysBuild(build_version)
+
+if not version_depends:
+    fwenv.Precious(build_version)
+    fwenv.AlwaysBuild(build_version)
 
 
 # Full firmware definition
