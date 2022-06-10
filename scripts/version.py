@@ -82,7 +82,7 @@ class Main(App):
             if self.args.debug:
                 print("old: ", current_version_info)
                 print("new: ", new_version_info_fmt)
-            with open(self.args.output, "w") as file:
+            with open(self.args.output, "w", newline="\n") as file:
                 file.write(new_version_info_fmt)
             # os.utime("../lib/toolbox/version.c", None)
             print("Version information updated")

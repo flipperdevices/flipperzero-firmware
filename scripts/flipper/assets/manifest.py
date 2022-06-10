@@ -124,7 +124,7 @@ class Manifest:
                 self.records.append(record)
 
     def save(self, filename):
-        with open(filename, "w+") as manifest:
+        with open(filename, "w+", newline="\n") as manifest:
             for record in self.records:
                 manifest.write(record.toLine())
 

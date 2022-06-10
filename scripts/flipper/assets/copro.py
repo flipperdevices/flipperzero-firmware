@@ -106,5 +106,5 @@ class Copro:
             address=f"0x{stack_addr:X}",
         )
         # Save manifest to
-        with open(manifest_file, "w") as file:
+        with open(manifest_file, "w", newline="\n") as file:
             json.dump(manifest, file)

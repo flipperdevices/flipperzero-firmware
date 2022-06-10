@@ -100,7 +100,11 @@ class Main(App):
 
     def icons(self):
         self.logger.debug(f"Converting icons")
-        icons_c = open(os.path.join(self.args.output_directory, "assets_icons.c"), "w")
+        icons_c = open(
+            os.path.join(self.args.output_directory, "assets_icons.c"),
+            "w",
+            newline="\n",
+        )
         icons_c.write(ICONS_TEMPLATE_C_HEADER)
         icons = []
         # Traverse icons tree, append image data to source file
@@ -186,7 +190,11 @@ class Main(App):
 
         # Create Public Header
         self.logger.debug(f"Creating header")
-        icons_h = open(os.path.join(self.args.output_directory, "assets_icons.h"), "w")
+        icons_h = open(
+            os.path.join(self.args.output_directory, "assets_icons.h"),
+            "w",
+            newline="\n",
+        )
         icons_h.write(ICONS_TEMPLATE_H_HEADER)
         for name, width, height, frame_rate, frame_count in icons:
             icons_h.write(ICONS_TEMPLATE_H_ICON_NAME.format(name=name))

@@ -302,7 +302,7 @@ class DolphinManifest:
     def _renderTemplate(self, template_filename: str, output_filename: str, **kwargs):
         template = Templite(filename=template_filename)
         output = template.render(**kwargs)
-        with open(output_filename, "w") as file:
+        with open(output_filename, "w", newline="\n") as file:
             file.write(output)
 
     def save2code(self, output_directory: str, symbol_name: str):
