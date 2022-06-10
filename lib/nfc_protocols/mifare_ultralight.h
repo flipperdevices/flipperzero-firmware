@@ -22,6 +22,10 @@
 #define MF_UL_READ_VCSL (0x4B)
 #define MF_UL_SECTOR_SELECT (0xC2)
 
+#define MF_UL_ACK (0xa)
+#define MF_UL_NAK_INVALID_ARGUMENT (0x0)
+#define MF_UL_NAK_AUTHLIM_REACHED (0x4)
+
 typedef enum {
     MfUltralightTypeUnknown,
     MfUltralightTypeUL11,
@@ -54,6 +58,13 @@ typedef enum {
     MfUltralightSupportSingleCounter = 1 << 10,
 } MfUltralightFeatures;
 
+typedef enum {
+    MfUltralightMirrorNone,
+    MfUltralightMirrorUid,
+    MfUltralightMirrorCounter,
+    MfUltralightMirrorUidCounter,
+} MfUltralightMirrorConf;
+
 typedef struct {
     uint8_t header;
     uint8_t vendor_id;
@@ -81,17 +92,53 @@ typedef struct {
     uint8_t signature[32];
     uint32_t counter[3];
     uint8_t tearing[3];
+    uint16_t curr_authlim;
     uint16_t data_size;
     uint8_t data[MF_UL_MAX_DUMP_SIZE];
 } MfUltralightData;
 
-typedef struct {
-    uint8_t pwd[4];
+typedef struct __attribute__((packed)) {
+    union {
+        uint8_t raw[4];
+        uint32_t value;
+    } pwd;
     union {
         uint8_t raw[2];
         uint16_t value;
     } pack;
 } MfUltralightAuth;
+
+// Common configuration pages for MFUL EV1, NTAG21x, and NTAG I2C Plus
+typedef struct __attribute__((packed)) {
+    union {
+        uint8_t value;
+        struct {
+            uint8_t rfui1 : 2;
+            bool strg_mod_en : 1;
+            bool rfui2 : 1;
+            uint8_t mirror_byte : 2;
+            MfUltralightMirrorConf mirror_conf : 2;
+        };
+    } mirror;
+    uint8_t rfui1;
+    uint8_t mirror_page;
+    uint8_t auth0;
+    union {
+        uint8_t value;
+        struct {
+            uint8_t authlim : 3;
+            bool nfc_cnt_pwd_prot : 1;
+            bool nfc_cnt_en : 1;
+            bool nfc_dis_sec1 : 1; // NTAG I2C Plus only
+            bool cfglck : 1;
+            bool prot : 1;
+        };
+    } access;
+    uint8_t vctid;
+    uint8_t rfui2[2];
+    MfUltralightAuth auth_data;
+    uint8_t rfui3[2];
+} MfUltralightConfigPages;
 
 typedef struct {
     uint16_t pages_to_read;
@@ -105,7 +152,6 @@ typedef struct {
     bool data_changed;
     bool comp_write_cmd_started;
     uint8_t comp_write_page_addr;
-    MfUltralightAuth* auth_data;
     bool auth_success;
     uint8_t curr_sector;
     bool sector_select_cmd_started;

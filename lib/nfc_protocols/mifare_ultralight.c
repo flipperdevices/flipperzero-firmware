@@ -401,12 +401,24 @@ static int16_t mf_ultralight_ntag_i2c_addr_tag_to_lin(
     }
 }
 
+static MfUltralightConfigPages* mf_ultralight_get_config_pages(MfUltralightData* data) {
+    if(data->type >= MfUltralightTypeUL11 && data->type <= MfUltralightTypeNTAG216) {
+        return (MfUltralightConfigPages*)&data->data[data->data_size - 4 * 4];
+    } else if(
+        data->type >= MfUltralightTypeNTAGI2CPlus1K &&
+        data->type <= MfUltralightTypeNTAGI2CPlus2K) {
+        return (MfUltralightConfigPages*)&data->data[0xe3 * 4];
+    } else {
+        return NULL;
+    }
+}
+
 // NTAG21x will NAK if NFC_CNT_EN unset, so preempt
 static bool mf_ultralight_should_read_counters(MfUltralightData* data) {
     if(data->type < MfUltralightTypeNTAG213 || data->type > MfUltralightTypeNTAG216) return true;
 
-    uint16_t access_index = data->data_size - 12;
-    return (data->data[access_index] & 0x10) != 0;
+    MfUltralightConfigPages* config = mf_ultralight_get_config_pages(data);
+    return config->access.nfc_cnt_en;
 }
 
 static bool mf_ultralight_sector_select(FuriHalNfcTxRxContext* tx_rx, uint8_t sector) {
@@ -651,9 +663,9 @@ static void mf_ul_protect_auth_data_on_read_command_i2c(
 
         // Handle AUTH0 for sector 0
         if(!emulator->auth_success) {
-            uint8_t access = emulator->data.data[228 * 4];
-            if(access & 0x80) {
-                uint8_t auth0 = emulator->data.data[227 * 4 + 3];
+            MfUltralightConfigPages* config = mf_ultralight_get_config_pages(&emulator->data);
+            if(config->access.prot) {
+                uint8_t auth0 = config->auth0;
                 if(auth0 < end_page) {
                     // start_page is always < auth0; otherwise is NAK'd already
                     uint8_t page_offset = auth0 - start_page;
@@ -748,18 +760,10 @@ void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* d
     FURI_LOG_D(TAG, "Prepare emulation");
     emulator->data = *data;
     emulator->supported_features = mf_ul_get_features(data->type);
-    emulator->auth_data = NULL;
     emulator->data_changed = false;
     emulator->comp_write_cmd_started = false;
     emulator->sector_select_cmd_started = false;
     emulator->ntag_i2c_plus_sector3_lockout = false;
-
-    if(data->type >= MfUltralightTypeNTAG213 && data->type < MfUltralightTypeNTAGI2C1K) {
-        uint16_t pwd_page = (data->data_size / 4) - 2;
-        emulator->auth_data = (MfUltralightAuth*)&data->data[pwd_page * 4];
-    } else if(data->type >= MfUltralightTypeNTAGI2CPlus1K) {
-        emulator->auth_data = (MfUltralightAuth*)&data->data[229 * 4];
-    }
 }
 
 bool mf_ul_prepare_emulation_response(
@@ -995,19 +999,48 @@ bool mf_ul_prepare_emulation_response(
         }
     } else if(cmd == MF_UL_AUTH) {
         if(emulator->supported_features & MfUltralightSupportAuth) {
-            if(memcmp(&buff_rx[1], emulator->auth_data->pwd, 4) == 0) {
-                buff_tx[0] = emulator->auth_data->pack.raw[0];
-                buff_tx[1] = emulator->auth_data->pack.raw[1];
-                tx_bytes = 2;
-                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                emulator->auth_success = true;
+            MfUltralightConfigPages* config = mf_ultralight_get_config_pages(&emulator->data);
+            uint16_t scaled_authlim = config->access.authlim;
+            // NTAG I2C Plus uses 2^AUTHLIM attempts rather than the direct number
+            if(scaled_authlim > 0 && emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K &&
+               emulator->data.type <= MfUltralightTypeNTAGI2CPlus2K) {
+                scaled_authlim = 1 << scaled_authlim;
+            }
+            if(scaled_authlim != 0 && emulator->data.curr_authlim == 0) {
+                // AUTHLIM reached, always fail
+                buff_tx[0] = MF_UL_NAK_AUTHLIM_REACHED;
+                tx_bits = 4;
+                *data_type = FURI_HAL_NFC_TX_RAW_RX_DEFAULT;
                 command_parsed = true;
-            } else if(!emulator->auth_data->pack.value) {
-                buff_tx[0] = 0x80;
-                buff_tx[1] = 0x80;
-                tx_bytes = 2;
-                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                command_parsed = true;
+            } else {
+                if(memcmp(&buff_rx[1], config->auth_data.pwd.raw, 4) == 0) {
+                    // Correct password
+                    buff_tx[0] = config->auth_data.pack.raw[0];
+                    buff_tx[1] = config->auth_data.pack.raw[1];
+                    tx_bytes = 2;
+                    *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                    emulator->auth_success = true;
+                    command_parsed = true;
+                    if(scaled_authlim != 0 && emulator->data.curr_authlim != scaled_authlim) {
+                        // Reset current AUTHLIM
+                        emulator->data.curr_authlim = scaled_authlim;
+                        emulator->data_changed = true;
+                    }
+                } else if(!config->auth_data.pwd.value) {
+                    // Unknown password, pretend to be an Amiibo
+                    buff_tx[0] = 0x80;
+                    buff_tx[1] = 0x80;
+                    tx_bytes = 2;
+                    *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                    emulator->auth_success = true;
+                    command_parsed = true;
+                } else {
+                    // Wrong password, decrease AUTHLIM if set
+                    if(scaled_authlim != 0) {
+                        --emulator->data.curr_authlim;
+                        emulator->data_changed = true;
+                    }
+                }
             }
         }
     } else if(cmd == MF_UL_READ_SIG) {
@@ -1050,11 +1083,11 @@ bool mf_ul_prepare_emulation_response(
 
     if(!command_parsed) {
         // Send NACK
-        buff_tx[0] = 0x00;
+        buff_tx[0] = MF_UL_NAK_INVALID_ARGUMENT;
         tx_bits = 4;
         *data_type = FURI_HAL_NFC_TX_RAW_RX_DEFAULT;
     } else if(send_ack) {
-        buff_tx[0] = 0x0A;
+        buff_tx[0] = MF_UL_ACK;
         tx_bits = 4;
         *data_type = FURI_HAL_NFC_TX_RAW_RX_DEFAULT;
     }
