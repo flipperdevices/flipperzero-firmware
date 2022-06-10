@@ -35,7 +35,6 @@ bool infrared_scene_edit_button_select_on_event(void* context, SceneManagerEvent
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        furi_assert(event.event >= 0);
         uint32_t edit_mode = infrared->app_state.edit_mode;
 
         if(edit_mode == InfraredEditModeRename) {
