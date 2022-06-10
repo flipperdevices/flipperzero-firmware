@@ -24,3 +24,16 @@ target_include_directories(tests PUBLIC ${CHECK_INCLUDE_DIRS})
 target_compile_options(tests PUBLIC ${CHECK_CFLAGS_OTHER})
 
 add_test(NAME tests COMMAND $<TARGET_FILE:tests>)
+
+
+find_program(SCAN_FOUND scan-build)
+
+if (SCAN_FOUND)
+    add_test(
+        NAME clang_static_analysis
+        COMMAND scan-build make
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+else()
+    MESSAGE(STATUS "scan-build not found, not scanning code")
+endif()
