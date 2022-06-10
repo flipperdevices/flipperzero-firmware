@@ -14,9 +14,11 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_POSIX_C_SOURCE=199309L -D_BSD_SOURCE -D_D
 
 set(minmea_SRCS minmea.c minmea.h)
 add_library(minmea ${minmea_SRCS})
+
 add_executable(example example.c)
-add_executable(tests tests.c)
 target_link_libraries(example minmea)
+
+add_executable(tests tests.c)
 target_link_libraries(tests minmea ${CHECK_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 target_include_directories(tests PUBLIC ${CHECK_INCLUDE_DIRS})
 target_compile_options(tests PUBLIC ${CHECK_CFLAGS_OTHER})
