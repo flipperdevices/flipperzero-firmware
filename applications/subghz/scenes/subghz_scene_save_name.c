@@ -39,12 +39,12 @@ void subghz_scene_save_name_on_enter(void* context) {
         path_extract_filename(subghz->file_path, file_name, true);
         if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
            SubGhzCustomEventManagerNoSet) {
-            subghz_get_next_name_file(subghz, SUBGHZ_MAX_LEN_NAME);
-            path_extract_filename(subghz->file_path, file_name, true);
             if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
                SubGhzCustomEventManagerSetRAW) {
                 dev_name_empty = true;
-            }
+                subghz_get_next_name_file(subghz, SUBGHZ_MAX_LEN_NAME);
+            } 
+            path_extract_filename(subghz->file_path, file_name, true);
         }
         string_set(subghz->file_path, dir_name);
     }
