@@ -49,7 +49,7 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversal);
             consumed = true;
         } else if(event.event == SubmenuIndexLearnNewRemote) {
-            // Learn new remote = true
+            infrared->app_state.is_learning_new_remote = true;
             scene_manager_next_scene(scene_manager, InfraredSceneLearn);
             consumed = true;
         } else if(event.event == SubmenuIndexSavedRemotes) {

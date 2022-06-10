@@ -59,27 +59,27 @@ bool infrared_scene_edit_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexAddButton) {
-            // Learn new remote = false
+            infrared->app_state.is_learning_new_remote = false;
             scene_manager_next_scene(scene_manager, InfraredSceneLearn);
             consumed = true;
         } else if(event.event == SubmenuIndexRenameButton) {
-            // Action = rename
-            // Element = button
+            infrared->app_state.edit_target = InfraredEditTargetButton;
+            infrared->app_state.edit_mode = InfraredEditModeRename;
             scene_manager_next_scene(scene_manager, InfraredSceneEditButtonSelect);
             consumed = true;
         } else if(event.event == SubmenuIndexDeleteButton) {
-            // Action = delete
-            // Element = button
+            infrared->app_state.edit_target = InfraredEditTargetButton;
+            infrared->app_state.edit_mode = InfraredEditModeDelete;
             scene_manager_next_scene(scene_manager, InfraredSceneEditButtonSelect);
             consumed = true;
         } else if(event.event == SubmenuIndexRenameRemote) {
-            // Action = rename
-            // Element = remote
+            infrared->app_state.edit_target = InfraredEditTargetRemote;
+            infrared->app_state.edit_mode = InfraredEditModeRename;
             scene_manager_next_scene(scene_manager, InfraredSceneEditRename);
             consumed = true;
         } else if(event.event == SubmenuIndexDeleteRemote) {
-            // Action = delete
-            // Element = remote
+            infrared->app_state.edit_target = InfraredEditTargetRemote;
+            infrared->app_state.edit_mode = InfraredEditModeDelete;
             scene_manager_next_scene(scene_manager, InfraredSceneEditDelete);
             consumed = true;
         }

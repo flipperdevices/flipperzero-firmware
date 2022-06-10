@@ -37,6 +37,7 @@ static Infrared* infrared_alloc() {
     Infrared* infrared = malloc(sizeof(Infrared));
 
     string_init(infrared->file_path);
+    memset(&infrared->app_state, 0, sizeof(InfraredAppState));
 
     infrared->scene_manager = scene_manager_alloc(&infrared_scene_handlers, infrared);
     infrared->view_dispatcher = view_dispatcher_alloc();

@@ -35,6 +35,22 @@
 #define INFRARED_APP_FOLDER "/any/infrared"
 #define INFRARED_APP_EXTENSION ".ir"
 
+typedef enum {
+    InfraredEditTargetRemote,
+    InfraredEditTargetButton,
+} InfraredEditTarget;
+
+typedef enum {
+    InfraredEditModeRename,
+    InfraredEditModeDelete,
+} InfraredEditMode;
+
+typedef struct {
+    bool is_learning_new_remote;
+    InfraredEditTarget edit_target : 8;
+    InfraredEditMode edit_mode : 8;
+} InfraredAppState;
+
 struct Infrared {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
@@ -61,6 +77,7 @@ struct Infrared {
 
     string_t file_path;
     char text_store[INFRARED_TEXT_STORE_NUM][INFRARED_TEXT_STORE_SIZE + 1];
+    InfraredAppState app_state;
 };
 
 typedef enum {

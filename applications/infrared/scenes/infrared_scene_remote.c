@@ -100,6 +100,7 @@ bool infrared_scene_remote_on_event(void* context, SceneManagerEvent event) {
         } else if(custom_type == InfraredCustomEventMenuSelected) {
             furi_assert(menu_index < 0);
             if(menu_index == ButtonIndexPlus) {
+                infrared->app_state.is_learning_new_remote = false;
                 scene_manager_next_scene(scene_manager, InfraredSceneLearn);
                 consumed = true;
             } else if(menu_index == ButtonIndexEdit) {
