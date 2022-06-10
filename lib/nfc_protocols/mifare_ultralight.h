@@ -148,7 +148,9 @@ typedef struct {
 
 typedef struct {
     MfUltralightData data;
+    MfUltralightConfigPages* config;
     MfUltralightFeatures supported_features;
+    uint16_t page_num;
     bool data_changed;
     bool comp_write_cmd_started;
     uint8_t comp_write_page_addr;
