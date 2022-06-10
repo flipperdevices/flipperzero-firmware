@@ -1079,6 +1079,15 @@ bool mf_ul_prepare_emulation_response(
                 command_parsed = true;
             }
         }
+    } else if(cmd == MF_UL_READ_VCSL) {
+        if(emulator->supported_features & MfUltralightSupportVcsl) {
+            if (buff_rx_len == 20) {
+                buff_tx[0] = mf_ultralight_get_config_pages(&emulator->data)->vctid;
+                tx_bytes = 1;
+                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                command_parsed = true;
+            }
+        }
     }
 
     if(!command_parsed) {
