@@ -15,6 +15,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 
 Latest Updates:
 - Latest DEV changes
+- Removed unused icons to conserve space
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
