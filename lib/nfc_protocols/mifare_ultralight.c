@@ -1006,15 +1006,27 @@ bool mf_ul_prepare_emulation_response(
     } else if(cmd == MF_UL_READ_CNT) {
         if(emulator->supported_features & MfUltralightSupportReadCounter) {
             if(buff_rx_len == (1 + 1) * 8) {
-                uint8_t cnt_num = buff_rx[1];
-                if(cnt_num < 3) {
-                    buff_tx[0] = emulator->data.counter[cnt_num] & 0xff;
-                    buff_tx[1] = (emulator->data.counter[cnt_num] >> 8) & 0xff;
-                    buff_tx[2] = (emulator->data.counter[cnt_num] >> 16) & 0xff;
-                    tx_bytes = 3;
-                    *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                    command_parsed = true;
-                }
+                do {
+                    uint8_t cnt_num = buff_rx[1];
+
+                    // NTAG21x checks
+                    if(emulator->supported_features & MfUltralightSupportSingleCounter) {
+                        if(cnt_num != 2) break; // Only counter 2 is available
+                        MfUltralightConfigPages* config =
+                            mf_ultralight_get_config_pages(&emulator->data);
+                        if(!config->access.nfc_cnt_en) break; // NAK if counter not enabled
+                        if(config->access.nfc_cnt_pwd_prot && !emulator->auth_success) break;
+                    }
+
+                    if(cnt_num < 3) {
+                        buff_tx[0] = emulator->data.counter[cnt_num] & 0xFF;
+                        buff_tx[1] = (emulator->data.counter[cnt_num] >> 8) & 0xFF;
+                        buff_tx[2] = (emulator->data.counter[cnt_num] >> 16) & 0xFF;
+                        tx_bytes = 3;
+                        *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                        command_parsed = true;
+                    }
+                } while(false);
             }
         }
     } else if(cmd == MF_UL_INC_CNT) {
