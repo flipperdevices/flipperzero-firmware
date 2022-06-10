@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
 
+enable_testing()
+
 project(minmea)
 
 find_package(Threads REQUIRED) # Workaround for https://github.com/libcheck/check/issues/48#issuecomment-322965461
@@ -18,3 +20,5 @@ target_link_libraries(example minmea)
 target_link_libraries(tests minmea ${CHECK_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 target_include_directories(tests PUBLIC ${CHECK_INCLUDE_DIRS})
 target_compile_options(tests PUBLIC ${CHECK_CFLAGS_OTHER})
+
+add_test(NAME tests COMMAND $<TARGET_FILE:tests>)
