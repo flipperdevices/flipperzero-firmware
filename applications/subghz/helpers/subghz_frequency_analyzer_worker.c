@@ -5,19 +5,7 @@
 
 #define TAG "SubghzFrequencyAnalyzerWorker"
 
-#define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -95.0f
-
-static const uint8_t subghz_preset_ook_58khz[][2] = {
-    {CC1101_MDMCFG4, 0b11110111}, // Rx BW filter is 58.035714kHz
-    /* End  */
-    {0, 0},
-};
-
-static const uint8_t subghz_preset_ook_650khz[][2] = {
-    {CC1101_MDMCFG4, 0b00010111}, // Rx BW filter is 650.000kHz
-    /* End  */
-    {0, 0},
-};
+#define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -75.0f
 
 struct SubGhzFrequencyAnalyzerWorker {
     FuriThread* thread;
@@ -32,16 +20,6 @@ struct SubGhzFrequencyAnalyzerWorker {
     SubGhzFrequencyAnalyzerWorkerPairCallback pair_callback;
     void* context;
 };
-
-static void subghz_frequency_analyzer_worker_load_registers(const uint8_t data[][2]) {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    size_t i = 0;
-    while(data[i][0]) {
-        cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, data[i][0], data[i][1]);
-        i++;
-    }
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
-}
 
 // running average with adaptive coefficient
 static uint32_t subghz_frequency_analyzer_worker_expRunningAverageAdaptive(
@@ -74,6 +52,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
 
     //Start CC1101
     furi_hal_subghz_reset();
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_flush_rx(&furi_hal_spi_bus_handle_subghz);
@@ -107,9 +86,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
 
         frequency_rssi.rssi = -127.0f;
         furi_hal_subghz_idle();
-        subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_650khz);
 
-        // First stage: coarse scan
         for(size_t i = 0; i < subghz_setting_get_frequency_count(instance->setting); i++) {
             if(furi_hal_subghz_is_frequency_valid(
                    subghz_setting_get_frequency(instance->setting, i))) {
@@ -151,45 +128,6 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
             (double)frequency_rssi.rssi,
             frequency_rssi.frequency,
             (double)rssi_min);
-
-        // Second stage: fine scan
-        if(frequency_rssi.rssi > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
-            FURI_LOG_D(TAG, "~:%u:%f", frequency_rssi.frequency, (double)frequency_rssi.rssi);
-
-            frequency_rssi.rssi = -127.0;
-            furi_hal_subghz_idle();
-            subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_58khz);
-            //-0.3 ... 433.92 ... +0.3 step 10KHz
-            for(uint32_t i = frequency_rssi.frequency - 300000;
-                i < frequency_rssi.frequency + 300000;
-                i += 20000) {
-                if(furi_hal_subghz_is_frequency_valid(i)) {
-                    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-                    cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
-                    frequency = cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, i);
-
-                    cc1101_calibrate(&furi_hal_spi_bus_handle_subghz);
-                    do {
-                        status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
-                    } while(status.STATE != CC1101StateIDLE);
-
-                    cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
-                    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
-
-                    // delay will be in range between 1 and 2ms
-                    osDelay(3);
-
-                    rssi = furi_hal_subghz_get_rssi();
-
-                    FURI_LOG_T(TAG, "#:%u:%f", frequency, (double)rssi);
-
-                    if(frequency_rssi.rssi < rssi) {
-                        frequency_rssi.rssi = rssi;
-                        frequency_rssi.frequency = frequency;
-                    }
-                }
-            }
-        }
 
         // Deliver results
         if(frequency_rssi.rssi > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
