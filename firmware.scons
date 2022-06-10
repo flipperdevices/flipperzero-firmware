@@ -220,6 +220,8 @@ Alias("dfu", dfu)
 
 
 flash = fwenv.Flasher("${FIRMWARE_BUILD_CFG}")
+if fwenv["FORCE"]:
+    AlwaysBuild(flash)
 Alias("flash", flash)
 
 

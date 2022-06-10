@@ -10,6 +10,7 @@ import multiprocessing
 
 vars = Variables(None, ARGUMENTS)
 vars.Add(BoolVariable("VERBOSE", help="Print full commands", default=0))
+vars.Add(BoolVariable("FORCE", help="Force target action", default=0))
 vars.Add(BoolVariable("DEBUG", help="Enable debug build", default=1))
 vars.Add(BoolVariable("COMPACT", help="Optimize for size", default=0))
 vars.Add(
@@ -118,16 +119,17 @@ env["ARCOM"] = '${TEMPFILE("' + env["ARCOM"] + '","$ARCOMSTR")}'
 
 def GlobRecursive(env, pattern, node=".", exclude=None):
     results = []
-    for f in Glob(str(node) + "/*", source=True, exclude=exclude):
-        if type(f) is SCons.Node.FS.Dir:
-            # print(f"recursing into {f}")
+    if isinstance(node, str):
+        node = Dir(node)
+    for f in node.glob("*", source=True, exclude=exclude):
+        if isinstance(f, SCons.Node.FS.Dir):
             results += env.GlobRecursive(pattern, f, exclude)
-    current_node_str = str(node) + "/"
-    results += Glob(
-        current_node_str + pattern,
+    results += node.glob(
+        pattern,
         source=True,
-        exclude=exclude and current_node_str + exclude or exclude,
+        exclude=exclude,
     )
+    # print(f"Glob for {pattern} from {node}: {results}")
     return results
 
 

@@ -36,13 +36,25 @@ def proto_emitter(target, source, env):
 
 
 def dolphin_emitter(target, source, env):
-    # target.append(target[0])
-    # print("dolphin_emitter", out_path)
-    asset_basename = f"assets_dolphin_{env['DOLPHIN_RES_TYPE']}"
-    target = [
-        File(asset_basename + ".c"),
-        File(asset_basename + ".h"),
-    ]
+    fixed_root_dir = source[0].Dir(env["DOLPHIN_RES_TYPE"])
+    source = [fixed_root_dir]
+    source.extend(
+        env.GlobRecursive("*.*", fixed_root_dir),
+    )
+
+    if env["DOLPHIN_RES_TYPE"] == "external":
+        pass
+    else:
+        asset_basename = f"assets_dolphin_{env['DOLPHIN_RES_TYPE']}"
+        target = [
+            File(asset_basename + ".c"),
+            File(asset_basename + ".h"),
+        ]
+    # print(
+    #     "dolphin_emitter OUT",
+    #     list(n.relpath for n in target),
+    #     list(n.relpath for n in source),
+    # )
     return target, source
 
 
@@ -107,10 +119,17 @@ assetsenv.Append(
             suffix=".pb.c",
             src_suffix=".proto",
         ),
-        "DolphinBuilder": Builder(
+        "DolphinSymBuilder": Builder(
             action=Action(
                 '${PYTHON3} ${ASSETS_COMPILER} dolphin -s dolphin_${DOLPHIN_RES_TYPE} "${SOURCE}" "${TARGET.dir.posix}"',
-                "\tDOLPHIN\t${SOURCE}",
+                "\tDOLPHIN\t${DOLPHIN_RES_TYPE}",
+            ),
+            emitter=dolphin_emitter,
+        ),
+        "DolphinExtBuilder": Builder(
+            action=Action(
+                '${PYTHON3} ${ASSETS_COMPILER} dolphin "${SOURCE}" "${TARGET.dir.posix}"',
+                "\tDOLPHIN\t${DOLPHIN_RES_TYPE}",
             ),
             emitter=dolphin_emitter,
         ),
@@ -134,23 +153,19 @@ Depends(proto, proto_options)
 Alias("proto", proto)
 
 
-dolphin_internal_src = assetsenv.GlobRecursive("*", "dolphin/internal")
-dolphin_internal = assetsenv.DolphinBuilder(
+dolphin_internal = assetsenv.DolphinSymBuilder(
     Dir("compiled"),
-    Dir("#/assets/dolphin/internal"),
+    Dir("#/assets/dolphin"),
     DOLPHIN_RES_TYPE="internal",
 )
-Depends(dolphin_internal, dolphin_internal_src)
 Alias("dolphin_internal", dolphin_internal)
 
 
-dolphin_blocking_src = assetsenv.GlobRecursive("*", "dolphin/blocking")
-dolphin_blocking = assetsenv.DolphinBuilder(
+dolphin_blocking = assetsenv.DolphinSymBuilder(
     Dir("compiled"),
-    Dir("#/assets/dolphin/blocking"),
+    Dir("#/assets/dolphin"),
     DOLPHIN_RES_TYPE="blocking",
 )
-Depends(dolphin_blocking, dolphin_blocking_src)
 Alias("dolphin_blocking", dolphin_blocking)
 
 proto_ver = assetsenv.Command(
