@@ -18,6 +18,7 @@
 #define TAG "FuriHalSubGhz"
 
 //https://www.silabs.com/documents/public/application-notes/AN633.pdf
+//https://d1.amobbs.com/bbs_upload782111/files_52/ourdev_719804UMAFBO.pdf
 
 static volatile SubGhzState furi_hal_subghz_state = SubGhzStateInit;
 static volatile SubGhzRegulation furi_hal_subghz_regulation = SubGhzRegulationTxRx;
@@ -161,9 +162,9 @@ void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
         furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_2FSK);
         break;
     case FuriHalSubGhzPresetOok650AsyncFreq:
-        //furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_650khz_async_for_freq_regs);
-        furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_650khz_async_regs);
-        furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
+        furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_650khz_async_for_freq_regs);
+        //furi_hal_subghz_load_config(furi_hal_subghz_preset_ook_650khz_async_regs);
+        //furi_hal_subghz_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
         break;
     // case FuriHalSubGhzPresetMSK99_97KbAsync:
     //     furi_hal_subghz_load_config(furi_hal_subghz_preset_msk_99_97kb_async_regs);

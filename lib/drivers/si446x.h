@@ -34,7 +34,7 @@ bool si446x_switch_to_start_tx(
 bool si446x_switch_to_start_rx(
     FuriHalSpiBusHandle* handle,
     uint8_t channel,
-    SI446X_State_t state_on_tx_finish,
+    SI446X_State_t state_on_rx_finish,
     uint8_t len_package_rx);
 bool si446x_switch_to_idle(FuriHalSpiBusHandle* handle);
 bool si446x_write_gpio(FuriHalSpiBusHandle* handle, SI446X_GPIO_t pin, uint8_t gpio_mode);

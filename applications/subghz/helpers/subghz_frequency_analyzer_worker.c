@@ -4,15 +4,14 @@
 #include <lib/drivers/si446x_regs.h>
 #include <lib/drivers/si446x.h>
 
-
 #include <furi.h>
 
 #define TAG "SubghzFrequencyAnalyzerWorker"
 
-//#define CC1101
+#define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -85.0f
 
+//#define CC1101
 #ifdef CC1101
-#define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -95.0f
 
 static const uint8_t subghz_preset_ook_58khz[][2] = {
     {CC1101_MDMCFG4, 0b11110111}, // Rx BW filter is 58.035714kHz
@@ -142,6 +141,35 @@ static void subghz_frequency_analyzer_worker_load_registers(const uint8_t data[]
     }
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
+#else
+static bool subghz_frequency_analyzer_worker_is_valid(uint32_t freq_hz) {
+    // See Si446x Data Sheet section 5.3.1
+
+    if(!(freq_hz >= 142000000 && freq_hz <= 175000000) &&
+       !(freq_hz >= 284000000 && freq_hz <= 525000000) &&
+       !(freq_hz >= 850000000 && freq_hz <= 1050000000)) {
+        return false;
+    }
+    return true;
+}
+
+static FuriHalSubGhzPath subghz_frequency_analyzer_worker_get_path(uint32_t freq_hz) {
+    FuriHalSubGhzPath ret = FuriHalSubGhzPathIsolate;
+    if(freq_hz >= 142000000 && freq_hz <= 175000000) {
+        ret = FuriHalSubGhzPath315;
+    } else if(freq_hz >= 284000000 && freq_hz <= 386999999) {
+        //ret = FuriHalSubGhzPath315;
+        ret = FuriHalSubGhzPath433;
+    } else if(freq_hz >= 387000000 && freq_hz <= 525000000) {
+        ret = FuriHalSubGhzPath433;
+    } else if(freq_hz >= 850000000 && freq_hz <= 1050000000) {
+        ret = FuriHalSubGhzPath868;
+    } else {
+        furi_crash(NULL);
+    }
+    return ret;
+}
+
 #endif
 
 // running average with adaptive coefficient
@@ -168,7 +196,7 @@ static uint32_t subghz_frequency_analyzer_worker_expRunningAverageAdaptive(
 static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
     SubGhzFrequencyAnalyzerWorker* instance = context;
 
-    FrequencyRSSI frequency_rssi = {.frequency = 0, .rssi = 0, .channel=0};
+    FrequencyRSSI frequency_rssi = {.frequency = 0, .rssi = 0, .channel = 0};
     float rssi = 0;
 
 #ifdef CC1101
@@ -323,85 +351,97 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
     furi_hal_subghz_sleep();
 #else
     uint32_t freq = 433920000;
-    uint32_t step = 250000;
-    float rssi1 = 0;
+    uint32_t step = 10000;
+    FuriHalSubGhzPath path = FuriHalSubGhzPathIsolate;
+    //float rssi1 = 0;
 
     //Start Si4463
     furi_hal_subghz_reset();
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650AsyncFreq);
+    furi_hal_subghz_idle();
+    //furi_hal_subghz_set_path(FuriHalSubGhzPath433);
 
-    //si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_RX_DATA);
-    uint8_t modem_rssi_thresh[1] = {0xF0};
-    si446x_set_properties(
-        &furi_hal_spi_bus_handle_subghz, SI446X_PROP_MODEM_RSSI_THRESH, &modem_rssi_thresh[0], sizeof(modem_rssi_thresh));
+    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow);
     si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_CCA);
+    //si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_NIRQ, SI446X_GPIO_MODE_CCA_LATCH);
+    //si446x_write_gpio(&furi_hal_spi_bus_handle_subghz, SI446X_GPIO1, SI446X_GPIO_MODE_RX_DATA);
+
+    uint8_t modem_rssi_comp = 0;
+    si446x_get_properties(
+        &furi_hal_spi_bus_handle_subghz, SI446X_PROP_MODEM_RSSI_COMP, &modem_rssi_comp, 1);
+    FURI_LOG_D(TAG, "modem_rssi_comp = 0x%X", modem_rssi_comp);
+
+    uint8_t modem_rssi_thresh = {0x70};
+    si446x_set_properties(
+        &furi_hal_spi_bus_handle_subghz, SI446X_PROP_MODEM_RSSI_THRESH, &modem_rssi_thresh, 1);
+    modem_rssi_thresh = 0;
+    si446x_set_bps(&furi_hal_spi_bus_handle_subghz, 200000);
+    si446x_get_properties(
+        &furi_hal_spi_bus_handle_subghz, SI446X_PROP_MODEM_RSSI_THRESH, &modem_rssi_thresh, 1);
+    FURI_LOG_D(TAG, "modem_rssi_thresh = 0x%X", modem_rssi_thresh);
+
+    uint8_t rssi_control = 0b00010011;
+    si446x_set_properties(
+        &furi_hal_spi_bus_handle_subghz, SI446X_PROP_MODEM_RSSI_CONTROL, &rssi_control, 1);
+    rssi_control = 0;
+    si446x_get_properties(
+        &furi_hal_spi_bus_handle_subghz, SI446X_PROP_MODEM_RSSI_CONTROL, &rssi_control, 1);
+    FURI_LOG_D(TAG, "rssi_control = 0x%X", rssi_control);
+
+    uint8_t modem_fast_delay = 0xFF;
+    si446x_set_properties(
+        &furi_hal_spi_bus_handle_subghz, SI446X_PROP_MODEM_FAST_RSSI_DELAY, &modem_fast_delay, 1);
+    FURI_LOG_D(TAG, "rssi_control = 0x%X", modem_fast_delay);
 
     while(instance->worker_running) {
         osDelay(10);
         frequency_rssi.rssi = -127.0f;
 
-        step = 250000;
-        freq = 433670000;
-        si446x_set_frequency_and_step_channel(&furi_hal_spi_bus_handle_subghz, freq, step);
-        furi_hal_subghz_load_config(subghz_preset_ook_650khz1);
+        for(size_t freq_ind = 0; freq_ind < subghz_setting_get_frequency_count(instance->setting);
+            freq_ind++) {
+            if(subghz_frequency_analyzer_worker_is_valid(
+                   subghz_setting_get_frequency(instance->setting, freq_ind))) {
+                //get freq from setting
+                freq = subghz_setting_get_frequency(instance->setting, freq_ind);
+                //set path if need;
+                if(path != subghz_frequency_analyzer_worker_get_path(freq)) {
+                    path = subghz_frequency_analyzer_worker_get_path(freq);
+                    furi_hal_subghz_set_path(path);
+                }
+                //check + - 0.5 MHz from the required frequency, step 10KHz
+                freq -= 250000;
+                for(size_t i = 0; i < 50; i++) {
+                    si446x_set_frequency_and_step_channel(
+                        &furi_hal_spi_bus_handle_subghz, freq + step * i, step);
+                    si446x_switch_to_start_rx(
+                        &furi_hal_spi_bus_handle_subghz, 0, SI446X_STATE_NOCHANGE, 0);
 
-        for(size_t i = 1; i < 70; i++) {
-            si446x_switch_to_start_rx(
-                &furi_hal_spi_bus_handle_subghz, i, SI446X_STATE_NOCHANGE, 0);
-            osDelay(2);
-            rssi = ((float)si446x_get_fast_reg(
-                        &furi_hal_spi_bus_handle_subghz, SI446X_CMD_FRR_A_READ) /
-                    2.0f) -
-                   134.0f;
-            rssi1 = furi_hal_subghz_get_rssi();
-            FURI_LOG_I(
-                "-  ",
-                "%d %d.%d , %d.%d ",
-                freq + step * i,
-                (int)rssi,
-                (int)((rssi - (int)rssi) * 10),
-                (int)rssi1,
-                (int)((rssi1 - (int)rssi1) * 10));
-            if(frequency_rssi.rssi < rssi) {
-                frequency_rssi.rssi = rssi;
-                frequency_rssi.frequency = freq + step * (i - 2);
-                frequency_rssi.channel = i - 2;
-            }
-        }
-        FURI_LOG_I("------############------", "");
-        if(frequency_rssi.rssi > -85.0) {
-            //  -0.5 ... 433.92 ... +0.5
-            //frequency_start = frequency_rssi.frequency - 250000;
-            //step 10KHz
-            frequency_rssi.rssi = -127.0;
-            step = 10000;
-            furi_hal_subghz_idle();
+                    //if(furi_hal_gpio_read(&gpio_cc1101_g0)) {
+                        osDelay(2);
+                        // rssi = ((float)si446x_get_rssi(&furi_hal_spi_bus_handle_subghz) / 2.0f) -
+                        //        modem_rssi_comp - 70;
+                        // rssi1 = ((float)si446x_get_lqi(&furi_hal_spi_bus_handle_subghz) / 2.0f) -
+                        //         modem_rssi_comp - 70;
+                        rssi = ((float)si446x_get_fast_reg(
+                                    &furi_hal_spi_bus_handle_subghz, SI446X_CMD_FRR_A_READ) /
+                                2.0f) -
+                               modem_rssi_comp - 70;
 
-            si446x_set_frequency_and_step_channel(
-                &furi_hal_spi_bus_handle_subghz, frequency_rssi.frequency, step);
-            furi_hal_subghz_load_config(subghz_preset_ook_57khz1);
-
-            for(uint32_t i = 0; i < 65; i++) {
-                si446x_switch_to_start_rx(
-                    &furi_hal_spi_bus_handle_subghz, i, SI446X_STATE_NOCHANGE, 0);
-                osDelay(2);
-                rssi = furi_hal_subghz_get_rssi();
-                FURI_LOG_I(
-                    "-  ",
-                    "%d %d.%d",
-                    frequency_rssi.frequency + step * i,
-                    (int)rssi,
-                    (int)((rssi - (int)rssi) * 10));
-                if(frequency_rssi.rssi < rssi) {
-                    frequency_rssi.rssi = rssi;
-                    frequency_rssi.frequency = freq + step * (i);
-                    frequency_rssi.channel = i;
+                        if(frequency_rssi.rssi < rssi) {
+                            frequency_rssi.rssi = rssi;
+                            frequency_rssi.frequency = freq + step * i;
+                            frequency_rssi.channel = i;
+                        }
+                    //}
+                    //printf("%ld, %d\r\n", freq + step * i, (int)rssi);
+                    printf("%d\r\n", (int)rssi);
+                    rssi = -127;
                 }
             }
         }
 
-        if(frequency_rssi.rssi > -85.0) {
-            instance->sample_hold_counter = 20;
+        if(frequency_rssi.rssi > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
+            instance->sample_hold_counter = 10;
             if(instance->filVal) {
                 frequency_rssi.frequency =
                     subghz_frequency_analyzer_worker_expRunningAverageAdaptive(

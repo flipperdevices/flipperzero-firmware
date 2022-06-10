@@ -1,6 +1,7 @@
 #include "si446x.h"
 #include <cmsis_os2.h>
 #include <furi_hal_delay.h>
+#include <furi.h>
 #include <assert.h>
 #include <string.h>
 
@@ -8,17 +9,22 @@ bool si446x_wait_cts_spi(FuriHalSpiBusHandle* handle) {
     uint8_t buff_tx[2] = {SI446X_CMD_READ_CMD_BUFF, 0xFF};
     uint8_t buff_rx[2] = {0};
     uint8_t timeout = 40;
-    while((buff_rx[1] != SI446X_CTS_OK) && timeout) {
+    do {
         furi_hal_spi_acquire(handle);
         furi_hal_spi_bus_trx(handle, buff_tx, (uint8_t*)buff_rx, 2, SI446X_TIMEOUT);
         furi_hal_spi_release(handle);
-        timeout--;
-        furi_hal_delay_ms(1);
-        if(!timeout) {
-            return false;
+        if(buff_rx[1] == SI446X_CTS_OK) {
+            return true;
+        } else {
+            timeout--;
+            furi_hal_delay_ms(1);
+            if(!timeout) {
+                break;
+            }
         }
-    }
-    return true;
+    } while((buff_rx[1] != SI446X_CTS_OK) && timeout);
+
+    return false;
 }
 
 bool si446x_write_data(FuriHalSpiBusHandle* handle, const uint8_t* data, uint8_t size) {
@@ -121,7 +127,8 @@ uint8_t si446x_set_rssi_control(FuriHalSpiBusHandle* handle) {
     //AVERAGE4	0	The RSSI value is updated at 1*Tb bit period intervals but always reflects the average value over the previous 4*Tb bit periods.
     //RX_STATE2	4	(only with AVERAGE=0) Latches RSSI at 11*Tb after RX is enabled. (3*Tb garbage + 8*Tb)
     uint8_t rssi_control[1] = {0b00010011};
-    return si446x_set_properties(handle, SI446X_PROP_MODEM_RSSI_CONTROL, &rssi_control[0], sizeof(rssi_control));
+    return si446x_set_properties(
+        handle, SI446X_PROP_MODEM_RSSI_CONTROL, &rssi_control[0], sizeof(rssi_control));
 }
 
 bool si446x_set_rssi_threshold(FuriHalSpiBusHandle* handle, int rssi_dbi) {
@@ -156,7 +163,7 @@ bool si446x_switch_to_start_tx(
 bool si446x_switch_to_start_rx(
     FuriHalSpiBusHandle* handle,
     uint8_t channel,
-    SI446X_State_t state_on_tx_finish,
+    SI446X_State_t state_on_rx_finish,
     uint8_t len_package_rx) {
     uint8_t buff_tx[] = {
         SI446X_CMD_START_RX,
@@ -165,8 +172,8 @@ bool si446x_switch_to_start_rx(
         0, //rx len hi package
         len_package_rx, //rx len lo package
         SI446X_STATE_NOCHANGE, // RX Timeout
-        state_on_tx_finish, //SI446X_STATE_RX, // RX Valid
-        state_on_tx_finish // IDLE_STATE // RX Invalid (using SI446X_STATE_SLEEP for the INVALID_SYNC fix)
+        state_on_rx_finish, //SI446X_STATE_RX, // RX Valid
+        state_on_rx_finish // IDLE_STATE // RX Invalid (using SI446X_STATE_SLEEP for the INVALID_SYNC fix)
     };
     //no need to poll CTS
     furi_hal_spi_acquire(handle);
@@ -282,10 +289,7 @@ uint32_t si446x_set_frequency_and_step_channel(
 
     uint8_t sy_sel = 8;
     uint8_t modem_clkgen[] = {sy_sel | band};
-    if(!si446x_set_properties(
-           handle, SI446X_PROP_MODEM_CLKGEN_BAND, &modem_clkgen[0], sizeof(modem_clkgen))) {
-        return 0;
-    }
+
     //sy_sel set => NPRESC=2
     uint32_t f_pfd = 2 * SI446X_QUARTZ / outdiv;
     uint32_t n = ((uint32_t)(freq_hz / f_pfd)) - 1;
@@ -300,6 +304,11 @@ uint32_t si446x_set_frequency_and_step_channel(
         m & 0xff,
         (channel_increment >> 8) & 0xFF,
         channel_increment & 0xFF};
+
+    if(!si446x_set_properties(
+           handle, SI446X_PROP_MODEM_CLKGEN_BAND, &modem_clkgen[0], sizeof(modem_clkgen))) {
+        return 0;
+    }
     if(!si446x_set_properties(
            handle, SI446X_PROP_FREQ_CONTROL_INTE, &freq_control[0], sizeof(freq_control))) {
         return 0;
