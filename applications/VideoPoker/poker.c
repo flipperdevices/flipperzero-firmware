@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include "furi_hal_random.h"
 
 // deck array
 // hand array
