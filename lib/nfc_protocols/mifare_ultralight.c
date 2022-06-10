@@ -1019,16 +1019,17 @@ bool mf_ul_prepare_emulation_response(
         }
     } else if(cmd == MF_UL_INC_CNT) {
         if(emulator->supported_features & MfUltralightSupportIncrCounter) {
-            if(buff_rx_len == (1 + 1) * 8) {
+            if(buff_rx_len == (1 + 5) * 8) {
                 uint8_t cnt_num = buff_rx[1];
                 uint32_t inc = (buff_rx[2] | (buff_rx[3] << 8) | (buff_rx[4] << 16));
-                if((cnt_num < 3) && (emulator->data.counter[cnt_num] + inc < 0x00FFFFFF)) {
+                // TODO: can you increment by 0 when counter is at 0xffffff?
+                if((cnt_num < 3) && (emulator->data.counter[cnt_num] != 0x00FFFFFF) &&
+                   (emulator->data.counter[cnt_num] + inc <= 0x00FFFFFF)) {
                     emulator->data.counter[cnt_num] += inc;
+                    // We're RAM-backed, so tearing never happens
+                    emulator->data.tearing[cnt_num] = MF_UL_TEARING_FLAG_DEFAULT;
                     emulator->data_changed = true;
-                    // ACK
-                    buff_tx[0] = 0x0A;
-                    tx_bits = 4;
-                    *data_type = FURI_HAL_NFC_TXRX_RAW;
+                    send_ack = true;
                     command_parsed = true;
                 }
             }
