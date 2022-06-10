@@ -16,6 +16,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 Latest Updates:
 - Latest DEV changes
 - Removed unused icons to conserve space
+- Removed [Zombiez (By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -53,6 +54,5 @@ Plugins:
 - [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
 - [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) With Fix From Atmanos
-- [Zombiez (By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
 
 Thank you, [MuddleBox](https://github.com/MuddledBox/flipperzero-firmware), [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & of course, most of all [Flipper Devices](https://github.com/flipperdevices/flipperzero-firmware)!
