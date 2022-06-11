@@ -7,9 +7,9 @@ AddOption(
     help="Full firmware environment",
 )
 
-SConscript("sconscfg/environ.scons")
-SConscript("sconscfg/cc.scons")
-SConscript("sconscfg/builders.scons")
+SConscript("site_scons/environ.scons")
+SConscript("site_scons/cc.scons")
+SConscript("site_scons/builders.scons")
 
 Import("coreenv")
 

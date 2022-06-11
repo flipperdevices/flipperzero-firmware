@@ -274,5 +274,4 @@ def build_apps_c(target, source, env):
         file.write(gen.generate())
 
 
-build_apps_c = Action(build_apps_c, "${APPSCOMSTR}")
-Export("build_apps_c")
+fwenv["APPS_C_ACTION"] = Action(build_apps_c, "${APPSCOMSTR}")

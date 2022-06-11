@@ -59,9 +59,9 @@ fwenv = env.Clone()
 Export("fwenv")
 
 # Set up additional app-specific build flags
-SConscript("sconscfg/firmwareopts.scons")
+SConscript("site_scons/firmwareopts.scons")
 # Prepare manifest-related env methods
-SConscript("sconscfg/appmanifests.scons")
+SConscript("site_scons/appmanifests.scons")
 
 # Set up app configuration
 if env["FIRMWARE_BUILD_CFG"] == "updater":
@@ -102,14 +102,16 @@ fwenv.Append(
 
 # Build applications.c for selected services & apps
 
-Import("build_apps_c", "FlipperAppType")
+Import("FlipperAppType")
 
 # Depends on virtual value-only node, so it only gets rebuilt when set of apps changes
 apps_c = fwenv.Command(
     "applications/applications.c",
     Value(fwenv["APPS"]),
-    action=build_apps_c,
+    action=fwenv["APPS_C_ACTION"],
 )
+AddPreAction(apps_c, fwenv["APPBUILD_DUMP"])
+
 
 sources = [apps_c]
 # Gather sources only from app folders from current configuration
@@ -169,8 +171,6 @@ firmware_elf = fwenv.Program(
         "toolbox",
     ],
 )
-
-AddPreAction(firmware_elf, fwenv["APPBUILD_DUMP"])
 
 # Make it depend on everything child builders returned
 Depends(firmware_elf, depends)
