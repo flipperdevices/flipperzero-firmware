@@ -58,6 +58,10 @@ debug_other:
 blackmagic:
 	@$(MAKE) -C firmware -j$(NPROCS) blackmagic
 
+.PHONY: blackmagic_load
+blackmagic_load:
+	@$(MAKE) -C firmware -j$(NPROCS) blackmagic_load
+
 .PHONY: wipe
 wipe:
 	@$(PROJECT_ROOT)/scripts/flash.py wipe
