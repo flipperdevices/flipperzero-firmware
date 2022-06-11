@@ -1,5 +1,8 @@
 Import("env", "lib_flags")
 
+import subprocess
+import datetime
+
 env.Append(
     CPPPATH=[
         "#/lib/toolbox",
@@ -10,7 +13,45 @@ env.Append(
 libenv = env.Clone()
 libenv.MergeFlags(lib_flags)
 
+# Git Version management
+version_depends = []
+try:
+    version = (
+        subprocess.check_output(
+            [
+                "git",
+                "describe",
+                "--always",
+                "--dirty",
+                "--all",
+                "--long",
+            ]
+        )
+        .strip()
+        .decode()
+    )
+    version_depends = Value((version, datetime.date.today()))
+    # print(version_depends)
+except Exception as e:
+    print("Failed to check for git changes", e)
+
+# Only invoke version generator if preliminary check target (version_depends) has changed
+build_version = libenv.Command(
+    "version.inc.h",
+    version_depends,
+    Action(
+        "${PYTHON3} ${ROOT_DIR.abspath}/scripts/version.py generate -o ${TARGET} --dir ${ROOT_DIR}",
+        "${VERSIONCOMSTR}",
+    ),
+)
+
+if not version_depends:
+    libenv.Precious(build_version)
+    libenv.AlwaysBuild(build_version)
+
 sources = libenv.GlobRecursive("*.c")
+
+libenv.Append(CPPPATH=["."])
 
 lib = libenv.StaticLibrary("toolbox", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)

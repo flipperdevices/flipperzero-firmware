@@ -23,12 +23,9 @@ vars.Add(
         ],
     )
 )
-vars.Add(
-    BoolVariable("RAM_EXEC", help="Build updater image for RAM exection", default=0)
-)
 
 
-env = Environment(
+coreenv = Environment(
     variables=vars,
     tools=["as", "gcc", "g++", "ar", "gnulink", "python", "compilation_db"],
     OBJCOPY="objcopy",
@@ -45,8 +42,8 @@ env = Environment(
     },
 )
 
-if not env["VERBOSE"]:
-    env.Replace(
+if not coreenv["VERBOSE"]:
+    coreenv.Replace(
         CCCOMSTR="\tCC\t${SOURCE}",
         CXXCOMSTR="\tCPP\t${SOURCE}",
         ASCOMSTR="\tASM\t${SOURCE}",
@@ -59,20 +56,20 @@ if not env["VERBOSE"]:
         # STRIPCOMSTR="\tSTRIP\t${TARGET}",
     )
 
-if env["PLATFORM"] == "win32":
+if coreenv["PLATFORM"] == "win32":
     # On Windows, Python 3 executable is usually just "python"
-    env["PYTHON3"] = env["PYTHON3"][:-1]
+    coreenv["PYTHON3"] = coreenv["PYTHON3"][:-1]
 
-Help(vars.GenerateHelpText(env))
+Help(vars.GenerateHelpText(coreenv))
 
 
-# Default value for -j
+# Default value for commandline options
 
 SetOption("num_jobs", multiprocessing.cpu_count())
 SetOption("implicit_cache", True)
-# SetOption("implicit_deps_unchanged", True)
+SetOption("implicit_deps_unchanged", True)
 SetOption("max_drift", 1)
-# env.Decider("content-timestamp")
+# coreenv.Decider("content-timestamp")
 
 
 # Setting up temp file parameters
@@ -82,13 +79,13 @@ WINPATHSEP_RE = re.compile(r"\\([^\"'\\]|$)")
 
 def tempfile_arg_esc_func(arg):
     arg = quote_spaces(arg)
-    if env["PLATFORM"] != "win32":
+    if coreenv["PLATFORM"] != "win32":
         return arg
     # GCC requires double Windows slashes, let's use UNIX separator
     return WINPATHSEP_RE.sub(r"/\1", arg)
 
 
-env["TEMPFILEARGESCFUNC"] = tempfile_arg_esc_func
+coreenv["TEMPFILEARGESCFUNC"] = tempfile_arg_esc_func
 
 
 # Set up cross-compile tools
@@ -104,14 +101,14 @@ for binary in [
     "RANLIB",
     "STRIP",
 ]:
-    if binary in env:
-        env[binary] = TOOLCHAIN_PREFIX + env[binary]
+    if binary in coreenv:
+        coreenv[binary] = TOOLCHAIN_PREFIX + coreenv[binary]
 
 
 # Commandline length limit hack
 
-env["LINKCOM"] = '${TEMPFILE("' + env["LINKCOM"] + '","$LINKCOMSTR")}'
-env["ARCOM"] = '${TEMPFILE("' + env["ARCOM"] + '","$ARCOMSTR")}'
+coreenv["LINKCOM"] = '${TEMPFILE("' + coreenv["LINKCOM"] + '","$LINKCOMSTR")}'
+coreenv["ARCOM"] = '${TEMPFILE("' + coreenv["ARCOM"] + '","$ARCOMSTR")}'
 
 
 # Build env extensions
@@ -123,7 +120,7 @@ def GlobRecursive(env, pattern, node=".", exclude=None):
         node = Dir(node)
     for f in node.glob("*", source=True, exclude=exclude):
         if isinstance(f, SCons.Node.FS.Dir):
-            results += env.GlobRecursive(pattern, f, exclude)
+            results += coreenv.GlobRecursive(pattern, f, exclude)
     results += node.glob(
         pattern,
         source=True,
@@ -146,7 +143,7 @@ def BuildModule(env, module):
 
     return env.SConscript(
         module_sconscript,
-        variant_dir=env["BUILD_DIR"] + "/" + module,
+        variant_dir=os.path.join(env["BUILD_DIR"], module),
         duplicate=0,
     )
 
@@ -158,15 +155,12 @@ def BuildModules(env, modules):
         # print("module ", module, build_res)
         if build_res is None:
             continue
-        elif isinstance(build_res, list):
-            result.extend(build_res)
-        else:
-            result.append(build_res[0])  # ???
+        result.append(build_res)
     return result
 
 
-env.AddMethod(GlobRecursive)
-env.AddMethod(BuildModule)
-env.AddMethod(BuildModules)
+coreenv.AddMethod(GlobRecursive)
+coreenv.AddMethod(BuildModule)
+coreenv.AddMethod(BuildModules)
 
-Export("env")
+Export("coreenv")

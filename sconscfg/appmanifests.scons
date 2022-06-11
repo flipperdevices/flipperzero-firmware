@@ -241,21 +241,27 @@ def LoadApplicationManifests(env):
         if isinstance(entry, SCons.Node.FS.Dir):
             appmgr.load_manifest(entry.File("application.fam").abspath, entry.name)
 
-    print(f"Loaded {len(appmgr.known_apps)} app definitions.")
+    # 
 
 
-def PrepareApplicationsBuild(env):
-    apps = fwenv["APPS"]
-    apps_buildlist = fwenv["APPBUILD"] = fwenv["APPMGR"].filter_apps(apps)
+def DumpApplicationConfig(target, source, env):
+    print(f"Loaded {len(env["APPMGR"].known_apps)} app definitions.")
     print("Firmware modules configuration:")
     for apptype in FlipperAppType:
-        app_sublist = apps_buildlist.get_apps_of_type(apptype)
+        app_sublist = env["APPBUILD"].get_apps_of_type(apptype)
         if app_sublist:
             print(
                 f"{apptype.value}:\n\t",
                 ", ".join(app.appid for app in app_sublist),
             )
-    # print("CDefs", apps_buildlist.get_apps_cdefs())
+
+
+def PrepareApplicationsBuild(env):
+    fwenv["APPBUILD"] = fwenv["APPMGR"].filter_apps(fwenv["APPS"])
+    fwenv["APPBUILD_DUMP"] = Action(
+        DumpApplicationConfig,
+        "\tINFO\t",
+    )
 
 
 fwenv.AddMethod(LoadApplicationManifests)

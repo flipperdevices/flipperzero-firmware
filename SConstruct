@@ -1,37 +1,53 @@
 import os
 
+AddOption(
+    "--with-updater",
+    dest="fullenv",
+    action="store_true",
+    help="Full firmware environment",
+)
+
 SConscript("sconscfg/environ.scons")
 SConscript("sconscfg/cc.scons")
 SConscript("sconscfg/builders.scons")
 
-Import("env")
-
-if env["RAM_EXEC"]:
-    env.Append(
-        FIRMWARE_BUILD_CFG="updater",
-    )
-else:
-    env.Append(
-        FIRMWARE_BUILD_CFG="firmware",
-    )
+Import("coreenv")
 
 # Progress(["-\r", "\\\r", "|\r", "/\r"], interval=5)
-variant_dir_name = f"f{env.subst('$TARGET_HW')}-{env.subst('$FIRMWARE_BUILD_CFG')}"
+variant_dir_name = f"f{coreenv.subst('$TARGET_HW')}-FWTYPE"
 suffix = ""
-if env["DEBUG"]:
+if coreenv["DEBUG"]:
     suffix += "D"
-if env["COMPACT"]:
+if coreenv["COMPACT"]:
     suffix += "C"
 if suffix:
     variant_dir_name += "-" + suffix
 
-root_path = Dir(".").abspath
-env["ROOT_DIR"] = root_path
-build_path = os.path.join(root_path, "build", variant_dir_name)
-env["BUILD_DIR"] = build_path
+coreenv["ROOT_DIR"] = Dir(".")
+build_path = os.path.join(Dir(".").abspath, "build", variant_dir_name)
 
-SConscript(
+firmware = SConscript(
     "firmware.scons",
-    variant_dir=build_path,
+    variant_dir=build_path.replace("FWTYPE", "firmware"),
     duplicate=0,
+    exports={
+        "fw_build_meta": {
+            "type": "firmware",
+            "build_dir": build_path.replace("FWTYPE", "firmware"),
+        },
+    },
 )
+Default(firmware)
+
+if GetOption("fullenv"):
+    updater = SConscript(
+        "firmware.scons",
+        variant_dir=build_path.replace("FWTYPE", "updater"),
+        duplicate=0,
+        exports={
+            "fw_build_meta": {
+                "type": "updater",
+                "build_dir": build_path.replace("FWTYPE", "updater"),
+            },
+        },
+    )

@@ -196,7 +196,8 @@ Alias("proto_ver", proto_ver)
 
 # Gather everything into a static lib
 assets_parts = (icons, proto, dolphin_blocking, dolphin_internal, proto_ver)
-assetsenv.Install("#/assets/compiled", assets_parts)
+if assetsenv["FIRMWARE_BUILD_CFG"] != "updater":
+    assetsenv.Install("#/assets/compiled", assets_parts)
 
 assetslib = assetsenv.Library("assets", assets_parts)
 assetsenv.Install("${LIB_DIST_DIR}", assetslib)
@@ -204,32 +205,32 @@ assetsenv.Install("${LIB_DIST_DIR}", assetslib)
 
 # Resources for SD card
 
-# External dolphin animations
+if assetsenv["FIRMWARE_BUILD_CFG"] != "updater":
+    # External dolphin animations
+    dolphin_external = assetsenv.DolphinExtBuilder(
+        Dir("#/assets/resources/dolphin"),
+        Dir("#/assets/dolphin"),
+        DOLPHIN_RES_TYPE="external",
+    )
+    NoClean(dolphin_external)
+    if assetsenv["FORCE"]:
+        AlwaysBuild(dolphin_external)
+    Alias("dolphin_ext", dolphin_external)
 
-dolphin_external = assetsenv.DolphinExtBuilder(
-    Dir("#/assets/resources/dolphin"),
-    Dir("#/assets/dolphin"),
-    DOLPHIN_RES_TYPE="external",
-)
-NoClean(dolphin_external)
-if assetsenv["FORCE"]:
-    AlwaysBuild(dolphin_external)
-Alias("dolphin_ext", dolphin_external)
+    # Resources manifest
 
-# Resources manifest
-
-resources = assetsenv.Command(
-    "#/assets/resources/Manifest",
-    assetsenv.GlobRecursive("*", "resources", exclude="Manifest"),
-    action=Action(
-        '${PYTHON3} ${ASSETS_COMPILER} manifest "${TARGET.dir.posix}"',
-        "\tRES\t${TARGET}",
-    ),
-)
-Precious(resources)
-NoClean(resources)
-if assetsenv["FORCE"]:
-    AlwaysBuild(resources)
-Alias("resources", resources)
+    resources = assetsenv.Command(
+        "#/assets/resources/Manifest",
+        assetsenv.GlobRecursive("*", "resources", exclude="Manifest"),
+        action=Action(
+            '${PYTHON3} ${ASSETS_COMPILER} manifest "${TARGET.dir.posix}"',
+            "\tRES\t${TARGET}",
+        ),
+    )
+    Precious(resources)
+    NoClean(resources)
+    if assetsenv["FORCE"]:
+        AlwaysBuild(resources)
+    Alias("resources", resources)
 
 Return("assetslib")

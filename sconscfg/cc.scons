@@ -1,7 +1,7 @@
-Import("env")
+Import("coreenv")
 
 
-env.Append(
+coreenv.Append(
     CFLAGS=[
         "-std=gnu17",
     ],
@@ -17,7 +17,7 @@ env.Append(
         "-mfloat-abi=hard",
         "-mfpu=fpv4-sp-d16",
         "-mthumb",
-        "-MMD",
+        # "-MMD",
         # "-MP",
         "-Wall",
         "-Wextra",
@@ -51,14 +51,8 @@ lib_flags = {
     ],
     "CPPDEFINES": [
         "NDEBUG",
+        "FURI_NDEBUG",
     ],
 }
-
-if env["RAM_EXEC"]:
-    env.Append(
-        CPPDEFINES=[
-            "FURI_RAM_EXEC",
-        ]
-    )
 
 Export("lib_flags")

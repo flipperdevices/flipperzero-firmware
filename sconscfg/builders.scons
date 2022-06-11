@@ -1,7 +1,7 @@
-Import("env")
+Import("coreenv")
 
 
-env.Append(
+coreenv.Append(
     BUILDERS={
         "HEXBuilder": Builder(
             action=Action(
@@ -29,7 +29,7 @@ env.Append(
         ),
         "ELFStripper": Builder(
             action=Action(
-                env["STRIPCOM"],
+                coreenv["STRIPCOM"],
                 "\tSTRIP\t${TARGET}",
             ),
             suffix=".elf",

@@ -2,4 +2,5 @@
 
 set +x
 
-/usr/bin/env python3 lib/scons/scripts/scons.py "$@"
+SCONS_DEFAULT_FLAGS="-Q --warn=target-not-built"
+/usr/bin/env python3 lib/scons/scripts/scons.py ${SCONS_DEFAULT_FLAGS} "$@"

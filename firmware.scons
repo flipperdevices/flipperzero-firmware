@@ -1,13 +1,14 @@
-Import("env")
+Import("coreenv", "fw_build_meta")
 
 import os
-import subprocess
-import datetime
 
 
 # Building initial C environment for libs
+env = coreenv.Clone()
+Export("env")
 
 env.Append(
+    BUILD_DIR=fw_build_meta["build_dir"],
     LIB_DIST_DIR="${BUILD_DIR}/lib",
     LIBPATH=[
         "${LIB_DIST_DIR}",
@@ -25,6 +26,22 @@ env.Append(
         "#/firmware/targets/furi_hal_include",
     ],
 )
+
+if fw_build_meta["type"] == "updater":
+    env.Append(
+        FIRMWARE_BUILD_CFG="updater",
+        RAM_EXEC=True,
+        CPPDEFINES=[
+            "FURI_RAM_EXEC",
+        ],
+    )
+else:
+    env.Append(
+        FIRMWARE_BUILD_CFG="firmware",
+        RAM_EXEC=False,
+    )
+# print(env.Dump())
+
 
 # Invoke child SCopscripts to populate global `env` + build their own part of the code
 depends = env.BuildModules(
@@ -47,7 +64,7 @@ SConscript("sconscfg/firmwareopts.scons")
 SConscript("sconscfg/appmanifests.scons")
 
 # Set up app configuration
-if fwenv["FIRMWARE_BUILD_CFG"] == "updater":
+if env["FIRMWARE_BUILD_CFG"] == "updater":
     fwenv.Append(
         APPS=[
             "updater",
@@ -95,49 +112,12 @@ apps_c = fwenv.Command(
 )
 
 sources = [apps_c]
-# Gather sources only from selected app folders
+# Gather sources only from app folders from current configuration
 for app_folder in fwenv["APPBUILD"].get_builtin_app_folders():
     sources += fwenv.GlobRecursive("*.c*", os.path.join("applications", app_folder))
 
-# Clone current environment to build external apps with its current state
+# Clone current environment to build external apps later with its current state
 appenv = fwenv.Clone()
-
-# Git Version management
-version_depends = []
-try:
-    version = (
-        subprocess.check_output(
-            [
-                "git",
-                "describe",
-                "--always",
-                "--dirty",
-                "--all",
-                "--long",
-            ]
-        )
-        .strip()
-        .decode()
-    )
-    version_depends = Value((version, datetime.date.today()))
-except Exception as e:
-    print("Failed to check for git changes", e)
-
-# Only invoke version generator if preliminary check (version_depends) triggers
-build_version = fwenv.Command(
-    "#lib/toolbox/version.inc.h",
-    version_depends,
-    Action(
-        "${PYTHON3} scripts/version.py generate -o ${TARGET} --dir ${ROOT_DIR}",
-        "${VERSIONCOMSTR}",
-    ),
-)
-
-if not version_depends:
-    fwenv.Precious(build_version)
-    fwenv.AlwaysBuild(build_version)
-
-# Full firmware definition
 
 fwenv.Append(
     LINKFLAGS=[
@@ -160,6 +140,8 @@ fwenv.Append(
 
 # Debug
 # print(fwenv.Dump())
+
+# Full firmware definition
 
 firmware_elf = fwenv.Program(
     "${FIRMWARE_BUILD_CFG}",
@@ -188,25 +170,28 @@ firmware_elf = fwenv.Program(
     ],
 )
 
+AddPreAction(firmware_elf, fwenv["APPBUILD_DUMP"])
+
+# Make it depend on everything child builders returned
 Depends(firmware_elf, depends)
 
 
 fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
 fwenv.BINBuilder("${FIRMWARE_BUILD_CFG}")
 dfu = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
-Default(dfu)
-Alias("dfu", dfu)
+# Default(dfu)
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", dfu)
 
 # Additional FW-related pseudotargets
 flash = fwenv.Flasher("${FIRMWARE_BUILD_CFG}")
 if fwenv["FORCE"]:
     AlwaysBuild(flash)
-Alias("flash", flash)
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)
 
 
 # Compile DB generation
 cdb = fwenv.CompilationDatabase("compile_database.json")
-Alias("cdb", cdb)
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", cdb)
 
 
 # Building external applications
@@ -255,4 +240,7 @@ for app in fwenv["APPBUILD"].get_apps_of_type(FlipperAppType.PLUGIN):
         APP_ENTRY=app.entry_point,
     )
     extapps.append(appenv.ELFStripper(app.appid, app_elf))
-Alias("extapps", extapps)
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps)
+
+
+Return("dfu")
