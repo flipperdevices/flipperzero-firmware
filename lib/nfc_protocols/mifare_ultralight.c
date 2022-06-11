@@ -874,25 +874,23 @@ static void mf_ul_emulate_write(
     uint8_t* page_buff) {
     // Assumption: all access checks have been completed
 
-    if(emulator->curr_sector == 0) {
-        if(tag_addr == 2) {
-            // Handle static locks
-            uint16_t orig_static_locks = emulator->data.data[write_page * 4 + 2] |
-                                         (emulator->data.data[write_page * 4 + 3] << 8);
-            uint16_t new_static_locks = page_buff[2] | (page_buff[3] << 8);
-            if(orig_static_locks & 1) new_static_locks &= ~0x08;
-            if(orig_static_locks & 2) new_static_locks &= ~0xF0;
-            if(orig_static_locks & 4) new_static_locks &= 0xFF;
-            new_static_locks |= orig_static_locks;
-            page_buff[0] = emulator->data.data[write_page * 4];
-            page_buff[1] = emulator->data.data[write_page * 4 + 1];
-            page_buff[2] = new_static_locks & 0xff;
-            page_buff[3] = new_static_locks >> 8;
-        }
-    }
-
-    // This check is outside of sector check because on NTAG I2C 2K this is in sector 1
-    if(tag_addr == mf_ul_get_dynamic_lock_page_addr(&emulator->data)) {
+    if(tag_addr == 2) {
+        // Handle static locks
+        uint16_t orig_static_locks = emulator->data.data[write_page * 4 + 2] |
+                                     (emulator->data.data[write_page * 4 + 3] << 8);
+        uint16_t new_static_locks = page_buff[2] | (page_buff[3] << 8);
+        if(orig_static_locks & 1) new_static_locks &= ~0x08;
+        if(orig_static_locks & 2) new_static_locks &= ~0xF0;
+        if(orig_static_locks & 4) new_static_locks &= 0xFF;
+        new_static_locks |= orig_static_locks;
+        page_buff[0] = emulator->data.data[write_page * 4];
+        page_buff[1] = emulator->data.data[write_page * 4 + 1];
+        page_buff[2] = new_static_locks & 0xff;
+        page_buff[3] = new_static_locks >> 8;
+    } else if(tag_addr == 3) {
+        // Handle OTP/capability container
+        *(uint32_t*)page_buff |= *(uint32_t*)&emulator->data.data[write_page * 4];
+    } else if(tag_addr == mf_ul_get_dynamic_lock_page_addr(&emulator->data)) {
         // Handle dynamic locks
         uint16_t orig_locks = emulator->data.data[write_page * 4] |
                               (emulator->data.data[write_page * 4 + 1] << 8);
