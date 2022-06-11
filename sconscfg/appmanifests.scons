@@ -241,11 +241,9 @@ def LoadApplicationManifests(env):
         if isinstance(entry, SCons.Node.FS.Dir):
             appmgr.load_manifest(entry.File("application.fam").abspath, entry.name)
 
-    # 
-
 
 def DumpApplicationConfig(target, source, env):
-    print(f"Loaded {len(env["APPMGR"].known_apps)} app definitions.")
+    print(f"Loaded {len(env['APPMGR'].known_apps)} app definitions.")
     print("Firmware modules configuration:")
     for apptype in FlipperAppType:
         app_sublist = env["APPBUILD"].get_apps_of_type(apptype)
