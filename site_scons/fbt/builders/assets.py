@@ -105,14 +105,14 @@ def add_assets_builders(env):
             "IconBuilder": Builder(
                 action=Action(
                     "${PYTHON3} ${ASSETS_COMPILER} icons ${SOURCE.posix} ${TARGET.dir.posix}",
-                    "\tICONS\t${TARGET}",
+                    "${ICONSCOMSTR}",
                 ),
                 emitter=icons_emitter,
             ),
             "ProtoBuilder": Builder(
                 action=Action(
                     "${PYTHON3} ${NANOPB_COMPILER} -q -I${SOURCE.dir.posix} -D${TARGET.dir.posix} ${SOURCES.posix}",
-                    "\tPROTO\t${SOURCE}",
+                    "${PROTOCOMSTR}",
                 ),
                 emitter=proto_emitter,
                 suffix=".pb.c",
@@ -121,14 +121,14 @@ def add_assets_builders(env):
             "DolphinSymBuilder": Builder(
                 action=Action(
                     '${PYTHON3} ${ASSETS_COMPILER} dolphin -s dolphin_${DOLPHIN_RES_TYPE} "${SOURCE}" "${_DOLPHIN_OUT_DIR}"',
-                    "\tDOLPHIN\t${DOLPHIN_RES_TYPE}",
+                    "${DOLPHINCOMSTR}",
                 ),
                 emitter=dolphin_emitter,
             ),
             "DolphinExtBuilder": Builder(
                 action=Action(
                     '${PYTHON3} ${ASSETS_COMPILER} dolphin "${SOURCE}" "${_DOLPHIN_OUT_DIR}"',
-                    "\tDOLPHIN\t${DOLPHIN_RES_TYPE}",
+                    "${DOLPHINCOMSTR}",
                 ),
                 emitter=dolphin_emitter,
             ),

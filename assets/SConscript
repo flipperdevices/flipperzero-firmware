@@ -6,14 +6,23 @@ from fbt.builders.assets import add_assets_builders, proto_ver_generator
 assetsenv = env.Clone()
 assetsenv.MergeFlags(lib_flags)
 
-assetsenv.Append(
-    ASSETS_COMPILER="scripts/assets.py",
-    NANOPB_COMPILER="lib/nanopb/generator/nanopb_generator.py",
-)
-
 # Setting up builders for scripts
 
 add_assets_builders(assetsenv)
+
+assetsenv.Append(
+    ASSETS_COMPILER="${ROOT_DIR.abspath}/scripts/assets.py",
+    NANOPB_COMPILER="${ROOT_DIR.abspath}/lib/nanopb/generator/nanopb_generator.py",
+)
+
+if not assetsenv["VERBOSE"]:
+    assetsenv.Replace(
+        ICONSCOMSTR="\tICONS\t${TARGET}",
+        PROTOCOMSTR="\tPROTO\t${SOURCE}",
+        DOLPHINCOMSTR="\tDOLPHIN\t${DOLPHIN_RES_TYPE}",
+        RESMANIFESTCOMSTR="\tMANIFEST\t${TARGET}",
+        PBVERCOMSTR="\tPBVER\t${TARGET}",
+    )
 
 # Gathering icons sources
 
@@ -62,7 +71,7 @@ proto_ver = assetsenv.Command(
     "#/assets/protobuf/Changelog",
     action=Action(
         proto_ver_generator,
-        "\tPBVER\t${TARGET}",
+        "${PBVERCOMSTR}",
     ),
 )
 Depends(proto_ver, proto)
@@ -98,7 +107,7 @@ if assetsenv["FIRMWARE_BUILD_CFG"] != "updater":
         assetsenv.GlobRecursive("*", "resources", exclude="Manifest"),
         action=Action(
             '${PYTHON3} ${ASSETS_COMPILER} manifest "${TARGET.dir.posix}"',
-            "\tRES\t${TARGET}",
+            "${RESMANIFESTCOMSTR}",
         ),
     )
     Precious(resources)

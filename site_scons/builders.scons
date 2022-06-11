@@ -6,7 +6,7 @@ coreenv.Append(
         "HEXBuilder": Builder(
             action=Action(
                 '${OBJCOPY} -O ihex "${SOURCE}" "${TARGET}"',
-                "\tHEX\t${TARGET}",
+                "${HEXCOMSTR}",
             ),
             suffix=".hex",
             src_suffix=".elf",
@@ -14,7 +14,7 @@ coreenv.Append(
         "BINBuilder": Builder(
             action=Action(
                 '${OBJCOPY} -O binary -S "${SOURCE}" "${TARGET}"',
-                "\tBIN\t${TARGET}",
+                "${BINCOMSTR}",
             ),
             suffix=".bin",
             src_suffix=".elf",
@@ -22,15 +22,15 @@ coreenv.Append(
         "DFUBuilder": Builder(
             action=Action(
                 '${PYTHON3} ./scripts/bin2dfu.py -i "${SOURCE}" -o "${TARGET}" -a ${IMAGE_BASE_ADDRESS} -l "Flipper Zero F${TARGET_HW}"',
-                "\tDFU\t${TARGET}",
+                "${DFUCOMSTR}",
             ),
             suffix=".dfu",
             src_suffix=".bin",
         ),
         "ELFStripper": Builder(
             action=Action(
-                coreenv["STRIPCOM"],
-                "\tSTRIP\t${TARGET}",
+                "${STRIPCOM}",
+                "${STRIPCOMSTR}",
             ),
             suffix=".elf",
             src_suffix=".elf",
@@ -39,7 +39,7 @@ coreenv.Append(
             action=[
                 Action(
                     'openocd ${OPENOCD_OPTS} -c "program ${SOURCE.posix} reset exit ${IMAGE_BASE_ADDRESS}"',
-                    "\tFLASH\t${SOURCE}",
+                    "${FLASHCOMSTR}",
                 ),
                 Touch("${TARGET}"),
             ],
@@ -48,3 +48,12 @@ coreenv.Append(
         ),
     }
 )
+
+if not coreenv["VERBOSE"]:
+    coreenv.Replace(
+        HEXCOMSTR="\tHEX\t${TARGET}",
+        BINCOMSTR="\tBIN\t${TARGET}",
+        DFUCOMSTR="\tDFU\t${TARGET}",
+        STRIPCOMSTR="\tSTRIP\t${TARGET}",
+        FLASHCOMSTR="\tFLASH\t${SOURCE}",
+    )
