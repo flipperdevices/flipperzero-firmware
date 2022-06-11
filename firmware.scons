@@ -1,11 +1,11 @@
-Import("coreenv", "fw_build_meta")
+Import("ENV", "fw_build_meta")
 
 import os
 
 from fbt.appmanifest import FlipperAppType
 
 # Building initial C environment for libs
-env = coreenv.Clone()
+env = ENV.Clone()
 Export("env")
 
 env.Append(
@@ -26,7 +26,20 @@ env.Append(
         "#/firmware/targets/f${TARGET_HW}/Inc",
         "#/firmware/targets/furi_hal_include",
     ],
+    # Specific flags for building libraries - always do optimized builds
+    FW_LIB_OPTS={
+        "Default": {
+            "CCFLAGS": [
+                "-Os",
+            ],
+            "CPPDEFINES": [
+                "NDEBUG",
+                "FURI_NDEBUG",
+            ],
+        }
+    },
 )
+
 
 if fw_build_meta["type"] == "updater":
     env.Append(
@@ -55,14 +68,13 @@ depends = env.BuildModules(
 )
 
 
-# Now, env is fully set up with everything to build apps src
+# Now, env is fully set up with everything to build apps
 fwenv = env.Clone()
-Export("fwenv")
 
 # Set up additional app-specific build flags
-SConscript("site_scons/firmwareopts.scons")
+SConscript("site_scons/firmwareopts.scons", exports={"ENV": fwenv})
 # Prepare manifest-related env methods
-SConscript("site_scons/appmanifests.scons")
+SConscript("site_scons/appmanifests.scons", exports={"ENV": fwenv})
 
 # Set up app configuration
 if env["FIRMWARE_BUILD_CFG"] == "updater":
@@ -196,7 +208,7 @@ Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", cdb)
 # Building external applications
 
 appenv.VariantDir("extapps", "applications", duplicate=False)
-appenv.Replace(
+appenv.SetDefault(
     LINKER_SCRIPT="application-ext",
     STRIPFLAGS=[
         "--strip-debug",
@@ -232,14 +244,14 @@ appenv.Append(
 )
 
 extapps = []
-for app in fwenv["APPBUILD"].get_apps_of_type(FlipperAppType.PLUGIN):
+for app in appenv["APPBUILD"].get_apps_of_type(FlipperAppType.PLUGIN):
     app_elf = appenv.Program(
         os.path.join("extapps", app.appid),
         appenv.GlobRecursive("*.c*", os.path.join("extapps", app._appdir)),
         APP_ENTRY=app.entry_point,
     )
     extapps.append(appenv.ELFStripper(app.appid, app_elf))
-Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps)
+Alias(appenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps)
 
 
 Return("fwhex fwelf fwbin")

@@ -1,4 +1,4 @@
-Import("env", "lib_flags")
+Import("env")
 
 env.Append(
     CPPPATH=[
@@ -13,8 +13,9 @@ env.Append(
 )
 
 
-libenv = env.Clone()
-libenv.MergeFlags(lib_flags)
+libenv = env.Clone(FW_LIB_NAME="freertos")
+libenv.ApplyLibFlags()
+
 
 sources = libenv.Glob("FreeRTOS-Kernel/*.c", source=True)
 sources += [
@@ -22,6 +23,6 @@ sources += [
     "FreeRTOS-glue/cmsis_os2.c",
 ]
 
-lib = libenv.StaticLibrary("freertos", sources)
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

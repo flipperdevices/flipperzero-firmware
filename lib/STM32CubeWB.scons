@@ -1,4 +1,4 @@
-Import("env", "lib_flags")
+Import("env")
 
 env.Append(
     CPPPATH=[
@@ -32,8 +32,8 @@ if env["RAM_EXEC"]:
     )
 
 
-libenv = env.Clone()
-libenv.MergeFlags(lib_flags)
+libenv = env.Clone(FW_LIB_NAME="stm32cubewb")
+libenv.ApplyLibFlags()
 
 sources = libenv.GlobRecursive(
     "*_ll_*.c", "STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Src/", exclude="*usb.c"
@@ -60,6 +60,7 @@ sources += [
     "STM32CubeWB/Middlewares/ST/STM32_WPAN/utilities/stm_list.c",
 ]
 
-lib = libenv.StaticLibrary("stm32cubewb", sources)
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

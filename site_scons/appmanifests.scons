@@ -1,4 +1,4 @@
-Import("fwenv")
+Import("ENV")
 
 import SCons
 from fbt.appmanifest import FlipperAppType, AppManager, ApplicationsCGenerator
@@ -24,15 +24,15 @@ def DumpApplicationConfig(target, source, env):
 
 
 def PrepareApplicationsBuild(env):
-    fwenv["APPBUILD"] = fwenv["APPMGR"].filter_apps(fwenv["APPS"])
-    fwenv["APPBUILD_DUMP"] = Action(
+    env["APPBUILD"] = env["APPMGR"].filter_apps(env["APPS"])
+    env["APPBUILD_DUMP"] = Action(
         DumpApplicationConfig,
         "\tINFO\t",
     )
 
 
-fwenv.AddMethod(LoadApplicationManifests)
-fwenv.AddMethod(PrepareApplicationsBuild)
+ENV.AddMethod(LoadApplicationManifests)
+ENV.AddMethod(PrepareApplicationsBuild)
 
 
 def build_apps_c(target, source, env):
@@ -43,4 +43,4 @@ def build_apps_c(target, source, env):
         file.write(gen.generate())
 
 
-fwenv["APPS_C_ACTION"] = Action(build_apps_c, "${APPSCOMSTR}")
+ENV["APPS_C_ACTION"] = Action(build_apps_c, "${APPSCOMSTR}")

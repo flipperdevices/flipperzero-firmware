@@ -1,4 +1,4 @@
-Import("env", "lib_flags")
+Import("env")
 
 env.Append(
     CPPPATH=[
@@ -16,9 +16,8 @@ env.Append(
 )
 
 
-libenv = env.Clone()
-libenv.MergeFlags(lib_flags)
-
+libenv = env.Clone(FW_LIB_NAME="misc")
+libenv.ApplyLibFlags()
 
 sources = []
 
@@ -42,6 +41,6 @@ libs_plain = [
 for lib in libs_plain:
     sources += Glob(lib + "/*.c*", source=True)
 
-lib = libenv.StaticLibrary("misc", sources)
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

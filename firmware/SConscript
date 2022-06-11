@@ -1,7 +1,7 @@
-Import("env", "lib_flags")
+Import("env")
 
-libenv = env.Clone()
-libenv.MergeFlags(lib_flags)
+libenv = env.Clone(FW_LIB_NAME="flipper${TARGET_HW}")
+libenv.ApplyLibFlags()
 
 libenv.Append(
     CPPPATH=[
@@ -12,6 +12,6 @@ libenv.Append(
 sources = ["targets/f${TARGET_HW}/startup_stm32wb55xx_cm4.s"]
 sources += libenv.GlobRecursive("*.c")
 
-lib = libenv.Library("flipper${TARGET_HW}", sources)
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

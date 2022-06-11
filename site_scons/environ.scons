@@ -3,13 +3,14 @@ import SCons
 import sutils
 
 import os
-import sys
 import multiprocessing
 
 
 vars = Variables(None, ARGUMENTS)
 vars.Add(BoolVariable("VERBOSE", help="Print full commands", default=0))
-vars.Add(BoolVariable("FORCE", help="Force target action", default=0))
+vars.Add(
+    BoolVariable("FORCE", help="Force target action (for supported targets)", default=0)
+)
 vars.Add(BoolVariable("DEBUG", help="Enable debug build", default=1))
 vars.Add(BoolVariable("COMPACT", help="Optimize for size", default=0))
 vars.Add(
@@ -42,7 +43,7 @@ coreenv = Environment(
 )
 
 if not coreenv["VERBOSE"]:
-    coreenv.Replace(
+    coreenv.SetDefault(
         CCCOMSTR="\tCC\t${SOURCE}",
         CXXCOMSTR="\tCPP\t${SOURCE}",
         ASCOMSTR="\tASM\t${SOURCE}",
@@ -52,7 +53,7 @@ if not coreenv["VERBOSE"]:
         INSTALLSTR="\tINSTALL\t${TARGET}",
         APPSCOMSTR="\tAPPS\t${TARGET}",
         VERSIONCOMSTR="\tVERSION\t${TARGET}",
-        # STRIPCOMSTR="\tSTRIP\t${TARGET}",
+        STRIPCOMSTR="\tSTRIP\t${TARGET}",
     )
 
 if coreenv["PLATFORM"] == "win32":
@@ -107,7 +108,7 @@ def GlobRecursive(env, pattern, node=".", exclude=None):
         node = Dir(node)
     for f in node.glob("*", source=True, exclude=exclude):
         if isinstance(f, SCons.Node.FS.Dir):
-            results += coreenv.GlobRecursive(pattern, f, exclude)
+            results += env.GlobRecursive(pattern, f, exclude)
     results += node.glob(
         pattern,
         source=True,
@@ -146,8 +147,18 @@ def BuildModules(env, modules):
     return result
 
 
+def ApplyLibFlags(env):
+    flags_to_apply = env["FW_LIB_OPTS"].get(
+        env.get("FW_LIB_NAME"),
+        env["FW_LIB_OPTS"]["Default"],
+    )
+    # print("Flags for ", env.get("FW_LIB_NAME", "Default"), flags_to_apply)
+    env.MergeFlags(flags_to_apply)
+
+
 coreenv.AddMethod(GlobRecursive)
+coreenv.AddMethod(ApplyLibFlags)
 coreenv.AddMethod(BuildModule)
 coreenv.AddMethod(BuildModules)
 
-Export("coreenv")
+Return("coreenv")

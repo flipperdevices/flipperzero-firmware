@@ -1,4 +1,4 @@
-Import("env", "lib_flags")
+Import("env")
 
 env.Append(
     CPPPATH=[
@@ -9,8 +9,9 @@ env.Append(
 )
 
 
-libenv = env.Clone()
-libenv.MergeFlags(lib_flags)
+libenv = env.Clone(FW_LIB_NAME="appframe")
+libenv.ApplyLibFlags()
+
 
 sources = []
 
@@ -22,6 +23,6 @@ recurse_dirs = [
 for recurse_dir in recurse_dirs:
     sources += libenv.GlobRecursive("*.c*", recurse_dir)
 
-lib = libenv.StaticLibrary("appframe", sources)
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

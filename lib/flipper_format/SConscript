@@ -1,4 +1,4 @@
-Import("env", "lib_flags")
+Import("env")
 
 env.Append(
     CPPPATH=[
@@ -7,8 +7,8 @@ env.Append(
 )
 
 
-libenv = env.Clone()
-libenv.MergeFlags(lib_flags)
+libenv = env.Clone(FW_LIB_NAME="flipperformat")
+libenv.ApplyLibFlags()
 
 if libenv["RAM_EXEC"]:
     libenv.Append(
@@ -20,6 +20,6 @@ if libenv["RAM_EXEC"]:
 
 sources = libenv.GlobRecursive("*.c")
 
-lib = libenv.StaticLibrary("flipperformat", sources)
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

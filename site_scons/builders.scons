@@ -1,7 +1,7 @@
-Import("coreenv")
+Import("ENV")
 
 
-coreenv.Append(
+ENV.Append(
     BUILDERS={
         "HEXBuilder": Builder(
             action=Action(
@@ -49,11 +49,10 @@ coreenv.Append(
     }
 )
 
-if not coreenv["VERBOSE"]:
-    coreenv.Replace(
+if not ENV["VERBOSE"]:
+    ENV.SetDefault(
         HEXCOMSTR="\tHEX\t${TARGET}",
         BINCOMSTR="\tBIN\t${TARGET}",
         DFUCOMSTR="\tDFU\t${TARGET}",
-        STRIPCOMSTR="\tSTRIP\t${TARGET}",
         FLASHCOMSTR="\tFLASH\t${SOURCE}",
     )

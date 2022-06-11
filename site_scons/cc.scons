@@ -1,7 +1,7 @@
-Import("coreenv")
+Import("ENV")
 
 
-coreenv.Append(
+ENV.Append(
     CFLAGS=[
         "-std=gnu17",
     ],
@@ -41,18 +41,3 @@ coreenv.Append(
         "-mthumb",
     ],
 )
-
-
-# Specific flags for building libraries - always do optimized builds
-
-lib_flags = {
-    "CCFLAGS": [
-        "-Os",
-    ],
-    "CPPDEFINES": [
-        "NDEBUG",
-        "FURI_NDEBUG",
-    ],
-}
-
-Export("lib_flags")

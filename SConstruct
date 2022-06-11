@@ -7,11 +7,10 @@ AddOption(
     help="Full firmware environment",
 )
 
-SConscript("site_scons/environ.scons")
-SConscript("site_scons/cc.scons")
-SConscript("site_scons/builders.scons")
+coreenv = SConscript("site_scons/environ.scons")
+SConscript("site_scons/cc.scons", exports={"ENV": coreenv})
+SConscript("site_scons/builders.scons", exports={"ENV": coreenv})
 
-Import("coreenv")
 
 # Progress(["-\r", "\\\r", "|\r", "/\r"], interval=5)
 variant_dir_name = f"f{coreenv.subst('$TARGET_HW')}-FWTYPE"
@@ -31,6 +30,7 @@ firmware = SConscript(
     variant_dir=build_path.replace("FWTYPE", "firmware"),
     duplicate=0,
     exports={
+        "ENV": coreenv,
         "fw_build_meta": {
             "type": "firmware",
             "build_dir": build_path.replace("FWTYPE", "firmware"),
@@ -45,6 +45,7 @@ if GetOption("fullenv"):
         variant_dir=build_path.replace("FWTYPE", "updater"),
         duplicate=0,
         exports={
+            "ENV": coreenv,
             "fw_build_meta": {
                 "type": "updater",
                 "build_dir": build_path.replace("FWTYPE", "updater"),

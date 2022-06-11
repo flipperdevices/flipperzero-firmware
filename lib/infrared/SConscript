@@ -1,4 +1,4 @@
-Import("env", "lib_flags")
+Import("env")
 
 env.Append(
     CPPPATH=[
@@ -8,11 +8,11 @@ env.Append(
 )
 
 
-libenv = env.Clone()
-libenv.MergeFlags(lib_flags)
+libenv = env.Clone(FW_LIB_NAME="infrared")
+libenv.ApplyLibFlags()
 
 sources = libenv.GlobRecursive("*.c")
 
-lib = libenv.StaticLibrary("infrared", sources)
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

@@ -1,4 +1,4 @@
-Import("env", "lib_flags")
+Import("env")
 
 import subprocess
 import datetime
@@ -10,8 +10,8 @@ env.Append(
 )
 
 
-libenv = env.Clone()
-libenv.MergeFlags(lib_flags)
+libenv = env.Clone(FW_LIB_NAME="toolbox")
+libenv.ApplyLibFlags()
 
 # Git Version management
 version_depends = []
@@ -53,6 +53,6 @@ sources = libenv.GlobRecursive("*.c")
 
 libenv.Append(CPPPATH=["."])
 
-lib = libenv.StaticLibrary("toolbox", sources)
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

@@ -1,10 +1,10 @@
-Import("env", "lib_flags")
+Import("env")
 
-libenv = env.Clone()
-libenv.MergeFlags(lib_flags)
+libenv = env.Clone(FW_LIB_NAME="core")
+libenv.ApplyLibFlags()
 
 sources = libenv.GlobRecursive("*.c")
 
-lib = libenv.Library("core", sources)
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

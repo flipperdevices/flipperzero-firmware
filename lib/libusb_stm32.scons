@@ -1,4 +1,4 @@
-Import("env", "lib_flags")
+Import("env")
 
 env.Append(
     CPPPATH=[
@@ -10,14 +10,15 @@ env.Append(
 )
 
 
-libenv = env.Clone()
-libenv.MergeFlags(lib_flags)
+libenv = env.Clone(FW_LIB_NAME="usb_stm32")
+libenv.ApplyLibFlags()
+
 
 sources = [
     "libusb_stm32/src/usbd_core.c",
     "libusb_stm32/src/usbd_stm32wb55_devfs.c",
 ]
 
-lib = libenv.StaticLibrary("usb_stm32", sources)
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")
