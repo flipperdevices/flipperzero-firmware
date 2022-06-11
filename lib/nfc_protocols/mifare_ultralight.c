@@ -934,7 +934,7 @@ static void mf_ul_emulate_write(
         page_buff[0] = new_locks & 0xff;
         page_buff[1] = new_locks >> 8;
         page_buff[2] = new_block_locks;
-        if(emulator->data.type >= MfUltralightTypeNTAG213 &&
+        if(emulator->data.type >= MfUltralightTypeUL21 &&
            emulator->data.type <= MfUltralightTypeNTAG216)
             page_buff[3] = MF_UL_TEARING_FLAG_DEFAULT;
         else
