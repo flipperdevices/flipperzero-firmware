@@ -1,2 +1,3 @@
 * text=auto eol=lf
 *.sh.bat binary
+*.ps1 eol=crlf
