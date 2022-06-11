@@ -27,11 +27,9 @@ build_version = libenv.VersionBuilder(
     version_depends,
 )
 
-# AddPostAction(build_version, libenv.Install("${BUILD_DIR}", "version.json"))
-libenv.Install("${BUILD_DIR}", "version.json")
+Default(libenv.InstallAs("${BUILD_DIR}/${FIRMWARE_BUILD_CFG}.json", "version.json"))
 
 
-# if True:
 if not version_depends:
     libenv.Precious(build_version)
     libenv.AlwaysBuild(build_version)
