@@ -126,6 +126,19 @@ blackmagic:
 		-ex "compare-sections" \
 		$(OBJ_DIR)/$(PROJECT).elf; \
 
+blackmagic_load:
+	arm-none-eabi-gdb-py \
+		-ex 'set pagination off' \
+		-ex 'set confirm off' \
+		-ex 'target extended-remote $(BLACKMAGIC)' \
+		-ex 'monitor swdp_scan' \
+		-ex 'attach 1' \
+		-ex 'set mem inaccessible-by-default off' \
+		-ex 'load' \
+		-ex 'run' \
+		-ex 'quit' \
+		$(OBJ_DIR)/$(PROJECT).elf; \
+
 .PHONY: openocd
 openocd:
 	openocd $(OPENOCD_OPTS)
