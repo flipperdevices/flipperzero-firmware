@@ -17,6 +17,7 @@ Latest Updates:
 - Latest DEV changes
 - Removed unused icons to conserve space
 - Removed [Zombiez (By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
+- Added [Tanks (By Alexgr13) Updated by RogueMaster To Work](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -42,6 +43,10 @@ Special shout out to these libraries for giving us more fun:
 - https://github.com/UberGuidoZ/Flipper
 - https://github.com/UberGuidoZ/Flipper-IRDB
 
+Added Features:
+- Actual PIN Lock (By RogueMaster)
+- Added 90s Timeout for Backlight Time (By RogueMaster)
+
 Plugins:
 - [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/dice/dice.c)
@@ -51,6 +56,7 @@ Plugins:
 - [Mouse Jiggler (By Jacob-Tate)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c)
 - [RF Remix (By ESurge)(Original By jimilinuxguy)](https://github.com/ESurge/flipperzero-firmware-unirfremix)
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer)
+- [Tanks (By Alexgr13) Updated by RogueMaster To Work](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game)
 - [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
 - [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) With Fix From Atmanos
