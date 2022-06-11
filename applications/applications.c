@@ -60,6 +60,7 @@ extern int32_t unirfremix_app(void *p);
 extern int32_t dice_app(void *p);
 extern int32_t hid_analyzer_app(void* p);
 extern int32_t mouse_jiggler_app(void *p);
+extern int32_t tanks_game_app(void* p);
 
 // On system start hooks declaration
 extern void bt_on_system_start();
@@ -336,6 +337,10 @@ const FlipperApplication FLIPPER_GAMES[] = {
      .stack_size = 1024,
      .icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
+#endif
+
+#ifdef APP_TANKS_GAME
+    {.app = tanks_game_app, .name = "Tanks", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
 
 #ifdef APP_TETRIS_GAME
