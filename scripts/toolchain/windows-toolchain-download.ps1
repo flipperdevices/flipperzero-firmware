@@ -1,7 +1,7 @@
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
-$repo_root = (Get-Item "$PSScriptRoot\..").FullName
+$repo_root = (Get-Item "$PSScriptRoot\..\..").FullName
 $toolchain_url = "https://github.com/flipperdevices/flipperzero-firmware/archive/refs/tags/0.60.0-rc.zip"
 $toolchain_zip = "gcc-arm-none-eabi-10.3-2022.06-win32.zip"
 
