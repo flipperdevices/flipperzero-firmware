@@ -1,19 +1,20 @@
 # Main Fipper Build System entry point.
 #
 # This file is evaluated every time every time scons is invoked.
-# scons bulds all referenced environments & their targets' dependency trees
+# scons builds all referenced environments & their targets' dependency trees
 # on startup. So, to keep startup time as low as possible, we're hiding
 # construction of certain targets behind command-line options.
 
 import os
 
-# To build updater-related targets, we need to set this option
+# To build updater-related targets, you need to set this option
 AddOption(
     "--with-updater",
     dest="fullenv",
     action="store_true",
     help="Full firmware environment",
 )
+
 
 # Building basic environment - tools, utility methods, cross-compilation
 # settings, gcc flags for Cortex-M4, basic builders and more
@@ -22,7 +23,7 @@ SConscript("site_scons/cc.scons", exports={"ENV": coreenv})
 SConscript("site_scons/builders.scons", exports={"ENV": coreenv})
 
 
-Progress(["-\r", "\\\r", "|\r", "/\r"], interval=5)
+Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
 
 # Variant dir setup
 variant_dir_name = f"f{coreenv.subst('$TARGET_HW')}-FWTYPE"

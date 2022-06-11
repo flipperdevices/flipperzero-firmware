@@ -38,7 +38,7 @@ ENV.AddMethod(PrepareApplicationsBuild)
 def build_apps_c(target, source, env):
     target_file_name = target[0].path
 
-    gen = ApplicationsCGenerator(fwenv["APPBUILD"])
+    gen = ApplicationsCGenerator(env["APPBUILD"])
     with open(target_file_name, "w") as file:
         file.write(gen.generate())
 
