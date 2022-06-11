@@ -108,6 +108,10 @@ else:
 fwenv.LoadApplicationManifests()
 fwenv.PrepareApplicationsBuild()
 
+# Clone current environment to build external apps later with its current state
+appenv = fwenv.Clone()
+
+
 # Add preprocessor definitions for current set of apps
 fwenv.Append(
     CPPDEFINES=fwenv["APPBUILD"].get_apps_cdefs(),
@@ -128,8 +132,6 @@ sources = [apps_c]
 for app_folder in fwenv["APPBUILD"].get_builtin_app_folders():
     sources += fwenv.GlobRecursive("*.c*", os.path.join("applications", app_folder))
 
-# Clone current environment to build external apps later with its current state
-appenv = fwenv.Clone()
 
 fwenv.Append(
     LINKFLAGS=[
@@ -208,7 +210,7 @@ Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", cdb)
 # Building external applications
 
 appenv.VariantDir("extapps", "applications", duplicate=False)
-appenv.SetDefault(
+appenv.Replace(
     LINKER_SCRIPT="application-ext",
     STRIPFLAGS=[
         "--strip-debug",
@@ -218,6 +220,7 @@ appenv.SetDefault(
         "-S",
     ],
 )
+
 appenv.Append(
     CCFLAGS=[
         "-Os",
