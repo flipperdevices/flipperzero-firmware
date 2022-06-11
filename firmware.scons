@@ -2,6 +2,7 @@ Import("coreenv", "fw_build_meta")
 
 import os
 
+from fbt.appmanifest import FlipperAppType
 
 # Building initial C environment for libs
 env = coreenv.Clone()
@@ -100,9 +101,8 @@ fwenv.Append(
     CPPDEFINES=fwenv["APPBUILD"].get_apps_cdefs(),
 )
 
-# Build applications.c for selected services & apps
 
-Import("FlipperAppType")
+# Build applications.c for selected services & apps
 
 # Depends on virtual value-only node, so it only gets rebuilt when set of apps changes
 apps_c = fwenv.Command(
