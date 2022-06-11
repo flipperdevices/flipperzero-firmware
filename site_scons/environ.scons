@@ -1,10 +1,9 @@
-from SCons.Subst import quote_spaces
 from SCons.Platform import TempFileMunge
-
 import SCons
+import sutils
+
 import os
 import sys
-import re
 import multiprocessing
 
 
@@ -69,46 +68,34 @@ SetOption("num_jobs", multiprocessing.cpu_count())
 SetOption("implicit_cache", True)
 SetOption("implicit_deps_unchanged", True)
 SetOption("max_drift", 1)
+SetOption("random", 1)
 # coreenv.Decider("content-timestamp")
-
-
-# Setting up temp file parameters
-
-WINPATHSEP_RE = re.compile(r"\\([^\"'\\]|$)")
-
-
-def tempfile_arg_esc_func(arg):
-    arg = quote_spaces(arg)
-    if coreenv["PLATFORM"] != "win32":
-        return arg
-    # GCC requires double Windows slashes, let's use UNIX separator
-    return WINPATHSEP_RE.sub(r"/\1", arg)
-
-
-coreenv["TEMPFILEARGESCFUNC"] = tempfile_arg_esc_func
 
 
 # Set up cross-compile tools
 
-TOOLCHAIN_PREFIX = "arm-none-eabi-"
+sutils.prefix_commands(
+    coreenv,
+    "arm-none-eabi-",
+    [
+        "AR",
+        "AS",
+        "CC",
+        "CXX",
+        "OBJCOPY",
+        "RANLIB",
+        "STRIP",
+    ],
+)
 
-for binary in [
-    "AR",
-    "AS",
-    "CC",
-    "CXX",
-    "OBJCOPY",
-    "RANLIB",
-    "STRIP",
-]:
-    if binary in coreenv:
-        coreenv[binary] = TOOLCHAIN_PREFIX + coreenv[binary]
+# Setting up temp file parameters
 
+coreenv["TEMPFILEARGESCFUNC"] = sutils.tempfile_arg_esc_func
 
 # Commandline length limit hack
 
-coreenv["LINKCOM"] = '${TEMPFILE("' + coreenv["LINKCOM"] + '","$LINKCOMSTR")}'
-coreenv["ARCOM"] = '${TEMPFILE("' + coreenv["ARCOM"] + '","$ARCOMSTR")}'
+sutils.wrap_tempfile(coreenv, "LINKCOM")
+sutils.wrap_tempfile(coreenv, "ARCOM")
 
 
 # Build env extensions
