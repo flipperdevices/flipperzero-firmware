@@ -18,6 +18,8 @@ Latest Updates:
 - Removed unused icons to conserve space
 - Removed [Zombiez (By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
 - Added [Tanks (By Alexgr13) Updated by RogueMaster To Work](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game)
+- Added Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
+- Removing T5577 passwords via the cli command rfid clear_pass_t5577 using a dictionary attack [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
