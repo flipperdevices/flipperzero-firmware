@@ -11,11 +11,12 @@ public:
     void write_hid(const uint8_t hid_data[3]);
     void write_ioprox(const uint8_t ioprox_data[4]);
     void write_indala(const uint8_t indala_data[3]);
+    void write_block(uint8_t page, uint8_t block, bool lock_bit, uint32_t data, bool password_enable, uint32_t password);
+    void write_reset();
 
 private:
     void write_gap(uint32_t gap_time);
     void write_bit(bool value);
     void write_byte(uint8_t value);
-    void write_block(uint8_t page, uint8_t block, bool lock_bit, uint32_t data);
-    void write_reset();
+
 };
