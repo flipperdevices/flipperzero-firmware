@@ -6,9 +6,9 @@ echo >/dev/null # >nul & GOTO WINDOWS & rem ^
 # *           New lines in Linux: \n\n
 # *           New lines in Windows: \r\n
 # ***********************************************************
-scripts/unix-toolchain-download.sh
+scripts/toolchain/unix-toolchain-download.sh
 exit 0
 :WINDOWS
 @echo off
 cls
-powershell -ExecutionPolicy Bypass -File scripts\windows-toolchain-download.ps1
+powershell -ExecutionPolicy Bypass -File scripts\toolchain\windows-toolchain-download.ps1
