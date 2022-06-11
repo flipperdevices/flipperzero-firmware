@@ -15,7 +15,7 @@ env.Append(
         "${LIB_DIST_DIR}",
     ],
     CPPDEFINES=[
-        ("TARGET", "${TARGET_HW}"),
+        # ("TARGET", "${TARGET_HW}"),
     ],
     CPPPATH=[
         "#/core",

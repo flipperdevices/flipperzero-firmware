@@ -4,6 +4,7 @@ from flipper.app import App
 
 import subprocess
 import os
+import json
 from datetime import date
 
 
@@ -23,7 +24,6 @@ class GitVersion:
 
         branch = self._exec_git("rev-parse --abbrev-ref HEAD") or "unknown"
         branch_num = self._exec_git("rev-list --count HEAD") or "n/a"
-        build_date = date.today().isoformat()
 
         try:
             version = self._exec_git("describe --tags --abbrev=0 --exact-match")
@@ -31,11 +31,10 @@ class GitVersion:
             version = "unknown"
 
         return {
-            "GIT_COMMIT": f'"{commit}"',
-            "GIT_BRANCH": f'"{branch}"',
-            "GIT_BRANCH_NUM": f'"{branch_num}"',
-            "VERSION": f'"{version}"',
-            "BUILD_DATE": f'"{build_date}"',
+            "GIT_COMMIT": commit,
+            "GIT_BRANCH": branch,
+            "GIT_BRANCH_NUM": branch_num,
+            "VERSION": version,
             "BUILD_DIRTY": dirty and 1 or 0,
         }
 
@@ -58,21 +57,41 @@ class Main(App):
             "generate", help="Generate version header"
         )
 
-        self.parser_generate.add_argument("-o", dest="output", required=True)
+        self.parser_generate.add_argument("-o", dest="outdir", required=True)
+        self.parser_generate.add_argument(
+            "-t",
+            dest="target",
+            type=int,
+            help="hardware target",
+            required=True,
+        )
         self.parser_generate.add_argument("--dir", dest="sourcedir", required=True)
         self.parser_generate.set_defaults(func=self.generate)
 
     def generate(self):
         current_info = GitVersion(self.args.sourcedir).get_version_info()
-        new_version_info_fmt = (
-            "\n".join(f"#define {key} {current_info[key]}" for key in current_info)
-            + "\n"
+        current_info.update(
+            {
+                "BUILD_DATE": date.today().strftime("%d-%m-%Y"),
+                "TARGET": self.args.target,
+            }
         )
 
+        version_values = []
+        for key in current_info:
+            val = current_info[key]
+            if isinstance(val, str):
+                val = f'"{val}"'
+            version_values.append(f"#define {key} {val}")
+
+        new_version_info_fmt = "\n".join(version_values) + "\n"
+
         current_version_info = None
+        version_header_name = os.path.join(self.args.outdir, "version.inc.h")
+        version_json_name = os.path.join(self.args.outdir, "version.json")
 
         try:
-            with open(self.args.output, "r") as file:
+            with open(version_header_name, "r") as file:
                 current_version_info = file.read()
         except EnvironmentError as e:
             if self.args.debug:
@@ -82,7 +101,7 @@ class Main(App):
             if self.args.debug:
                 print("old: ", current_version_info)
                 print("new: ", new_version_info_fmt)
-            with open(self.args.output, "w", newline="\n") as file:
+            with open(version_header_name, "w", newline="\n") as file:
                 file.write(new_version_info_fmt)
             # os.utime("../lib/toolbox/version.c", None)
             print("Version information updated")
@@ -90,6 +109,14 @@ class Main(App):
             if self.args.debug:
                 print("Version information hasn't changed")
 
+        version_json = {
+            "firmware_build_date": current_info["BUILD_DATE"],
+            "firmware_commit": current_info["GIT_COMMIT"],
+            "firmware_branch": current_info["GIT_BRANCH"],
+            "firmware_target": current_info["TARGET"],
+        }
+        with open(version_json_name, "w", newline="\n") as file:
+            json.dump(version_json, file, indent=4)
         return 0
 
 

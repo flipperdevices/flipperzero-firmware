@@ -1,7 +1,7 @@
 Import("env")
 
-import subprocess
-import datetime
+from fbt.builders.version import add_version_builders, get_fast_git_version_id
+
 
 env.Append(
     CPPPATH=[
@@ -13,38 +13,25 @@ env.Append(
 libenv = env.Clone(FW_LIB_NAME="toolbox")
 libenv.ApplyLibFlags()
 
+add_version_builders(libenv)
+
 # Git Version management
 version_depends = []
-try:
-    version = (
-        subprocess.check_output(
-            [
-                "git",
-                "describe",
-                "--always",
-                "--dirty",
-                "--all",
-                "--long",
-            ]
-        )
-        .strip()
-        .decode()
-    )
-    version_depends = Value((version, datetime.date.today()))
-    # print(version_depends)
-except Exception as e:
-    print("Failed to check for git changes", e)
+version_id_data = get_fast_git_version_id()
+if version_id_data:
+    version_depends = Value(version_id_data)
 
 # Only invoke version generator if preliminary check target (version_depends) has changed
-build_version = libenv.Command(
-    "version.inc.h",
+build_version = libenv.VersionBuilder(
+    Dir("."),
     version_depends,
-    Action(
-        "${PYTHON3} ${ROOT_DIR.abspath}/scripts/version.py generate -o ${TARGET} --dir ${ROOT_DIR}",
-        "${VERSIONCOMSTR}",
-    ),
 )
 
+# AddPostAction(build_version, libenv.Install("${BUILD_DIR}", "version.json"))
+libenv.Install("${BUILD_DIR}", "version.json")
+
+
+# if True:
 if not version_depends:
     libenv.Precious(build_version)
     libenv.AlwaysBuild(build_version)
