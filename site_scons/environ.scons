@@ -49,7 +49,7 @@ if not coreenv["VERBOSE"]:
         ARCOMSTR="\tAR\t${TARGET}",
         RANLIBCOMSTR="\tRANLIB\t${TARGET}",
         LINKCOMSTR="\tLINK\t${TARGET}",
-        INSTALLSTR="\tINSTALL\t${SOURCE}",
+        INSTALLSTR="\tINSTALL\t${TARGET}",
         APPSCOMSTR="\tAPPS\t${TARGET}",
         VERSIONCOMSTR="\tVERSION\t${TARGET}",
         # STRIPCOMSTR="\tSTRIP\t${TARGET}",

@@ -110,8 +110,6 @@ apps_c = fwenv.Command(
     Value(fwenv["APPS"]),
     action=fwenv["APPS_C_ACTION"],
 )
-AddPreAction(apps_c, fwenv["APPBUILD_DUMP"])
-
 
 sources = [apps_c]
 # Gather sources only from app folders from current configuration
@@ -145,7 +143,7 @@ fwenv.Append(
 
 # Full firmware definition
 
-firmware_elf = fwenv.Program(
+fwelf = fwenv.Program(
     "${FIRMWARE_BUILD_CFG}",
     sources,
     LIBS=[
@@ -173,14 +171,15 @@ firmware_elf = fwenv.Program(
 )
 
 # Make it depend on everything child builders returned
-Depends(firmware_elf, depends)
+Depends(fwelf, depends)
+AddPostAction(fwelf, fwenv["APPBUILD_DUMP"])
 
 
-fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
-fwenv.BINBuilder("${FIRMWARE_BUILD_CFG}")
-dfu = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
+fwhex = fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
+fwbin = fwenv.BINBuilder("${FIRMWARE_BUILD_CFG}")
+fwdfu = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
 # Default(dfu)
-Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", dfu)
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_dfu", fwdfu)
 
 # Additional FW-related pseudotargets
 flash = fwenv.Flasher("${FIRMWARE_BUILD_CFG}")
@@ -243,4 +242,4 @@ for app in fwenv["APPBUILD"].get_apps_of_type(FlipperAppType.PLUGIN):
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps)
 
 
-Return("dfu")
+Return("fwhex fwelf fwbin")
