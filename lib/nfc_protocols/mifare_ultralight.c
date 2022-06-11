@@ -753,7 +753,7 @@ static bool mf_ul_check_auth(MfUltralightEmulator* emulator, uint8_t start_page,
             return false;
     }
 
-    if(is_write && emulator->config->access.cfglck) {
+    if(is_write && emulator->cfglck_active) {
         uint16_t config_start_page = emulator->page_num - 4;
         if(start_page == config_start_page || start_page == config_start_page + 1) return false;
     }
@@ -955,6 +955,20 @@ static void mf_ul_emulate_write(
     emulator->data_changed = true;
 }
 
+void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle) {
+    emulator->curr_sector = 0;
+    emulator->ntag_i2c_plus_sector3_lockout = false;
+    emulator->auth_success = false;
+    if(is_power_cycle) {
+        if(emulator->data.type >= MfUltralightTypeUL11 &&
+           emulator->data.type <= MfUltralightTypeNTAG216) {
+            emulator->cfglck_active = emulator->config->access.cfglck;
+        } else {
+            emulator->cfglck_active = false;
+        }
+    }
+}
+
 void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* data) {
     FURI_LOG_D(TAG, "Prepare emulation");
     emulator->data = *data;
@@ -964,7 +978,7 @@ void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* d
     emulator->data_changed = false;
     emulator->comp_write_cmd_started = false;
     emulator->sector_select_cmd_started = false;
-    emulator->ntag_i2c_plus_sector3_lockout = false;
+    mf_ul_reset_emulation(emulator, true);
 }
 
 bool mf_ul_prepare_emulation_response(
@@ -1305,10 +1319,8 @@ bool mf_ul_prepare_emulation_response(
             }
         }
     } else if(cmd == MF_UL_HALT_START) {
+        mf_ul_reset_emulation(emulator, false);
         tx_bits = 0;
-        emulator->curr_sector = 0;
-        emulator->ntag_i2c_plus_sector3_lockout = false;
-        emulator->auth_success = false;
         command_parsed = true;
         FURI_LOG_D(TAG, "Received HLTA");
     } else if(cmd == MF_UL_SECTOR_SELECT) {

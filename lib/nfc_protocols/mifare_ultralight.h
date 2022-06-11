@@ -158,6 +158,7 @@ typedef struct {
     uint8_t curr_sector;
     bool sector_select_cmd_started;
     bool ntag_i2c_plus_sector3_lockout;
+    bool cfglck_active;
 } MfUltralightEmulator;
 
 bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
@@ -189,6 +190,8 @@ bool mf_ul_read_card(
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
     MfUltralightData* data);
+
+void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle);
 
 void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* data);
 
