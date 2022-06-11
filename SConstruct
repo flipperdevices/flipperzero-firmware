@@ -23,7 +23,7 @@ SConscript("site_scons/cc.scons", exports={"ENV": coreenv})
 SConscript("site_scons/builders.scons", exports={"ENV": coreenv})
 
 
-Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
+# Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
 
 # Variant dir setup
 variant_dir_name = f"f{coreenv.subst('$TARGET_HW')}-FWTYPE"
