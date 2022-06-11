@@ -5,6 +5,8 @@
 # on startup. So, to keep startup time as low as possible, we're hiding
 # construction of certain targets behind command-line options.
 
+from sutils import get_variant_dirname
+
 import os
 
 # To build updater-related targets, you need to set this option
@@ -22,50 +24,32 @@ coreenv = SConscript("site_scons/environ.scons")
 SConscript("site_scons/cc.scons", exports={"ENV": coreenv})
 SConscript("site_scons/builders.scons", exports={"ENV": coreenv})
 
+# Store root dir in environment for certain tools
+coreenv["ROOT_DIR"] = Dir(".")
 
 # Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
 
-# Variant dir setup
-variant_dir_name = f"f{coreenv.subst('$TARGET_HW')}-FWTYPE"
-suffix = ""
-if coreenv["DEBUG"]:
-    suffix += "D"
-if coreenv["COMPACT"]:
-    suffix += "C"
-if suffix:
-    variant_dir_name += "-" + suffix
 
-# Store root dir in environment for certain tools
-coreenv["ROOT_DIR"] = Dir(".")
 # Prepare variant dir for current configuration
-build_path = os.path.join(Dir(".").abspath, "build", variant_dir_name)
-
-# Configure basic firmware targets
-firmware = SConscript(
-    "firmware.scons",
-    variant_dir=build_path.replace("FWTYPE", "firmware"),
-    duplicate=0,
-    exports={
-        "ENV": coreenv,
-        "fw_build_meta": {
-            "type": "firmware",
-            "build_dir": build_path.replace("FWTYPE", "firmware"),
+def create_fw_build_targets(env, configuration_name):
+    build_dir = Dir("build").Dir(get_variant_dirname(env, "firmware")).abspath
+    return SConscript(
+        "firmware.scons",
+        variant_dir=build_dir,
+        duplicate=0,
+        exports={
+            "ENV": env,
+            "fw_build_meta": {
+                "type": "firmware",
+                "build_dir": build_dir,
+            },
         },
-    },
-)
+    )
+
+
+firmware = create_fw_build_targets(coreenv, "firmware")
 Default(firmware)
 
 # If enabled, configure updater-related targets
 if GetOption("fullenv"):
-    updater = SConscript(
-        "firmware.scons",
-        variant_dir=build_path.replace("FWTYPE", "updater"),
-        duplicate=0,
-        exports={
-            "ENV": coreenv,
-            "fw_build_meta": {
-                "type": "updater",
-                "build_dir": build_path.replace("FWTYPE", "updater"),
-            },
-        },
-    )
+    updater = create_fw_build_targets(coreenv, "updater")

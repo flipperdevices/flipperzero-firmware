@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Set, Dict, Tuple, Optional
+from typing import List, Optional
 from enum import Enum
 import os
 
@@ -77,11 +77,15 @@ class AppManager:
 
     def _add_known_app(self, app: FlipperApplication):
         if self.known_apps.get(app.appid, None):
-            raise Exception(f"Duplicate app declaration: {app.appid}")
+            raise FlipperManifestException(f"Duplicate app declaration: {app.appid}")
         self.known_apps[app.appid] = app
 
     def filter_apps(self, applist: List[str]):
         return AppBuildset(self, applist)
+
+
+class AppBuilderException(Exception):
+    pass
 
 
 class AppBuildset:
@@ -140,7 +144,7 @@ class AppBuildset:
                 conflicts.append((app, conflict_app_name))
 
         if len(conflicts):
-            raise Exception(
+            raise AppBuilderException(
                 f"App conflicts for {', '.join(f'{conflict_dep[0]}: {conflict_dep[1]}' for conflict_dep in conflicts)}"
             )
 
@@ -153,7 +157,7 @@ class AppBuildset:
                 unsatisfied.append((app, missing_dep))
 
         if len(unsatisfied):
-            raise Exception(
+            raise AppBuilderException(
                 f"Unsatisfied dependencies for {', '.join(f'{missing_dep[0]}: {missing_dep[1]}' for missing_dep in unsatisfied)}"
             )
 

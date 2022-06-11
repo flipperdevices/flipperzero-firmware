@@ -113,7 +113,7 @@ appenv = fwenv.Clone()
 
 
 # Add preprocessor definitions for current set of apps
-fwenv.Append(
+fwenv.AppendUnique(
     CPPDEFINES=fwenv["APPBUILD"].get_apps_cdefs(),
 )
 
@@ -133,7 +133,7 @@ for app_folder in fwenv["APPBUILD"].get_builtin_app_folders():
     sources += fwenv.GlobRecursive("*.c*", os.path.join("applications", app_folder))
 
 
-fwenv.Append(
+fwenv.AppendUnique(
     LINKFLAGS=[
         "-specs=nano.specs",
         "-specs=nosys.specs",
@@ -221,7 +221,7 @@ appenv.Replace(
     ],
 )
 
-appenv.Append(
+appenv.AppendUnique(
     CCFLAGS=[
         "-Os",
         "-ggdb3",
@@ -257,4 +257,5 @@ for app in appenv["APPBUILD"].get_apps_of_type(FlipperAppType.PLUGIN):
 Alias(appenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps)
 
 
-Return("fwhex fwelf fwbin")
+fw_version_json = env["FW_VERSION_JSON"]
+Return("fwhex fwelf fwbin fw_version_json")

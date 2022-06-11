@@ -1,7 +1,7 @@
 Import("ENV")
 
 
-ENV.Append(
+ENV.AppendUnique(
     CFLAGS=[
         "-std=gnu17",
     ],
