@@ -21,7 +21,7 @@ Latest Updates:
 - Added Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Removing T5577 passwords via the cli command rfid clear_pass_t5577 using a dictionary attack [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Removed some unneeded assets thanks to ESurge
-- Added [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated To Compile By RogueMaster
+- Added [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated To Compile By RogueMaster, Someone, please get this to work...
 - Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
 
 **Special Instructions:**
@@ -47,6 +47,7 @@ Special shout out to these libraries for giving us more fun:
 - https://github.com/neverfa11ing/FlipperMusicRTTTL
 - https://github.com/UberGuidoZ/Flipper
 - https://github.com/UberGuidoZ/Flipper-IRDB
+- https://johnearnest.github.io/chip8Archive/
 
 Added Features:
 - Actual PIN Lock (By RogueMaster)
