@@ -51,7 +51,7 @@ extern int32_t snake_game_app(void* p);
 extern int32_t tetris_game_app(void *p);
 extern int32_t clock_app(void *p);
 // extern int32_t floopper_bloopper(void* p);
-// extern int32_t raycast_game_app(void* p);
+extern int32_t raycast_game_app(void* p);
 extern int32_t spectrum_analyzer_app(void* p);
 extern int32_t flappy_game_app(void* p); 
 extern int32_t file_browser_app(void* p);
@@ -304,9 +304,6 @@ const size_t FLIPPER_APPS_COUNT = COUNT_OF(FLIPPER_APPS);
 
 const FlipperApplication FLIPPER_GAMES[] = {
 
-// #ifdef APP_RAYCAST_GAME
-//     {.app = raycast_game_app, .name = "Raycast Game", .stack_size = 4096, .icon = NULL, .flags = FlipperApplicationFlagDefault},
-// #endif
 
 // #ifdef FLOOPPER_BLOOPPER
 //     {.app = floopper_bloopper,
@@ -317,7 +314,7 @@ const FlipperApplication FLIPPER_GAMES[] = {
 // #endif
 
 #ifdef APP_CHIP8
-    {.app = chip8_app, .name = "CHIP8", .stack_size = 1024, .icon = &A_Plugins_14},
+    {.app = chip8_app, .name = "CHIP8 Emulator", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
 
 #ifdef APP_DICE
@@ -334,6 +331,10 @@ const FlipperApplication FLIPPER_GAMES[] = {
 	.stack_size = 1024, 
 	.icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
+#endif
+
+#ifdef APP_RAYCAST_GAME
+    {.app = raycast_game_app, .name = "Raycast", .stack_size = 4096, .icon = NULL, .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef APP_SNAKE_GAME
