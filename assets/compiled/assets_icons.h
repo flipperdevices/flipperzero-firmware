@@ -48,7 +48,6 @@ extern const Icon I_ButtonUp_7x4;
 extern const Icon I_DFU_128x50;
 extern const Icon I_Warning_30x23;
 extern const Icon A_Loading_24;
-extern const Icon I_DolphinFirstStart7_61x51;
 extern const Icon I_DolphinOkay_41x43;
 extern const Icon I_ArrowDownEmpty_14x15;
 extern const Icon I_ArrowDownFilled_14x15;
