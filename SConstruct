@@ -46,16 +46,16 @@ if GetOption("fullenv"):
         (distenv["DIST_DEPENDS"], firmware_out["FW_RESOURCES"]),
         DIST_EXTRA=[
             "-r",
-            "${ROOT_DIR.abspath}/assets/resources",
+            '"${ROOT_DIR.abspath}/assets/resources"',
             "--bundlever",
-            "${UPDATE_VERSION_STRING}",
+            '"${UPDATE_VERSION_STRING}"',
             "--radio",
-            "${ROOT_DIR.abspath}/${COPRO_STACK_BIN_PATH}",
+            '"${ROOT_DIR.abspath}/${COPRO_STACK_BIN_DIR}/${COPRO_STACK_BIN}"',
             "--radiotype",
             "${COPRO_STACK_TYPE}",
             "${COPRO_DISCLAIMER}",
             "--obdata",
-            "${ROOT_DIR.abspath}/${COPRO_OB_DATA}",
+            '"${ROOT_DIR.abspath}/${COPRO_OB_DATA}"',
         ],
     )
     distenv.Pseudo("pseudo")
@@ -68,3 +68,10 @@ basic_dist = distenv.DistBuilder("pseudo2", distenv["DIST_DEPENDS"])
 distenv.Pseudo("pseudo2")
 AlwaysBuild(basic_dist)
 Alias("fw_dist", basic_dist)
+
+copro_dist = distenv.CoproBuilder(
+    Dir("assets/core2_firmware"),
+    [],
+)
+AlwaysBuild(copro_dist)
+Alias("copro_dist", copro_dist)

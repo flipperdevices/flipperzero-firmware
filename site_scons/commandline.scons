@@ -71,6 +71,13 @@ vars.Add(
     default="0",
 )
 
+
+vars.Add(
+    "COPRO_STACK_BIN",
+    help="Core2 Firmware file name",
+    default="",
+)
+
 vars.Add(
     PathVariable(
         "COPRO_OB_DATA",
@@ -81,9 +88,9 @@ vars.Add(
 )
 vars.Add(
     PathVariable(
-        "COPRO_STACK_BIN_PATH",
-        help="Path to configuration file",
-        validator=PathVariable.PathIsFile,
+        "COPRO_STACK_BIN_DIR",
+        help="Path to ST-provided stacks",
+        validator=PathVariable.PathIsDir,
         default="",
     )
 )

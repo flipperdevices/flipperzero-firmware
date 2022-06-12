@@ -25,17 +25,16 @@ COPRO_MCU_FAMILY = "STM32WB5x"
 COPRO_CUBE_DIR = "lib/STM32CubeWB"
 
 # Default radio stack
-_COPRO_STACK_BIN = "stm32wb5x_BLE_Stack_light_fw.bin"
+COPRO_STACK_BIN = "stm32wb5x_BLE_Stack_light_fw.bin"
 # Firmware also supports "ble_full", but it might not fit into debug builds
 COPRO_STACK_TYPE = "ble_light"
 
 # Leave 0 to lets scripts automatically calculate it
 COPRO_STACK_ADDR = "0x0"
 
-COPRO_STACK_BIN_PATH = os.path.join(
+COPRO_STACK_BIN_DIR = os.path.join(
     COPRO_CUBE_DIR,
     "Projects",
     "STM32WB_Copro_Wireless_Binaries",
     COPRO_MCU_FAMILY,
-    _COPRO_STACK_BIN,
 )
