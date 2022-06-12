@@ -6,6 +6,7 @@
 # trees on startup. So, to keep startup time as low as possible, we're hiding
 # construction of certain targets behind command-line options.
 
+
 from fbt.builders.dist import add_dist_builders, add_project_to_distenv
 
 
@@ -26,9 +27,7 @@ coreenv["ROOT_DIR"] = Dir(".")
 # Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
 
 
-# Prepare variant dir for given fw configuration & current options
-
-
+# Create a separate "dist" environment and add construction envs to it
 distenv = coreenv.Clone()
 add_dist_builders(distenv)
 
@@ -40,7 +39,7 @@ Default(firmware_out["FW_ARTIFACTS"])
 if GetOption("fullenv"):
     updater_out = add_project_to_distenv(distenv, coreenv, "updater", "UPD_ENV")
 
-    # Target producing self-update package
+    # Target for self-update package
     selfupdate_dist = distenv.DistBuilder(
         "pseudo",
         (distenv["DIST_DEPENDS"], firmware_out["FW_RESOURCES"]),
@@ -62,13 +61,13 @@ if GetOption("fullenv"):
     AlwaysBuild(selfupdate_dist)
     Alias("updater_package", selfupdate_dist)
 
-# Just copy binaries to dist folder
+# Target for copying & renaming binaries to dist folder
 basic_dist = distenv.DistBuilder("pseudo2", distenv["DIST_DEPENDS"])
-
 distenv.Pseudo("pseudo2")
 AlwaysBuild(basic_dist)
 Alias("fw_dist", basic_dist)
 
+# Target for bundling core2 package for qFlipper
 copro_dist = distenv.CoproBuilder(
     Dir("assets/core2_firmware"),
     [],

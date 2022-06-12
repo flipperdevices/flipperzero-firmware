@@ -1,8 +1,5 @@
-import os
+import posixpath
 
-# Variables starting with _ are not consumed by scons and are introduced only
-# for ease of editing. If you want to override them on the commandline,
-# use final variables (without _)
 
 # Default hardware target
 TARGET_HW = 7
@@ -32,7 +29,8 @@ COPRO_STACK_TYPE = "ble_light"
 # Leave 0 to lets scripts automatically calculate it
 COPRO_STACK_ADDR = "0x0"
 
-COPRO_STACK_BIN_DIR = os.path.join(
+# If you override COPRO_CUBE_DIR on commandline, override this aswell
+COPRO_STACK_BIN_DIR = posixpath.join(
     COPRO_CUBE_DIR,
     "Projects",
     "STM32WB_Copro_Wireless_Binaries",

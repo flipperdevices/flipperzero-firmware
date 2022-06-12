@@ -65,7 +65,6 @@ Alias("dolphin_blocking", dolphin_blocking)
 
 
 # Protobuf version meta
-
 proto_ver = assetsenv.Command(
     "protobuf_version.h",
     "#/assets/protobuf/Changelog",
