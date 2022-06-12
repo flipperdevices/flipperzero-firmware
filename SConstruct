@@ -30,7 +30,8 @@ coreenv["ROOT_DIR"] = Dir(".")
 
 # Prepare variant dir for given fw configuration & current options
 def create_fw_build_targets(env, configuration_name):
-    build_dir = Dir("build").Dir(get_variant_dirname(env, configuration_name)).abspath
+    flavor = get_variant_dirname(env, configuration_name)
+    build_dir = Dir("build").Dir(flavor).abspath
     return SConscript(
         "firmware.scons",
         variant_dir=build_dir,
@@ -39,15 +40,42 @@ def create_fw_build_targets(env, configuration_name):
             "ENV": env,
             "fw_build_meta": {
                 "type": configuration_name,
+                "flavor": flavor,
                 "build_dir": build_dir,
             },
         },
     )
 
 
-firmware_out = create_fw_build_targets(coreenv, "firmware")
-Default(firmware_out.artifacts)
+def add_project_to_distenv(distenv, fw_type, fw_env_key):
+    project_env = distenv[fw_env_key] = create_fw_build_targets(coreenv, fw_type)
+    distenv.Append(
+        DIST_PROJECTS=[
+            project_env["FW_FLAVOR"],
+        ],
+        DIST_DEPENDS=[
+            project_env["FW_ARTIFACTS"],
+        ],
+    )
+    return project_env
+
+
+distenv = coreenv.Clone()
+firmware_out = add_project_to_distenv(distenv, "firmware", "FW_ENV")
+Default(firmware_out["FW_ARTIFACTS"])
+
 
 # If enabled, configure updater-related targets
 if GetOption("fullenv"):
-    updater_out = create_fw_build_targets(coreenv, "updater")
+    updater_out = add_project_to_distenv(distenv, "updater", "UPD_ENV")
+
+
+# Everything needs a target. So, we're using a dir for that
+dist = distenv.Command(
+    Dir("dist"),
+    [],
+    '${PYTHON3} ${ROOT_DIR.abspath}/scripts/sconsdist.py copy -p ${DIST_PROJECTS} -s "${DIST_SUFFIX}"',
+)
+Depends(dist, distenv["DIST_DEPENDS"])
+AlwaysBuild(dist)
+Alias("do_dist", dist)

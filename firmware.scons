@@ -2,7 +2,6 @@ Import("ENV", "fw_build_meta")
 
 import os
 
-from fbt.fwbuild import FirmwareOutput
 
 # Building initial C environment for libs
 env = ENV.Clone()
@@ -13,6 +12,7 @@ env.Append(
     PLUGIN_ELF_DIR="${BUILD_DIR}",
     LIB_DIST_DIR="${BUILD_DIR}/lib",
     IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",
+    FW_FLAVOR=fw_build_meta["flavor"],
     LIBPATH=[
         "${LIB_DIST_DIR}",
     ],
@@ -191,36 +191,42 @@ Depends(fwelf, depends)
 AddPostAction(fwelf, fwenv["APPBUILD_DUMP"])
 
 
-fwhex = fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
-fwbin = fwenv.BINBuilder("${FIRMWARE_BUILD_CFG}")
-fwdfu = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
+fwhex = fwenv["FW_HEX"] = fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
+fwbin = fwenv["FW_BIN"] = fwenv.BINBuilder("${FIRMWARE_BUILD_CFG}")
+fwdfu = fwenv["FW_DFU"] = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
 # Default(dfu)
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_dfu", fwdfu)
 
 # Additional FW-related pseudotargets
 if fwenv["IS_BASE_FIRMWARE"]:
-    flash = fwenv.Flasher("${FIRMWARE_BUILD_CFG}")
+    flash = fwenv["FW_FLASH"] = fwenv.Flasher("${FIRMWARE_BUILD_CFG}")
     if fwenv["FORCE"]:
         AlwaysBuild(flash)
     Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)
 
 
 # Compile DB generation
-cdb = fwenv.CompilationDatabase("compile_database.json")
-Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", cdb)
+fwcdb = fwenv["FW_CDB"] = fwenv.CompilationDatabase("compile_database.json")
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", fwcdb)
 
 # fw_version_json = env["FW_VERSION_JSON"]
 # Return("fwhex fwelf fwbin fw_version_json")
 
-fw_output = FirmwareOutput(
-    project=fwenv["FIRMWARE_BUILD_CFG"],
-    dfu=fwdfu[0],
-    elf=fwelf[0],
-    bin=fwbin[0],
-    json=env["FW_VERSION_JSON"][0],
-    extapps=extapps,
-)
+# fw_output = FirmwareOutput(
+#     project=fwenv["FIRMWARE_BUILD_CFG"],
+#     dfu=fwdfu[0],
+#     elf=fwelf[0],
+#     bin=fwbin[0],
+#     json=env["FW_VERSION_JSON"][0],
+#     extapps=extapps,
+# )
 
-Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", fw_output.artifacts)
+# Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", fw_output.artifacts)
+# Return("fw_output")
 
-Return("fw_output")
+artifacts = [fwhex, fwbin, fwdfu, env["FW_VERSION_JSON"]]
+fwenv["FW_ARTIFACTS"] = artifacts
+
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", artifacts)
+
+Return("fwenv")

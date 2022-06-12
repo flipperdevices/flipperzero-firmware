@@ -33,7 +33,7 @@ def display_build_status():
         failures_message = "\n".join(
             ["Failed building %s" % bf_to_str(x) for x in bf if x is not None]
         )
-
+        print("*" * 10, "ERRORS", "*" * 10)
         print(failures_message)
 
 

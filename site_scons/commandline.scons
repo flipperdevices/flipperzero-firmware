@@ -1,3 +1,5 @@
+# Commandline options
+
 # To build updater-related targets, you need to set this option
 AddOption(
     "--with-updater",
@@ -15,6 +17,7 @@ AddOption(
     default="fbt_options.py",
     help="Enviroment option file",
 )
+
 
 # Construction environment variables
 
@@ -36,6 +39,13 @@ vars.Add(
         ],
     )
 )
+
+vars.Add(
+    "DIST_SUFFIX",
+    help="Dist suffix",
+    default="local",
+)
+
 vars.Add(
     "COPRO_CUBE_VERSION",
     help="Cube version",
@@ -51,7 +61,7 @@ vars.Add(
 vars.Add(
     "COPRO_STACK_ADDR",
     help="Core2 Firmware address",
-    default=0,
+    default="0",
 )
 
 vars.Add(
