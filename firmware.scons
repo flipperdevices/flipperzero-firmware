@@ -12,6 +12,7 @@ env.Append(
     BUILD_DIR=fw_build_meta["build_dir"],
     PLUGIN_ELF_DIR="${BUILD_DIR}",
     LIB_DIST_DIR="${BUILD_DIR}/lib",
+    IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",
     LIBPATH=[
         "${LIB_DIST_DIR}",
     ],
@@ -197,10 +198,11 @@ fwdfu = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_dfu", fwdfu)
 
 # Additional FW-related pseudotargets
-flash = fwenv.Flasher("${FIRMWARE_BUILD_CFG}")
-if fwenv["FORCE"]:
-    AlwaysBuild(flash)
-Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)
+if fwenv["IS_BASE_FIRMWARE"]:
+    flash = fwenv.Flasher("${FIRMWARE_BUILD_CFG}")
+    if fwenv["FORCE"]:
+        AlwaysBuild(flash)
+    Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)
 
 
 # Compile DB generation

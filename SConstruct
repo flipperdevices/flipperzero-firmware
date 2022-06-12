@@ -11,18 +11,14 @@ from SCons.Action import CommandGeneratorAction
 
 import os
 
-# To build updater-related targets, you need to set this option
-AddOption(
-    "--with-updater",
-    dest="fullenv",
-    action="store_true",
-    help="Full firmware environment",
-)
-
+cmd_vars = SConscript("site_scons/commandline.scons")
 
 # Building basic environment - tools, utility methods, cross-compilation
 # settings, gcc flags for Cortex-M4, basic builders and more
-coreenv = SConscript("site_scons/environ.scons")
+coreenv = SConscript(
+    "site_scons/environ.scons",
+    exports={"VARIABLES": cmd_vars},
+)
 SConscript("site_scons/cc.scons", exports={"ENV": coreenv})
 SConscript("site_scons/builders.scons", exports={"ENV": coreenv})
 

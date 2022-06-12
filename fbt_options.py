@@ -1,0 +1,18 @@
+import os
+
+COMPACT = 1
+
+COPRO_OB_DATA = "ob.data"
+
+COPRO_CUBE_VERSION = "1.13.3"
+COPRO_MCU_FAMILY = "STM32WB5x"
+COPRO_CUBE_DIR = "lib/STM32CubeWB"
+
+COPRO_STACK_BIN = "stm32wb5x_BLE_Stack_light_fw.bin"
+COPRO_STACK_TYPE = "ble_light"
+COPRO_STACK_ADDR = 0
+
+COPRO_FIRMWARE_DIR = (
+    f"{COPRO_CUBE_DIR}/Projects/STM32WB_Copro_Wireless_Binaries/{COPRO_MCU_FAMILY}"
+)
+COPRO_STACK_BIN_PATH = os.path.join(COPRO_FIRMWARE_DIR, COPRO_STACK_BIN)

@@ -1,32 +1,19 @@
-from SCons.Platform import TempFileMunge
 import SCons
+from SCons.Platform import TempFileMunge
 from fbt import utils
 
 import os
 import multiprocessing
 
+Import("VARIABLES")
 
-vars = Variables(None, ARGUMENTS)
-vars.Add(BoolVariable("VERBOSE", help="Print full commands", default=0))
-vars.Add(
-    BoolVariable("FORCE", help="Force target action (for supported targets)", default=0)
-)
-vars.Add(BoolVariable("DEBUG", help="Enable debug build", default=1))
-vars.Add(BoolVariable("COMPACT", help="Optimize for size", default=0))
-vars.Add(
-    EnumVariable(
-        "TARGET_HW",
-        help="Hardware target",
-        default="7",
-        allowed_values=[
-            "7",
-        ],
-    )
-)
-
+# Dirty hack to construct environment with PathVariable paths relative to
+# upper dir
+_cwd = os.getcwd()
+os.chdir("..")
 
 coreenv = Environment(
-    variables=vars,
+    variables=VARIABLES,
     tools=["as", "gcc", "g++", "ar", "gnulink", "python", "compilation_db"],
     OBJCOPY="objcopy",
     PYTHON3="python3",
@@ -38,10 +25,13 @@ coreenv = Environment(
     PROGSUFFIX=".elf",
     COMPILATIONDB_USE_ABSPATH=True,
     ENV={
+        # Import PATH from OS env - scons doesn't do that by default
         "PATH": os.environ["PATH"],
     },
 )
+os.chdir(_cwd)
 
+# print(coreenv.Dump())
 if not coreenv["VERBOSE"]:
     coreenv.SetDefault(
         CCCOMSTR="\tCC\t${SOURCE}",
@@ -60,21 +50,22 @@ if coreenv["PLATFORM"] == "win32":
     # On Windows, Python 3 executable is usually just "python"
     coreenv["PYTHON3"] = coreenv["PYTHON3"][:-1]
 
-Help(vars.GenerateHelpText(coreenv))
+Help(VARIABLES.GenerateHelpText(coreenv))
 
 
 # Default value for commandline options
 
 SetOption("num_jobs", multiprocessing.cpu_count())
+# Avoiding re-scan of all sources on every startup
 SetOption("implicit_cache", True)
 SetOption("implicit_deps_unchanged", True)
+# More aggressive caching
 SetOption("max_drift", 1)
+# Random task queue - to discover isses with build logic faster
 SetOption("random", 1)
-# coreenv.Decider("content-timestamp")
 
 
-# Set up cross-compile tools
-
+# Setting up cross-compile tools
 utils.prefix_commands(
     coreenv,
     "arm-none-eabi-",
@@ -89,12 +80,8 @@ utils.prefix_commands(
     ],
 )
 
-# Setting up temp file parameters
-
+# Setting up temp file parameters - to overcome command line length limits
 coreenv["TEMPFILEARGESCFUNC"] = utils.tempfile_arg_esc_func
-
-# Commandline length limit hack
-
 utils.wrap_tempfile(coreenv, "LINKCOM")
 utils.wrap_tempfile(coreenv, "ARCOM")
 
@@ -131,7 +118,7 @@ def BuildModule(env, module):
 
     return env.SConscript(
         module_sconscript,
-        variant_dir=os.path.join(env["BUILD_DIR"], module),
+        variant_dir=os.path.join(env.subst("$BUILD_DIR"), module),
         duplicate=0,
     )
 

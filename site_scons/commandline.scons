@@ -1,0 +1,87 @@
+# To build updater-related targets, you need to set this option
+AddOption(
+    "--with-updater",
+    dest="fullenv",
+    action="store_true",
+    help="Full firmware environment",
+)
+
+AddOption(
+    "--options",
+    dest="optionfile",
+    type="string",
+    nargs=1,
+    action="store",
+    default="fbt_options.py",
+    help="Enviroment option file",
+)
+
+# Construction environment variables
+
+vars = Variables(GetOption("optionfile"), ARGUMENTS)
+vars.Add(BoolVariable("VERBOSE", help="Print full commands", default=0))
+vars.Add(
+    BoolVariable("FORCE", help="Force target action (for supported targets)", default=0)
+)
+vars.Add(BoolVariable("DEBUG", help="Enable debug build", default=1))
+vars.Add(BoolVariable("COMPACT", help="Optimize for size", default=0))
+
+vars.Add(
+    EnumVariable(
+        "TARGET_HW",
+        help="Hardware target",
+        default="7",
+        allowed_values=[
+            "7",
+        ],
+    )
+)
+vars.Add(
+    "COPRO_CUBE_VERSION",
+    help="Cube version",
+    default="",
+)
+
+vars.Add(
+    "COPRO_MCU_FAMILY",
+    help="Cube MCU family",
+    default="",
+)
+
+vars.Add(
+    "COPRO_STACK_ADDR",
+    help="Core2 Firmware address",
+    default=0,
+)
+
+vars.Add(
+    PathVariable(
+        "COPRO_STACK_BIN_PATH",
+        help="Path to configuration file",
+        validator=PathVariable.PathIsFile,
+        default="",
+    )
+)
+vars.Add(
+    PathVariable(
+        "COPRO_CUBE_DIR",
+        help="Path to Cube root",
+        validator=PathVariable.PathIsDir,
+        default="",
+    )
+)
+vars.Add(
+    EnumVariable(
+        "COPRO_STACK_TYPE",
+        help="Core2 stack type",
+        default="ble_light",
+        allowed_values=[
+            "ble_full",
+            "ble_light",
+            "ble_basic",
+        ],
+    )
+)
+
+
+Return("vars")

@@ -79,7 +79,7 @@ Alias("proto_ver", proto_ver)
 
 # Gather everything into a static lib
 assets_parts = (icons, proto, dolphin_blocking, dolphin_internal, proto_ver)
-if assetsenv["FIRMWARE_BUILD_CFG"] != "updater":
+if assetsenv["IS_BASE_FIRMWARE"]:
     assetsenv.Install("#/assets/compiled", assets_parts)
 
 assetslib = assetsenv.Library("${FW_LIB_NAME}", assets_parts)
@@ -88,7 +88,7 @@ assetsenv.Install("${LIB_DIST_DIR}", assetslib)
 
 # Resources for SD card
 
-if assetsenv["FIRMWARE_BUILD_CFG"] != "updater":
+if assetsenv["IS_BASE_FIRMWARE"]:
     # External dolphin animations
     dolphin_external = assetsenv.DolphinExtBuilder(
         Dir("#/assets/resources/dolphin"),
