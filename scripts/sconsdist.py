@@ -79,7 +79,7 @@ class Main(App):
         project_flavors = set(map(lambda p: p.flavor, self.projects.values()))
         if len(project_flavors) != 1:
             self.logger.error(f"Cannot mix flavors {project_flavors}!")
-            return 1
+            return 2
         self.flavor = project_flavors.pop()
 
         self.output_dir_path = join("dist", f"{self.target}-{self.flavor}")

@@ -47,6 +47,13 @@ vars.Add(
 )
 
 vars.Add(
+    "UPDATE_VERSION_STRING",
+    help="Version string for updater package",
+    default="${DIST_SUFFIX}",
+)
+
+
+vars.Add(
     "COPRO_CUBE_VERSION",
     help="Cube version",
     default="",
@@ -64,6 +71,14 @@ vars.Add(
     default="0",
 )
 
+vars.Add(
+    PathVariable(
+        "COPRO_OB_DATA",
+        help="Path to OB reference data",
+        validator=PathVariable.PathIsFile,
+        default="",
+    )
+)
 vars.Add(
     PathVariable(
         "COPRO_STACK_BIN_PATH",

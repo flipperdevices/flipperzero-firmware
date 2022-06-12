@@ -6,10 +6,8 @@
 # trees on startup. So, to keep startup time as low as possible, we're hiding
 # construction of certain targets behind command-line options.
 
-from fbt.utils import get_variant_dirname
-from SCons.Action import CommandGeneratorAction
+from fbt.builders.dist import add_dist_builders, add_project_to_distenv
 
-import os
 
 cmd_vars = SConscript("site_scons/commandline.scons")
 
@@ -29,53 +27,44 @@ coreenv["ROOT_DIR"] = Dir(".")
 
 
 # Prepare variant dir for given fw configuration & current options
-def create_fw_build_targets(env, configuration_name):
-    flavor = get_variant_dirname(env, configuration_name)
-    build_dir = Dir("build").Dir(flavor).abspath
-    return SConscript(
-        "firmware.scons",
-        variant_dir=build_dir,
-        duplicate=0,
-        exports={
-            "ENV": env,
-            "fw_build_meta": {
-                "type": configuration_name,
-                "flavor": flavor,
-                "build_dir": build_dir,
-            },
-        },
-    )
-
-
-def add_project_to_distenv(distenv, fw_type, fw_env_key):
-    project_env = distenv[fw_env_key] = create_fw_build_targets(coreenv, fw_type)
-    distenv.Append(
-        DIST_PROJECTS=[
-            project_env["FW_FLAVOR"],
-        ],
-        DIST_DEPENDS=[
-            project_env["FW_ARTIFACTS"],
-        ],
-    )
-    return project_env
 
 
 distenv = coreenv.Clone()
-firmware_out = add_project_to_distenv(distenv, "firmware", "FW_ENV")
+add_dist_builders(distenv)
+
+firmware_out = add_project_to_distenv(distenv, coreenv, "firmware", "FW_ENV")
 Default(firmware_out["FW_ARTIFACTS"])
 
 
-# If enabled, configure updater-related targets
+# If enabled, construct updater-related targets
 if GetOption("fullenv"):
-    updater_out = add_project_to_distenv(distenv, "updater", "UPD_ENV")
+    updater_out = add_project_to_distenv(distenv, coreenv, "updater", "UPD_ENV")
 
+    # Target producing self-update package
+    selfupdate_dist = distenv.DistBuilder(
+        "pseudo",
+        (distenv["DIST_DEPENDS"], firmware_out["FW_RESOURCES"]),
+        DIST_EXTRA=[
+            "-r",
+            "${ROOT_DIR.abspath}/assets/resources",
+            "--bundlever",
+            "${UPDATE_VERSION_STRING}",
+            "--radio",
+            "${ROOT_DIR.abspath}/${COPRO_STACK_BIN_PATH}",
+            "--radiotype",
+            "${COPRO_STACK_TYPE}",
+            "${COPRO_DISCLAIMER}",
+            "--obdata",
+            "${ROOT_DIR.abspath}/${COPRO_OB_DATA}",
+        ],
+    )
+    distenv.Pseudo("pseudo")
+    AlwaysBuild(selfupdate_dist)
+    Alias("updater_package", selfupdate_dist)
 
-# Everything needs a target. So, we're using a dir for that
-dist = distenv.Command(
-    Dir("dist"),
-    [],
-    '${PYTHON3} ${ROOT_DIR.abspath}/scripts/sconsdist.py copy -p ${DIST_PROJECTS} -s "${DIST_SUFFIX}"',
-)
-Depends(dist, distenv["DIST_DEPENDS"])
-AlwaysBuild(dist)
-Alias("do_dist", dist)
+# Just copy binaries to dist folder
+basic_dist = distenv.DistBuilder("pseudo2", distenv["DIST_DEPENDS"])
+
+distenv.Pseudo("pseudo2")
+AlwaysBuild(basic_dist)
+Alias("fw_dist", basic_dist)

@@ -62,7 +62,7 @@ SetOption("implicit_deps_unchanged", True)
 # More aggressive caching
 SetOption("max_drift", 1)
 # Random task queue - to discover isses with build logic faster
-SetOption("random", 1)
+# SetOption("random", 1)
 
 
 # Setting up cross-compile tools
@@ -92,7 +92,7 @@ utils.wrap_tempfile(coreenv, "ARCOM")
 def GlobRecursive(env, pattern, node=".", exclude=None):
     results = []
     if isinstance(node, str):
-        node = Dir(node)
+        node = env.Dir(node)
     for f in node.glob("*", source=True, exclude=exclude):
         if isinstance(f, SCons.Node.FS.Dir):
             results += env.GlobRecursive(pattern, f, exclude)
@@ -108,7 +108,7 @@ def GlobRecursive(env, pattern, node=".", exclude=None):
 def BuildModule(env, module):
     # print("cwd", os.getcwd())
     # print(type(Dir(".").srcdir), dir(Dir(".").srcdir))
-    src_dir = str(Dir(".").srcdir or os.getcwd())
+    src_dir = str(env.Dir(".").srcdir or os.getcwd())
     module_sconscript = os.path.join(src_dir, module, "SConscript")
     if not os.path.exists(module_sconscript):
         module_sconscript = os.path.join(src_dir, f"{module}.scons")

@@ -38,6 +38,8 @@ env.Append(
                 "NDEBUG",
                 "FURI_NDEBUG",
             ],
+            # You can add other entries named after libraries
+            # If they are present, they have precedence over Default
         }
     },
 )
