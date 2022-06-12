@@ -76,7 +76,7 @@ jobs:
         with:
           run: |
             set -e
-            pip3 install -r scripts/requirements.txt
+            /usr/bin/env python3 -m pip install -r scripts/requirements.txt
             for TARGET in ${TARGETS}
             do
               ./fbt TARGET_HW=${TARGET} --with-updater updater_package ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
@@ -206,7 +206,7 @@ jobs:
         with:
           run: |
             set -e
-            pip3 install -r scripts/requirements.txt
+            /usr/bin/env python3 -m pip install -r scripts/requirements.txt
             for TARGET in ${TARGETS}
             do
               ./fbt TARGET_HW=${TARGET} --with-updater updater_package DEBUG=0 COMPACT=1
