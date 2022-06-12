@@ -11,7 +11,7 @@ void subghz_scene_show_only_rx_on_enter(void* context) {
 
     // Setup view
     Popup* popup = subghz->popup;
-    popup_set_icon(popup, 67, 12, &I_DolphinFirstStart7_61x51);
+    // popup_set_icon(popup, 67, 12, &I_DolphinFirstStart7_61x51);
     popup_set_text(
         popup,
         "This frequency can\nonly be used for RX\nin your region",

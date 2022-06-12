@@ -97,7 +97,7 @@ void subghz_scene_receiver_info_on_enter(void* context) {
                 subghz);
         }
     } else {
-        widget_add_icon_element(subghz->widget, 32, 12, &I_DolphinFirstStart7_61x51);
+        // widget_add_icon_element(subghz->widget, 32, 12, &I_DolphinFirstStart7_61x51);
         widget_add_string_element(
             subghz->widget, 13, 8, AlignLeft, AlignBottom, FontSecondary, "Error history parse.");
     }
