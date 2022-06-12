@@ -58,6 +58,7 @@ APP_DICE = 1
 APP_HID_ANALYZER = 1
 APP_MOUSE_JIGGLER = 1
 APP_TANKS_GAME = 1
+APP_CHIP8 = 1
 
 # Debug
 APP_ACCESSOR = 1
@@ -297,6 +298,12 @@ endif
 APP_DICE ?= 0
 ifeq ($(APP_DICE), 1)
 CFLAGS		+= -DAPP_DICE
+SRV_GUI		= 1
+endif
+
+APP_CHIP8 ?= 0
+ifeq ($(APP_CHIP8), 1)
+CFLAGS		+= -DAPP_CHIP8
 SRV_GUI		= 1
 endif
 
