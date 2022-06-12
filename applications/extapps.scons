@@ -1,0 +1,62 @@
+Import("ENV")
+
+
+from fbt.appmanifest import FlipperAppType
+import os
+
+appenv = ENV.Clone()
+
+EXT_APPS_WORK_DIR = ".extapps"
+
+appenv.VariantDir(EXT_APPS_WORK_DIR, ".", duplicate=False)
+appenv.Replace(
+    LINKER_SCRIPT="application-ext",
+    STRIPFLAGS=[
+        "--strip-debug",
+        "--strip-unneeded",
+        "-d",
+        "-g",
+        "-S",
+    ],
+)
+
+appenv.AppendUnique(
+    CCFLAGS=[
+        "-Os",
+        "-ggdb3",
+        "-mword-relocations",
+        "-mlong-calls",
+        "-fno-common",
+        "-nostdlib",
+        "-fvisibility=hidden",
+    ],
+    LINKFLAGS=[
+        "-r",
+        "-s",
+        # "-Bsymbolic",
+        "-nostartfiles",
+        "-mlong-calls",
+        "-fno-common",
+        "-nostdlib",
+        "-Wl,--gc-sections",
+        "-Wl,--no-export-dynamic",
+        "-fvisibility=hidden",
+        "-Wl,-e${APP_ENTRY}",
+    ],
+)
+
+extapps = []
+for app in appenv["APPBUILD"].get_apps_of_type(FlipperAppType.PLUGIN):
+    app_elf = appenv.Program(
+        os.path.join(EXT_APPS_WORK_DIR, app.appid),
+        appenv.GlobRecursive("*.c*", os.path.join(EXT_APPS_WORK_DIR, app._appdir)),
+        APP_ENTRY=app.entry_point,
+    )
+    app_stripped_elf = appenv.ELFStripper(
+        os.path.join(appenv["PLUGIN_ELF_DIR"], app.appid), app_elf
+    )
+    extapps.append(app_stripped_elf)
+    Alias(f"{appenv['FIRMWARE_BUILD_CFG']}_{app.appid}", app_stripped_elf)
+
+Alias(appenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps)
+Return("extapps")

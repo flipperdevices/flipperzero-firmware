@@ -1,11 +1,13 @@
+#
 # Main Fipper Build System entry point.
 #
-# This file is evaluated every time every time scons is invoked.
-# scons builds all referenced environments & their targets' dependency trees
-# on startup. So, to keep startup time as low as possible, we're hiding
+# This file is evaluated every time scons is invoked.
+# Scons constructs all referenced environments & their targets' dependency
+# trees on startup. So, to keep startup time as low as possible, we're hiding
 # construction of certain targets behind command-line options.
 
-from sutils import get_variant_dirname
+from fbt.utils import get_variant_dirname
+from SCons.Action import CommandGeneratorAction
 
 import os
 
@@ -30,9 +32,9 @@ coreenv["ROOT_DIR"] = Dir(".")
 # Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
 
 
-# Prepare variant dir for current configuration
+# Prepare variant dir for given fw configuration & current options
 def create_fw_build_targets(env, configuration_name):
-    build_dir = Dir("build").Dir(get_variant_dirname(env, "firmware")).abspath
+    build_dir = Dir("build").Dir(get_variant_dirname(env, configuration_name)).abspath
     return SConscript(
         "firmware.scons",
         variant_dir=build_dir,
@@ -40,16 +42,16 @@ def create_fw_build_targets(env, configuration_name):
         exports={
             "ENV": env,
             "fw_build_meta": {
-                "type": "firmware",
+                "type": configuration_name,
                 "build_dir": build_dir,
             },
         },
     )
 
 
-firmware = create_fw_build_targets(coreenv, "firmware")
-Default(firmware)
+firmware_out = create_fw_build_targets(coreenv, "firmware")
+Default(firmware_out.artifacts)
 
 # If enabled, configure updater-related targets
 if GetOption("fullenv"):
-    updater = create_fw_build_targets(coreenv, "updater")
+    updater_out = create_fw_build_targets(coreenv, "updater")

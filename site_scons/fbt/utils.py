@@ -25,13 +25,17 @@ def prefix_commands(env, command_prefix, cmd_list):
             env[command] = command_prefix + env[command]
 
 
-def get_variant_dirname(env, project):
-    dir_name = f"f{env['TARGET_HW']}-{project}"
+def get_variant_dirname(env, project=None):
+    parts = [f"f{env['TARGET_HW']}"]
+    if project:
+        parts.append(project)
+
     suffix = ""
     if env["DEBUG"]:
         suffix += "D"
     if env["COMPACT"]:
         suffix += "C"
     if suffix:
-        dir_name += "-" + suffix
-    return dir_name
+        parts.append(suffix)
+
+    return "-".join(parts)

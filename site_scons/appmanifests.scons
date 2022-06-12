@@ -7,7 +7,7 @@ from fbt.appmanifest import FlipperAppType, AppManager, ApplicationsCGenerator
 def LoadApplicationManifests(env):
     appmgr = env["APPMGR"] = AppManager()
     for entry in Glob("#/applications/*"):
-        if isinstance(entry, SCons.Node.FS.Dir):
+        if isinstance(entry, SCons.Node.FS.Dir) and not str(entry).startswith("."):
             appmgr.load_manifest(entry.File("application.fam").abspath, entry.name)
 
 

@@ -1,6 +1,6 @@
 from SCons.Platform import TempFileMunge
 import SCons
-import sutils
+from fbt import utils
 
 import os
 import multiprocessing
@@ -75,7 +75,7 @@ SetOption("random", 1)
 
 # Set up cross-compile tools
 
-sutils.prefix_commands(
+utils.prefix_commands(
     coreenv,
     "arm-none-eabi-",
     [
@@ -91,12 +91,12 @@ sutils.prefix_commands(
 
 # Setting up temp file parameters
 
-coreenv["TEMPFILEARGESCFUNC"] = sutils.tempfile_arg_esc_func
+coreenv["TEMPFILEARGESCFUNC"] = utils.tempfile_arg_esc_func
 
 # Commandline length limit hack
 
-sutils.wrap_tempfile(coreenv, "LINKCOM")
-sutils.wrap_tempfile(coreenv, "ARCOM")
+utils.wrap_tempfile(coreenv, "LINKCOM")
+utils.wrap_tempfile(coreenv, "ARCOM")
 
 
 # Build env extensions

@@ -2,7 +2,7 @@ Import("ENV", "fw_build_meta")
 
 import os
 
-from fbt.appmanifest import FlipperAppType
+from fbt.fwbuild import FirmwareOutput
 
 # Building initial C environment for libs
 env = ENV.Clone()
@@ -10,6 +10,7 @@ Export("env")
 
 env.Append(
     BUILD_DIR=fw_build_meta["build_dir"],
+    PLUGIN_ELF_DIR="${BUILD_DIR}",
     LIB_DIST_DIR="${BUILD_DIR}/lib",
     LIBPATH=[
         "${LIB_DIST_DIR}",
@@ -108,8 +109,8 @@ else:
 fwenv.LoadApplicationManifests()
 fwenv.PrepareApplicationsBuild()
 
-# Clone current environment to build external apps later with its current state
-appenv = fwenv.Clone()
+# Build external apps
+extapps = SConscript("applications/extapps.scons", exports={"ENV": fwenv})
 
 
 # Add preprocessor definitions for current set of apps
@@ -206,56 +207,18 @@ Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)
 cdb = fwenv.CompilationDatabase("compile_database.json")
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", cdb)
 
+# fw_version_json = env["FW_VERSION_JSON"]
+# Return("fwhex fwelf fwbin fw_version_json")
 
-# Building external applications
-
-appenv.VariantDir("extapps", "applications", duplicate=False)
-appenv.Replace(
-    LINKER_SCRIPT="application-ext",
-    STRIPFLAGS=[
-        "--strip-debug",
-        "--strip-unneeded",
-        "-d",
-        "-g",
-        "-S",
-    ],
+fw_output = FirmwareOutput(
+    project=fwenv["FIRMWARE_BUILD_CFG"],
+    dfu=fwdfu[0],
+    elf=fwelf[0],
+    bin=fwbin[0],
+    json=env["FW_VERSION_JSON"][0],
+    extapps=extapps,
 )
 
-appenv.AppendUnique(
-    CCFLAGS=[
-        "-Os",
-        "-ggdb3",
-        "-mword-relocations",
-        "-mlong-calls",
-        "-fno-common",
-        "-nostdlib",
-        "-fvisibility=hidden",
-    ],
-    LINKFLAGS=[
-        "-r",
-        "-s",
-        # "-Bsymbolic",
-        "-nostartfiles",
-        "-mlong-calls",
-        "-fno-common",
-        "-nostdlib",
-        "-Wl,--gc-sections",
-        "-Wl,--no-export-dynamic",
-        "-fvisibility=hidden",
-        "-Wl,-e${APP_ENTRY}",
-    ],
-)
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", fw_output.artifacts)
 
-extapps = []
-for app in appenv["APPBUILD"].get_apps_of_type(FlipperAppType.PLUGIN):
-    app_elf = appenv.Program(
-        os.path.join("extapps", app.appid),
-        appenv.GlobRecursive("*.c*", os.path.join("extapps", app._appdir)),
-        APP_ENTRY=app.entry_point,
-    )
-    extapps.append(appenv.ELFStripper(app.appid, app_elf))
-Alias(appenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps)
-
-
-fw_version_json = env["FW_VERSION_JSON"]
-Return("fwhex fwelf fwbin fw_version_json")
+Return("fw_output")
