@@ -75,7 +75,7 @@ const SubGhzProtocol subghz_protocol_keeloq = {
     .type = SubGhzProtocolTypeDynamic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_315 |
             SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save |
-            SubGhzProtocolFlag_Send,
+            SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_keeloq_decoder,
     .encoder = &subghz_protocol_keeloq_encoder,
