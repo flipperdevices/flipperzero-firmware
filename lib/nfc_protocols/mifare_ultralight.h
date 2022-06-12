@@ -56,6 +56,8 @@ typedef enum {
     MfUltralightSupportSectorSelect = 1 << 9,
     // NTAG21x only has counter 2
     MfUltralightSupportSingleCounter = 1 << 10,
+    // ASCII mirror is not a command, but handy to have as a flag
+    MfUltralightSupportAsciiMirror = 1 << 11,
 } MfUltralightFeatures;
 
 typedef enum {
