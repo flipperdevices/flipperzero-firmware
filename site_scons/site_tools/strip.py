@@ -3,7 +3,6 @@ from SCons.Action import Action
 
 
 def generate(env):
-    # print("strip generate", env.Dump())
     env.SetDefault(
         STRIP="strip",
         STRIPFLAGS=[],

@@ -5,40 +5,27 @@ from fbt import utils
 import os
 import multiprocessing
 
-Import("VARIABLES")
+Import("VAR_ENV")
 
-# Dirty hack to construct environment with PathVariable paths relative to
-# upper dir
-_cwd = os.getcwd()
-os.chdir("..")
-
-coreenv = Environment(
-    variables=VARIABLES,
+coreenv = VAR_ENV.Clone(
     tools=[
-        "as",
-        "gcc",
-        "g++",
-        "ar",
-        "gnulink",
-        "python",
+        "crosscc",
+        "python3",
         "sconsmodular",
         "sconsrecursiveglob",
     ],
-    # OBJCOPY="objcopy",
-    PYTHON3="python3",
+    TOOLCHAIN_PREFIX="arm-none-eabi-",
     TEMPFILE=TempFileMunge,
     MAXLINELENGTH=2048,
     PROGSUFFIX=".elf",
     ENV={
         # Import PATH from OS env - scons doesn't do that by default
         "PATH": os.environ["PATH"],
-        # Proxying CI environment to child scripts
+        # Proxying CI environment to child processes & scripts
         "DIST_SUFFIX": os.environ.get("DIST_SUFFIX", None),
         "WORKFLOW_BRANCH_OR_TAG": os.environ.get("WORKFLOW_BRANCH_OR_TAG", None),
     },
 )
-
-os.chdir(_cwd)
 
 # If DIST_SUFFIX is set in environment, is has precedence (set by CI)
 if os_suffix := os.environ.get("DIST_SUFFIX", None):
@@ -61,13 +48,6 @@ if not coreenv["VERBOSE"]:
         STRIPCOMSTR="\tSTRIP\t${TARGET}",
     )
 
-if coreenv["PLATFORM"] == "win32":
-    # On Windows, Python 3 executable is usually just "python"
-    coreenv["PYTHON3"] = coreenv["PYTHON3"][:-1]
-
-Help(VARIABLES.GenerateHelpText(coreenv))
-
-
 # Default value for commandline options
 
 SetOption("num_jobs", multiprocessing.cpu_count())
@@ -79,21 +59,6 @@ SetOption("max_drift", 1)
 # Random task queue - to discover isses with build logic faster
 # SetOption("random", 1)
 
-
-# Setting up cross-compile tools
-utils.prefix_commands(
-    coreenv,
-    "arm-none-eabi-",
-    [
-        "AR",
-        "AS",
-        "CC",
-        "CXX",
-        "OBJCOPY",
-        "RANLIB",
-        "STRIP",
-    ],
-)
 
 # Setting up temp file parameters - to overcome command line length limits
 coreenv["TEMPFILEARGESCFUNC"] = utils.tempfile_arg_esc_func

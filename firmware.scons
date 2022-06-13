@@ -8,10 +8,10 @@ env = ENV.Clone(
     tools=["compilation_db", "fwbin", "openocd", "fbt_apps"],
     COMPILATIONDB_USE_ABSPATH=True,
     BUILD_DIR=fw_build_meta["build_dir"],
-    PLUGIN_ELF_DIR="${BUILD_DIR}",
-    LIB_DIST_DIR="${BUILD_DIR}/lib",
     IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",
     FW_FLAVOR=fw_build_meta["flavor"],
+    PLUGIN_ELF_DIR="${BUILD_DIR}",
+    LIB_DIST_DIR="${BUILD_DIR}/lib",
     LIBPATH=[
         "${LIB_DIST_DIR}",
     ],
@@ -80,7 +80,7 @@ else:
 
 
 # Invoke child SCopscripts to populate global `env` + build their own part of the code
-depends = env.BuildModules(
+lib_targets = env.BuildModules(
     [
         "lib",
         "firmware",
@@ -204,7 +204,7 @@ fwelf = fwenv.Program(
 )
 
 # Make it depend on everything child builders returned
-Depends(fwelf, depends)
+Depends(fwelf, lib_targets)
 AddPostAction(fwelf, fwenv["APPBUILD_DUMP"])
 
 

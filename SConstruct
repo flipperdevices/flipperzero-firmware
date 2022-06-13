@@ -11,13 +11,17 @@ from fbt.builders.dist import add_dist_builders, add_project_to_distenv
 
 DefaultEnvironment(tools=[])
 
-cmd_vars = SConscript("site_scons/commandline.scons")
+# This environment exists only for loading options & validating file/dir existance
+fbt_variables = SConscript("site_scons/commandline.scons")
+cmd_environment = Environment(tools=[], variables=fbt_variables)
+Help(fbt_variables.GenerateHelpText(cmd_environment))
+
 
 # Building basic environment - tools, utility methods, cross-compilation
 # settings, gcc flags for Cortex-M4, basic builders and more
 coreenv = SConscript(
     "site_scons/environ.scons",
-    exports={"VARIABLES": cmd_vars},
+    exports={"VAR_ENV": cmd_environment},
 )
 SConscript("site_scons/cc.scons", exports={"ENV": coreenv})
 
