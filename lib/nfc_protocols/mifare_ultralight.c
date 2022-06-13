@@ -855,40 +855,46 @@ static void mf_ul_make_ascii_mirror(MfUltralightEmulator* emulator, string_t str
     uint8_t mirror_page = emulator->config->mirror_page;
     uint8_t mirror_byte = emulator->config->mirror.mirror_byte;
     MfUltralightMirrorConf mirror_conf = emulator->config->mirror.mirror_conf;
-    uint16_t user_page_num = emulator->page_num - 5;
+    uint16_t last_user_page_index = emulator->page_num - 6;
+    bool uid_printed = false;
 
-    // Basic min mirror page check
-    if(mirror_page < 4) return;
-    // UID + counter mirror range check
-    if(mirror_conf & MfUltralightMirrorUidCounter) {
-        if(mirror_page > user_page_num - 5) return;
-        if(mirror_page == user_page_num - 5 && mirror_byte > 2) return;
-    }
-
-    if(mirror_conf & (MfUltralightMirrorUid | MfUltralightMirrorUidCounter)) {
+    if(mirror_conf == MfUltralightMirrorUid || mirror_conf == MfUltralightMirrorUidCounter) {
         // UID range check
-        if(mirror_page > user_page_num - 3) return;
-        if(mirror_page == user_page_num - 3 && mirror_byte > 1) return;
+        if(mirror_page < 4 || mirror_page > last_user_page_index - 3 ||
+           (mirror_page == last_user_page_index - 3 && mirror_byte > 2)) {
+            if(mirror_conf == MfUltralightMirrorUid) return;
+            // NTAG21x has the peculiar behavior when UID+counter selected, if UID does not fit but
+            // counter will fit, it will actually mirror the counter
+            string_cat_str(str, "              ");
+        } else {
+            for(int i = 0; i < 3; ++i) {
+                string_cat_printf(str, "%02X", emulator->data.data[i]);
+            }
+            // Skip BCC0
+            for(int i = 4; i < 8; ++i) {
+                string_cat_printf(str, "%02X", emulator->data.data[i]);
+            }
+            uid_printed = true;
+        }
 
-        for(int i = 0; i < 3; ++i) {
-            string_cat_printf(str, "%02X", emulator->data.data[i]);
-        }
-        // Skip BCC0
-        for(int i = 4; i < 8; ++i) {
-            string_cat_printf(str, "%02X", emulator->data.data[i]);
-        }
+        uint16_t next_byte_offset = mirror_page * 4 + mirror_byte + 14;
+        if(mirror_conf == MfUltralightMirrorUidCounter) ++next_byte_offset;
+        mirror_page = next_byte_offset / 4;
+        mirror_byte = next_byte_offset % 4;
     }
 
-    if(mirror_conf & (MfUltralightMirrorCounter | MfUltralightMirrorUidCounter)) {
+    if(mirror_conf == MfUltralightMirrorCounter || mirror_conf == MfUltralightMirrorUidCounter) {
         // Counter is only printed if counter enabled
         if(emulator->config->access.nfc_cnt_en) {
             // Counter protection check
             if(emulator->config->access.nfc_cnt_pwd_prot && !emulator->auth_success) return;
             // Counter range check
-            if(mirror_page > user_page_num - 1) return;
-            if(mirror_page == user_page_num - 1 && mirror_byte > 1) return;
+            if(mirror_page < 4) return;
+            if(mirror_page > last_user_page_index - 1) return;
+            if(mirror_page == last_user_page_index - 1 && mirror_byte > 2) return;
 
-            if(mirror_conf & MfUltralightMirrorUidCounter) string_cat_str(str, "x");
+            if(mirror_conf == MfUltralightMirrorUidCounter)
+                string_cat_str(str, uid_printed ? "x" : " ");
 
             string_cat_printf(str, "%06X", emulator->data.counter[2]);
         }
@@ -1146,11 +1152,13 @@ bool mf_ul_prepare_emulation_response(
                                 // Copy ASCII mirror
                                 size_t copy_len = 4 - ascii_mirror_curr_byte;
                                 if(copy_len > ascii_mirror_len) copy_len = ascii_mirror_len;
-                                memcpy(
-                                    dest_ptr + ascii_mirror_curr_byte,
-                                    ascii_mirror_cptr,
-                                    copy_len);
-                                ascii_mirror_cptr += copy_len;
+                                for(size_t i = 0; i < copy_len; ++i) {
+                                    if(*ascii_mirror_cptr != ' ')
+                                        dest_ptr[ascii_mirror_curr_byte] =
+                                            (uint8_t)*ascii_mirror_cptr;
+                                    ++ascii_mirror_curr_byte;
+                                    ++ascii_mirror_cptr;
+                                }
                                 ascii_mirror_len -= copy_len;
                                 // Don't care if this is inaccurate after ascii_mirror_len = 0
                                 ascii_mirror_curr_byte = 0;
@@ -1286,10 +1294,13 @@ bool mf_ul_prepare_emulation_response(
                                             ascii_mirror_len =
                                                 mirror_end_offset - mirror_start_offset;
                                         }
-                                        memcpy(
-                                            &buff_tx[mirror_start_offset],
-                                            ascii_mirror_cptr,
-                                            ascii_mirror_len);
+                                        for(size_t i = 0; i < ascii_mirror_len; ++i) {
+                                            if(*ascii_mirror_cptr != ' ')
+                                                buff_tx[mirror_start_offset] =
+                                                    (uint8_t)*ascii_mirror_cptr;
+                                            ++mirror_start_offset;
+                                            ++ascii_mirror_cptr;
+                                        }
                                     }
                                     string_clear(ascii_mirror);
                                 }
