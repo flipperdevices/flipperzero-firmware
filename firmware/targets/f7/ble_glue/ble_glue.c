@@ -161,7 +161,7 @@ static void ble_glue_update_c2_fw_info() {
         local_info->VersionMinor,
         local_info->VersionSub,
         local_info->VersionBranch,
-        ble_glue_get_reltype_str(local_info->VersionReleaseType));
+        ble_glue_get_reltype_str(local_info->StackType));
 
     local_info->FusVersionMajor = wireless_info.FusVersionMajor;
     local_info->FusVersionMinor = wireless_info.FusVersionMinor;
