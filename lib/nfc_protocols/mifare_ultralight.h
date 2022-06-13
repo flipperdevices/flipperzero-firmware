@@ -161,6 +161,7 @@ typedef struct {
     bool sector_select_cmd_started;
     bool ntag_i2c_plus_sector3_lockout;
     bool cfglck_active;
+    bool counter_incremented;
 } MfUltralightEmulator;
 
 bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);

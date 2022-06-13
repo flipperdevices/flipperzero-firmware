@@ -895,6 +895,14 @@ static void mf_ul_make_ascii_mirror(MfUltralightEmulator* emulator, string_t str
     }
 }
 
+static void mf_ul_increment_single_counter(MfUltralightEmulator* emulator) {
+    if(!emulator->counter_incremented && emulator->config->access.nfc_cnt_en) {
+        ++emulator->data.counter[2];
+        emulator->data_changed = true;
+        emulator->counter_incremented = true;
+    }
+}
+
 static void mf_ul_emulate_write(
     MfUltralightEmulator* emulator,
     int16_t tag_addr,
@@ -993,6 +1001,10 @@ void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle) 
             emulator->cfglck_active = emulator->config->access.cfglck;
         } else {
             emulator->cfglck_active = false;
+        }
+
+        if(emulator->supported_features & MfUltralightSupportSingleCounter) {
+            emulator->counter_incremented = false;
         }
     }
 }
@@ -1160,6 +1172,8 @@ bool mf_ul_prepare_emulation_response(
                         if(ascii_mirror_cptr != NULL) {
                             string_clear(ascii_mirror);
                         }
+                        if(emulator->supported_features & MfUltralightSupportSingleCounter)
+                            mf_ul_increment_single_counter(emulator);
                         *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
                         command_parsed = true;
                     } while(false);
@@ -1292,7 +1306,8 @@ bool mf_ul_prepare_emulation_response(
                                             memset(&buff_tx[(pwd_page_offset + 1) * 4], 0, 4);
                                     }
                                 }
-
+                                if(emulator->supported_features & MfUltralightSupportSingleCounter)
+                                    mf_ul_increment_single_counter(emulator);
                                 *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
                                 command_parsed = true;
                             } while(false);
