@@ -27,6 +27,6 @@ void chip8_set_release_callback(Chip8View* chip8, Chip8ViewReleaseCallback callb
 
 void chip8_set_backup_screen(Chip8View* chip8, uint8_t** screen);
 
-void chip8_set_file_name(Chip8View* chip8, char* name);
+void chip8_set_file_name(Chip8View* chip8, string_t name);
 
 void chip8_set_state(Chip8View* chip8, Chip8State* st);

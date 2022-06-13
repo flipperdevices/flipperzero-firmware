@@ -32,10 +32,10 @@ static int32_t chip8_worker(void* context) {
 
     FURI_LOG_I(WORKER_TAG, "Start storage file alloc");
     File* rom_file = storage_file_alloc(furi_storage_record);
-    FURI_LOG_I(WORKER_TAG, "Start storage file open, path = %s", chip8->file_path);
+    FURI_LOG_I(WORKER_TAG, "Start storage file open, path = %s", string_get_cstr(chip8->file_path));
 
-    uint8_t* rom_data = malloc(2048);
-    FURI_LOG_I(WORKER_TAG, "2048 array gotten");
+    uint8_t* rom_data = malloc(4096);
+    FURI_LOG_I(WORKER_TAG, "4096 array gotten");
 
 
     while(1) {
@@ -115,7 +115,7 @@ static int32_t chip8_worker(void* context) {
 
 Chip8Emulator* chip8_make_emulator(string_t file_path) {
     furi_assert(file_path);
-    FURI_LOG_I("CHIP8", "make emulator, file_path=", file_path);
+    FURI_LOG_I("CHIP8", "make emulator, file_path=", string_get_cstr(file_path));
 
     Chip8Emulator* chip8 = malloc(sizeof(Chip8Emulator));
     string_init(chip8->file_path);
@@ -138,7 +138,7 @@ Chip8Emulator* chip8_make_emulator(string_t file_path) {
 
     chip8->thread = furi_thread_alloc();
     furi_thread_set_name(chip8->thread, "Chip8Worker");
-    furi_thread_set_stack_size(chip8->thread, 2048);
+    furi_thread_set_stack_size(chip8->thread, 4096);
     furi_thread_set_context(chip8->thread, chip8);
     furi_thread_set_callback(chip8->thread, chip8_worker);
 

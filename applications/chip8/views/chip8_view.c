@@ -14,7 +14,7 @@ struct Chip8View {
 };
 
 typedef struct {
-    char* file_name;
+    string_t file_name;
     Chip8State state;
     uint8_t** backup_screen;
 } Chip8Model;
@@ -171,11 +171,11 @@ void chip8_set_down_callback(Chip8View* chip8, Chip8ViewKeyDownCallback callback
         });
 }
 
-void chip8_set_file_name(Chip8View* chip8, char* name) {
+void chip8_set_file_name(Chip8View* chip8, string_t name) {
     furi_assert(name);
     with_view_model(
         chip8->view, (Chip8Model* model) {
-            model->file_name = name;
+            *model->file_name = *name;
             return false;
         });
 }

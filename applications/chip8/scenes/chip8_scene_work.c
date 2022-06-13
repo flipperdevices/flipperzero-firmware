@@ -56,21 +56,22 @@ bool chip8_scene_work_on_event(void* context, SceneManagerEvent event) {
 void chip8_scene_work_on_enter(void* context) {
     Chip8App* app = context;
 
-    string_t file_name;
-    string_init(file_name);
-
     chip8_set_file_name(app->chip8_view, app->file_name);
 
-    string_printf(
-        file_name, "%s/%s%s", CHIP8_APP_PATH_FOLDER, app->file_name, CHIP8_APP_EXTENSION);
+	string_t file_tmp;
+	string_init(file_tmp);
+
+    string_printf(file_tmp, "%s", string_get_cstr(app->file_name));
+
+	FURI_LOG_I("chip8_scene_work_on_enter","file_name: %s", string_get_cstr(file_tmp));
 
     FURI_LOG_I("chip8_scene_work_on_enter", "START SET BACKUP SCREEN");
     chip8_set_backup_screen(app->chip8_view, app->backup_screen);
     FURI_LOG_I("chip8_scene_work_on_enter", "END SET BACKUP SCREEN");
 
-    app->chip8 = chip8_make_emulator(file_name);
+    app->chip8 = chip8_make_emulator(file_tmp);
 
-    string_clear(file_name);
+	string_clear(file_tmp);
 
     chip8_set_state(app->chip8_view, chip8_get_state(app->chip8));
 
