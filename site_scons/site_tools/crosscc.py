@@ -5,7 +5,11 @@ from SCons.Tool import ar
 from SCons.Tool import gnulink
 import strip
 
-from fbt import utils
+
+def prefix_commands(env, command_prefix, cmd_list):
+    for command in cmd_list:
+        if command in env:
+            env[command] = command_prefix + env[command]
 
 
 def generate(env):
@@ -13,7 +17,7 @@ def generate(env):
         orig_tool.generate(env)
     env.SetDefault(TOOLCHAIN_PREFIX="arm-none-eabi-")
 
-    utils.prefix_commands(
+    prefix_commands(
         env,
         env.subst("$TOOLCHAIN_PREFIX"),
         [

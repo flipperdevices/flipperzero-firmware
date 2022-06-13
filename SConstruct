@@ -7,10 +7,9 @@
 # construction of certain targets behind command-line options.
 
 
-from fbt.utils import add_project_to_distenv
-
-
 DefaultEnvironment(tools=[])
+# Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
+
 
 # This environment is created only for loading options & validating file/dir existance
 fbt_variables = SConscript("site_scons/commandline.scons")
@@ -29,19 +28,24 @@ SConscript("site_scons/cc.scons", exports={"ENV": coreenv})
 # Store root dir in environment for certain tools
 coreenv["ROOT_DIR"] = Dir(".")
 
-# Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
-
-
 # Create a separate "dist" environment and add construction envs to it
 distenv = coreenv.Clone(tools=["fbt_dist"])
 
-firmware_out = add_project_to_distenv(distenv, coreenv, "firmware", "FW_ENV")
+firmware_out = distenv.AddFwProject(
+    base_env=coreenv,
+    fw_type="firmware",
+    fw_env_key="FW_ENV",
+)
 Default(firmware_out["FW_ARTIFACTS"])
 
 
-# If enabled, construct updater-related targets
+# If enabled, initialize updater-related targets
 if GetOption("fullenv"):
-    updater_out = add_project_to_distenv(distenv, coreenv, "updater", "UPD_ENV")
+    updater_out = distenv.AddFwProject(
+        base_env=coreenv,
+        fw_type="updater",
+        fw_env_key="UPD_ENV",
+    )
 
     # Target for self-update package
     selfupdate_dist = distenv.DistBuilder(
