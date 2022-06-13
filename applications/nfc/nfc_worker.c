@@ -489,6 +489,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
 
 void nfc_worker_emulate_mifare_classic(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
+    nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, &tx_rx, true);
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     MfClassicEmulator emulator = {
         .cuid = nfc_util_bytes2num(&nfc_data->uid[nfc_data->uid_len - 4], 4),
