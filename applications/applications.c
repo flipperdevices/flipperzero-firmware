@@ -314,7 +314,7 @@ const FlipperApplication FLIPPER_GAMES[] = {
 // #endif
 
 #ifdef APP_CHIP8
-    {.app = chip8_app, .name = "CHIP8 Emulator", .stack_size = 1024, .icon = &A_Plugins_14},
+    {.app = chip8_app, .name = "CHIP8 Emulator", .stack_size = 4096, .icon = &A_Plugins_14},
 #endif
 
 #ifdef APP_DICE
