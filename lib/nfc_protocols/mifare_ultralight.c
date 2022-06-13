@@ -418,7 +418,7 @@ static MfUltralightConfigPages* mf_ultralight_get_config_pages(MfUltralightData*
     }
 }
 
-uint16_t mf_ultralight_calc_auth_count(MfUltralightData* data) {
+static uint16_t mf_ultralight_calc_auth_count(MfUltralightData* data) {
     if(mf_ul_get_features(data->type) & MfUltralightSupportAuth) {
         MfUltralightConfigPages* config = mf_ultralight_get_config_pages(data);
         uint16_t scaled_authlim = config->access.authlim;
@@ -644,7 +644,7 @@ bool mf_ul_read_card(
         if(reader->supported_features & MfUltralightSupportTearingFlags) {
             mf_ultralight_read_tearing_flags(tx_rx, data);
         }
-        data->curr_authlim = mf_ultralight_calc_auth_count(data);
+        data->curr_authlim = 0;
     }
 
     return card_read;
@@ -903,10 +903,10 @@ static void mf_ul_make_ascii_mirror(MfUltralightEmulator* emulator, string_t str
 }
 
 static void mf_ul_increment_single_counter(MfUltralightEmulator* emulator) {
-    if(!emulator->counter_incremented && emulator->config_cache.access.nfc_cnt_en) {
+    if(!emulator->read_counter_incremented && emulator->config_cache.access.nfc_cnt_en) {
         ++emulator->data.counter[2];
         emulator->data_changed = true;
-        emulator->counter_incremented = true;
+        emulator->read_counter_incremented = true;
     }
 }
 
@@ -992,7 +992,7 @@ static void mf_ul_emulate_write(
         // If config pages available, auth is available
         if(tag_addr == config_page_index + 1) {
             // Update authentication counter
-            emulator->data.curr_authlim = mf_ultralight_calc_auth_count(&emulator->data);
+            emulator->data.curr_authlim = 0;
         }
     }
     emulator->data_changed = true;
@@ -1006,7 +1006,7 @@ void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle) 
         emulator->config_cache = *emulator->config;
 
         if(emulator->supported_features & MfUltralightSupportSingleCounter) {
-            emulator->counter_incremented = false;
+            emulator->read_counter_incremented = false;
         }
     }
 }
@@ -1465,7 +1465,7 @@ bool mf_ul_prepare_emulation_response(
             if(emulator->supported_features & MfUltralightSupportAuth) {
                 if(buff_rx_len == (1 + 4) * 8) {
                     uint16_t scaled_authlim = mf_ultralight_calc_auth_count(&emulator->data);
-                    if(scaled_authlim != 0 && emulator->data.curr_authlim == 0) {
+                    if(scaled_authlim != 0 && emulator->data.curr_authlim > scaled_authlim) {
                         // AUTHLIM reached, always fail
                         buff_tx[0] = MF_UL_NAK_AUTHLIM_REACHED;
                         tx_bits = 4;
@@ -1480,10 +1480,9 @@ bool mf_ul_prepare_emulation_response(
                             *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
                             emulator->auth_success = true;
                             command_parsed = true;
-                            if(scaled_authlim != 0 &&
-                               emulator->data.curr_authlim != scaled_authlim) {
+                            if(scaled_authlim != 0 && emulator->data.curr_authlim != 0) {
                                 // Reset current AUTHLIM
-                                emulator->data.curr_authlim = scaled_authlim;
+                                emulator->data.curr_authlim = 0;
                                 emulator->data_changed = true;
                             }
                         } else if(!emulator->config->auth_data.pwd.value) {
@@ -1497,7 +1496,7 @@ bool mf_ul_prepare_emulation_response(
                         } else {
                             // Wrong password, decrease AUTHLIM if set
                             if(scaled_authlim != 0) {
-                                --emulator->data.curr_authlim;
+                                ++emulator->data.curr_authlim;
                                 emulator->data_changed = true;
                             }
                         }

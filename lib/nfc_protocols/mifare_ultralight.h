@@ -163,12 +163,10 @@ typedef struct {
     uint8_t curr_sector;
     bool sector_select_cmd_started;
     bool ntag_i2c_plus_sector3_lockout;
-    bool counter_incremented;
+    bool read_counter_incremented;
 } MfUltralightEmulator;
 
 bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
-
-uint16_t mf_ultralight_calc_auth_count(MfUltralightData* data);
 
 bool mf_ultralight_read_version(
     FuriHalNfcTxRxContext* tx_rx,

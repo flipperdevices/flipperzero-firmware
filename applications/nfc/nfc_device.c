@@ -180,12 +180,7 @@ bool nfc_device_load_mifare_ul_data(FlipperFormat* file, NfcDevice* dev) {
         // Read authentication counter
         uint32_t auth_counter;
         if(!flipper_format_read_uint32(file, "Remaining authentication attempts", &auth_counter, 1))
-            auth_counter = UINT32_MAX;
-
-        if(auth_counter > 256) // Max value is 256 as of NTAG I2C Plus
-            data->curr_authlim = mf_ultralight_calc_auth_count(data);
-        else
-            data->curr_authlim = (uint16_t)auth_counter;
+            auth_counter = 0;
 
         parsed = true;
     } while(false);
