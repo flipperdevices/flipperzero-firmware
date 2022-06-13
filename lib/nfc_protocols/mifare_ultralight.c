@@ -796,7 +796,7 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
     // Check static lock bytes
     if(write_page <= 15) {
         uint16_t static_lock_bytes = emulator->data.data[10] | (emulator->data.data[11] << 8);
-        if(static_lock_bytes & (1 << write_page)) return false;
+        return (static_lock_bytes & (1 << write_page)) == 0;
     }
 
     // Check dynamic lock bytes
