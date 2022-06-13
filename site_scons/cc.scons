@@ -21,7 +21,7 @@ ENV.AppendUnique(
         # "-MP",
         "-Wall",
         "-Wextra",
-        # "-Werror",
+        "-Werror",
         "-Wno-address-of-packed-member",
         "-Wredundant-decls",
         "-fdata-sections",

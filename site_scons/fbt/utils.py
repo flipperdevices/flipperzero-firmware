@@ -39,3 +39,34 @@ def get_variant_dirname(env, project=None):
         parts.append(suffix)
 
     return "-".join(parts)
+
+
+def create_fw_build_targets(env, configuration_name):
+    flavor = get_variant_dirname(env, configuration_name)
+    build_dir = env.Dir("build").Dir(flavor).abspath
+    return env.SConscript(
+        "firmware.scons",
+        variant_dir=build_dir,
+        duplicate=0,
+        exports={
+            "ENV": env,
+            "fw_build_meta": {
+                "type": configuration_name,
+                "flavor": flavor,
+                "build_dir": build_dir,
+            },
+        },
+    )
+
+
+def add_project_to_distenv(dist_env, core_env, fw_type, fw_env_key):
+    project_env = dist_env[fw_env_key] = create_fw_build_targets(core_env, fw_type)
+    dist_env.Append(
+        DIST_PROJECTS=[
+            project_env["FW_FLAVOR"],
+        ],
+        DIST_DEPENDS=[
+            project_env["FW_ARTIFACTS"],
+        ],
+    )
+    return project_env

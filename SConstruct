@@ -7,11 +7,12 @@
 # construction of certain targets behind command-line options.
 
 
-from fbt.builders.dist import add_dist_builders, add_project_to_distenv
+from fbt.utils import add_project_to_distenv
+
 
 DefaultEnvironment(tools=[])
 
-# This environment exists only for loading options & validating file/dir existance
+# This environment is created only for loading options & validating file/dir existance
 fbt_variables = SConscript("site_scons/commandline.scons")
 cmd_environment = Environment(tools=[], variables=fbt_variables)
 Help(fbt_variables.GenerateHelpText(cmd_environment))
@@ -32,8 +33,7 @@ coreenv["ROOT_DIR"] = Dir(".")
 
 
 # Create a separate "dist" environment and add construction envs to it
-distenv = coreenv.Clone()
-add_dist_builders(distenv)
+distenv = coreenv.Clone(tools=["fbt_dist"])
 
 firmware_out = add_project_to_distenv(distenv, coreenv, "firmware", "FW_ENV")
 Default(firmware_out["FW_ARTIFACTS"])

@@ -1,19 +1,10 @@
 Import("env")
 
-from fbt.builders.assets import add_assets_builders, proto_ver_generator
-
-
-assetsenv = env.Clone(FW_LIB_NAME="assets")
-assetsenv.ApplyLibFlags()
-
-# Setting up builders for scripts
-
-add_assets_builders(assetsenv)
-
-assetsenv.Append(
-    ASSETS_COMPILER="${ROOT_DIR.abspath}/scripts/assets.py",
-    NANOPB_COMPILER="${ROOT_DIR.abspath}/lib/nanopb/generator/nanopb_generator.py",
+assetsenv = env.Clone(
+    tools=["fbt_assets"],
+    FW_LIB_NAME="assets",
 )
+assetsenv.ApplyLibFlags()
 
 if not assetsenv["VERBOSE"]:
     assetsenv.SetDefault(
@@ -25,7 +16,6 @@ if not assetsenv["VERBOSE"]:
     )
 
 # Gathering icons sources
-
 icons_src = assetsenv.GlobRecursive("*.png", "icons")
 icons_src += assetsenv.GlobRecursive("frame_rate", "icons")
 
@@ -65,13 +55,9 @@ Alias("dolphin_blocking", dolphin_blocking)
 
 
 # Protobuf version meta
-proto_ver = assetsenv.Command(
+proto_ver = assetsenv.ProtoVerBuilder(
     "protobuf_version.h",
     "#/assets/protobuf/Changelog",
-    action=Action(
-        proto_ver_generator,
-        "${PBVERCOMSTR}",
-    ),
 )
 Depends(proto_ver, proto)
 Alias("proto_ver", proto_ver)

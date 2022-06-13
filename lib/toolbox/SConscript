@@ -1,6 +1,6 @@
 Import("env")
 
-from fbt.builders.version import add_version_builders, get_fast_git_version_id
+from fbt.version import get_fast_git_version_id
 
 
 env.Append(
@@ -10,10 +10,9 @@ env.Append(
 )
 
 
-libenv = env.Clone(FW_LIB_NAME="toolbox")
+libenv = env.Clone(tools=["fbt_version"], FW_LIB_NAME="toolbox")
 libenv.ApplyLibFlags()
 
-add_version_builders(libenv)
 
 # Git Version management
 version_depends = []

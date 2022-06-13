@@ -99,7 +99,12 @@ def proto_ver_generator(target, source, env):
         file.write("\n".join(version_file_data))
 
 
-def add_assets_builders(env):
+def generate(env):
+    env.SetDefault(
+        ASSETS_COMPILER="${ROOT_DIR.abspath}/scripts/assets.py",
+        NANOPB_COMPILER="${ROOT_DIR.abspath}/lib/nanopb/generator/nanopb_generator.py",
+    )
+
     env.Append(
         BUILDERS={
             "IconBuilder": Builder(
@@ -132,5 +137,15 @@ def add_assets_builders(env):
                 ),
                 emitter=dolphin_emitter,
             ),
+            "ProtoVerBuilder": Builder(
+                action=Action(
+                    proto_ver_generator,
+                    "${PBVERCOMSTR}",
+                ),
+            ),
         }
     )
+
+
+def exists(env):
+    return True
