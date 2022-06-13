@@ -492,7 +492,7 @@ bool mf_ultralight_read_pages(
         tx_rx->tx_data[1] = tag_page;
         tx_rx->tx_bits = 16;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-        if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
+        if(!furi_hal_nfc_tx_rx(tx_rx, 50) || tx_rx->rx_bits < 16 * 8) {
             FURI_LOG_D(
                 TAG,
                 "Failed to read pages %d - %d",
@@ -1108,6 +1108,8 @@ bool mf_ul_prepare_emulation_response(
                                    emulator->config_cache.auth0 < last_page_plus_one)
                                     last_page_plus_one = emulator->config_cache.auth0;
                             }
+                            if(emulator->supported_features & MfUltralightSupportSingleCounter)
+                                mf_ul_increment_single_counter(emulator);
                             if(emulator->supported_features & MfUltralightSupportAsciiMirror &&
                                emulator->config_cache.mirror.mirror_conf !=
                                    MfUltralightMirrorNone) {
@@ -1182,8 +1184,6 @@ bool mf_ul_prepare_emulation_response(
                             if(ascii_mirror_cptr != NULL) {
                                 string_clear(ascii_mirror);
                             }
-                            if(emulator->supported_features & MfUltralightSupportSingleCounter)
-                                mf_ul_increment_single_counter(emulator);
                             *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
                             command_parsed = true;
                         } while(false);
@@ -1264,6 +1264,9 @@ bool mf_ul_prepare_emulation_response(
                                             end_page >= emulator->config_cache.auth0))
                                             break;
                                     }
+                                    if(emulator->supported_features &
+                                       MfUltralightSupportSingleCounter)
+                                        mf_ul_increment_single_counter(emulator);
 
                                     // Copy requested pages
                                     memcpy(
@@ -1326,9 +1329,6 @@ bool mf_ul_prepare_emulation_response(
                                                 memset(&buff_tx[(pwd_page_offset + 1) * 4], 0, 4);
                                         }
                                     }
-                                    if(emulator->supported_features &
-                                       MfUltralightSupportSingleCounter)
-                                        mf_ul_increment_single_counter(emulator);
                                     *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
                                     command_parsed = true;
                                 } while(false);
@@ -1569,6 +1569,8 @@ bool mf_ul_prepare_emulation_response(
         buff_tx[0] = MF_UL_NAK_INVALID_ARGUMENT;
         tx_bits = 4;
         *data_type = FURI_HAL_NFC_TX_RAW_RX_DEFAULT;
+        // Every NAK should cause reset to IDLE
+        mf_ul_reset_emulation(emulator, false);
     } else if(send_ack) {
         buff_tx[0] = MF_UL_ACK;
         tx_bits = 4;
