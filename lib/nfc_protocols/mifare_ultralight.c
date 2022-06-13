@@ -1036,12 +1036,12 @@ bool mf_ul_prepare_emulation_response(
     void* context) {
     furi_assert(context);
     MfUltralightEmulator* emulator = context;
-    uint8_t cmd = buff_rx[0];
     uint16_t tx_bytes = 0;
     uint16_t tx_bits = 0;
     bool command_parsed = false;
     bool send_ack = false;
     bool respond_nothing = false;
+    bool reset_idle = false;
 
 #ifdef FURI_DEBUG
     string_t debug_buf;
@@ -1075,465 +1075,494 @@ bool mf_ul_prepare_emulation_response(
             }
         }
         emulator->sector_select_cmd_started = false;
-    } else if(cmd == MF_UL_GET_VERSION_CMD) {
-        if(emulator->data.type != MfUltralightTypeUnknown) {
-            if(buff_rx_len == 1 * 8) {
-                tx_bytes = sizeof(emulator->data.version);
-                memcpy(buff_tx, &emulator->data.version, tx_bytes);
-                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                command_parsed = true;
+    } else if(buff_rx_len >= 8) {
+        uint8_t cmd = buff_rx[0];
+        if(cmd == MF_UL_GET_VERSION_CMD) {
+            if(emulator->data.type != MfUltralightTypeUnknown) {
+                if(buff_rx_len == 1 * 8) {
+                    tx_bytes = sizeof(emulator->data.version);
+                    memcpy(buff_tx, &emulator->data.version, tx_bytes);
+                    *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                    command_parsed = true;
+                }
             }
-        }
-    } else if(cmd == MF_UL_READ_CMD) {
-        if(buff_rx_len == (1 + 1) * 8) {
-            int16_t start_page = buff_rx[1];
-            tx_bytes = 16;
-            if(emulator->data.type < MfUltralightTypeNTAGI2C1K) {
-                if(start_page < emulator->page_num) {
-                    do {
-                        uint8_t copied_pages = 0;
-                        uint8_t src_page = start_page;
-                        uint8_t last_page_plus_one = start_page + 4;
-                        uint8_t pwd_page = emulator->page_num - 2;
-                        string_t ascii_mirror;
-                        size_t ascii_mirror_len = 0;
-                        const char* ascii_mirror_cptr = NULL;
-                        uint8_t ascii_mirror_curr_page = 0;
-                        uint8_t ascii_mirror_curr_byte = 0;
-                        if(last_page_plus_one > emulator->page_num)
-                            last_page_plus_one = emulator->page_num;
-                        if(emulator->supported_features & MfUltralightSupportAuth) {
-                            if(!mf_ul_check_auth(emulator, start_page, false)) break;
-                            if(!emulator->auth_success && emulator->config->access.prot &&
-                               emulator->config->auth0 < last_page_plus_one)
-                                last_page_plus_one = emulator->config->auth0;
-                        }
-                        if(emulator->supported_features & MfUltralightSupportAsciiMirror &&
-                           emulator->config->mirror.mirror_conf != MfUltralightMirrorNone) {
-                            ascii_mirror_curr_byte = emulator->config->mirror.mirror_byte;
-                            ascii_mirror_curr_page = emulator->config->mirror_page;
-                            // Try to avoid wasting time making mirror if we won't copy it
-                            // Conservatively check with UID+counter mirror size
-                            if(last_page_plus_one > ascii_mirror_curr_page &&
-                               start_page + 3 >= ascii_mirror_curr_page &&
-                               start_page <= ascii_mirror_curr_page + 6) {
-                                string_init(ascii_mirror);
-                                mf_ul_make_ascii_mirror(emulator, ascii_mirror);
-                                ascii_mirror_len = string_length_u(ascii_mirror);
-                                ascii_mirror_cptr = string_get_cstr(ascii_mirror);
-                                // Move pointer to where it should be to start copying
-                                if(ascii_mirror_len > 0 && ascii_mirror_curr_page < start_page &&
-                                   ascii_mirror_curr_byte != 0) {
-                                    uint8_t diff = 4 - ascii_mirror_curr_byte;
-                                    ascii_mirror_len -= diff;
-                                    ascii_mirror_cptr += diff;
+        } else if(cmd == MF_UL_READ_CMD) {
+            if(buff_rx_len == (1 + 1) * 8) {
+                int16_t start_page = buff_rx[1];
+                tx_bytes = 16;
+                if(emulator->data.type < MfUltralightTypeNTAGI2C1K) {
+                    if(start_page < emulator->page_num) {
+                        do {
+                            uint8_t copied_pages = 0;
+                            uint8_t src_page = start_page;
+                            uint8_t last_page_plus_one = start_page + 4;
+                            uint8_t pwd_page = emulator->page_num - 2;
+                            string_t ascii_mirror;
+                            size_t ascii_mirror_len = 0;
+                            const char* ascii_mirror_cptr = NULL;
+                            uint8_t ascii_mirror_curr_page = 0;
+                            uint8_t ascii_mirror_curr_byte = 0;
+                            if(last_page_plus_one > emulator->page_num)
+                                last_page_plus_one = emulator->page_num;
+                            if(emulator->supported_features & MfUltralightSupportAuth) {
+                                if(!mf_ul_check_auth(emulator, start_page, false)) break;
+                                if(!emulator->auth_success && emulator->config->access.prot &&
+                                   emulator->config->auth0 < last_page_plus_one)
+                                    last_page_plus_one = emulator->config->auth0;
+                            }
+                            if(emulator->supported_features & MfUltralightSupportAsciiMirror &&
+                               emulator->config->mirror.mirror_conf != MfUltralightMirrorNone) {
+                                ascii_mirror_curr_byte = emulator->config->mirror.mirror_byte;
+                                ascii_mirror_curr_page = emulator->config->mirror_page;
+                                // Try to avoid wasting time making mirror if we won't copy it
+                                // Conservatively check with UID+counter mirror size
+                                if(last_page_plus_one > ascii_mirror_curr_page &&
+                                   start_page + 3 >= ascii_mirror_curr_page &&
+                                   start_page <= ascii_mirror_curr_page + 6) {
+                                    string_init(ascii_mirror);
+                                    mf_ul_make_ascii_mirror(emulator, ascii_mirror);
+                                    ascii_mirror_len = string_length_u(ascii_mirror);
+                                    ascii_mirror_cptr = string_get_cstr(ascii_mirror);
+                                    // Move pointer to where it should be to start copying
+                                    if(ascii_mirror_len > 0 &&
+                                       ascii_mirror_curr_page < start_page &&
+                                       ascii_mirror_curr_byte != 0) {
+                                        uint8_t diff = 4 - ascii_mirror_curr_byte;
+                                        ascii_mirror_len -= diff;
+                                        ascii_mirror_cptr += diff;
+                                        ascii_mirror_curr_byte = 0;
+                                        ++ascii_mirror_curr_page;
+                                    }
+                                    while(ascii_mirror_len > 0 &&
+                                          ascii_mirror_curr_page < start_page) {
+                                        uint8_t diff = ascii_mirror_len > 4 ? 4 : ascii_mirror_len;
+                                        ascii_mirror_len -= diff;
+                                        ascii_mirror_cptr += diff;
+                                        ++ascii_mirror_curr_page;
+                                    }
+                                }
+                            }
+
+                            uint8_t* dest_ptr = buff_tx;
+                            while(copied_pages < 4) {
+                                // Copy page
+                                memcpy(dest_ptr, &emulator->data.data[src_page * 4], 4);
+
+                                // Note: don't have to worry about roll-over with ASCII mirror because
+                                // lowest valid page for it is 4, while roll-over will at best read
+                                // pages 0-2
+                                if(ascii_mirror_len > 0 && src_page == ascii_mirror_curr_page) {
+                                    // Copy ASCII mirror
+                                    size_t copy_len = 4 - ascii_mirror_curr_byte;
+                                    if(copy_len > ascii_mirror_len) copy_len = ascii_mirror_len;
+                                    for(size_t i = 0; i < copy_len; ++i) {
+                                        if(*ascii_mirror_cptr != ' ')
+                                            dest_ptr[ascii_mirror_curr_byte] =
+                                                (uint8_t)*ascii_mirror_cptr;
+                                        ++ascii_mirror_curr_byte;
+                                        ++ascii_mirror_cptr;
+                                    }
+                                    ascii_mirror_len -= copy_len;
+                                    // Don't care if this is inaccurate after ascii_mirror_len = 0
                                     ascii_mirror_curr_byte = 0;
                                     ++ascii_mirror_curr_page;
                                 }
-                                while(ascii_mirror_len > 0 &&
-                                      ascii_mirror_curr_page < start_page) {
-                                    uint8_t diff = ascii_mirror_len > 4 ? 4 : ascii_mirror_len;
-                                    ascii_mirror_len -= diff;
-                                    ascii_mirror_cptr += diff;
-                                    ++ascii_mirror_curr_page;
+
+                                if(emulator->supported_features & MfUltralightSupportAuth) {
+                                    if(src_page == pwd_page || src_page == pwd_page + 1) {
+                                        // Blank out PWD and PACK pages
+                                        memset(dest_ptr, 0, 4);
+                                    }
+                                }
+
+                                dest_ptr += 4;
+                                ++copied_pages;
+                                ++src_page;
+                                if(src_page >= last_page_plus_one) src_page = 0;
+                            }
+                            if(ascii_mirror_cptr != NULL) {
+                                string_clear(ascii_mirror);
+                            }
+                            if(emulator->supported_features & MfUltralightSupportSingleCounter)
+                                mf_ul_increment_single_counter(emulator);
+                            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                            command_parsed = true;
+                        } while(false);
+                    }
+                } else {
+                    uint16_t valid_pages;
+                    start_page = mf_ultralight_ntag_i2c_addr_tag_to_lin(
+                        &emulator->data, start_page, emulator->curr_sector, &valid_pages);
+                    if(start_page != -1) {
+                        if(emulator->data.type < MfUltralightTypeNTAGI2CPlus1K ||
+                           mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], false)) {
+                            if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K &&
+                               emulator->curr_sector == 3 && valid_pages == 1) {
+                                // Rewind back a sector to match behavior on a real tag
+                                --start_page;
+                                ++valid_pages;
+                            }
+
+                            uint16_t copy_count = (valid_pages > 4 ? 4 : valid_pages) * 4;
+                            FURI_LOG_D(
+                                TAG,
+                                "NTAG I2C Emu: page valid, %02x:%02x -> %d, %d",
+                                emulator->curr_sector,
+                                buff_rx[1],
+                                start_page,
+                                valid_pages);
+                            memcpy(buff_tx, &emulator->data.data[start_page * 4], copy_count);
+                            // For NTAG I2C, there's no roll-over; remainder is filled by null bytes
+                            if(copy_count < tx_bytes)
+                                memset(&buff_tx[copy_count], 0, tx_bytes - copy_count);
+                            // Special case: NTAG I2C Plus sector 0 page 233 read crosses into page 236
+                            if(start_page == 233)
+                                memcpy(
+                                    &buff_tx[12], &emulator->data.data[(start_page + 1) * 4], 4);
+                            mf_ul_protect_auth_data_on_read_command_i2c(
+                                buff_tx, start_page, start_page + copy_count / 4 - 1, emulator);
+                            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                            command_parsed = true;
+                        }
+                    } else {
+                        FURI_LOG_D(
+                            TAG,
+                            "NTAG I2C Emu: page invalid, %02x:%02x",
+                            emulator->curr_sector,
+                            buff_rx[1]);
+                        if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K &&
+                           emulator->curr_sector == 3 &&
+                           !emulator->ntag_i2c_plus_sector3_lockout) {
+                            // NTAG I2C Plus has a weird behavior where if you read sector 3
+                            // at an invalid address, it responds with zeroes then locks
+                            // the read out, while if you read the mirrored session registers,
+                            // it returns both session registers on either pages
+                            memset(buff_tx, 0, tx_bytes);
+                            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                            command_parsed = true;
+                            emulator->ntag_i2c_plus_sector3_lockout = true;
+                        }
+                    }
+                }
+                if(!command_parsed) tx_bytes = 0;
+            }
+        } else if(cmd == MF_UL_FAST_READ_CMD) {
+            if(emulator->supported_features & MfUltralightSupportFastRead) {
+                if(buff_rx_len == (1 + 2) * 8) {
+                    int16_t start_page = buff_rx[1];
+                    uint8_t end_page = buff_rx[2];
+                    if(start_page <= end_page) {
+                        tx_bytes = ((end_page + 1) - start_page) * 4;
+                        if(emulator->data.type < MfUltralightTypeNTAGI2C1K) {
+                            if((start_page < emulator->page_num) &&
+                               (end_page < emulator->page_num)) {
+                                do {
+                                    if(emulator->supported_features & MfUltralightSupportAuth) {
+                                        // NAK if not authenticated and requested pages cross over AUTH0
+                                        if(!emulator->auth_success &&
+                                           emulator->config->access.prot &&
+                                           (start_page >= emulator->config->auth0 ||
+                                            end_page >= emulator->config->auth0))
+                                            break;
+                                    }
+
+                                    // Copy requested pages
+                                    memcpy(
+                                        buff_tx, &emulator->data.data[start_page * 4], tx_bytes);
+
+                                    if(emulator->supported_features &
+                                           MfUltralightSupportAsciiMirror &&
+                                       emulator->config->mirror.mirror_conf !=
+                                           MfUltralightMirrorNone) {
+                                        // Copy ASCII mirror
+                                        // Less stringent check here, because expecting FAST_READ to
+                                        // only be issued once rather than repeatedly
+                                        string_t ascii_mirror;
+                                        string_init(ascii_mirror);
+                                        mf_ul_make_ascii_mirror(emulator, ascii_mirror);
+                                        size_t ascii_mirror_len = string_length_u(ascii_mirror);
+                                        const char* ascii_mirror_cptr =
+                                            string_get_cstr(ascii_mirror);
+                                        int16_t mirror_start_offset =
+                                            (emulator->config->mirror_page - start_page) * 4 +
+                                            emulator->config->mirror.mirror_byte;
+                                        if(mirror_start_offset < 0) {
+                                            if(mirror_start_offset < -(int16_t)ascii_mirror_len) {
+                                                // Past ASCII mirror, don't copy
+                                                ascii_mirror_len = 0;
+                                            } else {
+                                                ascii_mirror_cptr += -mirror_start_offset;
+                                                ascii_mirror_len -= -mirror_start_offset;
+                                                mirror_start_offset = 0;
+                                            }
+                                        }
+                                        if(ascii_mirror_len > 0) {
+                                            int16_t mirror_end_offset =
+                                                mirror_start_offset + ascii_mirror_len;
+                                            if(mirror_end_offset > (end_page + 1) * 4) {
+                                                mirror_end_offset = (end_page + 1) * 4;
+                                                ascii_mirror_len =
+                                                    mirror_end_offset - mirror_start_offset;
+                                            }
+                                            for(size_t i = 0; i < ascii_mirror_len; ++i) {
+                                                if(*ascii_mirror_cptr != ' ')
+                                                    buff_tx[mirror_start_offset] =
+                                                        (uint8_t)*ascii_mirror_cptr;
+                                                ++mirror_start_offset;
+                                                ++ascii_mirror_cptr;
+                                            }
+                                        }
+                                        string_clear(ascii_mirror);
+                                    }
+
+                                    if(emulator->supported_features & MfUltralightSupportAuth) {
+                                        // Clear PWD and PACK pages
+                                        uint8_t pwd_page = emulator->page_num - 2;
+                                        int16_t pwd_page_offset = pwd_page - start_page;
+                                        // PWD page
+                                        if(pwd_page_offset >= 0 && pwd_page_offset <= end_page) {
+                                            memset(&buff_tx[pwd_page_offset * 4], 0, 4);
+                                            // PACK page
+                                            if(pwd_page_offset + 1 <= end_page)
+                                                memset(&buff_tx[(pwd_page_offset + 1) * 4], 0, 4);
+                                        }
+                                    }
+                                    if(emulator->supported_features &
+                                       MfUltralightSupportSingleCounter)
+                                        mf_ul_increment_single_counter(emulator);
+                                    *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                                    command_parsed = true;
+                                } while(false);
+                            }
+                        } else {
+                            uint16_t valid_pages;
+                            start_page = mf_ultralight_ntag_i2c_addr_tag_to_lin(
+                                &emulator->data, start_page, emulator->curr_sector, &valid_pages);
+                            if(start_page != -1) {
+                                if(emulator->data.type < MfUltralightTypeNTAGI2CPlus1K ||
+                                   mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], false)) {
+                                    uint16_t copy_count = (valid_pages > 4 ? 4 : valid_pages) * 4;
+                                    memcpy(
+                                        buff_tx, &emulator->data.data[start_page * 4], copy_count);
+                                    if(copy_count < tx_bytes)
+                                        memset(&buff_tx[copy_count], 0, tx_bytes - copy_count);
+                                    mf_ul_ntag_i2c_fill_cross_area_read(
+                                        buff_tx, buff_rx[1], buff_rx[2], emulator);
+                                    mf_ul_protect_auth_data_on_read_command_i2c(
+                                        buff_tx,
+                                        start_page,
+                                        start_page + copy_count / 4 - 1,
+                                        emulator);
+                                    *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                                    command_parsed = true;
                                 }
                             }
                         }
+                        if(!command_parsed) tx_bytes = 0;
+                    }
+                }
+            }
+        } else if(cmd == MF_UL_WRITE) {
+            if(buff_rx_len == (1 + 5) * 8) {
+                do {
+                    uint8_t orig_write_page = buff_rx[1];
+                    int16_t write_page = orig_write_page;
+                    uint16_t valid_pages; // unused
+                    write_page = mf_ultralight_ntag_i2c_addr_tag_to_lin(
+                        &emulator->data, write_page, emulator->curr_sector, &valid_pages);
+                    if(write_page == -1) // NTAG I2C range check
+                        break;
+                    else if(write_page < 2 || write_page >= emulator->page_num) // Other MFUL/NTAG range check
+                        break;
 
-                        uint8_t* dest_ptr = buff_tx;
-                        while(copied_pages < 4) {
-                            // Copy page
-                            memcpy(dest_ptr, &emulator->data.data[src_page * 4], 4);
-
-                            // Note: don't have to worry about roll-over with ASCII mirror because
-                            // lowest valid page for it is 4, while roll-over will at best read
-                            // pages 0-2
-                            if(ascii_mirror_len > 0 && src_page == ascii_mirror_curr_page) {
-                                // Copy ASCII mirror
-                                size_t copy_len = 4 - ascii_mirror_curr_byte;
-                                if(copy_len > ascii_mirror_len) copy_len = ascii_mirror_len;
-                                for(size_t i = 0; i < copy_len; ++i) {
-                                    if(*ascii_mirror_cptr != ' ')
-                                        dest_ptr[ascii_mirror_curr_byte] =
-                                            (uint8_t)*ascii_mirror_cptr;
-                                    ++ascii_mirror_curr_byte;
-                                    ++ascii_mirror_cptr;
-                                }
-                                ascii_mirror_len -= copy_len;
-                                // Don't care if this is inaccurate after ascii_mirror_len = 0
-                                ascii_mirror_curr_byte = 0;
-                                ++ascii_mirror_curr_page;
-                            }
-
-                            if(emulator->supported_features & MfUltralightSupportAuth) {
-                                if(src_page == pwd_page || src_page == pwd_page + 1) {
-                                    // Blank out PWD and PACK pages
-                                    memset(dest_ptr, 0, 4);
-                                }
-                            }
-
-                            dest_ptr += 4;
-                            ++copied_pages;
-                            ++src_page;
-                            if(src_page >= last_page_plus_one) src_page = 0;
+                    if(emulator->supported_features & MfUltralightSupportAuth) {
+                        if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K) {
+                            if(!mf_ul_ntag_i2c_plus_check_auth(emulator, orig_write_page, true))
+                                break;
+                        } else {
+                            if(!mf_ul_check_auth(emulator, orig_write_page, true)) break;
                         }
-                        if(ascii_mirror_cptr != NULL) {
-                            string_clear(ascii_mirror);
-                        }
-                        if(emulator->supported_features & MfUltralightSupportSingleCounter)
-                            mf_ul_increment_single_counter(emulator);
-                        *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                    }
+                    int16_t tag_addr = mf_ultralight_page_addr_to_tag_addr(
+                        emulator->curr_sector, orig_write_page);
+                    if(!mf_ul_check_lock(emulator, tag_addr)) break;
+                    mf_ul_emulate_write(emulator, tag_addr, write_page, &buff_rx[2]);
+                    send_ack = true;
+                    command_parsed = true;
+                } while(false);
+            }
+        } else if(cmd == MF_UL_FAST_WRITE) {
+            if(emulator->supported_features & MfUltralightSupportFastWrite) {
+                if(buff_rx_len == (1 + 66) * 8) {
+                    if(buff_rx[1] == 0xF0 && buff_rx[2] == 0xFF) {
+                        // TODO: update when SRAM emulation implemented
+                        send_ack = true;
+                        command_parsed = true;
+                    }
+                }
+            }
+        } else if(cmd == MF_UL_COMP_WRITE) {
+            if(emulator->supported_features & MfUltralightSupportCompatWrite) {
+                if(buff_rx_len == (1 + 1) * 8) {
+                    uint8_t write_page = buff_rx[1];
+                    do {
+                        if(write_page < 2 || write_page >= emulator->page_num) break;
+                        if(emulator->supported_features & MfUltralightSupportAuth &&
+                           !mf_ul_check_auth(emulator, write_page, true))
+                            break;
+                        // Note we don't convert to tag addr here because there's only one sector
+                        if(!mf_ul_check_lock(emulator, write_page)) break;
+
+                        emulator->comp_write_cmd_started = true;
+                        emulator->comp_write_page_addr = write_page;
+                        send_ack = true;
                         command_parsed = true;
                     } while(false);
                 }
-            } else {
-                uint16_t valid_pages;
-                start_page = mf_ultralight_ntag_i2c_addr_tag_to_lin(
-                    &emulator->data, start_page, emulator->curr_sector, &valid_pages);
-                if(start_page != -1) {
-                    if(emulator->data.type < MfUltralightTypeNTAGI2CPlus1K ||
-                       mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], false)) {
-                        if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K &&
-                           emulator->curr_sector == 3 && valid_pages == 1) {
-                            // Rewind back a sector to match behavior on a real tag
-                            --start_page;
-                            ++valid_pages;
+            }
+        } else if(cmd == MF_UL_READ_CNT) {
+            if(emulator->supported_features & MfUltralightSupportReadCounter) {
+                if(buff_rx_len == (1 + 1) * 8) {
+                    do {
+                        uint8_t cnt_num = buff_rx[1];
+
+                        // NTAG21x checks
+                        if(emulator->supported_features & MfUltralightSupportSingleCounter) {
+                            if(cnt_num != 2) break; // Only counter 2 is available
+                            if(!emulator->config->access.nfc_cnt_en)
+                                break; // NAK if counter not enabled
+                            if(emulator->config->access.nfc_cnt_pwd_prot &&
+                               !emulator->auth_success)
+                                break;
                         }
 
-                        uint16_t copy_count = (valid_pages > 4 ? 4 : valid_pages) * 4;
-                        FURI_LOG_D(
-                            TAG,
-                            "NTAG I2C Emu: page valid, %02x:%02x -> %d, %d",
-                            emulator->curr_sector,
-                            buff_rx[1],
-                            start_page,
-                            valid_pages);
-                        memcpy(buff_tx, &emulator->data.data[start_page * 4], copy_count);
-                        // For NTAG I2C, there's no roll-over; remainder is filled by null bytes
-                        if(copy_count < tx_bytes)
-                            memset(&buff_tx[copy_count], 0, tx_bytes - copy_count);
-                        // Special case: NTAG I2C Plus sector 0 page 233 read crosses into page 236
-                        if(start_page == 233)
-                            memcpy(&buff_tx[12], &emulator->data.data[(start_page + 1) * 4], 4);
-                        mf_ul_protect_auth_data_on_read_command_i2c(
-                            buff_tx, start_page, start_page + copy_count / 4 - 1, emulator);
-                        *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                        if(cnt_num < 3) {
+                            buff_tx[0] = emulator->data.counter[cnt_num] & 0xFF;
+                            buff_tx[1] = (emulator->data.counter[cnt_num] >> 8) & 0xFF;
+                            buff_tx[2] = (emulator->data.counter[cnt_num] >> 16) & 0xFF;
+                            tx_bytes = 3;
+                            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                            command_parsed = true;
+                        }
+                    } while(false);
+                }
+            }
+        } else if(cmd == MF_UL_INC_CNT) {
+            if(emulator->supported_features & MfUltralightSupportIncrCounter) {
+                if(buff_rx_len == (1 + 5) * 8) {
+                    uint8_t cnt_num = buff_rx[1];
+                    uint32_t inc = (buff_rx[2] | (buff_rx[3] << 8) | (buff_rx[4] << 16));
+                    // TODO: can you increment by 0 when counter is at 0xffffff?
+                    if((cnt_num < 3) && (emulator->data.counter[cnt_num] != 0x00FFFFFF) &&
+                       (emulator->data.counter[cnt_num] + inc <= 0x00FFFFFF)) {
+                        emulator->data.counter[cnt_num] += inc;
+                        // We're RAM-backed, so tearing never happens
+                        emulator->data.tearing[cnt_num] = MF_UL_TEARING_FLAG_DEFAULT;
+                        emulator->data_changed = true;
+                        send_ack = true;
                         command_parsed = true;
-                    }
-                } else {
-                    FURI_LOG_D(
-                        TAG,
-                        "NTAG I2C Emu: page invalid, %02x:%02x",
-                        emulator->curr_sector,
-                        buff_rx[1]);
-                    if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K &&
-                       emulator->curr_sector == 3 && !emulator->ntag_i2c_plus_sector3_lockout) {
-                        // NTAG I2C Plus has a weird behavior where if you read sector 3
-                        // at an invalid address, it responds with zeroes then locks
-                        // the read out, while if you read the mirrored session registers,
-                        // it returns both session registers on either pages
-                        memset(buff_tx, 0, tx_bytes);
-                        *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                        command_parsed = true;
-                        emulator->ntag_i2c_plus_sector3_lockout = true;
                     }
                 }
             }
-            if(!command_parsed) tx_bytes = 0;
-        }
-    } else if(cmd == MF_UL_FAST_READ_CMD) {
-        if(emulator->supported_features & MfUltralightSupportFastRead) {
-            if(buff_rx_len == (1 + 2) * 8) {
-                int16_t start_page = buff_rx[1];
-                uint8_t end_page = buff_rx[2];
-                if(start_page <= end_page) {
-                    tx_bytes = ((end_page + 1) - start_page) * 4;
-                    if(emulator->data.type < MfUltralightTypeNTAGI2C1K) {
-                        if((start_page < emulator->page_num) && (end_page < emulator->page_num)) {
-                            do {
-                                if(emulator->supported_features & MfUltralightSupportAuth) {
-                                    // NAK if not authenticated and requested pages cross over AUTH0
-                                    if(!emulator->auth_success && emulator->config->access.prot &&
-                                       (start_page >= emulator->config->auth0 ||
-                                        end_page >= emulator->config->auth0))
-                                        break;
-                                }
-
-                                // Copy requested pages
-                                memcpy(buff_tx, &emulator->data.data[start_page * 4], tx_bytes);
-
-                                if(emulator->supported_features & MfUltralightSupportAsciiMirror &&
-                                   emulator->config->mirror.mirror_conf !=
-                                       MfUltralightMirrorNone) {
-                                    // Copy ASCII mirror
-                                    // Less stringent check here, because expecting FAST_READ to
-                                    // only be issued once rather than repeatedly
-                                    string_t ascii_mirror;
-                                    string_init(ascii_mirror);
-                                    mf_ul_make_ascii_mirror(emulator, ascii_mirror);
-                                    size_t ascii_mirror_len = string_length_u(ascii_mirror);
-                                    const char* ascii_mirror_cptr = string_get_cstr(ascii_mirror);
-                                    int16_t mirror_start_offset =
-                                        (emulator->config->mirror_page - start_page) * 4 +
-                                        emulator->config->mirror.mirror_byte;
-                                    if(mirror_start_offset < 0) {
-                                        if(mirror_start_offset < -(int16_t)ascii_mirror_len) {
-                                            // Past ASCII mirror, don't copy
-                                            ascii_mirror_len = 0;
-                                        } else {
-                                            ascii_mirror_cptr += -mirror_start_offset;
-                                            ascii_mirror_len -= -mirror_start_offset;
-                                            mirror_start_offset = 0;
-                                        }
-                                    }
-                                    if(ascii_mirror_len > 0) {
-                                        int16_t mirror_end_offset =
-                                            mirror_start_offset + ascii_mirror_len;
-                                        if(mirror_end_offset > (end_page + 1) * 4) {
-                                            mirror_end_offset = (end_page + 1) * 4;
-                                            ascii_mirror_len =
-                                                mirror_end_offset - mirror_start_offset;
-                                        }
-                                        for(size_t i = 0; i < ascii_mirror_len; ++i) {
-                                            if(*ascii_mirror_cptr != ' ')
-                                                buff_tx[mirror_start_offset] =
-                                                    (uint8_t)*ascii_mirror_cptr;
-                                            ++mirror_start_offset;
-                                            ++ascii_mirror_cptr;
-                                        }
-                                    }
-                                    string_clear(ascii_mirror);
-                                }
-
-                                if(emulator->supported_features & MfUltralightSupportAuth) {
-                                    // Clear PWD and PACK pages
-                                    uint8_t pwd_page = emulator->page_num - 2;
-                                    int16_t pwd_page_offset = pwd_page - start_page;
-                                    // PWD page
-                                    if(pwd_page_offset >= 0 && pwd_page_offset <= end_page) {
-                                        memset(&buff_tx[pwd_page_offset * 4], 0, 4);
-                                        // PACK page
-                                        if(pwd_page_offset + 1 <= end_page)
-                                            memset(&buff_tx[(pwd_page_offset + 1) * 4], 0, 4);
-                                    }
-                                }
-                                if(emulator->supported_features & MfUltralightSupportSingleCounter)
-                                    mf_ul_increment_single_counter(emulator);
-                                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                                command_parsed = true;
-                            } while(false);
-                        }
+        } else if(cmd == MF_UL_AUTH) {
+            if(emulator->supported_features & MfUltralightSupportAuth) {
+                if(buff_rx_len == (1 + 4) * 8) {
+                    uint16_t scaled_authlim = mf_ultralight_calc_auth_count(&emulator->data);
+                    if(scaled_authlim != 0 && emulator->data.curr_authlim == 0) {
+                        // AUTHLIM reached, always fail
+                        buff_tx[0] = MF_UL_NAK_AUTHLIM_REACHED;
+                        tx_bits = 4;
+                        *data_type = FURI_HAL_NFC_TX_RAW_RX_DEFAULT;
+                        command_parsed = true;
                     } else {
-                        uint16_t valid_pages;
-                        start_page = mf_ultralight_ntag_i2c_addr_tag_to_lin(
-                            &emulator->data, start_page, emulator->curr_sector, &valid_pages);
-                        if(start_page != -1) {
-                            if(emulator->data.type < MfUltralightTypeNTAGI2CPlus1K ||
-                               mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], false)) {
-                                uint16_t copy_count = (valid_pages > 4 ? 4 : valid_pages) * 4;
-                                memcpy(buff_tx, &emulator->data.data[start_page * 4], copy_count);
-                                if(copy_count < tx_bytes)
-                                    memset(&buff_tx[copy_count], 0, tx_bytes - copy_count);
-                                mf_ul_ntag_i2c_fill_cross_area_read(
-                                    buff_tx, buff_rx[1], buff_rx[2], emulator);
-                                mf_ul_protect_auth_data_on_read_command_i2c(
-                                    buff_tx, start_page, start_page + copy_count / 4 - 1, emulator);
-                                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                                command_parsed = true;
+                        if(memcmp(&buff_rx[1], emulator->config->auth_data.pwd.raw, 4) == 0) {
+                            // Correct password
+                            buff_tx[0] = emulator->config->auth_data.pack.raw[0];
+                            buff_tx[1] = emulator->config->auth_data.pack.raw[1];
+                            tx_bytes = 2;
+                            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                            emulator->auth_success = true;
+                            command_parsed = true;
+                            if(scaled_authlim != 0 &&
+                               emulator->data.curr_authlim != scaled_authlim) {
+                                // Reset current AUTHLIM
+                                emulator->data.curr_authlim = scaled_authlim;
+                                emulator->data_changed = true;
+                            }
+                        } else if(!emulator->config->auth_data.pwd.value) {
+                            // Unknown password, pretend to be an Amiibo
+                            buff_tx[0] = 0x80;
+                            buff_tx[1] = 0x80;
+                            tx_bytes = 2;
+                            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                            emulator->auth_success = true;
+                            command_parsed = true;
+                        } else {
+                            // Wrong password, decrease AUTHLIM if set
+                            if(scaled_authlim != 0) {
+                                --emulator->data.curr_authlim;
+                                emulator->data_changed = true;
                             }
                         }
                     }
-                    if(!command_parsed) tx_bytes = 0;
                 }
             }
-        }
-    } else if(cmd == MF_UL_WRITE) {
-        if(buff_rx_len == (1 + 5) * 8) {
-            do {
-                uint8_t orig_write_page = buff_rx[1];
-                int16_t write_page = orig_write_page;
-                uint16_t valid_pages; // unused
-                write_page = mf_ultralight_ntag_i2c_addr_tag_to_lin(
-                    &emulator->data, write_page, emulator->curr_sector, &valid_pages);
-                if(write_page == -1) // NTAG I2C range check
-                    break;
-                else if(write_page < 2 || write_page >= emulator->page_num) // Other MFUL/NTAG range check
-                    break;
-
-                if(emulator->supported_features & MfUltralightSupportAuth) {
-                    if(emulator->data.type >= MfUltralightTypeNTAGI2CPlus1K) {
-                        if(!mf_ul_ntag_i2c_plus_check_auth(emulator, orig_write_page, true)) break;
-                    } else {
-                        if(!mf_ul_check_auth(emulator, orig_write_page, true)) break;
-                    }
-                }
-                int16_t tag_addr =
-                    mf_ultralight_page_addr_to_tag_addr(emulator->curr_sector, orig_write_page);
-                if(!mf_ul_check_lock(emulator, tag_addr)) break;
-                mf_ul_emulate_write(emulator, tag_addr, write_page, &buff_rx[2]);
-                send_ack = true;
-                command_parsed = true;
-            } while(false);
-        }
-    } else if(cmd == MF_UL_FAST_WRITE) {
-        if(emulator->supported_features & MfUltralightSupportFastWrite) {
-            if(buff_rx_len == (1 + 66) * 8) {
-                if(buff_rx[1] == 0xF0 && buff_rx[2] == 0xFF) {
-                    // TODO: update when SRAM emulation implemented
-                    send_ack = true;
+        } else if(cmd == MF_UL_READ_SIG) {
+            if(emulator->supported_features & MfUltralightSupportSignature) {
+                // Check 2nd byte = 0x00 - RFU
+                if(buff_rx_len == (1 + 1) * 8 && buff_rx[1] == 0x00) {
+                    tx_bytes = sizeof(emulator->data.signature);
+                    memcpy(buff_tx, emulator->data.signature, tx_bytes);
+                    *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
                     command_parsed = true;
                 }
             }
-        }
-    } else if(cmd == MF_UL_COMP_WRITE) {
-        if(emulator->supported_features & MfUltralightSupportCompatWrite) {
-            if(buff_rx_len == (1 + 1) * 8) {
-                uint8_t write_page = buff_rx[1];
-                do {
-                    if(write_page < 2 || write_page >= emulator->page_num) break;
-                    if(emulator->supported_features & MfUltralightSupportAuth &&
-                       !mf_ul_check_auth(emulator, write_page, true))
-                        break;
-                    // Note we don't convert to tag addr here because there's only one sector
-                    if(!mf_ul_check_lock(emulator, write_page)) break;
-
-                    emulator->comp_write_cmd_started = true;
-                    emulator->comp_write_page_addr = write_page;
-                    send_ack = true;
-                    command_parsed = true;
-                } while(false);
-            }
-        }
-    } else if(cmd == MF_UL_READ_CNT) {
-        if(emulator->supported_features & MfUltralightSupportReadCounter) {
-            if(buff_rx_len == (1 + 1) * 8) {
-                do {
+        } else if(cmd == MF_UL_CHECK_TEARING) {
+            if(emulator->supported_features & MfUltralightSupportTearingFlags) {
+                if(buff_rx_len == (1 + 1) * 8) {
                     uint8_t cnt_num = buff_rx[1];
-
-                    // NTAG21x checks
-                    if(emulator->supported_features & MfUltralightSupportSingleCounter) {
-                        if(cnt_num != 2) break; // Only counter 2 is available
-                        if(!emulator->config->access.nfc_cnt_en)
-                            break; // NAK if counter not enabled
-                        if(emulator->config->access.nfc_cnt_pwd_prot && !emulator->auth_success)
-                            break;
-                    }
-
                     if(cnt_num < 3) {
-                        buff_tx[0] = emulator->data.counter[cnt_num] & 0xFF;
-                        buff_tx[1] = (emulator->data.counter[cnt_num] >> 8) & 0xFF;
-                        buff_tx[2] = (emulator->data.counter[cnt_num] >> 16) & 0xFF;
-                        tx_bytes = 3;
+                        buff_tx[0] = emulator->data.tearing[cnt_num];
+                        tx_bytes = 1;
                         *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
                         command_parsed = true;
                     }
-                } while(false);
+                }
             }
-        }
-    } else if(cmd == MF_UL_INC_CNT) {
-        if(emulator->supported_features & MfUltralightSupportIncrCounter) {
-            if(buff_rx_len == (1 + 5) * 8) {
-                uint8_t cnt_num = buff_rx[1];
-                uint32_t inc = (buff_rx[2] | (buff_rx[3] << 8) | (buff_rx[4] << 16));
-                // TODO: can you increment by 0 when counter is at 0xffffff?
-                if((cnt_num < 3) && (emulator->data.counter[cnt_num] != 0x00FFFFFF) &&
-                   (emulator->data.counter[cnt_num] + inc <= 0x00FFFFFF)) {
-                    emulator->data.counter[cnt_num] += inc;
-                    // We're RAM-backed, so tearing never happens
-                    emulator->data.tearing[cnt_num] = MF_UL_TEARING_FLAG_DEFAULT;
-                    emulator->data_changed = true;
+        } else if(cmd == MF_UL_HALT_START) {
+            reset_idle = true;
+            FURI_LOG_D(TAG, "Received HLTA");
+        } else if(cmd == MF_UL_SECTOR_SELECT) {
+            if(emulator->supported_features & MfUltralightSupportSectorSelect) {
+                if(buff_rx_len == (1 + 1) * 8 && buff_rx[1] == 0xFF) {
+                    // Send ACK
+                    emulator->sector_select_cmd_started = true;
                     send_ack = true;
                     command_parsed = true;
                 }
             }
-        }
-    } else if(cmd == MF_UL_AUTH) {
-        if(emulator->supported_features & MfUltralightSupportAuth) {
-            if(buff_rx_len == (1 + 4) * 8) {
-                uint16_t scaled_authlim = mf_ultralight_calc_auth_count(&emulator->data);
-                if(scaled_authlim != 0 && emulator->data.curr_authlim == 0) {
-                    // AUTHLIM reached, always fail
-                    buff_tx[0] = MF_UL_NAK_AUTHLIM_REACHED;
-                    tx_bits = 4;
-                    *data_type = FURI_HAL_NFC_TX_RAW_RX_DEFAULT;
-                    command_parsed = true;
-                } else {
-                    if(memcmp(&buff_rx[1], emulator->config->auth_data.pwd.raw, 4) == 0) {
-                        // Correct password
-                        buff_tx[0] = emulator->config->auth_data.pack.raw[0];
-                        buff_tx[1] = emulator->config->auth_data.pack.raw[1];
-                        tx_bytes = 2;
-                        *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                        emulator->auth_success = true;
-                        command_parsed = true;
-                        if(scaled_authlim != 0 && emulator->data.curr_authlim != scaled_authlim) {
-                            // Reset current AUTHLIM
-                            emulator->data.curr_authlim = scaled_authlim;
-                            emulator->data_changed = true;
-                        }
-                    } else if(!emulator->config->auth_data.pwd.value) {
-                        // Unknown password, pretend to be an Amiibo
-                        buff_tx[0] = 0x80;
-                        buff_tx[1] = 0x80;
-                        tx_bytes = 2;
-                        *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                        emulator->auth_success = true;
-                        command_parsed = true;
-                    } else {
-                        // Wrong password, decrease AUTHLIM if set
-                        if(scaled_authlim != 0) {
-                            --emulator->data.curr_authlim;
-                            emulator->data_changed = true;
-                        }
-                    }
-                }
-            }
-        }
-    } else if(cmd == MF_UL_READ_SIG) {
-        if(emulator->supported_features & MfUltralightSupportSignature) {
-            // Check 2nd byte = 0x00 - RFU
-            if(buff_rx_len == (1 + 1) * 8 && buff_rx[1] == 0x00) {
-                tx_bytes = sizeof(emulator->data.signature);
-                memcpy(buff_tx, emulator->data.signature, tx_bytes);
-                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                command_parsed = true;
-            }
-        }
-    } else if(cmd == MF_UL_CHECK_TEARING) {
-        if(emulator->supported_features & MfUltralightSupportTearingFlags) {
-            if(buff_rx_len == (1 + 1) * 8) {
-                uint8_t cnt_num = buff_rx[1];
-                if(cnt_num < 3) {
-                    buff_tx[0] = emulator->data.tearing[cnt_num];
+        } else if(cmd == MF_UL_READ_VCSL) {
+            if(emulator->supported_features & MfUltralightSupportVcsl) {
+                if(buff_rx_len == (1 + 20) * 8) {
+                    buff_tx[0] = emulator->config->vctid;
                     tx_bytes = 1;
                     *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
                     command_parsed = true;
                 }
             }
+        } else {
+            reset_idle = true;
+            FURI_LOG_D(TAG, "Received invalid command");
         }
-    } else if(cmd == MF_UL_HALT_START) {
+    } else {
+        reset_idle = true;
+        FURI_LOG_D(TAG, "Received invalid buffer less than 8 bits in length");
+    }
+
+    if(reset_idle) {
         mf_ul_reset_emulation(emulator, false);
         tx_bits = 0;
         command_parsed = true;
-        FURI_LOG_D(TAG, "Received HLTA");
-    } else if(cmd == MF_UL_SECTOR_SELECT) {
-        if(emulator->supported_features & MfUltralightSupportSectorSelect) {
-            if(buff_rx_len == (1 + 1) * 8 && buff_rx[1] == 0xFF) {
-                // Send ACK
-                emulator->sector_select_cmd_started = true;
-                send_ack = true;
-                command_parsed = true;
-            }
-        }
-    } else if(cmd == MF_UL_READ_VCSL) {
-        if(emulator->supported_features & MfUltralightSupportVcsl) {
-            if(buff_rx_len == (1 + 20) * 8) {
-                buff_tx[0] = emulator->config->vctid;
-                tx_bytes = 1;
-                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                command_parsed = true;
-            }
-        }
     }
 
     if(!command_parsed) {
