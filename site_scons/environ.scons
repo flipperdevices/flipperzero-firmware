@@ -27,6 +27,9 @@ coreenv = Environment(
     ENV={
         # Import PATH from OS env - scons doesn't do that by default
         "PATH": os.environ["PATH"],
+        # Proxying CI environment to child scripts
+        "DIST_SUFFIX": os.environ.get("DIST_SUFFIX", None),
+        "WORKFLOW_BRANCH_OR_TAG": os.environ.get("WORKFLOW_BRANCH_OR_TAG", None),
     },
 )
 
