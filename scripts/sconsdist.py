@@ -13,8 +13,7 @@ class ProjectDir:
         parts = project_dir.split("-")
         self.target = parts[0]
         self.project = parts[1]
-        if len(parts) > 2:
-            self.flavor = parts[2]
+        self.flavor = parts[2] if len(parts) > 2 else ""
 
 
 class Main(App):
@@ -82,7 +81,11 @@ class Main(App):
             return 2
         self.flavor = project_flavors.pop()
 
-        self.output_dir_path = join("dist", f"{self.target}-{self.flavor}")
+        dist_dir_components = [self.target]
+        if self.flavor:
+            dist_dir_components.append(self.flavor)
+
+        self.output_dir_path = join("dist", "-".join(dist_dir_components))
         if exists(self.output_dir_path) and not self.args.noclean:
             shutil.rmtree(self.output_dir_path)
 

@@ -78,7 +78,7 @@ jobs:
             set -e
             for TARGET in ${TARGETS}
             do
-              ./fbt TARGET_HW=`echo ${TARGET} |sed 's/f//'` --with-updater updater_package ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
+              ./fbt TARGET_HW=`echo ${TARGET} | sed 's/f//'` --with-updater updater_package ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
             done
 
       - name: 'Move upload files'
@@ -144,7 +144,7 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
-          body-includes: 'to flash the'
+          body-includes: 'web updater'
 
       - name: 'Create or update comment'
         if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request}}
@@ -153,7 +153,7 @@ jobs:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            [Install](https://my.flipp.dev/?url=https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.artifacts-path}}/flipper-z-${{steps.names.outputs.default-target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=${{steps.names.outputs.artifacts-path}}&version=${{steps.names.outputs.short-hash}}) with web updater
+            [Install with web updater](https://my.flipp.dev/?url=https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.artifacts-path}}/flipper-z-${{steps.names.outputs.default-target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=${{steps.names.outputs.artifacts-path}}&version=${{steps.names.outputs.short-hash}})
           edit-mode: replace
 
   compact:
@@ -207,5 +207,5 @@ jobs:
             set -e
             for TARGET in ${TARGETS}
             do
-              ./fbt TARGET_HW=`echo ${TARGET} |sed 's/f//'` --with-updater updater_package DEBUG=0 COMPACT=1
+              ./fbt TARGET_HW=`echo ${TARGET} | sed 's/f//'` --with-updater updater_package DEBUG=0 COMPACT=1
             done
