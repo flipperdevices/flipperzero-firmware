@@ -8,6 +8,10 @@
 #include "assets_icons.h"
 #include <gui/icon_i.h>
 
+/* Core game logic from
+https://github.com/Yaoir/VideoPoker-C
+*/
+
 /* KNOWN BUGS
 This has been converted from a standalone PC console app to flipper
 All of the original input/output handing code has been ripped out
