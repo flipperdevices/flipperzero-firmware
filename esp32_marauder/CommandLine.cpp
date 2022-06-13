@@ -253,7 +253,15 @@ void CommandLine::runCommand(String input) {
     }
     // PMKID sniff
     else if (cmd_args.get(0) == SNIFF_PMKID_CMD) {
-      Serial.println("Starting PMKID sniff. Stop with " + (String)STOPSCAN_CMD);
+      int ch_sw = this->argSearch(&cmd_args, "-c");
+      
+      if (ch_sw != -1) {
+        wifi_scan_obj.set_channel = cmd_args.get(ch_sw + 1).toInt();
+        wifi_scan_obj.changeChannel();
+        Serial.println("Set channel: " + (String)wifi_scan_obj.set_channel);
+        
+      }
+      Serial.println("Starting PMKID sniff on channel " + (String)wifi_scan_obj.set_channel + ". Stop with " + (String)STOPSCAN_CMD);
       wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);
     }
 
