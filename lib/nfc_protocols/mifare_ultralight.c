@@ -1148,7 +1148,7 @@ bool mf_ul_prepare_emulation_response(
                             if(emulator->supported_features & MfUltralightSupportAuth) {
                                 if(src_page == pwd_page || src_page == pwd_page + 1) {
                                     // Blank out PWD and PACK pages
-                                    memset(&buff_tx[copied_pages * 4], 0, 4);
+                                    memset(dest_ptr, 0, 4);
                                 }
                             }
 
