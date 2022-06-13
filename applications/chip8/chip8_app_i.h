@@ -15,7 +15,6 @@
 
 #define CHIP8_APP_PATH_FOLDER "/any/chip8"
 #define CHIP8_APP_EXTENSION ".ch8"
-#define CHIP8_FILE_NAME_LEN 40
 
 struct Chip8App{
     Gui* gui;
@@ -23,7 +22,7 @@ struct Chip8App{
     SceneManager* scene_manager;
     DialogsApp* dialogs;
 
-    char file_name[CHIP8_FILE_NAME_LEN+ 1];
+    string_t file_name;
     uint8_t** backup_screen;
     Chip8View* chip8_view;
     Chip8Emulator* chip8;
