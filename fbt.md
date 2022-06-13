@@ -11,6 +11,7 @@ To build with FBT, call it specifying configuration options & targets to build. 
 
 `./fbt --with-updater COMPACT=1 DEBUG=0 VERBOSE=1 updater_package copro_dist`
 
+
 ## FBT targets
 FBT keeps track of internal dependencies, so you only need to build the highest-level target you need, and FBT will make sure everything it needs is up-to-date.  
 
@@ -34,10 +35,12 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 - `proto_ver` - generate .h with protobuf version 
 - `dolphin_internal`, `dolphin_blocking` - generate .c+.h for corresponding dolphin assets
  
+
 ## Command-line parameters
 
 - `--options optionfile.py` (default value `fbt_options.py`) - load file with multiple configuration values
 - `--with-updater` - enables updater-related targets and dependency tracking. Enabling this options introduces extra startup time costs, so use it when bundling update packages. Or if you have a fast computer and don't care about a few extra seconds of startup time. 
+
 
 ## Configuration 
 Default configuration variables are set in configuration file `fbt_options.py`. 
