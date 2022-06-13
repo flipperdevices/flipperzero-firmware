@@ -29,6 +29,12 @@ coreenv = Environment(
         "PATH": os.environ["PATH"],
     },
 )
+
+if os_suffix := os.environ.get("DIST_SUFFIX", None):
+    coreenv.Replace(
+        DIST_SUFFIX=os_suffix,
+    )
+
 os.chdir(_cwd)
 
 # print(coreenv.Dump())
