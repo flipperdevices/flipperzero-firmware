@@ -19,6 +19,7 @@ Latest Updates:
 - Added [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge To Work.
 - - Add a folder to SD card named `chip8`
 - - [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/)
+- - Let us know if you got any to work by submitting an Issue! LOL
 - Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
 - Added [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine) (Restart To Exit)
 - Added New SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
