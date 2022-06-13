@@ -24,6 +24,7 @@ class GitVersion:
 
         # If WORKFLOW_BRANCH_OR_TAG is set in environment, is has precedence
         # (set by CI)
+        print("OS env: ", os.environ)
         branch = (
             os.environ.get("WORKFLOW_BRANCH_OR_TAG", None)
             or self._exec_git("rev-parse --abbrev-ref HEAD")
