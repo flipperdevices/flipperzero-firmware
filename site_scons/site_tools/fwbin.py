@@ -6,7 +6,6 @@ __OBJCOPY_ARM_BIN = "arm-none-eabi-objcopy"
 
 
 def generate(env):
-    # print("strip generate", env.Dump())
     env.SetDefault(
         BIN2DFU="${ROOT_DIR.abspath}/scripts/bin2dfu.py",
         OBJCOPY=__OBJCOPY_ARM_BIN,  # FIXME

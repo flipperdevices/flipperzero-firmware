@@ -87,7 +87,10 @@ class Main(App):
 
         self.output_dir_path = join("dist", "-".join(dist_dir_components))
         if exists(self.output_dir_path) and not self.args.noclean:
-            shutil.rmtree(self.output_dir_path)
+            try:
+                shutil.rmtree(self.output_dir_path)
+            except Exception as ex:
+                pass
 
         if not exists(self.output_dir_path):
             makedirs(self.output_dir_path)
