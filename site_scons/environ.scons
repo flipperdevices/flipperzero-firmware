@@ -30,12 +30,13 @@ coreenv = Environment(
     },
 )
 
+os.chdir(_cwd)
+
+# If DIST_SUFFIX is set in environment, is has precedence (set by CI)
 if os_suffix := os.environ.get("DIST_SUFFIX", None):
     coreenv.Replace(
         DIST_SUFFIX=os_suffix,
     )
-
-os.chdir(_cwd)
 
 # print(coreenv.Dump())
 if not coreenv["VERBOSE"]:

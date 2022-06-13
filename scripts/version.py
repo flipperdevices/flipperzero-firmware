@@ -22,7 +22,13 @@ class GitVersion:
             if e.returncode == 1:
                 dirty = True
 
-        branch = self._exec_git("rev-parse --abbrev-ref HEAD") or "unknown"
+        # If WORKFLOW_BRANCH_OR_TAG is set in environment, is has precedence
+        # (set by CI)
+        branch = (
+            os.environ.get("WORKFLOW_BRANCH_OR_TAG", None)
+            or self._exec_git("rev-parse --abbrev-ref HEAD")
+            or "unknown"
+        )
         branch_num = self._exec_git("rev-list --count HEAD") or "n/a"
 
         try:
