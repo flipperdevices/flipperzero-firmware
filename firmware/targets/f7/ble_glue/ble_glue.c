@@ -123,9 +123,9 @@ static const char* ble_glue_get_reltype_str(const uint8_t reltype) {
     case INFO_STACK_TYPE_BLE_LIGHT:
         return "L";
     case INFO_STACK_TYPE_BLE_BEACON:
-        return "Ba";
-    case INFO_STACK_TYPE_BLE_BASIC:
         return "Be";
+    case INFO_STACK_TYPE_BLE_BASIC:
+        return "Ba";
     case INFO_STACK_TYPE_BLE_FULL_EXT_ADV:
         return "F+";
     case INFO_STACK_TYPE_BLE_HCI_EXT_ADV:
