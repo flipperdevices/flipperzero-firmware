@@ -1228,11 +1228,74 @@ bool mf_ul_prepare_emulation_response(
                     tx_bytes = ((end_page + 1) - start_page) * 4;
                     if(emulator->data.type < MfUltralightTypeNTAGI2C1K) {
                         if((start_page < emulator->page_num) && (end_page < emulator->page_num)) {
-                            memcpy(buff_tx, &emulator->data.data[start_page * 4], tx_bytes);
-                            // mf_ul_protect_auth_data_on_read_command(
-                            //     buff_tx, start_page, end_page, emulator);
-                            *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-                            command_parsed = true;
+                            do {
+                                if(emulator->supported_features & MfUltralightSupportAuth) {
+                                    // NAK if not authenticated and requested pages cross over AUTH0
+                                    if(!emulator->auth_success && emulator->config->access.prot &&
+                                       (start_page >= emulator->config->auth0 ||
+                                        end_page >= emulator->config->auth0))
+                                        break;
+                                }
+
+                                // Copy requested pages
+                                memcpy(buff_tx, &emulator->data.data[start_page * 4], tx_bytes);
+
+                                if(emulator->supported_features & MfUltralightSupportAsciiMirror &&
+                                   emulator->config->mirror.mirror_conf !=
+                                       MfUltralightMirrorNone) {
+                                    // Copy ASCII mirror
+                                    // Less stringent check here, because expecting FAST_READ to
+                                    // only be issued once rather than repeatedly
+                                    string_t ascii_mirror;
+                                    string_init(ascii_mirror);
+                                    mf_ul_make_ascii_mirror(emulator, ascii_mirror);
+                                    size_t ascii_mirror_len = string_length_u(ascii_mirror);
+                                    const char* ascii_mirror_cptr = string_get_cstr(ascii_mirror);
+                                    int16_t mirror_start_offset =
+                                        (emulator->config->mirror_page - start_page) * 4 +
+                                        emulator->config->mirror.mirror_byte;
+                                    if(mirror_start_offset < 0) {
+                                        if(mirror_start_offset < -(int16_t)ascii_mirror_len) {
+                                            // Past ASCII mirror, don't copy
+                                            ascii_mirror_len = 0;
+                                        } else {
+                                            ascii_mirror_cptr += -mirror_start_offset;
+                                            ascii_mirror_len -= -mirror_start_offset;
+                                            mirror_start_offset = 0;
+                                        }
+                                    }
+                                    if(ascii_mirror_len > 0) {
+                                        int16_t mirror_end_offset =
+                                            mirror_start_offset + ascii_mirror_len;
+                                        if(mirror_end_offset > (end_page + 1) * 4) {
+                                            mirror_end_offset = (end_page + 1) * 4;
+                                            ascii_mirror_len =
+                                                mirror_end_offset - mirror_start_offset;
+                                        }
+                                        memcpy(
+                                            &buff_tx[mirror_start_offset],
+                                            ascii_mirror_cptr,
+                                            ascii_mirror_len);
+                                    }
+                                    string_clear(ascii_mirror);
+                                }
+
+                                if(emulator->supported_features & MfUltralightSupportAuth) {
+                                    // Clear PWD and PACK pages
+                                    uint8_t pwd_page = emulator->page_num - 2;
+                                    int16_t pwd_page_offset = pwd_page - start_page;
+                                    // PWD page
+                                    if(pwd_page_offset >= 0 && pwd_page_offset <= end_page) {
+                                        memset(&buff_tx[pwd_page_offset * 4], 0, 4);
+                                        // PACK page
+                                        if(pwd_page_offset + 1 <= end_page)
+                                            memset(&buff_tx[(pwd_page_offset + 1) * 4], 0, 4);
+                                    }
+                                }
+
+                                *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+                                command_parsed = true;
+                            } while(false);
                         }
                     } else {
                         uint16_t valid_pages;
