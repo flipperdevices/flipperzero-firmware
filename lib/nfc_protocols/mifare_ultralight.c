@@ -1003,7 +1003,7 @@ void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle) 
     emulator->ntag_i2c_plus_sector3_lockout = false;
     emulator->auth_success = false;
     if(is_power_cycle) {
-        emulator->config_cache = *emulator->config;
+        if(emulator->config != NULL) emulator->config_cache = *emulator->config;
 
         if(emulator->supported_features & MfUltralightSupportSingleCounter) {
             emulator->read_counter_incremented = false;
