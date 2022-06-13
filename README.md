@@ -15,12 +15,6 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 
 Latest Updates:
 - Latest DEV changes
-- Removed unused icons to conserve space
-- Removed [Zombiez (By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
-- Added [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) Updated by RogueMaster To Work
-- Added Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
-- Removing T5577 passwords via the cli command rfid clear_pass_t5577 using a dictionary attack [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
-- Removed some unneeded assets thanks to ESurge
 - Added [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated To Compile By RogueMaster, Someone, please get this to work...
 - Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
 - Added [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine) (Restart To Exit)
