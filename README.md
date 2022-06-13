@@ -16,7 +16,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 Latest Updates:
 - Latest DEV changes
 - Fixed Actual PIN Lock (By RogueMaster)
-- Added [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated To Compile By RogueMaster, Someone, please get this to work...
+- Added [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge To Work.
 - Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
 - Added [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine) (Restart To Exit)
 - Added New SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
@@ -51,7 +51,7 @@ Added Features:
 - Added 90s Timeout for Backlight Time (By RogueMaster)
 
 Plugins:
-- [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated To Compile By RogueMaster, Someone, please get this to work...
+- [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge To Work.
 - [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/dice/dice.c)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)
