@@ -904,8 +904,10 @@ static void mf_ul_make_ascii_mirror(MfUltralightEmulator* emulator, string_t str
 
 static void mf_ul_increment_single_counter(MfUltralightEmulator* emulator) {
     if(!emulator->read_counter_incremented && emulator->config_cache.access.nfc_cnt_en) {
-        ++emulator->data.counter[2];
-        emulator->data_changed = true;
+        if(emulator->data.counter[2] < 0xFFFFFF) {
+            ++emulator->data.counter[2];
+            emulator->data_changed = true;
+        }
         emulator->read_counter_incremented = true;
     }
 }
@@ -1470,6 +1472,7 @@ bool mf_ul_prepare_emulation_response(
                         buff_tx[0] = MF_UL_NAK_AUTHLIM_REACHED;
                         tx_bits = 4;
                         *data_type = FURI_HAL_NFC_TX_RAW_RX_DEFAULT;
+                        mf_ul_reset_emulation(emulator, false);
                         command_parsed = true;
                     } else {
                         if(memcmp(&buff_rx[1], emulator->config->auth_data.pwd.raw, 4) == 0) {
