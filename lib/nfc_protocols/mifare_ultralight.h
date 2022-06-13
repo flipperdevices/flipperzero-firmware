@@ -151,6 +151,9 @@ typedef struct {
 typedef struct {
     MfUltralightData data;
     MfUltralightConfigPages* config;
+    // Most config values don't apply until power cycle, so cache config pages
+    // for correct behavior
+    MfUltralightConfigPages config_cache;
     MfUltralightFeatures supported_features;
     uint16_t page_num;
     bool data_changed;
@@ -160,7 +163,6 @@ typedef struct {
     uint8_t curr_sector;
     bool sector_select_cmd_started;
     bool ntag_i2c_plus_sector3_lockout;
-    bool cfglck_active;
     bool counter_incremented;
 } MfUltralightEmulator;
 

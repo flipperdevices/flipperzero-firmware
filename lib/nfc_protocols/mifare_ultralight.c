@@ -666,8 +666,8 @@ static void mf_ul_protect_auth_data_on_read_command_i2c(
 
         // Handle AUTH0 for sector 0
         if(!emulator->auth_success) {
-            if(emulator->config->access.prot) {
-                uint8_t auth0 = emulator->config->auth0;
+            if(emulator->config_cache.access.prot) {
+                uint8_t auth0 = emulator->config_cache.auth0;
                 if(auth0 < end_page) {
                     // start_page is always < auth0; otherwise is NAK'd already
                     uint8_t page_offset = auth0 - start_page;
@@ -732,11 +732,12 @@ static void mf_ul_ntag_i2c_fill_cross_area_read(
 
 static bool mf_ul_check_auth(MfUltralightEmulator* emulator, uint8_t start_page, bool is_write) {
     if(!emulator->auth_success) {
-        if(start_page >= emulator->config->auth0 && (emulator->config->access.prot || is_write))
+        if(start_page >= emulator->config_cache.auth0 &&
+           (emulator->config_cache.access.prot || is_write))
             return false;
     }
 
-    if(is_write && emulator->cfglck_active) {
+    if(is_write && emulator->config_cache.access.cfglck) {
         uint16_t config_start_page = emulator->page_num - 4;
         if(start_page == config_start_page || start_page == config_start_page + 1) return false;
     }
@@ -750,8 +751,8 @@ static bool mf_ul_ntag_i2c_plus_check_auth(
     bool is_write) {
     if(!emulator->auth_success) {
         // Check NFC_PROT
-        if(emulator->curr_sector == 0 && (emulator->config->access.prot || is_write)) {
-            if(start_page >= emulator->config->auth0) return false;
+        if(emulator->curr_sector == 0 && (emulator->config_cache.access.prot || is_write)) {
+            if(start_page >= emulator->config_cache.auth0) return false;
         } else if(emulator->curr_sector == 1) {
             // We don't have to specifically check for type because this is done
             // by address translator
@@ -763,7 +764,7 @@ static bool mf_ul_ntag_i2c_plus_check_auth(
 
     if(emulator->curr_sector == 1) {
         // Check NFC_DIS_SEC1
-        if(emulator->config->access.nfc_dis_sec1) return false;
+        if(emulator->config_cache.access.nfc_dis_sec1) return false;
     }
 
     return true;
@@ -854,7 +855,7 @@ static void mf_ul_make_ascii_mirror(MfUltralightEmulator* emulator, string_t str
     // Locals to improve readability
     uint8_t mirror_page = emulator->config->mirror_page;
     uint8_t mirror_byte = emulator->config->mirror.mirror_byte;
-    MfUltralightMirrorConf mirror_conf = emulator->config->mirror.mirror_conf;
+    MfUltralightMirrorConf mirror_conf = emulator->config_cache.mirror.mirror_conf;
     uint16_t last_user_page_index = emulator->page_num - 6;
     bool uid_printed = false;
 
@@ -885,9 +886,9 @@ static void mf_ul_make_ascii_mirror(MfUltralightEmulator* emulator, string_t str
 
     if(mirror_conf == MfUltralightMirrorCounter || mirror_conf == MfUltralightMirrorUidCounter) {
         // Counter is only printed if counter enabled
-        if(emulator->config->access.nfc_cnt_en) {
+        if(emulator->config_cache.access.nfc_cnt_en) {
             // Counter protection check
-            if(emulator->config->access.nfc_cnt_pwd_prot && !emulator->auth_success) return;
+            if(emulator->config_cache.access.nfc_cnt_pwd_prot && !emulator->auth_success) return;
             // Counter range check
             if(mirror_page < 4) return;
             if(mirror_page > last_user_page_index - 1) return;
@@ -902,7 +903,7 @@ static void mf_ul_make_ascii_mirror(MfUltralightEmulator* emulator, string_t str
 }
 
 static void mf_ul_increment_single_counter(MfUltralightEmulator* emulator) {
-    if(!emulator->counter_incremented && emulator->config->access.nfc_cnt_en) {
+    if(!emulator->counter_incremented && emulator->config_cache.access.nfc_cnt_en) {
         ++emulator->data.counter[2];
         emulator->data_changed = true;
         emulator->counter_incremented = true;
@@ -1002,12 +1003,7 @@ void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle) 
     emulator->ntag_i2c_plus_sector3_lockout = false;
     emulator->auth_success = false;
     if(is_power_cycle) {
-        if(emulator->data.type >= MfUltralightTypeUL11 &&
-           emulator->data.type <= MfUltralightTypeNTAG216) {
-            emulator->cfglck_active = emulator->config->access.cfglck;
-        } else {
-            emulator->cfglck_active = false;
-        }
+        emulator->config_cache = *emulator->config;
 
         if(emulator->supported_features & MfUltralightSupportSingleCounter) {
             emulator->counter_incremented = false;
@@ -1106,12 +1102,13 @@ bool mf_ul_prepare_emulation_response(
                                 last_page_plus_one = emulator->page_num;
                             if(emulator->supported_features & MfUltralightSupportAuth) {
                                 if(!mf_ul_check_auth(emulator, start_page, false)) break;
-                                if(!emulator->auth_success && emulator->config->access.prot &&
-                                   emulator->config->auth0 < last_page_plus_one)
-                                    last_page_plus_one = emulator->config->auth0;
+                                if(!emulator->auth_success && emulator->config_cache.access.prot &&
+                                   emulator->config_cache.auth0 < last_page_plus_one)
+                                    last_page_plus_one = emulator->config_cache.auth0;
                             }
                             if(emulator->supported_features & MfUltralightSupportAsciiMirror &&
-                               emulator->config->mirror.mirror_conf != MfUltralightMirrorNone) {
+                               emulator->config_cache.mirror.mirror_conf !=
+                                   MfUltralightMirrorNone) {
                                 ascii_mirror_curr_byte = emulator->config->mirror.mirror_byte;
                                 ascii_mirror_curr_page = emulator->config->mirror_page;
                                 // Try to avoid wasting time making mirror if we won't copy it
@@ -1260,9 +1257,9 @@ bool mf_ul_prepare_emulation_response(
                                     if(emulator->supported_features & MfUltralightSupportAuth) {
                                         // NAK if not authenticated and requested pages cross over AUTH0
                                         if(!emulator->auth_success &&
-                                           emulator->config->access.prot &&
-                                           (start_page >= emulator->config->auth0 ||
-                                            end_page >= emulator->config->auth0))
+                                           emulator->config_cache.access.prot &&
+                                           (start_page >= emulator->config_cache.auth0 ||
+                                            end_page >= emulator->config_cache.auth0))
                                             break;
                                     }
 
@@ -1272,7 +1269,7 @@ bool mf_ul_prepare_emulation_response(
 
                                     if(emulator->supported_features &
                                            MfUltralightSupportAsciiMirror &&
-                                       emulator->config->mirror.mirror_conf !=
+                                       emulator->config_cache.mirror.mirror_conf !=
                                            MfUltralightMirrorNone) {
                                         // Copy ASCII mirror
                                         // Less stringent check here, because expecting FAST_READ to
@@ -1429,9 +1426,9 @@ bool mf_ul_prepare_emulation_response(
                         // NTAG21x checks
                         if(emulator->supported_features & MfUltralightSupportSingleCounter) {
                             if(cnt_num != 2) break; // Only counter 2 is available
-                            if(!emulator->config->access.nfc_cnt_en)
+                            if(!emulator->config_cache.access.nfc_cnt_en)
                                 break; // NAK if counter not enabled
-                            if(emulator->config->access.nfc_cnt_pwd_prot &&
+                            if(emulator->config_cache.access.nfc_cnt_pwd_prot &&
                                !emulator->auth_success)
                                 break;
                         }
@@ -1544,7 +1541,7 @@ bool mf_ul_prepare_emulation_response(
         } else if(cmd == MF_UL_READ_VCSL) {
             if(emulator->supported_features & MfUltralightSupportVcsl) {
                 if(buff_rx_len == (1 + 20) * 8) {
-                    buff_tx[0] = emulator->config->vctid;
+                    buff_tx[0] = emulator->config_cache.vctid;
                     tx_bytes = 1;
                     *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
                     command_parsed = true;
