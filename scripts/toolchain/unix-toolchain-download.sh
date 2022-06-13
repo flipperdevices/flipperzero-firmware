@@ -34,7 +34,7 @@ check_tar()
 curl_wget_check()
 {
     printf "Checking curl..";
-    if ! curll --version > /dev/null 2>&1; then
+    if ! curl --version > /dev/null 2>&1; then
         echo "no";
         printf "Checking wget..";
         if ! wget --version > /dev/null 2>&1; then
