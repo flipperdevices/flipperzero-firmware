@@ -4,10 +4,9 @@ import os
 
 
 # Building initial C environment for libs
-env = ENV.Clone()
-Export("env")
-
-env.Append(
+env = ENV.Clone(
+    tools=["compilation_db", "fwbin", "openocd", "fbt_apps"],
+    COMPILATIONDB_USE_ABSPATH=True,
     BUILD_DIR=fw_build_meta["build_dir"],
     PLUGIN_ELF_DIR="${BUILD_DIR}",
     LIB_DIST_DIR="${BUILD_DIR}/lib",
@@ -15,9 +14,6 @@ env.Append(
     FW_FLAVOR=fw_build_meta["flavor"],
     LIBPATH=[
         "${LIB_DIST_DIR}",
-    ],
-    CPPDEFINES=[
-        # ("TARGET", "${TARGET_HW}"),
     ],
     CPPPATH=[
         "#/core",
@@ -43,6 +39,28 @@ env.Append(
         }
     },
 )
+
+
+def ApplyLibFlags(env):
+    flags_to_apply = env["FW_LIB_OPTS"].get(
+        env.get("FW_LIB_NAME"),
+        env["FW_LIB_OPTS"]["Default"],
+    )
+    # print("Flags for ", env.get("FW_LIB_NAME", "Default"), flags_to_apply)
+    env.MergeFlags(flags_to_apply)
+
+
+env.AddMethod(ApplyLibFlags)
+
+Export("env")
+
+if not env["VERBOSE"]:
+    env.SetDefault(
+        HEXCOMSTR="\tHEX\t${TARGET}",
+        BINCOMSTR="\tBIN\t${TARGET}",
+        DFUCOMSTR="\tDFU\t${TARGET}",
+        FLASHCOMSTR="\tFLASH\t${SOURCE}",
+    )
 
 
 if fw_build_meta["type"] == "updater":
@@ -77,8 +95,6 @@ fwenv = env.Clone()
 
 # Set up additional app-specific build flags
 SConscript("site_scons/firmwareopts.scons", exports={"ENV": fwenv})
-# Prepare manifest-related env methods
-SConscript("site_scons/appmanifests.scons", exports={"ENV": fwenv})
 
 # Set up app configuration
 if env["FIRMWARE_BUILD_CFG"] == "updater":
@@ -125,10 +141,9 @@ fwenv.AppendUnique(
 # Build applications.c for selected services & apps
 
 # Depends on virtual value-only node, so it only gets rebuilt when set of apps changes
-apps_c = fwenv.Command(
+apps_c = fwenv.ApplicationsC(
     "applications/applications.c",
     Value(fwenv["APPS"]),
-    action=fwenv["APPS_C_ACTION"],
 )
 
 sources = [apps_c]
@@ -201,7 +216,7 @@ Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_dfu", fwdfu)
 
 # Additional FW-related pseudotargets
 if fwenv["IS_BASE_FIRMWARE"]:
-    flash = fwenv["FW_FLASH"] = fwenv.Flasher("${FIRMWARE_BUILD_CFG}")
+    flash = fwenv["FW_FLASH"] = fwenv.OOCDFlash("${FIRMWARE_BUILD_CFG}")
     if fwenv["FORCE"]:
         AlwaysBuild(flash)
     Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)
@@ -211,20 +226,6 @@ if fwenv["IS_BASE_FIRMWARE"]:
 fwcdb = fwenv["FW_CDB"] = fwenv.CompilationDatabase("compile_database.json")
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", fwcdb)
 
-# fw_version_json = env["FW_VERSION_JSON"]
-# Return("fwhex fwelf fwbin fw_version_json")
-
-# fw_output = FirmwareOutput(
-#     project=fwenv["FIRMWARE_BUILD_CFG"],
-#     dfu=fwdfu[0],
-#     elf=fwelf[0],
-#     bin=fwbin[0],
-#     json=env["FW_VERSION_JSON"][0],
-#     extapps=extapps,
-# )
-
-# Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", fw_output.artifacts)
-# Return("fw_output")
 
 artifacts = [fwhex, fwbin, fwdfu, env["FW_VERSION_JSON"]]
 fwenv["FW_ARTIFACTS"] = artifacts

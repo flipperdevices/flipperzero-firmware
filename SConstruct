@@ -9,6 +9,7 @@
 
 from fbt.builders.dist import add_dist_builders, add_project_to_distenv
 
+DefaultEnvironment(tools=[])
 
 cmd_vars = SConscript("site_scons/commandline.scons")
 
@@ -19,7 +20,6 @@ coreenv = SConscript(
     exports={"VARIABLES": cmd_vars},
 )
 SConscript("site_scons/cc.scons", exports={"ENV": coreenv})
-SConscript("site_scons/builders.scons", exports={"ENV": coreenv})
 
 # Store root dir in environment for certain tools
 coreenv["ROOT_DIR"] = Dir(".")

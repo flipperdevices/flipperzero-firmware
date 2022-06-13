@@ -1,4 +1,5 @@
-Import("ENV")
+from SCons.Builder import Builder
+from SCons.Action import Action
 
 import SCons
 from fbt.appmanifest import FlipperAppType, AppManager, ApplicationsCGenerator
@@ -35,10 +36,6 @@ def DumpApplicationConfig(target, source, env):
             )
 
 
-ENV.AddMethod(LoadApplicationManifests)
-ENV.AddMethod(PrepareApplicationsBuild)
-
-
 def build_apps_c(target, source, env):
     target_file_name = target[0].path
 
@@ -47,5 +44,18 @@ def build_apps_c(target, source, env):
         file.write(gen.generate())
 
 
-# Exports apps.c generation action to environment
-ENV["APPS_C_ACTION"] = Action(build_apps_c, "${APPSCOMSTR}")
+def generate(env):
+    env.AddMethod(LoadApplicationManifests)
+    env.AddMethod(PrepareApplicationsBuild)
+
+    env.Append(
+        BUILDERS={
+            "ApplicationsC": Builder(
+                action=Action(build_apps_c, "${APPSCOMSTR}"),
+            ),
+        }
+    )
+
+
+def exists(env):
+    return True

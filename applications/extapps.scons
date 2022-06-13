@@ -4,7 +4,7 @@ Import("ENV")
 from fbt.appmanifest import FlipperAppType
 import os
 
-appenv = ENV.Clone()
+appenv = ENV.Clone(tools=["strip"])
 
 EXT_APPS_WORK_DIR = ".extapps"
 

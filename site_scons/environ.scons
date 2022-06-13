@@ -14,16 +14,21 @@ os.chdir("..")
 
 coreenv = Environment(
     variables=VARIABLES,
-    tools=["as", "gcc", "g++", "ar", "gnulink", "python", "compilation_db"],
-    OBJCOPY="objcopy",
+    tools=[
+        "as",
+        "gcc",
+        "g++",
+        "ar",
+        "gnulink",
+        "python",
+        "sconsmodular",
+        "sconsrecursiveglob",
+    ],
+    # OBJCOPY="objcopy",
     PYTHON3="python3",
-    STRIP="strip",
-    STRIPFLAGS=[],
-    STRIPCOM="$STRIP $STRIPFLAGS $SOURCES -o $TARGET",
     TEMPFILE=TempFileMunge,
     MAXLINELENGTH=2048,
     PROGSUFFIX=".elf",
-    COMPILATIONDB_USE_ABSPATH=True,
     ENV={
         # Import PATH from OS env - scons doesn't do that by default
         "PATH": os.environ["PATH"],
@@ -95,67 +100,5 @@ coreenv["TEMPFILEARGESCFUNC"] = utils.tempfile_arg_esc_func
 utils.wrap_tempfile(coreenv, "LINKCOM")
 utils.wrap_tempfile(coreenv, "ARCOM")
 
-
-# Build env extensions
-
-
-def GlobRecursive(env, pattern, node=".", exclude=None):
-    results = []
-    if isinstance(node, str):
-        node = env.Dir(node)
-    for f in node.glob("*", source=True, exclude=exclude):
-        if isinstance(f, SCons.Node.FS.Dir):
-            results += env.GlobRecursive(pattern, f, exclude)
-    results += node.glob(
-        pattern,
-        source=True,
-        exclude=exclude,
-    )
-    # print(f"Glob for {pattern} from {node}: {results}")
-    return results
-
-
-def BuildModule(env, module):
-    # print("cwd", os.getcwd())
-    # print(type(Dir(".").srcdir), dir(Dir(".").srcdir))
-    src_dir = str(env.Dir(".").srcdir or os.getcwd())
-    module_sconscript = os.path.join(src_dir, module, "SConscript")
-    if not os.path.exists(module_sconscript):
-        module_sconscript = os.path.join(src_dir, f"{module}.scons")
-        if not os.path.exists(module_sconscript):
-            print(f"Cannot build module {module}: scons file not found")
-            Exit(2)
-
-    return env.SConscript(
-        module_sconscript,
-        variant_dir=os.path.join(env.subst("$BUILD_DIR"), module),
-        duplicate=0,
-    )
-
-
-def BuildModules(env, modules):
-    result = []
-    for module in modules:
-        build_res = env.BuildModule(module)
-        # print("module ", module, build_res)
-        if build_res is None:
-            continue
-        result.append(build_res)
-    return result
-
-
-def ApplyLibFlags(env):
-    flags_to_apply = env["FW_LIB_OPTS"].get(
-        env.get("FW_LIB_NAME"),
-        env["FW_LIB_OPTS"]["Default"],
-    )
-    # print("Flags for ", env.get("FW_LIB_NAME", "Default"), flags_to_apply)
-    env.MergeFlags(flags_to_apply)
-
-
-coreenv.AddMethod(GlobRecursive)
-coreenv.AddMethod(ApplyLibFlags)
-coreenv.AddMethod(BuildModule)
-coreenv.AddMethod(BuildModules)
 
 Return("coreenv")
