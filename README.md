@@ -21,9 +21,7 @@ Latest Updates:
 - - [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/)
 - - Let us know if you got any to work by submitting an Issue! LOL
 - Updated [assets/resources/nfc/assets/mf_classic_dict.nfc](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/nfc/assets/mf_classic_dict.nfc)
-- Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
 - Added [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine) (Restart To Exit)
-- Added New SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -53,6 +51,8 @@ Special shout out to these libraries for giving us more fun:
 Added Features:
 - Actual PIN Lock (By RogueMaster)
 - Added 90s Timeout for Backlight Time (By RogueMaster)
+- Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
+- Added New SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
 
 Plugins:
 - [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge To Work.
