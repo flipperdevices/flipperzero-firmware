@@ -54,7 +54,10 @@ c=','.join(padded_hex(my_int,2) for my_int in b)
 # a bit ugly.
 
 framename="_I_"+infile+"_"+dims
-
+print(len(b))
+#d=len(b)
+# if b > 255 split 0x1234 into 0x34,0x12
+#d=hex(len(b))
 
 char_out = "const uint8_t "+framename+"_0[] = {"+  str(c) +  ",};"
 char_out2 = "const uint8_t "+framename+"[] = {"+framename+"_0};"
