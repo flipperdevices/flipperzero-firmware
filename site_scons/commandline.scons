@@ -22,12 +22,34 @@ AddOption(
 # Construction environment variables
 
 vars = Variables(GetOption("optionfile"), ARGUMENTS)
-vars.Add(BoolVariable("VERBOSE", help="Print full commands", default=0))
 vars.Add(
-    BoolVariable("FORCE", help="Force target action (for supported targets)", default=0)
+    BoolVariable(
+        "VERBOSE",
+        help="Print full commands",
+        default=False,
+    )
 )
-vars.Add(BoolVariable("DEBUG", help="Enable debug build", default=1))
-vars.Add(BoolVariable("COMPACT", help="Optimize for size", default=0))
+vars.Add(
+    BoolVariable(
+        "FORCE",
+        help="Force target action (for supported targets)",
+        default=False,
+    )
+)
+vars.Add(
+    BoolVariable(
+        "DEBUG",
+        help="Enable debug build",
+        default=True,
+    )
+)
+vars.Add(
+    BoolVariable(
+        "COMPACT",
+        help="Optimize for size",
+        default=False,
+    )
+)
 
 vars.Add(
     EnumVariable(
@@ -42,7 +64,7 @@ vars.Add(
 
 vars.Add(
     "DIST_SUFFIX",
-    help="Dist suffix",
+    help="Suffix for binaries in build output for dist targets",
     default="local",
 )
 
