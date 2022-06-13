@@ -50,7 +50,8 @@ extern int32_t music_player_app(void* p);
 extern int32_t snake_game_app(void* p);
 extern int32_t tetris_game_app(void *p);
 extern int32_t clock_app(void *p);
-extern int32_t box_mover_app(void* p);
+//extern int32_t box_mover_app(void* p);
+extern int32_t video_poker_app(void* p);
 // extern int32_t floopper_bloopper(void* p);
 extern int32_t raycast_game_app(void* p);
 extern int32_t spectrum_analyzer_app(void* p);
@@ -359,8 +360,16 @@ const FlipperApplication FLIPPER_GAMES[] = {
 #endif
 
 #ifdef APP_BOX_MOVER
-    {.app = box_mover_app,
-    .name = "Box Mover",
+    {.app = video_poker_app,
+    .name = "Video Poker",
+    .stack_size = 1024,
+    .icon = &A_Plugins_14,
+    .flags =FlipperApplicationFlagDefault},
+#endif
+
+#ifdef APP_VIDEO_POKER
+    {.app = video_poker_app,
+    .name = "Video Poker",
     .stack_size = 1024,
     .icon = &A_Plugins_14,
     .flags =FlipperApplicationFlagDefault},
