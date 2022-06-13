@@ -1086,7 +1086,7 @@ bool mf_ul_prepare_emulation_response(
                             last_page_plus_one = emulator->page_num;
                         if(emulator->supported_features & MfUltralightSupportAuth) {
                             if(!mf_ul_check_auth(emulator, start_page, false)) break;
-                            if(!emulator->auth_success &&
+                            if(!emulator->auth_success && emulator->config->access.prot &&
                                emulator->config->auth0 < last_page_plus_one)
                                 last_page_plus_one = emulator->config->auth0;
                         }
