@@ -20,6 +20,7 @@ RUN apt-get update \
         python3-protobuf \
         protobuf-compiler \
         python3-pip \
+        libpython3-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
