@@ -855,20 +855,20 @@ static void mf_ul_make_ascii_mirror(MfUltralightEmulator* emulator, string_t str
     uint8_t mirror_page = emulator->config->mirror_page;
     uint8_t mirror_byte = emulator->config->mirror.mirror_byte;
     MfUltralightMirrorConf mirror_conf = emulator->config->mirror.mirror_conf;
-    uint16_t page_num = emulator->page_num;
+    uint16_t user_page_num = emulator->page_num - 5;
 
     // Basic min mirror page check
     if(mirror_page < 4) return;
     // UID + counter mirror range check
     if(mirror_conf & MfUltralightMirrorUidCounter) {
-        if(mirror_page > page_num - 5) return;
-        if(mirror_page == page_num - 5 && mirror_byte > 2) return;
+        if(mirror_page > user_page_num - 5) return;
+        if(mirror_page == user_page_num - 5 && mirror_byte > 2) return;
     }
 
     if(mirror_conf & (MfUltralightMirrorUid | MfUltralightMirrorUidCounter)) {
         // UID range check
-        if(mirror_page > page_num - 3) return;
-        if(mirror_page == page_num - 3 && mirror_byte > 1) return;
+        if(mirror_page > user_page_num - 3) return;
+        if(mirror_page == user_page_num - 3 && mirror_byte > 1) return;
 
         for(int i = 0; i < 3; ++i) {
             string_cat_printf(str, "%02X", emulator->data.data[i]);
@@ -885,8 +885,8 @@ static void mf_ul_make_ascii_mirror(MfUltralightEmulator* emulator, string_t str
             // Counter protection check
             if(emulator->config->access.nfc_cnt_pwd_prot && !emulator->auth_success) return;
             // Counter range check
-            if(mirror_page > page_num - 1) return;
-            if(mirror_page == page_num - 1 && mirror_byte > 1) return;
+            if(mirror_page > user_page_num - 1) return;
+            if(mirror_page == user_page_num - 1 && mirror_byte > 1) return;
 
             if(mirror_conf & MfUltralightMirrorUidCounter) string_cat_str(str, "x");
 
@@ -1090,68 +1090,71 @@ bool mf_ul_prepare_emulation_response(
                                emulator->config->auth0 < last_page_plus_one)
                                 last_page_plus_one = emulator->config->auth0;
                         }
-                        if(emulator->supported_features & MfUltralightSupportAsciiMirror) {
-                            ascii_mirror_curr_page = emulator->config->mirror_page;
+                        if(emulator->supported_features & MfUltralightSupportAsciiMirror &&
+                           emulator->config->mirror.mirror_conf != MfUltralightMirrorNone) {
                             ascii_mirror_curr_byte = emulator->config->mirror.mirror_byte;
+                            ascii_mirror_curr_page = emulator->config->mirror_page;
                             // Try to avoid wasting time making mirror if we won't copy it
-                            if(emulator->config->mirror.mirror_conf != MfUltralightMirrorNone &&
-                               start_page + 3 >= ascii_mirror_curr_page) {
+                            // Conservatively check with UID+counter mirror size
+                            if(last_page_plus_one > ascii_mirror_curr_page &&
+                               start_page + 3 >= ascii_mirror_curr_page &&
+                               start_page <= ascii_mirror_curr_page + 6) {
                                 string_init(ascii_mirror);
                                 mf_ul_make_ascii_mirror(emulator, ascii_mirror);
                                 ascii_mirror_len = string_length_u(ascii_mirror);
                                 ascii_mirror_cptr = string_get_cstr(ascii_mirror);
+                                // Move pointer to where it should be to start copying
+                                if(ascii_mirror_len > 0 && ascii_mirror_curr_page < start_page &&
+                                   ascii_mirror_curr_byte != 0) {
+                                    uint8_t diff = 4 - ascii_mirror_curr_byte;
+                                    ascii_mirror_len -= diff;
+                                    ascii_mirror_cptr += diff;
+                                    ascii_mirror_curr_byte = 0;
+                                    ++ascii_mirror_curr_page;
+                                }
+                                while(ascii_mirror_len > 0 &&
+                                      ascii_mirror_curr_page < start_page) {
+                                    uint8_t diff = ascii_mirror_len > 4 ? 4 : ascii_mirror_len;
+                                    ascii_mirror_len -= diff;
+                                    ascii_mirror_cptr += diff;
+                                    ++ascii_mirror_curr_page;
+                                }
                             }
                         }
-                        // This handles both normal copy and roll-over copy
+
+                        uint8_t* dest_ptr = buff_tx;
                         while(copied_pages < 4) {
-                            // Auth check should prevent this calculation from being negative
-                            uint8_t num_copy_pages = last_page_plus_one - start_page;
-                            uint8_t pages_remaining = 4 - copied_pages;
-                            if(num_copy_pages > pages_remaining) num_copy_pages = pages_remaining;
-                            memcpy(
-                                &buff_tx[copied_pages * 4],
-                                &emulator->data.data[src_page * 4],
-                                num_copy_pages * 4);
+                            // Copy page
+                            memcpy(dest_ptr, &emulator->data.data[src_page * 4], 4);
 
                             // Note: don't have to worry about roll-over with ASCII mirror because
                             // lowest valid page for it is 4, while roll-over will at best read
                             // pages 0-2
-                            if(ascii_mirror_len > 0) {
-                                int16_t mirror_offset_page = ascii_mirror_curr_page - start_page;
-                                if(mirror_offset_page >= 0 &&
-                                   mirror_offset_page < pages_remaining) {
-                                    size_t copy_len = (pages_remaining - mirror_offset_page) * 4 -
-                                                      ascii_mirror_curr_byte;
-                                    if(ascii_mirror_len < copy_len) copy_len = ascii_mirror_len;
-                                    memcpy(
-                                        &buff_tx
-                                            [(copied_pages + mirror_offset_page) * 4 +
-                                             ascii_mirror_curr_byte],
-                                        ascii_mirror_cptr,
-                                        copy_len);
-                                    ascii_mirror_len -= copy_len;
-                                    ascii_mirror_cptr += copy_len;
-                                    // Don't care if this is inaccurate after ascii_mirror_len = 0
-                                    ascii_mirror_curr_byte = 0;
-                                    ascii_mirror_curr_page += pages_remaining - mirror_offset_page;
-                                }
+                            if(ascii_mirror_len > 0 && src_page == ascii_mirror_curr_page) {
+                                // Copy ASCII mirror
+                                size_t copy_len = 4 - ascii_mirror_curr_byte;
+                                if(copy_len > ascii_mirror_len) copy_len = ascii_mirror_len;
+                                memcpy(
+                                    dest_ptr + ascii_mirror_curr_byte,
+                                    ascii_mirror_cptr,
+                                    copy_len);
+                                ascii_mirror_cptr += copy_len;
+                                ascii_mirror_len -= copy_len;
+                                // Don't care if this is inaccurate after ascii_mirror_len = 0
+                                ascii_mirror_curr_byte = 0;
+                                ++ascii_mirror_curr_page;
                             }
 
                             if(emulator->supported_features & MfUltralightSupportAuth) {
-                                // Handle clearing PWD and PACK pages
-                                int16_t pwd_offset = pwd_page - src_page;
-                                // PWD
-                                if(pwd_offset >= 0 && pwd_offset < pages_remaining)
-                                    memset(&buff_tx[(copied_pages + pwd_offset) * 4], 0, 4);
-                                // PACK
-                                // No >= 0 check here because PACK is last page so no possibility
-                                // of negative
-                                if(pwd_offset + 1 < pages_remaining)
-                                    memset(&buff_tx[(copied_pages + pwd_offset + 1) * 4], 0, 4);
+                                if(src_page == pwd_page || src_page == pwd_page + 1) {
+                                    // Blank out PWD and PACK pages
+                                    memset(&buff_tx[copied_pages * 4], 0, 4);
+                                }
                             }
 
-                            copied_pages += num_copy_pages;
-                            src_page += num_copy_pages;
+                            dest_ptr += 4;
+                            ++copied_pages;
+                            ++src_page;
                             if(src_page >= last_page_plus_one) src_page = 0;
                         }
                         if(ascii_mirror_cptr != NULL) {
