@@ -1,0 +1,143 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build and Debug",
+      "type": "shell",
+      "command": "make -C firmware -j12 APP_RELEASE=1 debug",
+      "windows" : {
+        "command": "cd build & cmake ../CMakeLists.txt -DCMAKE_BUILD_TYPE=Release -G \"Unix Makefiles\" -B . & make -j12 debug",
+      },
+      "presentation": {
+        "echo": false,
+        "focus": true,
+        "group": "flipper",
+        "panel": "shared"
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+      },
+        "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".",
+            "endsPattern": "."
+        },
+      },
+    },
+    {
+      "label": "Build and Flash",
+      "type": "shell",
+      "command": "make -C firmware -j12 APP_RELEASE=1 flash",
+      "windows" : {
+        "command": "cd build & cmake ../CMakeLists.txt -DCMAKE_BUILD_TYPE=Release -G \"Unix Makefiles\" -B . & make -j12 flash",
+      },
+      "presentation": {
+        "echo": false,
+        "focus": false,
+        "group": "flipper",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+      },
+        "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".",
+            "endsPattern": "."
+        },
+      },
+    },
+    {
+      "label": "Monitor",
+      "type": "shell",
+      "osx" : {
+        "command": "minicom -D /dev/tty.usbmodem*02 -b 230400",
+      },
+      "linux": {
+         "command": "minicom -D /dev/ttyACM0 -b 230400",
+      },
+      "windows" : {
+        // "command":
+      },
+      "presentation": {
+        "echo": false,
+        "focus": false,
+        "group": "flipper",
+        "panel": "dedicated"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+            "regexp": "."
+        },
+        "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".",
+            "endsPattern": "."
+        },
+      },
+    },
+    {
+      "label": "Flash and Monitor",
+      "dependsOn": ["Build and Flash", "Monitor"],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "runOptions": {
+        "reevaluateOnRerun": true,
+        "instanceLimit": 1,
+      },
+    },
+    {
+      "label": "Debug and Monitor",
+      "dependsOn": ["Build and Debug", "Monitor"],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "test",
+        "isDefault": true,
+      },
+      "runOptions": {
+        "reevaluateOnRerun": true,
+        "instanceLimit": 1,
+      },
+    },
+    {
+      "label": "Clean",
+      "type": "shell",
+      "command": "make -C firmware clean",
+      "windows" : {
+        "command": "cd build & make clean",
+      },
+      "presentation": {
+        "echo": false,
+        "focus": true,
+        "group": "flipper",
+        "panel": "shared",
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": ".",
+      },
+        "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".",
+            "endsPattern": "."
+        },
+      },
+    },
+  ],
+}
