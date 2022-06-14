@@ -14,15 +14,11 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
-- Latest DEV changes cc861dd9
-- Fixed Actual PIN Lock (By RogueMaster)
+- Latest DEV changes up to b2132b2e
 - Added [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge To Work.
 - - Add a folder to SD card named `chip8`
 - - [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/)
 - - Let us know if you got any to work by submitting an Issue! LOL (Probably removing from build 6/15)
-- Updated [assets/resources/nfc/assets/mf_classic_dict.nfc](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/nfc/assets/mf_classic_dict.nfc)
-- Added [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine) (Restart To Exit)
-- Updates for [RF Remix (By ESurge)(Original By jimilinuxguy)](https://github.com/ESurge/flipperzero-firmware-unirfremix)
 - Added [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
 
 **Special Instructions:**
