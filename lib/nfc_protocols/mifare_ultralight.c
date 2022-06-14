@@ -987,16 +987,6 @@ static void mf_ul_emulate_write(
     }
 
     memcpy(&emulator->data.data[write_page * 4], page_buff, 4);
-    if(emulator->config != NULL) {
-        uint8_t config_page_index =
-            (uint8_t)(((uint8_t*)emulator->config - emulator->data.data) / 4);
-        // Handle config pages after update
-        // If config pages available, auth is available
-        if(tag_addr == config_page_index + 1) {
-            // Update authentication counter
-            emulator->data.curr_authlim = 0;
-        }
-    }
     emulator->data_changed = true;
 }
 
@@ -1467,7 +1457,12 @@ bool mf_ul_prepare_emulation_response(
             if(emulator->supported_features & MfUltralightSupportAuth) {
                 if(buff_rx_len == (1 + 4) * 8) {
                     uint16_t scaled_authlim = mf_ultralight_calc_auth_count(&emulator->data);
-                    if(scaled_authlim != 0 && emulator->data.curr_authlim > scaled_authlim) {
+                    if(scaled_authlim != 0 && emulator->data.curr_authlim >= scaled_authlim) {
+                        if (emulator->data.curr_authlim != UINT16_MAX) {
+                            // Handle case where AUTHLIM has been lowered or changed from 0
+                            emulator->data.curr_authlim = UINT16_MAX;
+                            emulator->data_changed = true;
+                        }
                         // AUTHLIM reached, always fail
                         buff_tx[0] = MF_UL_NAK_AUTHLIM_REACHED;
                         tx_bits = 4;
@@ -1483,7 +1478,7 @@ bool mf_ul_prepare_emulation_response(
                             *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
                             emulator->auth_success = true;
                             command_parsed = true;
-                            if(scaled_authlim != 0 && emulator->data.curr_authlim != 0) {
+                            if(emulator->data.curr_authlim != 0) {
                                 // Reset current AUTHLIM
                                 emulator->data.curr_authlim = 0;
                                 emulator->data_changed = true;
@@ -1497,10 +1492,18 @@ bool mf_ul_prepare_emulation_response(
                             emulator->auth_success = true;
                             command_parsed = true;
                         } else {
-                            // Wrong password, decrease AUTHLIM if set
-                            if(scaled_authlim != 0) {
-                                ++emulator->data.curr_authlim;
-                                emulator->data_changed = true;
+                            // Wrong password, increase negative verification count
+                            ++emulator->data.curr_authlim;
+                            emulator->data_changed = true;
+                            if (scaled_authlim != 0 && emulator->data.curr_authlim >= scaled_authlim) {
+                                emulator->data.curr_authlim = UINT16_MAX;
+                                buff_tx[0] = MF_UL_NAK_AUTHLIM_REACHED;
+                                tx_bits = 4;
+                                *data_type = FURI_HAL_NFC_TX_RAW_RX_DEFAULT;
+                                mf_ul_reset_emulation(emulator, false);
+                                command_parsed = true;
+                            } else {
+                                // Should delay here to slow brute forcing
                             }
                         }
                     }
