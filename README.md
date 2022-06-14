@@ -14,7 +14,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
-- Latest DEV changes up to b2132b2e
+- Latest DEV changes up to fb4d4011
 - Added [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge To Work.
 - - Add a folder to SD card named `chip8`
 - - [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/)
