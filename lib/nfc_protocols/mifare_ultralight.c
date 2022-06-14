@@ -1337,10 +1337,10 @@ bool mf_ul_prepare_emulation_response(
                                         uint8_t pwd_page = emulator->page_num - 2;
                                         int16_t pwd_page_offset = pwd_page - start_page;
                                         // PWD page
-                                        if(pwd_page_offset >= 0 && pwd_page_offset <= end_page) {
+                                        if(pwd_page_offset >= 0 && pwd_page <= end_page) {
                                             memset(&buff_tx[pwd_page_offset * 4], 0, 4);
                                             // PACK page
-                                            if(pwd_page_offset + 1 <= end_page)
+                                            if(pwd_page + 1 <= end_page)
                                                 memset(&buff_tx[(pwd_page_offset + 1) * 4], 0, 4);
                                         }
                                     }
