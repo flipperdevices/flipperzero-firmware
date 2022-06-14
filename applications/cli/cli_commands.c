@@ -316,14 +316,15 @@ void cli_command_i2c(Cli* cli, string_t args, void* context) {
 
 void cli_command_sound_tone(Cli* cli, string_t args, void* context) {
     float volumes[] = {0.01, 0.02, 0.05, 0.1, 0.5};
-    float sound_delay = 1000;    //1s
+    float sound_delay = 1000; //1s
     float freq = 0;
-    float volume = volumes[3];  //default
+    float volume = volumes[3]; //default
     uint8_t tmp = 0;
 
     char* end_ptr;
 
-    #define CLI_SOUND_PRINT_USAGE cli_print_usage("sound_tone", "<freq Hz> <duration ms> <volume 0-4>", string_get_cstr(args));
+#define CLI_SOUND_PRINT_USAGE \
+    cli_print_usage("sound_tone", "<freq Hz> <duration ms> <volume 0-4>", string_get_cstr(args));
 
     size_t ws = string_search_char(args, ' ');
 
@@ -345,9 +346,9 @@ void cli_command_sound_tone(Cli* cli, string_t args, void* context) {
         string_right(args, ws);
         string_strim(args);
     }
-    
+
     tmp = strtoul(string_get_cstr(args), &end_ptr, 0);
-    if(tmp >= 0 && tmp <=4) {
+    if(tmp >= 0 && tmp <= 4) {
         volume = volumes[tmp];
     } else {
         printf("Play sound: %.0fHz, %.0fms, Volume: %d\r\n", freq, sound_delay, tmp);
@@ -365,82 +366,47 @@ void cli_command_sound_tone(Cli* cli, string_t args, void* context) {
 void cli_command_sound_morse(Cli* cli, string_t args, void* context) {
     float volumes[] = {0.01, 0.02, 0.05, 0.1, 0.5};
     float freq = 600;
-    float volume = volumes[3];  //default
+    float volume = volumes[3]; //default
     float duration_unit = 200;
     uint16_t i, j, k;
 
-    static const struct {const char letter, *code;} MorseMap[] = {
-        { 'A', ".-" },
-        { 'B', "-..." },
-        { 'C', "-.-." },
-        { 'D', "-.." },
-        { 'E', "." },
-        { 'F', "..-." },
-        { 'G', "--." },
-        { 'H', "...." },
-        { 'I', ".." },
-        { 'J', ".---" },
-        { 'K', "-.-" },
-        { 'L', ".-.." },
-        { 'M', "--" },
-        { 'N', "-." },
-        { 'O', "---" },
-        { 'P', ".--." },
-        { 'Q', "--.-" },
-        { 'R', ".-." },
-        { 'S', "..." },
-        { 'T', "-" },
-        { 'U', "..-" },
-        { 'V', "...-" },
-        { 'W', ".--" },
-        { 'X', "-..-" },
-        { 'Y', "-.--" },
-        { 'Z', "--.." },
-        { ' ', "    " }, //Gap between word, seven units, but 3 already after each symbol
+    static const struct {
+        const char letter, *code;
+    } MorseMap[] = {
+        {'A', ".-"},     {'B', "-..."},   {'C', "-.-."},   {'D', "-.."},    {'E', "."},
+        {'F', "..-."},   {'G', "--."},    {'H', "...."},   {'I', ".."},     {'J', ".---"},
+        {'K', "-.-"},    {'L', ".-.."},   {'M', "--"},     {'N', "-."},     {'O', "---"},
+        {'P', ".--."},   {'Q', "--.-"},   {'R', ".-."},    {'S', "..."},    {'T', "-"},
+        {'U', "..-"},    {'V', "...-"},   {'W', ".--"},    {'X', "-..-"},   {'Y', "-.--"},
+        {'Z', "--.."},   {' ', "    "}, //Gap between word, seven units, but 3 already after each symbol
 
-        { '1', ".----" },
-        { '2', "..---" },
-        { '3', "...--" },
-        { '4', "....-" },
-        { '5', "....." },
-        { '6', "-...." },
-        { '7', "--..." },
-        { '8', "---.." },
-        { '9', "----." },
-        { '0', "-----" },
+        {'1', ".----"},  {'2', "..---"},  {'3', "...--"},  {'4', "....-"},  {'5', "....."},
+        {'6', "-...."},  {'7', "--..."},  {'8', "---.."},  {'9', "----."},  {'0', "-----"},
 
-        { '.', "·-·-·-" },
-        { ',', "--..--" },
-        { '?', "..--.." },
-        { '!', "-.-.--" },
-        { ':', "---..." },
-        { ';', "-.-.-." },
-        { '(', "-.--." },
-        { ')', "-.--.-" },
-        { '"', ".-..-." },
-        { '@', ".--.-." },
-        { '&', ".-..." },
+        {'.', "·-·-·-"}, {',', "--..--"}, {'?', "..--.."}, {'!', "-.-.--"}, {':', "---..."},
+        {';', "-.-.-."}, {'(', "-.--."},  {')', "-.--.-"}, {'"', ".-..-."}, {'@', ".--.-."},
+        {'&', ".-..."},
     };
 
-    for(i=0; i<string_size(args); i++) {
+    for(i = 0; i < string_size(args); i++) {
         printf("%c ", string_get_char(args, i));
-        for(j=0; j<sizeof(MorseMap)/sizeof(*MorseMap); j++) {
-            if (MorseMap[j].letter == string_get_char(args, i)) {
+        for(j = 0; j < sizeof(MorseMap) / sizeof(*MorseMap); j++) {
+            if(MorseMap[j].letter == string_get_char(args, i)) {
                 printf("%s \r\n", MorseMap[j].code);
-                for(k=0; k<sizeof(MorseMap[j].code); k++) {
+                for(k = 0; k < sizeof(MorseMap[j].code); k++) {
                     if(MorseMap[j].code[k] == '.') {
                         hal_pwm_set(volume, freq, &SPEAKER_TIM, SPEAKER_CH);
                         delay(duration_unit);
                         hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
                     } else if(MorseMap[j].code[k] == '-') {
                         hal_pwm_set(volume, freq, &SPEAKER_TIM, SPEAKER_CH);
-                        delay(duration_unit*3);
+                        delay(duration_unit * 3);
                         hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
                     } else {
                         delay(duration_unit);
                     }
                 }
-                delay(duration_unit*3);
+                delay(duration_unit * 3);
                 break;
             }
         }
@@ -448,6 +414,15 @@ void cli_command_sound_morse(Cli* cli, string_t args, void* context) {
         delay(duration_unit);
     }
     printf("\r\n");
+}
+
+/* 
+ * Ping Command
+ * This command is intended to be used by humans and machines
+ * For autotests purposes. To check that cli alive.
+ */
+void cli_command_ping(Cli* cli, string_t args, void* context) {
+    printf("pong\r\n");
 }
 
 void cli_commands_init(Cli* cli) {
@@ -463,6 +438,7 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "ps", CliCommandFlagParallelSafe, cli_command_ps, NULL);
     cli_add_command(cli, "free", CliCommandFlagParallelSafe, cli_command_free, NULL);
     cli_add_command(cli, "free_blocks", CliCommandFlagParallelSafe, cli_command_free_blocks, NULL);
+    cli_add_command(cli, "ping", CliCommandFlagParallelSafe, cli_command_ping, NULL);
 
     cli_add_command(cli, "vibro", CliCommandFlagDefault, cli_command_vibro, NULL);
     cli_add_command(cli, "led", CliCommandFlagDefault, cli_command_led, NULL);
