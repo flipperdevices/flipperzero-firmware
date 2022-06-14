@@ -5,8 +5,11 @@
 
 static const uint8_t version_bytes_mf0ulx1[] = {0x00, 0x04, 0x03, 0x00, 0x01, 0x00, 0x00, 0x03};
 static const uint8_t version_bytes_ntag21x[] = {0x00, 0x04, 0x04, 0x02, 0x01, 0x00, 0x00, 0x03};
+static const uint8_t version_bytes_ntag_i2c[] = {0x00, 0x04, 0x04, 0x05, 0x02, 0x00, 0x00, 0x03};
 static const uint8_t default_data_ntag213[] = {0x01, 0x03, 0xA0, 0x0C, 0x34, 0x03, 0x00, 0xFE};
 static const uint8_t default_data_ntag215_216[] = {0x03, 0x00, 0xFE};
+static const uint8_t default_data_ntag_i2c[] = {0xE1, 0x10, 0x00, 0x00, 0x03, 0x00, 0xFE};
+static const uint8_t default_config_ntag_i2c[] = {0x01, 0x00, 0xF8, 0x48, 0x08, 0x01, 0x00, 0x00};
 
 static void nfc_generate_common_start(NfcDeviceData* data) {
     nfc_device_data_clear(data);
@@ -154,6 +157,99 @@ static void nfc_generate_ntag216(NfcDeviceData* data) {
     memcpy(&mful->data[16], default_data_ntag215_216, sizeof(default_data_ntag215_216));
 }
 
+static void
+    nfc_generate_ntag_i2c_common(NfcDeviceData* data, MfUltralightType type, uint16_t num_pages) {
+    nfc_generate_common_start(data);
+    nfc_generate_mf_ul_common(data);
+
+    MfUltralightData* mful = &data->mf_ul_data;
+    mful->type = type;
+    memcpy(&mful->version, version_bytes_ntag_i2c, sizeof(version_bytes_ntag_i2c));
+    mful->data_size = num_pages * 4;
+    memcpy(mful->data, data->nfc_data.uid, data->nfc_data.uid_len);
+    mful->data[7] = data->nfc_data.sak;
+    mful->data[8] = data->nfc_data.atqa[0];
+    mful->data[9] = data->nfc_data.atqa[1];
+
+    uint16_t config_register_page;
+    uint16_t session_register_page;
+
+    // Sync with mifare_ultralight.c
+    switch(type) {
+    case MfUltralightTypeNTAGI2C1K:
+        config_register_page = 227;
+        session_register_page = 229;
+        break;
+    case MfUltralightTypeNTAGI2C2K:
+        config_register_page = 481;
+        session_register_page = 483;
+        break;
+    case MfUltralightTypeNTAGI2CPlus1K:
+    case MfUltralightTypeNTAGI2CPlus2K:
+        config_register_page = 232;
+        session_register_page = 234;
+        break;
+    default:
+        furi_assert(false);
+        break;
+    }
+
+    memcpy(
+        &mful->data[config_register_page * 4],
+        default_config_ntag_i2c,
+        sizeof(default_config_ntag_i2c));
+    memcpy(
+        &mful->data[session_register_page * 4],
+        default_config_ntag_i2c,
+        sizeof(default_config_ntag_i2c));
+}
+
+static void nfc_generate_ntag_i2c_1k(NfcDeviceData* data) {
+    nfc_generate_ntag_i2c_common(data, MfUltralightTypeNTAGI2C1K, 231);
+    MfUltralightData* mful = &data->mf_ul_data;
+    mful->version.prod_ver_minor = 0x01;
+    mful->version.storage_size = 0x13;
+
+    memcpy(&mful->data[12], default_data_ntag_i2c, sizeof(default_data_ntag_i2c));
+    mful->data[14] = 0x6D; // Size of tag in CC
+}
+
+static void nfc_generate_ntag_i2c_2k(NfcDeviceData* data) {
+    nfc_generate_ntag_i2c_common(data, MfUltralightTypeNTAGI2C2K, 485);
+    MfUltralightData* mful = &data->mf_ul_data;
+    mful->version.prod_ver_minor = 0x01;
+    mful->version.storage_size = 0x15;
+
+    memcpy(&mful->data[12], default_data_ntag_i2c, sizeof(default_data_ntag_i2c));
+    mful->data[14] = 0xEA; // Size of tag in CC
+}
+
+static void nfc_generate_ntag_i2c_plus_common(
+    NfcDeviceData* data,
+    MfUltralightType type,
+    uint16_t num_pages) {
+    nfc_generate_ntag_i2c_common(data, type, num_pages);
+
+    MfUltralightData* mful = &data->mf_ul_data;
+    uint16_t config_index = 227 * 4;
+    mful->data[config_index + 3] = 0xFF; // AUTH0
+    memset(&mful->data[config_index + 8], 0xFF, 4); // Default PWD
+}
+
+static void nfc_generate_ntag_i2c_plus_1k(NfcDeviceData* data) {
+    nfc_generate_ntag_i2c_plus_common(data, MfUltralightTypeNTAGI2CPlus1K, 236);
+    MfUltralightData* mful = &data->mf_ul_data;
+    mful->version.prod_ver_minor = 0x02;
+    mful->version.storage_size = 0x13;
+}
+
+static void nfc_generate_ntag_i2c_plus_2k(NfcDeviceData* data) {
+    nfc_generate_ntag_i2c_plus_common(data, MfUltralightTypeNTAGI2CPlus2K, 492);
+    MfUltralightData* mful = &data->mf_ul_data;
+    mful->version.prod_ver_minor = 0x02;
+    mful->version.storage_size = 0x15;
+}
+
 static const NfcGenerator mf_ul_generator = {
     "Mifare Ultralight",
     nfc_generate_mf_ul_orig,
@@ -194,6 +290,26 @@ static const NfcGenerator ntag216_generator = {
     nfc_generate_ntag216,
     NfcSceneReadMifareUlSuccess};
 
+static const NfcGenerator ntag_i2c_1k_generator = {
+    "NTAG I2C 1k",
+    nfc_generate_ntag_i2c_1k,
+    NfcSceneReadMifareUlSuccess};
+
+static const NfcGenerator ntag_i2c_2k_generator = {
+    "NTAG I2C 2k",
+    nfc_generate_ntag_i2c_2k,
+    NfcSceneReadMifareUlSuccess};
+
+static const NfcGenerator ntag_i2c_plus_1k_generator = {
+    "NTAG I2C Plus 1k",
+    nfc_generate_ntag_i2c_plus_1k,
+    NfcSceneReadMifareUlSuccess};
+
+static const NfcGenerator ntag_i2c_plus_2k_generator = {
+    "NTAG I2C Plus 2k",
+    nfc_generate_ntag_i2c_plus_2k,
+    NfcSceneReadMifareUlSuccess};
+
 const NfcGenerator* const nfc_generators[] = {
     &mf_ul_generator,
     &mf_ul_11_generator,
@@ -203,5 +319,9 @@ const NfcGenerator* const nfc_generators[] = {
     &ntag213_generator,
     &ntag215_generator,
     &ntag216_generator,
+    &ntag_i2c_1k_generator,
+    &ntag_i2c_2k_generator,
+    &ntag_i2c_plus_1k_generator,
+    &ntag_i2c_plus_2k_generator,
     NULL,
 };
