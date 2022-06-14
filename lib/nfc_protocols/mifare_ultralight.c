@@ -1518,6 +1518,10 @@ bool mf_ul_prepare_emulation_response(
                             command_parsed = true;
                         } else {
                             // Wrong password, increase negative verification count
+                            if(emulator->data.curr_authlim < UINT16_MAX) {
+                                ++emulator->data.curr_authlim;
+                                emulator->data_changed = true;
+                            }
                             ++emulator->data.curr_authlim;
                             emulator->data_changed = true;
                             if(scaled_authlim != 0 &&
