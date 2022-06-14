@@ -49,7 +49,9 @@ Special shout out to these libraries for giving us more fun:
 Added Features:
 - Actual PIN Lock (By RogueMaster)
 - Added 90s Timeout for Backlight Time (By RogueMaster)
+- Default scan names will have timestamp instead of random name assigned (By RogueMaster)
 - Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
+- SubGHz Protocols (Keeloq, Nice Flor, Star Line) updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - Added Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Removing T5577 passwords via the cli command rfid clear_pass_t5577 using a dictionary attack [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Added New SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
