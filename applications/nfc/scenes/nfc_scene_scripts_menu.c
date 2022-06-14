@@ -1,10 +1,11 @@
 #include "../nfc_i.h"
 
 enum SubmenuIndex {
+    SubmenuIndexGeneric,
     SubmenuIndexBankCard,
-    SubmenuIndexMifareUltralight,
-    SubmenuIdexReadMfClassic,
-    SubmenuIndexMifareDesfire,
+    SubmenuIndexMfUltralight,
+    SubmenuIndexMfClassic,
+    SubmenuIndexMfDesfire,
 };
 
 void nfc_scene_scripts_menu_submenu_callback(void* context, uint32_t index) {
@@ -18,6 +19,12 @@ void nfc_scene_scripts_menu_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
+        "Read Generic NFC",
+        SubmenuIndexGeneric,
+        nfc_scene_scripts_menu_submenu_callback,
+        nfc);
+    submenu_add_item(
+        submenu,
         "Read Bank Card",
         SubmenuIndexBankCard,
         nfc_scene_scripts_menu_submenu_callback,
@@ -25,19 +32,19 @@ void nfc_scene_scripts_menu_on_enter(void* context) {
     submenu_add_item(
         submenu,
         "Read Mifare Ultral/Ntag",
-        SubmenuIndexMifareUltralight,
+        SubmenuIndexMfUltralight,
         nfc_scene_scripts_menu_submenu_callback,
         nfc);
     submenu_add_item(
         submenu,
         "Read Mifare Classic",
-        SubmenuIdexReadMfClassic,
+        SubmenuIndexMfClassic,
         nfc_scene_scripts_menu_submenu_callback,
         nfc);
     submenu_add_item(
         submenu,
         "Read Mifare DESFire",
-        SubmenuIndexMifareDesfire,
+        SubmenuIndexMfDesfire,
         nfc_scene_scripts_menu_submenu_callback,
         nfc);
     submenu_set_selected_item(
@@ -50,24 +57,30 @@ bool nfc_scene_scripts_menu_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexBankCard) {
+        if(event.event == SubmenuIndexGeneric) {
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneScriptsMenu, SubmenuIndexGeneric);
+            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneReadCard, 0); // Don't auto-run reading scripts
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCard);
+            consumed = true;
+        } else if(event.event == SubmenuIndexBankCard) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneScriptsMenu, SubmenuIndexBankCard);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadEmvApp);
             consumed = true;
-        } else if(event.event == SubmenuIndexMifareUltralight) {
+        } else if(event.event == SubmenuIndexMfUltralight) {
             scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneScriptsMenu, SubmenuIndexMifareUltralight);
+                nfc->scene_manager, NfcSceneScriptsMenu, SubmenuIndexMfUltralight);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareUl);
             consumed = true;
-        } else if(event.event == SubmenuIdexReadMfClassic) {
+        } else if(event.event == SubmenuIndexMfClassic) {
             scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneScriptsMenu, SubmenuIdexReadMfClassic);
+                nfc->scene_manager, NfcSceneScriptsMenu, SubmenuIndexMfClassic);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareClassic);
             consumed = true;
-        } else if(event.event == SubmenuIndexMifareDesfire) {
+        } else if(event.event == SubmenuIndexMfDesfire) {
             scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneScriptsMenu, SubmenuIndexMifareDesfire);
+                nfc->scene_manager, NfcSceneScriptsMenu, SubmenuIndexMfDesfire);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareDesfire);
             consumed = true;
         }

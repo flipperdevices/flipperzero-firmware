@@ -13,7 +13,7 @@ void nfc_scene_read_card_on_enter(void* context) {
 
     // Setup view
     Popup* popup = nfc->popup;
-    popup_set_header(popup, "Detecting\nNFC card", 70, 34, AlignLeft, AlignTop);
+    popup_set_header(popup, "Detecting\nNFC tag", 70, 34, AlignLeft, AlignTop);
     popup_set_icon(popup, 0, 3, &I_RFIDDolphinReceive_97x61);
 
     // Start worker
@@ -27,10 +27,26 @@ void nfc_scene_read_card_on_enter(void* context) {
 bool nfc_scene_read_card_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
     bool consumed = false;
+    uint32_t auto_read = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneReadCard);
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventWorkerExit) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
+            if(auto_read) {
+                NfcProtocol card_type = nfc->dev->dev_data.protocol;
+                if(card_type == NfcDeviceProtocolMifareUl) {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareUl);
+                } else if(card_type == NfcDeviceProtocolMifareDesfire) {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareDesfire);
+                } else if(card_type == NfcDeviceProtocolEMV) {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneReadEmvApp);
+                } else if(card_type == NfcDeviceProtocolMifareClassic) {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareClassic);
+                } else { // Unknown protocol type, fallback to generic.
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
+                }
+            } else {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
+            }
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
