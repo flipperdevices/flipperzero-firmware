@@ -4,6 +4,9 @@
 #define NXP_MANUFACTURER_ID (0x04)
 
 static const uint8_t version_bytes_mf0ulx1[] = {0x00, 0x04, 0x03, 0x00, 0x01, 0x00, 0x00, 0x03};
+static const uint8_t version_bytes_ntag21x[] = {0x00, 0x04, 0x04, 0x02, 0x01, 0x00, 0x00, 0x03};
+static const uint8_t default_data_ntag213[] = {0x01, 0x03, 0xA0, 0x0C, 0x34, 0x03, 0x00, 0xFE};
+static const uint8_t default_data_ntag215_216[] = {0x03, 0x00, 0xFE};
 
 static void nfc_generate_common_start(NfcDeviceData* data) {
     nfc_device_data_clear(data);
@@ -74,6 +77,7 @@ static void nfc_generate_mf_ul_ev1_common(NfcDeviceData* data, uint8_t num_pages
     for(size_t i = 0; i < 3; ++i) {
         mful->tearing[i] = MF_UL_TEARING_FLAG_DEFAULT;
     }
+    // TODO: what's internal byte on page 2?
 }
 
 static void nfc_generate_mf_ul_11(NfcDeviceData* data) {
@@ -110,6 +114,46 @@ static void nfc_generate_mf_ul_h21(NfcDeviceData* data) {
     mful->version.storage_size = 0x0E;
 }
 
+static void nfc_generate_ntag21x_common(NfcDeviceData* data, uint8_t num_pages) {
+    nfc_generate_mf_ul_with_config_common(data, num_pages);
+    MfUltralightData* mful = &data->mf_ul_data;
+    memcpy(&mful->version, version_bytes_ntag21x, sizeof(version_bytes_mf0ulx1));
+    mful->data[9] = 0x48; // Internal byte
+    // Capability container
+    mful->data[12] = 0xE1;
+    mful->data[13] = 0x10;
+}
+
+static void nfc_generate_ntag213(NfcDeviceData* data) {
+    nfc_generate_ntag21x_common(data, 45);
+    MfUltralightData* mful = &data->mf_ul_data;
+    mful->type = MfUltralightTypeNTAG213;
+    mful->version.storage_size = 0x0F;
+    mful->data[14] = 0x12;
+    // Default contents
+    memcpy(&mful->data[16], default_data_ntag213, sizeof(default_data_ntag213));
+}
+
+static void nfc_generate_ntag215(NfcDeviceData* data) {
+    nfc_generate_ntag21x_common(data, 135);
+    MfUltralightData* mful = &data->mf_ul_data;
+    mful->type = MfUltralightTypeNTAG215;
+    mful->version.storage_size = 0x11;
+    mful->data[14] = 0x3E;
+    // Default contents
+    memcpy(&mful->data[16], default_data_ntag215_216, sizeof(default_data_ntag215_216));
+}
+
+static void nfc_generate_ntag216(NfcDeviceData* data) {
+    nfc_generate_ntag21x_common(data, 231);
+    MfUltralightData* mful = &data->mf_ul_data;
+    mful->type = MfUltralightTypeNTAG216;
+    mful->version.storage_size = 0x13;
+    mful->data[14] = 0x6D;
+    // Default contents
+    memcpy(&mful->data[16], default_data_ntag215_216, sizeof(default_data_ntag215_216));
+}
+
 static const NfcGenerator mf_ul_generator = {
     "Mifare Ultralight",
     nfc_generate_mf_ul_orig,
@@ -135,11 +179,29 @@ static const NfcGenerator mf_ul_h21_generator = {
     nfc_generate_mf_ul_h21,
     NfcSceneReadMifareUlSuccess};
 
+static const NfcGenerator ntag213_generator = {
+    "NTAG213",
+    nfc_generate_ntag213,
+    NfcSceneReadMifareUlSuccess};
+
+static const NfcGenerator ntag215_generator = {
+    "NTAG215",
+    nfc_generate_ntag215,
+    NfcSceneReadMifareUlSuccess};
+
+static const NfcGenerator ntag216_generator = {
+    "NTAG216",
+    nfc_generate_ntag216,
+    NfcSceneReadMifareUlSuccess};
+
 const NfcGenerator* nfc_generators[] = {
     &mf_ul_generator,
     &mf_ul_11_generator,
     &mf_ul_h11_generator,
     &mf_ul_21_generator,
     &mf_ul_h21_generator,
+    &ntag213_generator,
+    &ntag215_generator,
+    &ntag216_generator,
     NULL,
 };
