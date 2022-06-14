@@ -1355,7 +1355,8 @@ bool mf_ul_prepare_emulation_response(
                             if(start_page != -1) {
                                 if(emulator->data.type < MfUltralightTypeNTAGI2CPlus1K ||
                                    mf_ul_ntag_i2c_plus_check_auth(emulator, buff_rx[1], false)) {
-                                    uint16_t copy_count = (valid_pages > 4 ? 4 : valid_pages) * 4;
+                                    uint16_t copy_count = tx_bytes;
+                                    if(copy_count > valid_pages * 4) copy_count = valid_pages * 4;
                                     memcpy(
                                         buff_tx, &emulator->data.data[start_page * 4], copy_count);
                                     if(copy_count < tx_bytes)
