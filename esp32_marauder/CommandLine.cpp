@@ -271,6 +271,7 @@ void CommandLine::runCommand(String input) {
       int attack_type_switch = this->argSearch(&cmd_args, "-t"); // Required
       int list_beacon_sw = this->argSearch(&cmd_args, "-l");
       int rand_beacon_sw = this->argSearch(&cmd_args, "-r");
+      int ap_beacon_sw = this->argSearch(&cmd_args, "-a");
   
       if (attack_type_switch == -1) {
         Serial.println("You must specify an attack type");
@@ -316,6 +317,19 @@ void CommandLine::runCommand(String input) {
             #endif
             Serial.println("Starting random Beacon spam. Stop with " + (String)STOPSCAN_CMD);
             wifi_scan_obj.StartScan(WIFI_ATTACK_BEACON_SPAM, TFT_ORANGE);
+          }
+          // Spam from AP list
+          else if (ap_beacon_sw != -1) {
+            if (!this->apSelected()) {
+              Serial.println("You don't have any targets selected. Use " + (String)SEL_CMD);
+              return;
+            }
+            #ifdef HAS_SCREEN
+              display_obj.clearScreen();
+              menu_function_obj.drawStatusBar();
+            #endif
+            Serial.println("Starting Targeted AP Beacon spam. Stop with " + (String)STOPSCAN_CMD);
+            wifi_scan_obj.StartScan(WIFI_ATTACK_AP_SPAM, TFT_MAGENTA);
           }
           else {
             Serial.println("You did not specify a beacon attack type");

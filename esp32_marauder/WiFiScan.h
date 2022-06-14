@@ -58,6 +58,7 @@
 #define WIFI_ATTACK_AUTH 18
 #define WIFI_ATTACK_MIMIC 19
 #define WIFI_ATTACK_DEAUTH 20
+#define WIFI_ATTACK_AP_SPAM 21
 
 #define GRAPH_REFRESH 100
 
@@ -229,6 +230,7 @@ class WiFiScan
     void sendDeauthAttack(uint32_t currentTime);
     void broadcastRandomSSID(uint32_t currentTime);
     void broadcastCustomBeacon(uint32_t current_time, ssid custom_ssid);
+    void broadcastCustomBeacon(uint32_t current_time, AccessPoint custom_ssid);
     void broadcastSetSSID(uint32_t current_time, char* ESSID);
     void RunAPScan(uint8_t scan_mode, uint16_t color);
     //void RunRickRoll(uint8_t scan_mode, uint16_t color);
