@@ -33,7 +33,7 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
     if(m->state == DictAttackStateSearchCard) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(
-            canvas, 64, 32, AlignCenter, AlignCenter, "Detecting Mifare Classic");
+            canvas, 64, 32, AlignCenter, AlignCenter, "Reading Mifare Classic");
     } else if(m->state == DictAttackStateCardRemoved) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(

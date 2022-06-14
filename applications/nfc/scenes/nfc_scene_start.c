@@ -22,7 +22,7 @@ void nfc_scene_start_on_enter(void* context) {
         submenu, "Read NFC Tag", SubmenuIndexRead, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(
         submenu,
-        "Reading scripts",
+        "Reading Scripts",
         SubmenuIndexRunScript,
         nfc_scene_start_submenu_callback,
         nfc);

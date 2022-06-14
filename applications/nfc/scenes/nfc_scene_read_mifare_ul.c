@@ -13,7 +13,7 @@ void nfc_scene_read_mifare_ul_on_enter(void* context) {
 
     // Setup view
     Popup* popup = nfc->popup;
-    popup_set_header(popup, "Detecting\nultralight", 70, 34, AlignLeft, AlignTop);
+    popup_set_header(popup, "Reading\nultralight", 70, 34, AlignLeft, AlignTop);
     popup_set_icon(popup, 0, 3, &I_RFIDDolphinReceive_97x61);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
