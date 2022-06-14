@@ -60,7 +60,8 @@ bool nfc_scene_scripts_menu_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuIndexGeneric) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneScriptsMenu, SubmenuIndexGeneric);
-            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneReadCard, 0); // Don't auto-run reading scripts
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneReadCard, 0); // Don't auto-run reading scripts
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCard);
             consumed = true;
         } else if(event.event == SubmenuIndexBankCard) {

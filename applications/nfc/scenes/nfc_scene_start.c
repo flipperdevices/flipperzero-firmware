@@ -21,11 +21,7 @@ void nfc_scene_start_on_enter(void* context) {
     submenu_add_item(
         submenu, "Read NFC Tag", SubmenuIndexRead, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(
-        submenu,
-        "Reading Scripts",
-        SubmenuIndexRunScript,
-        nfc_scene_start_submenu_callback,
-        nfc);
+        submenu, "Reading Scripts", SubmenuIndexRunScript, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(
         submenu, "Add Manually", SubmenuIndexAddManualy, nfc_scene_start_submenu_callback, nfc);
@@ -48,7 +44,8 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexRead) {
-            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneReadCard, 1); // Auto-run reading script
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneReadCard, 1); // Auto-run reading script
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCard);
             consumed = true;
         } else if(event.event == SubmenuIndexRunScript) {

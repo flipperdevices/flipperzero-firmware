@@ -44,9 +44,6 @@ bool nfc_scene_mifare_ul_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateMifareUl);
             consumed = true;
         }
-    } else if(event.type == SceneManagerEventTypeBack) {
-        consumed =
-            scene_manager_search_and_switch_to_previous_scene(nfc->scene_manager, NfcSceneStart);
     }
 
     return consumed;
