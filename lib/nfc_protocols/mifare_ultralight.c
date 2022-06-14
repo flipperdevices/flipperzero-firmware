@@ -801,6 +801,31 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
     }
 
     // Check dynamic lock bytes
+
+    // Check max page
+    switch(emulator->data.type) {
+    case MfUltralightTypeUL21:
+    case MfUltralightTypeNTAG213:
+    case MfUltralightTypeNTAG215:
+    case MfUltralightTypeNTAG216:
+        if(write_page >= emulator->page_num - 5) return true;
+        break;
+    case MfUltralightTypeNTAGI2C1K:
+    case MfUltralightTypeNTAGI2CPlus1K:
+        if(write_page > 225) return true;
+        break;
+    case MfUltralightTypeNTAGI2C2K:
+        if(write_page > 479) return true;
+        break;
+    case MfUltralightTypeNTAGI2CPlus2K:
+        if(write_page >= 226 && write_page <= 255) return true;
+        if(write_page >= 512) return true;
+        break;
+    default:
+        furi_assert(false);
+        return true;
+    }
+
     int16_t dynamic_lock_index = mf_ul_get_dynamic_lock_page_addr(&emulator->data);
     if(dynamic_lock_index == -1) return true;
     // Run address through converter because NTAG I2C 2K is special
@@ -1458,7 +1483,7 @@ bool mf_ul_prepare_emulation_response(
                 if(buff_rx_len == (1 + 4) * 8) {
                     uint16_t scaled_authlim = mf_ultralight_calc_auth_count(&emulator->data);
                     if(scaled_authlim != 0 && emulator->data.curr_authlim >= scaled_authlim) {
-                        if (emulator->data.curr_authlim != UINT16_MAX) {
+                        if(emulator->data.curr_authlim != UINT16_MAX) {
                             // Handle case where AUTHLIM has been lowered or changed from 0
                             emulator->data.curr_authlim = UINT16_MAX;
                             emulator->data_changed = true;
@@ -1495,7 +1520,8 @@ bool mf_ul_prepare_emulation_response(
                             // Wrong password, increase negative verification count
                             ++emulator->data.curr_authlim;
                             emulator->data_changed = true;
-                            if (scaled_authlim != 0 && emulator->data.curr_authlim >= scaled_authlim) {
+                            if(scaled_authlim != 0 &&
+                               emulator->data.curr_authlim >= scaled_authlim) {
                                 emulator->data.curr_authlim = UINT16_MAX;
                                 buff_tx[0] = MF_UL_NAK_AUTHLIM_REACHED;
                                 tx_bits = 4;
