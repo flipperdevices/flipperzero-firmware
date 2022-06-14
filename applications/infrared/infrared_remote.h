@@ -21,6 +21,7 @@ InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t 
 
 bool infrared_remote_add_button(InfraredRemote* remote, const char* name, InfraredSignal* signal);
 bool infrared_remote_rename_button(InfraredRemote* remote, const char* new_name, size_t index);
+bool infrared_remote_delete_button(InfraredRemote* remote, size_t index);
 
 bool infrared_remote_store(InfraredRemote* remote);
 bool infrared_remote_load(InfraredRemote* remote, const char* path);

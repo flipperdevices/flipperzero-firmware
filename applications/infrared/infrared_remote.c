@@ -88,6 +88,14 @@ bool infrared_remote_rename_button(InfraredRemote* remote, const char* new_name,
     return infrared_remote_store(remote);
 }
 
+bool infrared_remote_delete_button(InfraredRemote* remote, size_t index) {
+    furi_assert(index < infrared_button_array_size(remote->buttons));
+    InfraredRemoteButton* button;
+    infrared_button_array_pop_at(&button, remote->buttons, index);
+    infrared_remote_button_free(button);
+    return infrared_remote_store(remote);
+}
+
 bool infrared_remote_store(InfraredRemote* remote) {
     Storage* storage = furi_record_open("storage");
     FlipperFormat* ff = flipper_format_file_alloc(storage);
