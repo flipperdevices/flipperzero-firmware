@@ -1522,8 +1522,6 @@ bool mf_ul_prepare_emulation_response(
                                 ++emulator->data.curr_authlim;
                                 emulator->data_changed = true;
                             }
-                            ++emulator->data.curr_authlim;
-                            emulator->data_changed = true;
                             if(scaled_authlim != 0 &&
                                emulator->data.curr_authlim >= scaled_authlim) {
                                 emulator->data.curr_authlim = UINT16_MAX;
