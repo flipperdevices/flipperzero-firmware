@@ -22,36 +22,28 @@ AddOption(
 # Construction environment variables
 
 vars = Variables(GetOption("optionfile"), ARGUMENTS)
-vars.Add(
+
+vars.AddVariables(
     BoolVariable(
         "VERBOSE",
         help="Print full commands",
         default=False,
-    )
-)
-vars.Add(
+    ),
     BoolVariable(
         "FORCE",
         help="Force target action (for supported targets)",
         default=False,
-    )
-)
-vars.Add(
+    ),
     BoolVariable(
         "DEBUG",
         help="Enable debug build",
         default=True,
-    )
-)
-vars.Add(
+    ),
     BoolVariable(
         "COMPACT",
         help="Optimize for size",
         default=False,
-    )
-)
-
-vars.Add(
+    ),
     EnumVariable(
         "TARGET_HW",
         help="Hardware target",
@@ -59,7 +51,7 @@ vars.Add(
         allowed_values=[
             "7",
         ],
-    )
+    ),
 )
 
 vars.Add(
@@ -100,31 +92,25 @@ vars.Add(
     default="",
 )
 
-vars.Add(
+vars.AddVariables(
     PathVariable(
         "COPRO_OB_DATA",
         help="Path to OB reference data",
         validator=PathVariable.PathIsFile,
         default="",
-    )
-)
-vars.Add(
+    ),
     PathVariable(
         "COPRO_STACK_BIN_DIR",
         help="Path to ST-provided stacks",
         validator=PathVariable.PathIsDir,
         default="",
-    )
-)
-vars.Add(
+    ),
     PathVariable(
         "COPRO_CUBE_DIR",
         help="Path to Cube root",
         validator=PathVariable.PathIsDir,
         default="",
-    )
-)
-vars.Add(
+    ),
     EnumVariable(
         "COPRO_STACK_TYPE",
         help="Core2 stack type",
@@ -134,8 +120,13 @@ vars.Add(
             "ble_light",
             "ble_basic",
         ],
-    )
+    ),
 )
 
+vars.Add(
+    "FBT_TOOLCHAIN_VERSIONS",
+    help="Whitelisted toolchain versions (leave empty for no check)",
+    default=tuple(),
+)
 
 Return("vars")

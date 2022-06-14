@@ -9,12 +9,17 @@ Import("VAR_ENV")
 
 coreenv = VAR_ENV.Clone(
     tools=[
-        "crosscc",
+        (
+            "crosscc",
+            {
+                "toolchain_prefix": "arm-none-eabi-",
+                "versions": VAR_ENV["FBT_TOOLCHAIN_VERSIONS"],
+            },
+        ),
         "python3",
         "sconsmodular",
         "sconsrecursiveglob",
     ],
-    TOOLCHAIN_PREFIX="arm-none-eabi-",
     TEMPFILE=TempFileMunge,
     MAXLINELENGTH=2048,
     PROGSUFFIX=".elf",

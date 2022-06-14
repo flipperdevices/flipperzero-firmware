@@ -36,3 +36,6 @@ COPRO_STACK_BIN_DIR = posixpath.join(
     "STM32WB_Copro_Wireless_Binaries",
     COPRO_MCU_FAMILY,
 )
+
+# Supported toolchain versions
+FBT_TOOLCHAIN_VERSIONS = (" 10.3.",)
