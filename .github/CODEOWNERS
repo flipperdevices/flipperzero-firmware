@@ -56,8 +56,33 @@
 /firmware/ @skotopes @DrZlo13 @hedger
 
 # Lib
-/lib/ST25RFAL002/** @skotopes @DrZlo13 @hedger @gornekich
-/lib/drivers/** @skotopes @DrZlo13 @hedger @gornekich
+/lib/FreeRTOS-Kernel/ @skotopes @DrZlo13 @hedger
+/lib/FreeRTOS-glue/ @skotopes @DrZlo13 @hedger
+/lib/ST25RFAL002/ @skotopes @DrZlo13 @hedger @gornekich
+/lib/STM32CubeWB/ @skotopes @DrZlo13 @hedger @gornekich
+/lib/app-scened-template/ @skotopes @DrZlo13 @hedger
+/lib/callback-connector/ @skotopes @DrZlo13 @hedger
+/lib/digital_signal/ @skotopes @DrZlo13 @hedger @gornekich
+/lib/drivers/ @skotopes @DrZlo13 @hedger
+/lib/fatfs/ @skotopes @DrZlo13 @hedger
+/lib/flipper_format/ @skotopes @DrZlo13 @hedger
+/lib/fnv1a-hash/ @skotopes @DrZlo13 @hedger
+/lib/heatshrink/ @skotopes @DrZlo13 @hedger
+/lib/infrared/ @skotopes @DrZlo13 @hedger @gsurkov
+/lib/libusb_stm32/ @skotopes @DrZlo13 @hedger @nminaylov
+/lib/littlefs/ @skotopes @DrZlo13 @hedger
+/lib/lfs_config.h @skotopes @DrZlo13 @hedger
+/lib/micro-ecc/ @skotopes @DrZlo13 @hedger @nminaylov
+/lib/microtar/ @skotopes @DrZlo13 @hedger
+/lib/mlib/ @skotopes @DrZlo13 @hedger
+/lib/nanopb/ @skotopes @DrZlo13 @hedger
+/lib/nfc_protocols/ @skotopes @DrZlo13 @hedger @gornekich
+/lib/one_wire/ @skotopes @DrZlo13 @hedger
+/lib/qrcode/ @skotopes @DrZlo13 @hedger
+/lib/subghz/ @skotopes @DrZlo13 @hedger @Skorpionm
+/lib/toolbox/ @skotopes @DrZlo13 @hedger
+/lib/u8g2/ @skotopes @DrZlo13 @hedger
+/lib/update_util/ @skotopes @DrZlo13 @hedger
 
 # Make tools
 /make/ @skotopes @DrZlo13 @hedger @aprosvetova
