@@ -1,0 +1,31 @@
+{
+	"Code snippet for FURI_LOG": {
+		"scope": "c,cpp",
+		"prefix": [ "FURI_LOG_", "log" ],
+		"body": [
+			"FURI_LOG_${1|E,W,I,D,V|}(\"${2:Tag}\", \"${3:Format}\", ${4:__VA_ARGS__});", 
+			"$0",
+		],
+	},
+	"Code snippet for furi_alloc()": {
+		"scope": "c,cpp",
+		"prefix": "furi_alloc",
+		"body": [
+			"furi_alloc(sizeof(${1:Struct}));", 
+			"$0",
+		],
+	},
+	"Code snippet for with_view_model()": {
+		"scope": "c",
+		"prefix": "with_view_model",
+		"body": [
+			"with_view_model(", 
+			"\t${1:View}, (${2:ViewModel} * model {",
+			"\t\t${3:/* function body */}",
+			"\t\treturn true;",
+			"\t});",
+			"$0",
+		],
+	},
+}
+

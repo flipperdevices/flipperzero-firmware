@@ -1,0 +1,34 @@
+{
+    // cortex-debug plugin required
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cortex Debug",
+            "cwd": "${workspaceRoot}",
+            "executable": "firmware/.obj/f6/firmware.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "rtos": "FreeRTOS",
+            "openOCDLaunchCommands": ["transport select hla_swd", "stm32wbx.cpu configure -rtos auto", "init"],
+            "svdFile": "${workspaceRoot}/debug/STM32WB55_CM4.svd",
+            "configFiles": [
+                "interface/stlink.cfg",
+                "debug/stm32wbx.cfg"
+            ], 
+            "windows": {
+                "showDevDebugOutput": false,
+                "executable": "./build/STM32.elf", // ?
+                "device": "stlink",
+                "cwd": "${workspaceFolder}",
+                "servertype": "stlink",
+                "armToolchainPath": "C:/work/cmake-stm32/arm_toolchain/gcc-arm-none-eabi-10-2020-q4-major/bin",
+                "stlinkPath": "C:/Program Files/STMicroelectronics/STM32CubeIDE/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.win32_1.6.0.202101291314/tools/bin/ST-LINK_gdbserver",
+                "stm32cubeprogrammer": "C:/Program Files/STMicroelectronics/STM32CubeIDE/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.win32_1.6.0.202101291314/tools/bin",
+            },
+        }
+    ]
+}
+
+
+                
