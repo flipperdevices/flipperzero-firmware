@@ -52,6 +52,9 @@ def AddFwProject(env, base_env, fw_type, fw_env_key):
 
 def generate(env):
     env.AddMethod(AddFwProject)
+    env.SetDefault(
+        COPRO_MCU_FAMILY="STM32WB5x",
+    )
     env.Append(
         BUILDERS={
             "DistBuilder": Builder(

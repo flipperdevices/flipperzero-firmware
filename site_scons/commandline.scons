@@ -74,17 +74,10 @@ vars.Add(
 )
 
 vars.Add(
-    "COPRO_MCU_FAMILY",
-    help="Cube MCU family",
-    default="",
-)
-
-vars.Add(
     "COPRO_STACK_ADDR",
     help="Core2 Firmware address",
     default="0",
 )
-
 
 vars.Add(
     "COPRO_STACK_BIN",

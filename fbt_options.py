@@ -10,6 +10,8 @@ COMPACT = 0
 ## Optimize for debugging experience
 DEBUG = 1
 
+# Suffix to add to files when building distribution.
+# If OS environment has DIST_SUFFIX set, it will be used instead..
 DIST_SUFFIX = "local"
 
 # Coprocessor firmware
@@ -18,7 +20,6 @@ COPRO_OB_DATA = "scripts/ob.data"
 # Must match lib/STM32CubeWB version
 COPRO_CUBE_VERSION = "1.13.3"
 
-COPRO_MCU_FAMILY = "STM32WB5x"
 COPRO_CUBE_DIR = "lib/STM32CubeWB"
 
 # Default radio stack
@@ -34,7 +35,7 @@ COPRO_STACK_BIN_DIR = posixpath.join(
     COPRO_CUBE_DIR,
     "Projects",
     "STM32WB_Copro_Wireless_Binaries",
-    COPRO_MCU_FAMILY,
+    "STM32WB5x",
 )
 
 # Supported toolchain versions
