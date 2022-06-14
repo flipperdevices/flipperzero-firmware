@@ -47,7 +47,7 @@
 
 # Docker
 /docker/ @skotopes @DrZlo13 @hedger @aprosvetova
-docker-compose.yml @skotopes @DrZlo13 @hedger @aprosvetova
+/docker-compose.yml @skotopes @DrZlo13 @hedger @aprosvetova
 
 # Documentation
 /documentation/ @skotopes @DrZlo13 @hedger @aprosvetova
