@@ -46,7 +46,6 @@ Special shout out to these libraries for giving us more fun:
 - https://github.com/neverfa11ing/FlipperMusicRTTTL
 - https://github.com/UberGuidoZ/Flipper
 - https://github.com/UberGuidoZ/Flipper-IRDB
-- https://johnearnest.github.io/chip8Archive/
 
 Added Features:
 - Actual PIN Lock (By RogueMaster)
