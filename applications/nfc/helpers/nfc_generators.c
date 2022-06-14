@@ -27,8 +27,8 @@ static void nfc_generate_mf_ul_common(NfcDeviceData* data) {
 }
 
 static void nfc_generate_calc_bcc(uint8_t* uid, uint8_t* bcc0, uint8_t* bcc1) {
-    *bcc0 = 0x88 ^ uid[0] ^ uid[1] ^ uid[2] ^ uid[3];
-    *bcc1 = uid[4] ^ uid[5] ^ uid[6] ^ uid[7];
+    *bcc0 = 0x88 ^ uid[0] ^ uid[1] ^ uid[2];
+    *bcc1 = uid[3] ^ uid[4] ^ uid[5] ^ uid[6];
 }
 
 static void nfc_generate_mf_ul_copy_uid_with_bcc(NfcDeviceData* data) {
