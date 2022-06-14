@@ -314,6 +314,142 @@ void cli_command_i2c(Cli* cli, string_t args, void* context) {
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 }
 
+void cli_command_sound_tone(Cli* cli, string_t args, void* context) {
+    float volumes[] = {0.01, 0.02, 0.05, 0.1, 0.5};
+    float sound_delay = 1000;    //1s
+    float freq = 0;
+    float volume = volumes[3];  //default
+    uint8_t tmp = 0;
+
+    char* end_ptr;
+
+    #define CLI_SOUND_PRINT_USAGE cli_print_usage("sound_tone", "<freq Hz> <duration ms> <volume 0-4>", string_get_cstr(args));
+
+    size_t ws = string_search_char(args, ' ');
+
+    if(ws == STRING_FAILURE) {
+        CLI_SOUND_PRINT_USAGE;
+        return;
+    } else {
+        freq = strtoul(string_get_cstr(args), &end_ptr, 0);
+        string_right(args, ws);
+        string_strim(args);
+    }
+
+    ws = string_search_char(args, ' ');
+    if(ws == STRING_FAILURE) {
+        CLI_SOUND_PRINT_USAGE;
+        return;
+    } else {
+        sound_delay = strtoul(string_get_cstr(args), &end_ptr, 0);
+        string_right(args, ws);
+        string_strim(args);
+    }
+    
+    tmp = strtoul(string_get_cstr(args), &end_ptr, 0);
+    if(tmp >= 0 && tmp <=4) {
+        volume = volumes[tmp];
+    } else {
+        printf("Play sound: %.0fHz, %.0fms, Volume: %d\r\n", freq, sound_delay, tmp);
+        CLI_SOUND_PRINT_USAGE;
+        return;
+    }
+
+    printf("Play sound: %.0fHz, %.0fms, Volume: %.02f\r\n", freq, sound_delay, volume);
+
+    hal_pwm_set(volume, freq, &SPEAKER_TIM, SPEAKER_CH);
+    delay(sound_delay);
+    hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
+}
+
+void cli_command_sound_morse(Cli* cli, string_t args, void* context) {
+    float volumes[] = {0.01, 0.02, 0.05, 0.1, 0.5};
+    float freq = 600;
+    float volume = volumes[3];  //default
+    float duration_unit = 200;
+    uint16_t i, j, k;
+
+    static const struct {const char letter, *code;} MorseMap[] = {
+        { 'A', ".-" },
+        { 'B', "-..." },
+        { 'C', "-.-." },
+        { 'D', "-.." },
+        { 'E', "." },
+        { 'F', "..-." },
+        { 'G', "--." },
+        { 'H', "...." },
+        { 'I', ".." },
+        { 'J', ".---" },
+        { 'K', "-.-" },
+        { 'L', ".-.." },
+        { 'M', "--" },
+        { 'N', "-." },
+        { 'O', "---" },
+        { 'P', ".--." },
+        { 'Q', "--.-" },
+        { 'R', ".-." },
+        { 'S', "..." },
+        { 'T', "-" },
+        { 'U', "..-" },
+        { 'V', "...-" },
+        { 'W', ".--" },
+        { 'X', "-..-" },
+        { 'Y', "-.--" },
+        { 'Z', "--.." },
+        { ' ', "    " }, //Gap between word, seven units, but 3 already after each symbol
+
+        { '1', ".----" },
+        { '2', "..---" },
+        { '3', "...--" },
+        { '4', "....-" },
+        { '5', "....." },
+        { '6', "-...." },
+        { '7', "--..." },
+        { '8', "---.." },
+        { '9', "----." },
+        { '0', "-----" },
+
+        { '.', "·-·-·-" },
+        { ',', "--..--" },
+        { '?', "..--.." },
+        { '!', "-.-.--" },
+        { ':', "---..." },
+        { ';', "-.-.-." },
+        { '(', "-.--." },
+        { ')', "-.--.-" },
+        { '"', ".-..-." },
+        { '@', ".--.-." },
+        { '&', ".-..." },
+    };
+
+    for(i=0; i<string_size(args); i++) {
+        printf("%c ", string_get_char(args, i));
+        for(j=0; j<sizeof(MorseMap)/sizeof(*MorseMap); j++) {
+            if (MorseMap[j].letter == string_get_char(args, i)) {
+                printf("%s \r\n", MorseMap[j].code);
+                for(k=0; k<sizeof(MorseMap[j].code); k++) {
+                    if(MorseMap[j].code[k] == '.') {
+                        hal_pwm_set(volume, freq, &SPEAKER_TIM, SPEAKER_CH);
+                        delay(duration_unit);
+                        hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
+                    } else if(MorseMap[j].code[k] == '-') {
+                        hal_pwm_set(volume, freq, &SPEAKER_TIM, SPEAKER_CH);
+                        delay(duration_unit*3);
+                        hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
+                    } else {
+                        delay(duration_unit);
+                    }
+                }
+                delay(duration_unit*3);
+                break;
+            }
+        }
+        fflush(stdout);
+        delay(duration_unit);
+    }
+    printf("\r\n");
+}
+
 void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_device_info, NULL);
     cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_device_info, NULL);
@@ -332,4 +468,7 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "led", CliCommandFlagDefault, cli_command_led, NULL);
     cli_add_command(cli, "gpio", CliCommandFlagDefault, cli_command_gpio, NULL);
     cli_add_command(cli, "i2c", CliCommandFlagDefault, cli_command_i2c, NULL);
+
+    cli_add_command(cli, "sound_tone", CliCommandFlagParallelSafe, cli_command_sound_tone, NULL);
+    cli_add_command(cli, "sound_morse", CliCommandFlagParallelSafe, cli_command_sound_morse, NULL);
 }
