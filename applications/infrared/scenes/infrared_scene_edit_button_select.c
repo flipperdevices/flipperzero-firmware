@@ -35,12 +35,15 @@ bool infrared_scene_edit_button_select_on_event(void* context, SceneManagerEvent
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        uint32_t edit_mode = infrared->app_state.edit_mode;
+        infrared->app_state.current_button_index = event.event;
 
+        const InfraredEditMode edit_mode = infrared->app_state.edit_mode;
         if(edit_mode == InfraredEditModeRename) {
             scene_manager_next_scene(scene_manager, InfraredSceneEditRename);
         } else if(edit_mode == InfraredEditModeDelete) {
             scene_manager_next_scene(scene_manager, InfraredSceneEditDelete);
+        } else {
+            furi_crash("Unexpected edit mode");
         }
         consumed = true;
     }

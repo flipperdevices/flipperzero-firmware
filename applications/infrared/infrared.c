@@ -1,5 +1,6 @@
 #include "infrared_i.h"
 
+#include <string.h>
 #include <dolphin/dolphin.h>
 
 static const NotificationSequence* infrared_notification_sequences[] = {
@@ -33,19 +34,18 @@ static void infrared_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(infrared->scene_manager);
 }
 
-static void infrared_find_vacant_remote_name(string_t name, string_t path) {
+static void infrared_find_vacant_remote_name(string_t name, const char* path) {
     Storage* storage = furi_record_open("storage");
 
     string_t base_path;
-    string_init_set(base_path, path);
+    string_init_set_str(base_path, path);
 
     if(string_end_with_str_p(base_path, INFRARED_APP_EXTENSION)) {
         size_t filename_start = string_search_rchar(base_path, '/');
         string_left(base_path, filename_start);
     }
 
-    string_printf(
-        base_path, "%s/%s%s", string_get_cstr(path), string_get_cstr(name), INFRARED_APP_EXTENSION);
+    string_printf(base_path, "%s/%s%s", path, string_get_cstr(name), INFRARED_APP_EXTENSION);
 
     FS_Error status = storage_common_stat(storage, string_get_cstr(base_path), NULL);
 
@@ -79,7 +79,12 @@ static Infrared* infrared_alloc() {
     Infrared* infrared = malloc(sizeof(Infrared));
 
     string_init(infrared->file_path);
-    memset(&infrared->app_state, 0, sizeof(InfraredAppState));
+
+    InfraredAppState* app_state = &infrared->app_state;
+    app_state->is_learning_new_remote = false;
+    app_state->edit_target = InfraredEditTargetNone;
+    app_state->edit_mode = InfraredEditModeNone;
+    app_state->current_button_index = InfraredButtonIndexNone;
 
     infrared->scene_manager = scene_manager_alloc(&infrared_scene_handlers, infrared);
     infrared->view_dispatcher = view_dispatcher_alloc();
@@ -216,7 +221,7 @@ bool infrared_add_remote_with_button(
     string_init_set_str(new_name, INFRARED_DEFAULT_REMOTE_NAME);
     string_init_set_str(new_path, INFRARED_APP_FOLDER);
 
-    infrared_find_vacant_remote_name(new_name, new_path);
+    infrared_find_vacant_remote_name(new_name, string_get_cstr(new_path));
     string_cat_printf(new_path, "/%s%s", string_get_cstr(new_name), INFRARED_APP_EXTENSION);
 
     infrared_remote_reset(remote);
@@ -226,6 +231,40 @@ bool infrared_add_remote_with_button(
     string_clear(new_name);
     string_clear(new_path);
     return infrared_remote_add_button(remote, button_name, signal);
+}
+
+bool infrared_rename_current_remote(Infrared* infrared, const char* name) {
+    InfraredRemote* remote = infrared->remote;
+    const char* remote_path = infrared_remote_get_path(remote);
+
+    if(!strcmp(infrared_remote_get_name(remote), name)) {
+        return true;
+    }
+
+    string_t new_name;
+    string_init_set_str(new_name, name);
+
+    infrared_find_vacant_remote_name(new_name, remote_path);
+
+    string_t new_path;
+    string_init_set(new_path, infrared_remote_get_path(remote));
+    if(string_end_with_str_p(new_path, INFRARED_APP_EXTENSION)) {
+        size_t filename_start = string_search_rchar(new_path, '/');
+        string_left(new_path, filename_start);
+    }
+    string_cat_printf(new_path, "/%s%s", string_get_cstr(new_name), INFRARED_APP_EXTENSION);
+
+    Storage* storage = furi_record_open("storage");
+
+    FS_Error status = storage_common_rename(
+        storage, infrared_remote_get_path(remote), string_get_cstr(new_path));
+    infrared_remote_set_name(remote, string_get_cstr(new_name));
+
+    string_clear(new_name);
+    string_clear(new_path);
+
+    furi_record_close("storage");
+    return (status == FSE_OK || status == FSE_EXIST);
 }
 
 void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal) {

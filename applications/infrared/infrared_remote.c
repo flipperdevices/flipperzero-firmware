@@ -81,6 +81,13 @@ bool infrared_remote_add_button(InfraredRemote* remote, const char* name, Infrar
     return infrared_remote_store(remote);
 }
 
+bool infrared_remote_rename_button(InfraredRemote* remote, const char* new_name, size_t index) {
+    furi_assert(index < infrared_button_array_size(remote->buttons));
+    InfraredRemoteButton* button = *infrared_button_array_get(remote->buttons, index);
+    infrared_remote_button_set_name(button, new_name);
+    return infrared_remote_store(remote);
+}
+
 bool infrared_remote_store(InfraredRemote* remote) {
     Storage* storage = furi_record_open("storage");
     FlipperFormat* ff = flipper_format_file_alloc(storage);
@@ -153,4 +160,14 @@ bool infrared_remote_load(InfraredRemote* remote, const char* path) {
     flipper_format_free(ff);
     furi_record_close("storage");
     return success;
+}
+
+bool infrared_remote_remove(InfraredRemote* remote) {
+    Storage* storage = furi_record_open("storage");
+
+    FS_Error status = storage_common_remove(storage, string_get_cstr(remote->path));
+    infrared_remote_reset(remote);
+
+    furi_record_close("storage");
+    return (status == FSE_OK || status == FSE_NOT_EXIST);
 }

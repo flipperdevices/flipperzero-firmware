@@ -41,11 +41,17 @@
 #define INFRARED_DEFAULT_REMOTE_NAME "Remote"
 
 typedef enum {
+    InfraredButtonIndexNone = -1,
+} InfraredButtonIndex;
+
+typedef enum {
+    InfraredEditTargetNone,
     InfraredEditTargetRemote,
     InfraredEditTargetButton,
 } InfraredEditTarget;
 
 typedef enum {
+    InfraredEditModeNone,
     InfraredEditModeRename,
     InfraredEditModeDelete,
 } InfraredEditMode;
@@ -54,6 +60,7 @@ typedef struct {
     bool is_learning_new_remote;
     InfraredEditTarget edit_target : 8;
     InfraredEditMode edit_mode : 8;
+    int32_t current_button_index;
 } InfraredAppState;
 
 struct Infrared {
@@ -104,6 +111,7 @@ typedef enum {
 
 bool infrared_select_remote_file(Infrared* infrared);
 bool infrared_add_remote_with_button(Infrared* infrared, const char* name, InfraredSignal* signal);
+bool infrared_rename_current_remote(Infrared* infrared, const char* name);
 void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal);
 void infrared_tx_start_button_index(Infrared* infrared, size_t button_index);
 void infrared_tx_start_received(Infrared* infrared);
