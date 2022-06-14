@@ -96,7 +96,7 @@ static void nfc_generate_mf_ul_h11(NfcDeviceData* data) {
 static void nfc_generate_mf_ul_21(NfcDeviceData* data) {
     nfc_generate_mf_ul_ev1_common(data, 41);
     MfUltralightData* mful = &data->mf_ul_data;
-    mful->type = MfUltralightTypeUL11;
+    mful->type = MfUltralightTypeUL21;
     mful->version.prod_subtype = 0x01;
     mful->version.storage_size = 0x0E;
     mful->data[37 * 4] = 0x00; // Low capacitance version does not have STRG_MOD_EN
@@ -105,7 +105,7 @@ static void nfc_generate_mf_ul_21(NfcDeviceData* data) {
 static void nfc_generate_mf_ul_h21(NfcDeviceData* data) {
     nfc_generate_mf_ul_ev1_common(data, 41);
     MfUltralightData* mful = &data->mf_ul_data;
-    mful->type = MfUltralightTypeUL11;
+    mful->type = MfUltralightTypeUL21;
     mful->version.prod_subtype = 0x02;
     mful->version.storage_size = 0x0E;
 }
