@@ -10,4 +10,4 @@ typedef struct {
     NfcScene next_scene;
 } NfcGenerator;
 
-extern const NfcGenerator* nfc_generators[];
+extern const NfcGenerator* const nfc_generators[];

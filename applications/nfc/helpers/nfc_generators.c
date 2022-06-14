@@ -194,7 +194,7 @@ static const NfcGenerator ntag216_generator = {
     nfc_generate_ntag216,
     NfcSceneReadMifareUlSuccess};
 
-const NfcGenerator* nfc_generators[] = {
+const NfcGenerator* const nfc_generators[] = {
     &mf_ul_generator,
     &mf_ul_11_generator,
     &mf_ul_h11_generator,

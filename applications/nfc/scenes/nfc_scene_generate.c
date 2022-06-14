@@ -12,7 +12,8 @@ void nfc_scene_generate_on_enter(void* context) {
     Submenu* submenu = nfc->submenu;
 
     int i = 0;
-    for(const NfcGenerator** generator = nfc_generators; *generator != NULL; ++generator, ++i) {
+    for(const NfcGenerator* const* generator = nfc_generators; *generator != NULL;
+        ++generator, ++i) {
         submenu_add_item(submenu, (*generator)->name, i, nfc_scene_generate_submenu_callback, nfc);
     }
 
