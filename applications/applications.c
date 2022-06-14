@@ -96,108 +96,167 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .flags = FlipperApplicationFlagDefault},
 #endif
 
+    <<<<<<< HEAD
 #ifdef SRV_BT
-    {.app = bt_srv,
-     .name = "BtSrv",
+    {
+        .app = bt_srv,
+        .name = "BtSrv",
+=======
+    void application_blink(void* p);
+void application_uart_write(void* p);
+void application_input_dump(void* p);
+void display_u8g2(void* p);
+void u8g2_example(void* p);
+void input_task(void* p);
+void menu_task(void* p);
+void coreglitch_demo_0(void* p);
+void u8g2_qrcode(void* p);
+void fatfs_list(void* p);
+void gui_task(void* p);
+void backlight_control(void* p);
+void irda(void* p);
+void app_loader(void* p);
+void cc1101_workaround(void* p);
+void lf_rfid_workaround(void* p);
+void nfc_task(void* p);
+void dolphin_task(void* p);
+void power_task(void* p);
+void bt_task(void* p);
+void sd_card_test(void* p);
+void application_vibro(void* p);
+void app_gpio_test(void* p);
+void app_ibutton(void* p);
+void cli_task(void* p);
+void music_player(void* p);
+void sdnfc(void* p);
+void floopper_bloopper(void* p);
+void game_of_life(void* p);
+void sd_filesystem(void* p);
+
+const FuriApplication FLIPPER_SERVICES[] = {
+#ifdef APP_DISPLAY
+    {.app = display_u8g2, .name = "display_u8g2", .stack_size = 1024, .icon = A_Plugins_14},
+#endif
+
+#ifdef APP_CLI
+    {.app = cli_task, .name = "cli_task", .stack_size = 1024, .icon = A_Plugins_14},
+#endif
+
+#ifdef APP_EXAMPLE_BLINK
+    {.app = application_blink, .name = "blink", .stack_size = 1024, .icon = A_Plugins_14},
+#endif
+
+#ifdef APP_INPUT
+    {.app = input_task, .name = "input_task", .stack_size = 1024, .icon = A_Plugins_14},
+#endif
+
+#ifdef APP_EXAMPLE_INPUT_DUMP
+    {.app = application_input_dump, .name = "input dump", .stack_size = 1024, .icon = A_Plugins_14},
+#endif
+
+#ifdef APP_GUI
+    {.app = backlight_control,
+     .name = "backlight_control",
+>>>>>>> c4803dbd9743d203cb9b4a956831d4a0c52c57e0
      .stack_size = 1024,
      .icon = NULL,
      .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_CLI
-    {.app = cli_srv,
-     .name = "CliSrv",
-     .stack_size = 4096,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
+        {.app = cli_srv,
+         .name = "CliSrv",
+         .stack_size = 4096,
+         .icon = NULL,
+         .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_DIALOGS
-    {.app = dialogs_srv,
-     .name = "DialogsSrv",
-     .stack_size = 1024,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
+        {.app = dialogs_srv,
+         .name = "DialogsSrv",
+         .stack_size = 1024,
+         .icon = NULL,
+         .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_DOLPHIN
-    {.app = dolphin_srv,
-     .name = "DolphinSrv",
-     .stack_size = 1024,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
+        {.app = dolphin_srv,
+         .name = "DolphinSrv",
+         .stack_size = 1024,
+         .icon = NULL,
+         .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_DESKTOP
 #ifdef SRV_UPDATER
 #error SRV_UPDATER and SRV_DESKTOP are mutually exclusive!
 #endif
-    {.app = desktop_srv,
-     .name = "DesktopSrv",
-     .stack_size = 2048,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
+        {.app = desktop_srv,
+         .name = "DesktopSrv",
+         .stack_size = 2048,
+         .icon = NULL,
+         .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_GUI
-    {.app = gui_srv,
-     .name = "GuiSrv",
-     .stack_size = 2048,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
+        {.app = gui_srv,
+         .name = "GuiSrv",
+         .stack_size = 2048,
+         .icon = NULL,
+         .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_INPUT
-    {.app = input_srv,
-     .name = "InputSrv",
-     .stack_size = 1024,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
+        {.app = input_srv,
+         .name = "InputSrv",
+         .stack_size = 1024,
+         .icon = NULL,
+         .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_LOADER
-    {.app = loader_srv,
-     .name = "LoaderSrv",
-     .stack_size = 1024,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
+        {.app = loader_srv,
+         .name = "LoaderSrv",
+         .stack_size = 1024,
+         .icon = NULL,
+         .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_NOTIFICATION
-    {.app = notification_srv,
-     .name = "NotificationSrv",
-     .stack_size = 1536,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
+        {.app = notification_srv,
+         .name = "NotificationSrv",
+         .stack_size = 1536,
+         .icon = NULL,
+         .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_POWER
-    {.app = power_srv,
-     .name = "PowerSrv",
-     .stack_size = 1024,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
+        {.app = power_srv,
+         .name = "PowerSrv",
+         .stack_size = 1024,
+         .icon = NULL,
+         .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_STORAGE
-    {.app = storage_srv,
-     .name = "StorageSrv",
-     .stack_size = 3072,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
+        {.app = storage_srv,
+         .name = "StorageSrv",
+         .stack_size = 3072,
+         .icon = NULL,
+         .flags = FlipperApplicationFlagDefault},
 #endif
 
 #ifdef SRV_UPDATER
 #ifdef SRV_DESKTOP
 #error SRV_UPDATER and SRV_DESKTOP are mutually exclusive!
 #endif
-    {.app = updater_srv,
-     .name = "UpdaterSrv",
-     .stack_size = 2048,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
+        {.app = updater_srv,
+         .name = "UpdaterSrv",
+         .stack_size = 2048,
+         .icon = NULL,
+         .flags = FlipperApplicationFlagDefault},
 #endif
-};
+    };
 
 const size_t FLIPPER_SERVICES_COUNT = COUNT_OF(FLIPPER_SERVICES);
 
@@ -449,6 +508,10 @@ const FlipperApplication FLIPPER_GAMES[] = {
      .stack_size = 1024,
      .icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
+#endif
+
+#ifdef BUILD_GAME_OF_LIFE
+    {.app = game_of_life, .name = "Game of Life", .stack_size = 1024, .icon = A_Games_14},
 #endif
 
 };
