@@ -581,7 +581,7 @@ bool mf_ultralight_read_counters(FuriHalNfcTxRxContext* tx_rx, MfUltralightData*
                              0;
     for(size_t i = is_single_counter ? 2 : 0; i < 3; i++) {
         tx_rx->tx_data[0] = MF_UL_READ_CNT;
-        tx_rx->rx_data[1] = i;
+        tx_rx->tx_data[1] = i;
         tx_rx->tx_bits = 16;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
         if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
