@@ -199,12 +199,20 @@ void CommandLine::runCommand(String input) {
 
     // AP Scan
     if (cmd_args.get(0) == SCANAP_CMD) {
-      Serial.println("Starting AP scan. Stop with " + (String)STOPSCAN_CMD);
+      int full_sw = this->argSearch(&cmd_args, "-f");
       #ifdef HAS_SCREEN
         display_obj.clearScreen();
         menu_function_obj.drawStatusBar();
       #endif
-      wifi_scan_obj.StartScan(WIFI_SCAN_TARGET_AP, TFT_MAGENTA);
+
+      if (full_sw == -1) {
+        Serial.println("Starting AP scan. Stop with " + (String)STOPSCAN_CMD);
+        wifi_scan_obj.StartScan(WIFI_SCAN_TARGET_AP, TFT_MAGENTA);
+      }
+      else {
+        Serial.println("Starting Full AP scan. Stop with " + (String)STOPSCAN_CMD);
+        wifi_scan_obj.StartScan(WIFI_SCAN_TARGET_AP_FULL, TFT_MAGENTA);
+      }
     }
     // Beacon sniff
     else if (cmd_args.get(0) == SNIFF_BEACON_CMD) {

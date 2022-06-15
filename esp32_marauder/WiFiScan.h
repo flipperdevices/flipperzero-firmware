@@ -59,6 +59,7 @@
 #define WIFI_ATTACK_MIMIC 19
 #define WIFI_ATTACK_DEAUTH 20
 #define WIFI_ATTACK_AP_SPAM 21
+#define WIFI_SCAN_TARGET_AP_FULL 22
 
 #define GRAPH_REFRESH 100
 
@@ -87,6 +88,7 @@ struct AccessPoint {
   int channel;
   int bssid[6];
   bool selected;
+  LinkedList<char>* beacon;
 };
 
 class WiFiScan
@@ -308,6 +310,7 @@ class WiFiScan
     static void pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
+    static void apSnifferCallbackFull(void* buf, wifi_promiscuous_pkt_type_t type);
     static void deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void beaconListSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);

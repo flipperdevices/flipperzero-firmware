@@ -281,6 +281,8 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
     RunBeaconScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_TARGET_AP)
     RunAPScan(scan_mode, color);
+  else if (scan_mode == WIFI_SCAN_TARGET_AP_FULL)
+    RunAPScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_PWN)
     RunPwnScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_DEAUTH)
@@ -398,6 +400,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   if ((currentScanMode == WIFI_SCAN_PROBE) ||
   (currentScanMode == WIFI_SCAN_AP) ||
   (currentScanMode == WIFI_SCAN_TARGET_AP) ||
+  (currentScanMode == WIFI_SCAN_TARGET_AP_FULL) ||
   (currentScanMode == WIFI_SCAN_PWN) ||
   (currentScanMode == WIFI_SCAN_ESPRESSIF) ||
   (currentScanMode == WIFI_SCAN_EAPOL) ||
@@ -514,7 +517,10 @@ void WiFiScan::RunAPScan(uint8_t scan_mode, uint16_t color)
   esp_wifi_start();
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_promiscuous_filter(&filt);
-  esp_wifi_set_promiscuous_rx_cb(&apSnifferCallback);
+  if (scan_mode == WIFI_SCAN_TARGET_AP_FULL)
+    esp_wifi_set_promiscuous_rx_cb(&apSnifferCallbackFull);
+  else
+    esp_wifi_set_promiscuous_rx_cb(&apSnifferCallback);
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
   this->wifi_initialized = true;
   initTime = millis();
@@ -1258,6 +1264,160 @@ void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
   }
 }
 
+void WiFiScan::apSnifferCallbackFull(void* buf, wifi_promiscuous_pkt_type_t type) {
+  bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
+  
+  wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
+  WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
+  wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
+  int len = snifferPacket->rx_ctrl.sig_len;
+
+  String display_string = "";
+  String essid = "";
+  String bssid = "";
+
+  if (type == WIFI_PKT_MGMT)
+  {
+    len -= 4;
+    int fctl = ntohs(frameControl->fctl);
+    const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)snifferPacket->payload;
+    const WifiMgmtHdr *hdr = &ipkt->hdr;
+
+    // If we dont the buffer size is not 0, don't write or else we get CORRUPT_HEAP
+    #ifdef HAS_SCREEN
+      int buf = display_obj.display_buffer->size();
+    #else
+      int buf = 0;
+    #endif
+    if ((snifferPacket->payload[0] == 0x80) && (buf == 0))
+    {
+      char addr[] = "00:00:00:00:00:00";
+      getMAC(addr, snifferPacket->payload, 10);
+
+      bool in_list = false;
+      bool mac_match = true;
+
+      for (int i = 0; i < access_points->size(); i++) {
+        mac_match = true;
+        //Serial.print("Checking ");
+        //Serial.print(addr);
+        //Serial.println(" against " + (String)access_points->get(i).essid);
+
+        
+        for (int x = 0; x < 6; x++) {
+          //Serial.println((String)snifferPacket->payload[x + 10] + " | " + (String)access_points->get(i).bssid[x]);
+          if (snifferPacket->payload[x + 10] != access_points->get(i).bssid[x]) {
+            mac_match = false;
+            //Serial.println("MACs do not match");
+            break;
+          }
+        }
+        if (mac_match) {
+          in_list = true;
+          break;
+        }
+      }
+
+      if (!in_list) {
+      
+        delay(random(0, 10));
+        Serial.print("RSSI: ");
+        Serial.print(snifferPacket->rx_ctrl.rssi);
+        Serial.print(" Ch: ");
+        Serial.print(snifferPacket->rx_ctrl.channel);
+        Serial.print(" BSSID: ");
+        Serial.print(addr);
+        display_string.concat(addr);
+        Serial.print(" ESSID: ");
+        display_string.concat(" -> ");
+        for (int i = 0; i < snifferPacket->payload[37]; i++)
+        {
+          Serial.print((char)snifferPacket->payload[i + 38]);
+          display_string.concat((char)snifferPacket->payload[i + 38]);
+          essid.concat((char)snifferPacket->payload[i + 38]);
+
+          
+        }
+
+        bssid.concat(addr);
+  
+        int temp_len = display_string.length();
+        for (int i = 0; i < 40 - temp_len; i++)
+        {
+          display_string.concat(" ");
+        }
+  
+        Serial.print(" ");
+
+        #ifdef HAS_SCREEN
+          if (display_obj.display_buffer->size() == 0)
+          {
+            display_obj.loading = true;
+            display_obj.display_buffer->add(display_string);
+            display_obj.loading = false;
+          }
+        #endif
+        
+        if (essid == "") {
+          essid = bssid;
+          Serial.print(essid + " ");
+        }
+
+        //LinkedList<char> beacon = new LinkedList<char>();
+        
+        /*AccessPoint ap = {essid,
+                          snifferPacket->rx_ctrl.channel,
+                          {snifferPacket->payload[10],
+                           snifferPacket->payload[11],
+                           snifferPacket->payload[12],
+                           snifferPacket->payload[13],
+                           snifferPacket->payload[14],
+                           snifferPacket->payload[15]},
+                          false,
+                          NULL};*/
+
+        AccessPoint ap;
+        ap.essid = essid;
+        ap.channel = snifferPacket->rx_ctrl.channel;
+        ap.bssid[0] = snifferPacket->payload[10];
+        ap.bssid[1] = snifferPacket->payload[11];
+        ap.bssid[2] = snifferPacket->payload[12];
+        ap.bssid[3] = snifferPacket->payload[13];
+        ap.bssid[4] = snifferPacket->payload[14];
+        ap.bssid[5] = snifferPacket->payload[15];
+        ap.selected = false;
+        
+        ap.beacon = new LinkedList<char>();
+
+        for (int i = 0; i < len; i++) {
+          ap.beacon->add(snifferPacket->payload[i]);
+        }
+
+        //Serial.println("\nBeacon: ");
+
+        /*for (int i = 0; i < len; i++) {
+          char hexCar[4];
+          sprintf(hexCar, "%02X", ap.beacon->get(i));
+          Serial.print(hexCar);
+          if ((i + 1) % 16 == 0)
+            Serial.print("\n");
+          else
+            Serial.print(" ");
+        }*/
+
+        access_points->add(ap);
+
+        Serial.print(access_points->size());
+
+        Serial.println();
+
+        if (save_packet)
+          sd_obj.addPacket(snifferPacket->payload, len);
+      }
+    }
+  }
+}
+
 void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
@@ -1357,7 +1517,7 @@ void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
           essid = bssid;
           Serial.print(essid + " ");
         }
-
+        
         AccessPoint ap = {essid,
                           snifferPacket->rx_ctrl.channel,
                           {snifferPacket->payload[10],
@@ -1366,7 +1526,9 @@ void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
                            snifferPacket->payload[13],
                            snifferPacket->payload[14],
                            snifferPacket->payload[15]},
-                          false};
+                          false,
+                          NULL};
+
 
         access_points->add(ap);
 
@@ -1702,43 +1864,52 @@ void WiFiScan::broadcastCustomBeacon(uint32_t current_time, AccessPoint custom_s
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
   delay(1);  
 
+  if (custom_ssid.beacon->size() == 0)
+    return;
+
+  uint8_t new_packet[custom_ssid.beacon->size()];
+
+  for (int i = 0; i < custom_ssid.beacon->size(); i++) {
+    new_packet[i] = custom_ssid.beacon->get(i);
+  }
+
   // Randomize SRC MAC
-  packet[10] = packet[16] = random(256);
-  packet[11] = packet[17] = random(256);
-  packet[12] = packet[18] = random(256);
-  packet[13] = packet[19] = random(256);
-  packet[14] = packet[20] = random(256);
-  packet[15] = packet[21] = random(256);
+  new_packet[10] = new_packet[16] = random(256);
+  new_packet[11] = new_packet[17] = random(256);
+  new_packet[12] = new_packet[18] = random(256);
+  new_packet[13] = new_packet[19] = random(256);
+  new_packet[14] = new_packet[20] = random(256);
+  new_packet[15] = new_packet[21] = random(256);
 
-  char ESSID[custom_ssid.essid.length() + 1] = {};
-  custom_ssid.essid.toCharArray(ESSID, custom_ssid.essid.length() + 1);
+  //char ESSID[custom_ssid.essid.length() + 1] = {};
+  //custom_ssid.essid.toCharArray(ESSID, custom_ssid.essid.length() + 1);
 
-  int ssidLen = strlen(ESSID);
+  //int ssidLen = strlen(ESSID);
   //int rand_len = sizeof(rand_reg);
-  int fullLen = ssidLen;
-  packet[37] = fullLen;
+  //int fullLen = ssidLen;
+  //new_packet[37] = fullLen;
 
   // Insert my tag
-  for(int i = 0; i < ssidLen; i++)
-    packet[38 + i] = ESSID[i];
+  //for(int i = 0; i < ssidLen; i++)
+  //  new_packet[38 + i] = ESSID[i];
 
   /////////////////////////////
   
-  packet[50 + fullLen] = set_channel;
+  //new_packet[50 + fullLen] = set_channel;
 
-  uint8_t postSSID[13] = {0x01, 0x08, 0x82, 0x84, 0x8b, 0x96, 0x24, 0x30, 0x48, 0x6c, //supported rate
-                      0x03, 0x01, 0x04 /*DSSS (Current Channel)*/ };
+  //uint8_t postSSID[13] = {0x01, 0x08, 0x82, 0x84, 0x8b, 0x96, 0x24, 0x30, 0x48, 0x6c, //supported rate
+  //                    0x03, 0x01, 0x04 /*DSSS (Current Channel)*/ };
 
 
 
   // Add everything that goes after the SSID
-  for(int i = 0; i < 12; i++) 
-    packet[38 + fullLen + i] = postSSID[i];
+  //for(int i = 0; i < 12; i++) 
+  //  packet[38 + fullLen + i] = postSSID[i];
   
 
-  esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
-  esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
-  esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+  esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
+  esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
+  esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
 
   packets_sent = packets_sent + 3;
 }

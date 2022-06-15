@@ -71,17 +71,17 @@ const char PROGMEM HELP_UPDATE_CMD_A[] = "update -s";
 const char PROGMEM HELP_UPDATE_CMD_B[] = "update -w";
 
 // WiFi sniff/scan
-const char PROGMEM HELP_SCANAP_CMD[] = "scanap";
+const char PROGMEM HELP_SCANAP_CMD[] = "scanap [-f]";
 const char PROGMEM HELP_SNIFF_BEACON_CMD[] = "sniffbeacon";
 const char PROGMEM HELP_SNIFF_PROBE_CMD[] = "sniffprobe";
 const char PROGMEM HELP_SNIFF_PWN_CMD[] = "sniffpwn";
 const char PROGMEM HELP_SNIFF_ESP_CMD[] = "sniffesp";
 const char PROGMEM HELP_SNIFF_DEAUTH_CMD[] = "sniffdeauth";
-const char PROGMEM HELP_SNIFF_PMKID_CMD[] = "sniffpmkid";
+const char PROGMEM HELP_SNIFF_PMKID_CMD[] = "sniffpmkid [-c <channel>]";
 const char PROGMEM HELP_STOPSCAN_CMD[] = "stopscan";
 
 // WiFi attack
-const char PROGMEM HELP_ATTACK_CMD[] = "attack -t <beacon [-l/-r]/deauth/probe/rickroll>";
+const char PROGMEM HELP_ATTACK_CMD[] = "attack -t <beacon [-l/-r/-a]/deauth/probe/rickroll>";
 
 // WiFi Aux
 const char PROGMEM HELP_LIST_AP_CMD_A[] = "list -s";
