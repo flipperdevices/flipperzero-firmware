@@ -23,6 +23,7 @@
 
 #include "infrared.h"
 #include "infrared_remote.h"
+#include "infrared_brute_force.h"
 #include "infrared_custom_event.h"
 
 #include "scenes/infrared_scene.h"
@@ -74,6 +75,7 @@ struct Infrared {
     InfraredWorker* worker;
     InfraredRemote* remote;
     InfraredSignal* received_signal;
+    InfraredBruteForce* brute_force;
 
     Submenu* submenu;
     TextInput* text_input;
