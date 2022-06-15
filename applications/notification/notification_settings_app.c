@@ -46,7 +46,7 @@ const char* const volume_text[VOLUME_COUNT] = {
 };
 const float volume_value[VOLUME_COUNT] = {0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
 
-#define DELAY_COUNT 6
+#define DELAY_COUNT 7
 const char* const delay_text[DELAY_COUNT] = {
     "1s",
     "5s",
