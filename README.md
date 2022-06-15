@@ -14,6 +14,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
+- Fixed [Added 90s Timeout for Backlight Time (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
 - Removed [Chip8 Emulator (By mega8bit & dwdraugr)](https://github.com/mega8bit/flipperzero-firmware) [Updated by ESurge To Work.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/0.60.2-adffe20b-0614-RM/applications/chip8) Per [dwdraugr](https://github.com/dwdraugr/flipper-chip/commit/741d7fb99939d74353a99c14ea21636daae1da14),  "Controlling are unavailable, because CHIP-8 using specific async event management. But we tried :)".
 - Latest DEV changes for Amiibo and 7618c8ba
 
