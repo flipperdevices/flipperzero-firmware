@@ -79,9 +79,12 @@ void nfc_scene_read_mifare_ul_success_on_enter(void* context) {
     submenu_add_item(
         submenu, "Save", SubmenuIndexSave, nfc_scene_read_mifare_ul_success_submenu_callback, nfc);
     submenu_add_item(
-        submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_read_mifare_ul_success_submenu_callback, nfc);
+        submenu,
+        "Emulate",
+        SubmenuIndexEmulate,
+        nfc_scene_read_mifare_ul_success_submenu_callback,
+        nfc);
     submenu_set_selected_item(nfc->submenu, 0);
-
 
     scene_manager_set_scene_state(
         nfc->scene_manager, NfcSceneReadMifareUlSuccess, ReadMifareUlStateShowUID);
@@ -98,13 +101,14 @@ bool nfc_scene_read_mifare_ul_success_on_event(void* context, SceneManagerEvent 
         if(event.type == SceneManagerEventTypeCustom) {
             if(event.event == DialogExResultLeft) {
                 // Return to auto read if possible, only if we didn't come from script select.
-                if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneReadCard) &&
-                !scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneScriptsMenu) &&
-                !scene_manager_search_and_switch_to_previous_scene(nfc->scene_manager, NfcSceneReadCard))
-                {
+                if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneScriptsMenu) ||
+                   scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneCardMenu)) {
                     scene_manager_previous_scene(nfc->scene_manager);
                 } else {
-                    scene_manager_previous_scene(nfc->scene_manager);
+                    if(!scene_manager_search_and_switch_to_previous_scene(
+                           nfc->scene_manager, NfcSceneReadCard)) {
+                        scene_manager_previous_scene(nfc->scene_manager);
+                    }
                 }
                 consumed = true;
             } else if(event.event == DialogExResultRight) {
@@ -120,8 +124,12 @@ bool nfc_scene_read_mifare_ul_success_on_event(void* context, SceneManagerEvent 
             }
         } else if(event.type == SceneManagerEventTypeBack) {
             // TODO: UID back press
-            if(!scene_manager_search_and_switch_to_previous_scene(nfc->scene_manager, NfcSceneScriptsMenu) &&
-            !scene_manager_search_and_switch_to_previous_scene(nfc->scene_manager, NfcSceneStart)) {
+            if(!scene_manager_search_and_switch_to_previous_scene(
+                   nfc->scene_manager, NfcSceneCardMenu) &&
+               !scene_manager_search_and_switch_to_previous_scene(
+                   nfc->scene_manager, NfcSceneScriptsMenu) &&
+               !scene_manager_search_and_switch_to_previous_scene(
+                   nfc->scene_manager, NfcSceneStart)) {
                 scene_manager_previous_scene(nfc->scene_manager);
             }
             consumed = true;
@@ -164,4 +172,5 @@ void nfc_scene_read_mifare_ul_success_on_exit(void* context) {
     dialog_ex_reset(nfc->dialog_ex);
     text_box_reset(nfc->text_box);
     string_reset(nfc->text_box_store);
+    submenu_reset(nfc->submenu);
 }

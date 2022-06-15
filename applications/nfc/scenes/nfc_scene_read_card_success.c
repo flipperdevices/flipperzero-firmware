@@ -83,7 +83,7 @@ bool nfc_scene_read_card_success_on_event(void* context, SceneManagerEvent event
         }
     } else if(event.type == SceneManagerEventTypeBack) {
         if(!scene_manager_search_and_switch_to_previous_scene(
-                nfc->scene_manager, NfcSceneScriptsMenu)) {
+               nfc->scene_manager, NfcSceneScriptsMenu)) {
             scene_manager_previous_scene(nfc->scene_manager);
         }
         consumed = true;
