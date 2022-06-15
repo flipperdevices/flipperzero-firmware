@@ -21,7 +21,7 @@ void nfc_scene_read_mifare_desfire_success_on_enter(void* context) {
     DialogEx* dialog_ex = nfc->dialog_ex;
     dialog_ex_set_left_button_text(dialog_ex, "Back");
     dialog_ex_set_center_button_text(dialog_ex, "Data");
-    dialog_ex_set_right_button_text(dialog_ex, "More");
+    dialog_ex_set_right_button_text(dialog_ex, "Save");
     dialog_ex_set_icon(dialog_ex, 8, 16, &I_Medium_chip_22x21);
 
     uint16_t n_apps = 0;
@@ -80,7 +80,9 @@ bool nfc_scene_read_mifare_desfire_success_on_event(void* context, SceneManagerE
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMifareDesfireData);
             consumed = true;
         } else if(state == ReadMifareDesfireSuccessStateShowUID && event.event == DialogExResultRight) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneMifareDesfireMenu);
+            nfc->dev->format = NfcDeviceSaveFormatMifareDesfire;
+            nfc_device_set_name(nfc->dev, "");
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
