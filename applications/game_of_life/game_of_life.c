@@ -1,6 +1,9 @@
 #include <furi.h>
 #include <gui/gui.h>
 
+#include <input/input.h>
+#include <stdlib.h>
+
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define TOTAL_PIXELS SCREEN_WIDTH* SCREEN_HEIGHT
@@ -11,11 +14,14 @@ typedef enum {
 } EventType;
 
 typedef struct {
-    union {
-        InputEvent input;
-    } value;
     EventType type;
+    InputEvent input;
 } AppEvent;
+
+typedef struct {
+    bool revive;
+    int evo;
+} State;
 
 unsigned char new[TOTAL_PIXELS] = {};
 unsigned char old[TOTAL_PIXELS] = {};
@@ -23,11 +29,6 @@ unsigned char* fields[] = {new, old};
 
 int current = 0;
 int next = 1;
-
-typedef struct {
-    bool revive;
-    int evo;
-} State;
 
 unsigned char get_cell(int x, int y) {
     if(x <= 0 || x >= SCREEN_WIDTH) return 0;
@@ -83,11 +84,10 @@ static void update_field(State* state) {
     }
 }
 
-static void input_callback(InputEvent* input_event, void* ctx) {
-    osMessageQueueId_t event_queue = ctx;
-    AppEvent event;
-    event.type = EventTypeKey;
-    event.value.input = *input_event;
+static void input_callback(InputEvent* input_event, osMessageQueueId_t event_queue) {
+    furi_assert(event_queue);
+
+    AppEvent event = {.type = EventTypeKey, .input = *input_event};
     osMessageQueuePut(event_queue, &event, 0, 0);
 }
 
@@ -103,20 +103,23 @@ static void render_callback(Canvas* canvas, void* ctx) {
     release_mutex((ValueMutex*)ctx, state);
 }
 
-void game_of_life(void* p) {
-    State _state;
-    ValueMutex state_mutex;
+int32_t game_of_life_app(void* p) {
+    UNUSED(p);
+    srand(DWT->CYCCNT);
 
     osMessageQueueId_t event_queue = osMessageQueueNew(1, sizeof(AppEvent), NULL);
     furi_check(event_queue);
 
-    if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
+    State* _state = malloc(sizeof(State));
+
+    ValueMutex state_mutex;
+    if(!init_mutex(&state_mutex, _state, sizeof(State))) {
         printf("cannot create mutex\r\n");
-        furiac_exit(NULL);
+        free(_state);
+        return 255;
     }
 
     ViewPort* view_port = view_port_alloc();
-
     view_port_draw_callback_set(view_port, render_callback, &state_mutex);
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
@@ -124,19 +127,32 @@ void game_of_life(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     AppEvent event;
-    while(1) {
+    for(bool processing = true; processing;) {
         State* state = (State*)acquire_mutex_block(&state_mutex);
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 25);
 
-        if(event_status == osOK && event.type == EventTypeKey) {
-            if(event.value.input.state && event.value.input.input == InputBack) {
-                view_port_enabled_set(view_port, false);
-                furiac_exit(NULL);
+        if(event_status == osOK && event.type == EventTypeKey &&
+           event.input.type == InputTypePress) {
+            if(event.input.key == InputKeyBack) {
+                // furiac_exit(NULL);
+                processing = false;
+                return 0;
             }
         }
 
         update_field(state);
+
         view_port_update(view_port);
         release_mutex(&state_mutex, state);
     }
+
+    view_port_enabled_set(view_port, false);
+    gui_remove_view_port(gui, view_port);
+    furi_record_close("gui");
+    view_port_free(view_port);
+    osMessageQueueDelete(event_queue);
+    delete_mutex(&state_mutex);
+    free(_state);
+
+    return 0;
 }
