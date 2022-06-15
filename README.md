@@ -14,14 +14,8 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
+- Removed [Chip8 Emulator (By mega8bit & dwdraugr)](https://github.com/mega8bit/flipperzero-firmware) [Updated by ESurge To Work.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/0.60.2-adffe20b-0614-RM/applications/chip8) Per [dwdraugr](https://github.com/dwdraugr/flipper-chip/commit/741d7fb99939d74353a99c14ea21636daae1da14),  "Controlling are unavailable, because CHIP-8 using specific async event management. But we tried :)".
 - Latest DEV changes for Amiibo and 7618c8ba
-- Fix for Raycast exit thanks to redlink2
-- [NTAG21x complete emulation Thanks To GMMan](https://github.com/flipperdevices/flipperzero-firmware/pull/1313), AMIIBO NOW WORK FULLY!
-- Added [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge To Work.
-- - Add a folder to SD card named `chip8`
-- - [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/)
-- - Let us know if you got any to work by submitting an Issue! LOL (Probably removing from build 6/15)
-- Added [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -58,7 +52,6 @@ Added Features:
 - Added New SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
 
 Plugins:
-- [Chip8 Emulator (By mega8bit & dwdraugr)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge To Work.
 - [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/dice/dice.c)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)
