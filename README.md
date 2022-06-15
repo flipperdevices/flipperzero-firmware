@@ -14,9 +14,9 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
+- Latest DEV changes for Amiibo and 7618c8ba
 - Fix for Raycast exit thanks to redlink2
 - [NTAG21x complete emulation Thanks To GMMan](https://github.com/flipperdevices/flipperzero-firmware/pull/1313), AMIIBO NOW WORK FULLY!
-- Latest DEV changes up to adffe20b
 - Added [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge To Work.
 - - Add a folder to SD card named `chip8`
 - - [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/)
