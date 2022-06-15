@@ -41,6 +41,10 @@ void infrared_brute_force_free(InfraredBruteForce* brute_force) {
     free(brute_force);
 }
 
+void infrared_brute_force_set_db_filename(InfraredBruteForce* brute_force, const char* db_filename) {
+    brute_force->db_filename = db_filename;
+}
+
 bool infrared_brute_force_calculate_messages(InfraredBruteForce* brute_force) {
     furi_assert(brute_force->db_filename);
     bool success = false;
