@@ -36,6 +36,7 @@ InfraredBruteForce* infrared_brute_force_alloc() {
 }
 
 void infrared_brute_force_free(InfraredBruteForce* brute_force) {
+    furi_assert(!brute_force->ff);
     InfraredBruteForceRecordDict_clear(brute_force->records);
     string_clear(brute_force->current_record_name);
     free(brute_force);
@@ -94,16 +95,18 @@ bool infrared_brute_force_start(
 
     if(*record_count) {
         Storage* storage = furi_record_open("storage");
-        FlipperFormat* ff = brute_force->ff;
-        ff = flipper_format_file_alloc(storage);
-        success = flipper_format_file_open_existing(ff, brute_force->db_filename);
+        brute_force->ff = flipper_format_file_alloc(storage);
+        success = flipper_format_file_open_existing(brute_force->ff, brute_force->db_filename);
         if(!success) {
-            flipper_format_free(ff);
+            flipper_format_free(brute_force->ff);
             furi_record_close("storage");
         }
     }
-
     return success;
+}
+
+bool infrared_brute_force_is_started(InfraredBruteForce* brute_force) {
+    return brute_force->ff;
 }
 
 void infrared_brute_force_stop(InfraredBruteForce* brute_force) {
@@ -113,6 +116,7 @@ void infrared_brute_force_stop(InfraredBruteForce* brute_force) {
     string_reset(brute_force->current_record_name);
     flipper_format_free(brute_force->ff);
     furi_record_close("storage");
+    brute_force->ff = NULL;
 }
 
 bool infrared_brute_force_send_next(InfraredBruteForce* brute_force) {

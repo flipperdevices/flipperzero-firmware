@@ -13,6 +13,7 @@ bool infrared_brute_force_start(
     InfraredBruteForce* brute_force,
     uint32_t index,
     uint32_t* record_count);
+bool infrared_brute_force_is_started(InfraredBruteForce* brute_force);
 void infrared_brute_force_stop(InfraredBruteForce* brute_force);
 bool infrared_brute_force_send_next(InfraredBruteForce* brute_force);
 void infrared_brute_force_add_record(
