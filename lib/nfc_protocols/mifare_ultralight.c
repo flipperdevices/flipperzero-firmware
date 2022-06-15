@@ -1025,6 +1025,14 @@ void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle) 
         if(emulator->supported_features & MfUltralightSupportSingleCounter) {
             emulator->read_counter_incremented = false;
         }
+    } else {
+        if(emulator->config != NULL) {
+            // ACCESS (less CFGLCK) and AUTH0 are updated when reactivated
+            // MIRROR_CONF is not; don't know about STRG_MOD_EN, but we're not using that anyway
+            emulator->config_cache.access.value = (emulator->config->access.value & 0xBF) |
+                                                  (emulator->config_cache.access.value & 0x40);
+            emulator->config_cache.auth0 = emulator->config->auth0;
+        }
     }
 }
 
