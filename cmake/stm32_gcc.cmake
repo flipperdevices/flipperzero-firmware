@@ -13,3 +13,6 @@ find_program(CMAKE_ASM_COMPILER NAMES ${STM32_TARGET_TRIPLET}-gcc HINTS ${TOOLCH
 set(CMAKE_EXECUTABLE_SUFFIX_C   .elf)
 set(CMAKE_EXECUTABLE_SUFFIX_CXX .elf)
 set(CMAKE_EXECUTABLE_SUFFIX_ASM .elf)
+
+# This should be safe to set for a bare-metal cross-compiler
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
