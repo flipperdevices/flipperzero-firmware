@@ -193,10 +193,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
         // Deliver results fine
         if(frequency_rssi.rssi_fine > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
             FURI_LOG_D(
-                TAG,
-                "=:%u:%f",
-                frequency_rssi.frequency_fine,
-                (double)frequency_rssi.rssi_fine);
+                TAG, "=:%u:%f", frequency_rssi.frequency_fine, (double)frequency_rssi.rssi_fine);
 
             instance->sample_hold_counter = 20;
             if(instance->filVal) {
@@ -207,9 +204,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
             // Deliver callback
             if(instance->pair_callback) {
                 instance->pair_callback(
-                    instance->context,
-                    frequency_rssi.frequency_fine,
-                    frequency_rssi.rssi_fine);
+                    instance->context, frequency_rssi.frequency_fine, frequency_rssi.rssi_fine);
             }
         } else if( // Deliver results coarse
             (frequency_rssi.rssi_coarse > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) &&
