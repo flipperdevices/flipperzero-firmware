@@ -42,9 +42,9 @@ Special shout out to these libraries for giving us more fun:
 - https://github.com/UberGuidoZ/Flipper-IRDB
 
 Added Features:
-- Actual PIN Lock (By RogueMaster)
-- Added 90s Timeout for Backlight Time (By RogueMaster)
-- Default scan names will have timestamp instead of random name assigned (By RogueMaster)
+- [Actual PIN Lock (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop.c)
+- [Added 90s Timeout for Backlight Time (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
+- [Default scan names will have timestamp instead of random name assigned (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c)
 - Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
 - SubGHz Protocols (Keeloq, Nice Flor, Star Line) updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - Added Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
