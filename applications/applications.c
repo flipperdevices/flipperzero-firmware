@@ -360,16 +360,10 @@ const FlipperApplication FLIPPER_GAMES[] = {
      .flags = FlipperApplicationFlagDefault},
 #endif
 
-<<<<<<< HEAD
 
 #ifdef APP_VIDEO_POKER
     {.app = video_poker_app,
     .name = "Video Poker",
-=======
-#ifdef APP_BOX_MOVER
-    {.app = box_mover_app,
-    .name = "Box Mover",
->>>>>>> 5adddb8c (box tutorial)
     .stack_size = 1024,
     .icon = &A_Plugins_14,
     .flags =FlipperApplicationFlagDefault},
