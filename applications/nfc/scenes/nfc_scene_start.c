@@ -4,6 +4,7 @@ enum SubmenuIndex {
     SubmenuIndexRead,
     SubmenuIndexRunScript,
     SubmenuIndexSaved,
+    SubmenuIndexGenerate,
     SubmenuIndexAddManualy,
     SubmenuIndexDebug,
 };
@@ -27,6 +28,8 @@ void nfc_scene_start_on_enter(void* context) {
         nfc_scene_start_submenu_callback,
         nfc);
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, nfc_scene_start_submenu_callback, nfc);
+    submenu_add_item(
+        submenu, "Generate", SubmenuIndexGenerate, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(
         submenu, "Add Manually", SubmenuIndexAddManualy, nfc_scene_start_submenu_callback, nfc);
 
@@ -55,6 +58,9 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexSaved) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneFileSelect);
+            consumed = true;
+        } else if(event.event == SubmenuIndexGenerate) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneGenerate);
             consumed = true;
         } else if(event.event == SubmenuIndexAddManualy) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSetType);

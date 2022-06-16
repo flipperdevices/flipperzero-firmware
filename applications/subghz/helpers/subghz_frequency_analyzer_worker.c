@@ -5,16 +5,10 @@
 
 #define TAG "SubghzFrequencyAnalyzerWorker"
 
-#define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -95.0f
+#define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -75.0f
 
 static const uint8_t subghz_preset_ook_58khz[][2] = {
     {CC1101_MDMCFG4, 0b11110111}, // Rx BW filter is 58.035714kHz
-    /* End  */
-    {0, 0},
-};
-
-static const uint8_t subghz_preset_ook_650khz[][2] = {
-    {CC1101_MDMCFG4, 0b00010111}, // Rx BW filter is 650.000kHz
     /* End  */
     {0, 0},
 };
@@ -67,13 +61,15 @@ static uint32_t subghz_frequency_analyzer_worker_expRunningAverageAdaptive(
 static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
     SubGhzFrequencyAnalyzerWorker* instance = context;
 
-    FrequencyRSSI frequency_rssi = {.frequency = 0, .rssi = 0};
+    FrequencyRSSI frequency_rssi = {
+        .frequency_coarse = 0, .rssi_coarse = 0, .frequency_fine = 0, .rssi_fine = 0};
     float rssi = 0;
     uint32_t frequency = 0;
     CC1101Status status;
 
     //Start CC1101
     furi_hal_subghz_reset();
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_flush_rx(&furi_hal_spi_bus_handle_subghz);
@@ -105,11 +101,10 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
         float rssi_avg = 0;
         size_t rssi_avg_samples = 0;
 
-        frequency_rssi.rssi = -127.0f;
+        frequency_rssi.rssi_coarse = -127.0f;
+        frequency_rssi.rssi_fine = -127.0f;
         furi_hal_subghz_idle();
-        subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_650khz);
 
-        // First stage: coarse scan
         for(size_t i = 0; i < subghz_setting_get_frequency_count(instance->setting); i++) {
             if(furi_hal_subghz_is_frequency_valid(
                    subghz_setting_get_frequency(instance->setting, i))) {
@@ -137,9 +132,9 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
 
                 if(rssi < rssi_min) rssi_min = rssi;
 
-                if(frequency_rssi.rssi < rssi) {
-                    frequency_rssi.rssi = rssi;
-                    frequency_rssi.frequency = frequency;
+                if(frequency_rssi.rssi_coarse < rssi) {
+                    frequency_rssi.rssi_coarse = rssi;
+                    frequency_rssi.frequency_coarse = frequency;
                 }
             }
         }
@@ -148,63 +143,79 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
             TAG,
             "RSSI: avg %f, max %f at %u, min %f",
             (double)(rssi_avg / rssi_avg_samples),
-            (double)frequency_rssi.rssi,
-            frequency_rssi.frequency,
+            (double)frequency_rssi.rssi_coarse,
+            frequency_rssi.frequency_coarse,
             (double)rssi_min);
 
         // Second stage: fine scan
-        if(frequency_rssi.rssi > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
-            FURI_LOG_D(TAG, "~:%u:%f", frequency_rssi.frequency, (double)frequency_rssi.rssi);
-
-            frequency_rssi.rssi = -127.0;
+        if(frequency_rssi.rssi_coarse > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
             furi_hal_subghz_idle();
             subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_58khz);
-            //-0.3 ... 433.92 ... +0.3 step 10KHz
-            for(uint32_t i = frequency_rssi.frequency - 300000;
-                i < frequency_rssi.frequency + 300000;
+            //for example -0.3 ... 433.92 ... +0.3 step 20KHz
+            for(uint32_t i = frequency_rssi.frequency_coarse - 300000;
+                i < frequency_rssi.frequency_coarse + 300000;
                 i += 20000) {
                 if(furi_hal_subghz_is_frequency_valid(i)) {
                     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
                     cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
                     frequency = cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, i);
-
                     cc1101_calibrate(&furi_hal_spi_bus_handle_subghz);
                     do {
                         status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
                     } while(status.STATE != CC1101StateIDLE);
-
                     cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
                     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
-
                     // delay will be in range between 1 and 2ms
                     osDelay(3);
-
                     rssi = furi_hal_subghz_get_rssi();
 
                     FURI_LOG_T(TAG, "#:%u:%f", frequency, (double)rssi);
 
-                    if(frequency_rssi.rssi < rssi) {
-                        frequency_rssi.rssi = rssi;
-                        frequency_rssi.frequency = frequency;
+                    if(frequency_rssi.rssi_fine < rssi) {
+                        frequency_rssi.rssi_fine = rssi;
+                        frequency_rssi.frequency_fine = frequency;
                     }
                 }
             }
         }
 
-        // Deliver results
-        if(frequency_rssi.rssi > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
-            FURI_LOG_D(TAG, "=:%u:%f", frequency_rssi.frequency, (double)frequency_rssi.rssi);
+        // Deliver results fine
+        if(frequency_rssi.rssi_fine > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
+            FURI_LOG_D(
+                TAG, "=:%u:%f", frequency_rssi.frequency_fine, (double)frequency_rssi.rssi_fine);
 
             instance->sample_hold_counter = 20;
             if(instance->filVal) {
-                frequency_rssi.frequency =
+                frequency_rssi.frequency_fine =
                     subghz_frequency_analyzer_worker_expRunningAverageAdaptive(
-                        instance, frequency_rssi.frequency);
+                        instance, frequency_rssi.frequency_fine);
             }
             // Deliver callback
             if(instance->pair_callback) {
                 instance->pair_callback(
-                    instance->context, frequency_rssi.frequency, frequency_rssi.rssi);
+                    instance->context, frequency_rssi.frequency_fine, frequency_rssi.rssi_fine);
+            }
+        } else if( // Deliver results coarse
+            (frequency_rssi.rssi_coarse > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) &&
+            (instance->sample_hold_counter < 10)) {
+            FURI_LOG_D(
+                TAG,
+                "~:%u:%f",
+                frequency_rssi.frequency_coarse,
+                (double)frequency_rssi.rssi_coarse);
+
+            instance->sample_hold_counter = 20;
+            if(instance->filVal) {
+                frequency_rssi.frequency_coarse =
+                    subghz_frequency_analyzer_worker_expRunningAverageAdaptive(
+                        instance, frequency_rssi.frequency_coarse);
+            }
+            // Deliver callback
+            if(instance->pair_callback) {
+                instance->pair_callback(
+                    instance->context,
+                    frequency_rssi.frequency_coarse,
+                    frequency_rssi.rssi_coarse);
             }
         } else {
             if(instance->sample_hold_counter > 0) {
