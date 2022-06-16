@@ -18,6 +18,7 @@ Latest Updates:
 - Changed touchtunes_map to be named touchtunes_map.txt, be sure to update your files!
 - Updates for [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
 - New Games [Tic Tac Toe & Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
+- [Favorite Games Menu by holding Up on Desktop (Thanks to gotnull)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -52,6 +53,7 @@ Added Features:
 - Added Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Removing T5577 passwords via the cli command rfid clear_pass_t5577 using a dictionary attack [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Added New SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
+- Favorite Games Menu by holding Up on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 
 Plugins:
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
