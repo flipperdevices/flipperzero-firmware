@@ -29,7 +29,6 @@ extern int32_t display_test_app(void* p);
 extern int32_t gpio_app(void* p);
 extern int32_t ibutton_app(void* p);
 extern int32_t infrared_app(void* p);
-extern int32_t infrared_app_old(void* p);
 extern int32_t infrared_monitor_app(void* p);
 extern int32_t keypad_test_app(void* p);
 extern int32_t lfrfid_app(void* p);
@@ -234,14 +233,6 @@ const FlipperApplication FLIPPER_APPS[] = {
 #ifdef APP_INFRARED
     {.app = infrared_app,
      .name = "Infrared",
-     .stack_size = 1024 * 3,
-     .icon = &A_Infrared_14,
-     .flags = FlipperApplicationFlagDefault},
-#endif
-
-#ifdef APP_INFRARED
-    {.app = infrared_app_old,
-     .name = "Infrared (old)",
      .stack_size = 1024 * 3,
      .icon = &A_Infrared_14,
      .flags = FlipperApplicationFlagDefault},
