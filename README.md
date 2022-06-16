@@ -14,10 +14,10 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
-- Fixed [Added 90s Timeout for Backlight Time (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
-- Removed [Chip8 Emulator (By mega8bit & dwdraugr)](https://github.com/mega8bit/flipperzero-firmware) [Updated by ESurge To Work.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/0.60.2-adffe20b-0614-RM/applications/chip8) Per [dwdraugr](https://github.com/dwdraugr/flipper-chip/commit/741d7fb99939d74353a99c14ea21636daae1da14),  "Controlling are unavailable, because CHIP-8 using specific async event management. But we tried :)".
 - Latest DEV changes for [Amiibo (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313) and [7618c8ba](https://github.com/flipperdevices/flipperzero-firmware/commit/7618c8ba6ffe3026858373f8346b052dd45193ef)
 - Changed touchtunes_map to be named touchtunes_map.txt, be sure to update your files!
+- Updates for [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
+- New Games [Tic Tac Toe & Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -54,6 +54,7 @@ Added Features:
 - Added New SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
 
 Plugins:
+- [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 - [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/dice/dice.c)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)
@@ -65,6 +66,7 @@ Plugins:
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer)
 - [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) Updated by RogueMaster To Work
 - [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
+- [Tic Tac Toe (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 - [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
 - [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
