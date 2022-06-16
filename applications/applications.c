@@ -319,6 +319,14 @@ const FlipperApplication FLIPPER_GAMES[] = {
 //     {.app = chip8_app, .name = "CHIP8 Emulator", .stack_size = 4096, .icon = &A_Plugins_14},
 // #endif
 
+#ifdef APP_ARKANOID_GAME
+    {.app = arkanoid_game_app,
+     .name = "Arkanoid",
+     .stack_size = 1024,
+     .icon = &A_Plugins_14,
+     .flags = FlipperApplicationFlagDefault},
+#endif
+
 #ifdef APP_DICE
     {.app = dice_app,
      .name = "Dice Roller",
@@ -351,6 +359,7 @@ const FlipperApplication FLIPPER_GAMES[] = {
      .flags = FlipperApplicationFlagDefault},
 #endif
 
+
 #ifdef APP_TANKS_GAME
     {.app = tanks_game_app, .name = "Tanks", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
@@ -358,14 +367,6 @@ const FlipperApplication FLIPPER_GAMES[] = {
 #ifdef APP_TETRIS_GAME
     {.app = tetris_game_app,
      .name = "Tetris",
-     .stack_size = 1024,
-     .icon = &A_Plugins_14,
-     .flags = FlipperApplicationFlagDefault},
-#endif
-
-#ifdef APP_VIDEO_POKER
-    {.app = video_poker_app,
-     .name = "Video Poker",
      .stack_size = 1024,
      .icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
@@ -379,9 +380,9 @@ const FlipperApplication FLIPPER_GAMES[] = {
      .flags = FlipperApplicationFlagDefault},
 #endif
 
-#ifdef APP_ARKANOID_GAME
-    {.app = arkanoid_game_app,
-     .name = "Arkanoid",
+#ifdef APP_VIDEO_POKER
+    {.app = video_poker_app,
+     .name = "Video Poker",
      .stack_size = 1024,
      .icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
