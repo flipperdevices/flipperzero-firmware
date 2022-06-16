@@ -149,37 +149,17 @@ void draw_win(Canvas* canvas, char player) {
         scoreO++;
     }
 
-    player_switch(); // Switches the players
+    // Switches the players
+    player_switch();
 
-    tictactoe_draw(canvas); // Draws the board with players switched
-
-    osDelay(
-        2000); // Delay for players to check which 3 squares led to the win - winning squares highlighting can be added
-
-    // Draws the win screen
-    int x = 54;
-    int y = 11;
-    canvas_set_font(canvas, FontPrimary);
-
-    if(player == 'X') {
-        canvas_draw_line(canvas, x, y, x + 20, y + 20); // top left - bottom right slash
-        canvas_draw_line(canvas, x + 20, y, x, y + 20); // down left - top right slash
-        canvas_draw_str(canvas, 48, 54, "Won!");
-    } else if(player == 'O') {
-        canvas_draw_circle(canvas, x + 10, y + 12, 12);
-        canvas_draw_str(canvas, 48, 54, "Won!");
-    } else if(player == 'T') {
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 42, 41, "TIE");
-    }
+    // Draws the board with players switched
+    tictactoe_draw(canvas);
 
     // Clear the game field
     clear_game_field();
 
-    osDelay(1500); // Show the above for 1500ms
-    tictactoe_draw(canvas); // Draw the new board
-    osDelay(
-        500); // Wait for 500ms to avoid accidental input (player pressing down the button while and after the win screen is showing)
+    // Draw the new board
+    tictactoe_draw(canvas);
 }
 
 static void tictactoe_state_init(TicTacToeState* const tictactoe_state) {
