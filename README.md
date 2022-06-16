@@ -14,10 +14,19 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
-- Added ReadMe for Open PRs Checkedout & Not Merged In Main
+- Added ReadMe Section for Open PRs Checkedout & Not Merged In Main
+- Added the following open PRs Checkedout & Not Merged In Main
+- - [On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
+- - [SubGhz: fix protocol scher_khan #1323 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1323)
+- - [SubGhz: Fast speed frequency analyzer without frequency fine tuning #1311 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1311)
+- - [SubGhz: frequency analyzer combined frequency detection method #1321 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1321)
 
 Open PRs Checkedout & Not Merged In Main:
-- Latest DEV changes for [Amiibo & NTAG21x Support (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313) #1313
+- Latest DEV changes for [Amiibo & NTAG21x Support #1313 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
+- [On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
+- [SubGhz: fix protocol scher_khan #1323 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1323)
+- [SubGhz: Fast speed frequency analyzer without frequency fine tuning #1311 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1311)
+- [SubGhz: frequency analyzer combined frequency detection method #1321 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1321)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
