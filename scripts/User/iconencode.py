@@ -5,8 +5,6 @@ import io
 import os
 import sys
 
-
-
 def padded_hex(i, l):
     given_int = i
     given_len = l
@@ -20,55 +18,51 @@ def padded_hex(i, l):
             '0x' + extra_zeros + hex_result if num_hex_chars < given_len else
             None)
 
-parser = argparse.ArgumentParser(description='Turn cooked Flipper .bm files back into .xbm')
+
+parser = argparse.ArgumentParser(description='Turn icon char arrays back into .xbm')
 
 parser.add_argument('infile', metavar='i',
                     help='Input file')
-parser.add_argument('outfile', metavar='o',
-                    help='File to write to')
 parser.add_argument('Width', metavar='W', type=int, nargs="?", default="128",
                     help='Width of the image. Find from meta.txt or directory name')
 parser.add_argument('Height', metavar='H', type=int, nargs="?",  default="64",
                     help='Height of the image. Find from meta.txt or directory name')
-
 args = vars(parser.parse_args())
 
-r = open(args["infile"],"rb")
-w = open(args["outfile"],"w")
-
-fileStream=r.read()
-filename=os.path.splitext(os.path.basename(args["outfile"]))[0]
-
+r = open(args["infile"],"r")
+infile=args["infile"].split(".")[0]
 
 imageWidth=args["Width"]
 imageHeight=args["Height"]
+dims=str(imageWidth)+"x"+str(imageHeight)
 
+output = subprocess.check_output(["cat", args["infile"]]) #yes this is terrible.
+f = io.StringIO(output.decode().strip())
 
-#remove headers and padding 
-if(fileStream[0:2] == bytes([0x01,0x00])):
-	unpad=fileStream[4:]
-else:
-	if(fileStream[0:1] == bytes([0x00])):
-		unpad=fileStream[2:]
+data = f.read().strip().replace(";","").replace("{","").replace("}","")
+data_str = data.replace(",", "").replace("0x", "")
+data_bin = bytearray.fromhex(data_str)
 
-
-
-#lzss decompress
-data_decoded_str = subprocess.check_output(
-    ["heatshrink", "-d","-w8","-l4"], input=unpad
+data_encoded_str = subprocess.check_output(
+    ["heatshrink", "-e","-w8","-l4"], input=data_bin
 )
 
-#turn it back into xbm
+b=list(data_encoded_str)
 
-b=list(data_decoded_str)
-c=', '.join(padded_hex(my_int,2) for my_int in b)
+c=','.join(padded_hex(my_int,2) for my_int in b)
 
-width_out = "#define "+ filename+ "_width "+ str(imageWidth) + "\n"
-height_out = "#define "+ filename+ "_height "+ str(imageHeight) + "\n"
-bytes_out = "static unsigned char "+ filename+ "_bits[] = {"+  str(c) +  "};"
+# a bit ugly.
 
-data=width_out+height_out+bytes_out
+framename="_I_"+infile+"_"+dims
+print(len(b))
+#d=len(b)
+# if b > 255 split 0x1234 into 0x34,0x12
+#d=hex(len(b))
 
-w.write(data)
-r.close()
-w.close()
+char_out = "const uint8_t "+framename+"_0[] = {"+  str(c) +  ",};"
+char_out2 = "const uint8_t "+framename+"[] = {"+framename+"_0};"
+#data=bytes_out
+print(char_out)
+print(char_out2)
+#w.write(data)
+#w.close()

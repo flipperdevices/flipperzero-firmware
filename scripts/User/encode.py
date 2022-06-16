@@ -21,8 +21,12 @@ w = open(args["outfile"],"wb")
 
 output = subprocess.check_output(["cat", args["infile"]])
 f = io.StringIO(output.decode().strip())
+print("Image Dimensions:")
 width = int(f.readline().strip().split(" ")[2])
+print("W: ", width)
 height = int(f.readline().strip().split(" ")[2])
+print("H: ", height)
+
 
 data = f.read().strip().replace("\n", "").replace(" ", "").split("=")[1][:-1]
 data_str = data[1:-1].replace(",", " ").replace("0x", "")
@@ -41,3 +45,5 @@ if len(data_enc) < len(data_bin) + 1:
 else:
     data = b"\x00" + data_bin
 w.write(data)
+r.close()
+w.close()
