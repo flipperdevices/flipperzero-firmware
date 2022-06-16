@@ -9,10 +9,10 @@ check_system()
     SYS_TYPE="$(uname -s)"
     if [ "$SYS_TYPE" = "Darwin" ]; then
         echo "darwin";
-        TOOLCHAIN_URL="https://github.com/flipperdevices/flipperzero-firmware/archive/refs/tags/0.60.1-rc.tar.gz"
+        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-2022.06-x86_64-linux-flipper.tar.gz"
     elif [ "$SYS_TYPE" = "Linux" ]; then
         echo "linux";
-        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-2022.06-x86_64-linux.tar.gz"
+        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-2022.06-x86_64-linux-flipper.tar.gz"
     else
         echo "unsupported.";
         echo "Your system is unsupported.. sorry..";
