@@ -60,7 +60,7 @@ APP_DICE = 1
 APP_HID_ANALYZER = 1
 APP_MOUSE_JIGGLER = 1
 APP_TANKS_GAME = 1
-APP_CHIP8 = 1
+# APP_CHIP8 = 0
 APP_VIDEO_POKER = 1
 
 # Debug
@@ -316,11 +316,11 @@ CFLAGS		+= -DAPP_DICE
 SRV_GUI		= 1
 endif
 
-APP_CHIP8 ?= 0
-ifeq ($(APP_CHIP8), 1)
-CFLAGS		+= -DAPP_CHIP8
-SRV_GUI		= 1
-endif
+# APP_CHIP8 ?= 0
+# ifeq ($(APP_CHIP8), 1)
+# CFLAGS		+= -DAPP_CHIP8
+# SRV_GUI		= 1
+# endif
 
 APP_VIDEO_POKER ?= 0
 ifeq ($(APP_VIDEO_POKER),1)

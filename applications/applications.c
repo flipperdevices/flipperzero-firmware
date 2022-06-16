@@ -63,7 +63,7 @@ extern int32_t dice_app(void *p);
 extern int32_t hid_analyzer_app(void* p);
 extern int32_t mouse_jiggler_app(void *p);
 extern int32_t tanks_game_app(void* p);
-extern int32_t chip8_app(void* p);
+// extern int32_t chip8_app(void* p);
 extern int32_t video_poker_app(void* p);
 
 // On system start hooks declaration
@@ -316,9 +316,9 @@ const FlipperApplication FLIPPER_GAMES[] = {
 //      .flags = FlipperApplicationFlagDefault},
 // #endif
 
-#ifdef APP_CHIP8
-    {.app = chip8_app, .name = "CHIP8 Emulator", .stack_size = 4096, .icon = &A_Plugins_14},
-#endif
+// #ifdef APP_CHIP8
+//     {.app = chip8_app, .name = "CHIP8 Emulator", .stack_size = 4096, .icon = &A_Plugins_14},
+// #endif
 
 #ifdef APP_DICE
     {.app = dice_app, 

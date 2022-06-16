@@ -188,7 +188,7 @@ int32_t jukebox_app(void* p) {
 
     string_t file_name;
     string_init(file_name);
-    string_set(file_name, "/ext/subghz/assets/touchtunes_map");
+    string_set(file_name, "/ext/subghz/assets/touchtunes_map.txt");
     Storage* storage = furi_record_open("storage");
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
     if(!flipper_format_file_open_existing(fff_data_file, string_get_cstr(file_name))) {

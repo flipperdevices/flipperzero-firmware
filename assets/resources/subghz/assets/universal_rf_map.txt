@@ -1,0 +1,12 @@
+Filetype: Flipper SubGhz RAW File
+Version: 1
+UP: /any/subghz/Vehicles/Tesla/Tesla_charge_door_AM270.sub
+DOWN: /any/subghz/Doorbells/Doorbell2.sub
+LEFT: /any/subghz/Vehicles/Tesla/Tesla_charge_door_AM650.sub
+RIGHT: /any/subghz/Doorbells/Doorbell1.sub
+OK: /any/subghz/Untested/Crosswalk_Unknown.sub
+ULABEL: TeslaAM270
+DLABEL: Doorbell2
+LLABEL: TeslaAM650
+RLABEL: Doorbell1
+OKLABEL: Crosswalk
