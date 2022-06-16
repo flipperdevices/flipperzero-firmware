@@ -9,26 +9,26 @@
 
 #define TAG "InfraredRemote"
 
-ARRAY_DEF(infrared_button_array, InfraredRemoteButton*, M_PTR_OPLIST);
+ARRAY_DEF(InfraredButtonArray, InfraredRemoteButton*, M_PTR_OPLIST);
 
 struct InfraredRemote {
-    infrared_button_array_t buttons;
+    InfraredButtonArray_t buttons;
     string_t name;
     string_t path;
 };
 
 static void infrared_remote_clear_buttons(InfraredRemote* remote) {
-    infrared_button_array_it_t it;
-    for(infrared_button_array_it(it, remote->buttons); !infrared_button_array_end_p(it);
-        infrared_button_array_next(it)) {
-        infrared_remote_button_free(*infrared_button_array_cref(it));
+    InfraredButtonArray_it_t it;
+    for(InfraredButtonArray_it(it, remote->buttons); !InfraredButtonArray_end_p(it);
+        InfraredButtonArray_next(it)) {
+        infrared_remote_button_free(*InfraredButtonArray_cref(it));
     }
-    infrared_button_array_reset(remote->buttons);
+    InfraredButtonArray_reset(remote->buttons);
 }
 
 InfraredRemote* infrared_remote_alloc() {
     InfraredRemote* remote = malloc(sizeof(InfraredRemote));
-    infrared_button_array_init(remote->buttons);
+    InfraredButtonArray_init(remote->buttons);
     string_init(remote->name);
     string_init(remote->path);
     return remote;
@@ -36,7 +36,7 @@ InfraredRemote* infrared_remote_alloc() {
 
 void infrared_remote_free(InfraredRemote* remote) {
     infrared_remote_clear_buttons(remote);
-    infrared_button_array_clear(remote->buttons);
+    InfraredButtonArray_clear(remote->buttons);
     string_clear(remote->path);
     string_clear(remote->name);
     free(remote);
@@ -65,33 +65,33 @@ const char* infrared_remote_get_path(InfraredRemote* remote) {
 }
 
 size_t infrared_remote_get_button_count(InfraredRemote* remote) {
-    return infrared_button_array_size(remote->buttons);
+    return InfraredButtonArray_size(remote->buttons);
 }
 
 InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t index) {
-    furi_assert(index < infrared_button_array_size(remote->buttons));
-    return *infrared_button_array_get(remote->buttons, index);
+    furi_assert(index < InfraredButtonArray_size(remote->buttons));
+    return *InfraredButtonArray_get(remote->buttons, index);
 }
 
 bool infrared_remote_add_button(InfraredRemote* remote, const char* name, InfraredSignal* signal) {
     InfraredRemoteButton* button = infrared_remote_button_alloc();
     infrared_remote_button_set_name(button, name);
     infrared_remote_button_set_signal(button, signal);
-    infrared_button_array_push_back(remote->buttons, button);
+    InfraredButtonArray_push_back(remote->buttons, button);
     return infrared_remote_store(remote);
 }
 
 bool infrared_remote_rename_button(InfraredRemote* remote, const char* new_name, size_t index) {
-    furi_assert(index < infrared_button_array_size(remote->buttons));
-    InfraredRemoteButton* button = *infrared_button_array_get(remote->buttons, index);
+    furi_assert(index < InfraredButtonArray_size(remote->buttons));
+    InfraredRemoteButton* button = *InfraredButtonArray_get(remote->buttons, index);
     infrared_remote_button_set_name(button, new_name);
     return infrared_remote_store(remote);
 }
 
 bool infrared_remote_delete_button(InfraredRemote* remote, size_t index) {
-    furi_assert(index < infrared_button_array_size(remote->buttons));
+    furi_assert(index < InfraredButtonArray_size(remote->buttons));
     InfraredRemoteButton* button;
-    infrared_button_array_pop_at(&button, remote->buttons, index);
+    InfraredButtonArray_pop_at(&button, remote->buttons, index);
     infrared_remote_button_free(button);
     return infrared_remote_store(remote);
 }
@@ -106,10 +106,10 @@ bool infrared_remote_store(InfraredRemote* remote) {
     bool success = flipper_format_file_open_always(ff, path) &&
                    flipper_format_write_header_cstr(ff, "IR signals file", 1);
     if(success) {
-        infrared_button_array_it_t it;
-        for(infrared_button_array_it(it, remote->buttons); !infrared_button_array_end_p(it);
-            infrared_button_array_next(it)) {
-            InfraredRemoteButton* button = *infrared_button_array_cref(it);
+        InfraredButtonArray_it_t it;
+        for(InfraredButtonArray_it(it, remote->buttons); !InfraredButtonArray_end_p(it);
+            InfraredButtonArray_next(it)) {
+            InfraredRemoteButton* button = *InfraredButtonArray_cref(it);
             success = infrared_signal_save(
                 infrared_remote_button_get_signal(button),
                 ff,
@@ -157,7 +157,7 @@ bool infrared_remote_load(InfraredRemote* remote, const char* path) {
             can_read = infrared_signal_read(infrared_remote_button_get_signal(button), ff, buf);
             if(can_read) {
                 infrared_remote_button_set_name(button, string_get_cstr(buf));
-                infrared_button_array_push_back(remote->buttons, button);
+                InfraredButtonArray_push_back(remote->buttons, button);
             } else {
                 infrared_remote_button_free(button);
             }
