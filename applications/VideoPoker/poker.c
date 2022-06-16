@@ -1024,4 +1024,3 @@ int32_t video_poker_app(void* p) {
     poker_player_free(poker_player);
     return 0;
 }
-

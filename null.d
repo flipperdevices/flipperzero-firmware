@@ -1,1 +1,0 @@
-null.o: /dev/null
