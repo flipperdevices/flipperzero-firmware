@@ -4,7 +4,11 @@
 void nfc_read_mifare_ul_worker_callback(NfcWorkerEvent event, void* context) {
     UNUSED(event);
     Nfc* nfc = context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerExit);
+    if(event == NfcCustomEventWorkerExitSuccess) {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerExitSuccess);
+    } else {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerExitFail);
+    }
 }
 
 void nfc_scene_read_mifare_ul_on_enter(void* context) {
@@ -32,8 +36,11 @@ bool nfc_scene_read_mifare_ul_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcCustomEventWorkerExit) {
+        if(event.event == NfcCustomEventWorkerExitSuccess) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareUlSuccess);
+            consumed = true;
+        } else if(event.event == NfcCustomEventWorkerExitFail) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareUlFail);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {

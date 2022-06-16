@@ -302,6 +302,10 @@ void nfc_worker_read_mifare_ultralight(NfcWorker* nfc_worker) {
                     break;
                 } else {
                     FURI_LOG_D(TAG, "Failed reading Mifare Ultralight");
+                    if(nfc_worker->callback) {
+                        nfc_worker->callback(NfcWorkerEventFail, nfc_worker->context);
+                    }
+                    break;
                 }
             } else {
                 FURI_LOG_W(TAG, "Tag is not Mifare Ultralight");

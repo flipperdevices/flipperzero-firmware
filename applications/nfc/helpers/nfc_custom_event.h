@@ -9,4 +9,6 @@ enum NfcCustomEvent {
     NfcCustomEventByteInputDone,
     NfcCustomEventTextInputDone,
     NfcCustomEventDictAttackDone,
+    NfcCustomEventWorkerExitSuccess,
+    NfcCustomEventWorkerExitFail,
 };
