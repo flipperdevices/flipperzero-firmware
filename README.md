@@ -14,11 +14,10 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
-- Latest DEV changes for [Amiibo (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313) and [7618c8ba](https://github.com/flipperdevices/flipperzero-firmware/commit/7618c8ba6ffe3026858373f8346b052dd45193ef)
-- Changed touchtunes_map to be named touchtunes_map.txt, be sure to update your files!
-- Updates for [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
-- New Games [Tic Tac Toe & Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
-- [Favorite Games Menu by holding Up on Desktop (Thanks to gotnull)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
+- Added ReadMe for Open PRs Checkedout & Not Merged In Main
+
+Open PRs Checkedout & Not Merged In Main:
+- Latest DEV changes for [Amiibo & NTAG21x Support (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
