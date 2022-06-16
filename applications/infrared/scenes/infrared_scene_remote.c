@@ -6,34 +6,23 @@ typedef enum {
     ButtonIndexNA = 0,
 } ButtonIndex;
 
-#pragma pack(push, 1)
-typedef union {
-    uint32_t packed_value;
-    struct {
-        uint16_t type;
-        int16_t index;
-    } content;
-} InfraredSceneRemoteEvent;
-#pragma pack(pop)
-
 static void
     infrared_scene_remote_button_menu_callback(void* context, int32_t index, InputType type) {
     Infrared* infrared = context;
 
-    InfraredSceneRemoteEvent event;
-    event.content.index = index;
-
+    uint16_t custom_type;
     if(type == InputTypePress) {
-        event.content.type = InfraredCustomEventTypeTransmitStarted;
+        custom_type = InfraredCustomEventTypeTransmitStarted;
     } else if(type == InputTypeRelease) {
-        event.content.type = InfraredCustomEventTypeTransmitStopped;
+        custom_type = InfraredCustomEventTypeTransmitStopped;
     } else if(type == InputTypeShort) {
-        event.content.type = InfraredCustomEventTypeMenuSelected;
+        custom_type = InfraredCustomEventTypeMenuSelected;
     } else {
         furi_crash("Unexpected input type");
     }
 
-    view_dispatcher_send_custom_event(infrared->view_dispatcher, event.packed_value);
+    view_dispatcher_send_custom_event(
+        infrared->view_dispatcher, infrared_custom_event_pack(custom_type, index));
 }
 
 void infrared_scene_remote_on_enter(void* context) {
@@ -89,11 +78,8 @@ bool infrared_scene_remote_on_event(void* context, SceneManagerEvent event) {
             scene_manager, possible_scenes, sizeof(possible_scenes) / sizeof(uint32_t));
         consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
-        InfraredSceneRemoteEvent custom_event;
-        custom_event.packed_value = event.event;
-
-        const uint16_t custom_type = custom_event.content.type;
-        const int16_t menu_index = custom_event.content.index;
+        const uint16_t custom_type = infrared_custom_event_get_type(event.event);
+        const int16_t menu_index = infrared_custom_event_get_value(event.event);
 
         if(custom_type == InfraredCustomEventTypeTransmitStarted) {
             furi_assert(menu_index >= 0);
