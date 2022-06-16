@@ -17,7 +17,7 @@ Latest Updates:
 - Added ReadMe for Open PRs Checkedout & Not Merged In Main
 
 Open PRs Checkedout & Not Merged In Main:
-- Latest DEV changes for [Amiibo & NTAG21x Support (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
+- Latest DEV changes for [Amiibo & NTAG21x Support (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313) #1313
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
