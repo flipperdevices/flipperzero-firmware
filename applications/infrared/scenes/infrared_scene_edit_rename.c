@@ -66,7 +66,7 @@ bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event)
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == InfraredCustomEventTextEditDone) {
+        if(event.event == InfraredCustomEventTypeTextEditDone) {
             bool success = false;
             const InfraredEditTarget edit_target = app_state->edit_target;
             if(edit_target == InfraredEditTargetButton) {

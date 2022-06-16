@@ -22,7 +22,7 @@ static void infrared_scene_learn_signal_received_callback(
 
     infrared_worker_rx_set_received_signal_callback(infrared->worker, NULL, NULL);
     view_dispatcher_send_custom_event(
-        infrared->view_dispatcher, InfraredCustomEventSignalReceived);
+        infrared->view_dispatcher, InfraredCustomEventTypeSignalReceived);
 }
 
 void infrared_scene_learn_on_enter(void* context) {
@@ -51,7 +51,7 @@ bool infrared_scene_learn_on_event(void* context, SceneManagerEvent event) {
         infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkRead);
         consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == InfraredCustomEventSignalReceived) {
+        if(event.event == InfraredCustomEventTypeSignalReceived) {
             infrared_play_notification_message(infrared, InfraredNotificationMessageSuccess);
             scene_manager_next_scene(infrared->scene_manager, InfraredSceneLearnSuccess);
             consumed = true;

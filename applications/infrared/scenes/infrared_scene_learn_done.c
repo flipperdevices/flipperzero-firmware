@@ -28,7 +28,7 @@ bool infrared_scene_learn_done_on_event(void* context, SceneManagerEvent event) 
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == InfraredCustomEventPopupTimeout) {
+        if(event.event == InfraredCustomEventTypePopupTimeout) {
             scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);
             consumed = true;
         }

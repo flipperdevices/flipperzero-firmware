@@ -24,11 +24,11 @@ static void
     event.content.index = index;
 
     if(type == InputTypePress) {
-        event.content.type = InfraredCustomEventTransmitStarted;
+        event.content.type = InfraredCustomEventTypeTransmitStarted;
     } else if(type == InputTypeRelease) {
-        event.content.type = InfraredCustomEventTransmitStopped;
+        event.content.type = InfraredCustomEventTypeTransmitStopped;
     } else if(type == InputTypeShort) {
-        event.content.type = InfraredCustomEventMenuSelected;
+        event.content.type = InfraredCustomEventTypeMenuSelected;
     } else {
         furi_crash("Unexpected input type");
     }
@@ -95,14 +95,14 @@ bool infrared_scene_remote_on_event(void* context, SceneManagerEvent event) {
         const uint16_t custom_type = custom_event.content.type;
         const int16_t menu_index = custom_event.content.index;
 
-        if(custom_type == InfraredCustomEventTransmitStarted) {
+        if(custom_type == InfraredCustomEventTypeTransmitStarted) {
             furi_assert(menu_index >= 0);
             infrared_tx_start_button_index(infrared, menu_index);
             consumed = true;
-        } else if(custom_type == InfraredCustomEventTransmitStopped) {
+        } else if(custom_type == InfraredCustomEventTypeTransmitStopped) {
             infrared_tx_stop(infrared);
             consumed = true;
-        } else if(custom_type == InfraredCustomEventMenuSelected) {
+        } else if(custom_type == InfraredCustomEventTypeMenuSelected) {
             furi_assert(menu_index < 0);
             if(menu_index == ButtonIndexPlus) {
                 infrared->app_state.is_learning_new_remote = false;

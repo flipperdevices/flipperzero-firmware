@@ -21,7 +21,7 @@ bool infrared_scene_edit_delete_done_on_event(void* context, SceneManagerEvent e
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == InfraredCustomEventPopupTimeout) {
+        if(event.event == InfraredCustomEventTypePopupTimeout) {
             const InfraredEditTarget edit_target = infrared->app_state.edit_target;
             if(edit_target == InfraredEditTargetButton) {
                 scene_manager_search_and_switch_to_previous_scene(

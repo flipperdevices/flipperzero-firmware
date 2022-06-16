@@ -4,12 +4,14 @@
 
 void infrared_scene_universal_common_item_callback(void* context, uint32_t index) {
     Infrared* infrared = context;
-    view_dispatcher_send_custom_event(infrared->view_dispatcher, index);
+    uint32_t event = infrared_custom_event_pack(InfraredCustomEventTypeButtonSelected, index);
+    view_dispatcher_send_custom_event(infrared->view_dispatcher, event);
 }
 
 static void infrared_scene_universal_common_progress_back_callback(void* context) {
     Infrared* infrared = context;
-    UNUSED(infrared);
+    uint32_t event = infrared_custom_event_pack(InfraredCustomEventTypeBackPressed, -1);
+    view_dispatcher_send_custom_event(infrared->view_dispatcher, event);
 }
 
 static void infrared_scene_universal_common_show_popup(Infrared* infrared, uint32_t record_count) {
@@ -41,26 +43,41 @@ bool infrared_scene_universal_common_on_event(void* context, SceneManagerEvent e
     if(infrared_brute_force_is_started(brute_force)) {
         if(event.type == SceneManagerEventTypeTick) {
             infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkSend);
+            bool success = infrared_brute_force_send_next(brute_force);
+            if(success) {
+                success = infrared_progress_view_increase_progress(infrared->progress);
+            }
+            if(!success) {
+                infrared_brute_force_stop(brute_force);
+                infrared_scene_universal_common_hide_popup(infrared);
+            }
             consumed = true;
-        } else if(event.type == SceneManagerEventTypeBack) {
-            infrared_brute_force_stop(brute_force);
-            infrared_scene_universal_common_hide_popup(infrared);
-            consumed = true;
+        } else if(event.type == SceneManagerEventTypeCustom) {
+            if(infrared_custom_event_get_type(event.event) == InfraredCustomEventTypeBackPressed) {
+                infrared_brute_force_stop(brute_force);
+                infrared_scene_universal_common_hide_popup(infrared);
+                consumed = true;
+            }
         }
     } else {
         if(event.type == SceneManagerEventTypeBack) {
             scene_manager_previous_scene(scene_manager);
             consumed = true;
         } else if(event.type == SceneManagerEventTypeCustom) {
-            uint32_t record_count;
-            if(infrared_brute_force_start(brute_force, event.event, &record_count)) {
-                DOLPHIN_DEED(DolphinDeedIrBruteForce);
-                infrared_scene_universal_common_show_popup(infrared, record_count);
-                infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkSend);
-            } else {
-                scene_manager_previous_scene(scene_manager);
+            if(infrared_custom_event_get_type(event.event) ==
+               InfraredCustomEventTypeButtonSelected) {
+                uint32_t record_count;
+                if(infrared_brute_force_start(
+                       brute_force, infrared_custom_event_get_value(event.event), &record_count)) {
+                    DOLPHIN_DEED(DolphinDeedIrBruteForce);
+                    infrared_scene_universal_common_show_popup(infrared, record_count);
+                    infrared_play_notification_message(
+                        infrared, InfraredNotificationMessageBlinkSend);
+                } else {
+                    scene_manager_previous_scene(scene_manager);
+                }
+                consumed = true;
             }
-            consumed = true;
         }
     }
 

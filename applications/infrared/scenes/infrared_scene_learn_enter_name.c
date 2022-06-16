@@ -37,7 +37,7 @@ bool infrared_scene_learn_enter_name_on_event(void* context, SceneManagerEvent e
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == InfraredCustomEventTextEditDone) {
+        if(event.event == InfraredCustomEventTypeTextEditDone) {
             bool success = false;
             if(infrared->app_state.is_learning_new_remote) {
                 success =

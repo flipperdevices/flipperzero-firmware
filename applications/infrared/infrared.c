@@ -326,13 +326,15 @@ void infrared_signal_sent_callback(void* context) {
 void infrared_text_input_callback(void* context) {
     furi_assert(context);
     Infrared* infrared = context;
-    view_dispatcher_send_custom_event(infrared->view_dispatcher, InfraredCustomEventTextEditDone);
+    view_dispatcher_send_custom_event(
+        infrared->view_dispatcher, InfraredCustomEventTypeTextEditDone);
 }
 
 void infrared_popup_timeout_callback(void* context) {
     furi_assert(context);
     Infrared* infrared = context;
-    view_dispatcher_send_custom_event(infrared->view_dispatcher, InfraredCustomEventPopupTimeout);
+    view_dispatcher_send_custom_event(
+        infrared->view_dispatcher, InfraredCustomEventTypePopupTimeout);
 }
 
 int32_t infrared_app(void* p) {
