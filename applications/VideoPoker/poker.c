@@ -16,19 +16,15 @@ https://github.com/Yaoir/VideoPoker-C
 This has been converted from a standalone PC console app to flipper
 All of the original input/output handing code has been ripped out
 Original code also used TONS of defines and everything was a global.
-I have not completed cleaning up and moving globals to members.
-
-It's not super well written but I think it at least meets a minimum expectation of quality
-A lot of it could be cleaned up or optimized.
-As is, it does what it wanted and doesn't seem to have major issues, so that's pretty good.
+As is, it does what I wanted and doesn't seem to have major issues, so that's pretty good.
 Game logic is handled during input and this is a bit of a mess of nested ifs.
 Sometimes duplicate cards will show up. there is a function to test this. I should use it better.
-After losing, bet is set to 10 eve
+
 */
 
 #define TAG "Video Poker"
 
-void Poker_Shaker(void) {
+static void Shake(void) {
     NotificationApp* notification = furi_record_open("notification");
     notification_message(notification, &sequence_single_vibro);
     furi_record_close("notification");
@@ -40,16 +36,17 @@ typedef struct {
     int suit; /* card's suit (see just below) */
     int gone; /* true if it's been dealt */
     int held; /* for hand */
-} card;
+} PokerPlayer_card;
 
 typedef struct {
     osMutexId_t* model_mutex;
     osMessageQueueId_t event_queue;
     ViewPort* view_port;
     Gui* gui;
-    card hand[5];
-    card shand[5];
-    card deck[52];
+    PokerPlayer_card hand[5];
+    PokerPlayer_card shand[5];
+    PokerPlayer_card deck[52];
+    int GameType; /* What rules are we using */
     int held[5];
     int score;
     int pot;
@@ -59,8 +56,46 @@ typedef struct {
     int minbet;
 } PokerPlayer;
 
+/* GameState 
+0=Splash/help, OK button (later on up/down for rules or settings)
+1=cards down, betting enabled, left/right to change bet, OK to confirm
+2=first hand, holding enabled, left/right to pick card, OK to hold/unhold card, down to confirm
+3=second hand, only confirm to claim rewards
+4=game over/won 
+*/
 
-card deck[52] = {
+/*
+#define AllAmerican 0
+#define TensOrBetter 1
+#define BonusPoker 2
+#define DoubleBonus 3
+#define DoubleBonusBonus 4
+#define JacksOrBetter 5 
+#define JacksOrBetter95 6
+#define JacksOrBetter86 7
+#define JacksOrBetter85 8
+#define JacksOrBetter75 9
+#define JacksOrBetter65 10
+#define NUMGAMES 11
+*/
+/*
+    The game in play. Default is Jacks or Better,
+    which is coded into initialization of static data
+*/
+const char* gamenames[11] = {
+    "All American",
+    "Tens or Better",
+    "Bonus Poker",
+    "Double Bonus",
+    "Double Bonus Bonus",
+    "Jacks or Better",
+    "9/5 Jacks or Better",
+    "8/6 Jacks or Better",
+    "8/5 Jacks or Better",
+    "7/5 Jacks or Better",
+    "6/5 Jacks or Better"};
+
+PokerPlayer_card deck[52] = {
     /*	index, card name, suit, gone */
     /* Clubs:0  Diamonds:1  Hearts: 2   Spades: 3 */
     {1, "2", 0, 0},  {2, "3", 0, 0},  {3, "4", 0, 0},  {4, "5", 0, 0},  {5, "6", 0, 0},
@@ -79,19 +114,8 @@ card deck[52] = {
     {6, "7", 3, 0},  {7, "8", 3, 0},  {8, "9", 3, 0},  {9, "10", 3, 0}, {10, "J", 3, 0},
     {11, "Q", 3, 0}, {12, "K", 3, 0}, {13, "A", 3, 0},
 };
-/*
-int score_low = 1000;
-    int score_high = 1000;
-    int minbet = 10;
-    int betmultiplier = 1;
-    */
-/* GameState 
-0=Splash/help, OK button (later on up/down for rules or settings)
-1=cards down, betting enabled, left/right to change bet, OK to confirm
-2=first hand, holding enabled, left/right to pick card, OK to hold/unhold card, down to confirm
-3=second hand, only confirm to claim rewards
-4=game over/won 
-*/
+
+
 
 /* 
 Image Format
@@ -100,7 +124,7 @@ Image Format
 0xa4,0x01 = 0x1a4, or, 420 - the size of the compressed array, minus this header.
 Rest of the data is char array output from heatshrink of the original XBM char array.
 Calculated Header: 0x01,0x00,0xa4,0x01
-from furi_hal_compress.c
+from furi_hal_compress.c:
 typedef struct {
     uint8_t is_compressed;
     uint8_t reserved;
@@ -291,56 +315,10 @@ const uint8_t* _I_Ten_7x8[] = {_I_Ten_7x8_0};
 const Icon I_Ten_7x8 =
     {.width = 18, .height = 14, .frame_count = 1, .frame_rate = 0, .frames = _I_Ten_7x8};
 
-const char* StateName[10] = {
-    /* use this for the status line and put in better wording */
-    "Intro", // should never see this
-    "Select Bet", // cards are face down
-    "Choose Cards", // cards are revealed, player can choose which to hold
-    "Good Luck!" // cards are replaced, payouts here.
-};
-
-//const uint8_t _I_Splash_128x64_0[] = {
-int Poker_Title; //Have we seen the title
-
-const char* suitname[4] = {"C", "D", "H", "S"};
-
-#define AllAmerican 0
-#define TensOrBetter 1
-#define BonusPoker 2
-#define DoubleBonus 3
-#define DoubleBonusBonus 4
-#define JacksOrBetter 5 /* default */
-#define JacksOrBetter95 6
-#define JacksOrBetter86 7
-#define JacksOrBetter85 8
-#define JacksOrBetter75 9
-#define JacksOrBetter65 10
-/* If you add another game, increment NUMGAMES: */
-#define NUMGAMES 11
-
-/*
-    The game in play. Default is Jacks or Better,
-    which is coded into initialization of static data
-*/
-
-int game = JacksOrBetter;
-
-const char* gamenames[NUMGAMES] = {
-    "All American",
-    "Tens or Better",
-    "Bonus Poker",
-    "Double Bonus",
-    "Double Bonus Bonus",
-    "Jacks or Better",
-    "9/5 Jacks or Better",
-    "8/6 Jacks or Better",
-    "8/5 Jacks or Better",
-    "7/5 Jacks or Better",
-    "6/5 Jacks or Better"};
 
 /* Sanity check: check that there are no duplicate cards in hand */
 
-void playcard(PokerPlayer* app) {
+static void playcard(PokerPlayer* app) {
     int i, c, crd;
 
     int hold[5];
@@ -369,7 +347,7 @@ void playcard(PokerPlayer* app) {
     }
 }
 
-int check_for_dupes(PokerPlayer* app) {
+static int check_for_dupes(PokerPlayer* app) {
     int i, j;
 
     for(i = 0; i < 5; i++) {
@@ -389,7 +367,7 @@ int check_for_dupes(PokerPlayer* app) {
     returns 1 if the sorted hand is a flush
 */
 
-int flush(PokerPlayer* app) {
+static int flush(PokerPlayer* app) {
     if(app->shand[0].suit == app->shand[1].suit && app->shand[1].suit == app->shand[2].suit &&
        app->shand[2].suit == app->shand[3].suit && app->shand[3].suit == app->shand[4].suit)
         return 1;
@@ -402,7 +380,7 @@ int flush(PokerPlayer* app) {
     returns 1 if the sorted hand is a straight
 */
 
-int straight(PokerPlayer* app) {
+static int straight(PokerPlayer* app) {
     if(app->shand[1].index == app->shand[0].index + 1 &&
        app->shand[2].index == app->shand[1].index + 1 &&
        app->shand[3].index == app->shand[2].index + 1 &&
@@ -423,7 +401,7 @@ int straight(PokerPlayer* app) {
     the middle 3 all match, and the first or last matches those
 */
 
-int four(PokerPlayer* app) {
+static int four(PokerPlayer* app) {
     if((app->shand[1].index == app->shand[2].index &&
         app->shand[2].index == app->shand[3].index) &&
        (app->shand[0].index == app->shand[2].index || app->shand[4].index == app->shand[2].index))
@@ -437,7 +415,7 @@ int four(PokerPlayer* app) {
     3 of a kind and a pair
 */
 
-int full(PokerPlayer* app) {
+static int full(PokerPlayer* app) {
     if(app->shand[0].index == app->shand[1].index &&
        (app->shand[2].index == app->shand[3].index && app->shand[3].index == app->shand[4].index))
         return 1;
@@ -454,7 +432,7 @@ int full(PokerPlayer* app) {
     it can appear 3 ways
 */
 
-int three(PokerPlayer* app) {
+static int three(PokerPlayer* app) {
     if(app->shand[0].index == app->shand[1].index && app->shand[1].index == app->shand[2].index)
         return 1;
 
@@ -472,7 +450,7 @@ int three(PokerPlayer* app) {
     it can appear in 3 ways
 */
 
-int twopair(PokerPlayer* app) {
+static int twopair(PokerPlayer* app) {
     if(((app->shand[0].index == app->shand[1].index) &&
         (app->shand[2].index == app->shand[3].index)) ||
        ((app->shand[0].index == app->shand[1].index) &&
@@ -489,10 +467,10 @@ int twopair(PokerPlayer* app) {
     or if the game is Tens or Better, 10s or better.
 */
 
-int two(PokerPlayer* app) {
+static int two(PokerPlayer* app) {
     int min = 10;
 
-    if(game == TensOrBetter) min = 9;
+    if(app->GameType == 1) min = 9;
 
     if(app->shand[0].index == app->shand[1].index && app->shand[1].index >= min) return 1;
     if(app->shand[1].index == app->shand[2].index && app->shand[2].index >= min) return 1;
@@ -502,7 +480,7 @@ int two(PokerPlayer* app) {
     return 0;
 }
 
-int paytable[10] = {
+static int paytable[10] = {
     800, /* royal flush: 800 */
     50, /* straight flush: 50 */
     25, /* 4 of a kind: 25 */
@@ -528,10 +506,10 @@ const char* handname[10] = {
     "Nothing",
 };
 
-int recognize(PokerPlayer* app) {
+static int recognize(PokerPlayer* app) {
     int i, j, f = 0;
     int min = 100;
-    card tmp[5];
+    PokerPlayer_card tmp[5];
     int st = 0, fl = 0;
 
     /* Sort hand into sorted hand (app->shand) */
@@ -589,38 +567,30 @@ void poker_draw_callback(Canvas* canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 127, 0, AlignRight, AlignTop, buffer);
     }
 
-    /* Draw the Cards */
+    /* Start of game. Cards are face down, bet can be changed */
     if(poker_player->GameState == 1) {
         snprintf(buffer, sizeof(buffer), "Bet:%d", poker_player->bet);
         canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, buffer);
         snprintf(buffer, sizeof(buffer), "<*> Place Bet");
         canvas_draw_str_aligned(canvas, 0, 9, AlignLeft, AlignTop, buffer);
+
+
         canvas_draw_icon(canvas, 5, 18, &I_CardBack_22x35);
-
         canvas_draw_icon(canvas, 29, 18, &I_CardBack_22x35);
-
         canvas_draw_icon(canvas, 53, 18, &I_CardBack_22x35);
-
         canvas_draw_icon(canvas, 77, 18, &I_CardBack_22x35);
-
         canvas_draw_icon(canvas, 101, 18, &I_CardBack_22x35);
 
     }
 
+/* Cards are turned face up. Bet is deducted and put in th pot. Show the selector hand */
     else if(poker_player->GameState == 2 || poker_player->GameState == 3) {
         snprintf(buffer, sizeof(buffer), "Pot:%d", poker_player->bet);
         canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, buffer);
         snprintf(buffer, sizeof(buffer), "<*> Select Hold");
         canvas_draw_str_aligned(canvas, 0, 9, AlignLeft, AlignTop, buffer);
 
-        /*     snprintf(
-            buffer,
-            sizeof(buffer),
-            "%s:%ix",
-            handname[recognize(poker_player)],
-            paytable[recognize(poker_player)]);
-        canvas_draw_str_aligned(canvas, 5, 5, AlignLeft, AlignTop, buffer); */
-
+/* Normal or inverse to indicate selection - cards*/
         poker_player->held[0] ? canvas_draw_rbox(canvas, 5, 18, 22, 35, 3) :
                                 canvas_draw_rframe(canvas, 5, 18, 22, 35, 3);
 
@@ -636,7 +606,7 @@ void poker_draw_callback(Canvas* canvas, void* ctx) {
         poker_player->held[4] ? canvas_draw_rbox(canvas, 101, 18, 22, 35, 3) :
                                 canvas_draw_rframe(canvas, 101, 18, 22, 35, 3);
 
-        //shameful
+/* Normal or inverse to indicate selection - card suit and value */
         poker_player->held[0] ? canvas_set_color(canvas, ColorWhite) :
                                 canvas_set_color(canvas, ColorBlack);
 
@@ -651,8 +621,6 @@ void poker_draw_callback(Canvas* canvas, void* ctx) {
 
         if(poker_player->hand[0].suit == 3) // spade
             canvas_draw_icon(canvas, 18, 43, &I_spade_7x8);
-
-        //canvas_draw_str_aligned(canvas, 25, 49, AlignRight, AlignBottom, buffer);
 
         poker_player->held[1] ? canvas_set_color(canvas, ColorWhite) :
                                 canvas_set_color(canvas, ColorBlack);
@@ -669,7 +637,6 @@ void poker_draw_callback(Canvas* canvas, void* ctx) {
         if(poker_player->hand[1].suit == 3) // spade
             canvas_draw_icon(canvas, 42, 43, &I_spade_7x8);
 
-        //canvas_draw_str_aligned(canvas, 49, 49, AlignRight, AlignBottom, buffer);
 
         poker_player->held[2] ? canvas_set_color(canvas, ColorWhite) :
                                 canvas_set_color(canvas, ColorBlack);
@@ -686,7 +653,6 @@ void poker_draw_callback(Canvas* canvas, void* ctx) {
         if(poker_player->hand[2].suit == 3) // spade
             canvas_draw_icon(canvas, 66, 43, &I_spade_7x8);
 
-        // canvas_draw_str_aligned(canvas, 73, 49, AlignRight, AlignBottom, buffer);
 
         poker_player->held[3] ? canvas_set_color(canvas, ColorWhite) :
                                 canvas_set_color(canvas, ColorBlack);
@@ -703,7 +669,6 @@ void poker_draw_callback(Canvas* canvas, void* ctx) {
         if(poker_player->hand[3].suit == 3) // spade
             canvas_draw_icon(canvas, 90, 43, &I_spade_7x8);
 
-        // canvas_draw_str_aligned(canvas, 97, 49, AlignRight, AlignBottom, buffer);
 
         poker_player->held[4] ? canvas_set_color(canvas, ColorWhite) :
                                 canvas_set_color(canvas, ColorBlack);
@@ -720,127 +685,126 @@ void poker_draw_callback(Canvas* canvas, void* ctx) {
         if(poker_player->hand[4].suit == 3) // spade
             canvas_draw_icon(canvas, 113, 43, &I_spade_7x8);
 
-        //canvas_draw_str_align-ed(canvas, 120, 50, AlignRight, AlignBottom, buffer);
-
+    /* Card Value. Profont_22 does not include letters (AJQK), and "10" is too big. These are bitmaps. */
         canvas_set_font(canvas, FontBigNumbers);
         if(poker_player->hand[0].index >= 1 && poker_player->hand[0].index <= 8) {
             poker_player->held[0] ? canvas_set_color(canvas, ColorWhite) :
                                     canvas_set_color(canvas, ColorBlack);
             snprintf(buffer, sizeof(buffer), "%s", poker_player->hand[0].sym);
-            canvas_draw_str_aligned(canvas, 7, 22, AlignLeft, AlignTop, buffer);
+            canvas_draw_str_aligned(canvas, 8, 21, AlignLeft, AlignTop, buffer);
         } else {
             poker_player->held[0] ? canvas_set_color(canvas, ColorWhite) :
                                     canvas_set_color(canvas, ColorBlack);
             if(poker_player->hand[0].index == 9) // Ten
-                canvas_draw_icon(canvas, 7, 22, &I_Ten_7x8);
+                canvas_draw_icon(canvas, 7, 21, &I_Ten_7x8);
 
             if(poker_player->hand[0].index == 10) // Jack
-                canvas_draw_icon(canvas, 7, 22, &I_Jack_7x8);
+                canvas_draw_icon(canvas, 8, 21, &I_Jack_7x8);
 
             if(poker_player->hand[0].index == 11) // Queen
-                canvas_draw_icon(canvas, 7, 22, &I_Queen_7x8);
+                canvas_draw_icon(canvas, 8, 21, &I_Queen_7x8);
 
             if(poker_player->hand[0].index == 12) // King
-                canvas_draw_icon(canvas, 7, 22, &I_King_7x8);
+                canvas_draw_icon(canvas, 8, 21, &I_King_7x8);
 
             if(poker_player->hand[0].index == 13) // ace
-                canvas_draw_icon(canvas, 7, 22, &I_Ace_7x8);
+                canvas_draw_icon(canvas, 8, 21, &I_Ace_7x8);
         }
         if(poker_player->hand[1].index >= 0 && poker_player->hand[1].index <= 8) {
             poker_player->held[1] ? canvas_set_color(canvas, ColorWhite) :
                                     canvas_set_color(canvas, ColorBlack);
             snprintf(buffer, sizeof(buffer), "%s", poker_player->hand[1].sym);
-            canvas_draw_str_aligned(canvas, 31, 22, AlignLeft, AlignTop, buffer);
+            canvas_draw_str_aligned(canvas, 32, 21, AlignLeft, AlignTop, buffer);
         } else {
             /* bitmap time */
             poker_player->held[1] ? canvas_set_color(canvas, ColorWhite) :
                                     canvas_set_color(canvas, ColorBlack);
             if(poker_player->hand[1].index == 9) // Ten
-                canvas_draw_icon(canvas, 31, 22, &I_Ten_7x8);
+                canvas_draw_icon(canvas, 31, 21, &I_Ten_7x8);
 
             if(poker_player->hand[1].index == 10) // Jack
-                canvas_draw_icon(canvas, 31, 22, &I_Jack_7x8);
+                canvas_draw_icon(canvas, 32, 21, &I_Jack_7x8);
 
             if(poker_player->hand[1].index == 11) // Queen
-                canvas_draw_icon(canvas, 31, 22, &I_Queen_7x8);
+                canvas_draw_icon(canvas, 32, 21, &I_Queen_7x8);
 
             if(poker_player->hand[1].index == 12) // King
-                canvas_draw_icon(canvas, 31, 22, &I_King_7x8);
+                canvas_draw_icon(canvas, 32, 21, &I_King_7x8);
 
             if(poker_player->hand[1].index == 13) // ace
-                canvas_draw_icon(canvas, 31, 22, &I_Ace_7x8);
+                canvas_draw_icon(canvas, 32, 21, &I_Ace_7x8);
         }
         if(poker_player->hand[2].index >= 0 && poker_player->hand[2].index <= 8) {
             poker_player->held[2] ? canvas_set_color(canvas, ColorWhite) :
                                     canvas_set_color(canvas, ColorBlack);
             snprintf(buffer, sizeof(buffer), "%s", poker_player->hand[2].sym);
-            canvas_draw_str_aligned(canvas, 55, 22, AlignLeft, AlignTop, buffer);
+            canvas_draw_str_aligned(canvas, 56, 21, AlignLeft, AlignTop, buffer);
         } else {
             /* bitmap time */
             poker_player->held[2] ? canvas_set_color(canvas, ColorWhite) :
                                     canvas_set_color(canvas, ColorBlack);
             if(poker_player->hand[2].index == 9) // Ten
-                canvas_draw_icon(canvas, 55, 22, &I_Ten_7x8);
+                canvas_draw_icon(canvas, 55, 21, &I_Ten_7x8);
 
             if(poker_player->hand[2].index == 10) // Jack
-                canvas_draw_icon(canvas, 55, 22, &I_Jack_7x8);
+                canvas_draw_icon(canvas, 56, 21, &I_Jack_7x8);
 
             if(poker_player->hand[2].index == 11) // Queen
-                canvas_draw_icon(canvas, 55, 22, &I_Queen_7x8);
+                canvas_draw_icon(canvas, 56, 21, &I_Queen_7x8);
 
             if(poker_player->hand[2].index == 12) // King
-                canvas_draw_icon(canvas, 55, 22, &I_King_7x8);
+                canvas_draw_icon(canvas, 56, 21, &I_King_7x8);
 
             if(poker_player->hand[2].index == 13) // ace
-                canvas_draw_icon(canvas, 55, 22, &I_Ace_7x8);
+                canvas_draw_icon(canvas, 56, 21, &I_Ace_7x8);
         }
         if(poker_player->hand[3].index >= 0 && poker_player->hand[3].index <= 8) {
             poker_player->held[3] ? canvas_set_color(canvas, ColorWhite) :
                                     canvas_set_color(canvas, ColorBlack);
             snprintf(buffer, sizeof(buffer), "%s", poker_player->hand[3].sym);
-            canvas_draw_str_aligned(canvas, 79, 22, AlignLeft, AlignTop, buffer);
+            canvas_draw_str_aligned(canvas, 80, 21, AlignLeft, AlignTop, buffer);
         } else {
             /* bitmap time */
             poker_player->held[3] ? canvas_set_color(canvas, ColorWhite) :
                                     canvas_set_color(canvas, ColorBlack);
             if(poker_player->hand[3].index == 9) // Ten
-                canvas_draw_icon(canvas, 79, 22, &I_Ten_7x8);
+                canvas_draw_icon(canvas, 79, 21, &I_Ten_7x8);
 
             if(poker_player->hand[3].index == 10) // Jack
-                canvas_draw_icon(canvas, 79, 22, &I_Jack_7x8);
+                canvas_draw_icon(canvas, 80, 21, &I_Jack_7x8);
 
             if(poker_player->hand[3].index == 11) // Queen
-                canvas_draw_icon(canvas, 79, 22, &I_Queen_7x8);
+                canvas_draw_icon(canvas, 80, 21, &I_Queen_7x8);
 
             if(poker_player->hand[3].index == 12) // King
-                canvas_draw_icon(canvas, 79, 22, &I_King_7x8);
+                canvas_draw_icon(canvas, 80, 21, &I_King_7x8);
 
             if(poker_player->hand[3].index == 13) // ace
-                canvas_draw_icon(canvas, 79, 22, &I_Ace_7x8);
+                canvas_draw_icon(canvas, 80, 21, &I_Ace_7x8);
         }
         if(poker_player->hand[4].index >= 0 && poker_player->hand[4].index <= 8) {
             poker_player->held[4] ? canvas_set_color(canvas, ColorWhite) :
                                     canvas_set_color(canvas, ColorBlack);
             snprintf(buffer, sizeof(buffer), "%s", poker_player->hand[4].sym);
-            canvas_draw_str_aligned(canvas, 103, 22, AlignLeft, AlignTop, buffer);
+            canvas_draw_str_aligned(canvas, 104, 21, AlignLeft, AlignTop, buffer);
         } else {
             /* bitmap time */
             poker_player->held[4] ? canvas_set_color(canvas, ColorWhite) :
                                     canvas_set_color(canvas, ColorBlack);
             if(poker_player->hand[4].index == 9) // Ten
-                canvas_draw_icon(canvas, 103, 22, &I_Ten_7x8);
+                canvas_draw_icon(canvas, 103, 21, &I_Ten_7x8);
 
             if(poker_player->hand[4].index == 10) // Jack
-                canvas_draw_icon(canvas, 103, 22, &I_Jack_7x8);
+                canvas_draw_icon(canvas, 104, 21, &I_Jack_7x8);
 
             if(poker_player->hand[4].index == 11) // Queen
-                canvas_draw_icon(canvas, 103, 22, &I_Queen_7x8);
+                canvas_draw_icon(canvas, 104, 21, &I_Queen_7x8);
 
             if(poker_player->hand[4].index == 12) // King
-                canvas_draw_icon(canvas, 103, 22, &I_King_7x8);
+                canvas_draw_icon(canvas, 104, 21, &I_King_7x8);
 
             if(poker_player->hand[4].index == 13) // ace
-                canvas_draw_icon(canvas, 103, 22, &I_Ace_7x8);
+                canvas_draw_icon(canvas, 104, 21, &I_Ace_7x8);
         }
 
         /* Draw the Select hand */
@@ -877,13 +841,13 @@ void poker_draw_callback(Canvas* canvas, void* ctx) {
             "%s:%ix",
             handname[recognize(poker_player)],
             paytable[recognize(poker_player)]);
-        canvas_draw_str_aligned(canvas, 63, 63, AlignCenter, AlignBottom, buffer);
+        canvas_draw_str_aligned(canvas, 63, 61, AlignCenter, AlignBottom, buffer);
     }
-    if(poker_player->GameState == 0) {
-        canvas_draw_icon(canvas, 0, 0, &I_Splash_128x64);
+    if(poker_player->GameState == 0) { 
+        canvas_draw_icon(canvas, 0, 0, &I_Splash_128x64); /* Initial launch */
     }
     if(poker_player->GameState == 4) {
-        canvas_draw_icon(canvas, 0, 0, &I_BadEnd_128x64);
+        canvas_draw_icon(canvas, 0, 0, &I_BadEnd_128x64); /* Just Lost The Game */
     }
 
     osMutexRelease(poker_player->model_mutex);
@@ -941,7 +905,7 @@ int32_t video_poker_app(void* p) {
             if(event.type == InputTypePress) {
                 switch(event.key) {
                 case InputKeyUp:
-                    Poker_Shaker();
+                    Shake();
                     break;
                 case InputKeyDown:
                     if(poker_player->GameState == 2) {
@@ -1007,7 +971,7 @@ int32_t video_poker_app(void* p) {
                         }
                         playcard(poker_player); // shuffle shuffle
                     } else if(poker_player->GameState == 4) {
-                        Poker_Shaker();
+                        Shake();
                         processing = false;
                     }
                     break;
@@ -1024,3 +988,4 @@ int32_t video_poker_app(void* p) {
     poker_player_free(poker_player);
     return 0;
 }
+
