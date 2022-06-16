@@ -1,0 +1,125 @@
+# Commandline options
+
+# To build updater-related targets, you need to set this option
+AddOption(
+    "--with-updater",
+    dest="fullenv",
+    action="store_true",
+    help="Full firmware environment",
+)
+
+AddOption(
+    "--options",
+    dest="optionfile",
+    type="string",
+    nargs=1,
+    action="store",
+    default="fbt_options.py",
+    help="Enviroment option file",
+)
+
+
+# Construction environment variables
+
+vars = Variables(GetOption("optionfile"), ARGUMENTS)
+
+vars.AddVariables(
+    BoolVariable(
+        "VERBOSE",
+        help="Print full commands",
+        default=False,
+    ),
+    BoolVariable(
+        "FORCE",
+        help="Force target action (for supported targets)",
+        default=False,
+    ),
+    BoolVariable(
+        "DEBUG",
+        help="Enable debug build",
+        default=True,
+    ),
+    BoolVariable(
+        "COMPACT",
+        help="Optimize for size",
+        default=False,
+    ),
+    EnumVariable(
+        "TARGET_HW",
+        help="Hardware target",
+        default="7",
+        allowed_values=[
+            "7",
+        ],
+    ),
+)
+
+vars.Add(
+    "DIST_SUFFIX",
+    help="Suffix for binaries in build output for dist targets",
+    default="local",
+)
+
+vars.Add(
+    "UPDATE_VERSION_STRING",
+    help="Version string for updater package",
+    default="${DIST_SUFFIX}",
+)
+
+
+vars.Add(
+    "COPRO_CUBE_VERSION",
+    help="Cube version",
+    default="",
+)
+
+vars.Add(
+    "COPRO_STACK_ADDR",
+    help="Core2 Firmware address",
+    default="0",
+)
+
+vars.Add(
+    "COPRO_STACK_BIN",
+    help="Core2 Firmware file name",
+    default="",
+)
+
+vars.AddVariables(
+    PathVariable(
+        "COPRO_OB_DATA",
+        help="Path to OB reference data",
+        validator=PathVariable.PathIsFile,
+        default="",
+    ),
+    PathVariable(
+        "COPRO_STACK_BIN_DIR",
+        help="Path to ST-provided stacks",
+        validator=PathVariable.PathIsDir,
+        default="",
+    ),
+    PathVariable(
+        "COPRO_CUBE_DIR",
+        help="Path to Cube root",
+        validator=PathVariable.PathIsDir,
+        default="",
+    ),
+    EnumVariable(
+        "COPRO_STACK_TYPE",
+        help="Core2 stack type",
+        default="ble_light",
+        allowed_values=[
+            "ble_full",
+            "ble_light",
+            "ble_basic",
+        ],
+    ),
+)
+
+vars.Add(
+    "FBT_TOOLCHAIN_VERSIONS",
+    help="Whitelisted toolchain versions (leave empty for no check)",
+    default=tuple(),
+)
+
+Return("vars")

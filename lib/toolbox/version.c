@@ -1,5 +1,9 @@
 #include "version.h"
 
+#ifndef GIT_COMMIT
+#include "version.inc.h"
+#endif
+
 struct Version {
     const char* git_hash;
     const char* git_branch;
