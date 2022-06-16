@@ -250,9 +250,6 @@ bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, string_t na
 
 void infrared_signal_transmit(InfraredSignal* signal) {
     if(signal->is_raw) {
-        InfraredMessage* message = &signal->payload.message;
-        infrared_send(message, 1);
-    } else {
         InfraredRawSignal* raw_signal = &signal->payload.raw;
         infrared_send_raw_ext(
             raw_signal->timings,
@@ -260,5 +257,8 @@ void infrared_signal_transmit(InfraredSignal* signal) {
             true,
             raw_signal->frequency,
             raw_signal->duty_cycle);
+    } else {
+        InfraredMessage* message = &signal->payload.message;
+        infrared_send(message, 1);
     }
 }
