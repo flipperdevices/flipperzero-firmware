@@ -17,6 +17,7 @@ Latest Updates:
 - Fixed [Added 90s Timeout for Backlight Time (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
 - Removed [Chip8 Emulator (By mega8bit & dwdraugr)](https://github.com/mega8bit/flipperzero-firmware) [Updated by ESurge To Work.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/0.60.2-adffe20b-0614-RM/applications/chip8) Per [dwdraugr](https://github.com/dwdraugr/flipper-chip/commit/741d7fb99939d74353a99c14ea21636daae1da14),  "Controlling are unavailable, because CHIP-8 using specific async event management. But we tried :)".
 - Latest DEV changes for [Amiibo (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313) and [7618c8ba](https://github.com/flipperdevices/flipperzero-firmware/commit/7618c8ba6ffe3026858373f8346b052dd45193ef)
+- Changed touchtunes_map to be named touchtunes_map.txt, be sure to update your files!
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -25,7 +26,7 @@ Latest Updates:
 - - Note 3: the changes you are making to the `_map` files is to point to the location of the specific assets of the touchtunes folder as well as the universal RF map apps which you will have to develop or compile seperately and are not a part of this repo. 
 - - Note 4: /any is effectively root, so the folder structure should start "/any/subghz/assets" and not what is based on the repo below do not blindly copy the repo it will not work.
 - - [assets/resources/subghz/assets/universal_rf_map.txt](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/universal_rf_map.txt)
-- - [assets/resources/subghz/assets/touchtunes_map](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/touchtunes_map)
+- - [assets/resources/subghz/assets/touchtunes_map.txt](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/touchtunes_map.txt)
 - - [assets/resources/subghz/assets/setting_user](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user)
 - Download this file into the nfc/assets folder on your SD card. 
 - - [assets/resources/nfc/assets/mf_classic_dict.nfc](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/nfc/assets/mf_classic_dict.nfc)
