@@ -12,7 +12,7 @@ check_system()
         TOOLCHAIN_URL="https://github.com/flipperdevices/flipperzero-firmware/archive/refs/tags/0.60.1-rc.tar.gz"
     elif [ "$SYS_TYPE" = "Linux" ]; then
         echo "linux";
-        TOOLCHAIN_URL="https://github.com/flipperdevices/flipperzero-firmware/archive/refs/tags/0.60.1-rc.tar.gz"
+        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-2022.06-x86_64-linux.tar.gz"
     else
         echo "unsupported.";
         echo "Your system is unsupported.. sorry..";
@@ -85,7 +85,7 @@ remove_old_tooclhain()
 unpack_toolchain()
 {
     printf "Unpacking toolchain..";
-    TOOLCHAIN_DIR="$(tar -tf "$REPO_ROOT/$TOOLCHAIN_TAR" | head -n 1 | tr -d '/')";
+    TOOLCHAIN_DIR="$(dirname -- "$(tar -tf "$REPO_ROOT/$TOOLCHAIN_TAR" | head -n 1)")";
     tar -xf "$REPO_ROOT/$TOOLCHAIN_TAR" -C "$REPO_ROOT/";
     mv "$REPO_ROOT/$TOOLCHAIN_DIR" "$REPO_ROOT/toolchain";
     echo "done";
@@ -111,7 +111,8 @@ main()
     fi
     remove_old_tooclhain;
     unpack_toolchain;
-    clearing;
 }
 
+trap clearing EXIT;
+trap clearing 2;  # SIGINT not coverable by EXIT
 main;
