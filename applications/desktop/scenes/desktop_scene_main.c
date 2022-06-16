@@ -140,6 +140,19 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             }
             consumed = true;
             break;
+        case DesktopMainEventOpenFavoriteGame:
+            LOAD_DESKTOP_SETTINGS(&desktop->settings);
+            if(desktop->settings.favorite_game < FLIPPER_GAMES_COUNT) {
+                LoaderStatus status = loader_start(
+                    desktop->loader, FLIPPER_GAMES[desktop->settings.favorite_game].name, NULL);
+                if(status != LoaderStatusOk) {
+                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                }
+            } else {
+                FURI_LOG_E(TAG, "Can't find game favorite application");
+            }
+            consumed = true;
+            break;
         case DesktopAnimationEventCheckAnimation:
             animation_manager_check_blocking_process(desktop->animation_manager);
             consumed = true;

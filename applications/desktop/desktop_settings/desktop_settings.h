@@ -39,6 +39,7 @@ typedef struct {
 typedef struct {
     uint16_t favorite_primary;
     uint16_t favorite_secondary;
+    uint16_t favorite_game;
     PinCode pin_code;
     uint8_t is_locked;
     uint32_t auto_lock_delay_ms;
