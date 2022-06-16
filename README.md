@@ -22,7 +22,7 @@ Latest Updates:
 - - [SubGhz: frequency analyzer combined frequency detection method #1321 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1321)
 
 Open PRs Checkedout & Not Merged In Main:
-- Latest DEV changes for [Amiibo & NTAG21x Support #1313 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
+- [Amiibo & NTAG21x Support #1313 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
 - [On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
 - [SubGhz: fix protocol scher_khan #1323 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1323)
 - [SubGhz: Fast speed frequency analyzer without frequency fine tuning #1311 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1311)
