@@ -111,7 +111,6 @@ typedef enum {
     InfraredNotificationMessageBlinkSend,
 } InfraredNotificationMessage;
 
-bool infrared_select_remote_file(Infrared* infrared);
 bool infrared_add_remote_with_button(Infrared* infrared, const char* name, InfraredSignal* signal);
 bool infrared_rename_current_remote(Infrared* infrared, const char* name);
 void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal);
@@ -121,6 +120,7 @@ void infrared_tx_stop(Infrared* infrared);
 void infrared_text_store_set(Infrared* infrared, uint32_t bank, const char* text, ...);
 void infrared_text_store_clear(Infrared* infrared, uint32_t bank);
 void infrared_play_notification_message(Infrared* infrared, uint32_t message);
+void infrared_show_loading_popup(Infrared* infrared, bool show);
 
 void infrared_signal_sent_callback(void* context);
 void infrared_text_input_callback(void* context);

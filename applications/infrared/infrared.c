@@ -190,26 +190,6 @@ static void infrared_free(Infrared* infrared) {
     free(infrared);
 }
 
-bool infrared_select_remote_file(Infrared* infrared) {
-    string_set_str(infrared->file_path, INFRARED_APP_FOLDER);
-
-    bool success = dialog_file_browser_show(
-        infrared->dialogs,
-        infrared->file_path,
-        infrared->file_path,
-        INFRARED_APP_EXTENSION,
-        true,
-        &I_ir_10px,
-        true);
-
-    //TODO: Show loading prompt (loading remotes takes a long time)
-    if(success) {
-        success = infrared_remote_load(infrared->remote, string_get_cstr(infrared->file_path));
-    }
-
-    return success;
-}
-
 bool infrared_add_remote_with_button(
     Infrared* infrared,
     const char* button_name,
@@ -312,6 +292,22 @@ void infrared_text_store_clear(Infrared* infrared, uint32_t bank) {
 void infrared_play_notification_message(Infrared* infrared, uint32_t message) {
     furi_assert(message < sizeof(infrared_notification_sequences) / sizeof(NotificationSequence*));
     notification_message(infrared->notifications, infrared_notification_sequences[message]);
+}
+
+void infrared_show_loading_popup(Infrared* infrared, bool show) {
+    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
+    ViewStack* view_stack = infrared->view_stack;
+    Loading* loading = infrared->loading;
+
+    if(show) {
+        // Raise timer priority so that animations can play
+        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        view_stack_add_view(view_stack, loading_get_view(loading));
+    } else {
+        view_stack_remove_view(view_stack, loading_get_view(loading));
+        // Restore default timer priority
+        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+    }
 }
 
 void infrared_signal_sent_callback(void* context) {

@@ -92,29 +92,9 @@ void infrared_scene_universal_tv_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
 
-    ViewStack* view_stack = infrared->view_stack;
-    Loading* loading = infrared->loading;
-
-    view_stack_add_view(view_stack, loading_get_view(loading));
-
-    /**
-     * Problem: Update events are not handled in Loading View, because:
-     * 1) Timer task has least prio
-     * 2) Storage service uses drivers that capture whole CPU time
-     *      to handle SD communication
-     *
-     * Ugly workaround, but it works for current situation:
-     * raise timer task prio for DB scanning period.
-     */
-    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
-    TaskHandle_t storage_task = xTaskGetHandle("StorageSrv");
-    uint32_t timer_prio = uxTaskPriorityGet(timer_task);
-    uint32_t storage_prio = uxTaskPriorityGet(storage_task);
-    vTaskPrioritySet(timer_task, storage_prio + 1);
+    infrared_show_loading_popup(infrared, true);
     bool success = infrared_brute_force_calculate_messages(brute_force);
-    vTaskPrioritySet(timer_task, timer_prio);
-
-    view_stack_remove_view(view_stack, loading_get_view(loading));
+    infrared_show_loading_popup(infrared, false);
 
     if(!success) {
         scene_manager_previous_scene(infrared->scene_manager);

@@ -2,11 +2,31 @@
 
 void infrared_scene_remote_list_on_enter(void* context) {
     Infrared* infrared = context;
+    SceneManager* scene_manager = infrared->scene_manager;
+    ViewDispatcher* view_dispatcher = infrared->view_dispatcher;
 
-    if(!infrared_select_remote_file(infrared)) {
-        scene_manager_previous_scene(infrared->scene_manager);
+    view_dispatcher_switch_to_view(view_dispatcher, InfraredViewStack);
+
+    string_set_str(infrared->file_path, INFRARED_APP_FOLDER);
+    bool success = dialog_file_browser_show(
+        infrared->dialogs,
+        infrared->file_path,
+        infrared->file_path,
+        INFRARED_APP_EXTENSION,
+        true,
+        &I_ir_10px,
+        true);
+
+    if(success) {
+        infrared_show_loading_popup(infrared, true);
+        success = infrared_remote_load(infrared->remote, string_get_cstr(infrared->file_path));
+        infrared_show_loading_popup(infrared, false);
+    }
+
+    if(success) {
+        scene_manager_next_scene(scene_manager, InfraredSceneRemote);
     } else {
-        scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);
+        scene_manager_previous_scene(scene_manager);
     }
 }
 
