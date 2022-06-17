@@ -20,7 +20,7 @@ void infrared_scene_remote_list_on_enter(void* context) {
         view_dispatcher_switch_to_view(view_dispatcher, InfraredViewStack);
 
         infrared_show_loading_popup(infrared, true);
-        success = infrared_remote_load(infrared->remote, string_get_cstr(infrared->file_path));
+        success = infrared_remote_load(infrared->remote, infrared->file_path);
         infrared_show_loading_popup(infrared, false);
     }
 

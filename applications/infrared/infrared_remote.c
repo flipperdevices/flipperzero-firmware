@@ -125,15 +125,15 @@ bool infrared_remote_store(InfraredRemote* remote) {
     return success;
 }
 
-bool infrared_remote_load(InfraredRemote* remote, const char* path) {
+bool infrared_remote_load(InfraredRemote* remote, string_t path) {
     Storage* storage = furi_record_open("storage");
     FlipperFormat* ff = flipper_format_file_alloc(storage);
 
     string_t buf;
     string_init(buf);
 
-    FURI_LOG_I(TAG, "load file: \'%s\'", path);
-    bool success = flipper_format_file_open_existing(ff, path);
+    FURI_LOG_I(TAG, "load file: \'%s\'", string_get_cstr(path));
+    bool success = flipper_format_file_open_existing(ff, string_get_cstr(path));
 
     if(success) {
         uint32_t version;
@@ -142,15 +142,10 @@ bool infrared_remote_load(InfraredRemote* remote, const char* path) {
     }
 
     if(success) {
-        //TODO: Find a better way to pass a string_t
-        string_t path_str;
-        string_init_set_str(path_str, path);
-        path_extract_filename(path_str, buf, true);
-        string_clear(path_str);
-
+        path_extract_filename(path, buf, true);
         infrared_remote_clear_buttons(remote);
         infrared_remote_set_name(remote, string_get_cstr(buf));
-        infrared_remote_set_path(remote, path);
+        infrared_remote_set_path(remote, string_get_cstr(path));
 
         for(bool can_read = true; can_read;) {
             InfraredRemoteButton* button = infrared_remote_button_alloc();

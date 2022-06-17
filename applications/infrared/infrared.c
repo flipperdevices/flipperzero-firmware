@@ -338,8 +338,7 @@ int32_t infrared_app(void* p) {
 
     if(p) {
         string_set_str(infrared->file_path, (const char*)p);
-        is_remote_loaded =
-            infrared_remote_load(infrared->remote, string_get_cstr(infrared->file_path));
+        is_remote_loaded = infrared_remote_load(infrared->remote, infrared->file_path);
         if(!is_remote_loaded) {
             dialog_message_show_storage_error(
                 infrared->dialogs, "Failed to load\nselected remote");
