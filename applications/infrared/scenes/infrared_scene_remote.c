@@ -29,6 +29,7 @@ void infrared_scene_remote_on_enter(void* context) {
     Infrared* infrared = context;
     InfraredRemote* remote = infrared->remote;
     ButtonMenu* button_menu = infrared->button_menu;
+    SceneManager* scene_manager = infrared->scene_manager;
 
     infrared_worker_tx_set_get_signal_callback(
         infrared->worker, infrared_worker_tx_get_signal_steady_callback, infrared);
@@ -63,6 +64,10 @@ void infrared_scene_remote_on_enter(void* context) {
         context);
 
     button_menu_set_header(button_menu, infrared_remote_get_name(remote));
+    const int16_t button_index =
+        (signed)scene_manager_get_scene_state(scene_manager, InfraredSceneRemote);
+    button_menu_set_selected_item(button_menu, button_index);
+    scene_manager_set_scene_state(scene_manager, InfraredSceneRemote, ButtonIndexNA);
 
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewButtonMenu);
 }
@@ -79,22 +84,24 @@ bool infrared_scene_remote_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         const uint16_t custom_type = infrared_custom_event_get_type(event.event);
-        const int16_t menu_index = infrared_custom_event_get_value(event.event);
+        const int16_t button_index = infrared_custom_event_get_value(event.event);
 
         if(custom_type == InfraredCustomEventTypeTransmitStarted) {
-            furi_assert(menu_index >= 0);
-            infrared_tx_start_button_index(infrared, menu_index);
+            furi_assert(button_index >= 0);
+            infrared_tx_start_button_index(infrared, button_index);
             consumed = true;
         } else if(custom_type == InfraredCustomEventTypeTransmitStopped) {
             infrared_tx_stop(infrared);
             consumed = true;
         } else if(custom_type == InfraredCustomEventTypeMenuSelected) {
-            furi_assert(menu_index < 0);
-            if(menu_index == ButtonIndexPlus) {
+            furi_assert(button_index < 0);
+            scene_manager_set_scene_state(
+                scene_manager, InfraredSceneRemote, (unsigned)button_index);
+            if(button_index == ButtonIndexPlus) {
                 infrared->app_state.is_learning_new_remote = false;
                 scene_manager_next_scene(scene_manager, InfraredSceneLearn);
                 consumed = true;
-            } else if(menu_index == ButtonIndexEdit) {
+            } else if(button_index == ButtonIndexEdit) {
                 scene_manager_next_scene(scene_manager, InfraredSceneEdit);
                 consumed = true;
             }
