@@ -83,3 +83,20 @@ copro_dist = distenv.CoproBuilder(
 )
 AlwaysBuild(copro_dist)
 Alias("copro_dist", copro_dist)
+
+
+# Debugging firmware
+debug = distenv.GDBPy(
+    "pseudo3",
+    # firmware_out["FW_ELF"],
+    firmware_out["FW_FLASH"],
+    GDBFLAGS="-ex 'target extended-remote | openocd.exe -c \"gdb_port pipe\" ${OPENOCD_OPTS}' "
+    '-ex "set confirm off" '
+    '-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
+    '-ex "source ${ROOT_DIR.abspath}/debug/PyCortexMDebug/PyCortexMDebug.py" '
+    '-ex "svd_load ${SVD_FILE}" '
+    '-ex "compare-sections"',
+)
+# distenv.Depends(debug, firmware_out["FW_FLASH"])
+# distenv.Pseudo("pseudo3")
+Alias("debug", debug)

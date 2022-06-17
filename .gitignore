@@ -44,3 +44,6 @@ dist
 .sconsign.dblite
 # SCons build dir
 build/
+
+# Toolchain
+toolchain*/

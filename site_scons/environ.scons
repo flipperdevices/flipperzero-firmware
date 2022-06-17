@@ -51,6 +51,8 @@ if not coreenv["VERBOSE"]:
         APPSCOMSTR="\tAPPS\t${TARGET}",
         VERSIONCOMSTR="\tVERSION\t${TARGET}",
         STRIPCOMSTR="\tSTRIP\t${TARGET}",
+        GDBCOMSTR="\tGDB\t${TARGET}",
+        GDBPYCOMSTR="\tGDB-PY\t${TARGET}",
     )
 
 # Default value for commandline options

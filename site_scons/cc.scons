@@ -28,6 +28,7 @@ ENV.AppendUnique(
         "-ffunction-sections",
         "-fno-math-errno",
         "-fstack-usage",
+        "-g",
         # "-Wno-stringop-overread",
         # "-Wno-stringop-overflow",
     ],
