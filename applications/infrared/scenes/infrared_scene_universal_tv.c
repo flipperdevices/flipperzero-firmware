@@ -90,6 +90,7 @@ void infrared_scene_universal_tv_on_enter(void* context) {
     button_panel_add_label(button_panel, 9, 64, FontSecondary, "Vol");
     button_panel_add_label(button_panel, 43, 64, FontSecondary, "Ch");
 
+    view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
 
     infrared_show_loading_popup(infrared, true);

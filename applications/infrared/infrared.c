@@ -128,7 +128,6 @@ static Infrared* infrared_alloc() {
     view_dispatcher_add_view(view_dispatcher, InfraredViewPopup, popup_get_view(infrared->popup));
 
     infrared->view_stack = view_stack_alloc();
-    view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_add_view(
         view_dispatcher, InfraredViewStack, view_stack_get_view(infrared->view_stack));
 
