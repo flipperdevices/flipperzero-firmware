@@ -104,14 +104,15 @@ AlwaysBuild(debug_elf)
 Alias("debug", debug_elf)
 
 
-debug_other = distenv.GDBPy(
-    "debugother.pseudo",
-    distenv.subst("$OTHER_ELF"),
-    GDBPYOPTS=
-    # '-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
-    '-ex "source ${ROOT_DIR.abspath}/debug/PyCortexMDebug/PyCortexMDebug.py" '
-    '-ex "svd_load ${SVD_FILE}" ',
-)
-distenv.Pseudo("debugother.pseudo")
-AlwaysBuild(debug_other)
-Alias("debug_other", debug_other)
+if other_elf_specified := distenv.subst("$OTHER_ELF"):
+    debug_other = distenv.GDBPy(
+        "debugother.pseudo",
+        other_elf_specified,
+        GDBPYOPTS=
+        # '-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
+        '-ex "source ${ROOT_DIR.abspath}/debug/PyCortexMDebug/PyCortexMDebug.py" '
+        '-ex "svd_load ${SVD_FILE}" ',
+    )
+    distenv.Pseudo("debugother.pseudo")
+    AlwaysBuild(debug_other)
+    Alias("debug_other", debug_other)
