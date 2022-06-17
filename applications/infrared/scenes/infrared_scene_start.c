@@ -14,6 +14,7 @@ static void infrared_scene_start_submenu_callback(void* context, uint32_t index)
 void infrared_scene_start_on_enter(void* context) {
     Infrared* infrared = context;
     Submenu* submenu = infrared->submenu;
+    SceneManager* scene_manager = infrared->scene_manager;
 
     submenu_add_item(
         submenu,
@@ -34,7 +35,11 @@ void infrared_scene_start_on_enter(void* context) {
         infrared_scene_start_submenu_callback,
         infrared);
 
-    submenu_set_selected_item(submenu, SubmenuIndexUniversalRemotes);
+    const uint32_t submenu_index =
+        scene_manager_get_scene_state(scene_manager, InfraredSceneStart);
+    submenu_set_selected_item(submenu, submenu_index);
+    scene_manager_set_scene_state(scene_manager, InfraredSceneStart, SubmenuIndexUniversalRemotes);
+
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewSubmenu);
 }
 
@@ -45,14 +50,16 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexUniversalRemotes) {
+        const uint32_t submenu_index = event.event;
+        scene_manager_set_scene_state(scene_manager, InfraredSceneStart, submenu_index);
+        if(submenu_index == SubmenuIndexUniversalRemotes) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversal);
             consumed = true;
-        } else if(event.event == SubmenuIndexLearnNewRemote) {
+        } else if(submenu_index == SubmenuIndexLearnNewRemote) {
             infrared->app_state.is_learning_new_remote = true;
             scene_manager_next_scene(scene_manager, InfraredSceneLearn);
             consumed = true;
-        } else if(event.event == SubmenuIndexSavedRemotes) {
+        } else if(submenu_index == SubmenuIndexSavedRemotes) {
             scene_manager_next_scene(scene_manager, InfraredSceneRemoteList);
             consumed = true;
         }
