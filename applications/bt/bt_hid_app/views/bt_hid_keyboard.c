@@ -127,7 +127,7 @@ BtHidKeyboardKey keyboardKeySet[ROW_COUNT][COLUMN_COUNT] = {
         {.width = 3, .icon = NULL, .key = "Alt", .value = HID_KEYBOARD_L_ALT},
         {.width = 0, .icon = NULL, .value = HID_KEYBOARD_L_ALT},
         {.width = 0, .icon = NULL, .value = HID_KEYBOARD_L_ALT},
-        {.width = 3, .icon = NULL, .key = "Gui", .value = HID_KEYBOARD_L_GUI},
+        {.width = 3, .icon = NULL, .key = "Cmd", .value = HID_KEYBOARD_L_GUI},
         {.width = 0, .icon = NULL, .value = HID_KEYBOARD_L_GUI},
         {.width = 0, .icon = NULL, .value = HID_KEYBOARD_L_GUI},
         {.width = 3, .icon = NULL, .key = "Tab", .value = HID_KEYBOARD_TAB},
@@ -236,10 +236,10 @@ static void bt_hid_keyboard_draw_callback(Canvas* canvas, void* context) {
         }
     }
 }
-static uint8_t bt_hid_keyboard_get_selected_key(BtHidKeyboardModel* model, InputType type) {
+static uint8_t bt_hid_keyboard_get_selected_key(BtHidKeyboardModel* model) {
     BtHidKeyboardKey key = keyboardKeySet[model->y][model->x];
-    // Use upper case if shift is toggled or its a long press
-    bool useUppercase = (model->shift || type == InputTypeLong);
+    // Use upper case if shift is toggled
+    bool useUppercase = model->shift;
     // Check if the key has an upper case version
     bool hasUppercase = key.shift_key != 0;
     if(useUppercase && hasUppercase)
@@ -272,8 +272,7 @@ static void bt_hid_keyboard_process(BtHidKeyboard* bt_hid_keyboard, InputEvent* 
                 if(event->type == InputTypePress) {
                     model->ok_pressed = true;
                 } else if(event->type == InputTypeLong || event->type == InputTypeShort) {
-                    // Long press will allow for a shift modifier to be included
-                    model->last_key_code = bt_hid_keyboard_get_selected_key(model, event->type);
+                    model->last_key_code = bt_hid_keyboard_get_selected_key(model);
 
                     // Toggle the modifier key when clicked, and click the key
                     if(model->last_key_code == HID_KEYBOARD_L_SHIFT) {
