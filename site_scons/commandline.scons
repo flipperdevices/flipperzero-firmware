@@ -124,6 +124,12 @@ vars.AddVariables(
             "ble_basic",
         ],
     ),
+    PathVariable(
+        "SVD_FILE",
+        help="Path to SVD file",
+        validator=PathVariable.PathIsFile,
+        default="",
+    ),
 )
 
 vars.Add(
