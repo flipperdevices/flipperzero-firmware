@@ -136,8 +136,6 @@ static Infrared* infrared_alloc() {
     infrared->loading = loading_alloc();
     infrared->progress = infrared_progress_view_alloc();
 
-    view_stack_add_view(infrared->view_stack, button_panel_get_view(infrared->button_panel));
-
     return infrared;
 }
 
@@ -161,7 +159,6 @@ static void infrared_free(Infrared* infrared) {
     popup_free(infrared->popup);
 
     view_dispatcher_remove_view(view_dispatcher, InfraredViewStack);
-    view_stack_remove_view(infrared->view_stack, button_panel_get_view(infrared->button_panel));
     view_stack_free(infrared->view_stack);
 
     button_panel_free(infrared->button_panel);

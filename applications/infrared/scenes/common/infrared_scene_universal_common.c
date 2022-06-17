@@ -31,7 +31,7 @@ static void infrared_scene_universal_common_hide_popup(Infrared* infrared) {
 
 void infrared_scene_universal_common_on_enter(void* context) {
     Infrared* infrared = context;
-    UNUSED(infrared);
+    view_stack_add_view(infrared->view_stack, button_panel_get_view(infrared->button_panel));
 }
 
 bool infrared_scene_universal_common_on_event(void* context, SceneManagerEvent event) {
@@ -87,5 +87,6 @@ bool infrared_scene_universal_common_on_event(void* context, SceneManagerEvent e
 void infrared_scene_universal_common_on_exit(void* context) {
     Infrared* infrared = context;
     ButtonPanel* button_panel = infrared->button_panel;
+    view_stack_remove_view(infrared->view_stack, button_panel_get_view(button_panel));
     button_panel_reset(button_panel);
 }
