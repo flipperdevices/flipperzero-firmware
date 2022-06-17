@@ -2,13 +2,9 @@ Import("ENV")
 
 
 from fbt.appmanifest import FlipperAppType
-import os
 
-appenv = ENV.Clone()
+appenv = ENV.Clone(tools=["fbt_extapps"])
 
-EXT_APPS_WORK_DIR = ".extapps"
-
-appenv.VariantDir(EXT_APPS_WORK_DIR, ".", duplicate=False)
 appenv.Replace(
     LINKER_SCRIPT="application-ext",
     STRIPFLAGS=[
@@ -45,19 +41,16 @@ appenv.AppendUnique(
     ],
 )
 
+
 extapps = []
 for apptype in (FlipperAppType.PLUGIN, FlipperAppType.EXTERNAL):
     for app in appenv["APPBUILD"].get_apps_of_type(apptype):
-        app_elf = appenv.Program(
-            os.path.join(EXT_APPS_WORK_DIR, app.appid),
-            appenv.GlobRecursive("*.c*", os.path.join(EXT_APPS_WORK_DIR, app._appdir)),
-            APP_ENTRY=app.entry_point,
-        )
-        app_stripped_elf = appenv.ELFStripper(
-            os.path.join(appenv["PLUGIN_ELF_DIR"], app.appid), app_elf
-        )
-        extapps.append(app_stripped_elf)
-        Alias(f"{appenv['FIRMWARE_BUILD_CFG']}_{app.appid}", app_stripped_elf)
+        extapps.append(appenv.BuildAppElf(app))
+
+# Ugly access to global option
+if extra_app_list := GetOption("extraextapps"):
+    for extra_app in extra_app_list.split(","):
+        extapps.append(appenv.BuildAppElf(appenv["APPMGR"].get(extra_app)))
 
 Alias(appenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps)
 Return("extapps")

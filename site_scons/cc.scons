@@ -26,9 +26,10 @@ ENV.AppendUnique(
         "-Wredundant-decls",
         "-fdata-sections",
         "-ffunction-sections",
-        # "-fno-diagnostics-show-caret",
         "-fno-math-errno",
         "-fstack-usage",
+        # "-Wno-stringop-overread",
+        # "-Wno-stringop-overflow",
     ],
     CPPDEFINES=[
         "_GNU_SOURCE",

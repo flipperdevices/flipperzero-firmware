@@ -36,7 +36,7 @@ firmware_out = distenv.AddFwProject(
     fw_type="firmware",
     fw_env_key="FW_ENV",
 )
-Default(firmware_out["FW_ARTIFACTS"])
+# Default(firmware_out["FW_ARTIFACTS"])
 
 
 # If enabled, initialize updater-related targets
@@ -74,6 +74,7 @@ basic_dist = distenv.DistBuilder("pseudo2", distenv["DIST_DEPENDS"])
 distenv.Pseudo("pseudo2")
 AlwaysBuild(basic_dist)
 Alias("fw_dist", basic_dist)
+Default(basic_dist)
 
 # Target for bundling core2 package for qFlipper
 copro_dist = distenv.CoproBuilder(

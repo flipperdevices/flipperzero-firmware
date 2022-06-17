@@ -11,9 +11,10 @@ To build with FBT, call it specifying configuration options & targets to build. 
 
 `./fbt --with-updater COMPACT=1 DEBUG=0 VERBOSE=1 updater_package copro_dist`
 
+To run cleanup (think of `make clean`) for specified targets, all `-c` option.
 
 ## FBT targets
-FBT keeps track of internal dependencies, so you only need to build the highest-level target you need, and FBT will make sure everything it needs is up-to-date.  
+FBT keeps track of internal dependencies, so you only need to build the highest-level target you need, and FBT will make sure everything it needs is up-to-date.
 
 ### High-level (what you most likely need)
 - `fw_dist` - build & publish firmware to `dist` folder
@@ -23,9 +24,10 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 ### Firmware targets
 - `firmware_extapps` - build all plug-ins as separate .elf files
     - `firmware_snake_game`, etc - build single plug-in as .elf by its name
+    - Check out `--extra-ext-apps` for force adding extra apps to external build 
 - `firmware_flash` - flash current version to attached device with OpenOCD
 - `firmware_cdb` - generate compilation database
-- `firmware_all`, `updater_all` - build basic set of binaries 
+- `firmware_all`, `updater_all` - build basic set of binaries
 
 ### Assets
 - `resources` - build resources and their Manifest
@@ -39,7 +41,8 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 ## Command-line parameters
 
 - `--options optionfile.py` (default value `fbt_options.py`) - load file with multiple configuration values
-- `--with-updater` - enables updater-related targets and dependency tracking. Enabling this options introduces extra startup time costs, so use it when bundling update packages. Or if you have a fast computer and don't care about a few extra seconds of startup time. 
+- `--with-updater` - enables updater-related targets and dependency tracking. Enabling this options introduces extra startup time costs, so use it when bundling update packages. Or if you have a fast computer and don't care about a few extra seconds of startup time
+- `--extra-ext-apps=app1,app2,appn` - forces listed apps to be built as external with  `firmware_extapps` target
 
 
 ## Configuration 

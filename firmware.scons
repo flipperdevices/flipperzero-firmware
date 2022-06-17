@@ -223,7 +223,7 @@ if fwenv["IS_BASE_FIRMWARE"]:
 
 
 # Compile DB generation
-fwcdb = fwenv["FW_CDB"] = fwenv.CompilationDatabase("compile_database.json")
+fwcdb = fwenv["FW_CDB"] = fwenv.CompilationDatabase("compile_commands.json")
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", fwcdb)
 
 
