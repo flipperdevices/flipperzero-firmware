@@ -16,6 +16,7 @@ static void infrared_scene_edit_submenu_callback(void* context, uint32_t index) 
 void infrared_scene_edit_on_enter(void* context) {
     Infrared* infrared = context;
     Submenu* submenu = infrared->submenu;
+    SceneManager* scene_manager = infrared->scene_manager;
 
     submenu_add_item(
         submenu,
@@ -47,7 +48,10 @@ void infrared_scene_edit_on_enter(void* context) {
         SubmenuIndexDeleteRemote,
         infrared_scene_edit_submenu_callback,
         context);
-    submenu_set_selected_item(submenu, 0);
+
+    const uint32_t submenu_index = scene_manager_get_scene_state(scene_manager, InfraredSceneEdit);
+    submenu_set_selected_item(submenu, submenu_index);
+    scene_manager_set_scene_state(scene_manager, InfraredSceneEdit, SubmenuIndexAddButton);
 
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewSubmenu);
 }
@@ -58,26 +62,29 @@ bool infrared_scene_edit_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexAddButton) {
+        const uint32_t submenu_index = event.event;
+        scene_manager_set_scene_state(scene_manager, InfraredSceneEdit, submenu_index);
+
+        if(submenu_index == SubmenuIndexAddButton) {
             infrared->app_state.is_learning_new_remote = false;
             scene_manager_next_scene(scene_manager, InfraredSceneLearn);
             consumed = true;
-        } else if(event.event == SubmenuIndexRenameButton) {
+        } else if(submenu_index == SubmenuIndexRenameButton) {
             infrared->app_state.edit_target = InfraredEditTargetButton;
             infrared->app_state.edit_mode = InfraredEditModeRename;
             scene_manager_next_scene(scene_manager, InfraredSceneEditButtonSelect);
             consumed = true;
-        } else if(event.event == SubmenuIndexDeleteButton) {
+        } else if(submenu_index == SubmenuIndexDeleteButton) {
             infrared->app_state.edit_target = InfraredEditTargetButton;
             infrared->app_state.edit_mode = InfraredEditModeDelete;
             scene_manager_next_scene(scene_manager, InfraredSceneEditButtonSelect);
             consumed = true;
-        } else if(event.event == SubmenuIndexRenameRemote) {
+        } else if(submenu_index == SubmenuIndexRenameRemote) {
             infrared->app_state.edit_target = InfraredEditTargetRemote;
             infrared->app_state.edit_mode = InfraredEditModeRename;
             scene_manager_next_scene(scene_manager, InfraredSceneEditRename);
             consumed = true;
-        } else if(event.event == SubmenuIndexDeleteRemote) {
+        } else if(submenu_index == SubmenuIndexDeleteRemote) {
             infrared->app_state.edit_target = InfraredEditTargetRemote;
             infrared->app_state.edit_mode = InfraredEditModeDelete;
             scene_manager_next_scene(scene_manager, InfraredSceneEditDelete);
