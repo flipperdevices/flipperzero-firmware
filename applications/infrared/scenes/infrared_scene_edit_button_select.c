@@ -9,7 +9,7 @@ void infrared_scene_edit_button_select_on_enter(void* context) {
     Infrared* infrared = context;
     Submenu* submenu = infrared->submenu;
     InfraredRemote* remote = infrared->remote;
-    SceneManager* scene_manager = infrared->scene_manager;
+    InfraredAppState* app_state = &infrared->app_state;
 
     const char* header = infrared->app_state.edit_mode == InfraredEditModeRename ?
                              "Rename Button:" :
@@ -27,14 +27,9 @@ void infrared_scene_edit_button_select_on_enter(void* context) {
             context);
     }
 
-    const int32_t submenu_index =
-        (signed)scene_manager_get_scene_state(scene_manager, InfraredSceneEditButtonSelect);
-
-    if(button_count && submenu_index != InfraredButtonIndexNone) {
-        submenu_set_selected_item(submenu, submenu_index);
-        infrared->app_state.current_button_index = InfraredButtonIndexNone;
-        scene_manager_set_scene_state(
-            scene_manager, InfraredSceneEditButtonSelect, (unsigned)InfraredButtonIndexNone);
+    if(button_count && app_state->current_button_index != InfraredButtonIndexNone) {
+        submenu_set_selected_item(submenu, app_state->current_button_index);
+        app_state->current_button_index = InfraredButtonIndexNone;
     }
 
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewSubmenu);
@@ -42,15 +37,13 @@ void infrared_scene_edit_button_select_on_enter(void* context) {
 
 bool infrared_scene_edit_button_select_on_event(void* context, SceneManagerEvent event) {
     Infrared* infrared = context;
+    InfraredAppState* app_state = &infrared->app_state;
     SceneManager* scene_manager = infrared->scene_manager;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        const uint32_t button_index = event.event;
-        infrared->app_state.current_button_index = button_index;
-        scene_manager_set_scene_state(scene_manager, InfraredSceneEditButtonSelect, button_index);
-
-        const InfraredEditMode edit_mode = infrared->app_state.edit_mode;
+        app_state->current_button_index = event.event;
+        const InfraredEditMode edit_mode = app_state->edit_mode;
         if(edit_mode == InfraredEditModeRename) {
             scene_manager_next_scene(scene_manager, InfraredSceneEditRename);
         } else if(edit_mode == InfraredEditModeDelete) {
