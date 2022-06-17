@@ -132,4 +132,10 @@ vars.Add(
     default=tuple(),
 )
 
+vars.Add(
+    "OPENOCD_OPTS",
+    help="Options to pass to OpenOCD",
+    default="",
+)
+
 Return("vars")
