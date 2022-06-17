@@ -59,7 +59,7 @@ if not env["VERBOSE"]:
         HEXCOMSTR="\tHEX\t${TARGET}",
         BINCOMSTR="\tBIN\t${TARGET}",
         DFUCOMSTR="\tDFU\t${TARGET}",
-        FLASHCOMSTR="\tFLASH\t${SOURCE}",
+        OOCDCOMSTR="\tFLASH\t${SOURCE}",
     )
 
 
@@ -216,7 +216,10 @@ Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_dfu", fwdfu)
 
 # Additional FW-related pseudotargets
 if fwenv["IS_BASE_FIRMWARE"]:
-    flash = fwenv["FW_FLASH"] = fwenv.OOCDFlash("${FIRMWARE_BUILD_CFG}")
+    flash = fwenv["FW_FLASH"] = fwenv.OOCDFlashCommand(
+        "${FIRMWARE_BUILD_CFG}",
+        OPENOCD_COMMAND='-c "program ${SOURCE.posix} reset exit ${IMAGE_BASE_ADDRESS}"',
+    )
     if fwenv["FORCE"]:
         AlwaysBuild(flash)
     Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)

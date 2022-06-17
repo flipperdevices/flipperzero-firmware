@@ -30,7 +30,7 @@ coreenv["ROOT_DIR"] = Dir(".")
 
 # Create a separate "dist" environment and add construction envs to it
 distenv = coreenv.Clone(
-    tools=["fbt_dist"],
+    tools=["fbt_dist", "openocd"],
     GDBOPTS="-ex 'target extended-remote | openocd.exe -c \"gdb_port pipe\" ${OPENOCD_OPTS}' "
     '-ex "set confirm off" ',
 )
@@ -93,8 +93,8 @@ Alias("copro_dist", copro_dist)
 debug_elf = distenv.GDBPy(
     "debug.pseudo",
     firmware_out["FW_ELF"],
-    GDBPYOPTS='-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
-    '-ex "source ${ROOT_DIR.abspath}/debug/PyCortexMDebug/PyCortexMDebug.py" '
+    GDBPYOPTS='-ex "source debug/FreeRTOS/FreeRTOS.py" '
+    '-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" '
     '-ex "svd_load ${SVD_FILE}" '
     '-ex "compare-sections"',
 )
@@ -104,15 +104,23 @@ AlwaysBuild(debug_elf)
 Alias("debug", debug_elf)
 
 
+# Debug alien elf
 if other_elf_specified := distenv.subst("$OTHER_ELF"):
     debug_other = distenv.GDBPy(
         "debugother.pseudo",
         other_elf_specified,
         GDBPYOPTS=
         # '-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
-        '-ex "source ${ROOT_DIR.abspath}/debug/PyCortexMDebug/PyCortexMDebug.py" '
+        '-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" '
         '-ex "svd_load ${SVD_FILE}" ',
     )
     distenv.Pseudo("debugother.pseudo")
     AlwaysBuild(debug_other)
     Alias("debug_other", debug_other)
+
+
+# Just start OpenOCD
+openocd = distenv.OOCDCommand("openocd.pseudo", [])
+distenv.Pseudo("openocd.pseudo")
+AlwaysBuild(openocd)
+Alias("openocd", openocd)

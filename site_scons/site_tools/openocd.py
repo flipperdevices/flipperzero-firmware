@@ -5,23 +5,32 @@ import SCons
 
 __OPENOCD_BIN = "openocd"
 
+_oocd_action = Action(
+    "${OPENOCD} ${OPENOCD_OPTS} ${OPENOCD_COMMAND}",
+    "${OOCDCOMSTR}",
+)
+
 
 def generate(env):
     env.SetDefault(
         OPENOCD=__OPENOCD_BIN,
+        OPENOCD_OPTS="",
+        OPENOCD_COMMAND="",
+        OOCDCOMSTR="",
     )
+
     env.Append(
         BUILDERS={
-            "OOCDFlash": Builder(
+            "OOCDFlashCommand": Builder(
                 action=[
-                    Action(
-                        '${OPENOCD} ${OPENOCD_OPTS} -c "program ${SOURCE.posix} reset exit ${IMAGE_BASE_ADDRESS}"',
-                        "${FLASHCOMSTR}",
-                    ),
+                    _oocd_action,
                     Touch("${TARGET}"),
                 ],
                 suffix=".flash",
                 src_suffix=".bin",
+            ),
+            "OOCDCommand": Builder(
+                action=_oocd_action,
             ),
         }
     )

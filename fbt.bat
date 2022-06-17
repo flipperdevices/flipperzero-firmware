@@ -1,3 +1,4 @@
+@echo off
 set "toolchainRoot=%~dp0toolchain"
 set "SCONS_DEFAULT_FLAGS=-Q --warn=target-not-built"
 if not exist "%toolchainRoot%" (powershell -ExecutionPolicy Bypass -File %~dp0scripts\toolchain\windows-toolchain-download.ps1)

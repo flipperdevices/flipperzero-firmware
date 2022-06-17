@@ -22,6 +22,7 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 - `copro_dist` - bundle Core2 FUS+stack binaries for qFlipper
 - `debug` - build and flash firmware, then attach with gdb with firmware's .elf loaded
 - `debug_other` - attach gdb loading an externally-built .elf. Specify .elf to debug with `OTHER_ELF=path/to/other.elf`
+- `openocd` - just start OpenOCD
 
 ### Firmware targets
 - `firmware_extapps` - build all plug-ins as separate .elf files
