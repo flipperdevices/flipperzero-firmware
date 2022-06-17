@@ -11,4 +11,4 @@ fi
 PATH="$SCRIPT_PATH/toolchain/python/bin:$PATH";
 PATH="$SCRIPT_PATH/toolchain/bin:$PATH";
 PATH="$SCRIPT_PATH/toolchain/protobuf/bin:$PATH";
-python3 lib/scons/scripts/scons.py $SCONS_DEFAULT_FLAGS "$*"
+python3 lib/scons/scripts/scons.py $SCONS_DEFAULT_FLAGS $*
