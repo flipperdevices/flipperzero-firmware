@@ -136,6 +136,12 @@ vars.AddVariables(
         validator=PathVariable.PathIsFile,
         default="",
     ),
+    PathVariable(
+        "OTHER_ELF",
+        help="Path to prebuilt ELF file to debug",
+        validator=PathVariable.PathAccept,
+        default="",
+    ),
 )
 
 vars.Add(

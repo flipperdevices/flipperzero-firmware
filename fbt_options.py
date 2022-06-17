@@ -44,3 +44,5 @@ FBT_TOOLCHAIN_VERSIONS = (" 10.3.",)
 OPENOCD_OPTS = '-f interface/stlink.cfg -c "transport select hla_swd" -f debug/stm32wbx.cfg -c "stm32wbx.cpu configure -rtos auto" -c "init"'
 
 SVD_FILE = "debug/STM32WB55_CM4.svd"
+
+OTHER_ELF = ""

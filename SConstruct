@@ -29,7 +29,11 @@ SConscript("site_scons/cc.scons", exports={"ENV": coreenv})
 coreenv["ROOT_DIR"] = Dir(".")
 
 # Create a separate "dist" environment and add construction envs to it
-distenv = coreenv.Clone(tools=["fbt_dist"])
+distenv = coreenv.Clone(
+    tools=["fbt_dist"],
+    GDBOPTS="-ex 'target extended-remote | openocd.exe -c \"gdb_port pipe\" ${OPENOCD_OPTS}' "
+    '-ex "set confirm off" ',
+)
 
 firmware_out = distenv.AddFwProject(
     base_env=coreenv,
@@ -49,7 +53,7 @@ if GetOption("fullenv"):
 
     # Target for self-update package
     selfupdate_dist = distenv.DistBuilder(
-        "pseudo",
+        "selfupdate.pseudo",
         (distenv["DIST_DEPENDS"], firmware_out["FW_RESOURCES"]),
         DIST_EXTRA=[
             "-r",
@@ -65,13 +69,13 @@ if GetOption("fullenv"):
             '"${ROOT_DIR.abspath}/${COPRO_OB_DATA}"',
         ],
     )
-    distenv.Pseudo("pseudo")
+    distenv.Pseudo("selfupdate.pseudo")
     AlwaysBuild(selfupdate_dist)
     Alias("updater_package", selfupdate_dist)
 
 # Target for copying & renaming binaries to dist folder
-basic_dist = distenv.DistBuilder("pseudo2", distenv["DIST_DEPENDS"])
-distenv.Pseudo("pseudo2")
+basic_dist = distenv.DistBuilder("dist.pseudo", distenv["DIST_DEPENDS"])
+distenv.Pseudo("dist.pseudo")
 AlwaysBuild(basic_dist)
 Alias("fw_dist", basic_dist)
 Default(basic_dist)
@@ -86,17 +90,28 @@ Alias("copro_dist", copro_dist)
 
 
 # Debugging firmware
-debug = distenv.GDBPy(
-    "pseudo3",
-    # firmware_out["FW_ELF"],
-    firmware_out["FW_FLASH"],
-    GDBFLAGS="-ex 'target extended-remote | openocd.exe -c \"gdb_port pipe\" ${OPENOCD_OPTS}' "
-    '-ex "set confirm off" '
-    '-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
+debug_elf = distenv.GDBPy(
+    "debug.pseudo",
+    firmware_out["FW_ELF"],
+    GDBPYOPTS='-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
     '-ex "source ${ROOT_DIR.abspath}/debug/PyCortexMDebug/PyCortexMDebug.py" '
     '-ex "svd_load ${SVD_FILE}" '
     '-ex "compare-sections"',
 )
-# distenv.Depends(debug, firmware_out["FW_FLASH"])
-# distenv.Pseudo("pseudo3")
-Alias("debug", debug)
+distenv.Depends(debug_elf, firmware_out["FW_FLASH"])
+distenv.Pseudo("debug.pseudo")
+AlwaysBuild(debug_elf)
+Alias("debug", debug_elf)
+
+
+debug_other = distenv.GDBPy(
+    "debugother.pseudo",
+    distenv.subst("$OTHER_ELF"),
+    GDBPYOPTS=
+    # '-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
+    '-ex "source ${ROOT_DIR.abspath}/debug/PyCortexMDebug/PyCortexMDebug.py" '
+    '-ex "svd_load ${SVD_FILE}" ',
+)
+distenv.Pseudo("debugother.pseudo")
+AlwaysBuild(debug_other)
+Alias("debug_other", debug_other)

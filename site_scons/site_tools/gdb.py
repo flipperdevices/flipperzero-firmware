@@ -6,10 +6,10 @@ def generate(env):
     env.SetDefault(
         GDB="gdb",
         GDBPY="gdb-py",
-        GDBFLAGS=[],
-        GDBPYFLAGS=[],
-        GDBCOM="$GDB $GDBFLAGS $SOURCES $TARGET",
-        GDBPYCOM="$GDBPY $GDBFLAGS $GDBPYFLAGS $SOURCES",
+        GDBOPTS="",
+        GDBPYOPTS="",
+        GDBCOM="$GDB $GDBOPTS $SOURCES",  # no $TARGET
+        GDBPYCOM="$GDBPY $GDBOPTS $GDBPYOPTS $SOURCES",  # no $TARGET
     )
     env.Append(
         BUILDERS={
