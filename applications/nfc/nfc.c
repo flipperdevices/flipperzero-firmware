@@ -164,6 +164,19 @@ void nfc_text_store_clear(Nfc* nfc) {
     memset(nfc->text_store, 0, sizeof(nfc->text_store));
 }
 
+void nfc_error_store_set(Nfc* nfc, const char* errtext, ...) {
+    va_list args;
+    va_start(args, errtext);
+
+    vsnprintf(nfc->text_store, sizeof(nfc->text_store), errtext, args);
+
+    va_end(args);
+}
+
+void nfc_error_store_clear(Nfc* nfc) {
+    memset(nfc->text_store, 0, sizeof(nfc->text_store));
+}
+
 static const NotificationSequence sequence_blink_start_blue = {
     &message_blink_start_10,
     &message_blink_set_color_blue,

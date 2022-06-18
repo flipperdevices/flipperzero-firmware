@@ -1,7 +1,8 @@
 #include "../nfc_i.h"
 #include <dolphin/dolphin.h>
 
-#define NFC_SCENE_READ_FAIL_SHIFT "              "
+#define NFC_SCENE_READ_FAIL_SHIFT_ERROR "                "
+#define NFC_SCENE_READ_FAIL_SHIFT_UID "              "
 
 enum {
     ReadMifareUlStateShowError,
@@ -30,22 +31,20 @@ void nfc_scene_read_mifare_ul_fail_submenu_callback(void* context, uint32_t inde
 
 static void load_error_dialog(void* context) {
     Nfc* nfc = context;
+    // MfUltralightData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
     DialogEx* dialog_ex = nfc->dialog_ex;
 
-    dialog_ex_set_left_button_text(dialog_ex, "Retry");
-    dialog_ex_set_right_button_text(dialog_ex, "More");
     dialog_ex_set_center_button_text(dialog_ex, "Info");
     dialog_ex_set_header(dialog_ex, "Failed to read tag!", 64, 8, AlignCenter, AlignCenter);
-    dialog_ex_set_icon(dialog_ex, 8, 13, &I_Warning_30x23);
-    dialog_ex_set_text(
-        dialog_ex,
-        NFC_SCENE_READ_FAIL_SHIFT "Some data could not be read.\n" NFC_SCENE_READ_FAIL_SHIFT
-                                  "Placeholder text.\n"
-                                  "[Details on what went wrong here]",
-        8,
-        16,
-        AlignLeft,
-        AlignTop);
+    dialog_ex_set_icon(dialog_ex, 4, 13, &I_Warning_30x23);
+    nfc_text_store_set(
+        nfc,
+        NFC_SCENE_READ_FAIL_SHIFT_ERROR "Some data could\n" NFC_SCENE_READ_FAIL_SHIFT_ERROR
+                                        "not be read.\n"
+                                        "Failed to read pages %i - %i",
+        99,
+        99); // TODO: Show actual page numbers
+    dialog_ex_set_text(dialog_ex, nfc->text_store, 4, 17, AlignLeft, AlignTop);
 }
 
 static void load_uid_dialog(void* context) {
@@ -54,8 +53,6 @@ static void load_uid_dialog(void* context) {
     MfUltralightData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
     DialogEx* dialog_ex = nfc->dialog_ex;
 
-    dialog_ex_set_left_button_text(dialog_ex, "Retry");
-    dialog_ex_set_right_button_text(dialog_ex, "More");
     dialog_ex_set_center_button_text(dialog_ex, "Error");
     dialog_ex_set_header(
         dialog_ex, nfc_mf_ul_type(mf_ul_data->type, true), 64, 8, AlignCenter, AlignCenter);
@@ -63,8 +60,8 @@ static void load_uid_dialog(void* context) {
     // Display UID
     nfc_text_store_set(
         nfc,
-        NFC_SCENE_READ_FAIL_SHIFT "ATQA: %02X%02X\n" NFC_SCENE_READ_FAIL_SHIFT
-                                  "SAK: %02X\nUID: %02X %02X %02X %02X %02X %02X %02X",
+        NFC_SCENE_READ_FAIL_SHIFT_UID "ATQA: %02X%02X\n" NFC_SCENE_READ_FAIL_SHIFT_UID
+                                      "SAK: %02X\nUID: %02X %02X %02X %02X %02X %02X %02X",
         data->atqa[0],
         data->atqa[1],
         data->sak,
@@ -87,12 +84,13 @@ void nfc_scene_read_mifare_ul_fail_on_enter(void* context) {
 
     // Setup dialog view
     load_error_dialog(nfc);
+    dialog_ex_set_left_button_text(nfc->dialog_ex, "Retry");
+    dialog_ex_set_right_button_text(nfc->dialog_ex, "More");
     dialog_ex_set_context(nfc->dialog_ex, nfc);
     dialog_ex_set_result_callback(nfc->dialog_ex, nfc_scene_read_mifare_ul_fail_dialog_callback);
 
     // Setup TextBox view
     TextBox* text_box = nfc->text_box;
-    FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
     MfUltralightData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
     text_box_set_font(text_box, TextBoxFontHex);
     for(uint16_t i = 0; i < mf_ul_data->data_size; i += 2) {

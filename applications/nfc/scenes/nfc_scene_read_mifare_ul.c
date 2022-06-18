@@ -4,7 +4,7 @@
 void nfc_read_mifare_ul_worker_callback(NfcWorkerEvent event, void* context) {
     UNUSED(event);
     Nfc* nfc = context;
-    if(event == NfcCustomEventWorkerExitSuccess) {
+    if(event == NfcWorkerEventSuccess) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerExitSuccess);
     } else {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerExitFail);
