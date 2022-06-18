@@ -26,7 +26,7 @@ Open PRs Checkedout & Not Merged In Main:
 - [SubGhz: frequency analyzer combined frequency detection method #1321 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1321)
 
 PRs waiting for improvement:
-{REMOVED}[Bluetooth Remote Additions (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) due to bad USB issues.
+- {REMOVED}[Bluetooth Remote Additions (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) due to bad USB issues.
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
