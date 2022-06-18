@@ -26,8 +26,8 @@ else
 GDB	= $(PREFIX)gdb-py
 endif
 
-DEBUG ?= 1
-COMPACT ?= 0
+DEBUG ?= 0
+COMPACT ?= 1
 ifeq ($(DEBUG), 1)
 CFLAGS += -DFURI_DEBUG -DNDEBUG -Og -g
 else ifeq ($(COMPACT), 1)
