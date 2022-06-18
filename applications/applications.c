@@ -55,7 +55,7 @@ extern int32_t raycast_game_app(void* p);
 extern int32_t spectrum_analyzer_app(void* p);
 extern int32_t flappy_game_app(void* p);
 extern int32_t file_browser_app(void* p);
-extern int32_t jukebox_app(void* p);
+// extern int32_t jukebox_app(void* p);
 extern int32_t unirfremix_app(void* p);
 extern int32_t dice_app(void* p);
 extern int32_t hid_analyzer_app(void* p);
@@ -477,13 +477,13 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
      .flags = FlipperApplicationFlagDefault},
 #endif
 
-#ifdef APP_JUKEBOX
-    {.app = jukebox_app,
-     .name = "TouchTunes Remote",
-     .stack_size = 2048,
-     .icon = &A_Plugins_14,
-     .flags = FlipperApplicationFlagDefault},
-#endif
+// #ifdef APP_JUKEBOX
+//     {.app = jukebox_app,
+//      .name = "TouchTunes Remote",
+//      .stack_size = 2048,
+//      .icon = &A_Plugins_14,
+//      .flags = FlipperApplicationFlagDefault},
+// #endif
 
     {.app = wav_player_app,
      .name = "Wav Player",
