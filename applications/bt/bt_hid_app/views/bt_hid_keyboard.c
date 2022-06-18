@@ -17,7 +17,7 @@ typedef struct {
     uint8_t x;
     uint8_t y;
     uint8_t last_key_code;
-    uint8_t modifier_code;
+    uint16_t modifier_code;
     bool ok_pressed;
     bool back_pressed;
     bool connected;
@@ -278,34 +278,32 @@ static void bt_hid_keyboard_process(BtHidKeyboard* bt_hid_keyboard, InputEvent* 
                     if(model->last_key_code == HID_KEYBOARD_L_SHIFT) {
                         model->shift = !model->shift;
                         if(model->shift)
-                            model->modifier_code |= HID_KB_MOD_L_SHIFT;
+                            model->modifier_code |= KEY_MOD_LEFT_SHIFT;
                         else
-                            model->modifier_code &= ~HID_KB_MOD_L_SHIFT;
+                            model->modifier_code &= ~KEY_MOD_LEFT_SHIFT;
                     } else if(model->last_key_code == HID_KEYBOARD_L_ALT) {
                         model->alt = !model->alt;
                         if(model->alt)
-                            model->modifier_code |= HID_KB_MOD_L_ALT;
+                            model->modifier_code |= KEY_MOD_LEFT_ALT;
                         else
-                            model->modifier_code &= ~HID_KB_MOD_L_ALT;
+                            model->modifier_code &= ~KEY_MOD_LEFT_ALT;
                     } else if(model->last_key_code == HID_KEYBOARD_L_CTRL) {
                         model->ctrl = !model->ctrl;
                         if(model->ctrl)
-                            model->modifier_code |= HID_KB_MOD_L_CTRL;
+                            model->modifier_code |= KEY_MOD_LEFT_CTRL;
                         else
-                            model->modifier_code &= ~HID_KB_MOD_L_CTRL;
+                            model->modifier_code &= ~KEY_MOD_LEFT_CTRL;
                     } else if(model->last_key_code == HID_KEYBOARD_L_GUI) {
                         model->gui = !model->gui;
                         if(model->gui)
-                            model->modifier_code |= HID_KB_MOD_L_GUI;
+                            model->modifier_code |= KEY_MOD_LEFT_GUI;
                         else
-                            model->modifier_code &= ~HID_KB_MOD_L_GUI;
+                            model->modifier_code &= ~KEY_MOD_LEFT_GUI;
                     }
-                    furi_hal_bt_hid_kb_press(
-                        ((model->modifier_code << 8) & 0XFF00) | model->last_key_code);
+                    furi_hal_bt_hid_kb_press(model->modifier_code | model->last_key_code);
                 } else if(event->type == InputTypeRelease) {
                     // Release happens after short and long presses
-                    furi_hal_bt_hid_kb_release(
-                        ((model->modifier_code << 8) & 0XFF00) | model->last_key_code);
+                    furi_hal_bt_hid_kb_release(model->modifier_code | model->last_key_code);
                     model->ok_pressed = false;
                 }
             } else if(event->key == InputKeyBack) {
