@@ -1,3 +1,1 @@
 * text=auto eol=lf
-*.bat eol=crlf
-*.ps1 eol=crlf
