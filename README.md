@@ -17,6 +17,7 @@ Latest Updates:
 - Removed [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox) to make space for updates and development.
 - Removed [Mouse Jiggler (By Jacob-Tate)(Original By MuddleBox)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c) Updated by Jacob-Tate To Work
 - Reverted [Bluetooth Remote Additions (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
+- Added [Bluetooth Remote Additions (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) with new fixes
 
 Open PRs Checkedout & Not Merged In Main:
 - [Amiibo & NTAG21x Support #1313 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
@@ -24,9 +25,7 @@ Open PRs Checkedout & Not Merged In Main:
 - [SubGhz: fix protocol scher_khan #1323 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1323)
 - [SubGhz: Fast speed frequency analyzer without frequency fine tuning #1311 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1311)
 - [SubGhz: frequency analyzer combined frequency detection method #1321 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1321)
-
-PRs waiting for improvement:
-- {REMOVED}[Bluetooth Remote Additions (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) due to bad USB issues.
+- [Bluetooth Remote Additions (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
