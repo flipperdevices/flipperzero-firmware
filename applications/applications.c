@@ -59,7 +59,7 @@ extern int32_t file_browser_app(void* p);
 extern int32_t unirfremix_app(void* p);
 extern int32_t dice_app(void* p);
 extern int32_t hid_analyzer_app(void* p);
-extern int32_t mouse_jiggler_app(void* p);
+// extern int32_t mouse_jiggler_app(void* p);
 extern int32_t tanks_game_app(void* p);
 // extern int32_t chip8_app(void* p);
 extern int32_t video_poker_app(void* p);
@@ -545,9 +545,9 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .flags = FlipperApplicationFlagDefault},
 #endif
 
-#ifdef APP_MOUSE_JIGGLER
-    {.app = mouse_jiggler_app, .name = "Mouse Jiggler", .stack_size = 1024, .icon = NULL},
-#endif
+// #ifdef APP_MOUSE_JIGGLER
+//     {.app = mouse_jiggler_app, .name = "Mouse Jiggler", .stack_size = 1024, .icon = NULL},
+// #endif
 
 #ifdef APP_UART_ECHO
     {.app = uart_echo_app,
