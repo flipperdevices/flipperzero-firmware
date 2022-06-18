@@ -9,7 +9,6 @@ jobs:
     - uses: actions/checkout@v3
     - name: Install dependencies
       run: sudo apt-get install -y clang-tools check cmake
-    - name: make
-      run: make
     - name: cmake
-      run: "( rm -rf build && mkdir build && cd build && cmake .. && make && ./tests && echo OK )"
+      run: "( rm -rf build && mkdir build && cd build && cmake .. && make && CTEST_OUTPUT_ON_FAILURE=1 make 
+test && echo OK )"
