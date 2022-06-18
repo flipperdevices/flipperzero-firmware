@@ -1,6 +1,8 @@
 #include "../subghz_i.h"
 #include "../helpers/subghz_custom_event.h"
 #include <dolphin/dolphin.h>
+#include <lib/subghz/protocols/keeloq.h>
+#include <lib/subghz/protocols/star_line.h>
 
 void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
@@ -84,11 +86,10 @@ void subghz_scene_receiver_info_on_enter(void* context) {
                 subghz_scene_receiver_info_callback,
                 subghz);
         }
+        // Removed static check
         if(((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Send) ==
             SubGhzProtocolFlag_Send) &&
-           subghz->txrx->decoder_result->protocol->encoder->deserialize
-           //  && subghz->txrx->decoder_result->protocol->type == SubGhzProtocolTypeStatic
-           ) {
+           subghz->txrx->decoder_result->protocol->encoder->deserialize) {
             widget_add_button_element(
                 subghz->widget,
                 GuiButtonTypeCenter,
@@ -159,6 +160,7 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             if(!subghz_scene_receiver_info_update_parser(subghz)) {
                 return false;
             }
+
             if((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Save) ==
                SubGhzProtocolFlag_Save) {
                 subghz_file_name_clear(subghz);
@@ -191,4 +193,8 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
 void subghz_scene_receiver_info_on_exit(void* context) {
     SubGhz* subghz = context;
     widget_reset(subghz->widget);
+    keeloq_reset_mfname();
+    keeloq_reset_kl_type();
+    star_line_reset_mfname();
+    star_line_reset_kl_type();
 }

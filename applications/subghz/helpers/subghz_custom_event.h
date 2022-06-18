@@ -6,6 +6,8 @@ typedef enum {
     SubGhzCustomEventManagerSetRAW,
 
     //SubmenuIndex
+    SubmenuIndexFaacSLH,
+    SubmenuIndexBFT,
     SubmenuIndexPricenton,
     SubmenuIndexNiceFlo12bit,
     SubmenuIndexNiceFlo24bit,
@@ -23,8 +25,6 @@ typedef enum {
     SubmenuIndexSecPlus_v2_310_00,
     SubmenuIndexSecPlus_v2_315_00,
     SubmenuIndexSecPlus_v2_390_00,
-    SubmenuIndexFaacSLH,
-    SubmenuIndexBFT,
 
     //SubGhzCustomEvent
     SubGhzCustomEventSceneDeleteSuccess = 100,
@@ -66,6 +66,6 @@ typedef enum {
     SubGhzCustomEventViewTransmitterSendStart,
     SubGhzCustomEventViewTransmitterSendStop,
     SubGhzCustomEventViewTransmitterError,
-
+    
     SubGhzCustomEventByteInputDone,
 } SubGhzCustomEvent;

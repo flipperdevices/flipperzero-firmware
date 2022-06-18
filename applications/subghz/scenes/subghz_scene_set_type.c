@@ -1,5 +1,6 @@
 #include "../subghz_i.h"
 #include <lib/subghz/protocols/keeloq.h>
+#include <lib/subghz/protocols/faac_slh.h>
 #include <lib/subghz/protocols/secplus_v1.h>
 #include <lib/subghz/protocols/secplus_v2.h>
 #include <lib/subghz/blocks/math.h>
@@ -65,6 +66,18 @@ void subghz_scene_set_type_submenu_callback(void* context, uint32_t index) {
 void subghz_scene_set_type_on_enter(void* context) {
     SubGhz* subghz = context;
 
+    submenu_add_item(
+        subghz->submenu,
+        "Faac SLH_868",
+        SubmenuIndexFaacSLH,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "BFT Mitto",
+        SubmenuIndexBFT,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
     submenu_add_item(
         subghz->submenu,
         "Princeton_433",
@@ -174,6 +187,12 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
         //ToDo Fix
         uint32_t key = subghz_random_serial();
         switch(event.event) {
+        case SubmenuIndexFaacSLH:
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSetFix);
+            break;
+        case SubmenuIndexBFT:
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSetFixBft);
+            break;
         case SubmenuIndexPricenton:
             key = (key & 0x00FFFFF0) | 0x4; //btn 0x1, 0x2, 0x4, 0x8
             if(subghz_scene_set_type_submenu_gen_data_protocol(

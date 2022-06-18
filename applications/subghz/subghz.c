@@ -149,6 +149,7 @@ SubGhz* subghz_alloc() {
     subghz->txrx->worker = subghz_worker_alloc();
     subghz->txrx->fff_data = flipper_format_string_alloc();
     subghz->txrx->secure_data = malloc(sizeof(SecureData));
+
     subghz->txrx->environment = subghz_environment_alloc();
     subghz_environment_set_came_atomo_rainbow_table_file_name(
         subghz->txrx->environment, "/ext/subghz/assets/came_atomo");

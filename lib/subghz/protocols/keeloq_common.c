@@ -97,4 +97,4 @@ inline uint64_t
     uint64_t man = (uint64_t)subghz_protocol_keeloq_common_encrypt(seed, key) << 32 | 
     subghz_protocol_keeloq_common_encrypt(lsb, key);
     return man;
-} 
+}
