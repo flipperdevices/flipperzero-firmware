@@ -14,12 +14,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 ```
 
 Latest Updates:
-- Added ReadMe Section for Open PRs Checkedout & Not Merged In Main
-- Added the following open PRs Checkedout & Not Merged In Main
-- - [On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
-- - [SubGhz: fix protocol scher_khan #1323 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1323)
-- - [SubGhz: Fast speed frequency analyzer without frequency fine tuning #1311 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1311)
-- - [SubGhz: frequency analyzer combined frequency detection method #1321 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1321)
+- Updates for Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line [(Thanks to Eng1n33r)](https://github.com/Eng1n33r/flipperzero-firmware)
 
 Open PRs Checkedout & Not Merged In Main:
 - [Amiibo & NTAG21x Support #1313 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
@@ -57,7 +52,7 @@ Added Features:
 - [Added 90s Timeout for Backlight Time (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
 - [Default scan names will have timestamp instead of random name assigned (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c)
 - Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
-- SubGHz Protocols (Keeloq, Nice Flor, Star Line) updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
+- SubGHz Protocols (Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line) updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - Added Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Removing T5577 passwords via the cli command rfid clear_pass_t5577 using a dictionary attack [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Added New SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
