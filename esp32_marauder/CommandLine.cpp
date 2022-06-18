@@ -199,7 +199,7 @@ void CommandLine::runCommand(String input) {
 
     // AP Scan
     if (cmd_args.get(0) == SCANAP_CMD) {
-      int full_sw = this->argSearch(&cmd_args, "-f");
+      int full_sw = -1;
       #ifdef HAS_SCREEN
         display_obj.clearScreen();
         menu_function_obj.drawStatusBar();

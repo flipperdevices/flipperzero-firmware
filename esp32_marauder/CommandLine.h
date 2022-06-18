@@ -71,7 +71,7 @@ const char PROGMEM HELP_UPDATE_CMD_A[] = "update -s";
 const char PROGMEM HELP_UPDATE_CMD_B[] = "update -w";
 
 // WiFi sniff/scan
-const char PROGMEM HELP_SCANAP_CMD[] = "scanap [-f]";
+const char PROGMEM HELP_SCANAP_CMD[] = "scanap";
 const char PROGMEM HELP_SNIFF_BEACON_CMD[] = "sniffbeacon";
 const char PROGMEM HELP_SNIFF_PROBE_CMD[] = "sniffprobe";
 const char PROGMEM HELP_SNIFF_PWN_CMD[] = "sniffpwn";
