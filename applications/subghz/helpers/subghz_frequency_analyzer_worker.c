@@ -5,10 +5,16 @@
 
 #define TAG "SubghzFrequencyAnalyzerWorker"
 
-#define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -75.0f
+#define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -95.0f
 
 static const uint8_t subghz_preset_ook_58khz[][2] = {
     {CC1101_MDMCFG4, 0b11110111}, // Rx BW filter is 58.035714kHz
+    /* End  */
+    {0, 0},
+};
+
+static const uint8_t subghz_preset_ook_650khz[][2] = {
+    {CC1101_MDMCFG4, 0b00010111}, // Rx BW filter is 650.000kHz
     /* End  */
     {0, 0},
 };
@@ -69,7 +75,6 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
 
     //Start CC1101
     furi_hal_subghz_reset();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_flush_rx(&furi_hal_spi_bus_handle_subghz);
@@ -104,7 +109,9 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
         frequency_rssi.rssi_coarse = -127.0f;
         frequency_rssi.rssi_fine = -127.0f;
         furi_hal_subghz_idle();
+        subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_650khz);
 
+        // First stage: coarse scan
         for(size_t i = 0; i < subghz_setting_get_frequency_count(instance->setting); i++) {
             if(furi_hal_subghz_is_frequency_valid(
                    subghz_setting_get_frequency(instance->setting, i))) {
@@ -159,14 +166,18 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
                     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
                     cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
                     frequency = cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, i);
+
                     cc1101_calibrate(&furi_hal_spi_bus_handle_subghz);
                     do {
                         status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
                     } while(status.STATE != CC1101StateIDLE);
+
                     cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
                     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+
                     // delay will be in range between 1 and 2ms
                     osDelay(3);
+
                     rssi = furi_hal_subghz_get_rssi();
 
                     FURI_LOG_T(TAG, "#:%u:%f", frequency, (double)rssi);
