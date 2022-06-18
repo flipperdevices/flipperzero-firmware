@@ -15,6 +15,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 
 Latest Updates:
 - Updates for Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line [(Thanks to Eng1n33r)](https://github.com/Eng1n33r/flipperzero-firmware)
+- Added [Bluetooth Remote Additions (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 
 Open PRs Checkedout & Not Merged In Main:
 - [Amiibo & NTAG21x Support #1313 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
@@ -22,6 +23,7 @@ Open PRs Checkedout & Not Merged In Main:
 - [SubGhz: fix protocol scher_khan #1323 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1323)
 - [SubGhz: Fast speed frequency analyzer without frequency fine tuning #1311 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1311)
 - [SubGhz: frequency analyzer combined frequency detection method #1321 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1321)
+- [Bluetooth Remote Additions (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
