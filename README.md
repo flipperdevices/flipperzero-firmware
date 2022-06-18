@@ -19,9 +19,9 @@ Latest Updates:
 Open PRs Checkedout & Not Merged In Main:
 - [Amiibo & NTAG21x Support #1313 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
 - [On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
-- [SubGhz: fix protocol scher_khan #1323 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1323)
 - [SubGhz: frequency analyzer combined frequency detection method #1321 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1321)
-- [Bluetooth Remote Additions (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
+- [SubGhz: fix protocol scher_khan #1323 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1323)
+- [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
