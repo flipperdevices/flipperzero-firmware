@@ -163,6 +163,7 @@ Desktop* desktop_alloc() {
     desktop->locked_view = desktop_view_locked_alloc();
     desktop->pin_input_view = desktop_view_pin_input_alloc();
     desktop->pin_timeout_view = desktop_view_pin_timeout_alloc();
+    desktop->slideshow_view = desktop_view_slideshow_alloc();
 
     desktop->main_view_stack = view_stack_alloc();
     desktop->main_view = desktop_main_alloc();
@@ -209,6 +210,10 @@ Desktop* desktop_alloc() {
         desktop->view_dispatcher,
         DesktopViewIdPinInput,
         desktop_view_pin_input_get_view(desktop->pin_input_view));
+    view_dispatcher_add_view(
+        desktop->view_dispatcher,
+        DesktopViewIdSlideshow,
+        desktop_view_slideshow_get_view(desktop->slideshow_view));
 
     // Lock icon
     desktop->lock_viewport = view_port_alloc();
@@ -290,9 +295,9 @@ void desktop_free(Desktop* desktop) {
     free(desktop);
 }
 
-static bool desktop_is_first_start() {
+static bool desktop_check_file_flag(const char* flag_path) {
     Storage* storage = furi_record_open("storage");
-    bool exists = storage_common_stat(storage, "/int/first_start", NULL) == FSE_OK;
+    bool exists = storage_common_stat(storage, flag_path, NULL) == FSE_OK;
     furi_record_close("storage");
 
     return exists;
@@ -320,8 +325,12 @@ int32_t desktop_srv(void* p) {
         desktop_lock(desktop);
     }
 
-    if(desktop_is_first_start()) {
+    if(desktop_check_file_flag("/int/first_start")) {
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneFirstStart);
+    }
+
+    if(desktop_check_file_flag("/int/slideshow")) {
+        scene_manager_next_scene(desktop->scene_manager, DesktopSceneSlideshow);
     }
 
     if(!furi_hal_version_do_i_belong_here()) {

@@ -39,7 +39,7 @@ void updater_scene_loadcfg_on_enter(void* context) {
             string_get_cstr(pending_upd->manifest->version));
 
         widget_add_button_element(
-            updater->widget,
+             updater->widget,
             GuiButtonTypeRight,
             "Install",
             updater_scene_loadcfg_apply_callback,

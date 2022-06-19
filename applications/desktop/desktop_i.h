@@ -9,6 +9,7 @@
 #include "views/desktop_view_first_start.h"
 #include "views/desktop_view_lock_menu.h"
 #include "views/desktop_view_debug.h"
+#include "views/desktop_view_slideshow.h"
 #include "desktop/desktop_settings/desktop_settings.h"
 
 #include <furi.h>
@@ -32,6 +33,7 @@ typedef enum {
     DesktopViewIdHwMismatch,
     DesktopViewIdPinInput,
     DesktopViewIdPinTimeout,
+    DesktopViewIdSlideshow,
     DesktopViewIdTotal,
 } DesktopViewId;
 
@@ -50,6 +52,7 @@ struct Desktop {
     DesktopViewLocked* locked_view;
     DesktopMainView* main_view;
     DesktopViewPinTimeout* pin_timeout_view;
+    DesktopSlideshowView* slideshow_view;
 
     ViewStack* main_view_stack;
     ViewStack* locked_view_stack;

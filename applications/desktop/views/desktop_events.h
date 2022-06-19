@@ -37,6 +37,8 @@ typedef enum {
     DesktopAnimationEventNewIdleAnimation,
     DesktopAnimationEventInteractAnimation,
 
+    DesktopSlideshowCompleted,
+
     // Global events
     DesktopGlobalBeforeAppStarted,
     DesktopGlobalAfterAppFinished,
