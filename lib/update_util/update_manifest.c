@@ -26,6 +26,7 @@ UpdateManifest* update_manifest_alloc() {
     string_init(update_manifest->radio_image);
     string_init(update_manifest->staged_loader_file);
     string_init(update_manifest->resource_bundle);
+    string_init(update_manifest->splash_file);
     update_manifest->target = 0;
     update_manifest->manifest_version = 0;
     memset(update_manifest->ob_reference.bytes, 0, FURI_HAL_FLASH_OB_RAW_SIZE_BYTES);
@@ -42,6 +43,7 @@ void update_manifest_free(UpdateManifest* update_manifest) {
     string_clear(update_manifest->radio_image);
     string_clear(update_manifest->staged_loader_file);
     string_clear(update_manifest->resource_bundle);
+    string_clear(update_manifest->splash_file);
     free(update_manifest);
 }
 

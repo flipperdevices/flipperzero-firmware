@@ -2,7 +2,6 @@
 
 import os
 import struct
-from zlib import crc32
 
 from flipper.app import App
 from flipper.assets.icon import file2image
@@ -42,6 +41,7 @@ class Main(App):
                 file_idx += 1
             except Exception as e:
                 self.logger.error(e)
+                break
 
         widths = set(img.width for img in images)
         heights = set(img.height for img in images)
