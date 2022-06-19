@@ -26,6 +26,12 @@ struct FuriThread {
     size_t heap_size;
 };
 
+/** Catch threads that are trying to exit wrong way */
+__attribute__((__noreturn__)) void furi_thread_catch() {
+    asm volatile("nop"); // extra magic
+    furi_crash("You are doing it wrong");
+}
+
 static void furi_thread_set_state(FuriThread* thread, FuriThreadState state) {
     furi_assert(thread);
     thread->state = state;
@@ -58,6 +64,7 @@ static void furi_thread_body(void* context) {
     furi_thread_set_state(thread, FuriThreadStateStopped);
 
     vTaskDelete(thread->task_handle);
+    furi_thread_catch();
 }
 
 FuriThread* furi_thread_alloc() {

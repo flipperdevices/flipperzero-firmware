@@ -89,6 +89,9 @@ to exclude the API function. */
 #define configTASK_NOTIFICATION_ARRAY_ENTRIES 2
 #define CMSIS_TASK_NOTIFY_INDEX 1
 
+extern __attribute__((__noreturn__)) void furi_thread_catch();
+#define configTASK_RETURN_ADDRESS (furi_thread_catch + 2)
+
 /*
  * The CMSIS-RTOS V2 FreeRTOS wrapper is dependent on the heap implementation used
  * by the application thus the correct define need to be enabled below
