@@ -21,11 +21,6 @@ static void desktop_view_slideshow_draw(Canvas* canvas, void* model) {
     DesktopSlideshowViewModel* m = model;
 
     canvas_clear(canvas);
-
-    canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontSecondary);
-    //uint8_t width = canvas_width(canvas);
-    //uint8_t height = canvas_height(canvas);
     slideshow_draw(m->slideshow, canvas, 0, 0);
 }
 
@@ -35,10 +30,22 @@ static bool desktop_view_slideshow_input(InputEvent* event, void* context) {
 
     if(event->type == InputTypeShort) {
         DesktopSlideshowViewModel* model = view_get_model(instance->view);
-        if((event->key == InputKeyRight) || (event->key == InputKeyOk)) {
-            if(!slideshow_advance(model->slideshow)) {
-                instance->callback(DesktopSlideshowCompleted, instance->context);
-            }
+        bool end_slideshow = false;
+        switch(event->key) {
+        case InputKeyLeft:
+            slideshow_goback(model->slideshow);
+            break;
+        case InputKeyRight:
+        case InputKeyOk:
+            end_slideshow = !slideshow_advance(model->slideshow);
+            break;
+        case InputKeyBack:
+            end_slideshow = true;
+        default:
+            break;
+        }
+        if(end_slideshow) {
+            instance->callback(DesktopSlideshowCompleted, instance->context);
         }
         view_commit_model(instance->view, true);
     }

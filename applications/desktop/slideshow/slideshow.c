@@ -95,6 +95,12 @@ bool slideshow_advance(Slideshow* slideshow) {
     return false;
 }
 
+void slideshow_goback(Slideshow* slideshow) {
+    if(slideshow->current_frame > 0) {
+        slideshow->current_frame--;
+    }
+}
+
 void slideshow_draw(Slideshow* slideshow, Canvas* canvas, uint8_t x, uint8_t y) {
     furi_assert(slideshow->current_frame < slideshow->icon.frame_count);
     canvas_draw_bitmap(
