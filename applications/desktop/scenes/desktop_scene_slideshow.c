@@ -13,8 +13,7 @@ void desktop_scene_slideshow_on_enter(void* context) {
     Desktop* desktop = (Desktop*)context;
     DesktopSlideshowView* slideshow_view = desktop->slideshow_view;
 
-    desktop_view_slideshow_set_callback(
-        slideshow_view, desktop_scene_slideshow_callback, desktop);
+    desktop_view_slideshow_set_callback(slideshow_view, desktop_scene_slideshow_callback, desktop);
 
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewIdSlideshow);
 }

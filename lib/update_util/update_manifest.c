@@ -17,6 +17,7 @@
 #define MANIFEST_KEY_OB_REFERENCE "OB reference"
 #define MANIFEST_KEY_OB_MASK "OB mask"
 #define MANIFEST_KEY_OB_WRITE_MASK "OB write mask"
+#define MANIFEST_KEY_SPLASH_FILE "Splashscreen"
 
 UpdateManifest* update_manifest_alloc() {
     UpdateManifest* update_manifest = malloc(sizeof(UpdateManifest));
@@ -106,6 +107,9 @@ static bool
             MANIFEST_KEY_OB_WRITE_MASK,
             update_manifest->ob_write_mask.bytes,
             FURI_HAL_FLASH_OB_RAW_SIZE_BYTES);
+
+        flipper_format_read_string(
+            flipper_file, MANIFEST_KEY_SPLASH_FILE, update_manifest->splash_file);
 
         update_manifest->valid =
             (!string_empty_p(update_manifest->firmware_dfu_image) ||

@@ -17,11 +17,12 @@ struct Slideshow {
 
 typedef struct {
     uint32_t magic;
+    uint8_t version;
     uint8_t width;
     uint8_t height;
     uint8_t frame_count;
 } SlideshowFileHeader;
-_Static_assert(sizeof(SlideshowFileHeader) == 7, "Incorrect SlideshowFileHeader size");
+_Static_assert(sizeof(SlideshowFileHeader) == 8, "Incorrect SlideshowFileHeader size");
 
 typedef struct {
     uint16_t size;

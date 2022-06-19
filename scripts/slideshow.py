@@ -10,6 +10,7 @@ from flipper.assets.icon import file2image
 
 class Main(App):
     MAGIC = 0x72676468
+    VERSION = 1
 
     def init(self):
         self.parser.add_argument("-i", "--input", help="input folder", required=True)
@@ -30,19 +31,17 @@ class Main(App):
         file_idx = 0
         images = []
         while True:
-            self.logger.debug(
-                f'working on {os.path.join(self.args.input, f"frame_{file_idx:02}.png")}'
-            )
+            frame_filename = os.path.join(self.args.input, f"frame_{file_idx:02}.png")
+            if not os.path.exists(frame_filename):
+                break
+
+            self.logger.debug(f"working on {frame_filename}")
             try:
-                images.append(
-                    file2image(
-                        os.path.join(self.args.input, f"frame_{file_idx:02}.png")
-                    )
-                )
-                self.logger.info(f"Processed #{file_idx}")
+                images.append(file2image(frame_filename))
+                self.logger.debug(f"Processed frame #{file_idx}")
                 file_idx += 1
             except Exception as e:
-                break
+                self.logger.error(e)
 
         widths = set(img.width for img in images)
         heights = set(img.height for img in images)
@@ -51,7 +50,7 @@ class Main(App):
             return 2
 
         data = struct.pack(
-            "<IBBB", self.MAGIC, widths.pop(), heights.pop(), len(images)
+            "<IBBBB", self.MAGIC, self.VERSION, widths.pop(), heights.pop(), len(images)
         )
         for image in images:
             data += struct.pack("<H", len(image.data))

@@ -24,6 +24,7 @@ static const char* update_task_stage_descr[] = {
     [UpdateTaskStageLfsBackup] = "Backing up LFS",
     [UpdateTaskStageLfsRestore] = "Restoring LFS",
     [UpdateTaskStageResourcesUpdate] = "Updating resources",
+    [UpdateTaskStageSplashscreenInstall] = "Installing splashscreen",
     [UpdateTaskStageCompleted] = "Restarting...",
     [UpdateTaskStageError] = "Error",
     [UpdateTaskStageOBError] = "OB, report",
@@ -58,6 +59,7 @@ static const UpdateTaskStageGroupMap update_task_stage_progress[] = {
     [UpdateTaskStageLfsRestore] = STAGE_DEF(UpdateTaskStageGroupPostUpdate, 30),
 
     [UpdateTaskStageResourcesUpdate] = STAGE_DEF(UpdateTaskStageGroupResources, 255),
+    [UpdateTaskStageSplashscreenInstall] = STAGE_DEF(UpdateTaskStageGroupSplashscreen, 5),
 
     [UpdateTaskStageCompleted] = STAGE_DEF(UpdateTaskStageGroupMisc, 1),
     [UpdateTaskStageError] = STAGE_DEF(UpdateTaskStageGroupMisc, 1),
@@ -78,6 +80,9 @@ static UpdateTaskStageGroup update_task_get_task_groups(UpdateTask* update_task)
     }
     if(!string_empty_p(manifest->resource_bundle)) {
         ret |= UpdateTaskStageGroupResources;
+    }
+    if(!string_empty_p(manifest->splash_file)) {
+        ret |= UpdateTaskStageGroupSplashscreen;
     }
     return ret;
 }
