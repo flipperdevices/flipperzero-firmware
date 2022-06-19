@@ -20,7 +20,7 @@ extern uint32_t SystemCoreClock;
 #define configUSE_TICK_HOOK 0
 #define configCPU_CLOCK_HZ (SystemCoreClock)
 #define configTICK_RATE_HZ ((TickType_t)1000)
-#define configMAX_PRIORITIES (56)
+#define configMAX_PRIORITIES (32)
 #define configMINIMAL_STACK_SIZE ((uint16_t)128)
 
 /* Heap size determined automatically by linker */
@@ -35,7 +35,7 @@ extern uint32_t SystemCoreClock;
 #define configUSE_RECURSIVE_MUTEXES 1
 #define configUSE_COUNTING_SEMAPHORES 1
 #define configENABLE_BACKWARD_COMPATIBILITY 0
-#define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
+#define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
 #define configUSE_TICKLESS_IDLE 2
 #define configRECORD_STACK_HIGH_ADDRESS 1
 #define configUSE_NEWLIB_REENTRANT 0
