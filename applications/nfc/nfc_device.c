@@ -495,16 +495,17 @@ static bool nfc_device_save_mifare_df_data(FlipperFormat* file, NfcDevice* dev) 
             n_apps++;
         }
         if(!flipper_format_write_uint32(file, "Application Count", &n_apps, 1)) break;
-        if(n_apps == 0) break;
-        tmp = malloc(n_apps * 3);
-        int i = 0;
-        for(MifareDesfireApplication* app = data->app_head; app; app = app->next) {
-            memcpy(tmp + i, app->id, 3);
-            i += 3;
-        }
-        if(!flipper_format_write_hex(file, "Application IDs", tmp, n_apps * 3)) break;
-        for(MifareDesfireApplication* app = data->app_head; app; app = app->next) {
-            if(!nfc_device_save_mifare_df_app(file, app)) break;
+        if(n_apps) {
+            tmp = malloc(n_apps * 3);
+            int i = 0;
+            for(MifareDesfireApplication* app = data->app_head; app; app = app->next) {
+                memcpy(tmp + i, app->id, 3);
+                i += 3;
+            }
+            if(!flipper_format_write_hex(file, "Application IDs", tmp, n_apps * 3)) break;
+            for(MifareDesfireApplication* app = data->app_head; app; app = app->next) {
+                if(!nfc_device_save_mifare_df_app(file, app)) break;
+            }
         }
         saved = true;
     } while(false);
