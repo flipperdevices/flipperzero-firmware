@@ -16,6 +16,7 @@ $ docker-compose exec dev make DEBUG=0 COMPACT=1
 Latest Updates:
 - Snake now shows score [Thanks to whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac)
 - Center hold now updates the idle animation [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba)
+- Tetris now shows score
 
 Open PRs Checkedout & Not Merged In Main:
 - [Amiibo & NTAG21x Support #1313 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
