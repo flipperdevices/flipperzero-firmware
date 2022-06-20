@@ -61,7 +61,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     if (letsRoll) {
         static bool rand_generator_inited = false;
         if(!rand_generator_inited) {
-            srand(DWT->CYCCNT);
+            srand(osKernelGetTickCount());
             rand_generator_inited = true;
         }
         sprintf(rollTime[0], "%.2d:%.2d:%.2d", state->datetime.hour, state->datetime.minute, state->datetime.second);
@@ -125,24 +125,11 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 playerTwoScore++;
                 sprintf(strings[1], "%s < %s", deckOne[d1_i], deckTwo[d2_i]);
             }
-
         } else if(diceSelect==232) {
-            const char* diceOne[] = {
-                "You", "You choose", "Nobody",
-                "Everyone", "Nose goes", "Player to your right"
-            };
-            const char* diceTwo[] = {
-                "take a tiny toke", "just chill", "take 2 tokes",
-                "take a huge hit", "bogart it", "take a puff"
-            };
-            const char* diceThree[] = {
-                "while humming a tune", "with your eyes closed", "on your knees",
-                "while holding your nose", "while spinning in a circle", "in slow motion"
-            };
-            const char* diceFour[] = {
-                "twice", "then tell a joke", "then laugh as hard as you can",
-                "with the player to your left", "then sing a song", "then do a dance"
-            };
+            const char* diceOne[]={"You", "You choose", "Nobody", "Everyone", "Nose goes", "Player to your right"};
+            const char* diceTwo[]={"take a tiny toke", "just chill", "take 2 tokes", "take a huge hit", "bogart it", "take a puff"};
+            const char* diceThree[]={"while humming a tune", "with your eyes closed", "on your knees","while holding your nose", "while spinning in a circle", "in slow motion"};
+            const char* diceFour[]={"twice", "then tell a joke", "then laugh as hard as you can", "with the player to your left", "then sing a song", "then do a dance"};
             diceRoll= ((rand() % diceSelect)+1); // JUST TO GET IT GOING? AND FIX BUG
             sprintf(diceType[0], "%s", "WEED!");
             sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
