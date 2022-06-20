@@ -84,6 +84,11 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_box(canvas, p.x, p.y, 4, 4);
     }
 
+    // Show score on the game field
+    char buffer2[12];
+    snprintf(buffer2, sizeof(buffer2), "Score: %u", snake_state->len - 7);
+    canvas_draw_str_aligned(canvas, 64, 57, AlignCenter, AlignBottom, buffer2);
+
     // Game Over banner
     if(snake_state->state == GameStateGameOver) {
         // Screen is 128x64 px
