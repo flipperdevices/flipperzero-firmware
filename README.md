@@ -19,7 +19,7 @@ Latest Updates:
 - Tetris now shows score
 - Latest dev updates from 839e52ac
 - Idle animations will show all animations regardless of level and butthurt [Thanks to MajiK]
-- Removed debug apps to make 45KB of space on final image
+- Removed debug apps to make 33KB of space on final image
 
 Open PRs Checkedout & Not Merged In Main:
 - [Amiibo & NTAG21x Support #1313 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
