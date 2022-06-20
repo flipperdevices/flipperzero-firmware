@@ -18,7 +18,7 @@ Latest Updates:
 - Center hold now updates the idle animation [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba)
 - Tetris now shows score
 - Latest dev updates from 839e52ac
-- Fixed sound decay issues on music player
+- Fixed sound decay issues on music player [Thanks to MajiK]
 - Idle animations will show all animations regardless of level and butthurt [Thanks to MajiK]
 - Removed debug apps to make 33KB of space on final image
 
