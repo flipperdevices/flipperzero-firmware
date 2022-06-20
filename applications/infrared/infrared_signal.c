@@ -170,7 +170,7 @@ bool infrared_signal_is_valid(InfraredSignal* signal) {
 }
 
 void infrared_signal_set_signal(InfraredSignal* signal, const InfraredSignal* other) {
-    if(signal->is_raw) {
+    if(other->is_raw) {
         const InfraredRawSignal* raw = &other->payload.raw;
         infrared_signal_set_raw_signal(
             signal, raw->timings, raw->timings_size, raw->frequency, raw->duty_cycle);
