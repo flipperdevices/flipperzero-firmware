@@ -20,7 +20,7 @@ Latest Updates:
 - Latest dev updates from 839e52ac
 - Fixed sound decay issues on music player [Thanks to MajiK]
 - Idle animations will show all animations regardless of level and butthurt [Thanks to MajiK]
-- Removed debug apps to make 33KB of space on final image
+- Removed debug apps compiling on applications.mk to make 33KB of space on final compressed image
 
 Open PRs Checkedout & Not Merged In Main:
 - [Amiibo & NTAG21x Support #1313 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
