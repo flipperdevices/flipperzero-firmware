@@ -82,6 +82,7 @@ static Infrared* infrared_alloc() {
 
     InfraredAppState* app_state = &infrared->app_state;
     app_state->is_learning_new_remote = false;
+    app_state->is_debug_enabled = furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
     app_state->edit_target = InfraredEditTargetNone;
     app_state->edit_mode = InfraredEditModeNone;
     app_state->current_button_index = InfraredButtonIndexNone;
@@ -131,6 +132,14 @@ static Infrared* infrared_alloc() {
     view_dispatcher_add_view(
         view_dispatcher, InfraredViewStack, view_stack_get_view(infrared->view_stack));
 
+    if(app_state->is_debug_enabled) {
+        infrared->debug_view = infrared_debug_view_alloc();
+        view_dispatcher_add_view(
+            view_dispatcher,
+            InfraredViewDebugView,
+            infrared_debug_view_get_view(infrared->debug_view));
+    }
+
     infrared->button_panel = button_panel_alloc();
     infrared->loading = loading_alloc();
     infrared->progress = infrared_progress_view_alloc();
@@ -141,6 +150,7 @@ static Infrared* infrared_alloc() {
 static void infrared_free(Infrared* infrared) {
     furi_assert(infrared);
     ViewDispatcher* view_dispatcher = infrared->view_dispatcher;
+    InfraredAppState* app_state = &infrared->app_state;
 
     view_dispatcher_remove_view(view_dispatcher, InfraredViewSubmenu);
     submenu_free(infrared->submenu);
@@ -159,6 +169,11 @@ static void infrared_free(Infrared* infrared) {
 
     view_dispatcher_remove_view(view_dispatcher, InfraredViewStack);
     view_stack_free(infrared->view_stack);
+
+    if(app_state->is_debug_enabled) {
+        view_dispatcher_remove_view(view_dispatcher, InfraredViewDebugView);
+        infrared_debug_view_free(infrared->debug_view);
+    }
 
     button_panel_free(infrared->button_panel);
     loading_free(infrared->loading);

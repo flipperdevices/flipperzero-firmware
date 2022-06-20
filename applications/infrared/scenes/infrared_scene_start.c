@@ -36,7 +36,7 @@ void infrared_scene_start_on_enter(void* context) {
         infrared_scene_start_submenu_callback,
         infrared);
 
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+    if(infrared->app_state.is_debug_enabled) {
         submenu_add_item(
             submenu, "Debug", SubmenuIndexDebug, infrared_scene_start_submenu_callback, infrared);
     }

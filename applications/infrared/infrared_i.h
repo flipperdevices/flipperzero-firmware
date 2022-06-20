@@ -28,6 +28,7 @@
 
 #include "scenes/infrared_scene.h"
 #include "views/infrared_progress_view.h"
+#include "views/infrared_debug_view.h"
 
 #define INFRARED_FILE_NAME_SIZE 100
 #define INFRARED_TEXT_STORE_NUM 2
@@ -59,6 +60,7 @@ typedef enum {
 
 typedef struct {
     bool is_learning_new_remote;
+    bool is_debug_enabled;
     InfraredEditTarget edit_target : 8;
     InfraredEditMode edit_mode : 8;
     int32_t current_button_index;
@@ -84,6 +86,7 @@ struct Infrared {
     Popup* popup;
 
     ViewStack* view_stack;
+    InfraredDebugView* debug_view;
 
     ButtonPanel* button_panel;
     Loading* loading;
@@ -101,6 +104,7 @@ typedef enum {
     InfraredViewButtonMenu,
     InfraredViewPopup,
     InfraredViewStack,
+    InfraredViewDebugView,
 } InfraredView;
 
 typedef enum {
