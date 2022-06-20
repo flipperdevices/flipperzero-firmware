@@ -5,9 +5,9 @@ $repo_root = (Get-Item "$PSScriptRoot\..\..").FullName
 $toolchain_url = "https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-2022.06-win32-flipper.zip"
 $toolchain_zip = "gcc-arm-none-eabi-10.3-2022.06-win32-flipper.zip"
 
-if (Test-Path -LiteralPath "$repo_root\toolchain") {
+if (Test-Path -LiteralPath "$repo_root\toolchain\win32") {
 	Write-Host -NoNewline "Removing old Windows toolchain.."
-	Remove-Item -LiteralPath "$repo_root\toolchain" -Force -Recurse
+	Remove-Item -LiteralPath "$repo_root\toolchain\win32" -Force -Recurse
 	Write-Host "done!"
 }
 
@@ -17,7 +17,7 @@ Write-Host "done!"
 
 Write-Host -NoNewline "Unziping Windows toolchain.."
 Expand-Archive -LiteralPath "$toolchain_zip" -DestinationPath "$repo_root\" -Force
-Rename-Item "$repo_root\gcc-arm-none-eabi-10.3-2022.06" "$repo_root\toolchain"
+Rename-Item "$repo_root\gcc-arm-none-eabi-10.3-2022.06" "$repo_root\toolchain\win32"
 Write-Host "done!"
 
 Write-Host -NoNewline "Clearing temporary files.."
