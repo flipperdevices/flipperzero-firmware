@@ -73,6 +73,11 @@ if GetOption("fullenv"):
     AlwaysBuild(selfupdate_dist)
     Alias("updater_package", selfupdate_dist)
 
+    # Updater debug
+    debug_updater_elf = distenv.AddDebugTarget(updater_out, False)
+    Alias("updater_debug", debug_updater_elf)
+
+
 # Target for copying & renaming binaries to dist folder
 basic_dist = distenv.DistBuilder("dist.pseudo", distenv["DIST_DEPENDS"])
 distenv.Pseudo("dist.pseudo")
@@ -90,18 +95,9 @@ Alias("copro_dist", copro_dist)
 
 
 # Debugging firmware
-debug_elf = distenv.GDBPy(
-    "debug.pseudo",
-    firmware_out["FW_ELF"],
-    GDBPYOPTS='-ex "source debug/FreeRTOS/FreeRTOS.py" '
-    '-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" '
-    '-ex "svd_load ${SVD_FILE}" '
-    '-ex "compare-sections"',
-)
-distenv.Depends(debug_elf, firmware_out["FW_FLASH"])
-distenv.Pseudo("debug.pseudo")
-AlwaysBuild(debug_elf)
-Alias("debug", debug_elf)
+
+debug_fw_elf = distenv.AddDebugTarget(firmware_out)
+Alias("debug", debug_fw_elf)
 
 
 # Debug alien elf

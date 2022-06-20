@@ -2,5 +2,6 @@
 
 set +x
 
+SCRIPTDIR="$( dirname -- "$0"; )";
 SCONS_DEFAULT_FLAGS="-Q --warn=target-not-built"
-/usr/bin/env python3 lib/scons/scripts/scons.py ${SCONS_DEFAULT_FLAGS} "$@"
+/usr/bin/env python3 ${SCRIPTDIR}/lib/scons/scripts/scons.py ${SCONS_DEFAULT_FLAGS} "$@"
