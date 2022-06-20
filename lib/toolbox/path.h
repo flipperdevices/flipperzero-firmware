@@ -15,6 +15,24 @@ extern "C" {
 void path_extract_filename_no_ext(const char* path, string_t filename);
 
 /**
+ * @brief Extract filename string from path.
+ * 
+ * @param path path string
+ * @param filename output filename string. Must be initialized before.
+ * @param trim_ext true - get filename without extension
+ */
+void path_extract_filename(string_t path, string_t filename, bool trim_ext);
+
+/**
+ * @brief Extract file extension from path.
+ * 
+ * @param path path string
+ * @param ext output extension string
+ * @param ext_len_max maximum extension string length
+ */
+void path_extract_extension(string_t path, char* ext, size_t ext_len_max);
+
+/**
  * @brief Extract last path component
  * 
  * @param path path string

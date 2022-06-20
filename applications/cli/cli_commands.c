@@ -1,6 +1,7 @@
 #include "cli_commands.h"
+#include "cli_command_gpio.h"
+
 #include <furi_hal.h>
-#include <furi_hal_gpio.h>
 #include <furi_hal_info.h>
 #include <task_control_block.h>
 #include <time.h>
@@ -248,101 +249,6 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
     furi_record_close("notification");
 }
 
-void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
-    UNUSED(context);
-    char pin_names[][4] = {
-        "PC0",
-        "PC1",
-        "PC3",
-        "PB2",
-        "PB3",
-        "PA4",
-        "PA6",
-        "PA7",
-#ifdef FURI_DEBUG
-        "PA0",
-        "PB7",
-        "PB8",
-        "PB9"
-#endif
-    };
-    GpioPin gpio[] = {
-        {.port = GPIOC, .pin = LL_GPIO_PIN_0},
-        {.port = GPIOC, .pin = LL_GPIO_PIN_1},
-        {.port = GPIOC, .pin = LL_GPIO_PIN_3},
-        {.port = GPIOB, .pin = LL_GPIO_PIN_2},
-        {.port = GPIOB, .pin = LL_GPIO_PIN_3},
-        {.port = GPIOA, .pin = LL_GPIO_PIN_4},
-        {.port = GPIOA, .pin = LL_GPIO_PIN_6},
-        {.port = GPIOA, .pin = LL_GPIO_PIN_7},
-#ifdef FURI_DEBUG
-        {.port = GPIOA, .pin = LL_GPIO_PIN_0}, // IR_RX (PA0)
-        {.port = GPIOB, .pin = LL_GPIO_PIN_7}, // UART RX (PB7)
-        {.port = GPIOB, .pin = LL_GPIO_PIN_8}, // SPEAKER (PB8)
-        {.port = GPIOB, .pin = LL_GPIO_PIN_9}, // IR_TX (PB9)
-#endif
-    };
-    uint8_t num = 0;
-    bool pin_found = false;
-
-    // Get first word as pin name
-    string_t pin_name;
-    string_init(pin_name);
-    size_t ws = string_search_char(args, ' ');
-    if(ws == STRING_FAILURE) {
-        cli_print_usage("gpio_set", "<pin_name> <0|1>", string_get_cstr(args));
-        string_clear(pin_name);
-        return;
-    } else {
-        string_set_n(pin_name, args, 0, ws);
-        string_right(args, ws);
-        string_strim(args);
-    }
-    // Search correct pin name
-    for(num = 0; num < sizeof(pin_names) / sizeof(char*); num++) {
-        if(!string_cmp(pin_name, pin_names[num])) {
-            pin_found = true;
-            break;
-        }
-    }
-    if(!pin_found) {
-        printf("Wrong pin name. Available pins: ");
-        for(uint8_t i = 0; i < sizeof(pin_names) / sizeof(char*); i++) {
-            printf("%s ", pin_names[i]);
-        }
-        string_clear(pin_name);
-        return;
-    }
-    string_clear(pin_name);
-    // Read "0" or "1" as second argument to set or reset pin
-    if(!string_cmp(args, "0")) {
-        LL_GPIO_SetPinMode(gpio[num].port, gpio[num].pin, LL_GPIO_MODE_OUTPUT);
-        LL_GPIO_SetPinOutputType(gpio[num].port, gpio[num].pin, LL_GPIO_OUTPUT_PUSHPULL);
-        LL_GPIO_ResetOutputPin(gpio[num].port, gpio[num].pin);
-    } else if(!string_cmp(args, "1")) {
-#ifdef FURI_DEBUG
-        if(num == 8) { // PA0
-            printf(
-                "Setting PA0 pin HIGH with TSOP connected can damage IR receiver. Are you sure you want to continue? (y/n)?\r\n");
-            char c = cli_getc(cli);
-            if(c != 'y' && c != 'Y') {
-                printf("Cancelled.\r\n");
-                return;
-            }
-        }
-#else
-        UNUSED(cli);
-#endif
-
-        LL_GPIO_SetPinMode(gpio[num].port, gpio[num].pin, LL_GPIO_MODE_OUTPUT);
-        LL_GPIO_SetPinOutputType(gpio[num].port, gpio[num].pin, LL_GPIO_OUTPUT_PUSHPULL);
-        LL_GPIO_SetOutputPin(gpio[num].port, gpio[num].pin);
-    } else {
-        printf("Wrong 2nd argument. Use \"1\" to set, \"0\" to reset");
-    }
-    return;
-}
-
 void cli_command_ps(Cli* cli, string_t args, void* context) {
     UNUSED(cli);
     UNUSED(args);
@@ -424,6 +330,6 @@ void cli_commands_init(Cli* cli) {
 
     cli_add_command(cli, "vibro", CliCommandFlagDefault, cli_command_vibro, NULL);
     cli_add_command(cli, "led", CliCommandFlagDefault, cli_command_led, NULL);
-    cli_add_command(cli, "gpio_set", CliCommandFlagDefault, cli_command_gpio_set, NULL);
+    cli_add_command(cli, "gpio", CliCommandFlagDefault, cli_command_gpio, NULL);
     cli_add_command(cli, "i2c", CliCommandFlagDefault, cli_command_i2c, NULL);
 }
