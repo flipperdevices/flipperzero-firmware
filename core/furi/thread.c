@@ -193,7 +193,6 @@ int32_t furi_thread_get_return_code(FuriThread* thread) {
 }
 
 FuriThreadId furi_thread_get_current_id() {
-    furi_assert(!FURI_IS_ISR());
     return xTaskGetCurrentTaskHandle();
 }
 
