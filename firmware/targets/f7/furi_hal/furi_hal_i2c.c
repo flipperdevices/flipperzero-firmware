@@ -1,9 +1,9 @@
 #include <furi_hal_i2c.h>
+#include <furi_hal_i2c_i.h>
 #include <furi_hal_delay.h>
 #include <furi_hal_version.h>
 #include <furi_hal_power.h>
 
-#include <stm32wbxx_ll_i2c.h>
 #include <stm32wbxx_ll_gpio.h>
 #include <stm32wbxx_ll_cortex.h>
 #include <furi.h>

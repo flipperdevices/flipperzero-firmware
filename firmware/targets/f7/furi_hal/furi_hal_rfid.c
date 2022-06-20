@@ -6,6 +6,7 @@
 
 #include <stm32wbxx_ll_tim.h>
 #include <stm32wbxx_ll_comp.h>
+#include <stm32wbxx_ll_exti.h>
 
 #define FURI_HAL_RFID_READ_TIMER TIM1
 #define FURI_HAL_RFID_READ_TIMER_CHANNEL LL_TIM_CHANNEL_CH1N

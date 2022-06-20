@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stm32wbxx_ll_i2c.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -21,13 +19,6 @@ typedef enum {
 
 /** FuriHal i2c bus event callback */
 typedef void (*FuriHalI2cBusEventCallback)(FuriHalI2cBus* bus, FuriHalI2cBusEvent event);
-
-/** FuriHal i2c bus */
-struct FuriHalI2cBus {
-    I2C_TypeDef* i2c;
-    FuriHalI2cBusHandle* current_handle;
-    FuriHalI2cBusEventCallback callback;
-};
 
 /** FuriHal i2c handle states */
 typedef enum {

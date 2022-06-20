@@ -1,6 +1,8 @@
 #include <furi_hal_spi_config.h>
 #include <furi_hal_resources.h>
 
+#include <stm32wbxx_ll_bus.h>
+
 /* SPI Presets */
 
 const LL_SPI_InitTypeDef furi_hal_spi_preset_2edge_low_8m = {

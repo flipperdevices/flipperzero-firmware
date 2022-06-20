@@ -2,6 +2,8 @@
 
 #include <furi_hal_spi_types.h>
 
+#include <stm32wbxx_ll_spi.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

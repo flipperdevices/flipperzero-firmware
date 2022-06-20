@@ -2,6 +2,7 @@
 #include "nfca.h"
 #include "nfc_util.h"
 #include <furi_hal_rtc.h>
+#include "nfc_common.h"
 
 // Algorithm from https://github.com/RfidResearchGroup/proxmark3.git
 

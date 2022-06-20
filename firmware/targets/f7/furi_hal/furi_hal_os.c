@@ -4,8 +4,9 @@
 #include <furi_hal_power.h>
 #include <furi_hal_gpio.h>
 #include <furi_hal_resources.h>
-#include <furi_hal_idle_timer.h>
+#include <furi_hal_idle_timer_i.h>
 
+#include <stm32wbxx_ll_exti.h>
 #include <stm32wbxx_ll_cortex.h>
 
 #include <furi.h>

@@ -7,7 +7,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
+#include <stddef.h>
 #include <lib/toolbox/version.h>
 
 #ifdef __cplusplus

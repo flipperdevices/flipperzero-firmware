@@ -3,6 +3,8 @@
 #include <flipper.h>
 #include <alt_boot.h>
 
+#include <stm32wbxx_ll_system.h>
+
 #include <fatfs.h>
 #include <flipper_format/flipper_format.h>
 

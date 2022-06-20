@@ -4,6 +4,7 @@
 #include <alt_boot.h>
 #include <u8g2_glue.h>
 #include <assets_icons.h>
+#include <stm32wbxx_ll_system.h>
 
 void flipper_boot_dfu_show_splash() {
     // Initialize

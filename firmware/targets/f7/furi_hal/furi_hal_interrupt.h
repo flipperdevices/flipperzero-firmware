@@ -1,10 +1,10 @@
 #pragma once
 
-#include <stm32wbxx_ll_tim.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stdint.h>
 
 /** Timer ISR */
 typedef void (*FuriHalInterruptISR)(void* context);

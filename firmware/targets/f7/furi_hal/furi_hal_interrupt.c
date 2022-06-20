@@ -7,6 +7,8 @@
 #include <stm32wbxx.h>
 #include <stm32wbxx_ll_tim.h>
 #include <stm32wbxx_ll_rcc.h>
+#include <stm32wbxx_ll_exti.h>
+#include <stm32wbxx_ll_system.h>
 
 #define TAG "FuriHalInterrupt"
 

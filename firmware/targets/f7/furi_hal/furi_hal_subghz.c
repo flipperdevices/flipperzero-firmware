@@ -8,6 +8,7 @@
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
 
+#include <stm32wbxx_ll_tim.h>
 #include <stm32wbxx_ll_dma.h>
 
 #include <furi.h>

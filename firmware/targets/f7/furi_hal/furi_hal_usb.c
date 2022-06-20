@@ -5,7 +5,7 @@
 #include <stm32wbxx_ll_pwr.h>
 #include <furi.h>
 
-#include "usb.h"
+#include "furi_hal_usb_i.h"
 
 #define TAG "FuriHalUsb"
 

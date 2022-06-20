@@ -6,6 +6,8 @@
 #include <furi.h>
 #include <m-string.h>
 
+#include <rfal_nfc.h>
+#include <lib/nfc_protocols/nfc_common.h>
 #include <lib/digital_signal/digital_signal.h>
 #include <furi_hal_delay.h>
 #include <furi_hal_spi.h>
@@ -386,7 +388,7 @@ bool furi_hal_nfc_emulate_nfca(
     uint16_t buff_rx_len = 0;
     uint8_t buff_tx[1040];
     uint16_t buff_tx_len = 0;
-    uint32_t data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+    uint32_t data_type = NFC_TXRX_DEFAULT;
 
     rfalLowPowerModeStop();
     if(rfalListenStart(

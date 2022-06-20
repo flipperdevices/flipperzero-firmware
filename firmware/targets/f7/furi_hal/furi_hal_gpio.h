@@ -1,8 +1,6 @@
 #pragma once
 #include "stdbool.h"
 #include <stm32wbxx_ll_gpio.h>
-#include <stm32wbxx_ll_system.h>
-#include <stm32wbxx_ll_exti.h>
 
 #ifdef __cplusplus
 extern "C" {

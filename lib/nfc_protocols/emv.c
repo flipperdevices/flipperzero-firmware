@@ -1,6 +1,8 @@
 #include "emv.h"
 
 #include <furi/common_defines.h>
+#include <furi/log.h>
+#include "nfc_common.h"
 
 #define TAG "Emv"
 

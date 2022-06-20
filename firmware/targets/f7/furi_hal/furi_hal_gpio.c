@@ -2,6 +2,8 @@
 #include <furi_hal_gpio.h>
 #include <furi_hal_version.h>
 #include <stm32wbxx_ll_comp.h>
+#include <stm32wbxx_ll_system.h>
+#include <stm32wbxx_ll_exti.h>
 
 #define GET_SYSCFG_EXTI_PORT(gpio)                \
     (((gpio) == (GPIOA)) ? LL_SYSCFG_EXTI_PORTA : \

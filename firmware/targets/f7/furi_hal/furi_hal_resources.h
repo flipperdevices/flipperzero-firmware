@@ -2,9 +2,6 @@
 
 #include <furi.h>
 
-#include <stm32wbxx.h>
-#include <stm32wbxx_ll_gpio.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
