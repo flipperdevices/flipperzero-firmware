@@ -8,4 +8,3 @@ struct FuriHalI2cBus {
     FuriHalI2cBusHandle* current_handle;
     FuriHalI2cBusEventCallback callback;
 };
-
