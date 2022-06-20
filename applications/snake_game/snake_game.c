@@ -85,9 +85,9 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
     }
 
     // Show score on the game field
-    char buffer2[12];
-    snprintf(buffer2, sizeof(buffer2), "Score: %u", snake_state->len - 7);
-    canvas_draw_str_aligned(canvas, 64, 57, AlignCenter, AlignBottom, buffer2);
+    char buffer2[6];
+    snprintf(buffer2, sizeof(buffer2), "%u", snake_state->len - 7);
+    canvas_draw_str_aligned(canvas, 126, 8, AlignRight, AlignBottom, buffer2);
 
     // Game Over banner
     if(snake_state->state == GameStateGameOver) {
