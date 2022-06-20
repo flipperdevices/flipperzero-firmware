@@ -65,7 +65,7 @@ Max level: 3
 Weight: 3
 
 Name: L1_Cry_128x64
-Min butthurt: 8
+Min butthurt: 0
 Max butthurt: 13
 Min level: 1
 Max level: 3
@@ -79,7 +79,7 @@ Max level: 3
 Weight: 3
 
 Name: L1_Mad_fist_128x64
-Min butthurt: 9
+Min butthurt: 0
 Max butthurt: 13
 Min level: 1
 Max level: 3
@@ -107,7 +107,7 @@ Max level: 3
 Weight: 3
 
 Name: L1_Leaving_sad_128x64
-Min butthurt: 14
+Min butthurt: 0
 Max butthurt: 14
 Min level: 1
 Max level: 3
