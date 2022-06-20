@@ -1,5 +1,6 @@
-#include "furi_hal_spi.h"
-#include "furi_hal_resources.h"
+#include <furi_hal_spi.h>
+#include <furi_hal_spi_i.h>
+#include <furi_hal_resources.h>
 #include <furi_hal_power.h>
 
 #include <stdbool.h>

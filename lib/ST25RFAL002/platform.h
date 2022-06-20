@@ -10,6 +10,7 @@
 #include <furi_hal_gpio.h>
 #include <furi_hal_light.h>
 #include <furi_hal_spi.h>
+#include <furi_hal_gpio_i.h>
 
 typedef void (*PlatformIrqCallback)();
 void platformSetIrqCallback(PlatformIrqCallback cb);

@@ -3,7 +3,6 @@
 #include "archive.h"
 #include <stdint.h>
 #include <furi.h>
-#include <gui/gui_i.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/text_input.h>

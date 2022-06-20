@@ -1,6 +1,7 @@
 #include "digital_signal.h"
 
 #include <furi.h>
+#include <furi_hal_gpio_i.h>
 #include <stm32wbxx_ll_dma.h>
 #include <stm32wbxx_ll_tim.h>
 #include <math.h>

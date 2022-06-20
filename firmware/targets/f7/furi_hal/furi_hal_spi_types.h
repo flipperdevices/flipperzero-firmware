@@ -25,12 +25,10 @@ typedef enum {
 /** FuriHal spi bus event callback */
 typedef void (*FuriHalSpiBusEventCallback)(FuriHalSpiBus* bus, FuriHalSpiBusEvent event);
 
-/** FuriHal spi bus */
-struct FuriHalSpiBus {
-    SPI_TypeDef* spi;
-    FuriHalSpiBusEventCallback callback;
-    FuriHalSpiBusHandle* current_handle;
-};
+//typedef struct SPI_TypeDef SPI_TypeDef;
+
+///** FuriHal spi bus */
+//struct FuriHalSpiBus;
 
 /** FuriHal spi handle states */
 typedef enum {

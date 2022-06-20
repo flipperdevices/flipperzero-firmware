@@ -1,10 +1,12 @@
 #include <furi_hal_spi_config.h>
+#include <furi_hal_spi_i.h>
 #include <furi_hal_resources.h>
 
 #include <stm32wbxx_ll_bus.h>
 
 /* SPI Presets */
 
+/** Preset for ST25R916 */
 const LL_SPI_InitTypeDef furi_hal_spi_preset_2edge_low_8m = {
     .Mode = LL_SPI_MODE_MASTER,
     .TransferDirection = LL_SPI_FULL_DUPLEX,
@@ -18,6 +20,7 @@ const LL_SPI_InitTypeDef furi_hal_spi_preset_2edge_low_8m = {
     .CRCPoly = 7,
 };
 
+/** Preset for CC1101 */
 const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_8m = {
     .Mode = LL_SPI_MODE_MASTER,
     .TransferDirection = LL_SPI_FULL_DUPLEX,
@@ -31,6 +34,7 @@ const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_8m = {
     .CRCPoly = 7,
 };
 
+/** Preset for ST7567 (Display) */
 const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_4m = {
     .Mode = LL_SPI_MODE_MASTER,
     .TransferDirection = LL_SPI_FULL_DUPLEX,
@@ -44,6 +48,7 @@ const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_4m = {
     .CRCPoly = 7,
 };
 
+/** Preset for SdCard in fast mode */
 const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_16m = {
     .Mode = LL_SPI_MODE_MASTER,
     .TransferDirection = LL_SPI_FULL_DUPLEX,
@@ -57,6 +62,7 @@ const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_16m = {
     .CRCPoly = 7,
 };
 
+/** Preset for SdCard in slow mode */
 const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_2m = {
     .Mode = LL_SPI_MODE_MASTER,
     .TransferDirection = LL_SPI_FULL_DUPLEX,

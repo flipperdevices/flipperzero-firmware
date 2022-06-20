@@ -8,7 +8,7 @@ void set_random_name(char* name, uint8_t max_name_size) {
     static bool rand_generator_inited = false;
 
     if(!rand_generator_inited) {
-        srand(DWT->CYCCNT);
+        srand(osKernelGetTickCount());
         rand_generator_inited = true;
     }
     const char* prefix[] = {

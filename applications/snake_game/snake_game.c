@@ -281,7 +281,7 @@ static void snake_game_process_game_step(SnakeState* const snake_state) {
 
 int32_t snake_game_app(void* p) {
     UNUSED(p);
-    srand(DWT->CYCCNT);
+    srand(osKernelGetTickCount());
 
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(SnakeEvent), NULL);
 

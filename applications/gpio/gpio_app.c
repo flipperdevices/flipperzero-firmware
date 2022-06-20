@@ -1,5 +1,6 @@
 #include "gpio_app_i.h"
 
+#include <stdint.h>
 #include <furi.h>
 #include <furi_hal.h>
 

@@ -3,6 +3,8 @@
 #include "ibutton_worker_i.h"
 #include "ibutton_key_command.h"
 
+#include <stm32wbxx_ll_system.h> // FIXME
+
 void ibutton_worker_mode_idle_start(iButtonWorker* worker);
 void ibutton_worker_mode_idle_tick(iButtonWorker* worker);
 void ibutton_worker_mode_idle_stop(iButtonWorker* worker);

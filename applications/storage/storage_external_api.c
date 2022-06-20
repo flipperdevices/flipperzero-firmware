@@ -6,6 +6,8 @@
 #include <toolbox/stream/file_stream.h>
 #include <toolbox/dir_walk.h>
 
+#include <stm32wbxx_ll_system.h> // FIXME
+
 #define MAX_NAME_LENGTH 256
 
 #define TAG "StorageAPI"

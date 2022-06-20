@@ -1,6 +1,7 @@
 #include "../gpio_app_i.h"
-#include "furi_hal_power.h"
-#include "furi_hal_usb.h"
+#include <furi_hal_power.h>
+#include <furi_hal_usb.h>
+#include <stdint.h>
 
 enum GpioItem {
     GpioItemUsbUart,

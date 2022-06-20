@@ -1,6 +1,7 @@
 #include "gpio_item.h"
 
 #include <furi_hal_resources.h>
+#include <stdint.h>
 
 typedef struct {
     const char* name;

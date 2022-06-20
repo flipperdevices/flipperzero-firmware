@@ -1,6 +1,5 @@
 #pragma once
 #include "stdbool.h"
-#include <stm32wbxx_ll_gpio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -154,13 +153,7 @@ typedef enum {
     GpioAltFnUnused = 16, /*!< just dummy value */
 } GpioAltFn;
 
-/**
- * Gpio structure
- */
-typedef struct {
-    GPIO_TypeDef* port;
-    uint16_t pin;
-} GpioPin;
+typedef struct GpioPin GpioPin;
 
 /**
  * GPIO initialization function, simple version
@@ -228,57 +221,14 @@ void furi_hal_gpio_remove_int_callback(const GpioPin* gpio);
  * @param gpio  GpioPin
  * @param state true / false
  */
-static inline void furi_hal_gpio_write(const GpioPin* gpio, const bool state) {
-    // writing to BSSR is an atomic operation
-    if(state == true) {
-        gpio->port->BSRR = gpio->pin;
-    } else {
-        gpio->port->BSRR = (uint32_t)gpio->pin << GPIO_NUMBER;
-    }
-}
-
-/**
- * GPIO read pin
- * @param port GPIO port
- * @param pin pin mask
- * @return true / false
- */
-static inline void
-    furi_hal_gpio_write_port_pin(GPIO_TypeDef* port, uint16_t pin, const bool state) {
-    // writing to BSSR is an atomic operation
-    if(state == true) {
-        port->BSRR = pin;
-    } else {
-        port->BSRR = pin << GPIO_NUMBER;
-    }
-}
+void furi_hal_gpio_write(const GpioPin* gpio, const bool state);
 
 /**
  * GPIO read pin
  * @param gpio GpioPin
  * @return true / false
  */
-static inline bool furi_hal_gpio_read(const GpioPin* gpio) {
-    if((gpio->port->IDR & gpio->pin) != 0x00U) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-/**
- * GPIO read pin
- * @param port GPIO port
- * @param pin pin mask
- * @return true / false
- */
-static inline bool furi_hal_gpio_read_port_pin(GPIO_TypeDef* port, uint16_t pin) {
-    if((port->IDR & pin) != 0x00U) {
-        return true;
-    } else {
-        return false;
-    }
-}
+bool furi_hal_gpio_read(const GpioPin* gpio);
 
 #ifdef __cplusplus
 }

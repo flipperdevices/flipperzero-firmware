@@ -1,6 +1,7 @@
 #include <furi_hal_ibutton.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
+#include <furi_hal_gpio_i.h>
 
 #include <stm32wbxx_ll_tim.h>
 #include <stm32wbxx_ll_exti.h>

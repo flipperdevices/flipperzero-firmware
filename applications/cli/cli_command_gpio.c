@@ -2,6 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <furi_hal_gpio_i.h>
 #include <lib/toolbox/args.h>
 
 typedef struct {

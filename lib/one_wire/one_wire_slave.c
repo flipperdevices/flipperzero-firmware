@@ -5,6 +5,8 @@
 #include <furi_hal_delay.h>
 #include <furi_hal_ibutton.h>
 
+#include <stm32wbxx_ll_system.h> // FIXME
+
 #define OWS_RESET_MIN 270
 #define OWS_RESET_MAX 960
 #define OWS_PRESENCE_TIMEOUT 20

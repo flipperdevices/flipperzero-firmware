@@ -5,6 +5,8 @@
 #include <stm32wbxx_ll_system.h>
 #include <stm32wbxx_ll_exti.h>
 
+#include "furi_hal_gpio_i.h"
+
 #define GET_SYSCFG_EXTI_PORT(gpio)                \
     (((gpio) == (GPIOA)) ? LL_SYSCFG_EXTI_PORTA : \
      ((gpio) == (GPIOB)) ? LL_SYSCFG_EXTI_PORTB : \
@@ -306,5 +308,39 @@ void EXTI15_10_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_15)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);
         furi_hal_gpio_int_call(15);
+    }
+}
+
+void furi_hal_gpio_write(const GpioPin* gpio, const bool state) {
+    // writing to BSSR is an atomic operation
+    if(state == true) {
+        gpio->port->BSRR = gpio->pin;
+    } else {
+        gpio->port->BSRR = (uint32_t)gpio->pin << GPIO_NUMBER;
+    }
+}
+
+void furi_hal_gpio_write_port_pin(GPIO_TypeDef* port, uint16_t pin, const bool state) {
+    // writing to BSSR is an atomic operation
+    if(state == true) {
+        port->BSRR = pin;
+    } else {
+        port->BSRR = pin << GPIO_NUMBER;
+    }
+}
+
+bool furi_hal_gpio_read(const GpioPin* gpio) {
+    if((gpio->port->IDR & gpio->pin) != 0x00U) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool furi_hal_gpio_read_port_pin(GPIO_TypeDef* port, uint16_t pin) {
+    if((port->IDR & pin) != 0x00U) {
+        return true;
+    } else {
+        return false;
     }
 }

@@ -6,10 +6,10 @@
 #include <cmsis_os2.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
+#include <furi_hal_gpio_i.h>
 
 #include <stdint.h>
 #include <stm32wbxx_ll_tim.h>
-#include <stm32wbxx_ll_gpio.h>
 
 #include <stdio.h>
 #include <furi.h>

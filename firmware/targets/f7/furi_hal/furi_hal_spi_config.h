@@ -2,26 +2,9 @@
 
 #include <furi_hal_spi_types.h>
 
-#include <stm32wbxx_ll_spi.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/** Preset for ST25R916 */
-extern const LL_SPI_InitTypeDef furi_hal_spi_preset_2edge_low_8m;
-
-/** Preset for CC1101 */
-extern const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_8m;
-
-/** Preset for ST7567 (Display) */
-extern const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_4m;
-
-/** Preset for SdCard in fast mode */
-extern const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_16m;
-
-/** Preset for SdCard in slow mode */
-extern const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_2m;
 
 /** Furi Hal Spi Bus R (Radio: CC1101, Nfc, External)*/
 extern FuriHalSpiBus furi_hal_spi_bus_r;

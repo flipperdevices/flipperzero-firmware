@@ -1,6 +1,7 @@
 #include <furi_hal_resources.h>
 #include <furi_hal_delay.h>
 #include <furi.h>
+#include <furi_hal_gpio_i.h>
 
 #include <stm32wbxx_ll_rcc.h>
 #include <stm32wbxx_ll_pwr.h>
