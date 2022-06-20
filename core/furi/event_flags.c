@@ -12,7 +12,7 @@ osEventFlagsId_t osEventFlagsNew(const osEventFlagsAttr_t* attr) {
 
     hEventGroup = NULL;
 
-    if(FURI_IS_ISR() == 0U) {
+    if(FURI_IS_IRQ_MODE() == 0U) {
         mem = -1;
 
         if(attr != NULL) {
@@ -59,7 +59,7 @@ uint32_t osEventFlagsSet(osEventFlagsId_t ef_id, uint32_t flags) {
 
     if((hEventGroup == NULL) || ((flags & EVENT_FLAGS_INVALID_BITS) != 0U)) {
         rflags = (uint32_t)osErrorParameter;
-    } else if(FURI_IS_ISR() != 0U) {
+    } else if(FURI_IS_IRQ_MODE() != 0U) {
 #if(configUSE_OS2_EVENTFLAGS_FROM_ISR == 0)
         (void)yield;
         /* Enable timers and xTimerPendFunctionCall function to support osEventFlagsSet from ISR */
@@ -94,7 +94,7 @@ uint32_t osEventFlagsClear(osEventFlagsId_t ef_id, uint32_t flags) {
 
     if((hEventGroup == NULL) || ((flags & EVENT_FLAGS_INVALID_BITS) != 0U)) {
         rflags = (uint32_t)osErrorParameter;
-    } else if(FURI_IS_ISR() != 0U) {
+    } else if(FURI_IS_IRQ_MODE() != 0U) {
 #if(configUSE_OS2_EVENTFLAGS_FROM_ISR == 0)
         /* Enable timers and xTimerPendFunctionCall function to support osEventFlagsSet from ISR */
         rflags = (uint32_t)osErrorResource;
@@ -130,7 +130,7 @@ uint32_t osEventFlagsGet(osEventFlagsId_t ef_id) {
 
     if(ef_id == NULL) {
         rflags = 0U;
-    } else if(FURI_IS_ISR() != 0U) {
+    } else if(FURI_IS_IRQ_MODE() != 0U) {
         rflags = xEventGroupGetBitsFromISR(hEventGroup);
     } else {
         rflags = xEventGroupGetBits(hEventGroup);
@@ -156,7 +156,7 @@ uint32_t
 
     if((hEventGroup == NULL) || ((flags & EVENT_FLAGS_INVALID_BITS) != 0U)) {
         rflags = (uint32_t)osErrorParameter;
-    } else if(FURI_IS_ISR() != 0U) {
+    } else if(FURI_IS_IRQ_MODE() != 0U) {
         rflags = (uint32_t)osErrorISR;
     } else {
         if(options & osFlagsWaitAll) {
@@ -205,7 +205,7 @@ osStatus_t osEventFlagsDelete(osEventFlagsId_t ef_id) {
     osStatus_t stat;
 
 #ifndef USE_FreeRTOS_HEAP_1
-    if(FURI_IS_ISR() != 0U) {
+    if(FURI_IS_IRQ_MODE() != 0U) {
         stat = osErrorISR;
     } else if(hEventGroup == NULL) {
         stat = osErrorParameter;

@@ -197,7 +197,7 @@ FuriThreadId furi_thread_get_current_id() {
 }
 
 void furi_thread_yield() {
-    furi_assert(!FURI_IS_ISR());
+    furi_assert(!FURI_IS_IRQ_MODE());
     taskYIELD();
 }
 
@@ -218,7 +218,7 @@ uint32_t furi_thread_flags_set(FuriThreadId thread_id, uint32_t flags) {
     } else {
         rflags = (uint32_t)osError;
 
-        if(FURI_IS_ISR()) {
+        if(FURI_IS_IRQ_MODE()) {
             yield = pdFALSE;
 
             (void)xTaskNotifyFromISR(hTask, flags, eSetBits, &yield);
@@ -238,7 +238,7 @@ uint32_t furi_thread_flags_clear(uint32_t flags) {
     TaskHandle_t hTask;
     uint32_t rflags, cflags;
 
-    if(FURI_IS_ISR()) {
+    if(FURI_IS_IRQ_MODE()) {
         rflags = (uint32_t)osErrorISR;
     } else if((flags & THREAD_FLAGS_INVALID_BITS) != 0U) {
         rflags = (uint32_t)osErrorParameter;
@@ -265,7 +265,7 @@ uint32_t furi_thread_flags_get(void) {
     TaskHandle_t hTask;
     uint32_t rflags;
 
-    if(FURI_IS_ISR()) {
+    if(FURI_IS_IRQ_MODE()) {
         rflags = (uint32_t)osErrorISR;
     } else {
         hTask = xTaskGetCurrentTaskHandle();
@@ -284,7 +284,7 @@ uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeo
     TickType_t t0, td, tout;
     BaseType_t rval;
 
-    if(FURI_IS_ISR()) {
+    if(FURI_IS_IRQ_MODE()) {
         rflags = (uint32_t)osErrorISR;
     } else if((flags & THREAD_FLAGS_INVALID_BITS) != 0U) {
         rflags = (uint32_t)osErrorParameter;
@@ -352,7 +352,7 @@ uint32_t furi_thread_enumerate(FuriThreadId* thread_array, uint32_t array_items)
     uint32_t i, count;
     TaskStatus_t* task;
 
-    if(FURI_IS_ISR() || (thread_array == NULL) || (array_items == 0U)) {
+    if(FURI_IS_IRQ_MODE() || (thread_array == NULL) || (array_items == 0U)) {
         count = 0U;
     } else {
         vTaskSuspendAll();
@@ -380,7 +380,7 @@ const char* furi_thread_get_name(FuriThreadId thread_id) {
     TaskHandle_t hTask = (TaskHandle_t)thread_id;
     const char* name;
 
-    if(FURI_IS_ISR() || (hTask == NULL)) {
+    if(FURI_IS_IRQ_MODE() || (hTask == NULL)) {
         name = NULL;
     } else {
         name = pcTaskGetName(hTask);
@@ -393,7 +393,7 @@ uint32_t furi_thread_get_stack_space(FuriThreadId thread_id) {
     TaskHandle_t hTask = (TaskHandle_t)thread_id;
     uint32_t sz;
 
-    if(FURI_IS_ISR() || (hTask == NULL)) {
+    if(FURI_IS_IRQ_MODE() || (hTask == NULL)) {
         sz = 0U;
     } else {
         sz = (uint32_t)(uxTaskGetStackHighWaterMark(hTask) * sizeof(StackType_t));

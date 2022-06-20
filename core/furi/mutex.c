@@ -12,7 +12,7 @@ osMutexId_t osMutexNew(const osMutexAttr_t* attr) {
 
     hMutex = NULL;
 
-    if(FURI_IS_ISR() == 0U) {
+    if(FURI_IS_IRQ_MODE() == 0U) {
         if(attr != NULL) {
             type = attr->attr_bits;
         } else {
@@ -101,7 +101,7 @@ osStatus_t osMutexAcquire(osMutexId_t mutex_id, uint32_t timeout) {
 
     stat = osOK;
 
-    if(FURI_IS_ISR() != 0U) {
+    if(FURI_IS_IRQ_MODE() != 0U) {
         stat = osErrorISR;
     } else if(hMutex == NULL) {
         stat = osErrorParameter;
@@ -146,7 +146,7 @@ osStatus_t osMutexRelease(osMutexId_t mutex_id) {
 
     stat = osOK;
 
-    if(FURI_IS_ISR() != 0U) {
+    if(FURI_IS_IRQ_MODE() != 0U) {
         stat = osErrorISR;
     } else if(hMutex == NULL) {
         stat = osErrorParameter;
@@ -177,7 +177,7 @@ FuriThreadId osMutexGetOwner(osMutexId_t mutex_id) {
 
     hMutex = (SemaphoreHandle_t)((uint32_t)mutex_id & ~1U);
 
-    if((FURI_IS_ISR() != 0U) || (hMutex == NULL)) {
+    if((FURI_IS_IRQ_MODE() != 0U) || (hMutex == NULL)) {
         owner = 0;
     } else {
         owner = (FuriThreadId)xSemaphoreGetMutexHolder(hMutex);
@@ -197,7 +197,7 @@ osStatus_t osMutexDelete(osMutexId_t mutex_id) {
 
     hMutex = (SemaphoreHandle_t)((uint32_t)mutex_id & ~1U);
 
-    if(FURI_IS_ISR() != 0U) {
+    if(FURI_IS_IRQ_MODE() != 0U) {
         stat = osErrorISR;
     } else if(hMutex == NULL) {
         stat = osErrorParameter;

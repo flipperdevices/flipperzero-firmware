@@ -11,7 +11,7 @@ osSemaphoreId_t
 
     hSemaphore = NULL;
 
-    if((FURI_IS_ISR() == 0U) && (max_count > 0U) && (initial_count <= max_count)) {
+    if((FURI_IS_IRQ_MODE() == 0U) && (max_count > 0U) && (initial_count <= max_count)) {
         mem = -1;
 
         if(attr != NULL) {
@@ -86,7 +86,7 @@ osStatus_t osSemaphoreAcquire(osSemaphoreId_t semaphore_id, uint32_t timeout) {
 
     if(hSemaphore == NULL) {
         stat = osErrorParameter;
-    } else if(FURI_IS_ISR() != 0U) {
+    } else if(FURI_IS_IRQ_MODE() != 0U) {
         if(timeout != 0U) {
             stat = osErrorParameter;
         } else {
@@ -124,7 +124,7 @@ osStatus_t osSemaphoreRelease(osSemaphoreId_t semaphore_id) {
 
     if(hSemaphore == NULL) {
         stat = osErrorParameter;
-    } else if(FURI_IS_ISR() != 0U) {
+    } else if(FURI_IS_IRQ_MODE() != 0U) {
         yield = pdFALSE;
 
         if(xSemaphoreGiveFromISR(hSemaphore, &yield) != pdTRUE) {
@@ -151,7 +151,7 @@ uint32_t osSemaphoreGetCount(osSemaphoreId_t semaphore_id) {
 
     if(hSemaphore == NULL) {
         count = 0U;
-    } else if(FURI_IS_ISR() != 0U) {
+    } else if(FURI_IS_IRQ_MODE() != 0U) {
         count = (uint32_t)uxSemaphoreGetCountFromISR(hSemaphore);
     } else {
         count = (uint32_t)uxSemaphoreGetCount(hSemaphore);
@@ -169,7 +169,7 @@ osStatus_t osSemaphoreDelete(osSemaphoreId_t semaphore_id) {
     osStatus_t stat;
 
 #ifndef USE_FreeRTOS_HEAP_1
-    if(FURI_IS_ISR() != 0U) {
+    if(FURI_IS_IRQ_MODE() != 0U) {
         stat = osErrorISR;
     } else if(hSemaphore == NULL) {
         stat = osErrorParameter;
