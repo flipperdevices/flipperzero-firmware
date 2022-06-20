@@ -18,6 +18,7 @@ Latest Updates:
 - Center hold now updates the idle animation [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba)
 - Tetris now shows score
 - Latest dev updates from 839e52ac
+- Idle animations will show all animations regardless of level and butthurt [Thanks to MajiK]
 
 Open PRs Checkedout & Not Merged In Main:
 - [Amiibo & NTAG21x Support #1313 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
