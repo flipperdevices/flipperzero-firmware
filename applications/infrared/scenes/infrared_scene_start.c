@@ -4,6 +4,7 @@ enum SubmenuIndex {
     SubmenuIndexUniversalRemotes,
     SubmenuIndexLearnNewRemote,
     SubmenuIndexSavedRemotes,
+    SubmenuIndexDebug
 };
 
 static void infrared_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -35,6 +36,11 @@ void infrared_scene_start_on_enter(void* context) {
         infrared_scene_start_submenu_callback,
         infrared);
 
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        submenu_add_item(
+            submenu, "Debug", SubmenuIndexDebug, infrared_scene_start_submenu_callback, infrared);
+    }
+
     const uint32_t submenu_index =
         scene_manager_get_scene_state(scene_manager, InfraredSceneStart);
     submenu_set_selected_item(submenu, submenu_index);
@@ -61,6 +67,9 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(submenu_index == SubmenuIndexSavedRemotes) {
             scene_manager_next_scene(scene_manager, InfraredSceneRemoteList);
+            consumed = true;
+        } else if(submenu_index == SubmenuIndexDebug) {
+            scene_manager_next_scene(scene_manager, InfraredSceneDebug);
             consumed = true;
         }
     }
