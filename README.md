@@ -14,7 +14,7 @@ $ docker-compose exec dev make
 ```
 
 Latest Updates:
-- Updates to size down [Thanks To PixlEmly](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c).
+- Updates to size down [Video Poker, Thanks To PixlEmly](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c).
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
