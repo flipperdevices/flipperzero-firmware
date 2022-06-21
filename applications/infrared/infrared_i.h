@@ -113,6 +113,8 @@ typedef enum {
     InfraredNotificationMessageGreenOff,
     InfraredNotificationMessageBlinkRead,
     InfraredNotificationMessageBlinkSend,
+    InfraredNotificationMessageYellowOn,
+    InfraredNotificationMessageYellowOff,
 } InfraredNotificationMessage;
 
 bool infrared_add_remote_with_button(Infrared* infrared, const char* name, InfraredSignal* signal);

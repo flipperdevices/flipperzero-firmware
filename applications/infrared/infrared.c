@@ -8,7 +8,9 @@ static const NotificationSequence* infrared_notification_sequences[] = {
     &sequence_set_only_green_255,
     &sequence_reset_green,
     &sequence_blink_cyan_10,
-    &sequence_blink_magenta_10};
+    &sequence_blink_magenta_10,
+    &sequence_solid_yellow,
+    &sequence_reset_rgb};
 
 static void infrared_make_app_folder(Infrared* infrared) {
     if(!storage_simply_mkdir(infrared->storage, INFRARED_APP_FOLDER)) {
