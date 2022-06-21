@@ -7,6 +7,7 @@
 #include <furi/dangerous_defines.h>
 
 #define SLIDESHOW_MAGIC 0x72676468
+#define SLIDESHOW_MAX_SUPPORTED_VERSION 1
 
 struct Slideshow {
     Icon icon;
@@ -58,7 +59,8 @@ bool slideshow_load(Slideshow* slideshow, const char* fspath) {
         }
         SlideshowFileHeader header;
         if((storage_file_read(slideshow_file, &header, sizeof(header)) != sizeof(header)) ||
-           (header.magic != SLIDESHOW_MAGIC)) {
+           (header.magic != SLIDESHOW_MAGIC) || 
+           (header.version > SLIDESHOW_MAX_SUPPORTED_VERSION)) {
             break;
         }
         Icon* icon = &slideshow->icon;
