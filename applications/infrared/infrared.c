@@ -330,6 +330,29 @@ void infrared_signal_sent_callback(void* context) {
     infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkSend);
 }
 
+void infrared_signal_received_callback(void* context, InfraredWorkerSignal* received_signal) {
+    furi_assert(context);
+    Infrared* infrared = context;
+
+    if(infrared_worker_signal_is_decoded(received_signal)) {
+        infrared_signal_set_message(
+            infrared->received_signal, infrared_worker_get_decoded_signal(received_signal));
+    } else {
+        const uint32_t* timings;
+        size_t timings_size;
+        infrared_worker_get_raw_signal(received_signal, &timings, &timings_size);
+        infrared_signal_set_raw_signal(
+            infrared->received_signal,
+            timings,
+            timings_size,
+            INFRARED_COMMON_CARRIER_FREQUENCY,
+            INFRARED_COMMON_DUTY_CYCLE);
+    }
+
+    view_dispatcher_send_custom_event(
+        infrared->view_dispatcher, InfraredCustomEventTypeSignalReceived);
+}
+
 void infrared_text_input_callback(void* context) {
     furi_assert(context);
     Infrared* infrared = context;
