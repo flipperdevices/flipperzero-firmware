@@ -12,10 +12,9 @@ forward_os_env = {
     "PATH": os.environ["PATH"],
 }
 # Proxying CI environment to child processes & scripts
-if WORKFLOW_BRANCH_OR_TAG := os.environ.get("WORKFLOW_BRANCH_OR_TAG", None):
-    forward_os_env["WORKFLOW_BRANCH_OR_TAG"] = WORKFLOW_BRANCH_OR_TAG
-if DIST_SUFFIX := os.environ.get("DIST_SUFFIX", None):
-    forward_os_env["DIST_SUFFIX"] = DIST_SUFFIX
+for env_value_name in ("WORKFLOW_BRANCH_OR_TAG", "DIST_SUFFIX"):
+    if environ_value := os.environ.get(env_value_name, None):
+        forward_os_env[env_value_name] = environ_value
 
 
 coreenv = VAR_ENV.Clone(
@@ -39,8 +38,7 @@ coreenv = VAR_ENV.Clone(
 
 # If DIST_SUFFIX is set in environment, is has precedence (set by CI)
 if os_suffix := os.environ.get("DIST_SUFFIX", None):
-    print("overriding DIST_SUFFIX to ", os_suffix)
-    coreenv.SetDefault(
+    coreenv.Replace(
         DIST_SUFFIX=os_suffix,
     )
 
