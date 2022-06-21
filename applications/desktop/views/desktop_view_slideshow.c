@@ -4,7 +4,7 @@
 
 #include "../desktop_i.h"
 #include "desktop_view_slideshow.h"
-#include "../slideshow/slideshow.h"
+#include "../helpers/slideshow.h"
 
 struct DesktopSlideshowView {
     View* view;

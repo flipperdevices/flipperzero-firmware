@@ -6,7 +6,6 @@
 #include "views/desktop_view_pin_input.h"
 #include "views/desktop_view_locked.h"
 #include "views/desktop_view_main.h"
-#include "views/desktop_view_first_start.h"
 #include "views/desktop_view_lock_menu.h"
 #include "views/desktop_view_debug.h"
 #include "views/desktop_view_slideshow.h"
@@ -45,7 +44,6 @@ struct Desktop {
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
-    DesktopFirstStartView* first_start_view;
     Popup* hw_mismatch_popup;
     DesktopLockMenuView* lock_menu;
     DesktopDebugView* debug_view;

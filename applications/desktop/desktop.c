@@ -158,7 +158,6 @@ Desktop* desktop_alloc() {
 
     desktop->lock_menu = desktop_lock_menu_alloc();
     desktop->debug_view = desktop_debug_alloc();
-    desktop->first_start_view = desktop_first_start_alloc();
     desktop->hw_mismatch_popup = popup_alloc();
     desktop->locked_view = desktop_view_locked_alloc();
     desktop->pin_input_view = desktop_view_pin_input_alloc();
@@ -194,10 +193,6 @@ Desktop* desktop_alloc() {
         desktop_lock_menu_get_view(desktop->lock_menu));
     view_dispatcher_add_view(
         desktop->view_dispatcher, DesktopViewIdDebug, desktop_debug_get_view(desktop->debug_view));
-    view_dispatcher_add_view(
-        desktop->view_dispatcher,
-        DesktopViewIdFirstStart,
-        desktop_first_start_get_view(desktop->first_start_view));
     view_dispatcher_add_view(
         desktop->view_dispatcher,
         DesktopViewIdHwMismatch,
@@ -279,7 +274,6 @@ void desktop_free(Desktop* desktop) {
     desktop_lock_menu_free(desktop->lock_menu);
     desktop_view_locked_free(desktop->locked_view);
     desktop_debug_free(desktop->debug_view);
-    desktop_first_start_free(desktop->first_start_view);
     popup_free(desktop->hw_mismatch_popup);
     desktop_view_pin_timeout_free(desktop->pin_timeout_view);
 
@@ -323,10 +317,6 @@ int32_t desktop_srv(void* p) {
         }
     } else {
         desktop_lock(desktop);
-    }
-
-    if(desktop_check_file_flag("/int/first_start")) {
-        scene_manager_next_scene(desktop->scene_manager, DesktopSceneFirstStart);
     }
 
     if(desktop_check_file_flag("/int/slideshow")) {
