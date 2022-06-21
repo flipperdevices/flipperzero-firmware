@@ -24,6 +24,7 @@ Latest Updates:
 - Removed debug apps compiling on applications.mk to make 33KB of space on final compressed image
 - Updates for the dice app randomization to use future standards
 - Added 10s display timeout
+- BadUSB issue fixed on [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
