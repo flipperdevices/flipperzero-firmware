@@ -1,4 +1,5 @@
-# UniRF Remix App - Minimalized
+# SubRemoteRemix
+## UniRF Remix App - Minimalized
 ### Notes
 * ##### App Usage
   - Press a button to send the assigned capture file.
