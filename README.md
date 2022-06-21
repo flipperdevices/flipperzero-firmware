@@ -19,6 +19,7 @@ Latest Updates:
 - BadUSB and U2F re-added. Was removed on the debug removals for some reason...
 - Added [Game of Life (Updated to work by tgxn)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c) Original By 
 itsyourbedtime. (Hard Fault or Restart to quit?)
+- [nfc: Display UL PWD_AUTH payload (Thanks to GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/dev-new)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -52,6 +53,7 @@ Added Features:
 - Hold Center to change flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
 - Idle animations will show all animations regardless of level and butthurt [Thanks to MajiK]
 - Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
+- nfc: Display UL PWD_AUTH payload [(Thanks to GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/dev-new)
 - Removing T5577 passwords via the cli command rfid clear_pass_t5577 using a dictionary attack [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Scan names will have timestamp instead of random name assigned [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c)
 - Snake and Tetris show score. [Thanks to whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) With changes by RogueMaster.
