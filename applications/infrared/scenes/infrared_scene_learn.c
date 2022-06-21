@@ -1,37 +1,12 @@
 #include "../infrared_i.h"
 
-static void infrared_scene_learn_signal_received_callback(
-    void* context,
-    InfraredWorkerSignal* received_signal) {
-    Infrared* infrared = context;
-
-    if(infrared_worker_signal_is_decoded(received_signal)) {
-        infrared_signal_set_message(
-            infrared->received_signal, infrared_worker_get_decoded_signal(received_signal));
-    } else {
-        const uint32_t* timings;
-        size_t timings_size;
-        infrared_worker_get_raw_signal(received_signal, &timings, &timings_size);
-        infrared_signal_set_raw_signal(
-            infrared->received_signal,
-            timings,
-            timings_size,
-            INFRARED_COMMON_CARRIER_FREQUENCY,
-            INFRARED_COMMON_DUTY_CYCLE);
-    }
-
-    infrared_worker_rx_set_received_signal_callback(infrared->worker, NULL, NULL);
-    view_dispatcher_send_custom_event(
-        infrared->view_dispatcher, InfraredCustomEventTypeSignalReceived);
-}
-
 void infrared_scene_learn_on_enter(void* context) {
     Infrared* infrared = context;
     Popup* popup = infrared->popup;
     InfraredWorker* worker = infrared->worker;
 
     infrared_worker_rx_set_received_signal_callback(
-        worker, infrared_scene_learn_signal_received_callback, context);
+        worker, infrared_signal_received_callback, context);
     infrared_worker_rx_start(worker);
 
     popup_set_icon(popup, 0, 32, &I_InfraredLearnShort_128x31);
@@ -52,6 +27,7 @@ bool infrared_scene_learn_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == InfraredCustomEventTypeSignalReceived) {
+            infrared_worker_rx_set_received_signal_callback(infrared->worker, NULL, NULL);
             infrared_play_notification_message(infrared, InfraredNotificationMessageSuccess);
             scene_manager_next_scene(infrared->scene_manager, InfraredSceneLearnSuccess);
             consumed = true;
