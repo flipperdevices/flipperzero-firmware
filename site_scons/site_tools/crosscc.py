@@ -4,6 +4,7 @@ from SCons.Tool import gxx
 from SCons.Tool import ar
 from SCons.Tool import gnulink
 import strip
+import gdb
 
 from SCons.Action import _subproc
 import subprocess
@@ -34,7 +35,7 @@ def _get_tool_version(env, tool):
 
 
 def generate(env, **kw):
-    for orig_tool in (asm, gcc, gxx, ar, gnulink, strip):
+    for orig_tool in (asm, gcc, gxx, ar, gnulink, strip, gdb):
         orig_tool.generate(env)
     env.SetDefault(
         TOOLCHAIN_PREFIX=kw.get("toolchain_prefix"),
@@ -50,6 +51,8 @@ def generate(env, **kw):
             "OBJCOPY",
             "RANLIB",
             "STRIP",
+            "GDB",
+            "GDBPY",
         ],
     )
     # Call CC to check version

@@ -50,8 +50,26 @@ def AddFwProject(env, base_env, fw_type, fw_env_key):
     return project_env
 
 
+def AddDebugTarget(env, targetenv, force_flash=True):
+    pseudo_name = f"debug.{targetenv.subst('$FIRMWARE_BUILD_CFG')}.pseudo"
+    debug_target = env.GDBPy(
+        pseudo_name,
+        targetenv["FW_ELF"],
+        GDBPYOPTS='-ex "source debug/FreeRTOS/FreeRTOS.py" '
+        '-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" '
+        '-ex "svd_load ${SVD_FILE}" '
+        '-ex "compare-sections"',
+    )
+    if force_flash:
+        env.Depends(debug_target, targetenv["FW_FLASH"])
+    env.Pseudo(pseudo_name)
+    env.AlwaysBuild(debug_target)
+    return debug_target
+
+
 def generate(env):
     env.AddMethod(AddFwProject)
+    env.AddMethod(AddDebugTarget)
     env.SetDefault(
         COPRO_MCU_FAMILY="STM32WB5x",
     )

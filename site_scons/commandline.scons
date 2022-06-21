@@ -95,6 +95,12 @@ vars.Add(
     default="",
 )
 
+vars.Add(
+    "COPRO_DISCLAIMER",
+    help="Value to pass to bundling script to confirm dangerous operations",
+    default="",
+)
+
 vars.AddVariables(
     PathVariable(
         "COPRO_OB_DATA",
@@ -130,6 +136,12 @@ vars.AddVariables(
         validator=PathVariable.PathIsFile,
         default="",
     ),
+    PathVariable(
+        "OTHER_ELF",
+        help="Path to prebuilt ELF file to debug",
+        validator=PathVariable.PathAccept,
+        default="",
+    ),
 )
 
 vars.Add(
@@ -142,6 +154,12 @@ vars.Add(
     "OPENOCD_OPTS",
     help="Options to pass to OpenOCD",
     default="",
+)
+
+vars.Add(
+    "UPDATE_SPLASH",
+    help="Directory name with slideshow frames to render after installing update package",
+    default="update_default",
 )
 
 Return("vars")

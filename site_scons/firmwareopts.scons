@@ -9,7 +9,6 @@ if ENV["DEBUG"]:
         ],
         CCFLAGS=[
             "-Og",
-            "-g",
         ],
     )
 elif ENV["COMPACT"]:
@@ -20,7 +19,6 @@ elif ENV["COMPACT"]:
         ],
         CCFLAGS=[
             "-Os",
-            "-g",
         ],
     )
 else:
@@ -31,7 +29,6 @@ else:
         ],
         CCFLAGS=[
             "-Og",
-            "-g",
         ],
     )
 

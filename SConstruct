@@ -29,7 +29,11 @@ SConscript("site_scons/cc.scons", exports={"ENV": coreenv})
 coreenv["ROOT_DIR"] = Dir(".")
 
 # Create a separate "dist" environment and add construction envs to it
-distenv = coreenv.Clone(tools=["fbt_dist"])
+distenv = coreenv.Clone(
+    tools=["fbt_dist", "openocd"],
+    GDBOPTS="-ex 'target extended-remote | openocd.exe -c \"gdb_port pipe\" ${OPENOCD_OPTS}' "
+    '-ex "set confirm off" ',
+)
 
 firmware_out = distenv.AddFwProject(
     base_env=coreenv,
@@ -48,30 +52,41 @@ if GetOption("fullenv"):
     )
 
     # Target for self-update package
+    dist_arguments = [
+        "-r",
+        '"${ROOT_DIR.abspath}/assets/resources"',
+        "--bundlever",
+        '"${UPDATE_VERSION_STRING}"',
+        "--radio",
+        '"${ROOT_DIR.abspath}/${COPRO_STACK_BIN_DIR}/${COPRO_STACK_BIN}"',
+        "--radiotype",
+        "${COPRO_STACK_TYPE}",
+        "${COPRO_DISCLAIMER}",
+        "--obdata",
+        '"${ROOT_DIR.abspath}/${COPRO_OB_DATA}"',
+    ]
+    if distenv["UPDATE_SPLASH"]:
+        dist_arguments += [
+            "--splash",
+            distenv.subst("assets/slideshow/$UPDATE_SPLASH"),
+        ]
     selfupdate_dist = distenv.DistBuilder(
-        "pseudo",
+        "selfupdate.pseudo",
         (distenv["DIST_DEPENDS"], firmware_out["FW_RESOURCES"]),
-        DIST_EXTRA=[
-            "-r",
-            '"${ROOT_DIR.abspath}/assets/resources"',
-            "--bundlever",
-            '"${UPDATE_VERSION_STRING}"',
-            "--radio",
-            '"${ROOT_DIR.abspath}/${COPRO_STACK_BIN_DIR}/${COPRO_STACK_BIN}"',
-            "--radiotype",
-            "${COPRO_STACK_TYPE}",
-            "${COPRO_DISCLAIMER}",
-            "--obdata",
-            '"${ROOT_DIR.abspath}/${COPRO_OB_DATA}"',
-        ],
+        DIST_EXTRA=dist_arguments,
     )
-    distenv.Pseudo("pseudo")
+    distenv.Pseudo("selfupdate.pseudo")
     AlwaysBuild(selfupdate_dist)
     Alias("updater_package", selfupdate_dist)
 
+    # Updater debug
+    debug_updater_elf = distenv.AddDebugTarget(updater_out, False)
+    Alias("updater_debug", debug_updater_elf)
+
+
 # Target for copying & renaming binaries to dist folder
-basic_dist = distenv.DistBuilder("pseudo2", distenv["DIST_DEPENDS"])
-distenv.Pseudo("pseudo2")
+basic_dist = distenv.DistBuilder("dist.pseudo", distenv["DIST_DEPENDS"])
+distenv.Pseudo("dist.pseudo")
 AlwaysBuild(basic_dist)
 Alias("fw_dist", basic_dist)
 Default(basic_dist)
@@ -83,3 +98,31 @@ copro_dist = distenv.CoproBuilder(
 )
 AlwaysBuild(copro_dist)
 Alias("copro_dist", copro_dist)
+
+
+# Debugging firmware
+
+debug_fw_elf = distenv.AddDebugTarget(firmware_out)
+Alias("debug", debug_fw_elf)
+
+
+# Debug alien elf
+if other_elf_specified := distenv.subst("$OTHER_ELF"):
+    debug_other = distenv.GDBPy(
+        "debugother.pseudo",
+        other_elf_specified,
+        GDBPYOPTS=
+        # '-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
+        '-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" '
+        '-ex "svd_load ${SVD_FILE}" ',
+    )
+    distenv.Pseudo("debugother.pseudo")
+    AlwaysBuild(debug_other)
+    Alias("debug_other", debug_other)
+
+
+# Just start OpenOCD
+openocd = distenv.OOCDCommand("openocd.pseudo", [])
+distenv.Pseudo("openocd.pseudo")
+AlwaysBuild(openocd)
+Alias("openocd", openocd)

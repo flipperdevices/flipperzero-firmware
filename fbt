@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set +x
+
+if [[ -d .git ]]; then
+	git submodule init
+	git submodule update
+fi
+
+SCRIPTDIR="$( dirname -- "$0"; )";
+SCONS_DEFAULT_FLAGS="-Q --warn=target-not-built"
+/usr/bin/env python3 ${SCRIPTDIR}/lib/scons/scripts/scons.py ${SCONS_DEFAULT_FLAGS} "$@"
