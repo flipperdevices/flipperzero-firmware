@@ -1,9 +1,11 @@
 #include "../nfc_i.h"
 #include "m-string.h"
+#include "../helpers/nfc_generators.h"
 
 enum SubmenuIndex {
     SubmenuIndexNFCA4,
     SubmenuIndexNFCA7,
+    SubmenuIndexGeneratorsStart,
 };
 
 void nfc_scene_set_type_submenu_callback(void* context, uint32_t index) {
@@ -22,6 +24,14 @@ void nfc_scene_set_type_on_enter(void* context) {
         submenu, "NFC-A 7-bytes UID", SubmenuIndexNFCA7, nfc_scene_set_type_submenu_callback, nfc);
     submenu_add_item(
         submenu, "NFC-A 4-bytes UID", SubmenuIndexNFCA4, nfc_scene_set_type_submenu_callback, nfc);
+
+    // Generators
+    int i = SubmenuIndexGeneratorsStart;
+    for(const NfcGenerator* const* generator = nfc_generators; *generator != NULL;
+        ++generator, ++i) {
+        submenu_add_item(submenu, (*generator)->name, i, nfc_scene_set_type_submenu_callback, nfc);
+    }
+
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }
 
@@ -39,6 +49,14 @@ bool nfc_scene_set_type_on_event(void* context, SceneManagerEvent event) {
             nfc->dev->dev_data.nfc_data.uid_len = 4;
             nfc->dev->format = NfcDeviceSaveFormatUid;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSetSak);
+            consumed = true;
+        } else {
+            nfc_device_clear(nfc->dev);
+            const NfcGenerator* generator =
+                nfc_generators[event.event - SubmenuIndexGeneratorsStart];
+            generator->generator_func(&nfc->dev->dev_data);
+
+            scene_manager_next_scene(nfc->scene_manager, generator->next_scene);
             consumed = true;
         }
     }
