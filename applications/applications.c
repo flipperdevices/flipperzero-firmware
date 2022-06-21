@@ -64,6 +64,7 @@ extern int32_t tanks_game_app(void* p);
 extern int32_t video_poker_app(void* p);
 extern int32_t tictactoe_game_app(void* p);
 extern int32_t arkanoid_game_app(void* p);
+extern int32_t game_of_life_app(void* p);
 
 // On system start hooks declaration
 extern void bt_on_system_start();
@@ -337,6 +338,14 @@ const FlipperApplication FLIPPER_GAMES[] = {
 #ifdef APP_FLAPPY_GAME
     {.app = flappy_game_app,
      .name = "Flipper Flappy Bird",
+     .stack_size = 1024,
+     .icon = &A_Plugins_14,
+     .flags = FlipperApplicationFlagDefault},
+#endif
+
+#ifdef APP_GAME_OF_LIFE
+    {.app = game_of_life_app,
+     .name = "Game of Life",
      .stack_size = 1024,
      .icon = &A_Plugins_14,
      .flags = FlipperApplicationFlagDefault},
