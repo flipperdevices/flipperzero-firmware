@@ -6,16 +6,47 @@
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
 
+static const NotificationSequence sequence_blink_start_cyan = {
+    &message_blink_start_10,
+    &message_blink_set_color_cyan,
+    &message_do_not_reset,
+    NULL,
+};
+
+static const NotificationSequence sequence_blink_start_magenta = {
+    &message_blink_start_10,
+    &message_blink_set_color_magenta,
+    &message_do_not_reset,
+    NULL,
+};
+
+static const NotificationSequence sequence_blink_set_yellow = {
+    &message_blink_set_color_yellow,
+    NULL,
+};
+
+static const NotificationSequence sequence_blink_set_magenta = {
+    &message_blink_set_color_magenta,
+    NULL,
+};
+
+static const NotificationSequence sequence_blink_stop = {
+    &message_blink_stop,
+    NULL,
+};
+
 static const NotificationSequence* ibutton_notification_sequences[] = {
     &sequence_error,
     &sequence_success,
-    &sequence_blink_cyan_10,
-    &sequence_blink_magenta_10,
-    &sequence_blink_yellow_10,
+    &sequence_blink_start_cyan,
+    &sequence_blink_start_magenta,
+    &sequence_blink_set_yellow,
+    &sequence_blink_set_magenta,
     &sequence_set_red_255,
     &sequence_reset_red,
     &sequence_set_green_255,
     &sequence_reset_green,
+    &sequence_blink_stop,
 };
 
 static void ibutton_make_app_folder(iButton* ibutton) {
@@ -211,11 +242,12 @@ bool ibutton_save_key(iButton* ibutton, const char* key_name) {
     bool result = false;
 
     do {
-        // First remove key if it was saved (we rename the key)
-        ibutton_delete_key(ibutton);
-
-        // Set full file name, for new key
+        // Check if we has old key
         if(string_end_with_str_p(ibutton->file_path, IBUTTON_APP_EXTENSION)) {
+            // First remove old key
+            ibutton_delete_key(ibutton);
+
+            // Remove old key name from path
             size_t filename_start = string_search_rchar(ibutton->file_path, '/');
             string_left(ibutton->file_path, filename_start);
         }

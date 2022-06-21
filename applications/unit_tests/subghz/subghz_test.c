@@ -75,7 +75,7 @@ static bool subghz_decoder_test(const char* path, const char* name_decoder) {
                     bool level = level_duration_get_level(level_duration);
                     uint32_t duration = level_duration_get_duration(level_duration);
                     // Yield, to load data inside the worker
-                    osThreadYield();
+                    furi_thread_yield();
                     decoder->protocol->decoder->feed(decoder, level, duration);
                 } else {
                     break;
@@ -115,7 +115,7 @@ static bool subghz_decode_random_test(const char* path) {
                 bool level = level_duration_get_level(level_duration);
                 uint32_t duration = level_duration_get_duration(level_duration);
                 // Yield, to load data inside the worker
-                osThreadYield();
+                furi_thread_yield();
                 subghz_receiver_decode(receiver_handler, level, duration);
             } else {
                 break;
@@ -328,10 +328,10 @@ MU_TEST(subghz_decoder_star_line_test) {
         "Test decoder " SUBGHZ_PROTOCOL_STAR_LINE_NAME " error\r\n");
 }
 
-MU_TEST(subghz_decoder_firefly_test) {
+MU_TEST(subghz_decoder_linear_test) {
     mu_assert(
-        subghz_decoder_test("/ext/unit_tests/subghz/firefly_raw.sub", SUBGHZ_PROTOCOL_FIREFLY_NAME),
-        "Test decoder " SUBGHZ_PROTOCOL_FIREFLY_NAME " error\r\n");
+        subghz_decoder_test("/ext/unit_tests/subghz/linear_raw.sub", SUBGHZ_PROTOCOL_LINEAR_NAME),
+        "Test decoder " SUBGHZ_PROTOCOL_LINEAR_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_megacode_test) {
@@ -398,10 +398,10 @@ MU_TEST(subghz_encoder_keelog_test) {
         "Test encoder " SUBGHZ_PROTOCOL_KEELOQ_NAME " error\r\n");
 }
 
-MU_TEST(subghz_encoder_firefly_test) {
+MU_TEST(subghz_encoder_linear_test) {
     mu_assert(
-        subghz_encoder_test("/ext/unit_tests/subghz/firely.sub"),
-        "Test encoder " SUBGHZ_PROTOCOL_FIREFLY_NAME " error\r\n");
+        subghz_encoder_test("/ext/unit_tests/subghz/linear.sub"),
+        "Test encoder " SUBGHZ_PROTOCOL_LINEAR_NAME " error\r\n");
 }
 
 MU_TEST(subghz_encoder_megacode_test) {
@@ -454,7 +454,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_somfy_keytis_test);
     MU_RUN_TEST(subghz_decoder_somfy_telis_test);
     MU_RUN_TEST(subghz_decoder_star_line_test);
-    MU_RUN_TEST(subghz_decoder_firefly_test);
+    MU_RUN_TEST(subghz_decoder_linear_test);
     MU_RUN_TEST(subghz_decoder_megacode_test);
     MU_RUN_TEST(subghz_decoder_secplus_v1_test);
     MU_RUN_TEST(subghz_decoder_secplus_v2_test);
@@ -466,7 +466,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_encoder_gate_tx_test);
     MU_RUN_TEST(subghz_encoder_nice_flo_test);
     MU_RUN_TEST(subghz_encoder_keelog_test);
-    MU_RUN_TEST(subghz_encoder_firefly_test);
+    MU_RUN_TEST(subghz_encoder_linear_test);
     MU_RUN_TEST(subghz_encoder_megacode_test);
     MU_RUN_TEST(subghz_encoder_holtek_test);
     MU_RUN_TEST(subghz_encoder_secplus_v1_test);

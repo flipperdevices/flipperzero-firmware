@@ -167,6 +167,12 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case SubGhzCustomEventViewReadRAWErase:
+            if(subghz->txrx->rx_key_state == SubGhzRxKeyStateAddKey) {
+                if(subghz_scene_read_raw_update_filename(subghz)) {
+                    string_set(subghz->file_path_tmp, subghz->file_path);
+                    subghz_delete_file(subghz);
+                }
+            }
             subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
             notification_message(subghz->notifications, &sequence_reset_rgb);
             return true;
@@ -180,7 +186,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneMoreRAW);
                 return true;
             } else {
-                furi_crash("SugGhz: RAW file name update error.");
+                furi_crash("SubGhz: RAW file name update error.");
             }
             break;
 
@@ -194,8 +200,6 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 }
                 if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
                    (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
-                    //ToDo FIX
-
                     if(!subghz_tx_start(subghz, subghz->txrx->fff_data)) {
                         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
                     } else {
