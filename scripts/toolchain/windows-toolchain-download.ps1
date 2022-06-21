@@ -2,8 +2,8 @@ Set-StrictMode -Version 2.0
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
 $repo_root = (Get-Item "$PSScriptRoot\..\..").FullName
-$toolchain_url = "https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-2022.06-win32-flipper.zip"
-$toolchain_zip = "gcc-arm-none-eabi-10.3-2022.06-win32-flipper.zip"
+$toolchain_url = "https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-2022.06-i686-windows-flipper.zip"
+$toolchain_zip = "gcc-arm-none-eabi-10.3-2022.06-i686-windows-flipper.zip"
 
 if (Test-Path -LiteralPath "$repo_root\toolchain\i686-windows") {
 	Write-Host -NoNewline "Removing old Windows toolchain.."
