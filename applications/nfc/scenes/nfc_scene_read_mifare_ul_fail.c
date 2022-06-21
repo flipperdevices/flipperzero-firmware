@@ -29,9 +29,20 @@ void nfc_scene_read_mifare_ul_fail_submenu_callback(void* context, uint32_t inde
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
+static char* error_detail(void* context) {
+    Nfc* nfc = context;
+    MfUltralightData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
+    if((mf_ul_data->type == MfUltralightTypeUL11 || mf_ul_data->type == MfUltralightTypeUL21) &&
+       mf_ul_data->data_size == 64) { // Page 16, Lock bytes.
+        return "Tag is password protected.";
+    } else { // TODO: Add more potential error details.
+        return "No details available.";
+    }
+}
+
 static void load_error_dialog(void* context) {
     Nfc* nfc = context;
-    // MfUltralightData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
+    MfUltralightData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
     DialogEx* dialog_ex = nfc->dialog_ex;
 
     dialog_ex_set_center_button_text(dialog_ex, "Info");
@@ -39,11 +50,12 @@ static void load_error_dialog(void* context) {
     dialog_ex_set_icon(dialog_ex, 4, 13, &I_Warning_30x23);
     nfc_text_store_set(
         nfc,
-        NFC_SCENE_READ_FAIL_SHIFT_ERROR "Some data could\n" NFC_SCENE_READ_FAIL_SHIFT_ERROR
-                                        "not be read.\n"
-                                        "Failed to read pages %i - %i",
-        99,
-        99); // TODO: Show actual page numbers
+        NFC_SCENE_READ_FAIL_SHIFT_ERROR "Could not read\n" NFC_SCENE_READ_FAIL_SHIFT_ERROR
+                                        "pages %i - %i.\n"
+                                        "%s",
+        mf_ul_data->data_size / 4,
+        (mf_ul_data->data_size / 4) + 3,
+        error_detail(context));
     dialog_ex_set_text(dialog_ex, nfc->text_store, 4, 17, AlignLeft, AlignTop);
 }
 
@@ -61,7 +73,8 @@ static void load_uid_dialog(void* context) {
     nfc_text_store_set(
         nfc,
         NFC_SCENE_READ_FAIL_SHIFT_UID "ATQA: %02X%02X\n" NFC_SCENE_READ_FAIL_SHIFT_UID
-                                      "SAK: %02X\nUID: %02X %02X %02X %02X %02X %02X %02X",
+                                      "SAK: %02X\n"
+                                      "UID: %02X %02X %02X %02X %02X %02X %02X",
         data->atqa[0],
         data->atqa[1],
         data->sak,

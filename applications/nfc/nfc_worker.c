@@ -302,6 +302,9 @@ void nfc_worker_read_mifare_ultralight(NfcWorker* nfc_worker) {
                     break;
                 } else {
                     FURI_LOG_D(TAG, "Failed reading Mifare Ultralight");
+                    result->protocol = NfcDeviceProtocolMifareUl;
+                    result->mf_ul_data = data;
+                    // Though about using error text from previous commit, but enough data can be inferred from result data to produce a decent error message.
                     if(nfc_worker->callback) {
                         nfc_worker->callback(NfcWorkerEventFail, nfc_worker->context);
                     }
