@@ -7,9 +7,9 @@ get_kernel_type()
 {
     SYS_TYPE="$(uname -s)"
     if [ "$SYS_TYPE" = "Darwin" ]; then
-        TOOLCHAIN_PATH="toolchain/darwin";
+        TOOLCHAIN_PATH="toolchain/x86_64-darwin";
     elif [ "$SYS_TYPE" = "Linux" ]; then
-        TOOLCHAIN_PATH="toolchain/linux";
+        TOOLCHAIN_PATH="toolchain/x86_64-linux";
     else
         echo "Your system is unsupported.. sorry..";
         exit 1;

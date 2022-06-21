@@ -10,11 +10,11 @@ check_system()
     if [ "$SYS_TYPE" = "Darwin" ]; then
         echo "darwin";
         TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-2022.06-x86_64-linux-flipper.tar.gz";
-        TOOLCHAIN_PATH="toolchain/darwin";
+        TOOLCHAIN_PATH="toolchain/x86_64-darwin";
     elif [ "$SYS_TYPE" = "Linux" ]; then
         echo "linux";
         TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-2022.06-x86_64-linux-flipper.tar.gz";
-        TOOLCHAIN_PATH="toolchain/linux";
+        TOOLCHAIN_PATH="toolchain/x86_64-linux";
     else
         echo "unsupported.";
         echo "Your system is unsupported.. sorry..";
@@ -89,6 +89,7 @@ unpack_toolchain()
     printf "Unpacking toolchain..";
     TOOLCHAIN_DIR="$(dirname -- "$(tar -tf "$REPO_ROOT/$TOOLCHAIN_TAR" | head -n 1)")";
     tar -xf "$REPO_ROOT/$TOOLCHAIN_TAR" -C "$REPO_ROOT/";
+    mkdir -p "$REPO_ROOT/toolchain";
     mv "$REPO_ROOT/$TOOLCHAIN_DIR" "$REPO_ROOT/$TOOLCHAIN_PATH/";
     echo "done";
 }
