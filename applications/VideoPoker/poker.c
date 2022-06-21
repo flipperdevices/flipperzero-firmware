@@ -497,7 +497,7 @@ static int paytable[10] = {
     0 /* nothing */
 };
 
-const char* handname[10] = {
+static const char* poker_handname[10] = {
     "Royal Flush",
     "Straight Flush",
     "Four of a Kind",
@@ -636,7 +636,7 @@ void poker_draw_callback(Canvas* canvas, void* ctx) {
             buffer,
             sizeof(buffer),
             "%s:%ix",
-            handname[recognize(poker_player)],
+            poker_handname[recognize(poker_player)],
             paytable[recognize(poker_player)]);
         canvas_draw_str_aligned(canvas, 63, 61, AlignCenter, AlignBottom, buffer);
     }
@@ -780,7 +780,13 @@ int32_t video_poker_app(void* p) {
                         playcard(poker_player); // shuffle shuffle
                     } else if(poker_player->GameState == 4) {
                         Shake();
-                        processing = false;
+                        poker_player->selected = 0;
+                        poker_player->GameState = 0;
+                        poker_player->bet = 10;
+                        poker_player->minbet = 10;
+                        poker_player->highscore = 1000;
+                        poker_player->score = 1000;
+                        poker_player->GameState = 0;
                     }
                     break;
                 case InputKeyBack:
