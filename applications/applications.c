@@ -29,7 +29,6 @@ extern int32_t display_test_app(void* p);
 extern int32_t gpio_app(void* p);
 extern int32_t ibutton_app(void* p);
 extern int32_t infrared_app(void* p);
-extern int32_t infrared_monitor_app(void* p);
 extern int32_t keypad_test_app(void* p);
 extern int32_t lfrfid_app(void* p);
 extern int32_t lfrfid_debug_app(void* p);
@@ -44,6 +43,7 @@ extern int32_t vibro_test_app(void* p);
 extern int32_t bt_hid_app(void* p);
 extern int32_t battery_test_app(void* p);
 extern int32_t text_box_test_app(void* p);
+extern int32_t file_browser_app(void* p);
 
 // Plugins
 extern int32_t music_player_app(void* p);
@@ -411,22 +411,6 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .flags = FlipperApplicationFlagDefault},
 #endif
 
-#ifdef APP_INFRARED_MONITOR
-    {.app = infrared_monitor_app,
-     .name = "Infrared Monitor",
-     .stack_size = 1024,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
-#endif
-
-#ifdef APP_SCENED
-    {.app = scened_app,
-     .name = "Templated Scene",
-     .stack_size = 1024,
-     .icon = NULL,
-     .flags = FlipperApplicationFlagDefault},
-#endif
-
 #ifdef APP_LF_RFID
     {.app = lfrfid_debug_app,
      .name = "LF-RFID Debug",
@@ -456,6 +440,14 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Display Test",
      .stack_size = 1024,
      .icon = NULL,
+     .flags = FlipperApplicationFlagDefault},
+#endif
+
+#ifdef APP_FILE_BROWSER_TEST
+    {.app = file_browser_app,
+     .name = "File Browser test",
+     .stack_size = 2048,
+     .icon = &A_BadUsb_14,
      .flags = FlipperApplicationFlagDefault},
 #endif
 

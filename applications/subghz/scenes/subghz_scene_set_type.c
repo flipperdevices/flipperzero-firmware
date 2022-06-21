@@ -1,5 +1,7 @@
 #include "../subghz_i.h"
 #include <lib/subghz/protocols/keeloq.h>
+#include <lib/subghz/protocols/secplus_v1.h>
+#include <lib/subghz/protocols/secplus_v2.h>
 #include <lib/subghz/blocks/math.h>
 #include <dolphin/dolphin.h>
 #include <flipper_format/flipper_format_i.h>
@@ -7,21 +9,6 @@
 #include <lib/subghz/protocols/registry.h>
 
 #define TAG "SubGhzSetType"
-
-enum SubmenuIndex {
-    SubmenuIndexPricenton,
-    SubmenuIndexNiceFlo12bit,
-    SubmenuIndexNiceFlo24bit,
-    SubmenuIndexCAME12bit,
-    SubmenuIndexCAME24bit,
-    SubmenuIndexCAMETwee,
-    SubmenuIndexNeroSketch,
-    SubmenuIndexNeroRadio,
-    SubmenuIndexGateTX,
-    SubmenuIndexDoorHan_315_00,
-    SubmenuIndexDoorHan_433_92,
-    SubmenuIndexFirefly_300_00,
-};
 
 bool subghz_scene_set_type_submenu_gen_data_protocol(
     void* context,
@@ -39,7 +26,7 @@ bool subghz_scene_set_type_submenu_gen_data_protocol(
         subghz_receiver_search_decoder_base_by_name(subghz->txrx->receiver, protocol_name);
 
     if(subghz->txrx->decoder_result == NULL) {
-        string_set(subghz->error_str, "Protocol not found");
+        string_set_str(subghz->error_str, "Protocol not found");
         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowErrorSub);
         return false;
     }
@@ -110,8 +97,8 @@ void subghz_scene_set_type_on_enter(void* context) {
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "Firefly_300",
-        SubmenuIndexFirefly_300_00,
+        "Linear_300",
+        SubmenuIndexLinear_300_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
@@ -140,6 +127,36 @@ void subghz_scene_set_type_on_enter(void* context) {
         subghz->submenu,
         "DoorHan_433",
         SubmenuIndexDoorHan_433_92,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "LiftMaster_315",
+        SubmenuIndexLiftMaster_315_00,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "LiftMaster_390",
+        SubmenuIndexLiftMaster_390_00,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "Security+2.0_310",
+        SubmenuIndexSecPlus_v2_310_00,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "Security+2.0_315",
+        SubmenuIndexSecPlus_v2_315_00,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "Security+2.0_390",
+        SubmenuIndexSecPlus_v2_390_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
 
@@ -219,11 +236,11 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
                 generated_protocol = true;
             }
             break;
-        case SubmenuIndexFirefly_300_00:
+        case SubmenuIndexLinear_300_00:
             key = (key & 0x3FF);
             if(subghz_scene_set_type_submenu_gen_data_protocol(
                    subghz,
-                   SUBGHZ_PROTOCOL_FIREFLY_NAME,
+                   SUBGHZ_PROTOCOL_LINEAR_NAME,
                    key,
                    10,
                    300000000,
@@ -282,7 +299,7 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
             }
             subghz_transmitter_free(subghz->txrx->transmitter);
             if(!generated_protocol) {
-                string_set(
+                string_set_str(
                     subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
             }
@@ -306,21 +323,103 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
             }
             subghz_transmitter_free(subghz->txrx->transmitter);
             if(!generated_protocol) {
-                string_set(
+                string_set_str(
                     subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
             }
+            break;
+        case SubmenuIndexLiftMaster_315_00:
+            while(!subghz_protocol_secplus_v1_check_fixed(key)) {
+                key = subghz_random_serial();
+            }
+            if(subghz_scene_set_type_submenu_gen_data_protocol(
+                   subghz,
+                   SUBGHZ_PROTOCOL_SECPLUS_V1_NAME,
+                   (uint64_t)key << 32 | 0xE6000000,
+                   42,
+                   315000000,
+                   FuriHalSubGhzPresetOok650Async)) {
+                generated_protocol = true;
+            }
+            break;
+        case SubmenuIndexLiftMaster_390_00:
+            while(!subghz_protocol_secplus_v1_check_fixed(key)) {
+                key = subghz_random_serial();
+            }
+            if(subghz_scene_set_type_submenu_gen_data_protocol(
+                   subghz,
+                   SUBGHZ_PROTOCOL_SECPLUS_V1_NAME,
+                   (uint64_t)key << 32 | 0xE6000000,
+                   42,
+                   390000000,
+                   FuriHalSubGhzPresetOok650Async)) {
+                generated_protocol = true;
+            }
+            break;
+        case SubmenuIndexSecPlus_v2_310_00:
+            subghz->txrx->transmitter = subghz_transmitter_alloc_init(
+                subghz->txrx->environment, SUBGHZ_PROTOCOL_SECPLUS_V2_NAME);
+            if(subghz->txrx->transmitter) {
+                subghz_protocol_secplus_v2_create_data(
+                    subghz_transmitter_get_protocol_instance(subghz->txrx->transmitter),
+                    subghz->txrx->fff_data,
+                    key,
+                    0x68,
+                    0xE500000,
+                    310000000,
+                    FuriHalSubGhzPresetOok650Async);
+                generated_protocol = true;
+            } else {
+                generated_protocol = false;
+            }
+            subghz_transmitter_free(subghz->txrx->transmitter);
+            break;
+        case SubmenuIndexSecPlus_v2_315_00:
+            subghz->txrx->transmitter = subghz_transmitter_alloc_init(
+                subghz->txrx->environment, SUBGHZ_PROTOCOL_SECPLUS_V2_NAME);
+            if(subghz->txrx->transmitter) {
+                subghz_protocol_secplus_v2_create_data(
+                    subghz_transmitter_get_protocol_instance(subghz->txrx->transmitter),
+                    subghz->txrx->fff_data,
+                    key,
+                    0x68,
+                    0xE500000,
+                    315000000,
+                    FuriHalSubGhzPresetOok650Async);
+                generated_protocol = true;
+            } else {
+                generated_protocol = false;
+            }
+            subghz_transmitter_free(subghz->txrx->transmitter);
+            break;
+        case SubmenuIndexSecPlus_v2_390_00:
+            subghz->txrx->transmitter = subghz_transmitter_alloc_init(
+                subghz->txrx->environment, SUBGHZ_PROTOCOL_SECPLUS_V2_NAME);
+            if(subghz->txrx->transmitter) {
+                subghz_protocol_secplus_v2_create_data(
+                    subghz_transmitter_get_protocol_instance(subghz->txrx->transmitter),
+                    subghz->txrx->fff_data,
+                    key,
+                    0x68,
+                    0xE500000,
+                    390000000,
+                    FuriHalSubGhzPresetOok650Async);
+                generated_protocol = true;
+            } else {
+                generated_protocol = false;
+            }
+            subghz_transmitter_free(subghz->txrx->transmitter);
             break;
         default:
             return false;
             break;
         }
 
+        scene_manager_set_scene_state(subghz->scene_manager, SubGhzSceneSetType, event.event);
+
         if(generated_protocol) {
             subghz_file_name_clear(subghz);
             DOLPHIN_DEED(DolphinDeedSubGhzAddManually);
-            scene_manager_set_scene_state(
-                subghz->scene_manager, SubGhzSceneSetType, SubGhzCustomEventManagerSet);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             return true;
         }
