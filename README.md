@@ -14,17 +14,14 @@ $ docker-compose exec dev make
 ```
 
 Latest Updates:
-- Snake now shows score [Thanks to whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac)
-- Center hold now updates the idle animation [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba)
-- Tetris now shows score
-- Latest dev updates from 839e52ac
-- Fixed sound decay issues on music player [Thanks to MajiK]
-- Default make now has DEBUG=0 and COMPACT=1
 - Idle animations will show all animations regardless of level and butthurt [Thanks to MajiK]
 - Removed debug apps compiling on applications.mk to make 33KB of space on final compressed image
 - Updates for the dice app randomization to use future standards
 - Added 10s display timeout
 - BadUSB issue fixed on [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
+- Latest dev changes 556af0b8
+- - Approved [Amiibo & NTAG21x Support #1313 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
+- - Approved [SubGhz: frequency analyzer combined frequency detection method #1321 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1321)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -65,9 +62,7 @@ Added Features:
 - SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
 
 Open PRs Checkedout & Not Merged In Main:
-- [Amiibo & NTAG21x Support #1313 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1313)
 - [On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
-- [SubGhz: frequency analyzer combined frequency detection method #1321 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1321)
 - [SubGhz: fix protocol scher_khan #1323 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1323)
 - [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 
