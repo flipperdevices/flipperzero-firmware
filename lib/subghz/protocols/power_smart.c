@@ -80,7 +80,7 @@ void* subghz_protocol_encoder_power_smart_alloc(SubGhzEnvironment* environment) 
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
-    instance->encoder.size_upload = 1536; //max upload 92*14 = 1288 !!!!
+    instance->encoder.size_upload = 1024;
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_runing = false;
     return instance;
@@ -134,14 +134,14 @@ static void
     manchester_encoder_reset(&enc_state);
     ManchesterEncoderResult result;
 
-    uint64_t temp_parcel = instance->generic.data;
-
     for(int i = 8; i > 0; i--) {
         for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
-            if(!manchester_encoder_advance(&enc_state, !bit_read(temp_parcel, i - 1), &result)) {
+            if(!manchester_encoder_advance(
+                   &enc_state, !bit_read(instance->generic.data, i - 1), &result)) {
                 instance->encoder.upload[index++] =
                     subghz_protocol_encoder_power_smart_add_duration_to_upload(result);
-                manchester_encoder_advance(&enc_state, !bit_read(temp_parcel, i - 1), &result);
+                manchester_encoder_advance(
+                    &enc_state, !bit_read(instance->generic.data, i - 1), &result);
             }
             instance->encoder.upload[index++] =
                 subghz_protocol_encoder_power_smart_add_duration_to_upload(result);
@@ -162,7 +162,28 @@ static void
  * @param instance Pointer to a SubGhzBlockGeneric* instance
  */
 static void subghz_protocol_power_smart_remote_controller(SubGhzBlockGeneric* instance) {
-    //ToDo not sure how to parse
+    /*
+    * Protocol: Manchester encoding, symbol rate ~2222.
+    * Packet Format: 
+    *       0xFDXXXXYYAAZZZZWW where 0xFD and 0xAA sync word
+    *                           XXXX = ~ZZZZ, YY=(~WW)-1 
+    * Example:
+    *                               SYNC1  K1  DATA1        K2 DATA2    SYNC2  ~K1 ~DATA2       ~K2 (~DATA2)-1
+    *       0xFD2137ACAADEC852 => 11111101 0 01000010011011 1 10101100 10101010 1 10111101100100 0 01010010
+    *       0xFDA137ACAA5EC852 => 11111101 1 01000010011011 1 10101100 10101010 0 10111101100100 0 01010010
+    *       0xFDA136ACAA5EC952 => 11111101 1 01000010011011 0 10101100 10101010 0 10111101100100 1 01010010
+    * 
+    * Key:
+    *       K1K2
+    *        0 0 - key_unknown
+    *        0 1 - key_down
+    *        1 0 - key_up
+    *        1 1 - key_stop
+    *        
+    */
+
+    instance->btn = ((instance->data >> 54) & 0x02) | ((instance->data >> 40) & 0x1);
+    instance->serial = ((instance->data >> 33) & 0x3FFF00) | ((instance->data >> 32) & 0xFF);
 }
 
 bool subghz_protocol_encoder_power_smart_deserialize(void* context, FlipperFormat* flipper_format) {
@@ -229,7 +250,6 @@ void subghz_protocol_decoder_power_smart_free(void* context) {
 void subghz_protocol_decoder_power_smart_reset(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderPowerSmart* instance = context;
-    instance->decoder.parser_step = PowerSmartDecoderStepReset;
     manchester_advance(
         instance->manchester_saved_state,
         ManchesterEventReset,
@@ -238,9 +258,11 @@ void subghz_protocol_decoder_power_smart_reset(void* context) {
 }
 
 bool subghz_protocol_power_smart_chek_valid(uint64_t packet) {
-    uint32_t data_1 = (uint32_t)((packet >> 32) & 0xFFFFFF);
-    uint32_t data_2 = (uint32_t)(((~packet) & 0xFFFFFF) - 1);
-    return data_1 == data_2;
+    uint32_t data_1 = (uint32_t)((packet >> 40) & 0xFFFF);
+    uint32_t data_2 = (uint32_t)((~packet >> 8) & 0xFFFF);
+    uint8_t data_3 = (uint8_t)(packet >> 32) & 0xFF;
+    uint8_t data_4 = (uint8_t)(((~packet) & 0xFF) - 1);
+    return (data_1 == data_2) && (data_3 == data_4);
 }
 
 void subghz_protocol_decoder_power_smart_feed(
@@ -250,60 +272,61 @@ void subghz_protocol_decoder_power_smart_feed(
     furi_assert(context);
     SubGhzProtocolDecoderPowerSmart* instance = context;
     ManchesterEvent event = ManchesterEventReset;
-    switch(instance->decoder.parser_step) {
-    case PowerSmartDecoderStepReset:
-        if(!level) {
-            if(DURATION_DIFF(duration, subghz_protocol_power_smart_const.te_short) <
-               subghz_protocol_power_smart_const.te_delta) {
-                event = ManchesterEventShortLow;
-            } else if(
-                DURATION_DIFF(duration, subghz_protocol_power_smart_const.te_long) <
-                subghz_protocol_power_smart_const.te_delta * 2) {
-                event = ManchesterEventLongLow;
-            }
-        } else {
-            if(DURATION_DIFF(duration, subghz_protocol_power_smart_const.te_short) <
-               subghz_protocol_power_smart_const.te_delta) {
-                event = ManchesterEventShortHigh;
-            } else if(
-                DURATION_DIFF(duration, subghz_protocol_power_smart_const.te_long) <
-                subghz_protocol_power_smart_const.te_delta * 2) {
-                event = ManchesterEventLongHigh;
-            }
+    if(!level) {
+        if(DURATION_DIFF(duration, subghz_protocol_power_smart_const.te_short) <
+           subghz_protocol_power_smart_const.te_delta) {
+            event = ManchesterEventShortLow;
+        } else if(
+            DURATION_DIFF(duration, subghz_protocol_power_smart_const.te_long) <
+            subghz_protocol_power_smart_const.te_delta * 2) {
+            event = ManchesterEventLongLow;
         }
-        if(event != ManchesterEventReset) {
-            bool data;
-            bool data_ok = manchester_advance(
-                instance->manchester_saved_state, event, &instance->manchester_saved_state, &data);
-
-            if(data_ok) {
-                instance->decoder.decode_data = (instance->decoder.decode_data << 1) | !data;
-            }
-            if((instance->decoder.decode_data & POWER_SMART_PACKET_HEADER_MASK) ==
-               POWER_SMART_PACKET_HEADER) {
-                if(subghz_protocol_power_smart_chek_valid(instance->decoder.decode_data)) {
-                    instance->decoder.decode_data = instance->decoder.decode_data;
-                    instance->generic.data = instance->decoder.decode_data;
-                    instance->generic.data_count_bit =
-                        subghz_protocol_power_smart_const.min_count_bit_for_found;
-                    if(instance->base.callback)
-                        instance->base.callback(&instance->base, instance->base.context);
-                    instance->decoder.decode_data = 0;
-                    instance->decoder.decode_count_bit = 0;
-                }
-            }
-        } else {
-            instance->decoder.decode_data = 0;
-            instance->decoder.decode_count_bit = 0;
-            manchester_advance(
-                instance->manchester_saved_state,
-                ManchesterEventReset,
-                &instance->manchester_saved_state,
-                NULL);
-            instance->decoder.parser_step = PowerSmartDecoderStepReset;
+    } else {
+        if(DURATION_DIFF(duration, subghz_protocol_power_smart_const.te_short) <
+           subghz_protocol_power_smart_const.te_delta) {
+            event = ManchesterEventShortHigh;
+        } else if(
+            DURATION_DIFF(duration, subghz_protocol_power_smart_const.te_long) <
+            subghz_protocol_power_smart_const.te_delta * 2) {
+            event = ManchesterEventLongHigh;
         }
-        break;
     }
+    if(event != ManchesterEventReset) {
+        bool data;
+        bool data_ok = manchester_advance(
+            instance->manchester_saved_state, event, &instance->manchester_saved_state, &data);
+
+        if(data_ok) {
+            instance->decoder.decode_data = (instance->decoder.decode_data << 1) | !data;
+        }
+        if((instance->decoder.decode_data & POWER_SMART_PACKET_HEADER_MASK) ==
+           POWER_SMART_PACKET_HEADER) {
+            if(subghz_protocol_power_smart_chek_valid(instance->decoder.decode_data)) {
+                instance->decoder.decode_data = instance->decoder.decode_data;
+                instance->generic.data = instance->decoder.decode_data;
+                instance->generic.data_count_bit =
+                    subghz_protocol_power_smart_const.min_count_bit_for_found;
+                if(instance->base.callback)
+                    instance->base.callback(&instance->base, instance->base.context);
+                instance->decoder.decode_data = 0;
+                instance->decoder.decode_count_bit = 0;
+            }
+        }
+    } else {
+        instance->decoder.decode_data = 0;
+        instance->decoder.decode_count_bit = 0;
+        manchester_advance(
+            instance->manchester_saved_state,
+            ManchesterEventReset,
+            &instance->manchester_saved_state,
+            NULL);
+    }
+}
+
+static const char* subghz_protocol_power_smart_get_name_button(uint8_t btn) {
+    btn &= 0x3;
+    const char* name_btn[0x4] = {"Unknown", "Down", "Up", "Stop"};
+    return name_btn[btn];
 }
 
 uint8_t subghz_protocol_decoder_power_smart_get_hash_data(void* context) {
@@ -334,16 +357,18 @@ void subghz_protocol_decoder_power_smart_get_string(void* context, string_t outp
     SubGhzProtocolDecoderPowerSmart* instance = context;
     subghz_protocol_power_smart_remote_controller(&instance->generic);
     uint32_t code_found_hi = instance->generic.data >> 32;
-    uint32_t code_found_lo = instance->generic.data & 0x00000000ffffffff;
+    uint32_t code_found_lo = instance->generic.data & 0xFFFFFFFF;
 
     string_cat_printf(
         output,
         "%s %db\r\n"
         "Key:0x%lX%08lX\r\n"
-        "Btn:%lX\r\n",
+        "Sn:0x%07lX \r\n"
+        "Btn:%s\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         code_found_hi,
         code_found_lo,
-        instance->generic.btn);
+        instance->generic.serial,
+        subghz_protocol_power_smart_get_name_button(instance->generic.btn));
 }
