@@ -6,6 +6,8 @@
 #include "hid_usage_led.h"
 
 #define HID_KEYBOARD_NONE 0x00
+// Remapping the colon key which is shift + ; to comma
+#define HID_KEYBOARD_COMMA HID_KEYBOARD_COLON
 
 /** HID keyboard modifier keys */
 enum HidKeyboardMods {
@@ -29,9 +31,9 @@ static const uint16_t hid_asciimap[] = {
     HID_KEYBOARD_NONE, // ENQ
     HID_KEYBOARD_NONE, // ACK
     HID_KEYBOARD_NONE, // BEL
-    HID_KEYPAD_BACKSPACE, // BS   Backspace
-    HID_KEYPAD_TAB, // TAB  Tab
-    HID_KEYPAD_ENTER, // LF   Enter
+    HID_KEYBOARD_DELETE, // BS   Backspace
+    HID_KEYBOARD_TAB, // TAB  Tab
+    HID_KEYBOARD_RETURN, // LF   Enter
     HID_KEYBOARD_NONE, // VT
     HID_KEYBOARD_NONE, // FF
     HID_KEYBOARD_NONE, // CR
@@ -65,7 +67,7 @@ static const uint16_t hid_asciimap[] = {
     HID_KEYBOARD_0 | KEY_MOD_LEFT_SHIFT, // )
     HID_KEYBOARD_8 | KEY_MOD_LEFT_SHIFT, // *
     HID_KEYBOARD_EQUAL_SIGN | KEY_MOD_LEFT_SHIFT, // +
-    HID_KEYPAD_COMMA, // ,
+    HID_KEYBOARD_COMMA, // ,
     HID_KEYBOARD_MINUS, // -
     HID_KEYBOARD_DOT, // .
     HID_KEYBOARD_SLASH, // /
@@ -81,7 +83,7 @@ static const uint16_t hid_asciimap[] = {
     HID_KEYBOARD_9, // 9
     HID_KEYBOARD_SEMICOLON | KEY_MOD_LEFT_SHIFT, // :
     HID_KEYBOARD_SEMICOLON, // ;
-    HID_KEYPAD_COMMA | KEY_MOD_LEFT_SHIFT, // <
+    HID_KEYBOARD_COMMA | KEY_MOD_LEFT_SHIFT, // <
     HID_KEYBOARD_EQUAL_SIGN, // =
     HID_KEYBOARD_DOT | KEY_MOD_LEFT_SHIFT, // >
     HID_KEYBOARD_SLASH | KEY_MOD_LEFT_SHIFT, // ?

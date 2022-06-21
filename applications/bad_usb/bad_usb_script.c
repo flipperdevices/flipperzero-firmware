@@ -217,9 +217,9 @@ static bool ducky_string(const char* param) {
 
 static uint16_t ducky_get_keycode(const char* param, bool accept_chars) {
     for(uint8_t i = 0; i < (sizeof(ducky_keys) / sizeof(ducky_keys[0])); i++) {
-        uint8_t HID_KEYBOARD_cmd_len = strlen(ducky_keys[i].name);
-        if((strncmp(param, ducky_keys[i].name, HID_KEYBOARD_cmd_len) == 0) &&
-           (ducky_is_line_end(param[HID_KEYBOARD_cmd_len]))) {
+        uint8_t key_cmd_len = strlen(ducky_keys[i].name);
+        if((strncmp(param, ducky_keys[i].name, key_cmd_len) == 0) &&
+           (ducky_is_line_end(param[key_cmd_len]))) {
             return ducky_keys[i].keycode;
         }
     }
