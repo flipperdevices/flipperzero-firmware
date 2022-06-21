@@ -11,6 +11,7 @@ typedef void (
 typedef struct {
     uint32_t frequency;
     float rssi;
+    uint16_t channel;
 } FrequencyRSSI;
 
 /** Allocate SubGhzFrequencyAnalyzerWorker
