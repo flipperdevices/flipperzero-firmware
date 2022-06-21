@@ -59,7 +59,7 @@ bool slideshow_load(Slideshow* slideshow, const char* fspath) {
         }
         SlideshowFileHeader header;
         if((storage_file_read(slideshow_file, &header, sizeof(header)) != sizeof(header)) ||
-           (header.magic != SLIDESHOW_MAGIC) || 
+           (header.magic != SLIDESHOW_MAGIC) ||
            (header.version > SLIDESHOW_MAX_SUPPORTED_VERSION)) {
             break;
         }

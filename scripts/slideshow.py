@@ -17,16 +17,11 @@ class Main(App):
 
         self.parser.set_defaults(func=self.pack)
 
-    def _icon2header(self, file):
-        image = file2image(file)
-        return image.width, image.height, image.data_as_carray()
-
     def pack(self):
         if not os.path.exists(self.args.input):
             self.logger.error(f'"{self.args.input}" does not exist')
             return 1
 
-        slideshow_data = bytes()
         file_idx = 0
         images = []
         while True:
