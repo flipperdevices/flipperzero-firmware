@@ -1,19 +1,4 @@
-# UniRF Remix App
-### Integrated into Flipper Zero Unleashed Firmware 0.58
-------------
-### Quick Start
-
-- Grab DFU from [Releases](https://github.com/ESurge/flipperzero-firmware-unifxremix/Relases/latest)
-- Flash onto Flipper Zero
-- Edit [universal\_rf\_map](https://github.com/ESurge/flipperzero-firmware-unirfremix/blob/dev/assets/resources/subghz/assets/universal_rf_map) and upload to SD card under ```/subghz/assets``` folder
-------------
-### Custom Import
-
-- UniRFRemix folder has the base code. Use ```unirfremix_app``` for ```applications.c```
-- Icons used are located at ```assets/icons/UniRFRemix```
-- Animated Icon used is located at ```assets/icons/MainMenu/UniRFRemix_14```
-- Follow compilation instructions from [Flipper Devices Flipper Zero Firmware GitHub](https://github.com/flipperdevices/flipperzero-firmware)
-------------
+# UniRF Remix App - Minimalized
 ### Notes
 * ##### App Usage
   - Press a button to send the assigned capture file.
@@ -23,8 +8,8 @@
   - No skip function.
 
 * ##### Universal RF Map
+  - App updated to read map definitions from ```subghz/assets/universal_rf_map.txt```
   - Backwards compatible with [jimilinuxguy Universal RF Remote](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote) map file. You should be able to use the map file as is with both versions.
-  - Recommend that you update the map file to the version included in this repo.
   - File path should not have any spaces or special characters (- and _ excluded).
   - Labels are limited to 12 characters.
     - Why? This is to prevent overlapping elements on screen.
@@ -40,16 +25,17 @@
 ### Screenshots
 #### Main Menu:
 ![unirfremix_mainmenu](https://user-images.githubusercontent.com/982575/169637623-bc41cfa5-6433-4198-a970-8fce42691ad7.png)
+
 #### Idle Screen:
 - Repeat indictator is located at the bottom right
 
-![unirfremix-idle](https://user-images.githubusercontent.com/982575/169639427-daef6274-2e38-4684-816a-14ba915aa051.png)
+![unirfremix-minimal-mainscreen_idle](https://user-images.githubusercontent.com/982575/174741909-aa1214b2-3d97-4232-ad5c-7e99711b8fa6.png)
 
 #### Sending Screen:
 - Button pressed will highlight when sending
 - LED indicator will flash
 
-![unirfremix-sending](https://user-images.githubusercontent.com/982575/169639435-74bdeb9e-da58-4ada-b613-8c4f8f89ab46.png)
+![unirfremix-minimal-mainscreen_send](https://user-images.githubusercontent.com/982575/174741934-ef144ba4-109a-430a-b439-699b863ac61c.png)
 
 #### Invalid Map File:
 - If you don't have at least one valid file path set in your ```universal_rf_map``` file, you'll see this screen
@@ -60,6 +46,11 @@
 - If you don't have the ```universal_rf_map``` file, you'll see this screen
 
 ![unirfremix-missingmap](https://user-images.githubusercontent.com/982575/169639439-6414c81a-3de9-4817-b9b5-235130fd0e56.png)
+
+#### Config Loading:
+- If the map file doesn't load properly for some reason, you'll see this screen
+
+![unirfremix-screen-loading](https://user-images.githubusercontent.com/982575/174741703-5632f7d5-ee1e-481e-8d11-7f87bc999c94.png)
 
 ------------
 ### Backstory
