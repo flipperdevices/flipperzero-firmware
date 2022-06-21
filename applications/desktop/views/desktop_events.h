@@ -26,9 +26,6 @@ typedef enum {
     DesktopDebugEventSaveState,
     DesktopDebugEventExit,
 
-    DesktopFirstStartCompleted,
-    DesktopFirstStartPoweroff,
-
     DesktopLockMenuEventLock,
     DesktopLockMenuEventPinLock,
     DesktopLockMenuEventExit,

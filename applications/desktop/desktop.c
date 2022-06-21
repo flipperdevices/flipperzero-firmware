@@ -258,7 +258,6 @@ void desktop_free(Desktop* desktop) {
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdLockMenu);
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdLocked);
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdDebug);
-    view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdFirstStart);
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdHwMismatch);
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdPinInput);
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdPinTimeout);
