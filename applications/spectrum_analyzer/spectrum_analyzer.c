@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include "spectrum_analyzer.h"
 
-#include <gui/gui.h>
-
 #include <lib/drivers/cc1101_regs.h>
 #include "spectrum_analyzer_worker.h"
 
@@ -63,6 +61,10 @@ void spectrum_analyzer_draw_scale(Canvas* canvas, const SpectrumAnalyzerModel* m
     case NARROW:
         tag_left = model->center_freq - 2;
         tag_right = model->center_freq + 2;
+        break;
+    case ULTRANARROW:
+        tag_left = model->center_freq - 1;
+        tag_right = model->center_freq + 1;
         break;
     case ULTRAWIDE:
         tag_left = model->center_freq - 40;
@@ -135,9 +137,9 @@ static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
             temp_str,
             36,
             "Peak: %3.2f Mhz %3.1f dbm",
-            ((float)(model->channel0_frequency + (model->max_rssi_channel * model->spacing)) /
+            ((double)(model->channel0_frequency + (model->max_rssi_channel * model->spacing)) /
              1000000),
-            model->max_rssi);
+            (double) model->max_rssi);
         canvas_draw_str_aligned(canvas, 127, 0, AlignRight, AlignTop, temp_str);
     }
 
@@ -193,6 +195,11 @@ void spectrum_analyzer_calculate_frequencies(SpectrumAnalyzerModel* model) {
         margin = NARROW_MARGIN;
         step = NARROW_STEP;
         model->spacing = NARROW_SPACING;
+        break;
+    case ULTRANARROW:
+        margin = ULTRANARROW_MARGIN;
+        step = ULTRANARROW_STEP;
+        model->spacing = ULTRANARROW_SPACING;
         break;
     case ULTRAWIDE:
         margin = ULTRAWIDE_MARGIN;
@@ -392,6 +399,9 @@ int32_t spectrum_analyzer_app(void* p) {
         case NARROW:
             hstep = NARROW_STEP;
             break;
+        case ULTRANARROW:
+            hstep = ULTRANARROW_STEP;
+            break;
         case ULTRAWIDE:
             hstep = ULTRAWIDE_STEP;
             break;
@@ -429,6 +439,9 @@ int32_t spectrum_analyzer_app(void* p) {
                 model->width = NARROW;
                 break;
             case NARROW:
+                model->width = ULTRANARROW;
+                break;
+            case ULTRANARROW:
                 model->width = ULTRAWIDE;
                 break;
             case ULTRAWIDE:
