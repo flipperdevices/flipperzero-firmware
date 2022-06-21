@@ -23,6 +23,7 @@ Latest Updates:
 - Idle animations will show all animations regardless of level and butthurt [Thanks to MajiK]
 - Removed debug apps compiling on applications.mk to make 33KB of space on final compressed image
 - Updates for the dice app randomization to use future standards
+- Added 10s display timeout
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -49,7 +50,7 @@ Special shout out to these libraries for giving us more fun:
 - https://github.com/UberGuidoZ/Flipper-IRDB
 
 Added Features:
-- 90s Timeout for Backlight Time [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
+- 10s+90s Timeout for Backlight Time [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
 - Actual PIN Lock [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop.c)
 - Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 - Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
