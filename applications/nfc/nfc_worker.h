@@ -41,6 +41,8 @@ typedef enum {
     NfcWorkerEventFoundKeyA,
     NfcWorkerEventFoundKeyB,
     NfcWorkerEventStartReading,
+    // Mifare Ultralight/NTAG events
+    NfcWorkerEventPwdAuth,
 } NfcWorkerEvent;
 
 typedef void (*NfcWorkerCallback)(NfcWorkerEvent event, void* context);
@@ -59,3 +61,5 @@ void nfc_worker_start(
     void* context);
 
 void nfc_worker_stop(NfcWorker* nfc_worker);
+
+void* nfc_worker_get_extra_context(NfcWorker* nfc_worker);

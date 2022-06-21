@@ -1,5 +1,6 @@
 #include "../nfc_i.h"
 #include <dolphin/dolphin.h>
+#include <applications/gui/view_dispatcher_i.h>
 
 #define NFC_MF_UL_DATA_NOT_CHANGED (0UL)
 #define NFC_MF_UL_DATA_CHANGED (1UL)
@@ -8,8 +9,23 @@ void nfc_emulate_mifare_ul_worker_callback(NfcWorkerEvent event, void* context) 
     UNUSED(event);
     Nfc* nfc = context;
 
-    scene_manager_set_scene_state(
-        nfc->scene_manager, NfcSceneEmulateMifareUl, NFC_MF_UL_DATA_CHANGED);
+    if(event == NfcWorkerEventSuccess) {
+        scene_manager_set_scene_state(
+            nfc->scene_manager, NfcSceneEmulateMifareUl, NFC_MF_UL_DATA_CHANGED);
+    } else if(event == NfcWorkerEventPwdAuth) {
+        MfUltralightAuth* auth = nfc_worker_get_extra_context(nfc->worker);
+        if(auth != NULL) {
+            nfc_text_store_set(
+                nfc,
+                "AUTH: %02x %02x %02x %02x",
+                auth->pwd.raw[0],
+                auth->pwd.raw[1],
+                auth->pwd.raw[2],
+                auth->pwd.raw[3]);
+            // HACK: force viewport update
+            view_port_update(nfc->view_dispatcher->view_port);
+        }
+    }
 }
 
 void nfc_scene_emulate_mifare_ul_on_enter(void* context) {
@@ -23,6 +39,7 @@ void nfc_scene_emulate_mifare_ul_on_enter(void* context) {
     }
     popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
     popup_set_header(popup, "Emulating\nMf Ultralight", 56, 31, AlignLeft, AlignTop);
+    popup_set_text(popup, nfc->text_store, 30, 56, AlignLeft, AlignTop);
 
     // Setup and start worker
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
