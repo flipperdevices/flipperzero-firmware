@@ -11,10 +11,10 @@
 #define POWER_SMART_PACKET_HEADER 0xFD000000AA000000
 #define POWER_SMART_PACKET_HEADER_MASK 0xFF000000FF000000
 
-#define CANNEL_PATTERN "%c%c%c%c%c%c"
-#define CNT_TO_CANNEL(dip)                                                              \
-    (dip & 0x0001 ? '1' : '0'), (dip & 0x0002 ? '1' : '0'), (dip & 0x0004 ? '1' : '0'), \
-        (dip & 0x0008 ? '1' : '0'), (dip & 0x0010 ? '1' : '0'), (dip & 0x0020 ? '1' : '0')
+#define CHANNEL_PATTERN "%c%c%c%c%c%c"
+#define CNT_TO_CHANNEL(dip)                                                             \
+    (dip & 0x0001 ? '*' : '-'), (dip & 0x0002 ? '*' : '-'), (dip & 0x0004 ? '*' : '-'), \
+        (dip & 0x0008 ? '*' : '-'), (dip & 0x0010 ? '*' : '-'), (dip & 0x0020 ? '*' : '-')
 
 static const SubGhzBlockConst subghz_protocol_power_smart_const = {
     .te_short = 225,
@@ -173,10 +173,10 @@ static void subghz_protocol_power_smart_remote_controller(SubGhzBlockGeneric* in
     *       0xFDXXXXYYAAZZZZWW where 0xFD and 0xAA sync word
     *                           XXXX = ~ZZZZ, YY=(~WW)-1 
     * Example:
-    *                               SYNC1  K1 CANAL  DATA1   K2 DATA2    SYNC2  ~K1 ~CANAL ~DATA2 ~K2 (~DATA2)-1
-    *       0xFD2137ACAADEC852 => 11111101 0 010000 10011011 1 10101100 10101010 1 1011110 1100100 0 01010010
-    *       0xFDA137ACAA5EC852 => 11111101 1 010000 10011011 1 10101100 10101010 0 1011110 1100100 0 01010010
-    *       0xFDA136ACAA5EC952 => 11111101 1 010000 10011011 0 10101100 10101010 0 1011110 1100100 1 01010010
+    *                               SYNC1 K1 CHANNEL DATA1   K2 DATA2    SYNC2  ~K1 ~CHANNEL ~DATA2  ~K2 (~DATA2)-1
+    *       0xFD2137ACAADEC852 => 11111101 0 010000 10011011 1 10101100 10101010  1  1011110 1100100  0  01010010
+    *       0xFDA137ACAA5EC852 => 11111101 1 010000 10011011 1 10101100 10101010  0  1011110 1100100  0  01010010
+    *       0xFDA136ACAA5EC952 => 11111101 1 010000 10011011 0 10101100 10101010  0  1011110 1100100  1  01010010
     * 
     * Key:
     *       K1K2
@@ -362,8 +362,6 @@ void subghz_protocol_decoder_power_smart_get_string(void* context, string_t outp
     furi_assert(context);
     SubGhzProtocolDecoderPowerSmart* instance = context;
     subghz_protocol_power_smart_remote_controller(&instance->generic);
-    uint32_t code_found_hi = instance->generic.data >> 32;
-    uint32_t code_found_lo = instance->generic.data & 0xFFFFFFFF;
 
     string_cat_printf(
         output,
@@ -371,12 +369,12 @@ void subghz_protocol_decoder_power_smart_get_string(void* context, string_t outp
         "Key:0x%lX%08lX\r\n"
         "Sn:0x%07lX \r\n"
         "Btn:%s\r\n"
-        "Cannel:" CANNEL_PATTERN "\r\n",
+        "Channel:" CHANNEL_PATTERN "\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
-        code_found_hi,
-        code_found_lo,
+        (uint32_t)(instance->generic.data >> 32),
+        (uint32_t)(instance->generic.data & 0xFFFFFFFF),
         instance->generic.serial,
         subghz_protocol_power_smart_get_name_button(instance->generic.btn),
-        CNT_TO_CANNEL(instance->generic.cnt));
+        CNT_TO_CHANNEL(instance->generic.cnt));
 }
