@@ -22,6 +22,7 @@ Latest Updates:
 - Default make now has DEBUG=0 and COMPACT=1
 - Idle animations will show all animations regardless of level and butthurt [Thanks to MajiK]
 - Removed debug apps compiling on applications.mk to make 33KB of space on final compressed image
+- Updates for the dice app randomization to use future standards
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -53,6 +54,7 @@ Added Features:
 - Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 - Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Hold Center to change flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
+- Idle animations will show all animations regardless of level and butthurt [Thanks to MajiK]
 - Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
 - Removing T5577 passwords via the cli command rfid clear_pass_t5577 using a dictionary attack [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Scan names will have timestamp instead of random name assigned [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c)
