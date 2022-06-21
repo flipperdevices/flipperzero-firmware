@@ -1,5 +1,5 @@
 V:0
-T:1655349687
+T:1655846202
 D:badusb
 D:dolphin
 D:infrared
@@ -25,7 +25,7 @@ D:dolphin/L2_Soldering_128x64
 D:dolphin/L3_Furippa3_128x64
 D:dolphin/L3_Hijack_radio_128x64
 D:dolphin/L3_Lab_research_128x54
-F:d1148ab5354eaf4fa7f959589d840932:1563:dolphin/manifest.txt
+F:2f15738d5c734134550bab968a867a23:1569:dolphin/manifest.txt
 F:d37be8444102ec5cde5fe3a85d55b57d:481:dolphin/L1_Boxing_128x64/frame_0.bm
 F:54fb07443bc153ded9589b74d23b4263:461:dolphin/L1_Boxing_128x64/frame_1.bm
 F:e007afe130d699c715b99ce8e5b407bd:531:dolphin/L1_Boxing_128x64/frame_2.bm
@@ -236,8 +236,8 @@ F:610a0ffa2479a874f2060eb2348104c5:2712:subghz/assets/keeloq_mfcodes
 F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
 F:2cb439fdabd909569a4d196a5009a92f:1307:subghz/assets/setting_user
-F:e7199dcdbc7910508b1ef3fddf3fe219:255:subghz/assets/touchtunes_map.txt
-F:994284c5e4796c3c292d5ceabde55fe4:384:subghz/assets/universal_rf_map.txt
+F:79c23605f2037021339d3a51cd80cc32:256:subghz/assets/touchtunes_map.txt
+F:9eddce3d5764d36a268763667c5d63a7:389:subghz/assets/universal_rf_map.txt
 D:u2f/assets
 F:7e11e688e39034bbb9d88410044795e1:365:u2f/assets/cert.der
 F:f60b88c20ed479ed9684e249f7134618:264:u2f/assets/cert_key.u2f
