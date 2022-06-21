@@ -156,11 +156,10 @@ static void ble_glue_update_c2_fw_info() {
     snprintf(
         local_info->StackTypeString,
         BLE_GLUE_MAX_VERSION_STRING_LEN,
-        "%d.%d.%d.%d.%s",
+        "%d.%d.%d.%s",
         local_info->VersionMajor,
         local_info->VersionMinor,
         local_info->VersionSub,
-        local_info->VersionBranch,
         ble_glue_get_reltype_str(local_info->StackType));
 
     local_info->FusVersionMajor = wireless_info.FusVersionMajor;

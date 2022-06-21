@@ -52,22 +52,28 @@ if GetOption("fullenv"):
     )
 
     # Target for self-update package
+    dist_arguments = [
+        "-r",
+        '"${ROOT_DIR.abspath}/assets/resources"',
+        "--bundlever",
+        '"${UPDATE_VERSION_STRING}"',
+        "--radio",
+        '"${ROOT_DIR.abspath}/${COPRO_STACK_BIN_DIR}/${COPRO_STACK_BIN}"',
+        "--radiotype",
+        "${COPRO_STACK_TYPE}",
+        "${COPRO_DISCLAIMER}",
+        "--obdata",
+        '"${ROOT_DIR.abspath}/${COPRO_OB_DATA}"',
+    ]
+    if distenv["UPDATE_SPLASH"]:
+        dist_arguments += [
+            "--splash",
+            distenv.subst("assets/slideshow/$UPDATE_SPLASH"),
+        ]
     selfupdate_dist = distenv.DistBuilder(
         "selfupdate.pseudo",
         (distenv["DIST_DEPENDS"], firmware_out["FW_RESOURCES"]),
-        DIST_EXTRA=[
-            "-r",
-            '"${ROOT_DIR.abspath}/assets/resources"',
-            "--bundlever",
-            '"${UPDATE_VERSION_STRING}"',
-            "--radio",
-            '"${ROOT_DIR.abspath}/${COPRO_STACK_BIN_DIR}/${COPRO_STACK_BIN}"',
-            "--radiotype",
-            "${COPRO_STACK_TYPE}",
-            "${COPRO_DISCLAIMER}",
-            "--obdata",
-            '"${ROOT_DIR.abspath}/${COPRO_OB_DATA}"',
-        ],
+        DIST_EXTRA=dist_arguments,
     )
     distenv.Pseudo("selfupdate.pseudo")
     AlwaysBuild(selfupdate_dist)

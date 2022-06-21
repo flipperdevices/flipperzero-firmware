@@ -29,6 +29,7 @@ class GitVersion:
             or self._exec_git("rev-parse --abbrev-ref HEAD")
             or "unknown"
         )
+
         branch_num = self._exec_git("rev-list --count HEAD") or "n/a"
 
         try:

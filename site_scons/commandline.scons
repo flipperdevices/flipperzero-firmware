@@ -156,4 +156,10 @@ vars.Add(
     default="",
 )
 
+vars.Add(
+    "UPDATE_SPLASH",
+    help="Directory name with slideshow frames to render after installing update package",
+    default="update_default",
+)
+
 Return("vars")

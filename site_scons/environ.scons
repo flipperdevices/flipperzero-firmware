@@ -7,6 +7,17 @@ import multiprocessing
 
 Import("VAR_ENV")
 
+forward_os_env = {
+    # Import PATH from OS env - scons doesn't do that by default
+    "PATH": os.environ["PATH"],
+}
+# Proxying CI environment to child processes & scripts
+if WORKFLOW_BRANCH_OR_TAG := os.environ.get("WORKFLOW_BRANCH_OR_TAG", None):
+    forward_os_env["WORKFLOW_BRANCH_OR_TAG"] = WORKFLOW_BRANCH_OR_TAG
+if DIST_SUFFIX := os.environ.get("DIST_SUFFIX", None):
+    forward_os_env["DIST_SUFFIX"] = DIST_SUFFIX
+
+
 coreenv = VAR_ENV.Clone(
     tools=[
         (
@@ -23,18 +34,13 @@ coreenv = VAR_ENV.Clone(
     TEMPFILE=TempFileMunge,
     MAXLINELENGTH=2048,
     PROGSUFFIX=".elf",
-    ENV={
-        # Import PATH from OS env - scons doesn't do that by default
-        "PATH": os.environ["PATH"],
-        # Proxying CI environment to child processes & scripts
-        "DIST_SUFFIX": os.environ.get("DIST_SUFFIX", None),
-        "WORKFLOW_BRANCH_OR_TAG": os.environ.get("WORKFLOW_BRANCH_OR_TAG", None),
-    },
+    ENV=forward_os_env,
 )
 
 # If DIST_SUFFIX is set in environment, is has precedence (set by CI)
 if os_suffix := os.environ.get("DIST_SUFFIX", None):
-    coreenv.Replace(
+    print("overriding DIST_SUFFIX to ", os_suffix)
+    coreenv.SetDefault(
         DIST_SUFFIX=os_suffix,
     )
 

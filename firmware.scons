@@ -121,7 +121,6 @@ else:
             "basic_plugins",
             # Debug
             "debug_apps",
-            "infrared_monitor",
         ]
     )
 
