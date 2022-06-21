@@ -24,7 +24,7 @@
 ------------
 ### Screenshots
 #### Main Menu:
-![unirfremix_mainmenu](https://user-images.githubusercontent.com/982575/169637623-bc41cfa5-6433-4198-a970-8fce42691ad7.png)
+![subremoteremix-mainmenu](https://user-images.githubusercontent.com/982575/174747166-c437a518-4db9-492c-a24d-48586ee751be.gif)
 
 #### Idle Screen:
 - Repeat indictator is located at the bottom right
