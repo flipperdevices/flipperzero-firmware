@@ -230,6 +230,7 @@ class WiFiScan
     void tftDrawGraphObjects();
     void sendProbeAttack(uint32_t currentTime);
     void sendDeauthAttack(uint32_t currentTime);
+    void sendDeauthFrame(uint8_t bssid[6], int channel);
     void broadcastRandomSSID(uint32_t currentTime);
     void broadcastCustomBeacon(uint32_t current_time, ssid custom_ssid);
     void broadcastCustomBeacon(uint32_t current_time, AccessPoint custom_ssid);
