@@ -131,4 +131,4 @@ void infrared_show_loading_popup(Infrared* infrared, bool show);
 void infrared_signal_sent_callback(void* context);
 void infrared_signal_received_callback(void* context, InfraredWorkerSignal* received_signal);
 void infrared_text_input_callback(void* context);
-void infrared_popup_timeout_callback(void* context);
+void infrared_popup_closed_callback(void* context);

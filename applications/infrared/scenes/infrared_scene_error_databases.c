@@ -9,7 +9,7 @@ void infrared_scene_error_databases_on_enter(void* context) {
         popup, "Function requires\nSD card with fresh\ndatabases.", 47, 17, AlignLeft, AlignTop);
 
     popup_set_context(popup, context);
-    popup_set_callback(popup, infrared_popup_timeout_callback);
+    popup_set_callback(popup, infrared_popup_closed_callback);
 
     infrared_play_notification_message(infrared, InfraredNotificationMessageYellowOn);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewPopup);
@@ -17,12 +17,10 @@ void infrared_scene_error_databases_on_enter(void* context) {
 
 bool infrared_scene_error_databases_on_event(void* context, SceneManagerEvent event) {
     Infrared* infrared = context;
-    UNUSED(infrared);
-    UNUSED(event);
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == InfraredCustomEventTypePopupTimeout) {
+        if(event.event == InfraredCustomEventTypePopupClosed) {
             scene_manager_search_and_switch_to_previous_scene(
                 infrared->scene_manager, InfraredSceneUniversal);
             consumed = true;
