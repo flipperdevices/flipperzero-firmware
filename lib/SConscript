@@ -7,7 +7,6 @@ env.Append(
         "lib/digital_signal",
         "lib/drivers",
         "lib/flipper_format",
-        "lib/FreeRTOS-glue",
         "lib/infrared",
         "lib/nfc_protocols",
         "lib/one_wire",
