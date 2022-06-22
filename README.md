@@ -15,15 +15,8 @@ $ docker-compose exec dev make
 ```
 
 Latest Updates:
-- Updates to size down [Video Poker, Thanks To PixlEmly](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c).
-- Spectrum Analyzer [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
-- BadUSB and U2F re-added. Was removed on the debug removals for some reason...
-- Added [Game of Life (Updated to work by tgxn)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c) Original By 
-itsyourbedtime. (Hard Fault or Restart to quit?)
-- [nfc: Display UL PWD_AUTH payload (Thanks to GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/dev-new)
-- Added [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048)
-- 10s+15s+90s Auto-Lock Options [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop_settings/scenes/desktop_settings_scene_start.c)
-- 2min+5min+10min LCD Timeout Options [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
+- Latest DEV changes and fixes from c79fb61
+- Fixed compile issue
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
