@@ -60,6 +60,7 @@
 #define WIFI_ATTACK_DEAUTH 20
 #define WIFI_ATTACK_AP_SPAM 21
 #define WIFI_SCAN_TARGET_AP_FULL 22
+#define WIFI_SCAN_ACTIVE_EAPOL 23
 
 #define GRAPH_REFRESH 100
 
@@ -315,6 +316,7 @@ class WiFiScan
     static void deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void beaconListSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
+    static void activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
 };

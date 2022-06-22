@@ -837,6 +837,7 @@ void MenuFunctions::main(uint32_t currentTime)
   // Get the display buffer out of the way
   if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF ) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AP_SPAM) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_MIMIC) &&
@@ -866,11 +867,13 @@ void MenuFunctions::main(uint32_t currentTime)
       if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP_FULL) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_PWN) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_ESPRESSIF) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AP_SPAM) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_MIMIC) ||
@@ -910,11 +913,13 @@ void MenuFunctions::main(uint32_t currentTime)
       if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP_FULL) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_PWN) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_ESPRESSIF) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AP_SPAM) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_MIMIC) ||
@@ -946,6 +951,7 @@ void MenuFunctions::main(uint32_t currentTime)
   // This is for when on a menu
   #ifndef MARAUDER_MINI
     if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
+        (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AP_SPAM) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_MIMIC) &&
