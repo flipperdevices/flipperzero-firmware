@@ -1,11 +1,12 @@
 #
-# Main Fipper Build System entry point.
+# Main Fipper Build System entry point
 #
-# This file is evaluated every time scons is invoked.
+# This file is evaluated by scons (the build system) every time fbt is invoked.
 # Scons constructs all referenced environments & their targets' dependency
 # trees on startup. So, to keep startup time as low as possible, we're hiding
 # construction of certain targets behind command-line options.
 
+import os
 
 DefaultEnvironment(tools=[])
 # Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
@@ -31,8 +32,9 @@ coreenv["ROOT_DIR"] = Dir(".")
 # Create a separate "dist" environment and add construction envs to it
 distenv = coreenv.Clone(
     tools=["fbt_dist", "openocd"],
-    GDBOPTS="-ex 'target extended-remote | openocd.exe -c \"gdb_port pipe\" ${OPENOCD_OPTS}' "
+    GDBOPTS="-ex 'target extended-remote | ${OPENOCD} -c \"gdb_port pipe\" ${OPENOCD_OPTS}' "
     '-ex "set confirm off" ',
+    ENV=os.environ,
 )
 
 firmware_out = distenv.AddFwProject(
@@ -40,7 +42,6 @@ firmware_out = distenv.AddFwProject(
     fw_type="firmware",
     fw_env_key="FW_ENV",
 )
-# Default(firmware_out["FW_ARTIFACTS"])
 
 
 # If enabled, initialize updater-related targets
