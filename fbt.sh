@@ -23,12 +23,22 @@ download_toolchain()
     fi
 }
 
+download_submodules()
+{
+    if [ -d .git ]; then
+        git submodule init
+        git submodule update
+    fi
+}
+
 SCRIPT_PATH="$(dirname -- "$(readlink -f -- "$0")")";
 SCONS_DEFAULT_FLAGS="-Q --warn=target-not-built";
 get_kernel_type;
 download_toolchain;
+download_submodules;
 PATH="$SCRIPT_PATH/$TOOLCHAIN_PATH/python/bin:$PATH";
 PATH="$SCRIPT_PATH/$TOOLCHAIN_PATH/bin:$PATH";
 PATH="$SCRIPT_PATH/$TOOLCHAIN_PATH/protobuf/bin:$PATH";
+PATH="$SCRIPT_PATH/$TOOLCHAIN_PATH/openocd/bin:$PATH";
 
 python3 lib/scons/scripts/scons.py $SCONS_DEFAULT_FLAGS $*
