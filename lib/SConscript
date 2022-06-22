@@ -3,7 +3,6 @@ Import("env")
 env.Append(
     LINT_SOURCES=[
         "lib/app-scened-template",
-        "lib/callback-connector",
         "lib/digital_signal",
         "lib/drivers",
         "lib/flipper_format",
