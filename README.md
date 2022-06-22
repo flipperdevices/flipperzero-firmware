@@ -16,7 +16,7 @@ $ docker-compose exec dev make
 
 Latest Updates:
 - Latest DEV changes and fixes from c79fb61
-- Fixed compile issue
+- Fixed compile issue from 2048 changes
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
