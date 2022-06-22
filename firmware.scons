@@ -12,6 +12,9 @@ env = ENV.Clone(
     FW_FLAVOR=fw_build_meta["flavor"],
     PLUGIN_ELF_DIR="${BUILD_DIR}",
     LIB_DIST_DIR="${BUILD_DIR}/lib",
+    LINT_SOURCES=[
+        "applications",
+    ],
     LIBPATH=[
         "${LIB_DIST_DIR}",
     ],

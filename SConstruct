@@ -127,3 +127,26 @@ openocd = distenv.OOCDCommand("openocd.pseudo", [])
 distenv.Pseudo("openocd.pseudo")
 AlwaysBuild(openocd)
 Alias("openocd", openocd)
+
+
+# Linter
+lint_check = distenv.Command(
+    "lint.check.pseudo",
+    [],
+    "${PYTHON3} scripts/lint.py check $LINT_SOURCES",
+    LINT_SOURCES=firmware_out["LINT_SOURCES"],
+)
+distenv.Pseudo("lint.check.pseudo")
+AlwaysBuild(lint_check)
+Alias("lint", lint_check)
+
+
+lint_format = distenv.Command(
+    "lint.format.pseudo",
+    [],
+    "${PYTHON3} scripts/lint.py format $LINT_SOURCES",
+    LINT_SOURCES=firmware_out["LINT_SOURCES"],
+)
+distenv.Pseudo("lint.format.pseudo")
+AlwaysBuild(lint_format)
+Alias("format", lint_format)
