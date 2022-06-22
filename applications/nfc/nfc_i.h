@@ -43,7 +43,6 @@ struct Nfc {
     FuriHalNfcDevData dev_edit_data;
 
     char text_store[NFC_TEXT_STORE_SIZE + 1];
-    char error_store[NFC_TEXT_STORE_SIZE + 1];
     string_t text_box_store;
 
     // Common Views
@@ -77,10 +76,6 @@ int32_t nfc_task(void* p);
 void nfc_text_store_set(Nfc* nfc, const char* text, ...);
 
 void nfc_text_store_clear(Nfc* nfc);
-
-void nfc_error_store_set(Nfc* nfc, const char* errtext, ...);
-
-void nfc_error_store_clear(Nfc* nfc);
 
 void nfc_blink_start(Nfc* nfc);
 
