@@ -79,13 +79,8 @@ bool infrared_scene_remote_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeBack) {
         const uint32_t possible_scenes[] = {InfraredSceneRemoteList, InfraredSceneStart};
-        const bool is_scene_found = scene_manager_search_and_switch_to_previous_scene_one_of(
+        consumed = scene_manager_search_and_switch_to_previous_scene_one_of(
             scene_manager, possible_scenes, sizeof(possible_scenes) / sizeof(uint32_t));
-        if(!is_scene_found) {
-            // Exit application if it was not run from launcher
-            view_dispatcher_stop(infrared->view_dispatcher);
-        }
-        consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         const uint16_t custom_type = infrared_custom_event_get_type(event.event);
         const int16_t button_index = infrared_custom_event_get_value(event.event);
