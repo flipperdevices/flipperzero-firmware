@@ -258,6 +258,79 @@ void furi_hal_nfc_stop() {
     }
 }
 
+bool furi_hal_nfc_listen_rx(FuriHalNfcTxRxContext* tx_rx, uint32_t timeout) {
+    // Wait for interrupts
+    uint32_t start = osKernelGetTickCount();
+    bool data_received = false;
+    while(true) {
+        if(furi_hal_gpio_read(&gpio_rfid_pull) == true) {
+            st25r3916ReadMultipleRegisters(ST25R3916_REG_IRQ_MAIN, interrupt_buff, 4);
+
+            if(interrupt_buff[0] & 0x10) {
+                read_fifo(tx_rx->rx_data, &tx_rx->rx_bits);
+                data_received = true;
+                break;
+            }
+            continue;
+        }
+        uint32_t timeout_ms = osKernelGetTickCount() - start;
+        if(timeout_ms > timeout) {
+            FURI_LOG_W(TAG, "Interrupt waiting timeout");
+            break;
+        }
+    }
+    return data_received;
+}
+
+bool furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data) {
+    furi_assert(nfc_data);
+
+    uint8_t interrupt_buff[4] = {};
+    uint8_t interrupt_mask[4] = {0xff, 0xff, 0xff, 0xff};
+    // Disable interrupt callback
+    platformDisableIrqCallback();
+    furi_hal_gpio_init(&gpio_rfid_pull, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
+
+    // Clear interrupts
+    st25r3916ReadMultipleRegisters(ST25R3916_REG_IRQ_MAIN, interrupt_buff, 4);
+    // Mask interrupts
+    st25r3916WriteMultipleRegisters(ST25R3916_REG_IRQ_MASK_MAIN, interrupt_mask, 4);
+    // RESET
+    st25r3916ExecuteCommand(ST25R3916_CMD_STOP);
+    // Setup registers
+    st25r3916WriteRegister(ST25R3916_REG_OP_CONTROL, 0b11000011);
+    st25r3916WriteRegister(ST25R3916_REG_MODE, 0b11001000);
+    st25r3916WriteRegister(ST25R3916_REG_PASSIVE_TARGET, 0b01011100);
+    st25r3916WriteRegister(ST25R3916_REG_MASK_RX_TIMER, 0x02);
+    st25r3916WriteRegister(ST25R3916_REG_IRQ_MASK_MAIN, 0b11101111);
+    st25r3916WriteRegister(ST25R3916_REG_IRQ_MASK_TIMER_NFC, 0b11111111);
+    st25r3916WriteRegister(ST25R3916_REG_IRQ_MASK_ERROR_WUP, 0b11111111);
+    st25r3916WriteRegister(ST25R3916_REG_IRQ_MASK_TARGET, 0b11101100);
+
+    // Set 4 or 7 bytes UID
+    if(nfc_data->uid_len == 4) {
+        st25r3916ChangeRegisterBits(
+            ST25R3916_REG_AUX, ST25R3916_REG_AUX_nfc_id_mask, ST25R3916_REG_AUX_nfc_id_4bytes);
+    } else {
+        st25r3916ChangeRegisterBits(
+            ST25R3916_REG_AUX, ST25R3916_REG_AUX_nfc_id_mask, ST25R3916_REG_AUX_nfc_id_7bytes);
+    }
+    // Write PT Memory
+    uint8_t pt_memory[14] = {};
+    memcpy(pt_memory, nfc_data->uid, nfc_data->uid_len);
+    pt_memory[10] = nfc_data->atqa[0];
+    pt_memory[11] = nfc_data->atqa[1];
+    pt_memory[12] = 0x0C;
+    pt_memory[13] = nfc_data->sak;
+    pt_memory[14] = nfc_data->sak;
+
+    st25r3916WritePTMem(pt_memory, sizeof(pt_memory));
+    // Go to sence
+    st25r3916ExecuteCommand(ST25R3916_CMD_GOTO_SENSE);
+
+    return true;
+}
+
 bool furi_hal_nfc_emulate_nfca(
     uint8_t* uid,
     uint8_t uid_len,
