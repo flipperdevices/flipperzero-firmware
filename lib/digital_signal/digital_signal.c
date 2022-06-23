@@ -5,8 +5,50 @@
 #include <stm32wbxx_ll_tim.h>
 #include <math.h>
 
+#pragma GCC optimize("O3,unroll-loops,Ofast")
+
 #define F_TIM (64000000.0)
 #define T_TIM (1.0 / F_TIM)
+
+#define STRICT_ASSIGN(type, lval, rval) ((lval) = (type)(rval))
+
+static inline float inline_modff(float x, float* iptr) {
+    union {
+        float x;
+        uint32_t n;
+    } u = {x};
+    uint32_t mask;
+    int e;
+
+    e = (int)(u.n >> 23 & 0xff) - 0x7f;
+
+    /* no fractional part */
+    if(e >= 23) {
+        *iptr = x;
+        if(e == 0x80 && u.n << 9 != 0) { /* nan */
+            return x;
+        }
+        u.n &= 0x80000000;
+        return u.x;
+    }
+    /* no integral part */
+    if(e < 0) {
+        u.n &= 0x80000000;
+        *iptr = u.x;
+        return x;
+    }
+
+    mask = 0x007fffff >> e;
+    if((u.n & mask) == 0) {
+        *iptr = x;
+        u.n &= 0x80000000;
+        return u.x;
+    }
+    u.n &= ~mask;
+    *iptr = u.x;
+    STRICT_ASSIGN(float, x, x - *iptr);
+    return x;
+}
 
 DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     DigitalSignal* signal = malloc(sizeof(DigitalSignal));
@@ -86,7 +128,7 @@ static void digital_signal_prepare_arr(DigitalSignal* signal) {
     for(size_t i = 0; i < signal->edge_cnt - 1; i++) {
         t_signal += signal->edge_timings[i];
         r = (t_signal - t_current) / T_TIM;
-        r_dec = modff(r, &r_int);
+        r_dec = inline_modff(r, &r_int);
         if(r_dec < 0.5f) {
             signal->reload_reg_buff[i] = (uint32_t)r_int - 1;
         } else {
