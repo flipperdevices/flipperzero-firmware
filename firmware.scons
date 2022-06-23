@@ -216,6 +216,9 @@ fwdfu = fwenv["FW_DFU"] = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
 # Default(dfu)
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_dfu", fwdfu)
 
+fwdump = fwenv.ObjDump("${FIRMWARE_BUILD_CFG}")
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_list", fwdump)
+
 # Additional FW-related pseudotargets
 if fwenv["IS_BASE_FIRMWARE"]:
     flash = fwenv["FW_FLASH"] = fwenv.OOCDFlashCommand(

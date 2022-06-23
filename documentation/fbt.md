@@ -29,9 +29,11 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 - `firmware_extapps` - build all plug-ins as separate .elf files
     - `firmware_snake_game`, etc - build single plug-in as .elf by its name
     - Check out `--extra-ext-apps` for force adding extra apps to external build 
+    - `firmware_snake_game_list`, etc - generate source + assembler listing for app's .elf
 - `firmware_flash` - flash current version to attached device with OpenOCD
 - `firmware_cdb` - generate compilation database
 - `firmware_all`, `updater_all` - build basic set of binaries
+- `firmware_list`, `updater_list` - generate source + assembler listing
 
 ### Assets
 - `resources` - build resources and their Manifest
