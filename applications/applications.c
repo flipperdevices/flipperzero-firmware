@@ -65,6 +65,7 @@ extern int32_t video_poker_app(void* p);
 extern int32_t tictactoe_game_app(void* p);
 extern int32_t arkanoid_game_app(void* p);
 extern int32_t game_of_life_app(void* p);
+extern int32_t game_2048_app(void* p);
 
 // On system start hooks declaration
 extern void bt_on_system_start();
@@ -318,6 +319,10 @@ const FlipperApplication FLIPPER_GAMES[] = {
 // #ifdef APP_CHIP8
 //     {.app = chip8_app, .name = "CHIP8 Emulator", .stack_size = 4096, .icon = &A_Plugins_14},
 // #endif
+
+#ifdef APP_GAME_2048
+    {.app = game_2048_app, .name = "2048", .stack_size = 1024, .icon = &A_Plugins_14},
+#endif
 
 #ifdef APP_ARKANOID_GAME
     {.app = arkanoid_game_app,
