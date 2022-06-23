@@ -34,7 +34,7 @@ static char* error_detail(void* context) {
     MfUltralightData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
     if((mf_ul_data->type == MfUltralightTypeUL11 || mf_ul_data->type == MfUltralightTypeUL21) &&
        mf_ul_data->data_size == 64) { // Page 16, Lock bytes.
-        return "Tag is password protected.";
+        return "Lock bytes are protected.";
     } else { // TODO: Add more potential error details.
         return "No details available.";
     }
@@ -54,7 +54,7 @@ static void load_error_dialog(void* context) {
                                         "pages %i - %i.\n"
                                         "%s",
         mf_ul_data->data_size / 4,
-        (mf_ul_data->data_size / 4) + 3,
+        (mf_ul_data->data_size / 4) + 3, // I'm aware this could go over the actual number of physical pages.
         error_detail(context));
     dialog_ex_set_text(dialog_ex, nfc->text_store, 4, 17, AlignLeft, AlignTop);
 }
@@ -106,7 +106,7 @@ void nfc_scene_read_mifare_ul_fail_on_enter(void* context) {
     TextBox* text_box = nfc->text_box;
     MfUltralightData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
     text_box_set_font(text_box, TextBoxFontHex);
-    for(uint16_t i = 0; i < mf_ul_data->data_size; i += 2) {
+    for(uint16_t i = 0; i < mf_ul_data->tag_size; i += 2) {
         if(!(i % 8) && i) {
             string_push_back(nfc->text_box_store, '\n');
         }

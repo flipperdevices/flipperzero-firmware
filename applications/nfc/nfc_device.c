@@ -109,10 +109,10 @@ static bool nfc_device_save_mifare_ul_data(FlipperFormat* file, NfcDevice* dev) 
         }
         if(!counters_saved) break;
         // Write pages data
-        uint32_t pages_total = data->data_size / 4;
+        uint32_t pages_total = data->tag_size / 4;
         if(!flipper_format_write_uint32(file, "Pages total", &pages_total, 1)) break;
         bool pages_saved = true;
-        for(uint16_t i = 0; i < data->data_size; i += 4) {
+        for(uint16_t i = 0; i < data->tag_size; i += 4) {
             string_printf(temp_str, "Page %d", i / 4);
             if(!flipper_format_write_hex(file, string_get_cstr(temp_str), &data->data[i], 4)) {
                 pages_saved = false;

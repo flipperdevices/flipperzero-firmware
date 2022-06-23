@@ -113,6 +113,7 @@ bool mf_ultralight_read_version(
             mf_ul_set_default_version(reader, data);
             break;
         }
+        data->tag_size = reader->pages_to_read * 4;
         version_read = true;
     } while(false);
 
@@ -475,6 +476,7 @@ bool mf_ultralight_read_pages(
     uint8_t pages_read_cnt = 0;
     uint8_t curr_sector_index = 0xff;
     reader->pages_read = 0;
+    memset(&data->data, 0x00, data->tag_size); // Prevent merging with previous reads.
     for(size_t i = 0; i < reader->pages_to_read; i += pages_read_cnt) {
         uint8_t tag_sector;
         int16_t valid_pages;
@@ -493,11 +495,14 @@ bool mf_ultralight_read_pages(
         tx_rx->tx_bits = 16;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
         if(!furi_hal_nfc_tx_rx(tx_rx, 50) || tx_rx->rx_bits < 16 * 8) {
+            pages_read_cnt = (valid_pages > 4 ? 4 : valid_pages);
+            // data->data_size += pages_read_cnt * 4;
+            memcpy(&data->data[i * 4], tx_rx->rx_data, pages_read_cnt * 4);
             FURI_LOG_D(
                 TAG,
                 "Failed to read pages %d - %d",
                 i,
-                i + (valid_pages > 4 ? 4 : valid_pages) - 1);
+                i + pages_read_cnt - 1);
             break;
         }
         if(valid_pages > 4) {
@@ -1041,7 +1046,7 @@ void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* d
     emulator->data = *data;
     emulator->supported_features = mf_ul_get_features(data->type);
     emulator->config = mf_ultralight_get_config_pages(&emulator->data);
-    emulator->page_num = emulator->data.data_size / 4;
+    emulator->page_num = emulator->data.tag_size / 4;
     emulator->data_changed = false;
     emulator->comp_write_cmd_started = false;
     emulator->sector_select_cmd_started = false;

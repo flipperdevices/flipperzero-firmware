@@ -96,6 +96,7 @@ typedef struct {
     uint8_t tearing[3];
     uint16_t curr_authlim;
     uint16_t data_size;
+    uint16_t tag_size;
     uint8_t data[MF_UL_MAX_DUMP_SIZE];
 } MfUltralightData;
 
