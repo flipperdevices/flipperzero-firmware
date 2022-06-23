@@ -54,7 +54,8 @@ static void load_error_dialog(void* context) {
                                         "pages %i - %i.\n"
                                         "%s",
         mf_ul_data->data_size / 4,
-        (mf_ul_data->data_size / 4) + 3, // I'm aware this could go over the actual number of physical pages.
+        (mf_ul_data->data_size / 4) +
+            3, // I'm aware this could go over the actual number of physical pages.
         error_detail(context));
     dialog_ex_set_text(dialog_ex, nfc->text_store, 4, 17, AlignLeft, AlignTop);
 }

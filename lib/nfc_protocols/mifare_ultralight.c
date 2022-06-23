@@ -498,11 +498,7 @@ bool mf_ultralight_read_pages(
             pages_read_cnt = (valid_pages > 4 ? 4 : valid_pages);
             // data->data_size += pages_read_cnt * 4;
             memcpy(&data->data[i * 4], tx_rx->rx_data, pages_read_cnt * 4);
-            FURI_LOG_D(
-                TAG,
-                "Failed to read pages %d - %d",
-                i,
-                i + pages_read_cnt - 1);
+            FURI_LOG_D(TAG, "Failed to read pages %d - %d", i, i + pages_read_cnt - 1);
             break;
         }
         if(valid_pages > 4) {
