@@ -1,7 +1,20 @@
-.PHONY: warning
-warning:
-	@echo Flipper Zero Firmware is no longer built with make
-	@echo Use ./fbt
-
-%:: warning
-	$(error Please read documentation/fbt.md for details)
+$(info +-------------------------------------------------+)
+$(info |                                                 |)
+$(info |      Hello, this is flipper team speaking!      |)
+$(info |                                                 |)
+$(info |       We've migrated to new build system        |)
+$(info |          It's nice and based on scons           |)
+$(info |                                                 |)
+$(info |      Crash course:                              |)
+$(info |                                                 |)
+$(info |        `./fbt`                                  |)
+$(info |        `./fbt firmware_flash`                   |)
+$(info |        `./fbt firmware_debug`                   |)
+$(info |                                                 |)
+$(info |      More details in documentation/fbt.md       |)
+$(info |                                                 |)
+$(info |      Also Please leave your feedback here:      |)
+$(info |           https://flipp.dev/4RDu                |)
+$(info |                      or                         |)
+$(info |           https://flipp.dev/2XM8                |)
+$(info +-------------------------------------------------+)
