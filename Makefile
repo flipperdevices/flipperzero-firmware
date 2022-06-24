@@ -1,6 +1,6 @@
 $(info +-------------------------------------------------+)
 $(info |                                                 |)
-$(info |      Hello, this is flipper team speaking!      |)
+$(info |      Hello, this is Flipper team speaking!      |)
 $(info |                                                 |)
 $(info |       We've migrated to new build system        |)
 $(info |          It's nice and based on scons           |)
