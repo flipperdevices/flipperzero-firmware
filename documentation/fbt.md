@@ -3,6 +3,10 @@
 FBT is the entry point for most firmware-related commands and utilities.
 It is invoked by `./fbt` in firmware project root directory. Internally, it is a wrapper around [scons](https://scons.org/) build system.
 
+## Requirements
+
+Please install Python packages required by assets build scripts: `pip3 install -r scripts/requirements.txt`
+
 ## NB 
 FBT constructs all referenced environments & their targets' dependency trees on startup. So, to keep startup time as low as possible, we're hiding construction of certain targets behind command-line options.
 
