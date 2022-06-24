@@ -72,9 +72,9 @@ bool platformSpiTxRx(const uint8_t* txBuf, uint8_t* rxBuf, uint16_t len) {
 }
 
 void platformProtectST25RComm() {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_nfc);
+    // furi_hal_spi_acquire(&furi_hal_spi_bus_handle_nfc);
 }
 
 void platformUnprotectST25RComm() {
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
+    // furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
 }

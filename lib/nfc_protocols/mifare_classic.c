@@ -541,11 +541,15 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             // Read first frame
             tx_rx->tx_bits = 0;
             tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-        }
-        if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
-            FURI_LOG_D(
-                TAG, "Error in tx rx. Tx :%d bits, Rx: %d bits", tx_rx->tx_bits, tx_rx->rx_bits);
-            break;
+        } else {
+            if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
+                FURI_LOG_D(
+                    TAG,
+                    "Error in tx rx. Tx :%d bits, Rx: %d bits",
+                    tx_rx->tx_bits,
+                    tx_rx->rx_bits);
+                break;
+            }
         }
         if(!is_encrypted) {
             memcpy(plain_data, tx_rx->rx_data, tx_rx->rx_bits / 8);
@@ -564,7 +568,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             uint8_t sector_trailer_block = mf_classic_get_sector_trailer(block);
             MfClassicSectorTrailer* sector_trailer =
                 (MfClassicSectorTrailer*)emulator->data.block[sector_trailer_block].value;
-            if(plain_data[0] == 0x61) {
+            if(plain_data[0] == 0x60) {
                 key = nfc_util_bytes2num(sector_trailer->key_b, 6);
                 access_key = MfClassicKeyA;
             } else {
@@ -581,8 +585,12 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             if(!is_encrypted) {
                 crypto1_word(&emulator->crypto, emulator->cuid ^ nonce, 0);
                 memcpy(tx_rx->tx_data, nt, sizeof(nt));
+                tx_rx->tx_parity[0] = 0;
+                for(size_t i = 0; i < sizeof(nt); i++) {
+                    tx_rx->tx_parity[0] |= nfc_util_odd_parity8(nt[i]) << (7 - i);
+                }
                 tx_rx->tx_bits = sizeof(nt) * 8;
-                tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRxRaw;
+                tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             } else {
                 mf_crypto1_encrypt(
                     &emulator->crypto,

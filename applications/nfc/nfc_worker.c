@@ -1,6 +1,9 @@
 #include "nfc_worker_i.h"
 #include <furi_hal.h>
 
+#include <platform.h>
+#include <furi_hal_spi.h>
+
 #define TAG "NfcWorker"
 
 /***************************** NFC Worker API *******************************/
@@ -86,6 +89,7 @@ void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state) {
 int32_t nfc_worker_task(void* context) {
     NfcWorker* nfc_worker = context;
 
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_nfc);
     furi_hal_nfc_exit_sleep();
 
     if(nfc_worker->state == NfcWorkerStateDetect) {
@@ -111,6 +115,7 @@ int32_t nfc_worker_task(void* context) {
     }
     furi_hal_nfc_sleep();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
 
     return 0;
 }
@@ -495,11 +500,14 @@ void nfc_worker_emulate_mifare_classic(NfcWorker* nfc_worker) {
     NfcaSignal* nfca_signal = nfca_signal_alloc();
     tx_rx.nfca_signal = nfca_signal;
 
+    platformDisableIrqCallback();
+
     while(nfc_worker->state == NfcWorkerStateEmulateMifareClassic) {
-        if(furi_hal_nfc_listen(
-               nfc_data->uid, nfc_data->uid_len, nfc_data->atqa, nfc_data->sak, true, 300)) {
+        furi_hal_nfc_listen_start(nfc_data);
+        if(furi_hal_nfc_listen_rx(&tx_rx, 1000)) {
             mf_classic_emulator(&emulator, &tx_rx);
         }
+        furi_hal_nfc_listen_sleep();
     }
     if(emulator.data_changed) {
         nfc_worker->dev_data->mf_classic_data = emulator.data;
@@ -510,6 +518,8 @@ void nfc_worker_emulate_mifare_classic(NfcWorker* nfc_worker) {
     }
 
     nfca_signal_free(nfca_signal);
+
+    platformEnableIrqCallback();
 }
 
 void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {

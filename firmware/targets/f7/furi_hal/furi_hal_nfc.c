@@ -8,6 +8,9 @@
 
 #include <lib/digital_signal/digital_signal.h>
 #include <furi_hal_delay.h>
+#include <furi_hal_spi.h>
+#include <furi_hal_gpio.h>
+#include <furi_hal_resources.h>
 
 #define TAG "FuriHalNfc"
 
@@ -20,6 +23,7 @@ osEventFlagsId_t event = NULL;
 #define EVENT_FLAG_ALL (EVENT_FLAG_INTERRUPT | EVENT_FLAG_STATE_CHANGED | EVENT_FLAG_STOP)
 
 void furi_hal_nfc_init() {
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_nfc);
     ReturnCode ret = rfalNfcInitialize();
     if(ret == ERR_NONE) {
         furi_hal_nfc_start_sleep();
@@ -28,6 +32,7 @@ void furi_hal_nfc_init() {
     } else {
         FURI_LOG_W(TAG, "Initialization failed, RFAL returned: %d", ret);
     }
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
 }
 
 bool furi_hal_nfc_is_busy() {
@@ -258,12 +263,29 @@ void furi_hal_nfc_stop() {
     }
 }
 
+static void read_fifo(uint8_t* fifo, uint16_t* bits) {
+    uint8_t fifo_stat[2];
+    st25r3916ReadMultipleRegisters(
+        ST25R3916_REG_FIFO_STATUS1, fifo_stat, ST25R3916_FIFO_STATUS_LEN);
+    uint16_t len =
+        ((((uint16_t)fifo_stat[1] & ST25R3916_REG_FIFO_STATUS2_fifo_b_mask) >>
+          ST25R3916_REG_FIFO_STATUS2_fifo_b_shift)
+         << RFAL_BITS_IN_BYTE);
+    len |= (((uint16_t)fifo_stat[0]) & 0x00FFU);
+    uint8_t rx[100];
+    st25r3916ReadFifo(rx, len);
+
+    *bits = len * 8;
+    memcpy(fifo, rx, len);
+}
+
 bool furi_hal_nfc_listen_rx(FuriHalNfcTxRxContext* tx_rx, uint32_t timeout) {
     // Wait for interrupts
+    uint8_t interrupt_buff[4] = {};
     uint32_t start = osKernelGetTickCount();
     bool data_received = false;
     while(true) {
-        if(furi_hal_gpio_read(&gpio_rfid_pull) == true) {
+        if(furi_hal_gpio_read(&gpio_nfc_irq_rfid_pull) == true) {
             st25r3916ReadMultipleRegisters(ST25R3916_REG_IRQ_MAIN, interrupt_buff, 4);
 
             if(interrupt_buff[0] & 0x10) {
@@ -289,7 +311,7 @@ bool furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data) {
     uint8_t interrupt_mask[4] = {0xff, 0xff, 0xff, 0xff};
     // Disable interrupt callback
     platformDisableIrqCallback();
-    furi_hal_gpio_init(&gpio_rfid_pull, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(&gpio_nfc_irq_rfid_pull, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
 
     // Clear interrupts
     st25r3916ReadMultipleRegisters(ST25R3916_REG_IRQ_MAIN, interrupt_buff, 4);
@@ -439,6 +461,10 @@ bool furi_hal_nfc_emulate_nfca(
     return true;
 }
 
+void furi_hal_nfc_listen_sleep() {
+    st25r3916ExecuteCommand(ST25R3916_CMD_GOTO_SLEEP);
+}
+
 static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
     furi_assert(tx_rx->nfca_signal);
 
@@ -457,11 +483,31 @@ static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_
     furi_hal_gpio_write(&gpio_spi_r_mosi, false);
 
     // Send signal
+    FURI_CRITICAL_ENTER();
     nfca_signal_encode(tx_rx->nfca_signal, tx_rx->tx_data, tx_rx->tx_bits, tx_rx->tx_parity);
     digital_signal_send(tx_rx->nfca_signal->tx_signal, &gpio_spi_r_mosi);
+    FURI_CRITICAL_EXIT();
     furi_hal_gpio_write(&gpio_spi_r_mosi, false);
 
     // Configure gpio back to SPI and exit transparent
+    furi_hal_gpio_init_ex(
+        &gpio_spi_r_mosi,
+        GpioModeAltFunctionPushPull,
+        GpioPullNo,
+        GpioSpeedVeryHigh,
+        GpioAltFn5SPI2);
+    furi_hal_gpio_init_ex(
+        &gpio_spi_r_miso,
+        GpioModeAltFunctionPushPull,
+        GpioPullNo,
+        GpioSpeedVeryHigh,
+        GpioAltFn5SPI2);
+    furi_hal_gpio_init_ex(
+        &gpio_spi_r_sck,
+        GpioModeAltFunctionPushPull,
+        GpioPullNo,
+        GpioSpeedVeryHigh,
+        GpioAltFn5SPI2);
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
     st25r3916ExecuteCommand(ST25R3916_CMD_UNMASK_RECEIVE_DATA);
 

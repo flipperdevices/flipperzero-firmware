@@ -155,6 +155,9 @@ bool furi_hal_nfc_activate_nfca(uint32_t timeout, uint32_t* cuid);
  *
  * @return     true on success
  */
+
+void furi_hal_nfc_listen_sleep();
+
 bool furi_hal_nfc_listen(
     uint8_t* uid,
     uint8_t uid_len,
@@ -162,6 +165,10 @@ bool furi_hal_nfc_listen(
     uint8_t sak,
     bool activate_after_sak,
     uint32_t timeout);
+
+bool furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data);
+
+bool furi_hal_nfc_listen_rx(FuriHalNfcTxRxContext* tx_rx, uint32_t timeout);
 
 bool furi_hal_nfc_emulate_nfca(
     uint8_t* uid,
