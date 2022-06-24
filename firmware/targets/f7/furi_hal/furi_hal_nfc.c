@@ -338,7 +338,7 @@ bool furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data) {
             ST25R3916_REG_AUX, ST25R3916_REG_AUX_nfc_id_mask, ST25R3916_REG_AUX_nfc_id_7bytes);
     }
     // Write PT Memory
-    uint8_t pt_memory[14] = {};
+    uint8_t pt_memory[15] = {};
     memcpy(pt_memory, nfc_data->uid, nfc_data->uid_len);
     pt_memory[10] = nfc_data->atqa[0];
     pt_memory[11] = nfc_data->atqa[1];
