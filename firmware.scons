@@ -228,6 +228,8 @@ if fwenv["IS_BASE_FIRMWARE"]:
     if fwenv["FORCE"]:
         AlwaysBuild(flash)
     Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)
+    if fwenv["IS_BASE_FIRMWARE"]:
+        Alias("flash", flash)
 
 
 # Compile DB generation
