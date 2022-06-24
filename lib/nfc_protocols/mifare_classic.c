@@ -569,10 +569,10 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             MfClassicSectorTrailer* sector_trailer =
                 (MfClassicSectorTrailer*)emulator->data.block[sector_trailer_block].value;
             if(plain_data[0] == 0x60) {
-                key = nfc_util_bytes2num(sector_trailer->key_b, 6);
+                key = nfc_util_bytes2num(sector_trailer->key_a, 6);
                 access_key = MfClassicKeyA;
             } else {
-                key = nfc_util_bytes2num(sector_trailer->key_a, 6);
+                key = nfc_util_bytes2num(sector_trailer->key_b, 6);
                 access_key = MfClassicKeyB;
             }
 
