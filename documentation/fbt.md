@@ -58,7 +58,8 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 
 - `--options optionfile.py` (default value `fbt_options.py`) - load file with multiple configuration values
 - `--with-updater` - enables updater-related targets and dependency tracking. Enabling this options introduces extra startup time costs, so use it when bundling update packages. Or if you have a fast computer and don't care about a few extra seconds of startup time
-- `--extra-ext-apps=app1,app2,appn` - forces listed apps to be built as external with  `firmware_extapps` target
+- `--extra-int-apps=app1,app2,appN` - forces listed apps to be built as internal with `firmware` target
+- `--extra-ext-apps=app1,app2,appN` - forces listed apps to be built as external with `firmware_extapps` target
 
 
 ## Configuration 
