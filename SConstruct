@@ -108,18 +108,16 @@ Alias("debug", debug_fw_elf)
 
 
 # Debug alien elf
-if other_elf_specified := distenv.subst("$OTHER_ELF"):
-    debug_other = distenv.GDBPy(
-        "debugother.pseudo",
-        other_elf_specified,
-        GDBPYOPTS=
-        # '-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
-        '-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" '
-        '-ex "svd_load ${SVD_FILE}" ',
-    )
-    distenv.Pseudo("debugother.pseudo")
-    AlwaysBuild(debug_other)
-    Alias("debug_other", debug_other)
+debug_other = distenv.GDBPy(
+    "debugother.pseudo",
+    None,
+    GDBPYOPTS=
+    # '-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
+    '-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" '
+)
+distenv.Pseudo("debugother.pseudo")
+AlwaysBuild(debug_other)
+Alias("debug_other", debug_other)
 
 
 # Just start OpenOCD
