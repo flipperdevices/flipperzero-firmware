@@ -105,9 +105,9 @@ if env["IS_BASE_FIRMWARE"]:
 else:
     fwenv.Append(APPS=["updater"])
 
-if extra_int_apps := GetOption("extraintapps"):
+if extra_int_apps := GetOption("extra_int_apps"):
     for extra_int_app in extra_int_apps.split(","):
-        fwenv.Append(APPS=[ extra_int_app ])
+        fwenv.Append(APPS=[extra_int_app])
 
 fwenv.LoadApplicationManifests()
 fwenv.PrepareApplicationsBuild()

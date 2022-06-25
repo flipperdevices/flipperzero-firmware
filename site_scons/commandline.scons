@@ -21,20 +21,16 @@ AddOption(
 AddOption(
     "--extra-int-apps",
     action="store",
-    dest="extraintapps",
+    dest="extra_int_apps",
     default="",
-    # type=str,
-    # nargs="+",
-    help="List of applications to forcefully build as standalone .elf",
+    help="List of applications to add to firmare's built-ins. Also see FIRMWARE_APP_SET and FIRMWARE_APPS",
 )
 
 AddOption(
     "--extra-ext-apps",
     action="store",
-    dest="extraextapps",
+    dest="extra_ext_apps",
     default="",
-    # type=str,
-    # nargs="+",
     help="List of applications to forcefully build as standalone .elf",
 )
 
