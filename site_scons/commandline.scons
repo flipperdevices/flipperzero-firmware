@@ -19,6 +19,16 @@ AddOption(
 )
 
 AddOption(
+    "--extra-int-apps",
+    action="store",
+    dest="extraintapps",
+    default="",
+    # type=str,
+    # nargs="+",
+    help="List of applications to forcefully build as standalone .elf",
+)
+
+AddOption(
     "--extra-ext-apps",
     action="store",
     dest="extraextapps",
