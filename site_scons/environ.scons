@@ -29,6 +29,7 @@ coreenv = VAR_ENV.Clone(
         "python3",
         "sconsmodular",
         "sconsrecursiveglob",
+        "ccache",
     ],
     TEMPFILE=TempFileMunge,
     MAXLINELENGTH=2048,
