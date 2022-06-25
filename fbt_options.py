@@ -41,7 +41,8 @@ COPRO_STACK_BIN_DIR = posixpath.join(
 # Supported toolchain versions
 FBT_TOOLCHAIN_VERSIONS = (" 10.3.",)
 
-OPENOCD_OPTS = '-f interface/stlink.cfg -c "transport select hla_swd" -f debug/stm32wbx.cfg -c "stm32wbx.cpu configure -rtos auto" -c "init"'
+# OPENOCD_OPTS = '-f interface/stlink.cfg -c "transport select hla_swd" -f debug/stm32wbx.cfg -c "stm32wbx.cpu configure -rtos auto" -c "init"'
+OPENOCD_OPTS = '-f interface/jlink.cfg -c "transport select swd" -f debug/stm32wbx.cfg -c "stm32wbx.cpu configure -rtos auto" -c "init"'
 
 SVD_FILE = "debug/STM32WB55_CM4.svd"
 
@@ -63,7 +64,7 @@ FIRMWARE_APPS = {
         # Debug
         "debug_apps",
     ),
-    "unittests": (
+    "unit_tests": (
         "basic_services",
         "unit_tests",
     ),
