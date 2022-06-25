@@ -202,16 +202,15 @@ fwdump = fwenv.ObjDump("${FIRMWARE_BUILD_CFG}")
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_list", fwdump)
 
 # Additional FW-related pseudotargets
+flash = fwenv["FW_FLASH"] = fwenv.OOCDFlashCommand(
+    "${FIRMWARE_BUILD_CFG}",
+    OPENOCD_COMMAND='-c "program ${SOURCE.posix} reset exit ${IMAGE_BASE_ADDRESS}"',
+)
+if fwenv["FORCE"]:
+    AlwaysBuild(flash)
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)
 if fwenv["IS_BASE_FIRMWARE"]:
-    flash = fwenv["FW_FLASH"] = fwenv.OOCDFlashCommand(
-        "${FIRMWARE_BUILD_CFG}",
-        OPENOCD_COMMAND='-c "program ${SOURCE.posix} reset exit ${IMAGE_BASE_ADDRESS}"',
-    )
-    if fwenv["FORCE"]:
-        AlwaysBuild(flash)
-    Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)
-    if fwenv["IS_BASE_FIRMWARE"]:
-        Alias("flash", flash)
+    Alias("flash", flash)
 
 
 # Compile DB generation
