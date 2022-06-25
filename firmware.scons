@@ -150,7 +150,7 @@ fwenv.AppendUnique(
         "-Wl,--wrap,_free_r",
         "-Wl,--wrap,_calloc_r",
         "-Wl,--wrap,_realloc_r",
-        "-u _printf_float",
+        "-u", "_printf_float",
         "-n",
     ],
 )
