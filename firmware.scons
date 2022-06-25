@@ -100,32 +100,10 @@ fwenv = env.Clone()
 SConscript("site_scons/firmwareopts.scons", exports={"ENV": fwenv})
 
 # Set up app configuration
-if env["FIRMWARE_BUILD_CFG"] == "updater":
-    fwenv.Append(
-        APPS=[
-            "updater",
-        ]
-    )
+if env["IS_BASE_FIRMWARE"]:
+    fwenv.Append(APPS=fwenv["FIRMWARE_APPS"].get(fwenv.subst("$FIRMWARE_APP_SET")))
 else:
-    fwenv.Append(
-        APPS=[
-            "crypto_start",
-            # Svc
-            "basic_services",
-            # Apps
-            "basic_apps",
-            "updater_app",
-            "archive",
-            # Settings
-            "passport",
-            "system_settings",
-            "about",
-            # Plugins
-            "basic_plugins",
-            # Debug
-            "debug_apps",
-        ]
-    )
+    fwenv.Append(APPS=["updater"])
 
 if extra_int_apps := GetOption("extraintapps"):
     for extra_int_app in extra_int_apps.split(","):

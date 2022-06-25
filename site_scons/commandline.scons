@@ -172,4 +172,35 @@ vars.Add(
     default="update_default",
 )
 
+
+vars.Add(
+    "FIRMWARE_APPS",
+    help="Map of (configuration_name->application_list)",
+    default={
+        "default": (
+            "crypto_start",
+            # Svc
+            "basic_services",
+            # Apps
+            "basic_apps",
+            "updater_app",
+            "archive",
+            # Settings
+            "passport",
+            "system_settings",
+            "about",
+            # Plugins
+            "basic_plugins",
+            # Debug
+            "debug_apps",
+        )
+    },
+)
+
+vars.Add(
+    "FIRMWARE_APP_SET",
+    help="Application set to use from FIRMWARE_APPS",
+    default="default",
+)
+
 Return("vars")
