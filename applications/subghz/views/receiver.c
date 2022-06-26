@@ -66,6 +66,7 @@ void subghz_view_receiver_set_key_board_lock(
     SubGhzViewReceiver* subghz_receiver,
     SubGhzKeyBoard key_board) {
     furi_assert(subghz_receiver);
+    subghz_receiver->lock_count = 0;
     if(key_board == SubGhzKeyBoardLock) {
         subghz_receiver->key_board = key_board;
         with_view_model(
@@ -74,6 +75,12 @@ void subghz_view_receiver_set_key_board_lock(
                 return true;
             });
         osTimerStart(subghz_receiver->timer, pdMS_TO_TICKS(1000));
+    } else {
+        with_view_model(
+            subghz_receiver->view, (SubGhzViewReceiverModel * model) {
+                model->bar_show = SubGhzViewReceiverBarShowDefault;
+                return true;
+            });
     }
 }
 
@@ -240,7 +247,7 @@ static void subghz_view_receiver_timer_callback(void* context) {
             model->bar_show = SubGhzViewReceiverBarShowDefault;
             return true;
         });
-    if(subghz_receiver->lock_count != UNLOCK_CNT) {
+    if(subghz_receiver->lock_count < UNLOCK_CNT) {
         subghz_receiver->callback(
             SubGhzCustomEventViewReceiverOffDisplay, subghz_receiver->context);
     }
@@ -263,7 +270,7 @@ bool subghz_view_receiver_input(InputEvent* event, void* context) {
         if(event->key == InputKeyBack && event->type == InputTypeShort) {
             subghz_receiver->lock_count++;
         }
-        if(subghz_receiver->lock_count == UNLOCK_CNT) {
+        if(subghz_receiver->lock_count >= UNLOCK_CNT) {
             subghz_receiver->callback(
                 SubGhzCustomEventViewReceiverUnlock, subghz_receiver->context);
             with_view_model(
