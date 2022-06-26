@@ -92,6 +92,8 @@ void subghz_scene_receiver_on_enter(void* context) {
         subghz->txrx->rx_key_state = SubGhzRxKeyStateStart;
     }
 
+    subghz_view_receiver_set_key_board_lock(subghz->subghz_receiver, subghz->key_board);
+
     //Load history to receiver
     subghz_view_receiver_exit(subghz->subghz_receiver);
     for(uint8_t i = 0; i < subghz_history_get_item(subghz->txrx->history); i++) {
@@ -126,7 +128,6 @@ void subghz_scene_receiver_on_enter(void* context) {
 
 bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
-
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case SubGhzCustomEventViewReceiverBack:
@@ -166,6 +167,14 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverConfig);
             return true;
             break;
+        case SubGhzCustomEventViewReceiverOffDisplay:
+            notification_message(subghz->notifications, &sequence_display_backlight_off);
+            return true;
+            break;
+        case SubGhzCustomEventViewReceiverUnlock:
+            subghz->key_board = SubGhzKeyBoardUnlock;
+            return true;
+            break;
         default:
             break;
         }
@@ -174,7 +183,6 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             subghz_hopper_update(subghz);
             subghz_scene_receiver_update_statusbar(subghz);
         }
-
         switch(subghz->state_notifications) {
         case SubGhzNotificationStateRx:
             notification_message(subghz->notifications, &sequence_blink_cyan_10);
