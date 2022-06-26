@@ -5,6 +5,7 @@ env.Append(
         "#/lib/digital_signal",
         "#/lib/fnv1a_hash",
         "#/lib/heatshrink",
+        "#/lib/mbedtls/include",
         "#/lib/micro-ecc",
         "#/lib/nanopb",
         "#/lib/nfc_protocols",
@@ -23,6 +24,7 @@ sources = []
 
 libs_recurse = [
     "digital_signal",
+    "loclass",
     "micro-ecc",
     "nfc_protocols",
     "one_wire",
@@ -40,6 +42,11 @@ libs_plain = [
 
 for lib in libs_plain:
     sources += Glob(lib + "/*.c*", source=True)
+
+# mbedtls
+# full lib doesn't build without warnings, but we only use these
+sources += ["mbedtls/library/des.c"]
+sources += ["mbedtls/library/platform_util.c"]
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
