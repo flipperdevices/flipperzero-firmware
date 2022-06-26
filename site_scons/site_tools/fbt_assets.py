@@ -95,7 +95,7 @@ def proto_ver_generator(target, source, env):
         f"#define PROTOBUF_MINOR_VERSION {git_minor}",
         "",
     )
-    with open(target_file, "wt") as file:
+    with open(str(target_file), "wt") as file:
         file.write("\n".join(version_file_data))
 
 
