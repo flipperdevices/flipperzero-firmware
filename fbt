@@ -2,19 +2,10 @@
 
 set -e
 
-if [[ -z ${USE_OS_TOOLS+x} ]]; then
-	if [[ -d .git ]]; then
-		echo "Prepairing git submodules"
-		git submodule init
-		git submodule update
-	fi
-
-	if ! [[ -d venv ]]; then
-		echo "Creating python venv"
-		python3 -m venv venv
-	fi
-	. venv/bin/activate
-	pip install --disable-pip-version-check --quiet -r scripts/requirements.txt
+if [[ -d .git ]]; then
+	echo "Prepairing git submodules"
+	git submodule init
+	git submodule update
 fi
 
 SCRIPTDIR="$( dirname -- "$0"; )";
