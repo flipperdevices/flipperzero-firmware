@@ -2,7 +2,7 @@ Import("env")
 
 env.Append(
     CPPPATH=[
-        Dir("compiled"),
+        "assets/compiled"
     ]
 )
 
