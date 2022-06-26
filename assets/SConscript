@@ -1,10 +1,12 @@
 Import("env")
 
-env.Append(
-    CPPPATH=[
-        "assets/compiled"
-    ]
-)
+# HACHHACK
+# Currently injected to CPPPATH by libs - since they are built earlier and depend on assets
+# env.Append(
+#     CPPPATH=[
+#         Dir("./compiled"),
+#     ]
+# )
 
 assetsenv = env.Clone(
     tools=["fbt_assets"],

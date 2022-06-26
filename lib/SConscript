@@ -22,6 +22,8 @@ env.Append(
         "#/",
         "#/lib",  # TODO: remove!
         "#/lib/mlib",
+        # Ugly hack
+        "${BUILD_DIR}/assets/compiled",
     ],
     CPPDEFINES=[
         '"M_MEMORY_FULL(x)=abort()"',
