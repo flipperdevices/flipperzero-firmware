@@ -86,8 +86,8 @@ else:
 lib_targets = env.BuildModules(
     [
         "lib",
-        "firmware",
         "assets",
+        "firmware",
         "core",
     ],
 )
