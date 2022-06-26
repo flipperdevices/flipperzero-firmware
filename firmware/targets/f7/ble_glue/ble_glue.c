@@ -113,13 +113,34 @@ BleGlueStatus ble_glue_get_c2_status() {
     return ble_glue->status;
 }
 
+static const char* ble_glue_get_reltype_str(const uint8_t reltype) {
+    static char relcode[3] = {0};
+    switch(reltype) {
+    case INFO_STACK_TYPE_BLE_FULL:
+        return "F";
+    case INFO_STACK_TYPE_BLE_HCI:
+        return "H";
+    case INFO_STACK_TYPE_BLE_LIGHT:
+        return "L";
+    case INFO_STACK_TYPE_BLE_BEACON:
+        return "Be";
+    case INFO_STACK_TYPE_BLE_BASIC:
+        return "Ba";
+    case INFO_STACK_TYPE_BLE_FULL_EXT_ADV:
+        return "F+";
+    case INFO_STACK_TYPE_BLE_HCI_EXT_ADV:
+        return "H+";
+    default:
+        snprintf(relcode, sizeof(relcode), "%X", reltype);
+        return relcode;
+    }
+}
+
 static void ble_glue_update_c2_fw_info() {
     WirelessFwInfo_t wireless_info;
     SHCI_GetWirelessFwInfo(&wireless_info);
     BleGlueC2Info* local_info = &ble_glue->c2_info;
 
-    local_info->VersionMajor = wireless_info.VersionMajor;
-    local_info->VersionMinor = wireless_info.VersionMinor;
     local_info->VersionMajor = wireless_info.VersionMajor;
     local_info->VersionMinor = wireless_info.VersionMinor;
     local_info->VersionSub = wireless_info.VersionSub;
@@ -132,6 +153,14 @@ static void ble_glue_update_c2_fw_info() {
     local_info->MemorySizeFlash = wireless_info.MemorySizeFlash;
 
     local_info->StackType = wireless_info.StackType;
+    snprintf(
+        local_info->StackTypeString,
+        BLE_GLUE_MAX_VERSION_STRING_LEN,
+        "%d.%d.%d.%s",
+        local_info->VersionMajor,
+        local_info->VersionMinor,
+        local_info->VersionSub,
+        ble_glue_get_reltype_str(local_info->StackType));
 
     local_info->FusVersionMajor = wireless_info.FusVersionMajor;
     local_info->FusVersionMinor = wireless_info.FusVersionMinor;
@@ -333,9 +362,9 @@ static void ble_glue_clear_shared_memory() {
 
 void ble_glue_thread_stop() {
     if(ble_glue) {
-        osThreadId_t thread_id = furi_thread_get_thread_id(ble_glue->thread);
+        FuriThreadId thread_id = furi_thread_get_id(ble_glue->thread);
         furi_assert(thread_id);
-        osThreadFlagsSet(thread_id, BLE_GLUE_FLAG_KILL_THREAD);
+        furi_thread_flags_set(thread_id, BLE_GLUE_FLAG_KILL_THREAD);
         furi_thread_join(ble_glue->thread);
         furi_thread_free(ble_glue->thread);
         // Free resources
@@ -353,7 +382,7 @@ static int32_t ble_glue_shci_thread(void* context) {
     uint32_t flags = 0;
 
     while(true) {
-        flags = osThreadFlagsWait(BLE_GLUE_FLAG_ALL, osFlagsWaitAny, osWaitForever);
+        flags = furi_thread_flags_wait(BLE_GLUE_FLAG_ALL, osFlagsWaitAny, osWaitForever);
         if(flags & BLE_GLUE_FLAG_SHCI_EVENT) {
             shci_user_evt_proc();
         }
@@ -368,9 +397,9 @@ static int32_t ble_glue_shci_thread(void* context) {
 void shci_notify_asynch_evt(void* pdata) {
     UNUSED(pdata);
     if(ble_glue) {
-        osThreadId_t thread_id = furi_thread_get_thread_id(ble_glue->thread);
+        FuriThreadId thread_id = furi_thread_get_id(ble_glue->thread);
         furi_assert(thread_id);
-        osThreadFlagsSet(thread_id, BLE_GLUE_FLAG_SHCI_EVENT);
+        furi_thread_flags_set(thread_id, BLE_GLUE_FLAG_SHCI_EVENT);
     }
 }
 
