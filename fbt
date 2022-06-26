@@ -3,9 +3,8 @@
 set -e
 
 if [[ -d .git ]]; then
-	echo "Prepairing git submodules"
-	git submodule init
-	git submodule update
+	echo "Updating git submodules"
+	git submodule update --init
 fi
 
 SCRIPTDIR="$( dirname -- "$0"; )";
