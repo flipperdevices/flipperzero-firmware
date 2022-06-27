@@ -17,7 +17,8 @@ $ docker-compose exec dev ./fbt
 Latest Updates:
 - Latest updates from dev with scons
 - - NOT ACTIVE: Settings: Scan names will have timestamp instead of random name assigned due to compile issues (COMING SOON)
-- Fixes for GAMES menu from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) and added .fam files and menu ordering.
+- Fixes for GAMES menu from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) 
+- Added .fam files for GAMES/PLUGINS and fixed menu ordering.
 - Fixes for VideoPoker from [PixlEmly](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
 
 **Special Instructions:**
