@@ -3,55 +3,20 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <furi.h>
+#include <stm32wbxx_ll_rtc.h>
 
 void set_random_name(char* name, uint8_t max_name_size) {
-    static bool rand_generator_inited = false;
-
-    if(!rand_generator_inited) {
-        srand(DWT->CYCCNT);
-        rand_generator_inited = true;
-    }
-    const char* prefix[] = {
-        "super",
-        "big",
-        "little",
-        "liquid",
-        "unknown",
-        "thin",
-        "thick",
-        "great",
-        "my",
-    };
-
-    const char* suffix[] = {
-        "maslina",
-        "sus",
-        "anomalija",
-        "artefact",
-        "monolit",
-        "burer",
-        "sidorovich",
-        "habar",
-    };
-    // sus is not (sus)pect - this is about super sus
-    uint8_t prefix_i = rand() % COUNT_OF(prefix);
-    uint8_t suffix_i = rand() % COUNT_OF(suffix);
-
-    sniprintf(name, max_name_size, "%s_%s", prefix[prefix_i], suffix[suffix_i]);
-    // Set first symbol to upper case
-    name[0] = name[0] - 0x20;
-}
-/* 
-void set_random_name(char* name, uint8_t max_name_size) {
-    FuriHalRtcDateTime datetime;
-    furi_hal_rtc_get_datetime(&datetime);
+    uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
+    uint32_t date = LL_RTC_DATE_Get(RTC); // 0xWWDDMMYY
     char strings[1][25];
     sprintf(strings[0], "%s%.4d%.2d%.2d%.2d%.2d", "s"
-        , datetime.year, datetime.month, datetime.day
-        , datetime.hour, datetime.minute
+        , __LL_RTC_CONVERT_BCD2BIN((date >> 0) & 0xFF) + 2000 // YEAR
+        , __LL_RTC_CONVERT_BCD2BIN((date >> 8) & 0xFF) // MONTH
+        , __LL_RTC_CONVERT_BCD2BIN((date >> 16) & 0xFF) // DAY
+        , __LL_RTC_CONVERT_BCD2BIN((time >> 16) & 0xFF) // HOUR
+        , __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF)  // DAY
     );
     sniprintf(name, max_name_size, "%s", strings[0]);
     // Set first symbol to upper case
     name[0] = name[0] - 0x20;
 }
-*/
