@@ -201,6 +201,7 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
 # Make it depend on everything child builders returned
 Depends(fwelf, lib_targets)
 AddPostAction(fwelf, fwenv["APPBUILD_DUMP"])
+AddPostAction(fwelf, Action("@$SIZECOM"))
 
 
 fwhex = fwenv["FW_HEX"] = fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
