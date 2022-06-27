@@ -26,4 +26,4 @@ uint32_t digital_signal_get_edges_cnt(DigitalSignal* signal);
 
 uint32_t digital_signal_get_edge(DigitalSignal* signal, uint32_t edge_num);
 
-uint32_t digital_signal_send(DigitalSignal* signal, const GpioPin* gpio);
+void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio);

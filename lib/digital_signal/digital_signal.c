@@ -138,7 +138,7 @@ static void digital_signal_prepare_arr(DigitalSignal* signal) {
     }
 }
 
-uint32_t digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
+void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
     furi_assert(signal);
     furi_assert(gpio);
 
@@ -172,9 +172,7 @@ uint32_t digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
 
     // Init timer arr register buffer and DMA channel
-    uint32_t time = DWT->CYCCNT;
     digital_signal_prepare_arr(signal);
-    time = DWT->CYCCNT - time;
     dma_config.MemoryOrM2MDstAddress = (uint32_t)signal->reload_reg_buff;
     dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (TIM2->ARR);
     dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
@@ -212,6 +210,4 @@ uint32_t digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
     LL_TIM_SetCounter(TIM2, 0);
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
-
-    return time;
 }

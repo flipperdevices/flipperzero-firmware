@@ -63,7 +63,7 @@ bool nfca_emulation_handler(
     return sleep;
 }
 
-static inline void nfca_add_bit(DigitalSignal* signal, bool bit) {
+static void nfca_add_bit(DigitalSignal* signal, bool bit) {
     if(bit) {
         signal->start_level = true;
         for(size_t i = 0; i < 7; i++) {
