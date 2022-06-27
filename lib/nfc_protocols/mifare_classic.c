@@ -538,9 +538,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
     // Read command
     while(!command_processed) {
         if(!is_encrypted) {
-            // Read first frame
-            tx_rx->tx_bits = 0;
-            tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+            memcpy(plain_data, tx_rx->rx_data, tx_rx->rx_bits / 8);
         } else {
             if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
                 FURI_LOG_D(
@@ -550,13 +548,8 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                     tx_rx->rx_bits);
                 break;
             }
-        }
-        if(!is_encrypted) {
-            memcpy(plain_data, tx_rx->rx_data, tx_rx->rx_bits / 8);
-        } else {
             mf_crypto1_decrypt(&emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
         }
-        // TODO Check crc
 
         if(plain_data[0] == 0x50 && plain_data[1] == 00) {
             FURI_LOG_T(TAG, "Halt received");

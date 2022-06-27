@@ -246,84 +246,81 @@ bool furi_hal_nfc_listen(
     return true;
 }
 
-void rfal_interrupt_callback_handler() {
-    osEventFlagsSet(event, EVENT_FLAG_INTERRUPT);
-}
+static void furi_hal_nfc_read_fifo(uint8_t* data, uint16_t* bits) {
+    uint8_t fifo_status[2];
+    uint8_t rx_buff[64];
 
-void rfal_state_changed_callback(void* context) {
-    UNUSED(context);
-    osEventFlagsSet(event, EVENT_FLAG_STATE_CHANGED);
-}
-
-void furi_hal_nfc_stop() {
-    if(event) {
-        osEventFlagsSet(event, EVENT_FLAG_STOP);
-    }
-}
-
-static void read_fifo(uint8_t* fifo, uint16_t* bits) {
-    uint8_t fifo_stat[2];
     st25r3916ReadMultipleRegisters(
-        ST25R3916_REG_FIFO_STATUS1, fifo_stat, ST25R3916_FIFO_STATUS_LEN);
-    uint16_t len =
-        ((((uint16_t)fifo_stat[1] & ST25R3916_REG_FIFO_STATUS2_fifo_b_mask) >>
+        ST25R3916_REG_FIFO_STATUS1, fifo_status, ST25R3916_FIFO_STATUS_LEN);
+    uint16_t rx_bytes =
+        ((((uint16_t)fifo_status[1] & ST25R3916_REG_FIFO_STATUS2_fifo_b_mask) >>
           ST25R3916_REG_FIFO_STATUS2_fifo_b_shift)
-         << RFAL_BITS_IN_BYTE);
-    len |= (((uint16_t)fifo_stat[0]) & 0x00FFU);
-    uint8_t rx[100];
-    st25r3916ReadFifo(rx, len);
+         << 8);
+    rx_bytes |= (((uint16_t)fifo_status[0]) & 0x00FFU);
+    st25r3916ReadFifo(rx_buff, rx_bytes);
 
-    *bits = len * 8;
-    memcpy(fifo, rx, len);
+    memcpy(data, rx_buff, rx_bytes);
+    *bits = rx_bytes * 8;
 }
 
-bool furi_hal_nfc_listen_rx(FuriHalNfcTxRxContext* tx_rx, uint32_t timeout) {
+void furi_hal_nfc_listen_sleep() {
+    st25r3916ExecuteCommand(ST25R3916_CMD_GOTO_SLEEP);
+}
+
+bool furi_hal_nfc_listen_rx(FuriHalNfcTxRxContext* tx_rx, uint32_t timeout_ms) {
+    furi_assert(tx_rx);
+
     // Wait for interrupts
-    uint8_t interrupt_buff[4] = {};
     uint32_t start = osKernelGetTickCount();
     bool data_received = false;
     while(true) {
         if(furi_hal_gpio_read(&gpio_nfc_irq_rfid_pull) == true) {
-            st25r3916ReadMultipleRegisters(ST25R3916_REG_IRQ_MAIN, interrupt_buff, 4);
-
-            if(interrupt_buff[0] & 0x10) {
-                read_fifo(tx_rx->rx_data, &tx_rx->rx_bits);
+            st25r3916CheckForReceivedInterrupts();
+            if(st25r3916GetInterrupt(ST25R3916_IRQ_MASK_RXE)) {
+                furi_hal_nfc_read_fifo(tx_rx->rx_data, &tx_rx->rx_bits);
                 data_received = true;
                 break;
             }
             continue;
         }
-        uint32_t timeout_ms = osKernelGetTickCount() - start;
-        if(timeout_ms > timeout) {
-            FURI_LOG_W(TAG, "Interrupt waiting timeout");
+        if(osKernelGetTickCount() - start > timeout_ms) {
+            FURI_LOG_D(TAG, "Interrupt waiting timeout");
             break;
         }
     }
+
     return data_received;
 }
 
-bool furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data) {
+void furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data) {
     furi_assert(nfc_data);
 
-    uint8_t interrupt_buff[4] = {};
-    uint8_t interrupt_mask[4] = {0xff, 0xff, 0xff, 0xff};
     furi_hal_gpio_init(&gpio_nfc_irq_rfid_pull, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
-
     // Clear interrupts
-    st25r3916ReadMultipleRegisters(ST25R3916_REG_IRQ_MAIN, interrupt_buff, 4);
-    // Mask interrupts
-    st25r3916WriteMultipleRegisters(ST25R3916_REG_IRQ_MASK_MAIN, interrupt_mask, 4);
+    st25r3916ClearInterrupts();
+    // Mask all interrupts
+    st25r3916DisableInterrupts(ST25R3916_IRQ_MASK_ALL);
     // RESET
     st25r3916ExecuteCommand(ST25R3916_CMD_STOP);
     // Setup registers
-    st25r3916WriteRegister(ST25R3916_REG_OP_CONTROL, 0b11000011);
-    st25r3916WriteRegister(ST25R3916_REG_MODE, 0b11001000);
-    st25r3916WriteRegister(ST25R3916_REG_PASSIVE_TARGET, 0b01011100);
+    st25r3916WriteRegister(
+        ST25R3916_REG_OP_CONTROL,
+        ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_rx_en |
+            ST25R3916_REG_OP_CONTROL_en_fd_auto_efd);
+    st25r3916WriteRegister(
+        ST25R3916_REG_MODE,
+        ST25R3916_REG_MODE_targ_targ | ST25R3916_REG_MODE_om3 | ST25R3916_REG_MODE_om0);
+    st25r3916WriteRegister(
+        ST25R3916_REG_PASSIVE_TARGET,
+        ST25R3916_REG_PASSIVE_TARGET_fdel_2 | ST25R3916_REG_PASSIVE_TARGET_fdel_0 |
+            ST25R3916_REG_PASSIVE_TARGET_d_ac_ap2p | ST25R3916_REG_PASSIVE_TARGET_d_212_424_1r);
     st25r3916WriteRegister(ST25R3916_REG_MASK_RX_TIMER, 0x02);
-    st25r3916WriteRegister(ST25R3916_REG_IRQ_MASK_MAIN, 0b11101111);
-    st25r3916WriteRegister(ST25R3916_REG_IRQ_MASK_TIMER_NFC, 0b11111111);
-    st25r3916WriteRegister(ST25R3916_REG_IRQ_MASK_ERROR_WUP, 0b11111111);
-    st25r3916WriteRegister(ST25R3916_REG_IRQ_MASK_TARGET, 0b11101100);
+
+    // Mask interrupts
+    uint32_t clear_irq_mask =
+        (ST25R3916_IRQ_MASK_RXE | ST25R3916_IRQ_MASK_RXE_PTA | ST25R3916_IRQ_MASK_WU_A_X |
+         ST25R3916_IRQ_MASK_WU_A);
+    st25r3916EnableInterrupts(clear_irq_mask);
 
     // Set 4 or 7 bytes UID
     if(nfc_data->uid_len == 4) {
@@ -345,8 +342,21 @@ bool furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data) {
     st25r3916WritePTMem(pt_memory, sizeof(pt_memory));
     // Go to sence
     st25r3916ExecuteCommand(ST25R3916_CMD_GOTO_SENSE);
+}
 
-    return true;
+void rfal_interrupt_callback_handler() {
+    osEventFlagsSet(event, EVENT_FLAG_INTERRUPT);
+}
+
+void rfal_state_changed_callback(void* context) {
+    UNUSED(context);
+    osEventFlagsSet(event, EVENT_FLAG_STATE_CHANGED);
+}
+
+void furi_hal_nfc_stop() {
+    if(event) {
+        osEventFlagsSet(event, EVENT_FLAG_STOP);
+    }
 }
 
 bool furi_hal_nfc_emulate_nfca(
@@ -455,10 +465,6 @@ bool furi_hal_nfc_emulate_nfca(
     }
     rfalListenStop();
     return true;
-}
-
-void furi_hal_nfc_listen_sleep() {
-    st25r3916ExecuteCommand(ST25R3916_CMD_GOTO_SLEEP);
 }
 
 static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
