@@ -2,7 +2,6 @@
 #include <furi_hal.h>
 
 #include <platform.h>
-#include <furi_hal_spi.h>
 
 #define TAG "NfcWorker"
 
@@ -89,7 +88,6 @@ void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state) {
 int32_t nfc_worker_task(void* context) {
     NfcWorker* nfc_worker = context;
 
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_nfc);
     furi_hal_nfc_exit_sleep();
 
     if(nfc_worker->state == NfcWorkerStateDetect) {
@@ -115,7 +113,6 @@ int32_t nfc_worker_task(void* context) {
     }
     furi_hal_nfc_sleep();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
 
     return 0;
 }
@@ -500,7 +497,7 @@ void nfc_worker_emulate_mifare_classic(NfcWorker* nfc_worker) {
     NfcaSignal* nfca_signal = nfca_signal_alloc();
     tx_rx.nfca_signal = nfca_signal;
 
-    platformDisableIrqCallback();
+    rfal_platform_spi_acquire();
 
     while(nfc_worker->state == NfcWorkerStateEmulateMifareClassic) {
         furi_hal_nfc_listen_start(nfc_data);
@@ -519,7 +516,7 @@ void nfc_worker_emulate_mifare_classic(NfcWorker* nfc_worker) {
 
     nfca_signal_free(nfca_signal);
 
-    platformEnableIrqCallback();
+    rfal_platform_spi_release();
 }
 
 void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker) {

@@ -193,11 +193,34 @@ inline static void furi_hal_spi_bus_nfc_handle_event_callback(
     FuriHalSpiBusHandleEvent event,
     const LL_SPI_InitTypeDef* preset) {
     if(event == FuriHalSpiBusHandleEventInit) {
+        // Configure GPIOs in normal SPI mode
+        furi_hal_gpio_init_ex(
+            handle->miso,
+            GpioModeAltFunctionPushPull,
+            GpioPullNo,
+            GpioSpeedVeryHigh,
+            GpioAltFn5SPI1);
+        furi_hal_gpio_init_ex(
+            handle->mosi,
+            GpioModeAltFunctionPushPull,
+            GpioPullNo,
+            GpioSpeedVeryHigh,
+            GpioAltFn5SPI1);
+        furi_hal_gpio_init_ex(
+            handle->sck,
+            GpioModeAltFunctionPushPull,
+            GpioPullNo,
+            GpioSpeedVeryHigh,
+            GpioAltFn5SPI1);
         furi_hal_gpio_write(handle->cs, true);
         furi_hal_gpio_init(handle->cs, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
     } else if(event == FuriHalSpiBusHandleEventDeinit) {
-        furi_hal_gpio_write(handle->cs, true);
-        furi_hal_gpio_init(handle->cs, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        // Configure GPIOs for st25r3916 Transparent mode
+        furi_hal_gpio_init(handle->sck, GpioModeInput, GpioPullUp, GpioSpeedLow);
+        furi_hal_gpio_init(handle->miso, GpioModeInput, GpioPullUp, GpioSpeedLow);
+        furi_hal_gpio_init(handle->cs, GpioModeInput, GpioPullUp, GpioSpeedLow);
+        furi_hal_gpio_write(handle->mosi, false);
+        furi_hal_gpio_init(handle->mosi, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
     } else if(event == FuriHalSpiBusHandleEventActivate) {
         LL_SPI_Init(handle->bus->spi, (LL_SPI_InitTypeDef*)preset);
         LL_SPI_SetRxFIFOThreshold(handle->bus->spi, LL_SPI_RX_FIFO_TH_QUARTER);
@@ -222,10 +245,7 @@ inline static void furi_hal_spi_bus_nfc_handle_event_callback(
             GpioSpeedVeryHigh,
             GpioAltFn5SPI1);
 
-        furi_hal_gpio_write(handle->cs, false);
     } else if(event == FuriHalSpiBusHandleEventDeactivate) {
-        furi_hal_gpio_write(handle->cs, true);
-
         furi_hal_gpio_init(handle->miso, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
         furi_hal_gpio_init(handle->mosi, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
         furi_hal_gpio_init(handle->sck, GpioModeAnalog, GpioPullNo, GpioSpeedLow);

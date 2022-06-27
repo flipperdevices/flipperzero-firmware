@@ -23,7 +23,6 @@ osEventFlagsId_t event = NULL;
 #define EVENT_FLAG_ALL (EVENT_FLAG_INTERRUPT | EVENT_FLAG_STATE_CHANGED | EVENT_FLAG_STOP)
 
 void furi_hal_nfc_init() {
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_nfc);
     ReturnCode ret = rfalNfcInitialize();
     if(ret == ERR_NONE) {
         furi_hal_nfc_start_sleep();
@@ -32,7 +31,6 @@ void furi_hal_nfc_init() {
     } else {
         FURI_LOG_W(TAG, "Initialization failed, RFAL returned: %d", ret);
     }
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
 }
 
 bool furi_hal_nfc_is_busy() {
@@ -309,8 +307,6 @@ bool furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data) {
 
     uint8_t interrupt_buff[4] = {};
     uint8_t interrupt_mask[4] = {0xff, 0xff, 0xff, 0xff};
-    // Disable interrupt callback
-    platformDisableIrqCallback();
     furi_hal_gpio_init(&gpio_nfc_irq_rfid_pull, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
 
     // Clear interrupts
@@ -468,19 +464,12 @@ void furi_hal_nfc_listen_sleep() {
 static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
     furi_assert(tx_rx->nfca_signal);
 
-    platformDisableIrqCallback();
-
     bool ret = false;
 
     // Start transparent mode
     st25r3916ExecuteCommand(ST25R3916_CMD_TRANSPARENT_MODE);
-    // Reconfigure gpio
+    // Reconfigure gpio for Transparent mode
     furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_nfc);
-    furi_hal_gpio_init(&gpio_spi_r_sck, GpioModeInput, GpioPullUp, GpioSpeedLow);
-    furi_hal_gpio_init(&gpio_spi_r_miso, GpioModeInput, GpioPullUp, GpioSpeedLow);
-    furi_hal_gpio_init(&gpio_nfc_cs, GpioModeInput, GpioPullUp, GpioSpeedLow);
-    furi_hal_gpio_init(&gpio_spi_r_mosi, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
 
     // Send signal
     FURI_CRITICAL_ENTER();
@@ -490,24 +479,6 @@ static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_
     furi_hal_gpio_write(&gpio_spi_r_mosi, false);
 
     // Configure gpio back to SPI and exit transparent
-    furi_hal_gpio_init_ex(
-        &gpio_spi_r_mosi,
-        GpioModeAltFunctionPushPull,
-        GpioPullNo,
-        GpioSpeedVeryHigh,
-        GpioAltFn5SPI2);
-    furi_hal_gpio_init_ex(
-        &gpio_spi_r_miso,
-        GpioModeAltFunctionPushPull,
-        GpioPullNo,
-        GpioSpeedVeryHigh,
-        GpioAltFn5SPI2);
-    furi_hal_gpio_init_ex(
-        &gpio_spi_r_sck,
-        GpioModeAltFunctionPushPull,
-        GpioPullNo,
-        GpioSpeedVeryHigh,
-        GpioAltFn5SPI2);
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
     st25r3916ExecuteCommand(ST25R3916_CMD_UNMASK_RECEIVE_DATA);
 
@@ -562,7 +533,6 @@ static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_
     }
 
     st25r3916ClearInterrupts();
-    platformEnableIrqCallback();
 
     return ret;
 }
