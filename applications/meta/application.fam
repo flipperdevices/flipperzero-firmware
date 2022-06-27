@@ -37,5 +37,6 @@ App(
         "music_player",
         "snake_game",
         "bt_hid",
+        "VideoPoker,
     ],
 )
