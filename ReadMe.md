@@ -1,160 +1,92 @@
-# Flipper Zero Firmware
-
-[![Discord](https://img.shields.io/discord/740930220399525928.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](http://flipperzero.one/discord)
-
-![Show me the code](https://habrastorage.org/webt/eo/m0/e4/eom0e4btudte7nrhnyic-laiog0.png)
-
-Welcome to [Flipper Zero](https://flipperzero.one/)'s Firmware repo!
-Our goal is to create nice and clean code with good documentation, to make it a pleasure for everyone to work with.
+# [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME
+- ****This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.**
+- FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE
+- BUILD WITH COMPACT FLAG SINCE IT IS TOO LARGE
+- CH0NG, CH33CH and N00BY rename your flipper.
+- Send something if you want... BTC:172CE1H1XZVt7tc4HDQ1q9Mej1K7VuHfEf ETH:0x6c46eE48Bd433b0ADE711B43D188Cf8215cd51c2
 
 # Clone the Repository
 
 You should clone with 
 ```shell
-$ git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git
+$ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
+$ docker-compose up -d
+$ docker-compose exec dev ./fbt
 ```
 
-# Update firmware
+Latest Updates:
+- Latest updates from dev with scons and protocol scher_khan
+- - NEW WAY TO COMPILE! docker-compose exec dev ./fbt
+- - NOT ACTIVE: Settings: Scan names will have timestamp instead of random name assigned due to compile issues (COMING SOON)
+- Fixes for GAMES menu from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) 
+- Added .fam files for GAMES/PLUGINS and fixed menu ordering.
+- Fixes for VideoPoker from [PixlEmly](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
 
-[Get Latest Firmware from Update Server](https://update.flipperzero.one/)
+**Special Instructions:**
+- Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
+- - Note 1: If you don't have a subghz/assets folder, you should ensure you have made at least one clean flash with stock firmware and your SD card installed in order to ensure the database structure is built, otherwise it will not exist for alternative forks.
+- - Note 2: /any is a special keyword signifying either /int (internal storage) or /ext (external storage).
+- - Note 3: the changes you are making to the `_map` files is to point to the location of the specific assets of the touchtunes folder as well as the universal RF map apps which you will have to develop or compile seperately and are not a part of this repo. 
+- - Note 4: /any is effectively root, so the folder structure should start "/any/subghz/assets" and not what is based on the repo below do not blindly copy the repo it will not work.
+- - [assets/resources/subghz/assets/universal_rf_map.txt](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/universal_rf_map.txt)
+- - [assets/resources/subghz/assets/touchtunes_map.txt](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/touchtunes_map.txt)
+- - [assets/resources/subghz/assets/setting_user](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user)
+- Download this file into the nfc/assets folder on your SD card. 
+- - [assets/resources/nfc/assets/mf_classic_dict.nfc](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/nfc/assets/mf_classic_dict.nfc)
+- Add a folder to SD card named `wav_player` (for 8bit 2ch unsigned wav files) 
+- Add a folder to SD card named `music_player` (FMF and RTTTL/TXT files)
 
-Flipper Zero's firmware consists of two components:
+Special shout out to these libraries for giving us more fun:
+- https://github.com/Gioman101/FlipperAmiibo
+- https://github.com/jimilinuxguy/flipperzero-touchtunes
+- https://github.com/Lucaslhm/AmiiboFlipperConverter
+- https://github.com/MuddledBox/FlipperZeroCases
+- https://github.com/MuddledBox/FlipperZeroSub-GHz
+- https://github.com/neverfa11ing/FlipperMusicRTTTL
+- https://github.com/UberGuidoZ/Flipper
+- https://github.com/UberGuidoZ/Flipper-IRDB
 
-- Core2 firmware set - proprietary components by ST: FUS + radio stack. FUS is flashed at factory and you should never update it.
-- Core1 Firmware - HAL + OS + Drivers + Applications.
+Added Features:
+- Animations: Hold Center to change flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
+- Animations: Idle animations will show all animations regardless of level and butthurt [Thanks to MajiK]
+- Animations: SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
+- Battery Meter on Desktop [Thanks to McAzzaMan](https://github.com/McAzzaMan/flipperzero-firmware/tree/BatteryPercentageView)
+- Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
+- NFC: Display UL PWD_AUTH payload [(Thanks to GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/dev-new)
+- Plugins: Fixed sound decay issues on music player [Thanks to qqmajikpp]
+- Plugins: Menu, Icons and Raycast exit [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
+- Plugins: Snake and Tetris show score. [Thanks to whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) With changes by RogueMaster.
+- RFID: Removing T5577 passwords via the cli command rfid clear_pass_t5577 using a dictionary attack [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
+- Settings: Actual PIN Lock [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop.c)
+- Settings: Auto-Lock Options Added: 10s+15s+90s [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop_settings/scenes/desktop_settings_scene_start.c)
+- Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
+- Settings: LCD Timeout Options Added: 10s+90s+2min+5min+10min [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
+- SubGHz: Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
+- SubGHz: Protocols Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 
-They both must be flashed in order described.
+Open PRs Checkedout & Not Merged In Main:
+- [On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
+- [SubGhz: fix protocol scher_khan #1323 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1323)
+- [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 
-## With offline update package
+Games:
+- [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048)
+- [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
+- [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/dice/dice.c)
+- [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)
+- [Game of Life (Updated to work by tgxn)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c) Original By 
+itsyourbedtime. (Hard Fault or Restart to quit?)
+- [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine)
+- [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) Updated by RogueMaster To Work
+- [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
+- [Tic Tac Toe (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
+- [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
 
-`./fbt --with-updater updater_package`
+Plugins:
+- [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)
+- [HID Analyzer (By Ownasaurus)](https://github.com/Ownasaurus/flipperzero-firmware/tree/hid-analyzer/applications/hid_analyzer)
+- [RF Remix (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix)[(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
+- [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
+- [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 
-Copy the resulting directory to Flipper's SD card and navigate to `update.fuf` file in Archive app. 
-
-## With STLink
-
-### Core1 Firmware
-
-Prerequisites:
-
-- Linux / macOS
-- Terminal
-- [arm-gcc-none-eabi](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
-- openocd
-
-One liner: `./fbt firmware_flash`
-
-## With USB DFU 
-
-1. Download latest [Firmware](https://update.flipperzero.one)
-
-2. Reboot Flipper to Bootloader
- - Press and hold `← Left` + `↩ Back` for reset 
- - Release `↩ Back` and keep holding `← Left` until blue LED lights up
- - Release `← Left`
-
-3. Run `dfu-util -D full.dfu -a 0`
-
-# Build with Docker
-
-## Prerequisites
-
-1. Install [Docker Engine and Docker Compose](https://www.docker.com/get-started)
-2. Prepare the container:
-
- ```sh
- docker-compose up -d
- ```
-
-## Compile everything
-
-```sh
-docker-compose exec dev ./fbt
-```
-
-Check `dist/` for build outputs.
-
-Use **`flipper-z-{target}-full-{suffix}.dfu`** to flash your device.
-
-If compilation fails, make sure all submodules are all initialized. Either clone with `--recursive` or use `git submodule update --init --recursive`.
-
-# Build on Linux/macOS
-
-Check out `documentation/fbt.md` for details on building and flashing firmware. 
-
-## macOS Prerequisites
-
-Make sure you have [brew](https://brew.sh) and install all the dependencies:
-```sh
-brew bundle --verbose
-```
-
-## Linux Prerequisites
-
-### gcc-arm-none-eabi
-
-```sh
-toolchain="gcc-arm-none-eabi-10.3-2021.10"
-toolchain_package="$toolchain-$(uname -m)-linux"
-
-wget -P /opt "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/$toolchain_package.tar.bz2"
-
-tar xjf /opt/$toolchain_package.tar.bz2 -C /opt
-rm /opt/$toolchain_package.tar.bz2
-
-for file in /opt/$toolchain/bin/* ; do ln -s "${file}" "/usr/bin/$(basename ${file})" ; done
-```
-
-### Optional dependencies
-
-- openocd (debugging/flashing over SWD)
-- heatshrink (compiling image assets)
-- clang-format (code formatting)
-- dfu-util (flashing over USB DFU)
-- protobuf (compiling proto sources)
-
-For example, to install them on Debian, use:
-```sh
-apt update
-apt install openocd clang-format-13 dfu-util protobuf-compiler
-```
-
-heatshrink has to be compiled [from sources](https://github.com/atomicobject/heatshrink).
-
-## Compile everything
-
-```sh
-./fbt
-```
-
-Check `dist/` for build outputs.
-
-Use **`flipper-z-{target}-full-{suffix}.dfu`** to flash your device.
-
-## Flash everything
-
-Connect your device via ST-Link and run:
-```sh
-./fbt firmware_flash
-```
-
-# Links
-
-* Discord: [flipp.dev/discord](https://flipp.dev/discord)
-* Website: [flipperzero.one](https://flipperzero.one)
-* Kickstarter page: [kickstarter.com](https://www.kickstarter.com/projects/flipper-devices/flipper-zero-tamagochi-for-hackers)
-* Forum: [forum.flipperzero.one](https://forum.flipperzero.one/)
-
-# Project structure
-
-- `applications`    - Applications and services used in firmware
-- `assets`          - Assets used by applications and services
-- `core`            - Furi Core: os level primitives and helpers
-- `debug`           - Debug tool: GDB-plugins, SVD-file and etc
-- `docker`          - Docker image sources (used for firmware build automation)
-- `documentation`   - Documentation generation system configs and input files
-- `firmware`        - Firmware source code
-- `lib`             - Our and 3rd party libraries, drivers and etc...
-- `scripts`         - Supplementary scripts and python libraries home
-
-Also pay attention to `ReadMe.md` files inside of those directories.
+Thank you, [MuddleBox](https://github.com/MuddledBox/flipperzero-firmware), [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware), [WeTox-Team](https://github.com/wetox-team/flipperzero-firmware) & of course, most of all [Flipper Devices](https://github.com/flipperdevices/flipperzero-firmware)!
