@@ -19,7 +19,7 @@ public:
         const uint8_t decoded_data_size) final;
 
     bool can_be_decoded(const uint8_t* encoded_data, const uint8_t encoded_data_size) final;
+
 private:
     int16_t find_second_1(const uint8_t* encoded_data);
-
 };

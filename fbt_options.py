@@ -6,9 +6,9 @@ TARGET_HW = 7
 
 # Optimization flags
 ## Optimize for size
-COMPACT = 0
+COMPACT = 1
 ## Optimize for debugging experience
-DEBUG = 1
+DEBUG = 0
 
 # Suffix to add to files when building distribution.
 # If OS environment has DIST_SUFFIX set, it will be used instead..
@@ -54,12 +54,16 @@ FIRMWARE_APPS = {
         "basic_apps",
         "updater_app",
         "archive",
+        # Custom Apps
+        "custom_apps",
         # Settings
         "passport",
         "system_settings",
         "about",
         # Plugins
         "basic_plugins",
+        # Custom Games
+        "custom_games",
         # Debug
         "debug_apps",
     ),

@@ -18,5 +18,4 @@ public:
 
 private:
     HIDReader reader;
-
 };

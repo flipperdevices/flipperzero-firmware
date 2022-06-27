@@ -1,11 +1,10 @@
 App(
-    appid="VideoPoker",
+    appid="videopoker_game",
     name="Video Poker",
-    apptype=FlipperAppType.PLUGIN,
+    apptype=FlipperAppType.GAME,
     entry_point="video_poker_app",
-    cdefines=["APP_VIDEO_POKER"],
+    cdefines=["APP_VIDEOPOKER_GAME"],
     requires=["gui"],
     stack_size=1 * 1024,
-    icon="A_Plugins_14",
-    order=90,
+    order=110,
 )

@@ -52,7 +52,7 @@ public:
 
     void run(void* args);
 
-// private:
+    // private:
     SceneController<GenericScene<HIDApp>, HIDApp> scene_controller;
     ViewController<HIDApp, SubmenuVM, PopupVM, DialogExVM, TextInputVM, ByteInputVM, ContainerVM>
         view_controller;

@@ -32,17 +32,17 @@ class GitVersion:
 
         branch_num = self._exec_git("rev-list --count HEAD") or "n/a"
 
-        try:
-            version = self._exec_git("describe --tags --abbrev=0 --exact-match")
-        except subprocess.CalledProcessError:
-            version = "unknown"
+        version = (
+            os.environ.get("DIST_SUFFIX", None)
+            or "unknown"
+        )
 
         return {
             "GIT_COMMIT": commit,
             "GIT_BRANCH": branch,
             "GIT_BRANCH_NUM": branch_num,
-            "VERSION": version,
-            "BUILD_DIRTY": dirty and 1 or 0,
+            "VERSION": "0.62.0",
+            "BUILD_DIRTY": 0,
         }
 
     def _exec_git(self, args):

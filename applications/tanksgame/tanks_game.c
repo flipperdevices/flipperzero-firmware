@@ -391,7 +391,7 @@ static void tanks_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 124, 10, AlignRight, AlignBottom, "Single");
         canvas_draw_str_aligned(canvas, 124, 25, AlignRight, AlignBottom, "Co-op S");
         canvas_draw_str_aligned(canvas, 124, 40, AlignRight, AlignBottom, "Co-op C");
-        
+
         switch(tanks_state->menu_state) {
         case MenuStateSingleMode:
             canvas_draw_icon(canvas, 74, 3, &I_tank_right);
@@ -414,7 +414,7 @@ static void tanks_game_render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_box(canvas, FIELD_WIDTH * CELL_LENGTH_PIXELS, 0, 2, SCREEN_HEIGHT);
 
     // Cooperative client
-    if (tanks_state->mode == ModeCooperative && !tanks_state->server){
+    if(tanks_state->mode == ModeCooperative && !tanks_state->server) {
         for(int8_t x = 0; x < FIELD_WIDTH; x++) {
             for(int8_t y = 0; y < FIELD_HEIGHT; y++) {
                 tanks_game_render_cell(tanks_state->thisMap[x][y], x, y, canvas);
@@ -568,11 +568,11 @@ static void tanks_game_render_callback(Canvas* const canvas, void* ctx) {
 
         snprintf(buffer1, sizeof(buffer1), "snt: %u", tanks_state->sent);
         canvas_draw_str_aligned(canvas, 127, 58, AlignRight, AlignBottom, buffer1);
-//        snprintf(buffer1, sizeof(buffer1), "p2 l: %u", tanks_state->p2->lives);
-//        canvas_draw_str_aligned(canvas, 127, 48, AlignRight, AlignBottom, buffer1);
-//
-//        snprintf(buffer1, sizeof(buffer1), "p2 s: %u", tanks_state->p2->score);
-//        canvas_draw_str_aligned(canvas, 127, 58, AlignRight, AlignBottom, buffer1);
+        //        snprintf(buffer1, sizeof(buffer1), "p2 l: %u", tanks_state->p2->lives);
+        //        canvas_draw_str_aligned(canvas, 127, 48, AlignRight, AlignBottom, buffer1);
+        //
+        //        snprintf(buffer1, sizeof(buffer1), "p2 s: %u", tanks_state->p2->score);
+        //        canvas_draw_str_aligned(canvas, 127, 58, AlignRight, AlignBottom, buffer1);
     }
 
     if(tanks_state->state == GameStateCooperativeClient) {
@@ -773,7 +773,7 @@ static void tanks_game_init_game(TanksState* const tanks_state, GameState type) 
 
     tanks_state->p1 = p1_state;
 
-    if (type == GameStateCooperativeServer) {
+    if(type == GameStateCooperativeServer) {
         int8_t index2 = tanks_get_random_free_respawn_point_index(
             tanks_state, tanks_state->team_one_respawn_points);
         Point c = {
@@ -804,7 +804,7 @@ static void tanks_game_init_game(TanksState* const tanks_state, GameState type) 
     tanks_state->received = 0;
     tanks_state->sent = 0;
 
-    if (type == GameStateCooperativeClient) {
+    if(type == GameStateCooperativeClient) {
         for(int8_t x = 0; x < FIELD_WIDTH; x++) {
             for(int8_t y = 0; y < FIELD_HEIGHT; y++) {
                 tanks_state->thisMap[x][y] = CellEmpty;
@@ -955,12 +955,8 @@ static void tanks_game_process_game_step(TanksState* const tanks_state) {
     }
 
     // Player 2 spawn
-    if(
-        tanks_state->state == GameStateCooperativeServer &&
-        tanks_state->p2 &&
-        !tanks_state->p2->live &&
-        tanks_state->p2->lives > 0
-        ) {
+    if(tanks_state->state == GameStateCooperativeServer && tanks_state->p2 &&
+       !tanks_state->p2->live && tanks_state->p2->lives > 0) {
         int8_t index = tanks_get_random_free_respawn_point_index(
             tanks_state, tanks_state->team_one_respawn_points);
 
@@ -1060,12 +1056,8 @@ static void tanks_game_process_game_step(TanksState* const tanks_state) {
     }
 
     // Player 2 spawn
-    if(
-        tanks_state->state == GameStateCooperativeServer &&
-        tanks_state->p2 &&
-        tanks_state->p2->live &&
-        tanks_state->p2->moving
-    ) {
+    if(tanks_state->state == GameStateCooperativeServer && tanks_state->p2 &&
+       tanks_state->p2->live && tanks_state->p2->moving) {
         Point next_step =
             tanks_game_get_next_step(tanks_state->p2->coordinates, tanks_state->p2->direction);
         bool crush = tanks_game_collision(next_step, false, tanks_state);
@@ -1127,11 +1119,8 @@ static void tanks_game_process_game_step(TanksState* const tanks_state) {
 
                 // Kill a player 2
                 if(tanks_state->p2 != NULL) {
-                    if(
-                        tanks_state->p2->live &&
-                        tanks_state->p2->coordinates.x == c.x &&
-                        tanks_state->p2->coordinates.y == c.y
-                        ) {
+                    if(tanks_state->p2->live && tanks_state->p2->coordinates.x == c.x &&
+                       tanks_state->p2->coordinates.y == c.y) {
                         tanks_state->p2->live = false;
                         tanks_state->p2->lives--;
                         tanks_state->p2->respawn_cooldown = PLAYER_RESPAWN_COOLDOWN;
@@ -1345,7 +1334,7 @@ int32_t tanks_game_app(void* p) {
                     }
                 }
             } else if(event.type == EventTypeTick) {
-                if (tanks_state->state == GameStateCooperativeServer) {
+                if(tanks_state->state == GameStateCooperativeServer) {
                     if(subghz_tx_rx_worker_available(subghz_txrx)) {
                         memset(incomingMessage, 0x00, message_max_len);
                         subghz_tx_rx_worker_read(subghz_txrx, incomingMessage, message_max_len);
@@ -1385,7 +1374,7 @@ int32_t tanks_game_app(void* p) {
                     unsigned char* data = tanks_game_serialize(tanks_state);
                     char arr[11 * 16 + 1];
 
-                    for (uint8_t i = 0; i < 11 * 16; i++) {
+                    for(uint8_t i = 0; i < 11 * 16; i++) {
                         arr[i] = data[i];
                     }
 
