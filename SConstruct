@@ -85,7 +85,10 @@ if GetOption("fullenv"):
     Alias("updater_debug", debug_updater_elf)
 
     # Installation over USB & CLI
-    usb_update_package = distenv.UsbInstall("usbinstall.flag", [])
+    usb_update_package = distenv.UsbInstall(
+        "usbinstall.flag",
+        (distenv["DIST_DEPENDS"], firmware_out["FW_RESOURCES"], selfupdate_dist),
+    )
     if distenv["FORCE"]:
         AlwaysBuild(usb_update_package)
     Depends(usb_update_package, selfupdate_dist)
