@@ -15,7 +15,8 @@ $ docker-compose exec dev ./fbt
 ```
 
 Latest Updates:
-- Latest updates from dev with scons
+- Latest updates from dev with scons and protocol scher_khan
+- - NEW WAY TO COMPILE! docker-compose exec dev ./fbt
 - - NOT ACTIVE: Settings: Scan names will have timestamp instead of random name assigned due to compile issues (COMING SOON)
 - Fixes for GAMES menu from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) 
 - Added .fam files for GAMES/PLUGINS and fixed menu ordering.
