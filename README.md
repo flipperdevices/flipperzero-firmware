@@ -19,8 +19,8 @@ Latest Updates:
 - - No visible changes between current source code and last released DFU, only stuff not working listed below therefore, no DFU yet.
 - - NEW WAY TO COMPILE! docker-compose exec dev ./fbt
 - - NOT ACTIVE: Settings: Scan names will have timestamp instead of random name assigned due to compile issues (COMING SOON)
-- Fixes for GAMES menu from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) 
-- Added .fam files for GAMES/PLUGINS and fixed menu ordering.
+- Fixes for GAMES menu for scons build from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) 
+- Added .fam files for GAMES/PLUGINS for scons build and fixed menu ordering.
 - Fixes for VideoPoker from [PixlEmly](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
 
 **Special Instructions:**
