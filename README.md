@@ -16,12 +16,11 @@ $ docker-compose exec dev ./fbt
 
 Latest Updates:
 - Latest updates from dev with scons and protocol scher_khan
-- - No visible changes between current source code and last released DFU, only stuff not working listed below therefore, no DFU yet.
 - - NEW WAY TO COMPILE! docker-compose exec dev ./fbt
-- - NOT ACTIVE: Settings: Scan names will have timestamp instead of random name assigned due to compile issues (COMING SOON)
 - Fixes for GAMES menu for scons build from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) 
 - Added .fam files for GAMES/PLUGINS for scons build and fixed menu ordering.
 - Fixes for VideoPoker from [PixlEmly](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
+- Fixes for FEATURE: Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -62,6 +61,7 @@ Added Features:
 - Settings: Auto-Lock Options Added: 10s+15s+90s [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop_settings/scenes/desktop_settings_scene_start.c)
 - Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 - Settings: LCD Timeout Options Added: 10s+90s+2min+5min+10min [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
+- Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
 - SubGHz: Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
 - SubGHz: Protocols Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 
