@@ -91,10 +91,10 @@ bool digital_signal_append(DigitalSignal* signal_a, DigitalSignal* signal_b) {
             signal_a->edge_timings[signal_a->edge_cnt] += signal_b->edge_timings[0];
         }
     }
-    memcpy(
-        &signal_a->edge_timings[signal_a->edge_cnt],
-        &signal_b->edge_timings[start_copy],
-        (signal_b->edge_cnt - start_copy) * sizeof(float));
+
+    for(size_t i = 0; i < signal_b->edge_cnt - start_copy; i++) {
+        signal_a->edge_timings[signal_a->edge_cnt + i] = signal_b->edge_timings[start_copy + i];
+    }
     signal_a->edge_cnt += signal_b->edge_cnt - start_copy;
 
     return true;
