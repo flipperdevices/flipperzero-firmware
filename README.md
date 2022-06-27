@@ -16,12 +16,12 @@ $ docker-compose exec dev ./fbt
 
 Latest Updates:
 - Latest updates from dev with scons [(Thank you Hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1269)
-- Protocol scher_khan merged into dev [(Thank you Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1323)
 - - NEW WAY TO COMPILE! docker-compose exec dev ./fbt
-- Fixes for GAMES menu for scons build from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) 
+- Protocol scher_khan merged into dev [(Thank you Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1323)
+- Fixes for GAMES menu for scons build from [(Thank you Eng1n33r)](https://github.com/Eng1n33r/flipperzero-firmware) 
 - Added .fam files for GAMES/PLUGINS for scons build and fixed menu ordering.
-- Fixes for VideoPoker from [PixlEmly](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
-- Fixes for FEATURE: Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
+- Fixes for VideoPoker from [(Thank you PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
+- Fixes for FEATURE: Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/subghz/scenes/subghz_scene_read_raw.c)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
