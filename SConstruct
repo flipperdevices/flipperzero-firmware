@@ -84,6 +84,13 @@ if GetOption("fullenv"):
     debug_updater_elf = distenv.AddDebugTarget(updater_out, False)
     Alias("updater_debug", debug_updater_elf)
 
+    # Installation over USB & CLI
+    usb_update_package = distenv.UsbInstall("usbinstall.flag", [])
+    if distenv["FORCE"]:
+        AlwaysBuild(usb_update_package)
+    Depends(usb_update_package, selfupdate_dist)
+    Alias("flash_usb", usb_update_package)
+
 
 # Target for copying & renaming binaries to dist folder
 basic_dist = distenv.DistBuilder("dist.pseudo", distenv["DIST_DEPENDS"])
@@ -91,6 +98,7 @@ distenv.Pseudo("dist.pseudo")
 AlwaysBuild(basic_dist)
 Alias("fw_dist", basic_dist)
 Default(basic_dist)
+
 
 # Target for bundling core2 package for qFlipper
 copro_dist = distenv.CoproBuilder(
@@ -113,7 +121,7 @@ debug_other = distenv.GDBPy(
     None,
     GDBPYOPTS=
     # '-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
-    '-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" '
+    '-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" ',
 )
 distenv.Pseudo("debugother.pseudo")
 AlwaysBuild(debug_other)
