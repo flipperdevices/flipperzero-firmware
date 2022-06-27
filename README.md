@@ -11,13 +11,11 @@ You should clone with
 ```shell
 $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
 $ docker-compose up -d
-$ docker-compose exec dev make
+$ docker-compose exec dev ./fbt
 ```
 
 Latest Updates:
-- Fixed compile issue from 2048 changes
-- Spectrum Analyzer updates from Eng1n33r/Unleashed
-- Battery Meter on Desktop [Thanks to McAzzaMan](https://github.com/McAzzaMan/flipperzero-firmware/tree/BatteryPercentageView)
+- Latest updates from dev with scons (Currently not all apps are working, will fix soon)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
