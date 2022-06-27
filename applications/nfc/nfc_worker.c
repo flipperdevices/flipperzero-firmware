@@ -499,12 +499,11 @@ void nfc_worker_emulate_mifare_classic(NfcWorker* nfc_worker) {
 
     rfal_platform_spi_acquire();
 
+    furi_hal_nfc_listen_start(nfc_data);
     while(nfc_worker->state == NfcWorkerStateEmulateMifareClassic) {
-        furi_hal_nfc_listen_start(nfc_data);
         if(furi_hal_nfc_listen_rx(&tx_rx, 300)) {
             mf_classic_emulator(&emulator, &tx_rx);
         }
-        furi_hal_nfc_listen_sleep();
     }
     if(emulator.data_changed) {
         nfc_worker->dev_data->mf_classic_data = emulator.data;

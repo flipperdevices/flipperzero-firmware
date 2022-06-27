@@ -553,6 +553,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
 
         if(plain_data[0] == 0x50 && plain_data[1] == 0x00) {
             FURI_LOG_T(TAG, "Halt received");
+            furi_hal_nfc_listen_sleep();
             command_processed = true;
             break;
         } else if(plain_data[0] == 0x60 || plain_data[0] == 0x61) {
