@@ -16,7 +16,7 @@ $ docker-compose exec dev ./fbt
 
 Latest Updates:
 - Latest updates from dev with scons and protocol scher_khan
-- - No great changes between current active source code and last released DFU, only stuff not working listed below therefore, no DFU yet.
+- - No visible changes between current source code and last released DFU, only stuff not working listed below therefore, no DFU yet.
 - - NEW WAY TO COMPILE! docker-compose exec dev ./fbt
 - - NOT ACTIVE: Settings: Scan names will have timestamp instead of random name assigned due to compile issues (COMING SOON)
 - Fixes for GAMES menu from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) 
