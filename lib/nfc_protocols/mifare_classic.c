@@ -551,7 +551,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             mf_crypto1_decrypt(&emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
         }
 
-        if(plain_data[0] == 0x50 && plain_data[1] == 00) {
+        if(plain_data[0] == 0x50 && plain_data[1] == 0x00) {
             FURI_LOG_T(TAG, "Halt received");
             command_processed = true;
             break;
