@@ -15,7 +15,10 @@ $ docker-compose exec dev ./fbt
 ```
 
 Latest Updates:
-- Latest updates from dev with scons (Currently not all apps are working, will fix soon)
+- Latest updates from dev with scons
+- - NOT ACTIVE: Settings: Scan names will have timestamp instead of random name assigned due to compile issues (COMING SOON)
+- Fixes for GAMES menu from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) and added .fam files and menu ordering.
+- Fixes for VideoPoker from [PixlEmly](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -56,7 +59,6 @@ Added Features:
 - Settings: Auto-Lock Options Added: 10s+15s+90s [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop_settings/scenes/desktop_settings_scene_start.c)
 - Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 - Settings: LCD Timeout Options Added: 10s+90s+2min+5min+10min [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
-- Settings: Scan names will have timestamp instead of random name assigned [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c)
 - SubGHz: Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
 - SubGHz: Protocols Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 
