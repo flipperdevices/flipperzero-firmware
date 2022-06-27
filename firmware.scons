@@ -39,7 +39,17 @@ env = ENV.Clone(
             ],
             # You can add other entries named after libraries
             # If they are present, they have precedence over Default
-        }
+        },
+        # for furi_check to respect build type
+        "core": {
+            "CCFLAGS": [
+                "-Os",
+            ],
+            "CPPDEFINES": [
+                "NDEBUG",
+                "FURI_DEBUG" if ENV["DEBUG"] else "FURI_NDEBUG",
+            ],
+        },
     },
 )
 
