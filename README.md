@@ -15,7 +15,8 @@ $ docker-compose exec dev ./fbt
 ```
 
 Latest Updates:
-- Latest updates from dev with scons and protocol scher_khan
+- Latest updates from dev with scons [(Thank you Hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1269)
+- Protocol scher_khan merged into dev [(Thank you Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1323)
 - - NEW WAY TO COMPILE! docker-compose exec dev ./fbt
 - Fixes for GAMES menu for scons build from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) 
 - Added .fam files for GAMES/PLUGINS for scons build and fixed menu ordering.
