@@ -63,6 +63,7 @@ typedef struct {
 2=first hand, holding enabled, left/right to pick card, OK to hold/unhold card, down to confirm
 3=second hand, only confirm to claim rewards
 4=game over/won 
+5=WIP saving gamestate
 */
 
 /*
@@ -99,21 +100,21 @@ const char* gamenames[11] = {
 PokerPlayer_card deck[52] = {
     /*	index, card name, suit, gone */
     /* Clubs:0  Diamonds:1  Hearts: 2   Spades: 3 */
-    {1, "2", 0, 0},  {2, "3", 0, 0},  {3, "4", 0, 0},  {4, "5", 0, 0},  {5, "6", 0, 0},
-    {6, "7", 0, 0},  {7, "8", 0, 0},  {8, "9", 0, 0},  {9, "10", 0, 0}, {10, "J", 0, 0},
-    {11, "Q", 0, 0}, {12, "K", 0, 0}, {13, "A", 0, 0},
+    {1, "2", 0, 0, 0},  {2, "3", 0, 0, 0},  {3, "4", 0, 0, 0},  {4, "5", 0, 0, 0},  {5, "6", 0, 0, 0},
+    {6, "7", 0, 0, 0},  {7, "8", 0, 0, 0},  {8, "9", 0, 0, 0},  {9, "10", 0, 0, 0}, {10, "J", 0, 0, 0},
+    {11, "Q", 0, 0, 0}, {12, "K", 0, 0, 0}, {13, "A", 0, 0, 0},
 
-    {1, "2", 1, 0},  {2, "3", 1, 0},  {3, "4", 1, 0},  {4, "5", 1, 0},  {5, "6", 1, 0},
-    {6, "7", 1, 0},  {7, "8", 1, 0},  {8, "9", 1, 0},  {9, "10", 1, 0}, {10, "J", 1, 0},
-    {11, "Q", 1, 0}, {12, "K", 1, 0}, {13, "A", 1, 0},
+    {1, "2", 1, 0, 0},  {2, "3", 1, 0, 0},  {3, "4", 1, 0, 0},  {4, "5", 1, 0, 0},  {5, "6", 1, 0, 0},
+    {6, "7", 1, 0, 0},  {7, "8", 1, 0, 0},  {8, "9", 1, 0, 0},  {9, "10", 1, 0, 0}, {10, "J", 1, 0, 0},
+    {11, "Q", 1, 0, 0}, {12, "K", 1, 0, 0}, {13, "A", 1, 0, 0},
 
-    {1, "2", 2, 0},  {2, "3", 2, 0},  {3, "4", 2, 0},  {4, "5", 2, 0},  {5, "6", 2, 0},
-    {6, "7", 2, 0},  {7, "8", 2, 0},  {8, "9", 2, 0},  {9, "10", 2, 0}, {10, "J", 2, 0},
-    {11, "Q", 2, 0}, {12, "K", 2, 0}, {13, "A", 2, 0},
+    {1, "2", 2, 0, 0},  {2, "3", 2, 0, 0},  {3, "4", 2, 0, 0},  {4, "5", 2, 0, 0},  {5, "6", 2, 0, 0},
+    {6, "7", 2, 0, 0},  {7, "8", 2, 0, 0},  {8, "9", 2, 0, 0},  {9, "10", 2, 0, 0}, {10, "J", 2, 0, 0},
+    {11, "Q", 2, 0, 0}, {12, "K", 2, 0, 0}, {13, "A", 2, 0, 0},
 
-    {1, "2", 3, 0},  {2, "3", 3, 0},  {3, "4", 3, 0},  {4, "5", 3, 0},  {5, "6", 3, 0},
-    {6, "7", 3, 0},  {7, "8", 3, 0},  {8, "9", 3, 0},  {9, "10", 3, 0}, {10, "J", 3, 0},
-    {11, "Q", 3, 0}, {12, "K", 3, 0}, {13, "A", 3, 0},
+    {1, "2", 3, 0, 0},  {2, "3", 3, 0, 0},  {3, "4", 3, 0, 0},  {4, "5", 3, 0, 0},  {5, "6", 3, 0, 0},
+    {6, "7", 3, 0, 0},  {7, "8", 3, 0, 0},  {8, "9", 3, 0, 0},  {9, "10", 3, 0, 0}, {10, "J", 3, 0, 0},
+    {11, "Q", 3, 0, 0}, {12, "K", 3, 0, 0}, {13, "A", 3, 0, 0},
 };
 
 /* 
@@ -751,16 +752,22 @@ int32_t video_poker_app(void* p) {
                     }
                     break;
                 case InputKeyOk:
+                /* close splash screen */
                     if(poker_player->GameState == 0) {
                         poker_player->GameState = 1;
                     } else if(poker_player->GameState == 1) {
-                        poker_player->score -= poker_player->bet;
+                        /* Pledge bet. Bet is subtracted here. Original code subtracts it during playcard
+                        but playcard is called multiple times which would otherwise subtract bet
+                        multiple times */
+                        poker_player->score -= poker_player->bet; 
                         poker_player->GameState = 2;
                     } else if(poker_player->GameState == 2) {
+                        /* Select or un-select card to be held */
                         poker_player->held[poker_player->selected] =
                             !poker_player
                                  ->held[poker_player->selected]; //cursed and bad pls replace
                     } else if(poker_player->GameState == 3) {
+                        /* accept your fate */
                         if(recognize(poker_player) != 9) {
                             poker_player->score +=
                                 poker_player->bet * paytable[recognize(poker_player)];
@@ -775,10 +782,12 @@ int32_t video_poker_app(void* p) {
                         poker_player->held[3] = 0;
                         poker_player->held[4] = 0;
                         if(poker_player->score <= 0) {
+                            /* lost the game */
                             poker_player->GameState = 4;
                         }
                         playcard(poker_player); // shuffle shuffle
                     } else if(poker_player->GameState == 4) {
+                        /* escape the summary, return to splash */
                         Shake();
                         poker_player->selected = 0;
                         poker_player->GameState = 0;
@@ -790,6 +799,7 @@ int32_t video_poker_app(void* p) {
                     }
                     break;
                 case InputKeyBack:
+                    /* if game is not over, we should store the game state. */
                     processing = false;
                     break;
                 }
