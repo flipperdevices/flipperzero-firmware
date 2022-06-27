@@ -34,15 +34,14 @@ void HIDAppSceneReadSuccess::on_enter(HIDApp* app, bool /* need_restore */) {
     line_2_text->set_text("Bit:", 65, 35, 0, AlignRight, AlignBottom, FontSecondary);
     // line_3_text->set_text("Bye:", 65, 47, 0, AlignRight, AlignBottom, FontSecondary);
 
-
     string_printf(string[1], "%u", data[0]);
 
     // line_1_value->set_text(
-        // string_get_cstr(string[0]), 68, 23, 0, AlignLeft, AlignBottom, FontSecondary);
+    // string_get_cstr(string[0]), 68, 23, 0, AlignLeft, AlignBottom, FontSecondary);
     line_2_value->set_text(
         string_get_cstr(string[1]), 68, 35, 0, AlignLeft, AlignBottom, FontSecondary);
     // line_3_value->set_text(
-        // string_get_cstr(string[2]), 68, 47, 0, AlignLeft, AlignBottom, FontSecondary);
+    // string_get_cstr(string[2]), 68, 47, 0, AlignLeft, AlignBottom, FontSecondary);
 
     app->view_controller.switch_to<ContainerVM>();
 

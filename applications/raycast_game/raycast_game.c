@@ -428,11 +428,11 @@ int32_t raycast_game_app(void* p) {
                 if(button_state & (1 << InputKeyUp) || button_state & (1 << InputKeyDown)) {
                     move_player(player, button_state & (1 << InputKeyUp));
                 }
-				
-				if(button_state & (1 << InputKeyBack)) {
-					processing = false;
-				}
-				
+
+                if(button_state & (1 << InputKeyBack)) {
+                    processing = false;
+                }
+
                 return true;
             });
     }

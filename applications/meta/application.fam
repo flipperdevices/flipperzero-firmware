@@ -34,8 +34,39 @@ App(
     name="Basic applications for plug-in menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "music_player",
-        "snake_game",
         "bt_hid",
+        "hid_anal",
+        "music_player",
+        "spectrum_analyzer",
+        "wav_player",
+    ],
+)
+
+App(
+    appid="custom_games",
+    name="Custom applications for games menu",
+    apptype=FlipperAppType.METAPACKAGE,
+    provides=[
+        "game_2048",
+        "arkanoid_game",
+        "dice_game",
+        "flappy_game",
+        "gameoflife_game",
+        "raycast_game",
+        "snake_game",
+        "tanks_game",
+        "tetris_game",
+        "tictactoe_game",
+        "videopoker_game",
+    ],
+)
+
+App(
+    appid="custom_apps",
+    name="Custom applications for main menu",
+    apptype=FlipperAppType.METAPACKAGE,
+    provides=[
+        "clock",
+        "unirfremix",
     ],
 )

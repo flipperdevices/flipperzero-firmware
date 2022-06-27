@@ -17,8 +17,7 @@ void ProtocolHID::encode(
     const uint8_t* decoded_data,
     const uint8_t decoded_data_size,
     uint8_t* encoded_data,
-    const uint8_t encoded_data_size)
-{
+    const uint8_t encoded_data_size) {
     UNUSED(decoded_data);
     UNUSED(decoded_data_size);
     UNUSED(encoded_data);
@@ -49,17 +48,17 @@ int16_t ProtocolHID::find_second_1(const uint8_t* encoded_data) {
         return 8;
     } else {
         for(int8_t i = 3; i >= 0; i--) {
-            if(((*(encoded_data + 0) >> (2*i)) & 0b11) == 0b10) {
+            if(((*(encoded_data + 0) >> (2 * i)) & 0b11) == 0b10) {
                 return (12 - i);
             }
         }
         for(int8_t i = 3; i >= 0; i--) {
-            if(((*(encoded_data + 7) >> (2*i)) & 0b11) == 0b10) {
+            if(((*(encoded_data + 7) >> (2 * i)) & 0b11) == 0b10) {
                 return (16 - i);
             }
         }
         for(int8_t i = 3; i >= 2; i--) {
-            if(((*(encoded_data + 6) >> (2*i)) & 0b11) == 0b10) {
+            if(((*(encoded_data + 6) >> (2 * i)) & 0b11) == 0b10) {
                 return (20 - i);
             }
         }

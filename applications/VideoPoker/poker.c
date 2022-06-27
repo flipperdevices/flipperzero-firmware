@@ -337,7 +337,9 @@ static void playcard(PokerPlayer* app) {
     for(i = 0; i < 5; i++) hold[i] = 1;
 
     /* app->score -= bet; */
-    if (app->score>app->highscore){app->highscore=app->score;} /* record high water mark */
+    if(app->score > app->highscore) {
+        app->highscore = app->score;
+    } /* record high water mark */
 
     for(i = 0; i < 5; i++) {
         /* find a card not already dealt */
@@ -645,17 +647,15 @@ void poker_draw_callback(Canvas* canvas, void* ctx) {
     }
     if(poker_player->GameState == 4) {
         /* canvas_draw_icon(canvas, 0, 0, &I_BadEnd_128x64);  Just Lost The Game - disabled for now :( */
-    canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontSecondary);
-    snprintf(buffer, sizeof(buffer), "%s", "You have run out of money!");
-    canvas_draw_str_aligned(canvas, 63, 22, AlignCenter, AlignCenter, buffer);
+        canvas_set_color(canvas, ColorBlack);
+        canvas_set_font(canvas, FontSecondary);
+        snprintf(buffer, sizeof(buffer), "%s", "You have run out of money!");
+        canvas_draw_str_aligned(canvas, 63, 22, AlignCenter, AlignCenter, buffer);
         snprintf(buffer, sizeof(buffer), "%s", "At one point, you had");
-    canvas_draw_str_aligned(canvas, 63, 32, AlignCenter, AlignCenter, buffer);
-    snprintf(buffer, sizeof(buffer), "%d dollars", poker_player->highscore);
-    canvas_draw_str_aligned(canvas, 63, 42, AlignCenter, AlignCenter, buffer);
+        canvas_draw_str_aligned(canvas, 63, 32, AlignCenter, AlignCenter, buffer);
+        snprintf(buffer, sizeof(buffer), "%d dollars", poker_player->highscore);
+        canvas_draw_str_aligned(canvas, 63, 42, AlignCenter, AlignCenter, buffer);
     }
-    
-    
 
     osMutexRelease(poker_player->model_mutex);
 }
