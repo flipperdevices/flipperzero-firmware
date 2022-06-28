@@ -15,7 +15,7 @@ $ docker-compose exec dev ./fbt
 ```
 
 Latest Updates:
-- Fixed to show correct version 0.61.0
+- Fixed to show version as 0.61.0
 - Fixed to show branch as dev
 
 **Special Instructions:**
