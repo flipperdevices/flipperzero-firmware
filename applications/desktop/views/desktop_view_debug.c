@@ -74,7 +74,7 @@ void desktop_debug_render(Canvas* canvas, void* model) {
         canvas_draw_str(canvas, 5, 39 + STATUS_BAR_Y_SHIFT, buffer);
 
         snprintf(
-            buffer, sizeof(buffer), "[%d] %s", version_get_target(ver), version_get_gitbranch(ver));
+            buffer, sizeof(buffer), "[%d] %s", version_get_target(ver), "dev");
         canvas_draw_str(canvas, 5, 50 + STATUS_BAR_Y_SHIFT, buffer);
 
     } else {
