@@ -31,7 +31,7 @@ download_submodules()
     fi
 }
 
-SCRIPT_PATH="$(dirname -- "$(readlink -f -- "$0")")";
+SCRIPT_PATH="$(cd "$(dirname "$0")" && pwd -P)"
 SCONS_DEFAULT_FLAGS="-Q --warn=target-not-built";
 get_kernel_type;
 download_toolchain;

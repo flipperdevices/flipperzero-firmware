@@ -9,7 +9,7 @@ check_system()
     SYS_TYPE="$(uname -s)"
     if [ "$SYS_TYPE" = "Darwin" ]; then
         echo "darwin";
-        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-2022.06-x86_64-linux-flipper.tar.gz";
+        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-2022.06-x86_64-darwin-flipper.tar.gz";
         TOOLCHAIN_PATH="toolchain/x86_64-darwin";
     elif [ "$SYS_TYPE" = "Linux" ]; then
         echo "linux";
@@ -103,7 +103,7 @@ clearing()
 
 main()
 {
-    SCRIPT_PATH="$(dirname -- "$(readlink -f -- "$0")")";
+    SCRIPT_PATH="$(cd "$(dirname "$0")" && pwd -P)"
     REPO_ROOT="$(cd "$SCRIPT_PATH/../../" && pwd)";
     check_system;  # defines $TOOLCHAIN_URl and $TOOLCHAIN_PATH
     check_tar;
