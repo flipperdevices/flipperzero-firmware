@@ -16,6 +16,7 @@ $ docker-compose exec dev ./fbt
 
 Latest Updates:
 - Fixed to show correct version 0.61.0
+- Fixed to show branch as dev
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
