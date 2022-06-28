@@ -1,0 +1,1 @@
+# flipperzero-sentry-safe-plugin
