@@ -1,9 +1,8 @@
 # [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME
 - ****This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.**
 - FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE
-- BUILD WITH COMPACT FLAG SINCE IT IS TOO LARGE
 - CH0NG, CH33CH and N00BY rename your flipper.
-- Send something if you want... BTC:172CE1H1XZVt7tc4HDQ1q9Mej1K7VuHfEf ETH:0x6c46eE48Bd433b0ADE711B43D188Cf8215cd51c2
+- DONATIONS ACCEPTED :D BTC:172CE1H1XZVt7tc4HDQ1q9Mej1K7VuHfEf ETH:0x6c46eE48Bd433b0ADE711B43D188Cf8215cd51c2
 
 # Clone the Repository
 
