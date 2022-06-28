@@ -1,0 +1,8 @@
+{
+	"plateform": "flipperzero",
+	"type": "plugin",
+	"name": "Sentry Safe",
+	"author": "H4ckd4ddy",
+	"url": "https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin",
+	"destination_menu": "plugins"
+}
