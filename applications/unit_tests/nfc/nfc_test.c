@@ -75,6 +75,7 @@ static bool nfc_test_read_signal_from_file(const char* file_name) {
         success = true;
     } while(false);
 
+    string_clear(file_type);
     flipper_format_free(file);
 
     return success;
