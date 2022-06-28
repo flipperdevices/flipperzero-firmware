@@ -17,6 +17,7 @@ Latest Updates:
 - Fixed to show version as 0.61.0
 - Fixed to show branch as dev
 - Latest fixes and updates from dev
+- Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -47,6 +48,7 @@ Added Features:
 - Animations: Idle animations will show all animations regardless of level and butthurt [Thanks to MajiK]
 - Animations: SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
 - Battery Meter on Desktop [Thanks to McAzzaMan](https://github.com/McAzzaMan/flipperzero-firmware/tree/BatteryPercentageView)
+- Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - NFC: Display UL PWD_AUTH payload [(Thanks to GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/dev-new)
 - Plugins: Fixed sound decay issues on music player [Thanks to qqmajikpp]
