@@ -22,15 +22,18 @@ typedef struct {
 } LFRFIDWorkerModeType;
 
 typedef enum {
-    LFRFIDWorkerIdle = 0,
-    LFRFIDWorkerRead = 1,
-    LFRFIDWorkerWrite = 2,
-    LFRFIDWorkerEmulate = 3,
+    LFRFIDWorkerIdle,
+    LFRFIDWorkerRead,
+    LFRFIDWorkerWrite,
+    LFRFIDWorkerEmulate,
+    LFRFIDWorkerReadRaw,
+    LFRFIDWorkerEmulateRaw,
 } LFRFIDWorkerMode;
 
 struct LFRFIDWorker {
     LFRFIDKey* key_p;
     uint8_t* key_data;
+    char* raw_filename;
     // LFRFIDWriter* writer;
     LFRFIDWorkerMode mode_index;
     osMessageQueueId_t messages;
@@ -38,6 +41,7 @@ struct LFRFIDWorker {
 
     LFRFIDWorkerReadCallback read_cb;
     LFRFIDWorkerWriteCallback write_cb;
+    LFRFIDWorkerEmulateCallback emulate_cb;
     void* cb_ctx;
 
     ProtocolDict* protocols;
@@ -47,7 +51,6 @@ struct LFRFIDWorker {
 extern const LFRFIDWorkerModeType lfrfid_worker_modes[];
 
 void lfrfid_worker_switch_mode(LFRFIDWorker* worker, LFRFIDWorkerMode mode);
-void lfrfid_worker_notify_emulate(LFRFIDWorker* worker);
 
 #ifdef __cplusplus
 }

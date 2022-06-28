@@ -18,6 +18,7 @@ typedef enum {
     LFRFIDKeyEM4100,
     LFRFIDKeyH10301,
     LFRFIDKeyI40134,
+    LFRFIDKeyKeyIOProxXSF,
 } LFRFIDKeyType;
 
 typedef struct LFRFIDKey LFRFIDKey;

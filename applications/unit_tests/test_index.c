@@ -20,6 +20,7 @@ int run_minunit_test_storage();
 int run_minunit_test_subghz();
 int run_minunit_test_dirwalk();
 int run_minunit_test_protocol_dict();
+int run_minunit_test_lfrfid_protocols();
 
 void minunit_print_progress(void) {
     static char progress[] = {'\\', '|', '/', '-'};
@@ -66,6 +67,7 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
         test_result |= run_minunit_test_protocol_dict();
         test_result |= run_minunit_test_flipper_format();
         test_result |= run_minunit_test_flipper_format_string();
+        test_result |= run_minunit_test_lfrfid_protocols();
         test_result |= run_minunit_test_infrared_decoder_encoder();
         test_result |= run_minunit_test_rpc();
         test_result |= run_minunit_test_subghz();

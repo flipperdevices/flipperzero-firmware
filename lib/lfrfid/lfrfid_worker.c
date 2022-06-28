@@ -9,12 +9,15 @@ typedef enum {
     LFRFIDMessageRead,
     LFRFIDMessageWrite,
     LFRFIDMessageEmulate,
+    LFRFIDMessageReadRaw,
+    LFRFIDMessageEmulateRaw,
 } LFRFIDMessageType;
 
 typedef struct {
     LFRFIDMessageType type;
     union {
         LFRFIDKey* key;
+        const char* filename;
     } data;
 } LFRFIDMessage;
 
@@ -28,7 +31,9 @@ LFRFIDWorker* lfrfid_worker_alloc() {
     worker->mode_index = LFRFIDWorkerIdle;
     worker->read_cb = NULL;
     worker->write_cb = NULL;
+    worker->emulate_cb = NULL;
     worker->cb_ctx = NULL;
+    worker->raw_filename = NULL;
 
     worker->thread = furi_thread_alloc();
     furi_thread_set_name(worker->thread, "lfrfid_worker");
@@ -59,6 +64,15 @@ void lfrfid_worker_write_set_callback(
     worker->cb_ctx = context;
 }
 
+void lfrfid_worker_emulate_set_callback(
+    LFRFIDWorker* worker,
+    LFRFIDWorkerEmulateCallback callback,
+    void* context) {
+    furi_check(worker->mode_index == LFRFIDWorkerIdle);
+    worker->emulate_cb = callback;
+    worker->cb_ctx = context;
+}
+
 void lfrfid_worker_read_start(LFRFIDWorker* worker, LFRFIDKey* key) {
     LFRFIDMessage message = {.type = LFRFIDMessageRead, .data.key = key};
     furi_check(osMessageQueuePut(worker->messages, &message, 0, osWaitForever) == osOK);
@@ -74,12 +88,26 @@ void lfrfid_worker_emulate_start(LFRFIDWorker* worker, LFRFIDKey* key) {
     furi_check(osMessageQueuePut(worker->messages, &message, 0, osWaitForever) == osOK);
 }
 
+void lfrfid_worker_read_raw_start(LFRFIDWorker* worker, const char* filename) {
+    LFRFIDMessage message = {.type = LFRFIDMessageEmulate, .data.filename = filename};
+    furi_check(osMessageQueuePut(worker->messages, &message, 0, osWaitForever) == osOK);
+}
+
+void lfrfid_worker_emulate_raw_start(LFRFIDWorker* worker, const char* filename) {
+    LFRFIDMessage message = {.type = LFRFIDMessageEmulate, .data.filename = filename};
+    furi_check(osMessageQueuePut(worker->messages, &message, 0, osWaitForever) == osOK);
+}
+
 void lfrfid_worker_stop(LFRFIDWorker* worker) {
     LFRFIDMessage message = {.type = LFRFIDMessageStop};
     furi_check(osMessageQueuePut(worker->messages, &message, 0, osWaitForever) == osOK);
 }
 
 void lfrfid_worker_free(LFRFIDWorker* worker) {
+    if(worker->raw_filename) {
+        free(worker->raw_filename);
+    }
+
     protocol_dict_free(worker->protocols);
     osMessageQueueDelete(worker->messages);
     furi_thread_free(worker->thread);
@@ -105,6 +133,14 @@ void lfrfid_worker_switch_mode(LFRFIDWorker* worker, LFRFIDWorkerMode mode) {
 
 void lfrfid_worker_set_key_p(LFRFIDWorker* worker, LFRFIDKey* key) {
     worker->key_p = key;
+}
+
+void lfrfid_worker_set_filename(LFRFIDWorker* worker, const char* filename) {
+    if(worker->raw_filename) {
+        free(worker->raw_filename);
+    }
+
+    worker->raw_filename = strdup(filename);
 }
 
 static int32_t lfrfid_worker_thread(void* thread_context) {
@@ -141,9 +177,22 @@ static int32_t lfrfid_worker_thread(void* thread_context) {
                 lfrfid_worker_set_key_p(worker, message.data.key);
                 lfrfid_worker_switch_mode(worker, LFRFIDWorkerEmulate);
                 break;
+            case LFRFIDMessageReadRaw:
+                lfrfid_worker_set_filename(worker, message.data.filename);
+                lfrfid_worker_switch_mode(worker, LFRFIDWorkerReadRaw);
+                break;
+            case LFRFIDMessageEmulateRaw:
+                lfrfid_worker_set_filename(worker, message.data.filename);
+                lfrfid_worker_switch_mode(worker, LFRFIDWorkerEmulateRaw);
+                break;
             }
         } else if(status == osErrorTimeout) {
-            lfrfid_worker_modes[worker->mode_index].tick(worker);
+            void (*const tick)(LFRFIDWorker * worker) =
+                lfrfid_worker_modes[worker->mode_index].tick;
+
+            if(tick != NULL) {
+                tick(worker);
+            }
         } else {
             furi_crash("LFRFID worker error");
         }

@@ -69,6 +69,9 @@ const char* lfrfid_key_get_string_by_type(LFRFIDKeyType key_type) {
     case LFRFIDKeyI40134:
         return "I40134";
         break;
+    case LFRFIDKeyKeyIOProxXSF:
+        return "IOProxXSF";
+        break;
     default:
         furi_crash("Invalid LF RFID type");
         return "";
@@ -87,23 +90,25 @@ const char* lfrfid_key_get_manufacturer_string(LFRFIDKeyType type) {
     case LFRFIDKeyI40134:
         return "Indala";
         break;
+    case LFRFIDKeyKeyIOProxXSF:
+        return "Kantech";
+        break;
     }
 
     return "Unknown";
 }
 
 bool lfrfid_key_get_type_by_string(const char* type_string, LFRFIDKeyType* key_type) {
-    if(strcmp(type_string, lfrfid_key_get_string_by_type(LFRFIDKeyEM4100)) == 0) {
-        *key_type = LFRFIDKeyEM4100;
-    } else if(strcmp(type_string, lfrfid_key_get_string_by_type(LFRFIDKeyH10301)) == 0) {
-        *key_type = LFRFIDKeyH10301;
-    } else if(strcmp(type_string, lfrfid_key_get_string_by_type(LFRFIDKeyI40134)) == 0) {
-        *key_type = LFRFIDKeyI40134;
-    } else {
-        return false;
+    uint32_t max_key_type = LFRFIDKeyKeyIOProxXSF;
+
+    for(uint32_t i = 0; i <= max_key_type; i++) {
+        if(strcmp(type_string, lfrfid_key_get_string_by_type(i)) == 0) {
+            *key_type = i;
+            return true;
+        }
     }
 
-    return true;
+    return false;
 }
 
 uint8_t lfrfid_key_get_size_by_type(LFRFIDKeyType key_type) {
@@ -118,6 +123,9 @@ uint8_t lfrfid_key_get_size_by_type(LFRFIDKeyType key_type) {
         break;
     case LFRFIDKeyI40134:
         size = 3;
+        break;
+    case LFRFIDKeyKeyIOProxXSF:
+        size = 4;
         break;
     }
 
