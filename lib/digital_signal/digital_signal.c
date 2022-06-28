@@ -119,7 +119,7 @@ uint32_t digital_signal_get_edge(DigitalSignal* signal, uint32_t edge_num) {
     return signal->edge_timings[edge_num];
 }
 
-static void digital_signal_prepare_arr(DigitalSignal* signal) {
+void digital_signal_prepare_arr(DigitalSignal* signal) {
     uint32_t t_signal_rest = signal->edge_timings[0];
     uint32_t r_count_tick_arr = 0;
     uint32_t r_rest_div = 0;

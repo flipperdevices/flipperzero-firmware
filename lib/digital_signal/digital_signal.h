@@ -20,6 +20,8 @@ void digital_signal_free(DigitalSignal* signal);
 
 bool digital_signal_append(DigitalSignal* signal_a, DigitalSignal* signal_b);
 
+void digital_signal_prepare_arr(DigitalSignal* signal);
+
 bool digital_signal_get_start_level(DigitalSignal* signal);
 
 uint32_t digital_signal_get_edges_cnt(DigitalSignal* signal);
