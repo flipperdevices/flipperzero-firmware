@@ -116,8 +116,7 @@ else:
     fwenv.Append(APPS=["updater"])
 
 if extra_int_apps := GetOption("extra_int_apps"):
-    for extra_int_app in extra_int_apps.split(","):
-        fwenv.Append(APPS=[extra_int_app])
+    fwenv.Append(APPS=extra_int_apps.split(","))
 
 fwenv.LoadApplicationManifests()
 fwenv.PrepareApplicationsBuild()
@@ -215,7 +214,7 @@ Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_list", fwdump)
 
 # Additional FW-related pseudotargets
 flash = fwenv["FW_FLASH"] = fwenv.OOCDFlashCommand(
-    "#build/oocdflash.flag",
+    "#build/oocd-${FIRMWARE_BUILD_CFG}-flash.flag",
     "${FIRMWARE_BUILD_CFG}",
     OPENOCD_COMMAND='-c "program ${SOURCE.posix} reset exit ${IMAGE_BASE_ADDRESS}"',
 )

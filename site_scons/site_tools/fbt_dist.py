@@ -85,7 +85,7 @@ def generate(env):
             "UsbInstall": Builder(
                 action=[
                     Action(
-                        "${PYTHON3} ${ROOT_DIR.abspath}/scripts/selfupdate.py install dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}/update.fuf"
+                        "${PYTHON3} ${ROOT_DIR.abspath}/scripts/selfupdate.py dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}/update.fuf"
                     ),
                     Touch("${TARGET}"),
                 ]
