@@ -2,6 +2,7 @@
 
 enum SubmenuIndex {
     SubmenuIndexRead,
+    SubmenuIndexReadCard,
     SubmenuIndexRunScript,
     SubmenuIndexSaved,
     SubmenuIndexAddManualy,
@@ -18,8 +19,9 @@ void nfc_scene_start_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
 
+    submenu_add_item(submenu, "Read", SubmenuIndexRead, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(
-        submenu, "Read Card", SubmenuIndexRead, nfc_scene_start_submenu_callback, nfc);
+        submenu, "Read Card", SubmenuIndexReadCard, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(
         submenu,
         "Run Special Action",
@@ -48,6 +50,9 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexRead) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            consumed = true;
+        } else if(event.event == SubmenuIndexReadCard) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCard);
             consumed = true;
         } else if(event.event == SubmenuIndexRunScript) {
