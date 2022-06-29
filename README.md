@@ -19,6 +19,7 @@ Latest Updates:
 - Latest fixes and updates from dev
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Updated Battery Meter on Desktop [Thanks to McAzzaMan](https://github.com/McAzzaMan/flipperzero-firmware/tree/BatteryPercentageView)
+- Testing [Embedded arm-none-eabi toolchain (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1351). Please provide feedback in issues if any.
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -67,6 +68,7 @@ Added Changes/Features:
 Open PRs Checkedout & Not Merged In Main:
 - [On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
 - [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
+- [Embedded arm-none-eabi toolchain (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1351). Please provide feedback in issues if any.
 
 Games:
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048)

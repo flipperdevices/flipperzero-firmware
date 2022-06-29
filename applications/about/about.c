@@ -125,12 +125,12 @@ static DialogMessageButton fw_version_screen(DialogsApp* dialogs, DialogMessage*
             "%s [%s]\n%s%s [%s] %s\n[%d] %s",
             version_get_version(ver),
             version_get_builddate(ver),
-            version_get_dirty_flag(ver) ? "" : "",
+            version_get_dirty_flag(ver) ? "[!] " : "",
             version_get_githash(ver),
             version_get_gitbranchnum(ver),
             c2_ver ? c2_ver->StackTypeString : "<none>",
             version_get_target(ver),
-            "dev");
+            version_get_gitbranch(ver));
     }
 
     dialog_message_set_header(message, "FW Version info:", 0, 0, AlignLeft, AlignTop);
