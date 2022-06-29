@@ -1,8 +1,9 @@
+
+set SCONS_EP=%~dp0/lib/scons/scripts/scons.py
 @echo off
 if exist ".git" (
-	echo Prepairing git submodules
-	git submodule update --init
+	python %SCONS_EP% -Q --git-tasks submodule_update
 )
 
 set "SCONS_DEFAULT_FLAGS=-Q --warn=target-not-built"
-python lib/scons/scripts/scons.py %SCONS_DEFAULT_FLAGS% %*
+python %SCONS_EP% %SCONS_DEFAULT_FLAGS% %*

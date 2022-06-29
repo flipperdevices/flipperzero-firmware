@@ -215,6 +215,7 @@ Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_list", fwdump)
 
 # Additional FW-related pseudotargets
 flash = fwenv["FW_FLASH"] = fwenv.OOCDFlashCommand(
+    "#build/oocdflash.flag",
     "${FIRMWARE_BUILD_CFG}",
     OPENOCD_COMMAND='-c "program ${SOURCE.posix} reset exit ${IMAGE_BASE_ADDRESS}"',
 )
@@ -230,7 +231,7 @@ fwcdb = fwenv["FW_CDB"] = fwenv.CompilationDatabase("compile_commands.json")
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", fwcdb)
 
 
-artifacts = [fwhex, fwbin, fwdfu, env["FW_VERSION_JSON"]]
+artifacts = [fwhex, fwbin, fwdfu, env["FW_VERSION_JSON"], fwcdb]
 fwenv["FW_ARTIFACTS"] = artifacts
 
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", artifacts)

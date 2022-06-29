@@ -2,11 +2,12 @@
 
 set -e
 
+SCRIPTDIR="$( dirname -- "$0"; )";
+SCONS_EP=${SCRIPTDIR}/lib/scons/scripts/scons.py
+
 if [[ -d .git ]]; then
-	echo "Updating git submodules"
-	git submodule update --init
+    python3 ${SCONS_EP} -Q --git-tasks submodule_update
 fi
 
-SCRIPTDIR="$( dirname -- "$0"; )";
 SCONS_DEFAULT_FLAGS="-Q --warn=target-not-built"
-python3 ${SCRIPTDIR}/lib/scons/scripts/scons.py ${SCONS_DEFAULT_FLAGS} "$@"
+python3 ${SCONS_EP} ${SCONS_DEFAULT_FLAGS} "$@"
