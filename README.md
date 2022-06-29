@@ -65,10 +65,10 @@ Added Changes/Features:
 - SubGHz: Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
 - SubGHz: Protocols Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 
-Open PRs Checkedout & Not Merged In Main:
+Open PRs Checkedout & Not Merged In Main: (Please provide feedback in issues if any.)
 - [On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
 - [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
-- [Embedded arm-none-eabi toolchain (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1351). Please provide feedback in issues if any.
+- [Embedded arm-none-eabi toolchain (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1351)
 
 Games:
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048)
