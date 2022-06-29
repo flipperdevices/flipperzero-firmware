@@ -14,6 +14,23 @@ static const NotificationSequence subghs_sequence_rx = {
     NULL,
 };
 
+static const NotificationSequence subghs_sequence_rx_locked = {
+    &message_green_255,
+
+    &message_display_backlight_on,
+
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_50,
+    &message_sound_off,
+    &message_vibro_off,
+
+    &message_delay_500,
+
+    &message_display_backlight_off,
+    NULL,
+};
+
 static void subghz_scene_receiver_update_statusbar(void* context) {
     SubGhz* subghz = context;
     string_t history_stat_str;
@@ -188,7 +205,11 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             notification_message(subghz->notifications, &sequence_blink_cyan_10);
             break;
         case SubGhzNotificationStateRxDone:
-            notification_message(subghz->notifications, &subghs_sequence_rx);
+            if(subghz->key_board != SubGhzKeyBoardLock) {
+                notification_message(subghz->notifications, &subghs_sequence_rx);
+            } else {
+                notification_message(subghz->notifications, &subghs_sequence_rx_locked);
+            }
             subghz->state_notifications = SubGhzNotificationStateRx;
             break;
         default:
