@@ -37,6 +37,7 @@ App(
         "bt_hid",
         "hid_anal",
         "music_player",
+        "picopass",
         "spectrum_analyzer",
         "wav_player",
     ],
