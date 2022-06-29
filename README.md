@@ -6,8 +6,8 @@ Flipper zero exploiting vulnerability to open any Sentry Safe and Master Lock el
 
 ### Installation
 
-[Comming soon]
-~~This plugin use manifest, so you can install it using [Flipperzero Plugins Manager](https://github.com/H4ckd4ddy/flipperzero-plugins-manager)~~
+- Clone this repository in the applications folder of your firmware
+- Add "sentry_safe" in one of menus in applications/meta/application.fam
 
 ### Usage
 

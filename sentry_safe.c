@@ -38,9 +38,9 @@ static void sentry_safe_render_callback(Canvas* const canvas, void* ctx) {
     // Message
     canvas_set_font(canvas, FontPrimary);
 
-    canvas_draw_frame(canvas, 28, 4, 73, 24);
+    canvas_draw_frame(canvas, 22, 4, 84, 24);
     canvas_draw_str_aligned(canvas, 64, 15, AlignCenter, AlignBottom, "BLACK <-> GND");
-    canvas_draw_str_aligned(canvas, 64, 25, AlignCenter, AlignBottom, "GREEN <-> C1");
+    canvas_draw_str_aligned(canvas, 64, 25, AlignCenter, AlignBottom, "GREEN <-> C1 ");
     canvas_draw_str_aligned(canvas, 64, 50, AlignCenter, AlignBottom, status_texts[sentry_state->status]);
 
     release_mutex((ValueMutex*)ctx, sentry_state);

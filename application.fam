@@ -1,0 +1,11 @@
+App(
+    appid="sentry_safe",
+    name="Sentry Safe",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="sentry_safe_app",
+    cdefines=["APP_SENTRY_SAFE"],
+    requires=["gui"],
+    stack_size=1 * 1024,
+    icon="A_Plugins_14",
+    order=40,
+)
