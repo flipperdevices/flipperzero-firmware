@@ -9,6 +9,7 @@
 You should clone with 
 ```shell
 $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
+$ cd flipperzero-firmware-wPlugins
 $ docker-compose up -d
 $ docker-compose exec dev ./fbt
 ```
