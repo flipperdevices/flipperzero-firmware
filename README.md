@@ -14,7 +14,7 @@ $ docker-compose exec dev ./fbt
 ```
 
 Latest Updates:
-- Fixed to show version as 0.61.0
+- Fixed to show version as 0.61.2
 - Fixed to show branch as dev
 - Latest fixes and updates from dev
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
