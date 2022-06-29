@@ -35,6 +35,8 @@
 #include <gui/modules/variable_item_list.h>
 #include <lib/toolbox/path.h>
 
+#include "rpc/rpc_app.h"
+
 #define SUBGHZ_MAX_LEN_NAME 64
 
 /** SubGhzNotification state */
@@ -135,6 +137,8 @@ struct SubGhz {
     SubGhzTestPacket* subghz_test_packet;
     string_t error_str;
     SubGhzSetting* setting;
+
+    void* rpc_ctx;
 };
 
 typedef enum {
@@ -162,7 +166,7 @@ void subghz_sleep(SubGhz* subghz);
 bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format);
 void subghz_tx_stop(SubGhz* subghz);
 void subghz_dialog_message_show_only_rx(SubGhz* subghz);
-bool subghz_key_load(SubGhz* subghz, const char* file_path);
+bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog);
 bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len);
 bool subghz_save_protocol_to_file(
     SubGhz* subghz,
