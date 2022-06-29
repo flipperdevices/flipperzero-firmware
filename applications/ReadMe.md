@@ -35,6 +35,4 @@
 - `u2f`                 - U2F Application
 - `updater`             - Update service & application
 
-- `application.c`       - Firmware application list source
 - `application.h`       - Firmware application list header
-- `application.mk`      - Makefile helper

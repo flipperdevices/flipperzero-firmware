@@ -48,7 +48,7 @@ for apptype in (FlipperAppType.PLUGIN, FlipperAppType.EXTERNAL):
         extapps.append(appenv.BuildAppElf(app))
 
 # Ugly access to global option
-if extra_app_list := GetOption("extraextapps"):
+if extra_app_list := GetOption("extra_ext_apps"):
     for extra_app in extra_app_list.split(","):
         extapps.append(appenv.BuildAppElf(appenv["APPMGR"].get(extra_app)))
 

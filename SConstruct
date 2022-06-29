@@ -1,11 +1,12 @@
 #
-# Main Fipper Build System entry point.
+# Main Fipper Build System entry point
 #
-# This file is evaluated every time scons is invoked.
+# This file is evaluated by scons (the build system) every time fbt is invoked.
 # Scons constructs all referenced environments & their targets' dependency
 # trees on startup. So, to keep startup time as low as possible, we're hiding
 # construction of certain targets behind command-line options.
 
+import os
 
 DefaultEnvironment(tools=[])
 # Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
@@ -31,8 +32,9 @@ coreenv["ROOT_DIR"] = Dir(".")
 # Create a separate "dist" environment and add construction envs to it
 distenv = coreenv.Clone(
     tools=["fbt_dist", "openocd"],
-    GDBOPTS="-ex 'target extended-remote | openocd.exe -c \"gdb_port pipe\" ${OPENOCD_OPTS}' "
+    GDBOPTS="-ex 'target extended-remote | ${OPENOCD} -c \"gdb_port pipe\" ${OPENOCD_OPTS}' "
     '-ex "set confirm off" ',
+    ENV=os.environ,
 )
 
 firmware_out = distenv.AddFwProject(
@@ -40,7 +42,6 @@ firmware_out = distenv.AddFwProject(
     fw_type="firmware",
     fw_env_key="FW_ENV",
 )
-# Default(firmware_out["FW_ARTIFACTS"])
 
 
 # If enabled, initialize updater-related targets
@@ -83,6 +84,16 @@ if GetOption("fullenv"):
     debug_updater_elf = distenv.AddDebugTarget(updater_out, False)
     Alias("updater_debug", debug_updater_elf)
 
+    # Installation over USB & CLI
+    usb_update_package = distenv.UsbInstall(
+        "usbinstall.flag",
+        (distenv["DIST_DEPENDS"], firmware_out["FW_RESOURCES"], selfupdate_dist),
+    )
+    if distenv["FORCE"]:
+        AlwaysBuild(usb_update_package)
+    Depends(usb_update_package, selfupdate_dist)
+    Alias("flash_usb", usb_update_package)
+
 
 # Target for copying & renaming binaries to dist folder
 basic_dist = distenv.DistBuilder("dist.pseudo", distenv["DIST_DEPENDS"])
@@ -90,6 +101,7 @@ distenv.Pseudo("dist.pseudo")
 AlwaysBuild(basic_dist)
 Alias("fw_dist", basic_dist)
 Default(basic_dist)
+
 
 # Target for bundling core2 package for qFlipper
 copro_dist = distenv.CoproBuilder(
@@ -107,18 +119,16 @@ Alias("debug", debug_fw_elf)
 
 
 # Debug alien elf
-if other_elf_specified := distenv.subst("$OTHER_ELF"):
-    debug_other = distenv.GDBPy(
-        "debugother.pseudo",
-        other_elf_specified,
-        GDBPYOPTS=
-        # '-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
-        '-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" '
-        '-ex "svd_load ${SVD_FILE}" ',
-    )
-    distenv.Pseudo("debugother.pseudo")
-    AlwaysBuild(debug_other)
-    Alias("debug_other", debug_other)
+debug_other = distenv.GDBPy(
+    "debugother.pseudo",
+    None,
+    GDBPYOPTS=
+    # '-ex "source ${ROOT_DIR.abspath}/debug/FreeRTOS/FreeRTOS.py" '
+    '-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" ',
+)
+distenv.Pseudo("debugother.pseudo")
+AlwaysBuild(debug_other)
+Alias("debug_other", debug_other)
 
 
 # Just start OpenOCD
@@ -126,3 +136,26 @@ openocd = distenv.OOCDCommand("openocd.pseudo", [])
 distenv.Pseudo("openocd.pseudo")
 AlwaysBuild(openocd)
 Alias("openocd", openocd)
+
+
+# Linter
+lint_check = distenv.Command(
+    "lint.check.pseudo",
+    [],
+    "${PYTHON3} scripts/lint.py check $LINT_SOURCES",
+    LINT_SOURCES=firmware_out["LINT_SOURCES"],
+)
+distenv.Pseudo("lint.check.pseudo")
+AlwaysBuild(lint_check)
+Alias("lint", lint_check)
+
+
+lint_format = distenv.Command(
+    "lint.format.pseudo",
+    [],
+    "${PYTHON3} scripts/lint.py format $LINT_SOURCES",
+    LINT_SOURCES=firmware_out["LINT_SOURCES"],
+)
+distenv.Pseudo("lint.format.pseudo")
+AlwaysBuild(lint_format)
+Alias("format", lint_format)

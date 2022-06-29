@@ -45,4 +45,28 @@ OPENOCD_OPTS = '-f interface/stlink.cfg -c "transport select hla_swd" -f debug/s
 
 SVD_FILE = "debug/STM32WB55_CM4.svd"
 
-OTHER_ELF = ""
+FIRMWARE_APPS = {
+    "default": (
+        "crypto_start",
+        # Svc
+        "basic_services",
+        # Apps
+        "basic_apps",
+        "updater_app",
+        "archive",
+        # Settings
+        "passport",
+        "system_settings",
+        "about",
+        # Plugins
+        "basic_plugins",
+        # Debug
+        "debug_apps",
+    ),
+    "unit_tests": (
+        "basic_services",
+        "unit_tests",
+    ),
+}
+
+FIRMWARE_APP_SET = "default"

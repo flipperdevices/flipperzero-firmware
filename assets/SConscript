@@ -1,5 +1,13 @@
 Import("env")
 
+# HACHHACK
+# Currently injected to CPPPATH by libs - since they are built earlier and depend on assets
+# env.Append(
+#     CPPPATH=[
+#         Dir("./compiled"),
+#     ]
+# )
+
 assetsenv = env.Clone(
     tools=["fbt_assets"],
     FW_LIB_NAME="assets",
@@ -56,7 +64,7 @@ Alias("dolphin_blocking", dolphin_blocking)
 
 # Protobuf version meta
 proto_ver = assetsenv.ProtoVerBuilder(
-    "protobuf_version.h",
+    "compiled/protobuf_version.h",
     "#/assets/protobuf/Changelog",
 )
 Depends(proto_ver, proto)
@@ -64,8 +72,6 @@ Alias("proto_ver", proto_ver)
 
 # Gather everything into a static lib
 assets_parts = (icons, proto, dolphin_blocking, dolphin_internal, proto_ver)
-if assetsenv["IS_BASE_FIRMWARE"]:
-    assetsenv.Install("#/assets/compiled", assets_parts)
 
 assetslib = assetsenv.Library("${FW_LIB_NAME}", assets_parts)
 assetsenv.Install("${LIB_DIST_DIR}", assetslib)

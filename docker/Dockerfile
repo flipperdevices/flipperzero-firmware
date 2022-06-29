@@ -20,6 +20,7 @@ RUN apt-get update \
         protobuf-compiler \
         python3-pip \
         libpython3-dev \
+        ccache \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

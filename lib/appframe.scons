@@ -4,14 +4,12 @@ env.Append(
     CPPPATH=[
         "#/lib/app-scened-template",
         "#/lib/callback-connector",
-        "#/assets/compiled",
     ],
 )
 
 
 libenv = env.Clone(FW_LIB_NAME="appframe")
 libenv.ApplyLibFlags()
-
 
 sources = []
 

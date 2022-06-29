@@ -10,8 +10,8 @@ import subprocess
 
 def icons_emitter(target, source, env):
     target = [
-        "assets_icons.c",
-        "assets_icons.h",
+        "compiled/assets_icons.c",
+        "compiled/assets_icons.h",
     ]
     return target, source
 
@@ -21,8 +21,8 @@ def proto_emitter(target, source, env):
     target = []
     for src in source:
         basename = os.path.splitext(src.name)[0]
-        target.append(env.File(basename + ".pb.c"))
-        target.append(env.File(basename + ".pb.h"))
+        target.append(env.File(f"compiled/{basename}.pb.c"))
+        target.append(env.File(f"compiled/{basename}.pb.h"))
     return target, source
 
 
@@ -67,7 +67,7 @@ def _invoke_git(args, source_dir):
 
 
 def proto_ver_generator(target, source, env):
-    target_file = target[0].abspath
+    target_file = target[0]
     src_dir = source[0].dir.abspath
     try:
         git_fetch = _invoke_git(
@@ -95,7 +95,7 @@ def proto_ver_generator(target, source, env):
         f"#define PROTOBUF_MINOR_VERSION {git_minor}",
         "",
     )
-    with open(target_file, "wt") as file:
+    with open(str(target_file), "wt") as file:
         file.write("\n".join(version_file_data))
 
 

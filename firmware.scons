@@ -12,6 +12,9 @@ env = ENV.Clone(
     FW_FLAVOR=fw_build_meta["flavor"],
     PLUGIN_ELF_DIR="${BUILD_DIR}",
     LIB_DIST_DIR="${BUILD_DIR}/lib",
+    LINT_SOURCES=[
+        "applications",
+    ],
     LIBPATH=[
         "${LIB_DIST_DIR}",
     ],
@@ -36,7 +39,17 @@ env = ENV.Clone(
             ],
             # You can add other entries named after libraries
             # If they are present, they have precedence over Default
-        }
+        },
+        # for furi_check to respect build type
+        "core": {
+            "CCFLAGS": [
+                "-Os",
+            ],
+            "CPPDEFINES": [
+                "NDEBUG",
+                "FURI_DEBUG" if ENV["DEBUG"] else "FURI_NDEBUG",
+            ],
+        },
     },
 )
 
@@ -83,8 +96,8 @@ else:
 lib_targets = env.BuildModules(
     [
         "lib",
-        "firmware",
         "assets",
+        "firmware",
         "core",
     ],
 )
@@ -97,32 +110,14 @@ fwenv = env.Clone()
 SConscript("site_scons/firmwareopts.scons", exports={"ENV": fwenv})
 
 # Set up app configuration
-if env["FIRMWARE_BUILD_CFG"] == "updater":
-    fwenv.Append(
-        APPS=[
-            "updater",
-        ]
-    )
+if env["IS_BASE_FIRMWARE"]:
+    fwenv.Append(APPS=fwenv["FIRMWARE_APPS"].get(fwenv.subst("$FIRMWARE_APP_SET")))
 else:
-    fwenv.Append(
-        APPS=[
-            "crypto_start",
-            # Svc
-            "basic_services",
-            # Apps
-            "basic_apps",
-            "updater_app",
-            "archive",
-            # Settings
-            "passport",
-            "system_settings",
-            "about",
-            # Plugins
-            "basic_plugins",
-            # Debug
-            "debug_apps",
-        ]
-    )
+    fwenv.Append(APPS=["updater"])
+
+if extra_int_apps := GetOption("extra_int_apps"):
+    for extra_int_app in extra_int_apps.split(","):
+        fwenv.Append(APPS=[extra_int_app])
 
 fwenv.LoadApplicationManifests()
 fwenv.PrepareApplicationsBuild()
@@ -165,7 +160,8 @@ fwenv.AppendUnique(
         "-Wl,--wrap,_free_r",
         "-Wl,--wrap,_calloc_r",
         "-Wl,--wrap,_realloc_r",
-        "-u _printf_float",
+        "-u",
+        "_printf_float",
         "-n",
     ],
 )
@@ -205,6 +201,7 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
 # Make it depend on everything child builders returned
 Depends(fwelf, lib_targets)
 AddPostAction(fwelf, fwenv["APPBUILD_DUMP"])
+AddPostAction(fwelf, Action("@$SIZECOM"))
 
 
 fwhex = fwenv["FW_HEX"] = fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
@@ -213,15 +210,19 @@ fwdfu = fwenv["FW_DFU"] = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
 # Default(dfu)
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_dfu", fwdfu)
 
+fwdump = fwenv.ObjDump("${FIRMWARE_BUILD_CFG}")
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_list", fwdump)
+
 # Additional FW-related pseudotargets
+flash = fwenv["FW_FLASH"] = fwenv.OOCDFlashCommand(
+    "${FIRMWARE_BUILD_CFG}",
+    OPENOCD_COMMAND='-c "program ${SOURCE.posix} reset exit ${IMAGE_BASE_ADDRESS}"',
+)
+if fwenv["FORCE"]:
+    AlwaysBuild(flash)
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)
 if fwenv["IS_BASE_FIRMWARE"]:
-    flash = fwenv["FW_FLASH"] = fwenv.OOCDFlashCommand(
-        "${FIRMWARE_BUILD_CFG}",
-        OPENOCD_COMMAND='-c "program ${SOURCE.posix} reset exit ${IMAGE_BASE_ADDRESS}"',
-    )
-    if fwenv["FORCE"]:
-        AlwaysBuild(flash)
-    Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)
+    Alias("flash", flash)
 
 
 # Compile DB generation
