@@ -46,4 +46,4 @@ dist
 build/
 
 # Toolchain
-toolchain*/
+/toolchain
