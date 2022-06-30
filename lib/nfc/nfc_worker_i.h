@@ -1,18 +1,17 @@
 #pragma once
 
 #include "nfc_worker.h"
-#include "nfc_i.h"
 
 #include <furi.h>
 #include <lib/toolbox/stream/file_stream.h>
 
-#include <lib/nfc_protocols/nfc_util.h>
-#include <lib/nfc_protocols/emv.h>
-#include <lib/nfc_protocols/mifare_common.h>
-#include <lib/nfc_protocols/mifare_ultralight.h>
-#include <lib/nfc_protocols/mifare_classic.h>
-#include <lib/nfc_protocols/mifare_desfire.h>
-#include <lib/nfc_protocols/nfca.h>
+#include <lib/nfc/protocols/nfc_util.h>
+#include <lib/nfc/protocols/emv.h>
+#include <lib/nfc/protocols/mifare_common.h>
+#include <lib/nfc/protocols/mifare_ultralight.h>
+#include <lib/nfc/protocols/mifare_classic.h>
+#include <lib/nfc/protocols/mifare_desfire.h>
+#include <lib/nfc/protocols/nfca.h>
 
 #include "helpers/nfc_mf_classic_dict.h"
 #include "helpers/nfc_debug_pcap.h"
@@ -35,6 +34,8 @@ struct NfcWorker {
 void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state);
 
 int32_t nfc_worker_task(void* context);
+
+void nfc_worker_read(NfcWorker* nfc_worker);
 
 void nfc_worker_read_emv_app(NfcWorker* nfc_worker);
 

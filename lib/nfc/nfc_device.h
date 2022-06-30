@@ -6,10 +6,10 @@
 #include <dialogs/dialogs.h>
 
 #include <furi_hal_nfc.h>
-#include <lib/nfc_protocols/emv.h>
-#include <lib/nfc_protocols/mifare_ultralight.h>
-#include <lib/nfc_protocols/mifare_classic.h>
-#include <lib/nfc_protocols/mifare_desfire.h>
+#include <lib/nfc/protocols/emv.h>
+#include <lib/nfc/protocols/mifare_ultralight.h>
+#include <lib/nfc/protocols/mifare_classic.h>
+#include <lib/nfc/protocols/mifare_desfire.h>
 
 #define NFC_DEV_NAME_MAX_LEN 22
 #define NFC_READER_DATA_MAX_SIZE 64

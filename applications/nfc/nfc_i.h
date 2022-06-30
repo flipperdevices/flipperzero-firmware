@@ -1,9 +1,6 @@
 #pragma once
 
 #include "nfc.h"
-#include "nfc_types.h"
-#include "nfc_worker.h"
-#include "nfc_device.h"
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -22,6 +19,10 @@
 #include <gui/modules/byte_input.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
+
+#include <lib/nfc/nfc_types.h>
+#include <lib/nfc/nfc_worker.h>
+#include <lib/nfc/nfc_device.h>
 
 #include "views/bank_card.h"
 #include "views/dict_attack.h"

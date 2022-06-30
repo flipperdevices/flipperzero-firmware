@@ -90,7 +90,9 @@ int32_t nfc_worker_task(void* context) {
 
     furi_hal_nfc_exit_sleep();
 
-    if(nfc_worker->state == NfcWorkerStateDetect) {
+    if(nfc_worker->state == NfcWorkerStateRead) {
+        nfc_worker_read(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateDetect) {
         nfc_worker_detect(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateEmulate) {
         nfc_worker_emulate(nfc_worker);
@@ -115,6 +117,21 @@ int32_t nfc_worker_task(void* context) {
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
 
     return 0;
+}
+
+void nfc_worker_read(NfcWorker* nfc_worker) {
+    UNUSED(nfc_worker);
+    // nfc_device_data_clear(nfc_worker->dev_data);
+    // NfcDeviceData* dev_data = nfc_worker->dev_data;
+    // FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+
+    // bool card_read = false;
+    // while(nfc_worker->state == NfcWorkerStateRead) {
+        
+    //     }
+    //     furi_hal_nfc_sleep();
+    //     osDelay(100);
+    // }
 }
 
 void nfc_worker_detect(NfcWorker* nfc_worker) {
