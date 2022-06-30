@@ -47,4 +47,4 @@ PATH="$SCRIPT_PATH/$TOOLCHAIN_PATH/bin:$PATH";
 PATH="$SCRIPT_PATH/$TOOLCHAIN_PATH/protobuf/bin:$PATH";
 PATH="$SCRIPT_PATH/$TOOLCHAIN_PATH/openocd/bin:$PATH";
 
-python3 lib/scons/scripts/scons.py $SCONS_DEFAULT_FLAGS "$@"
+"$SCRIPT_PATH/$TOOLCHAIN_PATH/python/bin/python3" "$SCRIPT_PATH/lib/scons/scripts/scons.py" $SCONS_DEFAULT_FLAGS "$@"
