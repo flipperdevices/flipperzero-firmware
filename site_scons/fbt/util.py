@@ -22,7 +22,7 @@ def wrap_tempfile(env, command):
 
 
 def link_dir(target_path, source_path, is_windows):
-    print(f"link_dir: {target_path} -> {source_path}")
+    # print(f"link_dir: {target_path} -> {source_path}")
     if os.path.lexists(target_path) or os.path.exists(target_path):
         os.unlink(target_path)
     if is_windows:

@@ -3,7 +3,9 @@
 set SCONS_EP=%~dp0\lib\scons\scripts\scons.py
 
 if exist ".git" (
-	python %SCONS_EP% -Q --git-tasks submodule_update
+	rem python %SCONS_EP% -Q --git-tasks submodule_update
+	echo "Updating git submodules"
+	git submodule update --init	
 )
 
 set "SCONS_DEFAULT_FLAGS=-Q --warn=target-not-built"
