@@ -1,3 +1,4 @@
+#include "cmsis_os2.h"
 #include "flipper.pb.h"
 #include "furi/record.h"
 #include "rpc_i.h"
@@ -6,12 +7,23 @@
 #include "rpc_app.h"
 
 #define TAG "RpcSystemApp"
+#define APP_BUTTON_TIMEOUT 1000
 
 struct RpcAppSystem {
     RpcSession* session;
     RpcAppSystemCallback app_callback;
     void* app_context;
+    osTimerId_t timer;
 };
+
+static void rpc_system_app_timer_callback(void* context) {
+    furi_assert(context);
+    RpcAppSystem* rpc_app = context;
+
+    if(rpc_app->app_callback) {
+        rpc_app->app_callback(RpcAppEventButtonRelease, NULL, rpc_app->app_context);
+    }
+}
 
 static void rpc_system_app_start_process(const PB_Main* request, void* context) {
     furi_assert(request);
@@ -99,6 +111,7 @@ static void rpc_system_app_exit(const PB_Main* request, void* context) {
     if(rpc_app->app_callback) {
         if(rpc_app->app_callback(RpcAppEventAppExit, NULL, rpc_app->app_context)) {
             status = PB_CommandStatus_OK;
+            osTimerStop(rpc_app->timer);
         } else {
             status = PB_CommandStatus_ERROR_APP_CMD_ERROR;
         }
@@ -147,6 +160,7 @@ static void rpc_system_app_button_press(const PB_Main* request, void* context) {
         const char* args = request->content.app_button_press_request.args;
         if(rpc_app->app_callback(RpcAppEventButtonPress, args, rpc_app->app_context)) {
             status = PB_CommandStatus_OK;
+            osTimerStart(rpc_app->timer, APP_BUTTON_TIMEOUT);
         } else {
             status = PB_CommandStatus_ERROR_APP_CMD_ERROR;
         }
@@ -170,6 +184,7 @@ static void rpc_system_app_button_release(const PB_Main* request, void* context)
     if(rpc_app->app_callback) {
         if(rpc_app->app_callback(RpcAppEventButtonRelease, NULL, rpc_app->app_context)) {
             status = PB_CommandStatus_OK;
+            osTimerStop(rpc_app->timer);
         } else {
             status = PB_CommandStatus_ERROR_APP_CMD_ERROR;
         }
@@ -192,6 +207,8 @@ void* rpc_system_app_alloc(RpcSession* session) {
 
     RpcAppSystem* rpc_app = malloc(sizeof(RpcAppSystem));
     rpc_app->session = session;
+
+    rpc_app->timer = osTimerNew(rpc_system_app_timer_callback, osTimerOnce, rpc_app, NULL);
 
     RpcHandler rpc_handler = {
         .message_handler = NULL,
@@ -224,6 +241,8 @@ void rpc_system_app_free(void* context) {
     RpcAppSystem* rpc_app = context;
     RpcSession* session = rpc_app->session;
     furi_assert(session);
+
+    osTimerDelete(rpc_app->timer);
 
     if(rpc_app->app_callback) {
         rpc_app->app_callback(RpcAppEventSessionClose, NULL, rpc_app->app_context);
