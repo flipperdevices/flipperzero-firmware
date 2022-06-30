@@ -23,20 +23,12 @@ bool archive_app_is_available(void* context, const char* path) {
 
     if(app == ArchiveAppTypeU2f) {
         bool file_exists = false;
-        Storage* fs_api = furi_record_open("storage");
-        File* file = storage_file_alloc(fs_api);
+        Storage* storage = furi_record_open("storage");
 
-        file_exists = storage_file_open(file, "/any/u2f/key.u2f", FSAM_READ, FSOM_OPEN_EXISTING);
-        if(file_exists) {
-            storage_file_close(file);
-            file_exists =
-                storage_file_open(file, "/any/u2f/cnt.u2f", FSAM_READ, FSOM_OPEN_EXISTING);
-            if(file_exists) {
-                storage_file_close(file);
-            }
+        if(storage_file_exists(storage, "/any/u2f/key.u2f")) {
+            file_exists = storage_file_exists(storage, "/any/u2f/cnt.u2f");
         }
 
-        storage_file_free(file);
         furi_record_close("storage");
 
         return file_exists;
