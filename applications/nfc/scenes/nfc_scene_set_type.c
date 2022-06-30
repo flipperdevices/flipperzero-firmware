@@ -52,11 +52,10 @@ bool nfc_scene_set_type_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else {
             nfc_device_clear(nfc->dev);
-            const NfcGenerator* generator =
-                nfc_generators[event.event - SubmenuIndexGeneratorsStart];
-            generator->generator_func(&nfc->dev->dev_data);
+            nfc->generator = nfc_generators[event.event - SubmenuIndexGeneratorsStart];
+            nfc->generator->generator_func(&nfc->dev->dev_data);
 
-            scene_manager_next_scene(nfc->scene_manager, generator->next_scene);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneGenerateInfo);
             consumed = true;
         }
     }
