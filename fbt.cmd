@@ -2,7 +2,7 @@
 set "toolchainRoot=%~dp0toolchain\i686-windows"
 set "SCONS_DEFAULT_FLAGS=-Q --warn=target-not-built"
 if not exist "%~dp0.git" (
-    echo ".git" directory not found, please clone repo via "git clone"
+    echo ".git" directory not found, please clone repo via "git clone --recursive"
     exit /B 1
 )
 git submodule update --init

@@ -15,7 +15,7 @@ get_kernel_type()
         echo "In MinGW shell use \"fbt.cmd\" instead of \"fbt\"";
         exit 1;
     else
-        echo "Your system is unsupported.. sorry..";
+        echo "Your system is not supported. Sorry. Please report us your configuration.";
         exit 1;
     fi
 }
@@ -31,7 +31,7 @@ download_toolchain()
 check_git()
 {
     if [ ! -d "$SCRIPT_PATH/.git" ]; then
-        echo "\".git\" directory not found, please clone repo via \"git clone\"";
+        echo "\".git\" directory not found, please clone repo via \"git clone --recursive\"";
         exit 1;
     fi
 }
