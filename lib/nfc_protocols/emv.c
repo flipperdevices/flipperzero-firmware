@@ -397,8 +397,7 @@ bool emv_read_bank_card(FuriHalNfcTxRxContext* tx_rx, EmvApplication* emv_app) {
 bool emv_card_emulation(FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(tx_rx);
     bool emulation_complete = false;
-    tx_rx->tx_bits = 0;
-    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+    memset(tx_rx, 0, sizeof(FuriHalNfcTxRxContext));
 
     do {
         FURI_LOG_D(TAG, "Read select PPSE command");
