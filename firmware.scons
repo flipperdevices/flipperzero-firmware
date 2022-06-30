@@ -6,7 +6,7 @@ from fbt.util import link_dir
 
 # Building initial C environment for libs
 env = ENV.Clone(
-    tools=["compilation_db", "fwbin", "openocd", "fbt_apps", "dirlink"],
+    tools=["compilation_db", "fwbin", "openocd", "fbt_apps"],
     COMPILATIONDB_USE_ABSPATH=True,
     BUILD_DIR=fw_build_meta["build_dir"],
     IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",

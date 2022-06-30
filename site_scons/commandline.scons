@@ -1,12 +1,5 @@
 # Commandline options
 
-AddOption(
-    "--git-tasks",
-    dest="git-tasks",
-    action="store_true",
-    help="Only process git-related tasks",
-)
-
 # To build updater-related targets, you need to set this option
 AddOption(
     "--with-updater",
