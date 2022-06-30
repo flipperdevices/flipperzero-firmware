@@ -3,7 +3,7 @@
 set SCONS_EP=%~dp0\lib\scons\scripts\scons.py
 
 if exist ".git" (
-	echo "Updating git submodules"
+	echo Updating git submodules
 	git submodule update --init	
 )
 
