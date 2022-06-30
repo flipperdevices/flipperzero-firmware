@@ -4,7 +4,7 @@
 void nfc_read_worker_callback(NfcWorkerEvent event, void* context) {
     UNUSED(event);
     Nfc* nfc = context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerExit);
+    view_dispatcher_send_custom_event(nfc->view_dispatcher, event);
 }
 
 void nfc_scene_read_on_enter(void* context) {
@@ -29,8 +29,24 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcCustomEventWorkerExit) {
+        if(event.event == NfcWorkerEventReadNfcB || event.event == NfcWorkerEventReadNfcF ||
+           event.event == NfcWorkerEventReadNfcV) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
+            consumed = true;
+        } else if(event.event == NfcWorkerEventReadMifareUltralight) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareUlSuccess);
+            consumed = true;
+        } else if(event.event == NfcWorkerEventReadMifareClassicDone) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMifareClassicMenu);
+            consumed = true;
+        } else if(event.event == NfcWorkerEventReadMifareDesfire) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareDesfireSuccess);
+            consumed = true;
+        } else if(event.event == NfcWorkerEventReadBankCard) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadEmvDataSuccess);
+            consumed = true;
+        } else if(event.event == NfcWorkerEventReadMifareClassicDictAttackRequired) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareClassic);
             consumed = true;
         }
     }

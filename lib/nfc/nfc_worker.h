@@ -30,6 +30,16 @@ typedef enum {
     // Reserve first 50 events for application events
     NfcWorkerEventReserved = 50,
 
+    // New events
+    NfcWorkerEventReadNfcB,
+    NfcWorkerEventReadNfcV,
+    NfcWorkerEventReadNfcF,
+    NfcWorkerEventReadMifareUltralight,
+    NfcWorkerEventReadMifareDesfire,
+    NfcWorkerEventReadBankCard,
+    NfcWorkerEventReadMifareClassicDone,
+    NfcWorkerEventReadMifareClassicDictAttackRequired,
+
     // Nfc worker common events
     NfcWorkerEventSuccess,
     NfcWorkerEventFail,
