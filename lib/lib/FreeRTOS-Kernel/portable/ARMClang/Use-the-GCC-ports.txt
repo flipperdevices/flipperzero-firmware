@@ -1,2 +1,0 @@
-The FreeRTOS GCC port layer also builds and works with the ARMClang compiler.
-To use the ARMClang compiler build the port files from FreeRTOS/Source/portable/GCC.
