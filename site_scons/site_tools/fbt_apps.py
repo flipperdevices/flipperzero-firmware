@@ -36,10 +36,7 @@ def DumpApplicationConfig(target, source, env):
             )
 
 
-# We are only using source node to indicate app set changed
-# Actual build is done using APPBUILD object
 def build_apps_c(target, source, env):
-    print("Generating apps.c")
     target_file_name = target[0].path
 
     gen = ApplicationsCGenerator(env["APPBUILD"])

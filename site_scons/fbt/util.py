@@ -3,7 +3,8 @@ from SCons.Subst import quote_spaces
 
 import re
 import os
-
+import random
+import string
 
 WINPATHSEP_RE = re.compile(r"\\([^\"'\\]|$)")
 
@@ -20,11 +21,11 @@ def wrap_tempfile(env, command):
     env[command] = '${TEMPFILE("' + env[command] + '","$' + command + 'STR")}'
 
 
-def link_dir(target, source, env):
-    target_path = os.path.realpath(target[0].abspath)
-    source_path = os.path.realpath(source[0].abspath)
-    os.unlink(target_path)
-    if env["PLATFORM"] == "win32":
+def link_dir(target_path, source_path, is_windows):
+    print(f"link_dir: {target_path} -> {source_path}")
+    if os.path.lexists(target_path) or os.path.exists(target_path):
+        os.unlink(target_path)
+    if is_windows:
         # Crete junction
         import _winapi
 
@@ -32,6 +33,12 @@ def link_dir(target, source, env):
             raise Exception(f"Source directory {source_path} is not a directory")
 
         if not os.path.exists(target_path):
-            _winapi.CreateJunction(target_path, source_path)
+            _winapi.CreateJunction(source_path, target_path)
     else:
-        os.symlink(source, target)
+        os.symlink(source_path, target_path)
+
+
+def random_alnum(length):
+    return "".join(
+        random.choice(string.ascii_letters + string.digits) for _ in range(length)
+    )
