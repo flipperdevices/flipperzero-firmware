@@ -23,6 +23,7 @@ get_kernel_type()
 download_toolchain()
 {
     if [ ! -d "$SCRIPT_PATH/$TOOLCHAIN_PATH" ]; then
+        chmod 744 scripts/toolchain/unix-toolchain-download.sh
         scripts/toolchain/unix-toolchain-download.sh || exit 1;
     fi
 }
