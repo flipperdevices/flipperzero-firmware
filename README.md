@@ -1,7 +1,7 @@
 # [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME
 - ****This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.**
 - FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE
-- CH0NG, CH33CH and N00BY rename your flipper.
+- Contact me on Discord if you want a renamed DFU
 - DONATIONS ACCEPTED :D BTC:172CE1H1XZVt7tc4HDQ1q9Mej1K7VuHfEf ETH:0x6c46eE48Bd433b0ADE711B43D188Cf8215cd51c2
 
 # Clone the Repository
@@ -15,7 +15,7 @@ $ docker-compose exec dev ./fbt
 
 Latest Updates:
 - Removed [Embedded arm-none-eabi toolchain (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1351) causing issues on compile.
-- Latest updates from DEV b3767d1
+- Latest updates from DEV b3767d1 (fbt fixes and support for MIFARE Classic 1K chipsets from the INFINEON manufacturer)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
