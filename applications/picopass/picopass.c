@@ -156,8 +156,6 @@ ReturnCode decrypt(uint8_t* enc_data, uint8_t* dec_data) {
 
 ReturnCode parseWiegand(uint8_t* data, WiegandRecord* record) {
     uint32_t* halves = (uint32_t*)data;
-    FURI_LOG_D(TAG, "halves[0]: %0lx", halves[0]);
-    FURI_LOG_D(TAG, "halves[1]: %0lx", halves[1]);
     if(halves[0] == 0) {
         uint8_t leading0s = __builtin_clz(REVERSE_BYTES_U32(halves[1]));
         record->bitLength = 31 - leading0s;
@@ -308,6 +306,7 @@ int32_t picopass_app(void* p) {
                         err = picopass_read_card(&AA1);
                         if(err != ERR_NONE) {
                             FURI_LOG_E(TAG, "picopass_read_card error %d", err);
+                            plugin_state->state = READY;
                             break;
                         }
                         FURI_LOG_D(TAG, "read OK");
