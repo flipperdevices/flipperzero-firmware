@@ -737,6 +737,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
         } else if(is_encrypted && plain_data[0] == MF_CLASSIC_INC_CMD) {
+            FURI_LOG_D("MFC", "INC");
             // Increment a value block
             uint8_t block = plain_data[1];
             if(!mf_classic_is_sector_trailer(block)) {
@@ -756,6 +757,8 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                         if(tx_rx->rx_bits != 6 * 8) {
                             FURI_LOG_D("MFC", "Invalid increment value");
                             break;
+                        } else {
+                            FURI_LOG_D("MFC", "Increment value: %02X", tx_rx->rx_data[0]);
                         }
                         mf_crypto1_decrypt(
                             &emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
@@ -817,6 +820,8 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                         if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
                             FURI_LOG_D("MFC", "Failed to receive increment value");
                             break;
+                        } else {
+                            FURI_LOG_D("MFC", "Received increment value");
                         }
                         if(tx_rx->rx_bits != 6 * 8) {
                             FURI_LOG_D("MFC", "Invalid increment value");
@@ -827,7 +832,8 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                     }
                 }
             }
-        } else if(is_encrypted && plain_data[0] == MF_CLASSIC_TRANSFER_CMD) {
+        } else if(is_encrypted && plain_data[0] == 0xB0) {
+            FURI_LOG_D("MFC", "Transfer command");
             // Transfer a value block from the internal register to a value block
             uint8_t block = plain_data[1];
             if(!mf_classic_is_sector_trailer(block)) {
@@ -835,7 +841,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                        emulator, block, access_key, MfClassicActionDataDec)) {
                     if(mf_classic_is_value_block(emulator->data.block[block].value)) {
                         // If this is a value block, send ack receive the value
-                        memcpy(emulator->data.block[block].value, &emulator->internal_register, 4);
+
                         uint8_t ack = 0x0A;
                         mf_crypto1_encrypt(
                             &emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
@@ -845,6 +851,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                             FURI_LOG_D("MFC", "Failed to receive increment value");
                             break;
                         }
+                        memcpy(emulator->data.block[block].value, &emulator->internal_register, 4);
                         command_processed = true;
                         emulator->data_changed = true;
                     }
@@ -852,6 +859,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             }
         } else {
             // Unknown command
+            FURI_LOG_D("MFC", "Unknown command");
             break;
         }
     }
