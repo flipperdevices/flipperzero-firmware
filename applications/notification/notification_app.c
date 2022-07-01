@@ -326,7 +326,7 @@ void notification_process_notification_message(
         reset_mask |= reset_green_mask;
         reset_mask |= reset_blue_mask;
 
-        if(need_minimal_delay) {
+        if((need_minimal_delay) && (reset_notifications)) {
             notification_apply_notification_leds(app, led_off_values);
             furi_hal_delay_ms(minimal_delay);
         }
