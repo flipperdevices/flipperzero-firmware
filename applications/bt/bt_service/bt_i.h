@@ -21,9 +21,11 @@
 typedef enum {
     BtMessageTypeUpdateStatus,
     BtMessageTypeUpdateBatteryLevel,
+    BtMessageTypeUpdatePowerState,
     BtMessageTypePinCodeShow,
     BtMessageTypeKeysStorageUpdated,
     BtMessageTypeSetProfile,
+    BtMessageTypeDisconnect,
     BtMessageTypeForgetBondedDevices,
 } BtMessageType;
 

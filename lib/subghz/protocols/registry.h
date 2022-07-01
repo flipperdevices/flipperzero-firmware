@@ -21,11 +21,13 @@
 #include "scher_khan.h"
 #include "gate_tx.h"
 #include "raw.h"
-#include "firefly.h"
+#include "linear.h"
 #include "secplus_v2.h"
 #include "secplus_v1.h"
 #include "megacode.h"
 #include "holtek.h"
+#include "chamberlain_code.h"
+#include "power_smart.h"
 
 /**
  * Registration by name SubGhzProtocol.
