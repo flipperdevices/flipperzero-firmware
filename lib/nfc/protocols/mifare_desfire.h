@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <furi_hal_nfc.h>
+
 #define MF_DF_GET_VERSION (0x60)
 #define MF_DF_GET_FREE_MEMORY (0x6E)
 #define MF_DF_GET_KEY_SETTINGS (0x45)
@@ -163,3 +165,5 @@ uint16_t mf_df_prepare_read_data(uint8_t* dest, uint8_t file_id, uint32_t offset
 uint16_t mf_df_prepare_get_value(uint8_t* dest, uint8_t file_id);
 uint16_t mf_df_prepare_read_records(uint8_t* dest, uint8_t file_id, uint32_t offset, uint32_t len);
 bool mf_df_parse_read_data_response(uint8_t* buf, uint16_t len, MifareDesfireFile* out);
+
+bool mf_df_read_card(FuriHalNfcTxRxContext* tx_rx, MifareDesfireData* data);

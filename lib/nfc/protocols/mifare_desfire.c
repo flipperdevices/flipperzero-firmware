@@ -2,6 +2,8 @@
 #include <furi.h>
 #include <furi_hal_nfc.h>
 
+#define TAG "MifareDESFire"
+
 void mf_df_clear(MifareDesfireData* data) {
     free(data->free_memory);
     if(data->master_key_settings) {
@@ -448,4 +450,174 @@ bool mf_df_parse_read_data_response(uint8_t* buf, uint16_t len, MifareDesfireFil
     out->contents = malloc(len);
     memcpy(out->contents, buf, len);
     return true;
+}
+
+bool mf_df_read_card(FuriHalNfcTxRxContext* tx_rx, MifareDesfireData* data) {
+    furi_assert(tx_rx);
+    furi_assert(data);
+
+    bool card_read = false;
+    do {
+        // Get version
+        tx_rx->tx_bits = 8 * mf_df_prepare_get_free_memory(tx_rx->tx_data);
+        if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+            FURI_LOG_W(TAG, "Bad exchange getting version");
+            break;
+        }
+        if(!mf_df_parse_get_version_response(tx_rx->rx_data, tx_rx->rx_bits / 8, &data->version)) {
+            FURI_LOG_W(TAG, "Bad DESFire GET_VERSION responce");
+        }
+
+        // Get free memory
+        tx_rx->tx_bits = 8 * mf_df_prepare_get_free_memory(tx_rx->tx_data);
+        if(furi_hal_nfc_tx_rx_full(tx_rx)) {
+            data->free_memory = malloc(sizeof(MifareDesfireFreeMemory));
+            if(!mf_df_parse_get_free_memory_response(
+                   tx_rx->rx_data, tx_rx->rx_bits / 8, data->free_memory)) {
+                FURI_LOG_D(TAG, "Bad DESFire GET_FREE_MEMORY response (normal for pre-EV1 cards)");
+                free(data->free_memory);
+                data->free_memory = NULL;
+            }
+        }
+
+        // Get key settings
+        tx_rx->tx_bits = 8 * mf_df_prepare_get_key_settings(tx_rx->tx_data);
+        if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+            FURI_LOG_D(TAG, "Bad exchange getting key settings");
+        } else {
+            data->master_key_settings = malloc(sizeof(MifareDesfireKeySettings));
+            if(!mf_df_parse_get_key_settings_response(
+                   tx_rx->rx_data, tx_rx->rx_bits / 8, data->master_key_settings)) {
+                FURI_LOG_W(TAG, "Bad DESFire GET_KEY_SETTINGS response");
+                free(data->master_key_settings);
+                data->master_key_settings = NULL;
+            } else {
+                MifareDesfireKeyVersion** key_version_head =
+                    &data->master_key_settings->key_version_head;
+                for(uint8_t key_id = 0; key_id < data->master_key_settings->max_keys; key_id++) {
+                    tx_rx->tx_bits = 8 * mf_df_prepare_get_key_version(tx_rx->tx_data, key_id);
+                    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+                        FURI_LOG_W(TAG, "Bad exchange getting key version");
+                        continue;
+                    }
+                    MifareDesfireKeyVersion* key_version = malloc(sizeof(MifareDesfireKeyVersion));
+                    memset(key_version, 0, sizeof(MifareDesfireKeyVersion));
+                    key_version->id = key_id;
+                    if(!mf_df_parse_get_key_version_response(
+                           tx_rx->rx_data, tx_rx->rx_bits / 8, key_version)) {
+                        FURI_LOG_W(TAG, "Bad DESFire GET_KEY_VERSION response");
+                        free(key_version);
+                        continue;
+                    }
+                    *key_version_head = key_version;
+                    key_version_head = &key_version->next;
+                }
+            }
+        }
+
+        // Get application IDs
+        tx_rx->tx_bits = 8 * mf_df_prepare_get_application_ids(tx_rx->tx_data);
+        if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+            FURI_LOG_W(TAG, "Bad exchange getting application IDs");
+            break;
+        } else {
+            if(!mf_df_parse_get_application_ids_response(
+                   tx_rx->rx_data, tx_rx->rx_bits / 8, &data->app_head)) {
+                FURI_LOG_W(TAG, "Bad DESFire GET_APPLICATION_IDS response");
+                break;
+            }
+        }
+
+        for(MifareDesfireApplication* app = data->app_head; app; app = app->next) {
+            tx_rx->tx_bits = 8 * mf_df_prepare_select_application(tx_rx->tx_data, app->id);
+            if(!furi_hal_nfc_tx_rx_full(tx_rx) ||
+               !mf_df_parse_select_application_response(tx_rx->rx_data, tx_rx->rx_bits / 8)) {
+                FURI_LOG_W(TAG, "Bad exchange selecting application");
+                continue;
+            }
+            tx_rx->tx_bits = 8 * mf_df_prepare_get_key_settings(tx_rx->tx_data);
+            if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+                FURI_LOG_W(TAG, "Bad exchange getting key settings");
+            } else {
+                app->key_settings = malloc(sizeof(MifareDesfireKeySettings));
+                memset(app->key_settings, 0, sizeof(MifareDesfireKeySettings));
+                if(!mf_df_parse_get_key_settings_response(
+                       tx_rx->rx_data, tx_rx->rx_bits / 8, app->key_settings)) {
+                    FURI_LOG_W(TAG, "Bad DESFire GET_KEY_SETTINGS response");
+                    free(app->key_settings);
+                    app->key_settings = NULL;
+                    continue;
+                }
+
+                MifareDesfireKeyVersion** key_version_head = &app->key_settings->key_version_head;
+                for(uint8_t key_id = 0; key_id < app->key_settings->max_keys; key_id++) {
+                    tx_rx->tx_bits = 8 * mf_df_prepare_get_key_version(tx_rx->tx_data, key_id);
+                    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+                        FURI_LOG_W(TAG, "Bad exchange getting key version");
+                        continue;
+                    }
+                    MifareDesfireKeyVersion* key_version = malloc(sizeof(MifareDesfireKeyVersion));
+                    memset(key_version, 0, sizeof(MifareDesfireKeyVersion));
+                    key_version->id = key_id;
+                    if(!mf_df_parse_get_key_version_response(
+                           tx_rx->rx_data, tx_rx->rx_bits / 8, key_version)) {
+                        FURI_LOG_W(TAG, "Bad DESFire GET_KEY_VERSION response");
+                        free(key_version);
+                        continue;
+                    }
+                    *key_version_head = key_version;
+                    key_version_head = &key_version->next;
+                }
+            }
+
+            tx_rx->tx_bits = 8 * mf_df_prepare_get_file_ids(tx_rx->tx_data);
+            if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+                FURI_LOG_W(TAG, "Bad exchange getting file IDs");
+            } else {
+                if(!mf_df_parse_get_file_ids_response(
+                       tx_rx->rx_data, tx_rx->rx_bits / 8, &app->file_head)) {
+                    FURI_LOG_W(TAG, "Bad DESFire GET_FILE_IDS response");
+                }
+            }
+
+            for(MifareDesfireFile* file = app->file_head; file; file = file->next) {
+                tx_rx->tx_bits = 8 * mf_df_prepare_get_file_settings(tx_rx->tx_data, file->id);
+                if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+                    FURI_LOG_W(TAG, "Bad exchange getting file settings");
+                    continue;
+                }
+                if(!mf_df_parse_get_file_settings_response(
+                       tx_rx->rx_data, tx_rx->rx_bits / 8, file)) {
+                    FURI_LOG_W(TAG, "Bad DESFire GET_FILE_SETTINGS response");
+                    continue;
+                }
+                switch(file->type) {
+                case MifareDesfireFileTypeStandard:
+                case MifareDesfireFileTypeBackup:
+                    tx_rx->tx_bits = 8 * mf_df_prepare_read_data(tx_rx->tx_data, file->id, 0, 0);
+                    break;
+                case MifareDesfireFileTypeValue:
+                    tx_rx->tx_bits = 8 * mf_df_prepare_get_value(tx_rx->tx_data, file->id);
+                    break;
+                case MifareDesfireFileTypeLinearRecord:
+                case MifareDesfireFileTypeCyclicRecord:
+                    tx_rx->tx_bits =
+                        8 * mf_df_prepare_read_records(tx_rx->tx_data, file->id, 0, 0);
+                    break;
+                }
+                if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+                    FURI_LOG_W(TAG, "Bad exchange reading file %d", file->id);
+                    continue;
+                }
+                if(!mf_df_parse_read_data_response(tx_rx->rx_data, tx_rx->rx_bits / 8, file)) {
+                    FURI_LOG_W(TAG, "Bad response reading file %d", file->id);
+                    continue;
+                }
+            }
+        }
+
+        card_read = true;
+    } while(false);
+
+    return card_read;
 }
