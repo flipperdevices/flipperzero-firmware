@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC2086
 
 # unofficial strict mode
 set -eu;
@@ -51,12 +52,12 @@ curl_wget_check()
         fi
         echo "yes"
         DOWNLOADER="wget";
-        DOWNLOADER_ARGS="-qO";
+        DOWNLOADER_ARGS="--show-progress --progress=bar:force -qO";
         return;
     fi
     echo "yes"
     DOWNLOADER="curl";
-    DOWNLOADER_ARGS="-sSLo";
+    DOWNLOADER_ARGS="--progress-bar -SLo";
 }
 
 check_downloaded_toolchain()
@@ -72,15 +73,15 @@ check_downloaded_toolchain()
 
 download_toolchain()
 {
-    printf "Checkin..oops Downloading toolchain..";
-    "$DOWNLOADER" "$DOWNLOADER_ARGS" "$REPO_ROOT/$TOOLCHAIN_TAR" "$TOOLCHAIN_URL";
+    echo "Downloading toolchain:";
+    "$DOWNLOADER" $DOWNLOADER_ARGS "$REPO_ROOT/$TOOLCHAIN_TAR" "$TOOLCHAIN_URL";
     echo "done";
 }
 
 remove_old_tooclhain()
 {
     printf "Removing old toolchain (if exist)..";
-    rm -rf "$REPO_ROOT/$TOOLCHAIN_PATH";
+    rm -rf "${REPO_ROOT:?}/$TOOLCHAIN_PATH";
     echo "done";
 }
 
@@ -88,7 +89,7 @@ unpack_toolchain()
 {
     printf "Unpacking toolchain..";
     TOOLCHAIN_DIR="$(dirname -- "$(tar -tf "$REPO_ROOT/$TOOLCHAIN_TAR" | head -n 1)")";
-    tar -xf "$REPO_ROOT/$TOOLCHAIN_TAR" -C "$REPO_ROOT/";
+    tar --checkpoint=.2000 -xf "$REPO_ROOT/$TOOLCHAIN_TAR" -C "$REPO_ROOT/";
     mkdir -p "$REPO_ROOT/toolchain";
     mv "$REPO_ROOT/$TOOLCHAIN_DIR" "$REPO_ROOT/$TOOLCHAIN_PATH/";
     echo "done";
@@ -97,7 +98,7 @@ unpack_toolchain()
 clearing()
 {
     printf "Clearing..";
-    rm -rf "$REPO_ROOT/$TOOLCHAIN_TAR";
+    rm -rf "${REPO_ROOT:?}/$TOOLCHAIN_TAR";
     echo "done";
 }
 
