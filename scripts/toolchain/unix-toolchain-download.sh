@@ -87,6 +87,7 @@ remove_old_tooclhain()
 
 show_unpack_percentage()
 {
+    LINE=0;
     while read -r line; do
         LINE=$(( LINE + 1 ));
         if [ $(( LINE % 300 )) -eq 0 ]; then
