@@ -85,11 +85,22 @@ remove_old_tooclhain()
     echo "done";
 }
 
+show_unpack_percentage()
+{
+    while read -r line; do
+        LINE=$(( LINE + 1 ));
+        if [ $(( LINE % 300 )) -eq 0 ]; then
+            printf "#";
+        fi
+    done
+    echo " 100.0%";
+}
+
 unpack_toolchain()
 {
-    printf "Unpacking toolchain..";
+    echo "Unpacking toolchain:";
     TOOLCHAIN_DIR="$(dirname -- "$(tar -tf "$REPO_ROOT/$TOOLCHAIN_TAR" | head -n 1)")";
-    tar --checkpoint=.2000 -xf "$REPO_ROOT/$TOOLCHAIN_TAR" -C "$REPO_ROOT/";
+    tar -xvf "$REPO_ROOT/$TOOLCHAIN_TAR" -C "$REPO_ROOT/" 2>&1 | show_unpack_percentage;
     mkdir -p "$REPO_ROOT/toolchain";
     mv "$REPO_ROOT/$TOOLCHAIN_DIR" "$REPO_ROOT/$TOOLCHAIN_PATH/";
     echo "done";
