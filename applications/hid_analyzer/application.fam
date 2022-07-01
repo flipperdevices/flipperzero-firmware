@@ -1,0 +1,11 @@
+App(
+    appid="hid_analyzer_app",
+    name="HID Analyser",
+    apptype=FlipperAppType.APP,
+    entry_point="hid_analyzer_app",
+    cdefines=["APP_HID_ANALYZER"],
+    requires=["gui"],
+    icon="A_125khz_14",
+    stack_size=2 * 1024,
+    order=9,
+)

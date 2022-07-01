@@ -1,0 +1,11 @@
+App(
+    appid="jukebox",
+    name="TouchTunes Remote",
+    apptype=FlipperAppType.APP,
+    entry_point="jukebox",
+    cdefines=["APP_JUKEBOX"],
+    requires=["gui"],
+    icon="A_Plugins_14",
+    stack_size=1024,
+    order=9,
+)

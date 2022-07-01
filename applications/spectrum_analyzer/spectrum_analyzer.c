@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include "spectrum_analyzer.h"
 
-#include <gui/gui.h>
-
 #include <lib/drivers/cc1101_regs.h>
 #include "spectrum_analyzer_worker.h"
 
@@ -19,6 +17,8 @@ typedef struct {
 
     uint32_t channel0_frequency;
     uint32_t spacing;
+
+    bool mode_change;
 
     float max_rssi;
     uint8_t max_rssi_dec;
@@ -64,6 +64,10 @@ void spectrum_analyzer_draw_scale(Canvas* canvas, const SpectrumAnalyzerModel* m
         tag_left = model->center_freq - 2;
         tag_right = model->center_freq + 2;
         break;
+    case ULTRANARROW:
+        tag_left = model->center_freq - 1;
+        tag_right = model->center_freq + 1;
+        break;
     case ULTRAWIDE:
         tag_left = model->center_freq - 40;
         tag_right = model->center_freq + 40;
@@ -85,7 +89,7 @@ void spectrum_analyzer_draw_scale(Canvas* canvas, const SpectrumAnalyzerModel* m
 
 static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
     SpectrumAnalyzer* spectrum_analyzer = ctx;
-    furi_check(osMutexAcquire(spectrum_analyzer->model_mutex, osWaitForever) == osOK);
+    //furi_check(osMutexAcquire(spectrum_analyzer->model_mutex, osWaitForever) == osOK);
 
     SpectrumAnalyzerModel* model = spectrum_analyzer->model;
 
@@ -101,6 +105,28 @@ static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_line(canvas, column, FREQ_BOTTOM_Y, column, y);
     }
 
+    if(model->mode_change) {
+        char temp_mode_str[12];
+        switch(model->width) {
+        case NARROW:
+            strncpy(temp_mode_str, "NARROW", 12);
+            break;
+        case ULTRANARROW:
+            strncpy(temp_mode_str, "ULTRANARROW", 12);
+            break;
+        case ULTRAWIDE:
+            strncpy(temp_mode_str, "ULTRAWIDE", 12);
+            break;
+        default:
+            strncpy(temp_mode_str, "WIDE", 12);
+            break;
+        }
+
+        // Current mode label
+        char tmp_str[21];
+        snprintf(tmp_str, 21, "Mode: %s", temp_mode_str);
+        canvas_draw_str_aligned(canvas, 127, 4, AlignRight, AlignTop, tmp_str);
+    }
     // Draw cross and label
     if(model->max_rssi > PEAK_THRESHOLD) {
         // Compress height to max of 64 values (255>>2)
@@ -137,11 +163,11 @@ static void spectrum_analyzer_render_callback(Canvas* const canvas, void* ctx) {
             "Peak: %3.2f Mhz %3.1f dbm",
             ((double)(model->channel0_frequency + (model->max_rssi_channel * model->spacing)) /
              1000000),
-            (double) model->max_rssi);
+            (double)model->max_rssi);
         canvas_draw_str_aligned(canvas, 127, 0, AlignRight, AlignTop, temp_str);
     }
 
-    osMutexRelease(spectrum_analyzer->model_mutex);
+    //osMutexRelease(spectrum_analyzer->model_mutex);
 
     // FURI_LOG_D("Spectrum", "model->vscroll %u", model->vscroll);
 }
@@ -193,6 +219,11 @@ void spectrum_analyzer_calculate_frequencies(SpectrumAnalyzerModel* model) {
         margin = NARROW_MARGIN;
         step = NARROW_STEP;
         model->spacing = NARROW_SPACING;
+        break;
+    case ULTRANARROW:
+        margin = ULTRANARROW_MARGIN;
+        step = ULTRANARROW_STEP;
+        model->spacing = ULTRANARROW_SPACING;
         break;
     case ULTRAWIDE:
         margin = ULTRAWIDE_MARGIN;
@@ -392,6 +423,9 @@ int32_t spectrum_analyzer_app(void* p) {
         case NARROW:
             hstep = NARROW_STEP;
             break;
+        case ULTRANARROW:
+            hstep = ULTRANARROW_STEP;
+            break;
         case ULTRAWIDE:
             hstep = ULTRAWIDE_STEP;
             break;
@@ -429,13 +463,26 @@ int32_t spectrum_analyzer_app(void* p) {
                 model->width = NARROW;
                 break;
             case NARROW:
+                model->width = ULTRANARROW;
+                break;
+            case ULTRANARROW:
                 model->width = ULTRAWIDE;
                 break;
             case ULTRAWIDE:
+                model->width = WIDE;
+                break;
             default:
                 model->width = WIDE;
+                break;
             }
         }
+
+            model->mode_change = true;
+            view_port_update(spectrum_analyzer->view_port);
+
+            furi_hal_delay_ms(1000);
+
+            model->mode_change = false;
             spectrum_analyzer_calculate_frequencies(model);
             spectrum_analyzer_worker_set_frequencies(
                 spectrum_analyzer->worker, model->channel0_frequency, model->spacing, model->width);

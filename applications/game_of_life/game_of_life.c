@@ -4,6 +4,8 @@
 #include <input/input.h>
 #include <stdlib.h>
 
+#define TAG "GameOfLife"
+
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define TOTAL_PIXELS SCREEN_WIDTH* SCREEN_HEIGHT
@@ -21,7 +23,7 @@ typedef struct {
 typedef struct {
     bool revive;
     int evo;
-} State;
+} AppState;
 
 unsigned char new[TOTAL_PIXELS] = {};
 unsigned char old[TOTAL_PIXELS] = {};
@@ -44,13 +46,13 @@ int count_neightbors(int x, int y) {
            get_cell(x, y + 1);
 }
 
-static void update_field(State* state) {
-    if(state->revive) {
+static void update_field(AppState* const app_state) {
+    if(app_state->revive) {
         for(int i = 0; i < TOTAL_PIXELS; ++i) {
             if((random() % 100) == 1) {
                 fields[current][i] = 1;
             }
-            state->revive = false;
+            app_state->revive = false;
         }
     }
 
@@ -62,12 +64,12 @@ static void update_field(State* state) {
         int n = count_neightbors(x, y);
 
         if(v && n == 3) {
-            ++state->evo;
+            ++app_state->evo;
         } else if(v && (n < 2 || n > 3)) {
-            ++state->evo;
+            ++app_state->evo;
             v = 0;
         } else if(!v && n == 3) {
-            ++state->evo;
+            ++app_state->evo;
             v = 1;
         }
 
@@ -78,9 +80,9 @@ static void update_field(State* state) {
     current ^= next;
     next ^= current;
 
-    if(state->evo < TOTAL_PIXELS) {
-        state->revive = true;
-        state->evo = 0;
+    if(app_state->evo < TOTAL_PIXELS) {
+        app_state->revive = true;
+        app_state->evo = 0;
     }
 }
 
@@ -92,7 +94,7 @@ static void input_callback(InputEvent* input_event, osMessageQueueId_t event_que
 }
 
 static void render_callback(Canvas* canvas, void* ctx) {
-    State* state = (State*)acquire_mutex((ValueMutex*)ctx, 25);
+    AppState* app_state = (AppState*)acquire_mutex((ValueMutex*)ctx, 25);
     canvas_clear(canvas);
 
     for(int i = 0; i < TOTAL_PIXELS; ++i) {
@@ -100,22 +102,20 @@ static void render_callback(Canvas* canvas, void* ctx) {
         int y = (int)(i / SCREEN_WIDTH);
         if(fields[current][i] == 1) canvas_draw_dot(canvas, x, y);
     }
-    release_mutex((ValueMutex*)ctx, state);
+
+    release_mutex((ValueMutex*)ctx, app_state);
 }
 
 int32_t game_of_life_app(void* p) {
-    UNUSED(p);
-    srand(DWT->CYCCNT);
-
     osMessageQueueId_t event_queue = osMessageQueueNew(1, sizeof(AppEvent), NULL);
     furi_check(event_queue);
 
-    State* _state = malloc(sizeof(State));
+    AppState* app_state = malloc(sizeof(AppState));
 
     ValueMutex state_mutex;
-    if(!init_mutex(&state_mutex, _state, sizeof(State))) {
-        printf("cannot create mutex\r\n");
-        free(_state);
+    if(!init_mutex(&state_mutex, app_state, sizeof(AppState))) {
+        FURI_LOG_E(TAG, "cannot create mutex\r\n");
+        free(app_state);
         return 255;
     }
 
@@ -128,8 +128,8 @@ int32_t game_of_life_app(void* p) {
 
     AppEvent event;
     for(bool processing = true; processing;) {
-        State* state = (State*)acquire_mutex_block(&state_mutex);
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 25);
+        AppState* app_state = (AppState*)acquire_mutex_block(&state_mutex);
 
         if(event_status == osOK && event.type == EventTypeKey &&
            event.input.type == InputTypePress) {
@@ -140,10 +140,10 @@ int32_t game_of_life_app(void* p) {
             }
         }
 
-        update_field(state);
+        update_field(app_state);
 
         view_port_update(view_port);
-        release_mutex(&state_mutex, state);
+        release_mutex(&state_mutex, app_state);
     }
 
     view_port_enabled_set(view_port, false);
@@ -151,8 +151,7 @@ int32_t game_of_life_app(void* p) {
     furi_record_close("gui");
     view_port_free(view_port);
     osMessageQueueDelete(event_queue);
-    delete_mutex(&state_mutex);
-    free(_state);
+    free(app_state);
 
     return 0;
 }

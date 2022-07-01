@@ -1,0 +1,11 @@
+App(
+    appid="raycast_game_app",
+    name="Raycast",
+    apptype=FlipperAppType.APP,
+    entry_point="raycast_game",
+    cdefines=["APP_RAYCAST_GAME"],
+    requires=["gui"],
+    icon="A_Plugins_14",
+    stack_size=4096,
+    order=9,
+)

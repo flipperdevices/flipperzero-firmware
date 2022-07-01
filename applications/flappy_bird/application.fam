@@ -1,0 +1,11 @@
+App(
+    appid="flappy_game_app",
+    name="Flipper Flappy Bird",
+    apptype=FlipperAppType.APP,
+    entry_point="flappy_bird",
+    cdefines=["APP_FLAPPY_GAME"],
+    requires=["gui"],
+    icon="A_Plugins_14",
+    stack_size=1024,
+    order=9,
+)

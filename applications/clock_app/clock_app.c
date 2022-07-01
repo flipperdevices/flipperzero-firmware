@@ -11,7 +11,6 @@
 bool timerStarted = false;
 int timerSecs = 0;
 int songSelect = 0;
-
 typedef enum {
     EventTypeTick,
     EventTypeKey,

@@ -1,0 +1,11 @@
+App(
+    appid="dice",
+    name="Dice Roller",
+    apptype=FlipperAppType.APP,
+    entry_point="dice",
+    cdefines=["APP_DICE"],
+    requires=["gui"],
+    icon="A_Plugins_14",
+    stack_size=1024,
+    order=9,
+)
