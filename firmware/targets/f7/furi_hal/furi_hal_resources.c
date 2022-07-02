@@ -77,6 +77,10 @@ const size_t input_pins_count = sizeof(input_pins) / sizeof(InputPin);
 void furi_hal_resources_init_early() {
     furi_hal_gpio_init(&gpio_button_left, GpioModeInput, GpioPullUp, GpioSpeedLow);
 
+    // SD Card stepdown control
+    furi_hal_gpio_write(&periph_power, 1);
+    furi_hal_gpio_init(&periph_power, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
+
     // Display pins
     furi_hal_gpio_write(&gpio_display_rst_n, 1);
     furi_hal_gpio_init_simple(&gpio_display_rst_n, GpioModeOutputPushPull);
@@ -141,8 +145,6 @@ void furi_hal_resources_init() {
     furi_hal_gpio_init(&gpio_nfc_irq_rfid_pull, GpioModeInterruptRise, GpioPullNo, GpioSpeedLow);
 
     furi_hal_gpio_init(&gpio_rf_sw_0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-
-    furi_hal_gpio_init(&periph_power, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
 
     NVIC_SetPriority(EXTI0_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
     NVIC_EnableIRQ(EXTI0_IRQn);
