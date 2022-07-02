@@ -4,6 +4,10 @@
 # unofficial strict mode
 set -eu;
 
+FLIPPER_TOOLCHAIN_VERSION="2";
+SCRIPT_PATH="$(cd "$(dirname "$0")" && pwd -P)"
+SCONS_DEFAULT_FLAGS="-Q --warn=target-not-built";
+
 get_kernel_type()
 {
     SYS_TYPE="$(uname -s)"
@@ -20,12 +24,21 @@ get_kernel_type()
     fi
 }
 
-download_toolchain()
+check_download_toolchain()
 {
     if [ ! -d "$SCRIPT_PATH/$TOOLCHAIN_PATH" ]; then
-        chmod 755 "scripts/toolchain/unix-toolchain-download.sh";
-        scripts/toolchain/unix-toolchain-download.sh || exit 1;
+        download_toolchain;
+    elif [ ! -f "$SCRIPT_PATH/$TOOLCHAIN_PATH/VERSION" ]; then
+        download_toolchain;
+    elif [ "$(cat "$SCRIPT_PATH/$TOOLCHAIN_PATH/VERSION")" -ne "$FLIPPER_TOOLCHAIN_VERSION" ]; then
+        download_toolchain;
     fi
+}
+
+download_toolchain()
+{
+    chmod 755 "$SCRIPT_PATH/scripts/toolchain/unix-toolchain-download.sh";
+    "$SCRIPT_PATH/scripts/toolchain/unix-toolchain-download.sh" "$FLIPPER_TOOLCHAIN_VERSION" || exit 1;
 }
 
 check_git()
@@ -36,11 +49,9 @@ check_git()
     fi
 }
 
-SCRIPT_PATH="$(cd "$(dirname "$0")" && pwd -P)"
-SCONS_DEFAULT_FLAGS="-Q --warn=target-not-built";
-get_kernel_type;
+get_kernel_type;  # sets TOOLCHAIN_PATH
 check_git;
-download_toolchain;
+check_download_toolchain;
 git submodule update --init;
 PATH="$SCRIPT_PATH/$TOOLCHAIN_PATH/python/bin:$PATH";
 PATH="$SCRIPT_PATH/$TOOLCHAIN_PATH/bin:$PATH";

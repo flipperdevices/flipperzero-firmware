@@ -1,20 +1,21 @@
 #!/bin/sh
-# shellcheck disable=SC2086
+# shellcheck disable=SC2086,SC2034
 
 # unofficial strict mode
 set -eu;
 
 check_system()
 {
+    VER="$1";  # toolchain version
     printf "Checking kernel type..";
     SYS_TYPE="$(uname -s)"
     if [ "$SYS_TYPE" = "Darwin" ]; then
         echo "darwin";
-        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-2022.06-x86_64-darwin-flipper.tar.gz";
+        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-x86_64-darwin-flipper-$VER.tar.gz";
         TOOLCHAIN_PATH="toolchain/x86_64-darwin";
     elif [ "$SYS_TYPE" = "Linux" ]; then
         echo "linux";
-        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-2022.06-x86_64-linux-flipper.tar.gz";
+        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-x86_64-linux-flipper-$VER.tar.gz";
         TOOLCHAIN_PATH="toolchain/x86_64-linux";
     else
         echo "unsupported.";
@@ -100,7 +101,6 @@ show_unpack_percentage()
 unpack_toolchain()
 {
     echo "Unpacking toolchain:";
-    TOOLCHAIN_DIR="$(dirname -- "$(tar -tf "$REPO_ROOT/$TOOLCHAIN_TAR" | head -n 1)")";
     tar -xvf "$REPO_ROOT/$TOOLCHAIN_TAR" -C "$REPO_ROOT/" 2>&1 | show_unpack_percentage;
     mkdir -p "$REPO_ROOT/toolchain";
     mv "$REPO_ROOT/$TOOLCHAIN_DIR" "$REPO_ROOT/$TOOLCHAIN_PATH/";
@@ -118,9 +118,10 @@ main()
 {
     SCRIPT_PATH="$(cd "$(dirname "$0")" && pwd -P)"
     REPO_ROOT="$(cd "$SCRIPT_PATH/../../" && pwd)";
-    check_system;  # defines $TOOLCHAIN_URl and $TOOLCHAIN_PATH
+    check_system "$1";  # recives TOOLCHAIN_VERSION, defines TOOLCHAIN_URL and TOOLCHAIN_PATH
     check_tar;
     TOOLCHAIN_TAR="$(basename "$TOOLCHAIN_URL")";
+    TOOLCHAIN_DIR="$(echo "$TOOLCHAIN_TAR" | sed "s/-$VER.tar.gz//g")";
     if ! check_downloaded_toolchain; then
         curl_wget_check;
         download_toolchain;
@@ -131,4 +132,4 @@ main()
 
 trap clearing EXIT;
 trap clearing 2;  # SIGINT not coverable by EXIT
-main;
+main "$1";  # toochain version
