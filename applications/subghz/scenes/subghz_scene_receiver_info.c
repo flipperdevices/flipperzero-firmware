@@ -89,6 +89,8 @@ void subghz_scene_receiver_info_on_enter(void* context) {
         // Removed static check
         if(((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Send) ==
             SubGhzProtocolFlag_Send) &&
+           // disable "Send" for auto-captured RAW signals for now. They can still be saved and sent by loading them.
+           subghz->txrx->decoder_result->protocol->type != SubGhzProtocolTypeRAW &&
            subghz->txrx->decoder_result->protocol->encoder->deserialize) {
             widget_add_button_element(
                 subghz->widget,
