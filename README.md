@@ -16,6 +16,7 @@ $ docker-compose exec dev ./fbt
 Latest Updates:
 - Removed [Embedded arm-none-eabi toolchain (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1351) causing issues on compile.
 - Latest updates from DEV b3767d1 (fbt fixes and support for MIFARE Classic 1K chipsets from the INFINEON manufacturer)
+- Updates from [On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
