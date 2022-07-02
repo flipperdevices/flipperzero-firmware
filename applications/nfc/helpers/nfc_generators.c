@@ -251,64 +251,64 @@ static void nfc_generate_ntag_i2c_plus_2k(NfcDeviceData* data) {
 }
 
 static const NfcGenerator mf_ul_generator = {
-    "Mifare Ultralight",
-    nfc_generate_mf_ul_orig,
-    NfcSceneReadMifareUlSuccess};
+    .name = "Mifare Ultralight",
+    .generator_func = nfc_generate_mf_ul_orig,
+    .next_scene = NfcSceneMifareUlMenu};
 
 static const NfcGenerator mf_ul_11_generator = {
-    "Mifare Ultralight EV1 11",
-    nfc_generate_mf_ul_11,
-    NfcSceneReadMifareUlSuccess};
+    .name = "Mifare Ultralight EV1 11",
+    .generator_func = nfc_generate_mf_ul_11,
+    .next_scene = NfcSceneMifareUlMenu};
 
 static const NfcGenerator mf_ul_h11_generator = {
-    "Mifare Ultralight EV1 H11",
-    nfc_generate_mf_ul_h11,
-    NfcSceneReadMifareUlSuccess};
+    .name = "Mifare Ultralight EV1 H11",
+    .generator_func = nfc_generate_mf_ul_h11,
+    .next_scene = NfcSceneMifareUlMenu};
 
 static const NfcGenerator mf_ul_21_generator = {
-    "Mifare Ultralight EV1 21",
-    nfc_generate_mf_ul_21,
-    NfcSceneReadMifareUlSuccess};
+    .name = "Mifare Ultralight EV1 21",
+    .generator_func = nfc_generate_mf_ul_21,
+    .next_scene = NfcSceneMifareUlMenu};
 
 static const NfcGenerator mf_ul_h21_generator = {
-    "Mifare Ultralight EV1 H21",
-    nfc_generate_mf_ul_h21,
-    NfcSceneReadMifareUlSuccess};
+    .name = "Mifare Ultralight EV1 H21",
+    .generator_func = nfc_generate_mf_ul_h21,
+    .next_scene = NfcSceneMifareUlMenu};
 
 static const NfcGenerator ntag213_generator = {
-    "NTAG213",
-    nfc_generate_ntag213,
-    NfcSceneReadMifareUlSuccess};
+    .name = "NTAG213",
+    .generator_func = nfc_generate_ntag213,
+    .next_scene = NfcSceneMifareUlMenu};
 
 static const NfcGenerator ntag215_generator = {
-    "NTAG215",
-    nfc_generate_ntag215,
-    NfcSceneReadMifareUlSuccess};
+    .name = "NTAG215",
+    .generator_func = nfc_generate_ntag215,
+    .next_scene = NfcSceneMifareUlMenu};
 
 static const NfcGenerator ntag216_generator = {
-    "NTAG216",
-    nfc_generate_ntag216,
-    NfcSceneReadMifareUlSuccess};
+    .name = "NTAG216",
+    .generator_func = nfc_generate_ntag216,
+    .next_scene = NfcSceneMifareUlMenu};
 
 static const NfcGenerator ntag_i2c_1k_generator = {
-    "NTAG I2C 1k",
-    nfc_generate_ntag_i2c_1k,
-    NfcSceneReadMifareUlSuccess};
+    .name = "NTAG I2C 1k",
+    .generator_func = nfc_generate_ntag_i2c_1k,
+    .next_scene = NfcSceneMifareUlMenu};
 
 static const NfcGenerator ntag_i2c_2k_generator = {
-    "NTAG I2C 2k",
-    nfc_generate_ntag_i2c_2k,
-    NfcSceneReadMifareUlSuccess};
+    .name = "NTAG I2C 2k",
+    .generator_func = nfc_generate_ntag_i2c_2k,
+    .next_scene = NfcSceneMifareUlMenu};
 
 static const NfcGenerator ntag_i2c_plus_1k_generator = {
-    "NTAG I2C Plus 1k",
-    nfc_generate_ntag_i2c_plus_1k,
-    NfcSceneReadMifareUlSuccess};
+    .name = "NTAG I2C Plus 1k",
+    .generator_func = nfc_generate_ntag_i2c_plus_1k,
+    .next_scene = NfcSceneMifareUlMenu};
 
 static const NfcGenerator ntag_i2c_plus_2k_generator = {
-    "NTAG I2C Plus 2k",
-    nfc_generate_ntag_i2c_plus_2k,
-    NfcSceneReadMifareUlSuccess};
+    .name = "NTAG I2C Plus 2k",
+    .generator_func = nfc_generate_ntag_i2c_plus_2k,
+    .next_scene = NfcSceneMifareUlMenu};
 
 const NfcGenerator* const nfc_generators[] = {
     &mf_ul_generator,

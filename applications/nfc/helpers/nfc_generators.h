@@ -4,10 +4,10 @@
 
 typedef void (*NfcGeneratorFunc)(NfcDeviceData* data);
 
-typedef struct {
+struct NfcGenerator {
     const char* name;
     NfcGeneratorFunc generator_func;
     NfcScene next_scene;
-} NfcGenerator;
+};
 
 extern const NfcGenerator* const nfc_generators[];
