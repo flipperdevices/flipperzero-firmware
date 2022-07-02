@@ -15,9 +15,10 @@
 
 #define TAG "SubGhzProtocolRAW"
 #define SUBGHZ_DOWNLOAD_MAX_SIZE 512
-#define SUBGHZ_AUTO_DETECT_RAW_THRESHOLD -75.0f
-#define SUBGHZ_AUTO_DETECT_RAW_MIN_LENGTH 5
-#define SUBGHZ_AUTO_DETECT_BUFFER 10
+#define SUBGHZ_AUTO_DETECT_RAW_THRESHOLD -72.0f
+#define SUBGHZ_AUTO_DETECT_RAW_MIN_FRAMES 5
+#define SUBGHZ_AUTO_DETECT_PREROLL_FRAMES 10
+#define SUBGHZ_AUTO_DETECT_POSTROLL_FRAMES 30
 
 static const SubGhzBlockConst subghz_protocol_raw_const = {
     .te_short = 50,
@@ -276,22 +277,22 @@ void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t durati
         }
 
         float rssi = furi_hal_subghz_get_rssi();
-        if (rssi >= SUBGHZ_AUTO_DETECT_RAW_THRESHOLD) {
+        if (rssi >= SUBGHZ_AUTO_DETECT_RAW_THRESHOLD && duration > subghz_protocol_raw_const.te_short) {
             subghz_protocol_decoder_raw_write_data(context, level, duration);
             instance->post_buffer_count = 0;
             instance->has_rssi_above_threshold = true;
         } else {
-            if (instance->ind_write >= SUBGHZ_AUTO_DETECT_BUFFER && !instance->has_rssi_above_threshold) {
+            if (instance->ind_write >= SUBGHZ_AUTO_DETECT_PREROLL_FRAMES && !instance->has_rssi_above_threshold) {
                 // remove the first item from the array so we can have preroll at the beginning of the raw data
-                memmove(&instance->upload_raw[0], &instance->upload_raw[1], (SUBGHZ_AUTO_DETECT_BUFFER - 1) *
+                memmove(&instance->upload_raw[0], &instance->upload_raw[1], (SUBGHZ_AUTO_DETECT_PREROLL_FRAMES - 1) *
                     sizeof(instance->upload_raw[0]));
                 instance->ind_write--;
             }
 
-            if (instance->post_buffer_count < SUBGHZ_AUTO_DETECT_BUFFER) {
+            if (instance->post_buffer_count < SUBGHZ_AUTO_DETECT_POSTROLL_FRAMES) {
                 subghz_protocol_decoder_raw_write_data(instance, level, duration);
 
-                if (instance->ind_write - SUBGHZ_AUTO_DETECT_BUFFER >= SUBGHZ_AUTO_DETECT_RAW_MIN_LENGTH &&
+                if (instance->ind_write - SUBGHZ_AUTO_DETECT_PREROLL_FRAMES >= SUBGHZ_AUTO_DETECT_RAW_MIN_FRAMES &&
                     instance->has_rssi_above_threshold) {
                     instance->post_buffer_count++;
                 }
