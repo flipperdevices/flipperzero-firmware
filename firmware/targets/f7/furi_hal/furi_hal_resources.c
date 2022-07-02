@@ -58,7 +58,7 @@ const GpioPin gpio_i2c_power_scl = {.port = GPIOA, .pin = LL_GPIO_PIN_9};
 
 const GpioPin gpio_speaker = {.port = GPIOB, .pin = LL_GPIO_PIN_8};
 
-const GpioPin periph_power = {.port = PERIPH_POWER_GPIO_Port, .pin = PERIPH_POWER_Pin};
+const GpioPin periph_power = {.port = GPIOA, .pin = LL_GPIO_PIN_3};
 
 const GpioPin gpio_usb_dm = {.port = GPIOA, .pin = LL_GPIO_PIN_11};
 const GpioPin gpio_usb_dp = {.port = GPIOA, .pin = LL_GPIO_PIN_12};
