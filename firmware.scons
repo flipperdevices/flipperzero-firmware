@@ -207,7 +207,7 @@ def link_elf_dir_as_latest(env, elf_target):
     # Ugly way to check if updater-related targets were requested
     elf_dir = elf_target.Dir(".")
     explicitly_building_updater = False
-    # print("BUILD_TARGETS:", ','.join(BUILD_TARGETS))
+    # print("BUILD_TARGETS:", ",".join(BUILD_TARGETS))
     for build_target in BUILD_TARGETS:
         # print(">>> ", str(build_target))
         if "updater" in str(build_target):
@@ -215,11 +215,12 @@ def link_elf_dir_as_latest(env, elf_target):
 
     latest_dir = env.Dir("#build/latest")
 
-    link_this_dir = True
-    if explicitly_building_updater:
-        # If updater is explicitly requested, link to the latest updater
-        # Otherwise, link to the latest firmware
-        link_this_dir = not env["IS_BASE_FIRMWARE"]
+    is_updater = not env["IS_BASE_FIRMWARE"]
+    # If updater is explicitly requested, link to the latest updater
+    # Otherwise, link to the latest firmware
+    link_this_dir = (is_updater and explicitly_building_updater) or (
+        not is_updater and not explicitly_building_updater
+    )
 
     if link_this_dir:
         print(f"Setting {elf_dir} as latest built dir")
@@ -261,7 +262,7 @@ artifacts = [
     fwhex,
     fwbin,
     fwdfu,
-    env["FW_VERSION_JSON"],
+    fwenv["FW_VERSION_JSON"],
     fwcdb,
 ]
 fwenv["FW_ARTIFACTS"] = artifacts
