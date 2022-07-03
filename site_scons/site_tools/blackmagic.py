@@ -1,5 +1,6 @@
 import serial.tools.list_ports as list_ports
 import socket
+from SCons.Errors import SConsEnvironmentError
 
 
 class BlackmagicResolver:
@@ -23,6 +24,7 @@ class BlackmagicResolver:
         if len(ports) == 0:
             # print("Blackmagic probe serial port not found")
             pass
+        # Blackmagic has 2 usb interfaces with same serial
         elif len(ports) > 2:
             print("More than one Blackmagic probe found")
         else:
@@ -60,7 +62,7 @@ class BlackmagicResolver:
         if probe := self.get_serial() or self.get_networked():
             return probe
 
-        raise Exception("Please specify BLACKMAGIC=...")
+        raise SConsEnvironmentError("Please specify BLACKMAGIC=...")
 
 
 def generate(env):
