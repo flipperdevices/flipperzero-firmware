@@ -14,11 +14,8 @@ $ docker-compose exec dev ./fbt
 ```
 
 Latest Updates:
-- Removed [Embedded arm-none-eabi toolchain (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1351) causing issues on compile.
-- Latest updates from DEV b3767d1 (fbt fixes and support for MIFARE Classic 1K chipsets from the INFINEON manufacturer)
-- Updates from [On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
-- Updates to submodules, listed firmware on [this new fork I made](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 - Fixed M_STR1NG_UTF8_* issue on subghz_cli.c after mlib submodule gets updated
+- Game of Life update [thanks to atomsmasha](https://github.com/atomsmasha/flipperzero-firmware/blob/patch-1/applications/game_of_life/game_of_life.c)
 
 **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -34,15 +31,8 @@ Latest Updates:
 - Add a folder to SD card named `wav_player` (for 8bit 2ch unsigned wav files) 
 - Add a folder to SD card named `music_player` (FMF and RTTTL/TXT files)
 
-Special shout out to these libraries for giving us more fun:
-- https://github.com/Gioman101/FlipperAmiibo
-- https://github.com/jimilinuxguy/flipperzero-touchtunes
-- https://github.com/Lucaslhm/AmiiboFlipperConverter
-- https://github.com/MuddledBox/FlipperZeroCases
-- https://github.com/MuddledBox/FlipperZeroSub-GHz
-- https://github.com/neverfa11ing/FlipperMusicRTTTL
-- https://github.com/UberGuidoZ/Flipper
-- https://github.com/UberGuidoZ/Flipper-IRDB
+Shout out to the libraries included in the link below for giving us more fun:
+- https://github.com/RogueMaster/awesome-flipperzero-withModules
 
 Added Changes/Features:
 - Animations: Hold Center to change flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
