@@ -31,7 +31,7 @@ Latest Updates:
 - Add a folder to SD card named `wav_player` (for 8bit 2ch unsigned wav files) 
 - Add a folder to SD card named `music_player` (FMF and RTTTL/TXT files)
 
-# [`FUN Links HERE` Collection of links and repos for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
+# [`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 
 Added Changes/Features:
 - Animations: Hold Center to change flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
