@@ -2,6 +2,8 @@ import serial.tools.list_ports as list_ports
 
 
 class BlackmagicResolver:
+    BLACKMAGIC_HOSTNAME = "blackmagic.local"
+
     def __init__(self, env):
         self.list_ports = list_ports
         self.env = env
@@ -18,20 +20,37 @@ class BlackmagicResolver:
     def _find_probe(self):
         ports = list(self.list_ports.grep("blackmagic"))
         if len(ports) == 0:
-            print("Blackmagic probe not found")
+            # print("Blackmagic probe serial port not found")
+            pass
         elif len(ports) > 2:
             print("More than one Blackmagic probe found")
         else:
             # print("\n".join([f"{p.device} {vars(p)}" for p in ports]))
             return sorted(ports, key=lambda p: p.location + p.name)[0]
 
-    def get_port(self):
+    # Look up blackmagic probe hostname with dns
+    def _resolve_hostname(self):
+        import socket
+
+        try:
+            return socket.gethostbyname(self.BLACKMAGIC_HOSTNAME)
+        except socket.gaierror:
+            print("Failed to resolve Blackmagic hostname")
+            return None
+
+    def get_serial(self):
         if not (probe := self._find_probe()):
-            raise Exception("Please specify BLACKMAGIC=...")
+            return None
         # print(f"Found Blackmagic probe on {probe.device}")
         if self.env.subst("$PLATFORM") == "win32":
             return f"\\\\.\\{probe.device}"
         return probe.device
+
+    def get_networked(self):
+        if not (probe := self._resolve_hostname()):
+            return None
+
+        return f"tcp:{probe}:2345"
 
     def __str__(self):
         # print("distenv blackmagic", self.env.subst("$BLACKMAGIC"))
@@ -39,7 +58,10 @@ class BlackmagicResolver:
             return blackmagic
 
         # print("Looking for Blackmagic...")
-        return self.get_port()
+        if probe := self.get_serial() or self.get_networked():
+            return probe
+
+        raise Exception("Please specify BLACKMAGIC=...")
 
 
 def generate(env):

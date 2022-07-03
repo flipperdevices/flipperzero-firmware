@@ -26,9 +26,10 @@ set "PYTHONHOME=%FBT_TOOLCHAIN_ROOT%\python"
 set "PATH=%FBT_TOOLCHAIN_ROOT%\python;%FBT_TOOLCHAIN_ROOT%\bin;%FBT_TOOLCHAIN_ROOT%\protoc\bin;%FBT_TOOLCHAIN_ROOT%\openocd\bin;%PATH%"
 set "PROMPT=(fbt) %PROMPT%"
 
-echo fbt build environment setup complete
-
 if not "%1" == "env" (
+    echo *********************************
+    echo *     fbt build environment     *
+    echo *********************************
     cd %FBT_ROOT%
-    cmd
+    cmd /k
 )
