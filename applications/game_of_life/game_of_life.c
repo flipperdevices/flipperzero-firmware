@@ -136,7 +136,8 @@ int32_t game_of_life_app(void* p) {
             if(event.input.key == InputKeyBack) {
                 // furiac_exit(NULL);
                 processing = false;
-                return 0;
+                release_mutex(&state_mutex, state);
+                break;
             }
         }
 
