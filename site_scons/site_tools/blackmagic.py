@@ -1,11 +1,12 @@
 import serial.tools.list_ports as list_ports
+import socket
 
 
 class BlackmagicResolver:
     BLACKMAGIC_HOSTNAME = "blackmagic.local"
+    BLACKMAGIC_PORT = 2345
 
     def __init__(self, env):
-        self.list_ports = list_ports
         self.env = env
 
     # On Win:
@@ -18,7 +19,7 @@ class BlackmagicResolver:
     #    'location': '0-1.3', 'name': 'cu.usbmodemblackmagic1',
     #    'location': '0-1.3', 'name': 'cu.usbmodemblackmagic3',
     def _find_probe(self):
-        ports = list(self.list_ports.grep("blackmagic"))
+        ports = list(list_ports.grep("blackmagic"))
         if len(ports) == 0:
             # print("Blackmagic probe serial port not found")
             pass
@@ -30,8 +31,6 @@ class BlackmagicResolver:
 
     # Look up blackmagic probe hostname with dns
     def _resolve_hostname(self):
-        import socket
-
         try:
             return socket.gethostbyname(self.BLACKMAGIC_HOSTNAME)
         except socket.gaierror:
@@ -50,7 +49,7 @@ class BlackmagicResolver:
         if not (probe := self._resolve_hostname()):
             return None
 
-        return f"tcp:{probe}:2345"
+        return f"tcp:{probe}:{self.BLACKMAGIC_PORT}"
 
     def __str__(self):
         # print("distenv blackmagic", self.env.subst("$BLACKMAGIC"))
