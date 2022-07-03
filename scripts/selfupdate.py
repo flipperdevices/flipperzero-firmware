@@ -104,7 +104,7 @@ class Main(App):
                 )
                 result = storage.read.until(storage.CLI_EOL)
                 if not b"Verifying" in result:
-                    self.logger.error(f"Unexpected response: {result.decode("ascii")}")
+                    self.logger.error(f"Unexpected response: {result.decode('ascii')}")
                     return -4
                 result = storage.read.until(storage.CLI_EOL)
                 if not result.startswith(b"OK"):
