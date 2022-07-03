@@ -90,7 +90,7 @@ struct SubGhz {
     SubGhzTestPacket* subghz_test_packet;
     string_t error_str;
     SubGhzSetting* setting;
-    SubGhzKeyBoard key_board;
+    SubGhzLock lock;
 };
 
 bool subghz_set_preset(SubGhz* subghz, const char* preset);

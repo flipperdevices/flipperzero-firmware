@@ -109,7 +109,7 @@ void subghz_scene_receiver_on_enter(void* context) {
         subghz->txrx->rx_key_state = SubGhzRxKeyStateStart;
     }
 
-    subghz_view_receiver_set_key_board_lock(subghz->subghz_receiver, subghz->key_board);
+    subghz_view_receiver_set_lock(subghz->subghz_receiver, subghz->lock);
 
     //Load history to receiver
     subghz_view_receiver_exit(subghz->subghz_receiver);
@@ -189,7 +189,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             return true;
             break;
         case SubGhzCustomEventViewReceiverUnlock:
-            subghz->key_board = SubGhzKeyBoardUnlock;
+            subghz->lock = SubGhzLockOff;
             return true;
             break;
         default:
@@ -205,7 +205,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             notification_message(subghz->notifications, &sequence_blink_cyan_10);
             break;
         case SubGhzNotificationStateRxDone:
-            if(subghz->key_board != SubGhzKeyBoardLock) {
+            if(subghz->lock != SubGhzLockOn) {
                 notification_message(subghz->notifications, &subghs_sequence_rx);
             } else {
                 notification_message(subghz->notifications, &subghs_sequence_rx_locked);

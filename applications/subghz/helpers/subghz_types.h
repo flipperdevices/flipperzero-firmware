@@ -46,11 +46,11 @@ typedef enum {
     SubGhzLoadKeyStateOnlyRx,
 } SubGhzLoadKeyState;
 
-/** SubGhzKeyboard */
+/** SubGhzLock */
 typedef enum {
-    SubGhzKeyBoardUnlock,
-    SubGhzKeyBoardLock,
-} SubGhzKeyBoard;
+    SubGhzLockOff,
+    SubGhzLockOn,
+} SubGhzLock;
 
 typedef enum {
     SubGhzViewIdMenu,

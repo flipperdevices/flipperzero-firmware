@@ -218,7 +218,7 @@ bool subghz_scene_receiver_config_on_event(void* context, SceneManagerEvent even
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubGhzCustomEventSceneSettingLock) {
-            subghz->key_board = SubGhzKeyBoardLock;
+            subghz->lock = SubGhzLockOn;
             scene_manager_previous_scene(subghz->scene_manager);
             consumed = true;
         }
