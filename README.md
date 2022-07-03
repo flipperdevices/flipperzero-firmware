@@ -15,6 +15,9 @@ $ docker-compose exec dev ./fbt
 - Fixed M_STR1NG_UTF8_* issue on subghz_cli.c after mlib submodule gets updated
 - Game of Life update [thanks to atomsmasha](https://github.com/atomsmasha/flipperzero-firmware/blob/patch-1/applications/game_of_life/game_of_life.c)
 - Reverted mlib submodule and reverted M_STR1NG_UTF8_* fix
+- PicoPass/iClass changes from DEV [b3767d1](https://github.com/flipperdevices/flipperzero-firmware/pull/1298)
+- NFC changes from DEV [1975868](https://github.com/flipperdevices/flipperzero-firmware/pull/1341)
+- SubGHz changes from DEV [fea2bfa](https://github.com/flipperdevices/flipperzero-firmware/pull/1343)
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
 - - Note 1: If you don't have a subghz/assets folder, you should ensure you have made at least one clean flash with stock firmware and your SD card installed in order to ensure the database structure is built, otherwise it will not exist for alternative forks.
