@@ -29,11 +29,7 @@ void nfc_scene_start_on_enter(void* context) {
         nfc);
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(
-        submenu,
-        "Generate/Add Manually",
-        SubmenuIndexAddManualy,
-        nfc_scene_start_submenu_callback,
-        nfc);
+        submenu, "Add Manually", SubmenuIndexAddManualy, nfc_scene_start_submenu_callback, nfc);
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         submenu_add_item(
