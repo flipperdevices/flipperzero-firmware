@@ -57,6 +57,7 @@ typedef enum {
     SubGhzViewIdReceiver,
     SubGhzViewIdPopup,
     SubGhzViewIdTextInput,
+    SubGhzViewIdByteInput,
     SubGhzViewIdWidget,
     SubGhzViewIdTransmitter,
     SubGhzViewIdVariableItemList,

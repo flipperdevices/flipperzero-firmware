@@ -21,6 +21,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/byte_input.h>
 #include <gui/modules/widget.h>
 
 #include <subghz/scenes/subghz_scene.h>
@@ -38,6 +39,12 @@
 
 #define SUBGHZ_MAX_LEN_NAME 64
 
+typedef struct {
+    uint8_t fix[4];
+    uint8_t cnt[2];
+    uint8_t seed[4];
+} SecureData;
+
 struct SubGhzTxRx {
     SubGhzWorker* worker;
 
@@ -46,6 +53,7 @@ struct SubGhzTxRx {
     SubGhzTransmitter* transmitter;
     SubGhzProtocolDecoderBase* decoder_result;
     FlipperFormat* fff_data;
+    SecureData* secure_data;
 
     uint32_t frequency;
     FuriHalSubGhzPreset preset;
@@ -72,6 +80,7 @@ struct SubGhz {
     Submenu* submenu;
     Popup* popup;
     TextInput* text_input;
+    ByteInput* byte_input;
     Widget* widget;
     DialogsApp* dialogs;
     string_t file_path;
