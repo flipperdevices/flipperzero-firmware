@@ -145,10 +145,10 @@ void subghz_scene_receiver_on_enter(void* context) {
 
 bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
+    bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case SubGhzCustomEventViewReceiverBack:
-
             // Stop CC1101 Rx
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
@@ -169,28 +169,28 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_search_and_switch_to_previous_scene(
                     subghz->scene_manager, SubGhzSceneStart);
             }
-            return true;
+            consumed = true;
             break;
         case SubGhzCustomEventViewReceiverOK:
             subghz->txrx->idx_menu_chosen =
                 subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverInfo);
-            return true;
+            consumed = true;
             break;
         case SubGhzCustomEventViewReceiverConfig:
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             subghz->txrx->idx_menu_chosen =
                 subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverConfig);
-            return true;
+            consumed = true;
             break;
         case SubGhzCustomEventViewReceiverOffDisplay:
             notification_message(subghz->notifications, &sequence_display_backlight_off);
-            return true;
+            consumed = true;
             break;
         case SubGhzCustomEventViewReceiverUnlock:
             subghz->lock = SubGhzLockOff;
-            return true;
+            consumed = true;
             break;
         default:
             break;
@@ -216,7 +216,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             break;
         }
     }
-    return false;
+    return consumed;
 }
 
 void subghz_scene_receiver_on_exit(void* context) {
