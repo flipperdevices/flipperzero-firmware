@@ -21,7 +21,6 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/text_input.h>
-#include <gui/modules/byte_input.h>
 #include <gui/modules/widget.h>
 
 #include <subghz/scenes/subghz_scene.h>
@@ -47,7 +46,6 @@ struct SubGhzTxRx {
     SubGhzTransmitter* transmitter;
     SubGhzProtocolDecoderBase* decoder_result;
     FlipperFormat* fff_data;
-    SecureData* secure_data;
 
     uint32_t frequency;
     FuriHalSubGhzPreset preset;
@@ -74,7 +72,6 @@ struct SubGhz {
     Submenu* submenu;
     Popup* popup;
     TextInput* text_input;
-    ByteInput* byte_input;
     Widget* widget;
     DialogsApp* dialogs;
     string_t file_path;
@@ -95,23 +92,6 @@ struct SubGhz {
     SubGhzSetting* setting;
     SubGhzLock lock;
 };
-
-typedef enum {
-    SubGhzViewIdMenu,
-    SubGhzViewIdReceiver,
-    SubGhzViewIdPopup,
-    SubGhzViewIdTextInput,
-    SubGhzViewIdByteInput,
-    SubGhzViewIdWidget,
-    SubGhzViewIdTransmitter,
-    SubGhzViewIdVariableItemList,
-    SubGhzViewIdFrequencyAnalyzer,
-    SubGhzViewIdReadRAW,
-
-    SubGhzViewIdStatic,
-    SubGhzViewIdTestCarrier,
-    SubGhzViewIdTestPacket,
-} SubGhzViewId;
 
 bool subghz_set_preset(SubGhz* subghz, const char* preset);
 void subghz_get_frequency_modulation(SubGhz* subghz, string_t frequency, string_t modulation);
