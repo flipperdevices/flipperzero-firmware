@@ -586,15 +586,15 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                     //delete 1 char UTF
                     const char* str = string_get_cstr(input);
                     size_t size = 0;
-                    m_str1ng_utf8_state_e s = M_STR1NG_UTF8_STARTING;
+                    m_str1ng_utf8_state_e s = M_STRING_UTF8_STARTING;
                     string_unicode_t u = 0;
                     string_reset(sysmsg);
                     while(*str) {
                         m_str1ng_utf8_decode(*str, &s, &u);
-                        if((s == M_STR1NG_UTF8_ERROR) || s == M_STR1NG_UTF8_STARTING) {
+                        if((s == M_STRING_UTF8_ERROR) || s == M_STRING_UTF8_STARTING) {
                             string_push_u(sysmsg, u);
                             if(++size >= len - 1) break;
-                            s = M_STR1NG_UTF8_STARTING;
+                            s = M_STRING_UTF8_STARTING;
                         }
                         str++;
                     }
