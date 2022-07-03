@@ -205,7 +205,7 @@ def link_elf_dir_as_latest(env, elf_target):
     # Ugly way to check if updater-related targets were requested
     elf_dir = elf_target.Dir(".")
     explicitly_building_updater = False
-    # print("BUILD_TARGETS:", ','.join(BUILD_TARGETS))
+    # print("BUILD_TARGETS:", ",".join(BUILD_TARGETS))
     for build_target in BUILD_TARGETS:
         # print(">>> ", str(build_target))
         if "updater" in str(build_target):
@@ -213,11 +213,12 @@ def link_elf_dir_as_latest(env, elf_target):
 
     latest_dir = env.Dir("#build/latest")
 
-    link_this_dir = True
-    if explicitly_building_updater:
-        # If updater is explicitly requested, link to the latest updater
-        # Otherwise, link to the latest firmware
-        link_this_dir = not env["IS_BASE_FIRMWARE"]
+    is_updater = not env["IS_BASE_FIRMWARE"]
+    # If updater is explicitly requested, link to the latest updater
+    # Otherwise, link to the latest firmware
+    link_this_dir = (is_updater and explicitly_building_updater) or (
+        not is_updater and not explicitly_building_updater
+    )
 
     if link_this_dir:
         print(f"Setting {elf_dir} as latest built dir")
@@ -249,21 +250,6 @@ Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_dfu", fwdfu)
 fwdump = fwenv.ObjDump("${FIRMWARE_BUILD_CFG}")
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_list", fwdump)
 
-# # Additional FW-related pseudotargets
-# flash = fwenv["FW_FLASH"] = fwenv.OpenOCDFlash(
-#     "#build/oocd-${FIRMWARE_BUILD_CFG}-flash.flag",
-#     "${FIRMWARE_BUILD_CFG}",
-#     OPENOCD_COMMAND=[
-#         "-c",
-#         "program ${SOURCE.posix} reset exit ${IMAGE_BASE_ADDRESS}",
-#     ],
-# )
-# if fwenv["FORCE"]:
-#     fwenv.AlwaysBuild(flash)
-# fwenv.Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)
-# if fwenv["IS_BASE_FIRMWARE"]:
-#     fwenv.Alias("flash", flash)
-
 
 # Compile DB generation
 fwcdb = fwenv["FW_CDB"] = fwenv.CompilationDatabase("compile_commands.json")
@@ -274,7 +260,7 @@ artifacts = [
     fwhex,
     fwbin,
     fwdfu,
-    env["FW_VERSION_JSON"],
+    fwenv["FW_VERSION_JSON"],
     fwcdb,
 ]
 fwenv["FW_ARTIFACTS"] = artifacts
