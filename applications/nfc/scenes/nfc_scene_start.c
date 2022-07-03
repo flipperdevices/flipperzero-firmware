@@ -4,7 +4,6 @@ enum SubmenuIndex {
     SubmenuIndexRead,
     SubmenuIndexRunScript,
     SubmenuIndexSaved,
-    SubmenuIndexGenerate,
     SubmenuIndexAddManualy,
     SubmenuIndexDebug,
 };
