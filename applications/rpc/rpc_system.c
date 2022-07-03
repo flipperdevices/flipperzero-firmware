@@ -280,6 +280,8 @@ static void rpc_system_system_update_request_process(const PB_Main* request, voi
     /* RPC enum does not have such entry; setting to closest one */
     if(update_prepare_result == UpdatePrepareResultOutdatedManifestVersion) {
         update_prepare_result = UpdatePrepareResultManifestInvalid;
+    } else if(update_prepare_result == UpdatePrepareResultIntFull) {
+        update_prepare_result = UpdatePrepareResultManifestPointerError;
     }
 
     PB_Main* response = malloc(sizeof(PB_Main));
