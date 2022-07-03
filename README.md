@@ -19,7 +19,7 @@ $ docker-compose exec dev ./fbt
 - PicoPass/iClass changes from DEV [b3767d1](https://github.com/flipperdevices/flipperzero-firmware/pull/1298)
 - NFC changes from DEV [1975868](https://github.com/flipperdevices/flipperzero-firmware/pull/1341)
 - SubGHz changes from DEV [fea2bfa](https://github.com/flipperdevices/flipperzero-firmware/pull/1343)
-- **Reviewing latest compile issues due to subghz files, use release version in the meantime.**
+- Fixes for compile errors on ByteInput items in SubGHz
 
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
