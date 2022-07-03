@@ -1,49 +1,4 @@
 #include "picopass.h"
-#include <furi.h>
-#include <gui/gui.h>
-#include <input/input.h>
-#include <stdlib.h>
-#include <st25r3916.h>
-#include <rfal_analogConfig.h>
-#include <rfal_rf.h>
-#include <rfal_nfc.h>
-
-#include <storage/storage.h>
-#include <lib/toolbox/path.h>
-
-#define TAG "PicoPass"
-
-typedef enum {
-    EventTypeTick,
-    EventTypeKey,
-} EventType;
-
-typedef struct {
-    EventType type;
-    InputEvent input;
-} PluginEvent;
-
-typedef struct {
-    bool valid;
-    uint8_t bitLength;
-    uint8_t FacilityCode;
-    uint16_t CardNumber;
-} WiegandRecord;
-
-typedef struct {
-    bool biometrics;
-    uint8_t encryption;
-    uint8_t credential[8];
-    uint8_t pin0[8];
-    uint8_t pin1[8];
-    WiegandRecord record;
-} PACS;
-
-enum State { INIT, READY, RESULT };
-typedef struct {
-    enum State state;
-    PACS pacs;
-} PluginState;
 
 uint8_t iclass_key[8] = {0xaf, 0xa7, 0x85, 0xa7, 0xda, 0xb3, 0x33, 0x78};
 uint8_t iclass_decryptionkey[16] =
@@ -149,7 +104,7 @@ ReturnCode disable_field(ReturnCode rc) {
     return rc;
 }
 
-ReturnCode picopass_read_card(ApplicationArea* AA1) {
+ReturnCode picopass_read_card() {
     rfalPicoPassIdentifyRes idRes;
     rfalPicoPassSelectRes selRes;
     rfalPicoPassReadCheckRes rcRes;
@@ -212,7 +167,7 @@ ReturnCode picopass_read_card(ApplicationArea* AA1) {
 
     for(size_t i = 0; i < 4; i++) {
         FURI_LOG_D(TAG, "rfalPicoPassPollerReadBlock block %d", i + 6);
-        err = rfalPicoPassPollerReadBlock(i + 6, &(AA1->block[i]));
+        err = rfalPicoPassPollerReadBlock(i + 6, &(AA1.block[i]));
         if(err != ERR_NONE) {
             FURI_LOG_E(TAG, "rfalPicoPassPollerReadBlock error %d", err);
             return disable_field(err);
@@ -268,7 +223,7 @@ int32_t picopass_app(void* p) {
                         break;
                     case InputKeyOk:
                         FURI_LOG_D(TAG, "Input OK");
-                        err = picopass_read_card(&AA1);
+                        err = picopass_read_card();
                         if(err != ERR_NONE) {
                             FURI_LOG_E(TAG, "picopass_read_card error %d", err);
                             plugin_state->state = READY;
