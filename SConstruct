@@ -111,11 +111,11 @@ if GetOption("fullenv"):
     )
 
     distenv.PhonyTarget(
-         "updater_blackmagic",
-         "${GDBPYCOM}",
-         source=updater_env["FW_ELF"],
-         GDBOPTS=distenv.subst("$GDBOPTS_BLACKMAGIC"),
-         GDBREMOTE="${BLACKMAGIC_ADDR}",
+        "updater_blackmagic",
+        "${GDBPYCOM}",
+        source=updater_env["FW_ELF"],
+        GDBOPTS=distenv.subst("$GDBOPTS_BLACKMAGIC"),
+        GDBREMOTE="${BLACKMAGIC_ADDR}",
     )
 
     # Installation over USB & CLI
@@ -203,4 +203,12 @@ distenv.PhonyTarget(
     "format",
     "${PYTHON3} scripts/lint.py format ${LINT_SOURCES}",
     LINT_SOURCES=firmware_env["LINT_SOURCES"],
+)
+
+
+# Find blackmagic probe
+
+distenv.PhonyTarget(
+    "get_blackmagic",
+    "@echo $( ${BLACKMAGIC_ADDR} $)",
 )

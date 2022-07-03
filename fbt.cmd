@@ -1,7 +1,7 @@
 @echo off
 
 
-if not exist "%FBT_ROOT%\.git" (
+if not exist ".git" (
     echo ".git" directory not found, please clone repo via "git clone --recursive"
     exit /B 1
 )
