@@ -1,3 +1,6 @@
+from SCons.Errors import StopError
+
+
 class BlackmagicResolver:
     BLACKMAGIC_HOSTNAME = "blackmagic.local"
 
@@ -21,7 +24,7 @@ class BlackmagicResolver:
             # Blackmagic probe serial port not found, will be handled later
             pass
         elif len(ports) > 2:
-            print("More than one Blackmagic probe found")
+            raise StopError("More than one Blackmagic probe found")
         else:
             # If you're getting any issues with auto lookup, uncomment this
             # print("\n".join([f"{p.device} {vars(p)}" for p in ports]))
