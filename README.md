@@ -13,6 +13,7 @@ $ docker-compose up -d
 $ docker-compose exec dev ./fbt
 ```
 
+## [Please Check Poll for Games To Remove](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/77)
 ## Latest Updates:
 - Updated Picopass Reader to not require SD card assets [Thanks again to Bettse](https://github.com/flipperdevices/flipperzero-firmware/pull/1360)
 - Now showing Picopass Reader in Plugins.
