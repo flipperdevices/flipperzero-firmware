@@ -1,6 +1,5 @@
 #include "../subghz_i.h"
 #include "../views/receiver.h"
-#include <lib/subghz/protocols/raw.h>
 
 static const NotificationSequence subghs_sequence_rx = {
     &message_green_255,
