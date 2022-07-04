@@ -6,6 +6,7 @@ enum SubGhzSettingIndex {
     SubGhzSettingIndexFrequency,
     SubGhzSettingIndexHopping,
     SubGhzSettingIndexModulation,
+    SubGhzSettingIndexDetectRaw,
     SubGhzSettingIndexLock,
 };
 
