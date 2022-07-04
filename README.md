@@ -14,9 +14,16 @@ $ docker-compose exec dev ./fbt
 ```
 
 ## [Please Check Poll for Games To Remove](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/77)
-## Latest Updates:
-- Updated Picopass Reader to not require SD card assets [Thanks again to Bettse](https://github.com/flipperdevices/flipperzero-firmware/pull/1360)
-- Now showing Picopass Reader in Plugins.
+## Latest Updates (all from OFW):
+- [Add iClass keys to source #1360 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1360)
+- [nfc: On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
+- [RPC App control commands #1350 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1350)
+- [Updater fixes related to /int handling #1359 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1359)
+- [FuriHal: RTC recovery routine and ext3v3 enabled on start #1357 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1357)
+- [Add GPIO control through RPC #1282 (By SamyelYvon)](https://github.com/flipperdevices/flipperzero-firmware/pull/1282)
+- [fbt: initial blackmagic support #1362 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1362)
+- [fbt: added support for FBT_NO_SYNC #1363 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1363)
+- [refactor: small simplification in direction calculation [snake] #1361 (By QtRoS)](https://github.com/flipperdevices/flipperzero-firmware/pull/1361)
 
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -53,9 +60,7 @@ $ docker-compose exec dev ./fbt
 - SubGHz: Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
 - SubGHz: Protocols Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 ## Open PRs Checkedout & Not Merged In Main:
-- [On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
 - [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
-- [Add iClass keys to source #1360 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1360)
 ## Games:
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048)
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
