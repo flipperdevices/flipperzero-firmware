@@ -20,10 +20,10 @@ uint32_t pwdgen_xiaomi(FuriHalNfcDevData* data) {
     mbedtls_sha1(data->uid, data->uid_len, hash);
 
     uint32_t pwd = 0;
-    pwd |= (hash[ hash[0] % 20 ]) << 24;
-    pwd |= (hash[(hash[0] + 5) % 20 ]) << 16;
-    pwd |= (hash[(hash[0] + 13) % 20 ]) << 8;
-    pwd |= (hash[(hash[0] + 17) % 20 ]);
+    pwd |= (hash[hash[0] % 20]) << 24;
+    pwd |= (hash[(hash[0] + 5) % 20]) << 16;
+    pwd |= (hash[(hash[0] + 13) % 20]) << 8;
+    pwd |= (hash[(hash[0] + 17) % 20]);
 
     return pwd;
 }
@@ -155,9 +155,7 @@ bool mf_ultralight_read_version(
     return version_read;
 }
 
-bool mf_ultralight_authenticate(
-    FuriHalNfcTxRxContext* tx_rx,
-    uint32_t key) {
+bool mf_ultralight_authenticate(FuriHalNfcTxRxContext* tx_rx, uint32_t key) {
     bool authenticated = false;
 
     do {
@@ -175,7 +173,7 @@ bool mf_ultralight_authenticate(
             break;
         }
 
-        if (tx_rx->tx_data[0] <= 0x09) {
+        if(tx_rx->tx_data[0] <= 0x09) {
             FURI_LOG_D(TAG, "Authentication failed");
             break;
         }
@@ -539,12 +537,7 @@ bool mf_ultralight_read_pages(
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
     MfUltralightData* data) {
-
-    pwd_generator pwd_gens[] = {
-        pwdgen_default,
-        pwdgen_amiibo,
-        pwdgen_xiaomi
-    };
+    pwd_generator pwd_gens[] = {pwdgen_default, pwdgen_amiibo, pwdgen_xiaomi};
 
     uint8_t pages_read_cnt = 0;
     uint8_t curr_sector_index = 0xff;
@@ -582,8 +575,7 @@ bool mf_ultralight_read_pages(
 
             uint32_t key;
             bool key_found = false;
-            for (size_t j = 0; j < (sizeof(pwd_gens) / sizeof(int32_t)); j++)
-            {
+            for(size_t j = 0; j < (sizeof(pwd_gens) / sizeof(int32_t)); j++) {
                 furi_hal_nfc_sleep();
                 furi_hal_nfc_activate_nfca(300, NULL);
 
@@ -595,7 +587,7 @@ bool mf_ultralight_read_pages(
                 }
             }
 
-            if (key_found) {
+            if(key_found) {
                 continue;
             } else {
                 FURI_LOG_D(
@@ -605,7 +597,7 @@ bool mf_ultralight_read_pages(
                     i + (valid_pages > 4 ? 4 : valid_pages) - 1);
                 break;
             }
-        } else if (tx_rx->rx_bits < 16 * 8) {
+        } else if(tx_rx->rx_bits < 16 * 8) {
             FURI_LOG_D(
                 TAG,
                 "Failed to read pages %d - %d",
