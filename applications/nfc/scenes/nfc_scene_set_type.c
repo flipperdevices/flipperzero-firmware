@@ -24,14 +24,14 @@ void nfc_scene_set_type_on_enter(void* context) {
         submenu, "NFC-A 7-bytes UID", SubmenuIndexNFCA7, nfc_scene_set_type_submenu_callback, nfc);
     submenu_add_item(
         submenu, "NFC-A 4-bytes UID", SubmenuIndexNFCA4, nfc_scene_set_type_submenu_callback, nfc);
-    
+
     // Generators
     int i = SubmenuIndexGeneratorsStart;
     for(const NfcGenerator* const* generator = nfc_generators; *generator != NULL;
         ++generator, ++i) {
         submenu_add_item(submenu, (*generator)->name, i, nfc_scene_set_type_submenu_callback, nfc);
     }
-    
+
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }
 
