@@ -1,5 +1,6 @@
 #pragma once
 
+#include "helpers/subghz_types.h"
 #include "subghz.h"
 #include "views/receiver.h"
 #include "views/transmitter.h"
@@ -35,53 +36,9 @@
 #include <gui/modules/variable_item_list.h>
 #include <lib/toolbox/path.h>
 
+#include "rpc/rpc_app.h"
+
 #define SUBGHZ_MAX_LEN_NAME 64
-
-/** SubGhzNotification state */
-typedef enum {
-    SubGhzNotificationStateStarting,
-    SubGhzNotificationStateIDLE,
-    SubGhzNotificationStateTx,
-    SubGhzNotificationStateRx,
-    SubGhzNotificationStateRxDone,
-} SubGhzNotificationState;
-
-/** SubGhzTxRx state */
-typedef enum {
-    SubGhzTxRxStateIDLE,
-    SubGhzTxRxStateRx,
-    SubGhzTxRxStateTx,
-    SubGhzTxRxStateSleep,
-} SubGhzTxRxState;
-
-/** SubGhzHopperState state */
-typedef enum {
-    SubGhzHopperStateOFF,
-    SubGhzHopperStateRunnig,
-    SubGhzHopperStatePause,
-    SubGhzHopperStateRSSITimeOut,
-} SubGhzHopperState;
-
-/** SubGhzRxKeyState state */
-typedef enum {
-    SubGhzRxKeyStateIDLE,
-    SubGhzRxKeyStateNoSave,
-    SubGhzRxKeyStateNeedSave,
-    SubGhzRxKeyStateBack,
-    SubGhzRxKeyStateStart,
-    SubGhzRxKeyStateAddKey,
-    SubGhzRxKeyStateExit,
-    SubGhzRxKeyStateRAWLoad,
-    SubGhzRxKeyStateRAWSave,
-} SubGhzRxKeyState;
-
-/** SubGhzLoadKeyState state */
-typedef enum {
-    SubGhzLoadKeyStateUnknown,
-    SubGhzLoadKeyStateOK,
-    SubGhzLoadKeyStateParseErr,
-    SubGhzLoadKeyStateOnlyRx,
-} SubGhzLoadKeyState;
 
 struct SubGhzTxRx {
     SubGhzWorker* worker;
@@ -135,23 +92,10 @@ struct SubGhz {
     SubGhzTestPacket* subghz_test_packet;
     string_t error_str;
     SubGhzSetting* setting;
+    SubGhzLock lock;
+
+    void* rpc_ctx;
 };
-
-typedef enum {
-    SubGhzViewIdMenu,
-    SubGhzViewIdReceiver,
-    SubGhzViewIdPopup,
-    SubGhzViewIdTextInput,
-    SubGhzViewIdWidget,
-    SubGhzViewIdTransmitter,
-    SubGhzViewIdVariableItemList,
-    SubGhzViewIdFrequencyAnalyzer,
-    SubGhzViewIdReadRAW,
-
-    SubGhzViewIdStatic,
-    SubGhzViewIdTestCarrier,
-    SubGhzViewIdTestPacket,
-} SubGhzViewId;
 
 bool subghz_set_preset(SubGhz* subghz, const char* preset);
 void subghz_get_frequency_modulation(SubGhz* subghz, string_t frequency, string_t modulation);
@@ -162,7 +106,7 @@ void subghz_sleep(SubGhz* subghz);
 bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format);
 void subghz_tx_stop(SubGhz* subghz);
 void subghz_dialog_message_show_only_rx(SubGhz* subghz);
-bool subghz_key_load(SubGhz* subghz, const char* file_path);
+bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog);
 bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len);
 bool subghz_save_protocol_to_file(
     SubGhz* subghz,
