@@ -18,11 +18,12 @@ class BlackmagicResolver:
 
         ports = list(list_ports.grep("blackmagic"))
         if len(ports) == 0:
-            # print("Blackmagic probe serial port not found")
+            # Blackmagic probe serial port not found, will be handled later
             pass
         elif len(ports) > 2:
             print("More than one Blackmagic probe found")
         else:
+            # If you're getting any issues with auto lookup, uncomment this
             # print("\n".join([f"{p.device} {vars(p)}" for p in ports]))
             return sorted(ports, key=lambda p: f"{p.location}_{p.name}")[0]
 

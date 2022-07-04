@@ -34,7 +34,6 @@ def PhonyTarget(env, name, action, source=None, **kw):
         source = []
     phony_name = "phony_" + name
     env.Pseudo(phony_name)
-    # print(f"phony target {phony_name}: action {action}, kw {kw}")
     command = env.Command(phony_name, source, action, **kw)
     env.AlwaysBuild(env.Alias(name, command))
     return command
