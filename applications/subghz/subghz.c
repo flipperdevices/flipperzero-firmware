@@ -57,7 +57,7 @@ static bool subghz_rpc_command_callback(RpcAppSystemEvent event, const char* arg
             }
         }
     } else if(event == RpcAppEventButtonPress) {
-        if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
+        if(subghz->txrx->txrx_state == SubGhzTxRxStateSleep) {
             result = subghz_tx_start(subghz, subghz->txrx->fff_data);
         }
     } else if(event == RpcAppEventButtonRelease) {
