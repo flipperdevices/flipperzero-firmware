@@ -1,5 +1,6 @@
 @echo off
 
+if not [%FBT_ROOT%] == [] goto already_set
 set "FBT_ROOT=%~dp0\..\..\"
 pushd %FBT_ROOT%
 set "FBT_ROOT=%cd%"
@@ -25,6 +26,8 @@ set "HOME=%USERPROFILE%"
 set "PYTHONHOME=%FBT_TOOLCHAIN_ROOT%\python"
 set "PATH=%FBT_TOOLCHAIN_ROOT%\python;%FBT_TOOLCHAIN_ROOT%\bin;%FBT_TOOLCHAIN_ROOT%\protoc\bin;%FBT_TOOLCHAIN_ROOT%\openocd\bin;%PATH%"
 set "PROMPT=(fbt) %PROMPT%"
+
+:already_set
 
 if not "%1" == "env" (
     echo *********************************
