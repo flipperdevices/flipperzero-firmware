@@ -10,6 +10,7 @@
 #include "storage/storage.h"
 #include <stdint.h>
 #include <lib/toolbox/md5.h>
+#include <lib/toolbox/path.h>
 #include <update_util/lfs_backup.h>
 
 #define TAG "RpcStorage"
@@ -245,18 +246,23 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
         FileInfo fileinfo;
         char* name = malloc(MAX_NAME_LENGTH + 1);
         if(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
-            if(i == COUNT_OF(list->file)) {
-                list->file_count = i;
-                response.has_next = true;
-                rpc_send_and_release(session, &response);
-                i = 0;
+            if(path_contains_only_ascii(name)) {
+                if(i == COUNT_OF(list->file)) {
+                    list->file_count = i;
+                    response.has_next = true;
+                    rpc_send_and_release(session, &response);
+                    i = 0;
+                }
+                list->file[i].type = (fileinfo.flags & FSF_DIRECTORY) ?
+                                         PB_Storage_File_FileType_DIR :
+                                         PB_Storage_File_FileType_FILE;
+                list->file[i].size = fileinfo.size;
+                list->file[i].data = NULL;
+                list->file[i].name = name;
+                ++i;
+            } else {
+                free(name);
             }
-            list->file[i].type = (fileinfo.flags & FSF_DIRECTORY) ? PB_Storage_File_FileType_DIR :
-                                                                    PB_Storage_File_FileType_FILE;
-            list->file[i].size = fileinfo.size;
-            list->file[i].data = NULL;
-            list->file[i].name = name;
-            ++i;
         } else {
             list->file_count = i;
             finish = true;
@@ -345,6 +351,14 @@ static void rpc_system_storage_write_process(const PB_Main* request, void* conte
 
     bool result = true;
 
+    if(!path_contains_only_ascii(request->content.storage_write_request.path)) {
+        rpc_storage->current_command_id = request->command_id;
+        rpc_send_and_release_empty(
+            session, rpc_storage->current_command_id, PB_CommandStatus_ERROR_STORAGE_INVALID_NAME);
+        rpc_system_storage_reset_state(rpc_storage, session, false);
+        return;
+    }
+
     if((request->command_id != rpc_storage->current_command_id) &&
        (rpc_storage->state == RpcStorageStateWriting)) {
         rpc_system_storage_reset_state(rpc_storage, session, true);
@@ -384,13 +398,18 @@ static void rpc_system_storage_write_process(const PB_Main* request, void* conte
 
 static bool rpc_system_storage_is_dir_is_empty(Storage* fs_api, const char* path) {
     FileInfo fileinfo;
-    bool is_dir_is_empty = false;
+    bool is_dir_is_empty = true;
     FS_Error error = storage_common_stat(fs_api, path, &fileinfo);
     if((error == FSE_OK) && (fileinfo.flags & FSF_DIRECTORY)) {
         File* dir = storage_file_alloc(fs_api);
         if(storage_dir_open(dir, path)) {
             char* name = malloc(MAX_NAME_LENGTH);
-            is_dir_is_empty = !storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH);
+            while(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
+                if(path_contains_only_ascii(name)) {
+                    is_dir_is_empty = false;
+                    break;
+                }
+            }
             free(name);
         }
         storage_dir_close(dir);
@@ -458,8 +477,12 @@ static void rpc_system_storage_mkdir_process(const PB_Main* request, void* conte
     Storage* fs_api = furi_record_open("storage");
     char* path = request->content.storage_mkdir_request.path;
     if(path) {
-        FS_Error error = storage_common_mkdir(fs_api, path);
-        status = rpc_system_storage_get_error(error);
+        if(path_contains_only_ascii(path)) {
+            FS_Error error = storage_common_mkdir(fs_api, path);
+            status = rpc_system_storage_get_error(error);
+        } else {
+            status = PB_CommandStatus_ERROR_STORAGE_INVALID_NAME;
+        }
     } else {
         status = PB_CommandStatus_ERROR_INVALID_PARAMETERS;
     }
@@ -551,11 +574,15 @@ static void rpc_system_storage_rename_process(const PB_Main* request, void* cont
 
     Storage* fs_api = furi_record_open("storage");
 
-    FS_Error error = storage_common_rename(
-        fs_api,
-        request->content.storage_rename_request.old_path,
-        request->content.storage_rename_request.new_path);
-    status = rpc_system_storage_get_error(error);
+    if(path_contains_only_ascii(request->content.storage_rename_request.new_path)) {
+        FS_Error error = storage_common_rename(
+            fs_api,
+            request->content.storage_rename_request.old_path,
+            request->content.storage_rename_request.new_path);
+        status = rpc_system_storage_get_error(error);
+    } else {
+        status = PB_CommandStatus_ERROR_STORAGE_INVALID_NAME;
+    }
 
     furi_record_close("storage");
     rpc_send_and_release_empty(session, request->command_id, status);

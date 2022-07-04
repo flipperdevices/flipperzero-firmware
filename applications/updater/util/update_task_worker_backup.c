@@ -67,7 +67,6 @@ static bool update_task_post_update(UpdateTask* update_task) {
             string_get_cstr(update_task->update_path), LFS_BACKUP_DEFAULT_FILENAME, file_path);
 
         update_task_set_progress(update_task, UpdateTaskStageLfsRestore, 0);
-        update_operation_disarm();
 
         CHECK_RESULT(lfs_backup_unpack(update_task->storage, string_get_cstr(file_path)));
 
@@ -93,6 +92,19 @@ static bool update_task_post_update(UpdateTask* update_task) {
                 CHECK_RESULT(tar_archive_unpack_to(archive, EXT_PATH));
             }
         }
+
+        if(update_task->state.groups & UpdateTaskStageGroupSplashscreen) {
+            update_task_set_progress(update_task, UpdateTaskStageSplashscreenInstall, 0);
+            string_t tmp_path;
+            string_init_set(tmp_path, update_task->update_path);
+            path_append(tmp_path, string_get_cstr(update_task->manifest->splash_file));
+            if(storage_common_copy(
+                   update_task->storage, string_get_cstr(tmp_path), "/int/slideshow") != FSE_OK) {
+                // actually, not critical
+            }
+            string_clear(tmp_path);
+            update_task_set_progress(update_task, UpdateTaskStageSplashscreenInstall, 100);
+        }
         success = true;
     } while(false);
 
@@ -104,28 +116,32 @@ static bool update_task_post_update(UpdateTask* update_task) {
 int32_t update_task_worker_backup_restore(void* context) {
     furi_assert(context);
     UpdateTask* update_task = context;
-    bool success = false;
 
-    FuriHalRtcBootMode boot_mode = furi_hal_rtc_get_boot_mode();
+    FuriHalRtcBootMode boot_mode = update_task->boot_mode;
     if((boot_mode != FuriHalRtcBootModePreUpdate) && (boot_mode != FuriHalRtcBootModePostUpdate)) {
-        /* no idea how we got here. Clear to normal boot */
-        update_operation_disarm();
+        /* no idea how we got here. Do nothing */
         return UPDATE_TASK_NOERR;
     }
 
-    if(!update_task_parse_manifest(update_task)) {
-        return UPDATE_TASK_FAILED;
-    }
+    bool success = false;
+    do {
+        if(!update_task_parse_manifest(update_task)) {
+            break;
+        }
 
-    /* Waiting for BT service to 'start', so we don't race for boot mode flag */
-    furi_record_open("bt");
-    furi_record_close("bt");
+        /* Waiting for BT service to 'start', so we don't race for boot mode flag */
+        furi_record_open("bt");
+        furi_record_close("bt");
 
-    if(boot_mode == FuriHalRtcBootModePreUpdate) {
-        success = update_task_pre_update(update_task);
-    } else if(boot_mode == FuriHalRtcBootModePostUpdate) {
-        success = update_task_post_update(update_task);
-    }
+        if(boot_mode == FuriHalRtcBootModePreUpdate) {
+            success = update_task_pre_update(update_task);
+        } else if(boot_mode == FuriHalRtcBootModePostUpdate) {
+            success = update_task_post_update(update_task);
+            if(success) {
+                update_operation_disarm();
+            }
+        }
+    } while(false);
 
     if(!success) {
         update_task_set_progress(update_task, UpdateTaskStageError, 0);
