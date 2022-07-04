@@ -14,6 +14,7 @@ uint32_t pwdgen_default(FuriHalNfcDevData* data) {
     return 0xFFFFFFFF;
 }
 
+// Algorithms from: https://github.com/RfidResearchGroup/proxmark3/blob/0f6061c16f072372b7d4d381911f1542afbc3a69/common/generator.c#L110
 uint32_t pwdgen_xiaomi(FuriHalNfcDevData* data) {
     uint8_t hash[20];
     mbedtls_sha1(data->uid, data->uid_len, hash);
