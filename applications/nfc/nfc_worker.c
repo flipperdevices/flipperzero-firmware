@@ -294,7 +294,7 @@ void nfc_worker_read_mifare_ultralight(NfcWorker* nfc_worker) {
             if(nfc_data->type == FuriHalNfcTypeA &&
                mf_ul_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
                 FURI_LOG_D(TAG, "Found Mifare Ultralight tag. Start reading");
-                if(mf_ul_read_card(&tx_rx, &reader, &data)) {
+                if(mf_ul_read_card(nfc_data, &tx_rx, &reader, &data)) {
                     result->protocol = NfcDeviceProtocolMifareUl;
                     result->mf_ul_data = data;
                     // Notify caller and exit

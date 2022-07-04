@@ -72,7 +72,6 @@ libs = env.BuildModules(
         "subghz",
         "appframe",
         "misc",
-        "mbedtls",
         "loclass",
     ],
 )

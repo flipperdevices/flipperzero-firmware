@@ -1,9 +1,43 @@
 #include <limits.h>
+#include <mbedtls/sha1.h>
 #include "mifare_ultralight.h"
 #include <furi.h>
+#include "furi_hal_nfc.h"
 #include <m-string.h>
 
 #define TAG "MfUltralight"
+
+typedef uint32_t (*pwd_generator)(FuriHalNfcDevData*);
+
+uint32_t pwdgen_default(FuriHalNfcDevData* data) {
+    UNUSED(data);
+    return 0xFFFFFFFF;
+}
+
+uint32_t pwdgen_xiaomi(FuriHalNfcDevData* data) {
+    uint8_t hash[20];
+    mbedtls_sha1(data->uid, data->uid_len, hash);
+
+    uint32_t pwd = 0;
+    pwd |= (hash[ hash[0] % 20 ]) << 24;
+    pwd |= (hash[(hash[0] + 5) % 20 ]) << 16;
+    pwd |= (hash[(hash[0] + 13) % 20 ]) << 8;
+    pwd |= (hash[(hash[0] + 17) % 20 ]);
+
+    return pwd;
+}
+
+uint32_t pwdgen_amiibo(FuriHalNfcDevData* data) {
+    uint8_t* uid = data->uid;
+
+    uint32_t pwd = 0;
+    pwd |= (uid[1] ^ uid[3] ^ 0xAA) << 24;
+    pwd |= (uid[2] ^ uid[4] ^ 0x55) << 16;
+    pwd |= (uid[3] ^ uid[5] ^ 0xAA) << 8;
+    pwd |= uid[4] ^ uid[6] ^ 0x55;
+
+    return pwd;
+}
 
 bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
     if((ATQA0 == 0x44) && (ATQA1 == 0x00) && (SAK == 0x00)) {
@@ -122,16 +156,17 @@ bool mf_ultralight_read_version(
 
 bool mf_ultralight_authenticate(
     FuriHalNfcTxRxContext* tx_rx,
-    uint8_t* key) {
+    uint32_t key) {
     bool authenticated = false;
 
     do {
         FURI_LOG_D(TAG, "Authenticating");
         tx_rx->tx_data[0] = MF_UL_AUTH;
-        tx_rx->tx_data[1] = key[0];
-        tx_rx->tx_data[2] = key[1];
-        tx_rx->tx_data[3] = key[2];
-        tx_rx->tx_data[4] = key[3];
+        tx_rx->tx_data[1] = (key >> 24) & 0xFF;
+        tx_rx->tx_data[2] = (key >> 16) & 0xFF;
+        tx_rx->tx_data[3] = (key >> 8) & 0xFF;
+        tx_rx->tx_data[4] = key & 0xFF;
+
         tx_rx->tx_bits = 40;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
         if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
@@ -499,9 +534,17 @@ static bool mf_ultralight_sector_select(FuriHalNfcTxRxContext* tx_rx, uint8_t se
 }
 
 bool mf_ultralight_read_pages(
+    FuriHalNfcDevData* info_data,
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
     MfUltralightData* data) {
+
+    pwd_generator pwd_gens[] = {
+        pwdgen_default,
+        pwdgen_amiibo,
+        pwdgen_xiaomi
+    };
+
     uint8_t pages_read_cnt = 0;
     uint8_t curr_sector_index = 0xff;
     reader->pages_read = 0;
@@ -522,7 +565,8 @@ bool mf_ultralight_read_pages(
         tx_rx->tx_data[1] = tag_page;
         tx_rx->tx_bits = 16;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-        if(!furi_hal_nfc_tx_rx(tx_rx, 50) || tx_rx->rx_bits < 16 * 8) {
+
+        if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
             FURI_LOG_D(
                 TAG,
                 "Failed to read pages %d - %d",
@@ -533,20 +577,40 @@ bool mf_ultralight_read_pages(
 
         if(tx_rx->rx_bits == 4 && tx_rx->rx_data[0] >> 4 == 0x00) {
             // This page is locked by a password
-            // We need to reset NFC and authenticate
             i -= 4;
 
-            furi_hal_nfc_sleep();
-            furi_hal_nfc_activate_nfca(300, NULL);
+            uint32_t key;
+            bool key_found = false;
+            for (size_t j = 0; j < (sizeof(pwd_gens) / sizeof(int32_t)); j++)
+            {
+                furi_hal_nfc_sleep();
+                furi_hal_nfc_activate_nfca(300, NULL);
 
-            uint8_t key[] = {0x00, 0x00, 0x00, 0x00};
-            if(!mf_ultralight_authenticate(tx_rx, key)) {
-                FURI_LOG_D(TAG, "Failed to read pages %d - %d", i, i + 3);
-                FURI_LOG_D(TAG, "Failed to authenticate");
-                break;
-            } else {
-                continue;
+                key = pwd_gens[j](info_data);
+
+                if(mf_ultralight_authenticate(tx_rx, key)) {
+                    key_found = true;
+                    break;
+                }
             }
+
+            if (key_found) {
+                continue;
+            } else {
+                FURI_LOG_D(
+                    TAG,
+                    "Failed to read pages %d - %d",
+                    i,
+                    i + (valid_pages > 4 ? 4 : valid_pages) - 1);
+                break;
+            }
+        } else if (tx_rx->rx_bits < 16 * 8) {
+            FURI_LOG_D(
+                TAG,
+                "Failed to read pages %d - %d",
+                i,
+                i + (valid_pages > 4 ? 4 : valid_pages) - 1);
+            break;
         }
 
         if(valid_pages > 4) {
@@ -666,6 +730,7 @@ bool mf_ultralight_read_tearing_flags(FuriHalNfcTxRxContext* tx_rx, MfUltralight
 }
 
 bool mf_ul_read_card(
+    FuriHalNfcDevData* info_data,
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
     MfUltralightData* data) {
@@ -683,7 +748,7 @@ bool mf_ul_read_card(
         }
     }
 
-    card_read = mf_ultralight_read_pages(tx_rx, reader, data);
+    card_read = mf_ultralight_read_pages(info_data, tx_rx, reader, data);
 
     if(card_read) {
         if(reader->supported_features & MfUltralightSupportReadCounter &&

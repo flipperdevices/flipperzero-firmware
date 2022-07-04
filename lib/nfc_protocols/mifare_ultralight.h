@@ -174,6 +174,7 @@ bool mf_ultralight_read_version(
     MfUltralightData* data);
 
 bool mf_ultralight_read_pages(
+    FuriHalNfcDevData* info_data,
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
     MfUltralightData* data);
@@ -190,6 +191,7 @@ bool mf_ultralight_read_counters(FuriHalNfcTxRxContext* tx_rx, MfUltralightData*
 bool mf_ultralight_read_tearing_flags(FuriHalNfcTxRxContext* tx_rx, MfUltralightData* data);
 
 bool mf_ul_read_card(
+    FuriHalNfcDevData* info_data,
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
     MfUltralightData* data);
