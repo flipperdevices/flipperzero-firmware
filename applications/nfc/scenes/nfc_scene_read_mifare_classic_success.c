@@ -36,6 +36,19 @@ void nfc_scene_read_mifare_classic_success_on_enter(void* context) {
         nfc_scene_read_mifare_classic_success_widget_callback,
         nfc);
 
+    if(string_size(nfc->dev->dev_data.parced_data)) {
+        widget_add_text_box_element(
+            nfc->widget,
+            0,
+            0,
+            128,
+            32,
+            AlignLeft,
+            AlignTop,
+            string_get_cstr(nfc->dev->dev_data.parced_data),
+            true);
+    }
+
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 
