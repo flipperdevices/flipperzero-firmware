@@ -5,6 +5,7 @@
 - BTC:**172CE1H1XZVt7tc4HDQ1q9Mej1K7VuHfEf** 
 - ETH:**0x6c46eE48Bd433b0ADE711B43D188Cf8215cd51c2**
 - Contact me on Discord if you want a renamed Flipper DFU. I can do custom names too!
+- [Join my Flipper/Amiibo Discord](https://discord.gg/JYrJPS74rN)
 ## You should clone with 
 ```shell
 $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
