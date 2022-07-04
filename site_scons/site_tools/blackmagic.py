@@ -1,11 +1,7 @@
-import serial.tools.list_ports as list_ports
-
-
 class BlackmagicResolver:
     BLACKMAGIC_HOSTNAME = "blackmagic.local"
 
     def __init__(self, env):
-        self.list_ports = list_ports
         self.env = env
 
     # On Win:
@@ -18,7 +14,9 @@ class BlackmagicResolver:
     #    'location': '0-1.3', 'name': 'cu.usbmodemblackmagic1',
     #    'location': '0-1.3', 'name': 'cu.usbmodemblackmagic3',
     def _find_probe(self):
-        ports = list(self.list_ports.grep("blackmagic"))
+        import serial.tools.list_ports as list_ports
+
+        ports = list(list_ports.grep("blackmagic"))
         if len(ports) == 0:
             # print("Blackmagic probe serial port not found")
             pass
