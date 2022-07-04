@@ -53,6 +53,7 @@ $ docker-compose exec dev ./fbt
 ## Open PRs Checkedout & Not Merged In Main:
 - [On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
 - [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
+- [Add iClass keys to source](https://github.com/flipperdevices/flipperzero-firmware/pull/1360)
 ## Games:
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048)
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
