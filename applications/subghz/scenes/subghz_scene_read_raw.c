@@ -100,6 +100,12 @@ void subghz_scene_read_raw_on_enter(void* context) {
         subghz->txrx->receiver, SUBGHZ_PROTOCOL_RAW_NAME);
     furi_assert(subghz->txrx->decoder_result);
 
+    // make sure we're not in auto-detect mode, which is only meant for the Read app
+    subghz_protocol_decoder_raw_set_auto_mode(
+        subghz->txrx->decoder_result,
+        false
+    );
+
     //set filter RAW feed
     subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_RAW);
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReadRAW);
@@ -243,7 +249,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
 
             string_t temp_str;
             string_init(temp_str);
-            
+
             uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
             uint32_t date = LL_RTC_DATE_Get(RTC); // 0xWWDDMMYY
             char strings[1][25];
@@ -254,7 +260,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 , __LL_RTC_CONVERT_BCD2BIN((time >> 16) & 0xFF) // HOUR
                 , __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF)  // DAY
             );
-                
+
             string_printf(
                 temp_str, "%s/%s%s", SUBGHZ_RAW_FOLDER, strings[0], SUBGHZ_APP_EXTENSION);
             subghz_protocol_raw_gen_fff_data(subghz->txrx->fff_data, string_get_cstr(temp_str));

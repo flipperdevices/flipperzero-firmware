@@ -39,10 +39,8 @@ void subghz_protocol_raw_save_to_file_stop(SubGhzProtocolDecoderRAW* instance);
  * Set SubGhzProtocolDecoderRAW to auto mode, which allows subghz_scene_receiver to capture RAW.
  * @param context Pointer to a SubGhzProtocolDecoderRAW instance
  * @param auto_mode Whether or not to enable auto mode
- * @param frequency The current frequency
- * @param preset The current FuriHalSubGhzPreset
  */
-void subghz_protocol_decoder_raw_set_auto_mode(void* context, bool auto_mode, uint32_t frequency, FuriHalSubGhzPreset preset);
+void subghz_protocol_decoder_raw_set_auto_mode(void* context, bool auto_mode);
 
 /**
  * Get the number of samples received SubGhzProtocolDecoderRAW.
