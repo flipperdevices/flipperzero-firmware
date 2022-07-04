@@ -40,3 +40,5 @@ ADD_SCENE(nfc, dict_not_found, DictNotFound)
 ADD_SCENE(nfc, rpc, Rpc)
 ADD_SCENE(nfc, generate_info, GenerateInfo)
 ADD_SCENE(nfc, read, Read)
+ADD_SCENE(nfc, read_mifare_classic_success, ReadMifareClassicSuccess)
+

@@ -184,6 +184,8 @@ bool troyka_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     return mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 16;
 }
 
+
+
 static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     UNUSED(tx_rx);
     bool read_success = false;

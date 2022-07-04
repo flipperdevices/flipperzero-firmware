@@ -37,7 +37,7 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareUlSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMifareClassicDone) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneMifareClassicMenu);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareClassicSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMifareDesfire) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareDesfireSuccess);
