@@ -143,9 +143,7 @@ static void subghz_scene_receiver_config_set_detect_raw(VariableItem* item) {
     subghz_receiver_set_filter(subghz->txrx->receiver, detect_raw_value[index]);
     subghz_protocol_decoder_raw_set_auto_mode(
         subghz_receiver_search_decoder_base_by_name(subghz->txrx->receiver, SUBGHZ_PROTOCOL_RAW_NAME),
-        (index == 1),
-        subghz->txrx->frequency,
-        subghz->txrx->preset
+        (index == 1)
     );
 }
 
