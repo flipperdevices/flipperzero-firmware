@@ -26,7 +26,7 @@ class BlackmagicResolver:
             print("More than one Blackmagic probe found")
         else:
             # print("\n".join([f"{p.device} {vars(p)}" for p in ports]))
-            return sorted(ports, key=lambda p: p.location + p.name)[0]
+            return sorted(ports, key=lambda p: f"{p.location}_{p.name}")[0]
 
     # Look up blackmagic probe hostname with dns
     def _resolve_hostname(self):
