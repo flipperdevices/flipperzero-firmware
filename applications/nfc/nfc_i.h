@@ -41,6 +41,9 @@ typedef enum {
     NfcRpcStateEmulated,
 } NfcRpcState;
 
+// Forward declaration due to circular dependency
+typedef struct NfcGenerator NfcGenerator;
+
 struct Nfc {
     NfcWorker* worker;
     ViewDispatcher* view_dispatcher;
@@ -66,6 +69,8 @@ struct Nfc {
     Widget* widget;
     BankCard* bank_card;
     DictAttack* dict_attack;
+
+    const NfcGenerator* generator;
 };
 
 typedef enum {
