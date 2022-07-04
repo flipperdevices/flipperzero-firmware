@@ -4,6 +4,7 @@ typedef enum {
     SubmenuRead,
     SubmenuSaved,
     SubmenuAddManually,
+    SubMenuEmulateDirectly,
 } SubmenuIndex;
 
 void LfRfidAppSceneStart::on_enter(LfRfidApp* app, bool need_restore) {
@@ -12,6 +13,7 @@ void LfRfidAppSceneStart::on_enter(LfRfidApp* app, bool need_restore) {
     submenu->add_item("Read", SubmenuRead, submenu_callback, app);
     submenu->add_item("Saved", SubmenuSaved, submenu_callback, app);
     submenu->add_item("Add Manually", SubmenuAddManually, submenu_callback, app);
+    submenu->add_item("Emulate Directly", SubMenuEmulateDirectly, submenu_callback, app);
 
     if(need_restore) {
         submenu->set_selected_item(submenu_item_selected);
@@ -37,6 +39,9 @@ bool LfRfidAppSceneStart::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
             break;
         case SubmenuAddManually:
             app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::SaveType);
+            break;
+        case SubMenuEmulateDirectly:
+            app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::EmuMenu);
             break;
         }
         consumed = true;
