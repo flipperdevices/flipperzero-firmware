@@ -254,9 +254,8 @@ void mf_classic_reader_add_sector(
     }
 }
 
-void mf_classic_auth_init_context(MfClassicAuthContext* auth_ctx, uint32_t cuid, uint8_t sector) {
+void mf_classic_auth_init_context(MfClassicAuthContext* auth_ctx, uint8_t sector) {
     furi_assert(auth_ctx);
-    auth_ctx->cuid = cuid;
     auth_ctx->sector = sector;
     auth_ctx->key_a = MF_CLASSIC_NO_KEY;
     auth_ctx->key_b = MF_CLASSIC_NO_KEY;
@@ -317,6 +316,7 @@ static bool mf_classic_auth(
 
 bool mf_classic_auth_attempt(
     FuriHalNfcTxRxContext* tx_rx,
+    uint32_t cuid,
     MfClassicAuthContext* auth_ctx,
     uint64_t key) {
     furi_assert(tx_rx);
@@ -330,7 +330,7 @@ bool mf_classic_auth_attempt(
         // Try AUTH with key A
         if(mf_classic_auth(
                tx_rx,
-               auth_ctx->cuid,
+               cuid,
                mf_classic_get_first_block_num_of_sector(auth_ctx->sector),
                key,
                MfClassicKeyA,
@@ -342,14 +342,14 @@ bool mf_classic_auth_attempt(
 
     if(need_halt) {
         furi_hal_nfc_sleep();
-        furi_hal_nfc_activate_nfca(300, &auth_ctx->cuid);
+        furi_hal_nfc_activate_nfca(300, &cuid);
     }
 
     if(auth_ctx->key_b == MF_CLASSIC_NO_KEY) {
         // Try AUTH with key B
         if(mf_classic_auth(
                tx_rx,
-               auth_ctx->cuid,
+               cuid,
                mf_classic_get_first_block_num_of_sector(auth_ctx->sector),
                key,
                MfClassicKeyB,

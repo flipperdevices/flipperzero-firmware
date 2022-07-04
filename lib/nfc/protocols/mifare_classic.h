@@ -48,7 +48,6 @@ typedef struct {
 } MfClassicData;
 
 typedef struct {
-    uint32_t cuid;
     uint8_t sector;
     uint64_t key_a;
     uint64_t key_b;
@@ -87,10 +86,11 @@ bool mf_classic_get_type(
 
 uint8_t mf_classic_get_total_sectors_num(MfClassicReader* reader);
 
-void mf_classic_auth_init_context(MfClassicAuthContext* auth_ctx, uint32_t cuid, uint8_t sector);
+void mf_classic_auth_init_context(MfClassicAuthContext* auth_ctx, uint8_t sector);
 
 bool mf_classic_auth_attempt(
     FuriHalNfcTxRxContext* tx_rx,
+    uint32_t cuid,
     MfClassicAuthContext* auth_ctx,
     uint64_t key);
 

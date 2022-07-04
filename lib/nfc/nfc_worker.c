@@ -137,6 +137,53 @@ static bool nfc_worker_read_mf_ul(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* 
     return read_success;
 }
 
+static const MfClassicAuthContext troyka_keys[] = {
+    {.sector = 0, .key_a = 0xa0a1a2a3a4a5, .key_b = 0xfbf225dc5d58},
+    {.sector = 1, .key_a = 0xa82607b01c0d, .key_b = 0x2910989b6880},
+    {.sector = 2, .key_a = 0x2aa05ed1856f, .key_b = 0xeaac88e5dc99},
+    {.sector = 3, .key_a = 0x2aa05ed1856f, .key_b = 0xeaac88e5dc99},
+    {.sector = 4, .key_a = 0x73068f118c13, .key_b = 0x2b7f3253fac5},
+    {.sector = 5, .key_a = 0xfbc2793d540b, .key_b = 0xd3a297dc2698},
+    {.sector = 6, .key_a = 0x2aa05ed1856f, .key_b = 0xeaac88e5dc99},
+    {.sector = 7, .key_a = 0xae3d65a3dad4, .key_b = 0x0f1c63013dba},
+    {.sector = 8, .key_a = 0xa73f5dc1d333, .key_b = 0xe35173494a81},
+    {.sector = 9, .key_a = 0x69a32f1c2f19, .key_b = 0x6b8bd9860763},
+    {.sector = 10, .key_a = 0x9becdf3d9273, .key_b = 0xf8493407799d},
+    {.sector = 11, .key_a = 0x08b386463229, .key_b = 0x5efbaecef46b},
+    {.sector = 12, .key_a = 0xcd4c61c26e3d, .key_b = 0x31c7610de3b0},
+    {.sector = 13, .key_a = 0xa82607b01c0d, .key_b = 0x2910989b6880},
+    {.sector = 14, .key_a = 0x0e8f64340ba4, .key_b = 0x4acec1205d75},
+    {.sector = 15, .key_a = 0x2aa05ed1856f, .key_b = 0xeaac88e5dc99},
+};
+
+bool troyka_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+    MfClassicAuthContext auth_ctx = {
+        .key_a = MF_CLASSIC_NO_KEY,
+        .key_b = MF_CLASSIC_NO_KEY,
+        .sector = 0,
+    };
+    return mf_classic_auth_attempt(
+        tx_rx, nfc_worker->dev_data->nfc_data.cuid, &auth_ctx, 0xa0a1a2a3a4a5);
+}
+
+bool troyka_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+    MfClassicReader reader = {};
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    mf_classic_get_type(
+        nfc_data->uid,
+        nfc_data->uid_len,
+        nfc_data->atqa[0],
+        nfc_data->atqa[1],
+        nfc_data->sak,
+        &reader);
+    for(size_t i = 0; i < COUNT_OF(troyka_keys); i++) {
+        mf_classic_reader_add_sector(
+            &reader, troyka_keys[i].sector, troyka_keys[i].key_a, troyka_keys[i].key_b);
+    }
+
+    return mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 16;
+}
+
 static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     UNUSED(tx_rx);
     bool read_success = false;
@@ -144,6 +191,13 @@ static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
     nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
     do {
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200)) break;
+        // Search for keys by uid
+
+        // Try to read supported card
+        if(troyka_verify(nfc_worker, tx_rx)) {
+            FURI_LOG_I(TAG, "Troyka detected. Start reading");
+            read_success = troyka_read(nfc_worker, tx_rx);
+        }
         // read_success = true;
     } while(false);
 
@@ -551,7 +605,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
             FURI_LOG_I(TAG, "Sector: %d ...", curr_sector);
             event = NfcWorkerEventNewSector;
             nfc_worker->callback(event, nfc_worker->context);
-            mf_classic_auth_init_context(&auth_ctx, reader.cuid, curr_sector);
+            mf_classic_auth_init_context(&auth_ctx, curr_sector);
             bool sector_key_found = false;
             while(nfc_mf_classic_dict_get_next_key(nfc_worker->dict_stream, &curr_key)) {
                 furi_hal_nfc_sleep();
@@ -572,7 +626,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
                         curr_sector,
                         (uint32_t)(curr_key >> 32),
                         (uint32_t)curr_key);
-                    if(mf_classic_auth_attempt(&tx_rx_ctx, &auth_ctx, curr_key)) {
+                    if(mf_classic_auth_attempt(&tx_rx_ctx, reader.cuid, &auth_ctx, curr_key)) {
                         sector_key_found = true;
                         if((auth_ctx.key_a != MF_CLASSIC_NO_KEY) &&
                            (auth_ctx.key_b != MF_CLASSIC_NO_KEY))
