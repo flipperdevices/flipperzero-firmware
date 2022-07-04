@@ -251,21 +251,6 @@ Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_dfu", fwdfu)
 fwdump = fwenv.ObjDump("${FIRMWARE_BUILD_CFG}")
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_list", fwdump)
 
-# # Additional FW-related pseudotargets
-# flash = fwenv["FW_FLASH"] = fwenv.OpenOCDFlash(
-#     "#build/oocd-${FIRMWARE_BUILD_CFG}-flash.flag",
-#     "${FIRMWARE_BUILD_CFG}",
-#     OPENOCD_COMMAND=[
-#         "-c",
-#         "program ${SOURCE.posix} reset exit ${IMAGE_BASE_ADDRESS}",
-#     ],
-# )
-# if fwenv["FORCE"]:
-#     fwenv.AlwaysBuild(flash)
-# fwenv.Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_flash", flash)
-# if fwenv["IS_BASE_FIRMWARE"]:
-#     fwenv.Alias("flash", flash)
-
 
 # Compile DB generation
 fwcdb = fwenv["FW_CDB"] = fwenv.CompilationDatabase("compile_commands.json")

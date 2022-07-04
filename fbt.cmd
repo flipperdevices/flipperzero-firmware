@@ -1,11 +1,11 @@
 @echo off
 
+set SCONS_EP=%~dp0\lib\scons\scripts\scons.py
 
-if not exist ".git" (
-    echo ".git" directory not found, please clone repo via "git clone --recursive"
-    exit /B 1
+if exist ".git" (
+	echo Updating git submodules
+	git submodule update --init	
 )
-git submodule update --init
 
 set "SCONS_DEFAULT_FLAGS=-Q --warn=target-not-built"
-python lib\scons\scripts\scons.py %SCONS_DEFAULT_FLAGS% %*
+python %SCONS_EP% %SCONS_DEFAULT_FLAGS% %*
