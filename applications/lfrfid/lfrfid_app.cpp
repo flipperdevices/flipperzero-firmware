@@ -20,6 +20,8 @@
 #include "scene/lfrfid_app_scene_saved_info.h"
 #include "scene/lfrfid_app_scene_delete_confirm.h"
 #include "scene/lfrfid_app_scene_delete_success.h"
+#include "scene/lfrfid_app_scene_emu_menu.h"
+#include "scene/lfrfid_app_scene_emu_data.h"
 
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
@@ -70,6 +72,8 @@ void LfRfidApp::run(void* _args) {
         scene_controller.add_scene(SceneType::SavedInfo, new LfRfidAppSceneSavedInfo());
         scene_controller.add_scene(SceneType::DeleteConfirm, new LfRfidAppSceneDeleteConfirm());
         scene_controller.add_scene(SceneType::DeleteSuccess, new LfRfidAppSceneDeleteSuccess());
+        scene_controller.add_scene(SceneType::EmuMenu, new LfRfidAppSceneEmuMenu());
+        scene_controller.add_scene(SceneType::EmuData, new LfRfidAppSceneEmuData());
         scene_controller.process(100);
     }
 }

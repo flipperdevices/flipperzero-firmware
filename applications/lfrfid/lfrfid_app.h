@@ -51,6 +51,8 @@ public:
         SavedInfo,
         DeleteConfirm,
         DeleteSuccess,
+        EmuMenu,
+        EmuData,
     };
 
     class Event {
