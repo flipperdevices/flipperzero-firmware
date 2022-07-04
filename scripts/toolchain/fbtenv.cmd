@@ -1,6 +1,13 @@
 @echo off
 
-if not [%FBT_ROOT%] == [] goto already_set
+if not [%FBT_NOENV%] == [] (
+    exit /b 0
+)
+
+if not [%FBT_ROOT%] == [] (
+    goto already_set
+)
+
 set "FBT_ROOT=%~dp0\..\..\"
 pushd %FBT_ROOT%
 set "FBT_ROOT=%cd%"
