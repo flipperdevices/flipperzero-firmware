@@ -14,7 +14,7 @@ $ docker-compose exec dev ./fbt
 ```
 
 ## [Please Check Poll for Games To Remove](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/77)
-## Latest Updates (all from OFW):
+## Latest Updates (mostly from OFW):
 - [Add iClass keys to source #1360 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1360)
 - [nfc: On-device tag generator #1319 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1319)
 - [RPC App control commands #1350 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1350)
@@ -24,6 +24,7 @@ $ docker-compose exec dev ./fbt
 - [fbt: initial blackmagic support #1362 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1362)
 - [fbt: added support for FBT_NO_SYNC #1363 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1363)
 - [refactor: small simplification in direction calculation [snake] #1361 (By QtRoS)](https://github.com/flipperdevices/flipperzero-firmware/pull/1361)
+- Updated applications/meta/applications.fam to exclude "flappy_game", "gameoflife_game", "raycast_game"
 
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
