@@ -166,11 +166,11 @@ void RfidWriter::write_ioprox(const uint8_t ioprox_data[4]) {
     FURI_CRITICAL_EXIT();
 }
 
-void RfidWriter::write_indala(const uint8_t indala_data[3]) {
+void RfidWriter::write_indala(const uint8_t indala_data[4]) {
     ProtocolIndala40134 indala_card;
     uint32_t card_data[2];
     indala_card.encode(
-        indala_data, 3, reinterpret_cast<uint8_t*>(&card_data), sizeof(card_data) * 2);
+        indala_data, 4, reinterpret_cast<uint8_t*>(&card_data), sizeof(card_data) * 2);
 
     const uint32_t indala_config_block_data = 0b00000000000010000001000001000000;
 
