@@ -1,9 +1,5 @@
 @echo off
 
-if not [%FBT_NOENV%] == [] (
-    exit /b 0
-)
-
 if not [%FBT_ROOT%] == [] (
     goto already_set
 )
@@ -12,6 +8,10 @@ set "FBT_ROOT=%~dp0\..\..\"
 pushd %FBT_ROOT%
 set "FBT_ROOT=%cd%"
 popd
+
+if not [%FBT_NOENV%] == [] (
+    exit /b 0
+)
 
 set "FLIPPER_TOOLCHAIN_VERSION=2"
 set "FBT_TOOLCHAIN_ROOT=%FBT_ROOT%\toolchain\i686-windows"

@@ -46,5 +46,4 @@ def random_alnum(length):
 
 
 def single_quote(arg_list):
-    # print("single_quote: ", arg_list)
     return " ".join(f"'{arg}'" if " " in arg else str(arg) for arg in arg_list)
