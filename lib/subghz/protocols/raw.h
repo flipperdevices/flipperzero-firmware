@@ -73,8 +73,9 @@ void subghz_protocol_decoder_raw_reset(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderRAW instance
  * @param level Signal level true-high false-low
  * @param duration Duration of this level in, us
+ * @return whether or not data was written
  */
-void subghz_protocol_decoder_raw_write_data(void* context, bool level, uint32_t duration);
+bool subghz_protocol_decoder_raw_write_data(void* context, bool level, uint32_t duration);
 
 /**
  * Parse a raw sequence of levels and durations received from the air.
