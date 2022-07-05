@@ -16,6 +16,7 @@ $ docker-compose exec dev ./fbt
 ## Latest Updates (mostly from OFW):
 - Added SubGHz: Unlock from SD flag [(Thanks to cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405)
 - - **Update with `subghz/assets/setting_user` using [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) on SD**
+- Updates for SubGHz auto-read raw
 
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
