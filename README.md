@@ -25,6 +25,7 @@ $ docker-compose exec dev ./fbt
 - [fbt: added support for FBT_NO_SYNC #1363 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1363)
 - [refactor: small simplification in direction calculation [snake] #1361 (By QtRoS)](https://github.com/flipperdevices/flipperzero-firmware/pull/1361)
 - Updated applications/meta/applications.fam to exclude "flappy_game", "gameoflife_game", "raycast_game"
+- Added [Auto detect raw #1367 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1367) with modifications he provided for unleashed. Thank you!
 
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -62,6 +63,7 @@ $ docker-compose exec dev ./fbt
 - SubGHz: Protocols Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 ## Open PRs Checkedout & Not Merged In Main:
 - [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
+- [Auto detect raw #1367 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1367)
 ## Games
 - - Games marked as `HIDDEN` can be re-added under [applications/meta/applications.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/applications.fam)
 - - They have been hidden to make space for development updates and new features
