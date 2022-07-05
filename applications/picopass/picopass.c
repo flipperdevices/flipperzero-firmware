@@ -103,24 +103,24 @@ void picopass_free(Picopass* picopass) {
     free(picopass);
 }
 
-static const NotificationSequence sequence_blink_start_blue = {
+static const NotificationSequence picopass_sequence_blink_start_blue = {
     &message_blink_start_10,
     &message_blink_set_color_blue,
     &message_do_not_reset,
     NULL,
 };
 
-static const NotificationSequence sequence_blink_stop = {
+static const NotificationSequence picopass_sequence_blink_stop = {
     &message_blink_stop,
     NULL,
 };
 
 void picopass_blink_start(Picopass* picopass) {
-    notification_message(picopass->notifications, &sequence_blink_start_blue);
+    notification_message(picopass->notifications, &picopass_sequence_blink_start_blue);
 }
 
 void picopass_blink_stop(Picopass* picopass) {
-    notification_message(picopass->notifications, &sequence_blink_stop);
+    notification_message(picopass->notifications, &picopass_sequence_blink_stop);
 }
 
 int32_t picopass_app(void* p) {

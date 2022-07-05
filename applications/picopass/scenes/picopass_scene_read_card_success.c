@@ -26,7 +26,7 @@ void picopass_scene_read_card_success_on_enter(void* context) {
     notification_message(picopass->notifications, &sequence_success);
 
     // Setup view
-    PACS* pacs = &picopass->dev->dev_data.pacs;
+    PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
     Widget* widget = picopass->widget;
 
     string_set_str(credential_str, "");

@@ -12,7 +12,7 @@ typedef struct {
     uint8_t bitLength;
     uint8_t FacilityCode;
     uint16_t CardNumber;
-} WiegandRecord;
+} PicopassWiegandRecord;
 
 typedef struct {
     bool biometrics;
@@ -20,12 +20,12 @@ typedef struct {
     uint8_t credential[8];
     uint8_t pin0[8];
     uint8_t pin1[8];
-    WiegandRecord record;
-} PACS;
+    PicopassWiegandRecord record;
+} PicopassPacs;
 
 typedef struct {
     ApplicationArea AA1;
-    PACS pacs;
+    PicopassPacs pacs;
 } PicopassDeviceData;
 
 typedef struct {

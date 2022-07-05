@@ -15,25 +15,25 @@
 
 #define TAG "PicopassWorker"
 
-uint8_t iclass_key[8] = {0xaf, 0xa7, 0x85, 0xa7, 0xda, 0xb3, 0x33, 0x78};
-uint8_t iclass_decryptionkey[16] =
+const uint8_t picopass_iclass_key[] = {0xaf, 0xa7, 0x85, 0xa7, 0xda, 0xb3, 0x33, 0x78};
+const uint8_t picopass_iclass_decryptionkey[] =
     {0xb4, 0x21, 0x2c, 0xca, 0xb7, 0xed, 0x21, 0x0f, 0x7b, 0x93, 0xd4, 0x59, 0x39, 0xc7, 0xdd, 0x36};
 
-void enable_field() {
+static void picopass_worker_enable_field() {
     st25r3916TxRxOn();
     rfalLowPowerModeStop();
     rfalWorker();
 }
 
-ReturnCode disable_field(ReturnCode rc) {
+static ReturnCode picopass_worker_disable_field(ReturnCode rc) {
     st25r3916TxRxOff();
     rfalLowPowerModeStart();
     return rc;
 }
 
-ReturnCode decrypt(uint8_t* enc_data, uint8_t* dec_data) {
+static ReturnCode picopass_worker_decrypt(uint8_t* enc_data, uint8_t* dec_data) {
     uint8_t key[32] = {0};
-    memcpy(key, iclass_decryptionkey, sizeof(iclass_decryptionkey));
+    memcpy(key, picopass_iclass_decryptionkey, sizeof(picopass_iclass_decryptionkey));
     mbedtls_des3_context ctx;
     mbedtls_des3_init(&ctx);
     mbedtls_des3_set2key_dec(&ctx, key);
@@ -42,7 +42,7 @@ ReturnCode decrypt(uint8_t* enc_data, uint8_t* dec_data) {
     return ERR_NONE;
 }
 
-ReturnCode parseWiegand(uint8_t* data, WiegandRecord* record) {
+static ReturnCode picopass_worker_parse_wiegand(uint8_t* data, PicopassWiegandRecord* record) {
     uint32_t* halves = (uint32_t*)data;
     if(halves[0] == 0) {
         uint8_t leading0s = __builtin_clz(REVERSE_BYTES_U32(halves[1]));
@@ -129,7 +129,7 @@ void picopass_worker_stop(PicopassWorker* picopass_worker) {
        picopass_worker->state == PicopassWorkerStateReady) {
         return;
     }
-    disable_field(ERR_NONE);
+    picopass_worker_disable_field(ERR_NONE);
 
     picopass_worker_change_state(picopass_worker, PicopassWorkerStateStop);
     furi_thread_join(picopass_worker->thread);
@@ -148,19 +148,19 @@ ReturnCode picopass_detect_card(int timeout) {
 
     err = rfalPicoPassPollerInitialize();
     if(err != ERR_NONE) {
-        FURI_LOG_E(TAG, "rfalPicoPassPollerInitialize error %d\n", err);
+        FURI_LOG_E(TAG, "rfalPicoPassPollerInitialize error %d", err);
         return err;
     }
 
     err = rfalFieldOnAndStartGT();
     if(err != ERR_NONE) {
-        FURI_LOG_E(TAG, "rfalFieldOnAndStartGT error %d\n", err);
+        FURI_LOG_E(TAG, "rfalFieldOnAndStartGT error %d", err);
         return err;
     }
 
     err = rfalPicoPassPollerCheckPresence();
     if(err != ERR_RF_COLLISION) {
-        FURI_LOG_E(TAG, "rfalPicoPassPollerCheckPresence error %d\n", err);
+        FURI_LOG_E(TAG, "rfalPicoPassPollerCheckPresence error %d", err);
         return err;
     }
 
@@ -181,13 +181,13 @@ ReturnCode picopass_read_card(ApplicationArea* AA1) {
 
     err = rfalPicoPassPollerIdentify(&idRes);
     if(err != ERR_NONE) {
-        FURI_LOG_E(TAG, "rfalPicoPassPollerIdentify error %d\n", err);
+        FURI_LOG_E(TAG, "rfalPicoPassPollerIdentify error %d", err);
         return err;
     }
 
     err = rfalPicoPassPollerSelect(idRes.CSN, &selRes);
     if(err != ERR_NONE) {
-        FURI_LOG_E(TAG, "rfalPicoPassPollerSelect error %d\n", err);
+        FURI_LOG_E(TAG, "rfalPicoPassPollerSelect error %d", err);
         return err;
     }
 
@@ -198,7 +198,7 @@ ReturnCode picopass_read_card(ApplicationArea* AA1) {
     }
     memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
 
-    diversifyKey(selRes.CSN, iclass_key, div_key);
+    diversifyKey(selRes.CSN, picopass_iclass_key, div_key);
     opt_doReaderMAC(ccnr, div_key, mac);
 
     err = rfalPicoPassPollerCheck(mac, &chkRes);
@@ -238,11 +238,11 @@ ReturnCode picopass_read_card(ApplicationArea* AA1) {
 int32_t picopass_worker_task(void* context) {
     PicopassWorker* picopass_worker = context;
 
-    enable_field();
+    picopass_worker_enable_field();
     if(picopass_worker->state == PicopassWorkerStateDetect) {
         picopass_worker_detect(picopass_worker);
     }
-    disable_field(ERR_NONE);
+    picopass_worker_disable_field(ERR_NONE);
 
     picopass_worker_change_state(picopass_worker, PicopassWorkerStateReady);
 
@@ -254,7 +254,7 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
     PicopassDeviceData* dev_data = picopass_worker->dev_data;
 
     ApplicationArea* AA1 = &dev_data->AA1;
-    PACS* pacs = &dev_data->pacs;
+    PicopassPacs* pacs = &dev_data->pacs;
     ReturnCode err;
 
     while(picopass_worker->state == PicopassWorkerStateDetect) {
@@ -272,21 +272,21 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
 
             if(pacs->encryption == 0x17) {
                 FURI_LOG_D(TAG, "3DES Encrypted");
-                err = decrypt(AA1->block[1].data, pacs->credential);
+                err = picopass_worker_decrypt(AA1->block[1].data, pacs->credential);
                 if(err != ERR_NONE) {
                     FURI_LOG_E(TAG, "decrypt error %d", err);
                     break;
                 }
                 FURI_LOG_D(TAG, "Decrypted 7");
 
-                err = decrypt(AA1->block[2].data, pacs->pin0);
+                err = picopass_worker_decrypt(AA1->block[2].data, pacs->pin0);
                 if(err != ERR_NONE) {
                     FURI_LOG_E(TAG, "decrypt error %d", err);
                     break;
                 }
                 FURI_LOG_D(TAG, "Decrypted 8");
 
-                err = decrypt(AA1->block[3].data, pacs->pin1);
+                err = picopass_worker_decrypt(AA1->block[3].data, pacs->pin1);
                 if(err != ERR_NONE) {
                     FURI_LOG_E(TAG, "decrypt error %d", err);
                     break;
@@ -304,7 +304,7 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
                 break;
             }
 
-            parseWiegand(pacs->credential, &pacs->record);
+            picopass_worker_parse_wiegand(pacs->credential, &pacs->record);
 
             // Notify caller and exit
             if(picopass_worker->callback) {
