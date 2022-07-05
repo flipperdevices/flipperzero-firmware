@@ -65,7 +65,7 @@ $ docker-compose exec dev ./fbt
 - [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - [Auto detect raw #1367 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1367)
 ## Games
-- - Games marked as `HIDDEN` can be re-added under [applications/meta/applications.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/applications.fam)
+- - Games `HIDDEN` can be added under [applications/meta/applications.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/applications.fam) as "flappy_game","gameoflife_game","raycast_game"
 - - They have been hidden to make space for development updates and new features
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048)
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
