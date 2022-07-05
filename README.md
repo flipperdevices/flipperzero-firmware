@@ -16,6 +16,12 @@ $ docker-compose exec dev ./fbt
 ## Latest Updates (mostly from OFW):
 - Updates for [Auto detect raw #1367 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1367)
 - Updated [assets/resources/nfc/assets/mf_classic_dict.nfc](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/nfc/assets/mf_classic_dict.nfc) from UberGuidoZ, update your `nfc/assets/mf_classic_dict.nfc` on SD!
+- [storage: fixed factory reset handling on changed LFS geometry #1372 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1372)
+- [fbt: compile_commands fixes & better latest directory handling #1368 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1368)
+- [Iclass UI #1366 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1366)
+- [Added Javacard Emulated mifare classic 1K compatibility #1369 (By equipter)](https://github.com/flipperdevices/flipperzero-firmware/pull/1369)
+- [Fix buffer overflow in mifare classic lib #1374 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1374)
+- Adding [125 kHz/LFRFID - New Feature - Direct Emulation #1371 (By atomsmasha)](https://github.com/flipperdevices/flipperzero-firmware/pull/1371)
 
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -42,6 +48,7 @@ $ docker-compose exec dev ./fbt
 - Plugins: Fixed sound decay issues on music player [Thanks to qqMajiKpp]
 - Plugins: Menu, Icons and Raycast exit [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
 - Plugins: Snake and Tetris show score. [Thanks to whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) With changes by RogueMaster.
+- RFID: [Direct Emulation (By atomsmasha)](https://github.com/flipperdevices/flipperzero-firmware/pull/1371)
 - RFID: Removing T5577 passwords via the cli command rfid clear_pass_t5577 using a dictionary attack [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Settings: Actual PIN Lock [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop.c)
 - Settings: Auto-Lock Options Added: 10s+15s+90s [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop_settings/scenes/desktop_settings_scene_start.c)
