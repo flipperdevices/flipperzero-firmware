@@ -97,6 +97,9 @@ void picopass_free(Picopass* picopass) {
     furi_record_close("notification");
     picopass->notifications = NULL;
 
+    picopass_device_free(picopass->dev);
+    picopass->dev = NULL;
+
     free(picopass);
 }
 
