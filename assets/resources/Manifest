@@ -1,5 +1,5 @@
 V:0
-T:1655846202
+T:1657055268
 D:badusb
 D:dolphin
 D:infrared
@@ -25,7 +25,7 @@ D:dolphin/L2_Soldering_128x64
 D:dolphin/L3_Furippa3_128x64
 D:dolphin/L3_Hijack_radio_128x64
 D:dolphin/L3_Lab_research_128x54
-F:2f15738d5c734134550bab968a867a23:1569:dolphin/manifest.txt
+F:6f1e38772c1f5dccc2ac6c8bc5a91224:1570:dolphin/manifest.txt
 F:d37be8444102ec5cde5fe3a85d55b57d:481:dolphin/L1_Boxing_128x64/frame_0.bm
 F:54fb07443bc153ded9589b74d23b4263:461:dolphin/L1_Boxing_128x64/frame_1.bm
 F:e007afe130d699c715b99ce8e5b407bd:531:dolphin/L1_Boxing_128x64/frame_2.bm
@@ -229,13 +229,13 @@ D:nfc/assets
 F:81dc04c7b181f94b644079a71476dff4:4742:nfc/assets/aid.nfc
 F:86efbebdf41bb6bf15cc51ef88f069d5:2565:nfc/assets/country_code.nfc
 F:41b4f08774249014cb8d3dffa5f5c07d:1757:nfc/assets/currency_code.nfc
-F:4ce3728b7c76d6d73a1d41407cb2048b:50387:nfc/assets/mf_classic_dict.nfc
+F:42f2b8f11efb8f2322355114de279ff4:50695:nfc/assets/mf_classic_dict.nfc
 D:subghz/assets
 F:dda1ef895b8a25fde57c874feaaef997:650:subghz/assets/came_atomo
 F:610a0ffa2479a874f2060eb2348104c5:2712:subghz/assets/keeloq_mfcodes
 F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
-F:2cb439fdabd909569a4d196a5009a92f:1307:subghz/assets/setting_user
+F:24894281c302f6475f56e455274938c7:1394:subghz/assets/setting_user
 F:79c23605f2037021339d3a51cd80cc32:256:subghz/assets/touchtunes_map.txt
 F:9eddce3d5764d36a268763667c5d63a7:389:subghz/assets/universal_rf_map.txt
 D:u2f/assets
