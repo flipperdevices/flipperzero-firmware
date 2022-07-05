@@ -1,9 +1,15 @@
 @echo off
 call %~dp0scripts\toolchain\fbtenv.cmd env
 
-if not exist "%FBT_ROOT%\.git" (
-    echo ".git" directory not found, please clone repo via "git clone --recursive"
-    exit /B 1
+set SCONS_EP=%~dp0\lib\scons\scripts\scons.py
+
+if [%FBT_NO_SYNC%] == [] (
+    if exist ".git" (
+        git submodule update --init
+    ) else (
+        echo Not in a git repo, please clone with git clone --recursive
+        exit /b 1
+    )
 )
 git submodule update --init
 
