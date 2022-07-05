@@ -15,7 +15,9 @@
 
 #define TAG "SubGhzProtocolRAW"
 #define SUBGHZ_DOWNLOAD_MAX_SIZE 512
+#define SUBGHZ_AUTO_DETECT_DOWNLOAD_MAX_SIZE 2048
 #define SUBGHZ_AUTO_DETECT_RAW_THRESHOLD -72.0f
+#define SUBGHZ_AUTO_DETECT_RAW_POSTROLL_FRAMES 30
 
 static const SubGhzBlockConst subghz_protocol_raw_const = {
     .te_short = 50,
@@ -39,6 +41,7 @@ struct SubGhzProtocolDecoderRAW {
     bool last_level;
     bool auto_mode;
     bool has_rssi_above_threshold;
+    uint8_t postroll_frames;
 };
 
 struct SubGhzProtocolEncoderRAW {
@@ -201,7 +204,7 @@ void subghz_protocol_decoder_raw_set_auto_mode(void* context, bool auto_mode) {
 
     if (auto_mode) {
         if (instance->upload_raw == NULL) {
-            instance->upload_raw = malloc(SUBGHZ_DOWNLOAD_MAX_SIZE * sizeof(int32_t));
+            instance->upload_raw = malloc(SUBGHZ_AUTO_DETECT_DOWNLOAD_MAX_SIZE * sizeof(int32_t));
         }
     } else {
         if (instance->upload_raw != NULL) {
@@ -225,6 +228,7 @@ void* subghz_protocol_decoder_raw_alloc(SubGhzEnvironment* environment) {
     instance->ind_write = 0;
     instance->last_level = false;
     instance->file_is_open = RAWFileIsOpenClose;
+    instance->postroll_frames = 0;
     string_init(instance->file_name);
 
     return instance;
@@ -247,54 +251,61 @@ void subghz_protocol_decoder_raw_reset(void* context) {
     instance->ind_write = 0;
     instance->has_rssi_above_threshold = false;
     instance->last_level = false;
+    instance->postroll_frames = 0;
 }
 
-void subghz_protocol_decoder_raw_write_data(void* context, bool level, uint32_t duration) {
+bool subghz_protocol_decoder_raw_write_data(void* context, bool level, uint32_t duration) {
     furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
+
+    bool wrote_data = false;
 
     if(instance->last_level != level) {
         instance->last_level = (level ? true : false);
         instance->upload_raw[instance->ind_write++] = (level ? duration : -duration);
         subghz_protocol_blocks_add_bit(&instance->decoder, (level) ? 1 : 0);
+        wrote_data = true;
     }
 
-    if(instance->ind_write == SUBGHZ_DOWNLOAD_MAX_SIZE) {
+    if(instance->ind_write == SUBGHZ_AUTO_DETECT_DOWNLOAD_MAX_SIZE) {
         if(instance->base.callback)
             instance->base.callback(&instance->base, instance->base.context);
+
+        return false;
     }
+
+    return wrote_data;
 }
 
 void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t duration) {
     furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
 
-    if(instance->upload_raw != NULL) {
+    if(instance->upload_raw != NULL && duration > subghz_protocol_raw_const.te_short) {
         if (instance->auto_mode) {
             float rssi = furi_hal_subghz_get_rssi();
-            if (rssi >= SUBGHZ_AUTO_DETECT_RAW_THRESHOLD && duration >= subghz_protocol_raw_const.te_short) {
+            if (rssi >= SUBGHZ_AUTO_DETECT_RAW_THRESHOLD) {
                 subghz_protocol_decoder_raw_write_data(context, level, duration);
                 instance->has_rssi_above_threshold = true;
+                instance->postroll_frames = 0;
             } else if (instance->has_rssi_above_threshold) {
                 subghz_protocol_decoder_raw_write_data(instance, level, duration);
+                instance->postroll_frames++;
 
-                if ((!level) && (DURATION_DIFF(duration, subghz_protocol_raw_const.te_long)) >
-                    subghz_protocol_raw_const.te_long * 7) {
+                if (instance->postroll_frames >= SUBGHZ_AUTO_DETECT_RAW_POSTROLL_FRAMES) {
                     if(instance->base.callback)
                         instance->base.callback(&instance->base, instance->base.context);
                 }
             }
         } else {
-            if(duration > subghz_protocol_raw_const.te_short) {
-                if(instance->last_level != level) {
-                    instance->last_level = (level ? true : false);
-                    instance->upload_raw[instance->ind_write++] = (level ? duration : -duration);
-                    subghz_protocol_blocks_add_bit(&instance->decoder, (level) ? 1 : 0);
-                }
+            if(instance->last_level != level) {
+                instance->last_level = (level ? true : false);
+                instance->upload_raw[instance->ind_write++] = (level ? duration : -duration);
+                subghz_protocol_blocks_add_bit(&instance->decoder, (level) ? 1 : 0);
             }
 
             if(instance->ind_write == SUBGHZ_DOWNLOAD_MAX_SIZE) {
-                subghz_protocol_raw_save_to_file_stop(instance);
+                subghz_protocol_raw_save_to_file_write(instance);
             }
         }
     }
@@ -397,7 +408,7 @@ bool subghz_protocol_decoder_raw_serialize(
             do {
                 stream_clean(flipper_format_get_raw_stream(flipper_format));
                 if(!flipper_format_write_header_cstr(
-                       flipper_format, SUBGHZ_KEY_FILE_TYPE, SUBGHZ_KEY_FILE_VERSION)) {
+                       flipper_format, SUBGHZ_RAW_FILE_TYPE, SUBGHZ_RAW_FILE_VERSION)) {
                     FURI_LOG_E(TAG, "Unable to add header");
                     break;
                 }
