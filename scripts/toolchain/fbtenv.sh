@@ -1,11 +1,9 @@
 #!/bin/sh
-# shellcheck disable=SC2086
 
 # unofficial strict mode
 set -eu;
 
 FLIPPER_TOOLCHAIN_VERSION="2";
-export FBT_ROOT="$(cd "$(dirname "$0")" && pwd -P)";
 
 get_kernel_type()
 {
@@ -25,40 +23,32 @@ get_kernel_type()
 
 check_download_toolchain()
 {
-    if [ ! -d "$FBT_ROOT/$TOOLCHAIN_PATH" ]; then
+    if [ ! -d "$SCRIPT_PATH/$TOOLCHAIN_PATH" ]; then
         download_toolchain;
-    elif [ ! -f "$FBT_ROOT/$TOOLCHAIN_PATH/VERSION" ]; then
+    elif [ ! -f "$SCRIPT_PATH/$TOOLCHAIN_PATH/VERSION" ]; then
         download_toolchain;
-    elif [ "$(cat "$FBT_ROOT/$TOOLCHAIN_PATH/VERSION")" -ne "$FLIPPER_TOOLCHAIN_VERSION" ]; then
+    elif [ "$(cat "$SCRIPT_PATH/$TOOLCHAIN_PATH/VERSION")" -ne "$FLIPPER_TOOLCHAIN_VERSION" ]; then
         download_toolchain;
     fi
 }
 
 download_toolchain()
 {
-    chmod 755 "$FBT_ROOT/scripts/toolchain/unix-toolchain-download.sh";
-    "$FBT_ROOT/scripts/toolchain/unix-toolchain-download.sh" "$FLIPPER_TOOLCHAIN_VERSION" || exit 1;
+    chmod 755 "$SCRIPT_PATH/scripts/toolchain/unix-toolchain-download.sh";
+    "$SCRIPT_PATH/scripts/toolchain/unix-toolchain-download.sh" "$FLIPPER_TOOLCHAIN_VERSION" || exit 1;
 }
 
-check_git()
+main()
 {
-    if [ ! -d "$FBT_ROOT/.git" ]; then
-        echo "\".git\" directory not found, please clone repo via \"git clone --recursive\"";
+    if [ -z "${SCRIPT_PATH:-}" ]; then
+        echo "Mannual running this script is now allowed.";
         exit 1;
     fi
-}
-
-setup_env()
-{
     get_kernel_type;  # sets TOOLCHAIN_PATH
-    check_git;
     check_download_toolchain;
-    PATH="$FBT_ROOT/$TOOLCHAIN_PATH/python/bin:$PATH";
-    PATH="$FBT_ROOT/$TOOLCHAIN_PATH/bin:$PATH";
-    PATH="$FBT_ROOT/$TOOLCHAIN_PATH/protobuf/bin:$PATH";
-    PATH="$FBT_ROOT/$TOOLCHAIN_PATH/openocd/bin:$PATH";    
+    PATH="$SCRIPT_PATH/$TOOLCHAIN_PATH/python/bin:$PATH";
+    PATH="$SCRIPT_PATH/$TOOLCHAIN_PATH/bin:$PATH";
+    PATH="$SCRIPT_PATH/$TOOLCHAIN_PATH/protobuf/bin:$PATH";
+    PATH="$SCRIPT_PATH/$TOOLCHAIN_PATH/openocd/bin:$PATH";
 }
-
-if [ -z "${FBT_NOENV:-}" ]; then
-    setup_env;
-fi
+main;
