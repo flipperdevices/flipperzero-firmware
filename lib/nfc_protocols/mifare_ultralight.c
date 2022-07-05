@@ -4,6 +4,7 @@
 #include <furi.h>
 #include "furi_hal_nfc.h"
 #include <m-string.h>
+#include "furi/common_defines.h"
 
 #define TAG "MfUltralight"
 
@@ -575,7 +576,7 @@ bool mf_ultralight_read_pages(
 
             uint32_t key;
             bool key_found = false;
-            for(size_t j = 0; j < (sizeof(pwd_gens) / sizeof(int32_t)); j++) {
+            for(size_t j = 0; j < COUNT_OF(pwd_gens); j++) {
                 furi_hal_nfc_sleep();
                 furi_hal_nfc_activate_nfca(300, NULL);
 
