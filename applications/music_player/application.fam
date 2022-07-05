@@ -10,7 +10,7 @@ App(
     ],
     provides=["music_player_start"],
     stack_size=2 * 1024,
-    order=35,
+    order=36,
 )
 
 App(
@@ -18,5 +18,5 @@ App(
     apptype=FlipperAppType.STARTUP,
     entry_point="music_player_on_system_start",
     requires=["music_player"],
-    order=30,
+    order=35,
 )
