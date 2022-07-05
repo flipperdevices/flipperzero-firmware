@@ -149,7 +149,7 @@ Chip8Emulator* chip8_make_emulator(string_t file_path) {
 void chip8_close_emulator(Chip8Emulator* chip8) {
     FURI_LOG_I("chip_8_close_emulator", "start");
     furi_assert(chip8);
-    osThreadFlagsSet(furi_thread_get_thread_id(chip8->thread), WorkerEvtEnd);
+    furi_thread_flags_set(furi_thread_get_id(chip8->thread), WorkerEvtEnd);
     furi_thread_join(chip8->thread);
     furi_thread_free(chip8->thread);
     string_clear(chip8->file_path);
@@ -159,7 +159,7 @@ void chip8_close_emulator(Chip8Emulator* chip8) {
 
 void chip8_toggle(Chip8Emulator* chip8) {
     furi_assert(chip8);
-    osThreadFlagsSet(furi_thread_get_thread_id(chip8->thread), WorkerEvtToggle);
+    furi_thread_flags_set(furi_thread_get_id(chip8->thread), WorkerEvtToggle);
 }
 
 Chip8State* chip8_get_state(Chip8Emulator* chip8) {
