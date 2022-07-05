@@ -14,15 +14,8 @@ $ docker-compose exec dev ./fbt
 ```
 
 ## Latest Updates (mostly from OFW):
-- Updates for [Auto detect raw #1367 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1367)
-- Updated [assets/resources/nfc/assets/mf_classic_dict.nfc](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/nfc/assets/mf_classic_dict.nfc) from UberGuidoZ
-- - **Update your `nfc/assets/mf_classic_dict.nfc` on SD!**
-- [storage: fixed factory reset handling on changed LFS geometry #1372 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1372)
-- [fbt: compile_commands fixes & better latest directory handling #1368 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1368)
-- [Iclass UI #1366 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1366)
-- [Added Javacard Emulated mifare classic 1K compatibility #1369 (By equipter)](https://github.com/flipperdevices/flipperzero-firmware/pull/1369)
-- [Fix buffer overflow in mifare classic lib #1374 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1374)
-- Adding [125 kHz/LFRFID - New Feature - Direct Emulation #1371 (By atomsmasha)](https://github.com/flipperdevices/flipperzero-firmware/pull/1371)
+- Added SubGHz: Unlock from SD flag [(Thanks to cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405)
+- - **Update your `subghz/assets/setting_user` on SD!**
 
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -59,11 +52,12 @@ $ docker-compose exec dev ./fbt
 - Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
 - SubGHz: Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
 - SubGHz: Protocols Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
+- SubGHz: Unlock from SD flag [(Thanks to cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405)
 ## Open PRs Checkedout & Not Merged In Main:
 - [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - [Auto detect raw #1367 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1367)
 ## Games
-- - Games `HIDDEN` can be added under [applications/meta/applications.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/applications.fam) as "flappy_game","gameoflife_game","raycast_game"
+- - Games `HIDDEN` can be added under [applications/meta/applications.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam#L54) as "flappy_game","gameoflife_game","raycast_game"
 - - They have been hidden to make space for development updates and new features
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048)
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
@@ -77,6 +71,8 @@ itsyourbedtime. `HIDDEN`
 - [Tic Tac Toe (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
 ## Plugins:
+- - Plugins `HIDDEN` can be added under [applications/meta/applications.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/applications.fam)
+- - They have been hidden to make space for development updates and new features
 - [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)
 - [HID Analyzer (By Ownasaurus)](https://github.com/Ownasaurus/flipperzero-firmware/tree/hid-analyzer/applications/hid_analyzer)
 - [RF Remix (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix)[(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
