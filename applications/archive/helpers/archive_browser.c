@@ -15,8 +15,9 @@ static void
 
     int32_t load_offset = 0;
     browser->is_root = is_root;
+    ArchiveTabEnum tab = archive_get_tab(browser);
 
-    if((item_cnt == 0) && (archive_is_home(browser))) {
+    if((item_cnt == 0) && (archive_is_home(browser)) && (tab != ArchiveTabBrowser)) {
         archive_switch_tab(browser, browser->last_tab_switch_dir);
     } else if(!string_start_with_str_p(browser->path, "/app:")) {
         with_view_model(
