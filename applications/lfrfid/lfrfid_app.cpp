@@ -20,12 +20,11 @@
 #include "scene/lfrfid_app_scene_saved_info.h"
 #include "scene/lfrfid_app_scene_delete_confirm.h"
 #include "scene/lfrfid_app_scene_delete_success.h"
-#include "scene/lfrfid_app_scene_rpc.h"
+#include "scene/lfrfid_app_scene_emu_menu.h"
+#include "scene/lfrfid_app_scene_emu_data.h"
 
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
-
-#include "rpc/rpc_app.h"
 
 const char* LfRfidApp::app_folder = "/any/lfrfid";
 const char* LfRfidApp::app_extension = ".rfid";
@@ -42,43 +41,6 @@ LfRfidApp::LfRfidApp()
 
 LfRfidApp::~LfRfidApp() {
     string_clear(file_path);
-    if(rpc_ctx) {
-        rpc_system_app_set_callback(rpc_ctx, NULL, NULL);
-    }
-}
-
-static bool rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context) {
-    furi_assert(context);
-    LfRfidApp* app = static_cast<LfRfidApp*>(context);
-
-    bool result = false;
-
-    if(event == RpcAppEventSessionClose) {
-        rpc_system_app_set_callback(app->rpc_ctx, NULL, NULL);
-        app->rpc_ctx = NULL;
-        LfRfidApp::Event event;
-        event.type = LfRfidApp::EventType::Exit;
-        app->view_controller.send_event(&event);
-        result = true;
-    } else if(event == RpcAppEventAppExit) {
-        LfRfidApp::Event event;
-        event.type = LfRfidApp::EventType::Exit;
-        app->view_controller.send_event(&event);
-        result = true;
-    } else if(event == RpcAppEventLoadFile) {
-        if(arg) {
-            string_set_str(app->file_path, arg);
-            if(app->load_key_data(app->file_path, &(app->worker.key), false)) {
-                LfRfidApp::Event event;
-                event.type = LfRfidApp::EventType::EmulateStart;
-                app->view_controller.send_event(&event);
-                app->worker.start_emulate();
-                result = true;
-            }
-        }
-    }
-
-    return result;
 }
 
 void LfRfidApp::run(void* _args) {
@@ -87,19 +49,10 @@ void LfRfidApp::run(void* _args) {
     make_app_folder();
 
     if(strlen(args)) {
-        uint32_t rpc_ctx_ptr = 0;
-        if(sscanf(args, "RPC %lX", &rpc_ctx_ptr) == 1) {
-            rpc_ctx = (RpcAppSystem*)rpc_ctx_ptr;
-            rpc_system_app_set_callback(rpc_ctx, rpc_command_callback, this);
-            scene_controller.add_scene(SceneType::Rpc, new LfRfidAppSceneRpc());
-            scene_controller.process(100, SceneType::Rpc);
-        } else {
-            string_set_str(file_path, args);
-            load_key_data(file_path, &worker.key, true);
-            scene_controller.add_scene(SceneType::Emulate, new LfRfidAppSceneEmulate());
-            scene_controller.process(100, SceneType::Emulate);
-        }
-
+        string_set_str(file_path, args);
+        load_key_data(file_path, &worker.key);
+        scene_controller.add_scene(SceneType::Emulate, new LfRfidAppSceneEmulate());
+        scene_controller.process(100, SceneType::Emulate);
     } else {
         scene_controller.add_scene(SceneType::Start, new LfRfidAppSceneStart());
         scene_controller.add_scene(SceneType::Read, new LfRfidAppSceneRead());
@@ -119,6 +72,8 @@ void LfRfidApp::run(void* _args) {
         scene_controller.add_scene(SceneType::SavedInfo, new LfRfidAppSceneSavedInfo());
         scene_controller.add_scene(SceneType::DeleteConfirm, new LfRfidAppSceneDeleteConfirm());
         scene_controller.add_scene(SceneType::DeleteSuccess, new LfRfidAppSceneDeleteSuccess());
+        scene_controller.add_scene(SceneType::EmuMenu, new LfRfidAppSceneEmuMenu());
+        scene_controller.add_scene(SceneType::EmuData, new LfRfidAppSceneEmuData());
         scene_controller.process(100);
     }
 }
@@ -148,7 +103,7 @@ bool LfRfidApp::load_key_from_file_select(bool need_restore) {
         dialogs, file_path, file_path, app_extension, true, &I_125_10px, true);
 
     if(result) {
-        result = load_key_data(file_path, &worker.key, true);
+        result = load_key_data(file_path, &worker.key);
     }
 
     return result;
@@ -159,7 +114,7 @@ bool LfRfidApp::delete_key(RfidKey* key) {
     return storage_simply_remove(storage, string_get_cstr(file_path));
 }
 
-bool LfRfidApp::load_key_data(string_t path, RfidKey* key, bool show_dialog) {
+bool LfRfidApp::load_key_data(string_t path, RfidKey* key) {
     FlipperFormat* file = flipper_format_file_alloc(storage);
     bool result = false;
     string_t str_result;
@@ -198,7 +153,7 @@ bool LfRfidApp::load_key_data(string_t path, RfidKey* key, bool show_dialog) {
     flipper_format_free(file);
     string_clear(str_result);
 
-    if((!result) && (show_dialog)) {
+    if(!result) {
         dialog_message_show_storage_error(dialogs, "Cannot load\nkey file");
     }
 
