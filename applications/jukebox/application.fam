@@ -1,5 +1,5 @@
 App(
-    appid="touchtones",
+    appid="touchtunes",
     name="Touch Tunes Remote",
     apptype=FlipperAppType.PLUGIN,
     entry_point="jukebox_app",
