@@ -8,6 +8,8 @@
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
 
+#include <lib/flipper_format/flipper_format.h>
+
 #include <stm32wbxx_ll_dma.h>
 
 #include <furi.h>
@@ -277,7 +279,18 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
 
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     //checking regional settings
-    bool is_allowed = true;
+    bool is_allowed = false;
+
+    Storage* storage = furi_record_open("storage");
+    FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
+
+    if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/setting_user")) {
+        flipper_format_read_bool(fff_data_file, "ignore_default_tx_region", &is_allowed, 1);
+    }
+
+    flipper_format_free(fff_data_file);
+    furi_record_close("storage");
+    
     switch(furi_hal_version_get_hw_region()) {
     case FuriHalVersionRegionEuRu:
         //433,05..434,79; 868,15..868,55
