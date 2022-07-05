@@ -13,7 +13,6 @@ $ docker-compose up -d
 $ docker-compose exec dev ./fbt
 ```
 
-## [Please Check Poll for Games To Remove](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/77)
 ## Latest Updates (mostly from OFW):
 - Updates for [Auto detect raw #1367 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1367)
 - Updated [assets/resources/nfc/assets/mf_classic_dict.nfc](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/nfc/assets/mf_classic_dict.nfc) from UberGuidoZ, update your `nfc/assets/mf_classic_dict.nfc` on SD!
