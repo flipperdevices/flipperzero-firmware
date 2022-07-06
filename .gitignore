@@ -47,3 +47,18 @@ build/
 
 # Toolchain
 toolchain*/
+.vs/VSWorkspaceState.json
+.vs/slnx.sqlite
+.vs/ProjectSettings.json
+.vs/flipperzero-firmware/v16/ipch/AutoPCH/9aaa9b8c80dc39cf/APPLICATIONS.ipch
+.vs/flipperzero-firmware/v16/Browse.VC.opendb
+.vs/flipperzero-firmware/v16/Browse.VC.db-wal
+.vs/flipperzero-firmware/v16/Browse.VC.db-shm
+.vs/flipperzero-firmware/v16/Browse.VC.db
+.vs/flipperzero-firmware/v16/.suo
+Azz_Build_and_Flash.bat
+Azz_Build_with_docker.bat
+get-pip.py
+site_scons/site_tools/crosscc.py
+site_scons/site_tools/crosscc.py
+site_scons/site_tools/crosscc.py
