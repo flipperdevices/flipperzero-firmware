@@ -17,6 +17,7 @@ $ docker-compose exec dev ./fbt
 - - **Update `subghz/assets/setting_user` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) on SD**
 - New tv.ir universal remote [(thanks to UberGuidoZ & Hyper_Mash)](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir)
 - - **Update `infrared/assets/tv.ir` with [this file](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir) on SD**
+- Updates to SubGHz code may have broken tanks, causes "StackOverflow"
 
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
