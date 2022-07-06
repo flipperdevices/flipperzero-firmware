@@ -38,7 +38,7 @@ App(
         "picopass",
         "spectrum_analyzer",
         "wav_player",
-        "mousejacker","nrfsniff","sentry_safe",
+        "mousejacker","nrfsniff","sentry_safe","barcode_generator"
     ],
 )
 
