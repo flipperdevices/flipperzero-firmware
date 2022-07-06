@@ -22,6 +22,7 @@ $ docker-compose exec dev ./fbt
 - Added [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `HIDDEN`
 - Added [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) `HIDDEN`
 - Added [Sentry Safe (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) `HIDDEN`
+- Fixed issue with SubGHz frequencies being repeated [(Thanks to UberGuidoZ)](https://github.com/UberGuidoZ) for pointing it out.
 
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
