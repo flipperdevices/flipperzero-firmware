@@ -9,7 +9,7 @@ from fbt.util import (
 
 # Building initial C environment for libs
 env = ENV.Clone(
-    tools=["compilation_db", "fwbin", "fbt_apps"],
+    tools=["compilation_db", "fwbin", "fbt_apps", "fbt_sdk"],
     COMPILATIONDB_USE_ABSPATH=False,
     BUILD_DIR=fw_build_meta["build_dir"],
     IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",
@@ -128,7 +128,7 @@ extapps = SConscript("applications/extapps.scons", exports={"ENV": fwenv})
 
 
 # Add preprocessor definitions for current set of apps
-fwenv.AppendUnique(
+fwenv.Append(
     CPPDEFINES=fwenv["APPBUILD"].get_apps_cdefs(),
 )
 
@@ -247,5 +247,10 @@ if should_gen_cdb_and_link_dir(fwenv, BUILD_TARGETS):
 
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", fw_artifacts)
 
+if fwenv["IS_BASE_FIRMWARE"]:
+    sdk = fwenv.SDKBuilder("#build/sdk/sdk.opts", [])
+    fwenv.Depends(sdk, fwelf)
+    AlwaysBuild(sdk)
+    Alias("sdk", sdk)
 
 Return("fwenv")
