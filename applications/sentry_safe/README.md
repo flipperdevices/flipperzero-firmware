@@ -1,3 +1,6 @@
+## (Flipper) 8/GND -> Black wire (Safe)
+## (Flipper) 15/C1 -> Green wire (Safe)
+
 # flipperzero-sentry-safe-plugin
 
 Flipper zero exploiting vulnerability to open any Sentry Safe and Master Lock electronic safe without any pin code.
