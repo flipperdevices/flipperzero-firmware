@@ -18,6 +18,8 @@ $ docker-compose exec dev ./fbt
 - New tv.ir universal remote [(thanks to UberGuidoZ & Hyper_Mash)](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir)
 - - **Update `infrared/assets/tv.ir` with [this file](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir) on SD**
 - Tanks, causes "StackOverflow". Not sure what broke it.
+- OFW: [Fix a race condition #1376 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1376)
+- OFW: [CLI, threads, notifications, archive fixes #1354 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1354)
 - Added [UPC Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
 
 ## **Special Instructions:**
