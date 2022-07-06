@@ -8,7 +8,9 @@ static const NotificationSequence* infrared_notification_sequences[] = {
     &sequence_set_only_green_255,
     &sequence_reset_green,
     &sequence_blink_cyan_10,
-    &sequence_blink_magenta_10};
+    &sequence_blink_magenta_10,
+    &sequence_solid_yellow,
+    &sequence_reset_rgb};
 
 static void infrared_make_app_folder(Infrared* infrared) {
     if(!storage_simply_mkdir(infrared->storage, INFRARED_APP_FOLDER)) {
@@ -32,6 +34,52 @@ static void infrared_tick_event_callback(void* context) {
     furi_assert(context);
     Infrared* infrared = context;
     scene_manager_handle_tick_event(infrared->scene_manager);
+}
+
+static bool
+    infrared_rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context) {
+    furi_assert(context);
+    Infrared* infrared = context;
+
+    if(!infrared->rpc_ctx) {
+        return false;
+    }
+
+    bool result = false;
+
+    if(event == RpcAppEventSessionClose) {
+        rpc_system_app_set_callback(infrared->rpc_ctx, NULL, NULL);
+        infrared->rpc_ctx = NULL;
+        view_dispatcher_send_custom_event(
+            infrared->view_dispatcher, InfraredCustomEventTypeBackPressed);
+        result = true;
+    } else if(event == RpcAppEventAppExit) {
+        view_dispatcher_send_custom_event(
+            infrared->view_dispatcher, InfraredCustomEventTypeBackPressed);
+        result = true;
+    } else if(event == RpcAppEventLoadFile) {
+        if(arg) {
+            string_set_str(infrared->file_path, arg);
+            result = infrared_remote_load(infrared->remote, infrared->file_path);
+            infrared_worker_tx_set_get_signal_callback(
+                infrared->worker, infrared_worker_tx_get_signal_steady_callback, infrared);
+            infrared_worker_tx_set_signal_sent_callback(
+                infrared->worker, infrared_signal_sent_callback, infrared);
+        }
+    } else if(event == RpcAppEventButtonPress) {
+        if(arg) {
+            size_t button_index = 0;
+            if(infrared_remote_find_button_by_name(infrared->remote, arg, &button_index)) {
+                infrared_tx_start_button_index(infrared, button_index);
+                result = true;
+            }
+        }
+    } else if(event == RpcAppEventButtonRelease) {
+        infrared_tx_stop(infrared);
+        result = true;
+    }
+
+    return result;
 }
 
 static void infrared_find_vacant_remote_name(string_t name, const char* path) {
@@ -151,6 +199,11 @@ static void infrared_free(Infrared* infrared) {
     furi_assert(infrared);
     ViewDispatcher* view_dispatcher = infrared->view_dispatcher;
     InfraredAppState* app_state = &infrared->app_state;
+
+    if(infrared->rpc_ctx) {
+        rpc_system_app_set_callback(infrared->rpc_ctx, NULL, NULL);
+        infrared->rpc_ctx = NULL;
+    }
 
     view_dispatcher_remove_view(view_dispatcher, InfraredViewSubmenu);
     submenu_free(infrared->submenu);
@@ -360,11 +413,11 @@ void infrared_text_input_callback(void* context) {
         infrared->view_dispatcher, InfraredCustomEventTypeTextEditDone);
 }
 
-void infrared_popup_timeout_callback(void* context) {
+void infrared_popup_closed_callback(void* context) {
     furi_assert(context);
     Infrared* infrared = context;
     view_dispatcher_send_custom_event(
-        infrared->view_dispatcher, InfraredCustomEventTypePopupTimeout);
+        infrared->view_dispatcher, InfraredCustomEventTypePopupClosed);
 }
 
 int32_t infrared_app(void* p) {
@@ -373,18 +426,29 @@ int32_t infrared_app(void* p) {
     infrared_make_app_folder(infrared);
 
     bool is_remote_loaded = false;
+    bool is_rpc_mode = false;
 
     if(p) {
-        string_set_str(infrared->file_path, (const char*)p);
-        is_remote_loaded = infrared_remote_load(infrared->remote, infrared->file_path);
-        if(!is_remote_loaded) {
-            dialog_message_show_storage_error(
-                infrared->dialogs, "Failed to load\nselected remote");
-            return -1;
+        uint32_t rpc_ctx = 0;
+        if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
+            infrared->rpc_ctx = (void*)rpc_ctx;
+            rpc_system_app_set_callback(
+                infrared->rpc_ctx, infrared_rpc_command_callback, infrared);
+            is_rpc_mode = true;
+        } else {
+            string_set_str(infrared->file_path, (const char*)p);
+            is_remote_loaded = infrared_remote_load(infrared->remote, infrared->file_path);
+            if(!is_remote_loaded) {
+                dialog_message_show_storage_error(
+                    infrared->dialogs, "Failed to load\nselected remote");
+                return -1;
+            }
         }
     }
 
-    if(is_remote_loaded) {
+    if(is_rpc_mode) {
+        scene_manager_next_scene(infrared->scene_manager, InfraredSceneRpc);
+    } else if(is_remote_loaded) {
         scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);
     } else {
         scene_manager_next_scene(infrared->scene_manager, InfraredSceneStart);

@@ -30,6 +30,8 @@
 #include "views/infrared_progress_view.h"
 #include "views/infrared_debug_view.h"
 
+#include "rpc/rpc_app.h"
+
 #define INFRARED_FILE_NAME_SIZE 100
 #define INFRARED_TEXT_STORE_NUM 2
 #define INFRARED_TEXT_STORE_SIZE 128
@@ -95,6 +97,8 @@ struct Infrared {
     string_t file_path;
     char text_store[INFRARED_TEXT_STORE_NUM][INFRARED_TEXT_STORE_SIZE + 1];
     InfraredAppState app_state;
+
+    void* rpc_ctx;
 };
 
 typedef enum {
@@ -113,6 +117,8 @@ typedef enum {
     InfraredNotificationMessageGreenOff,
     InfraredNotificationMessageBlinkRead,
     InfraredNotificationMessageBlinkSend,
+    InfraredNotificationMessageYellowOn,
+    InfraredNotificationMessageYellowOff,
 } InfraredNotificationMessage;
 
 bool infrared_add_remote_with_button(Infrared* infrared, const char* name, InfraredSignal* signal);
@@ -129,4 +135,4 @@ void infrared_show_loading_popup(Infrared* infrared, bool show);
 void infrared_signal_sent_callback(void* context);
 void infrared_signal_received_callback(void* context, InfraredWorkerSignal* received_signal);
 void infrared_text_input_callback(void* context);
-void infrared_popup_timeout_callback(void* context);
+void infrared_popup_closed_callback(void* context);

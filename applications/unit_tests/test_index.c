@@ -19,6 +19,7 @@ int run_minunit_test_stream();
 int run_minunit_test_storage();
 int run_minunit_test_subghz();
 int run_minunit_test_dirwalk();
+int run_minunit_test_nfc();
 
 void minunit_print_progress(void) {
     static char progress[] = {'\\', '|', '/', '-'};
@@ -32,7 +33,7 @@ void minunit_print_progress(void) {
 }
 
 void minunit_print_fail(const char* str) {
-    printf(FURI_LOG_CLR_E "%s\n" FURI_LOG_CLR_RESET, str);
+    printf(FURI_LOG_CLR_E "%s\r\n" FURI_LOG_CLR_RESET, str);
 }
 
 void unit_tests_cli(Cli* cli, string_t args, void* context) {
@@ -67,6 +68,7 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
         test_result |= run_minunit_test_infrared_decoder_encoder();
         test_result |= run_minunit_test_rpc();
         test_result |= run_minunit_test_subghz();
+        test_result |= run_minunit_test_nfc();
 
         cycle_counter = (furi_hal_get_tick() - cycle_counter);
 
