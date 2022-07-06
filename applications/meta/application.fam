@@ -11,7 +11,6 @@ App(
     ],
 )
 
-
 App(
     appid="basic_apps",
     name="Basic applications for main menu",
@@ -28,7 +27,6 @@ App(
     ],
 )
 
-
 App(
     appid="basic_plugins",
     name="Basic applications for plug-in menu",
@@ -40,6 +38,7 @@ App(
         "picopass",
         "spectrum_analyzer",
         "wav_player",
+        "mousejacker","nrfsniff","sentry_safe",
     ],
 )
 
@@ -56,6 +55,7 @@ App(
         "tetris_game",
         "tictactoe_game",
         "videopoker_game",
+        "flappy_game","gameoflife_game","raycast_game",
     ],
 )
 
