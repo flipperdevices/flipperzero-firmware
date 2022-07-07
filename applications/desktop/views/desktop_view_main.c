@@ -9,6 +9,7 @@
 #include "../desktop_i.h"
 #include "desktop_view_main.h"
 #include <applications/desktop/desktop_settings/desktop_settings.h>
+uint32_t codeSequence = 0;
 
 struct DesktopMainView {
     View* view;
@@ -79,10 +80,34 @@ bool desktop_main_input(InputEvent* event, void* context) {
                 // PREFER TO OPEN GAMES MENU
                 main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyUp) {
+                if(codeSequence==0 || codeSequence==1) {
+                    codeSequence++;
+                } else {
+                    codeSequence=0;
+                }
             } else if(event->key == InputKeyDown) {
+                if(codeSequence==2 || codeSequence==3) {
+                    codeSequence++;
+                } else {
+                    codeSequence=0;
+                }
             } else if(event->key == InputKeyLeft) {
+                if(codeSequence==4 || codeSequence==6) {
+                    codeSequence++;
+                } else {
+                    codeSequence=0;
+                }
             } else if(event->key == InputKeyRight) {
+                if(codeSequence==5 || codeSequence==7) {
+                    codeSequence++;
+                } else {
+                    codeSequence=0;
+                }
                 // GOES TO PASSPORT NO MATTER WHAT
+            }
+            if(codeSequence==8) {
+                // UNLOCK!
+                main_view->callback(DesktopMainEventOpenMenu, main_view->context);
             }
         } else if(event->type == InputTypeLong) {
             if (event->key == InputKeyOk) {
