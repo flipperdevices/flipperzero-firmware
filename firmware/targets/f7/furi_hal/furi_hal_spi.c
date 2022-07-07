@@ -1,5 +1,6 @@
 #include "furi_hal_spi.h"
 #include "furi_hal_resources.h"
+#include <furi_hal_power.h>
 
 #include <stdbool.h>
 #include <string.h>
@@ -11,13 +12,21 @@
 
 #define TAG "FuriHalSpi"
 
+void furi_hal_spi_init_early() {
+    furi_hal_spi_bus_init(&furi_hal_spi_bus_d);
+    furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_display);
+}
+
+void furi_hal_spi_deinit_early() {
+    furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_display);
+    furi_hal_spi_bus_deinit(&furi_hal_spi_bus_d);
+}
+
 void furi_hal_spi_init() {
     furi_hal_spi_bus_init(&furi_hal_spi_bus_r);
-    furi_hal_spi_bus_init(&furi_hal_spi_bus_d);
 
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
-    furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_display);
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_sd_fast);
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_sd_slow);
 
@@ -47,6 +56,8 @@ void furi_hal_spi_bus_handle_deinit(FuriHalSpiBusHandle* handle) {
 void furi_hal_spi_acquire(FuriHalSpiBusHandle* handle) {
     furi_assert(handle);
 
+    furi_hal_power_insomnia_enter();
+
     handle->bus->callback(handle->bus, FuriHalSpiBusEventLock);
     handle->bus->callback(handle->bus, FuriHalSpiBusEventActivate);
 
@@ -67,9 +78,12 @@ void furi_hal_spi_release(FuriHalSpiBusHandle* handle) {
     // Bus events
     handle->bus->callback(handle->bus, FuriHalSpiBusEventDeactivate);
     handle->bus->callback(handle->bus, FuriHalSpiBusEventUnlock);
+
+    furi_hal_power_insomnia_exit();
 }
 
 static void furi_hal_spi_bus_end_txrx(FuriHalSpiBusHandle* handle, uint32_t timeout) {
+    UNUSED(timeout); // FIXME
     while(LL_SPI_GetTxFIFOLevel(handle->bus->spi) != LL_SPI_TX_FIFO_EMPTY)
         ;
     while(LL_SPI_IsActiveFlag_BSY(handle->bus->spi))

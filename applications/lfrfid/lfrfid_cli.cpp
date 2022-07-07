@@ -7,7 +7,7 @@
 #include "helpers/rfid_reader.h"
 #include "helpers/rfid_timer_emulator.h"
 
-void lfrfid_cli(Cli* cli, string_t args, void* context);
+static void lfrfid_cli(Cli* cli, string_t args, void* context);
 
 // app cli function
 extern "C" void lfrfid_on_system_start() {
@@ -15,6 +15,8 @@ extern "C" void lfrfid_on_system_start() {
     Cli* cli = static_cast<Cli*>(furi_record_open("cli"));
     cli_add_command(cli, "rfid", CliCommandFlagDefault, lfrfid_cli, NULL);
     furi_record_close("cli");
+#else
+    UNUSED(lfrfid_cli);
 #endif
 }
 
@@ -26,10 +28,11 @@ void lfrfid_cli_print_usage() {
     printf("\tEM4100, EM-Marin (5 bytes key_data)\r\n");
     printf("\tH10301, HID26 (3 bytes key_data)\r\n");
     printf("\tI40134, Indala (3 bytes key_data)\r\n");
+    printf("\tIoProxXSF, IoProx (4 bytes key_data)\r\n");
     printf("\t<key_data> are hex-formatted\r\n");
 };
 
-bool lfrfid_cli_get_key_type(string_t data, LfrfidKeyType* type) {
+static bool lfrfid_cli_get_key_type(string_t data, LfrfidKeyType* type) {
     bool result = false;
 
     if(string_cmp_str(data, "EM4100") == 0 || string_cmp_str(data, "EM-Marin") == 0) {
@@ -41,12 +44,15 @@ bool lfrfid_cli_get_key_type(string_t data, LfrfidKeyType* type) {
     } else if(string_cmp_str(data, "I40134") == 0 || string_cmp_str(data, "Indala") == 0) {
         result = true;
         *type = LfrfidKeyType::KeyI40134;
+    } else if(string_cmp_str(data, "IoProxXSF") == 0 || string_cmp_str(data, "IoProx") == 0) {
+        result = true;
+        *type = LfrfidKeyType::KeyIoProxXSF;
     }
 
     return result;
 }
 
-void lfrfid_cli_read(Cli* cli, string_t args) {
+static void lfrfid_cli_read(Cli* cli, string_t args) {
     RfidReader reader;
     string_t type_string;
     string_init(type_string);
@@ -88,7 +94,7 @@ void lfrfid_cli_read(Cli* cli, string_t args) {
             printf("\r\n");
             break;
         }
-        delay(100);
+        furi_hal_delay_ms(100);
     }
 
     printf("Reading stopped\r\n");
@@ -97,12 +103,14 @@ void lfrfid_cli_read(Cli* cli, string_t args) {
     string_clear(type_string);
 }
 
-void lfrfid_cli_write(Cli* cli, string_t args) {
+static void lfrfid_cli_write(Cli* cli, string_t args) {
+    UNUSED(cli);
+    UNUSED(args);
     // TODO implement rfid write
     printf("Not implemented :(\r\n");
 }
 
-void lfrfid_cli_emulate(Cli* cli, string_t args) {
+static void lfrfid_cli_emulate(Cli* cli, string_t args) {
     string_t data;
     string_init(data);
     RfidTimerEmulator emulator;
@@ -136,7 +144,7 @@ void lfrfid_cli_emulate(Cli* cli, string_t args) {
 
     printf("Emulating RFID...\r\nPress Ctrl+C to abort\r\n");
     while(!cli_cmd_interrupt_received(cli)) {
-        delay(100);
+        furi_hal_delay_ms(100);
     }
     printf("Emulation stopped\r\n");
     emulator.stop();
@@ -144,7 +152,8 @@ void lfrfid_cli_emulate(Cli* cli, string_t args) {
     string_clear(data);
 }
 
-void lfrfid_cli(Cli* cli, string_t args, void* context) {
+static void lfrfid_cli(Cli* cli, string_t args, void* context) {
+    UNUSED(context);
     string_t cmd;
     string_init(cmd);
 

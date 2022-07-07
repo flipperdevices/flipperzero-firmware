@@ -72,19 +72,8 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
 
 uint64_t dolphin_state_timestamp() {
     FuriHalRtcDateTime datetime;
-    struct tm current;
-
     furi_hal_rtc_get_datetime(&datetime);
-
-    current.tm_year = datetime.year - 1900;
-    current.tm_mday = datetime.day;
-    current.tm_mon = datetime.month - 1;
-
-    current.tm_hour = datetime.hour;
-    current.tm_min = datetime.minute;
-    current.tm_sec = datetime.second;
-
-    return mktime(&current);
+    return furi_hal_rtc_datetime_to_timestamp(&datetime);
 }
 
 bool dolphin_state_is_levelup(uint32_t icounter) {
@@ -126,12 +115,29 @@ uint32_t dolphin_state_xp_to_levelup(uint32_t icounter) {
 }
 
 void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
+    // Special case for testing
+    if(deed > DolphinDeedMAX) {
+        if(deed == DolphinDeedTestLeft) {
+            dolphin_state->data.butthurt =
+                CLAMP(dolphin_state->data.butthurt + 1, BUTTHURT_MAX, BUTTHURT_MIN);
+            if(dolphin_state->data.icounter > 0) dolphin_state->data.icounter--;
+            dolphin_state->data.timestamp = dolphin_state_timestamp();
+            dolphin_state->dirty = true;
+        } else if(deed == DolphinDeedTestRight) {
+            dolphin_state->data.butthurt = BUTTHURT_MIN;
+            if(dolphin_state->data.icounter < UINT32_MAX) dolphin_state->data.icounter++;
+            dolphin_state->data.timestamp = dolphin_state_timestamp();
+            dolphin_state->dirty = true;
+        }
+        return;
+    }
+
     DolphinApp app = dolphin_deed_get_app(deed);
     int8_t weight_limit =
         dolphin_deed_get_app_limit(app) - dolphin_state->data.icounter_daily_limit[app];
     uint8_t deed_weight = CLAMP(dolphin_deed_get_weight(deed), weight_limit, 0);
 
-    uint8_t xp_to_levelup = dolphin_state_xp_to_levelup(dolphin_state->data.icounter);
+    uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(dolphin_state->data.icounter);
     if(xp_to_levelup) {
         deed_weight = MIN(xp_to_levelup, deed_weight);
         dolphin_state->data.icounter += deed_weight;

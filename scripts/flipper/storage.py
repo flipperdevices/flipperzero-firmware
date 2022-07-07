@@ -53,11 +53,11 @@ class FlipperStorage:
     CLI_PROMPT = ">: "
     CLI_EOL = "\r\n"
 
-    def __init__(self, portname: str):
+    def __init__(self, portname: str, portbaud: int = 115200):
         self.port = serial.Serial()
         self.port.port = portname
         self.port.timeout = 2
-        self.port.baudrate = 115200
+        self.port.baudrate = portbaud
         self.read = BufferedRead(self.port)
         self.last_error = ""
 
@@ -189,33 +189,33 @@ class FlipperStorage:
         """Send file from local device to Flipper"""
         self.remove(filename_to)
 
-        file = open(filename_from, "rb")
-        filesize = os.fstat(file.fileno()).st_size
+        with open(filename_from, "rb") as file:
+            filesize = os.fstat(file.fileno()).st_size
 
-        buffer_size = 512
-        while True:
-            filedata = file.read(buffer_size)
-            size = len(filedata)
-            if size == 0:
-                break
+            buffer_size = 512
+            while True:
+                filedata = file.read(buffer_size)
+                size = len(filedata)
+                if size == 0:
+                    break
 
-            self.send_and_wait_eol(f'storage write_chunk "{filename_to}" {size}\r')
-            answer = self.read.until(self.CLI_EOL)
-            if self.has_error(answer):
-                self.last_error = self.get_error(answer)
+                self.send_and_wait_eol(f'storage write_chunk "{filename_to}" {size}\r')
+                answer = self.read.until(self.CLI_EOL)
+                if self.has_error(answer):
+                    self.last_error = self.get_error(answer)
+                    self.read.until(self.CLI_PROMPT)
+                    return False
+
+                self.port.write(filedata)
                 self.read.until(self.CLI_PROMPT)
-                file.close()
-                return False
 
-            self.port.write(filedata)
-            self.read.until(self.CLI_PROMPT)
-
-            percent = str(math.ceil(file.tell() / filesize * 100))
-            total_chunks = str(math.ceil(filesize / buffer_size))
-            current_chunk = str(math.ceil(file.tell() / buffer_size))
-            sys.stdout.write(f"\r{percent}%, chunk {current_chunk} of {total_chunks}")
-            sys.stdout.flush()
-        file.close()
+                percent = str(math.ceil(file.tell() / filesize * 100))
+                total_chunks = str(math.ceil(filesize / buffer_size))
+                current_chunk = str(math.ceil(file.tell() / buffer_size))
+                sys.stdout.write(
+                    f"\r{percent}%, chunk {current_chunk} of {total_chunks}"
+                )
+                sys.stdout.flush()
         print()
         return True
 
@@ -232,18 +232,18 @@ class FlipperStorage:
             self.read.until(self.CLI_PROMPT)
             return filedata
         size = int(answer.split(b": ")[1])
-        readed_size = 0
+        read_size = 0
 
-        while readed_size < size:
+        while read_size < size:
             self.read.until("Ready?" + self.CLI_EOL)
             self.send("y")
-            read_size = min(size - readed_size, buffer_size)
+            read_size = min(size - read_size, buffer_size)
             filedata.extend(self.port.read(read_size))
-            readed_size = readed_size + read_size
+            read_size = read_size + read_size
 
-            percent = str(math.ceil(readed_size / size * 100))
+            percent = str(math.ceil(read_size / size * 100))
             total_chunks = str(math.ceil(size / buffer_size))
-            current_chunk = str(math.ceil(readed_size / buffer_size))
+            current_chunk = str(math.ceil(read_size / buffer_size))
             sys.stdout.write(f"\r{percent}%, chunk {current_chunk} of {total_chunks}")
             sys.stdout.flush()
         print()

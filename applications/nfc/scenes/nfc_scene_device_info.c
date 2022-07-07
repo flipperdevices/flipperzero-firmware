@@ -21,6 +21,7 @@ void nfc_scene_device_info_dialog_callback(DialogExResult result, void* context)
 }
 
 void nfc_scene_device_info_bank_card_callback(GuiButtonType result, InputType type, void* context) {
+    UNUSED(result);
     Nfc* nfc = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
@@ -30,19 +31,25 @@ void nfc_scene_device_info_bank_card_callback(GuiButtonType result, InputType ty
 void nfc_scene_device_info_on_enter(void* context) {
     Nfc* nfc = context;
 
+    bool data_display_supported = (nfc->dev->format == NfcDeviceSaveFormatUid) ||
+                                  (nfc->dev->format == NfcDeviceSaveFormatMifareUl) ||
+                                  (nfc->dev->format == NfcDeviceSaveFormatMifareDesfire) ||
+                                  (nfc->dev->format == NfcDeviceSaveFormatBankCard);
     // Setup Custom Widget view
     widget_add_text_box_element(
-        nfc->widget, 0, 0, 128, 22, AlignCenter, AlignCenter, nfc->dev->dev_name);
+        nfc->widget, 0, 0, 128, 22, AlignCenter, AlignTop, nfc->dev->dev_name, false);
     widget_add_button_element(
         nfc->widget, GuiButtonTypeLeft, "Back", nfc_scene_device_info_widget_callback, nfc);
-    widget_add_button_element(
-        nfc->widget, GuiButtonTypeRight, "Data", nfc_scene_device_info_widget_callback, nfc);
-    char uid_str[32];
-    NfcDeviceCommonData* data = &nfc->dev->dev_data.nfc_data;
+    if(data_display_supported) {
+        widget_add_button_element(
+            nfc->widget, GuiButtonTypeRight, "Data", nfc_scene_device_info_widget_callback, nfc);
+    }
+    char temp_str[32];
+    FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
     if(data->uid_len == 4) {
         snprintf(
-            uid_str,
-            sizeof(uid_str),
+            temp_str,
+            sizeof(temp_str),
             "UID: %02X %02X %02X %02X",
             data->uid[0],
             data->uid[1],
@@ -50,8 +57,8 @@ void nfc_scene_device_info_on_enter(void* context) {
             data->uid[3]);
     } else if(data->uid_len == 7) {
         snprintf(
-            uid_str,
-            sizeof(uid_str),
+            temp_str,
+            sizeof(temp_str),
             "UID: %02X %02X %02X %02X %02X %02X %02X",
             data->uid[0],
             data->uid[1],
@@ -61,13 +68,16 @@ void nfc_scene_device_info_on_enter(void* context) {
             data->uid[5],
             data->uid[6]);
     }
-    widget_add_string_element(nfc->widget, 64, 21, AlignCenter, AlignTop, FontSecondary, uid_str);
+    widget_add_string_element(nfc->widget, 64, 21, AlignCenter, AlignTop, FontSecondary, temp_str);
 
     const char* protocol_name = NULL;
-    if(data->protocol == NfcDeviceProtocolEMV) {
-        protocol_name = nfc_guess_protocol(data->protocol);
-    } else if(data->protocol == NfcDeviceProtocolMifareUl) {
+    NfcProtocol protocol = nfc->dev->dev_data.protocol;
+    if(protocol == NfcDeviceProtocolEMV || protocol == NfcDeviceProtocolMifareDesfire) {
+        protocol_name = nfc_guess_protocol(protocol);
+    } else if(protocol == NfcDeviceProtocolMifareUl) {
         protocol_name = nfc_mf_ul_type(nfc->dev->dev_data.mf_ul_data.type, false);
+    } else if(protocol == NfcDeviceProtocolMifareClassic) {
+        protocol_name = nfc_mf_classic_type(nfc->dev->dev_data.mf_classic_data.type);
     }
     if(protocol_name) {
         widget_add_string_element(
@@ -75,12 +85,10 @@ void nfc_scene_device_info_on_enter(void* context) {
     }
     // TODO change dinamically
     widget_add_string_element(nfc->widget, 118, 32, AlignRight, AlignTop, FontSecondary, "NFC-A");
-    char sak_str[16];
-    snprintf(sak_str, sizeof(sak_str), "SAK: %02X", data->sak);
-    widget_add_string_element(nfc->widget, 10, 42, AlignLeft, AlignTop, FontSecondary, sak_str);
-    char atqa_str[16];
-    snprintf(atqa_str, sizeof(atqa_str), "ATQA: %02X%02X", data->atqa[0], data->atqa[1]);
-    widget_add_string_element(nfc->widget, 118, 42, AlignRight, AlignTop, FontSecondary, atqa_str);
+    snprintf(temp_str, sizeof(temp_str), "SAK: %02X", data->sak);
+    widget_add_string_element(nfc->widget, 10, 42, AlignLeft, AlignTop, FontSecondary, temp_str);
+    snprintf(temp_str, sizeof(temp_str), "ATQA: %02X%02X", data->atqa[0], data->atqa[1]);
+    widget_add_string_element(nfc->widget, 118, 42, AlignRight, AlignTop, FontSecondary, temp_str);
 
     // Setup Data View
     if(nfc->dev->format == NfcDeviceSaveFormatUid) {
@@ -90,7 +98,7 @@ void nfc_scene_device_info_on_enter(void* context) {
         dialog_ex_set_context(dialog_ex, nfc);
         dialog_ex_set_result_callback(dialog_ex, nfc_scene_device_info_dialog_callback);
     } else if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
-        MifareUlData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
+        MfUltralightData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
         TextBox* text_box = nfc->text_box;
         text_box_set_font(text_box, TextBoxFontHex);
         for(uint16_t i = 0; i < mf_ul_data->data_size; i += 2) {
@@ -101,8 +109,27 @@ void nfc_scene_device_info_on_enter(void* context) {
                 nfc->text_box_store, "%02X%02X ", mf_ul_data->data[i], mf_ul_data->data[i + 1]);
         }
         text_box_set_text(text_box, string_get_cstr(nfc->text_box_store));
+    } else if(nfc->dev->format == NfcDeviceSaveFormatMifareDesfire) {
+        MifareDesfireData* mf_df_data = &nfc->dev->dev_data.mf_df_data;
+        uint16_t n_apps = 0;
+        uint16_t n_files = 0;
+        for(MifareDesfireApplication* app = mf_df_data->app_head; app; app = app->next) {
+            n_apps++;
+            for(MifareDesfireFile* file = app->file_head; file; file = file->next) {
+                n_files++;
+            }
+        }
+        nfc_text_store_set(
+            nfc,
+            "%d application%s, %d file%s",
+            n_apps,
+            n_apps == 1 ? "" : "s",
+            n_files,
+            n_files == 1 ? "" : "s");
+        widget_add_string_element(
+            nfc->widget, 64, 17, AlignCenter, AlignBottom, FontSecondary, nfc->text_store);
     } else if(nfc->dev->format == NfcDeviceSaveFormatBankCard) {
-        NfcEmvData* emv_data = &nfc->dev->dev_data.emv_data;
+        EmvData* emv_data = &nfc->dev->dev_data.emv_data;
         BankCard* bank_card = nfc->bank_card;
         bank_card_set_name(bank_card, emv_data->name);
         bank_card_set_number(bank_card, emv_data->number, emv_data->number_len);
@@ -162,6 +189,9 @@ bool nfc_scene_device_info_on_event(void* context, SceneManagerEvent event) {
                     nfc->scene_manager, NfcSceneDeviceInfo, NfcSceneDeviceInfoData);
                 view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewBankCard);
                 consumed = true;
+            } else if(nfc->dev->format == NfcDeviceSaveFormatMifareDesfire) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneMifareDesfireData);
+                consumed = true;
             }
         } else if(state == NfcSceneDeviceInfoData && event.event == NfcCustomEventViewExit) {
             scene_manager_set_scene_state(
@@ -181,21 +211,16 @@ bool nfc_scene_device_info_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_device_info_on_exit(void* context) {
-    Nfc* nfc = (Nfc*)context;
+    Nfc* nfc = context;
 
-    // Clear Custom Widget
+    // Clear views
     widget_reset(nfc->widget);
-
     if(nfc->dev->format == NfcDeviceSaveFormatUid) {
-        // Clear Dialog
-        DialogEx* dialog_ex = nfc->dialog_ex;
-        dialog_ex_reset(dialog_ex);
+        dialog_ex_reset(nfc->dialog_ex);
     } else if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
-        // Clear TextBox
         text_box_reset(nfc->text_box);
         string_reset(nfc->text_box_store);
     } else if(nfc->dev->format == NfcDeviceSaveFormatBankCard) {
-        // Clear Bank Card
         bank_card_clear(nfc->bank_card);
     }
 }

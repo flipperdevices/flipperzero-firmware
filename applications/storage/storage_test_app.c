@@ -316,6 +316,7 @@ static void do_test_end(Storage* api, const char* path) {
 }
 
 int32_t storage_test_app(void* p) {
+    UNUSED(p);
     Storage* api = furi_record_open("storage");
     do_test_start(api, "/int");
     do_test_start(api, "/any");
@@ -334,7 +335,7 @@ int32_t storage_test_app(void* p) {
     do_test_end(api, "/ext");
 
     while(true) {
-        delay(1000);
+        furi_hal_delay_ms(1000);
     }
 
     return 0;

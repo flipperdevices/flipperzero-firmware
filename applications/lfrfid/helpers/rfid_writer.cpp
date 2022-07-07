@@ -1,10 +1,9 @@
 #include "rfid_writer.h"
+#include "protocols/protocol_ioprox.h"
 #include <furi_hal.h>
 #include "protocols/protocol_emmarin.h"
 #include "protocols/protocol_hid_h10301.h"
 #include "protocols/protocol_indala_40134.h"
-
-extern COMP_HandleTypeDef hcomp1;
 
 /**
  * @brief all timings are specified in field clocks (field clock = 125 kHz, 8 us)
@@ -50,15 +49,15 @@ void RfidWriter::stop() {
 
 void RfidWriter::write_gap(uint32_t gap_time) {
     furi_hal_rfid_tim_read_stop();
-    delay_us(gap_time * 8);
+    furi_hal_delay_us(gap_time * 8);
     furi_hal_rfid_tim_read_start();
 }
 
 void RfidWriter::write_bit(bool value) {
     if(value) {
-        delay_us(T55xxTiming::data_1 * 8);
+        furi_hal_delay_us(T55xxTiming::data_1 * 8);
     } else {
-        delay_us(T55xxTiming::data_0 * 8);
+        furi_hal_delay_us(T55xxTiming::data_0 * 8);
     }
     write_gap(T55xxTiming::write_gap);
 }
@@ -70,7 +69,7 @@ void RfidWriter::write_byte(uint8_t value) {
 }
 
 void RfidWriter::write_block(uint8_t page, uint8_t block, bool lock_bit, uint32_t data) {
-    delay_us(T55xxTiming::wait_time * 8);
+    furi_hal_delay_us(T55xxTiming::wait_time * 8);
 
     // start gap
     write_gap(T55xxTiming::start_gap);
@@ -103,9 +102,9 @@ void RfidWriter::write_block(uint8_t page, uint8_t block, bool lock_bit, uint32_
     write_bit((block >> 1) & 1);
     write_bit((block >> 0) & 1);
 
-    delay_us(T55xxTiming::program * 8);
+    furi_hal_delay_us(T55xxTiming::program * 8);
 
-    delay_us(T55xxTiming::wait_time * 8);
+    furi_hal_delay_us(T55xxTiming::wait_time * 8);
     write_reset();
 }
 
@@ -141,6 +140,28 @@ void RfidWriter::write_hid(const uint8_t hid_data[3]) {
     write_block(0, 1, false, card_data[0]);
     write_block(0, 2, false, card_data[1]);
     write_block(0, 3, false, card_data[2]);
+    write_reset();
+    FURI_CRITICAL_EXIT();
+}
+
+/** Endian fixup. Translates an ioprox block into a t5577 block */
+static uint32_t ioprox_encode_block(const uint8_t block_data[4]) {
+    uint8_t raw_card_data[] = {block_data[3], block_data[2], block_data[1], block_data[0]};
+    return *reinterpret_cast<uint32_t*>(&raw_card_data);
+}
+
+void RfidWriter::write_ioprox(const uint8_t ioprox_data[4]) {
+    ProtocolIoProx ioprox_card;
+
+    uint8_t encoded_data[8];
+    ioprox_card.encode(ioprox_data, 4, encoded_data, sizeof(encoded_data));
+
+    const uint32_t ioprox_config_block_data = 0b00000000000101000111000001000000;
+
+    FURI_CRITICAL_ENTER();
+    write_block(0, 0, false, ioprox_config_block_data);
+    write_block(0, 1, false, ioprox_encode_block(&encoded_data[0]));
+    write_block(0, 2, false, ioprox_encode_block(&encoded_data[4]));
     write_reset();
     FURI_CRITICAL_EXIT();
 }

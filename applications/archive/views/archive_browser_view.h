@@ -8,14 +8,14 @@
 #include <storage/storage.h>
 #include "../helpers/archive_files.h"
 #include "../helpers/archive_favorites.h"
+#include "gui/modules/file_browser_worker.h"
 
 #define MAX_LEN_PX 110
 #define MAX_NAME_LEN 255
 #define MAX_EXT_LEN 6
 #define FRAME_HEIGHT 12
-#define MENU_ITEMS 4
-#define MAX_DEPTH 32
-#define MOVE_OFFSET 5
+#define MENU_ITEMS 4u
+#define MOVE_OFFSET 5u
 
 typedef enum {
     ArchiveTabFavorites,
@@ -35,21 +35,29 @@ typedef enum {
     ArchiveBrowserEventFileMenuClose,
     ArchiveBrowserEventFileMenuRun,
     ArchiveBrowserEventFileMenuPin,
-    ArchiveBrowserEventFileMenuAction,
+    ArchiveBrowserEventFileMenuRename,
     ArchiveBrowserEventFileMenuDelete,
+
     ArchiveBrowserEventEnterDir,
+
     ArchiveBrowserEventFavMoveUp,
     ArchiveBrowserEventFavMoveDown,
     ArchiveBrowserEventEnterFavMove,
     ArchiveBrowserEventExitFavMove,
     ArchiveBrowserEventSaveFavMove,
+
+    ArchiveBrowserEventLoadPrevItems,
+    ArchiveBrowserEventLoadNextItems,
+
+    ArchiveBrowserEventListRefresh,
+
     ArchiveBrowserEventExit,
 } ArchiveBrowserEvent;
 
 static const uint8_t file_menu_actions[MENU_ITEMS] = {
     [0] = ArchiveBrowserEventFileMenuRun,
     [1] = ArchiveBrowserEventFileMenuPin,
-    [2] = ArchiveBrowserEventFileMenuAction,
+    [2] = ArchiveBrowserEventFileMenuRename,
     [3] = ArchiveBrowserEventFileMenuDelete,
 };
 
@@ -65,27 +73,28 @@ typedef enum {
 
 struct ArchiveBrowserView {
     View* view;
+    BrowserWorker* worker;
     ArchiveBrowserViewCallback callback;
     void* context;
-
     string_t path;
+    InputKey last_tab_switch_dir;
+    bool is_root;
 };
 
 typedef struct {
     ArchiveTabEnum tab_idx;
-    ArchiveTabEnum last_tab;
     files_array_t files;
 
     uint8_t menu_idx;
-    bool move_fav;
     bool menu;
+    bool move_fav;
+    bool list_loading;
+    bool folder_loading;
 
-    uint16_t idx;
-    uint16_t last_idx;
-    uint16_t list_offset;
-    uint16_t last_offset;
-    uint8_t depth;
-
+    uint32_t item_cnt;
+    int32_t item_idx;
+    int32_t array_offset;
+    int32_t list_offset;
 } ArchiveBrowserViewModel;
 
 void archive_browser_set_callback(

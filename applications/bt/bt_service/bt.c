@@ -60,7 +60,7 @@ static ViewPort* bt_pin_code_view_port_alloc(Bt* bt) {
 
 static void bt_pin_code_show(Bt* bt, uint32_t pin_code) {
     bt->pin_code = pin_code;
-    notification_message(bt->notification, &sequence_display_on);
+    notification_message(bt->notification, &sequence_display_backlight_on);
     gui_view_port_send_to_front(bt->gui, bt->pin_code_view_port);
     view_port_enabled_set(bt->pin_code_view_port, true);
 }
@@ -74,13 +74,13 @@ static void bt_pin_code_hide(Bt* bt) {
 
 static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     furi_assert(bt);
-    notification_message(bt->notification, &sequence_display_on);
+    notification_message(bt->notification, &sequence_display_backlight_on);
     string_t pin_str;
     dialog_message_set_icon(bt->dialog_message, &I_BLE_Pairing_128x64, 0, 0);
     string_init_printf(pin_str, "Verify code\n%06d", pin);
     dialog_message_set_text(
         bt->dialog_message, string_get_cstr(pin_str), 64, 4, AlignCenter, AlignTop);
-    dialog_message_set_buttons(bt->dialog_message, "Cancel", "Ok", NULL);
+    dialog_message_set_buttons(bt->dialog_message, "Cancel", "OK", NULL);
     DialogMessageButton button = dialog_message_show(bt->dialogs, bt->dialog_message);
     string_clear(pin_str);
     return button == DialogMessageButtonCenter;
@@ -91,11 +91,16 @@ static void bt_battery_level_changed_callback(const void* _event, void* context)
     furi_assert(context);
 
     Bt* bt = context;
+    BtMessage message = {};
     const PowerEvent* event = _event;
     if(event->type == PowerEventTypeBatteryLevelChanged) {
-        BtMessage message = {
-            .type = BtMessageTypeUpdateBatteryLevel,
-            .data.battery_level = event->data.battery_level};
+        message.type = BtMessageTypeUpdateBatteryLevel;
+        message.data.battery_level = event->data.battery_level;
+        furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
+    } else if(
+        event->type == PowerEventTypeStartCharging || event->type == PowerEventTypeFullyCharged ||
+        event->type == PowerEventTypeStopCharging) {
+        message.type = BtMessageTypeUpdatePowerState;
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
     }
 }
@@ -167,7 +172,11 @@ static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t byt
     furi_assert(context);
     Bt* bt = context;
 
-    osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_ALL);
+    if(osEventFlagsGet(bt->rpc_event) & BT_RPC_EVENT_DISCONNECTED) {
+        // Early stop from sending if we're already disconnected
+        return;
+    }
+    osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_ALL & (~BT_RPC_EVENT_DISCONNECTED));
     size_t bytes_sent = 0;
     while(bytes_sent < bytes_len) {
         size_t bytes_remain = bytes_len - bytes_sent;
@@ -178,10 +187,14 @@ static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t byt
             furi_hal_bt_serial_tx(&bytes[bytes_sent], bytes_remain);
             bytes_sent += bytes_remain;
         }
-        uint32_t event_flag =
-            osEventFlagsWait(bt->rpc_event, BT_RPC_EVENT_ALL, osFlagsWaitAny, osWaitForever);
+        // We want BT_RPC_EVENT_DISCONNECTED to stick, so don't clear
+        uint32_t event_flag = osEventFlagsWait(
+            bt->rpc_event, BT_RPC_EVENT_ALL, osFlagsWaitAny | osFlagsNoClear, osWaitForever);
         if(event_flag & BT_RPC_EVENT_DISCONNECTED) {
             break;
+        } else {
+            // If we didn't get BT_RPC_EVENT_DISCONNECTED, then clear everything else
+            osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_ALL & (~BT_RPC_EVENT_DISCONNECTED));
         }
     }
 }
@@ -197,6 +210,8 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
         bt->status = BtStatusConnected;
         BtMessage message = {.type = BtMessageTypeUpdateStatus};
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
+        // Clear BT_RPC_EVENT_DISCONNECTED because it might be set from previous session
+        osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
         if(bt->profile == BtProfileSerial) {
             // Open RPC session
             bt->rpc_session = rpc_session_open(bt->rpc);
@@ -278,17 +293,20 @@ static void bt_show_warning(Bt* bt, const char* text) {
     dialog_message_show(bt->dialogs, bt->dialog_message);
 }
 
+static void bt_close_rpc_connection(Bt* bt) {
+    if(bt->profile == BtProfileSerial && bt->rpc_session) {
+        FURI_LOG_I(TAG, "Close RPC connection");
+        osEventFlagsSet(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
+        rpc_session_close(bt->rpc_session);
+        furi_hal_bt_serial_set_event_callback(0, NULL, NULL);
+        bt->rpc_session = NULL;
+    }
+}
+
 static void bt_change_profile(Bt* bt, BtMessage* message) {
-    FuriHalBtStack stack = furi_hal_bt_get_radio_stack();
-    if(stack == FuriHalBtStackLight) {
+    if(furi_hal_bt_is_ble_gatt_gap_supported()) {
         bt_settings_load(&bt->bt_settings);
-        if(bt->profile == BtProfileSerial && bt->rpc_session) {
-            FURI_LOG_I(TAG, "Close RPC connection");
-            osEventFlagsSet(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
-            rpc_session_close(bt->rpc_session);
-            furi_hal_bt_serial_set_event_callback(0, NULL, NULL);
-            bt->rpc_session = NULL;
-        }
+        bt_close_rpc_connection(bt);
 
         FuriHalBtProfile furi_profile;
         if(message->data.profile == BtProfileHidKeyboard) {
@@ -316,11 +334,23 @@ static void bt_change_profile(Bt* bt, BtMessage* message) {
     osEventFlagsSet(bt->api_event, BT_API_UNLOCK_EVENT);
 }
 
+static void bt_close_connection(Bt* bt) {
+    bt_close_rpc_connection(bt);
+    osEventFlagsSet(bt->api_event, BT_API_UNLOCK_EVENT);
+}
+
 int32_t bt_srv() {
     Bt* bt = bt_alloc();
 
+    if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
+        FURI_LOG_W(TAG, "Skipped BT init: device in special startup mode");
+        ble_glue_wait_for_c2_start(FURI_HAL_BT_C2_START_TIMEOUT);
+        furi_record_create("bt", bt);
+        return 0;
+    }
+
     // Read keys
-    if(!bt_load_key_storage(bt)) {
+    if(!bt_keys_storage_load(bt)) {
         FURI_LOG_W(TAG, "Failed to load bonding keys");
     }
 
@@ -328,14 +358,8 @@ int32_t bt_srv() {
     if(!furi_hal_bt_start_radio_stack()) {
         FURI_LOG_E(TAG, "Radio stack start failed");
     }
-    FuriHalBtStack stack_type = furi_hal_bt_get_radio_stack();
 
-    if(stack_type == FuriHalBtStackUnknown) {
-        bt_show_warning(bt, "Unsupported radio stack");
-        bt->status = BtStatusUnavailable;
-    } else if(stack_type == FuriHalBtStackHciLayer) {
-        bt->status = BtStatusUnavailable;
-    } else if(stack_type == FuriHalBtStackLight) {
+    if(furi_hal_bt_is_ble_gatt_gap_supported()) {
         if(!furi_hal_bt_start_app(FuriHalBtProfileSerial, bt_on_gap_event_callback, bt)) {
             FURI_LOG_E(TAG, "BLE App start failed");
         } else {
@@ -344,6 +368,9 @@ int32_t bt_srv() {
             }
             furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
         }
+    } else {
+        bt_show_warning(bt, "Unsupported radio stack");
+        bt->status = BtStatusUnavailable;
     }
 
     furi_record_create("bt", bt);
@@ -361,15 +388,19 @@ int32_t bt_srv() {
         } else if(message.type == BtMessageTypeUpdateBatteryLevel) {
             // Update battery level
             furi_hal_bt_update_battery_level(message.data.battery_level);
+        } else if(message.type == BtMessageTypeUpdatePowerState) {
+            furi_hal_bt_update_power_state();
         } else if(message.type == BtMessageTypePinCodeShow) {
             // Display PIN code
             bt_pin_code_show(bt, message.data.pin_code);
         } else if(message.type == BtMessageTypeKeysStorageUpdated) {
-            bt_save_key_storage(bt);
+            bt_keys_storage_save(bt);
         } else if(message.type == BtMessageTypeSetProfile) {
             bt_change_profile(bt, &message);
+        } else if(message.type == BtMessageTypeDisconnect) {
+            bt_close_connection(bt);
         } else if(message.type == BtMessageTypeForgetBondedDevices) {
-            bt_delete_key_storage(bt);
+            bt_keys_storage_delete(bt);
         }
     }
     return 0;

@@ -2,6 +2,7 @@
 #include "notification_app.h"
 #include <gui/modules/variable_item_list.h>
 #include <gui/view_dispatcher.h>
+#include <lib/toolbox/value_index.h>
 
 #define MAX_NOTIFICATION_SETTINGS 4
 
@@ -43,7 +44,7 @@ const char* const volume_text[VOLUME_COUNT] = {
     "75%",
     "100%",
 };
-const float volume_value[VOLUME_COUNT] = {0.0f, 0.04f, 0.1f, 0.2f, 1.0f};
+const float volume_value[VOLUME_COUNT] = {0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
 
 #define DELAY_COUNT 6
 const char* const delay_text[DELAY_COUNT] = {
@@ -63,51 +64,13 @@ const char* const vibro_text[VIBRO_COUNT] = {
 };
 const bool vibro_value[VIBRO_COUNT] = {false, true};
 
-uint8_t float_value_index(const float value, const float values[], uint8_t values_count) {
-    const float epsilon = 0.01f;
-    float last_value = values[0];
-    uint8_t index = 0;
-    for(uint8_t i = 0; i < values_count; i++) {
-        if((value >= last_value - epsilon) && (value <= values[i] + epsilon)) {
-            index = i;
-            break;
-        }
-        last_value = values[i];
-    }
-    return index;
-}
-
-uint8_t uint32_value_index(const uint32_t value, const uint32_t values[], uint8_t values_count) {
-    int64_t last_value = INT64_MIN;
-    uint8_t index = 0;
-    for(uint8_t i = 0; i < values_count; i++) {
-        if((value >= last_value) && (value <= values[i])) {
-            index = i;
-            break;
-        }
-        last_value = values[i];
-    }
-    return index;
-}
-
-uint8_t bool_value_index(const bool value, const bool values[], uint8_t values_count) {
-    uint8_t index = 0;
-    for(uint8_t i = 0; i < values_count; i++) {
-        if(value == values[i]) {
-            index = i;
-            break;
-        }
-    }
-    return index;
-}
-
 static void backlight_changed(VariableItem* item) {
     NotificationAppSettings* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, backlight_text[index]);
     app->notification->settings.display_brightness = backlight_value[index];
-    notification_message(app->notification, &sequence_display_on);
+    notification_message(app->notification, &sequence_display_backlight_on);
 }
 
 static void screen_changed(VariableItem* item) {
@@ -116,8 +79,16 @@ static void screen_changed(VariableItem* item) {
 
     variable_item_set_current_value_text(item, delay_text[index]);
     app->notification->settings.display_off_delay_ms = delay_value[index];
-    notification_message(app->notification, &sequence_display_on);
+    notification_message(app->notification, &sequence_display_backlight_on);
 }
+
+const NotificationMessage apply_message = {
+    .type = NotificationMessageTypeLedBrightnessSettingApply,
+};
+const NotificationSequence apply_sequence = {
+    &apply_message,
+    NULL,
+};
 
 static void led_changed(VariableItem* item) {
     NotificationAppSettings* app = variable_item_get_context(item);
@@ -125,6 +96,8 @@ static void led_changed(VariableItem* item) {
 
     variable_item_set_current_value_text(item, backlight_text[index]);
     app->notification->settings.led_brightness = backlight_value[index];
+    notification_message(app->notification, &apply_sequence);
+    notification_internal_message(app->notification, &apply_sequence);
     notification_message(app->notification, &sequence_blink_white_100);
 }
 
@@ -147,6 +120,7 @@ static void vibro_changed(VariableItem* item) {
 }
 
 static uint32_t notification_app_settings_exit(void* context) {
+    UNUSED(context);
     return VIEW_NONE;
 }
 
@@ -163,22 +137,22 @@ static NotificationAppSettings* alloc_settings() {
     uint8_t value_index;
 
     item = variable_item_list_add(
-        app->variable_item_list, "LCD backlight", BACKLIGHT_COUNT, backlight_changed, app);
-    value_index = float_value_index(
+        app->variable_item_list, "LCD Backlight", BACKLIGHT_COUNT, backlight_changed, app);
+    value_index = value_index_float(
         app->notification->settings.display_brightness, backlight_value, BACKLIGHT_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, backlight_text[value_index]);
 
     item = variable_item_list_add(
-        app->variable_item_list, "Backlight time", DELAY_COUNT, screen_changed, app);
-    value_index = uint32_value_index(
+        app->variable_item_list, "Backlight Time", DELAY_COUNT, screen_changed, app);
+    value_index = value_index_uint32(
         app->notification->settings.display_off_delay_ms, delay_value, DELAY_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, delay_text[value_index]);
 
     item = variable_item_list_add(
-        app->variable_item_list, "LED brightness", BACKLIGHT_COUNT, led_changed, app);
-    value_index = float_value_index(
+        app->variable_item_list, "LED Brightness", BACKLIGHT_COUNT, led_changed, app);
+    value_index = value_index_float(
         app->notification->settings.led_brightness, backlight_value, BACKLIGHT_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, backlight_text[value_index]);
@@ -186,13 +160,13 @@ static NotificationAppSettings* alloc_settings() {
     item = variable_item_list_add(
         app->variable_item_list, "Volume", VOLUME_COUNT, volume_changed, app);
     value_index =
-        float_value_index(app->notification->settings.speaker_volume, volume_value, VOLUME_COUNT);
+        value_index_float(app->notification->settings.speaker_volume, volume_value, VOLUME_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, volume_text[value_index]);
 
     item =
         variable_item_list_add(app->variable_item_list, "Vibro", VIBRO_COUNT, vibro_changed, app);
-    value_index = bool_value_index(app->notification->settings.vibro_on, vibro_value, VIBRO_COUNT);
+    value_index = value_index_bool(app->notification->settings.vibro_on, vibro_value, VIBRO_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, vibro_text[value_index]);
 
@@ -216,6 +190,7 @@ static void free_settings(NotificationAppSettings* app) {
 }
 
 int32_t notification_settings_app(void* p) {
+    UNUSED(p);
     NotificationAppSettings* app = alloc_settings();
     view_dispatcher_run(app->view_dispatcher);
     notification_message_save_settings(app->notification);

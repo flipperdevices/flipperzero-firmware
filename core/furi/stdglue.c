@@ -17,7 +17,6 @@ DICT_DEF2(
 
 typedef struct {
     osMutexId_t mutex;
-    FuriStdglueCallbackDict_t global_outputs;
     FuriStdglueCallbackDict_t thread_outputs;
 } FuriStdglue;
 
@@ -27,24 +26,13 @@ static ssize_t stdout_write(void* _cookie, const char* data, size_t size) {
     furi_assert(furi_stdglue);
     bool consumed = false;
     osKernelState_t state = osKernelGetState();
-    osThreadId_t thread_id = osThreadGetId();
-    if(state == osKernelRunning && thread_id &&
+    FuriThreadId task_id = furi_thread_get_current_id();
+    if(state == osKernelRunning && task_id &&
        osMutexAcquire(furi_stdglue->mutex, osWaitForever) == osOK) {
         // We are in the thread context
-        // Handle global callbacks
-        FuriStdglueCallbackDict_it_t it;
-        for(FuriStdglueCallbackDict_it(it, furi_stdglue->global_outputs);
-            !FuriStdglueCallbackDict_end_p(it);
-            FuriStdglueCallbackDict_next(it)) {
-            osThreadId_t it_thread = (osThreadId_t)FuriStdglueCallbackDict_ref(it)->key;
-            FuriStdglueWriteCallback it_callback = FuriStdglueCallbackDict_ref(it)->value;
-            if(thread_id != it_thread) {
-                it_callback(_cookie, data, size);
-            }
-        }
         // Handle thread callbacks
         FuriStdglueWriteCallback* callback_ptr =
-            FuriStdglueCallbackDict_get(furi_stdglue->thread_outputs, (uint32_t)thread_id);
+            FuriStdglueCallbackDict_get(furi_stdglue->thread_outputs, (uint32_t)task_id);
         if(callback_ptr) {
             (*callback_ptr)(_cookie, data, size);
             consumed = true;
@@ -71,7 +59,6 @@ void furi_stdglue_init() {
     // Init outputs structures
     furi_stdglue->mutex = osMutexNew(NULL);
     furi_check(furi_stdglue->mutex);
-    FuriStdglueCallbackDict_init(furi_stdglue->global_outputs);
     FuriStdglueCallbackDict_init(furi_stdglue->thread_outputs);
     // Prepare and set stdout descriptor
     FILE* fp = fopencookie(
@@ -87,34 +74,16 @@ void furi_stdglue_init() {
     stdout = fp;
 }
 
-bool furi_stdglue_set_global_stdout_callback(FuriStdglueWriteCallback callback) {
-    furi_assert(furi_stdglue);
-    osThreadId_t thread_id = osThreadGetId();
-    if(thread_id) {
-        furi_check(osMutexAcquire(furi_stdglue->mutex, osWaitForever) == osOK);
-        if(callback) {
-            FuriStdglueCallbackDict_set_at(
-                furi_stdglue->global_outputs, (uint32_t)thread_id, callback);
-        } else {
-            FuriStdglueCallbackDict_erase(furi_stdglue->global_outputs, (uint32_t)thread_id);
-        }
-        furi_check(osMutexRelease(furi_stdglue->mutex) == osOK);
-        return true;
-    } else {
-        return false;
-    }
-}
-
 bool furi_stdglue_set_thread_stdout_callback(FuriStdglueWriteCallback callback) {
     furi_assert(furi_stdglue);
-    osThreadId_t thread_id = osThreadGetId();
-    if(thread_id) {
+    FuriThreadId task_id = furi_thread_get_current_id();
+    if(task_id) {
         furi_check(osMutexAcquire(furi_stdglue->mutex, osWaitForever) == osOK);
         if(callback) {
             FuriStdglueCallbackDict_set_at(
-                furi_stdglue->thread_outputs, (uint32_t)thread_id, callback);
+                furi_stdglue->thread_outputs, (uint32_t)task_id, callback);
         } else {
-            FuriStdglueCallbackDict_erase(furi_stdglue->thread_outputs, (uint32_t)thread_id);
+            FuriStdglueCallbackDict_erase(furi_stdglue->thread_outputs, (uint32_t)task_id);
         }
         furi_check(osMutexRelease(furi_stdglue->mutex) == osOK);
         return true;
@@ -124,9 +93,11 @@ bool furi_stdglue_set_thread_stdout_callback(FuriStdglueWriteCallback callback) 
 }
 
 void __malloc_lock(struct _reent* REENT) {
+    UNUSED(REENT);
     vTaskSuspendAll();
 }
 
 void __malloc_unlock(struct _reent* REENT) {
+    UNUSED(REENT);
     xTaskResumeAll();
 }

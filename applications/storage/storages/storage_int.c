@@ -4,6 +4,7 @@
 
 #define TAG "StorageInt"
 #define STORAGE_PATH "/int"
+#define LFS_CLEAN_FINGERPRINT 0
 
 typedef struct {
     const size_t start_address;
@@ -129,6 +130,7 @@ static int storage_int_device_erase(const struct lfs_config* c, lfs_block_t bloc
 }
 
 static int storage_int_device_sync(const struct lfs_config* c) {
+    UNUSED(c);
     FURI_LOG_D(TAG, "Device sync: skipping, cause ");
     return 0;
 }
@@ -161,8 +163,9 @@ static LFSData* storage_int_lfs_data_alloc() {
     return lfs_data;
 };
 
-static bool storage_int_is_fingerprint_valid(LFSData* lfs_data) {
-    bool value = true;
+// Returns true if fingerprint was invalid and LFS reformatting is needed
+static bool storage_int_check_and_set_fingerprint(LFSData* lfs_data) {
+    bool value = false;
 
     uint32_t os_fingerprint = 0;
     os_fingerprint |= ((lfs_data->start_page & 0xFF) << 0);
@@ -170,13 +173,13 @@ static bool storage_int_is_fingerprint_valid(LFSData* lfs_data) {
     os_fingerprint |= ((LFS_DISK_VERSION_MAJOR & 0xFFFF) << 16);
 
     uint32_t rtc_fingerprint = furi_hal_rtc_get_register(FuriHalRtcRegisterLfsFingerprint);
-    if(rtc_fingerprint == 0) {
+    if(rtc_fingerprint == LFS_CLEAN_FINGERPRINT) {
         FURI_LOG_I(TAG, "Storing LFS fingerprint in RTC");
         furi_hal_rtc_set_register(FuriHalRtcRegisterLfsFingerprint, os_fingerprint);
     } else if(rtc_fingerprint != os_fingerprint) {
         FURI_LOG_E(TAG, "LFS fingerprint mismatch");
         furi_hal_rtc_set_register(FuriHalRtcRegisterLfsFingerprint, os_fingerprint);
-        value = false;
+        value = true;
     }
 
     return value;
@@ -186,8 +189,9 @@ static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
     int err;
     lfs_t* lfs = &lfs_data->lfs;
 
+    bool was_fingerprint_outdated = storage_int_check_and_set_fingerprint(lfs_data);
     bool need_format = furi_hal_rtc_is_flag_set(FuriHalRtcFlagFactoryReset) ||
-                       !storage_int_is_fingerprint_valid(lfs_data);
+                       was_fingerprint_outdated;
 
     if(need_format) {
         // Format storage
@@ -349,7 +353,7 @@ static uint16_t
     lfs_t* lfs = lfs_get_from_storage(storage);
     LFSHandle* handle = storage_get_storage_file_data(file, storage);
 
-    uint16_t bytes_readed = 0;
+    uint16_t bytes_read = 0;
 
     if(lfs_handle_is_open(handle)) {
         file->internal_error_id =
@@ -361,10 +365,10 @@ static uint16_t
     file->error_id = storage_int_parse_error(file->internal_error_id);
 
     if(file->error_id == FSE_OK) {
-        bytes_readed = file->internal_error_id;
+        bytes_read = file->internal_error_id;
         file->internal_error_id = 0;
     }
-    return bytes_readed;
+    return bytes_read;
 }
 
 static uint16_t
@@ -636,13 +640,6 @@ static FS_Error storage_int_common_remove(void* ctx, const char* path) {
     return storage_int_parse_error(result);
 }
 
-static FS_Error storage_int_common_rename(void* ctx, const char* old_path, const char* new_path) {
-    StorageData* storage = ctx;
-    lfs_t* lfs = lfs_get_from_storage(storage);
-    int result = lfs_rename(lfs, old_path, new_path);
-    return storage_int_parse_error(result);
-}
-
 static FS_Error storage_int_common_mkdir(void* ctx, const char* path) {
     StorageData* storage = ctx;
     lfs_t* lfs = lfs_get_from_storage(storage);
@@ -655,22 +652,54 @@ static FS_Error storage_int_common_fs_info(
     const char* fs_path,
     uint64_t* total_space,
     uint64_t* free_space) {
+    UNUSED(fs_path);
     StorageData* storage = ctx;
 
     lfs_t* lfs = lfs_get_from_storage(storage);
     LFSData* lfs_data = lfs_data_get_from_storage(storage);
 
-    *total_space = lfs_data->config.block_size * lfs_data->config.block_count;
+    if(total_space) {
+        *total_space = lfs_data->config.block_size * lfs_data->config.block_count;
+    }
 
     lfs_ssize_t result = lfs_fs_size(lfs);
-    if(result >= 0) {
-        *free_space = *total_space - (result * lfs_data->config.block_size);
+    if(free_space && (result >= 0)) {
+        *free_space = (lfs_data->config.block_count - result) * lfs_data->config.block_size;
     }
 
     return storage_int_parse_error(result);
 }
 
 /******************* Init Storage *******************/
+static const FS_Api fs_api = {
+    .file =
+        {
+            .open = storage_int_file_open,
+            .close = storage_int_file_close,
+            .read = storage_int_file_read,
+            .write = storage_int_file_write,
+            .seek = storage_int_file_seek,
+            .tell = storage_int_file_tell,
+            .truncate = storage_int_file_truncate,
+            .size = storage_int_file_size,
+            .sync = storage_int_file_sync,
+            .eof = storage_int_file_eof,
+        },
+    .dir =
+        {
+            .open = storage_int_dir_open,
+            .close = storage_int_dir_close,
+            .read = storage_int_dir_read,
+            .rewind = storage_int_dir_rewind,
+        },
+    .common =
+        {
+            .stat = storage_int_common_stat,
+            .mkdir = storage_int_common_mkdir,
+            .remove = storage_int_common_remove,
+            .fs_info = storage_int_common_fs_info,
+        },
+};
 
 void storage_int_init(StorageData* storage) {
     FURI_LOG_I(TAG, "Starting");
@@ -689,25 +718,5 @@ void storage_int_init(StorageData* storage) {
 
     storage->data = lfs_data;
     storage->api.tick = NULL;
-    storage->fs_api.file.open = storage_int_file_open;
-    storage->fs_api.file.close = storage_int_file_close;
-    storage->fs_api.file.read = storage_int_file_read;
-    storage->fs_api.file.write = storage_int_file_write;
-    storage->fs_api.file.seek = storage_int_file_seek;
-    storage->fs_api.file.tell = storage_int_file_tell;
-    storage->fs_api.file.truncate = storage_int_file_truncate;
-    storage->fs_api.file.size = storage_int_file_size;
-    storage->fs_api.file.sync = storage_int_file_sync;
-    storage->fs_api.file.eof = storage_int_file_eof;
-
-    storage->fs_api.dir.open = storage_int_dir_open;
-    storage->fs_api.dir.close = storage_int_dir_close;
-    storage->fs_api.dir.read = storage_int_dir_read;
-    storage->fs_api.dir.rewind = storage_int_dir_rewind;
-
-    storage->fs_api.common.stat = storage_int_common_stat;
-    storage->fs_api.common.mkdir = storage_int_common_mkdir;
-    storage->fs_api.common.rename = storage_int_common_rename;
-    storage->fs_api.common.remove = storage_int_common_remove;
-    storage->fs_api.common.fs_info = storage_int_common_fs_info;
+    storage->fs_api = &fs_api;
 }

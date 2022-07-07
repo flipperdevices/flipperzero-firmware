@@ -3,11 +3,17 @@
 #include <furi.h>
 #include <gui/icon.h>
 
+typedef enum {
+    FlipperApplicationFlagDefault = 0,
+    FlipperApplicationFlagInsomniaSafe = (1 << 0),
+} FlipperApplicationFlag;
+
 typedef struct {
     const FuriThreadCallback app;
     const char* name;
     const size_t stack_size;
     const Icon* icon;
+    const FlipperApplicationFlag flags;
 } FlipperApplication;
 
 typedef void (*FlipperOnStartHook)(void);
@@ -41,6 +47,12 @@ extern const size_t FLIPPER_PLUGINS_COUNT;
  */
 extern const FlipperApplication FLIPPER_DEBUG_APPS[];
 extern const size_t FLIPPER_DEBUG_APPS_COUNT;
+
+/* System apps
+ * Can only be spawned by loader by name
+ */
+extern const FlipperApplication FLIPPER_SYSTEM_APPS[];
+extern const size_t FLIPPER_SYSTEM_APPS_COUNT;
 
 /* Seperate scene app holder
  * Spawned by loader

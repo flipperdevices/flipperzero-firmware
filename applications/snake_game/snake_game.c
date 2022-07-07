@@ -29,6 +29,8 @@ typedef enum {
     GameStateGameOver,
 } GameState;
 
+// Note: do not change without purpose. Current values are used in smart
+// orthogonality calculation in `snake_game_get_turn_snake`.
 typedef enum {
     DirectionUp,
     DirectionRight,
@@ -195,44 +197,9 @@ static bool
 }
 
 static Direction snake_game_get_turn_snake(SnakeState const* const snake_state) {
-    switch(snake_state->currentMovement) {
-    case DirectionUp:
-        switch(snake_state->nextMovement) {
-        case DirectionRight:
-            return DirectionRight;
-        case DirectionLeft:
-            return DirectionLeft;
-        default:
-            return snake_state->currentMovement;
-        }
-    case DirectionRight:
-        switch(snake_state->nextMovement) {
-        case DirectionUp:
-            return DirectionUp;
-        case DirectionDown:
-            return DirectionDown;
-        default:
-            return snake_state->currentMovement;
-        }
-    case DirectionDown:
-        switch(snake_state->nextMovement) {
-        case DirectionRight:
-            return DirectionRight;
-        case DirectionLeft:
-            return DirectionLeft;
-        default:
-            return snake_state->currentMovement;
-        }
-    default: // case DirectionLeft:
-        switch(snake_state->nextMovement) {
-        case DirectionUp:
-            return DirectionUp;
-        case DirectionDown:
-            return DirectionDown;
-        default:
-            return snake_state->currentMovement;
-        }
-    }
+    // Sum of two `Direction` lies between 0 and 6, odd values indicate orthogonality.
+    bool is_orthogonal = (snake_state->currentMovement + snake_state->nextMovement) % 2 == 1;
+    return is_orthogonal ? snake_state->nextMovement : snake_state->currentMovement;
 }
 
 static Point snake_game_get_next_step(SnakeState const* const snake_state) {
@@ -313,6 +280,7 @@ static void snake_game_process_game_step(SnakeState* const snake_state) {
 }
 
 int32_t snake_game_app(void* p) {
+    UNUSED(p);
     srand(DWT->CYCCNT);
 
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(SnakeEvent), NULL);

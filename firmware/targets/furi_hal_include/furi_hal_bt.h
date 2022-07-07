@@ -15,7 +15,8 @@
 #include "furi_hal_bt_serial.h"
 
 #define FURI_HAL_BT_STACK_VERSION_MAJOR (1)
-#define FURI_HAL_BT_STACK_VERSION_MINOR (13)
+#define FURI_HAL_BT_STACK_VERSION_MINOR (12)
+#define FURI_HAL_BT_C2_START_TIMEOUT 1000
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,8 +24,8 @@ extern "C" {
 
 typedef enum {
     FuriHalBtStackUnknown,
-    FuriHalBtStackHciLayer,
     FuriHalBtStackLight,
+    FuriHalBtStackFull,
 } FuriHalBtStack;
 
 typedef enum {
@@ -57,6 +58,18 @@ bool furi_hal_bt_start_radio_stack();
  */
 FuriHalBtStack furi_hal_bt_get_radio_stack();
 
+/** Check if radio stack supports BLE GAT/GAP
+ *
+ * @return  true if supported
+ */
+bool furi_hal_bt_is_ble_gatt_gap_supported();
+
+/** Check if radio stack supports testing
+ *
+ * @return  true if supported
+ */
+bool furi_hal_bt_is_testing_supported();
+
 /** Start BLE app
  *
  * @param profile   FuriHalBtProfile instance
@@ -66,6 +79,12 @@ FuriHalBtStack furi_hal_bt_get_radio_stack();
  * @return          true on success
 */
 bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, void* context);
+
+/** Reinitialize core2
+ * 
+ * Also can be used to prepare core2 for stop modes
+ */
+void furi_hal_bt_reinit();
 
 /** Change BLE app
  * Restarts 2nd core
@@ -83,6 +102,9 @@ bool furi_hal_bt_change_app(FuriHalBtProfile profile, GapEventCallback event_cb,
  * @param battery_level battery level
  */
 void furi_hal_bt_update_battery_level(uint8_t battery_level);
+
+/** Update battery power state */
+void furi_hal_bt_update_power_state();
 
 /** Checks if BLE state is active
  *
@@ -196,16 +218,11 @@ float furi_hal_bt_get_rssi();
  */
 uint32_t furi_hal_bt_get_transmitted_packets();
 
-/** Start MAC addresses scan
- * @note Works only with HciLayer 2nd core firmware
+/** Check & switch C2 to given mode
  *
- * @param callback  GapScanCallback instance
- * @param context   pointer to context
+ * @param[in]  mode  mode to switch into
  */
-bool furi_hal_bt_start_scan(GapScanCallback callback, void* context);
-
-/** Stop MAC addresses scan */
-void furi_hal_bt_stop_scan();
+bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode);
 
 #ifdef __cplusplus
 }

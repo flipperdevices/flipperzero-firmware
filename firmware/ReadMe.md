@@ -1,6 +1,6 @@
 # Flipper firmware
 
-What it does?
+What does it do?
 
 - [x] RTOS
 - [x] FuriHAL
@@ -10,41 +10,13 @@ What it does?
 
 # Targets
 
-| Name      | Bootloader    | Firmware      | Reset     | DFU               |
-|           | Address       | Address       | Combo     | Combo             |
------------------------------------------------------------------------------
-| f7        | 0x08000000    | 0x00008000    | L+Back    | L+Back, hold L    |
+| Name      | Firmware Address  | Reset Combo           | DFU Combo             |
+|-----------|-------------------|-----------------------|-----------------------|
+| f7        | 0x08000000        | L+Back, release both  | L+Back, release Back  |
 
-Also there is a ST bootloader combo available on empty device: L+Ok+Back, release Back,Left.
-Target independent code and headers in `target/include` folders.
+Also there is a "hardware" ST bootloader combo available even on a bricked or empty device: L+Ok+Back, release Back, Left.
+Target independent code and headers in `target/include` folders. More details in `documentation/KeyCombo.md`
 
 # Building
 
-## With dev docker image:
-
-`docker-compose exec dev make -C firmware`
-
-## With toolchain installed in path:
-
-`make -C firmware`
-
-## Build Options
-
-- `DEBUG` - 0/1 - enable or disable debug build. Default is 1.
-- `TARGET` - string - target to build. Default is `f7`.
-
-# Flashing 
-
-Using SWD (STLink):
-
-`make -C firmware flash`
-
-Or use DFU (USB):
-
-`make -C firmware upload`
-
-# Debug
-
-Using SWD (STLink):
-
-`make -C firmware debug`
+Check out `documentation/fbt.md` on how to build and flash firmware.

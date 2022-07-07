@@ -1,6 +1,7 @@
 #pragma once
 #include "stdint.h"
 #include "stdbool.h"
+#include <furi_hal_resources.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -9,7 +10,7 @@ extern "C" {
 typedef struct NotificationApp NotificationApp;
 typedef struct {
     float frequency;
-    float pwm;
+    float volume;
 } NotificationMessageDataSound;
 
 typedef struct {
@@ -30,9 +31,16 @@ typedef struct {
     float display_brightness;
 } NotificationMessageDataForcedSettings;
 
+typedef struct {
+    uint16_t on_time;
+    uint16_t period;
+    Light color;
+} NotificationMessageDataLedBlink;
+
 typedef union {
     NotificationMessageDataSound sound;
     NotificationMessageDataLed led;
+    NotificationMessageDataLedBlink led_blink;
     NotificationMessageDataVibro vibro;
     NotificationMessageDataDelay delay;
     NotificationMessageDataForcedSettings forced_settings;
@@ -48,17 +56,23 @@ typedef enum {
     NotificationMessageTypeLedGreen,
     NotificationMessageTypeLedBlue,
 
+    NotificationMessageTypeLedBlinkStart,
+    NotificationMessageTypeLedBlinkStop,
+    NotificationMessageTypeLedBlinkColor,
+
     NotificationMessageTypeDelay,
 
-    NotificationMessageTypeLedDisplay,
-    NotificationMessageTypeLedDisplayLock,
-    NotificationMessageTypeLedDisplayUnlock,
+    NotificationMessageTypeLedDisplayBacklight,
+    NotificationMessageTypeLedDisplayBacklightEnforceOn,
+    NotificationMessageTypeLedDisplayBacklightEnforceAuto,
 
     NotificationMessageTypeDoNotReset,
 
     NotificationMessageTypeForceSpeakerVolumeSetting,
     NotificationMessageTypeForceVibroSetting,
     NotificationMessageTypeForceDisplayBrightnessSetting,
+
+    NotificationMessageTypeLedBrightnessSettingApply,
 } NotificationMessageType;
 
 typedef struct {

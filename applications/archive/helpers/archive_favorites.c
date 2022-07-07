@@ -4,20 +4,63 @@
 #include "archive_apps.h"
 #include "archive_browser.h"
 
+#define ARCHIVE_FAV_FILE_BUF_LEN 32
+
+static bool archive_favorites_read_line(File* file, string_t str_result) {
+    string_reset(str_result);
+    uint8_t buffer[ARCHIVE_FAV_FILE_BUF_LEN];
+    bool result = false;
+
+    do {
+        uint16_t read_count = storage_file_read(file, buffer, ARCHIVE_FAV_FILE_BUF_LEN);
+        if(storage_file_get_error(file) != FSE_OK) {
+            return false;
+        }
+
+        for(uint16_t i = 0; i < read_count; i++) {
+            if(buffer[i] == '\n') {
+                uint32_t position = storage_file_tell(file);
+                if(storage_file_get_error(file) != FSE_OK) {
+                    return false;
+                }
+
+                position = position - read_count + i + 1;
+
+                storage_file_seek(file, position, true);
+                if(storage_file_get_error(file) != FSE_OK) {
+                    return false;
+                }
+
+                result = true;
+                break;
+            } else {
+                string_push_back(str_result, buffer[i]);
+            }
+        }
+
+        if(result || read_count == 0) {
+            break;
+        }
+    } while(true);
+
+    return result;
+}
+
 uint16_t archive_favorites_count(void* context) {
     furi_assert(context);
 
-    FileWorker* file_worker = file_worker_alloc(true);
+    Storage* fs_api = furi_record_open("storage");
+    File* file = storage_file_alloc(fs_api);
 
     string_t buffer;
     string_init(buffer);
 
-    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+    bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
     uint16_t lines = 0;
 
     if(result) {
         while(1) {
-            if(!file_worker_read_until(file_worker, buffer, '\n')) {
+            if(!archive_favorites_read_line(file, buffer)) {
                 break;
             }
             if(!string_size(buffer)) {
@@ -27,21 +70,26 @@ uint16_t archive_favorites_count(void* context) {
         }
     }
 
+    storage_file_close(file);
+
     string_clear(buffer);
-    file_worker_close(file_worker);
-    file_worker_free(file_worker);
+    storage_file_free(file);
+    furi_record_close("storage");
+
     return lines;
 }
 
 static bool archive_favourites_rescan() {
     string_t buffer;
     string_init(buffer);
-    FileWorker* file_worker = file_worker_alloc(true);
+    Storage* fs_api = furi_record_open("storage");
+    File* file = storage_file_alloc(fs_api);
+    File* fav_item_file = storage_file_alloc(fs_api);
 
-    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+    bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
     if(result) {
         while(1) {
-            if(!file_worker_read_until(file_worker, buffer, '\n')) {
+            if(!archive_favorites_read_line(file, buffer)) {
                 break;
             }
             if(!string_size(buffer)) {
@@ -53,10 +101,13 @@ static bool archive_favourites_rescan() {
                     archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\n", string_get_cstr(buffer));
                 }
             } else {
-                bool file_exists = false;
-                file_worker_is_file_exist(file_worker, string_get_cstr(buffer), &file_exists);
+                bool file_exists = storage_file_open(
+                    fav_item_file, string_get_cstr(buffer), FSAM_READ, FSOM_OPEN_EXISTING);
                 if(file_exists) {
+                    storage_file_close(fav_item_file);
                     archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\n", string_get_cstr(buffer));
+                } else {
+                    storage_file_close(fav_item_file);
                 }
             }
         }
@@ -64,11 +115,14 @@ static bool archive_favourites_rescan() {
 
     string_clear(buffer);
 
-    file_worker_close(file_worker);
-    file_worker_remove(file_worker, ARCHIVE_FAV_PATH);
-    file_worker_rename(file_worker, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+    storage_file_close(file);
+    storage_common_remove(fs_api, ARCHIVE_FAV_PATH);
+    storage_common_rename(fs_api, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+    storage_common_remove(fs_api, ARCHIVE_FAV_TEMP_PATH);
 
-    file_worker_free(file_worker);
+    storage_file_free(file);
+    storage_file_free(fav_item_file);
+    furi_record_close("storage");
 
     return result;
 }
@@ -77,19 +131,24 @@ bool archive_favorites_read(void* context) {
     furi_assert(context);
 
     ArchiveBrowserView* browser = context;
-    FileWorker* file_worker = file_worker_alloc(true);
+    Storage* fs_api = furi_record_open("storage");
+    File* file = storage_file_alloc(fs_api);
+    File* fav_item_file = storage_file_alloc(fs_api);
 
     string_t buffer;
     FileInfo file_info;
     string_init(buffer);
 
     bool need_refresh = false;
+    uint16_t file_count = 0;
 
-    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+    archive_file_array_rm_all(browser);
+
+    bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(result) {
         while(1) {
-            if(!file_worker_read_until(file_worker, buffer, '\n')) {
+            if(!archive_favorites_read_line(file, buffer)) {
                 break;
             }
             if(!string_size(buffer)) {
@@ -99,25 +158,35 @@ bool archive_favorites_read(void* context) {
             if(string_search(buffer, "/app:") == 0) {
                 if(archive_app_is_available(browser, string_get_cstr(buffer))) {
                     archive_add_app_item(browser, string_get_cstr(buffer));
+                    file_count++;
                 } else {
                     need_refresh = true;
                 }
             } else {
-                bool file_exists = false;
-                file_worker_is_file_exist(file_worker, string_get_cstr(buffer), &file_exists);
-
-                if(file_exists)
-                    archive_add_file_item(browser, &file_info, string_get_cstr(buffer));
-                else
+                bool file_exists = storage_file_open(
+                    fav_item_file, string_get_cstr(buffer), FSAM_READ, FSOM_OPEN_EXISTING);
+                if(file_exists) {
+                    storage_common_stat(fs_api, string_get_cstr(buffer), &file_info);
+                    storage_file_close(fav_item_file);
+                    archive_add_file_item(
+                        browser, (file_info.flags & FSF_DIRECTORY), string_get_cstr(buffer));
+                    file_count++;
+                } else {
+                    storage_file_close(fav_item_file);
                     need_refresh = true;
+                }
             }
 
             string_reset(buffer);
         }
     }
+    storage_file_close(file);
     string_clear(buffer);
-    file_worker_close(file_worker);
-    file_worker_free(file_worker);
+    storage_file_free(file);
+    storage_file_free(fav_item_file);
+    furi_record_close("storage");
+
+    archive_set_item_count(browser, file_count);
 
     if(need_refresh) {
         archive_favourites_rescan();
@@ -135,12 +204,14 @@ bool archive_favorites_delete(const char* format, ...) {
     va_end(args);
 
     string_init(buffer);
-    FileWorker* file_worker = file_worker_alloc(true);
+    Storage* fs_api = furi_record_open("storage");
+    File* file = storage_file_alloc(fs_api);
 
-    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+    bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+
     if(result) {
         while(1) {
-            if(!file_worker_read_until(file_worker, buffer, '\n')) {
+            if(!archive_favorites_read_line(file, buffer)) {
                 break;
             }
             if(!string_size(buffer)) {
@@ -156,11 +227,13 @@ bool archive_favorites_delete(const char* format, ...) {
     string_clear(buffer);
     string_clear(filename);
 
-    file_worker_close(file_worker);
-    file_worker_remove(file_worker, ARCHIVE_FAV_PATH);
-    file_worker_rename(file_worker, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+    storage_file_close(file);
+    storage_common_remove(fs_api, ARCHIVE_FAV_PATH);
+    storage_common_rename(fs_api, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+    storage_common_remove(fs_api, ARCHIVE_FAV_TEMP_PATH);
 
-    file_worker_free(file_worker);
+    storage_file_free(file);
+    furi_record_close("storage");
 
     return result;
 }
@@ -174,14 +247,15 @@ bool archive_is_favorite(const char* format, ...) {
     va_end(args);
 
     string_init(buffer);
-    FileWorker* file_worker = file_worker_alloc(true);
+    Storage* fs_api = furi_record_open("storage");
+    File* file = storage_file_alloc(fs_api);
 
     bool found = false;
-    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+    bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(result) {
         while(1) {
-            if(!file_worker_read_until(file_worker, buffer, '\n')) {
+            if(!archive_favorites_read_line(file, buffer)) {
                 break;
             }
             if(!string_size(buffer)) {
@@ -194,10 +268,11 @@ bool archive_is_favorite(const char* format, ...) {
         }
     }
 
+    storage_file_close(file);
     string_clear(buffer);
     string_clear(filename);
-    file_worker_close(file_worker);
-    file_worker_free(file_worker);
+    storage_file_free(file);
+    furi_record_close("storage");
 
     return found;
 }
@@ -206,7 +281,8 @@ bool archive_favorites_rename(const char* src, const char* dst) {
     furi_assert(src);
     furi_assert(dst);
 
-    FileWorker* file_worker = file_worker_alloc(true);
+    Storage* fs_api = furi_record_open("storage");
+    File* file = storage_file_alloc(fs_api);
 
     string_t path;
     string_t buffer;
@@ -215,11 +291,11 @@ bool archive_favorites_rename(const char* src, const char* dst) {
     string_init(path);
 
     string_printf(path, "%s", src);
-    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+    bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(result) {
         while(1) {
-            if(!file_worker_read_until(file_worker, buffer, '\n')) {
+            if(!archive_favorites_read_line(file, buffer)) {
                 break;
             }
             if(!string_size(buffer)) {
@@ -236,11 +312,13 @@ bool archive_favorites_rename(const char* src, const char* dst) {
     string_clear(buffer);
     string_clear(path);
 
-    file_worker_close(file_worker);
-    file_worker_remove(file_worker, ARCHIVE_FAV_PATH);
-    file_worker_rename(file_worker, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+    storage_file_close(file);
+    storage_common_remove(fs_api, ARCHIVE_FAV_PATH);
+    storage_common_rename(fs_api, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+    storage_common_remove(fs_api, ARCHIVE_FAV_TEMP_PATH);
 
-    file_worker_free(file_worker);
+    storage_file_free(file);
+    furi_record_close("storage");
 
     return result;
 }
@@ -255,15 +333,18 @@ void archive_favorites_save(void* context) {
     furi_assert(context);
 
     ArchiveBrowserView* browser = context;
-    FileWorker* file_worker = file_worker_alloc(true);
+    Storage* fs_api = furi_record_open("storage");
+    File* file = storage_file_alloc(fs_api);
 
-    for(size_t i = 0; i < archive_file_array_size(browser); i++) {
+    for(size_t i = 0; i < archive_file_get_array_size(browser); i++) {
         ArchiveFile_t* item = archive_get_file_at(browser, i);
-        archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\n", string_get_cstr(item->name));
+        archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\n", string_get_cstr(item->path));
     }
 
-    file_worker_remove(file_worker, ARCHIVE_FAV_PATH);
-    file_worker_rename(file_worker, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+    storage_common_remove(fs_api, ARCHIVE_FAV_PATH);
+    storage_common_rename(fs_api, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+    storage_common_remove(fs_api, ARCHIVE_FAV_TEMP_PATH);
 
-    file_worker_free(file_worker);
+    storage_file_free(file);
+    furi_record_close("storage");
 }

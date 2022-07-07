@@ -5,36 +5,46 @@
 
 #pragma once
 
-#include "main.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** Init DWT
+/** Init Delay subsystem */
+void furi_hal_delay_init();
+
+/** Get instructions per microsecond count */
+uint32_t furi_hal_delay_instructions_per_microsecond();
+
+/** Get current tick counter
+ *
+ * System uptime, may overflow.
+ *
+ * @return     Current ticks in milliseconds
  */
-void furi_hal_delay_init(void);
+uint32_t furi_hal_get_tick(void);
+
+/** Convert milliseconds to ticks
+ *
+ * @param[in]   milliseconds    time in milliseconds
+ * @return      time in ticks
+ */
+uint32_t furi_hal_ms_to_ticks(float milliseconds);
 
 /** Delay in milliseconds
  * @warning    Cannot be used from ISR
  *
  * @param[in]  milliseconds  milliseconds to wait
  */
-void delay(float milliseconds);
+void furi_hal_delay_ms(float milliseconds);
 
 /** Delay in microseconds
  *
  * @param[in]  microseconds  microseconds to wait
  */
-void delay_us(float microseconds);
-
-/** Get current millisecond
- * 
- * System uptime, pProvided by HAL, may overflow.
- *
- * @return     Current milliseconds
- */
-uint32_t millis(void);
+void furi_hal_delay_us(float microseconds);
 
 #ifdef __cplusplus
 }

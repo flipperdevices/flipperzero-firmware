@@ -192,7 +192,7 @@ void furi_hal_version_init() {
         furi_crash(NULL);
     }
 
-    furi_hal_rtc_set_register(FuriHalRtcRegisterSystemVersion, (uint32_t)version_get());
+    furi_hal_rtc_set_register(FuriHalRtcRegisterVersion, (uint32_t)version_get());
 
     FURI_LOG_I(TAG, "Init OK");
 }
@@ -205,7 +205,7 @@ const char* furi_hal_version_get_model_name() {
     return "Flipper Zero";
 }
 
-const FuriHalVersionOtpVersion furi_hal_version_get_otp_version() {
+FuriHalVersionOtpVersion furi_hal_version_get_otp_version() {
     if(*(uint64_t*)FURI_HAL_VERSION_OTP_ADDRESS == 0xFFFFFFFF) {
         return FuriHalVersionOtpVersionEmpty;
     } else {
@@ -228,35 +228,49 @@ const FuriHalVersionOtpVersion furi_hal_version_get_otp_version() {
     }
 }
 
-const uint8_t furi_hal_version_get_hw_version() {
+uint8_t furi_hal_version_get_hw_version() {
     return furi_hal_version.board_version;
 }
 
-const uint8_t furi_hal_version_get_hw_target() {
+uint8_t furi_hal_version_get_hw_target() {
     return furi_hal_version.board_target;
 }
 
-const uint8_t furi_hal_version_get_hw_body() {
+uint8_t furi_hal_version_get_hw_body() {
     return furi_hal_version.board_body;
 }
 
-const FuriHalVersionColor furi_hal_version_get_hw_color() {
+FuriHalVersionColor furi_hal_version_get_hw_color() {
     return furi_hal_version.board_color;
 }
 
-const uint8_t furi_hal_version_get_hw_connect() {
+uint8_t furi_hal_version_get_hw_connect() {
     return furi_hal_version.board_connect;
 }
 
-const FuriHalVersionRegion furi_hal_version_get_hw_region() {
+FuriHalVersionRegion furi_hal_version_get_hw_region() {
     return furi_hal_version.board_region;
 }
 
-const FuriHalVersionDisplay furi_hal_version_get_hw_display() {
+const char* furi_hal_version_get_hw_region_name() {
+    switch(furi_hal_version_get_hw_region()) {
+    case FuriHalVersionRegionUnknown:
+        return "R00";
+    case FuriHalVersionRegionEuRu:
+        return "R01";
+    case FuriHalVersionRegionUsCaAu:
+        return "R02";
+    case FuriHalVersionRegionJp:
+        return "R03";
+    }
+    return "R??";
+}
+
+FuriHalVersionDisplay furi_hal_version_get_hw_display() {
     return furi_hal_version.board_display;
 }
 
-const uint32_t furi_hal_version_get_hw_timestamp() {
+uint32_t furi_hal_version_get_hw_timestamp() {
     return furi_hal_version.timestamp;
 }
 
@@ -278,15 +292,6 @@ const uint8_t* furi_hal_version_get_ble_mac() {
 
 const struct Version* furi_hal_version_get_firmware_version(void) {
     return version_get();
-}
-
-const struct Version* furi_hal_version_get_bootloader_version(void) {
-#ifdef NO_BOOTLOADER
-    return 0;
-#else
-    /* Backup register which points to structure in flash memory */
-    return (const struct Version*)furi_hal_rtc_get_register(FuriHalRtcRegisterBootVersion);
-#endif
 }
 
 size_t furi_hal_version_uid_size() {

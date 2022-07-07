@@ -19,7 +19,7 @@ ViewPort* gui_view_port_find_enabled(ViewPortArray_t array) {
 
 void gui_update(Gui* gui) {
     furi_assert(gui);
-    osThreadFlagsSet(gui->thread, GUI_THREAD_FLAG_DRAW);
+    furi_thread_flags_set(gui->thread_id, GUI_THREAD_FLAG_DRAW);
 }
 
 void gui_input_events_callback(const void* value, void* ctx) {
@@ -29,7 +29,7 @@ void gui_input_events_callback(const void* value, void* ctx) {
     Gui* gui = ctx;
 
     osMessageQueuePut(gui->input_queue, value, 0, osWaitForever);
-    osThreadFlagsSet(gui->thread, GUI_THREAD_FLAG_INPUT);
+    furi_thread_flags_set(gui->thread_id, GUI_THREAD_FLAG_INPUT);
 }
 
 // Only Fullscreen supports vertical display for now
@@ -47,10 +47,9 @@ bool gui_redraw_fs(Gui* gui) {
 
 static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
     ViewPortArray_it_t it;
-    uint8_t x;
-    uint8_t x_used = 0;
+    uint8_t left_used = 0;
+    uint8_t right_used = 0;
     uint8_t width;
-    ViewPort* view_port;
     canvas_set_orientation(gui->canvas, CanvasOrientationHorizontal);
     canvas_frame_set(
         gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_DISPLAY_WIDTH, GUI_STATUS_BAR_HEIGHT);
@@ -69,100 +68,126 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
     canvas_set_bitmap_mode(gui->canvas, 0);
 
     // Right side
-    x = GUI_DISPLAY_WIDTH;
+    uint8_t x = GUI_DISPLAY_WIDTH - 1;
     ViewPortArray_it(it, gui->layers[GuiLayerStatusBarRight]);
-    while(!ViewPortArray_end_p(it) && x_used < GUI_STATUS_BAR_WIDTH) {
-        // Render view_port;
-        view_port = *ViewPortArray_ref(it);
+    while(!ViewPortArray_end_p(it) && right_used < GUI_STATUS_BAR_WIDTH) {
+        ViewPort* view_port = *ViewPortArray_ref(it);
         if(view_port_is_enabled(view_port)) {
             width = view_port_get_width(view_port);
             if(!width) width = 8;
-            x_used += width;
+            // Recalculate next position
+            right_used += (width + 2);
             x -= (width + 2);
+            // Prepare work area background
             canvas_frame_set(
-                gui->canvas, x - 3, GUI_STATUS_BAR_Y, width + 5, GUI_STATUS_BAR_HEIGHT);
-
-            canvas_set_color(gui->canvas, ColorWhite);
-            canvas_draw_box(gui->canvas, 2, 1, width + 2, 10);
-            canvas_set_color(gui->canvas, ColorBlack);
-
-            canvas_draw_rframe(
-                gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas), 1);
-            canvas_draw_line(gui->canvas, 1, 1, 1, canvas_height(gui->canvas) - 2);
-            canvas_draw_line(
                 gui->canvas,
-                2,
-                canvas_height(gui->canvas) - 2,
-                canvas_width(gui->canvas) - 2,
-                canvas_height(gui->canvas) - 2);
-
+                x - 1,
+                GUI_STATUS_BAR_Y + 1,
+                width + 2,
+                GUI_STATUS_BAR_WORKAREA_HEIGHT + 2);
+            canvas_set_color(gui->canvas, ColorWhite);
+            canvas_draw_box(
+                gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas));
+            canvas_set_color(gui->canvas, ColorBlack);
+            // ViewPort draw
             canvas_frame_set(
-                gui->canvas, x, GUI_STATUS_BAR_Y + 1, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
-
+                gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
             view_port_draw(view_port, gui->canvas);
         }
         ViewPortArray_next(it);
     }
+    // Draw frame around icons on the right
+    if(right_used) {
+        canvas_frame_set(
+            gui->canvas,
+            GUI_DISPLAY_WIDTH - 3 - right_used,
+            GUI_STATUS_BAR_Y,
+            right_used + 3,
+            GUI_STATUS_BAR_HEIGHT);
+        canvas_set_color(gui->canvas, ColorBlack);
+        canvas_draw_rframe(
+            gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas), 1);
+        canvas_draw_line(
+            gui->canvas,
+            canvas_width(gui->canvas) - 2,
+            1,
+            canvas_width(gui->canvas) - 2,
+            canvas_height(gui->canvas) - 2);
+        canvas_draw_line(
+            gui->canvas,
+            1,
+            canvas_height(gui->canvas) - 2,
+            canvas_width(gui->canvas) - 2,
+            canvas_height(gui->canvas) - 2);
+    }
+
     // Left side
-    x = 0;
+    x = 2;
     ViewPortArray_it(it, gui->layers[GuiLayerStatusBarLeft]);
-    while(!ViewPortArray_end_p(it) && x_used < GUI_STATUS_BAR_WIDTH) {
-        // Render view_port;
-        view_port = *ViewPortArray_ref(it);
+    while(!ViewPortArray_end_p(it) && (right_used + left_used) < GUI_STATUS_BAR_WIDTH) {
+        ViewPort* view_port = *ViewPortArray_ref(it);
         if(view_port_is_enabled(view_port)) {
             width = view_port_get_width(view_port);
             if(!width) width = 8;
-            x_used += width;
-
+            // Prepare work area background
             canvas_frame_set(
-                gui->canvas, 0, GUI_STATUS_BAR_Y, x + width + 5, GUI_STATUS_BAR_HEIGHT);
-            canvas_draw_rframe(
-                gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas), 1);
-            canvas_draw_line(gui->canvas, 1, 1, 1, canvas_height(gui->canvas) - 2);
-            canvas_draw_line(
                 gui->canvas,
-                2,
-                canvas_height(gui->canvas) - 2,
-                canvas_width(gui->canvas) - 2,
-                canvas_height(gui->canvas) - 2);
-
-            canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y, width + 5, GUI_STATUS_BAR_HEIGHT);
-
+                x - 1,
+                GUI_STATUS_BAR_Y + 1,
+                width + 2,
+                GUI_STATUS_BAR_WORKAREA_HEIGHT + 2);
             canvas_set_color(gui->canvas, ColorWhite);
-            canvas_draw_box(gui->canvas, 2, 1, width + 2, 10);
+            canvas_draw_box(
+                gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas));
             canvas_set_color(gui->canvas, ColorBlack);
-
+            // ViewPort draw
             canvas_frame_set(
-                gui->canvas, x + 3, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
+                gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
             view_port_draw(view_port, gui->canvas);
-
+            // Recalculate next position
+            left_used += (width + 2);
             x += (width + 2);
         }
         ViewPortArray_next(it);
     }
-
+    // Extra notification
     if(need_attention) {
         width = icon_get_width(&I_Attention_5x8);
-        canvas_frame_set(gui->canvas, 0, GUI_STATUS_BAR_Y, x + width + 5, GUI_STATUS_BAR_HEIGHT);
+        // Prepare work area background
+        canvas_frame_set(
+            gui->canvas,
+            x - 1,
+            GUI_STATUS_BAR_Y + 1,
+            width + 2,
+            GUI_STATUS_BAR_WORKAREA_HEIGHT + 2);
+        canvas_set_color(gui->canvas, ColorWhite);
+        canvas_draw_box(gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas));
+        canvas_set_color(gui->canvas, ColorBlack);
+        // Draw Icon
+        canvas_frame_set(
+            gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
+        canvas_draw_icon(gui->canvas, 0, 0, &I_Attention_5x8);
+        // Recalculate next position
+        left_used += (width + 2);
+        x += (width + 2);
+    }
+    // Draw frame around icons on the left
+    if(left_used) {
+        canvas_frame_set(gui->canvas, 0, 0, left_used + 3, GUI_STATUS_BAR_HEIGHT);
         canvas_draw_rframe(
             gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas), 1);
-        canvas_draw_line(gui->canvas, 1, 1, 1, canvas_height(gui->canvas) - 2);
         canvas_draw_line(
             gui->canvas,
-            2,
+            canvas_width(gui->canvas) - 2,
+            1,
+            canvas_width(gui->canvas) - 2,
+            canvas_height(gui->canvas) - 2);
+        canvas_draw_line(
+            gui->canvas,
+            1,
             canvas_height(gui->canvas) - 2,
             canvas_width(gui->canvas) - 2,
             canvas_height(gui->canvas) - 2);
-
-        canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y, width + 5, GUI_STATUS_BAR_HEIGHT);
-
-        canvas_set_color(gui->canvas, ColorWhite);
-        canvas_draw_box(gui->canvas, 2, 1, width + 2, 10);
-        canvas_set_color(gui->canvas, ColorBlack);
-
-        canvas_frame_set(
-            gui->canvas, x + 3, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
-        canvas_draw_icon(gui->canvas, 0, 0, &I_Attention_5x8);
     }
 }
 
@@ -211,12 +236,11 @@ void gui_redraw(Gui* gui) {
     }
 
     canvas_commit(gui->canvas);
-    if(gui->canvas_callback) {
-        gui->canvas_callback(
-            canvas_get_buffer(gui->canvas),
-            canvas_get_buffer_size(gui->canvas),
-            gui->canvas_callback_context);
-    }
+    for
+        M_EACH(p, gui->canvas_callback_pair, CanvasCallbackPairArray_t) {
+            p->callback(
+                canvas_get_buffer(gui->canvas), canvas_get_buffer_size(gui->canvas), p->context);
+        }
     gui_unlock(gui);
 }
 
@@ -315,6 +339,7 @@ void gui_add_view_port(Gui* gui, ViewPort* view_port, GuiLayer layer) {
     view_port_gui_set(view_port, gui);
     gui_unlock(gui);
 
+    // Request redraw
     gui_update(gui);
 }
 
@@ -323,7 +348,6 @@ void gui_remove_view_port(Gui* gui, ViewPort* view_port) {
     furi_assert(view_port);
 
     gui_lock(gui);
-
     view_port_gui_set(view_port, NULL);
     ViewPortArray_it_t it;
     for(size_t i = 0; i < GuiLayerMAX; i++) {
@@ -336,12 +360,13 @@ void gui_remove_view_port(Gui* gui, ViewPort* view_port) {
             }
         }
     }
-
     if(gui->ongoing_input_view_port == view_port) {
         gui->ongoing_input_view_port = NULL;
     }
-
     gui_unlock(gui);
+
+    // Request redraw
+    gui_update(gui);
 }
 
 void gui_view_port_send_to_front(Gui* gui, ViewPort* view_port) {
@@ -368,6 +393,9 @@ void gui_view_port_send_to_front(Gui* gui, ViewPort* view_port) {
     // Return to the top
     ViewPortArray_push_back(gui->layers[layer], view_port);
     gui_unlock(gui);
+
+    // Request redraw
+    gui_update(gui);
 }
 
 void gui_view_port_send_to_back(Gui* gui, ViewPort* view_port) {
@@ -394,32 +422,56 @@ void gui_view_port_send_to_back(Gui* gui, ViewPort* view_port) {
     // Return to the top
     ViewPortArray_push_at(gui->layers[layer], 0, view_port);
     gui_unlock(gui);
+
+    // Request redraw
+    gui_update(gui);
 }
 
-void gui_set_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback, void* context) {
+void gui_add_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback, void* context) {
     furi_assert(gui);
+
+    const CanvasCallbackPair p = {callback, context};
+
     gui_lock(gui);
-    gui->canvas_callback = callback;
-    gui->canvas_callback_context = context;
+    furi_assert(CanvasCallbackPairArray_count(gui->canvas_callback_pair, p) == 0);
+    CanvasCallbackPairArray_push_back(gui->canvas_callback_pair, p);
     gui_unlock(gui);
 
-    if(callback != NULL) {
-        gui_update(gui);
-    }
+    // Request redraw
+    gui_update(gui);
+}
+
+void gui_remove_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback, void* context) {
+    furi_assert(gui);
+
+    const CanvasCallbackPair p = {callback, context};
+
+    gui_lock(gui);
+    furi_assert(CanvasCallbackPairArray_count(gui->canvas_callback_pair, p) == 1);
+    CanvasCallbackPairArray_remove_val(gui->canvas_callback_pair, p);
+    gui_unlock(gui);
+}
+
+size_t gui_get_framebuffer_size(Gui* gui) {
+    furi_assert(gui);
+    return canvas_get_buffer_size(gui->canvas);
 }
 
 void gui_set_lockdown(Gui* gui, bool lockdown) {
     furi_assert(gui);
+
     gui_lock(gui);
     gui->lockdown = lockdown;
     gui_unlock(gui);
+
+    // Request redraw
     gui_update(gui);
 }
 
 Gui* gui_alloc() {
     Gui* gui = malloc(sizeof(Gui));
     // Thread ID
-    gui->thread = osThreadGetId();
+    gui->thread_id = furi_thread_get_current_id();
     // Allocate mutex
     gui->mutex = osMutexNew(NULL);
     furi_check(gui->mutex);
@@ -429,9 +481,12 @@ Gui* gui_alloc() {
     }
     // Drawing canvas
     gui->canvas = canvas_init();
+    CanvasCallbackPairArray_init(gui->canvas_callback_pair);
+
     // Input
     gui->input_queue = osMessageQueueNew(8, sizeof(InputEvent), NULL);
     gui->input_events = furi_record_open("input_events");
+
     furi_check(gui->input_events);
     furi_pubsub_subscribe(gui->input_events, gui_input_events_callback, gui);
 
@@ -439,12 +494,14 @@ Gui* gui_alloc() {
 }
 
 int32_t gui_srv(void* p) {
+    UNUSED(p);
     Gui* gui = gui_alloc();
 
     furi_record_create("gui", gui);
 
     while(1) {
-        uint32_t flags = osThreadFlagsWait(GUI_THREAD_FLAG_ALL, osFlagsWaitAny, osWaitForever);
+        uint32_t flags =
+            furi_thread_flags_wait(GUI_THREAD_FLAG_ALL, osFlagsWaitAny, osWaitForever);
         // Process and dispatch input
         if(flags & GUI_THREAD_FLAG_INPUT) {
             // Process till queue become empty
@@ -456,7 +513,7 @@ int32_t gui_srv(void* p) {
         // Process and dispatch draw call
         if(flags & GUI_THREAD_FLAG_DRAW) {
             // Clear flags that arrived on input step
-            osThreadFlagsClear(GUI_THREAD_FLAG_DRAW);
+            furi_thread_flags_clear(GUI_THREAD_FLAG_DRAW);
             gui_redraw(gui);
         }
     }

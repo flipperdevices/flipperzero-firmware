@@ -1,8 +1,10 @@
 #include "cli_i.h"
 #include "cli_commands.h"
-
+#include "cli_vcp.h"
 #include <furi_hal_version.h>
 #include <loader/loader.h>
+
+#define TAG "CliSrv"
 
 Cli* cli_alloc() {
     Cli* cli = malloc(sizeof(Cli));
@@ -12,55 +14,78 @@ Cli* cli_alloc() {
     string_init(cli->last_line);
     string_init(cli->line);
 
+    cli->session = NULL;
+
     cli->mutex = osMutexNew(NULL);
     furi_check(cli->mutex);
+
+    cli->idle_sem = osSemaphoreNew(1, 0, NULL);
 
     return cli;
 }
 
-void cli_free(Cli* cli) {
+void cli_putc(Cli* cli, char c) {
     furi_assert(cli);
-
-    string_clear(cli->last_line);
-    string_clear(cli->line);
-
-    CliCommandTree_clear(cli->commands);
-
-    free(cli);
-}
-
-void cli_putc(char c) {
-    furi_hal_vcp_tx((uint8_t*)&c, 1);
+    if(cli->session != NULL) {
+        cli->session->tx((uint8_t*)&c, 1);
+    }
 }
 
 char cli_getc(Cli* cli) {
     furi_assert(cli);
-    char c;
-    if(furi_hal_vcp_rx((uint8_t*)&c, 1) == 0) {
+    char c = 0;
+    if(cli->session != NULL) {
+        if(cli->session->rx((uint8_t*)&c, 1, osWaitForever) == 0) {
+            cli_reset(cli);
+        }
+    } else {
         cli_reset(cli);
     }
     return c;
 }
 
-void cli_stdout_callback(void* _cookie, const char* data, size_t size) {
-    furi_hal_vcp_tx((const uint8_t*)data, size);
-}
-
 void cli_write(Cli* cli, const uint8_t* buffer, size_t size) {
-    return furi_hal_vcp_tx(buffer, size);
+    furi_assert(cli);
+    if(cli->session != NULL) {
+        cli->session->tx(buffer, size);
+    }
 }
 
 size_t cli_read(Cli* cli, uint8_t* buffer, size_t size) {
-    return furi_hal_vcp_rx(buffer, size);
+    furi_assert(cli);
+    if(cli->session != NULL) {
+        return cli->session->rx(buffer, size, osWaitForever);
+    } else {
+        return 0;
+    }
+}
+
+size_t cli_read_timeout(Cli* cli, uint8_t* buffer, size_t size, uint32_t timeout) {
+    furi_assert(cli);
+    if(cli->session != NULL) {
+        return cli->session->rx(buffer, size, timeout);
+    } else {
+        return 0;
+    }
 }
 
 bool cli_cmd_interrupt_received(Cli* cli) {
+    furi_assert(cli);
     char c = '\0';
-    if(furi_hal_vcp_rx_with_timeout((uint8_t*)&c, 1, 0) == 1) {
-        return c == CliSymbolAsciiETX;
-    } else {
-        return false;
+    if(cli->session != NULL) {
+        if(cli->session->rx((uint8_t*)&c, 1, 0) == 1) {
+            return c == CliSymbolAsciiETX;
+        }
     }
+    return false;
+}
+
+bool cli_is_connected(Cli* cli) {
+    furi_assert(cli);
+    if(cli->session != NULL) {
+        return (cli->session->is_connected());
+    }
+    return false;
 }
 
 void cli_print_usage(const char* cmd, const char* usage, const char* arg) {
@@ -95,19 +120,22 @@ void cli_motd() {
     const Version* firmware_version = furi_hal_version_get_firmware_version();
     if(firmware_version) {
         printf(
-            "Firmware version: %s %s (%s built on %s)\r\n",
+            "Firmware version: %s %s (%s%s built on %s)\r\n",
             version_get_gitbranch(firmware_version),
             version_get_version(firmware_version),
             version_get_githash(firmware_version),
+            version_get_dirty_flag(firmware_version) ? "-dirty" : "",
             version_get_builddate(firmware_version));
     }
 }
 
 void cli_nl(Cli* cli) {
+    UNUSED(cli);
     printf("\r\n");
 }
 
 void cli_prompt(Cli* cli) {
+    UNUSED(cli);
     printf("\r\n>: %s", string_get_cstr(cli->line));
     fflush(stdout);
 }
@@ -121,7 +149,8 @@ void cli_reset(Cli* cli) {
 }
 
 static void cli_handle_backspace(Cli* cli) {
-    if(string_size(cli->line) > 0) {
+    if(cli->cursor_position > 0) {
+        furi_assert(string_size(cli->line) > 0);
         // Other side
         printf("\e[D\e[1P");
         fflush(stdout);
@@ -138,7 +167,7 @@ static void cli_handle_backspace(Cli* cli) {
 
         cli->cursor_position--;
     } else {
-        cli_putc(CliSymbolAsciiBell);
+        cli_putc(cli, CliSymbolAsciiBell);
     }
 }
 
@@ -200,18 +229,22 @@ static void cli_handle_enter(Cli* cli) {
 
     // Search for command
     furi_check(osMutexAcquire(cli->mutex, osWaitForever) == osOK);
-    CliCommand* cli_command = CliCommandTree_get(cli->commands, command);
-    if(cli_command) {
+    CliCommand* cli_command_ptr = CliCommandTree_get(cli->commands, command);
+
+    if(cli_command_ptr) {
+        CliCommand cli_command;
+        memcpy(&cli_command, cli_command_ptr, sizeof(CliCommand));
+        furi_check(osMutexRelease(cli->mutex) == osOK);
         cli_nl(cli);
-        cli_execute_command(cli, cli_command, args);
+        cli_execute_command(cli, &cli_command, args);
     } else {
+        furi_check(osMutexRelease(cli->mutex) == osOK);
         cli_nl(cli);
         printf(
             "`%s` command not found, use `help` or `?` to list all available commands",
             string_get_cstr(command));
-        cli_putc(CliSymbolAsciiBell);
+        cli_putc(cli, CliSymbolAsciiBell);
     }
-    furi_check(osMutexRelease(cli->mutex) == osOK);
 
     cli_reset(cli);
     cli_prompt(cli);
@@ -300,43 +333,43 @@ static void cli_handle_escape(Cli* cli, char c) {
 }
 
 void cli_process_input(Cli* cli) {
-    char c = cli_getc(cli);
-    size_t r;
+    char in_chr = cli_getc(cli);
+    size_t rx_len;
 
-    if(c == CliSymbolAsciiTab) {
+    if(in_chr == CliSymbolAsciiTab) {
         cli_handle_autocomplete(cli);
-    } else if(c == CliSymbolAsciiSOH) {
+    } else if(in_chr == CliSymbolAsciiSOH) {
         osDelay(33); // We are too fast, Minicom is not ready yet
         cli_motd();
         cli_prompt(cli);
-    } else if(c == CliSymbolAsciiETX) {
+    } else if(in_chr == CliSymbolAsciiETX) {
         cli_reset(cli);
         cli_prompt(cli);
-    } else if(c == CliSymbolAsciiEOT) {
+    } else if(in_chr == CliSymbolAsciiEOT) {
         cli_reset(cli);
-    } else if(c == CliSymbolAsciiEsc) {
-        r = furi_hal_vcp_rx((uint8_t*)&c, 1);
-        if(r && c == '[') {
-            furi_hal_vcp_rx((uint8_t*)&c, 1);
-            cli_handle_escape(cli, c);
+    } else if(in_chr == CliSymbolAsciiEsc) {
+        rx_len = cli_read(cli, (uint8_t*)&in_chr, 1);
+        if((rx_len > 0) && (in_chr == '[')) {
+            cli_read(cli, (uint8_t*)&in_chr, 1);
+            cli_handle_escape(cli, in_chr);
         } else {
-            cli_putc(CliSymbolAsciiBell);
+            cli_putc(cli, CliSymbolAsciiBell);
         }
-    } else if(c == CliSymbolAsciiBackspace || c == CliSymbolAsciiDel) {
+    } else if(in_chr == CliSymbolAsciiBackspace || in_chr == CliSymbolAsciiDel) {
         cli_handle_backspace(cli);
-    } else if(c == CliSymbolAsciiCR) {
+    } else if(in_chr == CliSymbolAsciiCR) {
         cli_handle_enter(cli);
-    } else if(c >= 0x20 && c < 0x7F) {
+    } else if(in_chr >= 0x20 && in_chr < 0x7F) {
         if(cli->cursor_position == string_size(cli->line)) {
-            string_push_back(cli->line, c);
-            cli_putc(c);
+            string_push_back(cli->line, in_chr);
+            cli_putc(cli, in_chr);
         } else {
             // ToDo: better way?
             string_t temp;
             string_init(temp);
             string_reserve(temp, string_size(cli->line) + 1);
             string_set_strn(temp, string_get_cstr(cli->line), cli->cursor_position);
-            string_push_back(temp, c);
+            string_push_back(temp, in_chr);
             string_cat_str(temp, string_get_cstr(cli->line) + cli->cursor_position);
 
             // cli->line is cleared and temp's buffer moved to cli->line
@@ -344,12 +377,12 @@ void cli_process_input(Cli* cli) {
             // NO MEMORY LEAK, STOP REPORTING IT
 
             // Print character in replace mode
-            printf("\e[4h%c\e[4l", c);
+            printf("\e[4h%c\e[4l", in_chr);
             fflush(stdout);
         }
         cli->cursor_position++;
     } else {
-        cli_putc(CliSymbolAsciiBell);
+        cli_putc(cli, CliSymbolAsciiBell);
     }
 }
 
@@ -397,7 +430,35 @@ void cli_delete_command(Cli* cli, const char* name) {
     string_clear(name_str);
 }
 
+void cli_session_open(Cli* cli, void* session) {
+    furi_assert(cli);
+
+    furi_check(osMutexAcquire(cli->mutex, osWaitForever) == osOK);
+    cli->session = session;
+    if(cli->session != NULL) {
+        cli->session->init();
+        furi_stdglue_set_thread_stdout_callback(cli->session->tx_stdout);
+    } else {
+        furi_stdglue_set_thread_stdout_callback(NULL);
+    }
+    osSemaphoreRelease(cli->idle_sem);
+    furi_check(osMutexRelease(cli->mutex) == osOK);
+}
+
+void cli_session_close(Cli* cli) {
+    furi_assert(cli);
+
+    furi_check(osMutexAcquire(cli->mutex, osWaitForever) == osOK);
+    if(cli->session != NULL) {
+        cli->session->deinit();
+    }
+    cli->session = NULL;
+    furi_stdglue_set_thread_stdout_callback(NULL);
+    furi_check(osMutexRelease(cli->mutex) == osOK);
+}
+
 int32_t cli_srv(void* p) {
+    UNUSED(p);
     Cli* cli = cli_alloc();
 
     // Init basic cli commands
@@ -405,9 +466,24 @@ int32_t cli_srv(void* p) {
 
     furi_record_create("cli", cli);
 
-    furi_stdglue_set_thread_stdout_callback(cli_stdout_callback);
+    if(cli->session != NULL) {
+        furi_stdglue_set_thread_stdout_callback(cli->session->tx_stdout);
+    } else {
+        furi_stdglue_set_thread_stdout_callback(NULL);
+    }
+
+    if(furi_hal_rtc_get_boot_mode() == FuriHalRtcBootModeNormal) {
+        cli_session_open(cli, &cli_vcp);
+    } else {
+        FURI_LOG_W(TAG, "Skipped CLI session open: device in special startup mode");
+    }
+
     while(1) {
-        cli_process_input(cli);
+        if(cli->session != NULL) {
+            cli_process_input(cli);
+        } else {
+            furi_check(osSemaphoreAcquire(cli->idle_sem, osWaitForever) == osOK);
+        }
     }
 
     return 0;

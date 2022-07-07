@@ -1,19 +1,6 @@
 #include "system_settings.h"
 #include <loader/loader.h>
-
-static uint8_t
-    uint32_value_index(const uint32_t value, const uint32_t values[], uint8_t values_count) {
-    int64_t last_value = INT64_MIN;
-    uint8_t index = 0;
-    for(uint8_t i = 0; i < values_count; i++) {
-        if((value >= last_value) && (value <= values[i])) {
-            index = i;
-            break;
-        }
-        last_value = values[i];
-    }
-    return index;
-}
+#include <lib/toolbox/value_index.h>
 
 const char* const log_level_text[] = {
     "Default",
@@ -43,8 +30,8 @@ static void log_level_changed(VariableItem* item) {
 }
 
 const char* const debug_text[] = {
-    "Disable",
-    "Enable",
+    "OFF",
+    "ON",
 };
 
 static void debug_changed(VariableItem* item) {
@@ -59,6 +46,7 @@ static void debug_changed(VariableItem* item) {
 }
 
 static uint32_t system_settings_exit(void* context) {
+    UNUSED(context);
     return VIEW_NONE;
 }
 
@@ -80,7 +68,7 @@ SystemSettings* system_settings_alloc() {
 
     item = variable_item_list_add(
         app->var_item_list, "Log Level", COUNT_OF(log_level_text), log_level_changed, app);
-    value_index = uint32_value_index(
+    value_index = value_index_uint32(
         furi_hal_rtc_get_log_level(), log_level_value, COUNT_OF(log_level_text));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, log_level_text[value_index]);
@@ -116,6 +104,7 @@ void system_settings_free(SystemSettings* app) {
 }
 
 int32_t system_settings_app(void* p) {
+    UNUSED(p);
     SystemSettings* app = system_settings_alloc();
     view_dispatcher_run(app->view_dispatcher);
     system_settings_free(app);

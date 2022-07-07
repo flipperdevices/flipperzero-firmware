@@ -6,59 +6,18 @@
 
 #define ASSETS_DIR "assets"
 
-bool filter_by_extension(FileInfo* file_info, const char* tab_ext, const char* name) {
-    furi_assert(file_info);
-    furi_assert(tab_ext);
-    furi_assert(name);
-
-    bool result = false;
-
-    if(strcmp(tab_ext, "*") == 0) {
-        result = true;
-    } else if(strstr(name, tab_ext) != NULL) {
-        result = true;
-    } else if(file_info->flags & FSF_DIRECTORY) {
-        if(strstr(name, ASSETS_DIR) != NULL) {
-            result = false; // Skip assets folder in all tabs except browser
-        } else {
-            result = true;
-        }
-    }
-
-    return result;
-}
-
-void archive_trim_file_path(char* name, bool ext) {
-    char* slash = strrchr(name, '/') + 1;
-    if(strlen(slash)) strlcpy(name, slash, strlen(slash) + 1);
-    if(ext) {
-        char* dot = strrchr(name, '.');
-        if(strlen(dot)) *dot = '\0';
-    }
-}
-
-void archive_get_file_extension(char* name, char* ext) {
-    char* dot = strrchr(name, '.');
-    if(dot == NULL)
-        *ext = '\0';
-    else
-        strncpy(ext, dot, MAX_EXT_LEN);
-}
-
-void set_file_type(ArchiveFile_t* file, FileInfo* file_info, const char* path, bool is_app) {
+void archive_set_file_type(ArchiveFile_t* file, const char* path, bool is_folder, bool is_app) {
     furi_assert(file);
 
     file->is_app = is_app;
     if(is_app) {
         file->type = archive_get_app_filetype(archive_get_app_type(path));
     } else {
-        furi_assert(file_info);
-
-        for(size_t i = 0; i < SIZEOF_ARRAY(known_ext); i++) {
+        for(size_t i = 0; i < COUNT_OF(known_ext); i++) {
             if((known_ext[i][0] == '?') || (known_ext[i][0] == '*')) continue;
-            if(string_search_str(file->name, known_ext[i], 0) != STRING_FAILURE) {
+            if(string_search_str(file->path, known_ext[i], 0) != STRING_FAILURE) {
                 if(i == ArchiveFileTypeBadUsb) {
-                    if(string_search_str(file->name, archive_get_default_path(ArchiveTabBadUsb)) ==
+                    if(string_search_str(file->path, archive_get_default_path(ArchiveTabBadUsb)) ==
                        0) {
                         file->type = i;
                         return; // *.txt file is a BadUSB script only if it is in BadUSB folder
@@ -70,7 +29,7 @@ void set_file_type(ArchiveFile_t* file, FileInfo* file_info, const char* path, b
             }
         }
 
-        if(file_info->flags & FSF_DIRECTORY) {
+        if(is_folder) {
             file->type = ArchiveFileTypeFolder;
         } else {
             file->type = ArchiveFileTypeUnknown;
@@ -78,103 +37,18 @@ void set_file_type(ArchiveFile_t* file, FileInfo* file_info, const char* path, b
     }
 }
 
-bool archive_get_filenames(void* context, const char* path) {
+bool archive_get_items(void* context, const char* path) {
     furi_assert(context);
 
-    bool res;
+    bool res = false;
     ArchiveBrowserView* browser = context;
-    archive_file_array_rm_all(browser);
 
     if(archive_get_tab(browser) == ArchiveTabFavorites) {
         res = archive_favorites_read(browser);
     } else if(strncmp(path, "/app:", 5) == 0) {
         res = archive_app_read_dir(browser, path);
-    } else {
-        res = archive_read_dir(browser, path);
     }
     return res;
-}
-
-bool archive_dir_not_empty(void* context, const char* path) { // can be simpler?
-    furi_assert(context);
-
-    ArchiveBrowserView* browser = context;
-
-    FileInfo file_info;
-    Storage* fs_api = furi_record_open("storage");
-    File* directory = storage_file_alloc(fs_api);
-    char name[MAX_NAME_LEN];
-
-    if(!storage_dir_open(directory, path)) {
-        storage_dir_close(directory);
-        storage_file_free(directory);
-        return false;
-    }
-
-    bool files_found = false;
-    while(1) {
-        if(!storage_dir_read(directory, &file_info, name, MAX_NAME_LEN)) {
-            break;
-        }
-        if(files_found) {
-            break;
-        } else if((storage_file_get_error(directory) == FSE_OK) && (name[0])) {
-            if(filter_by_extension(
-                   &file_info, archive_get_tab_ext(archive_get_tab(browser)), name)) {
-                files_found = true;
-            }
-        } else {
-            return false;
-        }
-    }
-    storage_dir_close(directory);
-    storage_file_free(directory);
-
-    furi_record_close("storage");
-
-    return files_found;
-}
-
-bool archive_read_dir(void* context, const char* path) {
-    furi_assert(context);
-
-    ArchiveBrowserView* browser = context;
-    FileInfo file_info;
-    Storage* fs_api = furi_record_open("storage");
-    File* directory = storage_file_alloc(fs_api);
-    char name[MAX_NAME_LEN];
-    snprintf(name, MAX_NAME_LEN, "%s/", path);
-    size_t path_len = strlen(name);
-    size_t files_cnt = 0;
-
-    if(!storage_dir_open(directory, path)) {
-        storage_dir_close(directory);
-        storage_file_free(directory);
-        return false;
-    }
-
-    while(1) {
-        if(!storage_dir_read(directory, &file_info, &name[path_len], MAX_NAME_LEN - path_len)) {
-            break;
-        }
-
-        if(files_cnt > MAX_FILES) {
-            break;
-        } else if(storage_file_get_error(directory) == FSE_OK) {
-            archive_add_file_item(browser, &file_info, name);
-            ++files_cnt;
-        } else {
-            storage_dir_close(directory);
-            storage_file_free(directory);
-            return false;
-        }
-    }
-    storage_dir_close(directory);
-    storage_file_free(directory);
-
-    furi_record_close("storage");
-
-    return true;
 }
 
 void archive_file_append(const char* path, const char* format, ...) {
@@ -186,18 +60,18 @@ void archive_file_append(const char* path, const char* format, ...) {
     string_init_vprintf(string, format, args);
     va_end(args);
 
-    FileWorker* file_worker = file_worker_alloc(false);
+    Storage* fs_api = furi_record_open("storage");
+    File* file = storage_file_alloc(fs_api);
 
-    if(!file_worker_open(file_worker, path, FSAM_WRITE, FSOM_OPEN_APPEND)) {
-        FURI_LOG_E(TAG, "Append open error");
+    bool res = storage_file_open(file, path, FSAM_WRITE, FSOM_OPEN_APPEND);
+
+    if(res) {
+        storage_file_write(file, string_get_cstr(string), string_size(string));
     }
 
-    if(!file_worker_write(file_worker, string_get_cstr(string), string_size(string))) {
-        FURI_LOG_E(TAG, "Append write error");
-    }
-
-    file_worker_close(file_worker);
-    file_worker_free(file_worker);
+    storage_file_close(file);
+    storage_file_free(file);
+    furi_record_close("storage");
 }
 
 void archive_delete_file(void* context, const char* format, ...) {
@@ -210,10 +84,20 @@ void archive_delete_file(void* context, const char* format, ...) {
     va_end(args);
 
     ArchiveBrowserView* browser = context;
-    FileWorker* file_worker = file_worker_alloc(true);
+    Storage* fs_api = furi_record_open("storage");
 
-    bool res = file_worker_remove(file_worker, string_get_cstr(filename));
-    file_worker_free(file_worker);
+    FileInfo fileinfo;
+    storage_common_stat(fs_api, string_get_cstr(filename), &fileinfo);
+
+    bool res = false;
+
+    if(fileinfo.flags & FSF_DIRECTORY) {
+        res = storage_simply_remove_recursive(fs_api, string_get_cstr(filename));
+    } else {
+        res = (storage_common_remove(fs_api, string_get_cstr(filename)) == FSE_OK);
+    }
+
+    furi_record_close("storage");
 
     if(archive_is_favorite("%s", string_get_cstr(filename))) {
         archive_favorites_delete("%s", string_get_cstr(filename));

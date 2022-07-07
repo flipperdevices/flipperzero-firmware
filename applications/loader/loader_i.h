@@ -15,7 +15,7 @@
 #include <assets_icons.h>
 
 struct Loader {
-    osThreadId_t loader_thread;
+    FuriThreadId loader_thread;
 
     const FlipperApplication* application;
     FuriThread* application_thread;
@@ -30,7 +30,6 @@ struct Loader {
     Submenu* debug_menu;
     Submenu* settings_menu;
 
-    size_t free_heap_size;
     volatile uint8_t lock_count;
 
     FuriPubSub* pubsub;

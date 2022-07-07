@@ -9,22 +9,20 @@
 template <unsigned int N> struct STOP_EXTERNING_ME {};
 #endif
 
-#include "furi_hal_bootloader.h"
 #include "furi_hal_clock.h"
 #include "furi_hal_crypto.h"
 #include "furi_hal_console.h"
+#include "furi_hal_debug.h"
 #include "furi_hal_os.h"
 #include "furi_hal_sd.h"
 #include "furi_hal_i2c.h"
 #include "furi_hal_resources.h"
 #include "furi_hal_rtc.h"
+#include "furi_hal_speaker.h"
 #include "furi_hal_gpio.h"
 #include "furi_hal_light.h"
 #include "furi_hal_delay.h"
-#include "furi_hal_pwm.h"
-#include "furi_hal_task.h"
 #include "furi_hal_power.h"
-#include "furi_hal_vcp.h"
 #include "furi_hal_interrupt.h"
 #include "furi_hal_version.h"
 #include "furi_hal_bt.h"
@@ -42,11 +40,25 @@ template <unsigned int N> struct STOP_EXTERNING_ME {};
 #include "furi_hal_info.h"
 #include "furi_hal_random.h"
 
-/** Init furi_hal */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/** Early FuriHal init, only essential subsystems */
+void furi_hal_init_early();
+
+/** Early FuriHal deinit */
+void furi_hal_deinit_early();
+
+/** Init FuriHal */
 void furi_hal_init();
 
-/**
- * Init critical parts of furi_hal
- * That code should not use memory allocations
+/** Transfer execution to address
+ *
+ * @param[in]  address  pointer to new executable
  */
-void furi_hal_init_critical();
+void furi_hal_switch(void* address);
+
+#ifdef __cplusplus
+}
+#endif

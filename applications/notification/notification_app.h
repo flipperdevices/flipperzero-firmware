@@ -25,6 +25,7 @@ typedef enum {
 } NotificationLedLayerIndex;
 
 typedef struct {
+    uint8_t value_last[LayerMAX];
     uint8_t value[LayerMAX];
     NotificationLedLayerIndex index;
     Light light;
@@ -49,6 +50,7 @@ struct NotificationApp {
 
     NotificationLedLayer display;
     NotificationLedLayer led[NOTIFICATION_LED_COUNT];
+    uint8_t display_led_lock;
 
     NotificationSettings settings;
 };

@@ -1,8 +1,6 @@
 #include "input_i.h"
 
-#define GPIO_Read(input_pin)                                                    \
-    (HAL_GPIO_ReadPin((GPIO_TypeDef*)input_pin.pin->port, input_pin.pin->pin) ^ \
-     input_pin.pin->inverted)
+#define GPIO_Read(input_pin) (furi_hal_gpio_read(input_pin.pin->gpio) ^ (input_pin.pin->inverted))
 
 static Input* input = NULL;
 
@@ -37,7 +35,8 @@ void input_press_timer_callback(void* arg) {
 }
 
 void input_isr(void* _ctx) {
-    osThreadFlagsSet(input->thread, INPUT_THREAD_FLAG_ISR);
+    UNUSED(_ctx);
+    furi_thread_flags_set(input->thread_id, INPUT_THREAD_FLAG_ISR);
 }
 
 const char* input_get_key_name(InputKey key) {
@@ -67,7 +66,7 @@ const char* input_get_type_name(InputType type) {
 
 int32_t input_srv() {
     input = malloc(sizeof(Input));
-    input->thread = osThreadGetId();
+    input->thread_id = furi_thread_get_current_id();
     input->event_pubsub = furi_pubsub_alloc();
     furi_record_create("input_events", input->event_pubsub);
 
@@ -81,8 +80,7 @@ int32_t input_srv() {
     input->pin_states = malloc(input_pins_count * sizeof(InputPinState));
 
     for(size_t i = 0; i < input_pins_count; i++) {
-        GpioPin gpio = {(GPIO_TypeDef*)input_pins[i].port, (uint16_t)input_pins[i].pin};
-        hal_gpio_add_int_callback(&gpio, input_isr, NULL);
+        furi_hal_gpio_add_int_callback(input_pins[i].gpio, input_isr, NULL);
         input->pin_states[i].pin = &input_pins[i];
         input->pin_states[i].state = GPIO_Read(input->pin_states[i]);
         input->pin_states[i].debounce = INPUT_DEBOUNCE_TICKS_HALF;
@@ -131,7 +129,7 @@ int32_t input_srv() {
         if(is_changing) {
             osDelay(1);
         } else {
-            osThreadFlagsWait(INPUT_THREAD_FLAG_ISR, osFlagsWaitAny, osWaitForever);
+            furi_thread_flags_wait(INPUT_THREAD_FLAG_ISR, osFlagsWaitAny, osWaitForever);
         }
     }
 

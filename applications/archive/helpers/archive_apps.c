@@ -7,8 +7,14 @@ static const char* known_apps[] = {
 };
 
 ArchiveAppTypeEnum archive_get_app_type(const char* path) {
-    for(size_t i = 0; i < SIZEOF_ARRAY(known_apps); i++) {
-        if(strncmp(path, known_apps[i], strlen(known_apps[i])) != STRING_FAILURE) {
+    const char* app_name = strchr(path, ':');
+    if(app_name == NULL) {
+        return ArchiveAppTypeUnknown;
+    }
+    app_name++;
+
+    for(size_t i = 0; i < COUNT_OF(known_apps); i++) {
+        if(strncmp(app_name, known_apps[i], strlen(known_apps[i])) == 0) {
             return i;
         }
     }
@@ -16,18 +22,29 @@ ArchiveAppTypeEnum archive_get_app_type(const char* path) {
 }
 
 bool archive_app_is_available(void* context, const char* path) {
+    UNUSED(context);
     furi_assert(path);
 
     ArchiveAppTypeEnum app = archive_get_app_type(path);
 
     if(app == ArchiveAppTypeU2f) {
-        FileWorker* file_worker = file_worker_alloc(true);
         bool file_exists = false;
-        file_worker_is_file_exist(file_worker, "/any/u2f/key.u2f", &file_exists);
+        Storage* fs_api = furi_record_open("storage");
+        File* file = storage_file_alloc(fs_api);
+
+        file_exists = storage_file_open(file, "/any/u2f/key.u2f", FSAM_READ, FSOM_OPEN_EXISTING);
         if(file_exists) {
-            file_worker_is_file_exist(file_worker, "/any/u2f/cnt.u2f", &file_exists);
+            storage_file_close(file);
+            file_exists =
+                storage_file_open(file, "/any/u2f/cnt.u2f", FSAM_READ, FSOM_OPEN_EXISTING);
+            if(file_exists) {
+                storage_file_close(file);
+            }
         }
-        file_worker_free(file_worker);
+
+        storage_file_free(file);
+        furi_record_close("storage");
+
         return file_exists;
     } else {
         return false;
@@ -38,6 +55,8 @@ bool archive_app_read_dir(void* context, const char* path) {
     furi_assert(context);
     furi_assert(path);
     ArchiveBrowserView* browser = context;
+
+    archive_file_array_rm_all(browser);
 
     ArchiveAppTypeEnum app = archive_get_app_type(path);
 
@@ -58,10 +77,10 @@ void archive_app_delete_file(void* context, const char* path) {
     bool res = false;
 
     if(app == ArchiveAppTypeU2f) {
-        FileWorker* file_worker = file_worker_alloc(true);
-        res = file_worker_remove(file_worker, "/any/u2f/key.u2f");
-        res |= file_worker_remove(file_worker, "/any/u2f/cnt.u2f");
-        file_worker_free(file_worker);
+        Storage* fs_api = furi_record_open("storage");
+        res = (storage_common_remove(fs_api, "/any/u2f/key.u2f") == FSE_OK);
+        res |= (storage_common_remove(fs_api, "/any/u2f/cnt.u2f") == FSE_OK);
+        furi_record_close("storage");
 
         if(archive_is_favorite("/app:u2f/U2F Token")) {
             archive_favorites_delete("/app:u2f/U2F Token");

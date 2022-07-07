@@ -159,8 +159,6 @@ void HW_IPCC_Enable(void) {
   * Such as IPCC IP available to the CPU2, it is required to keep the IPCC clock running
     when FUS is running on CPU2 and CPU1 enters deep sleep mode
   */
-    LL_C2_AHB3_GRP1_EnableClock(LL_C2_AHB3_GRP1_PERIPH_IPCC);
-
     /**
    * When the device is out of standby, it is required to use the EXTI mechanism to wakeup CPU2
    */
@@ -184,15 +182,13 @@ void HW_IPCC_Enable(void) {
 }
 
 void HW_IPCC_Init(void) {
-    LL_AHB3_GRP1_EnableClock(LL_AHB3_GRP1_PERIPH_IPCC);
-
     LL_C1_IPCC_EnableIT_RXO(IPCC);
     LL_C1_IPCC_EnableIT_TXF(IPCC);
 
-    HAL_NVIC_SetPriority(IPCC_C1_RX_IRQn, 6, 0);
-    HAL_NVIC_EnableIRQ(IPCC_C1_RX_IRQn);
-    HAL_NVIC_SetPriority(IPCC_C1_TX_IRQn, 6, 0);
-    HAL_NVIC_EnableIRQ(IPCC_C1_TX_IRQn);
+    NVIC_SetPriority(IPCC_C1_RX_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 6, 0));
+    NVIC_EnableIRQ(IPCC_C1_RX_IRQn);
+    NVIC_SetPriority(IPCC_C1_TX_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 6, 0));
+    NVIC_EnableIRQ(IPCC_C1_TX_IRQn);
 
     return;
 }

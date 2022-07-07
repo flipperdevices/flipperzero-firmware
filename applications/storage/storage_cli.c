@@ -4,6 +4,7 @@
 #include <cli/cli.h>
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/md5.h>
+#include <lib/toolbox/dir_walk.h>
 #include <storage/storage.h>
 #include <storage/storage_sd_api.h>
 #include <power/power_service/power.h>
@@ -18,6 +19,7 @@ static void storage_cli_print_usage() {
     printf("\tinfo\t - get FS info\r\n");
     printf("\tformat\t - format filesystem\r\n");
     printf("\tlist\t - list files and dirs\r\n");
+    printf("\ttree\t - list files and dirs, recursive\r\n");
     printf("\tremove\t - delete the file or directory\r\n");
     printf("\tread\t - read text from file and print file size and content to cli\r\n");
     printf(
@@ -37,6 +39,7 @@ static void storage_cli_print_error(FS_Error error) {
 }
 
 static void storage_cli_info(Cli* cli, string_t path) {
+    UNUSED(cli);
     Storage* api = furi_record_open("storage");
 
     if(string_cmp_str(path, "/int") == 0) {
@@ -101,6 +104,7 @@ static void storage_cli_format(Cli* cli, string_t path) {
 };
 
 static void storage_cli_list(Cli* cli, string_t path) {
+    UNUSED(cli);
     if(string_cmp_str(path, "/") == 0) {
         printf("\t[D] int\r\n");
         printf("\t[D] ext\r\n");
@@ -112,10 +116,10 @@ static void storage_cli_list(Cli* cli, string_t path) {
         if(storage_dir_open(file, string_get_cstr(path))) {
             FileInfo fileinfo;
             char name[MAX_NAME_LENGTH];
-            bool readed = false;
+            bool read_done = false;
 
             while(storage_dir_read(file, &fileinfo, name, MAX_NAME_LENGTH)) {
-                readed = true;
+                read_done = true;
                 if(fileinfo.flags & FSF_DIRECTORY) {
                     printf("\t[D] %s\r\n", name);
                 } else {
@@ -123,7 +127,7 @@ static void storage_cli_list(Cli* cli, string_t path) {
                 }
             }
 
-            if(!readed) {
+            if(!read_done) {
                 printf("\tEmpty\r\n");
             }
         } else {
@@ -136,23 +140,62 @@ static void storage_cli_list(Cli* cli, string_t path) {
     }
 }
 
+static void storage_cli_tree(Cli* cli, string_t path) {
+    if(string_cmp_str(path, "/") == 0) {
+        string_set(path, "/int");
+        storage_cli_tree(cli, path);
+        string_set(path, "/ext");
+        storage_cli_tree(cli, path);
+    } else {
+        Storage* api = furi_record_open("storage");
+        DirWalk* dir_walk = dir_walk_alloc(api);
+        string_t name;
+        string_init(name);
+
+        if(dir_walk_open(dir_walk, string_get_cstr(path))) {
+            FileInfo fileinfo;
+            bool read_done = false;
+
+            while(dir_walk_read(dir_walk, name, &fileinfo) == DirWalkOK) {
+                read_done = true;
+                if(fileinfo.flags & FSF_DIRECTORY) {
+                    printf("\t[D] %s\r\n", string_get_cstr(name));
+                } else {
+                    printf("\t[F] %s %lub\r\n", string_get_cstr(name), (uint32_t)(fileinfo.size));
+                }
+            }
+
+            if(!read_done) {
+                printf("\tEmpty\r\n");
+            }
+        } else {
+            storage_cli_print_error(dir_walk_get_error(dir_walk));
+        }
+
+        string_clear(name);
+        dir_walk_free(dir_walk);
+        furi_record_close("storage");
+    }
+}
+
 static void storage_cli_read(Cli* cli, string_t path) {
+    UNUSED(cli);
     Storage* api = furi_record_open("storage");
     File* file = storage_file_alloc(api);
 
     if(storage_file_open(file, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-        const uint16_t read_size = 128;
-        uint16_t readed_size = 0;
-        uint8_t* data = malloc(read_size);
+        const uint16_t buffer_size = 128;
+        uint16_t read_size = 0;
+        uint8_t* data = malloc(buffer_size);
 
         printf("Size: %lu\r\n", (uint32_t)storage_file_size(file));
 
         do {
-            readed_size = storage_file_read(file, data, read_size);
-            for(uint16_t i = 0; i < readed_size; i++) {
+            read_size = storage_file_read(file, data, buffer_size);
+            for(uint16_t i = 0; i < read_size; i++) {
                 printf("%c", data[i]);
             }
-        } while(readed_size > 0);
+        } while(read_size > 0);
         printf("\r\n");
 
         free(data);
@@ -176,33 +219,33 @@ static void storage_cli_write(Cli* cli, string_t path) {
     if(storage_file_open(file, string_get_cstr(path), FSAM_WRITE, FSOM_OPEN_APPEND)) {
         printf("Just write your text data. New line by Ctrl+Enter, exit by Ctrl+C.\r\n");
 
-        uint32_t readed_index = 0;
+        uint32_t read_index = 0;
 
         while(true) {
             uint8_t symbol = cli_getc(cli);
 
             if(symbol == CliSymbolAsciiETX) {
-                uint16_t write_size = readed_index % buffer_size;
+                uint16_t write_size = read_index % buffer_size;
 
                 if(write_size > 0) {
-                    uint16_t writed_size = storage_file_write(file, buffer, write_size);
+                    uint16_t written_size = storage_file_write(file, buffer, write_size);
 
-                    if(writed_size != write_size) {
+                    if(written_size != write_size) {
                         storage_cli_print_error(storage_file_get_error(file));
                     }
                     break;
                 }
             }
 
-            buffer[readed_index % buffer_size] = symbol;
-            printf("%c", buffer[readed_index % buffer_size]);
+            buffer[read_index % buffer_size] = symbol;
+            printf("%c", buffer[read_index % buffer_size]);
             fflush(stdout);
-            readed_index++;
+            read_index++;
 
-            if(((readed_index % buffer_size) == 0)) {
-                uint16_t writed_size = storage_file_write(file, buffer, buffer_size);
+            if(((read_index % buffer_size) == 0)) {
+                uint16_t written_size = storage_file_write(file, buffer, buffer_size);
 
-                if(writed_size != buffer_size) {
+                if(written_size != buffer_size) {
                     storage_cli_print_error(storage_file_get_error(file));
                     break;
                 }
@@ -239,11 +282,11 @@ static void storage_cli_read_chunks(Cli* cli, string_t path, string_t args) {
             printf("\r\nReady?\r\n");
             cli_getc(cli);
 
-            uint16_t readed_size = storage_file_read(file, data, buffer_size);
-            for(uint16_t i = 0; i < readed_size; i++) {
+            uint16_t read_size = storage_file_read(file, data, buffer_size);
+            for(uint16_t i = 0; i < read_size; i++) {
                 putchar(data[i]);
             }
-            file_size -= readed_size;
+            file_size -= read_size;
         }
         printf("\r\n");
 
@@ -277,9 +320,9 @@ static void storage_cli_write_chunk(Cli* cli, string_t path, string_t args) {
                 buffer[i] = cli_getc(cli);
             }
 
-            uint16_t writed_size = storage_file_write(file, buffer, buffer_size);
+            uint16_t written_size = storage_file_write(file, buffer, buffer_size);
 
-            if(writed_size != buffer_size) {
+            if(written_size != buffer_size) {
                 storage_cli_print_error(storage_file_get_error(file));
             }
 
@@ -295,6 +338,7 @@ static void storage_cli_write_chunk(Cli* cli, string_t path, string_t args) {
 }
 
 static void storage_cli_stat(Cli* cli, string_t path) {
+    UNUSED(cli);
     Storage* api = furi_record_open("storage");
 
     if(string_cmp_str(path, "/") == 0) {
@@ -334,6 +378,7 @@ static void storage_cli_stat(Cli* cli, string_t path) {
 }
 
 static void storage_cli_copy(Cli* cli, string_t old_path, string_t args) {
+    UNUSED(cli);
     Storage* api = furi_record_open("storage");
     string_t new_path;
     string_init(new_path);
@@ -354,6 +399,7 @@ static void storage_cli_copy(Cli* cli, string_t old_path, string_t args) {
 }
 
 static void storage_cli_remove(Cli* cli, string_t path) {
+    UNUSED(cli);
     Storage* api = furi_record_open("storage");
     FS_Error error = storage_common_remove(api, string_get_cstr(path));
 
@@ -365,6 +411,7 @@ static void storage_cli_remove(Cli* cli, string_t path) {
 }
 
 static void storage_cli_rename(Cli* cli, string_t old_path, string_t args) {
+    UNUSED(cli);
     Storage* api = furi_record_open("storage");
     string_t new_path;
     string_init(new_path);
@@ -385,6 +432,7 @@ static void storage_cli_rename(Cli* cli, string_t old_path, string_t args) {
 }
 
 static void storage_cli_mkdir(Cli* cli, string_t path) {
+    UNUSED(cli);
     Storage* api = furi_record_open("storage");
     FS_Error error = storage_common_mkdir(api, string_get_cstr(path));
 
@@ -396,21 +444,22 @@ static void storage_cli_mkdir(Cli* cli, string_t path) {
 }
 
 static void storage_cli_md5(Cli* cli, string_t path) {
+    UNUSED(cli);
     Storage* api = furi_record_open("storage");
     File* file = storage_file_alloc(api);
 
     if(storage_file_open(file, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-        const uint16_t read_size = 512;
+        const uint16_t buffer_size = 512;
         const uint8_t hash_size = 16;
-        uint8_t* data = malloc(read_size);
+        uint8_t* data = malloc(buffer_size);
         uint8_t* hash = malloc(sizeof(uint8_t) * hash_size);
         md5_context* md5_ctx = malloc(sizeof(md5_context));
 
         md5_starts(md5_ctx);
         while(true) {
-            uint16_t readed_size = storage_file_read(file, data, read_size);
-            if(readed_size == 0) break;
-            md5_update(md5_ctx, data, readed_size);
+            uint16_t read_size = storage_file_read(file, data, buffer_size);
+            if(read_size == 0) break;
+            md5_update(md5_ctx, data, read_size);
         }
         md5_finish(md5_ctx, hash);
         free(md5_ctx);
@@ -433,6 +482,7 @@ static void storage_cli_md5(Cli* cli, string_t path) {
 }
 
 void storage_cli(Cli* cli, string_t args, void* context) {
+    UNUSED(context);
     string_t cmd;
     string_t path;
     string_init(cmd);
@@ -461,6 +511,11 @@ void storage_cli(Cli* cli, string_t args, void* context) {
 
         if(string_cmp_str(cmd, "list") == 0) {
             storage_cli_list(cli, path);
+            break;
+        }
+
+        if(string_cmp_str(cmd, "tree") == 0) {
+            storage_cli_tree(cli, path);
             break;
         }
 
@@ -521,7 +576,9 @@ void storage_cli(Cli* cli, string_t args, void* context) {
     string_clear(cmd);
 }
 
-void storage_cli_factory_reset(Cli* cli, string_t args, void* context) {
+static void storage_cli_factory_reset(Cli* cli, string_t args, void* context) {
+    UNUSED(args);
+    UNUSED(context);
     printf("All data will be lost. Are you sure (y/n)?\r\n");
     char c = cli_getc(cli);
     if(c == 'y' || c == 'Y') {
@@ -536,9 +593,11 @@ void storage_cli_factory_reset(Cli* cli, string_t args, void* context) {
 void storage_on_system_start() {
 #ifdef SRV_CLI
     Cli* cli = furi_record_open("cli");
-    cli_add_command(cli, "storage", CliCommandFlagDefault, storage_cli, NULL);
+    cli_add_command(cli, "storage", CliCommandFlagParallelSafe, storage_cli, NULL);
     cli_add_command(
         cli, "factory_reset", CliCommandFlagParallelSafe, storage_cli_factory_reset, NULL);
     furi_record_close("cli");
+#else
+    UNUSED(storage_cli_factory_reset);
 #endif
 }

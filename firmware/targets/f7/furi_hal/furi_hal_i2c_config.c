@@ -1,6 +1,8 @@
 #include "furi_hal_i2c_config.h"
 #include <furi_hal_resources.h>
 #include <furi_hal_version.h>
+#include <stm32wbxx_ll_bus.h>
+#include <stm32wbxx_ll_rcc.h>
 
 /** Timing register value is computed with the STM32CubeMX Tool,
   * Standard Mode @100kHz with I2CCLK = 64 MHz,
@@ -20,13 +22,16 @@ static void furi_hal_i2c_bus_power_event(FuriHalI2cBus* bus, FuriHalI2cBusEvent 
     if(event == FuriHalI2cBusEventInit) {
         furi_hal_i2c_bus_power_mutex = osMutexNew(NULL);
         FURI_CRITICAL_ENTER();
-        LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
         LL_RCC_SetI2CClockSource(LL_RCC_I2C1_CLKSOURCE_PCLK1);
         LL_APB1_GRP1_ForceReset(LL_APB1_GRP1_PERIPH_I2C1);
         FURI_CRITICAL_EXIT();
         bus->current_handle = NULL;
     } else if(event == FuriHalI2cBusEventDeinit) {
-        osMutexDelete(furi_hal_i2c_bus_power_mutex);
+        furi_check(osMutexDelete(furi_hal_i2c_bus_power_mutex) == osOK);
+        FURI_CRITICAL_ENTER();
+        LL_APB1_GRP1_ForceReset(LL_APB1_GRP1_PERIPH_I2C1);
+        LL_APB1_GRP1_ReleaseReset(LL_APB1_GRP1_PERIPH_I2C1);
+        FURI_CRITICAL_EXIT();
     } else if(event == FuriHalI2cBusEventLock) {
         furi_check(osMutexAcquire(furi_hal_i2c_bus_power_mutex, osWaitForever) == osOK);
     } else if(event == FuriHalI2cBusEventUnlock) {
@@ -50,9 +55,25 @@ FuriHalI2cBus furi_hal_i2c_bus_power = {
 osMutexId_t furi_hal_i2c_bus_external_mutex = NULL;
 
 static void furi_hal_i2c_bus_external_event(FuriHalI2cBus* bus, FuriHalI2cBusEvent event) {
-    if(event == FuriHalI2cBusEventActivate) {
+    if(event == FuriHalI2cBusEventInit) {
+        furi_hal_i2c_bus_external_mutex = osMutexNew(NULL);
         FURI_CRITICAL_ENTER();
-        LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C3);
+        LL_RCC_SetI2CClockSource(LL_RCC_I2C3_CLKSOURCE_PCLK1);
+        LL_APB1_GRP1_ForceReset(LL_APB1_GRP1_PERIPH_I2C3);
+        FURI_CRITICAL_EXIT();
+        bus->current_handle = NULL;
+    } else if(event == FuriHalI2cBusEventDeinit) {
+        furi_check(osMutexDelete(furi_hal_i2c_bus_external_mutex) == osOK);
+        FURI_CRITICAL_ENTER();
+        LL_APB1_GRP1_ForceReset(LL_APB1_GRP1_PERIPH_I2C3);
+        LL_APB1_GRP1_ReleaseReset(LL_APB1_GRP1_PERIPH_I2C3);
+        FURI_CRITICAL_EXIT();
+    } else if(event == FuriHalI2cBusEventLock) {
+        furi_check(osMutexAcquire(furi_hal_i2c_bus_external_mutex, osWaitForever) == osOK);
+    } else if(event == FuriHalI2cBusEventUnlock) {
+        furi_check(osMutexRelease(furi_hal_i2c_bus_external_mutex) == osOK);
+    } else if(event == FuriHalI2cBusEventActivate) {
+        FURI_CRITICAL_ENTER();
         LL_RCC_SetI2CClockSource(LL_RCC_I2C3_CLKSOURCE_PCLK1);
         LL_APB1_GRP1_ReleaseReset(LL_APB1_GRP1_PERIPH_I2C3);
         FURI_CRITICAL_EXIT();
@@ -72,13 +93,13 @@ void furi_hal_i2c_bus_handle_power_event(
     FuriHalI2cBusHandle* handle,
     FuriHalI2cBusHandleEvent event) {
     if(event == FuriHalI2cBusHandleEventActivate) {
-        hal_gpio_init_ex(
+        furi_hal_gpio_init_ex(
             &gpio_i2c_power_sda,
             GpioModeAltFunctionOpenDrain,
             GpioPullNo,
             GpioSpeedLow,
             GpioAltFn4I2C1);
-        hal_gpio_init_ex(
+        furi_hal_gpio_init_ex(
             &gpio_i2c_power_scl,
             GpioModeAltFunctionOpenDrain,
             GpioPullNo,
@@ -106,11 +127,11 @@ void furi_hal_i2c_bus_handle_power_event(
         LL_I2C_EnableClockStretching(handle->bus->i2c);
     } else if(event == FuriHalI2cBusHandleEventDeactivate) {
         LL_I2C_Disable(handle->bus->i2c);
-        hal_gpio_write(&gpio_i2c_power_sda, 1);
-        hal_gpio_write(&gpio_i2c_power_scl, 1);
-        hal_gpio_init_ex(
+        furi_hal_gpio_write(&gpio_i2c_power_sda, 1);
+        furi_hal_gpio_write(&gpio_i2c_power_scl, 1);
+        furi_hal_gpio_init_ex(
             &gpio_i2c_power_sda, GpioModeAnalog, GpioPullNo, GpioSpeedLow, GpioAltFnUnused);
-        hal_gpio_init_ex(
+        furi_hal_gpio_init_ex(
             &gpio_i2c_power_scl, GpioModeAnalog, GpioPullNo, GpioSpeedLow, GpioAltFnUnused);
     }
 }
@@ -124,9 +145,9 @@ void furi_hal_i2c_bus_handle_external_event(
     FuriHalI2cBusHandle* handle,
     FuriHalI2cBusHandleEvent event) {
     if(event == FuriHalI2cBusHandleEventActivate) {
-        hal_gpio_init_ex(
+        furi_hal_gpio_init_ex(
             &gpio_ext_pc0, GpioModeAltFunctionOpenDrain, GpioPullNo, GpioSpeedLow, GpioAltFn4I2C3);
-        hal_gpio_init_ex(
+        furi_hal_gpio_init_ex(
             &gpio_ext_pc1, GpioModeAltFunctionOpenDrain, GpioPullNo, GpioSpeedLow, GpioAltFn4I2C3);
 
         LL_I2C_InitTypeDef I2C_InitStruct = {0};
@@ -146,10 +167,12 @@ void furi_hal_i2c_bus_handle_external_event(
         LL_I2C_EnableClockStretching(handle->bus->i2c);
     } else if(event == FuriHalI2cBusHandleEventDeactivate) {
         LL_I2C_Disable(handle->bus->i2c);
-        hal_gpio_write(&gpio_ext_pc0, 1);
-        hal_gpio_write(&gpio_ext_pc1, 1);
-        hal_gpio_init_ex(&gpio_ext_pc0, GpioModeAnalog, GpioPullNo, GpioSpeedLow, GpioAltFnUnused);
-        hal_gpio_init_ex(&gpio_ext_pc1, GpioModeAnalog, GpioPullNo, GpioSpeedLow, GpioAltFnUnused);
+        furi_hal_gpio_write(&gpio_ext_pc0, 1);
+        furi_hal_gpio_write(&gpio_ext_pc1, 1);
+        furi_hal_gpio_init_ex(
+            &gpio_ext_pc0, GpioModeAnalog, GpioPullNo, GpioSpeedLow, GpioAltFnUnused);
+        furi_hal_gpio_init_ex(
+            &gpio_ext_pc1, GpioModeAnalog, GpioPullNo, GpioSpeedLow, GpioAltFnUnused);
     }
 }
 

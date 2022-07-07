@@ -1,3 +1,4 @@
+#include "furi/common_defines.h"
 #include <furi.h>
 #include <furi_hal.h>
 
@@ -5,8 +6,6 @@
 #include <input/input.h>
 
 #include <notification/notification_messages.h>
-
-#define BLINK_COLOR_COUNT 7
 
 typedef enum {
     BlinkEventTypeTick,
@@ -18,6 +17,42 @@ typedef struct {
     InputEvent input;
 } BlinkEvent;
 
+static const NotificationSequence blink_test_sequence_hw_blink_start_red = {
+    &message_blink_start_10,
+    &message_blink_set_color_red,
+    &message_do_not_reset,
+    NULL,
+};
+
+static const NotificationSequence blink_test_sequence_hw_blink_green = {
+    &message_blink_set_color_green,
+    NULL,
+};
+
+static const NotificationSequence blink_test_sequence_hw_blink_blue = {
+    &message_blink_set_color_blue,
+    NULL,
+};
+
+static const NotificationSequence blink_test_sequence_hw_blink_stop = {
+    &message_blink_stop,
+    NULL,
+};
+
+static const NotificationSequence* blink_test_colors[] = {
+    &sequence_blink_red_100,
+    &sequence_blink_green_100,
+    &sequence_blink_blue_100,
+    &sequence_blink_yellow_100,
+    &sequence_blink_cyan_100,
+    &sequence_blink_magenta_100,
+    &sequence_blink_white_100,
+    &blink_test_sequence_hw_blink_start_red,
+    &blink_test_sequence_hw_blink_green,
+    &blink_test_sequence_hw_blink_blue,
+    &blink_test_sequence_hw_blink_stop,
+};
+
 static void blink_test_update(void* ctx) {
     furi_assert(ctx);
     osMessageQueueId_t event_queue = ctx;
@@ -27,6 +62,7 @@ static void blink_test_update(void* ctx) {
 }
 
 static void blink_test_draw_callback(Canvas* canvas, void* ctx) {
+    UNUSED(ctx);
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 10, "Blink application");
@@ -41,6 +77,7 @@ static void blink_test_input_callback(InputEvent* input_event, void* ctx) {
 }
 
 int32_t blink_test_app(void* p) {
+    UNUSED(p);
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(BlinkEvent), NULL);
 
     // Configure view port
@@ -56,16 +93,6 @@ int32_t blink_test_app(void* p) {
 
     NotificationApp* notifications = furi_record_open("notification");
 
-    const NotificationSequence* colors[BLINK_COLOR_COUNT] = {
-        &sequence_blink_red_100,
-        &sequence_blink_green_100,
-        &sequence_blink_blue_100,
-        &sequence_blink_yellow_100,
-        &sequence_blink_cyan_100,
-        &sequence_blink_magenta_100,
-        &sequence_blink_white_100,
-    };
-
     uint8_t state = 0;
     BlinkEvent event;
 
@@ -76,13 +103,15 @@ int32_t blink_test_app(void* p) {
                 break;
             }
         } else {
-            notification_message(notifications, colors[state]);
+            notification_message(notifications, blink_test_colors[state]);
             state++;
-            if(state >= BLINK_COLOR_COUNT) {
+            if(state >= COUNT_OF(blink_test_colors)) {
                 state = 0;
             }
         }
     }
+
+    notification_message(notifications, &blink_test_sequence_hw_blink_stop);
 
     osTimerDelete(timer);
 

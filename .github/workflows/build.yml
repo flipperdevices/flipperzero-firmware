@@ -10,12 +10,12 @@ on:
   pull_request:
 
 env:
-  TARGETS: f6 f7
+  TARGETS: f7
   DEFAULT_TARGET: f7
 
 jobs:
   main:
-    runs-on: [self-hosted,Office]
+    runs-on: [self-hosted,FlipperZero]
     steps:
       - name: 'Cleanup workspace'
         uses: AutoModality/action-clean@v1
@@ -42,7 +42,7 @@ jobs:
         run: |
           test -d artifacts && rm -rf artifacts || true
           mkdir artifacts
-      
+
       - name: 'Generate suffix and folder name'
         id: names
         run: |
@@ -52,13 +52,13 @@ jobs:
           fi
           BRANCH_OR_TAG=${REF#refs/*/}
           SHA=$(git rev-parse --short HEAD)
-          
+
           if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
             SUFFIX=${BRANCH_OR_TAG//\//_}
           else
             SUFFIX=${BRANCH_OR_TAG//\//_}-$(date +'%d%m%Y')-${SHA}
           fi
-          
+
           echo "WORKFLOW_BRANCH_OR_TAG=${BRANCH_OR_TAG}" >> $GITHUB_ENV
           echo "DIST_SUFFIX=${SUFFIX}" >> $GITHUB_ENV
           echo "::set-output name=artifacts-path::${BRANCH_OR_TAG}"
@@ -71,14 +71,6 @@ jobs:
         run: |
           tar czpf artifacts/flipper-z-any-scripts-${{steps.names.outputs.suffix}}.tgz scripts
 
-      - name: 'Rebuild Assets'
-        uses: ./.github/actions/docker
-        with:
-          run: |
-            set -e
-            make -C assets clean
-            make -C assets
-
       - name: 'Build the firmware in docker'
         uses: ./.github/actions/docker
         with:
@@ -86,7 +78,7 @@ jobs:
             set -e
             for TARGET in ${TARGETS}
             do
-              make TARGET=${TARGET} ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
+              ./fbt TARGET_HW=`echo ${TARGET} | sed 's/f//'` --with-updater updater_package ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
             done
 
       - name: 'Move upload files'
@@ -97,22 +89,35 @@ jobs:
             set -e
             for TARGET in ${TARGETS}
             do
-              mv dist/${TARGET}/* artifacts/
+              mv dist/${TARGET}-*/* artifacts/
+            done
+
+      - name: 'Bundle self-update package'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: ./.github/actions/docker
+        with:
+          run: |
+            set -e
+            for UPDATEBUNDLE in artifacts/*/
+            do
+              BUNDLE_NAME=`echo $UPDATEBUNDLE | cut -d'/' -f2`
+              echo Packaging ${BUNDLE_NAME}
+              tar czpf artifacts/flipper-z-${BUNDLE_NAME}.tgz -C artifacts ${BUNDLE_NAME}
+              rm -rf artifacts/${BUNDLE_NAME}
             done
 
       - name: 'Bundle resources'
         if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
-          ./scripts/assets.py manifest assets/resources
           tar czpf artifacts/flipper-z-any-resources-${{steps.names.outputs.suffix}}.tgz -C assets resources
 
       - name: 'Bundle core2 firmware'
         if: ${{ !github.event.pull_request.head.repo.fork }}
-        run: |
-          test -d core2_firmware && rm -rf core2_firmware || true
-          mkdir core2_firmware
-          ./scripts/assets.py copro lib/STM32CubeWB core2_firmware STM32WB5x
-          tar czpf artifacts/flipper-z-any-core2_firmware-${{steps.names.outputs.suffix}}.tgz core2_firmware
+        uses: ./.github/actions/docker
+        with:
+          run: |
+            ./fbt copro_dist
+            tar czpf artifacts/flipper-z-any-core2_firmware-${{steps.names.outputs.suffix}}.tgz -C assets core2_firmware
 
       - name: 'Upload artifacts to update server'
         if: ${{ !github.event.pull_request.head.repo.fork }}
@@ -139,7 +144,7 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
-          body-includes: 'to flash the'
+          body-includes: 'Compiled firmware for commit'
 
       - name: 'Create or update comment'
         if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request}}
@@ -148,12 +153,15 @@ jobs:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            [Click here](https://update.flipperzero.one/?url=https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.artifacts-path}}/flipper-z-${{steps.names.outputs.default-target}}-full-${{steps.names.outputs.suffix}}.dfu&channel=${{steps.names.outputs.artifacts-path}}&version=${{steps.names.outputs.short-hash}}&target=${{steps.names.outputs.default-target}}) to flash the `${{steps.names.outputs.short-hash}}` version of this branch via WebUSB.
+            **Compiled firmware for commit `${{steps.names.outputs.short-hash}}`:**
+            - [📦 Update package](https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.artifacts-path}}/flipper-z-${{steps.names.outputs.default-target}}-update-${{steps.names.outputs.suffix}}.tgz)
+            - [📥 DFU file](https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.artifacts-path}}/flipper-z-${{steps.names.outputs.default-target}}-full-${{steps.names.outputs.suffix}}.dfu)
+            - [☁️ Web updater](https://my.flipp.dev/?url=https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.artifacts-path}}/flipper-z-${{steps.names.outputs.default-target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=${{steps.names.outputs.artifacts-path}}&version=${{steps.names.outputs.short-hash}})
           edit-mode: replace
 
   compact:
     if: ${{ !startsWith(github.ref, 'refs/tags') }}
-    runs-on: [self-hosted,koteeq]
+    runs-on: [self-hosted,FlipperZero]
     steps:
       - name: 'Cleanup workspace'
         uses: AutoModality/action-clean@v1
@@ -175,7 +183,7 @@ jobs:
 
       - name: 'Build docker image'
         uses: ./.github/actions/docker
-      
+
       - name: 'Generate suffix and folder name'
         id: names
         run: |
@@ -185,23 +193,15 @@ jobs:
           fi
           BRANCH_OR_TAG=${REF#refs/*/}
           SHA=$(git rev-parse --short HEAD)
-          
+
           if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
             SUFFIX=${BRANCH_OR_TAG//\//_}
           else
             SUFFIX=${BRANCH_OR_TAG//\//_}-$(date +'%d%m%Y')-${SHA}
           fi
-          
+
           echo "WORKFLOW_BRANCH_OR_TAG=${BRANCH_OR_TAG}" >> $GITHUB_ENV
           echo "DIST_SUFFIX=${SUFFIX}" >> $GITHUB_ENV
-
-      - name: 'Rebuild Assets'
-        uses: ./.github/actions/docker
-        with:
-          run: |
-            set -e
-            make -C assets clean
-            make -C assets
 
       - name: 'Build the firmware in docker'
         uses: ./.github/actions/docker
@@ -210,5 +210,5 @@ jobs:
             set -e
             for TARGET in ${TARGETS}
             do
-              make TARGET=${TARGET} DEBUG=0 COMPACT=1
+              ./fbt TARGET_HW=`echo ${TARGET} | sed 's/f//'` --with-updater updater_package DEBUG=0 COMPACT=1
             done

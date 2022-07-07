@@ -6,9 +6,9 @@
 #include "views/desktop_view_pin_input.h"
 #include "views/desktop_view_locked.h"
 #include "views/desktop_view_main.h"
-#include "views/desktop_view_first_start.h"
 #include "views/desktop_view_lock_menu.h"
 #include "views/desktop_view_debug.h"
+#include "views/desktop_view_slideshow.h"
 #include "desktop/desktop_settings/desktop_settings.h"
 
 #include <furi.h>
@@ -18,6 +18,9 @@
 #include <gui/modules/popup.h>
 #include <gui/scene_manager.h>
 
+#include <loader/loader.h>
+#include <notification/notification_app.h>
+
 #define STATUS_BAR_Y_SHIFT 13
 
 typedef enum {
@@ -25,10 +28,10 @@ typedef enum {
     DesktopViewIdLockMenu,
     DesktopViewIdLocked,
     DesktopViewIdDebug,
-    DesktopViewIdFirstStart,
     DesktopViewIdHwMismatch,
     DesktopViewIdPinInput,
     DesktopViewIdPinTimeout,
+    DesktopViewIdSlideshow,
     DesktopViewIdTotal,
 } DesktopViewId;
 
@@ -40,13 +43,13 @@ struct Desktop {
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
-    DesktopFirstStartView* first_start_view;
     Popup* hw_mismatch_popup;
     DesktopLockMenuView* lock_menu;
     DesktopDebugView* debug_view;
     DesktopViewLocked* locked_view;
     DesktopMainView* main_view;
     DesktopViewPinTimeout* pin_timeout_view;
+    DesktopSlideshowView* slideshow_view;
 
     ViewStack* main_view_stack;
     ViewStack* locked_view_stack;
@@ -57,10 +60,18 @@ struct Desktop {
     ViewPort* lock_viewport;
 
     AnimationManager* animation_manager;
-    osSemaphoreId_t unload_animation_semaphore;
+
+    Loader* loader;
+    NotificationApp* notification;
+
     FuriPubSubSubscription* app_start_stop_subscription;
+    FuriPubSub* input_events_pubsub;
+    FuriPubSubSubscription* input_events_subscription;
+    osTimerId_t auto_lock_timer;
 };
 
 Desktop* desktop_alloc();
 
 void desktop_free(Desktop* desktop);
+void desktop_lock(Desktop* desktop);
+void desktop_unlock(Desktop* desktop);

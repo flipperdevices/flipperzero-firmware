@@ -48,7 +48,7 @@ Almost everything in flipper firmware is built around this concept.
 # C coding style
 
 - Tab is 4 spaces
-- Use `make format` to reformat source code and check style guide before commit
+- Use `fbt format` to reformat source code and check style guide before commit
 
 ## Naming
 
@@ -58,7 +58,7 @@ Examples:
 
 	FuriHalUsb
 	Gui
-	SubghzKeystore
+	SubGhzKeystore
 
 
 ### Functions are snake_case
@@ -73,8 +73,8 @@ This rule makes easier to locate types, functions and sources.
 
 For example:
 
-We have abstraction that we call `Subghz Keystore`, so there will be:
-file `subghz_keystore.h` we have type `SubghzKeystore` and function `subghz_keystore_read`.
+We have abstraction that we call `SubGhz Keystore`, so there will be:
+file `subghz_keystore.h` we have type `SubGhzKeystore` and function `subghz_keystore_read`.
 
 ### File names
 

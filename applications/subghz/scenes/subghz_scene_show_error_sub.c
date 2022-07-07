@@ -3,7 +3,7 @@
 
 void subghz_scene_show_error_sub_popup_callback(void* context) {
     SubGhz* subghz = context;
-    view_dispatcher_send_custom_event(subghz->view_dispatcher, SubghzCustomEventSceneShowErrorSub);
+    view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneShowErrorSub);
 }
 
 void subghz_scene_show_error_sub_on_enter(void* context) {
@@ -17,13 +17,15 @@ void subghz_scene_show_error_sub_on_enter(void* context) {
     popup_set_context(popup, subghz);
     popup_set_callback(popup, subghz_scene_show_error_sub_popup_callback);
     popup_enable_timeout(popup);
-    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewPopup);
+    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdPopup);
+
+    notification_message(subghz->notifications, &sequence_set_red_255);
 }
 
 bool subghz_scene_show_error_sub_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubghzCustomEventSceneShowErrorSub) {
+        if(event.event == SubGhzCustomEventSceneShowErrorSub) {
             scene_manager_search_and_switch_to_previous_scene(
                 subghz->scene_manager, SubGhzSceneStart);
             return true;
@@ -45,4 +47,6 @@ void subghz_scene_show_error_sub_on_exit(void* context) {
     popup_set_timeout(popup, 0);
     popup_disable_timeout(popup);
     string_reset(subghz->error_str);
+
+    notification_message(subghz->notifications, &sequence_reset_rgb);
 }

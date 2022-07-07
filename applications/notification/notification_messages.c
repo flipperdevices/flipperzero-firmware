@@ -1,27 +1,31 @@
+#include "furi_hal_resources.h"
 #include "notification.h"
 #include "notification_messages_notes.h"
 #include <stddef.h>
 
 /*********************************** Messages **********************************/
 
-// Display
-const NotificationMessage message_display_on = {
-    .type = NotificationMessageTypeLedDisplay,
+/** Display: backlight wakeup */
+const NotificationMessage message_display_backlight_on = {
+    .type = NotificationMessageTypeLedDisplayBacklight,
     .data.led.value = 0xFF,
 };
 
-const NotificationMessage message_display_off = {
-    .type = NotificationMessageTypeLedDisplay,
+/** Display: backlight force off */
+const NotificationMessage message_display_backlight_off = {
+    .type = NotificationMessageTypeLedDisplayBacklight,
     .data.led.value = 0x00,
 };
 
-const NotificationMessage message_display_lock = {
-    .type = NotificationMessageTypeLedDisplayLock,
+/** Display: backlight always on */
+const NotificationMessage message_display_backlight_enforce_on = {
+    .type = NotificationMessageTypeLedDisplayBacklightEnforceOn,
     .data.led.value = 0xFF,
 };
 
-const NotificationMessage message_display_unlock = {
-    .type = NotificationMessageTypeLedDisplayLock,
+/** Display: automatic backlight management, with configured timeout */
+const NotificationMessage message_display_backlight_enforce_auto = {
+    .type = NotificationMessageTypeLedDisplayBacklightEnforceAuto,
     .data.led.value = 0x00,
 };
 
@@ -55,6 +59,59 @@ const NotificationMessage message_green_0 = {
 const NotificationMessage message_blue_0 = {
     .type = NotificationMessageTypeLedBlue,
     .data.led.value = 0x00,
+};
+
+const NotificationMessage message_blink_start_10 = {
+    .type = NotificationMessageTypeLedBlinkStart,
+    .data.led_blink.color = 0,
+    .data.led_blink.on_time = 10,
+    .data.led_blink.period = 100,
+};
+
+const NotificationMessage message_blink_start_100 = {
+    .type = NotificationMessageTypeLedBlinkStart,
+    .data.led_blink.color = 0,
+    .data.led_blink.on_time = 100,
+    .data.led_blink.period = 1000,
+};
+
+const NotificationMessage message_blink_stop = {
+    .type = NotificationMessageTypeLedBlinkStop,
+};
+
+const NotificationMessage message_blink_set_color_red = {
+    .type = NotificationMessageTypeLedBlinkColor,
+    .data.led_blink.color = LightRed,
+};
+
+const NotificationMessage message_blink_set_color_green = {
+    .type = NotificationMessageTypeLedBlinkColor,
+    .data.led_blink.color = LightGreen,
+};
+
+const NotificationMessage message_blink_set_color_blue = {
+    .type = NotificationMessageTypeLedBlinkColor,
+    .data.led_blink.color = LightBlue,
+};
+
+const NotificationMessage message_blink_set_color_cyan = {
+    .type = NotificationMessageTypeLedBlinkColor,
+    .data.led_blink.color = LightBlue | LightGreen,
+};
+
+const NotificationMessage message_blink_set_color_magenta = {
+    .type = NotificationMessageTypeLedBlinkColor,
+    .data.led_blink.color = LightBlue | LightRed,
+};
+
+const NotificationMessage message_blink_set_color_yellow = {
+    .type = NotificationMessageTypeLedBlinkColor,
+    .data.led_blink.color = LightGreen | LightRed,
+};
+
+const NotificationMessage message_blink_set_color_white = {
+    .type = NotificationMessageTypeLedBlinkColor,
+    .data.led_blink.color = LightRed | LightGreen | LightBlue,
 };
 
 // Delay
@@ -166,7 +223,7 @@ const NotificationSequence sequence_reset_rgb = {
 };
 
 const NotificationSequence sequence_reset_display = {
-    &message_display_off,
+    &message_display_backlight_off,
     NULL,
 };
 
@@ -188,23 +245,31 @@ const NotificationSequence sequence_set_vibro_on = {
 };
 
 // Display
-const NotificationSequence sequence_display_on = {
-    &message_display_on,
+const NotificationSequence sequence_display_backlight_on = {
+    &message_display_backlight_on,
     NULL,
 };
 
-const NotificationSequence sequence_display_off = {
-    &message_display_off,
+const NotificationSequence sequence_display_backlight_off = {
+    &message_display_backlight_off,
     NULL,
 };
 
-const NotificationSequence sequence_display_lock = {
-    &message_display_lock,
+/** Display: backlight always on lock */
+const NotificationSequence sequence_display_backlight_enforce_on = {
+    &message_display_backlight_enforce_on,
     NULL,
 };
 
-const NotificationSequence sequence_display_unlock = {
-    &message_display_unlock,
+/** Display: backlight always on unlock */
+const NotificationSequence sequence_display_backlight_enforce_auto = {
+    &message_display_backlight_enforce_auto,
+    NULL,
+};
+
+const NotificationSequence sequence_display_backlight_off_delay_1000 = {
+    &message_delay_1000,
+    &message_display_backlight_off,
     NULL,
 };
 
@@ -270,6 +335,15 @@ const NotificationSequence sequence_set_blue_255 = {
     NULL,
 };
 
+// Solid colors
+const NotificationSequence sequence_solid_yellow = {
+    &message_red_255,
+    &message_green_255,
+    &message_blue_0,
+    &message_do_not_reset,
+    NULL,
+};
+
 // Blink
 const NotificationSequence sequence_blink_blue_10 = {
     &message_blue_255,
@@ -298,6 +372,13 @@ const NotificationSequence sequence_blink_yellow_10 = {
 
 const NotificationSequence sequence_blink_cyan_10 = {
     &message_green_255,
+    &message_blue_255,
+    &message_delay_10,
+    NULL,
+};
+
+const NotificationSequence sequence_blink_magenta_10 = {
+    &message_red_255,
     &message_blue_255,
     &message_delay_10,
     NULL,
@@ -370,7 +451,7 @@ const NotificationSequence sequence_double_vibro = {
 };
 
 const NotificationSequence sequence_success = {
-    &message_display_on,
+    &message_display_backlight_on,
     &message_green_255,
     &message_vibro_on,
     &message_note_c5,
@@ -387,7 +468,7 @@ const NotificationSequence sequence_success = {
 };
 
 const NotificationSequence sequence_error = {
-    &message_display_on,
+    &message_display_backlight_on,
     &message_red_255,
     &message_vibro_on,
     &message_note_c5,
@@ -409,27 +490,27 @@ const NotificationSequence sequence_audiovisual_alert = {
     &message_force_display_brightness_setting_1f,
     &message_vibro_on,
 
-    &message_display_on,
+    &message_display_backlight_on,
     &message_note_c7,
     &message_delay_250,
 
-    &message_display_off,
+    &message_display_backlight_off,
     &message_note_c4,
     &message_delay_250,
 
-    &message_display_on,
+    &message_display_backlight_on,
     &message_note_c7,
     &message_delay_250,
 
-    &message_display_off,
+    &message_display_backlight_off,
     &message_note_c4,
     &message_delay_250,
 
-    &message_display_on,
+    &message_display_backlight_on,
     &message_note_c7,
     &message_delay_250,
 
-    &message_display_off,
+    &message_display_backlight_off,
     &message_note_c4,
     &message_delay_250,
 

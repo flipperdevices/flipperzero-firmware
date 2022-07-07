@@ -1,6 +1,8 @@
+#include "furi_hal_light.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
+#include <input/input.h>
 #include "notification.h"
 #include "notification_messages.h"
 #include "notification_app.h"
@@ -16,6 +18,7 @@ static const uint8_t reset_blue_mask = 1 << 2;
 static const uint8_t reset_vibro_mask = 1 << 3;
 static const uint8_t reset_sound_mask = 1 << 4;
 static const uint8_t reset_display_mask = 1 << 5;
+static const uint8_t reset_blink_mask = 1 << 6;
 
 void notification_vibro_on();
 void notification_vibro_off();
@@ -90,6 +93,9 @@ void notification_reset_notification_led_layer(NotificationLedLayer* layer) {
 }
 
 void notification_reset_notification_layer(NotificationApp* app, uint8_t reset_mask) {
+    if(reset_mask & reset_blink_mask) {
+        furi_hal_light_blink_stop();
+    }
     if(reset_mask & reset_red_mask) {
         notification_reset_notification_led_layer(&app->led[0]);
     }
@@ -139,19 +145,19 @@ void notification_vibro_off() {
     furi_hal_vibro_on(false);
 }
 
-void notification_sound_on(float pwm, float freq) {
-    hal_pwm_set(pwm, freq, &SPEAKER_TIM, SPEAKER_CH);
+void notification_sound_on(float freq, float volume) {
+    furi_hal_speaker_start(freq, volume);
 }
 
 void notification_sound_off() {
-    hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
+    furi_hal_speaker_stop();
 }
 
 // display timer
 static void notification_display_timer(void* ctx) {
     furi_assert(ctx);
     NotificationApp* app = ctx;
-    notification_message(app, &sequence_display_off);
+    notification_message(app, &sequence_display_backlight_off);
 }
 
 // message processing
@@ -163,7 +169,6 @@ void notification_process_notification_message(
     notification_message = (*message->sequence)[notification_message_index];
 
     bool led_active = false;
-    uint8_t display_led_lock = 0;
     uint8_t led_values[NOTIFICATION_LED_COUNT] = {0x00, 0x00, 0x00};
     bool reset_notifications = true;
     float speaker_volume_setting = app->settings.speaker_volume;
@@ -174,7 +179,7 @@ void notification_process_notification_message(
 
     while(notification_message != NULL) {
         switch(notification_message->type) {
-        case NotificationMessageTypeLedDisplay:
+        case NotificationMessageTypeLedDisplayBacklight:
             // if on - switch on and start timer
             // if off - switch off and stop timer
             // on timer - switch off
@@ -190,19 +195,19 @@ void notification_process_notification_message(
             }
             reset_mask |= reset_display_mask;
             break;
-        case NotificationMessageTypeLedDisplayLock:
-            furi_assert(display_led_lock < UINT8_MAX);
-            display_led_lock++;
-            if(display_led_lock == 1) {
+        case NotificationMessageTypeLedDisplayBacklightEnforceOn:
+            furi_assert(app->display_led_lock < UINT8_MAX);
+            app->display_led_lock++;
+            if(app->display_led_lock == 1) {
                 notification_apply_internal_led_layer(
                     &app->display,
                     notification_message->data.led.value * display_brightness_setting);
             }
             break;
-        case NotificationMessageTypeLedDisplayUnlock:
-            furi_assert(display_led_lock > 0);
-            display_led_lock--;
-            if(display_led_lock == 0) {
+        case NotificationMessageTypeLedDisplayBacklightEnforceAuto:
+            furi_assert(app->display_led_lock > 0);
+            app->display_led_lock--;
+            if(app->display_led_lock == 0) {
                 notification_apply_internal_led_layer(
                     &app->display,
                     notification_message->data.led.value * display_brightness_setting);
@@ -212,18 +217,45 @@ void notification_process_notification_message(
             // store and send on delay or after seq
             led_active = true;
             led_values[0] = notification_message->data.led.value;
+            app->led[0].value_last[LayerNotification] = led_values[0];
             reset_mask |= reset_red_mask;
             break;
         case NotificationMessageTypeLedGreen:
             // store and send on delay or after seq
             led_active = true;
             led_values[1] = notification_message->data.led.value;
+            app->led[1].value_last[LayerNotification] = led_values[1];
             reset_mask |= reset_green_mask;
             break;
         case NotificationMessageTypeLedBlue:
             // store and send on delay or after seq
             led_active = true;
             led_values[2] = notification_message->data.led.value;
+            app->led[2].value_last[LayerNotification] = led_values[2];
+            reset_mask |= reset_blue_mask;
+            break;
+        case NotificationMessageTypeLedBlinkStart:
+            // store and send on delay or after seq
+            led_active = true;
+            furi_hal_light_blink_start(
+                notification_message->data.led_blink.color,
+                app->settings.led_brightness * 255,
+                notification_message->data.led_blink.on_time,
+                notification_message->data.led_blink.period);
+            reset_mask |= reset_blink_mask;
+            reset_mask |= reset_red_mask;
+            reset_mask |= reset_green_mask;
+            reset_mask |= reset_blue_mask;
+            break;
+        case NotificationMessageTypeLedBlinkColor:
+            led_active = true;
+            furi_hal_light_blink_set_color(notification_message->data.led_blink.color);
+            break;
+        case NotificationMessageTypeLedBlinkStop:
+            furi_hal_light_blink_stop();
+            reset_mask &= ~reset_blink_mask;
+            reset_mask |= reset_red_mask;
+            reset_mask |= reset_green_mask;
             reset_mask |= reset_blue_mask;
             break;
         case NotificationMessageTypeVibro:
@@ -236,8 +268,8 @@ void notification_process_notification_message(
             break;
         case NotificationMessageTypeSoundOn:
             notification_sound_on(
-                notification_message->data.sound.pwm * speaker_volume_setting,
-                notification_message->data.sound.frequency);
+                notification_message->data.sound.frequency,
+                notification_message->data.sound.volume * speaker_volume_setting);
             reset_mask |= reset_sound_mask;
             break;
         case NotificationMessageTypeSoundOff:
@@ -248,7 +280,7 @@ void notification_process_notification_message(
             if(led_active) {
                 if(notification_is_any_led_layer_internal_and_not_empty(app)) {
                     notification_apply_notification_leds(app, led_off_values);
-                    delay(minimal_delay);
+                    furi_hal_delay_ms(minimal_delay);
                 }
 
                 led_active = false;
@@ -259,7 +291,7 @@ void notification_process_notification_message(
                 reset_mask |= reset_blue_mask;
             }
 
-            delay(notification_message->data.delay.length);
+            furi_hal_delay_ms(notification_message->data.delay.length);
             break;
         case NotificationMessageTypeDoNotReset:
             reset_notifications = false;
@@ -273,6 +305,16 @@ void notification_process_notification_message(
         case NotificationMessageTypeForceDisplayBrightnessSetting:
             display_brightness_setting =
                 notification_message->data.forced_settings.display_brightness;
+            break;
+        case NotificationMessageTypeLedBrightnessSettingApply:
+            led_active = true;
+            for(uint8_t i = 0; i < NOTIFICATION_LED_COUNT; i++) {
+                led_values[i] = app->led[i].value_last[LayerNotification];
+            }
+            reset_mask |= reset_red_mask;
+            reset_mask |= reset_green_mask;
+            reset_mask |= reset_blue_mask;
+            break;
         }
         notification_message_index++;
         notification_message = (*message->sequence)[notification_message_index];
@@ -285,15 +327,14 @@ void notification_process_notification_message(
             need_minimal_delay = true;
         }
 
-        led_active = false;
         notification_apply_notification_leds(app, led_values);
         reset_mask |= reset_red_mask;
         reset_mask |= reset_green_mask;
         reset_mask |= reset_blue_mask;
 
-        if(need_minimal_delay) {
+        if((need_minimal_delay) && (reset_notifications)) {
             notification_apply_notification_leds(app, led_off_values);
-            delay(minimal_delay);
+            furi_hal_delay_ms(minimal_delay);
         }
     }
 
@@ -309,29 +350,39 @@ void notification_process_internal_message(NotificationApp* app, NotificationApp
 
     while(notification_message != NULL) {
         switch(notification_message->type) {
-        case NotificationMessageTypeLedDisplay:
+        case NotificationMessageTypeLedDisplayBacklight:
             notification_apply_internal_led_layer(
                 &app->display,
                 notification_settings_get_display_brightness(
                     app, notification_message->data.led.value));
             break;
         case NotificationMessageTypeLedRed:
+            app->led[0].value_last[LayerInternal] = notification_message->data.led.value;
             notification_apply_internal_led_layer(
                 &app->led[0],
                 notification_settings_get_rgb_led_brightness(
                     app, notification_message->data.led.value));
             break;
         case NotificationMessageTypeLedGreen:
+            app->led[1].value_last[LayerInternal] = notification_message->data.led.value;
             notification_apply_internal_led_layer(
                 &app->led[1],
                 notification_settings_get_rgb_led_brightness(
                     app, notification_message->data.led.value));
             break;
         case NotificationMessageTypeLedBlue:
+            app->led[2].value_last[LayerInternal] = notification_message->data.led.value;
             notification_apply_internal_led_layer(
                 &app->led[2],
                 notification_settings_get_rgb_led_brightness(
                     app, notification_message->data.led.value));
+            break;
+        case NotificationMessageTypeLedBrightnessSettingApply:
+            for(uint8_t i = 0; i < NOTIFICATION_LED_COUNT; i++) {
+                uint8_t new_val = notification_settings_get_rgb_led_brightness(
+                    app, app->led[i].value_last[LayerInternal]);
+                notification_apply_internal_led_layer(&app->led[i], new_val);
+            }
             break;
         default:
             break;
@@ -416,8 +467,10 @@ static bool notification_save_settings(NotificationApp* app) {
 };
 
 static void input_event_callback(const void* value, void* context) {
+    furi_assert(value);
+    furi_assert(context);
     NotificationApp* app = context;
-    notification_message(app, &sequence_display_on);
+    notification_message(app, &sequence_display_backlight_on);
 }
 
 // App alloc
@@ -457,13 +510,14 @@ static NotificationApp* notification_app_alloc() {
     // display backlight control
     app->event_record = furi_record_open("input_events");
     furi_pubsub_subscribe(app->event_record, input_event_callback, app);
-    notification_message(app, &sequence_display_on);
+    notification_message(app, &sequence_display_backlight_on);
 
     return app;
 };
 
 // App
 int32_t notification_srv(void* p) {
+    UNUSED(p);
     NotificationApp* app = notification_app_alloc();
 
     if(!notification_load_settings(app)) {

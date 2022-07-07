@@ -19,7 +19,6 @@ struct SubGhzFileEncoderWorker {
     volatile bool worker_running;
     volatile bool worker_stoping;
     bool level;
-    int32_t duration;
     string_t str_data;
     string_t file_path;
 
@@ -37,50 +36,43 @@ void subghz_file_encoder_worker_callback_end(
     instance->context_end = context_end;
 }
 
-void subghz_file_encoder_worker_add_livel_duration(
+void subghz_file_encoder_worker_add_level_duration(
     SubGhzFileEncoderWorker* instance,
     int32_t duration) {
     bool res = true;
     if(duration < 0 && !instance->level) {
-        instance->duration += duration;
         res = false;
     } else if(duration > 0 && instance->level) {
-        instance->duration += duration;
         res = false;
-    } else if(duration == 0) {
-        instance->duration = 0;
     }
 
     if(res) {
         instance->level = !instance->level;
-        instance->duration += duration;
-        xStreamBufferSend(instance->stream, &instance->duration, sizeof(int32_t), 10);
-        instance->duration = 0;
+        xStreamBufferSend(instance->stream, &duration, sizeof(int32_t), 100);
+    } else {
+        FURI_LOG_E(TAG, "Invalid level in the stream");
     }
 }
 
-bool subghz_file_encoder_worker_data_parse(
-    SubGhzFileEncoderWorker* instance,
-    const char* strStart,
-    size_t len) {
+bool subghz_file_encoder_worker_data_parse(SubGhzFileEncoderWorker* instance, const char* strStart) {
     char* str1;
-    size_t ind_start = (size_t)strStart; //store the start address of the beginning of the line
     bool res = false;
+    // Line sample: "RAW_Data: -1, 2, -2..."
 
-    str1 = strstr(
-        strStart, "RAW_Data: "); //looking for the beginning of the desired title in the line
+    // Look for a key in the line
+    str1 = strstr(strStart, "RAW_Data: ");
+
     if(str1 != NULL) {
-        str1 = strchr(
-            str1,
-            ' '); //if found, shift the pointer by 1 element per line "RAW_Data: -1, 2, -2..."
-        while(
-            strchr(str1, ' ') != NULL &&
-            ((size_t)str1 <
-             (len +
-              ind_start))) { //check that there is still an element in the line and that it has not gone beyond the line
+        // Skip key
+        str1 = strchr(str1, ' ');
+
+        // Check that there is still an element in the line
+        while(strchr(str1, ' ') != NULL) {
             str1 = strchr(str1, ' ');
-            str1 += 1; //if found, shift the pointer by next element per line
-            subghz_file_encoder_worker_add_livel_duration(instance, atoi(str1));
+
+            // Skip space
+            str1 += 1;
+            subghz_file_encoder_worker_add_level_duration(instance, atoi(str1));
         }
         res = true;
     }
@@ -146,21 +138,18 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
         size_t stream_free_byte = xStreamBufferSpacesAvailable(instance->stream);
         if((stream_free_byte / sizeof(int32_t)) >= SUBGHZ_FILE_ENCODER_LOAD) {
             if(stream_read_line(stream, instance->str_data)) {
-                //skip the end of the previous line "\n"
-                stream_seek(stream, 1, StreamOffsetFromCurrent);
+                string_strim(instance->str_data);
                 if(!subghz_file_encoder_worker_data_parse(
-                       instance,
-                       string_get_cstr(instance->str_data),
-                       strlen(string_get_cstr(instance->str_data)))) {
+                       instance, string_get_cstr(instance->str_data))) {
                     //to stop DMA correctly
-                    subghz_file_encoder_worker_add_livel_duration(instance, LEVEL_DURATION_RESET);
-                    subghz_file_encoder_worker_add_livel_duration(instance, LEVEL_DURATION_RESET);
+                    subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
+                    subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
 
                     break;
                 }
             } else {
-                subghz_file_encoder_worker_add_livel_duration(instance, LEVEL_DURATION_RESET);
-                subghz_file_encoder_worker_add_livel_duration(instance, LEVEL_DURATION_RESET);
+                subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
+                subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
                 break;
             }
         }
@@ -168,7 +157,10 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
     }
     //waiting for the end of the transfer
     FURI_LOG_I(TAG, "End read file");
-
+    while(!furi_hal_subghz_is_async_tx_complete() && instance->worker_running) {
+        osDelay(5);
+    }
+    FURI_LOG_I(TAG, "End transmission");
     while(instance->worker_running) {
         if(instance->worker_stoping) {
             if(instance->callback_end) instance->callback_end(instance->context_end);
@@ -185,7 +177,7 @@ SubGhzFileEncoderWorker* subghz_file_encoder_worker_alloc() {
     SubGhzFileEncoderWorker* instance = malloc(sizeof(SubGhzFileEncoderWorker));
 
     instance->thread = furi_thread_alloc();
-    furi_thread_set_name(instance->thread, "SubghzFEWorker");
+    furi_thread_set_name(instance->thread, "SubGhzFEWorker");
     furi_thread_set_stack_size(instance->thread, 2048);
     furi_thread_set_context(instance->thread, instance);
     furi_thread_set_callback(instance->thread, subghz_file_encoder_worker_thread);
@@ -224,8 +216,9 @@ bool subghz_file_encoder_worker_start(SubGhzFileEncoderWorker* instance, const c
     xStreamBufferReset(instance->stream);
     string_set(instance->file_path, file_path);
     instance->worker_running = true;
-    bool res = furi_thread_start(instance->thread);
-    return res;
+    furi_thread_start(instance->thread);
+
+    return true;
 }
 
 void subghz_file_encoder_worker_stop(SubGhzFileEncoderWorker* instance) {

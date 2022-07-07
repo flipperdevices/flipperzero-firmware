@@ -1,7 +1,6 @@
 cask "gcc-arm-embedded"
 brew "protobuf"
-brew "heatshrink"
+brew "gdb"
 brew "open-ocd"
 brew "clang-format"
 brew "dfu-util"
-brew "imagemagick"

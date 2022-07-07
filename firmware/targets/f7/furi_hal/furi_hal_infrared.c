@@ -14,8 +14,6 @@
 #include <stdio.h>
 #include <furi.h>
 #include <math.h>
-#include <main.h>
-#include <furi_hal_pwm.h>
 
 #define INFRARED_TX_DEBUG 0
 
@@ -139,12 +137,7 @@ static void furi_hal_infrared_tim_rx_isr() {
 void furi_hal_infrared_async_rx_start(void) {
     furi_assert(furi_hal_infrared_state == InfraredStateIdle);
 
-    FURI_CRITICAL_ENTER();
-    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
-    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
-    FURI_CRITICAL_EXIT();
-
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         &gpio_infrared_rx, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
 
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
@@ -172,7 +165,7 @@ void furi_hal_infrared_async_rx_start(void) {
     LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ACTIVEINPUT_INDIRECTTI);
     LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ICPSC_DIV1);
 
-    furi_hal_interrupt_set_timer_isr(TIM2, furi_hal_infrared_tim_rx_isr);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, furi_hal_infrared_tim_rx_isr, NULL);
     furi_hal_infrared_state = InfraredStateAsyncRx;
 
     LL_TIM_EnableIT_CC1(TIM2);
@@ -182,22 +175,21 @@ void furi_hal_infrared_async_rx_start(void) {
 
     LL_TIM_SetCounter(TIM2, 0);
     LL_TIM_EnableCounter(TIM2);
-
-    NVIC_SetPriority(TIM2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
-    NVIC_EnableIRQ(TIM2_IRQn);
 }
 
 void furi_hal_infrared_async_rx_stop(void) {
     furi_assert(furi_hal_infrared_state == InfraredStateAsyncRx);
+
+    FURI_CRITICAL_ENTER();
+
     LL_TIM_DeInit(TIM2);
-    furi_hal_interrupt_set_timer_isr(TIM2, NULL);
-    LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_TIM2);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
     furi_hal_infrared_state = InfraredStateIdle;
+
+    FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_infrared_async_rx_set_timeout(uint32_t timeout_us) {
-    furi_assert(LL_APB1_GRP1_IsEnabledClock(LL_APB1_GRP1_PERIPH_TIM2));
-
     LL_TIM_OC_SetCompareCH3(TIM2, timeout_us);
     LL_TIM_OC_SetMode(TIM2, LL_TIM_CHANNEL_CH3, LL_TIM_OCMODE_ACTIVE);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH3);
@@ -323,7 +315,6 @@ static void furi_hal_infrared_tx_dma_isr() {
 }
 
 static void furi_hal_infrared_configure_tim_pwm_tx(uint32_t freq, float duty_cycle) {
-    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM1);
     /*    LL_DBGMCU_APB2_GRP1_FreezePeriph(LL_DBGMCU_APB2_GRP1_TIM1_STOP); */
 
     LL_TIM_DisableCounter(TIM1);
@@ -363,8 +354,6 @@ static void furi_hal_infrared_configure_tim_pwm_tx(uint32_t freq, float duty_cyc
 }
 
 static void furi_hal_infrared_configure_tim_cmgr2_dma_tx(void) {
-    LL_C2_AHB1_GRP1_EnableClock(LL_C2_AHB1_GRP1_PERIPH_DMA1);
-
     LL_DMA_InitTypeDef dma_config = {0};
 #if INFRARED_TX_DEBUG == 1
     dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (TIM1->CCMR1);
@@ -383,20 +372,18 @@ static void furi_hal_infrared_configure_tim_cmgr2_dma_tx(void) {
     dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM1_UP;
     dma_config.Priority = LL_DMA_PRIORITY_VERYHIGH;
     LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config);
-    furi_hal_interrupt_set_dma_channel_isr(
-        DMA1, LL_DMA_CHANNEL_1, furi_hal_infrared_tx_dma_polarity_isr);
+
     LL_DMA_ClearFlag_TE1(DMA1);
     LL_DMA_ClearFlag_TC1(DMA1);
+
     LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
 
-    NVIC_SetPriority(DMA1_Channel1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 4, 0));
-    NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+    furi_hal_interrupt_set_isr_ex(
+        FuriHalInterruptIdDma1Ch1, 4, furi_hal_infrared_tx_dma_polarity_isr, NULL);
 }
 
 static void furi_hal_infrared_configure_tim_rcr_dma_tx(void) {
-    LL_C2_AHB1_GRP1_EnableClock(LL_C2_AHB1_GRP1_PERIPH_DMA1);
-
     LL_DMA_InitTypeDef dma_config = {0};
     dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (TIM1->RCR);
     dma_config.MemoryOrM2MDstAddress = (uint32_t)NULL;
@@ -410,16 +397,17 @@ static void furi_hal_infrared_configure_tim_rcr_dma_tx(void) {
     dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM1_UP;
     dma_config.Priority = LL_DMA_PRIORITY_MEDIUM;
     LL_DMA_Init(DMA1, LL_DMA_CHANNEL_2, &dma_config);
-    furi_hal_interrupt_set_dma_channel_isr(DMA1, LL_DMA_CHANNEL_2, furi_hal_infrared_tx_dma_isr);
+
     LL_DMA_ClearFlag_TC2(DMA1);
     LL_DMA_ClearFlag_HT2(DMA1);
     LL_DMA_ClearFlag_TE2(DMA1);
+
     LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_2);
     LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_2);
     LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_2);
 
-    NVIC_SetPriority(DMA1_Channel2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
-    NVIC_EnableIRQ(DMA1_Channel2_IRQn);
+    furi_hal_interrupt_set_isr_ex(
+        FuriHalInterruptIdDma1Ch2, 5, furi_hal_infrared_tx_dma_isr, NULL);
 }
 
 static void furi_hal_infrared_tx_fill_buffer_last(uint8_t buf_num) {
@@ -559,12 +547,10 @@ static void furi_hal_infrared_async_tx_free_resources(void) {
         (furi_hal_infrared_state == InfraredStateAsyncTxStopped));
     osStatus_t status;
 
-    hal_gpio_init(&gpio_infrared_tx, GpioModeOutputOpenDrain, GpioPullDown, GpioSpeedLow);
-    furi_hal_interrupt_set_dma_channel_isr(DMA1, LL_DMA_CHANNEL_1, NULL);
-    furi_hal_interrupt_set_dma_channel_isr(DMA1, LL_DMA_CHANNEL_2, NULL);
+    furi_hal_gpio_init(&gpio_infrared_tx, GpioModeOutputOpenDrain, GpioPullDown, GpioSpeedLow);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, NULL, NULL);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch2, NULL, NULL);
     LL_TIM_DeInit(TIM1);
-    LL_APB2_GRP1_DisableClock(LL_APB2_GRP1_PERIPH_TIM1);
-    LL_C2_AHB1_GRP1_DisableClock(LL_C2_AHB1_GRP1_PERIPH_DMA1);
 
     status = osSemaphoreDelete(infrared_tim_tx.stop_semaphore);
     furi_check(status == osOK);
@@ -617,12 +603,12 @@ void furi_hal_infrared_async_tx_start(uint32_t freq, float duty_cycle) {
     LL_TIM_ClearFlag_UPDATE(TIM1);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
-    delay_us(5);
+    furi_hal_delay_us(5);
     LL_TIM_GenerateEvent_UPDATE(TIM1); /* DMA -> TIMx_RCR */
-    delay_us(5);
+    furi_hal_delay_us(5);
     LL_GPIO_ResetOutputPin(
         gpio_infrared_tx.port, gpio_infrared_tx.pin); /* when disable it prevents false pulse */
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         &gpio_infrared_tx, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedHigh, GpioAltFn1TIM1);
 
     FURI_CRITICAL_ENTER();

@@ -45,7 +45,7 @@ typedef enum {
 #define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
 const NotificationSequence sequence_notification = {
-    &message_display_on,
+    &message_display_backlight_on,
     &message_green_255,
     &message_delay_10,
     NULL,
@@ -80,11 +80,13 @@ static void uart_echo_view_draw_callback(Canvas* canvas, void* _model) {
 }
 
 static bool uart_echo_view_input_callback(InputEvent* event, void* context) {
-    bool consumed = false;
-    return consumed;
+    UNUSED(event);
+    UNUSED(context);
+    return false;
 }
 
 static uint32_t uart_echo_exit(void* context) {
+    UNUSED(context);
     return VIEW_NONE;
 }
 
@@ -95,7 +97,7 @@ static void uart_echo_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
 
     if(ev == UartIrqEventRXNE) {
         xStreamBufferSendFromISR(app->rx_stream, &data, 1, &xHigherPriorityTaskWoken);
-        osThreadFlagsSet(furi_thread_get_thread_id(app->worker_thread), WorkerEventRx);
+        furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
         portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
 }
@@ -147,7 +149,8 @@ static int32_t uart_echo_worker(void* context) {
     UartEchoApp* app = context;
 
     while(1) {
-        uint32_t events = osThreadFlagsWait(WORKER_EVENTS_MASK, osFlagsWaitAny, osWaitForever);
+        uint32_t events =
+            furi_thread_flags_wait(WORKER_EVENTS_MASK, osFlagsWaitAny, osWaitForever);
         furi_check((events & osFlagsError) == 0);
 
         if(events & WorkerEventStop) break;
@@ -170,7 +173,10 @@ static int32_t uart_echo_worker(void* context) {
 
             notification_message(app->notification, &sequence_notification);
             with_view_model(
-                app->view, (UartDumpModel * model) { return true; });
+                app->view, (UartDumpModel * model) {
+                    UNUSED(model);
+                    return true;
+                });
         }
     }
 
@@ -229,7 +235,7 @@ static UartEchoApp* uart_echo_app_alloc() {
 static void uart_echo_app_free(UartEchoApp* app) {
     furi_assert(app);
 
-    osThreadFlagsSet(furi_thread_get_thread_id(app->worker_thread), WorkerEventStop);
+    furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventStop);
     furi_thread_join(app->worker_thread);
     furi_thread_free(app->worker_thread);
 
@@ -261,6 +267,7 @@ static void uart_echo_app_free(UartEchoApp* app) {
 }
 
 int32_t uart_echo_app(void* p) {
+    UNUSED(p);
     UartEchoApp* app = uart_echo_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     uart_echo_app_free(app);

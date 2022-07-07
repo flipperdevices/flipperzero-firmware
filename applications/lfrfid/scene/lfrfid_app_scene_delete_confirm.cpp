@@ -3,7 +3,7 @@
 #include "../view/elements/icon_element.h"
 #include "../view/elements/string_element.h"
 
-void LfRfidAppSceneDeleteConfirm::on_enter(LfRfidApp* app, bool need_restore) {
+void LfRfidAppSceneDeleteConfirm::on_enter(LfRfidApp* app, bool /* need_restore */) {
     string_init(string_data);
     string_init(string_decrypted);
     string_init(string_header);
@@ -50,6 +50,14 @@ void LfRfidAppSceneDeleteConfirm::on_enter(LfRfidApp* app, bool need_restore) {
         string_printf(
             string_decrypted, "FC: %u    ID: %u", data[0], (uint16_t)((data[1] << 8) | (data[2])));
         break;
+    case LfrfidKeyType::KeyIoProxXSF:
+        string_printf(
+            string_decrypted,
+            "FC: %u   VC: %u   ID: %u",
+            data[0],
+            data[1],
+            (uint16_t)((data[2] << 8) | (data[3])));
+        break;
     }
     line_3->set_text(
         string_get_cstr(string_decrypted), 64, 39, 0, AlignCenter, AlignBottom, FontSecondary);
@@ -73,6 +81,11 @@ bool LfRfidAppSceneDeleteConfirm::on_event(LfRfidApp* app, LfRfidApp::Event* eve
         app->delete_key(&app->worker.key);
         app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::DeleteSuccess);
         consumed = true;
+    } else if(event->type == LfRfidApp::EventType::Stay) {
+        app->scene_controller.switch_to_previous_scene();
+        consumed = true;
+    } else if(event->type == LfRfidApp::EventType::Back) {
+        consumed = true;
     }
 
     return consumed;
@@ -88,7 +101,7 @@ void LfRfidAppSceneDeleteConfirm::on_exit(LfRfidApp* app) {
 void LfRfidAppSceneDeleteConfirm::back_callback(void* context) {
     LfRfidApp* app = static_cast<LfRfidApp*>(context);
     LfRfidApp::Event event;
-    event.type = LfRfidApp::EventType::Back;
+    event.type = LfRfidApp::EventType::Stay;
     app->view_controller.send_event(&event);
 }
 

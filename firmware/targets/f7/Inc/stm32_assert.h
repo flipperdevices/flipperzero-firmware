@@ -1,40 +1,52 @@
 /**
   ******************************************************************************
   * @file    stm32_assert.h
-  * @brief   STM32 assert file.
+  * @author  MCD Application Team
+  * @brief   STM32 assert template file.
+  *          This file should be copied to the application folder and renamed
+  *          to stm32_assert.h.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
-  * All rights reserved.</center></h2>
+  * Copyright (c) 2019 STMicroelectronics.
+  * All rights reserved.
   *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   ******************************************************************************
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __STM32_ASSERT_H
-#define __STM32_ASSERT_H
+#ifndef STM32_ASSERT_H
+#define STM32_ASSERT_H
+
+#include <furi/check.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifdef USE_FULL_ASSERT
-#define assert_param(expr) ((expr) ? (void)0U : assert_failed())
-void assert_failed();
+/* Exported types ------------------------------------------------------------*/
+/* Exported constants --------------------------------------------------------*/
+/* Includes ------------------------------------------------------------------*/
+/* Exported macro ------------------------------------------------------------*/
+
+/* We're confident in the parameters we pass to LL functions, so we can skip asserts
+ * since they introduce significant bloat to debug builds */
+
+#ifdef FURI_LL_DEBUG
+#define assert_param furi_assert
 #else
-#define assert_param(expr) ((void)0U)
-#endif /* USE_FULL_ASSERT */
+#define assert_param(__e) \
+    do {                  \
+        ((void)(__e));    \
+    } while(0)
+#endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __STM32_ASSERT_H */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+#endif /* STM32_ASSERT_H */

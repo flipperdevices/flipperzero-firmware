@@ -10,6 +10,8 @@
 #define FAST_ADV_TIMEOUT 30000
 #define INITIAL_ADV_TIMEOUT 60000
 
+#define GAP_INTERVAL_TO_MS(x) (uint16_t)((x)*1.25)
+
 typedef struct {
     uint16_t gap_svc_handle;
     uint16_t dev_name_char_handle;
@@ -23,6 +25,7 @@ typedef struct {
 typedef struct {
     GapSvc service;
     GapConfig* config;
+    GapConnectionParams connection_params;
     GapState state;
     osMutexId_t state_mutex;
     GapEventCallback on_event_cb;
@@ -40,11 +43,6 @@ typedef enum {
     GapCommandKillThread,
 } GapCommand;
 
-typedef struct {
-    GapScanCallback callback;
-    void* context;
-} GapScan;
-
 // Identity root key
 static const uint8_t gap_irk[16] =
     {0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0};
@@ -53,10 +51,36 @@ static const uint8_t gap_erk[16] =
     {0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21, 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21};
 
 static Gap* gap = NULL;
-static GapScan* gap_scan = NULL;
 
 static void gap_advertise_start(GapState new_state);
 static int32_t gap_app(void* context);
+
+static void gap_verify_connection_parameters(Gap* gap) {
+    furi_assert(gap);
+
+    FURI_LOG_I(
+        TAG,
+        "Connection parameters: Connection Interval: %d (%d ms), Slave Latency: %d, Supervision Timeout: %d",
+        gap->connection_params.conn_interval,
+        GAP_INTERVAL_TO_MS(gap->connection_params.conn_interval),
+        gap->connection_params.slave_latency,
+        gap->connection_params.supervisor_timeout);
+
+    // Send connection parameters request update if necessary
+    GapConnectionParamsRequest* params = &gap->config->conn_param;
+    if(params->conn_int_min > gap->connection_params.conn_interval ||
+       params->conn_int_max < gap->connection_params.conn_interval) {
+        FURI_LOG_W(TAG, "Unsupported connection interval. Request connection parameters update");
+        if(aci_l2cap_connection_parameter_update_req(
+               gap->service.connection_handle,
+               params->conn_int_min,
+               params->conn_int_max,
+               gap->connection_params.slave_latency,
+               gap->connection_params.supervisor_timeout)) {
+            FURI_LOG_E(TAG, "Failed to request connection parameters update");
+        }
+    }
+}
 
 SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
     hci_event_pckt* event_pckt;
@@ -85,7 +109,6 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
         if(gap->enable_adv) {
             // Restart advertising
             gap_advertise_start(GapStateAdvFast);
-            furi_hal_power_insomnia_exit();
         }
         GapEvent event = {.type = GapEventTypeDisconnected};
         gap->on_event_cb(event, gap->context);
@@ -97,12 +120,11 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
         case EVT_LE_CONN_UPDATE_COMPLETE: {
             hci_le_connection_update_complete_event_rp0* event =
                 (hci_le_connection_update_complete_event_rp0*)meta_evt->data;
-            FURI_LOG_I(
-                TAG,
-                "Connection interval: %d, latency: %d, supervision timeout: %d",
-                event->Conn_Interval,
-                event->Conn_Latency,
-                event->Supervision_Timeout);
+            gap->connection_params.conn_interval = event->Conn_Interval;
+            gap->connection_params.slave_latency = event->Conn_Latency;
+            gap->connection_params.supervisor_timeout = event->Supervision_Timeout;
+            FURI_LOG_I(TAG, "Connection parameters event complete");
+            gap_verify_connection_parameters(gap);
             break;
         }
 
@@ -122,50 +144,23 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
             }
             break;
 
-        case EVT_LE_CONN_COMPLETE:
-            furi_hal_power_insomnia_enter();
-            hci_le_connection_complete_event_rp0* connection_complete_event =
+        case EVT_LE_CONN_COMPLETE: {
+            hci_le_connection_complete_event_rp0* event =
                 (hci_le_connection_complete_event_rp0*)meta_evt->data;
-            FURI_LOG_I(
-                TAG,
-                "Connection complete for connection handle 0x%x",
-                connection_complete_event->Connection_Handle);
+            gap->connection_params.conn_interval = event->Conn_Interval;
+            gap->connection_params.slave_latency = event->Conn_Latency;
+            gap->connection_params.supervisor_timeout = event->Supervision_Timeout;
 
             // Stop advertising as connection completed
             osTimerStop(gap->advertise_timer);
 
             // Update connection status and handle
             gap->state = GapStateConnected;
-            gap->service.connection_handle = connection_complete_event->Connection_Handle;
-            GapConnectionParams* params = &gap->config->conn_param;
-            if(aci_l2cap_connection_parameter_update_req(
-                   gap->service.connection_handle,
-                   params->conn_int_min,
-                   params->conn_int_max,
-                   params->slave_latency,
-                   params->supervisor_timeout)) {
-                FURI_LOG_W(TAG, "Failed to request connection parameters update");
-            }
+            gap->service.connection_handle = event->Connection_Handle;
 
+            gap_verify_connection_parameters(gap);
             // Start pairing by sending security request
-            aci_gap_slave_security_req(connection_complete_event->Connection_Handle);
-            break;
-
-        case EVT_LE_ADVERTISING_REPORT: {
-            if(gap_scan) {
-                GapAddress address;
-                hci_le_advertising_report_event_rp0* evt =
-                    (hci_le_advertising_report_event_rp0*)meta_evt->data;
-                for(uint8_t i = 0; i < evt->Num_Reports; i++) {
-                    Advertising_Report_t* rep = &evt->Advertising_Report[i];
-                    address.type = rep->Address_Type;
-                    // Original MAC addres is in inverted order
-                    for(uint8_t j = 0; j < sizeof(address.mac); j++) {
-                        address.mac[j] = rep->Address[sizeof(address.mac) - j - 1];
-                    }
-                    gap_scan->callback(address, gap_scan->context);
-                }
-            }
+            aci_gap_slave_security_req(event->Connection_Handle);
         } break;
 
         default:
@@ -394,7 +389,9 @@ static void gap_advertise_start(GapState new_state) {
         // Stop advertising
         status = aci_gap_set_non_discoverable();
         if(status) {
-            FURI_LOG_E(TAG, "Stop Advertising Failed, result: %d", status);
+            FURI_LOG_E(TAG, "set_non_discoverable failed %d", status);
+        } else {
+            FURI_LOG_D(TAG, "set_non_discoverable success");
         }
     }
     // Configure advertising
@@ -411,7 +408,7 @@ static void gap_advertise_start(GapState new_state) {
         0,
         0);
     if(status) {
-        FURI_LOG_E(TAG, "Set discoverable err: %d", status);
+        FURI_LOG_E(TAG, "set_discoverable failed %d", status);
     }
     gap->state = new_state;
     GapEvent event = {.type = GapEventTypeStartAdvertising};
@@ -420,14 +417,25 @@ static void gap_advertise_start(GapState new_state) {
 }
 
 static void gap_advertise_stop() {
+    tBleStatus ret;
     if(gap->state > GapStateIdle) {
         if(gap->state == GapStateConnected) {
             // Terminate connection
-            aci_gap_terminate(gap->service.connection_handle, 0x13);
+            ret = aci_gap_terminate(gap->service.connection_handle, 0x13);
+            if(ret != BLE_STATUS_SUCCESS) {
+                FURI_LOG_E(TAG, "terminate failed %d", ret);
+            } else {
+                FURI_LOG_D(TAG, "terminate success");
+            }
         }
         // Stop advertising
         osTimerStop(gap->advertise_timer);
-        aci_gap_set_non_discoverable();
+        ret = aci_gap_set_non_discoverable();
+        if(ret != BLE_STATUS_SUCCESS) {
+            FURI_LOG_E(TAG, "set_non_discoverable failed %d", ret);
+        } else {
+            FURI_LOG_D(TAG, "set_non_discoverable success");
+        }
         gap->state = GapStateIdle;
     }
     GapEvent event = {.type = GapEventTypeStopAdvertising};
@@ -458,6 +466,7 @@ void gap_stop_advertising() {
 }
 
 static void gap_advetise_timer_callback(void* context) {
+    UNUSED(context);
     GapCommand command = GapCommandAdvLowPower;
     furi_check(osMessageQueuePut(gap->command_queue, &command, 0, 0) == osOK);
 }
@@ -518,23 +527,6 @@ GapState gap_get_state() {
     return state;
 }
 
-void gap_start_scan(GapScanCallback callback, void* context) {
-    furi_assert(callback);
-    gap_scan = malloc(sizeof(GapScan));
-    gap_scan->callback = callback;
-    gap_scan->context = context;
-    // Scan interval 250 ms
-    hci_le_set_scan_parameters(1, 4000, 200, 0, 0);
-    hci_le_set_scan_enable(1, 1);
-}
-
-void gap_stop_scan() {
-    furi_assert(gap_scan);
-    hci_le_set_scan_enable(0, 1);
-    free(gap_scan);
-    gap_scan = NULL;
-}
-
 void gap_thread_stop() {
     if(gap) {
         osMutexAcquire(gap->state_mutex, osWaitForever);
@@ -556,6 +548,7 @@ void gap_thread_stop() {
 }
 
 static int32_t gap_app(void* context) {
+    UNUSED(context);
     GapCommand command;
     while(1) {
         osStatus_t status = osMessageQueueGet(gap->command_queue, &command, NULL, osWaitForever);

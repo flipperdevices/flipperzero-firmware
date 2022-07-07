@@ -74,18 +74,17 @@ bool stream_read_line(Stream* stream, string_t str_result) {
 
     do {
         uint16_t bytes_were_read = stream_read(stream, buffer, buffer_size);
-        // TODO process EOF
         if(bytes_were_read == 0) break;
 
         bool result = false;
         bool error = false;
         for(uint16_t i = 0; i < bytes_were_read; i++) {
             if(buffer[i] == '\n') {
-                if(!stream_seek(stream, i - bytes_were_read, StreamOffsetFromCurrent)) {
+                if(!stream_seek(stream, i - bytes_were_read + 1, StreamOffsetFromCurrent)) {
                     error = true;
                     break;
                 }
-
+                string_push_back(str_result, buffer[i]);
                 result = true;
                 break;
             } else if(buffer[i] == '\r') {
@@ -218,7 +217,7 @@ bool stream_delete_and_insert_vaformat(
     string_init_vprintf(data, format, args);
     StreamWriteData write_data = {
         .data = (uint8_t*)string_get_cstr(data), .size = string_size(data)};
-    bool result = stream_delete_and_insert(stream, 0, stream_write_struct, &write_data);
+    bool result = stream_delete_and_insert(stream, delete_size, stream_write_struct, &write_data);
     string_clear(data);
 
     return result;

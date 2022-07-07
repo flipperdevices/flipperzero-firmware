@@ -127,7 +127,7 @@
  * Maximum number of simultaneous connections that the device will support.
  * Valid values are from 1 to 8
  */
-#define CFG_BLE_NUM_LINK 2
+#define CFG_BLE_NUM_LINK 1
 
 /**
  * Maximum number of Services that can be stored in the GATT database.
@@ -396,7 +396,7 @@ typedef enum {
  * keep debugger enabled while in any low power mode when set to 1
  * should be set to 0 in production
  */
-#define CFG_DEBUGGER_SUPPORTED 0
+#define CFG_DEBUGGER_SUPPORTED 1
 
 /**
  * When set to 1, the traces are enabled in the BLE services

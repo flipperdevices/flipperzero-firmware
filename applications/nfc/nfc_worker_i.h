@@ -1,23 +1,26 @@
 #pragma once
 
-#include "nfc_i.h"
 #include "nfc_worker.h"
+#include "nfc_i.h"
 
 #include <furi.h>
-#include <stdbool.h>
+#include <lib/toolbox/stream/file_stream.h>
 
-#include <rfal_analogConfig.h>
-#include <rfal_rf.h>
-#include <rfal_nfc.h>
-#include <rfal_nfca.h>
-#include <rfal_nfcb.h>
-#include <rfal_nfcf.h>
-#include <rfal_nfcv.h>
-#include <st25r3916.h>
-#include <st25r3916_irq.h>
+#include <lib/nfc_protocols/nfc_util.h>
+#include <lib/nfc_protocols/emv.h>
+#include <lib/nfc_protocols/mifare_common.h>
+#include <lib/nfc_protocols/mifare_ultralight.h>
+#include <lib/nfc_protocols/mifare_classic.h>
+#include <lib/nfc_protocols/mifare_desfire.h>
+#include <lib/nfc_protocols/nfca.h>
+
+#include "helpers/nfc_mf_classic_dict.h"
+#include "helpers/nfc_debug_pcap.h"
 
 struct NfcWorker {
     FuriThread* thread;
+    Storage* storage;
+    Stream* dict_stream;
 
     NfcDeviceData* dev_data;
 
@@ -25,6 +28,8 @@ struct NfcWorker {
     void* context;
 
     NfcWorkerState state;
+
+    NfcDebugPcapWorker* debug_pcap_worker;
 };
 
 void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state);
@@ -41,8 +46,12 @@ void nfc_worker_detect(NfcWorker* nfc_worker);
 
 void nfc_worker_emulate(NfcWorker* nfc_worker);
 
-void nfc_worker_field(NfcWorker* nfc_worker);
+void nfc_worker_read_mifare_ultralight(NfcWorker* nfc_worker);
 
-void nfc_worker_read_mifare_ul(NfcWorker* nfc_worker);
+void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker);
+
+void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker);
 
 void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker);
+
+void nfc_worker_emulate_mifare_classic(NfcWorker* nfc_worker);

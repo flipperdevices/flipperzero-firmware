@@ -1,5 +1,6 @@
 #include "../gpio_app_i.h"
 #include "furi_hal_power.h"
+#include "furi_hal_usb.h"
 
 enum GpioItem {
     GpioItemUsbUart,
@@ -14,15 +15,15 @@ enum GpioOtg {
 };
 
 const char* const gpio_otg_text[GpioOtgSettingsNum] = {
-    "Off",
-    "On",
+    "OFF",
+    "ON",
 };
 
 static void gpio_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     GpioApp* app = context;
     if(index == GpioItemTest) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, GpioStartEventManualConrol);
+        view_dispatcher_send_custom_event(app->view_dispatcher, GpioStartEventManualControl);
     } else if(index == GpioItemUsbUart) {
         view_dispatcher_send_custom_event(app->view_dispatcher, GpioStartEventUsbUart);
     }
@@ -48,9 +49,9 @@ void gpio_scene_start_on_enter(void* context) {
     variable_item_list_set_enter_callback(
         var_item_list, gpio_scene_start_var_list_enter_callback, app);
 
-    variable_item_list_add(var_item_list, "USB-UART bridge", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "USB-UART Bridge", 0, NULL, NULL);
 
-    variable_item_list_add(var_item_list, "GPIO manual control", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "GPIO Manual Control", 0, NULL, NULL);
 
     item = variable_item_list_add(
         var_item_list,
@@ -81,12 +82,16 @@ bool gpio_scene_start_on_event(void* context, SceneManagerEvent event) {
             furi_hal_power_enable_otg();
         } else if(event.event == GpioStartEventOtgOff) {
             furi_hal_power_disable_otg();
-        } else if(event.event == GpioStartEventManualConrol) {
+        } else if(event.event == GpioStartEventManualControl) {
             scene_manager_set_scene_state(app->scene_manager, GpioSceneStart, GpioItemTest);
             scene_manager_next_scene(app->scene_manager, GpioSceneTest);
         } else if(event.event == GpioStartEventUsbUart) {
             scene_manager_set_scene_state(app->scene_manager, GpioSceneStart, GpioItemUsbUart);
-            scene_manager_next_scene(app->scene_manager, GpioSceneUsbUart);
+            if(!furi_hal_usb_is_locked()) {
+                scene_manager_next_scene(app->scene_manager, GpioSceneUsbUart);
+            } else {
+                scene_manager_next_scene(app->scene_manager, GpioSceneUsbUartCloseRpc);
+            }
         }
         consumed = true;
     }

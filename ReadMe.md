@@ -7,21 +7,39 @@
 Welcome to [Flipper Zero](https://flipperzero.one/)'s Firmware repo!
 Our goal is to create nice and clean code with good documentation, to make it a pleasure for everyone to work with.
 
+# Clone the Repository
+
+You should clone with 
+```shell
+$ git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git
+```
+
 # Update firmware
 
 [Get Latest Firmware from Update Server](https://update.flipperzero.one/)
 
-Flipper Zero's firmware consists of three components:
+Flipper Zero's firmware consists of two components:
 
 - Core2 firmware set - proprietary components by ST: FUS + radio stack. FUS is flashed at factory and you should never update it.
-- Core1 Bootloader - controls basic hardware initialization and loads firmware.
 - Core1 Firmware - HAL + OS + Drivers + Applications.
 
-All 3 of them must be flashed in order described.
+They both must be flashed in order described.
+
+## With offline update package
+
+With Flipper attached over USB:
+
+`./fbt --with-updater flash_usb`
+
+Just building the package:
+
+`./fbt --with-updater updater_package`
+
+To update, copy the resulting directory to Flipper's SD card and navigate to `update.fuf` file in Archive app. 
 
 ## With STLink
 
-### Core1 Bootloader + Firmware
+### Core1 Firmware
 
 Prerequisites:
 
@@ -30,17 +48,7 @@ Prerequisites:
 - [arm-gcc-none-eabi](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
 - openocd
 
-One liner: `make flash`
-
-### Core2 flashing procedures
-
-Prerequisites:
-
-- Linux / macOS
-- Terminal
-- STM32_Programmer_CLI (v2.5.0) added to $PATH
-
-One liner: `make flash_radio`
+One liner: `./fbt firmware_flash`
 
 ## With USB DFU 
 
@@ -50,7 +58,6 @@ One liner: `make flash_radio`
  - Press and hold `← Left` + `↩ Back` for reset 
  - Release `↩ Back` and keep holding `← Left` until blue LED lights up
  - Release `← Left`
-<!-- ![Switch to DFU sequence](https://habrastorage.org/webt/uu/c3/g2/uuc3g2n36f2sju19rskcvjzjf6w.png) -->
 
 3. Run `dfu-util -D full.dfu -a 0`
 
@@ -68,14 +75,18 @@ One liner: `make flash_radio`
 ## Compile everything
 
 ```sh
-docker-compose exec dev make
+docker-compose exec dev ./fbt
 ```
 
 Check `dist/` for build outputs.
 
 Use **`flipper-z-{target}-full-{suffix}.dfu`** to flash your device.
 
+If compilation fails, make sure all submodules are all initialized. Either clone with `--recursive` or use `git submodule update --init --recursive`.
+
 # Build on Linux/macOS
+
+Check out `documentation/fbt.md` for details on building and flashing firmware. 
 
 ## macOS Prerequisites
 
@@ -119,7 +130,7 @@ heatshrink has to be compiled [from sources](https://github.com/atomicobject/hea
 ## Compile everything
 
 ```sh
-make
+./fbt
 ```
 
 Check `dist/` for build outputs.
@@ -130,7 +141,7 @@ Use **`flipper-z-{target}-full-{suffix}.dfu`** to flash your device.
 
 Connect your device via ST-Link and run:
 ```sh
-make whole
+./fbt firmware_flash
 ```
 
 # Links
@@ -144,14 +155,12 @@ make whole
 
 - `applications`    - Applications and services used in firmware
 - `assets`          - Assets used by applications and services
-- `bootloader`      - Bootloader source code
 - `core`            - Furi Core: os level primitives and helpers
 - `debug`           - Debug tool: GDB-plugins, SVD-file and etc
 - `docker`          - Docker image sources (used for firmware build automation)
 - `documentation`   - Documentation generation system configs and input files
 - `firmware`        - Firmware source code
 - `lib`             - Our and 3rd party libraries, drivers and etc...
-- `make`            - Make helpers
 - `scripts`         - Supplementary scripts and python libraries home
 
 Also pay attention to `ReadMe.md` files inside of those directories.

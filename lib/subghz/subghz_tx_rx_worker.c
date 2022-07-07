@@ -71,7 +71,7 @@ bool subghz_tx_rx_worker_rx(SubGhzTxRxWorker* instance, uint8_t* data, uint8_t* 
         osDelay(1);
     }
     //waiting for reception to complete
-    while(hal_gpio_read(&gpio_cc1101_g0)) {
+    while(furi_hal_gpio_read(&gpio_cc1101_g0)) {
         osDelay(1);
         if(!--timeout) {
             FURI_LOG_W(TAG, "RX cc1101_g0 timeout");
@@ -83,7 +83,10 @@ bool subghz_tx_rx_worker_rx(SubGhzTxRxWorker* instance, uint8_t* data, uint8_t* 
 
     if(furi_hal_subghz_rx_pipe_not_empty()) {
         FURI_LOG_I(
-            TAG, "RSSI: %03.1fdbm LQI: %d", furi_hal_subghz_get_rssi(), furi_hal_subghz_get_lqi());
+            TAG,
+            "RSSI: %03.1fdbm LQI: %d",
+            (double)furi_hal_subghz_get_rssi(),
+            furi_hal_subghz_get_lqi());
         if(furi_hal_subghz_is_rx_data_crc_valid()) {
             furi_hal_subghz_read_packet(data, size);
             ret = true;
@@ -102,14 +105,14 @@ void subghz_tx_rx_worker_tx(SubGhzTxRxWorker* instance, uint8_t* data, size_t si
     furi_hal_subghz_write_packet(data, size);
     furi_hal_subghz_tx(); //start send
     instance->status = SubGhzTxRxWorkerStatusTx;
-    while(!hal_gpio_read(&gpio_cc1101_g0)) { // Wait for GDO0 to be set -> sync transmitted
+    while(!furi_hal_gpio_read(&gpio_cc1101_g0)) { // Wait for GDO0 to be set -> sync transmitted
         osDelay(1);
         if(!--timeout) {
             FURI_LOG_W(TAG, "TX !cc1101_g0 timeout");
             break;
         }
     }
-    while(hal_gpio_read(&gpio_cc1101_g0)) { // Wait for GDO0 to be cleared -> end of packet
+    while(furi_hal_gpio_read(&gpio_cc1101_g0)) { // Wait for GDO0 to be cleared -> end of packet
         osDelay(1);
         if(!--timeout) {
             FURI_LOG_W(TAG, "TX cc1101_g0 timeout");
@@ -132,7 +135,7 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
     furi_hal_subghz_idle();
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetGFSK9_99KbAsync);
     //furi_hal_subghz_load_preset(FuriHalSubGhzPresetMSK99_97KbAsync);
-    hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
     furi_hal_subghz_set_frequency_and_path(instance->frequency);
     furi_hal_subghz_flush_rx();
@@ -200,7 +203,7 @@ SubGhzTxRxWorker* subghz_tx_rx_worker_alloc() {
     SubGhzTxRxWorker* instance = malloc(sizeof(SubGhzTxRxWorker));
 
     instance->thread = furi_thread_alloc();
-    furi_thread_set_name(instance->thread, "SubghzTxRxWorker");
+    furi_thread_set_name(instance->thread, "SubGhzTxRxWorker");
     furi_thread_set_stack_size(instance->thread, 2048);
     furi_thread_set_context(instance->thread, instance);
     furi_thread_set_callback(instance->thread, subghz_tx_rx_worker_thread);
@@ -234,12 +237,12 @@ bool subghz_tx_rx_worker_start(SubGhzTxRxWorker* instance, uint32_t frequency) {
 
     instance->worker_running = true;
 
-    furi_thread_start(instance->thread);
-
     if(furi_hal_subghz_is_tx_allowed(frequency)) {
         instance->frequency = frequency;
         res = true;
     }
+
+    furi_thread_start(instance->thread);
 
     return res;
 }

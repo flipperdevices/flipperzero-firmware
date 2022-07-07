@@ -24,13 +24,25 @@
 #include <gui/modules/widget.h>
 
 #include "views/bank_card.h"
+#include "views/dict_attack.h"
 
 #include <nfc/scenes/nfc_scene.h>
 #include <nfc/helpers/nfc_custom_event.h>
 
+#include "rpc/rpc_app.h"
+
 #define NFC_SEND_NOTIFICATION_FALSE (0UL)
 #define NFC_SEND_NOTIFICATION_TRUE (1UL)
 #define NFC_TEXT_STORE_SIZE 128
+
+typedef enum {
+    NfcRpcStateIdle,
+    NfcRpcStateEmulating,
+    NfcRpcStateEmulated,
+} NfcRpcState;
+
+// Forward declaration due to circular dependency
+typedef struct NfcGenerator NfcGenerator;
 
 struct Nfc {
     NfcWorker* worker;
@@ -39,10 +51,13 @@ struct Nfc {
     NotificationApp* notifications;
     SceneManager* scene_manager;
     NfcDevice* dev;
-    NfcDeviceCommonData dev_edit_data;
+    FuriHalNfcDevData dev_edit_data;
 
     char text_store[NFC_TEXT_STORE_SIZE + 1];
     string_t text_box_store;
+
+    void* rpc_ctx;
+    NfcRpcState rpc_state;
 
     // Common Views
     Submenu* submenu;
@@ -53,6 +68,9 @@ struct Nfc {
     TextBox* text_box;
     Widget* widget;
     BankCard* bank_card;
+    DictAttack* dict_attack;
+
+    const NfcGenerator* generator;
 };
 
 typedef enum {
@@ -64,6 +82,7 @@ typedef enum {
     NfcViewTextBox,
     NfcViewWidget,
     NfcViewBankCard,
+    NfcViewDictAttack,
 } NfcView;
 
 Nfc* nfc_alloc();
@@ -73,3 +92,9 @@ int32_t nfc_task(void* p);
 void nfc_text_store_set(Nfc* nfc, const char* text, ...);
 
 void nfc_text_store_clear(Nfc* nfc);
+
+void nfc_blink_start(Nfc* nfc);
+
+void nfc_blink_stop(Nfc* nfc);
+
+void nfc_rpc_exit_callback(Nfc* nfc);

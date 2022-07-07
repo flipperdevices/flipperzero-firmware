@@ -19,10 +19,12 @@ void bt_debug_submenu_callback(void* context, uint32_t index) {
 }
 
 uint32_t bt_debug_exit(void* context) {
+    UNUSED(context);
     return VIEW_NONE;
 }
 
 uint32_t bt_debug_start_view(void* context) {
+    UNUSED(context);
     return BtDebugAppViewSubmenu;
 }
 
@@ -94,8 +96,9 @@ void bt_debug_app_free(BtDebugApp* app) {
 }
 
 int32_t bt_debug_app(void* p) {
-    if(furi_hal_bt_get_radio_stack() != FuriHalBtStackHciLayer) {
-        FURI_LOG_E(TAG, "Incorrect radio stack, replace with HciLayer for tests.");
+    UNUSED(p);
+    if(!furi_hal_bt_is_testing_supported()) {
+        FURI_LOG_E(TAG, "Incorrect radio stack: radio testing fetures are absent.");
         DialogsApp* dialogs = furi_record_open("dialogs");
         dialog_message_show_storage_error(dialogs, "Incorrect\nRadioStack");
         return 255;

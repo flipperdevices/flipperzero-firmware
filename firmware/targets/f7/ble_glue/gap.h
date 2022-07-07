@@ -33,13 +33,6 @@ typedef struct {
 
 typedef bool (*GapEventCallback)(GapEvent event, void* context);
 
-typedef struct {
-    uint8_t type;
-    uint8_t mac[6];
-} GapAddress;
-
-typedef void (*GapScanCallback)(GapAddress address, void* context);
-
 typedef enum {
     GapStateUninitialized,
     GapStateIdle,
@@ -56,11 +49,17 @@ typedef enum {
 } GapPairing;
 
 typedef struct {
+    uint16_t conn_interval;
+    uint16_t slave_latency;
+    uint16_t supervisor_timeout;
+} GapConnectionParams;
+
+typedef struct {
     uint16_t conn_int_min;
     uint16_t conn_int_max;
     uint16_t slave_latency;
     uint16_t supervisor_timeout;
-} GapConnectionParams;
+} GapConnectionParamsRequest;
 
 typedef struct {
     uint16_t adv_service_uuid;
@@ -69,7 +68,7 @@ typedef struct {
     GapPairing pairing_method;
     uint8_t mac_address[GAP_MAC_ADDR_SIZE];
     char adv_name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH];
-    GapConnectionParams conn_param;
+    GapConnectionParamsRequest conn_param;
 } GapConfig;
 
 bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context);
@@ -81,10 +80,6 @@ void gap_stop_advertising();
 GapState gap_get_state();
 
 void gap_thread_stop();
-
-void gap_start_scan(GapScanCallback callback, void* context);
-
-void gap_stop_scan();
 
 #ifdef __cplusplus
 }

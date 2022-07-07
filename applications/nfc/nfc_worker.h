@@ -13,16 +13,37 @@ typedef enum {
     NfcWorkerStateDetect,
     NfcWorkerStateEmulate,
     NfcWorkerStateReadEMVApp,
-    NfcWorkerStateReadEMV,
+    NfcWorkerStateReadEMVData,
     NfcWorkerStateEmulateApdu,
     NfcWorkerStateField,
-    NfcWorkerStateReadMifareUl,
-    NfcWorkerStateEmulateMifareUl,
+    NfcWorkerStateReadMifareUltralight,
+    NfcWorkerStateEmulateMifareUltralight,
+    NfcWorkerStateReadMifareClassic,
+    NfcWorkerStateEmulateMifareClassic,
+    NfcWorkerStateReadMifareDesfire,
     // Transition
     NfcWorkerStateStop,
 } NfcWorkerState;
 
-typedef void (*NfcWorkerCallback)(void* context);
+typedef enum {
+    // Reserve first 50 events for application events
+    NfcWorkerEventReserved = 50,
+
+    // Nfc worker common events
+    NfcWorkerEventSuccess,
+    NfcWorkerEventFail,
+    NfcWorkerEventNoCardDetected,
+    // Mifare Classic events
+    NfcWorkerEventNoDictFound,
+    NfcWorkerEventDetectedClassic1k,
+    NfcWorkerEventDetectedClassic4k,
+    NfcWorkerEventNewSector,
+    NfcWorkerEventFoundKeyA,
+    NfcWorkerEventFoundKeyB,
+    NfcWorkerEventStartReading,
+} NfcWorkerEvent;
+
+typedef void (*NfcWorkerCallback)(NfcWorkerEvent event, void* context);
 
 NfcWorker* nfc_worker_alloc();
 

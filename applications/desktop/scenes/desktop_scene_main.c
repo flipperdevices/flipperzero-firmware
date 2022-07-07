@@ -12,21 +12,6 @@
 
 #define TAG "DesktopSrv"
 
-static void desktop_scene_main_app_started_callback(const void* message, void* context) {
-    furi_assert(context);
-    Desktop* desktop = context;
-    const LoaderEvent* event = message;
-
-    if(event->type == LoaderEventTypeApplicationStarted) {
-        view_dispatcher_send_custom_event(
-            desktop->view_dispatcher, DesktopMainEventBeforeAppStarted);
-        osSemaphoreAcquire(desktop->unload_animation_semaphore, osWaitForever);
-    } else if(event->type == LoaderEventTypeApplicationStopped) {
-        view_dispatcher_send_custom_event(
-            desktop->view_dispatcher, DesktopMainEventAfterAppFinished);
-    }
-}
-
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
@@ -48,6 +33,7 @@ static void desktop_scene_main_interact_animation_callback(void* context) {
         desktop->view_dispatcher, DesktopAnimationEventInteractAnimation);
 }
 
+#ifdef APP_ARCHIVE
 static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* flipper_app) {
     furi_assert(desktop);
     furi_assert(flipper_app);
@@ -65,6 +51,7 @@ static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* fl
 
     furi_thread_start(desktop->scene_thread);
 }
+#endif
 
 void desktop_scene_main_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
@@ -82,12 +69,6 @@ void desktop_scene_main_on_enter(void* context) {
         desktop->animation_manager, desktop_scene_main_check_animation_callback);
     animation_manager_set_interact_callback(
         desktop->animation_manager, desktop_scene_main_interact_animation_callback);
-
-    furi_assert(osSemaphoreGetCount(desktop->unload_animation_semaphore) == 0);
-    Loader* loader = furi_record_open("loader");
-    desktop->app_start_stop_subscription = furi_pubsub_subscribe(
-        loader_get_pubsub(loader), desktop_scene_main_app_started_callback, desktop);
-    furi_record_close("loader");
 
     desktop_main_set_callback(main_view, desktop_scene_main_callback, desktop);
 
@@ -122,22 +103,43 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
 
-        case DesktopMainEventOpenFavorite:
-            LOAD_DESKTOP_SETTINGS(&desktop->settings);
-            if(desktop->settings.favorite < FLIPPER_APPS_COUNT) {
-                Loader* loader = furi_record_open("loader");
-                LoaderStatus status =
-                    loader_start(loader, FLIPPER_APPS[desktop->settings.favorite].name, NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-                furi_record_close("loader");
-            } else {
-                FURI_LOG_E(TAG, "Can't find favorite application");
+        case DesktopMainEventOpenPowerOff: {
+            LoaderStatus status = loader_start(desktop->loader, "Power", "off");
+            if(status != LoaderStatusOk) {
+                FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
             consumed = true;
             break;
+        }
 
+        case DesktopMainEventOpenFavoritePrimary:
+            LOAD_DESKTOP_SETTINGS(&desktop->settings);
+            if(desktop->settings.favorite_primary < FLIPPER_APPS_COUNT) {
+                LoaderStatus status = loader_start(
+                    desktop->loader, FLIPPER_APPS[desktop->settings.favorite_primary].name, NULL);
+                if(status != LoaderStatusOk) {
+                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                }
+            } else {
+                FURI_LOG_E(TAG, "Can't find primary favorite application");
+            }
+            consumed = true;
+            break;
+        case DesktopMainEventOpenFavoriteSecondary:
+            LOAD_DESKTOP_SETTINGS(&desktop->settings);
+            if(desktop->settings.favorite_secondary < FLIPPER_APPS_COUNT) {
+                LoaderStatus status = loader_start(
+                    desktop->loader,
+                    FLIPPER_APPS[desktop->settings.favorite_secondary].name,
+                    NULL);
+                if(status != LoaderStatusOk) {
+                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                }
+            } else {
+                FURI_LOG_E(TAG, "Can't find secondary favorite application");
+            }
+            consumed = true;
+            break;
         case DesktopAnimationEventCheckAnimation:
             animation_manager_check_blocking_process(desktop->animation_manager);
             consumed = true;
@@ -147,16 +149,12 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case DesktopAnimationEventInteractAnimation:
-            animation_manager_interact_process(desktop->animation_manager);
-            consumed = true;
-            break;
-        case DesktopMainEventBeforeAppStarted:
-            animation_manager_unload_and_stall_animation(desktop->animation_manager);
-            osSemaphoreRelease(desktop->unload_animation_semaphore);
-            consumed = true;
-            break;
-        case DesktopMainEventAfterAppFinished:
-            animation_manager_load_and_continue_animation(desktop->animation_manager);
+            if(!animation_manager_interact_process(desktop->animation_manager)) {
+                LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
+                if(status != LoaderStatusOk) {
+                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                }
+            }
             consumed = true;
             break;
         case DesktopLockedEventUpdate:
@@ -174,16 +172,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
 
 void desktop_scene_main_on_exit(void* context) {
     Desktop* desktop = (Desktop*)context;
-
-    /**
-     * We're allowed to leave this scene only when any other app & loader
-     * is finished, that's why we can be sure there is no task waiting
-     * for start/stop semaphore
-     */
-    Loader* loader = furi_record_open("loader");
-    furi_pubsub_unsubscribe(loader_get_pubsub(loader), desktop->app_start_stop_subscription);
-    furi_record_close("loader");
-    furi_assert(osSemaphoreGetCount(desktop->unload_animation_semaphore) == 0);
 
     animation_manager_set_new_idle_callback(desktop->animation_manager, NULL);
     animation_manager_set_check_callback(desktop->animation_manager, NULL);

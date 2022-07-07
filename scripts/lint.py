@@ -83,7 +83,7 @@ class Main(App):
         pool = multiprocessing.Pool()
         results = pool.map(self._format_source, tasks)
 
-        return not False in results
+        return all(results)
 
     def _fix_filename(self, filename: str):
         return filename.replace("-", "_")
@@ -117,6 +117,7 @@ class Main(App):
         if dry_run:
             if len(bad) > 0:
                 self.logger.error(f"Found {len(bad)} incorrectly named files")
+                self.logger.info(bad)
                 return False
         else:
             # Replace occurances in text files

@@ -16,7 +16,6 @@
 - `ibutton`             - iButton application, onewire keys and more
 - `input`               - Input service
 - `infrared`            - Infrared application, controls your IR devices
-- `infrared_monitor`    - Infrared debug tool
 - `lfrfid`              - LF RFID application
 - `lfrfid_debug`        - LF RFID debug tool
 - `loader`              - Application loader service
@@ -30,11 +29,10 @@
 - `snake_game`          - Snake game application
 - `storage`             - Storage service, internal + sdcard
 - `storage_settings`    - Storage settings app
-- `subghz`              - Subghz application, 433 fobs and etc
+- `subghz`              - SubGhz application, 433 fobs and etc
 - `system`              - System settings, tools and API
 - `tests`               - Unit tests and etc
 - `u2f`                 - U2F Application
+- `updater`             - Update service & application
 
-- `application.c`       - Firmware application list source
 - `application.h`       - Firmware application list header
-- `application.mk`      - Makefile helper

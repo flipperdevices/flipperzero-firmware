@@ -12,6 +12,8 @@ struct SubGhzChatWorker {
     volatile bool worker_stoping;
     osMessageQueueId_t event_queue;
     uint32_t last_time_rx_data;
+
+    Cli* cli;
 };
 
 /** Worker thread
@@ -23,12 +25,12 @@ static int32_t subghz_chat_worker_thread(void* context) {
     SubGhzChatWorker* instance = context;
     FURI_LOG_I(TAG, "Worker start");
     char c;
-    SubghzChatEvent event;
-    event.event = SubghzChatEventUserEntrance;
+    SubGhzChatEvent event;
+    event.event = SubGhzChatEventUserEntrance;
     osMessageQueuePut(instance->event_queue, &event, 0, 0);
     while(instance->worker_running) {
-        if(furi_hal_vcp_rx_with_timeout((uint8_t*)&c, 1, 1000) == 1) {
-            event.event = SubghzChatEventInputData;
+        if(cli_read_timeout(instance->cli, (uint8_t*)&c, 1, 1000) == 1) {
+            event.event = SubGhzChatEventInputData;
             event.c = c;
             osMessageQueuePut(instance->event_queue, &event, 0, osWaitForever);
         }
@@ -41,26 +43,29 @@ static int32_t subghz_chat_worker_thread(void* context) {
 static void subghz_chat_worker_update_rx_event_chat(void* context) {
     furi_assert(context);
     SubGhzChatWorker* instance = context;
-    SubghzChatEvent event;
-    if((millis() - instance->last_time_rx_data) > SUBGHZ_CHAT_WORKER_TIMEOUT_BETWEEN_MESSAGES) {
-        event.event = SubghzChatEventNewMessage;
+    SubGhzChatEvent event;
+    if((furi_hal_get_tick() - instance->last_time_rx_data) >
+       SUBGHZ_CHAT_WORKER_TIMEOUT_BETWEEN_MESSAGES) {
+        event.event = SubGhzChatEventNewMessage;
         osMessageQueuePut(instance->event_queue, &event, 0, osWaitForever);
     }
-    instance->last_time_rx_data = millis();
-    event.event = SubghzChatEventRXData;
+    instance->last_time_rx_data = furi_hal_get_tick();
+    event.event = SubGhzChatEventRXData;
     osMessageQueuePut(instance->event_queue, &event, 0, osWaitForever);
 }
 
-SubGhzChatWorker* subghz_chat_worker_alloc() {
+SubGhzChatWorker* subghz_chat_worker_alloc(Cli* cli) {
     SubGhzChatWorker* instance = malloc(sizeof(SubGhzChatWorker));
 
+    instance->cli = cli;
+
     instance->thread = furi_thread_alloc();
-    furi_thread_set_name(instance->thread, "SubghzChat");
+    furi_thread_set_name(instance->thread, "SubGhzChat");
     furi_thread_set_stack_size(instance->thread, 2048);
     furi_thread_set_context(instance->thread, instance);
     furi_thread_set_callback(instance->thread, subghz_chat_worker_thread);
     instance->subghz_txrx = subghz_tx_rx_worker_alloc();
-    instance->event_queue = osMessageQueueNew(80, sizeof(SubghzChatEvent), NULL);
+    instance->event_queue = osMessageQueueNew(80, sizeof(SubGhzChatEvent), NULL);
     return instance;
 }
 
@@ -87,7 +92,9 @@ bool subghz_chat_worker_start(SubGhzChatWorker* instance, uint32_t frequency) {
         instance->worker_running = true;
         instance->last_time_rx_data = 0;
 
-        res = furi_thread_start(instance->thread);
+        furi_thread_start(instance->thread);
+
+        res = true;
     }
     return res;
 }
@@ -109,18 +116,18 @@ bool subghz_chat_worker_is_running(SubGhzChatWorker* instance) {
     return instance->worker_running;
 }
 
-SubghzChatEvent subghz_chat_worker_get_event_chat(SubGhzChatWorker* instance) {
+SubGhzChatEvent subghz_chat_worker_get_event_chat(SubGhzChatWorker* instance) {
     furi_assert(instance);
-    SubghzChatEvent event;
+    SubGhzChatEvent event;
     if(osMessageQueueGet(instance->event_queue, &event, NULL, osWaitForever) == osOK) {
         return event;
     } else {
-        event.event = SubghzChatEventNoEvent;
+        event.event = SubGhzChatEventNoEvent;
         return event;
     }
 }
 
-void subghz_chat_worker_put_event_chat(SubGhzChatWorker* instance, SubghzChatEvent* event) {
+void subghz_chat_worker_put_event_chat(SubGhzChatWorker* instance, SubGhzChatEvent* event) {
     furi_assert(instance);
     osMessageQueuePut(instance->event_queue, event, 0, osWaitForever);
 }

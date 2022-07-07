@@ -3,12 +3,12 @@
 typedef enum {
     DesktopMainEventOpenLockMenu,
     DesktopMainEventOpenArchive,
-    DesktopMainEventOpenFavorite,
+    DesktopMainEventOpenFavoritePrimary,
+    DesktopMainEventOpenFavoriteSecondary,
     DesktopMainEventOpenMenu,
     DesktopMainEventOpenDebug,
-    DesktopMainEventRightShort,
-    DesktopMainEventBeforeAppStarted,
-    DesktopMainEventAfterAppFinished,
+    DesktopMainEventOpenPassport, /**< Broken, don't use it */
+    DesktopMainEventOpenPowerOff,
 
     DesktopLockedEventUnlocked,
     DesktopLockedEventUpdate,
@@ -26,9 +26,6 @@ typedef enum {
     DesktopDebugEventSaveState,
     DesktopDebugEventExit,
 
-    DesktopFirstStartCompleted,
-    DesktopFirstStartPoweroff,
-
     DesktopLockMenuEventLock,
     DesktopLockMenuEventPinLock,
     DesktopLockMenuEventExit,
@@ -37,4 +34,10 @@ typedef enum {
     DesktopAnimationEventNewIdleAnimation,
     DesktopAnimationEventInteractAnimation,
 
+    DesktopSlideshowCompleted,
+
+    // Global events
+    DesktopGlobalBeforeAppStarted,
+    DesktopGlobalAfterAppFinished,
+    DesktopGlobalAutoLock,
 } DesktopEvent;

@@ -7,7 +7,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <main.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,9 +57,11 @@ void furi_hal_rfid_tim_read_stop();
  */
 void furi_hal_rfid_tim_emulate(float freq);
 
+typedef void (*FuriHalRfidEmulateCallback)(void* context);
+
 /** Start emulation timer
  */
-void furi_hal_rfid_tim_emulate_start();
+void furi_hal_rfid_tim_emulate_start(FuriHalRfidEmulateCallback callback, void* context);
 
 /** Stop emulation timer
  */
@@ -69,14 +70,6 @@ void furi_hal_rfid_tim_emulate_stop();
 /** Config rfid timers to reset state
  */
 void furi_hal_rfid_tim_reset();
-
-/** Check that timer instance is emulation timer
- *
- * @param      hw    timer instance
- *
- * @return     true if instance is emulation timer
- */
-bool furi_hal_rfid_is_tim_emulate(TIM_HandleTypeDef* hw);
 
 /** Set emulation timer period
  *
@@ -108,6 +101,17 @@ void furi_hal_rfid_set_read_pulse(uint32_t pulse);
  * @param      duty_cycle  new duty cycle
  */
 void furi_hal_rfid_change_read_config(float freq, float duty_cycle);
+
+/** Start/Enable comparator */
+void furi_hal_rfid_comp_start();
+
+/** Stop/Disable comparator */
+void furi_hal_rfid_comp_stop();
+
+typedef void (*FuriHalRfidCompCallback)(bool level, void* context);
+
+/** Set comparator callback */
+void furi_hal_rfid_comp_set_callback(FuriHalRfidCompCallback callback, void* context);
 
 #ifdef __cplusplus
 }

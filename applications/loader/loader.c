@@ -29,16 +29,13 @@ static bool
     furi_thread_set_callback(
         loader_instance->application_thread, loader_instance->application->app);
 
-    bool result = furi_thread_start(loader_instance->application_thread);
+    furi_thread_start(loader_instance->application_thread);
 
-    if(!result) {
-        loader_instance->application = NULL;
-    }
-
-    return result;
+    return true;
 }
 
 static void loader_menu_callback(void* _ctx, uint32_t index) {
+    UNUSED(index);
     const FlipperApplication* application = _ctx;
 
     furi_assert(application->app);
@@ -53,6 +50,7 @@ static void loader_menu_callback(void* _ctx, uint32_t index) {
 }
 
 static void loader_submenu_callback(void* context, uint32_t index) {
+    UNUSED(index);
     uint32_t view_id = (uint32_t)context;
     view_dispatcher_switch_to_view(loader_instance->view_dispatcher, view_id);
 }
@@ -65,39 +63,48 @@ static void loader_cli_print_usage() {
     printf("\topen <Application Name:string>\t - Open application by name\r\n");
 }
 
+static FlipperApplication const* loader_find_application_by_name_in_list(
+    const char* name,
+    const FlipperApplication* list,
+    const uint32_t n_apps) {
+    for(size_t i = 0; i < n_apps; i++) {
+        if(strcmp(name, list[i].name) == 0) {
+            return &list[i];
+        }
+    }
+    return NULL;
+}
+
 const FlipperApplication* loader_find_application_by_name(const char* name) {
     const FlipperApplication* application = NULL;
-
-    for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        if(strcmp(name, FLIPPER_APPS[i].name) == 0) {
-            application = &FLIPPER_APPS[i];
-        }
+    application = loader_find_application_by_name_in_list(name, FLIPPER_APPS, FLIPPER_APPS_COUNT);
+    if(!application) {
+        application =
+            loader_find_application_by_name_in_list(name, FLIPPER_PLUGINS, FLIPPER_PLUGINS_COUNT);
     }
-
-    for(size_t i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
-        if(strcmp(name, FLIPPER_PLUGINS[i].name) == 0) {
-            application = &FLIPPER_PLUGINS[i];
-        }
+    if(!application) {
+        application = loader_find_application_by_name_in_list(
+            name, FLIPPER_SETTINGS_APPS, FLIPPER_SETTINGS_APPS_COUNT);
     }
-
-    for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
-        if(strcmp(name, FLIPPER_SETTINGS_APPS[i].name) == 0) {
-            application = &FLIPPER_SETTINGS_APPS[i];
-        }
+    if(!application) {
+        application = loader_find_application_by_name_in_list(
+            name, FLIPPER_SYSTEM_APPS, FLIPPER_SYSTEM_APPS_COUNT);
     }
-
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        for(size_t i = 0; i < FLIPPER_DEBUG_APPS_COUNT; i++) {
-            if(strcmp(name, FLIPPER_DEBUG_APPS[i].name) == 0) {
-                application = &FLIPPER_DEBUG_APPS[i];
-            }
-        }
+    if(!application) {
+        application = loader_find_application_by_name_in_list(
+            name, FLIPPER_DEBUG_APPS, FLIPPER_DEBUG_APPS_COUNT);
     }
 
     return application;
 }
 
 void loader_cli_open(Cli* cli, string_t args, Loader* instance) {
+    UNUSED(cli);
+    if(loader_is_locked(instance)) {
+        printf("Can't start, furi application is running");
+        return;
+    }
+
     string_t application_name;
     string_init(application_name);
 
@@ -131,6 +138,9 @@ void loader_cli_open(Cli* cli, string_t args, Loader* instance) {
 }
 
 void loader_cli_list(Cli* cli, string_t args, Loader* instance) {
+    UNUSED(cli);
+    UNUSED(args);
+    UNUSED(instance);
     printf("Applications:\r\n");
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_APPS[i].name);
@@ -149,7 +159,7 @@ void loader_cli_list(Cli* cli, string_t args, Loader* instance) {
     }
 }
 
-void loader_cli(Cli* cli, string_t args, void* _ctx) {
+static void loader_cli(Cli* cli, string_t args, void* _ctx) {
     furi_assert(_ctx);
     Loader* instance = _ctx;
 
@@ -179,6 +189,7 @@ void loader_cli(Cli* cli, string_t args, void* _ctx) {
 }
 
 LoaderStatus loader_start(Loader* instance, const char* name, const char* args) {
+    UNUSED(instance);
     furi_assert(name);
 
     const FlipperApplication* application = loader_find_application_by_name(name);
@@ -230,27 +241,15 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
     if(thread_state == FuriThreadStateRunning) {
         event.type = LoaderEventTypeApplicationStarted;
         furi_pubsub_publish(loader_instance->pubsub, &event);
-        furi_hal_power_insomnia_enter();
 
-        // Snapshot current memory usage
-        instance->free_heap_size = memmgr_get_free_heap();
+        if(!loader_instance->application->flags & FlipperApplicationFlagInsomniaSafe) {
+            furi_hal_power_insomnia_enter();
+        }
     } else if(thread_state == FuriThreadStateStopped) {
-        /*
-         * Current Leak Sanitizer assumes that memory is allocated and freed
-         * inside one thread. Timers are allocated in one task, but freed in
-         * Timer-Task thread, and xTimerDelete() just put command to queue.
-         * To avoid some bad cases there are few fixes:
-         * 1) delay for Timer to process commands
-         * 2) there are 'heap diff' which shows difference in heap before task
-         * started and after task completed. In process of leakage monitoring
-         * both values should be taken into account.
-         */
-        delay(20);
-        int heap_diff = instance->free_heap_size - memmgr_get_free_heap();
         FURI_LOG_I(
             TAG,
-            "Application thread stopped. Heap allocation balance: %d. Thread allocation balance: %d.",
-            heap_diff,
+            "Application thread stopped. Free heap: %d. Thread allocation balance: %d.",
+            memmgr_get_free_heap(),
             furi_thread_get_heap_size(instance->application_thread));
 
         if(loader_instance->application_arguments) {
@@ -258,7 +257,9 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
             loader_instance->application_arguments = NULL;
         }
 
-        furi_hal_power_insomnia_exit();
+        if(!loader_instance->application->flags & FlipperApplicationFlagInsomniaSafe) {
+            furi_hal_power_insomnia_exit();
+        }
         loader_unlock(instance);
 
         event.type = LoaderEventTypeApplicationStopped;
@@ -267,6 +268,7 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
 }
 
 static uint32_t loader_hide_menu(void* context) {
+    UNUSED(context);
     return VIEW_NONE;
 }
 
@@ -289,10 +291,12 @@ static Loader* loader_alloc() {
 
 #ifdef SRV_CLI
     instance->cli = furi_record_open("cli");
-    cli_add_command(instance->cli, "loader", CliCommandFlagDefault, loader_cli, instance);
+    cli_add_command(instance->cli, "loader", CliCommandFlagParallelSafe, loader_cli, instance);
+#else
+    UNUSED(loader_cli);
 #endif
 
-    instance->loader_thread = osThreadGetId();
+    instance->loader_thread = furi_thread_get_current_id();
 
     // Gui
     instance->gui = furi_record_open("gui");
@@ -386,7 +390,7 @@ static void loader_build_menu() {
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         menu_add_item(
             loader_instance->primary_menu,
-            "Debug tools",
+            "Debug Tools",
             &A_Debug_14,
             i++,
             loader_submenu_callback,
@@ -436,7 +440,7 @@ static void loader_build_submenu() {
 
 void loader_show_menu() {
     furi_assert(loader_instance);
-    osThreadFlagsSet(loader_instance->loader_thread, LOADER_THREAD_FLAG_SHOW_MENU);
+    furi_thread_flags_set(loader_instance->loader_thread, LOADER_THREAD_FLAG_SHOW_MENU);
 }
 
 void loader_update_menu() {
@@ -445,17 +449,17 @@ void loader_update_menu() {
 }
 
 int32_t loader_srv(void* p) {
-    FURI_LOG_I(TAG, "Starting");
+    UNUSED(p);
+    FURI_LOG_I(TAG, "Executing system start hooks");
+    for(size_t i = 0; i < FLIPPER_ON_SYSTEM_START_COUNT; i++) {
+        FLIPPER_ON_SYSTEM_START[i]();
+    }
 
+    FURI_LOG_I(TAG, "Starting");
     loader_instance = loader_alloc();
 
     loader_build_menu();
     loader_build_submenu();
-
-    // Call on start hooks
-    for(size_t i = 0; i < FLIPPER_ON_SYSTEM_START_COUNT; i++) {
-        FLIPPER_ON_SYSTEM_START[i]();
-    }
 
     FURI_LOG_I(TAG, "Started");
 
@@ -466,7 +470,8 @@ int32_t loader_srv(void* p) {
 #endif
 
     while(1) {
-        uint32_t flags = osThreadFlagsWait(LOADER_THREAD_FLAG_ALL, osFlagsWaitAny, osWaitForever);
+        uint32_t flags =
+            furi_thread_flags_wait(LOADER_THREAD_FLAG_ALL, osFlagsWaitAny, osWaitForever);
         if(flags & LOADER_THREAD_FLAG_SHOW_MENU) {
             menu_set_selected_item(loader_instance->primary_menu, 0);
             view_dispatcher_switch_to_view(

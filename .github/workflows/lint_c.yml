@@ -10,11 +10,11 @@ on:
   pull_request:
 
 env:
-  TARGETS: f6 f7
+  TARGETS: f7
 
 jobs:
   lint_c_cpp:
-    runs-on: [self-hosted,Office]
+    runs-on: [self-hosted,FlipperZero]
     steps:
       - name: 'Cleanup workspace'
         uses: AutoModality/action-clean@v1
@@ -47,7 +47,7 @@ jobs:
         id: syntax_check
         uses: ./.github/actions/docker
         with:
-          run: SET_GH_OUTPUT=1 make lint
+          run: SET_GH_OUTPUT=1 ./fbt lint
 
       - name: Report code formatting errors
         if: failure() && steps.syntax_check.outputs.errors && github.event.pull_request

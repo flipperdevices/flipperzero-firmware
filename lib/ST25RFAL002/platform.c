@@ -1,54 +1,65 @@
 #include "platform.h"
 #include <assert.h>
-#include <main.h>
 #include <furi.h>
 #include <furi_hal_spi.h>
 
-static const osThreadAttr_t platform_irq_thread_attr = {
-    .name = "RfalIrqDriver",
-    .stack_size = 1024,
-    .priority = osPriorityRealtime,
+typedef struct {
+    FuriThread* thread;
+    volatile PlatformIrqCallback callback;
+    bool need_spi_lock;
+} RfalPlatform;
+
+static volatile RfalPlatform rfal_platform = {
+    .thread = NULL,
+    .callback = NULL,
+    .need_spi_lock = true,
 };
 
-static volatile osThreadId_t platform_irq_thread_id = NULL;
-static volatile PlatformIrqCallback platform_irq_callback = NULL;
-static const GpioPin pin = {ST25R_INT_PORT, ST25R_INT_PIN};
-
 void nfc_isr(void* _ctx) {
-    if(platform_irq_callback && platformGpioIsHigh(ST25R_INT_PORT, ST25R_INT_PIN)) {
-        osThreadFlagsSet(platform_irq_thread_id, 0x1);
+    UNUSED(_ctx);
+    if(rfal_platform.callback && platformGpioIsHigh(ST25R_INT_PORT, ST25R_INT_PIN)) {
+        furi_thread_flags_set(furi_thread_get_id(rfal_platform.thread), 0x1);
     }
 }
 
-void platformIrqThread() {
+int32_t rfal_platform_irq_thread(void* context) {
+    UNUSED(context);
+
     while(1) {
-        uint32_t flags = osThreadFlagsWait(0x1, osFlagsWaitAny, osWaitForever);
+        uint32_t flags = furi_thread_flags_wait(0x1, osFlagsWaitAny, osWaitForever);
         if(flags & 0x1) {
-            platform_irq_callback();
+            rfal_platform.callback();
         }
     }
 }
 
 void platformEnableIrqCallback() {
-    hal_gpio_init(&pin, GpioModeInterruptRise, GpioPullDown, GpioSpeedLow);
-    hal_gpio_enable_int_callback(&pin);
+    furi_hal_gpio_init(&gpio_nfc_irq_rfid_pull, GpioModeInterruptRise, GpioPullDown, GpioSpeedLow);
+    furi_hal_gpio_enable_int_callback(&gpio_nfc_irq_rfid_pull);
 }
 
 void platformDisableIrqCallback() {
-    hal_gpio_init(&pin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
-    hal_gpio_disable_int_callback(&pin);
+    furi_hal_gpio_init(&gpio_nfc_irq_rfid_pull, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_disable_int_callback(&gpio_nfc_irq_rfid_pull);
 }
 
 void platformSetIrqCallback(PlatformIrqCallback callback) {
-    platform_irq_callback = callback;
-    platform_irq_thread_id = osThreadNew(platformIrqThread, NULL, &platform_irq_thread_attr);
-    hal_gpio_add_int_callback(&pin, nfc_isr, NULL);
+    rfal_platform.callback = callback;
+    rfal_platform.thread = furi_thread_alloc();
+
+    furi_thread_set_name(rfal_platform.thread, "RfalIrqDriver");
+    furi_thread_set_callback(rfal_platform.thread, rfal_platform_irq_thread);
+    furi_thread_set_stack_size(rfal_platform.thread, 1024);
+    furi_thread_set_priority(rfal_platform.thread, FuriThreadPriorityIsr);
+    furi_thread_start(rfal_platform.thread);
+
+    furi_hal_gpio_add_int_callback(&gpio_nfc_irq_rfid_pull, nfc_isr, NULL);
     // Disable interrupt callback as the pin is shared between 2 apps
     // It is enabled in rfalLowPowerModeStop()
-    hal_gpio_disable_int_callback(&pin);
+    furi_hal_gpio_disable_int_callback(&gpio_nfc_irq_rfid_pull);
 }
 
-HAL_StatusTypeDef platformSpiTxRx(const uint8_t* txBuf, uint8_t* rxBuf, uint16_t len) {
+bool platformSpiTxRx(const uint8_t* txBuf, uint8_t* rxBuf, uint16_t len) {
     bool ret = false;
     if(txBuf && rxBuf) {
         ret =
@@ -59,17 +70,33 @@ HAL_StatusTypeDef platformSpiTxRx(const uint8_t* txBuf, uint8_t* rxBuf, uint16_t
         ret = furi_hal_spi_bus_rx(&furi_hal_spi_bus_handle_nfc, (uint8_t*)rxBuf, len, 1000);
     }
 
-    if(!ret) {
-        return HAL_ERROR;
-    } else {
-        return HAL_OK;
-    }
+    return ret;
 }
 
-void platformProtectST25RComm() {
+// Until we completely remove RFAL, NFC works with SPI from rfal_platform_irq_thread and nfc_worker
+// threads. Some nfc features already stop using RFAL and work with SPI from nfc_worker only.
+// rfal_platform_spi_acquire() and rfal_platform_spi_release() functions are used to lock SPI for a
+// long term without locking it for each SPI transaction. This is needed for time critical communications.
+void rfal_platform_spi_acquire() {
+    platformDisableIrqCallback();
+    rfal_platform.need_spi_lock = false;
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_nfc);
 }
 
-void platformUnprotectST25RComm() {
+void rfal_platform_spi_release() {
     furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
+    rfal_platform.need_spi_lock = true;
+    platformEnableIrqCallback();
+}
+
+void platformProtectST25RComm() {
+    if(rfal_platform.need_spi_lock) {
+        furi_hal_spi_acquire(&furi_hal_spi_bus_handle_nfc);
+    }
+}
+
+void platformUnprotectST25RComm() {
+    if(rfal_platform.need_spi_lock) {
+        furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
+    }
 }

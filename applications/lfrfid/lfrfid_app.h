@@ -1,4 +1,5 @@
 #pragma once
+#include "m-string.h"
 #include <furi.h>
 #include <furi_hal.h>
 
@@ -20,6 +21,7 @@
 #include <dialogs/dialogs.h>
 
 #include "helpers/rfid_worker.h"
+#include "rpc/rpc_app.h"
 
 class LfRfidApp {
 public:
@@ -27,13 +29,19 @@ public:
         GENERIC_EVENT_ENUM_VALUES,
         Next,
         MenuSelected,
+        Stay,
+        Retry,
+        Exit,
+        EmulateStart,
     };
 
     enum class SceneType : uint8_t {
         GENERIC_SCENE_ENUM_VALUES,
         Read,
         ReadSuccess,
-        ReadedMenu,
+        RetryConfirm,
+        ExitConfirm,
+        ReadKeyMenu,
         Write,
         WriteSuccess,
         Emulate,
@@ -46,6 +54,7 @@ public:
         SavedInfo,
         DeleteConfirm,
         DeleteSuccess,
+        Rpc,
     };
 
     class Event {
@@ -72,6 +81,10 @@ public:
 
     TextStore text_store;
 
+    string_t file_path;
+
+    RpcAppSystem* rpc_ctx;
+
     void run(void* args);
 
     static const char* app_folder;
@@ -82,8 +95,9 @@ public:
     bool load_key_from_file_select(bool need_restore);
     bool delete_key(RfidKey* key);
 
-    bool load_key_data(const char* path, RfidKey* key);
-    bool save_key_data(const char* path, RfidKey* key);
+    bool load_key_data(string_t path, RfidKey* key, bool show_dialog);
+    bool save_key_data(string_t path, RfidKey* key);
 
     void make_app_folder();
+    //bool rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context);
 };
