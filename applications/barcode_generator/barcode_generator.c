@@ -227,7 +227,7 @@ void number_9(
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    const PluginState* plugin_state = acquire_mutex((ValueMutex*)ctx, 25);
+    PluginState* plugin_state = acquire_mutex((ValueMutex*)ctx, 25);
     if(plugin_state == NULL) {
         return;
     }
@@ -257,6 +257,26 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         bool isOnRight = false;
         if(index >= 6) {
             isOnRight = true;
+        }
+        if(index == 11) { //calculate the check digit
+            int checkDigit = plugin_state->barcodeNumeral[0] + plugin_state->barcodeNumeral[2] +
+                             plugin_state->barcodeNumeral[4] + plugin_state->barcodeNumeral[6] +
+                             plugin_state->barcodeNumeral[8] + plugin_state->barcodeNumeral[10];
+            //add all odd positions Confusing because 0index
+            checkDigit = checkDigit * 3; //times 3
+            checkDigit +=
+                plugin_state->barcodeNumeral[1] + plugin_state->barcodeNumeral[3] +
+                plugin_state->barcodeNumeral[5] + plugin_state->barcodeNumeral[7] +
+                plugin_state->barcodeNumeral[9]; 
+            //add all even positions to above. Confusing because 0index
+            checkDigit = checkDigit % 10; //mod 10
+            //if m - 0 then x12 = 0, otherwise x12 is 10 - m
+            if(checkDigit == 0) {
+                plugin_state->barcodeNumeral[11] = 0;
+            } else {
+                checkDigit = 10 - checkDigit;
+                plugin_state->barcodeNumeral[11] = checkDigit;
+            }
         }
         switch(plugin_state->barcodeNumeral[index]) {
         case 0:
@@ -302,12 +322,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     if(plugin_state->editingMode) {
         canvas_set_color(canvas, ColorBlack);
-        canvas_draw_box(
-            canvas,
-            editingMarkerPosition[plugin_state->editingIndex],
-            63,
-            7,
-            1); //draw editing cursor
+        canvas_draw_box(canvas,editingMarkerPosition[plugin_state->editingIndex],63,7,1); //draw editing cursor
     }
 
     canvas_set_color(canvas, ColorBlack);
@@ -323,6 +338,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     release_mutex((ValueMutex*)ctx, plugin_state);
 }
+
 
 static void input_callback(InputEvent* input_event, osMessageQueueId_t event_queue) {
     furi_assert(event_queue);
@@ -397,7 +413,7 @@ int32_t barcode_generator_app(void* p) {
                         if(plugin_state->editingMode) {
                             plugin_state->editingIndex++;
                         }
-                        if(plugin_state->editingIndex >= 12) {
+                        if(plugin_state->editingIndex >= 11) {
                             plugin_state->editingIndex = 0;
                         }
                         break;
@@ -406,7 +422,7 @@ int32_t barcode_generator_app(void* p) {
                             plugin_state->editingIndex--;
                         }
                         if(plugin_state->editingIndex < 0) {
-                            plugin_state->editingIndex = 11;
+                            plugin_state->editingIndex = 10;
                         }
                         break;
                     case InputKeyOk:
