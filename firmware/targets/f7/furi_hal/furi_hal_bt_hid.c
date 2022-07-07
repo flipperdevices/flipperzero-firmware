@@ -15,21 +15,19 @@
 #define FURI_HAL_BT_HID_KB_MAX_KEYS 6
 #define FURI_HAL_BT_HID_CONSUMER_MAX_KEYS 1
 
-enum HidReportId {
-    ReportIdKeyboard = 1,
-    ReportIdMouse = 2,
-    ReportIdConsumer = 3,
+enum HidInputNumber {
+    ReportIdKeyboard = 0, // Maps to report id 1
+    ReportIdMouse = 1, // Maps to report id 2
+    ReportIdConsumer = 2, // Maps to report id 3
 };
 
 typedef struct {
-    uint8_t report_id;
     uint8_t mods;
     uint8_t reserved;
     uint8_t key[FURI_HAL_BT_HID_KB_MAX_KEYS];
 } __attribute__((__packed__)) FuriHalBtHidKbReport;
 
 typedef struct {
-    uint8_t report_id;
     uint8_t btn;
     int8_t x;
     int8_t y;
@@ -37,7 +35,6 @@ typedef struct {
 } __attribute__((__packed__)) FuriHalBtHidMouseReport;
 
 typedef struct {
-    uint8_t report_id;
     uint16_t key[FURI_HAL_BT_HID_CONSUMER_MAX_KEYS];
 } __attribute__((__packed__)) FuriHalBtHidConsumerReport;
 
@@ -136,11 +133,8 @@ void furi_hal_bt_hid_start() {
     }
     // Configure HID Keyboard
     kb_report = malloc(sizeof(FuriHalBtHidKbReport));
-    kb_report->report_id = ReportIdKeyboard;
     mouse_report = malloc(sizeof(FuriHalBtHidMouseReport));
-    mouse_report->report_id = ReportIdMouse;
     consumer_report = malloc(sizeof(FuriHalBtHidConsumerReport));
-    consumer_report->report_id = ReportIdConsumer;
     // Configure Report Map characteristic
     hid_svc_update_report_map(
         furi_hal_bt_hid_report_map_data, sizeof(furi_hal_bt_hid_report_map_data));
@@ -186,7 +180,8 @@ bool furi_hal_bt_hid_kb_press(uint16_t button) {
         }
     }
     kb_report->mods |= (button >> 8);
-    return hid_svc_update_input_report((uint8_t*)kb_report, sizeof(FuriHalBtHidKbReport));
+    return hid_svc_update_input_report(
+        ReportIdKeyboard, (uint8_t*)kb_report, sizeof(FuriHalBtHidKbReport));
 }
 
 bool furi_hal_bt_hid_kb_release(uint16_t button) {
@@ -198,7 +193,8 @@ bool furi_hal_bt_hid_kb_release(uint16_t button) {
         }
     }
     kb_report->mods &= ~(button >> 8);
-    return hid_svc_update_input_report((uint8_t*)kb_report, sizeof(FuriHalBtHidKbReport));
+    return hid_svc_update_input_report(
+        ReportIdKeyboard, (uint8_t*)kb_report, sizeof(FuriHalBtHidKbReport));
 }
 
 bool furi_hal_bt_hid_kb_release_all() {
@@ -207,7 +203,8 @@ bool furi_hal_bt_hid_kb_release_all() {
         kb_report->key[i] = 0;
     }
     kb_report->mods = 0;
-    return hid_svc_update_input_report((uint8_t*)kb_report, sizeof(FuriHalBtHidKbReport));
+    return hid_svc_update_input_report(
+        ReportIdKeyboard, (uint8_t*)kb_report, sizeof(FuriHalBtHidKbReport));
 }
 
 bool furi_hal_bt_hid_consumer_key_press(uint16_t button) {
@@ -219,7 +216,7 @@ bool furi_hal_bt_hid_consumer_key_press(uint16_t button) {
         }
     }
     return hid_svc_update_input_report(
-        (uint8_t*)consumer_report, sizeof(FuriHalBtHidConsumerReport));
+        ReportIdConsumer, (uint8_t*)consumer_report, sizeof(FuriHalBtHidConsumerReport));
 }
 
 bool furi_hal_bt_hid_consumer_key_release(uint16_t button) {
@@ -231,7 +228,7 @@ bool furi_hal_bt_hid_consumer_key_release(uint16_t button) {
         }
     }
     return hid_svc_update_input_report(
-        (uint8_t*)consumer_report, sizeof(FuriHalBtHidConsumerReport));
+        ReportIdConsumer, (uint8_t*)consumer_report, sizeof(FuriHalBtHidConsumerReport));
 }
 
 bool furi_hal_bt_hid_consumer_key_release_all() {
@@ -240,15 +237,15 @@ bool furi_hal_bt_hid_consumer_key_release_all() {
         consumer_report->key[i] = 0;
     }
     return hid_svc_update_input_report(
-        (uint8_t*)consumer_report, sizeof(FuriHalBtHidConsumerReport));
+        ReportIdConsumer, (uint8_t*)consumer_report, sizeof(FuriHalBtHidConsumerReport));
 }
 
 bool furi_hal_bt_hid_mouse_move(int8_t dx, int8_t dy) {
     furi_assert(mouse_report);
     mouse_report->x = dx;
     mouse_report->y = dy;
-    bool state =
-        hid_svc_update_input_report((uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
+    bool state = hid_svc_update_input_report(
+        ReportIdMouse, (uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
     mouse_report->x = 0;
     mouse_report->y = 0;
     return state;
@@ -257,26 +254,29 @@ bool furi_hal_bt_hid_mouse_move(int8_t dx, int8_t dy) {
 bool furi_hal_bt_hid_mouse_press(uint8_t button) {
     furi_assert(mouse_report);
     mouse_report->btn |= button;
-    return hid_svc_update_input_report((uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
+    return hid_svc_update_input_report(
+        ReportIdMouse, (uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
 }
 
 bool furi_hal_bt_hid_mouse_release(uint8_t button) {
     furi_assert(mouse_report);
     mouse_report->btn &= ~button;
-    return hid_svc_update_input_report((uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
+    return hid_svc_update_input_report(
+        ReportIdMouse, (uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
 }
 
 bool furi_hal_bt_hid_mouse_release_all() {
     furi_assert(mouse_report);
     mouse_report->btn = 0;
-    return hid_svc_update_input_report((uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
+    return hid_svc_update_input_report(
+        ReportIdMouse, (uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
 }
 
 bool furi_hal_bt_hid_mouse_scroll(int8_t delta) {
     furi_assert(mouse_report);
     mouse_report->wheel = delta;
-    bool state =
-        hid_svc_update_input_report((uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
+    bool state = hid_svc_update_input_report(
+        ReportIdMouse, (uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
     mouse_report->wheel = 0;
     return state;
 }
