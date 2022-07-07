@@ -1,7 +1,7 @@
 #include <gui/elements.h>
 #include "chip8_view.h"
 #include "../chip8.h"
-#include "../emulator-core/flipper-chip.h"
+#include "../emulator-core/flipper_chip.h"
 
 struct Chip8View {
     View* view;
