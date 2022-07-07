@@ -475,6 +475,13 @@ static void loader_build_submenu() {
     }
 }
 
+void loader_show_game_menu() {
+    furi_assert(loader_instance);
+    menu_set_selected_item(loader_instance->primary_menu, 10);
+    view_dispatcher_switch_to_view(loader_instance->view_dispatcher, LoaderMenuViewGames);
+    view_dispatcher_run(loader_instance->view_dispatcher);
+}
+
 void loader_show_menu() {
     furi_assert(loader_instance);
     furi_thread_flags_set(loader_instance->loader_thread, LOADER_THREAD_FLAG_SHOW_MENU);
