@@ -25,6 +25,7 @@ $ docker-compose exec dev ./fbt
 - - LEFT + HOLD LEFT FOR CLOCK/PRIMARY FAVORITE
 - - RIGHT ALWAYS WILL GO TO PASSPORT
 - - UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
+- Updated [UPC Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
     
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
