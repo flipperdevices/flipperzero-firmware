@@ -2,8 +2,8 @@
 // Created by dwdraugr on 24.11.2021.
 //
 
-#include "flipper-chip.h"
-#include "flipper-fonts.h"
+#include "flipper_chip.h"
+#include "flipper_fonts.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
