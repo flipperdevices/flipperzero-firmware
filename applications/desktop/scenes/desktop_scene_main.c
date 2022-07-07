@@ -87,7 +87,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
                 
         case DesktopMainEventOpenGames:
-            loader_submenu_callback((void*)context,3);
+            loader_submenu_callback((void*)context,10);
             consumed = true;
             break;
 
