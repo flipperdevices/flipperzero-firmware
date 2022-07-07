@@ -87,7 +87,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
                 
         case DesktopMainEventOpenGames:
-            FlipperApplication* context2 = loader_find_application_by_name("Games");
+            const FlipperApplication* context2 = loader_find_application_by_name("Games");
             loader_submenu_callback((void*)context2,10);
             consumed = true;
             break;
