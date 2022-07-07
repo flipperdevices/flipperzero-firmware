@@ -102,7 +102,7 @@ bool desktop_main_input(InputEvent* event, void* context) {
                     codeSequence++;
                 } else {
                     codeSequence=0;
-                    main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
+                    main_view->callback(DesktopMainEventOpenClock, main_view->context);
                 }
             } else if(event->key == InputKeyRight) {
                 // GOES TO PASSPORT NO MATTER WHAT
@@ -120,8 +120,7 @@ bool desktop_main_input(InputEvent* event, void* context) {
             } else if(event->key == InputKeyDown) {
                 main_view->callback(DesktopMainEventOpenDebug, main_view->context);
             } else if(event->key == InputKeyLeft) {
-                // PREFER TO OPEN CLOCK INSTEAD OF FAVORITE PRIMARY, BUT THIS WILL DO
-                main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
+                main_view->callback(DesktopMainEventOpenClock, main_view->context);
             } else if(event->key == InputKeyRight) {
                 // THIS DOESNT WORK, PASSPORT WILL ONLY OPEN ON REGULAR RIGHT, NOTHING CAN GET ASSIGNED HERE
             }
