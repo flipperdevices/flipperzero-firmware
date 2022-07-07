@@ -77,7 +77,7 @@ void desktop_lock_menu_render(Canvas* canvas, void* model) {
         if(i == 1 && !m->pin_set) str = "Set PIN";
        
         if(m->hint_timeout && m->idx == 2 && m->idx == i) {
-            str = "UUDDLCLC For Main Menu";
+            str = "UUDDLCLC For Main";
             canvas_draw_str_aligned(
                 canvas, 64, 9 + (i * 17) + STATUS_BAR_Y_SHIFT, AlignCenter, AlignCenter, str);
         } else if(str != NULL) {
