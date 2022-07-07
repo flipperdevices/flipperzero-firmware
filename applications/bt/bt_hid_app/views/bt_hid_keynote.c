@@ -75,7 +75,7 @@ static void bt_hid_keynote_draw_callback(Canvas* canvas, void* context) {
     // Right
     canvas_draw_icon(canvas, 42, 45, &I_Button_18x18);
     if(model->right_pressed) {
-        elements_slightly_rounded_box(canvas, 65, 47, 13, 13);
+        elements_slightly_rounded_box(canvas, 45, 47, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
     bt_hid_keynote_draw_arrow(canvas, 53, 53, CanvasDirectionLeftToRight);
