@@ -77,8 +77,12 @@ bool desktop_main_input(InputEvent* event, void* context) {
     } else {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
-                // PREFER TO OPEN GAMES MENU
-                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+                // PREFER TO OPEN GAMES MENU, SINCE RIGHT ONLY WORKS FOR PASSPORT NEED TO USE TO EXIT GAME MODE
+                if(codeSequence==5 || codeSequence==7) {
+                    codeSequence++;
+                } else {
+                    codeSequence=0;
+                }
             } else if(event->key == InputKeyUp) {
                 if(codeSequence==0 || codeSequence==1) {
                     codeSequence++;
@@ -98,11 +102,6 @@ bool desktop_main_input(InputEvent* event, void* context) {
                     codeSequence=0;
                 }
             } else if(event->key == InputKeyRight) {
-                if(codeSequence==5 || codeSequence==7) {
-                    codeSequence++;
-                } else {
-                    codeSequence=0;
-                }
                 // GOES TO PASSPORT NO MATTER WHAT
             }
             if(codeSequence==8) {
