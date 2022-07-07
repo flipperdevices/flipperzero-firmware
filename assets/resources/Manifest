@@ -1,5 +1,5 @@
 V:0
-T:1657088119
+T:1657216928
 D:badusb
 D:dolphin
 D:infrared
@@ -235,7 +235,7 @@ F:dda1ef895b8a25fde57c874feaaef997:650:subghz/assets/came_atomo
 F:610a0ffa2479a874f2060eb2348104c5:2712:subghz/assets/keeloq_mfcodes
 F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
-F:2b58b89f4d01e5fe2ea6dc8b48900f50:1339:subghz/assets/setting_user
+F:22c2dff53c68a8fe576c7e9fbd9f2d54:1340:subghz/assets/setting_user
 F:76460390a308e933a2c134e1e1aeb1e7:258:subghz/assets/touchtunes_map.txt
 F:19e77ea1b0b5d83a25af1d5e8103cd0d:375:subghz/assets/universal_rf_map.txt
 D:u2f/assets
