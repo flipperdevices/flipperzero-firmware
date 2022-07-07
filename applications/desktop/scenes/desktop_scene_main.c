@@ -88,8 +88,8 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
                 
         case DesktopMainEventOpenGames:
             // const FlipperApplication* context2 = loader_find_application_by_name("Games");
-            // loader_submenu_callback((void*)10,10);
-            desktop_switch_to_app(desktop, &FLIPPER_GAMES);
+            loader_submenu_callback((void*)&FLIPPER_GAMES,10);
+            // desktop_switch_to_app(desktop, &FLIPPER_GAMES);
             consumed = true;
             break;
 
