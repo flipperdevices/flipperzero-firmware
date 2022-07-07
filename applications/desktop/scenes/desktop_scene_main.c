@@ -112,11 +112,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpenClock:
-            LoaderStatus status = loader_start(
-                desktop->loader, FLIPPER_APPS[0].name, NULL);
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
+            loader_start(desktop->loader, FLIPPER_APPS[0].name, NULL);
             consumed = true;
             break;
         case DesktopMainEventOpenFavoritePrimary:
