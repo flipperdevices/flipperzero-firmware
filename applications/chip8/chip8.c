@@ -5,7 +5,7 @@
 #include <lib/toolbox/args.h>
 #include <storage/storage.h>
 #include "chip8.h"
-#include "emulator-core/flipper-chip.h"
+#include "emulator-core/flipper_chip.h"
 
 #define TAG "Chip8Emulator"
 #define WORKER_TAG TAG "Worker"
