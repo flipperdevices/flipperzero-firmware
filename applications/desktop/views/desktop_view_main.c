@@ -82,12 +82,14 @@ bool desktop_main_input(InputEvent* event, void* context) {
                     codeSequence++;
                 } else {
                     codeSequence=0;
+                    main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
                 }
             } else if(event->key == InputKeyUp) {
                 if(codeSequence==0 || codeSequence==1) {
                     codeSequence++;
                 } else {
                     codeSequence=0;
+                    main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
                 }
             } else if(event->key == InputKeyDown) {
                 if(codeSequence==2 || codeSequence==3) {
@@ -100,6 +102,7 @@ bool desktop_main_input(InputEvent* event, void* context) {
                     codeSequence++;
                 } else {
                     codeSequence=0;
+                    main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
                 }
             } else if(event->key == InputKeyRight) {
                 // GOES TO PASSPORT NO MATTER WHAT
@@ -107,6 +110,7 @@ bool desktop_main_input(InputEvent* event, void* context) {
             if(codeSequence==8) {
                 // UNLOCK!
                 main_view->callback(DesktopMainEventOpenMenu, main_view->context);
+                codeSequence=0;
             }
         } else if(event->type == InputTypeLong) {
             if (event->key == InputKeyOk) {
@@ -114,9 +118,9 @@ bool desktop_main_input(InputEvent* event, void* context) {
             } else if(event->key == InputKeyUp) {
                 main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyDown) {
-                main_view->callback(DesktopMainEventOpenMenu, main_view->context);
+                // main_view->callback(DesktopMainEventOpenMenu, main_view->context);
             } else if(event->key == InputKeyLeft) {
-                // PREFER TO OPEN CLOCK
+                // PREFER TO OPEN CLOCK INSTEAD OF FAVORITE PRIMARY, BUT THIS WILL DO
                 main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
                 // main_view->callback(DesktopMainEventOpenPassport, main_view->context); THIS ONLY WORKS ON MENU RIGHT WITH NO HOLD
             } else if(event->key == InputKeyRight) {
