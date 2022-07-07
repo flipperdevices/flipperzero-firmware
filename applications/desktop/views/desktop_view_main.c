@@ -77,7 +77,6 @@ bool desktop_main_input(InputEvent* event, void* context) {
     } else {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
-                // PREFER TO OPEN GAMES MENU, SINCE RIGHT ONLY WORKS FOR PASSPORT NEED TO USE TO EXIT GAME MODE
                 if(codeSequence==5 || codeSequence==7) {
                     codeSequence++;
                 } else {
@@ -92,6 +91,7 @@ bool desktop_main_input(InputEvent* event, void* context) {
                     main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
                 }
             } else if(event->key == InputKeyDown) {
+                // PREFER TO OPEN GAMES MENU
                 if(codeSequence==2 || codeSequence==3) {
                     codeSequence++;
                 } else {
@@ -118,11 +118,10 @@ bool desktop_main_input(InputEvent* event, void* context) {
             } else if(event->key == InputKeyUp) {
                 main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyDown) {
-                // main_view->callback(DesktopMainEventOpenMenu, main_view->context);
+                main_view->callback(DesktopMainEventOpenDebug, main_view->context);
             } else if(event->key == InputKeyLeft) {
                 // PREFER TO OPEN CLOCK INSTEAD OF FAVORITE PRIMARY, BUT THIS WILL DO
                 main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
-                // main_view->callback(DesktopMainEventOpenPassport, main_view->context); THIS ONLY WORKS ON MENU RIGHT WITH NO HOLD
             } else if(event->key == InputKeyRight) {
                 // THIS DOESNT WORK, PASSPORT WILL ONLY OPEN ON REGULAR RIGHT, NOTHING CAN GET ASSIGNED HERE
             }
