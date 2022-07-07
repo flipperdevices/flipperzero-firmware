@@ -43,6 +43,14 @@ static void lock_menu_callback(void* context, uint8_t index) {
     case 1: // lock
         lock_menu->callback(DesktopLockMenuEventPinLock, lock_menu->context);
         break;
+    case 2: // GAMES ONLY MODE
+        // lock_menu->callback(DesktopLockMenuEventPinLock, lock_menu->context);
+        with_view_model(
+            lock_menu->view, (DesktopLockMenuViewModel * model) {
+                model->hint_timeout = HINT_TIMEOUT;
+                return true;
+            });
+        break;
     default: // wip message
         with_view_model(
             lock_menu->view, (DesktopLockMenuViewModel * model) {
