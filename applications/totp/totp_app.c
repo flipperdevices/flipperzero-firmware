@@ -109,6 +109,7 @@ void totp_app_update(void* ctx) {
 }
 
 int32_t totp_app(void* p) {
+    UNUSED(p);
     bool saved = false;
     Storage* storage = furi_record_open("storage");
     FlipperFormat* file = flipper_format_file_alloc(storage);
