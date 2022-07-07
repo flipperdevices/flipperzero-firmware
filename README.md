@@ -19,7 +19,17 @@ $ docker-compose exec dev ./fbt
 - Tanks, causes "StackOverflow". Not sure what broke it.
 - Updates for [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - Added [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Updated by RogueMaster, crashes quickly. Someone please fix.
-
+- Settings: Games Only setting under Desktop settings! (By RogueMaster)[(Thanks to Astrrra for Inverted Mode to Mimic)](https://github.com/wetox-team/flipperzero-firmware/commit/ce91582b7417c5d7a9d8416c17a102d3a5868238)
+- - DESKTOP LOOKS THE SAME WITH BATTERY AND IDLE ANIMATION
+- - EXIT OF GAMES/CLOCK GOES BACK TO GAMES ONLY MODE
+- - HOLD BACK TO TURN OFF FLIPPER
+- - RESTARTING REMEMBERS YOU ARE IN GAMES ONLY MODE
+- - CENTER + HOLD CENTER TO CHANGE IDLE ANIMATION
+- - UP + HOLD UP FOR FAVORITE GAME
+- - LEFT + HOLD LEFT FOR CLOCK/PRIMARY FAVORITE
+- - RIGHT ALWAYS WILL GO TO PASSPORT
+- - UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
+    
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
 - - Note 1: If you don't have a subghz/assets folder, you should ensure you have made at least one clean flash with stock firmware and your SD card installed in order to ensure the database structure is built, otherwise it will not exist for alternative forks.
