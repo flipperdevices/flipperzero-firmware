@@ -12,11 +12,10 @@
 #include <gui/modules/variable_item_list.h>
 #include "views/chip8_view.h"
 
-
 #define CHIP8_APP_PATH_FOLDER "/any/chip8"
 #define CHIP8_APP_EXTENSION ".ch8"
 
-struct Chip8App{
+struct Chip8App {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;

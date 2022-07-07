@@ -10,8 +10,6 @@ typedef void (*Chip8ViewKeyUpCallback)(InputType type, void* context);
 typedef void (*Chip8ViewKeyDownCallback)(InputType type, void* context);
 typedef void (*Chip8ViewReleaseCallback)(InputType type, void* context);
 
-
-
 Chip8View* chip8_alloc();
 
 void chip8_free(Chip8View* chip8);
@@ -23,7 +21,6 @@ void chip8_set_back_callback(Chip8View* chip8, Chip8ViewKeyBackCallback callback
 void chip8_set_up_callback(Chip8View* chip8, Chip8ViewKeyUpCallback callback, void* context);
 void chip8_set_down_callback(Chip8View* chip8, Chip8ViewKeyDownCallback callback, void* context);
 void chip8_set_release_callback(Chip8View* chip8, Chip8ViewReleaseCallback callback, void* context);
-
 
 void chip8_set_backup_screen(Chip8View* chip8, uint8_t** screen);
 

@@ -1,7 +1,7 @@
 #include <gui/elements.h>
 #include "chip8_view.h"
 #include "../chip8.h"
-#include "../emulator-core/flipper_chip.h"
+#include "../emulator_core/flipper_chip.h"
 
 struct Chip8View {
     View* view;
@@ -22,15 +22,15 @@ typedef struct {
 static void chip8_draw_callback(Canvas* canvas, void* _model) {
     Chip8Model* model = _model;
 
-    if (model->state.worker_state == WorkerStateLoadingRom) {
+    if(model->state.worker_state == WorkerStateLoadingRom) {
         canvas_draw_icon(canvas, 4, 22, &I_Clock_18x18);
     }
 
-    if (model->state.worker_state == WorkerStateRomLoaded) {
-        while (!model->state.t_chip8_state->go_render) {
-            for (int y = 0; y < CHIP8_SCREEN_H; y++) {
-                for (int x = 0; x < CHIP8_SCREEN_W; x++) {
-                    if (model->backup_screen[y][x] == 0) {
+    if(model->state.worker_state == WorkerStateRomLoaded) {
+        while(!model->state.t_chip8_state->go_render) {
+            for(int y = 0; y < CHIP8_SCREEN_H; y++) {
+                for(int x = 0; x < CHIP8_SCREEN_W; x++) {
+                    if(model->backup_screen[y][x] == 0) {
                         canvas_set_color(canvas, ColorWhite);
                     } else {
                         canvas_set_color(canvas, ColorBlack);
@@ -44,9 +44,9 @@ static void chip8_draw_callback(Canvas* canvas, void* _model) {
 
         uint8_t** screen = t_chip8_get_screen(model->state.t_chip8_state);
 
-        for (int y = 0; y < CHIP8_SCREEN_H; y++) {
-            for (int x = 0; x < CHIP8_SCREEN_W; x++) {
-                if (screen[y][x] == 0) {
+        for(int y = 0; y < CHIP8_SCREEN_H; y++) {
+            for(int x = 0; x < CHIP8_SCREEN_W; x++) {
+                if(screen[y][x] == 0) {
                     canvas_set_color(canvas, ColorWhite);
                 } else {
                     canvas_set_color(canvas, ColorBlack);
@@ -57,13 +57,11 @@ static void chip8_draw_callback(Canvas* canvas, void* _model) {
             }
         }
         model->state.t_chip8_state->go_render = false;
-
     }
 
-    if (model->state.worker_state == WorkerStateRomLoadError) {
+    if(model->state.worker_state == WorkerStateRomLoadError) {
         canvas_draw_icon(canvas, 4, 22, &I_Error_18x18);
     }
-
 }
 
 static bool chip8_input_callback(InputEvent* event, void* context) {
@@ -96,8 +94,7 @@ static bool chip8_input_callback(InputEvent* event, void* context) {
             chip8->downCallback(InputTypeShort, chip8->context);
         }
     }
-    if (event->type == InputTypeRelease)
-    {
+    if(event->type == InputTypeRelease) {
         chip8->releaseCallback(InputTypeShort, chip8->context);
     }
 
@@ -131,7 +128,7 @@ void chip8_set_ok_callback(Chip8View* chip8, Chip8ViewCallback callback, void* c
     furi_assert(chip8);
     furi_assert(callback);
     with_view_model(
-        chip8->view, (Chip8Model* model) {
+        chip8->view, (Chip8Model * model) {
             chip8->callback = callback;
             chip8->context = context;
             return false;
@@ -142,7 +139,7 @@ void chip8_set_back_callback(Chip8View* chip8, Chip8ViewKeyBackCallback callback
     furi_assert(chip8);
     furi_assert(callback);
     with_view_model(
-        chip8->view, (Chip8Model* model) {
+        chip8->view, (Chip8Model * model) {
             chip8->backCallback = callback;
             chip8->context = context;
             return true;
@@ -153,7 +150,7 @@ void chip8_set_up_callback(Chip8View* chip8, Chip8ViewKeyUpCallback callback, vo
     furi_assert(chip8);
     furi_assert(callback);
     with_view_model(
-        chip8->view, (Chip8Model* model) {
+        chip8->view, (Chip8Model * model) {
             chip8->upCallback = callback;
             chip8->context = context;
             return true;
@@ -164,7 +161,7 @@ void chip8_set_down_callback(Chip8View* chip8, Chip8ViewKeyDownCallback callback
     furi_assert(chip8);
     furi_assert(callback);
     with_view_model(
-        chip8->view, (Chip8Model* model) {
+        chip8->view, (Chip8Model * model) {
             chip8->downCallback = callback;
             chip8->context = context;
             return true;
@@ -174,7 +171,7 @@ void chip8_set_down_callback(Chip8View* chip8, Chip8ViewKeyDownCallback callback
 void chip8_set_file_name(Chip8View* chip8, string_t name) {
     furi_assert(name);
     with_view_model(
-        chip8->view, (Chip8Model* model) {
+        chip8->view, (Chip8Model * model) {
             *model->file_name = *name;
             return false;
         });
@@ -183,7 +180,7 @@ void chip8_set_file_name(Chip8View* chip8, string_t name) {
 void chip8_set_backup_screen(Chip8View* chip8, uint8_t** screen) {
     furi_assert(screen);
     with_view_model(
-        chip8->view, (Chip8Model* model) {
+        chip8->view, (Chip8Model * model) {
             model->backup_screen = screen;
             return false;
         });
@@ -192,21 +189,19 @@ void chip8_set_backup_screen(Chip8View* chip8, uint8_t** screen) {
 void chip8_set_state(Chip8View* chip8, Chip8State* st) {
     furi_assert(st);
     with_view_model(
-        chip8->view, (Chip8Model* model) {
+        chip8->view, (Chip8Model * model) {
             memcpy(&(model->state), st, sizeof(Chip8State));
             return true;
         });
 }
 
-void chip8_set_release_callback(Chip8View* chip8, Chip8ViewReleaseCallback callback, void*
-                                                                                         context) {
+void chip8_set_release_callback(Chip8View* chip8, Chip8ViewReleaseCallback callback, void* context) {
     furi_assert(chip8);
     furi_assert(callback);
     with_view_model(
-        chip8->view, (Chip8Model* model) {
+        chip8->view, (Chip8Model * model) {
             chip8->releaseCallback = callback;
             chip8->context = context;
             return true;
         });
 }
-

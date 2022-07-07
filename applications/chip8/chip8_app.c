@@ -23,11 +23,9 @@ uint8_t** chip8_backup_screen_alloc() {
     FURI_LOG_I("chip8", "chip8_backup_screen_alloc start");
 
     uint8_t** backup_screen = malloc(SCREEN_HEIGHT * sizeof(size_t));
-    for (int i = 0; i < SCREEN_HEIGHT; i++)
-    {
+    for(int i = 0; i < SCREEN_HEIGHT; i++) {
         backup_screen[i] = malloc(SCREEN_WIDTH * sizeof(uint8_t));
-        for (int j = 0; j < SCREEN_WIDTH; j++)
-        {
+        for(int j = 0; j < SCREEN_WIDTH; j++) {
             backup_screen[i][j] = 0;
         }
     }
@@ -58,8 +56,7 @@ Chip8App* chip8_app_alloc() {
 
     app->chip8_view = chip8_alloc();
     app->backup_screen = chip8_backup_screen_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, Chip8WorkView, chip8_get_view(app->chip8_view));
+    view_dispatcher_add_view(app->view_dispatcher, Chip8WorkView, chip8_get_view(app->chip8_view));
 
     scene_manager_next_scene(app->scene_manager, Chip8FileSelectView);
 

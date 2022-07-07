@@ -7,7 +7,7 @@ extern "C" {
 #include <furi.h>
 #include <m-string.h>
 #include <storage/storage.h>
-#include "emulator-core/flipper_chip.h"
+#include "emulator_core/flipper_chip.h"
 
 #define CHIP8_SCREEN_W 64
 #define CHIP8_SCREEN_H 32
@@ -33,8 +33,6 @@ void chip8_set_back_pressed(Chip8Emulator* chip8);
 void chip8_set_up_pressed(Chip8Emulator* chip8);
 void chip8_set_down_pressed(Chip8Emulator* chip8);
 void chip8_release_keyboard(Chip8Emulator* chip8);
-
-
 
 Chip8State* chip8_get_state(Chip8Emulator* chip8);
 
