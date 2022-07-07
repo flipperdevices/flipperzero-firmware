@@ -1,0 +1,10 @@
+App(
+    appid="chess_game",
+    name="Chess",
+    apptype=FlipperAppType.GAME,
+    entry_point="chess_app",
+    cdefines=["APP_CHESS"],
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=23,
+)
