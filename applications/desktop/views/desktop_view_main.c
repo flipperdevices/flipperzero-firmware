@@ -67,7 +67,7 @@ bool desktop_main_input(InputEvent* event, void* context) {
             } else if(event->key == InputKeyUp) {
                 main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyDown) {
-                main_view->callback(DesktopMainEventOpenDebug, main_view->context);
+                main_view->callback(DesktopMainEventOpenGames , main_view->context);
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
             } else if(event->key == InputKeyRight) {
@@ -81,7 +81,7 @@ bool desktop_main_input(InputEvent* event, void* context) {
                     codeSequence++;
                 } else {
                     codeSequence=0;
-                    main_view->callback(DesktopMainEventOpenGames, main_view->context);
+                    main_view->callback(DesktopMainEventOpenGames , main_view->context);
                 }
             } else if(event->key == InputKeyUp) {
                 if(codeSequence==0 || codeSequence==1) {
@@ -118,7 +118,7 @@ bool desktop_main_input(InputEvent* event, void* context) {
             } else if(event->key == InputKeyUp) {
                 main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyDown) {
-                main_view->callback(DesktopMainEventOpenDebug, main_view->context);
+                main_view->callback(DesktopMainEventOpenGames , main_view->context);
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenClock, main_view->context);
             } else if(event->key == InputKeyRight) {
