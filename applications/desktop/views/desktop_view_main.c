@@ -61,16 +61,16 @@ bool desktop_main_input(InputEvent* event, void* context) {
                 main_view->callback(DesktopMainEventOpenPassport, main_view->context);
             }
         } else if(event->type == InputTypeLong) {
-            if(event->key == InputKeyDown) {
+            if(event->key == InputKeyOk) {
+                main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
+            } else if(event->key == InputKeyUp) {
+                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+            } else if(event->key == InputKeyDown) {
                 main_view->callback(DesktopMainEventOpenDebug, main_view->context);
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
             } else if(event->key == InputKeyRight) {
                 // THIS DOESNT WORK
-            } else if(event->key == InputKeyUp) {
-                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
-            } else if (event->key == InputKeyOk) {
-                main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
             }
         }
     } else {
@@ -79,27 +79,24 @@ bool desktop_main_input(InputEvent* event, void* context) {
                 // PREFER TO OPEN GAMES MENU
                 main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyUp) {
-                // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyDown) {
-                // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyLeft) {
-                // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyRight) {
-                // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+                // GOES TO PASSPORT NO MATTER WHAT
             }
         } else if(event->type == InputTypeLong) {
-            if(event->key == InputKeyDown) {
-                main_view->callback(DesktopMainEventOpenMenu, main_view->context);
-            } else if(event->key == InputKeyLeft) {
-                // PREFER TO OPEN CLOCK INSTEAD OF PASSPORT
-                main_view->callback(DesktopMainEventOpenPassport, main_view->context);
-            } else if(event->key == InputKeyRight) {
-                // THIS DOESNT WORK
-                main_view->callback(DesktopMainEventOpenPassport, main_view->context);
+            if (event->key == InputKeyOk) {
+                main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
             } else if(event->key == InputKeyUp) {
                 main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
-            } else if (event->key == InputKeyOk) {
-                main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
+            } else if(event->key == InputKeyDown) {
+                main_view->callback(DesktopMainEventOpenMenu, main_view->context);
+            } else if(event->key == InputKeyLeft) {
+                // PREFER TO OPEN CLOCK
+                main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
+                // main_view->callback(DesktopMainEventOpenPassport, main_view->context); THIS ONLY WORKS ON MENU RIGHT WITH NO HOLD
+            } else if(event->key == InputKeyRight) {
+                // THIS DOESNT WORK, PASSPORT WILL ONLY OPEN ON REGULAR RIGHT, NOTHING CAN GET ASSIGNED HERE
             }
         }
     }
