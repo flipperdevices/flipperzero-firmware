@@ -5,8 +5,8 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 
-#include <gui/icon_i.h>
 #include "fast_chess.h"
+#include <gui/icon_i.h>
 
 static bool flag = true;
 static bool should_exit = false;
