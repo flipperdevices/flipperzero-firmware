@@ -14,6 +14,7 @@ $ docker-compose exec dev ./fbt
 ```
 
 ## Latest Updates:
+- - **Update `subghz/assets/setting_user` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) on SD**
 - Tanks, causes "StackOverflow". Not sure what broke it. Chess is also broken. Someone please fix.
 - Settings: Desktop => Games Only (By RogueMaster) [(Thanks to Astrrra for Inverted Mode to Mimic)](https://github.com/wetox-team/flipperzero-firmware/commit/ce91582b7417c5d7a9d8416c17a102d3a5868238)
 - - DESKTOP LOOKS THE SAME WITH BATTERY AND IDLE ANIMATION
@@ -31,7 +32,9 @@ $ docker-compose exec dev ./fbt
 - Fixed loading Games menu in Games Only mode [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
 - Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
 - Updates for [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
-    
+- Updated [assets/resources/nfc/assets/mf_classic_dict.nfc](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/nfc/assets/mf_classic_dict.nfc) from UberGuidoZ
+- - **Update your `nfc/assets/mf_classic_dict.nfc` on SD!**
+
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
 - - Note 1: If you don't have a subghz/assets folder, you should ensure you have made at least one clean flash with stock firmware and your SD card installed in order to ensure the database structure is built, otherwise it will not exist for alternative forks.
