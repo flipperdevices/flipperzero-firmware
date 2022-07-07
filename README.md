@@ -21,6 +21,7 @@ $ docker-compose exec dev ./fbt
 - OFW: [Fix a race condition #1376 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1376)
 - OFW: [CLI, threads, notifications, archive fixes #1354 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1354)
 - Added [UPC Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
+- Updates for [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
