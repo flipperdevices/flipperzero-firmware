@@ -54,7 +54,7 @@ static void lock_menu_callback(void* context, uint8_t index) {
 }
 
 void desktop_lock_menu_render(Canvas* canvas, void* model) {
-    const char* Lockmenu_Items[LOCK_MENU_ITEMS_NB] = {"Lock", "Lock with PIN", "DUMB mode"};
+    const char* Lockmenu_Items[LOCK_MENU_ITEMS_NB] = {"Lock", "Lock with PIN", "Games Only mode"};
 
     DesktopLockMenuViewModel* m = model;
     canvas_clear(canvas);
@@ -67,11 +67,15 @@ void desktop_lock_menu_render(Canvas* canvas, void* model) {
         const char* str = Lockmenu_Items[i];
 
         if(i == 1 && !m->pin_set) str = "Set PIN";
-        if(m->hint_timeout && m->idx == 2 && m->idx == i) str = "Not implemented";
+        if(m->hint_timeout && m->idx == 2 && m->idx == i) str = "UUDDLCLC For Main Menu";
 
-        if(str != NULL)
+        if(str == "UUDDLCLC For Main Menu") {
             canvas_draw_str_aligned(
                 canvas, 64, 9 + (i * 17) + STATUS_BAR_Y_SHIFT, AlignCenter, AlignCenter, str);
+        } else if(str != NULL) {
+            canvas_draw_str_aligned(
+                canvas, 64, 9 + (i * 17) + STATUS_BAR_Y_SHIFT, AlignCenter, AlignCenter, str);
+        }
 
         if(m->idx == i) elements_frame(canvas, 15, 1 + (i * 17) + STATUS_BAR_Y_SHIFT, 98, 15);
     }
