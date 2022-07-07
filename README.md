@@ -30,6 +30,7 @@ $ docker-compose exec dev ./fbt
 - Fixed loading Clock in Games Only mode instead of Primary Favorite
 - Fixed loading Games menu in Games Only mode [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
 - Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
+- Updates for [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
     
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
