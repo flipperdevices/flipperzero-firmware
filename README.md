@@ -20,12 +20,16 @@ $ docker-compose exec dev ./fbt
 - - EXIT OF GAMES/CLOCK GOES BACK TO GAMES ONLY MODE
 - - HOLD BACK TO TURN OFF FLIPPER
 - - RESTARTING REMEMBERS YOU ARE IN GAMES ONLY MODE
-- - CENTER + HOLD CENTER TO CHANGE IDLE ANIMATION
-- - UP + HOLD UP FOR FAVORITE GAME
-- - LEFT + HOLD LEFT FOR CLOCK/PRIMARY FAVORITE
+- - CENTER OR HOLD DOWN FOR GAMES MENU
+- - HOLD CENTER TO CHANGE IDLE ANIMATION
+- - UP OR HOLD UP FOR FAVORITE GAME
+- - LEFT OR HOLD LEFT FOR CLOCK/PRIMARY FAVORITE
 - - RIGHT ALWAYS WILL GO TO PASSPORT
 - - UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
 - Updated [UPC Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
+- Fixed loading Clock in Games Only mode instead of Primary Favorite
+- Fixed loading Games menu in Games Only mode [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
+- Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
     
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -61,8 +65,9 @@ $ docker-compose exec dev ./fbt
 - Settings: Auto-Lock Options Added: 10s+15s+90s [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop_settings/scenes/desktop_settings_scene_start.c)
 - Settings: Battery Meter on Desktop [Thanks to McAzzaMan](https://github.com/McAzzaMan/flipperzero-firmware/tree/BatteryPercentageView)
 - Settings: Desktop => Games Only (By RogueMaster) [(Thanks to Astrrra for Inverted Mode to Mimic)](https://github.com/wetox-team/flipperzero-firmware/commit/ce91582b7417c5d7a9d8416c17a102d3a5868238)
-- Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 - - UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
+- Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
+- Settings: Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
 - Settings: LCD Timeout Options Added: 10s+90s+2min+5min+10min [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
 - Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
 - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
