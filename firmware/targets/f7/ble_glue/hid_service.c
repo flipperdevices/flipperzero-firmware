@@ -10,6 +10,7 @@ typedef struct {
     uint16_t svc_handle;
     uint16_t protocol_mode_char_handle;
     uint16_t report_char_handle[HID_SVC_REPORT_COUNT];
+    uint16_t report_ref_desc_handle[HID_SVC_REPORT_COUNT];
     uint16_t report_map_char_handle;
     uint16_t info_char_handle;
     uint16_t ctrl_point_char_handle;
@@ -38,6 +39,7 @@ void hid_svc_start() {
     tBleStatus status;
     hid_svc = malloc(sizeof(HIDSvc));
     Service_UUID_t svc_uuid = {};
+    Char_Desc_Uuid_t desc_uuid = {};
     Char_UUID_t char_uuid = {};
 
     // Register event handler
@@ -86,6 +88,7 @@ void hid_svc_start() {
 #if(HID_SVC_REPORT_COUNT != 0)
     for(uint8_t i = 0; i < HID_SVC_REPORT_COUNT; i++) {
         if(i < HID_SVC_INPUT_REPORT_COUNT) {
+            uint8_t buf[2] = {i + 1, 1}; // 1 input
             char_uuid.Char_UUID_16 = REPORT_CHAR_UUID;
             status = aci_gatt_add_char(
                 hid_svc->svc_handle,
@@ -100,8 +103,28 @@ void hid_svc_start() {
                 &(hid_svc->report_char_handle[i]));
             if(status) {
                 FURI_LOG_E(TAG, "Failed to add report characteristic: %d", status);
+            }
+            
+            desc_uuid.Char_UUID_16 = REPORT_REFERENCE_DESCRIPTOR_UUID;
+            status = aci_gatt_add_char_desc(
+                hid_svc->svc_handle,
+                hid_svc->report_char_handle[i],
+                UUID_TYPE_16,
+                &desc_uuid,
+                HID_SVC_REPORT_REF_LEN,
+                HID_SVC_REPORT_REF_LEN,
+                buf,
+                ATTR_PERMISSION_NONE,
+                ATTR_ACCESS_READ_WRITE,
+                GATT_DONT_NOTIFY_EVENTS,
+                MIN_ENCRY_KEY_SIZE,
+                CHAR_VALUE_LEN_CONSTANT,
+                &(hid_svc->report_ref_desc_handle[i]));
+            if(status) {
+                FURI_LOG_E(TAG, "Failed to add report reference descriptor: %d", status);
             }
         } else if((i - HID_SVC_INPUT_REPORT_COUNT) < HID_SVC_OUTPUT_REPORT_COUNT) {
+            uint8_t buf[2] = {i + 1, 2}; // 2 output
             char_uuid.Char_UUID_16 = REPORT_CHAR_UUID;
             status = aci_gatt_add_char(
                 hid_svc->svc_handle,
@@ -117,7 +140,27 @@ void hid_svc_start() {
             if(status) {
                 FURI_LOG_E(TAG, "Failed to add report characteristic: %d", status);
             }
+
+            desc_uuid.Char_UUID_16 = REPORT_REFERENCE_DESCRIPTOR_UUID;
+            status = aci_gatt_add_char_desc(
+                hid_svc->svc_handle,
+                hid_svc->report_char_handle[i],
+                UUID_TYPE_16,
+                &desc_uuid,
+                HID_SVC_REPORT_REF_LEN,
+                HID_SVC_REPORT_REF_LEN,
+                buf,
+                ATTR_PERMISSION_NONE,
+                ATTR_ACCESS_READ_WRITE,
+                GATT_DONT_NOTIFY_EVENTS,
+                MIN_ENCRY_KEY_SIZE,
+                CHAR_VALUE_LEN_CONSTANT,
+                &(hid_svc->report_ref_desc_handle[i]));
+            if(status) {
+                FURI_LOG_E(TAG, "Failed to add report reference descriptor: %d", status);
+            }
         } else {
+            uint8_t buf[2] = {i + 1, 3}; // 3 feature
             char_uuid.Char_UUID_16 = REPORT_CHAR_UUID;
             status = aci_gatt_add_char(
                 hid_svc->svc_handle,
@@ -132,6 +175,25 @@ void hid_svc_start() {
                 &(hid_svc->report_char_handle[i]));
             if(status) {
                 FURI_LOG_E(TAG, "Failed to add report characteristic: %d", status);
+            }
+
+            desc_uuid.Char_UUID_16 = REPORT_REFERENCE_DESCRIPTOR_UUID;
+            status = aci_gatt_add_char_desc(
+                hid_svc->svc_handle,
+                hid_svc->report_char_handle[i],
+                UUID_TYPE_16,
+                &desc_uuid,
+                HID_SVC_REPORT_REF_LEN,
+                HID_SVC_REPORT_REF_LEN,
+                buf,
+                ATTR_PERMISSION_NONE,
+                ATTR_ACCESS_READ_WRITE,
+                GATT_DONT_NOTIFY_EVENTS,
+                MIN_ENCRY_KEY_SIZE,
+                CHAR_VALUE_LEN_CONSTANT,
+                &(hid_svc->report_ref_desc_handle[i]));
+            if(status) {
+                FURI_LOG_E(TAG, "Failed to add report reference descriptor: %d", status);
             }
         }
     }
@@ -200,12 +262,12 @@ bool hid_svc_update_report_map(uint8_t* data, uint16_t len) {
     return true;
 }
 
-bool hid_svc_update_input_report(uint8_t* data, uint16_t len) {
+bool hid_svc_update_input_report(uint8_t input_report_num, uint8_t* data, uint16_t len) {
     furi_assert(data);
     furi_assert(hid_svc);
 
     tBleStatus status = aci_gatt_update_char_value(
-        hid_svc->svc_handle, hid_svc->report_char_handle[0], 0, len, data);
+        hid_svc->svc_handle, hid_svc->report_char_handle[input_report_num], 0, len, data);
     if(status) {
         FURI_LOG_E(TAG, "Failed updating report characteristic: %d", status);
         return false;
