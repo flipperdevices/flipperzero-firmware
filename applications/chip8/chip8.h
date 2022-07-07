@@ -7,7 +7,7 @@ extern "C" {
 #include <furi.h>
 #include <m-string.h>
 #include <storage/storage.h>
-#include "emulator-core/flipper-chip.h"
+#include "emulator-core/flipper_chip.h"
 
 #define CHIP8_SCREEN_W 64
 #define CHIP8_SCREEN_H 32
