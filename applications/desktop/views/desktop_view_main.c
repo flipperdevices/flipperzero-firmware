@@ -81,7 +81,7 @@ bool desktop_main_input(InputEvent* event, void* context) {
                     codeSequence++;
                 } else {
                     codeSequence=0;
-                    main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
+                    main_view->callback(DesktopMainEventOpenGames, main_view->context);
                 }
             } else if(event->key == InputKeyUp) {
                 if(codeSequence==0 || codeSequence==1) {
