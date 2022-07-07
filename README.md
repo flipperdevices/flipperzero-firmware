@@ -14,11 +14,7 @@ $ docker-compose exec dev ./fbt
 ```
 
 ## Latest Updates:
-- - **Update `subghz/assets/setting_user` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) on SD**
-- - **Update `infrared/assets/tv.ir` with [this file](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir) on SD**
-- Tanks, causes "StackOverflow". Not sure what broke it.
-- Updates for [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
-- Added [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Updated by RogueMaster, crashes quickly. Someone please fix.
+- Tanks, causes "StackOverflow". Not sure what broke it. Chess is also broken. Someone please fix.
 - Settings: Games Only setting under Desktop settings! (By RogueMaster)[(Thanks to Astrrra for Inverted Mode to Mimic)](https://github.com/wetox-team/flipperzero-firmware/commit/ce91582b7417c5d7a9d8416c17a102d3a5868238)
 - - DESKTOP LOOKS THE SAME WITH BATTERY AND IDLE ANIMATION
 - - EXIT OF GAMES/CLOCK GOES BACK TO GAMES ONLY MODE
@@ -64,6 +60,8 @@ $ docker-compose exec dev ./fbt
 - Settings: Auto-Lock Options Added: 10s+15s+90s [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop_settings/scenes/desktop_settings_scene_start.c)
 - Settings: Battery Meter on Desktop [Thanks to McAzzaMan](https://github.com/McAzzaMan/flipperzero-firmware/tree/BatteryPercentageView)
 - Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
+- Settings: Games Only setting under Desktop settings! (By RogueMaster)[(Thanks to Astrrra for Inverted Mode to Mimic)](https://github.com/wetox-team/flipperzero-firmware/commit/ce91582b7417c5d7a9d8416c17a102d3a5868238)
+- - UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
 - Settings: LCD Timeout Options Added: 10s+90s+2min+5min+10min [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
 - Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
 - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
