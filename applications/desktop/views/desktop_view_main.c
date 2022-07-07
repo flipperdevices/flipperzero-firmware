@@ -8,6 +8,7 @@
 
 #include "../desktop_i.h"
 #include "desktop_view_main.h"
+#include <applications/desktop/desktop_settings/desktop_settings.h>
 
 struct DesktopMainView {
     View* view;
@@ -44,27 +45,52 @@ bool desktop_main_input(InputEvent* event, void* context) {
 
     DesktopMainView* main_view = context;
 
-    if(event->type == InputTypeShort) {
-        if(event->key == InputKeyOk) {
-            main_view->callback(DesktopMainEventOpenMenu, main_view->context);
-        } else if(event->key == InputKeyUp) {
-            main_view->callback(DesktopMainEventOpenLockMenu, main_view->context);
-        } else if(event->key == InputKeyDown) {
-            main_view->callback(DesktopMainEventOpenArchive, main_view->context);
-        } else if(event->key == InputKeyLeft) {
-            main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
-        } else if(event->key == InputKeyRight) {
-            main_view->callback(DesktopMainEventOpenPassport, main_view->context);
+    DesktopSettings* desktop_settings = malloc(sizeof(DesktopSettings));
+    LOAD_DESKTOP_SETTINGS(desktop_settings);
+    if(!desktop_settings->is_dumbmode) {
+        if(event->type == InputTypeShort) {
+            if(event->key == InputKeyOk) {
+                main_view->callback(DesktopMainEventOpenMenu, main_view->context);
+            } else if(event->key == InputKeyUp) {
+                main_view->callback(DesktopMainEventOpenLockMenu, main_view->context);
+            } else if(event->key == InputKeyDown) {
+                main_view->callback(DesktopMainEventOpenArchive, main_view->context);
+            } else if(event->key == InputKeyLeft) {
+                main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
+            } else if(event->key == InputKeyRight) {
+                main_view->callback(DesktopMainEventOpenPassport, main_view->context);
+            }
+        } else if(event->type == InputTypeLong) {
+            if(event->key == InputKeyDown) {
+                main_view->callback(DesktopMainEventOpenDebug, main_view->context);
+            } else if(event->key == InputKeyLeft) {
+                main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
+            } else if(event->key == InputKeyUp) {
+                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+            } else if (event->key == InputKeyOk) {
+                main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
+            }
         }
-    } else if(event->type == InputTypeLong) {
-        if(event->key == InputKeyDown) {
-            main_view->callback(DesktopMainEventOpenDebug, main_view->context);
-        } else if(event->key == InputKeyLeft) {
-            main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
-        } else if(event->key == InputKeyUp) {
-            main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
-        } else if (event->key == InputKeyOk) {
-            main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
+    } else {
+        if(event->type == InputTypeShort) {
+            if(event->key == InputKeyOk) {
+                main_view->callback(DesktopMainEventOpenMenu, main_view->context);
+            } else if(event->key == InputKeyUp) {
+            } else if(event->key == InputKeyDown) {
+            } else if(event->key == InputKeyLeft) {
+            } else if(event->key == InputKeyRight) {
+                main_view->callback(DesktopMainEventOpenPassport, main_view->context);
+            }
+        } else if(event->type == InputTypeLong) {
+            if(event->key == InputKeyDown) {
+            } else if(event->key == InputKeyLeft) {
+            } else if(event->key == InputKeyRight) {
+                main_view->callback(DesktopMainEventOpenDebug, main_view->context);
+            } else if(event->key == InputKeyUp) {
+                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+            } else if (event->key == InputKeyOk) {
+                main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
+            }
         }
     }
 
