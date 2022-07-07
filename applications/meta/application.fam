@@ -49,6 +49,7 @@ App(
     provides=[
         "game_2048",
         "arkanoid_game",
+        "chess_game",
         "dice_game",
         "snake_game",
         "tanks_game",
