@@ -44,12 +44,12 @@ static void lock_menu_callback(void* context, uint8_t index) {
         lock_menu->callback(DesktopLockMenuEventPinLock, lock_menu->context);
         break;
     case 2: // GAMES ONLY MODE
-        // lock_menu->callback(DesktopLockMenuEventPinLock, lock_menu->context);
         with_view_model(
             lock_menu->view, (DesktopLockMenuViewModel * model) {
                 model->hint_timeout = HINT_TIMEOUT;
                 return true;
             });
+        // ENTER CODE TO UPDATE SETTING
         break;
     default: // wip message
         with_view_model(
@@ -62,7 +62,7 @@ static void lock_menu_callback(void* context, uint8_t index) {
 }
 
 void desktop_lock_menu_render(Canvas* canvas, void* model) {
-    const char* Lockmenu_Items[LOCK_MENU_ITEMS_NB] = {"Lock", "Lock with PIN", "Games Only mode"};
+    const char* Lockmenu_Items[LOCK_MENU_ITEMS_NB] = {"Lock", "Lock with PIN", "Games Only Mode"};
 
     DesktopLockMenuViewModel* m = model;
     canvas_clear(canvas);
