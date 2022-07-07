@@ -88,8 +88,12 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
                 
         case DesktopMainEventOpenGames:
             // const FlipperApplication* context2 = loader_find_application_by_name("Games");
-            loader_submenu_callback((void*)&FLIPPER_GAMES,10);
+            // loader_submenu_callback((void*)&FLIPPER_GAMES,10);
             // desktop_switch_to_app(desktop, &FLIPPER_GAMES);
+                LoaderStatus status = loader_start(desktop->loader, "Games", NULL);
+                if(status != LoaderStatusOk) {
+                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                }
             consumed = true;
             break;
 
