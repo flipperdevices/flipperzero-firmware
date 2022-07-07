@@ -32,6 +32,8 @@ $ docker-compose exec dev ./fbt
 - Fixed loading Games menu in Games Only mode [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
 - Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
 - Updates for [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
+- New tv.ir universal remote [(thanks to UberGuidoZ & Hyper_Mash)](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir)
+- - **Update `infrared/assets/tv.ir` with [this file](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir) on SD**
 
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
