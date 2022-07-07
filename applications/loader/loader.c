@@ -321,7 +321,7 @@ static Loader* loader_alloc() {
     instance->games_menu = submenu_alloc();
     view_set_context(submenu_get_view(instance->games_menu), instance->games_menu);
     view_set_previous_callback(
-        submenu_get_view(instance->games_menu), loader_back_to_primary_menu);
+        submenu_get_view(instance->games_menu), loader_hide_menu);
     view_dispatcher_add_view(
         instance->view_dispatcher, LoaderMenuViewGames, submenu_get_view(instance->games_menu));
     // Plugins menu
