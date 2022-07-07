@@ -22,7 +22,7 @@ $ docker-compose exec dev ./fbt
 - OFW: [CLI, threads, notifications, archive fixes #1354 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1354)
 - Added [UPC Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
 - Updates for [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
-- Added [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Updated by RogueMaster To Work.
+- Added [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Updated by RogueMaster To Compile, crashes quickly. Someone please fix. `HIDDEN "chess_game"`
 
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -71,13 +71,13 @@ $ docker-compose exec dev ./fbt
 - - Games `HIDDEN` for development space; can be added under [applications/meta/application.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam#L54)
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048)
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
-- [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Updated by RogueMaster To Compile, crashes easily. Will run as favorite. `HIDDEN "chess_game"`
+- [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Updated by RogueMaster To Compile, crashes quickly. Someone please fix. `HIDDEN "chess_game"`
 - [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge. Add SD folder `chip8`, [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/) `HIDDEN "chip8"`
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/dice/dice.c)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)
 - [Game of Life (Updated to work by tgxn)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c) Original By itsyourbedtime.
 - [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine)
-- [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) (CURRENTLY BROKEN)
+- [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) (CURRENTLY BROKEN) Someone please fix.
 - [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
 - [Tic Tac Toe (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
