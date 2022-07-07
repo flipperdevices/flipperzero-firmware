@@ -44,5 +44,5 @@ typedef struct {
     uint8_t is_locked;
     uint32_t auto_lock_delay_ms;
     uint8_t displayBatteryPercentage;
-    bool is_dumb;
+    bool is_dumbmode;
 } DesktopSettings;
