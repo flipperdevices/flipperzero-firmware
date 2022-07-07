@@ -93,7 +93,8 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             // loader_instance = loader_alloc();
             // view_dispatcher_switch_to_view(loader_instance->view_dispatcher, LoaderMenuViewGames);
             // loader_start(desktop->loader, "Games", NULL);
-            submenu_get_view(instance->games_menu);
+            games_menu = submenu_alloc();
+            submenu_get_view(games_menu);
             consumed = true;
             break;
 
