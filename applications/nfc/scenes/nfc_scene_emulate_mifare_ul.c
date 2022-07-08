@@ -83,11 +83,6 @@ void nfc_scene_emulate_mifare_ul_on_enter(void* context) {
     text_box_set_focus(text_box, TextBoxFocusEnd);
     string_reset(nfc->text_box_store);
     
-    if(strcmp(nfc->dev->dev_name, "")) {
-        nfc_text_store_set(nfc, "     %s", nfc->dev->dev_name);
-    }
-    popup_set_text(popup, nfc->text_store, 30, 56, AlignLeft, AlignTop);
-    
     // Set Widget state and view
     state = (state & ~NfcSceneEmulateMifareUlStateMax) | NfcSceneEmulateMifareUlStateWidget;
     scene_manager_set_scene_state(nfc->scene_manager, NfcSceneEmulateMifareUl, state);
