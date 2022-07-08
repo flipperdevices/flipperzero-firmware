@@ -6,8 +6,14 @@
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
 
+#define NFC_DEVICE_KEYS_FOLDER "/ext/nfc/keys_cache"
+#define NFC_DEVICE_KEYS_EXTENSION ".keys"
+
 static const char* nfc_file_header = "Flipper NFC device";
 static const uint32_t nfc_file_version = 2;
+
+static const char* nfc_keys_file_header = "Flipper NFC keys";
+static const uint32_t nfc_keys_file_version = 1;
 
 // Protocols format versions
 static const uint32_t nfc_mifare_classic_data_format_version = 1;
@@ -747,6 +753,33 @@ static bool nfc_device_load_mifare_classic_data(FlipperFormat* file, NfcDevice* 
     return parsed;
 }
 
+static bool nfc_device_save_mifare_classic_keys(NfcDevice* dev) {
+    FlipperFormat* file = flipper_format_file_alloc(dev->storage);
+    uint8_t* uid = dev->dev_data.nfc_data.uid;
+    uint8_t uid_len = dev->dev_data.nfc_data.uid_len;
+    // Generate file name by UID
+    string_t file_path;
+    string_init(file_path);
+    for(size_t i = 0; i < uid_len; i++) {
+        string_cat_printf(NFC_DEVICE_KEYS_FOLDER "/%02X" NFC_DEVICE_KEYS_EXTENSION, uid[i]);
+    }
+
+    bool key_save_success = false;
+    do {
+        if(!storage_simply_mkdir(dev->storage, NFC_DEVICE_KEYS_FOLDER)) break;
+        if(!storage_simply_remove(dev->storage, string_get_cstr(file_path))) break;
+        if(!flipper_format_file_open_always(file, string_get_cstr(file_path))) break;
+        if(!flipper_format_write_header_cstr(file, nfc_keys_file_header, nfc_keys_file_version))
+            break;
+        
+        
+        key_save_success = true;
+    } while(false);
+
+    flipper_format_free(file);
+    return key_save_success;
+}
+
 void nfc_device_set_name(NfcDevice* dev, const char* name) {
     furi_assert(dev);
 
@@ -817,7 +850,10 @@ static bool nfc_device_save_file(
         } else if(dev->format == NfcDeviceSaveFormatBankCard) {
             if(!nfc_device_save_bank_card_data(file, dev)) break;
         } else if(dev->format == NfcDeviceSaveFormatMifareClassic) {
+            // Save data
             if(!nfc_device_save_mifare_classic_data(file, dev)) break;
+            // Save keys cache
+            if(!nfc_device_save_mifare_classic_keys(dev)) break;
         }
         saved = true;
     } while(0);
