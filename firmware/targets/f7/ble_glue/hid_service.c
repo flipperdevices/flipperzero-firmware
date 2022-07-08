@@ -104,7 +104,7 @@ void hid_svc_start() {
             if(status) {
                 FURI_LOG_E(TAG, "Failed to add report characteristic: %d", status);
             }
-            
+
             desc_uuid.Char_UUID_16 = REPORT_REFERENCE_DESCRIPTOR_UUID;
             status = aci_gatt_add_char_desc(
                 hid_svc->svc_handle,
@@ -249,7 +249,7 @@ void hid_svc_start() {
     }
 }
 
-bool hid_svc_update_report_map(uint8_t* data, uint16_t len) {
+bool hid_svc_update_report_map(const uint8_t* data, uint16_t len) {
     furi_assert(data);
     furi_assert(hid_svc);
 

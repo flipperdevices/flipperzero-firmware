@@ -46,7 +46,7 @@ typedef struct {
 } __attribute__((__packed__)) FuriHalBtHidConsumerReport;
 
 // keyboard+mouse+consumer hid report
-static uint8_t furi_hal_bt_hid_report_map_data[] = {
+static const uint8_t furi_hal_bt_hid_report_map_data[] = {
     // Keyboard Report
     HID_USAGE_PAGE(HID_PAGE_DESKTOP),
     HID_USAGE(HID_DESKTOP_KEYBOARD),
@@ -245,6 +245,47 @@ bool furi_hal_bt_hid_consumer_key_release_all() {
     }
     return hid_svc_update_input_report(
         ReportNumberConsumer, (uint8_t*)consumer_report, sizeof(FuriHalBtHidConsumerReport));
+}
+
+bool furi_hal_bt_hid_mouse_move(int8_t dx, int8_t dy) {
+    furi_assert(mouse_report);
+    mouse_report->x = dx;
+    mouse_report->y = dy;
+    bool state = hid_svc_update_input_report(
+        ReportNumberMouse, (uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
+    mouse_report->x = 0;
+    mouse_report->y = 0;
+    return state;
+}
+
+bool furi_hal_bt_hid_mouse_press(uint8_t button) {
+    furi_assert(mouse_report);
+    mouse_report->btn |= button;
+    return hid_svc_update_input_report(
+        ReportNumberMouse, (uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
+}
+
+bool furi_hal_bt_hid_mouse_release(uint8_t button) {
+    furi_assert(mouse_report);
+    mouse_report->btn &= ~button;
+    return hid_svc_update_input_report(
+        ReportNumberMouse, (uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
+}
+
+bool furi_hal_bt_hid_mouse_release_all() {
+    furi_assert(mouse_report);
+    mouse_report->btn = 0;
+    return hid_svc_update_input_report(
+        ReportNumberMouse, (uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
+}
+
+bool furi_hal_bt_hid_mouse_scroll(int8_t delta) {
+    furi_assert(mouse_report);
+    mouse_report->wheel = delta;
+    bool state = hid_svc_update_input_report(
+        ReportNumberMouse, (uint8_t*)mouse_report, sizeof(FuriHalBtHidMouseReport));
+    mouse_report->wheel = 0;
+    return state;
 }
 
 bool furi_hal_bt_hid_mouse_move(int8_t dx, int8_t dy) {
