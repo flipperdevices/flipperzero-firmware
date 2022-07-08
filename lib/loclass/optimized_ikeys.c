@@ -61,15 +61,13 @@ From "Dismantling iclass":
 #include <mbedtls/des.h>
 #include "optimized_cipherutils.h"
 
-static uint8_t loclass_pi[35] = {
+static const uint8_t loclass_pi[35] = {
     0x0F, 0x17, 0x1B, 0x1D, 0x1E, 0x27, 0x2B, 0x2D,
     0x2E, 0x33, 0x35, 0x39, 0x36, 0x3A, 0x3C, 0x47,
     0x4B, 0x4D, 0x4E, 0x53, 0x55, 0x56, 0x59, 0x5A,
     0x5C, 0x63, 0x65, 0x66, 0x69, 0x6A, 0x6C, 0x71,
     0x72, 0x74, 0x78
 };
-
-static mbedtls_des_context loclass_ctx_enc;
 
 /**
  * @brief The key diversification algorithm uses 6-bit bytes.
@@ -305,6 +303,8 @@ void loclass_hash0(uint64_t c, uint8_t k[8]) {
  * @param div_key
  */
 void loclass_diversifyKey(uint8_t *csn, const uint8_t *key, uint8_t *div_key) {
+    mbedtls_des_context loclass_ctx_enc;
+
     // Prepare the DES key
     mbedtls_des_setkey_enc(&loclass_ctx_enc, key);
 
