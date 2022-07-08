@@ -10,6 +10,7 @@
 #define SCENE_EVENT_SELECT_PIN_SETUP 3
 #define SCENE_EVENT_SELECT_AUTO_LOCK_DELAY 4
 #define SCENE_EVENT_SELECT_BATTERY_DISPLAY 5
+#define SCENE_EVENT_SELECT_DUMBMODE 6
 
 #define AUTO_LOCK_DELAY_COUNT 9
 const char* const auto_lock_delay_text[AUTO_LOCK_DELAY_COUNT] = {
@@ -163,6 +164,9 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent sme)
             consumed = true;
             break;
         case SCENE_EVENT_SELECT_BATTERY_DISPLAY:
+            consumed = true;
+            break;
+        case SCENE_EVENT_SELECT_DUMBMODE
             consumed = true;
             break;
         }
