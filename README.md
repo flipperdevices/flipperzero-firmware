@@ -14,17 +14,17 @@ $ docker-compose exec dev ./fbt
 ```
 
 ## Latest Updates:
-- NE WFLIPPER UNLOCK/UNLEASH METHOD
+- NEW FLIPPER UNLOCK/UNLEASH METHOD
 - - **Update `subghz/assets/setting_user` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) on SD**
 - - **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 - Tanks, causes "StackOverflow". Not sure what broke it. Chess is also broken. Someone please fix.
-- Settings: Desktop => Games Only (By RogueMaster) [(Thanks to Astrrra for Inverted Mode to Mimic)](https://github.com/wetox-team/flipperzero-firmware/commit/ce91582b7417c5d7a9d8416c17a102d3a5868238)
-- - UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
 - New tv.ir universal remote [(thanks to UberGuidoZ & Hyper_Mash)](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir)
 - - **Update `infrared/assets/tv.ir` with [this file](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir) on SD**
+- Code optimization for Chip8 and Manifest updates
 - Added NFC: ntag-pwd-capture [(Thanks to GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/dev-new)
 
 ## **Special Instructions:**
+- GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
 - - Note 1: If you don't have a subghz/assets folder, you should ensure you have made at least one clean flash with stock firmware and your SD card installed in order to ensure the database structure is built, otherwise it will not exist for alternative forks.
 - - Note 2: /any is a special keyword signifying either /int (internal storage) or /ext (external storage).
@@ -32,7 +32,7 @@ $ docker-compose exec dev ./fbt
 - - Note 4: /any is effectively root, so the folder structure should start "/any/subghz/assets" and not what is based on the repo below do not blindly copy the repo it will not work.
 - - [assets/resources/subghz/assets/universal_rf_map.txt](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/universal_rf_map.txt)
 - - [assets/resources/subghz/assets/touchtunes_map.txt](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/touchtunes_map.txt)
-- - [assets/resources/subghz/assets/setting_user](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user)
+- - [assets/resources/subghz/assets/setting_user](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 - Download this file into the nfc/assets folder on your SD card. 
 - - [assets/resources/nfc/assets/mf_classic_dict.nfc](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/nfc/assets/mf_classic_dict.nfc)
 - Add a folder to SD card named `wav_player` (for 8bit 2ch unsigned wav files) 
