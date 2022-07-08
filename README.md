@@ -17,6 +17,7 @@ $ docker-compose exec dev ./fbt
 - Tanks, causes "StackOverflow". Not sure what broke it. Chess is also broken. Someone please fix.
 - OFW: [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - OFW: [Namespace loclass library #1379 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1379)
+- NFC: Mifare UL update to show name of emulated tag
 
 ## **Special Instructions:**
 - GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
