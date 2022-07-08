@@ -166,7 +166,7 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent sme)
         case SCENE_EVENT_SELECT_BATTERY_DISPLAY:
             consumed = true;
             break;
-        case SCENE_EVENT_SELECT_DUMBMODE
+        case SCENE_EVENT_SELECT_DUMBMODE:
             consumed = true;
             break;
         }
