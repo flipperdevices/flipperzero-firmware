@@ -66,6 +66,12 @@ void nfc_scene_emulate_mifare_ul_widget_config(Nfc* nfc, bool auth_attempted) {
     if(auth_attempted) {
         widget_add_button_element(
             widget, GuiButtonTypeCenter, "Log", nfc_scene_emulate_mifare_ul_widget_callback, nfc);
+    } else {
+        if(strcmp(nfc->dev->dev_name, "")) {
+            nfc_text_store_set(nfc, "%s", nfc->dev->dev_name);
+        }
+        widget_add_string_multiline_element(
+            widget, 40, 56, AlignLeft, AlignTop, FontSecondary, nfc->text_store);
     }
 }
 
