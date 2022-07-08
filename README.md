@@ -14,26 +14,15 @@ $ docker-compose exec dev ./fbt
 ```
 
 ## Latest Updates:
+- NE WFLIPPER UNLOCK/UNLEASH METHOD
 - - **Update `subghz/assets/setting_user` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) on SD**
+- - **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 - Tanks, causes "StackOverflow". Not sure what broke it. Chess is also broken. Someone please fix.
 - Settings: Desktop => Games Only (By RogueMaster) [(Thanks to Astrrra for Inverted Mode to Mimic)](https://github.com/wetox-team/flipperzero-firmware/commit/ce91582b7417c5d7a9d8416c17a102d3a5868238)
-- - DESKTOP LOOKS THE SAME WITH BATTERY AND IDLE ANIMATION
-- - EXIT OF GAMES/CLOCK GOES BACK TO GAMES ONLY MODE
-- - HOLD BACK TO TURN OFF FLIPPER
-- - RESTARTING REMEMBERS YOU ARE IN GAMES ONLY MODE
-- - CENTER OR HOLD DOWN FOR GAMES MENU
-- - HOLD CENTER TO CHANGE IDLE ANIMATION
-- - UP OR HOLD UP FOR FAVORITE GAME
-- - LEFT OR HOLD LEFT FOR CLOCK/PRIMARY FAVORITE
-- - RIGHT ALWAYS WILL GO TO PASSPORT
 - - UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
-- Updated [UPC Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
-- Fixed loading Clock in Games Only mode instead of Primary Favorite
-- Fixed loading Games menu in Games Only mode [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
-- Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
-- Updates for [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - New tv.ir universal remote [(thanks to UberGuidoZ & Hyper_Mash)](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir)
 - - **Update `infrared/assets/tv.ir` with [this file](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir) on SD**
+- Added NFC: ntag-pwd-capture [(Thanks to GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/dev-new)
 
 ## **Special Instructions:**
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
@@ -60,6 +49,7 @@ $ docker-compose exec dev ./fbt
 - Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
 - NFC: Display UL PWD_AUTH payload [(Thanks to GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/dev-new)
+- NFC: ntag-pwd-capture [(Thanks to GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/dev-new)
 - Plugins: Fixed sound decay issues on music player [Thanks to qqMajiKpp]
 - Plugins: Menu, Icons and Raycast exit [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
 - Plugins: Snake and Tetris show score. [Thanks to whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) With changes by RogueMaster.
