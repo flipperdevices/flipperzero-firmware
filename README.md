@@ -22,6 +22,8 @@ $ docker-compose exec dev ./fbt
 - - **Update `infrared/assets/tv.ir` with [this file](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir) on SD**
 - Code format optimization for Chip8 and Manifest updates
 - Added NFC: ntag-pwd-capture [(Thanks to GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/dev-new)
+- OFW: [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
+- OFW: [Namespace loclass library #1379 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1379)
 
 ## **Special Instructions:**
 - GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
@@ -67,9 +69,9 @@ $ docker-compose exec dev ./fbt
 - SubGHz: Keeloq update from [Xorist](https://github.com/xorist/FlipperX)
 - SubGHz: Protocols Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - SubGHz: Unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/setting_user` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) on SD.
+<!-- 
 ## Open PRs Checkedout & Not Merged In Main:
-- [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
-
+ -->
 ## Games
 - - Games `HIDDEN` for development space; can be added under [applications/meta/application.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam#L54)
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048)
