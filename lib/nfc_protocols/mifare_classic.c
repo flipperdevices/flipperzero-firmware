@@ -781,7 +781,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                             break;
                         } else {
                             mf_crypto1_decrypt(
-                            &emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
+                                &emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
                             FURI_LOG_D("MFC", "Increment value: %02X", plain_data[0]);
                         }
                         uint32_t value = 0;
@@ -820,7 +820,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                             break;
                         } else {
                             mf_crypto1_decrypt(
-                            &emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
+                                &emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
                             FURI_LOG_D("MFC", "decrement value: %02X", plain_data[0]);
                         }
                         uint32_t value = 0;
@@ -892,8 +892,11 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                         uint32_t inverted_register = ~emulator->internal_register;
                         memcpy(emulator->data.block[block].value + 4, &inverted_register, 4);
                         // Copy the internal register to the bytes 8-12 in the value block
-                        memcpy(emulator->data.block[block].value + 8, &emulator->internal_register, 4);
-                        
+                        memcpy(
+                            emulator->data.block[block].value + 8,
+                            &emulator->internal_register,
+                            4);
+
                         emulator->data_changed = true;
                         is_value_op = false;
                         command_processed = true;
@@ -907,7 +910,6 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             FURI_LOG_D("MFC", "Command: %02X", plain_data[0]);
             break;
         }
-
     }
 
     FURI_LOG_D("MFC", "Before NACK");
