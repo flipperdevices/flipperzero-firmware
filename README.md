@@ -20,7 +20,7 @@ $ docker-compose exec dev ./fbt
 - Tanks, causes "StackOverflow". Not sure what broke it. Chess is also broken. Someone please fix.
 - New tv.ir universal remote [(thanks to UberGuidoZ & Hyper_Mash)](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir)
 - - **Update `infrared/assets/tv.ir` with [this file](https://raw.githubusercontent.com/UberGuidoZ/Flipper/main/Infrared/tv.ir) on SD**
-- Code optimization for Chip8 and Manifest updates
+- Code format optimization for Chip8 and Manifest updates
 - Added NFC: ntag-pwd-capture [(Thanks to GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/dev-new)
 
 ## **Special Instructions:**
