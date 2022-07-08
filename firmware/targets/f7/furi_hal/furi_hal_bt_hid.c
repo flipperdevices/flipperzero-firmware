@@ -46,7 +46,7 @@ typedef struct {
 } __attribute__((__packed__)) FuriHalBtHidConsumerReport;
 
 // keyboard+mouse+consumer hid report
-static uint8_t furi_hal_bt_hid_report_map_data[] = {
+static const uint8_t furi_hal_bt_hid_report_map_data[] = {
     // Keyboard Report
     HID_USAGE_PAGE(HID_PAGE_DESKTOP),
     HID_USAGE(HID_DESKTOP_KEYBOARD),

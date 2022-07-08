@@ -249,7 +249,7 @@ void hid_svc_start() {
     }
 }
 
-bool hid_svc_update_report_map(uint8_t* data, uint16_t len) {
+bool hid_svc_update_report_map(const uint8_t* data, uint16_t len) {
     furi_assert(data);
     furi_assert(hid_svc);
 

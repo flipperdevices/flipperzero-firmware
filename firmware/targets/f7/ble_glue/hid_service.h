@@ -21,7 +21,7 @@ void hid_svc_stop();
 
 bool hid_svc_is_started();
 
-bool hid_svc_update_report_map(uint8_t* data, uint16_t len);
+bool hid_svc_update_report_map(const uint8_t* data, uint16_t len);
 
 bool hid_svc_update_input_report(uint8_t input_report_num, uint8_t* data, uint16_t len);
 
