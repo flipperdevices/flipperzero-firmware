@@ -4,7 +4,7 @@
 #include "../desktop_i.h"
 #include "desktop_view_lock_menu.h"
 
-#define LOCK_MENU_ITEMS_NB 3
+#define LOCK_MENU_ITEMS_NB 4
 
 void desktop_lock_menu_set_callback(
     DesktopLockMenuView* lock_menu,
@@ -43,7 +43,14 @@ static void lock_menu_callback(void* context, uint8_t index) {
     case 1: // lock
         lock_menu->callback(DesktopLockMenuEventPinLock, lock_menu->context);
         break;
-    case 2: // GAMES ONLY MODE
+    case 2: // DUMB MODE
+        with_view_model(
+            lock_menu->view, (DesktopLockMenuViewModel * model) {
+                model->hint_timeout = HINT_TIMEOUT;
+                return true;
+            });
+        break;
+    case 3: // GAMES ONLY MODE
         with_view_model(
             lock_menu->view, (DesktopLockMenuViewModel * model) {
                 model->hint_timeout = HINT_TIMEOUT;
@@ -62,31 +69,31 @@ static void lock_menu_callback(void* context, uint8_t index) {
 }
 
 void desktop_lock_menu_render(Canvas* canvas, void* model) {
-    const char* Lockmenu_Items[LOCK_MENU_ITEMS_NB] = {"Lock", "Lock with PIN", "DUMB Mode"};
+    const char* Lockmenu_Items[LOCK_MENU_ITEMS_NB] = {"Lock", "Lock with PIN", "DUMB Mode", "GAMES ONLY"};
 
     DesktopLockMenuViewModel* m = model;
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_icon(canvas, -57, 0 + STATUS_BAR_Y_SHIFT, &I_DoorLeft_70x55);
     canvas_draw_icon(canvas, 116, 0 + STATUS_BAR_Y_SHIFT, &I_DoorRight_70x55);
-    canvas_set_font(canvas, FontSecondary);
+    canvas_set_font(canvas, FontBatteryPercent);
 
     for(uint8_t i = 0; i < LOCK_MENU_ITEMS_NB; ++i) {
         const char* str = Lockmenu_Items[i];
 
         if(i == 1 && !m->pin_set) str = "Set PIN";
-       
         if(m->hint_timeout && m->idx == 2 && m->idx == i) {
+            str = "Not Implemented";
+        } else if(m->hint_timeout && m->idx == 3 && m->idx == i) {
             // str = "UUDDLCLC For Main";
             str = "Not Implemented";
+        }
+        if(str != NULL) {
             canvas_draw_str_aligned(
-                canvas, 64, 9 + (i * 17) + STATUS_BAR_Y_SHIFT, AlignCenter, AlignCenter, str);
-        } else if(str != NULL) {
-            canvas_draw_str_aligned(
-                canvas, 64, 9 + (i * 17) + STATUS_BAR_Y_SHIFT, AlignCenter, AlignCenter, str);
+                canvas, 64, 9 + (i * 13) + STATUS_BAR_Y_SHIFT, AlignCenter, AlignCenter, str);
         }
 
-        if(m->idx == i) elements_frame(canvas, 15, 1 + (i * 17) + STATUS_BAR_Y_SHIFT, 98, 15);
+        if(m->idx == i) elements_frame(canvas, 15, 1 + (i * 13) + STATUS_BAR_Y_SHIFT, 98, 15);
     }
 }
 
