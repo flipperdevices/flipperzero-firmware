@@ -1016,6 +1016,8 @@ static void mf_ul_emulate_write(
 }
 
 void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle) {
+    emulator->comp_write_cmd_started = false;
+    emulator->sector_select_cmd_started = false;
     emulator->curr_sector = 0;
     emulator->ntag_i2c_plus_sector3_lockout = false;
     emulator->auth_success = false;
@@ -1043,12 +1045,8 @@ void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* d
     emulator->config = mf_ultralight_get_config_pages(&emulator->data);
     emulator->page_num = emulator->data.data_size / 4;
     emulator->data_changed = false;
-    emulator->comp_write_cmd_started = false;
-    emulator->sector_select_cmd_started = false;
+    memset(&emulator->auth_attempt, 0, sizeof(MfUltralightAuth));
     mf_ul_reset_emulation(emulator, true);
-    if(emulator->supported_features & MfUltralightSupportAuth) {
-        memset(&emulator->auth_attempt, 0, sizeof(MfUltralightAuth));
-    }
 }
 
 bool mf_ul_prepare_emulation_response(
@@ -1080,7 +1078,6 @@ bool mf_ul_prepare_emulation_response(
 
     // Check composite commands
     if(emulator->comp_write_cmd_started) {
-        // Compatibility write is the only one composit command
         if(buff_rx_len == 16 * 8) {
             mf_ul_emulate_write(
                 emulator, emulator->comp_write_page_addr, emulator->comp_write_page_addr, buff_rx);
@@ -1492,13 +1489,14 @@ bool mf_ul_prepare_emulation_response(
             }
         } else if(cmd == MF_UL_AUTH) {
             if(emulator->supported_features & MfUltralightSupportAuth) {
-                memcpy(
-                    emulator->auth_attempt.pwd.raw,
-                    &buff_rx[1],
-                    sizeof(emulator->auth_attempt.pwd));
-                emulator->auth_attempted = true;
-
                 if(buff_rx_len == (1 + 4) * 8) {
+                    // Record password sent by PCD
+                    memcpy(
+                        emulator->auth_attempt.pwd.raw,
+                        &buff_rx[1],
+                        sizeof(emulator->auth_attempt.pwd.raw));
+                    emulator->auth_attempted = true;
+
                     uint16_t scaled_authlim = mf_ultralight_calc_auth_count(&emulator->data);
                     if(scaled_authlim != 0 && emulator->data.curr_authlim >= scaled_authlim) {
                         if(emulator->data.curr_authlim != UINT16_MAX) {
