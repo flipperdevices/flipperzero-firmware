@@ -21,6 +21,7 @@ typedef struct {
     bool ok_pressed;
     bool back_pressed;
     bool connected;
+    char key_string[5];
 } BtHidKeyboardModel;
 
 typedef struct {
@@ -35,6 +36,7 @@ typedef struct {
     int8_t x;
     int8_t y;
 } BtHidKeyboardPoint;
+
 // 4 BY 12
 #define MARGIN_TOP 0
 #define MARGIN_LEFT 4
@@ -45,7 +47,7 @@ typedef struct {
 #define COLUMN_COUNT 12
 
 // 0 width items are not drawn, but there value is used
-BtHidKeyboardKey keyboardKeySet[ROW_COUNT][COLUMN_COUNT] = {
+const BtHidKeyboardKey bt_hid_keyboard_keyset[ROW_COUNT][COLUMN_COUNT] = {
     {
         {.width = 1, .icon = NULL, .key = "1", .shift_key = "!", .value = HID_KEYBOARD_1},
         {.width = 1, .icon = NULL, .key = "2", .shift_key = "@", .value = HID_KEYBOARD_2},
@@ -135,13 +137,14 @@ BtHidKeyboardKey keyboardKeySet[ROW_COUNT][COLUMN_COUNT] = {
         {.width = 0, .icon = NULL, .value = HID_KEYBOARD_TAB},
     },
 };
+
 static void bt_hid_keyboard_to_upper(char* str) {
     while(*str) {
         *str = toupper((unsigned char)*str);
         str++;
     }
 }
-char keyString[5];
+
 static void bt_hid_keyboard_draw_key(
     Canvas* canvas,
     BtHidKeyboardModel* model,
@@ -180,12 +183,12 @@ static void bt_hid_keyboard_draw_key(
             key.icon);
     } else {
         // If shift is toggled use the shift key when available
-        strcpy(keyString, (model->shift && key.shift_key != 0) ? key.shift_key : key.key);
+        strcpy(model->key_string, (model->shift && key.shift_key != 0) ? key.shift_key : key.key);
         // Upper case if ctrl or alt was toggled true
         if((model->ctrl && key.value == HID_KEYBOARD_L_CTRL) ||
            (model->alt && key.value == HID_KEYBOARD_L_ALT) ||
            (model->gui && key.value == HID_KEYBOARD_L_GUI)) {
-            bt_hid_keyboard_to_upper(keyString);
+            bt_hid_keyboard_to_upper(model->key_string);
         }
         canvas_draw_str_aligned(
             canvas,
@@ -193,7 +196,7 @@ static void bt_hid_keyboard_draw_key(
             MARGIN_TOP + y * (KEY_HEIGHT + KEY_PADDING) + KEY_HEIGHT / 2,
             AlignCenter,
             AlignCenter,
-            keyString);
+            model->key_string);
     }
 }
 
@@ -215,7 +218,7 @@ static void bt_hid_keyboard_draw_callback(Canvas* canvas, void* context) {
     // Start shifting the all keys up if on the next row (Scrolling)
     uint8_t initY = model->y - 4 > 0 ? model->y - 4 : 0;
     for(uint8_t y = initY; y < ROW_COUNT; y++) {
-        BtHidKeyboardKey* keyboardKeyRow = keyboardKeySet[y];
+        const BtHidKeyboardKey* keyboardKeyRow = bt_hid_keyboard_keyset[y];
         uint8_t x = 0;
         for(uint8_t i = 0; i < COLUMN_COUNT; i++) {
             BtHidKeyboardKey key = keyboardKeyRow[i];
@@ -236,8 +239,9 @@ static void bt_hid_keyboard_draw_callback(Canvas* canvas, void* context) {
         }
     }
 }
+
 static uint8_t bt_hid_keyboard_get_selected_key(BtHidKeyboardModel* model) {
-    BtHidKeyboardKey key = keyboardKeySet[model->y][model->x];
+    BtHidKeyboardKey key = bt_hid_keyboard_keyset[model->y][model->x];
     // Use upper case if shift is toggled
     bool useUppercase = model->shift;
     // Check if the key has an upper case version
@@ -247,6 +251,7 @@ static uint8_t bt_hid_keyboard_get_selected_key(BtHidKeyboardModel* model) {
     else
         return key.value;
 }
+
 static void bt_hid_keyboard_get_select_key(BtHidKeyboardModel* model, BtHidKeyboardPoint delta) {
     // Keep going until a valid spot is found, this allows for nulls and zero width keys in the map
     do {
@@ -254,14 +259,14 @@ static void bt_hid_keyboard_get_select_key(BtHidKeyboardModel* model, BtHidKeybo
             model->y = ROW_COUNT - 1;
         else
             model->y = (model->y + delta.y) % ROW_COUNT;
-    } while(delta.y != 0 && keyboardKeySet[model->y][model->x].value == 0);
+    } while(delta.y != 0 && bt_hid_keyboard_keyset[model->y][model->x].value == 0);
 
     do {
         if(((int8_t)model->x) + delta.x < 0)
             model->x = COLUMN_COUNT - 1;
         else
             model->x = (model->x + delta.x) % COLUMN_COUNT;
-    } while(delta.x != 0 && keyboardKeySet[model->y][model->x].width ==
+    } while(delta.x != 0 && bt_hid_keyboard_keyset[model->y][model->x].width ==
                                 0); // Skip zero width keys, pretend they are one key
 }
 
