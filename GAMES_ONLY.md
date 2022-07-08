@@ -1,4 +1,4 @@
-- Settings: Desktop => Games Only (By RogueMaster) [(Thanks to Astrrra for Inverted Mode to Mimic)](https://github.com/wetox-team/flipperzero-firmware/commit/ce91582b7417c5d7a9d8416c17a102d3a5868238)
+## Settings: Desktop => Games Only (By RogueMaster) [(Thanks to Astrrra for Inverted Mode to Mimic)](https://github.com/wetox-team/flipperzero-firmware/commit/ce91582b7417c5d7a9d8416c17a102d3a5868238)
 - - DESKTOP LOOKS THE SAME WITH BATTERY AND IDLE ANIMATION
 - - EXIT OF GAMES/CLOCK GOES BACK TO GAMES ONLY MODE
 - - HOLD BACK TO TURN OFF FLIPPER
@@ -8,4 +8,4 @@
 - - UP OR HOLD UP FOR FAVORITE GAME
 - - LEFT OR HOLD LEFT FOR CLOCK (NOT PRIMARY/SECONDAY FAVORITE)
 - - RIGHT ALWAYS WILL GO TO PASSPORT
-- - UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
+## UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
