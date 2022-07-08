@@ -38,16 +38,13 @@ const char* const battery_view_count_text[BATTERY_VIEW_COUNT] = {
 const uint32_t displayBatteryPercentage_value[BATTERY_VIEW_COUNT] =
     {0, 1, 2, 3, 4};
 
-
-#define DUMBMODE 1
-#define NOT_DUMBMODE 0
 #define DUMBMODE_COUNT 2
 const char* const dumbmode_text[DUMBMODE_COUNT] = {
     "OFF",
     "ON",
 };
 
-const uint32_t dumbmode_value[DUMBMODE_COUNT] = {NOT_DUMBMODE, DUMBMODE};
+const uint32_t dumbmode_value[DUMBMODE_COUNT] = {0, 1};
 
 static void desktop_settings_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
