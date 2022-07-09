@@ -3,8 +3,15 @@
 
 #include "../desktop_i.h"
 #include "desktop_view_lock_menu.h"
+#include "desktop/desktop_settings/desktop_settings_app.h"
 
 #define LOCK_MENU_ITEMS_NB 4
+
+static void desktop_view_lock_menu_dumbmode_changed(void* context, bool isThisDumb) {
+    DesktopSettingsApp* app = context;
+    app->settings.is_dumbmode = isThisDumb;
+    SAVE_DESKTOP_SETTINGS(&app->settings);
+}
 
 void desktop_lock_menu_set_callback(
     DesktopLockMenuView* lock_menu,
@@ -56,8 +63,8 @@ static void lock_menu_callback(void* context, uint8_t index) {
                 model->hint_timeout = HINT_TIMEOUT;
                 return true;
             });
-        // ENTER CODE TO UPDATE SETTING
-        osDelay(3000);
+        desktop_view_lock_menu_dumbmode_changed(context,1);
+        osDelay(2000);
         lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
         break;
     default: // wip message
@@ -87,8 +94,7 @@ void desktop_lock_menu_render(Canvas* canvas, void* model) {
         if(m->hint_timeout && m->idx == 2 && m->idx == i) {
             str = "Not Implemented";
         } else if(m->hint_timeout && m->idx == 3 && m->idx == i) {
-            // str = "UUDDLCLC For Main";
-            str = "Not Implemented";
+            str = "UUDDLCLC For Main";
         }
         if(str != NULL) {
             canvas_draw_str_aligned(
