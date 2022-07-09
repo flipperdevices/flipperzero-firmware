@@ -88,7 +88,7 @@ static bool open_ducky_script(Storage* storage, Stream* stream) {
     bool ret =
         dialog_file_browser_show(dialogs, path, path, MOUSEJACKER_APP_PATH_EXTENSION,
                 true,
-                &I_music_10px,
+                &I_badusb_10px,
                 false);
 
     furi_record_close("dialogs");
@@ -112,7 +112,7 @@ static bool open_addrs_file(Storage* storage, Stream* stream) {
     bool ret =
         dialog_file_browser_show(dialogs, path, path, NRFSNIFF_APP_PATH_EXTENSION,
                 true,
-                &I_music_10px,
+                &I_sub1_10px,
                 false);
 
     furi_record_close("dialogs");

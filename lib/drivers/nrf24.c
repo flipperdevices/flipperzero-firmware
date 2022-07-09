@@ -410,7 +410,7 @@ void int64_to_bytes(uint64_t val, uint8_t* out, bool bigendian)
     }
 }
 
-uint64_t bytes_to_int32(uint8_t* bytes, bool bigendian)
+uint32_t bytes_to_int32(uint8_t* bytes, bool bigendian)
 {
     uint32_t ret = 0;
     for(int i = 0; i < 4; i++)
@@ -457,7 +457,7 @@ void int16_to_bytes(uint16_t val, uint8_t* out, bool bigendian)
 }
 
 // handle iffyness with preamble processing sometimes being a bit (literally) off
-void alt_address(uint8_t* packet, uint8_t* altaddr)
+void alt_address_old(uint8_t* packet, uint8_t* altaddr)
 {
     uint8_t macmess_hi_b[4];
     uint8_t macmess_lo_b[2];

@@ -353,3 +353,12 @@ void int64_to_bytes(uint64_t val, uint8_t* out, bool bigendian);
  * @param      bigendian - if true, convert as big endian, otherwise little endian
  */
 void int32_to_bytes(uint32_t val, uint8_t* out, bool bigendian);
+
+
+/** Converts uint8_t array into 32 bit value
+ * @param      bytes  - uint8_t array
+ * @param      bigendian - if true, convert as big endian, otherwise little endian
+ * 
+ * @return     32-bit value
+ */
+uint32_t bytes_to_int32(uint8_t* bytes, bool bigendian);

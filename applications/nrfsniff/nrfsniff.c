@@ -237,10 +237,43 @@ static bool save_addr_to_file(Storage* storage, uint8_t* data, uint8_t size) {
 
 }
 
-static void wrap_up(Storage* storage, uint8_t* address)
+void alt_address(uint8_t* addr, uint8_t* altaddr)
+{
+    uint8_t macmess_hi_b[4];
+    uint32_t macmess_hi;
+    uint8_t macmess_lo;
+    uint8_t preserved;
+    uint8_t tmpaddr[5];
+
+    // swap bytes
+    for(int i = 0; i < 5; i++)
+        tmpaddr[i] = addr[4 - i];
+
+    // get address into 32-bit and 8-bit variables
+    memcpy(macmess_hi_b, tmpaddr, 4);
+    macmess_lo = tmpaddr[4];
+
+    macmess_hi = bytes_to_int32(macmess_hi_b, true);
+
+    //preserve lowest bit from hi to shift to low
+    preserved = macmess_hi & 1;
+    macmess_hi >>= 1;
+    macmess_lo >>= 1;
+    macmess_lo = (preserved << 7) | macmess_lo;
+    int32_to_bytes(macmess_hi, macmess_hi_b, true);
+    memcpy(tmpaddr, macmess_hi_b, 4);
+    tmpaddr[4] = macmess_lo;
+
+    // swap bytes back
+    for(int i = 0; i < 5; i++)
+        altaddr[i] = tmpaddr[4 - i];
+}
+
+static void wrap_up(Storage* storage)
 {
     uint8_t ch;
     uint8_t addr[5];
+    uint8_t altaddr[5];
     char trying[12];
     uint8_t idx;
     uint8_t rate = 0;
@@ -248,8 +281,6 @@ static void wrap_up(Storage* storage, uint8_t* address)
         rate = 2;
 
     nrf24_set_idle(nrf24_HANDLE);
-    memset(address, 0, 5);
-    hexlify(address, 5, top_address);
 
     while(true)
     {
@@ -263,6 +294,16 @@ static void wrap_up(Storage* storage, uint8_t* address)
         FURI_LOG_I(TAG, "trying address %s", trying);
         ch = nrf24_find_channel(nrf24_HANDLE, addr, addr, 5, rate, 2, LOGITECH_MAX_CHANNEL, false);
         FURI_LOG_I(TAG, "find_channel returned %d", (int)ch);
+        if(ch > LOGITECH_MAX_CHANNEL)
+        {
+            alt_address(addr, altaddr);
+            hexlify(altaddr, 5, trying);
+            FURI_LOG_I(TAG, "trying alternate address %s", trying);
+            ch = nrf24_find_channel(nrf24_HANDLE, altaddr, altaddr, 5, rate, 2, LOGITECH_MAX_CHANNEL, false);
+            FURI_LOG_I(TAG, "find_channel returned %d", (int)ch);
+            memcpy(addr, altaddr, 5);
+        }
+
         if(ch <= LOGITECH_MAX_CHANNEL)
         {
             hexlify(addr, 5, top_address);
@@ -357,7 +398,7 @@ int32_t nrfsniff_app(void* p) {
                             start = furi_hal_get_tick();
                         }
                         else
-                            wrap_up(storage, address);
+                            wrap_up(storage);
                         break; 
                     case InputKeyBack: 
                         processing = false;
@@ -388,7 +429,7 @@ int32_t nrfsniff_app(void* p) {
 
             if(furi_hal_get_tick() - start >= SAMPLE_TIME)
             {
-                wrap_up(storage, address);
+                wrap_up(storage);
                 target_channel++;
                 if(target_channel > LOGITECH_MAX_CHANNEL)
                     target_channel = 2;
