@@ -267,10 +267,11 @@ if fwenv["IS_BASE_FIRMWARE"]:
     # AlwaysBuild(sdk_source)
 
     sdk_tree = fwenv.SDKTree("sdk/sdk.opts", "sdk_origin")
-    # AlwaysBuild(sdk_tree)
+    AlwaysBuild(sdk_tree)
 
     sdk_apidefs = fwenv.SDKBuilder("sdk_origin")
-    Alias("sdk", sdk_apidefs)
+    AlwaysBuild(sdk_apidefs)
+    Alias("sdk", [sdk_tree, sdk_apidefs])
     # sdk = fwenv.SDKBuilder("#build/sdk/sdk.opts", "sdktmp.pp")
     # fwenv.Depends(sdk, fwelf)
     # AlwaysBuild(sdk)
