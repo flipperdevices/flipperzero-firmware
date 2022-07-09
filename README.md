@@ -15,7 +15,7 @@ $ docker-compose exec dev ./fbt
 
 ## Latest Updates:
 - Tanks, causes "StackOverflow". Not sure what broke it. Chess is also broken. Someone please fix.
-- Updates made to [tv.ir](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/infrared/assets/tv.ir), update your SD file: infrared/assets/tv.ir
+- Updates made to [tv.ir](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/infrared/assets/tv.ir), update your SD file: infrared/assets/tv.ir (Thanks to [UberGuidoZ](https://github.com/UberGuidoZ/))
 - Updates for [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker)(Pin Out from nocomp/Frog)
 - Updates for [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff)(Pin Out from nocomp/Frog)
 
@@ -90,7 +90,7 @@ $ docker-compose exec dev ./fbt
 - [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff)(Pin Out from nocomp/Frog)
 - [PicoPass Reader (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1366)
 - [RF Remix (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix)[(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
-- [Sentry Safe (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin)(Pin Out from UberGuidoZ)
+- [Sentry Safe (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin)(Pin Out from [UberGuidoZ](https://github.com/UberGuidoZ/))
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
 - [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox) `HIDDEN "touchtunes"`
 - [UPC Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
