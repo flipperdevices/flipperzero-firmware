@@ -25,6 +25,7 @@ App(
         "subghz",
         "bad_usb",
         "u2f",
+        "elf_loader",
     ],
 )
 
