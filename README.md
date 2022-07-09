@@ -16,6 +16,8 @@ $ docker-compose exec dev ./fbt
 ## Latest Updates:
 - Tanks, causes "StackOverflow". Not sure what broke it. Chess is also broken. Someone please fix.
 - Updates made to [tv.ir](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/infrared/assets/tv.ir), update your SD file: infrared/assets/tv.ir (Thanks to [UberGuidoZ](https://github.com/UberGuidoZ/))
+- Updates for [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker)(Pin Out from nocomp/Frog)
+- Updates for [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff)(Pin Out from nocomp/Frog)
 - Games Only Mode: Enter Games Only mode from Settings=>Desktop or from (Up Menu)Lock Menu=>GAMES ONLY (By RogueMaster)
 - Games Only Mode: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR AUTO-OFF GAMES ONLY MODE AND GO TO MAIN MENU (By RogueMaster)
 - Games Only Mode: Optimizations for settings saved
