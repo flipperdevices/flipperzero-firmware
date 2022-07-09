@@ -24,6 +24,10 @@ from cxxheaderparser.types import (
     NameSpecifier,
     FundamentalSpecifier,
     Parameter,
+    Array,
+    Value,
+    Token,
+    FunctionType,
 )
 
 from cxxheaderparser.parserstate import (
@@ -76,7 +80,7 @@ class ApiManager:
         self.api.functions.add(function_def)
 
     def add_variable(self, variable_def: ApiEntryVariable):
-        if variable_def in self.api.functions:
+        if variable_def in self.api.variables:
             return
         self._name_check(variable_def.name)
         self.api.variables.add(variable_def)
@@ -93,12 +97,18 @@ class Sdk:
     def __init__(self):
         self.api_manager = ApiManager()
 
-    def process_source_file_for_sdk(file_path: str, api_manager: ApiManager):
+    def process_source_file_for_sdk(self, file_path: str):
         visitor = SdkCxxVisitor(self.api_manager)
         with open(file_path, "rt") as f:
             content = f.read()
         parser = CxxParser(file_path, content, visitor, None)
         parser.parse()
+
+    def get_functions(self):
+        return sorted(self.api_manager.api.functions, key=lambda o: o.name)
+
+    def get_variables(self):
+        return sorted(self.api_manager.api.variables, key=lambda o: o.name)
 
 
 def stringify_array_dimension(size_descr):

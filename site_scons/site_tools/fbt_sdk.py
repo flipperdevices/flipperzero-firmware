@@ -7,19 +7,9 @@ from SCons.Util import LogicalLines
 
 import os.path
 import posixpath
+import pathlib
 
 from fbt.sdk import Sdk
-
-
-# class SdkPreBuilder:
-#     def __init__(self, env) -> None:
-#         self.env = env
-
-#     def generate_actions(self):
-#         return [
-#             self._pregen_sdk_origin_file,
-#             "$CC -o $TARGET -E -P $CCFLAGS $_CCCOMCOM $SDK_PP_FLAGS -MMD ${TARGET}.c",
-#         ]
 
 
 def prebuild_sdk_emitter(target, source, env):
@@ -59,7 +49,9 @@ class SdkTreeBuilder:
             self.header_depends = list(
                 filter(lambda fname: fname.endswith(".h"), depends.split()),
             )
-            self.header_dirs = sorted(set(map(os.path.dirname, self.header_depends)))
+            self.header_dirs = sorted(
+                set(map(os.path.normpath, map(os.path.dirname, self.header_depends)))
+            )
 
     def _generate_sdk_meta(self):
         filtered_paths = [self.target_sdk_dir]
@@ -67,17 +59,32 @@ class SdkTreeBuilder:
             "$_CPPINCFLAGS",
             target=Entry("dummy"),
         )
-        for dir in self.header_dirs:
-            if dir in expanded_paths:
+        # print(expanded_paths)
+        full_fw_paths = list(
+            map(
+                os.path.normpath,
+                (self.env.Dir(inc_dir).relpath for inc_dir in self.env["CPPPATH"]),
+            )
+        )
+
+        sdk_dirs = ", ".join(f"'{dir}'" for dir in self.header_dirs)
+        for dir in full_fw_paths:
+            if dir in sdk_dirs:
                 # print("approved", dir)
                 filtered_paths.append(
                     posixpath.normpath(posixpath.join(self.target_sdk_dir, dir))
                 )
+            # else:
+            # print("rejected", dir)
 
         sdk_env = self.env.Clone()
         sdk_env.Replace(CPPPATH=filtered_paths)
         with open(self.target[0].path, "wt") as f:
-            f.write(sdk_env.subst("$CCFLAGS $_CCCOMCOM", target=Entry("dummy")))
+            cmdline_options = sdk_env.subst(
+                "$CCFLAGS $_CCCOMCOM", target=Entry("dummy")
+            )
+            f.write(cmdline_options.replace("\\", "/"))
+            f.write("\n")
 
     def _create_deploy_commands(self):
         dirs_to_create = set(
@@ -113,6 +120,34 @@ def deploy_sdk_tree(target, source, env, for_signature):
     return sdk_tree.generate_actions()
 
 
+def gen_sdk_data(env, api_manager):
+    api_def = []
+    api_def.extend(f"#include <{h.relpath}>" for h in sorted(env["SDK_HEADERS"]))
+    api_def.append(
+        "static const constexpr auto elf_api_table = sort(create_array_t<sym_entry>("
+    )
+
+    for fun_def in api_manager.get_functions():
+        api_def.append(
+            f"API_METHOD({fun_def.name}, {fun_def.ret_type}, ({fun_def.args})),"
+        )
+
+    for var_def in api_manager.get_variables():
+        api_def.append(f"API_VARIABLE({var_def.name}, {var_def.obj_type}),")
+
+    api_def.append(");")
+    return api_def
+
+
+def generate_sdk(source, target, env):
+    print(f"Generating SDK for {source[0]}")
+    sdk = Sdk()
+    sdk.process_source_file_for_sdk(source[0].path)
+    api_data = gen_sdk_data(env, sdk)
+    with open(target[0].path, "wt") as f:
+        f.write("\n".join(api_data))
+
+
 def generate(env, **kw):
     env.Append(
         BUILDERS={
@@ -125,9 +160,11 @@ def generate(env, **kw):
                 generator=deploy_sdk_tree,
                 src_suffix=".d",
             ),
-            # "SDKBuilder": Builder(
-            #     # generator=generate_sdk,
-            # ),
+            "SDKBuilder": Builder(
+                action=generate_sdk,
+                suffix=".sdk.h",
+                src_suffix=".i",
+            ),
         }
     )
 
