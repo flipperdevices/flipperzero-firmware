@@ -18,6 +18,8 @@ $ docker-compose exec dev ./fbt
 - OFW: [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - OFW: [Namespace loclass library #1379 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1379)
 - NFC: Mifare UL update to show name of emulated tag
+- Updates for [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker)(Pin Out from nocomp/Frog)
+- Updates for [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff)(Pin Out from nocomp/Frog)
 
 ## **Special Instructions:**
 - GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
