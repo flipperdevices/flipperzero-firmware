@@ -3,22 +3,13 @@
 
 #include "../desktop_i.h"
 #include "desktop_view_lock_menu.h"
-
 #include "desktop/desktop_settings/desktop_settings_app.h"
 
 #define LOCK_MENU_ITEMS_NB 4
 
-static void desktop_view_lock_menu_dumbmode_changed(void* context, bool isThisGameMode) {
-    DesktopSettings* desktop_settings = malloc(sizeof(DesktopSettings));
-    LOAD_DESKTOP_SETTINGS(desktop_settings);
+static void desktop_view_lock_menu_dumbmode_changed(bool isThisGameMode) {
     DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
-    app->settings.favorite_primary = desktop_settings->favorite_primary;
-    app->settings.favorite_secondary = desktop_settings->favorite_secondary;
-    app->settings.favorite_game = desktop_settings->favorite_game;
-    app->settings.pin_code = desktop_settings->pin_code;
-    app->settings.is_locked = desktop_settings->is_locked;
-    app->settings.auto_lock_delay_ms = desktop_settings->auto_lock_delay_ms;
-    app->settings.displayBatteryPercentage = desktop_settings->displayBatteryPercentage;
+    LOAD_DESKTOP_SETTINGS(&app->settings); 
     app->settings.is_dumbmode = isThisGameMode;
     SAVE_DESKTOP_SETTINGS(&app->settings);
 }
@@ -73,8 +64,8 @@ static void lock_menu_callback(void* context, uint8_t index) {
                 model->hint_timeout = HINT_TIMEOUT;
                 return true;
             });
-        desktop_view_lock_menu_dumbmode_changed(context,1);
-        osDelay(750);
+        desktop_view_lock_menu_dumbmode_changed(1);
+        osDelay(500);
         lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
         break;
     default: // wip message
@@ -88,7 +79,8 @@ static void lock_menu_callback(void* context, uint8_t index) {
 }
 
 void desktop_lock_menu_render(Canvas* canvas, void* model) {
-    const char* Lockmenu_Items[LOCK_MENU_ITEMS_NB] = {"Lock", "Lock with PIN", "DUMB Mode", "GAMES ONLY"};
+    const char* Lockmenu_Items[LOCK_MENU_ITEMS_NB] = {
+        "Lock", "Lock with PIN", "DUMB Mode", "GAMES ONLY"};
 
     DesktopLockMenuViewModel* m = model;
     canvas_clear(canvas);

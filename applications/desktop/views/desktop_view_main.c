@@ -5,10 +5,8 @@
 #include <furi.h>
 #include <input/input.h>
 #include <dolphin/dolphin.h>
-
 #include "../desktop_i.h"
 #include "desktop_view_main.h"
-
 #include "desktop/desktop_settings/desktop_settings_app.h"
 
 uint32_t codeSequence = 0;
@@ -22,17 +20,9 @@ struct DesktopMainView {
 
 #define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 5000
 
-static void desktop_view_main_dumbmode_changed(void* context, bool isThisGameMode) {
-    DesktopSettings* desktop_settings = malloc(sizeof(DesktopSettings));
-    LOAD_DESKTOP_SETTINGS(desktop_settings);
+static void desktop_view_main_dumbmode_changed(bool isThisGameMode) {
     DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
-    app->settings.favorite_primary = desktop_settings->favorite_primary;
-    app->settings.favorite_secondary = desktop_settings->favorite_secondary;
-    app->settings.favorite_game = desktop_settings->favorite_game;
-    app->settings.pin_code = desktop_settings->pin_code;
-    app->settings.is_locked = desktop_settings->is_locked;
-    app->settings.auto_lock_delay_ms = desktop_settings->auto_lock_delay_ms;
-    app->settings.displayBatteryPercentage = desktop_settings->displayBatteryPercentage;
+    LOAD_DESKTOP_SETTINGS(&app->settings); 
     app->settings.is_dumbmode = isThisGameMode;
     SAVE_DESKTOP_SETTINGS(&app->settings);
 }
@@ -127,7 +117,7 @@ bool desktop_main_input(InputEvent* event, void* context) {
             if(codeSequence == 8) {
                 // UNLOCK!
                 codeSequence = 0;
-                desktop_view_main_dumbmode_changed(context,0);
+                desktop_view_main_dumbmode_changed(0);
                 main_view->callback(DesktopMainEventOpenMenu, main_view->context);
             }
         } else if(event->type == InputTypeLong) {
