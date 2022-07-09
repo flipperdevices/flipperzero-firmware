@@ -2,7 +2,11 @@ Import("env")
 
 env.Append(
     LINT_SOURCES=["firmware"],
-    SDK_HEADERS=[File("#/firmware/targets/furi_hal_include/furi_hal.h")],
+    # SDK_HEADERS=[env.File("#/firmware/targets/furi_hal_include/furi_hal.h")],
+    SDK_HEADERS=[
+        *env.GlobRecursive("*.h", "#/firmware/targets/furi_hal_include", "*_i.h"),
+        *env.GlobRecursive("*.h", "#/firmware/targets/f${TARGET_HW}/furi_hal", "*_i.h"),
+    ],
 )
 
 libenv = env.Clone(FW_LIB_NAME="flipper${TARGET_HW}")

@@ -1,131 +1,133 @@
 from SCons.Builder import Builder
 from SCons.Action import Action
-from SCons.Scanner import C
-from SCons.Script import Mkdir, Copy, Delete, Entry
 
+# from SCons.Scanner import C
+from SCons.Script import Mkdir, Copy, Delete, Entry
+from SCons.Util import LogicalLines
+
+import os.path
 import posixpath
 
+from fbt.sdk import Sdk
 
-class IncludeWalker:
-    def __init__(self, env, use_defines: bool):
-        print("IncludeWalker:", env.get("FW_FLAVOR"))
+
+# class SdkPreBuilder:
+#     def __init__(self, env) -> None:
+#         self.env = env
+
+#     def generate_actions(self):
+#         return [
+#             self._pregen_sdk_origin_file,
+#             "$CC -o $TARGET -E -P $CCFLAGS $_CCCOMCOM $SDK_PP_FLAGS -MMD ${TARGET}.c",
+#         ]
+
+
+def prebuild_sdk_emitter(target, source, env):
+    target.append(env.ChangeFileExtension(target[0], ".d"))
+    return target, source
+
+
+def prebuild_sdk(source, target, env, for_signature):
+    def _pregen_sdk_origin_file(source, target, env):
+        mega_file = env.subst("${TARGET}.c", target=target[0])
+        with open(mega_file, "wt") as sdk_c:
+            sdk_c.write("\n".join(f"#include <{h.path}>" for h in env["SDK_HEADERS"]))
+
+    return [
+        _pregen_sdk_origin_file,
+        "$CC -o $TARGET -E -P $CCFLAGS $_CCCOMCOM $SDK_PP_FLAGS -MMD ${TARGET}.c",
+    ]
+
+
+class SdkTreeBuilder:
+    def __init__(self, env, target, source) -> None:
         self.env = env
-        print(f"{self.env['CPPPATH']}")
-        self.scanner = C.CConditionalScanner() if use_defines else C.CScanner()
-        self.path = self.scanner.path(self.env)
-        self.headers = set()
-        self.visited = set()
+        self.target = target
+        self.source = source
 
-    def _walk(self, node):
-        # print("Walking", node.name, node.path)
-        if node in self.visited:
-            # print("-> Already seen")
-            return
-        # print("New", node.name)
-        headers = self.scanner(node, self.env, self.path)
-        self.headers.update(headers)
-        self.visited.add(node)
-        for header in headers:
-            self._walk(header)
+        self.header_depends = []
+        self.header_dirs = []
 
-    def add_header(self, node):
-        self.headers.add(node)
-        self._walk(node)
-
-    def walk(self, srcpath):
-        self._walk(self.env.File(srcpath))
-
-
-class SdkBuilder:
-    # USE_CDEFS = False
-    USE_CDEFS = True
-
-    def __init__(self, env):
-        self.env = env
         self.target_sdk_dir = env.subst("f${TARGET_HW}_sdk")
-        self._process()
+        self.sdk_deploy_dir = target[0].Dir(self.target_sdk_dir)
 
-    def _process(self):
-        self.includewalker = IncludeWalker(self.env, self.USE_CDEFS)
-        print("src sdk", [f.path for f in self.env["SDK_HEADERS"]])
-        for header in self.env["SDK_HEADERS"]:
-            self.includewalker.add_header(header)
+    def _parse_sdk_depends(self):
+        deps_file = self.source[0]
+        with open(deps_file.path, "rt") as deps_f:
+            lines = LogicalLines(deps_f).readlines()
+            _, depends = lines[0].split(":", 1)
+            self.header_depends = list(
+                filter(lambda fname: fname.endswith(".h"), depends.split()),
+            )
+            self.header_dirs = sorted(set(map(os.path.dirname, self.header_depends)))
 
-        self.sdk_dirs = list(set(h.dir.relpath for h in self.includewalker.headers))
-
-    def get_headers(self):
-        return self.includewalker.headers
-
-    def generate_sdk_meta(self, source, target, env):
-        # print(env.Dump())
-        # print("generate_sdk_meta", source, target, env)
-        filtered_paths = []
-        expanded_paths = env.subst(
-            # "${_concat('', CPPPATH, '', __env__)}", target="a", source="b"
+    def _generate_sdk_meta(self):
+        filtered_paths = [self.target_sdk_dir]
+        expanded_paths = self.env.subst(
             "$_CPPINCFLAGS",
             target=Entry("dummy"),
         )
-        # print(f"{expanded_paths=}")
-        # print(f"{self.sdk_dirs=}")
-        for dir in self.sdk_dirs:
+        for dir in self.header_dirs:
             if dir in expanded_paths:
-                print("approved", dir)
+                # print("approved", dir)
                 filtered_paths.append(
                     posixpath.normpath(posixpath.join(self.target_sdk_dir, dir))
                 )
 
-        sdk_env = env.Clone()
+        sdk_env = self.env.Clone()
         sdk_env.Replace(CPPPATH=filtered_paths)
-        # print(f"{sdk_env.Dump('CPPPATH')=}")
-        with open(target[0].path, "wt") as f:
-            # f.write("aaa")
-            f.write(sdk_env.subst("$_CCCOMCOM", target=Entry("dummy")))
-            # for h in self.includewalker.headers:
-            # f.write(h.path + "\n")
+        with open(self.target[0].path, "wt") as f:
+            f.write(sdk_env.subst("$CCFLAGS $_CCCOMCOM", target=Entry("dummy")))
 
-    def gen_actions(self, sdk_root_dir):
+    def _create_deploy_commands(self):
+        dirs_to_create = set(
+            self.sdk_deploy_dir.Dir(dirpath) for dirpath in self.header_dirs
+        )
         actions = [
-            Action(self.generate_sdk_meta),
-            # Touch(self.env["SDK_META"]),
+            Delete(self.sdk_deploy_dir),
+            Mkdir(self.sdk_deploy_dir),
         ]
-
-        sdk_dir = sdk_root_dir.Dir(self.target_sdk_dir)
-        dirs_to_create = set(sdk_dir.Dir(dirpath) for dirpath in self.sdk_dirs)
-        # print([n.path for n in dirs_to_create])
-        # actions = [Mkdir(sdk_dir), Touch(target[0])]
         actions += [Mkdir(d) for d in dirs_to_create]
-        actions += [Copy(sdk_dir.File(h.path), h) for h in self.includewalker.headers]
+
+        actions += [
+            Copy(
+                self.sdk_deploy_dir.File(h).path,
+                h,
+            )
+            for h in self.header_depends
+        ]
         return actions
 
+    def generate_actions(self):
+        self._parse_sdk_depends()
+        self._generate_sdk_meta()
 
-def generate_sdk(source, target, env, for_signature):
-    print("generate_sdk", for_signature)
-    sdk_root_dir = target[0].Dir(".")
-    actions = [
-        Delete(sdk_root_dir),
-        Mkdir(sdk_root_dir),
-    ]
+        return self._create_deploy_commands()
+
+
+def deploy_sdk_tree(target, source, env, for_signature):
     if for_signature:
-        return actions
+        return []
 
-    sdk_gen = SdkBuilder(env)
-    actions += sdk_gen.gen_actions(sdk_root_dir)
-
-    # iw.walk("#applications/about/test.c")
-    # dirs_to_create = set(sdk_dir.Dir(h.dir.relpath) for h in iw.headers)
-    # print([n.path for n in dirs_to_create])
-    # actions = [Mkdir(sdk_dir), Touch(target[0])]
-    # actions += [Mkdir(d) for d in dirs_to_create]
-    # actions += [Copy(sdk_dir.File(h.path), h) for h in iw.headers]
-    return actions
+    sdk_tree = SdkTreeBuilder(env, target, source)
+    return sdk_tree.generate_actions()
 
 
 def generate(env, **kw):
     env.Append(
         BUILDERS={
-            "SDKBuilder": Builder(
-                generator=generate_sdk,
+            "SDKPrebuilder": Builder(
+                emitter=prebuild_sdk_emitter,
+                generator=prebuild_sdk,
+                suffix=".i",
             ),
+            "SDKTree": Builder(
+                generator=deploy_sdk_tree,
+                src_suffix=".d",
+            ),
+            # "SDKBuilder": Builder(
+            #     # generator=generate_sdk,
+            # ),
         }
     )
 

@@ -248,9 +248,30 @@ if should_gen_cdb_and_link_dir(fwenv, BUILD_TARGETS):
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", fw_artifacts)
 
 if fwenv["IS_BASE_FIRMWARE"]:
-    sdk = fwenv.SDKBuilder("#build/sdk/sdk.opts", [])
-    fwenv.Depends(sdk, fwelf)
-    AlwaysBuild(sdk)
-    Alias("sdk", sdk)
+    sdk_source = fwenv.SDKPrebuilder(
+        "sdk_origin",
+        [],
+        # Filtering out things cxxheaderparser cannot handle
+        SDK_PP_FLAGS=[
+            "-D_Static_assert(x,y)=",
+            "-D__asm__(x)=",
+            "-D__attribute__(x)=",
+            "-Drestrict=",
+            "-D_Noreturn=",
+            "-D__restrict=",
+            "-D__extension__=",
+            "-D__inline=inline",
+            "-D__inline__=inline",
+        ],
+    )
+    # AlwaysBuild(sdk_source)
+
+    sdk_tree = fwenv.SDKTree("sdk/sdk.opts", "sdk_origin")
+    AlwaysBuild(sdk_tree)
+    Alias("sdk", sdk_tree)
+    # sdk = fwenv.SDKBuilder("#build/sdk/sdk.opts", "sdktmp.pp")
+    # fwenv.Depends(sdk, fwelf)
+    # AlwaysBuild(sdk)
+    # Alias("sdk", sdk)
 
 Return("fwenv")
