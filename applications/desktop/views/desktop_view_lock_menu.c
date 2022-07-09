@@ -57,6 +57,8 @@ static void lock_menu_callback(void* context, uint8_t index) {
                 return true;
             });
         // ENTER CODE TO UPDATE SETTING
+        osDelay(3000);
+        lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
         break;
     default: // wip message
         with_view_model(
