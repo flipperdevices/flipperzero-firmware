@@ -2,6 +2,7 @@
 #include "rpc_i.h"
 #include "gpio.pb.h"
 #include <furi_hal_gpio.h>
+#include <furi_hal_gpio_i.h>
 #include <furi_hal_resources.h>
 
 static const GpioPin* rpc_pin_to_hal_pin(PB_Gpio_GpioPin rpc_pin) {
