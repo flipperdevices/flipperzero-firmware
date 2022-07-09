@@ -4,8 +4,8 @@
 ### **DONATIONS ACCEPTED** 😄🚀💸
 - BTC:**172CE1H1XZVt7tc4HDQ1q9Mej1K7VuHfEf** 
 - ETH:**0x6c46eE48Bd433b0ADE711B43D188Cf8215cd51c2**
-- Contact me on Discord if you want a renamed Flipper DFU. I can do custom names too!
-- [Join my Flipper/Amiibo Discord](https://discord.gg/JYrJPS74rN)
+- Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Flipper DFU. I can do custom names too!
+- [Join my Flipper/Amiibo Discord](https://discord.gg/gF2bBUzAFe)
 ## You should clone with 
 ```shell
 $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
@@ -18,6 +18,7 @@ $ docker-compose exec dev ./fbt
 - OFW: [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - OFW: [Namespace loclass library #1379 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1379)
 - NFC: Mifare UL update to show name of emulated tag
+- Updates made to [tv.ir](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/infrared/assets/tv.ir), update your SD file: infrared/assets/tv.ir
 
 ## **Special Instructions:**
 - GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU
