@@ -15,9 +15,6 @@ $ docker-compose exec dev ./fbt
 
 ## Latest Updates:
 - Tanks, causes "StackOverflow". Not sure what broke it. Chess is also broken. Someone please fix.
-- OFW: [Bluetooth Remote Additions #1330 (By Cutch)](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
-- OFW: [Namespace loclass library #1379 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1379)
-- NFC: Mifare UL update to show name of emulated tag
 - Updates made to [tv.ir](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/infrared/assets/tv.ir), update your SD file: infrared/assets/tv.ir
 - Updates for [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker)(Pin Out from nocomp/Frog)
 - Updates for [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff)(Pin Out from nocomp/Frog)
