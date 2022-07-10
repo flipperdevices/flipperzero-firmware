@@ -29,9 +29,20 @@ def BuildModules(env, modules):
     return result
 
 
+def PhonyTarget(env, name, action, source=None, **kw):
+    if not source:
+        source = []
+    phony_name = "phony_" + name
+    env.Pseudo(phony_name)
+    command = env.Command(phony_name, source, action, **kw)
+    env.AlwaysBuild(env.Alias(name, command))
+    return command
+
+
 def generate(env):
     env.AddMethod(BuildModule)
     env.AddMethod(BuildModules)
+    env.AddMethod(PhonyTarget)
 
 
 def exists(env):

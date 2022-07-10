@@ -2,11 +2,17 @@
 
 set -e
 
-if [[ -d .git ]]; then
-	echo "Updating git submodules"
-	git submodule update --init
+SCRIPTDIR="$( dirname -- "$0"; )";
+SCONS_EP=${SCRIPTDIR}/lib/scons/scripts/scons.py
+
+if [[ -z "${FBT_NO_SYNC:-}" ]] ; then
+    if [[ -d .git ]]; then
+        git submodule update --init
+    else
+        echo Not in a git repo, please clone with git clone --recursive
+        exit 1
+    fi
 fi
 
-SCRIPTDIR="$( dirname -- "$0"; )";
 SCONS_DEFAULT_FLAGS="-Q --warn=target-not-built"
-python3 ${SCRIPTDIR}/lib/scons/scripts/scons.py ${SCONS_DEFAULT_FLAGS} "$@"
+python3 ${SCONS_EP} ${SCONS_DEFAULT_FLAGS} "$@"

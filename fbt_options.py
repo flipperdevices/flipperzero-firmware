@@ -41,12 +41,26 @@ COPRO_STACK_BIN_DIR = posixpath.join(
 # Supported toolchain versions
 FBT_TOOLCHAIN_VERSIONS = (" 10.3.",)
 
-OPENOCD_OPTS = '-f interface/stlink.cfg -c "transport select hla_swd" -f debug/stm32wbx.cfg -c "stm32wbx.cpu configure -rtos auto" -c "init"'
+OPENOCD_OPTS = [
+    "-f",
+    "interface/stlink.cfg",
+    "-c",
+    "transport select hla_swd",
+    "-f",
+    "debug/stm32wbx.cfg",
+    "-c",
+    "stm32wbx.cpu configure -rtos auto",
+    "-c",
+    "init",
+]
 
 SVD_FILE = "debug/STM32WB55_CM4.svd"
 
+# Look for blackmagic probe on serial ports
+BLACKMAGIC = "auto"
+
 FIRMWARE_APPS = {
-    "default": (
+    "default": [
         "crypto_start",
         # Svc
         "basic_services",
@@ -62,11 +76,11 @@ FIRMWARE_APPS = {
         "basic_plugins",
         # Debug
         "debug_apps",
-    ),
-    "unit_tests": (
+    ],
+    "unit_tests": [
         "basic_services",
         "unit_tests",
-    ),
+    ],
 }
 
 FIRMWARE_APP_SET = "default"
