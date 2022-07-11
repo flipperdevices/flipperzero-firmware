@@ -1,7 +1,35 @@
-# RoadMap
+# RoadMap for RM BUILD
+### This is more of a project wish list...
+- It is open to whomever wants to build and PR. You get all the credit if you can create it! :D
+- I likely won't have time to cover all these items.
+- Some of these would make great sample projects to learn how to make apps for flipper.
+- I tried to organize them in terms of difficulty.
 
+## WISH LIST ITEMS:
+- `Dolphin Restorer` APP to backup/restore internal dolphin state and settings from SD
+- `Notepad` APP to allow taking quick notes and saving to SD.
+- - Also can possibly open/edit .md,.txt,.fmf and other text friendly formats
+- `Doplhin SubGHz Chat` APP to allow listening for and viewing SubGHz messages and sending SubGHz messages
+- - Could also be set to transmit a message every X seconds/minutes until another Flipper responds
+- `Write URL to NFC` APP to allow creating URL NFC tags from only the flipper
+- - Also can possibly support larger URLs than the ones in samples (due to length limits on NFC types)
+- - Also can possibly create other types of tags, like WIFI configurations
+- `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for mp3 playback
+- - Also can possible pair to speaker via NFC tap, here are some possible resources:
+- - - https://github.com/urish/circuitpython-mp3-ble
+- - - https://github.com/averyling82/wifi-bt-audio
+- - - https://github.com/YetAnotherElectronicsChannel/ESP32_Bluetooth_Audio_Receiver
+- - - https://github.com/redchenjs/bluetooth_visual_speaker_esp32
+- - - https://github.com/cefali9154/BluetoothPlayer
+- - - https://github.com/jujax/lyrat_passthru
+- `Bluetooth OpenHayStack` for Flipper, changes current bluetooth configuration to transmit Bluetooth Open Haystack packet as needed for the device to be findable when settings for Bluetooth is set to ON in settings and OpenHayStack is set to ON in settings.
+- - Not sure if could possiblt also serve to find devices
+- - Example resource of OpenHayStack as an alternative to Bluetooth On/Off: https://github.com/AlexStrNik/flipperzero-firmware/tree/dev
+
+# 
+# 
+# RoadMap for ORIGINAL FIRMWARE
 # Where we are (0.x.x branch)
-
 Our goal for 0.x.x branch is to build stable usable apps and API.
 First public release that we support in this branch is 0.43.1. Your device most likely came with this version.
 You can develop applications but keep in mind that API is not final yet.
