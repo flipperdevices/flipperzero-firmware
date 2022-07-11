@@ -18,7 +18,7 @@ $ docker-compose exec dev ./fbt
 - OFW: [added gui-shift command to ducky script #1381 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1381)
 - OFW: [Save picopass as picopass or, for 26bit, as lfrfid #1380 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1380)
 - Added [Mandelbrot set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
-- Update for [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) by RogueMaster, crashes on 1st load
+- Update for [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) by RogueMaster `HIDDEN "chess_game"` Crashes on 1st load if firmware is <750KB or every load on larger firmwares
 
 ## **Special Instructions:**
 - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
@@ -72,7 +72,7 @@ $ docker-compose exec dev ./fbt
 - - Games `HIDDEN` for development space; can be added under [applications/meta/application.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam#L54)
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048)
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
-- [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Updates by RogueMaster, crashes on 1st load
+- [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Updates by RogueMaster, crashes on 1st load `HIDDEN "chess_game"` Crashes on 1st load if firmware is <750KB or every load on larger firmwares
 - [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge. Add SD folder `chip8`, [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/) `HIDDEN "chip8"`
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/dice/dice.c)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)
