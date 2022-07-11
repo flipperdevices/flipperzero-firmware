@@ -889,9 +889,10 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
             shift = (write_page - 28) / 4 + 5;
         else if(write_page == 41)
             shift = 12;
-        else
+        else {
             furi_assert(false);
-        shift = 0;
+            shift = 0;
+        }
 
         break;
     case MfUltralightTypeUL21:
