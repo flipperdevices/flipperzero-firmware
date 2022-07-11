@@ -22,9 +22,12 @@
 - - - https://github.com/redchenjs/bluetooth_visual_speaker_esp32
 - - - https://github.com/cefali9154/BluetoothPlayer
 - - - https://github.com/jujax/lyrat_passthru
+- - Also can support playlists / playlist files
 - `Bluetooth OpenHayStack` for Flipper, changes current bluetooth configuration to transmit Bluetooth Open Haystack packet as needed for the device to be findable when settings for Bluetooth is set to ON in settings and OpenHayStack is set to ON in settings.
 - - Not sure if could possiblt also serve to find devices
 - - Example resource of OpenHayStack as an alternative to Bluetooth On/Off: https://github.com/AlexStrNik/flipperzero-firmware/tree/dev
+- `Tamagochi` APP serves as a virtual pet
+- - Possible resource: https://learn.littlerobotfriends.com/downloads/
 
 # 
 # 
