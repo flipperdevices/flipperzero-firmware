@@ -807,6 +807,8 @@ static bool mf_ul_ntag_i2c_plus_check_auth(
 
 static int16_t mf_ul_get_dynamic_lock_page_addr(MfUltralightData* data) {
     switch(data->type) {
+    case MfUltralightTypeNTAG203:
+        return 0x28;
     case MfUltralightTypeUL21:
     case MfUltralightTypeNTAG213:
     case MfUltralightTypeNTAG215:
@@ -839,6 +841,9 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
 
     // Check max page
     switch(emulator->data.type) {
+    case MfUltralightTypeNTAG203:
+        // Counter page can be locked and is after dynamic locks
+        if(write_page == 40) return true;
     case MfUltralightTypeUL21:
     case MfUltralightTypeNTAG213:
     case MfUltralightTypeNTAG215:
@@ -876,6 +881,17 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
 
     switch(emulator->data.type) {
     // low byte LSB range, MSB range
+    case MfUltralightTypeNTAG203:
+        if(write_page >= 16 && write_page <= 27)
+            shift = (write_page - 16) / 4 + 1;
+        else if(write_page >= 28 && write_page <= 39)
+            shift = (write_page - 28) / 4 + 5;
+        else if(write_page == 41)
+            shift = 12;
+        else
+            furi_assert(false);
+
+        break;
     case MfUltralightTypeUL21:
     case MfUltralightTypeNTAG213:
         // 16-17, 30-31
@@ -997,53 +1013,75 @@ static void mf_ul_emulate_write(
         *(uint32_t*)page_buff |= *(uint32_t*)&emulator->data.data[write_page * 4];
     } else if(tag_addr == mf_ul_get_dynamic_lock_page_addr(&emulator->data)) {
         // Handle dynamic locks
-        uint16_t orig_locks = emulator->data.data[write_page * 4] |
-                              (emulator->data.data[write_page * 4 + 1] << 8);
-        uint8_t orig_block_locks = emulator->data.data[write_page * 4 + 2];
-        uint16_t new_locks = page_buff[0] | (page_buff[1] << 8);
-        uint8_t new_block_locks = page_buff[2];
+        if(emulator->data.type == MfUltralightTypeNTAG203) {
+            // NTAG203 lock bytes are a bit different from the others
+            uint8_t orig_page_lock_byte = emulator->data.data[write_page * 4];
+            uint8_t orig_cnt_lock_byte = emulator->data.data[write_page * 4 + 1];
+            uint8_t new_page_lock_byte = page_buff[0];
+            uint8_t new_cnt_lock_byte = page_buff[1];
 
-        int block_lock_count;
-        switch(emulator->data.type) {
-        case MfUltralightTypeUL21:
-            block_lock_count = 5;
-            break;
-        case MfUltralightTypeNTAG213:
-            block_lock_count = 6;
-            break;
-        case MfUltralightTypeNTAG215:
-            block_lock_count = 4;
-            break;
-        case MfUltralightTypeNTAG216:
-        case MfUltralightTypeNTAGI2C1K:
-        case MfUltralightTypeNTAGI2CPlus1K:
-            block_lock_count = 7;
-            break;
-        case MfUltralightTypeNTAGI2C2K:
-        case MfUltralightTypeNTAGI2CPlus2K:
-            block_lock_count = 8;
-            break;
-        default:
-            furi_assert(false);
-            block_lock_count = 0;
-            break;
+            if(orig_page_lock_byte & 0x01) // Block lock bits 1-3
+                new_page_lock_byte & ~0x0E;
+            if(orig_page_lock_byte & 0x10) // Block lock bits 5-7
+                new_page_lock_byte & ~0xE0;
+            if(orig_cnt_lock_byte & 0x01) // Block lock counter bit
+                new_cnt_lock_byte &= ~0x10;
+            // TODO: Check exact behavior of counter lock byte and remaining page bytes when I have
+            // NTAG203 tags in hand
+
+            new_page_lock_byte |= orig_page_lock_byte;
+            new_cnt_lock_byte |= orig_cnt_lock_byte;
+            page_buff[0] = new_page_lock_byte;
+            page_buff[1] = new_cnt_lock_byte;
+        } else {
+            uint16_t orig_locks = emulator->data.data[write_page * 4] |
+                                  (emulator->data.data[write_page * 4 + 1] << 8);
+            uint8_t orig_block_locks = emulator->data.data[write_page * 4 + 2];
+            uint16_t new_locks = page_buff[0] | (page_buff[1] << 8);
+            uint8_t new_block_locks = page_buff[2];
+
+            int block_lock_count;
+            switch(emulator->data.type) {
+            case MfUltralightTypeUL21:
+                block_lock_count = 5;
+                break;
+            case MfUltralightTypeNTAG213:
+                block_lock_count = 6;
+                break;
+            case MfUltralightTypeNTAG215:
+                block_lock_count = 4;
+                break;
+            case MfUltralightTypeNTAG216:
+            case MfUltralightTypeNTAGI2C1K:
+            case MfUltralightTypeNTAGI2CPlus1K:
+                block_lock_count = 7;
+                break;
+            case MfUltralightTypeNTAGI2C2K:
+            case MfUltralightTypeNTAGI2CPlus2K:
+                block_lock_count = 8;
+                break;
+            default:
+                furi_assert(false);
+                block_lock_count = 0;
+                break;
+            }
+
+            for(int i = 0; i < block_lock_count; ++i) {
+                if(orig_block_locks & (1 << i)) new_locks &= ~(3 << (2 * i));
+            }
+
+            new_locks |= orig_locks;
+            new_block_locks |= orig_block_locks;
+
+            page_buff[0] = new_locks & 0xff;
+            page_buff[1] = new_locks >> 8;
+            page_buff[2] = new_block_locks;
+            if(emulator->data.type >= MfUltralightTypeUL21 &&
+               emulator->data.type <= MfUltralightTypeNTAG216)
+                page_buff[3] = MF_UL_TEARING_FLAG_DEFAULT;
+            else
+                page_buff[3] = 0;
         }
-
-        for(int i = 0; i < block_lock_count; ++i) {
-            if(orig_block_locks & (1 << i)) new_locks &= ~(3 << (2 * i));
-        }
-
-        new_locks |= orig_locks;
-        new_block_locks |= orig_block_locks;
-
-        page_buff[0] = new_locks & 0xff;
-        page_buff[1] = new_locks >> 8;
-        page_buff[2] = new_block_locks;
-        if(emulator->data.type >= MfUltralightTypeUL21 &&
-           emulator->data.type <= MfUltralightTypeNTAG216)
-            page_buff[3] = MF_UL_TEARING_FLAG_DEFAULT;
-        else
-            page_buff[3] = 0;
     }
 
     memcpy(&emulator->data.data[write_page * 4], page_buff, 4);
