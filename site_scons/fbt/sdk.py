@@ -1,4 +1,8 @@
-from typing import List
+from copyreg import constructor
+import os
+
+from typing import List, Set, ClassVar
+
 
 from dataclasses import dataclass, field
 
@@ -42,22 +46,43 @@ from cxxheaderparser.parserstate import (
 @dataclass(frozen=True)
 class ApiEntryFunction:
     name: str
-    ret_type: str
-    args: str
+    returns: str
+    params: str
+
+    csv_type: ClassVar[str] = "Function"
+
+    def dictify(self):
+        return dict(name=self.name, type=self.returns, params=self.params)
 
 
 @dataclass(frozen=True)
 class ApiEntryVariable:
     name: str
-    obj_type: str
+    var_type: str
+
+    csv_type: ClassVar[str] = "Variable"
+
+    def dictify(self):
+        return dict(name=self.name, type=self.var_type, params=None)
+
+
+@dataclass
+class ApiHeader:
+    name: str
+
+    csv_type: ClassVar[str] = "Header"
+
+    def dictify(self):
+        return dict(name=self.name, type=None, params=None)
 
 
 @dataclass
 class ApiEntries:
     # These are sets, to avoid creating duplicates when we have multiple
     # declarations with same signature
-    functions: List[ApiEntryFunction] = field(default_factory=set)
-    variables: List[ApiEntryVariable] = field(default_factory=set)
+    functions: Set[ApiEntryFunction] = field(default_factory=set)
+    variables: Set[ApiEntryVariable] = field(default_factory=set)
+    headers: Set[ApiHeader] = field(default_factory=set)
 
 
 class ApiManager:
@@ -85,6 +110,9 @@ class ApiManager:
         self._name_check(variable_def.name)
         self.api.variables.add(variable_def)
 
+    def add_header(self, header: str):
+        self.api.headers.add(header)
+
 
 def gnu_sym_hash(name: str):
     h = 0x1505
@@ -96,6 +124,9 @@ def gnu_sym_hash(name: str):
 class Sdk:
     def __init__(self):
         self.api_manager = ApiManager()
+
+    def add_header_to_sdk(self, header: str):
+        self.api_manager.add_header(header)
 
     def process_source_file_for_sdk(self, file_path: str):
         visitor = SdkCxxVisitor(self.api_manager)
@@ -252,3 +283,167 @@ class SdkCxxVisitor:
 
     def on_class_end(self, state: ClassBlockState) -> None:
         pass
+
+
+@dataclass(frozen=True)
+class SdkVersion:
+    major: int = 0
+    minor: int = 0
+
+    csv_type: ClassVar[str] = "Version"
+
+    def __str__(self):
+        return f"{self.major}.{self.minor}"
+
+    @staticmethod
+    def from_str(s: str) -> "SdkVersion":
+        major, minor = s.split(".")
+        return SdkVersion(int(major), int(minor))
+
+    def dictify(self):
+        return dict(name=str(self), type=None, params=None)
+
+
+import csv
+from enum import Enum, auto
+
+
+class VersionBump(Enum):
+    NONE = auto()
+    MAJOR = auto()
+    MINOR = auto()
+
+
+# Class that stored all known API entries, both enabled and disabled.
+# Also keep track of API versioning
+# Allows comparison with newly-generated API
+class SdkCache:
+    CSV_FIELD_NAMES = ("entry", "status", "name", "type", "params")
+    CSV_TYPES = (ApiEntryFunction, ApiEntryVariable, ApiHeader, SdkVersion)
+
+    def __init__(self, cache_file: str):
+        self.cache_file_name = cache_file
+        self.version = SdkVersion(1, 1)
+        self.sdk = ApiEntries()
+        self.disabled_entries = set()
+        self.new_entries = set()
+        self.loaded_dirty = False
+        self.loaded_dirty_version = False
+
+        self.version_action = VersionBump.NONE
+        self.load_cache()
+
+    def _get_entry_status(self, entry) -> str:
+        if entry in self.disabled_entries:
+            return "-"
+        elif entry in self.new_entries:
+            return "!"
+        else:
+            return "+"
+
+    def _format_entry(self, obj):
+        obj_dict = obj.dictify()
+        obj_dict.update(dict(entry=obj.csv_type, status=self._get_entry_status(obj)))
+        return obj_dict
+
+    def save_cache(self) -> None:
+        version_is_clean = True
+        if self.loaded_dirty:
+            # There are still new entries and version was already updated
+            version_is_clean = False
+
+        if self.version_action == VersionBump.MINOR:
+            self.version = SdkVersion(self.version.major, self.version.minor + 1)
+            version_is_clean = False
+        elif self.version_action == VersionBump.MAJOR:
+            self.version = SdkVersion(self.version.major + 1, 0)
+            version_is_clean = False
+
+        if version_is_clean:
+            print(f"API version {self.version} is up to date")
+        else:
+            self.new_entries.add(self.version)
+            print(
+                f"API version is still WIP: {self.version}. Review the changes and re-run command to update."
+            )
+            print("Entries to review for version ", end="")
+            print("\n".join(map(str, self.new_entries)))
+
+        str_cache_entries = [self.version]
+        str_cache_entries.extend(sorted(self.sdk.headers, key=lambda x: x.name))
+        str_cache_entries.extend(sorted(self.sdk.functions, key=lambda x: x.name))
+        str_cache_entries.extend(sorted(self.sdk.variables, key=lambda x: x.name))
+
+        with open(self.cache_file_name, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=SdkCache.CSV_FIELD_NAMES)
+            writer.writeheader()
+
+            for entry in str_cache_entries:
+                writer.writerow(self._format_entry(entry))
+
+    def _process_entry(self, entry_dict: dict) -> None:
+        # print(f"{entry_dict=}")
+        entry_class = entry_dict["entry"]
+        entry_status = entry_dict["status"]
+        entry_name = entry_dict["name"]
+        entry_type = entry_dict["type"]
+        entry_params = entry_dict["params"]
+
+        entry = None
+        if entry_class == "Version":
+            self.version = SdkVersion.from_str(entry_name)
+            if entry_status == "!":
+                self.loaded_dirty_version = True
+        elif entry_class == "Header":
+            self.sdk.headers.add(entry := ApiHeader(entry_name))
+        elif entry_class == "Function":
+            self.sdk.functions.add(
+                entry := ApiEntryFunction(entry_name, entry_type, entry_params)
+            )
+        elif entry_class == "Variable":
+            self.sdk.variables.add(entry := ApiEntryVariable(entry_name, entry_type))
+        else:
+            print(entry_dict)
+            raise Exception("Unknown entry type: %s" % entry_class)
+
+        if entry is None:
+            return
+
+        if entry_status == "-":
+            self.disabled_entries.add(entry)
+        elif entry_status == "!":
+            self.new_entries.add(entry)
+
+    def load_cache(self) -> None:
+        if not os.path.exists(self.cache_file_name):
+            raise Exception("CANNOT LOAD SYMBOL CACHE! FILE DOES NOT EXIST")
+
+        with open(self.cache_file_name, "r") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                # print(row)
+                self._process_entry(row)
+
+        self.loaded_dirty = bool(self.new_entries)
+
+    def sync_sets(self, known_set, new_set):
+        new_entries = new_set - known_set
+        if new_entries:
+            print(f"New: {new_entries}")
+            known_set |= new_entries
+            self.new_entries |= new_entries
+            if self.version_action == VersionBump.NONE:
+                self.version_action = VersionBump.MINOR
+            # self.version = SdkVersion(self.version.major, self.version.minor + 1)
+        removed_entries = known_set - new_set
+        if removed_entries:
+            print(f"Removed: {removed_entries}")
+            known_set -= removed_entries
+            self.version_action = VersionBump.MAJOR
+            self.loaded_dirty = True
+
+    def validate_api(self, api: ApiEntries) -> None:
+        self.sync_sets(self.sdk.headers, api.headers)
+        self.sync_sets(self.sdk.functions, api.functions)
+        self.sync_sets(self.sdk.variables, api.variables)
+

@@ -9,7 +9,7 @@ import os.path
 import posixpath
 import pathlib
 
-from fbt.sdk import Sdk
+from fbt.sdk import Sdk, SdkCache
 
 
 def prebuild_sdk_emitter(target, source, env):
@@ -120,32 +120,37 @@ def deploy_sdk_tree(target, source, env, for_signature):
     return sdk_tree.generate_actions()
 
 
-def gen_sdk_data(env, api_manager):
+def gen_sdk_data(env, sdk):
     api_def = []
     api_def.extend(f"#include <{h.relpath}>" for h in sorted(env["SDK_HEADERS"]))
     api_def.append(
         "static const constexpr auto elf_api_table = sort(create_array_t<sym_entry>("
     )
 
-    for fun_def in api_manager.get_functions():
+    for fun_def in sdk.get_functions():
         api_def.append(
-            f"API_METHOD({fun_def.name}, {fun_def.ret_type}, ({fun_def.args})),"
+            f"API_METHOD({fun_def.name}, {fun_def.returns}, ({fun_def.params})),"
         )
 
-    for var_def in api_manager.get_variables():
-        api_def.append(f"API_VARIABLE({var_def.name}, {var_def.obj_type}),")
+    for var_def in sdk.get_variables():
+        api_def.append(f"API_VARIABLE({var_def.name}, {var_def.var_type }),")
 
     api_def.append(");")
     return api_def
 
 
-def generate_sdk(source, target, env):
-    print(f"Generating SDK for {source[0]}")
+def validate_sdk_cache(source, target, env):
+    print(f"Generating SDK for {source[0]} to {target[0]}")
     sdk = Sdk()
     sdk.process_source_file_for_sdk(source[0].path)
-    api_data = gen_sdk_data(env, sdk)
-    with open(target[0].path, "wt") as f:
-        f.write("\n".join(api_data))
+
+    sdk_cache = SdkCache(target[0].path)
+    sdk_cache.validate_api(sdk.api_manager.api)
+    sdk_cache.save_cache()
+
+
+def generate_sdk_symbols(source, target, env):
+    pass
 
 
 def generate(env, **kw):
@@ -160,10 +165,15 @@ def generate(env, **kw):
                 generator=deploy_sdk_tree,
                 src_suffix=".d",
             ),
-            "SDKBuilder": Builder(
-                action=generate_sdk,
-                suffix=".sdk.h",
+            "SDKSymUpdater": Builder(
+                action=validate_sdk_cache,
+                suffix=".csv",
                 src_suffix=".i",
+            ),
+            "SDKSymGenerator": Builder(
+                action=generate_sdk_symbols,
+                suffix=".h",
+                src_suffix=".csv",
             ),
         }
     )

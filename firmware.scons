@@ -269,9 +269,20 @@ if fwenv["IS_BASE_FIRMWARE"]:
     sdk_tree = fwenv.SDKTree("sdk/sdk.opts", "sdk_origin")
     AlwaysBuild(sdk_tree)
 
-    sdk_apidefs = fwenv.SDKBuilder("sdk_origin")
-    AlwaysBuild(sdk_apidefs)
-    Alias("sdk", [sdk_tree, sdk_apidefs])
+    sdk_apicheck = fwenv.SDKSymUpdater(
+        "#/firmware/targets/f${TARGET_HW}/api_symbols.csv", "sdk_origin"
+    )
+    Precious(sdk_apicheck)
+    AlwaysBuild(sdk_apicheck)
+    # Alias("sdk", [sdk_tree, sdk_apicheck])
+    # Alias("sdk", sdk_tree)
+    Alias("sdk", sdk_apicheck)
+
+    sdk_apisyms = fwenv.SDKSymGenerator(
+        "symbols.h", "#/firmware/targets/f${TARGET_HW}/api_symbols.csv"
+    )
+    AlwaysBuild(sdk_apisyms)
+    Alias("syms", sdk_apisyms)
     # sdk = fwenv.SDKBuilder("#build/sdk/sdk.opts", "sdktmp.pp")
     # fwenv.Depends(sdk, fwelf)
     # AlwaysBuild(sdk)
