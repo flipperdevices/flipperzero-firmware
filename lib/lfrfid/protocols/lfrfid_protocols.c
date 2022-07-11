@@ -6,7 +6,7 @@
 
 const ProtocolBase* lfrfid_protocols[] = {
     [LFRFIDProtocolEM4100] = &protocol_em4100,
-    // [LFRFIDProtocolH10301] = &protocol_h10301,
+    [LFRFIDProtocolH10301] = &protocol_h10301,
     // [LFRFIDProtocolI40134] = &protocol_i40134,
     // [LFRFIDProtocolIOProxXSF] = &protocol_io_prox_xsf,
 };

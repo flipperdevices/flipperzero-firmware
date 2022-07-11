@@ -3,9 +3,9 @@
 
 typedef enum {
     LFRFIDProtocolEM4100,
-    // LFRFIDProtocolH10301,
+    LFRFIDProtocolH10301,
     // LFRFIDProtocolI40134,
-    // LFRFIDProtocolIOProxXSF,
+    LFRFIDProtocolIOProxXSF,
 
     LFRFIDProtocolMax,
 } LFRFIDProtocol;
