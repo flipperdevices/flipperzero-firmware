@@ -20,6 +20,7 @@ $ docker-compose exec dev ./fbt
 - Added [Mandelbrot set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - Update for [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) by RogueMaster, Crashes 1st load if FW <~750KB or every load on larger FW `HIDDEN "chess_game"`
 - Update to fix [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) Thanks to ESurge
+- Updated [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) to require hold back to exit
 
 ## **Special Instructions:**
 - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
