@@ -6,15 +6,17 @@
 // #include "test_data/infrared_nec_test_data.srcdata"
 // #include "test_data/infrared_necext_test_data.srcdata"
 #include "test_data/infrared_samsung_test_data.srcdata"
-// #include "test_data/infrared_rc6_test_data.srcdata"
-// #include "test_data/infrared_rc5_test_data.srcdata"
+#include "test_data/infrared_rc6_test_data.srcdata"
+#include "test_data/infrared_rc5_test_data.srcdata"
 // #include "test_data/infrared_sirc_test_data.srcdata"
 
-#define IR_TEST_TAG "IrTest"
 #define IR_TEST_FILES_DIR "/ext/unit_tests/infrared_decoder_encoder"
 #define IR_TEST_FILE_PREFIX "test_"
 #define IR_TEST_FILE_SUFFIX ".irtest"
 
+#define IR_TEST_PROTO_RC5 "rc5"
+#define IR_TEST_PROTO_RC5X "rc5x"
+#define IR_TEST_PROTO_RC6 "rc6"
 #define IR_TEST_PROTO_SAMSUNG "samsung"
 
 #define RUN_ENCODER(data, expected) \
@@ -164,12 +166,13 @@ static void
     free(timings);
 }
 
-static void load_raw_signal(
+static bool load_raw_signal(
     const char* protocol_name,
     uint32_t input_index,
     uint32_t** timings,
     uint32_t* timings_count) {
     string_t str_buf, file_path, signal_name;
+    bool success = false;
 
     string_init(str_buf);
     string_init(file_path);
@@ -185,30 +188,35 @@ static void load_raw_signal(
     string_printf(signal_name, "input%d", input_index);
 
     uint32_t format_version;
-    mu_assert(flipper_format_file_open_existing(ff, string_get_cstr(file_path)), "Failed to open tests file");
-    mu_assert(flipper_format_read_header(ff, str_buf, &format_version), "Failed to read FFF header");
-    mu_assert_string_eq("IR tests file", string_get_cstr(str_buf));
-    mu_assert_int_eq(1, format_version);
+    do{
+        if(!flipper_format_file_open_existing(ff, string_get_cstr(file_path))) break;
+        else if(!flipper_format_read_header(ff, str_buf, &format_version)) break;
+        else if(string_cmp_str(str_buf, "IR tests file")) break;
+        else if(format_version != 1) break;
 
-    bool is_name_found = false;
-    for(; !is_name_found && flipper_format_read_string(ff, "name", str_buf);
-        is_name_found = !string_cmp(str_buf, signal_name));
+        bool is_name_found = false;
+        for(; !is_name_found && flipper_format_read_string(ff, "name", str_buf);
+            is_name_found = !string_cmp(str_buf, signal_name))
+            ;
 
-    mu_assert(is_name_found, "Signal not found");
-    mu_assert(flipper_format_read_string(ff, "type", str_buf), "Signal type missing");
-    mu_assert(!string_cmp_str(str_buf, "raw"), "Signal is not raw");
-    mu_assert(flipper_format_get_value_count(ff, "data", timings_count), "Failed to determine raw signal size");
-    mu_assert(*timings_count, "Raw signal size is zero");
+        if(!is_name_found) break;
+        else if(!flipper_format_read_string(ff, "type", str_buf)) break;
+        else if(string_cmp_str(str_buf, "raw")) break;
+        else if(!flipper_format_get_value_count(ff, "data", timings_count)) break;
+        else if(!*timings_count) break;
 
-    *timings = malloc(*timings_count * sizeof(uint32_t*));
-
-    mu_assert(flipper_format_read_uint32(ff, "data", *timings, *timings_count), "Failed to read raw signal data");
+        *timings = malloc(*timings_count * sizeof(uint32_t*));
+        success = flipper_format_read_uint32(ff, "data", *timings, *timings_count);
+        if(!success) free(*timings);
+    } while(false);
 
     flipper_format_file_close(ff);
 
     string_clear(str_buf);
     string_clear(file_path);
     string_clear(signal_name);
+
+    return success;
 }
 
 static void run_decoder(
@@ -218,7 +226,7 @@ static void run_decoder(
     uint32_t message_expected_len) {
     uint32_t* timings;
     uint32_t timings_count;
-    load_raw_signal(protocol_name, test_index, &timings, &timings_count);
+    mu_assert(load_raw_signal(protocol_name, test_index, &timings, &timings_count), "Failed to load raw signal from file");
 
     InfraredMessage message_decoded_check_local;
     bool level = 0;
@@ -333,7 +341,7 @@ MU_TEST(test_decoder_sirc) {
 }
 
 MU_TEST(test_decoder_rc5) {
-    //     RUN_DECODER(test_decoder_rc5x_input1, test_decoder_rc5x_expected1);
+    RUN_DECODER(IR_TEST_PROTO_RC5X, 1, test_decoder_rc5x_expected1);
     //     RUN_DECODER(test_decoder_rc5_input1, test_decoder_rc5_expected1);
     //     RUN_DECODER(test_decoder_rc5_input2, test_decoder_rc5_expected2);
     //     RUN_DECODER(test_decoder_rc5_input3, test_decoder_rc5_expected3);
@@ -352,7 +360,7 @@ MU_TEST(test_encoder_rc5) {
 }
 
 MU_TEST(test_decoder_rc6) {
-    //     RUN_DECODER(test_decoder_rc6_input1, test_decoder_rc6_expected1);
+    RUN_DECODER(IR_TEST_PROTO_RC6, 1, test_decoder_rc6_expected1);
 }
 
 MU_TEST(test_encoder_rc6) {
