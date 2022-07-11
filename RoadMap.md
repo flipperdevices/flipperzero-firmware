@@ -28,6 +28,7 @@
 - - Example resource of OpenHayStack as an alternative to Bluetooth On/Off: https://github.com/AlexStrNik/flipperzero-firmware/tree/dev
 - `Tamagochi` APP serves as a virtual pet
 - - Possible resource: https://learn.littlerobotfriends.com/downloads/
+- Skip to next or previous SubGHz scan file from emulation screen using UP/DOWN
 
 # 
 # 
