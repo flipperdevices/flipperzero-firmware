@@ -1,5 +1,5 @@
 #include <furi.h>
-#include "protocol_em4100.h"
+#include <toolbox/protocols/protocol.h>
 #include <toolbox/manchester_decoder.h>
 
 typedef uint64_t EM4100DecodedData;
@@ -166,13 +166,13 @@ bool protocol_em4100_decoder_feed(ProtocolEM4100* proto, bool level, uint32_t du
     ManchesterEvent event = ManchesterEventReset;
 
     if(duration > EM_READ_SHORT_TIME_LOW && duration < EM_READ_SHORT_TIME_HIGH) {
-        if(level) {
+        if(!level) {
             event = ManchesterEventShortHigh;
         } else {
             event = ManchesterEventShortLow;
         }
     } else if(duration > EM_READ_LONG_TIME_LOW && duration < EM_READ_LONG_TIME_HIGH) {
-        if(level) {
+        if(!level) {
             event = ManchesterEventLongHigh;
         } else {
             event = ManchesterEventLongLow;
