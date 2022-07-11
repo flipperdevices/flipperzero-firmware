@@ -37,7 +37,7 @@ static MfUltralightFeatures mf_ul_get_features(MfUltralightType type) {
                MfUltralightSupportSectorSelect;
     default:
         // Assumed original MFUL 512-bit
-        return MfUltralightSupportNone;
+        return MfUltralightSupportCompatWrite;
     }
 }
 
