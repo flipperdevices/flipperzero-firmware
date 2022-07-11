@@ -188,11 +188,10 @@ static bool load_raw_signal(
     string_printf(signal_name, "input%d", input_index);
 
     uint32_t format_version;
-    do{
+    do {
         if(!flipper_format_file_open_existing(ff, string_get_cstr(file_path))) break;
-        else if(!flipper_format_read_header(ff, str_buf, &format_version)) break;
-        else if(string_cmp_str(str_buf, "IR tests file")) break;
-        else if(format_version != 1) break;
+        if(!flipper_format_read_header(ff, str_buf, &format_version)) break;
+        if(string_cmp_str(str_buf, "IR tests file") || format_version != 1) break;
 
         bool is_name_found = false;
         for(; !is_name_found && flipper_format_read_string(ff, "name", str_buf);
@@ -200,14 +199,17 @@ static bool load_raw_signal(
             ;
 
         if(!is_name_found) break;
-        else if(!flipper_format_read_string(ff, "type", str_buf)) break;
-        else if(string_cmp_str(str_buf, "raw")) break;
-        else if(!flipper_format_get_value_count(ff, "data", timings_count)) break;
-        else if(!*timings_count) break;
+        if(!flipper_format_read_string(ff, "type", str_buf) || string_cmp_str(str_buf, "raw"))
+            break;
+        if(!flipper_format_get_value_count(ff, "data", timings_count)) break;
+        if(!*timings_count) break;
 
         *timings = malloc(*timings_count * sizeof(uint32_t*));
-        success = flipper_format_read_uint32(ff, "data", *timings, *timings_count);
-        if(!success) free(*timings);
+        if(!flipper_format_read_uint32(ff, "data", *timings, *timings_count)) {
+            free(*timings);
+            break;
+        }
+        success = true;
     } while(false);
 
     flipper_format_file_close(ff);
@@ -226,7 +228,9 @@ static void run_decoder(
     uint32_t message_expected_len) {
     uint32_t* timings;
     uint32_t timings_count;
-    mu_assert(load_raw_signal(protocol_name, test_index, &timings, &timings_count), "Failed to load raw signal from file");
+    mu_assert(
+        load_raw_signal(protocol_name, test_index, &timings, &timings_count),
+        "Failed to load raw signal from file");
 
     InfraredMessage message_decoded_check_local;
     bool level = 0;
