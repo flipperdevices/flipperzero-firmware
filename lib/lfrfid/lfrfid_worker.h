@@ -25,12 +25,14 @@ typedef enum {
 } LFRFIDWorkerEmulateResult;
 
 typedef enum {
+    LFRFIDWorkerReadRawFileError,
     LFRFIDWorkerReadRawOverrun,
     LFRFIDWorkerReadRawDone,
 } LFRFIDWorkerReadRawResult;
 
 typedef enum {
-    LFRFIDWorkerEmulateRawUnderrun,
+    LFRFIDWorkerEmulateRawFileError,
+    LFRFIDWorkerEmulateRawOverrun,
     LFRFIDWorkerEmulateRawDone,
 } LFRFIDWorkerEmulateRawResult;
 
@@ -122,14 +124,36 @@ void lfrfid_worker_emulate_set_callback(
 void lfrfid_worker_emulate_start(LFRFIDWorker* worker, LFRFIDKey* key);
 
 /**
- * Start RAW read mode
+ * Set "read raw event" callback
+ * @param worker 
+ * @param callback 
+ * @param context 
+ */
+void lfrfid_worker_read_raw_set_callback(
+    LFRFIDWorker* worker,
+    LFRFIDWorkerReadRawCallback callback,
+    void* context);
+
+/**
+ * Start raw read mode
  * @param worker 
  * @param filename 
  */
 void lfrfid_worker_read_raw_start(LFRFIDWorker* worker, const char* filename);
 
 /**
- * Emulate RAW read mode
+ * Set "emulate raw event" callback
+ * @param worker 
+ * @param callback 
+ * @param context 
+ */
+void lfrfid_worker_emulate_raw_set_callback(
+    LFRFIDWorker* worker,
+    LFRFIDWorkerEmulateRawCallback callback,
+    void* context);
+
+/**
+ * Emulate raw read mode
  * @param worker 
  * @param filename 
  */
