@@ -104,13 +104,16 @@ void furi_hal_bt_unlock_core2() {
 
 static bool furi_hal_bt_radio_stack_is_supported(const BleGlueC2Info* info) {
     bool supported = false;
-    if(info->StackType == INFO_STACK_TYPE_BLE_HCI) {
-        furi_hal_bt_stack = FuriHalBtStackHciLayer;
-        supported = true;
-    } else if(info->StackType == INFO_STACK_TYPE_BLE_LIGHT) {
+    if(info->StackType == INFO_STACK_TYPE_BLE_LIGHT) {
         if(info->VersionMajor >= FURI_HAL_BT_STACK_VERSION_MAJOR &&
            info->VersionMinor >= FURI_HAL_BT_STACK_VERSION_MINOR) {
             furi_hal_bt_stack = FuriHalBtStackLight;
+            supported = true;
+        }
+    } else if(info->StackType == INFO_STACK_TYPE_BLE_FULL) {
+        if(info->VersionMajor >= FURI_HAL_BT_STACK_VERSION_MAJOR &&
+           info->VersionMinor >= FURI_HAL_BT_STACK_VERSION_MINOR) {
+            furi_hal_bt_stack = FuriHalBtStackFull;
             supported = true;
         }
     } else {
@@ -168,6 +171,22 @@ FuriHalBtStack furi_hal_bt_get_radio_stack() {
     return furi_hal_bt_stack;
 }
 
+bool furi_hal_bt_is_ble_gatt_gap_supported() {
+    if(furi_hal_bt_stack == FuriHalBtStackLight || furi_hal_bt_stack == FuriHalBtStackFull) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool furi_hal_bt_is_testing_supported() {
+    if(furi_hal_bt_stack == FuriHalBtStackFull) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, void* context) {
     furi_assert(event_cb);
     furi_assert(profile < FuriHalBtProfileNumber);
@@ -178,7 +197,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             FURI_LOG_E(TAG, "Can't start BLE App - radio stack did not start");
             break;
         }
-        if(furi_hal_bt_stack != FuriHalBtStackLight) {
+        if(!furi_hal_bt_is_ble_gatt_gap_supported()) {
             FURI_LOG_E(TAG, "Can't start Ble App - unsupported radio stack");
             break;
         }
@@ -199,8 +218,8 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
         } else if(profile == FuriHalBtProfileHidKeyboard) {
             // Change MAC address for HID profile
             config->mac_address[2]++;
-            // Change name Flipper -> Keynote
-            const char* clicker_str = "Keynote";
+            // Change name Flipper -> Control
+            const char* clicker_str = "Control";
             memcpy(&config->adv_name[1], clicker_str, strlen(clicker_str));
         }
         if(!gap_init(config, event_cb, context)) {
@@ -209,7 +228,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             break;
         }
         // Start selected profile services
-        if(furi_hal_bt_stack == FuriHalBtStackLight) {
+        if(furi_hal_bt_is_ble_gatt_gap_supported()) {
             profile_config[profile].start();
         }
         ret = true;
@@ -284,6 +303,12 @@ void furi_hal_bt_update_battery_level(uint8_t battery_level) {
     }
 }
 
+void furi_hal_bt_update_power_state() {
+    if(battery_svc_is_started()) {
+        battery_svc_update_power_state();
+    }
+}
+
 void furi_hal_bt_get_key_storage_buff(uint8_t** key_buff_addr, uint16_t* key_buff_size) {
     ble_app_get_key_storage_buff(key_buff_addr, key_buff_size);
 }
@@ -297,7 +322,7 @@ void furi_hal_bt_set_key_storage_change_callback(
 
 void furi_hal_bt_nvm_sram_sem_acquire() {
     while(LL_HSEM_1StepLock(HSEM, CFG_HW_BLE_NVM_SRAM_SEMID)) {
-        osThreadYield();
+        furi_thread_yield();
     }
 }
 
@@ -403,20 +428,6 @@ uint32_t furi_hal_bt_get_transmitted_packets() {
 
 void furi_hal_bt_stop_rx() {
     aci_hal_rx_stop();
-}
-
-bool furi_hal_bt_start_scan(GapScanCallback callback, void* context) {
-    if(furi_hal_bt_stack != FuriHalBtStackHciLayer) {
-        return false;
-    }
-    gap_start_scan(callback, context);
-    return true;
-}
-
-void furi_hal_bt_stop_scan() {
-    if(furi_hal_bt_stack == FuriHalBtStackHciLayer) {
-        gap_stop_scan();
-    }
 }
 
 bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {

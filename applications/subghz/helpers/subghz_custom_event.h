@@ -5,6 +5,26 @@ typedef enum {
     SubGhzCustomEventManagerSet,
     SubGhzCustomEventManagerSetRAW,
 
+    //SubmenuIndex
+    SubmenuIndexPricenton,
+    SubmenuIndexNiceFlo12bit,
+    SubmenuIndexNiceFlo24bit,
+    SubmenuIndexCAME12bit,
+    SubmenuIndexCAME24bit,
+    SubmenuIndexCAMETwee,
+    SubmenuIndexNeroSketch,
+    SubmenuIndexNeroRadio,
+    SubmenuIndexGateTX,
+    SubmenuIndexDoorHan_315_00,
+    SubmenuIndexDoorHan_433_92,
+    SubmenuIndexLinear_300_00,
+    SubmenuIndexLiftMaster_315_00,
+    SubmenuIndexLiftMaster_390_00,
+    SubmenuIndexSecPlus_v2_310_00,
+    SubmenuIndexSecPlus_v2_315_00,
+    SubmenuIndexSecPlus_v2_390_00,
+
+    //SubGhzCustomEvent
     SubGhzCustomEventSceneDeleteSuccess = 100,
     SubGhzCustomEventSceneDelete,
     SubGhzCustomEventSceneDeleteRAW,
@@ -21,6 +41,7 @@ typedef enum {
     SubGhzCustomEventSceneShowOnlyRX,
     SubGhzCustomEventSceneAnalyzerLock,
     SubGhzCustomEventSceneAnalyzerUnlock,
+    SubGhzCustomEventSceneSettingLock,
 
     SubGhzCustomEventSceneExit,
     SubGhzCustomEventSceneStay,
@@ -28,6 +49,8 @@ typedef enum {
     SubGhzCustomEventViewReceiverOK,
     SubGhzCustomEventViewReceiverConfig,
     SubGhzCustomEventViewReceiverBack,
+    SubGhzCustomEventViewReceiverOffDisplay,
+    SubGhzCustomEventViewReceiverUnlock,
 
     SubGhzCustomEventViewReadRAWBack,
     SubGhzCustomEventViewReadRAWIDLE,

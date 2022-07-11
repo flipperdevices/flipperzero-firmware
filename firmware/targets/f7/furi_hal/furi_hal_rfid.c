@@ -76,8 +76,8 @@ void furi_hal_rfid_pins_reset() {
     furi_hal_gpio_write(&gpio_rfid_carrier_out, false);
 
     // from both sides
-    furi_hal_gpio_init(&gpio_rfid_pull, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    furi_hal_gpio_write(&gpio_rfid_pull, true);
+    furi_hal_gpio_init(&gpio_nfc_irq_rfid_pull, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_write(&gpio_nfc_irq_rfid_pull, true);
 
     furi_hal_gpio_init_simple(&gpio_rfid_carrier, GpioModeAnalog);
 
@@ -91,7 +91,11 @@ void furi_hal_rfid_pins_emulate() {
 
     // pull pin to timer out
     furi_hal_gpio_init_ex(
-        &gpio_rfid_pull, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
+        &gpio_nfc_irq_rfid_pull,
+        GpioModeAltFunctionPushPull,
+        GpioPullNo,
+        GpioSpeedLow,
+        GpioAltFn1TIM2);
 
     // pull rfid antenna from carrier side
     furi_hal_gpio_init(&gpio_rfid_carrier_out, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -107,8 +111,8 @@ void furi_hal_rfid_pins_read() {
     furi_hal_ibutton_pin_low();
 
     // dont pull rfid antenna
-    furi_hal_gpio_init(&gpio_rfid_pull, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    furi_hal_gpio_write(&gpio_rfid_pull, false);
+    furi_hal_gpio_init(&gpio_nfc_irq_rfid_pull, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_write(&gpio_nfc_irq_rfid_pull, false);
 
     // carrier pin to timer out
     furi_hal_gpio_init_ex(
@@ -123,11 +127,11 @@ void furi_hal_rfid_pins_read() {
 }
 
 void furi_hal_rfid_pin_pull_release() {
-    furi_hal_gpio_write(&gpio_rfid_pull, true);
+    furi_hal_gpio_write(&gpio_nfc_irq_rfid_pull, true);
 }
 
 void furi_hal_rfid_pin_pull_pulldown() {
-    furi_hal_gpio_write(&gpio_rfid_pull, false);
+    furi_hal_gpio_write(&gpio_nfc_irq_rfid_pull, false);
 }
 
 void furi_hal_rfid_tim_read(float freq, float duty_cycle) {

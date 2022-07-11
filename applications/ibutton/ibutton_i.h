@@ -41,7 +41,7 @@ struct iButton {
     iButtonWorker* key_worker;
     iButtonKey* key;
 
-    char file_name[IBUTTON_FILE_NAME_SIZE];
+    string_t file_path;
     char text_store[IBUTTON_TEXT_STORE_SIZE + 1];
 
     Submenu* submenu;
@@ -50,6 +50,8 @@ struct iButton {
     Popup* popup;
     Widget* widget;
     DialogEx* dialog_ex;
+
+    void* rpc_ctx;
 };
 
 typedef enum {
@@ -64,17 +66,18 @@ typedef enum {
 typedef enum {
     iButtonNotificationMessageError,
     iButtonNotificationMessageSuccess,
-    iButtonNotificationMessageRead,
-    iButtonNotificationMessageEmulate,
+    iButtonNotificationMessageReadStart,
+    iButtonNotificationMessageEmulateStart,
     iButtonNotificationMessageYellowBlink,
+    iButtonNotificationMessageEmulateBlink,
     iButtonNotificationMessageRedOn,
     iButtonNotificationMessageRedOff,
     iButtonNotificationMessageGreenOn,
     iButtonNotificationMessageGreenOff,
+    iButtonNotificationMessageBlinkStop,
 } iButtonNotificationMessage;
 
 bool ibutton_file_select(iButton* ibutton);
-bool ibutton_load_key(iButton* ibutton, const char* key_name);
 bool ibutton_save_key(iButton* ibutton, const char* key_name);
 bool ibutton_delete_key(iButton* ibutton);
 void ibutton_text_store_set(iButton* ibutton, const char* text, ...);

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+
+SCRIPTDIR="$( dirname -- "$0"; )";
+SCONS_EP=${SCRIPTDIR}/lib/scons/scripts/scons.py
+
+if [[ -z "${FBT_NO_SYNC:-}" ]] ; then
+    if [[ -d .git ]]; then
+        git submodule update --init
+    else
+        echo Not in a git repo, please clone with git clone --recursive
+        exit 1
+    fi
+fi
+
+SCONS_DEFAULT_FLAGS="-Q --warn=target-not-built"
+python3 ${SCONS_EP} ${SCONS_DEFAULT_FLAGS} "$@"

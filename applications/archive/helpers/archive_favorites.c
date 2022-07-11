@@ -157,7 +157,8 @@ bool archive_favorites_read(void* context) {
             } else {
                 if(storage_file_exists(storage, string_get_cstr(buffer))) {
                     storage_common_stat(storage, string_get_cstr(buffer), &file_info);
-                    archive_add_file_item(browser, &file_info, string_get_cstr(buffer));
+                    archive_add_file_item(
+                        browser, (file_info.flags & FSF_DIRECTORY), string_get_cstr(buffer));
                     file_count++;
                 } else {
                     need_refresh = true;
@@ -324,7 +325,7 @@ void archive_favorites_save(void* context) {
 
     for(size_t i = 0; i < archive_file_get_array_size(browser); i++) {
         ArchiveFile_t* item = archive_get_file_at(browser, i);
-        archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\n", string_get_cstr(item->name));
+        archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\n", string_get_cstr(item->path));
     }
 
     storage_common_remove(fs_api, ARCHIVE_FAV_PATH);
