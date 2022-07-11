@@ -18,7 +18,7 @@ $ docker-compose exec dev ./fbt
 - OFW: [Save picopass as picopass or, for 26bit, as lfrfid #1380 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1380)
 - Added [Mandelbrot set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - Update for [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) by RogueMaster, Crashes 1st load if FW <~750KB or every load on larger FW `HIDDEN "chess_game"`
-- Update to fix [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) thanks to ESurge
+- Update to fix [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) Thanks to ESurge
 
 ## **Special Instructions:**
 - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
@@ -32,6 +32,8 @@ $ docker-compose exec dev ./fbt
 - - [assets/resources/subghz/assets/setting_user](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 - Download this file into the nfc/assets folder on your SD card. 
 - - [assets/resources/nfc/assets/mf_classic_dict.nfc](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/nfc/assets/mf_classic_dict.nfc)
+- Download this file into the infrared/assets folder on your SD card. 
+- - [assets/resources/infrared/assets/tv.ir](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/infrared/assets/tv.ir)
 - Add a folder to SD card named `wav_player` (for 8bit 2ch unsigned wav files) 
 - Add a folder to SD card named `music_player` (FMF and RTTTL/TXT files)
 - Eventually, if all possible apps are added to [applications/meta/application.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam), your DFU will not install due to size. However, currently, all apps @ 803KB DFU has been tested to install successfully.
