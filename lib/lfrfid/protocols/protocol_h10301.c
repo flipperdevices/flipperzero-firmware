@@ -8,7 +8,9 @@
 #define MAX_TIME (80 + JITTER_TIME)
 
 #define H10301_DECODED_DATA_SIZE (3)
-#define H10301_ENCODED_DATA_SIZE (sizeof(uint32_t) * 3)
+#define H10301_ENCODED_DATA_SIZE_U32 (3)
+#define H10301_ENCODED_DATA_SIZE (sizeof(uint32_t) * H10301_ENCODED_DATA_SIZE_U32)
+
 #define H10301_BIT_SIZE (sizeof(uint32_t) * 8)
 #define H10301_BIT_MAX_SIZE (H10301_BIT_SIZE * H10301_DECODED_DATA_SIZE)
 
@@ -25,7 +27,7 @@ typedef struct {
 typedef struct {
     ProtocolH10301Decoder decoder;
     ProtocolH10301Encoder encoder;
-    uint32_t encoded_data[3];
+    uint32_t encoded_data[H10301_ENCODED_DATA_SIZE_U32];
     uint8_t data[H10301_DECODED_DATA_SIZE];
 } ProtocolH10301;
 
@@ -356,7 +358,7 @@ LevelDuration protocol_h10301_encoder_yield(ProtocolH10301* protocol) {
 };
 
 void protocol_h10301_encoder_reset(ProtocolH10301* protocol) {
-    UNUSED(protocol);
+    protocol_h10301_encoder_start(protocol);
 };
 
 const ProtocolBase protocol_h10301 = {
