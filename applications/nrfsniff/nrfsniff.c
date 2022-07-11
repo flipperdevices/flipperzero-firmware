@@ -400,9 +400,10 @@ int32_t nrfsniff_app(void* p) {
                         else
                             wrap_up(storage);
                         break; 
-                    case InputKeyBack: 
-                        if (event.input.type == InputTypeLong) processing = false;
-                        break;
+                    }
+                } else if(event.input.type == InputTypeRelease) {
+                    if (event.input.type == InputTypeLong && event.input.key == InputKeyBack) {
+                        processing = false;
                     }
                 }
             } 
