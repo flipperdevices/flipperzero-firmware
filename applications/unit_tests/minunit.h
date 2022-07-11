@@ -151,46 +151,46 @@ void minunit_print_fail(const char* error);
 #define MU_EXIT_CODE minunit_fail
 
 /*  Assertions */
-#define mu_check(test)                     \
-    MU__SAFE_BLOCK(                        \
-        minunit_assert++; if(!(test)) {    \
-            snprintf(                      \
-                minunit_last_message,      \
-                MINUNIT_MESSAGE_LEN,       \
-                "%s failed:\n\t%s:%d: %s", \
-                __func__,                  \
-                __FILE__,                  \
-                __LINE__,                  \
-                #test);                    \
-            minunit_status = 1;            \
-            return;                        \
+#define mu_check(test)                       \
+    MU__SAFE_BLOCK(                          \
+        minunit_assert++; if(!(test)) {      \
+            snprintf(                        \
+                minunit_last_message,        \
+                MINUNIT_MESSAGE_LEN,         \
+                "%s failed:\r\n\t%s:%d: %s", \
+                __func__,                    \
+                __FILE__,                    \
+                __LINE__,                    \
+                #test);                      \
+            minunit_status = 1;              \
+            return;                          \
         } else { minunit_print_progress(); })
 
-#define mu_fail(message)                          \
-    MU__SAFE_BLOCK(minunit_assert++; snprintf(    \
-                       minunit_last_message,      \
-                       MINUNIT_MESSAGE_LEN,       \
-                       "%s failed:\n\t%s:%d: %s", \
-                       __func__,                  \
-                       __FILE__,                  \
-                       __LINE__,                  \
-                       message);                  \
-                   minunit_status = 1;            \
+#define mu_fail(message)                            \
+    MU__SAFE_BLOCK(minunit_assert++; snprintf(      \
+                       minunit_last_message,        \
+                       MINUNIT_MESSAGE_LEN,         \
+                       "%s failed:\r\n\t%s:%d: %s", \
+                       __func__,                    \
+                       __FILE__,                    \
+                       __LINE__,                    \
+                       message);                    \
+                   minunit_status = 1;              \
                    return;)
 
-#define mu_assert(test, message)           \
-    MU__SAFE_BLOCK(                        \
-        minunit_assert++; if(!(test)) {    \
-            snprintf(                      \
-                minunit_last_message,      \
-                MINUNIT_MESSAGE_LEN,       \
-                "%s failed:\n\t%s:%d: %s", \
-                __func__,                  \
-                __FILE__,                  \
-                __LINE__,                  \
-                message);                  \
-            minunit_status = 1;            \
-            return;                        \
+#define mu_assert(test, message)             \
+    MU__SAFE_BLOCK(                          \
+        minunit_assert++; if(!(test)) {      \
+            snprintf(                        \
+                minunit_last_message,        \
+                MINUNIT_MESSAGE_LEN,         \
+                "%s failed:\r\n\t%s:%d: %s", \
+                __func__,                    \
+                __FILE__,                    \
+                __LINE__,                    \
+                message);                    \
+            minunit_status = 1;              \
+            return;                          \
         } else { minunit_print_progress(); })
 
 #define mu_assert_int_eq(expected, result)                                                  \
@@ -201,7 +201,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                                       \
                 minunit_last_message,                                                       \
                 MINUNIT_MESSAGE_LEN,                                                        \
-                "%s failed:\n\t%s:%d: %d expected but was %d",                              \
+                "%s failed:\r\n\t%s:%d: %d expected but was %d",                            \
                 __func__,                                                                   \
                 __FILE__,                                                                   \
                 __LINE__,                                                                   \
@@ -219,7 +219,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                                       \
                 minunit_last_message,                                                       \
                 MINUNIT_MESSAGE_LEN,                                                        \
-                "%s failed:\n\t%s:%d: expected different results but both were %d",         \
+                "%s failed:\r\n\t%s:%d: expected different results but both were %d",       \
                 __func__,                                                                   \
                 __FILE__,                                                                   \
                 __LINE__,                                                                   \
@@ -236,7 +236,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                                  \
                 minunit_last_message,                                                  \
                 MINUNIT_MESSAGE_LEN,                                                   \
-                "%s failed:\n\t%s:%d: %d <= %d",                                       \
+                "%s failed:\r\n\t%s:%d: %d <= %d",                                     \
                 __func__,                                                              \
                 __FILE__,                                                              \
                 __LINE__,                                                              \
@@ -254,7 +254,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                                  \
                 minunit_last_message,                                                  \
                 MINUNIT_MESSAGE_LEN,                                                   \
-                "%s failed:\n\t%s:%d: %d >= %d",                                       \
+                "%s failed:\r\n\t%s:%d: %d >= %d",                                     \
                 __func__,                                                              \
                 __FILE__,                                                              \
                 __LINE__,                                                              \
@@ -274,7 +274,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                              \
                 minunit_last_message,                                              \
                 MINUNIT_MESSAGE_LEN,                                               \
-                "%s failed:\n\t%s:%d: %d was not between (inclusive) %d and %d",   \
+                "%s failed:\r\n\t%s:%d: %d was not between (inclusive) %d and %d", \
                 __func__,                                                          \
                 __FILE__,                                                          \
                 __LINE__,                                                          \
@@ -302,7 +302,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                                    \
                 minunit_last_message,                                                    \
                 MINUNIT_MESSAGE_LEN,                                                     \
-                "%s failed:\n\t%s:%d: expected to be one of %s but was %d",              \
+                "%s failed:\r\n\t%s:%d: expected to be one of %s but was %d",            \
                 __func__,                                                                \
                 __FILE__,                                                                \
                 __LINE__,                                                                \
@@ -321,7 +321,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                                             \
                 minunit_last_message,                                                             \
                 MINUNIT_MESSAGE_LEN,                                                              \
-                "%s failed:\n\t%s:%d: %.*g expected but was %.*g",                                \
+                "%s failed:\r\n\t%s:%d: %.*g expected but was %.*g",                              \
                 __func__,                                                                         \
                 __FILE__,                                                                         \
                 __LINE__,                                                                         \
@@ -341,7 +341,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                                        \
                 minunit_last_message,                                                        \
                 MINUNIT_MESSAGE_LEN,                                                         \
-                "%s failed:\n\t%s:%d: %f <= %f",                                             \
+                "%s failed:\r\n\t%s:%d: %f <= %f",                                           \
                 __func__,                                                                    \
                 __FILE__,                                                                    \
                 __LINE__,                                                                    \
@@ -359,7 +359,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                                        \
                 minunit_last_message,                                                        \
                 MINUNIT_MESSAGE_LEN,                                                         \
-                "%s failed:\n\t%s:%d: %f >= %f",                                             \
+                "%s failed:\r\n\t%s:%d: %f >= %f",                                           \
                 __func__,                                                                    \
                 __FILE__,                                                                    \
                 __LINE__,                                                                    \
@@ -379,7 +379,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                                       \
                 minunit_last_message,                                                       \
                 MINUNIT_MESSAGE_LEN,                                                        \
-                "%s failed:\n\t%s:%d: %f was not between (inclusive) %f and %f",            \
+                "%s failed:\r\n\t%s:%d: %f was not between (inclusive) %f and %f",          \
                 __func__,                                                                   \
                 __FILE__,                                                                   \
                 __LINE__,                                                                   \
@@ -400,7 +400,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                                 \
                 minunit_last_message,                                                 \
                 MINUNIT_MESSAGE_LEN,                                                  \
-                "%s failed:\n\t%s:%d: '%s' expected but was '%s'",                    \
+                "%s failed:\r\n\t%s:%d: '%s' expected but was '%s'",                  \
                 __func__,                                                             \
                 __FILE__,                                                             \
                 __LINE__,                                                             \
@@ -418,7 +418,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                             \
                 minunit_last_message,                                             \
                 MINUNIT_MESSAGE_LEN,                                              \
-                "%s failed:\n\t%s:%d: mem not equal",                             \
+                "%s failed:\r\n\t%s:%d: mem not equal",                           \
                 __func__,                                                         \
                 __FILE__,                                                         \
                 __LINE__);                                                        \
@@ -432,7 +432,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                             \
                 minunit_last_message,                                             \
                 MINUNIT_MESSAGE_LEN,                                              \
-                "%s failed:\n\t%s:%d: Expected result was not NULL",              \
+                "%s failed:\r\n\t%s:%d: Expected result was not NULL",            \
                 __func__,                                                         \
                 __FILE__,                                                         \
                 __LINE__);                                                        \
@@ -446,7 +446,7 @@ void minunit_print_fail(const char* error);
             snprintf(                                                             \
                 minunit_last_message,                                             \
                 MINUNIT_MESSAGE_LEN,                                              \
-                "%s failed:\n\t%s:%d: Expected result was not NULL",              \
+                "%s failed:\r\n\t%s:%d: Expected result was not NULL",            \
                 __func__,                                                         \
                 __FILE__,                                                         \
                 __LINE__);                                                        \
@@ -454,32 +454,32 @@ void minunit_print_fail(const char* error);
             return;                                                               \
         })
 
-#define mu_assert_pointers_eq(pointer1, pointer2)                                                  \
-    MU__SAFE_BLOCK(                                                                                \
-        minunit_assert++; if(pointer1 == pointer2) { minunit_print_progress(); } else {            \
-            snprintf(                                                                              \
-                minunit_last_message,                                                              \
-                MINUNIT_MESSAGE_LEN,                                                               \
-                "%s failed:\n\t%s:%d: Expected the pointers to point to the same memory location", \
-                __func__,                                                                          \
-                __FILE__,                                                                          \
-                __LINE__);                                                                         \
-            minunit_status = 1;                                                                    \
-            return;                                                                                \
+#define mu_assert_pointers_eq(pointer1, pointer2)                                                    \
+    MU__SAFE_BLOCK(                                                                                  \
+        minunit_assert++; if(pointer1 == pointer2) { minunit_print_progress(); } else {              \
+            snprintf(                                                                                \
+                minunit_last_message,                                                                \
+                MINUNIT_MESSAGE_LEN,                                                                 \
+                "%s failed:\r\n\t%s:%d: Expected the pointers to point to the same memory location", \
+                __func__,                                                                            \
+                __FILE__,                                                                            \
+                __LINE__);                                                                           \
+            minunit_status = 1;                                                                      \
+            return;                                                                                  \
         })
 
-#define mu_assert_pointers_not_eq(pointer1, pointer2)                                              \
-    MU__SAFE_BLOCK(                                                                                \
-        minunit_assert++; if(pointer1 != pointer2) { minunit_print_progress(); } else {            \
-            snprintf(                                                                              \
-                minunit_last_message,                                                              \
-                MINUNIT_MESSAGE_LEN,                                                               \
-                "%s failed:\n\t%s:%d: Expected the pointers to point to the same memory location", \
-                __func__,                                                                          \
-                __FILE__,                                                                          \
-                __LINE__);                                                                         \
-            minunit_status = 1;                                                                    \
-            return;                                                                                \
+#define mu_assert_pointers_not_eq(pointer1, pointer2)                                                \
+    MU__SAFE_BLOCK(                                                                                  \
+        minunit_assert++; if(pointer1 != pointer2) { minunit_print_progress(); } else {              \
+            snprintf(                                                                                \
+                minunit_last_message,                                                                \
+                MINUNIT_MESSAGE_LEN,                                                                 \
+                "%s failed:\r\n\t%s:%d: Expected the pointers to point to the same memory location", \
+                __func__,                                                                            \
+                __FILE__,                                                                            \
+                __LINE__);                                                                           \
+            minunit_status = 1;                                                                      \
+            return;                                                                                  \
         })
 
 /*
