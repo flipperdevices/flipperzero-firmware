@@ -57,6 +57,7 @@ App(
         "tictactoe_game",
         "videopoker_game",
         "flappy_game","gameoflife_game","raycast_game",
+        "mandelbrot",
     ],
 )
 
