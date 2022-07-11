@@ -988,6 +988,33 @@ static void mf_ul_increment_single_counter(MfUltralightEmulator* emulator) {
     }
 }
 
+static bool
+    mf_ul_emulate_ntag203_counter_write(MfUltralightEmulator* emulator, uint8_t* page_buff) {
+    // We'll reuse the existing counters for other NTAGs as staging
+    // TODO: What if you try to write to the counter multiple times in one connection?
+    uint32_t counter_value = emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4] |
+                             (emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4 + 1] << 8);
+    uint32_t increment = page_buff[0] | (page_buff[1] << 8);
+    if(counter_value == 0) {
+        counter_value = increment;
+    } else {
+        if(increment > 0x000F) return false;
+        if(counter_value + increment > 0xFFFF) return false;
+        counter_value += increment;
+    }
+    emulator->data.counter[0] = (uint16_t)counter_value;
+    emulator->data_changed = true;
+}
+
+static void mf_ul_emulate_ntag203_counter_commit(MfUltralightEmulator* emulator) {
+    uint32_t counter_value = emulator->data.counter[0];
+    if(counter_value != 0) {
+        emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4] = (uint8_t)counter_value;
+        emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4 + 1] = (uint8_t)(counter_value >> 8);
+        emulator->data.counter[0] = 0;
+    }
+}
+
 static void mf_ul_emulate_write(
     MfUltralightEmulator* emulator,
     int16_t tag_addr,
@@ -1107,6 +1134,9 @@ void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle) 
             emulator->config_cache.auth0 = emulator->config->auth0;
         }
     }
+    if(emulator->data.type == MfUltralightTypeNTAG203) {
+        mf_ul_emulate_ntag203_counter_commit(emulator);
+    }
 }
 
 void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* data) {
@@ -1118,7 +1148,17 @@ void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* d
     emulator->data_changed = false;
     emulator->comp_write_cmd_started = false;
     emulator->sector_select_cmd_started = false;
+    if(emulator->data.type == MfUltralightTypeNTAG203) {
+        // Clear holding counter
+        emulator->data.counter[0] = 0;
+    }
     mf_ul_reset_emulation(emulator, true);
+}
+
+void mf_ul_finish_emulation(MfUltralightEmulator* emulator) {
+    if(emulator->data.type == MfUltralightTypeNTAG203) {
+        mf_ul_emulate_ntag203_counter_commit(emulator);
+    }
 }
 
 bool mf_ul_prepare_emulation_response(
@@ -1150,12 +1190,20 @@ bool mf_ul_prepare_emulation_response(
 
     // Check composite commands
     if(emulator->comp_write_cmd_started) {
-        // Compatibility write is the only one composit command
         if(buff_rx_len == 16 * 8) {
-            mf_ul_emulate_write(
-                emulator, emulator->comp_write_page_addr, emulator->comp_write_page_addr, buff_rx);
-            send_ack = true;
-            command_parsed = true;
+            if(emulator->data.type == MfUltralightTypeNTAG203 &&
+               emulator->comp_write_page_addr == MF_UL_NTAG203_COUNTER_PAGE) {
+                send_ack = mf_ul_emulate_ntag203_counter_write(emulator, buff_rx);
+                command_parsed = send_ack;
+            } else {
+                mf_ul_emulate_write(
+                    emulator,
+                    emulator->comp_write_page_addr,
+                    emulator->comp_write_page_addr,
+                    buff_rx);
+                send_ack = true;
+                command_parsed = true;
+            }
         }
         emulator->comp_write_cmd_started = false;
     } else if(emulator->sector_select_cmd_started) {
@@ -1482,9 +1530,15 @@ bool mf_ul_prepare_emulation_response(
                     int16_t tag_addr = mf_ultralight_page_addr_to_tag_addr(
                         emulator->curr_sector, orig_write_page);
                     if(!mf_ul_check_lock(emulator, tag_addr)) break;
-                    mf_ul_emulate_write(emulator, tag_addr, write_page, &buff_rx[2]);
-                    send_ack = true;
-                    command_parsed = true;
+                    if(emulator->data.type == MfUltralightTypeNTAG203 &&
+                       orig_write_page == MF_UL_NTAG203_COUNTER_PAGE) {
+                        send_ack = mf_ul_emulate_ntag203_counter_write(emulator, &buff_rx[2]);
+                        command_parsed = send_ack;
+                    } else {
+                        mf_ul_emulate_write(emulator, tag_addr, write_page, &buff_rx[2]);
+                        send_ack = true;
+                        command_parsed = true;
+                    }
                 } while(false);
             }
         } else if(cmd == MF_UL_FAST_WRITE) {

@@ -26,6 +26,8 @@
 #define MF_UL_NAK_INVALID_ARGUMENT (0x0)
 #define MF_UL_NAK_AUTHLIM_REACHED (0x4)
 
+#define MF_UL_NTAG203_COUNTER_PAGE (41)
+
 typedef enum {
     MfUltralightTypeUnknown,
     MfUltralightTypeNTAG203,
@@ -205,6 +207,8 @@ bool mf_ul_read_card(
 void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle);
 
 void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* data);
+
+void mf_ul_finish_emulation(MfUltralightEmulator* emulator);
 
 bool mf_ul_prepare_emulation_response(
     uint8_t* buff_rx,
