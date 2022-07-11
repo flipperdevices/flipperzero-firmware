@@ -18,7 +18,7 @@ $ docker-compose exec dev ./fbt
 - OFW: [added gui-shift command to ducky script #1381 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1381)
 - OFW: [Save picopass as picopass or, for 26bit, as lfrfid #1380 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1380)
 - Added [Mandelbrot set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
-- Udpat for [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) by RogueMaster. App has been set to `HIDDEN "chess_game"` due to crash issues and it only running when build is <750KB.
+- Update for [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) by RogueMaster. App has been set to `HIDDEN "chess_game"` due to crash issues and it only running when build is <750KB.
 
 ## **Special Instructions:**
 - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
