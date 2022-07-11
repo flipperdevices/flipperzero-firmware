@@ -17,6 +17,7 @@ $ docker-compose exec dev ./fbt
 - Tanks, causes "StackOverflow". Not sure what broke it. Chess is also broken. Someone please fix.
 - OFW: [added gui-shift command to ducky script #1381 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1381)
 - OFW: [Save picopass as picopass or, for 26bit, as lfrfid #1380 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1380)
+- Added [Mandelbrot set(By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 
 ## **Special Instructions:**
 - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
@@ -75,6 +76,7 @@ $ docker-compose exec dev ./fbt
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/dice/dice.c)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)
 - [Game of Life (Updated to work by tgxn)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c) Original By itsyourbedtime.
+- [Mandelbrot set(By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine)
 - [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) (CURRENTLY BROKEN) Someone please fix.
 - [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
