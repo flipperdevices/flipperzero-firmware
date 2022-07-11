@@ -14,11 +14,11 @@ $ docker-compose exec dev ./fbt
 ```
 
 ## Latest Updates:
-- Tanks, causes "StackOverflow". Not sure what broke it. Someone please fix.
 - OFW: [added gui-shift command to ducky script #1381 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1381)
 - OFW: [Save picopass as picopass or, for 26bit, as lfrfid #1380 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1380)
 - Added [Mandelbrot set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - Update for [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) by RogueMaster, Crashes 1st load if FW <~750KB or every load on larger FW `HIDDEN "chess_game"`
+- Update to fix [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) thanks to ESurge
 
 ## **Special Instructions:**
 - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
@@ -79,7 +79,7 @@ $ docker-compose exec dev ./fbt
 - [Game of Life (Updated to work by tgxn)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c) Original By itsyourbedtime.
 - [Mandelbrot set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine)
-- [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) (CURRENTLY BROKEN) Someone please fix.
+- [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) Fixed thanks to ESurge
 - [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
 - [Tic Tac Toe (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/unleashed/applications/VideoPoker/poker.c)
