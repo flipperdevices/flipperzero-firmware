@@ -19,6 +19,7 @@
 - `lfrfid`              - LF RFID application
 - `lfrfid_debug`        - LF RFID debug tool
 - `loader`              - Application loader service
+- `mandelbrot`          - Mandelbrot Set Viewer
 - `music_player`        - Music player app (demo)
 - `nfc`                 - NFC application, HF rfid, EMV and etc
 - `notification`        - Notification service 
