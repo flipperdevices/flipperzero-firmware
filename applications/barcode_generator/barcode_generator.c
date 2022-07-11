@@ -347,7 +347,7 @@ static void input_callback(InputEvent* input_event, osMessageQueueId_t event_que
     osMessageQueuePut(event_queue, &event, 0, osWaitForever);
 }
 
-static void barcode_generator_state_init(PluginState* const plugin_state) {
+static void barcode_UPCA_generator_state_init(PluginState* const plugin_state) {
     int i;
     for(i = 0; i < 12; ++i) {
         if(i > 9) {
@@ -360,16 +360,16 @@ static void barcode_generator_state_init(PluginState* const plugin_state) {
     plugin_state->editingMode = false;
 }
 
-int32_t barcode_generator_app(void* p) {
+int32_t barcode_UPCA_generator_app(void* p) {
     UNUSED(p);
     //testing
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(PluginEvent), NULL);
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
-    barcode_generator_state_init(plugin_state);
+    barcode_UPCA_generator_state_init(plugin_state);
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
-        FURI_LOG_E("barcode_generator", "cannot create mutex\r\n");
+        FURI_LOG_E("barcode_UPCA_generator", "cannot create mutex\r\n");
         free(plugin_state);
         return 255;
     }
@@ -439,7 +439,7 @@ int32_t barcode_generator_app(void* p) {
                 }
             }
         } else {
-            FURI_LOG_D("barcode_generator", "osMessageQueue: event timeout");
+            FURI_LOG_D("barcode_UPCA_generator", "osMessageQueue: event timeout");
             // event timeout
         }
 

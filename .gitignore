@@ -62,3 +62,6 @@ get-pip.py
 site_scons/site_tools/crosscc.py
 site_scons/site_tools/crosscc.py
 site_scons/site_tools/crosscc.py
+.vs/flipperzero-firmware/v16/ipch/AutoPCH/a8e8884ee1b69cb1/INFRARED_SCENE.ipch
+.vs/flipperzero-firmware/v16/ipch/AutoPCH/70a3bfe70e3b6cc8/BARCODE_SCENE.ipch
+.vs/flipperzero-firmware/v16/ipch/AutoPCH/69cd9675b6f66926/BARCODE_I.ipch

@@ -1,8 +1,8 @@
 App(
     appid="barcode_generator",
-    name="UPC Generator",
+    name="UPC-A Generator",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="barcode_generator_app",
+    entry_point="barcode_UPCA_generator_app",
     cdefines=["APP_BARCODE_GEN"],
     requires=[
         "gui",
