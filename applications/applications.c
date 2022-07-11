@@ -55,6 +55,7 @@ extern void crypto_on_system_start();
 extern void ibutton_on_system_start();
 extern void infrared_on_system_start();
 extern void lfrfid_on_system_start();
+extern void lfrfid_c_on_system_start();
 extern void music_player_on_system_start();
 extern void nfc_on_system_start();
 extern void storage_on_system_start();
@@ -295,6 +296,7 @@ const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
 
 #ifdef APP_LF_RFID
     lfrfid_on_system_start,
+    lfrfid_c_on_system_start,
 #endif
 
 #ifdef APP_IBUTTON
