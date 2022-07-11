@@ -28,6 +28,7 @@
 
 typedef enum {
     MfUltralightTypeUnknown,
+    MfUltralightTypeNTAG203,
     MfUltralightTypeUL11,
     MfUltralightTypeUL21,
     MfUltralightTypeNTAG213,
@@ -58,6 +59,8 @@ typedef enum {
     MfUltralightSupportSingleCounter = 1 << 10,
     // ASCII mirror is not a command, but handy to have as a flag
     MfUltralightSupportAsciiMirror = 1 << 11,
+    // NTAG203 counter that's in memory rather than through a command
+    MfUltralightSupportCounterInMemory = 1 << 12,
 } MfUltralightFeatures;
 
 typedef enum {
@@ -172,6 +175,11 @@ bool mf_ultralight_read_version(
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
     MfUltralightData* data);
+
+bool mf_ultralight_read_pages_direct(
+    FuriHalNfcTxRxContext* tx_rx,
+    uint8_t start_index,
+    uint8_t* data);
 
 bool mf_ultralight_read_pages(
     FuriHalNfcTxRxContext* tx_rx,

@@ -35,6 +35,8 @@ static MfUltralightFeatures mf_ul_get_features(MfUltralightType type) {
         return MfUltralightSupportFastRead | MfUltralightSupportAuth |
                MfUltralightSupportFastWrite | MfUltralightSupportSignature |
                MfUltralightSupportSectorSelect;
+    case MfUltralightTypeNTAG203:
+        return MfUltralightSupportCompatWrite | MfUltralightSupportCounterInMemory;
     default:
         // Assumed original MFUL 512-bit
         return MfUltralightSupportCompatWrite;
@@ -44,6 +46,11 @@ static MfUltralightFeatures mf_ul_get_features(MfUltralightType type) {
 static void mf_ul_set_default_version(MfUltralightReader* reader, MfUltralightData* data) {
     data->type = MfUltralightTypeUnknown;
     reader->pages_to_read = 16;
+}
+
+static void mf_ul_set_version_ntag203(MfUltralightReader* reader, MfUltralightData* data) {
+    data->type = MfUltralightTypeNTAG203;
+    reader->pages_to_read = 42;
 }
 
 bool mf_ultralight_read_version(
@@ -468,6 +475,23 @@ static bool mf_ultralight_sector_select(FuriHalNfcTxRxContext* tx_rx, uint8_t se
     return true;
 }
 
+bool mf_ultralight_read_pages_direct(
+    FuriHalNfcTxRxContext* tx_rx,
+    uint8_t start_index,
+    uint8_t* data) {
+    FURI_LOG_D(TAG, "Reading pages %d - %d", start_index, start_index + 3);
+    tx_rx->tx_data[0] = MF_UL_READ_CMD;
+    tx_rx->tx_data[1] = start_index;
+    tx_rx->tx_bits = 16;
+    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+    if(!furi_hal_nfc_tx_rx(tx_rx, 50) || tx_rx->rx_bits < 16 * 8) {
+        FURI_LOG_D(TAG, "Failed to read pages %d - %d", start_index, start_index + 3);
+        return false;
+    }
+    memcpy(data, tx_rx->rx_data, 16);
+    return true;
+}
+
 bool mf_ultralight_read_pages(
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
@@ -631,6 +655,17 @@ bool mf_ul_read_card(
         if(reader->supported_features & MfUltralightSupportSignature) {
             // Read Signature
             mf_ultralight_read_signature(tx_rx, data);
+        }
+    } else {
+        // No GET_VERSION command, check for NTAG203 by reading last page (41)
+        uint8_t dummy[16];
+        if(mf_ultralight_read_pages_direct(tx_rx, 41, dummy)) {
+            mf_ul_set_version_ntag203(reader, data);
+            reader->supported_features = mf_ul_get_features(data->type);
+        } else {
+            // We're really an original Mifare Ultralight, reset tag for safety
+            furi_hal_nfc_sleep();
+            furi_hal_nfc_activate_nfca(300, NULL);
         }
     }
 
