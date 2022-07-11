@@ -14,7 +14,7 @@ $ docker-compose exec dev ./fbt
 ```
 
 ## Latest Updates:
-- Tanks, causes "StackOverflow". Not sure what broke it. Chess is also broken. Someone please fix.
+- Tanks, causes "StackOverflow". Not sure what broke it. Someone please fix.
 - OFW: [added gui-shift command to ducky script #1381 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1381)
 - OFW: [Save picopass as picopass or, for 26bit, as lfrfid #1380 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1380)
 - Added [Mandelbrot set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
