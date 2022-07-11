@@ -844,6 +844,7 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
     case MfUltralightTypeNTAG203:
         // Counter page can be locked and is after dynamic locks
         if(write_page == 40) return true;
+        break;
     case MfUltralightTypeUL21:
     case MfUltralightTypeNTAG213:
     case MfUltralightTypeNTAG215:
@@ -890,6 +891,7 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
             shift = 12;
         else
             furi_assert(false);
+        shift = 0;
 
         break;
     case MfUltralightTypeUL21:
@@ -1004,6 +1006,7 @@ static bool
     }
     emulator->data.counter[0] = (uint16_t)counter_value;
     emulator->data_changed = true;
+    return true;
 }
 
 static void mf_ul_emulate_ntag203_counter_commit(MfUltralightEmulator* emulator) {
@@ -1048,9 +1051,9 @@ static void mf_ul_emulate_write(
             uint8_t new_cnt_lock_byte = page_buff[1];
 
             if(orig_page_lock_byte & 0x01) // Block lock bits 1-3
-                new_page_lock_byte & ~0x0E;
+                new_page_lock_byte &= ~0x0E;
             if(orig_page_lock_byte & 0x10) // Block lock bits 5-7
-                new_page_lock_byte & ~0xE0;
+                new_page_lock_byte &= ~0xE0;
             if(orig_cnt_lock_byte & 0x01) // Block lock counter bit
                 new_cnt_lock_byte &= ~0x10;
             // TODO: Check exact behavior of counter lock byte and remaining page bytes when I have
