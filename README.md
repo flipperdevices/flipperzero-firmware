@@ -21,6 +21,8 @@ $ docker-compose exec dev ./fbt
 - Games Only Mode: Enter Games Only mode from Settings=>Desktop or from (Up Menu)Lock Menu=>GAMES ONLY (By RogueMaster)
 - Games Only Mode: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR AUTO-OFF GAMES ONLY MODE AND GO TO MAIN MENU (By RogueMaster)
 - Games Only Mode: Optimizations for settings saved
+- OFW: [added gui-shift command to ducky script #1381 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1381)
+- OFW: [Save picopass as picopass or, for 26bit, as lfrfid #1380 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1380)
 
 ## **Special Instructions:**
 - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
