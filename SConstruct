@@ -144,6 +144,8 @@ copro_dist = distenv.CoproBuilder(
 distenv.Alias("copro_dist", copro_dist)
 
 firmware_flash = distenv.AddOpenOCDFlashTarget(firmware_env)
+if distenv["FORCE"]:
+    distenv.AlwaysBuild(firmware_flash)
 distenv.Alias("flash", firmware_flash)
 
 firmware_bm_flash = distenv.PhonyTarget(

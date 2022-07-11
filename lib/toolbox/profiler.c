@@ -1,7 +1,8 @@
 #include "profiler.h"
 #include <stdlib.h>
 #include <m-dict.h>
-#include <furi_hal.h>
+#include <furi.h>
+#include <furi_hal_gpio.h>
 
 typedef struct {
     uint32_t start;

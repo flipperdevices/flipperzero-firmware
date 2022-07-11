@@ -74,6 +74,7 @@ libs = env.BuildModules(
         "misc",
         "mbedtls",
         "loclass",
+        "lfrfid",
     ],
 )
 
