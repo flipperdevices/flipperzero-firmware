@@ -1,6 +1,6 @@
 App(
     appid="mandelbrot",
-    name="Mandelbrot set",
+    name="Mandelbrot Set",
     apptype=FlipperAppType.GAME,
     entry_point="mandelbrot_app",
     cdefines=["APP_MANDELBROT_GAME"],
