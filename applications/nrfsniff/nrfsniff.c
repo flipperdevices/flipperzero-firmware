@@ -355,7 +355,7 @@ int32_t nrfsniff_app(void* p) {
         if(event_status == osOK) {
             // press events
             if(event.type == EventTypeKey) {
-                if(event.input.type == InputTypePress) {  
+                if(event.input.type == InputTypePress || (event.input.type == InputTypeLong && event.input.key == InputKeyBack)) {  
                     switch(event.input.key) {
                     case InputKeyUp: 
                         // toggle rate  1/2Mbps
@@ -400,10 +400,10 @@ int32_t nrfsniff_app(void* p) {
                         else
                             wrap_up(storage);
                         break; 
-                    }
-                } else if(event.input.type == InputTypeRelease) {
-                    if (event.input.type == InputTypeLong && event.input.key == InputKeyBack) {
-                        processing = false;
+                    case InputKeyBack:  
+                        if(event.input.type == InputTypeLong)
+                            processing = false;
+                        break; 
                     }
                 }
             } 
