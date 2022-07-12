@@ -2,7 +2,7 @@ from copyreg import constructor
 import os
 
 from typing import List, Set, ClassVar
-
+import operator
 
 from dataclasses import dataclass, field
 
@@ -66,7 +66,7 @@ class ApiEntryVariable:
         return dict(name=self.name, type=self.var_type, params=None)
 
 
-@dataclass
+@dataclass(frozen=True)
 class ApiHeader:
     name: str
 
@@ -111,7 +111,7 @@ class ApiManager:
         self.api.variables.add(variable_def)
 
     def add_header(self, header: str):
-        self.api.headers.add(header)
+        self.api.headers.add(ApiHeader(header))
 
 
 def gnu_sym_hash(name: str):
@@ -323,7 +323,7 @@ class SdkCache:
 
     def __init__(self, cache_file: str):
         self.cache_file_name = cache_file
-        self.version = SdkVersion(1, 1)
+        self.version = SdkVersion(0, 0)
         self.sdk = ApiEntries()
         self.disabled_entries = set()
         self.new_entries = set()
@@ -333,11 +333,35 @@ class SdkCache:
         self.version_action = VersionBump.NONE
         self.load_cache()
 
+    def is_buildable(self) -> bool:
+        return (
+            self.version != SdkVersion(0, 0)
+            and self.version_action == VersionBump.NONE
+            and not self.loaded_dirty_version
+            and not self.loaded_dirty
+            and not self.new_entries
+        )
+
+    def _filter_enabled(self, sdk_entries):
+        return sorted(
+            filter(lambda e: e not in self.disabled_entries, sdk_entries),
+            key=operator.attrgetter("name"),
+        )
+
+    def get_functions(self):
+        return self._filter_enabled(self.sdk.functions)
+
+    def get_variables(self):
+        return self._filter_enabled(self.sdk.variables)
+
+    def get_headers(self):
+        return self._filter_enabled(self.sdk.headers)
+
     def _get_entry_status(self, entry) -> str:
         if entry in self.disabled_entries:
             return "-"
         elif entry in self.new_entries:
-            return "!"
+            return "?"
         else:
             return "+"
 
@@ -392,7 +416,7 @@ class SdkCache:
         entry = None
         if entry_class == "Version":
             self.version = SdkVersion.from_str(entry_name)
-            if entry_status == "!":
+            if entry_status in ("!", "?"):
                 self.loaded_dirty_version = True
         elif entry_class == "Header":
             self.sdk.headers.add(entry := ApiHeader(entry_name))
@@ -439,11 +463,12 @@ class SdkCache:
         if removed_entries:
             print(f"Removed: {removed_entries}")
             known_set -= removed_entries
-            self.version_action = VersionBump.MAJOR
-            self.loaded_dirty = True
+            # If any of removed entries was part of active API, that's a major bump
+            if any(filter(lambda e: e not in self.disabled_entries, removed_entries)):
+                self.version_action = VersionBump.MAJOR
+                # self.loaded_dirty = True
 
     def validate_api(self, api: ApiEntries) -> None:
         self.sync_sets(self.sdk.headers, api.headers)
         self.sync_sets(self.sdk.functions, api.functions)
         self.sync_sets(self.sdk.variables, api.variables)
-

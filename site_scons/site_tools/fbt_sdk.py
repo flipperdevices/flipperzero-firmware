@@ -1,5 +1,6 @@
 from SCons.Builder import Builder
 from SCons.Action import Action
+from SCons.Errors import UserError
 
 # from SCons.Scanner import C
 from SCons.Script import Mkdir, Copy, Delete, Entry
@@ -8,6 +9,7 @@ from SCons.Util import LogicalLines
 import os.path
 import posixpath
 import pathlib
+import operator
 
 from fbt.sdk import Sdk, SdkCache
 
@@ -55,10 +57,10 @@ class SdkTreeBuilder:
 
     def _generate_sdk_meta(self):
         filtered_paths = [self.target_sdk_dir]
-        expanded_paths = self.env.subst(
-            "$_CPPINCFLAGS",
-            target=Entry("dummy"),
-        )
+        # expanded_paths = self.env.subst(
+        #     "$_CPPINCFLAGS",
+        #     target=Entry("dummy"),
+        # )
         # print(expanded_paths)
         full_fw_paths = list(
             map(
@@ -120,19 +122,21 @@ def deploy_sdk_tree(target, source, env, for_signature):
     return sdk_tree.generate_actions()
 
 
-def gen_sdk_data(env, sdk):
+def gen_sdk_data(sdk_cache):
     api_def = []
-    api_def.extend(f"#include <{h.relpath}>" for h in sorted(env["SDK_HEADERS"]))
+    api_def.extend(
+        (f"#include <{h.name}>" for h in sdk_cache.get_headers()),
+    )
     api_def.append(
         "static const constexpr auto elf_api_table = sort(create_array_t<sym_entry>("
     )
 
-    for fun_def in sdk.get_functions():
+    for fun_def in sdk_cache.get_functions():
         api_def.append(
             f"API_METHOD({fun_def.name}, {fun_def.returns}, ({fun_def.params})),"
         )
 
-    for var_def in sdk.get_variables():
+    for var_def in sdk_cache.get_variables():
         api_def.append(f"API_VARIABLE({var_def.name}, {var_def.var_type }),")
 
     api_def.append(");")
@@ -143,6 +147,9 @@ def validate_sdk_cache(source, target, env):
     print(f"Generating SDK for {source[0]} to {target[0]}")
     sdk = Sdk()
     sdk.process_source_file_for_sdk(source[0].path)
+    for h in env["SDK_HEADERS"]:
+        # print(f"{h.path=}")
+        sdk.add_header_to_sdk(pathlib.Path(h.path).as_posix())
 
     sdk_cache = SdkCache(target[0].path)
     sdk_cache.validate_api(sdk.api_manager.api)
@@ -150,7 +157,13 @@ def validate_sdk_cache(source, target, env):
 
 
 def generate_sdk_symbols(source, target, env):
-    pass
+    sdk_cache = SdkCache(source[0].path)
+    if not sdk_cache.is_buildable():
+        raise UserError("SDK version is not finalized, please run 'fbt sdk_check'")
+
+    api_def = gen_sdk_data(sdk_cache)
+    with open(target[0].path, "wt") as f:
+        f.write("\n".join(api_def))
 
 
 def generate(env, **kw):
