@@ -4,8 +4,8 @@
  */
 
 #pragma once
-
-#include "widget_elements/widget_element_i.h"
+#include <gui/view.h>
+#include "widget_elements/widget_element.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -7,14 +7,11 @@
 #include <furi.h>
 #include <gui/view.h>
 #include <input/input.h>
+#include "widget_element.h"
 
-typedef enum {
-    GuiButtonTypeLeft,
-    GuiButtonTypeCenter,
-    GuiButtonTypeRight,
-} GuiButtonType;
-
-typedef void (*ButtonCallback)(GuiButtonType result, InputType type, void* context);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct WidgetElement WidgetElement;
 typedef struct Widget Widget;
@@ -80,3 +77,7 @@ WidgetElement* widget_element_frame_create(
     uint8_t width,
     uint8_t height,
     uint8_t radius);
+
+#ifdef __cplusplus
+}
+#endif
