@@ -5,7 +5,7 @@
 
 - Updated [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) to require hold back to exit
 - OFW: [NFC: fix exit from Classic emulation #1385 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1385)
-- OFW: [Fix ./fbt flash FORCE=1 #1386 (By Astrrra)](Fix ./fbt flash FORCE=1 #1386)
+- OFW: [Fix ./fbt flash FORCE=1 #1386 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1386)
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
