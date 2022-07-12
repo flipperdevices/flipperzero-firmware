@@ -1,4 +1,10 @@
-# [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME
+<h2>
+
+[Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
+<b>Latest Updates:</b>
+
+- Updated [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) to require hold back to exit
+
 <table width="100%" border="0" cellspacing="0">
   <tr>
     <td>
@@ -21,9 +27,7 @@ Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Fli
 <br><br>[Join my Flipper/Amiibo Discord](https://discord.gg/gF2bBUzAFe)
 </td>
       </tr>
-</table>
-  
-
+      <tr><td>
 
 <details>
   <summary><B>You should clone with</B></summary></br>
@@ -34,14 +38,6 @@ $ docker-compose up -d
 $ docker-compose exec dev ./fbt
 ```
 </details>
-
-## Latest Updates:
-- OFW: [added gui-shift command to ducky script #1381 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1381)
-- OFW: [Save picopass as picopass or, for 26bit, as lfrfid #1380 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1380)
-- Added [Mandelbrot set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
-- Update for [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) by RogueMaster, Crashes 1st load if FW <~750KB or every load on larger FW `HIDDEN "chess_game"`
-- Update to fix [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) Thanks to ESurge
-- Updated [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) to require hold back to exit
 
 <details>
   <summary><B>Special Instructions</B></summary></br>
@@ -63,7 +59,7 @@ $ docker-compose exec dev ./fbt
 - Add a folder to SD card named `music_player` (FMF and RTTTL/TXT files)
 - Eventually, if all possible apps are added to [applications/meta/application.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam), your DFU will not install due to size. However, currently, all apps @ 803KB DFU has been tested to install successfully.
 </details>
-
+</td><td>
 <details>
   <summary><B>All Changes/Features</b></summary><br/>
   
@@ -135,5 +131,6 @@ $ docker-compose exec dev ./fbt
 - [UPC Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
 - [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 </details>
+</td></tr></table>
 
 ### Thank you, [MuddleBox](https://github.com/MuddledBox/flipperzero-firmware), [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware), [WeTox-Team](https://github.com/wetox-team/flipperzero-firmware) & of course, most of all [Flipper Devices](https://github.com/flipperdevices/flipperzero-firmware)!
