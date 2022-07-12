@@ -7,12 +7,13 @@
 - Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Flipper DFU. I can do custom names too!
 - [Join my Flipper/Amiibo Discord](https://discord.gg/gF2bBUzAFe)
 ## [FLIPPER WISH LIST](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/RoadMap.md)
-## You should clone with 
-```shell
+
+<details>
+  <summary><B>You should clone with</B></summary>
 $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
-$ docker-compose up -d
-$ docker-compose exec dev ./fbt
-```
+<br>$ docker-compose up -d
+<br>$ docker-compose exec dev ./fbt
+</details>
 
 ## Latest Updates:
 - OFW: [added gui-shift command to ducky script #1381 (By perspecdev)](https://github.com/flipperdevices/flipperzero-firmware/pull/1381)
@@ -46,7 +47,8 @@ $ docker-compose exec dev ./fbt
 
 # [`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 
-## All Changes/Features:
+<details>
+  <summary><B>All Changes/Features:</b></summary><pre>
 - Animations: Hold Center to change flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
 - Animations: Idle animations will show all animations regardless of level and butthurt [Thanks to qqMajiKpp]
 - Animations: SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
@@ -72,9 +74,13 @@ $ docker-compose exec dev ./fbt
 - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
 - SubGHz: Protocols Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - SubGHz: Unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/setting_user` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
-<!-- 
+</pre>
+ </details>
+ <!-- 
 ## Open PRs Checkedout & Not Merged In Main:
  -->
+ 
+
 ## Games
 - - Games `HIDDEN` for development space; can be added under [applications/meta/application.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam#L54)
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048)
