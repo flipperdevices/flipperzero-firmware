@@ -1,18 +1,34 @@
 # [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME
-- ****This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.**
-- FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE
-### **DONATIONS ACCEPTED** 😄🚀💸
-- BTC:**172CE1H1XZVt7tc4HDQ1q9Mej1K7VuHfEf** 
-- ETH:**0x6c46eE48Bd433b0ADE711B43D188Cf8215cd51c2**
-- Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Flipper DFU. I can do custom names too!
-- [Join my Flipper/Amiibo Discord](https://discord.gg/gF2bBUzAFe)
-## [FLIPPER WISH LIST](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/RoadMap.md)
+<table width="100%">
+  <tr><td>
+
+<h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3>
+<br><b>FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE<b>
+    
+<br>[FLIPPER PROJECT WISH LIST](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/RoadMap.md) - [SAMPLE EDUCATIONAL PROJECTS 😄](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/RoadMap.md)
+</td><td>
+
+<h2>DONATIONS ACCEPTED 😄🚀💸</h2>
+BTC: <B>172CE1H1XZVt7tc4HDQ1q9Mej1K7VuHfEf</B><br>
+ETH: <B>0x6c46eE48Bd433b0ADE711B43D188Cf8215cd51c2</B>
+    <br>
+    <br>
+    
+Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Flipper DFU. I can do custom names too!
+<br><br>[Join my Flipper/Amiibo Discord](https://discord.gg/gF2bBUzAFe)
+</td></tr>
+</table>
+  
+
 
 <details>
-  <summary><B>You should clone with</B></summary>
+  <summary><B>You should clone with</B></summary></br>
+
+  ```shell
 $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
-<br>$ docker-compose up -d
-<br>$ docker-compose exec dev ./fbt
+$ docker-compose up -d
+$ docker-compose exec dev ./fbt
+```
 </details>
 
 ## Latest Updates:
@@ -24,31 +40,30 @@ $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlu
 - Updated [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) to require hold back to exit
 
 <details>
-  <summary><B>Special Instructions:</B></summary>
-  <ul>
-<li><a href="https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md">GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU</a></li>
-<li>Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
-<BR>- Note 1: If you don't have a subghz/assets folder, you should ensure you have made at least one clean flash with stock firmware and your SD card installed in order to ensure the database structure is built, otherwise it will not exist for alternative forks.
-<BR>- Note 2: /any is a special keyword signifying either /int (internal storage) or /ext (external storage).
-<BR>- Note 3: the changes you are making to the `_map` files is to point to the location of the specific assets of the touchtunes folder as well as the universal RF map apps which you will have to develop or compile seperately and are not a part of this repo. 
-<BR>- Note 4: /any is effectively root, so the folder structure should start "/any/subghz/assets" and not what is based on the repo below do not blindly copy the repo it will not work.
-<BR>- <a href="https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/universal_rf_map.txt">assets/resources/subghz/assets/universal_rf_map.txt</a>
-<BR>- <a href="https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/touchtunes_map.txt">assets/resources/subghz/assets/touchtunes_map.txt</a>
-<BR>- <a href="https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user">assets/resources/subghz/assets/setting_user</a> **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**</li>
-<li>Download this file into the nfc/assets folder on your SD card. 
-<BR>- <a href="https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/nfc/assets/mf_classic_dict.nfc">assets/resources/nfc/assets/mf_classic_dict.nfc</a></li>
-<li>Download this file into the infrared/assets folder on your SD card. 
-<BR>- <a href="https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/infrared/assets/tv.ir">assets/resources/infrared/assets/tv.ir</a></li>
-<li>Add a folder to SD card named `wav_player` (for 8bit 2ch unsigned wav files) </li>
-<li>Add a folder to SD card named `music_player` (FMF and RTTTL/TXT files)</li>
-<li>Eventually, if all possible apps are added to <a href="https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam">applications/meta/application.fam</a>, your DFU will not install due to size. However, currently, all apps @ 803KB DFU has been tested to install successfully.</li>
-  </ul>
+  <summary><B>Special Instructions:</B></summary></br>
+  
+  - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
+- Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
+- - Note 1: If you don't have a subghz/assets folder, you should ensure you have made at least one clean flash with stock firmware and your SD card installed in order to ensure the database structure is built, otherwise it will not exist for alternative forks.
+- - Note 2: /any is a special keyword signifying either /int (internal storage) or /ext (external storage).
+- - Note 3: the changes you are making to the `_map` files is to point to the location of the specific assets of the touchtunes folder as well as the universal RF map apps which you will have to develop or compile seperately and are not a part of this repo. 
+- - Note 4: /any is effectively root, so the folder structure should start "/any/subghz/assets" and not what is based on the repo below do not blindly copy the repo it will not work.
+- - [assets/resources/subghz/assets/universal_rf_map.txt](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/universal_rf_map.txt)
+- - [assets/resources/subghz/assets/touchtunes_map.txt](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/touchtunes_map.txt)
+- - [assets/resources/subghz/assets/setting_user](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
+- Download this file into the nfc/assets folder on your SD card. 
+- - [assets/resources/nfc/assets/mf_classic_dict.nfc](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/nfc/assets/mf_classic_dict.nfc)
+- Download this file into the infrared/assets folder on your SD card. 
+- - [assets/resources/infrared/assets/tv.ir](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/infrared/assets/tv.ir)
+- Add a folder to SD card named `wav_player` (for 8bit 2ch unsigned wav files) 
+- Add a folder to SD card named `music_player` (FMF and RTTTL/TXT files)
+- Eventually, if all possible apps are added to [applications/meta/application.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam), your DFU will not install due to size. However, currently, all apps @ 803KB DFU has been tested to install successfully.
 </details>
 
 # [`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 
 <details>
-  <summary><B>All Changes/Features:</b></summary><br/>
+  <summary><B>All Changes/Features</b></summary><br/>
   
 - Animations: Hold Center to change flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
 - Animations: Idle animations will show all animations regardless of level and butthurt [Thanks to qqMajiKpp]
