@@ -162,28 +162,26 @@ static void
 }
 
 static bool load_raw_signal(
-    const char* file_path,
+    FlipperFormat* ff,
     const char* signal_name,
     uint32_t** timings,
     uint32_t* timings_count) {
-    string_t str_buf;
-    string_init(str_buf);
+    string_t buf;
+    string_init(buf);
     bool success = false;
 
     do {
         uint32_t format_version;
-        if(!flipper_format_file_open_existing(ff, file_path)) break;
-        if(!flipper_format_read_header(ff, str_buf, &format_version)) break;
-        if(string_cmp_str(str_buf, "IR tests file") || format_version != 1) break;
+        if(!flipper_format_read_header(ff, buf, &format_version)) break;
+        if(string_cmp_str(buf, "IR tests file") || format_version != 1) break;
 
         bool is_name_found = false;
-        for(; !is_name_found && flipper_format_read_string(ff, "name", str_buf);
-            is_name_found = !string_cmp_str(str_buf, signal_name))
+        for(; !is_name_found && flipper_format_read_string(ff, "name", buf);
+            is_name_found = !string_cmp_str(buf, signal_name))
             ;
 
         if(!is_name_found) break;
-        if(!flipper_format_read_string(ff, "type", str_buf) || string_cmp_str(str_buf, "raw"))
-            break;
+        if(!flipper_format_read_string(ff, "type", buf) || string_cmp_str(buf, "raw")) break;
         if(!flipper_format_get_value_count(ff, "data", timings_count)) break;
         if(!*timings_count) break;
 
@@ -195,9 +193,7 @@ static bool load_raw_signal(
         success = true;
     } while(false);
 
-    flipper_format_file_close(ff);
-    string_clear(str_buf);
-
+    string_clear(buf);
     return success;
 }
 
@@ -223,9 +219,13 @@ static void run_decoder(
     string_printf(input_name, "decoder_input%d", test_index);
 
     mu_assert(
-        load_raw_signal(string_get_cstr(file_path), string_get_cstr(input_name), &timings, &timings_count),
+        flipper_format_file_open_existing(ff, string_get_cstr(file_path)),
+        "Failed to open data file");
+    mu_assert(
+        load_raw_signal(ff, string_get_cstr(input_name), &timings, &timings_count),
         "Failed to load raw signal from file");
 
+    flipper_format_file_close(ff);
     string_clear(file_path);
     string_clear(input_name);
 
