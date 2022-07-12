@@ -5,26 +5,140 @@ name: decoder_input1
 type: raw
 data: 27888 888 888 1776 1776 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 888 888
 #
+name: decoder_expected1
+type: parsed_array
+count: 1
+#
+protocol: RC5
+address: 13 00 00 00
+command: 10 00 00 00
+repeat: false
+#
 name: decoder_input2
 type: raw
 data: 27888 888 888 888 888 888 888 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 888 888
+#
+name: decoder_expected2
+type: parsed_array
+count: 1
+#
+protocol: RC5
+address: 13 00 00 00
+command: 10 00 00 00
+repeat: false
 #
 name: decoder_input3
 type: raw
 data: 27888 888 888 1776 1776 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 1776 888
 #
+name: decoder_expected3
+type: parsed_array
+count: 1
+#
+protocol: RC5
+address: 13 00 00 00
+command: 11 00 00 00
+repeat: false
+#
 name: decoder_input4
 type: raw
 data: 27888 888 888 888 888 888 888 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 1776 888
+#
+name: decoder_expected4
+type: parsed_array
+count: 1
+#
+protocol: RC5
+address: 13 00 00 00
+command: 11 00 00 00
+repeat: false
 #
 name: decoder_input5
 type: raw
 data: 27888 888 888 1776 1776 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888
 #
+name: decoder_expected5
+type: parsed_array
+count: 1
+#
+protocol: RC5
+address: 1F 00 00 00
+command: 3F 00 00 00
+repeat: false
+#
 name: decoder_input6
 type: raw
 data: 27888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888
 #
+name: decoder_expected6
+type: parsed_array
+count: 1
+#
+protocol: RC5
+address: 1F 00 00 00
+command: 3F 00 00 00
+repeat: false
+#
 name: decoder_input7
 type: raw
 data: 27888 888 888 1776 1776 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 1776 888 27888 888 888 888 888 888 888 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 1776 888 27888 888 888 888 888 888 888 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 1776 888 27888 888 888 888 888 888 888 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 1776 888 27888 888 888 1776 1776 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 1776 888 27888 888 888 888 888 888 888 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 888 888 27888 888 888 1776 1776 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 888 888 27888 888 888 1776 1776 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 888 888 27888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 27888 888 888 1776 1776 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 27888 888 888 1776 1776 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888
+#
+name: decoder_expected7
+type: parsed_array
+count: 11
+#
+protocol: RC5
+address: 13 00 00 00
+command: 11 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 13 00 00 00
+command: 11 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 13 00 00 00
+command: 11 00 00 00
+repeat: true
+#
+protocol: RC5
+address: 13 00 00 00
+command: 11 00 00 00
+repeat: true
+#
+protocol: RC5
+address: 13 00 00 00
+command: 11 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 13 00 00 00
+command: 10 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 13 00 00 00
+command: 10 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 13 00 00 00
+command: 10 00 00 00
+repeat: true
+#
+protocol: RC5
+address: 1F 00 00 00
+command: 3F 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 1F 00 00 00
+command: 3F 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 1F 00 00 00
+command: 3F 00 00 00
+repeat: true
+#

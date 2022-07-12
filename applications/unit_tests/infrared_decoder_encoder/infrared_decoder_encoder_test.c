@@ -410,14 +410,14 @@ MU_TEST(test_decoder_sirc) {
 }
 
 MU_TEST(test_decoder_rc5) {
-//     RUN_DECODER(InfraredProtocolRC5X, 1, test_decoder_rc5x_expected1);
-//     RUN_DECODER(InfraredProtocolRC5, 1, test_decoder_rc5_expected1);
-//     RUN_DECODER(InfraredProtocolRC5, 2, test_decoder_rc5_expected2);
-//     RUN_DECODER(InfraredProtocolRC5, 3, test_decoder_rc5_expected3);
-//     RUN_DECODER(InfraredProtocolRC5, 4, test_decoder_rc5_expected4);
-//     RUN_DECODER(InfraredProtocolRC5, 5, test_decoder_rc5_expected5);
-//     RUN_DECODER(InfraredProtocolRC5, 6, test_decoder_rc5_expected6);
-//     RUN_DECODER(InfraredProtocolRC5, 7, test_decoder_rc5_expected_all_repeats);
+    RUN_DECODER(InfraredProtocolRC5X, 1);
+    RUN_DECODER(InfraredProtocolRC5, 1);
+    RUN_DECODER(InfraredProtocolRC5, 2);
+    RUN_DECODER(InfraredProtocolRC5, 3);
+    RUN_DECODER(InfraredProtocolRC5, 4);
+    RUN_DECODER(InfraredProtocolRC5, 5);
+    RUN_DECODER(InfraredProtocolRC5, 6);
+    RUN_DECODER(InfraredProtocolRC5, 7);
 }
 
 MU_TEST(test_encoder_rc5x) {
