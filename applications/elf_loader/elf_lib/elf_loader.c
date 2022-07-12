@@ -13,7 +13,7 @@
 /**
  * Callable elf entry type
  */
-typedef void(entry_t)(void);
+typedef int32_t(entry_t)(void*);
 
 typedef struct {
     void* data;
@@ -135,6 +135,8 @@ static int load_section_data(ELFExec_t* e, ELFSection_t* s, Elf32_Shdr* h) {
 
     /* FURI_LOG_D(TAG, "DATA: "); */
     dump_data(s->data, h->sh_size);
+
+    FURI_LOG_I(TAG, "0x%X", s->data);
     return 0;
 }
 
@@ -259,6 +261,7 @@ static Elf32_Addr address_of(ELFExec_t* e, Elf32_Sym* sym, const char* sName) {
 
 static int relocate(ELFExec_t* e, Elf32_Shdr* h, ELFSection_t* s, const char* name) {
     UNUSED(name);
+
     if(s->data) {
         Elf32_Rel rel;
         size_t relEntries = h->sh_size / sizeof(rel);
@@ -270,41 +273,55 @@ static int relocate(ELFExec_t* e, Elf32_Shdr* h, ELFSection_t* s, const char* na
                 Elf32_Sym sym;
                 Elf32_Addr symAddr;
 
-                char name[33] = "<unnamed>";
+                // char name[33] = "<unnamed>";
+                string_t name;
+                const size_t max_name_size = 256;
+                string_init(name);
+                string_reserve(name, max_name_size + 1);
+
                 int symEntry = ELF32_R_SYM(rel.r_info);
                 int relType = ELF32_R_TYPE(rel.r_info);
                 Elf32_Addr relAddr = ((Elf32_Addr)s->data) + rel.r_offset;
 
-                read_symbol(e, symEntry, &sym, name, sizeof(name));
+                read_symbol(e, symEntry, &sym, m_str1ng_get_cstr(name), max_name_size);
                 FURI_LOG_D(
                     TAG,
                     " %08X %08X %-16s %s",
                     (unsigned int)rel.r_offset,
                     (unsigned int)rel.r_info,
                     type_to_str(relType),
-                    name);
+                    string_get_cstr(name));
 
-                symAddr = address_of(e, &sym, name);
+                symAddr = address_of(e, &sym, string_get_cstr(name));
                 if(symAddr != 0xffffffff) {
                     FURI_LOG_D(
                         TAG,
                         "  symAddr=%08X relAddr=%08X",
                         (unsigned int)symAddr,
                         (unsigned int)relAddr);
-                    if(relocate_symbol(relAddr, relType, symAddr) == -1) return -1;
+                    if(relocate_symbol(relAddr, relType, symAddr) == -1) {
+                        string_clear(name);
+                        return -1;
+                    }
                 } else {
-                    FURI_LOG_D(TAG, "  No symbol address of %s", name);
+                    FURI_LOG_D(TAG, "  No symbol address of %s", string_get_cstr(name));
+                    string_clear(name);
                     return -1;
                 }
+                string_clear(name);
             }
         }
+
         return 0;
     } else
         FURI_LOG_I(TAG, "Section not loaded");
+
     return -1;
 }
 
 int place_info(ELFExec_t* e, Elf32_Shdr* sh, const char* name, int n) {
+    FURI_LOG_I(TAG, "Name: %s", name);
+
     if(strcmp(name, ".symtab") == 0) {
         e->symbol_table = sh->sh_offset;
         e->symbol_count = sh->sh_size / sizeof(Elf32_Sym);
@@ -426,26 +443,8 @@ static int relocate_sections(ELFExec_t* e) {
 
 #define APP_STACK_SIZE 2048
 static void arch_jump_to(entry_t entry) {
-    void* stack = aligned_malloc(APP_STACK_SIZE, 8);
-
-    register uint32_t saved = 0;
-    void* tos = stack + APP_STACK_SIZE;
-
-    /* s->saved */
-    __asm__ volatile("MOV %0, sp\n\t" : : "r"(saved));
-    /* tos->MSP */
-    __asm__ volatile("MOV sp, %0\n\t" : : "r"(tos));
-    /* push saved */
-    __asm__ volatile("PUSH {%0}\n\t" : : "r"(saved));
-
-    entry();
-
-    /* pop saved */
-    __asm__ volatile("POP {%0}\n\t" : : "r"(saved));
-    /* saved->sp */
-    __asm__ volatile("MOV sp, %0\n\t" : : "r"(saved));
-
-    aligned_free(stack);
+    // TODO: allocate thread and stack
+    entry(NULL);
 }
 
 static int loader_jump_to(ELFExec_t* e) {
