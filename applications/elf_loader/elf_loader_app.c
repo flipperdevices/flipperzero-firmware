@@ -13,10 +13,10 @@ int32_t elf_loader_app(void* p) {
     DialogsApp* dialogs = furi_record_open("dialogs");
 
     string_t elf_name;
-    string_init_set(elf_name, "/ext/");
+    string_init_set(elf_name, "/ext/elf");
 
     if(dialog_file_browser_show(dialogs, elf_name, elf_name, ".elf", true, NULL, false)) {
-        FURI_LOG_I("elf_loader_app", "ELF Loader start");
+        FURI_LOG_I("elf_loader_app", "ELF Loader is loading %s", string_get_cstr(elf_name));
         int ret = loader_exec_elf(string_get_cstr(elf_name), resolver, storage);
         FURI_LOG_I("elf_loader_app", "ELF Loader returned: %i", ret);
     }

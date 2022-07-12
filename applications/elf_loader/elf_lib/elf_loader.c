@@ -128,8 +128,10 @@ static int load_section_data(ELFExec_t* e, ELFSection_t* s, Elf32_Shdr* h) {
         return -1;
     }
 
-    if(storage_file_read(e->fd, s->data, h->sh_size) != h->sh_size) {
-        FURI_LOG_E(TAG, "     read data fail");
+    uint16_t read = storage_file_read(e->fd, s->data, h->sh_size);
+    if(read != h->sh_size) {
+        FURI_LOG_E(TAG, "     read %d, expected %d", read, h->sh_size);
+        FURI_LOG_E(TAG, "     read data fail '%s'", storage_file_get_error_desc(e->fd));
         return -1;
     }
 
@@ -268,16 +270,17 @@ static int relocate(ELFExec_t* e, Elf32_Shdr* h, ELFSection_t* s, const char* na
         size_t relCount;
         (void)storage_file_seek(e->fd, h->sh_offset, true);
         FURI_LOG_D(TAG, " Offset   Info     Type             Name");
+
+        int relocate_result = 0;
+        string_t name;
+        const size_t max_name_size = 256;
+        string_init(name);
+        string_reserve(name, max_name_size + 1);
+
         for(relCount = 0; relCount < relEntries; relCount++) {
             if(storage_file_read(e->fd, &rel, sizeof(rel)) == sizeof(rel)) {
                 Elf32_Sym sym;
                 Elf32_Addr symAddr;
-
-                // char name[33] = "<unnamed>";
-                string_t name;
-                const size_t max_name_size = 256;
-                string_init(name);
-                string_reserve(name, max_name_size + 1);
 
                 int symEntry = ELF32_R_SYM(rel.r_info);
                 int relType = ELF32_R_TYPE(rel.r_info);
@@ -300,19 +303,17 @@ static int relocate(ELFExec_t* e, Elf32_Shdr* h, ELFSection_t* s, const char* na
                         (unsigned int)symAddr,
                         (unsigned int)relAddr);
                     if(relocate_symbol(relAddr, relType, symAddr) == -1) {
-                        string_clear(name);
-                        return -1;
+                        relocate_result = -1;
                     }
                 } else {
                     FURI_LOG_D(TAG, "  No symbol address of %s", string_get_cstr(name));
-                    string_clear(name);
-                    return -1;
+                    relocate_result = -1;
                 }
-                string_clear(name);
             }
         }
 
-        return 0;
+        string_clear(name);
+        return relocate_result;
     } else
         FURI_LOG_I(TAG, "Section not loaded");
 
@@ -367,7 +368,7 @@ int place_info(ELFExec_t* e, Elf32_Shdr* sh, const char* name, int n) {
 
 static int load_symbols(ELFExec_t* e) {
     size_t n;
-    int founded = 0;
+    int found = 0;
     FURI_LOG_I(TAG, "Scan ELF indexs...");
     for(n = 1; n < e->sections; n++) {
         Elf32_Shdr section_header;
@@ -379,11 +380,11 @@ static int load_symbols(ELFExec_t* e) {
         if(section_header.sh_name)
             read_section_name(e, section_header.sh_name, name, sizeof(name));
         FURI_LOG_D(TAG, "Examining section %d %s", n, name);
-        founded |= place_info(e, &section_header, name, n);
-        if(IS_FLAGS_SET(founded, FoundAll)) return FoundAll;
+        found |= place_info(e, &section_header, name, n);
+        if(IS_FLAGS_SET(found, FoundAll)) return FoundAll;
     }
-    FURI_LOG_I(TAG, "Done");
-    return founded;
+    FURI_LOG_I(TAG, "Load symbols done");
+    return found;
 }
 
 static int init_elf(ELFExec_t* e, File* f) {
@@ -432,23 +433,21 @@ static int relocate_section(ELFExec_t* e, ELFSection_t* s, const char* name) {
 }
 
 static int relocate_sections(ELFExec_t* e) {
-    return relocate_section(e, &e->text, ".text") | relocate_section(e, &e->rodata, ".rodata") |
-           relocate_section(e, &e->data, ".data")
-    /* BSS not need relocation */
-#if 0
-	       | relocate_section(e, &e->bss, ".bss")
-#endif
-        ;
+    int reloc_error = 0;
+
+    if(relocate_section(e, &e->text, ".text") == -1) reloc_error = -1;
+    if(relocate_section(e, &e->rodata, ".rodata") == -1) reloc_error = -1;
+    if(relocate_section(e, &e->data, ".data") == -1) reloc_error = -1;
+
+    return reloc_error;
 }
 
-#define APP_STACK_SIZE 2048
 static void arch_jump_to(entry_t entry) {
     // TODO: allocate thread and stack
     entry(NULL);
 }
 
 static int loader_jump_to(ELFExec_t* e) {
-#if 1
     if(e->entry) {
         entry_t* entry = (entry_t*)(e->text.data + e->entry);
         arch_jump_to(entry);
@@ -457,10 +456,6 @@ static int loader_jump_to(ELFExec_t* e) {
         FURI_LOG_I(TAG, "No entry defined.");
         return -1;
     }
-#else
-    FURI_LOG_I(TAG, "Jump not implemented.");
-    return 0;
-#endif
 }
 
 int loader_exec_elf(const char* path, ELFResolver resolver, Storage* storage) {
@@ -484,7 +479,10 @@ int loader_exec_elf(const char* path, ELFResolver resolver, Storage* storage) {
         exec.resolver = resolver;
         if(IS_FLAGS_SET(load_symbols(&exec), FoundValid)) {
             int ret = -1;
-            if(relocate_sections(&exec) == 0) ret = loader_jump_to(&exec);
+            if(relocate_sections(&exec) == 0) {
+                FURI_LOG_I(TAG, "Start");
+                ret = loader_jump_to(&exec);
+            }
             free_elf(&exec);
             result = ret;
             break;
