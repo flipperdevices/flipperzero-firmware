@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 
 from cxxheaderparser.parser import CxxParser
 
-# 'Fixing' complains about typedefs
+# 'Fixing' complaints about typedefs
 CxxParser._fundamentals.discard("wchar_t")
 
 from cxxheaderparser.types import (
@@ -84,7 +84,7 @@ class ApiEntries:
     headers: Set[ApiHeader] = field(default_factory=set)
 
 
-class ApiManager:
+class SymbolManager:
     def __init__(self):
         self.api = ApiEntries()
         # self.root_headers = []
@@ -120,25 +120,22 @@ def gnu_sym_hash(name: str):
     return str(hex(h))[-8:]
 
 
-class Sdk:
+class SdkCollector:
     def __init__(self):
-        self.api_manager = ApiManager()
+        self.symbol_manager = SymbolManager()
 
     def add_header_to_sdk(self, header: str):
-        self.api_manager.add_header(header)
+        self.symbol_manager.add_header(header)
 
     def process_source_file_for_sdk(self, file_path: str):
-        visitor = SdkCxxVisitor(self.api_manager)
+        visitor = SdkCxxVisitor(self.symbol_manager)
         with open(file_path, "rt") as f:
             content = f.read()
         parser = CxxParser(file_path, content, visitor, None)
         parser.parse()
 
-    def get_functions(self):
-        return sorted(self.api_manager.api.functions, key=lambda o: o.name)
-
-    def get_variables(self):
-        return sorted(self.api_manager.api.variables, key=lambda o: o.name)
+    def get_api(self):
+        return self.symbol_manager.api
 
 
 def stringify_array_dimension(size_descr):
@@ -194,8 +191,8 @@ def stringify_descr(type_descr):
 
 
 class SdkCxxVisitor:
-    def __init__(self, api_manager: ApiManager):
-        self.api = api_manager
+    def __init__(self, symbol_manager: SymbolManager):
+        self.api = symbol_manager
 
     def on_variable(self, state: State, v: Variable) -> None:
         # print("on_variable", v)
@@ -393,9 +390,10 @@ class SdkCache:
             print("\n".join(map(str, self.new_entries)))
 
         str_cache_entries = [self.version]
-        str_cache_entries.extend(sorted(self.sdk.headers, key=lambda x: x.name))
-        str_cache_entries.extend(sorted(self.sdk.functions, key=lambda x: x.name))
-        str_cache_entries.extend(sorted(self.sdk.variables, key=lambda x: x.name))
+        name_getter = operator.attrgetter("name")
+        str_cache_entries.extend(sorted(self.sdk.headers, key=name_getter))
+        str_cache_entries.extend(sorted(self.sdk.functions, key=name_getter))
+        str_cache_entries.extend(sorted(self.sdk.variables, key=name_getter))
 
         with open(self.cache_file_name, "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=SdkCache.CSV_FIELD_NAMES)
@@ -415,7 +413,7 @@ class SdkCache:
         entry = None
         if entry_class == "Version":
             self.version = SdkVersion.from_str(entry_name)
-            if entry_status in ("!", "?"):
+            if entry_status == "?":
                 self.loaded_dirty_version = True
         elif entry_class == "Header":
             self.sdk.headers.add(entry := ApiHeader(entry_name))
@@ -434,7 +432,7 @@ class SdkCache:
 
         if entry_status == "-":
             self.disabled_entries.add(entry)
-        elif entry_status == "!":
+        elif entry_status == "?":
             self.new_entries.add(entry)
 
     def load_cache(self) -> None:

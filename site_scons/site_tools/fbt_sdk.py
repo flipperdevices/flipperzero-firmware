@@ -9,9 +9,8 @@ from SCons.Util import LogicalLines
 import os.path
 import posixpath
 import pathlib
-import operator
 
-from fbt.sdk import Sdk, SdkCache
+from fbt.sdk import SdkCollector, SdkCache
 
 
 def prebuild_sdk_emitter(target, source, env):
@@ -150,14 +149,14 @@ def gen_sdk_data(sdk_cache):
 
 def validate_sdk_cache(source, target, env):
     print(f"Generating SDK for {source[0]} to {target[0]}")
-    sdk = Sdk()
-    sdk.process_source_file_for_sdk(source[0].path)
+    current_sdk = SdkCollector()
+    current_sdk.process_source_file_for_sdk(source[0].path)
     for h in env["SDK_HEADERS"]:
         # print(f"{h.path=}")
-        sdk.add_header_to_sdk(pathlib.Path(h.path).as_posix())
+        current_sdk.add_header_to_sdk(pathlib.Path(h.path).as_posix())
 
     sdk_cache = SdkCache(target[0].path)
-    sdk_cache.validate_api(sdk.api_manager.api)
+    sdk_cache.validate_api(current_sdk.get_api())
     sdk_cache.save()
 
 
