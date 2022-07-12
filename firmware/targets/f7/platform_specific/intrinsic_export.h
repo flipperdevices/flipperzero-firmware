@@ -1,3 +1,4 @@
+#include "aeabi.h"
 
 #ifdef __cplusplus
 extern "C" {

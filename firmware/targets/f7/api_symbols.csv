@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,0.18,,
+Version,+,1.0,,
 Header,+,applications/bt/bt_service/bt.h,,
 Header,+,applications/cli/cli.h,,
 Header,+,applications/cli/cli_vcp.h,,
@@ -34,7 +34,6 @@ Header,+,applications/notification/notification_messages.h,,
 Header,+,applications/power/power_service/power.h,,
 Header,+,applications/rpc/rpc_app.h,,
 Header,+,applications/storage/storage.h,,
-Header,+,core/intrinsic_export.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_clock.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_console.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_crc.h,,
@@ -51,6 +50,7 @@ Header,+,firmware/targets/f7/furi_hal/furi_hal_spi_types.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_subghz_configs.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_uart.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_usb_cdc.h,,
+Header,+,firmware/targets/f7/platform_specific/intrinsic_export.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_bt.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_bt_hid.h,,
@@ -218,6 +218,82 @@ Function,+,LL_mDelay,void,uint32_t
 Function,-,SystemCoreClockUpdate,void,
 Function,+,SystemInit,void,
 Function,-,_Exit,void,int
+Function,+,__aeabi_cdcmpeq,void,"double, double"
+Function,+,__aeabi_cdcmple,void,"double, double"
+Function,+,__aeabi_cdrcmple,void,"double, double"
+Function,-,__aeabi_cfcmpeq,void,"float, float"
+Function,-,__aeabi_cfcmple,void,"float, float"
+Function,-,__aeabi_cfrcmple,void,"float, float"
+Function,+,__aeabi_d2f,float,double
+Function,-,__aeabi_d2h,short,double
+Function,-,__aeabi_d2h_alt,short,double
+Function,+,__aeabi_d2iz,int,double
+Function,+,__aeabi_d2lz,long long,double
+Function,+,__aeabi_d2uiz,unsigned,double
+Function,+,__aeabi_d2ulz,unsigned long long,double
+Function,+,__aeabi_dadd,double,"double, double"
+Function,+,__aeabi_dcmpeq,int,"double, double"
+Function,+,__aeabi_dcmpge,int,"double, double"
+Function,+,__aeabi_dcmpgt,int,"double, double"
+Function,+,__aeabi_dcmple,int,"double, double"
+Function,+,__aeabi_dcmplt,int,"double, double"
+Function,+,__aeabi_dcmpun,int,"double, double"
+Function,+,__aeabi_ddiv,double,"double, double"
+Function,+,__aeabi_dmul,double,"double, double"
+Function,+,__aeabi_drsub,double,"double, double"
+Function,+,__aeabi_dsub,double,"double, double"
+Function,+,__aeabi_f2d,double,float
+Function,-,__aeabi_f2h,short,float
+Function,-,__aeabi_f2h_alt,short,float
+Function,-,__aeabi_f2iz,int,float
+Function,-,__aeabi_f2lz,long long,float
+Function,-,__aeabi_f2uiz,unsigned,float
+Function,-,__aeabi_f2ulz,unsigned long long,float
+Function,+,__aeabi_fadd,float,"float, float"
+Function,-,__aeabi_fcmpeq,int,"float, float"
+Function,-,__aeabi_fcmpge,int,"float, float"
+Function,-,__aeabi_fcmpgt,int,"float, float"
+Function,-,__aeabi_fcmple,int,"float, float"
+Function,-,__aeabi_fcmplt,int,"float, float"
+Function,-,__aeabi_fcmpun,int,"float, float"
+Function,-,__aeabi_fdiv,float,"float, float"
+Function,-,__aeabi_fmul,float,"float, float"
+Function,+,__aeabi_frsub,float,"float, float"
+Function,+,__aeabi_fsub,float,"float, float"
+Function,-,__aeabi_h2f,float,short
+Function,-,__aeabi_h2f_alt,float,short
+Function,+,__aeabi_i2d,double,int
+Function,+,__aeabi_i2f,float,int
+Function,-,__aeabi_idiv,int,"int, int"
+Function,+,__aeabi_idiv0,int,int
+Function,-,__aeabi_idivmod,idiv_return,"int, int"
+Function,+,__aeabi_l2d,double,long long
+Function,+,__aeabi_l2f,float,long long
+Function,+,__aeabi_ldiv0,long long,long long
+Function,+,__aeabi_ldivmod,lldiv_t,"long long, long long"
+Function,-,__aeabi_lmul,long long,"long long, long long"
+Function,-,__aeabi_memclr,void,"void*, size_t"
+Function,-,__aeabi_memclr4,void,"void*, size_t"
+Function,-,__aeabi_memclr8,void,"void*, size_t"
+Function,-,__aeabi_memcpy,void,"void*, const void*, size_t"
+Function,-,__aeabi_memcpy4,void,"void*, const void*, size_t"
+Function,-,__aeabi_memcpy8,void,"void*, const void*, size_t"
+Function,-,__aeabi_memmove,void,"void*, const void*, size_t"
+Function,-,__aeabi_memmove4,void,"void*, const void*, size_t"
+Function,-,__aeabi_memmove8,void,"void*, const void*, size_t"
+Function,-,__aeabi_memset,void,"void*, size_t, int"
+Function,-,__aeabi_memset4,void,"void*, size_t, int"
+Function,-,__aeabi_memset8,void,"void*, size_t, int"
+Function,+,__aeabi_ui2d,double,unsigned
+Function,+,__aeabi_ui2f,float,unsigned
+Function,-,__aeabi_uidiv,unsigned,"unsigned, unsigned"
+Function,-,__aeabi_uidivmod,uidiv_return,"unsigned, unsigned"
+Function,+,__aeabi_ul2d,double,unsigned long long
+Function,+,__aeabi_ul2f,float,unsigned long long
+Function,-,__aeabi_uread4,int,void*
+Function,-,__aeabi_uread8,long long,void*
+Function,-,__aeabi_uwrite4,int,"int, void*"
+Function,-,__aeabi_uwrite8,long long,"long long, void*"
 Function,-,__assert,void,"const char*, int, const char*"
 Function,+,__assert_func,void,"const char*, int, const char*, const char*"
 Function,+,__clear_cache,void,"void*, void*"
@@ -1592,7 +1668,7 @@ Function,-,qsort_r,void,"void*, size_t, size_t, int (*)(const void*, const void*
 Function,-,quick_exit,void,int
 Function,+,rand,int,
 Function,-,rand_r,int,unsigned*
-Function,-,random,long,
+Function,+,random,long,
 Function,-,rawmemchr,void*,"const void*, int"
 Function,-,read_mutex,_Bool,"ValueMutex*, void*, size_t, uint32_t"
 Function,+,realloc,void*,"void*, size_t"
