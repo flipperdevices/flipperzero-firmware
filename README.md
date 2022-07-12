@@ -6,6 +6,7 @@
 <br><b>FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE<b>
     
 <br>[FLIPPER PROJECT WISH LIST](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/RoadMap.md) - [SAMPLE EDUCATIONAL PROJECTS 😄](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/RoadMap.md)
+<br>[`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 </td><td>
 
 <h2>DONATIONS ACCEPTED 😄🚀💸</h2>
@@ -59,8 +60,6 @@ $ docker-compose exec dev ./fbt
 - Add a folder to SD card named `music_player` (FMF and RTTTL/TXT files)
 - Eventually, if all possible apps are added to [applications/meta/application.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam), your DFU will not install due to size. However, currently, all apps @ 803KB DFU has been tested to install successfully.
 </details>
-
-# [`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 
 <details>
   <summary><B>All Changes/Features</b></summary><br/>
