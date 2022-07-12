@@ -1,13 +1,15 @@
 # [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME
-<table width="100%">
-  <tr><td>
+<table width="100%" border="0" cellspacing="0">
+  <tr>
+    <td>
 
 <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3>
 <br><b>FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE<b>
     
 <br>[FLIPPER PROJECT WISH LIST](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/RoadMap.md) - [SAMPLE EDUCATIONAL PROJECTS 😄](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/RoadMap.md)
 <br>[`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
-</td><td>
+</td>
+      <td>
 
 <h2>DONATIONS ACCEPTED 😄🚀💸</h2>
 BTC: <B>172CE1H1XZVt7tc4HDQ1q9Mej1K7VuHfEf</B><br>
@@ -17,7 +19,8 @@ ETH: <B>0x6c46eE48Bd433b0ADE711B43D188Cf8215cd51c2</B>
     
 Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Flipper DFU. I can do custom names too!
 <br><br>[Join my Flipper/Amiibo Discord](https://discord.gg/gF2bBUzAFe)
-</td></tr>
+</td>
+      </tr>
 </table>
   
 
