@@ -41,7 +41,7 @@ $ docker-compose exec dev ./fbt
 - Updated [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) to require hold back to exit
 
 <details>
-  <summary><B>Special Instructions:</B></summary></br>
+  <summary><B>Special Instructions</B></summary></br>
   
   - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
