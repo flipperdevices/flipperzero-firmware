@@ -17,8 +17,8 @@
 #define RUN_ENCODER(data, expected) \
     run_encoder((data), COUNT_OF(data), (expected), COUNT_OF(expected))
 
-#define RUN_DECODER(protocol, input_index, expected) \
-    run_decoder((protocol), (input_index), (expected), COUNT_OF(expected))
+#define RUN_DECODER(protocol, input_index) \
+    run_decoder((protocol), (input_index))
 
 #define RUN_ENCODER_DECODER(data) run_encoder_decoder((data), COUNT_OF(data))
 
@@ -171,10 +171,6 @@ static bool load_raw_signal(
     bool success = false;
 
     do {
-        uint32_t format_version;
-        if(!flipper_format_read_header(ff, buf, &format_version)) break;
-        if(string_cmp_str(buf, "IR tests file") || format_version != 1) break;
-
         bool is_name_found = false;
         for(; !is_name_found && flipper_format_read_string(ff, "name", buf);
             is_name_found = !string_cmp_str(buf, signal_name))
@@ -197,17 +193,78 @@ static bool load_raw_signal(
     return success;
 }
 
+static bool read_message(FlipperFormat* ff, InfraredMessage* message) {
+    string_t buf;
+    string_init(buf);
+    bool success = false;
+
+    do {
+        if(!flipper_format_read_string(ff, "protocol", buf)) break;
+        message->protocol = infrared_get_protocol_by_name(string_get_cstr(buf));
+        if(!infrared_is_protocol_valid(message->protocol)) break;
+        if(!flipper_format_read_hex(ff, "address", (uint8_t*)&message->address, sizeof(uint32_t)))
+            break;
+        if(!flipper_format_read_hex(ff, "command", (uint8_t*)&message->command, sizeof(uint32_t)))
+            break;
+        if(!flipper_format_read_bool(ff, "repeat", &message->repeat, 1)) break;
+        success = true;
+    } while(false);
+
+    string_clear(buf);
+    return success;
+}
+
+static bool load_messages(
+    FlipperFormat* ff,
+    const char* signal_name,
+    InfraredMessage** messages,
+    uint32_t* messages_count) {
+    string_t buf;
+    string_init(buf);
+    bool success = false;
+
+    do {
+        bool is_name_found = false;
+        for(; !is_name_found && flipper_format_read_string(ff, "name", buf);
+            is_name_found = !string_cmp_str(buf, signal_name))
+            ;
+
+        if(!is_name_found) break;
+        if(!flipper_format_read_string(ff, "type", buf) || string_cmp_str(buf, "parsed_array"))
+            break;
+        if(!flipper_format_read_uint32(ff, "count", messages_count, 1)) break;
+        if(!*messages_count) break;
+
+        *messages = malloc(*messages_count * sizeof(InfraredMessage));
+        uint32_t i;
+        for(i = 0; i < *messages_count; ++i) {
+            if(!read_message(ff, (*messages) + i)) {
+                break;
+            }
+        }
+        if(*messages_count != i) {
+            free(*messages);
+            break;
+        }
+        success = true;
+    } while(false);
+
+    string_clear(buf);
+    return success;
+}
+
 static void run_decoder(
     InfraredProtocol protocol,
-    uint32_t test_index,
-    const InfraredMessage* message_expected,
-    uint32_t message_expected_len) {
+    uint32_t test_index) {
     uint32_t* timings;
     uint32_t timings_count;
-    string_t file_path, input_name;
+    InfraredMessage* messages;
+    uint32_t messages_count;
+
+    string_t file_path, buf;
 
     string_init(file_path);
-    string_init(input_name);
+    string_init(buf);
 
     string_printf(
         file_path,
@@ -216,18 +273,28 @@ static void run_decoder(
         IR_TEST_FILE_PREFIX,
         infrared_get_protocol_name(protocol),
         IR_TEST_FILE_SUFFIX);
-    string_printf(input_name, "decoder_input%d", test_index);
 
     mu_assert(
         flipper_format_file_open_existing(ff, string_get_cstr(file_path)),
         "Failed to open data file");
+
+    uint32_t format_version;
+    mu_assert(flipper_format_read_header(ff, buf, &format_version), "Failed to read header");
+    mu_assert(!string_cmp_str(buf, "IR tests file") && format_version == 1, "Wrong file type");
+
+    string_printf(buf, "decoder_input%d", test_index);
     mu_assert(
-        load_raw_signal(ff, string_get_cstr(input_name), &timings, &timings_count),
+        load_raw_signal(ff, string_get_cstr(buf), &timings, &timings_count),
         "Failed to load raw signal from file");
+
+    string_printf(buf, "decoder_expected%d", test_index);
+    mu_assert(
+        load_messages(ff, string_get_cstr(buf), &messages, &messages_count),
+        "Failed to load messages from file");
 
     flipper_format_file_close(ff);
     string_clear(file_path);
-    string_clear(input_name);
+    string_clear(buf);
 
     InfraredMessage message_decoded_check_local;
     bool level = 0;
@@ -258,8 +325,8 @@ static void run_decoder(
                 message_decoded = message_decoded_check;
             }
 
-            mu_assert(message_counter < message_expected_len, "decoded more than expected");
-            compare_message_results(message_decoded, &message_expected[message_counter]);
+            mu_assert(message_counter < messages_count, "decoded more than expected");
+            compare_message_results(message_decoded, &messages[message_counter]);
 
             ++message_counter;
         }
@@ -268,63 +335,64 @@ static void run_decoder(
 
     message_decoded = infrared_check_decoder_ready(decoder_handler);
     if(message_decoded) {
-        compare_message_results(message_decoded, &message_expected[message_counter]);
+        compare_message_results(message_decoded, &messages[message_counter]);
         ++message_counter;
     }
 
-    mu_assert(message_counter == message_expected_len, "decoded less than expected");
-
     free(timings);
+    free(messages);
+
+    mu_assert(message_counter == messages_count, "decoded less than expected");
 }
 
 MU_TEST(test_decoder_samsung32) {
-    RUN_DECODER(InfraredProtocolSamsung32, 1, test_decoder_samsung32_expected1);
+//     RUN_DECODER(InfraredProtocolSamsung32, 1, test_decoder_samsung32_expected1);
 }
 
 MU_TEST(test_mix) {
-    RUN_DECODER(InfraredProtocolRC5, 2, test_decoder_rc5_expected2);
-    RUN_DECODER(InfraredProtocolSIRC, 1, test_decoder_sirc_expected1);
-    RUN_DECODER(InfraredProtocolNECext, 1, test_decoder_necext_expected1);
-    RUN_DECODER(InfraredProtocolRC6, 2, test_encoder_rc6_input1);
-    RUN_DECODER(InfraredProtocolSamsung32, 1, test_decoder_samsung32_expected1);
-    RUN_DECODER(InfraredProtocolRC6, 1, test_decoder_rc6_expected1);
-    RUN_DECODER(InfraredProtocolSamsung32, 1, test_decoder_samsung32_expected1);
-    RUN_DECODER(InfraredProtocolRC5, 1, test_decoder_rc5_expected1);
-    RUN_DECODER(InfraredProtocolSIRC, 2, test_decoder_sirc_expected2);
-    RUN_DECODER(InfraredProtocolNECext, 1, test_decoder_necext_expected1);
-    RUN_DECODER(InfraredProtocolSIRC, 4, test_decoder_sirc_expected4);
-    RUN_DECODER(InfraredProtocolNEC, 2, test_decoder_nec_expected2);
-    RUN_DECODER(InfraredProtocolRC6, 1, test_decoder_rc6_expected1);
-    RUN_DECODER(InfraredProtocolNECext, 1, test_decoder_necext_expected1);
-    RUN_DECODER(InfraredProtocolSIRC, 5, test_decoder_sirc_expected5);
-    RUN_DECODER(InfraredProtocolNEC, 3, test_decoder_nec_expected3);
-    RUN_DECODER(InfraredProtocolRC5, 5, test_decoder_rc5_expected5);
-    RUN_DECODER(InfraredProtocolSamsung32, 1, test_decoder_samsung32_expected1);
-    RUN_DECODER(InfraredProtocolSIRC, 3, test_decoder_sirc_expected3);
+//     RUN_DECODER(InfraredProtocolRC5, 2, test_decoder_rc5_expected2);
+//     RUN_DECODER(InfraredProtocolSIRC, 1, test_decoder_sirc_expected1);
+//     RUN_DECODER(InfraredProtocolNECext, 1, test_decoder_necext_expected1);
+//     RUN_DECODER(InfraredProtocolRC6, 2, test_encoder_rc6_input1);
+//     RUN_DECODER(InfraredProtocolSamsung32, 1, test_decoder_samsung32_expected1);
+//     RUN_DECODER(InfraredProtocolRC6, 1, test_decoder_rc6_expected1);
+//     RUN_DECODER(InfraredProtocolSamsung32, 1, test_decoder_samsung32_expected1);
+//     RUN_DECODER(InfraredProtocolRC5, 1, test_decoder_rc5_expected1);
+//     RUN_DECODER(InfraredProtocolSIRC, 2, test_decoder_sirc_expected2);
+//     RUN_DECODER(InfraredProtocolNECext, 1, test_decoder_necext_expected1);
+//     RUN_DECODER(InfraredProtocolSIRC, 4, test_decoder_sirc_expected4);
+//     RUN_DECODER(InfraredProtocolNEC, 2, test_decoder_nec_expected2);
+//     RUN_DECODER(InfraredProtocolRC6, 1, test_decoder_rc6_expected1);
+//     RUN_DECODER(InfraredProtocolNECext, 1, test_decoder_necext_expected1);
+//     RUN_DECODER(InfraredProtocolSIRC, 5, test_decoder_sirc_expected5);
+//     RUN_DECODER(InfraredProtocolNEC, 3, test_decoder_nec_expected3);
+//     RUN_DECODER(InfraredProtocolRC5, 5, test_decoder_rc5_expected5);
+//     RUN_DECODER(InfraredProtocolSamsung32, 1, test_decoder_samsung32_expected1);
+//     RUN_DECODER(InfraredProtocolSIRC, 3, test_decoder_sirc_expected3);
 }
 
 MU_TEST(test_decoder_nec) {
-    RUN_DECODER(InfraredProtocolNEC, 1, test_decoder_nec_expected1);
-    RUN_DECODER(InfraredProtocolNEC, 2, test_decoder_nec_expected2);
-    RUN_DECODER(InfraredProtocolNEC, 3, test_decoder_nec_expected3);
+    RUN_DECODER(InfraredProtocolNEC, 1);
+//     RUN_DECODER(InfraredProtocolNEC, 2, test_decoder_nec_expected2);
+//     RUN_DECODER(InfraredProtocolNEC, 3, test_decoder_nec_expected3);
 }
 
 MU_TEST(test_decoder_unexpected_end_in_sequence) {
     // test_decoder_nec_input1 and test_decoder_nec_input2 shuts unexpected
-    RUN_DECODER(InfraredProtocolNEC, 1, test_decoder_nec_expected1);
-    RUN_DECODER(InfraredProtocolNEC, 1, test_decoder_nec_expected1);
-    RUN_DECODER(InfraredProtocolNEC, 2, test_decoder_nec_expected2);
-    RUN_DECODER(InfraredProtocolNEC, 2, test_decoder_nec_expected2);
+//     RUN_DECODER(InfraredProtocolNEC, 1, test_decoder_nec_expected1);
+//     RUN_DECODER(InfraredProtocolNEC, 1, test_decoder_nec_expected1);
+//     RUN_DECODER(InfraredProtocolNEC, 2, test_decoder_nec_expected2);
+//     RUN_DECODER(InfraredProtocolNEC, 2, test_decoder_nec_expected2);
 }
 
 MU_TEST(test_decoder_necext1) {
-    RUN_DECODER(InfraredProtocolNECext, 1, test_decoder_necext_expected1);
-    RUN_DECODER(InfraredProtocolNECext, 1, test_decoder_necext_expected1);
+//     RUN_DECODER(InfraredProtocolNECext, 1, test_decoder_necext_expected1);
+//     RUN_DECODER(InfraredProtocolNECext, 1, test_decoder_necext_expected1);
 }
 
 MU_TEST(test_decoder_long_packets_with_nec_start) {
-    RUN_DECODER(InfraredProtocolNEC42ext, 1, test_decoder_nec42ext_expected1);
-    RUN_DECODER(InfraredProtocolNEC42ext, 2, test_decoder_nec42ext_expected2);
+//     RUN_DECODER(InfraredProtocolNEC42ext, 1, test_decoder_nec42ext_expected1);
+//     RUN_DECODER(InfraredProtocolNEC42ext, 2, test_decoder_nec42ext_expected2);
 }
 
 MU_TEST(test_encoder_sirc) {
@@ -333,23 +401,23 @@ MU_TEST(test_encoder_sirc) {
 }
 
 MU_TEST(test_decoder_sirc) {
-    RUN_DECODER(InfraredProtocolSIRC, 3, test_decoder_sirc_expected3);
-    RUN_DECODER(InfraredProtocolSIRC, 1, test_decoder_sirc_expected1);
-    RUN_DECODER(InfraredProtocolSIRC, 2, test_decoder_sirc_expected2);
-    RUN_DECODER(InfraredProtocolSIRC, 4, test_decoder_sirc_expected4);
-    RUN_DECODER(InfraredProtocolSIRC, 5, test_decoder_sirc_expected5);
+//     RUN_DECODER(InfraredProtocolSIRC, 3, test_decoder_sirc_expected3);
+//     RUN_DECODER(InfraredProtocolSIRC, 1, test_decoder_sirc_expected1);
+//     RUN_DECODER(InfraredProtocolSIRC, 2, test_decoder_sirc_expected2);
+//     RUN_DECODER(InfraredProtocolSIRC, 4, test_decoder_sirc_expected4);
+//     RUN_DECODER(InfraredProtocolSIRC, 5, test_decoder_sirc_expected5);
     //     RUN_ENCODER_DECODER(test_sirc);
 }
 
 MU_TEST(test_decoder_rc5) {
-    RUN_DECODER(InfraredProtocolRC5X, 1, test_decoder_rc5x_expected1);
-    RUN_DECODER(InfraredProtocolRC5, 1, test_decoder_rc5_expected1);
-    RUN_DECODER(InfraredProtocolRC5, 2, test_decoder_rc5_expected2);
-    RUN_DECODER(InfraredProtocolRC5, 3, test_decoder_rc5_expected3);
-    RUN_DECODER(InfraredProtocolRC5, 4, test_decoder_rc5_expected4);
-    RUN_DECODER(InfraredProtocolRC5, 5, test_decoder_rc5_expected5);
-    RUN_DECODER(InfraredProtocolRC5, 6, test_decoder_rc5_expected6);
-    RUN_DECODER(InfraredProtocolRC5, 7, test_decoder_rc5_expected_all_repeats);
+//     RUN_DECODER(InfraredProtocolRC5X, 1, test_decoder_rc5x_expected1);
+//     RUN_DECODER(InfraredProtocolRC5, 1, test_decoder_rc5_expected1);
+//     RUN_DECODER(InfraredProtocolRC5, 2, test_decoder_rc5_expected2);
+//     RUN_DECODER(InfraredProtocolRC5, 3, test_decoder_rc5_expected3);
+//     RUN_DECODER(InfraredProtocolRC5, 4, test_decoder_rc5_expected4);
+//     RUN_DECODER(InfraredProtocolRC5, 5, test_decoder_rc5_expected5);
+//     RUN_DECODER(InfraredProtocolRC5, 6, test_decoder_rc5_expected6);
+//     RUN_DECODER(InfraredProtocolRC5, 7, test_decoder_rc5_expected_all_repeats);
 }
 
 MU_TEST(test_encoder_rc5x) {
@@ -361,7 +429,7 @@ MU_TEST(test_encoder_rc5) {
 }
 
 MU_TEST(test_decoder_rc6) {
-    RUN_DECODER(InfraredProtocolRC6, 1, test_decoder_rc6_expected1);
+//     RUN_DECODER(InfraredProtocolRC6, 1, test_decoder_rc6_expected1);
 }
 
 MU_TEST(test_encoder_rc6) {
