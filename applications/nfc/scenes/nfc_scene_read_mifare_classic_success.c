@@ -36,7 +36,7 @@ void nfc_scene_read_mifare_classic_success_on_enter(void* context) {
         nfc_scene_read_mifare_classic_success_widget_callback,
         nfc);
 
-    if(string_size(nfc->dev->dev_data.parced_data)) {
+    if(string_size(nfc->dev->dev_data.parsed_data)) {
         widget_add_text_box_element(
             nfc->widget,
             0,
@@ -45,7 +45,7 @@ void nfc_scene_read_mifare_classic_success_on_enter(void* context) {
             32,
             AlignLeft,
             AlignTop,
-            string_get_cstr(nfc->dev->dev_data.parced_data),
+            string_get_cstr(nfc->dev->dev_data.parsed_data),
             true);
     }
 

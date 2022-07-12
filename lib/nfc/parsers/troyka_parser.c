@@ -61,7 +61,7 @@ bool troyka_parser_parse(NfcWorker* nfc_worker) {
     number >>= 4;
 
     string_printf(
-        nfc_worker->dev_data->parced_data,
+        nfc_worker->dev_data->parsed_data,
         "Troyka Transport card\nNumber: %ld\nBalance: %d rub",
         number,
         balance);

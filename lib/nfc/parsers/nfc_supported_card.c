@@ -7,6 +7,6 @@ NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
         .protocol = NfcDeviceProtocolMifareClassic,
         .verify = troyka_parser_verify,
         .read = troyka_parser_read,
-        .parce = troyka_parser_parse,
+        .parse = troyka_parser_parse,
     },
 };

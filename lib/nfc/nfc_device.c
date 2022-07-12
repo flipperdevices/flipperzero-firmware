@@ -23,7 +23,7 @@ NfcDevice* nfc_device_alloc() {
     nfc_dev->storage = furi_record_open("storage");
     nfc_dev->dialogs = furi_record_open("dialogs");
     string_init(nfc_dev->load_path);
-    string_init(nfc_dev->dev_data.parced_data);
+    string_init(nfc_dev->dev_data.parsed_data);
     return nfc_dev;
 }
 
@@ -33,7 +33,7 @@ void nfc_device_free(NfcDevice* nfc_dev) {
     furi_record_close("storage");
     furi_record_close("dialogs");
     string_clear(nfc_dev->load_path);
-    string_clear(nfc_dev->dev_data.parced_data);
+    string_clear(nfc_dev->dev_data.parsed_data);
     free(nfc_dev);
 }
 
@@ -1065,7 +1065,7 @@ void nfc_device_data_clear(NfcDeviceData* dev_data) {
     if(dev_data->protocol == NfcDeviceProtocolMifareDesfire) {
         mf_df_clear(&dev_data->mf_df_data);
     }
-    string_reset(dev_data->parced_data);
+    string_reset(dev_data->parsed_data);
 }
 
 void nfc_device_clear(NfcDevice* dev) {

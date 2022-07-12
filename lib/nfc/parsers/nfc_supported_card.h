@@ -21,7 +21,7 @@ typedef struct {
     NfcProtocol protocol;
     NfcSupportedCardVerify verify;
     NfcSupportedCardRead read;
-    NfcSupportedCardParse parce;
+    NfcSupportedCardParse parse;
 } NfcSupportedCard;
 
 extern NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd];
