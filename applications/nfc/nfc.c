@@ -35,11 +35,12 @@ void nfc_rpc_exit_callback(Nfc* nfc) {
     }
 }
 
-static void nfc_rpc_emulate_callback(NfcWorkerEvent event, void* context) {
+static bool nfc_rpc_emulate_callback(NfcWorkerEvent event, void* context) {
     UNUSED(event);
     Nfc* nfc = context;
 
     nfc->rpc_state = NfcRpcStateEmulated;
+    return true;
 }
 
 static bool nfc_rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context) {

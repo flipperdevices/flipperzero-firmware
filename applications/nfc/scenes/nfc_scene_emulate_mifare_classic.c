@@ -4,12 +4,13 @@
 #define NFC_MF_CLASSIC_DATA_NOT_CHANGED (0UL)
 #define NFC_MF_CLASSIC_DATA_CHANGED (1UL)
 
-void nfc_emulate_mifare_classic_worker_callback(NfcWorkerEvent event, void* context) {
+bool nfc_emulate_mifare_classic_worker_callback(NfcWorkerEvent event, void* context) {
     UNUSED(event);
     Nfc* nfc = context;
 
     scene_manager_set_scene_state(
         nfc->scene_manager, NfcSceneEmulateMifareClassic, NFC_MF_CLASSIC_DATA_CHANGED);
+    return true;
 }
 
 void nfc_scene_emulate_mifare_classic_on_enter(void* context) {

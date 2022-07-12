@@ -38,6 +38,7 @@ typedef enum {
     NfcWorkerEventReadMifareDesfire,
     NfcWorkerEventReadBankCard,
     NfcWorkerEventReadMifareClassicDone,
+    NfcWorkerEventReadMifareClassicLoadKeyCache,
     NfcWorkerEventReadMifareClassicDictAttackRequired,
 
     // Nfc worker common events
@@ -54,7 +55,7 @@ typedef enum {
     NfcWorkerEventStartReading,
 } NfcWorkerEvent;
 
-typedef void (*NfcWorkerCallback)(NfcWorkerEvent event, void* context);
+typedef bool (*NfcWorkerCallback)(NfcWorkerEvent event, void* context);
 
 NfcWorker* nfc_worker_alloc();
 

@@ -1,10 +1,16 @@
 #include "../nfc_i.h"
 #include <dolphin/dolphin.h>
 
-void nfc_read_worker_callback(NfcWorkerEvent event, void* context) {
-    UNUSED(event);
+bool nfc_read_worker_callback(NfcWorkerEvent event, void* context) {
     Nfc* nfc = context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, event);
+    bool consumed = false;
+    if(event == NfcWorkerEventReadMifareClassicLoadKeyCache) {
+        consumed = nfc_device_load_key_cache(nfc->dev);
+    } else {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, event);
+        consumed = true;
+    }
+    return consumed;
 }
 
 void nfc_scene_read_on_enter(void* context) {

@@ -34,6 +34,15 @@ static uint8_t mf_classic_get_first_block_num_of_sector(uint8_t sector) {
     }
 }
 
+static uint8_t mf_classic_get_sector_trailer_block_num_by_sector(uint8_t sector) {
+    furi_assert(sector < 40);
+    if(sector < 32) {
+        return sector * 4 + 3;
+    } else {
+        return 32 * 4 + (sector - 32) * 16 + 15;
+    }
+}
+
 static uint8_t mf_classic_get_sector_by_block(uint8_t block) {
     if(block < 128) {
         return (block | 0x03) / 4;
@@ -47,7 +56,7 @@ static uint8_t mf_classic_get_blocks_num_in_sector(uint8_t sector) {
     return sector < 32 ? 4 : 16;
 }
 
-static uint8_t mf_classic_get_sector_trailer(uint8_t block) {
+static uint8_t mf_classic_get_sector_trailer_num_by_block(uint8_t block) {
     if(block < 128) {
         return block | 0x03;
     } else {
@@ -56,14 +65,20 @@ static uint8_t mf_classic_get_sector_trailer(uint8_t block) {
 }
 
 static bool mf_classic_is_sector_trailer(uint8_t block) {
-    return block == mf_classic_get_sector_trailer(block);
+    return block == mf_classic_get_sector_trailer_num_by_block(block);
 }
 
-uint8_t mf_classic_get_total_sectors_num(MfClassicReader* reader) {
-    furi_assert(reader);
-    if(reader->type == MfClassicType1k) {
+MfClassicSectorTrailer*
+    mf_classic_get_sector_trailer_by_sector(MfClassicData* data, uint8_t sector) {
+    furi_assert(data);
+    uint8_t sec_tr_block_num = mf_classic_get_sector_trailer_block_num_by_sector(sector);
+    return (MfClassicSectorTrailer*)data->block[sec_tr_block_num].value;
+}
+
+uint8_t mf_classic_get_total_sectors_num(MfClassicType type) {
+    if(type == MfClassicType1k) {
         return MF_CLASSIC_1K_TOTAL_SECTORS_NUM;
-    } else if(reader->type == MfClassicType4k) {
+    } else if(type == MfClassicType4k) {
         return MF_CLASSIC_4K_TOTAL_SECTORS_NUM;
     } else {
         return 0;
@@ -126,7 +141,8 @@ static bool mf_classic_is_allowed_access_data_block(
     uint8_t block_num,
     MfClassicKey key,
     MfClassicAction action) {
-    uint8_t* sector_trailer = emulator->data.block[mf_classic_get_sector_trailer(block_num)].value;
+    uint8_t* sector_trailer =
+        emulator->data.block[mf_classic_get_sector_trailer_num_by_block(block_num)].value;
 
     uint8_t sector_block;
     if(block_num <= 128) {
@@ -207,15 +223,8 @@ bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
     }
 }
 
-bool mf_classic_get_type(
-    uint8_t* uid,
-    uint8_t uid_len,
-    uint8_t ATQA0,
-    uint8_t ATQA1,
-    uint8_t SAK,
-    MfClassicReader* reader) {
+bool mf_classic_get_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK, MfClassicReader* reader) {
     UNUSED(ATQA1);
-    furi_assert(uid);
     furi_assert(reader);
     memset(reader, 0, sizeof(MfClassicReader));
 
@@ -226,14 +235,6 @@ bool mf_classic_get_type(
     } else {
         return false;
     }
-
-    uint8_t* cuid_start = uid;
-    if(uid_len == 7) {
-        cuid_start = &uid[3];
-    }
-    reader->cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) |
-                   (cuid_start[3]);
-
     return true;
 }
 
@@ -246,7 +247,7 @@ void mf_classic_reader_add_sector(
     furi_assert(sector < MF_CLASSIC_SECTORS_MAX);
     furi_assert((key_a != MF_CLASSIC_NO_KEY) || (key_b != MF_CLASSIC_NO_KEY));
 
-    if(reader->sectors_to_read < MF_CLASSIC_SECTORS_MAX - 1) {
+    if(reader->sectors_to_read < MF_CLASSIC_SECTORS_MAX) {
         reader->sector_reader[reader->sectors_to_read].key_a = key_a;
         reader->sector_reader[reader->sectors_to_read].key_b = key_b;
         reader->sector_reader[reader->sectors_to_read].sector_num = sector;
@@ -263,17 +264,18 @@ void mf_classic_auth_init_context(MfClassicAuthContext* auth_ctx, uint8_t sector
 
 static bool mf_classic_auth(
     FuriHalNfcTxRxContext* tx_rx,
-    uint32_t cuid,
     uint32_t block,
     uint64_t key,
     MfClassicKey key_type,
     Crypto1* crypto) {
     bool auth_success = false;
+    uint32_t cuid = 0;
     memset(tx_rx->tx_data, 0, sizeof(tx_rx->tx_data));
     memset(tx_rx->tx_parity, 0, sizeof(tx_rx->tx_parity));
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
 
     do {
+        if(!furi_hal_nfc_activate_nfca(200, &cuid)) break;
         if(key_type == MfClassicKeyA) {
             tx_rx->tx_data[0] = MF_CLASSIC_AUTH_KEY_A_CMD;
         } else {
@@ -316,7 +318,6 @@ static bool mf_classic_auth(
 
 bool mf_classic_auth_attempt(
     FuriHalNfcTxRxContext* tx_rx,
-    uint32_t cuid,
     MfClassicAuthContext* auth_ctx,
     uint64_t key) {
     furi_assert(tx_rx);
@@ -330,7 +331,6 @@ bool mf_classic_auth_attempt(
         // Try AUTH with key A
         if(mf_classic_auth(
                tx_rx,
-               cuid,
                mf_classic_get_first_block_num_of_sector(auth_ctx->sector),
                key,
                MfClassicKeyA,
@@ -342,14 +342,12 @@ bool mf_classic_auth_attempt(
 
     if(need_halt) {
         furi_hal_nfc_sleep();
-        furi_hal_nfc_activate_nfca(300, &cuid);
     }
 
     if(auth_ctx->key_b == MF_CLASSIC_NO_KEY) {
         // Try AUTH with key B
         if(mf_classic_auth(
                tx_rx,
-               cuid,
                mf_classic_get_first_block_num_of_sector(auth_ctx->sector),
                key,
                MfClassicKeyB,
@@ -419,7 +417,6 @@ bool mf_classic_read_sector(
     furi_assert(sector_reader);
     furi_assert(sector);
 
-    uint32_t cuid = 0;
     uint64_t key;
     MfClassicKey key_type;
     uint8_t first_block;
@@ -428,7 +425,6 @@ bool mf_classic_read_sector(
     furi_hal_nfc_sleep();
     do {
         // Activate card
-        if(!furi_hal_nfc_activate_nfca(200, &cuid)) break;
         first_block = mf_classic_get_first_block_num_of_sector(sector_reader->sector_num);
         if(sector_reader->key_a != MF_CLASSIC_NO_KEY) {
             key = sector_reader->key_a;
@@ -441,7 +437,7 @@ bool mf_classic_read_sector(
         }
 
         // Auth to first block in sector
-        if(!mf_classic_auth(tx_rx, cuid, first_block, key, key_type, crypto)) break;
+        if(!mf_classic_auth(tx_rx, first_block, key, key_type, crypto)) break;
         sector->total_blocks = mf_classic_get_blocks_num_in_sector(sector_reader->sector_num);
 
         // Read blocks
@@ -486,15 +482,55 @@ uint8_t mf_classic_read_card(
                 data->block[first_block + j] = temp_sector.block[j];
             }
             if(reader->sector_reader[i].key_a != MF_CLASSIC_NO_KEY) {
-                data->key_a_mask |= 1 << reader->sector_reader[i].sector_num;
+                data->key_a_mask |= 0x01ULL << reader->sector_reader[i].sector_num;
             }
             if(reader->sector_reader[i].key_b != MF_CLASSIC_NO_KEY) {
-                data->key_b_mask |= 1 << reader->sector_reader[i].sector_num;
+                data->key_b_mask |= 0x01ULL << reader->sector_reader[i].sector_num;
             }
             sectors_read++;
         }
     }
 
+    return sectors_read;
+}
+
+uint8_t mf_classic_update_card(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data) {
+    furi_assert(tx_rx);
+    furi_assert(data);
+
+    uint8_t sectors_read = 0;
+    Crypto1 crypto = {};
+    uint8_t total_sectors = mf_classic_get_total_sectors_num(data->type);
+    uint64_t key_a = 0;
+    uint64_t key_b = 0;
+    MfClassicSectorReader sec_reader = {};
+    MfClassicSector temp_sector = {};
+
+    for(size_t i = 0; i < total_sectors; i++) {
+        MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, i);
+        // Load key A
+        if(FURI_BIT(data->key_a_mask, i)) {
+            sec_reader.key_a = nfc_util_bytes2num(sec_tr->key_a, 6);
+        } else {
+            sec_reader.key_a = MF_CLASSIC_NO_KEY;
+        }
+        // Load key B
+        if(FURI_BIT(data->key_a_mask, i)) {
+            sec_reader.key_b = nfc_util_bytes2num(sec_tr->key_b, 6);
+        } else {
+            sec_reader.key_b = MF_CLASSIC_NO_KEY;
+        }
+        if((key_a != MF_CLASSIC_NO_KEY) || (key_b != MF_CLASSIC_NO_KEY)) {
+            sec_reader.sector_num = i;
+            if(mf_classic_read_sector(tx_rx, &crypto, &sec_reader, &temp_sector)) {
+                uint8_t first_block = mf_classic_get_first_block_num_of_sector(i);
+                for(uint8_t j = 0; j < temp_sector.total_blocks; j++) {
+                    data->block[first_block + j] = temp_sector.block[j];
+                }
+                sectors_read++;
+            }
+        }
+    }
     return sectors_read;
 }
 
@@ -573,7 +609,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
         } else if(plain_data[0] == 0x60 || plain_data[0] == 0x61) {
             uint8_t block = plain_data[1];
             uint64_t key = 0;
-            uint8_t sector_trailer_block = mf_classic_get_sector_trailer(block);
+            uint8_t sector_trailer_block = mf_classic_get_sector_trailer_num_by_block(block);
             MfClassicSectorTrailer* sector_trailer =
                 (MfClassicSectorTrailer*)emulator->data.block[sector_trailer_block].value;
             if(plain_data[0] == 0x60) {
@@ -626,13 +662,13 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             if(access_key == MfClassicKeyA) {
                 if(FURI_BIT(emulator->data.key_a_mask, mf_classic_get_sector_by_block(block)) ==
                    0) {
-                    FURI_LOG_D(TAG, "Unsupported sector key A for block %d", sector_trailer_block);
+                    FURI_LOG_D(TAG, "Unknown sector key A for block %d", sector_trailer_block);
                     break;
                 }
             } else if(access_key == MfClassicKeyB) {
                 if(FURI_BIT(emulator->data.key_b_mask, mf_classic_get_sector_by_block(block)) ==
                    0) {
-                    FURI_LOG_D(TAG, "Unsupported sector key B for block %d", sector_trailer_block);
+                    FURI_LOG_D(TAG, "Unknown sector key B for block %d", sector_trailer_block);
                     break;
                 }
             }

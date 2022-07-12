@@ -61,9 +61,8 @@ typedef struct {
 
 typedef struct {
     MfClassicType type;
-    uint32_t cuid;
-    uint8_t sectors_to_read;
     Crypto1 crypto;
+    uint8_t sectors_to_read;
     MfClassicSectorReader sector_reader[MF_CLASSIC_SECTORS_MAX];
 } MfClassicReader;
 
@@ -76,21 +75,17 @@ typedef struct {
 
 bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
-bool mf_classic_get_type(
-    uint8_t* uid,
-    uint8_t uid_len,
-    uint8_t ATQA0,
-    uint8_t ATQA1,
-    uint8_t SAK,
-    MfClassicReader* reader);
+bool mf_classic_get_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK, MfClassicReader* reader);
 
-uint8_t mf_classic_get_total_sectors_num(MfClassicReader* reader);
+uint8_t mf_classic_get_total_sectors_num(MfClassicType type);
+
+MfClassicSectorTrailer*
+    mf_classic_get_sector_trailer_by_sector(MfClassicData* data, uint8_t sector);
 
 void mf_classic_auth_init_context(MfClassicAuthContext* auth_ctx, uint8_t sector);
 
 bool mf_classic_auth_attempt(
     FuriHalNfcTxRxContext* tx_rx,
-    uint32_t cuid,
     MfClassicAuthContext* auth_ctx,
     uint64_t key);
 
@@ -110,5 +105,7 @@ uint8_t mf_classic_read_card(
     FuriHalNfcTxRxContext* tx_rx,
     MfClassicReader* reader,
     MfClassicData* data);
+
+uint8_t mf_classic_update_card(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data);
 
 bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx);

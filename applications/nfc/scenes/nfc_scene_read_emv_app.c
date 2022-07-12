@@ -1,10 +1,11 @@
 #include "../nfc_i.h"
 #include <dolphin/dolphin.h>
 
-void nfc_read_emv_app_worker_callback(NfcWorkerEvent event, void* context) {
+bool nfc_read_emv_app_worker_callback(NfcWorkerEvent event, void* context) {
     UNUSED(event);
     Nfc* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerExit);
+    return true;
 }
 
 void nfc_scene_read_emv_app_on_enter(void* context) {

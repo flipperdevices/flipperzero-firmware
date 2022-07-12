@@ -753,31 +753,111 @@ static bool nfc_device_load_mifare_classic_data(FlipperFormat* file, NfcDevice* 
     return parsed;
 }
 
-static bool nfc_device_save_mifare_classic_keys(NfcDevice* dev) {
-    FlipperFormat* file = flipper_format_file_alloc(dev->storage);
+static void nfc_device_get_key_cache_file_path(NfcDevice* dev, string_t file_path) {
     uint8_t* uid = dev->dev_data.nfc_data.uid;
     uint8_t uid_len = dev->dev_data.nfc_data.uid_len;
-    // Generate file name by UID
-    string_t file_path;
-    string_init(file_path);
+    string_set_str(file_path, NFC_DEVICE_KEYS_FOLDER "/");
     for(size_t i = 0; i < uid_len; i++) {
-        string_cat_printf(NFC_DEVICE_KEYS_FOLDER "/%02X" NFC_DEVICE_KEYS_EXTENSION, uid[i]);
+        string_cat_printf(file_path, "%02X", uid[i]);
     }
+    string_cat_printf(file_path, NFC_DEVICE_KEYS_EXTENSION);
+}
 
-    bool key_save_success = false;
+static bool nfc_device_save_mifare_classic_keys(NfcDevice* dev) {
+    FlipperFormat* file = flipper_format_file_alloc(dev->storage);
+    MfClassicData* data = &dev->dev_data.mf_classic_data;
+    string_t temp_str;
+    string_init(temp_str);
+
+    nfc_device_get_key_cache_file_path(dev, temp_str);
+    bool save_success = false;
     do {
         if(!storage_simply_mkdir(dev->storage, NFC_DEVICE_KEYS_FOLDER)) break;
-        if(!storage_simply_remove(dev->storage, string_get_cstr(file_path))) break;
-        if(!flipper_format_file_open_always(file, string_get_cstr(file_path))) break;
+        if(!storage_simply_remove(dev->storage, string_get_cstr(temp_str))) break;
+        if(!flipper_format_file_open_always(file, string_get_cstr(temp_str))) break;
         if(!flipper_format_write_header_cstr(file, nfc_keys_file_header, nfc_keys_file_version))
             break;
-        
-        
-        key_save_success = true;
+        if(data->type == MfClassicType1k) {
+            if(!flipper_format_write_string_cstr(file, "Mifare Classic type", "1K")) break;
+        } else if(data->type == MfClassicType4k) {
+            if(!flipper_format_write_string_cstr(file, "Mifare Classic type", "4K")) break;
+        }
+        if(!flipper_format_write_hex_uint64(file, "Key A map", &data->key_a_mask, 1)) break;
+        if(!flipper_format_write_hex_uint64(file, "Key B map", &data->key_b_mask, 1)) break;
+        uint8_t sector_num = mf_classic_get_total_sectors_num(data->type);
+        bool key_save_success = true;
+        for(size_t i = 0; (i < sector_num) && (key_save_success); i++) {
+            MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, i);
+            if(FURI_BIT(data->key_a_mask, i)) {
+                string_printf(temp_str, "Key A sector %d", i);
+                key_save_success =
+                    flipper_format_write_hex(file, string_get_cstr(temp_str), sec_tr->key_a, 6);
+            }
+            if(!key_save_success) break;
+            if(FURI_BIT(data->key_a_mask, i)) {
+                string_printf(temp_str, "Key B sector %d", i);
+                key_save_success =
+                    flipper_format_write_hex(file, string_get_cstr(temp_str), sec_tr->key_b, 6);
+            }
+        }
+        save_success = key_save_success;
     } while(false);
 
     flipper_format_free(file);
-    return key_save_success;
+    string_clear(temp_str);
+    return save_success;
+}
+
+bool nfc_device_load_key_cache(NfcDevice* dev) {
+    furi_assert(dev);
+    string_t temp_str;
+    string_init(temp_str);
+
+    MfClassicData* data = &dev->dev_data.mf_classic_data;
+    nfc_device_get_key_cache_file_path(dev, temp_str);
+    FlipperFormat* file = flipper_format_file_alloc(dev->storage);
+
+    bool load_success = false;
+    do {
+        if(storage_common_stat(dev->storage, string_get_cstr(temp_str), NULL) != FSE_OK) break;
+        if(!flipper_format_file_open_existing(file, string_get_cstr(temp_str))) break;
+        uint32_t version = 0;
+        if(!flipper_format_read_header(file, temp_str, &version)) break;
+        if(string_cmp_str(temp_str, nfc_keys_file_header)) break;
+        if(version != nfc_keys_file_version) break;
+        if(!flipper_format_read_string(file, "Mifare Classic type", temp_str)) break;
+        if(!string_cmp_str(temp_str, "1K")) {
+            data->type = MfClassicType1k;
+        } else if(!string_cmp_str(temp_str, "4K")) {
+            data->type = MfClassicType4k;
+        } else {
+            break;
+        }
+        if(!flipper_format_read_hex_uint64(file, "Key A map", &data->key_a_mask, 1)) break;
+        if(!flipper_format_read_hex_uint64(file, "Key B map", &data->key_b_mask, 1)) break;
+        uint8_t sectors = mf_classic_get_total_sectors_num(data->type);
+        bool key_read_success = true;
+        for(size_t i = 0; (i < sectors) && (key_read_success); i++) {
+            MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, i);
+            if(FURI_BIT(data->key_a_mask, i)) {
+                string_printf(temp_str, "Key A sector %d", i);
+                key_read_success =
+                    flipper_format_read_hex(file, string_get_cstr(temp_str), sec_tr->key_a, 6);
+            }
+            if(!key_read_success) break;
+            if(FURI_BIT(data->key_b_mask, i)) {
+                string_printf(temp_str, "Key B sector %d", i);
+                key_read_success =
+                    flipper_format_read_hex(file, string_get_cstr(temp_str), sec_tr->key_b, 6);
+            }
+        }
+        load_success = key_read_success;
+    } while(false);
+
+    string_clear(temp_str);
+    flipper_format_free(file);
+
+    return load_success;
 }
 
 void nfc_device_set_name(NfcDevice* dev, const char* name) {

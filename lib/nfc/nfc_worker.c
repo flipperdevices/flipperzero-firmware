@@ -139,14 +139,11 @@ static bool nfc_worker_read_mf_ul(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* 
 }
 
 static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
-    UNUSED(tx_rx);
+    furi_assert(nfc_worker->callback);
     bool read_success = false;
 
     nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
     do {
-        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200)) break;
-        // Search for keys by uid
-
         // Try to read supported card
         for(size_t i = 0; i < NfcSupportedCardTypeEnd; i++) {
             if(nfc_supported_card[i].protocol == NfcDeviceProtocolMifareClassic) {
@@ -157,6 +154,17 @@ static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
                     }
                 }
             }
+        }
+        if(read_success) break;
+        // Try to read card with key cache
+        if(nfc_worker->callback(NfcWorkerEventReadMifareClassicLoadKeyCache, nfc_worker->context)) {
+            FURI_LOG_D(TAG, "Load keys cache success. Start reading");
+            uint8_t sectors_read =
+                mf_classic_update_card(tx_rx, &nfc_worker->dev_data->mf_classic_data);
+            uint8_t sectors_total =
+                mf_classic_get_total_sectors_num(nfc_worker->dev_data->mf_classic_data.type);
+            FURI_LOG_D(TAG, "Read %d sectors out of %d total", sectors_read, sectors_total);
+            read_success = (sectors_read == sectors_total);
         }
     } while(false);
 
@@ -534,14 +542,8 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
     // Detect Mifare Classic card
     while(nfc_worker->state == NfcWorkerStateReadMifareClassic) {
         if(furi_hal_nfc_detect(nfc_data, 300)) {
-            if(mf_classic_get_type(
-                   nfc_data->uid,
-                   nfc_data->uid_len,
-                   nfc_data->atqa[0],
-                   nfc_data->atqa[1],
-                   nfc_data->sak,
-                   &reader)) {
-                total_sectors = mf_classic_get_total_sectors_num(&reader);
+            if(mf_classic_get_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak, &reader)) {
+                total_sectors = mf_classic_get_total_sectors_num(reader.type);
                 if(reader.type == MfClassicType1k) {
                     event = NfcWorkerEventDetectedClassic1k;
                 } else {
@@ -568,7 +570,10 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
             bool sector_key_found = false;
             while(nfc_mf_classic_dict_get_next_key(nfc_worker->dict_stream, &curr_key)) {
                 furi_hal_nfc_sleep();
-                if(furi_hal_nfc_activate_nfca(300, &reader.cuid)) {
+                // TODO REWORK!
+                uint32_t cuid = 0;
+                if(furi_hal_nfc_activate_nfca(300, &cuid)) {
+                    furi_hal_nfc_sleep();
                     if(!card_found_notified) {
                         if(reader.type == MfClassicType1k) {
                             event = NfcWorkerEventDetectedClassic1k;
@@ -585,7 +590,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
                         curr_sector,
                         (uint32_t)(curr_key >> 32),
                         (uint32_t)curr_key);
-                    if(mf_classic_auth_attempt(&tx_rx_ctx, reader.cuid, &auth_ctx, curr_key)) {
+                    if(mf_classic_auth_attempt(&tx_rx_ctx, &auth_ctx, curr_key)) {
                         sector_key_found = true;
                         if((auth_ctx.key_a != MF_CLASSIC_NO_KEY) &&
                            (auth_ctx.key_b != MF_CLASSIC_NO_KEY))

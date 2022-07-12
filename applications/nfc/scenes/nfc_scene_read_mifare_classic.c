@@ -5,10 +5,11 @@ enum {
     NfcSceneReadMifareClassicStateDone,
 };
 
-void nfc_read_mifare_classic_worker_callback(NfcWorkerEvent event, void* context) {
+bool nfc_read_mifare_classic_worker_callback(NfcWorkerEvent event, void* context) {
     furi_assert(context);
     Nfc* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, event);
+    return true;
 }
 
 void nfc_read_mifare_classic_dict_attack_result_callback(void* context) {
