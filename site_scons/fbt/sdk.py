@@ -1,4 +1,3 @@
-from copyreg import constructor
 import os
 
 from typing import List, Set, ClassVar
@@ -370,7 +369,7 @@ class SdkCache:
         obj_dict.update(dict(entry=obj.csv_type, status=self._get_entry_status(obj)))
         return obj_dict
 
-    def save_cache(self) -> None:
+    def save(self) -> None:
         version_is_clean = True
         if self.loaded_dirty:
             # There are still new entries and version was already updated

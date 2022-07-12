@@ -23,6 +23,11 @@ struct sym_entry {
         .hash = elf_gnu_hash(#x), .address = (uint32_t)(static_cast<ret_type(*) args_type>(x)) \
     }
 
+#define API_VARIABLE(x, var_type)                              \
+    sym_entry {                                                \
+        .hash = elf_gnu_hash(#x), .address = (uint32_t)(&(x)), \
+    }
+
 constexpr bool operator<(const sym_entry& k1, const sym_entry& k2) {
     return k1.hash < k2.hash;
 }

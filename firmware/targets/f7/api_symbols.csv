@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,0.4,,
+Version,+,0.6,,
 Header,+,applications/bt/bt_service/bt.h,,
 Header,+,applications/dialogs/dialogs.h,,
 Header,+,applications/dolphin/dolphin.h,,
@@ -78,6 +78,7 @@ Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_tim.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_usart.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_utils.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_wwdg.h,,
+Header,+,lib/flipper_format/flipper_format.h,,
 Function,-,LL_ADC_CommonDeInit,ErrorStatus,ADC_Common_TypeDef*
 Function,-,LL_ADC_CommonInit,ErrorStatus,"ADC_Common_TypeDef*, LL_ADC_CommonInitTypeDef*"
 Function,-,LL_ADC_CommonStructInit,void,LL_ADC_CommonInitTypeDef*
@@ -565,6 +566,54 @@ Function,+,finitef,int,float
 Function,-,finitel,int,long double
 Function,+,fiprintf,int,"FILE*, const char*, ..."
 Function,-,fiscanf,int,"FILE*, const char*, ..."
+Function,+,flipper_format_delete_key,_Bool,"FlipperFormat*, const char*"
+Function,+,flipper_format_file_alloc,FlipperFormat*,Storage*
+Function,+,flipper_format_file_close,_Bool,FlipperFormat*
+Function,+,flipper_format_file_open_always,_Bool,"FlipperFormat*, const char*"
+Function,+,flipper_format_file_open_append,_Bool,"FlipperFormat*, const char*"
+Function,+,flipper_format_file_open_existing,_Bool,"FlipperFormat*, const char*"
+Function,+,flipper_format_file_open_new,_Bool,"FlipperFormat*, const char*"
+Function,+,flipper_format_free,void,FlipperFormat*
+Function,+,flipper_format_get_value_count,_Bool,"FlipperFormat*, const char*, uint32_t*"
+Function,+,flipper_format_insert_or_update_bool,_Bool,"FlipperFormat*, const char*, const _Bool*, const uint16_t"
+Function,+,flipper_format_insert_or_update_float,_Bool,"FlipperFormat*, const char*, const float*, const uint16_t"
+Function,+,flipper_format_insert_or_update_hex,_Bool,"FlipperFormat*, const char*, const uint8_t*, const uint16_t"
+Function,+,flipper_format_insert_or_update_int32,_Bool,"FlipperFormat*, const char*, const int32_t*, const uint16_t"
+Function,+,flipper_format_insert_or_update_string,_Bool,"FlipperFormat*, const char*, string_t"
+Function,+,flipper_format_insert_or_update_string_cstr,_Bool,"FlipperFormat*, const char*, const char*"
+Function,+,flipper_format_insert_or_update_uint32,_Bool,"FlipperFormat*, const char*, const uint32_t*, const uint16_t"
+Function,+,flipper_format_key_exist,_Bool,"FlipperFormat*, const char*"
+Function,+,flipper_format_read_bool,_Bool,"FlipperFormat*, const char*, _Bool*, const uint16_t"
+Function,+,flipper_format_read_float,_Bool,"FlipperFormat*, const char*, float*, const uint16_t"
+Function,+,flipper_format_read_header,_Bool,"FlipperFormat*, string_t, uint32_t*"
+Function,+,flipper_format_read_hex,_Bool,"FlipperFormat*, const char*, uint8_t*, const uint16_t"
+Function,+,flipper_format_read_hex_uint64,_Bool,"FlipperFormat*, const char*, uint64_t*, const uint16_t"
+Function,+,flipper_format_read_int32,_Bool,"FlipperFormat*, const char*, int32_t*, const uint16_t"
+Function,+,flipper_format_read_string,_Bool,"FlipperFormat*, const char*, string_t"
+Function,+,flipper_format_read_uint32,_Bool,"FlipperFormat*, const char*, uint32_t*, const uint16_t"
+Function,+,flipper_format_rewind,_Bool,FlipperFormat*
+Function,+,flipper_format_seek_to_end,_Bool,FlipperFormat*
+Function,+,flipper_format_set_strict_mode,void,"FlipperFormat*, _Bool"
+Function,+,flipper_format_string_alloc,FlipperFormat*,
+Function,+,flipper_format_update_bool,_Bool,"FlipperFormat*, const char*, const _Bool*, const uint16_t"
+Function,+,flipper_format_update_float,_Bool,"FlipperFormat*, const char*, const float*, const uint16_t"
+Function,+,flipper_format_update_hex,_Bool,"FlipperFormat*, const char*, const uint8_t*, const uint16_t"
+Function,+,flipper_format_update_int32,_Bool,"FlipperFormat*, const char*, const int32_t*, const uint16_t"
+Function,+,flipper_format_update_string,_Bool,"FlipperFormat*, const char*, string_t"
+Function,+,flipper_format_update_string_cstr,_Bool,"FlipperFormat*, const char*, const char*"
+Function,+,flipper_format_update_uint32,_Bool,"FlipperFormat*, const char*, const uint32_t*, const uint16_t"
+Function,+,flipper_format_write_bool,_Bool,"FlipperFormat*, const char*, const _Bool*, const uint16_t"
+Function,+,flipper_format_write_comment,_Bool,"FlipperFormat*, string_t"
+Function,+,flipper_format_write_comment_cstr,_Bool,"FlipperFormat*, const char*"
+Function,+,flipper_format_write_float,_Bool,"FlipperFormat*, const char*, const float*, const uint16_t"
+Function,+,flipper_format_write_header,_Bool,"FlipperFormat*, string_t, const uint32_t"
+Function,+,flipper_format_write_header_cstr,_Bool,"FlipperFormat*, const char*, const uint32_t"
+Function,+,flipper_format_write_hex,_Bool,"FlipperFormat*, const char*, const uint8_t*, const uint16_t"
+Function,+,flipper_format_write_hex_uint64,_Bool,"FlipperFormat*, const char*, const uint64_t*, const uint16_t"
+Function,+,flipper_format_write_int32,_Bool,"FlipperFormat*, const char*, const int32_t*, const uint16_t"
+Function,+,flipper_format_write_string,_Bool,"FlipperFormat*, const char*, string_t"
+Function,+,flipper_format_write_string_cstr,_Bool,"FlipperFormat*, const char*, const char*"
+Function,+,flipper_format_write_uint32,_Bool,"FlipperFormat*, const char*, const uint32_t*, const uint16_t"
 Function,-,flockfile,void,FILE*
 Function,-,floor,double,double
 Function,-,floorf,float,float

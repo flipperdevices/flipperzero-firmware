@@ -123,23 +123,28 @@ def deploy_sdk_tree(target, source, env, for_signature):
 
 
 def gen_sdk_data(sdk_cache):
+    # api_def = ['#ifdef __cplusplus\n extern "C"\n #endif\n {']
     api_def = []
     api_def.extend(
         (f"#include <{h.name}>" for h in sdk_cache.get_headers()),
     )
+    # api_def.append("#ifdef __cplusplus\n } \n #endif\n {")
     api_def.append(
         "static const constexpr auto elf_api_table = sort(create_array_t<sym_entry>("
     )
 
+    api_lines = []
     for fun_def in sdk_cache.get_functions():
-        api_def.append(
-            f"API_METHOD({fun_def.name}, {fun_def.returns}, ({fun_def.params})),"
+        api_lines.append(
+            f"API_METHOD({fun_def.name}, {fun_def.returns}, ({fun_def.params}))"
         )
 
     for var_def in sdk_cache.get_variables():
-        api_def.append(f"API_VARIABLE({var_def.name}, {var_def.var_type }),")
+        api_lines.append(f"API_VARIABLE({var_def.name}, {var_def.var_type })")
 
-    api_def.append(");")
+    api_def.append(",\n".join(api_lines))
+
+    api_def.append("));")
     return api_def
 
 
@@ -153,7 +158,7 @@ def validate_sdk_cache(source, target, env):
 
     sdk_cache = SdkCache(target[0].path)
     sdk_cache.validate_api(sdk.api_manager.api)
-    sdk_cache.save_cache()
+    sdk_cache.save()
 
 
 def generate_sdk_symbols(source, target, env):
