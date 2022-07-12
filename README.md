@@ -24,7 +24,7 @@ ETH: <B>0x6c46eE48Bd433b0ADE711B43D188Cf8215cd51c2</B>
     <br>
     
 Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Flipper DFU. I can do custom names too!
-<br><br>[Join my Flipper/Amiibo Discord](https://discord.gg/gF2bBUzAFe)
+<br><h2>[Join my Flipper/Amiibo Discord](https://discord.gg/gF2bBUzAFe)</h2>
 </td>
       </tr>
       <tr><td>
