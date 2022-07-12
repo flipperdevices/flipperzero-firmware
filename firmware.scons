@@ -266,9 +266,9 @@ if fwenv["IS_BASE_FIRMWARE"]:
         [],
         # Filtering out things cxxheaderparser cannot handle
         SDK_PP_FLAGS=[
-            "-D_Static_assert(x,y)=",
-            "-D__asm__(x)=",
-            "-D__attribute__(x)=",
+            '-D"_Static_assert(x,y)="',
+            '-D"__asm__(x)="',
+            '-D"__attribute__(x)="',
             "-Drestrict=",
             "-D_Noreturn=",
             "-D__restrict=",
@@ -282,6 +282,7 @@ if fwenv["IS_BASE_FIRMWARE"]:
 
     sdk_tree = fwenv.SDKTree("sdk/sdk.opts", "sdk_origin")
     AlwaysBuild(sdk_tree)
+    Alias("sdk_tree", sdk_tree)
 
     sdk_apicheck = fwenv.SDKSymUpdater(
         "#/firmware/targets/f${TARGET_HW}/api_symbols.csv", "sdk_origin"

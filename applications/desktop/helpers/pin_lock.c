@@ -8,6 +8,7 @@
 
 #include "../helpers/pin_lock.h"
 #include "../desktop_i.h"
+#include <cli/cli.h>
 #include <cli/cli_vcp.h>
 
 static const NotificationSequence sequence_pin_fail = {
