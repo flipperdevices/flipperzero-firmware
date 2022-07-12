@@ -2,7 +2,7 @@ Import("env")
 
 env.Append(
     LINT_SOURCES=["core"],
-    # SDK_HEADERS=[File("#/core/furi.h")],
+    SDK_HEADERS=[File("#/core/intrinsic_export.h")],
 )
 
 
