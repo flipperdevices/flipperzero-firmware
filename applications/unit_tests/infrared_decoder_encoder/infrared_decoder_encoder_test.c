@@ -162,36 +162,23 @@ static void
 }
 
 static bool load_raw_signal(
-    InfraredProtocol protocol,
-    uint32_t input_index,
+    const char* file_path,
+    const char* signal_name,
     uint32_t** timings,
     uint32_t* timings_count) {
-    string_t str_buf, file_path, signal_name;
+    string_t str_buf;
+    string_init(str_buf);
     bool success = false;
 
-    string_init(str_buf);
-    string_init(file_path);
-    string_init(signal_name);
-
-    ;
-    string_printf(
-        file_path,
-        "%s/%s%s%s",
-        IR_TEST_FILES_DIR,
-        IR_TEST_FILE_PREFIX,
-        infrared_get_protocol_name(protocol),
-        IR_TEST_FILE_SUFFIX);
-    string_printf(signal_name, "input%d", input_index);
-
-    uint32_t format_version;
     do {
-        if(!flipper_format_file_open_existing(ff, string_get_cstr(file_path))) break;
+        uint32_t format_version;
+        if(!flipper_format_file_open_existing(ff, file_path)) break;
         if(!flipper_format_read_header(ff, str_buf, &format_version)) break;
         if(string_cmp_str(str_buf, "IR tests file") || format_version != 1) break;
 
         bool is_name_found = false;
         for(; !is_name_found && flipper_format_read_string(ff, "name", str_buf);
-            is_name_found = !string_cmp(str_buf, signal_name))
+            is_name_found = !string_cmp_str(str_buf, signal_name))
             ;
 
         if(!is_name_found) break;
@@ -209,10 +196,7 @@ static bool load_raw_signal(
     } while(false);
 
     flipper_format_file_close(ff);
-
     string_clear(str_buf);
-    string_clear(file_path);
-    string_clear(signal_name);
 
     return success;
 }
@@ -224,9 +208,26 @@ static void run_decoder(
     uint32_t message_expected_len) {
     uint32_t* timings;
     uint32_t timings_count;
+    string_t file_path, input_name;
+
+    string_init(file_path);
+    string_init(input_name);
+
+    string_printf(
+        file_path,
+        "%s/%s%s%s",
+        IR_TEST_FILES_DIR,
+        IR_TEST_FILE_PREFIX,
+        infrared_get_protocol_name(protocol),
+        IR_TEST_FILE_SUFFIX);
+    string_printf(input_name, "decoder_input%d", test_index);
+
     mu_assert(
-        load_raw_signal(protocol, test_index, &timings, &timings_count),
+        load_raw_signal(string_get_cstr(file_path), string_get_cstr(input_name), &timings, &timings_count),
         "Failed to load raw signal from file");
+
+    string_clear(file_path);
+    string_clear(input_name);
 
     InfraredMessage message_decoded_check_local;
     bool level = 0;
@@ -272,6 +273,7 @@ static void run_decoder(
     }
 
     mu_assert(message_counter == message_expected_len, "decoded less than expected");
+
     free(timings);
 }
 
@@ -283,8 +285,7 @@ MU_TEST(test_mix) {
     RUN_DECODER(InfraredProtocolRC5, 2, test_decoder_rc5_expected2);
     RUN_DECODER(InfraredProtocolSIRC, 1, test_decoder_sirc_expected1);
     RUN_DECODER(InfraredProtocolNECext, 1, test_decoder_necext_expected1);
-    // can use encoder data for decoding, but can't do opposite
-    //     RUN_DECODER(test_encoder_rc6_expected1, test_encoder_rc6_input1);
+    RUN_DECODER(InfraredProtocolRC6, 2, test_encoder_rc6_input1);
     RUN_DECODER(InfraredProtocolSamsung32, 1, test_decoder_samsung32_expected1);
     RUN_DECODER(InfraredProtocolRC6, 1, test_decoder_rc6_expected1);
     RUN_DECODER(InfraredProtocolSamsung32, 1, test_decoder_samsung32_expected1);
