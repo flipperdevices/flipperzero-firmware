@@ -6,7 +6,8 @@
 - Updated [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) to require hold back to exit
 - OFW: [NFC: fix exit from Classic emulation #1385 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1385)
 - OFW: [Fix ./fbt flash FORCE=1 #1386 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1386)
-- Added Dolphin Restorer APP that is a work in progress. The copy is not working.
+- Added [Dolphin Backup (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) as a clone of [[FL-2633] Move files from /int to /ext on SD mount #1384 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Modified by RogueMaster
+- Added [Dolphin Restorer (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) as a clone of [[FL-2633] Move files from /int to /ext on SD mount #1384 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Cloned by RogueMaster
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
@@ -62,6 +63,11 @@ $ docker-compose exec dev ./fbt
 - Add a folder to SD card named `music_player` (FMF and RTTTL/TXT files)
 - Eventually, if all possible apps are added to [applications/meta/application.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam), your DFU will not install due to size. However, currently, all apps @ 803KB DFU has been tested to install successfully.
 </details>
+
+
+## Open PRs Checkedout & Not Merged In Main:
+- [[FL-2633] Move files from /int to /ext on SD mount #1384 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384)
+ 
 </td><td>
 <details>
   <summary><B>All Changes/Features</b></summary><br/>
@@ -93,10 +99,6 @@ $ docker-compose exec dev ./fbt
 - SubGHz: Unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/setting_user` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 
  </details>
- <!-- 
-## Open PRs Checkedout & Not Merged In Main:
- -->
- 
 
 <details>
   <summary><B>GAMES</b></summary><br/>
