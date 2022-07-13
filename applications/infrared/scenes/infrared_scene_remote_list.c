@@ -5,7 +5,6 @@ void infrared_scene_remote_list_on_enter(void* context) {
     SceneManager* scene_manager = infrared->scene_manager;
     ViewDispatcher* view_dispatcher = infrared->view_dispatcher;
 
-    string_set_str(infrared->file_path, INFRARED_APP_FOLDER);
     bool success = dialog_file_browser_show(
         infrared->dialogs,
         infrared->file_path,
