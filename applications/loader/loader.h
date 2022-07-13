@@ -3,6 +3,10 @@
 #include <furi/pubsub.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct Loader Loader;
 
 typedef enum {
@@ -50,3 +54,7 @@ void loader_update_menu();
 
 /** Show primary loader */
 FuriPubSub* loader_get_pubsub(Loader* instance);
+
+#ifdef __cplusplus
+}
+#endif
