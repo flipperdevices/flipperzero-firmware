@@ -896,10 +896,38 @@ address: B5 0F 00 00
 command: 53 00 00 00
 repeat: false
 #
+name: encoder_input1
+type: parsed_array
+count: 1
+#
+protocol: SIRC
+address: 0A 00 00 00
+command: 55 00 00 00
+repeat: false
+#
 name: encoder_expected1
 type: raw
 data:
 10000 2400 600 1200 600 600 600 1200 600 600 600 1200 600 600 600 1200 600 600 600 1200 600 600 600 1200 600 600
+#
+name: encoder_input2
+type: parsed_array
+count: 3
+#
+protocol: SIRC15
+address: 7D 00 00 00
+command: 53 00 00 00
+repeat: false
+#
+protocol: SIRC15
+address: 7D 00 00 00
+command: 53 00 00 00
+repeat: true
+#
+protocol: SIRC15
+address: 7D 00 00 00
+command: 53 00 00 00
+repeat: true
 #
 name: encoder_expected2
 type: raw

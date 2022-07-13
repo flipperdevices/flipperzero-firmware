@@ -224,15 +224,15 @@ static void infrared_test_run_encoder(InfraredProtocol protocol, uint32_t test_i
     const char* protocol_name = infrared_get_protocol_name(protocol);
     mu_assert(infrared_test_prepare_file(protocol_name), "Failed to prepare test file");
 
-    string_printf(buf, "encoder_expected%d", test_index);
-    mu_assert(
-        infrared_test_load_raw_signal(test->ff, string_get_cstr(buf), &expected_timings, &expected_timings_count),
-        "Failed to load raw signal from file");
-
     string_printf(buf, "encoder_input%d", test_index);
     mu_assert(
         infrared_test_load_messages(test->ff, string_get_cstr(buf), &input_messages, &input_messages_count),
         "Failed to load messages from file");
+
+    string_printf(buf, "encoder_expected%d", test_index);
+    mu_assert(
+        infrared_test_load_raw_signal(test->ff, string_get_cstr(buf), &expected_timings, &expected_timings_count),
+        "Failed to load raw signal from file");
 
     flipper_format_file_close(test->ff);
     string_clear(buf);
@@ -431,8 +431,8 @@ MU_TEST(infrared_test_decoder_long_packets_with_nec_start) {
 }
 
 MU_TEST(infrared_test_encoder_sirc) {
-    //         RUN_ENCODER(test_encoder_sirc_input1, test_encoder_sirc_expected1);
-    //     RUN_ENCODER(test_encoder_sirc_input2, test_encoder_sirc_expected2);
+    infrared_test_run_encoder(InfraredProtocolSIRC, 1);
+    infrared_test_run_encoder(InfraredProtocolSIRC, 2);
 }
 
 MU_TEST(infrared_test_decoder_sirc) {
