@@ -197,7 +197,7 @@ static void subghz_setting_preset_reset(SubGhzSetting* instance) {
             string_clear(item->custom_preset_name);
             free(item->custom_preset_data);
         }
-    SubGhzSettingCustomPresetItemArray_clear(instance->preset->data);
+    SubGhzSettingCustomPresetItemArray_reset(instance->preset->data);
 }
 
 void subghz_setting_free(SubGhzSetting* instance) {
