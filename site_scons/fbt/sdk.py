@@ -288,15 +288,18 @@ class SdkVersion:
 
     csv_type: ClassVar[str] = "Version"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.major}.{self.minor}"
+
+    def as_int(self) -> int:
+        return ((self.major & 0xFFFF) << 16) | (self.minor & 0xFFFF)
 
     @staticmethod
     def from_str(s: str) -> "SdkVersion":
         major, minor = s.split(".")
         return SdkVersion(int(major), int(minor))
 
-    def dictify(self):
+    def dictify(self) -> dict:
         return dict(name=str(self), type=None, params=None)
 
 
@@ -318,7 +321,7 @@ class ApiEntryState(Enum):
 class SdkCache:
     CSV_FIELD_NAMES = ("entry", "status", "name", "type", "params")
 
-    def __init__(self, cache_file: str):
+    def __init__(self, cache_file: str, load_version_only=False):
         self.cache_file_name = cache_file
         self.version = SdkVersion(0, 0)
         self.sdk = ApiEntries()
@@ -328,6 +331,7 @@ class SdkCache:
         self.loaded_dirty_version = False
 
         self.version_action = VersionBump.NONE
+        self._load_version_only = load_version_only
         self.load_cache()
 
     def is_buildable(self) -> bool:
@@ -372,6 +376,9 @@ class SdkCache:
         return obj_dict
 
     def save(self) -> None:
+        if self._load_version_only:
+            raise Exception("Only SDK version was loaded, cannot save")
+
         version_is_clean = True
         if self.loaded_dirty:
             # There are still new entries and version was already updated
@@ -403,18 +410,20 @@ class SdkCache:
                 )
             )
 
-        str_cache_entries = [self.version]
-        name_getter = operator.attrgetter("name")
-        str_cache_entries.extend(sorted(self.sdk.headers, key=name_getter))
-        str_cache_entries.extend(sorted(self.sdk.functions, key=name_getter))
-        str_cache_entries.extend(sorted(self.sdk.variables, key=name_getter))
+        if not version_is_clean or self.loaded_dirty_version:
+            # Regenerate cache file
+            str_cache_entries = [self.version]
+            name_getter = operator.attrgetter("name")
+            str_cache_entries.extend(sorted(self.sdk.headers, key=name_getter))
+            str_cache_entries.extend(sorted(self.sdk.functions, key=name_getter))
+            str_cache_entries.extend(sorted(self.sdk.variables, key=name_getter))
 
-        with open(self.cache_file_name, "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=SdkCache.CSV_FIELD_NAMES)
-            writer.writeheader()
+            with open(self.cache_file_name, "w", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=SdkCache.CSV_FIELD_NAMES)
+                writer.writeheader()
 
-            for entry in str_cache_entries:
-                writer.writerow(self._format_entry(entry))
+                for entry in str_cache_entries:
+                    writer.writerow(self._format_entry(entry))
 
     def _process_entry(self, entry_dict: dict) -> None:
         entry_class = entry_dict["entry"]
@@ -460,6 +469,8 @@ class SdkCache:
             reader = csv.DictReader(f)
             for row in reader:
                 self._process_entry(row)
+                if self._load_version_only and row.get("entry") == SdkVersion.csv_type:
+                    break
         self.loaded_dirty = bool(self.new_entries)
 
     def sync_sets(self, known_set: Set[Any], new_set: Set[Any]):

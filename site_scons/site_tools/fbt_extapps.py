@@ -1,8 +1,10 @@
 from SCons.Builder import Builder
 from SCons.Action import Action
+from SCons.Errors import UserError
 
 import os
 from fbt.elfmanifest import assemble_manifest_data
+from fbt.sdk import SdkCache
 
 
 def BuildAppElf(env, app):
@@ -23,6 +25,7 @@ def BuildAppElf(env, app):
         app_target_name,
         app_elf_raw,
         APP=app,
+        SDK_DEF=env.File("#/firmware/targets/f${TARGET_HW}/api_symbols.csv"),
         # APPMETA=f"{app.appid}.meta",
     )
 
@@ -36,22 +39,18 @@ def BuildAppElf(env, app):
 def prepare_app_metadata(target, source, env):
     print(f"prepare_app_metadata: {target}, {source}")
 
+    sdk_cache = SdkCache(env["SDK_DEF"].path, load_version_only=True)
+    if not sdk_cache.is_buildable():
+        raise UserError(
+            "SDK version is not finalized, please review changes and re-run operation"
+        )
+
     app = env["APP"]
     meta_file_name = target[0].path + ".meta"
     with open(meta_file_name, "wb") as f:
+
         # f.write(f"hello this is {app}")
-        f.write(assemble_manifest_data(app, 1337))
-
-
-# def embed_app_metadata(target, source, env):
-#     print(f"embed_app_metadata: {target}, {source}")
-
-
-# def gen_embed_app_metadata(env, target, source, for_signature):
-#     if for_signature:
-#         return []
-
-#     return [prepare_app_metadata, embed_app_metadata]
+        f.write(assemble_manifest_data(app, sdk_cache.version.as_int()))
 
 
 def generate(env, **kw):
