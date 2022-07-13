@@ -9,6 +9,13 @@
 
 #define APP_PATH "/ext/plugin.elf"
 
+bool elf_resolve_from_hashtable_w_delay(const char* name, Elf32_Addr* address) {
+    // for gui thread, to draw loading animation
+    osDelay(1);
+
+    return elf_resolve_from_hashtable(name, address);
+}
+
 int32_t elf_loader_app(void* p) {
     Storage* storage = furi_record_open("storage");
     DialogsApp* dialogs = furi_record_open("dialogs");
@@ -35,8 +42,25 @@ int32_t elf_loader_app(void* p) {
         view_dispatcher_switch_to_view(view_dispatcher, 0);
 
         FURI_LOG_I("elf_loader_app", "ELF Loader is loading %s", string_get_cstr(elf_name));
-        int ret = loader_exec_elf(string_get_cstr(elf_name), elf_resolve_from_hashtable, storage);
+        int ret = loader_exec_elf(
+            string_get_cstr(elf_name), elf_resolve_from_hashtable_w_delay, storage);
         FURI_LOG_I("elf_loader_app", "ELF Loader returned: %i", ret);
+
+        if(ret == -1) {
+            DialogMessage* message = dialog_message_alloc();
+            dialog_message_set_header(message, "ELF Loader", 64, 0, AlignCenter, AlignTop);
+            dialog_message_set_buttons(message, NULL, NULL, NULL);
+
+            string_t buffer;
+            string_init(buffer);
+            string_printf(buffer, "failed to load\n%s", string_get_cstr(elf_name));
+            dialog_message_set_text(
+                message, string_get_cstr(buffer), 64, 32, AlignCenter, AlignCenter);
+
+            dialog_message_show(dialogs, message);
+            dialog_message_free(message);
+            string_clear(buffer);
+        }
 
         // free
         view_dispatcher_remove_view(view_dispatcher, 0);
