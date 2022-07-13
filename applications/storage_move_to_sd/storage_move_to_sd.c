@@ -50,8 +50,6 @@ bool storage_move_to_sd_perform(void) {
             storage_common_merge(storage, string_get_cstr(path_src), string_get_cstr(path_dst));
             storage_simply_remove_recursive(storage, string_get_cstr(path_src));
         }
-        storage_common_copy(storage, string_get_cstr(path_src), string_get_cstr(path_dst));
-        if(i <= 5) storage_simply_remove_recursive(storage, string_get_cstr(path_src));
     }
 	
     string_clear(path_src);
