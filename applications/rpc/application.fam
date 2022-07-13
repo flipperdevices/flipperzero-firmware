@@ -9,5 +9,4 @@ App(
     ],
     stack_size=4 * 1024,
     order=10,
-    sdk_headers=["rpc_app.h"],
 )

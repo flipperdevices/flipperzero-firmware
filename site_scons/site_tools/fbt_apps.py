@@ -17,13 +17,7 @@ def LoadApplicationManifests(env):
 
 
 def PrepareApplicationsBuild(env):
-    appbuild = env["APPBUILD"] = env["APPMGR"].filter_apps(env["APPS"])
-    env.Append(
-        SDK_HEADERS=[
-            env.Dir("#applications/").File(header_path)
-            for header_path in appbuild.get_sdk_headers()
-        ]
-    )
+    env["APPBUILD"] = env["APPMGR"].filter_apps(env["APPS"])
     env["APPBUILD_DUMP"] = env.Action(
         DumpApplicationConfig,
         "\tINFO\t",

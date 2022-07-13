@@ -5,10 +5,6 @@
 #include <stdbool.h>
 #include <furi.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define RPC_BUFFER_SIZE (1024)
 #define RPC_MAX_MESSAGE_SIZE (1536)
 
@@ -116,7 +112,3 @@ size_t rpc_session_feed(RpcSession* session, uint8_t* buffer, size_t size, TickT
  * @return              bytes available in buffer
  */
 size_t rpc_session_get_available_size(RpcSession* session);
-
-#ifdef __cplusplus
-}
-#endif

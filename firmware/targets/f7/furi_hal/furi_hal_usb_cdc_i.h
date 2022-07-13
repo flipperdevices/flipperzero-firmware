@@ -5,10 +5,6 @@
 
 #define CDC_DATA_SZ 64
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct {
     void (*tx_ep_callback)(void* context);
     void (*rx_ep_callback)(void* context);
@@ -26,7 +22,3 @@ uint8_t furi_hal_cdc_get_ctrl_line_state(uint8_t if_num);
 void furi_hal_cdc_send(uint8_t if_num, uint8_t* buf, uint16_t len);
 
 int32_t furi_hal_cdc_receive(uint8_t if_num, uint8_t* buf, uint16_t max_len);
-
-#ifdef __cplusplus
-}
-#endif

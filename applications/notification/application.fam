@@ -8,7 +8,6 @@ App(
     provides=["notification_settings"],
     stack_size=int(1.5 * 1024),
     order=100,
-    sdk_headers=["notification.h", "notification_messages.h"],
 )
 
 App(

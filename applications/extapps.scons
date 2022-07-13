@@ -18,7 +18,7 @@ appenv.Replace(
 
 appenv.AppendUnique(
     CCFLAGS=[
-        # "-Os",
+        "-Os",
         "-ggdb3",
         "-mword-relocations",
         "-mlong-calls",
@@ -52,7 +52,5 @@ if extra_app_list := GetOption("extra_ext_apps"):
     for extra_app in extra_app_list.split(","):
         extapps.append(appenv.BuildAppElf(appenv["APPMGR"].get(extra_app)))
 
-if appenv["FORCE"]:
-    appenv.AlwaysBuild(extapps)
 Alias(appenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps)
 Return("extapps")

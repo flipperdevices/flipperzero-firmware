@@ -9,7 +9,7 @@ from fbt.util import (
 
 # Building initial C environment for libs
 env = ENV.Clone(
-    tools=["compilation_db", "fwbin", "fbt_apps", "fbt_sdk"],
+    tools=["compilation_db", "fwbin", "fbt_apps"],
     COMPILATIONDB_USE_ABSPATH=False,
     BUILD_DIR=fw_build_meta["build_dir"],
     IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",
@@ -77,12 +77,6 @@ if not env["VERBOSE"]:
         BINCOMSTR="\tBIN\t${TARGET}",
         DFUCOMSTR="\tDFU\t${TARGET}",
         OPENOCDCOMSTR="\tFLASH\t${SOURCE}",
-        SDK_PREGEN_COMSTR="\tPREGEN\t${TARGET}",
-        SDK_COMSTR="\tSDKSRC\t${TARGET}",
-        SDKSYM_UPDATER_COMSTR="\tSDKCHK\t${TARGET}",
-        SDKSYM_GENERATOR_COMSTR="\tSDKSYM\t${TARGET}",
-        APPMETA_COMSTR="\tAPPMETA\t${TARGET}",
-        APPMETAEMBED_COMSTR="\tFAP\t${TARGET}",
     )
 
 
@@ -134,7 +128,7 @@ extapps = SConscript("applications/extapps.scons", exports={"ENV": fwenv})
 
 
 # Add preprocessor definitions for current set of apps
-fwenv.Append(
+fwenv.AppendUnique(
     CPPDEFINES=fwenv["APPBUILD"].get_apps_cdefs(),
 )
 
@@ -177,6 +171,7 @@ fwenv.AppendUnique(
 # print(fwenv.Dump())
 
 # Full firmware definition
+
 fwelf = fwenv["FW_ELF"] = fwenv.Program(
     "${FIRMWARE_BUILD_CFG}",
     sources,
@@ -237,8 +232,6 @@ if should_gen_cdb_and_link_dir(fwenv, BUILD_TARGETS):
     # without filtering, both updater & firmware commands would be generated
     fwenv.Replace(COMPILATIONDB_PATH_FILTER=fwenv.subst("*${FW_FLAVOR}*"))
     Depends(fwcdb, fwelf)
-    AlwaysBuild(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", fwcdb)
-    Alias(fwcdb, "")
     fw_artifacts.append(fwcdb)
 
     # Adding as a phony target, so folder link is updated even if elf didn't change
@@ -253,41 +246,6 @@ if should_gen_cdb_and_link_dir(fwenv, BUILD_TARGETS):
     fw_artifacts.append(link_dir_command)
 
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", fw_artifacts)
-
-if fwenv["IS_BASE_FIRMWARE"]:
-    sdk_source = fwenv.SDKPrebuilder(
-        "sdk_origin",
-        [],
-        # Filtering out things cxxheaderparser cannot handle
-        SDK_PP_FLAGS=[
-            '-D"_Static_assert(x,y)="',
-            '-D"__asm__(x)="',
-            '-D"__attribute__(x)="',
-            "-Drestrict=",
-            "-D_Noreturn=",
-            "-D__restrict=",
-            "-D__extension__=",
-            "-D__inline=inline",
-            "-D__inline__=inline",
-        ],
-    )
-    Depends(sdk_source, fwenv["SDK_HEADERS"])
-
-    sdk_tree = fwenv.SDKTree("sdk/sdk.opts", "sdk_origin")
-    AlwaysBuild(sdk_tree)
-    Alias("sdk_tree", sdk_tree)
-
-    sdk_apicheck = fwenv.SDKSymUpdater(fwenv.subst("$SDK_DEFINITION"), "sdk_origin")
-    Precious(sdk_apicheck)
-    Alias("sdk_check", sdk_apicheck)
-
-    sdk_apisyms = fwenv.SDKSymGenerator(
-        "assets/compiled/symbols.h", fwenv.subst("$SDK_DEFINITION")
-    )
-    Alias("api_syms", sdk_apisyms)
-
-    if fwenv["FORCE"]:
-        fwenv.AlwaysBuild(sdk_source, sdk_tree, sdk_apicheck, sdk_apisyms)
 
 
 Return("fwenv")
