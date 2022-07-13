@@ -26,6 +26,7 @@ def BuildAppElf(env, app):
         app_elf_raw,
         APP=app,
     )
+    env.Depends(app_elf_augmented, [env["SDK_DEFINITION"], env.Value(app)])
 
     app_stripped_elf = env.ELFStripper(
         os.path.join(env.subst("$PLUGIN_ELF_DIR"), app.appid), app_elf_augmented
@@ -61,7 +62,7 @@ def generate(env, **kw):
                     Action(prepare_app_metadata, "$APPMETA_COMSTR"),
                     # embed_app_metadata,
                     Action(
-                        "${OBJCOPY} --add-section .fzmeta=${TARGET}.meta --set-section-flags .fzmeta=contents,data,readonly ${SOURCES} ${TARGET}",
+                        "${OBJCOPY} --add-section .fzmeta=${TARGET}.meta --set-section-flags .fzmeta=contents,noload,readonly,data ${SOURCES} ${TARGET}",
                         "$APPMETAEMBED_COMSTR",
                     ),
                 ],

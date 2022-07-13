@@ -1,5 +1,8 @@
 #include "elf_loader.h"
 #include "elf.h"
+#include "../elf_manifest/elf_manifest.h"
+#include "../elf_cpp/elf_hashtable.h"
+
 #include <furi.h>
 #include <string.h>
 
@@ -32,6 +35,8 @@ typedef struct {
     off_t symbol_table;
     off_t symbol_table_strings;
     off_t entry;
+
+    size_t app_stack_size;
 
     ELFSection_t text;
     ELFSection_t rodata;
@@ -387,6 +392,51 @@ static int load_symbols(ELFExec_t* e) {
     return found;
 }
 
+bool load_metadata(ELFExec_t* e, ElfManifest* manifest) {
+    size_t n;
+    int found = false;
+    FURI_LOG_I(TAG, "Scan ELF index for meta...");
+    char name[33] = "";
+
+    ELFSection_t meta_section = {0};
+
+    for(n = 1; n < e->sections; n++) {
+        Elf32_Shdr section_header;
+        if(read_section_header(e, n, &section_header) != 0) {
+            FURI_LOG_E(TAG, "Error reading section");
+            return -1;
+        }
+        if(section_header.sh_name)
+            read_section_name(e, section_header.sh_name, name, sizeof(name));
+
+        FURI_LOG_D(TAG, "Examining section %d %s", n, name);
+        if(strcmp(name, ".fzmeta") == 0) {
+            // LOAD
+            FURI_LOG_E(TAG, "FOUND META SECTION");
+            if(section_header.sh_size < sizeof(ElfManifestV1)) {
+                FURI_LOG_E(
+                    TAG,
+                    "Metadata section too small (%d < %d)",
+                    section_header.sh_size,
+                    sizeof(ElfManifestV1));
+            }
+
+            if(load_section_data(e, &meta_section, &section_header) != 0) {
+                FURI_LOG_E(TAG, "Failed to load meta section data");
+                break;
+            }
+
+            memcpy(manifest, meta_section.data, sizeof(ElfManifest));
+            found = true;
+            break;
+        }
+    }
+
+    free_section(&meta_section);
+    FURI_LOG_I(TAG, "Load meta done");
+    return found;
+}
+
 static int init_elf(ELFExec_t* e, File* f) {
     Elf32_Ehdr h;
     Elf32_Shdr sH;
@@ -406,6 +456,36 @@ static int init_elf(ELFExec_t* e, File* f) {
     e->section_table_strings = sH.sh_offset;
 
     /* TODO Check ELF validity */
+    ElfManifest manifest = {0};
+    if(!load_metadata(e, &manifest)) {
+        FURI_LOG_E(TAG, "Failed to load metadata");
+        return -1;
+    }
+
+    /* Validate metadata */
+    if(manifest.base.manifest_magic != ELF_MANIFEST_MAGIC) {
+        FURI_LOG_E(TAG, "Invalid manifest magic %x", manifest.base.manifest_magic);
+        return -1;
+    }
+
+    if(manifest.base.manifest_version > ELF_MANIFEST_MAX_SUPPORTED_VERSION) {
+        FURI_LOG_E(TAG, "Unsupported metadata version %d", manifest.base.manifest_version);
+        return -1;
+    }
+
+    if((manifest.base.api_version.major != ELF_API_MAJOR) ||
+       (manifest.base.api_version.minor < ELF_API_MINOR)) {
+        FURI_LOG_E(
+            TAG,
+            "API version mismatch (fw %d.%d, elf %d.%d)",
+            ELF_API_MAJOR,
+            ELF_API_MINOR,
+            manifest.base.api_version.major,
+            manifest.base.api_version.minor);
+        return -1;
+    }
+
+    e->app_stack_size = manifest.stack_size;
 
     return 0;
 }
@@ -450,6 +530,7 @@ static void arch_jump_to(entry_t entry) {
 static int loader_jump_to(ELFExec_t* e) {
     if(e->entry) {
         entry_t* entry = (entry_t*)(e->text.data + e->entry);
+        // Stack size is @ e->app_stack_size, use it!
         arch_jump_to(entry);
         return 0;
     } else {

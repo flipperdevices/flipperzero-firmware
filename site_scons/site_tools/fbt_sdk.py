@@ -18,22 +18,10 @@ def prebuild_sdk_emitter(target, source, env):
     return target, source
 
 
-def prebuild_sdk(source, target, env, for_signature):
-    def _pregen_sdk_origin_file(source, target, env):
-        mega_file = env.subst("${TARGET}.c", target=target[0])
-        with open(mega_file, "wt") as sdk_c:
-            sdk_c.write("\n".join(f"#include <{h.path}>" for h in env["SDK_HEADERS"]))
-
-    return [
-        Action(
-            _pregen_sdk_origin_file,
-            "$SDK_PREGEN_COMSTR",
-        ),
-        Action(
-            "$CC -o $TARGET -E -P $CCFLAGS $_CCCOMCOM $SDK_PP_FLAGS -MMD ${TARGET}.c",
-            "$SDK_COMSTR",
-        ),
-    ]
+def prebuild_sdk_create_origin_file(target, source, env):
+    mega_file = env.subst("${TARGET}.c", target=target[0])
+    with open(mega_file, "wt") as sdk_c:
+        sdk_c.write("\n".join(f"#include <{h.path}>" for h in env["SDK_HEADERS"]))
 
 
 class SdkTreeBuilder:
@@ -119,11 +107,13 @@ def deploy_sdk_tree(target, source, env, for_signature):
     return sdk_tree.generate_actions()
 
 
-def gen_sdk_data(sdk_cache):
+def gen_sdk_data(sdk_cache: SdkCache):
     api_def = []
     api_def.extend(
         (f"#include <{h.name}>" for h in sdk_cache.get_headers()),
     )
+
+    api_def.append(f"const int elf_api_version = {sdk_cache.version.as_int()};")
 
     api_def.append(
         "static constexpr auto elf_api_table = sort(create_array_t<sym_entry>("
@@ -178,7 +168,16 @@ def generate(env, **kw):
         BUILDERS={
             "SDKPrebuilder": Builder(
                 emitter=prebuild_sdk_emitter,
-                generator=prebuild_sdk,
+                action=[
+                    Action(
+                        prebuild_sdk_create_origin_file,
+                        "$SDK_PREGEN_COMSTR",
+                    ),
+                    Action(
+                        "$CC -o $TARGET -E -P $CCFLAGS $_CCCOMCOM $SDK_PP_FLAGS -MMD ${TARGET}.c",
+                        "$SDK_COMSTR",
+                    ),
+                ],
                 suffix=".i",
             ),
             "SDKTree": Builder(

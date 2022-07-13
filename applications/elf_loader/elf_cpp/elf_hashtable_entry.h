@@ -12,9 +12,7 @@ struct sym_entry {
 
 #ifdef __cplusplus
 }
-#endif
 
-#ifdef __cplusplus
 #include <array>
 #include <algorithm>
 

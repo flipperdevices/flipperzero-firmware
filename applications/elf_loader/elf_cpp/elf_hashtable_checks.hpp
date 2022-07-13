@@ -1,5 +1,5 @@
 /**
- * @file elf-hashtable-checks.h
+ * @file elf-hashtable-checks.hpp
  * @author https://github.com/hedger/
  * @version 1.0
  * @date 2021-12-21

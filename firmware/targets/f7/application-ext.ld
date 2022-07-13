@@ -31,6 +31,8 @@ SECTIONS
 
 	/DISCARD/ :
 	{
+		*(.ARM.attributes)
+		*(.ARM.attributes.*)
 		*(.comment)
 		*(.comment.*)
 	}
