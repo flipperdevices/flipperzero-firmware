@@ -13,7 +13,7 @@
 #include <lib/nfc/protocols/mifare_desfire.h>
 #include <lib/nfc/protocols/nfca.h>
 
-#include "helpers/nfc_mf_classic_dict.h"
+#include "helpers/mf_classic_dict.h"
 #include "helpers/nfc_debug_pcap.h"
 
 struct NfcWorker {

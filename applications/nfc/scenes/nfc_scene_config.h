@@ -41,4 +41,6 @@ ADD_SCENE(nfc, rpc, Rpc)
 ADD_SCENE(nfc, generate_info, GenerateInfo)
 ADD_SCENE(nfc, read, Read)
 ADD_SCENE(nfc, read_mifare_classic_success, ReadMifareClassicSuccess)
-
+ADD_SCENE(nfc, extra_actions, ExtraActions)
+ADD_SCENE(nfc, mf_classic_keys, MfClassicKeys)
+ADD_SCENE(nfc, mf_classic_keys_add, MfClassicKeysAdd)

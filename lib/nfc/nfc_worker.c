@@ -530,12 +530,9 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
 
     // Open dictionary
-    nfc_worker->dict_stream = file_stream_alloc(nfc_worker->storage);
-    if(!nfc_mf_classic_dict_open_file(nfc_worker->dict_stream)) {
-        event = NfcWorkerEventNoDictFound;
-        nfc_worker->callback(event, nfc_worker->context);
-        nfc_mf_classic_dict_close_file(nfc_worker->dict_stream);
-        stream_free(nfc_worker->dict_stream);
+    MfClassicDict* dict = mf_classic_dict_alloc(MfClassicDictTypeFlipper);
+    if(!dict) {
+        nfc_worker->callback(NfcWorkerEventNoDictFound, nfc_worker->context);
         return;
     }
 
@@ -568,7 +565,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
             nfc_worker->callback(event, nfc_worker->context);
             mf_classic_auth_init_context(&auth_ctx, curr_sector);
             bool sector_key_found = false;
-            while(nfc_mf_classic_dict_get_next_key(nfc_worker->dict_stream, &curr_key)) {
+            while(mf_classic_dict_get_next_key(dict, &curr_key)) {
                 furi_hal_nfc_sleep();
                 // TODO REWORK!
                 uint32_t cuid = 0;
@@ -635,7 +632,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
                 // Add sectors to read sequence
                 mf_classic_reader_add_sector(&reader, curr_sector, auth_ctx.key_a, auth_ctx.key_b);
             }
-            nfc_mf_classic_dict_reset(nfc_worker->dict_stream);
+            mf_classic_dict_rewind(dict);
         }
     }
 
@@ -654,8 +651,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
         nfc_worker->callback(event, nfc_worker->context);
     }
 
-    nfc_mf_classic_dict_close_file(nfc_worker->dict_stream);
-    stream_free(nfc_worker->dict_stream);
+    mf_classic_dict_free(dict);
 }
 
 void nfc_worker_emulate_mifare_classic(NfcWorker* nfc_worker) {

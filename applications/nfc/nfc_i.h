@@ -23,6 +23,7 @@
 #include <lib/nfc/nfc_types.h>
 #include <lib/nfc/nfc_worker.h>
 #include <lib/nfc/nfc_device.h>
+#include <lib/nfc/helpers/mf_classic_dict.h>
 
 #include "views/bank_card.h"
 #include "views/dict_attack.h"
@@ -56,6 +57,7 @@ struct Nfc {
 
     char text_store[NFC_TEXT_STORE_SIZE + 1];
     string_t text_box_store;
+    uint8_t byte_input_store[6];
 
     void* rpc_ctx;
     NfcRpcState rpc_state;
