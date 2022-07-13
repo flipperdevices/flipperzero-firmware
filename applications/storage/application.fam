@@ -8,6 +8,7 @@ App(
     provides=["storage_start"],
     stack_size=3 * 1024,
     order=120,
+    sdk_headers=["storage.h"],
 )
 
 App(

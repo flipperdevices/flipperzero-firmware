@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 from enum import Enum
 import os
+import posixpath
 
 
 class FlipperManifestException(Exception):
@@ -36,6 +37,7 @@ class FlipperApplication:
     stack_size: int = 2048
     icon: Optional[str] = None
     order: int = 0
+    sdk_headers: List[str] = field(default_factory=list)
     _appdir: Optional[str] = None
 
 
@@ -168,6 +170,14 @@ class AppBuildset:
         for app in self.apps:
             cdefs.update(app.cdefines)
         return sorted(list(cdefs))
+
+    def get_sdk_headers(self):
+        sdk_headers = []
+        for app in self.apps:
+            sdk_headers.extend(
+                [posixpath.join(app._appdir, header) for header in app.sdk_headers]
+            )
+        return sdk_headers
 
     def get_apps_of_type(self, apptype: FlipperAppType):
         return sorted(

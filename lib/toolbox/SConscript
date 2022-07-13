@@ -7,6 +7,13 @@ env.Append(
     CPPPATH=[
         "#/lib/toolbox",
     ],
+    SDK_HEADERS=[
+        File("#/lib/toolbox/manchester_decoder.h"),
+        File("#/lib/toolbox/manchester_encoder.h"),
+        File("#/lib/toolbox/path.h"),
+        File("#/lib/toolbox/random_name.h"),
+        File("#/lib/toolbox/hmac_sha256.h"),
+    ],
 )
 
 
