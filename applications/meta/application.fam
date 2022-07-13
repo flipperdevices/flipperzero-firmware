@@ -33,6 +33,8 @@ App(
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         "bt_hid",
+        "drestorer",
+        "storage_move_to_sd",
         "hid_anal",
         "music_player",
         "picopass",
