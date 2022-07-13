@@ -10,31 +10,37 @@
 #include "test_data/infrared_rc5_test_data.srcdata"
 #include "test_data/infrared_sirc_test_data.srcdata"
 
-#define IR_TEST_FILES_DIR "/ext/unit_tests/infrared_decoder_encoder"
+#define IR_TEST_FILES_DIR "/ext/unit_tests/infrared"
 #define IR_TEST_FILE_PREFIX "test_"
 #define IR_TEST_FILE_SUFFIX ".irtest"
 
-#define RUN_ENCODER(data, expected) \
-    run_encoder((data), COUNT_OF(data), (expected), COUNT_OF(expected))
+typedef struct {
+    InfraredDecoderHandler* decoder_handler;
+    InfraredEncoderHandler* encoder_handler;
+    string_t file_path;
+    FlipperFormat* ff;
+} TestInfrared;
 
-#define RUN_ENCODER_DECODER(data) run_encoder_decoder((data), COUNT_OF(data))
+static TestInfrared* test;
 
-static InfraredDecoderHandler* decoder_handler;
-static InfraredEncoderHandler* encoder_handler;
-static FlipperFormat* ff;
-
-static void test_setup(void) {
-    decoder_handler = infrared_alloc_decoder();
-    encoder_handler = infrared_alloc_encoder();
+static void infrared_test_alloc() {
     Storage* storage = furi_record_open("storage");
-    ff = flipper_format_file_alloc(storage);
+    test = malloc(sizeof(TestInfrared));
+    test->decoder_handler = infrared_alloc_decoder();
+    test->encoder_handler = infrared_alloc_encoder();
+    test->ff = flipper_format_file_alloc(storage);
+    string_init(test->file_path);
 }
 
-static void test_teardown(void) {
-    infrared_free_decoder(decoder_handler);
-    infrared_free_encoder(encoder_handler);
-    flipper_format_free(ff);
+static void infrared_test_free() {
+    furi_assert(test);
+    infrared_free_decoder(test->decoder_handler);
+    infrared_free_encoder(test->encoder_handler);
+    flipper_format_free(test->ff);
+    string_clear(test->file_path);
     furi_record_close("storage");
+    free(test);
+    test = NULL;
 }
 
 static void compare_message_results(
@@ -87,7 +93,7 @@ static void run_encoder_fill_array(
 }
 
 // messages in input array for encoder should have one protocol
-static void run_encoder(
+static void infrared_test_run_encoder(
     const InfraredMessage input_messages[],
     uint32_t input_messages_len,
     const uint32_t expected_timings[],
@@ -100,11 +106,11 @@ static void run_encoder(
     for(uint32_t message_counter = 0; message_counter < input_messages_len; ++message_counter) {
         const InfraredMessage* message = &input_messages[message_counter];
         if(!message->repeat) {
-            infrared_reset_encoder(encoder_handler, message);
+            infrared_reset_encoder(test->encoder_handler, message);
         }
 
         timings_len = 200;
-        run_encoder_fill_array(encoder_handler, timings, &timings_len, NULL);
+        run_encoder_fill_array(test->encoder_handler, timings, &timings_len, NULL);
         furi_check(timings_len <= 200);
 
         for(size_t i = 0; i < timings_len; ++i, ++j) {
@@ -116,8 +122,9 @@ static void run_encoder(
     mu_assert(j == expected_timings_len, "encoded less timings than expected");
 }
 
-static void
-    run_encoder_decoder(const InfraredMessage input_messages[], uint32_t input_messages_len) {
+static void infrared_test_run_encoder_decoder(
+    const InfraredMessage input_messages[],
+    uint32_t input_messages_len) {
     uint32_t* timings = 0;
     uint32_t timings_len = 200;
     bool level = false;
@@ -126,16 +133,16 @@ static void
     for(uint32_t message_counter = 0; message_counter < input_messages_len; ++message_counter) {
         const InfraredMessage* message_encoded = &input_messages[message_counter];
         if(!message_encoded->repeat) {
-            infrared_reset_encoder(encoder_handler, message_encoded);
+            infrared_reset_encoder(test->encoder_handler, message_encoded);
         }
 
         timings_len = 200;
-        run_encoder_fill_array(encoder_handler, timings, &timings_len, &level);
+        run_encoder_fill_array(test->encoder_handler, timings, &timings_len, &level);
         furi_check(timings_len <= 200);
 
         const InfraredMessage* message_decoded = 0;
         for(size_t i = 0; i < timings_len; ++i) {
-            message_decoded = infrared_decode(decoder_handler, level, timings[i]);
+            message_decoded = infrared_decode(test->decoder_handler, level, timings[i]);
             if((i == timings_len - 2) && level && message_decoded) {
                 /* In case we end with space timing - message can be decoded at last mark */
                 break;
@@ -143,7 +150,7 @@ static void
                 mu_check(!message_decoded);
             } else {
                 if(!message_decoded) {
-                    message_decoded = infrared_check_decoder_ready(decoder_handler);
+                    message_decoded = infrared_check_decoder_ready(test->decoder_handler);
                 }
                 mu_check(message_decoded);
             }
@@ -158,7 +165,7 @@ static void
     free(timings);
 }
 
-static bool load_raw_signal(
+static bool infrared_test_load_raw_signal(
     FlipperFormat* ff,
     const char* signal_name,
     uint32_t** timings,
@@ -190,7 +197,7 @@ static bool load_raw_signal(
     return success;
 }
 
-static bool read_message(FlipperFormat* ff, InfraredMessage* message) {
+static bool infrared_test_read_message(FlipperFormat* ff, InfraredMessage* message) {
     string_t buf;
     string_init(buf);
     bool success = false;
@@ -211,7 +218,7 @@ static bool read_message(FlipperFormat* ff, InfraredMessage* message) {
     return success;
 }
 
-static bool load_messages(
+static bool infrared_test_load_messages(
     FlipperFormat* ff,
     const char* signal_name,
     InfraredMessage** messages,
@@ -235,7 +242,7 @@ static bool load_messages(
         *messages = malloc(*messages_count * sizeof(InfraredMessage));
         uint32_t i;
         for(i = 0; i < *messages_count; ++i) {
-            if(!read_message(ff, (*messages) + i)) {
+            if(!infrared_test_read_message(ff, (*messages) + i)) {
                 break;
             }
         }
@@ -250,9 +257,7 @@ static bool load_messages(
     return success;
 }
 
-static void run_decoder(
-    InfraredProtocol protocol,
-    uint32_t test_index) {
+static void infrared_test_run_decoder(InfraredProtocol protocol, uint32_t test_index) {
     uint32_t* timings;
     uint32_t timings_count;
     InfraredMessage* messages;
@@ -272,24 +277,24 @@ static void run_decoder(
         IR_TEST_FILE_SUFFIX);
 
     mu_assert(
-        flipper_format_file_open_existing(ff, string_get_cstr(file_path)),
+        flipper_format_file_open_existing(test->ff, string_get_cstr(file_path)),
         "Failed to open data file");
 
     uint32_t format_version;
-    mu_assert(flipper_format_read_header(ff, buf, &format_version), "Failed to read header");
+    mu_assert(flipper_format_read_header(test->ff, buf, &format_version), "Failed to read header");
     mu_assert(!string_cmp_str(buf, "IR tests file") && format_version == 1, "Wrong file type");
 
     string_printf(buf, "decoder_input%d", test_index);
     mu_assert(
-        load_raw_signal(ff, string_get_cstr(buf), &timings, &timings_count),
+        infrared_test_load_raw_signal(test->ff, string_get_cstr(buf), &timings, &timings_count),
         "Failed to load raw signal from file");
 
     string_printf(buf, "decoder_expected%d", test_index);
     mu_assert(
-        load_messages(ff, string_get_cstr(buf), &messages, &messages_count),
+        infrared_test_load_messages(test->ff, string_get_cstr(buf), &messages, &messages_count),
         "Failed to load messages from file");
 
-    flipper_format_file_close(ff);
+    flipper_format_file_close(test->ff);
     string_clear(file_path);
     string_clear(buf);
 
@@ -302,7 +307,7 @@ static void run_decoder(
         const InfraredMessage* message_decoded_check = 0;
 
         if(timings[i] > INFRARED_RAW_RX_TIMING_DELAY_US) {
-            message_decoded_check = infrared_check_decoder_ready(decoder_handler);
+            message_decoded_check = infrared_check_decoder_ready(test->decoder_handler);
             if(message_decoded_check) {
                 /* infrared_decode() can reset message, but we have to call infrared_decode() to perform real
                  * simulation: infrared_check() by timeout, then infrared_decode() when meet edge */
@@ -311,7 +316,7 @@ static void run_decoder(
             }
         }
 
-        message_decoded = infrared_decode(decoder_handler, level, timings[i]);
+        message_decoded = infrared_decode(test->decoder_handler, level, timings[i]);
 
         if(message_decoded_check || message_decoded) {
             mu_assert(
@@ -330,7 +335,7 @@ static void run_decoder(
         level = !level;
     }
 
-    message_decoded = infrared_check_decoder_ready(decoder_handler);
+    message_decoded = infrared_check_decoder_ready(test->decoder_handler);
     if(message_decoded) {
         compare_message_results(message_decoded, &messages[message_counter]);
         ++message_counter;
@@ -342,97 +347,97 @@ static void run_decoder(
     mu_assert(message_counter == messages_count, "decoded less than expected");
 }
 
-MU_TEST(test_decoder_samsung32) {
-    run_decoder(InfraredProtocolSamsung32, 1);
+MU_TEST(infrared_test_decoder_samsung32) {
+    infrared_test_run_decoder(InfraredProtocolSamsung32, 1);
 }
 
-MU_TEST(test_mix) {
-    run_decoder(InfraredProtocolRC5, 2);
-    run_decoder(InfraredProtocolSIRC, 1);
-    run_decoder(InfraredProtocolNECext, 1);
-    run_decoder(InfraredProtocolRC6, 2);
-    run_decoder(InfraredProtocolSamsung32, 1);
-    run_decoder(InfraredProtocolRC6, 1);
-    run_decoder(InfraredProtocolSamsung32, 1);
-    run_decoder(InfraredProtocolRC5, 1);
-    run_decoder(InfraredProtocolSIRC, 2);
-    run_decoder(InfraredProtocolNECext, 1);
-    run_decoder(InfraredProtocolSIRC, 4);
-    run_decoder(InfraredProtocolNEC, 2);
-    run_decoder(InfraredProtocolRC6, 1);
-    run_decoder(InfraredProtocolNECext, 1);
-    run_decoder(InfraredProtocolSIRC, 5);
-    run_decoder(InfraredProtocolNEC, 3);
-    run_decoder(InfraredProtocolRC5, 5);
-    run_decoder(InfraredProtocolSamsung32, 1);
-    run_decoder(InfraredProtocolSIRC, 3);
+MU_TEST(infrared_test_decoder_mixed) {
+    infrared_test_run_decoder(InfraredProtocolRC5, 2);
+    infrared_test_run_decoder(InfraredProtocolSIRC, 1);
+    infrared_test_run_decoder(InfraredProtocolNECext, 1);
+    infrared_test_run_decoder(InfraredProtocolRC6, 2);
+    infrared_test_run_decoder(InfraredProtocolSamsung32, 1);
+    infrared_test_run_decoder(InfraredProtocolRC6, 1);
+    infrared_test_run_decoder(InfraredProtocolSamsung32, 1);
+    infrared_test_run_decoder(InfraredProtocolRC5, 1);
+    infrared_test_run_decoder(InfraredProtocolSIRC, 2);
+    infrared_test_run_decoder(InfraredProtocolNECext, 1);
+    infrared_test_run_decoder(InfraredProtocolSIRC, 4);
+    infrared_test_run_decoder(InfraredProtocolNEC, 2);
+    infrared_test_run_decoder(InfraredProtocolRC6, 1);
+    infrared_test_run_decoder(InfraredProtocolNECext, 1);
+    infrared_test_run_decoder(InfraredProtocolSIRC, 5);
+    infrared_test_run_decoder(InfraredProtocolNEC, 3);
+    infrared_test_run_decoder(InfraredProtocolRC5, 5);
+    infrared_test_run_decoder(InfraredProtocolSamsung32, 1);
+    infrared_test_run_decoder(InfraredProtocolSIRC, 3);
 }
 
-MU_TEST(test_decoder_nec) {
-    run_decoder(InfraredProtocolNEC, 1);
-    run_decoder(InfraredProtocolNEC, 2);
-    run_decoder(InfraredProtocolNEC, 3);
+MU_TEST(infrared_test_decoder_nec) {
+    infrared_test_run_decoder(InfraredProtocolNEC, 1);
+    infrared_test_run_decoder(InfraredProtocolNEC, 2);
+    infrared_test_run_decoder(InfraredProtocolNEC, 3);
 }
 
-MU_TEST(test_decoder_unexpected_end_in_sequence) {
-    run_decoder(InfraredProtocolNEC, 1);
-    run_decoder(InfraredProtocolNEC, 1);
-    run_decoder(InfraredProtocolNEC, 2);
-    run_decoder(InfraredProtocolNEC, 2);
+MU_TEST(infrared_test_decoder_unexpected_end_in_sequence) {
+    infrared_test_run_decoder(InfraredProtocolNEC, 1);
+    infrared_test_run_decoder(InfraredProtocolNEC, 1);
+    infrared_test_run_decoder(InfraredProtocolNEC, 2);
+    infrared_test_run_decoder(InfraredProtocolNEC, 2);
 }
 
-MU_TEST(test_decoder_necext1) {
-    run_decoder(InfraredProtocolNECext, 1);
-    run_decoder(InfraredProtocolNECext, 1);
+MU_TEST(infrared_test_decoder_necext1) {
+    infrared_test_run_decoder(InfraredProtocolNECext, 1);
+    infrared_test_run_decoder(InfraredProtocolNECext, 1);
 }
 
-MU_TEST(test_decoder_long_packets_with_nec_start) {
-    run_decoder(InfraredProtocolNEC42ext, 1);
-    run_decoder(InfraredProtocolNEC42ext, 2);
+MU_TEST(infrared_test_decoder_long_packets_with_nec_start) {
+    infrared_test_run_decoder(InfraredProtocolNEC42ext, 1);
+    infrared_test_run_decoder(InfraredProtocolNEC42ext, 2);
 }
 
-MU_TEST(test_encoder_sirc) {
-//         RUN_ENCODER(test_encoder_sirc_input1, test_encoder_sirc_expected1);
+MU_TEST(infrared_test_encoder_sirc) {
+    //         RUN_ENCODER(test_encoder_sirc_input1, test_encoder_sirc_expected1);
     //     RUN_ENCODER(test_encoder_sirc_input2, test_encoder_sirc_expected2);
 }
 
-MU_TEST(test_decoder_sirc) {
-    run_decoder(InfraredProtocolSIRC, 3);
-    run_decoder(InfraredProtocolSIRC, 1);
-    run_decoder(InfraredProtocolSIRC, 2);
-    run_decoder(InfraredProtocolSIRC, 4);
-    run_decoder(InfraredProtocolSIRC, 5);
+MU_TEST(infrared_test_decoder_sirc) {
+    infrared_test_run_decoder(InfraredProtocolSIRC, 3);
+    infrared_test_run_decoder(InfraredProtocolSIRC, 1);
+    infrared_test_run_decoder(InfraredProtocolSIRC, 2);
+    infrared_test_run_decoder(InfraredProtocolSIRC, 4);
+    infrared_test_run_decoder(InfraredProtocolSIRC, 5);
     //     RUN_ENCODER_DECODER(test_sirc);
 }
 
-MU_TEST(test_decoder_rc5) {
-    run_decoder(InfraredProtocolRC5X, 1);
-    run_decoder(InfraredProtocolRC5, 1);
-    run_decoder(InfraredProtocolRC5, 2);
-    run_decoder(InfraredProtocolRC5, 3);
-    run_decoder(InfraredProtocolRC5, 4);
-    run_decoder(InfraredProtocolRC5, 5);
-    run_decoder(InfraredProtocolRC5, 6);
-    run_decoder(InfraredProtocolRC5, 7);
+MU_TEST(infrared_test_decoder_rc5) {
+    infrared_test_run_decoder(InfraredProtocolRC5X, 1);
+    infrared_test_run_decoder(InfraredProtocolRC5, 1);
+    infrared_test_run_decoder(InfraredProtocolRC5, 2);
+    infrared_test_run_decoder(InfraredProtocolRC5, 3);
+    infrared_test_run_decoder(InfraredProtocolRC5, 4);
+    infrared_test_run_decoder(InfraredProtocolRC5, 5);
+    infrared_test_run_decoder(InfraredProtocolRC5, 6);
+    infrared_test_run_decoder(InfraredProtocolRC5, 7);
 }
 
-MU_TEST(test_encoder_rc5x) {
+MU_TEST(infrared_test_encoder_rc5x) {
     //     RUN_ENCODER(test_decoder_rc5x_expected1, test_decoder_rc5x_input1);
 }
 
-MU_TEST(test_encoder_rc5) {
+MU_TEST(infrared_test_encoder_rc5) {
     //     RUN_ENCODER(test_decoder_rc5_expected_all_repeats, test_decoder_rc5_input_all_repeats);
 }
 
-MU_TEST(test_decoder_rc6) {
-    run_decoder(InfraredProtocolRC6, 1);
+MU_TEST(infrared_test_decoder_rc6) {
+    infrared_test_run_decoder(InfraredProtocolRC6, 1);
 }
 
-MU_TEST(test_encoder_rc6) {
+MU_TEST(infrared_test_encoder_rc6) {
     //     RUN_ENCODER(test_encoder_rc6_input1, test_encoder_rc6_expected1);
 }
 
-MU_TEST(test_encoder_decoder_all) {
+MU_TEST(infrared_test_encoder_decoder_all) {
     //     RUN_ENCODER_DECODER(test_nec);
     //     RUN_ENCODER_DECODER(test_necext);
     //     RUN_ENCODER_DECODER(test_nec42);
@@ -443,29 +448,28 @@ MU_TEST(test_encoder_decoder_all) {
     //     RUN_ENCODER_DECODER(test_sirc);
 }
 
-MU_TEST_SUITE(test_infrared_decoder_encoder) {
-    UNUSED(run_encoder);
-    UNUSED(run_encoder_decoder);
-    MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
+MU_TEST_SUITE(infrared_test) {
+    UNUSED(infrared_test_run_encoder);
+    UNUSED(infrared_test_run_encoder_decoder);
+    MU_SUITE_CONFIGURE(&infrared_test_alloc, &infrared_test_free);
 
-    MU_RUN_TEST(test_encoder_sirc);
-    MU_RUN_TEST(test_decoder_sirc);
-    MU_RUN_TEST(test_encoder_rc5x);
-    MU_RUN_TEST(test_encoder_rc5);
-    MU_RUN_TEST(test_decoder_rc5);
-    MU_RUN_TEST(test_decoder_rc6);
-    MU_RUN_TEST(test_encoder_rc6);
-    MU_RUN_TEST(test_decoder_unexpected_end_in_sequence);
-    MU_RUN_TEST(test_decoder_long_packets_with_nec_start);
-    MU_RUN_TEST(test_decoder_nec);
-    MU_RUN_TEST(test_decoder_samsung32);
-    MU_RUN_TEST(test_decoder_necext1);
-    MU_RUN_TEST(test_mix);
-    MU_RUN_TEST(test_encoder_decoder_all);
+    MU_RUN_TEST(infrared_test_encoder_sirc);
+    MU_RUN_TEST(infrared_test_decoder_sirc);
+    MU_RUN_TEST(infrared_test_encoder_rc5x);
+    MU_RUN_TEST(infrared_test_encoder_rc5);
+    MU_RUN_TEST(infrared_test_decoder_rc5);
+    MU_RUN_TEST(infrared_test_decoder_rc6);
+    MU_RUN_TEST(infrared_test_encoder_rc6);
+    MU_RUN_TEST(infrared_test_decoder_unexpected_end_in_sequence);
+    MU_RUN_TEST(infrared_test_decoder_long_packets_with_nec_start);
+    MU_RUN_TEST(infrared_test_decoder_nec);
+    MU_RUN_TEST(infrared_test_decoder_samsung32);
+    MU_RUN_TEST(infrared_test_decoder_necext1);
+    MU_RUN_TEST(infrared_test_decoder_mixed);
+    MU_RUN_TEST(infrared_test_encoder_decoder_all);
 }
 
-int run_minunit_test_infrared_decoder_encoder() {
-    MU_RUN_SUITE(test_infrared_decoder_encoder);
-
+int run_minunit_test_infrared() {
+    MU_RUN_SUITE(infrared_test);
     return MU_EXIT_CODE;
 }
