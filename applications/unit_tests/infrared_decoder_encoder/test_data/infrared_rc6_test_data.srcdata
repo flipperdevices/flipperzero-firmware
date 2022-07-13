@@ -1,16 +1,3 @@
-const InfraredMessage test_decoder_rc6_expected1[] = {
-    {InfraredProtocolRC6,     0x94,      0xA0,  false}, // toggle 0
-    {InfraredProtocolRC6,     0x93,      0xA0,  false}, // toggle 1
-//    {InfraredProtocolRC6,     0x95,      0xA0,  false},       failed
-    {InfraredProtocolRC6,     0x93,      0xA0,  false}, // toggle 0
-    {InfraredProtocolRC6,     0x94,      0xA0,  false}, // toggle 1
-    {InfraredProtocolRC6,     0x95,      0xA0,  false}, // toggle 0
-//    {InfraredProtocolRC6,     0x93,      0xA0,  false},       failed
-//    {InfraredProtocolRC6,     0x93,      0xA0,  false},       failed
-//    {InfraredProtocolRC6,     0x93,      0xA0,  false},       failed
-    {InfraredProtocolRC6,     0x95,      0xA0,  false}, // toggle 1
-};
-
 const InfraredMessage test_encoder_rc6_input1[] = {
     {InfraredProtocolRC6,     0x93,      0xA0,  false}, // Toggle 0
     {InfraredProtocolRC6,     0x93,      0xA0,  true},  // Toggle 0
