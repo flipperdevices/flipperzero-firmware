@@ -130,7 +130,9 @@ void furi_hal_subghz_load_registers(const uint8_t data[][2]) {
     while(data[i][0]) {
         cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, data[i][0], data[i][1]);
         i++;
+        printf( "%X %X ", data[i][0], data[i][1]);
     }
+    printf("\r\n");
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 

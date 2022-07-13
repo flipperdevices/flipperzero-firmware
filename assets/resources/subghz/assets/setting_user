@@ -16,3 +16,12 @@ Version: 1
 #hopper_frequency: 300000000
 #hopper_frequency: 310000000
 #hopper_frequency: 310000000
+
+# Custom preset
+custom_preset_name: AM_1
+custom_preset_data: 02 0D 03 07 08 32 0B 06 14 00 13 00 12 30 11 32 10 17 18 18 19 18 1D 91 1C 00 1B 07 20 FB 22 11 21 B6 00 00
+custom_preset_pa: 00 C0 00 00 00 00 00 00
+
+custom_preset_name: AM_2
+custom_preset_data: 02 0D 03 07 08 32 0B 06 14 00 13 00 12 30 11 32 10 17 18 18 19 18 1D 91 1C 00 1B 07 20 FB 22 11 21 B6 00 00
+custom_preset_pa: 00 C0 00 00 00 00 00 00

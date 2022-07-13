@@ -157,26 +157,60 @@ static const uint32_t subghz_hopper_frequency_list_region_jp[] = {
     0,
 };
 
+typedef struct {
+    string_t custom_preset_name;
+    uint8_t* custom_preset_data;
+    uint8_t custom_preset_pa[8];
+} SubGhzSettingCustomPresetItem;
+
+ARRAY_DEF(SubGhzSettingCustomPresetItemArray, SubGhzSettingCustomPresetItem, M_POD_OPLIST)
+
+#define M_OPL_SubGhzSettingCustomPresetItemArray_t() \
+    ARRAY_OPLIST(SubGhzSettingCustomPresetItemArray, M_POD_OPLIST)
+
 LIST_DEF(FrequencyList, uint32_t)
 
 #define M_OPL_FrequencyList_t() LIST_OPLIST(FrequencyList)
 
+typedef struct {
+    SubGhzSettingCustomPresetItemArray_t data;
+} SubGhzSettingCustomPresetStruct;
+
 struct SubGhzSetting {
     FrequencyList_t frequencies;
     FrequencyList_t hopper_frequencies;
+    SubGhzSettingCustomPresetStruct* preset;
 };
 
 SubGhzSetting* subghz_setting_alloc(void) {
     SubGhzSetting* instance = malloc(sizeof(SubGhzSetting));
     FrequencyList_init(instance->frequencies);
     FrequencyList_init(instance->hopper_frequencies);
+    instance->preset = malloc(sizeof(SubGhzSettingCustomPresetStruct));
+    SubGhzSettingCustomPresetItemArray_init(instance->preset->data);
     return instance;
+}
+
+static void subghz_setting_preset_reset(SubGhzSetting* instance) {
+    for
+        M_EACH(item, instance->preset->data, SubGhzSettingCustomPresetItemArray_t) {
+            string_clear(item->custom_preset_name);
+            free(item->custom_preset_data);
+        }
+    SubGhzSettingCustomPresetItemArray_clear(instance->preset->data);
 }
 
 void subghz_setting_free(SubGhzSetting* instance) {
     furi_assert(instance);
     FrequencyList_clear(instance->frequencies);
     FrequencyList_clear(instance->hopper_frequencies);
+    for
+        M_EACH(item, instance->preset->data, SubGhzSettingCustomPresetItemArray_t) {
+            string_clear(item->custom_preset_name);
+            free(item->custom_preset_data);
+        }
+    SubGhzSettingCustomPresetItemArray_clear(instance->preset->data);
+    free(instance->preset);
     free(instance);
 }
 
@@ -188,6 +222,7 @@ static void subghz_setting_load_default_region(
 
     FrequencyList_reset(instance->frequencies);
     FrequencyList_reset(instance->hopper_frequencies);
+    subghz_setting_preset_reset(instance);
 
     while(*frequencies) {
         FrequencyList_push_back(instance->frequencies, *frequencies);
@@ -313,6 +348,43 @@ void subghz_setting_load(SubGhzSetting* instance, const char* file_path) {
                         }
                     }
             }
+
+            // custom preset (optional)
+            if(!flipper_format_rewind(fff_data_file)) {
+                FURI_LOG_E(TAG, "Rewind error");
+                break;
+            }
+            SubGhzSettingCustomPresetItem* item;
+            while(flipper_format_read_string(fff_data_file, "custom_preset_name", temp_str)) {
+                item = SubGhzSettingCustomPresetItemArray_push_raw(instance->preset->data);
+                string_init(item->custom_preset_name);
+                string_cat(item->custom_preset_name, temp_str);
+                if(!flipper_format_get_value_count(
+                       fff_data_file, "custom_preset_data", &temp_data32))
+                    break;
+                if(!temp_data32 || (temp_data32 % 2)) {
+                    FURI_LOG_E(TAG, "Integrity error custom_preset_data");
+                    break;
+                }
+                item->custom_preset_data = malloc(sizeof(uint8_t) * temp_data32);
+                if(!flipper_format_read_hex(
+                       fff_data_file,
+                       "custom_preset_data",
+                       item->custom_preset_data,
+                       temp_data32)) {
+                    FURI_LOG_E(TAG, "Missing custom_preset_data");
+                    break;
+                }
+                if(!flipper_format_read_hex(
+                       fff_data_file,
+                       "custom_preset_pa",
+                       item->custom_preset_pa,
+                       8)) {
+                    FURI_LOG_E(TAG, "Missing custom_preset_pa");
+                    break;
+                }
+            }
+
         } while(false);
     }
 
