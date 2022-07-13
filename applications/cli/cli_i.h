@@ -9,20 +9,16 @@
 #include <m-bptree.h>
 #include <m-array.h>
 
-#include "cli_vcp.h"
-
 #define CLI_LINE_SIZE_MAX
 #define CLI_COMMANDS_TREE_RANK 4
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 typedef struct {
     CliCallback callback;
     void* context;
     uint32_t flags;
 } CliCommand;
+
+typedef struct CliSession CliSession;
 
 struct CliSession {
     void (*init)(void);
@@ -61,7 +57,3 @@ void cli_reset(Cli* cli);
 void cli_putc(Cli* cli, char c);
 
 void cli_stdout_callback(void* _cookie, const char* data, size_t size);
-
-#ifdef __cplusplus
-}
-#endif

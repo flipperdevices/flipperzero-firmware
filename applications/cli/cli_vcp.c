@@ -1,4 +1,4 @@
-#include <furi_hal_usb_cdc.h>
+#include <furi_hal_usb_cdc_i.h>
 #include <furi_hal.h>
 #include <furi.h>
 #include <stream_buffer.h>

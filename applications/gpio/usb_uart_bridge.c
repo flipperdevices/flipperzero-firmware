@@ -1,7 +1,7 @@
 #include "usb_uart_bridge.h"
 #include "furi_hal.h"
 #include <stream_buffer.h>
-#include <furi_hal_usb_cdc.h>
+#include <furi_hal_usb_cdc_i.h>
 #include "usb_cdc.h"
 #include "cli/cli_vcp.h"
 #include "cli/cli.h"

@@ -5,11 +5,11 @@
 
 #pragma once
 
+#include "cli_i.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct CliSession CliSession;
 
 extern CliSession cli_vcp;
 

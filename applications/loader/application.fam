@@ -7,5 +7,4 @@ App(
     requires=["gui"],
     stack_size=1 * 1024,
     order=90,
-    sdk_headers=["loader.h"],
 )
