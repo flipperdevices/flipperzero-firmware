@@ -463,7 +463,9 @@ class SdkCache:
 
     def load_cache(self) -> None:
         if not os.path.exists(self.cache_file_name):
-            raise Exception("Cannot load symbol cache! File does not exist")
+            raise Exception(
+                f"Cannot load symbol cache '{self.cache_file_name}'! File does not exist"
+            )
 
         with open(self.cache_file_name, "r") as f:
             reader = csv.DictReader(f)

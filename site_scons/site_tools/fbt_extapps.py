@@ -25,8 +25,6 @@ def BuildAppElf(env, app):
         app_target_name,
         app_elf_raw,
         APP=app,
-        SDK_DEF=env.File("#/firmware/targets/f${TARGET_HW}/api_symbols.csv"),
-        # APPMETA=f"{app.appid}.meta",
     )
 
     app_stripped_elf = env.ELFStripper(
@@ -37,9 +35,7 @@ def BuildAppElf(env, app):
 
 
 def prepare_app_metadata(target, source, env):
-    print(f"prepare_app_metadata: {target}, {source}")
-
-    sdk_cache = SdkCache(env["SDK_DEF"].path, load_version_only=True)
+    sdk_cache = SdkCache(env.subst("$SDK_DEFINITION"), load_version_only=True)
     if not sdk_cache.is_buildable():
         raise UserError(
             "SDK version is not finalized, please review changes and re-run operation"
@@ -62,9 +58,12 @@ def generate(env, **kw):
             "EmbedAppMetadata": Builder(
                 # generator=gen_embed_app_metadata,
                 action=[
-                    prepare_app_metadata,
+                    Action(prepare_app_metadata, "$APPMETA_COMSTR"),
                     # embed_app_metadata,
-                    "${OBJCOPY} --add-section .fzmeta=${TARGET}.meta --set-section-flags .fzmeta=contents,data,readonly ${SOURCES} ${TARGET}",
+                    Action(
+                        "${OBJCOPY} --add-section .fzmeta=${TARGET}.meta --set-section-flags .fzmeta=contents,data,readonly ${SOURCES} ${TARGET}",
+                        "$APPMETAEMBED_COMSTR",
+                    ),
                 ],
                 suffix=".elf",
                 src_suffix=".elf",
