@@ -14,6 +14,11 @@ extern "C" {
  */
 bool elf_resolve_from_hashtable(const char* name, Elf32_Addr* address);
 
+extern const int elf_api_version;
+
+#define ELF_API_MAJOR (elf_api_version >> 16)
+#define ELF_API_MINOR (elf_api_version & 0xFFFF)
+
 #ifdef __cplusplus
 }
 #endif

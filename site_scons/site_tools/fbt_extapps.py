@@ -26,6 +26,7 @@ def BuildAppElf(env, app):
         app_elf_raw,
         APP=app,
     )
+    env.Depends(app_elf_augmented, [env["SDK_DEFINITION"], env.Value(app)])
 
     app_stripped_elf = env.ELFStripper(
         os.path.join(env.subst("$PLUGIN_ELF_DIR"), app.appid), app_elf_augmented
