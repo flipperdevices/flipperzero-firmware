@@ -33,7 +33,7 @@ void drestorer_scene_confirm_on_enter(void* context) {
         AlignCenter,
         AlignCenter,
         FontSecondary,
-        "Move backup from\nSD card to internal storage?");
+        "Copy backup from\nSD card to internal storage?");
 
     view_dispatcher_switch_to_view(app->view_dispatcher, StorageMoveToSdViewWidget);
 }
