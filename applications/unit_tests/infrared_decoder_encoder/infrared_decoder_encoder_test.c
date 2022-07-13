@@ -346,7 +346,7 @@ static void run_decoder(
 }
 
 MU_TEST(test_decoder_samsung32) {
-//     RUN_DECODER(InfraredProtocolSamsung32, 1, test_decoder_samsung32_expected1);
+    RUN_DECODER(InfraredProtocolSamsung32, 1);
 }
 
 MU_TEST(test_mix) {
@@ -373,26 +373,26 @@ MU_TEST(test_mix) {
 
 MU_TEST(test_decoder_nec) {
     RUN_DECODER(InfraredProtocolNEC, 1);
-//     RUN_DECODER(InfraredProtocolNEC, 2, test_decoder_nec_expected2);
-//     RUN_DECODER(InfraredProtocolNEC, 3, test_decoder_nec_expected3);
+    RUN_DECODER(InfraredProtocolNEC, 2);
+    RUN_DECODER(InfraredProtocolNEC, 3);
 }
 
 MU_TEST(test_decoder_unexpected_end_in_sequence) {
     // test_decoder_nec_input1 and test_decoder_nec_input2 shuts unexpected
-//     RUN_DECODER(InfraredProtocolNEC, 1, test_decoder_nec_expected1);
-//     RUN_DECODER(InfraredProtocolNEC, 1, test_decoder_nec_expected1);
-//     RUN_DECODER(InfraredProtocolNEC, 2, test_decoder_nec_expected2);
-//     RUN_DECODER(InfraredProtocolNEC, 2, test_decoder_nec_expected2);
+    RUN_DECODER(InfraredProtocolNEC, 1);
+    RUN_DECODER(InfraredProtocolNEC, 1);
+    RUN_DECODER(InfraredProtocolNEC, 2);
+    RUN_DECODER(InfraredProtocolNEC, 2);
 }
 
 MU_TEST(test_decoder_necext1) {
-//     RUN_DECODER(InfraredProtocolNECext, 1, test_decoder_necext_expected1);
-//     RUN_DECODER(InfraredProtocolNECext, 1, test_decoder_necext_expected1);
+    RUN_DECODER(InfraredProtocolNECext, 1);
+    RUN_DECODER(InfraredProtocolNECext, 1);
 }
 
 MU_TEST(test_decoder_long_packets_with_nec_start) {
-//     RUN_DECODER(InfraredProtocolNEC42ext, 1, test_decoder_nec42ext_expected1);
-//     RUN_DECODER(InfraredProtocolNEC42ext, 2, test_decoder_nec42ext_expected2);
+    RUN_DECODER(InfraredProtocolNEC42ext, 1);
+    RUN_DECODER(InfraredProtocolNEC42ext, 2);
 }
 
 MU_TEST(test_encoder_sirc) {
