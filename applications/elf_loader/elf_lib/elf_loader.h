@@ -2,11 +2,13 @@
 #define LOADER_H_
 
 #include <storage/storage.h>
-#include "../elf_addr_resolver.h"
+#include "elf.h"
 
 #ifdef __cplusplus__
 extern "C" {
 #endif
+
+typedef bool (*ELFResolver)(const char* name, Elf32_Addr* address);
 
 /**
  * @defgroup elf_loader ELF Loader

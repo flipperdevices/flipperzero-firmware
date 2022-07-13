@@ -127,7 +127,7 @@ def gen_sdk_data(sdk_cache):
     )
     # api_def.append("#ifdef __cplusplus\n } \n #endif\n {")
     api_def.append(
-        "static const constexpr auto elf_api_table = sort(create_array_t<sym_entry>("
+        "static constexpr auto elf_api_table = sort(create_array_t<sym_entry>("
     )
 
     api_lines = []

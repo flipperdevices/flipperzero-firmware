@@ -34,7 +34,9 @@ constexpr bool operator<(const sym_entry& k1, const sym_entry& k2) {
 
 constexpr uint32_t elf_gnu_hash(const char* s) {
     uint32_t h = 0x1505;
-    for(unsigned char c = *s; c != '\0'; c = *++s) h = (h << 5) + h + c;
+    for(unsigned char c = *s; c != '\0'; c = *++s) {
+        h = (h << 5) + h + c;
+    }
     return h;
 }
 
