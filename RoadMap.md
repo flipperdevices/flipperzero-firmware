@@ -6,7 +6,6 @@
 - I tried to organize them in terms of difficulty.
 
 ## WISH LIST ITEMS:
-- `Dolphin Restorer` APP to backup/restore internal dolphin state and settings from SD
 - `Notepad` APP to allow taking quick notes and saving to SD.
 - - Also can possibly open/edit .md,.txt,.fmf and other text friendly formats
 - `Write URL to NFC` APP to allow creating URL NFC tags from only the flipper
