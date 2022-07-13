@@ -27,11 +27,11 @@ def prebuild_sdk(source, target, env, for_signature):
     return [
         Action(
             _pregen_sdk_origin_file,
-            "$SDK_PREGEN_CMDSTR",
+            "$SDK_PREGEN_COMSTR",
         ),
         Action(
             "$CC -o $TARGET -E -P $CCFLAGS $_CCCOMCOM $SDK_PP_FLAGS -MMD ${TARGET}.c",
-            "$SDK_CMDSTR",
+            "$SDK_COMSTR",
         ),
     ]
 
@@ -120,12 +120,11 @@ def deploy_sdk_tree(target, source, env, for_signature):
 
 
 def gen_sdk_data(sdk_cache):
-    # api_def = ['#ifdef __cplusplus\n extern "C"\n #endif\n {']
     api_def = []
     api_def.extend(
         (f"#include <{h.name}>" for h in sdk_cache.get_headers()),
     )
-    # api_def.append("#ifdef __cplusplus\n } \n #endif\n {")
+
     api_def.append(
         "static constexpr auto elf_api_table = sort(create_array_t<sym_entry>("
     )
@@ -189,7 +188,7 @@ def generate(env, **kw):
             "SDKSymUpdater": Builder(
                 action=Action(
                     validate_sdk_cache,
-                    "$SDKSYM_UPDATER_CMDSTR",
+                    "$SDKSYM_UPDATER_COMSTR",
                 ),
                 suffix=".csv",
                 src_suffix=".i",
@@ -197,7 +196,7 @@ def generate(env, **kw):
             "SDKSymGenerator": Builder(
                 action=Action(
                     generate_sdk_symbols,
-                    "$SDKSYM_GENERATOR_CMDSTR",
+                    "$SDKSYM_GENERATOR_COMSTR",
                 ),
                 suffix=".h",
                 src_suffix=".csv",
