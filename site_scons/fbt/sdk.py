@@ -1,11 +1,14 @@
+import operator
 import os
-
-from typing import List, Set, ClassVar
+import csv
 import operator
 
+from enum import Enum, auto
+from typing import List, Set, ClassVar, Any
 from dataclasses import dataclass, field
 
 from cxxheaderparser.parser import CxxParser
+
 
 # 'Fixing' complaints about typedefs
 CxxParser._fundamentals.discard("wchar_t")
@@ -87,7 +90,6 @@ class ApiEntries:
 class SymbolManager:
     def __init__(self):
         self.api = ApiEntries()
-        # self.root_headers = []
         self.name_hashes = set()
 
     # Calculate hash of name and raise exception if it already is in the set
@@ -195,10 +197,9 @@ class SdkCxxVisitor:
         self.api = symbol_manager
 
     def on_variable(self, state: State, v: Variable) -> None:
-        # print("on_variable", v)
         if not v.extern:
-            # print("SKIPPING VAR", v)
             return
+
         self.api.add_variable(
             ApiEntryVariable(
                 stringify_descr(v.name),
@@ -207,10 +208,9 @@ class SdkCxxVisitor:
         )
 
     def on_function(self, state: State, fn: Function) -> None:
-        # print("on_function", fn)
         if fn.inline or fn.has_body:
-            # print("SKIPPING FN", fn.name)
             return
+
         self.api.add_function(
             ApiEntryFunction(
                 stringify_descr(fn.name),
@@ -300,22 +300,23 @@ class SdkVersion:
         return dict(name=str(self), type=None, params=None)
 
 
-import csv
-from enum import Enum, auto
-
-
 class VersionBump(Enum):
     NONE = auto()
     MAJOR = auto()
     MINOR = auto()
 
 
-# Class that stored all known API entries, both enabled and disabled.
-# Also keep track of API versioning
-# Allows comparison with newly-generated API
+class ApiEntryState(Enum):
+    PENDING = "?"
+    APPROVED = "+"
+    DISABLED = "-"
+
+
+# Class that stores all known API entries, both enabled and disabled.
+# Also keeps track of API versioning
+# Allows comparison and update from newly-generated API
 class SdkCache:
     CSV_FIELD_NAMES = ("entry", "status", "name", "type", "params")
-    CSV_TYPES = (ApiEntryFunction, ApiEntryVariable, ApiHeader, SdkVersion)
 
     def __init__(self, cache_file: str):
         self.cache_file_name = cache_file
@@ -333,7 +334,6 @@ class SdkCache:
         return (
             self.version != SdkVersion(0, 0)
             and self.version_action == VersionBump.NONE
-            and not self.loaded_dirty_version
             and not self.loaded_dirty
             and not self.new_entries
         )
@@ -355,15 +355,20 @@ class SdkCache:
 
     def _get_entry_status(self, entry) -> str:
         if entry in self.disabled_entries:
-            return "-"
+            return ApiEntryState.DISABLED
         elif entry in self.new_entries:
-            return "?"
+            return ApiEntryState.PENDING
         else:
-            return "+"
+            return ApiEntryState.APPROVED
 
     def _format_entry(self, obj):
         obj_dict = obj.dictify()
-        obj_dict.update(dict(entry=obj.csv_type, status=self._get_entry_status(obj)))
+        obj_dict.update(
+            dict(
+                entry=obj.csv_type,
+                status=self._get_entry_status(obj).value,
+            )
+        )
         return obj_dict
 
     def save(self) -> None:
@@ -384,10 +389,19 @@ class SdkCache:
         else:
             self.new_entries.add(self.version)
             print(
-                f"API version is still WIP: {self.version}. Review the changes and re-run command to update."
+                f"API version is still WIP: {self.version}. Review the changes and re-run command."
             )
-            print("Entries to review for version ", end="")
-            print("\n".join(map(str, self.new_entries)))
+            print(f"Entries to review:")
+            print(
+                "\n".join(
+                    map(
+                        str,
+                        filter(
+                            lambda e: not isinstance(e, SdkVersion), self.new_entries
+                        ),
+                    )
+                )
+            )
 
         str_cache_entries = [self.version]
         name_getter = operator.attrgetter("name")
@@ -403,26 +417,29 @@ class SdkCache:
                 writer.writerow(self._format_entry(entry))
 
     def _process_entry(self, entry_dict: dict) -> None:
-        # print(f"{entry_dict=}")
         entry_class = entry_dict["entry"]
         entry_status = entry_dict["status"]
         entry_name = entry_dict["name"]
-        entry_type = entry_dict["type"]
-        entry_params = entry_dict["params"]
 
         entry = None
-        if entry_class == "Version":
+        if entry_class == SdkVersion.csv_type:
             self.version = SdkVersion.from_str(entry_name)
-            if entry_status == "?":
+            if entry_status == ApiEntryState.PENDING.value:
                 self.loaded_dirty_version = True
-        elif entry_class == "Header":
+        elif entry_class == ApiHeader.csv_type:
             self.sdk.headers.add(entry := ApiHeader(entry_name))
-        elif entry_class == "Function":
+        elif entry_class == ApiEntryFunction.csv_type:
             self.sdk.functions.add(
-                entry := ApiEntryFunction(entry_name, entry_type, entry_params)
+                entry := ApiEntryFunction(
+                    entry_name,
+                    entry_dict["type"],
+                    entry_dict["params"],
+                )
             )
-        elif entry_class == "Variable":
-            self.sdk.variables.add(entry := ApiEntryVariable(entry_name, entry_type))
+        elif entry_class == ApiEntryVariable.csv_type:
+            self.sdk.variables.add(
+                entry := ApiEntryVariable(entry_name, entry_dict["type"])
+            )
         else:
             print(entry_dict)
             raise Exception("Unknown entry type: %s" % entry_class)
@@ -430,24 +447,22 @@ class SdkCache:
         if entry is None:
             return
 
-        if entry_status == "-":
+        if entry_status == ApiEntryState.DISABLED.value:
             self.disabled_entries.add(entry)
-        elif entry_status == "?":
+        elif entry_status == ApiEntryState.PENDING.value:
             self.new_entries.add(entry)
 
     def load_cache(self) -> None:
         if not os.path.exists(self.cache_file_name):
-            raise Exception("CANNOT LOAD SYMBOL CACHE! FILE DOES NOT EXIST")
+            raise Exception("Cannot load symbol cache! File does not exist")
 
         with open(self.cache_file_name, "r") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                # print(row)
                 self._process_entry(row)
-
         self.loaded_dirty = bool(self.new_entries)
 
-    def sync_sets(self, known_set, new_set):
+    def sync_sets(self, known_set: Set[Any], new_set: Set[Any]):
         new_entries = new_set - known_set
         if new_entries:
             print(f"New: {new_entries}")
@@ -455,15 +470,21 @@ class SdkCache:
             self.new_entries |= new_entries
             if self.version_action == VersionBump.NONE:
                 self.version_action = VersionBump.MINOR
-            # self.version = SdkVersion(self.version.major, self.version.minor + 1)
         removed_entries = known_set - new_set
         if removed_entries:
             print(f"Removed: {removed_entries}")
             known_set -= removed_entries
             # If any of removed entries was part of active API, that's a major bump
-            if any(filter(lambda e: e not in self.disabled_entries, removed_entries)):
+            if any(
+                filter(
+                    lambda e: e not in self.disabled_entries
+                    and e not in self.new_entries,
+                    removed_entries,
+                )
+            ):
                 self.version_action = VersionBump.MAJOR
-                # self.loaded_dirty = True
+            self.disabled_entries -= removed_entries
+            self.new_entries -= removed_entries
 
     def validate_api(self, api: ApiEntries) -> None:
         self.sync_sets(self.sdk.headers, api.headers)

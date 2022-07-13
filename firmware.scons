@@ -77,6 +77,10 @@ if not env["VERBOSE"]:
         BINCOMSTR="\tBIN\t${TARGET}",
         DFUCOMSTR="\tDFU\t${TARGET}",
         OPENOCDCOMSTR="\tFLASH\t${SOURCE}",
+        SDK_PREGEN_CMDSTR="\tPREGEN\t${TARGET}",
+        SDK_CMDSTR="\tSDKSRC\t${TARGET}",
+        SDKSYM_UPDATER_CMDSTR="\tSDKCHK\t${TARGET}",
+        SDKSYM_GENERATOR_CMDSTR="\tSDKSYM\t${TARGET}",
     )
 
 
@@ -171,7 +175,6 @@ fwenv.AppendUnique(
 # print(fwenv.Dump())
 
 # Full firmware definition
-
 fwelf = fwenv["FW_ELF"] = fwenv.Program(
     "${FIRMWARE_BUILD_CFG}",
     sources,
@@ -196,20 +199,8 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
         "mbedtls",
         "loclass",
         # 2nd round
-        "flipper${TARGET_HW}",
         "flipperformat",
         "toolbox",
-        "misc",
-        "st25rfal002",
-        "misc",
-        "flipper${TARGET_HW}",
-        "flipper${TARGET_HW}",
-        "flipper${TARGET_HW}",
-        "flipper${TARGET_HW}",
-        "st25rfal002",
-        # "toolbox",
-        # "toolbox",
-        # "toolbox",
     ],
 )
 
@@ -244,7 +235,8 @@ if should_gen_cdb_and_link_dir(fwenv, BUILD_TARGETS):
     # without filtering, both updater & firmware commands would be generated
     fwenv.Replace(COMPILATIONDB_PATH_FILTER=fwenv.subst("*${FW_FLAVOR}*"))
     Depends(fwcdb, fwelf)
-    AlwaysBuild(fwcdb)
+    AlwaysBuild(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", fwcdb)
+    Alias(fwcdb, "")
     fw_artifacts.append(fwcdb)
 
     # Adding as a phony target, so folder link is updated even if elf didn't change
@@ -278,7 +270,6 @@ if fwenv["IS_BASE_FIRMWARE"]:
         ],
     )
     Depends(sdk_source, fwenv["SDK_HEADERS"])
-    # AlwaysBuild(sdk_source)
 
     sdk_tree = fwenv.SDKTree("sdk/sdk.opts", "sdk_origin")
     AlwaysBuild(sdk_tree)
@@ -288,14 +279,15 @@ if fwenv["IS_BASE_FIRMWARE"]:
         "#/firmware/targets/f${TARGET_HW}/api_symbols.csv", "sdk_origin"
     )
     Precious(sdk_apicheck)
-    AlwaysBuild(sdk_apicheck)
-    # Alias("sdk", [sdk_tree, sdk_apicheck])
     Alias("sdk_check", sdk_apicheck)
 
     sdk_apisyms = fwenv.SDKSymGenerator(
         "assets/compiled/symbols.h", "#/firmware/targets/f${TARGET_HW}/api_symbols.csv"
     )
-    AlwaysBuild(sdk_apisyms)
     Alias("api_syms", sdk_apisyms)
+
+    if fwenv["FORCE"]:
+        fwenv.AlwaysBuild(sdk_source, sdk_tree, sdk_apicheck, sdk_apisyms)
+
 
 Return("fwenv")

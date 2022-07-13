@@ -25,8 +25,14 @@ def prebuild_sdk(source, target, env, for_signature):
             sdk_c.write("\n".join(f"#include <{h.path}>" for h in env["SDK_HEADERS"]))
 
     return [
-        _pregen_sdk_origin_file,
-        "$CC -o $TARGET -E -P $CCFLAGS $_CCCOMCOM $SDK_PP_FLAGS -MMD ${TARGET}.c",
+        Action(
+            _pregen_sdk_origin_file,
+            "$SDK_PREGEN_CMDSTR",
+        ),
+        Action(
+            "$CC -o $TARGET -E -P $CCFLAGS $_CCCOMCOM $SDK_PP_FLAGS -MMD ${TARGET}.c",
+            "$SDK_CMDSTR",
+        ),
     ]
 
 
@@ -56,11 +62,6 @@ class SdkTreeBuilder:
 
     def _generate_sdk_meta(self):
         filtered_paths = [self.target_sdk_dir]
-        # expanded_paths = self.env.subst(
-        #     "$_CPPINCFLAGS",
-        #     target=Entry("dummy"),
-        # )
-        # print(expanded_paths)
         full_fw_paths = list(
             map(
                 os.path.normpath,
@@ -71,12 +72,9 @@ class SdkTreeBuilder:
         sdk_dirs = ", ".join(f"'{dir}'" for dir in self.header_dirs)
         for dir in full_fw_paths:
             if dir in sdk_dirs:
-                # print("approved", dir)
                 filtered_paths.append(
                     posixpath.normpath(posixpath.join(self.target_sdk_dir, dir))
                 )
-            # else:
-            # print("rejected", dir)
 
         sdk_env = self.env.Clone()
         sdk_env.Replace(CPPPATH=filtered_paths)
@@ -147,23 +145,29 @@ def gen_sdk_data(sdk_cache):
     return api_def
 
 
+def _check_sdk_is_up2date(sdk_cache: SdkCache):
+    if not sdk_cache.is_buildable():
+        raise UserError(
+            "SDK version is not finalized, please review changes and re-run operation"
+        )
+
+
 def validate_sdk_cache(source, target, env):
-    print(f"Generating SDK for {source[0]} to {target[0]}")
+    # print(f"Generating SDK for {source[0]} to {target[0]}")
     current_sdk = SdkCollector()
     current_sdk.process_source_file_for_sdk(source[0].path)
     for h in env["SDK_HEADERS"]:
-        # print(f"{h.path=}")
         current_sdk.add_header_to_sdk(pathlib.Path(h.path).as_posix())
 
     sdk_cache = SdkCache(target[0].path)
     sdk_cache.validate_api(current_sdk.get_api())
     sdk_cache.save()
+    _check_sdk_is_up2date(sdk_cache)
 
 
 def generate_sdk_symbols(source, target, env):
     sdk_cache = SdkCache(source[0].path)
-    if not sdk_cache.is_buildable():
-        raise UserError("SDK version is not finalized, please run 'fbt sdk_check'")
+    _check_sdk_is_up2date(sdk_cache)
 
     api_def = gen_sdk_data(sdk_cache)
     with open(target[0].path, "wt") as f:
@@ -183,12 +187,18 @@ def generate(env, **kw):
                 src_suffix=".d",
             ),
             "SDKSymUpdater": Builder(
-                action=validate_sdk_cache,
+                action=Action(
+                    validate_sdk_cache,
+                    "$SDKSYM_UPDATER_CMDSTR",
+                ),
                 suffix=".csv",
                 src_suffix=".i",
             ),
             "SDKSymGenerator": Builder(
-                action=generate_sdk_symbols,
+                action=Action(
+                    generate_sdk_symbols,
+                    "$SDKSYM_GENERATOR_CMDSTR",
+                ),
                 suffix=".h",
                 src_suffix=".csv",
             ),
