@@ -62,7 +62,7 @@ def generate(env, **kw):
                     Action(prepare_app_metadata, "$APPMETA_COMSTR"),
                     # embed_app_metadata,
                     Action(
-                        "${OBJCOPY} --add-section .fzmeta=${TARGET}.meta --set-section-flags .fzmeta=contents,data,readonly ${SOURCES} ${TARGET}",
+                        "${OBJCOPY} --add-section .fzmeta=${TARGET}.meta --set-section-flags .fzmeta=contents,noload,readonly,data ${SOURCES} ${TARGET}",
                         "$APPMETAEMBED_COMSTR",
                     ),
                 ],
