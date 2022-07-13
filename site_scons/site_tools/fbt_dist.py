@@ -48,44 +48,55 @@ def AddFwProject(env, base_env, fw_type, fw_env_key):
             project_env["FW_ARTIFACTS"],
         ],
     )
+
     env.Replace(DIST_DIR=get_variant_dirname(env))
     return project_env
 
 
-def AddDebugTarget(env, targetenv, force_flash=True):
-    pseudo_name = f"debug.{targetenv.subst('$FIRMWARE_BUILD_CFG')}.pseudo"
-    debug_target = env.GDBPy(
-        pseudo_name,
-        targetenv["FW_ELF"],
-        GDBPYOPTS='-ex "source debug/FreeRTOS/FreeRTOS.py" '
-        '-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" '
-        '-ex "svd_load ${SVD_FILE}" '
-        '-ex "compare-sections"',
+def AddOpenOCDFlashTarget(env, targetenv, **kw):
+    openocd_target = env.OpenOCDFlash(
+        "#build/oocd-${BUILD_CFG}-flash.flag",
+        targetenv["FW_BIN"],
+        OPENOCD_COMMAND=[
+            "-c",
+            "program ${SOURCE.posix} reset exit ${BASE_ADDRESS}",
+        ],
+        BUILD_CFG=targetenv.subst("$FIRMWARE_BUILD_CFG"),
+        BASE_ADDRESS=targetenv.subst("$IMAGE_BASE_ADDRESS"),
+        **kw,
     )
-    if force_flash:
-        env.Depends(debug_target, targetenv["FW_FLASH"])
-    env.Pseudo(pseudo_name)
-    env.AlwaysBuild(debug_target)
-    return debug_target
+    env.Alias(targetenv.subst("${FIRMWARE_BUILD_CFG}_flash"), openocd_target)
+    return openocd_target
+
+
+def DistCommand(env, name, source, **kw):
+    target = f"dist_{name}"
+    command = env.Command(
+        target,
+        source,
+        '@${PYTHON3} ${ROOT_DIR.abspath}/scripts/sconsdist.py copy -p ${DIST_PROJECTS} -s "${DIST_SUFFIX}" ${DIST_EXTRA}',
+        **kw,
+    )
+    env.Pseudo(target)
+    env.Alias(name, command)
+    return command
 
 
 def generate(env):
     env.AddMethod(AddFwProject)
-    env.AddMethod(AddDebugTarget)
+    env.AddMethod(DistCommand)
+    env.AddMethod(AddOpenOCDFlashTarget)
+
     env.SetDefault(
         COPRO_MCU_FAMILY="STM32WB5x",
     )
+
     env.Append(
         BUILDERS={
-            "DistBuilder": Builder(
-                action=Action(
-                    '@${PYTHON3} ${ROOT_DIR.abspath}/scripts/sconsdist.py copy -p ${DIST_PROJECTS} -s "${DIST_SUFFIX}" ${DIST_EXTRA}',
-                ),
-            ),
             "UsbInstall": Builder(
                 action=[
                     Action(
-                        "${PYTHON3} ${ROOT_DIR.abspath}/scripts/selfupdate.py install dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}/update.fuf"
+                        "${PYTHON3} ${ROOT_DIR.abspath}/scripts/selfupdate.py dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}/update.fuf"
                     ),
                     Touch("${TARGET}"),
                 ]
