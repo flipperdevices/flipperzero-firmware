@@ -35,7 +35,7 @@ void storage_move_to_sd_scene_confirm_on_enter(void* context) {
         app);
 
     widget_add_string_element(
-        app->widget, 64, 10, AlignCenter, AlignCenter, FontPrimary, "SD card inserted");
+        app->widget, 64, 10, AlignCenter, AlignCenter, FontPrimary, "SD Card Present");
     widget_add_string_multiline_element(
         app->widget,
         64,
@@ -43,7 +43,7 @@ void storage_move_to_sd_scene_confirm_on_enter(void* context) {
         AlignCenter,
         AlignCenter,
         FontSecondary,
-        "Move data from\ninternal storage to SD card?");
+        "Copy data from\ninternal storage to SD card?");
 
     view_dispatcher_switch_to_view(app->view_dispatcher, StorageMoveToSdViewWidget);
 }
