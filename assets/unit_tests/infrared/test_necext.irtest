@@ -549,3 +549,136 @@ address: 84 79 00 00
 command: 12 ED 00 00
 repeat: true
 #
+name: encoder_decoder_input1
+type: parsed_array
+count: 26
+protocol: NECext
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: NECext
+address: 01 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: NECext
+address: 01 00 00 00
+command: 00 80 00 00
+repeat: false
+#
+protocol: NECext
+address: 00 00 00 00
+command: 00 80 00 00
+repeat: false
+#
+protocol: NECext
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: NECext
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: true
+#
+protocol: NECext
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: NECext
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: true
+#
+protocol: NECext
+address: FF FF 00 00
+command: FF FF 00 00
+repeat: false
+#
+protocol: NECext
+address: FE FF 00 00
+command: FF FF 00 00
+repeat: false
+#
+protocol: NECext
+address: FE FF 00 00
+command: FF 7F 00 00
+repeat: false
+#
+protocol: NECext
+address: FF FF 00 00
+command: FF 7F 00 00
+repeat: false
+#
+protocol: NECext
+address: FF FF 00 00
+command: FF FF 00 00
+repeat: false
+#
+protocol: NECext
+address: FF FF 00 00
+command: FF FF 00 00
+repeat: true
+#
+protocol: NECext
+address: AA AA 00 00
+command: 55 55 00 00
+repeat: false
+#
+protocol: NECext
+address: 55 55 00 00
+command: AA AA 00 00
+repeat: false
+#
+protocol: NECext
+address: 55 55 00 00
+command: 55 55 00 00
+repeat: false
+#
+protocol: NECext
+address: AA AA 00 00
+command: AA AA 00 00
+repeat: false
+#
+protocol: NECext
+address: AA AA 00 00
+command: AA AA 00 00
+repeat: true
+#
+protocol: NECext
+address: AA AA 00 00
+command: AA AA 00 00
+repeat: false
+#
+protocol: NECext
+address: AA AA 00 00
+command: AA AA 00 00
+repeat: true
+#
+protocol: NECext
+address: AA AA 00 00
+command: AA AA 00 00
+repeat: true
+#
+protocol: NECext
+address: 55 55 00 00
+command: 55 55 00 00
+repeat: false
+#
+protocol: NECext
+address: 55 55 00 00
+command: 55 55 00 00
+repeat: true
+#
+protocol: NECext
+address: 55 55 00 00
+command: 55 55 00 00
+repeat: true
+#
+protocol: NECext
+address: 55 55 00 00
+command: 55 55 00 00
+repeat: true
+#

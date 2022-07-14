@@ -205,3 +205,137 @@ name: encoder_expected1
 type: raw
 data: 27888 888 888 1776 1776 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 1776 888 27888 888 888 888 888 888 888 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 1776 888 27888 888 888 888 888 888 888 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 1776 888 27888 888 888 888 888 888 888 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 1776 888 27888 888 888 1776 1776 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 1776 888 27888 888 888 888 888 888 888 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 888 888 27888 888 888 1776 1776 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 888 888 27888 888 888 1776 1776 1776 888 888 1776 888 888 1776 1776 1776 888 888 888 888 888 888 27888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 27888 888 888 1776 1776 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 27888 888 888 1776 1776 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888 888
 #
+name: encoder_decoder_input1
+type: parsed_array
+count: 26
+#
+protocol: RC5
+address: 1F 00 00 00
+command: 3F 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 10 00 00 00
+command: 01 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 01 00 00 00
+command: 20 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 01 00 00 00
+command: 20 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 01 00 00 00
+command: 20 00 00 00
+repeat: true
+#
+protocol: RC5
+address: 01 00 00 00
+command: 20 00 00 00
+repeat: true
+#
+protocol: RC5
+address: 01 00 00 00
+command: 20 00 00 00
+repeat: true
+#
+protocol: RC5
+address: 01 00 00 00
+command: 20 00 00 00
+repeat: true
+#
+protocol: RC5
+address: 1F 00 00 00
+command: 3F 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 0A 00 00 00
+command: 2A 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 15 00 00 00
+command: 15 00 00 00
+repeat: false
+#
+protocol: RC5
+address: 15 00 00 00
+command: 15 00 00 00
+repeat: true
+#
+protocol: RC5X
+address: 1F 00 00 00
+command: 3F 00 00 00
+repeat: false
+#
+protocol: RC5X
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: RC5X
+address: 10 00 00 00
+command: 01 00 00 00
+repeat: false
+#
+protocol: RC5X
+address: 01 00 00 00
+command: 20 00 00 00
+repeat: false
+#
+protocol: RC5X
+address: 01 00 00 00
+command: 20 00 00 00
+repeat: false
+#
+protocol: RC5X
+address: 01 00 00 00
+command: 20 00 00 00
+repeat: true
+#
+protocol: RC5X
+address: 01 00 00 00
+command: 20 00 00 00
+repeat: true
+#
+protocol: RC5X
+address: 01 00 00 00
+command: 20 00 00 00
+repeat: true
+#
+protocol: RC5X
+address: 01 00 00 00
+command: 20 00 00 00
+repeat: true
+#
+protocol: RC5X
+address: 1F 00 00 00
+command: 3F 00 00 00
+repeat: false
+#
+protocol: RC5X
+address: 0A 00 00 00
+command: 2A 00 00 00
+repeat: false
+#
+protocol: RC5X
+address: 15 00 00 00
+command: 15 00 00 00
+repeat: false
+#
+protocol: RC5X
+address: 15 00 00 00
+command: 15 00 00 00
+repeat: true
+#

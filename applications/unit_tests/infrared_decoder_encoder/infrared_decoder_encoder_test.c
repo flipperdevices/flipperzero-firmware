@@ -3,12 +3,6 @@
 #include "../minunit.h"
 #include "infrared.h"
 #include "common/infrared_common_i.h"
-#include "test_data/infrared_nec_test_data.srcdata"
-#include "test_data/infrared_necext_test_data.srcdata"
-#include "test_data/infrared_samsung_test_data.srcdata"
-#include "test_data/infrared_rc6_test_data.srcdata"
-#include "test_data/infrared_rc5_test_data.srcdata"
-#include "test_data/infrared_sirc_test_data.srcdata"
 
 #define IR_TEST_FILES_DIR "/ext/unit_tests/infrared/"
 #define IR_TEST_FILE_PREFIX "test_"
@@ -226,12 +220,14 @@ static void infrared_test_run_encoder(InfraredProtocol protocol, uint32_t test_i
 
     string_printf(buf, "encoder_input%d", test_index);
     mu_assert(
-        infrared_test_load_messages(test->ff, string_get_cstr(buf), &input_messages, &input_messages_count),
+        infrared_test_load_messages(
+            test->ff, string_get_cstr(buf), &input_messages, &input_messages_count),
         "Failed to load messages from file");
 
     string_printf(buf, "encoder_expected%d", test_index);
     mu_assert(
-        infrared_test_load_raw_signal(test->ff, string_get_cstr(buf), &expected_timings, &expected_timings_count),
+        infrared_test_load_raw_signal(
+            test->ff, string_get_cstr(buf), &expected_timings, &expected_timings_count),
         "Failed to load raw signal from file");
 
     flipper_format_file_close(test->ff);
@@ -263,31 +259,47 @@ static void infrared_test_run_encoder(InfraredProtocol protocol, uint32_t test_i
     mu_assert(j == expected_timings_count, "encoded less timings than expected");
 }
 
-static void infrared_test_run_encoder_decoder(
-    const InfraredMessage input_messages[],
-    uint32_t input_messages_len) {
+static void infrared_test_run_encoder_decoder(InfraredProtocol protocol, uint32_t test_index) {
     uint32_t* timings = 0;
-    uint32_t timings_len = 200;
+    uint32_t timings_count = 200;
+    InfraredMessage* input_messages;
+    uint32_t input_messages_count;
     bool level = false;
-    timings = malloc(sizeof(uint32_t) * timings_len);
 
-    for(uint32_t message_counter = 0; message_counter < input_messages_len; ++message_counter) {
+    string_t buf;
+    string_init(buf);
+
+    timings = malloc(sizeof(uint32_t) * timings_count);
+
+    const char* protocol_name = infrared_get_protocol_name(protocol);
+    mu_assert(infrared_test_prepare_file(protocol_name), "Failed to prepare test file");
+
+    string_printf(buf, "encoder_decoder_input%d", test_index);
+    mu_assert(
+        infrared_test_load_messages(
+            test->ff, string_get_cstr(buf), &input_messages, &input_messages_count),
+        "Failed to load messages from file");
+
+    flipper_format_file_close(test->ff);
+    string_clear(buf);
+
+    for(uint32_t message_counter = 0; message_counter < input_messages_count; ++message_counter) {
         const InfraredMessage* message_encoded = &input_messages[message_counter];
         if(!message_encoded->repeat) {
             infrared_reset_encoder(test->encoder_handler, message_encoded);
         }
 
-        timings_len = 200;
-        run_encoder_fill_array(test->encoder_handler, timings, &timings_len, &level);
-        furi_check(timings_len <= 200);
+        timings_count = 200;
+        run_encoder_fill_array(test->encoder_handler, timings, &timings_count, &level);
+        furi_check(timings_count <= 200);
 
         const InfraredMessage* message_decoded = 0;
-        for(size_t i = 0; i < timings_len; ++i) {
+        for(size_t i = 0; i < timings_count; ++i) {
             message_decoded = infrared_decode(test->decoder_handler, level, timings[i]);
-            if((i == timings_len - 2) && level && message_decoded) {
+            if((i == timings_count - 2) && level && message_decoded) {
                 /* In case we end with space timing - message can be decoded at last mark */
                 break;
-            } else if(i < timings_len - 1) {
+            } else if(i < timings_count - 1) {
                 mu_check(!message_decoded);
             } else {
                 if(!message_decoded) {
@@ -303,6 +315,7 @@ static void infrared_test_run_encoder_decoder(
             mu_check(0);
         }
     }
+    free(input_messages);
     free(timings);
 }
 
@@ -441,7 +454,6 @@ MU_TEST(infrared_test_decoder_sirc) {
     infrared_test_run_decoder(InfraredProtocolSIRC, 2);
     infrared_test_run_decoder(InfraredProtocolSIRC, 4);
     infrared_test_run_decoder(InfraredProtocolSIRC, 5);
-    //     RUN_ENCODER_DECODER(test_sirc);
 }
 
 MU_TEST(infrared_test_decoder_rc5) {
@@ -472,19 +484,17 @@ MU_TEST(infrared_test_encoder_rc6) {
 }
 
 MU_TEST(infrared_test_encoder_decoder_all) {
-    //     RUN_ENCODER_DECODER(test_nec);
-    //     RUN_ENCODER_DECODER(test_necext);
-    //     RUN_ENCODER_DECODER(test_nec42);
-    //     RUN_ENCODER_DECODER(test_nec42ext);
-    //     RUN_ENCODER_DECODER(test_samsung32);
-    //     RUN_ENCODER_DECODER(test_rc6);
-    //     RUN_ENCODER_DECODER(test_rc5);
-    //     RUN_ENCODER_DECODER(test_sirc);
+    infrared_test_run_encoder_decoder(InfraredProtocolNEC, 1);
+    infrared_test_run_encoder_decoder(InfraredProtocolNECext, 1);
+    infrared_test_run_encoder_decoder(InfraredProtocolNEC42, 1);
+    infrared_test_run_encoder_decoder(InfraredProtocolNEC42ext, 1);
+    infrared_test_run_encoder_decoder(InfraredProtocolSamsung32, 1);
+    infrared_test_run_encoder_decoder(InfraredProtocolRC6, 1);
+    infrared_test_run_encoder_decoder(InfraredProtocolRC5, 1);
+    infrared_test_run_encoder_decoder(InfraredProtocolSIRC, 1);
 }
 
 MU_TEST_SUITE(infrared_test) {
-    UNUSED(infrared_test_run_encoder);
-    UNUSED(infrared_test_run_encoder_decoder);
     MU_SUITE_CONFIGURE(&infrared_test_alloc, &infrared_test_free);
 
     MU_RUN_TEST(infrared_test_encoder_sirc);

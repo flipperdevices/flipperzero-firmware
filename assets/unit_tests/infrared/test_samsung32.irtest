@@ -399,3 +399,137 @@ address: 0E 00 00 00
 command: 01 00 00 00
 repeat: true
 #
+name: encoder_decoder_input1
+type: parsed_array
+count: 26
+#
+protocol: Samsung32
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: 01 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: 01 00 00 00
+command: 80 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: 00 00 00 00
+command: 80 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: true
+#
+protocol: Samsung32
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: true
+#
+protocol: Samsung32
+address: FF 00 00 00
+command: FF 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: FE 00 00 00
+command: FF 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: FE 00 00 00
+command: 7F 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: FF 00 00 00
+command: 7F 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: FF 00 00 00
+command: FF 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: FF 00 00 00
+command: FF 00 00 00
+repeat: true
+#
+protocol: Samsung32
+address: AA 00 00 00
+command: 55 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: 55 00 00 00
+command: AA 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: 55 00 00 00
+command: 55 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: AA 00 00 00
+command: AA 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: AA 00 00 00
+command: AA 00 00 00
+repeat: true
+#
+protocol: Samsung32
+address: AA 00 00 00
+command: AA 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: AA 00 00 00
+command: AA 00 00 00
+repeat: true
+#
+protocol: Samsung32
+address: AA 00 00 00
+command: AA 00 00 00
+repeat: true
+#
+protocol: Samsung32
+address: 55 00 00 00
+command: 55 00 00 00
+repeat: false
+#
+protocol: Samsung32
+address: 55 00 00 00
+command: 55 00 00 00
+repeat: true
+#
+protocol: Samsung32
+address: 55 00 00 00
+command: 55 00 00 00
+repeat: true
+#
+protocol: Samsung32
+address: 55 00 00 00
+command: 55 00 00 00
+repeat: true
+#

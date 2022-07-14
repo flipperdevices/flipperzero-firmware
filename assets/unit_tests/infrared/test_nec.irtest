@@ -375,3 +375,137 @@ address: 1C 01 00 00
 command: 12 00 00 00
 repeat: false
 #
+name: encoder_decoder_input1
+type: parsed_array
+count: 26
+#
+protocol: NEC
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: NEC
+address: 01 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: NEC
+address: 01 00 00 00
+command: 80 00 00 00
+repeat: false
+#
+protocol: NEC
+address: 00 00 00 00
+command: 80 00 00 00
+repeat: false
+#
+protocol: NEC
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: NEC
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: true
+#
+protocol: NEC
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: NEC
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: true
+#
+protocol: NEC
+address: FF 00 00 00
+command: FF 00 00 00
+repeat: false
+#
+protocol: NEC
+address: FE 00 00 00
+command: FF 00 00 00
+repeat: false
+#
+protocol: NEC
+address: FE 00 00 00
+command: 7F 00 00 00
+repeat: false
+#
+protocol: NEC
+address: FF 00 00 00
+command: 7F 00 00 00
+repeat: false
+#
+protocol: NEC
+address: FF 00 00 00
+command: FF 00 00 00
+repeat: false
+#
+protocol: NEC
+address: FF 00 00 00
+command: FF 00 00 00
+repeat: true
+#
+protocol: NEC
+address: AA 00 00 00
+command: 55 00 00 00
+repeat: false
+#
+protocol: NEC
+address: 55 00 00 00
+command: AA 00 00 00
+repeat: false
+#
+protocol: NEC
+address: 55 00 00 00
+command: 55 00 00 00
+repeat: false
+#
+protocol: NEC
+address: AA 00 00 00
+command: AA 00 00 00
+repeat: false
+#
+protocol: NEC
+address: AA 00 00 00
+command: AA 00 00 00
+repeat: true
+#
+protocol: NEC
+address: AA 00 00 00
+command: AA 00 00 00
+repeat: false
+#
+protocol: NEC
+address: AA 00 00 00
+command: AA 00 00 00
+repeat: true
+#
+protocol: NEC
+address: AA 00 00 00
+command: AA 00 00 00
+repeat: true
+#
+protocol: NEC
+address: 55 00 00 00
+command: 55 00 00 00
+repeat: false
+#
+protocol: NEC
+address: 55 00 00 00
+command: 55 00 00 00
+repeat: true
+#
+protocol: NEC
+address: 55 00 00 00
+command: 55 00 00 00
+repeat: true
+#
+protocol: NEC
+address: 55 00 00 00
+command: 55 00 00 00
+repeat: true
+#

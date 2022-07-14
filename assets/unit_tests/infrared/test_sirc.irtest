@@ -934,3 +934,127 @@ type: raw
 data:
 10000 2400 600 1200 600 1200 600 600 600 600 600 1200 600 600 600 1200 600 1200 600 600 600 1200 600 1200 600 1200 600 1200 600 1200 600 600 18600 2400 600 1200 600 1200 600 600 600 600 600 1200 600 600 600 1200 600 1200 600 600 600 1200 600 1200 600 1200 600 1200 600 1200 600 600 18600 2400 600 1200 600 1200 600 600 600 600 600 1200 600 600 600 1200 600 1200 600 600 600 1200 600 1200 600 1200 600 1200 600 1200 600 600
 #
+name: encoder_decoder_input1
+type: parsed_array
+count: 24
+#
+protocol: SIRC20
+address: FF 1F 00 00
+command: 7F 00 00 00
+repeat: false
+#
+protocol: SIRC20
+address: FF 1F 00 00
+command: 7F 00 00 00
+repeat: true
+#
+protocol: SIRC20
+address: FF 1F 00 00
+command: 7F 00 00 00
+repeat: true
+#
+protocol: SIRC
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: SIRC
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: true
+#
+protocol: SIRC
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: true
+#
+protocol: SIRC
+address: 1A 00 00 00
+command: 22 00 00 00
+repeat: false
+#
+protocol: SIRC
+address: 1A 00 00 00
+command: 22 00 00 00
+repeat: true
+#
+protocol: SIRC
+address: 1A 00 00 00
+command: 22 00 00 00
+repeat: true
+#
+protocol: SIRC
+address: 17 00 00 00
+command: 0A 00 00 00
+repeat: false
+#
+protocol: SIRC15
+address: 7D 00 00 00
+command: 53 00 00 00
+repeat: false
+#
+protocol: SIRC15
+address: 7D 00 00 00
+command: 53 00 00 00
+repeat: true
+#
+protocol: SIRC15
+address: 7D 00 00 00
+command: 53 00 00 00
+repeat: true
+#
+protocol: SIRC15
+address: 71 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: SIRC15
+address: 15 00 00 00
+command: 01 00 00 00
+repeat: false
+#
+protocol: SIRC15
+address: 01 00 00 00
+command: 15 00 00 00
+repeat: false
+#
+protocol: SIRC20
+address: AA 00 00 00
+command: 55 00 00 00
+repeat: false
+#
+protocol: SIRC20
+address: 31 03 00 00
+command: 71 00 00 00
+repeat: false
+#
+protocol: SIRC
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: SIRC
+address: 1F 00 00 00
+command: 7F 00 00 00
+repeat: false
+#
+protocol: SIRC15
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: SIRC15
+address: FF 00 00 00
+command: 7F 00 00 00
+repeat: false
+#
+protocol: SIRC20
+address: 00 00 00 00
+command: 00 00 00 00
+repeat: false
+#
+protocol: SIRC20
+address: FF 1F 00 00
+command: 7F 00 00 00
+repeat: false
+#
