@@ -40,6 +40,10 @@ for apptype in (FlipperAppType.PLUGIN, FlipperAppType.EXTERNAL):
     for app in appenv["APPBUILD"].get_apps_of_type(apptype):
         extapps.append(appenv.BuildAppElf(app))
 
+for apptype in (FlipperAppType.GAME, FlipperAppType.EXTERNAL):
+    for app in appenv["APPBUILD"].get_apps_of_type(apptype):
+        extapps.append(appenv.BuildAppElf(app))
+
 # Ugly access to global option
 if extra_app_list := GetOption("extra_ext_apps"):
     for extra_app in extra_app_list.split(","):
