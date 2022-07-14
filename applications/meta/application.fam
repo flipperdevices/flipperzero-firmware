@@ -33,15 +33,12 @@ App(
     name="Basic applications for plug-in menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "bt_hid",
-        "drestorer",
-        "storage_move_to_sd",
         "hid_anal",
-        "music_player",
         "picopass",
-        "spectrum_analyzer",
         "wav_player",
-        "mousejacker","nrfsniff","sentry_safe","barcode_generator",
+        "mousejacker",
+        "nrfsniff",
+        "touchtunes",
     ],
 )
 
@@ -50,16 +47,11 @@ App(
     name="Custom applications for games menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "game_2048",
-        "arkanoid_game",
-        "dice_game",
-        "snake_game",
         "tanks_game",
+        "gameoflife_game",
+        "raycast_game",
+        "chess_game",
         "tetris_game",
-        "tictactoe_game",
-        "videopoker_game",
-        "flappy_game","gameoflife_game","raycast_game",
-        "mandelbrot",
     ],
 )
 
