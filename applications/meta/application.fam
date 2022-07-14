@@ -50,7 +50,6 @@ App(
         "tanks_game",
         "gameoflife_game",
         "raycast_game",
-        "chess_game",
         "tetris_game",
     ],
 )
