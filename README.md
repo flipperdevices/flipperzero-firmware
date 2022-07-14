@@ -7,6 +7,8 @@
 - Moved out WAV Player and made changes so it's ELF can be compiled properly (Thanks to Hedger/DaFakeBillGates)
 - OFW: [[FL-2554] Embedded arm-none-eabi toolchain #1351](https://github.com/flipperdevices/flipperzero-firmware/pull/1351)
 - OFW: [[FL-2633] Move files from /int to /ext on SD mount #1384 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384)
+- OFW: [Correct # to ! for the inverted text example #1395](https://github.com/flipperdevices/flipperzero-firmware/pull/1395)
+- OFW: [IR: increase raw timings amount #1388](https://github.com/flipperdevices/flipperzero-firmware/pull/1388)
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
