@@ -65,9 +65,9 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
         test_result |= run_minunit_test_dirwalk();
         test_result |= run_minunit_test_flipper_format();
         test_result |= run_minunit_test_flipper_format_string();
-        test_result |= run_minunit_test_infrared();
         test_result |= run_minunit_test_rpc();
         test_result |= run_minunit_test_subghz();
+        test_result |= run_minunit_test_infrared();
         test_result |= run_minunit_test_nfc();
 
         cycle_counter = (furi_hal_get_tick() - cycle_counter);
