@@ -144,7 +144,7 @@ $ docker-compose exec dev ./fbt
 - [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/SentrySafe.elf) [Sentry Safe (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/unleashed/applications/sentry_safe) from [UberGuidoZ](https://github.com/UberGuidoZ/))
 - [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/SpectrumAnalyzer.elf) [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
 - [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
-- [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
+- [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/WAVPlayer.elf) [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 </details>
 </td></tr></table>
 
