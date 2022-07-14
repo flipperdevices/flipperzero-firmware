@@ -85,6 +85,12 @@ uint8_t mf_classic_get_total_sectors_num(MfClassicType type) {
     }
 }
 
+bool mf_classic_block_read(MfClassicData* data, uint8_t block_num) {
+    furi_assert(data);
+
+    return FURI_BIT(data->block_read_mask[block_num / 32], block_num / 32);
+}
+
 static uint16_t mf_classic_get_total_block_num(MfClassicType type) {
     if(type == MfClassicType1k) {
         return 64;

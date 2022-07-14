@@ -42,6 +42,7 @@ typedef struct {
 
 typedef struct {
     MfClassicType type;
+    uint32_t block_read_mask[MF_CLASSIC_TOTAL_BLOCKS_MAX / 32];
     uint64_t key_a_mask;
     uint64_t key_b_mask;
     MfClassicBlock block[MF_CLASSIC_TOTAL_BLOCKS_MAX];
