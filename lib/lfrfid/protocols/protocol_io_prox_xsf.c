@@ -2,6 +2,7 @@
 #include <toolbox/protocols/protocol.h>
 #include <lfrfid/tools/fsk_demod.h>
 #include <lfrfid/tools/fsk_osc.h>
+#include <lfrfid/tools/bit_lib.h>
 
 #define JITTER_TIME (20)
 #define MIN_TIME (64 - JITTER_TIME)
@@ -20,7 +21,6 @@ typedef struct {
 typedef struct {
     FSKOsc* fsk_osc;
     uint8_t encoded_index;
-    uint32_t pulse;
 } ProtocolH10301Encoder;
 
 typedef struct {
@@ -88,21 +88,11 @@ static uint8_t protocol_io_prox_xsf_compute_checksum(const uint8_t* data) {
 
     uint8_t checksum = 0;
 
-    checksum += (data[1] << 1) | (data[2] >> 7); // VVVVVVVVV
-    checksum += (data[2] << 2) | (data[3] >> 6); // WWWWWWWWW
-    checksum += (data[3] << 3) | (data[4] >> 5); // XXXXXXXXX
-    checksum += (data[4] << 4) | (data[5] >> 4); // YYYYYYYYY
-    checksum += (data[5] << 5) | (data[6] >> 3); // ZZZZZZZZZ
+    for(size_t i = 1; i <= 5; i++) {
+        checksum += bit_lib_get_bits(data, 9 * i, 8);
+    }
 
     return 0xFF - checksum;
-}
-
-static void protocol_io_prox_xsf_store_data(ProtocolIOProxXSF* protocol, bool data) {
-    for(int i = 0; i < 7; ++i) {
-        protocol->encoded_data[i] = (protocol->encoded_data[i] << 1) |
-                                    ((protocol->encoded_data[i + 1] >> 7) & 1);
-    }
-    protocol->encoded_data[7] = (protocol->encoded_data[7] << 1) | data;
 }
 
 static bool protocol_io_prox_xsf_can_be_decoded(const uint8_t* encoded_data) {
@@ -128,28 +118,31 @@ static bool protocol_io_prox_xsf_can_be_decoded(const uint8_t* encoded_data) {
     }
 
     // ... check for known ones...
-    if((encoded_data[2] & 0b01000000) == 0) {
+    if(bit_lib_bit_is_not_set(encoded_data[2], 6)) {
         return false;
     }
-    if((encoded_data[3] & 0b00100000) == 0) {
+    if(bit_lib_bit_is_not_set(encoded_data[3], 5)) {
         return false;
     }
-    if((encoded_data[4] & 0b00010000) == 0) {
+    if(bit_lib_bit_is_not_set(encoded_data[4], 4)) {
         return false;
     }
-    if((encoded_data[5] & 0b00001000) == 0) {
+    if(bit_lib_bit_is_not_set(encoded_data[5], 3)) {
         return false;
     }
-    if((encoded_data[6] & 0b00000100) == 0) {
+    if(bit_lib_bit_is_not_set(encoded_data[6], 2)) {
         return false;
     }
-    if((encoded_data[7] & 0b00000011) == 0) {
+    if(bit_lib_bit_is_not_set(encoded_data[7], 1)) {
+        return false;
+    }
+    if(bit_lib_bit_is_not_set(encoded_data[7], 0)) {
         return false;
     }
 
     // ... and validate our checksums.
     uint8_t checksum = protocol_io_prox_xsf_compute_checksum(encoded_data);
-    uint8_t checkval = (encoded_data[6] << 6) | (encoded_data[7] >> 2);
+    uint8_t checkval = bit_lib_get_bits(encoded_data, 54, 8);
 
     if(checksum != checkval) {
         return false;
@@ -175,14 +168,14 @@ void protocol_io_prox_xsf_decode(const uint8_t* encoded_data, uint8_t* decoded_d
     // X = checksum
 
     // Facility code
-    decoded_data[0] = (encoded_data[2] << 2) | (encoded_data[3] >> 6);
+    decoded_data[0] = bit_lib_get_bits(encoded_data, 18, 8);
 
     // Version code.
-    decoded_data[1] = (encoded_data[3] << 3) | (encoded_data[4] >> 5);
+    decoded_data[1] = bit_lib_get_bits(encoded_data, 27, 8);
 
     // Code bytes.
-    decoded_data[2] = (encoded_data[4] << 4) | (encoded_data[5] >> 4);
-    decoded_data[3] = (encoded_data[5] << 5) | (encoded_data[6] >> 3);
+    decoded_data[2] = bit_lib_get_bits(encoded_data, 36, 8);
+    decoded_data[3] = bit_lib_get_bits(encoded_data, 45, 8);
 }
 
 bool protocol_io_prox_xsf_decoder_feed(ProtocolIOProxXSF* protocol, bool level, uint32_t duration) {
@@ -193,7 +186,7 @@ bool protocol_io_prox_xsf_decoder_feed(ProtocolIOProxXSF* protocol, bool level, 
 
     fsk_demod_feed(protocol->decoder.fsk_demod, level, duration, &value, &count);
     for(size_t i = 0; i < count; i++) {
-        protocol_io_prox_xsf_store_data(protocol, value);
+        bit_lib_push_bit(protocol->encoded_data, IOPROXXSF_ENCODED_DATA_SIZE, value);
         if(protocol_io_prox_xsf_can_be_decoded(protocol->encoded_data)) {
             protocol_io_prox_xsf_decode(protocol->encoded_data, protocol->data);
             result = true;
@@ -208,27 +201,6 @@ void protocol_io_prox_xsf_decoder_reset(ProtocolIOProxXSF* protocol) {
     protocol_io_prox_xsf_decoder_start(protocol);
 };
 
-static void write_bit(bool bit, uint8_t position, uint8_t* data) {
-    if(bit) {
-        data[position / 8] |= 1UL << (7 - (position % 8));
-    } else {
-        data[position / 8] &= ~(1UL << (7 - (position % 8)));
-    }
-}
-
-/**
- * Writes up to eight contiguous bits into the output buffer.
- */
-static void write_bits(uint8_t byte, uint8_t position, uint8_t* data, uint8_t length) {
-    furi_check(length <= 8);
-    furi_check(length > 0);
-
-    for(uint8_t i = 0; i < length; ++i) {
-        uint8_t shift = 7 - i;
-        write_bit((byte >> shift) & 1, position + i, data);
-    }
-}
-
 static void protocol_io_prox_xsf_encode(const uint8_t* decoded_data, uint8_t* encoded_data) {
     // Packet to transmit:
     //
@@ -239,75 +211,51 @@ static void protocol_io_prox_xsf_encode(const uint8_t* decoded_data, uint8_t* en
     // 00000000 0 11110000 1 facility 1 version_ 1 code-one 1 code-two 1 checksum 11
 
     // Preamble.
-    write_bits(0b00000000, 0, encoded_data, 8);
-    write_bit(0, 8, encoded_data);
+    bit_lib_set_bits(encoded_data, 0, 0b00000000, 8);
+    bit_lib_set_bit(encoded_data, 8, 0);
 
-    write_bits(0b11110000, 9, encoded_data, 8);
-    write_bit(1, 17, encoded_data);
+    bit_lib_set_bits(encoded_data, 9, 0b11110000, 8);
+    bit_lib_set_bit(encoded_data, 17, 1);
 
     // Facility code.
-    write_bits(decoded_data[0], 18, encoded_data, 8);
-    write_bit(1, 26, encoded_data);
+    bit_lib_set_bits(encoded_data, 18, decoded_data[0], 8);
+    bit_lib_set_bit(encoded_data, 26, 1);
 
     // Version
-    write_bits(decoded_data[1], 27, encoded_data, 8);
-    write_bit(1, 35, encoded_data);
+    bit_lib_set_bits(encoded_data, 27, decoded_data[1], 8);
+    bit_lib_set_bit(encoded_data, 35, 1);
 
     // Code one
-    write_bits(decoded_data[2], 36, encoded_data, 8);
-    write_bit(1, 44, encoded_data);
+    bit_lib_set_bits(encoded_data, 36, decoded_data[2], 8);
+    bit_lib_set_bit(encoded_data, 44, 1);
 
     // Code two
-    write_bits(decoded_data[3], 45, encoded_data, 8);
-    write_bit(1, 53, encoded_data);
+    bit_lib_set_bits(encoded_data, 45, decoded_data[3], 8);
+    bit_lib_set_bit(encoded_data, 53, 1);
 
     // Checksum
-    write_bits(protocol_io_prox_xsf_compute_checksum(encoded_data), 54, encoded_data, 8);
-    write_bit(1, 62, encoded_data);
-    write_bit(1, 63, encoded_data);
+    bit_lib_set_bits(encoded_data, 54, protocol_io_prox_xsf_compute_checksum(encoded_data), 8);
+    bit_lib_set_bit(encoded_data, 62, 1);
+    bit_lib_set_bit(encoded_data, 63, 1);
 }
 
 bool protocol_io_prox_xsf_encoder_start(ProtocolIOProxXSF* protocol) {
     protocol_io_prox_xsf_encode(protocol->data, (uint8_t*)protocol->encoded_data);
     protocol->encoder.encoded_index = 0;
-    protocol->encoder.pulse = 0;
-
+    fsk_osc_reset(protocol->encoder.fsk_osc);
     return true;
 };
 
 LevelDuration protocol_io_prox_xsf_encoder_yield(ProtocolIOProxXSF* protocol) {
-    bool level = 0;
-    uint32_t duration = 0;
+    bool level;
+    uint32_t duration;
 
-    // if pulse is zero, we need to output high, otherwise we need to output low
-    if(protocol->encoder.pulse == 0) {
-        // get bit
-        uint8_t bit =
-            (protocol->encoded_data[protocol->encoder.encoded_index / IOPROXXSF_BIT_SIZE] >>
-             ((IOPROXXSF_BIT_SIZE - 1) - (protocol->encoder.encoded_index % IOPROXXSF_BIT_SIZE))) &
-            1;
+    bool bit = bit_lib_get_bit(protocol->encoded_data, protocol->encoder.encoded_index);
+    bool advance = fsk_osc_next_half(protocol->encoder.fsk_osc, bit, &level, &duration);
 
-        // get pulse from oscillator
-        bool advance = fsk_osc_next(protocol->encoder.fsk_osc, bit, &duration);
-
-        if(advance) {
-            protocol->encoder.encoded_index++;
-            if(protocol->encoder.encoded_index >= (IOPROXXSF_BIT_MAX_SIZE)) {
-                protocol->encoder.encoded_index = 0;
-            }
-        }
-
-        // duration diveded by 2 because we need to output high and low
-        duration = duration / 2;
-        protocol->encoder.pulse = duration;
-        level = true;
-    } else {
-        // output low half and reset pulse
-        duration = protocol->encoder.pulse;
-        protocol->encoder.pulse = 0;
-        level = false;
+    if(advance) {
+        bit_lib_increment_index(protocol->encoder.encoded_index, IOPROXXSF_BIT_MAX_SIZE);
     }
-
     return level_duration_make(level, duration);
 };
 
