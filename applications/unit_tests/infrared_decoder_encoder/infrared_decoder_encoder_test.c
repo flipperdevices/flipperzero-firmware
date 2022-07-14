@@ -1,8 +1,8 @@
 #include <furi.h>
 #include <flipper_format.h>
+#include <infrared.h>
+#include <common/infrared_common_i.h>
 #include "../minunit.h"
-#include "infrared.h"
-#include "common/infrared_common_i.h"
 
 #define IR_TEST_FILES_DIR "/ext/unit_tests/infrared/"
 #define IR_TEST_FILE_PREFIX "test_"
@@ -154,7 +154,7 @@ static bool infrared_test_load_messages(
     return success;
 }
 
-static void compare_message_results(
+static void infrared_test_compare_message_results(
     const InfraredMessage* message_decoded,
     const InfraredMessage* message_expected) {
     mu_check(message_decoded->protocol == message_expected->protocol);
@@ -170,7 +170,7 @@ static void compare_message_results(
 }
 
 /* Encodes signal and merges same levels (high+high, low+low) */
-static void run_encoder_fill_array(
+static void infrared_test_run_encoder_fill_array(
     InfraredEncoderHandler* handler,
     uint32_t* timings,
     uint32_t* timings_len,
@@ -243,7 +243,7 @@ static void infrared_test_run_encoder(InfraredProtocol protocol, uint32_t test_i
         }
 
         timings_count = 200;
-        run_encoder_fill_array(test->encoder_handler, timings, &timings_count, NULL);
+        infrared_test_run_encoder_fill_array(test->encoder_handler, timings, &timings_count, NULL);
         furi_check(timings_count <= 200);
 
         for(size_t i = 0; i < timings_count; ++i, ++j) {
@@ -290,7 +290,7 @@ static void infrared_test_run_encoder_decoder(InfraredProtocol protocol, uint32_
         }
 
         timings_count = 200;
-        run_encoder_fill_array(test->encoder_handler, timings, &timings_count, &level);
+        infrared_test_run_encoder_fill_array(test->encoder_handler, timings, &timings_count, &level);
         furi_check(timings_count <= 200);
 
         const InfraredMessage* message_decoded = 0;
@@ -310,7 +310,7 @@ static void infrared_test_run_encoder_decoder(InfraredProtocol protocol, uint32_
             level = !level;
         }
         if(message_decoded) {
-            compare_message_results(message_decoded, message_encoded);
+            infrared_test_compare_message_results(message_decoded, message_encoded);
         } else {
             mu_check(0);
         }
@@ -375,7 +375,7 @@ static void infrared_test_run_decoder(InfraredProtocol protocol, uint32_t test_i
             }
 
             mu_assert(message_counter < messages_count, "decoded more than expected");
-            compare_message_results(message_decoded, &messages[message_counter]);
+            infrared_test_compare_message_results(message_decoded, &messages[message_counter]);
 
             ++message_counter;
         }
@@ -384,7 +384,7 @@ static void infrared_test_run_decoder(InfraredProtocol protocol, uint32_t test_i
 
     message_decoded = infrared_check_decoder_ready(test->decoder_handler);
     if(message_decoded) {
-        compare_message_results(message_decoded, &messages[message_counter]);
+        infrared_test_compare_message_results(message_decoded, &messages[message_counter]);
         ++message_counter;
     }
 
