@@ -44,7 +44,7 @@ static void __furi_print_name(bool isr) {
         furi_hal_console_puts(tmp_str);
         furi_hal_console_puts("] ");
     } else {
-        const char* name = pcTaskGetName(xTaskGetCurrentTaskHandle());
+        const char* name = pcTaskGetName(NULL);
         if(name == NULL) {
             furi_hal_console_puts("[main] ");
         } else {
