@@ -13,6 +13,8 @@ env.Append(
         File("#/lib/toolbox/path.h"),
         File("#/lib/toolbox/random_name.h"),
         File("#/lib/toolbox/hmac_sha256.h"),
+        File("#/lib/toolbox/stream/stream.h"),
+        File("#/lib/toolbox/stream/file_stream.h")
     ],
 )
 
