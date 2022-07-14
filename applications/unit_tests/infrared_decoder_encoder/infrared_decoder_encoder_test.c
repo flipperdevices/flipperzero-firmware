@@ -456,11 +456,11 @@ MU_TEST(infrared_test_decoder_rc5) {
 }
 
 MU_TEST(infrared_test_encoder_rc5x) {
-    //     RUN_ENCODER(test_decoder_rc5x_expected1, test_decoder_rc5x_input1);
+    infrared_test_run_encoder(InfraredProtocolRC5X, 1);
 }
 
 MU_TEST(infrared_test_encoder_rc5) {
-    //     RUN_ENCODER(test_decoder_rc5_expected_all_repeats, test_decoder_rc5_input_all_repeats);
+    infrared_test_run_encoder(InfraredProtocolRC5, 1);
 }
 
 MU_TEST(infrared_test_decoder_rc6) {
@@ -468,7 +468,7 @@ MU_TEST(infrared_test_decoder_rc6) {
 }
 
 MU_TEST(infrared_test_encoder_rc6) {
-    //     RUN_ENCODER(test_encoder_rc6_input1, test_encoder_rc6_expected1);
+    infrared_test_run_encoder(InfraredProtocolRC6, 1);
 }
 
 MU_TEST(infrared_test_encoder_decoder_all) {
