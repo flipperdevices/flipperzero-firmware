@@ -2,10 +2,13 @@
 
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
-- OFW: Added [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
-- Moving apps to [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/elf) status in PLUGIN/GAMES list; to load with [the `.elf` files](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/elf) from SD using the `ELF Loader` APP.
 - Updated so elfs get built for games
 - Updated README with new compilation information `docker-compose exec dev ./fbt firmware_extapps FIRMWARE_APP_SET=ext_apps`
+- Moved out WAV Player and made changes so it's ELF can be compiled properly (Thanks to Hedger/DaFakeBillGates)
+- OFW: [[FL-2554] Embedded arm-none-eabi toolchain #1351](https://github.com/flipperdevices/flipperzero-firmware/pull/1351)
+- OFW: [[FL-2633] Move files from /int to /ext on SD mount #1384 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384)
+- OFW: [Correct # to ! for the inverted text example #1395](https://github.com/flipperdevices/flipperzero-firmware/pull/1395)
+- OFW: [IR: increase raw timings amount #1388](https://github.com/flipperdevices/flipperzero-firmware/pull/1388)
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
@@ -67,7 +70,6 @@ $ docker-compose exec dev ./fbt
 
 
 ## Open PRs Checkedout & Not Merged In Main:
-- [[FL-2633] Move files from /int to /ext on SD mount #1384 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384)
 - [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
   
 </td><td>
@@ -142,7 +144,7 @@ $ docker-compose exec dev ./fbt
 - [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/SentrySafe.elf) [Sentry Safe (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/unleashed/applications/sentry_safe) from [UberGuidoZ](https://github.com/UberGuidoZ/))
 - [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/SpectrumAnalyzer.elf) [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
 - [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
-- [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
+- [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/WavPlayer.elf) [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 </details>
 </td></tr></table>
 
