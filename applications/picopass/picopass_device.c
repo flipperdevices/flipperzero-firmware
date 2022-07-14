@@ -32,7 +32,7 @@ static bool picopass_device_save_file(
     bool saved = false;
     FlipperFormat* file = flipper_format_file_alloc(dev->storage);
     PicopassPacs* pacs = &dev->dev_data.pacs;
-    ApplicationArea* AA1 = &dev->dev_data.AA1;
+    PicopassBlock* AA1 = dev->dev_data.AA1;
     string_t temp_str;
     string_init(temp_str);
 
@@ -67,27 +67,26 @@ static bool picopass_device_save_file(
                 if(!flipper_format_write_hex(
                        file, "Credential", pacs->credential, PICOPASS_BLOCK_LEN))
                     break;
-                if(!flipper_format_write_hex(file, "PIN", pacs->pin0, PICOPASS_BLOCK_LEN)) break;
-                if(!flipper_format_write_hex(file, "PIN(cont.)", pacs->pin1, PICOPASS_BLOCK_LEN))
+                if(!flipper_format_write_hex(file, "PIN\t\t", pacs->pin0, PICOPASS_BLOCK_LEN))
                     break;
-
-                if(!flipper_format_write_comment_cstr(file, "Picopass blocks")) break;
-                // TODO: Save CSN, CFG, AA1, etc
-                bool block_saved = true;
-                for(size_t i = 0; i < 4; i++) {
-                    string_printf(temp_str, "Block %d", i + 6);
-                    if(!flipper_format_write_hex(
-                           file,
-                           string_get_cstr(temp_str),
-                           AA1->block[i].data,
-                           PICOPASS_BLOCK_LEN)) {
-                        block_saved = false;
-                        break;
-                    }
-                }
-                if(!block_saved) break;
-                if(!flipper_format_write_comment_cstr(file, "This is currently incomplete")) break;
+                if(!flipper_format_write_hex(file, "PIN(cont.)\t", pacs->pin1, PICOPASS_BLOCK_LEN))
+                    break;
             }
+            if(!flipper_format_write_comment_cstr(file, "Picopass blocks")) break;
+            bool block_saved = true;
+
+            size_t app_limit = AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[0] < PICOPASS_MAX_APP_LIMIT ?
+                                   AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[0] :
+                                   PICOPASS_MAX_APP_LIMIT;
+            for(size_t i = 0; i < app_limit; i++) {
+                string_printf(temp_str, "Block %d", i);
+                if(!flipper_format_write_hex(
+                       file, string_get_cstr(temp_str), AA1[i].data, PICOPASS_BLOCK_LEN)) {
+                    block_saved = false;
+                    break;
+                }
+            }
+            if(!block_saved) break;
         } else if(dev->format == PicopassDeviceSaveFormatLF) {
             const char* lf_header = "Flipper RFID key";
             // Write header
@@ -142,5 +141,7 @@ void picopass_device_free(PicopassDevice* picopass_dev) {
 }
 
 void picopass_device_data_clear(PicopassDeviceData* dev_data) {
-    memset(&dev_data->AA1, 0, sizeof(ApplicationArea));
+    for(size_t i = 0; i < PICOPASS_MAX_APP_LIMIT; i++) {
+        memset(dev_data->AA1[i].data, 0, sizeof(dev_data->AA1[i].data));
+    }
 }

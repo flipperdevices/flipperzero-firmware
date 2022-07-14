@@ -10,6 +10,10 @@
 #define PICOPASS_DEV_NAME_MAX_LEN 22
 #define PICOPASS_READER_DATA_MAX_SIZE 64
 #define PICOPASS_BLOCK_LEN 8
+#define PICOPASS_MAX_APP_LIMIT 32
+
+#define PICOPASS_CSN_BLOCK_INDEX 0
+#define PICOPASS_CONFIG_BLOCK_INDEX 1
 
 #define PICOPASS_APP_FOLDER "/any/picopass"
 #define PICOPASS_APP_EXTENSION ".picopass"
@@ -44,7 +48,11 @@ typedef struct {
 } PicopassPacs;
 
 typedef struct {
-    ApplicationArea AA1;
+    uint8_t data[PICOPASS_BLOCK_LEN];
+} PicopassBlock;
+
+typedef struct {
+    PicopassBlock AA1[PICOPASS_MAX_APP_LIMIT];
     PicopassPacs pacs;
 } PicopassDeviceData;
 

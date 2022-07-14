@@ -165,7 +165,7 @@ ReturnCode picopass_detect_card(int timeout) {
     return ERR_NONE;
 }
 
-ReturnCode picopass_read_card(ApplicationArea* AA1) {
+ReturnCode picopass_read_card(PicopassBlock* AA1) {
     rfalPicoPassIdentifyRes idRes;
     rfalPicoPassSelectRes selRes;
     rfalPicoPassReadCheckRes rcRes;
@@ -205,10 +205,20 @@ ReturnCode picopass_read_card(ApplicationArea* AA1) {
         return err;
     }
 
-    for(size_t i = 0; i < 4; i++) {
-        FURI_LOG_D(TAG, "rfalPicoPassPollerReadBlock block %d", i + 6);
+    rfalPicoPassReadBlockRes csn;
+    err = rfalPicoPassPollerReadBlock(PICOPASS_CSN_BLOCK_INDEX, &csn);
+    memcpy(AA1[PICOPASS_CSN_BLOCK_INDEX].data, csn.data, sizeof(csn.data));
+
+    rfalPicoPassReadBlockRes cfg;
+    err = rfalPicoPassPollerReadBlock(PICOPASS_CONFIG_BLOCK_INDEX, &cfg);
+    memcpy(AA1[PICOPASS_CONFIG_BLOCK_INDEX].data, cfg.data, sizeof(cfg.data));
+
+    size_t app_limit = cfg.data[0] < PICOPASS_MAX_APP_LIMIT ? cfg.data[0] : PICOPASS_MAX_APP_LIMIT;
+
+    for(size_t i = 2; i < app_limit; i++) {
+        FURI_LOG_D(TAG, "rfalPicoPassPollerReadBlock block %d", i);
         rfalPicoPassReadBlockRes block;
-        err = rfalPicoPassPollerReadBlock(i + 6, &block);
+        err = rfalPicoPassPollerReadBlock(i, &block);
         if(err != ERR_NONE) {
             FURI_LOG_E(TAG, "rfalPicoPassPollerReadBlock error %d", err);
             return err;
@@ -217,7 +227,7 @@ ReturnCode picopass_read_card(ApplicationArea* AA1) {
         FURI_LOG_D(
             TAG,
             "rfalPicoPassPollerReadBlock %d %02x%02x%02x%02x%02x%02x%02x%02x",
-            i + 6,
+            i,
             block.data[0],
             block.data[1],
             block.data[2],
@@ -227,7 +237,7 @@ ReturnCode picopass_read_card(ApplicationArea* AA1) {
             block.data[6],
             block.data[7]);
 
-        memcpy(&(AA1->block[i]), &block, sizeof(block));
+        memcpy(AA1[i].data, block.data, sizeof(block.data));
     }
 
     return ERR_NONE;
@@ -251,7 +261,7 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
     picopass_device_data_clear(picopass_worker->dev_data);
     PicopassDeviceData* dev_data = picopass_worker->dev_data;
 
-    ApplicationArea* AA1 = &dev_data->AA1;
+    PicopassBlock* AA1 = dev_data->AA1;
     PicopassPacs* pacs = &dev_data->pacs;
     ReturnCode err;
 
@@ -263,33 +273,33 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
                 FURI_LOG_E(TAG, "picopass_read_card error %d", err);
             }
 
-            pacs->biometrics = AA1->block[0].data[4];
-            pacs->encryption = AA1->block[0].data[7];
+            pacs->biometrics = AA1[6].data[4];
+            pacs->encryption = AA1[6].data[7];
 
             if(pacs->encryption == 0x17) {
                 FURI_LOG_D(TAG, "3DES Encrypted");
-                err = picopass_worker_decrypt(AA1->block[1].data, pacs->credential);
+                err = picopass_worker_decrypt(AA1[7].data, pacs->credential);
                 if(err != ERR_NONE) {
                     FURI_LOG_E(TAG, "decrypt error %d", err);
                     break;
                 }
 
-                err = picopass_worker_decrypt(AA1->block[2].data, pacs->pin0);
+                err = picopass_worker_decrypt(AA1[8].data, pacs->pin0);
                 if(err != ERR_NONE) {
                     FURI_LOG_E(TAG, "decrypt error %d", err);
                     break;
                 }
 
-                err = picopass_worker_decrypt(AA1->block[3].data, pacs->pin1);
+                err = picopass_worker_decrypt(AA1[9].data, pacs->pin1);
                 if(err != ERR_NONE) {
                     FURI_LOG_E(TAG, "decrypt error %d", err);
                     break;
                 }
             } else if(pacs->encryption == 0x14) {
                 FURI_LOG_D(TAG, "No Encryption");
-                memcpy(pacs->credential, AA1->block[1].data, RFAL_PICOPASS_MAX_BLOCK_LEN);
-                memcpy(pacs->pin0, AA1->block[2].data, RFAL_PICOPASS_MAX_BLOCK_LEN);
-                memcpy(pacs->pin1, AA1->block[3].data, RFAL_PICOPASS_MAX_BLOCK_LEN);
+                memcpy(pacs->credential, AA1[7].data, PICOPASS_BLOCK_LEN);
+                memcpy(pacs->pin0, AA1[8].data, PICOPASS_BLOCK_LEN);
+                memcpy(pacs->pin1, AA1[9].data, PICOPASS_BLOCK_LEN);
             } else if(pacs->encryption == 0x15) {
                 FURI_LOG_D(TAG, "DES Encrypted");
             } else {
