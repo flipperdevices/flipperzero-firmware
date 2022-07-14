@@ -100,22 +100,22 @@ void furi_hal_subghz_dump_state() {
 
 void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
     if(preset == FuriHalSubGhzPresetOok650Async) {
-        furi_hal_subghz_load_registers(furi_hal_subghz_preset_ook_650khz_async_regs);
+        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_ook_650khz_async_regs);
         furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
     } else if(preset == FuriHalSubGhzPresetOok270Async) {
-        furi_hal_subghz_load_registers(furi_hal_subghz_preset_ook_270khz_async_regs);
+        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_ook_270khz_async_regs);
         furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
     } else if(preset == FuriHalSubGhzPreset2FSKDev238Async) {
-        furi_hal_subghz_load_registers(furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs);
+        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs);
         furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
     } else if(preset == FuriHalSubGhzPreset2FSKDev476Async) {
-        furi_hal_subghz_load_registers(furi_hal_subghz_preset_2fsk_dev47_6khz_async_regs);
+        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_2fsk_dev47_6khz_async_regs);
         furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
     } else if(preset == FuriHalSubGhzPresetMSK99_97KbAsync) {
-        furi_hal_subghz_load_registers(furi_hal_subghz_preset_msk_99_97kb_async_regs);
+        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_msk_99_97kb_async_regs);
         furi_hal_subghz_load_patable(furi_hal_subghz_preset_msk_async_patable);
     } else if(preset == FuriHalSubGhzPresetGFSK9_99KbAsync) {
-        furi_hal_subghz_load_registers(furi_hal_subghz_preset_gfsk_9_99kb_async_regs);
+        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_gfsk_9_99kb_async_regs);
         furi_hal_subghz_load_patable(furi_hal_subghz_preset_gfsk_async_patable);
     } else {
         furi_crash("SubGhz: Missing config.");
@@ -123,14 +123,20 @@ void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
     furi_hal_subghz.preset = preset;
 }
 
-void furi_hal_subghz_load_registers(const uint8_t data[][2]) {
+void furi_hal_subghz_load_custom_preset(uint8_t *preset_data, uint8_t preset_pa[8]) {
+        furi_hal_subghz_load_registers(preset_data);
+        furi_hal_subghz_load_patable(preset_pa);
+    furi_hal_subghz.preset = FuriHalSubGhzPresetCustom;
+}
+
+void furi_hal_subghz_load_registers(uint8_t *data) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_reset(&furi_hal_spi_bus_handle_subghz);
     uint32_t i = 0;
-    while(data[i][0]) {
-        cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, data[i][0], data[i][1]);
-        i++;
-        printf( "%X %X ", data[i][0], data[i][1]);
+    while(data[i]) {
+        cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, data[i], data[i+1]);
+        i+=2;
+        printf( "%X %X ", data[i], data[i+1]);
     }
     printf("\r\n");
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);

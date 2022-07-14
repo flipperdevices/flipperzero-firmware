@@ -186,6 +186,8 @@ SubGhz* subghz_alloc() {
     subghz->txrx = malloc(sizeof(SubGhzTxRx));
     subghz->txrx->frequency = subghz_setting_get_default_frequency(subghz->setting);
     subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
+    string_init(subghz->txrx->preset_name);
+    string_set(subghz->txrx->preset_name, "AM650");
     subghz->txrx->txrx_state = SubGhzTxRxStateSleep;
     subghz->txrx->hopper_state = SubGhzHopperStateOFF;
     subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;

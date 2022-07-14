@@ -21,13 +21,15 @@
 
 bool subghz_set_preset(SubGhz* subghz, const char* preset) {
     if(!strcmp(preset, "FuriHalSubGhzPresetOok270Async")) {
-        subghz->txrx->preset = FuriHalSubGhzPresetOok270Async;
+        string_set(subghz->txrx->preset_name, "AM270");
     } else if(!strcmp(preset, "FuriHalSubGhzPresetOok650Async")) {
-        subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
+        string_set(subghz->txrx->preset_name, "AM650");
     } else if(!strcmp(preset, "FuriHalSubGhzPreset2FSKDev238Async")) {
-        subghz->txrx->preset = FuriHalSubGhzPreset2FSKDev238Async;
+        string_set(subghz->txrx->preset_name, "FM238");
     } else if(!strcmp(preset, "FuriHalSubGhzPreset2FSKDev476Async")) {
-        subghz->txrx->preset = FuriHalSubGhzPreset2FSKDev476Async;
+        string_set(subghz->txrx->preset_name, "FM476");
+    } else if(!strcmp(preset, "FuriHalSubGhzCustomPreset")) {
+        string_set(subghz->txrx->preset_name, "XXXX");
     } else {
         FURI_LOG_E(TAG, "Unknown preset");
         return false;
@@ -46,24 +48,26 @@ void subghz_get_frequency_modulation(SubGhz* subghz, string_t frequency, string_
     }
 
     if(modulation != NULL) {
-        if(subghz->txrx->preset == FuriHalSubGhzPresetOok650Async ||
-           subghz->txrx->preset == FuriHalSubGhzPresetOok270Async) {
+        if(!strcmp(string_get_cstr(instance->txrx->preset_name), "AM270") ||
+           !strcmp(string_get_cstr(instance->txrx->preset_name), "AM650")) {
             string_set_str(modulation, "AM");
         } else if(
-            subghz->txrx->preset == FuriHalSubGhzPreset2FSKDev238Async ||
-            subghz->txrx->preset == FuriHalSubGhzPreset2FSKDev476Async) {
+            !strcmp(string_get_cstr(instance->txrx->preset_name), "FM238") ||
+            !strcmp(string_get_cstr(instance->txrx->preset_name, "FM476"))
             string_set_str(modulation, "FM");
-        } else {
-            furi_crash("SubGhz: Modulation is incorrect.");
-        }
+    } else if(!strcmp(string_get_cstr(instance->txrx->preset_name), "XXXX")) {
+        string_set_str(modulation, "XX");
+    } else {
+        furi_crash("SubGhz: Modulation is incorrect.");
     }
 }
+}
 
-void subghz_begin(SubGhz* subghz, FuriHalSubGhzPreset preset) {
+void subghz_begin(SubGhz* subghz, uint8_t* preset_data, uint8_t preset_pa) {
     furi_assert(subghz);
     furi_hal_subghz_reset();
     furi_hal_subghz_idle();
-    furi_hal_subghz_load_preset(preset);
+    furi_hal_subghz_load_custom_preset(preset_data, preset_pa);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     subghz->txrx->txrx_state = SubGhzTxRxStateIDLE;
 }
@@ -155,10 +159,10 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
 
         if(subghz->txrx->transmitter) {
             if(subghz_transmitter_deserialize(subghz->txrx->transmitter, flipper_format)) {
-                if(subghz->txrx->preset) {
-                    subghz_begin(subghz, subghz->txrx->preset);
+                if(!strcmp(string_get_cstr(subghz->txrx->preset_name), "")) {
+                    subghz_begin(subghz, subghz->txrx->preset_name);
                 } else {
-                    subghz_begin(subghz, FuriHalSubGhzPresetOok270Async);
+                    subghz_begin(subghz, "AM270");
                 }
                 if(subghz->txrx->frequency) {
                     ret = subghz_tx(subghz, subghz->txrx->frequency);

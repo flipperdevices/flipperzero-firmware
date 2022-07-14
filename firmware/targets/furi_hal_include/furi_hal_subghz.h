@@ -22,7 +22,8 @@ typedef enum {
     FuriHalSubGhzPreset2FSKDev238Async, /**< FM, deviation 2.380371 kHz, asynchronous */
     FuriHalSubGhzPreset2FSKDev476Async, /**< FM, deviation 47.60742 kHz, asynchronous */
     FuriHalSubGhzPresetMSK99_97KbAsync, /**< MSK, deviation 47.60742 kHz, 99.97Kb/s, asynchronous */
-    FuriHalSubGhzPresetGFSK9_99KbAsync /**< GFSK, deviation 19.042969 kHz, 9.996Kb/s, asynchronous */
+    FuriHalSubGhzPresetGFSK9_99KbAsync, /**< GFSK, deviation 19.042969 kHz, 9.996Kb/s, asynchronous */
+    FuriHalSubGhzPresetCustom, /**Custom Preset*/
 } FuriHalSubGhzPreset;
 
 /** Switchable Radio Paths */
@@ -74,11 +75,18 @@ void furi_hal_subghz_dump_state();
  */
 void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset);
 
+/** Load custom registers from preset
+ *
+ * @param      preset_data   registers to load
+ * @param      preset_pa   registers to patable
+ */
+void furi_hal_subghz_load_custom_preset(uint8_t *preset_data, uint8_t preset_pa[8]);
+
 /** Load registers
  *
  * @param      data  Registers data
  */
-void furi_hal_subghz_load_registers(const uint8_t data[][2]);
+void furi_hal_subghz_load_registers(uint8_t *data);
 
 /** Load PATABLE
  *

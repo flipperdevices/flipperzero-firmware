@@ -50,6 +50,7 @@ struct SubGhzTxRx {
     FlipperFormat* fff_data;
 
     uint32_t frequency;
+    string_t preset_name;
     FuriHalSubGhzPreset preset;
     SubGhzHistory* history;
     uint16_t idx_menu_chosen;
