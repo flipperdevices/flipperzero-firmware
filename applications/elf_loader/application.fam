@@ -7,5 +7,5 @@ App(
     requires=["gui", "storage"],
     stack_size=10 * 1024,
     icon="A_Debug_14",
-    order=0,
+    order=300,
 )
