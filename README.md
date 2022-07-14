@@ -6,6 +6,8 @@
 - Moving apps to [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/elf) status in PLUGIN/GAMES list; to load with [the `.elf` files](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/elf) from SD using the `ELF Loader` APP.
 - Updated so elfs get built for games
 - Updated README with new compilation information `docker-compose exec dev ./fbt firmware_extapps FIRMWARE_APP_SET=ext_apps`
+- OFW: [[FL-2554] Embedded arm-none-eabi toolchain #1351](https://github.com/flipperdevices/flipperzero-firmware/pull/1351)
+- OFW: [[FL-2633] Move files from /int to /ext on SD mount #1384 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384)
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
@@ -67,7 +69,6 @@ $ docker-compose exec dev ./fbt
 
 
 ## Open PRs Checkedout & Not Merged In Main:
-- [[FL-2633] Move files from /int to /ext on SD mount #1384 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384)
 - [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
   
 </td><td>
