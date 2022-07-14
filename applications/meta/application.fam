@@ -35,7 +35,6 @@ App(
     provides=[
         "hid_anal",
         "picopass",
-        "wav_player",
         "mousejacker",
         "nrfsniff",
         "touchtunes",
