@@ -290,7 +290,8 @@ static void infrared_test_run_encoder_decoder(InfraredProtocol protocol, uint32_
         }
 
         timings_count = 200;
-        infrared_test_run_encoder_fill_array(test->encoder_handler, timings, &timings_count, &level);
+        infrared_test_run_encoder_fill_array(
+            test->encoder_handler, timings, &timings_count, &level);
         furi_check(timings_count <= 200);
 
         const InfraredMessage* message_decoded = 0;
