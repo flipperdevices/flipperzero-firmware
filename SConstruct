@@ -34,7 +34,9 @@ coreenv["ROOT_DIR"] = Dir(".")
 # Create a separate "dist" environment and add construction envs to it
 distenv = coreenv.Clone(
     tools=["fbt_dist", "openocd", "blackmagic"],
-    OPENOCD_GDB_PIPE=["|openocd -c 'gdb_port pipe; log_output debug/openocd.log' ${[SINGLEQUOTEFUNC(OPENOCD_OPTS)]}"],
+    OPENOCD_GDB_PIPE=[
+        "|openocd -c 'gdb_port pipe; log_output debug/openocd.log' ${[SINGLEQUOTEFUNC(OPENOCD_OPTS)]}"
+    ],
     GDBOPTS_BASE=[
         "-ex",
         "target extended-remote ${GDBREMOTE}",
@@ -137,6 +139,18 @@ if GetOption("fullenv"):
 # Target for copying & renaming binaries to dist folder
 basic_dist = distenv.DistCommand("fw_dist", distenv["DIST_DEPENDS"])
 distenv.Default(basic_dist)
+
+dist_dir = distenv.GetProjetDirName()
+plugin_dist = [
+    distenv.Install(
+        f"#/dist/{dist_dir}/plugins/debug", firmware_env["FW_EXTAPPS"]["debug"]
+    ),
+    distenv.Install(
+        f"#/dist/{dist_dir}/plugins", firmware_env["FW_EXTAPPS"]["compact"]
+    ),
+]
+Alias("plugin_dist", plugin_dist)
+# distenv.Default(plugin_dist)
 
 # Target for bundling core2 package for qFlipper
 copro_dist = distenv.CoproBuilder(

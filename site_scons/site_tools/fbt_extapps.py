@@ -11,7 +11,7 @@ def BuildAppElf(env, app):
     work_dir = env.subst("$EXT_APPS_WORK_DIR")
 
     app_alias = f"{env['FIRMWARE_BUILD_CFG']}_{app.appid}"
-    app_original = os.path.join(work_dir, app.appid)
+    app_original = os.path.join(work_dir, f"{app.appid}_d")
     app_elf_raw = env.Program(
         app_original,
         env.GlobRecursive("*.c*", os.path.join(work_dir, app._appdir)),
@@ -28,7 +28,7 @@ def BuildAppElf(env, app):
     )
     env.Depends(app_elf_augmented, [env["SDK_DEFINITION"], env.Value(app)])
     env.Alias(app_alias, app_elf_augmented)
-    return app_elf_augmented
+    return (app_elf_augmented, app_elf_raw)
 
 
 def prepare_app_metadata(target, source, env):

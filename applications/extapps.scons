@@ -35,17 +35,27 @@ appenv.AppendUnique(
 )
 
 
-extapps = []
+extapps = {
+    "compact": [],
+    "debug": [],
+}
+
 for apptype in (FlipperAppType.PLUGIN, FlipperAppType.EXTERNAL):
     for app in appenv["APPBUILD"].get_apps_of_type(apptype):
-        extapps.append(appenv.BuildAppElf(app))
+        compact_elf, debug_elf = appenv.BuildAppElf(app)
+        extapps["compact"].append(compact_elf)
+        extapps["debug"].append(debug_elf)
 
 # Ugly access to global option
 if extra_app_list := GetOption("extra_ext_apps"):
     for extra_app in extra_app_list.split(","):
-        extapps.append(appenv.BuildAppElf(appenv["APPMGR"].get(extra_app)))
+        compact_elf, debug_elf = appenv.BuildAppElf(appenv["APPMGR"].get(extra_app))
+        extapps["compact"].append(compact_elf)
+        extapps["debug"].append(debug_elf)
 
 if appenv["FORCE"]:
-    appenv.AlwaysBuild(extapps)
-Alias(appenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps)
+    appenv.AlwaysBuild(extapps["compact"])
+
+Alias(appenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps["compact"])
+
 Return("extapps")
