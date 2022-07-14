@@ -114,8 +114,6 @@ void picopass_worker_start(
     furi_assert(picopass_worker);
     furi_assert(dev_data);
 
-    FURI_LOG_D(TAG, "picopass_worker_start");
-
     picopass_worker->callback = callback;
     picopass_worker->context = context;
     picopass_worker->dev_data = dev_data;
@@ -198,8 +196,8 @@ ReturnCode picopass_read_card(ApplicationArea* AA1) {
     }
     memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
 
-    diversifyKey(selRes.CSN, picopass_iclass_key, div_key);
-    opt_doReaderMAC(ccnr, div_key, mac);
+    loclass_diversifyKey(selRes.CSN, picopass_iclass_key, div_key);
+    loclass_opt_doReaderMAC(ccnr, div_key, mac);
 
     err = rfalPicoPassPollerCheck(mac, &chkRes);
     if(err != ERR_NONE) {
@@ -258,10 +256,8 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
     ReturnCode err;
 
     while(picopass_worker->state == PicopassWorkerStateDetect) {
-        FURI_LOG_D(TAG, "PicopassWorkerStateDetect");
         if(picopass_detect_card(1000) == ERR_NONE) {
             // Process first found device
-            FURI_LOG_D(TAG, "picopass_read_card");
             err = picopass_read_card(AA1);
             if(err != ERR_NONE) {
                 FURI_LOG_E(TAG, "picopass_read_card error %d", err);
@@ -277,21 +273,18 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
                     FURI_LOG_E(TAG, "decrypt error %d", err);
                     break;
                 }
-                FURI_LOG_D(TAG, "Decrypted 7");
 
                 err = picopass_worker_decrypt(AA1->block[2].data, pacs->pin0);
                 if(err != ERR_NONE) {
                     FURI_LOG_E(TAG, "decrypt error %d", err);
                     break;
                 }
-                FURI_LOG_D(TAG, "Decrypted 8");
 
                 err = picopass_worker_decrypt(AA1->block[3].data, pacs->pin1);
                 if(err != ERR_NONE) {
                     FURI_LOG_E(TAG, "decrypt error %d", err);
                     break;
                 }
-                FURI_LOG_D(TAG, "Decrypted 9");
             } else if(pacs->encryption == 0x14) {
                 FURI_LOG_D(TAG, "No Encryption");
                 memcpy(pacs->credential, AA1->block[1].data, RFAL_PICOPASS_MAX_BLOCK_LEN);
