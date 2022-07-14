@@ -29,10 +29,14 @@ SECTIONS
 		*(COMMON)
 	}
 
-	/DISCARD/ :
+	.ARM.attributes : 
 	{
 		*(.ARM.attributes)
-		*(.ARM.attributes.*)
+		*(.ARM.attributes.*)	
+	}
+
+	/DISCARD/ :
+	{
 		*(.comment)
 		*(.comment.*)
 	}
