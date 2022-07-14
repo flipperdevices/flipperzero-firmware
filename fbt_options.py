@@ -85,6 +85,12 @@ FIRMWARE_APPS = {
         "basic_services",
         "unit_tests",
     ],
+    "ext_apps": [
+        "basic_services",
+
+         "external_apps"
+    ],
+
 }
 
 FIRMWARE_APP_SET = "default"
