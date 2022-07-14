@@ -42,7 +42,8 @@ $ docker-compose exec dev ./fbt
 <details>
   <summary><B>Special Instructions</B></summary></br>
   
-  - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
+- [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
+- Add a folder to SD card named `elf` ([the `.elf` files](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/elf))
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
 - - Note 1: If you don't have a subghz/assets folder, you should ensure you have made at least one clean flash with stock firmware and your SD card installed in order to ensure the database structure is built, otherwise it will not exist for alternative forks.
 - - Note 2: /any is a special keyword signifying either /int (internal storage) or /ext (external storage).
@@ -57,7 +58,6 @@ $ docker-compose exec dev ./fbt
 - - [assets/resources/infrared/assets/tv.ir](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/infrared/assets/tv.ir)
 - Add a folder to SD card named `wav_player` (for 8bit 2ch unsigned wav files) 
 - Add a folder to SD card named `music_player` (FMF and RTTTL/TXT files)
-- Add a folder to SD card named `elf` ([the `.elf` files](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/elf))
 - Eventually, if all possible apps are added to [applications/meta/application.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam), your DFU will not install due to size. However, currently, all apps @ 817KB DFU has been tested to install successfully.
 </details>
 
