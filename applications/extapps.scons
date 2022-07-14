@@ -7,18 +7,12 @@ appenv = ENV.Clone(tools=["fbt_extapps"])
 
 appenv.Replace(
     LINKER_SCRIPT="application-ext",
-    STRIPFLAGS=[
-        "--strip-debug",
-        "--strip-unneeded",
-        "-d",
-        "-g",
-        "-S",
-    ],
 )
 
 appenv.AppendUnique(
     CCFLAGS=[
         # "-Os",
+        # "-Og",
         "-ggdb3",
         "-mword-relocations",
         "-mlong-calls",
@@ -28,7 +22,6 @@ appenv.AppendUnique(
     ],
     LINKFLAGS=[
         "-r",
-        "-s",
         # "-Bsymbolic",
         "-nostartfiles",
         "-mlong-calls",

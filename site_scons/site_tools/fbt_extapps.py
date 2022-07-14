@@ -9,9 +9,9 @@ from fbt.sdk import SdkCache
 
 def BuildAppElf(env, app):
     work_dir = env.subst("$EXT_APPS_WORK_DIR")
-    app_target_name = os.path.join(work_dir, app.appid)
+
     app_alias = f"{env['FIRMWARE_BUILD_CFG']}_{app.appid}"
-    app_original = app_target_name + "_raw"
+    app_original = os.path.join(work_dir, app.appid)
     app_elf_raw = env.Program(
         app_original,
         env.GlobRecursive("*.c*", os.path.join(work_dir, app._appdir)),
@@ -22,17 +22,13 @@ def BuildAppElf(env, app):
     env.Alias(f"{app_alias}_list", app_elf_dump)
 
     app_elf_augmented = env.EmbedAppMetadata(
-        app_target_name,
+        os.path.join(env.subst("$PLUGIN_ELF_DIR"), app.appid),
         app_elf_raw,
         APP=app,
     )
     env.Depends(app_elf_augmented, [env["SDK_DEFINITION"], env.Value(app)])
-
-    app_stripped_elf = env.ELFStripper(
-        os.path.join(env.subst("$PLUGIN_ELF_DIR"), app.appid), app_elf_augmented
-    )
-    env.Alias(app_alias, app_stripped_elf)
-    return app_stripped_elf
+    env.Alias(app_alias, app_elf_augmented)
+    return app_elf_augmented
 
 
 def prepare_app_metadata(target, source, env):
@@ -43,9 +39,8 @@ def prepare_app_metadata(target, source, env):
         )
 
     app = env["APP"]
-    meta_file_name = target[0].path + ".meta"
+    meta_file_name = source[0].path + ".meta"
     with open(meta_file_name, "wb") as f:
-
         # f.write(f"hello this is {app}")
         f.write(assemble_manifest_data(app, sdk_cache.version.as_int()))
 
@@ -62,7 +57,12 @@ def generate(env, **kw):
                     Action(prepare_app_metadata, "$APPMETA_COMSTR"),
                     # embed_app_metadata,
                     Action(
-                        "${OBJCOPY} --add-section .fzmeta=${TARGET}.meta --set-section-flags .fzmeta=contents,noload,readonly,data ${SOURCES} ${TARGET}",
+                        "${OBJCOPY} "
+                        "--remove-section .ARM.attributes "
+                        "--add-section .fzmeta=${SOURCE}.meta "
+                        "--set-section-flags .fzmeta=contents,noload,readonly,data "
+                        "--strip-debug --strip-unneeded "
+                        "${SOURCES} ${TARGET}",
                         "$APPMETAEMBED_COMSTR",
                     ),
                 ],
