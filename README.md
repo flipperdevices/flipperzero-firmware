@@ -3,6 +3,7 @@
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
 - Added [WiFi Scanner (By gotnull)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/99) `HIDDEN "wifi_scanner"` due to hardware requirement
+- Renamed many apps internally to have ELFs compiled with the right name
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
