@@ -17,6 +17,6 @@ App(
     appid="music_player_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="music_player_on_system_start",
-    requires=["music_player"],
+    requires=["APPS_MusicPlayer"],
     order=35,
 )
