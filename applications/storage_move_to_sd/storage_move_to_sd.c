@@ -18,22 +18,39 @@ static const char* app_dirs[] = {
     "infrared",
     "ibutton",
     "badusb",
+    "bt.settings",
+    "desktop.settings",
+    "dolphin.state",
+    "notification.settings",
+    "bt.keys",
 };
 
 bool storage_move_to_sd_perform(void) {
     Storage* storage = furi_record_open("storage");
     string_t path_src;
     string_t path_dst;
+    string_t new_path;
     string_init(path_src);
     string_init(path_dst);
+    string_init(new_path);
 
+    string_printf(new_path, "%s/dolphin_restorer", MOVE_DST);
+    storage_common_mkdir(storage, string_get_cstr(new_path));
+    string_clear(new_path);
     for(uint32_t i = 0; i < COUNT_OF(app_dirs); i++) {
-        string_printf(path_src, "%s/%s", MOVE_SRC, app_dirs[i]);
-        string_printf(path_dst, "%s/%s", MOVE_DST, app_dirs[i]);
-        storage_common_merge(storage, string_get_cstr(path_src), string_get_cstr(path_dst));
-        storage_simply_remove_recursive(storage, string_get_cstr(path_src));
+        if(i > 5) {
+            string_printf(path_src, "%s/%s", MOVE_SRC, app_dirs[i]);
+            string_printf(path_dst, "%s/dolphin_restorer/%s", MOVE_DST, app_dirs[i]);
+		    storage_simply_remove_recursive(storage, string_get_cstr(path_dst));
+            storage_common_copy(storage, string_get_cstr(path_src), string_get_cstr(path_dst));
+        } else {
+            string_printf(path_src, "%s/%s", MOVE_SRC, app_dirs[i]);
+            string_printf(path_dst, "%s/%s", MOVE_DST, app_dirs[i]);
+            storage_common_merge(storage, string_get_cstr(path_src), string_get_cstr(path_dst));
+            storage_simply_remove_recursive(storage, string_get_cstr(path_src));
+        }
     }
-
+	
     string_clear(path_src);
     string_clear(path_dst);
 
@@ -53,10 +70,10 @@ static bool storage_move_to_sd_check(void) {
     for(uint32_t i = 0; i < COUNT_OF(app_dirs); i++) {
         string_printf(path, "%s/%s", MOVE_SRC, app_dirs[i]);
         if(storage_common_stat(storage, string_get_cstr(path), &file_info) == FSE_OK) {
-            if((file_info.flags & FSF_DIRECTORY) != 0) {
-                state = true;
-                break;
-            }
+            // if((file_info.flags & FSF_DIRECTORY) != 0) {
+            state = true;
+            break;
+            // }
         }
     }
 
