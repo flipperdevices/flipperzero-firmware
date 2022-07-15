@@ -113,13 +113,21 @@ Header,+,lib/one_wire/one_wire_device.h,,
 Header,+,lib/one_wire/one_wire_host.h,,
 Header,+,lib/one_wire/one_wire_host_timing.h,,
 Header,+,lib/one_wire/one_wire_slave.h,,
+Header,+,lib/toolbox/args.h,,
+Header,+,lib/toolbox/crc32_calc.h,,
+Header,+,lib/toolbox/dir_walk.h,,
 Header,+,lib/toolbox/hmac_sha256.h,,
 Header,+,lib/toolbox/manchester_decoder.h,,
 Header,+,lib/toolbox/manchester_encoder.h,,
+Header,+,lib/toolbox/md5.h,,
 Header,+,lib/toolbox/path.h,,
 Header,+,lib/toolbox/random_name.h,,
+Header,+,lib/toolbox/saved_struct.h,,
 Header,+,lib/toolbox/stream/file_stream.h,,
 Header,+,lib/toolbox/stream/stream.h,,
+Header,+,lib/toolbox/stream/string_stream.h,,
+Header,+,lib/toolbox/tar/tar_archive.h,,
+Header,+,lib/toolbox/version.h,,
 Function,-,LL_ADC_CommonDeInit,ErrorStatus,ADC_Common_TypeDef*
 Function,-,LL_ADC_CommonInit,ErrorStatus,"ADC_Common_TypeDef*, LL_ADC_CommonInitTypeDef*"
 Function,-,LL_ADC_CommonStructInit,void,LL_ADC_CommonInitTypeDef*
@@ -477,6 +485,13 @@ Function,-,aligned_malloc,void*,"size_t, size_t"
 Function,-,arc4random,__uint32_t,
 Function,-,arc4random_buf,void,"void*, size_t"
 Function,-,arc4random_uniform,__uint32_t,__uint32_t
+Function,+,args_char_to_hex,_Bool,"char, char, uint8_t*"
+Function,+,args_get_first_word_length,size_t,string_t
+Function,+,args_length,size_t,string_t
+Function,+,args_read_hex_bytes,_Bool,"string_t, uint8_t*, size_t"
+Function,+,args_read_int_and_trim,_Bool,"string_t, int*"
+Function,+,args_read_probably_quoted_string_and_trim,_Bool,"string_t, string_t"
+Function,+,args_read_string_and_trim,_Bool,"string_t, string_t"
 Function,-,asin,double,double
 Function,-,asinf,float,float
 Function,-,asinh,double,double
@@ -628,6 +643,8 @@ Function,-,cosh,double,double
 Function,-,coshf,float,float
 Function,-,coshl,long double,long double
 Function,-,cosl,long double,long double
+Function,+,crc32_calc_buffer,uint32_t,"uint32_t, const void*, size_t"
+Function,+,crc32_calc_file,uint32_t,"File*, const FileCrcProgressCb, void*"
 Function,-,ctermid,char*,char*
 Function,-,cuserid,char*,char*
 Function,+,delete_mutex,_Bool,ValueMutex*
@@ -672,6 +689,14 @@ Function,-,digital_signal_get_start_level,_Bool,DigitalSignal*
 Function,-,digital_signal_prepare_arr,void,DigitalSignal*
 Function,+,digital_signal_send,void,"DigitalSignal*, const GpioPin*"
 Function,-,diprintf,int,"int, const char*, ..."
+Function,+,dir_walk_alloc,DirWalk*,Storage*
+Function,+,dir_walk_close,void,DirWalk*
+Function,+,dir_walk_free,void,DirWalk*
+Function,+,dir_walk_get_error,FS_Error,DirWalk*
+Function,+,dir_walk_open,_Bool,"DirWalk*, const char*"
+Function,+,dir_walk_read,DirWalkResult,"DirWalk*, string_t, FileInfo*"
+Function,+,dir_walk_set_filter_cb,void,"DirWalk*, DirWalkFilterCb, void*"
+Function,+,dir_walk_set_recursive,void,"DirWalk*, _Bool"
 Function,-,div,div_t,"int, int"
 Function,+,dolphin_deed,void,"Dolphin*, DolphinDeed"
 Function,+,dolphin_deed_get_app,DolphinApp,DolphinDeed
@@ -1440,7 +1465,6 @@ Function,-,llroundl,long long int,long double
 Function,+,loader_get_pubsub,FuriPubSub*,Loader*
 Function,+,loader_is_locked,_Bool,Loader*
 Function,+,loader_lock,_Bool,Loader*
-Function,+,loader_show_game_menu,void,
 Function,+,loader_show_menu,void,
 Function,+,loader_start,LoaderStatus,"Loader*, const char*, const char*"
 Function,+,loader_unlock,void,Loader*
@@ -1479,6 +1503,11 @@ Function,+,maxim_crc8,uint8_t,"const uint8_t*, const uint8_t, const uint8_t"
 Function,-,mblen,int,"const char*, size_t"
 Function,-,mbstowcs,size_t,"wchar_t*, const char*, size_t"
 Function,-,mbtowc,int,"wchar_t*, const char*, size_t"
+Function,+,md5,void,"const unsigned char*, size_t, unsigned char[16]"
+Function,+,md5_finish,void,"md5_context*, unsigned char[16]"
+Function,+,md5_process,void,"md5_context*, const unsigned char[64]"
+Function,+,md5_starts,void,md5_context*
+Function,+,md5_update,void,"md5_context*, const unsigned char*, size_t"
 Function,-,memccpy,void*,"void*, const void*, int, size_t"
 Function,+,memchr,void*,"const void*, int, size_t"
 Function,+,memcmp,int,"const void*, const void*, size_t"
@@ -1882,6 +1911,8 @@ Function,+,rpc_session_set_send_bytes_callback,void,"RpcSession*, RpcSendBytesCa
 Function,+,rpc_session_set_terminated_callback,void,"RpcSession*, RpcSessionTerminatedCallback"
 Function,+,rpc_system_app_set_callback,void,"RpcAppSystem*, RpcAppSystemCallback, void*"
 Function,-,rpmatch,int,const char*
+Function,+,saved_struct_load,_Bool,"const char*, void*, size_t, uint8_t, uint8_t"
+Function,+,saved_struct_save,_Bool,"const char*, void*, size_t, uint8_t, uint8_t"
 Function,-,scalbln,double,"double, long int"
 Function,-,scalblnf,float,"float, long int"
 Function,-,scalblnl,long double,"long double, long"
@@ -1948,7 +1979,6 @@ Function,-,srandom,void,unsigned
 Function,+,sscanf,int,"const char*, const char*, ..."
 Function,+,storage_common_copy,FS_Error,"Storage*, const char*, const char*"
 Function,+,storage_common_fs_info,FS_Error,"Storage*, const char*, uint64_t*, uint64_t*"
-Function,+,storage_common_merge,FS_Error,"Storage*, const char*, const char*"
 Function,+,storage_common_mkdir,FS_Error,"Storage*, const char*"
 Function,+,storage_common_remove,FS_Error,"Storage*, const char*"
 Function,+,storage_common_rename,FS_Error,"Storage*, const char*, const char*"
@@ -2037,6 +2067,7 @@ Function,+,stream_write_vaformat,size_t,"Stream*, const char*, va_list"
 Function,-,strerror,char*,int
 Function,-,strerror_l,char*,"int, locale_t"
 Function,-,strerror_r,char*,"int, char*, size_t"
+Function,+,string_stream_alloc,Stream*,
 Function,-,strlcat,size_t,"char*, const char*, size_t"
 Function,+,strlcpy,size_t,"char*, const char*, size_t"
 Function,+,strlen,size_t,const char*
@@ -2086,9 +2117,23 @@ Function,-,system,int,const char*
 Function,-,tan,double,double
 Function,-,tanf,float,float
 Function,-,tanh,double,double
-Function,+,tanhf,float,float
+Function,-,tanhf,float,float
 Function,-,tanhl,long double,long double
 Function,-,tanl,long double,long double
+Function,+,tar_archive_add_dir,_Bool,"TarArchive*, const char*, const char*"
+Function,+,tar_archive_add_file,_Bool,"TarArchive*, const char*, const char*, const int32_t"
+Function,+,tar_archive_alloc,TarArchive*,Storage*
+Function,+,tar_archive_dir_add_element,_Bool,"TarArchive*, const char*"
+Function,+,tar_archive_file_add_data_block,_Bool,"TarArchive*, const uint8_t*, const int32_t"
+Function,+,tar_archive_file_add_header,_Bool,"TarArchive*, const char*, const int32_t"
+Function,+,tar_archive_file_finalize,_Bool,TarArchive*
+Function,+,tar_archive_finalize,_Bool,TarArchive*
+Function,+,tar_archive_free,void,TarArchive*
+Function,+,tar_archive_get_entries_count,int32_t,TarArchive*
+Function,+,tar_archive_open,_Bool,"TarArchive*, const char*, TarOpenMode"
+Function,+,tar_archive_set_file_callback,void,"TarArchive*, tar_unpack_file_cb, void*"
+Function,+,tar_archive_store_data,_Bool,"TarArchive*, const char*, const uint8_t*, const int32_t"
+Function,+,tar_archive_unpack_to,_Bool,"TarArchive*, const char*"
 Function,-,tempnam,char*,"const char*, const char*"
 Function,+,text_box_alloc,TextBox*,
 Function,+,text_box_free,void,TextBox*
@@ -2357,7 +2402,6 @@ Variable,+,APBPrescTable,const uint32_t[8],
 Variable,+,A_125khz_14,const Icon,
 Variable,+,A_BadUsb_14,const Icon,
 Variable,-,A_Bluetooth_14,const Icon,
-Variable,+,A_Clock_14,const Icon,
 Variable,+,A_Debug_14,const Icon,
 Variable,+,A_FileManager_14,const Icon,
 Variable,+,A_GPIO_14,const Icon,
@@ -2374,7 +2418,6 @@ Variable,+,A_Settings_14,const Icon,
 Variable,+,A_Sub1ghz_14,const Icon,
 Variable,-,A_Tamagotchi_14,const Icon,
 Variable,+,A_U2F_14,const Icon,
-Variable,+,A_UniRFRemix_14,const Icon,
 Variable,+,A_iButton_14,const Icon,
 Variable,-,ITM_RxBuffer,volatile int32_t,
 Variable,+,I_125_10px,const Icon,
@@ -2416,8 +2459,15 @@ Variable,+,I_Connected_62x31,const Icon,
 Variable,+,I_Cry_dolph_55x52,const Icon,
 Variable,+,I_DFU_128x50,const Icon,
 Variable,+,I_Detailed_chip_17x13,const Icon,
+Variable,-,I_DolphinFirstStart0_70x53,const Icon,
+Variable,-,I_DolphinFirstStart1_59x53,const Icon,
+Variable,-,I_DolphinFirstStart2_59x51,const Icon,
+Variable,-,I_DolphinFirstStart3_57x48,const Icon,
+Variable,-,I_DolphinFirstStart4_67x53,const Icon,
 Variable,-,I_DolphinFirstStart5_54x49,const Icon,
+Variable,-,I_DolphinFirstStart6_58x54,const Icon,
 Variable,+,I_DolphinFirstStart7_61x51,const Icon,
+Variable,-,I_DolphinFirstStart8_56x51,const Icon,
 Variable,+,I_DolphinMafia_115x62,const Icon,
 Variable,+,I_DolphinNice_96x59,const Icon,
 Variable,-,I_DolphinOkay_41x43,const Icon,
@@ -2439,7 +2489,6 @@ Variable,+,I_FaceCharging_29x14,const Icon,
 Variable,+,I_FaceConfused_29x14,const Icon,
 Variable,+,I_FaceNopower_29x14,const Icon,
 Variable,+,I_FaceNormal_29x14,const Icon,
-Variable,+,I_HappyFlipper_128x64,const Icon,
 Variable,+,I_Health_16x16,const Icon,
 Variable,+,I_InfraredArrowDown_4x8,const Icon,
 Variable,+,I_InfraredArrowUp_4x8,const Icon,
@@ -2488,7 +2537,6 @@ Variable,+,I_SDcardMounted_11x8,const Icon,
 Variable,+,I_Scanning_123x52,const Icon,
 Variable,+,I_Smile_18x18,const Icon,
 Variable,+,I_Space_65x18,const Icon,
-Variable,+,I_TanksSplashScreen_128x64,const Icon,
 Variable,+,I_Temperature_16x16,const Icon,
 Variable,+,I_Unlock_7x8,const Icon,
 Variable,+,I_Up_25x27,const Icon,
@@ -2508,10 +2556,6 @@ Variable,+,I_back_10px,const Icon,
 Variable,+,I_badusb_10px,const Icon,
 Variable,-,I_ble_10px,const Icon,
 Variable,+,I_dir_10px,const Icon,
-Variable,+,I_enemy_down,const Icon,
-Variable,+,I_enemy_left,const Icon,
-Variable,+,I_enemy_right,const Icon,
-Variable,+,I_enemy_up,const Icon,
 Variable,+,I_iButtonDolphinVerySuccess_108x52,const Icon,
 Variable,+,I_iButtonKey_49x44,const Icon,
 Variable,+,I_ibutt_10px,const Icon,
@@ -2529,20 +2573,7 @@ Variable,+,I_passport_left_6x46,const Icon,
 Variable,+,I_passport_okay1_46x49,const Icon,
 Variable,+,I_passport_okay2_46x49,const Icon,
 Variable,+,I_passport_okay3_46x49,const Icon,
-Variable,+,I_projectile_down,const Icon,
-Variable,+,I_projectile_left,const Icon,
-Variable,+,I_projectile_right,const Icon,
-Variable,+,I_projectile_up,const Icon,
 Variable,+,I_sub1_10px,const Icon,
-Variable,+,I_tank_base,const Icon,
-Variable,+,I_tank_down,const Icon,
-Variable,+,I_tank_explosion,const Icon,
-Variable,+,I_tank_hedgehog,const Icon,
-Variable,+,I_tank_left,const Icon,
-Variable,+,I_tank_right,const Icon,
-Variable,+,I_tank_stone,const Icon,
-Variable,+,I_tank_up,const Icon,
-Variable,+,I_tank_wall,const Icon,
 Variable,+,I_u2f_10px,const Icon,
 Variable,+,I_unknown_10px,const Icon,
 Variable,+,I_update_10px,const Icon,

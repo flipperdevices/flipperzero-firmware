@@ -32,7 +32,7 @@ class ElfManifestBaseHeader:
 class ElfManifestV1:
     stack_size: int
     app_version: int
-    name: str
+    name: str = ""
     icon: bytes = field(default=b"")
 
     def as_bytes(self):
