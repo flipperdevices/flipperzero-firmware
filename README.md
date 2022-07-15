@@ -4,6 +4,8 @@
 <b>Latest Updates:</b>
 - Added [WiFi Scanner (By gotnull)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/99) `HIDDEN "wifi_scanner"` due to hardware requirement
 - Renamed many apps internally to have ELFs compiled with the right name
+- Updated [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387), no more ELFs in /ext/elf
+- - Now its FAPs in /ext/apps. Untested and unreleased. Feel free to test and compile your own FAPs.
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
