@@ -26,7 +26,7 @@ class FlipperAppType(Enum):
 class FlipperApplication:
     appid: str
     apptype: FlipperAppType
-    name: Optional[str] = None
+    name: Optional[str] = ""
     entry_point: Optional[str] = None
     flags: List[str] = field(default_factory=lambda: ["Default"])
     cdefines: List[str] = field(default_factory=list)
