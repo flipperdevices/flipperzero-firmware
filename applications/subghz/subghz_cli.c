@@ -358,10 +358,12 @@ void subghz_cli_command_decode_raw(Cli* cli, string_t args, void* context) {
         } else {
             printf("SubGhz decode_raw: Load_keystore keeloq_mfcodes \033[0;31mERROR\033[0m\r\n");
         }
-        if(subghz_environment_load_keystore(environment, "/ext/subghz/assets/keeloq_mfcodes_user")) {
+        if(subghz_environment_load_keystore(
+               environment, "/ext/subghz/assets/keeloq_mfcodes_user")) {
             printf("SubGhz decode_raw: Load_keystore keeloq_mfcodes_user \033[0;32mOK\033[0m\r\n");
         } else {
-            printf("SubGhz decode_raw: Load_keystore keeloq_mfcodes_user \033[0;31mERROR\033[0m\r\n");
+            printf(
+                "SubGhz decode_raw: Load_keystore keeloq_mfcodes_user \033[0;31mERROR\033[0m\r\n");
         }
         subghz_environment_set_came_atomo_rainbow_table_file_name(
             environment, "/ext/subghz/assets/came_atomo");
