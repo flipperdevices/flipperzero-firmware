@@ -59,8 +59,8 @@ def generate(env, **kw):
                     Action(
                         "${OBJCOPY} "
                         "--remove-section .ARM.attributes "
-                        "--add-section .fzmeta=${SOURCE}.meta "
-                        "--set-section-flags .fzmeta=contents,noload,readonly,data "
+                        "--add-section .fapmeta=${SOURCE}.meta "
+                        "--set-section-flags .fapmeta=contents,noload,readonly,data "
                         "--strip-debug --strip-unneeded "
                         "${SOURCES} ${TARGET}",
                         "$APPMETAEMBED_COMSTR",

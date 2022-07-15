@@ -410,7 +410,7 @@ bool load_metadata(ELFExec_t* e, ElfManifest* manifest) {
             read_section_name(e, section_header.sh_name, name, sizeof(name));
 
         FURI_LOG_D(TAG, "Examining section %d %s", n, name);
-        if(strcmp(name, ".fzmeta") == 0) {
+        if(strcmp(name, ".fapmeta") == 0) {
             // LOAD
             FURI_LOG_E(TAG, "FOUND META SECTION");
             if(section_header.sh_size < sizeof(ElfManifestV1)) {
