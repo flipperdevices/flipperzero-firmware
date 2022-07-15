@@ -14,34 +14,30 @@ extern size_t xPortGetTotalHeapSize(void);
 extern size_t xPortGetFreeHeapSize(void);
 extern size_t xPortGetMinimumEverFreeHeapSize(void);
 
-static void __furi_print_stack_info() {
+static void __furi_put_uint32_as_text(uint32_t data) {
     char tmp_str[] = "-2147483648";
-    itoa(uxTaskGetStackHighWaterMark(NULL) * 4, tmp_str, 10);
-    furi_hal_console_puts("\r\n\tstack watermark: ");
+    itoa(data, tmp_str, 10);
     furi_hal_console_puts(tmp_str);
 }
 
+static void __furi_print_stack_info() {
+    furi_hal_console_puts("\r\n\tstack watermark: ");
+    __furi_put_uint32_as_text(uxTaskGetStackHighWaterMark(NULL) * 4);
+}
+
 static void __furi_print_heap_info() {
-    char tmp_str[] = "-2147483648";
-    itoa(xPortGetTotalHeapSize(), tmp_str, 10);
     furi_hal_console_puts("\r\n\t     heap total: ");
-    furi_hal_console_puts(tmp_str);
-
-    itoa(xPortGetFreeHeapSize(), tmp_str, 10);
+    __furi_put_uint32_as_text(xPortGetTotalHeapSize());
     furi_hal_console_puts("\r\n\t      heap free: ");
-    furi_hal_console_puts(tmp_str);
-
-    itoa(xPortGetMinimumEverFreeHeapSize(), tmp_str, 10);
+    __furi_put_uint32_as_text(xPortGetFreeHeapSize());
     furi_hal_console_puts("\r\n\t heap watermark: ");
-    furi_hal_console_puts(tmp_str);
+    __furi_put_uint32_as_text(xPortGetMinimumEverFreeHeapSize());
 }
 
 static void __furi_print_name(bool isr) {
     if(isr) {
-        char tmp_str[] = "-2147483648";
-        itoa(__get_IPSR(), tmp_str, 10);
         furi_hal_console_puts("[ISR ");
-        furi_hal_console_puts(tmp_str);
+        __furi_put_uint32_as_text(__get_IPSR());
         furi_hal_console_puts("] ");
     } else {
         const char* name = pcTaskGetName(NULL);
