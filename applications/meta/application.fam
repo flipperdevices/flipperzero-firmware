@@ -38,7 +38,6 @@ App(
         "mousejacker",
         "nrfsniff",
         "touchtunes",
-        "wifi_scanner",
     ],
 )
 
@@ -68,7 +67,10 @@ App(
     appid="external_apps",
     name="Custom applications for main menu",
     apptype=FlipperAppType.METAPACKAGE,
-    provides=[        "tanks_game",
+    provides=[
+        "clock",
+        "unirfremix",
+        "tanks_game",
         "gameoflife_game",
         "raycast_game",
         "tetris_game",
@@ -78,8 +80,8 @@ App(
         "mousejacker",
         "nrfsniff",
         "touchtunes",
-        "wifi_scanner",
 
+        "wifi_scanner",
         "spectrum_analyzer","bt_hid","drestorer","storage_move_to_sd",
         "music_player","sentry_safe","barcode_generator","mousejiggler",
         "game_2048","arkanoid_game","dice_game","snake_game","tictactoe_game",
