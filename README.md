@@ -45,11 +45,11 @@ Compile firmware for FlipperZero with new [application](https://github.com/Sequo
 
 Use next schematics to solder the WiFi Scanner board for FlipperZero
 
-![image](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266/blob/main/images/Schematics_1.jpg?raw=true)
+![image](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266/blob/main/rep_images/Schematics_1.jpg?raw=true)
 
 # How to add new application on FlipperZero
 
-1. Copy [wifi_scanner](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266/tree/main/applications/wifi_scanner) into [applications](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications) folder.
+1. Copy [folders](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266/tree/main/FlipperZero-WiFi-Scanner-App) and paste directly into [root folder of original firmware](https://github.com/flipperdevices/flipperzero-firmware).
 2. Add new applications category in [/fbt_options.py](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/fbt_options.py) my_apps for example
 <pre>
 FIRMWARE_APPS = {
@@ -99,5 +99,5 @@ I tested all the things on a test bench with Wemos D1 and all was good.
 When I soldered protoboard with Wemos D1 mini pro I started to receive exceptions. It seems for some reason Wemos D1 mini doesn't run well on FlipperZero 5V.
 To fast solve the issue I've added an AMS1117 voltage regulator on 5V to drop it to 3V3 and feed the module.
 
-![image](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266/blob/main/images/Schematics_2.jpg?raw=true)
+![image](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266/blob/main/rep_images/Schematics_2.jpg?raw=true)
 
