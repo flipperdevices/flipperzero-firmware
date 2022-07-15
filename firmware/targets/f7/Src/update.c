@@ -23,6 +23,15 @@ static FATFS* pfs = NULL;
         }                       \
     }
 
+static bool flipper_update_mount_sd() {
+    for(int i = 0; i < BSP_SD_MaxMountRetryCount(); ++i) {
+        if((BSP_SD_Init((i % 2) == 0) == MSD_OK) && (f_mount(pfs, FS_ROOT_PATH, 1) == FR_OK)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static bool flipper_update_init() {
     furi_hal_clock_init();
     furi_hal_rtc_init();
@@ -36,12 +45,9 @@ static bool flipper_update_init() {
         return false;
     }
 
-    if(BSP_SD_Init(true)) {
-        return false;
-    }
-
     pfs = malloc(sizeof(FATFS));
-    CHECK_FRESULT(f_mount(pfs, FS_ROOT_PATH, 1));
+
+    CHECK_FRESULT(flipper_update_mount_sd());
     return true;
 }
 
