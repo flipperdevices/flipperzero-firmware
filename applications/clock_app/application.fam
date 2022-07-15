@@ -1,5 +1,5 @@
 App(
-    appid="clock",
+    appid="Clock",
     name="Clock",
     apptype=FlipperAppType.APP,
     entry_point="clock_app",

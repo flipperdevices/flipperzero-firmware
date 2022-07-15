@@ -1,5 +1,5 @@
 App(
-    appid="music_player",
+    appid="APPS_MusicPlayer",
     name="Music Player",
     apptype=FlipperAppType.PLUGIN,
     entry_point="music_player_app",
@@ -10,7 +10,7 @@ App(
     ],
     provides=["music_player_start"],
     stack_size=2 * 1024,
-    order=36,
+    order=160,
 )
 
 App(

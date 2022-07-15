@@ -1,5 +1,5 @@
 App(
-    appid="game_2048",
+    appid="GAME_2048",
     name="2048",
     apptype=FlipperAppType.GAME,
     entry_point="game_2048_app",

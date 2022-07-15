@@ -1,10 +1,10 @@
 App(
-    appid="tanks_game",
+    appid="GAME_Tanks",
     name="Tanks",
     apptype=FlipperAppType.GAME,
     entry_point="tanks_game_app",
     cdefines=["APP_TANKS_GAME"],
     requires=["gui"],
     stack_size=2 * 1024,
-    order=80,
+    order=230,
 )

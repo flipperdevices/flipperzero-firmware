@@ -53,7 +53,7 @@ App(
 )
 
 App(
-    appid="bt_hid",
+    appid="APPS_BluetoothRemote",
     name="Bluetooth Remote",
     apptype=FlipperAppType.PLUGIN,
     entry_point="bt_hid_app",
@@ -63,5 +63,5 @@ App(
         "bt",
         "gui",
     ],
-    order=10,
+    order=40,
 )

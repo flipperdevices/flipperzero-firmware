@@ -1,10 +1,10 @@
 App(
-    appid="mandelbrot",
+    appid="GAME_MandelbrotSet",
     name="Mandelbrot Set",
     apptype=FlipperAppType.GAME,
     entry_point="mandelbrot_app",
     cdefines=["APP_MANDELBROT_GAME"],
     requires=["gui"],
     stack_size=1 * 1024,
-    order=50,
+    order=130,
 )

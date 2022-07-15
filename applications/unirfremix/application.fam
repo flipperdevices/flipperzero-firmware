@@ -1,5 +1,5 @@
 App(
-    appid="unirfremix",
+    appid="UniRFRemix",
     name="UniRF Remix",
     apptype=FlipperAppType.APP,
     entry_point="unirfremix_app",

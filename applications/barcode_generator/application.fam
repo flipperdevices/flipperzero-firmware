@@ -1,5 +1,5 @@
 App(
-    appid="barcode_generator",
+    appid="APPS_BarcodeGenerator",
     name="UPC Generator",
     apptype=FlipperAppType.PLUGIN,
     entry_point="barcode_generator_app",
@@ -9,5 +9,5 @@ App(
         "dialogs",
     ],
     stack_size=1 * 1024,
-    order=60,
+    order=30,
 )
