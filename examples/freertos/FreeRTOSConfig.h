@@ -44,6 +44,12 @@
 #include <stdint.h>
 extern uint32_t SystemCoreClock;
 
+#if defined STM32F1
+	// This is enough for Blinky example.
+	#define configMINIMAL_STACK_SIZE		( ( unsigned short ) 50 )
+	#define configTOTAL_HEAP_SIZE			( ( size_t ) ( 2 * 1024 ) )
+#endif
+
 #if defined STM32L5
 	#define configENABLE_TRUSTZONE                   0
 	#if configENABLE_TRUSTZONE
@@ -62,8 +68,12 @@ extern uint32_t SystemCoreClock;
 #if !defined USE_CMSIS_RTOS_V2
 #define configMAX_PRIORITIES			( 5 )
 #endif
+#if !defined configMINIMAL_STACK_SIZE
 #define configMINIMAL_STACK_SIZE		( ( unsigned short ) 130 )
+#endif
+#if !defined configTOTAL_HEAP_SIZE
 #define configTOTAL_HEAP_SIZE			( ( size_t ) ( 8 * 1024 ) )
+#endif
 #define configMAX_TASK_NAME_LEN			( 10 )
 #define configUSE_TRACE_FACILITY		1
 #define configUSE_16_BIT_TICKS			0
