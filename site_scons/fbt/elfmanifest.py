@@ -45,13 +45,28 @@ class ElfManifestV1:
 
 
 def assemble_manifest_data(app_manifest: FlipperApplication, sdk_version):
-    if app_manifest.fap_icon:
+    image_data = b""
+    if app_manifest.fapp_icon:
         from flipper.assets.icon import file2image
 
-        image = file2image(os.path.join(app_manifest._apppath, app_manifest.fap_icon))
-        print(image)
+        image = file2image(os.path.join(app_manifest._apppath, app_manifest.fapp_icon))
+        if (image.width, image.height) != (10, 10):
+            raise ValueError(
+                f"Flipper app icon must be 10x10 pixels, but {image.width}x{image.height} was given"
+            )
+        if len(image.data) > 32:
+            raise ValueError(
+                f"Flipper app icon must be 32 bytes or less, but {len(image.data)} bytes were given"
+            )
+        image_data = image.data
+
+    app_version_as_int = ((app_manifest.version[0] & 0xFFFF) << 16) | (
+        app_manifest.version[1] & 0xFFFF
+    )
 
     data = ElfManifestBaseHeader(1, sdk_version).as_bytes()
-    data += ElfManifestV1(app_manifest.stack_size, 1, app_manifest.name).as_bytes()
+    data += ElfManifestV1(
+        app_manifest.stack_size, app_version_as_int, app_manifest.name, image_data
+    ).as_bytes()
 
     return data

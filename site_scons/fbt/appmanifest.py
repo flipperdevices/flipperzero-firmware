@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from enum import Enum
 import os
 import posixpath
@@ -37,7 +37,8 @@ class FlipperApplication:
     icon: Optional[str] = None
     order: int = 0
     sdk_headers: List[str] = field(default_factory=list)
-    fap_icon: Optional[str] = None
+    version: Tuple[int] = field(default_factory=lambda: (0, 0))
+    fapp_icon: Optional[str] = None
     _appdir: Optional[str] = None
     _apppath: Optional[str] = None
 

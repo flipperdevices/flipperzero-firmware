@@ -66,7 +66,7 @@ def generate(env, **kw):
                         "$APPMETAEMBED_COMSTR",
                     ),
                 ],
-                suffix=".elf",
+                suffix=".fap",
                 src_suffix=".elf",
             )
         }
