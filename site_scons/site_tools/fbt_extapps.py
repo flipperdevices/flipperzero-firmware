@@ -1,6 +1,7 @@
 from SCons.Builder import Builder
 from SCons.Action import Action
 from SCons.Errors import UserError
+import SCons.Warnings
 
 import os
 from fbt.elfmanifest import assemble_manifest_data
@@ -33,6 +34,7 @@ def BuildAppElf(env, app):
 
 def prepare_app_metadata(target, source, env):
     sdk_cache = SdkCache(env.subst("$SDK_DEFINITION"), load_version_only=True)
+
     if not sdk_cache.is_buildable():
         raise UserError(
             "SDK version is not finalized, please review changes and re-run operation"
@@ -51,6 +53,20 @@ def prepare_app_metadata(target, source, env):
         )
 
 
+def validate_app_imports(target, source, env):
+    sdk_cache = SdkCache(env.subst("$SDK_DEFINITION"), load_version_only=False)
+    app_syms = set()
+    with open(source[0].path + ".impsyms", "rt") as f:
+        for line in f:
+            app_syms.add(line.split()[0])
+    unresolved_syms = app_syms - sdk_cache.get_valid_names()
+    if unresolved_syms:
+        SCons.Warnings.warn(
+            SCons.Warnings.LinkWarning,
+            f"{target[0].path}: app won't run. Unresolved symbols: {unresolved_syms}",
+        )
+
+
 def generate(env, **kw):
     env.SetDefault(EXT_APPS_WORK_DIR=kw.get("EXT_APPS_WORK_DIR", ".extapps"))
     env.VariantDir(env.subst("$EXT_APPS_WORK_DIR"), ".", duplicate=False)
@@ -58,10 +74,8 @@ def generate(env, **kw):
     env.Append(
         BUILDERS={
             "EmbedAppMetadata": Builder(
-                # generator=gen_embed_app_metadata,
                 action=[
                     Action(prepare_app_metadata, "$APPMETA_COMSTR"),
-                    # embed_app_metadata,
                     Action(
                         "${OBJCOPY} "
                         "--remove-section .ARM.attributes "
@@ -70,6 +84,14 @@ def generate(env, **kw):
                         "--strip-debug --strip-unneeded "
                         "${SOURCES} ${TARGET}",
                         "$APPMETAEMBED_COMSTR",
+                    ),
+                    Action(
+                        "${NM} -P -u ${SOURCE} > ${SOURCE}.impsyms",
+                        "$APPDUMP_COMSTR",
+                    ),
+                    Action(
+                        validate_app_imports,
+                        "$APPCHECK_COMSTR",
                     ),
                 ],
                 suffix=".fap",

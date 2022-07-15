@@ -8,9 +8,10 @@
 
 import os
 
+DefaultEnvironment(tools=[])
+
 EnsurePythonVersion(3, 8)
 
-DefaultEnvironment(tools=[])
 # Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
 
 

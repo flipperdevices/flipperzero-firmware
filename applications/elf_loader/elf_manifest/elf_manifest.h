@@ -30,7 +30,7 @@ typedef struct {
     uint32_t app_version;
     char name[32];
     char has_icon;
-    char icon[32];
+    char icon[32]; // TODO: reduce size?
 } ElfManifestV1;
 
 typedef ElfManifestV1 ElfManifest;
