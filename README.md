@@ -2,13 +2,6 @@
 
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
-- Updated so elfs get built for games
-- Updated README with new compilation information `docker-compose exec dev ./fbt firmware_extapps FIRMWARE_APP_SET=ext_apps`
-- Moved out WAV Player and made changes so it's ELF can be compiled properly (Thanks to Hedger/DaFakeBillGates)
-- OFW: [[FL-2554] Embedded arm-none-eabi toolchain #1351](https://github.com/flipperdevices/flipperzero-firmware/pull/1351)
-- OFW: [[FL-2633] Move files from /int to /ext on SD mount #1384 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384)
-- OFW: [Correct # to ! for the inverted text example #1395](https://github.com/flipperdevices/flipperzero-firmware/pull/1395)
-- OFW: [IR: increase raw timings amount #1388](https://github.com/flipperdevices/flipperzero-firmware/pull/1388)
 - Added [WiFi Scanner (By gotnull)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/99) `HIDDEN "wifi_scanner"` due to hardware requirement
 
 <table width="100%" border="0" cellspacing="0">
