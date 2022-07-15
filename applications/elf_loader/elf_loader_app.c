@@ -7,8 +7,6 @@
 #include "elf_lib/elf_loader.h"
 #include "elf_cpp/elf_hashtable.h"
 
-#define APP_PATH "/ext/plugin.elf"
-
 bool elf_resolve_from_hashtable_w_delay(const char* name, Elf32_Addr* address) {
     // for gui thread, to draw loading animation
     osDelay(1);
@@ -25,8 +23,8 @@ int32_t elf_loader_app(void* p) {
         if(p) {
             string_init_set(elf_name, (const char*)p);
         } else {
-            string_init_set(elf_name, "/ext/elf");
-            if(!dialog_file_browser_show(dialogs, elf_name, elf_name, ".elf", true, NULL, false)) {
+            string_init_set(elf_name, "/ext/apps");
+            if(!dialog_file_browser_show(dialogs, elf_name, elf_name, ".fap", true, NULL, false)) {
                 break;
             }
         }

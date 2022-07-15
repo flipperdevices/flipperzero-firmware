@@ -83,6 +83,8 @@ if not env["VERBOSE"]:
         SDKSYM_GENERATOR_COMSTR="\tSDKSYM\t${TARGET}",
         APPMETA_COMSTR="\tAPPMETA\t${TARGET}",
         APPMETAEMBED_COMSTR="\tFAP\t${TARGET}",
+        APPDUMP_COMSTR="\tFAPDUMP\t${TARGET}",
+        APPCHECK_COMSTR="\tFAPCHECK\t${TARGET}",
     )
 
 
@@ -130,7 +132,9 @@ fwenv.LoadApplicationManifests()
 fwenv.PrepareApplicationsBuild()
 
 # Build external apps
-extapps = SConscript("applications/extapps.scons", exports={"ENV": fwenv})
+extapps = fwenv["FW_EXTAPPS"] = SConscript(
+    "applications/extapps.scons", exports={"ENV": fwenv}
+)
 
 
 # Add preprocessor definitions for current set of apps

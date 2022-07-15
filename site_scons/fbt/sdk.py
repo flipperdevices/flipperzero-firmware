@@ -348,6 +348,11 @@ class SdkCache:
             key=operator.attrgetter("name"),
         )
 
+    def get_valid_names(self):
+        syms = set(map(lambda e: e.name, self.get_functions()))
+        syms.update(map(lambda e: e.name, self.get_variables()))
+        return syms
+
     def get_functions(self):
         return self._filter_enabled(self.sdk.functions)
 

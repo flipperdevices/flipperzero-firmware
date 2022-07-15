@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from enum import Enum
 import os
 import posixpath
@@ -38,7 +38,10 @@ class FlipperApplication:
     icon: Optional[str] = None
     order: int = 0
     sdk_headers: List[str] = field(default_factory=list)
+    version: Tuple[int] = field(default_factory=lambda: (0, 0))
+    fapp_icon: Optional[str] = None
     _appdir: Optional[str] = None
+    _apppath: Optional[str] = None
 
 
 class AppManager:
@@ -64,7 +67,14 @@ class AppManager:
 
         def App(*args, **kw):
             nonlocal app_manifests
-            app_manifests.append(FlipperApplication(*args, **kw, _appdir=app_dir_name))
+            app_manifests.append(
+                FlipperApplication(
+                    *args,
+                    **kw,
+                    _appdir=app_dir_name,
+                    _apppath=os.path.dirname(app_manifest_path),
+                ),
+            )
 
         try:
             with open(app_manifest_path, "rt") as manifest_file:
