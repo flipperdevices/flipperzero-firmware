@@ -29,6 +29,8 @@ typedef struct {
     uint16_t stack_size;
     uint32_t app_version;
     char name[32];
+    char has_icon;
+    char icon[32];
 } ElfManifestV1;
 
 typedef ElfManifestV1 ElfManifest;
