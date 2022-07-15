@@ -1,5 +1,5 @@
 App(
-    appid="APPS_Picopass",
+    appid="INTAPP_Picopass",
     name="PicoPass Reader",
     apptype=FlipperAppType.PLUGIN,
     entry_point="picopass_app",

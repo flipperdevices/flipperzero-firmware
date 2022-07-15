@@ -1,5 +1,5 @@
 App(
-    appid="GAME_Chess",
+    appid="INTAPP_Chess",
     name="Chess",
     apptype=FlipperAppType.GAME,
     entry_point="chess_app",

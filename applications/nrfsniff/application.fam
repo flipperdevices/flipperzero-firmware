@@ -1,5 +1,5 @@
 App(
-    appid="APPS_NRFSniff",
+    appid="INTAPP_NRFSniff",
     name="NRF Sniff",
     apptype=FlipperAppType.PLUGIN,
     entry_point="nrfsniff_app",

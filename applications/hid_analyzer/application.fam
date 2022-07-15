@@ -1,5 +1,5 @@
 App(
-    appid="APPS_HIDAnalyzer",
+    appid="INTAPP_HIDAnalyzer",
     name="HID Analyzer",
     apptype=FlipperAppType.PLUGIN,
     entry_point="hid_analyzer_app",

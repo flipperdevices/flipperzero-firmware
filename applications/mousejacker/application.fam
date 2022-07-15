@@ -1,5 +1,5 @@
 App(
-    appid="APPS_MouseJacker",
+    appid="INTAPP_MouseJacker",
     name="Mouse Jacker",
     apptype=FlipperAppType.PLUGIN,
     entry_point="mousejacker_app",

@@ -1,5 +1,5 @@
 App(
-    appid="APPS_WiFiScanner",
+    appid="INTAPP_WiFiScanner",
     name="WiFi Scanner",
     apptype=FlipperAppType.PLUGIN,
     entry_point="wifi_scanner_app",

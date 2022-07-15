@@ -1,5 +1,5 @@
 App(
-    appid="GAME_Chip8",
+    appid="INTAPP_Chip8",
     name="CHIP8 Emulator",
     apptype=FlipperAppType.GAME,
     entry_point="chip8_app",
