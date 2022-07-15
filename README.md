@@ -9,7 +9,7 @@
 - OFW: [[FL-2633] Move files from /int to /ext on SD mount #1384 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384)
 - OFW: [Correct # to ! for the inverted text example #1395](https://github.com/flipperdevices/flipperzero-firmware/pull/1395)
 - OFW: [IR: increase raw timings amount #1388](https://github.com/flipperdevices/flipperzero-firmware/pull/1388)
-- Added [WiFi Scanner (By gotnull)](WiFi Scanner) `HIDDEN "wifi_scanner"` due to hardware requirement
+- Added [WiFi Scanner (By gotnull)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/99) `HIDDEN "wifi_scanner"` due to hardware requirement
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
@@ -146,7 +146,7 @@ $ docker-compose exec dev ./fbt
 - [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/SpectrumAnalyzer.elf) [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
 - [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/WavPlayer.elf) [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
-- [WiFi Scanner (By gotnull)](WiFi Scanner) `HIDDEN "wifi_scanner"` due to `Hardware Requirement: ESP8266`
+- [WiFi Scanner (By gotnull)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/99) `HIDDEN "wifi_scanner"` due to `Hardware Requirement: ESP8266`
 </details>
 </td></tr></table>
 
