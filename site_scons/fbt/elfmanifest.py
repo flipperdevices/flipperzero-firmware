@@ -14,15 +14,17 @@ _MANIFEST_MAGIC = 0x52474448
 class ElfManifestBaseHeader:
     manifest_version: int
     api_version: int
+    hardware_target_id: int
 
     manifest_magic: int = 0x52474448
 
     def as_bytes(self):
         return struct.pack(
-            "<III",
+            "<IIIh",
             self.manifest_magic,
             self.manifest_version,
             self.api_version,
+            self.hardware_target_id,
         )
 
 
@@ -44,7 +46,9 @@ class ElfManifestV1:
         )
 
 
-def assemble_manifest_data(app_manifest: FlipperApplication, sdk_version):
+def assemble_manifest_data(
+    app_manifest: FlipperApplication, hardware_target: int, sdk_version
+):
     image_data = b""
     if app_manifest.fapp_icon:
         from flipper.assets.icon import file2image
@@ -64,9 +68,16 @@ def assemble_manifest_data(app_manifest: FlipperApplication, sdk_version):
         app_manifest.version[1] & 0xFFFF
     )
 
-    data = ElfManifestBaseHeader(1, sdk_version).as_bytes()
+    data = ElfManifestBaseHeader(
+        manifest_version=1,
+        api_version=sdk_version,
+        hardware_target_id=sdk_version,
+    ).as_bytes()
     data += ElfManifestV1(
-        app_manifest.stack_size, app_version_as_int, app_manifest.name, image_data
+        stack_size=app_manifest.stack_size,
+        app_version=app_version_as_int,
+        name=app_manifest.name,
+        icon=image_data,
     ).as_bytes()
 
     return data

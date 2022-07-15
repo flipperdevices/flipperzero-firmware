@@ -473,8 +473,8 @@ static int init_elf(ELFExec_t* e, File* f) {
         return -1;
     }
 
-    if((manifest.base.api_version.major != ELF_API_MAJOR) ||
-       (manifest.base.api_version.minor < ELF_API_MINOR)) {
+    if((manifest.base.api_version.major != ELF_API_MAJOR) /* ||
+       (manifest.base.api_version.minor < ELF_API_MINOR) */) {
         FURI_LOG_E(
             TAG,
             "API version mismatch (fw %d.%d, elf %d.%d)",

@@ -21,11 +21,11 @@ typedef struct {
         };
         uint32_t version;
     } api_version;
+    uint16_t hardware_target_id;
 } ElfManifestBase;
 
 typedef struct {
     ElfManifestBase base;
-
     uint16_t stack_size;
     uint32_t app_version;
     char name[32];

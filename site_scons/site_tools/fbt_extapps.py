@@ -42,7 +42,13 @@ def prepare_app_metadata(target, source, env):
     meta_file_name = source[0].path + ".meta"
     with open(meta_file_name, "wb") as f:
         # f.write(f"hello this is {app}")
-        f.write(assemble_manifest_data(app, sdk_cache.version.as_int()))
+        f.write(
+            assemble_manifest_data(
+                app_manifest=app,
+                hardware_target=int(env.subst("$TARGET_HW")),
+                sdk_version=sdk_cache.version.as_int(),
+            )
+        )
 
 
 def generate(env, **kw):
