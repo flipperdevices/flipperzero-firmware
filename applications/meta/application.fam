@@ -34,6 +34,8 @@ App(
     name="Basic applications for plug-in menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
+        "storage_move_to_sd",
+        "APPS_DolphinRestorer",
         "music_player",
         "snake_game",
         "bt_hid",
