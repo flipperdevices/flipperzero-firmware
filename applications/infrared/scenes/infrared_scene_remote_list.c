@@ -15,7 +15,7 @@ void infrared_scene_remote_list_on_enter(void* context) {
         true);
 
     if(success) {
-        view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationHorizontal);
+        view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
         view_dispatcher_switch_to_view(view_dispatcher, InfraredViewStack);
 
         infrared_show_loading_popup(infrared, true);
