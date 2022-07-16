@@ -14,6 +14,7 @@
 
 #define PICOPASS_CSN_BLOCK_INDEX 0
 #define PICOPASS_CONFIG_BLOCK_INDEX 1
+#define PICOPASS_AIA_BLOCK_INDEX 5
 
 #define PICOPASS_APP_FOLDER "/any/picopass"
 #define PICOPASS_APP_EXTENSION ".picopass"
@@ -39,7 +40,10 @@ typedef struct {
 } PicopassWiegandRecord;
 
 typedef struct {
+    bool legacy;
+    bool se_enabled;
     bool biometrics;
+    uint8_t pin_length;
     PicopassEncryption encryption;
     uint8_t credential[8];
     uint8_t pin0[8];

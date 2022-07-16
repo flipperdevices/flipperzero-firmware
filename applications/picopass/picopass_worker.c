@@ -273,10 +273,15 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
                 FURI_LOG_E(TAG, "picopass_read_card error %d", err);
             }
 
+            // Thank you proxmark!
+            pacs->legacy = (memcmp(AA1[5].data, "\xff\xff\xff\xff\xff\xff\xff\xff", 8) == 0);
+            pacs->se_enabled = (memcmp(AA1[5].data, "\xff\xff\xff\x00\x06\xff\xff\xff", 8) == 0);
+
             pacs->biometrics = AA1[6].data[4];
+            pacs->pin_length = AA1[6].data[6] & 0x0F;
             pacs->encryption = AA1[6].data[7];
 
-            if(pacs->encryption == 0x17) {
+            if(pacs->encryption == PicopassDeviceEncryption3DES) {
                 FURI_LOG_D(TAG, "3DES Encrypted");
                 err = picopass_worker_decrypt(AA1[7].data, pacs->credential);
                 if(err != ERR_NONE) {
@@ -295,12 +300,12 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
                     FURI_LOG_E(TAG, "decrypt error %d", err);
                     break;
                 }
-            } else if(pacs->encryption == 0x14) {
+            } else if(pacs->encryption == PicopassDeviceEncryptionNone) {
                 FURI_LOG_D(TAG, "No Encryption");
                 memcpy(pacs->credential, AA1[7].data, PICOPASS_BLOCK_LEN);
                 memcpy(pacs->pin0, AA1[8].data, PICOPASS_BLOCK_LEN);
                 memcpy(pacs->pin1, AA1[9].data, PICOPASS_BLOCK_LEN);
-            } else if(pacs->encryption == 0x15) {
+            } else if(pacs->encryption == PicopassDeviceEncryptionDES) {
                 FURI_LOG_D(TAG, "DES Encrypted");
             } else {
                 FURI_LOG_D(TAG, "Unknown encryption");

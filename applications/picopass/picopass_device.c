@@ -10,6 +10,9 @@ static const uint32_t picopass_file_version = 1;
 
 PicopassDevice* picopass_device_alloc() {
     PicopassDevice* picopass_dev = malloc(sizeof(PicopassDevice));
+    picopass_dev->dev_data.pacs.legacy = false;
+    picopass_dev->dev_data.pacs.se_enabled = false;
+    picopass_dev->dev_data.pacs.pin_length = 0;
     picopass_dev->storage = furi_record_open("storage");
     picopass_dev->dialogs = furi_record_open("dialogs");
     return picopass_dev;
@@ -67,10 +70,13 @@ static bool picopass_device_save_file(
                 if(!flipper_format_write_hex(
                        file, "Credential", pacs->credential, PICOPASS_BLOCK_LEN))
                     break;
-                if(!flipper_format_write_hex(file, "PIN\t\t", pacs->pin0, PICOPASS_BLOCK_LEN))
-                    break;
-                if(!flipper_format_write_hex(file, "PIN(cont.)\t", pacs->pin1, PICOPASS_BLOCK_LEN))
-                    break;
+                if(pacs->pin_length > 0) {
+                    if(!flipper_format_write_hex(file, "PIN\t\t", pacs->pin0, PICOPASS_BLOCK_LEN))
+                        break;
+                    if(!flipper_format_write_hex(
+                           file, "PIN(cont.)\t", pacs->pin1, PICOPASS_BLOCK_LEN))
+                        break;
+                }
             }
             if(!flipper_format_write_comment_cstr(file, "Picopass blocks")) break;
             bool block_saved = true;
@@ -144,4 +150,7 @@ void picopass_device_data_clear(PicopassDeviceData* dev_data) {
     for(size_t i = 0; i < PICOPASS_MAX_APP_LIMIT; i++) {
         memset(dev_data->AA1[i].data, 0, sizeof(dev_data->AA1[i].data));
     }
+    dev_data->pacs.legacy = false;
+    dev_data->pacs.se_enabled = false;
+    dev_data->pacs.pin_length = 0;
 }
