@@ -133,11 +133,15 @@ static int load_section_data(ELFExec_t* e, ELFSection_t* s, Elf32_Shdr* h) {
         return -1;
     }
 
-    uint16_t read = storage_file_read(e->fd, s->data, h->sh_size);
-    if(read != h->sh_size) {
-        FURI_LOG_E(TAG, "     read %d, expected %d", read, h->sh_size);
-        FURI_LOG_E(TAG, "     read data fail '%s'", storage_file_get_error_desc(e->fd));
-        return -1;
+    if(h->sh_type == SHT_NOBITS) {
+        /* no need to memset - allocator already did that */
+        /* memset(s->data, 0, h->sh_size); */
+    } else {
+        if(storage_file_read(e->fd, s->data, h->sh_size) != h->sh_size) {
+            FURI_LOG_E(TAG, "    read fail");
+            free_section(s);
+            return -1;
+        }
     }
 
     /* FURI_LOG_D(TAG, "DATA: "); */
