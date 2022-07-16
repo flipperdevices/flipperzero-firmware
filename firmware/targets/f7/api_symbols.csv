@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,0.23,,
+Version,+,0.25,,
 Header,+,applications/bt/bt_service/bt.h,,
 Header,+,applications/cli/cli.h,,
 Header,+,applications/cli/cli_vcp.h,,
@@ -106,6 +106,7 @@ Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_usart.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_utils.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_wwdg.h,,
 Header,+,lib/flipper_format/flipper_format.h,,
+Header,+,lib/flipper_format/flipper_format_i.h,,
 Header,+,lib/micro-ecc/uECC.h,,
 Header,+,lib/one_wire/ibutton/ibutton_worker.h,,
 Header,+,lib/one_wire/maxim_crc.h,,
@@ -113,6 +114,10 @@ Header,+,lib/one_wire/one_wire_device.h,,
 Header,+,lib/one_wire/one_wire_host.h,,
 Header,+,lib/one_wire/one_wire_host_timing.h,,
 Header,+,lib/one_wire/one_wire_slave.h,,
+Header,+,lib/subghz/environment.h,,
+Header,+,lib/subghz/receiver.h,,
+Header,+,lib/subghz/subghz_worker.h,,
+Header,+,lib/subghz/transmitter.h,,
 Header,+,lib/toolbox/args.h,,
 Header,+,lib/toolbox/crc32_calc.h,,
 Header,+,lib/toolbox/dir_walk.h,,
@@ -814,6 +819,7 @@ Function,+,flipper_format_file_open_append,_Bool,"FlipperFormat*, const char*"
 Function,+,flipper_format_file_open_existing,_Bool,"FlipperFormat*, const char*"
 Function,+,flipper_format_file_open_new,_Bool,"FlipperFormat*, const char*"
 Function,+,flipper_format_free,void,FlipperFormat*
+Function,+,flipper_format_get_raw_stream,Stream*,FlipperFormat*
 Function,+,flipper_format_get_value_count,_Bool,"FlipperFormat*, const char*, uint32_t*"
 Function,+,flipper_format_insert_or_update_bool,_Bool,"FlipperFormat*, const char*, const _Bool*, const uint16_t"
 Function,+,flipper_format_insert_or_update_float,_Bool,"FlipperFormat*, const char*, const float*, const uint16_t"
@@ -2106,6 +2112,48 @@ Function,-,strupr,char*,char*
 Function,-,strverscmp,int,"const char*, const char*"
 Function,-,strxfrm,size_t,"char*, const char*, size_t"
 Function,-,strxfrm_l,size_t,"char*, const char*, size_t, locale_t"
+Function,+,subghz_environment_alloc,SubGhzEnvironment*,
+Function,+,subghz_environment_free,void,SubGhzEnvironment*
+Function,-,subghz_environment_get_came_atomo_rainbow_table_file_name,const char*,SubGhzEnvironment*
+Function,-,subghz_environment_get_keystore,SubGhzKeystore*,SubGhzEnvironment*
+Function,-,subghz_environment_get_nice_flor_s_rainbow_table_file_name,const char*,SubGhzEnvironment*
+Function,+,subghz_environment_load_keystore,_Bool,"SubGhzEnvironment*, const char*"
+Function,-,subghz_environment_set_came_atomo_rainbow_table_file_name,void,"SubGhzEnvironment*, const char*"
+Function,-,subghz_environment_set_nice_flor_s_rainbow_table_file_name,void,"SubGhzEnvironment*, const char*"
+Function,-,subghz_keystore_alloc,SubGhzKeystore*,
+Function,-,subghz_keystore_free,void,SubGhzKeystore*
+Function,-,subghz_keystore_get_data,SubGhzKeyArray_t*,SubGhzKeystore*
+Function,-,subghz_keystore_load,_Bool,"SubGhzKeystore*, const char*"
+Function,-,subghz_keystore_raw_encrypted_save,_Bool,"const char*, const char*, uint8_t*"
+Function,-,subghz_keystore_raw_get_data,_Bool,"const char*, size_t, uint8_t*, size_t"
+Function,-,subghz_keystore_save,_Bool,"SubGhzKeystore*, const char*, uint8_t*"
+Function,-,subghz_protocol_decoder_base_deserialize,_Bool,"SubGhzProtocolDecoderBase*, FlipperFormat*"
+Function,-,subghz_protocol_decoder_base_get_hash_data,uint8_t,SubGhzProtocolDecoderBase*
+Function,-,subghz_protocol_decoder_base_get_string,_Bool,"SubGhzProtocolDecoderBase*, string_t"
+Function,-,subghz_protocol_decoder_base_serialize,_Bool,"SubGhzProtocolDecoderBase*, FlipperFormat*, uint32_t, FuriHalSubGhzPreset"
+Function,-,subghz_protocol_decoder_base_set_decoder_callback,void,"SubGhzProtocolDecoderBase*, SubGhzProtocolDecoderBaseRxCallback, void*"
+Function,+,subghz_receiver_alloc_init,SubGhzReceiver*,SubGhzEnvironment*
+Function,+,subghz_receiver_decode,void,"SubGhzReceiver*, _Bool, uint32_t"
+Function,+,subghz_receiver_free,void,SubGhzReceiver*
+Function,+,subghz_receiver_reset,void,SubGhzReceiver*
+Function,+,subghz_receiver_search_decoder_base_by_name,SubGhzProtocolDecoderBase*,"SubGhzReceiver*, const char*"
+Function,+,subghz_receiver_set_filter,void,"SubGhzReceiver*, SubGhzProtocolFlag"
+Function,+,subghz_receiver_set_rx_callback,void,"SubGhzReceiver*, SubGhzReceiverCallback, void*"
+Function,+,subghz_transmitter_alloc_init,SubGhzTransmitter*,"SubGhzEnvironment*, const char*"
+Function,+,subghz_transmitter_deserialize,_Bool,"SubGhzTransmitter*, FlipperFormat*"
+Function,+,subghz_transmitter_free,void,SubGhzTransmitter*
+Function,+,subghz_transmitter_get_protocol_instance,SubGhzProtocolEncoderBase*,SubGhzTransmitter*
+Function,+,subghz_transmitter_stop,_Bool,SubGhzTransmitter*
+Function,+,subghz_transmitter_yield,LevelDuration,void*
+Function,-,subghz_worker_alloc,SubGhzWorker*,
+Function,-,subghz_worker_free,void,SubGhzWorker*
+Function,-,subghz_worker_is_running,_Bool,SubGhzWorker*
+Function,-,subghz_worker_rx_callback,void,"_Bool, uint32_t, void*"
+Function,-,subghz_worker_set_context,void,"SubGhzWorker*, void*"
+Function,-,subghz_worker_set_overrun_callback,void,"SubGhzWorker*, SubGhzWorkerOverrunCallback"
+Function,-,subghz_worker_set_pair_callback,void,"SubGhzWorker*, SubGhzWorkerPairCallback"
+Function,-,subghz_worker_start,void,SubGhzWorker*
+Function,-,subghz_worker_stop,void,SubGhzWorker*
 Function,+,submenu_add_item,void,"Submenu*, const char*, uint32_t, SubmenuItemCallback, void*"
 Function,+,submenu_alloc,Submenu*,
 Function,+,submenu_free,void,Submenu*
@@ -2518,7 +2566,7 @@ Variable,+,I_Pin_arrow_up7x9,const Icon,
 Variable,+,I_Pin_attention_dpad_29x29,const Icon,
 Variable,+,I_Pin_back_arrow_10x8,const Icon,
 Variable,+,I_Pin_back_full_40x8,const Icon,
-Variable,-,I_Pin_cell_13x13,const Icon,
+Variable,+,I_Pin_cell_13x13,const Icon,
 Variable,+,I_Pin_pointer_5x3,const Icon,
 Variable,+,I_Pin_star_7x7,const Icon,
 Variable,-,I_PlaceholderL_11x13,const Icon,
