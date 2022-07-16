@@ -152,7 +152,7 @@ if(FREERTOS_F100RB_EXAMPLE)
     endif()
     if(USE_CMSIS_RTOS_V2)
         target_link_libraries(${TARGET_NAME} PRIVATE
-            CMSIS::STM32::F100RB::RTOS_V2
+            CMSIS::STM32::F1::RTOS_V2
         )
         target_compile_definitions(${TARGET_NAME} PRIVATE
             USE_CMSIS_RTOS_V2
