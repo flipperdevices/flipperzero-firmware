@@ -8,6 +8,7 @@
 
 #define IS_FLAGS_SET(v, m) ((v & m) == m)
 #define SECTION_OFFSET(e, n) (e->section_table + n * sizeof(Elf32_Shdr))
+#define SYMBOL_OFFSET(e, n) (e->_table + n * sizeof(Elf32_Shdr))
 
 #define TAG "elf-loader"
 
@@ -68,55 +69,30 @@ typedef enum {
                FoundRelText | FoundRelRodata | FoundRelData | FoundRelBss
 } FindFlags_t;
 
-static int read_section_name(ELFExec_t* e, off_t off, char* buf, size_t max) {
+static int read_string_from_offset(ELFExec_t* e, off_t offset, char* buffer, size_t buffer_size) {
     int ret = -1;
-    off_t offset = e->section_table_strings + off;
+
     off_t old = storage_file_tell(e->fd);
-    if(storage_file_seek(e->fd, offset, true))
-        if(storage_file_read(e->fd, buf, max) == 0) ret = 0;
+    if(storage_file_seek(e->fd, offset, true) &&
+       (storage_file_read(e->fd, buffer, buffer_size) != buffer_size)) {
+        ret = 0;
+    }
     (void)storage_file_seek(e->fd, old, true);
+
     return ret;
 }
 
+static int read_section_name(ELFExec_t* e, off_t off, char* buf, size_t max) {
+    return read_string_from_offset(e, e->section_table_strings + off, buf, max);
+}
+
 static int read_symbol_name(ELFExec_t* e, off_t off, char* buf, size_t max) {
-    int ret = -1;
-    off_t offset = e->symbol_table_strings + off;
-    off_t old = storage_file_tell(e->fd);
-    if(storage_file_seek(e->fd, offset, true))
-        if(storage_file_read(e->fd, buf, max) == 0) ret = 0;
-    (void)storage_file_seek(e->fd, old, true);
-    return ret;
+    return read_string_from_offset(e, e->symbol_table_strings + off, buf, max);
 }
 
 static void free_section(ELFSection_t* s) {
     if(s->data) aligned_free(s->data);
     s->data = NULL;
-}
-
-#if 0
-static uint32_t swabo(uint32_t hl) {
-    return (
-        (((hl) >> 24)) | /* */
-        (((hl) >> 8) & 0x0000ff00) | /* */
-        (((hl) << 8) & 0x00ff0000) | /* */
-        (((hl) << 24))); /* */
-}
-#endif
-
-static void dump_data(uint8_t* data, size_t size) {
-#if 0
-	int i = 0;
-	while (i < size) {
-		if ((i & 0xf) == 0)
-			FURI_LOG_D(TAG, "  %04X: ", i);
-		FURI_LOG_D(TAG, "%08x ", swabo(*((uint32_t*)(data + i))));
-		i += sizeof(uint32_t);
-	}
-	FURI_LOG_D(TAG, "");
-#else
-    UNUSED(data);
-    UNUSED(size);
-#endif
 }
 
 static int load_section_data(ELFExec_t* e, ELFSection_t* s, Elf32_Shdr* h) {
@@ -127,25 +103,20 @@ static int load_section_data(ELFExec_t* e, ELFSection_t* s, Elf32_Shdr* h) {
 
     s->data = aligned_malloc(h->sh_size, h->sh_addralign);
 
-    if(!storage_file_seek(e->fd, h->sh_offset, true)) {
-        FURI_LOG_E(TAG, "    seek fail");
+    if(h->sh_type == SHT_NOBITS) {
+        /* section is empty (.bss?) */
+        /* no need to memset - allocator already did that */
+        /* memset(s->data, 0, h->sh_size); */
+        FURI_LOG_I(TAG, "0x%X", s->data);
+        return 0;
+    }
+
+    if((!storage_file_seek(e->fd, h->sh_offset, true)) ||
+       (storage_file_read(e->fd, s->data, h->sh_size) != h->sh_size)) {
+        FURI_LOG_E(TAG, "    seek/read fail");
         free_section(s);
         return -1;
     }
-
-    if(h->sh_type == SHT_NOBITS) {
-        /* no need to memset - allocator already did that */
-        /* memset(s->data, 0, h->sh_size); */
-    } else {
-        if(storage_file_read(e->fd, s->data, h->sh_size) != h->sh_size) {
-            FURI_LOG_E(TAG, "    read fail");
-            free_section(s);
-            return -1;
-        }
-    }
-
-    /* FURI_LOG_D(TAG, "DATA: "); */
-    dump_data(s->data, h->sh_size);
 
     FURI_LOG_I(TAG, "0x%X", s->data);
     return 0;
@@ -153,30 +124,33 @@ static int load_section_data(ELFExec_t* e, ELFSection_t* s, Elf32_Shdr* h) {
 
 static int read_section_header(ELFExec_t* e, int n, Elf32_Shdr* h) {
     off_t offset = SECTION_OFFSET(e, n);
-    if(!storage_file_seek(e->fd, offset, true)) return -1;
-    if(storage_file_read(e->fd, h, sizeof(Elf32_Shdr)) != sizeof(Elf32_Shdr)) return -1;
+    if(!storage_file_seek(e->fd, offset, true) ||
+       (storage_file_read(e->fd, h, sizeof(Elf32_Shdr)) != sizeof(Elf32_Shdr)))
+        return -1;
     return 0;
 }
 
 static int read_section(ELFExec_t* e, int n, Elf32_Shdr* h, char* name, size_t nlen) {
     if(read_section_header(e, n, h) != 0) return -1;
-    if(h->sh_name) return read_section_name(e, h->sh_name, name, nlen);
-    return 0;
+    if(!h->sh_name) {
+        return 0;
+    }
+    return read_section_name(e, h->sh_name, name, nlen);
 }
 
 static int read_symbol(ELFExec_t* e, int n, Elf32_Sym* sym, char* name, size_t nlen) {
     int ret = -1;
     off_t old = storage_file_tell(e->fd);
     off_t pos = e->symbol_table + n * sizeof(Elf32_Sym);
-    if(storage_file_seek(e->fd, pos, true))
-        if(storage_file_read(e->fd, sym, sizeof(Elf32_Sym)) == sizeof(Elf32_Sym)) {
-            if(sym->st_name)
-                ret = read_symbol_name(e, sym->st_name, name, nlen);
-            else {
-                Elf32_Shdr shdr;
-                ret = read_section(e, sym->st_shndx, &shdr, name, nlen);
-            }
+    if(storage_file_seek(e->fd, pos, true) &&
+       storage_file_read(e->fd, sym, sizeof(Elf32_Sym)) == sizeof(Elf32_Sym)) {
+        if(sym->st_name)
+            ret = read_symbol_name(e, sym->st_name, name, nlen);
+        else {
+            Elf32_Shdr shdr;
+            ret = read_section(e, sym->st_shndx, &shdr, name, nlen);
         }
+    }
     (void)storage_file_seek(e->fd, old, true);
     return ret;
 }
