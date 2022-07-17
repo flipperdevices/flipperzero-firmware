@@ -1,7 +1,7 @@
 #include "flipper.pb.h"
 #include "furi_hal_delay.h"
-#include "furi/check.h"
-#include "furi/record.h"
+#include <core/check.h>
+#include <core/record.h>
 #include "pb_decode.h"
 #include <rpc/rpc.h>
 #include "rpc/rpc_i.h"

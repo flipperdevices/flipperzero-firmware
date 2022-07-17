@@ -1,5 +1,5 @@
-#include "furi/check.h"
-#include "furi/common_defines.h"
+#include <core/check.h>
+#include <core/common_defines.h>
 #include "sys/_stdint.h"
 #include "infrared_worker.h"
 #include <infrared.h>

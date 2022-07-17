@@ -1,8 +1,8 @@
 #include "assets_icons.h"
 #include "cmsis_os2.h"
 #include "dolphin/helpers/dolphin_state.h"
-#include "furi/check.h"
-#include "furi/record.h"
+#include <core/check.h>
+#include <core/record.h>
 #include <furi.h>
 #include <gui/gui.h>
 #include <furi_hal_version.h>

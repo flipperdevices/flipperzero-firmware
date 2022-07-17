@@ -2,7 +2,7 @@
 #include "bq27220_reg.h"
 
 #include <furi_hal_delay.h>
-#include <furi/log.h>
+#include <core/log.h>
 #include <stdbool.h>
 
 #define TAG "Gauge"

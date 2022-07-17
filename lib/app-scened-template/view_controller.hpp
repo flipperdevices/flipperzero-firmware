@@ -1,7 +1,7 @@
 #pragma once
 #include "view_modules/generic_view_module.h"
 #include <map>
-#include <furi/check.h>
+#include <core/check.h>
 #include <gui/view_dispatcher.h>
 #include <callback-connector.h>
 #include "typeindex_no_rtti.hpp"

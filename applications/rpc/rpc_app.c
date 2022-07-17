@@ -1,6 +1,6 @@
 #include "cmsis_os2.h"
 #include "flipper.pb.h"
-#include "furi/record.h"
+#include <core/record.h>
 #include "rpc_i.h"
 #include <furi.h>
 #include <loader/loader.h>

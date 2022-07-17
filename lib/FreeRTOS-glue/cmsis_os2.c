@@ -22,7 +22,7 @@
 
 #include <string.h>
 
-#include <furi/common_defines.h>
+#include <core/common_defines.h>
 
 #include "cmsis_os2.h"                  // ::CMSIS:RTOS2
 #include "cmsis_compiler.h"             // Compiler agnostic definitions

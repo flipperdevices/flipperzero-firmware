@@ -1,7 +1,7 @@
 #include "protocol_metakom.h"
 #include <stdlib.h>
 #include <string.h>
-#include <furi/check.h>
+#include <core/check.h>
 #include <furi_hal_delay.h>
 
 #define METAKOM_DATA_SIZE 4

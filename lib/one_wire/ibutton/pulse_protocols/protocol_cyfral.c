@@ -1,7 +1,7 @@
 #include "protocol_cyfral.h"
 #include <stdlib.h>
 #include <string.h>
-#include <furi/check.h>
+#include <core/check.h>
 #include <furi_hal_delay.h>
 
 #define CYFRAL_DATA_SIZE 2

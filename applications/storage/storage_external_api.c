@@ -1,5 +1,5 @@
-#include "furi/log.h"
-#include <furi/record.h>
+#include <core/log.h>
+#include <core/record.h>
 #include <m-string.h>
 #include "storage.h"
 #include "storage_i.h"

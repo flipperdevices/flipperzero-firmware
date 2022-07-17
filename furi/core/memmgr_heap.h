@@ -6,7 +6,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "furi/thread.h"
+#include <core/thread.h>
 
 #ifdef __cplusplus
 extern "C" {

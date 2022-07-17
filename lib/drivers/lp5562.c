@@ -1,5 +1,5 @@
 #include "lp5562.h"
-#include "furi/common_defines.h"
+#include <core/common_defines.h>
 #include "lp5562_reg.h"
 #include <furi_hal.h>
 

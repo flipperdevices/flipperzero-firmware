@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <FreeRTOS.h>
 #include <timers.h>
-#include <furi/dangerous_defines.h>
+#include <core/dangerous_defines.h>
 
 #define ACTIVE_SHIFT 2
 

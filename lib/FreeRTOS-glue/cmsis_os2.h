@@ -61,7 +61,7 @@
 #endif
 #endif
 
-#include <furi/base.h>
+#include <core/base.h>
 
 #ifdef  __cplusplus
 extern "C"

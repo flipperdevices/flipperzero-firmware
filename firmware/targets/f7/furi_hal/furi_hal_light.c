@@ -1,4 +1,4 @@
-#include "furi/common_defines.h"
+#include <core/common_defines.h>
 #include "furi_hal_resources.h"
 #include <furi_hal_light.h>
 #include <furi_hal_delay.h>

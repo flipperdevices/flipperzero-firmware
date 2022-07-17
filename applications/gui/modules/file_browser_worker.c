@@ -1,6 +1,6 @@
 #include "file_browser_worker.h"
-#include "furi/check.h"
-#include "furi/common_defines.h"
+#include <core/check.h>
+#include <core/common_defines.h>
 #include "m-string.h"
 #include "storage/filesystem_api_defines.h"
 #include <m-array.h>

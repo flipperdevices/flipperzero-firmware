@@ -23,7 +23,7 @@ env = ENV.Clone(
         "${LIB_DIST_DIR}",
     ],
     CPPPATH=[
-        "#/core",
+        "#/furi",
         "#/applications",
         "#/firmware/targets/f${TARGET_HW}/ble_glue",
         "#/firmware/targets/f${TARGET_HW}/fatfs",
@@ -100,7 +100,7 @@ lib_targets = env.BuildModules(
         "lib",
         "assets",
         "firmware",
-        "core",
+        "furi",
     ],
 )
 
