@@ -10,7 +10,7 @@
 
 #define TAG "UnitTests"
 
-int run_minunit();
+int run_minunit_test_furi();
 int run_minunit_test_infrared();
 int run_minunit_test_rpc();
 int run_minunit_test_flipper_format();
@@ -21,7 +21,27 @@ int run_minunit_test_subghz();
 int run_minunit_test_dirwalk();
 int run_minunit_test_nfc();
 
-void minunit_print_progress(void) {
+typedef int (*UnitTestEntry)();
+
+typedef struct {
+    const char* name;
+    const UnitTestEntry entry;
+} UnitTest;
+
+const UnitTest unit_tests[] = {
+    {.name = "furi", .entry = run_minunit_test_furi},
+    {.name = "storage", .entry = run_minunit_test_storage},
+    {.name = "stream", .entry = run_minunit_test_stream},
+    {.name = "dirwalk", .entry = run_minunit_test_dirwalk},
+    {.name = "flipper_format", .entry = run_minunit_test_flipper_format},
+    {.name = "flipper_format_string", .entry = run_minunit_test_flipper_format_string},
+    {.name = "rpc", .entry = run_minunit_test_rpc},
+    {.name = "subghz", .entry = run_minunit_test_subghz},
+    {.name = "infrared", .entry = run_minunit_test_infrared},
+    {.name = "nfc", .entry = run_minunit_test_nfc},
+};
+
+void minunit_print_progress() {
     static const char progress[] = {'\\', '|', '/', '-'};
     static uint8_t progress_counter = 0;
     static TickType_t last_tick = 0;
@@ -41,7 +61,7 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
     UNUSED(cli);
     UNUSED(args);
     UNUSED(context);
-    uint32_t test_result = 0;
+    uint32_t failed_tests = 0;
     minunit_run = 0;
     minunit_assert = 0;
     minunit_fail = 0;
@@ -60,20 +80,26 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
         uint32_t heap_before = memmgr_get_free_heap();
         uint32_t cycle_counter = furi_hal_get_tick();
 
-        test_result |= run_minunit();
-        test_result |= run_minunit_test_storage();
-        test_result |= run_minunit_test_stream();
-        test_result |= run_minunit_test_dirwalk();
-        test_result |= run_minunit_test_flipper_format();
-        test_result |= run_minunit_test_flipper_format_string();
-        test_result |= run_minunit_test_rpc();
-        test_result |= run_minunit_test_subghz();
-        test_result |= run_minunit_test_infrared();
-        test_result |= run_minunit_test_nfc();
+        for(size_t i = 0; i < COUNT_OF(unit_tests); i++) {
+            if(cli_cmd_interrupt_received(cli)) {
+                break;
+            }
+
+            if(string_size(args)) {
+                if(string_cmp_str(args, unit_tests[i].name) == 0) {
+                    failed_tests += unit_tests[i].entry();
+                } else {
+                    printf("Skipping %s\r\n", unit_tests[i].name);
+                }
+            } else {
+                failed_tests += unit_tests[i].entry();
+            }
+        }
+        printf("\r\nFailed tests: %lu\r\n", failed_tests);
 
         // Time report
         cycle_counter = (furi_hal_get_tick() - cycle_counter);
-        printf("\r\nConsumed: %lu ms\r\n", cycle_counter);
+        printf("Consumed: %lu ms\r\n", cycle_counter);
 
         // Wait for tested services and apps to deallocate memory
         furi_hal_delay_ms(200);
@@ -81,7 +107,7 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
         printf("Leaked: %ld\r\n", heap_before - heap_after);
 
         // Final Report
-        if(test_result == 0) {
+        if(failed_tests == 0) {
             notification_message(notification, &sequence_success);
             printf("Status: PASSED\r\n");
         } else {
