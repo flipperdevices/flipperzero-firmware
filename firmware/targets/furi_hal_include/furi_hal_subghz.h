@@ -78,9 +78,8 @@ void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset);
 /** Load custom registers from preset
  *
  * @param      preset_data   registers to load
- * @param      preset_pa   registers to patable
  */
-void furi_hal_subghz_load_custom_preset(uint8_t *preset_data, uint8_t preset_pa[8]);
+void furi_hal_subghz_load_custom_preset(uint8_t* preset_data) ;
 
 /** Load registers
  *

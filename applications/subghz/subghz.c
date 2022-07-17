@@ -184,10 +184,17 @@ SubGhz* subghz_alloc() {
     //init Worker & Protocol & History & KeyBoard
     subghz->lock = SubGhzLockOff;
     subghz->txrx = malloc(sizeof(SubGhzTxRx));
+    subghz->txrx->preset_1 = malloc(sizeof(SubGhzPesetDefinition));
+    string_init(subghz->txrx->preset_1->name);
+    string_set(subghz->txrx->preset_1->name, "AM650");
+    subghz->txrx->preset_1->frequency = subghz_setting_get_default_frequency(subghz->setting);
+
+
     subghz->txrx->frequency = subghz_setting_get_default_frequency(subghz->setting);
     subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
     string_init(subghz->txrx->preset_name);
     string_set(subghz->txrx->preset_name, "AM650");
+    
     subghz->txrx->txrx_state = SubGhzTxRxStateSleep;
     subghz->txrx->hopper_state = SubGhzHopperStateOFF;
     subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
@@ -293,6 +300,8 @@ void subghz_free(SubGhz* subghz) {
     subghz_worker_free(subghz->txrx->worker);
     flipper_format_free(subghz->txrx->fff_data);
     subghz_history_free(subghz->txrx->history);
+    string_clear(subghz->txrx->preset_1->name);
+    free(subghz->txrx->preset_1);
     free(subghz->txrx);
 
     //Error string

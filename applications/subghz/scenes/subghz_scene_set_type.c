@@ -18,43 +18,43 @@ bool subghz_scene_set_type_submenu_gen_data_protocol(
     uint32_t frequency,
     FuriHalSubGhzPreset preset) {
     furi_assert(context);
-    SubGhz* subghz = context;
+    // SubGhz* subghz = context;
 
-    bool res = false;
+    // bool res = false;
 
-    subghz->txrx->decoder_result =
-        subghz_receiver_search_decoder_base_by_name(subghz->txrx->receiver, protocol_name);
+    // subghz->txrx->decoder_result =
+    //     subghz_receiver_search_decoder_base_by_name(subghz->txrx->receiver, protocol_name);
 
-    if(subghz->txrx->decoder_result == NULL) {
-        string_set_str(subghz->error_str, "Protocol not found");
-        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowErrorSub);
-        return false;
-    }
+    // if(subghz->txrx->decoder_result == NULL) {
+    //     string_set_str(subghz->error_str, "Protocol not found");
+    //     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowErrorSub);
+    //     return false;
+    // }
 
-    do {
-        Stream* fff_data_stream = flipper_format_get_raw_stream(subghz->txrx->fff_data);
-        stream_clean(fff_data_stream);
-        if(!subghz_protocol_decoder_base_serialize(
-               subghz->txrx->decoder_result, subghz->txrx->fff_data, frequency, preset)) {
-            FURI_LOG_E(TAG, "Unable to serialize");
-            break;
-        }
-        if(!flipper_format_update_uint32(subghz->txrx->fff_data, "Bit", &bit, 1)) {
-            FURI_LOG_E(TAG, "Unable to update Bit");
-            break;
-        }
+    // do {
+    //     Stream* fff_data_stream = flipper_format_get_raw_stream(subghz->txrx->fff_data);
+    //     stream_clean(fff_data_stream);
+    //     if(!subghz_protocol_decoder_base_serialize(
+    //            subghz->txrx->decoder_result, subghz->txrx->fff_data, frequency, preset)) {
+    //         FURI_LOG_E(TAG, "Unable to serialize");
+    //         break;
+    //     }
+    //     if(!flipper_format_update_uint32(subghz->txrx->fff_data, "Bit", &bit, 1)) {
+    //         FURI_LOG_E(TAG, "Unable to update Bit");
+    //         break;
+    //     }
 
-        uint8_t key_data[sizeof(uint64_t)] = {0};
-        for(size_t i = 0; i < sizeof(uint64_t); i++) {
-            key_data[sizeof(uint64_t) - i - 1] = (key >> i * 8) & 0xFF;
-        }
-        if(!flipper_format_update_hex(subghz->txrx->fff_data, "Key", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(TAG, "Unable to update Key");
-            break;
-        }
-        res = true;
-    } while(false);
-    return res;
+    //     uint8_t key_data[sizeof(uint64_t)] = {0};
+    //     for(size_t i = 0; i < sizeof(uint64_t); i++) {
+    //         key_data[sizeof(uint64_t) - i - 1] = (key >> i * 8) & 0xFF;
+    //     }
+    //     if(!flipper_format_update_hex(subghz->txrx->fff_data, "Key", key_data, sizeof(uint64_t))) {
+    //         FURI_LOG_E(TAG, "Unable to update Key");
+    //         break;
+    //     }
+    //     res = true;
+    // } while(false);
+    // return res;
 }
 
 void subghz_scene_set_type_submenu_callback(void* context, uint32_t index) {

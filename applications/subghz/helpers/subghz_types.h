@@ -1,5 +1,10 @@
 #pragma once
 
+#include "m-string.h"
+#include <furi.h>
+#include <furi_hal.h>
+
+
 /** SubGhzNotification state */
 typedef enum {
     SubGhzNotificationStateStarting,
@@ -67,3 +72,14 @@ typedef enum {
     SubGhzViewIdTestCarrier,
     SubGhzViewIdTestPacket,
 } SubGhzViewId;
+
+struct SubGhzPesetDefinition
+ {
+    string_t name;
+    uint32_t frequency;
+    uint32_t* data;
+    size_t data_size;
+ };
+ 
+ typedef struct SubGhzPesetDefinition SubGhzPesetDefinition;
+

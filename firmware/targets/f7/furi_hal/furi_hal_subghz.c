@@ -106,10 +106,12 @@ void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
         furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_ook_270khz_async_regs);
         furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
     } else if(preset == FuriHalSubGhzPreset2FSKDev238Async) {
-        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs);
+        furi_hal_subghz_load_registers(
+            (uint8_t*)furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs);
         furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
     } else if(preset == FuriHalSubGhzPreset2FSKDev476Async) {
-        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_2fsk_dev47_6khz_async_regs);
+        furi_hal_subghz_load_registers(
+            (uint8_t*)furi_hal_subghz_preset_2fsk_dev47_6khz_async_regs);
         furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
     } else if(preset == FuriHalSubGhzPresetMSK99_97KbAsync) {
         furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_msk_99_97kb_async_regs);
@@ -123,22 +125,32 @@ void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
     furi_hal_subghz.preset = preset;
 }
 
-void furi_hal_subghz_load_custom_preset(uint8_t *preset_data, uint8_t preset_pa[8]) {
-        furi_hal_subghz_load_registers(preset_data);
-        furi_hal_subghz_load_patable(preset_pa);
+void furi_hal_subghz_load_custom_preset(uint8_t* preset_data) {
+    //load config
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    cc1101_reset(&furi_hal_spi_bus_handle_subghz);
+    uint32_t i = 0;
+    uint8_t pa[8] = {0};
+    while(preset_data[i]) {
+        cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, preset_data[i], preset_data[i + 1]);
+        i += 2;  
+    }
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+
+    //load pa table
+    memcpy(&pa[0], &preset_data[i+2], 8);   
+    furi_hal_subghz_load_patable(pa);
     furi_hal_subghz.preset = FuriHalSubGhzPresetCustom;
 }
 
-void furi_hal_subghz_load_registers(uint8_t *data) {
+void furi_hal_subghz_load_registers(uint8_t* data) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_reset(&furi_hal_spi_bus_handle_subghz);
     uint32_t i = 0;
     while(data[i]) {
-        cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, data[i], data[i+1]);
-        i+=2;
-        printf( "%X %X ", data[i], data[i+1]);
+        cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, data[i], data[i + 1]);
+        i += 2;
     }
-    printf("\r\n");
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 

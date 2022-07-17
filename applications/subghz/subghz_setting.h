@@ -4,6 +4,7 @@
 #include <math.h>
 #include <furi.h>
 #include <furi_hal.h>
+#include <lib/flipper_format/flipper_format.h>
 
 #define SUBGHZ_SETTING_DEFAULT_PRESET_COUNT 4
 
@@ -27,7 +28,14 @@ int subghz_setting_get_inx_preset_by_name(SubGhzSetting* instance, const char* p
 
 uint8_t* subghz_setting_get_preset_data(SubGhzSetting* instance, size_t idx);
 
-uint8_t* subghz_setting_get_preset_pa(SubGhzSetting* instance, size_t idx);
+uint8_t* subghz_setting_get_preset_data_by_name(SubGhzSetting* instance, const char* preset_name);
+
+bool subghz_setting_load_custom_preset(
+    SubGhzSetting* instance,
+    const char* preset_name,
+    FlipperFormat* fff_data_file);
+
+bool subghz_setting_delete_custom_preset(SubGhzSetting* instance, const char* preset_name);
 
 uint32_t subghz_setting_get_frequency(SubGhzSetting* instance, size_t idx);
 

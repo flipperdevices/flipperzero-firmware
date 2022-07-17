@@ -10,6 +10,9 @@
 #include "environment.h"
 #include <furi.h>
 #include <furi_hal.h>
+#include <subghz/helpers/subghz_types.h>
+
+
 
 #define SUBGHZ_APP_FOLDER "/any/subghz"
 #define SUBGHZ_RAW_FOLDER "/ext/subghz"
@@ -30,11 +33,8 @@ typedef void* (*SubGhzAlloc)(SubGhzEnvironment* environment);
 typedef void (*SubGhzFree)(void* context);
 
 // Serialize and Deserialize
-typedef bool (*SubGhzSerialize)(
-    void* context,
-    FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset);
+typedef bool (
+    *SubGhzSerialize)(void* context, FlipperFormat* flipper_format, SubGhzPesetDefinition *preset);
 typedef bool (*SubGhzDeserialize)(void* context, FlipperFormat* flipper_format);
 
 // Decoder specific

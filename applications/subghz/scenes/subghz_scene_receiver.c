@@ -76,7 +76,7 @@ static void subghz_scene_add_to_history_callback(
     string_init(str_buff);
 
     if(subghz_history_add_to_history(
-           subghz->txrx->history, decoder_base, subghz->txrx->frequency, subghz->txrx->preset)) {
+           subghz->txrx->history, decoder_base, subghz->txrx->preset_1)) {
         string_reset(str_buff);
 
         subghz->state_notifications = SubGhzNotificationStateRxDone;
@@ -103,8 +103,8 @@ void subghz_scene_receiver_on_enter(void* context) {
     string_init(str_buff);
 
     if(subghz->txrx->rx_key_state == SubGhzRxKeyStateIDLE) {
-        subghz->txrx->frequency = subghz_setting_get_default_frequency(subghz->setting);
-        subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
+        subghz->txrx->preset_1->frequency = subghz_setting_get_default_frequency(subghz->setting);
+        string_set(subghz->txrx->preset_1->name ,"AM650");
         subghz_history_reset(subghz->txrx->history);
         subghz->txrx->rx_key_state = SubGhzRxKeyStateStart;
     }
@@ -135,8 +135,11 @@ void subghz_scene_receiver_on_enter(void* context) {
     };
     if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
        (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
-        subghz_begin(subghz, subghz->txrx->preset);
-        subghz_rx(subghz, subghz->txrx->frequency);
+        subghz_begin(
+            subghz,
+            subghz_setting_get_preset_data_by_name(
+                subghz->setting, string_get_cstr(subghz->txrx->preset_1->name)));
+        subghz_rx(subghz, subghz->txrx->preset_1->frequency);
     }
     subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
 
@@ -164,8 +167,8 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
-                subghz->txrx->frequency = subghz_setting_get_default_frequency(subghz->setting);
-                subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
+                subghz->txrx->preset_1->frequency = subghz_setting_get_default_frequency(subghz->setting);
+                string_set(subghz->txrx->preset_1->name, "AM650");
                 scene_manager_search_and_switch_to_previous_scene(
                     subghz->scene_manager, SubGhzSceneStart);
             }

@@ -272,7 +272,10 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                     DOLPHIN_DEED(DolphinDeedSubGhzRawRec);
                     if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
                        (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
-                        subghz_begin(subghz, subghz->txrx->preset);
+                        subghz_begin(
+                            subghz,
+                            subghz_setting_get_preset_data_by_name(
+                                subghz->setting, string_get_cstr(subghz->txrx->preset_name)));
                         subghz_rx(subghz, subghz->txrx->frequency);
                     }
                     subghz->state_notifications = SubGhzNotificationStateRx;

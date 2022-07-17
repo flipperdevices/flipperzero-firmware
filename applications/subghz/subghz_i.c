@@ -1,7 +1,6 @@
 #include "subghz_i.h"
 
 #include "assets_icons.h"
-#include "m-string.h"
 #include "subghz/types.h"
 #include <math.h>
 #include <furi.h>
@@ -21,15 +20,15 @@
 
 bool subghz_set_preset(SubGhz* subghz, const char* preset) {
     if(!strcmp(preset, "FuriHalSubGhzPresetOok270Async")) {
-        string_set(subghz->txrx->preset_name, "AM270");
+        string_set(subghz->txrx->preset_1->name, "AM270");
     } else if(!strcmp(preset, "FuriHalSubGhzPresetOok650Async")) {
-        string_set(subghz->txrx->preset_name, "AM650");
+        string_set(subghz->txrx->preset_1->name, "AM650");
     } else if(!strcmp(preset, "FuriHalSubGhzPreset2FSKDev238Async")) {
-        string_set(subghz->txrx->preset_name, "FM238");
+        string_set(subghz->txrx->preset_1->name, "FM238");
     } else if(!strcmp(preset, "FuriHalSubGhzPreset2FSKDev476Async")) {
-        string_set(subghz->txrx->preset_name, "FM476");
+        string_set(subghz->txrx->preset_1->name, "FM476");
     } else if(!strcmp(preset, "FuriHalSubGhzCustomPreset")) {
-        string_set(subghz->txrx->preset_name, "XXXX");
+        string_set(subghz->txrx->preset_1->name, "CUSTOM");
     } else {
         FURI_LOG_E(TAG, "Unknown preset");
         return false;
@@ -46,28 +45,16 @@ void subghz_get_frequency_modulation(SubGhz* subghz, string_t frequency, string_
             subghz->txrx->frequency / 1000000 % 1000,
             subghz->txrx->frequency / 10000 % 100);
     }
-
     if(modulation != NULL) {
-        if(!strcmp(string_get_cstr(instance->txrx->preset_name), "AM270") ||
-           !strcmp(string_get_cstr(instance->txrx->preset_name), "AM650")) {
-            string_set_str(modulation, "AM");
-        } else if(
-            !strcmp(string_get_cstr(instance->txrx->preset_name), "FM238") ||
-            !strcmp(string_get_cstr(instance->txrx->preset_name, "FM476"))
-            string_set_str(modulation, "FM");
-    } else if(!strcmp(string_get_cstr(instance->txrx->preset_name), "XXXX")) {
-        string_set_str(modulation, "XX");
-    } else {
-        furi_crash("SubGhz: Modulation is incorrect.");
+            string_printf(modulation, "%0.2s", string_get_cstr(subghz->txrx->preset_1->name));
     }
 }
-}
 
-void subghz_begin(SubGhz* subghz, uint8_t* preset_data, uint8_t preset_pa) {
+void subghz_begin(SubGhz* subghz, uint8_t* preset_data) {
     furi_assert(subghz);
     furi_hal_subghz_reset();
     furi_hal_subghz_idle();
-    furi_hal_subghz_load_custom_preset(preset_data, preset_pa);
+    furi_hal_subghz_load_custom_preset(preset_data);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     subghz->txrx->txrx_state = SubGhzTxRxStateIDLE;
 }
@@ -160,9 +147,13 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
         if(subghz->txrx->transmitter) {
             if(subghz_transmitter_deserialize(subghz->txrx->transmitter, flipper_format)) {
                 if(!strcmp(string_get_cstr(subghz->txrx->preset_name), "")) {
-                    subghz_begin(subghz, subghz->txrx->preset_name);
+                    subghz_begin(
+                        subghz,
+                        subghz_setting_get_preset_data_by_name(
+                            subghz->setting, string_get_cstr(subghz->txrx->preset_name)));
                 } else {
-                    subghz_begin(subghz, "AM270");
+                    subghz_begin(
+                        subghz, subghz_setting_get_preset_data_by_name(subghz->setting, "AM270"));
                 }
                 if(subghz->txrx->frequency) {
                     ret = subghz_tx(subghz, subghz->txrx->frequency);
@@ -276,8 +267,22 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
             FURI_LOG_E(TAG, "Missing Preset");
             break;
         }
+
         if(!subghz_set_preset(subghz, string_get_cstr(temp_str))) {
             break;
+        }
+
+        if(!strcmp(string_get_cstr(temp_str), "FuriHalSubGhzCustomPreset")) {
+            //Todo add Custom_preset_module
+            //delete peset if it already exists
+            subghz_setting_delete_custom_preset(
+                subghz->setting, string_get_cstr(subghz->txrx->preset_1->name));
+            //load custom preset from file
+            if(!subghz_setting_load_custom_preset(
+                   subghz->setting, string_get_cstr(subghz->txrx->preset_1->name), fff_data_file)) {
+                FURI_LOG_E(TAG, "Missing Custom preset");
+                break;
+            }
         }
 
         if(!flipper_format_read_string(fff_data_file, "Protocol", temp_str)) {

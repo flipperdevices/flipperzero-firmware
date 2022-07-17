@@ -11,8 +11,8 @@
 #include "views/subghz_test_carrier.h"
 #include "views/subghz_test_packet.h"
 
-#include <furi.h>
-#include <furi_hal.h>
+// #include <furi.h>
+// #include <furi_hal.h>
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
 #include <gui/scene_manager.h>
@@ -40,6 +40,7 @@
 
 #define SUBGHZ_MAX_LEN_NAME 64
 
+ 
 struct SubGhzTxRx {
     SubGhzWorker* worker;
 
@@ -52,6 +53,7 @@ struct SubGhzTxRx {
     uint32_t frequency;
     string_t preset_name;
     FuriHalSubGhzPreset preset;
+    SubGhzPesetDefinition *preset_1;
     SubGhzHistory* history;
     uint16_t idx_menu_chosen;
     SubGhzTxRxState txrx_state;
@@ -100,7 +102,7 @@ struct SubGhz {
 
 bool subghz_set_preset(SubGhz* subghz, const char* preset);
 void subghz_get_frequency_modulation(SubGhz* subghz, string_t frequency, string_t modulation);
-void subghz_begin(SubGhz* subghz, FuriHalSubGhzPreset preset);
+void subghz_begin(SubGhz* subghz, uint8_t* preset_data);
 uint32_t subghz_rx(SubGhz* subghz, uint32_t frequency);
 void subghz_rx_end(SubGhz* subghz);
 void subghz_sleep(SubGhz* subghz);
