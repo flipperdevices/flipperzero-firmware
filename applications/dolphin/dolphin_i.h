@@ -17,7 +17,7 @@ typedef enum {
 
 typedef struct {
     DolphinEventType type;
-    osEventFlagsId_t flag;
+    FuriEventFlag* flag;
     union {
         DolphinDeed deed;
         DolphinStats* stats;
@@ -28,7 +28,7 @@ struct Dolphin {
     // State
     DolphinState* state;
     // Queue
-    osMessageQueueId_t event_queue;
+    FuriMessageQueue* event_queue;
     FuriPubSub* pubsub;
     TimerHandle_t butthurt_timer;
     TimerHandle_t flush_timer;

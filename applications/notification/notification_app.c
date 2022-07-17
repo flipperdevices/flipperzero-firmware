@@ -30,10 +30,11 @@ uint8_t notification_settings_get_rgb_led_brightness(NotificationApp* app, uint8
 uint32_t notification_settings_display_off_delay_ticks(NotificationApp* app);
 
 void notification_message_save_settings(NotificationApp* app) {
-    NotificationAppMessage m = {.type = SaveSettingsMessage, .back_event = osEventFlagsNew(NULL)};
-    furi_check(osMessageQueuePut(app->queue, &m, 0, osWaitForever) == osOK);
-    osEventFlagsWait(m.back_event, NOTIFICATION_EVENT_COMPLETE, osFlagsWaitAny, osWaitForever);
-    osEventFlagsDelete(m.back_event);
+    NotificationAppMessage m = {
+        .type = SaveSettingsMessage, .back_event = furi_event_flag_alloc()};
+    furi_check(furi_message_queue_put(app->queue, &m, 0, osWaitForever) == osOK);
+    furi_event_flag_wait(m.back_event, NOTIFICATION_EVENT_COMPLETE, osFlagsWaitAny, osWaitForever);
+    furi_event_flag_free(m.back_event);
 };
 
 // internal layer
@@ -112,7 +113,7 @@ void notification_reset_notification_layer(NotificationApp* app, uint8_t reset_m
         notification_sound_off();
     }
     if(reset_mask & reset_display_mask) {
-        osTimerStart(app->display_timer, notification_settings_display_off_delay_ticks(app));
+        furi_timer_start(app->display_timer, notification_settings_display_off_delay_ticks(app));
     }
 }
 
@@ -191,8 +192,8 @@ void notification_process_notification_message(
                     notification_message->data.led.value * display_brightness_setting);
             } else {
                 notification_reset_notification_led_layer(&app->display);
-                if(osTimerIsRunning(app->display_timer)) {
-                    osTimerStop(app->display_timer);
+                if(furi_timer_is_running(app->display_timer)) {
+                    furi_timer_stop(app->display_timer);
                 }
             }
             reset_mask |= reset_display_mask;
@@ -282,7 +283,7 @@ void notification_process_notification_message(
             if(led_active) {
                 if(notification_is_any_led_layer_internal_and_not_empty(app)) {
                     notification_apply_notification_leds(app, led_off_values);
-                    furi_hal_delay_ms(minimal_delay);
+                    furi_delay_ms(minimal_delay);
                 }
 
                 led_active = false;
@@ -293,7 +294,7 @@ void notification_process_notification_message(
                 reset_mask |= reset_blue_mask;
             }
 
-            furi_hal_delay_ms(notification_message->data.delay.length);
+            furi_delay_ms(notification_message->data.delay.length);
             break;
         case NotificationMessageTypeDoNotReset:
             reset_notifications = false;
@@ -336,7 +337,7 @@ void notification_process_notification_message(
 
         if((need_minimal_delay) && (reset_notifications)) {
             notification_apply_notification_leds(app, led_off_values);
-            furi_hal_delay_ms(minimal_delay);
+            furi_delay_ms(minimal_delay);
         }
     }
 
@@ -478,8 +479,8 @@ static void input_event_callback(const void* value, void* context) {
 // App alloc
 static NotificationApp* notification_app_alloc() {
     NotificationApp* app = malloc(sizeof(NotificationApp));
-    app->queue = osMessageQueueNew(8, sizeof(NotificationAppMessage), NULL);
-    app->display_timer = osTimerNew(notification_display_timer, osTimerOnce, app, NULL);
+    app->queue = furi_message_queue_alloc(8, sizeof(NotificationAppMessage));
+    app->display_timer = furi_timer_alloc(notification_display_timer, osTimerOnce, app);
 
     app->settings.speaker_volume = 1.0f;
     app->settings.display_brightness = 1.0f;
@@ -537,7 +538,7 @@ int32_t notification_srv(void* p) {
 
     NotificationAppMessage message;
     while(1) {
-        furi_check(osMessageQueueGet(app->queue, &message, NULL, osWaitForever) == osOK);
+        furi_check(furi_message_queue_get(app->queue, &message, NULL, osWaitForever) == osOK);
 
         switch(message.type) {
         case NotificationLayerMessage:
@@ -552,7 +553,7 @@ int32_t notification_srv(void* p) {
         }
 
         if(message.back_event != NULL) {
-            osEventFlagsSet(message.back_event, NOTIFICATION_EVENT_COMPLETE);
+            furi_event_flag_set(message.back_event, NOTIFICATION_EVENT_COMPLETE);
         }
     }
 

@@ -15,7 +15,7 @@
 template <typename TApp, typename... TViewModules> class ViewController {
 public:
     ViewController() {
-        event_queue = osMessageQueueNew(10, sizeof(typename TApp::Event), NULL);
+        event_queue = furi_message_queue_alloc(10, sizeof(typename TApp::Event));
 
         view_dispatcher = view_dispatcher_alloc();
         previous_view_callback_pointer = cbc::obtain_connector(
@@ -36,7 +36,7 @@ public:
         }
 
         view_dispatcher_free(view_dispatcher);
-        osMessageQueueDelete(event_queue);
+        furi_message_queue_free(event_queue);
     }
 
     /**
@@ -81,7 +81,7 @@ public:
      * @param event event pointer
      */
     void receive_event(typename TApp::Event* event) {
-        if(osMessageQueueGet(event_queue, event, NULL, 100) != osOK) {
+        if(furi_message_queue_get(event_queue, event, NULL, 100) != osOK) {
             event->type = TApp::EventType::Tick;
         }
     }
@@ -92,7 +92,7 @@ public:
      * @param event event pointer
      */
     void send_event(typename TApp::Event* event) {
-        osStatus_t result = osMessageQueuePut(event_queue, event, 0, osWaitForever);
+        osStatus_t result = furi_message_queue_put(event_queue, event, 0, osWaitForever);
         furi_check(result == osOK);
     }
 
@@ -107,7 +107,7 @@ private:
      * @brief App event queue
      * 
      */
-    osMessageQueueId_t event_queue;
+    FuriMessageQueue* event_queue;
 
     /**
      * @brief Main ViewDispatcher pointer

@@ -4,89 +4,43 @@
 
 #include <semphr.h>
 
-osSemaphoreId_t
-    osSemaphoreNew(uint32_t max_count, uint32_t initial_count, const osSemaphoreAttr_t* attr) {
-    SemaphoreHandle_t hSemaphore;
-    int32_t mem;
+FuriSemaphore*
+    furi_semaphore_alloc(uint32_t max_count, uint32_t initial_count) {
+    furi_assert(!FURI_IS_IRQ_MODE());
+    furi_assert((max_count > 0U) && (initial_count <= max_count));
 
-    hSemaphore = NULL;
-
-    if((FURI_IS_IRQ_MODE() == 0U) && (max_count > 0U) && (initial_count <= max_count)) {
-        mem = -1;
-
-        if(attr != NULL) {
-            if((attr->cb_mem != NULL) && (attr->cb_size >= sizeof(StaticSemaphore_t))) {
-                /* The memory for control block is provided, use static object */
-                mem = 1;
-            } else {
-                if((attr->cb_mem == NULL) && (attr->cb_size == 0U)) {
-                    /* Control block will be allocated from the dynamic pool */
-                    mem = 0;
-                }
+    SemaphoreHandle_t hSemaphore = NULL;
+    if(max_count == 1U) {
+        hSemaphore = xSemaphoreCreateBinary();
+        if((hSemaphore != NULL) && (initial_count != 0U)) {
+            if(xSemaphoreGive(hSemaphore) != pdPASS) {
+                vSemaphoreDelete(hSemaphore);
+                hSemaphore = NULL;
             }
-        } else {
-            mem = 0;
         }
-
-        if(mem != -1) {
-            if(max_count == 1U) {
-                if(mem == 1) {
-#if(configSUPPORT_STATIC_ALLOCATION == 1)
-                    hSemaphore = xSemaphoreCreateBinaryStatic((StaticSemaphore_t*)attr->cb_mem);
-#endif
-                } else {
-#if(configSUPPORT_DYNAMIC_ALLOCATION == 1)
-                    hSemaphore = xSemaphoreCreateBinary();
-#endif
-                }
-
-                if((hSemaphore != NULL) && (initial_count != 0U)) {
-                    if(xSemaphoreGive(hSemaphore) != pdPASS) {
-                        vSemaphoreDelete(hSemaphore);
-                        hSemaphore = NULL;
-                    }
-                }
-            } else {
-                if(mem == 1) {
-#if(configSUPPORT_STATIC_ALLOCATION == 1)
-                    hSemaphore = xSemaphoreCreateCountingStatic(
-                        max_count, initial_count, (StaticSemaphore_t*)attr->cb_mem);
-#endif
-                } else {
-#if(configSUPPORT_DYNAMIC_ALLOCATION == 1)
-                    hSemaphore = xSemaphoreCreateCounting(max_count, initial_count);
-#endif
-                }
-            }
-
-#if(configQUEUE_REGISTRY_SIZE > 0)
-            if(hSemaphore != NULL) {
-                if((attr != NULL) && (attr->name != NULL)) {
-                    /* Only non-NULL name objects are added to the Queue Registry */
-                    vQueueAddToRegistry(hSemaphore, attr->name);
-                }
-            }
-#endif
-        }
+    } else {
+        hSemaphore = xSemaphoreCreateCounting(max_count, initial_count);
     }
 
+    furi_check(hSemaphore);
+
     /* Return semaphore ID */
-    return ((osSemaphoreId_t)hSemaphore);
+    return ((FuriSemaphore*)hSemaphore);
 }
 
 /*
     Acquire a Semaphore token or timeout if no tokens are available.
 */
-osStatus_t osSemaphoreAcquire(osSemaphoreId_t semaphore_id, uint32_t timeout) {
-    SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)semaphore_id;
+osStatus_t furi_semaphore_acquire(FuriSemaphore* instance, uint32_t timeout) {
+    furi_assert(instance);
+
+    SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)instance;
     osStatus_t stat;
     BaseType_t yield;
 
     stat = osOK;
 
-    if(hSemaphore == NULL) {
-        stat = osErrorParameter;
-    } else if(FURI_IS_IRQ_MODE() != 0U) {
+    if(FURI_IS_IRQ_MODE() != 0U) {
         if(timeout != 0U) {
             stat = osErrorParameter;
         } else {
@@ -115,16 +69,16 @@ osStatus_t osSemaphoreAcquire(osSemaphoreId_t semaphore_id, uint32_t timeout) {
 /*
     Release a Semaphore token up to the initial maximum count.
 */
-osStatus_t osSemaphoreRelease(osSemaphoreId_t semaphore_id) {
-    SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)semaphore_id;
+osStatus_t furi_semaphore_release(FuriSemaphore* instance) {
+    furi_assert(instance);
+
+    SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)instance;
     osStatus_t stat;
     BaseType_t yield;
 
     stat = osOK;
 
-    if(hSemaphore == NULL) {
-        stat = osErrorParameter;
-    } else if(FURI_IS_IRQ_MODE() != 0U) {
+    if(FURI_IS_IRQ_MODE() != 0U) {
         yield = pdFALSE;
 
         if(xSemaphoreGiveFromISR(hSemaphore, &yield) != pdTRUE) {
@@ -145,13 +99,13 @@ osStatus_t osSemaphoreRelease(osSemaphoreId_t semaphore_id) {
 /*
     Get current Semaphore token count.
 */
-uint32_t osSemaphoreGetCount(osSemaphoreId_t semaphore_id) {
-    SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)semaphore_id;
+uint32_t furi_semaphore_get_count(FuriSemaphore* instance) {
+    furi_assert(instance);
+
+    SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)instance;
     uint32_t count;
 
-    if(hSemaphore == NULL) {
-        count = 0U;
-    } else if(FURI_IS_IRQ_MODE() != 0U) {
+    if(FURI_IS_IRQ_MODE() != 0U) {
         count = (uint32_t)uxSemaphoreGetCountFromISR(hSemaphore);
     } else {
         count = (uint32_t)uxSemaphoreGetCount(hSemaphore);
@@ -164,27 +118,11 @@ uint32_t osSemaphoreGetCount(osSemaphoreId_t semaphore_id) {
 /*
     Delete a Semaphore object.
 */
-osStatus_t osSemaphoreDelete(osSemaphoreId_t semaphore_id) {
-    SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)semaphore_id;
-    osStatus_t stat;
+void furi_semaphore_free(FuriSemaphore* instance) {
+    furi_assert(instance);
+    furi_assert(!FURI_IS_IRQ_MODE());
 
-#ifndef USE_FreeRTOS_HEAP_1
-    if(FURI_IS_IRQ_MODE() != 0U) {
-        stat = osErrorISR;
-    } else if(hSemaphore == NULL) {
-        stat = osErrorParameter;
-    } else {
-#if(configQUEUE_REGISTRY_SIZE > 0)
-        vQueueUnregisterQueue(hSemaphore);
-#endif
+    SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)instance;
 
-        stat = osOK;
-        vSemaphoreDelete(hSemaphore);
-    }
-#else
-    stat = osError;
-#endif
-
-    /* Return execution status */
-    return (stat);
+    vSemaphoreDelete(hSemaphore);
 }

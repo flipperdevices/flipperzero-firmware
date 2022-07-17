@@ -7,7 +7,7 @@ struct Popup {
     void* context;
     PopupCallback callback;
 
-    osTimerId_t timer;
+    FuriTimer* timer;
     uint32_t timer_period_in_ms;
     bool timer_enabled;
 };
@@ -97,7 +97,7 @@ void popup_start_timer(void* context) {
             popup->timer_period_in_ms / (1000.0f / furi_kernel_get_tick_frequency());
         if(timer_period == 0) timer_period = 1;
 
-        if(osTimerStart(popup->timer, timer_period) != osOK) {
+        if(furi_timer_start(popup->timer, timer_period) != osOK) {
             furi_assert(0);
         };
     }
@@ -105,13 +105,13 @@ void popup_start_timer(void* context) {
 
 void popup_stop_timer(void* context) {
     Popup* popup = context;
-    osTimerStop(popup->timer);
+    furi_timer_stop(popup->timer);
 }
 
 Popup* popup_alloc() {
     Popup* popup = malloc(sizeof(Popup));
     popup->view = view_alloc();
-    popup->timer = osTimerNew(popup_timer_callback, osTimerOnce, popup, NULL);
+    popup->timer = furi_timer_alloc(popup_timer_callback, osTimerOnce, popup);
     furi_assert(popup->timer);
     popup->timer_period_in_ms = 1000;
     popup->timer_enabled = false;
@@ -147,7 +147,7 @@ Popup* popup_alloc() {
 
 void popup_free(Popup* popup) {
     furi_assert(popup);
-    osTimerDelete(popup->timer);
+    furi_timer_free(popup->timer);
     view_free(popup->view);
     free(popup);
 }

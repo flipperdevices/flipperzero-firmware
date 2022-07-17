@@ -30,7 +30,7 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
     view_port_free(view_dispatcher->view_port);
     // Free internal queue
     if(view_dispatcher->queue) {
-        osMessageQueueDelete(view_dispatcher->queue);
+        furi_message_queue_free(view_dispatcher->queue);
     }
     // Free dispatcher
     free(view_dispatcher);
@@ -39,7 +39,7 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
 void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
     furi_assert(view_dispatcher);
     furi_assert(view_dispatcher->queue == NULL);
-    view_dispatcher->queue = osMessageQueueNew(16, sizeof(ViewDispatcherMessage), NULL);
+    view_dispatcher->queue = furi_message_queue_alloc(16, sizeof(ViewDispatcherMessage));
 }
 
 void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher, void* context) {
@@ -81,7 +81,7 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
                                                                view_dispatcher->tick_period;
     ViewDispatcherMessage message;
     while(1) {
-        if(osMessageQueueGet(view_dispatcher->queue, &message, NULL, tick_period) != osOK) {
+        if(furi_message_queue_get(view_dispatcher->queue, &message, NULL, tick_period) != osOK) {
             view_dispatcher_handle_tick_event(view_dispatcher);
             continue;
         }
@@ -96,7 +96,7 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
 
     // Wait till all input events delivered
     while(view_dispatcher->ongoing_input) {
-        osMessageQueueGet(view_dispatcher->queue, &message, NULL, osWaitForever);
+        furi_message_queue_get(view_dispatcher->queue, &message, NULL, osWaitForever);
         if(message.type == ViewDispatcherMessageTypeInput) {
             uint8_t key_bit = (1 << message.input.key);
             if(message.input.type == InputTypePress) {
@@ -113,7 +113,7 @@ void view_dispatcher_stop(ViewDispatcher* view_dispatcher) {
     furi_assert(view_dispatcher->queue);
     ViewDispatcherMessage message;
     message.type = ViewDispatcherMessageTypeStop;
-    furi_check(osMessageQueuePut(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
+    furi_check(furi_message_queue_put(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
 }
 
 void view_dispatcher_add_view(ViewDispatcher* view_dispatcher, uint32_t view_id, View* view) {
@@ -224,7 +224,8 @@ void view_dispatcher_input_callback(InputEvent* event, void* context) {
         ViewDispatcherMessage message;
         message.type = ViewDispatcherMessageTypeInput;
         message.input = *event;
-        furi_check(osMessageQueuePut(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
+        furi_check(
+            furi_message_queue_put(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
     } else {
         view_dispatcher_handle_input(view_dispatcher, event);
     }
@@ -314,7 +315,7 @@ void view_dispatcher_send_custom_event(ViewDispatcher* view_dispatcher, uint32_t
     message.type = ViewDispatcherMessageTypeCustomEvent;
     message.custom_event = event;
 
-    furi_check(osMessageQueuePut(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
+    furi_check(furi_message_queue_put(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
 }
 
 void view_dispatcher_set_current_view(ViewDispatcher* view_dispatcher, View* view) {

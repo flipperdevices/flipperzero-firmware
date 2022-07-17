@@ -6,7 +6,7 @@ bool init_mutex(ValueMutex* valuemutex, void* value, size_t size) {
     // mutex without name,
     // no attributes (unfortunatly robust mutex is not supported by FreeRTOS),
     // with dynamic memory allocation
-    valuemutex->mutex = osMutexNew(NULL);
+    valuemutex->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(valuemutex->mutex == NULL) return false;
 
     valuemutex->value = value;
@@ -16,15 +16,16 @@ bool init_mutex(ValueMutex* valuemutex, void* value, size_t size) {
 }
 
 bool delete_mutex(ValueMutex* valuemutex) {
-    if(osMutexAcquire(valuemutex->mutex, osWaitForever) == osOK) {
-        return osMutexDelete(valuemutex->mutex) == osOK;
+    if(furi_mutex_acquire(valuemutex->mutex, osWaitForever) == osOK) {
+        furi_mutex_free(valuemutex->mutex);
+        return true;
     } else {
         return false;
     }
 }
 
 void* acquire_mutex(ValueMutex* valuemutex, uint32_t timeout) {
-    if(osMutexAcquire(valuemutex->mutex, timeout) == osOK) {
+    if(furi_mutex_acquire(valuemutex->mutex, timeout) == osOK) {
         return valuemutex->value;
     } else {
         return NULL;
@@ -34,7 +35,7 @@ void* acquire_mutex(ValueMutex* valuemutex, uint32_t timeout) {
 bool release_mutex(ValueMutex* valuemutex, const void* value) {
     if(value != valuemutex->value) return false;
 
-    if(osMutexRelease(valuemutex->mutex) != osOK) return false;
+    if(furi_mutex_release(valuemutex->mutex) != osOK) return false;
 
     return true;
 }

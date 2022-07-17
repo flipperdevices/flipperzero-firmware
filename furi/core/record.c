@@ -2,7 +2,7 @@
 #include "check.h"
 #include "memmgr.h"
 #include "mutex.h"
-#include "event_flags.h"
+#include "event_flag.h"
 
 #include <m-string.h>
 #include <m-dict.h>
@@ -10,7 +10,7 @@
 #define FURI_RECORD_FLAG_READY (0x1)
 
 typedef struct {
-    osEventFlagsId_t flags;
+    FuriEventFlag* flags;
     void* data;
     size_t holders_count;
 } FuriRecordData;
@@ -18,7 +18,7 @@ typedef struct {
 DICT_DEF2(FuriRecordDataDict, string_t, STRING_OPLIST, FuriRecordData, M_POD_OPLIST)
 
 typedef struct {
-    osMutexId_t mutex;
+    FuriMutex* mutex;
     FuriRecordDataDict_t records;
 } FuriRecord;
 
@@ -26,7 +26,7 @@ static FuriRecord* furi_record = NULL;
 
 void furi_record_init() {
     furi_record = malloc(sizeof(FuriRecord));
-    furi_record->mutex = osMutexNew(NULL);
+    furi_record->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     furi_check(furi_record->mutex);
     FuriRecordDataDict_init(furi_record->records);
 }
@@ -36,7 +36,7 @@ static FuriRecordData* furi_record_data_get_or_create(string_t name_str) {
     FuriRecordData* record_data = FuriRecordDataDict_get(furi_record->records, name_str);
     if(!record_data) {
         FuriRecordData new_record;
-        new_record.flags = osEventFlagsNew(NULL);
+        new_record.flags = furi_event_flag_alloc();
         new_record.data = NULL;
         new_record.holders_count = 0;
         FuriRecordDataDict_set_at(furi_record->records, name_str, new_record);
@@ -46,11 +46,11 @@ static FuriRecordData* furi_record_data_get_or_create(string_t name_str) {
 }
 
 static void furi_record_lock() {
-    furi_check(osMutexAcquire(furi_record->mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(furi_record->mutex, osWaitForever) == osOK);
 }
 
 static void furi_record_unlock() {
-    furi_check(osMutexRelease(furi_record->mutex) == osOK);
+    furi_check(furi_mutex_release(furi_record->mutex) == osOK);
 }
 
 bool furi_record_exists(const char* name) {
@@ -83,7 +83,7 @@ void furi_record_create(const char* name, void* data) {
     FuriRecordData* record_data = furi_record_data_get_or_create(name_str);
     furi_assert(record_data->data == NULL);
     record_data->data = data;
-    osEventFlagsSet(record_data->flags, FURI_RECORD_FLAG_READY);
+    furi_event_flag_set(record_data->flags, FURI_RECORD_FLAG_READY);
 
     furi_record_unlock();
 
@@ -103,7 +103,7 @@ bool furi_record_destroy(const char* name) {
     FuriRecordData* record_data = FuriRecordDataDict_get(furi_record->records, name_str);
     furi_assert(record_data);
     if(record_data->holders_count == 0) {
-        furi_check(osOK == osEventFlagsDelete(record_data->flags));
+        furi_event_flag_free(record_data->flags);
         FuriRecordDataDict_erase(furi_record->records, name_str);
         ret = true;
     }
@@ -130,7 +130,7 @@ void* furi_record_open(const char* name) {
 
     // Wait for record to become ready
     furi_check(
-        osEventFlagsWait(
+        furi_event_flag_wait(
             record_data->flags,
             FURI_RECORD_FLAG_READY,
             osFlagsWaitAny | osFlagsNoClear,

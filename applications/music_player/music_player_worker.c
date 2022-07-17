@@ -51,7 +51,7 @@ static int32_t music_player_worker_thread_callback(void* context) {
     while(instance->should_work) {
         if(NoteBlockArray_end_p(it)) {
             NoteBlockArray_it(it, instance->notes);
-            osDelay(10);
+            furi_delay_ms(10);
         } else {
             NoteBlock* note_block = NoteBlockArray_ref(it);
 
@@ -64,7 +64,7 @@ static int32_t music_player_worker_thread_callback(void* context) {
                 duration += duration / 2;
                 dots--;
             }
-            uint32_t next_tick = furi_hal_get_tick() + duration;
+            uint32_t next_tick = furi_get_tick() + duration;
             float volume = instance->volume;
 
             if(instance->callback) {
@@ -78,10 +78,10 @@ static int32_t music_player_worker_thread_callback(void* context) {
 
             furi_hal_speaker_stop();
             furi_hal_speaker_start(frequency, volume);
-            while(instance->should_work && furi_hal_get_tick() < next_tick) {
+            while(instance->should_work && furi_get_tick() < next_tick) {
                 volume *= 0.9945679;
                 furi_hal_speaker_set_volume(volume);
-                furi_hal_delay_ms(2);
+                furi_delay_ms(2);
             }
             NoteBlockArray_next(it);
         }

@@ -18,7 +18,7 @@
 /* Time, in ms, to wait for mode transition before crashing */
 #define C2_MODE_SWITCH_TIMEOUT 10000
 
-osMutexId_t furi_hal_bt_core2_mtx = NULL;
+FuriMutex* furi_hal_bt_core2_mtx = NULL;
 static FuriHalBtStack furi_hal_bt_stack = FuriHalBtStackUnknown;
 
 typedef void (*FuriHalBtProfileStart)(void);
@@ -78,7 +78,7 @@ FuriHalBtProfileConfig* current_profile = NULL;
 
 void furi_hal_bt_init() {
     if(!furi_hal_bt_core2_mtx) {
-        furi_hal_bt_core2_mtx = osMutexNew(NULL);
+        furi_hal_bt_core2_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
         furi_assert(furi_hal_bt_core2_mtx);
     }
 
@@ -93,12 +93,12 @@ void furi_hal_bt_init() {
 
 void furi_hal_bt_lock_core2() {
     furi_assert(furi_hal_bt_core2_mtx);
-    furi_check(osMutexAcquire(furi_hal_bt_core2_mtx, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(furi_hal_bt_core2_mtx, osWaitForever) == osOK);
 }
 
 void furi_hal_bt_unlock_core2() {
     furi_assert(furi_hal_bt_core2_mtx);
-    furi_check(osMutexRelease(furi_hal_bt_core2_mtx) == osOK);
+    furi_check(furi_mutex_release(furi_hal_bt_core2_mtx) == osOK);
 }
 
 static bool furi_hal_bt_radio_stack_is_supported(const BleGlueC2Info* info) {
@@ -125,7 +125,7 @@ bool furi_hal_bt_start_radio_stack() {
     bool res = false;
     furi_assert(furi_hal_bt_core2_mtx);
 
-    osMutexAcquire(furi_hal_bt_core2_mtx, osWaitForever);
+    furi_mutex_acquire(furi_hal_bt_core2_mtx, osWaitForever);
 
     // Explicitly tell that we are in charge of CLK48 domain
     if(!LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_CLK48_CONFIG_SEMID)) {
@@ -161,7 +161,7 @@ bool furi_hal_bt_start_radio_stack() {
         }
         res = true;
     } while(false);
-    osMutexRelease(furi_hal_bt_core2_mtx);
+    furi_mutex_release(furi_hal_bt_core2_mtx);
 
     return res;
 }
@@ -254,7 +254,7 @@ void furi_hal_bt_reinit() {
     FURI_LOG_I(TAG, "Reset SHCI");
     furi_check(ble_glue_reinit_c2());
 
-    osDelay(100);
+    furi_delay_ms(100);
     ble_glue_thread_stop();
 
     FURI_LOG_I(TAG, "Start BT initialization");
@@ -291,7 +291,7 @@ void furi_hal_bt_stop_advertising() {
     if(furi_hal_bt_is_active()) {
         gap_stop_advertising();
         while(furi_hal_bt_is_active()) {
-            osDelay(1);
+            furi_delay_ms(1);
         }
     }
 }
@@ -435,7 +435,7 @@ bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
         return true;
     } else if(fw_start_res == BleGlueCommandResultRestartPending) {
         // Do nothing and wait for system reset
-        osDelay(C2_MODE_SWITCH_TIMEOUT);
+        furi_delay_ms(C2_MODE_SWITCH_TIMEOUT);
         furi_crash("Waiting for FUS->radio stack transition");
         return true;
     }

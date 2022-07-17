@@ -18,7 +18,7 @@ extern "C" {
 typedef struct {
     void* value;
     size_t size;
-    osMutexId_t mutex;
+    FuriMutex* mutex;
 } ValueMutex;
 
 /**
@@ -117,7 +117,7 @@ void provider_app(void* _p) {
         }
         release_mutex(&example_mutex, value);
 
-        osDelay(100);
+        furi_delay_ms(100);
     }
 }
 
@@ -142,7 +142,7 @@ void consumer_app(void* _p) {
             printf("counter value: %d\n", counter);
         }
 
-        osDelay(1000);
+        furi_delay_ms(1000);
     }
 }
 ```

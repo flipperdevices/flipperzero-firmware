@@ -29,7 +29,7 @@ typedef struct {
 
 struct BubbleAnimationView {
     View* view;
-    osTimerId_t timer;
+    FuriTimer* timer;
     BubbleAnimationInteractCallback interact_callback;
     void* interact_callback_context;
 };
@@ -190,7 +190,7 @@ static void bubble_animation_activate_right_now(BubbleAnimationView* view) {
     view_commit_model(view->view, true);
 
     if(frame_rate) {
-        osTimerStart(view->timer, 1000 / frame_rate);
+        furi_timer_start(view->timer, 1000 / frame_rate);
     }
 }
 
@@ -292,21 +292,21 @@ static void bubble_animation_enter(void* context) {
     view_commit_model(view->view, false);
 
     if(frame_rate) {
-        osTimerStart(view->timer, 1000 / frame_rate);
+        furi_timer_start(view->timer, 1000 / frame_rate);
     }
 }
 
 static void bubble_animation_exit(void* context) {
     furi_assert(context);
     BubbleAnimationView* view = context;
-    osTimerStop(view->timer);
+    furi_timer_stop(view->timer);
 }
 
 BubbleAnimationView* bubble_animation_view_alloc(void) {
     BubbleAnimationView* view = malloc(sizeof(BubbleAnimationView));
     view->view = view_alloc();
     view->interact_callback = NULL;
-    view->timer = osTimerNew(bubble_animation_timer_callback, osTimerPeriodic, view, NULL);
+    view->timer = furi_timer_alloc(bubble_animation_timer_callback, osTimerPeriodic, view);
 
     view_allocate_model(view->view, ViewModelTypeLocking, sizeof(BubbleAnimationViewModel));
     view_set_context(view->view, view);
@@ -367,7 +367,7 @@ void bubble_animation_view_set_animation(
     model->active_cycle = 0;
     view_commit_model(view->view, true);
 
-    osTimerStart(view->timer, 1000 / new_animation->icon_animation.frame_rate);
+    furi_timer_start(view->timer, 1000 / new_animation->icon_animation.frame_rate);
 }
 
 void bubble_animation_freeze(BubbleAnimationView* view) {
@@ -379,7 +379,7 @@ void bubble_animation_freeze(BubbleAnimationView* view) {
     model->freeze_frame = bubble_animation_clone_first_frame(&model->current->icon_animation);
     model->current = NULL;
     view_commit_model(view->view, false);
-    osTimerStop(view->timer);
+    furi_timer_stop(view->timer);
 }
 
 void bubble_animation_unfreeze(BubbleAnimationView* view) {
@@ -393,7 +393,7 @@ void bubble_animation_unfreeze(BubbleAnimationView* view) {
     frame_rate = model->current->icon_animation.frame_rate;
     view_commit_model(view->view, true);
 
-    osTimerStart(view->timer, 1000 / frame_rate);
+    furi_timer_start(view->timer, 1000 / frame_rate);
     bubble_animation_activate(view, false);
 }
 

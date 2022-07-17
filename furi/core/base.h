@@ -10,7 +10,7 @@ extern "C" {
 // Timeout value.
 #define osWaitForever 0xFFFFFFFFU ///< Wait forever timeout value.
 
-// Flags options (\ref furi_thread_flags_wait and \ref osEventFlagsWait).
+// Flags options (\ref furi_thread_flags_wait and \ref furi_event_flag_wait).
 #define osFlagsWaitAny 0x00000000U ///< Wait for any flag (default).
 #define osFlagsWaitAll 0x00000001U ///< Wait for all flags.
 #define osFlagsNoClear 0x00000002U ///< Do not clear flags which have been specified to wait for.

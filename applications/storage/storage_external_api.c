@@ -13,18 +13,19 @@
 
 #define TAG "StorageAPI"
 
-#define S_API_PROLOGUE                                      \
-    osSemaphoreId_t semaphore = osSemaphoreNew(1, 0, NULL); \
+#define S_API_PROLOGUE                                     \
+    FuriSemaphore* semaphore = furi_semaphore_alloc(1, 0); \
     furi_check(semaphore != NULL);
 
 #define S_FILE_API_PROLOGUE           \
     Storage* storage = file->storage; \
     furi_assert(storage);
 
-#define S_API_EPILOGUE                                                                         \
-    furi_check(osMessageQueuePut(storage->message_queue, &message, 0, osWaitForever) == osOK); \
-    osSemaphoreAcquire(semaphore, osWaitForever);                                              \
-    osSemaphoreDelete(semaphore);
+#define S_API_EPILOGUE                                                                       \
+    furi_check(                                                                              \
+        furi_message_queue_put(storage->message_queue, &message, 0, osWaitForever) == osOK); \
+    furi_semaphore_acquire(semaphore, osWaitForever);                                        \
+    furi_semaphore_free(semaphore);
 
 #define S_API_MESSAGE(_command)      \
     SAReturn return_data;            \
@@ -88,8 +89,8 @@ static void storage_file_close_callback(const void* message, void* context) {
     if(storage_event->type == StorageEventTypeFileClose ||
        storage_event->type == StorageEventTypeDirClose) {
         furi_assert(context);
-        osEventFlagsId_t event = context;
-        osEventFlagsSet(event, StorageEventFlagFileClose);
+        FuriEventFlag* event = context;
+        furi_event_flag_set(event, StorageEventFlagFileClose);
     }
 }
 
@@ -99,7 +100,7 @@ bool storage_file_open(
     FS_AccessMode access_mode,
     FS_OpenMode open_mode) {
     bool result;
-    osEventFlagsId_t event = osEventFlagsNew(NULL);
+    FuriEventFlag* event = furi_event_flag_alloc();
     FuriPubSubSubscription* subscription = furi_pubsub_subscribe(
         storage_get_pubsub(file->storage), storage_file_close_callback, event);
 
@@ -107,14 +108,14 @@ bool storage_file_open(
         result = storage_file_open_internal(file, path, access_mode, open_mode);
 
         if(!result && file->error_id == FSE_ALREADY_OPEN) {
-            osEventFlagsWait(event, StorageEventFlagFileClose, osFlagsWaitAny, osWaitForever);
+            furi_event_flag_wait(event, StorageEventFlagFileClose, osFlagsWaitAny, osWaitForever);
         } else {
             break;
         }
     } while(true);
 
     furi_pubsub_unsubscribe(storage_get_pubsub(file->storage), subscription);
-    osEventFlagsDelete(event);
+    furi_event_flag_free(event);
 
     FURI_LOG_T(
         TAG, "File %p - %p open (%s)", (uint32_t)file - SRAM_BASE, file->file_id - SRAM_BASE, path);
@@ -258,7 +259,7 @@ static bool storage_dir_open_internal(File* file, const char* path) {
 
 bool storage_dir_open(File* file, const char* path) {
     bool result;
-    osEventFlagsId_t event = osEventFlagsNew(NULL);
+    FuriEventFlag* event = furi_event_flag_alloc();
     FuriPubSubSubscription* subscription = furi_pubsub_subscribe(
         storage_get_pubsub(file->storage), storage_file_close_callback, event);
 
@@ -266,14 +267,14 @@ bool storage_dir_open(File* file, const char* path) {
         result = storage_dir_open_internal(file, path);
 
         if(!result && file->error_id == FSE_ALREADY_OPEN) {
-            osEventFlagsWait(event, StorageEventFlagFileClose, osFlagsWaitAny, osWaitForever);
+            furi_event_flag_wait(event, StorageEventFlagFileClose, osFlagsWaitAny, osWaitForever);
         } else {
             break;
         }
     } while(true);
 
     furi_pubsub_unsubscribe(storage_get_pubsub(file->storage), subscription);
-    osEventFlagsDelete(event);
+    furi_event_flag_free(event);
 
     FURI_LOG_T(
         TAG, "Dir %p - %p open (%s)", (uint32_t)file - SRAM_BASE, file->file_id - SRAM_BASE, path);

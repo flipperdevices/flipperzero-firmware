@@ -9,7 +9,7 @@ typedef enum {
 
 typedef struct {
     CRC_State state;
-    osMutexId_t mtx;
+    FuriMutex* mtx;
 } HAL_CRC_Control;
 
 static volatile HAL_CRC_Control hal_crc_control = {
@@ -26,7 +26,7 @@ void furi_hal_crc_init(bool synchronize) {
     LL_CRC_SetInitialData(CRC, LL_CRC_DEFAULT_CRC_INITVALUE);
 
     if(synchronize) {
-        hal_crc_control.mtx = osMutexNew(NULL);
+        hal_crc_control.mtx = furi_mutex_alloc(FuriMutexTypeNormal);
     }
     hal_crc_control.state = CRC_State_Ready;
 }
@@ -34,8 +34,8 @@ void furi_hal_crc_init(bool synchronize) {
 void furi_hal_crc_reset() {
     furi_check(hal_crc_control.state == CRC_State_Ready);
     if(hal_crc_control.mtx) {
-        furi_check(osMutexGetOwner(hal_crc_control.mtx) == furi_thread_get_current_id());
-        osMutexRelease(hal_crc_control.mtx);
+        furi_check(furi_mutex_get_owner(hal_crc_control.mtx) == furi_thread_get_current_id());
+        furi_mutex_release(hal_crc_control.mtx);
     }
     LL_CRC_ResetCRCCalculationUnit(CRC);
 }
@@ -74,7 +74,7 @@ static uint32_t furi_hal_crc_handle_8(uint8_t pBuffer[], uint32_t BufferLength) 
 static uint32_t furi_hal_crc_accumulate(uint32_t pBuffer[], uint32_t BufferLength) {
     furi_check(hal_crc_control.state == CRC_State_Ready);
     if(hal_crc_control.mtx) {
-        furi_check(osMutexGetOwner(hal_crc_control.mtx) != NULL);
+        furi_check(furi_mutex_get_owner(hal_crc_control.mtx) != NULL);
     }
     return furi_hal_crc_handle_8((uint8_t*)pBuffer, BufferLength);
 }
@@ -85,7 +85,7 @@ uint32_t furi_hal_crc_feed(void* data, uint16_t length) {
 
 bool furi_hal_crc_acquire(uint32_t timeout) {
     furi_assert(hal_crc_control.mtx);
-    if(osMutexAcquire(hal_crc_control.mtx, timeout) == osOK) {
+    if(furi_mutex_acquire(hal_crc_control.mtx, timeout) == osOK) {
         LL_CRC_ResetCRCCalculationUnit(CRC);
         return true;
     }

@@ -14,13 +14,13 @@ LIST_DEF(FuriPubSubSubscriptionList, FuriPubSubSubscription, M_POD_OPLIST);
 
 struct FuriPubSub {
     FuriPubSubSubscriptionList_t items;
-    osMutexId_t mutex;
+    FuriMutex* mutex;
 };
 
 FuriPubSub* furi_pubsub_alloc() {
     FuriPubSub* pubsub = malloc(sizeof(FuriPubSub));
 
-    pubsub->mutex = osMutexNew(NULL);
+    pubsub->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     furi_assert(pubsub->mutex);
 
     FuriPubSubSubscriptionList_init(pubsub->items);
@@ -35,14 +35,14 @@ void furi_pubsub_free(FuriPubSub* pubsub) {
 
     FuriPubSubSubscriptionList_clear(pubsub->items);
 
-    furi_check(osMutexDelete(pubsub->mutex) == osOK);
+    furi_mutex_free(pubsub->mutex);
 
     free(pubsub);
 }
 
 FuriPubSubSubscription*
     furi_pubsub_subscribe(FuriPubSub* pubsub, FuriPubSubCallback callback, void* callback_context) {
-    furi_check(osMutexAcquire(pubsub->mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(pubsub->mutex, osWaitForever) == osOK);
     // put uninitialized item to the list
     FuriPubSubSubscription* item = FuriPubSubSubscriptionList_push_raw(pubsub->items);
 
@@ -50,7 +50,7 @@ FuriPubSubSubscription*
     item->callback = callback;
     item->callback_context = callback_context;
 
-    furi_check(osMutexRelease(pubsub->mutex) == osOK);
+    furi_check(furi_mutex_release(pubsub->mutex) == osOK);
 
     return item;
 }
@@ -59,7 +59,7 @@ void furi_pubsub_unsubscribe(FuriPubSub* pubsub, FuriPubSubSubscription* pubsub_
     furi_assert(pubsub);
     furi_assert(pubsub_subscription);
 
-    furi_check(osMutexAcquire(pubsub->mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(pubsub->mutex, osWaitForever) == osOK);
     bool result = false;
 
     // iterate over items
@@ -76,12 +76,12 @@ void furi_pubsub_unsubscribe(FuriPubSub* pubsub, FuriPubSubSubscription* pubsub_
         }
     }
 
-    furi_check(osMutexRelease(pubsub->mutex) == osOK);
+    furi_check(furi_mutex_release(pubsub->mutex) == osOK);
     furi_check(result);
 }
 
 void furi_pubsub_publish(FuriPubSub* pubsub, void* message) {
-    furi_check(osMutexAcquire(pubsub->mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(pubsub->mutex, osWaitForever) == osOK);
 
     // iterate over subscribers
     FuriPubSubSubscriptionList_it_t it;
@@ -91,5 +91,5 @@ void furi_pubsub_publish(FuriPubSub* pubsub, void* message) {
         item->callback(message, item->callback_context);
     }
 
-    furi_check(osMutexRelease(pubsub->mutex) == osOK);
+    furi_check(furi_mutex_release(pubsub->mutex) == osOK);
 }

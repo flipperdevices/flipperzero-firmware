@@ -40,11 +40,11 @@ void RfidReader::decode(bool polarity) {
 
 bool RfidReader::switch_timer_elapsed() {
     const uint32_t seconds_to_switch = furi_kernel_get_tick_frequency() * 2.0f;
-    return (furi_hal_get_tick() - switch_os_tick_last) > seconds_to_switch;
+    return (furi_get_tick() - switch_os_tick_last) > seconds_to_switch;
 }
 
 void RfidReader::switch_timer_reset() {
-    switch_os_tick_last = furi_hal_get_tick();
+    switch_os_tick_last = furi_get_tick();
 }
 
 void RfidReader::switch_mode() {

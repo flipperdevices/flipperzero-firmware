@@ -11,7 +11,7 @@ typedef struct {
     uint16_t rx_char_handle;
     uint16_t tx_char_handle;
     uint16_t flow_ctrl_char_handle;
-    osMutexId_t buff_size_mtx;
+    FuriMutex* buff_size_mtx;
     uint32_t buff_size;
     uint16_t bytes_ready_to_receive;
     SerialServiceEventCallback callback;
@@ -44,7 +44,8 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void* event) {
             } else if(attribute_modified->Attr_Handle == serial_svc->rx_char_handle + 1) {
                 FURI_LOG_D(TAG, "Received %d bytes", attribute_modified->Attr_Data_Length);
                 if(serial_svc->callback) {
-                    furi_check(osMutexAcquire(serial_svc->buff_size_mtx, osWaitForever) == osOK);
+                    furi_check(
+                        furi_mutex_acquire(serial_svc->buff_size_mtx, osWaitForever) == osOK);
                     if(attribute_modified->Attr_Data_Length > serial_svc->bytes_ready_to_receive) {
                         FURI_LOG_W(
                             TAG,
@@ -62,7 +63,7 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void* event) {
                         }};
                     uint32_t buff_free_size = serial_svc->callback(event, serial_svc->context);
                     FURI_LOG_D(TAG, "Available buff size: %d", buff_free_size);
-                    furi_check(osMutexRelease(serial_svc->buff_size_mtx) == osOK);
+                    furi_check(furi_mutex_release(serial_svc->buff_size_mtx) == osOK);
                 }
                 ret = SVCCTL_EvtAckFlowEnable;
             }
@@ -140,7 +141,7 @@ void serial_svc_start() {
         FURI_LOG_E(TAG, "Failed to add Flow Control characteristic: %d", status);
     }
     // Allocate buffer size mutex
-    serial_svc->buff_size_mtx = osMutexNew(NULL);
+    serial_svc->buff_size_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
 }
 
 void serial_svc_set_callbacks(
@@ -165,7 +166,7 @@ void serial_svc_notify_buffer_is_empty() {
     furi_assert(serial_svc);
     furi_assert(serial_svc->buff_size_mtx);
 
-    furi_check(osMutexAcquire(serial_svc->buff_size_mtx, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(serial_svc->buff_size_mtx, osWaitForever) == osOK);
     if(serial_svc->bytes_ready_to_receive == 0) {
         FURI_LOG_D(TAG, "Buffer is empty. Notifying client");
         serial_svc->bytes_ready_to_receive = serial_svc->buff_size;
@@ -177,7 +178,7 @@ void serial_svc_notify_buffer_is_empty() {
             sizeof(uint32_t),
             (uint8_t*)&buff_size_reversed);
     }
-    furi_check(osMutexRelease(serial_svc->buff_size_mtx) == osOK);
+    furi_check(furi_mutex_release(serial_svc->buff_size_mtx) == osOK);
 }
 
 void serial_svc_stop() {
@@ -202,7 +203,7 @@ void serial_svc_stop() {
             FURI_LOG_E(TAG, "Failed to delete Serial service: %d", status);
         }
         // Delete buffer size mutex
-        osMutexDelete(serial_svc->buff_size_mtx);
+        furi_mutex_free(serial_svc->buff_size_mtx);
         free(serial_svc);
         serial_svc = NULL;
     }

@@ -2,67 +2,12 @@
 #include "core/common_defines.h"
 #include <FreeRTOS.h>
 #include <queue.h>
+#include "check.h"
 
-/*
-    Create and Initialize a Message Queue object.
+FuriMessageQueue* furi_message_queue_alloc(uint32_t msg_count, uint32_t msg_size) {
+    furi_assert((furi_is_irq_context() == 0U) && (msg_count > 0U) && (msg_size > 0U));
 
-    Limitations:
-    - The memory for control block and and message data must be provided in the
-        osThreadAttr_t structure in order to allocate object statically.
-*/
-osMessageQueueId_t osMessageQueueNew (uint32_t msg_count, uint32_t msg_size, const osMessageQueueAttr_t *attr) {
-    QueueHandle_t hQueue;
-    int32_t mem;
-
-    hQueue = NULL;
-
-    if ((furi_is_irq_context() == 0U) && (msg_count > 0U) && (msg_size > 0U)) {
-        mem = -1;
-
-        if (attr != NULL) {
-            if ((attr->cb_mem != NULL) && (attr->cb_size >= sizeof(StaticQueue_t)) &&
-                    (attr->mq_mem != NULL) && (attr->mq_size >= (msg_count * msg_size))) {
-                /* The memory for control block and message data is provided, use static object */
-                mem = 1;
-            }
-            else {
-                if ((attr->cb_mem == NULL) && (attr->cb_size == 0U) &&
-                        (attr->mq_mem == NULL) && (attr->mq_size == 0U)) {
-                    /* Control block will be allocated from the dynamic pool */
-                    mem = 0;
-                }
-            }
-        }
-        else {
-            mem = 0;
-        }
-
-        if (mem == 1) {
-            #if (configSUPPORT_STATIC_ALLOCATION == 1)
-                hQueue = xQueueCreateStatic (msg_count, msg_size, attr->mq_mem, attr->cb_mem);
-            #endif
-        }
-        else {
-            if (mem == 0) {
-                #if (configSUPPORT_DYNAMIC_ALLOCATION == 1)
-                    hQueue = xQueueCreate (msg_count, msg_size);
-                #endif
-            }
-        }
-
-        #if (configQUEUE_REGISTRY_SIZE > 0)
-        if (hQueue != NULL) {
-            if ((attr != NULL) && (attr->name != NULL)) {
-                /* Only non-NULL name objects are added to the Queue Registry */
-                vQueueAddToRegistry (hQueue, attr->name);
-            }
-        }
-        #endif
-
-    }
-
-    /* Return message queue ID */
-    return ((osMessageQueueId_t)hQueue);
+    return ((FuriMessageQueue*)xQueueCreate(msg_count, msg_size));
 }
 
 /*
@@ -71,8 +16,8 @@ osMessageQueueId_t osMessageQueueNew (uint32_t msg_count, uint32_t msg_size, con
     Limitations:
     - Message priority is ignored
 */
-osStatus_t osMessageQueuePut (osMessageQueueId_t mq_id, const void *msg_ptr, uint8_t msg_prio, uint32_t timeout) {
-    QueueHandle_t hQueue = (QueueHandle_t)mq_id;
+osStatus_t furi_message_queue_put (FuriMessageQueue* instance, const void *msg_ptr, uint8_t msg_prio, uint32_t timeout) {
+    QueueHandle_t hQueue = (QueueHandle_t)instance;
     osStatus_t stat;
     BaseType_t yield;
 
@@ -119,8 +64,8 @@ osStatus_t osMessageQueuePut (osMessageQueueId_t mq_id, const void *msg_ptr, uin
     Limitations:
     - Message priority is ignored
 */
-osStatus_t osMessageQueueGet (osMessageQueueId_t mq_id, void *msg_ptr, uint8_t *msg_prio, uint32_t timeout) {
-    QueueHandle_t hQueue = (QueueHandle_t)mq_id;
+osStatus_t furi_message_queue_get (FuriMessageQueue* instance, void *msg_ptr, uint8_t *msg_prio, uint32_t timeout) {
+    QueueHandle_t hQueue = (QueueHandle_t)instance;
     osStatus_t stat;
     BaseType_t yield;
 
@@ -164,8 +109,8 @@ osStatus_t osMessageQueueGet (osMessageQueueId_t mq_id, void *msg_ptr, uint8_t *
 /*
     Get maximum number of messages in a Message Queue.
 */
-uint32_t osMessageQueueGetCapacity (osMessageQueueId_t mq_id) {
-    StaticQueue_t *mq = (StaticQueue_t *)mq_id;
+uint32_t furi_message_queue_get_capacity (FuriMessageQueue* instance) {
+    StaticQueue_t *mq = (StaticQueue_t *)instance;
     uint32_t capacity;
 
     if (mq == NULL) {
@@ -182,8 +127,8 @@ uint32_t osMessageQueueGetCapacity (osMessageQueueId_t mq_id) {
 /*
     Get maximum message size in a Message Queue.
 */
-uint32_t osMessageQueueGetMsgSize (osMessageQueueId_t mq_id) {
-    StaticQueue_t *mq = (StaticQueue_t *)mq_id;
+uint32_t furi_message_queue_get_message_size (FuriMessageQueue* instance) {
+    StaticQueue_t *mq = (StaticQueue_t *)instance;
     uint32_t size;
 
     if (mq == NULL) {
@@ -200,8 +145,8 @@ uint32_t osMessageQueueGetMsgSize (osMessageQueueId_t mq_id) {
 /*
     Get number of queued messages in a Message Queue.
 */
-uint32_t osMessageQueueGetCount (osMessageQueueId_t mq_id) {
-    QueueHandle_t hQueue = (QueueHandle_t)mq_id;
+uint32_t furi_message_queue_get_count (FuriMessageQueue* instance) {
+    QueueHandle_t hQueue = (QueueHandle_t)instance;
     UBaseType_t count;
 
     if (hQueue == NULL) {
@@ -221,8 +166,8 @@ uint32_t osMessageQueueGetCount (osMessageQueueId_t mq_id) {
 /*
     Get number of available slots for messages in a Message Queue.
 */
-uint32_t osMessageQueueGetSpace (osMessageQueueId_t mq_id) {
-    StaticQueue_t *mq = (StaticQueue_t *)mq_id;
+uint32_t furi_message_queue_get_space (FuriMessageQueue* instance) {
+    StaticQueue_t *mq = (StaticQueue_t *)instance;
     uint32_t space;
     uint32_t isrm;
 
@@ -248,8 +193,8 @@ uint32_t osMessageQueueGetSpace (osMessageQueueId_t mq_id) {
 /*
     Reset a Message Queue to initial empty state.
 */
-osStatus_t osMessageQueueReset (osMessageQueueId_t mq_id) {
-    QueueHandle_t hQueue = (QueueHandle_t)mq_id;
+osStatus_t furi_message_queue_reset (FuriMessageQueue* instance) {
+    QueueHandle_t hQueue = (QueueHandle_t)instance;
     osStatus_t stat;
 
     if (furi_is_irq_context() != 0U) {
@@ -267,32 +212,9 @@ osStatus_t osMessageQueueReset (osMessageQueueId_t mq_id) {
     return (stat);
 }
 
-/*
-    Delete a Message Queue object.
-*/
-osStatus_t osMessageQueueDelete (osMessageQueueId_t mq_id) {
-    QueueHandle_t hQueue = (QueueHandle_t)mq_id;
-    osStatus_t stat;
+void furi_message_queue_free (FuriMessageQueue* instance) {
+    furi_assert(furi_is_irq_context() != 0U);
+    furi_assert(instance);
 
-#ifndef USE_FreeRTOS_HEAP_1
-    if (furi_is_irq_context() != 0U) {
-        stat = osErrorISR;
-    }
-    else if (hQueue == NULL) {
-        stat = osErrorParameter;
-    }
-    else {
-        #if (configQUEUE_REGISTRY_SIZE > 0)
-        vQueueUnregisterQueue (hQueue);
-        #endif
-
-        stat = osOK;
-        vQueueDelete (hQueue);
-    }
-#else
-    stat = osError;
-#endif
-
-    /* Return execution status */
-    return (stat);
+    vQueueDelete((QueueHandle_t)instance);
 }
