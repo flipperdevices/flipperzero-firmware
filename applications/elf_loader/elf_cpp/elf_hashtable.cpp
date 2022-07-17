@@ -3,8 +3,6 @@
 #include "elf_hashtable_entry.h"
 #include "elf_hashtable_checks.hpp"
 
-#include <gui/gui.h>
-#include <furi.h>
 
 #include <array>
 #include <algorithm>

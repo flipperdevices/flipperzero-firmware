@@ -82,6 +82,7 @@ libs = env.BuildModules(
         "misc",
         "mbedtls",
         "loclass",
+        "flipper_application",
     ],
 )
 

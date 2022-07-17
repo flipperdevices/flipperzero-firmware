@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
-#include "../elf_lib/elf.h"
+
+#include <flipper_application/elf/elf.h>
 
 #ifdef __cplusplus
 extern "C" {
