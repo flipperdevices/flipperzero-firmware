@@ -3,9 +3,10 @@
 
 #define TAG "fapp"
 
-FlipperApplication* flipper_application_alloc(Storage* storage, SymbolResolver resolver) {
+FlipperApplication*
+    flipper_application_alloc(Storage* storage, const ElfApiInterface* api_interface) {
     FlipperApplication* app = malloc(sizeof(FlipperApplication));
-    app->resolver = resolver;
+    app->api_interface = api_interface;
     app->fd = storage_file_alloc(storage);
     return app;
 }

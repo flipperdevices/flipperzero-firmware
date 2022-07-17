@@ -1,6 +1,7 @@
 #pragma once
 
 #include "application_manifest.h"
+#include "elf/elf_api_interface.h"
 
 #include <furi.h>
 #include <storage/storage.h>
@@ -41,9 +42,8 @@ typedef struct {
     uint32_t mmap_entry_count;
 } FlipperApplicationState;
 
-typedef bool (*SymbolResolver)(const char* name, uint32_t* address);
-
-FlipperApplication* flipper_application_alloc(Storage* storage, SymbolResolver resolver);
+FlipperApplication*
+    flipper_application_alloc(Storage* storage, const ElfApiInterface* api_interface);
 
 void flipper_application_free(FlipperApplication* app);
 

@@ -9,19 +9,13 @@
 
 #define TAG "elf_loader_app"
 
-bool elf_resolve_from_hashtable_w_delay(const char* name, Elf32_Addr* address) {
-    // for gui thread, to draw loading animation
-    osDelay(1);
-
-    return elf_resolve_from_hashtable(name, address);
-}
 
 int32_t elf_loader_app(void* p) {
     Storage* storage = furi_record_open("storage");
     DialogsApp* dialogs = furi_record_open("dialogs");
     string_t elf_name;
-    FlipperApplication* app =
-        flipper_application_alloc(storage, elf_resolve_from_hashtable_w_delay);
+
+    FlipperApplication* app = flipper_application_alloc(storage, &hashtable_api_interface);
 
     Gui* gui = furi_record_open("gui");
     ViewDispatcher* view_dispatcher = view_dispatcher_alloc();

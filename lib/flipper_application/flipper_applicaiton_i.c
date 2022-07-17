@@ -3,6 +3,8 @@
 
 #define TAG "fapp-i"
 
+#define RESOLVER_THREAD_YIELD_STEP 20
+
 #define IS_FLAGS_SET(v, m) ((v & m) == m)
 #define SECTION_OFFSET(e, n) (e->section_table + n * sizeof(Elf32_Shdr))
 #define SYMBOL_OFFSET(e, n) (e->_table + n * sizeof(Elf32_Shdr))
@@ -238,7 +240,7 @@ static ELFSection_t* section_of(FlipperApplication* e, int index) {
 static Elf32_Addr address_of(FlipperApplication* e, Elf32_Sym* sym, const char* sName) {
     if(sym->st_shndx == SHN_UNDEF) {
         Elf32_Addr addr = 0;
-        if(e->resolver(sName, &addr)) {
+        if(e->api_interface->resolver_callback(sName, &addr)) {
             return addr;
         }
     } else {
@@ -280,6 +282,10 @@ static bool relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection_t* s) {
         char symbol_name[MAX_SYMBOL_NAME_LEN + 1] = {0};
 
         for(relCount = 0; relCount < relEntries; relCount++) {
+            if(relCount % RESOLVER_THREAD_YIELD_STEP == 0) {
+                osDelay(1);
+            }
+
             if(storage_file_read(e->fd, &rel, sizeof(rel)) == sizeof(rel)) {
                 Elf32_Sym sym;
                 Elf32_Addr symAddr;

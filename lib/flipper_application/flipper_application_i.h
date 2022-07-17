@@ -19,7 +19,7 @@ typedef struct {
 } ELFSection_t;
 
 struct FlipperApplication {
-    SymbolResolver resolver;
+    const ElfApiInterface* api_interface;
     File* fd;
     FlipperApplicationState state;
     FlipperApplicationManifest manifest;
