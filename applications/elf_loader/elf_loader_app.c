@@ -9,7 +9,6 @@
 
 #define TAG "elf_loader_app"
 
-
 int32_t elf_loader_app(void* p) {
     Storage* storage = furi_record_open("storage");
     DialogsApp* dialogs = furi_record_open("dialogs");
