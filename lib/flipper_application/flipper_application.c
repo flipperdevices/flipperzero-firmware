@@ -28,6 +28,8 @@ void flipper_application_free(FlipperApplication* app) {
     }
 
     storage_file_free(app->fd);
+
+    free(app);
 }
 
 /* Parse headers, load manifest */
@@ -43,8 +45,10 @@ FlipperApplicationPreloadStatus
         return FlipperApplicationPreloadStatusInvalidManifest;
     }
 
-    // TODO: api version check
-    // return FlipperApplicationPreloadStatusApiMismatch;
+    if(app->manifest.base.api_version.major != app->api_interface->api_version_major /* ||
+       app->manifest.base.api_version.minor > app->api_interface->api_version_minor */) {
+        return FlipperApplicationPreloadStatusApiMismatch;
+    }
 
     return FlipperApplicationPreloadStatusSuccess;
 }

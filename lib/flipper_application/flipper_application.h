@@ -22,7 +22,7 @@ typedef enum {
 } FlipperApplicationPreloadStatus;
 
 typedef enum {
-    FlipperApplicationLoadStatusSuccess,
+    FlipperApplicationLoadStatusSuccess = 0,
     FlipperApplicationLoadStatusUnspecifiedError,
     FlipperApplicationLoadStatusNoFreeMemory,
     FlipperApplicationLoadStatusMissingImports,
