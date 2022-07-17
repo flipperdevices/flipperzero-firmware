@@ -32,6 +32,7 @@ int32_t elf_loader_app(void* p) {
         } else {
             string_init_set(elf_name, "/ext/apps");
             if(!dialog_file_browser_show(dialogs, elf_name, elf_name, ".fap", true, NULL, false)) {
+                load_success = true;
                 break;
             }
         }
