@@ -22,13 +22,14 @@ int run_minunit_test_dirwalk();
 int run_minunit_test_nfc();
 
 void minunit_print_progress(void) {
-    static char progress[] = {'\\', '|', '/', '-'};
+    static const char progress[] = {'\\', '|', '/', '-'};
     static uint8_t progress_counter = 0;
     static TickType_t last_tick = 0;
     TickType_t current_tick = xTaskGetTickCount();
     if(current_tick - last_tick > 20) {
         last_tick = current_tick;
         printf("[%c]\033[3D", progress[++progress_counter % COUNT_OF(progress)]);
+        fflush(stdout);
     }
 }
 
@@ -51,7 +52,7 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
 
     // TODO: lock device while test running
     if(loader_is_locked(loader)) {
-        FURI_LOG_E(TAG, "RPC: stop all applications to run tests");
+        printf("RPC: stop all applications to run tests\r\n");
         notification_message(notification, &sequence_blink_magenta_100);
     } else {
         notification_message_block(notification, &sequence_set_only_blue_255);
@@ -70,23 +71,22 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
         test_result |= run_minunit_test_infrared();
         test_result |= run_minunit_test_nfc();
 
+        // Time report
         cycle_counter = (furi_hal_get_tick() - cycle_counter);
+        printf("\r\nConsumed: %lu ms\r\n", cycle_counter);
 
-        FURI_LOG_I(TAG, "Consumed: %u us", cycle_counter);
+        // Wait for tested services and apps to deallocate memory
+        furi_hal_delay_ms(200);
+        uint32_t heap_after = memmgr_get_free_heap();
+        printf("Leaked: %ld\r\n", heap_before - heap_after);
 
+        // Final Report
         if(test_result == 0) {
-            furi_hal_delay_ms(200); /* wait for tested services and apps to deallocate */
-            uint32_t heap_after = memmgr_get_free_heap();
             notification_message(notification, &sequence_success);
-            if(heap_after != heap_before) {
-                FURI_LOG_E(TAG, "Leaked: %d", heap_before - heap_after);
-            } else {
-                FURI_LOG_I(TAG, "No leaks");
-            }
-            FURI_LOG_I(TAG, "PASSED");
+            printf("Status: PASSED\r\n");
         } else {
             notification_message(notification, &sequence_error);
-            FURI_LOG_E(TAG, "FAILED");
+            printf("Status: FAILED\r\n");
         }
     }
 
