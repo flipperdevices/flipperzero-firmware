@@ -7,6 +7,8 @@
 #include "elf_cpp/elf_hashtable.h"
 #include <flipper_application/flipper_application.h>
 
+#define TAG "elf_loader_app"
+
 bool elf_resolve_from_hashtable_w_delay(const char* name, Elf32_Addr* address) {
     // for gui thread, to draw loading animation
     osDelay(1);
@@ -42,22 +44,21 @@ int32_t elf_loader_app(void* p) {
 
         view_dispatcher_switch_to_view(view_dispatcher, 0);
 
-        FURI_LOG_I("elf_loader_app", "ELF Loader is loading %s", string_get_cstr(elf_name));
+        FURI_LOG_I(TAG, "ELF Loader is loading %s", string_get_cstr(elf_name));
 
         if(flipper_application_preload(app, string_get_cstr(elf_name)) !=
            FlipperApplicationPreloadStatusSuccess) {
-            FURI_LOG_E(
-                "elf_loader_app", "ELF Loader failed to preload %s", string_get_cstr(elf_name));
+            FURI_LOG_E(TAG, "ELF Loader failed to preload %s", string_get_cstr(elf_name));
             break;
         }
 
+        FURI_LOG_I(TAG, "ELF Loader is mapping");
         if(flipper_application_map_to_memory(app) != FlipperApplicationLoadStatusSuccess) {
-            FURI_LOG_E(
-                "elf_loader_app",
-                "ELF Loader failed to map to memory %s",
-                string_get_cstr(elf_name));
+            FURI_LOG_E(TAG, "ELF Loader failed to map to memory %s", string_get_cstr(elf_name));
             break;
         }
+
+        FURI_LOG_I(TAG, "ELF Loader is staring app");
 
         FuriThread* thread = flipper_application_spawn(app, NULL);
         furi_thread_join(thread);
@@ -65,7 +66,7 @@ int32_t elf_loader_app(void* p) {
         load_success = true;
         int ret = furi_thread_get_return_code(thread);
 
-        FURI_LOG_I("elf_loader_app", "ELF app returned: %i", ret);
+        FURI_LOG_I(TAG, "ELF app returned: %i", ret);
     } while(0);
 
     if(!load_success) {
