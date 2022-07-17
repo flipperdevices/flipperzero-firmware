@@ -12,14 +12,15 @@
 int32_t elf_loader_app(void* p) {
     Storage* storage = furi_record_open("storage");
     DialogsApp* dialogs = furi_record_open("dialogs");
+    Gui* gui = furi_record_open("gui");
+
     string_t elf_name;
 
     FlipperApplication* app = flipper_application_alloc(storage, &hashtable_api_interface);
 
-    Gui* gui = furi_record_open("gui");
     ViewDispatcher* view_dispatcher = view_dispatcher_alloc();
     Loading* loading = loading_alloc();
-    view_dispatcher = view_dispatcher_alloc();
+
     view_dispatcher_enable_queue(view_dispatcher);
     view_dispatcher_attach_to_gui(view_dispatcher, gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_add_view(view_dispatcher, 0, loading_get_view(loading));
@@ -82,8 +83,9 @@ int32_t elf_loader_app(void* p) {
     view_dispatcher_remove_view(view_dispatcher, 0);
     loading_free(loading);
     view_dispatcher_free(view_dispatcher);
-    furi_record_close("gui");
+
     string_clear(elf_name);
+    furi_record_close("gui");
     furi_record_close("dialogs");
     furi_record_close("storage");
     return 0;
