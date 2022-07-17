@@ -68,7 +68,7 @@ void icon_animation_start(IconAnimation* instance) {
         furi_check(
             xTimerChangePeriod(
                 instance->timer,
-                (osKernelGetTickFreq() / instance->icon->frame_rate),
+                (furi_kernel_get_tick_frequency() / instance->icon->frame_rate),
                 portMAX_DELAY) == pdPASS);
     }
 }

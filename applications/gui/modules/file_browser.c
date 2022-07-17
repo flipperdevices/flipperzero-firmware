@@ -1,6 +1,5 @@
 #include "file_browser.h"
 #include "assets_icons.h"
-#include "cmsis_os2.h"
 #include "file_browser_worker.h"
 #include <core/check.h>
 #include <core/common_defines.h>

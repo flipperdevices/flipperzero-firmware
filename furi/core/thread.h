@@ -6,6 +6,7 @@
 #pragma once
 
 #include "base.h"
+#include "common_defines.h"
 
 #ifdef __cplusplus
 extern "C" {

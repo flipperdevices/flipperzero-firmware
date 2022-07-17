@@ -6,6 +6,7 @@
 
 #include <task.h>
 #include <m-string.h>
+#include <furi_hal_delay.h>
 
 #define THREAD_NOTIFY_INDEX 1 // Index 0 is used for stream buffers
 
@@ -57,7 +58,7 @@ static void furi_thread_body(void* context) {
     thread->ret = thread->callback(thread->context);
 
     if(thread->heap_trace_enabled == true) {
-        osDelay(33);
+        furi_hal_delay_ms(33);
         thread->heap_size = memmgr_heap_get_thread_memory((FuriThreadId)task_handle);
         memmgr_heap_disable_thread_trace((FuriThreadId)task_handle);
     }
@@ -157,7 +158,7 @@ bool furi_thread_join(FuriThread* thread) {
     furi_assert(thread);
 
     while(thread->state != FuriThreadStateStopped) {
-        osDelay(10);
+        furi_hal_delay_ms(10);
     }
 
     return osOK;

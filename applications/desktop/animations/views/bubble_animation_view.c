@@ -11,8 +11,6 @@
 #include <gui/icon_i.h>
 #include <input/input.h>
 #include <stdint.h>
-#include <FreeRTOS.h>
-#include <timers.h>
 #include <core/dangerous_defines.h>
 
 #define ACTIVE_SHIFT 2

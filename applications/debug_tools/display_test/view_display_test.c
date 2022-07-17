@@ -138,7 +138,7 @@ static bool view_display_test_input_callback(InputEvent* event, void* context) {
 
 static void view_display_test_enter(void* context) {
     ViewDisplayTest* instance = context;
-    osTimerStart(instance->timer, osKernelGetTickFreq() / 32);
+    osTimerStart(instance->timer, furi_kernel_get_tick_frequency() / 32);
 }
 
 static void view_display_test_exit(void* context) {

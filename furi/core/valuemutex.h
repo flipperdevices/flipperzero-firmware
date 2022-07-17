@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cmsis_os2.h>
 #include <stdbool.h>
 #include "mutex.h"
 

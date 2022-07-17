@@ -3,7 +3,6 @@
 #include <core/check.h>
 #include "stm32wbxx_ll_dma.h"
 #include "sys/_stdint.h"
-#include <cmsis_os2.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
 

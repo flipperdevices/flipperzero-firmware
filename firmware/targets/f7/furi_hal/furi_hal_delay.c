@@ -1,7 +1,6 @@
 #include "furi_hal_delay.h"
 
 #include <furi.h>
-#include <cmsis_os2.h>
 #include <stm32wbxx_ll_utils.h>
 
 #define TAG "FuriHalDelay"
@@ -17,11 +16,19 @@ uint32_t furi_hal_delay_instructions_per_microsecond() {
 }
 
 uint32_t furi_hal_get_tick(void) {
-    return osKernelGetTickCount();
+    TickType_t ticks;
+
+    if(furi_is_irq_context() != 0U) {
+        ticks = xTaskGetTickCountFromISR();
+    } else {
+        ticks = xTaskGetTickCount();
+    }
+
+    return ticks;
 }
 
 uint32_t furi_hal_ms_to_ticks(float milliseconds) {
-    return milliseconds / (1000.0f / osKernelGetTickFreq());
+    return milliseconds / (1000.0f / furi_kernel_get_tick_frequency());
 }
 
 void furi_hal_delay_us(float microseconds) {
@@ -31,11 +38,9 @@ void furi_hal_delay_us(float microseconds) {
     };
 }
 
-// cannot be used in ISR
-// TODO add delay_ISR variant
 void furi_hal_delay_ms(float milliseconds) {
-    if(!FURI_IS_ISR() && osKernelGetState() == osKernelRunning) {
-        uint32_t ticks = milliseconds / (1000.0f / osKernelGetTickFreq());
+    if(!FURI_IS_ISR() && xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) {
+        uint32_t ticks = milliseconds / (1000.0f / furi_kernel_get_tick_frequency());
         osStatus_t result = osDelay(ticks);
         (void)result;
         furi_assert(result == osOK);

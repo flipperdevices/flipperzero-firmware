@@ -1,7 +1,8 @@
 #pragma once
 
 #include <stdbool.h>
-#include <cmsis_os2.h>
+#include <FreeRTOS.h>
+#include <task.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -103,7 +104,7 @@ extern "C" {
 #define FURI_CRITICAL_ENTER()                                        \
     uint32_t __isrm = 0;                                             \
     bool __from_isr = FURI_IS_ISR();                                 \
-    bool __kernel_running = (osKernelGetState() == osKernelRunning); \
+    bool __kernel_running = (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING); \
     if(__from_isr) {                                                 \
         __isrm = taskENTER_CRITICAL_FROM_ISR();                      \
     } else if(__kernel_running) {                                    \
@@ -123,6 +124,31 @@ extern "C" {
         __enable_irq();                     \
     }
 #endif
+
+static inline bool furi_is_irq_context() {
+    bool irq = false;
+    BaseType_t state;
+
+    if (FURI_IS_IRQ_MODE()) {
+        /* Called from interrupt context */
+        irq = true;
+    }
+    else {
+        /* Get FreeRTOS scheduler state */
+        state = xTaskGetSchedulerState();
+
+        if (state != taskSCHEDULER_NOT_STARTED) {
+            /* Scheduler was started */
+            if (FURI_IS_IRQ_MASKED()) {
+                /* Interrupts are masked */
+                irq = true;
+            }
+        }
+    }
+
+    /* Return context, 0: thread context, 1: IRQ context */
+    return (irq);
+}
 
 #ifdef __cplusplus
 }

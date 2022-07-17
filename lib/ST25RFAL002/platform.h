@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <limits.h>
-#include <cmsis_os2.h>
 #include "timer.h"
 #include "math.h"
 #include <furi_hal_gpio.h>
@@ -107,7 +106,7 @@ void rfal_platform_spi_release();
 #define platformDelay(t) osDelay(t) /*!< Performs a delay for the given time (ms)    */
 
 #define platformGetSysTick() \
-    osKernelGetTickCount() /*!< Get System Tick (1 tick = 1 ms)             */
+    furi_hal_get_tick() /*!< Get System Tick (1 tick = 1 ms)             */
 
 #define platformAssert(exp) assert_param(exp) /*!< Asserts whether the given expression is true*/
 

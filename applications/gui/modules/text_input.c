@@ -310,7 +310,7 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, b
            (!model->validator_callback(
                model->text_buffer, model->validator_text, model->validator_callback_context))) {
             model->valadator_message_visible = true;
-            osTimerStart(text_input->timer, osKernelGetTickFreq() * 4);
+            osTimerStart(text_input->timer, furi_kernel_get_tick_frequency() * 4);
         } else if(model->callback != 0 && text_length > 0) {
             model->callback(model->callback_context);
         }

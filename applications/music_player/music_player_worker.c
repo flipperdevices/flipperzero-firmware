@@ -58,7 +58,7 @@ static int32_t music_player_worker_thread_callback(void* context) {
             float note_from_a4 = (float)note_block->semitone - NOTE_C4_SEMITONE;
             float frequency = NOTE_C4 * powf(TWO_POW_TWELTH_ROOT, note_from_a4);
             float duration =
-                60.0 * osKernelGetTickFreq() * 4 / instance->bpm / note_block->duration;
+                60.0 * furi_kernel_get_tick_frequency() * 4 / instance->bpm / note_block->duration;
             uint32_t dots = note_block->dots;
             while(dots > 0) {
                 duration += duration / 2;

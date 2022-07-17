@@ -2,7 +2,6 @@
 #include <ble.h>
 #include <stm32wbxx.h>
 #include <shci.h>
-#include <cmsis_os2.h>
 
 #include <furi_hal_version.h>
 #include <furi_hal_bt_hid.h>

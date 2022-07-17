@@ -133,7 +133,9 @@ uint8_t notification_settings_get_rgb_led_brightness(NotificationApp* app, uint8
 }
 
 uint32_t notification_settings_display_off_delay_ticks(NotificationApp* app) {
-    return ((float)(app->settings.display_off_delay_ms) / (1000.0f / osKernelGetTickFreq()));
+    return (
+        (float)(app->settings.display_off_delay_ms) /
+        (1000.0f / furi_kernel_get_tick_frequency()));
 }
 
 // generics
@@ -416,9 +418,9 @@ static bool notification_load_settings(NotificationApp* app) {
             FURI_LOG_E(
                 TAG, "version(%d != %d) mismatch", settings.version, NOTIFICATION_SETTINGS_VERSION);
         } else {
-            osKernelLock();
+            furi_kernel_lock();
             memcpy(&app->settings, &settings, settings_size);
-            osKernelUnlock();
+            furi_kernel_unlock();
         }
     } else {
         FURI_LOG_E(TAG, "load failed, %s", storage_file_get_error_desc(file));
@@ -438,9 +440,9 @@ static bool notification_save_settings(NotificationApp* app) {
 
     FURI_LOG_I(TAG, "saving settings to \"%s\"", NOTIFICATION_SETTINGS_PATH);
 
-    osKernelLock();
+    furi_kernel_lock();
     memcpy(&settings, &app->settings, settings_size);
-    osKernelUnlock();
+    furi_kernel_unlock();
 
     bool fs_result =
         storage_file_open(file, NOTIFICATION_SETTINGS_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS);

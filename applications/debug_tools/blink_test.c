@@ -85,7 +85,7 @@ int32_t blink_test_app(void* p) {
     view_port_draw_callback_set(view_port, blink_test_draw_callback, NULL);
     view_port_input_callback_set(view_port, blink_test_input_callback, event_queue);
     osTimerId_t timer = osTimerNew(blink_test_update, osTimerPeriodic, event_queue, NULL);
-    osTimerStart(timer, osKernelGetTickFreq());
+    osTimerStart(timer, furi_kernel_get_tick_frequency());
 
     // Register view port in GUI
     Gui* gui = furi_record_open("gui");

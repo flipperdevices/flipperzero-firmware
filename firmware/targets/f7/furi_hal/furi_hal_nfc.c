@@ -273,7 +273,7 @@ bool furi_hal_nfc_listen_rx(FuriHalNfcTxRxContext* tx_rx, uint32_t timeout_ms) {
     furi_assert(tx_rx);
 
     // Wait for interrupts
-    uint32_t start = osKernelGetTickCount();
+    uint32_t start = furi_hal_get_tick();
     bool data_received = false;
     while(true) {
         if(furi_hal_gpio_read(&gpio_nfc_irq_rfid_pull) == true) {
@@ -285,7 +285,7 @@ bool furi_hal_nfc_listen_rx(FuriHalNfcTxRxContext* tx_rx, uint32_t timeout_ms) {
             }
             continue;
         }
-        if(osKernelGetTickCount() - start > timeout_ms) {
+        if(furi_hal_get_tick() - start > timeout_ms) {
             FURI_LOG_T(TAG, "Interrupt waiting timeout");
             osDelay(1);
             break;

@@ -154,7 +154,7 @@ void subghz_test_carrier_enter(void* context) {
 
     furi_hal_subghz_rx();
 
-    osTimerStart(subghz_test_carrier->timer, osKernelGetTickFreq() / 4);
+    osTimerStart(subghz_test_carrier->timer, furi_kernel_get_tick_frequency() / 4);
 }
 
 void subghz_test_carrier_exit(void* context) {

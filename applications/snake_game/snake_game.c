@@ -301,7 +301,7 @@ int32_t snake_game_app(void* p) {
 
     osTimerId_t timer =
         osTimerNew(snake_game_update_timer_callback, osTimerPeriodic, event_queue, NULL);
-    osTimerStart(timer, osKernelGetTickFreq() / 4);
+    osTimerStart(timer, furi_kernel_get_tick_frequency() / 4);
 
     // Open GUI and register view_port
     Gui* gui = furi_record_open("gui");

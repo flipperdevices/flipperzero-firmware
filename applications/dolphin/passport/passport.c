@@ -1,5 +1,4 @@
 #include "assets_icons.h"
-#include "cmsis_os2.h"
 #include "dolphin/helpers/dolphin_state.h"
 #include <core/check.h>
 #include <core/record.h>

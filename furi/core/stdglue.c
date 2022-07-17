@@ -25,9 +25,8 @@ static FuriStdglue* furi_stdglue = NULL;
 static ssize_t stdout_write(void* _cookie, const char* data, size_t size) {
     furi_assert(furi_stdglue);
     bool consumed = false;
-    osKernelState_t state = osKernelGetState();
     FuriThreadId task_id = furi_thread_get_current_id();
-    if(state == osKernelRunning && task_id &&
+    if(xTaskGetSchedulerState() == taskSCHEDULER_RUNNING && task_id &&
        osMutexAcquire(furi_stdglue->mutex, osWaitForever) == osOK) {
         // We are in the thread context
         // Handle thread callbacks

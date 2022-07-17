@@ -38,7 +38,6 @@
 #include "check.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <cmsis_os2.h>
 #include <stm32wbxx.h>
 #include <furi_hal_console.h>
 #include <core/common_defines.h>
@@ -222,7 +221,7 @@ static inline void traceFREE(void* pointer, size_t size) {
 size_t memmgr_heap_get_max_free_block() {
     size_t max_free_size = 0;
     BlockLink_t* pxBlock;
-    osKernelLock();
+    vTaskSuspendAll();
 
     pxBlock = xStart.pxNextFreeBlock;
     while(pxBlock->pxNextFreeBlock != NULL) {
@@ -232,14 +231,14 @@ size_t memmgr_heap_get_max_free_block() {
         pxBlock = pxBlock->pxNextFreeBlock;
     }
 
-    osKernelUnlock();
+    xTaskResumeAll();
     return max_free_size;
 }
 
 void memmgr_heap_printf_free_blocks() {
     BlockLink_t* pxBlock;
     //TODO enable when we can do printf with a locked scheduler
-    //osKernelLock();
+    //vTaskSuspendAll();
 
     pxBlock = xStart.pxNextFreeBlock;
     while(pxBlock->pxNextFreeBlock != NULL) {
@@ -247,7 +246,7 @@ void memmgr_heap_printf_free_blocks() {
         pxBlock = pxBlock->pxNextFreeBlock;
     }
 
-    //osKernelUnlock();
+    //xTaskResumeAll();
 }
 
 #ifdef HEAP_PRINT_DEBUG
