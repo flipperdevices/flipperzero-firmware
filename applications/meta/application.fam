@@ -72,7 +72,6 @@ App(
     name="Custom applications for main menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "INTAPP_Tanks",
         "INTAPP_HIDAnalyzer",
         "INTAPP_Picopass",
         "INTAPP_MouseJacker",
@@ -91,5 +90,6 @@ App(
         "GAME_GameOfLife",
         "GAME_Raycast",
         "GAME_Tetris",
+        "GAME_Tanks",
     ],
 )
