@@ -49,7 +49,7 @@ App(
     name="Custom applications for games menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "INTAPP_Tanks",
+        "GAME_Tanks",
         "GAME_Tetris",
         "GAME_2048","GAME_Arkanoid","GAME_Dice",
 	"GAME_Snake","GAME_TicTacToe",
