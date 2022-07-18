@@ -71,7 +71,7 @@ def assemble_manifest_data(
     data = ElfManifestBaseHeader(
         manifest_version=1,
         api_version=sdk_version,
-        hardware_target_id=sdk_version,
+        hardware_target_id=hardware_target,
     ).as_bytes()
     data += ElfManifestV1(
         stack_size=app_manifest.stack_size,

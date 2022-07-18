@@ -2,6 +2,10 @@
 
 #include "../types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct SubGhzProtocolDecoderBase SubGhzProtocolDecoderBase;
 
 typedef void (
@@ -79,3 +83,7 @@ struct SubGhzProtocolEncoderBase {
 
     // Callback section
 };
+
+#ifdef __cplusplus
+}
+#endif

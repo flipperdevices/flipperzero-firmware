@@ -7,4 +7,3 @@ App(
     stack_size=2 * 1024,
     order=80,
 )
-

@@ -6,8 +6,11 @@
 extern "C" {
 #endif
 
-#define ELF_MANIFEST_MAGIC 0x52474448
-#define ELF_MANIFEST_MAX_SUPPORTED_VERSION 1
+#define FAP_MANIFEST_MAGIC 0x52474448
+#define FAP_MANIFEST_SUPPORTED_VERSION 1
+
+#define FAP_MANIFEST_MAX_APP_NAME_LENGTH 32
+#define FAP_MANIFEST_MAX_ICON_SIZE 32 // TODO: reduce size?
 
 #pragma pack(push, 1)
 
@@ -22,18 +25,18 @@ typedef struct {
         uint32_t version;
     } api_version;
     uint16_t hardware_target_id;
-} ElfManifestBase;
+} FlipperApplicationManifestBase;
 
 typedef struct {
-    ElfManifestBase base;
+    FlipperApplicationManifestBase base;
     uint16_t stack_size;
     uint32_t app_version;
-    char name[32];
+    char name[FAP_MANIFEST_MAX_APP_NAME_LENGTH];
     char has_icon;
-    char icon[32]; // TODO: reduce size?
-} ElfManifestV1;
+    char icon[FAP_MANIFEST_MAX_ICON_SIZE];
+} FlipperApplicationManifestV1;
 
-typedef ElfManifestV1 ElfManifest;
+typedef FlipperApplicationManifestV1 FlipperApplicationManifest;
 
 #pragma pack(pop)
 

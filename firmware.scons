@@ -54,6 +54,15 @@ env = ENV.Clone(
                 "FURI_DEBUG" if ENV["DEBUG"] else "FURI_NDEBUG",
             ],
         },
+        "flipper_application": {
+            "CCFLAGS": [
+                "-Og",
+            ],
+            "CPPDEFINES": [
+                "NDEBUG",
+                "FURI_DEBUG" if ENV["DEBUG"] else "FURI_NDEBUG",
+            ],
+        },
     },
 )
 
@@ -204,6 +213,7 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
         "misc",
         "mbedtls",
         "loclass",
+        "flipper_application",
         # 2nd round
         "flipperformat",
         "toolbox",
