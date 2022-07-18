@@ -14,6 +14,7 @@
 - More updates from Hedger on [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
 - Updated apps to be installed internally while ELF Loader is being troubleshooted
 - Added [TOTP (By Astrrra)](https://github.com/wetox-team/flipperzero-firmware/tree/gen-totp)
+- Updated Manifest and packed in pre-compiled working apps/games
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
