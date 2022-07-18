@@ -38,8 +38,6 @@ App(
         "INTAPP_MouseJacker",
         "INTAPP_NRFSniff",
         "INTAPP_TOTP",
-		
-        "APPS_TouchTunes",
         "APPS_WAVPlayer",
         "APPS_SpectrumAnalyzer","APPS_BluetoothRemote",
 	"APPS_MusicPlayer","APPS_MouseJiggler",
@@ -53,7 +51,6 @@ App(
     provides=[
         "INTAPP_Tanks",
         "GAME_Tetris",
-	
         "GAME_2048","GAME_Arkanoid","GAME_Dice",
 	"GAME_Snake","GAME_TicTacToe",
         "GAME_VideoPoker","GAME_FlappyBird",
