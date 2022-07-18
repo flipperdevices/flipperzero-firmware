@@ -52,7 +52,6 @@ App(
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         "INTAPP_Tanks",
-        "GAME_GameOfLife",
         "GAME_Tetris",
 	
         "GAME_2048","GAME_Arkanoid","GAME_Dice",
