@@ -12,6 +12,8 @@
 - OFW: [SubGhz: add new protocol (IronLogic, Comunello, Sommer(fsk476), Normstahl, KEY, EcoStar, Gibidi, Mutancode) #1404 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1404)
 - OFW: [Update bad_usb_script.c to fix incorrect ALT key const #1406 (By t0m1o1)](https://github.com/flipperdevices/flipperzero-firmware/pull/1406)
 - More updates from Hedger on [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
+- Updated apps to be installed internally while ELF Loader is being troubleshooted
+- Added [TOTP (By Astrrra)](https://github.com/wetox-team/flipperzero-firmware/tree/gen-totp)
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
@@ -147,6 +149,7 @@ $ docker-compose exec dev ./fbt
 - [RF Remix (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - `ELF` [Sentry Safe (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/unleashed/applications/sentry_safe) from [UberGuidoZ](https://github.com/UberGuidoZ/))
 - `ELF` [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
+- [TOTP (By Astrrra)](https://github.com/wetox-team/flipperzero-firmware/tree/gen-totp)
 - [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - `ELF` [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 - [WiFi Scanner (By gotnull)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/99) `HIDDEN "wifi_scanner"` due to `Req: ESP8266`
