@@ -116,6 +116,7 @@ Header,+,lib/one_wire/one_wire_host_timing.h,,
 Header,+,lib/one_wire/one_wire_slave.h,,
 Header,+,lib/subghz/environment.h,,
 Header,+,lib/subghz/receiver.h,,
+Header,+,lib/subghz/subghz_tx_rx_worker.h,,
 Header,+,lib/subghz/subghz_worker.h,,
 Header,+,lib/subghz/transmitter.h,,
 Header,+,lib/toolbox/args.h,,
@@ -1967,7 +1968,7 @@ Function,+,sha256_update,void,"sha256_context*, const unsigned char*, unsigned i
 Function,-,sin,double,double
 Function,-,sincos,void,"double, double*, double*"
 Function,-,sincosf,void,"float, float*, float*"
-Function,-,sinf,float,float
+Function,+,sinf,float,float
 Function,-,sinh,double,double
 Function,-,sinhf,float,float
 Function,-,sinhl,long double,long double
@@ -1977,7 +1978,7 @@ Function,+,siscanf,int,"const char*, const char*, ..."
 Function,+,sniprintf,int,"char*, size_t, const char*, ..."
 Function,+,snprintf,int,"char*, size_t, const char*, ..."
 Function,+,sprintf,int,"char*, const char*, ..."
-Function,-,sqrt,double,double
+Function,+,sqrt,double,double
 Function,-,sqrtf,float,float
 Function,-,sqrtl,long double,long double
 Function,+,srand,void,unsigned
@@ -2148,6 +2149,15 @@ Function,+,subghz_transmitter_free,void,SubGhzTransmitter*
 Function,+,subghz_transmitter_get_protocol_instance,SubGhzProtocolEncoderBase*,SubGhzTransmitter*
 Function,+,subghz_transmitter_stop,_Bool,SubGhzTransmitter*
 Function,+,subghz_transmitter_yield,LevelDuration,void*
+Function,+,subghz_tx_rx_worker_alloc,SubGhzTxRxWorker*,
+Function,+,subghz_tx_rx_worker_free,void,SubGhzTxRxWorker*
+Function,+,subghz_tx_rx_worker_available,size_t,SubGhzTxRxWorker*
+Function,+,subghz_tx_rx_worker_is_running,_Bool,SubGhzTxRxWorker*
+Function,+,subghz_tx_rx_worker_read,size_t,"SubGhzTxRxWorker*, uint8_t*, size_t"
+Function,+,subghz_tx_rx_worker_set_callback_have_read,void,"SubGhzTxRxWorker*, SubGhzTxRxWorkerCallbackHaveRead, void*"
+Function,+,subghz_tx_rx_worker_start,_Bool,"SubGhzTxRxWorker*, uint32_t"
+Function,+,subghz_tx_rx_worker_stop,void,SubGhzTxRxWorker*
+Function,+,subghz_tx_rx_worker_write,_Bool,"SubGhzTxRxWorker*, uint8_t*, size_t"
 Function,-,subghz_worker_alloc,SubGhzWorker*,
 Function,-,subghz_worker_free,void,SubGhzWorker*
 Function,-,subghz_worker_is_running,_Bool,SubGhzWorker*
@@ -2168,7 +2178,7 @@ Function,-,system,int,const char*
 Function,-,tan,double,double
 Function,-,tanf,float,float
 Function,-,tanh,double,double
-Function,-,tanhf,float,float
+Function,+,tanhf,float,float
 Function,-,tanhl,long double,long double
 Function,-,tanl,long double,long double
 Function,+,tar_archive_add_dir,_Bool,"TarArchive*, const char*, const char*"
@@ -2255,7 +2265,7 @@ Function,+,uxTaskGetStackHighWaterMark,UBaseType_t,TaskHandle_t
 Function,-,uxTaskGetStackHighWaterMark2,uint16_t,TaskHandle_t
 Function,+,uxTaskGetSystemState,UBaseType_t,"TaskStatus_t*, const UBaseType_t, uint32_t*"
 Function,-,uxTaskGetTaskNumber,UBaseType_t,TaskHandle_t
-Function,-,uxTaskPriorityGet,UBaseType_t,const TaskHandle_t
+Function,+,uxTaskPriorityGet,UBaseType_t,const TaskHandle_t
 Function,-,uxTaskPriorityGetFromISR,UBaseType_t,const TaskHandle_t
 Function,+,uxTaskResetEventItemValue,TickType_t,
 Function,-,uxTimerGetReloadMode,UBaseType_t,TimerHandle_t
