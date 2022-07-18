@@ -6,7 +6,9 @@
 - [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): An-Motors and HCS101 keeloq emulation
 - [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): FAAC SLH/Spa counter fix, now it uses 20-bits
 - [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): Keeloq increased hold duration
-
+- Updates for api_symbols.csv used by external apps [(By E_Surge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
+- Tested and renamed newly working FAPs and uploaded to assets and awesome repo
+  
 <table width="100%" border="0" cellspacing="0">
   <tr>
     <td>
