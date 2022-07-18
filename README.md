@@ -2,10 +2,16 @@
 
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
-- Added [WiFi Scanner (By gotnull)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/99) `HIDDEN "wifi_scanner"` due to hardware requirement
-- Renamed many apps internally to have ELFs compiled with the right name
 - Updated [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387), no more ELFs in /ext/elf
 - - Now its FAPs in /ext/apps. Untested and unreleased. Feel free to test and compile your own FAPs.
+- OFW: [Calculate picopass CRC dynamically #1389 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1389)
+- OFW: [Log MFC nonces for use with mfkey32v2 #1390 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1390)
+- OFW: [Ibutton, Infrared, LfRFID GUI fixes #1392 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1392)
+- OFW: [Move Infrared unit test data to assets #1396 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1396)
+- OFW: [Better crash handling #1397 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1397)
+- OFW: [SubGhz: add new protocol (IronLogic, Comunello, Sommer(fsk476), Normstahl, KEY, EcoStar, Gibidi, Mutancode) #1404 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1404)
+- OFW: [Update bad_usb_script.c to fix incorrect ALT key const #1406 (By t0m1o1)](https://github.com/flipperdevices/flipperzero-firmware/pull/1406)
+- More updates from Hedger on [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
