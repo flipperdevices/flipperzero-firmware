@@ -1,7 +1,7 @@
 App(
     appid="APPS_TOTP",
     name="TOTP",
-    apptype=FlipperAppType.APP,
+    apptype=FlipperAppType.PLUGIN,
     entry_point="totp_app",
     cdefines=["APP_TOTP"],
     requires=[
