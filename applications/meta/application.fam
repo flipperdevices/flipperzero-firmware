@@ -25,6 +25,7 @@ App(
         "bad_usb",
         "u2f",
         "elf_loader",
+        "totp",
     ],
 )
 
@@ -38,6 +39,11 @@ App(
         "INTAPP_MouseJacker",
         "INTAPP_NRFSniff",
         "INTAPP_TouchTunes",
+		
+        "APPS_WAVPlayer",
+        "APPS_SpectrumAnalyzer","APPS_BluetoothRemote","APPS_DolphinRestorer",
+		"APPS_DolphinBackup","APPS_MusicPlayer",
+        "APPS_SentrySafe","APPS_BarcodeGenerator","APPS_MouseJiggler",
     ],
 )
 
@@ -50,6 +56,9 @@ App(
         "INTAPP_GameOfLife",
         "INTAPP_Raycast",
         "INTAPP_Tetris",
+        "GAME_2048","GAME_Arkanoid","GAME_Dice",
+		"GAME_Snake","GAME_TicTacToe",,"GAME_MandelbrotSet"
+        "GAME_VideoPoker","GAME_FlappyBird",
     ],
 )
 
@@ -81,12 +90,13 @@ App(
 		"INTAPP_Chip8","INTAPP_Chess",
         "Clock",
         "UniRFRemix",
+		"totp",
         "APPS_WAVPlayer",
         "APPS_SpectrumAnalyzer","APPS_BluetoothRemote","APPS_DolphinRestorer",
-		"APPS_DolphinBackup","GAME_MandelbrotSet","APPS_MusicPlayer",
+		"APPS_DolphinBackup","APPS_MusicPlayer",
         "APPS_SentrySafe","APPS_BarcodeGenerator","APPS_MouseJiggler",
         "GAME_2048","GAME_Arkanoid","GAME_Dice",
-		"GAME_Snake","GAME_TicTacToe",
+		"GAME_Snake","GAME_TicTacToe",,"GAME_MandelbrotSet"
         "GAME_VideoPoker","GAME_FlappyBird",
     ],
 )
