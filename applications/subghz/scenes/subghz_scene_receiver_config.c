@@ -79,7 +79,7 @@ static void subghz_scene_receiver_config_set_frequency(VariableItem* item) {
             subghz_setting_get_frequency(subghz->setting, index) / 1000000,
             (subghz_setting_get_frequency(subghz->setting, index) % 1000000) / 10000);
         variable_item_set_current_value_text(item, text_buf);
-        subghz->txrx->preset_1->frequency = subghz_setting_get_frequency(subghz->setting, index);
+        subghz->txrx->preset->frequency = subghz_setting_get_frequency(subghz->setting, index);
     } else {
         variable_item_set_current_value_index(
             item, subghz_setting_get_frequency_default_index(subghz->setting));
@@ -91,7 +91,12 @@ static void subghz_scene_receiver_config_set_preset(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(
         item, subghz_setting_get_preset_name(subghz->setting, index));
-    string_set(subghz->txrx->preset_1->name, subghz_setting_get_preset_name(subghz->setting, index));
+    subghz_preset_init(
+        subghz,
+        subghz_setting_get_preset_name(subghz->setting, index),
+        subghz->txrx->preset->frequency,
+        subghz_setting_get_preset_data(subghz->setting, index),
+        subghz_setting_get_preset_data_size(subghz->setting, index));
 }
 
 static void subghz_scene_receiver_config_set_hopping_runing(VariableItem* item) {
@@ -110,7 +115,7 @@ static void subghz_scene_receiver_config_set_hopping_runing(VariableItem* item) 
             (VariableItem*)scene_manager_get_scene_state(
                 subghz->scene_manager, SubGhzSceneReceiverConfig),
             text_buf);
-        subghz->txrx->preset_1->frequency = subghz_setting_get_default_frequency(subghz->setting);
+        subghz->txrx->preset->frequency = subghz_setting_get_default_frequency(subghz->setting);
         variable_item_set_current_value_index(
             (VariableItem*)scene_manager_get_scene_state(
                 subghz->scene_manager, SubGhzSceneReceiverConfig),
@@ -149,7 +154,8 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         subghz_setting_get_frequency_count(subghz->setting),
         subghz_scene_receiver_config_set_frequency,
         subghz);
-    value_index = subghz_scene_receiver_config_next_frequency(subghz->txrx->preset_1->frequency, subghz);
+    value_index =
+        subghz_scene_receiver_config_next_frequency(subghz->txrx->preset->frequency, subghz);
     scene_manager_set_scene_state(
         subghz->scene_manager, SubGhzSceneReceiverConfig, (uint32_t)item);
     variable_item_set_current_value_index(item, value_index);
@@ -182,7 +188,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         subghz_scene_receiver_config_set_preset,
         subghz);
     value_index = subghz_scene_receiver_config_next_preset(
-        string_get_cstr(subghz->txrx->preset_1->name), subghz);
+        string_get_cstr(subghz->txrx->preset->name), subghz);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(
         item, subghz_setting_get_preset_name(subghz->setting, value_index));

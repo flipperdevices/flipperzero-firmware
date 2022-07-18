@@ -28,6 +28,8 @@ int subghz_setting_get_inx_preset_by_name(SubGhzSetting* instance, const char* p
 
 uint8_t* subghz_setting_get_preset_data(SubGhzSetting* instance, size_t idx);
 
+size_t subghz_setting_get_preset_data_size(SubGhzSetting* instance, size_t idx);
+
 uint8_t* subghz_setting_get_preset_data_by_name(SubGhzSetting* instance, const char* preset_name);
 
 bool subghz_setting_load_custom_preset(

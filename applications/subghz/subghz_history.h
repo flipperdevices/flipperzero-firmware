@@ -35,6 +35,8 @@ void subghz_history_reset(SubGhzHistory* instance);
  */
 uint32_t subghz_history_get_frequency(SubGhzHistory* instance, uint16_t idx);
 
+SubGhzPesetDefinition* subghz_history_get_presset(SubGhzHistory* instance, uint16_t idx);
+
 /** Get preset to history[idx]
  * 
  * @param instance  - SubGhzHistory instance

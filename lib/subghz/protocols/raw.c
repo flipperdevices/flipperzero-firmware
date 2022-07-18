@@ -128,9 +128,8 @@ bool subghz_protocol_raw_save_to_file_init(
             FURI_LOG_E(TAG, "Unable to add Frequency");
             break;
         }
-        if(!subghz_block_generic_get_preset_name(preset, temp_str)) {
-            break;
-        }
+
+        subghz_block_generic_get_preset_name(string_get_cstr(preset->name), temp_str);
         if(!flipper_format_write_string_cstr(
                instance->flipper_file, "Preset", string_get_cstr(temp_str))) {
             FURI_LOG_E(TAG, "Unable to add Preset");
@@ -138,15 +137,15 @@ bool subghz_protocol_raw_save_to_file_init(
         }
         if(!strcmp(string_get_cstr(temp_str), "FuriHalSubGhzPresetCustom")) {
             if(!flipper_format_write_string_cstr(
-                   flipper_format, "Custom_preset_module", "CC1101")) {
+                   instance->flipper_file, "Custom_preset_module", "CC1101")) {
                 FURI_LOG_E(TAG, "Unable to add Custom_preset_module");
                 break;
             }
-            // if(!flipper_format_write_hex(
-            //        flipper_format, "Сustom_preset_data", preset->data, preset->data_size)) {
-            //     FURI_LOG_E(TAG, "Unable to add Сustom_preset_data");
-            //     break;
-            // }
+            if(!flipper_format_write_hex(
+                   instance->flipper_file, "Сustom_preset_data", preset->data, preset->data_size)) {
+                FURI_LOG_E(TAG, "Unable to add Сustom_preset_data");
+                break;
+            }
         }
         if(!flipper_format_write_string_cstr(
                instance->flipper_file, "Protocol", instance->base.protocol->name)) {

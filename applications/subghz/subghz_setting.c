@@ -512,6 +512,13 @@ uint8_t* subghz_setting_get_preset_data(SubGhzSetting* instance, size_t idx) {
     return item->custom_preset_data;
 }
 
+size_t subghz_setting_get_preset_data_size(SubGhzSetting* instance, size_t idx) {
+    furi_assert(instance);
+    SubGhzSettingCustomPresetItem* item =
+        SubGhzSettingCustomPresetItemArray_get(instance->preset->data, idx);
+    return item->custom_preset_data_size;
+}
+
 uint8_t* subghz_setting_get_preset_data_by_name(SubGhzSetting* instance, const char* preset_name) {
     furi_assert(instance);
     SubGhzSettingCustomPresetItem* item = SubGhzSettingCustomPresetItemArray_get(

@@ -52,8 +52,7 @@ LevelDuration subghz_protocol_encoder_secplus_v2_yield(void* context);
  * @param btn Button number, 8 bit
  * @param cnt Container value, 28 bit
  * @param manufacture_name Name of manufacturer's key
- * @param frequency Transmission frequency, Hz
- * @param preset Modulation, FuriHalSubGhzPreset
+ * @param preset Modulation, SubGhzPesetDefinition
  * @return true On success
  */
 bool subghz_protocol_secplus_v2_create_data(
@@ -62,8 +61,7 @@ bool subghz_protocol_secplus_v2_create_data(
     uint32_t serial,
     uint8_t btn,
     uint32_t cnt,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset);
+    SubGhzPesetDefinition* preset);
 
 /**
  * Allocate SubGhzProtocolDecoderSecPlus_v2.

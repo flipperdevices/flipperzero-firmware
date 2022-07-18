@@ -40,7 +40,6 @@
 
 #define SUBGHZ_MAX_LEN_NAME 64
 
- 
 struct SubGhzTxRx {
     SubGhzWorker* worker;
 
@@ -50,10 +49,7 @@ struct SubGhzTxRx {
     SubGhzProtocolDecoderBase* decoder_result;
     FlipperFormat* fff_data;
 
-    uint32_t frequency;
-    string_t preset_name;
-    FuriHalSubGhzPreset preset;
-    SubGhzPesetDefinition *preset_1;
+    SubGhzPesetDefinition* preset;
     SubGhzHistory* history;
     uint16_t idx_menu_chosen;
     SubGhzTxRxState txrx_state;
@@ -100,6 +96,12 @@ struct SubGhz {
     void* rpc_ctx;
 };
 
+void subghz_preset_init(
+    void* context,
+    const char* preset_name,
+    uint32_t frequency,
+    uint8_t* preset_data,
+    size_t preset_data_size);
 bool subghz_set_preset(SubGhz* subghz, const char* preset);
 void subghz_get_frequency_modulation(SubGhz* subghz, string_t frequency, string_t modulation);
 void subghz_begin(SubGhz* subghz, uint8_t* preset_data);

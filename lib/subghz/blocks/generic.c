@@ -52,11 +52,11 @@ bool subghz_block_generic_serialize(
                 FURI_LOG_E(TAG, "Unable to add Custom_preset_module");
                 break;
             }
-            // if(!flipper_format_write_hex(
-            //        flipper_format, "Сustom_preset_data", preset->data, preset->data_size)) {
-            //     FURI_LOG_E(TAG, "Unable to add Сustom_preset_data");
-            //     break;
-            // }
+            if(!flipper_format_write_hex(
+                   flipper_format, "Сustom_preset_data", preset->data, preset->data_size)) {
+                FURI_LOG_E(TAG, "Unable to add Сustom_preset_data");
+                break;
+            }
         }
         if(!flipper_format_write_string_cstr(flipper_format, "Protocol", instance->protocol_name)) {
             FURI_LOG_E(TAG, "Unable to add Protocol");

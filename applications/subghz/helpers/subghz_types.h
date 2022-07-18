@@ -77,7 +77,7 @@ struct SubGhzPesetDefinition
  {
     string_t name;
     uint32_t frequency;
-    uint32_t* data;
+    uint8_t* data;
     size_t data_size;
  };
  
