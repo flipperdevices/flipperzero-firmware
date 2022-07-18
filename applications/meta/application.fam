@@ -57,7 +57,7 @@ App(
         "INTAPP_Raycast",
         "INTAPP_Tetris",
         "GAME_2048","GAME_Arkanoid","GAME_Dice",
-		"GAME_Snake","GAME_TicTacToe",,"GAME_MandelbrotSet"
+		"GAME_Snake","GAME_TicTacToe","GAME_MandelbrotSet",
         "GAME_VideoPoker","GAME_FlappyBird",
     ],
 )
