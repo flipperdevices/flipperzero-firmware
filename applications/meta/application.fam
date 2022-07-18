@@ -53,7 +53,7 @@ App(
     provides=[
         "INTAPP_Tanks",
         "INTAPP_GameOfLife",
-        "INTAPP_Tetris",
+        "GAME_Tetris",
 	
         "GAME_2048","GAME_Arkanoid","GAME_Dice",
 	"GAME_Snake","GAME_TicTacToe",
@@ -78,8 +78,8 @@ App(
     provides=[
         "INTAPP_Tanks",
         "INTAPP_GameOfLife",
-        "APPS_Raycast",
-        "INTAPP_Tetris",
+        "GAME_Raycast",
+        "GAME_Tetris",
         "INTAPP_HIDAnalyzer",
         "INTAPP_Picopass",
         "INTAPP_MouseJacker",
