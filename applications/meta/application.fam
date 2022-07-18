@@ -83,8 +83,6 @@ App(
         "INTAPP_WiFiScanner",
 	"INTAPP_Chip8","INTAPP_Chess",
 	"INTAPP_TOTP",
-        "Clock",
-        "UniRFRemix",
         "APPS_TouchTunes",
         "APPS_WAVPlayer",
         "APPS_SpectrumAnalyzer","APPS_BluetoothRemote","APPS_DolphinRestorer",
