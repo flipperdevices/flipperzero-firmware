@@ -142,8 +142,8 @@ bool subghz_protocol_raw_save_to_file_init(
                 break;
             }
             if(!flipper_format_write_hex(
-                   instance->flipper_file, "Сustom_preset_data", preset->data, preset->data_size)) {
-                FURI_LOG_E(TAG, "Unable to add Сustom_preset_data");
+                   instance->flipper_file, "Custom_preset_data", preset->data, preset->data_size)) {
+                FURI_LOG_E(TAG, "Unable to add Custom_preset_data");
                 break;
             }
         }

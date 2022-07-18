@@ -53,8 +53,8 @@ bool subghz_block_generic_serialize(
                 break;
             }
             if(!flipper_format_write_hex(
-                   flipper_format, "Сustom_preset_data", preset->data, preset->data_size)) {
-                FURI_LOG_E(TAG, "Unable to add Сustom_preset_data");
+                   flipper_format, "Custom_preset_data", preset->data, preset->data_size)) {
+                FURI_LOG_E(TAG, "Unable to add Custom_preset_data");
                 break;
             }
         }
