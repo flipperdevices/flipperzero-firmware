@@ -94,19 +94,16 @@ void furi_timer_free(FuriTimer* instance) {
 }
 
 FuriStatus furi_timer_start(FuriTimer* instance, uint32_t ticks) {
+    furi_assert(!furi_is_irq_context());
     furi_assert(instance);
 
     TimerHandle_t hTimer = (TimerHandle_t)instance;
     FuriStatus stat;
 
-    if(furi_is_irq_context() != 0U) {
-        stat = FuriStatusErrorISR;
+    if(xTimerChangePeriod(hTimer, ticks, portMAX_DELAY) == pdPASS) {
+        stat = FuriStatusOk;
     } else {
-        if(xTimerChangePeriod(hTimer, ticks, portMAX_DELAY) == pdPASS) {
-            stat = FuriStatusOk;
-        } else {
-            stat = FuriStatusErrorResource;
-        }
+        stat = FuriStatusErrorResource;
     }
 
     /* Return execution status */
@@ -114,22 +111,19 @@ FuriStatus furi_timer_start(FuriTimer* instance, uint32_t ticks) {
 }
 
 FuriStatus furi_timer_stop(FuriTimer* instance) {
+    furi_assert(!furi_is_irq_context());
     furi_assert(instance);
 
     TimerHandle_t hTimer = (TimerHandle_t)instance;
     FuriStatus stat;
 
-    if(furi_is_irq_context() != 0U) {
-        stat = FuriStatusErrorISR;
+    if(xTimerIsTimerActive(hTimer) == pdFALSE) {
+        stat = FuriStatusErrorResource;
     } else {
-        if(xTimerIsTimerActive(hTimer) == pdFALSE) {
-            stat = FuriStatusErrorResource;
+        if(xTimerStop(hTimer, portMAX_DELAY) == pdPASS) {
+            stat = FuriStatusOk;
         } else {
-            if(xTimerStop(hTimer, portMAX_DELAY) == pdPASS) {
-                stat = FuriStatusOk;
-            } else {
-                stat = FuriStatusError;
-            }
+            stat = FuriStatusError;
         }
     }
 
@@ -138,17 +132,11 @@ FuriStatus furi_timer_stop(FuriTimer* instance) {
 }
 
 uint32_t furi_timer_is_running(FuriTimer* instance) {
+    furi_assert(!furi_is_irq_context());
     furi_assert(instance);
 
     TimerHandle_t hTimer = (TimerHandle_t)instance;
-    uint32_t running;
-
-    if((furi_is_irq_context() != 0U)) {
-        running = 0U;
-    } else {
-        running = (uint32_t)xTimerIsTimerActive(hTimer);
-    }
 
     /* Return 0: not running, 1: running */
-    return (running);
+    return (uint32_t)xTimerIsTimerActive(hTimer);
 }

@@ -11,7 +11,7 @@ FuriMessageQueue* furi_message_queue_alloc(uint32_t msg_count, uint32_t msg_size
 }
 
 void furi_message_queue_free(FuriMessageQueue* instance) {
-    furi_assert(furi_is_irq_context() != 0U);
+    furi_assert(furi_is_irq_context() == 0U);
     furi_assert(instance);
 
     vQueueDelete((QueueHandle_t)instance);
