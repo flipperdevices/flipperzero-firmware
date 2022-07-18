@@ -621,20 +621,6 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 command_processed = true;
                 break;
             }
-            
-            uint32_t nr = nfc_util_bytes2num(tx_rx->rx_data, 4);
-            uint32_t ar = nfc_util_bytes2num(&tx_rx->rx_data[4], 4);
-
-            FURI_LOG_D(
-                TAG,
-                "%08x key%c block %d nt/nr/ar: %08x %08x %08x",
-                emulator->cuid,
-                access_key == MfClassicKeyA ? 'A' : 'B',
-                sector_trailer_block,
-                nonce,
-                nr,
-                ar);
-
 
             uint32_t nr = nfc_util_bytes2num(tx_rx->rx_data, 4);
             uint32_t ar = nfc_util_bytes2num(&tx_rx->rx_data[4], 4);
