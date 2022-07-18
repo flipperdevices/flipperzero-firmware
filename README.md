@@ -44,10 +44,9 @@ Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Fli
 
   ```shell
 $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
-$ docker-compose up -d
-$ docker-compose exec dev ./fbt resources icons
-$ docker-compose exec dev ./fbt firmware_extapps FIRMWARE_APP_SET=ext_apps
-$ docker-compose exec dev ./fbt
+$ ./fbt resources icons
+$ ./fbt firmware_extapps FIRMWARE_APP_SET=ext_apps
+$ ./fbt
 ```
 </details>
 
