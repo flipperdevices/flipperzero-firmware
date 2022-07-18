@@ -25,7 +25,6 @@ App(
         "bad_usb",
         "u2f",
         "elf_loader",
-        "APPS_TOTP",
     ],
 )
 
@@ -39,6 +38,7 @@ App(
         "INTAPP_MouseJacker",
         "INTAPP_NRFSniff",
         "INTAPP_TouchTunes",
+        "APPS_TOTP",
 		
         "APPS_WAVPlayer",
         "APPS_SpectrumAnalyzer","APPS_BluetoothRemote","APPS_DolphinRestorer",
