@@ -388,7 +388,7 @@ bool minmea_parse_gbs(struct minmea_sentence_gbs *frame, const char *sentence)
 {
     // $GNGBS,170556.00,3.0,2.9,8.3,,,,*5C
     char type[6];
-    if (!minmea_scan(sentence, "tTfffdfff",
+    if (!minmea_scan(sentence, "tTfffifff",
             type,
             &frame->time,
             &frame->err_latitude,
