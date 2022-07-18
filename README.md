@@ -2,19 +2,10 @@
 
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
-- Updated [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387), no more ELFs in /ext/elf
-- - Now its FAPs in /ext/apps. Untested and unreleased. Feel free to test and compile your own FAPs.
-- OFW: [Calculate picopass CRC dynamically #1389 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1389)
-- OFW: [Log MFC nonces for use with mfkey32v2 #1390 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1390)
-- OFW: [Ibutton, Infrared, LfRFID GUI fixes #1392 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1392)
-- OFW: [Move Infrared unit test data to assets #1396 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1396)
-- OFW: [Better crash handling #1397 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1397)
-- OFW: [SubGhz: add new protocol (IronLogic, Comunello, Sommer(fsk476), Normstahl, KEY, EcoStar, Gibidi, Mutancode) #1404 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1404)
-- OFW: [Update bad_usb_script.c to fix incorrect ALT key const #1406 (By t0m1o1)](https://github.com/flipperdevices/flipperzero-firmware/pull/1406)
-- More updates from Hedger on [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
-- Updated apps to be installed internally while ELF Loader is being troubleshooted
-- Added [TOTP (By Astrrra)](https://github.com/wetox-team/flipperzero-firmware/tree/gen-totp)
 - Updated Manifest and packed in pre-compiled working apps/games
+- [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): An-Motors and HCS101 keeloq emulation
+- [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): FAAC SLH/Spa counter fix, now it uses 20-bits
+- [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): Keeloq increased hold duration
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
