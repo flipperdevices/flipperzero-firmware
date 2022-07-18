@@ -46,7 +46,7 @@ void subghz_history_free(SubGhzHistory* instance) {
         M_EACH(item, instance->history->data, SubGhzHistoryItemArray_t) {
             string_clear(item->item_str);
             string_clear(item->preset->name);
-            free(item->preset->data);
+            free(item->preset);
             flipper_format_free(item->flipper_string);
             item->type = 0;
         }
@@ -80,7 +80,7 @@ void subghz_history_reset(SubGhzHistory* instance) {
         M_EACH(item, instance->history->data, SubGhzHistoryItemArray_t) {
             string_clear(item->item_str);
             string_clear(item->preset->name);
-            free(item->preset->data);
+            free(item->preset);
             flipper_format_free(item->flipper_string);
             item->type = 0;
         }
@@ -159,6 +159,7 @@ bool subghz_history_add_to_history(
     string_t text;
     string_init(text);
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_push_raw(instance->history->data);
+    item->preset = malloc(sizeof(SubGhzPesetDefinition));
     item->type = decoder_base->protocol->type;
     item->preset->frequency = preset->frequency;
     string_init(item->preset->name);
