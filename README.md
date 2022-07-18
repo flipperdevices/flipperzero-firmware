@@ -54,7 +54,7 @@ $ ./fbt
   <summary><B>Special Instructions</B></summary></br>
   
 - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
-- Add a folder to SD card named `elf` ([the `.elf` files](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/elf))
+- Add a folder to SD card named `apps` with [the `.fap` files](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/apps)
 - Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
 - - Note 1: If you don't have a subghz/assets folder, you should ensure you have made at least one clean flash with stock firmware and your SD card installed in order to ensure the database structure is built, otherwise it will not exist for alternative forks.
 - - Note 2: /any is a special keyword signifying either /int (internal storage) or /ext (external storage).
@@ -101,7 +101,7 @@ $ ./fbt
 - Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 - Settings: Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
 - Settings: LCD Timeout Options Added: 10s+90s+2min+5min+10min [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/notification/notification_settings_app.c)
-- Settings: Renamed flippers have the correct name for Bluetooth pairing
+- Settings: Renamed flippers have the correct name for Bluetooth pairing [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/firmware/targets/f7/furi_hal/furi_hal_version.c#L95)
 - Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
 - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
 - SubGHz: Protocols Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
@@ -113,7 +113,7 @@ $ ./fbt
   <summary><B>GAMES</b></summary><br/>
   
 - - Games `HIDDEN` if they dont work well; can be added under [applications/meta/application.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam#L54)
-- - Check [the `.elf` files](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/elf) for external SD games
+- - Check [the `.fap` files](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/apps) for external SD games
 - `ELF` [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048)
 - `ELF` [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 - [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Crashes 1st load if FW <~750KB or every load on larger FW `HIDDEN "chess_game"`
@@ -133,7 +133,7 @@ $ ./fbt
 <details>
   <summary><B>PLUGINS</b></summary><br/>
 
-- - Check [the `.elf` files](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/elf) for external SD plugins
+- - Check [the `.fap` files](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/apps) for external SD plugins
 - `ELF` [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
 - `ELF` [Bluetooth Remote (By Cutch)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)
