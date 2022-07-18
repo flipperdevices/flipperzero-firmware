@@ -104,14 +104,6 @@ jobs:
           ./fbt copro_dist
           tar czpf artifacts/flipper-z-any-core2_firmware-${{steps.names.outputs.suffix}}.tgz -C assets core2_firmware
 
-      - name: 'Install SSH key for rsync'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: "${{ secrets.RSYNC_DEPLOY_KEY }}"
-          name: "${{ secrets.RSYNC_DEPLOY_HOST }}.sec"
-          known_hosts: "${{ secrets.RSYNC_KNOWN_HOST }}"
-          if_key_exists: replace
-
       - name: 'Upload artifacts to update server'
         if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
