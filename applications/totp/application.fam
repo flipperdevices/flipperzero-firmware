@@ -1,5 +1,5 @@
 App(
-    appid="totp",
+    appid="APPS_TOTP",
     name="TOTP",
     apptype=FlipperAppType.APP,
     entry_point="totp_app",
