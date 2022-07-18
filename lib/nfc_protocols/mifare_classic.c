@@ -636,6 +636,19 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 ar);
 
 
+            uint32_t nr = nfc_util_bytes2num(tx_rx->rx_data, 4);
+            uint32_t ar = nfc_util_bytes2num(&tx_rx->rx_data[4], 4);
+
+            FURI_LOG_D(
+                TAG,
+                "%08x key%c block %d nt/nr/ar: %08x %08x %08x",
+                emulator->cuid,
+                access_key == MfClassicKeyA ? 'A' : 'B',
+                sector_trailer_block,
+                nonce,
+                nr,
+                ar);
+
             // Check if we store valid key
             if(access_key == MfClassicKeyA) {
                 if(FURI_BIT(emulator->data.key_a_mask, mf_classic_get_sector_by_block(block)) ==
@@ -650,7 +663,6 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                     break;
                 }
             }
-
 
             crypto1_word(&emulator->crypto, nr, 1);
             uint32_t cardRr = ar ^ crypto1_word(&emulator->crypto, 0, 0);
