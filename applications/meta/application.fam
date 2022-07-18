@@ -41,9 +41,8 @@ App(
         "APPS_TOTP",
 		
         "APPS_WAVPlayer",
-        "APPS_SpectrumAnalyzer","APPS_BluetoothRemote","APPS_DolphinRestorer",
-		"APPS_DolphinBackup","APPS_MusicPlayer",
-        "APPS_SentrySafe","APPS_BarcodeGenerator","APPS_MouseJiggler",
+        "APPS_SpectrumAnalyzer","APPS_BluetoothRemote",
+	"APPS_MusicPlayer","APPS_MouseJiggler",
     ],
 )
 
@@ -56,8 +55,9 @@ App(
         "INTAPP_GameOfLife",
         "INTAPP_Raycast",
         "INTAPP_Tetris",
+	
         "GAME_2048","GAME_Arkanoid","GAME_Dice",
-		"GAME_Snake","GAME_TicTacToe","GAME_MandelbrotSet",
+	"GAME_Snake","GAME_TicTacToe",
         "GAME_VideoPoker","GAME_FlappyBird",
     ],
 )
