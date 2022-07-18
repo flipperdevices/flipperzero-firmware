@@ -85,7 +85,7 @@ uint32_t furi_hal_crc_feed(void* data, uint16_t length) {
 
 bool furi_hal_crc_acquire(uint32_t timeout) {
     furi_assert(hal_crc_control.mtx);
-    if(furi_mutex_acquire(hal_crc_control.mtx, timeout) == osOK) {
+    if(furi_mutex_acquire(hal_crc_control.mtx, timeout) == FuriStatusOk) {
         LL_CRC_ResetCRCCalculationUnit(CRC);
         return true;
     }

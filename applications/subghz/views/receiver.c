@@ -375,7 +375,7 @@ SubGhzViewReceiver* subghz_view_receiver_alloc() {
             return true;
         });
     subghz_receiver->timer =
-        furi_timer_alloc(subghz_view_receiver_timer_callback, osTimerOnce, subghz_receiver);
+        furi_timer_alloc(subghz_view_receiver_timer_callback, FuriTimerTypeOnce, subghz_receiver);
     return subghz_receiver;
 }
 

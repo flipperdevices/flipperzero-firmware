@@ -27,7 +27,7 @@ static ssize_t stdout_write(void* _cookie, const char* data, size_t size) {
     bool consumed = false;
     FuriThreadId task_id = furi_thread_get_current_id();
     if(xTaskGetSchedulerState() == taskSCHEDULER_RUNNING && task_id &&
-       furi_mutex_acquire(furi_stdglue->mutex, osWaitForever) == osOK) {
+       furi_mutex_acquire(furi_stdglue->mutex, FuriWaitForever) == FuriStatusOk) {
         // We are in the thread context
         // Handle thread callbacks
         FuriStdglueWriteCallback* callback_ptr =
@@ -36,7 +36,7 @@ static ssize_t stdout_write(void* _cookie, const char* data, size_t size) {
             (*callback_ptr)(_cookie, data, size);
             consumed = true;
         }
-        furi_check(furi_mutex_release(furi_stdglue->mutex) == osOK);
+        furi_check(furi_mutex_release(furi_stdglue->mutex) == FuriStatusOk);
     }
     // Flush
     if(data == 0) {
@@ -77,14 +77,14 @@ bool furi_stdglue_set_thread_stdout_callback(FuriStdglueWriteCallback callback) 
     furi_assert(furi_stdglue);
     FuriThreadId task_id = furi_thread_get_current_id();
     if(task_id) {
-        furi_check(furi_mutex_acquire(furi_stdglue->mutex, osWaitForever) == osOK);
+        furi_check(furi_mutex_acquire(furi_stdglue->mutex, FuriWaitForever) == FuriStatusOk);
         if(callback) {
             FuriStdglueCallbackDict_set_at(
                 furi_stdglue->thread_outputs, (uint32_t)task_id, callback);
         } else {
             FuriStdglueCallbackDict_erase(furi_stdglue->thread_outputs, (uint32_t)task_id);
         }
-        furi_check(furi_mutex_release(furi_stdglue->mutex) == osOK);
+        furi_check(furi_mutex_release(furi_stdglue->mutex) == FuriStatusOk);
         return true;
     } else {
         return false;

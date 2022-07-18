@@ -7,7 +7,7 @@ typedef FuriEventFlag* FuriApiLock;
 #define API_LOCK_INIT_LOCKED() furi_event_flag_alloc();
 
 #define API_LOCK_WAIT_UNTIL_UNLOCK(_lock) \
-    furi_event_flag_wait(_lock, API_LOCK_EVENT, osFlagsWaitAny, osWaitForever);
+    furi_event_flag_wait(_lock, API_LOCK_EVENT, FuriFlagWaitAny, FuriWaitForever);
 
 #define API_LOCK_FREE(_lock) furi_event_flag_free(_lock);
 

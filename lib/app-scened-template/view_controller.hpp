@@ -81,7 +81,7 @@ public:
      * @param event event pointer
      */
     void receive_event(typename TApp::Event* event) {
-        if(furi_message_queue_get(event_queue, event, NULL, 100) != osOK) {
+        if(furi_message_queue_get(event_queue, event, 100) != FuriStatusOk) {
             event->type = TApp::EventType::Tick;
         }
     }
@@ -92,8 +92,8 @@ public:
      * @param event event pointer
      */
     void send_event(typename TApp::Event* event) {
-        osStatus_t result = furi_message_queue_put(event_queue, event, 0, osWaitForever);
-        furi_check(result == osOK);
+        FuriStatus result = furi_message_queue_put(event_queue, event, FuriWaitForever);
+        furi_check(result == FuriStatusOk);
     }
 
 private:

@@ -83,7 +83,7 @@ void ibutton_cli_read(Cli* cli) {
     ibutton_worker_read_start(worker, key);
     while(true) {
         uint32_t flags =
-            furi_event_flag_wait(event, EVENT_FLAG_IBUTTON_COMPLETE, osFlagsWaitAny, 100);
+            furi_event_flag_wait(event, EVENT_FLAG_IBUTTON_COMPLETE, FuriFlagWaitAny, 100);
 
         if(flags & EVENT_FLAG_IBUTTON_COMPLETE) {
             ibutton_cli_print_key_data(key);
@@ -168,7 +168,7 @@ void ibutton_cli_write(Cli* cli, string_t args) {
         ibutton_worker_write_start(worker, key);
         while(true) {
             uint32_t flags = furi_event_flag_wait(
-                write_context.event, EVENT_FLAG_IBUTTON_COMPLETE, osFlagsWaitAny, 100);
+                write_context.event, EVENT_FLAG_IBUTTON_COMPLETE, FuriFlagWaitAny, 100);
 
             if(flags & EVENT_FLAG_IBUTTON_COMPLETE) {
                 if(write_context.result == iButtonWorkerWriteSameKey ||

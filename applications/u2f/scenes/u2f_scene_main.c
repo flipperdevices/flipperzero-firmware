@@ -94,7 +94,7 @@ bool u2f_scene_main_on_event(void* context, SceneManagerEvent event) {
 void u2f_scene_main_on_enter(void* context) {
     U2fApp* app = context;
 
-    app->timer = furi_timer_alloc(u2f_scene_main_timer_callback, osTimerOnce, app);
+    app->timer = furi_timer_alloc(u2f_scene_main_timer_callback, FuriTimerTypeOnce, app);
 
     app->u2f_instance = u2f_alloc();
     app->u2f_ready = u2f_init(app->u2f_instance);

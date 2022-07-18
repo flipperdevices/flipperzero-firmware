@@ -33,9 +33,9 @@ void furi_mutex_free(FuriMutex* instance) {
     vSemaphoreDelete((SemaphoreHandle_t)((uint32_t)instance & ~1U));
 }
 
-osStatus_t furi_mutex_acquire(FuriMutex* instance, uint32_t timeout) {
+FuriStatus furi_mutex_acquire(FuriMutex* instance, uint32_t timeout) {
     SemaphoreHandle_t hMutex;
-    osStatus_t stat;
+    FuriStatus stat;
     uint32_t rmtx;
 
     hMutex = (SemaphoreHandle_t)((uint32_t)instance & ~1U);
@@ -43,27 +43,27 @@ osStatus_t furi_mutex_acquire(FuriMutex* instance, uint32_t timeout) {
     /* Extract recursive mutex flag */
     rmtx = (uint32_t)instance & 1U;
 
-    stat = osOK;
+    stat = FuriStatusOk;
 
     if(FURI_IS_IRQ_MODE() != 0U) {
-        stat = osErrorISR;
+        stat = FuriStatusErrorISR;
     } else if(hMutex == NULL) {
-        stat = osErrorParameter;
+        stat = FuriStatusErrorParameter;
     } else {
         if(rmtx != 0U) {
             if(xSemaphoreTakeRecursive(hMutex, timeout) != pdPASS) {
                 if(timeout != 0U) {
-                    stat = osErrorTimeout;
+                    stat = FuriStatusErrorTimeout;
                 } else {
-                    stat = osErrorResource;
+                    stat = FuriStatusErrorResource;
                 }
             }
         } else {
             if(xSemaphoreTake(hMutex, timeout) != pdPASS) {
                 if(timeout != 0U) {
-                    stat = osErrorTimeout;
+                    stat = FuriStatusErrorTimeout;
                 } else {
-                    stat = osErrorResource;
+                    stat = FuriStatusErrorResource;
                 }
             }
         }
@@ -73,9 +73,9 @@ osStatus_t furi_mutex_acquire(FuriMutex* instance, uint32_t timeout) {
     return (stat);
 }
 
-osStatus_t furi_mutex_release(FuriMutex* instance) {
+FuriStatus furi_mutex_release(FuriMutex* instance) {
     SemaphoreHandle_t hMutex;
-    osStatus_t stat;
+    FuriStatus stat;
     uint32_t rmtx;
 
     hMutex = (SemaphoreHandle_t)((uint32_t)instance & ~1U);
@@ -83,20 +83,20 @@ osStatus_t furi_mutex_release(FuriMutex* instance) {
     /* Extract recursive mutex flag */
     rmtx = (uint32_t)instance & 1U;
 
-    stat = osOK;
+    stat = FuriStatusOk;
 
     if(FURI_IS_IRQ_MODE() != 0U) {
-        stat = osErrorISR;
+        stat = FuriStatusErrorISR;
     } else if(hMutex == NULL) {
-        stat = osErrorParameter;
+        stat = FuriStatusErrorParameter;
     } else {
         if(rmtx != 0U) {
             if(xSemaphoreGiveRecursive(hMutex) != pdPASS) {
-                stat = osErrorResource;
+                stat = FuriStatusErrorResource;
             }
         } else {
             if(xSemaphoreGive(hMutex) != pdPASS) {
-                stat = osErrorResource;
+                stat = FuriStatusErrorResource;
             }
         }
     }
@@ -105,9 +105,6 @@ osStatus_t furi_mutex_release(FuriMutex* instance) {
     return (stat);
 }
 
-/*
-    Get Thread which owns a Mutex object.
-*/
 FuriThreadId furi_mutex_get_owner(FuriMutex* instance) {
     SemaphoreHandle_t hMutex;
     FuriThreadId owner;

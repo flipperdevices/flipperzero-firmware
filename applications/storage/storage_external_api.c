@@ -21,10 +21,11 @@
     Storage* storage = file->storage; \
     furi_assert(storage);
 
-#define S_API_EPILOGUE                                                                       \
-    furi_check(                                                                              \
-        furi_message_queue_put(storage->message_queue, &message, 0, osWaitForever) == osOK); \
-    furi_semaphore_acquire(semaphore, osWaitForever);                                        \
+#define S_API_EPILOGUE                                                               \
+    furi_check(                                                                      \
+        furi_message_queue_put(storage->message_queue, &message, FuriWaitForever) == \
+        FuriStatusOk);                                                               \
+    furi_semaphore_acquire(semaphore, FuriWaitForever);                              \
     furi_semaphore_free(semaphore);
 
 #define S_API_MESSAGE(_command)      \
@@ -108,7 +109,8 @@ bool storage_file_open(
         result = storage_file_open_internal(file, path, access_mode, open_mode);
 
         if(!result && file->error_id == FSE_ALREADY_OPEN) {
-            furi_event_flag_wait(event, StorageEventFlagFileClose, osFlagsWaitAny, osWaitForever);
+            furi_event_flag_wait(
+                event, StorageEventFlagFileClose, FuriFlagWaitAny, FuriWaitForever);
         } else {
             break;
         }
@@ -267,7 +269,8 @@ bool storage_dir_open(File* file, const char* path) {
         result = storage_dir_open_internal(file, path);
 
         if(!result && file->error_id == FSE_ALREADY_OPEN) {
-            furi_event_flag_wait(event, StorageEventFlagFileClose, osFlagsWaitAny, osWaitForever);
+            furi_event_flag_wait(
+                event, StorageEventFlagFileClose, FuriFlagWaitAny, FuriWaitForever);
         } else {
             break;
         }

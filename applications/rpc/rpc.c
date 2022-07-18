@@ -89,7 +89,7 @@ static void rpc_close_session_process(const PB_Main* request, void* context) {
     furi_assert(session);
 
     rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_OK);
-    furi_mutex_acquire(session->callbacks_mutex, osWaitForever);
+    furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
     if(session->closed_callback) {
         session->closed_callback(session->context);
     } else {
@@ -359,7 +359,7 @@ void rpc_print_message(const PB_Main* message) {
 void rpc_session_set_context(RpcSession* session, void* context) {
     furi_assert(session);
 
-    furi_mutex_acquire(session->callbacks_mutex, osWaitForever);
+    furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
     session->context = context;
     furi_mutex_release(session->callbacks_mutex);
 }
@@ -367,7 +367,7 @@ void rpc_session_set_context(RpcSession* session, void* context) {
 void rpc_session_set_close_callback(RpcSession* session, RpcSessionClosedCallback callback) {
     furi_assert(session);
 
-    furi_mutex_acquire(session->callbacks_mutex, osWaitForever);
+    furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
     session->closed_callback = callback;
     furi_mutex_release(session->callbacks_mutex);
 }
@@ -375,7 +375,7 @@ void rpc_session_set_close_callback(RpcSession* session, RpcSessionClosedCallbac
 void rpc_session_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callback) {
     furi_assert(session);
 
-    furi_mutex_acquire(session->callbacks_mutex, osWaitForever);
+    furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
     session->send_bytes_callback = callback;
     furi_mutex_release(session->callbacks_mutex);
 }
@@ -385,7 +385,7 @@ void rpc_session_set_buffer_is_empty_callback(
     RpcBufferIsEmptyCallback callback) {
     furi_assert(session);
 
-    furi_mutex_acquire(session->callbacks_mutex, osWaitForever);
+    furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
     session->buffer_is_empty_callback = callback;
     furi_mutex_release(session->callbacks_mutex);
 }
@@ -395,7 +395,7 @@ void rpc_session_set_terminated_callback(
     RpcSessionTerminatedCallback callback) {
     furi_assert(session);
 
-    furi_mutex_acquire(session->callbacks_mutex, osWaitForever);
+    furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
     session->terminated_callback = callback;
     furi_mutex_release(session->callbacks_mutex);
 }
@@ -444,7 +444,7 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
         if(count == bytes_received) {
             break;
         } else {
-            flags = furi_thread_flags_wait(RPC_ALL_EVENTS, osFlagsWaitAny, osWaitForever);
+            flags = furi_thread_flags_wait(RPC_ALL_EVENTS, FuriFlagWaitAny, FuriWaitForever);
             if(flags & RpcEvtDisconnect) {
                 if(xStreamBufferIsEmpty(session->stream)) {
                     session->terminate = true;
@@ -508,9 +508,9 @@ static int32_t rpc_session_worker(void* context) {
                 RpcHandlerDict_get(session->handlers, session->decoded_message->which_content);
 
             if(handler && handler->message_handler) {
-                furi_check(furi_mutex_acquire(rpc->busy_mutex, osWaitForever) == osOK);
+                furi_check(furi_mutex_acquire(rpc->busy_mutex, FuriWaitForever) == FuriStatusOk);
                 handler->message_handler(session->decoded_message, handler->context);
-                furi_check(furi_mutex_release(rpc->busy_mutex) == osOK);
+                furi_check(furi_mutex_release(rpc->busy_mutex) == FuriStatusOk);
             } else if(session->decoded_message->which_content == 0) {
                 /* Receiving zeroes means message is 0-length, which
                  * is valid for proto3: all fields are filled with default values.
@@ -551,7 +551,7 @@ static int32_t rpc_session_worker(void* context) {
                 FURI_LOG_E(TAG, "Decode failed, error: \'%.128s\'", PB_GET_ERROR(&istream));
                 session->decode_error = true;
                 rpc_send_and_release_empty(session, 0, PB_CommandStatus_ERROR_DECODE);
-                furi_mutex_acquire(session->callbacks_mutex, osWaitForever);
+                furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
                 if(session->closed_callback) {
                     session->closed_callback(session->context);
                 }
@@ -586,7 +586,7 @@ static void rpc_session_free_callback(FuriThreadState thread_state, void* contex
         RpcHandlerDict_clear(session->handlers);
         vStreamBufferDelete(session->stream);
 
-        furi_mutex_acquire(session->callbacks_mutex, osWaitForever);
+        furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
         if(session->terminated_callback) {
             session->terminated_callback(session->context);
         }
@@ -693,7 +693,7 @@ void rpc_send(RpcSession* session, PB_Main* message) {
     rpc_print_data("OUTPUT", buffer, ostream.bytes_written);
 #endif
 
-    furi_mutex_acquire(session->callbacks_mutex, osWaitForever);
+    furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
     if(session->send_bytes_callback) {
         session->send_bytes_callback(session->context, buffer, ostream.bytes_written);
     }

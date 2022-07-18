@@ -232,7 +232,7 @@ Desktop* desktop_alloc() {
     desktop->input_events_subscription = NULL;
 
     desktop->auto_lock_timer =
-        furi_timer_alloc(desktop_auto_lock_timer_callback, osTimerOnce, desktop);
+        furi_timer_alloc(desktop_auto_lock_timer_callback, FuriTimerTypeOnce, desktop);
 
     return desktop;
 }

@@ -104,7 +104,7 @@ int32_t passport_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     view_port_update(view_port);
 
-    furi_check(furi_semaphore_acquire(semaphore, osWaitForever) == osOK);
+    furi_check(furi_semaphore_acquire(semaphore, FuriWaitForever) == FuriStatusOk);
 
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);

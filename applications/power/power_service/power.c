@@ -138,7 +138,7 @@ static bool power_update_info(Power* power) {
     info.temperature_charger = furi_hal_power_get_battery_temperature(FuriHalPowerICCharger);
     info.temperature_gauge = furi_hal_power_get_battery_temperature(FuriHalPowerICFuelGauge);
 
-    furi_mutex_acquire(power->api_mtx, osWaitForever);
+    furi_mutex_acquire(power->api_mtx, FuriWaitForever);
     bool need_refresh = power->info.charge != info.charge;
     power->info = info;
     furi_mutex_release(power->api_mtx);

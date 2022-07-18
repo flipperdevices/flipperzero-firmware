@@ -137,7 +137,7 @@ BtPacketTest* bt_packet_test_alloc() {
     bt_packet_test->data_rate = BtDataRate1M;
 
     bt_packet_test->timer =
-        furi_timer_alloc(bt_test_packet_timer_callback, osTimerPeriodic, bt_packet_test);
+        furi_timer_alloc(bt_test_packet_timer_callback, FuriTimerTypePeriodic, bt_packet_test);
 
     return bt_packet_test;
 }

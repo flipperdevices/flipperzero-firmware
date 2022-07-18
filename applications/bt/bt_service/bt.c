@@ -96,12 +96,14 @@ static void bt_battery_level_changed_callback(const void* _event, void* context)
     if(event->type == PowerEventTypeBatteryLevelChanged) {
         message.type = BtMessageTypeUpdateBatteryLevel;
         message.data.battery_level = event->data.battery_level;
-        furi_check(furi_message_queue_put(bt->message_queue, &message, 0, osWaitForever) == osOK);
+        furi_check(
+            furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
     } else if(
         event->type == PowerEventTypeStartCharging || event->type == PowerEventTypeFullyCharged ||
         event->type == PowerEventTypeStopCharging) {
         message.type = BtMessageTypeUpdatePowerState;
-        furi_check(furi_message_queue_put(bt->message_queue, &message, 0, osWaitForever) == osOK);
+        furi_check(
+            furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
     }
 }
 
@@ -189,7 +191,7 @@ static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t byt
         }
         // We want BT_RPC_EVENT_DISCONNECTED to stick, so don't clear
         uint32_t event_flag = furi_event_flag_wait(
-            bt->rpc_event, BT_RPC_EVENT_ALL, osFlagsWaitAny | osFlagsNoClear, osWaitForever);
+            bt->rpc_event, BT_RPC_EVENT_ALL, FuriFlagWaitAny | FuriFlagNoClear, FuriWaitForever);
         if(event_flag & BT_RPC_EVENT_DISCONNECTED) {
             break;
         } else {
@@ -209,7 +211,8 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
         // Update status bar
         bt->status = BtStatusConnected;
         BtMessage message = {.type = BtMessageTypeUpdateStatus};
-        furi_check(furi_message_queue_put(bt->message_queue, &message, 0, osWaitForever) == osOK);
+        furi_check(
+            furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
         // Clear BT_RPC_EVENT_DISCONNECTED because it might be set from previous session
         furi_event_flag_clear(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
         if(bt->profile == BtProfileSerial) {
@@ -232,7 +235,8 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
         power_get_info(bt->power, &info);
         message.type = BtMessageTypeUpdateBatteryLevel;
         message.data.battery_level = info.charge;
-        furi_check(furi_message_queue_put(bt->message_queue, &message, 0, osWaitForever) == osOK);
+        furi_check(
+            furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
         ret = true;
     } else if(event.type == GapEventTypeDisconnected) {
         if(bt->profile == BtProfileSerial && bt->rpc_session) {
@@ -246,17 +250,20 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
     } else if(event.type == GapEventTypeStartAdvertising) {
         bt->status = BtStatusAdvertising;
         BtMessage message = {.type = BtMessageTypeUpdateStatus};
-        furi_check(furi_message_queue_put(bt->message_queue, &message, 0, osWaitForever) == osOK);
+        furi_check(
+            furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
         ret = true;
     } else if(event.type == GapEventTypeStopAdvertising) {
         bt->status = BtStatusOff;
         BtMessage message = {.type = BtMessageTypeUpdateStatus};
-        furi_check(furi_message_queue_put(bt->message_queue, &message, 0, osWaitForever) == osOK);
+        furi_check(
+            furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
         ret = true;
     } else if(event.type == GapEventTypePinCodeShow) {
         BtMessage message = {
             .type = BtMessageTypePinCodeShow, .data.pin_code = event.data.pin_code};
-        furi_check(furi_message_queue_put(bt->message_queue, &message, 0, osWaitForever) == osOK);
+        furi_check(
+            furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
         ret = true;
     } else if(event.type == GapEventTypePinCodeVerify) {
         ret = bt_pin_code_verify_event_handler(bt, event.data.pin_code);
@@ -272,7 +279,8 @@ static void bt_on_key_storage_change_callback(uint8_t* addr, uint16_t size, void
     Bt* bt = context;
     FURI_LOG_I(TAG, "Changed addr start: %08lX, size changed: %d", addr, size);
     BtMessage message = {.type = BtMessageTypeKeysStorageUpdated};
-    furi_check(furi_message_queue_put(bt->message_queue, &message, 0, osWaitForever) == osOK);
+    furi_check(
+        furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
 }
 
 static void bt_statusbar_update(Bt* bt) {
@@ -378,7 +386,7 @@ int32_t bt_srv() {
     BtMessage message;
     while(1) {
         furi_check(
-            furi_message_queue_get(bt->message_queue, &message, NULL, osWaitForever) == osOK);
+            furi_message_queue_get(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
         if(message.type == BtMessageTypeUpdateStatus) {
             // Update view ports
             bt_statusbar_update(bt);

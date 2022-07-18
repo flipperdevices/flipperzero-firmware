@@ -42,7 +42,7 @@ void furi_pubsub_free(FuriPubSub* pubsub) {
 
 FuriPubSubSubscription*
     furi_pubsub_subscribe(FuriPubSub* pubsub, FuriPubSubCallback callback, void* callback_context) {
-    furi_check(furi_mutex_acquire(pubsub->mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(pubsub->mutex, FuriWaitForever) == FuriStatusOk);
     // put uninitialized item to the list
     FuriPubSubSubscription* item = FuriPubSubSubscriptionList_push_raw(pubsub->items);
 
@@ -50,7 +50,7 @@ FuriPubSubSubscription*
     item->callback = callback;
     item->callback_context = callback_context;
 
-    furi_check(furi_mutex_release(pubsub->mutex) == osOK);
+    furi_check(furi_mutex_release(pubsub->mutex) == FuriStatusOk);
 
     return item;
 }
@@ -59,7 +59,7 @@ void furi_pubsub_unsubscribe(FuriPubSub* pubsub, FuriPubSubSubscription* pubsub_
     furi_assert(pubsub);
     furi_assert(pubsub_subscription);
 
-    furi_check(furi_mutex_acquire(pubsub->mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(pubsub->mutex, FuriWaitForever) == FuriStatusOk);
     bool result = false;
 
     // iterate over items
@@ -76,12 +76,12 @@ void furi_pubsub_unsubscribe(FuriPubSub* pubsub, FuriPubSubSubscription* pubsub_
         }
     }
 
-    furi_check(furi_mutex_release(pubsub->mutex) == osOK);
+    furi_check(furi_mutex_release(pubsub->mutex) == FuriStatusOk);
     furi_check(result);
 }
 
 void furi_pubsub_publish(FuriPubSub* pubsub, void* message) {
-    furi_check(furi_mutex_acquire(pubsub->mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(pubsub->mutex, FuriWaitForever) == FuriStatusOk);
 
     // iterate over subscribers
     FuriPubSubSubscriptionList_it_t it;
@@ -91,5 +91,5 @@ void furi_pubsub_publish(FuriPubSub* pubsub, void* message) {
         item->callback(message, item->callback_context);
     }
 
-    furi_check(furi_mutex_release(pubsub->mutex) == osOK);
+    furi_check(furi_mutex_release(pubsub->mutex) == FuriStatusOk);
 }

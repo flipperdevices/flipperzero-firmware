@@ -101,16 +101,16 @@ extern "C" {
 #endif
 
 #ifndef FURI_CRITICAL_ENTER
-#define FURI_CRITICAL_ENTER()                                        \
-    uint32_t __isrm = 0;                                             \
-    bool __from_isr = FURI_IS_ISR();                                 \
+#define FURI_CRITICAL_ENTER()                                                    \
+    uint32_t __isrm = 0;                                                         \
+    bool __from_isr = FURI_IS_ISR();                                             \
     bool __kernel_running = (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING); \
-    if(__from_isr) {                                                 \
-        __isrm = taskENTER_CRITICAL_FROM_ISR();                      \
-    } else if(__kernel_running) {                                    \
-        taskENTER_CRITICAL();                                        \
-    } else {                                                         \
-        __disable_irq();                                             \
+    if(__from_isr) {                                                             \
+        __isrm = taskENTER_CRITICAL_FROM_ISR();                                  \
+    } else if(__kernel_running) {                                                \
+        taskENTER_CRITICAL();                                                    \
+    } else {                                                                     \
+        __disable_irq();                                                         \
     }
 #endif
 
@@ -129,17 +129,16 @@ static inline bool furi_is_irq_context() {
     bool irq = false;
     BaseType_t state;
 
-    if (FURI_IS_IRQ_MODE()) {
+    if(FURI_IS_IRQ_MODE()) {
         /* Called from interrupt context */
         irq = true;
-    }
-    else {
+    } else {
         /* Get FreeRTOS scheduler state */
         state = xTaskGetSchedulerState();
 
-        if (state != taskSCHEDULER_NOT_STARTED) {
+        if(state != taskSCHEDULER_NOT_STARTED) {
             /* Scheduler was started */
-            if (FURI_IS_IRQ_MASKED()) {
+            if(FURI_IS_IRQ_MASKED()) {
                 /* Interrupts are masked */
                 irq = true;
             }

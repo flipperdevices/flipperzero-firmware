@@ -1,3 +1,7 @@
+/**
+ * @file log.h
+ * Furi Logging system
+ */
 #pragma once
 
 #include <stdio.h>
@@ -37,11 +41,39 @@ typedef enum {
 typedef void (*FuriLogPuts)(const char* data);
 typedef uint32_t (*FuriLogTimestamp)(void);
 
+/** Initialize logging */
 void furi_log_init();
+
+/** Log record
+ *
+ * @param[in]  level      The level
+ * @param[in]  format     The format
+ * @param[in]  <unnamed>  VA args
+ */
 void furi_log_print(FuriLogLevel level, const char* format, ...);
+
+/** Set log level
+ *
+ * @param[in]  level  The level
+ */
 void furi_log_set_level(FuriLogLevel level);
+
+/** Get log level
+ *
+ * @return     The furi log level.
+ */
 FuriLogLevel furi_log_get_level();
+
+/** Set log output callback
+ *
+ * @param[in]  puts  The puts callback
+ */
 void furi_log_set_puts(FuriLogPuts puts);
+
+/** Set timestamp callback
+ *
+ * @param[in]  timestamp  The timestamp callback
+ */
 void furi_log_set_timestamp(FuriLogTimestamp timestamp);
 
 #define FURI_LOG_FORMAT(log_letter, tag, format) \
@@ -49,6 +81,12 @@ void furi_log_set_timestamp(FuriLogTimestamp timestamp);
 #define FURI_LOG_SHOW(tag, format, log_level, log_letter, ...) \
     furi_log_print(log_level, FURI_LOG_FORMAT(log_letter, tag, format), ##__VA_ARGS__)
 
+/** Log methods
+ *
+ * @param      tag     The application tag
+ * @param      format  The format
+ * @param      ...     VA Args
+ */
 #define FURI_LOG_E(tag, format, ...) \
     FURI_LOG_SHOW(tag, format, FuriLogLevelError, E, ##__VA_ARGS__)
 #define FURI_LOG_W(tag, format, ...) FURI_LOG_SHOW(tag, format, FuriLogLevelWarn, W, ##__VA_ARGS__)

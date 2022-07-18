@@ -1,3 +1,7 @@
+/**
+ * @file pubsub.h
+ * FuriPubSub
+ */
 #pragma once
 
 #ifdef __cplusplus

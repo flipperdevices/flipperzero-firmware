@@ -35,7 +35,7 @@ char cli_getc(Cli* cli) {
     furi_assert(cli);
     char c = 0;
     if(cli->session != NULL) {
-        if(cli->session->rx((uint8_t*)&c, 1, osWaitForever) == 0) {
+        if(cli->session->rx((uint8_t*)&c, 1, FuriWaitForever) == 0) {
             cli_reset(cli);
         }
     } else {
@@ -54,7 +54,7 @@ void cli_write(Cli* cli, const uint8_t* buffer, size_t size) {
 size_t cli_read(Cli* cli, uint8_t* buffer, size_t size) {
     furi_assert(cli);
     if(cli->session != NULL) {
-        return cli->session->rx(buffer, size, osWaitForever);
+        return cli->session->rx(buffer, size, FuriWaitForever);
     } else {
         return 0;
     }
@@ -228,17 +228,17 @@ static void cli_handle_enter(Cli* cli) {
     }
 
     // Search for command
-    furi_check(furi_mutex_acquire(cli->mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
     CliCommand* cli_command_ptr = CliCommandTree_get(cli->commands, command);
 
     if(cli_command_ptr) {
         CliCommand cli_command;
         memcpy(&cli_command, cli_command_ptr, sizeof(CliCommand));
-        furi_check(furi_mutex_release(cli->mutex) == osOK);
+        furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);
         cli_nl(cli);
         cli_execute_command(cli, &cli_command, args);
     } else {
-        furi_check(furi_mutex_release(cli->mutex) == osOK);
+        furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);
         cli_nl(cli);
         printf(
             "`%s` command not found, use `help` or `?` to list all available commands",
@@ -406,9 +406,9 @@ void cli_add_command(
     c.context = context;
     c.flags = flags;
 
-    furi_check(furi_mutex_acquire(cli->mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
     CliCommandTree_set_at(cli->commands, name_str, c);
-    furi_check(furi_mutex_release(cli->mutex) == osOK);
+    furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);
 
     string_clear(name_str);
 }
@@ -423,9 +423,9 @@ void cli_delete_command(Cli* cli, const char* name) {
         name_replace = string_replace_str(name_str, " ", "_");
     } while(name_replace != STRING_FAILURE);
 
-    furi_check(furi_mutex_acquire(cli->mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
     CliCommandTree_erase(cli->commands, name_str);
-    furi_check(furi_mutex_release(cli->mutex) == osOK);
+    furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);
 
     string_clear(name_str);
 }
@@ -433,7 +433,7 @@ void cli_delete_command(Cli* cli, const char* name) {
 void cli_session_open(Cli* cli, void* session) {
     furi_assert(cli);
 
-    furi_check(furi_mutex_acquire(cli->mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
     cli->session = session;
     if(cli->session != NULL) {
         cli->session->init();
@@ -442,19 +442,19 @@ void cli_session_open(Cli* cli, void* session) {
         furi_stdglue_set_thread_stdout_callback(NULL);
     }
     furi_semaphore_release(cli->idle_sem);
-    furi_check(furi_mutex_release(cli->mutex) == osOK);
+    furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);
 }
 
 void cli_session_close(Cli* cli) {
     furi_assert(cli);
 
-    furi_check(furi_mutex_acquire(cli->mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
     if(cli->session != NULL) {
         cli->session->deinit();
     }
     cli->session = NULL;
     furi_stdglue_set_thread_stdout_callback(NULL);
-    furi_check(furi_mutex_release(cli->mutex) == osOK);
+    furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);
 }
 
 int32_t cli_srv(void* p) {
@@ -482,7 +482,7 @@ int32_t cli_srv(void* p) {
         if(cli->session != NULL) {
             cli_process_input(cli);
         } else {
-            furi_check(furi_semaphore_acquire(cli->idle_sem, osWaitForever) == osOK);
+            furi_check(furi_semaphore_acquire(cli->idle_sem, FuriWaitForever) == FuriStatusOk);
         }
     }
 

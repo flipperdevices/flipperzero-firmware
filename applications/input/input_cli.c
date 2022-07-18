@@ -16,7 +16,7 @@ static void input_cli_dump_events_callback(const void* value, void* ctx) {
     furi_assert(value);
     furi_assert(ctx);
     FuriMessageQueue* input_queue = ctx;
-    furi_message_queue_put(input_queue, value, 0, osWaitForever);
+    furi_message_queue_put(input_queue, value, FuriWaitForever);
 }
 
 static void input_cli_dump(Cli* cli, string_t args, Input* input) {
@@ -28,7 +28,7 @@ static void input_cli_dump(Cli* cli, string_t args, Input* input) {
     InputEvent input_event;
     printf("Press CTRL+C to stop\r\n");
     while(!cli_cmd_interrupt_received(cli)) {
-        if(furi_message_queue_get(input_queue, &input_event, NULL, 100) == osOK) {
+        if(furi_message_queue_get(input_queue, &input_event, 100) == FuriStatusOk) {
             printf(
                 "key: %s type: %s\r\n",
                 input_get_key_name(input_event.key),

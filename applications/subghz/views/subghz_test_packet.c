@@ -242,7 +242,7 @@ SubGhzTestPacket* subghz_test_packet_alloc() {
     view_set_exit_callback(instance->view, subghz_test_packet_exit);
 
     instance->timer =
-        furi_timer_alloc(subghz_test_packet_rssi_timer_callback, osTimerPeriodic, instance);
+        furi_timer_alloc(subghz_test_packet_rssi_timer_callback, FuriTimerTypePeriodic, instance);
 
     instance->decoder = subghz_decoder_princeton_for_testing_alloc();
     subghz_decoder_princeton_for_testing_set_callback(

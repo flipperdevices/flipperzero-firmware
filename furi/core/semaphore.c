@@ -4,8 +4,7 @@
 
 #include <semphr.h>
 
-FuriSemaphore*
-    furi_semaphore_alloc(uint32_t max_count, uint32_t initial_count) {
+FuriSemaphore* furi_semaphore_alloc(uint32_t max_count, uint32_t initial_count) {
     furi_assert(!FURI_IS_IRQ_MODE());
     furi_assert((max_count > 0U) && (initial_count <= max_count));
 
@@ -28,26 +27,32 @@ FuriSemaphore*
     return ((FuriSemaphore*)hSemaphore);
 }
 
-/*
-    Acquire a Semaphore token or timeout if no tokens are available.
-*/
-osStatus_t furi_semaphore_acquire(FuriSemaphore* instance, uint32_t timeout) {
+void furi_semaphore_free(FuriSemaphore* instance) {
+    furi_assert(instance);
+    furi_assert(!FURI_IS_IRQ_MODE());
+
+    SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)instance;
+
+    vSemaphoreDelete(hSemaphore);
+}
+
+FuriStatus furi_semaphore_acquire(FuriSemaphore* instance, uint32_t timeout) {
     furi_assert(instance);
 
     SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)instance;
-    osStatus_t stat;
+    FuriStatus stat;
     BaseType_t yield;
 
-    stat = osOK;
+    stat = FuriStatusOk;
 
     if(FURI_IS_IRQ_MODE() != 0U) {
         if(timeout != 0U) {
-            stat = osErrorParameter;
+            stat = FuriStatusErrorParameter;
         } else {
             yield = pdFALSE;
 
             if(xSemaphoreTakeFromISR(hSemaphore, &yield) != pdPASS) {
-                stat = osErrorResource;
+                stat = FuriStatusErrorResource;
             } else {
                 portYIELD_FROM_ISR(yield);
             }
@@ -55,9 +60,9 @@ osStatus_t furi_semaphore_acquire(FuriSemaphore* instance, uint32_t timeout) {
     } else {
         if(xSemaphoreTake(hSemaphore, (TickType_t)timeout) != pdPASS) {
             if(timeout != 0U) {
-                stat = osErrorTimeout;
+                stat = FuriStatusErrorTimeout;
             } else {
-                stat = osErrorResource;
+                stat = FuriStatusErrorResource;
             }
         }
     }
@@ -66,29 +71,26 @@ osStatus_t furi_semaphore_acquire(FuriSemaphore* instance, uint32_t timeout) {
     return (stat);
 }
 
-/*
-    Release a Semaphore token up to the initial maximum count.
-*/
-osStatus_t furi_semaphore_release(FuriSemaphore* instance) {
+FuriStatus furi_semaphore_release(FuriSemaphore* instance) {
     furi_assert(instance);
 
     SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)instance;
-    osStatus_t stat;
+    FuriStatus stat;
     BaseType_t yield;
 
-    stat = osOK;
+    stat = FuriStatusOk;
 
     if(FURI_IS_IRQ_MODE() != 0U) {
         yield = pdFALSE;
 
         if(xSemaphoreGiveFromISR(hSemaphore, &yield) != pdTRUE) {
-            stat = osErrorResource;
+            stat = FuriStatusErrorResource;
         } else {
             portYIELD_FROM_ISR(yield);
         }
     } else {
         if(xSemaphoreGive(hSemaphore) != pdPASS) {
-            stat = osErrorResource;
+            stat = FuriStatusErrorResource;
         }
     }
 
@@ -96,9 +98,6 @@ osStatus_t furi_semaphore_release(FuriSemaphore* instance) {
     return (stat);
 }
 
-/*
-    Get current Semaphore token count.
-*/
 uint32_t furi_semaphore_get_count(FuriSemaphore* instance) {
     furi_assert(instance);
 
@@ -113,16 +112,4 @@ uint32_t furi_semaphore_get_count(FuriSemaphore* instance) {
 
     /* Return number of tokens */
     return (count);
-}
-
-/*
-    Delete a Semaphore object.
-*/
-void furi_semaphore_free(FuriSemaphore* instance) {
-    furi_assert(instance);
-    furi_assert(!FURI_IS_IRQ_MODE());
-
-    SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)instance;
-
-    vSemaphoreDelete(hSemaphore);
 }

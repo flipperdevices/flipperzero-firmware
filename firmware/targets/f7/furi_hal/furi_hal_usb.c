@@ -240,8 +240,8 @@ static int32_t furi_hal_usb_thread(void* context) {
     }
 
     while(true) {
-        uint32_t flags = furi_thread_flags_wait(USB_SRV_ALL_EVENTS, osFlagsWaitAny, 500);
-        if((flags & osFlagsError) == 0) {
+        uint32_t flags = furi_thread_flags_wait(USB_SRV_ALL_EVENTS, FuriFlagWaitAny, 500);
+        if((flags & FuriFlagError) == 0) {
             if(flags & EventModeChange) {
                 if(usb.if_next != usb.if_cur) {
                     if_new = usb.if_next;

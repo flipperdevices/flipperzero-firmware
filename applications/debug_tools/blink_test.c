@@ -58,7 +58,7 @@ static void blink_test_update(void* ctx) {
     FuriMessageQueue* event_queue = ctx;
     BlinkEvent event = {.type = BlinkEventTypeTick};
     // It's OK to loose this event if system overloaded
-    furi_message_queue_put(event_queue, &event, 0, 0);
+    furi_message_queue_put(event_queue, &event, 0);
 }
 
 static void blink_test_draw_callback(Canvas* canvas, void* ctx) {
@@ -73,7 +73,7 @@ static void blink_test_input_callback(InputEvent* input_event, void* ctx) {
     FuriMessageQueue* event_queue = ctx;
 
     BlinkEvent event = {.type = BlinkEventTypeInput, .input = *input_event};
-    furi_message_queue_put(event_queue, &event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
 int32_t blink_test_app(void* p) {
@@ -84,7 +84,7 @@ int32_t blink_test_app(void* p) {
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, blink_test_draw_callback, NULL);
     view_port_input_callback_set(view_port, blink_test_input_callback, event_queue);
-    FuriTimer* timer = furi_timer_alloc(blink_test_update, osTimerPeriodic, event_queue);
+    FuriTimer* timer = furi_timer_alloc(blink_test_update, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, furi_kernel_get_tick_frequency());
 
     // Register view port in GUI
@@ -97,7 +97,7 @@ int32_t blink_test_app(void* p) {
     BlinkEvent event;
 
     while(1) {
-        furi_check(furi_message_queue_get(event_queue, &event, NULL, osWaitForever) == osOK);
+        furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
         if(event.type == BlinkEventTypeInput) {
             if((event.input.type == InputTypeShort) && (event.input.key == InputKeyBack)) {
                 break;

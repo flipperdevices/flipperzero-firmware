@@ -223,8 +223,8 @@ static void furi_hal_infrared_tx_dma_terminate(void) {
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
     LL_TIM_DisableCounter(TIM1);
-    osStatus_t status = furi_semaphore_release(infrared_tim_tx.stop_semaphore);
-    furi_check(status == osOK);
+    FuriStatus status = furi_semaphore_release(infrared_tim_tx.stop_semaphore);
+    furi_check(status == FuriStatusOk);
     furi_hal_infrared_state = InfraredStateAsyncTxStopped;
 }
 
@@ -617,9 +617,9 @@ void furi_hal_infrared_async_tx_wait_termination(void) {
     furi_assert(furi_hal_infrared_state >= InfraredStateAsyncTx);
     furi_assert(furi_hal_infrared_state < InfraredStateMAX);
 
-    osStatus_t status;
-    status = furi_semaphore_acquire(infrared_tim_tx.stop_semaphore, osWaitForever);
-    furi_check(status == osOK);
+    FuriStatus status;
+    status = furi_semaphore_acquire(infrared_tim_tx.stop_semaphore, FuriWaitForever);
+    furi_check(status == FuriStatusOk);
     furi_hal_infrared_async_tx_free_resources();
     furi_hal_infrared_state = InfraredStateIdle;
 }

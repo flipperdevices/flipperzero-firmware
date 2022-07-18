@@ -32,8 +32,9 @@ uint32_t notification_settings_display_off_delay_ticks(NotificationApp* app);
 void notification_message_save_settings(NotificationApp* app) {
     NotificationAppMessage m = {
         .type = SaveSettingsMessage, .back_event = furi_event_flag_alloc()};
-    furi_check(furi_message_queue_put(app->queue, &m, 0, osWaitForever) == osOK);
-    furi_event_flag_wait(m.back_event, NOTIFICATION_EVENT_COMPLETE, osFlagsWaitAny, osWaitForever);
+    furi_check(furi_message_queue_put(app->queue, &m, FuriWaitForever) == FuriStatusOk);
+    furi_event_flag_wait(
+        m.back_event, NOTIFICATION_EVENT_COMPLETE, FuriFlagWaitAny, FuriWaitForever);
     furi_event_flag_free(m.back_event);
 };
 
@@ -480,7 +481,7 @@ static void input_event_callback(const void* value, void* context) {
 static NotificationApp* notification_app_alloc() {
     NotificationApp* app = malloc(sizeof(NotificationApp));
     app->queue = furi_message_queue_alloc(8, sizeof(NotificationAppMessage));
-    app->display_timer = furi_timer_alloc(notification_display_timer, osTimerOnce, app);
+    app->display_timer = furi_timer_alloc(notification_display_timer, FuriTimerTypeOnce, app);
 
     app->settings.speaker_volume = 1.0f;
     app->settings.display_brightness = 1.0f;
@@ -538,7 +539,7 @@ int32_t notification_srv(void* p) {
 
     NotificationAppMessage message;
     while(1) {
-        furi_check(furi_message_queue_get(app->queue, &message, NULL, osWaitForever) == osOK);
+        furi_check(furi_message_queue_get(app->queue, &message, FuriWaitForever) == FuriStatusOk);
 
         switch(message.type) {
         case NotificationLayerMessage:

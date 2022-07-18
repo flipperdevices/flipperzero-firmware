@@ -229,7 +229,7 @@ static void hid_u2f_on_suspend(usbd_device* dev) {
 
 void furi_hal_hid_u2f_send_response(uint8_t* data, uint8_t len) {
     if((hid_u2f_semaphore == NULL) || (hid_u2f_connected == false)) return;
-    furi_check(furi_semaphore_acquire(hid_u2f_semaphore, osWaitForever) == osOK);
+    furi_check(furi_semaphore_acquire(hid_u2f_semaphore, FuriWaitForever) == FuriStatusOk);
     if(hid_u2f_connected == true) {
         usbd_ep_write(usb_dev, HID_EP_OUT, data, len);
     }

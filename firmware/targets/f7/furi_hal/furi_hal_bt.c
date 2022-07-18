@@ -93,12 +93,12 @@ void furi_hal_bt_init() {
 
 void furi_hal_bt_lock_core2() {
     furi_assert(furi_hal_bt_core2_mtx);
-    furi_check(furi_mutex_acquire(furi_hal_bt_core2_mtx, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(furi_hal_bt_core2_mtx, FuriWaitForever) == FuriStatusOk);
 }
 
 void furi_hal_bt_unlock_core2() {
     furi_assert(furi_hal_bt_core2_mtx);
-    furi_check(furi_mutex_release(furi_hal_bt_core2_mtx) == osOK);
+    furi_check(furi_mutex_release(furi_hal_bt_core2_mtx) == FuriStatusOk);
 }
 
 static bool furi_hal_bt_radio_stack_is_supported(const BleGlueC2Info* info) {
@@ -125,7 +125,7 @@ bool furi_hal_bt_start_radio_stack() {
     bool res = false;
     furi_assert(furi_hal_bt_core2_mtx);
 
-    furi_mutex_acquire(furi_hal_bt_core2_mtx, osWaitForever);
+    furi_mutex_acquire(furi_hal_bt_core2_mtx, FuriWaitForever);
 
     // Explicitly tell that we are in charge of CLK48 domain
     if(!LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_CLK48_CONFIG_SEMID)) {

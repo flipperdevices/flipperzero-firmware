@@ -28,7 +28,7 @@ void power_get_info(Power* power, PowerInfo* info) {
     furi_assert(power);
     furi_assert(info);
 
-    furi_mutex_acquire(power->api_mtx, osWaitForever);
+    furi_mutex_acquire(power->api_mtx, FuriWaitForever);
     memcpy(info, &power->info, sizeof(power->info));
     furi_mutex_release(power->api_mtx);
 }
@@ -41,7 +41,7 @@ FuriPubSub* power_get_pubsub(Power* power) {
 bool power_is_battery_healthy(Power* power) {
     furi_assert(power);
     bool is_healthy = false;
-    furi_mutex_acquire(power->api_mtx, osWaitForever);
+    furi_mutex_acquire(power->api_mtx, FuriWaitForever);
     is_healthy = power->info.health > POWER_BATTERY_HEALTHY_LEVEL;
     furi_mutex_release(power->api_mtx);
     return is_healthy;
@@ -49,7 +49,7 @@ bool power_is_battery_healthy(Power* power) {
 
 void power_enable_low_battery_level_notification(Power* power, bool enable) {
     furi_assert(power);
-    furi_mutex_acquire(power->api_mtx, osWaitForever);
+    furi_mutex_acquire(power->api_mtx, FuriWaitForever);
     power->show_low_bat_level_message = enable;
     furi_mutex_release(power->api_mtx);
 }

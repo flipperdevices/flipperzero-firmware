@@ -195,7 +195,7 @@ SubGhzTestCarrier* subghz_test_carrier_alloc() {
     view_set_exit_callback(subghz_test_carrier->view, subghz_test_carrier_exit);
 
     subghz_test_carrier->timer = furi_timer_alloc(
-        subghz_test_carrier_rssi_timer_callback, osTimerPeriodic, subghz_test_carrier);
+        subghz_test_carrier_rssi_timer_callback, FuriTimerTypePeriodic, subghz_test_carrier);
 
     return subghz_test_carrier;
 }

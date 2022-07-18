@@ -97,7 +97,7 @@ void popup_start_timer(void* context) {
             popup->timer_period_in_ms / (1000.0f / furi_kernel_get_tick_frequency());
         if(timer_period == 0) timer_period = 1;
 
-        if(furi_timer_start(popup->timer, timer_period) != osOK) {
+        if(furi_timer_start(popup->timer, timer_period) != FuriStatusOk) {
             furi_assert(0);
         };
     }
@@ -111,7 +111,7 @@ void popup_stop_timer(void* context) {
 Popup* popup_alloc() {
     Popup* popup = malloc(sizeof(Popup));
     popup->view = view_alloc();
-    popup->timer = furi_timer_alloc(popup_timer_callback, osTimerOnce, popup);
+    popup->timer = furi_timer_alloc(popup_timer_callback, FuriTimerTypeOnce, popup);
     furi_assert(popup->timer);
     popup->timer_period_in_ms = 1000;
     popup->timer_enabled = false;

@@ -170,7 +170,7 @@ BtCarrierTest* bt_carrier_test_alloc() {
     bt_carrier_test->power = BtPower0dB;
 
     bt_carrier_test->timer =
-        furi_timer_alloc(bt_test_carrier_timer_callback, osTimerPeriodic, bt_carrier_test);
+        furi_timer_alloc(bt_test_carrier_timer_callback, FuriTimerTypePeriodic, bt_carrier_test);
 
     return bt_carrier_test;
 }

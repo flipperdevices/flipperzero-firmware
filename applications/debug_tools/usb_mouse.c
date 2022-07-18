@@ -34,7 +34,7 @@ static void usb_mouse_input_callback(InputEvent* input_event, void* ctx) {
     UsbMouseEvent event;
     event.type = EventTypeInput;
     event.input = *input_event;
-    furi_message_queue_put(event_queue, &event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
 int32_t usb_mouse_app(void* p) {
@@ -56,9 +56,9 @@ int32_t usb_mouse_app(void* p) {
 
     UsbMouseEvent event;
     while(1) {
-        osStatus_t event_status = furi_message_queue_get(event_queue, &event, NULL, osWaitForever);
+        FuriStatus event_status = furi_message_queue_get(event_queue, &event, FuriWaitForever);
 
-        if(event_status == osOK) {
+        if(event_status == FuriStatusOk) {
             if(event.type == EventTypeInput) {
                 if(event.input.type == InputTypeLong && event.input.key == InputKeyBack) {
                     break;

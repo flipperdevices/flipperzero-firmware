@@ -102,7 +102,8 @@ void dolphin_event_send_async(Dolphin* dolphin, DolphinEvent* event) {
     furi_assert(dolphin);
     furi_assert(event);
     event->flag = NULL;
-    furi_check(furi_message_queue_put(dolphin->event_queue, event, 0, osWaitForever) == osOK);
+    furi_check(
+        furi_message_queue_put(dolphin->event_queue, event, FuriWaitForever) == FuriStatusOk);
 }
 
 void dolphin_event_send_wait(Dolphin* dolphin, DolphinEvent* event) {
@@ -110,9 +111,11 @@ void dolphin_event_send_wait(Dolphin* dolphin, DolphinEvent* event) {
     furi_assert(event);
     event->flag = furi_event_flag_alloc();
     furi_check(event->flag);
-    furi_check(furi_message_queue_put(dolphin->event_queue, event, 0, osWaitForever) == osOK);
     furi_check(
-        furi_event_flag_wait(event->flag, DOLPHIN_LOCK_EVENT_FLAG, osFlagsWaitAny, osWaitForever) ==
+        furi_message_queue_put(dolphin->event_queue, event, FuriWaitForever) == FuriStatusOk);
+    furi_check(
+        furi_event_flag_wait(
+            event->flag, DOLPHIN_LOCK_EVENT_FLAG, FuriFlagWaitAny, FuriWaitForever) ==
         DOLPHIN_LOCK_EVENT_FLAG);
     furi_event_flag_free(event->flag);
 }
@@ -161,7 +164,8 @@ int32_t dolphin_srv(void* p) {
 
     DolphinEvent event;
     while(1) {
-        if(furi_message_queue_get(dolphin->event_queue, &event, NULL, HOURS_IN_TICKS(1)) == osOK) {
+        if(furi_message_queue_get(dolphin->event_queue, &event, HOURS_IN_TICKS(1)) ==
+           FuriStatusOk) {
             if(event.type == DolphinEventTypeDeed) {
                 dolphin_state_on_deed(dolphin->state, event.deed);
                 DolphinPubsubEvent event = DolphinPubsubEventUpdate;

@@ -13,7 +13,7 @@ extern "C" {
 void furi_hal_crc_init(bool synchronize);
 
 /** Blocking call to get control of CRC block. Mandatory while RTOS is running
- * @param timeout time to wait for CRC to be available. Can be osWaitForever
+ * @param timeout time to wait for CRC to be available. Can be FuriWaitForever
  * @return bool acquisition success 
  */
 bool furi_hal_crc_acquire(uint32_t timeout);

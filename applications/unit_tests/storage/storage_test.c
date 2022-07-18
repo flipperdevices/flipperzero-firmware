@@ -51,14 +51,14 @@ MU_TEST(storage_file_open_lock) {
     furi_thread_start(locker_thread);
 
     // wait for file lock
-    furi_semaphore_acquire(semaphore, osWaitForever);
+    furi_semaphore_acquire(semaphore, FuriWaitForever);
     furi_semaphore_free(semaphore);
 
     result = storage_file_open(file, STORAGE_LOCKED_FILE, FSAM_READ_WRITE, FSOM_OPEN_EXISTING);
     storage_file_close(file);
 
     // file_locker thread stop
-    mu_check(furi_thread_join(locker_thread) == osOK);
+    mu_check(furi_thread_join(locker_thread) == FuriStatusOk);
     furi_thread_free(locker_thread);
 
     // clean data
@@ -141,14 +141,14 @@ MU_TEST(storage_dir_open_lock) {
     furi_thread_start(locker_thread);
 
     // wait for dir lock
-    furi_semaphore_acquire(semaphore, osWaitForever);
+    furi_semaphore_acquire(semaphore, FuriWaitForever);
     furi_semaphore_free(semaphore);
 
     result = storage_dir_open(file, STORAGE_LOCKED_DIR);
     storage_dir_close(file);
 
     // file_locker thread stop
-    mu_check(furi_thread_join(locker_thread) == osOK);
+    mu_check(furi_thread_join(locker_thread) == FuriStatusOk);
     furi_thread_free(locker_thread);
 
     // clean data

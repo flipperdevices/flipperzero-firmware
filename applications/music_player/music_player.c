@@ -126,7 +126,7 @@ static bool is_black_note(uint8_t semitone, uint8_t id) {
 
 static void render_callback(Canvas* canvas, void* ctx) {
     MusicPlayer* music_player = ctx;
-    furi_check(furi_mutex_acquire(music_player->model_mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(music_player->model_mutex, FuriWaitForever) == FuriStatusOk);
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -214,7 +214,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
 static void input_callback(InputEvent* input_event, void* ctx) {
     MusicPlayer* music_player = ctx;
     if(input_event->type == InputTypeShort) {
-        furi_message_queue_put(music_player->input_queue, input_event, 0, 0);
+        furi_message_queue_put(music_player->input_queue, input_event, 0);
     }
 }
 
@@ -225,7 +225,7 @@ static void music_player_worker_callback(
     float position,
     void* context) {
     MusicPlayer* music_player = context;
-    furi_check(furi_mutex_acquire(music_player->model_mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(music_player->model_mutex, FuriWaitForever) == FuriStatusOk);
 
     for(size_t i = 0; i < MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - 1; i++) {
         size_t r = MUSIC_PLAYER_SEMITONE_HISTORY_SIZE - 1 - i;
@@ -327,9 +327,10 @@ int32_t music_player_app(void* p) {
         music_player_worker_start(music_player->worker);
 
         InputEvent input;
-        while(furi_message_queue_get(music_player->input_queue, &input, NULL, osWaitForever) ==
-              osOK) {
-            furi_check(furi_mutex_acquire(music_player->model_mutex, osWaitForever) == osOK);
+        while(furi_message_queue_get(music_player->input_queue, &input, FuriWaitForever) ==
+              FuriStatusOk) {
+            furi_check(
+                furi_mutex_acquire(music_player->model_mutex, FuriWaitForever) == FuriStatusOk);
 
             if(input.key == InputKeyBack) {
                 furi_mutex_release(music_player->model_mutex);

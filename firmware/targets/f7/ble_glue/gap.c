@@ -94,7 +94,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
     event_pckt = (hci_event_pckt*)((hci_uart_pckt*)pckt)->data;
 
     if(gap) {
-        furi_mutex_acquire(gap->state_mutex, osWaitForever);
+        furi_mutex_acquire(gap->state_mutex, FuriWaitForever);
     }
     switch(event_pckt->evt) {
     case EVT_DISCONN_COMPLETE: {
@@ -443,24 +443,24 @@ static void gap_advertise_stop() {
 }
 
 void gap_start_advertising() {
-    furi_mutex_acquire(gap->state_mutex, osWaitForever);
+    furi_mutex_acquire(gap->state_mutex, FuriWaitForever);
     if(gap->state == GapStateIdle) {
         gap->state = GapStateStartingAdv;
         FURI_LOG_I(TAG, "Start advertising");
         gap->enable_adv = true;
         GapCommand command = GapCommandAdvFast;
-        furi_check(furi_message_queue_put(gap->command_queue, &command, 0, 0) == osOK);
+        furi_check(furi_message_queue_put(gap->command_queue, &command, 0) == FuriStatusOk);
     }
     furi_mutex_release(gap->state_mutex);
 }
 
 void gap_stop_advertising() {
-    furi_mutex_acquire(gap->state_mutex, osWaitForever);
+    furi_mutex_acquire(gap->state_mutex, FuriWaitForever);
     if(gap->state > GapStateIdle) {
         FURI_LOG_I(TAG, "Stop advertising");
         gap->enable_adv = false;
         GapCommand command = GapCommandAdvStop;
-        furi_check(furi_message_queue_put(gap->command_queue, &command, 0, 0) == osOK);
+        furi_check(furi_message_queue_put(gap->command_queue, &command, 0) == FuriStatusOk);
     }
     furi_mutex_release(gap->state_mutex);
 }
@@ -468,7 +468,7 @@ void gap_stop_advertising() {
 static void gap_advetise_timer_callback(void* context) {
     UNUSED(context);
     GapCommand command = GapCommandAdvLowPower;
-    furi_check(furi_message_queue_put(gap->command_queue, &command, 0, 0) == osOK);
+    furi_check(furi_message_queue_put(gap->command_queue, &command, 0) == FuriStatusOk);
 }
 
 bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
@@ -480,7 +480,7 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     gap->config = config;
     srand(DWT->CYCCNT);
     // Create advertising timer
-    gap->advertise_timer = furi_timer_alloc(gap_advetise_timer_callback, osTimerOnce, NULL);
+    gap->advertise_timer = furi_timer_alloc(gap_advetise_timer_callback, FuriTimerTypeOnce, NULL);
     // Initialization of GATT & GAP layer
     gap->service.adv_name = config->adv_name;
     gap_init_svc(gap);
@@ -518,7 +518,7 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
 GapState gap_get_state() {
     GapState state;
     if(gap) {
-        furi_mutex_acquire(gap->state_mutex, osWaitForever);
+        furi_mutex_acquire(gap->state_mutex, FuriWaitForever);
         state = gap->state;
         furi_mutex_release(gap->state_mutex);
     } else {
@@ -529,10 +529,10 @@ GapState gap_get_state() {
 
 void gap_thread_stop() {
     if(gap) {
-        furi_mutex_acquire(gap->state_mutex, osWaitForever);
+        furi_mutex_acquire(gap->state_mutex, FuriWaitForever);
         gap->enable_adv = false;
         GapCommand command = GapCommandKillThread;
-        furi_message_queue_put(gap->command_queue, &command, 0, osWaitForever);
+        furi_message_queue_put(gap->command_queue, &command, FuriWaitForever);
         furi_mutex_release(gap->state_mutex);
         furi_thread_join(gap->thread);
         furi_thread_free(gap->thread);
@@ -551,13 +551,12 @@ static int32_t gap_app(void* context) {
     UNUSED(context);
     GapCommand command;
     while(1) {
-        osStatus_t status =
-            furi_message_queue_get(gap->command_queue, &command, NULL, osWaitForever);
-        if(status != osOK) {
+        FuriStatus status = furi_message_queue_get(gap->command_queue, &command, FuriWaitForever);
+        if(status != FuriStatusOk) {
             FURI_LOG_E(TAG, "Message queue get error: %d", status);
             continue;
         }
-        furi_mutex_acquire(gap->state_mutex, osWaitForever);
+        furi_mutex_acquire(gap->state_mutex, FuriWaitForever);
         if(command == GapCommandKillThread) {
             break;
         }

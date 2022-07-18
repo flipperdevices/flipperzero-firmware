@@ -45,7 +45,7 @@ env = ENV.Clone(
             # If they are present, they have precedence over Default
         },
         # for furi_check to respect build type
-        "core": {
+        "furi": {
             "CCFLAGS": [
                 "-Os",
             ],
@@ -177,7 +177,7 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
     sources,
     LIBS=[
         "flipper${TARGET_HW}",
-        "core",
+        "furi",
         "freertos",
         "stm32cubewb",
         "hwdrivers",

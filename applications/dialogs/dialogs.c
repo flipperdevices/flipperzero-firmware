@@ -33,7 +33,7 @@ int32_t dialogs_srv(void* p) {
 
     DialogsAppMessage message;
     while(1) {
-        if(furi_message_queue_get(app->message_queue, &message, NULL, osWaitForever) == osOK) {
+        if(furi_message_queue_get(app->message_queue, &message, FuriWaitForever) == FuriStatusOk) {
             dialogs_app_process_message(app, &message);
         }
     }

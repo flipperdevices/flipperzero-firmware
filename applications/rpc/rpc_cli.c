@@ -77,7 +77,8 @@ void rpc_cli_command_start_session(Cli* cli, string_t args, void* context) {
 
     rpc_session_close(rpc_session);
 
-    furi_check(furi_semaphore_acquire(cli_rpc.terminate_semaphore, osWaitForever) == osOK);
+    furi_check(
+        furi_semaphore_acquire(cli_rpc.terminate_semaphore, FuriWaitForever) == FuriStatusOk);
 
     furi_semaphore_free(cli_rpc.terminate_semaphore);
 

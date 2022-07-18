@@ -39,11 +39,11 @@ void storage_data_init(StorageData* storage) {
 }
 
 bool storage_data_lock(StorageData* storage) {
-    return (furi_mutex_acquire(storage->mutex, osWaitForever) == osOK);
+    return (furi_mutex_acquire(storage->mutex, FuriWaitForever) == FuriStatusOk);
 }
 
 bool storage_data_unlock(StorageData* storage) {
-    return (furi_mutex_release(storage->mutex) == osOK);
+    return (furi_mutex_release(storage->mutex) == FuriStatusOk);
 }
 
 StorageStatus storage_data_status(StorageData* storage) {

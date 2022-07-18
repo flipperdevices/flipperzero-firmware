@@ -167,7 +167,7 @@ ViewDisplayTest* view_display_test_alloc() {
     view_set_exit_callback(instance->view, view_display_test_exit);
 
     instance->timer =
-        furi_timer_alloc(view_display_test_timer_callback, osTimerPeriodic, instance);
+        furi_timer_alloc(view_display_test_timer_callback, FuriTimerTypePeriodic, instance);
 
     return instance;
 }

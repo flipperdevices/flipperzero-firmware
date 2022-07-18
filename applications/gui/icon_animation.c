@@ -7,7 +7,8 @@ IconAnimation* icon_animation_alloc(const Icon* icon) {
     furi_assert(icon);
     IconAnimation* instance = malloc(sizeof(IconAnimation));
     instance->icon = icon;
-    instance->timer = furi_timer_alloc(icon_animation_timer_callback, osTimerPeriodic, instance);
+    instance->timer =
+        furi_timer_alloc(icon_animation_timer_callback, FuriTimerTypePeriodic, instance);
     return instance;
 }
 

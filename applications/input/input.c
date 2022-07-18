@@ -84,8 +84,8 @@ int32_t input_srv() {
         input->pin_states[i].pin = &input_pins[i];
         input->pin_states[i].state = GPIO_Read(input->pin_states[i]);
         input->pin_states[i].debounce = INPUT_DEBOUNCE_TICKS_HALF;
-        input->pin_states[i].press_timer =
-            furi_timer_alloc(input_press_timer_callback, osTimerPeriodic, &input->pin_states[i]);
+        input->pin_states[i].press_timer = furi_timer_alloc(
+            input_press_timer_callback, FuriTimerTypePeriodic, &input->pin_states[i]);
         input->pin_states[i].press_counter = 0;
     }
 
@@ -129,7 +129,7 @@ int32_t input_srv() {
         if(is_changing) {
             furi_delay_ms(1);
         } else {
-            furi_thread_flags_wait(INPUT_THREAD_FLAG_ISR, osFlagsWaitAny, osWaitForever);
+            furi_thread_flags_wait(INPUT_THREAD_FLAG_ISR, FuriFlagWaitAny, FuriWaitForever);
         }
     }
 

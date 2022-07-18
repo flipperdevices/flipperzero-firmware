@@ -109,14 +109,14 @@ static void snake_game_input_callback(InputEvent* input_event, FuriMessageQueue*
     furi_assert(event_queue);
 
     SnakeEvent event = {.type = EventTypeKey, .input = *input_event};
-    furi_message_queue_put(event_queue, &event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
 static void snake_game_update_timer_callback(FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
     SnakeEvent event = {.type = EventTypeTick};
-    furi_message_queue_put(event_queue, &event, 0, 0);
+    furi_message_queue_put(event_queue, &event, 0);
 }
 
 static void snake_game_init_game(SnakeState* const snake_state) {
@@ -300,7 +300,7 @@ int32_t snake_game_app(void* p) {
     view_port_input_callback_set(view_port, snake_game_input_callback, event_queue);
 
     FuriTimer* timer =
-        furi_timer_alloc(snake_game_update_timer_callback, osTimerPeriodic, event_queue);
+        furi_timer_alloc(snake_game_update_timer_callback, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, furi_kernel_get_tick_frequency() / 4);
 
     // Open GUI and register view_port
@@ -309,11 +309,11 @@ int32_t snake_game_app(void* p) {
 
     SnakeEvent event;
     for(bool processing = true; processing;) {
-        osStatus_t event_status = furi_message_queue_get(event_queue, &event, NULL, 100);
+        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
 
         SnakeState* snake_state = (SnakeState*)acquire_mutex_block(&state_mutex);
 
-        if(event_status == osOK) {
+        if(event_status == FuriStatusOk) {
             // press events
             if(event.type == EventTypeKey) {
                 if(event.input.type == InputTypePress) {

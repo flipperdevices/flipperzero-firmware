@@ -268,7 +268,7 @@ static void output_bytes_callback(void* ctx, uint8_t* got_bytes, size_t got_size
     RpcSessionContext* callbacks_context = ctx;
 
     size_t bytes_sent =
-        xStreamBufferSend(callbacks_context->output_stream, got_bytes, got_size, osWaitForever);
+        xStreamBufferSend(callbacks_context->output_stream, got_bytes, got_size, FuriWaitForever);
     (void)bytes_sent;
     furi_check(bytes_sent == got_size);
 }

@@ -7,35 +7,36 @@
 extern "C" {
 #endif
 
-// Timeout value.
-#define osWaitForever 0xFFFFFFFFU ///< Wait forever timeout value.
-
-// Flags options (\ref furi_thread_flags_wait and \ref furi_event_flag_wait).
-#define osFlagsWaitAny 0x00000000U ///< Wait for any flag (default).
-#define osFlagsWaitAll 0x00000001U ///< Wait for all flags.
-#define osFlagsNoClear 0x00000002U ///< Do not clear flags which have been specified to wait for.
-
-// Flags errors (returned by osThreadFlagsXxxx and osEventFlagsXxxx).
-#define osFlagsError 0x80000000U ///< Error indicator.
-#define osFlagsErrorUnknown 0xFFFFFFFFU ///< osError (-1).
-#define osFlagsErrorTimeout 0xFFFFFFFEU ///< osErrorTimeout (-2).
-#define osFlagsErrorResource 0xFFFFFFFDU ///< osErrorResource (-3).
-#define osFlagsErrorParameter 0xFFFFFFFCU ///< osErrorParameter (-4).
-#define osFlagsErrorISR 0xFFFFFFFAU ///< osErrorISR (-6).
-
-/// Status code values returned by CMSIS-RTOS functions.
 typedef enum {
-    osOK = 0, ///< Operation completed successfully.
-    osError = -1, ///< Unspecified RTOS error: run-time error but no other error message fits.
-    osErrorTimeout = -2, ///< Operation not completed within the timeout period.
-    osErrorResource = -3, ///< Resource not available.
-    osErrorParameter = -4, ///< Parameter error.
-    osErrorNoMemory =
+    FuriWaitForever = 0xFFFFFFFFU,
+} FuriWait;
+
+typedef enum {
+    FuriFlagWaitAny = 0x00000000U, ///< Wait for any flag (default).
+    FuriFlagWaitAll = 0x00000001U, ///< Wait for all flags.
+    FuriFlagNoClear = 0x00000002U, ///< Do not clear flags which have been specified to wait for.
+
+    FuriFlagError = 0x80000000U, ///< Error indicator.
+    FuriFlagErrorUnknown = 0xFFFFFFFFU, ///< FuriStatusError (-1).
+    FuriFlagErrorTimeout = 0xFFFFFFFEU, ///< FuriStatusErrorTimeout (-2).
+    FuriFlagErrorResource = 0xFFFFFFFDU, ///< FuriStatusErrorResource (-3).
+    FuriFlagErrorParameter = 0xFFFFFFFCU, ///< FuriStatusErrorParameter (-4).
+    FuriFlagErrorISR = 0xFFFFFFFAU, ///< FuriStatusErrorISR (-6).
+} FuriFlag;
+
+typedef enum {
+    FuriStatusOk = 0, ///< Operation completed successfully.
+    FuriStatusError =
+        -1, ///< Unspecified RTOS error: run-time error but no other error message fits.
+    FuriStatusErrorTimeout = -2, ///< Operation not completed within the timeout period.
+    FuriStatusErrorResource = -3, ///< Resource not available.
+    FuriStatusErrorParameter = -4, ///< Parameter error.
+    FuriStatusErrorNoMemory =
         -5, ///< System is out of memory: it was impossible to allocate or reserve memory for the operation.
-    osErrorISR =
+    FuriStatusErrorISR =
         -6, ///< Not allowed in ISR context: the function cannot be called from interrupt service routines.
-    osStatusReserved = 0x7FFFFFFF ///< Prevents enum down-size compiler optimization.
-} osStatus_t;
+    FuriStatusReserved = 0x7FFFFFFF ///< Prevents enum down-size compiler optimization.
+} FuriStatus;
 
 #ifdef __cplusplus
 }

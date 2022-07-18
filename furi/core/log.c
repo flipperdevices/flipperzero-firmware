@@ -23,7 +23,8 @@ void furi_log_init() {
 }
 
 void furi_log_print(FuriLogLevel level, const char* format, ...) {
-    if(level <= furi_log.log_level && furi_mutex_acquire(furi_log.mutex, osWaitForever) == osOK) {
+    if(level <= furi_log.log_level &&
+       furi_mutex_acquire(furi_log.mutex, FuriWaitForever) == FuriStatusOk) {
         string_t string;
 
         // Timestamp

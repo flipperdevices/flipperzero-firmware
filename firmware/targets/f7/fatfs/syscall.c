@@ -71,7 +71,7 @@ int ff_req_grant(/* 1:Got a grant to access the volume, 0:Could not get a grant 
 ) {
     int ret = 0;
 
-    if(furi_mutex_acquire(sobj, _FS_TIMEOUT) == osOK) {
+    if(furi_mutex_acquire(sobj, _FS_TIMEOUT) == FuriStatusOk) {
         ret = 1;
     }
 

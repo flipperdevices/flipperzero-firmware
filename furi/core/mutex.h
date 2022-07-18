@@ -1,3 +1,7 @@
+/**
+ * @file mutex.h
+ * FuriMutex
+ */
 #pragma once
 
 #include "base.h"
@@ -12,29 +16,45 @@ typedef enum {
     FuriMutexTypeRecursive,
 } FuriMutexType;
 
-/// \details Mutex ID identifies the mutex.
 typedef void FuriMutex;
 
-/// Create and Initialize a Mutex object.
-/// \param[in]     attr          mutex attributes; NULL: default values.
-/// \return mutex ID for reference by other functions or NULL in case of error.
+/** Allocate FuriMutex
+ *
+ * @param[in]  type  The mutex type
+ *
+ * @return     pointer to FuriMutex instance
+ */
 FuriMutex* furi_mutex_alloc(FuriMutexType type);
 
-/// Delete a Mutex object.
-/// \param[in]     instance      mutex ID obtained by \ref furi_mutex_alloc.
+/** Free FuriMutex
+ *
+ * @param      instance  The pointer to FuriMutex instance
+ */
 void furi_mutex_free(FuriMutex* instance);
 
-/// Acquire a Mutex or timeout if it is locked.
-/// \param[in]     instance      mutex ID obtained by \ref furi_mutex_alloc.
-/// \param[in]     timeout       \ref CMSIS_RTOS_TimeOutValue or 0 in case of no time-out.
-/// \return status code that indicates the execution status of the function.
-osStatus_t furi_mutex_acquire(FuriMutex* instance, uint32_t timeout);
+/** Acquire mutex
+ *
+ * @param      instance  The pointer to FuriMutex instance
+ * @param[in]  timeout   The timeout
+ *
+ * @return     The furi status.
+ */
+FuriStatus furi_mutex_acquire(FuriMutex* instance, uint32_t timeout);
 
-/// Release a Mutex that was acquired by \ref furi_mutex_acquire.
-/// \param[in]     instance      mutex ID obtained by \ref furi_mutex_alloc.
-/// \return status code that indicates the execution status of the function.
-osStatus_t furi_mutex_release(FuriMutex* instance);
+/** Release mutex
+ *
+ * @param      instance  The pointer to FuriMutex instance
+ *
+ * @return     The furi status.
+ */
+FuriStatus furi_mutex_release(FuriMutex* instance);
 
+/** Get mutex owner thread id
+ *
+ * @param      instance  The pointer to FuriMutex instance
+ *
+ * @return     The furi thread identifier.
+ */
 FuriThreadId furi_mutex_get_owner(FuriMutex* instance);
 
 #ifdef __cplusplus

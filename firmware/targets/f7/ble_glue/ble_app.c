@@ -126,7 +126,7 @@ static int32_t ble_app_hci_thread(void* arg) {
     uint32_t flags = 0;
 
     while(1) {
-        flags = furi_thread_flags_wait(BLE_APP_FLAG_ALL, osFlagsWaitAny, osWaitForever);
+        flags = furi_thread_flags_wait(BLE_APP_FLAG_ALL, FuriFlagWaitAny, FuriWaitForever);
         if(flags & BLE_APP_FLAG_KILL_THREAD) {
             break;
         }
@@ -158,7 +158,7 @@ void hci_cmd_resp_release(uint32_t flag) {
 void hci_cmd_resp_wait(uint32_t timeout) {
     UNUSED(timeout);
     if(ble_app) {
-        furi_semaphore_acquire(ble_app->hci_sem, osWaitForever);
+        furi_semaphore_acquire(ble_app->hci_sem, FuriWaitForever);
     }
 }
 
@@ -178,7 +178,7 @@ static void ble_app_hci_event_handler(void* pPayload) {
 
 static void ble_app_hci_status_not_handler(HCI_TL_CmdStatus_t status) {
     if(status == HCI_TL_CmdBusy) {
-        furi_mutex_acquire(ble_app->hci_mtx, osWaitForever);
+        furi_mutex_acquire(ble_app->hci_mtx, FuriWaitForever);
     } else if(status == HCI_TL_CmdAvailable) {
         furi_mutex_release(ble_app->hci_mtx);
     }

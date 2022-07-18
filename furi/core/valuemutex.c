@@ -16,7 +16,7 @@ bool init_mutex(ValueMutex* valuemutex, void* value, size_t size) {
 }
 
 bool delete_mutex(ValueMutex* valuemutex) {
-    if(furi_mutex_acquire(valuemutex->mutex, osWaitForever) == osOK) {
+    if(furi_mutex_acquire(valuemutex->mutex, FuriWaitForever) == FuriStatusOk) {
         furi_mutex_free(valuemutex->mutex);
         return true;
     } else {
@@ -25,7 +25,7 @@ bool delete_mutex(ValueMutex* valuemutex) {
 }
 
 void* acquire_mutex(ValueMutex* valuemutex, uint32_t timeout) {
-    if(furi_mutex_acquire(valuemutex->mutex, timeout) == osOK) {
+    if(furi_mutex_acquire(valuemutex->mutex, timeout) == FuriStatusOk) {
         return valuemutex->value;
     } else {
         return NULL;
@@ -35,7 +35,7 @@ void* acquire_mutex(ValueMutex* valuemutex, uint32_t timeout) {
 bool release_mutex(ValueMutex* valuemutex, const void* value) {
     if(value != valuemutex->value) return false;
 
-    if(furi_mutex_release(valuemutex->mutex) != osOK) return false;
+    if(furi_mutex_release(valuemutex->mutex) != FuriStatusOk) return false;
 
     return true;
 }

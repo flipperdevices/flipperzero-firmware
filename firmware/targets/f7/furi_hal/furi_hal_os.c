@@ -47,7 +47,8 @@ void furi_hal_os_init() {
     furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeOutputPushPull);
     furi_hal_gpio_init_simple(&gpio_ext_pa6, GpioModeOutputPushPull);
     furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeOutputPushPull);
-    FuriTimer* second_timer = furi_timer_alloc(furi_hal_os_timer_callback, osTimerPeriodic, NULL);
+    FuriTimer* second_timer =
+        furi_timer_alloc(furi_hal_os_timer_callback, FuriTimerTypePeriodic, NULL);
     furi_timer_start(second_timer, FURI_HAL_OS_TICK_HZ);
 #endif
 

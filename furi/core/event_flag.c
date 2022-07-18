@@ -4,32 +4,31 @@
 
 #include <event_groups.h>
 
-#define MAX_BITS_EVENT_GROUPS 24U
-#define EVENT_FLAGS_INVALID_BITS (~((1UL << MAX_BITS_EVENT_GROUPS) - 1U))
+#define FURI_EVENT_FLAG_MAX_BITS_EVENT_GROUPS 24U
+#define FURI_EVENT_FLAG_INVALID_BITS (~((1UL << FURI_EVENT_FLAG_MAX_BITS_EVENT_GROUPS) - 1U))
 
 FuriEventFlag* furi_event_flag_alloc() {
     furi_assert(!FURI_IS_IRQ_MODE());
     return ((FuriEventFlag*)xEventGroupCreate());
 }
 
-/*
-  Set the specified Event Flags.
+void furi_event_flag_free(FuriEventFlag* instance) {
+    furi_assert(!FURI_IS_IRQ_MODE());
+    vEventGroupDelete((EventGroupHandle_t)instance);
+}
 
-  Limitations:
-  - Event flags are limited to 24 bits.
-*/
 uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
+    furi_assert(instance);
+    furi_assert((flags & FURI_EVENT_FLAG_INVALID_BITS) == 0U);
+
     EventGroupHandle_t hEventGroup = (EventGroupHandle_t)instance;
     uint32_t rflags;
     BaseType_t yield;
 
-    if((hEventGroup == NULL) || ((flags & EVENT_FLAGS_INVALID_BITS) != 0U)) {
-        rflags = (uint32_t)osErrorParameter;
-    } else if(FURI_IS_IRQ_MODE() != 0U) {
+    if(FURI_IS_IRQ_MODE() != 0U) {
         yield = pdFALSE;
-
         if(xEventGroupSetBitsFromISR(hEventGroup, (EventBits_t)flags, &yield) == pdFAIL) {
-            rflags = (uint32_t)osErrorResource;
+            rflags = (uint32_t)FuriStatusErrorResource;
         } else {
             rflags = flags;
             portYIELD_FROM_ISR(yield);
@@ -42,23 +41,18 @@ uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
     return (rflags);
 }
 
-/*
-  Clear the specified Event Flags.
-
-  Limitations:
-  - Event flags are limited to 24 bits.
-*/
 uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags) {
+    furi_assert(instance);
+    furi_assert((flags & FURI_EVENT_FLAG_INVALID_BITS) == 0U);
+
     EventGroupHandle_t hEventGroup = (EventGroupHandle_t)instance;
     uint32_t rflags;
 
-    if((hEventGroup == NULL) || ((flags & EVENT_FLAGS_INVALID_BITS) != 0U)) {
-        rflags = (uint32_t)osErrorParameter;
-    } else if(FURI_IS_IRQ_MODE() != 0U) {
+    if(FURI_IS_IRQ_MODE() != 0U) {
         rflags = xEventGroupGetBitsFromISR(hEventGroup);
 
         if(xEventGroupClearBitsFromISR(hEventGroup, (EventBits_t)flags) == pdFAIL) {
-            rflags = (uint32_t)osErrorResource;
+            rflags = (uint32_t)FuriStatusErrorResource;
         } else {
             /* xEventGroupClearBitsFromISR only registers clear operation in the timer command queue. */
             /* Yield is required here otherwise clear operation might not execute in the right order. */
@@ -73,19 +67,13 @@ uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags) {
     return (rflags);
 }
 
-/*
-  Get the current Event Flags.
-
-  Limitations:
-  - Event flags are limited to 24 bits.
-*/
 uint32_t furi_event_flag_get(FuriEventFlag* instance) {
+    furi_assert(instance);
+
     EventGroupHandle_t hEventGroup = (EventGroupHandle_t)instance;
     uint32_t rflags;
 
-    if(instance == NULL) {
-        rflags = 0U;
-    } else if(FURI_IS_IRQ_MODE() != 0U) {
+    if(FURI_IS_IRQ_MODE() != 0U) {
         rflags = xEventGroupGetBitsFromISR(hEventGroup);
     } else {
         rflags = xEventGroupGetBits(hEventGroup);
@@ -95,67 +83,53 @@ uint32_t furi_event_flag_get(FuriEventFlag* instance) {
     return (rflags);
 }
 
-/*
-  Wait for one or more Event Flags to become signaled.
+uint32_t furi_event_flag_wait(
+    FuriEventFlag* instance,
+    uint32_t flags,
+    uint32_t options,
+    uint32_t timeout) {
+    furi_assert(!FURI_IS_IRQ_MODE());
+    furi_assert(instance);
+    furi_assert((flags & FURI_EVENT_FLAG_INVALID_BITS) == 0U);
 
-  Limitations:
-  - Event flags are limited to 24 bits.
-  - furi_event_flag_wait cannot be called from an ISR.
-*/
-uint32_t
-    furi_event_flag_wait(FuriEventFlag* instance, uint32_t flags, uint32_t options, uint32_t timeout) {
     EventGroupHandle_t hEventGroup = (EventGroupHandle_t)instance;
     BaseType_t wait_all;
     BaseType_t exit_clr;
     uint32_t rflags;
 
-    if((hEventGroup == NULL) || ((flags & EVENT_FLAGS_INVALID_BITS) != 0U)) {
-        rflags = (uint32_t)osErrorParameter;
-    } else if(FURI_IS_IRQ_MODE() != 0U) {
-        rflags = (uint32_t)osErrorISR;
+    if(options & FuriFlagWaitAll) {
+        wait_all = pdTRUE;
     } else {
-        if(options & osFlagsWaitAll) {
-            wait_all = pdTRUE;
-        } else {
-            wait_all = pdFAIL;
-        }
+        wait_all = pdFAIL;
+    }
 
-        if(options & osFlagsNoClear) {
-            exit_clr = pdFAIL;
-        } else {
-            exit_clr = pdTRUE;
-        }
+    if(options & FuriFlagNoClear) {
+        exit_clr = pdFAIL;
+    } else {
+        exit_clr = pdTRUE;
+    }
 
-        rflags = xEventGroupWaitBits(
-            hEventGroup, (EventBits_t)flags, exit_clr, wait_all, (TickType_t)timeout);
+    rflags = xEventGroupWaitBits(
+        hEventGroup, (EventBits_t)flags, exit_clr, wait_all, (TickType_t)timeout);
 
-        if(options & osFlagsWaitAll) {
-            if((flags & rflags) != flags) {
-                if(timeout > 0U) {
-                    rflags = (uint32_t)osErrorTimeout;
-                } else {
-                    rflags = (uint32_t)osErrorResource;
-                }
+    if(options & FuriFlagWaitAll) {
+        if((flags & rflags) != flags) {
+            if(timeout > 0U) {
+                rflags = (uint32_t)FuriStatusErrorTimeout;
+            } else {
+                rflags = (uint32_t)FuriStatusErrorResource;
             }
-        } else {
-            if((flags & rflags) == 0U) {
-                if(timeout > 0U) {
-                    rflags = (uint32_t)osErrorTimeout;
-                } else {
-                    rflags = (uint32_t)osErrorResource;
-                }
+        }
+    } else {
+        if((flags & rflags) == 0U) {
+            if(timeout > 0U) {
+                rflags = (uint32_t)FuriStatusErrorTimeout;
+            } else {
+                rflags = (uint32_t)FuriStatusErrorResource;
             }
         }
     }
 
     /* Return event flags before clearing */
     return (rflags);
-}
-
-/*
-  Delete an Event Flags object.
-*/
-void furi_event_flag_free(FuriEventFlag* instance) {
-    furi_assert(!FURI_IS_IRQ_MODE());
-    vEventGroupDelete((EventGroupHandle_t)instance);
 }

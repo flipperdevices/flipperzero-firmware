@@ -193,16 +193,17 @@ static int32_t u2f_hid_worker(void* context) {
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     furi_check(furi_hal_usb_set_config(&usb_hid_u2f, NULL) == true);
 
-    u2f_hid->lock_timer = furi_timer_alloc(u2f_hid_lock_timeout_callback, osTimerOnce, u2f_hid);
+    u2f_hid->lock_timer =
+        furi_timer_alloc(u2f_hid_lock_timeout_callback, FuriTimerTypeOnce, u2f_hid);
 
     furi_hal_hid_u2f_set_callback(u2f_hid_event_callback, u2f_hid);
 
     while(1) {
         uint32_t flags = furi_thread_flags_wait(
             WorkerEvtStop | WorkerEvtConnect | WorkerEvtDisconnect | WorkerEvtRequest,
-            osFlagsWaitAny,
-            osWaitForever);
-        furi_check((flags & osFlagsError) == 0);
+            FuriFlagWaitAny,
+            FuriWaitForever);
+        furi_check((flags & FuriFlagError) == 0);
         if(flags & WorkerEvtStop) break;
         if(flags & WorkerEvtConnect) {
             u2f_set_state(u2f_hid->u2f_instance, 1);

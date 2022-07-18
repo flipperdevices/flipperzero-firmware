@@ -10,20 +10,20 @@ int32_t furi_kernel_lock() {
 
     int32_t lock;
 
-    switch (xTaskGetSchedulerState()) {
-        case taskSCHEDULER_SUSPENDED:
-            lock = 1;
-            break;
+    switch(xTaskGetSchedulerState()) {
+    case taskSCHEDULER_SUSPENDED:
+        lock = 1;
+        break;
 
-        case taskSCHEDULER_RUNNING:
-            vTaskSuspendAll();
-            lock = 0;
-            break;
+    case taskSCHEDULER_RUNNING:
+        vTaskSuspendAll();
+        lock = 0;
+        break;
 
-        case taskSCHEDULER_NOT_STARTED:
-        default:
-            lock = (int32_t)osError;
-            break;
+    case taskSCHEDULER_NOT_STARTED:
+    default:
+        lock = (int32_t)FuriStatusError;
+        break;
     }
 
     /* Return previous lock state */
@@ -35,58 +35,56 @@ int32_t furi_kernel_unlock() {
 
     int32_t lock;
 
-    switch (xTaskGetSchedulerState()) {
-        case taskSCHEDULER_SUSPENDED:
-            lock = 1;
+    switch(xTaskGetSchedulerState()) {
+    case taskSCHEDULER_SUSPENDED:
+        lock = 1;
 
-            if (xTaskResumeAll() != pdTRUE) {
-                if (xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED) {
-                    lock = (int32_t)osError;
-                }
+        if(xTaskResumeAll() != pdTRUE) {
+            if(xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED) {
+                lock = (int32_t)FuriStatusError;
             }
-            break;
+        }
+        break;
 
-        case taskSCHEDULER_RUNNING:
-            lock = 0;
-            break;
+    case taskSCHEDULER_RUNNING:
+        lock = 0;
+        break;
 
-        case taskSCHEDULER_NOT_STARTED:
-        default:
-            lock = (int32_t)osError;
-            break;
+    case taskSCHEDULER_NOT_STARTED:
+    default:
+        lock = (int32_t)FuriStatusError;
+        break;
     }
 
     /* Return previous lock state */
     return (lock);
 }
 
-int32_t furi_kernel_restore_lock (int32_t lock) {
+int32_t furi_kernel_restore_lock(int32_t lock) {
     furi_assert(!furi_is_irq_context());
 
-    switch (xTaskGetSchedulerState()) {
-        case taskSCHEDULER_SUSPENDED:
-        case taskSCHEDULER_RUNNING:
-            if (lock == 1) {
-                vTaskSuspendAll();
-            }
-            else {
-                if (lock != 0) {
-                    lock = (int32_t)osError;
-                }
-                else {
-                    if (xTaskResumeAll() != pdTRUE) {
-                        if (xTaskGetSchedulerState() != taskSCHEDULER_RUNNING) {
-                            lock = (int32_t)osError;
-                        }
+    switch(xTaskGetSchedulerState()) {
+    case taskSCHEDULER_SUSPENDED:
+    case taskSCHEDULER_RUNNING:
+        if(lock == 1) {
+            vTaskSuspendAll();
+        } else {
+            if(lock != 0) {
+                lock = (int32_t)FuriStatusError;
+            } else {
+                if(xTaskResumeAll() != pdTRUE) {
+                    if(xTaskGetSchedulerState() != taskSCHEDULER_RUNNING) {
+                        lock = (int32_t)FuriStatusError;
                     }
                 }
             }
-            break;
+        }
+        break;
 
-        case taskSCHEDULER_NOT_STARTED:
-        default:
-            lock = (int32_t)osError;
-            break;
+    case taskSCHEDULER_NOT_STARTED:
+    default:
+        lock = (int32_t)FuriStatusError;
+        break;
     }
 
     /* Return new lock state */
@@ -98,13 +96,13 @@ uint32_t furi_kernel_get_tick_frequency() {
     return (configTICK_RATE_HZ);
 }
 
-osStatus_t furi_delay_tick(uint32_t ticks) {
+FuriStatus furi_delay_tick(uint32_t ticks) {
     furi_assert(!furi_is_irq_context());
-    osStatus_t stat;
+    FuriStatus stat;
 
-    stat = osOK;
+    stat = FuriStatusOk;
 
-    if (ticks != 0U) {
+    if(ticks != 0U) {
         vTaskDelay(ticks);
     }
 
@@ -112,29 +110,27 @@ osStatus_t furi_delay_tick(uint32_t ticks) {
     return (stat);
 }
 
-osStatus_t furi_delay_until_tick(uint32_t ticks) {
+FuriStatus furi_delay_until_tick(uint32_t tick) {
     furi_assert(!furi_is_irq_context());
 
     TickType_t tcnt, delay;
-    osStatus_t stat;
+    FuriStatus stat;
 
-    stat = osOK;
+    stat = FuriStatusOk;
     tcnt = xTaskGetTickCount();
 
-    /* Determine remaining number of ticks to delay */
-    delay = (TickType_t)ticks - tcnt;
+    /* Determine remaining number of tick to delay */
+    delay = (TickType_t)tick - tcnt;
 
     /* Check if target tick has not expired */
     if((delay != 0U) && (0 == (delay >> (8 * sizeof(TickType_t) - 1)))) {
-        if (xTaskDelayUntil (&tcnt, delay) == pdFALSE) {
+        if(xTaskDelayUntil(&tcnt, delay) == pdFALSE) {
             /* Did not delay */
-            stat = osError;
+            stat = FuriStatusError;
         }
-    }
-    else
-    {
+    } else {
         /* No delay or already expired */
-        stat = osErrorParameter;
+        stat = FuriStatusErrorParameter;
     }
 
     /* Return execution status */
@@ -171,9 +167,9 @@ void furi_delay_us(float microseconds) {
 void furi_delay_ms(float milliseconds) {
     if(!FURI_IS_ISR() && xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) {
         uint32_t ticks = milliseconds / (1000.0f / furi_kernel_get_tick_frequency());
-        osStatus_t result = furi_delay_tick(ticks);
+        FuriStatus result = furi_delay_tick(ticks);
         (void)result;
-        furi_assert(result == osOK);
+        furi_assert(result == FuriStatusOk);
     } else {
         furi_delay_us(milliseconds * 1000);
     }

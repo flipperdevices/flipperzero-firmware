@@ -207,7 +207,7 @@ void* rpc_system_app_alloc(RpcSession* session) {
     RpcAppSystem* rpc_app = malloc(sizeof(RpcAppSystem));
     rpc_app->session = session;
 
-    rpc_app->timer = furi_timer_alloc(rpc_system_app_timer_callback, osTimerOnce, rpc_app);
+    rpc_app->timer = furi_timer_alloc(rpc_system_app_timer_callback, FuriTimerTypeOnce, rpc_app);
 
     RpcHandler rpc_handler = {
         .message_handler = NULL,

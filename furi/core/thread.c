@@ -161,7 +161,7 @@ bool furi_thread_join(FuriThread* thread) {
         furi_delay_ms(10);
     }
 
-    return osOK;
+    return FuriStatusOk;
 }
 
 FuriThreadId furi_thread_get_id(FuriThread* thread) {
@@ -217,9 +217,9 @@ uint32_t furi_thread_flags_set(FuriThreadId thread_id, uint32_t flags) {
     BaseType_t yield;
 
     if((hTask == NULL) || ((flags & THREAD_FLAGS_INVALID_BITS) != 0U)) {
-        rflags = (uint32_t)osErrorParameter;
+        rflags = (uint32_t)FuriStatusErrorParameter;
     } else {
-        rflags = (uint32_t)osError;
+        rflags = (uint32_t)FuriStatusError;
 
         if(FURI_IS_IRQ_MODE()) {
             yield = pdFALSE;
@@ -243,9 +243,9 @@ uint32_t furi_thread_flags_clear(uint32_t flags) {
     uint32_t rflags, cflags;
 
     if(FURI_IS_IRQ_MODE()) {
-        rflags = (uint32_t)osErrorISR;
+        rflags = (uint32_t)FuriStatusErrorISR;
     } else if((flags & THREAD_FLAGS_INVALID_BITS) != 0U) {
-        rflags = (uint32_t)osErrorParameter;
+        rflags = (uint32_t)FuriStatusErrorParameter;
     } else {
         hTask = xTaskGetCurrentTaskHandle();
 
@@ -256,10 +256,10 @@ uint32_t furi_thread_flags_clear(uint32_t flags) {
 
             if(xTaskNotifyIndexed(hTask, THREAD_NOTIFY_INDEX, cflags, eSetValueWithOverwrite) !=
                pdPASS) {
-                rflags = (uint32_t)osError;
+                rflags = (uint32_t)FuriStatusError;
             }
         } else {
-            rflags = (uint32_t)osError;
+            rflags = (uint32_t)FuriStatusError;
         }
     }
 
@@ -272,13 +272,13 @@ uint32_t furi_thread_flags_get(void) {
     uint32_t rflags;
 
     if(FURI_IS_IRQ_MODE()) {
-        rflags = (uint32_t)osErrorISR;
+        rflags = (uint32_t)FuriStatusErrorISR;
     } else {
         hTask = xTaskGetCurrentTaskHandle();
 
         if(xTaskNotifyAndQueryIndexed(hTask, THREAD_NOTIFY_INDEX, 0, eNoAction, &rflags) !=
            pdPASS) {
-            rflags = (uint32_t)osError;
+            rflags = (uint32_t)FuriStatusError;
         }
     }
 
@@ -292,11 +292,11 @@ uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeo
     BaseType_t rval;
 
     if(FURI_IS_IRQ_MODE()) {
-        rflags = (uint32_t)osErrorISR;
+        rflags = (uint32_t)FuriStatusErrorISR;
     } else if((flags & THREAD_FLAGS_INVALID_BITS) != 0U) {
-        rflags = (uint32_t)osErrorParameter;
+        rflags = (uint32_t)FuriStatusErrorParameter;
     } else {
-        if((options & osFlagsNoClear) == osFlagsNoClear) {
+        if((options & FuriFlagNoClear) == FuriFlagNoClear) {
             clear = 0U;
         } else {
             clear = flags;
@@ -313,12 +313,12 @@ uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeo
                 rflags &= flags;
                 rflags |= nval;
 
-                if((options & osFlagsWaitAll) == osFlagsWaitAll) {
+                if((options & FuriFlagWaitAll) == FuriFlagWaitAll) {
                     if((flags & rflags) == flags) {
                         break;
                     } else {
                         if(timeout == 0U) {
-                            rflags = (uint32_t)osErrorResource;
+                            rflags = (uint32_t)FuriStatusErrorResource;
                             break;
                         }
                     }
@@ -327,7 +327,7 @@ uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeo
                         break;
                     } else {
                         if(timeout == 0U) {
-                            rflags = (uint32_t)osErrorResource;
+                            rflags = (uint32_t)FuriStatusErrorResource;
                             break;
                         }
                     }
@@ -343,9 +343,9 @@ uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeo
                 }
             } else {
                 if(timeout == 0) {
-                    rflags = (uint32_t)osErrorResource;
+                    rflags = (uint32_t)FuriStatusErrorResource;
                 } else {
-                    rflags = (uint32_t)osErrorTimeout;
+                    rflags = (uint32_t)FuriStatusErrorTimeout;
                 }
             }
         } while(rval != pdFAIL);

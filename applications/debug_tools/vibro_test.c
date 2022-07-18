@@ -19,7 +19,7 @@ void vibro_test_draw_callback(Canvas* canvas, void* ctx) {
 void vibro_test_input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
     FuriMessageQueue* event_queue = ctx;
-    furi_message_queue_put(event_queue, input_event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
 int32_t vibro_test_app(void* p) {
@@ -39,7 +39,7 @@ int32_t vibro_test_app(void* p) {
 
     InputEvent event;
 
-    while(furi_message_queue_get(event_queue, &event, NULL, osWaitForever) == osOK) {
+    while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
         if(event.type == InputTypeShort && event.key == InputKeyBack) {
             notification_message(notification, &sequence_reset_vibro);
             notification_message(notification, &sequence_reset_green);

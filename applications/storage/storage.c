@@ -106,7 +106,7 @@ int32_t storage_srv(void* p) {
 
     StorageMessage message;
     while(1) {
-        if(furi_message_queue_get(app->message_queue, &message, NULL, STORAGE_TICK) == osOK) {
+        if(furi_message_queue_get(app->message_queue, &message, STORAGE_TICK) == FuriStatusOk) {
             storage_process_message(app, &message);
         } else {
             storage_tick(app);

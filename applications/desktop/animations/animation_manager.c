@@ -283,7 +283,7 @@ AnimationManager* animation_manager_alloc(void) {
     string_init(animation_manager->freezed_animation_name);
 
     animation_manager->idle_animation_timer =
-        furi_timer_alloc(animation_manager_timer_callback, osTimerOnce, animation_manager);
+        furi_timer_alloc(animation_manager_timer_callback, FuriTimerTypeOnce, animation_manager);
     bubble_animation_view_set_interact_callback(
         animation_manager->animation_view, animation_manager_interact_callback, animation_manager);
 

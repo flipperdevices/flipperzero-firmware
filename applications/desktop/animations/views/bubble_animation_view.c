@@ -306,7 +306,7 @@ BubbleAnimationView* bubble_animation_view_alloc(void) {
     BubbleAnimationView* view = malloc(sizeof(BubbleAnimationView));
     view->view = view_alloc();
     view->interact_callback = NULL;
-    view->timer = furi_timer_alloc(bubble_animation_timer_callback, osTimerPeriodic, view);
+    view->timer = furi_timer_alloc(bubble_animation_timer_callback, FuriTimerTypePeriodic, view);
 
     view_allocate_model(view->view, ViewModelTypeLocking, sizeof(BubbleAnimationViewModel));
     view_set_context(view->view, view);

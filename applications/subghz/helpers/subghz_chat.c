@@ -27,12 +27,12 @@ static int32_t subghz_chat_worker_thread(void* context) {
     char c;
     SubGhzChatEvent event;
     event.event = SubGhzChatEventUserEntrance;
-    furi_message_queue_put(instance->event_queue, &event, 0, 0);
+    furi_message_queue_put(instance->event_queue, &event, 0);
     while(instance->worker_running) {
         if(cli_read_timeout(instance->cli, (uint8_t*)&c, 1, 1000) == 1) {
             event.event = SubGhzChatEventInputData;
             event.c = c;
-            furi_message_queue_put(instance->event_queue, &event, 0, osWaitForever);
+            furi_message_queue_put(instance->event_queue, &event, FuriWaitForever);
         }
     }
 
@@ -47,11 +47,11 @@ static void subghz_chat_worker_update_rx_event_chat(void* context) {
     if((furi_get_tick() - instance->last_time_rx_data) >
        SUBGHZ_CHAT_WORKER_TIMEOUT_BETWEEN_MESSAGES) {
         event.event = SubGhzChatEventNewMessage;
-        furi_message_queue_put(instance->event_queue, &event, 0, osWaitForever);
+        furi_message_queue_put(instance->event_queue, &event, FuriWaitForever);
     }
     instance->last_time_rx_data = furi_get_tick();
     event.event = SubGhzChatEventRXData;
-    furi_message_queue_put(instance->event_queue, &event, 0, osWaitForever);
+    furi_message_queue_put(instance->event_queue, &event, FuriWaitForever);
 }
 
 SubGhzChatWorker* subghz_chat_worker_alloc(Cli* cli) {
@@ -119,7 +119,7 @@ bool subghz_chat_worker_is_running(SubGhzChatWorker* instance) {
 SubGhzChatEvent subghz_chat_worker_get_event_chat(SubGhzChatWorker* instance) {
     furi_assert(instance);
     SubGhzChatEvent event;
-    if(furi_message_queue_get(instance->event_queue, &event, NULL, osWaitForever) == osOK) {
+    if(furi_message_queue_get(instance->event_queue, &event, FuriWaitForever) == FuriStatusOk) {
         return event;
     } else {
         event.event = SubGhzChatEventNoEvent;
@@ -129,7 +129,7 @@ SubGhzChatEvent subghz_chat_worker_get_event_chat(SubGhzChatWorker* instance) {
 
 void subghz_chat_worker_put_event_chat(SubGhzChatWorker* instance, SubGhzChatEvent* event) {
     furi_assert(instance);
-    furi_message_queue_put(instance->event_queue, event, 0, osWaitForever);
+    furi_message_queue_put(instance->event_queue, event, FuriWaitForever);
 }
 
 size_t subghz_chat_worker_available(SubGhzChatWorker* instance) {

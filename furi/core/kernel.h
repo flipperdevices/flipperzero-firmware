@@ -1,3 +1,7 @@
+/**
+ * @file kenrel.h
+ * Furi Kernel primitives
+ */
 #pragma once
 
 #include <core/base.h>
@@ -6,36 +10,52 @@
 extern "C" {
 #endif
 
-/// Lock the RTOS Kernel scheduler.
-/// \return previous lock state (1 - locked, 0 - not locked, error code if negative).
+/** Lock kernel, pause process scheduling
+ *
+ * @return     previous lock state(0 - unlocked, 1 - locked)
+ */
 int32_t furi_kernel_lock();
 
-/// Unlock the RTOS Kernel scheduler.
-/// \return previous lock state (1 - locked, 0 - not locked, error code if negative).
+/** Unlock kernel, resume process scheduling
+ *
+ * @return     previous lock state(0 - unlocked, 1 - locked)
+ */
 int32_t furi_kernel_unlock();
 
-/// Restore the RTOS Kernel scheduler lock state.
-/// \param[in]     lock          lock state obtained by \ref furi_kernel_lock or \ref furi_kernel_unlock.
-/// \return new lock state (1 - locked, 0 - not locked, error code if negative).
+/** Restore kernel lock state
+ *
+ * @param[in]  lock  The lock state
+ *
+ * @return     new lock state or error
+ */
 int32_t furi_kernel_restore_lock(int32_t lock);
 
-/// Get the RTOS kernel tick frequency.
-/// \return frequency of the kernel tick in hertz, i.e. kernel ticks per second.
+/** Get kernel systick frequency
+ *
+ * @return     systick counts per second
+ */
 uint32_t furi_kernel_get_tick_frequency();
 
-//  ==== Generic Wait Functions ====
+/** Delay execution
+ *
+ * @param[in]  ticks  The ticks count to pause
+ *
+ * @return     The furi status.
+ */
+FuriStatus furi_delay_tick(uint32_t ticks);
 
-/// Wait for Timeout (Time Delay).
-/// \param[in]     ticks         \ref CMSIS_RTOS_TimeOutValue "time ticks" value
-/// \return status code that indicates the execution status of the function.
-osStatus_t furi_delay_tick(uint32_t ticks);
+/** Delay until tick
+ *
+ * @param[in]  ticks  The tick until which kerel should delay task execution
+ *
+ * @return     The furi status.
+ */
+FuriStatus furi_delay_until_tick(uint32_t tick);
 
-/// Wait until specified tick.
-/// \param[in]     ticks         absolute time in ticks
-/// \return status code that indicates the execution status of the function.
-osStatus_t furi_delay_until_tick(uint32_t ticks);
-
-/** Get instructions per microsecond count */
+/** Get instructions per microsecond count
+ *
+ * @return     { description_of_the_return_value }
+ */
 uint32_t furi_instructions_per_microsecond();
 
 /** Get current tick counter

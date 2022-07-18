@@ -21,7 +21,7 @@ void ibutton_worker_mode_write_stop(iButtonWorker* worker);
 
 const iButtonWorkerModeType ibutton_worker_modes[] = {
     {
-        .quant = osWaitForever,
+        .quant = FuriWaitForever,
         .start = ibutton_worker_mode_idle_start,
         .tick = ibutton_worker_mode_idle_tick,
         .stop = ibutton_worker_mode_idle_stop,

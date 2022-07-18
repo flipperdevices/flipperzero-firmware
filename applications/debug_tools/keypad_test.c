@@ -56,7 +56,7 @@ static void keypad_test_render_callback(Canvas* canvas, void* ctx) {
 
 static void keypad_test_input_callback(InputEvent* input_event, void* ctx) {
     FuriMessageQueue* event_queue = ctx;
-    furi_message_queue_put(event_queue, input_event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
 int32_t keypad_test_app(void* p) {
@@ -82,7 +82,7 @@ int32_t keypad_test_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     InputEvent event;
-    while(furi_message_queue_get(event_queue, &event, NULL, osWaitForever) == osOK) {
+    while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
         KeypadTestState* state = (KeypadTestState*)acquire_mutex_block(&state_mutex);
         FURI_LOG_I(
             TAG,

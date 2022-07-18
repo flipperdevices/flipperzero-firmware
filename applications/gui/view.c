@@ -111,7 +111,7 @@ void* view_get_model(View* view) {
     furi_assert(view);
     if(view->model_type == ViewModelTypeLocking) {
         ViewModelLocking* model = (ViewModelLocking*)(view->model);
-        furi_check(furi_mutex_acquire(model->mutex, osWaitForever) == osOK);
+        furi_check(furi_mutex_acquire(model->mutex, FuriWaitForever) == FuriStatusOk);
         return model->data;
     }
     return view->model;
@@ -138,7 +138,7 @@ void view_unlock_model(View* view) {
     furi_assert(view);
     if(view->model_type == ViewModelTypeLocking) {
         ViewModelLocking* model = (ViewModelLocking*)(view->model);
-        furi_check(furi_mutex_release(model->mutex) == osOK);
+        furi_check(furi_mutex_release(model->mutex) == FuriStatusOk);
     }
 }
 

@@ -46,11 +46,11 @@ static FuriRecordData* furi_record_data_get_or_create(string_t name_str) {
 }
 
 static void furi_record_lock() {
-    furi_check(furi_mutex_acquire(furi_record->mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(furi_record->mutex, FuriWaitForever) == FuriStatusOk);
 }
 
 static void furi_record_unlock() {
-    furi_check(furi_mutex_release(furi_record->mutex) == osOK);
+    furi_check(furi_mutex_release(furi_record->mutex) == FuriStatusOk);
 }
 
 bool furi_record_exists(const char* name) {
@@ -133,8 +133,8 @@ void* furi_record_open(const char* name) {
         furi_event_flag_wait(
             record_data->flags,
             FURI_RECORD_FLAG_READY,
-            osFlagsWaitAny | osFlagsNoClear,
-            osWaitForever) == FURI_RECORD_FLAG_READY);
+            FuriFlagWaitAny | FuriFlagNoClear,
+            FuriWaitForever) == FURI_RECORD_FLAG_READY);
 
     string_clear(name_str);
 

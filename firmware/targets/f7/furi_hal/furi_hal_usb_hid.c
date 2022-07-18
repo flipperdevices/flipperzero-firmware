@@ -438,7 +438,7 @@ static void hid_on_suspend(usbd_device* dev) {
 static bool hid_send_report(uint8_t report_id) {
     if((hid_semaphore == NULL) || (hid_connected == false)) return false;
 
-    furi_check(furi_semaphore_acquire(hid_semaphore, osWaitForever) == osOK);
+    furi_check(furi_semaphore_acquire(hid_semaphore, FuriWaitForever) == FuriStatusOk);
     if(hid_connected == true) {
         if(report_id == ReportIdKeyboard)
             usbd_ep_write(usb_dev, HID_EP_IN, &hid_report.keyboard, sizeof(hid_report.keyboard));
