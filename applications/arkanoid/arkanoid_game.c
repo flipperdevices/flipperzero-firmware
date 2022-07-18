@@ -21,7 +21,7 @@ int lives = 3; //Amount of lives
 int level = 1; //Current level
 unsigned int score = 0; //Score for the game
 unsigned int brickCount; //Amount of bricks hit
-int pad, pad2, pad3; //Button press buffer used to stop pause repeating
+int pad1, pad2, pad3; //Button press buffer used to stop pause repeating
 int oldpad, oldpad2, oldpad3;
 char text[16]; //General string buffer
 bool start = false; //If in menu or in game
