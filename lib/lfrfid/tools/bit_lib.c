@@ -23,7 +23,7 @@ void bit_lib_set_bits(uint8_t* data, size_t position, uint8_t byte, uint8_t leng
     furi_check(length > 0);
 
     for(uint8_t i = 0; i < length; ++i) {
-        uint8_t shift = 7 - i;
+        uint8_t shift = (length - 1) - i;
         bit_lib_set_bit(data, position + i, (byte >> shift) & 1);
     }
 }
@@ -41,4 +41,19 @@ uint8_t bit_lib_get_bits(const uint8_t* data, size_t position, uint8_t length) {
         return ((data[position / 8] << (shift)) | (data[position / 8 + 1] >> (8 - shift))) >>
                (8 - length);
     }
+}
+
+bool bit_lib_test_parity_u32(uint32_t bits, BitLibParity parity) {
+#if !defined __GNUC__
+#error Please, implement parity test for non-GCC compilers
+#else
+    switch(parity) {
+    case BitLibParityEven:
+        return __builtin_parity(bits);
+    case BitLibParityOdd:
+        return !__builtin_parity(bits);
+    default:
+        furi_crash("Unknown parity");
+    }
+#endif
 }
