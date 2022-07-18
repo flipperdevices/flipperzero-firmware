@@ -22,6 +22,8 @@ typedef enum {
     NfcWorkerStateReadMifareClassic,
     NfcWorkerStateEmulateMifareClassic,
     NfcWorkerStateReadMifareDesfire,
+    NfcWorkerStateMfClassicUserDictAttack,
+    NfcWorkerStateMfClassicFlipperDictAttack,
     // Transition
     NfcWorkerStateStop,
 } NfcWorkerState;
@@ -44,6 +46,7 @@ typedef enum {
     // Nfc worker common events
     NfcWorkerEventSuccess,
     NfcWorkerEventFail,
+    NfcWorkerEventCardDetected,
     NfcWorkerEventNoCardDetected,
     // Mifare Classic events
     NfcWorkerEventNoDictFound,

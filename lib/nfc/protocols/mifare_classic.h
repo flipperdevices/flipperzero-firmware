@@ -80,10 +80,32 @@ bool mf_classic_get_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK, MfClassicRea
 
 uint8_t mf_classic_get_total_sectors_num(MfClassicType type);
 
+uint8_t mf_classic_get_sector_trailer_block_num_by_sector(uint8_t sector);
+
+bool mf_classic_is_key_found(MfClassicData* data, uint8_t sector_num, MfClassicKey key_type);
+
+void mf_classic_set_key_found(
+    MfClassicData* data,
+    uint8_t sector_num,
+    MfClassicKey key_type,
+    uint64_t key);
+
+bool mf_classic_is_block_read(MfClassicData* data, uint8_t block_num);
+
+void mf_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassicBlock* block_data);
+
+bool mf_classic_is_sector_read(MfClassicData* data, uint8_t sector_num);
+
 MfClassicSectorTrailer*
     mf_classic_get_sector_trailer_by_sector(MfClassicData* data, uint8_t sector);
 
 void mf_classic_auth_init_context(MfClassicAuthContext* auth_ctx, uint8_t sector);
+
+bool mf_classic_authenticate(
+    FuriHalNfcTxRxContext* tx_rx,
+    uint8_t block_num,
+    uint64_t key,
+    MfClassicKey key_type);
 
 bool mf_classic_auth_attempt(
     FuriHalNfcTxRxContext* tx_rx,
@@ -96,7 +118,9 @@ void mf_classic_reader_add_sector(
     uint64_t key_a,
     uint64_t key_b);
 
-bool mf_classic_read_sector(
+void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, uint8_t sec_num);
+
+bool _mf_classic_read_sector(
     FuriHalNfcTxRxContext* tx_rx,
     Crypto1* crypto,
     MfClassicSectorReader* sector_reader,
