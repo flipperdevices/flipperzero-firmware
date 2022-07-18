@@ -6,7 +6,7 @@
 
 #include <notification/notification_messages.h>
 
-#include <totp.h>
+#include <TOTP.h>
 #include "totp_app.h"
 
 #include <base32.h>
