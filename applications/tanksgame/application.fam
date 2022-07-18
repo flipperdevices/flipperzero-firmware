@@ -1,5 +1,5 @@
 App(
-    appid="INTAPP_Tanks",
+    appid="GAME_Tanks",
     name="Tanks",
     apptype=FlipperAppType.GAME,
     entry_point="tanks_game_app",
