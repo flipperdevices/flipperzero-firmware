@@ -1,5 +1,5 @@
 App(
-    appid="APPS_Raycast",
+    appid="GAME_Raycast",
     name="Raycast",
     apptype=FlipperAppType.GAME,
     entry_point="raycast_game_app",
