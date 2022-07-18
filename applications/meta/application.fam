@@ -40,7 +40,7 @@ App(
         "INTAPP_TouchTunes",
         "INTAPP_TOTP",
 		
-        "INTAPP_WAVPlayer",
+        "APPS_WAVPlayer",
         "APPS_SpectrumAnalyzer","APPS_BluetoothRemote",
 	"APPS_MusicPlayer","APPS_MouseJiggler",
     ],
@@ -91,7 +91,7 @@ App(
         "Clock",
         "UniRFRemix",
 	"INTAPP_TOTP",
-        "INTAPP_WAVPlayer",
+        "APPS_WAVPlayer",
         "APPS_SpectrumAnalyzer","APPS_BluetoothRemote","APPS_DolphinRestorer",
 		"APPS_DolphinBackup","APPS_MusicPlayer",
         "APPS_SentrySafe","APPS_BarcodeGenerator","APPS_MouseJiggler",
