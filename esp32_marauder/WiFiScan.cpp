@@ -348,13 +348,14 @@ void WiFiScan::startWiFiAttacks(uint8_t scan_mode, uint16_t color, String title_
     display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
   #endif
   packets_sent = 0;
-  esp_wifi_init(&cfg);
-  esp_wifi_set_storage(WIFI_STORAGE_RAM);
-  esp_wifi_set_mode(WIFI_AP_STA);
-  esp_wifi_start();
-  esp_wifi_set_promiscuous_filter(NULL);
+  WiFi.mode(WIFI_AP_STA);
+  //esp_wifi_init(&cfg);
+  //esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  //esp_wifi_set_mode(WIFI_AP_STA);
+  //esp_wifi_start();
+  //esp_wifi_set_promiscuous_filter(NULL);
   esp_wifi_set_promiscuous(true);
-  esp_wifi_set_max_tx_power(78);
+  esp_wifi_set_max_tx_power(82);
   this->wifi_initialized = true;
   initTime = millis();
 }
@@ -2055,8 +2056,8 @@ void WiFiScan::broadcastRandomSSID(uint32_t currentTime) {
     packet[38 + 6 + i] = postSSID[i];
 
   esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
-  esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
-  esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+  //ESP_ERROR_CHECK(esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false));
+  //ESP_ERROR_CHECK(esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false));
 
   packets_sent = packets_sent + 3;
 }

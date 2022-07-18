@@ -301,7 +301,11 @@ void loop()
     }
       if (wifi_scan_obj.currentScanMode == OTA_UPDATE)
         web_obj.main();
-    delay(1);
+    #ifdef HAS_SCREEN
+      delay(1);
+    #else
+      delay(50);
+    #endif
   }
   #ifdef HAS_SCREEN
     else if ((display_obj.draw_tft) &&
