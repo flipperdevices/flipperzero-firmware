@@ -1,5 +1,5 @@
 App(
-    appid="INTAPP_WAVPlayer",
+    appid="APPS_WAVPlayer",
     name="WAV Player",
     apptype=FlipperAppType.PLUGIN,
     entry_point="wav_player_app",
