@@ -47,7 +47,7 @@ size_t stream_buffer_read(StreamBuffer* buffer, uint8_t* data, size_t size) {
         memcpy(data, buffer->data + buffer->offset, size_read);
         buffer->offset += size_read;
     }
-    return size - size_read;
+    return size_read;
 }
 
 size_t stream_buffer_seek(StreamBuffer* buffer, int32_t offset) {

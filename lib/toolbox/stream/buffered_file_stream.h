@@ -29,7 +29,7 @@ bool buffered_file_stream_open(
  * @return true
  * @return false
  */
-bool buffered_file_stream_buffered_close(Stream* stream);
+bool buffered_file_stream_close(Stream* stream);
 
 /**
  * Retrieves the error id from the file object

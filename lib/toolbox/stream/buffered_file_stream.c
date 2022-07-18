@@ -55,7 +55,7 @@ bool buffered_file_stream_open(
     return file_stream_open(stream->file_stream, path, FSAM_READ, FSOM_OPEN_EXISTING);
 }
 
-bool buffered_file_stream_buffered_close(Stream* _stream) {
+bool buffered_file_stream_close(Stream* _stream) {
     furi_assert(_stream);
     BufferedFileStream* stream = (BufferedFileStream*)_stream;
     furi_check(stream->stream_base.vtable == &buffered_file_stream_vtable);
@@ -116,7 +116,7 @@ static size_t buffered_file_stream_read(BufferedFileStream* stream, uint8_t* dat
     size_t need_to_read = size;
 
     while(need_to_read) {
-        need_to_read -= stream_buffer_read(stream->read_buffer, data, size);
+        need_to_read -= stream_buffer_read(stream->read_buffer, data + (size - need_to_read), need_to_read);
         if(need_to_read) {
             if(!stream_buffer_fill(stream->read_buffer, stream->file_stream)) {
                 break;
