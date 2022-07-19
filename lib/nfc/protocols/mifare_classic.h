@@ -14,6 +14,8 @@
 
 #define MF_CLASSIC_NO_KEY (0xFFFFFFFFFFFFFFFF)
 #define MF_CLASSIC_MAX_DATA_SIZE (16)
+#define MF_CLASSIC_KEY_SIZE (6)
+#define MF_CLASSIC_ACCESS_BYTES_SIZE (4)
 
 typedef enum {
     MfClassicType1k,
@@ -30,9 +32,9 @@ typedef struct {
 } MfClassicBlock;
 
 typedef struct {
-    uint8_t key_a[6];
-    uint8_t access_bits[4];
-    uint8_t key_b[6];
+    uint8_t key_a[MF_CLASSIC_KEY_SIZE];
+    uint8_t access_bits[MF_CLASSIC_ACCESS_BYTES_SIZE];
+    uint8_t key_b[MF_CLASSIC_KEY_SIZE];
 } MfClassicSectorTrailer;
 
 typedef struct {
@@ -83,6 +85,10 @@ bool mf_classic_get_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK, MfClassicRea
 uint8_t mf_classic_get_total_sectors_num(MfClassicType type);
 
 uint8_t mf_classic_get_sector_trailer_block_num_by_sector(uint8_t sector);
+
+bool mf_classic_is_sector_trailer(uint8_t block);
+
+uint8_t mf_classic_get_sector_by_block(uint8_t block);
 
 bool mf_classic_is_key_found(MfClassicData* data, uint8_t sector_num, MfClassicKey key_type);
 

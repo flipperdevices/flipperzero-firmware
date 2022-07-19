@@ -43,7 +43,7 @@ uint8_t mf_classic_get_sector_trailer_block_num_by_sector(uint8_t sector) {
     }
 }
 
-static uint8_t mf_classic_get_sector_by_block(uint8_t block) {
+uint8_t mf_classic_get_sector_by_block(uint8_t block) {
     if(block < 128) {
         return (block | 0x03) / 4;
     } else {
@@ -64,7 +64,7 @@ uint8_t mf_classic_get_sector_trailer_num_by_block(uint8_t block) {
     }
 }
 
-static bool mf_classic_is_sector_trailer(uint8_t block) {
+bool mf_classic_is_sector_trailer(uint8_t block) {
     return block == mf_classic_get_sector_trailer_num_by_block(block);
 }
 
@@ -825,21 +825,6 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 FURI_LOG_W(TAG, "Incorrect nr + ar");
                 command_processed = true;
                 break;
-            }
-
-            // Check if we store valid key
-            if(access_key == MfClassicKeyA) {
-                if(FURI_BIT(emulator->data.key_a_mask, mf_classic_get_sector_by_block(block)) ==
-                   0) {
-                    FURI_LOG_D(TAG, "Unknown sector key A for block %d", sector_trailer_block);
-                    break;
-                }
-            } else if(access_key == MfClassicKeyB) {
-                if(FURI_BIT(emulator->data.key_b_mask, mf_classic_get_sector_by_block(block)) ==
-                   0) {
-                    FURI_LOG_D(TAG, "Unknown sector key B for block %d", sector_trailer_block);
-                    break;
-                }
             }
 
             uint32_t nr = nfc_util_bytes2num(tx_rx->rx_data, 4);

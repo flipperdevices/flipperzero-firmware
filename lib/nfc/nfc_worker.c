@@ -149,7 +149,7 @@ static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
     nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
     do {
         // Try to read supported card
-        FURI_LOG_D(TAG, "Try read supported card");
+        FURI_LOG_I(TAG, "Try read supported card ...");
         for(size_t i = 0; i < NfcSupportedCardTypeEnd; i++) {
             if(nfc_supported_card[i].protocol == NfcDeviceProtocolMifareClassic) {
                 if(nfc_supported_card[i].verify(nfc_worker, tx_rx)) {
@@ -162,14 +162,14 @@ static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
         }
         if(read_success) break;
         // Try to read card with key cache
-        FURI_LOG_D(TAG, "Search for key cache");
+        FURI_LOG_I(TAG, "Search for key cache ...");
         if(nfc_worker->callback(NfcWorkerEventReadMifareClassicLoadKeyCache, nfc_worker->context)) {
-            FURI_LOG_D(TAG, "Load keys cache success. Start reading");
+            FURI_LOG_I(TAG, "Load keys cache success. Start reading");
             uint8_t sectors_read =
                 mf_classic_update_card(tx_rx, &nfc_worker->dev_data->mf_classic_data);
             uint8_t sectors_total =
                 mf_classic_get_total_sectors_num(nfc_worker->dev_data->mf_classic_data.type);
-            FURI_LOG_D(TAG, "Read %d sectors out of %d total", sectors_read, sectors_total);
+            FURI_LOG_I(TAG, "Read %d sectors out of %d total", sectors_read, sectors_total);
             read_success = (sectors_read == sectors_total);
         }
     } while(false);
@@ -232,21 +232,21 @@ static bool nfc_worker_nfca_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     bool card_read = false;
     furi_hal_nfc_sleep();
     if(mf_ul_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
-        FURI_LOG_D(TAG, "Mifare Ultralight / NTAG detected");
+        FURI_LOG_I(TAG, "Mifare Ultralight / NTAG detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareUl;
         card_read = nfc_worker_read_mf_ul(nfc_worker, tx_rx);
     } else if(mf_classic_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
-        FURI_LOG_D(TAG, "Mifare Classic detected");
+        FURI_LOG_I(TAG, "Mifare Classic detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareClassic;
         nfc_worker->dev_data->mf_classic_data.type =
             mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
         card_read = nfc_worker_read_mf_classic(nfc_worker, tx_rx);
     } else if(mf_df_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
-        FURI_LOG_D(TAG, "Mifare DESFire detected");
+        FURI_LOG_I(TAG, "Mifare DESFire detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareDesfire;
         card_read = nfc_worker_read_mf_desf(nfc_worker, tx_rx);
     } else if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
-        FURI_LOG_D(TAG, "ISO14443-4 card detected");
+        FURI_LOG_I(TAG, "ISO14443-4 card detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolEMV;
         card_read = nfc_worker_read_bank_card(nfc_worker, tx_rx);
     }
