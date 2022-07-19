@@ -2,7 +2,10 @@
 
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
-<ul><li><h2><B>Reorganized many apps and games to be loaded as FAP from SD.<br>If you have questions about where X app is located, DO NOT ASK ON THE MAIN DISCORD, USE <a href='https://discord.gg/gF2bBUzAFe'>THE ROGUE DISCORD</a></B></h2></li></ul>
+<ul>
+<li><h3><B>Reorganized many apps and games to be loaded as FAP from SD.<br>If you have questions about where X app is located, DO NOT ASK ON THE MAIN DISCORD, USE <a href='https://discord.gg/gF2bBUzAFe'>THE ROGUE DISCORD</a></B></h3></li>
+<li>Moved Tanks image assets into application file and recompiled FAP</li>
+</ul>
   
 <table width="100%" border="0" cellspacing="0">
   <tr>
