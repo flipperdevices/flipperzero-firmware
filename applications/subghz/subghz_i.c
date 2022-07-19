@@ -212,7 +212,7 @@ void subghz_dialog_message_show_only_rx(SubGhz* subghz) {
         23,
         AlignCenter,
         AlignCenter);
-    dialog_message_set_icon(message, &I_DolphinFirstStart7_61x51, 67, 12);
+    dialog_message_set_icon(message, &I_DolphinFirstStart4_61x49, 67, 14);
     dialog_message_set_buttons(message, "Back", NULL, NULL);
     dialog_message_show(dialogs, message);
     dialog_message_free(message);
