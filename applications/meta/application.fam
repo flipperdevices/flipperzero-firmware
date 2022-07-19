@@ -38,8 +38,6 @@ App(
         "INTAPP_MouseJacker",
         "INTAPP_NRFSniff",
         "INTAPP_TOTP",
-        "APPS_BluetoothRemote",
-	"APPS_MusicPlayer",
     ],
 )
 
@@ -49,7 +47,6 @@ App(
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         "GAME_Tetris",
-        "GAME_2048",
 	"GAME_Snake",
     ],
 )
@@ -75,7 +72,8 @@ App(
         "INTAPP_NRFSniff",
         "INTAPP_WiFiScanner",
 	"INTAPP_TOTP",
-	"INTAPP_Chip8","INTAPP_Chess",
+	"INTAPP_Chip8",
+	"INTAPP_Chess",
         "APPS_TouchTunes",
         "APPS_WAVPlayer",
         "APPS_SpectrumAnalyzer",
