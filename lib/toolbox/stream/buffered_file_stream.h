@@ -19,9 +19,7 @@ Stream* buffered_file_stream_alloc(Storage* storage);
  * @param path path to file
  * @return success flag. You need to close the file even if the open operation failed.
  */
-bool buffered_file_stream_open(
-    Stream* stream,
-    const char* path);
+bool buffered_file_stream_open(Stream* stream, const char* path);
 
 /**
  * Closes the file.

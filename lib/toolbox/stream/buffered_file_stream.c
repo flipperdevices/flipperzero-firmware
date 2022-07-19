@@ -13,10 +13,12 @@ typedef struct {
 static void buffered_file_stream_free(BufferedFileStream* stream);
 static bool buffered_file_stream_eof(BufferedFileStream* stream);
 static void buffered_file_stream_clean(BufferedFileStream* stream);
-static bool buffered_file_stream_seek(BufferedFileStream* stream, int32_t offset, StreamOffset offset_type);
+static bool
+    buffered_file_stream_seek(BufferedFileStream* stream, int32_t offset, StreamOffset offset_type);
 static size_t buffered_file_stream_tell(BufferedFileStream* stream);
 static size_t buffered_file_stream_size(BufferedFileStream* stream);
-static size_t buffered_file_stream_write(BufferedFileStream* stream, const uint8_t* data, size_t size);
+static size_t
+    buffered_file_stream_write(BufferedFileStream* stream, const uint8_t* data, size_t size);
 static size_t buffered_file_stream_read(BufferedFileStream* stream, uint8_t* data, size_t size);
 static bool buffered_file_stream_delete_and_insert(
     BufferedFileStream* stream,
@@ -46,9 +48,7 @@ Stream* buffered_file_stream_alloc(Storage* storage) {
     return (Stream*)stream;
 }
 
-bool buffered_file_stream_open(
-    Stream* _stream,
-    const char* path) {
+bool buffered_file_stream_open(Stream* _stream, const char* path) {
     furi_assert(_stream);
     BufferedFileStream* stream = (BufferedFileStream*)_stream;
     stream_buffer_reset(stream->read_buffer);
@@ -71,7 +71,7 @@ static void buffered_file_stream_free(BufferedFileStream* stream) {
 }
 
 static bool buffered_file_stream_eof(BufferedFileStream* stream) {
-    return stream_buffer_eof(stream->read_buffer) && stream_eof(stream->file_stream);
+    return stream_buffer_at_end(stream->read_buffer) && stream_eof(stream->file_stream);
 }
 
 static void buffered_file_stream_clean(BufferedFileStream* stream) {
@@ -79,7 +79,10 @@ static void buffered_file_stream_clean(BufferedFileStream* stream) {
     stream_clean(stream->file_stream);
 }
 
-static bool buffered_file_stream_seek(BufferedFileStream* stream, int32_t offset, StreamOffset offset_type) {
+static bool buffered_file_stream_seek(
+    BufferedFileStream* stream,
+    int32_t offset,
+    StreamOffset offset_type) {
     bool result = false;
 
     if(offset_type == StreamOffsetFromCurrent) {
@@ -105,15 +108,16 @@ static bool buffered_file_stream_seek(BufferedFileStream* stream, int32_t offset
 }
 
 static size_t buffered_file_stream_tell(BufferedFileStream* stream) {
-    //TODO Buffer tell() as well
-    return stream_tell(stream->file_stream) + stream_buffer_tell(stream->read_buffer) - stream_buffer_size(stream->read_buffer);
+    return stream_tell(stream->file_stream) + stream_buffer_position(stream->read_buffer) -
+           stream_buffer_size(stream->read_buffer);
 }
 
 static size_t buffered_file_stream_size(BufferedFileStream* stream) {
     return stream_buffer_size(stream->read_buffer) + stream_size(stream->file_stream);
 }
 
-static size_t buffered_file_stream_write(BufferedFileStream* stream, const uint8_t* data, size_t size) {
+static size_t
+    buffered_file_stream_write(BufferedFileStream* stream, const uint8_t* data, size_t size) {
     UNUSED(stream);
     UNUSED(data);
     UNUSED(size);
@@ -124,7 +128,8 @@ static size_t buffered_file_stream_read(BufferedFileStream* stream, uint8_t* dat
     size_t need_to_read = size;
 
     while(need_to_read) {
-        need_to_read -= stream_buffer_read(stream->read_buffer, data + (size - need_to_read), need_to_read);
+        need_to_read -=
+            stream_buffer_read(stream->read_buffer, data + (size - need_to_read), need_to_read);
         if(need_to_read) {
             if(!stream_buffer_fill(stream->read_buffer, stream->file_stream)) {
                 break;
