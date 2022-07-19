@@ -11,7 +11,7 @@ void subghz_scene_show_error_sub_on_enter(void* context) {
 
     // Setup view
     Popup* popup = subghz->popup;
-    popup_set_icon(popup, 32, 12, &I_DolphinFirstStart7_61x51);
+    popup_set_icon(popup, 32, 14, &I_DolphinFirstStart4_61x49);
     popup_set_header(popup, string_get_cstr(subghz->error_str), 64, 8, AlignCenter, AlignBottom);
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, subghz);

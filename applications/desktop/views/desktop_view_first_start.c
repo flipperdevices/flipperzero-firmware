@@ -27,29 +27,20 @@ static void desktop_first_start_draw(Canvas* canvas, void* model) {
     canvas_set_font(canvas, FontSecondary);
     uint8_t width = canvas_width(canvas);
     uint8_t height = canvas_height(canvas);
+
+    char buf[64];
     const char* my_name = furi_hal_version_get_name_ptr();
+
     if(m->page == 0) {
-        canvas_draw_icon(canvas, 0, height - 51, &I_DolphinFirstStart0_70x53);
+        canvas_draw_icon(canvas, 0, height - 49, &I_DolphinFirstStart0_67x49);
         elements_multiline_text_framed(
             canvas, 75, 16 + STATUS_BAR_Y_SHIFT, "Hey m8,\npress > to\ncontinue");
     } else if(m->page == 1) {
-        canvas_draw_icon(canvas, 0, height - 51, &I_DolphinFirstStart1_59x53);
+        canvas_draw_icon(canvas, width - 65, height - 50, &I_DolphinFirstStart1_65x50);
         elements_multiline_text_framed(
-            canvas, 64, 16 + STATUS_BAR_Y_SHIFT, "First Of All,\n...      >");
+            canvas, 0, 13 + STATUS_BAR_Y_SHIFT, "Allow me\nto introduce\nmyself >");
     } else if(m->page == 2) {
-        canvas_draw_icon(canvas, 0, height - 51, &I_DolphinFirstStart2_59x51);
-        elements_multiline_text_framed(
-            canvas, 64, 16 + STATUS_BAR_Y_SHIFT, "Thank you\nfor your\nsupport! >");
-    } else if(m->page == 3) {
-        canvas_draw_icon(canvas, width - 57, height - 45, &I_DolphinFirstStart3_57x48);
-        elements_multiline_text_framed(
-            canvas, 0, 16 + STATUS_BAR_Y_SHIFT, "Kickstarter\ncampaign\nwas INSANE! >");
-    } else if(m->page == 4) {
-        canvas_draw_icon(canvas, width - 67, height - 51, &I_DolphinFirstStart4_67x53);
-        elements_multiline_text_framed(
-            canvas, 0, 13 + STATUS_BAR_Y_SHIFT, "Now\nallow me\nto introduce\nmyself >");
-    } else if(m->page == 5) {
-        char buf[64];
+        canvas_draw_icon(canvas, 0, height - 48, &I_DolphinFirstStart2_49x48);
         snprintf(
             buf,
             64,
@@ -57,21 +48,21 @@ static void desktop_first_start_draw(Canvas* canvas, void* model) {
             "I am",
             my_name ? my_name : "Unknown",
             ",\ncyberdolphin\nliving in your\npocket >");
-        canvas_draw_icon(canvas, 0, height - 49, &I_DolphinFirstStart5_54x49);
+        canvas_draw_icon(canvas, 0, height - 48, &I_DolphinFirstStart2_49x48);
         elements_multiline_text_framed(canvas, 60, 13 + STATUS_BAR_Y_SHIFT, buf);
-    } else if(m->page == 6) {
-        canvas_draw_icon(canvas, 0, height - 51, &I_DolphinFirstStart6_58x54);
+    } else if(m->page == 3) {
+        canvas_draw_icon(canvas, 0, height - 50, &I_DolphinFirstStart3_50x50);
         elements_multiline_text_framed(
             canvas,
             63,
             13 + STATUS_BAR_Y_SHIFT,
             "I can grow\nsmart'n'cool\nif you use me\noften >");
-    } else if(m->page == 7) {
-        canvas_draw_icon(canvas, width - 61, height - 51, &I_DolphinFirstStart7_61x51);
+    } else if(m->page == 4) {
+        canvas_draw_icon(canvas, width - 61, height - 49, &I_DolphinFirstStart4_61x49);
         elements_multiline_text_framed(
             canvas, 0, 13 + STATUS_BAR_Y_SHIFT, "As long as\nyou read, write\nand emulate >");
-    } else if(m->page == 8) {
-        canvas_draw_icon(canvas, width - 56, height - 51, &I_DolphinFirstStart8_56x51);
+    } else if(m->page == 5) {
+        canvas_draw_icon(canvas, width - 56, height - 48, &I_DolphinFirstStart5_56x48);
         elements_multiline_text_framed(
             canvas,
             0,
@@ -90,7 +81,7 @@ static bool desktop_first_start_input(InputEvent* event, void* context) {
             if(model->page > 0) model->page--;
         } else if(event->key == InputKeyRight) {
             uint32_t page = ++model->page;
-            if(page > 8) {
+            if(page > 5) {
                 instance->callback(DesktopFirstStartCompleted, instance->context);
             }
         }
