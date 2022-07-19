@@ -1,5 +1,5 @@
 V:0
-T:1658180705
+T:1658209416
 D:apps
 D:badusb
 D:dolphin
@@ -25,8 +25,8 @@ F:55b695272125edd13fcf0eaf1c40fd4e:3904:apps/GAME_FlappyBird.fap
 F:6118892858db3656d3390524b9819bec:3408:apps/GAME_GameOfLife.fap
 F:b604aa5c11aad7bf17ff5cef6b9927d9:2856:apps/GAME_MandelbrotSet.fap
 F:30b682269f6d5995a79fed8d2ffc1ac1:5228:apps/GAME_Raycast.fap
-F:836125095096a2d6945b97dc7a5690bc:4448:apps/GAME_Snake.fap
-F:ac7ded5b3c14185c6d1d025e90591a54:10440:apps/GAME_Tanks.fap
+F:718299069e8b3a4402ae9ebe87b095a5:4448:apps/GAME_Snake.fap
+F:1ba2cad2418d4434b9fd91e0f61adcd2:13820:apps/GAME_Tanks.fap
 F:0dd7e257da79f74e8a872d5505ebb55c:5812:apps/GAME_Tetris.fap
 F:fff409711d633ebd96371705f2595842:5780:apps/GAME_TicTacToe.fap
 F:6caa0348fb3a9e234fceac0af81ebc3d:10192:apps/GAME_VideoPoker.fap
