@@ -160,14 +160,18 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
 
         if(subghz->txrx->transmitter) {
             if(subghz_transmitter_deserialize(subghz->txrx->transmitter, flipper_format)) {
-                if(!strcmp(string_get_cstr(subghz->txrx->preset->name), "")) {
+                if(strcmp(string_get_cstr(subghz->txrx->preset->name), "")) {
                     subghz_begin(
                         subghz,
                         subghz_setting_get_preset_data_by_name(
                             subghz->setting, string_get_cstr(subghz->txrx->preset->name)));
                 } else {
+                    FURI_LOG_E(
+                        TAG,
+                        "Unknown name preset \" %s \"",
+                        string_get_cstr(subghz->txrx->preset->name));
                     subghz_begin(
-                        subghz, subghz_setting_get_preset_data_by_name(subghz->setting, "AM270"));
+                        subghz, subghz_setting_get_preset_data_by_name(subghz->setting, "AM650"));
                 }
                 if(subghz->txrx->preset->frequency) {
                     ret = subghz_tx(subghz, subghz->txrx->preset->frequency);

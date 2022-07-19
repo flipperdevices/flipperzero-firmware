@@ -133,8 +133,10 @@ void furi_hal_subghz_load_custom_preset(uint8_t* preset_data) {
     uint8_t pa[8] = {0};
     while(preset_data[i]) {
         cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, preset_data[i], preset_data[i + 1]);
+        printf ("%X %X ", preset_data[i], preset_data[i+1]);
         i += 2;  
     }
+    printf ("\r\n");
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 
     //load pa table

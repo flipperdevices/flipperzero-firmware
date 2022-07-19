@@ -269,8 +269,7 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
         case SubmenuIndexDoorHan_315_00:
             subghz->txrx->transmitter = subghz_transmitter_alloc_init(
                 subghz->txrx->environment, SUBGHZ_PROTOCOL_KEELOQ_NAME);
-            uint8_t data[]={0x02, 0x0D, 0x03, 0x07, 0x08, 0x32, 0x0B, 0x06, 0x14, 0x00, 0x13, 0x00, 0x12, 0x30, 0x11, 0x32, 0x10, 0x17, 0x18, 0x18, 0x19, 0x18, 0x1D, 0x91, 0x1C, 0x00, 0x1B, 0x07, 0x20, 0xFB, 0x22, 0x11, 0x21, 0xB6, 0x00, 0x00, 0x00, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-            subghz_preset_init(subghz, "CUSTOM", 315000000, data, sizeof(data));
+            subghz_preset_init(subghz, "AM650", 315000000, NULL, 0);
             if(subghz->txrx->transmitter) {
                 subghz_protocol_keeloq_create_data(
                     subghz_transmitter_get_protocol_instance(subghz->txrx->transmitter),
