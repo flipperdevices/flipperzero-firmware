@@ -49,7 +49,7 @@ FuriStatus furi_semaphore_release(FuriSemaphore* instance);
  *
  * @param      instance  The pointer to FuriSemaphore instance
  *
- * @return     { description_of_the_return_value }
+ * @return     Semaphore count
  */
 uint32_t furi_semaphore_get_count(FuriSemaphore* instance);
 

@@ -52,7 +52,7 @@ FuriStatus furi_timer_stop(FuriTimer* instance);
  *
  * @param      instance  The pointer to FuriTimer instance
  *
- * @return     { description_of_the_return_value }
+ * @return     0: not running, 1: running
  */
 uint32_t furi_timer_is_running(FuriTimer* instance);
 

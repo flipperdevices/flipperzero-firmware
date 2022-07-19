@@ -29,7 +29,7 @@ void furi_event_flag_free(FuriEventFlag* instance);
  * @param      instance  pointer to FuriEventFlag
  * @param[in]  flags     The flags
  *
- * @return     { description_of_the_return_value }
+ * @return     Resulting flags or error (FuriStatus)
  */
 uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags);
 
@@ -38,7 +38,7 @@ uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags);
  * @param      instance  pointer to FuriEventFlag
  * @param[in]  flags     The flags
  *
- * @return     { description_of_the_return_value }
+ * @return     Resulting flags or error (FuriStatus)
  */
 uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags);
 
@@ -46,7 +46,7 @@ uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags);
  *
  * @param      instance  pointer to FuriEventFlag
  *
- * @return     { description_of_the_return_value }
+ * @return     Resulting flags
  */
 uint32_t furi_event_flag_get(FuriEventFlag* instance);
 
@@ -57,7 +57,7 @@ uint32_t furi_event_flag_get(FuriEventFlag* instance);
  * @param[in]  options   The option flags
  * @param[in]  timeout   The timeout
  *
- * @return     { description_of_the_return_value }
+ * @return     Resulting flags or error (FuriStatus)
  */
 uint32_t furi_event_flag_wait(
     FuriEventFlag* instance,
