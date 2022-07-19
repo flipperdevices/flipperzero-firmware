@@ -30,4 +30,4 @@
 	url = https://github.com/Mbed-TLS/mbedtls.git
 [submodule "lib/black"]
 	path = lib/black
-	url = https://github.com/psf/black.git
+	url = https://github.com/psf/black
