@@ -2,7 +2,7 @@
 
 #include <furi/common_defines.h>
 
-#define STREAM_BUFFER_MAX_SIZE 512U
+#define STREAM_BUFFER_MAX_SIZE 1024U
 
 struct StreamBuffer {
     uint8_t data[STREAM_BUFFER_MAX_SIZE];
