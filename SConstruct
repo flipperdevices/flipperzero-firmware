@@ -209,6 +209,12 @@ distenv.PhonyTarget(
     LINT_SOURCES=firmware_env["LINT_SOURCES"],
 )
 
+distenv.PhonyTarget(
+    "lint_py",
+    "${PYTHON3} scripts/lint.py check_py ${LINT_SOURCES}",
+    LINT_SOURCES=firmware_env["LINT_SOURCES"],
+)
+
 
 # Find blackmagic probe
 

@@ -28,3 +28,6 @@
 [submodule "lib/mbedtls"]
 	path = lib/mbedtls
 	url = https://github.com/Mbed-TLS/mbedtls.git
+[submodule "lib/black"]
+	path = lib/black
+	url = https://github.com/psf/black.git
