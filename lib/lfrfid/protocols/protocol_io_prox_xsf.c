@@ -16,16 +16,16 @@
 
 typedef struct {
     FSKDemod* fsk_demod;
-} ProtocolH10301Decoder;
+} ProtocolIOProxXSFDecoder;
 
 typedef struct {
     FSKOsc* fsk_osc;
     uint8_t encoded_index;
-} ProtocolH10301Encoder;
+} ProtocolIOProxXSFEncoder;
 
 typedef struct {
-    ProtocolH10301Encoder encoder;
-    ProtocolH10301Decoder decoder;
+    ProtocolIOProxXSFEncoder encoder;
+    ProtocolIOProxXSFDecoder decoder;
     uint8_t encoded_data[IOPROXXSF_ENCODED_DATA_SIZE];
     uint8_t data[IOPROXXSF_DECODED_DATA_SIZE];
 } ProtocolIOProxXSF;
