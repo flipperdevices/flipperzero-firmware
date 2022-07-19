@@ -35,9 +35,8 @@ App(
     provides=[
         "INTAPP_HIDAnalyzer",
         "INTAPP_Picopass",
-        "INTAPP_MouseJacker",
-        "INTAPP_NRFSniff",
         "INTAPP_TOTP",
+        "INTAPP_WiFiScanner",
     ],
 )
 
@@ -46,7 +45,6 @@ App(
     name="Custom applications for games menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "GAME_Tetris",
 	"GAME_Snake",
     ],
 )
@@ -68,10 +66,8 @@ App(
     provides=[
         "INTAPP_HIDAnalyzer",
         "INTAPP_Picopass",
-        "INTAPP_MouseJacker",
-        "INTAPP_NRFSniff",
-        "INTAPP_WiFiScanner",
 	"INTAPP_TOTP",
+        "INTAPP_WiFiScanner",
 	"INTAPP_Chip8",
 	"INTAPP_Chess",
         "APPS_TouchTunes",
@@ -84,6 +80,8 @@ App(
         "APPS_SentrySafe",
 	"APPS_BarcodeGenerator",
 	"APPS_MouseJiggler",
+        "APPS_MouseJacker",
+        "APPS_NRFSniff",
         "GAME_2048",
 	"GAME_Arkanoid",
 	"GAME_Dice",

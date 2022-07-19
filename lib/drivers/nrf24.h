@@ -362,3 +362,7 @@ void int32_to_bytes(uint32_t val, uint8_t* out, bool bigendian);
  * @return     32-bit value
  */
 uint32_t bytes_to_int32(uint8_t* bytes, bool bigendian);
+
+#ifdef __cplusplus
+}
+#endif
