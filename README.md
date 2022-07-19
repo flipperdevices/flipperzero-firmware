@@ -37,8 +37,9 @@ Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Fli
   ```shell
 $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
 $ ./fbt resources icons
-$ ./fbt firmware_extapps FIRMWARE_APP_SET=ext_apps
 $ ./fbt
+$ ./fbt --with-updater updater_package
+$ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 ```
 </details>
 
