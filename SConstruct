@@ -212,7 +212,7 @@ distenv.PhonyTarget(
     LINT_SOURCES=firmware_env["LINT_SOURCES"],
 )
 
-findStr = 'find . -type f ( -iname *.py -o -iname *.scons -o -iname *.fam ) -not ( -path ./toolchain/* -o -path ./lib/black* -o -path ./lib/scons/* -o -path ./lib/STM32CubeWB/* -o -path ./lib/FreeRTOS-Kernel -o -path ./lib/littlefs/* )'
+findStr = 'find . -type f ( -iname *.py -o -iname *.scons -o -iname *.fam ) -not ( -path ./toolchain/* -o -path ./lib/black* -o -path ./lib/scons/* -o -path ./lib/STM32CubeWB/* -o -path ./lib/FreeRTOS-Kernel -o -path ./lib/littlefs/* -o -path ./lib/mbedtls/* -o -path ./lib/nanopb/* )'
 findFiles = subprocess.run(findStr.split(" "),
     stdout=subprocess.PIPE,
     encoding="utf-8"

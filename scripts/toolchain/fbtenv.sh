@@ -3,7 +3,7 @@
 # unofficial strict mode
 set -eu;
 
-FLIPPER_TOOLCHAIN_VERSION="4";
+FLIPPER_TOOLCHAIN_VERSION="5";
 
 get_kernel_type()
 {
