@@ -48,12 +48,12 @@ Stream* buffered_file_stream_alloc(Storage* storage) {
     return (Stream*)stream;
 }
 
-bool buffered_file_stream_open(Stream* _stream, const char* path) {
+bool buffered_file_stream_open(Stream* _stream, const char* path, FS_AccessMode access_mode, FS_OpenMode open_mode) {
     furi_assert(_stream);
     BufferedFileStream* stream = (BufferedFileStream*)_stream;
     stream_buffer_reset(stream->read_buffer);
     furi_check(stream->stream_base.vtable == &buffered_file_stream_vtable);
-    return file_stream_open(stream->file_stream, path, FSAM_READ, FSOM_OPEN_EXISTING);
+    return file_stream_open(stream->file_stream, path, access_mode, open_mode);
 }
 
 bool buffered_file_stream_close(Stream* _stream) {

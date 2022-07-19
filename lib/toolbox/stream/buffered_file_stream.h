@@ -14,12 +14,18 @@ extern "C" {
 Stream* buffered_file_stream_alloc(Storage* storage);
 
 /**
- * Opens an existing file.
+ * Opens an existing file or creates a new one.
  * @param stream pointer to file stream object.
  * @param path path to file
+ * @param access_mode access mode from FS_AccessMode
+ * @param open_mode open mode from FS_OpenMode
  * @return success flag. You need to close the file even if the open operation failed.
  */
-bool buffered_file_stream_open(Stream* stream, const char* path);
+bool buffered_file_stream_open(
+    Stream* stream,
+    const char* path,
+    FS_AccessMode access_mode,
+    FS_OpenMode open_mode);
 
 /**
  * Closes the file.

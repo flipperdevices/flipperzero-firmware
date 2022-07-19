@@ -51,7 +51,7 @@ bool flipper_format_file_open_existing(FlipperFormat* flipper_format, const char
 
 bool flipper_format_file_buffered_open_existing(FlipperFormat* flipper_format, const char* path) {
     furi_assert(flipper_format);
-    return buffered_file_stream_open(flipper_format->stream, path);
+    return buffered_file_stream_open(flipper_format->stream, path, FSAM_READ_WRITE, FSOM_OPEN_EXISTING);
 }
 
 bool flipper_format_file_open_append(FlipperFormat* flipper_format, const char* path) {
