@@ -5,6 +5,7 @@
 <ul>
 <li><h3><B>Reorganized many apps and games to be loaded as FAP from SD.<br>If you have questions about where X app is located, DO NOT ASK ON THE MAIN DISCORD, USE <a href='https://discord.gg/gF2bBUzAFe'>THE ROGUE DISCORD</a></B></h3></li>
 <li>Moved Tanks image assets into application file and recompiled FAP</li>
+<li>More apps such as NRFSniffer and Mouse Jacker now work as FAP, thus more apps removed from internal memory</li>
 </ul>
   
 <table width="100%" border="0" cellspacing="0">
