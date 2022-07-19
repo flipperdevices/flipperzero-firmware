@@ -51,6 +51,7 @@ bool buffered_file_stream_open(
     const char* path) {
     furi_assert(_stream);
     BufferedFileStream* stream = (BufferedFileStream*)_stream;
+    stream_buffer_reset(stream->read_buffer);
     furi_check(stream->stream_base.vtable == &buffered_file_stream_vtable);
     return file_stream_open(stream->file_stream, path, FSAM_READ, FSOM_OPEN_EXISTING);
 }
@@ -104,8 +105,8 @@ static bool buffered_file_stream_seek(BufferedFileStream* stream, int32_t offset
 }
 
 static size_t buffered_file_stream_tell(BufferedFileStream* stream) {
-    UNUSED(stream);
-    furi_crash("Using tell() on a buffered file stream is not implemented");
+    //TODO Buffer tell() as well
+    return stream_tell(stream->file_stream) + stream_buffer_tell(stream->read_buffer) - stream_buffer_size(stream->read_buffer);
 }
 
 static size_t buffered_file_stream_size(BufferedFileStream* stream) {

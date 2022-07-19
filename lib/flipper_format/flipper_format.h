@@ -175,6 +175,14 @@ bool flipper_format_file_open_new(FlipperFormat* flipper_format, const char* pat
 bool flipper_format_file_close(FlipperFormat* flipper_format);
 
 /**
+ * Closes the file, use only if FlipperFormat allocated as a buffered file.
+ * @param flipper_format
+ * @return true
+ * @return false
+ */
+bool flipper_format_buffered_file_close(FlipperFormat* flipper_format);
+
+/**
  * Free FlipperFormat.
  * @param flipper_format Pointer to a FlipperFormat instance
  */

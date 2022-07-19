@@ -11,6 +11,7 @@ void stream_buffer_reset(StreamBuffer* buffer);
 
 bool stream_buffer_eof(StreamBuffer* buffer);
 size_t stream_buffer_size(StreamBuffer* buffer);
+size_t stream_buffer_tell(StreamBuffer* buffer);
 
 size_t stream_buffer_fill(StreamBuffer* buffer, Stream* stream);
 size_t stream_buffer_read(StreamBuffer* buffer, uint8_t* data, size_t size);

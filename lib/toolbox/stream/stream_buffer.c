@@ -37,6 +37,10 @@ size_t stream_buffer_size(StreamBuffer* buffer) {
     return buffer->data_size;
 }
 
+size_t stream_buffer_tell(StreamBuffer* buffer) {
+    return buffer->offset;
+}
+
 size_t stream_buffer_fill(StreamBuffer* buffer, Stream* stream) {
     const size_t size_read = stream_read(stream, buffer->data, STREAM_BUFFER_MAX_SIZE);
     buffer->data_size = size_read;
@@ -55,6 +59,7 @@ size_t stream_buffer_read(StreamBuffer* buffer, uint8_t* data, size_t size) {
 }
 
 int32_t stream_buffer_seek(StreamBuffer* buffer, int32_t offset) {
+    furi_assert(buffer->data_size >= buffer->offset);
     int32_t actual_offset = 0;
 
     if(offset > 0) {

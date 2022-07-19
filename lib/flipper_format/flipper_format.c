@@ -100,6 +100,11 @@ bool flipper_format_file_close(FlipperFormat* flipper_format) {
     return file_stream_close(flipper_format->stream);
 }
 
+bool flipper_format_buffered_file_close(FlipperFormat* flipper_format) {
+    furi_assert(flipper_format);
+    return buffered_file_stream_close(flipper_format->stream);
+}
+
 void flipper_format_free(FlipperFormat* flipper_format) {
     furi_assert(flipper_format);
     stream_free(flipper_format->stream);
