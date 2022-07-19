@@ -78,6 +78,22 @@ uint8_t bit_lib_get_bits(const uint8_t* data, size_t position, uint8_t length);
  */
 bool bit_lib_test_parity_u32(uint32_t bits, BitLibParity parity);
 
+bool bit_lib_test_parity(
+    const uint8_t* bits,
+    size_t position,
+    uint8_t length,
+    BitLibParity parity,
+    uint8_t parity_length);
+
+size_t bit_lib_remove_bit_every_nth(uint8_t* data, size_t position, uint8_t length, uint8_t n);
+
+void bit_lib_copy_bits(
+    uint8_t* data,
+    size_t position,
+    size_t length,
+    const uint8_t* source,
+    size_t source_position);
+
 #ifdef __cplusplus
 }
 #endif

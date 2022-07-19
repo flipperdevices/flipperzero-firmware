@@ -38,8 +38,10 @@ uint8_t bit_lib_get_bits(const uint8_t* data, size_t position, uint8_t length) {
         return data[position / 8] >> (8 - length);
     } else {
         // TODO fix read out of bounds
-        return ((data[position / 8] << (shift)) | (data[position / 8 + 1] >> (8 - shift))) >>
-               (8 - length);
+        uint8_t value = (data[position / 8] << (shift));
+        value |= data[position / 8 + 1] >> (8 - shift);
+        value = value >> (8 - length);
+        return value;
     }
 }
 
@@ -56,4 +58,79 @@ bool bit_lib_test_parity_u32(uint32_t bits, BitLibParity parity) {
         furi_crash("Unknown parity");
     }
 #endif
+}
+
+bool bit_lib_test_parity(
+    const uint8_t* bits,
+    size_t position,
+    uint8_t length,
+    BitLibParity parity,
+    uint8_t parity_length) {
+    uint8_t parity_block;
+    bool result = true;
+    const size_t parity_blocks_count = length / parity_length;
+
+    for(size_t i = 0; i < parity_blocks_count; ++i) {
+        switch(parity) {
+        case BitLibParityEven:
+        case BitLibParityOdd:
+            parity_block = bit_lib_get_bits(bits, position + i * parity_length, parity_length);
+            if(!bit_lib_test_parity_u32(parity_block, parity)) {
+                result = false;
+            }
+            break;
+        case BitLibParityAlways0:
+            if(bit_lib_get_bit(bits, position + i * parity_length + parity_length - 1)) {
+                result = false;
+            }
+            break;
+        case BitLibParityAlways1:
+            if(!bit_lib_get_bit(bits, position + i * parity_length + parity_length - 1)) {
+                result = false;
+            }
+            break;
+        }
+
+        if(!result) break;
+    }
+    return result;
+}
+
+size_t bit_lib_remove_bit_every_nth(uint8_t* data, size_t position, uint8_t length, uint8_t n) {
+    size_t counter = 0;
+    size_t result_counter = 0;
+    uint8_t bit_buffer = 0;
+    uint8_t bit_counter = 0;
+
+    while(counter < length) {
+        if((counter + 1) % n != 0) {
+            bit_buffer = (bit_buffer << 1) | bit_lib_get_bit(data, position + counter);
+            bit_counter++;
+        }
+
+        if(bit_counter == 8) {
+            bit_lib_set_bits(data, position + result_counter, bit_buffer, 8);
+            bit_counter = 0;
+            bit_buffer = 0;
+            result_counter += 8;
+        }
+        counter++;
+    }
+
+    if(bit_counter != 0) {
+        bit_lib_set_bits(data, position + result_counter, bit_buffer, bit_counter);
+        result_counter += bit_counter;
+    }
+    return result_counter;
+}
+
+void bit_lib_copy_bits(
+    uint8_t* data,
+    size_t position,
+    size_t length,
+    const uint8_t* source,
+    size_t source_position) {
+    for(size_t i = 0; i < length; ++i) {
+        bit_lib_set_bit(data, position + i, bit_lib_get_bit(source, source_position + i));
+    }
 }

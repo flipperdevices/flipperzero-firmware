@@ -202,6 +202,69 @@ MU_TEST(test_bit_lib_test_parity_u32) {
     mu_assert_int_eq(bit_lib_test_parity_u32(0b00010000, BitLibParityOdd), 0);
 }
 
+MU_TEST(test_bit_lib_test_parity) {
+    // next data contains valid parity for 1-3 nibble and invalid for 4 nibble
+    uint8_t data_always_0_parity[2] = {0b11101110, 0b11101111};
+    uint8_t data_always_1_parity[2] = {0b00010001, 0b00010000};
+    uint8_t data_always_odd_parity[2] = {0b00000011, 0b11110111};
+    uint8_t data_always_even_parity[2] = {0b00010111, 0b10110011};
+
+    // test alawys 0 parity
+    mu_check(bit_lib_test_parity(data_always_0_parity, 0, 12, BitLibParityAlways0, 4));
+    mu_check(bit_lib_test_parity(data_always_0_parity, 4, 8, BitLibParityAlways0, 4));
+    mu_check(bit_lib_test_parity(data_always_0_parity, 8, 4, BitLibParityAlways0, 4));
+    mu_check(bit_lib_test_parity(data_always_1_parity, 12, 4, BitLibParityAlways0, 4));
+
+    mu_check(!bit_lib_test_parity(data_always_0_parity, 0, 16, BitLibParityAlways0, 4));
+    mu_check(!bit_lib_test_parity(data_always_0_parity, 4, 12, BitLibParityAlways0, 4));
+    mu_check(!bit_lib_test_parity(data_always_0_parity, 8, 8, BitLibParityAlways0, 4));
+    mu_check(!bit_lib_test_parity(data_always_0_parity, 12, 4, BitLibParityAlways0, 4));
+
+    // test alawys 1 parity
+    mu_check(bit_lib_test_parity(data_always_1_parity, 0, 12, BitLibParityAlways1, 4));
+    mu_check(bit_lib_test_parity(data_always_1_parity, 4, 8, BitLibParityAlways1, 4));
+    mu_check(bit_lib_test_parity(data_always_1_parity, 8, 4, BitLibParityAlways1, 4));
+    mu_check(bit_lib_test_parity(data_always_0_parity, 12, 4, BitLibParityAlways1, 4));
+
+    mu_check(!bit_lib_test_parity(data_always_1_parity, 0, 16, BitLibParityAlways1, 4));
+    mu_check(!bit_lib_test_parity(data_always_1_parity, 4, 12, BitLibParityAlways1, 4));
+    mu_check(!bit_lib_test_parity(data_always_1_parity, 8, 8, BitLibParityAlways1, 4));
+    mu_check(!bit_lib_test_parity(data_always_1_parity, 12, 4, BitLibParityAlways1, 4));
+
+    // test odd parity
+    mu_check(bit_lib_test_parity(data_always_odd_parity, 0, 12, BitLibParityOdd, 4));
+    mu_check(bit_lib_test_parity(data_always_odd_parity, 4, 8, BitLibParityOdd, 4));
+    mu_check(bit_lib_test_parity(data_always_odd_parity, 8, 4, BitLibParityOdd, 4));
+    mu_check(bit_lib_test_parity(data_always_even_parity, 12, 4, BitLibParityOdd, 4));
+
+    mu_check(!bit_lib_test_parity(data_always_odd_parity, 0, 16, BitLibParityOdd, 4));
+    mu_check(!bit_lib_test_parity(data_always_odd_parity, 4, 12, BitLibParityOdd, 4));
+    mu_check(!bit_lib_test_parity(data_always_odd_parity, 8, 8, BitLibParityOdd, 4));
+    mu_check(!bit_lib_test_parity(data_always_odd_parity, 12, 4, BitLibParityOdd, 4));
+
+    // test even parity
+    mu_check(bit_lib_test_parity(data_always_even_parity, 0, 12, BitLibParityEven, 4));
+    mu_check(bit_lib_test_parity(data_always_even_parity, 4, 8, BitLibParityEven, 4));
+    mu_check(bit_lib_test_parity(data_always_even_parity, 8, 4, BitLibParityEven, 4));
+    mu_check(bit_lib_test_parity(data_always_odd_parity, 12, 4, BitLibParityEven, 4));
+
+    mu_check(!bit_lib_test_parity(data_always_even_parity, 0, 16, BitLibParityEven, 4));
+    mu_check(!bit_lib_test_parity(data_always_even_parity, 4, 12, BitLibParityEven, 4));
+    mu_check(!bit_lib_test_parity(data_always_even_parity, 8, 8, BitLibParityEven, 4));
+    mu_check(!bit_lib_test_parity(data_always_even_parity, 12, 4, BitLibParityEven, 4));
+}
+
+MU_TEST(test_bit_lib_remove_bit_every_nth) {
+    // TODO: more tests
+    uint8_t data_i[1] = {0b00001111};
+    uint8_t data_o[1] = {0b00011111};
+    size_t length;
+
+    length = bit_lib_remove_bit_every_nth(data_i, 0, 8, 3);
+    mu_assert_int_eq(6, length);
+    mu_assert_mem_eq(data_o, data_i, 1);
+}
+
 MU_TEST_SUITE(test_bit_lib) {
     MU_RUN_TEST(test_bit_lib_increment_index);
     MU_RUN_TEST(test_bit_lib_is_set);
@@ -211,6 +274,8 @@ MU_TEST_SUITE(test_bit_lib) {
     MU_RUN_TEST(test_bit_lib_get_bit);
     MU_RUN_TEST(test_bit_lib_get_bits);
     MU_RUN_TEST(test_bit_lib_test_parity_u32);
+    MU_RUN_TEST(test_bit_lib_test_parity);
+    MU_RUN_TEST(test_bit_lib_remove_bit_every_nth);
 }
 
 int run_minunit_test_bit_lib() {
