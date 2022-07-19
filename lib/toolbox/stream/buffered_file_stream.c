@@ -63,6 +63,13 @@ bool buffered_file_stream_close(Stream* _stream) {
     return file_stream_close(stream->file_stream);
 }
 
+FS_Error buffered_file_stream_get_error(Stream* _stream) {
+    furi_assert(_stream);
+    BufferedFileStream* stream = (BufferedFileStream*)_stream;
+    furi_check(stream->stream_base.vtable == &buffered_file_stream_vtable);
+    return file_stream_get_error(stream->file_stream);
+}
+
 static void buffered_file_stream_free(BufferedFileStream* stream) {
     furi_assert(stream);
     stream_free(stream->file_stream);
@@ -83,28 +90,24 @@ static bool buffered_file_stream_seek(
     BufferedFileStream* stream,
     int32_t offset,
     StreamOffset offset_type) {
-    bool result = false;
+    bool success = false;
+    int32_t new_offset = offset;
 
     if(offset_type == StreamOffsetFromCurrent) {
-        int32_t new_offset = offset - stream_buffer_seek(stream->read_buffer, offset);
-
-        if(new_offset != 0) {
-            if(new_offset < 0) {
-                new_offset -= (int32_t)stream_buffer_size(stream->read_buffer);
-            }
-            stream_buffer_reset(stream->read_buffer);
-            result = stream_seek(stream->file_stream, new_offset, offset_type);
-
-        } else {
-            result = true;
+        new_offset -= stream_buffer_seek(stream->read_buffer, offset);
+        if(new_offset < 0) {
+            new_offset -= (int32_t)stream_buffer_size(stream->read_buffer);
         }
-
-    } else {
-        stream_buffer_reset(stream->read_buffer);
-        result = stream_seek(stream->file_stream, offset, offset_type);
     }
 
-    return result;
+    if((new_offset != 0) || (offset_type != StreamOffsetFromCurrent)) {
+        stream_buffer_reset(stream->read_buffer);
+        success = stream_seek(stream->file_stream, new_offset, offset_type);
+    } else {
+        success = true;
+    }
+
+    return success;
 }
 
 static size_t buffered_file_stream_tell(BufferedFileStream* stream) {
@@ -118,10 +121,8 @@ static size_t buffered_file_stream_size(BufferedFileStream* stream) {
 
 static size_t
     buffered_file_stream_write(BufferedFileStream* stream, const uint8_t* data, size_t size) {
-    UNUSED(stream);
-    UNUSED(data);
-    UNUSED(size);
-    furi_crash("Using write() on a buffered file stream is not implemented");
+    stream_buffer_reset(stream->read_buffer);
+    return stream_write(stream->file_stream, data, size);
 }
 
 static size_t buffered_file_stream_read(BufferedFileStream* stream, uint8_t* data, size_t size) {
@@ -145,9 +146,6 @@ static bool buffered_file_stream_delete_and_insert(
     size_t delete_size,
     StreamWriteCB write_callback,
     const void* ctx) {
-    UNUSED(stream);
-    UNUSED(delete_size);
-    UNUSED(write_callback);
-    UNUSED(ctx);
-    furi_crash("Using delete_and_insert() on a buffered file stream is not implemented");
+    stream_buffer_reset(stream->read_buffer);
+    return stream_delete_and_insert(stream->file_stream, delete_size, write_callback, ctx);
 }

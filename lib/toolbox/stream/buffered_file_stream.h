@@ -8,13 +8,13 @@ extern "C" {
 #endif
 
 /**
- * Allocate a buffered read-only file stream
+ * Allocate a file stream with buffered read operations
  * @return Stream*
  */
 Stream* buffered_file_stream_alloc(Storage* storage);
 
 /**
- * Opens an existing file in read-only mode.
+ * Opens an existing file.
  * @param stream pointer to file stream object.
  * @param path path to file
  * @return success flag. You need to close the file even if the open operation failed.
