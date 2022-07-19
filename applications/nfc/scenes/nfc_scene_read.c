@@ -52,7 +52,7 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadEmvDataSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMifareClassicDictAttackRequired) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareClassic);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicDictAttack);
             consumed = true;
         }
     }

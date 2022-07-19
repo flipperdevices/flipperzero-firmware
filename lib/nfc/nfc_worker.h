@@ -46,6 +46,7 @@ typedef enum {
     // Nfc worker common events
     NfcWorkerEventSuccess,
     NfcWorkerEventFail,
+    NfcWorkerEventAborted,
     NfcWorkerEventCardDetected,
     NfcWorkerEventNoCardDetected,
     // Mifare Classic events

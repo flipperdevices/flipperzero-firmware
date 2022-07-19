@@ -149,6 +149,7 @@ static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
     nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
     do {
         // Try to read supported card
+        FURI_LOG_D(TAG, "Try read supported card");
         for(size_t i = 0; i < NfcSupportedCardTypeEnd; i++) {
             if(nfc_supported_card[i].protocol == NfcDeviceProtocolMifareClassic) {
                 if(nfc_supported_card[i].verify(nfc_worker, tx_rx)) {
@@ -161,6 +162,7 @@ static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
         }
         if(read_success) break;
         // Try to read card with key cache
+        FURI_LOG_D(TAG, "Search for key cache");
         if(nfc_worker->callback(NfcWorkerEventReadMifareClassicLoadKeyCache, nfc_worker->context)) {
             FURI_LOG_D(TAG, "Load keys cache success. Start reading");
             uint8_t sectors_read =
@@ -230,15 +232,21 @@ static bool nfc_worker_nfca_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     bool card_read = false;
     furi_hal_nfc_sleep();
     if(mf_ul_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
+        FURI_LOG_D(TAG, "Mifare Ultralight / NTAG detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareUl;
         card_read = nfc_worker_read_mf_ul(nfc_worker, tx_rx);
     } else if(mf_classic_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
+        FURI_LOG_D(TAG, "Mifare Classic detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareClassic;
+        nfc_worker->dev_data->mf_classic_data.type =
+            mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
         card_read = nfc_worker_read_mf_classic(nfc_worker, tx_rx);
     } else if(mf_df_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
+        FURI_LOG_D(TAG, "Mifare DESFire detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareDesfire;
         card_read = nfc_worker_read_mf_desf(nfc_worker, tx_rx);
     } else if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
+        FURI_LOG_D(TAG, "ISO14443-4 card detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolEMV;
         card_read = nfc_worker_read_bank_card(nfc_worker, tx_rx);
     }
@@ -535,62 +543,78 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker, MfClassicDictType 
     // Load dictionary
     MfClassicDict* dict = mf_classic_dict_alloc(type);
     if(!dict) {
+        FURI_LOG_E(TAG, "Dictionary not found");
         nfc_worker->callback(NfcWorkerEventNoDictFound, nfc_worker->context);
         mf_classic_dict_free(dict);
         return;
     }
 
-    while((nfc_worker->state == NfcWorkerStateMfClassicUserDictAttack) ||
-          (nfc_worker->state == NfcWorkerStateMfClassicFlipperDictAttack)) {
-        for(size_t i = 0; i < total_sectors; i++) {
-            uint8_t block_num = mf_classic_get_sector_trailer_block_num_by_sector(i);
-            if(mf_classic_is_sector_read(data, i)) continue;
-            bool is_key_a_found = mf_classic_is_key_found(data, i, MfClassicKeyA);
-            bool is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
-            while(mf_classic_dict_get_next_key(dict, &key)) {
+    FURI_LOG_D(TAG, "Start Dictionary attack");
+    for(size_t i = 0; i < total_sectors; i++) {
+        FURI_LOG_I(TAG, "Sector %d", i);
+        nfc_worker->callback(NfcWorkerEventNewSector, nfc_worker->context);
+        uint8_t block_num = mf_classic_get_sector_trailer_block_num_by_sector(i);
+        if(mf_classic_is_sector_read(data, i)) continue;
+        bool is_key_a_found = mf_classic_is_key_found(data, i, MfClassicKeyA);
+        bool is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
+        while(mf_classic_dict_get_next_key(dict, &key)) {
+            furi_hal_nfc_sleep();
+            if(furi_hal_nfc_activate_nfca(200, NULL)) {
                 furi_hal_nfc_sleep();
-                if(furi_hal_nfc_activate_nfca(200, NULL)) {
+                if(!card_found_notified) {
+                    nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
+                    card_found_notified = true;
+                    card_removed_notified = false;
+                }
+                FURI_LOG_D(
+                    TAG,
+                    "Try to auth to sector %d with key %04lx%08lx",
+                    i,
+                    (uint32_t)(key >> 32),
+                    (uint32_t)key);
+                if(!is_key_a_found) {
+                    is_key_a_found = mf_classic_is_key_found(data, i, MfClassicKeyA);
+                    if(mf_classic_authenticate(&tx_rx, block_num, key, MfClassicKeyA)) {
+                        mf_classic_set_key_found(data, i, MfClassicKeyA, key);
+                        nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
+                    }
                     furi_hal_nfc_sleep();
-                    if(!card_found_notified) {
-                        nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
-                        card_found_notified = true;
-                        card_removed_notified = false;
-                    }
-                    if(!is_key_a_found) {
-                        is_key_a_found = mf_classic_is_key_found(data, i, MfClassicKeyA);
-                        if(mf_classic_authenticate(&tx_rx, block_num, key, MfClassicKeyA)) {
-                            mf_classic_set_key_found(data, i, MfClassicKeyA, key);
-                            nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
-                        }
-                        furi_hal_nfc_sleep();
-                    }
-                    if(!is_key_b_found) {
-                        is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
-                        if(mf_classic_authenticate(&tx_rx, block_num, key, MfClassicKeyB)) {
-                            mf_classic_set_key_found(data, i, MfClassicKeyB, key);
-                            nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
-                        }
-                    }
-                    if(is_key_a_found && is_key_b_found) break;
-                    if(!((nfc_worker->state == NfcWorkerStateMfClassicUserDictAttack) ||
-                         (nfc_worker->state == NfcWorkerStateMfClassicFlipperDictAttack)))
-                        break;
-                } else {
-                    if(!card_removed_notified) {
-                        nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
-                        card_removed_notified = true;
-                        card_found_notified = false;
+                }
+                if(!is_key_b_found) {
+                    is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
+                    if(mf_classic_authenticate(&tx_rx, block_num, key, MfClassicKeyB)) {
+                        mf_classic_set_key_found(data, i, MfClassicKeyB, key);
+                        nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
                     }
                 }
+                if(is_key_a_found && is_key_b_found) break;
+                if(!((nfc_worker->state == NfcWorkerStateMfClassicUserDictAttack) ||
+                     (nfc_worker->state == NfcWorkerStateMfClassicFlipperDictAttack)))
+                    break;
+            } else {
+                if(!card_removed_notified) {
+                    nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
+                    card_removed_notified = true;
+                    card_found_notified = false;
+                }
+                if(!((nfc_worker->state == NfcWorkerStateMfClassicUserDictAttack) ||
+                     (nfc_worker->state == NfcWorkerStateMfClassicFlipperDictAttack)))
+                    break;
             }
-            if(!((nfc_worker->state == NfcWorkerStateMfClassicUserDictAttack) ||
-                 (nfc_worker->state == NfcWorkerStateMfClassicFlipperDictAttack)))
-                break;
-            mf_classic_read_sector(&tx_rx, data, i);
-            mf_classic_dict_rewind(dict);
         }
+        if(!((nfc_worker->state == NfcWorkerStateMfClassicUserDictAttack) ||
+             (nfc_worker->state == NfcWorkerStateMfClassicFlipperDictAttack)))
+            break;
+        mf_classic_read_sector(&tx_rx, data, i);
+        mf_classic_dict_rewind(dict);
     }
     mf_classic_dict_free(dict);
+    if((nfc_worker->state == NfcWorkerStateMfClassicUserDictAttack) ||
+       (nfc_worker->state == NfcWorkerStateMfClassicFlipperDictAttack)) {
+        nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
+    } else {
+        nfc_worker->callback(NfcWorkerEventAborted, nfc_worker->context);
+    }
 }
 
 void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {

@@ -85,6 +85,16 @@ uint8_t mf_classic_get_total_sectors_num(MfClassicType type) {
     }
 }
 
+static uint16_t mf_classic_get_total_block_num(MfClassicType type) {
+    if(type == MfClassicType1k) {
+        return 64;
+    } else if(type == MfClassicType4k) {
+        return 256;
+    } else {
+        return 0;
+    }
+}
+
 bool mf_classic_is_block_read(MfClassicData* data, uint8_t block_num) {
     furi_assert(data);
 
@@ -155,13 +165,26 @@ bool mf_classic_is_sector_read(MfClassicData* data, uint8_t sector_num) {
     return sector_read;
 }
 
-static uint16_t mf_classic_get_total_block_num(MfClassicType type) {
-    if(type == MfClassicType1k) {
-        return 64;
-    } else if(type == MfClassicType4k) {
-        return 256;
-    } else {
-        return 0;
+void mf_classic_get_read_sectors_and_keys(
+    MfClassicData* data,
+    uint8_t* sectors_read,
+    uint8_t* keys_found) {
+    furi_assert(data);
+    *sectors_read = 0;
+    *keys_found = 0;
+    uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);
+    for(size_t i = 0; i < sectors_total; i++) {
+        if(mf_classic_is_sector_read(data, i)) {
+            *keys_found += 2;
+            *sectors_read += 1;
+        } else {
+            if(mf_classic_is_key_found(data, i, MfClassicKeyA)) {
+                *keys_found += 1;
+            }
+            if(mf_classic_is_key_found(data, i, MfClassicKeyB)) {
+                *keys_found += 1;
+            }
+        }
     }
 }
 
@@ -291,6 +314,16 @@ bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
     } else {
         return false;
     }
+}
+
+MfClassicType mf_classic_get_classic_type(int8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
+    UNUSED(ATQA1);
+    if((ATQA0 == 0x44 || ATQA0 == 0x04) && (SAK == 0x08 || SAK == 0x88 || SAK == 0x09)) {
+        return MfClassicType1k;
+    } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
+        return MfClassicType4k;
+    }
+    return MfClassicType1k;
 }
 
 bool mf_classic_get_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK, MfClassicReader* reader) {

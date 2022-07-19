@@ -76,6 +76,8 @@ typedef struct {
 
 bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
+MfClassicType mf_classic_get_classic_type(int8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
+
 bool mf_classic_get_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK, MfClassicReader* reader);
 
 uint8_t mf_classic_get_total_sectors_num(MfClassicType type);
@@ -95,6 +97,11 @@ bool mf_classic_is_block_read(MfClassicData* data, uint8_t block_num);
 void mf_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassicBlock* block_data);
 
 bool mf_classic_is_sector_read(MfClassicData* data, uint8_t sector_num);
+
+void mf_classic_get_read_sectors_and_keys(
+    MfClassicData* data,
+    uint8_t* sectors_read,
+    uint8_t* keys_found);
 
 MfClassicSectorTrailer*
     mf_classic_get_sector_trailer_by_sector(MfClassicData* data, uint8_t sector);

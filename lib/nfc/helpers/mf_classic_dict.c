@@ -5,6 +5,8 @@
 #define MF_CLASSIC_DICT_FLIPPER_PATH "/ext/nfc/assets/mf_classic_dict.nfc"
 #define MF_CLASSIC_DICT_USER_PATH "/ext/nfc/assets/mf_classic_dict_user.nfc"
 
+#define TAG "MfClassicDict"
+
 #define NFC_MF_CLASSIC_KEY_LEN (13)
 
 struct MfClassicDict {
@@ -68,6 +70,10 @@ MfClassicDict* mf_classic_dict_alloc(MfClassicDictType dict_type) {
         file_stream_close(dict->stream);
         free(dict);
         dict = NULL;
+    }
+
+    if(dict_loaded) {
+        FURI_LOG_I(TAG, "Loaded dictionary with %d keys", dict->total_keys);
     }
 
     return dict;
