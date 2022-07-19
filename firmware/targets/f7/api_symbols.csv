@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,0.27,,
+Version,+,1,,
 Header,+,applications/bt/bt_service/bt.h,,
 Header,+,applications/cli/cli.h,,
 Header,+,applications/cli/cli_vcp.h,,
