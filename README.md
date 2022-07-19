@@ -2,12 +2,7 @@
 
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
-- Updated Manifest and packed in pre-compiled working apps/games
-- [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): An-Motors and HCS101 keeloq emulation
-- [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): FAAC SLH/Spa counter fix, now it uses 20-bits
-- [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): Keeloq increased hold duration
-- Updates for api_symbols.csv used by external apps [(By E_Surge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
-- Tested and renamed newly working FAPs and uploaded to assets and awesome repo
+<ul><li><h2><B>Reorganized many apps and games to be loaded as FAP from SD.<br>If you have questions about where X app is located, DO NOT ASK ON THE MAIN DISCORD, USE <a href='https://discord.gg/gF2bBUzAFe'>THE ROGUE DISCORD</a></B></h2></li></ul>
   
 <table width="100%" border="0" cellspacing="0">
   <tr>
