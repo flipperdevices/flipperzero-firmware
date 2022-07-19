@@ -37,12 +37,12 @@ int32_t furi_kernel_restore_lock(int32_t lock);
 uint32_t furi_kernel_get_tick_frequency();
 
 /** Delay execution
+ * 
+ * Also keep in mind delay is aliased to scheduler timer intervals.
  *
  * @param[in]  ticks  The ticks count to pause
- *
- * @return     The furi status.
  */
-FuriStatus furi_delay_tick(uint32_t ticks);
+void furi_delay_tick(uint32_t ticks);
 
 /** Delay until tick
  *
@@ -71,20 +71,28 @@ uint32_t furi_get_tick(void);
  * @param[in]   milliseconds    time in milliseconds
  * @return      time in ticks
  */
-uint32_t furi_ms_to_ticks(float milliseconds);
+uint32_t furi_ms_to_ticks(uint32_t milliseconds);
 
 /** Delay in milliseconds
+ * 
+ * This method uses kernel ticks on the inside, which causes delay to be aliased to scheduler timer intervals.
+ * Real wait time will be between X+ milliseconds.
+ * Special value: 0, will cause task yield.
+ * Also if used when kernel is not running will fall back to `furi_delay_us`.
+ * 
  * @warning    Cannot be used from ISR
  *
  * @param[in]  milliseconds  milliseconds to wait
  */
-void furi_delay_ms(float milliseconds);
+void furi_delay_ms(uint32_t milliseconds);
 
 /** Delay in microseconds
+ * 
+ * Implemented using Cortex DWT counter. Blocking and non aliased.
  *
  * @param[in]  microseconds  microseconds to wait
  */
-void furi_delay_us(float microseconds);
+void furi_delay_us(uint32_t microseconds);
 
 #ifdef __cplusplus
 }

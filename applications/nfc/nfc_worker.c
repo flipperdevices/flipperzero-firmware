@@ -434,7 +434,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
                     }
                 }
                 if(nfc_worker->state != NfcWorkerStateReadMifareClassic) break;
-                furi_delay_ms(1);
+                furi_delay_tick(1);
             }
             if(nfc_worker->state != NfcWorkerStateReadMifareClassic) break;
             if(sector_key_found) {

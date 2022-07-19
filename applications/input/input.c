@@ -15,7 +15,7 @@ inline static void input_timer_stop(FuriTimer* timer_id) {
     // xTimerStop is not actually stopping timer,
     // Instead it places stop event into timer queue
     // This code ensures that timer is stopped
-    while(xTimerIsTimerActive(hTimer) == pdTRUE) furi_delay_ms(1);
+    while(xTimerIsTimerActive(hTimer) == pdTRUE) furi_delay_tick(1);
 }
 
 void input_press_timer_callback(void* arg) {
@@ -127,7 +127,7 @@ int32_t input_srv() {
         }
 
         if(is_changing) {
-            furi_delay_ms(1);
+            furi_delay_tick(1);
         } else {
             furi_thread_flags_wait(INPUT_THREAD_FLAG_ISR, FuriFlagWaitAny, FuriWaitForever);
         }

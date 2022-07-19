@@ -15,7 +15,7 @@ IconAnimation* icon_animation_alloc(const Icon* icon) {
 void icon_animation_free(IconAnimation* instance) {
     furi_assert(instance);
     icon_animation_stop(instance);
-    while(xTimerIsTimerActive(instance->timer) == pdTRUE) furi_delay_ms(1);
+    while(xTimerIsTimerActive(instance->timer) == pdTRUE) furi_delay_tick(1);
     furi_timer_free(instance->timer);
     free(instance);
 }

@@ -201,7 +201,7 @@ bool ble_glue_wait_for_c2_start(int32_t timeout) {
         started = ble_glue->status == BleGlueStatusC2Started;
         if(!started) {
             timeout--;
-            furi_delay_ms(1);
+            furi_delay_tick(1);
         }
     } while(!started && (timeout > 0));
 

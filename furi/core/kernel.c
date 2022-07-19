@@ -93,21 +93,16 @@ int32_t furi_kernel_restore_lock(int32_t lock) {
 
 uint32_t furi_kernel_get_tick_frequency() {
     /* Return frequency in hertz */
-    return (configTICK_RATE_HZ);
+    return (configTICK_RATE_HZ_RAW);
 }
 
-FuriStatus furi_delay_tick(uint32_t ticks) {
+void furi_delay_tick(uint32_t ticks) {
     furi_assert(!furi_is_irq_context());
-    FuriStatus stat;
-
-    stat = FuriStatusOk;
-
-    if(ticks != 0U) {
+    if(ticks == 0U) {
+        taskYIELD();
+    } else {
         vTaskDelay(ticks);
     }
-
-    /* Return execution status */
-    return (stat);
 }
 
 FuriStatus furi_delay_until_tick(uint32_t tick) {
@@ -153,24 +148,32 @@ uint32_t furi_get_tick() {
     return ticks;
 }
 
-uint32_t furi_ms_to_ticks(float milliseconds) {
-    return milliseconds / (1000.0f / furi_kernel_get_tick_frequency());
+uint32_t furi_ms_to_ticks(uint32_t milliseconds) {
+#if configTICK_RATE_HZ_RAW == 1000
+    return milliseconds;
+#else
+    return (uint32_t)((float)configTICK_RATE_HZ_RAW) / 1000.0f * (float)milliseconds;
+#endif
 }
 
-void furi_delay_us(float microseconds) {
+void furi_delay_ms(uint32_t milliseconds) {
+    if(!FURI_IS_ISR() && xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) {
+        if(milliseconds > 0 && milliseconds < portMAX_DELAY - 1) {
+            milliseconds += 1;
+        }
+#if configTICK_RATE_HZ_RAW == 1000
+        furi_delay_tick(milliseconds);
+#else
+        furi_delay_tick(furi_ms_to_ticks(milliseconds));
+#endif
+    } else if(milliseconds > 0) {
+        furi_delay_us(milliseconds * 1000);
+    }
+}
+
+void furi_delay_us(uint32_t microseconds) {
     uint32_t start = DWT->CYCCNT;
     uint32_t time_ticks = microseconds * furi_instructions_per_microsecond();
     while((DWT->CYCCNT - start) < time_ticks) {
     };
-}
-
-void furi_delay_ms(float milliseconds) {
-    if(!FURI_IS_ISR() && xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) {
-        uint32_t ticks = milliseconds / (1000.0f / furi_kernel_get_tick_frequency());
-        FuriStatus result = furi_delay_tick(ticks);
-        (void)result;
-        furi_assert(result == FuriStatusOk);
-    } else {
-        furi_delay_us(milliseconds * 1000);
-    }
 }

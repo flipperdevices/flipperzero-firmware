@@ -291,7 +291,7 @@ void furi_hal_bt_stop_advertising() {
     if(furi_hal_bt_is_active()) {
         gap_stop_advertising();
         while(furi_hal_bt_is_active()) {
-            furi_delay_ms(1);
+            furi_delay_tick(1);
         }
     }
 }

@@ -86,7 +86,7 @@ static void test_rpc_setup(void) {
     rpc = furi_record_open("rpc");
     for(int i = 0; !(rpc_session[0].session) && (i < 10000); ++i) {
         rpc_session[0].session = rpc_session_open(rpc);
-        furi_delay_ms(1);
+        furi_delay_tick(1);
     }
     furi_check(rpc_session[0].session);
 
@@ -106,7 +106,7 @@ static void test_rpc_setup_second_session(void) {
 
     for(int i = 0; !(rpc_session[1].session) && (i < 10000); ++i) {
         rpc_session[1].session = rpc_session_open(rpc);
-        furi_delay_ms(1);
+        furi_delay_tick(1);
     }
     furi_check(rpc_session[1].session);
 

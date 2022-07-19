@@ -540,7 +540,7 @@ void gap_thread_stop() {
         furi_mutex_free(gap->state_mutex);
         furi_message_queue_free(gap->command_queue);
         furi_timer_stop(gap->advertise_timer);
-        while(xTimerIsTimerActive(gap->advertise_timer) == pdTRUE) furi_delay_ms(1);
+        while(xTimerIsTimerActive(gap->advertise_timer) == pdTRUE) furi_delay_tick(1);
         furi_timer_free(gap->advertise_timer);
         free(gap);
         gap = NULL;
