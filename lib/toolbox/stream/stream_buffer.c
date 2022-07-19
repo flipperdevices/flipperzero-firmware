@@ -28,9 +28,13 @@ void stream_buffer_reset(StreamBuffer* buffer) {
     buffer->offset = 0;
 }
 
-size_t stream_buffer_size_available(StreamBuffer* buffer) {
+bool stream_buffer_eof(StreamBuffer* buffer) {
     furi_assert(buffer->data_size >= buffer->offset);
-    return buffer->data_size - buffer->offset;
+    return buffer->data_size == buffer->offset;
+}
+
+size_t stream_buffer_size(StreamBuffer* buffer) {
+    return buffer->data_size;
 }
 
 size_t stream_buffer_fill(StreamBuffer* buffer, Stream* stream) {
@@ -50,7 +54,7 @@ size_t stream_buffer_read(StreamBuffer* buffer, uint8_t* data, size_t size) {
     return size_read;
 }
 
-size_t stream_buffer_seek(StreamBuffer* buffer, int32_t offset) {
+int32_t stream_buffer_seek(StreamBuffer* buffer, int32_t offset) {
     int32_t actual_offset = 0;
 
     if(offset > 0) {

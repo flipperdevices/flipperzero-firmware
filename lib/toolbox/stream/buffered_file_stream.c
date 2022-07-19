@@ -70,7 +70,7 @@ static void buffered_file_stream_free(BufferedFileStream* stream) {
 }
 
 static bool buffered_file_stream_eof(BufferedFileStream* stream) {
-    return !stream_buffer_size_available(stream->read_buffer) && stream_eof(stream->file_stream);
+    return stream_buffer_eof(stream->read_buffer) && stream_eof(stream->file_stream);
 }
 
 static void buffered_file_stream_clean(BufferedFileStream* stream) {
@@ -80,17 +80,24 @@ static void buffered_file_stream_clean(BufferedFileStream* stream) {
 
 static bool buffered_file_stream_seek(BufferedFileStream* stream, int32_t offset, StreamOffset offset_type) {
     bool result = false;
-    int32_t new_offset = offset;
 
     if(offset_type == StreamOffsetFromCurrent) {
-        new_offset -= stream_buffer_seek(stream->read_buffer, offset);
-    }
+        int32_t new_offset = offset - stream_buffer_seek(stream->read_buffer, offset);
 
-    if(new_offset != 0) {
-        stream_buffer_reset(stream->read_buffer);
-        result = stream_seek(stream->file_stream, new_offset, offset_type);
+        if(new_offset != 0) {
+            if(new_offset < 0) {
+                new_offset -= (int32_t)stream_buffer_size(stream->read_buffer);
+            }
+            stream_buffer_reset(stream->read_buffer);
+            result = stream_seek(stream->file_stream, new_offset, offset_type);
+
+        } else {
+            result = true;
+        }
+
     } else {
-        result = true;
+        stream_buffer_reset(stream->read_buffer);
+        result = stream_seek(stream->file_stream, offset, offset_type);
     }
 
     return result;
@@ -102,7 +109,7 @@ static size_t buffered_file_stream_tell(BufferedFileStream* stream) {
 }
 
 static size_t buffered_file_stream_size(BufferedFileStream* stream) {
-    return stream_buffer_size_available(stream->read_buffer) + stream_size(stream->file_stream);
+    return stream_buffer_size(stream->read_buffer) + stream_size(stream->file_stream);
 }
 
 static size_t buffered_file_stream_write(BufferedFileStream* stream, const uint8_t* data, size_t size) {
