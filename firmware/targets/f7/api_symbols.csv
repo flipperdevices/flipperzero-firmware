@@ -105,6 +105,7 @@ Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_tim.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_usart.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_utils.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_wwdg.h,,
+Header,+,lib/drivers/nrf24.h,,
 Header,+,lib/flipper_format/flipper_format.h,,
 Header,+,lib/flipper_format/flipper_format_i.h,,
 Header,+,lib/micro-ecc/uECC.h,,
@@ -569,6 +570,7 @@ Function,+,byte_input_free,void,ByteInput*
 Function,+,byte_input_get_view,View*,ByteInput*
 Function,+,byte_input_set_header_text,void,"ByteInput*, const char*"
 Function,+,byte_input_set_result_callback,void,"ByteInput*, ByteInputCallback, ByteChangedCallback, void*, uint8_t*, uint8_t"
+Function,+,bytes_to_int32,uint32_t,"uint8_t*, _Bool"
 Function,-,bzero,void,"void*, size_t"
 Function,-,calloc,void*,"size_t, size_t"
 Function,+,canvas_clear,void,Canvas*
@@ -745,7 +747,7 @@ Function,-,erfcf,float,float
 Function,-,erfcl,long double,long double
 Function,-,erff,float,float
 Function,-,erfl,long double,long double
-Function,-,exit,void,int
+Function,+,exit,void,int
 Function,-,exp,double,double
 Function,-,exp10,double,double
 Function,-,exp10f,float,float
@@ -1409,6 +1411,7 @@ Function,+,init_mutex,_Bool,"ValueMutex*, void*, size_t"
 Function,-,initstate,char*,"unsigned, char*, size_t"
 Function,+,input_get_key_name,const char*,InputKey
 Function,+,input_get_type_name,const char*,InputType
+Function,+,int32_to_bytes,void,"uint32_t, uint8_t*, bool"
 Function,+,iprintf,int,"const char*, ..."
 Function,-,isalnum,int,int
 Function,-,isalnum_l,int,"int, locale_t"
@@ -1567,6 +1570,13 @@ Function,+,nfca_get_crc16,uint16_t,"uint8_t*, uint16_t"
 Function,+,nfca_signal_alloc,NfcaSignal*,
 Function,+,nfca_signal_encode,void,"NfcaSignal*, uint8_t*, uint16_t, uint8_t*"
 Function,+,nfca_signal_free,void,NfcaSignal*
+Function,+,nrf24_find_channel,uint8_t,"FuriHalSpiBusHandle*, uint8_t*, uint8_t*, uint8_t, uint8_t, uint8_t, uint8_t, bool"
+Function,+,nrf24_init,void,,
+Function,+,nrf24_init_promisc_mode,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t"
+Function,+,nrf24_set_idle,uint8_t,"FuriHalSpiBusHandle*"
+Function,+,nrf24_set_src_mac,uint8_t,"FuriHalSpiBusHandle*, uint8_t*, uint8_t"
+Function,+,nrf24_sniff_address,_Bool,"FuriHalSpiBusHandle*, uint8_t, uint8_t*"
+Function,+,nrf24_txpacket,uint8_t,"FuriHalSpiBusHandle*, uint8_t*, uint8_t, bool"
 Function,+,notification_internal_message,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_internal_message_block,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_message,void,"NotificationApp*, const NotificationSequence*"
@@ -2030,7 +2040,7 @@ Function,-,stpncpy,char*,"char*, const char*, size_t"
 Function,-,strcasecmp,int,"const char*, const char*"
 Function,-,strcasecmp_l,int,"const char*, const char*, locale_t"
 Function,+,strcasestr,char*,"const char*, const char*"
-Function,-,strcat,char*,"char*, const char*"
+Function,+,strcat,char*,"char*, const char*"
 Function,+,strchr,char*,"const char*, int"
 Function,-,strchrnul,char*,"const char*, int"
 Function,+,strcmp,int,"const char*, const char*"
@@ -2099,7 +2109,7 @@ Function,-,strtod,double,"const char*, char**"
 Function,-,strtod_l,double,"const char*, char**, locale_t"
 Function,+,strtof,float,"const char*, char**"
 Function,-,strtof_l,float,"const char*, char**, locale_t"
-Function,-,strtok,char*,"char*, const char*"
+Function,+,strtok,char*,"char*, const char*"
 Function,-,strtok_r,char*,"char*, const char*, char**"
 Function,+,strtol,long,"const char*, char**, int"
 Function,-,strtol_l,long,"const char*, char**, int, locale_t"
@@ -2545,7 +2555,7 @@ Variable,+,I_FaceCharging_29x14,const Icon,
 Variable,+,I_FaceConfused_29x14,const Icon,
 Variable,+,I_FaceNopower_29x14,const Icon,
 Variable,+,I_FaceNormal_29x14,const Icon,
-Variable,+,I_HappyFlipper_128x64,const Icon,
+Variable,-,I_HappyFlipper_128x64,const Icon,
 Variable,+,I_Health_16x16,const Icon,
 Variable,+,I_InfraredArrowDown_4x8,const Icon,
 Variable,+,I_InfraredArrowUp_4x8,const Icon,
@@ -2594,7 +2604,7 @@ Variable,+,I_SDcardMounted_11x8,const Icon,
 Variable,+,I_Scanning_123x52,const Icon,
 Variable,+,I_Smile_18x18,const Icon,
 Variable,+,I_Space_65x18,const Icon,
-Variable,+,I_TanksSplashScreen_128x64,const Icon,
+Variable,-,I_TanksSplashScreen_128x64,const Icon,
 Variable,+,I_Temperature_16x16,const Icon,
 Variable,+,I_Unlock_7x8,const Icon,
 Variable,+,I_Up_25x27,const Icon,
@@ -2614,10 +2624,10 @@ Variable,+,I_back_10px,const Icon,
 Variable,+,I_badusb_10px,const Icon,
 Variable,-,I_ble_10px,const Icon,
 Variable,+,I_dir_10px,const Icon,
-Variable,+,I_enemy_down,const Icon,
-Variable,+,I_enemy_left,const Icon,
-Variable,+,I_enemy_right,const Icon,
-Variable,+,I_enemy_up,const Icon,
+Variable,-,I_enemy_down,const Icon,
+Variable,-,I_enemy_left,const Icon,
+Variable,-,I_enemy_right,const Icon,
+Variable,-,I_enemy_up,const Icon,
 Variable,+,I_iButtonDolphinVerySuccess_108x52,const Icon,
 Variable,+,I_iButtonKey_49x44,const Icon,
 Variable,+,I_ibutt_10px,const Icon,
@@ -2635,20 +2645,20 @@ Variable,+,I_passport_left_6x46,const Icon,
 Variable,+,I_passport_okay1_46x49,const Icon,
 Variable,+,I_passport_okay2_46x49,const Icon,
 Variable,+,I_passport_okay3_46x49,const Icon,
-Variable,+,I_projectile_down,const Icon,
-Variable,+,I_projectile_left,const Icon,
-Variable,+,I_projectile_right,const Icon,
-Variable,+,I_projectile_up,const Icon,
+Variable,-,I_projectile_down,const Icon,
+Variable,-,I_projectile_left,const Icon,
+Variable,-,I_projectile_right,const Icon,
+Variable,-,I_projectile_up,const Icon,
 Variable,+,I_sub1_10px,const Icon,
-Variable,+,I_tank_base,const Icon,
-Variable,+,I_tank_down,const Icon,
-Variable,+,I_tank_explosion,const Icon,
-Variable,+,I_tank_hedgehog,const Icon,
-Variable,+,I_tank_left,const Icon,
-Variable,+,I_tank_right,const Icon,
-Variable,+,I_tank_stone,const Icon,
-Variable,+,I_tank_up,const Icon,
-Variable,+,I_tank_wall,const Icon,
+Variable,-,I_tank_base,const Icon,
+Variable,-,I_tank_down,const Icon,
+Variable,-,I_tank_explosion,const Icon,
+Variable,-,I_tank_hedgehog,const Icon,
+Variable,-,I_tank_left,const Icon,
+Variable,-,I_tank_right,const Icon,
+Variable,-,I_tank_stone,const Icon,
+Variable,-,I_tank_up,const Icon,
+Variable,-,I_tank_wall,const Icon,
 Variable,+,I_u2f_10px,const Icon,
 Variable,+,I_unknown_10px,const Icon,
 Variable,+,I_update_10px,const Icon,
@@ -2666,7 +2676,7 @@ Variable,+,furi_hal_i2c_handle_power,FuriHalI2cBusHandle,
 Variable,+,furi_hal_sd_spi_handle,FuriHalSpiBusHandle*,
 Variable,+,furi_hal_spi_bus_d,FuriHalSpiBus,
 Variable,+,furi_hal_spi_bus_handle_display,FuriHalSpiBusHandle,
-Variable,-,furi_hal_spi_bus_handle_external,FuriHalSpiBusHandle,
+Variable,+,furi_hal_spi_bus_handle_external,FuriHalSpiBusHandle,
 Variable,+,furi_hal_spi_bus_handle_nfc,FuriHalSpiBusHandle,
 Variable,+,furi_hal_spi_bus_handle_sd_fast,FuriHalSpiBusHandle,
 Variable,+,furi_hal_spi_bus_handle_sd_slow,FuriHalSpiBusHandle,
