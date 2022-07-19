@@ -6,10 +6,6 @@ void furi_init() {
     furi_assert(!furi_is_irq_context());
     furi_assert(xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED);
 
-    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-    DWT->CYCCNT = 0U;
-
     furi_log_init();
     furi_record_init();
     furi_stdglue_init();

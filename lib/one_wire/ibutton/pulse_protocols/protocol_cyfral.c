@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <furi.h>
+#include <furi_hal.h>
 
 #define CYFRAL_DATA_SIZE 2
 #define CYFRAL_MAX_PERIOD_US 230
@@ -103,7 +104,7 @@ static void cyfral_reset(void* context) {
     cyfral->nibble = 0;
     cyfral->data_valid = true;
 
-    cyfral->max_period = CYFRAL_MAX_PERIOD_US * furi_instructions_per_microsecond();
+    cyfral->max_period = CYFRAL_MAX_PERIOD_US * furi_hal_cortex_instructions_per_microsecond();
 }
 
 static bool cyfral_process_bit(

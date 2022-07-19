@@ -3,6 +3,8 @@
 #include "check.h"
 #include "common_defines.h"
 
+#include <furi_hal.h>
+
 #include CMSIS_device_header
 
 int32_t furi_kernel_lock() {
@@ -132,10 +134,6 @@ FuriStatus furi_delay_until_tick(uint32_t tick) {
     return (stat);
 }
 
-uint32_t furi_instructions_per_microsecond() {
-    return SystemCoreClock / 1000000;
-}
-
 uint32_t furi_get_tick() {
     TickType_t ticks;
 
@@ -172,8 +170,5 @@ void furi_delay_ms(uint32_t milliseconds) {
 }
 
 void furi_delay_us(uint32_t microseconds) {
-    uint32_t start = DWT->CYCCNT;
-    uint32_t time_ticks = microseconds * furi_instructions_per_microsecond();
-    while((DWT->CYCCNT - start) < time_ticks) {
-    };
+    furi_hal_cortex_delay_us(microseconds);
 }

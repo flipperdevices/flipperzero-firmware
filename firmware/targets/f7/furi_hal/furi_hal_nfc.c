@@ -9,6 +9,7 @@
 #include <lib/digital_signal/digital_signal.h>
 #include <furi_hal_spi.h>
 #include <furi_hal_gpio.h>
+#include <furi_hal_cortex.h>
 #include <furi_hal_resources.h>
 
 #define TAG "FuriHalNfc"
@@ -514,7 +515,7 @@ static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_
             }
         }
         uint32_t timeout = DWT->CYCCNT - start;
-        if(timeout / furi_instructions_per_microsecond() > timeout_ms * 1000) {
+        if(timeout / furi_hal_cortex_instructions_per_microsecond() > timeout_ms * 1000) {
             FURI_LOG_D(TAG, "Interrupt waiting timeout");
             break;
         }

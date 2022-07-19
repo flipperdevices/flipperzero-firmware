@@ -52,12 +52,6 @@ void furi_delay_tick(uint32_t ticks);
  */
 FuriStatus furi_delay_until_tick(uint32_t tick);
 
-/** Get instructions per microsecond count
- *
- * @return     { description_of_the_return_value }
- */
-uint32_t furi_instructions_per_microsecond();
-
 /** Get current tick counter
  *
  * System uptime, may overflow.
