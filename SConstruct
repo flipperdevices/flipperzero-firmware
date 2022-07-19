@@ -7,6 +7,7 @@
 # construction of certain targets behind command-line options.
 
 import os
+import subprocess
 
 EnsurePythonVersion(3, 8)
 
@@ -34,7 +35,9 @@ coreenv["ROOT_DIR"] = Dir(".")
 # Create a separate "dist" environment and add construction envs to it
 distenv = coreenv.Clone(
     tools=["fbt_dist", "openocd", "blackmagic"],
-    OPENOCD_GDB_PIPE=["|openocd -c 'gdb_port pipe; log_output debug/openocd.log' ${[SINGLEQUOTEFUNC(OPENOCD_OPTS)]}"],
+    OPENOCD_GDB_PIPE=[
+        "|openocd -c 'gdb_port pipe; log_output debug/openocd.log' ${[SINGLEQUOTEFUNC(OPENOCD_OPTS)]}"
+    ],
     GDBOPTS_BASE=[
         "-ex",
         "target extended-remote ${GDBREMOTE}",
@@ -209,10 +212,15 @@ distenv.PhonyTarget(
     LINT_SOURCES=firmware_env["LINT_SOURCES"],
 )
 
+findStr = 'find . -type f ( -iname *.py -o -iname *.scons -o -iname *.fam ) -not ( -path ./toolchain/* -o -path ./lib/black* -o -path ./lib/scons/* -o -path ./lib/STM32CubeWB/* -o -path ./lib/FreeRTOS-Kernel -o -path ./lib/littlefs/* )'
+findFiles = subprocess.run(findStr.split(" "),
+    stdout=subprocess.PIPE,
+    encoding="utf-8"
+)
 distenv.PhonyTarget(
     "lint_py",
-    "${PYTHON3} scripts/lint.py check_py ${LINT_SOURCES}",
-    LINT_SOURCES=firmware_env["LINT_SOURCES"],
+    "@${PYTHON3} scripts/lint_py.py ${PY_LINT_SOURCES}",
+    PY_LINT_SOURCES=findFiles.stdout.split('\n'),
 )
 
 
