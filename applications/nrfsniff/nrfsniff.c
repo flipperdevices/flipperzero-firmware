@@ -395,7 +395,7 @@ int32_t nrfsniff_app(void* p) {
                         if(sniffing_state)
                         {
                             start_sniffing();
-                            start = furi_hal_get_tick();
+                            start = furi_get_tick();
                         }
                         else
                             wrap_up(storage);
@@ -428,7 +428,7 @@ int32_t nrfsniff_app(void* p) {
                 hexlify(top_addr, 5, top_address);
             }
 
-            if(furi_hal_get_tick() - start >= SAMPLE_TIME)
+            if(furi_get_tick() - start >= SAMPLE_TIME)
             {
                 wrap_up(storage);
                 target_channel++;
@@ -436,7 +436,7 @@ int32_t nrfsniff_app(void* p) {
                     target_channel = 2;
 
                 start_sniffing();
-                start = furi_hal_get_tick();
+                start = furi_get_tick();
             }
         }
 
