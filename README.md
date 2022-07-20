@@ -1,7 +1,7 @@
 # (WIP)
 
 # FlipperZero WiFi Scanner Module
- WiFi Scanner Module for FlipperZero based on ESP8266.
+ WiFi Scanner Module for FlipperZero based on ESP8266/ESP32 (results with ESP8266 much better than with ESP32)
  
  This module will help you in finding specific access point physical location.  
  
@@ -42,7 +42,7 @@
 
 # How to
 
-Flash [firmware](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266/tree/main/FlipperZero-WiFi-Scanner_Module-ESP8266) on Wemos D1 Mini
+Flash [firmware](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266/tree/main/FlipperZero-WiFi-Scanner_Module) on Wemos D1 Mini
 Install EPS8266 board version 2.7.4 for Arduino IDE. I had issues with higher versions.
 
 Compile firmware for FlipperZero with new [application](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266/tree/main/applications/wifi_scanner)
