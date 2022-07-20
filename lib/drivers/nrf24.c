@@ -264,7 +264,7 @@ uint8_t nrf24_power_up(FuriHalSpiBusHandle* handle)
     nrf24_read_reg(handle, REG_CONFIG, &cfg, 1);
     cfg = cfg | 2;
     status = nrf24_write_reg(handle, REG_CONFIG, cfg);
-    furi_hal_delay_ms(5000); 
+    furi_delay_ms(5000); 
     return status;
 }
 
@@ -290,7 +290,7 @@ uint8_t nrf24_set_rx_mode(FuriHalSpiBusHandle* handle)
     status = nrf24_write_reg(handle, REG_CONFIG, cfg);
     //nr204_write_reg(REG_EN_RXADDR, 0x03) // Set RX Pipe 0 and 1
     furi_hal_gpio_write(nrf24_CE_PIN, true);
-    furi_hal_delay_ms(2000);
+    furi_delay_ms(2000);
     return status;
 }
 
@@ -306,7 +306,7 @@ uint8_t nrf24_set_tx_mode(FuriHalSpiBusHandle* handle)
     cfg |= 0x02; // PWR_UP
     status = nrf24_write_reg(handle, REG_CONFIG, cfg);
     furi_hal_gpio_write(nrf24_CE_PIN, true);
-    furi_hal_delay_ms(2);
+    furi_delay_ms(2);
     return status;
 }
 
@@ -350,7 +350,7 @@ void nrf24_configure(FuriHalSpiBusHandle* handle, uint8_t rate, uint8_t* srcmac,
 
     nrf24_write_reg(handle, REG_RF_CH, channel);
     nrf24_write_reg(handle, REG_RF_SETUP, rate);
-    furi_hal_delay_ms(200);
+    furi_delay_ms(200);
 }
 
 void nrf24_init_promisc_mode(FuriHalSpiBusHandle* handle, uint8_t channel, uint8_t rate)
@@ -372,12 +372,12 @@ void nrf24_init_promisc_mode(FuriHalSpiBusHandle* handle, uint8_t channel, uint8
     nrf24_flush_tx(handle);
     nrf24_write_reg(handle, REG_RF_CH, channel);
     nrf24_write_reg(handle, REG_RF_SETUP, rate);
-    furi_hal_delay_ms(200);
+    furi_delay_ms(200);
 
     // prime for RX, no checksum
     nrf24_write_reg(handle, REG_CONFIG,0x03); // PWR_UP and PRIM_RX, disable AA and CRC
     furi_hal_gpio_write(nrf24_CE_PIN, true);
-    furi_hal_delay_ms(2000);
+    furi_delay_ms(2000);
 }
 
 void hexlify(uint8_t* in, uint8_t size, char* out)

@@ -177,7 +177,7 @@ int32_t totp_app(void* p) {
 
     while(1) {
         view_port_update(view_port);
-        furi_check(osMessageQueueGet(event_queue, &event, NULL, FuriWaitForever) == FuriStatusOk);
+        furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
 
         if((event.input.type == InputTypeShort) && (event.input.key == InputKeyBack)) {
             break;

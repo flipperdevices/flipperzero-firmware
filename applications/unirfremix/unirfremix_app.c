@@ -916,7 +916,7 @@ void unirfremix_free(UniRFRemix* app) {
 
     furi_message_queue_free(app->input_queue);
 
-    osMutexDelete(app->model_mutex);
+    furi_mutex_free(app->model_mutex);
 
     free(app);
 }
@@ -1105,7 +1105,7 @@ int32_t unirfremix_app(void* p) {
 
         InputEvent input;
         while(1) {
-            furi_check(osMessageQueueGet(app->input_queue, &input, NULL, FuriWaitForever) == FuriStatusOk);
+            furi_check(furi_message_queue_get(app->input_queue, &input, FuriWaitForever) == FuriStatusOk);
             FURI_LOG_I(
                 TAG,
                 "key: %s type: %s",
