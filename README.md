@@ -3,10 +3,7 @@
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
 
-- [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): Add new keys: FAAC SLH/Spa and BFT Mitto/Secure
-- [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): FAAC SLH correct seed view
-- Fix for Games Menu
-- Fix for NRF Sniffer
+- [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): Add FAAC SLH 433 MHz create support
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
