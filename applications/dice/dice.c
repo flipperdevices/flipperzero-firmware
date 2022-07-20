@@ -61,7 +61,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     if(letsRoll) {
         static bool rand_generator_inited = false;
         if(!rand_generator_inited) {
-            srand(osKernelGetTickCount());
+            srand(furi_get_tick());
             rand_generator_inited = true;
         }
         sprintf(

@@ -339,7 +339,7 @@ static void wifi_module_render_callback(Canvas* const canvas, void* ctx)
                 break;
             case ScanAnimation:
             {
-                uint32_t currentTime = osKernelGetTickCount();
+                uint32_t currentTime = furi_get_tick();
                 if (currentTime - app->m_prevAnimationTime > app->m_animationTime)
                 {
                     app->m_prevAnimationTime = currentTime;
@@ -363,7 +363,7 @@ static void wifi_module_render_callback(Canvas* const canvas, void* ctx)
                 break;
             case MonitorAnimation:
             {
-                uint32_t currentTime = osKernelGetTickCount();
+                uint32_t currentTime = furi_get_tick();
                 if (currentTime - app->m_prevAnimationTime > app->m_animationTime)
                 {
                     app->m_prevAnimationTime = currentTime;
