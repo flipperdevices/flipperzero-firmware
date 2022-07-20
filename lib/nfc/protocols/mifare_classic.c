@@ -648,13 +648,21 @@ uint8_t mf_classic_read_card(
             uint8_t first_block =
                 mf_classic_get_first_block_num_of_sector(reader->sector_reader[i].sector_num);
             for(uint8_t j = 0; j < temp_sector.total_blocks; j++) {
-                data->block[first_block + j] = temp_sector.block[j];
+                mf_classic_set_block_read(data, first_block + j, &temp_sector.block[j]);
             }
             if(reader->sector_reader[i].key_a != MF_CLASSIC_NO_KEY) {
-                data->key_a_mask |= 0x01ULL << reader->sector_reader[i].sector_num;
+                mf_classic_set_key_found(
+                    data,
+                    reader->sector_reader[i].sector_num,
+                    MfClassicKeyA,
+                    reader->sector_reader[i].key_a);
             }
             if(reader->sector_reader[i].key_b != MF_CLASSIC_NO_KEY) {
-                data->key_b_mask |= 0x01ULL << reader->sector_reader[i].sector_num;
+                mf_classic_set_key_found(
+                    data,
+                    reader->sector_reader[i].sector_num,
+                    MfClassicKeyB,
+                    reader->sector_reader[i].key_b);
             }
             sectors_read++;
         }
