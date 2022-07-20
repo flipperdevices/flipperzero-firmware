@@ -70,6 +70,10 @@ bool bit_lib_get_bit(const uint8_t* data, size_t position);
  */
 uint8_t bit_lib_get_bits(const uint8_t* data, size_t position, uint8_t length);
 
+uint16_t bit_lib_get_bits_16(const uint8_t* data, size_t position, uint8_t length);
+
+uint32_t bit_lib_get_bits_32(const uint8_t* data, size_t position, uint8_t length);
+
 /**
  * @brief Test parity of given bits
  * @param bits Bits to test parity of

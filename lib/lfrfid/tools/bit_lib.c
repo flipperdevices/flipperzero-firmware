@@ -45,6 +45,38 @@ uint8_t bit_lib_get_bits(const uint8_t* data, size_t position, uint8_t length) {
     }
 }
 
+uint16_t bit_lib_get_bits_16(const uint8_t* data, size_t position, uint8_t length) {
+    uint16_t value = 0;
+    if(length <= 8) {
+        value = bit_lib_get_bits(data, position, length);
+    } else {
+        value = bit_lib_get_bits(data, position, 8) << (length - 8);
+        value |= bit_lib_get_bits(data, position + 8, length - 8);
+    }
+    return value;
+}
+
+uint32_t bit_lib_get_bits_32(const uint8_t* data, size_t position, uint8_t length) {
+    uint32_t value = 0;
+    if(length <= 8) {
+        value = bit_lib_get_bits(data, position, length);
+    } else if(length <= 16) {
+        value = bit_lib_get_bits(data, position, 8) << (length - 8);
+        value |= bit_lib_get_bits(data, position + 8, length - 8);
+    } else if(length <= 24) {
+        value = bit_lib_get_bits(data, position, 8) << (length - 8);
+        value |= bit_lib_get_bits(data, position + 8, 8) << (length - 16);
+        value |= bit_lib_get_bits(data, position + 16, length - 16);
+    } else {
+        value = bit_lib_get_bits(data, position, 8) << (length - 8);
+        value |= bit_lib_get_bits(data, position + 8, 8) << (length - 16);
+        value |= bit_lib_get_bits(data, position + 16, 8) << (length - 24);
+        value |= bit_lib_get_bits(data, position + 24, length - 24);
+    }
+
+    return value;
+}
+
 bool bit_lib_test_parity_u32(uint32_t bits, BitLibParity parity) {
 #if !defined __GNUC__
 #error Please, implement parity test for non-GCC compilers
@@ -66,7 +98,7 @@ bool bit_lib_test_parity(
     uint8_t length,
     BitLibParity parity,
     uint8_t parity_length) {
-    uint8_t parity_block;
+    uint32_t parity_block;
     bool result = true;
     const size_t parity_blocks_count = length / parity_length;
 
@@ -74,7 +106,7 @@ bool bit_lib_test_parity(
         switch(parity) {
         case BitLibParityEven:
         case BitLibParityOdd:
-            parity_block = bit_lib_get_bits(bits, position + i * parity_length, parity_length);
+            parity_block = bit_lib_get_bits_32(bits, position + i * parity_length, parity_length);
             if(!bit_lib_test_parity_u32(parity_block, parity)) {
                 result = false;
             }

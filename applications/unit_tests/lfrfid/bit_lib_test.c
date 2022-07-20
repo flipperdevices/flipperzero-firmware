@@ -151,15 +151,71 @@ MU_TEST(test_bit_lib_get_bit) {
 
 MU_TEST(test_bit_lib_get_bits) {
     uint8_t value[2] = {0b00000000, 0b11111111};
-    mu_assert_int_eq(bit_lib_get_bits(value, 0, 8), 0b00000000);
-    mu_assert_int_eq(bit_lib_get_bits(value, 1, 8), 0b00000001);
-    mu_assert_int_eq(bit_lib_get_bits(value, 2, 8), 0b00000011);
-    mu_assert_int_eq(bit_lib_get_bits(value, 3, 8), 0b00000111);
-    mu_assert_int_eq(bit_lib_get_bits(value, 4, 8), 0b00001111);
-    mu_assert_int_eq(bit_lib_get_bits(value, 5, 8), 0b00011111);
-    mu_assert_int_eq(bit_lib_get_bits(value, 6, 8), 0b00111111);
-    mu_assert_int_eq(bit_lib_get_bits(value, 7, 8), 0b01111111);
-    mu_assert_int_eq(bit_lib_get_bits(value, 8, 8), 0b11111111);
+    mu_assert_int_eq(0b00000000, bit_lib_get_bits(value, 0, 8));
+    mu_assert_int_eq(0b00000001, bit_lib_get_bits(value, 1, 8));
+    mu_assert_int_eq(0b00000011, bit_lib_get_bits(value, 2, 8));
+    mu_assert_int_eq(0b00000111, bit_lib_get_bits(value, 3, 8));
+    mu_assert_int_eq(0b00001111, bit_lib_get_bits(value, 4, 8));
+    mu_assert_int_eq(0b00011111, bit_lib_get_bits(value, 5, 8));
+    mu_assert_int_eq(0b00111111, bit_lib_get_bits(value, 6, 8));
+    mu_assert_int_eq(0b01111111, bit_lib_get_bits(value, 7, 8));
+    mu_assert_int_eq(0b11111111, bit_lib_get_bits(value, 8, 8));
+}
+
+MU_TEST(test_bit_lib_get_bits_16) {
+    uint8_t value[2] = {0b00001001, 0b10110001};
+    mu_assert_int_eq(0b0, bit_lib_get_bits_16(value, 0, 1));
+    mu_assert_int_eq(0b00, bit_lib_get_bits_16(value, 0, 2));
+    mu_assert_int_eq(0b000, bit_lib_get_bits_16(value, 0, 3));
+    mu_assert_int_eq(0b0000, bit_lib_get_bits_16(value, 0, 4));
+    mu_assert_int_eq(0b00001, bit_lib_get_bits_16(value, 0, 5));
+    mu_assert_int_eq(0b000010, bit_lib_get_bits_16(value, 0, 6));
+    mu_assert_int_eq(0b0000100, bit_lib_get_bits_16(value, 0, 7));
+    mu_assert_int_eq(0b00001001, bit_lib_get_bits_16(value, 0, 8));
+    mu_assert_int_eq(0b000010011, bit_lib_get_bits_16(value, 0, 9));
+    mu_assert_int_eq(0b0000100110, bit_lib_get_bits_16(value, 0, 10));
+    mu_assert_int_eq(0b00001001101, bit_lib_get_bits_16(value, 0, 11));
+    mu_assert_int_eq(0b000010011011, bit_lib_get_bits_16(value, 0, 12));
+    mu_assert_int_eq(0b0000100110110, bit_lib_get_bits_16(value, 0, 13));
+    mu_assert_int_eq(0b00001001101100, bit_lib_get_bits_16(value, 0, 14));
+    mu_assert_int_eq(0b000010011011000, bit_lib_get_bits_16(value, 0, 15));
+    mu_assert_int_eq(0b0000100110110001, bit_lib_get_bits_16(value, 0, 16));
+}
+
+MU_TEST(test_bit_lib_get_bits_32) {
+    uint8_t value[4] = {0b00001001, 0b10110001, 0b10001100, 0b01100010};
+    mu_assert_int_eq(0b0, bit_lib_get_bits_32(value, 0, 1));
+    mu_assert_int_eq(0b00, bit_lib_get_bits_32(value, 0, 2));
+    mu_assert_int_eq(0b000, bit_lib_get_bits_32(value, 0, 3));
+    mu_assert_int_eq(0b0000, bit_lib_get_bits_32(value, 0, 4));
+    mu_assert_int_eq(0b00001, bit_lib_get_bits_32(value, 0, 5));
+    mu_assert_int_eq(0b000010, bit_lib_get_bits_32(value, 0, 6));
+    mu_assert_int_eq(0b0000100, bit_lib_get_bits_32(value, 0, 7));
+    mu_assert_int_eq(0b00001001, bit_lib_get_bits_32(value, 0, 8));
+    mu_assert_int_eq(0b000010011, bit_lib_get_bits_32(value, 0, 9));
+    mu_assert_int_eq(0b0000100110, bit_lib_get_bits_32(value, 0, 10));
+    mu_assert_int_eq(0b00001001101, bit_lib_get_bits_32(value, 0, 11));
+    mu_assert_int_eq(0b000010011011, bit_lib_get_bits_32(value, 0, 12));
+    mu_assert_int_eq(0b0000100110110, bit_lib_get_bits_32(value, 0, 13));
+    mu_assert_int_eq(0b00001001101100, bit_lib_get_bits_32(value, 0, 14));
+    mu_assert_int_eq(0b000010011011000, bit_lib_get_bits_32(value, 0, 15));
+    mu_assert_int_eq(0b0000100110110001, bit_lib_get_bits_32(value, 0, 16));
+    mu_assert_int_eq(0b00001001101100011, bit_lib_get_bits_32(value, 0, 17));
+    mu_assert_int_eq(0b000010011011000110, bit_lib_get_bits_32(value, 0, 18));
+    mu_assert_int_eq(0b0000100110110001100, bit_lib_get_bits_32(value, 0, 19));
+    mu_assert_int_eq(0b00001001101100011000, bit_lib_get_bits_32(value, 0, 20));
+    mu_assert_int_eq(0b000010011011000110001, bit_lib_get_bits_32(value, 0, 21));
+    mu_assert_int_eq(0b0000100110110001100011, bit_lib_get_bits_32(value, 0, 22));
+    mu_assert_int_eq(0b00001001101100011000110, bit_lib_get_bits_32(value, 0, 23));
+    mu_assert_int_eq(0b000010011011000110001100, bit_lib_get_bits_32(value, 0, 24));
+    mu_assert_int_eq(0b0000100110110001100011000, bit_lib_get_bits_32(value, 0, 25));
+    mu_assert_int_eq(0b00001001101100011000110001, bit_lib_get_bits_32(value, 0, 26));
+    mu_assert_int_eq(0b000010011011000110001100011, bit_lib_get_bits_32(value, 0, 27));
+    mu_assert_int_eq(0b0000100110110001100011000110, bit_lib_get_bits_32(value, 0, 28));
+    mu_assert_int_eq(0b00001001101100011000110001100, bit_lib_get_bits_32(value, 0, 29));
+    mu_assert_int_eq(0b000010011011000110001100011000, bit_lib_get_bits_32(value, 0, 30));
+    mu_assert_int_eq(0b0000100110110001100011000110001, bit_lib_get_bits_32(value, 0, 31));
+    mu_assert_int_eq(0b00001001101100011000110001100010, bit_lib_get_bits_32(value, 0, 32));
 }
 
 MU_TEST(test_bit_lib_test_parity_u32) {
@@ -273,6 +329,8 @@ MU_TEST_SUITE(test_bit_lib) {
     MU_RUN_TEST(test_bit_lib_set_bits);
     MU_RUN_TEST(test_bit_lib_get_bit);
     MU_RUN_TEST(test_bit_lib_get_bits);
+    MU_RUN_TEST(test_bit_lib_get_bits_16);
+    MU_RUN_TEST(test_bit_lib_get_bits_32);
     MU_RUN_TEST(test_bit_lib_test_parity_u32);
     MU_RUN_TEST(test_bit_lib_test_parity);
     MU_RUN_TEST(test_bit_lib_remove_bit_every_nth);
