@@ -359,6 +359,8 @@ static void loader_free(Loader* instance) {
 
     menu_free(loader_instance->primary_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPrimary);
+    submenu_free(loader_instance->games_menu);
+    view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewGames);
     submenu_free(loader_instance->plugins_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPlugins);
     submenu_free(loader_instance->debug_menu);
@@ -393,6 +395,15 @@ static void loader_build_menu() {
             i++,
             loader_submenu_callback,
             (void*)LoaderMenuViewPlugins);
+    }
+    if(FLIPPER_GAMES_COUNT != 0) {
+        menu_add_item(
+            loader_instance->primary_menu,
+            "Games",
+            &A_Games_14,
+            i++,
+            loader_submenu_callback,
+            (void*)LoaderMenuViewGames);
     }
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         menu_add_item(
