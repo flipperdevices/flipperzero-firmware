@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,0.26,,
+Version,+,1.0,,
 Header,+,applications/bt/bt_service/bt.h,,
 Header,+,applications/cli/cli.h,,
 Header,+,applications/cli/cli_vcp.h,,
@@ -36,7 +36,6 @@ Header,+,applications/rpc/rpc_app.h,,
 Header,+,applications/storage/storage.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_clock.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_console.h,,
-Header,+,firmware/targets/f7/furi_hal/furi_hal_crc.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_flash.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_gpio.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_i2c_config.h,,
@@ -56,9 +55,9 @@ Header,+,firmware/targets/furi_hal_include/furi_hal_bt.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_bt_hid.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_bt_serial.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_compress.h,,
+Header,+,firmware/targets/furi_hal_include/furi_hal_cortex.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_crypto.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_debug.h,,
-Header,+,firmware/targets/furi_hal_include/furi_hal_delay.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_i2c.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_ibutton.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_info.h,,
@@ -905,6 +904,17 @@ Function,-,ftrylockfile,int,FILE*
 Function,-,funlockfile,void,FILE*
 Function,-,funopen,FILE*,"const void*, int (*)(void*, char*, int), int (*)(void*, const char*, int), fpos_t (*)(void*, fpos_t, int), int (*)(void*)"
 Function,+,furi_crash,void,const char*
+Function,+,furi_delay_ms,void,uint32_t
+Function,+,furi_delay_tick,void,uint32_t
+Function,+,furi_delay_until_tick,FuriStatus,uint32_t
+Function,+,furi_delay_us,void,uint32_t
+Function,+,furi_event_flag_alloc,FuriEventFlag*,
+Function,+,furi_event_flag_clear,uint32_t,"FuriEventFlag*, uint32_t"
+Function,+,furi_event_flag_free,void,FuriEventFlag*
+Function,+,furi_event_flag_get,uint32_t,FuriEventFlag*
+Function,+,furi_event_flag_set,uint32_t,"FuriEventFlag*, uint32_t"
+Function,+,furi_event_flag_wait,uint32_t,"FuriEventFlag*, uint32_t, uint32_t, uint32_t"
+Function,+,furi_get_tick,uint32_t,
 Function,+,furi_hal_bt_change_app,_Bool,"FuriHalBtProfile, GapEventCallback, void*"
 Function,+,furi_hal_bt_clear_white_list,_Bool,
 Function,+,furi_hal_bt_dump_state,void,string_t
@@ -981,10 +991,9 @@ Function,+,furi_hal_console_puts,void,const char*
 Function,+,furi_hal_console_set_tx_callback,void,"FuriHalConsoleTxCallback, void*"
 Function,+,furi_hal_console_tx,void,"const uint8_t*, size_t"
 Function,-,furi_hal_console_tx_with_new_line,void,"const uint8_t*, size_t"
-Function,-,furi_hal_crc_acquire,_Bool,uint32_t
-Function,-,furi_hal_crc_feed,uint32_t,"void*, uint16_t"
-Function,-,furi_hal_crc_init,void,_Bool
-Function,-,furi_hal_crc_reset,void,
+Function,+,furi_hal_cortex_delay_us,void,uint32_t
+Function,-,furi_hal_cortex_init_early,void,
+Function,+,furi_hal_cortex_instructions_per_microsecond,uint32_t,
 Function,+,furi_hal_crypto_decrypt,_Bool,"const uint8_t*, uint8_t*, size_t"
 Function,+,furi_hal_crypto_encrypt,_Bool,"const uint8_t*, uint8_t*, size_t"
 Function,+,furi_hal_crypto_init,void,
@@ -996,10 +1005,6 @@ Function,+,furi_hal_crypto_verify_key,_Bool,uint8_t
 Function,+,furi_hal_debug_disable,void,
 Function,+,furi_hal_debug_enable,void,
 Function,+,furi_hal_deinit_early,void,
-Function,+,furi_hal_delay_init,void,
-Function,+,furi_hal_delay_instructions_per_microsecond,uint32_t,
-Function,+,furi_hal_delay_ms,void,float
-Function,+,furi_hal_delay_us,void,float
 Function,+,furi_hal_flash_erase,_Bool,uint8_t
 Function,+,furi_hal_flash_get_base,size_t,
 Function,+,furi_hal_flash_get_cycles_count,size_t,
@@ -1017,7 +1022,6 @@ Function,-,furi_hal_flash_ob_get_raw_ptr,const FuriHalFlashRawOptionByteData*,
 Function,-,furi_hal_flash_ob_set_word,_Bool,"size_t, const uint32_t"
 Function,-,furi_hal_flash_program_page,_Bool,"const uint8_t, const uint8_t*, uint16_t"
 Function,+,furi_hal_flash_write_dword,_Bool,"size_t, uint64_t"
-Function,+,furi_hal_get_tick,uint32_t,
 Function,+,furi_hal_gpio_add_int_callback,void,"const GpioPin*, GpioExtiCallback, void*"
 Function,+,furi_hal_gpio_disable_int_callback,void,const GpioPin*
 Function,+,furi_hal_gpio_enable_int_callback,void,const GpioPin*
@@ -1093,7 +1097,6 @@ Function,+,furi_hal_light_blink_stop,void,
 Function,+,furi_hal_light_init,void,
 Function,+,furi_hal_light_sequence,void,const char*
 Function,+,furi_hal_light_set,void,"Light, uint8_t"
-Function,+,furi_hal_ms_to_ticks,uint32_t,float
 Function,+,furi_hal_nfc_activate_nfca,_Bool,"uint32_t, uint32_t*"
 Function,+,furi_hal_nfc_detect,_Bool,"FuriHalNfcDevData*, uint32_t"
 Function,+,furi_hal_nfc_emulate_nfca,_Bool,"uint8_t*, uint8_t, uint8_t*, uint8_t, FuriHalNfcEmulateCallback, void*, uint32_t"
@@ -1278,12 +1281,31 @@ Function,+,furi_hal_vibro_init,void,
 Function,+,furi_hal_vibro_on,void,_Bool
 Function,+,furi_halt,void,const char*
 Function,+,furi_init,void,
+Function,+,furi_kernel_get_tick_frequency,uint32_t,
+Function,+,furi_kernel_lock,int32_t,
+Function,+,furi_kernel_restore_lock,int32_t,int32_t
+Function,+,furi_kernel_unlock,int32_t,
 Function,+,furi_log_get_level,FuriLogLevel,
 Function,+,furi_log_init,void,
 Function,+,furi_log_print,void,"FuriLogLevel, const char*, ..."
 Function,+,furi_log_set_level,void,FuriLogLevel
 Function,-,furi_log_set_puts,void,FuriLogPuts
 Function,-,furi_log_set_timestamp,void,FuriLogTimestamp
+Function,+,furi_message_queue_alloc,FuriMessageQueue*,"uint32_t, uint32_t"
+Function,+,furi_message_queue_free,void,FuriMessageQueue*
+Function,+,furi_message_queue_get,FuriStatus,"FuriMessageQueue*, void*, uint32_t"
+Function,+,furi_message_queue_get_capacity,uint32_t,FuriMessageQueue*
+Function,+,furi_message_queue_get_count,uint32_t,FuriMessageQueue*
+Function,+,furi_message_queue_get_message_size,uint32_t,FuriMessageQueue*
+Function,+,furi_message_queue_get_space,uint32_t,FuriMessageQueue*
+Function,+,furi_message_queue_put,FuriStatus,"FuriMessageQueue*, const void*, uint32_t"
+Function,+,furi_message_queue_reset,FuriStatus,FuriMessageQueue*
+Function,+,furi_ms_to_ticks,uint32_t,uint32_t
+Function,+,furi_mutex_acquire,FuriStatus,"FuriMutex*, uint32_t"
+Function,+,furi_mutex_alloc,FuriMutex*,FuriMutexType
+Function,+,furi_mutex_free,void,FuriMutex*
+Function,+,furi_mutex_get_owner,FuriThreadId,FuriMutex*
+Function,+,furi_mutex_release,FuriStatus,FuriMutex*
 Function,+,furi_pubsub_alloc,FuriPubSub*,
 Function,-,furi_pubsub_free,void,FuriPubSub*
 Function,+,furi_pubsub_publish,void,"FuriPubSub*, void*"
@@ -1296,6 +1318,11 @@ Function,-,furi_record_exists,_Bool,const char*
 Function,+,furi_record_init,void,
 Function,+,furi_record_open,void*,const char*
 Function,+,furi_run,void,
+Function,+,furi_semaphore_acquire,FuriStatus,"FuriSemaphore*, uint32_t"
+Function,+,furi_semaphore_alloc,FuriSemaphore*,"uint32_t, uint32_t"
+Function,+,furi_semaphore_free,void,FuriSemaphore*
+Function,+,furi_semaphore_get_count,uint32_t,FuriSemaphore*
+Function,+,furi_semaphore_release,FuriStatus,FuriSemaphore*
 Function,+,furi_stdglue_init,void,
 Function,+,furi_stdglue_set_thread_stdout_callback,_Bool,FuriStdglueWriteCallback
 Function,+,furi_thread_alloc,FuriThread*,
@@ -1325,6 +1352,11 @@ Function,+,furi_thread_set_state_callback,void,"FuriThread*, FuriThreadStateCall
 Function,+,furi_thread_set_state_context,void,"FuriThread*, void*"
 Function,+,furi_thread_start,void,FuriThread*
 Function,+,furi_thread_yield,void,
+Function,+,furi_timer_alloc,FuriTimer*,"FuriTimerCallback, FuriTimerType, void*"
+Function,+,furi_timer_free,void,FuriTimer*
+Function,+,furi_timer_is_running,uint32_t,FuriTimer*
+Function,+,furi_timer_start,FuriStatus,"FuriTimer*, uint32_t"
+Function,+,furi_timer_stop,FuriStatus,FuriTimer*
 Function,-,fwrite,size_t,"const void*, size_t, size_t, FILE*"
 Function,-,fwrite_unlocked,size_t,"const void*, size_t, size_t, FILE*"
 Function,-,gamma,double,double
@@ -1599,55 +1631,6 @@ Function,+,onewire_slave_set_result_callback,void,"OneWireSlave*, OneWireSlaveRe
 Function,+,onewire_slave_start,void,OneWireSlave*
 Function,+,onewire_slave_stop,void,OneWireSlave*
 Function,-,open_memstream,FILE*,"char**, size_t*"
-Function,+,osDelay,osStatus_t,uint32_t
-Function,-,osDelayUntil,osStatus_t,uint32_t
-Function,+,osEventFlagsClear,uint32_t,"osEventFlagsId_t, uint32_t"
-Function,+,osEventFlagsDelete,osStatus_t,osEventFlagsId_t
-Function,+,osEventFlagsGet,uint32_t,osEventFlagsId_t
-Function,-,osEventFlagsGetName,const char*,osEventFlagsId_t
-Function,+,osEventFlagsNew,osEventFlagsId_t,const osEventFlagsAttr_t*
-Function,+,osEventFlagsSet,uint32_t,"osEventFlagsId_t, uint32_t"
-Function,+,osEventFlagsWait,uint32_t,"osEventFlagsId_t, uint32_t, uint32_t, uint32_t"
-Function,-,osKernelGetInfo,osStatus_t,"osVersion_t*, char*, uint32_t"
-Function,+,osKernelGetState,osKernelState_t,
-Function,-,osKernelGetSysTimerFreq,uint32_t,
-Function,+,osKernelGetTickCount,uint32_t,
-Function,+,osKernelGetTickFreq,uint32_t,
-Function,+,osKernelInitialize,osStatus_t,
-Function,+,osKernelLock,int32_t,
-Function,-,osKernelRestoreLock,int32_t,int32_t
-Function,-,osKernelResume,void,uint32_t
-Function,+,osKernelStart,osStatus_t,
-Function,-,osKernelSuspend,uint32_t,
-Function,+,osKernelUnlock,int32_t,
-Function,+,osMessageQueueDelete,osStatus_t,osMessageQueueId_t
-Function,+,osMessageQueueGet,osStatus_t,"osMessageQueueId_t, void*, uint8_t*, uint32_t"
-Function,-,osMessageQueueGetCapacity,uint32_t,osMessageQueueId_t
-Function,-,osMessageQueueGetCount,uint32_t,osMessageQueueId_t
-Function,-,osMessageQueueGetMsgSize,uint32_t,osMessageQueueId_t
-Function,-,osMessageQueueGetName,const char*,osMessageQueueId_t
-Function,-,osMessageQueueGetSpace,uint32_t,osMessageQueueId_t
-Function,+,osMessageQueueNew,osMessageQueueId_t,"uint32_t, uint32_t, const osMessageQueueAttr_t*"
-Function,+,osMessageQueuePut,osStatus_t,"osMessageQueueId_t, const void*, uint8_t, uint32_t"
-Function,+,osMessageQueueReset,osStatus_t,osMessageQueueId_t
-Function,+,osMutexAcquire,osStatus_t,"osMutexId_t, uint32_t"
-Function,+,osMutexDelete,osStatus_t,osMutexId_t
-Function,-,osMutexGetName,const char*,osMutexId_t
-Function,-,osMutexGetOwner,FuriThreadId,osMutexId_t
-Function,+,osMutexNew,osMutexId_t,const osMutexAttr_t*
-Function,+,osMutexRelease,osStatus_t,osMutexId_t
-Function,+,osSemaphoreAcquire,osStatus_t,"osSemaphoreId_t, uint32_t"
-Function,+,osSemaphoreDelete,osStatus_t,osSemaphoreId_t
-Function,-,osSemaphoreGetCount,uint32_t,osSemaphoreId_t
-Function,-,osSemaphoreGetName,const char*,osSemaphoreId_t
-Function,+,osSemaphoreNew,osSemaphoreId_t,"uint32_t, uint32_t, const osSemaphoreAttr_t*"
-Function,+,osSemaphoreRelease,osStatus_t,osSemaphoreId_t
-Function,+,osTimerDelete,osStatus_t,osTimerId_t
-Function,-,osTimerGetName,const char*,osTimerId_t
-Function,+,osTimerIsRunning,uint32_t,osTimerId_t
-Function,+,osTimerNew,osTimerId_t,"osTimerFunc_t, osTimerType_t, void*, const osTimerAttr_t*"
-Function,+,osTimerStart,osStatus_t,"osTimerId_t, uint32_t"
-Function,+,osTimerStop,osStatus_t,osTimerId_t
 Function,+,path_append,void,"string_t, const char*"
 Function,+,path_concat,void,"const char*, const char*, string_t"
 Function,+,path_contains_only_ascii,_Bool,const char*

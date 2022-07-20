@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <furi/pubsub.h>
+#include <core/pubsub.h>
 #include <stdbool.h>
 
 #ifdef __cplusplus

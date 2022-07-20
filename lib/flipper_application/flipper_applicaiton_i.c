@@ -283,7 +283,7 @@ static bool relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection_t* s) {
 
         for(relCount = 0; relCount < relEntries; relCount++) {
             if(relCount % RESOLVER_THREAD_YIELD_STEP == 0) {
-                osDelay(1);
+                furi_delay_tick(1);
             }
 
             if(storage_file_read(e->fd, &rel, sizeof(rel)) == sizeof(rel)) {
