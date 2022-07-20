@@ -1,5 +1,4 @@
 #include "../drestorer.h"
-#include "cmsis_os2.h"
 
 void drestorer_scene_progress_on_enter(void* context) {
     StorageMoveToSd* app = context;
