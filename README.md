@@ -1,13 +1,11 @@
-<h2>
-
-[Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
+<h2>[Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
-<ul>
-<li>If you have questions about where X app is located, DO NOT ASK ON MAIN DISCORD, ASK <a href='https://discord.gg/gF2bBUzAFe'>HERE</a></li>
-<li>READ SPECIAL INSTRUCTIONS FOR UNLESHING YOUR FLIPPER OR EXITING GAME MODE</li>
-<li>Fixed issue with api_symbols.csv being rebuilt on clone</li>
-</ul>
-  
+
+- If you have questions about where X app is located, DO NOT ASK ON MAIN DISCORD, ASK <a href='https://discord.gg/gF2bBUzAFe'>HERE</a>
+- READ SPECIAL INSTRUCTIONS FOR UNLESHING YOUR FLIPPER OR EXITING GAME MODE
+- Fixed issue with api_symbols.csv being rebuilt on clone
+- Added [Picopass: dump full card, extract some details #1408 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1408)
+
 <table width="100%" border="0" cellspacing="0">
   <tr>
     <td>
@@ -69,7 +67,8 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 
 ## Open PRs Checkedout & Not Merged In Main:
 - [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
-  
+- [Picopass: dump full card, extract some details #1408 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1408)
+
 </td><td>
 <details>
   <summary><B>All Changes/Features</b></summary><br/>
