@@ -10,6 +10,7 @@
 - OFW: [Furi: core refactoring and CMSIS removal part 2 #1410 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1410)
 - OFW: [Respect SOURCE_DATE_EPOCH when setting build date #1421 (By adisbladis)](https://github.com/flipperdevices/flipperzero-firmware/pull/1421)
 - Updated nearly all apps and games for refactoring
+- Removed RFID: Removing T5577 passwords via the cli command rfid clear_pass_t5577 using a dictionary attack; don't use this unless you are certain that a password is present [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
@@ -86,11 +87,9 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
 - NFC: Display UL PWD_AUTH payload / ntag-pwd-capture [(Thanks to GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/dev-new)
 - NFC: Mifare UL update to show name of emulated tag (By RogueMaster with some help from GMMan)
-- Plugins: Fixed sound decay issues on music player [Thanks to qqMajiKpp]
 - Plugins: Menu, Icons and Raycast exit [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
 - Plugins: Snake and Tetris show score. [Thanks to whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) With changes by RogueMaster.
 - RFID: Direct Emulation from [(atomsmasha)](https://github.com/flipperdevices/flipperzero-firmware/pull/1371)
-- RFID: Removing T5577 passwords via the cli command rfid clear_pass_t5577 using a dictionary attack; don't use this unless you are certain that a password is present [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Settings: Actual PIN Lock [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop.c)
 - Settings: Auto-Lock Options Added: 10s+15s+90s [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop_settings/scenes/desktop_settings_scene_start.c)
 - Settings: Battery Meter on Desktop [Thanks to McAzzaMan](https://github.com/McAzzaMan/flipperzero-firmware/tree/BatteryPercentageView)
