@@ -6,6 +6,24 @@ import subprocess
 import os
 import json
 from datetime import date
+import os.path
+
+
+_version_info_keys = [
+    "GIT_COMMIT",
+    "GIT_BRANCH",
+    "GIT_BRANCH_NUM",
+    "VERSION",
+    "BUILD_DIRTY"
+]
+
+
+class EnvVersion:
+    def get_version_info(self):
+        return {
+            k: os.environ.get(k, "" if k != "BUILD_DIRTY" else 0)
+            for k in _version_info_keys
+        }
 
 
 class GitVersion:
@@ -76,7 +94,10 @@ class Main(App):
         self.parser_generate.set_defaults(func=self.generate)
 
     def generate(self):
-        current_info = GitVersion(self.args.sourcedir).get_version_info()
+        if os.path.exists(os.path.join(self.args.sourcedir, ".git")):
+            current_info = GitVersion(self.args.sourcedir).get_version_info()
+        else:
+            current_info = EnvVersion().get_version_info()
         current_info.update(
             {
                 "BUILD_DATE": date.today().strftime("%d-%m-%Y"),
