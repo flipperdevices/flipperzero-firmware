@@ -64,7 +64,7 @@ bool mf_ultralight_read_version(
         tx_rx->tx_data[0] = MF_UL_GET_VERSION_CMD;
         tx_rx->tx_bits = 8;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-        if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
+        if(!furi_hal_nfc_tx_rx(tx_rx, 50) || tx_rx->rx_bits != 64) {
             FURI_LOG_D(TAG, "Failed reading version");
             mf_ul_set_default_version(reader, data);
             furi_hal_nfc_sleep();
