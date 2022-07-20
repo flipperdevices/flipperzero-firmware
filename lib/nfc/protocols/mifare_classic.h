@@ -76,6 +76,8 @@ typedef struct {
     bool data_changed;
 } MfClassicEmulator;
 
+const char* mf_classic_get_type_str(MfClassicType type);
+
 bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
 MfClassicType mf_classic_get_classic_type(int8_t ATQA0, uint8_t ATQA1, uint8_t SAK);

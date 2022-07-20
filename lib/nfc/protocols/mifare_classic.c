@@ -25,6 +25,16 @@ typedef enum {
     MfClassicActionACWrite,
 } MfClassicAction;
 
+const char* mf_classic_get_type_str(MfClassicType type) {
+    if(type == MfClassicType1k) {
+        return "MIFARE Classic 1K";
+    } else if(type == MfClassicType4k) {
+        return "MIFARE Classic 4K";
+    } else {
+        return "Unknown";
+    }
+}
+
 static uint8_t mf_classic_get_first_block_num_of_sector(uint8_t sector) {
     furi_assert(sector < 40);
     if(sector < 32) {

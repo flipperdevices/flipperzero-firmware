@@ -15,6 +15,10 @@ void nfc_scene_read_mifare_classic_success_widget_callback(
 
 void nfc_scene_read_mifare_classic_success_on_enter(void* context) {
     Nfc* nfc = context;
+    NfcDeviceData* dev_data = &nfc->dev->dev_data;
+    MfClassicData* mf_data = &dev_data->mf_classic_data;
+    string_t str_tmp;
+    string_init(str_tmp);
 
     DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
 
@@ -47,8 +51,37 @@ void nfc_scene_read_mifare_classic_success_on_enter(void* context) {
             AlignTop,
             string_get_cstr(nfc->dev->dev_data.parsed_data),
             true);
+    } else {
+        widget_add_string_element(
+            widget,
+            0,
+            0,
+            AlignLeft,
+            AlignTop,
+            FontSecondary,
+            mf_classic_get_type_str(mf_data->type));
+        widget_add_string_element(
+            widget, 0, 11, AlignLeft, AlignTop, FontSecondary, "ISO 14443-3 (Type A)");
+        string_printf(str_tmp, "UID:");
+        for(size_t i = 0; i < dev_data->nfc_data.uid_len; i++) {
+            string_cat_printf(str_tmp, " %02X", dev_data->nfc_data.uid[i]);
+        }
+        widget_add_string_element(
+            widget, 0, 22, AlignLeft, AlignTop, FontSecondary, string_get_cstr(str_tmp));
+        uint8_t sectors_total = mf_classic_get_total_sectors_num(mf_data->type);
+        uint8_t keys_total = sectors_total * 2;
+        uint8_t keys_found = 0;
+        uint8_t sectors_read = 0;
+        mf_classic_get_read_sectors_and_keys(mf_data, &sectors_read, &keys_found);
+        string_printf(str_tmp, "Keys Found: %d/%d", keys_found, keys_total);
+        widget_add_string_element(
+            widget, 0, 33, AlignLeft, AlignTop, FontSecondary, string_get_cstr(str_tmp));
+        string_printf(str_tmp, "Sectors Read: %d/%d", sectors_read, sectors_total);
+        widget_add_string_element(
+            widget, 0, 44, AlignLeft, AlignTop, FontSecondary, string_get_cstr(str_tmp));
     }
 
+    string_clear(str_tmp);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 
