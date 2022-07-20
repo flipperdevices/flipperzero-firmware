@@ -40,9 +40,9 @@ const char* keyNames[] = {"Test Key 1", "Test Key 2", "Amogus key"};
 int keyLengths[] = {10, 10, 10};
 
 static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
-    osMessageQueueId_t event_queue = ctx;
+    FuriMessageQueue* event_queue = ctx;
     TotpEvent event;
-    osMessageQueueGet(event_queue, &event, NULL, osWaitForever);
+    furi_message_queue_get(event_queue, &event, FuriWaitForever);
 
     uint8_t hmacKey[20];
 
@@ -95,17 +95,17 @@ static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
 
 static void totp_app_input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
-    osMessageQueueId_t event_queue = ctx;
+    FuriMessageQueue* event_queue = ctx;
 
     TotpEvent event = {.type = TotpEventTypeInput, .input = *input_event};
-    osMessageQueuePut(event_queue, &event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
 void totp_app_update(void* ctx) {
     furi_assert(ctx);
-    osMessageQueueId_t event_queue = ctx;
+    FuriMessageQueue* event_queue = ctx;
     TotpEvent event = {.type = TotpEventTypeTick};
-    osMessageQueuePut(event_queue, &event, 0, 0);
+    furi_message_queue_put(event_queue, &event, 0);
 }
 
 int32_t totp_app(void* p) {
@@ -159,7 +159,7 @@ int32_t totp_app(void* p) {
         furi_record_close("storage");
     }
 
-    osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(TotpEvent), NULL);
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(TotpEvent));
     // Configure view port
     ViewPort* view_port = view_port_alloc();
     view_port_input_callback_set(view_port, totp_app_input_callback, event_queue);
@@ -170,14 +170,14 @@ int32_t totp_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     view_port_update(view_port);
 
-    osTimerId_t timer = osTimerNew(totp_app_update, osTimerPeriodic, event_queue, NULL);
-    osTimerStart(timer, osKernelGetTickFreq());
+    FuriTimer* timer = furi_timer_alloc(totp_app_update, FuriTimerTypePeriodic, event_queue, timer);
+    furi_timer_start(timer, furi_kernel_get_tick_frequency());
 
     TotpEvent event;
 
     while(1) {
         view_port_update(view_port);
-        furi_check(osMessageQueueGet(event_queue, &event, NULL, osWaitForever) == osOK);
+        furi_check(osMessageQueueGet(event_queue, &event, NULL, FuriWaitForever) == FuriStatusOk);
 
         if((event.input.type == InputTypeShort) && (event.input.key == InputKeyBack)) {
             break;
@@ -196,11 +196,11 @@ int32_t totp_app(void* p) {
         }
     }
 
-    osTimerDelete(timer);
+    furi_timer_free(timer);
 
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
-    osMessageQueueDelete(event_queue);
+    furi_message_queue_free(event_queue);
 
     furi_record_close("gui");
     return 0;

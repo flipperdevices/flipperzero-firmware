@@ -50,14 +50,14 @@ typedef struct {
 } WavPlayerEvent;
 
 static void wav_player_dma_isr(void* ctx) {
-    osMessageQueueId_t event_queue = ctx;
+    FuriMessageQueue* event_queue = ctx;
 
     // half of transfer
     if(LL_DMA_IsActiveFlag_HT1(DMA1)) {
         LL_DMA_ClearFlag_HT1(DMA1);
         // fill first half of buffer
         WavPlayerEvent event = {.type = WavPlayerEventHalfTransfer};
-        osMessageQueuePut(event_queue, &event, 0, 0);
+        furi_message_queue_put(event_queue, &event, 0);
     }
 
     // transfer complete
@@ -65,7 +65,7 @@ static void wav_player_dma_isr(void* ctx) {
         LL_DMA_ClearFlag_TC1(DMA1);
         // fill second half of buffer
         WavPlayerEvent event = {.type = WavPlayerEventFullTransfer};
-        osMessageQueuePut(event_queue, &event, 0, 0);
+        furi_message_queue_put(event_queue, &event, 0);
     }
 }
 
@@ -79,7 +79,7 @@ typedef struct {
     size_t samples_count_half;
     size_t samples_count;
 
-    osMessageQueueId_t queue;
+    FuriMessageQueue* queue;
 
     float volume;
     bool play;
@@ -99,7 +99,7 @@ static WavPlayerApp* app_alloc() {
     app->parser = wav_parser_alloc();
     app->sample_buffer = malloc(sizeof(uint16_t) * app->samples_count);
     app->tmp_buffer = malloc(sizeof(uint8_t) * app->samples_count);
-    app->queue = osMessageQueueNew(10, sizeof(WavPlayerEvent), NULL);
+    app->queue = furi_message_queue_alloc(10, sizeof(WavPlayerEvent));
 
     app->volume = 10.0f;
     app->play = true;
@@ -124,7 +124,7 @@ static void app_free(WavPlayerApp* app) {
     wav_player_view_free(app->view);
     furi_record_close("gui");
 
-    osMessageQueueDelete(app->queue);
+    furi_message_queue_free(app->queue);
     free(app->tmp_buffer);
     free(app->sample_buffer);
     wav_parser_free(app->parser);
@@ -173,33 +173,33 @@ static bool fill_data(WavPlayerApp* app, size_t index) {
 }
 
 static void ctrl_callback(WavPlayerCtrl ctrl, void* ctx) {
-    osMessageQueueId_t event_queue = ctx;
+    FuriMessageQueue* event_queue = ctx;
     WavPlayerEvent event;
 
     switch(ctrl) {
     case WavPlayerCtrlVolUp:
         event.type = WavPlayerEventCtrlVolUp;
-        osMessageQueuePut(event_queue, &event, 0, 0);
+        furi_message_queue_put(event_queue, &event, 0);
         break;
     case WavPlayerCtrlVolDn:
         event.type = WavPlayerEventCtrlVolDn;
-        osMessageQueuePut(event_queue, &event, 0, 0);
+        furi_message_queue_put(event_queue, &event, 0);
         break;
     case WavPlayerCtrlMoveL:
         event.type = WavPlayerEventCtrlMoveL;
-        osMessageQueuePut(event_queue, &event, 0, 0);
+        furi_message_queue_put(event_queue, &event, 0);
         break;
     case WavPlayerCtrlMoveR:
         event.type = WavPlayerEventCtrlMoveR;
-        osMessageQueuePut(event_queue, &event, 0, 0);
+        furi_message_queue_put(event_queue, &event, 0);
         break;
     case WavPlayerCtrlOk:
         event.type = WavPlayerEventCtrlOk;
-        osMessageQueuePut(event_queue, &event, 0, 0);
+        furi_message_queue_put(event_queue, &event, 0);
         break;
     case WavPlayerCtrlBack:
         event.type = WavPlayerEventCtrlBack;
-        osMessageQueuePut(event_queue, &event, 0, 0);
+        furi_message_queue_put(event_queue, &event, 0);
         break;
     default:
         break;
@@ -233,7 +233,7 @@ static void app_run(WavPlayerApp* app) {
     WavPlayerEvent event;
 
     while(1) {
-        if(osMessageQueueGet(app->queue, &event, NULL, osWaitForever) == osOK) {
+        if(furi_message_queue_get(app->queue, &event, FuriWaitForever) == FuriStatusOk) {
             if(event.type == WavPlayerEventHalfTransfer) {
                 eof = fill_data(app, 0);
                 wav_player_view_set_current(app->view, stream_tell(app->stream));

@@ -39,8 +39,8 @@ typedef struct {
 } PokerPlayer_card;
 
 typedef struct {
-    osMutexId_t* model_mutex;
-    osMessageQueueId_t event_queue;
+    FuriMutex** model_mutex;
+    FuriMessageQueue* event_queue;
     ViewPort* view_port;
     Gui* gui;
     PokerPlayer_card hand[5];
@@ -558,7 +558,7 @@ static int recognize(PokerPlayer* app) {
 
 void poker_draw_callback(Canvas* canvas, void* ctx) {
     PokerPlayer* poker_player = ctx;
-    furi_check(osMutexAcquire(poker_player->model_mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(poker_player->model_mutex, FuriWaitForever) == FuriStatusOk);
     canvas_clear(canvas);
     char buffer[30];
     canvas_set_color(canvas, ColorBlack);
@@ -658,20 +658,20 @@ void poker_draw_callback(Canvas* canvas, void* ctx) {
     
     
 
-    osMutexRelease(poker_player->model_mutex);
+    furi_mutex_release(poker_player->model_mutex);
 }
 
 void poker_input_callback(InputEvent* input, void* ctx) {
     PokerPlayer* poker_player = ctx;
-    osMessageQueuePut(poker_player->event_queue, input, 0, osWaitForever);
+    furi_message_queue_put(poker_player->event_queue, input, FuriWaitForever);
 }
 
 PokerPlayer* poker_player_alloc() {
     PokerPlayer* poker_player = malloc(sizeof(PokerPlayer));
 
     poker_player->score = 1000;
-    poker_player->model_mutex = osMutexNew(NULL);
-    poker_player->event_queue = osMessageQueueNew(8, sizeof(InputEvent), NULL);
+    poker_player->model_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    poker_player->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
     poker_player->view_port = view_port_alloc();
     poker_player->selected = 0;
     poker_player->GameState = 0;
@@ -696,7 +696,7 @@ void poker_player_free(PokerPlayer* poker_player) {
     gui_remove_view_port(poker_player->gui, poker_player->view_port);
     furi_record_close("gui");
     view_port_free(poker_player->view_port);
-    osMessageQueueDelete(poker_player->event_queue);
+    furi_message_queue_free(poker_player->event_queue);
     osMutexDelete(poker_player->model_mutex);
 
     free(poker_player);
@@ -708,9 +708,9 @@ int32_t video_poker_app(void* p) {
 
     InputEvent event;
     for(bool processing = true; processing;) {
-        osStatus_t status = osMessageQueueGet(poker_player->event_queue, &event, NULL, 100);
-        furi_check(osMutexAcquire(poker_player->model_mutex, osWaitForever) == osOK);
-        if(status == osOK) {
+        FuriStatus status = furi_message_queue_get(poker_player->event_queue, &event, 100);
+        furi_check(furi_mutex_acquire(poker_player->model_mutex, FuriWaitForever) == FuriStatusOk);
+        if(status == FuriStatusOk) {
             if(event.type == InputTypePress) {
                 switch(event.key) {
                 case InputKeyUp:
@@ -805,7 +805,7 @@ int32_t video_poker_app(void* p) {
                 }
             }
         }
-        osMutexRelease(poker_player->model_mutex);
+        furi_mutex_release(poker_player->model_mutex);
         view_port_update(poker_player->view_port);
     }
 

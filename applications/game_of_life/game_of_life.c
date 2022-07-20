@@ -84,11 +84,11 @@ static void update_field(State* state) {
     }
 }
 
-static void input_callback(InputEvent* input_event, osMessageQueueId_t event_queue) {
+static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
     AppEvent event = {.type = EventTypeKey, .input = *input_event};
-    osMessageQueuePut(event_queue, &event, 0, 0);
+    furi_message_queue_put(event_queue, &event, 0);
 }
 
 static void render_callback(Canvas* canvas, void* ctx) {
@@ -107,7 +107,7 @@ int32_t game_of_life_app(void* p) {
     UNUSED(p);
     srand(DWT->CYCCNT);
 
-    osMessageQueueId_t event_queue = osMessageQueueNew(1, sizeof(AppEvent), NULL);
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(1, sizeof(AppEvent));
     furi_check(event_queue);
 
     State* _state = malloc(sizeof(State));
@@ -129,9 +129,9 @@ int32_t game_of_life_app(void* p) {
     AppEvent event;
     for(bool processing = true; processing;) {
         State* state = (State*)acquire_mutex_block(&state_mutex);
-        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 25);
+        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 25);
 
-        if(event_status == osOK && event.type == EventTypeKey &&
+        if(event_status == FuriStatusOk && event.type == EventTypeKey &&
            event.input.type == InputTypePress) {
             if(event.input.key == InputKeyBack) {
                 // furiac_exit(NULL);
@@ -151,7 +151,7 @@ int32_t game_of_life_app(void* p) {
     gui_remove_view_port(gui, view_port);
     furi_record_close("gui");
     view_port_free(view_port);
-    osMessageQueueDelete(event_queue);
+    furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
     free(_state);
 

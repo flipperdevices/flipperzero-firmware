@@ -32,10 +32,10 @@ typedef struct {
     FuriHalRtcDateTime datetime;
 } ClockState;
 
-static void dice_input_callback(InputEvent* input_event, osMessageQueueId_t event_queue) {
+static void dice_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
     PluginEvent event = {.type = EventTypeKey, .input = *input_event};
-    osMessageQueuePut(event_queue, &event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
 static void dice_render_callback(Canvas* const canvas, void* ctx) {
@@ -312,9 +312,9 @@ static void diceclock_state_init(ClockState* const state) {
 
 static void dice_tick(void* ctx) {
     furi_assert(ctx);
-    osMessageQueueId_t event_queue = ctx;
+    FuriMessageQueue* event_queue = ctx;
     PluginEvent event = {.type = EventTypeTick};
-    osMessageQueuePut(event_queue, &event, 0, 0);
+    furi_message_queue_put(event_queue, &event, 0);
 }
 
 int32_t dice_app(void* p) {
@@ -325,7 +325,7 @@ int32_t dice_app(void* p) {
     diceRoll = 0;
     playerOneScore = 0;
     playerTwoScore = 0;
-    osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(PluginEvent), NULL);
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     ClockState* plugin_state = malloc(sizeof(ClockState));
     diceclock_state_init(plugin_state);
     ValueMutex state_mutex;
@@ -337,15 +337,15 @@ int32_t dice_app(void* p) {
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, dice_render_callback, &state_mutex);
     view_port_input_callback_set(view_port, dice_input_callback, event_queue);
-    osTimerId_t timer = osTimerNew(dice_tick, osTimerPeriodic, event_queue, NULL);
-    osTimerStart(timer, osKernelGetTickFreq());
+    FuriTimer* timer = furi_timer_alloc(dice_tick, FuriTimerTypePeriodic, event_queue, timer);
+    furi_timer_start(timer, furi_kernel_get_tick_frequency());
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     PluginEvent event;
     for(bool processing = true; processing;) {
-        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
+        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         ClockState* plugin_state = (ClockState*)acquire_mutex_block(&state_mutex);
-        if(event_status == osOK) {
+        if(event_status == FuriStatusOk) {
             if(event.type == EventTypeKey) {
                 if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
                     switch(event.input.key) {
@@ -412,11 +412,11 @@ int32_t dice_app(void* p) {
         view_port_update(view_port);
         release_mutex(&state_mutex, plugin_state);
     }
-    osTimerDelete(timer);
+    furi_timer_free(timer);
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close("gui");
     view_port_free(view_port);
-    osMessageQueueDelete(event_queue);
+    furi_message_queue_free(event_queue);
     return 0;
 }

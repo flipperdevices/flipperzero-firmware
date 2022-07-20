@@ -46,11 +46,11 @@ static void sentry_safe_render_callback(Canvas* const canvas, void* ctx) {
     release_mutex((ValueMutex*)ctx, sentry_state);
 }
 
-static void sentry_safe_input_callback(InputEvent* input_event, osMessageQueueId_t event_queue) {
+static void sentry_safe_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
     Event event = {.type = EventTypeKey, .input = *input_event};
-    osMessageQueuePut(event_queue, &event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
 void send_request(int command, int a, int b, int c, int d, int e){
@@ -58,7 +58,7 @@ void send_request(int command, int a, int b, int c, int d, int e){
 
     furi_hal_gpio_init_simple(&gpio_ext_pc1, GpioModeOutputPushPull);
     furi_hal_gpio_write(&gpio_ext_pc1, false);
-    osDelay(3.4);
+    furi_delay_ms(3.4);
     furi_hal_gpio_write(&gpio_ext_pc1, true);
     
     furi_hal_uart_init(FuriHalUartIdLPUART1, 4800);
@@ -68,7 +68,7 @@ void send_request(int command, int a, int b, int c, int d, int e){
     uint8_t data[8] = {0x0, command, a, b, c, d, e, checksum};
     furi_hal_uart_tx(FuriHalUartIdLPUART1, data, 8);
     
-    osDelay(100);
+    furi_delay_ms(100);
 
     furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, NULL, NULL);
     furi_hal_uart_deinit(FuriHalUartIdLPUART1);
@@ -86,7 +86,7 @@ int32_t sentry_safe_app(void* p) {
 
     UNUSED(p);
 
-    osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(Event), NULL);
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(Event));
 
     SentryState* sentry_state = malloc(sizeof(SentryState));
 
@@ -109,11 +109,11 @@ int32_t sentry_safe_app(void* p) {
 
     Event event;
     for(bool processing = true; processing;) {
-        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
+        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
 
         SentryState* sentry_state = (SentryState*)acquire_mutex_block(&state_mutex);
 
-        if(event_status == osOK) {
+        if(event_status == FuriStatusOk) {
             // press events
             if(event.type == EventTypeKey) {
                 if(event.input.type == InputTypePress) {
@@ -139,7 +139,7 @@ int32_t sentry_safe_app(void* p) {
                             sentry_state->status = 1;
 
                             reset_code(1,2,3,4,5);
-                            osDelay(500);
+                            furi_delay_ms(500);
                             try_code(1,2,3,4,5);
 
                             sentry_state->status = 2;
@@ -165,7 +165,7 @@ int32_t sentry_safe_app(void* p) {
     gui_remove_view_port(gui, view_port);
     furi_record_close("gui");
     view_port_free(view_port);
-    osMessageQueueDelete(event_queue);
+    furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
     free(sentry_state);
 

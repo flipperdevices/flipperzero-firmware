@@ -71,7 +71,7 @@ static int32_t chip8_worker(void* context) {
                 for(int j = 0; j < CHIP8_SCREEN_W; j++) {
                     chip8->st.t_chip8_state->screen[i][j] = 0;
                 }
-                osDelay(15);
+                furi_delay_ms(15);
             }
             FURI_LOG_I(WORKER_TAG, "Wipe screen end");
 
@@ -88,7 +88,7 @@ static int32_t chip8_worker(void* context) {
                 "current: 0x%X next: 0x%X",
                 chip8->st.t_chip8_state->current_opcode,
                 chip8->st.t_chip8_state->next_opcode);
-            osDelay(2);
+            furi_delay_ms(2);
             //t_chip8_tick(chip8->st.t_chip8_state);
         }
     }
@@ -112,7 +112,7 @@ Chip8Emulator* chip8_make_emulator(string_t file_path) {
     chip8->st.t_chip8_state = t_chip8_init(malloc);
 
     //    FURI_LOG_I(WORKER_TAG, "Start wipe screen");
-    //    osDelay(1500);
+    //    furi_delay_ms(1500);
     //    for (int i = 0; i < CHIP8_SCREEN_H; i++)
     //    {
     //        FURI_LOG_I(WORKER_TAG, "Start wipe line %d", i);

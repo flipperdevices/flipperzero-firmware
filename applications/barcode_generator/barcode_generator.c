@@ -340,11 +340,11 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 }
 
 
-static void input_callback(InputEvent* input_event, osMessageQueueId_t event_queue) {
+static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
     PluginEvent event = {.type = EventTypeKey, .input = *input_event};
-    osMessageQueuePut(event_queue, &event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
 static void barcode_generator_state_init(PluginState* const plugin_state) {
@@ -363,7 +363,7 @@ static void barcode_generator_state_init(PluginState* const plugin_state) {
 int32_t barcode_generator_app(void* p) {
     UNUSED(p);
     //testing
-    osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(PluginEvent), NULL);
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
     barcode_generator_state_init(plugin_state);
@@ -385,10 +385,10 @@ int32_t barcode_generator_app(void* p) {
 
     PluginEvent event;
     for(bool processing = true; processing;) {
-        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
+        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
 
-        if(event_status == osOK) {
+        if(event_status == FuriStatusOk) {
             // press events
             if(event.type == EventTypeKey) {
                 if((event.input.type == InputTypePress) || (event.input.type == InputTypeRepeat)) {
@@ -451,7 +451,7 @@ int32_t barcode_generator_app(void* p) {
     gui_remove_view_port(gui, view_port);
     furi_record_close("gui");
     view_port_free(view_port);
-    osMessageQueueDelete(event_queue);
+    furi_message_queue_free(event_queue);
 
     return 0;
 }

@@ -108,10 +108,10 @@ static void game_2048_render_callback(Canvas* const canvas, ValueMutex* const vm
 
 static void game_2048_input_callback(
     const InputEvent* const input_event,
-    const osMessageQueueId_t event_queue) {
+    const FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
-    osMessageQueuePut(event_queue, input_event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
 // if return false then Game Over
@@ -326,7 +326,7 @@ static void game_2048_process_move(GameState* const game_state) {
 int32_t game_2048_app(void* p) {
     int32_t return_code = 0;
 
-    osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(InputEvent), NULL);
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     GameState* game_state = malloc(sizeof(GameState));
 
@@ -373,10 +373,10 @@ int32_t game_2048_app(void* p) {
 
     InputEvent event;
     for(bool loop = true; loop;) {
-        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
+        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         GameState* game_state = (GameState*)acquire_mutex_block(&state_mutex);
 
-        if(event_status == osOK) {
+        if(event_status == FuriStatusOk) {
             if(event.type == InputTypePress) {
                 switch(event.key) {
                 case InputKeyUp:
@@ -420,7 +420,7 @@ int32_t game_2048_app(void* p) {
 
 free_and_exit:
     free(game_state);
-    osMessageQueueDelete(event_queue);
+    furi_message_queue_free(event_queue);
 
     return return_code;
 }

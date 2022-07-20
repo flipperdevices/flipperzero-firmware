@@ -32,7 +32,7 @@ typedef struct {
 } RaycastGameModel;
 
 typedef struct {
-    osMessageQueueId_t queue;
+    FuriMessageQueue* queue;
     Gui* gui;
     View* view;
     ViewDispatcher* view_dispatcher;
@@ -285,7 +285,7 @@ static bool game_input_callback(InputEvent* input_event, void* context) {
     RaycastGame* game = context;
 
     RaycastGameEvent event = {.type = EventTypeKey, .input = *input_event};
-    osMessageQueuePut(game->queue, &event, 0, 0);
+    furi_message_queue_put(game->queue, &event, 0);
     return true;
 }
 
@@ -311,7 +311,7 @@ static void player_free(Player* player) {
 static RaycastGame* raycast_game_aloc() {
     RaycastGame* game = malloc(sizeof(RaycastGame));
 
-    game->queue = osMessageQueueNew(8, sizeof(RaycastGameEvent), NULL);
+    game->queue = furi_message_queue_alloc(8, sizeof(RaycastGameEvent));
 
     game->view_dispatcher = view_dispatcher_alloc();
 
@@ -351,7 +351,7 @@ static void raycast_game_free(RaycastGame* game) {
 
     view_free(game->view);
 
-    osMessageQueueDelete(game->queue);
+    furi_message_queue_free(game->queue);
 
     // NotificationApp* notifications = furi_record_open("notification");
     // notification_message(notifications, &sequence_display_unlock);
@@ -403,9 +403,9 @@ int32_t raycast_game_app(void* p) {
     size_t button_state = 0;
 
     for(bool processing = true; processing;) {
-        osStatus_t event_status = osMessageQueueGet(game->queue, &event, NULL, 100);
+        FuriStatus event_status = furi_message_queue_get(game->queue, &event, 100);
 
-        if(event_status == osOK) {
+        if(event_status == FuriStatusOk) {
             // press events
             if(event.type == EventTypeKey) {
                 if(event.input.type == InputTypePress) {

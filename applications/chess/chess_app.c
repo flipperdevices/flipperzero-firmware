@@ -440,7 +440,7 @@ static int32_t ai_thread(void* context) {
     while(true) {
         if(should_exit) break;
         if(thinking) make_ai_move(context);
-        osDelay(100);
+        furi_delay_ms(100);
     }
     return 0;
 }
@@ -649,7 +649,7 @@ int32_t chess_app(void* p) {
     // test_engine();
 
     while(!should_exit) {
-        osDelay(100);
+        furi_delay_ms(100);
         if(!thinking) {
             flag = !flag;
             should_update_screen = true;

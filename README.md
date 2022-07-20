@@ -7,6 +7,9 @@
 - READ SPECIAL INSTRUCTIONS FOR UNLESHING YOUR FLIPPER OR EXITING GAME MODE
 - Fixed issue with api_symbols.csv being rebuilt on clone
 - Added [Picopass: dump full card, extract some details #1408 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1408)
+- OFW: [Furi: core refactoring and CMSIS removal part 2 #1410 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1410)
+- OFW: [Respect SOURCE_DATE_EPOCH when setting build date #1421 (By adisbladis)](https://github.com/flipperdevices/flipperzero-firmware/pull/1421)
+- Updated nearly all apps and games for refactoring
 
 <table width="100%" border="0" cellspacing="0">
   <tr>

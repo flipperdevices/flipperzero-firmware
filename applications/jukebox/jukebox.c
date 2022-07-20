@@ -85,7 +85,7 @@ static void jukebox_send_signal(uint32_t frequency, string_t signal, string_t pr
     while(!(furi_hal_subghz_is_async_tx_complete())) {
         FURI_LOG_D(TAG, ".");
         fflush(stdout);
-        osDelay(333);
+        furi_delay_ms(333);
     }
     notification_message(notification, &sequence_reset_vibro);
 
@@ -171,14 +171,14 @@ static void jukebox_render_callback(Canvas* canvas, void* ctx) {
 
 static void jukebox_input_callback(InputEvent* input_event, void* ctx) {
 	if (input_event->type == InputTypeRelease) {
-		osMessageQueueId_t event_queue = ctx;
-		osMessageQueuePut(event_queue, input_event, 0, osWaitForever);
+		FuriMessageQueue* event_queue = ctx;
+		furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 	}
 }
 
 int32_t jukebox_app(void* p) {
     UNUSED(p);
-    osMessageQueueId_t event_queue = osMessageQueueNew(32, sizeof(InputEvent), NULL);
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(32, sizeof(InputEvent));
     furi_check(event_queue);
     string_init(up_file);
     string_init(down_file);
@@ -239,7 +239,7 @@ int32_t jukebox_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     InputEvent event;
-    while(osMessageQueueGet(event_queue, &event, NULL, osWaitForever) == osOK) {
+    while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
         RemoteAppState* state = (RemoteAppState*)acquire_mutex_block(&state_mutex);
         FURI_LOG_D(
             TAG,
@@ -267,7 +267,7 @@ int32_t jukebox_app(void* p) {
     // remove & free all stuff created by app
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
-    osMessageQueueDelete(event_queue);
+    furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
 
     furi_record_close("gui");
