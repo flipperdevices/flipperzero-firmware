@@ -1411,7 +1411,8 @@ Function,+,init_mutex,_Bool,"ValueMutex*, void*, size_t"
 Function,-,initstate,char*,"unsigned, char*, size_t"
 Function,+,input_get_key_name,const char*,InputKey
 Function,+,input_get_type_name,const char*,InputType
-Function,+,int32_to_bytes,void,"uint32_t, uint8_t*, bool"
+Function,+,int32_to_bytes,void,"uint32_t, uint8_t*, _Bool"
+Function,+,int64_to_bytes,void,"uint64_t, uint8_t*, _Bool"
 Function,+,iprintf,int,"const char*, ..."
 Function,-,isalnum,int,int
 Function,-,isalnum_l,int,"int, locale_t"
@@ -1570,18 +1571,40 @@ Function,+,nfca_get_crc16,uint16_t,"uint8_t*, uint16_t"
 Function,+,nfca_signal_alloc,NfcaSignal*,
 Function,+,nfca_signal_encode,void,"NfcaSignal*, uint8_t*, uint16_t, uint8_t*"
 Function,+,nfca_signal_free,void,NfcaSignal*
-Function,+,nrf24_find_channel,uint8_t,"FuriHalSpiBusHandle*, uint8_t*, uint8_t*, uint8_t, uint8_t, uint8_t, uint8_t, bool"
-Function,+,nrf24_init,void,,
-Function,+,nrf24_init_promisc_mode,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t"
-Function,+,nrf24_set_idle,uint8_t,"FuriHalSpiBusHandle*"
-Function,+,nrf24_set_src_mac,uint8_t,"FuriHalSpiBusHandle*, uint8_t*, uint8_t"
-Function,+,nrf24_sniff_address,_Bool,"FuriHalSpiBusHandle*, uint8_t, uint8_t*"
-Function,+,nrf24_txpacket,uint8_t,"FuriHalSpiBusHandle*, uint8_t*, uint8_t, bool"
 Function,+,notification_internal_message,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_internal_message_block,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_message,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_message_block,void,"NotificationApp*, const NotificationSequence*"
 Function,-,nrand48,long,unsigned short[3]
+Function,-,nrf24_configure,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t*, uint8_t*, uint8_t, uint8_t, _Bool, _Bool"
+Function,+,nrf24_find_channel,uint8_t,"FuriHalSpiBusHandle*, uint8_t*, uint8_t*, uint8_t, uint8_t, uint8_t, uint8_t, _Bool"
+Function,-,nrf24_flush_rx,uint8_t,FuriHalSpiBusHandle*
+Function,-,nrf24_flush_tx,uint8_t,FuriHalSpiBusHandle*
+Function,-,nrf24_get_chan,uint8_t,FuriHalSpiBusHandle*
+Function,-,nrf24_get_dst_mac,uint8_t,"FuriHalSpiBusHandle*, uint8_t*"
+Function,-,nrf24_get_maclen,uint8_t,FuriHalSpiBusHandle*
+Function,-,nrf24_get_packetlen,uint8_t,FuriHalSpiBusHandle*
+Function,-,nrf24_get_rate,uint32_t,FuriHalSpiBusHandle*
+Function,-,nrf24_get_src_mac,uint8_t,"FuriHalSpiBusHandle*, uint8_t*"
+Function,+,nrf24_init,void,
+Function,+,nrf24_init_promisc_mode,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t"
+Function,-,nrf24_power_up,uint8_t,FuriHalSpiBusHandle*
+Function,-,nrf24_read_reg,uint8_t,"FuriHalSpiBusHandle*, uint8_t, uint8_t*, uint8_t"
+Function,-,nrf24_rxpacket,uint8_t,"FuriHalSpiBusHandle*, uint8_t*, uint8_t*, _Bool"
+Function,-,nrf24_set_chan,uint8_t,"FuriHalSpiBusHandle*, uint8_t"
+Function,-,nrf24_set_dst_mac,uint8_t,"FuriHalSpiBusHandle*, uint8_t*, uint8_t"
+Function,+,nrf24_set_idle,uint8_t,FuriHalSpiBusHandle*
+Function,-,nrf24_set_maclen,uint8_t,"FuriHalSpiBusHandle*, uint8_t"
+Function,-,nrf24_set_packetlen,uint8_t,"FuriHalSpiBusHandle*, uint8_t"
+Function,-,nrf24_set_rate,uint8_t,"FuriHalSpiBusHandle*, uint32_t"
+Function,-,nrf24_set_rx_mode,uint8_t,FuriHalSpiBusHandle*
+Function,+,nrf24_set_src_mac,uint8_t,"FuriHalSpiBusHandle*, uint8_t*, uint8_t"
+Function,-,nrf24_set_tx_mode,uint8_t,FuriHalSpiBusHandle*
+Function,+,nrf24_sniff_address,_Bool,"FuriHalSpiBusHandle*, uint8_t, uint8_t*"
+Function,-,nrf24_status,uint8_t,FuriHalSpiBusHandle*
+Function,+,nrf24_txpacket,uint8_t,"FuriHalSpiBusHandle*, uint8_t*, uint8_t, _Bool"
+Function,-,nrf24_write_buf_reg,uint8_t,"FuriHalSpiBusHandle*, uint8_t, uint8_t*, uint8_t"
+Function,-,nrf24_write_reg,uint8_t,"FuriHalSpiBusHandle*, uint8_t, uint8_t"
 Function,-,on_exit,int,"void (*)(int, void*), void*"
 Function,+,onewire_device_alloc,OneWireDevice*,"uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,+,onewire_device_attach,void,"OneWireDevice*, OneWireSlave*"
@@ -2160,8 +2183,8 @@ Function,+,subghz_transmitter_get_protocol_instance,SubGhzProtocolEncoderBase*,S
 Function,+,subghz_transmitter_stop,_Bool,SubGhzTransmitter*
 Function,+,subghz_transmitter_yield,LevelDuration,void*
 Function,+,subghz_tx_rx_worker_alloc,SubGhzTxRxWorker*,
-Function,+,subghz_tx_rx_worker_free,void,SubGhzTxRxWorker*
 Function,+,subghz_tx_rx_worker_available,size_t,SubGhzTxRxWorker*
+Function,+,subghz_tx_rx_worker_free,void,SubGhzTxRxWorker*
 Function,+,subghz_tx_rx_worker_is_running,_Bool,SubGhzTxRxWorker*
 Function,+,subghz_tx_rx_worker_read,size_t,"SubGhzTxRxWorker*, uint8_t*, size_t"
 Function,+,subghz_tx_rx_worker_set_callback_have_read,void,"SubGhzTxRxWorker*, SubGhzTxRxWorkerCallbackHaveRead, void*"
@@ -2555,7 +2578,6 @@ Variable,+,I_FaceCharging_29x14,const Icon,
 Variable,+,I_FaceConfused_29x14,const Icon,
 Variable,+,I_FaceNopower_29x14,const Icon,
 Variable,+,I_FaceNormal_29x14,const Icon,
-Variable,-,I_HappyFlipper_128x64,const Icon,
 Variable,+,I_Health_16x16,const Icon,
 Variable,+,I_InfraredArrowDown_4x8,const Icon,
 Variable,+,I_InfraredArrowUp_4x8,const Icon,
@@ -2604,7 +2626,6 @@ Variable,+,I_SDcardMounted_11x8,const Icon,
 Variable,+,I_Scanning_123x52,const Icon,
 Variable,+,I_Smile_18x18,const Icon,
 Variable,+,I_Space_65x18,const Icon,
-Variable,-,I_TanksSplashScreen_128x64,const Icon,
 Variable,+,I_Temperature_16x16,const Icon,
 Variable,+,I_Unlock_7x8,const Icon,
 Variable,+,I_Up_25x27,const Icon,
@@ -2624,10 +2645,6 @@ Variable,+,I_back_10px,const Icon,
 Variable,+,I_badusb_10px,const Icon,
 Variable,-,I_ble_10px,const Icon,
 Variable,+,I_dir_10px,const Icon,
-Variable,-,I_enemy_down,const Icon,
-Variable,-,I_enemy_left,const Icon,
-Variable,-,I_enemy_right,const Icon,
-Variable,-,I_enemy_up,const Icon,
 Variable,+,I_iButtonDolphinVerySuccess_108x52,const Icon,
 Variable,+,I_iButtonKey_49x44,const Icon,
 Variable,+,I_ibutt_10px,const Icon,
@@ -2645,20 +2662,7 @@ Variable,+,I_passport_left_6x46,const Icon,
 Variable,+,I_passport_okay1_46x49,const Icon,
 Variable,+,I_passport_okay2_46x49,const Icon,
 Variable,+,I_passport_okay3_46x49,const Icon,
-Variable,-,I_projectile_down,const Icon,
-Variable,-,I_projectile_left,const Icon,
-Variable,-,I_projectile_right,const Icon,
-Variable,-,I_projectile_up,const Icon,
 Variable,+,I_sub1_10px,const Icon,
-Variable,-,I_tank_base,const Icon,
-Variable,-,I_tank_down,const Icon,
-Variable,-,I_tank_explosion,const Icon,
-Variable,-,I_tank_hedgehog,const Icon,
-Variable,-,I_tank_left,const Icon,
-Variable,-,I_tank_right,const Icon,
-Variable,-,I_tank_stone,const Icon,
-Variable,-,I_tank_up,const Icon,
-Variable,-,I_tank_wall,const Icon,
 Variable,+,I_u2f_10px,const Icon,
 Variable,+,I_unknown_10px,const Icon,
 Variable,+,I_update_10px,const Icon,
