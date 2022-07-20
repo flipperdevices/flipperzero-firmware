@@ -7,7 +7,7 @@
 #include <string.h>
 #include <nrf24.h>
 #include <furi.h>
-#include <furi_hal_delay.h>
+#include <furi_hal.h>
 
 #ifdef __cplusplus
 extern "C" {

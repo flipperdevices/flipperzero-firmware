@@ -1,5 +1,5 @@
 #include <furi.h>
-#include <furi_hal_delay.h>
+#include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
