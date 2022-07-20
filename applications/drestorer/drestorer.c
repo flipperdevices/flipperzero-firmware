@@ -1,5 +1,4 @@
 #include "drestorer.h"
-#include "cmsis_os2.h"
 #include <core/common_defines.h>
 #include <core/log.h>
 #include "loader/loader.h"
