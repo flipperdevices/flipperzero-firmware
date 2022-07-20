@@ -115,6 +115,9 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
                 consumed = true;
             }
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_next_scene(nfc->scene_manager, NfcSceneExitConfirm);
+        consumed = true;
     }
     return consumed;
 }

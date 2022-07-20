@@ -91,14 +91,19 @@ bool nfc_scene_read_mifare_classic_success_on_event(void* context, SceneManagerE
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
-            consumed = scene_manager_previous_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRetryConfirm);
+            consumed = true;
         } else if(event.event == GuiButtonTypeRight) {
             // Clear device name
             nfc_device_set_name(nfc->dev, "");
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMifareClassicMenu);
             consumed = true;
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_next_scene(nfc->scene_manager, NfcSceneExitConfirm);
+        consumed = true;
     }
+
     return consumed;
 }
 

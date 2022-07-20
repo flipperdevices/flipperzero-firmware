@@ -10,9 +10,9 @@ void nfc_scene_retry_confirm_on_enter(void* context) {
     Nfc* nfc = context;
     DialogEx* dialog_ex = nfc->dialog_ex;
 
-    dialog_ex_set_left_button_text(dialog_ex, "Exit");
+    dialog_ex_set_left_button_text(dialog_ex, "Retry");
     dialog_ex_set_right_button_text(dialog_ex, "Stay");
-    dialog_ex_set_header(dialog_ex, "Return to reading?", 64, 11, AlignCenter, AlignTop);
+    dialog_ex_set_header(dialog_ex, "Retry reading?", 64, 11, AlignCenter, AlignTop);
     dialog_ex_set_text(
         dialog_ex, "All unsaved data will be\nlost.", 64, 25, AlignCenter, AlignTop);
     dialog_ex_set_context(dialog_ex, nfc);
