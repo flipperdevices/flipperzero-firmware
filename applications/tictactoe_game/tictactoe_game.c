@@ -287,7 +287,7 @@ int32_t tictactoe_game_app(void* p) {
     view_port_input_callback_set(view_port, tictactoe_input_callback, event_queue);
 
     tictactoe_state->timer =
-        furi_timer_alloc(tictactoe_update_timer_callback, FuriTimerTypePeriodic, event_queue, timer);
+        furi_timer_alloc(tictactoe_update_timer_callback, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(tictactoe_state->timer, furi_kernel_get_tick_frequency() / 22);
 
     tictactoe_state_init(tictactoe_state);

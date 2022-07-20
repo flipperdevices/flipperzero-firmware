@@ -337,7 +337,7 @@ int32_t dice_app(void* p) {
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, dice_render_callback, &state_mutex);
     view_port_input_callback_set(view_port, dice_input_callback, event_queue);
-    FuriTimer* timer = furi_timer_alloc(dice_tick, FuriTimerTypePeriodic, event_queue, timer);
+    FuriTimer* timer = furi_timer_alloc(dice_tick, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, furi_kernel_get_tick_frequency());
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);

@@ -170,7 +170,7 @@ int32_t totp_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     view_port_update(view_port);
 
-    FuriTimer* timer = furi_timer_alloc(totp_app_update, FuriTimerTypePeriodic, event_queue, timer);
+    FuriTimer* timer = furi_timer_alloc(totp_app_update, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, furi_kernel_get_tick_frequency());
 
     TotpEvent event;

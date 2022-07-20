@@ -376,7 +376,7 @@ int32_t tetris_game_app() {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     tetris_state->timer =
-        furi_timer_alloc(tetris_game_update_timer_callback, FuriTimerTypePeriodic, event_queue, timer);
+        furi_timer_alloc(tetris_game_update_timer_callback, FuriTimerTypePeriodic, event_queue);
     tetris_game_init_state(tetris_state);
 
     TetrisEvent event;

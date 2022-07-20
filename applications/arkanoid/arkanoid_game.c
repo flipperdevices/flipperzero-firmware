@@ -341,7 +341,7 @@ int32_t arkanoid_game_app(void* p) {
     view_port_input_callback_set(view_port, arkanoid_input_callback, event_queue);
 
     FuriTimer* timer =
-        furi_timer_alloc(arkanoid_update_timer_callback, FuriTimerTypePeriodic, event_queue, timer);
+        furi_timer_alloc(arkanoid_update_timer_callback, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, furi_kernel_get_tick_frequency() / 22);
 
     // Open GUI and register view_port

@@ -331,7 +331,7 @@ int32_t clock_app(void* p) {
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, clock_render_callback, &state_mutex);
     view_port_input_callback_set(view_port, clock_input_callback, event_queue);
-    FuriTimer* timer = furi_timer_alloc(clock_tick, FuriTimerTypePeriodic, event_queue, timer);
+    FuriTimer* timer = furi_timer_alloc(clock_tick, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, furi_kernel_get_tick_frequency());
     // Open GUI and register view_port
     Gui* gui = furi_record_open("gui");

@@ -601,7 +601,7 @@ int32_t wifi_scanner_app(void* p)
 
     WIFI_APP_LOG_I("Init");
     
-    // FuriTimer* timer = furi_timer_alloc(blink_test_update, FuriTimerTypePeriodic, event_queue, timer);
+    // FuriTimer* timer = furi_timer_alloc(blink_test_update, FuriTimerTypePeriodic, event_queue);
     // furi_timer_start(timer, furi_kernel_get_tick_frequency());
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(SPluginEvent)); 
