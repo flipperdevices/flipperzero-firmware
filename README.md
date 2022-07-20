@@ -5,7 +5,7 @@
 
 - If you have questions about where X app is located, DO NOT ASK ON MAIN DISCORD, ASK <a href='https://discord.gg/gF2bBUzAFe'>HERE</a>
 - READ SPECIAL INSTRUCTIONS FOR UNLESHING YOUR FLIPPER OR EXITING GAME MODE
-- Fixed issue with api_symbols.csv being rebuilt on clone
+- Fixed issue with api_symbols.csv being rebuilt incorrectly on clone
 - Added [Picopass: dump full card, extract some details #1408 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1408)
 - OFW: [Furi: core refactoring and CMSIS removal part 2 #1410 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1410)
 - OFW: [Respect SOURCE_DATE_EPOCH when setting build date #1421 (By adisbladis)](https://github.com/flipperdevices/flipperzero-firmware/pull/1421)
@@ -148,7 +148,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [TOTP (By Astrrra)](https://github.com/wetox-team/flipperzero-firmware/tree/gen-totp)
 - `ELF` [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - `ELF` [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
-- [WiFi Scanner (By gotnull)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/99) `HIDDEN "wifi_scanner"` due to `Req: ESP8266`
+- [WiFi Scanner (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `HIDDEN "wifi_scanner"` due to `Req: ESP8266`
 </details>
 </td></tr></table>
 
