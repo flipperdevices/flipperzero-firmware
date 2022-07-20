@@ -4,7 +4,7 @@
 <b>Latest Updates:</b>
 
 - [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): Add FAAC SLH 433 MHz create support
-- Fix for Emulate Directly bug, [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins) for pointing it out
+- Fix for Emulate Directly bug, [thanks to ESurge](https://github.com/ESurge/flipperzero-firmware-wPlugins) for pointing it out
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
