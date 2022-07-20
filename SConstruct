@@ -212,15 +212,41 @@ distenv.PhonyTarget(
     LINT_SOURCES=firmware_env["LINT_SOURCES"],
 )
 
-findStr = 'find . -type f ( -iname *.py -o -iname *.scons -o -iname *.fam ) -not ( -path ./toolchain/* -o -path ./lib/black* -o -path ./lib/scons/* -o -path ./lib/STM32CubeWB/* -o -path ./lib/FreeRTOS-Kernel -o -path ./lib/littlefs/* -o -path ./lib/mbedtls/* -o -path ./lib/nanopb/* )'
-findFiles = subprocess.run(findStr.split(" "),
-    stdout=subprocess.PIPE,
-    encoding="utf-8"
+# PY_LINT_SOURCES contains recursively-built modules' SConscript files + application manifests
+# Here we add additional Python files residing in repo root
+firmware_env.Append(
+    PY_LINT_SOURCES=[
+        # Py code folders
+        "site_scons",
+        "scripts",
+        # Extra files
+        "applications/extapps.scons",
+        "SConstruct",
+        "firmware.scons",
+        "fbt_options.py",
+    ]
 )
+
+
+black_commandline = "@${PYTHON3} -m black ${PY_BLACK_ARGS} ${PY_LINT_SOURCES}"
+black_base_args = ["--include", '"\\.scons|\\.py|SConscript|SConstruct"']
+
 distenv.PhonyTarget(
     "lint_py",
-    "@${PYTHON3} scripts/lint_py.py ${PY_LINT_SOURCES}",
-    PY_LINT_SOURCES=findFiles.stdout.split('\n'),
+    black_commandline,
+    PY_BLACK_ARGS=[
+        "--check",
+        "--diff",
+        *black_base_args,
+    ],
+    PY_LINT_SOURCES=firmware_env["PY_LINT_SOURCES"],
+)
+
+distenv.PhonyTarget(
+    "format_py",
+    black_commandline,
+    PY_BLACK_ARGS=black_base_args,
+    PY_LINT_SOURCES=firmware_env["PY_LINT_SOURCES"],
 )
 
 
