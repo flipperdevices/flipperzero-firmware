@@ -4,7 +4,6 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-
 /** SubGhzNotification state */
 typedef enum {
     SubGhzNotificationStateStarting,
@@ -73,13 +72,11 @@ typedef enum {
     SubGhzViewIdTestPacket,
 } SubGhzViewId;
 
-struct SubGhzPesetDefinition
- {
+struct SubGhzPesetDefinition {
     string_t name;
     uint32_t frequency;
     uint8_t* data;
     size_t data_size;
- };
- 
- typedef struct SubGhzPesetDefinition SubGhzPesetDefinition;
+};
 
+typedef struct SubGhzPesetDefinition SubGhzPesetDefinition;

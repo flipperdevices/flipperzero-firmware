@@ -94,7 +94,7 @@ bool subghz_history_get_text_space_left(SubGhzHistory* instance, string_t output
 bool subghz_history_add_to_history(
     SubGhzHistory* instance,
     void* context,
-    SubGhzPesetDefinition *preset);
+    SubGhzPesetDefinition* preset);
 
 /** Get SubGhzProtocolCommonLoad to load into the protocol decoder bin data
  * 

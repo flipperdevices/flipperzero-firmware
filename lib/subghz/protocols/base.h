@@ -49,7 +49,7 @@ bool subghz_protocol_decoder_base_get_string(
 bool subghz_protocol_decoder_base_serialize(
     SubGhzProtocolDecoderBase* decoder_base,
     FlipperFormat* flipper_format,
-    SubGhzPesetDefinition *preset);
+    SubGhzPesetDefinition* preset);
 
 /**
  * Deserialize data SubGhzProtocolDecoderBase.

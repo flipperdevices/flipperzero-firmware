@@ -236,7 +236,7 @@ static void subghz_setting_load_default_preset(
     item->custom_preset_data = malloc(item->custom_preset_data_size);
     //load preset register
     memcpy(&item->custom_preset_data[0], &preset_data[0], preset_data_count);
-    // //load pa table
+    //load pa table
     memcpy(&item->custom_preset_data[preset_data_count], &preset_pa_table[0], 8);
 }
 
