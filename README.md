@@ -3,7 +3,7 @@
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
 <ul>
-<li><h3>If you have questions about where X app is located, DO NOT ASK ON THE MAIN DISCORD, USE <a href='https://discord.gg/gF2bBUzAFe'>THE ROGUE DISCORD</a></B></h3></li>
+<li><h3>If you have questions about where X app is located, DO NOT ASK ON MAIN DISCORD, ASK <a href='https://discord.gg/gF2bBUzAFe'>HERE</a></B></h3></li>
 <li>READ SPECIAL INSTRUCTIONS FOR UNLESHING YOUR FLIPPER OR EXITING GAME MODE</li>
 <li>Fixed issue with api_symbols.csv being rebuilt on clone</li>
 </ul>
