@@ -26,7 +26,7 @@
       
 - To update, get zip from Releases, copy the unzipped directory to Flipper's SD card and navigate to update.fuf file in Archive app.
 - If you have questions about where X app is located, DO NOT ASK ON MAIN DISCORD, ASK <a href='https://discord.gg/gF2bBUzAFe'>HERE</a>
-- READ SPECIAL INSTRUCTIONS FOR UNLESHING YOUR FLIPPER OR EXITING GAME MODE
+- READ SPECIAL INSTRUCTIONS FOR UNLEASHING YOUR FLIPPER OR EXITING GAME MODE
 
 <br>[FLIPPER PROJECT WISH LIST](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/RoadMap.md) - [SAMPLE EDUCATIONAL PROJECTS 😄](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/RoadMap.md)
 <br>[`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
