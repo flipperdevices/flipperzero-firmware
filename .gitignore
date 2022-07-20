@@ -50,3 +50,6 @@ build/
 
 # openocd output file
 openocd.log
+
+# Nix result symlinks
+result*
