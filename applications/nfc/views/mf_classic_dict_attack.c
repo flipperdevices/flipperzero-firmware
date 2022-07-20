@@ -29,8 +29,10 @@ static void mf_classic_dict_attack_draw_callback(Canvas* canvas, void* model) {
     MfClassicDictAttackViewModel* m = model;
     if(m->state == MfClassicDictAttackStateCardRemoved) {
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(
-            canvas, 64, 32, AlignCenter, AlignTop, "Place card back to flipper");
+        canvas_draw_str_aligned(canvas, 64, 4, AlignCenter, AlignTop, "Lost the tag!");
+        canvas_set_font(canvas, FontSecondary);
+        elements_multiline_text_aligned(
+            canvas, 64, 23, AlignCenter, AlignTop, "Make sure the tag is\npositioned correctly.");
     } else if(m->state == MfClassicDictAttackStateRead) {
         char draw_str[32] = {};
         canvas_set_font(canvas, FontPrimary);
@@ -38,13 +40,13 @@ static void mf_classic_dict_attack_draw_callback(Canvas* canvas, void* model) {
         canvas_set_font(canvas, FontSecondary);
         float progress =
             m->sectors_total == 0 ? 0 : (float)(m->sector_current) / (float)(m->sectors_total);
-        elements_progress_bar(canvas, 5, 12, 120, progress);
+        elements_progress_bar(canvas, 5, 15, 120, progress);
         canvas_set_font(canvas, FontSecondary);
-        snprintf(
-            draw_str, sizeof(draw_str), "Sectors read: %d/%d", m->sectors_read, m->sectors_total);
-        canvas_draw_str_aligned(canvas, 1, 23, AlignLeft, AlignTop, draw_str);
         snprintf(draw_str, sizeof(draw_str), "Keys found: %d/%d", m->keys_found, m->keys_total);
-        canvas_draw_str_aligned(canvas, 1, 35, AlignLeft, AlignTop, draw_str);
+        canvas_draw_str_aligned(canvas, 1, 28, AlignLeft, AlignTop, draw_str);
+        snprintf(
+            draw_str, sizeof(draw_str), "Sectors Read: %d/%d", m->sectors_read, m->sectors_total);
+        canvas_draw_str_aligned(canvas, 1, 40, AlignLeft, AlignTop, draw_str);
     }
     elements_button_center(canvas, "Skip");
 }
