@@ -1,7 +1,5 @@
 #include "stream_cache.h"
 
-#include <furi/common_defines.h>
-
 #define STREAM_CACHE_MAX_SIZE 1024U
 
 struct StreamCache {
