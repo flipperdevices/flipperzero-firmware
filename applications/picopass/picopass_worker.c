@@ -320,6 +320,6 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
             }
             break;
         }
-        osDelay(100);
+        furi_delay_ms(100);
     }
 }

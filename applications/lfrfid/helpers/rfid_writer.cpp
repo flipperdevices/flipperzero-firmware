@@ -49,15 +49,15 @@ void RfidWriter::stop() {
 
 void RfidWriter::write_gap(uint32_t gap_time) {
     furi_hal_rfid_tim_read_stop();
-    furi_hal_delay_us(gap_time * 8);
+    furi_delay_us(gap_time * 8);
     furi_hal_rfid_tim_read_start();
 }
 
 void RfidWriter::write_bit(bool value) {
     if(value) {
-        furi_hal_delay_us(T55xxTiming::data_1 * 8);
+        furi_delay_us(T55xxTiming::data_1 * 8);
     } else {
-        furi_hal_delay_us(T55xxTiming::data_0 * 8);
+        furi_delay_us(T55xxTiming::data_0 * 8);
     }
     write_gap(T55xxTiming::write_gap);
 }
@@ -68,8 +68,8 @@ void RfidWriter::write_byte(uint8_t value) {
     }
 }
 
-void RfidWriter::write_block(uint8_t page, uint8_t block, bool lock_bit, uint32_t data, bool password_enable, uint32_t password) {
-    furi_hal_delay_us(T55xxTiming::wait_time * 8);
+void RfidWriter::write_block(uint8_t page, uint8_t block, bool lock_bit, uint32_t data) {
+    furi_delay_us(T55xxTiming::wait_time * 8);
 
     //client: https://github.com/Proxmark/proxmark3/blob/6116334485ca77343eda51c557cdc81032afcf38/client/cmdlft55xx.c#L944
     //hardware: https://github.com/Proxmark/proxmark3/blob/555fa197730c061bbf0ab01334e99bc47fb3dc06/armsrc/lfops.c#L1465
@@ -113,9 +113,9 @@ void RfidWriter::write_block(uint8_t page, uint8_t block, bool lock_bit, uint32_
     write_bit((block >> 1) & 1);
     write_bit((block >> 0) & 1);
 
-    furi_hal_delay_us(T55xxTiming::program * 8);
+    furi_delay_us(T55xxTiming::program * 8);
 
-    furi_hal_delay_us(T55xxTiming::wait_time * 8);
+    furi_delay_us(T55xxTiming::wait_time * 8);
     write_reset();
 }
 
