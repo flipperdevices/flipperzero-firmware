@@ -1,6 +1,6 @@
 #include "nrf24.h"
-#include <cmsis_os2.h>
-#include <furi_hal_delay.h>
+#include <furi.h>
+#include <furi_hal.h>
 #include <furi_hal_resources.h>
 #include <assert.h>
 #include <string.h>
