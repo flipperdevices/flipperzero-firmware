@@ -23,7 +23,7 @@ void stream_cache_free(StreamCache* cache) {
     free(cache);
 }
 
-void stream_cache_reset(StreamCache* cache) {
+void stream_cache_drop(StreamCache* cache) {
     cache->data_size = 0;
     cache->position = 0;
 }
@@ -37,7 +37,7 @@ size_t stream_cache_size(StreamCache* cache) {
     return cache->data_size;
 }
 
-size_t stream_cache_position(StreamCache* cache) {
+size_t stream_cache_pos(StreamCache* cache) {
     return cache->position;
 }
 

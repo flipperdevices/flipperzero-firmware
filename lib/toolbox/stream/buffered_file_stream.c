@@ -48,10 +48,14 @@ Stream* buffered_file_stream_alloc(Storage* storage) {
     return (Stream*)stream;
 }
 
-bool buffered_file_stream_open(Stream* _stream, const char* path, FS_AccessMode access_mode, FS_OpenMode open_mode) {
+bool buffered_file_stream_open(
+    Stream* _stream,
+    const char* path,
+    FS_AccessMode access_mode,
+    FS_OpenMode open_mode) {
     furi_assert(_stream);
     BufferedFileStream* stream = (BufferedFileStream*)_stream;
-    stream_cache_reset(stream->cache);
+    stream_cache_drop(stream->cache);
     furi_check(stream->stream_base.vtable == &buffered_file_stream_vtable);
     return file_stream_open(stream->file_stream, path, access_mode, open_mode);
 }
@@ -82,7 +86,7 @@ static bool buffered_file_stream_eof(BufferedFileStream* stream) {
 }
 
 static void buffered_file_stream_clean(BufferedFileStream* stream) {
-    stream_cache_reset(stream->cache);
+    stream_cache_drop(stream->cache);
     stream_clean(stream->file_stream);
 }
 
@@ -101,7 +105,7 @@ static bool buffered_file_stream_seek(
     }
 
     if((new_offset != 0) || (offset_type != StreamOffsetFromCurrent)) {
-        stream_cache_reset(stream->cache);
+        stream_cache_drop(stream->cache);
         success = stream_seek(stream->file_stream, new_offset, offset_type);
     } else {
         success = true;
@@ -111,7 +115,7 @@ static bool buffered_file_stream_seek(
 }
 
 static size_t buffered_file_stream_tell(BufferedFileStream* stream) {
-    return stream_tell(stream->file_stream) + stream_cache_position(stream->cache) -
+    return stream_tell(stream->file_stream) + stream_cache_pos(stream->cache) -
            stream_cache_size(stream->cache);
 }
 
@@ -121,7 +125,7 @@ static size_t buffered_file_stream_size(BufferedFileStream* stream) {
 
 static size_t
     buffered_file_stream_write(BufferedFileStream* stream, const uint8_t* data, size_t size) {
-    stream_cache_reset(stream->cache);
+    stream_cache_drop(stream->cache);
     return stream_write(stream->file_stream, data, size);
 }
 
@@ -146,6 +150,6 @@ static bool buffered_file_stream_delete_and_insert(
     size_t delete_size,
     StreamWriteCB write_callback,
     const void* ctx) {
-    stream_cache_reset(stream->cache);
+    stream_cache_drop(stream->cache);
     return stream_delete_and_insert(stream->file_stream, delete_size, write_callback, ctx);
 }
