@@ -384,7 +384,7 @@ void spectrum_analyzer_free(SpectrumAnalyzer* instance) {
 
     furi_message_queue_free(instance->event_queue);
 
-    osMutexDelete(instance->model_mutex);
+    furi_mutex_free(instance->model_mutex);
 
     free(instance->model);
     free(instance);
@@ -400,12 +400,12 @@ int32_t spectrum_analyzer_app(void* p) {
     InputEvent input;
 
     FURI_LOG_D("Spectrum", "Main Loop - Starting worker");
-    furi_hal_delay_ms(50);
+    furi_delay_ms(50);
 
     spectrum_analyzer_worker_start(spectrum_analyzer->worker);
 
     FURI_LOG_D("Spectrum", "Main Loop - Wait on queue");
-    furi_hal_delay_ms(50);
+    furi_delay_ms(50);
 
     while(furi_message_queue_get(spectrum_analyzer->event_queue, &input, FuriWaitForever) == FuriStatusOk) {
         furi_check(furi_mutex_acquire(spectrum_analyzer->model_mutex, FuriWaitForever) == FuriStatusOk);
@@ -480,7 +480,7 @@ int32_t spectrum_analyzer_app(void* p) {
             model->mode_change = true;
             view_port_update(spectrum_analyzer->view_port);
 
-            furi_hal_delay_ms(1000);
+            furi_delay_ms(1000);
 
             model->mode_change = false;
             spectrum_analyzer_calculate_frequencies(model);

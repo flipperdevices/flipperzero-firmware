@@ -242,7 +242,7 @@ static void send_hid_packet(FuriHalSpiBusHandle* handle, uint8_t* addr, uint8_t 
 	prev_hid = hid;
     build_hid_packet(mod, hid, hid_payload);
 	inject_packet(handle, addr, addr_size, rate, hid_payload, LOGITECH_HID_TEMPLATE_SIZE);
-	furi_hal_delay_ms(12);
+	furi_delay_ms(12);
 }
 
 // returns false if there was an error processing script line
@@ -277,7 +277,7 @@ static bool mj_process_ducky_line(FuriHalSpiBusHandle* handle, uint8_t* addr, ui
         	for(int i = 0; i < delay_count; i++)
         	{
         		inject_packet(handle, addr, addr_size, rate, LOGITECH_KEEPALIVE, LOGITECH_KEEPALIVE_SIZE);
-            	furi_hal_delay_ms(10);
+            	furi_delay_ms(10);
             }
             return true;
         }

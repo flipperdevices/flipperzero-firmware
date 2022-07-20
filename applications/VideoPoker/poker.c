@@ -697,7 +697,7 @@ void poker_player_free(PokerPlayer* poker_player) {
     furi_record_close("gui");
     view_port_free(poker_player->view_port);
     furi_message_queue_free(poker_player->event_queue);
-    osMutexDelete(poker_player->model_mutex);
+    furi_mutex_free(poker_player->model_mutex);
 
     free(poker_player);
 }
