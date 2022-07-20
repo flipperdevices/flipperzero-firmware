@@ -7,7 +7,6 @@ env.Append(
     SDK_HEADERS=[
         File("#/lib/drivers/nrf24.h"),
     ],
-
 )
 
 
