@@ -33,19 +33,28 @@ static void nfc_scene_mf_classic_dict_attack_update_view(Nfc* nfc) {
 static void
     nfc_scene_mf_classic_dict_attack_prepare_view(Nfc* nfc, MfClassicDictAttackState state) {
     MfClassicData* data = &nfc->dev->dev_data.mf_classic_data;
+    NfcWorkerState worker_state = NfcWorkerStateReady;
 
-    uint32_t new_state = MfClassicDictAttackStateIdle;
-    NfcWorkerState worker_state = NfcWorkerStateMfClassicUserDictAttack;
+    // Identify scene state
     if(state == MfClassicDictAttackStateIdle) {
-        new_state = MfClassicDictAttackStateUserDictInProgress;
+        if(mf_classic_dict_check_presence(MfClassicDictTypeUser)) {
+            state = MfClassicDictAttackStateUserDictInProgress;
+        } else {
+            state = MfClassicDictAttackStateFlipperDictInProgress;
+        }
+    } else if(state == MfClassicDictAttackStateUserDictInProgress) {
+        state = MfClassicDictAttackStateFlipperDictInProgress;
+    }
+
+    // Setup view
+    if(state == MfClassicDictAttackStateUserDictInProgress) {
         worker_state = NfcWorkerStateMfClassicUserDictAttack;
         mf_classic_dict_attack_set_header(nfc->mf_classic_dict_attack, "Mf Classic User Dict.");
-    } else if(state == MfClassicDictAttackStateUserDictInProgress) {
-        new_state = MfClassicDictAttackStateFlipperDictInProgress;
+    } else if(state == MfClassicDictAttackStateFlipperDictInProgress) {
         worker_state = NfcWorkerStateMfClassicFlipperDictAttack;
         mf_classic_dict_attack_set_header(nfc->mf_classic_dict_attack, "Mf Classic Flipper Dict.");
     }
-    scene_manager_set_scene_state(nfc->scene_manager, NfcSceneMfClassicDictAttack, new_state);
+    scene_manager_set_scene_state(nfc->scene_manager, NfcSceneMfClassicDictAttack, state);
     mf_classic_dict_attack_set_callback(
         nfc->mf_classic_dict_attack, nfc_mf_classic_dict_attack_dict_attack_result_callback, nfc);
     mf_classic_dict_attack_set_current_sector(nfc->mf_classic_dict_attack, 0);

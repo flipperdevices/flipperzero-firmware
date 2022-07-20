@@ -14,7 +14,7 @@ struct MfClassicDict {
     uint32_t total_keys;
 };
 
-bool nfc_mf_classic_dict_check_presence(MfClassicDictType dict_type) {
+bool mf_classic_dict_check_presence(MfClassicDictType dict_type) {
     Storage* storage = furi_record_open("storage");
 
     bool dict_present = false;
