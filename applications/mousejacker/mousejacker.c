@@ -3,13 +3,13 @@
 #include <dialogs/dialogs.h>
 #include <input/input.h>
 #include <stdlib.h>
+#include <furi_hal.h>
 #include <furi_hal_gpio.h>
 #include <furi_hal_spi.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
 #include <nrf24.h>
 #include <toolbox/stream/file_stream.h>
-#include <furi_hal_delay.h>
 #include "mousejacker_ducky.h"
 
 #define TAG "mousejacker"
