@@ -6,6 +6,7 @@
 - [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): Add new keys: FAAC SLH/Spa and BFT Mitto/Secure
 - [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): FAAC SLH correct seed view
 - Fix for Games Menu
+- Fix for NRF Sniffer
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
