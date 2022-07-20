@@ -1,5 +1,5 @@
 V:0
-T:1658340910
+T:1658352915
 D:apps
 D:badusb
 D:dolphin
@@ -15,7 +15,7 @@ F:6b34c4aa2629814c74a108314bcc64af:6088:apps/APPS_DolphinRestorer.fap
 F:b641a38b115c24028f33443703094e2b:12248:apps/APPS_MouseJacker.fap
 F:128c1a97194fc7aeb3e69da998ebb48d:2336:apps/APPS_MouseJiggler.fap
 F:36ad8a17dd27e331692e4d22d56ff535:10656:apps/APPS_MusicPlayer.fap
-F:09bf3189cef7d30b1517d3c00ed59e91:7788:apps/APPS_NRFSniff.fap
+F:cb1964571f1cf42e58475feb39f6e712:7784:apps/APPS_NRFSniff.fap
 F:41728990cdab6902b6b3ca822d3daeb3:3700:apps/APPS_SentrySafe.fap
 F:310c631ad89be981829b62378244d7ce:8352:apps/APPS_SpectrumAnalyzer.fap
 F:0074031886ce4f61332b919985175f6a:8208:apps/APPS_TouchTunes.fap
@@ -257,7 +257,7 @@ F:41b4f08774249014cb8d3dffa5f5c07d:1757:nfc/assets/currency_code.nfc
 F:42f2b8f11efb8f2322355114de279ff4:50695:nfc/assets/mf_classic_dict.nfc
 D:subghz/assets
 F:dda1ef895b8a25fde57c874feaaef997:650:subghz/assets/came_atomo
-F:788eef2cc74e29f3388463d6607dab0d:3264:subghz/assets/keeloq_mfcodes
+F:5e81e9809984ee74d426730c1afa4093:3232:subghz/assets/keeloq_mfcodes
 F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
 F:22c2dff53c68a8fe576c7e9fbd9f2d54:1340:subghz/assets/setting_user
