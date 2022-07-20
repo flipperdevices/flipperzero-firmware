@@ -133,16 +133,28 @@ void furi_hal_subghz_load_custom_preset(uint8_t* preset_data) {
     uint8_t pa[8] = {0};
     while(preset_data[i]) {
         cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, preset_data[i], preset_data[i + 1]);
-        printf ("%X %X ", preset_data[i], preset_data[i+1]);
-        i += 2;  
+        i += 2;
     }
-    printf ("\r\n");
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 
     //load pa table
-    memcpy(&pa[0], &preset_data[i+2], 8);   
+    memcpy(&pa[0], &preset_data[i + 2], 8);
     furi_hal_subghz_load_patable(pa);
     furi_hal_subghz.preset = FuriHalSubGhzPresetCustom;
+
+    //show debug
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        i = 0;
+        printf("\033[0;34m [D] " TAG " Load custom preset\033[0m ");
+        while(preset_data[i]) {
+            printf("%X %X ", preset_data[i], preset_data[i + 1]);
+            i += 2;
+        }
+        for(uint8_t y = i; y < i + 10; y++) {
+            printf("%X ", preset_data[y]);
+        }
+        printf("\r\n");
+    }
 }
 
 void furi_hal_subghz_load_registers(uint8_t* data) {

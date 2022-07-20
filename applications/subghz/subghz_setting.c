@@ -493,15 +493,18 @@ bool subghz_setting_load_custom_preset(
 bool subghz_setting_delete_custom_preset(SubGhzSetting* instance, const char* preset_name) {
     furi_assert(instance);
     furi_assert(preset_name);
-    for
-        M_EACH(item, instance->preset->data, SubGhzSettingCustomPresetItemArray_t) {
-            if(strcmp(string_get_cstr(item->custom_preset_name), preset_name) == 0) {
-                string_clear(item->custom_preset_name);
-                free(item->custom_preset_data);
-                //SubGhzSettingCustomPresetItemArray_remove(instance->preset->data, item);
-                return true;
-            }
+    SubGhzSettingCustomPresetItemArray_it_t it;
+    SubGhzSettingCustomPresetItemArray_it_last(it, instance->preset->data);
+    while(!SubGhzSettingCustomPresetItemArray_end_p(it)) {
+        SubGhzSettingCustomPresetItem* item = SubGhzSettingCustomPresetItemArray_ref(it);
+        if(strcmp(string_get_cstr(item->custom_preset_name), preset_name) == 0) {
+            string_clear(item->custom_preset_name);
+            free(item->custom_preset_data);
+            SubGhzSettingCustomPresetItemArray_remove(instance->preset->data, it);
+            return true;
         }
+        SubGhzSettingCustomPresetItemArray_previous(it);
+    }
     return false;
 }
 

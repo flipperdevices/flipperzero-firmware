@@ -89,7 +89,7 @@ uint8_t subghz_protocol_decoder_came_twee_get_hash_data(void* context);
 bool subghz_protocol_decoder_came_twee_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPesetDefinition *preset);
+    SubGhzPesetDefinition* preset);
 
 /**
  * Deserialize data SubGhzProtocolDecoderCameTwee.
