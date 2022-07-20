@@ -52,7 +52,7 @@ static bool infrared_test_prepare_file(const char* protocol_name) {
 
     do {
         uint32_t format_version;
-        if(!flipper_format_file_buffered_open_existing(test->ff, string_get_cstr(test->file_path)))
+        if(!flipper_format_buffered_file_open_existing(test->ff, string_get_cstr(test->file_path)))
             break;
         if(!flipper_format_read_header(test->ff, file_type, &format_version)) break;
         if(string_cmp_str(file_type, "IR tests file") || format_version != 1) break;

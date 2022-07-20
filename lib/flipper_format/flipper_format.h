@@ -137,7 +137,7 @@ bool flipper_format_file_open_existing(FlipperFormat* flipper_format, const char
  * @param path File path
  * @return True on success
  */
-bool flipper_format_file_buffered_open_existing(FlipperFormat* flipper_format, const char* path);
+bool flipper_format_buffered_file_open_existing(FlipperFormat* flipper_format, const char* path);
 
 /**
  * Open existing file for writing and add values to the end of file. 
