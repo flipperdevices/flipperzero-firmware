@@ -14,6 +14,7 @@ struct RpcAppSystem {
     RpcAppSystemCallback app_callback;
     void* app_context;
     osTimerId_t timer;
+    PB_Main* state_msg;
 };
 
 static void rpc_system_app_timer_callback(void* context) {
@@ -97,7 +98,7 @@ static void rpc_system_app_lock_status_process(const PB_Main* request, void* con
     pb_release(&PB_Main_msg, &response);
 }
 
-static void rpc_system_app_exit(const PB_Main* request, void* context) {
+static void rpc_system_app_exit_request(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(context);
 
@@ -195,6 +196,24 @@ static void rpc_system_app_button_release(const PB_Main* request, void* context)
     rpc_send_and_release_empty(session, request->command_id, status);
 }
 
+void rpc_system_app_send_started(RpcAppSystem* rpc_app) {
+    furi_assert(rpc_app);
+    RpcSession* session = rpc_app->session;
+    furi_assert(session);
+
+    rpc_app->state_msg->content.app_state_response.state = PB_App_AppState_APP_STARTED;
+    rpc_send(session, rpc_app->state_msg);
+}
+
+void rpc_system_app_send_exited(RpcAppSystem* rpc_app) {
+    furi_assert(rpc_app);
+    RpcSession* session = rpc_app->session;
+    furi_assert(session);
+
+    rpc_app->state_msg->content.app_state_response.state = PB_App_AppState_APP_CLOSED;
+    rpc_send(session, rpc_app->state_msg);
+}
+
 void rpc_system_app_set_callback(RpcAppSystem* rpc_app, RpcAppSystemCallback callback, void* ctx) {
     furi_assert(rpc_app);
 
@@ -210,6 +229,11 @@ void* rpc_system_app_alloc(RpcSession* session) {
 
     rpc_app->timer = osTimerNew(rpc_system_app_timer_callback, osTimerOnce, rpc_app, NULL);
 
+    // App exit message
+    rpc_app->state_msg = malloc(sizeof(PB_Main));
+    rpc_app->state_msg->which_content = PB_Main_app_state_response_tag;
+    rpc_app->state_msg->command_status = PB_CommandStatus_OK;
+
     RpcHandler rpc_handler = {
         .message_handler = NULL,
         .decode_submessage = NULL,
@@ -222,7 +246,7 @@ void* rpc_system_app_alloc(RpcSession* session) {
     rpc_handler.message_handler = rpc_system_app_lock_status_process;
     rpc_add_handler(session, PB_Main_app_lock_status_request_tag, &rpc_handler);
 
-    rpc_handler.message_handler = rpc_system_app_exit;
+    rpc_handler.message_handler = rpc_system_app_exit_request;
     rpc_add_handler(session, PB_Main_app_exit_request_tag, &rpc_handler);
 
     rpc_handler.message_handler = rpc_system_app_load_file;
@@ -248,5 +272,6 @@ void rpc_system_app_free(void* context) {
         rpc_app->app_callback(RpcAppEventSessionClose, NULL, rpc_app->app_context);
     }
 
+    free(rpc_app->state_msg);
     free(rpc_app);
 }
