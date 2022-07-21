@@ -2,8 +2,6 @@
 
 enum SubmenuIndex {
     SubmenuIndexRead,
-    SubmenuIndexReadCard,
-    SubmenuIndexRunScript,
     SubmenuIndexSaved,
     SubmenuIndexExtraAction,
     SubmenuIndexAddManualy,
@@ -21,14 +19,6 @@ void nfc_scene_start_on_enter(void* context) {
     Submenu* submenu = nfc->submenu;
 
     submenu_add_item(submenu, "Read", SubmenuIndexRead, nfc_scene_start_submenu_callback, nfc);
-    submenu_add_item(
-        submenu, "Read Card", SubmenuIndexReadCard, nfc_scene_start_submenu_callback, nfc);
-    submenu_add_item(
-        submenu,
-        "Run Special Action",
-        SubmenuIndexRunScript,
-        nfc_scene_start_submenu_callback,
-        nfc);
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(
         submenu, "Extra Actions", SubmenuIndexExtraAction, nfc_scene_start_submenu_callback, nfc);
@@ -54,12 +44,6 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexRead) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
-            consumed = true;
-        } else if(event.event == SubmenuIndexReadCard) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCard);
-            consumed = true;
-        } else if(event.event == SubmenuIndexRunScript) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneScriptsMenu);
             consumed = true;
         } else if(event.event == SubmenuIndexSaved) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneFileSelect);

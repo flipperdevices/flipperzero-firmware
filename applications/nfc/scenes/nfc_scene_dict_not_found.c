@@ -31,16 +31,8 @@ bool nfc_scene_dict_not_found_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventViewExit) {
-            if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneScriptsMenu)) {
-                consumed = scene_manager_search_and_switch_to_previous_scene(
-                    nfc->scene_manager, NfcSceneScriptsMenu);
-            } else if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneCardMenu)) {
-                consumed = scene_manager_search_and_switch_to_previous_scene(
-                    nfc->scene_manager, NfcSceneCardMenu);
-            } else {
-                consumed = scene_manager_search_and_switch_to_previous_scene(
-                    nfc->scene_manager, NfcSceneStart);
-            }
+            consumed = scene_manager_search_and_switch_to_previous_scene(
+                nfc->scene_manager, NfcSceneStart);
         }
     }
     return consumed;

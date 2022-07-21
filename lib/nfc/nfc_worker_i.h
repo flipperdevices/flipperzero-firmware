@@ -37,21 +37,9 @@ int32_t nfc_worker_task(void* context);
 
 void nfc_worker_read(NfcWorker* nfc_worker);
 
-void nfc_worker_read_emv_app(NfcWorker* nfc_worker);
-
-void nfc_worker_read_emv(NfcWorker* nfc_worker);
-
 void nfc_worker_emulate_apdu(NfcWorker* nfc_worker);
 
-void nfc_worker_detect(NfcWorker* nfc_worker);
-
 void nfc_worker_emulate(NfcWorker* nfc_worker);
-
-void nfc_worker_read_mifare_ultralight(NfcWorker* nfc_worker);
-
-void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker);
-
-void nfc_worker_read_mifare_desfire(NfcWorker* nfc_worker);
 
 void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker);
 

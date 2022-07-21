@@ -120,8 +120,7 @@ bool nfc_scene_read_emv_data_success_on_event(void* context, SceneManagerEvent e
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
-            consumed = scene_manager_search_and_switch_to_previous_scene(
-                nfc->scene_manager, NfcSceneReadEmvAppSuccess);
+            consumed = true;
         } else if(event.event == GuiButtonTypeRight) {
             // Clear device name
             nfc_device_set_name(nfc->dev, "");
@@ -131,7 +130,7 @@ bool nfc_scene_read_emv_data_success_on_event(void* context, SceneManagerEvent e
         }
     } else if(event.type == SceneManagerEventTypeBack) {
         consumed = scene_manager_search_and_switch_to_previous_scene(
-            nfc->scene_manager, NfcSceneReadEmvAppSuccess);
+            nfc->scene_manager, NfcSceneStart);
     }
     return consumed;
 }
