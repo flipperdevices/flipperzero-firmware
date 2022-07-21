@@ -166,3 +166,25 @@ void bit_lib_copy_bits(
         bit_lib_set_bit(data, position + i, bit_lib_get_bit(source, source_position + i));
     }
 }
+
+#include <stdio.h>
+void bit_lib_reverse_bits(uint8_t* data, size_t position, uint8_t length) {
+    size_t i = 0;
+    size_t j = length - 1;
+
+    while(i < j) {
+        bool tmp = bit_lib_get_bit(data, position + i);
+        bit_lib_set_bit(data, position + i, bit_lib_get_bit(data, position + j));
+        bit_lib_set_bit(data, position + j, tmp);
+        i++;
+        j--;
+    }
+}
+
+uint8_t bit_lib_get_bit_count(uint32_t data) {
+#if defined __GNUC__
+    return __builtin_popcountl(data);
+#else
+#error Please, implement popcount for non-GCC compilers
+#endif
+}

@@ -98,6 +98,10 @@ void bit_lib_copy_bits(
     const uint8_t* source,
     size_t source_position);
 
+void bit_lib_reverse_bits(uint8_t* data, size_t position, uint8_t length);
+
+uint8_t bit_lib_get_bit_count(uint32_t data);
+
 #ifdef __cplusplus
 }
 #endif
