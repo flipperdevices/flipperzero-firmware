@@ -5,6 +5,8 @@
 
 - Added [nfc: NTAG203 support #1383 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1383)
 - Added [Added condition to cli "log" command to end if serial terminal is disconnected. #1425 (By ESurge)](https://github.com/flipperdevices/flipperzero-firmware/pull/1425)
+- Added some more default resources to make things more fun and create needed folders
+- Running DolphinRestorer.fap on new install will auto-level to the end of Level 2
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
@@ -50,8 +52,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
   <summary><B>Special Instructions</B></summary></br>
 
 - Edit the two `_map` files in /ext/subghz/assets to contain your specific subghz (.SUB) files.
-- Add a folder to SD card named `wav_player` (for 8bit 2ch unsigned wav files) 
-- Add a folder to SD card named `music_player` (FMF and RTTTL/TXT files)
 </details>
 
 
