@@ -1,4 +1,8 @@
 #include "../gpio_app_i.h"
+#include <furi_hal_gpio.h>
+
+static I2CScannerState* i2c_scanner_state;
+
 
 void gpio_scene_i2c_scanner_ok_callback(InputType type, void* context) {
     furi_assert(context);
@@ -8,12 +12,19 @@ void gpio_scene_i2c_scanner_ok_callback(InputType type, void* context) {
         notification_message(app->notifications, &sequence_set_green_255);
     } else if(type == InputTypeRelease) {
         notification_message(app->notifications, &sequence_reset_green);
+        i2c_scanner_state->items++;
     }
+    gpio_i2c_scanner_update_state(app->gpio_i2c_scanner, i2c_scanner_state);
 }
 
 void gpio_scene_i2c_scanner_on_enter(void* context) {
     GpioApp* app = context;
-    //gpio_item_configure_all_pins(GpioModeOutputPushPull);
+    i2c_scanner_state = malloc(sizeof(I2CScannerState));
+
+
+    furi_hal_gpio_init_ex(&gpio_ext_pc0, GpioModeInput, GpioPullNo, GpioSpeedVeryHigh, GpioAltFn4I2C3);
+    furi_hal_gpio_init_ex(&gpio_ext_pc1, GpioModeInput, GpioPullNo, GpioSpeedVeryHigh, GpioAltFn4I2C3);
+
     gpio_i2c_scanner_set_ok_callback(app->gpio_i2c_scanner, gpio_scene_i2c_scanner_ok_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, GpioAppViewI2CScanner);
 }
