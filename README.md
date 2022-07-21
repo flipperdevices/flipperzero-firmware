@@ -24,9 +24,9 @@
 <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3>
 <br><b>FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE<b>
       
-- To update, get zip from Releases, copy the unzipped directory to Flipper's SD card and navigate to update.fuf file in Archive app (down and left from flipper desktop).
+- To install new FW, everyone should extract the zip file to a folder, put the folder in the update folder on your SD card and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your setting_user file. **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
+- READ SPECIAL INSTRUCTIONS
 - If you have questions about where X app is located, DO NOT ASK ON MAIN DISCORD, ASK <a href='https://discord.gg/gF2bBUzAFe'>HERE</a>
-- READ SPECIAL INSTRUCTIONS FOR UNLEASHING YOUR FLIPPER OR EXITING GAME MODE
 
 <br>[FLIPPER PROJECT WISH LIST](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/RoadMap.md) - [SAMPLE EDUCATIONAL PROJECTS 😄](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/RoadMap.md)
 <br>[`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
@@ -59,24 +59,12 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 
 <details>
   <summary><B>Special Instructions</B></summary></br>
-  
+
+- To install new FW, everyone should extract the zip file to a folder, put the folder in the update folder on your SD card and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your setting_user file. **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
-- Add a folder to SD card named `apps` with [the `.fap` files](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/apps)
-- Download these files into the subghz/assets folder on your SD card. Edit the two `_map` files to contain your specific subghz (.SUB) files.
-- - Note 1: If you don't have a subghz/assets folder, you should ensure you have made at least one clean flash with stock firmware and your SD card installed in order to ensure the database structure is built, otherwise it will not exist for alternative forks.
-- - Note 2: /any is a special keyword signifying either /int (internal storage) or /ext (external storage).
-- - Note 3: the changes you are making to the `_map` files is to point to the location of the specific assets of the touchtunes folder as well as the universal RF map apps which you will have to develop or compile seperately and are not a part of this repo. 
-- - Note 4: /any is effectively root, so the folder structure should start "/any/subghz/assets" and not what is based on the repo below do not blindly copy the repo it will not work.
-- - [assets/resources/subghz/assets/universal_rf_map.txt](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/universal_rf_map.txt)
-- - [assets/resources/subghz/assets/touchtunes_map.txt](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/touchtunes_map.txt)
-- - [assets/resources/subghz/assets/setting_user](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
-- Download this file into the nfc/assets folder on your SD card. 
-- - [assets/resources/nfc/assets/mf_classic_dict.nfc](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/nfc/assets/mf_classic_dict.nfc)
-- Download this file into the infrared/assets folder on your SD card. 
-- - [assets/resources/infrared/assets/tv.ir](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/infrared/assets/tv.ir)
+- Edit the two `_map` files in /ext/subghz/assets to contain your specific subghz (.SUB) files.
 - Add a folder to SD card named `wav_player` (for 8bit 2ch unsigned wav files) 
 - Add a folder to SD card named `music_player` (FMF and RTTTL/TXT files)
-- Eventually, if all possible apps are added to [applications/meta/application.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/meta/application.fam), your DFU will not install due to size. However, currently, all apps @ 818KB DFU has been tested to install successfully.
 </details>
 
 
