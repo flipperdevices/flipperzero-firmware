@@ -208,8 +208,6 @@ void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle);
 
 void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* data);
 
-void mf_ul_finish_emulation(MfUltralightEmulator* emulator);
-
 bool mf_ul_prepare_emulation_response(
     uint8_t* buff_rx,
     uint16_t buff_rx_len,

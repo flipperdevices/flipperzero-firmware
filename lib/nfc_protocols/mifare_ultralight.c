@@ -994,29 +994,34 @@ static void mf_ul_increment_single_counter(MfUltralightEmulator* emulator) {
 static bool
     mf_ul_emulate_ntag203_counter_write(MfUltralightEmulator* emulator, uint8_t* page_buff) {
     // We'll reuse the existing counters for other NTAGs as staging
-    // TODO: What if you try to write to the counter multiple times in one connection?
-    uint32_t counter_value = emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4] |
-                             (emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4 + 1] << 8);
+    // Counter 0 stores original value, data is new value
+    uint32_t counter_value;
+    if(emulator->data.tearing[0] == MF_UL_TEARING_FLAG_DEFAULT) {
+        counter_value = emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4] |
+                        (emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4 + 1] << 8);
+    } else {
+        // We've had a reset here, so load from original value
+        counter_value = emulator->data.counter[0];
+    }
     uint32_t increment = page_buff[0] | (page_buff[1] << 8);
     if(counter_value == 0) {
         counter_value = increment;
     } else {
-        if(increment > 0x000F) return false;
+        // Per datasheet specifying > 0x000F is supposed to NAK, but actual tag doesn't
+        increment &= 0x000F;
         if(counter_value + increment > 0xFFFF) return false;
         counter_value += increment;
     }
-    emulator->data.counter[0] = (uint16_t)counter_value;
+    // Commit to new value counter
+    emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4] = (uint8_t)counter_value;
+    emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4 + 1] = (uint8_t)(counter_value >> 8);
+    emulator->data.tearing[0] = MF_UL_TEARING_FLAG_DEFAULT;
+    if(counter_value == 0xFFFF) {
+        // Tag will lock out counter if final number is 0xFFFF, even if you try to roll it back
+        emulator->data.counter[1] = 0xFFFF;
+    }
     emulator->data_changed = true;
     return true;
-}
-
-static void mf_ul_emulate_ntag203_counter_commit(MfUltralightEmulator* emulator) {
-    uint32_t counter_value = emulator->data.counter[0];
-    if(counter_value != 0) {
-        emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4] = (uint8_t)counter_value;
-        emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4 + 1] = (uint8_t)(counter_value >> 8);
-        emulator->data.counter[0] = 0;
-    }
 }
 
 static void mf_ul_emulate_write(
@@ -1129,6 +1134,18 @@ void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle) 
         if(emulator->supported_features & MfUltralightSupportSingleCounter) {
             emulator->read_counter_incremented = false;
         }
+
+        if(emulator->data.type == MfUltralightTypeNTAG203) {
+            // Apply lockout if counter ever reached 0xFFFF
+            if(emulator->data.counter[1] == 0xFFFF) {
+                emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4] = 0xFF;
+                emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4 + 1] = 0xFF;
+            }
+            // Copy original counter value from data
+            emulator->data.counter[0] =
+                emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4] |
+                (emulator->data.data[MF_UL_NTAG203_COUNTER_PAGE * 4 + 1] << 8);
+        }
     } else {
         if(emulator->config != NULL) {
             // ACCESS (less CFGLCK) and AUTH0 are updated when reactivated
@@ -1139,7 +1156,8 @@ void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle) 
         }
     }
     if(emulator->data.type == MfUltralightTypeNTAG203) {
-        mf_ul_emulate_ntag203_counter_commit(emulator);
+        // Mark counter as dirty
+        emulator->data.tearing[0] = 0;
     }
 }
 
@@ -1157,12 +1175,6 @@ void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* d
         emulator->data.counter[0] = 0;
     }
     mf_ul_reset_emulation(emulator, true);
-}
-
-void mf_ul_finish_emulation(MfUltralightEmulator* emulator) {
-    if(emulator->data.type == MfUltralightTypeNTAG203) {
-        mf_ul_emulate_ntag203_counter_commit(emulator);
-    }
 }
 
 bool mf_ul_prepare_emulation_response(
@@ -1722,7 +1734,8 @@ bool mf_ul_prepare_emulation_response(
                 }
             }
         } else {
-            reset_idle = true;
+            // NTAG203 appears to NAK instead of just falling off on invalid commands
+            if(emulator->data.type != MfUltralightTypeNTAG203) reset_idle = true;
             FURI_LOG_D(TAG, "Received invalid command");
         }
     } else {

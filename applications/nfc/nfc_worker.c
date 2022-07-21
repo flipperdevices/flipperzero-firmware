@@ -330,7 +330,6 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
             mf_ul_prepare_emulation_response,
             &emulator,
             5000);
-        mf_ul_finish_emulation(&emulator);
         // Check if data was modified
         if(emulator.data_changed) {
             nfc_worker->dev_data->mf_ul_data = emulator.data;
