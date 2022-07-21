@@ -3,19 +3,6 @@
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
 
-- Fixed issue with api_symbols.csv being rebuilt incorrectly on clone
-- Added [Picopass: dump full card, extract some details #1408 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1408)
-- OFW: [Furi: core refactoring and CMSIS removal part 2 #1410 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1410)
-- OFW: [Respect SOURCE_DATE_EPOCH when setting build date #1421 (By adisbladis)](https://github.com/flipperdevices/flipperzero-firmware/pull/1421)
-- Updated nearly all apps and games for refactoring
-- Removed RFID: Removing T5577 passwords via the cli command rfid clear_pass_t5577 using a dictionary attack; don't use this unless you are certain that a password is present [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
-- [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): Add new keys: FAAC SLH/Spa and BFT Mitto/Secure
-- [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): FAAC SLH correct seed view
-- Fix for Games Menu
-- Fix for NRF Sniffer [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
-- [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware): Add FAAC SLH 433 MHz create support
-- Fix for Emulate Directly bug, [thanks to ESurge](https://github.com/ESurge/flipperzero-firmware-wPlugins) for pointing it out
-- Fixed Games Menu correctly
 - Added [nfc: NTAG203 support #1383 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1383)
 
 <table width="100%" border="0" cellspacing="0">
