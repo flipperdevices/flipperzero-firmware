@@ -1,13 +1,17 @@
 //#define DEBUG
 
-#if ESP8266
+#ifdef ESP8266
 #include <ESP8266WiFi.h>
 #else // ESP32
 #include <WiFi.h>
 #endif
 
+#include <climits>
 #include "DebugHelpers.h"
 #include "FlipperZeroWiFiModuleDefines.h"
+
+const uint16_t ASSOCIATIVE_INDEX_ARRAY_MAX_ELEMENTS = UCHAR_MAX + 1;
+uint8_t g_associativeIndexArray[ASSOCIATIVE_INDEX_ARRAY_MAX_ELEMENTS];
 
 enum EContext
 {
@@ -84,7 +88,7 @@ void ChangeContext(EContext context)
 
 const char* EncryptionTypeToString(uint8_t encType)
 {
-#if ESP8266
+#ifdef ESP8266
   switch(encType)
   {
     case ENC_TYPE_WEP:
@@ -154,8 +158,8 @@ bool IsAnyAPLocked()
 
 void LockAP()
 {
-  g_bssid = WiFi.BSSIDstr(g_currentNetworkIndex); 
-  g_ssid = WiFi.SSID(g_currentNetworkIndex);
+  g_bssid = WiFi.BSSIDstr(g_associativeIndexArray[g_currentNetworkIndex]); 
+  g_ssid = WiFi.SSID(g_associativeIndexArray[g_currentNetworkIndex]);
   g_apLocked = true;
 }
 
@@ -180,6 +184,22 @@ bool FindLockedAP(int& foundAPIndex)
     }
   }
   return false;
+}
+
+void NextAP() 
+{
+  DEBUG_LOG_LN(F("NextAP"));
+
+  if(g_context != EContext::SCAN_PAGE)
+  {
+    return;
+  }
+  
+  g_currentNetworkIndex = ++g_currentNetworkIndex % g_totalAp;
+  pageChanged = true;
+
+  DEBUG_LOG(F("NextAP Index: "));
+  DEBUG_LOG_LN(g_currentNetworkIndex);
 }
 
 void PreviousAP() 
@@ -213,22 +233,6 @@ void ScanMode()
   ScanNetworks();
 }
 
-void NextAP() 
-{
-  DEBUG_LOG_LN(F("NextAP"));
-
-  if(g_context != EContext::SCAN_PAGE)
-  {
-    return;
-  }
-  
-  g_currentNetworkIndex = ++g_currentNetworkIndex % g_totalAp;
-  pageChanged = true;
-
-  DEBUG_LOG(F("NextAP Index: "));
-  DEBUG_LOG_LN(g_currentNetworkIndex);
-}
-
 void setup() {
   Serial.begin(115200);
   while (!Serial) {
@@ -248,18 +252,52 @@ void setup() {
 bool GetNetworkInfo(const uint8_t currentAp, String& ssid, uint8_t& encType, int32_t& rssi, String& bssid, int32_t& channel, bool& isHidden)
 {
   FUNCTION_PERF();
-  
-#if ESP8266
+
+  uint8_t index = g_associativeIndexArray[currentAp];
   uint8_t* fake_BSSID;
-  bssid = WiFi.BSSIDstr(currentAp);
-  return WiFi.getNetworkInfo(currentAp, ssid, encType, rssi, fake_BSSID, channel, isHidden);
+
+#ifdef ESP8266
+  bssid = WiFi.BSSIDstr(index);
+  return WiFi.getNetworkInfo(index, ssid, encType, rssi, fake_BSSID, channel, isHidden);
 #elif ESP32
-  uint8_t* fake_BSSID;
-  bssid = WiFi.BSSIDstr(currentAp);
-  const bool result = WiFi.getNetworkInfo(currentAp, ssid, encType, rssi, fake_BSSID, channel);
+  bssid = WiFi.BSSIDstr(index);
+  const bool result = WiFi.getNetworkInfo(index, ssid, encType, rssi, fake_BSSID, channel);
   isHidden = ssid.length() == 0 ? true : false;
   return result;
+#else
+  return false;
 #endif
+}
+
+void clearSortArray()
+{
+  FUNCTION_PERF();
+
+  for(uint16_t i = 0; i < ASSOCIATIVE_INDEX_ARRAY_MAX_ELEMENTS; ++i)
+  {
+    g_associativeIndexArray[i] = i;
+  }
+}
+
+void SortScan(int16_t totalAps) // Sort scan by RSSI
+{
+  FUNCTION_PERF();
+  
+  clearSortArray();
+
+  uint8_t temp = 0;
+  for(uint16_t i = 0; i < totalAps; ++i)
+  {
+    for(uint16_t j = i; j < totalAps; ++j)
+    {
+      if(WiFi.RSSI(g_associativeIndexArray[j]) > WiFi.RSSI(g_associativeIndexArray[i]))
+      {
+        temp = g_associativeIndexArray[i];
+        g_associativeIndexArray[i] = g_associativeIndexArray[j];
+        g_associativeIndexArray[j] = temp;
+      }
+    }
+  }
 }
 
 void OnScanComplete(int16_t totalAps)
@@ -269,6 +307,7 @@ void OnScanComplete(int16_t totalAps)
   pageChanged = true;
   if(g_totalAp > 0)
   {
+    SortScan(totalAps);
     ChangeContext(EContext::SCAN_PAGE);
   }
   else
@@ -341,7 +380,7 @@ void ScanNetworks()
   ChangeContext(EContext::SCAN_ANIMATION);
 }
 
-bool MonitorNetwork(const bool firstRun = true)
+bool MonitorNetwork(const bool firstRun = false)
 {
   int16_t scanResult = WiFi.scanComplete();
   if(scanResult != WIFI_SCAN_RUNNING)
@@ -349,6 +388,10 @@ bool MonitorNetwork(const bool firstRun = true)
     DEBUG_LOG_LN(F("MonitorNetwork()"));
     
     if(firstRun)
+    {
+      clearSortArray();
+    }
+    else
     {
       OnMonScanComplete(scanResult);
     }
@@ -385,7 +428,7 @@ void ChangeBetweenMonitorAndScanMode()
     case SCAN_PAGE:
     {
       LockAP();
-      const bool firstRun = false;
+      const bool firstRun = true;
       MonitorNetwork(firstRun);
       ChangeContext(EContext::MONITOR_ANIMATION);
     }
@@ -451,7 +494,11 @@ void CheckForFlipperCommands()
     }
     else
     {
-      DEBUG_LOG_LN(printf("Skip command due to unpropriate context %c", char(incommingCommand)));
+#ifdef DEBUG
+      char buffer[80];
+      sprintf(buffer, "Skip command due to unpropriate context for command '%c'", char(incommingCommand));
+      DEBUG_LOG_LN(buffer);
+#endif // DEBUG
     }
   }  
 }
