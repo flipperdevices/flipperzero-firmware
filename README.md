@@ -42,10 +42,6 @@ ETH: <B>0x6c46eE48Bd433b0ADE711B43D188Cf8215cd51c2</B>
     
 Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Flipper DFU. I can do custom names too!
 <br><h2>[Join my Flipper/Amiibo Discord](https://discord.gg/gF2bBUzAFe)</h2>
-</td>
-      </tr>
-      <tr><td>
-
 <details>
   <summary><B>You should clone with</B></summary></br>
 
@@ -57,6 +53,9 @@ $ ./fbt --with-updater updater_package
 $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 ```
 </details>
+      </td>
+      </tr>
+      <tr><td>
 
 <details>
   <summary><B>Special Instructions</B></summary></br>
