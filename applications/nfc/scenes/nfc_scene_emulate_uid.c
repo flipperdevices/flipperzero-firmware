@@ -77,7 +77,7 @@ void nfc_scene_emulate_uid_on_enter(void* context) {
     memset(&nfc->dev->dev_data.reader_data, 0, sizeof(NfcReaderRequestData));
     nfc_worker_start(
         nfc->worker,
-        NfcWorkerStateEmulate,
+        NfcWorkerStateUidEmulate,
         &nfc->dev->dev_data,
         nfc_emulate_uid_worker_callback,
         nfc);

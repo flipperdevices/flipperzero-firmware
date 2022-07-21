@@ -4,7 +4,7 @@
 bool nfc_read_worker_callback(NfcWorkerEvent event, void* context) {
     Nfc* nfc = context;
     bool consumed = false;
-    if(event == NfcWorkerEventReadMifareClassicLoadKeyCache) {
+    if(event == NfcWorkerEventReadMfClassicLoadKeyCache) {
         consumed = nfc_device_load_key_cache(nfc->dev);
     } else {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, event);
@@ -35,23 +35,23 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcWorkerEventReadNfcB || event.event == NfcWorkerEventReadNfcF ||
-           event.event == NfcWorkerEventReadNfcV) {
+        if(event.event == NfcWorkerEventReadUidNfcB || event.event == NfcWorkerEventReadUidNfcF ||
+           event.event == NfcWorkerEventReadUidNfcV) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
             consumed = true;
-        } else if(event.event == NfcWorkerEventReadMifareUltralight) {
+        } else if(event.event == NfcWorkerEventReadMfUltralight) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareUlSuccess);
             consumed = true;
-        } else if(event.event == NfcWorkerEventReadMifareClassicDone) {
+        } else if(event.event == NfcWorkerEventReadMfClassicDone) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareClassicSuccess);
             consumed = true;
-        } else if(event.event == NfcWorkerEventReadMifareDesfire) {
+        } else if(event.event == NfcWorkerEventReadMfDesfire) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareDesfireSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadBankCard) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadEmvDataSuccess);
             consumed = true;
-        } else if(event.event == NfcWorkerEventReadMifareClassicDictAttackRequired) {
+        } else if(event.event == NfcWorkerEventReadMfClassicDictAttackRequired) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicDictAttack);
             consumed = true;
         }

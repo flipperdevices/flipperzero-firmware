@@ -67,20 +67,20 @@ static bool nfc_rpc_command_callback(RpcAppSystemEvent event, const char* arg, v
                 if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
                     nfc_worker_start(
                         nfc->worker,
-                        NfcWorkerStateEmulateMifareUltralight,
+                        NfcWorkerStateMfUltralightEmulate,
                         &nfc->dev->dev_data,
                         nfc_rpc_emulate_callback,
                         nfc);
                 } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
                     nfc_worker_start(
                         nfc->worker,
-                        NfcWorkerStateEmulateMifareClassic,
+                        NfcWorkerStateMfClassicEmulate,
                         &nfc->dev->dev_data,
                         nfc_rpc_emulate_callback,
                         nfc);
                 } else {
                     nfc_worker_start(
-                        nfc->worker, NfcWorkerStateEmulate, &nfc->dev->dev_data, NULL, nfc);
+                        nfc->worker, NfcWorkerStateUidEmulate, &nfc->dev->dev_data, NULL, nfc);
                 }
                 nfc->rpc_state = NfcRpcStateEmulating;
                 result = true;

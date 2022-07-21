@@ -37,12 +37,12 @@ int32_t nfc_worker_task(void* context);
 
 void nfc_worker_read(NfcWorker* nfc_worker);
 
-void nfc_worker_emulate_apdu(NfcWorker* nfc_worker);
+void nfc_worker_emulate_uid(NfcWorker* nfc_worker);
 
-void nfc_worker_emulate(NfcWorker* nfc_worker);
+void nfc_worker_emulate_mf_ultralight(NfcWorker* nfc_worker);
 
-void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker);
-
-void nfc_worker_emulate_mifare_classic(NfcWorker* nfc_worker);
+void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker);
 
 void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker, MfClassicDictType type);
+
+void nfc_worker_emulate_apdu(NfcWorker* nfc_worker);

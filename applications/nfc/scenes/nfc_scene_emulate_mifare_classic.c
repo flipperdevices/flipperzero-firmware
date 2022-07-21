@@ -29,7 +29,7 @@ void nfc_scene_emulate_mifare_classic_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
     nfc_worker_start(
         nfc->worker,
-        NfcWorkerStateEmulateMifareClassic,
+        NfcWorkerStateMfClassicEmulate,
         &nfc->dev->dev_data,
         nfc_emulate_mifare_classic_worker_callback,
         nfc);

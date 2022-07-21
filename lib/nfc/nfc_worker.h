@@ -11,14 +11,14 @@ typedef enum {
     NfcWorkerStateReady,
     // Main worker states
     NfcWorkerStateRead,
-    NfcWorkerStateEmulate,
-    NfcWorkerStateEmulateApdu,
-    NfcWorkerStateField,
-    NfcWorkerStateReadMifareUltralight,
-    NfcWorkerStateEmulateMifareUltralight,
-    NfcWorkerStateEmulateMifareClassic,
+    NfcWorkerStateUidEmulate,
+    NfcWorkerStateMfUltralightEmulate,
+    NfcWorkerStateMfClassicEmulate,
     NfcWorkerStateMfClassicUserDictAttack,
     NfcWorkerStateMfClassicFlipperDictAttack,
+    // Debug
+    NfcWorkerStateEmulateApdu,
+    NfcWorkerStateField,
     // Transition
     NfcWorkerStateStop,
 } NfcWorkerState;
@@ -28,15 +28,15 @@ typedef enum {
     NfcWorkerEventReserved = 50,
 
     // New events
-    NfcWorkerEventReadNfcB,
-    NfcWorkerEventReadNfcV,
-    NfcWorkerEventReadNfcF,
-    NfcWorkerEventReadMifareUltralight,
-    NfcWorkerEventReadMifareDesfire,
+    NfcWorkerEventReadUidNfcB,
+    NfcWorkerEventReadUidNfcV,
+    NfcWorkerEventReadUidNfcF,
+    NfcWorkerEventReadMfUltralight,
+    NfcWorkerEventReadMfDesfire,
+    NfcWorkerEventReadMfClassicDone,
+    NfcWorkerEventReadMfClassicLoadKeyCache,
+    NfcWorkerEventReadMfClassicDictAttackRequired,
     NfcWorkerEventReadBankCard,
-    NfcWorkerEventReadMifareClassicDone,
-    NfcWorkerEventReadMifareClassicLoadKeyCache,
-    NfcWorkerEventReadMifareClassicDictAttackRequired,
 
     // Nfc worker common events
     NfcWorkerEventSuccess,
