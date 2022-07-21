@@ -1003,6 +1003,9 @@ static bool
         // We've had a reset here, so load from original value
         counter_value = emulator->data.counter[0];
     }
+    // Although the datasheet says increment by 0 is always possible, this is not the case on
+    // an actual tag. If the counter is at 0xFFFF, any writes are locked out.
+    if(counter_value == 0xFFFF) return false;
     uint32_t increment = page_buff[0] | (page_buff[1] << 8);
     if(counter_value == 0) {
         counter_value = increment;
@@ -1060,10 +1063,10 @@ static void mf_ul_emulate_write(
                 new_page_lock_byte &= ~0x0E;
             if(orig_page_lock_byte & 0x10) // Block lock bits 5-7
                 new_page_lock_byte &= ~0xE0;
-            if(orig_cnt_lock_byte & 0x01) // Block lock counter bit
-                new_cnt_lock_byte &= ~0x10;
-            // TODO: Check exact behavior of counter lock byte and remaining page bytes when I have
-            // NTAG203 tags in hand
+            for(uint8_t i = 0; i < 4; ++i) {
+                if(orig_cnt_lock_byte & (1 << i)) // Block lock counter bit
+                    new_cnt_lock_byte &= ~(1 << (4 + i));
+            }
 
             new_page_lock_byte |= orig_page_lock_byte;
             new_cnt_lock_byte |= orig_cnt_lock_byte;

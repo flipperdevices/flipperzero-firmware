@@ -68,7 +68,7 @@ static void nfc_generate_mf_ul_ntag203(NfcDeviceData* data) {
     mful->type = MfUltralightTypeNTAG203;
     mful->data_size = 42 * 4;
     nfc_generate_mf_ul_copy_uid_with_bcc(data);
-    // TODO: what's internal byte on page 2?
+    mful->data[9] = 0x48; // Internal byte
     memcpy(&mful->data[3 * 4], default_data_ntag203, sizeof(default_data_ntag203));
 }
 
