@@ -25,6 +25,7 @@
 <br><b>FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE<b>
       
 - To install new FW, everyone should extract the zip file to a folder, put the folder in the update folder on your SD card and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your setting_user file. **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
+- [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
 - READ SPECIAL INSTRUCTIONS
 - If you have questions about where X app is located, DO NOT ASK ON MAIN DISCORD, ASK <a href='https://discord.gg/gF2bBUzAFe'>HERE</a>
 
@@ -60,8 +61,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 <details>
   <summary><B>Special Instructions</B></summary></br>
 
-- To install new FW, everyone should extract the zip file to a folder, put the folder in the update folder on your SD card and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your setting_user file. **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
-- [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
 - Edit the two `_map` files in /ext/subghz/assets to contain your specific subghz (.SUB) files.
 - Add a folder to SD card named `wav_player` (for 8bit 2ch unsigned wav files) 
 - Add a folder to SD card named `music_player` (FMF and RTTTL/TXT files)
