@@ -10,9 +10,14 @@
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
-    <td>
+    <td colspan=2>
 
 <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3>
+
+    </td>
+  </>
+  <tr>
+    <td>
 <br><b>FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE<b>
       
 - To install new FW, extract the zip file to a folder, put the folder in the update folder on your SD card and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your setting_user file. **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
