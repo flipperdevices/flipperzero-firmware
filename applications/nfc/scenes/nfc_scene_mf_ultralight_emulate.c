@@ -40,9 +40,7 @@ bool nfc_scene_mf_ultralight_emulate_on_event(void* context, SceneManagerEvent e
     Nfc* nfc = context;
     bool consumed = false;
 
-    if(event.type == SceneManagerEventTypeTick) {
-        consumed = true;
-    } else if(event.type == SceneManagerEventTypeBack) {
+    if(event.type == SceneManagerEventTypeBack) {
         // Stop worker
         nfc_worker_stop(nfc->worker);
         // Check if data changed and save in shadow file

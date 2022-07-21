@@ -91,9 +91,7 @@ bool nfc_scene_emulate_uid_on_event(void* context, SceneManagerEvent event) {
     uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneEmulateUid);
     bool consumed = false;
 
-    if(event.type == SceneManagerEventTypeTick) {
-        consumed = true;
-    } else if(event.type == SceneManagerEventTypeCustom) {
+    if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventWorkerExit) {
             // Add data button to widget if data is received for the first time
             if(!string_size(nfc->text_box_store)) {

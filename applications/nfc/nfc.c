@@ -13,12 +13,6 @@ bool nfc_back_event_callback(void* context) {
     return scene_manager_handle_back_event(nfc->scene_manager);
 }
 
-void nfc_tick_event_callback(void* context) {
-    furi_assert(context);
-    Nfc* nfc = context;
-    scene_manager_handle_tick_event(nfc->scene_manager);
-}
-
 void nfc_rpc_exit_callback(Nfc* nfc) {
     if(nfc->rpc_state == NfcRpcStateEmulating) {
         // Stop worker
@@ -101,7 +95,6 @@ Nfc* nfc_alloc() {
     view_dispatcher_set_event_callback_context(nfc->view_dispatcher, nfc);
     view_dispatcher_set_custom_event_callback(nfc->view_dispatcher, nfc_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(nfc->view_dispatcher, nfc_back_event_callback);
-    view_dispatcher_set_tick_event_callback(nfc->view_dispatcher, nfc_tick_event_callback, 100);
 
     // Nfc device
     nfc->dev = nfc_device_alloc();
