@@ -46,10 +46,6 @@ bool minmea_check(const char *sentence, bool strict)
 {
     uint8_t checksum = 0x00;
 
-    // Sequence length is limited.
-    if (strlen(sentence) > MINMEA_MAX_SENTENCE_LENGTH + 3)
-        return false;
-
     // A valid sentence starts with "$".
     if (*sentence++ != '$')
         return false;
