@@ -29,11 +29,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 'Trace build firmware'
-        run: pvs-studio-analyzer trace -- ./fbt -j8
+      - name: 'Build firmware'
+        run: ./fbt
 
       - name: 'Static code analysis'
-        run: pvs-studio-analyzer analyze -j2 -l /opt/pvs_studio/PVS-Studio.lic -o PVS-Studio.log
+        run: |
+          SCRIPT_PATH=$(pwd) scripts/toochain/fbtenv.sh
+          pvs-studio-analyzer analyze -l /opt/pvs_studio/PVS-Studio.lic -f build/latest/compile_commands.json -o PVS-Studio.log
 
       - name: 'Generate suffix and folder name'
         id: names
