@@ -1,21 +1,21 @@
-#include "mf_classic_dict_attack.h"
+#include "dict_attack.h"
 
 #include <m-string.h>
 #include <gui/elements.h>
 
 typedef enum {
-    MfClassicDictAttackStateRead,
-    MfClassicDictAttackStateCardRemoved,
-} MfClassicDictAttackState;
+    DictAttackStateRead,
+    DictAttackStateCardRemoved,
+} DictAttackState;
 
-struct MfClassicDictAttack {
+struct DictAttack {
     View* view;
-    MfClassicDictAttackCallback callback;
+    DictAttackCallback callback;
     void* context;
 };
 
 typedef struct {
-    MfClassicDictAttackState state;
+    DictAttackState state;
     MfClassicType type;
     string_t header;
     uint8_t sectors_total;
@@ -23,17 +23,17 @@ typedef struct {
     uint8_t sector_current;
     uint8_t keys_total;
     uint8_t keys_found;
-} MfClassicDictAttackViewModel;
+} DictAttackViewModel;
 
-static void mf_classic_dict_attack_draw_callback(Canvas* canvas, void* model) {
-    MfClassicDictAttackViewModel* m = model;
-    if(m->state == MfClassicDictAttackStateCardRemoved) {
+static void dict_attack_draw_callback(Canvas* canvas, void* model) {
+    DictAttackViewModel* m = model;
+    if(m->state == DictAttackStateCardRemoved) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 64, 4, AlignCenter, AlignTop, "Lost the tag!");
         canvas_set_font(canvas, FontSecondary);
         elements_multiline_text_aligned(
             canvas, 64, 23, AlignCenter, AlignTop, "Make sure the tag is\npositioned correctly.");
-    } else if(m->state == MfClassicDictAttackStateRead) {
+    } else if(m->state == DictAttackStateRead) {
         char draw_str[32] = {};
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 64, 2, AlignCenter, AlignTop, string_get_cstr(m->header));
@@ -51,8 +51,8 @@ static void mf_classic_dict_attack_draw_callback(Canvas* canvas, void* model) {
     elements_button_center(canvas, "Skip");
 }
 
-static bool mf_classic_dict_attack_input_callback(InputEvent* event, void* context) {
-    MfClassicDictAttack* dict_attack = context;
+static bool dict_attack_input_callback(InputEvent* event, void* context) {
+    DictAttack* dict_attack = context;
     bool consumed = false;
     if(event->type == InputTypeShort && event->key == InputKeyOk) {
         if(dict_attack->callback) {
@@ -63,26 +63,25 @@ static bool mf_classic_dict_attack_input_callback(InputEvent* event, void* conte
     return consumed;
 }
 
-MfClassicDictAttack* mf_classic_dict_attack_alloc() {
-    MfClassicDictAttack* dict_attack = malloc(sizeof(MfClassicDictAttack));
+DictAttack* dict_attack_alloc() {
+    DictAttack* dict_attack = malloc(sizeof(DictAttack));
     dict_attack->view = view_alloc();
-    view_allocate_model(
-        dict_attack->view, ViewModelTypeLocking, sizeof(MfClassicDictAttackViewModel));
-    view_set_draw_callback(dict_attack->view, mf_classic_dict_attack_draw_callback);
-    view_set_input_callback(dict_attack->view, mf_classic_dict_attack_input_callback);
+    view_allocate_model(dict_attack->view, ViewModelTypeLocking, sizeof(DictAttackViewModel));
+    view_set_draw_callback(dict_attack->view, dict_attack_draw_callback);
+    view_set_input_callback(dict_attack->view, dict_attack_input_callback);
     view_set_context(dict_attack->view, dict_attack);
     with_view_model(
-        dict_attack->view, (MfClassicDictAttackViewModel * model) {
+        dict_attack->view, (DictAttackViewModel * model) {
             string_init(model->header);
             return false;
         });
     return dict_attack;
 }
 
-void mf_classic_dict_attack_free(MfClassicDictAttack* dict_attack) {
+void dict_attack_free(DictAttack* dict_attack) {
     furi_assert(dict_attack);
     with_view_model(
-        dict_attack->view, (MfClassicDictAttackViewModel * model) {
+        dict_attack->view, (DictAttackViewModel * model) {
             string_clear(model->header);
             return false;
         });
@@ -90,11 +89,11 @@ void mf_classic_dict_attack_free(MfClassicDictAttack* dict_attack) {
     free(dict_attack);
 }
 
-void mf_classic_dict_attack_reset(MfClassicDictAttack* dict_attack) {
+void dict_attack_reset(DictAttack* dict_attack) {
     furi_assert(dict_attack);
     with_view_model(
-        dict_attack->view, (MfClassicDictAttackViewModel * model) {
-            model->state = MfClassicDictAttackStateRead;
+        dict_attack->view, (DictAttackViewModel * model) {
+            model->state = DictAttackStateRead;
             model->type = MfClassicType1k;
             model->sectors_total = 0;
             model->sectors_read = 0;
@@ -106,83 +105,80 @@ void mf_classic_dict_attack_reset(MfClassicDictAttack* dict_attack) {
         });
 }
 
-View* mf_classic_dict_attack_get_view(MfClassicDictAttack* dict_attack) {
+View* dict_attack_get_view(DictAttack* dict_attack) {
     furi_assert(dict_attack);
     return dict_attack->view;
 }
 
-void mf_classic_dict_attack_set_callback(
-    MfClassicDictAttack* dict_attack,
-    MfClassicDictAttackCallback callback,
-    void* context) {
+void dict_attack_set_callback(DictAttack* dict_attack, DictAttackCallback callback, void* context) {
     furi_assert(dict_attack);
     furi_assert(callback);
     dict_attack->callback = callback;
     dict_attack->context = context;
 }
 
-void mf_classic_dict_attack_set_header(MfClassicDictAttack* dict_attack, const char* header) {
+void dict_attack_set_header(DictAttack* dict_attack, const char* header) {
     furi_assert(dict_attack);
     furi_assert(header);
 
     with_view_model(
-        dict_attack->view, (MfClassicDictAttackViewModel * model) {
+        dict_attack->view, (DictAttackViewModel * model) {
             string_set_str(model->header, header);
             return true;
         });
 }
 
-void mf_classic_dict_attack_set_card_detected(MfClassicDictAttack* dict_attack, MfClassicType type) {
+void dict_attack_set_card_detected(DictAttack* dict_attack, MfClassicType type) {
     furi_assert(dict_attack);
     with_view_model(
-        dict_attack->view, (MfClassicDictAttackViewModel * model) {
-            model->state = MfClassicDictAttackStateRead;
+        dict_attack->view, (DictAttackViewModel * model) {
+            model->state = DictAttackStateRead;
             model->sectors_total = mf_classic_get_total_sectors_num(type);
             model->keys_total = model->sectors_total * 2;
             return true;
         });
 }
 
-void mf_classic_dict_attack_set_card_removed(MfClassicDictAttack* dict_attack) {
+void dict_attack_set_card_removed(DictAttack* dict_attack) {
     furi_assert(dict_attack);
     with_view_model(
-        dict_attack->view, (MfClassicDictAttackViewModel * model) {
-            model->state = MfClassicDictAttackStateCardRemoved;
+        dict_attack->view, (DictAttackViewModel * model) {
+            model->state = DictAttackStateCardRemoved;
             return true;
         });
 }
 
-void mf_classic_dict_attack_set_sector_read(MfClassicDictAttack* dict_attack, uint8_t sec_read) {
+void dict_attack_set_sector_read(DictAttack* dict_attack, uint8_t sec_read) {
     furi_assert(dict_attack);
     with_view_model(
-        dict_attack->view, (MfClassicDictAttackViewModel * model) {
+        dict_attack->view, (DictAttackViewModel * model) {
             model->sectors_read = sec_read;
             return true;
         });
 }
 
-void mf_classic_dict_attack_set_keys_found(MfClassicDictAttack* dict_attack, uint8_t keys_found) {
+void dict_attack_set_keys_found(DictAttack* dict_attack, uint8_t keys_found) {
     furi_assert(dict_attack);
     with_view_model(
-        dict_attack->view, (MfClassicDictAttackViewModel * model) {
+        dict_attack->view, (DictAttackViewModel * model) {
             model->keys_found = keys_found;
             return true;
         });
 }
 
-void mf_classic_dict_attack_set_current_sector(MfClassicDictAttack* dict_attack, uint8_t curr_sec) {
+void dict_attack_set_current_sector(DictAttack* dict_attack, uint8_t curr_sec) {
     furi_assert(dict_attack);
     with_view_model(
-        dict_attack->view, (MfClassicDictAttackViewModel * model) {
+        dict_attack->view, (DictAttackViewModel * model) {
             model->sector_current = curr_sec;
             return true;
         });
 }
 
-void mf_classic_dict_attack_inc_current_sector(MfClassicDictAttack* dict_attack) {
+void dict_attack_inc_current_sector(DictAttack* dict_attack) {
     furi_assert(dict_attack);
     with_view_model(
-        dict_attack->view, (MfClassicDictAttackViewModel * model) {
+        dict_attack->view, (DictAttackViewModel * model) {
             if(model->sector_current < model->sectors_total) {
                 model->sector_current++;
             }
@@ -190,10 +186,10 @@ void mf_classic_dict_attack_inc_current_sector(MfClassicDictAttack* dict_attack)
         });
 }
 
-void mf_classic_dict_attack_inc_keys_found(MfClassicDictAttack* dict_attack) {
+void dict_attack_inc_keys_found(DictAttack* dict_attack) {
     furi_assert(dict_attack);
     with_view_model(
-        dict_attack->view, (MfClassicDictAttackViewModel * model) {
+        dict_attack->view, (DictAttackViewModel * model) {
             if(model->keys_found < model->keys_total) {
                 model->keys_found++;
             }

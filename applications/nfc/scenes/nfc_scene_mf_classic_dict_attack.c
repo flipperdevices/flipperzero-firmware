@@ -1,19 +1,19 @@
 #include "../nfc_i.h"
 
 typedef enum {
-    MfClassicDictAttackStateIdle,
-    MfClassicDictAttackStateUserDictInProgress,
-    MfClassicDictAttackStateFlipperDictInProgress,
-} MfClassicDictAttackState;
+    DictAttackStateIdle,
+    DictAttackStateUserDictInProgress,
+    DictAttackStateFlipperDictInProgress,
+} DictAttackState;
 
-bool nfc_mf_classic_dict_attack_worker_callback(NfcWorkerEvent event, void* context) {
+bool nfc_dict_attack_worker_callback(NfcWorkerEvent event, void* context) {
     furi_assert(context);
     Nfc* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, event);
     return true;
 }
 
-void nfc_mf_classic_dict_attack_dict_attack_result_callback(void* context) {
+void nfc_dict_attack_dict_attack_result_callback(void* context) {
     furi_assert(context);
     Nfc* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventDictAttackSkip);
@@ -26,52 +26,46 @@ static void nfc_scene_mf_classic_dict_attack_update_view(Nfc* nfc) {
 
     // Calculate found keys and read sectors
     mf_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
-    mf_classic_dict_attack_set_keys_found(nfc->mf_classic_dict_attack, keys_found);
-    mf_classic_dict_attack_set_sector_read(nfc->mf_classic_dict_attack, sectors_read);
+    dict_attack_set_keys_found(nfc->dict_attack, keys_found);
+    dict_attack_set_sector_read(nfc->dict_attack, sectors_read);
 }
 
-static void
-    nfc_scene_mf_classic_dict_attack_prepare_view(Nfc* nfc, MfClassicDictAttackState state) {
+static void nfc_scene_mf_classic_dict_attack_prepare_view(Nfc* nfc, DictAttackState state) {
     MfClassicData* data = &nfc->dev->dev_data.mf_classic_data;
     NfcWorkerState worker_state = NfcWorkerStateReady;
 
     // Identify scene state
-    if(state == MfClassicDictAttackStateIdle) {
+    if(state == DictAttackStateIdle) {
         if(mf_classic_dict_check_presence(MfClassicDictTypeUser)) {
-            state = MfClassicDictAttackStateUserDictInProgress;
+            state = DictAttackStateUserDictInProgress;
         } else {
-            state = MfClassicDictAttackStateFlipperDictInProgress;
+            state = DictAttackStateFlipperDictInProgress;
         }
-    } else if(state == MfClassicDictAttackStateUserDictInProgress) {
-        state = MfClassicDictAttackStateFlipperDictInProgress;
+    } else if(state == DictAttackStateUserDictInProgress) {
+        state = DictAttackStateFlipperDictInProgress;
     }
 
     // Setup view
-    if(state == MfClassicDictAttackStateUserDictInProgress) {
+    if(state == DictAttackStateUserDictInProgress) {
         worker_state = NfcWorkerStateMfClassicUserDictAttack;
-        mf_classic_dict_attack_set_header(nfc->mf_classic_dict_attack, "Mf Classic User Dict.");
-    } else if(state == MfClassicDictAttackStateFlipperDictInProgress) {
+        dict_attack_set_header(nfc->dict_attack, "Mf Classic User Dict.");
+    } else if(state == DictAttackStateFlipperDictInProgress) {
         worker_state = NfcWorkerStateMfClassicFlipperDictAttack;
-        mf_classic_dict_attack_set_header(nfc->mf_classic_dict_attack, "Mf Classic Flipper Dict.");
+        dict_attack_set_header(nfc->dict_attack, "Mf Classic Flipper Dict.");
     }
     scene_manager_set_scene_state(nfc->scene_manager, NfcSceneMfClassicDictAttack, state);
-    mf_classic_dict_attack_set_callback(
-        nfc->mf_classic_dict_attack, nfc_mf_classic_dict_attack_dict_attack_result_callback, nfc);
-    mf_classic_dict_attack_set_current_sector(nfc->mf_classic_dict_attack, 0);
-    mf_classic_dict_attack_set_card_detected(nfc->mf_classic_dict_attack, data->type);
+    dict_attack_set_callback(nfc->dict_attack, nfc_dict_attack_dict_attack_result_callback, nfc);
+    dict_attack_set_current_sector(nfc->dict_attack, 0);
+    dict_attack_set_card_detected(nfc->dict_attack, data->type);
     nfc_scene_mf_classic_dict_attack_update_view(nfc);
     nfc_worker_start(
-        nfc->worker,
-        worker_state,
-        &nfc->dev->dev_data,
-        nfc_mf_classic_dict_attack_worker_callback,
-        nfc);
+        nfc->worker, worker_state, &nfc->dev->dev_data, nfc_dict_attack_worker_callback, nfc);
 }
 
 void nfc_scene_mf_classic_dict_attack_on_enter(void* context) {
     Nfc* nfc = context;
-    nfc_scene_mf_classic_dict_attack_prepare_view(nfc, MfClassicDictAttackStateIdle);
-    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMfCLassicDictAttack);
+    nfc_scene_mf_classic_dict_attack_prepare_view(nfc, DictAttackStateIdle);
+    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewDictAttack);
     nfc_blink_start(nfc);
 }
 
@@ -84,7 +78,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfClassicDictAttack);
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcWorkerEventSuccess) {
-            if(state == MfClassicDictAttackStateUserDictInProgress) {
+            if(state == DictAttackStateUserDictInProgress) {
                 nfc_scene_mf_classic_dict_attack_prepare_view(nfc, state);
                 consumed = true;
             } else {
@@ -92,7 +86,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
                 consumed = true;
             }
         } else if(event.event == NfcWorkerEventAborted) {
-            if(state == MfClassicDictAttackStateUserDictInProgress) {
+            if(state == DictAttackStateUserDictInProgress) {
                 nfc_scene_mf_classic_dict_attack_prepare_view(nfc, state);
                 consumed = true;
             } else {
@@ -100,26 +94,26 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
                 consumed = true;
             }
         } else if(event.event == NfcWorkerEventCardDetected) {
-            mf_classic_dict_attack_set_card_detected(nfc->mf_classic_dict_attack, data->type);
+            dict_attack_set_card_detected(nfc->dict_attack, data->type);
             consumed = true;
         } else if(event.event == NfcWorkerEventNoCardDetected) {
-            mf_classic_dict_attack_set_card_removed(nfc->mf_classic_dict_attack);
+            dict_attack_set_card_removed(nfc->dict_attack);
             consumed = true;
         } else if(event.event == NfcWorkerEventFoundKeyA) {
-            mf_classic_dict_attack_inc_keys_found(nfc->mf_classic_dict_attack);
+            dict_attack_inc_keys_found(nfc->dict_attack);
             consumed = true;
         } else if(event.event == NfcWorkerEventFoundKeyB) {
-            mf_classic_dict_attack_inc_keys_found(nfc->mf_classic_dict_attack);
+            dict_attack_inc_keys_found(nfc->dict_attack);
             consumed = true;
         } else if(event.event == NfcWorkerEventNewSector) {
             nfc_scene_mf_classic_dict_attack_update_view(nfc);
-            mf_classic_dict_attack_inc_current_sector(nfc->mf_classic_dict_attack);
+            dict_attack_inc_current_sector(nfc->dict_attack);
             consumed = true;
         } else if(event.event == NfcCustomEventDictAttackSkip) {
-            if(state == MfClassicDictAttackStateUserDictInProgress) {
+            if(state == DictAttackStateUserDictInProgress) {
                 nfc_worker_stop(nfc->worker);
                 consumed = true;
-            } else if(state == MfClassicDictAttackStateFlipperDictInProgress) {
+            } else if(state == DictAttackStateFlipperDictInProgress) {
                 nfc_worker_stop(nfc->worker);
                 consumed = true;
             }
@@ -135,6 +129,6 @@ void nfc_scene_mf_classic_dict_attack_on_exit(void* context) {
     Nfc* nfc = context;
     // Stop worker
     nfc_worker_stop(nfc->worker);
-    mf_classic_dict_attack_reset(nfc->mf_classic_dict_attack);
+    dict_attack_reset(nfc->dict_attack);
     nfc_blink_stop(nfc);
 }

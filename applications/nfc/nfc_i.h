@@ -26,7 +26,7 @@
 #include <lib/nfc/helpers/mf_classic_dict.h>
 
 #include "views/bank_card.h"
-#include "views/mf_classic_dict_attack.h"
+#include "views/dict_attack.h"
 
 #include <nfc/scenes/nfc_scene.h>
 #include <nfc/helpers/nfc_custom_event.h>
@@ -71,7 +71,7 @@ struct Nfc {
     TextBox* text_box;
     Widget* widget;
     BankCard* bank_card;
-    MfClassicDictAttack* mf_classic_dict_attack;
+    DictAttack* dict_attack;
 
     const NfcGenerator* generator;
 };
@@ -85,7 +85,7 @@ typedef enum {
     NfcViewTextBox,
     NfcViewWidget,
     NfcViewBankCard,
-    NfcViewMfCLassicDictAttack,
+    NfcViewDictAttack,
 } NfcView;
 
 Nfc* nfc_alloc();
