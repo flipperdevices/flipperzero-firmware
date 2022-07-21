@@ -2,7 +2,7 @@
 #include "../helpers/nfc_emv_parser.h"
 #include <dolphin/dolphin.h>
 
-void nfc_scene_read_emv_data_success_widget_callback(
+void nfc_scene_emv_read_success_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context) {
@@ -12,7 +12,7 @@ void nfc_scene_read_emv_data_success_widget_callback(
     }
 }
 
-void nfc_scene_read_emv_data_success_on_enter(void* context) {
+void nfc_scene_emv_read_success_on_enter(void* context) {
     Nfc* nfc = context;
     EmvData* emv_data = &nfc->dev->dev_data.emv_data;
     FuriHalNfcDevData* nfc_data = &nfc->dev->dev_data.nfc_data;
@@ -26,13 +26,13 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
         nfc->widget,
         GuiButtonTypeLeft,
         "Back",
-        nfc_scene_read_emv_data_success_widget_callback,
+        nfc_scene_emv_read_success_widget_callback,
         nfc);
     widget_add_button_element(
         nfc->widget,
         GuiButtonTypeRight,
         "Save",
-        nfc_scene_read_emv_data_success_widget_callback,
+        nfc_scene_emv_read_success_widget_callback,
         nfc);
     // Add card name
     widget_add_string_element(
@@ -104,17 +104,17 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
     }
 
     // Send notification
-    if(scene_manager_get_scene_state(nfc->scene_manager, NfcSceneReadEmvDataSuccess) ==
+    if(scene_manager_get_scene_state(nfc->scene_manager, NfcSceneEmvReadSuccess) ==
        NFC_SEND_NOTIFICATION_TRUE) {
         notification_message(nfc->notifications, &sequence_success);
         scene_manager_set_scene_state(
-            nfc->scene_manager, NfcSceneReadEmvDataSuccess, NFC_SEND_NOTIFICATION_FALSE);
+            nfc->scene_manager, NfcSceneEmvReadSuccess, NFC_SEND_NOTIFICATION_FALSE);
     }
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 
-bool nfc_scene_read_emv_data_success_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_emv_read_success_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
     bool consumed = false;
 
@@ -135,7 +135,7 @@ bool nfc_scene_read_emv_data_success_on_event(void* context, SceneManagerEvent e
     return consumed;
 }
 
-void nfc_scene_read_emv_data_success_on_exit(void* context) {
+void nfc_scene_emv_read_success_on_exit(void* context) {
     Nfc* nfc = context;
 
     // Clear view

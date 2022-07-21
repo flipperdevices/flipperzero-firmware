@@ -40,16 +40,16 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMfUltralight) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareUlSuccess);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMfClassicDone) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareClassicSuccess);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMfDesfire) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareDesfireSuccess);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadBankCard) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadEmvDataSuccess);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneEmvReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMfClassicDictAttackRequired) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicDictAttack);

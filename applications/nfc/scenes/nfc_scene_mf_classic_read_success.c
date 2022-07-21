@@ -1,7 +1,7 @@
 #include "../nfc_i.h"
 #include <dolphin/dolphin.h>
 
-void nfc_scene_read_mifare_classic_success_widget_callback(
+void nfc_scene_mf_classic_read_success_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context) {
@@ -13,7 +13,7 @@ void nfc_scene_read_mifare_classic_success_widget_callback(
     }
 }
 
-void nfc_scene_read_mifare_classic_success_on_enter(void* context) {
+void nfc_scene_mf_classic_read_success_on_enter(void* context) {
     Nfc* nfc = context;
     NfcDeviceData* dev_data = &nfc->dev->dev_data;
     MfClassicData* mf_data = &dev_data->mf_classic_data;
@@ -31,13 +31,13 @@ void nfc_scene_read_mifare_classic_success_on_enter(void* context) {
         widget,
         GuiButtonTypeLeft,
         "Retry",
-        nfc_scene_read_mifare_classic_success_widget_callback,
+        nfc_scene_mf_classic_read_success_widget_callback,
         nfc);
     widget_add_button_element(
         widget,
         GuiButtonTypeRight,
         "More",
-        nfc_scene_read_mifare_classic_success_widget_callback,
+        nfc_scene_mf_classic_read_success_widget_callback,
         nfc);
 
     if(string_size(nfc->dev->dev_data.parsed_data)) {
@@ -85,7 +85,7 @@ void nfc_scene_read_mifare_classic_success_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 
-bool nfc_scene_read_mifare_classic_success_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_mf_classic_read_success_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
     bool consumed = false;
 
@@ -96,7 +96,7 @@ bool nfc_scene_read_mifare_classic_success_on_event(void* context, SceneManagerE
         } else if(event.event == GuiButtonTypeRight) {
             // Clear device name
             nfc_device_set_name(nfc->dev, "");
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneMifareClassicMenu);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicMenu);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
@@ -107,7 +107,7 @@ bool nfc_scene_read_mifare_classic_success_on_event(void* context, SceneManagerE
     return consumed;
 }
 
-void nfc_scene_read_mifare_classic_success_on_exit(void* context) {
+void nfc_scene_mf_classic_read_success_on_exit(void* context) {
     Nfc* nfc = context;
 
     // Clear view

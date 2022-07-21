@@ -82,7 +82,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
                 nfc_scene_mf_classic_dict_attack_prepare_view(nfc, state);
                 consumed = true;
             } else {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareClassicSuccess);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSuccess);
                 consumed = true;
             }
         } else if(event.event == NfcWorkerEventAborted) {
@@ -90,7 +90,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
                 nfc_scene_mf_classic_dict_attack_prepare_view(nfc, state);
                 consumed = true;
             } else {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareClassicSuccess);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSuccess);
                 consumed = true;
             }
         } else if(event.event == NfcWorkerEventCardDetected) {

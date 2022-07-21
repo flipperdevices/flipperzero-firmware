@@ -272,9 +272,9 @@ int32_t nfc_app(void* p) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRpc);
         } else if(nfc_device_load(nfc->dev, p, true)) {
             if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateMifareUl);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
             } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateMifareClassic);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
             } else {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
             }

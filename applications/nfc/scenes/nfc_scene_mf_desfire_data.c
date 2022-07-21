@@ -1,6 +1,6 @@
 #include "../nfc_i.h"
 
-#define TAG "NfcSceneMifareDesfireData"
+#define TAG "NfcSceneMfDesfireData"
 
 enum {
     MifareDesfireDataStateMenu,
@@ -12,16 +12,16 @@ enum SubmenuIndex {
     SubmenuIndexDynamic, // dynamic indexes start here
 };
 
-void nfc_scene_mifare_desfire_data_submenu_callback(void* context, uint32_t index) {
+void nfc_scene_mf_desfire_data_submenu_callback(void* context, uint32_t index) {
     Nfc* nfc = (Nfc*)context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
-void nfc_scene_mifare_desfire_data_on_enter(void* context) {
+void nfc_scene_mf_desfire_data_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
-    uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMifareDesfireData);
+    uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireData);
     MifareDesfireData* data = &nfc->dev->dev_data.mf_df_data;
 
     text_box_set_font(nfc->text_box, TextBoxFontHex);
@@ -30,7 +30,7 @@ void nfc_scene_mifare_desfire_data_on_enter(void* context) {
         submenu,
         "Card info",
         SubmenuIndexCardInfo,
-        nfc_scene_mifare_desfire_data_submenu_callback,
+        nfc_scene_mf_desfire_data_submenu_callback,
         nfc);
 
     uint16_t cap = NFC_TEXT_STORE_SIZE;
@@ -47,23 +47,23 @@ void nfc_scene_mifare_desfire_data_on_enter(void* context) {
         cap -= size + 1;
         buf += size + 1;
         submenu_add_item(
-            submenu, label, idx++, nfc_scene_mifare_desfire_data_submenu_callback, nfc);
+            submenu, label, idx++, nfc_scene_mf_desfire_data_submenu_callback, nfc);
     }
 
     if(state >= MifareDesfireDataStateItem) {
         submenu_set_selected_item(
             nfc->submenu, state - MifareDesfireDataStateItem + SubmenuIndexDynamic);
         scene_manager_set_scene_state(
-            nfc->scene_manager, NfcSceneMifareDesfireData, MifareDesfireDataStateMenu);
+            nfc->scene_manager, NfcSceneMfDesfireData, MifareDesfireDataStateMenu);
     }
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }
 
-bool nfc_scene_mifare_desfire_data_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_mf_desfire_data_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
     bool consumed = false;
-    uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMifareDesfireData);
+    uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireData);
     MifareDesfireData* data = &nfc->dev->dev_data.mf_df_data;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -75,23 +75,23 @@ bool nfc_scene_mifare_desfire_data_on_event(void* context, SceneManagerEvent eve
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
             scene_manager_set_scene_state(
                 nfc->scene_manager,
-                NfcSceneMifareDesfireData,
+                NfcSceneMfDesfireData,
                 MifareDesfireDataStateItem + SubmenuIndexCardInfo);
             consumed = true;
         } else {
             uint16_t index = event.event - SubmenuIndexDynamic;
             scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneMifareDesfireData, MifareDesfireDataStateItem + index);
+                nfc->scene_manager, NfcSceneMfDesfireData, MifareDesfireDataStateItem + index);
             scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneMifareDesfireApp, index << 1);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneMifareDesfireApp);
+                nfc->scene_manager, NfcSceneMfDesfireApp, index << 1);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireApp);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
         if(state >= MifareDesfireDataStateItem) {
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
             scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneMifareDesfireData, MifareDesfireDataStateMenu);
+                nfc->scene_manager, NfcSceneMfDesfireData, MifareDesfireDataStateMenu);
             consumed = true;
         }
     }
@@ -99,7 +99,7 @@ bool nfc_scene_mifare_desfire_data_on_event(void* context, SceneManagerEvent eve
     return consumed;
 }
 
-void nfc_scene_mifare_desfire_data_on_exit(void* context) {
+void nfc_scene_mf_desfire_data_on_exit(void* context) {
     Nfc* nfc = context;
 
     // Clear views
