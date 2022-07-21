@@ -4,6 +4,7 @@
 <b>Latest Updates:</b>
 
 - Added [nfc: NTAG203 support #1383 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1383)
+- Added [Added condition to cli "log" command to end if serial terminal is disconnected. #1425 (By ESurge)](https://github.com/flipperdevices/flipperzero-firmware/pull/1425)
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
@@ -58,6 +59,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
 - [Picopass: dump full card, extract some details #1408 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1408)
 - [nfc: NTAG203 support #1383 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1383)
+- [Added condition to cli "log" command to end if serial terminal is disconnected. #1425 (By ESurge)](https://github.com/flipperdevices/flipperzero-firmware/pull/1425)
 
 </td><td>
 <details>
