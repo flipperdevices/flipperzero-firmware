@@ -152,7 +152,7 @@ void cli_command_log(Cli* cli, string_t args, void* context) {
     furi_hal_console_set_tx_callback(cli_command_log_tx_callback, ring);
 
     printf("Press CTRL+C to stop...\r\n");
-    while(!cli_cmd_interrupt_received(cli)) {
+    while(!cli_cmd_interrupt_received(cli) && cli_is_connected(cli)) {
         size_t ret = xStreamBufferReceive(ring, buffer, CLI_COMMAND_LOG_BUFFER_SIZE, 50);
         cli_write(cli, buffer, ret);
     }
