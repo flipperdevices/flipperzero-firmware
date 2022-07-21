@@ -1173,10 +1173,6 @@ void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* d
     emulator->data_changed = false;
     emulator->comp_write_cmd_started = false;
     emulator->sector_select_cmd_started = false;
-    if(emulator->data.type == MfUltralightTypeNTAG203) {
-        // Clear holding counter
-        emulator->data.counter[0] = 0;
-    }
     mf_ul_reset_emulation(emulator, true);
 }
 
