@@ -55,12 +55,11 @@ static ReturnCode picopass_worker_parse_wiegand(uint8_t* data, PicopassWiegandRe
 
     if(record->bitLength == 26) {
         uint8_t* v4 = data + 4;
-        v4[0] = 0;
-
         uint32_t bot = v4[3] | (v4[2] << 8) | (v4[1] << 16) | (v4[0] << 24);
 
         record->CardNumber = (bot >> 1) & 0xFFFF;
         record->FacilityCode = (bot >> 17) & 0xFF;
+        FURI_LOG_D(TAG, "FC:%u CN: %u\n", record->FacilityCode, record->CardNumber);
         record->valid = true;
     } else {
         record->CardNumber = 0;

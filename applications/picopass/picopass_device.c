@@ -57,16 +57,14 @@ static bool picopass_device_save_file(
         if(!flipper_format_file_open_always(file, string_get_cstr(temp_str))) break;
 
         if(dev->format == PicopassDeviceSaveFormatHF) {
+            uint32_t fc = pacs->record.FacilityCode;
+            uint32_t cn = pacs->record.CardNumber;
             // Write header
             if(!flipper_format_write_header_cstr(file, picopass_file_header, picopass_file_version))
                 break;
             if(pacs->record.valid) {
-                if(!flipper_format_write_uint32(
-                       file, "Facility Code", (uint32_t*)&pacs->record.FacilityCode, 1))
-                    break;
-                if(!flipper_format_write_uint32(
-                       file, "Card Number", (uint32_t*)&pacs->record.CardNumber, 1))
-                    break;
+                if(!flipper_format_write_uint32(file, "Facility Code", &fc, 1)) break;
+                if(!flipper_format_write_uint32(file, "Card Number", &cn, 1)) break;
                 if(!flipper_format_write_hex(
                        file, "Credential", pacs->credential, PICOPASS_BLOCK_LEN))
                     break;
