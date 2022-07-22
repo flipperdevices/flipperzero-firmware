@@ -12,8 +12,8 @@ void gpio_scene_i2c_scanner_ok_callback(InputType type, void* context) {
         notification_message(app->notifications, &sequence_set_green_255);
         gpio_i2c_scanner_run_once(i2c_scanner_state);
         notification_message(app->notifications, &sequence_reset_green);
+        gpio_i2c_scanner_update_state(app->gpio_i2c_scanner, i2c_scanner_state);
     }
-    gpio_i2c_scanner_update_state(app->gpio_i2c_scanner, i2c_scanner_state);
 }
 
 void gpio_scene_i2c_scanner_on_enter(void* context) {

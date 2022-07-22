@@ -2,6 +2,8 @@
 #include "../gpio_item.h"
 
 #include <gui/elements.h>
+#include <string.h>
+
 
 struct GpioI2CScanner {
     View* view;
@@ -20,21 +22,47 @@ static bool gpio_i2c_scanner_process_ok(GpioI2CScanner* gpio_test, InputEvent* e
 
 static void gpio_i2c_scanner_draw_callback(Canvas* canvas, void* _model) {
     GpioI2CScannerModel* model = _model;
-    canvas_set_font(canvas, FontPrimary);
-    elements_multiline_text_aligned(canvas, 64, 2, AlignCenter, AlignTop, "I2C-Scanner");
-    canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text_aligned(
-        canvas, 64, 16, AlignCenter, AlignTop, "SCL: Pin 16, SDA: Pin 15");
     
-    
-    char temp_str[27];
-    snprintf(temp_str, 27, "Slaves: %u", model->items);
-    elements_multiline_text_aligned(
-        canvas, 64, 32, AlignCenter, AlignTop, temp_str);
+    char temp_str[25];
+    elements_button_left(canvas, "Start scan");
+    canvas_draw_line(canvas, 2, 10, 125, 10);
+    canvas_draw_line(canvas, 44, 52, 123, 52);
 
-    snprintf(temp_str, 27, "Adr: %u, %u, %u, %u", model->responding_address[0], model->responding_address[1], model->responding_address[2], model->responding_address[3]);
-    elements_multiline_text_aligned(
-        canvas, 64, 48, AlignCenter, AlignTop, temp_str);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 2, 9, "I2C-Scanner");
+    canvas_draw_str(canvas, 3, 25, "SDA:");
+    canvas_draw_str(canvas, 3, 42, "SCL:");
+
+    canvas_set_font(canvas, FontSecondary);
+    snprintf(temp_str, 25, "Slaves: %u", model->items);
+    canvas_draw_str_aligned(canvas, 126, 8, AlignRight, AlignBottom, temp_str);
+
+    canvas_draw_str(canvas, 29, 25, "Pin 15");
+    canvas_draw_str(canvas, 29, 42, "Pin 16");
+
+    canvas_set_font(canvas, FontSecondary);
+
+    char temp_str2[6];
+    if(model->items > 0) {
+        snprintf(temp_str, 25, "Addr: " );
+        for(int i = 0; i< model->items; i++){
+            snprintf(temp_str2, 6, "0x%x ", model->responding_address[i]);
+            strcat (temp_str, temp_str2);
+
+            if(i == 1 || model->items == 1) {
+                canvas_draw_str_aligned(canvas, 127, 24, AlignRight, AlignBottom, temp_str);
+                temp_str[0] = '\0';
+            }
+            else if(i == 4 || (model->items-1 == i && i<6 )) {
+                canvas_draw_str_aligned(canvas, 127, 36, AlignRight, AlignBottom, temp_str);
+                temp_str[0] = '\0';
+            }            
+            else if(i == 7 || model->items-1 == i) {
+                canvas_draw_str_aligned(canvas, 127, 48, AlignRight, AlignBottom, temp_str);
+                break;
+            }
+        }
+    }
 }
 
 static bool gpio_i2c_scanner_input_callback(InputEvent* event, void* context) {
@@ -123,11 +151,8 @@ void gpio_i2c_scanner_update_state(GpioI2CScanner* instance, I2CScannerState* st
     with_view_model(
         instance->view, (GpioI2CScannerModel * model) {
             model->items = st->items;
-            //UNUSED(model);
 
-
-            for(int i =0; i<model->items; i++)
-            {
+            for(int i =0; i<model->items; i++) {
                 model->responding_address[i] = st->responding_address[i];
             }
 
