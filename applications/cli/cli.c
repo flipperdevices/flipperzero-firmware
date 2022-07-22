@@ -84,7 +84,8 @@ bool cli_cmd_interrupt_received(Cli* cli) {
         if(cli->session->rx((uint8_t*)&c, 1, 0) == 1) {
             return c == CliSymbolAsciiETX;
         }
-    } else {
+    }
+    else {
         return true;
     }
     return false;
