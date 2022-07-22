@@ -34,6 +34,7 @@ jobs:
 
       - name: 'Static code analysis'
         run: |
+          export
           SCRIPT_PATH=$(pwd) source scripts/toolchain/fbtenv.sh
           pvs-studio-analyzer analyze -l /opt/pvs_studio/PVS-Studio.lic -f build/latest/compile_commands.json -o PVS-Studio.log
 
