@@ -79,7 +79,7 @@ typedef struct __attribute__((packed))
     uint32_t packet_size;
     uint32_t offset;
     uint32_t encrypted;
-} begin_command_t;
+} flash_begin_command_t;
 
 typedef struct __attribute__((packed))
 {
@@ -95,6 +95,15 @@ typedef struct __attribute__((packed))
     command_common_t common;
     uint32_t stay_in_loader;
 } flash_end_command_t;
+
+typedef struct __attribute__((packed))
+{
+    command_common_t common;
+    uint32_t total_size;
+    uint32_t blocks;
+    uint32_t block_size;
+    uint32_t offset;
+} mem_begin_command_t;
 
 typedef struct __attribute__((packed))
 {

@@ -244,11 +244,11 @@ esp_loader_error_t loader_flash_begin_cmd(uint32_t offset,
 {
     uint32_t encryption_size = encryption ? sizeof(uint32_t) : 0;
 
-    begin_command_t begin_cmd = {
+    flash_begin_command_t flash_begin_cmd = {
         .common = {
             .direction = WRITE_DIRECTION,
             .command = FLASH_BEGIN,
-            .size = CMD_SIZE(begin_cmd) - encryption_size,
+            .size = CMD_SIZE(flash_begin_cmd) - encryption_size,
             .checksum = 0
         },
         .erase_size = erase_size,
@@ -260,7 +260,7 @@ esp_loader_error_t loader_flash_begin_cmd(uint32_t offset,
 
     s_sequence_number = 0;
 
-    return send_cmd(&begin_cmd, sizeof(begin_cmd) - encryption_size, NULL);
+    return send_cmd(&flash_begin_cmd, sizeof(flash_begin_cmd) - encryption_size, NULL);
 }
 
 
@@ -291,6 +291,59 @@ esp_loader_error_t loader_flash_end_cmd(bool stay_in_loader)
             .checksum = 0
         },
         .stay_in_loader = stay_in_loader
+    };
+
+    return send_cmd(&end_cmd, sizeof(end_cmd), NULL);
+}
+
+
+esp_loader_error_t loader_mem_begin_cmd(uint32_t offset, uint32_t size, uint32_t blocks_to_write, uint32_t block_size)
+{
+
+    mem_begin_command_t mem_begin_cmd = {
+        .common = {
+            .direction = WRITE_DIRECTION,
+            .command = MEM_BEGIN,
+            .size = CMD_SIZE(mem_begin_cmd),
+            .checksum = 0
+        },
+        .total_size = size,
+        .blocks = blocks_to_write,
+        .block_size = block_size,
+        .offset = offset
+    };
+
+    s_sequence_number = 0;
+
+    return send_cmd(&mem_begin_cmd, sizeof(mem_begin_cmd), NULL);
+}
+
+
+esp_loader_error_t loader_mem_data_cmd(const uint8_t *data, uint32_t size)
+{
+    data_command_t data_cmd = {
+        .common = {
+            .direction = WRITE_DIRECTION,
+            .command = MEM_DATA,
+            .size = CMD_SIZE(data_cmd) + size,
+            .checksum = compute_checksum(data, size)
+        },
+        .data_size = size,
+        .sequence_number = s_sequence_number++,
+    };
+    return send_cmd_with_data(&data_cmd, sizeof(data_cmd), data, size);
+}
+
+esp_loader_error_t loader_mem_end_cmd(uint32_t entrypoint)
+{
+    mem_end_command_t end_cmd = {
+        .common = {
+            .direction = WRITE_DIRECTION,
+            .command = MEM_END,
+            .size = CMD_SIZE(end_cmd),
+        },
+        .stay_in_loader = (entrypoint == 0),
+        .entry_point_address = entrypoint
     };
 
     return send_cmd(&end_cmd, sizeof(end_cmd), NULL);
