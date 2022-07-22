@@ -23,17 +23,9 @@ void nfc_scene_emv_read_success_on_enter(void* context) {
     widget_add_frame_element(nfc->widget, 0, 0, 128, 64, 6);
     // Add buttons
     widget_add_button_element(
-        nfc->widget,
-        GuiButtonTypeLeft,
-        "Back",
-        nfc_scene_emv_read_success_widget_callback,
-        nfc);
+        nfc->widget, GuiButtonTypeLeft, "Back", nfc_scene_emv_read_success_widget_callback, nfc);
     widget_add_button_element(
-        nfc->widget,
-        GuiButtonTypeRight,
-        "Save",
-        nfc_scene_emv_read_success_widget_callback,
-        nfc);
+        nfc->widget, GuiButtonTypeRight, "Save", nfc_scene_emv_read_success_widget_callback, nfc);
     // Add card name
     widget_add_string_element(
         nfc->widget, 64, 3, AlignCenter, AlignTop, FontSecondary, nfc->dev->dev_data.emv_data.name);
@@ -129,8 +121,8 @@ bool nfc_scene_emv_read_success_on_event(void* context, SceneManagerEvent event)
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        consumed = scene_manager_search_and_switch_to_previous_scene(
-            nfc->scene_manager, NfcSceneStart);
+        consumed =
+            scene_manager_search_and_switch_to_previous_scene(nfc->scene_manager, NfcSceneStart);
     }
     return consumed;
 }

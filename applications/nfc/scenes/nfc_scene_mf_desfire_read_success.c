@@ -55,13 +55,10 @@ void nfc_scene_mf_desfire_read_success_on_enter(void* context) {
         n_files == 1 ? "" : "s");
     dialog_ex_set_text(dialog_ex, nfc->text_store, 8, 6, AlignLeft, AlignTop);
     dialog_ex_set_context(dialog_ex, nfc);
-    dialog_ex_set_result_callback(
-        dialog_ex, nfc_scene_mf_desfire_read_success_dialog_callback);
+    dialog_ex_set_result_callback(dialog_ex, nfc_scene_mf_desfire_read_success_dialog_callback);
 
     scene_manager_set_scene_state(
-        nfc->scene_manager,
-        NfcSceneMfDesfireReadSuccess,
-        MfDesfireReadSuccessStateShowUID);
+        nfc->scene_manager, NfcSceneMfDesfireReadSuccess, MfDesfireReadSuccessStateShowUID);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewDialogEx);
 }
 
@@ -75,8 +72,7 @@ bool nfc_scene_mf_desfire_read_success_on_event(void* context, SceneManagerEvent
         if(state == MfDesfireReadSuccessStateShowUID && event.event == DialogExResultLeft) {
             scene_manager_previous_scene(nfc->scene_manager);
             consumed = true;
-        } else if(
-            state == MfDesfireReadSuccessStateShowUID && event.event == DialogExResultCenter) {
+        } else if(state == MfDesfireReadSuccessStateShowUID && event.event == DialogExResultCenter) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireData);
             consumed = true;
         } else if(state == MfDesfireReadSuccessStateShowUID && event.event == DialogExResultRight) {

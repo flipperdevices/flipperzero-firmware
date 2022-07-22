@@ -46,8 +46,7 @@ void nfc_scene_mf_desfire_data_on_enter(void* context) {
         char* label = buf;
         cap -= size + 1;
         buf += size + 1;
-        submenu_add_item(
-            submenu, label, idx++, nfc_scene_mf_desfire_data_submenu_callback, nfc);
+        submenu_add_item(submenu, label, idx++, nfc_scene_mf_desfire_data_submenu_callback, nfc);
     }
 
     if(state >= MifareDesfireDataStateItem) {
@@ -82,8 +81,7 @@ bool nfc_scene_mf_desfire_data_on_event(void* context, SceneManagerEvent event) 
             uint16_t index = event.event - SubmenuIndexDynamic;
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneMfDesfireData, MifareDesfireDataStateItem + index);
-            scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneMfDesfireApp, index << 1);
+            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneMfDesfireApp, index << 1);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireApp);
             consumed = true;
         }

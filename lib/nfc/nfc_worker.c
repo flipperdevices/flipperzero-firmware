@@ -24,7 +24,7 @@ NfcWorker* nfc_worker_alloc() {
 
     // Initialize rfal
     while(furi_hal_nfc_is_busy()) {
-        osDelay(10);
+        furi_delay_ms(10);
     }
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
 
@@ -60,7 +60,7 @@ void nfc_worker_start(
     furi_assert(nfc_worker);
     furi_assert(dev_data);
     while(furi_hal_nfc_is_busy()) {
-        osDelay(10);
+        furi_delay_ms(10);
     }
 
     nfc_worker->callback = callback;
@@ -285,7 +285,7 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
             }
         }
         furi_hal_nfc_sleep();
-        osDelay(100);
+        furi_delay_ms(100);
     }
     // Notify caller and exit
     if((event > NfcWorkerEventReserved) && nfc_worker->callback) {
@@ -337,7 +337,7 @@ void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
             FURI_LOG_D(TAG, "Can't find reader");
         }
         furi_hal_nfc_sleep();
-        osDelay(20);
+        furi_delay_ms(20);
     }
 }
 

@@ -17,8 +17,7 @@ void nfc_scene_mf_desfire_menu_on_enter(void* context) {
     submenu_add_item(
         submenu, "Save", SubmenuIndexSave, nfc_scene_mf_desfire_menu_submenu_callback, nfc);
     submenu_set_selected_item(
-        nfc->submenu,
-        scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireMenu));
+        nfc->submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireMenu));
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }

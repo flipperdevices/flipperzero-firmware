@@ -8,8 +8,8 @@ enum SubmenuIndex {
 };
 
 MifareDesfireApplication* nfc_scene_mf_desfire_app_get_app(Nfc* nfc) {
-    uint32_t app_idx =
-        scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireApp) >> 1;
+    uint32_t app_idx = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireApp) >>
+                       1;
     MifareDesfireApplication* app = nfc->dev->dev_data.mf_df_data.app_head;
     for(uint32_t i = 0; i < app_idx && app; i++) {
         app = app->next;
@@ -45,11 +45,7 @@ void nfc_scene_mf_desfire_app_on_enter(void* context) {
     text_box_set_font(nfc->text_box, TextBoxFontHex);
 
     submenu_add_item(
-        submenu,
-        "App info",
-        SubmenuIndexAppInfo,
-        nfc_scene_mf_desfire_app_submenu_callback,
-        nfc);
+        submenu, "App info", SubmenuIndexAppInfo, nfc_scene_mf_desfire_app_submenu_callback, nfc);
 
     uint16_t cap = NFC_TEXT_STORE_SIZE;
     char* buf = nfc->text_store;
@@ -65,8 +61,7 @@ void nfc_scene_mf_desfire_app_on_enter(void* context) {
         char* label = buf;
         cap -= size + 1;
         buf += size + 1;
-        submenu_add_item(
-            submenu, label, idx++, nfc_scene_mf_desfire_app_submenu_callback, nfc);
+        submenu_add_item(submenu, label, idx++, nfc_scene_mf_desfire_app_submenu_callback, nfc);
     }
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
@@ -101,8 +96,7 @@ bool nfc_scene_mf_desfire_app_on_event(void* context, SceneManagerEvent event) {
     } else if(event.type == SceneManagerEventTypeBack) {
         if(state & 1) {
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
-            scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneMfDesfireApp, state & ~1);
+            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneMfDesfireApp, state & ~1);
             consumed = true;
         }
     }

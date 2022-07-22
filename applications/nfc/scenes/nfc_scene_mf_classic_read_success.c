@@ -28,17 +28,9 @@ void nfc_scene_mf_classic_read_success_on_enter(void* context) {
     // Setup view
     Widget* widget = nfc->widget;
     widget_add_button_element(
-        widget,
-        GuiButtonTypeLeft,
-        "Retry",
-        nfc_scene_mf_classic_read_success_widget_callback,
-        nfc);
+        widget, GuiButtonTypeLeft, "Retry", nfc_scene_mf_classic_read_success_widget_callback, nfc);
     widget_add_button_element(
-        widget,
-        GuiButtonTypeRight,
-        "More",
-        nfc_scene_mf_classic_read_success_widget_callback,
-        nfc);
+        widget, GuiButtonTypeRight, "More", nfc_scene_mf_classic_read_success_widget_callback, nfc);
 
     if(string_size(nfc->dev->dev_data.parsed_data)) {
         widget_add_text_box_element(
