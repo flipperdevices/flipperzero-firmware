@@ -27,10 +27,14 @@ static void gpio_i2c_scanner_draw_callback(Canvas* canvas, void* _model) {
         canvas, 64, 16, AlignCenter, AlignTop, "SCL: Pin 16, SDA: Pin 15");
     
     
-    char temp_str[18];
-    snprintf(temp_str, 18, "Slaves:%u", model->items);
+    char temp_str[27];
+    snprintf(temp_str, 27, "Slaves: %u", model->items);
     elements_multiline_text_aligned(
         canvas, 64, 32, AlignCenter, AlignTop, temp_str);
+
+    snprintf(temp_str, 27, "Adr: %u, %u, %u, %u", model->responding_address[0], model->responding_address[1], model->responding_address[2], model->responding_address[3]);
+    elements_multiline_text_aligned(
+        canvas, 64, 48, AlignCenter, AlignTop, temp_str);
 }
 
 static bool gpio_i2c_scanner_input_callback(InputEvent* event, void* context) {
