@@ -1,7 +1,7 @@
 #pragma once
 
 #include <gui/view.h>
-#include "../gpio_i2c_scanner_items.h"
+#include "../gpio_i2c_scanner_control.h"
 
 
 typedef struct GpioI2CScanner GpioI2CScanner;

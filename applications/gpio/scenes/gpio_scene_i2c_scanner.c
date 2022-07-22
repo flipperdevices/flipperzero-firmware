@@ -32,5 +32,5 @@ bool gpio_scene_i2c_scanner_on_event(void* context, SceneManagerEvent event) {
 
 void gpio_scene_i2c_scanner_on_exit(void* context) {
     UNUSED(context);
-    //free(i2c_scanner_state);@TODO
+    free(i2c_scanner_state);
 }
