@@ -15,6 +15,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
+#include <gui/modules/loading.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
 #include <gui/modules/text_box.h>
@@ -66,6 +67,7 @@ struct Nfc {
     Submenu* submenu;
     DialogEx* dialog_ex;
     Popup* popup;
+    Loading* loading;
     TextInput* text_input;
     ByteInput* byte_input;
     TextBox* text_box;
@@ -80,6 +82,7 @@ typedef enum {
     NfcViewMenu,
     NfcViewDialogEx,
     NfcViewPopup,
+    NfcViewLoading,
     NfcViewTextInput,
     NfcViewByteInput,
     NfcViewTextBox,
@@ -99,5 +102,7 @@ void nfc_text_store_clear(Nfc* nfc);
 void nfc_blink_start(Nfc* nfc);
 
 void nfc_blink_stop(Nfc* nfc);
+
+void nfc_show_loading_popup(void* context, bool show);
 
 void nfc_rpc_exit_callback(Nfc* nfc);
