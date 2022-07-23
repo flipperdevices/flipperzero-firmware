@@ -3,7 +3,7 @@
 #include <flipper_format/flipper_format.h>
 #include <lib/toolbox/args.h>
 
-#define NFC_MF_CLASSIC_DICT_PATH "/ext/nfc/assets/mf_classic_dict.nfc"
+#define NFC_MF_CLASSIC_DICT_PATH STORAGE_EXT_PATH_PREFIX "/nfc/assets/mf_classic_dict.nfc"
 
 #define NFC_MF_CLASSIC_KEY_LEN (13)
 

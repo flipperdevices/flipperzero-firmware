@@ -119,7 +119,7 @@ static bool flipper_update_get_manifest_path(string_t out_path) {
             break;
         }
         string_set_str(out_path, manifest_name_buf);
-        string_right(out_path, strlen("/ext"));
+        string_right(out_path, strlen(STORAGE_EXT_PATH_PREFIX));
     } while(0);
     f_close(&file);
     return !string_empty_p(out_path);

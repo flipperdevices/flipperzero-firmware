@@ -4,6 +4,8 @@
 
 #include "desktop_events.h"
 
+#define SLIDESHOW_FS_PATH STORAGE_INT_PATH_PREFIX "/.slideshow"
+
 typedef struct DesktopSlideshowView DesktopSlideshowView;
 
 typedef void (*DesktopSlideshowViewCallback)(DesktopEvent event, void* context);

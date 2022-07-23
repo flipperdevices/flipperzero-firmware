@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../archive_i.h"
+#include <storage/storage.h>
 
 #define TAB_RIGHT InputKeyRight // Default tab swith direction
 #define TAB_DEFAULT ArchiveTabFavorites // Start tab
@@ -8,14 +9,14 @@
 
 static const char* tab_default_paths[] = {
     [ArchiveTabFavorites] = "/app:favorites",
-    [ArchiveTabIButton] = "/any/ibutton",
-    [ArchiveTabNFC] = "/any/nfc",
-    [ArchiveTabSubGhz] = "/any/subghz",
-    [ArchiveTabLFRFID] = "/any/lfrfid",
-    [ArchiveTabInfrared] = "/any/infrared",
-    [ArchiveTabBadUsb] = "/any/badusb",
+    [ArchiveTabIButton] = STORAGE_ANY_PATH_PREFIX "/ibutton",
+    [ArchiveTabNFC] = STORAGE_ANY_PATH_PREFIX "/nfc",
+    [ArchiveTabSubGhz] = STORAGE_ANY_PATH_PREFIX "/subghz",
+    [ArchiveTabLFRFID] = STORAGE_ANY_PATH_PREFIX "/lfrfid",
+    [ArchiveTabInfrared] = STORAGE_ANY_PATH_PREFIX "/infrared",
+    [ArchiveTabBadUsb] = STORAGE_ANY_PATH_PREFIX "/badusb",
     [ArchiveTabU2f] = "/app:u2f",
-    [ArchiveTabBrowser] = "/any",
+    [ArchiveTabBrowser] = STORAGE_ANY_PATH_PREFIX,
 };
 
 static const char* known_ext[] = {

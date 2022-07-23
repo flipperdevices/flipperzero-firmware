@@ -12,7 +12,7 @@
 
 #define TAG "NfcTest"
 
-#define NFC_TEST_RESOURCES_DIR "/ext/unit_tests/nfc/"
+#define NFC_TEST_RESOURCES_DIR STORAGE_EXT_PATH_PREFIX "/unit_tests/nfc/"
 #define NFC_TEST_SIGNAL_SHORT_FILE "nfc_nfca_signal_short.nfc"
 #define NFC_TEST_SIGNAL_LONG_FILE "nfc_nfca_signal_long.nfc"
 

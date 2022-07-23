@@ -47,7 +47,7 @@ static RpcSessionContext rpc_session[TEST_RPC_SESSIONS];
 #define MAX_NAME_LENGTH 255
 #define MAX_DATA_SIZE 512u // have to be exact as in rpc_storage.c
 #define TEST_DIR TEST_DIR_NAME "/"
-#define TEST_DIR_NAME "/ext/unit_tests_tmp"
+#define TEST_DIR_NAME STORAGE_EXT_PATH_PREFIX "/unit_tests_tmp"
 #define MD5SUM_SIZE 16
 
 #define PING_REQUEST 0
@@ -693,13 +693,13 @@ static void test_rpc_storage_list_run(const char* path, uint32_t command_id) {
 
 MU_TEST(test_storage_list) {
     test_rpc_storage_list_run("/", ++command_id);
-    test_rpc_storage_list_run("/ext/nfc", ++command_id);
+    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX "/nfc", ++command_id);
 
-    test_rpc_storage_list_run("/int", ++command_id);
-    test_rpc_storage_list_run("/ext", ++command_id);
-    test_rpc_storage_list_run("/ext/infrared", ++command_id);
-    test_rpc_storage_list_run("/ext/ibutton", ++command_id);
-    test_rpc_storage_list_run("/ext/lfrfid", ++command_id);
+    test_rpc_storage_list_run(STORAGE_INT_PATH_PREFIX, ++command_id);
+    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX, ++command_id);
+    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX "/infrared", ++command_id);
+    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX "/ibutton", ++command_id);
+    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX "/lfrfid", ++command_id);
     test_rpc_storage_list_run("error_path", ++command_id);
 }
 
@@ -884,9 +884,9 @@ static void test_rpc_storage_stat_run(const char* path, uint32_t command_id) {
 }
 
 MU_TEST(test_storage_info) {
-    test_rpc_storage_info_run("/any", ++command_id);
-    test_rpc_storage_info_run("/int", ++command_id);
-    test_rpc_storage_info_run("/ext", ++command_id);
+    test_rpc_storage_info_run(STORAGE_ANY_PATH_PREFIX, ++command_id);
+    test_rpc_storage_info_run(STORAGE_INT_PATH_PREFIX, ++command_id);
+    test_rpc_storage_info_run(STORAGE_EXT_PATH_PREFIX, ++command_id);
 }
 
 #define TEST_DIR_STAT_NAME TEST_DIR "stat_dir"
@@ -897,8 +897,8 @@ MU_TEST(test_storage_stat) {
     test_create_file(TEST_DIR_STAT "l33t.txt", 1337);
 
     test_rpc_storage_stat_run("/", ++command_id);
-    test_rpc_storage_stat_run("/int", ++command_id);
-    test_rpc_storage_stat_run("/ext", ++command_id);
+    test_rpc_storage_stat_run(STORAGE_INT_PATH_PREFIX, ++command_id);
+    test_rpc_storage_stat_run(STORAGE_EXT_PATH_PREFIX, ++command_id);
 
     test_rpc_storage_stat_run(TEST_DIR_STAT "empty.txt", ++command_id);
     test_rpc_storage_stat_run(TEST_DIR_STAT "l33t.txt", ++command_id);
@@ -1516,7 +1516,11 @@ static void test_app_get_status_lock_run(bool locked_expected, uint32_t command_
 
 MU_TEST(test_app_start_and_lock_status) {
     test_app_get_status_lock_run(false, ++command_id);
-    test_app_start_run(NULL, "/ext/file", PB_CommandStatus_ERROR_INVALID_PARAMETERS, ++command_id);
+    test_app_start_run(
+        NULL,
+        STORAGE_EXT_PATH_PREFIX "/file",
+        PB_CommandStatus_ERROR_INVALID_PARAMETERS,
+        ++command_id);
     test_app_start_run(NULL, NULL, PB_CommandStatus_ERROR_INVALID_PARAMETERS, ++command_id);
     test_app_get_status_lock_run(false, ++command_id);
     test_app_start_run(

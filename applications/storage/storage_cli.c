@@ -42,10 +42,11 @@ static void storage_cli_info(Cli* cli, string_t path) {
     UNUSED(cli);
     Storage* api = furi_record_open("storage");
 
-    if(string_cmp_str(path, "/int") == 0) {
+    if(string_cmp_str(path, STORAGE_INT_PATH_PREFIX) == 0) {
         uint64_t total_space;
         uint64_t free_space;
-        FS_Error error = storage_common_fs_info(api, "/int", &total_space, &free_space);
+        FS_Error error =
+            storage_common_fs_info(api, STORAGE_INT_PATH_PREFIX, &total_space, &free_space);
 
         if(error != FSE_OK) {
             storage_cli_print_error(error);
@@ -56,7 +57,7 @@ static void storage_cli_info(Cli* cli, string_t path) {
                 (uint32_t)(total_space / 1024),
                 (uint32_t)(free_space / 1024));
         }
-    } else if(string_cmp_str(path, "/ext") == 0) {
+    } else if(string_cmp_str(path, STORAGE_EXT_PATH_PREFIX) == 0) {
         SDInfo sd_info;
         FS_Error error = storage_sd_info(api, &sd_info);
 
@@ -78,9 +79,9 @@ static void storage_cli_info(Cli* cli, string_t path) {
 };
 
 static void storage_cli_format(Cli* cli, string_t path) {
-    if(string_cmp_str(path, "/int") == 0) {
+    if(string_cmp_str(path, STORAGE_INT_PATH_PREFIX) == 0) {
         storage_cli_print_error(FSE_NOT_IMPLEMENTED);
-    } else if(string_cmp_str(path, "/ext") == 0) {
+    } else if(string_cmp_str(path, STORAGE_EXT_PATH_PREFIX) == 0) {
         printf("Formatting SD card, all data will be lost. Are you sure (y/n)?\r\n");
         char answer = cli_getc(cli);
         if(answer == 'y' || answer == 'Y') {
@@ -142,9 +143,9 @@ static void storage_cli_list(Cli* cli, string_t path) {
 
 static void storage_cli_tree(Cli* cli, string_t path) {
     if(string_cmp_str(path, "/") == 0) {
-        string_set(path, "/int");
+        string_set(path, STORAGE_INT_PATH_PREFIX);
         storage_cli_tree(cli, path);
-        string_set(path, "/ext");
+        string_set(path, STORAGE_EXT_PATH_PREFIX);
         storage_cli_tree(cli, path);
     } else {
         Storage* api = furi_record_open("storage");
@@ -344,8 +345,9 @@ static void storage_cli_stat(Cli* cli, string_t path) {
     if(string_cmp_str(path, "/") == 0) {
         printf("Storage\r\n");
     } else if(
-        string_cmp_str(path, "/ext") == 0 || string_cmp_str(path, "/int") == 0 ||
-        string_cmp_str(path, "/any") == 0) {
+        string_cmp_str(path, STORAGE_EXT_PATH_PREFIX) == 0 ||
+        string_cmp_str(path, STORAGE_INT_PATH_PREFIX) == 0 ||
+        string_cmp_str(path, STORAGE_ANY_PATH_PREFIX) == 0) {
         uint64_t total_space;
         uint64_t free_space;
         FS_Error error =

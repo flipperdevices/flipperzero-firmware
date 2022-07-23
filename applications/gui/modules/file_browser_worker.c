@@ -13,7 +13,7 @@
 #define TAG "BrowserWorker"
 
 #define ASSETS_DIR "assets"
-#define BROWSER_ROOT "/any"
+#define BROWSER_ROOT STORAGE_ANY_PATH_PREFIX
 #define FILE_NAME_LEN_MAX 256
 #define LONG_LOAD_THRESHOLD 100
 

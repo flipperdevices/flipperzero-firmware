@@ -4,9 +4,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <toolbox/saved_struct.h>
+#include <storage/storage.h>
 
 #define DESKTOP_SETTINGS_VER (4)
-#define DESKTOP_SETTINGS_PATH "/int/desktop.settings"
+
+#define DESKTOP_SETTINGS_FILE_NAME ".desktop.settings"
+#define DESKTOP_SETTINGS_PATH STORAGE_INT_PATH_PREFIX "/" DESKTOP_SETTINGS_FILE_NAME
 #define DESKTOP_SETTINGS_MAGIC (0x17)
 #define PIN_MAX_LENGTH 12
 

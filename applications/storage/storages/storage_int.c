@@ -3,7 +3,7 @@
 #include <furi_hal.h>
 
 #define TAG "StorageInt"
-#define STORAGE_PATH "/int"
+#define STORAGE_PATH STORAGE_INT_PATH_PREFIX
 #define LFS_CLEAN_FINGERPRINT 0
 
 typedef struct {

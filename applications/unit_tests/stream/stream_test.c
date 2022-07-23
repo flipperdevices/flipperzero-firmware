@@ -280,14 +280,15 @@ MU_TEST(stream_composite_test) {
     // test file stream
     Storage* storage = furi_record_open("storage");
     stream = file_stream_alloc(storage);
-    mu_check(file_stream_open(stream, "/ext/filestream.str", FSAM_READ_WRITE, FSOM_CREATE_ALWAYS));
+    mu_check(file_stream_open(
+        stream, STORAGE_EXT_PATH_PREFIX "/filestream.str", FSAM_READ_WRITE, FSOM_CREATE_ALWAYS));
     MU_RUN_TEST_1(stream_composite_subtest, stream);
     stream_free(stream);
 
     // test buffered file stream
     stream = buffered_file_stream_alloc(storage);
     mu_check(buffered_file_stream_open(
-        stream, "/ext/filestream.str", FSAM_READ_WRITE, FSOM_CREATE_ALWAYS));
+        stream, STORAGE_EXT_PATH_PREFIX "/filestream.str", FSAM_READ_WRITE, FSOM_CREATE_ALWAYS));
     MU_RUN_TEST_1(stream_composite_subtest, stream);
     stream_free(stream);
     furi_record_close("storage");
@@ -321,7 +322,8 @@ MU_TEST(stream_write_read_save_load_test) {
     mu_check(stream_seek(stream_orig, 0, StreamOffsetFromStart));
     mu_assert_int_eq(
         strlen(stream_test_data),
-        stream_save_to_file(stream_orig, storage, "/ext/filestream.str", FSOM_CREATE_ALWAYS));
+        stream_save_to_file(
+            stream_orig, storage, STORAGE_EXT_PATH_PREFIX "/filestream.str", FSOM_CREATE_ALWAYS));
 
     stream_free(stream_copy);
     stream_free(stream_orig);
@@ -330,7 +332,7 @@ MU_TEST(stream_write_read_save_load_test) {
     Stream* stream_new = string_stream_alloc();
     mu_assert_int_eq(
         strlen(stream_test_data),
-        stream_load_from_file(stream_new, storage, "/ext/filestream.str"));
+        stream_load_from_file(stream_new, storage, STORAGE_EXT_PATH_PREFIX "/filestream.str"));
     MU_RUN_TEST_1(stream_read_subtest, stream_new);
     stream_free(stream_new);
 
@@ -371,14 +373,15 @@ MU_TEST(stream_split_test) {
     // test file stream
     Storage* storage = furi_record_open("storage");
     stream = file_stream_alloc(storage);
-    mu_check(file_stream_open(stream, "/ext/filestream.str", FSAM_READ_WRITE, FSOM_CREATE_ALWAYS));
+    mu_check(file_stream_open(
+        stream, STORAGE_EXT_PATH_PREFIX "/filestream.str", FSAM_READ_WRITE, FSOM_CREATE_ALWAYS));
     MU_RUN_TEST_1(stream_split_subtest, stream);
     stream_free(stream);
 
     // test buffered stream
     stream = buffered_file_stream_alloc(storage);
     mu_check(buffered_file_stream_open(
-        stream, "/ext/filestream.str", FSAM_READ_WRITE, FSOM_CREATE_ALWAYS));
+        stream, STORAGE_EXT_PATH_PREFIX "/filestream.str", FSAM_READ_WRITE, FSOM_CREATE_ALWAYS));
     MU_RUN_TEST_1(stream_split_subtest, stream);
     stream_free(stream);
 
@@ -405,7 +408,7 @@ MU_TEST(stream_buffered_large_file_test) {
     // write test data to file
     Stream* stream = buffered_file_stream_alloc(storage);
     mu_check(buffered_file_stream_open(
-        stream, "/ext/filestream.str", FSAM_READ_WRITE, FSOM_CREATE_ALWAYS));
+        stream, STORAGE_EXT_PATH_PREFIX "/filestream.str", FSAM_READ_WRITE, FSOM_CREATE_ALWAYS));
     mu_assert_int_eq(0, stream_size(stream));
     mu_assert_int_eq(string_size(input_data), stream_write_string(stream, input_data));
     mu_assert_int_eq(string_size(input_data), stream_size(stream));

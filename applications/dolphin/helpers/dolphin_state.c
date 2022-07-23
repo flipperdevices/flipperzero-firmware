@@ -8,7 +8,7 @@
 #include <toolbox/saved_struct.h>
 
 #define TAG "DolphinState"
-#define DOLPHIN_STATE_PATH "/int/dolphin.state"
+#define DOLPHIN_STATE_PATH STORAGE_INT_PATH_PREFIX "/.dolphin.state"
 #define DOLPHIN_STATE_HEADER_MAGIC 0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
 #define LEVEL2_THRESHOLD 735

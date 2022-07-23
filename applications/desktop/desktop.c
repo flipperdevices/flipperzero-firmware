@@ -318,7 +318,7 @@ int32_t desktop_srv(void* p) {
         desktop_lock(desktop);
     }
 
-    if(desktop_check_file_flag("/int/slideshow")) {
+    if(desktop_check_file_flag(STORAGE_INT_PATH_PREFIX "/slideshow")) {
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneSlideshow);
     }
 

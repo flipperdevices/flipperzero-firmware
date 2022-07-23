@@ -36,7 +36,8 @@ Updater* updater_alloc(const char* arg) {
     Updater* updater = malloc(sizeof(Updater));
     if(arg) {
         string_init_set_str(updater->startup_arg, arg);
-        string_replace_str(updater->startup_arg, "/any/", "/ext/");
+        string_replace_str(
+            updater->startup_arg, STORAGE_ANY_PATH_PREFIX "/", STORAGE_EXT_PATH_PREFIX "/");
     } else {
         string_init(updater->startup_arg);
     }

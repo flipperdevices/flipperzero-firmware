@@ -27,7 +27,7 @@ bool desktop_scene_slideshow_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case DesktopSlideshowCompleted:
             storage = furi_record_open("storage");
-            storage_common_remove(storage, "/int/slideshow");
+            storage_common_remove(storage, SLIDESHOW_FS_PATH);
             furi_record_close("storage");
             scene_manager_previous_scene(desktop->scene_manager);
             consumed = true;

@@ -5,7 +5,7 @@
 #include "../minunit.h"
 
 #define TEST_DIR TEST_DIR_NAME "/"
-#define TEST_DIR_NAME "/ext/unit_tests_tmp"
+#define TEST_DIR_NAME STORAGE_EXT_PATH_PREFIX "/unit_tests_tmp"
 
 static const char* test_filetype = "Flipper File test";
 static const uint32_t test_version = 666;

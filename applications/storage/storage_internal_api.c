@@ -3,7 +3,7 @@
 #include "storage.h"
 #include <toolbox/tar/tar_archive.h>
 
-#define INT_PATH "/int"
+#define INT_PATH STORAGE_INT_PATH_PREFIX
 
 FS_Error storage_int_backup(Storage* api, const char* dstname) {
     TarArchive* archive = tar_archive_alloc(api);

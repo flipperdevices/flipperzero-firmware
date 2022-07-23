@@ -7,8 +7,8 @@
 
 #define TAG "MoveToSd"
 
-#define MOVE_SRC "/int"
-#define MOVE_DST "/ext"
+#define MOVE_SRC STORAGE_INT_PATH_PREFIX
+#define MOVE_DST STORAGE_EXT_PATH_PREFIX
 
 static const char* app_dirs[] = {
     "subghz",

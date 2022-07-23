@@ -1,15 +1,18 @@
-#include "assets_icons.h"
-#include "m-string.h"
+#include "music_player_worker.h"
+
 #include <furi.h>
 #include <furi_hal.h>
 
+#include <assets_icons.h>
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
-#include "music_player_worker.h"
+#include <storage/storage.h>
+
+#include <m-string.h>
 
 #define TAG "MusicPlayer"
 
-#define MUSIC_PLAYER_APP_PATH_FOLDER "/any/music_player"
+#define MUSIC_PLAYER_APP_PATH_FOLDER STORAGE_ANY_PATH_PREFIX "/music_player"
 #define MUSIC_PLAYER_APP_EXTENSION "*"
 
 #define MUSIC_PLAYER_SEMITONE_HISTORY_SIZE 4

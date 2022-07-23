@@ -11,7 +11,7 @@ typedef FILINFO SDFileInfo;
 typedef FRESULT SDError;
 
 #define TAG "StorageExt"
-#define STORAGE_PATH "/ext"
+
 /********************* Definitions ********************/
 
 typedef struct {

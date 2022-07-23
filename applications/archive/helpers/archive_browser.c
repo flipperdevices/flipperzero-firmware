@@ -391,7 +391,7 @@ void archive_favorites_move_mode(ArchiveBrowserView* browser, bool active) {
 }
 
 static bool archive_is_dir_exists(string_t path) {
-    if(string_equal_str_p(path, "/any")) {
+    if(string_equal_str_p(path, STORAGE_ANY_PATH_PREFIX)) {
         return true;
     }
     bool state = false;

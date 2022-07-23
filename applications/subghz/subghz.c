@@ -179,7 +179,7 @@ SubGhz* subghz_alloc() {
 
     //init setting
     subghz->setting = subghz_setting_alloc();
-    subghz_setting_load(subghz->setting, "/ext/subghz/assets/setting_user");
+    subghz_setting_load(subghz->setting, STORAGE_EXT_PATH_PREFIX "/subghz/assets/setting_user");
 
     //init Worker & Protocol & History & KeyBoard
     subghz->lock = SubGhzLockOff;
@@ -195,9 +195,9 @@ SubGhz* subghz_alloc() {
 
     subghz->txrx->environment = subghz_environment_alloc();
     subghz_environment_set_came_atomo_rainbow_table_file_name(
-        subghz->txrx->environment, "/ext/subghz/assets/came_atomo");
+        subghz->txrx->environment, STORAGE_EXT_PATH_PREFIX "/subghz/assets/came_atomo");
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
-        subghz->txrx->environment, "/ext/subghz/assets/nice_flor_s");
+        subghz->txrx->environment, STORAGE_EXT_PATH_PREFIX "/subghz/assets/nice_flor_s");
     subghz->txrx->receiver = subghz_receiver_alloc_init(subghz->txrx->environment);
     subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_Decodable);
 
@@ -313,9 +313,9 @@ int32_t subghz_app(void* p) {
 
     //Load database
     bool load_database = subghz_environment_load_keystore(
-        subghz->txrx->environment, "/ext/subghz/assets/keeloq_mfcodes");
+        subghz->txrx->environment, STORAGE_EXT_PATH_PREFIX "/subghz/assets/keeloq_mfcodes");
     subghz_environment_load_keystore(
-        subghz->txrx->environment, "/ext/subghz/assets/keeloq_mfcodes_user");
+        subghz->txrx->environment, STORAGE_EXT_PATH_PREFIX "/subghz/assets/keeloq_mfcodes_user");
     // Check argument and run corresponding scene
     if(p) {
         uint32_t rpc_ctx = 0;

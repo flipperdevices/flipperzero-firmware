@@ -60,7 +60,7 @@ static void desktop_view_slideshow_enter(void* context) {
 
     DesktopSlideshowViewModel* model = view_get_model(instance->view);
     model->slideshow = slideshow_alloc();
-    if(!slideshow_load(model->slideshow, "/int/slideshow")) {
+    if(!slideshow_load(model->slideshow, SLIDESHOW_FS_PATH)) {
         instance->callback(DesktopSlideshowCompleted, instance->context);
     }
     view_commit_model(instance->view, false);
