@@ -24,6 +24,8 @@ static void wifi_marauder_app_tick_event_callback(void* context) {
 WifiMarauderApp* wifi_marauder_app_alloc() {
     WifiMarauderApp* app = malloc(sizeof(WifiMarauderApp));
 
+    app->uart = wifi_marauder_uart_init();
+
     app->selected_wifi_channel = 1;
 
     app->gui = furi_record_open("gui");
@@ -72,6 +74,8 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
 
+    wifi_marauder_uart_free(app->uart);
+
     // Close records
     furi_record_close("gui");
 
@@ -81,6 +85,8 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
 int32_t wifi_marauder_app(void* p) {
     UNUSED(p);
     WifiMarauderApp* wifi_marauder_app = wifi_marauder_app_alloc();
+
+    wifi_marauder_uart_init();
 
     view_dispatcher_run(wifi_marauder_app->view_dispatcher);
 
