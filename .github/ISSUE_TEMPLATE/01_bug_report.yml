@@ -1,5 +1,5 @@
 name: Bug report
-description: File a bug reports regarding the Flipper Zero firmware.
+description: File a bug reports regarding the firmware.
 labels: ['bug']
 body:
 - type: textarea
