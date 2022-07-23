@@ -67,11 +67,11 @@ void wifi_marauder_uart_tx(uint8_t *data, size_t len) {
 }
 
 WifiMarauderUart* wifi_marauder_uart_init(WifiMarauderApp* app) {
+    WifiMarauderUart *uart = malloc(sizeof(WifiMarauderUart));
+
     furi_hal_console_disable();
     furi_hal_uart_set_br(UART_CH, BAUDRATE);
-    furi_hal_uart_set_irq_cb(UART_CH, wifi_marauder_uart_on_irq_cb, app->uart);
-
-    WifiMarauderUart *uart = malloc(sizeof(WifiMarauderUart));
+    furi_hal_uart_set_irq_cb(UART_CH, wifi_marauder_uart_on_irq_cb, uart);
 
     uart->app = app;
     uart->rx_thread = furi_thread_alloc();
