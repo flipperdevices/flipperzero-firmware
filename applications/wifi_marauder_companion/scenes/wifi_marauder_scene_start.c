@@ -1,77 +1,74 @@
 #include "../wifi_marauder_app_i.h"
 
-#define NUM_MENU_ITEMS (26)
-const char* const item_strings[NUM_MENU_ITEMS] = {
-    "attack -t beacon -l\n",
-    "attack -t beacon -r\n",
-    "attack -t beacon -a\n",
-    "attack -t deauth\n",
-    "attack -t probe\n",
-    "attack -t rickroll\n",
-    "channel\n",
-    "channel -s\n",
-    "clearlist -a\n",
-    "clearlist -s\n",
-    "help\n",
-    "list -a\n",
-    "list -s\n",
-    "reboot\n",
-    "scanap\n",
-    "select -a\n",
-    "select -s\n",
-    "sniffbeacon\n",
-    "sniffdeauth\n",
-    "sniffesp\n",
-    "sniffpmkid\n",
-    "sniffpwn\n",
-    "ssid -a -g\n",
-    "ssid -a -n\n",
-    "ssid -r\n",
-    "update -w\n",
+#define NUM_MENU_ITEMS (27)
+
+// For each command, define whether additional arguments are needed
+// (enabling text input to fill them out), and whether the console
+// text box should focus at the start of the output or the end
+#define INPUT_ARGS          (true)
+#define NO_ARGS             (false)
+#define FOCUS_CONSOLE_START (true)
+#define FOCUS_CONSOLE_END   (false)
+struct WifiMarauderItem {
+    const char* item_string;
+    bool needs_keyboard;
+    bool focus_console_start;
 };
 
-// TODO: check if all these channels are actually supported
-#define NUM_CHANNELS (14)
-const char* const channel_select_text[NUM_CHANNELS] = {
-    "1", "2", "3", "4", "5", "6", "7",
-    "8", "9", "10", "11", "12", "13", "14",
+const struct WifiMarauderItem items[NUM_MENU_ITEMS] = {
+    { "attack -t beacon -l", NO_ARGS, FOCUS_CONSOLE_END },
+    { "attack -t beacon -r", NO_ARGS, FOCUS_CONSOLE_END },
+    { "attack -t beacon -a", NO_ARGS, FOCUS_CONSOLE_END },
+    { "attack -t deauth", NO_ARGS, FOCUS_CONSOLE_END },
+    { "attack -t probe", NO_ARGS, FOCUS_CONSOLE_END },
+    { "attack -t rickroll", NO_ARGS, FOCUS_CONSOLE_END },
+    { "channel", NO_ARGS, FOCUS_CONSOLE_END },
+    { "channel -s", INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "clearlist -a", NO_ARGS, FOCUS_CONSOLE_END },
+    { "clearlist -s", NO_ARGS, FOCUS_CONSOLE_END },
+    { "help", NO_ARGS, FOCUS_CONSOLE_START },
+    { "list -a", NO_ARGS, FOCUS_CONSOLE_START },
+    { "list -s", NO_ARGS, FOCUS_CONSOLE_START },
+    { "reboot", NO_ARGS, FOCUS_CONSOLE_END },
+    { "scanap", NO_ARGS, FOCUS_CONSOLE_END },
+    { "select -a", INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "select -s", INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "sniffbeacon", NO_ARGS, FOCUS_CONSOLE_END },
+    { "sniffdeauth", NO_ARGS, FOCUS_CONSOLE_END },
+    { "sniffesp", NO_ARGS, FOCUS_CONSOLE_END },
+    { "sniffpmkid", NO_ARGS, FOCUS_CONSOLE_END },
+    { "sniffpmkid -c", INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "sniffpwn", NO_ARGS, FOCUS_CONSOLE_END },
+    { "ssid -a -g", INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "ssid -a -n", INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "ssid -r", INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "update -w", NO_ARGS, FOCUS_CONSOLE_END },
 };
 
 static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     WifiMarauderApp* app = context;
-    app->selected_tx_string = item_strings[index];
+    app->selected_tx_string = items[index].item_string;
+    app->is_custom_tx_string = false;
     app->selected_menu_index = index;
-    view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartConsole);
-}
-
-static void wifi_marauder_scene_start_var_list_change_callback(VariableItem* item) {
-    WifiMarauderApp* app = variable_item_get_context(item);
-    uint8_t index = variable_item_get_current_value_index(item);
-
-    variable_item_set_current_value_text(item, channel_select_text[index]);
-    app->selected_wifi_channel = index + 1;
+    app->focus_console_start = items[index].focus_console_start;
+    if (items[index].needs_keyboard) {
+        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartKeyboard);
+    } else {
+        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartConsole);
+    }
 }
 
 void wifi_marauder_scene_start_on_enter(void* context) {
     WifiMarauderApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
 
-    VariableItem* item;
     variable_item_list_set_enter_callback(
         var_item_list, wifi_marauder_scene_start_var_list_enter_callback, app);
 
     // TODO: organize menu
     for (int i = 0; i < NUM_MENU_ITEMS; ++i) {
-        if (0 == strncmp(item_strings[i], "channel -s", strlen("channel -s"))) {
-            item = variable_item_list_add(var_item_list, item_strings[i], NUM_CHANNELS,
-                                          wifi_marauder_scene_start_var_list_change_callback,
-                                          app);
-            variable_item_set_current_value_index(item, 0);
-            variable_item_set_current_value_text(item, channel_select_text[0]);
-        } else {
-            variable_item_list_add(var_item_list, item_strings[i], 0, NULL, NULL);
-        }
+        variable_item_list_add(var_item_list, items[i].item_string, 0, NULL, NULL);
     }
 
     variable_item_list_set_selected_item(
@@ -86,7 +83,10 @@ bool wifi_marauder_scene_start_on_event(void* context, SceneManagerEvent event) 
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if (event.event == WifiMarauderEventStartConsole) {
+        if (event.event == WifiMarauderEventStartKeyboard) {
+            scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
+            scene_manager_next_scene(app->scene_manager, WifiMarauderAppViewTextInput);
+        } else if (event.event == WifiMarauderEventStartConsole) {
             scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, WifiMarauderAppViewConsoleOutput);
         }

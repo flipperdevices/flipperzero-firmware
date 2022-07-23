@@ -20,7 +20,11 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
 
     TextBox* text_box = app->text_box;
     text_box_set_font(text_box, TextBoxFontText);
-    text_box_set_focus(text_box, TextBoxFocusEnd);
+    if (app->focus_console_start) {
+        text_box_set_focus(text_box, TextBoxFocusStart);
+    } else {
+        text_box_set_focus(text_box, TextBoxFocusEnd);
+    }
     string_reset(app->text_box_store);
 
     scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneConsoleOutput, 0);
@@ -29,9 +33,10 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
     // Register callback to receive data
     wifi_marauder_uart_set_handle_rx_data_cb(app->uart, wifi_marauder_console_output_handle_rx_data_cb); // setup callback for rx thread
 
-    // Send command
+    // Send command with newline '\n'
     if (app->selected_tx_string) {
         wifi_marauder_uart_tx((uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
+        wifi_marauder_uart_tx((uint8_t*)("\n"), 1);
     }
 }
 
