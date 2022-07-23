@@ -1,5 +1,6 @@
 name: Feature Request
 description: For feature requests regarding the Flipper Zero firmware.
+labels: ['feature request']
 body:
 - type: textarea
   id: proposal
