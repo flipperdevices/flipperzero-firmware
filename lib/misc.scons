@@ -10,7 +10,6 @@ env.Append(
         "#/lib/nanopb",
         "#/lib/nfc_protocols",
         "#/lib/u8g2",
-        "#/lib/TOTP-MCU",
     ],
     CPPDEFINES=[
         "PB_ENABLE_MALLOC",
@@ -33,7 +32,6 @@ libs_recurse = [
     "one_wire",
     "u8g2",
     "update_util",
-    "TOTP-MCU",
 ]
 
 for lib in libs_recurse:
