@@ -1,6 +1,6 @@
 #include "../wifi_marauder_app_i.h"
 
-#define NUM_MENU_ITEMS (24)
+#define NUM_MENU_ITEMS (26)
 const char* const item_strings[NUM_MENU_ITEMS] = {
     "attack -t beacon -l\n",
     "attack -t beacon -r\n",
@@ -24,7 +24,9 @@ const char* const item_strings[NUM_MENU_ITEMS] = {
     "sniffesp\n",
     "sniffpmkid\n",
     "sniffpwn\n",
-    "ssid\n",
+    "ssid -a -g\n",
+    "ssid -a -n\n",
+    "ssid -r\n",
     "update -w\n",
 };
 
@@ -49,7 +51,6 @@ static void wifi_marauder_scene_start_var_list_change_callback(VariableItem* ite
 
     variable_item_set_current_value_text(item, channel_select_text[index]);
     app->selected_wifi_channel = index + 1;
-    //view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartConsole);
 }
 
 void wifi_marauder_scene_start_on_enter(void* context) {
@@ -72,42 +73,6 @@ void wifi_marauder_scene_start_on_enter(void* context) {
             variable_item_list_add(var_item_list, item_strings[i], 0, NULL, NULL);
         }
     }
-    /*
-    variable_item_list_add(var_item_list, ATTACK_BEACON_L, 0, NULL, NULL);
-    variable_item_list_add(var_item_list, ATTACK_BEACON_R, 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "attack -t beacon -a", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "attack -t deauth", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "attack -t probe", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "attack -t rickroll", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "channel", 0, NULL, NULL);
-
-    item = variable_item_list_add(
-        var_item_list,
-        "channel -s",
-        NUM_CHANNELS,
-        wifi_marauder_scene_start_var_list_change_callback,
-        app);
-    // TODO: get current channel to display here
-    // don't forget that the index is channel - 1
-    variable_item_set_current_value_index(item, 0);
-    variable_item_set_current_value_text(item, channel_select_text[0]);
-
-    variable_item_list_add(var_item_list, "clearlist -a", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "clearlist -s", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "help", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "listap -a", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "listap -s", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "reboot", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "scanap", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "select -a", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "select -s", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "sniffbeacon", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "sniffdeauth", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "sniffesp", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "sniffpmkid", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "sniffpwn", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "update -w", 0, NULL, NULL);
-    */
 
     variable_item_list_set_selected_item(
         var_item_list, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneStart));
@@ -121,10 +86,6 @@ bool wifi_marauder_scene_start_on_event(void* context, SceneManagerEvent event) 
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        // TODO remove when done debugging
-        //variable_item_list_add(app->var_item_list, "FEEDBACK", 0, NULL, NULL);
-        //const char *attack_str = "attack -t rickroll\n";
-        //wifi_marauder_uart_tx((uint8_t*)attack_str, strlen(attack_str));
         if (event.event == WifiMarauderEventStartConsole) {
             scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, WifiMarauderAppViewConsoleOutput);

@@ -91,5 +91,8 @@ void wifi_marauder_uart_free(WifiMarauderUart* uart) {
     furi_thread_join(uart->rx_thread);
     furi_thread_free(uart->rx_thread);
 
+    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
+    furi_hal_console_enable();
+
     free(uart);
 }
