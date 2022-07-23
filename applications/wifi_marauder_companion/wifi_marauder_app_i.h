@@ -9,26 +9,30 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/text_box.h>
+#include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
 
 #define WIFI_MARAUDER_TEXT_BOX_STORE_SIZE (4096)
+#define WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE (512)
 
 struct WifiMarauderApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
+    char text_input_store[WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE + 1];
     string_t text_box_store;
     TextBox* text_box;
+    TextInput* text_input;
     //Widget* widget;
 
     VariableItemList* var_item_list;
-    //WifiMarauderDetect* detect;
 
     WifiMarauderUart* uart;
-    int selected_wifi_channel;
     int selected_menu_index;
     const char* selected_tx_string;
+    bool is_custom_tx_string;
+    bool focus_console_start;
 };
 
 // Supported commands:
@@ -55,11 +59,5 @@ struct WifiMarauderApp {
 typedef enum {
     WifiMarauderAppViewVarItemList,
     WifiMarauderAppViewConsoleOutput,
-    WifiMarauderAppViewDetect,
-    WifiMarauderAppViewScan,
-    WifiMarauderAppViewAttack,
-    WifiMarauderAppViewSniff,
-    WifiMarauderAppViewChannel,
-    WifiMarauderAppViewUpdate,
-    WifiMarauderAppViewReboot,
+    WifiMarauderAppViewTextInput,
 } WifiMarauderAppView;
