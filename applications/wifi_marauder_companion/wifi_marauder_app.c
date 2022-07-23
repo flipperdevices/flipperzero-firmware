@@ -50,6 +50,10 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
         WifiMarauderAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
 
+    app->text_box = text_box_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, WifiMarauderAppViewConsoleOutput, text_box_get_view(app->text_box));
+    string_init(app->text_box_store);
+    string_reserve(app->text_box_store, WIFI_MARAUDER_TEXT_BOX_STORE_SIZE);
     // TODO add other views
 
     scene_manager_next_scene(app->scene_manager, WifiMarauderSceneStart);
@@ -62,13 +66,9 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
 
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewVarItemList);
-    // TODO add back
-    // view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewScan);
-    // view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewAttack);
-    // view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewSniff);
-    // view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewChannel);
-    // view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewUpdate);
-    // view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewReboot);
+    view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewConsoleOutput);
+    text_box_free(app->text_box);
+    string_clear(app->text_box_store);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
@@ -86,7 +86,7 @@ int32_t wifi_marauder_app(void* p) {
     UNUSED(p);
     WifiMarauderApp* wifi_marauder_app = wifi_marauder_app_alloc();
 
-    wifi_marauder_uart_init();
+    wifi_marauder_uart_init(wifi_marauder_app);
 
     view_dispatcher_run(wifi_marauder_app->view_dispatcher);
 
