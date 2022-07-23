@@ -76,10 +76,14 @@ void wifi_marauder_scene_start_on_enter(void* context) {
 
 bool wifi_marauder_scene_start_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
-    //WifiMarauderApp* app = context;
+    WifiMarauderApp* app = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
+        // TODO remove when done debugging
+        variable_item_list_add(app->var_item_list, "FEEDBACK", 0, NULL, NULL);
+        const char *attack_str = "attack -t rickroll\n";
+        wifi_marauder_uart_tx((uint8_t*)attack_str, strlen(attack_str));
         // TODO
         // if (event.event == WifiMarauderStartEventScan) {
         //     scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneStart, WifiMarauderItemScan);

@@ -3,6 +3,7 @@
 #include "wifi_marauder_app.h"
 #include "scenes/wifi_marauder_scene.h"
 #include "wifi_marauder_custom_event.h"
+#include "wifi_marauder_uart.h"
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
@@ -16,6 +17,8 @@ struct WifiMarauderApp {
     SceneManager* scene_manager;
 
     VariableItemList* var_item_list;
+
+    WifiMarauderUart* uart;
 
     int selected_wifi_channel;
 };
