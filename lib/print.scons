@@ -1,0 +1,29 @@
+Import("env")
+
+env.Append(
+    LINKFLAGS=[
+        "-Wl,--wrap,fiprintf",
+        "-Wl,--wrap,fprintf",
+        "-Wl,--wrap,iprintf",  # ???
+        "-Wl,--wrap,printf",
+        "-Wl,--wrap,siprintf",
+        "-Wl,--wrap,sniprintf",
+        "-Wl,--wrap,snprintf",
+        "-Wl,--wrap,sprintf",
+        "-Wl,--wrap,vsniprintf",
+        "-Wl,--wrap,vsnprintf",
+    ],
+    CCFLAGS=[
+        "-fno-builtin-printf",
+    ],
+)
+
+
+libenv = env.Clone(FW_LIB_NAME="print")
+libenv.ApplyLibFlags()
+
+sources = libenv.GlobRecursive("*.c", "print")
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")

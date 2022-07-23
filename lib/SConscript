@@ -14,6 +14,7 @@ env.Append(
         "lib/toolbox",
         "lib/u8g2",
         "lib/update_util",
+        "lib/print",
     ]
 )
 
@@ -74,6 +75,7 @@ libs = env.BuildModules(
         "misc",
         "mbedtls",
         "loclass",
+        "print",
     ],
 )
 
