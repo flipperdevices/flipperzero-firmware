@@ -2,6 +2,8 @@
 
 #include "furi_hal.h"
 
+#define RX_BUF_SIZE (320)
+
 typedef struct WifiMarauderUart WifiMarauderUart;
 
 void wifi_marauder_uart_set_handle_rx_data_cb(WifiMarauderUart* uart, void (*handle_rx_data_cb)(uint8_t *buf, size_t len, void* context));

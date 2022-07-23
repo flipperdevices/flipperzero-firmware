@@ -5,7 +5,6 @@
 
 #define UART_CH (FuriHalUartIdUSART1)
 #define BAUDRATE (115200)
-#define RX_BUF_SIZE (64)
 
 struct WifiMarauderUart {
     WifiMarauderApp* app;
