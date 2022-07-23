@@ -98,7 +98,9 @@ void desktop_debug_render(Canvas* canvas, void* model) {
             (remaining == (uint32_t)(-1) ? remaining : 0));
         canvas_draw_str(canvas, 5, 29 + STATUS_BAR_Y_SHIFT, buffer);
 
-        snprintf(buffer, 64, "%s", asctime(localtime((const time_t*)&m->timestamp)));
+        // even if timestamp is uint64_t, it's safe to cast it to uint32_t, because furi_hal_rtc_datetime_to_timestamp only returns uint32_t
+        snprintf(buffer, 64, "%ld", (uint32_t)m->timestamp);
+
         canvas_draw_str(canvas, 5, 39 + STATUS_BAR_Y_SHIFT, buffer);
         canvas_draw_str(canvas, 0, 49 + STATUS_BAR_Y_SHIFT, "[< >] icounter value   [ok] save");
     }

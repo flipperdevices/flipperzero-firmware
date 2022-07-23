@@ -14,18 +14,6 @@ int __wrap_fiprintf(FILE* file, const char* format, ...) {
     return 0;
 }
 
-int __wrap_sprintf(char* str, const char* format, ...) {
-    UNUSED(str);
-    UNUSED(format);
-    return 0;
-}
-
-int __wrap_siprintf(char* str, const char* format, ...) {
-    UNUSED(str);
-    UNUSED(format);
-    return 0;
-}
-
 int __wrap_snprintf(char* str, size_t size, const char* format, ...) {
     UNUSED(str);
     UNUSED(size);
