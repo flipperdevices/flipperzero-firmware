@@ -6,6 +6,6 @@ App(
     cdefines=["APP_WIFI_MARAUDER"],
     requires=["gui"],
     stack_size=1 * 1024,
-    icon="A_GPIO_14",
+    icon="A_Infrared_14",
     order=50,
 )
