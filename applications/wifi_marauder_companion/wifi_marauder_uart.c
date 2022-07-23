@@ -10,7 +10,7 @@ struct WifiMarauderUart {
     WifiMarauderApp* app;
     FuriThread* rx_thread;
     StreamBufferHandle_t rx_stream;
-    uint8_t rx_buf[RX_BUF_SIZE];
+    uint8_t rx_buf[RX_BUF_SIZE+1];
     void (*handle_rx_data_cb)(uint8_t *buf, size_t len, void* context);
 };
 
