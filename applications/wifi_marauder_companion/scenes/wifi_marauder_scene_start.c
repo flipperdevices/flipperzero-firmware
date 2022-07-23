@@ -1,12 +1,31 @@
 #include "../wifi_marauder_app_i.h"
 
-enum WifiMarauderItem {
-    WifiMarauderItemScan,
-    WifiMarauderItemAttack,
-    WifiMarauderItemSniff,
-    WifiMarauderItemChannel,
-    WifiMarauderItemUpdate,
-    WifiMarauderItemReboot,
+#define NUM_MENU_ITEMS (24)
+const char* const item_strings[NUM_MENU_ITEMS] = {
+    "attack -t beacon -l\n",
+    "attack -t beacon -r\n",
+    "attack -t beacon -a\n",
+    "attack -t deauth\n",
+    "attack -t probe\n",
+    "attack -t rickroll\n",
+    "channel\n",
+    "channel -s\n",
+    "clearlist -a\n",
+    "clearlist -s\n",
+    "help\n",
+    "list -a\n",
+    "list -s\n",
+    "reboot\n",
+    "scanap\n",
+    "select -a\n",
+    "select -s\n",
+    "sniffbeacon\n",
+    "sniffdeauth\n",
+    "sniffesp\n",
+    "sniffpmkid\n",
+    "sniffpwn\n",
+    "ssid\n",
+    "update -w\n",
 };
 
 // TODO: check if all these channels are actually supported
@@ -19,18 +38,9 @@ const char* const channel_select_text[NUM_CHANNELS] = {
 static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     WifiMarauderApp* app = context;
-
-    if(index == WifiMarauderItemScan) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderStartEventScan);
-    } else if(index == WifiMarauderItemAttack) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderStartEventAttack);
-    } else if(index == WifiMarauderItemSniff) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderStartEventSniff);
-    } else if(index == WifiMarauderItemUpdate) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderStartEventUpdate);
-    } else if(index == WifiMarauderItemReboot) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderStartEventReboot);
-    }
+    app->selected_tx_string = item_strings[index];
+    app->selected_menu_index = index;
+    view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartConsole);
 }
 
 static void wifi_marauder_scene_start_var_list_change_callback(VariableItem* item) {
@@ -39,7 +49,7 @@ static void wifi_marauder_scene_start_var_list_change_callback(VariableItem* ite
 
     variable_item_set_current_value_text(item, channel_select_text[index]);
     app->selected_wifi_channel = index + 1;
-    view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderStartEventChannel);
+    //view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartConsole);
 }
 
 void wifi_marauder_scene_start_on_enter(void* context) {
@@ -50,13 +60,30 @@ void wifi_marauder_scene_start_on_enter(void* context) {
     variable_item_list_set_enter_callback(
         var_item_list, wifi_marauder_scene_start_var_list_enter_callback, app);
 
-    variable_item_list_add(var_item_list, "Scan", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "Attack", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "Sniff", 0, NULL, NULL);
+    // TODO: organize menu
+    for (int i = 0; i < NUM_MENU_ITEMS; ++i) {
+        if (0 == strncmp(item_strings[i], "channel -s", strlen("channel -s"))) {
+            item = variable_item_list_add(var_item_list, item_strings[i], NUM_CHANNELS,
+                                          wifi_marauder_scene_start_var_list_change_callback,
+                                          app);
+            variable_item_set_current_value_index(item, 0);
+            variable_item_set_current_value_text(item, channel_select_text[0]);
+        } else {
+            variable_item_list_add(var_item_list, item_strings[i], 0, NULL, NULL);
+        }
+    }
+    /*
+    variable_item_list_add(var_item_list, ATTACK_BEACON_L, 0, NULL, NULL);
+    variable_item_list_add(var_item_list, ATTACK_BEACON_R, 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "attack -t beacon -a", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "attack -t deauth", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "attack -t probe", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "attack -t rickroll", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "channel", 0, NULL, NULL);
 
     item = variable_item_list_add(
         var_item_list,
-        "Channel",
+        "channel -s",
         NUM_CHANNELS,
         wifi_marauder_scene_start_var_list_change_callback,
         app);
@@ -65,8 +92,22 @@ void wifi_marauder_scene_start_on_enter(void* context) {
     variable_item_set_current_value_index(item, 0);
     variable_item_set_current_value_text(item, channel_select_text[0]);
 
-    variable_item_list_add(var_item_list, "Update", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "Reboot", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "clearlist -a", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "clearlist -s", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "help", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "listap -a", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "listap -s", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "reboot", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "scanap", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "select -a", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "select -s", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "sniffbeacon", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "sniffdeauth", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "sniffesp", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "sniffpmkid", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "sniffpwn", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "update -w", 0, NULL, NULL);
+    */
 
     variable_item_list_set_selected_item(
         var_item_list, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneStart));
@@ -81,28 +122,13 @@ bool wifi_marauder_scene_start_on_event(void* context, SceneManagerEvent event) 
 
     if(event.type == SceneManagerEventTypeCustom) {
         // TODO remove when done debugging
-        variable_item_list_add(app->var_item_list, "FEEDBACK", 0, NULL, NULL);
-        const char *attack_str = "attack -t rickroll\n";
-        wifi_marauder_uart_tx((uint8_t*)attack_str, strlen(attack_str));
-        // TODO
-        // if (event.event == WifiMarauderStartEventScan) {
-        //     scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneStart, WifiMarauderItemScan);
-        //     scene_manager_next_scene(app->scene_manager, WifiMarauderSceneScan);
-        // } else if (event.event == WifiMarauderStartEventAttack) {
-        //     scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneStart, WifiMarauderItemAttack);
-        //     scene_manager_next_scene(app->scene_manager, WifiMarauderSceneAttack);
-        // } else if (event.event == WifiMarauderStartEventSniff) {
-        //     scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneStart, WifiMarauderItemSniff);
-        //     scene_manager_next_scene(app->scene_manager, WifiMarauderSceneSniff);
-        // } else if (event.event == WifiMarauderStartEventUpdate) {
-        //     scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneStart, WifiMarauderItemUpdate);
-        //     scene_manager_next_scene(app->scene_manager, WifiMarauderSceneUpdate);
-        // } else if (event.event == WifiMarauderStartEventReboot) {
-        //     scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneStart, WifiMarauderItemReboot);
-        //     scene_manager_next_scene(app->scene_manager, WifiMarauderSceneReboot);
-        // } else if (event.event == WifiMarauderStartEventChannel) {
-        //     // TODO: Send app->selected_wifi_channel to UART
-        // }
+        //variable_item_list_add(app->var_item_list, "FEEDBACK", 0, NULL, NULL);
+        //const char *attack_str = "attack -t rickroll\n";
+        //wifi_marauder_uart_tx((uint8_t*)attack_str, strlen(attack_str));
+        if (event.event == WifiMarauderEventStartConsole) {
+            scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
+            scene_manager_next_scene(app->scene_manager, WifiMarauderAppViewConsoleOutput);
+        }
         consumed = true;
     }
 

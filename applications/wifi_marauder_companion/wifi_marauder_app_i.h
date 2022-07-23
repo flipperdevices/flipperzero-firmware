@@ -8,19 +8,27 @@
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
-#include <gui/modules/submenu.h>
+#include <gui/modules/text_box.h>
 #include <gui/modules/variable_item_list.h>
+
+#define WIFI_MARAUDER_TEXT_BOX_STORE_SIZE (4096)
 
 struct WifiMarauderApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
+    string_t text_box_store;
+    TextBox* text_box;
+    //Widget* widget;
+
     VariableItemList* var_item_list;
+    //WifiMarauderDetect* detect;
 
     WifiMarauderUart* uart;
-
     int selected_wifi_channel;
+    int selected_menu_index;
+    const char* selected_tx_string;
 };
 
 // Supported commands:
@@ -46,6 +54,8 @@ struct WifiMarauderApp {
 
 typedef enum {
     WifiMarauderAppViewVarItemList,
+    WifiMarauderAppViewConsoleOutput,
+    WifiMarauderAppViewDetect,
     WifiMarauderAppViewScan,
     WifiMarauderAppViewAttack,
     WifiMarauderAppViewSniff,
