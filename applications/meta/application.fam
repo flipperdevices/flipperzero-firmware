@@ -35,7 +35,6 @@ App(
     provides=[
         "INTAPP_HIDAnalyzer",
         "INTAPP_Picopass",
-        "INTAPP_TOTP",
         "INTAPP_WiFiScanner",
     ],
 )
@@ -66,7 +65,6 @@ App(
     provides=[
         "INTAPP_HIDAnalyzer",
         "INTAPP_Picopass",
-	"INTAPP_TOTP",
         "INTAPP_WiFiScanner",
 	"INTAPP_Chip8",
 	"INTAPP_Chess",
