@@ -44,8 +44,7 @@ bool nfc_emv_parser_get_aid_name(
     for(uint8_t i = 0; i < aid_len; i++) {
         string_cat_printf(key, "%02X", aid[i]);
     }
-    if(nfc_emv_parser_search_data(
-           storage, STORAGE_EXT_PATH_PREFIX "/nfc/assets/aid.nfc", key, aid_name)) {
+    if(nfc_emv_parser_search_data(storage, EXT_PATH("nfc/assets/aid.nfc"), key, aid_name)) {
         parsed = true;
     }
     string_clear(key);
@@ -60,7 +59,7 @@ bool nfc_emv_parser_get_country_name(
     string_t key;
     string_init_printf(key, "%04X", country_code);
     if(nfc_emv_parser_search_data(
-           storage, STORAGE_EXT_PATH_PREFIX "/nfc/assets/country_code.nfc", key, country_name)) {
+           storage, EXT_PATH("nfc/assets/country_code.nfc"), key, country_name)) {
         parsed = true;
     }
     string_clear(key);
@@ -75,7 +74,7 @@ bool nfc_emv_parser_get_currency_name(
     string_t key;
     string_init_printf(key, "%04X", currency_code);
     if(nfc_emv_parser_search_data(
-           storage, STORAGE_EXT_PATH_PREFIX "/nfc/assets/currency_code.nfc", key, currency_name)) {
+           storage, EXT_PATH("nfc/assets/currency_code.nfc"), key, currency_name)) {
         parsed = true;
     }
     string_clear(key);

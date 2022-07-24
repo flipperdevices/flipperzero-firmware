@@ -2,7 +2,7 @@
 
 #include <toolbox/tar/tar_archive.h>
 
-#define LFS_BACKUP_DEFAULT_LOCATION STORAGE_EXT_PATH_PREFIX "/" LFS_BACKUP_DEFAULT_FILENAME
+#define LFS_BACKUP_DEFAULT_LOCATION EXT_PATH(LFS_BACKUP_DEFAULT_FILENAME)
 
 bool lfs_backup_create(Storage* storage, const char* destination) {
     const char* final_destination =

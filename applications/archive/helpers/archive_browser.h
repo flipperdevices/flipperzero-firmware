@@ -9,12 +9,12 @@
 
 static const char* tab_default_paths[] = {
     [ArchiveTabFavorites] = "/app:favorites",
-    [ArchiveTabIButton] = STORAGE_ANY_PATH_PREFIX "/ibutton",
-    [ArchiveTabNFC] = STORAGE_ANY_PATH_PREFIX "/nfc",
-    [ArchiveTabSubGhz] = STORAGE_ANY_PATH_PREFIX "/subghz",
-    [ArchiveTabLFRFID] = STORAGE_ANY_PATH_PREFIX "/lfrfid",
-    [ArchiveTabInfrared] = STORAGE_ANY_PATH_PREFIX "/infrared",
-    [ArchiveTabBadUsb] = STORAGE_ANY_PATH_PREFIX "/badusb",
+    [ArchiveTabIButton] = ANY_PATH("ibutton"),
+    [ArchiveTabNFC] = ANY_PATH("nfc"),
+    [ArchiveTabSubGhz] = ANY_PATH("subghz"),
+    [ArchiveTabLFRFID] = ANY_PATH("lfrfid"),
+    [ArchiveTabInfrared] = ANY_PATH("infrared"),
+    [ArchiveTabBadUsb] = ANY_PATH("badusb"),
     [ArchiveTabU2f] = "/app:u2f",
     [ArchiveTabBrowser] = STORAGE_ANY_PATH_PREFIX,
 };

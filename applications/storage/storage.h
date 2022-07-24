@@ -12,6 +12,10 @@ extern "C" {
 #define STORAGE_EXT_PATH_PREFIX "/ext"
 #define STORAGE_ANY_PATH_PREFIX "/any"
 
+#define INT_PATH(path) STORAGE_INT_PATH_PREFIX "/" path
+#define EXT_PATH(path) STORAGE_EXT_PATH_PREFIX "/" path
+#define ANY_PATH(path) STORAGE_ANY_PATH_PREFIX "/" path
+
 typedef struct Storage Storage;
 
 /** Allocates and initializes a file descriptor

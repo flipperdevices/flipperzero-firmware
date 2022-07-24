@@ -9,9 +9,8 @@
 #include <lib/toolbox/path.h>
 #include <lib/toolbox/crc32_calc.h>
 
-#define UPDATE_ROOT_DIR STORAGE_EXT_PATH_PREFIX UPDATE_DIR_DEFAULT_REL_PATH
-#define UPDATE_PREFIX STORAGE_EXT_PATH_PREFIX UPDATE_DIR_DEFAULT_REL_PATH "/"
-#define UPDATE_SUFFIX "/" UPDATE_MANIFEST_DEFAULT_NAME
+#define UPDATE_ROOT_DIR EXT_PATH("update")
+
 /* Need at least 4 free LFS pages before update */
 #define UPDATE_MIN_INT_FREE_SPACE 4 * 4 * 1024
 
@@ -70,7 +69,7 @@ static bool update_operation_get_current_package_path_rtc(Storage* storage, stri
     return found;
 }
 
-#define UPDATE_FILE_POINTER_FN STORAGE_EXT_PATH_PREFIX "/" UPDATE_MANIFEST_POINTER_FILE_NAME
+#define UPDATE_FILE_POINTER_FN EXT_PATH(UPDATE_MANIFEST_POINTER_FILE_NAME)
 #define UPDATE_MANIFEST_MAX_PATH_LEN 256u
 
 bool update_operation_get_current_package_manifest_path(Storage* storage, string_t out_path) {

@@ -14,7 +14,7 @@
 #include <assets_dolphin_blocking.h>
 
 #define ANIMATION_META_FILE "meta.txt"
-#define ANIMATION_DIR STORAGE_EXT_PATH_PREFIX "/dolphin"
+#define ANIMATION_DIR EXT_PATH("dolphin")
 #define ANIMATION_MANIFEST_FILE ANIMATION_DIR "/manifest.txt"
 #define TAG "AnimationStorage"
 

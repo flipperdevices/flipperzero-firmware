@@ -120,8 +120,7 @@ bool picopass_device_save(PicopassDevice* dev, const char* dev_name) {
         return picopass_device_save_file(
             dev, dev_name, PICOPASS_APP_FOLDER, PICOPASS_APP_EXTENSION, true);
     } else if(dev->format == PicopassDeviceSaveFormatLF) {
-        return picopass_device_save_file(
-            dev, dev_name, STORAGE_ANY_PATH_PREFIX "/lfrfid", ".rfid", true);
+        return picopass_device_save_file(dev, dev_name, ANY_PATH("lfrfid"), ".rfid", true);
     }
     return false;
 }

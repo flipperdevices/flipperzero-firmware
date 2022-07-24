@@ -4,7 +4,7 @@
 #include <common/infrared_common_i.h>
 #include "../minunit.h"
 
-#define IR_TEST_FILES_DIR STORAGE_EXT_PATH_PREFIX "/unit_tests/infrared/"
+#define IR_TEST_FILES_DIR EXT_PATH("unit_tests/infrared/")
 #define IR_TEST_FILE_PREFIX "test_"
 #define IR_TEST_FILE_SUFFIX ".irtest"
 

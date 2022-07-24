@@ -245,14 +245,12 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     furi_check(instance->stream);
 
     SubGhzEnvironment* environment = subghz_environment_alloc();
-    subghz_environment_load_keystore(
-        environment, STORAGE_EXT_PATH_PREFIX "/subghz/assets/keeloq_mfcodes");
-    subghz_environment_load_keystore(
-        environment, STORAGE_EXT_PATH_PREFIX "/subghz/assets/keeloq_mfcodes_user");
+    subghz_environment_load_keystore(environment, EXT_PATH("subghz/assets/keeloq_mfcodes"));
+    subghz_environment_load_keystore(environment, EXT_PATH("subghz/assets/keeloq_mfcodes_user"));
     subghz_environment_set_came_atomo_rainbow_table_file_name(
-        environment, STORAGE_EXT_PATH_PREFIX "/subghz/assets/came_atomo");
+        environment, EXT_PATH("subghz/assets/came_atomo"));
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
-        environment, STORAGE_EXT_PATH_PREFIX "/subghz/assets/nice_flor_s");
+        environment, EXT_PATH("subghz/assets/nice_flor_s"));
 
     SubGhzReceiver* receiver = subghz_receiver_alloc_init(environment);
     subghz_receiver_set_filter(receiver, SubGhzProtocolFlag_Decodable);
@@ -306,7 +304,7 @@ void subghz_cli_command_decode_raw(Cli* cli, string_t args, void* context) {
     UNUSED(context);
     string_t file_name;
     string_init(file_name);
-    string_set_str(file_name, STORAGE_ANY_PATH_PREFIX "/subghz/test.sub");
+    string_set_str(file_name, ANY_PATH("subghz/test.sub"));
 
     Storage* storage = furi_record_open("storage");
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
@@ -356,22 +354,22 @@ void subghz_cli_command_decode_raw(Cli* cli, string_t args, void* context) {
 
         SubGhzEnvironment* environment = subghz_environment_alloc();
         if(subghz_environment_load_keystore(
-               environment, STORAGE_EXT_PATH_PREFIX "/subghz/assets/keeloq_mfcodes")) {
+               environment, EXT_PATH("subghz/assets/keeloq_mfcodes"))) {
             printf("SubGhz decode_raw: Load_keystore keeloq_mfcodes \033[0;32mOK\033[0m\r\n");
         } else {
             printf("SubGhz decode_raw: Load_keystore keeloq_mfcodes \033[0;31mERROR\033[0m\r\n");
         }
         if(subghz_environment_load_keystore(
-               environment, STORAGE_EXT_PATH_PREFIX "/subghz/assets/keeloq_mfcodes_user")) {
+               environment, EXT_PATH("subghz/assets/keeloq_mfcodes_user"))) {
             printf("SubGhz decode_raw: Load_keystore keeloq_mfcodes_user \033[0;32mOK\033[0m\r\n");
         } else {
             printf(
                 "SubGhz decode_raw: Load_keystore keeloq_mfcodes_user \033[0;31mERROR\033[0m\r\n");
         }
         subghz_environment_set_came_atomo_rainbow_table_file_name(
-            environment, STORAGE_EXT_PATH_PREFIX "/subghz/assets/came_atomo");
+            environment, EXT_PATH("subghz/assets/came_atomo"));
         subghz_environment_set_nice_flor_s_rainbow_table_file_name(
-            environment, STORAGE_EXT_PATH_PREFIX "/subghz/assets/nice_flor_s");
+            environment, EXT_PATH("subghz/assets/nice_flor_s"));
 
         SubGhzReceiver* receiver = subghz_receiver_alloc_init(environment);
         subghz_receiver_set_filter(receiver, SubGhzProtocolFlag_Decodable);

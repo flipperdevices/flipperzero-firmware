@@ -97,9 +97,8 @@ static bool update_task_post_update(UpdateTask* update_task) {
             string_init_set(tmp_path, update_task->update_path);
             path_append(tmp_path, string_get_cstr(update_task->manifest->splash_file));
             if(storage_common_copy(
-                   update_task->storage,
-                   string_get_cstr(tmp_path),
-                   STORAGE_INT_PATH_PREFIX "/.slideshow") != FSE_OK) {
+                   update_task->storage, string_get_cstr(tmp_path), INT_PATH(".slideshow")) !=
+               FSE_OK) {
                 // actually, not critical
             }
             string_clear(tmp_path);

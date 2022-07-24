@@ -322,9 +322,9 @@ int32_t storage_test_app(void* p) {
     do_test_start(api, STORAGE_ANY_PATH_PREFIX);
     do_test_start(api, STORAGE_EXT_PATH_PREFIX);
 
-    do_file_test(api, STORAGE_INT_PATH_PREFIX "/test.txt");
-    do_file_test(api, STORAGE_ANY_PATH_PREFIX "/test.txt");
-    do_file_test(api, STORAGE_EXT_PATH_PREFIX "/test.txt");
+    do_file_test(api, INT_PATH("test.txt"));
+    do_file_test(api, ANY_PATH("test.txt"));
+    do_file_test(api, EXT_PATH("test.txt"));
 
     do_dir_test(api, STORAGE_INT_PATH_PREFIX);
     do_dir_test(api, STORAGE_ANY_PATH_PREFIX);

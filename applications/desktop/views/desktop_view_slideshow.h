@@ -4,7 +4,7 @@
 
 #include "desktop_events.h"
 
-#define SLIDESHOW_FS_PATH STORAGE_INT_PATH_PREFIX "/.slideshow"
+#define SLIDESHOW_FS_PATH INT_PATH(".slideshow")
 
 typedef struct DesktopSlideshowView DesktopSlideshowView;
 

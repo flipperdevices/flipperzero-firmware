@@ -11,8 +11,7 @@
 #include <toolbox/path.h>
 #include <toolbox/crc32_calc.h>
 
-#define FS_ROOT_PATH "/"
-#define UPDATE_POINTER_FILE_PATH FS_ROOT_PATH UPDATE_MANIFEST_POINTER_FILE_NAME
+#define UPDATE_POINTER_FILE_PATH "/" UPDATE_MANIFEST_POINTER_FILE_NAME
 
 static FATFS* pfs = NULL;
 
@@ -40,7 +39,7 @@ static bool flipper_update_init() {
     }
 
     pfs = malloc(sizeof(FATFS));
-    CHECK_FRESULT(f_mount(pfs, FS_ROOT_PATH, 1));
+    CHECK_FRESULT(f_mount(pfs, "/", 1));
     return true;
 }
 

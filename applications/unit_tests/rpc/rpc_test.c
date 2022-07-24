@@ -47,7 +47,7 @@ static RpcSessionContext rpc_session[TEST_RPC_SESSIONS];
 #define MAX_NAME_LENGTH 255
 #define MAX_DATA_SIZE 512u // have to be exact as in rpc_storage.c
 #define TEST_DIR TEST_DIR_NAME "/"
-#define TEST_DIR_NAME STORAGE_EXT_PATH_PREFIX "/unit_tests_tmp"
+#define TEST_DIR_NAME EXT_PATH("unit_tests_tmp")
 #define MD5SUM_SIZE 16
 
 #define PING_REQUEST 0
@@ -693,13 +693,13 @@ static void test_rpc_storage_list_run(const char* path, uint32_t command_id) {
 
 MU_TEST(test_storage_list) {
     test_rpc_storage_list_run("/", ++command_id);
-    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX "/nfc", ++command_id);
+    test_rpc_storage_list_run(EXT_PATH("nfc"), ++command_id);
 
     test_rpc_storage_list_run(STORAGE_INT_PATH_PREFIX, ++command_id);
     test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX, ++command_id);
-    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX "/infrared", ++command_id);
-    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX "/ibutton", ++command_id);
-    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX "/lfrfid", ++command_id);
+    test_rpc_storage_list_run(EXT_PATH("infrared"), ++command_id);
+    test_rpc_storage_list_run(EXT_PATH("ibutton"), ++command_id);
+    test_rpc_storage_list_run(EXT_PATH("lfrfid"), ++command_id);
     test_rpc_storage_list_run("error_path", ++command_id);
 }
 
@@ -1517,10 +1517,7 @@ static void test_app_get_status_lock_run(bool locked_expected, uint32_t command_
 MU_TEST(test_app_start_and_lock_status) {
     test_app_get_status_lock_run(false, ++command_id);
     test_app_start_run(
-        NULL,
-        STORAGE_EXT_PATH_PREFIX "/file",
-        PB_CommandStatus_ERROR_INVALID_PARAMETERS,
-        ++command_id);
+        NULL, EXT_PATH("file"), PB_CommandStatus_ERROR_INVALID_PARAMETERS, ++command_id);
     test_app_start_run(NULL, NULL, PB_CommandStatus_ERROR_INVALID_PARAMETERS, ++command_id);
     test_app_get_status_lock_run(false, ++command_id);
     test_app_start_run(
