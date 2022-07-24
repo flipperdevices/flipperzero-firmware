@@ -2,16 +2,25 @@ Import("env")
 
 env.Append(
     LINKFLAGS=[
-        "-Wl,--wrap,fiprintf",
+        #
+        # used by our firmware, so we provide their realizations
+        #
+        "-Wl,--wrap,printf",  # everywhere
+        "-Wl,--wrap,snprintf",  # everywhere
+        "-Wl,--wrap,vsnprintf",  # m-string
+        #
+        # wrap other functions to make sure they are not called
+        # realization is not provided
+        #
         "-Wl,--wrap,fprintf",
-        "-Wl,--wrap,iprintf",  # ???
-        "-Wl,--wrap,printf",
+        "-Wl,--wrap,fiprintf",
+        "-Wl,--wrap,iprintf",
         "-Wl,--wrap,siprintf",
         "-Wl,--wrap,sniprintf",
-        "-Wl,--wrap,snprintf",
         "-Wl,--wrap,sprintf",
         "-Wl,--wrap,vsniprintf",
-        "-Wl,--wrap,vsnprintf",
+        "-Wl,--wrap,__assert",
+        "-Wl,--wrap,__assert_func",
     ],
     CCFLAGS=[
         "-fno-builtin-printf",
