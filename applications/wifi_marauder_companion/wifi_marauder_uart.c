@@ -44,8 +44,8 @@ static int32_t uart_worker(void* context) {
 
     while(1) {
         uint32_t events =
-            furi_thread_flags_wait(WORKER_ALL_RX_EVENTS, osFlagsWaitAny, osWaitForever);
-        furi_check((events & osFlagsError) == 0);
+            furi_thread_flags_wait(WORKER_ALL_RX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
+        furi_check((events & FuriFlagError) == 0);
         if(events & WorkerEvtStop) break;
         if(events & WorkerEvtRxDone) {
             size_t len =
