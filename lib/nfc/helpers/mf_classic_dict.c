@@ -32,21 +32,21 @@ bool mf_classic_dict_check_presence(MfClassicDictType dict_type) {
 MfClassicDict* mf_classic_dict_alloc(MfClassicDictType dict_type) {
     MfClassicDict* dict = malloc(sizeof(MfClassicDict));
     Storage* storage = furi_record_open("storage");
-    dict->stream = file_stream_alloc(storage);
+    dict->stream = buffered_file_stream_alloc(storage);
     furi_record_close("storage");
 
     bool dict_loaded = false;
     do {
         if(dict_type == MfClassicDictTypeFlipper) {
-            if(!file_stream_open(
+            if(!buffered_file_stream_open(
                    dict->stream, MF_CLASSIC_DICT_FLIPPER_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-                file_stream_close(dict->stream);
+                buffered_file_stream_close(dict->stream);
                 break;
             }
         } else if(dict_type == MfClassicDictTypeUser) {
-            if(!file_stream_open(
+            if(!buffered_file_stream_open(
                    dict->stream, MF_CLASSIC_DICT_USER_PATH, FSAM_READ_WRITE, FSOM_OPEN_ALWAYS)) {
-                file_stream_close(dict->stream);
+                buffered_file_stream_close(dict->stream);
                 break;
             }
         }
@@ -67,7 +67,7 @@ MfClassicDict* mf_classic_dict_alloc(MfClassicDictType dict_type) {
     } while(false);
 
     if(!dict_loaded) {
-        file_stream_close(dict->stream);
+        buffered_file_stream_close(dict->stream);
         free(dict);
         dict = NULL;
     }
@@ -83,7 +83,7 @@ void mf_classic_dict_free(MfClassicDict* dict) {
     furi_assert(dict);
     furi_assert(dict->stream);
 
-    file_stream_close(dict->stream);
+    buffered_file_stream_close(dict->stream);
     free(dict);
 }
 

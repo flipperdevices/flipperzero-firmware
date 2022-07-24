@@ -4,6 +4,7 @@
 #include <storage/storage.h>
 #include <lib/flipper_format/flipper_format.h>
 #include <lib/toolbox/stream/file_stream.h>
+#include <lib/toolbox/stream/buffered_file_stream.h>
 
 typedef enum {
     MfClassicDictTypeUser,
