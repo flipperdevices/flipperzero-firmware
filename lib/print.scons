@@ -8,6 +8,9 @@ env.Append(
         "-Wl,--wrap,printf",  # everywhere
         "-Wl,--wrap,snprintf",  # everywhere
         "-Wl,--wrap,vsnprintf",  # m-string
+        "-Wl,--wrap,puts",
+        "-Wl,--wrap,putchar",
+        "-Wl,--wrap,putc", 
         #
         # wrap other functions to make sure they are not called
         # realization is not provided
@@ -21,9 +24,6 @@ env.Append(
         "-Wl,--wrap,vsniprintf",
         "-Wl,--wrap,__assert",
         "-Wl,--wrap,__assert_func",
-    ],
-    CCFLAGS=[
-        "-fno-builtin-printf",
     ],
 )
 

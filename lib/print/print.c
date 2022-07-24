@@ -19,6 +19,22 @@ int __wrap_vsnprintf(char* str, size_t size, const char* format, va_list args) {
     return 0;
 }
 
+int __wrap_puts(const char* str) {
+    UNUSED(str);
+    return 0;
+}
+
+int __wrap_putchar(int ch) {
+    UNUSED(ch);
+    return 0;
+}
+
+int __wrap_putc(int ch, FILE* stream) {
+    UNUSED(ch);
+    UNUSED(stream);
+    return 0;
+}
+
 int __wrap_snprintf(char* str, size_t size, const char* format, ...) {
     va_list args;
     va_start(args, format);
@@ -31,7 +47,6 @@ int __wrap_snprintf(char* str, size_t size, const char* format, ...) {
 __attribute__((__noreturn__)) void __wrap___assert(const char* file, int line, const char* e) {
     UNUSED(file);
     UNUSED(line);
-    UNUSED(e);
     furi_crash(e);
 }
 
@@ -40,6 +55,5 @@ __attribute__((__noreturn__)) void
     UNUSED(file);
     UNUSED(line);
     UNUSED(func);
-    UNUSED(e);
     furi_crash(e);
 }
