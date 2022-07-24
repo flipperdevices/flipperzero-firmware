@@ -22,6 +22,7 @@ void nfc_scene_read_mifare_classic_on_enter(void* context) {
 
     // Setup and start worker
     memset(&nfc->dev->dev_data.mf_classic_data, 0, sizeof(MfClassicData));
+    nfc->dev->dev_data.key_dict_size = 0;
     dict_attack_set_result_callback(
         nfc->dict_attack, nfc_read_mifare_classic_dict_attack_result_callback, nfc);
     scene_manager_set_scene_state(
@@ -54,7 +55,10 @@ bool nfc_scene_read_mifare_classic_on_event(void* context, SceneManagerEvent eve
             dict_attack_card_detected(nfc->dict_attack, MfClassicType4k);
             consumed = true;
         } else if(event.event == NfcWorkerEventNewSector) {
-            dict_attack_inc_curr_sector(nfc->dict_attack);
+            dict_attack_inc_curr_sector(nfc->dict_attack, nfc->dev->dev_data.key_dict_size);
+            consumed = true;
+        } else if(event.event == NfcWorkerEventDictProgress) {
+            dict_attack_inc_dict_index(nfc->dict_attack);
             consumed = true;
         } else if(event.event == NfcWorkerEventFoundKeyA) {
             dict_attack_inc_found_key(nfc->dict_attack, MfClassicKeyA);

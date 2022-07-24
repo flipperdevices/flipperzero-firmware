@@ -12,4 +12,6 @@ void nfc_mf_classic_dict_close_file(Stream* stream);
 
 bool nfc_mf_classic_dict_get_next_key(Stream* stream, uint64_t* key);
 
+uint32_t nfc_mf_classic_dict_get_key_count(Stream* stream);
+
 void nfc_mf_classic_dict_reset(Stream* stream);

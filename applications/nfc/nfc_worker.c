@@ -4,6 +4,7 @@
 #include <platform.h>
 
 #define TAG "NfcWorker"
+#define NFC_WORKER_DICT_INDEX_MULTIPLIER (50)
 
 /***************************** NFC Worker API *******************************/
 
@@ -391,6 +392,10 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
     if(nfc_worker->state == NfcWorkerStateReadMifareClassic) {
         bool card_removed_notified = false;
         bool card_found_notified = false;
+        uint32_t dict_size = nfc_mf_classic_dict_get_key_count(nfc_worker->dict_stream);
+
+        nfc_worker->dev_data->key_dict_size = dict_size / NFC_WORKER_DICT_INDEX_MULTIPLIER;
+
         // Seek for mifare classic keys
         for(curr_sector = 0; curr_sector < total_sectors; curr_sector++) {
             FURI_LOG_I(TAG, "Sector: %d ...", curr_sector);
@@ -398,6 +403,7 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
             nfc_worker->callback(event, nfc_worker->context);
             mf_classic_auth_init_context(&auth_ctx, reader.cuid, curr_sector);
             bool sector_key_found = false;
+            uint32_t dict_index = 0;
             while(nfc_mf_classic_dict_get_next_key(nfc_worker->dict_stream, &curr_key)) {
                 furi_hal_nfc_sleep();
                 if(furi_hal_nfc_activate_nfca(300, &reader.cuid)) {
@@ -434,6 +440,13 @@ void nfc_worker_mifare_classic_dict_attack(NfcWorker* nfc_worker) {
                     }
                 }
                 if(nfc_worker->state != NfcWorkerStateReadMifareClassic) break;
+
+                dict_index++;
+                if (dict_index % NFC_WORKER_DICT_INDEX_MULTIPLIER == 0) {
+                    event = NfcWorkerEventDictProgress;
+                    nfc_worker->callback(event, nfc_worker->context);
+                }
+
                 furi_delay_tick(1);
             }
             if(nfc_worker->state != NfcWorkerStateReadMifareClassic) break;

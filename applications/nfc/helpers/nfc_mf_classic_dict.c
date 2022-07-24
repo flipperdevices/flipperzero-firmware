@@ -47,6 +47,16 @@ bool nfc_mf_classic_dict_get_next_key(Stream* stream, uint64_t* key) {
     return next_key_read;
 }
 
+uint32_t nfc_mf_classic_dict_get_key_count(Stream* stream) {
+    uint32_t count = 0;
+    uint64_t unused;
+    while (nfc_mf_classic_dict_get_next_key(stream, &unused)) {
+        count++;
+    }
+    nfc_mf_classic_dict_reset(stream);
+    return count;
+}
+
 void nfc_mf_classic_dict_reset(Stream* stream) {
     furi_assert(stream);
     stream_rewind(stream);

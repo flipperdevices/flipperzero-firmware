@@ -20,6 +20,8 @@ struct DictAttack {
 typedef struct {
     DictAttackState state;
     MfClassicType type;
+    uint32_t dict_size;
+    uint32_t dict_index;
     uint8_t current_sector;
     uint8_t total_sectors;
     uint8_t keys_a_found;
@@ -53,7 +55,11 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
         }
         uint16_t keys_found = m->keys_a_found + m->keys_b_found;
         uint16_t keys_total = m->keys_a_total + m->keys_b_total;
-        float progress = (float)(m->current_sector) / (float)(m->total_sectors);
+        float dict_progress = (float)(m->dict_index) / (float)(m->dict_size);
+        float progress = ((float)(m->current_sector) + dict_progress) / (float)(m->total_sectors);
+        if (progress > 1.0) {
+          progress = 1.0;
+        }
         elements_progress_bar(canvas, 5, 12, 120, progress);
         canvas_set_font(canvas, FontSecondary);
         snprintf(draw_str, sizeof(draw_str), "Total keys found: %d/%d", keys_found, keys_total);
@@ -157,11 +163,22 @@ void dict_attack_card_removed(DictAttack* dict_attack) {
         });
 }
 
-void dict_attack_inc_curr_sector(DictAttack* dict_attack) {
+void dict_attack_inc_dict_index(DictAttack* dict_attack) {
+    furi_assert(dict_attack);
+    with_view_model(
+        dict_attack->view, (DictAttackViewModel * model) {
+            model->dict_index++;
+            return true;
+        });
+}
+
+void dict_attack_inc_curr_sector(DictAttack* dict_attack, uint32_t dict_size) {
     furi_assert(dict_attack);
     with_view_model(
         dict_attack->view, (DictAttackViewModel * model) {
             model->current_sector++;
+            model->dict_size = dict_size;
+            model->dict_index = 0;
             return true;
         });
 }

@@ -44,7 +44,10 @@ typedef struct {
 typedef struct {
     FuriHalNfcDevData nfc_data;
     NfcProtocol protocol;
-    NfcReaderRequestData reader_data;
+    union {
+        NfcReaderRequestData reader_data;
+        uint32_t key_dict_size;
+    };
     union {
         EmvData emv_data;
         MfUltralightData mf_ul_data;
