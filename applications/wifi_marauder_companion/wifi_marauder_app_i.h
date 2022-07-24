@@ -32,6 +32,7 @@ struct WifiMarauderApp {
     WifiMarauderUart* uart;
     int selected_menu_index;
     const char* selected_tx_string;
+    bool is_command;
     bool is_custom_tx_string;
     bool focus_console_start;
 };
