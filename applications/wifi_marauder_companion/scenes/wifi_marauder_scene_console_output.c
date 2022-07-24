@@ -22,14 +22,19 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
     WifiMarauderApp* app = context;
 
     TextBox* text_box = app->text_box;
+    text_box_reset(app->text_box);
     text_box_set_font(text_box, TextBoxFontText);
     if (app->focus_console_start) {
         text_box_set_focus(text_box, TextBoxFocusStart);
     } else {
         text_box_set_focus(text_box, TextBoxFocusEnd);
     }
-    string_reset(app->text_box_store);
-    app->text_box_store_strlen = 0;
+    if (app->is_command) {
+        string_reset(app->text_box_store);
+        app->text_box_store_strlen = 0;
+    } else { // "View Log" menu action
+        text_box_set_text(app->text_box, string_get_cstr(app->text_box_store));
+    }
 
     scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneConsoleOutput, 0);
     view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewConsoleOutput);
@@ -38,7 +43,7 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
     wifi_marauder_uart_set_handle_rx_data_cb(app->uart, wifi_marauder_console_output_handle_rx_data_cb); // setup callback for rx thread
 
     // Send command with newline '\n'
-    if (app->selected_tx_string) {
+    if (app->is_command && app->selected_tx_string) {
         wifi_marauder_uart_tx((uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
         wifi_marauder_uart_tx((uint8_t*)("\n"), 1);
     }
@@ -66,9 +71,7 @@ void wifi_marauder_scene_console_output_on_exit(void* context) {
     wifi_marauder_uart_set_handle_rx_data_cb(app->uart, NULL);
 
     // Automatically stop the scan when exiting view
-    wifi_marauder_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
-
-    text_box_reset(app->text_box);
-    string_reset(app->text_box_store);
-    app->text_box_store_strlen = 0;
+    if (app->is_command) {
+        wifi_marauder_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
+    }
 }

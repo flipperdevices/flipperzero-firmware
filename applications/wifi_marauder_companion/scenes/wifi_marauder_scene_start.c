@@ -1,6 +1,6 @@
 #include "../wifi_marauder_app_i.h"
 
-#define NUM_MENU_ITEMS (27)
+#define NUM_MENU_ITEMS (29)
 
 // For each command, define whether additional arguments are needed
 // (enabling text input to fill them out), and whether the console
@@ -16,6 +16,8 @@ struct WifiMarauderItem {
 };
 
 const struct WifiMarauderItem items[NUM_MENU_ITEMS] = {
+    { "View Log (start)", NO_ARGS, FOCUS_CONSOLE_START },
+    { "View Log (end)", NO_ARGS, FOCUS_CONSOLE_END },
     { "attack -t beacon -l", NO_ARGS, FOCUS_CONSOLE_END },
     { "attack -t beacon -r", NO_ARGS, FOCUS_CONSOLE_END },
     { "attack -t beacon -a", NO_ARGS, FOCUS_CONSOLE_END },
@@ -49,6 +51,7 @@ static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uin
     furi_assert(context);
     WifiMarauderApp* app = context;
     app->selected_tx_string = items[index].item_string;
+    app->is_command = (2 <= index);
     app->is_custom_tx_string = false;
     app->selected_menu_index = index;
     app->focus_console_start = items[index].focus_console_start;
