@@ -1,6 +1,7 @@
 #include "stdglue.h"
 #include "check.h"
 #include "memmgr.h"
+#include "thread_local_storage.h"
 
 #include <FreeRTOS.h>
 #include <task.h>
@@ -25,32 +26,42 @@ static FuriStdglue* furi_stdglue = NULL;
 static ssize_t stdout_write(void* _cookie, const char* data, size_t size) {
     furi_assert(furi_stdglue);
     bool consumed = false;
-    FuriThreadId task_id = furi_thread_get_current_id();
-    if(xTaskGetSchedulerState() == taskSCHEDULER_RUNNING && task_id &&
-       furi_mutex_acquire(furi_stdglue->mutex, FuriWaitForever) == FuriStatusOk) {
-        // We are in the thread context
-        // Handle thread callbacks
-        FuriStdglueWriteCallback* callback_ptr =
-            FuriStdglueCallbackDict_get(furi_stdglue->thread_outputs, (uint32_t)task_id);
-        if(callback_ptr) {
-            (*callback_ptr)(_cookie, data, size);
-            consumed = true;
-        }
-        furi_check(furi_mutex_release(furi_stdglue->mutex) == FuriStatusOk);
-    }
+    string_ptr buf = furi_thread_local_storage_get_buffer();
+
     // Flush
-    if(data == 0) {
+    if(size == 0 || data == NULL) {
         /*
          * This means that we should flush internal buffers.  Since we
          * don't we just return.  (Remember, "handle" == -1 means that all
          * handles should be flushed.)
          */
+        FuriThreadId task_id = furi_thread_get_current_id();
+        if(xTaskGetSchedulerState() == taskSCHEDULER_RUNNING && task_id &&
+           furi_mutex_acquire(furi_stdglue->mutex, FuriWaitForever) == FuriStatusOk) {
+            // We are in the thread context
+            // Handle thread callbacks
+            FuriStdglueWriteCallback* callback_ptr =
+                FuriStdglueCallbackDict_get(furi_stdglue->thread_outputs, (uint32_t)task_id);
+            if(callback_ptr) {
+                (*callback_ptr)(_cookie, string_get_cstr(buf), string_size(buf));
+                consumed = true;
+            }
+            furi_check(furi_mutex_release(furi_stdglue->mutex) == FuriStatusOk);
+        }
+
+        // Debug uart
+        if(!consumed) furi_hal_console_tx((const uint8_t*)string_get_cstr(buf), string_size(buf));
+
+        string_reset(buf);
+
         return 0;
+    } else {
+        for(size_t i = 0; i < size; i++) {
+            string_push_back(buf, data[i]);
+        }
+
+        return size;
     }
-    // Debug uart
-    if(!consumed) furi_hal_console_tx((const uint8_t*)data, size);
-    // All data consumed
-    return size;
 }
 
 void furi_stdglue_init() {
