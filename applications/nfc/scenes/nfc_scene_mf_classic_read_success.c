@@ -22,9 +22,6 @@ void nfc_scene_mf_classic_read_success_on_enter(void* context) {
 
     DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
 
-    // Send notification
-    notification_message(nfc->notifications, &sequence_success);
-
     // Setup view
     Widget* widget = nfc->widget;
     widget_add_button_element(
