@@ -1,9 +1,9 @@
 #pragma once
 
+#include "bt_settings_filename.h"
+
 #include <stdint.h>
 #include <stdbool.h>
-
-#define BT_SETTINGS_FILE_NAME ".bt.settings"
 
 typedef struct {
     bool enabled;

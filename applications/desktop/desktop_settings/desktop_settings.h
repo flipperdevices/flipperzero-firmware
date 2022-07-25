@@ -1,5 +1,7 @@
 #pragma once
 
+#include "desktop_settings_filename.h"
+
 #include <furi_hal.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -8,7 +10,6 @@
 
 #define DESKTOP_SETTINGS_VER (4)
 
-#define DESKTOP_SETTINGS_FILE_NAME ".desktop.settings"
 #define DESKTOP_SETTINGS_PATH INT_PATH(DESKTOP_SETTINGS_FILE_NAME)
 #define DESKTOP_SETTINGS_MAGIC (0x17)
 #define PIN_MAX_LENGTH 12

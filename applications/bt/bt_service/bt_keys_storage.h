@@ -1,8 +1,7 @@
 #pragma once
 
 #include "bt_i.h"
-
-#define BT_KEYS_STORAGE_FILE_NAME ".bt.keys"
+#include "bt_keys_filename.h"
 
 bool bt_keys_storage_load(Bt* bt);
 
