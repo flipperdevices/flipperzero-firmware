@@ -4,37 +4,49 @@
 #include "loader/loader.h"
 #include "m-string.h"
 #include <stdint.h>
+#include <toolbox/dir_walk.h>
+#include <toolbox/path.h>
 
 #define TAG "MoveToSd"
 
 #define MOVE_SRC STORAGE_INT_PATH_PREFIX
 #define MOVE_DST STORAGE_EXT_PATH_PREFIX
 
-static const char* app_dirs[] = {
-    "subghz",
-    "lfrfid",
-    "nfc",
-    "infrared",
-    "ibutton",
-    "badusb",
-};
+static bool storage_move_to_sd_check_entry(const char* name, FileInfo* fileinfo, void* ctx) {
+    UNUSED(ctx);
+    if((fileinfo->flags & FSF_DIRECTORY) != 0) {
+        return true;
+    }
+
+    return (name && (*name != '.'));
+}
 
 bool storage_move_to_sd_perform(void) {
     Storage* storage = furi_record_open("storage");
-    string_t path_src;
-    string_t path_dst;
-    string_init(path_src);
-    string_init(path_dst);
 
-    for(uint32_t i = 0; i < COUNT_OF(app_dirs); i++) {
-        string_printf(path_src, "%s/%s", MOVE_SRC, app_dirs[i]);
-        string_printf(path_dst, "%s/%s", MOVE_DST, app_dirs[i]);
-        storage_common_merge(storage, string_get_cstr(path_src), string_get_cstr(path_dst));
-        storage_simply_remove_recursive(storage, string_get_cstr(path_src));
+    DirWalk* dir_walk = dir_walk_alloc(storage);
+    dir_walk_set_recursive(dir_walk, false);
+    dir_walk_set_filter_cb(dir_walk, storage_move_to_sd_check_entry, NULL);
+
+    string_t path_src, path_dst;
+
+    string_init(path_dst);
+    string_init(path_src);
+
+    if(dir_walk_open(dir_walk, STORAGE_INT_PATH_PREFIX)) {
+        while(dir_walk_read(dir_walk, path_src, NULL) == DirWalkOK) {
+            string_set(path_dst, path_src);
+            string_replace_at(
+                path_dst, 0, strlen(STORAGE_INT_PATH_PREFIX), STORAGE_EXT_PATH_PREFIX);
+
+            storage_common_merge(storage, string_get_cstr(path_src), string_get_cstr(path_dst));
+            storage_simply_remove_recursive(storage, string_get_cstr(path_src));
+        }
     }
 
-    string_clear(path_src);
+    dir_walk_free(dir_walk);
     string_clear(path_dst);
+    string_clear(path_src);
 
     furi_record_close("storage");
 
@@ -44,26 +56,26 @@ bool storage_move_to_sd_perform(void) {
 static bool storage_move_to_sd_check(void) {
     Storage* storage = furi_record_open("storage");
 
-    FileInfo file_info;
-    bool state = false;
-    string_t path;
-    string_init(path);
+    bool should_migrate = false;
 
-    for(uint32_t i = 0; i < COUNT_OF(app_dirs); i++) {
-        string_printf(path, "%s/%s", MOVE_SRC, app_dirs[i]);
-        if(storage_common_stat(storage, string_get_cstr(path), &file_info) == FSE_OK) {
-            if((file_info.flags & FSF_DIRECTORY) != 0) {
-                state = true;
-                break;
-            }
-        }
+    DirWalk* dir_walk = dir_walk_alloc(storage);
+    dir_walk_set_recursive(dir_walk, false);
+    dir_walk_set_filter_cb(dir_walk, storage_move_to_sd_check_entry, NULL);
+
+    string_t name;
+    string_init(name);
+
+    if(dir_walk_open(dir_walk, STORAGE_INT_PATH_PREFIX)) {
+        // if at least 1 entry is present, we should migrate
+        should_migrate = (dir_walk_read(dir_walk, name, NULL) == DirWalkOK);
     }
 
-    string_clear(path);
+    dir_walk_free(dir_walk);
+    string_clear(name);
 
     furi_record_close("storage");
 
-    return state;
+    return should_migrate;
 }
 
 static bool storage_move_to_sd_custom_event_callback(void* context, uint32_t event) {
