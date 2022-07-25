@@ -37,7 +37,7 @@ void picopass_scene_read_card_success_on_enter(void* context) {
 
     if(pacs->record.valid) {
         string_cat_printf(
-            wiegand_str, "FC: %03u CN: %05u", pacs->record.FacilityCode, pacs->record.CardNumber);
+            wiegand_str, "FC: %u CN: %u", pacs->record.FacilityCode, pacs->record.CardNumber);
     } else {
         string_cat_printf(wiegand_str, "%d bits", pacs->record.bitLength);
     }
