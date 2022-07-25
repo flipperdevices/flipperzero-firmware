@@ -11,6 +11,7 @@ env.Append(
         "-Wl,--wrap,puts",  # fallback from printf, thanks gcc
         "-Wl,--wrap,putchar",  # storage cli
         "-Wl,--wrap,putc",  # fallback from printf, thanks gcc
+        "-Wl,--wrap,fflush",
         #
         # wrap other functions to make sure they are not called
         # realization is not provided

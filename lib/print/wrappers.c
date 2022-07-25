@@ -10,6 +10,9 @@
 
 void _putchar(char character) {
     furi_stdglue_stdout_write(NULL, &character, 1);
+    if(character == '\n') {
+        furi_stdglue_stdout_write(NULL, NULL, 0);
+    }
 }
 
 int __wrap_printf(const char* format, ...) {
@@ -28,16 +31,25 @@ int __wrap_vsnprintf(char* str, size_t size, const char* format, va_list args) {
 int __wrap_puts(const char* str) {
     size_t size = furi_stdglue_stdout_write(NULL, str, strlen(str));
     size += furi_stdglue_stdout_write(NULL, "\n", 1);
+    furi_stdglue_stdout_write(NULL, NULL, 0);
     return size;
 }
 
 int __wrap_putchar(int ch) {
-    return furi_stdglue_stdout_write(NULL, (char*)&ch, 1);
+    size_t size = furi_stdglue_stdout_write(NULL, (char*)&ch, 1);
+    if(ch == '\n') {
+        furi_stdglue_stdout_write(NULL, NULL, 0);
+    }
+    return size;
 }
 
 int __wrap_putc(int ch, FILE* stream) {
     UNUSED(stream);
-    return furi_stdglue_stdout_write(NULL, (char*)&ch, 1);
+    size_t size = furi_stdglue_stdout_write(NULL, (char*)&ch, 1);
+    if(ch == '\n') {
+        furi_stdglue_stdout_write(NULL, NULL, 0);
+    }
+    return size;
 }
 
 int __wrap_snprintf(char* str, size_t size, const char* format, ...) {
@@ -47,6 +59,12 @@ int __wrap_snprintf(char* str, size_t size, const char* format, ...) {
     va_end(args);
 
     return ret;
+}
+
+int __wrap_fflush(FILE* stream) {
+    UNUSED(stream);
+    furi_stdglue_stdout_write(NULL, NULL, 0);
+    return 0;
 }
 
 __attribute__((__noreturn__)) void __wrap___assert(const char* file, int line, const char* e) {
