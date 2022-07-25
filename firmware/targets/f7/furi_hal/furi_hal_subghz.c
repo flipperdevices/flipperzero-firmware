@@ -253,6 +253,7 @@ uint8_t furi_hal_subghz_get_lqi() {
     return data[0] & 0x7F;
 }
 
+/* Original frequency ranges for reference as officially supported
 bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
     if(!(value >= 299999755 && value <= 348000335) &&
        !(value >= 386999938 && value <= 464000000) &&
@@ -268,6 +269,37 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     if(value >= 299999755 && value <= 348000335) {
         furi_hal_subghz_set_path(FuriHalSubGhzPath315);
     } else if(value >= 386999938 && value <= 464000000) {
+        furi_hal_subghz_set_path(FuriHalSubGhzPath433);
+    } else if(value >= 778999847 && value <= 928000000) {
+        furi_hal_subghz_set_path(FuriHalSubGhzPath868);
+    } else {
+        furi_crash("SubGhz: Incorrect frequency during set.");
+    }
+    return value;
+}
+*/
+
+
+/* 
+We've extended only to cover the restaurant pager range. Could consider the full YARD Stick One extended range of
+of 281-361 MHz, 378-481 MHz, and 749-962 MHz. These changes are at your own risk. The PLL may not lock and FZ devs have warned of possible damage
+*/
+
+bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
+    if(!(value >= 299999755 && value <= 348000335) &&
+       !(value >= 386999938 && value <= 468000000) &&
+       !(value >= 778999847 && value <= 928000000)) {
+        return false;
+    }
+
+    return true;
+}
+
+uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
+    value = furi_hal_subghz_set_frequency(value);
+    if(value >= 299999755 && value <= 348000335) {
+        furi_hal_subghz_set_path(FuriHalSubGhzPath315);
+    } else if(value >= 386999938 && value <= 468000000) {
         furi_hal_subghz_set_path(FuriHalSubGhzPath433);
     } else if(value >= 778999847 && value <= 928000000) {
         furi_hal_subghz_set_path(FuriHalSubGhzPath868);
