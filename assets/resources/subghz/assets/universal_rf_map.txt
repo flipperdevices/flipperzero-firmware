@@ -1,12 +1,12 @@
 Filetype: Flipper SubGhz RAW File
 Version: 1
 UP: /any/subghz/Vehicles/Tesla/Tesla_charge_AM270.sub
-DOWN: /any/subghz/Doorbells/Doorbell2.sub
+DOWN: /any/subghz/Handicap/handicap_push_door.sub
 LEFT: /any/subghz/Vehicles/Tesla/Tesla_charge_AM650.sub
-RIGHT: /any/subghz/Doorbells/Doorbell1.sub
+RIGHT: /any/subghz/Sextoy/Sextoy1.sub
 OK: /any/subghz/Misc/Crosswalk_Unknown.sub
 ULABEL: TeslaAM270
-DLABEL: Doorbell2
+DLABEL: HandicapDoor
 LLABEL: TeslaAM650
-RLABEL: Doorbell1
+RLABEL: Sextoy1
 OKLABEL: Crosswalk
