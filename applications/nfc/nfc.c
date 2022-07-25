@@ -31,6 +31,7 @@ void nfc_rpc_exit_callback(Nfc* nfc) {
     }
     if(nfc->rpc_ctx) {
         rpc_system_app_set_callback(nfc->rpc_ctx, NULL, NULL);
+        rpc_system_app_send_exited(nfc->rpc_ctx);
         nfc->rpc_ctx = NULL;
     }
 }
@@ -82,6 +83,7 @@ static bool nfc_rpc_command_callback(RpcAppSystemEvent event, const char* arg, v
                         nfc->worker, NfcWorkerStateEmulate, &nfc->dev->dev_data, NULL, nfc);
                 }
                 nfc->rpc_state = NfcRpcStateEmulating;
+                view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcLoad);
                 result = true;
             }
         }
@@ -107,7 +109,6 @@ Nfc* nfc_alloc() {
 
     // Open GUI record
     nfc->gui = furi_record_open("gui");
-    view_dispatcher_attach_to_gui(nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
 
     // Open Notification record
     nfc->notifications = furi_record_open("notification");
@@ -124,6 +125,10 @@ Nfc* nfc_alloc() {
     // Popup
     nfc->popup = popup_alloc();
     view_dispatcher_add_view(nfc->view_dispatcher, NfcViewPopup, popup_get_view(nfc->popup));
+
+    // Loading
+    nfc->loading = loading_alloc();
+    view_dispatcher_add_view(nfc->view_dispatcher, NfcViewLoading, loading_get_view(nfc->loading));
 
     // Text Input
     nfc->text_input = text_input_alloc();
@@ -178,6 +183,10 @@ void nfc_free(Nfc* nfc) {
     // Popup
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewPopup);
     popup_free(nfc->popup);
+
+    // Loading
+    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewLoading);
+    loading_free(nfc->loading);
 
     // TextInput
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewTextInput);
@@ -258,30 +267,55 @@ void nfc_blink_stop(Nfc* nfc) {
     notification_message(nfc->notifications, &sequence_blink_stop);
 }
 
+void nfc_show_loading_popup(void* context, bool show) {
+    Nfc* nfc = context;
+    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
+
+    if(show) {
+        // Raise timer priority so that animations can play
+        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewLoading);
+    } else {
+        // Restore default timer priority
+        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+    }
+}
+
 int32_t nfc_app(void* p) {
     Nfc* nfc = nfc_alloc();
     char* args = p;
 
     // Check argument and run corresponding scene
     if((*args != '\0')) {
+        nfc_device_set_loading_callback(nfc->dev, nfc_show_loading_popup, nfc);
         uint32_t rpc_ctx = 0;
         if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
             nfc->rpc_ctx = (void*)rpc_ctx;
             rpc_system_app_set_callback(nfc->rpc_ctx, nfc_rpc_command_callback, nfc);
+            rpc_system_app_send_started(nfc->rpc_ctx);
+            view_dispatcher_attach_to_gui(
+                nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeDesktop);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRpc);
-        } else if(nfc_device_load(nfc->dev, p, true)) {
-            if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateMifareUl);
-            } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateMifareClassic);
-            } else {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
-            }
         } else {
-            // Exit app
-            view_dispatcher_stop(nfc->view_dispatcher);
+            view_dispatcher_attach_to_gui(
+                nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
+            if(nfc_device_load(nfc->dev, p, true)) {
+                if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateMifareUl);
+                } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateMifareClassic);
+                } else {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
+                }
+            } else {
+                // Exit app
+                view_dispatcher_stop(nfc->view_dispatcher);
+            }
         }
+        nfc_device_set_loading_callback(nfc->dev, NULL, nfc);
     } else {
+        view_dispatcher_attach_to_gui(
+            nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
         scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
     }
 
