@@ -35,8 +35,10 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcWorkerEventReadUidNfcB || event.event == NfcWorkerEventReadUidNfcF ||
-           event.event == NfcWorkerEventReadUidNfcV) {
+        if((event.event == NfcWorkerEventReadUidNfcB) ||
+           (event.event == NfcWorkerEventReadUidNfcF) ||
+           (event.event == NfcWorkerEventReadUidNfcV) ||
+           (event.event == NfcWorkerEventReadUidNfcA)) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
             consumed = true;

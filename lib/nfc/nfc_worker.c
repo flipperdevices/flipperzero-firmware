@@ -236,7 +236,11 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     } else if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
         FURI_LOG_I(TAG, "ISO14443-4 card detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolEMV;
-        card_read = nfc_worker_read_bank_card(nfc_worker, tx_rx);
+        if(!nfc_worker_read_bank_card(nfc_worker, tx_rx)) {
+            FURI_LOG_I(TAG, "Unknown card. Save UID");
+            nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
+        }
+        card_read = true;
     }
 
     return card_read;
@@ -265,6 +269,9 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
                         break;
                     } else if(dev_data->protocol == NfcDeviceProtocolEMV) {
                         event = NfcWorkerEventReadBankCard;
+                        break;
+                    } else if(dev_data->protocol == NfcDeviceProtocolUnknown) {
+                        event = NfcWorkerEventReadUidNfcA;
                         break;
                     }
                 } else {

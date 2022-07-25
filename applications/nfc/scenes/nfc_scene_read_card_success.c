@@ -22,9 +22,6 @@ void nfc_scene_read_card_success_on_enter(void* context) {
     string_init(uid_str);
     DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
 
-    // Send notification
-    notification_message(nfc->notifications, &sequence_success);
-
     // Setup view
     FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
     Widget* widget = nfc->widget;
@@ -40,13 +37,12 @@ void nfc_scene_read_card_success_on_enter(void* context) {
         widget_add_button_element(
             widget, GuiButtonTypeRight, "Save", nfc_scene_read_card_success_widget_callback, nfc);
         widget_add_icon_element(widget, 8, 13, &I_Medium_chip_22x21);
-        string_cat_printf(data_str, "Unknown");
         widget_add_string_element(
             widget, 37, 12, AlignLeft, AlignBottom, FontPrimary, string_get_cstr(data_str));
         string_printf(
-            data_str, "ATQA: %02X%02X SAK: %02X", data->atqa[0], data->atqa[1], data->sak);
+            data_str, "ATQA: %02X%02X\nSAK: %02X", data->atqa[0], data->atqa[1], data->sak);
         widget_add_string_multiline_element(
-            widget, 48, 16, AlignLeft, AlignTop, FontSecondary, string_get_cstr(data_str));
+            widget, 37, 16, AlignLeft, AlignTop, FontSecondary, string_get_cstr(data_str));
         widget_add_string_element(
             widget, 64, 46, AlignCenter, AlignBottom, FontSecondary, string_get_cstr(uid_str));
     } else {
