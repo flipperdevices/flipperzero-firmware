@@ -1,1 +1,2 @@
+# Whether to allow extended ranges that can break your flipper
 use_ext_range_at_own_risk: false
