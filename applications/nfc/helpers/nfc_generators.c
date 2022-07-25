@@ -292,7 +292,7 @@ static const NfcGenerator mf_ul_h21_generator = {
 static const NfcGenerator ntag203_generator = {
     .name = "NTAG203",
     .generator_func = nfc_generate_mf_ul_ntag203,
-    .next_scene = NfcSceneMifareUlMenu};
+    .next_scene = NfcSceneMfUltralightMenu};
 
 static const NfcGenerator ntag213_generator = {
     .name = "NTAG213",
