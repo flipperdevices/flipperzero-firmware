@@ -3,23 +3,17 @@
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
 
-- Removed [TOTP (By Astrrra)](https://github.com/wetox-team/flipperzero-firmware/tree/gen-totp) since it's a test app
-- OFW: Added [Added condition to cli "log" command to end if serial terminal is disconnected. #1425 (By ESurge)](https://github.com/flipperdevices/flipperzero-firmware/pull/1425) final changes
-- OFW: Added [Buffered file streams #1424 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1424)
-- Added [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `REQUIRES WIFI DEV BOARD WITH MARAUDER FLASHED`
-- Updated "ELF Loader" to "FAP Loader". Considering renaming to SD Loader.
-- Updates for [nfc: NTAG203 support #1383 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1383)
-- Updates for [Picopass: dump full card, extract some details #1408 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1408)
-- Updates for api_symbols and apps/faps for new version with flipper format support
-- Updates to included resources/fun files
+- Updates from OFW
+- Updates for api_symbols
+- New app updates coming soon
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
   <tr> <td>
 <br><b>FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE<b><br><a href="https://interestingsoup.com/n00b-guide-flashing-flipper-zero-to-rougemaster/" target="_blank">HERE IS A NOOB GUIDE TO FLASH AND UNLOCK (BY interestingsoup)</a>
       
-- To install new FW, extract the [latest release zip file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases) to a folder, put the folder in the update folder on your SD card and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your setting_user file. **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
-- [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
+- To install new FW, extract the [latest release zip file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases) to a folder, put the folder in the update folder on your SD card and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your setting_user file. **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!** On any update, you may need to update this file and your unirf map file, so keep backups. 😄
+    - [<h2>GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU</h2>](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
 - READ SPECIAL INSTRUCTIONS
 - If you have questions about where X app is located, DO NOT ASK ON MAIN DISCORD, ASK <a href='https://discord.gg/gF2bBUzAFe'>HERE</a>
 
@@ -57,8 +51,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 
 ## Open PRs Checkedout & Not Merged In Main:
 - [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
-- [Picopass: dump full card, extract some details #1408 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1408)
-- [nfc: NTAG203 support #1383 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1383)
 
 </td><td>
 <details>
