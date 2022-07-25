@@ -1,6 +1,7 @@
 #include "mf_classic_dict.h"
 
 #include <lib/toolbox/args.h>
+#include <lib/flipper_format/flipper_format.h>
 
 #define MF_CLASSIC_DICT_FLIPPER_PATH "/ext/nfc/assets/mf_classic_dict.nfc"
 #define MF_CLASSIC_DICT_USER_PATH "/ext/nfc/assets/mf_classic_dict_user.nfc"
@@ -64,16 +65,13 @@ MfClassicDict* mf_classic_dict_alloc(MfClassicDictType dict_type) {
         stream_rewind(dict->stream);
 
         dict_loaded = true;
+        FURI_LOG_I(TAG, "Loaded dictionary with %d keys", dict->total_keys);
     } while(false);
 
     if(!dict_loaded) {
         buffered_file_stream_close(dict->stream);
         free(dict);
         dict = NULL;
-    }
-
-    if(dict_loaded) {
-        FURI_LOG_I(TAG, "Loaded dictionary with %d keys", dict->total_keys);
     }
 
     return dict;
@@ -84,6 +82,7 @@ void mf_classic_dict_free(MfClassicDict* dict) {
     furi_assert(dict->stream);
 
     buffered_file_stream_close(dict->stream);
+    stream_free(dict->stream);
     free(dict);
 }
 
