@@ -459,7 +459,7 @@ bool mf_df_read_card(FuriHalNfcTxRxContext* tx_rx, MifareDesfireData* data) {
     bool card_read = false;
     do {
         // Get version
-        tx_rx->tx_bits = 8 * mf_df_prepare_get_free_memory(tx_rx->tx_data);
+        tx_rx->tx_bits = 8 * mf_df_prepare_get_version(tx_rx->tx_data);
         if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
             FURI_LOG_W(TAG, "Bad exchange getting version");
             break;
