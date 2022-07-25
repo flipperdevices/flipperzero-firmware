@@ -51,8 +51,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 
 ## Open PRs Checkedout & Not Merged In Main:
 - [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
-- [Picopass: dump full card, extract some details #1408 (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1408)
-- [nfc: NTAG203 support #1383 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1383)
 
 </td><td>
 <details>
