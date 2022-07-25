@@ -10,4 +10,5 @@ enum NfcCustomEvent {
     NfcCustomEventTextInputDone,
     NfcCustomEventDictAttackDone,
     NfcCustomEventDictAttackSkip,
+    NfcCustomEventRpcLoad,
 };
