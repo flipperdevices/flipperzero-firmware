@@ -4,6 +4,7 @@
 #include "memmgr_heap.h"
 #include "check.h"
 #include "common_defines.h"
+#include "thread_local_storage.h"
 
 #include <task.h>
 #include <m-string.h>
@@ -47,6 +48,8 @@ static void furi_thread_body(void* context) {
     furi_assert(context);
     FuriThread* thread = context;
 
+    furi_thread_local_storage_init();
+
     furi_assert(thread->state == FuriThreadStateStarting);
     furi_thread_set_state(thread, FuriThreadStateRunning);
 
@@ -65,6 +68,8 @@ static void furi_thread_body(void* context) {
 
     furi_assert(thread->state == FuriThreadStateRunning);
     furi_thread_set_state(thread, FuriThreadStateStopped);
+
+    furi_thread_local_storage_clear();
 
     vTaskDelete(thread->task_handle);
     furi_thread_catch();
