@@ -10,8 +10,8 @@ static const uint32_t picopass_file_version = 1;
 
 PicopassDevice* picopass_device_alloc() {
     PicopassDevice* picopass_dev = malloc(sizeof(PicopassDevice));
-    picopass_dev->storage = furi_record_open("storage");
-    picopass_dev->dialogs = furi_record_open("dialogs");
+    picopass_dev->storage = furi_record_open(RECORD_STORAGE);
+    picopass_dev->dialogs = furi_record_open(RECORD_DIALOGS);
     return picopass_dev;
 }
 
@@ -135,8 +135,8 @@ void picopass_device_clear(PicopassDevice* dev) {
 void picopass_device_free(PicopassDevice* picopass_dev) {
     furi_assert(picopass_dev);
     picopass_device_clear(picopass_dev);
-    furi_record_close("storage");
-    furi_record_close("dialogs");
+    furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_DIALOGS);
     string_clear(picopass_dev->load_path);
     free(picopass_dev);
 }

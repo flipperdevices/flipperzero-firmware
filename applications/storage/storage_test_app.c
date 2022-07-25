@@ -317,7 +317,7 @@ static void do_test_end(Storage* api, const char* path) {
 
 int32_t storage_test_app(void* p) {
     UNUSED(p);
-    Storage* api = furi_record_open("storage");
+    Storage* api = furi_record_open(RECORD_STORAGE);
     do_test_start(api, STORAGE_INT_PATH_PREFIX);
     do_test_start(api, STORAGE_ANY_PATH_PREFIX);
     do_test_start(api, STORAGE_EXT_PATH_PREFIX);

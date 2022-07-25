@@ -106,11 +106,11 @@ Nfc* nfc_alloc() {
     nfc->dev = nfc_device_alloc();
 
     // Open GUI record
-    nfc->gui = furi_record_open("gui");
+    nfc->gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
 
     // Open Notification record
-    nfc->notifications = furi_record_open("notification");
+    nfc->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     // Submenu
     nfc->submenu = submenu_alloc();
@@ -223,11 +223,11 @@ void nfc_free(Nfc* nfc) {
     scene_manager_free(nfc->scene_manager);
 
     // GUI
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     nfc->gui = NULL;
 
     // Notifications
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
     nfc->notifications = NULL;
 
     free(nfc);

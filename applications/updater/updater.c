@@ -41,10 +41,10 @@ Updater* updater_alloc(const char* arg) {
         string_init(updater->startup_arg);
     }
 
-    updater->storage = furi_record_open("storage");
-    updater->notification = furi_record_open("notification");
+    updater->storage = furi_record_open(RECORD_STORAGE);
+    updater->notification = furi_record_open(RECORD_NOTIFICATION);
 
-    updater->gui = furi_record_open("gui");
+    updater->gui = furi_record_open(RECORD_GUI);
     updater->view_dispatcher = view_dispatcher_alloc();
     updater->scene_manager = scene_manager_alloc(&updater_scene_handlers, updater);
 
@@ -111,9 +111,9 @@ void updater_free(Updater* updater) {
     view_dispatcher_free(updater->view_dispatcher);
     scene_manager_free(updater->scene_manager);
 
-    furi_record_close("gui");
-    furi_record_close("storage");
-    furi_record_close("notification");
+    furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_NOTIFICATION);
 
     free(updater);
 }

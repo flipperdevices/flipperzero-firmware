@@ -18,7 +18,7 @@ typedef struct {
 static InfraredTest* test;
 
 static void infrared_test_alloc() {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     test = malloc(sizeof(InfraredTest));
     test->decoder_handler = infrared_alloc_decoder();
     test->encoder_handler = infrared_alloc_encoder();
@@ -32,7 +32,7 @@ static void infrared_test_free() {
     infrared_free_encoder(test->encoder_handler);
     flipper_format_free(test->ff);
     string_clear(test->file_path);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     free(test);
     test = NULL;
 }

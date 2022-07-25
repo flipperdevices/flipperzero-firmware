@@ -255,7 +255,7 @@ MU_TEST_1(test_dirwalk_filter, Storage* storage) {
 }
 
 MU_TEST_SUITE(test_dirwalk_suite) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     storage_dirs_create(storage, EXT_PATH("dirwalk"));
 
     MU_RUN_TEST_1(test_dirwalk_full, storage);
@@ -263,7 +263,7 @@ MU_TEST_SUITE(test_dirwalk_suite) {
     MU_RUN_TEST_1(test_dirwalk_filter, storage);
 
     storage_simply_remove_recursive(storage, EXT_PATH("dirwalk"));
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 }
 
 int run_minunit_test_dirwalk() {

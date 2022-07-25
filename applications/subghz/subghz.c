@@ -78,7 +78,7 @@ SubGhz* subghz_alloc() {
     string_init(subghz->file_path_tmp);
 
     // GUI
-    subghz->gui = furi_record_open("gui");
+    subghz->gui = furi_record_open(RECORD_GUI);
 
     // View Dispatcher
     subghz->view_dispatcher = view_dispatcher_alloc();
@@ -96,7 +96,7 @@ SubGhz* subghz_alloc() {
         subghz->view_dispatcher, subghz_tick_event_callback, 100);
 
     // Open Notification record
-    subghz->notifications = furi_record_open("notification");
+    subghz->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     // SubMenu
     subghz->submenu = submenu_alloc();
@@ -126,7 +126,7 @@ SubGhz* subghz_alloc() {
         subghz->view_dispatcher, SubGhzViewIdWidget, widget_get_view(subghz->widget));
 
     //Dialog
-    subghz->dialogs = furi_record_open("dialogs");
+    subghz->dialogs = furi_record_open(RECORD_DIALOGS);
 
     // Transmitter
     subghz->subghz_transmitter = subghz_view_transmitter_alloc();
@@ -246,7 +246,7 @@ void subghz_free(SubGhz* subghz) {
     widget_free(subghz->widget);
 
     //Dialog
-    furi_record_close("dialogs");
+    furi_record_close(RECORD_DIALOGS);
 
     // Transmitter
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTransmitter);
@@ -279,7 +279,7 @@ void subghz_free(SubGhz* subghz) {
     view_dispatcher_free(subghz->view_dispatcher);
 
     // GUI
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     subghz->gui = NULL;
 
     //setting
@@ -297,7 +297,7 @@ void subghz_free(SubGhz* subghz) {
     string_clear(subghz->error_str);
 
     // Notifications
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
     subghz->notifications = NULL;
 
     // Path strings

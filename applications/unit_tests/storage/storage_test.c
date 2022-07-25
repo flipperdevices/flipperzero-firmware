@@ -6,24 +6,24 @@
 #define STORAGE_LOCKED_DIR STORAGE_INT_PATH_PREFIX
 
 static void storage_file_open_lock_setup() {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
     storage_simply_remove(storage, STORAGE_LOCKED_FILE);
     mu_check(storage_file_open(file, STORAGE_LOCKED_FILE, FSAM_WRITE, FSOM_CREATE_NEW));
     mu_check(storage_file_write(file, "0123", 4) == 4);
     mu_check(storage_file_close(file));
     storage_file_free(file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 }
 
 static void storage_file_open_lock_teardown() {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     mu_check(storage_simply_remove(storage, STORAGE_LOCKED_FILE));
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 }
 
 static int32_t storage_file_locker(void* ctx) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriSemaphore* semaphore = ctx;
     File* file = storage_file_alloc(storage);
     furi_check(storage_file_open(file, STORAGE_LOCKED_FILE, FSAM_READ_WRITE, FSOM_OPEN_EXISTING));
@@ -31,13 +31,13 @@ static int32_t storage_file_locker(void* ctx) {
     furi_delay_ms(1000);
 
     furi_check(storage_file_close(file));
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     storage_file_free(file);
     return 0;
 }
 
 MU_TEST(storage_file_open_lock) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     bool result = false;
     FuriSemaphore* semaphore = furi_semaphore_alloc(1, 0);
     File* file = storage_file_alloc(storage);
@@ -63,13 +63,13 @@ MU_TEST(storage_file_open_lock) {
 
     // clean data
     storage_file_free(file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     mu_assert(result, "cannot open locked file");
 }
 
 MU_TEST(storage_file_open_close) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file;
 
     file = storage_file_alloc(storage);
@@ -84,7 +84,7 @@ MU_TEST(storage_file_open_close) {
         storage_file_free(file);
     }
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 }
 
 MU_TEST_SUITE(storage_file) {
@@ -95,7 +95,7 @@ MU_TEST_SUITE(storage_file) {
 }
 
 MU_TEST(storage_dir_open_close) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file;
 
     file = storage_file_alloc(storage);
@@ -109,11 +109,11 @@ MU_TEST(storage_dir_open_close) {
         storage_file_free(file);
     }
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 }
 
 static int32_t storage_dir_locker(void* ctx) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriSemaphore* semaphore = ctx;
     File* file = storage_file_alloc(storage);
     furi_check(storage_dir_open(file, STORAGE_LOCKED_DIR));
@@ -121,13 +121,13 @@ static int32_t storage_dir_locker(void* ctx) {
     furi_delay_ms(1000);
 
     furi_check(storage_dir_close(file));
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     storage_file_free(file);
     return 0;
 }
 
 MU_TEST(storage_dir_open_lock) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     bool result = false;
     FuriSemaphore* semaphore = furi_semaphore_alloc(1, 0);
     File* file = storage_file_alloc(storage);
@@ -153,7 +153,7 @@ MU_TEST(storage_dir_open_lock) {
 
     // clean data
     storage_file_free(file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     mu_assert(result, "cannot open locked dir");
 }
@@ -265,7 +265,7 @@ static bool storage_dir_rename_check(Storage* storage, const char* base) {
 }
 
 MU_TEST(storage_file_rename) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
 
     mu_check(write_file_13DA(storage, EXT_PATH("file.old")));
@@ -278,11 +278,11 @@ MU_TEST(storage_file_rename) {
     mu_assert_int_eq(FSE_OK, storage_common_remove(storage, EXT_PATH("file.new")));
 
     storage_file_free(file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 }
 
 MU_TEST(storage_dir_rename) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
 
     storage_dir_create(storage, EXT_PATH("dir.old"));
 
@@ -296,17 +296,17 @@ MU_TEST(storage_dir_rename) {
     storage_dir_remove(storage, EXT_PATH("dir.new"));
     mu_assert_int_eq(FSE_NOT_EXIST, storage_common_stat(storage, EXT_PATH("dir.new"), NULL));
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 }
 
 MU_TEST_SUITE(storage_rename) {
     MU_RUN_TEST(storage_file_rename);
     MU_RUN_TEST(storage_dir_rename);
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     storage_dir_remove(storage, EXT_PATH("dir.old"));
     storage_dir_remove(storage, EXT_PATH("dir.new"));
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 }
 
 int run_minunit_test_storage() {

@@ -306,7 +306,7 @@ void subghz_cli_command_decode_raw(Cli* cli, string_t args, void* context) {
     string_init(file_name);
     string_set_str(file_name, ANY_PATH("subghz/test.sub"));
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
     string_t temp_str;
     string_init(temp_str);
@@ -346,7 +346,7 @@ void subghz_cli_command_decode_raw(Cli* cli, string_t args, void* context) {
 
     string_clear(temp_str);
     flipper_format_free(fff_data_file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     if(check_file) {
         // Allocate context
@@ -570,7 +570,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
     bool exit = false;
     SubGhzChatEvent chat_event;
 
-    NotificationApp* notification = furi_record_open("notification");
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     string_printf(name, "\033[0;33m%s\033[0m: ", furi_hal_version_get_name_ptr());
     string_set(input, name);
@@ -684,7 +684,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
     string_clear(output);
     string_clear(sysmsg);
     furi_hal_power_suppress_charge_exit();
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
 
     if(subghz_chat_worker_is_running(subghz_chat)) {
         subghz_chat_worker_stop(subghz_chat);
@@ -753,11 +753,11 @@ static void subghz_cli_command(Cli* cli, string_t args, void* context) {
 
 void subghz_on_system_start() {
 #ifdef SRV_CLI
-    Cli* cli = furi_record_open("cli");
+    Cli* cli = furi_record_open(RECORD_CLI);
 
     cli_add_command(cli, "subghz", CliCommandFlagDefault, subghz_cli_command, NULL);
 
-    furi_record_close("cli");
+    furi_record_close(RECORD_CLI);
 #else
     UNUSED(subghz_cli_command);
 #endif

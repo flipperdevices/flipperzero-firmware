@@ -130,10 +130,6 @@ int32_t update_task_worker_backup_restore(void* context) {
             break;
         }
 
-        /* Waiting for BT service to 'start', so we don't race for boot mode flag */
-        furi_record_open("bt");
-        furi_record_close("bt");
-
         if(boot_mode == FuriHalRtcBootModePreUpdate) {
             success = update_task_pre_update(update_task);
         } else if(boot_mode == FuriHalRtcBootModePostUpdate) {

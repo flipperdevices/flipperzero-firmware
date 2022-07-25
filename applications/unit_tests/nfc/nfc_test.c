@@ -36,13 +36,13 @@ static NfcTest* nfc_test = NULL;
 static void nfc_test_alloc() {
     nfc_test = malloc(sizeof(NfcTest));
     nfc_test->signal = nfca_signal_alloc();
-    nfc_test->storage = furi_record_open("storage");
+    nfc_test->storage = furi_record_open(RECORD_STORAGE);
 }
 
 static void nfc_test_free() {
     furi_assert(nfc_test);
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     nfca_signal_free(nfc_test->signal);
     free(nfc_test);
     nfc_test = NULL;

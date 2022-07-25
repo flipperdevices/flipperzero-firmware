@@ -145,7 +145,7 @@ static bool subghz_encoder_test(const char* path) {
     string_init(temp_str);
     bool file_load = false;
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
 
     do {
