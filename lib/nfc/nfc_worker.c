@@ -251,15 +251,21 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
 }
 
 void nfc_worker_read(NfcWorker* nfc_worker) {
+    furi_assert(nfc_worker);
+    furi_assert(nfc_worker->callback);
+
     nfc_device_data_clear(nfc_worker->dev_data);
     NfcDeviceData* dev_data = nfc_worker->dev_data;
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     FuriHalNfcTxRxContext tx_rx = {};
     NfcWorkerEvent event = 0;
+    bool card_not_detected_notified = false;
 
     while(nfc_worker->state == NfcWorkerStateRead) {
-        if(furi_hal_nfc_detect(nfc_data, 1000)) {
+        if(furi_hal_nfc_detect(nfc_data, 300)) {
             // Process first found device
+            nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
+            card_not_detected_notified = false;
             if(nfc_data->type == FuriHalNfcTypeA) {
                 if(nfc_worker_read_nfca(nfc_worker, &tx_rx)) {
                     if(dev_data->protocol == NfcDeviceProtocolMifareUl) {
@@ -294,12 +300,17 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
                 event = NfcWorkerEventReadUidNfcV;
                 break;
             }
+        } else {
+            if(!card_not_detected_notified) {
+                nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
+                card_not_detected_notified = true;
+            }
         }
         furi_hal_nfc_sleep();
         furi_delay_ms(100);
     }
     // Notify caller and exit
-    if((event > NfcWorkerEventReserved) && nfc_worker->callback) {
+    if(event > NfcWorkerEventReserved) {
         nfc_worker->callback(event, nfc_worker->context);
     }
 }

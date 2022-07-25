@@ -1,7 +1,13 @@
 #include "../nfc_i.h"
 #include <dolphin/dolphin.h>
 
-bool nfc_read_worker_callback(NfcWorkerEvent event, void* context) {
+typedef enum {
+    NfcSceneReadStateIdle,
+    NfcSceneReadStateDetecting,
+    NfcSceneReadStateReading,
+} NfcSceneReadState;
+
+bool nfc_scene_read_worker_callback(NfcWorkerEvent event, void* context) {
     Nfc* nfc = context;
     bool consumed = false;
     if(event == NfcWorkerEventReadMfClassicLoadKeyCache) {
@@ -13,20 +19,32 @@ bool nfc_read_worker_callback(NfcWorkerEvent event, void* context) {
     return consumed;
 }
 
+void nfc_scene_read_set_state(Nfc* nfc, NfcSceneReadState state) {
+    uint32_t curr_state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneRead);
+    if(curr_state != state) {
+        if(state == NfcSceneReadStateDetecting) {
+            popup_set_header(nfc->popup, "Detecting\nNFC card", 90, 24, AlignCenter, AlignTop);
+            popup_set_icon(nfc->popup, 5, 7, &I_NFC_manual);
+        } else if(state == NfcSceneReadStateReading) {
+            popup_set_header(
+                nfc->popup, "Reading card\nDon't move...", 85, 24, AlignCenter, AlignTop);
+            popup_set_icon(nfc->popup, 19, 23, &A_Loading_24);
+        }
+        scene_manager_set_scene_state(nfc->scene_manager, NfcSceneRead, state);
+    }
+}
+
 void nfc_scene_read_on_enter(void* context) {
     Nfc* nfc = context;
     DOLPHIN_DEED(DolphinDeedNfcRead);
 
-    // Setup view
-    Popup* popup = nfc->popup;
-    popup_set_header(popup, "Detecting\nNFC card", 70, 34, AlignLeft, AlignTop);
-    popup_set_icon(popup, 0, 3, &I_RFIDDolphinReceive_97x61);
     nfc_device_clear(nfc->dev);
-
-    // Start worker
+    // Setup view
+    nfc_scene_read_set_state(nfc, NfcSceneReadStateDetecting);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
+    // Start worker
     nfc_worker_start(
-        nfc->worker, NfcWorkerStateRead, &nfc->dev->dev_data, nfc_read_worker_callback, nfc);
+        nfc->worker, NfcWorkerStateRead, &nfc->dev->dev_data, nfc_scene_read_worker_callback, nfc);
 
     nfc_blink_start(nfc);
 }
@@ -66,6 +84,12 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);
             }
             consumed = true;
+        } else if(event.event == NfcWorkerEventCardDetected) {
+            nfc_scene_read_set_state(nfc, NfcSceneReadStateReading);
+            consumed = true;
+        } else if(event.event == NfcWorkerEventNoCardDetected) {
+            nfc_scene_read_set_state(nfc, NfcSceneReadStateDetecting);
+            consumed = true;
         }
     }
     return consumed;
@@ -78,6 +102,7 @@ void nfc_scene_read_on_exit(void* context) {
     nfc_worker_stop(nfc->worker);
     // Clear view
     popup_reset(nfc->popup);
+    scene_manager_set_scene_state(nfc->scene_manager, NfcSceneRead, NfcSceneReadStateIdle);
 
     nfc_blink_stop(nfc);
 }
