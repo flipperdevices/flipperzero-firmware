@@ -29,7 +29,11 @@ bool nfc_scene_extra_actions_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexMfClassicKeys) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicKeys);
+            if(mf_classic_dict_check_presence(MfClassicDictTypeFlipper)) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicKeys);
+            } else {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);
+            }
             consumed = true;
         }
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneExtraActions, event.event);
