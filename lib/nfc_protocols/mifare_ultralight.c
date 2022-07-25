@@ -1176,10 +1176,6 @@ void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* d
     memset(&emulator->auth_attempt, 0, sizeof(MfUltralightAuth));
     emulator->comp_write_cmd_started = false;
     emulator->sector_select_cmd_started = false;
-    if(emulator->data.type == MfUltralightTypeNTAG203) {
-        // Clear holding counter
-        emulator->data.counter[0] = 0;
-    }
     mf_ul_reset_emulation(emulator, true);
 }
 
@@ -1242,8 +1238,7 @@ bool mf_ul_prepare_emulation_response(
     } else if(buff_rx_len >= 8) {
         uint8_t cmd = buff_rx[0];
         if(cmd == MF_UL_GET_VERSION_CMD) {
-            if(emulator->data.type != MfUltralightTypeUnknown &&
-               emulator->data.type != MfUltralightTypeNTAG203) {
+            if(emulator->data.type >= MfUltralightTypeUL11) {
                 if(buff_rx_len == 1 * 8) {
                     tx_bytes = sizeof(emulator->data.version);
                     memcpy(buff_tx, &emulator->data.version, tx_bytes);
