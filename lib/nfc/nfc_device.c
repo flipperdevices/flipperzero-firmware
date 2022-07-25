@@ -1183,7 +1183,15 @@ bool nfc_file_select(NfcDevice* dev) {
 void nfc_device_data_clear(NfcDeviceData* dev_data) {
     if(dev_data->protocol == NfcDeviceProtocolMifareDesfire) {
         mf_df_clear(&dev_data->mf_df_data);
+    } else if(dev_data->protocol == NfcDeviceProtocolMifareClassic) {
+        memset(&dev_data->mf_classic_data, 0, sizeof(MfClassicData));
+    } else if(dev_data->protocol == NfcDeviceProtocolMifareUl) {
+        memset(&dev_data->mf_ul_data, 0, sizeof(MfUltralightData));
+    } else if(dev_data->protocol == NfcDeviceProtocolEMV) {
+        memset(&dev_data->emv_data, 0, sizeof(EmvData));
     }
+    memset(&dev_data->nfc_data, 0, sizeof(FuriHalNfcDevData));
+    dev_data->protocol = NfcDeviceProtocolUnknown;
     string_reset(dev_data->parsed_data);
 }
 
@@ -1191,7 +1199,6 @@ void nfc_device_clear(NfcDevice* dev) {
     furi_assert(dev);
 
     nfc_device_data_clear(&dev->dev_data);
-    memset(&dev->dev_data, 0, sizeof(dev->dev_data));
     dev->format = NfcDeviceSaveFormatUid;
     string_reset(dev->load_path);
 }

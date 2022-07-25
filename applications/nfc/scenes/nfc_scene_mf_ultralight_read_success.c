@@ -18,9 +18,6 @@ void nfc_scene_mf_ultralight_read_success_on_enter(void* context) {
     Nfc* nfc = context;
     DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
 
-    // Send notification
-    notification_message(nfc->notifications, &sequence_success);
-
     // Setup dialog view
     FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
     MfUltralightData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
