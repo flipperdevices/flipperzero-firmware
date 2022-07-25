@@ -23,7 +23,7 @@ void nfc_scene_emv_read_success_on_enter(void* context) {
     widget_add_frame_element(nfc->widget, 0, 0, 128, 64, 6);
     // Add buttons
     widget_add_button_element(
-        nfc->widget, GuiButtonTypeLeft, "Back", nfc_scene_emv_read_success_widget_callback, nfc);
+        nfc->widget, GuiButtonTypeLeft, "Retry", nfc_scene_emv_read_success_widget_callback, nfc);
     widget_add_button_element(
         nfc->widget, GuiButtonTypeRight, "Save", nfc_scene_emv_read_success_widget_callback, nfc);
     // Add card name
@@ -95,14 +95,6 @@ void nfc_scene_emv_read_success_on_enter(void* context) {
         widget_add_string_element(nfc->widget, 7, 32, AlignLeft, AlignTop, FontSecondary, exp_str);
     }
 
-    // Send notification
-    if(scene_manager_get_scene_state(nfc->scene_manager, NfcSceneEmvReadSuccess) ==
-       NFC_SEND_NOTIFICATION_TRUE) {
-        notification_message(nfc->notifications, &sequence_success);
-        scene_manager_set_scene_state(
-            nfc->scene_manager, NfcSceneEmvReadSuccess, NFC_SEND_NOTIFICATION_FALSE);
-    }
-
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 
@@ -112,6 +104,7 @@ bool nfc_scene_emv_read_success_on_event(void* context, SceneManagerEvent event)
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRetryConfirm);
             consumed = true;
         } else if(event.event == GuiButtonTypeRight) {
             // Clear device name
@@ -121,8 +114,8 @@ bool nfc_scene_emv_read_success_on_event(void* context, SceneManagerEvent event)
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        consumed =
-            scene_manager_search_and_switch_to_previous_scene(nfc->scene_manager, NfcSceneStart);
+        scene_manager_next_scene(nfc->scene_manager, NfcSceneExitConfirm);
+        consumed = true;
     }
     return consumed;
 }

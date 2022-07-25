@@ -34,8 +34,6 @@
 
 #include "rpc/rpc_app.h"
 
-#define NFC_SEND_NOTIFICATION_FALSE (0UL)
-#define NFC_SEND_NOTIFICATION_TRUE (1UL)
 #define NFC_TEXT_STORE_SIZE 128
 
 typedef enum {
