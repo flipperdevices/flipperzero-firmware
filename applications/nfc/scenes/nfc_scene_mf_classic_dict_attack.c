@@ -79,6 +79,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcWorkerEventSuccess) {
             if(state == DictAttackStateUserDictInProgress) {
+                nfc_worker_stop(nfc->worker);
                 nfc_scene_mf_classic_dict_attack_prepare_view(nfc, state);
                 consumed = true;
             } else {

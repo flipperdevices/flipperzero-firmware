@@ -184,16 +184,21 @@ void mf_classic_get_read_sectors_and_keys(
     *keys_found = 0;
     uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);
     for(size_t i = 0; i < sectors_total; i++) {
-        if(mf_classic_is_sector_read(data, i)) {
-            *keys_found += 2;
+        if(mf_classic_is_key_found(data, i, MfClassicKeyA)) {
+            *keys_found += 1;
+        }
+        if(mf_classic_is_key_found(data, i, MfClassicKeyB)) {
+            *keys_found += 1;
+        }
+        uint8_t first_block = mf_classic_get_first_block_num_of_sector(i);
+        uint8_t total_blocks_in_sec = mf_classic_get_blocks_num_in_sector(i);
+        bool blocks_read = true;
+        for(size_t i = first_block; i < first_block + total_blocks_in_sec; i++) {
+            blocks_read = mf_classic_is_block_read(data, i);
+            if(!blocks_read) break;
+        }
+        if(blocks_read) {
             *sectors_read += 1;
-        } else {
-            if(mf_classic_is_key_found(data, i, MfClassicKeyA)) {
-                *keys_found += 1;
-            }
-            if(mf_classic_is_key_found(data, i, MfClassicKeyB)) {
-                *keys_found += 1;
-            }
         }
     }
 }
