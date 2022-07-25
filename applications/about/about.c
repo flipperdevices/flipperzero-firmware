@@ -58,7 +58,7 @@ static DialogMessageButton compliance_screen(DialogsApp* dialogs, DialogMessage*
 static DialogMessageButton icon1_screen(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
 
-    dialog_message_set_icon(message, &I_Certification1_103x56, 13, 0);
+    // dialog_message_set_icon(message, &I_Certification1_103x56, 13, 0);
     result = dialog_message_show(dialogs, message);
     dialog_message_set_icon(message, NULL, 0, 0);
 
@@ -68,7 +68,7 @@ static DialogMessageButton icon1_screen(DialogsApp* dialogs, DialogMessage* mess
 static DialogMessageButton icon2_screen(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
 
-    dialog_message_set_icon(message, &I_Certification2_98x33, 15, 10);
+    // dialog_message_set_icon(message, &I_Certification2_98x33, 15, 10);
     result = dialog_message_show(dialogs, message);
     dialog_message_set_icon(message, NULL, 0, 0);
 
