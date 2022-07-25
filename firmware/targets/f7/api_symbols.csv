@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,0.28,,
+Version,+,0.29,,
 Header,+,applications/bt/bt_service/bt.h,,
 Header,+,applications/cli/cli.h,,
 Header,+,applications/cli/cli_vcp.h,,
@@ -813,6 +813,9 @@ Function,+,finitef,int,float
 Function,-,finitel,int,long double
 Function,+,fiprintf,int,"FILE*, const char*, ..."
 Function,-,fiscanf,int,"FILE*, const char*, ..."
+Function,+,flipper_format_buffered_file_alloc,FlipperFormat*,Storage*
+Function,+,flipper_format_buffered_file_close,_Bool,FlipperFormat*
+Function,+,flipper_format_buffered_file_open_existing,_Bool,"FlipperFormat*, const char*"
 Function,+,flipper_format_delete_key,_Bool,"FlipperFormat*, const char*"
 Function,+,flipper_format_file_alloc,FlipperFormat*,Storage*
 Function,+,flipper_format_file_close,_Bool,FlipperFormat*
