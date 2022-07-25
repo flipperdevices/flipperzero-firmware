@@ -3,36 +3,41 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <furi/core/check.h>
+#include <furi/core/stdglue.h>
 #include <furi/core/common_defines.h>
+#include <string.h>
+#include "printf_tiny.h"
+
+void _putchar(char character) {
+    furi_stdglue_stdout_write(NULL, &character, 1);
+}
 
 int __wrap_printf(const char* format, ...) {
-    UNUSED(format);
-    return 0;
+    va_list args;
+    va_start(args, format);
+    int ret = vprintf_(format, args);
+    va_end(args);
+
+    return ret;
 }
 
 int __wrap_vsnprintf(char* str, size_t size, const char* format, va_list args) {
-    UNUSED(str);
-    UNUSED(size);
-    UNUSED(format);
-    UNUSED(args);
-
-    return 0;
+    return vsnprintf_(str, size, format, args);
 }
 
 int __wrap_puts(const char* str) {
-    UNUSED(str);
-    return 0;
+    size_t size = furi_stdglue_stdout_write(NULL, str, strlen(str));
+    size += furi_stdglue_stdout_write(NULL, "\n", 1);
+    return size;
 }
 
 int __wrap_putchar(int ch) {
-    UNUSED(ch);
-    return 0;
+    return furi_stdglue_stdout_write(NULL, (char*)&ch, 1);
 }
 
 int __wrap_putc(int ch, FILE* stream) {
-    UNUSED(ch);
     UNUSED(stream);
-    return 0;
+    return furi_stdglue_stdout_write(NULL, (char*)&ch, 1);
 }
 
 int __wrap_snprintf(char* str, size_t size, const char* format, ...) {

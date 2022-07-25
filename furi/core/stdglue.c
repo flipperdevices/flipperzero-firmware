@@ -59,18 +59,6 @@ void furi_stdglue_init() {
     furi_stdglue->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     furi_check(furi_stdglue->mutex);
     FuriStdglueCallbackDict_init(furi_stdglue->thread_outputs);
-    // Prepare and set stdout descriptor
-    FILE* fp = fopencookie(
-        NULL,
-        "w",
-        (cookie_io_functions_t){
-            .read = NULL,
-            .write = stdout_write,
-            .seek = NULL,
-            .close = NULL,
-        });
-    setvbuf(fp, NULL, _IOLBF, 0);
-    stdout = fp;
 }
 
 bool furi_stdglue_set_thread_stdout_callback(FuriStdglueWriteCallback callback) {
@@ -91,12 +79,6 @@ bool furi_stdglue_set_thread_stdout_callback(FuriStdglueWriteCallback callback) 
     }
 }
 
-void __malloc_lock(struct _reent* REENT) {
-    UNUSED(REENT);
-    vTaskSuspendAll();
-}
-
-void __malloc_unlock(struct _reent* REENT) {
-    UNUSED(REENT);
-    xTaskResumeAll();
+size_t furi_stdglue_stdout_write(void* _cookie, const char* data, size_t size) {
+    return stdout_write(_cookie, data, size);
 }

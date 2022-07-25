@@ -8,9 +8,9 @@ env.Append(
         "-Wl,--wrap,printf",  # everywhere
         "-Wl,--wrap,snprintf",  # everywhere
         "-Wl,--wrap,vsnprintf",  # m-string
-        "-Wl,--wrap,puts",
-        "-Wl,--wrap,putchar",
-        "-Wl,--wrap,putc", 
+        "-Wl,--wrap,puts",  # fallback from printf, thanks gcc
+        "-Wl,--wrap,putchar",  # storage cli
+        "-Wl,--wrap,putc",  # fallback from printf, thanks gcc
         #
         # wrap other functions to make sure they are not called
         # realization is not provided
@@ -30,8 +30,9 @@ env.Append(
 
 libenv = env.Clone(FW_LIB_NAME="print")
 libenv.ApplyLibFlags()
+libenv.Append(CCFLAGS=["-Wno-double-promotion"])
 
-sources = libenv.GlobRecursive("*.c", "print")
+sources = libenv.GlobRecursive("*.c*", ".")
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)

@@ -31,6 +31,16 @@ void furi_stdglue_init();
  */
 bool furi_stdglue_set_thread_stdout_callback(FuriStdglueWriteCallback callback);
 
+/** Write data to stdout
+ * 
+ * @param _cookie unused, TODO: remove
+ * @param data 
+ * @param size 
+ * 
+ * @return size_t 
+ */
+size_t furi_stdglue_stdout_write(void* _cookie, const char* data, size_t size);
+
 #ifdef __cplusplus
 }
 #endif

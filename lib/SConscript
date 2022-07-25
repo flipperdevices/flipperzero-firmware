@@ -61,6 +61,7 @@ libs = env.BuildModules(
     [
         "STM32CubeWB",
         "freertos",
+        "print",
         "microtar",
         "toolbox",
         "ST25RFAL002",
@@ -75,7 +76,6 @@ libs = env.BuildModules(
         "misc",
         "mbedtls",
         "loclass",
-        "print",
     ],
 )
 
