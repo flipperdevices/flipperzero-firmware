@@ -19,7 +19,7 @@ void nfc_scene_mf_desfire_read_success_on_enter(void* context) {
 
     MifareDesfireData* data = &nfc->dev->dev_data.mf_df_data;
     DialogEx* dialog_ex = nfc->dialog_ex;
-    dialog_ex_set_left_button_text(dialog_ex, "Back");
+    dialog_ex_set_left_button_text(dialog_ex, "Retry");
     dialog_ex_set_center_button_text(dialog_ex, "Data");
     dialog_ex_set_right_button_text(dialog_ex, "More");
     dialog_ex_set_icon(dialog_ex, 8, 16, &I_Medium_chip_22x21);
@@ -70,7 +70,7 @@ bool nfc_scene_mf_desfire_read_success_on_event(void* context, SceneManagerEvent
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(state == MfDesfireReadSuccessStateShowUID && event.event == DialogExResultLeft) {
-            scene_manager_previous_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRetryConfirm);
             consumed = true;
         } else if(state == MfDesfireReadSuccessStateShowUID && event.event == DialogExResultCenter) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireData);
@@ -86,6 +86,9 @@ bool nfc_scene_mf_desfire_read_success_on_event(void* context, SceneManagerEvent
                 nfc->scene_manager,
                 NfcSceneMfDesfireReadSuccess,
                 MfDesfireReadSuccessStateShowUID);
+            consumed = true;
+        } else {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneExitConfirm);
             consumed = true;
         }
     }
