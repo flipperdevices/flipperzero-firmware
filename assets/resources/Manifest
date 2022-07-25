@@ -1,5 +1,5 @@
 V:0
-T:1658718167
+T:1658718328
 D:apps
 D:badusb
 D:dolphin
@@ -295,6 +295,7 @@ F:4ea73b964caa4f515ac18317deef0008:8222:subghz/Handicap/Handicap_button_1650.sub
 F:94eab58ea7ba75e4a738c69fd8d92af3:12402:subghz/Handicap/handicap_push_door.sub
 F:cd402353b933de0d291230284383b2cb:20604:subghz/Handicap/ook650_315brute.sub
 D:subghz/Misc/Sextoy
+F:4486d3f4298f2edac5ba79bd81a6d008:157:subghz/Misc/Crosswalk_Unknown.sub
 F:c13ab464563dca4db217a4ff87a31db0:204:subghz/Misc/Sextoy/Sextoy1.sub
 F:19a9f11b8daf0a3cbf48da6280a17d9e:204:subghz/Misc/Sextoy/Sextoy2.sub
 F:1751fb75f2f2337304c47e4f1d96f638:204:subghz/Misc/Sextoy/Sextoy3.sub
@@ -308,7 +309,7 @@ F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
 F:22c2dff53c68a8fe576c7e9fbd9f2d54:1340:subghz/assets/setting_user
 F:76460390a308e933a2c134e1e1aeb1e7:258:subghz/assets/touchtunes_map.txt
-F:19e77ea1b0b5d83a25af1d5e8103cd0d:375:subghz/assets/universal_rf_map.txt
+F:659ae9a07d7bc3907cbf9bcf3a7eb6af:379:subghz/assets/universal_rf_map.txt
 D:u2f/assets
 F:7e11e688e39034bbb9d88410044795e1:365:u2f/assets/cert.der
 F:f60b88c20ed479ed9684e249f7134618:264:u2f/assets/cert_key.u2f
