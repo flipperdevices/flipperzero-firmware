@@ -30,11 +30,11 @@ jobs:
           fetch-depth: 0
 
       - name: 'Build firmware'
-        run: ./fbt
+        run: FBT_TOOLCHAIN_PATH=/opt ./fbt
 
       - name: 'Static code analysis'
         run: |
-          SCRIPT_PATH=$(pwd) source scripts/toolchain/fbtenv.sh
+          SCRIPT_PATH=$(pwd) FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
           set +e
           export
           pvs-studio --license-info /opt/pvs_studio/PVS-Studio.lic

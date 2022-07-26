@@ -27,4 +27,4 @@ jobs:
           fetch-depth: 0
 
       - name: 'Check code formatting'
-        run: SET_GH_OUTPUT=1 ./fbt lint_py
+        run: SET_GH_OUTPUT=1 FBT_TOOLCHAIN_PATH=/opt ./fbt lint_py
