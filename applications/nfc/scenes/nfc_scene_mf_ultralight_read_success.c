@@ -72,7 +72,7 @@ bool nfc_scene_mf_ultralight_read_success_on_event(void* context, SceneManagerEv
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(state == ReadMifareUlStateShowUID && event.event == DialogExResultLeft) {
-            scene_manager_previous_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRetryConfirm);
             consumed = true;
         } else if(state == ReadMifareUlStateShowUID && event.event == DialogExResultRight) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightMenu);
@@ -88,6 +88,9 @@ bool nfc_scene_mf_ultralight_read_success_on_event(void* context, SceneManagerEv
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewDialogEx);
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneMfUltralightReadSuccess, ReadMifareUlStateShowUID);
+            consumed = true;
+        } else {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneExitConfirm);
             consumed = true;
         }
     }
