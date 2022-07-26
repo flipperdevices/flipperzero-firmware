@@ -65,6 +65,8 @@ static bool
                 infrared->worker, infrared_worker_tx_get_signal_steady_callback, infrared);
             infrared_worker_tx_set_signal_sent_callback(
                 infrared->worker, infrared_signal_sent_callback, infrared);
+            view_dispatcher_send_custom_event(
+                infrared->view_dispatcher, InfraredCustomEventTypeRpcLoaded);
         }
     } else if(event == RpcAppEventButtonPress) {
         if(arg) {
@@ -83,7 +85,7 @@ static bool
 }
 
 static void infrared_find_vacant_remote_name(string_t name, const char* path) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
 
     string_t base_path;
     string_init_set_str(base_path, path);
@@ -120,7 +122,7 @@ static void infrared_find_vacant_remote_name(string_t name, const char* path) {
     }
 
     string_clear(base_path);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 }
 
 static Infrared* infrared_alloc() {
@@ -138,19 +140,18 @@ static Infrared* infrared_alloc() {
     infrared->scene_manager = scene_manager_alloc(&infrared_scene_handlers, infrared);
     infrared->view_dispatcher = view_dispatcher_alloc();
 
-    infrared->gui = furi_record_open("gui");
+    infrared->gui = furi_record_open(RECORD_GUI);
 
     ViewDispatcher* view_dispatcher = infrared->view_dispatcher;
-    view_dispatcher_attach_to_gui(view_dispatcher, infrared->gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_enable_queue(view_dispatcher);
     view_dispatcher_set_event_callback_context(view_dispatcher, infrared);
     view_dispatcher_set_custom_event_callback(view_dispatcher, infrared_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(view_dispatcher, infrared_back_event_callback);
     view_dispatcher_set_tick_event_callback(view_dispatcher, infrared_tick_event_callback, 100);
 
-    infrared->storage = furi_record_open("storage");
-    infrared->dialogs = furi_record_open("dialogs");
-    infrared->notifications = furi_record_open("notification");
+    infrared->storage = furi_record_open(RECORD_STORAGE);
+    infrared->dialogs = furi_record_open(RECORD_DIALOGS);
+    infrared->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     infrared->worker = infrared_worker_alloc();
     infrared->remote = infrared_remote_alloc();
@@ -202,6 +203,7 @@ static void infrared_free(Infrared* infrared) {
 
     if(infrared->rpc_ctx) {
         rpc_system_app_set_callback(infrared->rpc_ctx, NULL, NULL);
+        rpc_system_app_send_exited(infrared->rpc_ctx);
         infrared->rpc_ctx = NULL;
     }
 
@@ -240,16 +242,16 @@ static void infrared_free(Infrared* infrared) {
     infrared_remote_free(infrared->remote);
     infrared_worker_free(infrared->worker);
 
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     infrared->gui = NULL;
 
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
     infrared->notifications = NULL;
 
-    furi_record_close("dialogs");
+    furi_record_close(RECORD_DIALOGS);
     infrared->dialogs = NULL;
 
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     infrared->gui = NULL;
 
     string_clear(infrared->file_path);
@@ -300,16 +302,17 @@ bool infrared_rename_current_remote(Infrared* infrared, const char* name) {
     }
     string_cat_printf(new_path, "/%s%s", string_get_cstr(new_name), INFRARED_APP_EXTENSION);
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
 
     FS_Error status = storage_common_rename(
         storage, infrared_remote_get_path(remote), string_get_cstr(new_path));
     infrared_remote_set_name(remote, string_get_cstr(new_name));
+    infrared_remote_set_path(remote, string_get_cstr(new_path));
 
     string_clear(new_name);
     string_clear(new_path);
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     return (status == FSE_OK || status == FSE_EXIST);
 }
 
@@ -434,6 +437,7 @@ int32_t infrared_app(void* p) {
             infrared->rpc_ctx = (void*)rpc_ctx;
             rpc_system_app_set_callback(
                 infrared->rpc_ctx, infrared_rpc_command_callback, infrared);
+            rpc_system_app_send_started(infrared->rpc_ctx);
             is_rpc_mode = true;
         } else {
             string_set_str(infrared->file_path, (const char*)p);
@@ -447,11 +451,17 @@ int32_t infrared_app(void* p) {
     }
 
     if(is_rpc_mode) {
+        view_dispatcher_attach_to_gui(
+            infrared->view_dispatcher, infrared->gui, ViewDispatcherTypeDesktop);
         scene_manager_next_scene(infrared->scene_manager, InfraredSceneRpc);
-    } else if(is_remote_loaded) {
-        scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);
     } else {
-        scene_manager_next_scene(infrared->scene_manager, InfraredSceneStart);
+        view_dispatcher_attach_to_gui(
+            infrared->view_dispatcher, infrared->gui, ViewDispatcherTypeFullscreen);
+        if(is_remote_loaded) {
+            scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);
+        } else {
+            scene_manager_next_scene(infrared->scene_manager, InfraredSceneStart);
+        }
     }
 
     view_dispatcher_run(infrared->view_dispatcher);
