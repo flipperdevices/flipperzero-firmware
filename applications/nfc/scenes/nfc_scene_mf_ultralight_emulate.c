@@ -1,23 +1,13 @@
 #include "../nfc_i.h"
-#include <lib/nfc_protocols/mifare_ultralight.h>
 #include <dolphin/dolphin.h>
 
-#define NFC_SCENE_EMULATE_MIFARE_UL_LOG_SIZE_MAX (200)
-
-enum {
-    // View states
-    NfcSceneEmulateMifareUlStateWidget,
-    NfcSceneEmulateMifareUlStateTextBox,
-    NfcSceneEmulateMifareUlStateMax = 0xFF,
-    // State flags
-    NfcSceneEmulateMifareUlStateDataChanged = 1 << 8,
-    NfcSceneEmulateMifareUlStateAuthAttempted = 1 << 9,
-    NfcSceneEmulateMifareUlStateLogButtonShown = 1 << 10,
-};
+#define NFC_MF_UL_DATA_NOT_CHANGED (0UL)
+#define NFC_MF_UL_DATA_CHANGED (1UL)
 
 bool nfc_mf_ultralight_emulate_worker_callback(NfcWorkerEvent event, void* context) {
     UNUSED(event);
     Nfc* nfc = context;
+
     scene_manager_set_scene_state(
         nfc->scene_manager, NfcSceneMfUltralightEmulate, NFC_MF_UL_DATA_CHANGED);
     return true;
@@ -25,7 +15,6 @@ bool nfc_mf_ultralight_emulate_worker_callback(NfcWorkerEvent event, void* conte
 
 void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
     Nfc* nfc = context;
-    uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneEmulateMifareUl);
     DOLPHIN_DEED(DolphinDeedNfcEmulate);
 
     // Setup view
@@ -51,7 +40,6 @@ void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
 
 bool nfc_scene_mf_ultralight_emulate_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
-    uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneEmulateMifareUl);
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeBack) {
@@ -64,27 +52,16 @@ bool nfc_scene_mf_ultralight_emulate_on_event(void* context, SceneManagerEvent e
                 nfc->scene_manager, NfcSceneMfUltralightEmulate, NFC_MF_UL_DATA_NOT_CHANGED);
             nfc_device_save_shadow(nfc->dev, nfc->dev->dev_name);
         }
+        consumed = false;
     }
     return consumed;
 }
 
 void nfc_scene_mf_ultralight_emulate_on_exit(void* context) {
     Nfc* nfc = context;
-    uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneEmulateMifareUl);
-
-    // Stop worker
-    nfc_worker_stop(nfc->worker);
-    // Check if data changed and save in shadow file
-    if(state & NfcSceneEmulateMifareUlStateDataChanged) {
-        state &= ~NfcSceneEmulateMifareUlStateDataChanged;
-        scene_manager_set_scene_state(nfc->scene_manager, NfcSceneEmulateMifareUl, state);
-        nfc_device_save_shadow(nfc->dev, nfc->dev->dev_name);
-    }
 
     // Clear view
-    widget_reset(nfc->widget);
-    text_box_reset(nfc->text_box);
-    string_reset(nfc->text_box_store);
+    popup_reset(nfc->popup);
 
     nfc_blink_stop(nfc);
 }
