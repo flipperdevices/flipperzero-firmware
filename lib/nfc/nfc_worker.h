@@ -59,6 +59,8 @@ NfcWorker* nfc_worker_alloc();
 
 NfcWorkerState nfc_worker_get_state(NfcWorker* nfc_worker);
 
+void* nfc_worker_get_event_data(NfcWorker* nfc_worker);
+
 void nfc_worker_free(NfcWorker* nfc_worker);
 
 void nfc_worker_start(

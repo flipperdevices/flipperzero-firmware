@@ -25,6 +25,7 @@ struct NfcWorker {
 
     NfcWorkerCallback callback;
     void* context;
+    void* event_data;
 
     NfcWorkerState state;
 

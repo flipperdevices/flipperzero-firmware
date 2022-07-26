@@ -20,6 +20,7 @@ NfcWorker* nfc_worker_alloc() {
 
     nfc_worker->callback = NULL;
     nfc_worker->context = NULL;
+    nfc_worker->event_data = NULL;
     nfc_worker->storage = furi_record_open(RECORD_STORAGE);
 
     // Initialize rfal
@@ -49,6 +50,10 @@ void nfc_worker_free(NfcWorker* nfc_worker) {
 
 NfcWorkerState nfc_worker_get_state(NfcWorker* nfc_worker) {
     return nfc_worker->state;
+}
+
+void* nfc_worker_get_event_data(NfcWorker* nfc_worker) {
+    return nfc_worker->event_data;
 }
 
 void nfc_worker_start(
