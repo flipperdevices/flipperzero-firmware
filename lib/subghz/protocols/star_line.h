@@ -36,8 +36,7 @@ void subghz_protocol_encoder_star_line_free(void* context);
  * @param btn Button number, 8 bit
  * @param cnt Counter value, 16 bit
  * @param manufacture_name Name of manufacturer's key
- * @param frequency Transmission frequency, Hz
- * @param preset Modulation, FuriHalSubGhzPreset
+ * @param preset Modulation, SubGhzPesetDefinition
  * @return true On success
  */
 bool subghz_protocol_star_line_create_data(
@@ -47,8 +46,7 @@ bool subghz_protocol_star_line_create_data(
     uint8_t btn,
     uint16_t cnt,
     const char* manufacture_name,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset);
+    SubGhzPesetDefinition* preset);
 
 /**
  * Deserialize and generating an upload to send.
