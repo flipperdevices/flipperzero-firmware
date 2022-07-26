@@ -4,8 +4,7 @@
 <b>Latest Updates:</b>
 
 - Updates from OFW July 25th, except #1437 which contradicts with RM changes somehow
-- Updates for api_symbols
-- Updates for apps and Manifest
+- Updates for api_symbol.csv, apps and Manifest
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -51,6 +50,8 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 
 ## Open PRs Checkedout & Not Merged In Main:
 - [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
+## Conflicting PRs Not Merged But In Main:
+- [Fixed building for users with space in windows username #1437 (By SzymonLisowiec)](https://github.com/flipperdevices/flipperzero-firmware/pull/1437)
 
 </td><td>
 <details>
