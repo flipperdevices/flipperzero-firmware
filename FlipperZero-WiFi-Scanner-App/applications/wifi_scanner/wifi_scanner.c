@@ -339,7 +339,7 @@ static void wifi_module_render_callback(Canvas* const canvas, void* ctx)
                 break;
             case ScanAnimation:
             {
-                uint32_t currentTime = osKernelGetTickCount();
+                uint32_t currentTime = furi_get_tick();
                 if (currentTime - app->m_prevAnimationTime > app->m_animationTime)
                 {
                     app->m_prevAnimationTime = currentTime;
@@ -363,7 +363,7 @@ static void wifi_module_render_callback(Canvas* const canvas, void* ctx)
                 break;
             case MonitorAnimation:
             {
-                uint32_t currentTime = osKernelGetTickCount();
+                uint32_t currentTime = furi_get_tick();
                 if (currentTime - app->m_prevAnimationTime > app->m_animationTime)
                 {
                     app->m_prevAnimationTime = currentTime;
@@ -392,11 +392,11 @@ static void wifi_module_render_callback(Canvas* const canvas, void* ctx)
     release_mutex((ValueMutex*)ctx, app);
 }
 
-static void wifi_module_input_callback(InputEvent* input_event, osMessageQueueId_t event_queue) {
+static void wifi_module_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue); 
 
     SPluginEvent event = {.m_type = EventTypeKey, .m_input = *input_event};
-    osMessageQueuePut(event_queue, &event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
 static void uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
@@ -432,8 +432,8 @@ static int32_t uart_worker(void* context) {
 
     while(true) 
     {
-        uint32_t events = furi_thread_flags_wait(WorkerEventStop | WorkerEventRx, osFlagsWaitAny, osWaitForever);
-        furi_check((events & osFlagsError) == 0);
+        uint32_t events = furi_thread_flags_wait(WorkerEventStop | WorkerEventRx, FuriFlagWaitAny, FuriWaitForever);
+        furi_check((events & FuriFlagError) == 0);
 
         if(events & WorkerEventStop) break;
         if(events & WorkerEventRx) 
@@ -601,10 +601,10 @@ int32_t wifi_scanner_app(void* p)
 
     WIFI_APP_LOG_I("Init");
     
-    // osTimerId_t timer = osTimerNew(blink_test_update, osTimerPeriodic, event_queue, NULL);
-    // osTimerStart(timer, osKernelGetTickFreq());
+    // FuriTimer* timer = furi_timer_alloc(blink_test_update, FuriTimerTypePeriodic, event_queue);
+    // furi_timer_start(timer, furi_kernel_get_tick_frequency());
 
-    osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(SPluginEvent), NULL); 
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(SPluginEvent)); 
 
     SWiFiScannerApp* app = malloc(sizeof(SWiFiScannerApp));
 
@@ -663,7 +663,7 @@ int32_t wifi_scanner_app(void* p)
     SPluginEvent event; 
     for(bool processing = true; processing;) 
     {
-        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
+        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         SWiFiScannerApp* app = (SWiFiScannerApp*)acquire_mutex_block(&app_data_mutex);
 
 #if ENABLE_MODULE_DETECTION
@@ -681,7 +681,7 @@ int32_t wifi_scanner_app(void* p)
         }
 #endif // ENABLE_MODULE_DETECTION
 
-        if(event_status == osOK) 
+        if(event_status == FuriStatusOk) 
         {
             if(event.m_type == EventTypeKey) 
             {
@@ -817,7 +817,7 @@ int32_t wifi_scanner_app(void* p)
 
     view_port_free(view_port);
 
-    osMessageQueueDelete(event_queue);  
+    furi_message_queue_free(event_queue);  
 
     vStreamBufferDelete(app->m_rx_stream);
 
