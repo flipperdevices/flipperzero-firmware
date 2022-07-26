@@ -5,6 +5,7 @@
 
 - Updated `All Changes/Features` section to include new assets listing
 - Updated universal_rf_map.txt to use assets included
+- Fixed Dolphin animation weighting to make the sad ones appear less
 - Fixed naming on a few music assets and updated the Manifest
 
 <table width="100%" border="0" cellspacing="0">
