@@ -64,10 +64,11 @@ size_t stream_cache_read(StreamCache* cache, uint8_t* data, size_t size) {
 }
 
 size_t stream_cache_write(StreamCache* cache, const uint8_t* data, size_t size) {
-    furi_assert(cache->data_size >= cache->position);
-    const size_t size_written = MIN(size, cache->data_size - cache->position);
+    furi_assert(STREAM_CACHE_MAX_SIZE >= cache->position);
+    const size_t size_written = MIN(size, STREAM_CACHE_MAX_SIZE - cache->position);
     if(size_written > 0) {
         memcpy(cache->data + cache->position, data, size_written);
+        cache->data_size += size_written;
         cache->position += size_written;
     }
     return size_written;
