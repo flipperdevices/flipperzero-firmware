@@ -256,7 +256,7 @@ uint8_t furi_hal_subghz_get_lqi() {
 /* 
  Modified to the full YARD Stick One extended range of 281-361 MHz, 378-481 MHz, and 749-962 MHz. 
  These changes are at your own risk. The PLL may not lock and FZ devs have warned of possible damage
- Set flag use_ext_range_at_own_risk in setting_user to use
+ Set flag use_ext_range_at_own_risk in extend_range to use
  */
 
  bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
