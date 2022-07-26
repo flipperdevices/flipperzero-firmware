@@ -3,7 +3,9 @@
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
 
-- Updates from OFW July 25th, except #1437 which contradicts with RM changes somehow
+- OFW APPROVED AND ADDED: [#1435](https://github.com/flipperdevices/flipperzero-firmware/pull/1435), [#1444](https://github.com/flipperdevices/flipperzero-firmware/pull/1444), [#1440](https://github.com/flipperdevices/flipperzero-firmware/pull/1440), [#1428](https://github.com/flipperdevices/flipperzero-firmware/pull/1428), [#1433](https://github.com/flipperdevices/flipperzero-firmware/pull/1433), [#1423](https://github.com/flipperdevices/flipperzero-firmware/pull/1423), [#1422](https://github.com/flipperdevices/flipperzero-firmware/pull/1422), [#1413](https://github.com/flipperdevices/flipperzero-firmware/pull/1413), [#1449](https://github.com/flipperdevices/flipperzero-firmware/pull/1449) and [#1450](https://github.com/flipperdevices/flipperzero-firmware/pull/1450)
+- - Except [#1437](https://github.com/flipperdevices/flipperzero-firmware/pull/1437) which contradicts with RM asset detection somehow
+- - [#1383 (was already merged)](https://github.com/flipperdevices/flipperzero-firmware/pull/1383) & [#1408 (was already merged)](https://github.com/flipperdevices/flipperzero-firmware/pull/1408)
 - Updates for api_symbol.csv, apps and Manifest
 
 <table width="100%" border="0" cellspacing="0">
