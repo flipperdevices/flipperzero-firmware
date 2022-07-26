@@ -9,6 +9,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <lib/nfc/protocols/nfca.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
