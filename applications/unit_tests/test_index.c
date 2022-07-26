@@ -67,8 +67,8 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
     minunit_fail = 0;
     minunit_status = 0;
 
-    Loader* loader = furi_record_open("loader");
-    NotificationApp* notification = furi_record_open("notification");
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     // TODO: lock device while test running
     if(loader_is_locked(loader)) {
@@ -78,7 +78,7 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
         notification_message_block(notification, &sequence_set_only_blue_255);
 
         uint32_t heap_before = memmgr_get_free_heap();
-        uint32_t cycle_counter = furi_hal_get_tick();
+        uint32_t cycle_counter = furi_get_tick();
 
         for(size_t i = 0; i < COUNT_OF(unit_tests); i++) {
             if(cli_cmd_interrupt_received(cli)) {
@@ -98,11 +98,11 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
         printf("\r\nFailed tests: %lu\r\n", failed_tests);
 
         // Time report
-        cycle_counter = (furi_hal_get_tick() - cycle_counter);
+        cycle_counter = (furi_get_tick() - cycle_counter);
         printf("Consumed: %lu ms\r\n", cycle_counter);
 
         // Wait for tested services and apps to deallocate memory
-        furi_hal_delay_ms(200);
+        furi_delay_ms(200);
         uint32_t heap_after = memmgr_get_free_heap();
         printf("Leaked: %ld\r\n", heap_before - heap_after);
 
@@ -116,16 +116,16 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
         }
     }
 
-    furi_record_close("notification");
-    furi_record_close("loader");
+    furi_record_close(RECORD_NOTIFICATION);
+    furi_record_close(RECORD_LOADER);
 }
 
 void unit_tests_on_system_start() {
 #ifdef SRV_CLI
-    Cli* cli = furi_record_open("cli");
+    Cli* cli = furi_record_open(RECORD_CLI);
 
     // We need to launch apps from tests, so we cannot lock loader
     cli_add_command(cli, "unit_tests", CliCommandFlagParallelSafe, unit_tests_cli, NULL);
-    furi_record_close("cli");
+    furi_record_close(RECORD_CLI);
 #endif
 }

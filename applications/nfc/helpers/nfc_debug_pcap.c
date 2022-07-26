@@ -15,7 +15,7 @@
 #define DATA_PICC_TO_PCD_CRC_DROPPED 0xFB
 #define DATA_PCD_TO_PICC_CRC_DROPPED 0xFA
 
-#define NFC_DEBUG_PCAP_FILENAME "/ext/nfc/debug.pcap"
+#define NFC_DEBUG_PCAP_FILENAME EXT_PATH("nfc/debug.pcap")
 #define NFC_DEBUG_PCAP_BUFFER_SIZE 64
 
 struct NfcDebugPcapWorker {
@@ -77,8 +77,8 @@ static void
         .event = event,
         .len = len << 8 | len >> 8,
     };
-    xStreamBufferSend(instance->stream, &pkt_hdr, sizeof(pkt_hdr), osWaitForever);
-    xStreamBufferSend(instance->stream, data, len, osWaitForever);
+    xStreamBufferSend(instance->stream, &pkt_hdr, sizeof(pkt_hdr), FuriWaitForever);
+    xStreamBufferSend(instance->stream, data, len, FuriWaitForever);
 }
 
 static void

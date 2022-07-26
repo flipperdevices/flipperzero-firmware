@@ -205,15 +205,19 @@ void subghz_tx_stop(SubGhz* subghz) {
 void subghz_dialog_message_show_only_rx(SubGhz* subghz) {
     DialogsApp* dialogs = subghz->dialogs;
     DialogMessage* message = dialog_message_alloc();
+
+    dialog_message_set_header(message, "Transmission is blocked", 63, 3, AlignCenter, AlignTop);
+
     dialog_message_set_text(
         message,
-        "This frequency can\nonly be used for RX\nin your region",
-        38,
-        23,
-        AlignCenter,
-        AlignCenter);
-    dialog_message_set_icon(message, &I_DolphinFirstStart7_61x51, 67, 12);
-    dialog_message_set_buttons(message, "Back", NULL, NULL);
+        "This frequency\nis restricted to\nreceiving only\nin your region.",
+        3,
+        17,
+        AlignLeft,
+        AlignTop);
+
+    dialog_message_set_icon(message, &I_DolphinFirstStart8_56x51, 72, 14);
+
     dialog_message_show(dialogs, message);
     dialog_message_free(message);
 }
@@ -222,7 +226,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
     furi_assert(subghz);
     furi_assert(file_path);
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
     Stream* fff_data_stream = flipper_format_get_raw_stream(subghz->txrx->fff_data);
 
@@ -304,7 +308,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
 
     string_clear(temp_str);
     flipper_format_free(fff_data_file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     switch(load_key_state) {
     case SubGhzLoadKeyStateParseErr:
@@ -331,7 +335,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
 bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len) {
     furi_assert(subghz);
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     string_t temp_str;
     string_t file_name;
     string_t file_path;
@@ -368,7 +372,7 @@ bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len) {
     string_clear(temp_str);
     string_clear(file_path);
     string_clear(file_name);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return res;
 }
@@ -381,7 +385,7 @@ bool subghz_save_protocol_to_file(
     furi_assert(flipper_format);
     furi_assert(dev_file_name);
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     Stream* flipper_format_stream = flipper_format_get_raw_stream(flipper_format);
 
     bool saved = false;
@@ -410,7 +414,7 @@ bool subghz_save_protocol_to_file(
         saved = true;
     } while(0);
     string_clear(file_dir);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     return saved;
 }
 
@@ -443,7 +447,7 @@ bool subghz_rename_file(SubGhz* subghz) {
     furi_assert(subghz);
     bool ret = true;
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
 
     if(string_cmp(subghz->file_path_tmp, subghz->file_path)) {
         FS_Error fs_result = storage_common_rename(
@@ -454,7 +458,7 @@ bool subghz_rename_file(SubGhz* subghz) {
             ret = false;
         }
     }
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return ret;
 }
@@ -462,9 +466,9 @@ bool subghz_rename_file(SubGhz* subghz) {
 bool subghz_delete_file(SubGhz* subghz) {
     furi_assert(subghz);
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     bool result = storage_simply_remove(storage, string_get_cstr(subghz->file_path_tmp));
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     subghz_file_name_clear(subghz);
 

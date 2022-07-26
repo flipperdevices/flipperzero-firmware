@@ -1,6 +1,6 @@
 #include "lfrfid_app.h"
 #include "assets_icons.h"
-#include "furi/common_defines.h"
+#include <core/common_defines.h>
 #include "m-string.h"
 #include "scene/lfrfid_app_scene_start.h"
 #include "scene/lfrfid_app_scene_read.h"
@@ -27,7 +27,7 @@
 
 #include "rpc/rpc_app.h"
 
-const char* LfRfidApp::app_folder = "/any/lfrfid";
+const char* LfRfidApp::app_folder = ANY_PATH("lfrfid");
 const char* LfRfidApp::app_extension = ".rfid";
 const char* LfRfidApp::app_filetype = "Flipper RFID key";
 
@@ -44,6 +44,7 @@ LfRfidApp::~LfRfidApp() {
     string_clear(file_path);
     if(rpc_ctx) {
         rpc_system_app_set_callback(rpc_ctx, NULL, NULL);
+        rpc_system_app_send_exited(rpc_ctx);
     }
 }
 
@@ -91,6 +92,7 @@ void LfRfidApp::run(void* _args) {
         if(sscanf(args, "RPC %lX", &rpc_ctx_ptr) == 1) {
             rpc_ctx = (RpcAppSystem*)rpc_ctx_ptr;
             rpc_system_app_set_callback(rpc_ctx, rpc_command_callback, this);
+            rpc_system_app_send_started(rpc_ctx);
             scene_controller.add_scene(SceneType::Rpc, new LfRfidAppSceneRpc());
             scene_controller.process(100, SceneType::Rpc);
         } else {
