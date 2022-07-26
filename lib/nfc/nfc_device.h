@@ -14,6 +14,7 @@
 
 #define NFC_DEV_NAME_MAX_LEN 22
 #define NFC_READER_DATA_MAX_SIZE 64
+#define NFC_DICT_KEY_BATCH_SIZE 50
 
 #define NFC_APP_FOLDER ANY_PATH("nfc")
 #define NFC_APP_EXTENSION ".nfc"

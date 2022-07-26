@@ -48,6 +48,7 @@ typedef enum {
     // Mifare Classic events
     NfcWorkerEventNoDictFound,
     NfcWorkerEventNewSector,
+    NfcWorkerEventNewDictKeyBatch,
     NfcWorkerEventFoundKeyA,
     NfcWorkerEventFoundKeyB,
 } NfcWorkerEvent;

@@ -415,9 +415,11 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
         nfc_worker->callback(NfcWorkerEventNoDictFound, nfc_worker->context);
         return;
     }
-    dict_attack_data->dict = NULL;
 
-    FURI_LOG_D(TAG, "Start Dictionary attack");
+    FURI_LOG_D(
+        TAG,
+        "Start Dictionary attack, Key Count %d",
+        mf_classic_dict_get_total_keys(dict));
     for(size_t i = 0; i < total_sectors; i++) {
         FURI_LOG_I(TAG, "Sector %d", i);
         nfc_worker->callback(NfcWorkerEventNewSector, nfc_worker->context);
@@ -425,7 +427,11 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
         if(mf_classic_is_sector_read(data, i)) continue;
         bool is_key_a_found = mf_classic_is_key_found(data, i, MfClassicKeyA);
         bool is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
+        uint16_t key_index = 0;
         while(mf_classic_dict_get_next_key(dict, &key)) {
+            if(++key_index % NFC_DICT_KEY_BATCH_SIZE == 0) {
+                nfc_worker->callback(NfcWorkerEventNewDictKeyBatch, nfc_worker->context);
+            }
             furi_hal_nfc_sleep();
             if(furi_hal_nfc_activate_nfca(200, NULL)) {
                 furi_hal_nfc_sleep();
@@ -456,7 +462,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     }
                 }
                 if(is_key_a_found && is_key_b_found) break;
-                if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack || dict != dict_attack_data->dict)
+                if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack)
                     break;
             } else {
                 if(!card_removed_notified) {
@@ -478,7 +484,6 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
     } else {
         nfc_worker->callback(NfcWorkerEventAborted, nfc_worker->context);
     }
-    mf_classic_dict_free(dict);
 }
 
 void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
