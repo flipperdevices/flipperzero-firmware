@@ -20,6 +20,8 @@
 #define PICOPASS_APP_EXTENSION ".picopass"
 #define PICOPASS_APP_SHADOW_EXTENSION ".pas"
 
+typedef void (*PicopassLoadingCallback)(void* context, bool state);
+
 typedef enum {
     PicopassDeviceEncryptionUnknown = 0,
     PicopassDeviceEncryptionNone = 0x14,
@@ -67,6 +69,9 @@ typedef struct {
     char dev_name[PICOPASS_DEV_NAME_MAX_LEN + 1];
     string_t load_path;
     PicopassDeviceSaveFormat format;
+    PicopassLoadingCallback loading_cb;
+    void* loading_cb_ctx;
+
 } PicopassDevice;
 
 PicopassDevice* picopass_device_alloc();
@@ -77,6 +82,13 @@ void picopass_device_set_name(PicopassDevice* dev, const char* name);
 
 bool picopass_device_save(PicopassDevice* dev, const char* dev_name);
 
+bool picopass_file_select(PicopassDevice* dev);
+
 void picopass_device_data_clear(PicopassDeviceData* dev_data);
 
 void picopass_device_clear(PicopassDevice* dev);
+
+void picopass_device_set_loading_callback(
+    PicopassDevice* dev,
+    PicopassLoadingCallback callback,
+    void* context);

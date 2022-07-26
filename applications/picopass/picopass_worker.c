@@ -1,21 +1,9 @@
 #include "picopass_worker_i.h"
-#include <furi_hal.h>
-
-#include <stdlib.h>
-#include <st25r3916.h>
-#include <rfal_analogConfig.h>
-#include <rfal_rf.h>
-#include <rfal_nfc.h>
-
-#include <mbedtls/des.h>
-#include <loclass/optimized_ikeys.h>
-#include <loclass/optimized_cipher.h>
-
-#include <platform.h>
 
 #define TAG "PicopassWorker"
 
 const uint8_t picopass_iclass_key[] = {0xaf, 0xa7, 0x85, 0xa7, 0xda, 0xb3, 0x33, 0x78};
+const uint8_t picopass_factory_key[] = {0x76, 0x65, 0x54, 0x43, 0x32, 0x21, 0x10, 0x00};
 const uint8_t picopass_iclass_decryptionkey[] =
     {0xb4, 0x21, 0x2c, 0xca, 0xb7, 0xed, 0x21, 0x0f, 0x7b, 0x93, 0xd4, 0x59, 0x39, 0xc7, 0xdd, 0x36};
 
