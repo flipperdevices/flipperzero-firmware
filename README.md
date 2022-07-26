@@ -50,13 +50,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Edit the two `_map` files in /ext/subghz/assets to contain your specific subghz (.SUB) files.
 </details>
 
-
-## Open PRs Checkedout & Not Merged In Main:
-- [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
-## Conflicting PRs Not Merged But In Main:
-- [Fixed building for users with space in windows username #1437 (By SzymonLisowiec)](https://github.com/flipperdevices/flipperzero-firmware/pull/1437)
-
-</td><td>
 <details>
   <summary><B>All Changes/Features</b></summary><br/>
   
@@ -88,6 +81,11 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 
  </details>
 
+
+## Open PRs Checkedout & Not Merged In Main:
+- [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
+
+</td><td>
 <details>
   <summary><B>GAMES</b></summary><br/>
   
@@ -131,6 +129,10 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `REQUIRES WIFI DEV BOARD WITH MARAUDER FLASHED`
 - [WiFi Scanner (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `HIDDEN "wifi_scanner"` due to `Req: ESP8266`
 </details>
+
+## Conflicting PRs Not Merged:
+- [Fixed building for users with space in windows username #1437 (By SzymonLisowiec)](https://github.com/flipperdevices/flipperzero-firmware/pull/1437)
+
 </td></tr></table>
 
 ### Thank you, [MuddleBox](https://github.com/MuddledBox/flipperzero-firmware), [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware), [WeTox-Team](https://github.com/wetox-team/flipperzero-firmware) & of course, most of all [Flipper Devices](https://github.com/flipperdevices/flipperzero-firmware)!
