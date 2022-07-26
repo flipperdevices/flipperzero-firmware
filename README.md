@@ -8,6 +8,8 @@
 - - [#1383 (was already merged)](https://github.com/flipperdevices/flipperzero-firmware/pull/1383) & [#1408 (was already merged)](https://github.com/flipperdevices/flipperzero-firmware/pull/1408)
 - Updates for api_symbol.csv, apps and Manifest
 - SubGHz: Extended ranges enabled through flag in /ext/subghz/assets/extend_range [Thanks to tkerrby](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/116)
+- Updated `All Changes/Features` section to include new assets listing
+- Updated universal_rf_map.txt to use assets included
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -56,6 +58,12 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Animations: Hold Center to change flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
 - Animations: Idle animations will show all animations regardless of level and butthurt [Thanks to qqMajiKpp]
 - Animations: SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
+- Assets: Includes a NFC Level 50 Link Amiibo
+- Assets: Includes a NFC Rick Roll link
+- Assets: Includes sample Music Player tunes
+- Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys and Tesla Charge Port
+- Assets: Includes Sonic Screw Driver sound for the Wav Player
+- Assets: Running DolphinRestorer.fap on new install will auto-level to the end of Level 2.
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
