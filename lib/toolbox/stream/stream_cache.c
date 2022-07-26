@@ -46,6 +46,13 @@ size_t stream_cache_fill(StreamCache* cache, Stream* stream) {
     return size_read;
 }
 
+size_t stream_cache_flush(StreamCache* cache, Stream* stream) {
+    const size_t size_written = stream_write(stream, cache->data, cache->data_size);
+    cache->data_size = 0;
+    cache->position = 0;
+    return size_written;
+}
+
 size_t stream_cache_read(StreamCache* cache, uint8_t* data, size_t size) {
     furi_assert(cache->data_size >= cache->position);
     const size_t size_read = MIN(size, cache->data_size - cache->position);
@@ -54,6 +61,16 @@ size_t stream_cache_read(StreamCache* cache, uint8_t* data, size_t size) {
         cache->position += size_read;
     }
     return size_read;
+}
+
+size_t stream_cache_write(StreamCache* cache, const uint8_t* data, size_t size) {
+    furi_assert(cache->data_size >= cache->position);
+    const size_t size_written = MIN(size, cache->data_size - cache->position);
+    if(size_written > 0) {
+        memcpy(cache->data + cache->position, data, size_written);
+        cache->position += size_written;
+    }
+    return size_written;
 }
 
 int32_t stream_cache_seek(StreamCache* cache, int32_t offset) {
