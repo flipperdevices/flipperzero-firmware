@@ -115,7 +115,7 @@ void mf_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassic
     furi_assert(data);
 
     if(mf_classic_is_sector_trailer(block_num)) {
-        memcpy(&data->block[block_num].value[6], block_data->value, 4);
+        memcpy(&data->block[block_num].value[6], &block_data->value[6], 4);
     } else {
         memcpy(data->block[block_num].value, block_data->value, MF_CLASSIC_BLOCK_SIZE);
     }
