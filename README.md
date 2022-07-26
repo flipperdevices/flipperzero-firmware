@@ -7,6 +7,7 @@
 - - Except [#1437](https://github.com/flipperdevices/flipperzero-firmware/pull/1437) which contradicts with RM asset detection somehow
 - - [#1383 (was already merged)](https://github.com/flipperdevices/flipperzero-firmware/pull/1383) & [#1408 (was already merged)](https://github.com/flipperdevices/flipperzero-firmware/pull/1408)
 - Updates for api_symbol.csv, apps and Manifest
+- SubGHz: Extended ranges enabled through flag in /ext/subghz/assets/extend_range [Thanks to tkerrby](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/116)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -81,6 +82,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Settings: Renamed flippers have the correct name for Bluetooth pairing [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/firmware/targets/f7/furi_hal/furi_hal_version.c#L95)
 - Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
 - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
+- SubGHz: Extended ranges enabled through flag in /ext/subghz/assets/extend_range [Thanks to tkerrby](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/116)
 - SubGHz: Protocols Came Atomo, FAAC_SLH, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - SubGHz: Unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/setting_user` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 
