@@ -60,6 +60,7 @@ static bool desktop_view_slideshow_input(InputEvent* event, void* context) {
             furi_timer_start(instance->timer, DESKTOP_SLIDESHOW_POWEROFF_SHORT);
         } else if(event->type == InputTypeRelease) {
             furi_timer_stop(instance->timer);
+            furi_timer_start(instance->timer, DESKTOP_SLIDESHOW_POWEROFF_LONG);
         }
     }
 

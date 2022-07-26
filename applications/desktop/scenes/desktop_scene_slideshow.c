@@ -35,9 +35,9 @@ bool desktop_scene_slideshow_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case DesktopSlideshowPoweroff:
-            power = furi_record_open("power");
+            power = furi_record_open(RECORD_POWER);
             power_off(power);
-            furi_record_close("power");
+            furi_record_close(RECORD_POWER);
             consumed = true;
             break;
 
