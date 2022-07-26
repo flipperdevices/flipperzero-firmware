@@ -8,7 +8,7 @@
 #include <lib/nfc/protocols/nfc_util.h>
 #include <flipper_format/flipper_format.h>
 
-#define NFC_DEVICE_KEYS_FOLDER "/ext/nfc/cache"
+#define NFC_DEVICE_KEYS_FOLDER EXT_PATH("nfc/cache")
 #define NFC_DEVICE_KEYS_EXTENSION ".keys"
 
 static const char* nfc_file_header = "Flipper NFC device";
@@ -22,8 +22,8 @@ static const uint32_t nfc_mifare_classic_data_format_version = 2;
 
 NfcDevice* nfc_device_alloc() {
     NfcDevice* nfc_dev = malloc(sizeof(NfcDevice));
-    nfc_dev->storage = furi_record_open("storage");
-    nfc_dev->dialogs = furi_record_open("dialogs");
+    nfc_dev->storage = furi_record_open(RECORD_STORAGE);
+    nfc_dev->dialogs = furi_record_open(RECORD_DIALOGS);
     string_init(nfc_dev->load_path);
     string_init(nfc_dev->dev_data.parsed_data);
     return nfc_dev;
@@ -32,8 +32,8 @@ NfcDevice* nfc_device_alloc() {
 void nfc_device_free(NfcDevice* nfc_dev) {
     furi_assert(nfc_dev);
     nfc_device_clear(nfc_dev);
-    furi_record_close("storage");
-    furi_record_close("dialogs");
+    furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_DIALOGS);
     string_clear(nfc_dev->load_path);
     string_clear(nfc_dev->dev_data.parsed_data);
     free(nfc_dev);
