@@ -6,6 +6,7 @@
 #include <dialogs/dialogs.h>
 
 #include <furi_hal_nfc.h>
+#include <lib/nfc/helpers/mf_classic_dict.h>
 #include <lib/nfc/protocols/emv.h>
 #include <lib/nfc/protocols/mifare_ultralight.h>
 #include <lib/nfc/protocols/mifare_classic.h>
@@ -42,9 +43,16 @@ typedef struct {
 } NfcReaderRequestData;
 
 typedef struct {
+    MfClassicDict* dict;
+} NfcMfClassicDictAttackData;
+
+typedef struct {
     FuriHalNfcDevData nfc_data;
     NfcProtocol protocol;
-    NfcReaderRequestData reader_data;
+    union {
+        NfcReaderRequestData reader_data;
+        NfcMfClassicDictAttackData mf_classic_dict_attack_data;
+    };
     union {
         EmvData emv_data;
         MfUltralightData mf_ul_data;
