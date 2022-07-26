@@ -290,14 +290,6 @@ int32_t nfc_app(void* p) {
             view_dispatcher_attach_to_gui(
                 nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeDesktop);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRpc);
-        } else if(nfc_device_load(nfc->dev, p, true)) {
-            if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
-            } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
-            } else {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
-            }
         } else {
             view_dispatcher_attach_to_gui(
                 nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
