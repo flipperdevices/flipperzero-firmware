@@ -12,6 +12,8 @@ extern "C" {
 #define RPC_BUFFER_SIZE (1024)
 #define RPC_MAX_MESSAGE_SIZE (1536)
 
+#define RECORD_RPC "rpc"
+
 /** Rpc interface. Used for opening session only. */
 typedef struct Rpc Rpc;
 /** Rpc session interface */

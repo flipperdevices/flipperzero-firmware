@@ -3,7 +3,7 @@ App(
     name="Dolphin Backup",
     apptype=FlipperAppType.PLUGIN,
     entry_point="storage_move_to_sd_app",
-    requires=["gui","storage"],
+    requires=["gui", "storage"],
     stack_size=2 * 1024,
     order=80,
 )

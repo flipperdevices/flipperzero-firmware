@@ -4,9 +4,7 @@
 #include <core/pubsub.h>
 #include <stdbool.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define RECORD_POWER "power"
 
 typedef struct Power Power;
 

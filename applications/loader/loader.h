@@ -3,9 +3,7 @@
 #include <core/pubsub.h>
 #include <stdbool.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define RECORD_LOADER "loader"
 
 typedef struct Loader Loader;
 
