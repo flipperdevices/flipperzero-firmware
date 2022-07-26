@@ -97,7 +97,7 @@ SubGhzWorker* subghz_worker_alloc() {
     furi_thread_set_context(instance->thread, instance);
     furi_thread_set_callback(instance->thread, subghz_worker_thread_callback);
 
-    instance->stream = xStreamBufferCreate(sizeof(LevelDuration) * 4048, sizeof(LevelDuration));
+    instance->stream = xStreamBufferCreate(sizeof(LevelDuration) * 4096, sizeof(LevelDuration));
 
     //setting filter
     instance->filter_running = true;

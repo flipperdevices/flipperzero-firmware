@@ -145,15 +145,14 @@ void furi_hal_subghz_load_custom_preset(uint8_t* preset_data) {
     //show debug
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         i = 0;
-        printf("\033[0;34m [D] " TAG " Load custom preset\033[0m ");
+        FURI_LOG_D(TAG, "Loading custom preset");
         while(preset_data[i]) {
-            printf("%X %X ", preset_data[i], preset_data[i + 1]);
+            FURI_LOG_D(TAG, "Reg[%lu]: %02X=%02X", i, preset_data[i], preset_data[i + 1]);
             i += 2;
         }
         for(uint8_t y = i; y < i + 10; y++) {
-            printf("%X ", preset_data[y]);
+            FURI_LOG_D(TAG,"PA[%lu]:  %02X", y, preset_data[y]);
         }
-        printf("\r\n");
     }
 }
 
