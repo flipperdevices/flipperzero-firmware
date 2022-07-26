@@ -52,7 +52,3 @@ void loader_update_menu();
 
 /** Show primary loader */
 FuriPubSub* loader_get_pubsub(Loader* instance);
-
-#ifdef __cplusplus
-}
-#endif

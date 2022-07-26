@@ -38,7 +38,3 @@ const char* input_get_key_name(InputKey key);
  * @return string
  */
 const char* input_get_type_name(InputType type);
-
-#ifdef __cplusplus
-}
-#endif

@@ -87,7 +87,3 @@ bool power_is_battery_healthy(Power* power);
  * @param enable    true - enable, false - disable
  */
 void power_enable_low_battery_level_notification(Power* power, bool enable);
-
-#ifdef __cplusplus
-}
-#endif
