@@ -7,6 +7,7 @@
 - Updated universal_rf_map.txt to use assets included
 - Fixed Dolphin animation weighting to make the sad ones appear less
 - Fixed naming on a few music assets and updated the Manifest
+- Changes from July 26th have the code not compiling. Will work on this.
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
