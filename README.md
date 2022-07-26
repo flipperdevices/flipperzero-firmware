@@ -3,13 +3,9 @@
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
 
-- OFW APPROVED AND ADDED: [#1435](https://github.com/flipperdevices/flipperzero-firmware/pull/1435), [#1444](https://github.com/flipperdevices/flipperzero-firmware/pull/1444), [#1440](https://github.com/flipperdevices/flipperzero-firmware/pull/1440), [#1428](https://github.com/flipperdevices/flipperzero-firmware/pull/1428), [#1433](https://github.com/flipperdevices/flipperzero-firmware/pull/1433), [#1423](https://github.com/flipperdevices/flipperzero-firmware/pull/1423), [#1422](https://github.com/flipperdevices/flipperzero-firmware/pull/1422), [#1413](https://github.com/flipperdevices/flipperzero-firmware/pull/1413), [#1449](https://github.com/flipperdevices/flipperzero-firmware/pull/1449) and [#1450](https://github.com/flipperdevices/flipperzero-firmware/pull/1450)
-- - Except [#1437](https://github.com/flipperdevices/flipperzero-firmware/pull/1437) which contradicts with RM asset detection somehow
-- - [#1383 (was already merged)](https://github.com/flipperdevices/flipperzero-firmware/pull/1383) & [#1408 (was already merged)](https://github.com/flipperdevices/flipperzero-firmware/pull/1408)
-- Updates for api_symbol.csv, apps and Manifest
-- SubGHz: Extended ranges enabled through flag in /ext/subghz/assets/extend_range [Thanks to tkerrby](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/116)
 - Updated `All Changes/Features` section to include new assets listing
 - Updated universal_rf_map.txt to use assets included
+- Fixed naming on a few music assets and updated the Manifest
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
