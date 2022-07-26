@@ -86,6 +86,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
 
 </td><td>
+
 <details>
   <summary><B>GAMES</b></summary><br/>
   
