@@ -2,8 +2,8 @@
 #include "archive_files.h"
 #include "archive_apps.h"
 #include "archive_browser.h"
-#include "furi/common_defines.h"
-#include "furi/log.h"
+#include <core/common_defines.h>
+#include <core/log.h>
 #include "gui/modules/file_browser_worker.h"
 #include "m-string.h"
 #include <math.h>
@@ -15,8 +15,9 @@ static void
 
     int32_t load_offset = 0;
     browser->is_root = is_root;
+    ArchiveTabEnum tab = archive_get_tab(browser);
 
-    if((item_cnt == 0) && (archive_is_home(browser))) {
+    if((item_cnt == 0) && (archive_is_home(browser)) && (tab != ArchiveTabBrowser)) {
         archive_switch_tab(browser, browser->last_tab_switch_dir);
     } else if(!string_start_with_str_p(browser->path, "/app:")) {
         with_view_model(
@@ -389,6 +390,22 @@ void archive_favorites_move_mode(ArchiveBrowserView* browser, bool active) {
         });
 }
 
+static bool archive_is_dir_exists(string_t path) {
+    if(string_equal_str_p(path, STORAGE_ANY_PATH_PREFIX)) {
+        return true;
+    }
+    bool state = false;
+    FileInfo file_info;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    if(storage_common_stat(storage, string_get_cstr(path), &file_info) == FSE_OK) {
+        if(file_info.flags & FSF_DIRECTORY) {
+            state = true;
+        }
+    }
+    furi_record_close(RECORD_STORAGE);
+    return state;
+}
+
 void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     furi_assert(browser);
     ArchiveTabEnum tab = archive_get_tab(browser);
@@ -418,11 +435,15 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
             }
         }
     } else {
-        ArchiveTabEnum tab = archive_get_tab(browser);
-        bool skip_assets = (strcmp(archive_get_tab_ext(tab), "*") == 0) ? false : true;
-        file_browser_worker_set_config(
-            browser->worker, browser->path, archive_get_tab_ext(tab), skip_assets);
-        tab_empty = false; // Empty check will be performed later
+        tab = archive_get_tab(browser);
+        if(archive_is_dir_exists(browser->path)) {
+            bool skip_assets = (strcmp(archive_get_tab_ext(tab), "*") == 0) ? false : true;
+            file_browser_worker_set_config(
+                browser->worker, browser->path, archive_get_tab_ext(tab), skip_assets);
+            tab_empty = false; // Empty check will be performed later
+        } else {
+            tab_empty = true;
+        }
     }
 
     if((tab_empty) && (tab != ArchiveTabBrowser)) {

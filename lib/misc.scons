@@ -7,8 +7,6 @@ env.Append(
         "#/lib/heatshrink",
         "#/lib/micro-ecc",
         "#/lib/nanopb",
-        "#/lib/mbedtls/include",
-        "#/lib/nfc_protocols",
         "#/lib/u8g2",
     ],
     CPPDEFINES=[
@@ -22,11 +20,9 @@ libenv.ApplyLibFlags()
 
 sources = []
 
-libenv.BuildModules(["mbedtls"])
 libs_recurse = [
     "digital_signal",
     "micro-ecc",
-    "nfc_protocols",
     "one_wire",
     "u8g2",
     "update_util",

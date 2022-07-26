@@ -39,12 +39,12 @@ Picopass* picopass_alloc() {
     picopass->dev = picopass_device_alloc();
 
     // Open GUI record
-    picopass->gui = furi_record_open("gui");
+    picopass->gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(
         picopass->view_dispatcher, picopass->gui, ViewDispatcherTypeFullscreen);
 
     // Open Notification record
-    picopass->notifications = furi_record_open("notification");
+    picopass->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     // Submenu
     picopass->submenu = submenu_alloc();
@@ -55,6 +55,13 @@ Picopass* picopass_alloc() {
     picopass->popup = popup_alloc();
     view_dispatcher_add_view(
         picopass->view_dispatcher, PicopassViewPopup, popup_get_view(picopass->popup));
+
+    // Text Input
+    picopass->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        picopass->view_dispatcher,
+        PicopassViewTextInput,
+        text_input_get_view(picopass->text_input));
 
     // Custom Widget
     picopass->widget = widget_alloc();
@@ -67,6 +74,10 @@ Picopass* picopass_alloc() {
 void picopass_free(Picopass* picopass) {
     furi_assert(picopass);
 
+    // Picopass device
+    picopass_device_free(picopass->dev);
+    picopass->dev = NULL;
+
     // Submenu
     view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewMenu);
     submenu_free(picopass->submenu);
@@ -74,6 +85,10 @@ void picopass_free(Picopass* picopass) {
     // Popup
     view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewPopup);
     popup_free(picopass->popup);
+
+    // TextInput
+    view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewTextInput);
+    text_input_free(picopass->text_input);
 
     // Custom Widget
     view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewWidget);
@@ -90,17 +105,27 @@ void picopass_free(Picopass* picopass) {
     scene_manager_free(picopass->scene_manager);
 
     // GUI
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     picopass->gui = NULL;
 
     // Notifications
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
     picopass->notifications = NULL;
 
-    picopass_device_free(picopass->dev);
-    picopass->dev = NULL;
-
     free(picopass);
+}
+
+void picopass_text_store_set(Picopass* picopass, const char* text, ...) {
+    va_list args;
+    va_start(args, text);
+
+    vsnprintf(picopass->text_store, sizeof(picopass->text_store), text, args);
+
+    va_end(args);
+}
+
+void picopass_text_store_clear(Picopass* picopass) {
+    memset(picopass->text_store, 0, sizeof(picopass->text_store));
 }
 
 static const NotificationSequence picopass_sequence_blink_start_blue = {
