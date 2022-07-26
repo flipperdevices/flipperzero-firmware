@@ -57,8 +57,7 @@ bool subghz_protocol_keeloq_create_data(
  * @param cnt Counter value, 16 bit
  * @param seed Seed value, 32 bit
  * @param manufacture_name Name of manufacturer's key
- * @param frequency Transmission frequency, Hz
- * @param preset Modulation, FuriHalSubGhzPreset
+ * @param preset Modulation, SubGhzPesetDefinition
  * @return true On success
  */
 bool subghz_protocol_keeloq_bft_create_data(
@@ -69,8 +68,7 @@ bool subghz_protocol_keeloq_bft_create_data(
     uint16_t cnt,
     uint32_t seed,
     const char* manufacture_name,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset);
+    SubGhzPesetDefinition* preset);
 
 /**
  * Deserialize and generating an upload to send.
