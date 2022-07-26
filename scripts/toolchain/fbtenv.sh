@@ -170,7 +170,7 @@ fbtenv_download_toolchain()
         fbtenv_download_toolchain_tar;
     fi
     fbtenv_remove_old_tooclhain;
-    fbtenv_unpack_toolchain || fbtenv_clearing && return 1;
+    fbtenv_unpack_toolchain || { fbtenv_clearing && return 1; };
     fbtenv_clearing;
     return 0;
 }
