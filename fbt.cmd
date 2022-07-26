@@ -1,5 +1,5 @@
 @echo off
-call %~dp0scripts\toolchain\fbtenv.cmd env
+call "%~dp0scripts\toolchain\fbtenv.cmd" env
 
 set SCONS_EP=%~dp0\lib\scons\scripts\scons.py
 
@@ -11,7 +11,6 @@ if [%FBT_NO_SYNC%] == [] (
         exit /b 1
     )
 )
-git submodule update --init
 
 set "SCONS_DEFAULT_FLAGS=-Q --warn=target-not-built"
 python lib\scons\scripts\scons.py %SCONS_DEFAULT_FLAGS% %*
