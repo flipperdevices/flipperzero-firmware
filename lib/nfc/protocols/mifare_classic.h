@@ -135,12 +135,6 @@ void mf_classic_reader_add_sector(
 
 void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, uint8_t sec_num);
 
-bool _mf_classic_read_sector(
-    FuriHalNfcTxRxContext* tx_rx,
-    Crypto1* crypto,
-    MfClassicSectorReader* sector_reader,
-    MfClassicSector* sector);
-
 uint8_t mf_classic_read_card(
     FuriHalNfcTxRxContext* tx_rx,
     MfClassicReader* reader,

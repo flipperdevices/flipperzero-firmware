@@ -592,7 +592,7 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
     } while(false);
 }
 
-bool _mf_classic_read_sector(
+static bool mf_classic_read_sector_with_reader(
     FuriHalNfcTxRxContext* tx_rx,
     Crypto1* crypto,
     MfClassicSectorReader* sector_reader,
@@ -658,7 +658,7 @@ uint8_t mf_classic_read_card(
     data->key_b_mask = 0;
     MfClassicSector temp_sector = {};
     for(uint8_t i = 0; i < reader->sectors_to_read; i++) {
-        if(_mf_classic_read_sector(
+        if(mf_classic_read_sector_with_reader(
                tx_rx, &reader->crypto, &reader->sector_reader[i], &temp_sector)) {
             uint8_t first_block =
                 mf_classic_get_first_block_num_of_sector(reader->sector_reader[i].sector_num);
@@ -701,23 +701,23 @@ uint8_t mf_classic_update_card(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data
     for(size_t i = 0; i < total_sectors; i++) {
         MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, i);
         // Load key A
-        if(FURI_BIT(data->key_a_mask, i)) {
+        if(mf_classic_is_key_found(data, i, MfClassicKeyA)) {
             sec_reader.key_a = nfc_util_bytes2num(sec_tr->key_a, 6);
         } else {
             sec_reader.key_a = MF_CLASSIC_NO_KEY;
         }
         // Load key B
-        if(FURI_BIT(data->key_a_mask, i)) {
+        if(mf_classic_is_key_found(data, i, MfClassicKeyB)) {
             sec_reader.key_b = nfc_util_bytes2num(sec_tr->key_b, 6);
         } else {
             sec_reader.key_b = MF_CLASSIC_NO_KEY;
         }
         if((key_a != MF_CLASSIC_NO_KEY) || (key_b != MF_CLASSIC_NO_KEY)) {
             sec_reader.sector_num = i;
-            if(_mf_classic_read_sector(tx_rx, &crypto, &sec_reader, &temp_sector)) {
+            if(mf_classic_read_sector_with_reader(tx_rx, &crypto, &sec_reader, &temp_sector)) {
                 uint8_t first_block = mf_classic_get_first_block_num_of_sector(i);
                 for(uint8_t j = 0; j < temp_sector.total_blocks; j++) {
-                    data->block[first_block + j] = temp_sector.block[j];
+                    mf_classic_set_block_read(data, first_block + j, &temp_sector.block[j]);
                 }
                 sectors_read++;
             }
