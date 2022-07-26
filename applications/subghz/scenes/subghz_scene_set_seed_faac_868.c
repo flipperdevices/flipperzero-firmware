@@ -32,20 +32,23 @@ bool subghz_scene_set_seed_faac_868_on_event(void* context, SceneManagerEvent ev
     bool generated_protocol = false;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubGhzCustomEventByteInputDone) {
-            
-            uint32_t fix_part = subghz->txrx->secure_data->fix[0] << 24 | subghz->txrx->secure_data->fix[1] << 16 |
-                           subghz->txrx->secure_data->fix[2] << 8 | subghz->txrx->secure_data->fix[3];
+            uint32_t fix_part =
+                subghz->txrx->secure_data->fix[0] << 24 | subghz->txrx->secure_data->fix[1] << 16 |
+                subghz->txrx->secure_data->fix[2] << 8 | subghz->txrx->secure_data->fix[3];
 
             uint32_t cnt = subghz->txrx->secure_data->cnt[0] << 16 |
                            subghz->txrx->secure_data->cnt[1] << 8 |
                            subghz->txrx->secure_data->cnt[2];
 
-            uint32_t seed = subghz->txrx->secure_data->seed[0] << 24 | subghz->txrx->secure_data->seed[1] << 16 |
-                            subghz->txrx->secure_data->seed[2] << 8 | subghz->txrx->secure_data->seed[3];
-            
+            uint32_t seed = subghz->txrx->secure_data->seed[0] << 24 |
+                            subghz->txrx->secure_data->seed[1] << 16 |
+                            subghz->txrx->secure_data->seed[2] << 8 |
+                            subghz->txrx->secure_data->seed[3];
+
             subghz->txrx->transmitter =
                 subghz_transmitter_alloc_init(subghz->txrx->environment, "Faac SLH");
             if(subghz->txrx->transmitter) {
+                subghz_preset_init(subghz, "AM650", 868350000, NULL, 0);
                 subghz_protocol_faac_slh_create_data(
                     subghz_transmitter_get_protocol_instance(subghz->txrx->transmitter),
                     subghz->txrx->fff_data,
@@ -54,23 +57,23 @@ bool subghz_scene_set_seed_faac_868_on_event(void* context, SceneManagerEvent ev
                     (cnt & 0xFFFFF),
                     seed,
                     "FAAC_SLH",
-                    868350000,
-                    FuriHalSubGhzPresetOok650Async);
-                
+                    subghz->txrx->preset);
+                // roguemastter dont steal!!
                 uint8_t seed_data[sizeof(uint32_t)] = {0};
                 for(size_t i = 0; i < sizeof(uint32_t); i++) {
                     seed_data[sizeof(uint32_t) - i - 1] = (seed >> i * 8) & 0xFF;
-                    }
+                }
 
-                flipper_format_write_hex(subghz->txrx->fff_data, "Seed", seed_data, sizeof(uint32_t));
-                
+                flipper_format_write_hex(
+                    subghz->txrx->fff_data, "Seed", seed_data, sizeof(uint32_t));
+
                 generated_protocol = true;
             } else {
                 generated_protocol = false;
             }
 
             subghz_transmitter_free(subghz->txrx->transmitter);
-            
+
             if(!generated_protocol) {
                 string_set_str(
                     subghz->error_str, "Function requires\nan SD card with\nfresh databases.");
@@ -78,7 +81,7 @@ bool subghz_scene_set_seed_faac_868_on_event(void* context, SceneManagerEvent ev
             }
             consumed = true;
         }
-        
+
         if(generated_protocol) {
             subghz_file_name_clear(subghz);
             DOLPHIN_DEED(DolphinDeedSubGhzAddManually);
@@ -88,12 +91,12 @@ bool subghz_scene_set_seed_faac_868_on_event(void* context, SceneManagerEvent ev
             return true;
         }
     }
-    return consumed;;
+    return consumed;
 }
 
 void subghz_scene_set_seed_faac_868_on_exit(void* context) {
     SubGhz* subghz = context;
-    
+
     // Clear view
     byte_input_set_result_callback(subghz->byte_input, NULL, NULL, NULL, NULL, 0);
     byte_input_set_header_text(subghz->byte_input, "");
