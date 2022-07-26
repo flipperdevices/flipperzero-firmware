@@ -16,7 +16,7 @@ struct MfClassicDict {
 };
 
 bool mf_classic_dict_check_presence(MfClassicDictType dict_type) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
 
     bool dict_present = false;
     if(dict_type == MfClassicDictTypeFlipper) {
@@ -25,16 +25,16 @@ bool mf_classic_dict_check_presence(MfClassicDictType dict_type) {
         dict_present = storage_common_stat(storage, MF_CLASSIC_DICT_USER_PATH, NULL) == FSE_OK;
     }
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return dict_present;
 }
 
 MfClassicDict* mf_classic_dict_alloc(MfClassicDictType dict_type) {
     MfClassicDict* dict = malloc(sizeof(MfClassicDict));
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     dict->stream = buffered_file_stream_alloc(storage);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     bool dict_loaded = false;
     do {
