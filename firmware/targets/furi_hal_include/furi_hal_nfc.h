@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <rfal_nfc.h>
 #include <st_errno.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -14,8 +15,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <rfal_nfc.h>
-#include <lib/nfc_protocols/nfca.h>
 
 #define FURI_HAL_NFC_UID_MAX_LEN 10
 #define FURI_HAL_NFC_DATA_BUFF_SIZE (512)
