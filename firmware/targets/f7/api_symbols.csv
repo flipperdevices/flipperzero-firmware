@@ -1996,12 +1996,9 @@ Function,-,strupr,char*,char*
 Function,-,strverscmp,int,"const char*, const char*"
 Function,-,strxfrm,size_t,"char*, const char*, size_t"
 Function,-,strxfrm_l,size_t,"char*, const char*, size_t, locale_t"
-Function,+,subghz_environment_alloc,SubGhzEnvironment*,
-Function,+,subghz_environment_free,void,SubGhzEnvironment*
 Function,-,subghz_environment_get_came_atomo_rainbow_table_file_name,const char*,SubGhzEnvironment*
 Function,-,subghz_environment_get_keystore,SubGhzKeystore*,SubGhzEnvironment*
 Function,-,subghz_environment_get_nice_flor_s_rainbow_table_file_name,const char*,SubGhzEnvironment*
-Function,+,subghz_environment_load_keystore,_Bool,"SubGhzEnvironment*, const char*"
 Function,-,subghz_environment_set_came_atomo_rainbow_table_file_name,void,"SubGhzEnvironment*, const char*"
 Function,-,subghz_environment_set_nice_flor_s_rainbow_table_file_name,void,"SubGhzEnvironment*, const char*"
 Function,-,subghz_keystore_alloc,SubGhzKeystore*,
@@ -2014,31 +2011,7 @@ Function,-,subghz_keystore_save,_Bool,"SubGhzKeystore*, const char*, uint8_t*"
 Function,-,subghz_protocol_decoder_base_deserialize,_Bool,"SubGhzProtocolDecoderBase*, FlipperFormat*"
 Function,-,subghz_protocol_decoder_base_get_hash_data,uint8_t,SubGhzProtocolDecoderBase*
 Function,-,subghz_protocol_decoder_base_get_string,_Bool,"SubGhzProtocolDecoderBase*, string_t"
-Function,+,subghz_protocol_decoder_base_serialize,_Bool,"SubGhzProtocolDecoderBase*, FlipperFormat*, SubGhzPesetDefinition*"
 Function,-,subghz_protocol_decoder_base_set_decoder_callback,void,"SubGhzProtocolDecoderBase*, SubGhzProtocolDecoderBaseRxCallback, void*"
-Function,+,subghz_receiver_alloc_init,SubGhzReceiver*,SubGhzEnvironment*
-Function,+,subghz_receiver_decode,void,"SubGhzReceiver*, _Bool, uint32_t"
-Function,+,subghz_receiver_free,void,SubGhzReceiver*
-Function,+,subghz_receiver_get_filter,SubGhzProtocolFlag,SubGhzReceiver*
-Function,+,subghz_receiver_reset,void,SubGhzReceiver*
-Function,+,subghz_receiver_search_decoder_base_by_name,SubGhzProtocolDecoderBase*,"SubGhzReceiver*, const char*"
-Function,+,subghz_receiver_set_filter,void,"SubGhzReceiver*, SubGhzProtocolFlag"
-Function,+,subghz_receiver_set_rx_callback,void,"SubGhzReceiver*, SubGhzReceiverCallback, void*"
-Function,+,subghz_transmitter_alloc_init,SubGhzTransmitter*,"SubGhzEnvironment*, const char*"
-Function,+,subghz_transmitter_deserialize,_Bool,"SubGhzTransmitter*, FlipperFormat*"
-Function,+,subghz_transmitter_free,void,SubGhzTransmitter*
-Function,+,subghz_transmitter_get_protocol_instance,SubGhzProtocolEncoderBase*,SubGhzTransmitter*
-Function,+,subghz_transmitter_stop,_Bool,SubGhzTransmitter*
-Function,+,subghz_transmitter_yield,LevelDuration,void*
-Function,+,subghz_tx_rx_worker_alloc,SubGhzTxRxWorker*,
-Function,+,subghz_tx_rx_worker_available,size_t,SubGhzTxRxWorker*
-Function,+,subghz_tx_rx_worker_free,void,SubGhzTxRxWorker*
-Function,+,subghz_tx_rx_worker_is_running,_Bool,SubGhzTxRxWorker*
-Function,+,subghz_tx_rx_worker_read,size_t,"SubGhzTxRxWorker*, uint8_t*, size_t"
-Function,+,subghz_tx_rx_worker_set_callback_have_read,void,"SubGhzTxRxWorker*, SubGhzTxRxWorkerCallbackHaveRead, void*"
-Function,+,subghz_tx_rx_worker_start,_Bool,"SubGhzTxRxWorker*, uint32_t"
-Function,+,subghz_tx_rx_worker_stop,void,SubGhzTxRxWorker*
-Function,+,subghz_tx_rx_worker_write,_Bool,"SubGhzTxRxWorker*, uint8_t*, size_t"
 Function,-,subghz_worker_alloc,SubGhzWorker*,
 Function,-,subghz_worker_free,void,SubGhzWorker*
 Function,-,subghz_worker_is_running,_Bool,SubGhzWorker*
