@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+#define RECORD_POWER "power"
+
 typedef struct Power Power;
 
 typedef enum {

@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 #include <rfal_nfc.h>
-#include <lib/nfc_protocols/nfca.h>
+#include <lib/nfc/protocols/nfca.h>
 
 #define FURI_HAL_NFC_UID_MAX_LEN 10
 #define FURI_HAL_NFC_DATA_BUFF_SIZE (512)

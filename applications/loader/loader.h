@@ -7,6 +7,8 @@
 extern "C" {
 #endif
 
+#define RECORD_LOADER "loader"
+
 typedef struct Loader Loader;
 
 typedef enum {

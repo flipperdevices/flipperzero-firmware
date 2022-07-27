@@ -11,6 +11,8 @@
 extern "C" {
 #endif
 
+#define RECORD_INPUT_EVENTS "input_events"
+
 /** Input Types
  * Some of them are physical events and some logical
  */
