@@ -34,7 +34,7 @@ jobs:
 
       - name: 'Static code analysis'
         run: |
-          strace -y -v -s 4096 -f -o /tmp/strace.out -- pvs-studio-analyzer analyze -l /opt/pvs_studio/PVS-Studio.lic -f build/latest/compile_commands.json -o PVS-Studio.log
+          pvs-studio-analyzer analyze -l /opt/pvs_studio/PVS-Studio.lic -f build/latest/compile_commands.json -o PVS-Studio.log
 
       - name: 'Generate suffix and folder name'
         id: names
