@@ -8,6 +8,7 @@
 - Fixed Dolphin animation weighting to make the sad ones appear less
 - Fixed naming on a few music assets and updated the Manifest
 - OFW APPROVED AND ADDED: [#1454](https://github.com/flipperdevices/flipperzero-firmware/pull/1454), [#1455](https://github.com/flipperdevices/flipperzero-firmware/pull/1455), [#1448](https://github.com/flipperdevices/flipperzero-firmware/pull/1448), [#1456](https://github.com/flipperdevices/flipperzero-firmware/pull/1456), [#1446](https://github.com/flipperdevices/flipperzero-firmware/pull/1446), [#1398](https://github.com/flipperdevices/flipperzero-firmware/pull/1398), [#1364](https://github.com/flipperdevices/flipperzero-firmware/pull/1364), [#1458](https://github.com/flipperdevices/flipperzero-firmware/pull/1458) & [#1459](https://github.com/flipperdevices/flipperzero-firmware/pull/1459)
+- Updated APPS and Manifest
 - Compiling requires some play with api_symbols... working on a fix...
 - TEMPORARILY NOT WORKING: SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
 - <h2>This release performs data migration and downgrade to previous firmware will cause data loss (dolphin progress and settings).</h2>
