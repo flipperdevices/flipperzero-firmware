@@ -1,5 +1,5 @@
 V:0
-T:1658813848
+T:1658903722
 D:apps
 D:badusb
 D:dolphin
@@ -286,6 +286,7 @@ F:81dc04c7b181f94b644079a71476dff4:4742:nfc/assets/aid.nfc
 F:86efbebdf41bb6bf15cc51ef88f069d5:2565:nfc/assets/country_code.nfc
 F:41b4f08774249014cb8d3dffa5f5c07d:1757:nfc/assets/currency_code.nfc
 F:42f2b8f11efb8f2322355114de279ff4:50695:nfc/assets/mf_classic_dict.nfc
+F:7a8b1962f14d89b1a0c9845647a30060:30135:nfc/assets/mf_classic_dict_user.nfc
 D:subghz/Handicap
 D:subghz/Misc
 D:subghz/Vehicles
@@ -303,12 +304,13 @@ F:b877ff3fdb3c642d272d039e832f3bfb:204:subghz/Misc/Sextoy/Sextoy4.sub
 D:subghz/Vehicles/Tesla
 F:8b22aa0a2df0b22fc5791a3ecb4fa4fb:10991:subghz/Vehicles/Tesla/Tesla_charge_AM270.sub
 F:7ea28e3ce3c38b2d98ae99aecc45b7b9:11913:subghz/Vehicles/Tesla/Tesla_charge_AM650.sub
+F:b5380ddd37e6d35fd71a38c5690dd68b:1355:subghz/assets/README.md
 F:dda1ef895b8a25fde57c874feaaef997:650:subghz/assets/came_atomo
 F:a4c31b8b8c2a82dc3a96fcf5256cbfc5:96:subghz/assets/extend_range
 F:5e81e9809984ee74d426730c1afa4093:3232:subghz/assets/keeloq_mfcodes
 F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
-F:22c2dff53c68a8fe576c7e9fbd9f2d54:1340:subghz/assets/setting_user
+F:a1c2ecec362e13bbf358f4ce1122a24b:1962:subghz/assets/setting_user
 F:76460390a308e933a2c134e1e1aeb1e7:258:subghz/assets/touchtunes_map.txt
 F:659ae9a07d7bc3907cbf9bcf3a7eb6af:379:subghz/assets/universal_rf_map.txt
 D:u2f/assets
