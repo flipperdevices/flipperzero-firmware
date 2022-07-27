@@ -187,6 +187,7 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
         "subghz",
         "flipperformat",
         "toolbox",
+        "nfc",
         "microtar",
         "usb_stm32",
         "st25rfal002",
