@@ -6,7 +6,10 @@
 #include <m-string.h>
 
 typedef enum {
+    NfcSupportedCardTypePlantain,
     NfcSupportedCardTypeTroyka,
+    NfcSupportedCardTypePlantain4K,
+    NfcSupportedCardTypeTwoCities,
 
     NfcSupportedCardTypeEnd,
 } NfcSupportedCardType;
