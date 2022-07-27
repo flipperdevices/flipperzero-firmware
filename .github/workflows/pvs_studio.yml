@@ -34,11 +34,7 @@ jobs:
 
       - name: 'Static code analysis'
         run: |
-          SCRIPT_PATH=$(pwd) FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
-          set +e
-          export
-          pvs-studio --license-info /opt/pvs_studio/PVS-Studio.lic
-          strace pvs-studio-analyzer analyze -l /opt/pvs_studio/PVS-Studio.lic -f build/latest/compile_commands.json -o PVS-Studio.log
+          strace -y -v -s 4096 -f -o /tmp/strace.out -- pvs-studio-analyzer analyze -l /opt/pvs_studio/PVS-Studio.lic -f build/latest/compile_commands.json -o PVS-Studio.log
 
       - name: 'Generate suffix and folder name'
         id: names
