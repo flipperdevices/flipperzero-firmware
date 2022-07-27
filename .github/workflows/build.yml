@@ -108,7 +108,7 @@ jobs:
 
       - name: "Check for uncommited changes"
         run: |
-          git diff --exit-code || ( echo "Assets recompilation required."; exit 255 )
+          git diff --exit-code
 
       - name: 'Bundle resources'
         if: ${{ !github.event.pull_request.head.repo.fork }}
