@@ -4,10 +4,6 @@
 #include <m-array.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct {
     string_t name;
     uint64_t key;
@@ -74,7 +70,3 @@ bool subghz_keystore_raw_encrypted_save(
  * @return true On success
  */
 bool subghz_keystore_raw_get_data(const char* file_name, size_t offset, uint8_t* data, size_t len);
-
-#ifdef __cplusplus
-}
-#endif

@@ -2,10 +2,6 @@
 
 #include <furi_hal.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef void (*SubGhzTxRxWorkerCallbackHaveRead)(void* context);
 
 typedef struct SubGhzTxRxWorker SubGhzTxRxWorker;
@@ -83,7 +79,3 @@ void subghz_tx_rx_worker_stop(SubGhzTxRxWorker* instance);
  * @return bool - true if running
  */
 bool subghz_tx_rx_worker_is_running(SubGhzTxRxWorker* instance);
-
-#ifdef __cplusplus
-}
-#endif

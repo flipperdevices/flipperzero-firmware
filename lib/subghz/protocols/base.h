@@ -2,10 +2,6 @@
 
 #include "../types.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct SubGhzProtocolDecoderBase SubGhzProtocolDecoderBase;
 
 typedef void (
@@ -47,13 +43,13 @@ bool subghz_protocol_decoder_base_get_string(
  * Serialize data SubGhzProtocolDecoderBase.
  * @param decoder_base Pointer to a SubGhzProtocolDecoderBase instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @param preset The modulation on which the signal was received, SubGhzPesetDefinition
+ * @param preset The modulation on which the signal was received, SubGhzPresetDefinition
  * @return true On success
  */
 bool subghz_protocol_decoder_base_serialize(
     SubGhzProtocolDecoderBase* decoder_base,
     FlipperFormat* flipper_format,
-    SubGhzPesetDefinition* preset);
+    SubGhzPresetDefinition* preset);
 
 /**
  * Deserialize data SubGhzProtocolDecoderBase.
@@ -81,7 +77,3 @@ struct SubGhzProtocolEncoderBase {
 
     // Callback section
 };
-
-#ifdef __cplusplus
-}
-#endif

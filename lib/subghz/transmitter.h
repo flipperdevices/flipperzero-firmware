@@ -4,10 +4,6 @@
 #include "environment.h"
 #include "protocols/base.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct SubGhzTransmitter SubGhzTransmitter;
 
 /**
@@ -49,7 +45,3 @@ bool subghz_transmitter_deserialize(SubGhzTransmitter* instance, FlipperFormat* 
  * @return LevelDuration 
  */
 LevelDuration subghz_transmitter_yield(void* context);
-
-#ifdef __cplusplus
-}
-#endif
