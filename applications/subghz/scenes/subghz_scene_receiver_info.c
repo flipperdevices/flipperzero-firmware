@@ -30,8 +30,8 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
             subghz->txrx->decoder_result,
             subghz_history_get_raw_data(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
 
-        SubGhzPesetDefinition* preset =
-            subghz_history_get_presset(subghz->txrx->history, subghz->txrx->idx_menu_chosen);
+        SubGhzPresetDefinition* preset =
+            subghz_history_get_preset_def(subghz->txrx->history, subghz->txrx->idx_menu_chosen);
         subghz_preset_init(
             subghz,
             string_get_cstr(preset->name),
@@ -44,10 +44,7 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
     return false;
 }
 
-void subghz_scene_receiver_info_on_enter(void* context) {
-    SubGhz* subghz = context;
-
-    DOLPHIN_DEED(DolphinDeedSubGhzReceiverInfo);
+void subghz_scene_receiver_info_draw_widget(SubGhz* subghz) {
     if(subghz_scene_receiver_info_update_parser(subghz)) {
         string_t frequency_str;
         string_t modulation_str;
@@ -95,8 +92,6 @@ void subghz_scene_receiver_info_on_enter(void* context) {
         // Removed static check
         if(((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Send) ==
             SubGhzProtocolFlag_Send) &&
-           // disable "Send" for auto-captured RAW signals for now. They can still be saved and sent by loading them.
-           subghz->txrx->decoder_result->protocol->type != SubGhzProtocolTypeRAW &&
            subghz->txrx->decoder_result->protocol->encoder->deserialize) {
             widget_add_button_element(
                 subghz->widget,
@@ -106,12 +101,19 @@ void subghz_scene_receiver_info_on_enter(void* context) {
                 subghz);
         }
     } else {
-        // widget_add_icon_element(subghz->widget, 32, 12, &I_DolphinFirstStart7_61x51);
+        widget_add_icon_element(subghz->widget, 32, 12, &I_DolphinFirstStart7_61x51);
         widget_add_string_element(
             subghz->widget, 13, 8, AlignLeft, AlignBottom, FontSecondary, "Error history parse.");
     }
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdWidget);
+}
+
+void subghz_scene_receiver_info_on_enter(void* context) {
+    SubGhz* subghz = context;
+
+    DOLPHIN_DEED(DolphinDeedSubGhzReceiverInfo);
+    subghz_scene_receiver_info_draw_widget(subghz);
 }
 
 bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event) {
@@ -143,6 +145,10 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
         } else if(event.event == SubGhzCustomEventSceneReceiverInfoTxStop) {
             //CC1101 Stop Tx -> Start RX
             subghz->state_notifications = SubGhzNotificationStateIDLE;
+
+            widget_reset(subghz->widget);
+            subghz_scene_receiver_info_draw_widget(subghz);
+
             if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
                 subghz_tx_stop(subghz);
             }

@@ -204,7 +204,7 @@ SubGhz* subghz_alloc() {
     //init Worker & Protocol & History & KeyBoard
     subghz->lock = SubGhzLockOff;
     subghz->txrx = malloc(sizeof(SubGhzTxRx));
-    subghz->txrx->preset = malloc(sizeof(SubGhzPesetDefinition));
+    subghz->txrx->preset = malloc(sizeof(SubGhzPresetDefinition));
     string_init(subghz->txrx->preset->name);
     subghz_preset_init(
         subghz, "AM650", subghz_setting_get_default_frequency(subghz->setting), NULL, 0);
@@ -323,6 +323,7 @@ void subghz_free(SubGhz* subghz) {
     subghz_history_free(subghz->txrx->history);
     string_clear(subghz->txrx->preset->name);
     free(subghz->txrx->preset);
+    free(subghz->txrx->secure_data);
     free(subghz->txrx);
 
     //Error string
