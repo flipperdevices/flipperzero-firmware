@@ -11,11 +11,11 @@
 #define MOVE_DST "/int"
 
 static const char* app_dirs[] = {
-    "bt.settings",
-    "desktop.settings",
-    "dolphin.state",
-    "notification.settings",
-    "bt.keys",
+    ".bt.settings",
+    ".desktop.settings",
+    ".dolphin.state",
+    ".notification.settings",
+    ".bt.keys",
 };
 
 bool drestorer_perform(void) {
