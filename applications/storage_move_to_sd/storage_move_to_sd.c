@@ -17,11 +17,11 @@ static const char* app_dirs[] = {
     "infrared",
     "ibutton",
     "badusb",
-    "bt.settings",
-    "desktop.settings",
-    "dolphin.state",
-    "notification.settings",
-    "bt.keys",
+    ".bt.settings",
+    ".desktop.settings",
+    ".dolphin.state",
+    ".notification.settings",
+    ".bt.keys",
 };
 
 bool storage_move_to_sd_perform(void) {
