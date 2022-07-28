@@ -71,7 +71,9 @@ firmware_env = distenv.AddFwProject(
 )
 
 # If enabled, initialize updater-related targets
-if GetOption("fullenv"):
+if GetOption("fullenv") or any(
+    filter(lambda target: "updater" in target or "flash_usb" in target, BUILD_TARGETS)
+):
     updater_env = distenv.AddFwProject(
         base_env=coreenv,
         fw_type="updater",
@@ -80,10 +82,10 @@ if GetOption("fullenv"):
 
     # Target for self-update package
     dist_arguments = [
-        "-r",
-        '"${ROOT_DIR.abspath}/assets/resources"',
         "--bundlever",
         '"${UPDATE_VERSION_STRING}"',
+    ]
+    dist_radio_arguments = [
         "--radio",
         '"${ROOT_DIR.abspath}/${COPRO_STACK_BIN_DIR}/${COPRO_STACK_BIN}"',
         "--radiotype",
@@ -92,6 +94,11 @@ if GetOption("fullenv"):
         "--obdata",
         '"${ROOT_DIR.abspath}/${COPRO_OB_DATA}"',
     ]
+    dist_resource_arguments = [
+        "-r",
+        '"${ROOT_DIR.abspath}/assets/resources"',
+    ]
+
     if distenv["UPDATE_SPLASH"]:
         dist_arguments += [
             "--splash",
@@ -101,6 +108,12 @@ if GetOption("fullenv"):
     selfupdate_dist = distenv.DistCommand(
         "updater_package",
         (distenv["DIST_DEPENDS"], firmware_env["FW_RESOURCES"]),
+        DIST_EXTRA=[*dist_arguments, *dist_radio_arguments, *dist_resource_arguments],
+    )
+
+    selfupdate_min_dist = distenv.DistCommand(
+        "updater_minpackage",
+        distenv["DIST_DEPENDS"],
         DIST_EXTRA=dist_arguments,
     )
 
@@ -132,7 +145,21 @@ if GetOption("fullenv"):
     if distenv["FORCE"]:
         distenv.AlwaysBuild(usb_update_package)
     distenv.Depends(usb_update_package, selfupdate_dist)
-    distenv.Alias("flash_usb", usb_update_package)
+    distenv.Alias("flash_usb_full", usb_update_package)
+
+    # Minimal flash - only with DFU file
+    usb_minupdate_package = distenv.UsbInstall(
+        "#build/minusbinstall.flag",
+        (
+            distenv["DIST_DEPENDS"],
+            selfupdate_min_dist,
+        ),
+    )
+    if distenv["FORCE"]:
+        distenv.AlwaysBuild(usb_minupdate_package)
+    distenv.Depends(usb_minupdate_package, selfupdate_min_dist)
+    distenv.Alias("flash_usb", usb_minupdate_package)
+
 
 # Target for copying & renaming binaries to dist folder
 basic_dist = distenv.DistCommand("fw_dist", distenv["DIST_DEPENDS"])
