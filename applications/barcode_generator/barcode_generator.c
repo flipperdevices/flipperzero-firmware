@@ -19,9 +19,11 @@ typedef struct {
 } PluginEvent;
 
 typedef struct {
-    int barcodeNumeral[12];
-    int editingIndex;
-    bool editingMode;
+    int barcodeNumeral[12]; //The current barcode number
+    int editingIndex; //The index of the editing symbol
+    int menuIndex; //The index of the menu cursor
+    int modeIndex; //Set to 0 for view, 1 for edit, 2 for menu
+    bool doParityCalculation; //Should do parity check?
 } PluginState;
 
 void number_0(
@@ -247,98 +249,119 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         94,
         101,
     };
+    int menuTextLocations[6] = {20, 30, 40, 50, 60, 70,};
 
-    canvas_set_color(canvas, ColorBlack);
-    canvas_draw_box(canvas, BARCODE_STARTING_POS, BARCODE_Y_START, 1, BARCODE_HEIGHT + 2);
-    //canvas_draw_box(canvas, BARCODE_STARTING_POS + 1, 1, 1, 50); //left blank on purpose
-    canvas_draw_box(
-        canvas, (BARCODE_STARTING_POS + 2), BARCODE_Y_START, 1, BARCODE_HEIGHT + 2); //start saftey
-    for(int index = 0; index < 12; index++) {
-        bool isOnRight = false;
-        if(index >= 6) {
-            isOnRight = true;
+    if(plugin_state->modeIndex == 2) { //if in the menu
+        canvas_set_color(canvas, ColorBlack);
+        canvas_draw_str_aligned(canvas, 64, 6, AlignCenter, AlignCenter, "MENU");
+        canvas_draw_frame(canvas, 50, 0, 29, 11); //box around Menu
+        canvas_draw_str_aligned(canvas, 64, menuTextLocations[0], AlignCenter, AlignCenter, "View");
+        canvas_draw_str_aligned(canvas, 64, menuTextLocations[1], AlignCenter, AlignCenter, "Edit");
+        canvas_draw_str_aligned(canvas, 64, menuTextLocations[2], AlignCenter, AlignCenter, "Parity?");
+
+        canvas_draw_frame(canvas, 81, menuTextLocations[2]-2, 6, 6);
+        if(plugin_state->doParityCalculation == true) {
+            canvas_draw_box(canvas, 83, menuTextLocations[2], 2, 2);
         }
-        if(index == 11) { //calculate the check digit
-            int checkDigit = plugin_state->barcodeNumeral[0] + plugin_state->barcodeNumeral[2] +
-                             plugin_state->barcodeNumeral[4] + plugin_state->barcodeNumeral[6] +
-                             plugin_state->barcodeNumeral[8] + plugin_state->barcodeNumeral[10];
-            //add all odd positions Confusing because 0index
-            checkDigit = checkDigit * 3; //times 3
-            checkDigit +=
-                plugin_state->barcodeNumeral[1] + plugin_state->barcodeNumeral[3] +
-                plugin_state->barcodeNumeral[5] + plugin_state->barcodeNumeral[7] +
-                plugin_state->barcodeNumeral[9]; 
-            //add all even positions to above. Confusing because 0index
-            checkDigit = checkDigit % 10; //mod 10
-            //if m - 0 then x12 = 0, otherwise x12 is 10 - m
-            if(checkDigit == 0) {
-                plugin_state->barcodeNumeral[11] = 0;
-            } else {
-                checkDigit = 10 - checkDigit;
-                plugin_state->barcodeNumeral[11] = checkDigit;
+        canvas_draw_str_aligned(canvas, 64, menuTextLocations[3], AlignCenter, AlignCenter, "TODO");
+        canvas_draw_disc(canvas, 40, menuTextLocations[plugin_state->menuIndex], 2); //draw menu cursor
+    }
+
+    if(plugin_state->modeIndex != 2) { //if not in the menu
+        canvas_set_color(canvas, ColorBlack);
+        //canvas_draw_glyph(canvas, 115, BARCODE_Y_START + BARCODE_HEIGHT + BARCODE_TEXT_OFFSET, 'M');
+        canvas_draw_box(canvas, BARCODE_STARTING_POS, BARCODE_Y_START, 1, BARCODE_HEIGHT + 2);
+        //canvas_draw_box(canvas, BARCODE_STARTING_POS + 1, 1, 1, 50); //left blank on purpose
+        canvas_draw_box(canvas,(BARCODE_STARTING_POS + 2),BARCODE_Y_START,1,BARCODE_HEIGHT + 2); //start saftey
+        for(int index = 0; index < 12; index++) {
+            bool isOnRight = false;
+            if(index >= 6) {
+                isOnRight = true;
+            }
+            if((index == 11)&&(plugin_state->doParityCalculation)) { //calculate the check digit
+                int checkDigit =
+                    plugin_state->barcodeNumeral[0] + plugin_state->barcodeNumeral[2] +
+                    plugin_state->barcodeNumeral[4] + plugin_state->barcodeNumeral[6] +
+                    plugin_state->barcodeNumeral[8] + plugin_state->barcodeNumeral[10];
+                //add all odd positions Confusing because 0index
+                checkDigit = checkDigit * 3; //times 3
+                checkDigit += plugin_state->barcodeNumeral[1] + plugin_state->barcodeNumeral[3] +
+                              plugin_state->barcodeNumeral[5] + plugin_state->barcodeNumeral[7] +
+                              plugin_state->barcodeNumeral[9];
+                //add all even positions to above. Confusing because 0index
+                checkDigit = checkDigit % 10; //mod 10
+                //if m - 0 then x12 = 0, otherwise x12 is 10 - m
+                if(checkDigit == 0) {
+                    plugin_state->barcodeNumeral[11] = 0;
+                } else {
+                    checkDigit = 10 - checkDigit;
+                    plugin_state->barcodeNumeral[11] = checkDigit;
+                }
+            }
+            switch(plugin_state->barcodeNumeral[index]) {
+            case 0:
+                number_0(canvas, isOnRight, editingMarkerPosition[index]);
+                break;
+            case 1:
+                number_1(canvas, isOnRight, editingMarkerPosition[index]);
+                break;
+            case 2:
+                number_2(canvas, isOnRight, editingMarkerPosition[index]);
+                break;
+            case 3:
+                number_3(canvas, isOnRight, editingMarkerPosition[index]);
+                break;
+            case 4:
+                number_4(canvas, isOnRight, editingMarkerPosition[index]);
+                break;
+            case 5:
+                number_5(canvas, isOnRight, editingMarkerPosition[index]);
+                break;
+            case 6:
+                number_6(canvas, isOnRight, editingMarkerPosition[index]);
+                break;
+            case 7:
+                number_7(canvas, isOnRight, editingMarkerPosition[index]);
+                break;
+            case 8:
+                number_8(canvas, isOnRight, editingMarkerPosition[index]);
+                break;
+            case 9:
+                number_9(canvas, isOnRight, editingMarkerPosition[index]);
+                break;
             }
         }
-        switch(plugin_state->barcodeNumeral[index]) {
-        case 0:
-            number_0(canvas, isOnRight, editingMarkerPosition[index]);
-            break;
-        case 1:
-            number_1(canvas, isOnRight, editingMarkerPosition[index]);
-            break;
-        case 2:
-            number_2(canvas, isOnRight, editingMarkerPosition[index]);
-            break;
-        case 3:
-            number_3(canvas, isOnRight, editingMarkerPosition[index]);
-            break;
-        case 4:
-            number_4(canvas, isOnRight, editingMarkerPosition[index]);
-            break;
-        case 5:
-            number_5(canvas, isOnRight, editingMarkerPosition[index]);
-            break;
-        case 6:
-            number_6(canvas, isOnRight, editingMarkerPosition[index]);
-            break;
-        case 7:
-            number_7(canvas, isOnRight, editingMarkerPosition[index]);
-            break;
-        case 8:
-            number_8(canvas, isOnRight, editingMarkerPosition[index]);
-            break;
-        case 9:
-            number_9(canvas, isOnRight, editingMarkerPosition[index]);
-            break;
-        }
-    }
 
-    canvas_set_color(canvas, ColorBlack);
-    //canvas_draw_box(canvas, BARCODE_STARTING_POS + 45, BARCODE_Y_START, 1, BARCODE_HEIGHT);
-    canvas_draw_box(canvas, BARCODE_STARTING_POS + 46, BARCODE_Y_START, 1, BARCODE_HEIGHT + 2);
-    //canvas_draw_box(canvas, BARCODE_STARTING_POS + 47, BARCODE_Y_START, 1, BARCODE_HEIGHT);
-    canvas_draw_box(canvas, BARCODE_STARTING_POS + 48, BARCODE_Y_START, 1, BARCODE_HEIGHT + 2);
-    //canvas_draw_box(canvas, BARCODE_STARTING_POS + 49, BARCODE_Y_START, 1, BARCODE_HEIGHT);
-
-
-    if(plugin_state->editingMode) {
         canvas_set_color(canvas, ColorBlack);
-        canvas_draw_box(canvas,editingMarkerPosition[plugin_state->editingIndex],63,7,1); //draw editing cursor
+        //canvas_draw_box(canvas, BARCODE_STARTING_POS + 45, BARCODE_Y_START, 1, BARCODE_HEIGHT);
+        canvas_draw_box(canvas, BARCODE_STARTING_POS + 46, BARCODE_Y_START, 1, BARCODE_HEIGHT + 2);
+        //canvas_draw_box(canvas, BARCODE_STARTING_POS + 47, BARCODE_Y_START, 1, BARCODE_HEIGHT);
+        canvas_draw_box(canvas, BARCODE_STARTING_POS + 48, BARCODE_Y_START, 1, BARCODE_HEIGHT + 2);
+        //canvas_draw_box(canvas, BARCODE_STARTING_POS + 49, BARCODE_Y_START, 1, BARCODE_HEIGHT);
+
+        if(plugin_state->modeIndex == 1) {
+            canvas_set_color(canvas, ColorBlack);
+            canvas_draw_box(
+                canvas,
+                editingMarkerPosition[plugin_state->editingIndex],
+                63,
+                7,
+                1); //draw editing cursor
+        }
+
+        canvas_set_color(canvas, ColorBlack);
+        canvas_draw_box(canvas, BARCODE_STARTING_POS + 92, BARCODE_Y_START, 1, BARCODE_HEIGHT + 2);
+        //canvas_draw_box(canvas, 14, 1, 1, 50); //left blank on purpose
+        canvas_draw_box(
+            canvas,
+            (BARCODE_STARTING_POS + 2) + 92,
+            BARCODE_Y_START,
+            1,
+            BARCODE_HEIGHT + 2); //end safety
     }
-
-    canvas_set_color(canvas, ColorBlack);
-    canvas_draw_box(canvas, BARCODE_STARTING_POS + 92, BARCODE_Y_START, 1, BARCODE_HEIGHT + 2);
-    //canvas_draw_box(canvas, 14, 1, 1, 50); //left blank on purpose
-    canvas_draw_box(
-        canvas,
-        (BARCODE_STARTING_POS + 2) + 92,
-        BARCODE_Y_START,
-        1,
-        BARCODE_HEIGHT + 2); //end safety
-
 
     release_mutex((ValueMutex*)ctx, plugin_state);
 }
-
 
 static void input_callback(InputEvent* input_event, osMessageQueueId_t event_queue) {
     furi_assert(event_queue);
@@ -357,7 +380,9 @@ static void barcode_UPCA_generator_state_init(PluginState* const plugin_state) {
         }
     }
     plugin_state->editingIndex = 0;
-    plugin_state->editingMode = false;
+    plugin_state->modeIndex = 0;
+    plugin_state->doParityCalculation = true;
+    plugin_state->menuIndex = 0;
 }
 
 int32_t barcode_UPCA_generator_app(void* p) {
@@ -387,6 +412,13 @@ int32_t barcode_UPCA_generator_app(void* p) {
     for(bool processing = true; processing;) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
         PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
+        int barcodeMaxIndex;
+        if(plugin_state->doParityCalculation == true) {
+            barcodeMaxIndex = 11;
+        }
+        if(plugin_state->doParityCalculation == false) {
+           barcodeMaxIndex = 12;
+        }
 
         if(event_status == osOK) {
             // press events
@@ -394,46 +426,76 @@ int32_t barcode_UPCA_generator_app(void* p) {
                 if((event.input.type == InputTypePress) || (event.input.type == InputTypeRepeat)) {
                     switch(event.input.key) {
                     case InputKeyUp:
-                        if(plugin_state->editingMode) {
+                        if(plugin_state->modeIndex == 1) { //if edit mode
                             plugin_state->barcodeNumeral[plugin_state->editingIndex]++;
                         }
                         if(plugin_state->barcodeNumeral[plugin_state->editingIndex] > 9) {
                             plugin_state->barcodeNumeral[plugin_state->editingIndex] = 0;
                         }
+                        if(plugin_state->modeIndex == 2) { //if menu mode
+                            plugin_state->menuIndex--;
+                        }
+                        if(plugin_state->menuIndex < 0) {
+                            plugin_state->menuIndex = 3;
+                        }
                         break;
                     case InputKeyDown:
-                        if(plugin_state->editingMode) {
+                        if(plugin_state->modeIndex == 1) {
                             plugin_state->barcodeNumeral[plugin_state->editingIndex]--;
                         }
                         if(plugin_state->barcodeNumeral[plugin_state->editingIndex] < 0) {
                             plugin_state->barcodeNumeral[plugin_state->editingIndex] = 9;
                         }
+                        if(plugin_state->modeIndex == 2) { //if menu mode
+                            plugin_state->menuIndex++;
+                        }
+                        if(plugin_state->menuIndex > 3) {
+                            plugin_state->menuIndex = 0;
+                        }
                         break;
                     case InputKeyRight:
-                        if(plugin_state->editingMode) {
+                        if(plugin_state->modeIndex == 1) {
                             plugin_state->editingIndex++;
                         }
-                        if(plugin_state->editingIndex >= 11) {
+                        if(plugin_state->editingIndex >= barcodeMaxIndex) {
                             plugin_state->editingIndex = 0;
                         }
                         break;
                     case InputKeyLeft:
-                        if(plugin_state->editingMode) {
+                        if(plugin_state->modeIndex == 1) {
                             plugin_state->editingIndex--;
                         }
                         if(plugin_state->editingIndex < 0) {
-                            plugin_state->editingIndex = 10;
+                            plugin_state->editingIndex = barcodeMaxIndex-1;
                         }
                         break;
                     case InputKeyOk:
-                        if(plugin_state->editingMode == true) {
-                            plugin_state->editingMode = false;
-                        } else {
-                            plugin_state->editingMode = true;
+                        if((plugin_state->modeIndex == 0) || (plugin_state->modeIndex == 1)) { //if normal or edit more, open menu
+                            plugin_state->modeIndex = 2;
+                            break;
+                        } 
+                        else if((plugin_state->modeIndex == 2) && (plugin_state->menuIndex == 1)) { //if hits select in menu, while index is 1. edit mode
+                            plugin_state->modeIndex = 1;
+                            break;
                         }
-                        break;
+                        else if((plugin_state->modeIndex == 2) && (plugin_state->menuIndex == 0)) { //if hits select in menu, while index is 0. view mode
+                            plugin_state->modeIndex = 0;
+                            break;
+                        }
+                        else if((plugin_state->modeIndex == 2) && (plugin_state->menuIndex == 2)) { //if hits select in menu, while index is 2. Parity switch
+                            plugin_state->doParityCalculation = !plugin_state->doParityCalculation; //invert bool
+                            break;
+                        } else {
+                            break;
+                        }
+
                     case InputKeyBack:
-                        processing = false;
+                        if(plugin_state->modeIndex == 0) {
+                            processing = false;
+                        }
+                        if(plugin_state->modeIndex == 2) {
+                            plugin_state->modeIndex = 0;
+                        }
                         break;
                     }
                 }
