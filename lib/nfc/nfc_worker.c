@@ -245,6 +245,9 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
             nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
         }
         card_read = true;
+    } else {
+        nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
+        card_read = true;
     }
 
     return card_read;
