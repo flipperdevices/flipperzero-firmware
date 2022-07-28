@@ -1,33 +1,103 @@
+from textwrap import wrap
+
+
 Import("env")
 
-env.Append(
-    LINKFLAGS=[
-        #
-        # used by our firmware, so we provide their realizations
-        #
-        "-Wl,--wrap,printf",  # everywhere
-        "-Wl,--wrap,snprintf",  # everywhere
-        "-Wl,--wrap,vsnprintf",  # m-string
-        "-Wl,--wrap,puts",  # fallback from printf, thanks gcc
-        "-Wl,--wrap,putchar",  # storage cli
-        "-Wl,--wrap,putc",  # fallback from printf, thanks gcc
-        "-Wl,--wrap,fflush",
-        #
-        # wrap other functions to make sure they are not called
-        # realization is not provided
-        #
-        "-Wl,--wrap,fprintf",
-        "-Wl,--wrap,fiprintf",
-        "-Wl,--wrap,iprintf",
-        "-Wl,--wrap,siprintf",
-        "-Wl,--wrap,sniprintf",
-        "-Wl,--wrap,sprintf",
-        "-Wl,--wrap,vsniprintf",
-        "-Wl,--wrap,__assert",
-        "-Wl,--wrap,__assert_func",
-    ],
-)
+wrapped_fn_list = [
+    #
+    # used by our firmware, so we provide their realizations
+    #
+    "fflush",
+    "printf",
+    "putc",  # fallback from printf, thanks gcc
+    "putchar",  # storage cli
+    "puts",  # fallback from printf, thanks gcc
+    "snprintf",
+    "vsnprintf",  # m-string
+    "__assert",  # ???
+    "__assert_func",  # ???
+    #
+    # wrap other functions to make sure they are not called
+    # realization is not provided
+    #
+    "setbuf",
+    "setvbuf",
+    "fprintf",
+    "vfprintf",
+    "vprintf",
+    "fputc",
+    "fputs",
+    "sprintf",  # specially, because this function is dangerous
+    "asprintf",
+    "vasprintf",
+    "asiprintf",
+    "asniprintf",
+    "asnprintf",
+    "diprintf",
+    "fiprintf",
+    "iprintf",
+    "siprintf",
+    "sniprintf",
+    "vasiprintf",
+    "vasniprintf",
+    "vasnprintf",
+    "vdiprintf",
+    "vfiprintf",
+    "viprintf",
+    "vsiprintf",
+    "vsniprintf",
+    #
+    # Scanf is not implemented 4 now
+    #
+    # "fscanf",
+    # "scanf",
+    # "sscanf",
+    # "vsprintf",
+    # "fgetc",
+    # "fgets",
+    # "getc",
+    # "getchar",
+    # "gets",
+    # "ungetc",
+    # "vfscanf",
+    # "vscanf",
+    # "vsscanf",
+    # "fiscanf",
+    # "iscanf",
+    # "siscanf",
+    # "vfiscanf",
+    # "viscanf",
+    # "vsiscanf",
+    #
+    # File management
+    #
+    # "fclose",
+    # "freopen",
+    # "fread",
+    # "fwrite",
+    # "fgetpos",
+    # "fseek",
+    # "fsetpos",
+    # "ftell",
+    # "rewind",
+    # "feof",
+    # "ferror",
+    # "fopen",
+    # "remove",
+    # "rename",
+    # "fseeko",
+    # "ftello",
+]
 
+for wrapped_fn in wrapped_fn_list:
+    env.Append(
+        LINKFLAGS=[
+            "-Wl,--wrap," + wrapped_fn,
+            "-Wl,--wrap," + wrapped_fn + "_unlocked",
+            "-Wl,--wrap,_" + wrapped_fn + "_r",
+            "-Wl,--wrap,_" + wrapped_fn + "_unlocked_r",
+        ]
+    )
 
 libenv = env.Clone(FW_LIB_NAME="print")
 libenv.ApplyLibFlags()
