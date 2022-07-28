@@ -6,7 +6,7 @@
 - READDED - NFC: Display UL PWD_AUTH payload / ntag-pwd-capture [(Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
 - TOFIX - NFC: Mifare UL update to show name of emulated tag (By RogueMaster with some help from GMMan)
 - TOFIX - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
-- TOFIX - Compiling requires some play with api_symbols... working on a fix... also, many apps not working so the api_symbols definitely needs to be fixed more...
+- TOFIX - Compiling requires some play with api_symbols... some FAPs are not working, we are aware
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
