@@ -209,13 +209,24 @@ uint32_t furi_thread_get_stack_space(FuriThreadId thread_id);
 /** Set STDOUT callback for thread
  * 
  * @param      callback  callback or NULL to clear
- *
+ * 
  * @return     true on success, otherwise fail
  */
 bool furi_thread_set_stdout_callback(FuriThreadStdoutWriteCallback callback);
 
+/** Write data to buffered STDOUT
+ * 
+ * @param data input data
+ * @param size input data size
+ * 
+ * @return size_t written data size
+ */
 size_t furi_thread_stdout_write(const char* data, size_t size);
 
+/** Flush data to STDOUT
+ * 
+ * @return int32_t error code
+ */
 int32_t furi_thread_stdout_flush();
 
 #ifdef __cplusplus
