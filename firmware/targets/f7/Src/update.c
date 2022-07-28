@@ -25,6 +25,8 @@ static FATFS* pfs = NULL;
 static bool flipper_update_mount_sd() {
     for(int i = 0; i < BSP_SD_MaxMountRetryCount(); ++i) {
         if(BSP_SD_Init((i % 2) == 0) != MSD_OK) {
+            /* Next attemnt will be without card reset, let it settle */
+            furi_delay_ms(1000);
             continue;
         }
 
