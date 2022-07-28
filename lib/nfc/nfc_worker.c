@@ -327,10 +327,11 @@ void nfc_worker_emulate_uid(NfcWorker* nfc_worker) {
     // TODO add support for RATS
     // Now remove bit 6 in SAK to support ISO-14443A-3 emulation
     // Need to save ATS to support ISO-14443A-4 emulation
-    FURI_BIT_CLEAR(data->sak, 5);
+    uint8_t sak = data->sak;
+    FURI_BIT_CLEAR(sak, 5);
 
     while(nfc_worker->state == NfcWorkerStateUidEmulate) {
-        if(furi_hal_nfc_listen(data->uid, data->uid_len, data->atqa, data->sak, true, 100)) {
+        if(furi_hal_nfc_listen(data->uid, data->uid_len, data->atqa, sak, true, 100)) {
             if(furi_hal_nfc_tx_rx(&tx_rx, 100)) {
                 reader_data->size = tx_rx.rx_bits / 8;
                 if(reader_data->size > 0) {
