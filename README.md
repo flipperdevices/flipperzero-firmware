@@ -3,12 +3,7 @@
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
 
-- Updated `All Changes/Features` section to include new assets listing
-- Updated universal_rf_map.txt to use assets included
-- Fixed Dolphin animation weighting to make the sad ones appear less
-- Fixed naming on a few music assets and updated the Manifest
-- OFW APPROVED AND ADDED: [#1454](https://github.com/flipperdevices/flipperzero-firmware/pull/1454), [#1455](https://github.com/flipperdevices/flipperzero-firmware/pull/1455), [#1448](https://github.com/flipperdevices/flipperzero-firmware/pull/1448), [#1456](https://github.com/flipperdevices/flipperzero-firmware/pull/1456), [#1446](https://github.com/flipperdevices/flipperzero-firmware/pull/1446), [#1398 (Thanks to Nano/Eng1n33r for thier quick modifications to get this merged)](https://github.com/flipperdevices/flipperzero-firmware/pull/1398), [#1364](https://github.com/flipperdevices/flipperzero-firmware/pull/1364), [#1458](https://github.com/flipperdevices/flipperzero-firmware/pull/1458) & [#1459](https://github.com/flipperdevices/flipperzero-firmware/pull/1459)
-- Updated APPS and Manifest
+- Readded - NFC: Mifare UL update to show name of emulated tag (By RogueMaster with some help from GMMan)
 - Compiling requires some play with api_symbols... working on a fix... also, many apps not working so the api_symbols definitely needs to be fixed more...
 - TEMPORARILY NOT WORKING: SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
 - <h2>This release performs data migration and downgrade to previous firmware will cause data loss (dolphin progress and settings).</h2>
@@ -71,7 +66,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Flashing the firmware using the blackmagic board with make blackmagic_load [From WeTox](https://github.com/wetox-team/flipperzero-firmware)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
-- NFC: Display UL PWD_AUTH payload / ntag-pwd-capture [(Thanks to GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/dev-new)
+- NFC: Display UL PWD_AUTH payload / ntag-pwd-capture [(Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
 - NFC: Mifare UL update to show name of emulated tag (By RogueMaster with some help from GMMan)
 - Plugins: Menu, Icons and Raycast exit [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
 - Plugins: Snake and Tetris show score. [Thanks to whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) With changes by RogueMaster.
