@@ -69,21 +69,23 @@ size_t cli_read_timeout(Cli* cli, uint8_t* buffer, size_t size, uint32_t timeout
     }
 }
 
-bool cli_cmd_interrupt_received(Cli* cli) {
-    furi_assert(cli);
-    char c = '\0';
-    if(cli->session != NULL) {
-        if(cli->session->rx((uint8_t*)&c, 1, 0) == 1) {
-            return c == CliSymbolAsciiETX;
-        }
-    }
-    return false;
-}
-
 bool cli_is_connected(Cli* cli) {
     furi_assert(cli);
     if(cli->session != NULL) {
         return (cli->session->is_connected());
+    }
+    return false;
+}
+
+bool cli_cmd_interrupt_received(Cli* cli) {
+    furi_assert(cli);
+    char c = '\0';
+    if(cli_is_connected(cli)) {
+        if(cli->session->rx((uint8_t*)&c, 1, 0) == 1) {
+            return c == CliSymbolAsciiETX;
+        }
+    } else {
+        return true;
     }
     return false;
 }
@@ -183,7 +185,7 @@ static void cli_execute_command(Cli* cli, CliCommand* command, string_t args) {
 
     // Ensure that we running alone
     if(!(command->flags & CliCommandFlagParallelSafe)) {
-        Loader* loader = furi_record_open("loader");
+        Loader* loader = furi_record_open(RECORD_LOADER);
         bool safety_lock = loader_lock(loader);
         if(safety_lock) {
             // Execute command
@@ -192,7 +194,7 @@ static void cli_execute_command(Cli* cli, CliCommand* command, string_t args) {
         } else {
             printf("Other application is running, close it first");
         }
-        furi_record_close("loader");
+        furi_record_close(RECORD_LOADER);
     } else {
         // Execute command
         command->callback(cli, args, command->context);
@@ -464,7 +466,7 @@ int32_t cli_srv(void* p) {
     // Init basic cli commands
     cli_commands_init(cli);
 
-    furi_record_create("cli", cli);
+    furi_record_create(RECORD_CLI, cli);
 
     if(cli->session != NULL) {
         furi_stdglue_set_thread_stdout_callback(cli->session->tx_stdout);
