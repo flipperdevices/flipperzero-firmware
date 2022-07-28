@@ -339,7 +339,7 @@ bool subghz_protocol_decoder_nice_flor_s_serialize(
 bool subghz_protocol_decoder_nice_flor_s_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderNiceFlorS* instance = context;
-   bool ret = false;
+    bool ret = false;
     do {
         if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
             break;

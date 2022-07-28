@@ -403,7 +403,7 @@ bool subghz_protocol_decoder_somfy_keytis_deserialize(void* context, FlipperForm
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
-         if(instance->generic.data_count_bit !=
+        if(instance->generic.data_count_bit !=
            subghz_protocol_somfy_keytis_const.min_count_bit_for_found) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
             break;
