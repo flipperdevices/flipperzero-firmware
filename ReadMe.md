@@ -5,7 +5,7 @@
 ![Show me the code](https://habrastorage.org/webt/eo/m0/e4/eom0e4btudte7nrhnyic-laiog0.png)
 
 Welcome to [Flipper Zero](https://flipperzero.one/)'s Firmware repo!
-Our goal is to create nice and clean code with good documentation, to make it a pleasure for everyone to work with.
+Our goal is to create nice and clean code with good documentation and to have a great work environment.
 
 # Clone the Repository
 
