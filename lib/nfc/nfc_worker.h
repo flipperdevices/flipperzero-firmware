@@ -51,7 +51,7 @@ typedef enum {
     NfcWorkerEventNewSector,
     NfcWorkerEventFoundKeyA,
     NfcWorkerEventFoundKeyB,
-    NfcWorkerEventStartReading,
+
     // Mifare Ultralight/NTAG events
     NfcWorkerEventPwdAuth,
 } NfcWorkerEvent;

@@ -20,6 +20,7 @@ NfcWorker* nfc_worker_alloc() {
 
     nfc_worker->callback = NULL;
     nfc_worker->context = NULL;
+    nfc_worker->event_data = NULL;
     nfc_worker->storage = furi_record_open(RECORD_STORAGE);
 
     // Initialize rfal
@@ -49,6 +50,10 @@ void nfc_worker_free(NfcWorker* nfc_worker) {
 
 NfcWorkerState nfc_worker_get_state(NfcWorker* nfc_worker) {
     return nfc_worker->state;
+}
+
+void* nfc_worker_get_event_data(NfcWorker* nfc_worker) {
+    return nfc_worker->event_data;
 }
 
 void nfc_worker_start(
@@ -386,6 +391,15 @@ void nfc_worker_emulate_mf_ultralight(NfcWorker* nfc_worker) {
             mf_ul_prepare_emulation_response,
             &emulator,
             5000);
+        // Check if there was an auth attempt
+        if(emulator.auth_attempted) {
+            nfc_worker->event_data = &emulator.auth_attempt;
+            if(nfc_worker->callback) {
+                nfc_worker->callback(NfcWorkerEventPwdAuth, nfc_worker->context);
+            }
+            emulator.auth_attempted = false;
+            nfc_worker->event_data = NULL;
+        }
         // Check if data was modified
         if(emulator.data_changed) {
             nfc_worker->dev_data->mf_ul_data = emulator.data;
