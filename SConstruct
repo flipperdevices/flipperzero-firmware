@@ -249,6 +249,9 @@ distenv.PhonyTarget(
     PY_LINT_SOURCES=firmware_env["PY_LINT_SOURCES"],
 )
 
+# Start Flipper CLI via PySerial's miniterm
+distenv.PhonyTarget("cli", "${PYTHON3} scripts/serial_cli.py")
+
 
 # Find blackmagic probe
 
