@@ -54,7 +54,7 @@ Scan through our [existing issues](https://github.com/flipperdevices/flipperzero
 
 ### Commit your update
 
-Commit the changes once you are happy with them. Make sure that code compilation is not broken and passes tests. Check syntax and formatting.
+Commit the changes once you are happy with them, making sure that the code compiles, passes tests, and syntax is correct.  
 
 ### Pull Request
 
