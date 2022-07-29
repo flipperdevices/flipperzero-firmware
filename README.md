@@ -4,8 +4,7 @@
 <b>Latest Updates:</b>
 
 - TOFIX - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
-- FAP Loader disabled so the FW compiles.
-- TOFIX - Compiling requires some play with api_symbols... some FAPs are not working, we are aware.
+- TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
 - UPDATED extend_range to extend_range.txt to allow change via iOS app
 - READDED WIFI MARAUDER AND WIFI SCANNER for normal compile
 
