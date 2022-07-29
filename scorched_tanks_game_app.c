@@ -4,6 +4,15 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define PLAYER_INIT_LOCATION_X 20
+#define PLAYER_INIT_AIM 45
+#define PLAYER_INIT_POWER 50
+#define ENEMY_INIT_LOCATION_X 108
+#define TANK_BARREL_LENGTH 8
+#define GRAVITY_FORCE 32
+
 // That's a filthy workaround but sin(player.aimAngle) breaks it all... If you're able to fix it, please do create a PR!
 double scorched_tanks_sin[91] = {
     0.000,  -0.017, -0.035, -0.052, -0.070, -0.087, -0.105, -0.122, -0.139, -0.156, -0.174, -0.191,
@@ -50,11 +59,11 @@ typedef struct {
 } Tank;
 
 typedef struct {
-    Point ground[128];
+    Point ground[SCREEN_WIDTH];
     Tank player;
     Tank enemy;
     bool isPlayerTurn;
-    unsigned char trajectoryY[128];
+    unsigned char trajectoryY[SCREEN_WIDTH];
     unsigned char trajectoryAnimationStep;
     Point bulletPosition;
 } Game;
@@ -74,12 +83,9 @@ int scorched_tanks_random(int min, int max) {
 }
 
 void scorched_tanks_generate_ground(Game* game_state) {
-    unsigned char ScreenWith = 128;
-    // unsigned char ScreenHeight = 64;
-
     auto lastHeight = 45;
 
-    for(unsigned char a = 0; a < ScreenWith; a++) {
+    for(unsigned char a = 0; a < SCREEN_WIDTH; a++) {
         auto diffHeight = scorched_tanks_random(-2, 3);
         auto changeLength = scorched_tanks_random(1, 6);
 
@@ -88,7 +94,7 @@ void scorched_tanks_generate_ground(Game* game_state) {
         }
 
         for(int b = 0; b < changeLength; b++) {
-            if(a + b < ScreenWith) {
+            if(a + b < SCREEN_WIDTH) {
                 auto index = a + b;
                 auto newPoint = lastHeight + diffHeight;
                 newPoint = newPoint < 35 ? 35 : newPoint;
@@ -110,12 +116,12 @@ void scorched_tanks_calculate_trajectory(Game* game_state) {
     if(game_state->player.isShooting) {
         int x0 = game_state->player.locationX;
         int y0 = game_state->ground[game_state->player.locationX].y - 3;
-        int v0 = 50;
-        int g = 32;
+        int v0 = PLAYER_INIT_POWER;
+        int g = GRAVITY_FORCE;
         int angle = game_state->player.aimAngle;
 
-        if(x0 + game_state->trajectoryAnimationStep > 128 ||
-           game_state->bulletPosition.x > 128 ||
+        if(x0 + game_state->trajectoryAnimationStep > SCREEN_WIDTH ||
+           game_state->bulletPosition.x > SCREEN_WIDTH ||
            game_state->bulletPosition.y > game_state->ground[game_state->bulletPosition.x].y) { 
            game_state->player.isShooting = false;
                 game_state->bulletPosition.x = 0;
@@ -141,9 +147,9 @@ void scorched_tanks_calculate_trajectory(Game* game_state) {
 }
 
 void scorched_tanks_init_game(Game* game_state) {
-    game_state->player.locationX = 20;
-    game_state->player.aimAngle = 45;
-    game_state->enemy.locationX = 108;
+    game_state->player.locationX = PLAYER_INIT_LOCATION_X;
+    game_state->player.aimAngle = PLAYER_INIT_AIM;
+    game_state->enemy.locationX = ENEMY_INIT_LOCATION_X;
 
     scorched_tanks_generate_ground(game_state);
 }
@@ -155,7 +161,7 @@ static void scorched_tanks_render_callback(Canvas* const canvas, void* ctx) {
         return;
     }
 
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
+    canvas_draw_frame(canvas, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     canvas_set_color(canvas, ColorBlack);
 
@@ -163,7 +169,7 @@ static void scorched_tanks_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_dot(canvas, game_state->bulletPosition.x, game_state->bulletPosition.y);
     }
 
-    for(int a = 1; a < 128; a++) {
+    for(int a = 1; a < SCREEN_WIDTH; a++) {
         canvas_draw_line(
             canvas,
             game_state->ground[a - 1].x,
@@ -193,8 +199,8 @@ static void scorched_tanks_render_callback(Canvas* const canvas, void* ctx) {
 
     double sinFromAngle = scorched_tanks_sin[game_state->player.aimAngle];
     double cosFromAngle = scorched_tanks_cos[game_state->player.aimAngle];
-    int aimX2 = aimX1 + 8 * cosFromAngle;
-    int aimY2 = aimY1 + 8 * sinFromAngle;
+    int aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
+    int aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
 
     canvas_draw_line(canvas, aimX1, aimY1, aimX2, aimY2);
 
@@ -223,7 +229,7 @@ static void scorched_tanks_update_timer_callback(FuriMessageQueue* event_queue) 
 }
 
 static void scorched_tanks_move_right(Game* game_state) {
-    if(game_state->player.locationX < 128 - 3) {
+    if(game_state->player.locationX < SCREEN_WIDTH - 3) {
         game_state->player.locationX++;
     }
 }
@@ -252,7 +258,7 @@ static void scorched_tanks_fire(Game* game_state) {
         game_state->bulletPosition.y = game_state->ground[game_state->player.locationX].y - 3;
         game_state->trajectoryAnimationStep = 0;
 
-        for(int x = 0; x < 128; x++) {
+        for(int x = 0; x < SCREEN_WIDTH; x++) {
             game_state->trajectoryY[x] = 0;
         }
 
