@@ -36,3 +36,9 @@ void furi_hal_mpu_protect_read_only(FuriHalRegion region, uint32_t address, Furi
         region, 0x00, address, FURI_HAL_MPU_ATTRIBUTES | LL_MPU_REGION_PRIV_RO_URO | size_ll);
     furi_hal_mpu_enable();
 }
+
+void furi_hal_mpu_protect_disable(FuriHalRegion region) {
+    furi_hal_mpu_disable();
+    LL_MPU_DisableRegion(region);
+    furi_hal_mpu_enable();
+}

@@ -84,7 +84,7 @@ void furi_hal_init() {
     FURI_LOG_I(TAG, "FATFS OK");
 
     // Partial null pointer dereference protection
-    furi_hal_mpu_protect_read_only(FuriHalRegion0, 0x00, FuriHalRegionSize1MB);
+    furi_hal_mpu_protect_no_access(FuriHalRegion0, 0x00, FuriHalRegionSize1MB);
 }
 
 void furi_hal_switch(void* address) {
