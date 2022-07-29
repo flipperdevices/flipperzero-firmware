@@ -289,7 +289,7 @@ uint8_t furi_hal_subghz_get_lqi() {
 /* 
  Modified to the full YARD Stick One extended range of 281-361 MHz, 378-481 MHz, and 749-962 MHz. 
  These changes are at your own risk. The PLL may not lock and FZ devs have warned of possible damage
- Set flag use_ext_range_at_own_risk in extend_range to use
+ Set flag use_ext_range_at_own_risk in extend_range.txt to use
  */
 
  bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
@@ -299,7 +299,7 @@ uint8_t furi_hal_subghz_get_lqi() {
      Storage* storage = furi_record_open("storage");
      FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
 
-     if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/extend_range")) {
+     if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/extend_range.txt")) {
          flipper_format_read_bool(fff_data_file, "use_ext_range_at_own_risk", &is_extended, 1);
          FURI_LOG_I(TAG, "Using extended frequencies at own risk");
      } else{
