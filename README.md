@@ -1,6 +1,8 @@
 # flipper-scorched-tanks-game
 A flipper zero game inspired by scorched earth.
 
+Current state is shown on this video: https://youtu.be/MKRm3_m7pJU
+
 ## How to do:
 Do not hesitate to create PRs. If you start working on sth, please start branch name with TODO id (e.g. "feature/2-change-tank-icon")
 
