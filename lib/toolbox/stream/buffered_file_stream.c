@@ -194,23 +194,18 @@ static size_t
 
 static size_t buffered_file_stream_read(BufferedFileStream* stream, uint8_t* data, size_t size) {
     size_t need_to_read = size;
-
-    do {
-        if(stream->sync_pending) {
-            if(!buffered_file_stream_flush(stream)) break;
-        }
-
-        while(need_to_read) {
-            need_to_read -=
-                stream_cache_read(stream->cache, data + (size - need_to_read), need_to_read);
-            if(need_to_read) {
-                if(!stream_cache_fill(stream->cache, stream->file_stream)) {
-                    break;
-                }
+    while(need_to_read) {
+        need_to_read -=
+            stream_cache_read(stream->cache, data + (size - need_to_read), need_to_read);
+        if(need_to_read) {
+            if(stream->sync_pending) {
+                if(!buffered_file_stream_flush(stream)) break;
+            }
+            if(!stream_cache_fill(stream->cache, stream->file_stream)) {
+                break;
             }
         }
-    } while(false);
-
+    }
     return size - need_to_read;
 }
 
