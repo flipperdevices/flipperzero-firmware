@@ -1,5 +1,5 @@
 V:0
-T:1658905535
+T:1658979237
 D:apps
 D:badusb
 D:dolphin
@@ -250,7 +250,7 @@ F:5442895c85f769349288aa3df0990f9d:585:dolphin/L3_Lab_research_128x54/frame_7.bm
 F:33b8fde22f34ef556b64b77164bc19b0:578:dolphin/L3_Lab_research_128x54/frame_8.bm
 F:f267f0654781049ca323b11bb4375519:581:dolphin/L3_Lab_research_128x54/frame_9.bm
 F:41106c0cbc5144f151b2b2d3daaa0527:727:dolphin/L3_Lab_research_128x54/meta.txt
-F:05e24c3e99c57e84b04a1451b7184d99:40:dolphin_restorer/dolphin.state
+F:05e24c3e99c57e84b04a1451b7184d99:40:dolphin_restorer/.dolphin.state
 D:infrared/assets
 F:bd53bd964d83abfe4968b2db285ee530:106933:infrared/assets/tv.ir
 F:18acc61b64d25ca9d80c57821470a387:226:music_player/Contra.txt
@@ -285,7 +285,7 @@ F:bc02f4b592f0c122335f8c49f92d2cad:3368:nfc/SmashAmiibo/Link50_SHARED.nfc
 F:81dc04c7b181f94b644079a71476dff4:4742:nfc/assets/aid.nfc
 F:86efbebdf41bb6bf15cc51ef88f069d5:2565:nfc/assets/country_code.nfc
 F:41b4f08774249014cb8d3dffa5f5c07d:1757:nfc/assets/currency_code.nfc
-F:42f2b8f11efb8f2322355114de279ff4:50695:nfc/assets/mf_classic_dict.nfc
+F:c60e862919731b0bd538a1001bbc1098:17453:nfc/assets/mf_classic_dict.nfc
 F:7a8b1962f14d89b1a0c9845647a30060:30135:nfc/assets/mf_classic_dict_user.nfc
 D:subghz/Handicap
 D:subghz/Misc
@@ -312,7 +312,7 @@ F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
 F:a1c2ecec362e13bbf358f4ce1122a24b:1962:subghz/assets/setting_user
 F:76460390a308e933a2c134e1e1aeb1e7:258:subghz/assets/touchtunes_map.txt
-F:659ae9a07d7bc3907cbf9bcf3a7eb6af:379:subghz/assets/universal_rf_map.txt
+F:6ad7e0b407cab89cac4407da7f44b6a3:385:subghz/assets/universal_rf_map.txt
 D:u2f/assets
 F:7e11e688e39034bbb9d88410044795e1:365:u2f/assets/cert.der
 F:f60b88c20ed479ed9684e249f7134618:264:u2f/assets/cert_key.u2f
