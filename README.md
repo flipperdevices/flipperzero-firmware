@@ -5,8 +5,6 @@
 
 - TOFIX - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
-- UPDATED extend_range to extend_range.txt to allow change via iOS app
-- READDED WIFI MARAUDER AND WIFI SCANNER for normal compile
 - ADDED DUCKY_LANG keyword support [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
 - <h2>UPDATE USING SD CARD METHOD FOR NEW setting_user and extend_range.txt FILE. You can now unleash your flipper via iOS by editing the extend_range.txt.</h2>
 
