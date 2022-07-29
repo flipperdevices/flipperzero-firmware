@@ -71,7 +71,9 @@ bool buffered_file_stream_close(Stream* _stream) {
     furi_check(stream->stream_base.vtable == &buffered_file_stream_vtable);
     bool success = false;
     do {
-        if(!(stream->sync_pending ? buffered_file_stream_flush(stream) : true)) break;
+        if(stream->sync_pending) {
+            if(!buffered_file_stream_flush(stream)) break;
+        }
         if(!file_stream_close(stream->file_stream)) break;
         success = true;
     } while(false);
@@ -194,7 +196,9 @@ static size_t buffered_file_stream_read(BufferedFileStream* stream, uint8_t* dat
     size_t need_to_read = size;
 
     do {
-        if(!(stream->sync_pending ? buffered_file_stream_flush(stream) : true)) break;
+        if(stream->sync_pending) {
+            if(!buffered_file_stream_flush(stream)) break;
+        }
 
         while(need_to_read) {
             need_to_read -=
@@ -232,8 +236,8 @@ static bool buffered_file_stream_flush(BufferedFileStream* stream) {
     bool success = false;
     const int32_t offset = stream_cache_size(stream->cache) - stream_cache_pos(stream->cache);
     do {
-        stream->sync_pending = false;
         if(!stream_cache_flush(stream->cache, stream->file_stream)) break;
+        stream->sync_pending = false;
         if(offset > 0) {
             if(!stream_seek(stream->file_stream, -offset, StreamOffsetFromCurrent)) break;
         }
