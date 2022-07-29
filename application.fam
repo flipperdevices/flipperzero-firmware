@@ -1,0 +1,10 @@
+App(
+    appid="GAME_scorched_tanks",
+    name="Scorched Tanks",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="scorched_tanks_game_app",
+    cdefines=["APP_SCORCHED_TANKS_GAME"],
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=100,
+)
