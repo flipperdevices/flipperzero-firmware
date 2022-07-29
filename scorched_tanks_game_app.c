@@ -3,6 +3,8 @@
 #include <input/input.h>
 #include <stdlib.h>
 #include <math.h>
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -16,6 +18,7 @@
 #define MAX_GROUND_HEIGHT 55
 #define MAX_FIRE_POWER 100
 #define MIN_FIRE_POWER 0
+#define TANK_COLLIDER_SIZE 3
 
 // That's a filthy workaround but sin(player.aimAngle) breaks it all... If you're able to fix it, please do create a PR!
 double scorched_tanks_sin[91] = {
@@ -117,10 +120,24 @@ void scorched_tanks_generate_ground(Game* game_state) {
     }
 }
 
+void scorched_tanks_init_game(Game* game_state) {
+    game_state->player.locationX = PLAYER_INIT_LOCATION_X;
+    game_state->player.aimAngle = PLAYER_INIT_AIM;
+    game_state->player.firePower = PLAYER_INIT_POWER;
+    game_state->enemy.locationX = ENEMY_INIT_LOCATION_X;
+
+    for (int x = 0; x < SCREEN_WIDTH; x++)
+    {
+        game_state->trajectoryY[x] = 0;
+    }
+
+    scorched_tanks_generate_ground(game_state);
+}
+
 void scorched_tanks_calculate_trajectory(Game* game_state) {
     if(game_state->player.isShooting) {
         int x0 = game_state->player.locationX;
-        int y0 = game_state->ground[game_state->player.locationX].y - 3;
+        int y0 = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
         int v0 = game_state->player.firePower;
         int g = GRAVITY_FORCE;
         int angle = game_state->player.aimAngle;
@@ -128,10 +145,21 @@ void scorched_tanks_calculate_trajectory(Game* game_state) {
         if(x0 + game_state->trajectoryAnimationStep > SCREEN_WIDTH ||
            game_state->bulletPosition.x > SCREEN_WIDTH ||
            game_state->bulletPosition.y > game_state->ground[game_state->bulletPosition.x].y) { 
-           game_state->player.isShooting = false;
+                game_state->player.isShooting = false;
                 game_state->bulletPosition.x = 0;
                 game_state->bulletPosition.y = 0;
                 return;
+        }
+
+        unsigned char distanceToEnemyX = game_state->enemy.locationX - game_state->bulletPosition.x;
+        unsigned char distanceToEnemyY = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE - game_state->bulletPosition.y;
+        int totalDistanceToEnemy = sqrt(distanceToEnemyX*distanceToEnemyX+distanceToEnemyY*distanceToEnemyY);
+
+        if (totalDistanceToEnemy <= TANK_COLLIDER_SIZE)
+        {
+            game_state->player.isShooting = false;
+            scorched_tanks_init_game(game_state);
+            return;
         }
 
         auto x = game_state->trajectoryAnimationStep;
@@ -149,15 +177,6 @@ void scorched_tanks_calculate_trajectory(Game* game_state) {
 
         game_state->trajectoryAnimationStep++;
     }
-}
-
-void scorched_tanks_init_game(Game* game_state) {
-    game_state->player.locationX = PLAYER_INIT_LOCATION_X;
-    game_state->player.aimAngle = PLAYER_INIT_AIM;
-    game_state->player.firePower = PLAYER_INIT_POWER;
-    game_state->enemy.locationX = ENEMY_INIT_LOCATION_X;
-
-    scorched_tanks_generate_ground(game_state);
 }
 
 static void scorched_tanks_render_callback(Canvas* const canvas, void* ctx) {
@@ -191,17 +210,17 @@ static void scorched_tanks_render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_disc(
         canvas,
         game_state->enemy.locationX,
-        game_state->ground[game_state->enemy.locationX].y - 3,
+        game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE,
         3);
 
     canvas_draw_circle(
         canvas,
         game_state->player.locationX,
-        game_state->ground[game_state->player.locationX].y - 3,
+        game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE,
         3);
 
     auto aimX1 = game_state->player.locationX;
-    auto aimY1 = game_state->ground[game_state->player.locationX].y - 3;
+    auto aimY1 = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
 
     double sinFromAngle = scorched_tanks_sin[game_state->player.aimAngle];
     double cosFromAngle = scorched_tanks_cos[game_state->player.aimAngle];
@@ -239,7 +258,7 @@ static void scorched_tanks_update_timer_callback(FuriMessageQueue* event_queue) 
 
 static void scorched_tanks_increase_power(Game* game_state)
 {
-    if (game_state->player.firePower < MAX_FIRE_POWER)
+    if (game_state->player.firePower < MAX_FIRE_POWER && !game_state->player.isShooting)
     {
         game_state->player.firePower++;
     }
@@ -247,28 +266,35 @@ static void scorched_tanks_increase_power(Game* game_state)
 
 static void scorched_tanks_decrease_power(Game* game_state)
 {
-    if (game_state->player.firePower > MIN_FIRE_POWER)
+    if (game_state->player.firePower > MIN_FIRE_POWER && !game_state->player.isShooting)
     {
         game_state->player.firePower--;
     }
 }
 
 static void scorched_tanks_aim_up(Game* game_state) {
-    if(game_state->player.aimAngle < 90) {
+    if(game_state->player.aimAngle < 90 && !game_state->player.isShooting) {
         game_state->player.aimAngle++;
     }
 }
 
 static void scorched_tanks_aim_down(Game* game_state) {
-    if(game_state->player.aimAngle > 0) {
+    if(game_state->player.aimAngle > 0 && !game_state->player.isShooting) {
         game_state->player.aimAngle--;
     }
 }
 
+const NotificationSequence sequence_long_vibro = {
+    &message_vibro_on,
+    &message_delay_500,
+    &message_vibro_off,
+    NULL,
+};
+
 static void scorched_tanks_fire(Game* game_state) {
     if(!game_state->player.isShooting) {
         game_state->bulletPosition.x = game_state->player.locationX;
-        game_state->bulletPosition.y = game_state->ground[game_state->player.locationX].y - 3;
+        game_state->bulletPosition.y = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
         game_state->trajectoryAnimationStep = 0;
 
         for(int x = 0; x < SCREEN_WIDTH; x++) {
@@ -276,6 +302,11 @@ static void scorched_tanks_fire(Game* game_state) {
         }
 
         game_state->player.isShooting = true;
+
+        NotificationApp* notification = furi_record_open("notification");
+        notification_message(notification, &sequence_long_vibro);
+        notification_message(notification, &sequence_blink_white_100);
+        furi_record_close("notification");
     }
 }
 

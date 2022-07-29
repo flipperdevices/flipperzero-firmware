@@ -8,13 +8,13 @@ Do not hesitate to create PRs. If you start working on sth, please start branch 
 
 If you see an improvement, modify this readme and add suggestions via PR. Bugs can be reported via Issues
 
-## What to do next:
+## What to do next (it's not in the priority order):
 1. ~~remove movement~~
 2. change tank icon
 3. ~~power as variable not constant~~
 4. better map generation: high, low regions
 5. flatten surface beneath tanks
-6. collision with the enemy
+6. ~~collision with the enemy~~
 7. explosion animation
 8. local multi-player
 9. sub-ghz multi-player
@@ -24,3 +24,7 @@ If you see an improvement, modify this readme and add suggestions via PR. Bugs c
 13. add terain destruction
 14. add terain gravity (fall down after hitting the middle of the mountain)
 15. FIX: firing stops when bullet fly above the screen
+16. Slightly randomize player and enemy spawn locations
+17. ~~Shooting vibration~~
+18. Add menu with settings (vibartion on/off, difficulty)
+19. Add wind
