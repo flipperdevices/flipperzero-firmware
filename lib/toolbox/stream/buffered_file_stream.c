@@ -229,10 +229,10 @@ static bool buffered_file_stream_delete_and_insert(
 // Almost same as sync, but private
 static bool buffered_file_stream_flush(BufferedFileStream* stream) {
     bool success = false;
-    const int32_t offset = stream_cache_size(stream->cache) - stream_cache_pos(stream->cache);
     do {
         if(!stream_cache_flush(stream->cache, stream->file_stream)) break;
         stream->sync_pending = false;
+        const int32_t offset = stream_cache_size(stream->cache) - stream_cache_pos(stream->cache);
         if(offset > 0) {
             if(!stream_seek(stream->file_stream, -offset, StreamOffsetFromCurrent)) break;
         }
@@ -248,8 +248,8 @@ static bool buffered_file_stream_unread(BufferedFileStream* stream) {
     if((!stream->sync_pending) && (cache_size > 0)) {
         const size_t cache_pos = stream_cache_pos(stream->cache);
         if(cache_pos < cache_size) {
-            const int32_t seek_amount = -(int32_t)(cache_size - cache_pos);
-            success = stream_seek(stream->file_stream, seek_amount, StreamOffsetFromCurrent);
+            const int32_t offset = cache_size - cache_pos;
+            success = stream_seek(stream->file_stream, -offset, StreamOffsetFromCurrent);
         }
         stream_cache_drop(stream->cache);
     }
