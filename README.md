@@ -7,6 +7,7 @@
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
 - UPDATED extend_range to extend_range.txt to allow change via iOS app
 - READDED WIFI MARAUDER AND WIFI SCANNER for normal compile
+- <h2>UPDATE USING SD CARD METHOD FOR NEW setting_user and extend_range.txt FILE. You can now unleash your flipper via iOS by editing the extend_range.txt.</h2>
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -15,7 +16,7 @@
     <br><a href="https://flipper.pingywon.com/" target="_blank">HERE IS A GUIDE FOR INSTALL (BY PINGYWON)</a>
     <br><a href="https://interestingsoup.com/n00b-guide-flashing-flipper-zero-to-rougemaster/" target="_blank">HERE IS A NOOB GUIDE TO FLASH AND UNLOCK (BY interestingsoup)</a>
       
-- To install new FW, extract the [latest release zip file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases) to a folder, put the folder in the update folder on your SD card and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your setting_user file. **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!** On any update, you may need to update this file and your unirf map file, so keep backups. 😄
+- To install new FW, extract the [latest release zip file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases) to a folder, put the folder in the update folder on your SD card and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your extend_range.txt file. **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!** On any update, you may need to update this file and your unirf map file, so keep backups. 😄
     - [<h2>GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU</h2>](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)
 - READ SPECIAL INSTRUCTIONS
 - If you have questions about where X app is located, DO NOT ASK ON MAIN DISCORD, ASK <a href='https://discord.gg/gF2bBUzAFe'>HERE</a>
@@ -84,7 +85,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
 - SubGHz: Extended ranges enabled through flag in /ext/subghz/assets/extend_range [from tkerrby](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/116)
 - SubGHz: Protocols An-Motors, BFT Mitto, Came Atomo, FAAC SLH (Spa), HCS101, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
-- SubGHz: Unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/setting_user` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
+- SubGHz: Unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/extend_range.txt` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/extend_range.txt) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 
  </details>
 
