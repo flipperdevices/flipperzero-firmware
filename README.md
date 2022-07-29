@@ -40,6 +40,8 @@ $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlu
 $ cd flipperzero-firmware-wPlugins/
 $ ./fbt resources icons
 $ ./fbt --with-updater updater_package
+
+# If building FAPS:
 $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 ```
 </details>
