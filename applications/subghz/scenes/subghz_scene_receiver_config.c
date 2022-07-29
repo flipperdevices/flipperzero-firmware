@@ -75,7 +75,7 @@ static void subghz_scene_receiver_config_set_frequency(VariableItem* item) {
         char text_buf[10] = {0};
         snprintf(
             text_buf,
-            10,
+            sizeof(text_buf),
             "%lu.%02lu",
             subghz_setting_get_frequency(subghz->setting, index) / 1000000,
             (subghz_setting_get_frequency(subghz->setting, index) % 1000000) / 10000);
@@ -109,7 +109,7 @@ static void subghz_scene_receiver_config_set_hopping_runing(VariableItem* item) 
         char text_buf[10] = {0};
         snprintf(
             text_buf,
-            10,
+            sizeof(text_buf),
             "%lu.%02lu",
             subghz_setting_get_default_frequency(subghz->setting) / 1000000,
             (subghz_setting_get_default_frequency(subghz->setting) % 1000000) / 10000);
@@ -164,7 +164,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
     char text_buf[10] = {0};
     snprintf(
         text_buf,
-        10,
+        sizeof(text_buf),
         "%lu.%02lu",
         subghz_setting_get_frequency(subghz->setting, value_index) / 1000000,
         (subghz_setting_get_frequency(subghz->setting, value_index) % 1000000) / 10000);
