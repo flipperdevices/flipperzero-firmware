@@ -6,24 +6,20 @@
 #include "rpc_app.h"
 
 #define TAG "RpcSystemApp"
-#define APP_BUTTON_TIMEOUT 1000
+
+typedef enum {
+    RpcAppSystemStateIdle,
+    RpcAppSystemStateStarted,
+    RpcAppSystemStatePressed,
+} RpcAppSystemState;
 
 struct RpcAppSystem {
     RpcSession* session;
     RpcAppSystemCallback app_callback;
     void* app_context;
     PB_Main* state_msg;
-    FuriTimer* timer;
+    RpcAppSystemState state;
 };
-
-static void rpc_system_app_timer_callback(void* context) {
-    furi_assert(context);
-    RpcAppSystem* rpc_app = context;
-
-    if(rpc_app->app_callback) {
-        rpc_app->app_callback(RpcAppEventButtonRelease, NULL, rpc_app->app_context);
-    }
-}
 
 static void rpc_system_app_start_process(const PB_Main* request, void* context) {
     furi_assert(request);
@@ -111,7 +107,6 @@ static void rpc_system_app_exit_request(const PB_Main* request, void* context) {
     if(rpc_app->app_callback) {
         if(rpc_app->app_callback(RpcAppEventAppExit, NULL, rpc_app->app_context)) {
             status = PB_CommandStatus_OK;
-            furi_timer_stop(rpc_app->timer);
         } else {
             status = PB_CommandStatus_ERROR_APP_CMD_ERROR;
         }
@@ -160,7 +155,6 @@ static void rpc_system_app_button_press(const PB_Main* request, void* context) {
         const char* args = request->content.app_button_press_request.args;
         if(rpc_app->app_callback(RpcAppEventButtonPress, args, rpc_app->app_context)) {
             status = PB_CommandStatus_OK;
-            furi_timer_start(rpc_app->timer, APP_BUTTON_TIMEOUT);
         } else {
             status = PB_CommandStatus_ERROR_APP_CMD_ERROR;
         }
@@ -184,7 +178,6 @@ static void rpc_system_app_button_release(const PB_Main* request, void* context)
     if(rpc_app->app_callback) {
         if(rpc_app->app_callback(RpcAppEventButtonRelease, NULL, rpc_app->app_context)) {
             status = PB_CommandStatus_OK;
-            furi_timer_stop(rpc_app->timer);
         } else {
             status = PB_CommandStatus_ERROR_APP_CMD_ERROR;
         }
@@ -226,8 +219,6 @@ void* rpc_system_app_alloc(RpcSession* session) {
     RpcAppSystem* rpc_app = malloc(sizeof(RpcAppSystem));
     rpc_app->session = session;
 
-    rpc_app->timer = furi_timer_alloc(rpc_system_app_timer_callback, FuriTimerTypeOnce, rpc_app);
-
     // App exit message
     rpc_app->state_msg = malloc(sizeof(PB_Main));
     rpc_app->state_msg->which_content = PB_Main_app_state_response_tag;
@@ -264,8 +255,6 @@ void rpc_system_app_free(void* context) {
     RpcAppSystem* rpc_app = context;
     RpcSession* session = rpc_app->session;
     furi_assert(session);
-
-    furi_timer_free(rpc_app->timer);
 
     if(rpc_app->app_callback) {
         rpc_app->app_callback(RpcAppEventSessionClose, NULL, rpc_app->app_context);
