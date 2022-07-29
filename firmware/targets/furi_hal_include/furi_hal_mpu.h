@@ -9,8 +9,8 @@
 #include <stdint.h>
 
 typedef enum {
-    FuriHalRegion0 = 0x00,
-    FuriHalRegion1 = 0x01,
+    FuriHalRegionNULL = 0x00, // region 0 used to protect null pointer dereference
+    FuriHalRegionStack = 0x01, // region 1 used to protect stack
     FuriHalRegion2 = 0x02,
     FuriHalRegion3 = 0x03,
     FuriHalRegion4 = 0x04,

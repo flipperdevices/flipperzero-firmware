@@ -7,6 +7,9 @@
 
 void furi_hal_mpu_init() {
     furi_hal_mpu_enable();
+
+    // Partial null pointer dereference protection
+    furi_hal_mpu_protect_no_access(FuriHalRegionNULL, 0x00, FuriHalRegionSize1MB);
 }
 
 void furi_hal_mpu_enable() {
@@ -41,4 +44,8 @@ void furi_hal_mpu_protect_disable(FuriHalRegion region) {
     furi_hal_mpu_disable();
     LL_MPU_DisableRegion(region);
     furi_hal_mpu_enable();
+}
+
+void furi_hal_mpu_set_stack_protection(uint32_t* stack) {
+    furi_hal_mpu_protect_read_only(FuriHalRegionStack, (uint32_t)stack, FuriHalRegionSize32B);
 }
