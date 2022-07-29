@@ -12,6 +12,10 @@
 #define ENEMY_INIT_LOCATION_X 108
 #define TANK_BARREL_LENGTH 8
 #define GRAVITY_FORCE 32
+#define MIN_GROUND_HEIGHT 35
+#define MAX_GROUND_HEIGHT 55
+#define MAX_FIRE_POWER 100
+#define MIN_FIRE_POWER 0
 
 // That's a filthy workaround but sin(player.aimAngle) breaks it all... If you're able to fix it, please do create a PR!
 double scorched_tanks_sin[91] = {
@@ -52,9 +56,10 @@ typedef struct {
 } Point;
 
 typedef struct {
+    unsigned char locationX;
     unsigned char hp;
     int aimAngle;
-    unsigned char locationX;
+    unsigned char firePower;
     bool isShooting;
 } Tank;
 
@@ -97,8 +102,8 @@ void scorched_tanks_generate_ground(Game* game_state) {
             if(a + b < SCREEN_WIDTH) {
                 auto index = a + b;
                 auto newPoint = lastHeight + diffHeight;
-                newPoint = newPoint < 35 ? 35 : newPoint;
-                newPoint = newPoint > 55 ? 55 : newPoint;
+                newPoint = newPoint < MIN_GROUND_HEIGHT ? MIN_GROUND_HEIGHT : newPoint;
+                newPoint = newPoint > MAX_GROUND_HEIGHT ? MAX_GROUND_HEIGHT : newPoint;
                 game_state->ground[index].x = index;
                 game_state->ground[index].y = newPoint;
                 lastHeight = newPoint;
@@ -116,7 +121,7 @@ void scorched_tanks_calculate_trajectory(Game* game_state) {
     if(game_state->player.isShooting) {
         int x0 = game_state->player.locationX;
         int y0 = game_state->ground[game_state->player.locationX].y - 3;
-        int v0 = PLAYER_INIT_POWER;
+        int v0 = game_state->player.firePower;
         int g = GRAVITY_FORCE;
         int angle = game_state->player.aimAngle;
 
@@ -149,6 +154,7 @@ void scorched_tanks_calculate_trajectory(Game* game_state) {
 void scorched_tanks_init_game(Game* game_state) {
     game_state->player.locationX = PLAYER_INIT_LOCATION_X;
     game_state->player.aimAngle = PLAYER_INIT_AIM;
+    game_state->player.firePower = PLAYER_INIT_POWER;
     game_state->enemy.locationX = ENEMY_INIT_LOCATION_X;
 
     scorched_tanks_generate_ground(game_state);
@@ -205,11 +211,14 @@ static void scorched_tanks_render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_line(canvas, aimX1, aimY1, aimX2, aimY2);
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 40, 10, "Scorched Tanks");
+    canvas_draw_str(canvas, 55, 10, "Scorched Tanks");
 
     char buffer[12];
     snprintf(buffer, sizeof(buffer), "a: %u", game_state->player.aimAngle);
     canvas_draw_str(canvas, 2, 10, buffer);
+
+    snprintf(buffer, sizeof(buffer), "p: %u", game_state->player.firePower);
+    canvas_draw_str(canvas, 27, 10, buffer);
 
     release_mutex((ValueMutex*)ctx, game_state);
 }
@@ -228,15 +237,19 @@ static void scorched_tanks_update_timer_callback(FuriMessageQueue* event_queue) 
     furi_message_queue_put(event_queue, &event, 0);
 }
 
-static void scorched_tanks_move_right(Game* game_state) {
-    if(game_state->player.locationX < SCREEN_WIDTH - 3) {
-        game_state->player.locationX++;
+static void scorched_tanks_increase_power(Game* game_state)
+{
+    if (game_state->player.firePower < MAX_FIRE_POWER)
+    {
+        game_state->player.firePower++;
     }
 }
 
-static void scorched_tanks_move_left(Game* game_state) {
-    if(game_state->player.locationX > 0 + 3) {
-        game_state->player.locationX--;
+static void scorched_tanks_decrease_power(Game* game_state)
+{
+    if (game_state->player.firePower > MIN_FIRE_POWER)
+    {
+        game_state->player.firePower--;
     }
 }
 
@@ -308,10 +321,10 @@ int32_t scorched_tanks_game_app(void* p) {
                     scorched_tanks_aim_down(game_state);
                     break;
                 case InputKeyRight:
-                    scorched_tanks_move_right(game_state);
+                    scorched_tanks_increase_power(game_state);
                     break;
                 case InputKeyLeft:
-                    scorched_tanks_move_left(game_state);
+                    scorched_tanks_decrease_power(game_state);
                     break;
                 case InputKeyOk:
                     scorched_tanks_fire(game_state);
