@@ -59,9 +59,9 @@ size_t stream_cache_fill(StreamCache* cache, Stream* stream);
  * Write as much cached data as possible to a stream.
  * @param cache Pointer to a StreamCache instance
  * @param stream Pointer to a Stream instance
- * @return Size of written data.
+ * @return True on success, False on failure.
  */
-size_t stream_cache_flush(StreamCache* cache, Stream* stream);
+bool stream_cache_flush(StreamCache* cache, Stream* stream);
 
 /**
  * Read cached data and advance the internal cursor.

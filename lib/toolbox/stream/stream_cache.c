@@ -46,11 +46,12 @@ size_t stream_cache_fill(StreamCache* cache, Stream* stream) {
     return size_read;
 }
 
-size_t stream_cache_flush(StreamCache* cache, Stream* stream) {
+bool stream_cache_flush(StreamCache* cache, Stream* stream) {
     const size_t size_written = stream_write(stream, cache->data, cache->data_size);
+    const bool success = (size_written == cache->data_size);
     cache->data_size = 0;
     cache->position = 0;
-    return size_written;
+    return success;
 }
 
 size_t stream_cache_read(StreamCache* cache, uint8_t* data, size_t size) {
@@ -81,7 +82,7 @@ int32_t stream_cache_seek(StreamCache* cache, int32_t offset) {
     if(offset > 0) {
         actual_offset = MIN(cache->data_size - cache->position, (size_t)offset);
     } else if(offset < 0) {
-        actual_offset = -MIN(cache->position, (size_t)abs(offset));
+        actual_offset = MAX(-((int32_t)cache->position), offset);
     }
 
     cache->position += actual_offset;
