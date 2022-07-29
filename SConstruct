@@ -34,7 +34,9 @@ coreenv["ROOT_DIR"] = Dir(".")
 # Create a separate "dist" environment and add construction envs to it
 distenv = coreenv.Clone(
     tools=["fbt_dist", "openocd", "blackmagic"],
-    OPENOCD_GDB_PIPE=["|openocd -c 'gdb_port pipe; log_output debug/openocd.log' ${[SINGLEQUOTEFUNC(OPENOCD_OPTS)]}"],
+    OPENOCD_GDB_PIPE=[
+        "|openocd -c 'gdb_port pipe; log_output debug/openocd.log' ${[SINGLEQUOTEFUNC(OPENOCD_OPTS)]}"
+    ],
     GDBOPTS_BASE=[
         "-ex",
         "target extended-remote ${GDBREMOTE}",
@@ -99,16 +101,24 @@ if GetOption("fullenv") or any(
         '"${ROOT_DIR.abspath}/assets/resources"',
     ]
 
-    if distenv["UPDATE_SPLASH"]:
-        dist_arguments += [
+    dist_arguments_splash = (
+        [
             "--splash",
             distenv.subst("assets/slideshow/$UPDATE_SPLASH"),
         ]
+        if distenv["UPDATE_SPLASH"]
+        else []
+    )
 
     selfupdate_dist = distenv.DistCommand(
         "updater_package",
         (distenv["DIST_DEPENDS"], firmware_env["FW_RESOURCES"]),
-        DIST_EXTRA=[*dist_arguments, *dist_radio_arguments, *dist_resource_arguments],
+        DIST_EXTRA=[
+            *dist_arguments,
+            *dist_radio_arguments,
+            *dist_resource_arguments,
+            *dist_arguments_splash,
+        ],
     )
 
     selfupdate_min_dist = distenv.DistCommand(
