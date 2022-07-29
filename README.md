@@ -15,8 +15,23 @@
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
   <tr> <td>
 <br><b>FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE<b>
-    <br><a href="https://flipper.pingywon.com/" target="_blank">HERE IS A GUIDE FOR INSTALL (BY PINGYWON)</a>
-    <br><a href="https://interestingsoup.com/n00b-guide-flashing-flipper-zero-to-rougemaster/" target="_blank">HERE IS A NOOB GUIDE TO FLASH AND UNLOCK (BY interestingsoup)</a>
+
+<details>
+  <summary><B>HOW TOs</b></summary><br/>
+  
+- [- HERE IS A GUIDE FOR INSTALL (BY PINGYWON)](https://flipper.pingywon.com/)
+- [- HERE IS A NOOB GUIDE TO FLASH AND UNLOCK (BY interestingsoup)](https://interestingsoup.com/n00b-guide-flashing-flipper-zero-to-rougemaster/)
+- [- How to install firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/HowToInstall.md)
+- [- How to build firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/HowToBuild.md)
+- [- BadUSB: how to use different keyboard layouts](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/BadUSBLayouts.md)
+- [- Configure UniversalRF Remix App](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/UniRFRemix.md)
+- [- How to use: NRF24 plugins](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/NRF24.md)
+- [- How to use: SentrySafe plugin](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/SentrySafe.md)
+- [- Barcode Generator readme](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/BarcodeGenerator.md)
+- [- How to extend SubGHz frequency range](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/DangerousSettings.md)
+- [- How to add extra SubGHz frequencies](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/SubGHzSettings.md)
+</details>
+
       
 - To install new FW, extract the [latest release zip file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases) to a folder, put the folder in the update folder on your SD card and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your extend_range.txt file. **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!** On any update, you may need to update this file and your unirf map file, so keep backups. 😄
     - [<h2>GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU</h2>](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/GAMES_ONLY.md)

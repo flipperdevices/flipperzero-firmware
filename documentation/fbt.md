@@ -31,7 +31,6 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 ### High-level (what you most likely need)
 
 - `fw_dist` - build & publish firmware to `dist` folder. This is a default target, when no other are specified
-- `plugin_dist` - build external plugins & publish to `dist` folder  
 - `updater_package` - build self-update package. _Requires `--with-updater` option_
 - `copro_dist` - bundle Core2 FUS+stack binaries for qFlipper
 - `flash` - flash attached device with OpenOCD over ST-Link
