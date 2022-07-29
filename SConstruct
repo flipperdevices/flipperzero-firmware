@@ -83,7 +83,7 @@ if GetOption("fullenv") or any(
     )
 
     # Target for self-update package
-    dist_arguments = [
+    dist_basic_arguments = [
         "--bundlever",
         '"${UPDATE_VERSION_STRING}"',
     ]
@@ -100,8 +100,7 @@ if GetOption("fullenv") or any(
         "-r",
         '"${ROOT_DIR.abspath}/assets/resources"',
     ]
-
-    dist_arguments_splash = (
+    dist_splash_arguments = (
         [
             "--splash",
             distenv.subst("assets/slideshow/$UPDATE_SPLASH"),
@@ -114,17 +113,17 @@ if GetOption("fullenv") or any(
         "updater_package",
         (distenv["DIST_DEPENDS"], firmware_env["FW_RESOURCES"]),
         DIST_EXTRA=[
-            *dist_arguments,
+            *dist_basic_arguments,
             *dist_radio_arguments,
             *dist_resource_arguments,
-            *dist_arguments_splash,
+            *dist_splash_arguments,
         ],
     )
 
     selfupdate_min_dist = distenv.DistCommand(
         "updater_minpackage",
         distenv["DIST_DEPENDS"],
-        DIST_EXTRA=dist_arguments,
+        DIST_EXTRA=dist_basic_arguments,
     )
 
     # Updater debug
