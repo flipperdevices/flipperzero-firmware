@@ -155,6 +155,28 @@ void mf_classic_set_key_found(
     }
 }
 
+uint8_t mf_classic_get_found_keys(
+    MfClassicData* data,
+    uint64_t* key,
+    MfClassicKey key_type,
+    uint8_t key_number) {
+    if(key_type == MfClassicKeyA) {
+        while(FURI_BIT(data->key_a_mask, key_number -= 1) != 1) {
+            if(key_number == 0) break;
+        }
+        MfClassicSectorTrailer* sec_trailer =
+            mf_classic_get_sector_trailer_by_sector(data, key_number);
+        *key = nfc_util_bytes2num(sec_trailer->key_a, sizeof(sec_trailer->key_a));
+    } else if(key_type == MfClassicKeyB) {
+        while(FURI_BIT(data->key_b_mask, key_number -= 1) != 1) {
+            if(key_number == 0) break;
+        }
+        MfClassicSectorTrailer* sec_trailer =
+            mf_classic_get_sector_trailer_by_sector(data, key_number);
+        *key = nfc_util_bytes2num(sec_trailer->key_b, sizeof(sec_trailer->key_b));
+    }
+    return key_number;
+}
 bool mf_classic_is_sector_read(MfClassicData* data, uint8_t sector_num) {
     furi_assert(data);
 

@@ -100,6 +100,12 @@ void mf_classic_set_key_found(
     MfClassicKey key_type,
     uint64_t key);
 
+uint8_t mf_classic_get_found_keys(
+    MfClassicData* data,
+    uint64_t* key,
+    MfClassicKey key_type,
+    uint8_t key_number);
+
 bool mf_classic_is_block_read(MfClassicData* data, uint8_t block_num);
 
 void mf_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassicBlock* block_data);

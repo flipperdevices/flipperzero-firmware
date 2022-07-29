@@ -408,6 +408,8 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker, MfClassicDictType 
     bool card_found_notified = true;
     bool card_removed_notified = false;
 
+    uint8_t key_number_a = 0;
+    uint8_t key_number_b = 0;
     // Load dictionary
     MfClassicDict* dict = mf_classic_dict_alloc(type);
     if(!dict) {
@@ -425,7 +427,14 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker, MfClassicDictType 
         if(mf_classic_is_sector_read(data, i)) continue;
         bool is_key_a_found = mf_classic_is_key_found(data, i, MfClassicKeyA);
         bool is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
-        while(mf_classic_dict_get_next_key(dict, &key)) {
+        bool tried_previous = false;
+        key_number_a = i;
+        key_number_b = i;
+
+        while(1) {
+            if(tried_previous) {
+                if(!mf_classic_dict_get_next_key(dict, &key)) break;
+            }
             furi_hal_nfc_sleep();
             if(furi_hal_nfc_activate_nfca(200, NULL)) {
                 furi_hal_nfc_sleep();
@@ -441,14 +450,30 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker, MfClassicDictType 
                     (uint32_t)(key >> 32),
                     (uint32_t)key);
                 if(!is_key_a_found) {
+                    if(!tried_previous) {
+                        key_number_a =
+                            mf_classic_get_found_keys(data, &key, MfClassicKeyB, key_number_a);
+                        if(key_number_a == 0) {
+                            mf_classic_dict_rewind(dict);
+                            tried_previous = true;
+                        }
+                    }
                     is_key_a_found = mf_classic_is_key_found(data, i, MfClassicKeyA);
                     if(mf_classic_authenticate(&tx_rx, block_num, key, MfClassicKeyA)) {
                         mf_classic_set_key_found(data, i, MfClassicKeyA, key);
                         nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
                     }
-                    furi_hal_nfc_sleep();
+                    //furi_hal_nfc_sleep();
                 }
                 if(!is_key_b_found) {
+                    if(!tried_previous) {
+                        key_number_b =
+                            mf_classic_get_found_keys(data, &key, MfClassicKeyB, key_number_b);
+                        if(key_number_b == 0) {
+                            mf_classic_dict_rewind(dict);
+                            tried_previous = true;
+                        }
+                    }
                     is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
                     if(mf_classic_authenticate(&tx_rx, block_num, key, MfClassicKeyB)) {
                         mf_classic_set_key_found(data, i, MfClassicKeyB, key);
@@ -474,7 +499,6 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker, MfClassicDictType 
              (nfc_worker->state == NfcWorkerStateMfClassicFlipperDictAttack)))
             break;
         mf_classic_read_sector(&tx_rx, data, i);
-        mf_classic_dict_rewind(dict);
     }
     mf_classic_dict_free(dict);
     if((nfc_worker->state == NfcWorkerStateMfClassicUserDictAttack) ||
