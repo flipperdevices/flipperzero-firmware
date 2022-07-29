@@ -1,4 +1,4 @@
-# flipper-scorched-tanks-game
+# Scorched tanks - flipper zero game
 A flipper zero game inspired by scorched earth.
 
 Current state is shown on this video: https://youtu.be/MKRm3_m7pJU
