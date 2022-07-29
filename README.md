@@ -9,6 +9,7 @@
 - Added some SubGHz Frequencies not previously listed [(Thanks to Eng1n33r/Nano)](https://github.com/Eng1n33r/flipperzero-firmware)
 - Updated UniRF Remix to have multiple map file support [(Thanks to Eng1n33r/Nano)](https://github.com/Eng1n33r/flipperzero-firmware)
 - Fixed Music Player to start at full volume
+- Fixed UniRF buttons
 #   - UPDATE USING SD CARD METHOD FOR NEW [`subghz/assets/setting_user`](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) and [`subghz/assets/extend_range.txt`](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/extend_range.txt) FILE.<br>&nbsp;&nbsp;&nbsp;&nbsp;You can now unleash your flipper via iOS app.
 
 <table width="100%" border="0" cellspacing="0">
