@@ -35,7 +35,7 @@ void subghz_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(subghz->scene_manager);
 }
 
-static bool subghz_rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context) {
+static bool subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
 
@@ -63,6 +63,7 @@ static bool subghz_rpc_command_callback(RpcAppSystemEvent event, const char* arg
         }
         result = true;
     } else if(event == RpcAppEventLoadFile) {
+        const char* arg = rpc_system_app_get_filename(subghz->rpc_ctx);
         if(arg) {
             if(subghz_key_load(subghz, arg, false)) {
                 string_set_str(subghz->file_path, arg);

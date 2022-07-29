@@ -99,7 +99,7 @@ static bool ibutton_load_key_data(iButton* ibutton, string_t key_path, bool show
     return result;
 }
 
-static bool ibutton_rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context) {
+static bool ibutton_rpc_command_callback(RpcAppSystemEvent event, void* context) {
     furi_assert(context);
     iButton* ibutton = context;
 
@@ -114,6 +114,7 @@ static bool ibutton_rpc_command_callback(RpcAppSystemEvent event, const char* ar
         view_dispatcher_send_custom_event(ibutton->view_dispatcher, iButtonCustomEventRpcExit);
         result = true;
     } else if(event == RpcAppEventLoadFile) {
+        const char* arg = rpc_system_app_get_filename(ibutton->rpc_ctx);
         if(arg) {
             string_set_str(ibutton->file_path, arg);
             if(ibutton_load_key_data(ibutton, ibutton->file_path, false)) {

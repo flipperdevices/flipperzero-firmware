@@ -10,6 +10,7 @@
 typedef enum {
     RpcAppSystemStateIdle,
     RpcAppSystemStateStarted,
+    RpcAppSystemStateLoaded,
     RpcAppSystemStatePressed,
 } RpcAppSystemState;
 
@@ -19,6 +20,8 @@ struct RpcAppSystem {
     void* app_context;
     PB_Main* state_msg;
     RpcAppSystemState state;
+    char* file_path;
+    char* button_name;
 };
 
 static void rpc_system_app_start_process(const PB_Main* request, void* context) {
@@ -105,7 +108,7 @@ static void rpc_system_app_exit_request(const PB_Main* request, void* context) {
     PB_CommandStatus status;
 
     if(rpc_app->app_callback) {
-        if(rpc_app->app_callback(RpcAppEventAppExit, NULL, rpc_app->app_context)) {
+        if(rpc_app->app_callback(RpcAppEventAppExit, rpc_app->app_context)) {
             status = PB_CommandStatus_OK;
         } else {
             status = PB_CommandStatus_ERROR_APP_CMD_ERROR;
@@ -128,8 +131,9 @@ static void rpc_system_app_load_file(const PB_Main* request, void* context) {
 
     PB_CommandStatus status;
     if(rpc_app->app_callback) {
-        const char* file_path = request->content.app_load_file_request.path;
-        if(rpc_app->app_callback(RpcAppEventLoadFile, file_path, rpc_app->app_context)) {
+        if(rpc_app->file_path) free(rpc_app->file_path);
+        rpc_app->file_path = strdup(request->content.app_load_file_request.path);
+        if(rpc_app->app_callback(RpcAppEventLoadFile, rpc_app->app_context)) {
             status = PB_CommandStatus_OK;
         } else {
             status = PB_CommandStatus_ERROR_APP_CMD_ERROR;
@@ -152,8 +156,9 @@ static void rpc_system_app_button_press(const PB_Main* request, void* context) {
 
     PB_CommandStatus status;
     if(rpc_app->app_callback) {
-        const char* args = request->content.app_button_press_request.args;
-        if(rpc_app->app_callback(RpcAppEventButtonPress, args, rpc_app->app_context)) {
+        if(rpc_app->button_name) free(rpc_app->button_name);
+        rpc_app->button_name = strdup(request->content.app_button_press_request.args);
+        if(rpc_app->app_callback(RpcAppEventButtonPress, rpc_app->app_context)) {
             status = PB_CommandStatus_OK;
         } else {
             status = PB_CommandStatus_ERROR_APP_CMD_ERROR;
@@ -176,7 +181,7 @@ static void rpc_system_app_button_release(const PB_Main* request, void* context)
 
     PB_CommandStatus status;
     if(rpc_app->app_callback) {
-        if(rpc_app->app_callback(RpcAppEventButtonRelease, NULL, rpc_app->app_context)) {
+        if(rpc_app->app_callback(RpcAppEventButtonRelease, rpc_app->app_context)) {
             status = PB_CommandStatus_OK;
         } else {
             status = PB_CommandStatus_ERROR_APP_CMD_ERROR;
@@ -257,9 +262,19 @@ void rpc_system_app_free(void* context) {
     furi_assert(session);
 
     if(rpc_app->app_callback) {
-        rpc_app->app_callback(RpcAppEventSessionClose, NULL, rpc_app->app_context);
+        rpc_app->app_callback(RpcAppEventSessionClose, rpc_app->app_context);
     }
 
+    if(rpc_app->file_path) free(rpc_app->file_path);
+    if(rpc_app->button_name) free(rpc_app->button_name);
     free(rpc_app->state_msg);
     free(rpc_app);
+}
+
+const char* rpc_system_app_get_filename(RpcAppSystem* rpc_app) {
+    return rpc_app->file_path;
+}
+
+const char* rpc_system_app_get_button(RpcAppSystem* rpc_app) {
+    return rpc_app->button_name;
 }

@@ -38,7 +38,7 @@ static bool nfc_rpc_emulate_callback(NfcWorkerEvent event, void* context) {
     return true;
 }
 
-static bool nfc_rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context) {
+static bool nfc_rpc_command_callback(RpcAppSystemEvent event, void* context) {
     furi_assert(context);
     Nfc* nfc = context;
 
@@ -57,6 +57,7 @@ static bool nfc_rpc_command_callback(RpcAppSystemEvent event, const char* arg, v
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
         result = true;
     } else if(event == RpcAppEventLoadFile) {
+        const char* arg = rpc_system_app_get_filename(nfc->rpc_ctx);
         if((arg) && (nfc->rpc_state == NfcRpcStateIdle)) {
             if(nfc_device_load(nfc->dev, arg, false)) {
                 if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {

@@ -36,8 +36,7 @@ static void infrared_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(infrared->scene_manager);
 }
 
-static bool
-    infrared_rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context) {
+static bool infrared_rpc_command_callback(RpcAppSystemEvent event, void* context) {
     furi_assert(context);
     Infrared* infrared = context;
 
@@ -46,6 +45,7 @@ static bool
     }
 
     bool result = false;
+    const char* arg = rpc_system_app_get_filename(infrared->rpc_ctx);
 
     if(event == RpcAppEventSessionClose) {
         rpc_system_app_set_callback(infrared->rpc_ctx, NULL, NULL);

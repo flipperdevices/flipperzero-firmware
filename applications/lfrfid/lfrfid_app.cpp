@@ -48,7 +48,7 @@ LfRfidApp::~LfRfidApp() {
     }
 }
 
-static bool rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context) {
+static bool rpc_command_callback(RpcAppSystemEvent event, void* context) {
     furi_assert(context);
     LfRfidApp* app = static_cast<LfRfidApp*>(context);
 
@@ -67,6 +67,7 @@ static bool rpc_command_callback(RpcAppSystemEvent event, const char* arg, void*
         app->view_controller.send_event(&event);
         result = true;
     } else if(event == RpcAppEventLoadFile) {
+        const char* arg = rpc_system_app_get_filename(app->rpc_ctx);
         if(arg) {
             string_set_str(app->file_path, arg);
             if(app->load_key_data(app->file_path, &(app->worker.key), false)) {
