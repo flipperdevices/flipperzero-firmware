@@ -27,7 +27,7 @@ static bool buffered_file_stream_delete_and_insert(
     StreamWriteCB write_callback,
     const void* ctx);
 
-// Drop read cache and adjust the underlying stream seek position
+static bool buffered_file_stream_flush(BufferedFileStream* stream);
 static bool buffered_file_stream_unread(BufferedFileStream* stream);
 
 const StreamVTable buffered_file_stream_vtable = {
@@ -69,20 +69,20 @@ bool buffered_file_stream_close(Stream* _stream) {
     furi_assert(_stream);
     BufferedFileStream* stream = (BufferedFileStream*)_stream;
     furi_check(stream->stream_base.vtable == &buffered_file_stream_vtable);
-    const bool sync_success = buffered_file_stream_sync(_stream);
-    const bool close_success = file_stream_close(stream->file_stream);
-    return sync_success && close_success;
+    bool success = false;
+    do {
+        if(!(stream->sync_pending ? buffered_file_stream_flush(stream) : true)) break;
+        if(!file_stream_close(stream->file_stream)) break;
+        success = true;
+    } while(false);
+    return success;
 }
 
 bool buffered_file_stream_sync(Stream* _stream) {
+    furi_assert(_stream);
     BufferedFileStream* stream = (BufferedFileStream*)_stream;
     furi_check(stream->stream_base.vtable == &buffered_file_stream_vtable);
-    bool success = true;
-    if(stream->sync_pending) {
-        success = stream_cache_flush(stream->cache, stream->file_stream);
-        stream->sync_pending = false;
-    }
-    return success;
+    return stream->sync_pending ? buffered_file_stream_flush(stream) : true;
 }
 
 FS_Error buffered_file_stream_get_error(Stream* _stream) {
@@ -100,15 +100,18 @@ static void buffered_file_stream_free(BufferedFileStream* stream) {
 }
 
 static bool buffered_file_stream_eof(BufferedFileStream* stream) {
+    bool ret;
     const bool file_stream_eof = stream_eof(stream->file_stream);
     const bool cache_at_end = stream_cache_at_end(stream->cache);
     if(!stream->sync_pending) {
-        return file_stream_eof && cache_at_end;
+        ret = file_stream_eof && cache_at_end;
     } else {
         const size_t remaining_size =
             stream_size(stream->file_stream) - stream_tell(stream->file_stream);
-        return stream_cache_size(stream->cache) >= remaining_size ? cache_at_end : file_stream_eof;
+        ret = stream_cache_size(stream->cache) >=
+              (remaining_size ? cache_at_end : file_stream_eof);
     }
+    return ret;
 }
 
 static void buffered_file_stream_clean(BufferedFileStream* stream) {
@@ -133,8 +136,7 @@ static bool buffered_file_stream_seek(
 
     if((new_offset != 0) || (offset_type != StreamOffsetFromCurrent)) {
         if(stream->sync_pending) {
-            success = stream_cache_flush(stream->cache, stream->file_stream);
-            stream->sync_pending = false;
+            success = buffered_file_stream_sync((Stream*)stream);
         } else {
             stream_cache_drop(stream->cache);
         }
@@ -170,43 +172,40 @@ static size_t buffered_file_stream_size(BufferedFileStream* stream) {
 static size_t
     buffered_file_stream_write(BufferedFileStream* stream, const uint8_t* data, size_t size) {
     size_t need_to_write = size;
-
-    // TODO Check return status
-    buffered_file_stream_unread(stream);
-
-    while(need_to_write) {
-        need_to_write -=
-            stream_cache_write(stream->cache, data + (size - need_to_write), need_to_write);
-        stream->sync_pending = true;
-        if(need_to_write) {
-            if(stream_cache_flush(stream->cache, stream->file_stream)) {
-                stream->sync_pending = false;
-            } else {
-                break;
+    do {
+        if(!buffered_file_stream_unread(stream)) break;
+        while(need_to_write) {
+            need_to_write -=
+                stream_cache_write(stream->cache, data + (size - need_to_write), need_to_write);
+            stream->sync_pending = true;
+            if(need_to_write) {
+                if(stream_cache_flush(stream->cache, stream->file_stream)) {
+                    stream->sync_pending = false;
+                } else {
+                    break;
+                }
             }
         }
-    }
-
+    } while(false);
     return size - need_to_write;
 }
 
 static size_t buffered_file_stream_read(BufferedFileStream* stream, uint8_t* data, size_t size) {
     size_t need_to_read = size;
 
-    if(stream->sync_pending) {
-        stream_cache_flush(stream->cache, stream->file_stream);
-        stream->sync_pending = false;
-    }
+    do {
+        if(!(stream->sync_pending ? buffered_file_stream_flush(stream) : true)) break;
 
-    while(need_to_read) {
-        need_to_read -=
-            stream_cache_read(stream->cache, data + (size - need_to_read), need_to_read);
-        if(need_to_read) {
-            if(!stream_cache_fill(stream->cache, stream->file_stream)) {
-                break;
+        while(need_to_read) {
+            need_to_read -=
+                stream_cache_read(stream->cache, data + (size - need_to_read), need_to_read);
+            if(need_to_read) {
+                if(!stream_cache_fill(stream->cache, stream->file_stream)) {
+                    break;
+                }
             }
         }
-    }
+    } while(false);
 
     return size - need_to_read;
 }
@@ -217,19 +216,33 @@ static bool buffered_file_stream_delete_and_insert(
     StreamWriteCB write_callback,
     const void* ctx) {
     //TODO Implement a less aggressive method if possible
-    bool success = true;
-    if(stream->sync_pending) {
-        stream_cache_flush(stream->cache, stream->file_stream);
-        stream->sync_pending = false;
-    } else {
-        success = buffered_file_stream_unread(stream);
-    }
-    if(success) {
-        success = stream_delete_and_insert(stream->file_stream, delete_size, write_callback, ctx);
-    }
+    bool success = false;
+    do {
+        if(!(stream->sync_pending ? buffered_file_stream_flush(stream) :
+                                    buffered_file_stream_unread(stream)))
+            break;
+        if(!stream_delete_and_insert(stream->file_stream, delete_size, write_callback, ctx)) break;
+        success = true;
+    } while(false);
     return success;
 }
 
+// Almost same as sync, but private
+static bool buffered_file_stream_flush(BufferedFileStream* stream) {
+    bool success = false;
+    const int32_t offset = stream_cache_size(stream->cache) - stream_cache_pos(stream->cache);
+    do {
+        stream->sync_pending = false;
+        if(!stream_cache_flush(stream->cache, stream->file_stream)) break;
+        if(offset > 0) {
+            if(!stream_seek(stream->file_stream, -offset, StreamOffsetFromCurrent)) break;
+        }
+        success = true;
+    } while(false);
+    return success;
+}
+
+// Drop read cache and adjust the underlying stream seek position
 static bool buffered_file_stream_unread(BufferedFileStream* stream) {
     bool success = true;
     const size_t cache_size = stream_cache_size(stream->cache);
