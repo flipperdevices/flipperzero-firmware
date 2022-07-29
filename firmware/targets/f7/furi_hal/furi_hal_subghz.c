@@ -350,7 +350,7 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     Storage* storage = furi_record_open("storage");
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
 
-    if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/setting_user")) {
+    if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/extend_range.txt")) {
         flipper_format_read_bool(fff_data_file, "ignore_default_tx_region", &is_allowed, 1);
     }
 
