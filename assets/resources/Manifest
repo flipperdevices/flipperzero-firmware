@@ -1,5 +1,5 @@
 V:0
-T:1659108825
+T:1659124239
 D:apps
 D:badusb
 D:dolphin
@@ -9,6 +9,7 @@ D:music_player
 D:nfc
 D:subghz
 D:u2f
+D:unirf
 D:update
 D:wav_player
 F:a533ebec8a4bc555203f4eeecd67d5bc:6004:apps/APPS_BarcodeGenerator.fap
@@ -311,11 +312,11 @@ F:ea81ac5f878e045581a2f5e2add46b0b:180:subghz/assets/extend_range.txt
 F:5e81e9809984ee74d426730c1afa4093:3232:subghz/assets/keeloq_mfcodes
 F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
-F:add7842aaaa00c2e434200df09afb2a0:1878:subghz/assets/setting_user
-F:76460390a308e933a2c134e1e1aeb1e7:258:subghz/assets/touchtunes_map.txt
-F:6ad7e0b407cab89cac4407da7f44b6a3:385:subghz/assets/universal_rf_map.txt
+F:891be701cac63e7d88fe170b8ebe8900:2004:subghz/assets/setting_user
 D:u2f/assets
 F:7e11e688e39034bbb9d88410044795e1:365:u2f/assets/cert.der
 F:f60b88c20ed479ed9684e249f7134618:264:u2f/assets/cert_key.u2f
+F:76460390a308e933a2c134e1e1aeb1e7:258:unirf/touchtunes_brute_map.txt
+F:6ad7e0b407cab89cac4407da7f44b6a3:385:unirf/universal_rf_map.txt
 F:d41d8cd98f00b204e9800998ecf8427e:0:update/unzip_the_release_here.txt
 F:a9a90a7e7e60e3add602929e5b38e83b:94508:wav_player/sonicscrewdriver.wav
