@@ -7,6 +7,7 @@
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
 - UPDATED extend_range to extend_range.txt to allow change via iOS app
 - READDED WIFI MARAUDER AND WIFI SCANNER for normal compile
+- ADDED DUCKY_LANG keyword support [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
 - <h2>UPDATE USING SD CARD METHOD FOR NEW setting_user and extend_range.txt FILE. You can now unleash your flipper via iOS by editing the extend_range.txt.</h2>
 
 <table width="100%" border="0" cellspacing="0">
@@ -66,6 +67,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys and Tesla Charge Port
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
 - Assets: Running DolphinRestorer.fap on new install will auto-level to the end of Level 2.
+- BadUSB: DUCKY_LANG keyword support [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
 - NFC: Display UL PWD_AUTH payload / ntag-pwd-capture [(Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
