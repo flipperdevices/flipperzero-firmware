@@ -3,10 +3,9 @@
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
 
-- READDED - NFC: Display UL PWD_AUTH payload / ntag-pwd-capture [(Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
-- TOFIX - NFC: Mifare UL update to show name of emulated tag (By RogueMaster with some help from GMMan)
 - TOFIX - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
-- TOFIX - Compiling requires some play with api_symbols... some FAPs are not working, we are aware
+- FAP Loader disabled so the FW compiles.
+- TOFIX - Compiling requires some play with api_symbols... some FAPs are not working, we are aware.
 - UPDATED extend_range to extend_range.txt to allow change via iOS app
 
 <table width="100%" border="0" cellspacing="0">
