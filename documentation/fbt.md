@@ -20,7 +20,7 @@ Make sure that `gcc-arm-none-eabi` toolchain & OpenOCD executables are in system
 
 To build with FBT, call it specifying configuration options & targets to build. For example,
 
-`./fbt --with-updater COMPACT=1 DEBUG=0 VERBOSE=1 updater_package copro_dist`
+`./fbt COMPACT=1 DEBUG=0 VERBOSE=1 updater_package copro_dist`
 
 To run cleanup (think of `make clean`) for specified targets, add `-c` option.
 
@@ -31,13 +31,13 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 ### High-level (what you most likely need)
 
 - `fw_dist` - build & publish firmware to `dist` folder. This is a default target, when no other are specified
-- `updater_package` - build self-update package. _Requires `--with-updater` option_
+- `updater_package`, `updater_minpackage` - build self-update package. Minimal version only inclues firmware's DFU file; full version also includes radio stack & resources for SD card
 - `copro_dist` - bundle Core2 FUS+stack binaries for qFlipper
 - `flash` - flash attached device with OpenOCD over ST-Link
-- `flash_usb` - build, upload and install update package to device over USB.  _Requires `--with-updater` option_
+- `flash_usb`, `flash_usb_full` - build, upload and install update package to device over USB. See details on `updater_package`, `updater_minpackage` 
 - `debug` - build and flash firmware, then attach with gdb with firmware's .elf loaded
-- `debug_updater` - attach gdb with updater's .elf loaded. _Requires `--with-updater` option_
-- `debug_other` - attach gdb without loading any .elf. Allows to manually add external elf files with `add-symbol-file` in gdb.
+- `debug_updater` - attach gdb with updater's .elf loaded
+- `debug_other` - attach gdb without loading any .elf. Allows to manually add external elf files with `add-symbol-file` in gdb
 - `blackmagic` - debug firmware with Blackmagic probe (WiFi dev board)
 - `openocd` - just start OpenOCD
 - `get_blackmagic` - output blackmagic address in gdb remote format. Useful for IDE integration
@@ -66,7 +66,7 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 ## Command-line parameters
 
 - `--options optionfile.py` (default value `fbt_options.py`) - load file with multiple configuration values
-- `--with-updater` - enables updater-related targets and dependency tracking. Enabling this option introduces extra startup time costs, so use it when bundling update packages. Or if you have a fast computer and don't care about a few extra seconds of startup time
+- `--with-updater` - enables updater-related targets and dependency tracking. Enabling this option introduces extra startup time costs, so use it when bundling update packages. _Explicily enabling this should no longer be required, fbt now has specific handling for updater-related targets_
 - `--extra-int-apps=app1,app2,appN` - forces listed apps to be built as internal with `firmware` target
 - `--extra-ext-apps=app1,app2,appN` - forces listed apps to be built as external with `firmware_extapps` target
 
