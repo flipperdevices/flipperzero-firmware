@@ -7,6 +7,7 @@
 - FAP Loader disabled so the FW compiles.
 - TOFIX - Compiling requires some play with api_symbols... some FAPs are not working, we are aware.
 - UPDATED extend_range to extend_range.txt to allow change via iOS app
+- READDED WIFI MARAUDER AND WIFI SCANNER for normal compile
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
