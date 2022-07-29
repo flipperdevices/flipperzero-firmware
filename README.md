@@ -48,12 +48,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
       <tr> <td>
 
 <details>
-  <summary><B>Special Instructions</B></summary></br>
-
-- Edit the two `_map` files in /ext/subghz/assets to contain your specific subghz (.SUB) files.
-</details>
-
-<details>
   <summary><B>All Changes/Features</b></summary><br/>
   
 - Animations: Hold Center to change flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
