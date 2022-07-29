@@ -1,5 +1,5 @@
 V:0
-T:1658979237
+T:1659108825
 D:apps
 D:badusb
 D:dolphin
@@ -261,6 +261,7 @@ F:fde3cc62e2c2c765a9bfe8c6fd1ba19c:210:music_player/FF7_Victory_Fanfare.fmf
 F:82bc993e009d33a3399dbccd6b14a624:406:music_player/FF9_To_Zanarkand.txt
 F:a10444051facca34682f5bd19dcb4b48:205:music_player/FF9_chocobo_theme.txt
 F:d9282f95427441981edab835f1c5728f:229:music_player/FF9_moogle_theme.txt
+F:e7b39e6305642e67f5b4c60cea05dd4c:209:music_player/Final_Fantasy_Victory_Fanfare.txt
 F:bdda45c93b234e1c3ffab6be4fe1af4c:245:music_player/GorillazClintEastwood.txt
 F:f8c188e05fbdfcd226d66a633dc706c3:522:music_player/Hello_Flip.txt
 F:5b2d402322167799c89e80d3cd10fd0a:165:music_player/JamesBondTheme.txt
@@ -306,11 +307,11 @@ F:8b22aa0a2df0b22fc5791a3ecb4fa4fb:10991:subghz/Vehicles/Tesla/Tesla_charge_AM27
 F:7ea28e3ce3c38b2d98ae99aecc45b7b9:11913:subghz/Vehicles/Tesla/Tesla_charge_AM650.sub
 F:b5380ddd37e6d35fd71a38c5690dd68b:1355:subghz/assets/README.md
 F:dda1ef895b8a25fde57c874feaaef997:650:subghz/assets/came_atomo
-F:a4c31b8b8c2a82dc3a96fcf5256cbfc5:96:subghz/assets/extend_range
+F:ea81ac5f878e045581a2f5e2add46b0b:180:subghz/assets/extend_range.txt
 F:5e81e9809984ee74d426730c1afa4093:3232:subghz/assets/keeloq_mfcodes
 F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
-F:a1c2ecec362e13bbf358f4ce1122a24b:1962:subghz/assets/setting_user
+F:add7842aaaa00c2e434200df09afb2a0:1878:subghz/assets/setting_user
 F:76460390a308e933a2c134e1e1aeb1e7:258:subghz/assets/touchtunes_map.txt
 F:6ad7e0b407cab89cac4407da7f44b6a3:385:subghz/assets/universal_rf_map.txt
 D:u2f/assets
