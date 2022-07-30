@@ -337,6 +337,7 @@ static void game_2048_restart(GameState* const game_state) {
 }
 
 int32_t game_2048_app(void* p) {
+    UNUSED(p);
     int32_t return_code = 0;
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
