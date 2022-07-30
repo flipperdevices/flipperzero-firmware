@@ -12,7 +12,7 @@
 - 2048 now has hold center for restart [Thanks to DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/133)
 - Added [Add skylanders (/activision) mifare classic to identification procedure #1497 (By equipter)](https://github.com/flipperdevices/flipperzero-firmware/pull/1497)
 - Added NFC keys for Skylanders
-- Added [[DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `HIDDEN "INTAPP_esp8266_deauth"` due to `Req: ESP8266`
+- Added [DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `HIDDEN "INTAPP_esp8266_deauth"` due to `Req: ESP8266`
 - UPDATED Plugins & Games list to show what has been `HIDDEN`
 
 <table width="100%" border="0" cellspacing="0">
