@@ -34,6 +34,7 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "settings.h"
 #include "CommandLine.h"
 #include "lang_var.h"
+#include "flipperLED.h"
 
 #ifdef HAS_SCREEN
   #include "Display.h"
@@ -60,6 +61,7 @@ LedInterface led_obj;
 EspInterface esp_obj;
 Settings settings_obj;
 CommandLine cli_obj;
+flipperLED flipper_led;
 
 #ifdef HAS_SCREEN
   Display display_obj;
@@ -133,6 +135,10 @@ void setup()
   //#else
   //  Serial.println("Does not have screen");
   //#endif
+
+  #ifdef MARAUDER_FLIPPER
+    flipper_led.RunSetup();
+  #endif
 
   #ifdef HAS_SCREEN
     display_obj.RunSetup();

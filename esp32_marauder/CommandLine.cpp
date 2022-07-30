@@ -463,24 +463,44 @@ void CommandLine::runCommand(String input) {
       // Get list of indices
       LinkedList<String> ap_index = this->parseCommand(cmd_args.get(ap_sw + 1), ",");
 
-      // Mark APs as selected
-      for (int i = 0; i < ap_index.size(); i++) {
-        int index = ap_index.get(i).toInt();
-        if (!this->inRange(access_points->size(), index)) {
-          Serial.println("Index not in range: " + (String)index);
-          continue;
+      // Select ALL APs
+      if (cmd_args.get(ap_sw + 1) == "all") {
+        for (int i = 0; i < access_points->size(); i++) {
+          if (access_points->get(i).selected) {
+            // Unselect "selected" ap
+            AccessPoint new_ap = access_points->get(i);
+            new_ap.selected = false;
+            access_points->set(i, new_ap);
+          }
+          else {
+            // Select "unselected" ap
+            AccessPoint new_ap = access_points->get(i);
+            new_ap.selected = true;
+            access_points->set(i, new_ap);
+          }
         }
-        if (access_points->get(index).selected) {
-          // Unselect "selected" ap
-          AccessPoint new_ap = access_points->get(index);
-          new_ap.selected = false;
-          access_points->set(index, new_ap);
-        }
-        else {
-          // Select "unselected" ap
-          AccessPoint new_ap = access_points->get(index);
-          new_ap.selected = true;
-          access_points->set(index, new_ap);
+      }
+      // Select specific APs
+      else {
+        // Mark APs as selected
+        for (int i = 0; i < ap_index.size(); i++) {
+          int index = ap_index.get(i).toInt();
+          if (!this->inRange(access_points->size(), index)) {
+            Serial.println("Index not in range: " + (String)index);
+            continue;
+          }
+          if (access_points->get(index).selected) {
+            // Unselect "selected" ap
+            AccessPoint new_ap = access_points->get(index);
+            new_ap.selected = false;
+            access_points->set(index, new_ap);
+          }
+          else {
+            // Select "unselected" ap
+            AccessPoint new_ap = access_points->get(index);
+            new_ap.selected = true;
+            access_points->set(index, new_ap);
+          }
         }
       }
     }

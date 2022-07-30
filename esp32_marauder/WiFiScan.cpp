@@ -357,6 +357,9 @@ void WiFiScan::startWiFiAttacks(uint8_t scan_mode, uint16_t color, String title_
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_max_tx_power(82);
   this->wifi_initialized = true;
+  #ifdef MARAUDER_FLIPPER
+    flipper_led.attackLED();
+  #endif
   initTime = millis();
 }
 
@@ -369,6 +372,10 @@ bool WiFiScan::shutdownWiFi() {
     esp_wifi_set_mode(WIFI_MODE_NULL);
     esp_wifi_stop();
     esp_wifi_deinit();
+
+    #ifdef MARAUDER_FLIPPER
+      flipper_led.offLED();
+    #endif
   
     this->wifi_initialized = false;
     return true;
@@ -385,6 +392,10 @@ bool WiFiScan::shutdownBLE() {
       
       pBLEScan->clearResults();
       BLEDevice::deinit();
+
+      #ifdef MARAUDER_FLIPPER
+        flipper_led.offLED();
+      #endif
     
       this->ble_initialized = false;
       return true;
@@ -498,6 +509,10 @@ String WiFiScan::freeRAM()
 void WiFiScan::RunAPScan(uint8_t scan_mode, uint16_t color)
 {
   sd_obj.openCapture("ap");
+
+  #ifdef MARAUDER_FLIPPER
+    flipper_led.sniffLED();
+  #endif
 
   Serial.println(text_table4[9] + (String)access_points->size());
   #ifdef HAS_SCREEN
@@ -728,6 +743,10 @@ void WiFiScan::RunInfo()
 void WiFiScan::RunEspressifScan(uint8_t scan_mode, uint16_t color) {
   sd_obj.openCapture("espressif");
 
+  #ifdef MARAUDER_FLIPPER
+    flipper_led.sniffLED();
+  #endif
+
   #ifdef HAS_SCREEN
     display_obj.TOP_FIXED_AREA_2 = 48;
     display_obj.tteBar = true;
@@ -757,6 +776,10 @@ void WiFiScan::RunEspressifScan(uint8_t scan_mode, uint16_t color) {
 
 void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
 {
+  #ifdef MARAUDER_FLIPPER
+    flipper_led.sniffLED();
+  #endif
+  
   #ifdef HAS_SCREEN
     display_obj.tft.init();
     display_obj.tft.setRotation(1);
@@ -806,6 +829,10 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
 
 void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
 {
+  #ifdef MARAUDER_FLIPPER
+    flipper_led.sniffLED();
+  #endif
+  
   num_eapol = 0;
 
   #ifdef HAS_SCREEN
@@ -890,6 +917,10 @@ void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
 {
   sd_obj.openCapture("pwnagotchi");
 
+  #ifdef MARAUDER_FLIPPER
+    flipper_led.sniffLED();
+  #endif
+
   #ifdef HAS_SCREEN
     display_obj.TOP_FIXED_AREA_2 = 48;
     display_obj.tteBar = true;
@@ -922,6 +953,10 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 {
   sd_obj.openCapture("beacon");
 
+  #ifdef MARAUDER_FLIPPER
+    flipper_led.sniffLED();
+  #endif
+  
   #ifdef HAS_SCREEN
     display_obj.TOP_FIXED_AREA_2 = 48;
     display_obj.tteBar = true;
@@ -953,6 +988,10 @@ void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
 {
   sd_obj.openCapture("deauth");
 
+  #ifdef MARAUDER_FLIPPER
+    flipper_led.sniffLED();
+  #endif
+  
   #ifdef HAS_SCREEN
     display_obj.TOP_FIXED_AREA_2 = 48;
     display_obj.tteBar = true;
@@ -986,6 +1025,10 @@ void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
 {
   sd_obj.openCapture("probe");
 
+  #ifdef MARAUDER_FLIPPER
+    flipper_led.sniffLED();
+  #endif
+  
   #ifdef HAS_SCREEN
     display_obj.TOP_FIXED_AREA_2 = 48;
     display_obj.tteBar = true;

@@ -30,6 +30,7 @@
 #include "TemperatureInterface.h"
 #include "settings.h"
 #include "Assets.h"
+#include "flipperLED.h"
 //#include "MenuFunctions.h"
 
 #define bad_list_length 3
@@ -74,6 +75,7 @@ extern Buffer buffer_obj;
 extern BatteryInterface battery_obj;
 extern TemperatureInterface temp_obj;
 extern Settings settings_obj;
+extern flipperLED flipper_led;
 
 esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
 //int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3);
