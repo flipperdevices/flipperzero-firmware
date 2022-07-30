@@ -65,7 +65,7 @@ void furi_thread_free(FuriThread* thread);
  * @param      thread  FuriThread instance
  * @param      name    string
  */
-void furi_thread_set_name(FuriThread* thread, const char* name);
+NONNULL void furi_thread_set_name(FuriThread* thread, const char* name);
 
 /** Set FuriThread stack size
  *

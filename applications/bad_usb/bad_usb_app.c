@@ -79,7 +79,6 @@ void bad_usb_app_free(BadUsbApp* app) {
     furi_assert(app);
 
     // Views
-    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewFileSelect);
     view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewWork);
     bad_usb_free(app->bad_usb_view);
 
