@@ -2,12 +2,47 @@
 
 # shellcheck disable=SC2034,SC2016,SC2086
 
+# public variables
+DEFAULT_SCRIPT_PATH="$(pwd -P)";
+SCRIPT_PATH="${SCRIPT_PATH:-$DEFAULT_SCRIPT_PATH}";
+FBT_TOOLCHAIN_VERSION="${FBT_TOOLCHAIN_VERSION:-"8"}";
+FBT_TOOLCHAIN_PATH="${FBT_TOOLCHAIN_PATH:-$SCRIPT_PATH}";
+
+fbtenv_check_sourced()
+{
+    case "${ZSH_EVAL_CONTEXT:-""}" in *:file:*)
+        return 0;;
+    esac
+    case ${0##*/} in dash|-dash|bash|-bash|ksh|-ksh|sh|-sh)
+        return 0;;
+    esac
+    if [ "$(basename $0)" = "fbt" ]; then
+        return 0;
+    fi
+    echo "Running this script manually is wrong, please source it";
+    echo "Example:";
+    printf "\tsource scripts/toolchain/fbtenv.sh\n";
+    return 1;
+}
+
+fbtenv_check_script_path()
+{
+    if [ ! -x "$SCRIPT_PATH/fbt" ]; then
+        echo "Please source this script being into flipperzero-firmware root directory, or specify 'SCRIPT_PATH' manualy";
+        echo "Example:";
+        printf "\tSCRIPT_PATH=lang/c/flipperzero-firmware source lang/c/flipperzero-firmware/scripts/fbtenv.sh\n";
+        echo "If current directory is right, type 'unset SCRIPT_PATH' and try again"
+        return 1;
+    fi
+    return 0;
+}
+
 fbtenv_get_kernel_type()
 {
     SYS_TYPE="$(uname -s)";
     ARCH_TYPE="$(uname -m)";
     if [ "$ARCH_TYPE" != "x86_64" ] && [ "$SYS_TYPE" != "Darwin" ]; then
-        echo "Now we provide toolchain only for x86_64 arhitecture. Sorry..";
+        echo "Now we provide toolchain only for x86_64 arhitecture, sorry..";
         return 1;
     fi
     if [ "$SYS_TYPE" = "Darwin" ]; then
@@ -115,12 +150,12 @@ fbtenv_curl_wget_check()
         printf "Checking wget..";
         if ! wget --version > /dev/null 2>&1; then
             echo "no";
-            echo "No curl or wget found in your PATH.";
+            echo "No curl or wget found in your PATH";
             echo "Please provide it or download this file:";
             echo;
             echo "$TOOLCHAIN_URL";
             echo;
-            echo "And place in $FBT_TOOLCHAIN_PATH/toolchain/ dir mannualy.";
+            echo "And place in $FBT_TOOLCHAIN_PATH/toolchain/ dir mannualy";
             return 1;
         fi
         echo "yes"
@@ -146,20 +181,6 @@ fbtenv_check_download_toolchain()
     return 0;
 }
 
-fbtenv_show_usage()
-{
-    echo "fbtenv.sh - sets eviroment variables for Flipper Build Tool (FBT) and downloads toolchain";
-    echo "Warning! Not recomended to run this script mannualy! Use ./fbt !";
-    echo "Usage:";
-    printf "\tFBT_TOOLCHAIN_VERSION=.. FBT_TOOLCHAIN_PATH=.. SCRIPT_PATH=.. source fbtenv.sh\n";
-    echo "Example:";
-    printf '\tFBT_TOOLCHAIN_VERSION=10 SCRIPT_PATH=$(pwd) FBT_TOOLCHAIN_PATH=/tmp/ source scripts/toolchain/fbtenv.sh\n'
-    echo "Arguments:";
-    printf "\tFBT_TOOLCHAIN_VERSION - version of Flipper Zero Toolchain\n";
-    printf "\tFBT_TOOLCHAIN_PATH - path when Flipper Zero Toolchain will be stored\n";
-    printf "\tSCRIPT_PATH - path to fliepperzero-firmware directory\n";
-}
-
 fbtenv_download_toolchain()
 {
     fbtenv_check_tar || return 1;
@@ -177,13 +198,8 @@ fbtenv_download_toolchain()
 
 fbtenv_main()
 {
-
-    if [ -z "$SCRIPT_PATH" ] || \
-            [ -z "$FBT_TOOLCHAIN_VERSION" ] || \
-            [ -z "$FBT_TOOLCHAIN_PATH" ]; then
-        fbtenv_show_usage;
-        return 1;
-    fi
+    fbtenv_check_sourced || return 1;
+    fbtenv_check_script_path || return 1;
     fbtenv_get_kernel_type || return 1;
     fbtenv_check_download_toolchain || return 1;
     PATH="$TOOLCHAIN_ARCH_DIR/python/bin:$PATH";

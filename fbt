@@ -11,7 +11,6 @@ SCONS_DEFAULT_FLAGS="-Q --warn=target-not-built";
 # public variables
 FBT_NOENV="${FBT_NOENV:-""}";
 FBT_NO_SYNC="${FBT_NO_SYNC:-""}";
-FBT_TOOLCHAIN_VERSION="8";
 FBT_TOOLCHAIN_PATH="${FBT_TOOLCHAIN_PATH:-$SCRIPT_PATH}";
 
 if [ -z "$FBT_NOENV" ]; then

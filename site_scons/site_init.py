@@ -5,7 +5,6 @@ import os
 import atexit
 
 sys.path.insert(0, os.path.join(os.getcwd(), "scripts"))
-sys.path.insert(0, os.path.join(os.getcwd(), "lib/black/src"))
 
 
 def bf_to_str(bf):
