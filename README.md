@@ -5,11 +5,6 @@
 
 - TOFIX - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
-- ADDED DUCKY_LANG keyword support [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
-- Added some SubGHz Frequencies not previously listed [(Thanks to Eng1n33r/Nano)](https://github.com/Eng1n33r/flipperzero-firmware)
-- Updated UniRF Remix to have multiple map file support [(Thanks to Eng1n33r/Nano)](https://github.com/Eng1n33r/flipperzero-firmware)
-- Fixed Music Player to start at full volume
-- Fixed UniRF buttons arrows displayed on press
 - Dolphin Mood: Stays Happy [Thanks to biocage](https://github.com/biocage/flipperzero-firmware)
 - 2048 now has hold center for restart [Thanks to DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/133)
 - Added [Add skylanders (/activision) mifare classic to identification procedure #1497 (By equipter)](https://github.com/flipperdevices/flipperzero-firmware/pull/1497)
