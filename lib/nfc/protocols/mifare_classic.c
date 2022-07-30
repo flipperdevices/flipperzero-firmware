@@ -155,27 +155,28 @@ void mf_classic_set_key_found(
     }
 }
 
-uint8_t mf_classic_get_found_keys(
+uint8_t mf_classic_get_previously_found_key(
     MfClassicData* data,
     uint64_t* key,
     MfClassicKey key_type,
-    uint8_t key_number) {
+    uint8_t current_sector_number) {
     if(key_type == MfClassicKeyA) {
-        while(FURI_BIT(data->key_a_mask, key_number -= 1) != 1) {
-            if(key_number == 0) break;
+        while(FURI_BIT(data->key_a_mask, current_sector_number -= 1) != 1) {
+            if(current_sector_number == 0) break;
         }
         MfClassicSectorTrailer* sec_trailer =
-            mf_classic_get_sector_trailer_by_sector(data, key_number);
+            mf_classic_get_sector_trailer_by_sector(data, current_sector_number);
         *key = nfc_util_bytes2num(sec_trailer->key_a, sizeof(sec_trailer->key_a));
     } else if(key_type == MfClassicKeyB) {
-        while(FURI_BIT(data->key_b_mask, key_number -= 1) != 1) {
-            if(key_number == 0) break;
+        while(FURI_BIT(data->key_b_mask, current_sector_number -= 1) != 1) {
+            if(current_sector_number == 0) break;
         }
         MfClassicSectorTrailer* sec_trailer =
-            mf_classic_get_sector_trailer_by_sector(data, key_number);
+            mf_classic_get_sector_trailer_by_sector(data, current_sector_number);
         *key = nfc_util_bytes2num(sec_trailer->key_b, sizeof(sec_trailer->key_b));
     }
-    return key_number;
+    uint8_t previously_found_key_number = current_sector_number;
+    return previously_found_key_number;
 }
 bool mf_classic_is_sector_read(MfClassicData* data, uint8_t sector_num) {
     furi_assert(data);
