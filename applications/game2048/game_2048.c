@@ -391,7 +391,7 @@ int32_t game_2048_app(void* p) {
         GameState* game_state = (GameState*)acquire_mutex_block(&state_mutex);
 
         if(event_status == FuriStatusOk) {
-            if(event.type == InputTypePress) {
+            if(event.type == InputTypeShort) {
                 switch(event.key) {
                 case InputKeyUp:
                     game_state->direction = DirectionUp;
@@ -415,11 +415,15 @@ int32_t game_2048_app(void* p) {
                     break;
                 case InputKeyOk:
                     game_state->direction = DirectionIdle;
-                    game_2048_restart(game_state);
                     break;
                 case InputKeyBack:
                     loop = false;
                     break;
+                }
+            } else if(event.type == InputTypeLong) {
+                if(event.key == InputKeyOk) {
+                    game_state->direction = DirectionIdle;
+                    game_2048_restart(game_state);
                 }
             }
         }
