@@ -159,6 +159,8 @@ static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
                         read_success = true;
                         nfc_supported_card[i].parse(nfc_worker);
                     }
+                } else {
+                    furi_hal_nfc_sleep();
                 }
             }
         }
