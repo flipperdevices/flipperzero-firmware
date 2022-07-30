@@ -77,13 +77,11 @@ void string_push_uint64(uint64_t input, string_t output) {
     }
 }
 
-
-uint8_t plantain_calculate_luhn(uint64_t number){
+uint8_t plantain_calculate_luhn(uint64_t number) {
     // No.
     UNUSED(number);
     return 0;
 }
-
 
 bool plantain_parser_parse(NfcWorker* nfc_worker) {
     MfClassicData* data = &nfc_worker->dev_data->mf_classic_data;
@@ -91,7 +89,8 @@ bool plantain_parser_parse(NfcWorker* nfc_worker) {
     uint8_t* temp_ptr = &data->block[4 * 4].value[0];
     // Read first 4 bytes of block 0 of sector 4 from last to first and convert them to uint32_t
     // 38 18 00 00 becomes 00 00 18 38, and equals to 6200 decimal
-    uint32_t balance = ((temp_ptr[3] << 24) | (temp_ptr[2] << 16) | (temp_ptr[1] << 8) | temp_ptr[0]) / 100;
+    uint32_t balance =
+        ((temp_ptr[3] << 24) | (temp_ptr[2] << 16) | (temp_ptr[1] << 8) | temp_ptr[0]) / 100;
     // Read card number
     // Point to block 0 of sector 0, value 0
     temp_ptr = &data->block[0 * 4].value[0];
@@ -123,7 +122,7 @@ bool plantain_parser_parse(NfcWorker* nfc_worker) {
     // string_t luhn_checksum_str;
     // string_init(luhn_checksum_str);
     // string_push_uint64(luhn_checksum, luhn_checksum_str);
-    
+
     string_cat_printf(card_number_suffix, "-");
     // FURI_LOG_D("plant4k", "Card checksum: %d", luhn_checksum);
     string_cat_printf(card_number_str, string_get_cstr(card_number_suffix));

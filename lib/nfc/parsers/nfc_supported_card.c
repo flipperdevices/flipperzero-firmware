@@ -4,6 +4,7 @@
 #include "troyka_parser.h"
 #include "plantain_4k_parser.h"
 #include "two_cities.h"
+#include "united.h"
 
 NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
     [NfcSupportedCardTypePlantain] =
@@ -33,5 +34,12 @@ NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
             .verify = two_cities_parser_verify,
             .read = two_cities_parser_read,
             .parse = two_cities_parser_parse,
+        },
+    [NfcSupportedCardTypeUnited] =
+        {
+            .protocol = NfcDeviceProtocolMifareUl,
+            .verify = united_parser_verify,
+            .read = united_parser_read,
+            .parse = united_parser_parse,
         },
 };
