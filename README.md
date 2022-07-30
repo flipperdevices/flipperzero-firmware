@@ -10,7 +10,8 @@
 - Updated UniRF Remix to have multiple map file support [(Thanks to Eng1n33r/Nano)](https://github.com/Eng1n33r/flipperzero-firmware)
 - Fixed Music Player to start at full volume
 - Fixed UniRF buttons arrows displayed on press
-- Dolphin Mood: Stays Happy [(By biocage)](https://github.com/biocage/flipperzero-firmware)
+- Dolphin Mood: Stays Happy [Thanks to biocage](https://github.com/biocage/flipperzero-firmware)
+- 2048 now has hold center for restart [Thanks to DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/133)
 #   - UPDATE USING SD CARD METHOD FOR NEW [`subghz/assets/setting_user`](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) and [`subghz/assets/extend_range.txt`](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/extend_range.txt) FILE.<br>&nbsp;&nbsp;&nbsp;&nbsp;You can now unleash your flipper via iOS app.
 
 <table width="100%" border="0" cellspacing="0">
@@ -80,7 +81,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Assets: Running DolphinRestorer.fap on new install will auto-level to the end of Level 2.
 - BadUSB: DUCKY_LANG keyword support [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
-- Dolphin Mood: Stays Happy [(By biocage)](https://github.com/biocage/flipperzero-firmware)
+- Dolphin Mood: Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
 - NFC: Display UL PWD_AUTH payload / ntag-pwd-capture [(Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
 - Plugins: Fixed sound decay issues on music player [Thanks to qqMajiKpp]
