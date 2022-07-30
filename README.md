@@ -45,8 +45,8 @@
 </td> <td>
 
 <h2>DONATIONS ACCEPTED 😄🚀💸</h2>
-BTC: <B>172CE1H1XZVt7tc4HDQ1q9Mej1K7VuHfEf</B><br>
-ETH: <B>0x6c46eE48Bd433b0ADE711B43D188Cf8215cd51c2</B>
+BTC: <B>3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a</B><br>
+ETH: <B>0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f</B>
     <br> <br>
     
 Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Flipper DFU. I can do custom names too!
