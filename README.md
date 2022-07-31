@@ -22,6 +22,7 @@
 - Added [nfc: make dict attack more interactive #1462 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1462)
 - Added [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484)
 - Added [FIX: Fixed inconsistencies between texts #1496 (By zigad)](https://github.com/flipperdevices/flipperzero-firmware/pull/1496)
+- Latest OFW Changes: [#1502](https://github.com/flipperdevices/flipperzero-firmware/pull/1502), [#1467](https://github.com/flipperdevices/flipperzero-firmware/pull/1467) & [#1402](https://github.com/flipperdevices/flipperzero-firmware/pull/1402)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
