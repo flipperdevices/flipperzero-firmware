@@ -52,6 +52,7 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 - `flash_blackmagic` - flash current version to attached device with Blackmagic probe
 - `firmware_all`, `updater_all` - build basic set of binaries
 - `firmware_list`, `updater_list` - generate source + assembler listing
+- `firmware_cdb`, `updater_cdb` - generate `compilation_database.json` file for external tools and IDEs. It can be created without actually building the firmware. 
 
 ### Assets
 
