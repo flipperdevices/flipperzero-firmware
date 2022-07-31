@@ -443,6 +443,9 @@ void WiFiScan::StopScan(uint8_t scan_mode)
 
   #ifdef HAS_SCREEN
     display_obj.display_buffer->clear();
+    #ifdef SCREEN_BUFFER
+      display_obj.screen_buffer->clear();
+    #endif
     //Serial.print("display_buffer->size(): ");
     Serial.println(display_obj.display_buffer->size());
   
@@ -682,11 +685,11 @@ void WiFiScan::RunInfo()
   #ifdef HAS_SCREEN
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setFreeFont(NULL);
-    display_obj.tft.setCursor(0, 100);
+    display_obj.tft.setCursor(0, SCREEN_HEIGHT / 3);
     display_obj.tft.setTextSize(1);
     display_obj.tft.setTextColor(TFT_CYAN);
     display_obj.tft.println(text_table4[20]);
-    display_obj.tft.println(text_table4[21] + display_obj.version_number + "\n");
+    display_obj.tft.println(text_table4[21] + display_obj.version_number);
     display_obj.tft.println(text_table4[22] + (String)esp_get_idf_version());
   #endif
 

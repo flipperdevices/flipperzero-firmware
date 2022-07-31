@@ -14,6 +14,10 @@ void Display::RunSetup()
 
   // Need to declare new
   display_buffer = new LinkedList<String>();
+
+  #ifdef SCREEN_BUFFER
+    screen_buffer = new LinkedList<String>();
+  #endif
   
   tft.init();
   tft.setRotation(0); // Portrait
@@ -252,30 +256,57 @@ void Display::clearScreen()
   tft.setCursor(0, 0);
 }
 
+#ifdef SCREEN_BUFFER
+void Display::scrollScreenBuffer(bool down) {
+  // Scroll screen normal direction (Up)
+  if (!down) {
+    this->screen_buffer->shift();
+  }
+}
+#endif
+
 void Display::displayBuffer(bool do_clear)
 {
   if (this->display_buffer->size() > 0)
   {
     delay(1);
-    
+
     while (display_buffer->size() > 0)
     {
-      xPos = 0;
-      if ((display_buffer->size() > 0) && (!loading))
-      {
-        printing = true;
-        delay(print_delay_1);
-        yDraw = scroll_line(TFT_RED);
-        tft.setCursor(xPos, yDraw);
-        tft.setTextColor(TFT_GREEN, TFT_BLACK);
-        tft.print(display_buffer->shift());
-        printing = false;
-        delay(print_delay_2);
-      }
-      if (!tteBar)
-        blank[(18+(yStart - TOP_FIXED_AREA) / TEXT_HEIGHT)%19] = xPos;
-      else
-        blank[(18+(yStart - TOP_FIXED_AREA_2) / TEXT_HEIGHT)%19] = xPos;
+
+      #ifndef SCREEN_BUFFER
+        xPos = 0;
+        if ((display_buffer->size() > 0) && (!loading))
+        {
+          printing = true;
+          delay(print_delay_1);
+          yDraw = scroll_line(TFT_RED);
+          tft.setCursor(xPos, yDraw);
+          tft.setTextColor(TFT_GREEN, TFT_BLACK);
+          tft.print(display_buffer->shift());
+          printing = false;
+          delay(print_delay_2);
+        }
+        if (!tteBar)
+          blank[(18+(yStart - TOP_FIXED_AREA) / TEXT_HEIGHT)%19] = xPos;
+        else
+          blank[(18+(yStart - TOP_FIXED_AREA_2) / TEXT_HEIGHT)%19] = xPos;
+      #else
+        xPos = 0;
+        if (this->screen_buffer->size() >= MAX_SCREEN_BUFFER) 
+          this->scrollScreenBuffer();
+
+        screen_buffer->add(display_buffer->shift());
+
+        for (int i = 0; i < this->screen_buffer->size(); i++) {
+          tft.setCursor(xPos, (i * 12) + (SCREEN_HEIGHT / 3));
+          for (int x = 0; x < TFT_WIDTH / CHAR_WIDTH; x++)
+            tft.print(" ");
+          tft.setCursor(xPos, (i * 12) + (SCREEN_HEIGHT / 3));
+          tft.setTextColor(TFT_GREEN, TFT_BLACK);
+          tft.print(this->screen_buffer->get(i));
+        }
+      #endif
     }
   }
 }

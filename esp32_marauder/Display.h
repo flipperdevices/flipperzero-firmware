@@ -72,6 +72,10 @@ class Display
 
     void drawFrame();
 
+    #ifdef SCREEN_BUFFER
+      void scrollScreenBuffer(bool down = false);
+    #endif
+
     //void addNodes(Menu* menu, String name, Menu* child, std::function<void()> callable);
     //void changeMenu(Menu* menu);
     //void showMenuList(Menu* menu, int layer);
@@ -102,6 +106,10 @@ class Display
     //Menu bluetoothMenu;
 
     LinkedList<String>* display_buffer;
+
+    #ifdef SCREEN_BUFFER
+      LinkedList<String>* screen_buffer;
+    #endif
 
     // The initial y coordinate of the top of the bottom text line
     uint16_t yDraw = YMAX - BOT_FIXED_AREA - TEXT_HEIGHT;

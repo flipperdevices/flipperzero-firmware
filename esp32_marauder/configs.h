@@ -4,12 +4,12 @@
 
   #define POLISH_POTATO
   
-  //#define MARAUDER_MINI
+  #define MARAUDER_MINI
   //#define MARAUDER_V4
   //#define MARAUDER_V6
   //#define MARAUDER_KIT
   //#define GENERIC_ESP32
-  #define MARAUDER_FLIPPER
+  //#define MARAUDER_FLIPPER
 
   #define MARAUDER_VERSION "v0.9.11"
 
@@ -201,6 +201,10 @@
     #define TOUCH_CS 21
     #define SD_CS 4
 
+    #define SCREEN_BUFFER
+
+    #define MAX_SCREEN_BUFFER 8
+
     #define BANNER_TEXT_SIZE 1
 
     #ifndef TFT_WIDTH
@@ -210,7 +214,8 @@
     #ifndef TFT_HEIGHT
       #define TFT_HEIGHT 128
     #endif
-    
+
+    #define CHAR_WIDTH 6
     #define SCREEN_WIDTH TFT_WIDTH // Originally 240
     #define SCREEN_HEIGHT TFT_HEIGHT // Originally 320
     #define HEIGHT_1 TFT_WIDTH
