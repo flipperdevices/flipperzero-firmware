@@ -14,6 +14,7 @@
 - Added NFC keys for Skylanders
 - Added [DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `HIDDEN "INTAPP_esp8266_deauth"` due to `Req: ESP8266`
 - UPDATED Plugins & Games list to show what has been `HIDDEN`
+- DUCKY_LANG has been extended with HU parameter [Thanks to terzinnorbert](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/135)
 - Added [New frequency analyzer #1501 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501)
 - Added [Add a Mifare Classic info screen to parser output #1504 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1504)
 - Added [BadUSB: add SYSRQ keys #1460 (By rck)](https://github.com/flipperdevices/flipperzero-firmware/pull/1460) with small refactor by RogueMaster
