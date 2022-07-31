@@ -40,7 +40,7 @@ typedef struct {
     uint8_t ins;
     uint8_t p1;
     uint8_t p2;
-    uint8_t len[3];
+    uint8_t len[1];  // TODO: Somehow make dynamic
     uint8_t challenge[32];
     uint8_t app_id[32];
 } __attribute__((packed)) U2fRegisterReq;
@@ -57,7 +57,7 @@ typedef struct {
     uint8_t ins;
     uint8_t p1;
     uint8_t p2;
-    uint8_t len[3];
+    uint8_t len[1];  // TODO: Somehow make dynamic
     uint8_t challenge[32];
     uint8_t app_id[32];
     U2fKeyHandle key_handle;

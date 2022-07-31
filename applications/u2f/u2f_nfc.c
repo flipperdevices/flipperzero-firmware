@@ -22,85 +22,123 @@ static bool u2f_nfc_callback(
     uint16_t* buff_tx_len,
     uint32_t* data_type,
     void* context) {
-    UNUSED(context);
+    U2fNfc* u2f_nfc = context;
     *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+    buff_tx[0] = 0x02;
     *buff_tx_len = 0;
-//    FURI_LOG_D(TAG, "Something detected");
-    if(buff_rx_len >= 16) {
-        uint8_t cla = buff_rx[0];
-        uint8_t ins = buff_rx[1];
-//        FURI_LOG_D(TAG, "cla: 0x%02x ins: 0x%02x", cla, ins);
-        if (cla != 0x00) {
-            buff_tx[0] = 0x68;
-            buff_tx[1] = 0x00;
-            *buff_tx_len = 16;
-//            FURI_LOG_D(TAG, "cla 0x%02x not supported", cla);
+    FURI_LOG_D(TAG, "Something detected");
+    if(buff_rx_len >= 24) {
+        uint8_t pcb = buff_rx[0];
+        uint8_t cla = buff_rx[1];
+        uint8_t ins = buff_rx[2];
+        FURI_LOG_D(TAG, "pcb: 0x%02x cla: 0x%02x ins: 0x%02x", pcb, cla, ins);
+        if((pcb & ~0x03) != 0) {
+            buff_tx[1] = 0x68;
+            buff_tx[2] = 0x00;
+            *buff_tx_len = 24;
+            FURI_LOG_E(TAG, "pcb 0x%02x not supported", pcb);
             return true;
         }
-        if (ins == 0xa4) {
-            if (memcmp(&buff_rx[2], "\x04\x00\x08\xa0\x00\x00\x06\x47\x2f\x00\x01", 11) != 0) {
-                buff_tx[0] = 0x6A;
-                buff_tx[1] = 0x82;
-                *buff_tx_len = 16;
-//                FURI_LOG_D(TAG, "Unknown AID");
+        if(cla != 0x00) {
+            buff_tx[1] = 0x68;
+            buff_tx[2] = 0x00;
+            *buff_tx_len = 24;
+            FURI_LOG_D(TAG, "cla 0x%02x not supported", cla);
+            return true;
+        }
+        if(ins == 0xa4) {
+            if(memcmp(&buff_rx[3], "\x04\x00\x08\xa0\x00\x00\x06\x47\x2f\x00\x01", 11) != 0) {
+                buff_tx[1] = 0x6A;
+                buff_tx[2] = 0x82;
+                *buff_tx_len = 24;
+                FURI_LOG_D(TAG, "Unknown AID");
                 return true;
             }
-            memcpy(buff_tx, "U2F_V2\x90\x00", 8);
-//            FURI_LOG_D(TAG, "Card selected");
-            *buff_tx_len = 64;
-        } else if (ins == 0x01) {
-            buff_tx[0] = 0x69;
-            buff_tx[1] = 0x00;
-            *buff_tx_len = 16;
-//            FURI_LOG_D(TAG, "Request sent of p1: %02x, p2: %02x, len: %02x", buff_tx[2], buff_tx[3], buff_tx[4]);
+            memcpy(buff_tx, "\x02U2F_V2\x90\x00", 9);
+            FURI_LOG_D(TAG, "Card selected");
+            *buff_tx_len = 72;
+        } else if(ins != 0 && (ins & ~0x03) == 0) {
+            buff_tx[0] = 0x02;
+            buff_tx[1] = 0x69;
+            buff_tx[2] = 0x00;
+            *buff_tx_len = 24;
+            FURI_LOG_D(
+                TAG,
+                "Request sent of p1: %02x, p2: %02x, len: %02x",
+                buff_rx[3],
+                buff_rx[4],
+                buff_rx[5]);
             return true;
         } else {
-            buff_tx[0] = 0x69;
-            buff_tx[1] = 0x00;
+            buff_tx[1] = 0x69;
+            buff_tx[2] = 0x00;
             *buff_tx_len = 216;
-//            FURI_LOG_D(TAG, "Unknown instruction");
+            FURI_LOG_D(TAG, "Unknown instruction");
             return true;
         }
+    } else {
+        FURI_LOG_D(TAG, "Unknown short message");
+        return false;
     }
-    return *buff_tx_len > 0;
+    return buff_rx_len > 0;
 }
 
 static int32_t u2f_nfc_worker(void* context) {
     U2fNfc* u2f_nfc = context;
+    //    FuriHalNfcTxRxContext tx_rx = {};
     FURI_LOG_D(TAG, "Init");
-    //    NfcWorker* nfc_worker = nfc_worker_alloc();
     while(furi_hal_nfc_is_busy()) {
         furi_delay_ms(10);
     }
     FuriHalNfcDevData nfc_data = {
         // TODO: Randomize this or something?
-        .uid = {0xCF, 0x72, 0xd4, 0x40},
+        .uid = {0x50, 0x3F, 0xA2, 0xE6},
         .uid_len = 4,
-        .atqa = {0x00, 0x04},
-        .sak = 0x42,
+        .atqa = {0x04, 0x00},
+        .sak = 0x20,
         .type = FuriHalNfcTypeA,
     };
     furi_hal_nfc_exit_sleep();
     FURI_LOG_D(TAG, "Start");
     while(1) {
-        uint32_t flags = furi_thread_flags_wait(WorkerEvtStop, FuriFlagWaitAny, 100);
-        furi_check((flags & FuriFlagError));
-        if(flags & WorkerEvtStop) break;
+        uint32_t flags = furi_thread_flags_wait(WorkerEvtStop, FuriFlagWaitAny, 10);
+        if(flags != FuriFlagErrorTimeout) {
+            furi_check((flags & FuriFlagError) == 0);
+            if(flags & WorkerEvtStop) break;
+        }
 
-        if (!furi_hal_nfc_emulate_nfca(
-            nfc_data.uid,
-            nfc_data.uid_len,
-            nfc_data.atqa,
-            nfc_data.sak,
-            u2f_nfc_callback,
-            u2f_nfc,
-            1000)) {
+        if(!furi_hal_nfc_emulate_nfca(
+               nfc_data.uid,
+               nfc_data.uid_len,
+               nfc_data.atqa,
+               nfc_data.sak,
+               u2f_nfc_callback,
+               u2f_nfc,
+               5000)) {
             FURI_LOG_T(TAG, "No device found");
         }
+        //        if(furi_hal_nfc_listen(
+        //               nfc_data.uid, nfc_data.uid_len, nfc_data.atqa, nfc_data.sak, true, 100)) {
+        //            tx_rx.tx_bits = 0;
+        //            tx_rx.tx_rx_type = FuriHalNfcTxRxTypeDefault;
+        //            while(furi_hal_nfc_tx_rx(&tx_rx, 100)) {
+        //                if(!u2f_nfc_callback(
+        //                       tx_rx.rx_data,
+        //                       tx_rx.rx_bits,
+        //                       tx_rx.tx_data,
+        //                       &tx_rx.tx_bits,
+        //                       (uint32_t*)&tx_rx.tx_rx_type,
+        //                       u2f_nfc)) {
+        //                    break;
+        //                }
+        //            }
+        //            FURI_LOG_T(TAG, "Done communicating");
+        //        } else {
+        //            FURI_LOG_T(TAG, "No device found");
+        //        }
     }
     FURI_LOG_D(TAG, "Cleanup");
     furi_hal_nfc_sleep();
-    //    nfc_worker_free(nfc_worker);
     FURI_LOG_D(TAG, "End");
     return 0;
 }
@@ -111,7 +149,7 @@ U2fNfc* u2f_nfc_start(U2fData* u2f_inst) {
 
     u2f_nfc->thread = furi_thread_alloc();
     furi_thread_set_name(u2f_nfc->thread, "U2fNFCWorker");
-    furi_thread_set_stack_size(u2f_nfc->thread, 2048);
+    furi_thread_set_stack_size(u2f_nfc->thread, 4096);
     furi_thread_set_context(u2f_nfc->thread, u2f_nfc);
     furi_thread_set_callback(u2f_nfc->thread, u2f_nfc_worker);
     furi_thread_start(u2f_nfc->thread);
