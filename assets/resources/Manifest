@@ -1,5 +1,5 @@
 V:0
-T:1659246860
+T:1659248217
 D:apps
 D:badusb
 D:dolphin
@@ -316,7 +316,7 @@ F:891be701cac63e7d88fe170b8ebe8900:2004:subghz/assets/setting_user
 D:u2f/assets
 F:7e11e688e39034bbb9d88410044795e1:365:u2f/assets/cert.der
 F:f60b88c20ed479ed9684e249f7134618:264:u2f/assets/cert_key.u2f
-F:76460390a308e933a2c134e1e1aeb1e7:258:unirf/touchtunes_brute_map.txt
+F:ce3a0d17d643925d5c51c9f569641c76:269:unirf/touchtunes_brute_map.txt
 F:193f5e3a68cb351dcbd8eeb91825b476:410:unirf/universal_rf_map.txt
 F:d41d8cd98f00b204e9800998ecf8427e:0:update/unzip_the_release_here.txt
 F:a9a90a7e7e60e3add602929e5b38e83b:94508:wav_player/sonicscrewdriver.wav
