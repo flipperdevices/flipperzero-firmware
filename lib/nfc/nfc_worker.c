@@ -5,6 +5,7 @@
 #include "parsers/nfc_supported_card.h"
 
 #define TAG "NfcWorker"
+#define NFC_MAX_NONCE_LOG_SIZE (8000)
 
 /***************************** NFC Worker API *******************************/
 
@@ -500,14 +501,46 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
     }
 }
 
+static void nfc_worker_emulate_mf_classic_nonce_callback(
+    MfClassicEmulatorNonce* nonce,
+    void* context
+) {
+    NfcWorker* nfc_worker = context;
+    NfcMfClassicEmulatorOutput* output =
+        &nfc_worker->dev_data->mf_classic_emulator_output;
+
+    string_cat_printf(
+        output->nonce_log,
+        "%08x %d%c %08x %08x %08x\n",
+        nonce->cuid,
+        nonce->block,
+        nonce->access_key == MfClassicKeyA ? 'A' : 'B',
+        nonce->nt,
+        nonce->nr,
+        nonce->ar);
+
+    // Trim log string if needed
+    if(string_size(output->nonce_log) > NFC_MAX_NONCE_LOG_SIZE) {
+        string_right(
+            output->nonce_log,
+            string_size(output->nonce_log) - NFC_MAX_NONCE_LOG_SIZE);
+    }
+}
+
 void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
     nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, &tx_rx, true);
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    NfcMfClassicEmulatorOutput* emulator_output =
+        &nfc_worker->dev_data->mf_classic_emulator_output;
+
+    uint32_t cuid = nfc_util_bytes2num(&nfc_data->uid[nfc_data->uid_len - 4], 4);
     MfClassicEmulator emulator = {
-        .cuid = nfc_util_bytes2num(&nfc_data->uid[nfc_data->uid_len - 4], 4),
+        .cuid = cuid,
         .data = nfc_worker->dev_data->mf_classic_data,
         .data_changed = false,
+        .nonce_callback = nfc_worker_emulate_mf_classic_nonce_callback,
+        .context = nfc_worker,
     };
     NfcaSignal* nfca_signal = nfca_signal_alloc();
     tx_rx.nfca_signal = nfca_signal;
@@ -519,12 +552,17 @@ void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
         if(furi_hal_nfc_listen_rx(&tx_rx, 300)) {
             mf_classic_emulator(&emulator, &tx_rx);
         }
-    }
-    if(emulator.data_changed) {
-        nfc_worker->dev_data->mf_classic_data = emulator.data;
+        if(nfc_worker->state != NfcWorkerStateMfClassicEmulate) {
+            break;
+        }
+
         if(nfc_worker->callback) {
             nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
         }
+    }
+    if(emulator.data_changed) {
+        nfc_worker->dev_data->mf_classic_data = emulator.data;
+        emulator_output->data_changed = true;
         emulator.data_changed = false;
     }
 

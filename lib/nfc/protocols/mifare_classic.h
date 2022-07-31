@@ -71,9 +71,22 @@ typedef struct {
 
 typedef struct {
     uint32_t cuid;
+    MfClassicKey access_key;
+    uint8_t block;
+    uint32_t nt;
+    uint32_t nr;
+    uint32_t ar;
+} MfClassicEmulatorNonce;
+
+typedef void (*MfClassicEmulatorKeyCallback)(MfClassicEmulatorNonce* data, void* context);
+
+typedef struct {
+    uint32_t cuid;
     Crypto1 crypto;
     MfClassicData data;
     bool data_changed;
+    MfClassicEmulatorKeyCallback nonce_callback;
+    void* context;
 } MfClassicEmulator;
 
 const char* mf_classic_get_type_str(MfClassicType type);

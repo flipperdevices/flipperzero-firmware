@@ -53,6 +53,7 @@ struct Nfc {
     SceneManager* scene_manager;
     NfcDevice* dev;
     FuriHalNfcDevData dev_edit_data;
+    bool card_data_changed;
 
     char text_store[NFC_TEXT_STORE_SIZE + 1];
     string_t text_box_store;
