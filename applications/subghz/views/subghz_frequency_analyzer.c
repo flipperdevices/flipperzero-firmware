@@ -63,11 +63,17 @@ void subghz_frequency_analyzer_set_callback(
     subghz_frequency_analyzer->context = context;
 }
 
-void subghz_frequency_analyzer_draw_rssi(Canvas* canvas, float rssi, float rssi_last, float trigger, uint8_t x, uint8_t y) {
+void subghz_frequency_analyzer_draw_rssi(
+    Canvas* canvas,
+    float rssi,
+    float rssi_last,
+    float trigger,
+    uint8_t x,
+    uint8_t y) {
     // Current RSSI
-    if (rssi) {
+    if(rssi) {
         rssi = (rssi + 90) / 3;
-        if (rssi > 20) rssi = 20;
+        if(rssi > 20) rssi = 20;
         uint8_t column_number = 0;
         for(size_t i = 1; i < (uint8_t)rssi; i++) {
             if(i % 4) {
@@ -78,20 +84,20 @@ void subghz_frequency_analyzer_draw_rssi(Canvas* canvas, float rssi, float rssi_
     }
 
     // Last RSSI
-    if (!rssi && rssi_last) {
+    if(!rssi && rssi_last) {
         int max_x = (int)((rssi_last + 87.0) / 3) * 2;
-        //if (!(max_x % 8)) max_x -= 2;
+        //if(!(max_x % 8)) max_x -= 2;
         int max_h = (int)((rssi_last + 87.0) / 3) + 4;
         max_h -= (max_h / 4) + 3;
-        if (max_x > 38) max_h = 38;
-        if (max_h > 19) max_h = 19;
-        if (max_x >= 0 && max_h > 0) {
+        if(max_x > 38) max_h = 38;
+        if(max_h > 19) max_h = 19;
+        if(max_x >= 0 && max_h > 0) {
             canvas_draw_line(canvas, x + max_x + 1, y - max_h, x + max_x + 1, y + 3);
         }
     }
 
     // Trigger cursor
-    if (trigger > TRIGGER_MIN) {
+    if(trigger > TRIGGER_MIN) {
         trigger = (trigger + 90) / 3;
         uint8_t tr_x = x + 2 * trigger - 2;
         canvas_draw_dot(canvas, tr_x, y + 4);
@@ -111,7 +117,8 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel
 
     // RSSI
     canvas_draw_str(canvas, 33, 62, "RSSI");
-    subghz_frequency_analyzer_draw_rssi(canvas, model->rssi, model->rssi_last, model->trigger, 55, 58);
+    subghz_frequency_analyzer_draw_rssi(
+        canvas, model->rssi, model->rssi_last, model->trigger, 55, 58);
 
     // Frequency
     canvas_set_font(canvas, FontBigNumbers);
@@ -126,7 +133,7 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel
 
     // Last detected frequency
     canvas_set_font(canvas, FontSecondary);
-    if (model->frequency_last) {
+    if(model->frequency_last) {
         snprintf(
             buffer,
             sizeof(buffer),
@@ -145,31 +152,30 @@ bool subghz_frequency_analyzer_input(InputEvent* event, void* context) {
 
     bool need_redraw = false;
 
-    if (event->key == InputKeyBack)
-        return false;
+    if(event->key == InputKeyBack) return false;
 
-    if (((event->type == InputTypePress) || (event->type == InputTypeRepeat))
-            && ((event->key == InputKeyLeft) || (event->key == InputKeyRight))) {
+    if(((event->type == InputTypePress) || (event->type == InputTypeRepeat)) &&
+       ((event->key == InputKeyLeft) || (event->key == InputKeyRight))) {
         // Trigger setup
-        switch (event->key) {
+        switch(event->key) {
         case InputKeyLeft:
             instance->trigger -= 1.5;
-            if (instance->trigger < TRIGGER_MIN) instance->trigger = TRIGGER_MIN;
+            if(instance->trigger < TRIGGER_MIN) instance->trigger = TRIGGER_MIN;
             break;
         default:
         case InputKeyRight:
             instance->trigger += 1.5;
-            if (instance->trigger > TRIGGER_MAX) instance->trigger = TRIGGER_MAX;
+            if(instance->trigger > TRIGGER_MAX) instance->trigger = TRIGGER_MAX;
             break;
         }
-        if (instance->trigger > TRIGGER_MIN)
+        if(instance->trigger > TRIGGER_MIN)
             FURI_LOG_I(TAG, "trigger = %.1f", (double)instance->trigger);
         else
             FURI_LOG_I(TAG, "trigger disabled");
         need_redraw = true;
     }
 
-    if (need_redraw) {
+    if(need_redraw) {
         SubGhzFrequencyAnalyzer* instance = context;
         with_view_model(
             instance->view, (SubGhzFrequencyAnalyzerModel * model) {
@@ -199,10 +205,11 @@ void subghz_frequency_analyzer_pair_callback(void* context, uint32_t frequency, 
         }
     }
 
-    if ((rssi != 0.f) && (frequency != 0)) {
+    if((rssi != 0.f) && (frequency != 0)) {
         // Threre is some signal
         FURI_LOG_I(TAG, "rssi = %.2f, frequency = %d", (double)rssi, frequency);
-        if (!instance->triggered && ((instance->trigger <= TRIGGER_MIN) || (rssi >= instance->trigger))) {
+        if(!instance->triggered &&
+           ((instance->trigger <= TRIGGER_MIN) || (rssi >= instance->trigger))) {
             // Triggered!
             instance->triggered = true;
             instance->rssi_last = rssi;
@@ -210,9 +217,9 @@ void subghz_frequency_analyzer_pair_callback(void* context, uint32_t frequency, 
             notification_message(instance->notifications, &sequence_success);
             FURI_LOG_D(TAG, "triggered");
         }
-        if (instance->triggered) {
+        if(instance->triggered) {
             // Update values
-            if (rssi > instance->rssi_last) instance->rssi_last = rssi;
+            if(rssi > instance->rssi_last) instance->rssi_last = rssi;
             instance->frequency_last = frequency;
         }
     }
