@@ -361,23 +361,33 @@
     (isoDep_PCBisRBlock(pcb) && \
      isoDep_PCBisNAK(pcb)) /*!< Checks if pcb is R-Block indicating NAK     */
 
-#define isoDep_PCBIBlock(bn) \
-    ((uint8_t)(0x00U | ISODEP_PCB_IBLOCK | ISODEP_PCB_B2_BIT | ((bn)&ISODEP_PCB_BN_MASK))) /*!< Returns an I-Block with the given block number (bn)                     */
+#define isoDep_PCBIBlock(bn)                            \
+    ((uint8_t)(                                         \
+        0x00U | ISODEP_PCB_IBLOCK | ISODEP_PCB_B2_BIT | \
+        ((bn)&ISODEP_PCB_BN_MASK))) /*!< Returns an I-Block with the given block number (bn)                     */
 #define isoDep_PCBIBlockChaining(bn) \
-    ((uint8_t)(isoDep_PCBIBlock(bn) | ISODEP_PCB_CHAINING_BIT)) /*!< Returns an I-Block with the given block number (bn) indicating chaining */
+    ((uint8_t)(                      \
+        isoDep_PCBIBlock(bn) |       \
+        ISODEP_PCB_CHAINING_BIT)) /*!< Returns an I-Block with the given block number (bn) indicating chaining */
 
-#define isoDep_PCBRBlock(bn) \
-    ((uint8_t)(0x00U | ISODEP_PCB_RBLOCK | ISODEP_PCB_B6_BIT | ISODEP_PCB_B2_BIT | ((bn)&ISODEP_PCB_BN_MASK))) /*!< Returns an R-Block with the given block number (bn)                */
-#define isoDep_PCBRACK(bn) \
-    ((uint8_t)(isoDep_PCBRBlock(bn) | ISODEP_PCB_ACK)) /*!< Returns an R-Block with the given block number (bn) indicating ACK */
-#define isoDep_PCBRNAK(bn) \
-    ((uint8_t)(isoDep_PCBRBlock(bn) | ISODEP_PCB_NAK)) /*!< Returns an R-Block with the given block number (bn) indicating NAK */
+#define isoDep_PCBRBlock(bn)                                                \
+    ((uint8_t)(                                                             \
+        0x00U | ISODEP_PCB_RBLOCK | ISODEP_PCB_B6_BIT | ISODEP_PCB_B2_BIT | \
+        ((bn)&ISODEP_PCB_BN_MASK))) /*!< Returns an R-Block with the given block number (bn)                */
+#define isoDep_PCBRACK(bn)     \
+    ((uint8_t)(                \
+        isoDep_PCBRBlock(bn) | \
+        ISODEP_PCB_ACK)) /*!< Returns an R-Block with the given block number (bn) indicating ACK */
+#define isoDep_PCBRNAK(bn)     \
+    ((uint8_t)(                \
+        isoDep_PCBRBlock(bn) | \
+        ISODEP_PCB_NAK)) /*!< Returns an R-Block with the given block number (bn) indicating NAK */
 
 #define isoDep_GetBN(pcb) \
     ((uint8_t)((pcb)&ISODEP_PCB_BN_MASK)) /*!< Returns the block number (bn) from the given pcb */
 #define isoDep_GetWTXM(inf) \
-    ((uint8_t)((            \
-        inf)&ISODEP_SWTX_WTXM_MASK)) /*!< Returns the WTX value from the given inf byte    */
+    ((uint8_t)(             \
+        (inf)&ISODEP_SWTX_WTXM_MASK)) /*!< Returns the WTX value from the given inf byte    */
 #define isoDep_isWTXMValid(wtxm)    \
     (((wtxm) >= ISODEP_WTXM_MIN) && \
      ((wtxm) <= ISODEP_WTXM_MAX)) /*!< Checks if the given wtxm is valid                */
@@ -1579,8 +1589,8 @@ ReturnCode rfalIsoDepListenGetActivationStatus(void) {
     /* Activation done, keep the rcvd data in, reMap the activation buffer to the global to be retrieved by the DEP method */
     gIsoDep.rxBuf = (uint8_t*)gIsoDep.actvParam.rxBuf;
     gIsoDep.rxBufLen = sizeof(rfalIsoDepBufFormat);
-    gIsoDep.rxBufInfPos =
-        (uint8_t)((uint32_t)gIsoDep.actvParam.rxBuf->inf - (uint32_t)gIsoDep.actvParam.rxBuf->prologue);
+    gIsoDep.rxBufInfPos = (uint8_t)(
+        (uint32_t)gIsoDep.actvParam.rxBuf->inf - (uint32_t)gIsoDep.actvParam.rxBuf->prologue);
     gIsoDep.rxLen = gIsoDep.actvParam.rxLen;
     gIsoDep.rxChaining = gIsoDep.actvParam.isRxChaining;
 
@@ -2192,7 +2202,8 @@ static ReturnCode rfalIsoDepStartATTRIB(
     rfalCreateByteFlagsTxRxContext(
         ctx,
         (uint8_t*)&gIsoDep.actv.attribReq,
-        (uint16_t)(RFAL_ISODEP_ATTRIB_HDR_LEN + MIN((uint16_t)HLInfoLen, RFAL_ISODEP_ATTRIB_HLINFO_LEN)),
+        (uint16_t)(
+            RFAL_ISODEP_ATTRIB_HDR_LEN + MIN((uint16_t)HLInfoLen, RFAL_ISODEP_ATTRIB_HLINFO_LEN)),
         (uint8_t*)gIsoDep.rxBuf,
         sizeof(rfalIsoDepAttribRes),
         &gIsoDep.rxBufLen,
@@ -2340,7 +2351,8 @@ ReturnCode rfalIsoDepPollAGetActivationStatus(void) {
                     EXIT_ON_ERR(
                         ret,
                         rfalIsoDepStartRATS(
-                            (rfalIsoDepFSxI)(uint8_t)(gIsoDep.actv.ratsReq.PARAM >> RFAL_ISODEP_RATS_PARAM_FSDI_SHIFT),
+                            (rfalIsoDepFSxI)(uint8_t)(
+                                gIsoDep.actv.ratsReq.PARAM >> RFAL_ISODEP_RATS_PARAM_FSDI_SHIFT),
                             gIsoDep.did,
                             &gIsoDep.actvDev->activation.A.Listener.ATS,
                             &gIsoDep.actvDev->activation.A.Listener.ATSLen));
@@ -2398,8 +2410,9 @@ ReturnCode rfalIsoDepPollAGetActivationStatus(void) {
                         RFAL_ISODEP_ATS_T0_TB_PRESENCE_MASK) != 0U) {
                         gIsoDep.actvDev->info.SFGI =
                             ((uint8_t*)&gIsoDep.actvDev->activation.A.Listener.ATS)[msgIt++];
-                        gIsoDep.actvDev->info.FWI =
-                            (uint8_t)((gIsoDep.actvDev->info.SFGI >> RFAL_ISODEP_ATS_TB_FWI_SHIFT) & RFAL_ISODEP_ATS_FWI_MASK);
+                        gIsoDep.actvDev->info.FWI = (uint8_t)(
+                            (gIsoDep.actvDev->info.SFGI >> RFAL_ISODEP_ATS_TB_FWI_SHIFT) &
+                            RFAL_ISODEP_ATS_FWI_MASK);
                         gIsoDep.actvDev->info.SFGI &= RFAL_ISODEP_ATS_TB_SFGI_MASK;
                     }
 

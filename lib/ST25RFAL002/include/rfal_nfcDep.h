@@ -239,8 +239,8 @@
      ((uint8_t)(br)&RFAL_NFCDEP_BRS_Dx_MASK))
 
 #define rfalNfcDepBRS2DRI(brs) \
-    (uint8_t)((                \
-        uint8_t)(brs)&RFAL_NFCDEP_BRS_Dx_MASK) /*!< Returns the DRI value from the given BRS byte */
+    (uint8_t)((uint8_t)(       \
+        brs)&RFAL_NFCDEP_BRS_Dx_MASK) /*!< Returns the DRI value from the given BRS byte */
 #define rfalNfcDepBRS2DSI(brs)                        \
     (uint8_t)(                                        \
         ((uint8_t)(brs) >> RFAL_NFCDEP_BRS_DSI_POS) & \

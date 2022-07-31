@@ -100,21 +100,25 @@ const char* gamenames[11] = {
 PokerPlayer_card deck[52] = {
     /*	index, card name, suit, gone */
     /* Clubs:0  Diamonds:1  Hearts: 2   Spades: 3 */
-    {1, "2", 0, 0, 0},  {2, "3", 0, 0, 0},  {3, "4", 0, 0, 0},  {4, "5", 0, 0, 0},  {5, "6", 0, 0, 0},
-    {6, "7", 0, 0, 0},  {7, "8", 0, 0, 0},  {8, "9", 0, 0, 0},  {9, "10", 0, 0, 0}, {10, "J", 0, 0, 0},
-    {11, "Q", 0, 0, 0}, {12, "K", 0, 0, 0}, {13, "A", 0, 0, 0},
+    {1, "2", 0, 0, 0},  {2, "3", 0, 0, 0},  {3, "4", 0, 0, 0},  {4, "5", 0, 0, 0},
+    {5, "6", 0, 0, 0},  {6, "7", 0, 0, 0},  {7, "8", 0, 0, 0},  {8, "9", 0, 0, 0},
+    {9, "10", 0, 0, 0}, {10, "J", 0, 0, 0}, {11, "Q", 0, 0, 0}, {12, "K", 0, 0, 0},
+    {13, "A", 0, 0, 0},
 
-    {1, "2", 1, 0, 0},  {2, "3", 1, 0, 0},  {3, "4", 1, 0, 0},  {4, "5", 1, 0, 0},  {5, "6", 1, 0, 0},
-    {6, "7", 1, 0, 0},  {7, "8", 1, 0, 0},  {8, "9", 1, 0, 0},  {9, "10", 1, 0, 0}, {10, "J", 1, 0, 0},
-    {11, "Q", 1, 0, 0}, {12, "K", 1, 0, 0}, {13, "A", 1, 0, 0},
+    {1, "2", 1, 0, 0},  {2, "3", 1, 0, 0},  {3, "4", 1, 0, 0},  {4, "5", 1, 0, 0},
+    {5, "6", 1, 0, 0},  {6, "7", 1, 0, 0},  {7, "8", 1, 0, 0},  {8, "9", 1, 0, 0},
+    {9, "10", 1, 0, 0}, {10, "J", 1, 0, 0}, {11, "Q", 1, 0, 0}, {12, "K", 1, 0, 0},
+    {13, "A", 1, 0, 0},
 
-    {1, "2", 2, 0, 0},  {2, "3", 2, 0, 0},  {3, "4", 2, 0, 0},  {4, "5", 2, 0, 0},  {5, "6", 2, 0, 0},
-    {6, "7", 2, 0, 0},  {7, "8", 2, 0, 0},  {8, "9", 2, 0, 0},  {9, "10", 2, 0, 0}, {10, "J", 2, 0, 0},
-    {11, "Q", 2, 0, 0}, {12, "K", 2, 0, 0}, {13, "A", 2, 0, 0},
+    {1, "2", 2, 0, 0},  {2, "3", 2, 0, 0},  {3, "4", 2, 0, 0},  {4, "5", 2, 0, 0},
+    {5, "6", 2, 0, 0},  {6, "7", 2, 0, 0},  {7, "8", 2, 0, 0},  {8, "9", 2, 0, 0},
+    {9, "10", 2, 0, 0}, {10, "J", 2, 0, 0}, {11, "Q", 2, 0, 0}, {12, "K", 2, 0, 0},
+    {13, "A", 2, 0, 0},
 
-    {1, "2", 3, 0, 0},  {2, "3", 3, 0, 0},  {3, "4", 3, 0, 0},  {4, "5", 3, 0, 0},  {5, "6", 3, 0, 0},
-    {6, "7", 3, 0, 0},  {7, "8", 3, 0, 0},  {8, "9", 3, 0, 0},  {9, "10", 3, 0, 0}, {10, "J", 3, 0, 0},
-    {11, "Q", 3, 0, 0}, {12, "K", 3, 0, 0}, {13, "A", 3, 0, 0},
+    {1, "2", 3, 0, 0},  {2, "3", 3, 0, 0},  {3, "4", 3, 0, 0},  {4, "5", 3, 0, 0},
+    {5, "6", 3, 0, 0},  {6, "7", 3, 0, 0},  {7, "8", 3, 0, 0},  {8, "9", 3, 0, 0},
+    {9, "10", 3, 0, 0}, {10, "J", 3, 0, 0}, {11, "Q", 3, 0, 0}, {12, "K", 3, 0, 0},
+    {13, "A", 3, 0, 0},
 };
 
 /* 
@@ -338,7 +342,9 @@ static void playcard(PokerPlayer* app) {
     for(i = 0; i < 5; i++) hold[i] = 1;
 
     /* app->score -= bet; */
-    if (app->score>app->highscore){app->highscore=app->score;} /* record high water mark */
+    if(app->score > app->highscore) {
+        app->highscore = app->score;
+    } /* record high water mark */
 
     for(i = 0; i < 5; i++) {
         /* find a card not already dealt */
@@ -646,17 +652,15 @@ void poker_draw_callback(Canvas* canvas, void* ctx) {
     }
     if(poker_player->GameState == 4) {
         /* canvas_draw_icon(canvas, 0, 0, &I_BadEnd_128x64);  Just Lost The Game - disabled for now :( */
-    canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontSecondary);
-    snprintf(buffer, sizeof(buffer), "%s", "You have run out of money!");
-    canvas_draw_str_aligned(canvas, 63, 22, AlignCenter, AlignCenter, buffer);
+        canvas_set_color(canvas, ColorBlack);
+        canvas_set_font(canvas, FontSecondary);
+        snprintf(buffer, sizeof(buffer), "%s", "You have run out of money!");
+        canvas_draw_str_aligned(canvas, 63, 22, AlignCenter, AlignCenter, buffer);
         snprintf(buffer, sizeof(buffer), "%s", "At one point, you had");
-    canvas_draw_str_aligned(canvas, 63, 32, AlignCenter, AlignCenter, buffer);
-    snprintf(buffer, sizeof(buffer), "%d dollars", poker_player->highscore);
-    canvas_draw_str_aligned(canvas, 63, 42, AlignCenter, AlignCenter, buffer);
+        canvas_draw_str_aligned(canvas, 63, 32, AlignCenter, AlignCenter, buffer);
+        snprintf(buffer, sizeof(buffer), "%d dollars", poker_player->highscore);
+        canvas_draw_str_aligned(canvas, 63, 42, AlignCenter, AlignCenter, buffer);
     }
-    
-    
 
     furi_mutex_release(poker_player->model_mutex);
 }
@@ -752,14 +756,14 @@ int32_t video_poker_app(void* p) {
                     }
                     break;
                 case InputKeyOk:
-                /* close splash screen */
+                    /* close splash screen */
                     if(poker_player->GameState == 0) {
                         poker_player->GameState = 1;
                     } else if(poker_player->GameState == 1) {
                         /* Pledge bet. Bet is subtracted here. Original code subtracts it during playcard
                         but playcard is called multiple times which would otherwise subtract bet
                         multiple times */
-                        poker_player->score -= poker_player->bet; 
+                        poker_player->score -= poker_player->bet;
                         poker_player->GameState = 2;
                     } else if(poker_player->GameState == 2) {
                         /* Select or un-select card to be held */

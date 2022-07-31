@@ -9,12 +9,19 @@ void set_random_name(char* name, uint8_t max_name_size) {
     uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
     uint32_t date = LL_RTC_DATE_Get(RTC); // 0xWWDDMMYY
     char strings[1][25];
-    sprintf(strings[0], "%s%.4d%.2d%.2d%.2d%.2d", "s"
-        , __LL_RTC_CONVERT_BCD2BIN((date >> 0) & 0xFF) + 2000 // YEAR
-        , __LL_RTC_CONVERT_BCD2BIN((date >> 8) & 0xFF) // MONTH
-        , __LL_RTC_CONVERT_BCD2BIN((date >> 16) & 0xFF) // DAY
-        , __LL_RTC_CONVERT_BCD2BIN((time >> 16) & 0xFF) // HOUR
-        , __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF)  // DAY
+    sprintf(
+        strings[0],
+        "%s%.4d%.2d%.2d%.2d%.2d",
+        "s",
+        __LL_RTC_CONVERT_BCD2BIN((date >> 0) & 0xFF) + 2000 // YEAR
+        ,
+        __LL_RTC_CONVERT_BCD2BIN((date >> 8) & 0xFF) // MONTH
+        ,
+        __LL_RTC_CONVERT_BCD2BIN((date >> 16) & 0xFF) // DAY
+        ,
+        __LL_RTC_CONVERT_BCD2BIN((time >> 16) & 0xFF) // HOUR
+        ,
+        __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF) // DAY
     );
     sniprintf(name, max_name_size, "%s", strings[0]);
     // Set first symbol to upper case

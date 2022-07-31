@@ -59,7 +59,8 @@ const char* const delay_text[DELAY_COUNT] = {
     "5min",
     "10min",
 };
-const uint32_t delay_value[DELAY_COUNT] = {1000, 5000, 10000, 15000, 30000, 60000, 90000, 120000, 300000, 600000};
+const uint32_t delay_value[DELAY_COUNT] =
+    {1000, 5000, 10000, 15000, 30000, 60000, 90000, 120000, 300000, 600000};
 
 #define VIBRO_COUNT 2
 const char* const vibro_text[VIBRO_COUNT] = {

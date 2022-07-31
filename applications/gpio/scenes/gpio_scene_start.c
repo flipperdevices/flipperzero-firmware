@@ -69,7 +69,7 @@ void gpio_scene_start_on_enter(void* context) {
         variable_item_set_current_value_index(item, GpioOtgOff);
         variable_item_set_current_value_text(item, gpio_otg_text[GpioOtgOff]);
     }
-    
+
     variable_item_list_add(var_item_list, "I2C-Scanner", 0, NULL, NULL);
 
     variable_item_list_set_selected_item(

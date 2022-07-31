@@ -53,7 +53,9 @@ GpioApp* gpio_app_alloc() {
 
     app->gpio_i2c_scanner = gpio_i2c_scanner_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, GpioAppViewI2CScanner, gpio_i2c_scanner_get_view(app->gpio_i2c_scanner));
+        app->view_dispatcher,
+        GpioAppViewI2CScanner,
+        gpio_i2c_scanner_get_view(app->gpio_i2c_scanner));
 
     app->widget = widget_alloc();
     view_dispatcher_add_view(

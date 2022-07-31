@@ -281,8 +281,9 @@ static ReturnCode rfalST25xVPollerGenericWriteMessage(
     uint16_t rcvLen;
 
     /* Calculate required Tx buf length:                    Mfg Code               UID                      MSGLen  MSGLen+1 */
-    msgIt =
-        (uint16_t)(msgLen + sizeof(flags) + sizeof(cmd) + 1U + ((uid != NULL) ? RFAL_NFCV_UID_LEN : 0U) + 1U + 1U);
+    msgIt = (uint16_t)(
+        msgLen + sizeof(flags) + sizeof(cmd) + 1U + ((uid != NULL) ? RFAL_NFCV_UID_LEN : 0U) + 1U +
+        1U);
     /* Note:  MSGlength parameter of the command is the number of Data bytes minus - 1 (00 for 1 byte of data, FFh for 256 bytes of data) */
 
     /* Check for valid parameters */
@@ -303,8 +304,9 @@ static ReturnCode rfalST25xVPollerGenericWriteMessage(
     }
 
     /* Compute Request Command */
-    reqFlag =
-        (uint8_t)(flags & (~((uint32_t)RFAL_NFCV_REQ_FLAG_ADDRESS) & ~((uint32_t)RFAL_NFCV_REQ_FLAG_SELECT)));
+    reqFlag = (uint8_t)(
+        flags &
+        (~((uint32_t)RFAL_NFCV_REQ_FLAG_ADDRESS) & ~((uint32_t)RFAL_NFCV_REQ_FLAG_SELECT)));
     reqFlag |=
         ((uid != NULL) ? (uint8_t)RFAL_NFCV_REQ_FLAG_ADDRESS : (uint8_t)RFAL_NFCV_REQ_FLAG_SELECT);
 

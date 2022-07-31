@@ -364,9 +364,10 @@ ReturnCode st25r3916AdjustRegulators(uint16_t* result_mV) {
                ST25R3916_REG_IO_CONF2,
                ST25R3916_REG_IO_CONF2_sup3V,
                ST25R3916_REG_IO_CONF2_sup3V)) {
-            result = MIN(
-                result,
-                (uint8_t)(result - 5U)); /* In 3.3V mode [0,4] are not used                       */
+            result =
+                MIN(result,
+                    (uint8_t)(
+                        result - 5U)); /* In 3.3V mode [0,4] are not used                       */
             *result_mV = 2400U; /* Minimum regulated voltage 2.4V in case of 3.3V supply */
         } else {
             *result_mV = 3600U; /* Minimum regulated voltage 3.6V in case of 5V supply   */
@@ -779,13 +780,18 @@ ReturnCode st25r3916GetRSSI(uint16_t* amRssi, uint16_t* pmRssi) {
     st25r3916ReadRegister(ST25R3916_REG_GAIN_RED_STATE, &gainRed);
 
     if(amRssi != NULL) {
-        *amRssi =
-            (uint16_t)(((uint32_t)st25r3916Rssi2mV[(rssi >> ST25R3916_REG_RSSI_RESULT_rssi_am_shift)] * (uint32_t)st25r3916Gain2Percent[(gainRed >> ST25R3916_REG_GAIN_RED_STATE_gs_am_shift)]) / 100U);
+        *amRssi = (uint16_t)(
+            ((uint32_t)st25r3916Rssi2mV[(rssi >> ST25R3916_REG_RSSI_RESULT_rssi_am_shift)] *
+             (uint32_t)
+                 st25r3916Gain2Percent[(gainRed >> ST25R3916_REG_GAIN_RED_STATE_gs_am_shift)]) /
+            100U);
     }
 
     if(pmRssi != NULL) {
-        *pmRssi =
-            (uint16_t)(((uint32_t)st25r3916Rssi2mV[(rssi & ST25R3916_REG_RSSI_RESULT_rssi_pm_mask)] * (uint32_t)st25r3916Gain2Percent[(gainRed & ST25R3916_REG_GAIN_RED_STATE_gs_pm_mask)]) / 100U);
+        *pmRssi = (uint16_t)(
+            ((uint32_t)st25r3916Rssi2mV[(rssi & ST25R3916_REG_RSSI_RESULT_rssi_pm_mask)] *
+             (uint32_t)st25r3916Gain2Percent[(gainRed & ST25R3916_REG_GAIN_RED_STATE_gs_pm_mask)]) /
+            100U);
     }
 
     return ERR_NONE;

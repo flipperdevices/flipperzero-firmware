@@ -73,8 +73,7 @@ void desktop_debug_render(Canvas* canvas, void* model) {
             c2_ver ? c2_ver->StackTypeString : "<none>");
         canvas_draw_str(canvas, 5, 39 + STATUS_BAR_Y_SHIFT, buffer);
 
-        snprintf(
-            buffer, sizeof(buffer), "[%d] %s", version_get_target(ver), "dev");
+        snprintf(buffer, sizeof(buffer), "[%d] %s", version_get_target(ver), "dev");
         canvas_draw_str(canvas, 5, 50 + STATUS_BAR_Y_SHIFT, buffer);
 
     } else {

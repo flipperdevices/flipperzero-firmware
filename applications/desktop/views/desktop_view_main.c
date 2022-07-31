@@ -22,7 +22,7 @@ struct DesktopMainView {
 
 static void desktop_view_main_dumbmode_changed(bool isThisGameMode) {
     DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
-    LOAD_DESKTOP_SETTINGS(&app->settings); 
+    LOAD_DESKTOP_SETTINGS(&app->settings);
     app->settings.is_dumbmode = isThisGameMode;
     SAVE_DESKTOP_SETTINGS(&app->settings);
 }

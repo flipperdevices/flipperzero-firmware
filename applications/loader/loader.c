@@ -154,7 +154,7 @@ void loader_cli_list(Cli* cli, string_t args, Loader* instance) {
     for(size_t i = 0; i < FLIPPER_GAMES_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_GAMES[i].name);
     }
-	
+
     printf("Plugins:\r\n");
     for(size_t i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_PLUGINS[i].name);
@@ -321,8 +321,7 @@ static Loader* loader_alloc() {
     // Games menu
     instance->games_menu = submenu_alloc();
     view_set_context(submenu_get_view(instance->games_menu), instance->games_menu);
-    view_set_previous_callback(
-        submenu_get_view(instance->games_menu), loader_hide_menu);
+    view_set_previous_callback(submenu_get_view(instance->games_menu), loader_hide_menu);
     view_dispatcher_add_view(
         instance->view_dispatcher, LoaderMenuViewGames, submenu_get_view(instance->games_menu));
     // Plugins menu

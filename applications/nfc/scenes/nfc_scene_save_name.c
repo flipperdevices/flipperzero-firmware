@@ -47,8 +47,8 @@ void nfc_scene_save_name_on_enter(void* context) {
         string_set_str(folder_path, NFC_APP_FOLDER);
     }
 
-    ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
-        string_get_cstr(folder_path), extension, nfc->dev->dev_name);
+    ValidatorIsFile* validator_is_file =
+        validator_is_file_alloc_init(string_get_cstr(folder_path), extension, nfc->dev->dev_name);
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextInput);
@@ -60,10 +60,7 @@ bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
     bool consumed = false;
 
-    if(
-        event.type == SceneManagerEventTypeCustom &&
-        event.event == NfcCustomEventTextInputDone
-    ) {
+    if(event.type == SceneManagerEventTypeCustom && event.event == NfcCustomEventTextInputDone) {
         if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneMfClassicEmulate)) {
             NfcMfClassicEmulatorOutput* mf_classic_emulate =
                 &nfc->dev->dev_data.mf_classic_emulator_output;

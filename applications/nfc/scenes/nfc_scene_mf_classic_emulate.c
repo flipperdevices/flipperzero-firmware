@@ -17,8 +17,7 @@ bool nfc_mf_classic_emulate_worker_callback(NfcWorkerEvent event, void* context)
 static void nfc_scene_mf_classic_emulate_widget_callback(
     GuiButtonType result,
     InputType type,
-    void* context
-) {
+    void* context) {
     furi_assert(context);
     Nfc* nfc = context;
     if(type == InputTypeShort) {
@@ -27,10 +26,7 @@ static void nfc_scene_mf_classic_emulate_widget_callback(
 }
 
 // Add widget with device name or inform that data received
-static void nfc_scene_mf_classic_emulate_widget_config(
-    Nfc* nfc,
-    bool has_data
-) {
+static void nfc_scene_mf_classic_emulate_widget_config(Nfc* nfc, bool has_data) {
     Widget* widget = nfc->widget;
     widget_reset(widget);
 
@@ -41,13 +37,7 @@ static void nfc_scene_mf_classic_emulate_widget_config(
         nfc_text_store_set(nfc, "Emulating\nMf Classic");
     }
     widget_add_string_multiline_element(
-        widget,
-        56,
-        31,
-        AlignLeft,
-        AlignTop,
-        FontPrimary,
-        nfc->text_store);
+        widget, 56, 31, AlignLeft, AlignTop, FontPrimary, nfc->text_store);
 
     if(has_data) {
         widget_add_button_element(
@@ -87,8 +77,7 @@ void nfc_scene_mf_classic_emulate_on_enter(void* context) {
 bool nfc_scene_mf_classic_emulate_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
     bool consumed = false;
-    NfcMfClassicEmulatorOutput* emulator_output =
-        &nfc->dev->dev_data.mf_classic_emulator_output;
+    NfcMfClassicEmulatorOutput* emulator_output = &nfc->dev->dev_data.mf_classic_emulator_output;
     uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfClassicEmulate);
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -110,7 +99,9 @@ bool nfc_scene_mf_classic_emulate_on_event(void* context, SceneManagerEvent even
         } else if(event.event == GuiButtonTypeLeft && state == NfcSceneMfClassicEmulateStateWidget) {
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
             scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneMfClassicEmulate, NfcSceneMfClassicEmulateStateTextBox);
+                nfc->scene_manager,
+                NfcSceneMfClassicEmulate,
+                NfcSceneMfClassicEmulateStateTextBox);
             consumed = true;
         } else if(event.event == GuiButtonTypeRight && state == NfcSceneMfClassicEmulateStateWidget) {
             // Stop worker without deallocating the nonce log
@@ -124,7 +115,9 @@ bool nfc_scene_mf_classic_emulate_on_event(void* context, SceneManagerEvent even
             // Enter next scene
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
             consumed = true;
-        } else if(event.event == NfcCustomEventViewExit && state == NfcSceneMfClassicEmulateStateTextBox) {
+        } else if(
+            event.event == NfcCustomEventViewExit &&
+            state == NfcSceneMfClassicEmulateStateTextBox) {
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneMfClassicEmulate, NfcSceneMfClassicEmulateStateWidget);

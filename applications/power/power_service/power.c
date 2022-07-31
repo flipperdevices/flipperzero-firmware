@@ -15,32 +15,40 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, 0, 0, &I_Battery_26x8);
 
     if(power->info.gauge_is_ok) {
-
         char batteryPercentile[5];
-        sprintf(batteryPercentile, "%d", power->info.charge); 
+        sprintf(batteryPercentile, "%d", power->info.charge);
         strcat(batteryPercentile, "%");
 
-        if((power->displayBatteryPercentage == 1) && (power->state != PowerStateCharging)) { //if display battery percentage, black background white text
+        if((power->displayBatteryPercentage == 1) &&
+           (power->state !=
+            PowerStateCharging)) { //if display battery percentage, black background white text
             canvas_set_font(canvas, FontBatteryPercent);
             canvas_set_color(canvas, ColorBlack);
-            canvas_draw_box(canvas, 1, 1, 22, 6); 
+            canvas_draw_box(canvas, 1, 1, 22, 6);
             canvas_set_color(canvas, ColorWhite);
             canvas_draw_str_aligned(canvas, 12, 4, AlignCenter, AlignCenter, batteryPercentile);
-        } else if((power->displayBatteryPercentage == 2) && (power->state != PowerStateCharging)) { //if display inverted percentage, white background black text
+        } else if(
+            (power->displayBatteryPercentage == 2) &&
+            (power->state !=
+             PowerStateCharging)) { //if display inverted percentage, white background black text
             canvas_set_font(canvas, FontBatteryPercent);
             canvas_set_color(canvas, ColorBlack);
             canvas_draw_str_aligned(canvas, 12, 4, AlignCenter, AlignCenter, batteryPercentile);
-        } else if((power->displayBatteryPercentage == 3) && (power->state != PowerStateCharging)) { //Retro style segmented display, 3 parts
+        } else if(
+            (power->displayBatteryPercentage == 3) &&
+            (power->state != PowerStateCharging)) { //Retro style segmented display, 3 parts
             if(power->info.charge > 25) {
                 canvas_draw_box(canvas, 2, 2, 6, 4);
             }
             if(power->info.charge > 50) {
-                canvas_draw_box(canvas, 9, 2, 6, 4); 
+                canvas_draw_box(canvas, 9, 2, 6, 4);
             }
             if(power->info.charge > 75) {
-                canvas_draw_box(canvas, 16, 2, 6, 4); 
+                canvas_draw_box(canvas, 16, 2, 6, 4);
             }
-        } else if((power->displayBatteryPercentage == 4) && (power->state != PowerStateCharging)) { //Retro style segmented display, 5 parts
+        } else if(
+            (power->displayBatteryPercentage == 4) &&
+            (power->state != PowerStateCharging)) { //Retro style segmented display, 5 parts
             if(power->info.charge > 10) {
                 canvas_draw_box(canvas, 2, 2, 3, 4);
             }
@@ -172,7 +180,7 @@ static bool power_update_info(Power* power) {
     LOAD_DESKTOP_SETTINGS(settings);
     power->displayBatteryPercentage = settings->displayBatteryPercentage;
     free(settings);
-	
+
     info.gauge_is_ok = furi_hal_power_gauge_is_ok();
     info.charge = furi_hal_power_get_pct();
     info.health = furi_hal_power_get_bat_health_pct();

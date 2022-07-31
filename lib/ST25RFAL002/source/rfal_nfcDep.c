@@ -239,33 +239,52 @@
     (nfcip_PFBisSPDU(pfb) && (((pfb)&NFCIP_PFB_Sx_MASK) == \
                               NFCIP_PFB_TO)) /*!< Checks if pfb is a R-PDU indicating TO    */
 
-#define nfcip_PFBIPDU(pni) \
-    ((uint8_t)(0x00U | NFCIP_PFB_IPDU | ((pni)&NFCIP_PFB_PNI_MASK))) /*!< Returns a PFB I-PDU with the given packet number (pni)                   */
-#define nfcip_PFBIPDU_MI(pni) \
-    ((uint8_t)(isoDep_PCBIBlock(pni) | NFCIP_PFB_MI_BIT)) /*!< Returns a PFB I-PDU with the given packet number (pni) indicating chaing */
+#define nfcip_PFBIPDU(pni)       \
+    ((uint8_t)(                  \
+        0x00U | NFCIP_PFB_IPDU | \
+        ((pni)&NFCIP_PFB_PNI_MASK))) /*!< Returns a PFB I-PDU with the given packet number (pni)                   */
+#define nfcip_PFBIPDU_MI(pni)   \
+    ((uint8_t)(                 \
+        isoDep_PCBIBlock(pni) | \
+        NFCIP_PFB_MI_BIT)) /*!< Returns a PFB I-PDU with the given packet number (pni) indicating chaing */
 
-#define nfcip_PFBRPDU(pni) \
-    ((uint8_t)(0x00U | NFCIP_PFB_RPDU | ((pni)&NFCIP_PFB_PNI_MASK))) /*!< Returns a PFB R-PDU with the given packet number (pni)                   */
+#define nfcip_PFBRPDU(pni)       \
+    ((uint8_t)(                  \
+        0x00U | NFCIP_PFB_RPDU | \
+        ((pni)&NFCIP_PFB_PNI_MASK))) /*!< Returns a PFB R-PDU with the given packet number (pni)                   */
 #define nfcip_PFBRPDU_NACK(pni) \
-    ((uint8_t)(nfcip_PFBRPDU(pni) | NFCIP_PFB_NACK)) /*!< Returns a PFB R-PDU with the given packet number (pni) indicating NACK   */
+    ((uint8_t)(                 \
+        nfcip_PFBRPDU(pni) |    \
+        NFCIP_PFB_NACK)) /*!< Returns a PFB R-PDU with the given packet number (pni) indicating NACK   */
 #define nfcip_PFBRPDU_ACK(pni) \
-    ((uint8_t)(nfcip_PFBRPDU(pni) | NFCIP_PFB_ACK)) /*!< Returns a PFB R-PDU with the given packet number (pni) indicating ACK    */
+    ((uint8_t)(                \
+        nfcip_PFBRPDU(pni) |   \
+        NFCIP_PFB_ACK)) /*!< Returns a PFB R-PDU with the given packet number (pni) indicating ACK    */
 
 #define nfcip_PFBSPDU() \
-    ((uint8_t)(0x00U | NFCIP_PFB_SPDU)) /*!< Returns a PFB S-PDU                                   */
+    ((uint8_t)(         \
+        0x00U | NFCIP_PFB_SPDU)) /*!< Returns a PFB S-PDU                                   */
 #define nfcip_PFBSPDU_ATN() \
-    ((uint8_t)(nfcip_PFBSPDU() | NFCIP_PFB_ATN)) /*!< Returns a PFB S-PDU indicating ATN                    */
+    ((uint8_t)(             \
+        nfcip_PFBSPDU() |   \
+        NFCIP_PFB_ATN)) /*!< Returns a PFB S-PDU indicating ATN                    */
 #define nfcip_PFBSPDU_TO() \
-    ((uint8_t)(nfcip_PFBSPDU() | NFCIP_PFB_TO)) /*!< Returns a PFB S-PDU indicating TO                     */
+    ((uint8_t)(            \
+        nfcip_PFBSPDU() |  \
+        NFCIP_PFB_TO)) /*!< Returns a PFB S-PDU indicating TO                     */
 
 #define nfcip_PNIInc(pni) \
-    ((uint8_t)(((pni) + 1U) & NFCIP_PFB_PNI_MASK)) /*!< Returns a incremented PNI from the given (pni)        */
+    ((uint8_t)(           \
+        ((pni) + 1U) &    \
+        NFCIP_PFB_PNI_MASK)) /*!< Returns a incremented PNI from the given (pni)        */
 #define nfcip_PNIDec(pni) \
-    ((uint8_t)(((pni)-1U) & NFCIP_PFB_PNI_MASK)) /*!< Returns a decremented PNI from the given (pni)        */
+    ((uint8_t)(           \
+        ((pni)-1U) &      \
+        NFCIP_PFB_PNI_MASK)) /*!< Returns a decremented PNI from the given (pni)        */
 
 #define nfcip_PBF_PNI(pfb) \
-    ((uint8_t)((           \
-        pfb)&NFCIP_PFB_PNI_MASK)) /*!< Returns the Packet Number Information (pni)           */
+    ((uint8_t)(            \
+        (pfb)&NFCIP_PFB_PNI_MASK)) /*!< Returns the Packet Number Information (pni)           */
 
 #define nfcip_PPwGB(lr)    \
     (rfalNfcDepLR2PP(lr) | \

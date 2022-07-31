@@ -326,8 +326,8 @@ static ReturnCode rfalNfcaPollerGetSingleCollisionResolutionStatus(void) {
             } else {
                 gNfca.CR.bitsTxRx--;
             }
-            collBit =
-                (uint8_t)(((uint8_t*)&gNfca.CR.selReq)[gNfca.CR.bytesTxRx] & (1U << gNfca.CR.bitsTxRx));
+            collBit = (uint8_t)(
+                ((uint8_t*)&gNfca.CR.selReq)[gNfca.CR.bytesTxRx] & (1U << gNfca.CR.bitsTxRx));
             collBit = (uint8_t)((0U == collBit) ? 1U : 0U); // invert the collision bit
             gNfca.CR.doBacktrack = true;
             gNfca.CR.backtrackCnt--;
@@ -348,8 +348,11 @@ static ReturnCode rfalNfcaPollerGetSingleCollisionResolutionStatus(void) {
                 gNfca.CR.backtrackCnt--;
                 gNfca.CR.bytesTxRx = RFAL_NFCA_CASCADE_1_UID_LEN + RFAL_NFCA_SDD_REQ_LEN - 1U;
                 gNfca.CR.bitsTxRx = 7;
-                collBit =
-                    (uint8_t)(((uint8_t*)&gNfca.CR.selReq)[gNfca.CR.bytesTxRx] & (1U << gNfca.CR.bitsTxRx)); /* Not a real collision, extract the actual bit for the subsequent code */
+                collBit = (uint8_t)(
+                    ((uint8_t*)&gNfca.CR.selReq)[gNfca.CR.bytesTxRx] &
+                    (1U
+                     << gNfca.CR
+                            .bitsTxRx)); /* Not a real collision, extract the actual bit for the subsequent code */
             }
 
             if((gNfca.CR.devLimit == 0U) && !(*gNfca.CR.collPend)) {
@@ -363,11 +366,13 @@ static ReturnCode rfalNfcaPollerGetSingleCollisionResolutionStatus(void) {
 
             /* Set and select the collision bit, with the number of bytes/bits successfully TxRx */
             if(collBit != 0U) {
-                ((uint8_t*)&gNfca.CR.selReq)[gNfca.CR.bytesTxRx] =
-                    (uint8_t)(((uint8_t*)&gNfca.CR.selReq)[gNfca.CR.bytesTxRx] | (1U << gNfca.CR.bitsTxRx)); /* MISRA 10.3 */
+                ((uint8_t*)&gNfca.CR.selReq)[gNfca.CR.bytesTxRx] = (uint8_t)(
+                    ((uint8_t*)&gNfca.CR.selReq)[gNfca.CR.bytesTxRx] |
+                    (1U << gNfca.CR.bitsTxRx)); /* MISRA 10.3 */
             } else {
-                ((uint8_t*)&gNfca.CR.selReq)[gNfca.CR.bytesTxRx] =
-                    (uint8_t)(((uint8_t*)&gNfca.CR.selReq)[gNfca.CR.bytesTxRx] & ~(1U << gNfca.CR.bitsTxRx)); /* MISRA 10.3 */
+                ((uint8_t*)&gNfca.CR.selReq)[gNfca.CR.bytesTxRx] = (uint8_t)(
+                    ((uint8_t*)&gNfca.CR.selReq)[gNfca.CR.bytesTxRx] &
+                    ~(1U << gNfca.CR.bitsTxRx)); /* MISRA 10.3 */
             }
 
             gNfca.CR.bitsTxRx++;

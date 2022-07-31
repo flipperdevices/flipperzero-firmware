@@ -1,5 +1,5 @@
 V:0
-T:1659170897
+T:1659246860
 D:apps
 D:badusb
 D:dolphin
@@ -288,7 +288,7 @@ F:81dc04c7b181f94b644079a71476dff4:4742:nfc/assets/aid.nfc
 F:86efbebdf41bb6bf15cc51ef88f069d5:2565:nfc/assets/country_code.nfc
 F:41b4f08774249014cb8d3dffa5f5c07d:1757:nfc/assets/currency_code.nfc
 F:c60e862919731b0bd538a1001bbc1098:17453:nfc/assets/mf_classic_dict.nfc
-F:7a8b1962f14d89b1a0c9845647a30060:30135:nfc/assets/mf_classic_dict_user.nfc
+F:13344d97ba659c773c2a3e74071b9906:31636:nfc/assets/mf_classic_dict_user.nfc
 D:subghz/Handicap
 D:subghz/Misc
 D:subghz/Vehicles

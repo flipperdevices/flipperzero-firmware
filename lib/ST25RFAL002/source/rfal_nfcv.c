@@ -404,8 +404,8 @@ ReturnCode rfalNfcvPollerCollisionResolution(
                             (uint8_t)((1U << (colPos % RFAL_BITS_IN_BYTE)) - 1U);
                         colFound[colCnt].maskVal[(colPos / RFAL_BITS_IN_BYTE)] |=
                             (uint8_t)((slotNum - 1U) << (colPos % RFAL_BITS_IN_BYTE));
-                        colFound[colCnt].maskVal[((colPos / RFAL_BITS_IN_BYTE) + 1U)] =
-                            (uint8_t)((slotNum - 1U) >> (RFAL_BITS_IN_BYTE - (colPos % RFAL_BITS_IN_BYTE)));
+                        colFound[colCnt].maskVal[((colPos / RFAL_BITS_IN_BYTE) + 1U)] = (uint8_t)(
+                            (slotNum - 1U) >> (RFAL_BITS_IN_BYTE - (colPos % RFAL_BITS_IN_BYTE)));
 
                         colFound[colCnt].maskLen = (colFound[colIt].maskLen + 4U);
 
@@ -642,8 +642,9 @@ ReturnCode rfalNfcvPollerWriteMultipleBlocks(
     uint16_t msgIt;
 
     /* Calculate required buffer length */
-    reqLen =
-        (uint16_t)((uid != NULL) ? (RFAL_NFCV_WR_MUL_REQ_HEADER_LEN + RFAL_NFCV_UID_LEN + wrDataLen) : (RFAL_NFCV_WR_MUL_REQ_HEADER_LEN + wrDataLen));
+    reqLen = (uint16_t)(
+        (uid != NULL) ? (RFAL_NFCV_WR_MUL_REQ_HEADER_LEN + RFAL_NFCV_UID_LEN + wrDataLen) :
+                        (RFAL_NFCV_WR_MUL_REQ_HEADER_LEN + wrDataLen));
 
     if((reqLen > txBufLen) || (blockLen > (uint8_t)RFAL_NFCV_MAX_BLOCK_LEN) ||
        ((((uint16_t)numOfBlocks) * (uint16_t)blockLen) != wrDataLen) || (numOfBlocks == 0U) ||

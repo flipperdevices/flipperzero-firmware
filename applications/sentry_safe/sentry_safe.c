@@ -19,12 +19,9 @@ typedef struct {
     InputEvent input;
 } Event;
 
-
-const char* status_texts[3] = { "[Press OK to open safe]", "Sending...", "Done !" };
-
+const char* status_texts[3] = {"[Press OK to open safe]", "Sending...", "Done !"};
 
 static void sentry_safe_render_callback(Canvas* const canvas, void* ctx) {
-
     const SentryState* sentry_state = acquire_mutex((ValueMutex*)ctx, 25);
     if(sentry_state == NULL) {
         return;
@@ -41,7 +38,8 @@ static void sentry_safe_render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_frame(canvas, 22, 4, 84, 24);
     canvas_draw_str_aligned(canvas, 64, 15, AlignCenter, AlignBottom, "BLACK <-> GND");
     canvas_draw_str_aligned(canvas, 64, 25, AlignCenter, AlignBottom, "GREEN <-> C1 ");
-    canvas_draw_str_aligned(canvas, 64, 50, AlignCenter, AlignBottom, status_texts[sentry_state->status]);
+    canvas_draw_str_aligned(
+        canvas, 64, 50, AlignCenter, AlignBottom, status_texts[sentry_state->status]);
 
     release_mutex((ValueMutex*)ctx, sentry_state);
 }
@@ -53,21 +51,21 @@ static void sentry_safe_input_callback(InputEvent* input_event, FuriMessageQueue
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-void send_request(int command, int a, int b, int c, int d, int e){
+void send_request(int command, int a, int b, int c, int d, int e) {
     int checksum = (command + a + b + c + d + e);
 
     furi_hal_gpio_init_simple(&gpio_ext_pc1, GpioModeOutputPushPull);
     furi_hal_gpio_write(&gpio_ext_pc1, false);
     furi_delay_ms(3.4);
     furi_hal_gpio_write(&gpio_ext_pc1, true);
-    
+
     furi_hal_uart_init(FuriHalUartIdLPUART1, 4800);
     //furi_hal_uart_set_br(FuriHalUartIdLPUART1, 4800);
     //furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, usb_uart_on_irq_cb, usb_uart);
 
     uint8_t data[8] = {0x0, command, a, b, c, d, e, checksum};
     furi_hal_uart_tx(FuriHalUartIdLPUART1, data, 8);
-    
+
     furi_delay_ms(100);
 
     furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, NULL, NULL);
@@ -75,15 +73,14 @@ void send_request(int command, int a, int b, int c, int d, int e){
 }
 
 void reset_code(int a, int b, int c, int d, int e) {
-  send_request(0x75, a, b, c, d, e);
+    send_request(0x75, a, b, c, d, e);
 }
 
 void try_code(int a, int b, int c, int d, int e) {
-  send_request(0x71, a, b, c, d, e);
+    send_request(0x71, a, b, c, d, e);
 }
 
 int32_t sentry_safe_app(void* p) {
-
     UNUSED(p);
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(Event));
@@ -118,7 +115,6 @@ int32_t sentry_safe_app(void* p) {
             if(event.type == EventTypeKey) {
                 if(event.input.type == InputTypePress) {
                     switch(event.input.key) {
-
                     case InputKeyUp:
                         break;
                     case InputKeyDown:
@@ -127,23 +123,20 @@ int32_t sentry_safe_app(void* p) {
                         break;
                     case InputKeyLeft:
                         break;
-                    
+
                     case InputKeyOk:
 
-                        if(sentry_state->status == 2){
-
+                        if(sentry_state->status == 2) {
                             sentry_state->status = 0;
 
-                        }else if(sentry_state->status == 0){
-                            
+                        } else if(sentry_state->status == 0) {
                             sentry_state->status = 1;
 
-                            reset_code(1,2,3,4,5);
+                            reset_code(1, 2, 3, 4, 5);
                             furi_delay_ms(500);
-                            try_code(1,2,3,4,5);
+                            try_code(1, 2, 3, 4, 5);
 
                             sentry_state->status = 2;
-
                         }
 
                         break;

@@ -292,54 +292,52 @@ uint8_t furi_hal_subghz_get_lqi() {
  Set flag use_ext_range_at_own_risk in extend_range.txt to use
  */
 
- bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
-     FURI_LOG_I(TAG, "Checking if frequency is valid");
-     bool is_extended = false;
+bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
+    FURI_LOG_I(TAG, "Checking if frequency is valid");
+    bool is_extended = false;
 
-     Storage* storage = furi_record_open("storage");
-     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
+    Storage* storage = furi_record_open("storage");
+    FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
 
-     if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/extend_range.txt")) {
-         flipper_format_read_bool(fff_data_file, "use_ext_range_at_own_risk", &is_extended, 1);
-         FURI_LOG_I(TAG, "Using extended frequencies at own risk");
-     } else{
+    if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/extend_range.txt")) {
+        flipper_format_read_bool(fff_data_file, "use_ext_range_at_own_risk", &is_extended, 1);
+        FURI_LOG_I(TAG, "Using extended frequencies at own risk");
+    } else {
         FURI_LOG_I(TAG, "Keeping standard frequency ranges");
-     }
+    }
 
-     flipper_format_free(fff_data_file);
-     furi_record_close("storage");
+    flipper_format_free(fff_data_file);
+    furi_record_close("storage");
 
-
- // No flag - test original range, flag set, test extended range
-     if(!(value >= 299999755 && value <= 348000335) &&
-        !(value >= 386999938 && value <= 464000000) &&
-        !(value >= 778999847 && value <= 928000000) &&
-        !(is_extended)) {
+    // No flag - test original range, flag set, test extended range
+    if(!(value >= 299999755 && value <= 348000335) &&
+       !(value >= 386999938 && value <= 464000000) &&
+       !(value >= 778999847 && value <= 928000000) && !(is_extended)) {
         FURI_LOG_I(TAG, "Frequency blocked - outside standard range");
-         return false;
-     } else if(!(value >= 281000000 && value <= 361000000) &&
+        return false;
+    } else if(
+        !(value >= 281000000 && value <= 361000000) &&
         !(value >= 378000000 && value <= 481000000) &&
-        !(value >= 749000000 && value <= 962000000) &&
-        is_extended) {
+        !(value >= 749000000 && value <= 962000000) && is_extended) {
         FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
-         return false;
-     }
+        return false;
+    }
 
-     return true;
- }
+    return true;
+}
 
- uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
-     // Set these values to the extended frequency range only. They dont define if you can transmit but do select the correct RF path
-     value = furi_hal_subghz_set_frequency(value);
-     if(value >= 281000000 && value <= 361000000) {
-         furi_hal_subghz_set_path(FuriHalSubGhzPath315);
-     } else if(value >= 378000000 && value <= 481000000) {
-         furi_hal_subghz_set_path(FuriHalSubGhzPath433);
-     } else if(value >= 749000000 && value <= 962000000) {
-         furi_hal_subghz_set_path(FuriHalSubGhzPath868);
-     } else {
-         furi_crash("SubGhz: Incorrect frequency during set.");
-     }
+uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
+    // Set these values to the extended frequency range only. They dont define if you can transmit but do select the correct RF path
+    value = furi_hal_subghz_set_frequency(value);
+    if(value >= 281000000 && value <= 361000000) {
+        furi_hal_subghz_set_path(FuriHalSubGhzPath315);
+    } else if(value >= 378000000 && value <= 481000000) {
+        furi_hal_subghz_set_path(FuriHalSubGhzPath433);
+    } else if(value >= 749000000 && value <= 962000000) {
+        furi_hal_subghz_set_path(FuriHalSubGhzPath868);
+    } else {
+        furi_crash("SubGhz: Incorrect frequency during set.");
+    }
     return value;
 }
 
@@ -356,7 +354,7 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
 
     flipper_format_free(fff_data_file);
     furi_record_close("storage");
-    
+
     switch(furi_hal_version_get_hw_region()) {
     case FuriHalVersionRegionEuRu:
         //433,05..434,79; 868,15..868,55

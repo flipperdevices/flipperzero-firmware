@@ -32,7 +32,7 @@ static char* subString(char* someString, int n) {
     char* new = malloc(sizeof(char) * n + 1);
     strncpy(new, someString, n);
     new[n] = '\0';
-    return(new);
+    return (new);
 }
 
 static char* file_stub(const char* file_name) {
@@ -41,7 +41,7 @@ static char* file_stub(const char* file_name) {
     // string_init(file_name);
     path_extract_filename_no_ext(file_name, filename);
 
-    return(subString((char*)string_get_cstr(filename), 8));
+    return (subString((char*)string_get_cstr(filename), 8));
 }
 
 static void jukebox_send_signal(uint32_t frequency, string_t signal, string_t protocol) {
@@ -170,10 +170,10 @@ static void jukebox_render_callback(Canvas* canvas, void* ctx) {
 }
 
 static void jukebox_input_callback(InputEvent* input_event, void* ctx) {
-	if (input_event->type == InputTypeRelease) {
-		FuriMessageQueue* event_queue = ctx;
-		furi_message_queue_put(event_queue, input_event, FuriWaitForever);
-	}
+    if(input_event->type == InputTypeRelease) {
+        FuriMessageQueue* event_queue = ctx;
+        furi_message_queue_put(event_queue, input_event, FuriWaitForever);
+    }
 }
 
 int32_t jukebox_app(void* p) {
@@ -226,7 +226,7 @@ int32_t jukebox_app(void* p) {
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(RemoteAppState))) {
         FURI_LOG_D(TAG, "cannot create mutex");
-        return(0);
+        return (0);
     }
 
     ViewPort* view_port = view_port_alloc();
@@ -248,18 +248,18 @@ int32_t jukebox_app(void* p) {
             input_get_type_name(event.type));
 
         if(event.key == InputKeyRight) {
-                state->press[0] = true;
+            state->press[0] = true;
         } else if(event.key == InputKeyLeft) {
-                state->press[1] = true;
+            state->press[1] = true;
         } else if(event.key == InputKeyUp) {
-                state->press[2] = true;
+            state->press[2] = true;
         } else if(event.key == InputKeyDown) {
-                state->press[3] = true;
+            state->press[3] = true;
         } else if(event.key == InputKeyOk) {
-                state->press[4] = true;
+            state->press[4] = true;
         } else if(event.key == InputKeyBack) {
-                release_mutex(&state_mutex, state);
-                break;
+            release_mutex(&state_mutex, state);
+            break;
         }
         release_mutex(&state_mutex, state);
         view_port_update(view_port);
@@ -272,5 +272,5 @@ int32_t jukebox_app(void* p) {
 
     furi_record_close("gui");
 
-    return(0);
+    return (0);
 }

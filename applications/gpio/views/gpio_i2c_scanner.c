@@ -4,7 +4,6 @@
 
 #include <string.h>
 
-
 struct GpioI2CScanner {
     View* view;
     GpioI2CScannerOkCallback callback;
@@ -20,7 +19,7 @@ static bool gpio_i2c_scanner_process_ok(GpioI2CScanner* gpio_i2c_scanner, InputE
 
 static void gpio_i2c_scanner_draw_callback(Canvas* canvas, void* _model) {
     GpioI2CScannerModel* model = _model;
-    
+
     char temp_str[25];
     elements_button_center(canvas, "Start scan");
     canvas_draw_line(canvas, 2, 10, 125, 10);
@@ -42,20 +41,20 @@ static void gpio_i2c_scanner_draw_callback(Canvas* canvas, void* _model) {
 
     char temp_str2[6];
     if(model->items > 0) {
-        snprintf(temp_str, 25, "Addr: " );
-        for(int i = 0; i< model->items; i++){
+        snprintf(temp_str, 25, "Addr: ");
+        for(int i = 0; i < model->items; i++) {
             snprintf(temp_str2, 6, "0x%x ", model->responding_address[i]);
-            strcat (temp_str, temp_str2);
+            strcat(temp_str, temp_str2);
 
             if(i == 1 || model->items == 1) { //Draw a maximum of two addresses in the first line
                 canvas_draw_str_aligned(canvas, 127, 24, AlignRight, AlignBottom, temp_str);
                 temp_str[0] = '\0';
-            }
-            else if(i == 4 || (model->items-1 == i && i<6 )) { //Draw a maximum of three addresses in the second line
+            } else if(
+                i == 4 || (model->items - 1 == i &&
+                           i < 6)) { //Draw a maximum of three addresses in the second line
                 canvas_draw_str_aligned(canvas, 127, 36, AlignRight, AlignBottom, temp_str);
                 temp_str[0] = '\0';
-            }            
-            else if(i == 7 || model->items-1 == i) { //Draw a maximum of three addresses in the third line
+            } else if(i == 7 || model->items - 1 == i) { //Draw a maximum of three addresses in the third line
                 canvas_draw_str_aligned(canvas, 127, 48, AlignRight, AlignBottom, temp_str);
                 break;
             }
@@ -105,7 +104,10 @@ View* gpio_i2c_scanner_get_view(GpioI2CScanner* gpio_i2c_scanner) {
     return gpio_i2c_scanner->view;
 }
 
-void gpio_i2c_scanner_set_ok_callback(GpioI2CScanner* gpio_i2c_scanner, GpioI2CScannerOkCallback callback, void* context) {
+void gpio_i2c_scanner_set_ok_callback(
+    GpioI2CScanner* gpio_i2c_scanner,
+    GpioI2CScannerOkCallback callback,
+    void* context) {
     furi_assert(gpio_i2c_scanner);
     furi_assert(callback);
     with_view_model(
@@ -125,12 +127,10 @@ void gpio_i2c_scanner_update_state(GpioI2CScanner* instance, I2CScannerState* st
         instance->view, (GpioI2CScannerModel * model) {
             model->items = st->items;
 
-            for(int i =0; i<model->items; i++) {
+            for(int i = 0; i < model->items; i++) {
                 model->responding_address[i] = st->responding_address[i];
             }
 
             return true;
         });
 }
-
-

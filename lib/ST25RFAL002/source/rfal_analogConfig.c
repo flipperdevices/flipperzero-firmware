@@ -195,8 +195,9 @@ ReturnCode rfalAnalogConfigListWrite(uint8_t more, const rfalAnalogConfig* confi
     }
 
     numConfig = config->num;
-    configSize =
-        (uint8_t)(sizeof(rfalAnalogConfigId) + sizeof(rfalAnalogConfigNum) + (numConfig * sizeof(rfalAnalogConfigRegAddrMaskVal)));
+    configSize = (uint8_t)(
+        sizeof(rfalAnalogConfigId) + sizeof(rfalAnalogConfigNum) +
+        (numConfig * sizeof(rfalAnalogConfigRegAddrMaskVal)));
 
     /* Check if the Configuration Set exceed the Table size. */
     if(RFAL_ANALOG_CONFIG_TBL_SIZE <= (gRfalAnalogConfigMgmt.configTblSize + configSize)) {
@@ -284,8 +285,9 @@ ReturnCode rfalAnalogConfigListRead(
     *configOffset = offset + configSize;
 
     /* Check if it is the last Analog Configuration in the Table.*/
-    *more =
-        (uint8_t)((*configOffset >= gRfalAnalogConfigMgmt.configTblSize) ? RFAL_ANALOG_CONFIG_UPDATE_LAST : RFAL_ANALOG_CONFIG_UPDATE_MORE);
+    *more = (uint8_t)(
+        (*configOffset >= gRfalAnalogConfigMgmt.configTblSize) ? RFAL_ANALOG_CONFIG_UPDATE_LAST :
+                                                                 RFAL_ANALOG_CONFIG_UPDATE_MORE);
 
     return ERR_NONE;
 } /* rfalAnalogConfigListRead() */
@@ -468,8 +470,9 @@ static rfalAnalogConfigNum
         }
 
         /* If Config Id does not match, increment to next Configuration Id */
-        i +=
-            (uint16_t)(sizeof(rfalAnalogConfigId) + sizeof(rfalAnalogConfigNum) + (configTbl[sizeof(rfalAnalogConfigId)] * sizeof(rfalAnalogConfigRegAddrMaskVal)));
+        i += (uint16_t)(
+            sizeof(rfalAnalogConfigId) + sizeof(rfalAnalogConfigNum) +
+            (configTbl[sizeof(rfalAnalogConfigId)] * sizeof(rfalAnalogConfigRegAddrMaskVal)));
     } /* for */
 
     return RFAL_ANALOG_CONFIG_LUT_NOT_FOUND;

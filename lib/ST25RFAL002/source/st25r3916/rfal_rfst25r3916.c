@@ -1069,8 +1069,12 @@ ReturnCode rfalSetBitRate(rfalBitRate txBR, rfalBitRate rxBR) {
 
         /* Set Analog configurations for this bit rate */
         rfalSetAnalogConfig((RFAL_ANALOG_CONFIG_TECH_CHIP | RFAL_ANALOG_CONFIG_CHIP_POLL_COMMON));
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCA | rfalConvBR2ACBR(gRFAL.txBR) | RFAL_ANALOG_CONFIG_TX ) );
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCA | rfalConvBR2ACBR(gRFAL.rxBR) | RFAL_ANALOG_CONFIG_RX ) );
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCA | rfalConvBR2ACBR(gRFAL.txBR) |
+            RFAL_ANALOG_CONFIG_TX));
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCA | rfalConvBR2ACBR(gRFAL.rxBR) |
+            RFAL_ANALOG_CONFIG_RX));
         break;
 
     /*******************************************************************************/
@@ -1080,8 +1084,12 @@ ReturnCode rfalSetBitRate(rfalBitRate txBR, rfalBitRate rxBR) {
 
         /* Set Analog configurations for this bit rate */
         rfalSetAnalogConfig((RFAL_ANALOG_CONFIG_TECH_CHIP | RFAL_ANALOG_CONFIG_CHIP_POLL_COMMON));
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCB | rfalConvBR2ACBR(gRFAL.txBR) | RFAL_ANALOG_CONFIG_TX ) );
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCB | rfalConvBR2ACBR(gRFAL.rxBR) | RFAL_ANALOG_CONFIG_RX ) );
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCB | rfalConvBR2ACBR(gRFAL.txBR) |
+            RFAL_ANALOG_CONFIG_TX));
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCB | rfalConvBR2ACBR(gRFAL.rxBR) |
+            RFAL_ANALOG_CONFIG_RX));
         break;
 
     /*******************************************************************************/
@@ -1089,8 +1097,12 @@ ReturnCode rfalSetBitRate(rfalBitRate txBR, rfalBitRate rxBR) {
 
         /* Set Analog configurations for this bit rate */
         rfalSetAnalogConfig((RFAL_ANALOG_CONFIG_TECH_CHIP | RFAL_ANALOG_CONFIG_CHIP_POLL_COMMON));
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCF | rfalConvBR2ACBR(gRFAL.txBR) | RFAL_ANALOG_CONFIG_TX ) );
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCF | rfalConvBR2ACBR(gRFAL.rxBR) | RFAL_ANALOG_CONFIG_RX ) );
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCF | rfalConvBR2ACBR(gRFAL.txBR) |
+            RFAL_ANALOG_CONFIG_TX));
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCF | rfalConvBR2ACBR(gRFAL.rxBR) |
+            RFAL_ANALOG_CONFIG_RX));
         break;
 
     /*******************************************************************************/
@@ -1135,8 +1147,12 @@ ReturnCode rfalSetBitRate(rfalBitRate txBR, rfalBitRate rxBR) {
 
         /* Set Analog configurations for this bit rate */
         rfalSetAnalogConfig((RFAL_ANALOG_CONFIG_TECH_CHIP | RFAL_ANALOG_CONFIG_CHIP_POLL_COMMON));
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCV | rfalConvBR2ACBR(gRFAL.txBR) | RFAL_ANALOG_CONFIG_TX ) );
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCV | rfalConvBR2ACBR(gRFAL.rxBR) | RFAL_ANALOG_CONFIG_RX ) );
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCV | rfalConvBR2ACBR(gRFAL.txBR) |
+            RFAL_ANALOG_CONFIG_TX));
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_NFCV | rfalConvBR2ACBR(gRFAL.rxBR) |
+            RFAL_ANALOG_CONFIG_RX));
         break;
 
 #endif /* RFAL_FEATURE_NFCV */
@@ -1146,8 +1162,12 @@ ReturnCode rfalSetBitRate(rfalBitRate txBR, rfalBitRate rxBR) {
 
         /* Set Analog configurations for this bit rate */
         rfalSetAnalogConfig((RFAL_ANALOG_CONFIG_TECH_CHIP | RFAL_ANALOG_CONFIG_CHIP_POLL_COMMON));
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_AP2P | rfalConvBR2ACBR(gRFAL.txBR) | RFAL_ANALOG_CONFIG_TX ) );
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_AP2P | rfalConvBR2ACBR(gRFAL.rxBR) | RFAL_ANALOG_CONFIG_RX ) );
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_AP2P | rfalConvBR2ACBR(gRFAL.txBR) |
+            RFAL_ANALOG_CONFIG_TX));
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_POLL | RFAL_ANALOG_CONFIG_TECH_AP2P | rfalConvBR2ACBR(gRFAL.rxBR) |
+            RFAL_ANALOG_CONFIG_RX));
         break;
 
     /*******************************************************************************/
@@ -1156,8 +1176,12 @@ ReturnCode rfalSetBitRate(rfalBitRate txBR, rfalBitRate rxBR) {
         /* Set Analog configurations for this bit rate */
         rfalSetAnalogConfig(
             (RFAL_ANALOG_CONFIG_TECH_CHIP | RFAL_ANALOG_CONFIG_CHIP_LISTEN_COMMON));
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_LISTEN | RFAL_ANALOG_CONFIG_TECH_AP2P | rfalConvBR2ACBR(gRFAL.txBR) | RFAL_ANALOG_CONFIG_TX ) );
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_LISTEN | RFAL_ANALOG_CONFIG_TECH_AP2P | rfalConvBR2ACBR(gRFAL.rxBR) | RFAL_ANALOG_CONFIG_RX ) );
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_LISTEN | RFAL_ANALOG_CONFIG_TECH_AP2P |
+            rfalConvBR2ACBR(gRFAL.txBR) | RFAL_ANALOG_CONFIG_TX));
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_LISTEN | RFAL_ANALOG_CONFIG_TECH_AP2P |
+            rfalConvBR2ACBR(gRFAL.rxBR) | RFAL_ANALOG_CONFIG_RX));
         break;
 
     /*******************************************************************************/
@@ -1166,8 +1190,12 @@ ReturnCode rfalSetBitRate(rfalBitRate txBR, rfalBitRate rxBR) {
         /* Set Analog configurations for this bit rate */
         rfalSetAnalogConfig(
             (RFAL_ANALOG_CONFIG_TECH_CHIP | RFAL_ANALOG_CONFIG_CHIP_LISTEN_COMMON));
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_LISTEN | RFAL_ANALOG_CONFIG_TECH_NFCA | rfalConvBR2ACBR(gRFAL.txBR) | RFAL_ANALOG_CONFIG_TX ) );
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_LISTEN | RFAL_ANALOG_CONFIG_TECH_NFCA | rfalConvBR2ACBR(gRFAL.rxBR) | RFAL_ANALOG_CONFIG_RX ) );
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_LISTEN | RFAL_ANALOG_CONFIG_TECH_NFCA |
+            rfalConvBR2ACBR(gRFAL.txBR) | RFAL_ANALOG_CONFIG_TX));
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_LISTEN | RFAL_ANALOG_CONFIG_TECH_NFCA |
+            rfalConvBR2ACBR(gRFAL.rxBR) | RFAL_ANALOG_CONFIG_RX));
         break;
 
     /*******************************************************************************/
@@ -1176,8 +1204,12 @@ ReturnCode rfalSetBitRate(rfalBitRate txBR, rfalBitRate rxBR) {
         /* Set Analog configurations for this bit rate */
         rfalSetAnalogConfig(
             (RFAL_ANALOG_CONFIG_TECH_CHIP | RFAL_ANALOG_CONFIG_CHIP_LISTEN_COMMON));
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_LISTEN | RFAL_ANALOG_CONFIG_TECH_NFCF | rfalConvBR2ACBR(gRFAL.txBR) | RFAL_ANALOG_CONFIG_TX ) );
-        rfalSetAnalogConfig( (rfalAnalogConfigId)(RFAL_ANALOG_CONFIG_LISTEN | RFAL_ANALOG_CONFIG_TECH_NFCF | rfalConvBR2ACBR(gRFAL.rxBR) | RFAL_ANALOG_CONFIG_RX ) );
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_LISTEN | RFAL_ANALOG_CONFIG_TECH_NFCF |
+            rfalConvBR2ACBR(gRFAL.txBR) | RFAL_ANALOG_CONFIG_TX));
+        rfalSetAnalogConfig((rfalAnalogConfigId)(
+            RFAL_ANALOG_CONFIG_LISTEN | RFAL_ANALOG_CONFIG_TECH_NFCF |
+            rfalConvBR2ACBR(gRFAL.rxBR) | RFAL_ANALOG_CONFIG_RX));
         break;
 
     /*******************************************************************************/
@@ -1431,8 +1463,9 @@ ReturnCode rfalStartTransceive(const rfalTransceiveContext* ctx) {
                 FxTAdj += (uint32_t)RFAL_FWT_B_ADJUSTMENT;
             }
             if((gRFAL.mode == RFAL_MODE_POLL_NFCF) || (gRFAL.mode == RFAL_MODE_POLL_ACTIVE_P2P)) {
-                FxTAdj +=
-                    (uint32_t)((gRFAL.txBR == RFAL_BR_212) ? RFAL_FWT_F_212_ADJUSTMENT : RFAL_FWT_F_424_ADJUSTMENT);
+                FxTAdj += (uint32_t)(
+                    (gRFAL.txBR == RFAL_BR_212) ? RFAL_FWT_F_212_ADJUSTMENT :
+                                                  RFAL_FWT_F_424_ADJUSTMENT);
             }
 
             /* Ensure that the given FWT doesn't exceed NRT maximum */
@@ -3052,8 +3085,9 @@ ReturnCode rfalISO15693TransceiveAnticollisionFrame(
        (rfalConvBitsToBytes(*ctx.rxRcvdLen) < RFAL_ISO15693_INV_RES_LEN)) {
         /* If INVENTORY_RES is shorter than expected, tag is still modulating *
          * Ensure that response is complete before next frame                 */
-        platformDelay((
-            uint8_t)((RFAL_ISO15693_INV_RES_LEN - rfalConvBitsToBytes(*ctx.rxRcvdLen)) / ((RFAL_ISO15693_INV_RES_LEN / RFAL_ISO15693_INV_RES_DUR) + 1U)));
+        platformDelay((uint8_t)(
+            (RFAL_ISO15693_INV_RES_LEN - rfalConvBitsToBytes(*ctx.rxRcvdLen)) /
+            ((RFAL_ISO15693_INV_RES_LEN / RFAL_ISO15693_INV_RES_DUR) + 1U)));
     }
 
     /* Restore common Analog configurations for this mode */
@@ -3517,8 +3551,8 @@ static ReturnCode rfalRunListenModeWorker(void) {
                 newBr = ST25R3916_REG_BIT_RATE_rxrate_424;
             }
 
-            gRFAL.Lm.brDetected =
-                (rfalBitRate)(newBr); /* PRQA S 4342 # MISRA 10.5 - Guaranteed that no invalid enum values may be created. See also equalityGuard_RFAL_BR_106 ff.*/
+            gRFAL.Lm.brDetected = (rfalBitRate)(
+                newBr); /* PRQA S 4342 # MISRA 10.5 - Guaranteed that no invalid enum values may be created. See also equalityGuard_RFAL_BR_106 ff.*/
         }
 
         if(((irqs & ST25R3916_IRQ_MASK_WU_F) != 0U) && (gRFAL.Lm.brDetected != RFAL_BR_KEEP)) {
@@ -3709,8 +3743,8 @@ static ReturnCode rfalRunListenModeWorker(void) {
                 newBr = ST25R3916_REG_BIT_RATE_rxrate_424;
             }
 
-            gRFAL.Lm.brDetected =
-                (rfalBitRate)(newBr); /* PRQA S 4342 # MISRA 10.5 - Guaranteed that no invalid enum values may be created. See also equalityGuard_RFAL_BR_106 ff.*/
+            gRFAL.Lm.brDetected = (rfalBitRate)(
+                newBr); /* PRQA S 4342 # MISRA 10.5 - Guaranteed that no invalid enum values may be created. See also equalityGuard_RFAL_BR_106 ff.*/
         }
 
         if(((irqs & ST25R3916_IRQ_MASK_WU_F) != 0U) && (gRFAL.Lm.brDetected != RFAL_BR_KEEP)) {
@@ -4280,10 +4314,12 @@ ReturnCode rfalWakeUpModeStart(const rfalWakeUpConfig* config) {
 
     /*******************************************************************************/
     /* Prepare Wake-Up Timer Control Register */
-    reg =
-        (uint8_t)(((uint8_t)gRFAL.wum.cfg.period & 0x0FU) << ST25R3916_REG_WUP_TIMER_CONTROL_wut_shift);
-    reg |=
-        (uint8_t)(((uint8_t)gRFAL.wum.cfg.period < (uint8_t)RFAL_WUM_PERIOD_100MS) ? ST25R3916_REG_WUP_TIMER_CONTROL_wur : 0x00U);
+    reg = (uint8_t)(
+        ((uint8_t)gRFAL.wum.cfg.period & 0x0FU) << ST25R3916_REG_WUP_TIMER_CONTROL_wut_shift);
+    reg |= (uint8_t)(
+        ((uint8_t)gRFAL.wum.cfg.period < (uint8_t)RFAL_WUM_PERIOD_100MS) ?
+            ST25R3916_REG_WUP_TIMER_CONTROL_wur :
+            0x00U);
 
     if(gRFAL.wum.cfg.irqTout || gRFAL.wum.cfg.swTagDetect) {
         reg |= ST25R3916_REG_WUP_TIMER_CONTROL_wto;
@@ -4299,14 +4335,17 @@ ReturnCode rfalWakeUpModeStart(const rfalWakeUpConfig* config) {
         /*******************************************************************************/
         /* Check if Inductive Amplitude is to be performed */
         if(gRFAL.wum.cfg.indAmp.enabled) {
-            aux =
-                (uint8_t)((gRFAL.wum.cfg.indAmp.delta) << ST25R3916_REG_AMPLITUDE_MEASURE_CONF_am_d_shift);
-            aux |=
-                (uint8_t)(gRFAL.wum.cfg.indAmp.aaInclMeas ? ST25R3916_REG_AMPLITUDE_MEASURE_CONF_am_aam : 0x00U);
-            aux |=
-                (uint8_t)(((uint8_t)gRFAL.wum.cfg.indAmp.aaWeight << ST25R3916_REG_AMPLITUDE_MEASURE_CONF_am_aew_shift) & ST25R3916_REG_AMPLITUDE_MEASURE_CONF_am_aew_mask);
-            aux |=
-                (uint8_t)(gRFAL.wum.cfg.indAmp.autoAvg ? ST25R3916_REG_AMPLITUDE_MEASURE_CONF_am_ae : 0x00U);
+            aux = (uint8_t)(
+                (gRFAL.wum.cfg.indAmp.delta) << ST25R3916_REG_AMPLITUDE_MEASURE_CONF_am_d_shift);
+            aux |= (uint8_t)(
+                gRFAL.wum.cfg.indAmp.aaInclMeas ? ST25R3916_REG_AMPLITUDE_MEASURE_CONF_am_aam :
+                                                  0x00U);
+            aux |= (uint8_t)(
+                ((uint8_t)gRFAL.wum.cfg.indAmp.aaWeight
+                 << ST25R3916_REG_AMPLITUDE_MEASURE_CONF_am_aew_shift) &
+                ST25R3916_REG_AMPLITUDE_MEASURE_CONF_am_aew_mask);
+            aux |= (uint8_t)(
+                gRFAL.wum.cfg.indAmp.autoAvg ? ST25R3916_REG_AMPLITUDE_MEASURE_CONF_am_ae : 0x00U);
 
             st25r3916WriteRegister(ST25R3916_REG_AMPLITUDE_MEASURE_CONF, aux);
 
@@ -4327,14 +4366,16 @@ ReturnCode rfalWakeUpModeStart(const rfalWakeUpConfig* config) {
         /*******************************************************************************/
         /* Check if Inductive Phase is to be performed */
         if(gRFAL.wum.cfg.indPha.enabled) {
-            aux =
-                (uint8_t)((gRFAL.wum.cfg.indPha.delta) << ST25R3916_REG_PHASE_MEASURE_CONF_pm_d_shift);
-            aux |=
-                (uint8_t)(gRFAL.wum.cfg.indPha.aaInclMeas ? ST25R3916_REG_PHASE_MEASURE_CONF_pm_aam : 0x00U);
-            aux |=
-                (uint8_t)(((uint8_t)gRFAL.wum.cfg.indPha.aaWeight << ST25R3916_REG_PHASE_MEASURE_CONF_pm_aew_shift) & ST25R3916_REG_PHASE_MEASURE_CONF_pm_aew_mask);
-            aux |=
-                (uint8_t)(gRFAL.wum.cfg.indPha.autoAvg ? ST25R3916_REG_PHASE_MEASURE_CONF_pm_ae : 0x00U);
+            aux = (uint8_t)(
+                (gRFAL.wum.cfg.indPha.delta) << ST25R3916_REG_PHASE_MEASURE_CONF_pm_d_shift);
+            aux |= (uint8_t)(
+                gRFAL.wum.cfg.indPha.aaInclMeas ? ST25R3916_REG_PHASE_MEASURE_CONF_pm_aam : 0x00U);
+            aux |= (uint8_t)(
+                ((uint8_t)gRFAL.wum.cfg.indPha.aaWeight
+                 << ST25R3916_REG_PHASE_MEASURE_CONF_pm_aew_shift) &
+                ST25R3916_REG_PHASE_MEASURE_CONF_pm_aew_mask);
+            aux |= (uint8_t)(
+                gRFAL.wum.cfg.indPha.autoAvg ? ST25R3916_REG_PHASE_MEASURE_CONF_pm_ae : 0x00U);
 
             st25r3916WriteRegister(ST25R3916_REG_PHASE_MEASURE_CONF, aux);
 
@@ -4369,14 +4410,17 @@ ReturnCode rfalWakeUpModeStart(const rfalWakeUpConfig* config) {
             st25r3916CalibrateCapacitiveSensor(NULL);
 
             /*******************************************************************************/
-            aux =
-                (uint8_t)((gRFAL.wum.cfg.cap.delta) << ST25R3916_REG_CAPACITANCE_MEASURE_CONF_cm_d_shift);
-            aux |=
-                (uint8_t)(gRFAL.wum.cfg.cap.aaInclMeas ? ST25R3916_REG_CAPACITANCE_MEASURE_CONF_cm_aam : 0x00U);
-            aux |=
-                (uint8_t)(((uint8_t)gRFAL.wum.cfg.cap.aaWeight << ST25R3916_REG_CAPACITANCE_MEASURE_CONF_cm_aew_shift) & ST25R3916_REG_CAPACITANCE_MEASURE_CONF_cm_aew_mask);
-            aux |=
-                (uint8_t)(gRFAL.wum.cfg.cap.autoAvg ? ST25R3916_REG_CAPACITANCE_MEASURE_CONF_cm_ae : 0x00U);
+            aux = (uint8_t)(
+                (gRFAL.wum.cfg.cap.delta) << ST25R3916_REG_CAPACITANCE_MEASURE_CONF_cm_d_shift);
+            aux |= (uint8_t)(
+                gRFAL.wum.cfg.cap.aaInclMeas ? ST25R3916_REG_CAPACITANCE_MEASURE_CONF_cm_aam :
+                                               0x00U);
+            aux |= (uint8_t)(
+                ((uint8_t)gRFAL.wum.cfg.cap.aaWeight
+                 << ST25R3916_REG_CAPACITANCE_MEASURE_CONF_cm_aew_shift) &
+                ST25R3916_REG_CAPACITANCE_MEASURE_CONF_cm_aew_mask);
+            aux |= (uint8_t)(
+                gRFAL.wum.cfg.cap.autoAvg ? ST25R3916_REG_CAPACITANCE_MEASURE_CONF_cm_ae : 0x00U);
 
             st25r3916WriteRegister(ST25R3916_REG_CAPACITANCE_MEASURE_CONF, aux);
 

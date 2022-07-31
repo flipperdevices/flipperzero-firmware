@@ -13,12 +13,15 @@
 extern "C" {
 #endif
 
-
 typedef struct {
     char* name;
     uint8_t hid;
     uint8_t mod;
 } MJDuckyKey;
 
-
-void mj_process_ducky_script(FuriHalSpiBusHandle* handle, uint8_t* addr, uint8_t addr_size, uint8_t rate, char *script);
+void mj_process_ducky_script(
+    FuriHalSpiBusHandle* handle,
+    uint8_t* addr,
+    uint8_t addr_size,
+    uint8_t rate,
+    char* script);

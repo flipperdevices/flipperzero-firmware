@@ -807,7 +807,8 @@ static const uint16_t hid_asciimap_hu[] = {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
-static const uint16_t* hid_asciimaps[] = {hid_asciimap, hid_asciimap_de, hid_asciimap_fr, hid_asciimap_hu};
+static const uint16_t* hid_asciimaps[] =
+    {hid_asciimap, hid_asciimap_de, hid_asciimap_fr, hid_asciimap_hu};
 #pragma GCC diagnostic pop
 
 typedef struct {

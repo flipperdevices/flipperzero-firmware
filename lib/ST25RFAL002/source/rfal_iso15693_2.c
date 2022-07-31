@@ -244,7 +244,10 @@ ReturnCode iso15693VCDCode(
         uint16_t filled_size;
         if(0U == crc) {
             crc = rfalCrcCalculateCcitt(
-                (uint16_t)((picopassMode) ? 0xE012U : 0xFFFFU), /* In PicoPass Mode a different Preset Value is used   */
+                (uint16_t)(
+                    (picopassMode) ?
+                        0xE012U :
+                        0xFFFFU), /* In PicoPass Mode a different Preset Value is used   */
                 ((picopassMode) ?
                      (buffer + 1U) :
                      buffer), /* CMD byte is not taken into account in PicoPass mode */

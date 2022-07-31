@@ -476,8 +476,10 @@ ReturnCode rfalNfcfPollerUpdate(
     }
 
     /* Calculate required txBuffer lenth */
-    auxLen = (uint16_t)( RFAL_NFCF_CMD_LEN + RFAL_NFCF_NFCID2_LEN + ( servBlock->numServ * sizeof(rfalNfcfServ) ) + 
-              (servBlock->numBlock * sizeof(rfalNfcfBlockListElem)) + (uint16_t)((uint16_t)servBlock->numBlock * RFAL_NFCF_BLOCK_LEN) );
+    auxLen = (uint16_t)(
+        RFAL_NFCF_CMD_LEN + RFAL_NFCF_NFCID2_LEN + (servBlock->numServ * sizeof(rfalNfcfServ)) +
+        (servBlock->numBlock * sizeof(rfalNfcfBlockListElem)) +
+        (uint16_t)((uint16_t)servBlock->numBlock * RFAL_NFCF_BLOCK_LEN));
 
     /* Check whether the provided buffer is sufficient for this request */
     if(txBufLen < auxLen) {

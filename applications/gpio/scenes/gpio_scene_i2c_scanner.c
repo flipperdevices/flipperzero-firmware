@@ -3,7 +3,6 @@
 
 static I2CScannerState* i2c_scanner_state;
 
-
 void gpio_scene_i2c_scanner_ok_callback(InputType type, void* context) {
     furi_assert(context);
     GpioApp* app = context;
@@ -20,7 +19,8 @@ void gpio_scene_i2c_scanner_on_enter(void* context) {
     GpioApp* app = context;
     i2c_scanner_state = malloc(sizeof(I2CScannerState));
 
-    gpio_i2c_scanner_set_ok_callback(app->gpio_i2c_scanner, gpio_scene_i2c_scanner_ok_callback, app);
+    gpio_i2c_scanner_set_ok_callback(
+        app->gpio_i2c_scanner, gpio_scene_i2c_scanner_ok_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, GpioAppViewI2CScanner);
 }
 
