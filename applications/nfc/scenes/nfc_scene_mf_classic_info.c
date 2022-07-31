@@ -19,8 +19,6 @@ void nfc_scene_mf_classic_info_on_enter(void* context) {
 
     // Setup view
     Widget* widget = nfc->widget;
-    widget_add_button_element(
-        widget, GuiButtonTypeLeft, "Back", nfc_scene_mf_classic_info_widget_callback, nfc);
 
     widget_add_string_element(
         widget, 0, 0, AlignLeft, AlignTop, FontSecondary, mf_classic_get_type_str(mf_data->type));
@@ -32,6 +30,14 @@ void nfc_scene_mf_classic_info_on_enter(void* context) {
     }
     widget_add_string_element(
         widget, 0, 22, AlignLeft, AlignTop, FontSecondary, string_get_cstr(str_tmp));
+    string_printf(
+        str_tmp,
+        "ATQA: %02X %02X SAK: %02X",
+        dev_data->nfc_data.atqa[0],
+        dev_data->nfc_data.atqa[1],
+        dev_data->nfc_data.sak);
+    widget_add_string_element(
+        widget, 0, 33, AlignLeft, AlignTop, FontSecondary, string_get_cstr(str_tmp));
     uint8_t sectors_total = mf_classic_get_total_sectors_num(mf_data->type);
     uint8_t keys_total = sectors_total * 2;
     uint8_t keys_found = 0;
@@ -39,10 +45,10 @@ void nfc_scene_mf_classic_info_on_enter(void* context) {
     mf_classic_get_read_sectors_and_keys(mf_data, &sectors_read, &keys_found);
     string_printf(str_tmp, "Keys Found: %d/%d", keys_found, keys_total);
     widget_add_string_element(
-        widget, 0, 33, AlignLeft, AlignTop, FontSecondary, string_get_cstr(str_tmp));
+        widget, 0, 44, AlignLeft, AlignTop, FontSecondary, string_get_cstr(str_tmp));
     string_printf(str_tmp, "Sectors Read: %d/%d", sectors_read, sectors_total);
     widget_add_string_element(
-        widget, 0, 44, AlignLeft, AlignTop, FontSecondary, string_get_cstr(str_tmp));
+        widget, 0, 55, AlignLeft, AlignTop, FontSecondary, string_get_cstr(str_tmp));
 
     string_clear(str_tmp);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
@@ -52,11 +58,7 @@ bool nfc_scene_mf_classic_info_on_event(void* context, SceneManagerEvent event) 
     Nfc* nfc = context;
     bool consumed = false;
 
-    if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == GuiButtonTypeLeft) {
-            consumed = scene_manager_previous_scene(nfc->scene_manager);
-        }
-    } else if(event.type == SceneManagerEventTypeBack) {
+    if(event.type == SceneManagerEventTypeBack) {
         consumed = scene_manager_previous_scene(nfc->scene_manager);
     }
 
