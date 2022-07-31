@@ -786,39 +786,59 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
   #endif
-  
-  #ifdef HAS_SCREEN
-    display_obj.tft.init();
-    display_obj.tft.setRotation(1);
-    display_obj.tft.fillScreen(TFT_BLACK);
-  #endif
 
   sd_obj.openCapture("packet_monitor");
 
-  #ifdef HAS_SCREEN
-    #ifdef TFT_SHIELD
-      uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield
-      Serial.println("Using TFT Shield");
-    #else if defined(TFT_DIY)
-      uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY
-      Serial.println("Using TFT DIY");
+  #ifndef MARAUDER_MINI
+    
+    #ifdef HAS_SCREEN
+      display_obj.tft.init();
+      display_obj.tft.setRotation(1);
+      display_obj.tft.fillScreen(TFT_BLACK);
     #endif
-    display_obj.tft.setTouch(calData);
   
-    //display_obj.tft.setFreeFont(1);
-    display_obj.tft.setFreeFont(NULL);
-    display_obj.tft.setTextSize(1);
-    display_obj.tft.fillRect(127, 0, 193, 28, TFT_BLACK); // Buttons
-    display_obj.tft.fillRect(12, 0, 90, 32, TFT_BLACK); // color key
-  
-    delay(10);
-  
-    display_obj.tftDrawGraphObjects(x_scale); //draw graph objects
-    display_obj.tftDrawColorKey();
-    display_obj.tftDrawXScaleButtons(x_scale);
-    display_obj.tftDrawYScaleButtons(y_scale);
-    display_obj.tftDrawChannelScaleButtons(set_channel);
-    display_obj.tftDrawExitScaleButtons();
+    #ifdef HAS_SCREEN
+      #ifdef TFT_SHIELD
+        uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield
+        Serial.println("Using TFT Shield");
+      #else if defined(TFT_DIY)
+        uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY
+        Serial.println("Using TFT DIY");
+      #endif
+      display_obj.tft.setTouch(calData);
+    
+      //display_obj.tft.setFreeFont(1);
+      display_obj.tft.setFreeFont(NULL);
+      display_obj.tft.setTextSize(1);
+      display_obj.tft.fillRect(127, 0, 193, 28, TFT_BLACK); // Buttons
+      display_obj.tft.fillRect(12, 0, 90, 32, TFT_BLACK); // color key
+    
+      delay(10);
+    
+      display_obj.tftDrawGraphObjects(x_scale); //draw graph objects
+      display_obj.tftDrawColorKey();
+      display_obj.tftDrawXScaleButtons(x_scale);
+      display_obj.tftDrawYScaleButtons(y_scale);
+      display_obj.tftDrawChannelScaleButtons(set_channel);
+      display_obj.tftDrawExitScaleButtons();
+    #endif
+  #else
+    #ifdef HAS_SCREEN
+      display_obj.TOP_FIXED_AREA_2 = 48;
+      display_obj.tteBar = true;
+      display_obj.print_delay_1 = 15;
+      display_obj.print_delay_2 = 10;
+      display_obj.initScrollValues(true);
+      display_obj.tft.setTextWrap(false);
+      display_obj.tft.setTextColor(TFT_WHITE, color);
+      #ifndef MARAUDER_MINI
+        display_obj.tft.fillRect(0,16,240,16, color);
+        display_obj.tft.drawCentreString(text_table4[38],120,16,2);
+        display_obj.touchToExit();
+      #endif
+      display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+      display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
+    #endif
   #endif
 
   Serial.println("Running packet scan...");
@@ -842,35 +862,56 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
   
   num_eapol = 0;
 
-  #ifdef HAS_SCREEN
-    display_obj.tft.init();
-    display_obj.tft.setRotation(1);
-    display_obj.tft.fillScreen(TFT_BLACK);
-  #endif
-
-  sd_obj.openCapture("eapol");
-
-  #ifdef HAS_SCREEN
-    #ifdef TFT_SHIELD
-      uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield
-      //Serial.println("Using TFT Shield");
-    #else if defined(TFT_DIY)
-      uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY
-      //Serial.println("Using TFT DIY");
+  #ifndef MARAUDER_MINI
+    #ifdef HAS_SCREEN
+      display_obj.tft.init();
+      display_obj.tft.setRotation(1);
+      display_obj.tft.fillScreen(TFT_BLACK);
     #endif
-    display_obj.tft.setTouch(calData);
   
-    display_obj.tft.setFreeFont(NULL);
-    display_obj.tft.setTextSize(1);
-    display_obj.tft.fillRect(127, 0, 193, 28, TFT_BLACK); // Buttons
-    display_obj.tft.fillRect(12, 0, 90, 32, TFT_BLACK); // color key
+    sd_obj.openCapture("eapol");
   
-    delay(10);
-  
-    display_obj.tftDrawGraphObjects(x_scale); //draw graph objects
-    display_obj.tftDrawEapolColorKey();
-    display_obj.tftDrawChannelScaleButtons(set_channel);
-    display_obj.tftDrawExitScaleButtons();
+    #ifdef HAS_SCREEN
+      #ifdef TFT_SHIELD
+        uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield
+        //Serial.println("Using TFT Shield");
+      #else if defined(TFT_DIY)
+        uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY
+        //Serial.println("Using TFT DIY");
+      #endif
+      display_obj.tft.setTouch(calData);
+    
+      display_obj.tft.setFreeFont(NULL);
+      display_obj.tft.setTextSize(1);
+      display_obj.tft.fillRect(127, 0, 193, 28, TFT_BLACK); // Buttons
+      display_obj.tft.fillRect(12, 0, 90, 32, TFT_BLACK); // color key
+    
+      delay(10);
+    
+      display_obj.tftDrawGraphObjects(x_scale); //draw graph objects
+      display_obj.tftDrawEapolColorKey();
+      display_obj.tftDrawChannelScaleButtons(set_channel);
+      display_obj.tftDrawExitScaleButtons();
+    #endif
+  #else
+    sd_obj.openCapture("eapol");
+    
+    #ifdef HAS_SCREEN
+      display_obj.TOP_FIXED_AREA_2 = 48;
+      display_obj.tteBar = true;
+      display_obj.print_delay_1 = 15;
+      display_obj.print_delay_2 = 10;
+      display_obj.initScrollValues(true);
+      display_obj.tft.setTextWrap(false);
+      display_obj.tft.setTextColor(TFT_WHITE, color);
+      #ifndef MARAUDER_MINI
+        display_obj.tft.fillRect(0,16,240,16, color);
+        display_obj.tft.drawCentreString(text_table4[38],120,16,2);
+        display_obj.touchToExit();
+      #endif
+      display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+      display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
+    #endif
   #endif
 
 
@@ -2273,6 +2314,14 @@ void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
   int len = snifferPacket->rx_ctrl.sig_len;
 
+  String display_string = "";
+
+  #ifdef HAS_SCREEN
+    int buff = display_obj.display_buffer->size();
+  #else
+    int buff = 0;
+  #endif
+
   if (type == WIFI_PKT_MGMT)
   {
     len -= 4;
@@ -2281,18 +2330,44 @@ void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
     const WifiMgmtHdr *hdr = &ipkt->hdr;
 
     // If we dont the buffer size is not 0, don't write or else we get CORRUPT_HEAP
-    if (snifferPacket->payload[0] == 0x80)
-    {
-      num_beacon++;
-    }
-    else if ((snifferPacket->payload[0] == 0xA0 || snifferPacket->payload[0] == 0xC0 ))
-    {
-      num_deauth++;
-    }
-    else if (snifferPacket->payload[0] == 0x40)
-    {
-      num_probe++;
-    }
+    #ifndef MARAUDER_MINI
+      if (snifferPacket->payload[0] == 0x80)
+      {
+        num_beacon++;
+      }
+      else if ((snifferPacket->payload[0] == 0xA0 || snifferPacket->payload[0] == 0xC0 ))
+      {
+        num_deauth++;
+      }
+      else if (snifferPacket->payload[0] == 0x40)
+      {
+        num_probe++;
+      }
+    #endif
+
+    char addr[] = "00:00:00:00:00:00";
+    getMAC(addr, snifferPacket->payload, 10);
+    display_string.concat(addr);
+
+    int temp_len = display_string.length();
+
+    #ifdef HAS_SCREEN
+      for (int i = 0; i < 40 - temp_len; i++)
+      {
+        display_string.concat(" ");
+      }
+    
+      //Serial.print(" ");
+    
+      #ifdef MARAUDER_MINI
+        if (display_obj.display_buffer->size() == 0)
+        {
+          display_obj.loading = true;
+          display_obj.display_buffer->add(display_string);
+          display_obj.loading = false;
+        }
+      #endif
+    #endif
 
     if (save_packet)
       sd_obj.addPacket(snifferPacket->payload, len);
@@ -2309,6 +2384,8 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
   int len = snifferPacket->rx_ctrl.sig_len;
 
+  String display_string = "";
+
   if (type == WIFI_PKT_MGMT)
   {
     len -= 4;
@@ -2316,6 +2393,12 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
     const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)snifferPacket->payload;
     const WifiMgmtHdr *hdr = &ipkt->hdr;
   }
+
+  #ifdef HAS_SCREEN
+    int buff = display_obj.display_buffer->size();
+  #else
+    int buff = 0;
+  #endif
 
   // Found beacon frame. Decide whether to deauth
   if (send_deauth) {
@@ -2357,6 +2440,30 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
     num_eapol++;
     Serial.println("Received EAPOL:");
 
+    char addr[] = "00:00:00:00:00:00";
+    getMAC(addr, snifferPacket->payload, 10);
+    display_string.concat(addr);
+
+    int temp_len = display_string.length();
+
+   #ifdef HAS_SCREEN
+      for (int i = 0; i < 40 - temp_len; i++)
+      {
+        display_string.concat(" ");
+      }
+
+      Serial.print(" ");
+
+      #ifdef MARAUDER_MINI
+        if (display_obj.display_buffer->size() == 0)
+        {
+          display_obj.loading = true;
+          display_obj.display_buffer->add(display_string);
+          display_obj.loading = false;
+        }
+      #endif
+    #endif
+    
     for (int i = 0; i < len; i++) {
       char hexCar[4];
       sprintf(hexCar, "%02X", snifferPacket->payload[i]);
@@ -2858,6 +2965,12 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
 //  showMetadata(snifferPacket, type);
 //}
 
+void WiFiScan::changeChannel(int chan) {
+  this->set_channel = chan;
+  esp_wifi_set_channel(this->set_channel, WIFI_SECOND_CHAN_NONE);
+  delay(1);
+}
+
 void WiFiScan::changeChannel()
 {
   esp_wifi_set_channel(this->set_channel, WIFI_SECOND_CHAN_NONE);
@@ -2904,13 +3017,17 @@ void WiFiScan::main(uint32_t currentTime)
   else if (currentScanMode == WIFI_PACKET_MONITOR)
   {
     #ifdef HAS_SCREEN
-      packetMonitorMain(currentTime);
+      #ifndef MARAUDER_MINI
+        packetMonitorMain(currentTime);
+      #endif
     #endif
   }
   else if (currentScanMode == WIFI_SCAN_EAPOL)
   {
     #ifdef HAS_SCREEN
-      eapolMonitorMain(currentTime);
+      #ifndef MARAUDER_MINI
+        eapolMonitorMain(currentTime);
+      #endif
     #endif
   }
   else if (currentScanMode == WIFI_SCAN_ACTIVE_EAPOL)

@@ -926,7 +926,10 @@ void MenuFunctions::main(uint32_t currentTime)
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
-          (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
+          (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_EAPOL) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_ACTIVE_EAPOL) ||
+          (wifi_scan_obj.currentScanMode == WIFI_PACKET_MONITOR))
       {
         //Serial.println("Stopping scan...");
         wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
@@ -1016,17 +1019,31 @@ void MenuFunctions::main(uint32_t currentTime)
 
   #ifdef MARAUDER_MINI
     if (u_btn.justPressed()){
-      if (current_menu->selected > 0) {
-        current_menu->selected--;
-        this->buttonSelected(current_menu->selected);
-        this->buttonNotSelected(current_menu->selected + 1);
+      if (wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) {
+        if (current_menu->selected > 0) {
+          current_menu->selected--;
+          this->buttonSelected(current_menu->selected);
+          this->buttonNotSelected(current_menu->selected + 1);
+        }
+      }
+      else if ((wifi_scan_obj.currentScanMode == WIFI_PACKET_MONITOR) ||
+               (wifi_scan_obj.currentScanMode == WIFI_SCAN_EAPOL)) {
+        if (wifi_scan_obj.set_channel < 14)
+          wifi_scan_obj.changeChannel(wifi_scan_obj.set_channel + 1);
       }
     }
     if (d_btn.justPressed()){
-      if (current_menu->selected < current_menu->list->size() - 1) {
-        current_menu->selected++;
-        this->buttonSelected(current_menu->selected);
-        this->buttonNotSelected(current_menu->selected - 1);
+      if (wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) {
+        if (current_menu->selected < current_menu->list->size() - 1) {
+          current_menu->selected++;
+          this->buttonSelected(current_menu->selected);
+          this->buttonNotSelected(current_menu->selected - 1);
+        }
+      }
+      else if ((wifi_scan_obj.currentScanMode == WIFI_PACKET_MONITOR) ||
+               (wifi_scan_obj.currentScanMode == WIFI_SCAN_EAPOL)) {
+        if (wifi_scan_obj.set_channel > 1)
+          wifi_scan_obj.changeChannel(wifi_scan_obj.set_channel - 1);
       }
     }
     if(c_btn_press){
@@ -1510,12 +1527,25 @@ void MenuFunctions::RunSetup()
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_DEAUTH, TFT_RED);
   });
-  addNodes(&wifiSnifferMenu, text_table1[45], TFT_BLUE, NULL, PACKET_MONITOR, [this]() {
-    wifi_scan_obj.StartScan(WIFI_PACKET_MONITOR, TFT_BLUE);
-  });
-  addNodes(&wifiSnifferMenu, text_table1[46], TFT_VIOLET, NULL, EAPOL, [this]() {
-    wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);
-  });
+  #ifndef MARAUDER_MINI
+    addNodes(&wifiSnifferMenu, text_table1[46], TFT_VIOLET, NULL, EAPOL, [this]() {
+      wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);
+    });
+    addNodes(&wifiSnifferMenu, text_table1[45], TFT_BLUE, NULL, PACKET_MONITOR, [this]() {
+      wifi_scan_obj.StartScan(WIFI_PACKET_MONITOR, TFT_BLUE);
+    });
+  #else
+    addNodes(&wifiSnifferMenu, text_table1[46], TFT_VIOLET, NULL, EAPOL, [this]() {
+      display_obj.clearScreen();
+      this->drawStatusBar();
+      wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);
+    });
+    addNodes(&wifiSnifferMenu, text_table1[45], TFT_BLUE, NULL, PACKET_MONITOR, [this]() {
+      display_obj.clearScreen();
+      this->drawStatusBar();
+      wifi_scan_obj.StartScan(WIFI_PACKET_MONITOR, TFT_BLUE);
+    });
+  #endif
   addNodes(&wifiSnifferMenu, text_table1[47], TFT_RED, NULL, PWNAGOTCHI, [this]() {
     display_obj.clearScreen();
     this->drawStatusBar();

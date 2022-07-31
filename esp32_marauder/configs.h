@@ -4,8 +4,8 @@
 
   #define POLISH_POTATO
   
-  #define MARAUDER_MINI
-  //#define MARAUDER_V4
+  //#define MARAUDER_MINI
+  #define MARAUDER_V4
   //#define MARAUDER_V6
   //#define MARAUDER_KIT
   //#define GENERIC_ESP32

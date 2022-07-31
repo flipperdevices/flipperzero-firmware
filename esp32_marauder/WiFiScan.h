@@ -297,6 +297,7 @@ class WiFiScan
     String getApMAC();
     String freeRAM();
     void changeChannel();
+    void changeChannel(int chan);
     void RunInfo();
     void RunShutdownWiFi();
     void RunShutdownBLE();
