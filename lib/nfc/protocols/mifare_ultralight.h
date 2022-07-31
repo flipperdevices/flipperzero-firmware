@@ -28,6 +28,13 @@
 
 #define MF_UL_NTAG203_COUNTER_PAGE (41)
 
+typedef uint32_t (*MfUlPwdGenerator)(FuriHalNfcDevData*);
+
+uint32_t pwdgen_default(FuriHalNfcDevData* data);
+uint32_t pwdgen_xiaomi(FuriHalNfcDevData* data);
+uint32_t pwdgen_amiibo(FuriHalNfcDevData* data);
+extern MfUlPwdGenerator pwd_gens[3];
+
 // Important: order matters; some features are based on positioning in this enum
 typedef enum {
     MfUltralightTypeUnknown,
@@ -49,6 +56,13 @@ typedef enum {
     // Keep last for number of types calculation
     MfUltralightTypeNum,
 } MfUltralightType;
+
+typedef enum {
+    MfUltralightAuthLimitUnknown,
+    MfUltralightAuthLimitNotSupported,
+    MfUltralightAuthLimitConfigured,
+    MfUltralightAuthLimitNotConfigured,
+} MfUltralightAuthLimit;
 
 typedef enum {
     MfUltralightSupportNone = 0,
@@ -104,6 +118,8 @@ typedef struct {
     uint8_t signature[32];
     uint32_t counter[3];
     uint8_t tearing[3];
+    bool has_auth;
+    bool auth_readable;
     uint16_t curr_authlim;
     uint16_t data_size;
     uint8_t data[MF_UL_MAX_DUMP_SIZE];
@@ -189,7 +205,6 @@ bool mf_ultralight_read_pages_direct(
     uint8_t* data);
 
 bool mf_ultralight_read_pages(
-    FuriHalNfcDevData* info_data,
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
     MfUltralightData* data);
@@ -205,8 +220,11 @@ bool mf_ultralight_read_counters(FuriHalNfcTxRxContext* tx_rx, MfUltralightData*
 
 bool mf_ultralight_read_tearing_flags(FuriHalNfcTxRxContext* tx_rx, MfUltralightData* data);
 
+bool mf_ultralight_authenticate(FuriHalNfcTxRxContext* tx_rx, uint32_t key, uint16_t* pack);
+
+MfUltralightConfigPages* mf_ultralight_get_config_pages(MfUltralightData* data);
+
 bool mf_ul_read_card(
-    FuriHalNfcDevData* info_data,
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
     MfUltralightData* data);
@@ -222,3 +240,8 @@ bool mf_ul_prepare_emulation_response(
     uint16_t* buff_tx_len,
     uint32_t* data_type,
     void* context);
+
+int16_t mf_ultralight_get_authlim(
+    FuriHalNfcTxRxContext* tx_rx,
+    MfUltralightReader* reader,
+    MfUltralightData* data);
