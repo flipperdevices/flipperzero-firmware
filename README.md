@@ -8,7 +8,6 @@
 
 - TOFIX - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
-- Added [badusb: show script errors on screen #1506 (By CrmFr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1506)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -111,7 +110,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [nfc: make dict attack more interactive #1462 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1462)
 - [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484)
 - [FIX: Fixed inconsistencies between texts #1496 (By zigad)](https://github.com/flipperdevices/flipperzero-firmware/pull/1496)
-- [badusb: show script errors on screen #1506 (By CrmFr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1506)
 
 </td><td>
 
