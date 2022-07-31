@@ -24,14 +24,20 @@ static const MfClassicAuthContext troyka_keys[] = {
 
 bool troyka_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
-    UNUSED(nfc_worker);
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
 
     MfClassicAuthContext auth_ctx = {
         .key_a = MF_CLASSIC_NO_KEY,
         .key_b = MF_CLASSIC_NO_KEY,
         .sector = 8,
     };
-    return mf_classic_auth_attempt(tx_rx, &auth_ctx, 0xa73f5dc1d333);
+
+    if(mf_classic_auth_attempt(tx_rx, &auth_ctx, 0xa73f5dc1d333) &&
+       mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak) ==
+           MfClassicType1k) {
+        return true;
+    }
+    return false;
 }
 
 bool troyka_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {

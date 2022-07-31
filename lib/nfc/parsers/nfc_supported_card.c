@@ -3,6 +3,7 @@
 #include "plantain_parser.h"
 #include "troyka_parser.h"
 #include "plantain_4k_parser.h"
+#include "troyka_4k_parser.h"
 #include "two_cities.h"
 #include "united.h"
 
@@ -27,6 +28,13 @@ NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
             .verify = plantain_4k_parser_verify,
             .read = plantain_4k_parser_read,
             .parse = plantain_4k_parser_parse,
+        },
+    [NfcSupportedCardTypeTroyka4K] =
+        {
+            .protocol = NfcDeviceProtocolMifareClassic,
+            .verify = troyka_4k_parser_verify,
+            .read = troyka_4k_parser_read,
+            .parse = troyka_4k_parser_parse,
         },
     [NfcSupportedCardTypeTwoCities] =
         {
