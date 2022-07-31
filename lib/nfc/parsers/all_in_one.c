@@ -1,48 +1,49 @@
 #include "nfc_supported_card.h"
-#include "united.h"
+#include "all_in_one.h"
 
 #include <gui/modules/widget.h>
 #include <nfc_worker_i.h>
 
 #include "furi_hal.h"
 
-#define UNITED_LAYOUT_UNKNOWN 0
-#define UNITED_LAYOUT_A 1
-#define UNITED_LAYOUT_D 2
-#define UNITED_LAYOUT_E2 3
-#define UNITED_LAYOUT_E3 4
-#define UNITED_LAYOUT_E5 5
-#define UNITED_LAYOUT_2 6
+#define ALL_IN_ONE_LAYOUT_UNKNOWN 0
+#define ALL_IN_ONE_LAYOUT_A 1
+#define ALL_IN_ONE_LAYOUT_D 2
+#define ALL_IN_ONE_LAYOUT_E2 3
+#define ALL_IN_ONE_LAYOUT_E3 4
+#define ALL_IN_ONE_LAYOUT_E5 5
+#define ALL_IN_ONE_LAYOUT_2 6
 
-uint8_t united_get_layout(NfcWorker* nfc_worker) {
+uint8_t all_in_one_get_layout(NfcWorker* nfc_worker) {
     // I absolutely hate what's about to happen here.
 
     // Switch on the second half of the third byte of page 5
-    FURI_LOG_I("united", "Layout byte: %02x", nfc_worker->dev_data->mf_ul_data.data[(4 * 5) + 2]);
     FURI_LOG_I(
-        "united",
+        "all_in_one", "Layout byte: %02x", nfc_worker->dev_data->mf_ul_data.data[(4 * 5) + 2]);
+    FURI_LOG_I(
+        "all_in_one",
         "Layout half-byte: %02x",
         nfc_worker->dev_data->mf_ul_data.data[(4 * 5) + 3] & 0x0F);
     switch(nfc_worker->dev_data->mf_ul_data.data[(4 * 5) + 2] & 0x0F) {
     // If it is A, the layout type is a type A layout
     case 0x0A:
-        return UNITED_LAYOUT_A;
+        return ALL_IN_ONE_LAYOUT_A;
     case 0x0D:
-        return UNITED_LAYOUT_D;
+        return ALL_IN_ONE_LAYOUT_D;
     case 0x02:
-        return UNITED_LAYOUT_2;
+        return ALL_IN_ONE_LAYOUT_2;
     default:
         FURI_LOG_I(
-            "united",
+            "all_in_one",
             "Unknown layout type: %d",
             nfc_worker->dev_data->mf_ul_data.data[(4 * 5) + 2] & 0x0F);
-        return UNITED_LAYOUT_UNKNOWN;
+        return ALL_IN_ONE_LAYOUT_UNKNOWN;
     }
 }
 
-bool united_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+bool all_in_one_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     UNUSED(nfc_worker);
-    // If this is a united pass, first 2 bytes of page 4 are 0x45 0xD9
+    // If this is a all_in_one pass, first 2 bytes of page 4 are 0x45 0xD9
     MfUltralightReader reader = {};
     MfUltralightData data = {};
 
@@ -50,32 +51,32 @@ bool united_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
         return false;
     } else {
         if(data.data[4 * 4] == 0x45 && data.data[4 * 4 + 1] == 0xD9) {
-            FURI_LOG_I("united", "Pass verified");
+            FURI_LOG_I("all_in_one", "Pass verified");
             return true;
         }
     }
     return false;
 }
 
-bool united_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+bool all_in_one_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     MfUltralightReader reader = {};
     MfUltralightData data = {};
     if(!mf_ul_read_card(tx_rx, &reader, &data)) {
         return false;
     } else {
         memcpy(&nfc_worker->dev_data->mf_ul_data, &data, sizeof(data));
-        FURI_LOG_I("united", "Card read");
+        FURI_LOG_I("all_in_one", "Card read");
         return true;
     }
 }
 
-bool united_parser_parse(NfcWorker* nfc_worker) {
+bool all_in_one_parser_parse(NfcWorker* nfc_worker) {
     // If the layout is a then the ride count is stored in the first byte of page 8
     uint8_t ride_count = 0;
     uint32_t serial = 0;
-    if(united_get_layout(nfc_worker) == UNITED_LAYOUT_A) {
+    if(all_in_one_get_layout(nfc_worker) == ALL_IN_ONE_LAYOUT_A) {
         ride_count = nfc_worker->dev_data->mf_ul_data.data[4 * 8];
-    } else if(united_get_layout(nfc_worker) == UNITED_LAYOUT_D) {
+    } else if(all_in_one_get_layout(nfc_worker) == ALL_IN_ONE_LAYOUT_D) {
         // If the layout is D, the ride count is stored in the second byte of page 9
         ride_count = nfc_worker->dev_data->mf_ul_data.data[4 * 9 + 1];
         // I hate this with a burning passion.
@@ -89,7 +90,7 @@ bool united_parser_parse(NfcWorker* nfc_worker) {
                  nfc_worker->dev_data->mf_ul_data.data[4 * 4 + 5] << 4 |
                  (nfc_worker->dev_data->mf_ul_data.data[4 * 4 + 6] >> 4);
     } else {
-        FURI_LOG_I("united", "Unknown layout: %d", united_get_layout(nfc_worker));
+        FURI_LOG_I("all_in_one", "Unknown layout: %d", all_in_one_get_layout(nfc_worker));
         ride_count = 137;
     }
 
@@ -107,7 +108,7 @@ bool united_parser_parse(NfcWorker* nfc_worker) {
     // Format string for rides count
     string_printf(
         nfc_worker->dev_data->parsed_data,
-        "United Transport card\nNumber: %u\nRides left: %u",
+        "All-In-One Transport card\nNumber: %u\nRides left: %u",
         serial,
         ride_count);
     return true;

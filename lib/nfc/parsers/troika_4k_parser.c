@@ -3,7 +3,7 @@
 #include <gui/modules/widget.h>
 #include <nfc_worker_i.h>
 
-static const MfClassicAuthContext troyka_4k_keys[] = {
+static const MfClassicAuthContext troika_4k_keys[] = {
     {.sector = 0, .key_a = 0xa0a1a2a3a4a5, .key_b = 0xfbf225dc5d58},
     {.sector = 1, .key_a = 0xa82607b01c0d, .key_b = 0x2910989b6880},
     {.sector = 2, .key_a = 0x2aa05ed1856f, .key_b = 0xeaac88e5dc99},
@@ -46,7 +46,7 @@ static const MfClassicAuthContext troyka_4k_keys[] = {
     {.sector = 39, .key_a = 0xbb52f8cce07f, .key_b = 0x6b6119752c70},
 };
 
-bool troyka_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+bool troika_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
 
@@ -65,21 +65,21 @@ bool troyka_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx
     return false;
 }
 
-bool troyka_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+bool troika_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
 
     MfClassicReader reader = {};
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     mf_classic_get_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak, &reader);
-    for(size_t i = 0; i < COUNT_OF(troyka_4k_keys); i++) {
+    for(size_t i = 0; i < COUNT_OF(troika_4k_keys); i++) {
         mf_classic_reader_add_sector(
-            &reader, troyka_4k_keys[i].sector, troyka_4k_keys[i].key_a, troyka_4k_keys[i].key_b);
+            &reader, troika_4k_keys[i].sector, troika_4k_keys[i].key_a, troika_4k_keys[i].key_b);
     }
 
     return mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 40;
 }
 
-bool troyka_4k_parser_parse(NfcWorker* nfc_worker) {
+bool troika_4k_parser_parse(NfcWorker* nfc_worker) {
     MfClassicData* data = &nfc_worker->dev_data->mf_classic_data;
     uint8_t* temp_ptr = &data->block[8 * 4 + 1].value[5];
     uint16_t balance = ((temp_ptr[0] << 8) | temp_ptr[1]) / 25;
@@ -93,7 +93,7 @@ bool troyka_4k_parser_parse(NfcWorker* nfc_worker) {
 
     string_printf(
         nfc_worker->dev_data->parsed_data,
-        "Troyka Transport card (4K)\nNumber: %ld\nBalance: %d rub",
+        "Troika Transport card (4K)\nNumber: %ld\nBalance: %d rub",
         number,
         balance);
 

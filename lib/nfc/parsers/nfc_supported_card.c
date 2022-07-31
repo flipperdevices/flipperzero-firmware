@@ -1,11 +1,11 @@
 #include "nfc_supported_card.h"
 
 #include "plantain_parser.h"
-#include "troyka_parser.h"
+#include "troika_parser.h"
 #include "plantain_4k_parser.h"
-#include "troyka_4k_parser.h"
+#include "troika_4k_parser.h"
 #include "two_cities.h"
-#include "united.h"
+#include "all_in_one.h"
 
 NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
     [NfcSupportedCardTypePlantain] =
@@ -15,12 +15,12 @@ NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
             .read = plantain_parser_read,
             .parse = plantain_parser_parse,
         },
-    [NfcSupportedCardTypeTroyka] =
+    [NfcSupportedCardTypeTroika] =
         {
             .protocol = NfcDeviceProtocolMifareClassic,
-            .verify = troyka_parser_verify,
-            .read = troyka_parser_read,
-            .parse = troyka_parser_parse,
+            .verify = troika_parser_verify,
+            .read = troika_parser_read,
+            .parse = troika_parser_parse,
         },
     [NfcSupportedCardTypePlantain4K] =
         {
@@ -29,12 +29,12 @@ NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
             .read = plantain_4k_parser_read,
             .parse = plantain_4k_parser_parse,
         },
-    [NfcSupportedCardTypeTroyka4K] =
+    [NfcSupportedCardTypeTroika4K] =
         {
             .protocol = NfcDeviceProtocolMifareClassic,
-            .verify = troyka_4k_parser_verify,
-            .read = troyka_4k_parser_read,
-            .parse = troyka_4k_parser_parse,
+            .verify = troika_4k_parser_verify,
+            .read = troika_4k_parser_read,
+            .parse = troika_4k_parser_parse,
         },
     [NfcSupportedCardTypeTwoCities] =
         {
@@ -43,11 +43,11 @@ NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
             .read = two_cities_parser_read,
             .parse = two_cities_parser_parse,
         },
-    [NfcSupportedCardTypeUnited] =
+    [NfcSupportedCardTypeAllInOne] =
         {
             .protocol = NfcDeviceProtocolMifareUl,
-            .verify = united_parser_verify,
-            .read = united_parser_read,
-            .parse = united_parser_parse,
+            .verify = all_in_one_parser_verify,
+            .read = all_in_one_parser_read,
+            .parse = all_in_one_parser_parse,
         },
 };
