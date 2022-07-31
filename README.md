@@ -1,6 +1,7 @@
 <h2>
 
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
+### Thank you, [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & [Flipper Devices](https://github.com/flipperdevices/flipperzero-firmware)!
 
 #   - UPDATE USING SD CARD METHOD FOR NEW [`subghz/assets/setting_user`](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) and [`subghz/assets/extend_range.txt`](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/extend_range.txt) FILE.<br>&nbsp;&nbsp;&nbsp;&nbsp;You can now unleash your flipper via iOS app.
 
@@ -162,5 +163,3 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Fixed building for users with space in windows username #1437 (By SzymonLisowiec)](https://github.com/flipperdevices/flipperzero-firmware/pull/1437)
 
 </td></tr></table>
-
-### Thank you, [MuddleBox](https://github.com/MuddledBox/flipperzero-firmware), [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware), [WeTox-Team](https://github.com/wetox-team/flipperzero-firmware) & of course, most of all [Flipper Devices](https://github.com/flipperdevices/flipperzero-firmware)!
