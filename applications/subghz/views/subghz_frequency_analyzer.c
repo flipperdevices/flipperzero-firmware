@@ -189,9 +189,22 @@ bool subghz_frequency_analyzer_input(InputEvent* event, void* context) {
     return true;
 }
 
+uint32_t round_int(uint32_t value, uint8_t n) {
+    // Round value
+    uint8_t on = n;
+    while(n--) {
+        uint8_t i = value % 10;
+        value /= 10;
+        if(i >= 5) value++;
+    }
+    while(on--) value *= 10;
+    return value;
+}
+
 void subghz_frequency_analyzer_pair_callback(void* context, uint32_t frequency, float rssi) {
     furi_assert(context);
     SubGhzFrequencyAnalyzer* instance = context;
+
     if((rssi == 0.f) && (instance->locked)) {
         if(instance->callback) {
             instance->callback(SubGhzCustomEventSceneAnalyzerUnlock, instance->context);
@@ -207,7 +220,8 @@ void subghz_frequency_analyzer_pair_callback(void* context, uint32_t frequency, 
 
     if((rssi != 0.f) && (frequency != 0)) {
         // Threre is some signal
-        FURI_LOG_I(TAG, "rssi = %.2f, frequency = %d", (double)rssi, frequency);
+        FURI_LOG_I(TAG, "rssi = %.2f, frequency = %d Hz", (double)rssi, frequency);
+        frequency = round_int(frequency, 3); // Round 299999990Hz to 300000000Hz
         if(!instance->triggered &&
            ((instance->trigger <= TRIGGER_MIN) || (rssi >= instance->trigger))) {
             // Triggered!
