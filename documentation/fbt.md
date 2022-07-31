@@ -36,8 +36,8 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 - `flash` - flash attached device with OpenOCD over ST-Link
 - `flash_usb`, `flash_usb_full` - build, upload and install update package to device over USB. See details on `updater_package`, `updater_minpackage` 
 - `debug` - build and flash firmware, then attach with gdb with firmware's .elf loaded
-- `debug_updater` - attach gdb with updater's .elf loaded
 - `debug_other` - attach gdb without loading any .elf. Allows to manually add external elf files with `add-symbol-file` in gdb
+- `updater_debug` - attach gdb with updater's .elf loaded
 - `blackmagic` - debug firmware with Blackmagic probe (WiFi dev board)
 - `openocd` - just start OpenOCD
 - `get_blackmagic` - output blackmagic address in gdb remote format. Useful for IDE integration
