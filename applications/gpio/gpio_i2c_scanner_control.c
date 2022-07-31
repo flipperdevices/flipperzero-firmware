@@ -1,5 +1,5 @@
 #include "gpio_i2c_scanner_control.h"
-#include <furi_hal_delay.h>
+#include <furi_hal.h>
 
 
 void gpio_i2c_scanner_run_once(I2CScannerState* i2c_scanner_state) {
