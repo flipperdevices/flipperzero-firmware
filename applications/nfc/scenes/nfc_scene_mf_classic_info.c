@@ -17,8 +17,6 @@ void nfc_scene_mf_classic_info_on_enter(void* context) {
     string_t str_tmp;
     string_init(str_tmp);
 
-    DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
-
     // Setup view
     Widget* widget = nfc->widget;
     widget_add_button_element(
