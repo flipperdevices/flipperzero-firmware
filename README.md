@@ -18,6 +18,7 @@
 - Added [Add a Mifare Classic info screen to parser output #1504 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1504)
 - Added [BadUSB: add SYSRQ keys #1460 (By rck)](https://github.com/flipperdevices/flipperzero-firmware/pull/1460) with small refactor by RogueMaster
 - Added [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431) with small refactor by RogueMaster
+- Added [nfc: make dict attack more interactive #1462 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1462)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -117,7 +118,8 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Add a Mifare Classic info screen to parser output #1504 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1504)
 - [BadUSB: add SYSRQ keys #1460 (By rck)](https://github.com/flipperdevices/flipperzero-firmware/pull/1460)
 - [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
-
+- [nfc: make dict attack more interactive #1462 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1462)
+  
 </td><td>
 
 <details>
