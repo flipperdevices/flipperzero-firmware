@@ -1,8 +1,8 @@
 from SCons.Builder import Builder
 from SCons.Action import Action
-from SCons.Errors import UserError
-
+from SCons.Warnings import warn, WarningOnByDefault
 import SCons
+
 from fbt.appmanifest import (
     FlipperAppType,
     AppManager,
@@ -24,7 +24,7 @@ def LoadApplicationManifests(env):
                 appmgr.load_manifest(app_manifest_file_path, entry.name)
                 env.Append(PY_LINT_SOURCES=[app_manifest_file_path])
             except FlipperManifestException as e:
-                raise UserError(e)
+                warn(WarningOnByDefault, str(e))
 
 
 def PrepareApplicationsBuild(env):
