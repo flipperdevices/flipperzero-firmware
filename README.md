@@ -8,21 +8,7 @@
 
 - TOFIX - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
-- Dolphin Mood: Stays Happy [Thanks to biocage](https://github.com/biocage/flipperzero-firmware)
-- 2048 now has hold center for restart [Thanks to DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/133)
-- Added [Add skylanders (/activision) mifare classic to identification procedure #1497 (By equipter)](https://github.com/flipperdevices/flipperzero-firmware/pull/1497)
-- Added NFC keys for Skylanders
-- Added [DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `HIDDEN "INTAPP_esp8266_deauth"` due to `Req: ESP8266`
-- UPDATED Plugins & Games list to show what has been `HIDDEN`
-- DUCKY_LANG has been extended with HU parameter [Thanks to terzinnorbert](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/135)
-- Added [New frequency analyzer #1501 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501)
-- Added [Add a Mifare Classic info screen to parser output #1504 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1504)
-- Added [BadUSB: add SYSRQ keys #1460 (By rck)](https://github.com/flipperdevices/flipperzero-firmware/pull/1460) with small refactor by RogueMaster
-- Added [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431) with small refactor by RogueMaster
-- Added [nfc: make dict attack more interactive #1462 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1462)
-- Added [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484)
-- Added [FIX: Fixed inconsistencies between texts #1496 (By zigad)](https://github.com/flipperdevices/flipperzero-firmware/pull/1496)
-- Latest OFW Changes: [#1502](https://github.com/flipperdevices/flipperzero-firmware/pull/1502), [#1467](https://github.com/flipperdevices/flipperzero-firmware/pull/1467) & [#1402](https://github.com/flipperdevices/flipperzero-firmware/pull/1402)
+- Added [badusb: show script errors on screen #1506 (By CrmFr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1506)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -125,6 +111,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [nfc: make dict attack more interactive #1462 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1462)
 - [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484)
 - [FIX: Fixed inconsistencies between texts #1496 (By zigad)](https://github.com/flipperdevices/flipperzero-firmware/pull/1496)
+- [badusb: show script errors on screen #1506 (By CrmFr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1506)
 
 </td><td>
 
