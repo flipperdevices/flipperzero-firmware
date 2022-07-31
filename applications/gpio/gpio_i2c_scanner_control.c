@@ -7,7 +7,7 @@ void gpio_i2c_scanner_run_once(I2CScannerState* i2c_scanner_state) {
     i2c_scanner_state->items = 0;
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
 
-    uint32_t response_timeout_ticks = furi_hal_ms_to_ticks(5.f);
+    uint32_t response_timeout_ticks = furi_ms_to_ticks(5.f);
 
     //Addresses 0 to 7 are reserved and won't be scanned
     for(int i = FIRST_NON_RESERVED_I2C_ADDRESS; i<=HIGHEST_I2C_ADDRESS; i++) {
