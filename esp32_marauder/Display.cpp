@@ -299,10 +299,10 @@ void Display::displayBuffer(bool do_clear)
         screen_buffer->add(display_buffer->shift());
 
         for (int i = 0; i < this->screen_buffer->size(); i++) {
-          tft.setCursor(xPos, (i * 12) + (SCREEN_HEIGHT / 3));
+          tft.setCursor(xPos, (i * 12) + (SCREEN_HEIGHT / 6));
           for (int x = 0; x < TFT_WIDTH / CHAR_WIDTH; x++)
             tft.print(" ");
-          tft.setCursor(xPos, (i * 12) + (SCREEN_HEIGHT / 3));
+          tft.setCursor(xPos, (i * 12) + (SCREEN_HEIGHT / 6));
           tft.setTextColor(TFT_GREEN, TFT_BLACK);
           tft.print(this->screen_buffer->get(i));
         }

@@ -203,7 +203,7 @@
 
     #define SCREEN_BUFFER
 
-    #define MAX_SCREEN_BUFFER 8
+    #define MAX_SCREEN_BUFFER 9
 
     #define BANNER_TEXT_SIZE 1
 
