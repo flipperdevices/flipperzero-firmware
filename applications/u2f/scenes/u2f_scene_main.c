@@ -100,7 +100,8 @@ void u2f_scene_main_on_enter(void* context) {
     app->u2f_ready = u2f_init(app->u2f_instance);
     if(app->u2f_ready == true) {
         u2f_set_event_callback(app->u2f_instance, u2f_scene_main_event_callback, app);
-        app->u2f_hid = u2f_hid_start(app->u2f_instance);
+        //        app->u2f_hid = u2f_hid_start(app->u2f_instance);
+        app->u2f_nfc = u2f_nfc_start(app->u2f_instance);
         u2f_view_set_ok_callback(app->u2f_view, u2f_scene_main_ok_callback, app);
     } else {
         u2f_free(app->u2f_instance);
@@ -116,7 +117,8 @@ void u2f_scene_main_on_exit(void* context) {
     furi_timer_stop(app->timer);
     furi_timer_free(app->timer);
     if(app->u2f_ready == true) {
-        u2f_hid_stop(app->u2f_hid);
+        //        u2f_hid_stop(app->u2f_hid);
+        u2f_nfc_stop(app->u2f_nfc);
         u2f_free(app->u2f_instance);
     }
 }

@@ -14,6 +14,7 @@
 #include "views/u2f_view.h"
 #include "u2f_hid.h"
 #include "u2f.h"
+#include "u2f_nfc.h"
 
 typedef enum {
     U2fAppErrorNoFiles,
@@ -52,7 +53,8 @@ struct U2fApp {
     NotificationApp* notifications;
     Widget* widget;
     FuriTimer* timer;
-    U2fHid* u2f_hid;
+//    U2fHid* u2f_hid;
+    U2fNfc* u2f_nfc;
     U2fView* u2f_view;
     U2fData* u2f_instance;
     GpioCustomEvent event_cur;
