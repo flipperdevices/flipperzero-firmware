@@ -1,18 +1,31 @@
 #include "u2f_nfc.h"
-#include "nfc_worker.h"
+#include "furi_hal.h"
 
 #define TAG "U2F_NFC"
 
-#define U2F_SELECT_CMD (0xA4)
+// TODO: determine actual max payload length
+#define U2F_NFC_MAX_PAYLOAD_LEN (7680)
+
+#define U2F_NFC_MAX_PAYLOAD_PER_PACKET (256)
 
 typedef enum {
     WorkerEvtReserved = (1 << 0),
     WorkerEvtStop = (1 << 1),
 } WorkerEvtFlags;
 
+typedef enum {
+    StateUnselected,
+    StateSelected,
+    StateSending,
+} U2fNfcState;
+
 struct U2fNfc {
     FuriThread* thread;
     U2fData* u2f_instance;
+    U2fNfcState state;
+    uint8_t payload[U2F_NFC_MAX_PAYLOAD_LEN];
+    uint16_t payload_len;
+    uint16_t payload_cursor;
 };
 
 static bool u2f_nfc_callback(
@@ -26,7 +39,7 @@ static bool u2f_nfc_callback(
     *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
     buff_tx[0] = 0x02;
     *buff_tx_len = 0;
-    FURI_LOG_D(TAG, "Something detected");
+    FURI_LOG_D(TAG, "Something detected of length %d", buff_rx_len);
     if(buff_rx_len >= 24) {
         uint8_t pcb = buff_rx[0];
         uint8_t cla = buff_rx[1];
@@ -46,7 +59,7 @@ static bool u2f_nfc_callback(
             FURI_LOG_D(TAG, "cla 0x%02x not supported", cla);
             return true;
         }
-        if(ins == 0xa4) {
+        if(u2f_nfc->state == StateUnselected && ins == 0xa4) {
             if(memcmp(&buff_rx[3], "\x04\x00\x08\xa0\x00\x00\x06\x47\x2f\x00\x01", 11) != 0) {
                 buff_tx[1] = 0x6A;
                 buff_tx[2] = 0x82;
@@ -57,11 +70,39 @@ static bool u2f_nfc_callback(
             memcpy(buff_tx, "\x02U2F_V2\x90\x00", 9);
             FURI_LOG_D(TAG, "Card selected");
             *buff_tx_len = 72;
-        } else if(ins != 0 && (ins & ~0x03) == 0) {
+            u2f_nfc->state = StateSelected;
+        } else if(u2f_nfc->state == StateSelected && ins != 0 && (ins & ~0x03) == 0) {
             buff_tx[0] = 0x02;
-            buff_tx[1] = 0x69;
-            buff_tx[2] = 0x00;
-            *buff_tx_len = 24;
+            uint16_t max_resp_len = U2F_NFC_MAX_PAYLOAD_PER_PACKET;
+//            uint16_t max_resp_len = buff_rx[6 + buff_rx[5]];
+//            if(max_resp_len == 0) {
+//                max_resp_len = U2F_NFC_MAX_PAYLOAD_PER_PACKET;
+//            }
+            FURI_LOG_D(TAG, "Expected response size: %03x or %03x or %03x", buff_rx[6 + buff_rx[5]], buff_rx[5 + buff_rx[5]], buff_rx[7 + buff_rx[5]]);
+            u2f_nfc->payload_len = (buff_rx_len / 8) - 1;
+            memcpy(u2f_nfc->payload, &buff_rx[1], u2f_nfc->payload_len);
+            u2f_confirm_user_present(
+                u2f_nfc
+                    ->u2f_instance); // TODO: Check on discord whether this is normal behaviour for NFC
+            u2f_nfc->payload_len =
+                u2f_msg_parse(u2f_nfc->u2f_instance, u2f_nfc->payload, u2f_nfc->payload_len);
+
+            if(u2f_nfc->payload_len > max_resp_len) {
+                memcpy(&buff_tx[1], u2f_nfc->payload, max_resp_len);
+                buff_tx[1 + max_resp_len] = 0x61;
+                uint16_t remaining_len = u2f_nfc->payload_len - max_resp_len;
+                if(remaining_len >= U2F_NFC_MAX_PAYLOAD_PER_PACKET) {
+                    buff_tx[2 + max_resp_len] = 0x00;
+                } else {
+                    buff_tx[2 + max_resp_len] = remaining_len - 2;  // Do not include the 0x9000 at the end in this count
+                }
+                *buff_tx_len = 8 + 8 * max_resp_len + 16;
+                u2f_nfc->payload_cursor = max_resp_len;
+                u2f_nfc->state = StateSending;
+            } else {
+                memcpy(&buff_tx[1], u2f_nfc->payload, u2f_nfc->payload_len);
+                *buff_tx_len = 8 + 8 * u2f_nfc->payload_len;
+            }
             FURI_LOG_D(
                 TAG,
                 "Request sent of p1: %02x, p2: %02x, len: %02x",
@@ -69,6 +110,31 @@ static bool u2f_nfc_callback(
                 buff_rx[4],
                 buff_rx[5]);
             return true;
+        } else if(u2f_nfc->state == StateSending && ins == 0xC0) {
+            buff_tx[0] = 0x02;
+            uint16_t max_resp_len = buff_rx[6 + buff_rx[5]];
+            if(max_resp_len == 0) {
+                max_resp_len = U2F_NFC_MAX_PAYLOAD_PER_PACKET;
+            }
+
+            uint16_t remaining_len = u2f_nfc->payload_len - u2f_nfc->payload_cursor;
+
+            if(remaining_len > max_resp_len) {
+                memcpy(&buff_tx[1], &u2f_nfc->payload[u2f_nfc->payload_cursor], max_resp_len);
+                remaining_len -= max_resp_len;
+                if(remaining_len >= U2F_NFC_MAX_PAYLOAD_PER_PACKET) {
+                    buff_tx[2 + max_resp_len] = 0x00;
+                } else {
+                    buff_tx[2 + max_resp_len] = remaining_len - 2;  // Do not include the 0x9000 at the end in this count
+                }
+                *buff_tx_len = 8 + 8 * max_resp_len + 16;
+                u2f_nfc->payload_cursor += max_resp_len;
+                u2f_nfc->state = StateSending;
+            } else {
+                memcpy(&buff_tx[1], &u2f_nfc->payload[u2f_nfc->payload_cursor], remaining_len);
+                *buff_tx_len = 8 + 8 * remaining_len;
+                u2f_nfc->state = StateSelected;
+            }
         } else {
             buff_tx[1] = 0x69;
             buff_tx[2] = 0x00;
