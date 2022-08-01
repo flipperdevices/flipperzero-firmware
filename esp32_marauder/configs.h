@@ -11,7 +11,7 @@
   //#define GENERIC_ESP32
   #define MARAUDER_FLIPPER
 
-  #define MARAUDER_VERSION "v0.9.11"
+  #define MARAUDER_VERSION "v0.9.12"
 
   //// BUTTON DEFINITIONS
   #ifdef MARAUDER_MINI
@@ -351,7 +351,7 @@
   #endif
 
   #ifdef MARAUDER_FLIPPER
-    #define SD_CS -1
+    #define SD_CS 10
   #endif
   //// END SD DEFINITIONS
 

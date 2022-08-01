@@ -107,6 +107,7 @@ void CommandLine::runCommand(String input) {
   if (cmd_args.get(0) == HELP_CMD) {
     Serial.println(HELP_HEAD);
     Serial.println(HELP_CH_CMD);
+    Serial.println(HELP_SETTINGS_CMD);
     Serial.println(HELP_CLEARAP_CMD_A);
     Serial.println(HELP_CLEARAP_CMD_B);
     Serial.println(HELP_REBOOT_CMD);
@@ -187,6 +188,14 @@ void CommandLine::runCommand(String input) {
 
     if (ss_sw != -1)
       wifi_scan_obj.RunClearSSIDs();
+  }
+
+  else if (cmd_args.get(0) == SETTINGS_CMD) {
+    int ss_sw = this->argSearch(&cmd_args, "-s"); // Set setting
+
+    if (ss_sw == -1) {
+      settings_obj.printJsonSettings(settings_obj.getSettingsString());
+    }
   }
 
   else if (cmd_args.get(0) == REBOOT_CMD) {
