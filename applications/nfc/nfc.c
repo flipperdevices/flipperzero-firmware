@@ -24,8 +24,8 @@ void nfc_rpc_exit_callback(Nfc* nfc) {
         nfc_device_save_shadow(nfc->dev, nfc->dev->dev_name);
     }
     if(nfc->rpc_ctx) {
-        rpc_system_app_send_exited(nfc->rpc_ctx);
         rpc_system_app_set_callback(nfc->rpc_ctx, NULL, NULL);
+        rpc_system_app_send_exited(nfc->rpc_ctx);
         nfc->rpc_ctx = NULL;
     }
 }
