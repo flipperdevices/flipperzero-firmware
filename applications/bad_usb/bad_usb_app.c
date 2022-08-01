@@ -27,6 +27,7 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
     BadUsbApp* app = malloc(sizeof(BadUsbApp));
 
     string_init(app->file_path);
+    string_init(app->keyboard_layout);
 
     if(arg != NULL) {
         string_set_str(app->file_path, arg);
@@ -54,6 +55,10 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
     view_dispatcher_add_view(
         app->view_dispatcher, BadUsbAppViewError, widget_get_view(app->widget));
 
+    app->submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, BadUsbAppViewConfig, submenu_get_view(app->submenu));
+
     app->bad_usb_view = bad_usb_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, BadUsbAppViewWork, bad_usb_get_view(app->bad_usb_view));
@@ -67,7 +72,7 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
         if(!string_empty_p(app->file_path)) {
             scene_manager_next_scene(app->scene_manager, BadUsbSceneWork);
         } else {
-            string_set_str(app->file_path, BAD_USB_APP_PATH_FOLDER);
+            string_set_str(app->file_path, BAD_USB_APP_PATH_SCRIPT_FOLDER);
             scene_manager_next_scene(app->scene_manager, BadUsbSceneFileSelect);
         }
     }
@@ -87,6 +92,10 @@ void bad_usb_app_free(BadUsbApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewError);
     widget_free(app->widget);
 
+    // Submenu
+    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewConfig);
+    submenu_free(app->submenu);
+
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
@@ -97,6 +106,7 @@ void bad_usb_app_free(BadUsbApp* app) {
     furi_record_close(RECORD_DIALOGS);
 
     string_clear(app->file_path);
+    string_clear(app->keyboard_layout);
 
     free(app);
 }

@@ -10,7 +10,7 @@ static bool bad_usb_file_select(BadUsbApp* bad_usb) {
         bad_usb->dialogs,
         bad_usb->file_path,
         bad_usb->file_path,
-        BAD_USB_APP_EXTENSION,
+        BAD_USB_APP_SCRIPT_EXTENSION,
         true,
         &I_badusb_10px,
         true);
