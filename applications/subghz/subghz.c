@@ -35,13 +35,11 @@ void subghz_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(subghz->scene_manager);
 }
 
-static bool subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) {
+static void subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
 
-    if(!subghz->rpc_ctx) {
-        return false;
-    }
+    furi_assert(subghz->rpc_ctx);
 
     bool result = false;
 
@@ -63,7 +61,7 @@ static bool subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) 
         }
         result = true;
     } else if(event == RpcAppEventLoadFile) {
-        const char* arg = rpc_system_app_get_filename(subghz->rpc_ctx);
+        const char* arg = rpc_system_app_get_data(subghz->rpc_ctx);
         if(arg) {
             if(subghz_key_load(subghz, arg, false)) {
                 string_set_str(subghz->file_path, arg);
@@ -86,7 +84,7 @@ static bool subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) 
         }
     }
 
-    return result;
+    rpc_system_app_confirm(subghz->rpc_ctx, event, result);
 }
 
 SubGhz* subghz_alloc() {

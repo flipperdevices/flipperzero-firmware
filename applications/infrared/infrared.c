@@ -36,16 +36,13 @@ static void infrared_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(infrared->scene_manager);
 }
 
-static bool infrared_rpc_command_callback(RpcAppSystemEvent event, void* context) {
+static void infrared_rpc_command_callback(RpcAppSystemEvent event, void* context) {
     furi_assert(context);
     Infrared* infrared = context;
-
-    if(!infrared->rpc_ctx) {
-        return false;
-    }
+    furi_assert(infrared->rpc_ctx);
 
     bool result = false;
-    const char* arg = rpc_system_app_get_filename(infrared->rpc_ctx);
+    const char* arg = rpc_system_app_get_data(infrared->rpc_ctx);
 
     if(event == RpcAppEventSessionClose) {
         rpc_system_app_set_callback(infrared->rpc_ctx, NULL, NULL);
@@ -81,7 +78,7 @@ static bool infrared_rpc_command_callback(RpcAppSystemEvent event, void* context
         result = true;
     }
 
-    return result;
+    rpc_system_app_confirm(infrared->rpc_ctx, event, result);
 }
 
 static void infrared_find_vacant_remote_name(string_t name, const char* path) {
