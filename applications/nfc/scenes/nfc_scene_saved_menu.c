@@ -28,8 +28,14 @@ void nfc_scene_saved_menu_on_enter(void* context) {
             SubmenuIndexEmulate,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
-        submenu_add_item(
-            submenu, "Edit UID", SubmenuIndexEditUid, nfc_scene_saved_menu_submenu_callback, nfc);
+        if(nfc->dev->dev_data.protocol == NfcDeviceProtocolUnknown) {
+            submenu_add_item(
+                submenu,
+                "Edit UID",
+                SubmenuIndexEditUid,
+                nfc_scene_saved_menu_submenu_callback,
+                nfc);
+        }
     } else if(
         nfc->dev->format == NfcDeviceSaveFormatMifareUl ||
         nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
