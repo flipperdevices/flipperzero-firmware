@@ -49,6 +49,7 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
     - Check out `--extra-ext-apps` for force adding extra apps to external build 
     - `firmware_snake_game_list`, etc - generate source + assembler listing for app's .elf
 - `flash`, `firmware_flash` - flash current version to attached device with OpenOCD over ST-Link
+- `jflash` - flash current version to attached device with JFlash using J-Link probe. JFlash executable must be on your $PATH
 - `flash_blackmagic` - flash current version to attached device with Blackmagic probe
 - `firmware_all`, `updater_all` - build basic set of binaries
 - `firmware_list`, `updater_list` - generate source + assembler listing

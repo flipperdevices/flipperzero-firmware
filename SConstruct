@@ -33,7 +33,7 @@ coreenv["ROOT_DIR"] = Dir(".")
 
 # Create a separate "dist" environment and add construction envs to it
 distenv = coreenv.Clone(
-    tools=["fbt_dist", "openocd", "blackmagic"],
+    tools=["fbt_dist", "openocd", "blackmagic", "jflash"],
     OPENOCD_GDB_PIPE=[
         "|openocd -c 'gdb_port pipe; log_output debug/openocd.log' ${[SINGLEQUOTEFUNC(OPENOCD_OPTS)]}"
     ],
@@ -63,6 +63,7 @@ distenv = coreenv.Clone(
         "-ex",
         "compare-sections",
     ],
+    JFLASHPROJECT="${ROOT_DIR.abspath}/debug/fw.jflash",
     ENV=os.environ,
 )
 
@@ -143,30 +144,14 @@ if GetOption("fullenv") or any(
     )
 
     # Installation over USB & CLI
-    usb_update_package = distenv.UsbInstall(
-        "#build/usbinstall.flag",
-        (
-            distenv["DIST_DEPENDS"],
-            firmware_env["FW_RESOURCES"],
-            selfupdate_dist,
-        ),
+    usb_update_package = distenv.AddUsbFlashTarget(
+        "#build/usbinstall.flag", (firmware_env["FW_RESOURCES"], selfupdate_dist)
     )
-    if distenv["FORCE"]:
-        distenv.AlwaysBuild(usb_update_package)
-    distenv.Depends(usb_update_package, selfupdate_dist)
     distenv.Alias("flash_usb_full", usb_update_package)
 
-    # Minimal flash - only with DFU file
-    usb_minupdate_package = distenv.UsbInstall(
-        "#build/minusbinstall.flag",
-        (
-            distenv["DIST_DEPENDS"],
-            selfupdate_min_dist,
-        ),
+    usb_minupdate_package = distenv.AddUsbFlashTarget(
+        "#build/minusbinstall.flag", (selfupdate_min_dist,)
     )
-    if distenv["FORCE"]:
-        distenv.AlwaysBuild(usb_minupdate_package)
-    distenv.Depends(usb_minupdate_package, selfupdate_min_dist)
     distenv.Alias("flash_usb", usb_minupdate_package)
 
 
@@ -183,8 +168,9 @@ distenv.Alias("copro_dist", copro_dist)
 
 firmware_flash = distenv.AddOpenOCDFlashTarget(firmware_env)
 distenv.Alias("flash", firmware_flash)
-if distenv["FORCE"]:
-    distenv.AlwaysBuild(firmware_flash)
+
+firmware_jflash = distenv.AddJFlashTarget(firmware_env)
+distenv.Alias("jflash", firmware_jflash)
 
 firmware_bm_flash = distenv.PhonyTarget(
     "flash_blackmagic",
