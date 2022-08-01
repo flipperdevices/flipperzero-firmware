@@ -10,7 +10,6 @@
 
 #include <flipper_format/flipper_format_i.h>
 #include <lib/toolbox/path.h>
-
 /*#include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/subghz_file_encoder_worker.h>*/
@@ -104,6 +103,37 @@ static const char* int_to_char(int number) {
         return "0";
     }
 }
+
+/*Decided not to use this
+//check name for special characters and length
+static char* check_special(char* filename)
+{
+	char stripped[11];
+	
+	//grab length of string
+	int len = strlen(filename);
+
+	int c = 0;
+	int i;
+
+	//remove special characters
+	for (i = 0; i < len; i++)
+	{
+		if (isalnum((unsigned)filename[i]))
+		{
+			if(c < 11)
+			{
+				stripped[c] = filename[i];
+				c++;
+			}
+		}
+	}
+	
+	stripped[c] = '\0';
+	
+	return char_to_str(stripped, 10);
+}
+*/
 
 //get filename without path
 static char* extract_filename(const char* name, int len) {
@@ -323,7 +353,7 @@ void unirfremix_cfg_set_check(UniRFRemix* app, string_t file_name) {
 
     flipper_format_free(fff_data_file);
     furi_record_close("storage");
-
+	
     //File Existence Check
     //Check each file definition if not already set to "N/A"
 
@@ -551,7 +581,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     furi_check(furi_mutex_acquire(app->model_mutex, FuriWaitForever) == FuriStatusOk);
 
     //setup different canvas settings
-	if(app->file_result == 1) {
+    if(app->file_result == 1) {
         //if map has no valid filenames defined
         canvas_clear(canvas);
         canvas_set_font(canvas, FontPrimary);
@@ -573,46 +603,57 @@ static void render_callback(Canvas* canvas, void* ctx) {
         //PNGs are located in assets/icons/UniRFRemix before compiliation
 
         //Icons for Labels
-        canvas_draw_icon(canvas, 0, 0, &I_UniRFRemix_LeftAlignedButtons_9x64);
+        //canvas_draw_icon(canvas, 0, 0, &I_UniRFRemix_LeftAlignedButtons_9x64);
+        canvas_draw_icon(canvas, 1, 5, &I_ButtonUp_7x4);
+        canvas_draw_icon(canvas, 1, 15, &I_ButtonDown_7x4);
+        canvas_draw_icon(canvas, 2, 23, &I_ButtonLeft_4x7);
+        canvas_draw_icon(canvas, 2, 33, &I_ButtonRight_4x7);
+        canvas_draw_icon(canvas, 0, 42, &I_Ok_btn_9x9);
+        canvas_draw_icon(canvas, 0, 53, &I_back_10px);
 
         //Labels
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 12, 10, app->up_label);
-        canvas_draw_str(canvas, 12, 20, app->down_label);
-        canvas_draw_str(canvas, 12, 30, app->left_label);
-        canvas_draw_str(canvas, 12, 40, app->right_label);
-        canvas_draw_str(canvas, 12, 50, app->ok_label);
+        canvas_draw_str(canvas, 10, 10, app->up_label);
+        canvas_draw_str(canvas, 10, 20, app->down_label);
+        canvas_draw_str(canvas, 10, 30, app->left_label);
+        canvas_draw_str(canvas, 10, 40, app->right_label);
+        canvas_draw_str(canvas, 10, 50, app->ok_label);
 
         canvas_draw_str_aligned(
             canvas, 11, 62, AlignLeft, AlignBottom, "Hold=Exit. Tap for Repeat:");
 
         //Status text and indicator
-        canvas_draw_str_aligned(canvas, 125, 10, AlignRight, AlignBottom, app->send_status);
+        canvas_draw_str_aligned(canvas, 126, 10, AlignRight, AlignBottom, app->send_status);
 
         switch(app->send_status_c) {
         case 0:
-            canvas_draw_icon(canvas, 110, 15, &I_UniRFRemix_Outline_14x14);
+            canvas_draw_icon(canvas, 113, 15, &I_Pin_cell_13x13);
             break;
         case 1:
-            canvas_draw_icon(canvas, 110, 15, &I_UniRFRemix_Up_14x14);
+            canvas_draw_icon(canvas, 113, 15, &I_Pin_cell_13x13);
+            canvas_draw_icon(canvas, 116, 17, &I_Pin_arrow_up7x9);
             break;
         case 2:
-            canvas_draw_icon(canvas, 110, 15, &I_UniRFRemix_Down_14x14);
+            canvas_draw_icon(canvas, 113, 15, &I_Pin_cell_13x13);
+            canvas_draw_icon(canvas, 116, 17, &I_Pin_arrow_down_7x9);
             break;
         case 3:
-            canvas_draw_icon(canvas, 110, 15, &I_UniRFRemix_Left_14x14);
+            canvas_draw_icon(canvas, 113, 15, &I_Pin_cell_13x13);
+            canvas_draw_icon(canvas, 115, 18, &I_Pin_arrow_right_9x7);
             break;
         case 4:
-            canvas_draw_icon(canvas, 110, 15, &I_UniRFRemix_Right_14x14);
+            canvas_draw_icon(canvas, 113, 15, &I_Pin_cell_13x13);
+            canvas_draw_icon(canvas, 115, 18, &I_Pin_arrow_left_9x7);
             break;
         case 5:
-            canvas_draw_icon(canvas, 110, 15, &I_UniRFRemix_Center_14x14);
+            canvas_draw_icon(canvas, 113, 15, &I_Pin_cell_13x13);
+            canvas_draw_icon(canvas, 116, 18, &I_Pin_star_7x7);
             break;
         }
 
         //Repeat indicator
         //canvas_draw_str_aligned(canvas, 125, 40, AlignRight, AlignBottom, "Repeat:");
-        canvas_draw_icon(canvas, 115, 39, &I_UniRFRemix_Repeat_12x14);
+        //canvas_draw_icon(canvas, 115, 39, &I_UniRFRemix_Repeat_12x14);
         canvas_draw_str_aligned(
             canvas, 125, 62, AlignRight, AlignBottom, int_to_char(app->repeat));
     }
