@@ -19,7 +19,7 @@ fbtenv_check_sourced()
     if [ "$(basename $0)" = "fbt" ]; then
         return 0;
     fi
-    echo "Running this script manually is wrong, please source it";
+    echo "Running this script manualy is wrong, please source it";
     echo "Example:";
     printf "\tsource scripts/toolchain/fbtenv.sh\n";
     return 1;
