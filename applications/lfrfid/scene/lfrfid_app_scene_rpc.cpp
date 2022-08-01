@@ -37,6 +37,16 @@ bool LfRfidAppSceneRpc::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
         LfRfidApp::Event view_event;
         view_event.type = LfRfidApp::EventType::Back;
         app->view_controller.send_event(&view_event);
+        rpc_system_app_confirm(app->rpc_ctx, RpcAppEventAppExit, true);
+    } else if(event->type == LfRfidApp::EventType::RpcSessionClose) {
+        // Detach RPC
+        rpc_system_app_set_callback(app->rpc_ctx, NULL, NULL);
+        app->rpc_ctx = NULL;
+
+        consumed = true;
+        LfRfidApp::Event view_event;
+        view_event.type = LfRfidApp::EventType::Back;
+        app->view_controller.send_event(&view_event);
     } else if(event->type == LfRfidApp::EventType::EmulateStart) {
         auto popup = app->view_controller.get<PopupVM>();
         consumed = true;

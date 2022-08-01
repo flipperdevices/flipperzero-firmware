@@ -56,6 +56,9 @@ bool ibutton_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             rpc_system_app_confirm(ibutton->rpc_ctx, RpcAppEventLoadFile, result);
         } else if(event.event == iButtonCustomEventRpcExit) {
             rpc_system_app_confirm(ibutton->rpc_ctx, RpcAppEventAppExit, true);
+        } else if(event.event == iButtonCustomEventRpcSessionClose) {
+            rpc_system_app_set_callback(ibutton->rpc_ctx, NULL, NULL);
+            ibutton->rpc_ctx = NULL;
             ibutton_notification_message(ibutton, iButtonNotificationMessageBlinkStop);
             view_dispatcher_stop(ibutton->view_dispatcher);
         }

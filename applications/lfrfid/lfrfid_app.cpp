@@ -53,17 +53,13 @@ static void rpc_command_callback(RpcAppSystemEvent rpc_event, void* context) {
     LfRfidApp* app = static_cast<LfRfidApp*>(context);
 
     if(rpc_event == RpcAppEventSessionClose) {
-        rpc_system_app_set_callback(app->rpc_ctx, NULL, NULL);
-        app->rpc_ctx = NULL;
         LfRfidApp::Event event;
-        event.type = LfRfidApp::EventType::Exit;
+        event.type = LfRfidApp::EventType::RpcSessionClose;
         app->view_controller.send_event(&event);
-        rpc_system_app_confirm(app->rpc_ctx, rpc_event, true);
     } else if(rpc_event == RpcAppEventAppExit) {
         LfRfidApp::Event event;
         event.type = LfRfidApp::EventType::Exit;
         app->view_controller.send_event(&event);
-        rpc_system_app_confirm(app->rpc_ctx, rpc_event, true);
     } else if(rpc_event == RpcAppEventLoadFile) {
         LfRfidApp::Event event;
         event.type = LfRfidApp::EventType::RpcLoadFile;

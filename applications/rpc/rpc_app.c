@@ -292,6 +292,10 @@ void rpc_system_app_free(void* context) {
         rpc_app->app_callback(RpcAppEventSessionClose, rpc_app->app_context);
     }
 
+    while(rpc_app->app_callback){
+        furi_delay_tick(1);
+    }
+
     if(rpc_app->last_data) free(rpc_app->last_data);
 
     free(rpc_app->state_msg);
