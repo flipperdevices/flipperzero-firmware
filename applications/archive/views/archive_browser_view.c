@@ -194,7 +194,7 @@ static void archive_render_status_bar(Canvas* canvas, ArchiveBrowserViewModel* m
     canvas_set_color(canvas, ColorBlack);
 }
 
-void archive_view_render(Canvas* canvas, void* mdl) {
+static void archive_view_render(Canvas* canvas, void* mdl) {
     ArchiveBrowserViewModel* model = mdl;
 
     archive_render_status_bar(canvas, mdl);
@@ -234,7 +234,7 @@ static bool is_file_list_load_required(ArchiveBrowserViewModel* model) {
     return false;
 }
 
-bool archive_view_input(InputEvent* event, void* context) {
+static bool archive_view_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
 
