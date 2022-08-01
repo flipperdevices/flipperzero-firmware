@@ -1,8 +1,8 @@
 from SCons.Builder import Builder
 from SCons.Action import Action
 from SCons.Warnings import warn, WarningOnByDefault
-
 import SCons
+
 from fbt.appmanifest import (
     FlipperAppType,
     AppManager,
