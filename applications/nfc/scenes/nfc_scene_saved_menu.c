@@ -2,6 +2,7 @@
 
 enum SubmenuIndex {
     SubmenuIndexEmulate,
+    SubmenuIndexEditUid,
     SubmenuIndexRename,
     SubmenuIndexDelete,
     SubmenuIndexInfo,
@@ -25,6 +26,12 @@ void nfc_scene_saved_menu_on_enter(void* context) {
             submenu,
             "Emulate UID",
             SubmenuIndexEmulate,
+            nfc_scene_saved_menu_submenu_callback,
+            nfc);
+        submenu_add_item(
+            submenu,
+            "Edit UID",
+            SubmenuIndexEditUid,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
     } else if(
@@ -70,6 +77,9 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexRename) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
+            consumed = true;
+        } else if(event.event == SubmenuIndexEditUid) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSetUid);
             consumed = true;
         } else if(event.event == SubmenuIndexDelete) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneDelete);
