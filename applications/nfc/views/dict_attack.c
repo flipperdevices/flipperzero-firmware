@@ -40,9 +40,12 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 64, 2, AlignCenter, AlignTop, string_get_cstr(m->header));
         canvas_set_font(canvas, FontSecondary);
-        float dict_progress = m->dict_keys_total == 0 ? 0 : (float)(m->dict_keys_current) / (float)(m->dict_keys_total);
-        float progress =
-            m->sectors_total == 0 ? 0 : ((float)(m->sector_current) + dict_progress) / (float)(m->sectors_total);
+        float dict_progress = m->dict_keys_total == 0 ?
+                                  0 :
+                                  (float)(m->dict_keys_current) / (float)(m->dict_keys_total);
+        float progress = m->sectors_total == 0 ? 0 :
+                                                 ((float)(m->sector_current) + dict_progress) /
+                                                     (float)(m->sectors_total);
         if(progress > 1.0) {
             progress = 1.0;
         }

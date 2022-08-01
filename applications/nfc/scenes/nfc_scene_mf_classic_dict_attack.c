@@ -34,8 +34,7 @@ static void nfc_scene_mf_classic_dict_attack_update_view(Nfc* nfc) {
 
 static void nfc_scene_mf_classic_dict_attack_prepare_view(Nfc* nfc, DictAttackState state) {
     MfClassicData* data = &nfc->dev->dev_data.mf_classic_data;
-    NfcMfClassicDictAttackData* dict_attack_data =
-        &nfc->dev->dev_data.mf_classic_dict_attack_data;
+    NfcMfClassicDictAttackData* dict_attack_data = &nfc->dev->dev_data.mf_classic_dict_attack_data;
     NfcWorkerState worker_state = NfcWorkerStateReady;
     MfClassicDict* dict = NULL;
 
@@ -80,7 +79,8 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(Nfc* nfc, DictAttackSt
     dict_attack_set_callback(nfc->dict_attack, nfc_dict_attack_dict_attack_result_callback, nfc);
     dict_attack_set_current_sector(nfc->dict_attack, 0);
     dict_attack_set_card_detected(nfc->dict_attack, data->type);
-    dict_attack_set_total_dict_keys(nfc->dict_attack, dict ? mf_classic_dict_get_total_keys(dict) : 0);
+    dict_attack_set_total_dict_keys(
+        nfc->dict_attack, dict ? mf_classic_dict_get_total_keys(dict) : 0);
     nfc_scene_mf_classic_dict_attack_update_view(nfc);
     nfc_worker_start(
         nfc->worker, worker_state, &nfc->dev->dev_data, nfc_dict_attack_worker_callback, nfc);
@@ -158,8 +158,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
 
 void nfc_scene_mf_classic_dict_attack_on_exit(void* context) {
     Nfc* nfc = context;
-    NfcMfClassicDictAttackData* dict_attack_data =
-        &nfc->dev->dev_data.mf_classic_dict_attack_data;
+    NfcMfClassicDictAttackData* dict_attack_data = &nfc->dev->dev_data.mf_classic_dict_attack_data;
     // Stop worker
     nfc_worker_stop(nfc->worker);
     if(dict_attack_data->dict) {
