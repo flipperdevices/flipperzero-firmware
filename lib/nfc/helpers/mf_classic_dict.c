@@ -118,6 +118,26 @@ bool mf_classic_dict_get_next_key(MfClassicDict* dict, uint64_t* key) {
     return key_read;
 }
 
+bool mf_classic_dict_get_next_key_str(MfClassicDict* dict, string_t* key) {
+    furi_assert(dict);
+    furi_assert(dict->stream);
+
+    string_t next_line;
+    string_init(next_line);
+
+    bool key_read = false;
+    while(!key_read) {
+        if(!stream_read_line(dict->stream, next_line)) break;
+        if(string_get_char(next_line, 0) == '#') continue;
+        if(string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
+        string_set(*key, next_line);
+        key_read = true;
+    }
+
+    string_clear(next_line);
+    return key_read;
+}
+
 bool mf_classic_dict_rewind(MfClassicDict* dict) {
     furi_assert(dict);
     furi_assert(dict->stream);

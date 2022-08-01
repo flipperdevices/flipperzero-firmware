@@ -23,6 +23,8 @@ uint32_t mf_classic_dict_get_total_keys(MfClassicDict* dict);
 
 bool mf_classic_dict_get_next_key(MfClassicDict* dict, uint64_t* key);
 
+bool mf_classic_dict_get_next_key_str(MfClassicDict* dict, string_t* key);
+
 bool mf_classic_dict_rewind(MfClassicDict* dict);
 
 bool mf_classic_dict_add_key(MfClassicDict* dict, uint8_t* key);
