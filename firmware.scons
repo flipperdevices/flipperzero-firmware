@@ -294,6 +294,7 @@ if fwenv["IS_BASE_FIRMWARE"]:
 
     sdk_apicheck = fwenv.SDKSymUpdater(fwenv.subst("$SDK_DEFINITION"), "sdk_origin")
     Precious(sdk_apicheck)
+    AlwaysBuild(sdk_apicheck)
     Alias("sdk_check", sdk_apicheck)
 
     sdk_apisyms = fwenv.SDKSymGenerator(
