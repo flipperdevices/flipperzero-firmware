@@ -118,7 +118,7 @@ bool mf_classic_dict_get_next_key(MfClassicDict* dict, uint64_t* key) {
     return key_read;
 }
 
-bool mf_classic_dict_get_next_key_str(MfClassicDict* dict, string_t* key) {
+bool mf_classic_dict_get_next_key_str(MfClassicDict* dict, string_t key) {
     furi_assert(dict);
     furi_assert(dict->stream);
 
@@ -130,7 +130,7 @@ bool mf_classic_dict_get_next_key_str(MfClassicDict* dict, string_t* key) {
         if(!stream_read_line(dict->stream, next_line)) break;
         if(string_get_char(next_line, 0) == '#') continue;
         if(string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
-        string_set(*key, next_line);
+        string_set_n(key, next_line, 0, NFC_MF_CLASSIC_KEY_LEN - 1);
         key_read = true;
     }
 
