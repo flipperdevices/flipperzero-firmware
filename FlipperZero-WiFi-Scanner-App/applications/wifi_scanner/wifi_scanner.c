@@ -16,7 +16,7 @@
 
 #include "FlipperZeroWiFiModuleDefines.h"
 
-#define FLIPPERZERO_DEV_BOARD_V_1 1
+#define FLIPPERZERO_DEV_BOARD_V_1 0
 
 #define WIFI_APP_DEBUG 0
 
