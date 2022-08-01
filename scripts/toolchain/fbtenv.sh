@@ -19,7 +19,7 @@ fbtenv_check_sourced()
     if [ "$(basename $0)" = "fbt" ]; then
         return 0;
     fi
-    echo "Running this script manualy is wrong, please source it";
+    echo "Running this script manually is wrong, please source it";
     echo "Example:";
     printf "\tsource scripts/toolchain/fbtenv.sh\n";
     return 1;
@@ -28,7 +28,7 @@ fbtenv_check_sourced()
 fbtenv_check_script_path()
 {
     if [ ! -x "$SCRIPT_PATH/fbt" ]; then
-        echo "Please source this script being into flipperzero-firmware root directory, or specify 'SCRIPT_PATH' manualy";
+        echo "Please source this script being into flipperzero-firmware root directory, or specify 'SCRIPT_PATH' manually";
         echo "Example:";
         printf "\tSCRIPT_PATH=lang/c/flipperzero-firmware source lang/c/flipperzero-firmware/scripts/fbtenv.sh\n";
         echo "If current directory is right, type 'unset SCRIPT_PATH' and try again"
