@@ -190,6 +190,12 @@ iButton* ibutton_alloc() {
 void ibutton_free(iButton* ibutton) {
     furi_assert(ibutton);
 
+    if(ibutton->rpc_ctx) {
+        rpc_system_app_set_callback(ibutton->rpc_ctx, NULL, NULL);
+        rpc_system_app_send_exited(ibutton->rpc_ctx);
+        ibutton->rpc_ctx = NULL;
+    }
+
     view_dispatcher_remove_view(ibutton->view_dispatcher, iButtonViewDialogEx);
     dialog_ex_free(ibutton->dialog_ex);
 
@@ -386,10 +392,7 @@ int32_t ibutton_app(void* p) {
 
     view_dispatcher_run(ibutton->view_dispatcher);
 
-    if(ibutton->rpc_ctx) {
-        rpc_system_app_set_callback(ibutton->rpc_ctx, NULL, NULL);
-        rpc_system_app_send_exited(ibutton->rpc_ctx);
-    }
     ibutton_free(ibutton);
+
     return 0;
 }
