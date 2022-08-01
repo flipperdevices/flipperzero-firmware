@@ -33,8 +33,7 @@ bool nfc_scene_set_uid_on_event(void* context, SceneManagerEvent event) {
             DOLPHIN_DEED(DolphinDeedNfcAdd);
             if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSavedMenu)) {
                 nfc->dev->dev_data.nfc_data = nfc->dev_edit_data;
-                strlcpy(nfc->dev->dev_name, nfc->text_store, strlen(nfc->text_store) + 1);
-                if(nfc_device_save(nfc->dev, nfc->text_store)) {
+                if(nfc_device_save(nfc->dev, nfc->dev->dev_name)) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
                     consumed = true;
                 }
