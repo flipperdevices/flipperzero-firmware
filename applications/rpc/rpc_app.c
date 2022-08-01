@@ -7,19 +7,11 @@
 
 #define TAG "RpcSystemApp"
 
-typedef enum {
-    RpcAppSystemStateIdle,
-    RpcAppSystemStateStarted,
-    RpcAppSystemStateLoaded,
-    RpcAppSystemStatePressed,
-} RpcAppSystemState;
-
 struct RpcAppSystem {
     RpcSession* session;
     RpcAppSystemCallback app_callback;
     void* app_context;
     PB_Main* state_msg;
-    RpcAppSystemState state;
 
     uint32_t last_id;
     char* last_data;
@@ -131,6 +123,7 @@ static void rpc_system_app_load_file(const PB_Main* request, void* context) {
     if(rpc_app->app_callback) {
         FURI_LOG_D(TAG, "LoadFile");
         furi_assert(!rpc_app->last_data);
+        rpc_app->last_id = request->command_id;
         rpc_app->last_data = strdup(request->content.app_load_file_request.path);
         rpc_app->app_callback(RpcAppEventLoadFile, rpc_app->app_context);
     } else {
@@ -292,7 +285,7 @@ void rpc_system_app_free(void* context) {
         rpc_app->app_callback(RpcAppEventSessionClose, rpc_app->app_context);
     }
 
-    while(rpc_app->app_callback){
+    while(rpc_app->app_callback) {
         furi_delay_tick(1);
     }
 
