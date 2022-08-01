@@ -16,6 +16,8 @@
 
 #include "FlipperZeroWiFiModuleDefines.h"
 
+#define FLIPPERZERO_DEV_BOARD_V_1 1
+
 #define WIFI_APP_DEBUG 0
 
 #if WIFI_APP_DEBUG
@@ -30,8 +32,15 @@
 #endif // WIFI_APP_DEBUG
 
 #define DISABLE_CONSOLE !WIFI_APP_DEBUG
+
+#if FLIPPERZERO_DEV_BOARD_V_1
+#define ENABLE_MODULE_POWER 0
+#define ENABLE_MODULE_DETECTION 0
+#else
 #define ENABLE_MODULE_POWER 1
 #define ENABLE_MODULE_DETECTION 1
+#endif
+
 
 #define ANIMATION_TIME 350
 
@@ -133,11 +142,7 @@ static void wifi_scanner_app_init(SWiFiScannerApp* const app)
     app->m_animationTime = ANIMATION_TIME;
     app->m_animtaionCounter = 0;
 
-#if ENABLE_MODULE_POWER
     app->m_wifiModuleInitialized = false;
-#else
-    app->m_wifiModuleInitialized = true;
-#endif // ENABLE_MODULE_POWER
 
 #if ENABLE_MODULE_DETECTION
     app->m_wifiModuleAttached = false;
@@ -199,8 +204,8 @@ static void wifi_module_render_callback(Canvas* const canvas, void* ctx)
             {
                 canvas_set_font(canvas, FontPrimary);
 
-                const char* strInitializing = "Something wrong";
-                canvas_draw_str(canvas, (u8g2_GetDisplayWidth(&canvas->fb) / 2) - (canvas_string_width(canvas, strInitializing) / 2), (u8g2_GetDisplayHeight(&canvas->fb) / 2)/* - (u8g2_GetMaxCharHeight(&canvas->fb) / 2)*/, strInitializing);
+                const char* strError = "Something wrong";
+                canvas_draw_str(canvas, (u8g2_GetDisplayWidth(&canvas->fb) / 2) - (canvas_string_width(canvas, strError) / 2), (u8g2_GetDisplayHeight(&canvas->fb) / 2)/* - (u8g2_GetMaxCharHeight(&canvas->fb) / 2)*/, strError);
             }
                 break;
             case WaitingForModule:
@@ -210,13 +215,12 @@ static void wifi_module_render_callback(Canvas* const canvas, void* ctx)
                 {
                     canvas_set_font(canvas, FontSecondary);
 
-                    const char* strInitializing = "Attach WiFi scanner module";
-                    canvas_draw_str(canvas, (u8g2_GetDisplayWidth(&canvas->fb) / 2) - (canvas_string_width(canvas, strInitializing) / 2), (u8g2_GetDisplayHeight(&canvas->fb) / 2)/* - (u8g2_GetMaxCharHeight(&canvas->fb) / 2)*/, strInitializing);
+                    const char* strConnectModule = "Attach WiFi scanner module";
+                    canvas_draw_str(canvas, (u8g2_GetDisplayWidth(&canvas->fb) / 2) - (canvas_string_width(canvas, strConnectModule) / 2), (u8g2_GetDisplayHeight(&canvas->fb) / 2)/* - (u8g2_GetMaxCharHeight(&canvas->fb) / 2)*/, strConnectModule);
                 }
 #endif
                 break;
             case Initializing:
-#if ENABLE_MODULE_POWER
             {
                 furi_assert(!app->m_wifiModuleInitialized);
                 if (!app->m_wifiModuleInitialized)
@@ -227,7 +231,6 @@ static void wifi_module_render_callback(Canvas* const canvas, void* ctx)
                     canvas_draw_str(canvas, (u8g2_GetDisplayWidth(&canvas->fb) / 2) - (canvas_string_width(canvas, strInitializing) / 2), (u8g2_GetDisplayHeight(&canvas->fb) / 2) - (u8g2_GetMaxCharHeight(&canvas->fb) / 2), strInitializing);
                 }
             }
-#endif // ENABLE_MODULE_POWER
                 break;
             case ScanMode:
             {
@@ -501,7 +504,7 @@ static int32_t uart_worker(void* context) {
                     return 1;
                 }
 
-#if ENABLE_MODULE_POWER
+
                 if (!app->m_wifiModuleInitialized)
                 {
                     if (string_cmp_str(chunksArray[EChunkArrayData_Context], MODULE_CONTEXT_INITIALIZATION) == 0)
@@ -511,7 +514,6 @@ static int32_t uart_worker(void* context) {
                     }
                 }
                 else
-#endif // ENABLE_MODULE_POWER
                 {
                     if (string_cmp_str(chunksArray[EChunkArrayData_Context], MODULE_CONTEXT_MONITOR) == 0)
                     {
@@ -564,12 +566,18 @@ typedef enum ESerialCommand
     ESerialCommand_Next,
     ESerialCommand_Previous,
     ESerialCommand_Scan,
-    ESerialCommand_MonitorMode
+    ESerialCommand_MonitorMode,
+    ESerialCommand_Restart
 } ESerialCommand;
 
 void send_serial_command(ESerialCommand command)
 {
+#if !DISABLE_CONSOLE
+    return;
+#endif
+
     uint8_t data[1] = { 0 };
+
     switch(command)
     {
         case ESerialCommand_Next:
@@ -584,14 +592,13 @@ void send_serial_command(ESerialCommand command)
         case ESerialCommand_MonitorMode:
             data[0] = MODULE_CONTROL_COMMAND_MONITOR;
             break;  
+        case ESerialCommand_Restart:
+            data[0] = MODULE_CONTROL_COMMAND_RESTART;
+            break;
         default:
             return;          
     };
 
-#if !DISABLE_CONSOLE
-    return;
-#endif
-   
     furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
 }
 
@@ -615,10 +622,10 @@ int32_t wifi_scanner_app(void* p)
     //furi_hal_gpio_add_int_callback(pinD0, input_isr_d0, this);
     app->m_context = WaitingForModule;
 #else
-#if ENABLE_MODULE_POWER
     app->m_context = Initializing;
+#if ENABLE_MODULE_POWER
     furi_hal_power_enable_otg();
-#endif
+#endif // ENABLE_MODULE_POWER
 #endif // ENABLE_MODULE_DETECTION
 
     ValueMutex app_data_mutex; 
@@ -648,7 +655,7 @@ int32_t wifi_scanner_app(void* p)
 #if DISABLE_CONSOLE    
     furi_hal_console_disable();
 #endif
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
+    furi_hal_uart_set_br(FuriHalUartIdUSART1, FLIPPERZERO_SERIAL_BAUD);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_on_irq_cb, app);
     WIFI_APP_LOG_I("UART Listener created");
 
@@ -659,6 +666,11 @@ int32_t wifi_scanner_app(void* p)
     furi_thread_set_callback(app->m_worker_thread, uart_worker);
     furi_thread_start(app->m_worker_thread);
     WIFI_APP_LOG_I("UART thread allocated");
+
+#if !ENABLE_MODULE_POWER
+    // Because we assume that module was on before we launched the app. We need to ensure that module will be in initial state on app start
+    send_serial_command(ESerialCommand_Restart);
+#endif // ENABLE_MODULE_POWER
 
     SPluginEvent event; 
     for(bool processing = true; processing;) 
@@ -673,8 +685,8 @@ int32_t wifi_scanner_app(void* p)
             {
                 WIFI_APP_LOG_I("Module Attached");
                 app->m_wifiModuleAttached = true;
-#if ENABLE_MODULE_POWER
                 app->m_context = Initializing;
+#if ENABLE_MODULE_POWER
                 furi_hal_power_enable_otg();
 #endif
             }

@@ -234,7 +234,7 @@ void ScanMode()
 }
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(FLIPPERZERO_SERIAL_BAUD);
   while (!Serial) {
     ; // wait for serial port to connect
   }
@@ -380,12 +380,12 @@ void ScanNetworks()
   ChangeContext(EContext::SCAN_ANIMATION);
 }
 
-bool MonitorNetwork(const bool firstRun = false)
+void MonitorNetwork(const bool firstRun = false)
 {
-  int16_t scanResult = WiFi.scanComplete();
+  const int16_t scanResult = WiFi.scanComplete();
   if(scanResult != WIFI_SCAN_RUNNING)
   {
-    DEBUG_LOG_LN(F("MonitorNetwork()"));
+    DEBUG_LOG_LN(F("MonitorNetwork() - Scan Completed"));
     
     if(firstRun)
     {
@@ -396,7 +396,6 @@ bool MonitorNetwork(const bool firstRun = false)
       OnMonScanComplete(scanResult);
     }
     
-    WiFi.scanDelete();
     const bool async = true;
     const bool showHidden = true;
     WiFi.scanNetworks(async, showHidden);
@@ -468,6 +467,12 @@ void CheckForFlipperCommands()
     FUNCTION_PERF();
     
     int incommingCommand = Serial.read();
+    if(incommingCommand == MODULE_CONTROL_COMMAND_RESTART)
+    {
+      DEBUG_LOG_LN(F("Restart module"));
+      ESP.restart();
+    }
+    else
     if(g_context >= EContext::SCAN_PAGE)
     {
       switch(incommingCommand)
@@ -487,6 +492,10 @@ void CheckForFlipperCommands()
         case MODULE_CONTROL_COMMAND_MONITOR:
           DEBUG_LOG_LN(F("Monitor command"));
           ChangeBetweenMonitorAndScanMode();        
+          break;
+        case MODULE_CONTROL_COMMAND_RESTART:
+          DEBUG_LOG_LN(F("Restart module"));
+          ESP.restart();
           break;
         default:
           break;
