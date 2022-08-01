@@ -1,9 +1,9 @@
-  AppVersion = 75901
+  AppVersion = 76803
   FileVersion = 2
 [GENERAL]
   aATEModuleSel[24] = 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
   ConnectMode = 0
-  CurrentFile = "build\f7-firmware-D\firmware.bin"
+  CurrentFile = "..\build\latest\firmware.bin"
   DataFileSAddr = 0x08000000
   GUIMode = 0
   HostName = ""
@@ -23,24 +23,20 @@
   UseMaxSpeed0 = 0
   UseMaxSpeed1 = 0
 [CPU]
-  NumInitSteps = 1
+  NumInitSteps = 2
   InitStep0_Action = "Reset"
   InitStep0_Value0 = 0x00000000
   InitStep0_Value1 = 0x00000000
-  InitStep0_Comment = "Reset and halt target"
-  NumExitSteps = 3
-  ExitStep0_Action = "Delay"
-  ExitStep0_Value0 = 0xFFFFFFFF
-  ExitStep0_Value1 = 0x00000258
+  InitStep0_Comment = ""
+  InitStep1_Action = "Halt"
+  InitStep1_Value0 = 0xFFFFFFFF
+  InitStep1_Value1 = 0xFFFFFFFF
+  InitStep1_Comment = ""
+  NumExitSteps = 1
+  ExitStep0_Action = "Reset"
+  ExitStep0_Value0 = 0x00000005
+  ExitStep0_Value1 = 0x00000032
   ExitStep0_Comment = ""
-  ExitStep1_Action = "Reset"
-  ExitStep1_Value0 = 0x00000000
-  ExitStep1_Value1 = 0x00000064
-  ExitStep1_Comment = ""
-  ExitStep2_Action = "Go"
-  ExitStep2_Value0 = 0xFFFFFFFF
-  ExitStep2_Value1 = 0xFFFFFFFF
-  ExitStep2_Comment = ""
   UseScriptFile = 0
   ScriptFile = ""
   UseRAM = 1
@@ -64,7 +60,7 @@
   AutoPerformsErase = 1
   AutoPerformsProgram = 1
   AutoPerformsSecure = 0
-  AutoPerformsStartApp = 0
+  AutoPerformsStartApp = 1
   AutoPerformsUnsecure = 0
   AutoPerformsVerify = 0
   EnableFixedVTref = 0
@@ -82,7 +78,7 @@
   SNLen = 0x00000004
   SNListFile = ""
   SNValue = 0x00000001
-  StartAppType = 0
+  StartAppType = 1
   TargetPowerDelay = 0x00000014
   TimeoutErase = 0x00003A98
   TimeoutProgram = 0x00002710
