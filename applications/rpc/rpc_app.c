@@ -27,6 +27,9 @@ static void rpc_system_app_start_process(const PB_Main* request, void* context) 
     furi_assert(session);
     char args_temp[16];
 
+    furi_assert(!rpc_app->last_id);
+    furi_assert(!rpc_app->last_data);
+
     FURI_LOG_D(TAG, "StartProcess");
 
     PB_CommandStatus result = PB_CommandStatus_ERROR_APP_CANT_START;
@@ -102,6 +105,9 @@ static void rpc_system_app_exit_request(const PB_Main* request, void* context) {
 
     if(rpc_app->app_callback) {
         FURI_LOG_D(TAG, "ExitRequest");
+        furi_assert(!rpc_app->last_id);
+        furi_assert(!rpc_app->last_data);
+        rpc_app->last_id = request->command_id;
         rpc_app->app_callback(RpcAppEventAppExit, rpc_app->app_context);
     } else {
         FURI_LOG_E(TAG, "ExitRequest: APP_NOT_RUNNING");
@@ -122,6 +128,7 @@ static void rpc_system_app_load_file(const PB_Main* request, void* context) {
     PB_CommandStatus status;
     if(rpc_app->app_callback) {
         FURI_LOG_D(TAG, "LoadFile");
+        furi_assert(!rpc_app->last_id);
         furi_assert(!rpc_app->last_data);
         rpc_app->last_id = request->command_id;
         rpc_app->last_data = strdup(request->content.app_load_file_request.path);
@@ -145,6 +152,7 @@ static void rpc_system_app_button_press(const PB_Main* request, void* context) {
     PB_CommandStatus status;
     if(rpc_app->app_callback) {
         FURI_LOG_D(TAG, "ButtonPress");
+        furi_assert(!rpc_app->last_id);
         furi_assert(!rpc_app->last_data);
         rpc_app->last_id = request->command_id;
         rpc_app->last_data = strdup(request->content.app_button_press_request.args);
@@ -168,6 +176,8 @@ static void rpc_system_app_button_release(const PB_Main* request, void* context)
     PB_CommandStatus status;
     if(rpc_app->app_callback) {
         FURI_LOG_D(TAG, "ButtonRelease");
+        furi_assert(!rpc_app->last_id);
+        furi_assert(!rpc_app->last_data);
         rpc_app->last_id = request->command_id;
         rpc_app->app_callback(RpcAppEventButtonRelease, rpc_app->app_context);
     } else {
@@ -207,6 +217,7 @@ void rpc_system_app_confirm(RpcAppSystem* rpc_app, RpcAppSystemEvent event, bool
     furi_assert(rpc_app);
     RpcSession* session = rpc_app->session;
     furi_assert(session);
+    furi_assert(rpc_app->last_id);
 
     PB_CommandStatus status = result ? PB_CommandStatus_OK : PB_CommandStatus_ERROR_APP_CMD_ERROR;
 
@@ -224,10 +235,10 @@ void rpc_system_app_confirm(RpcAppSystem* rpc_app, RpcAppSystemEvent event, bool
         break;
     }
 
+    rpc_app->last_id = 0;
     if(rpc_app->last_data) {
         free(rpc_app->last_data);
         rpc_app->last_data = NULL;
-        rpc_app->last_id = 0;
     }
 }
 
