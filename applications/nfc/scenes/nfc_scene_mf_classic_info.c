@@ -1,5 +1,4 @@
 #include "../nfc_i.h"
-#include <dolphin/dolphin.h>
 
 void nfc_scene_mf_classic_info_widget_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
