@@ -26,6 +26,8 @@ static void bad_usb_app_tick_event_callback(void* context) {
 BadUsbApp* bad_usb_app_alloc(char* arg) {
     BadUsbApp* app = malloc(sizeof(BadUsbApp));
 
+    app->bad_usb_script = NULL;
+
     string_init(app->file_path);
     string_init(app->keyboard_layout);
 
@@ -83,9 +85,15 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
 void bad_usb_app_free(BadUsbApp* app) {
     furi_assert(app);
 
+    if(app->bad_usb_script) {
+        bad_usb_script_close(app->bad_usb_script);
+        app->bad_usb_script = NULL;
+    }
+
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewFileSelect);
     view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewWork);
+    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewConfigLayout);
     bad_usb_free(app->bad_usb_view);
 
     // Custom Widget

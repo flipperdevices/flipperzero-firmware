@@ -45,4 +45,5 @@ typedef enum {
     BadUsbAppViewFileSelect,
     BadUsbAppViewWork,
     BadUsbAppViewConfig,
+    BadUsbAppViewConfigLayout,
 } BadUsbAppView;

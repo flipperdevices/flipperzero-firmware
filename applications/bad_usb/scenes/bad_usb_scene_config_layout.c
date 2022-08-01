@@ -31,7 +31,9 @@ static bool bad_usb_layout_select(BadUsbApp* bad_usb) {
 void bad_usb_scene_config_layout_on_enter(void* context) {
     BadUsbApp* bad_usb = context;
 
-    bad_usb_layout_select(bad_usb);
+    if(bad_usb_layout_select(bad_usb)) {
+        bad_usb_script_set_keyboard_layout(bad_usb->bad_usb_script, bad_usb->keyboard_layout);
+    }
     scene_manager_previous_scene(bad_usb->scene_manager);
 }
 

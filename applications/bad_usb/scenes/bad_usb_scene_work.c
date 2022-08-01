@@ -34,11 +34,8 @@ void bad_usb_scene_work_on_enter(void* context) {
 
     string_t file_name;
     string_init(file_name);
-
     path_extract_filename(app->file_path, file_name, true);
     bad_usb_set_file_name(app->bad_usb_view, string_get_cstr(file_name));
-    app->bad_usb_script = bad_usb_script_open(app->file_path);
-
     string_clear(file_name);
 
     bad_usb_set_state(app->bad_usb_view, bad_usb_script_get_state(app->bad_usb_script));
@@ -48,6 +45,5 @@ void bad_usb_scene_work_on_enter(void* context) {
 }
 
 void bad_usb_scene_work_on_exit(void* context) {
-    BadUsbApp* app = context;
-    bad_usb_script_close(app->bad_usb_script);
+    UNUSED(context);
 }
