@@ -41,50 +41,32 @@ static void subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) 
 
     furi_assert(subghz->rpc_ctx);
 
-    bool result = false;
-
     if(event == RpcAppEventSessionClose) {
-        rpc_system_app_set_callback(subghz->rpc_ctx, NULL, NULL);
-        subghz->rpc_ctx = NULL;
-        notification_message(subghz->notifications, &sequence_blink_stop);
-        view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneExit);
-        if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
-            subghz_tx_stop(subghz);
-            subghz_sleep(subghz);
-        }
-        result = true;
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneRpcSessionClose);
     } else if(event == RpcAppEventAppExit) {
         view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneExit);
-        if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
-            subghz_tx_stop(subghz);
-            subghz_sleep(subghz);
-        }
-        result = true;
     } else if(event == RpcAppEventLoadFile) {
-        const char* arg = rpc_system_app_get_data(subghz->rpc_ctx);
-        if(arg) {
-            if(subghz_key_load(subghz, arg, false)) {
-                string_set_str(subghz->file_path, arg);
-                view_dispatcher_send_custom_event(
-                    subghz->view_dispatcher, SubGhzCustomEventSceneRpcLoad);
-                result = true;
-            }
-        }
+        view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneRpcLoad);
     } else if(event == RpcAppEventButtonPress) {
-        if(subghz->txrx->txrx_state == SubGhzTxRxStateSleep) {
-            notification_message(subghz->notifications, &sequence_blink_start_magenta);
-            result = subghz_tx_start(subghz, subghz->txrx->fff_data);
-        }
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneRpcButtonPress);
     } else if(event == RpcAppEventButtonRelease) {
-        if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
-            notification_message(subghz->notifications, &sequence_blink_stop);
-            subghz_tx_stop(subghz);
-            subghz_sleep(subghz);
-            result = true;
-        }
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneRpcButtonRelease);
+    } else {
+        rpc_system_app_confirm(subghz->rpc_ctx, event, false);
     }
+}
 
-    rpc_system_app_confirm(subghz->rpc_ctx, event, result);
+void subghz_blink_start(SubGhz* instance) {
+    furi_assert(instance);
+    notification_message(instance->notifications, &sequence_blink_start_magenta);
+}
+
+void subghz_blink_stop(SubGhz* instance) {
+    furi_assert(instance);
+    notification_message(instance->notifications, &sequence_blink_stop);
 }
 
 SubGhz* subghz_alloc() {
@@ -236,7 +218,7 @@ void subghz_free(SubGhz* subghz) {
     if(subghz->rpc_ctx) {
         rpc_system_app_set_callback(subghz->rpc_ctx, NULL, NULL);
         rpc_system_app_send_exited(subghz->rpc_ctx);
-        notification_message(subghz->notifications, &sequence_blink_stop);
+        subghz_blink_stop(subghz);
         subghz->rpc_ctx = NULL;
     }
 
