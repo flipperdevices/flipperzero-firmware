@@ -9,11 +9,9 @@
 
 - TOFIX - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
-- Added some formatting updates and updates from the checkedout PRs
-- Added some game score updates pushed in unleashed
-- Update to touchtunes_brute_map.txt
-- Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)
-- Updates for [UniRF Remix (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix/blob/minimal-fbt/applications/unirfremix/unirfremix_app.c)
+- Fixed internal manifest to have pic always available with max level 30
+- Fixed level animation sequence for level 3+
+- Fixed assigned profile pic for levels 1-10, 11-20 and 21-30
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
