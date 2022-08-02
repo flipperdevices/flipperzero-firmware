@@ -322,6 +322,14 @@ void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t durati
     }
 }
 
+bool subghz_protocol_decoder_raw_deserialize(void* context, FlipperFormat* flipper_format) {
+    furi_assert(context);
+    UNUSED(context);
+    UNUSED(flipper_format);
+    //ToDo stub, for backwards compatibility
+    return true;
+}
+
 uint8_t subghz_protocol_decoder_raw_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
