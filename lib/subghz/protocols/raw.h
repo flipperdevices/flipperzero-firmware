@@ -84,12 +84,11 @@ bool subghz_protocol_decoder_raw_write_data(void* context, bool level, uint32_t 
 void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t duration);
 
 /**
- * Deserialize data SubGhzProtocolDecoderRAW.
+ * Getting the hash sum of the last randomly received parcel.
  * @param context Pointer to a SubGhzProtocolDecoderRAW instance
- * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return hash Hash sum
  */
-bool subghz_protocol_decoder_raw_deserialize(void* context, FlipperFormat* flipper_format);
+uint8_t subghz_protocol_decoder_raw_get_hash_data(void* context);
 
 /**
  * Getting the hash sum of the last randomly received parcel.
