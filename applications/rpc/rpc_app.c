@@ -115,7 +115,8 @@ static void rpc_system_app_exit_request(const PB_Main* request, void* context) {
         rpc_app->app_callback(RpcAppEventAppExit, rpc_app->app_context);
     } else {
         status = PB_CommandStatus_ERROR_APP_NOT_RUNNING;
-        FURI_LOG_E(TAG, "ExitRequest: APP_NOT_RUNNING, id %d, status: %d", request->command_id, status);
+        FURI_LOG_E(
+            TAG, "ExitRequest: APP_NOT_RUNNING, id %d, status: %d", request->command_id, status);
         rpc_send_and_release_empty(session, request->command_id, status);
     }
 }
@@ -139,7 +140,8 @@ static void rpc_system_app_load_file(const PB_Main* request, void* context) {
         rpc_app->app_callback(RpcAppEventLoadFile, rpc_app->app_context);
     } else {
         status = PB_CommandStatus_ERROR_APP_NOT_RUNNING;
-        FURI_LOG_E(TAG, "LoadFile: APP_NOT_RUNNING, id %d, status: %d", request->command_id, status);
+        FURI_LOG_E(
+            TAG, "LoadFile: APP_NOT_RUNNING, id %d, status: %d", request->command_id, status);
         rpc_send_and_release_empty(session, request->command_id, status);
     }
 }
@@ -163,7 +165,8 @@ static void rpc_system_app_button_press(const PB_Main* request, void* context) {
         rpc_app->app_callback(RpcAppEventButtonPress, rpc_app->app_context);
     } else {
         status = PB_CommandStatus_ERROR_APP_NOT_RUNNING;
-        FURI_LOG_E(TAG, "ButtonPress: APP_NOT_RUNNING, id %d, status: %d", request->command_id, status);
+        FURI_LOG_E(
+            TAG, "ButtonPress: APP_NOT_RUNNING, id %d, status: %d", request->command_id, status);
         rpc_send_and_release_empty(session, request->command_id, status);
     }
 }
@@ -186,7 +189,8 @@ static void rpc_system_app_button_release(const PB_Main* request, void* context)
         rpc_app->app_callback(RpcAppEventButtonRelease, rpc_app->app_context);
     } else {
         status = PB_CommandStatus_ERROR_APP_NOT_RUNNING;
-        FURI_LOG_E(TAG, "ButtonRelease: APP_NOT_RUNNING, id %d, status: %d", request->command_id, status);
+        FURI_LOG_E(
+            TAG, "ButtonRelease: APP_NOT_RUNNING, id %d, status: %d", request->command_id, status);
         rpc_send_and_release_empty(session, request->command_id, status);
     }
 }
@@ -225,7 +229,7 @@ void rpc_system_app_confirm(RpcAppSystem* rpc_app, RpcAppSystemEvent event, bool
 
     PB_CommandStatus status = result ? PB_CommandStatus_OK : PB_CommandStatus_ERROR_APP_CMD_ERROR;
 
-    uint32_t last_id=0;
+    uint32_t last_id = 0;
     switch(event) {
     case RpcAppEventAppExit:
     case RpcAppEventLoadFile:
@@ -237,8 +241,7 @@ void rpc_system_app_confirm(RpcAppSystem* rpc_app, RpcAppSystemEvent event, bool
             free(rpc_app->last_data);
             rpc_app->last_data = NULL;
         }
-        FURI_LOG_D(
-            TAG, "AppConfirm: event %d last_id %d status %d", event, last_id, status);
+        FURI_LOG_D(TAG, "AppConfirm: event %d last_id %d status %d", event, last_id, status);
         rpc_send_and_release_empty(session, last_id, status);
         break;
     default:
