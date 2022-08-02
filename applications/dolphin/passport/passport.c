@@ -71,8 +71,9 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
     // portrait
     furi_assert((stats->level > 0) && (stats->level <= 30));
-    uint16_t tmpLvl = stats->level - 1;
-    if (tmpLvl>2) tmpLvl=2;
+    uint16_t tmpLvl = 0;
+    if (stats->level>10) tmpLvl=1;
+    if (stats->level>20) tmpLvl=2;
     canvas_draw_icon(canvas, 9, 5, portraits[mood][tmpLvl]);
     canvas_draw_line(canvas, 58, 16, 123, 16);
     canvas_draw_line(canvas, 58, 30, 123, 30);
