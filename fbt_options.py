@@ -74,12 +74,13 @@ FIRMWARE_APPS = {
         "system_settings",
         "about",
         # Plugins
-        "basic_plugins",
+        # "basic_plugins",
         # Debug
-        "debug_apps",
+        # "debug_apps",
     ],
     "unit_tests": [
         "basic_services",
+        "updater_app",
         "unit_tests",
     ],
 }
