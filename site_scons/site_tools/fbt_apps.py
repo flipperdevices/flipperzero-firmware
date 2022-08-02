@@ -2,6 +2,7 @@ from SCons.Builder import Builder
 from SCons.Action import Action
 from SCons.Warnings import warn, WarningOnByDefault
 import SCons
+import os.path
 
 from fbt.appmanifest import (
     FlipperAppType,
@@ -17,10 +18,10 @@ from fbt.appmanifest import (
 
 def LoadApplicationManifests(env):
     appmgr = env["APPMGR"] = AppManager()
-    for entry in env.Glob("#/applications/*", source=True):
+    for entry in env.Glob("#/applications/*", ondisk=True, source=True):
         if isinstance(entry, SCons.Node.FS.Dir) and not str(entry).startswith("."):
             try:
-                app_manifest_file_path = entry.File("application.fam").abspath
+                app_manifest_file_path = os.path.join(entry.abspath, "application.fam")
                 appmgr.load_manifest(app_manifest_file_path, entry.name)
                 env.Append(PY_LINT_SOURCES=[app_manifest_file_path])
             except FlipperManifestException as e:

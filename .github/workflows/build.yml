@@ -69,7 +69,7 @@ jobs:
           set -e
           for TARGET in ${TARGETS}
           do
-            FBT_TOOLCHAIN_PATH=/opt ./fbt TARGET_HW=`echo ${TARGET} | sed 's/f//'` --with-updater updater_package ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
+            FBT_TOOLCHAIN_PATH=/opt ./fbt TARGET_HW=`echo ${TARGET} | sed 's/f//'` updater_package ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
           done
 
       - name: 'Move upload files'
@@ -92,6 +92,10 @@ jobs:
             tar czpf artifacts/flipper-z-${BUNDLE_NAME}.tgz -C artifacts ${BUNDLE_NAME}
             rm -rf artifacts/${BUNDLE_NAME}
           done
+
+      - name: "Check for uncommited changes"
+        run: |
+          git diff --exit-code
 
       - name: 'Bundle resources'
         if: ${{ !github.event.pull_request.head.repo.fork }}
@@ -183,5 +187,5 @@ jobs:
           set -e
           for TARGET in ${TARGETS}
           do
-            FBT_TOOLCHAIN_PATH=/opt ./fbt TARGET_HW=`echo ${TARGET} | sed 's/f//'` --with-updater updater_package DEBUG=0 COMPACT=1
+            FBT_TOOLCHAIN_PATH=/opt ./fbt TARGET_HW=`echo ${TARGET} | sed 's/f//'` updater_package DEBUG=0 COMPACT=1
           done
