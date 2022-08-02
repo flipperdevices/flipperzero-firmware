@@ -33,6 +33,8 @@ public:
         Retry,
         Exit,
         EmulateStart,
+        RpcLoadFile,
+        RpcSessionClose,
     };
 
     enum class SceneType : uint8_t {
@@ -55,8 +57,6 @@ public:
         DeleteConfirm,
         DeleteSuccess,
         Rpc,
-        EmuMenu,
-        EmuData,
     };
 
     class Event {
