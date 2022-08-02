@@ -12,6 +12,8 @@
 - Fixed internal manifest to have pic always available with max level 30
 - Fixed level animation sequence for level 3+
 - Fixed assigned profile pic for levels 1-10, 11-20 and 21-30
+- Latest OFW updates [#1485](https://github.com/flipperdevices/flipperzero-firmware/pull/1485)
+- Music player plugin - removed second pointer fix from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
