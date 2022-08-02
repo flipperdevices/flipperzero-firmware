@@ -4,12 +4,12 @@
 
   #define POLISH_POTATO
   
-  #define MARAUDER_MINI
+  //#define MARAUDER_MINI
   //#define MARAUDER_V4
   //#define MARAUDER_V6
   //#define MARAUDER_KIT
   //#define GENERIC_ESP32
-  //#define MARAUDER_FLIPPER
+  #define MARAUDER_FLIPPER
 
   #define MARAUDER_VERSION "v0.9.13-rc1"
 
