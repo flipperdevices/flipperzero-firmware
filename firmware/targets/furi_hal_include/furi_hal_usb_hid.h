@@ -1080,6 +1080,8 @@ static const uint16_t hid_asciimap_be[] = {
     HID_KEYBOARD_NONE, // DEL
 };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 static const uint16_t* hid_asciimaps[] = {
     hid_asciimap,
     hid_asciimap_de,
@@ -1087,6 +1089,7 @@ static const uint16_t* hid_asciimaps[] = {
     hid_asciimap_hu,
     hid_asciimap_be
 };
+#pragma GCC diagnostic pop
 
 typedef struct {
     uint32_t vid;
