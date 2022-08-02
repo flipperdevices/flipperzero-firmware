@@ -13,7 +13,7 @@ Min butthurt: 0
 Max butthurt: 10
 Min level: 1
 Max level: 30
-Weight: 3
+Weight: 5
 
 Name: L1_Sleep_128x64
 Min butthurt: 0
@@ -27,7 +27,7 @@ Min butthurt: 0
 Max butthurt: 10
 Min level: 1
 Max level: 30
-Weight: 3
+Weight: 4
 
 Name: L1_Furippa1_128x64
 Min butthurt: 0
@@ -62,7 +62,7 @@ Min butthurt: 0
 Max butthurt: 10
 Min level: 1
 Max level: 30
-Weight: 3
+Weight: 5
 
 Name: L1_Cry_128x64
 Min butthurt: 0
@@ -90,21 +90,21 @@ Min butthurt: 0
 Max butthurt: 10
 Min level: 1
 Max level: 30
-Weight: 3
+Weight: 4
 
 Name: L3_Lab_research_128x54
 Min butthurt: 0
 Max butthurt: 10
 Min level: 1
 Max level: 30
-Weight: 3
+Weight: 4
 
 Name: L2_Soldering_128x64
 Min butthurt: 0
 Max butthurt: 10
 Min level: 1
 Max level: 30
-Weight: 3
+Weight: 5
 
 Name: L1_Leaving_sad_128x64
 Min butthurt: 0

@@ -67,6 +67,7 @@ const SubGhzProtocolDecoder subghz_protocol_raw_decoder = {
 
     .get_hash_data = subghz_protocol_decoder_raw_get_hash_data,
     .serialize = subghz_protocol_decoder_raw_serialize,
+    .deserialize = subghz_protocol_decoder_raw_deserialize,
     .get_string = subghz_protocol_decoder_raw_get_string,
 };
 
@@ -331,6 +332,7 @@ uint8_t subghz_protocol_decoder_raw_get_hash_data(void* context) {
 void subghz_protocol_decoder_raw_get_string(void* context, string_t output) {
     furi_assert(context);
     //SubGhzProtocolDecoderRAW* instance = context;
+    UNUSED(context);
     //ToDo no use
     string_cat_printf(output, "RAW Data");
 }

@@ -10,8 +10,11 @@
 - TOFIX - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
 - Fixed internal manifest to have pic always available with max level 30
-- Fixed level animation sequence for level 3+
-- Fixed assigned profile pic for levels 1-10, 11-20 and 21-30
+- Fixed level animation sequence for level 3+ to be lvl1->2 for levels 1-20 and lvl2->3 for levels 21-30.
+- Fixed assigned profile pic for levels 1-10, 11-20 and 21-30 respectively from default lvl 1, 2 & 3
+- Latest OFW updates [#1485](https://github.com/flipperdevices/flipperzero-firmware/pull/1485)
+- Music player plugin - removed second pointer fix from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
+- Fixed SD dolphin manifest to weight animations differently
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
