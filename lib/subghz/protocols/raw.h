@@ -2,6 +2,8 @@
 
 #include "base.h"
 
+#include <furi_hal.h>
+
 #define SUBGHZ_PROTOCOL_RAW_NAME "RAW"
 
 typedef void (*SubGhzProtocolEncoderRAWCallbackEnd)(void* context);
@@ -24,6 +26,13 @@ bool subghz_protocol_raw_save_to_file_init(
     SubGhzProtocolDecoderRAW* instance,
     const char* dev_name,
     SubGhzPresetDefinition* preset);
+
+/**
+ * Set SubGhzProtocolDecoderRAW to auto mode, which allows subghz_scene_receiver to capture RAW.
+ * @param context Pointer to a SubGhzProtocolDecoderRAW instance
+ * @param auto_mode Whether or not to enable auto mode
+ */
+void subghz_protocol_decoder_raw_set_auto_mode(void* context, bool auto_mode);
 
 /**
  * Stop writing file to flash
@@ -58,6 +67,15 @@ void subghz_protocol_decoder_raw_free(void* context);
 void subghz_protocol_decoder_raw_reset(void* context);
 
 /**
+ * Write raw data to the instance's internal buffer.
+ * @param context Pointer to a SubGhzProtocolDecoderRAW instance
+ * @param level Signal level true-high false-low
+ * @param duration Duration of this level in, us
+ * @return whether or not data was written
+ */
+bool subghz_protocol_decoder_raw_write_data(void* context, bool level, uint32_t duration);
+
+/**
  * Parse a raw sequence of levels and durations received from the air.
  * @param context Pointer to a SubGhzProtocolDecoderRAW instance
  * @param level Signal level true-high false-low
@@ -72,6 +90,13 @@ void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t durati
  * @return true On success
  */
 bool subghz_protocol_decoder_raw_deserialize(void* context, FlipperFormat* flipper_format);
+
+/**
+ * Getting the hash sum of the last randomly received parcel.
+ * @param context Pointer to a SubGhzProtocolDecoderRAW instance
+ * @return hash Hash sum
+ */
+uint8_t subghz_protocol_decoder_raw_get_hash_data(void* context);
 
 /**
  * Getting a textual representation of the received data.
@@ -124,6 +149,19 @@ void subghz_protocol_raw_file_encoder_worker_set_callback_end(
 void subghz_protocol_raw_gen_fff_data(FlipperFormat* flipper_format, const char* file_path);
 
 /**
+ * Serialize data SubGhzProtocolDecoderRAW.
+ * @param context Pointer to a SubGhzProtocolDecoderRAW instance
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @param frequency The frequency at which the signal was received, Hz
+ * @param preset The modulation on which the signal was received, FuriHalSubGhzPreset
+ * @return true On success
+ */
+bool subghz_protocol_decoder_raw_serialize(
+    void* context,
+    FlipperFormat* flipper_format,
+    SubGhzPresetDefinition* preset);
+
+/**
  * Deserialize and generating an upload to send.
  * @param context Pointer to a SubGhzProtocolEncoderRAW instance
  * @param flipper_format Pointer to a FlipperFormat instance
@@ -134,6 +172,6 @@ bool subghz_protocol_encoder_raw_deserialize(void* context, FlipperFormat* flipp
 /**
  * Getting the level and duration of the upload to be loaded into DMA.
  * @param context Pointer to a SubGhzProtocolEncoderRAW instance
- * @return LevelDuration 
+ * @return LevelDuration
  */
 LevelDuration subghz_protocol_encoder_raw_yield(void* context);
