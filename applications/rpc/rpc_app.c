@@ -108,7 +108,7 @@ static void rpc_system_app_exit_request(const PB_Main* request, void* context) {
     PB_CommandStatus status;
 
     if(rpc_app->app_callback) {
-        FURI_LOG_D(TAG, "ExitRequest");
+        FURI_LOG_D(TAG, "ExitRequest: id %d", request->command_id);
         furi_assert(!rpc_app->last_id);
         furi_assert(!rpc_app->last_data);
         rpc_app->last_id = request->command_id;
