@@ -13,8 +13,8 @@
 - Dolphin: Assigned profile pic for levels 1-10, 11-20 and 21-30 respectively from default lvl 1, 2 & 3
 - Latest OFW updates [#1485](https://github.com/flipperdevices/flipperzero-firmware/pull/1485)
 - Music player plugin - removed second pointer fix from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
-- Fixed SD dolphin manifest to weight animations differently
-- FIXED SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
+- Dolphin: SD dolphin manifest updated to weight animations differently
+- FIXED SubGHz: Auto Detect Raw in READ action [THANKS TO perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -87,6 +87,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Dolphin: Internal manifest updated to have animations always available with max level 30
 - Dolphin: Level animation sequence for level 3+ to be lvl1->2 for levels 1-20 and lvl2->3 for levels 21-30.
 - Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware)
+- Dolphin: SD dolphin manifest updated to weight animations differently
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
 - NFC: Display UL PWD_AUTH payload / ntag-pwd-capture [(Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
 - Plugins: Fixed sound decay issues on music player [Thanks to qqMajiKpp]
