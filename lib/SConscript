@@ -70,10 +70,10 @@ libs = env.BuildModules(
         "infrared",
         "littlefs",
         "subghz",
-        "mbedtls",
         "nfc",
         "appframe",
         "misc",
+        "mbedtls",
         "loclass",
     ],
 )
