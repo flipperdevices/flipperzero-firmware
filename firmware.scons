@@ -9,7 +9,11 @@ from fbt.util import (
 
 # Building initial C environment for libs
 env = ENV.Clone(
-    tools=["compilation_db", "fwbin", "fbt_apps"],
+    tools=[
+        ("compilation_db", {"COMPILATIONDB_COMSTR": "\tCDB\t${TARGET}"}),
+        "fwbin",
+        "fbt_apps",
+    ],
     COMPILATIONDB_USE_ABSPATH=False,
     BUILD_DIR=fw_build_meta["build_dir"],
     IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",
@@ -23,7 +27,7 @@ env = ENV.Clone(
         "${LIB_DIST_DIR}",
     ],
     CPPPATH=[
-        "#/core",
+        "#/furi",
         "#/applications",
         "#/firmware/targets/f${TARGET_HW}/ble_glue",
         "#/firmware/targets/f${TARGET_HW}/fatfs",
@@ -45,7 +49,7 @@ env = ENV.Clone(
             # If they are present, they have precedence over Default
         },
         # for furi_check to respect build type
-        "core": {
+        "furi": {
             "CCFLAGS": [
                 "-Os",
             ],
@@ -76,7 +80,6 @@ if not env["VERBOSE"]:
         HEXCOMSTR="\tHEX\t${TARGET}",
         BINCOMSTR="\tBIN\t${TARGET}",
         DFUCOMSTR="\tDFU\t${TARGET}",
-        OPENOCDCOMSTR="\tFLASH\t${SOURCE}",
     )
 
 
@@ -100,7 +103,7 @@ lib_targets = env.BuildModules(
         "lib",
         "assets",
         "firmware",
-        "core",
+        "furi",
     ],
 )
 
@@ -139,7 +142,7 @@ apps_c = fwenv.ApplicationsC(
     Value(fwenv["APPS"]),
 )
 # Adding dependency on manifest files so apps.c is rebuilt when any manifest is changed
-fwenv.Depends(apps_c, fwenv.GlobRecursive("*.fam", "applications"))
+fwenv.Depends(apps_c, fwenv.GlobRecursive("*.fam", "#/applications"))
 
 sources = [apps_c]
 # Gather sources only from app folders in current configuration
@@ -164,6 +167,8 @@ fwenv.AppendUnique(
         "-u",
         "_printf_float",
         "-n",
+        "-Xlinker",
+        "-Map=${TARGET}.map",
     ],
 )
 
@@ -177,7 +182,7 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
     sources,
     LIBS=[
         "flipper${TARGET_HW}",
-        "core",
+        "furi",
         "freertos",
         "stm32cubewb",
         "hwdrivers",
@@ -186,6 +191,7 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
         "subghz",
         "flipperformat",
         "toolbox",
+        "nfc",
         "microtar",
         "usb_stm32",
         "st25rfal002",
@@ -200,7 +206,6 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
         "toolbox",
     ],
 )
-
 
 # Firmware depends on everything child builders returned
 Depends(fwelf, lib_targets)
@@ -231,7 +236,8 @@ if should_gen_cdb_and_link_dir(fwenv, BUILD_TARGETS):
     fwcdb = fwenv.CompilationDatabase()
     # without filtering, both updater & firmware commands would be generated
     fwenv.Replace(COMPILATIONDB_PATH_FILTER=fwenv.subst("*${FW_FLAVOR}*"))
-    Depends(fwcdb, fwelf)
+    AlwaysBuild(fwcdb)
+    Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", fwcdb)
     fw_artifacts.append(fwcdb)
 
     # Adding as a phony target, so folder link is updated even if elf didn't change
