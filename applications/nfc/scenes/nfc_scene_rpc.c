@@ -80,7 +80,6 @@ void nfc_scene_rpc_on_exit(void* context) {
     Nfc* nfc = context;
     Popup* popup = nfc->popup;
 
-    nfc_rpc_exit_callback(nfc);
     nfc_blink_stop(nfc);
 
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);

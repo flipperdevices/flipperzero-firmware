@@ -17,6 +17,8 @@ struct RpcAppSystem {
     char* last_data;
 };
 
+#define RPC_SYSTEM_APP_TEMP_ARGS_SIZE 16
+
 static void rpc_system_app_start_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(context);
@@ -25,7 +27,7 @@ static void rpc_system_app_start_process(const PB_Main* request, void* context) 
     RpcAppSystem* rpc_app = context;
     RpcSession* session = rpc_app->session;
     furi_assert(session);
-    char args_temp[16];
+    char args_temp[RPC_SYSTEM_APP_TEMP_ARGS_SIZE];
 
     furi_assert(!rpc_app->last_id);
     furi_assert(!rpc_app->last_data);
@@ -38,9 +40,9 @@ static void rpc_system_app_start_process(const PB_Main* request, void* context) 
     const char* app_name = request->content.app_start_request.name;
     if(app_name) {
         const char* app_args = request->content.app_start_request.args;
-        if(strcmp(app_args, "RPC") == 0) {
+        if(app_args && strcmp(app_args, "RPC") == 0) {
             // If app is being started in RPC mode - pass RPC context via args string
-            snprintf(args_temp, 16, "RPC %08lX", (uint32_t)rpc_app);
+            snprintf(args_temp, RPC_SYSTEM_APP_TEMP_ARGS_SIZE, "RPC %08lX", (uint32_t)rpc_app);
             app_args = args_temp;
         }
         LoaderStatus status = loader_start(loader, app_name, app_args);
@@ -127,7 +129,7 @@ static void rpc_system_app_load_file(const PB_Main* request, void* context) {
 
     PB_CommandStatus status;
     if(rpc_app->app_callback) {
-        FURI_LOG_D(TAG, "LoadFile");
+        FURI_LOG_D(TAG, "LoadFile: id %d", request->command_id);
         furi_assert(!rpc_app->last_id);
         furi_assert(!rpc_app->last_data);
         rpc_app->last_id = request->command_id;
@@ -231,7 +233,7 @@ void rpc_system_app_confirm(RpcAppSystem* rpc_app, RpcAppSystemEvent event, bool
         rpc_send_and_release_empty(session, rpc_app->last_id, status);
         break;
     default:
-        furi_crash("RCP App state programming Error");
+        furi_crash("RPC App state programming Error");
         break;
     }
 
