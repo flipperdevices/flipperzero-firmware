@@ -27,7 +27,7 @@
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
 
-#include <rpc/rpc_app.h>
+#include "rpc/rpc_app.h"
 
 const char* LfRfidApp::app_folder = ANY_PATH("lfrfid");
 const char* LfRfidApp::app_extension = ".rfid";
@@ -50,25 +50,38 @@ LfRfidApp::~LfRfidApp() {
     }
 }
 
-static void rpc_command_callback(RpcAppSystemEvent rpc_event, void* context) {
+static bool rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context) {
     furi_assert(context);
     LfRfidApp* app = static_cast<LfRfidApp*>(context);
 
-    if(rpc_event == RpcAppEventSessionClose) {
-        LfRfidApp::Event event;
-        event.type = LfRfidApp::EventType::RpcSessionClose;
-        app->view_controller.send_event(&event);
-    } else if(rpc_event == RpcAppEventAppExit) {
+    bool result = false;
+
+    if(event == RpcAppEventSessionClose) {
+        rpc_system_app_set_callback(app->rpc_ctx, NULL, NULL);
+        app->rpc_ctx = NULL;
         LfRfidApp::Event event;
         event.type = LfRfidApp::EventType::Exit;
         app->view_controller.send_event(&event);
-    } else if(rpc_event == RpcAppEventLoadFile) {
+        result = true;
+    } else if(event == RpcAppEventAppExit) {
         LfRfidApp::Event event;
-        event.type = LfRfidApp::EventType::RpcLoadFile;
+        event.type = LfRfidApp::EventType::Exit;
         app->view_controller.send_event(&event);
-    } else {
-        rpc_system_app_confirm(app->rpc_ctx, rpc_event, false);
+        result = true;
+    } else if(event == RpcAppEventLoadFile) {
+        if(arg) {
+            string_set_str(app->file_path, arg);
+            if(app->load_key_data(app->file_path, &(app->worker.key), false)) {
+                LfRfidApp::Event event;
+                event.type = LfRfidApp::EventType::EmulateStart;
+                app->view_controller.send_event(&event);
+                app->worker.start_emulate();
+                result = true;
+            }
+        }
     }
+
+    return result;
 }
 
 void LfRfidApp::run(void* _args) {
