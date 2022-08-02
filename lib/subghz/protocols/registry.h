@@ -28,7 +28,8 @@
 #include "holtek.h"
 #include "chamberlain_code.h"
 #include "power_smart.h"
-#include"marantec.h"
+#include "marantec.h"
+#include "bett.h"
 
 /**
  * Registration by name SubGhzProtocol.
