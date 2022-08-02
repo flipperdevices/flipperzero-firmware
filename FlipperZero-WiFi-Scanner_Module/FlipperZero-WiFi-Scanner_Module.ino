@@ -10,6 +10,11 @@
 #include "DebugHelpers.h"
 #include "FlipperZeroWiFiModuleDefines.h"
 
+#if FLIPPERZERO_DEV_BOARD_V_1 && !ESP32
+Please_choose_ESP32S2_Dev_Module_from_Board_Manager
+#endif
+
+
 const uint16_t ASSOCIATIVE_INDEX_ARRAY_MAX_ELEMENTS = UCHAR_MAX + 1;
 uint8_t g_associativeIndexArray[ASSOCIATIVE_INDEX_ARRAY_MAX_ELEMENTS];
 
@@ -234,6 +239,11 @@ void ScanMode()
 }
 
 void setup() {
+#if ESP32 // For FlipperZero's Dev Module v.1
+  pinMode(17, OUTPUT);
+  digitalWrite(17, false);
+#endif
+  
   Serial.begin(FLIPPERZERO_SERIAL_BAUD);
   while (!Serial) {
     ; // wait for serial port to connect
