@@ -407,7 +407,7 @@ MU_TEST(stream_write_after_read_test) {
     mu_assert_int_eq(prefix_len, stream_read(stream, (uint8_t*)buf, prefix_len));
     mu_assert_string_eq(prefix, buf);
     mu_assert_int_eq(substr_len, stream_write(stream, (uint8_t*)substr, substr_len));
-    mu_check(stream_seek(stream, -(int32_t)substr_len, StreamOffsetFromCurrent));
+    mu_check(stream_seek(stream, prefix_len, StreamOffsetFromStart));
     mu_assert_int_eq(substr_len, stream_read(stream, (uint8_t*)buf, substr_len));
     mu_assert_string_eq(substr, buf);
 
