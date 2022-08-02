@@ -556,7 +556,7 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     view_stack_add_view(animation_manager->view_stack, next_view);
     if(stats.level == 1) {
         one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64);
-    } else if(stats.level == 2) {
+    } else if(stats.level >= 2) {
         one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup2_128x64);
     } else {
         furi_assert(0);
