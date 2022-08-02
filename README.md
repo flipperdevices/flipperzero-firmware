@@ -15,6 +15,7 @@
 - Music player plugin - removed second pointer fix from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - Dolphin: SD dolphin manifest updated to weight animations differently
 - FIXED SubGHz: Auto Detect Raw in READ action [THANKS TO perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
+- UPDATED [WiFi Scanner v.0.3 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `HIDDEN "INTAPP_wifi_scanner"` due to `Req: ESP8266 or WIFI DEV BOARD`
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -172,7 +173,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - `FAP` [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox) `HIDDEN "APPS_TouchTunes"`
 - `FAP` [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 - [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `REQUIRES WIFI DEV BOARD WITH MARAUDER FLASHED`
-- [WiFi Scanner (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `HIDDEN "INTAPP_wifi_scanner"` due to `Req: ESP8266 or WIFI DEV BOARD WITH MARAUDER FLASHED?`
+- [WiFi Scanner v.0.3 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `HIDDEN "INTAPP_wifi_scanner"` due to `Req: ESP8266 or WIFI DEV BOARD`
 </details>
 
 ## Conflicting PRs Not Merged:
