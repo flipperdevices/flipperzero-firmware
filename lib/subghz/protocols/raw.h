@@ -166,7 +166,7 @@ bool subghz_protocol_decoder_raw_serialize(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-bool subghz_protocol_encoder_raw_deserialize(void* context, FlipperFormat* flipper_format);
+bool subghz_protocol_decoder_raw_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Getting the level and duration of the upload to be loaded into DMA.
