@@ -230,9 +230,9 @@ static bool buffered_file_stream_delete_and_insert(
 static bool buffered_file_stream_flush(BufferedFileStream* stream) {
     bool success = false;
     do {
+        const int32_t offset = stream_cache_size(stream->cache) - stream_cache_pos(stream->cache);
         if(!stream_cache_flush(stream->cache, stream->file_stream)) break;
         stream->sync_pending = false;
-        const int32_t offset = stream_cache_size(stream->cache) - stream_cache_pos(stream->cache);
         if(offset > 0) {
             if(!stream_seek(stream->file_stream, -offset, StreamOffsetFromCurrent)) break;
         }
