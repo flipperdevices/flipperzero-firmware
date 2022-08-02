@@ -1019,7 +1019,8 @@ void MenuFunctions::main(uint32_t currentTime)
 
   #ifdef MARAUDER_MINI
     if (u_btn.justPressed()){
-      if (wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) {
+      if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) ||
+          (wifi_scan_obj.currentScanMode == OTA_UPDATE)) {
         if (current_menu->selected > 0) {
           current_menu->selected--;
           this->buttonSelected(current_menu->selected);
@@ -1033,7 +1034,8 @@ void MenuFunctions::main(uint32_t currentTime)
       }
     }
     if (d_btn.justPressed()){
-      if (wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) {
+      if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) ||
+          (wifi_scan_obj.currentScanMode == OTA_UPDATE)) {
         if (current_menu->selected < current_menu->list->size() - 1) {
           current_menu->selected++;
           this->buttonSelected(current_menu->selected);
@@ -1810,6 +1812,7 @@ void MenuFunctions::RunSetup()
   // Select update
   whichUpdateMenu.parentMenu = &deviceMenu;
   addNodes(&whichUpdateMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
+    wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
     changeMenu(whichUpdateMenu.parentMenu);
   });
   addNodes(&whichUpdateMenu, text_table1[39], TFT_GREEN, NULL, WEB_UPDATE, [this]() {
