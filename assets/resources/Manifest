@@ -1,5 +1,5 @@
 V:0
-T:1659334560
+T:1659419824
 D:apps
 D:badusb
 D:dolphin
@@ -54,7 +54,7 @@ D:dolphin/L2_Soldering_128x64
 D:dolphin/L3_Furippa3_128x64
 D:dolphin/L3_Hijack_radio_128x64
 D:dolphin/L3_Lab_research_128x54
-F:108cab764c0d56e46341841466e6cc2b:1586:dolphin/manifest.txt
+F:800428568d7e242db936d027afa7c72d:1586:dolphin/manifest.txt
 F:d37be8444102ec5cde5fe3a85d55b57d:481:dolphin/L1_Boxing_128x64/frame_0.bm
 F:54fb07443bc153ded9589b74d23b4263:461:dolphin/L1_Boxing_128x64/frame_1.bm
 F:e007afe130d699c715b99ce8e5b407bd:531:dolphin/L1_Boxing_128x64/frame_2.bm
@@ -288,7 +288,7 @@ F:81dc04c7b181f94b644079a71476dff4:4742:nfc/assets/aid.nfc
 F:86efbebdf41bb6bf15cc51ef88f069d5:2565:nfc/assets/country_code.nfc
 F:41b4f08774249014cb8d3dffa5f5c07d:1757:nfc/assets/currency_code.nfc
 F:c60e862919731b0bd538a1001bbc1098:17453:nfc/assets/mf_classic_dict.nfc
-F:13344d97ba659c773c2a3e74071b9906:31636:nfc/assets/mf_classic_dict_user.nfc
+F:7a8b1962f14d89b1a0c9845647a30060:30135:nfc/assets/mf_classic_dict_user.nfc
 D:subghz/Handicap
 D:subghz/Misc
 D:subghz/Vehicles
