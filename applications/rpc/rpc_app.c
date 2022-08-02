@@ -201,6 +201,8 @@ void rpc_system_app_send_started(RpcAppSystem* rpc_app) {
     furi_assert(session);
 
     rpc_app->state_msg->content.app_state_response.state = PB_App_AppState_APP_STARTED;
+
+    FURI_LOG_D(TAG, "SendStarted");
     rpc_send(session, rpc_app->state_msg);
 }
 
@@ -209,9 +211,9 @@ void rpc_system_app_send_exited(RpcAppSystem* rpc_app) {
     RpcSession* session = rpc_app->session;
     furi_assert(session);
 
-    FURI_LOG_D(TAG, "SendExit");
-
     rpc_app->state_msg->content.app_state_response.state = PB_App_AppState_APP_CLOSED;
+
+    FURI_LOG_D(TAG, "SendExit");
     rpc_send(session, rpc_app->state_msg);
 }
 
