@@ -60,7 +60,6 @@ bool buffered_file_stream_open(
     FS_OpenMode open_mode) {
     furi_assert(_stream);
     BufferedFileStream* stream = (BufferedFileStream*)_stream;
-    stream_cache_drop(stream->cache);
     furi_check(stream->stream_base.vtable == &buffered_file_stream_vtable);
     return file_stream_open(stream->file_stream, path, access_mode, open_mode);
 }
@@ -71,9 +70,9 @@ bool buffered_file_stream_close(Stream* _stream) {
     furi_check(stream->stream_base.vtable == &buffered_file_stream_vtable);
     bool success = false;
     do {
-        if(stream->sync_pending) {
-            if(!buffered_file_stream_flush(stream)) break;
-        }
+        if(!(stream->sync_pending ? buffered_file_stream_flush(stream) :
+                                    buffered_file_stream_unread(stream)))
+            break;
         if(!file_stream_close(stream->file_stream)) break;
         success = true;
     } while(false);
@@ -118,6 +117,7 @@ static bool buffered_file_stream_eof(BufferedFileStream* stream) {
 
 static void buffered_file_stream_clean(BufferedFileStream* stream) {
     // Not syncing because data will be deleted anyway
+    stream->sync_pending = false;
     stream_cache_drop(stream->cache);
     stream_clean(stream->file_stream);
 }
@@ -161,8 +161,7 @@ static size_t buffered_file_stream_tell(BufferedFileStream* stream) {
 static size_t buffered_file_stream_size(BufferedFileStream* stream) {
     size_t size = stream_size(stream->file_stream);
     if(stream->sync_pending) {
-        const size_t remaining_size =
-            stream_size(stream->file_stream) - stream_tell(stream->file_stream);
+        const size_t remaining_size = size - stream_tell(stream->file_stream);
         const size_t cache_size = stream_cache_size(stream->cache);
         if(cache_size > remaining_size) {
             size += (cache_size - remaining_size);
@@ -214,7 +213,6 @@ static bool buffered_file_stream_delete_and_insert(
     size_t delete_size,
     StreamWriteCB write_callback,
     const void* ctx) {
-    //TODO Implement a less aggressive method if possible
     bool success = false;
     do {
         if(!(stream->sync_pending ? buffered_file_stream_flush(stream) :
@@ -226,18 +224,18 @@ static bool buffered_file_stream_delete_and_insert(
     return success;
 }
 
-// Almost same as sync, but private
+// Write the cache into the underlying stream and adjust seek position
 static bool buffered_file_stream_flush(BufferedFileStream* stream) {
     bool success = false;
     do {
         const int32_t offset = stream_cache_size(stream->cache) - stream_cache_pos(stream->cache);
         if(!stream_cache_flush(stream->cache, stream->file_stream)) break;
-        stream->sync_pending = false;
         if(offset > 0) {
             if(!stream_seek(stream->file_stream, -offset, StreamOffsetFromCurrent)) break;
         }
         success = true;
     } while(false);
+    stream->sync_pending = false;
     return success;
 }
 
