@@ -9,7 +9,7 @@
             "type": "command",
             "command": "shellCommand.execute",
             "args": {
-                "command": "fbt get_blackmagic",
+                "command": "./fbt get_blackmagic",
                 "description": "Get Blackmagic device",
             }
         }
