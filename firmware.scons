@@ -167,6 +167,8 @@ fwenv.AppendUnique(
         "-u",
         "_printf_float",
         "-n",
+        "-Xlinker",
+        "-Map=${TARGET}.map",
     ],
 )
 
