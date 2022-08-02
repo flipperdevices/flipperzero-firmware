@@ -6,14 +6,9 @@
 <b>Latest Updates:</b>
 
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
-- Dolphin: Internal manifest updated to have animations always available with max level 30
-- Dolphin: Level animation sequence for level 3+ to be lvl1->2 for levels 1-20 and lvl2->3 for levels 21-30.
-- Dolphin: Assigned profile pic for levels 1-10, 11-20 and 21-30 respectively from default lvl 1, 2 & 3
-- Latest OFW updates [#1485](https://github.com/flipperdevices/flipperzero-firmware/pull/1485)
-- Music player plugin - removed second pointer fix from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
-- Dolphin: SD dolphin manifest updated to weight animations differently
-- FIXED SubGHz: Auto Detect Raw in READ action (Needs To Be Enabled In Read Settings) [THANKS TO perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
-- UPDATED [WiFi Scanner v.0.3 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `HIDDEN "INTAPP_wifi_scanner"` due to `Req: ESP8266 or WIFI DEV BOARD`
+- Removed extra logging for extended range checks
+- Latest OFW updates to come: [#1514](https://github.com/flipperdevices/flipperzero-firmware/pull/1514), [#1491](https://github.com/flipperdevices/flipperzero-firmware/pull/1491), [#1515](https://github.com/flipperdevices/flipperzero-firmware/pull/1515), [#1461](https://github.com/flipperdevices/flipperzero-firmware/pull/1461), [#1490](https://github.com/flipperdevices/flipperzero-firmware/pull/1490) & [#1412](https://github.com/flipperdevices/flipperzero-firmware/pull/1412)
+- TOFIX SubGHz: Auto Detect Raw Replay Issue
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
