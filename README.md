@@ -68,8 +68,6 @@ Install EPS8266 board version 2.7.4 for Arduino IDE. I had issues with higher ve
 
 Compile firmware for FlipperZero with new [application](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266/tree/main/applications/wifi_scanner)
 
-If you want compile for Dev Board then enable **FLIPPERZERO_DEV_BOARD_V_1** in code. Same goes to **ENABLE_MODULE_POWER**, **ENABLE_MODULE_DETECTION**
-
 Use next schematics to solder the WiFi Scanner board for FlipperZero
 
 ![image](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266/blob/main/rep_images/Schematics_1.jpg?raw=true)
