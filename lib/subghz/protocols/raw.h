@@ -19,21 +19,13 @@ extern const SubGhzProtocol subghz_protocol_raw;
  * Open file for writing
  * @param instance Pointer to a SubGhzProtocolDecoderRAW instance
  * @param dev_name  File name
- * @param frequency The frequency at which the signal was received, Hz
- * @param preset The modulation on which the signal was received, FuriHalSubGhzPreset
+ * @param preset The modulation on which the signal was received, SubGhzPresetDefinition
  * @return true On success
  */
 bool subghz_protocol_raw_save_to_file_init(
     SubGhzProtocolDecoderRAW* instance,
     const char* dev_name,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset);
-
-/**
- * Stop writing file to flash
- * @param instance Pointer to a SubGhzProtocolDecoderRAW instance
- */
-void subghz_protocol_raw_save_to_file_stop(SubGhzProtocolDecoderRAW* instance);
+    SubGhzPresetDefinition* preset);
 
 /**
  * Set SubGhzProtocolDecoderRAW to auto mode, which allows subghz_scene_receiver to capture RAW.
@@ -41,6 +33,12 @@ void subghz_protocol_raw_save_to_file_stop(SubGhzProtocolDecoderRAW* instance);
  * @param auto_mode Whether or not to enable auto mode
  */
 void subghz_protocol_decoder_raw_set_auto_mode(void* context, bool auto_mode);
+
+/**
+ * Stop writing file to flash
+ * @param instance Pointer to a SubGhzProtocolDecoderRAW instance
+ */
+void subghz_protocol_raw_save_to_file_stop(SubGhzProtocolDecoderRAW* instance);
 
 /**
  * Get the number of samples received SubGhzProtocolDecoderRAW.
@@ -73,8 +71,9 @@ void subghz_protocol_decoder_raw_reset(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderRAW instance
  * @param level Signal level true-high false-low
  * @param duration Duration of this level in, us
+ * @return whether or not data was written
  */
-void subghz_protocol_decoder_raw_write_data(void* context, bool level, uint32_t duration);
+bool subghz_protocol_decoder_raw_write_data(void* context, bool level, uint32_t duration);
 
 /**
  * Parse a raw sequence of levels and durations received from the air.
@@ -152,8 +151,7 @@ void subghz_protocol_raw_gen_fff_data(FlipperFormat* flipper_format, const char*
 bool subghz_protocol_decoder_raw_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset);
+    SubGhzPresetDefinition* preset);
 
 /**
  * Deserialize and generating an upload to send.
