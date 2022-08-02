@@ -13,6 +13,7 @@ env = ENV.Clone(
         ("compilation_db", {"COMPILATIONDB_COMSTR": "\tCDB\t${TARGET}"}),
         "fwbin",
         "fbt_apps",
+        "fbt_sdk",
     ],
     COMPILATIONDB_USE_ABSPATH=False,
     BUILD_DIR=fw_build_meta["build_dir"],
@@ -89,6 +90,15 @@ if not env["VERBOSE"]:
         HEXCOMSTR="\tHEX\t${TARGET}",
         BINCOMSTR="\tBIN\t${TARGET}",
         DFUCOMSTR="\tDFU\t${TARGET}",
+        OPENOCDCOMSTR="\tFLASH\t${SOURCE}",
+        SDK_PREGEN_COMSTR="\tPREGEN\t${TARGET}",
+        SDK_COMSTR="\tSDKSRC\t${TARGET}",
+        SDKSYM_UPDATER_COMSTR="\tSDKCHK\t${TARGET}",
+        SDKSYM_GENERATOR_COMSTR="\tSDKSYM\t${TARGET}",
+        APPMETA_COMSTR="\tAPPMETA\t${TARGET}",
+        APPMETAEMBED_COMSTR="\tFAP\t${TARGET}",
+        APPDUMP_COMSTR="\tFAPDUMP\t${TARGET}",
+        APPCHECK_COMSTR="\tFAPCHK\t${TARGET}",
     )
 
 
@@ -142,7 +152,7 @@ extapps = fwenv["FW_EXTAPPS"] = SConscript(
 
 
 # Add preprocessor definitions for current set of apps
-fwenv.Append(
+fwenv.AppendUnique(
     CPPDEFINES=fwenv["APPBUILD"].get_apps_cdefs(),
 )
 

@@ -115,6 +115,7 @@ def generate(env):
     env.AddMethod(AddFwProject)
     env.AddMethod(DistCommand)
     env.AddMethod(AddOpenOCDFlashTarget)
+    env.AddMethod(GetProjetDirName)
     env.AddMethod(AddJFlashTarget)
     env.AddMethod(AddUsbFlashTarget)
 
