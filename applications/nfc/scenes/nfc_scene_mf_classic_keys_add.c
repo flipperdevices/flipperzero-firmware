@@ -37,6 +37,7 @@ bool nfc_scene_mf_classic_keys_add_on_event(void* context, SceneManagerEvent eve
                 }
             }
             if(key_added) {
+                scene_manager_set_scene_state(nfc->scene_manager, NfcSceneSaveSuccess, NfcSceneMfClassicKeys);
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
             } else {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);

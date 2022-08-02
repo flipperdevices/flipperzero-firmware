@@ -63,6 +63,7 @@ bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
             }
             strlcpy(nfc->dev->dev_name, nfc->text_store, strlen(nfc->text_store) + 1);
             if(nfc_device_save(nfc->dev, nfc->text_store)) {
+                scene_manager_set_scene_state(nfc->scene_manager, NfcSceneSaveSuccess, NfcSceneFileSelect);
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
                 consumed = true;
             } else {
