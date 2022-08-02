@@ -2,7 +2,7 @@
 
 Dolphin assets are split into 3 parts:
 
-- essential - Essential animations that are used for blocking system notifications. They are packed to `assets_dolphin_essential.[h,c]`.
+- blocking - Essential animations that are used for blocking system notifications. They are packed to `assets_dolphin_essential.[h,c]`.
 - internal  - Internal animations that are used for idle dolphin animation. Converted to `assets_dolphin_internal.[h,c]`.
 - external  - External animations that are used for idle dolphin animation. Packed to resource folder and placed on SD card.
 
