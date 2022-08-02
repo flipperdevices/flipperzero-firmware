@@ -39,7 +39,7 @@ bool LfRfidAppSceneRpc::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
         app->view_controller.send_event(&view_event);
         // rpc_system_app_confirm(app->rpc_ctx, RpcAppEventAppExit, true);
     // } else if(event->type == LfRfidApp::EventType::RpcSessionClose) {
-        Detach RPC
+        // // // // Detach RPC
         // rpc_system_app_set_callback(app->rpc_ctx, NULL, NULL);
         // app->rpc_ctx = NULL;
 
