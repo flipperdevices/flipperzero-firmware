@@ -158,7 +158,7 @@ static bool buffered_file_stream_delete_and_insert(
     StreamWriteCB write_callback,
     const void* ctx) {
     return buffered_file_stream_unread(stream) &&
-        stream_delete_and_insert(stream->file_stream, delete_size, write_callback, ctx);
+           stream_delete_and_insert(stream->file_stream, delete_size, write_callback, ctx);
 }
 
 // Drop read cache and adjust the underlying stream seek position
