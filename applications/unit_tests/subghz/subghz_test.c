@@ -386,8 +386,7 @@ MU_TEST(subghz_decoder_marantec_test) {
 
 MU_TEST(subghz_decoder_bett_test) {
     mu_assert(
-        subghz_decoder_test(
-            EXT_PATH("unit_tests/subghz/bett_raw.sub"), SUBGHZ_PROTOCOL_BETT_NAME),
+        subghz_decoder_test(EXT_PATH("unit_tests/subghz/bett_raw.sub"), SUBGHZ_PROTOCOL_BETT_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_BETT_NAME " error\r\n");
 }
 
