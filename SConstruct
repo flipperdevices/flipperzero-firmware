@@ -9,9 +9,10 @@
 import os
 import subprocess
 
+DefaultEnvironment(tools=[])
+
 EnsurePythonVersion(3, 8)
 
-DefaultEnvironment(tools=[])
 # Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
 
 
@@ -159,6 +160,18 @@ if GetOption("fullenv") or any(
 # Target for copying & renaming binaries to dist folder
 basic_dist = distenv.DistCommand("fw_dist", distenv["DIST_DEPENDS"])
 distenv.Default(basic_dist)
+
+dist_dir = distenv.GetProjetDirName()
+plugin_dist = [
+    distenv.Install(
+        f"#/dist/{dist_dir}/plugins/debug", firmware_env["FW_EXTAPPS"]["debug"]
+    ),
+    distenv.Install(
+        f"#/dist/{dist_dir}/plugins", firmware_env["FW_EXTAPPS"]["compact"]
+    ),
+]
+Alias("plugin_dist", plugin_dist)
+# distenv.Default(plugin_dist)
 
 # Target for bundling core2 package for qFlipper
 copro_dist = distenv.CoproBuilder(
