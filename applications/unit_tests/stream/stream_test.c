@@ -387,7 +387,7 @@ MU_TEST(stream_split_test) {
     furi_record_close(RECORD_STORAGE);
 }
 
-MU_TEST(stream_write_after_read_test) {
+MU_TEST(stream_buffered_write_after_read_test) {
     const char* prefix = "I write ";
     const char* substr = "Hello there";
 
@@ -498,7 +498,7 @@ MU_TEST_SUITE(stream_suite) {
     MU_RUN_TEST(stream_write_read_save_load_test);
     MU_RUN_TEST(stream_composite_test);
     MU_RUN_TEST(stream_split_test);
-    MU_RUN_TEST(stream_write_after_read_test);
+    MU_RUN_TEST(stream_buffered_write_after_read_test);
     MU_RUN_TEST(stream_buffered_large_file_test);
 }
 
