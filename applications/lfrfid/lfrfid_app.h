@@ -102,4 +102,4 @@ public:
 
     void make_app_folder();
     //bool rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context);
-}
+};
