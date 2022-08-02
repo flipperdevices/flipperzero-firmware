@@ -3,6 +3,7 @@
 #include <dolphin/dolphin.h>
 #include <lib/subghz/protocols/raw.h>
 #include <lib/toolbox/path.h>
+#include <stm32wbxx_ll_rtc.h>
 
 #define RAW_FILE_NAME "R_"
 #define TAG "SubGhzSceneReadRAW"
