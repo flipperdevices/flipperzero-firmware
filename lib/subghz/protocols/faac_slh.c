@@ -160,7 +160,6 @@ bool subghz_protocol_faac_slh_create_data(
     const char* manufacture_name,
     SubGhzPresetDefinition* preset) {
     furi_assert(context);
-    // roguemaster don't steal!!!
     SubGhzProtocolEncoderFaacSLH* instance = context;
     instance->generic.serial = serial;
     instance->generic.btn = btn;
@@ -339,7 +338,7 @@ void subghz_protocol_decoder_faac_slh_feed(void* context, bool level, uint32_t d
             if(duration >= ((uint32_t)subghz_protocol_faac_slh_const.te_short * 3 +
                             subghz_protocol_faac_slh_const.te_delta)) {
                 instance->decoder.parser_step = FaacSLHDecoderStepFoundPreambula;
-                if(instance->decoder.decode_count_bit >=
+                if(instance->decoder.decode_count_bit ==
                    subghz_protocol_faac_slh_const.min_count_bit_for_found) {
                     instance->generic.data = instance->decoder.decode_data;
                     instance->generic.data_count_bit = instance->decoder.decode_count_bit;
@@ -456,6 +455,11 @@ bool subghz_protocol_decoder_faac_slh_deserialize(void* context, FlipperFormat* 
     do {
         if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
             FURI_LOG_E(TAG, "Deserialize error");
+            break;
+        }
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_faac_slh_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
             break;
         }
         if(!flipper_format_rewind(flipper_format)) {
