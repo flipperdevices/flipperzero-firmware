@@ -58,15 +58,6 @@ env = ENV.Clone(
                 "FURI_DEBUG" if ENV["DEBUG"] else "FURI_NDEBUG",
             ],
         },
-        "flipper_application": {
-            "CCFLAGS": [
-                "-Og",
-            ],
-            "CPPDEFINES": [
-                "NDEBUG",
-                "FURI_DEBUG" if ENV["DEBUG"] else "FURI_NDEBUG",
-            ],
-        },
     },
 )
 
@@ -136,13 +127,11 @@ fwenv.LoadApplicationManifests()
 fwenv.PrepareApplicationsBuild()
 
 # Build external apps
-extapps = fwenv["FW_EXTAPPS"] = SConscript(
-    "applications/extapps.scons", exports={"ENV": fwenv}
-)
+extapps = SConscript("applications/extapps.scons", exports={"ENV": fwenv})
 
 
 # Add preprocessor definitions for current set of apps
-fwenv.Append(
+fwenv.AppendUnique(
     CPPDEFINES=fwenv["APPBUILD"].get_apps_cdefs(),
 )
 
@@ -187,6 +176,7 @@ fwenv.AppendUnique(
 # print(fwenv.Dump())
 
 # Full firmware definition
+
 fwelf = fwenv["FW_ELF"] = fwenv.Program(
     "${FIRMWARE_BUILD_CFG}",
     sources,
@@ -211,7 +201,6 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
         "misc",
         "mbedtls",
         "loclass",
-        "flipper_application",
         # 2nd round
         "flipperformat",
         "toolbox",
@@ -263,42 +252,6 @@ if should_gen_cdb_and_link_dir(fwenv, BUILD_TARGETS):
     fw_artifacts.append(link_dir_command)
 
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", fw_artifacts)
-
-if fwenv["IS_BASE_FIRMWARE"]:
-    sdk_source = fwenv.SDKPrebuilder(
-        "sdk_origin",
-        [],
-        # Filtering out things cxxheaderparser cannot handle
-        SDK_PP_FLAGS=[
-            '-D"_Static_assert(x,y)="',
-            '-D"__asm__(x)="',
-            '-D"__attribute__(x)="',
-            "-Drestrict=",
-            "-D_Noreturn=",
-            "-D__restrict=",
-            "-D__extension__=",
-            "-D__inline=inline",
-            "-D__inline__=inline",
-        ],
-    )
-    Depends(sdk_source, fwenv["SDK_HEADERS"])
-
-    sdk_tree = fwenv.SDKTree("sdk/sdk.opts", "sdk_origin")
-    AlwaysBuild(sdk_tree)
-    Alias("sdk_tree", sdk_tree)
-
-    sdk_apicheck = fwenv.SDKSymUpdater(fwenv.subst("$SDK_DEFINITION"), "sdk_origin")
-    Precious(sdk_apicheck)
-    AlwaysBuild(sdk_apicheck)
-    Alias("sdk_check", sdk_apicheck)
-
-    sdk_apisyms = fwenv.SDKSymGenerator(
-        "assets/compiled/symbols.h", fwenv.subst("$SDK_DEFINITION")
-    )
-    Alias("api_syms", sdk_apisyms)
-
-    if fwenv["FORCE"]:
-        fwenv.AlwaysBuild(sdk_source, sdk_tree, sdk_apicheck, sdk_apisyms)
 
 
 Return("fwenv")

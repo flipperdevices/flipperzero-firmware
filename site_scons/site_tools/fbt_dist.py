@@ -4,7 +4,7 @@ from SCons.Script import Mkdir
 from SCons.Defaults import Touch
 
 
-def GetProjetDirName(env, project=None):
+def get_variant_dirname(env, project=None):
     parts = [f"f{env['TARGET_HW']}"]
     if project:
         parts.append(project)
@@ -21,7 +21,7 @@ def GetProjetDirName(env, project=None):
 
 
 def create_fw_build_targets(env, configuration_name):
-    flavor = GetProjetDirName(env, configuration_name)
+    flavor = get_variant_dirname(env, configuration_name)
     build_dir = env.Dir("build").Dir(flavor).abspath
     return env.SConscript(
         "firmware.scons",
@@ -49,7 +49,7 @@ def AddFwProject(env, base_env, fw_type, fw_env_key):
         ],
     )
 
-    env.Replace(DIST_DIR=env.GetProjetDirName())
+    env.Replace(DIST_DIR=get_variant_dirname(env))
     return project_env
 
 
@@ -103,7 +103,7 @@ def DistCommand(env, name, source, **kw):
     command = env.Command(
         target,
         source,
-        '@${PYTHON3} ${ROOT_DIR.abspath}/scripts/sconsdist.py copy -p ${DIST_PROJECTS} -s "${DIST_SUFFIX}" ${DIST_EXTRA}',
+        '@${PYTHON3} "${ROOT_DIR.abspath}/scripts/sconsdist.py" copy -p ${DIST_PROJECTS} -s "${DIST_SUFFIX}" ${DIST_EXTRA}',
         **kw,
     )
     env.Pseudo(target)
@@ -127,7 +127,7 @@ def generate(env):
             "UsbInstall": Builder(
                 action=[
                     Action(
-                        "${PYTHON3} ${ROOT_DIR.abspath}/scripts/selfupdate.py dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}/update.fuf"
+                        '${PYTHON3} "${ROOT_DIR.abspath}/scripts/selfupdate.py" dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}/update.fuf'
                     ),
                     Touch("${TARGET}"),
                 ]
@@ -136,7 +136,7 @@ def generate(env):
                 action=Action(
                     [
                         Mkdir("$TARGET"),
-                        "${PYTHON3} ${ROOT_DIR.abspath}/scripts/assets.py "
+                        '${PYTHON3} "${ROOT_DIR.abspath}/scripts/assets.py" '
                         "copro ${COPRO_CUBE_DIR} "
                         "${TARGET} ${COPRO_MCU_FAMILY} "
                         "--cube_ver=${COPRO_CUBE_VERSION} "
