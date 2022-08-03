@@ -33,8 +33,6 @@ void infrared_scene_remote_on_enter(void* context) {
 
     infrared_worker_tx_set_get_signal_callback(
         infrared->worker, infrared_worker_tx_get_signal_steady_callback, infrared);
-    infrared_worker_tx_set_signal_sent_callback(
-        infrared->worker, infrared_signal_sent_callback, infrared);
 
     size_t button_count = infrared_remote_get_button_count(remote);
     for(size_t i = 0; i < button_count; ++i) {
@@ -81,6 +79,11 @@ bool infrared_scene_remote_on_event(void* context, SceneManagerEvent event) {
         const uint32_t possible_scenes[] = {InfraredSceneRemoteList, InfraredSceneStart};
         consumed = scene_manager_search_and_switch_to_previous_scene_one_of(
             scene_manager, possible_scenes, sizeof(possible_scenes) / sizeof(uint32_t));
+    } else if(event.type == SceneManagerEventTypeTick) {
+        if(infrared->app_state.is_tx_started) {
+            infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkSend);
+        }
+        consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         const uint16_t custom_type = infrared_custom_event_get_type(event.event);
         const int16_t button_index = infrared_custom_event_get_value(event.event);
@@ -112,7 +115,7 @@ bool infrared_scene_remote_on_event(void* context, SceneManagerEvent event) {
 
 void infrared_scene_remote_on_exit(void* context) {
     Infrared* infrared = context;
+    infrared_tx_stop(infrared);
     infrared_worker_tx_set_get_signal_callback(infrared->worker, NULL, NULL);
-    infrared_worker_tx_set_signal_sent_callback(infrared->worker, NULL, NULL);
     button_menu_reset(infrared->button_menu);
 }

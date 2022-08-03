@@ -2,11 +2,6 @@
 
 #include <dolphin/dolphin.h>
 
-typedef enum {
-    InfraredSceneLearnSuccessStateIdle = 0,
-    InfraredSceneLearnSuccessStateSending = 1,
-} InfraredSceneLearnSuccessState;
-
 static void
     infrared_scene_learn_success_dialog_result_callback(DialogExResult result, void* context) {
     Infrared* infrared = context;
@@ -23,8 +18,6 @@ void infrared_scene_learn_success_on_enter(void* context) {
 
     infrared_worker_tx_set_get_signal_callback(
         infrared->worker, infrared_worker_tx_get_signal_steady_callback, context);
-    infrared_worker_tx_set_signal_sent_callback(
-        infrared->worker, infrared_signal_sent_callback, context);
 
     if(infrared_signal_is_raw(signal)) {
         InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
@@ -65,51 +58,43 @@ void infrared_scene_learn_success_on_enter(void* context) {
     dialog_ex_set_context(dialog_ex, context);
     dialog_ex_enable_extended_events(dialog_ex);
 
-    scene_manager_set_scene_state(
-        infrared->scene_manager, InfraredSceneLearnSuccess, InfraredSceneLearnSuccessStateIdle);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewDialogEx);
 }
 
 bool infrared_scene_learn_success_on_event(void* context, SceneManagerEvent event) {
     Infrared* infrared = context;
+    InfraredAppState* app_state = &infrared->app_state;
     SceneManager* scene_manager = infrared->scene_manager;
-    uint32_t scene_state = scene_manager_get_scene_state(scene_manager, InfraredSceneLearnSuccess);
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeTick) {
-        if(scene_state == InfraredSceneLearnSuccessStateIdle) {
-            infrared_play_notification_message(infrared, InfraredNotificationMessageGreenOn);
-        }
+        const uint32_t message = app_state->is_tx_started ? InfraredNotificationMessageBlinkSend :
+                                                            InfraredNotificationMessageGreenOn;
+        infrared_play_notification_message(infrared, message);
         consumed = true;
     } else if(event.type == SceneManagerEventTypeBack) {
-        if(scene_state == InfraredSceneLearnSuccessStateIdle) {
+        if(!app_state->is_tx_started) {
             scene_manager_next_scene(scene_manager, InfraredSceneAskBack);
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == DialogExResultLeft) {
-            if(scene_state == InfraredSceneLearnSuccessStateIdle) {
+            if(!app_state->is_tx_started) {
                 scene_manager_next_scene(scene_manager, InfraredSceneAskRetry);
             }
             consumed = true;
         } else if(event.event == DialogExResultRight) {
-            if(scene_state == InfraredSceneLearnSuccessStateIdle) {
+            if(!app_state->is_tx_started) {
                 scene_manager_next_scene(scene_manager, InfraredSceneLearnEnterName);
             }
             consumed = true;
         } else if(event.event == DialogExPressCenter) {
-            if(scene_state == InfraredSceneLearnSuccessStateIdle) {
-                scene_manager_set_scene_state(
-                    scene_manager,
-                    InfraredSceneLearnSuccess,
-                    InfraredSceneLearnSuccessStateSending);
+            if(!app_state->is_tx_started) {
                 infrared_tx_start_received(infrared);
             }
             consumed = true;
         } else if(event.event == DialogExReleaseCenter) {
-            if(scene_state == InfraredSceneLearnSuccessStateSending) {
-                scene_manager_set_scene_state(
-                    scene_manager, InfraredSceneLearnSuccess, InfraredSceneLearnSuccessStateIdle);
+            if(app_state->is_tx_started) {
                 infrared_tx_stop(infrared);
                 infrared_play_notification_message(infrared, InfraredNotificationMessageGreenOff);
             }
@@ -122,9 +107,8 @@ bool infrared_scene_learn_success_on_event(void* context, SceneManagerEvent even
 
 void infrared_scene_learn_success_on_exit(void* context) {
     Infrared* infrared = context;
-    InfraredWorker* worker = infrared->worker;
     dialog_ex_reset(infrared->dialog_ex);
+    infrared_tx_stop(infrared);
     infrared_play_notification_message(infrared, InfraredNotificationMessageGreenOff);
-    infrared_worker_tx_set_get_signal_callback(worker, NULL, NULL);
-    infrared_worker_tx_set_signal_sent_callback(worker, NULL, NULL);
+    infrared_worker_tx_set_get_signal_callback(infrared->worker, NULL, NULL);
 }

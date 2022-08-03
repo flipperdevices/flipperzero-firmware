@@ -300,6 +300,7 @@ void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal) {
     }
 
     DOLPHIN_DEED(DolphinDeedIrSend);
+    infrared->app_state.is_tx_started = true;
     infrared_worker_tx_start(infrared->worker);
 }
 
@@ -309,14 +310,17 @@ void infrared_tx_start_button_index(Infrared* infrared, size_t button_index) {
     InfraredRemoteButton* button = infrared_remote_get_button(infrared->remote, button_index);
     InfraredSignal* signal = infrared_remote_button_get_signal(button);
 
+    infrared->app_state.is_tx_started = true;
     infrared_tx_start_signal(infrared, signal);
 }
 
 void infrared_tx_start_received(Infrared* infrared) {
+    infrared->app_state.is_tx_started = true;
     infrared_tx_start_signal(infrared, infrared->received_signal);
 }
 
 void infrared_tx_stop(Infrared* infrared) {
+    infrared->app_state.is_tx_started = false;
     infrared_worker_tx_stop(infrared->worker);
 }
 
