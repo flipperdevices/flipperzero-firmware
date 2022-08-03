@@ -28,7 +28,7 @@ typedef struct {
 
 typedef struct {
     SpectrumAnalyzerModel* model;
-    FuriMutex** model_mutex;
+    FuriMutex* model_mutex;
 
     FuriMessageQueue* event_queue;
 
