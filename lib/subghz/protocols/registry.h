@@ -30,6 +30,7 @@
 #include "power_smart.h"
 #include "marantec.h"
 #include "bett.h"
+#include "doitrand.h"
 
 /**
  * Registration by name SubGhzProtocol.

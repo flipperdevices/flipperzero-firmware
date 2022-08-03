@@ -48,7 +48,6 @@ struct SubGhzProtocolEncoderBETT {
 
 typedef enum {
     BETTDecoderStepReset = 0,
-    BETTDecoderStepFoundStartBit,
     BETTDecoderStepSaveDuration,
     BETTDecoderStepCheckDuration,
 } BETTDecoderStep;
