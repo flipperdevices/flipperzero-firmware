@@ -358,12 +358,6 @@ void infrared_show_loading_popup(Infrared* infrared, bool show) {
     }
 }
 
-void infrared_signal_sent_callback(void* context) {
-    furi_assert(context);
-    Infrared* infrared = context;
-    infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkSend);
-}
-
 void infrared_signal_received_callback(void* context, InfraredWorkerSignal* received_signal) {
     furi_assert(context);
     Infrared* infrared = context;

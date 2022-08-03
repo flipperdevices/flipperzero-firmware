@@ -133,7 +133,6 @@ void infrared_text_store_clear(Infrared* infrared, uint32_t bank);
 void infrared_play_notification_message(Infrared* infrared, uint32_t message);
 void infrared_show_loading_popup(Infrared* infrared, bool show);
 
-void infrared_signal_sent_callback(void* context);
 void infrared_signal_received_callback(void* context, InfraredWorkerSignal* received_signal);
 void infrared_text_input_callback(void* context);
 void infrared_popup_closed_callback(void* context);
