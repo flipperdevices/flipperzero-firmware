@@ -31,7 +31,7 @@ void nfc_scene_mf_classic_info_on_enter(void* context) {
         widget, 0, 22, AlignLeft, AlignTop, FontSecondary, string_get_cstr(str_tmp));
     string_printf(
         str_tmp,
-        "ATQA: %02X %02X SAK: %02X",
+        "ATQA: %02X %02X   SAK: %02X",
         dev_data->nfc_data.atqa[0],
         dev_data->nfc_data.atqa[1],
         dev_data->nfc_data.sak);
