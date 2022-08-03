@@ -410,20 +410,32 @@ void minunit_print_fail(const char* error);
             return;                                                                   \
         } else { minunit_print_progress(); })
 
-#define mu_assert_mem_eq(expected, result, size)                                  \
-    MU__SAFE_BLOCK(                                                               \
-        const void* minunit_tmp_e = expected; const void* minunit_tmp_r = result; \
-        minunit_assert++;                                                         \
-        if(memcmp(minunit_tmp_e, minunit_tmp_r, size)) {                          \
-            snprintf(                                                             \
-                minunit_last_message,                                             \
-                MINUNIT_MESSAGE_LEN,                                              \
-                "%s failed:\r\n\t%s:%d: mem not equal",                           \
-                __func__,                                                         \
-                __FILE__,                                                         \
-                __LINE__);                                                        \
-            minunit_status = 1;                                                   \
-            return;                                                               \
+#define mu_assert_mem_eq(expected, result, size)                                   \
+    MU__SAFE_BLOCK(                                                                \
+        const void* minunit_tmp_e = expected; const void* minunit_tmp_r = result;  \
+        minunit_assert++;                                                          \
+        if(memcmp(minunit_tmp_e, minunit_tmp_r, size)) {                           \
+            snprintf(                                                              \
+                minunit_last_message,                                              \
+                MINUNIT_MESSAGE_LEN,                                               \
+                "%s failed:\r\n\t%s:%d: mem not equal\r\n\tEXP  RES",              \
+                __func__,                                                          \
+                __FILE__,                                                          \
+                __LINE__);                                                         \
+            for(size_t __index = 0; __index < size; __index++) {                   \
+                if(strlen(minunit_last_message) > MINUNIT_MESSAGE_LEN - 20) break; \
+                uint8_t __e = ((uint8_t*)minunit_tmp_e)[__index];                  \
+                uint8_t __r = ((uint8_t*)minunit_tmp_r)[__index];                  \
+                snprintf(                                                          \
+                    minunit_last_message + strlen(minunit_last_message),           \
+                    MINUNIT_MESSAGE_LEN - strlen(minunit_last_message),            \
+                    "\r\n\t%02X %s %02X",                                          \
+                    __e,                                                           \
+                    ((__e == __r) ? ".." : "!="),                                  \
+                    __r);                                                          \
+            }                                                                      \
+            minunit_status = 1;                                                    \
+            return;                                                                \
         } else { minunit_print_progress(); })
 
 #define mu_assert_null(result)                                                    \
