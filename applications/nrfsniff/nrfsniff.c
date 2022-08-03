@@ -162,7 +162,7 @@ static bool save_addr_to_file(Storage* storage, uint8_t* data, uint8_t size) {
     Stream* stream = file_stream_alloc(storage);
 
     if(target_rate == 8) rate = 2;
-    sprintf(ending, ",%d\n", rate);
+    snprintf(ending, strlen(ending), ",%d\n", rate);
     hexlify(data, size, addrline);
     strcat(addrline, ending);
     linesize = strlen(addrline);
