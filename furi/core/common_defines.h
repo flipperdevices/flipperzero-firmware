@@ -63,11 +63,6 @@ extern "C" {
 #define NONNULL __attribute__((nonnull))
 #endif
 
-/** @brief Macro for marking function arguments from # to # as non null. */
-#ifndef NONNULL_ARGS
-#define NONNULL_ARGS(from, to) __attribute__((nonnull(from, to)))
-#endif
-
 #ifndef ALIGN
 #define ALIGN(n) __attribute__((aligned(n)))
 #endif
