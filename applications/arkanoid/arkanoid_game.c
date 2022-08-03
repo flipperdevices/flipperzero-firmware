@@ -167,7 +167,7 @@ void move_ball(Canvas* canvas) {
                        leftBall <= rightBrick && rightBall >= leftBrick) {
                         // Draw score
                         score += (level * 10);
-                        snprintf(text, "SCORE:%u", score);
+                        sprintf(text, "SCORE:%u", score);
                         canvas_draw_str(canvas, 80, 90, text);
 
                         brickCount++;
@@ -209,7 +209,7 @@ void move_ball(Canvas* canvas) {
 }
 
 void draw_lives(Canvas* canvas) {
-    snprintf(text, "LIVES:%u", lives);
+    sprintf(text, "LIVES:%u", lives);
     canvas_draw_str(canvas, 0, 90, text);
 }
 

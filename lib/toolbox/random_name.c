@@ -9,7 +9,7 @@ void set_random_name(char* name, uint8_t max_name_size) {
     uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
     uint32_t date = LL_RTC_DATE_Get(RTC); // 0xWWDDMMYY
     char strings[1][25];
-    snprintf(
+    sprintf(
         strings[0],
         "%s%.4d%.2d%.2d%.2d%.2d",
         "s",
@@ -23,7 +23,7 @@ void set_random_name(char* name, uint8_t max_name_size) {
         ,
         __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF) // DAY
     );
-    snprintf(name, max_name_size, "%s", strings[0]);
+    sniprintf(name, max_name_size, "%s", strings[0]);
     // Set first symbol to upper case
     name[0] = name[0] - 0x20;
 }

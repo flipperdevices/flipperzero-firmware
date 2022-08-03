@@ -39,19 +39,19 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     char strings[3][20];
     int curMin = (timerSecs / 60);
     int curSec = timerSecs - (curMin * 60);
-    snprintf(
+    sprintf(
         strings[0],
         "%.4d-%.2d-%.2d",
         state->datetime.year,
         state->datetime.month,
         state->datetime.day);
-    snprintf(
+    sprintf(
         strings[1],
         "%.2d:%.2d:%.2d",
         state->datetime.hour,
         state->datetime.minute,
         state->datetime.second);
-    snprintf(strings[2], "%.2d:%.2d", curMin, curSec);
+    sprintf(strings[2], "%.2d:%.2d", curMin, curSec);
     release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
