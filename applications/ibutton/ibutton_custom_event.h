@@ -12,5 +12,4 @@ enum iButtonCustomEvent {
 
     iButtonCustomEventRpcLoad,
     iButtonCustomEventRpcExit,
-    iButtonCustomEventRpcSessionClose,
 };
