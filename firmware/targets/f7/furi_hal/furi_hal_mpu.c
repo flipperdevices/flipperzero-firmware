@@ -11,7 +11,7 @@ void furi_hal_mpu_init() {
     furi_hal_mpu_enable();
 
     // NULL pointer dereference protection
-    furi_hal_mpu_protect_no_access(FuriHalRegionNULL, 0x00, FuriHalMPURegionSize1MB);
+    furi_hal_mpu_protect_no_access(FuriHalMpuRegionNULL, 0x00, FuriHalMPURegionSize1MB);
 }
 
 void furi_hal_mpu_enable() {
@@ -23,7 +23,7 @@ void furi_hal_mpu_disable() {
 }
 
 void furi_hal_mpu_protect_no_access(
-    FuriHalRegion region,
+    FuriHalMpuRegion region,
     uint32_t address,
     FuriHalMPURegionSize size) {
     uint32_t size_ll = size;
@@ -36,7 +36,7 @@ void furi_hal_mpu_protect_no_access(
 }
 
 void furi_hal_mpu_protect_read_only(
-    FuriHalRegion region,
+    FuriHalMpuRegion region,
     uint32_t address,
     FuriHalMPURegionSize size) {
     uint32_t size_ll = size;
@@ -48,7 +48,7 @@ void furi_hal_mpu_protect_read_only(
     furi_hal_mpu_enable();
 }
 
-void furi_hal_mpu_protect_disable(FuriHalRegion region) {
+void furi_hal_mpu_protect_disable(FuriHalMpuRegion region) {
     furi_hal_mpu_disable();
     LL_MPU_DisableRegion(region);
     furi_hal_mpu_enable();
@@ -62,5 +62,5 @@ void furi_hal_mpu_set_stack_protection(uint32_t* stack) {
     if(stack_ptr < (uint32_t)stack) stack_ptr += (mask + 1);
 
     furi_hal_mpu_protect_read_only(
-        FuriHalRegionStack, stack_ptr, FURI_HAL_MPU_STACK_PROTECT_REGION);
+        FuriHalMpuRegionStack, stack_ptr, FURI_HAL_MPU_STACK_PROTECT_REGION);
 }

@@ -36,6 +36,7 @@ void furi_hal_deinit_early() {
 }
 
 void furi_hal_init() {
+    furi_hal_mpu_init();
     furi_hal_clock_init();
     furi_hal_console_init();
     furi_hal_rtc_init();
@@ -77,7 +78,6 @@ void furi_hal_init() {
 #endif
     furi_hal_bt_init();
     furi_hal_compress_icon_init();
-    furi_hal_mpu_init();
 
     // FatFS driver initialization
     MX_FATFS_Init();

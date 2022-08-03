@@ -8,16 +8,20 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
-    FuriHalRegionNULL = 0x00, // region 0 used to protect null pointer dereference
-    FuriHalRegionStack = 0x01, // region 1 used to protect stack
-    FuriHalRegion2 = 0x02,
-    FuriHalRegion3 = 0x03,
-    FuriHalRegion4 = 0x04,
-    FuriHalRegion5 = 0x05,
-    FuriHalRegion6 = 0x06,
-    FuriHalRegion7 = 0x07,
-} FuriHalRegion;
+    FuriHalMpuRegionNULL = 0x00, // region 0 used to protect null pointer dereference
+    FuriHalMpuRegionStack = 0x01, // region 1 used to protect stack
+    FuriHalMpuRegion2 = 0x02,
+    FuriHalMpuRegion3 = 0x03,
+    FuriHalMpuRegion4 = 0x04,
+    FuriHalMpuRegion5 = 0x05,
+    FuriHalMpuRegion6 = 0x06,
+    FuriHalMpuRegion7 = 0x07,
+} FuriHalMpuRegion;
 
 typedef enum {
     FuriHalMPURegionSize32B = 0x04U,
@@ -66,13 +70,17 @@ void furi_hal_mpu_enable();
 void furi_hal_mpu_disable();
 
 void furi_hal_mpu_protect_no_access(
-    FuriHalRegion region,
+    FuriHalMpuRegion region,
     uint32_t address,
     FuriHalMPURegionSize size);
 
 void furi_hal_mpu_protect_read_only(
-    FuriHalRegion region,
+    FuriHalMpuRegion region,
     uint32_t address,
     FuriHalMPURegionSize size);
 
-void furi_hal_mpu_protect_disable(FuriHalRegion region);
+void furi_hal_mpu_protect_disable(FuriHalMpuRegion region);
+
+#ifdef __cplusplus
+}
+#endif
