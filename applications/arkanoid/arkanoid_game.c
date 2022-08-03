@@ -115,7 +115,7 @@ void move_ball(Canvas* canvas) {
             released = false;
             lives--;
 
-            snprintf(text, 10, "LIVES:%u", lives);
+            snprintf(text, sizeof(text), "LIVES:%u", lives);
             canvas_draw_str(canvas, 0, 90, text);
 
             // arduboy.tunes.tone(175, 250);
@@ -167,7 +167,7 @@ void move_ball(Canvas* canvas) {
                        leftBall <= rightBrick && rightBall >= leftBrick) {
                         // Draw score
                         score += (level * 10);
-                        snprintf(text, 10, "SCORE:%u", score);
+                        snprintf(text, sizeof(text), "SCORE:%u", score);
                         canvas_draw_str(canvas, 80, 90, text);
 
                         brickCount++;

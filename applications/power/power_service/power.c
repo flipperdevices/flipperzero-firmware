@@ -16,7 +16,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
 
     if(power->info.gauge_is_ok) {
         char batteryPercentile[5];
-        snprintf(batteryPercentile, 5, "%d", power->info.charge);
+        snprintf(batteryPercentile, sizeof(batteryPercentile), "%d", power->info.charge);
         strcat(batteryPercentile, "%");
 
         if((power->displayBatteryPercentage == 1) &&

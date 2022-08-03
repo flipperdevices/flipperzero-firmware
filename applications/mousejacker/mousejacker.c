@@ -52,7 +52,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
 
     canvas_set_font(canvas, FontSecondary);
-    snprintf(target_text, 30, target_fmt_text, target_address_str);
+    snprintf(target_text, sizeof(target_text), target_fmt_text, target_address_str);
     canvas_draw_str_aligned(canvas, 10, 10, AlignLeft, AlignBottom, target_text);
     canvas_draw_str_aligned(canvas, 10, 30, AlignLeft, AlignBottom, "Press Ok button to ");
     canvas_draw_str_aligned(canvas, 10, 40, AlignLeft, AlignBottom, "browse for ducky script");
@@ -74,7 +74,7 @@ static void mousejacker_state_init(PluginState* const plugin_state) {
 
 static void hexlify(uint8_t* in, uint8_t size, char* out) {
     memset(out, 0, size * 2);
-    for(int i = 0; i < size; i++) snprintf(out + strlen(out), strlen(out + strlen(out)), "%02X", in[i]);
+    for(int i = 0; i < size; i++) snprintf(out + strlen(out), sizeof(out + strlen(out)), "%02X", in[i]);
 }
 
 static bool open_ducky_script(Storage* storage, Stream* stream) {

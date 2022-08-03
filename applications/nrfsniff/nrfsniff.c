@@ -124,11 +124,11 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     if(!sniffing_state) strcpy(sniffing, "No");
 
-    snprintf(rate_text, strlen(rate_text), rate_text_fmt, (int)rate);
-    snprintf(channel_text, strlen(channel_text), channel_text_fmt, (int)target_channel);
-    snprintf(preamble_text, strlen(preamble_text), preamble_text_fmt, target_preamble[0]);
-    snprintf(sniff_text, strlen(sniff_text), sniff_text_fmt, sniffing);
-    snprintf(sniffed_address, strlen(sniffed_address), sniffed_address_fmt, top_address, (int)rate);
+    snprintf(rate_text, sizeof(rate_text), rate_text_fmt, (int)rate);
+    snprintf(channel_text, sizeof(channel_text), channel_text_fmt, (int)target_channel);
+    snprintf(preamble_text, sizeof(preamble_text), preamble_text_fmt, target_preamble[0]);
+    snprintf(sniff_text, sizeof(sniff_text), sniff_text_fmt, sniffing);
+    snprintf(sniffed_address, sizeof(sniffed_address), sniffed_address_fmt, top_address, (int)rate);
     canvas_draw_str_aligned(canvas, 10, 10, AlignLeft, AlignBottom, rate_text);
     canvas_draw_str_aligned(canvas, 10, 20, AlignLeft, AlignBottom, channel_text);
     canvas_draw_str_aligned(canvas, 10, 30, AlignLeft, AlignBottom, preamble_text);
@@ -148,7 +148,7 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 
 static void hexlify(uint8_t* in, uint8_t size, char* out) {
     memset(out, 0, size * 2);
-    for(int i = 0; i < size; i++) snprintf(out + strlen(out), strlen(out + strlen(out)),"%02X", in[i]);
+    for(int i = 0; i < size; i++) snprintf(out + strlen(out), sizeof(out + strlen(out)),"%02X", in[i]);
 }
 
 static bool save_addr_to_file(Storage* storage, uint8_t* data, uint8_t size) {
@@ -162,7 +162,7 @@ static bool save_addr_to_file(Storage* storage, uint8_t* data, uint8_t size) {
     Stream* stream = file_stream_alloc(storage);
 
     if(target_rate == 8) rate = 2;
-    snprintf(ending, 4, ",%d\n", rate);
+    snprintf(ending, sizeof(ending), ",%d\n", rate);
     hexlify(data, size, addrline);
     strcat(addrline, ending);
     linesize = strlen(addrline);
