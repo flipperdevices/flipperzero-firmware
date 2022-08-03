@@ -300,7 +300,6 @@ static void subghz_protocol_doitrand_check_remote_controller(SubGhzBlockGeneric*
 * k- KEY
 */
     instance->cnt = (instance->data >> 24) | ((instance->data >> 15) & 0x1);
-    printf("%08lX \r\n", instance->cnt);
     instance->btn = ((instance->data >> 18) & 0x3);
 }
 
