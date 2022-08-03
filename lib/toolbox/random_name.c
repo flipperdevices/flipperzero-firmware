@@ -9,7 +9,7 @@ void set_random_name(char* name, uint8_t max_name_size) {
     uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
     uint32_t date = LL_RTC_DATE_Get(RTC); // 0xWWDDMMYY
     char strings[1][25];
-    sprintf(
+    snprintf(
         strings[0],
         "%s%.4d%.2d%.2d%.2d%.2d",
         "s",
