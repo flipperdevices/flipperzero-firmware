@@ -10,7 +10,7 @@
 - BadUSB: DUCKY_LANG keyword support for BE [By Bramard](https://github.com/v1nc/flipperzero-firmware/pull/4/files)
 - Latest OFW updates: [#1514](https://github.com/flipperdevices/flipperzero-firmware/pull/1514), [#1515](https://github.com/flipperdevices/flipperzero-firmware/pull/1515), [#1461](https://github.com/flipperdevices/flipperzero-firmware/pull/1461), [#1490](https://github.com/flipperdevices/flipperzero-firmware/pull/1490) & [#1412](https://github.com/flipperdevices/flipperzero-firmware/pull/1412)
 - Excluded [App RPC Bug Fixes and redesign #1491](https://github.com/flipperdevices/flipperzero-firmware/pull/1491) since it breaks compile
-- UPDATED [WiFi Scanner v.0.3 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `HIDDEN "INTAPP_wifi_scanner"` due to `Req: ESP8266 or WIFI DEV BOARD`
+- UPDATED [WiFi Scanner v.0.4 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `HIDDEN "INTAPP_wifi_scanner"` due to `Req: ESP8266 or WIFI DEV BOARD`
 - SubGHz: Auto Detect Raw Replay Issue Fixed Via Send Removal [from perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/160)
 
 <table width="100%" border="0" cellspacing="0">
@@ -169,7 +169,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - `FAP` [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox) `HIDDEN "APPS_TouchTunes"`
 - `FAP` [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 - [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `REQUIRES WIFI DEV BOARD WITH MARAUDER FLASHED`
-- [WiFi Scanner v.0.3 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `HIDDEN "INTAPP_wifi_scanner"` due to `Req: ESP8266 or WIFI DEV BOARD`
+- [WiFi Scanner v.0.4 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `HIDDEN "INTAPP_wifi_scanner"` due to `Req: ESP8266 or WIFI DEV BOARD`
 </details>
 
 ## Conflicting PRs Not Merged:
