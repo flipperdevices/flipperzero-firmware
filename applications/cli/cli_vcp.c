@@ -277,7 +277,8 @@ static void cli_vcp_tx(const uint8_t* buffer, size_t size) {
 #endif
 }
 
-static void cli_vcp_tx_stdout(const char* data, size_t size) {
+static void cli_vcp_tx_stdout(void* _cookie, const char* data, size_t size) {
+    UNUSED(_cookie);
     cli_vcp_tx((const uint8_t*)data, size);
 }
 

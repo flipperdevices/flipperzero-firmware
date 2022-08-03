@@ -14,6 +14,7 @@
 #include <core/pubsub.h>
 #include <core/record.h>
 #include <core/semaphore.h>
+#include <core/stdglue.h>
 #include <core/thread.h>
 #include <core/timer.h>
 #include <core/valuemutex.h>
