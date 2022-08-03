@@ -6,7 +6,7 @@
 <b>Latest Updates:</b>
 
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
-- Latest OFW updates: [#1524](https://github.com/flipperdevices/flipperzero-firmware/pull/1524)
+- Latest OFW updates: [#1524](https://github.com/flipperdevices/flipperzero-firmware/pull/1524) & [#1492](https://github.com/flipperdevices/flipperzero-firmware/pull/1492)
 - Excluded [App RPC Bug Fixes and redesign #1491](https://github.com/flipperdevices/flipperzero-firmware/pull/1491) since it breaks compile
 
 <table width="100%" border="0" cellspacing="0">
