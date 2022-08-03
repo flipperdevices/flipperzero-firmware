@@ -65,8 +65,14 @@ void furi_hal_mpu_enable();
 */
 void furi_hal_mpu_disable();
 
-void furi_hal_mpu_protect_no_access(FuriHalRegion region, uint32_t address, FuriHalMPURegionSize size);
+void furi_hal_mpu_protect_no_access(
+    FuriHalRegion region,
+    uint32_t address,
+    FuriHalMPURegionSize size);
 
-void furi_hal_mpu_protect_read_only(FuriHalRegion region, uint32_t address, FuriHalMPURegionSize size);
+void furi_hal_mpu_protect_read_only(
+    FuriHalRegion region,
+    uint32_t address,
+    FuriHalMPURegionSize size);
 
 void furi_hal_mpu_protect_disable(FuriHalRegion region);
