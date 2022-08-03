@@ -6,9 +6,8 @@
 <b>Latest Updates:</b>
 
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
-- Latest OFW updates: [#1524](https://github.com/flipperdevices/flipperzero-firmware/pull/1524), [#1492](https://github.com/flipperdevices/flipperzero-firmware/pull/1492), [#1496](https://github.com/flipperdevices/flipperzero-firmware/pull/1496), [#1520](https://github.com/flipperdevices/flipperzero-firmware/pull/1520), [#1523](https://github.com/flipperdevices/flipperzero-firmware/pull/1523), [#1513](https://github.com/flipperdevices/flipperzero-firmware/pull/1513), [#1462](https://github.com/flipperdevices/flipperzero-firmware/pull/1462) & [#1528](https://github.com/flipperdevices/flipperzero-firmware/pull/1528)
+- Latest OFW updates: [#1524](https://github.com/flipperdevices/flipperzero-firmware/pull/1524), [#1492](https://github.com/flipperdevices/flipperzero-firmware/pull/1492), [#1496](https://github.com/flipperdevices/flipperzero-firmware/pull/1496), [#1520](https://github.com/flipperdevices/flipperzero-firmware/pull/1520), [#1523](https://github.com/flipperdevices/flipperzero-firmware/pull/1523), [#1513](https://github.com/flipperdevices/flipperzero-firmware/pull/1513), [#1462](https://github.com/flipperdevices/flipperzero-firmware/pull/1462), [#1528](https://github.com/flipperdevices/flipperzero-firmware/pull/1528) & [Make printf great again #1438 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1438)
 - Excluded [App RPC Bug Fixes and redesign #1491](https://github.com/flipperdevices/flipperzero-firmware/pull/1491) since it breaks compile
-- Excluded [Make printf great again #1438 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1438)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -170,6 +169,5 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 ## Conflicting PRs Not Merged:
 - [Fixed building for users with space in windows username #1437 (By SzymonLisowiec)](https://github.com/flipperdevices/flipperzero-firmware/pull/1437)
 - [App RPC Bug Fixes and redesign #1491 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1491)
-- [Make printf great again #1438 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1438)
 
 </td></tr></table>
