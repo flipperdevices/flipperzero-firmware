@@ -124,11 +124,11 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     if(!sniffing_state) strcpy(sniffing, "No");
 
-    sprintf(rate_text, rate_text_fmt, (int)rate);
-    sprintf(channel_text, channel_text_fmt, (int)target_channel);
-    sprintf(preamble_text, preamble_text_fmt, target_preamble[0]);
-    sprintf(sniff_text, sniff_text_fmt, sniffing);
-    sprintf(sniffed_address, sniffed_address_fmt, top_address, (int)rate);
+    snprintf(rate_text, strlen(rate_text), rate_text_fmt, (int)rate);
+    snprintf(channel_text, strlen(channel_text), channel_text_fmt, (int)target_channel);
+    snprintf(preamble_text, strlen(preamble_text), preamble_text_fmt, target_preamble[0]);
+    snprintf(sniff_text, strlen(sniff_text), sniff_text_fmt, sniffing);
+    snprintf(sniffed_address, strlen(sniffed_address), sniffed_address_fmt, top_address, (int)rate);
     canvas_draw_str_aligned(canvas, 10, 10, AlignLeft, AlignBottom, rate_text);
     canvas_draw_str_aligned(canvas, 10, 20, AlignLeft, AlignBottom, channel_text);
     canvas_draw_str_aligned(canvas, 10, 30, AlignLeft, AlignBottom, preamble_text);
