@@ -28,7 +28,7 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
 
     string_init(app->file_path);
 
-    if(arg != NULL) {
+    if(arg && strlen(arg)) {
         string_set_str(app->file_path, arg);
     }
 
