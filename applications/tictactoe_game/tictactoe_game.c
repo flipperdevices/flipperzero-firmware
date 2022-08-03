@@ -103,12 +103,12 @@ void tictactoe_draw(Canvas* canvas) {
     canvas_draw_str(canvas, 75, 24, "X:");
 
     char scoreXBuffer[10];
-    snprintf(scoreXBuffer, strlen(scoreXBuffer), "%d", scoreX);
+    snprintf(scoreXBuffer, 10, "%d", scoreX);
     canvas_draw_str(canvas, 88, 24, scoreXBuffer);
     canvas_draw_str(canvas, 75, 35, "O:");
 
     char scoreOBuffer[10];
-    snprintf(scoreOBuffer, strlen(scoreOBuffer), "%d", scoreO);
+    snprintf(scoreOBuffer, 10, "%d", scoreO);
     canvas_draw_str(canvas, 88, 35, scoreOBuffer);
 
     canvas_set_font(canvas, FontSecondary);
