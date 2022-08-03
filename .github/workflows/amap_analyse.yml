@@ -38,6 +38,7 @@ jobs:
           mkdir artifacts
 
       - name: 'Make amap report'
+        run: |
           cp build/latest/firmware.elf.map artifacts/
           cd artifacts/
           /Applications/amap/Contents/MacOS/amap -f firmware.elf.map
