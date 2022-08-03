@@ -7,9 +7,11 @@
 
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
 - Removed extra logging for extended range checks
-- Latest OFW updates: [#1514](https://github.com/flipperdevices/flipperzero-firmware/pull/1514), [#1491](https://github.com/flipperdevices/flipperzero-firmware/pull/1491), [#1515](https://github.com/flipperdevices/flipperzero-firmware/pull/1515), [#1461](https://github.com/flipperdevices/flipperzero-firmware/pull/1461), [#1490](https://github.com/flipperdevices/flipperzero-firmware/pull/1490) & [#1412](https://github.com/flipperdevices/flipperzero-firmware/pull/1412)
 - BadUSB: DUCKY_LANG keyword support for BE [By Bramard](https://github.com/v1nc/flipperzero-firmware/pull/4/files)
-- TOFIX SubGHz: Auto Detect Raw Replay Issue
+- Latest OFW updates: [#1514](https://github.com/flipperdevices/flipperzero-firmware/pull/1514), [#1515](https://github.com/flipperdevices/flipperzero-firmware/pull/1515), [#1461](https://github.com/flipperdevices/flipperzero-firmware/pull/1461), [#1490](https://github.com/flipperdevices/flipperzero-firmware/pull/1490) & [#1412](https://github.com/flipperdevices/flipperzero-firmware/pull/1412)
+- Excluded [App RPC Bug Fixes and redesign #1491](https://github.com/flipperdevices/flipperzero-firmware/pull/1491) since it breaks compile
+- UPDATED [WiFi Scanner v.0.3 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `HIDDEN "INTAPP_wifi_scanner"` due to `Req: ESP8266 or WIFI DEV BOARD`
+- SubGHz: Auto Detect Raw Replay Issue Fixed Via Send Removal [from perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/160)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -172,5 +174,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 
 ## Conflicting PRs Not Merged:
 - [Fixed building for users with space in windows username #1437 (By SzymonLisowiec)](https://github.com/flipperdevices/flipperzero-firmware/pull/1437)
+- [App RPC Bug Fixes and redesign #1491 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1491)
 
 </td></tr></table>

@@ -16,8 +16,6 @@
 
 #include "FlipperZeroWiFiModuleDefines.h"
 
-#define FLIPPERZERO_DEV_BOARD_V_1 0
-
 #define WIFI_APP_DEBUG 0
 
 #if WIFI_APP_DEBUG
@@ -33,13 +31,8 @@
 
 #define DISABLE_CONSOLE !WIFI_APP_DEBUG
 
-#if FLIPPERZERO_DEV_BOARD_V_1
-#define ENABLE_MODULE_POWER 0
-#define ENABLE_MODULE_DETECTION 0
-#else
 #define ENABLE_MODULE_POWER 1
 #define ENABLE_MODULE_DETECTION 1
-#endif
 
 
 #define ANIMATION_TIME 350
@@ -504,7 +497,6 @@ static int32_t uart_worker(void* context) {
                     return 1;
                 }
 
-
                 if (!app->m_wifiModuleInitialized)
                 {
                     if (string_cmp_str(chunksArray[EChunkArrayData_Context], MODULE_CONTEXT_INITIALIZATION) == 0)
@@ -512,6 +504,7 @@ static int32_t uart_worker(void* context) {
                         app->m_wifiModuleInitialized = true;
                         app->m_context = ScanAnimation;
                     }
+
                 }
                 else
                 {
@@ -667,10 +660,8 @@ int32_t wifi_scanner_app(void* p)
     furi_thread_start(app->m_worker_thread);
     WIFI_APP_LOG_I("UART thread allocated");
 
-#if !ENABLE_MODULE_POWER
     // Because we assume that module was on before we launched the app. We need to ensure that module will be in initial state on app start
     send_serial_command(ESerialCommand_Restart);
-#endif // ENABLE_MODULE_POWER
 
     SPluginEvent event; 
     for(bool processing = true; processing;) 
@@ -779,7 +770,7 @@ int32_t wifi_scanner_app(void* p)
                 {
                     if(event.m_input.key == InputKeyBack)
                     {
-                        if(event.m_input.type == InputTypeShort || event.m_input.type == InputTypeLong) //event.input.type == InputTypePress)
+                        if(event.m_input.type == InputTypeShort || event.m_input.type == InputTypeLong)
                         {
                             processing = false;
                         }
