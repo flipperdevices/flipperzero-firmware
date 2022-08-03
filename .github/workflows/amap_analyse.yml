@@ -13,7 +13,7 @@ env:
   TARGETS: f7
 
 jobs:
-  lint_c_cpp:
+  amap_analyse:
     runs-on: [self-hosted,FlipperZeroMacShell]
     steps:
       - name: 'Decontaminate previous build leftovers'
@@ -31,4 +31,20 @@ jobs:
 
       - name: 'Build the firmware'
         run: SET_GH_OUTPUT=1 FBT_TOOLCHAIN_PATH=/opt ./fbt
+
+      - name: 'Make artifacts directory'
+        run: |
+          rm -rf artifacts
+          mkdir artifacts
+
+      - name: 'Make amap report'
+          cp build/latest/firmware.elf.map artifacts/
+          cd artifacts/
+          /Applications/amap/Contents/MacOS/amap -f firmware.elf.map
+
+      - name: 'Upload report to database'
+        run: |
+          echo "Comming soon"
+
+
 
