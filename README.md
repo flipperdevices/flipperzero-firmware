@@ -23,7 +23,6 @@
 - [- HERE IS A NOOB GUIDE TO FLASH AND UNLOCK (BY interestingsoup)](https://interestingsoup.com/n00b-guide-flashing-flipper-zero-to-rougemaster/)
 - [- How to install firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/HowToInstall.md)
 - [- How to build firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/HowToBuild.md)
-- [- BadUSB: how to use different keyboard layouts](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/BadUSBLayouts.md)
 - [- Configure UniversalRF Remix App](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/UniRFRemix.md)
 - [- How to use: NRF24 plugins](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/NRF24.md)
 - [- How to use: SentrySafe plugin](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/SentrySafe.md)
