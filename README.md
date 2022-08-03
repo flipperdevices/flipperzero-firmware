@@ -55,7 +55,12 @@ Flash firmware for Dev Board and firmware for FlipperZero from [latest release](
 ## DIY Module
 Precompiled .bin for ESP and firmware for FlipperZero can be found in [latest release](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module/releases)
 
+### [Flash ESP in you web browser](https://sequoiasan.github.io/FlipperZero-WiFi-Scanner_Module/)
+
+or
+
 [How To Flash .bin to ESP](https://github.com/SequoiaSan/Guide-How-To-Upload-bin-to-ESP8266-ESP32)
+
 
 [How To Update FlipperZero firmware](https://www.youtube.com/watch?v=PUn7XJrslQ4) (choose **Install from file**)
 
