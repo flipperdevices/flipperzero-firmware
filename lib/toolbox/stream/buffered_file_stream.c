@@ -174,17 +174,16 @@ static size_t
     buffered_file_stream_write(BufferedFileStream* stream, const uint8_t* data, size_t size) {
     size_t need_to_write = size;
     do {
-        if(!buffered_file_stream_unread(stream)) break;
+        if(!stream->sync_pending) {
+            if(!buffered_file_stream_unread(stream)) break;
+        }
         while(need_to_write) {
+            stream->sync_pending = true;
             need_to_write -=
                 stream_cache_write(stream->cache, data + (size - need_to_write), need_to_write);
-            stream->sync_pending = true;
             if(need_to_write) {
-                if(stream_cache_flush(stream->cache, stream->file_stream)) {
-                    stream->sync_pending = false;
-                } else {
-                    break;
-                }
+                stream->sync_pending = false;
+                if(!stream_cache_flush(stream->cache, stream->file_stream)) break;
             }
         }
     } while(false);
@@ -200,9 +199,7 @@ static size_t buffered_file_stream_read(BufferedFileStream* stream, uint8_t* dat
             if(stream->sync_pending) {
                 if(!buffered_file_stream_flush(stream)) break;
             }
-            if(!stream_cache_fill(stream->cache, stream->file_stream)) {
-                break;
-            }
+            if(!stream_cache_fill(stream->cache, stream->file_stream)) break;
         }
     }
     return size - need_to_read;
@@ -243,7 +240,7 @@ static bool buffered_file_stream_flush(BufferedFileStream* stream) {
 static bool buffered_file_stream_unread(BufferedFileStream* stream) {
     bool success = true;
     const size_t cache_size = stream_cache_size(stream->cache);
-    if((!stream->sync_pending) && (cache_size > 0)) {
+    if(cache_size > 0) {
         const size_t cache_pos = stream_cache_pos(stream->cache);
         if(cache_pos < cache_size) {
             const int32_t offset = cache_size - cache_pos;
