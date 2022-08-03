@@ -258,7 +258,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
             uint32_t date = LL_RTC_DATE_Get(RTC); // 0xWWDDMMYY
             char strings[1][25];
-            sprintf(strings[0], "%s%.4d%.2d%.2d%.2d%.2d", "R"
+            snprintf(strings[0], sizeof(strings[0]), "%s%.4d%.2d%.2d%.2d%.2d", "R"
                 , __LL_RTC_CONVERT_BCD2BIN((date >> 0) & 0xFF) + 2000 // YEAR
                 , __LL_RTC_CONVERT_BCD2BIN((date >> 8) & 0xFF) // MONTH
                 , __LL_RTC_CONVERT_BCD2BIN((date >> 16) & 0xFF) // DAY
@@ -290,7 +290,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
                 uint32_t date = LL_RTC_DATE_Get(RTC); // 0xWWDDMMYY
                 char strings[1][25];
-                sprintf(strings[0], "%s%.4d%.2d%.2d%.2d%.2d", "R"
+                snprintf(strings[0], sizeof(strings[0]), "%s%.4d%.2d%.2d%.2d%.2d", "R"
                     , __LL_RTC_CONVERT_BCD2BIN((date >> 0) & 0xFF) + 2000 // YEAR
                     , __LL_RTC_CONVERT_BCD2BIN((date >> 8) & 0xFF) // MONTH
                     , __LL_RTC_CONVERT_BCD2BIN((date >> 16) & 0xFF) // DAY
