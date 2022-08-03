@@ -246,7 +246,7 @@ void HardFault_Handler() {
 }
 
 void MemManage_Handler() {
-    if((READ_BIT(SCB->CFSR, SCB_CFSR_MMARVALID_Msk) >> SCB_CFSR_MMARVALID_Pos) == 1) {
+    if(FURI_BIT(SCB->CFSR, SCB_CFSR_MMARVALID_Pos)) {
         uint32_t memfault_address = SCB->MMFAR;
         if(memfault_address < (1024 * 1024)) {
             // from 0x00 to 1MB, see FuriHalRegionNULL
@@ -255,7 +255,7 @@ void MemManage_Handler() {
             // write or read of MPU region 1 (FuriHalRegionStack)
             furi_crash("MPU fault, possibly stack overflow");
         }
-    } else if((READ_BIT(SCB->CFSR, SCB_CFSR_MSTKERR_Msk) >> SCB_CFSR_MSTKERR_Pos) == 1) {
+    } else if(FURI_BIT(SCB->CFSR, SCB_CFSR_MSTKERR_Pos)) {
         // push to stack on MPU region 1 (FuriHalRegionStack)
         furi_crash("MemManage fault, possibly stack overflow");
     }

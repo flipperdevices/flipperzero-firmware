@@ -5,13 +5,13 @@
     (LL_MPU_ACCESS_BUFFERABLE | LL_MPU_ACCESS_CACHEABLE | LL_MPU_ACCESS_SHAREABLE | \
      LL_MPU_TEX_LEVEL1 | LL_MPU_INSTRUCTION_ACCESS_ENABLE)
 
-#define FURI_HAL_MPU_STACK_PROTECT_REGION FuriHalRegionSize32B
+#define FURI_HAL_MPU_STACK_PROTECT_REGION FuriHalMPURegionSize32B
 
 void furi_hal_mpu_init() {
     furi_hal_mpu_enable();
 
     // NULL pointer dereference protection
-    furi_hal_mpu_protect_no_access(FuriHalRegionNULL, 0x00, FuriHalRegionSize1MB);
+    furi_hal_mpu_protect_no_access(FuriHalRegionNULL, 0x00, FuriHalMPURegionSize1MB);
 }
 
 void furi_hal_mpu_enable() {
@@ -22,7 +22,10 @@ void furi_hal_mpu_disable() {
     LL_MPU_Disable();
 }
 
-void furi_hal_mpu_protect_no_access(FuriHalRegion region, uint32_t address, FuriHalRegionSize size) {
+void furi_hal_mpu_protect_no_access(
+    FuriHalRegion region,
+    uint32_t address,
+    FuriHalMPURegionSize size) {
     uint32_t size_ll = size;
     size_ll = size_ll << MPU_RASR_SIZE_Pos;
 
@@ -32,7 +35,10 @@ void furi_hal_mpu_protect_no_access(FuriHalRegion region, uint32_t address, Furi
     furi_hal_mpu_enable();
 }
 
-void furi_hal_mpu_protect_read_only(FuriHalRegion region, uint32_t address, FuriHalRegionSize size) {
+void furi_hal_mpu_protect_read_only(
+    FuriHalRegion region,
+    uint32_t address,
+    FuriHalMPURegionSize size) {
     uint32_t size_ll = size;
     size_ll = size_ll << MPU_RASR_SIZE_Pos;
 
@@ -49,6 +55,7 @@ void furi_hal_mpu_protect_disable(FuriHalRegion region) {
 }
 
 void furi_hal_mpu_set_stack_protection(uint32_t* stack) {
+    // Protection area address must be aligned to region size
     uint32_t stack_ptr = (uint32_t)stack;
     uint32_t mask = ((1 << (FURI_HAL_MPU_STACK_PROTECT_REGION + 2)) - 1);
     stack_ptr &= ~mask;

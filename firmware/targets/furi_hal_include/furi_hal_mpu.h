@@ -20,35 +20,35 @@ typedef enum {
 } FuriHalRegion;
 
 typedef enum {
-    FuriHalRegionSize32B = 0x04U,
-    FuriHalRegionSize64B = 0x05U,
-    FuriHalRegionSize128B = 0x06U,
-    FuriHalRegionSize256B = 0x07U,
-    FuriHalRegionSize512B = 0x08U,
-    FuriHalRegionSize1KB = 0x09U,
-    FuriHalRegionSize2KB = 0x0AU,
-    FuriHalRegionSize4KB = 0x0BU,
-    FuriHalRegionSize8KB = 0x0CU,
-    FuriHalRegionSize16KB = 0x0DU,
-    FuriHalRegionSize32KB = 0x0EU,
-    FuriHalRegionSize64KB = 0x0FU,
-    FuriHalRegionSize128KB = 0x10U,
-    FuriHalRegionSize256KB = 0x11U,
-    FuriHalRegionSize512KB = 0x12U,
-    FuriHalRegionSize1MB = 0x13U,
-    FuriHalRegionSize2MB = 0x14U,
-    FuriHalRegionSize4MB = 0x15U,
-    FuriHalRegionSize8MB = 0x16U,
-    FuriHalRegionSize16MB = 0x17U,
-    FuriHalRegionSize32MB = 0x18U,
-    FuriHalRegionSize64MB = 0x19U,
-    FuriHalRegionSize128MB = 0x1AU,
-    FuriHalRegionSize256MB = 0x1BU,
-    FuriHalRegionSize512MB = 0x1CU,
-    FuriHalRegionSize1GB = 0x1DU,
-    FuriHalRegionSize2GB = 0x1EU,
-    FuriHalRegionSize4GB = 0x1FU,
-} FuriHalRegionSize;
+    FuriHalMPURegionSize32B = 0x04U,
+    FuriHalMPURegionSize64B = 0x05U,
+    FuriHalMPURegionSize128B = 0x06U,
+    FuriHalMPURegionSize256B = 0x07U,
+    FuriHalMPURegionSize512B = 0x08U,
+    FuriHalMPURegionSize1KB = 0x09U,
+    FuriHalMPURegionSize2KB = 0x0AU,
+    FuriHalMPURegionSize4KB = 0x0BU,
+    FuriHalMPURegionSize8KB = 0x0CU,
+    FuriHalMPURegionSize16KB = 0x0DU,
+    FuriHalMPURegionSize32KB = 0x0EU,
+    FuriHalMPURegionSize64KB = 0x0FU,
+    FuriHalMPURegionSize128KB = 0x10U,
+    FuriHalMPURegionSize256KB = 0x11U,
+    FuriHalMPURegionSize512KB = 0x12U,
+    FuriHalMPURegionSize1MB = 0x13U,
+    FuriHalMPURegionSize2MB = 0x14U,
+    FuriHalMPURegionSize4MB = 0x15U,
+    FuriHalMPURegionSize8MB = 0x16U,
+    FuriHalMPURegionSize16MB = 0x17U,
+    FuriHalMPURegionSize32MB = 0x18U,
+    FuriHalMPURegionSize64MB = 0x19U,
+    FuriHalMPURegionSize128MB = 0x1AU,
+    FuriHalMPURegionSize256MB = 0x1BU,
+    FuriHalMPURegionSize512MB = 0x1CU,
+    FuriHalMPURegionSize1GB = 0x1DU,
+    FuriHalMPURegionSize2GB = 0x1EU,
+    FuriHalMPURegionSize4GB = 0x1FU,
+} FuriHalMPURegionSize;
 
 /**
  * @brief Initialize memory protection unit
@@ -65,8 +65,8 @@ void furi_hal_mpu_enable();
 */
 void furi_hal_mpu_disable();
 
-void furi_hal_mpu_protect_no_access(FuriHalRegion region, uint32_t address, FuriHalRegionSize size);
+void furi_hal_mpu_protect_no_access(FuriHalRegion region, uint32_t address, FuriHalMPURegionSize size);
 
-void furi_hal_mpu_protect_read_only(FuriHalRegion region, uint32_t address, FuriHalRegionSize size);
+void furi_hal_mpu_protect_read_only(FuriHalRegion region, uint32_t address, FuriHalMPURegionSize size);
 
 void furi_hal_mpu_protect_disable(FuriHalRegion region);
