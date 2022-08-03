@@ -8,7 +8,7 @@
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
 - Removed extra logging for extended range checks
 - Latest OFW updates: [#1514](https://github.com/flipperdevices/flipperzero-firmware/pull/1514), [#1515](https://github.com/flipperdevices/flipperzero-firmware/pull/1515), [#1461](https://github.com/flipperdevices/flipperzero-firmware/pull/1461), [#1490](https://github.com/flipperdevices/flipperzero-firmware/pull/1490) & [#1412](https://github.com/flipperdevices/flipperzero-firmware/pull/1412)
-- Excluded [#1491](https://github.com/flipperdevices/flipperzero-firmware/pull/1491) since it breaks compile
+- Excluded [App RPC Bug Fixes and redesign #1491](https://github.com/flipperdevices/flipperzero-firmware/pull/1491) since it breaks compile
 - BadUSB: DUCKY_LANG keyword support for BE [By Bramard](https://github.com/v1nc/flipperzero-firmware/pull/4/files)
 - TOFIX SubGHz: Auto Detect Raw Replay Issue
 
