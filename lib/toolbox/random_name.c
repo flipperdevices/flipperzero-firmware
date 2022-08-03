@@ -23,7 +23,7 @@ void set_random_name(char* name, uint8_t max_name_size) {
         ,
         __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF) // DAY
     );
-    sniprintf(name, max_name_size, "%s", strings[0]);
+    snprintf(name, max_name_size, "%s", strings[0]);
     // Set first symbol to upper case
     name[0] = name[0] - 0x20;
 }
