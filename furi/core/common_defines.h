@@ -58,11 +58,6 @@ extern "C" {
 #define PLACE_IN_SECTION(x) __attribute__((section(x)))
 #endif
 
-/** @brief Macro for marking all function arguments as non null. */
-#ifndef NONNULL
-#define NONNULL __attribute__((nonnull))
-#endif
-
 #ifndef ALIGN
 #define ALIGN(n) __attribute__((aligned(n)))
 #endif

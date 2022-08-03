@@ -8,7 +8,7 @@ extern "C" {
 #endif
 typedef struct ValidatorIsFile ValidatorIsFile;
 
-NONNULL ValidatorIsFile* validator_is_file_alloc_init(
+ValidatorIsFile* validator_is_file_alloc_init(
     const char* app_path_folder,
     const char* app_extension,
     const char* current_name);
