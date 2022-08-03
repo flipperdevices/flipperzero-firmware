@@ -8,6 +8,10 @@
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
 - Latest OFW updates: [#1524](https://github.com/flipperdevices/flipperzero-firmware/pull/1524), [#1492](https://github.com/flipperdevices/flipperzero-firmware/pull/1492), [#1496](https://github.com/flipperdevices/flipperzero-firmware/pull/1496), [#1520](https://github.com/flipperdevices/flipperzero-firmware/pull/1520), [#1523](https://github.com/flipperdevices/flipperzero-firmware/pull/1523), [#1513](https://github.com/flipperdevices/flipperzero-firmware/pull/1513), [#1462](https://github.com/flipperdevices/flipperzero-firmware/pull/1462), [#1528](https://github.com/flipperdevices/flipperzero-firmware/pull/1528) & [#1438](https://github.com/flipperdevices/flipperzero-firmware/pull/1438)
 - Excluded [App RPC Bug Fixes and redesign #1491](https://github.com/flipperdevices/flipperzero-firmware/pull/1491) since it breaks compile
+- Removed BadUSB: DUCKY_LANG keyword support [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)(Supports US, DE, FR, [HU by terzinnorbert](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/135), [BE By Bramard](https://github.com/v1nc/flipperzero-firmware/pull/4/files))
+- Added [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
+- Added ignore DUCKY_LANG cmd to retain compatibility with existing scripts [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
+- Readded [BadUSB: add SYSRQ keys #1460 (By rck)](https://github.com/flipperdevices/flipperzero-firmware/pull/1460)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -21,7 +25,6 @@
 - [- HERE IS A NOOB GUIDE TO FLASH AND UNLOCK (BY interestingsoup)](https://interestingsoup.com/n00b-guide-flashing-flipper-zero-to-rougemaster/)
 - [- How to install firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/HowToInstall.md)
 - [- How to build firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/HowToBuild.md)
-- [- BadUSB: how to use different keyboard layouts](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/BadUSBLayouts.md)
 - [- Configure UniversalRF Remix App](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/UniRFRemix.md)
 - [- How to use: NRF24 plugins](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/NRF24.md)
 - [- How to use: SentrySafe plugin](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/SentrySafe.md)
@@ -73,7 +76,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys and Tesla Charge Port
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
 - Assets: Running DolphinRestorer.fap on new install will auto-level to the end of Level 2.
-- BadUSB: DUCKY_LANG keyword support [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)(Supports US, DE, FR, [HU by terzinnorbert](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/135), [BE By Bramard](https://github.com/v1nc/flipperzero-firmware/pull/4/files))
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Dolphin: Assigned profile pic for levels 1-10, 11-20 and 21-30 respectively from default lvl 1, 2 & 3
 - Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)
@@ -116,6 +118,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [BadUSB: add SYSRQ keys #1460 (By rck)](https://github.com/flipperdevices/flipperzero-firmware/pull/1460)
 - [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
 - [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484)
+- [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 
 </details>
 
