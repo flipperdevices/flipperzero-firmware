@@ -79,28 +79,6 @@ void furi_log_print_format(FuriLogLevel level, const char* tag, const char* form
     }
 }
 
-void furi_log_print(FuriLogLevel level, const char* format, ...) {
-    if(level <= furi_log.log_level &&
-       furi_mutex_acquire(furi_log.mutex, FuriWaitForever) == FuriStatusOk) {
-        string_t string;
-
-        // Timestamp
-        string_init_printf(string, "%lu ", furi_log.timetamp());
-        furi_log.puts(string_get_cstr(string));
-        string_clear(string);
-
-        va_list args;
-        va_start(args, format);
-        string_init_vprintf(string, format, args);
-        va_end(args);
-
-        furi_log.puts(string_get_cstr(string));
-        string_clear(string);
-
-        furi_mutex_release(furi_log.mutex);
-    }
-}
-
 void furi_log_set_level(FuriLogLevel level) {
     if(level == FuriLogLevelDefault) {
         level = FURI_LOG_LEVEL_DEFAULT;
