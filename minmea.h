@@ -199,11 +199,14 @@ enum minmea_sentence_id minmea_sentence_id(const char *sentence, bool strict);
  * Scanf-like processor for NMEA sentences. Supports the following formats:
  * c - single character (char *)
  * d - direction, returned as 1/-1, default 0 (int *)
- * f - fractional, returned as value + scale (int *, int *)
+ * f - fractional, returned as value + scale (struct minmea_float *)
  * i - decimal, default zero (int *)
  * s - string (char *)
  * t - talker identifier and type (char *)
- * T - date/time stamp (int *, int *, int *)
+ * D - date (struct minmea_date *)
+ * T - time stamp (struct minmea_time *)
+ * _ - ignore this field
+ * ; - following fields are optional
  * Returns true on success. See library source code for details.
  */
 bool minmea_scan(const char *sentence, const char *format, ...);
