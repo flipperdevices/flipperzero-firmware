@@ -10,7 +10,6 @@
 - Updated [Add a Mifare Classic info screen to parser output #1504 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1504)
 - Added OFW Updates: [#1511](https://github.com/flipperdevices/flipperzero-firmware/pull/1511), [#1535](https://github.com/flipperdevices/flipperzero-firmware/pull/1535) & [Archive: fix null dereference #1531 #1532 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1532)
 - Finally added [App RPC Bug Fixes and redesign #1491 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1491)
-- SubGHz: Moved settings pull to different location in code
   
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
