@@ -8,6 +8,7 @@
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
 - SubGHz: Auto Detect Raw Replay Issue Fixed Via Send Removal [from perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/160)
 - Fix for loading settings on key press (doesn't seem to change the Loading "/int/.desktop.settings")
+- Updated to check desktop settings when a bettery refresh is needed or device boot; instead of constantly. Changing battery display type should now require a restart to take effect immediately
   
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
