@@ -31,7 +31,7 @@ class HardwareTargetLoader:
             return vals
 
     def _processTargetDefinitions(self, target_id):
-        self.layered_target_dirs.insert(0, self._getTargetDir(target_id))
+        self.layered_target_dirs.append(self._getTargetDir(target_id))
         config = self._loadDescription(target_id)
         if include_paths := config.get("include_paths", None):
             self.include_paths.extend(
