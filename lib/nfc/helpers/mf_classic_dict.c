@@ -159,10 +159,31 @@ bool mf_classic_dict_add_key(MfClassicDict* dict, uint8_t* key) {
     bool key_added = false;
     do {
         if(!stream_seek(dict->stream, 0, StreamOffsetFromEnd)) break;
-        if(!stream_insert_string(dict->stream, key_str)) break;
-        key_added = true;
+        key_added = stream_insert_string(dict->stream, key_str);
     } while(false);
 
     string_clear(key_str);
     return key_added;
+}
+
+bool mf_classic_dict_remove_key(MfClassicDict* dict, uint32_t target) {
+    furi_assert(dict);
+    furi_assert(dict->stream);
+
+    string_t next_line;
+    string_init(next_line);
+    uint32_t index = 0;
+
+    bool key_removed = false;
+    while(!key_removed) {
+        if(!stream_read_line(dict->stream, next_line)) break;
+        if(string_get_char(next_line, 0) == '#') continue;
+        if(string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
+        if(index++ != target) continue;
+        stream_seek(dict->stream, -NFC_MF_CLASSIC_KEY_LEN, StreamOffsetFromCurrent);
+        key_removed = stream_delete(dict->stream, NFC_MF_CLASSIC_KEY_LEN);
+    }
+
+    string_clear(next_line);
+    return key_removed;
 }

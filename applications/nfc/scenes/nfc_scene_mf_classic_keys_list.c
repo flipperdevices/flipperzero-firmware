@@ -34,11 +34,20 @@ void nfc_scene_mf_classic_keys_list_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_classic_keys_list_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    // Nfc* nfc = context;
+    Nfc* nfc = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
-        FURI_LOG_D("ListKeys", "Selected item %d", index);
+        MfClassicDict* dict = mf_classic_dict_alloc(MfClassicDictTypeUser);
+        if(dict) {
+            mf_classic_dict_rewind(dict);
+            if(mf_classic_dict_remove_key(dict, event.event)) {
+                scene_manager_set_scene_state(nfc->scene_manager, NfcSceneDeleteSuccess, NfcSceneMfClassicKeysList);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneDeleteSuccess);
+            } else {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);
+            }
+        }
+        mf_classic_dict_free(dict);
         consumed = true;
     }
     return consumed;
@@ -46,6 +55,6 @@ bool nfc_scene_mf_classic_keys_list_on_event(void* context, SceneManagerEvent ev
 
 void nfc_scene_mf_classic_keys_list_on_exit(void* context) {
     Nfc* nfc = context;
-
+    // TODO: Find some way to clear all those strings from submenu.
     submenu_reset(nfc->submenu);
 }
