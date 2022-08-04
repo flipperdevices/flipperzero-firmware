@@ -10,7 +10,7 @@ on:
   pull_request:
 
 env:
-  TARGETS: f7
+  TARGETS: f7 f18
   DEFAULT_TARGET: f7
 
 jobs:
