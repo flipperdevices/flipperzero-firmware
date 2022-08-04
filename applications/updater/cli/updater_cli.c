@@ -77,8 +77,8 @@ static void updater_cli_ep(Cli* cli, string_t args, void* context) {
     for(size_t idx = 0; idx < COUNT_OF(update_cli_subcommands); ++idx) {
         const CliSubcommand* subcmd_def = &update_cli_subcommands[idx];
         if(string_cmp_str(subcommand, subcmd_def->command) == 0) {
-            string_clear(subcommand);
             subcmd_def->handler(args);
+            string_clear(subcommand);
             return;
         }
     }

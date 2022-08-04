@@ -66,6 +66,12 @@ bool furi_hal_version_do_i_belong_here();
  */
 const char* furi_hal_version_get_model_name();
 
+/** Get model name
+ *
+ * @return     model code C-string
+ */
+const char* furi_hal_version_get_model_code();
+
 /** Get OTP version
  *
  * @return     OTP Version

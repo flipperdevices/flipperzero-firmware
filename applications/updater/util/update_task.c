@@ -291,7 +291,8 @@ bool update_task_parse_manifest(UpdateTask* update_task) {
         }
 
         update_task_set_progress(update_task, UpdateTaskStageProgress, 50);
-        if(manifest->target != furi_hal_version_get_hw_target()) {
+        if(furi_hal_version_get_hw_target() &&
+           (manifest->target != furi_hal_version_get_hw_target())) {
             break;
         }
 

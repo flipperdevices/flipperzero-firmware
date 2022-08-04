@@ -12,17 +12,22 @@ typedef DialogMessageButton (*AboutDialogScreen)(DialogsApp* dialogs, DialogMess
 static DialogMessageButton product_screen(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
 
-    const char* screen_header = "Product: Flipper Zero\n"
-                                "Model: FZ.1\n";
+    string_t screen_header;
+    string_init_printf(
+        screen_header,
+        "Product: %s\n"
+        "Model: %s\n",
+        furi_hal_version_get_model_name(),
+        furi_hal_version_get_model_code());
     const char* screen_text = "FCC ID: 2A2V6-FZ\n"
                               "IC: 27624-FZ";
 
-    dialog_message_set_header(message, screen_header, 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_header(message, string_get_cstr(screen_header), 0, 0, AlignLeft, AlignTop);
     dialog_message_set_text(message, screen_text, 0, 26, AlignLeft, AlignTop);
     result = dialog_message_show(dialogs, message);
     dialog_message_set_header(message, NULL, 0, 0, AlignLeft, AlignTop);
     dialog_message_set_text(message, NULL, 0, 0, AlignLeft, AlignTop);
-
+    string_clear(screen_header);
     return result;
 }
 

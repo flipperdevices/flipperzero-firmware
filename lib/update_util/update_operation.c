@@ -22,8 +22,10 @@ static const char* update_prepare_result_descr[] = {
     [UpdatePrepareResultStageMissing] = "Missing Stage2 loader",
     [UpdatePrepareResultStageIntegrityError] = "Corrupted Stage2 loader",
     [UpdatePrepareResultManifestPointerError] = "Failed to create update pointer file",
+    [UpdatePrepareResultTargetMismatch] = "Hardware target mismatch",
     [UpdatePrepareResultOutdatedManifestVersion] = "Update package is too old",
     [UpdatePrepareResultIntFull] = "Need more free space in internal storage",
+    [UpdatePrepareResultUnspecifiedError] = "Unknown error",
 };
 
 const char* update_operation_describe_preparation_result(const UpdatePrepareResult value) {
@@ -165,7 +167,8 @@ UpdatePrepareResult update_operation_prepare(const char* manifest_file_path) {
             break;
         }
 
-        if(furi_hal_version_get_hw_target() != manifest->target) {
+        if(furi_hal_version_get_hw_target() &&
+           (furi_hal_version_get_hw_target() != manifest->target)) {
             result = UpdatePrepareResultTargetMismatch;
             break;
         }
