@@ -41,7 +41,11 @@ bool nfc_scene_mf_classic_keys_list_on_event(void* context, SceneManagerEvent ev
         if(dict) {
             mf_classic_dict_rewind(dict);
             if(mf_classic_dict_remove_key(dict, event.event)) {
-                scene_manager_set_scene_state(nfc->scene_manager, NfcSceneDeleteSuccess, NfcSceneMfClassicKeysList);
+                if(mf_classic_dict_get_total_keys(dict) == 0) {
+                    scene_manager_set_scene_state(nfc->scene_manager, NfcSceneDeleteSuccess, NfcSceneMfClassicKeys);
+                } else {
+                    scene_manager_set_scene_state(nfc->scene_manager, NfcSceneDeleteSuccess, NfcSceneMfClassicKeysList);
+                }
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDeleteSuccess);
             } else {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);
