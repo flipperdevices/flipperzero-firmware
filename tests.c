@@ -18,6 +18,8 @@
 
 static const char *valid_sentences_nochecksum[] = {
     "$GPTXT,xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "$GPTXT,xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxx",
     "$GPTXT,hello\n",
     "$GPTXT,hello\r",
     "$GPTXT,hello\r\n",
@@ -51,8 +53,6 @@ static const char *valid_sentences_checksum[] = {
 };
 
 static const char *invalid_sentences[] = {
-    "$GPTXT,xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-        "xxxxxxxxxxxxxxxxxxxxxxxxxxx",
     "$GPTXT,01,01,02,ANTSTATUS=INIT*26",
     "$GPRMC,,V,,,,,,,,,,N*532",
     "$GPVTG,,,,\xff,,,,,N*30",
