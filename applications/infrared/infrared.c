@@ -7,10 +7,12 @@ static const NotificationSequence* infrared_notification_sequences[] = {
     &sequence_success,
     &sequence_set_only_green_255,
     &sequence_reset_green,
-    &sequence_blink_cyan_10,
-    &sequence_blink_magenta_10,
     &sequence_solid_yellow,
-    &sequence_reset_rgb};
+    &sequence_reset_rgb,
+    &sequence_blink_hw_cyan_10,
+    &sequence_blink_hw_magenta_10,
+    &sequence_blink_hw_stop,
+};
 
 static void infrared_make_app_folder(Infrared* infrared) {
     if(!storage_simply_mkdir(infrared->storage, INFRARED_APP_FOLDER)) {
@@ -300,8 +302,8 @@ void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal) {
     }
 
     DOLPHIN_DEED(DolphinDeedIrSend);
-    infrared->app_state.is_tx_started = true;
     infrared_worker_tx_start(infrared->worker);
+    infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStartSend);
 }
 
 void infrared_tx_start_button_index(Infrared* infrared, size_t button_index) {
@@ -310,18 +312,18 @@ void infrared_tx_start_button_index(Infrared* infrared, size_t button_index) {
     InfraredRemoteButton* button = infrared_remote_get_button(infrared->remote, button_index);
     InfraredSignal* signal = infrared_remote_button_get_signal(button);
 
-    infrared->app_state.is_tx_started = true;
     infrared_tx_start_signal(infrared, signal);
+    infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStartSend);
 }
 
 void infrared_tx_start_received(Infrared* infrared) {
-    infrared->app_state.is_tx_started = true;
     infrared_tx_start_signal(infrared, infrared->received_signal);
+    infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStartSend);
 }
 
 void infrared_tx_stop(Infrared* infrared) {
-    infrared->app_state.is_tx_started = false;
     infrared_worker_tx_stop(infrared->worker);
+    infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStop);
 }
 
 void infrared_text_store_set(Infrared* infrared, uint32_t bank, const char* text, ...) {

@@ -431,6 +431,26 @@ const NotificationSequence sequence_blink_white_100 = {
     NULL,
 };
 
+// Hardware blink
+const NotificationSequence sequence_blink_hw_stop = {
+    &message_blink_stop,
+    NULL,
+};
+
+const NotificationSequence sequence_blink_hw_cyan_10 = {
+    &message_blink_start_10,
+    &message_blink_set_color_cyan,
+    &message_do_not_reset,
+    NULL,
+};
+
+const NotificationSequence sequence_blink_hw_magenta_10 = {
+    &message_blink_start_10,
+    &message_blink_set_color_magenta,
+    &message_do_not_reset,
+    NULL,
+};
+
 //General
 const NotificationSequence sequence_single_vibro = {
     &message_vibro_on,

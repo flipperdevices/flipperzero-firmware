@@ -22,12 +22,7 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
     Infrared* infrared = context;
     bool consumed = false;
 
-    if(event.type == SceneManagerEventTypeTick) {
-        if(infrared->app_state.is_tx_started) {
-            infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkSend);
-        }
-        consumed = true;
-    } else if(event.type == SceneManagerEventTypeCustom) {
+    if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == InfraredCustomEventTypeBackPressed) {
             view_dispatcher_stop(infrared->view_dispatcher);

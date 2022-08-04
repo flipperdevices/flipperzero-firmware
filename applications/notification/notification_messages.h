@@ -122,6 +122,11 @@ extern const NotificationSequence sequence_blink_cyan_100;
 extern const NotificationSequence sequence_blink_magenta_100;
 extern const NotificationSequence sequence_blink_white_100;
 
+// Hardware blink
+extern const NotificationSequence sequence_blink_hw_stop;
+extern const NotificationSequence sequence_blink_hw_cyan_10;
+extern const NotificationSequence sequence_blink_hw_magenta_10;
+
 // General
 extern const NotificationSequence sequence_single_vibro;
 extern const NotificationSequence sequence_double_vibro;

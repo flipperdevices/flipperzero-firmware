@@ -63,7 +63,6 @@ typedef enum {
 typedef struct {
     bool is_learning_new_remote;
     bool is_debug_enabled;
-    bool is_tx_started;
     InfraredEditTarget edit_target : 8;
     InfraredEditMode edit_mode : 8;
     int32_t current_button_index;
@@ -116,10 +115,11 @@ typedef enum {
     InfraredNotificationMessageSuccess,
     InfraredNotificationMessageGreenOn,
     InfraredNotificationMessageGreenOff,
-    InfraredNotificationMessageBlinkRead,
-    InfraredNotificationMessageBlinkSend,
     InfraredNotificationMessageYellowOn,
     InfraredNotificationMessageYellowOff,
+    InfraredNotificationMessageBlinkStartRead,
+    InfraredNotificationMessageBlinkStartSend,
+    InfraredNotificationMessageBlinkStop,
 } InfraredNotificationMessage;
 
 bool infrared_add_remote_with_button(Infrared* infrared, const char* name, InfraredSignal* signal);
