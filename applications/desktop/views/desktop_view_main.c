@@ -5,6 +5,7 @@
 #include <furi.h>
 #include <input/input.h>
 #include <dolphin/dolphin.h>
+
 #include "../desktop_i.h"
 #include "desktop_view_main.h"
 #include "desktop/desktop_settings/desktop_settings_app.h"
@@ -16,7 +17,7 @@ struct DesktopMainView {
     DesktopMainViewCallback callback;
     void* context;
     TimerHandle_t poweroff_timer;
-	bool is_gamemode;
+    bool is_gamemode;
 };
 
 #define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 5000
