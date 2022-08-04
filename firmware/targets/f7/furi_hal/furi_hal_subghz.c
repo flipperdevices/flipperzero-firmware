@@ -42,8 +42,8 @@ void furi_hal_subghz_init() {
     Storage* storage = furi_record_open("storage");
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/extend_range.txt")) {
-        flipper_format_read_bool(fff_data_file, "ignore_default_tx_region", furi_hal_subghz.is_allowed, 1);{
-        flipper_format_read_bool(fff_data_file, "use_ext_range_at_own_risk", furi_hal_subghz.is_extended, 1);
+        flipper_format_read_bool(fff_data_file, "ignore_default_tx_region", &furi_hal_subghz.is_allowed, 1);{
+        flipper_format_read_bool(fff_data_file, "use_ext_range_at_own_risk", &furi_hal_subghz.is_extended, 1);
         // FURI_LOG_I(TAG, "Using extended frequencies at own risk");
     } else {
         // FURI_LOG_I(TAG, "Keeping standard frequency ranges");
