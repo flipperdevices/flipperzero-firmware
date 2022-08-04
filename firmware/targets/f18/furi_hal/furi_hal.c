@@ -52,8 +52,8 @@ void furi_hal_init() {
 
     furi_hal_spi_init();
 
-    furi_hal_ibutton_init();
-    FURI_LOG_I(TAG, "iButton OK");
+    // furi_hal_ibutton_init();
+    // FURI_LOG_I(TAG, "iButton OK");
     furi_hal_speaker_init();
     FURI_LOG_I(TAG, "Speaker OK");
 
