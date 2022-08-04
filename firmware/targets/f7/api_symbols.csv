@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,4.0,,
+Version,+,5.2,,
 Header,+,applications/bt/bt_service/bt.h,,
 Header,+,applications/cli/cli.h,,
 Header,+,applications/cli/cli_vcp.h,,
@@ -63,6 +63,7 @@ Header,+,firmware/targets/furi_hal_include/furi_hal_ibutton.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_info.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_infrared.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_light.h,,
+Header,+,firmware/targets/furi_hal_include/furi_hal_mpu.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_nfc.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_power.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_random.h,,
@@ -113,6 +114,7 @@ Header,+,lib/one_wire/one_wire_device.h,,
 Header,+,lib/one_wire/one_wire_host.h,,
 Header,+,lib/one_wire/one_wire_host_timing.h,,
 Header,+,lib/one_wire/one_wire_slave.h,,
+Header,+,lib/print/wrappers.h,,
 Header,+,lib/subghz/environment.h,,
 Header,+,lib/subghz/receiver.h,,
 Header,+,lib/subghz/subghz_worker.h,,
@@ -336,8 +338,17 @@ Function,-,__signbitd,int,double
 Function,-,__signbitf,int,float
 Function,-,__signgam,int*,
 Function,-,__srget_r,int,"_reent*, FILE*"
-Function,+,__swbuf_r,int,"_reent*, int, FILE*"
+Function,-,__swbuf_r,int,"_reent*, int, FILE*"
 Function,-,__utoa,char*,"unsigned, char*, int"
+Function,+,__wrap___assert,void,"const char*, int, const char*"
+Function,+,__wrap___assert_func,void,"const char*, int, const char*, const char*"
+Function,+,__wrap_fflush,int,FILE*
+Function,+,__wrap_printf,int,"const char*, ..."
+Function,+,__wrap_putc,int,"int, FILE*"
+Function,+,__wrap_putchar,int,int
+Function,+,__wrap_puts,int,const char*
+Function,+,__wrap_snprintf,int,"char*, size_t, const char*, ..."
+Function,+,__wrap_vsnprintf,int,"char*, size_t, const char*, va_list"
 Function,-,_asiprintf_r,int,"_reent*, char**, const char*, ..."
 Function,-,_asniprintf_r,char*,"_reent*, char*, size_t*, const char*, ..."
 Function,-,_asnprintf_r,char*,"_reent*, char*, size_t*, const char*, ..."
@@ -349,24 +360,24 @@ Function,-,_calloc_r,void*,"_reent*, size_t, size_t"
 Function,-,_diprintf_r,int,"_reent*, int, const char*, ..."
 Function,-,_dprintf_r,int,"_reent*, int, const char*, ..."
 Function,-,_drand48_r,double,_reent*
-Function,+,_dtoa_r,char*,"_reent*, double, int, int, int*, int*, char**"
+Function,-,_dtoa_r,char*,"_reent*, double, int, int, int*, int*, char**"
 Function,-,_erand48_r,double,"_reent*, unsigned short[3]"
 Function,-,_fclose_r,int,"_reent*, FILE*"
 Function,-,_fcloseall_r,int,_reent*
 Function,-,_fdopen_r,FILE*,"_reent*, int, const char*"
-Function,+,_fflush_r,int,"_reent*, FILE*"
+Function,-,_fflush_r,int,"_reent*, FILE*"
 Function,-,_fgetc_r,int,"_reent*, FILE*"
 Function,-,_fgetc_unlocked_r,int,"_reent*, FILE*"
 Function,-,_fgetpos_r,int,"_reent*, FILE*, fpos_t*"
 Function,-,_fgets_r,char*,"_reent*, char*, int, FILE*"
 Function,-,_fgets_unlocked_r,char*,"_reent*, char*, int, FILE*"
 Function,-,_findenv,char*,"const char*, int*"
-Function,+,_findenv_r,char*,"_reent*, const char*, int*"
+Function,-,_findenv_r,char*,"_reent*, const char*, int*"
 Function,-,_fiprintf_r,int,"_reent*, FILE*, const char*, ..."
 Function,-,_fiscanf_r,int,"_reent*, FILE*, const char*, ..."
 Function,-,_fmemopen_r,FILE*,"_reent*, void*, size_t, const char*"
 Function,-,_fopen_r,FILE*,"_reent*, const char*, const char*"
-Function,+,_fopencookie_r,FILE*,"_reent*, void*, const char*, cookie_io_functions_t"
+Function,-,_fopencookie_r,FILE*,"_reent*, void*, const char*, cookie_io_functions_t"
 Function,-,_fprintf_r,int,"_reent*, FILE*, const char*, ..."
 Function,-,_fpurge_r,int,"_reent*, FILE*"
 Function,-,_fputc_r,int,"_reent*, int, FILE*"
@@ -390,7 +401,7 @@ Function,-,_getc_r,int,"_reent*, FILE*"
 Function,-,_getc_unlocked_r,int,"_reent*, FILE*"
 Function,-,_getchar_r,int,_reent*
 Function,-,_getchar_unlocked_r,int,_reent*
-Function,+,_getenv_r,char*,"_reent*, const char*"
+Function,-,_getenv_r,char*,"_reent*, const char*"
 Function,-,_gets_r,char*,"_reent*, char*"
 Function,-,_iprintf_r,int,"_reent*, const char*, ..."
 Function,-,_iscanf_r,int,"_reent*, const char*, ..."
@@ -414,12 +425,13 @@ Function,-,_nrand48_r,long,"_reent*, unsigned short[3]"
 Function,-,_open_memstream_r,FILE*,"_reent*, char**, size_t*"
 Function,-,_perror_r,void,"_reent*, const char*"
 Function,-,_printf_r,int,"_reent*, const char*, ..."
-Function,+,_putc_r,int,"_reent*, int, FILE*"
+Function,-,_putc_r,int,"_reent*, int, FILE*"
 Function,-,_putc_unlocked_r,int,"_reent*, int, FILE*"
+Function,+,_putchar,void,char
 Function,-,_putchar_r,int,"_reent*, int"
 Function,-,_putchar_unlocked_r,int,"_reent*, int"
 Function,-,_putenv_r,int,"_reent*, char*"
-Function,+,_puts_r,int,"_reent*, const char*"
+Function,-,_puts_r,int,"_reent*, const char*"
 Function,-,_realloc_r,void*,"_reent*, void*, size_t"
 Function,-,_reallocf_r,void*,"_reent*, void*, size_t"
 Function,-,_reclaim_reent,void,_reent*
@@ -440,10 +452,10 @@ Function,-,_strdup_r,char*,"_reent*, const char*"
 Function,-,_strerror_r,char*,"_reent*, int, int, int*"
 Function,-,_strndup_r,char*,"_reent*, const char*, size_t"
 Function,-,_strtod_r,double,"_reent*, const char*, char**"
-Function,+,_strtol_r,long,"_reent*, const char*, char**, int"
+Function,-,_strtol_r,long,"_reent*, const char*, char**, int"
 Function,-,_strtold_r,long double,"_reent*, const char*, char**"
 Function,-,_strtoll_r,long long,"_reent*, const char*, char**, int"
-Function,+,_strtoul_r,unsigned long,"_reent*, const char*, char**, int"
+Function,-,_strtoul_r,unsigned long,"_reent*, const char*, char**, int"
 Function,-,_strtoull_r,unsigned long long,"_reent*, const char*, char**, int"
 Function,-,_system_r,int,"_reent*, const char*"
 Function,-,_tempnam_r,char*,"_reent*, const char*, const char*"
@@ -457,9 +469,9 @@ Function,-,_vasnprintf_r,char*,"_reent*, char*, size_t*, const char*, __gnuc_va_
 Function,-,_vasprintf_r,int,"_reent*, char**, const char*, __gnuc_va_list"
 Function,-,_vdiprintf_r,int,"_reent*, int, const char*, __gnuc_va_list"
 Function,-,_vdprintf_r,int,"_reent*, int, const char*, __gnuc_va_list"
-Function,+,_vfiprintf_r,int,"_reent*, FILE*, const char*, __gnuc_va_list"
+Function,-,_vfiprintf_r,int,"_reent*, FILE*, const char*, __gnuc_va_list"
 Function,-,_vfiscanf_r,int,"_reent*, FILE*, const char*, __gnuc_va_list"
-Function,+,_vfprintf_r,int,"_reent*, FILE*, const char*, __gnuc_va_list"
+Function,-,_vfprintf_r,int,"_reent*, FILE*, const char*, __gnuc_va_list"
 Function,-,_vfscanf_r,int,"_reent*, FILE*, const char*, __gnuc_va_list"
 Function,-,_viprintf_r,int,"_reent*, const char*, __gnuc_va_list"
 Function,-,_viscanf_r,int,"_reent*, const char*, __gnuc_va_list"
@@ -467,8 +479,8 @@ Function,-,_vprintf_r,int,"_reent*, const char*, __gnuc_va_list"
 Function,-,_vscanf_r,int,"_reent*, const char*, __gnuc_va_list"
 Function,-,_vsiprintf_r,int,"_reent*, char*, const char*, __gnuc_va_list"
 Function,-,_vsiscanf_r,int,"_reent*, const char*, const char*, __gnuc_va_list"
-Function,+,_vsniprintf_r,int,"_reent*, char*, size_t, const char*, __gnuc_va_list"
-Function,+,_vsnprintf_r,int,"_reent*, char*, size_t, const char*, __gnuc_va_list"
+Function,-,_vsniprintf_r,int,"_reent*, char*, size_t, const char*, __gnuc_va_list"
+Function,-,_vsnprintf_r,int,"_reent*, char*, size_t, const char*, __gnuc_va_list"
 Function,-,_vsprintf_r,int,"_reent*, char*, const char*, __gnuc_va_list"
 Function,-,_vsscanf_r,int,"_reent*, const char*, const char*, __gnuc_va_list"
 Function,-,_wcstombs_r,size_t,"_reent*, char*, const wchar_t*, size_t, _mbstate_t*"
@@ -769,7 +781,7 @@ Function,-,feof,int,FILE*
 Function,-,feof_unlocked,int,FILE*
 Function,-,ferror,int,FILE*
 Function,-,ferror_unlocked,int,FILE*
-Function,+,fflush,int,FILE*
+Function,-,fflush,int,FILE*
 Function,-,fflush_unlocked,int,FILE*
 Function,-,ffs,int,int
 Function,-,ffsl,int,long
@@ -808,7 +820,7 @@ Function,+,filesystem_api_error_get_desc,const char*,FS_Error
 Function,-,finite,int,double
 Function,+,finitef,int,float
 Function,-,finitel,int,long double
-Function,+,fiprintf,int,"FILE*, const char*, ..."
+Function,-,fiprintf,int,"FILE*, const char*, ..."
 Function,-,fiscanf,int,"FILE*, const char*, ..."
 Function,+,flipper_format_buffered_file_alloc,FlipperFormat*,Storage*
 Function,+,flipper_format_buffered_file_close,_Bool,FlipperFormat*
@@ -883,8 +895,8 @@ Function,-,fmod,double,"double, double"
 Function,-,fmodf,float,"float, float"
 Function,-,fmodl,long double,"long double, long double"
 Function,-,fopen,FILE*,"const char*, const char*"
-Function,+,fopencookie,FILE*,"void*, const char*, cookie_io_functions_t"
-Function,+,fprintf,int,"FILE*, const char*, ..."
+Function,-,fopencookie,FILE*,"void*, const char*, cookie_io_functions_t"
+Function,-,fprintf,int,"FILE*, const char*, ..."
 Function,-,fpurge,int,FILE*
 Function,-,fputc,int,"int, FILE*"
 Function,-,fputc_unlocked,int,"int, FILE*"
@@ -989,7 +1001,7 @@ Function,+,furi_hal_compress_icon_init,void,
 Function,+,furi_hal_console_disable,void,
 Function,+,furi_hal_console_enable,void,
 Function,+,furi_hal_console_init,void,
-Function,-,furi_hal_console_printf,void,"const char[], ..."
+Function,+,furi_hal_console_printf,void,"const char[], ..."
 Function,+,furi_hal_console_puts,void,const char*
 Function,+,furi_hal_console_set_tx_callback,void,"FuriHalConsoleTxCallback, void*"
 Function,+,furi_hal_console_tx,void,"const uint8_t*, size_t"
@@ -1100,6 +1112,12 @@ Function,+,furi_hal_light_blink_stop,void,
 Function,+,furi_hal_light_init,void,
 Function,+,furi_hal_light_sequence,void,const char*
 Function,+,furi_hal_light_set,void,"Light, uint8_t"
+Function,+,furi_hal_mpu_disable,void,
+Function,+,furi_hal_mpu_enable,void,
+Function,+,furi_hal_mpu_init,void,
+Function,+,furi_hal_mpu_protect_disable,void,FuriHalMpuRegion
+Function,+,furi_hal_mpu_protect_no_access,void,"FuriHalMpuRegion, uint32_t, FuriHalMPURegionSize"
+Function,+,furi_hal_mpu_protect_read_only,void,"FuriHalMpuRegion, uint32_t, FuriHalMPURegionSize"
 Function,+,furi_hal_nfc_activate_nfca,_Bool,"uint32_t, uint32_t*"
 Function,+,furi_hal_nfc_detect,_Bool,"FuriHalNfcDevData*, uint32_t"
 Function,+,furi_hal_nfc_emulate_nfca,_Bool,"uint8_t*, uint8_t, uint8_t*, uint8_t, FuriHalNfcEmulateCallback, void*, uint32_t"
@@ -1291,7 +1309,7 @@ Function,+,furi_kernel_restore_lock,int32_t,int32_t
 Function,+,furi_kernel_unlock,int32_t,
 Function,+,furi_log_get_level,FuriLogLevel,
 Function,+,furi_log_init,void,
-Function,+,furi_log_print,void,"FuriLogLevel, const char*, ..."
+Function,+,furi_log_print_format,void,"FuriLogLevel, const char*, const char*, ..."
 Function,+,furi_log_set_level,void,FuriLogLevel
 Function,-,furi_log_set_puts,void,FuriLogPuts
 Function,-,furi_log_set_timestamp,void,FuriLogTimestamp
@@ -1327,8 +1345,6 @@ Function,+,furi_semaphore_alloc,FuriSemaphore*,"uint32_t, uint32_t"
 Function,+,furi_semaphore_free,void,FuriSemaphore*
 Function,+,furi_semaphore_get_count,uint32_t,FuriSemaphore*
 Function,+,furi_semaphore_release,FuriStatus,FuriSemaphore*
-Function,+,furi_stdglue_init,void,
-Function,+,furi_stdglue_set_thread_stdout_callback,_Bool,FuriStdglueWriteCallback
 Function,+,furi_thread_alloc,FuriThread*,
 Function,+,furi_thread_catch,void,
 Function,-,furi_thread_disable_heap_trace,void,FuriThread*
@@ -1339,6 +1355,7 @@ Function,+,furi_thread_flags_get,uint32_t,
 Function,+,furi_thread_flags_set,uint32_t,"FuriThreadId, uint32_t"
 Function,+,furi_thread_flags_wait,uint32_t,"uint32_t, uint32_t, uint32_t"
 Function,+,furi_thread_free,void,FuriThread*
+Function,+,furi_thread_get_current,FuriThread*,
 Function,+,furi_thread_get_current_id,FuriThreadId,
 Function,+,furi_thread_get_heap_size,size_t,FuriThread*
 Function,+,furi_thread_get_id,FuriThreadId,FuriThread*
@@ -1354,7 +1371,10 @@ Function,+,furi_thread_set_priority,void,"FuriThread*, FuriThreadPriority"
 Function,+,furi_thread_set_stack_size,void,"FuriThread*, size_t"
 Function,+,furi_thread_set_state_callback,void,"FuriThread*, FuriThreadStateCallback"
 Function,+,furi_thread_set_state_context,void,"FuriThread*, void*"
+Function,+,furi_thread_set_stdout_callback,_Bool,FuriThreadStdoutWriteCallback
 Function,+,furi_thread_start,void,FuriThread*
+Function,+,furi_thread_stdout_flush,int32_t,
+Function,+,furi_thread_stdout_write,size_t,"const char*, size_t"
 Function,+,furi_thread_yield,void,
 Function,+,furi_timer_alloc,FuriTimer*,"FuriTimerCallback, FuriTimerType, void*"
 Function,+,furi_timer_free,void,FuriTimer*
@@ -1444,7 +1464,7 @@ Function,+,init_mutex,_Bool,"ValueMutex*, void*, size_t"
 Function,-,initstate,char*,"unsigned, char*, size_t"
 Function,+,input_get_key_name,const char*,InputKey
 Function,+,input_get_type_name,const char*,InputType
-Function,+,iprintf,int,"const char*, ..."
+Function,-,iprintf,int,"const char*, ..."
 Function,-,isalnum,int,int
 Function,-,isalnum_l,int,"int, locale_t"
 Function,-,isalpha,int,int
@@ -1678,14 +1698,14 @@ Function,+,power_off,void,Power*
 Function,+,power_reboot,void,PowerBootMode
 Function,+,powf,float,"float, float"
 Function,-,powl,long double,"long double, long double"
-Function,+,printf,int,"const char*, ..."
+Function,-,printf,int,"const char*, ..."
 Function,-,pselect,int,"int, fd_set*, fd_set*, fd_set*, const timespec*, const sigset_t*"
-Function,+,putc,int,"int, FILE*"
+Function,-,putc,int,"int, FILE*"
 Function,-,putc_unlocked,int,"int, FILE*"
-Function,+,putchar,int,int
+Function,-,putchar,int,int
 Function,-,putchar_unlocked,int,int
 Function,-,putenv,int,char*
-Function,+,puts,int,const char*
+Function,-,puts,int,const char*
 Function,-,putw,int,"int, FILE*"
 Function,+,pvPortMalloc,void*,size_t
 Function,-,pvTaskGetThreadLocalStoragePointer,void*,"TaskHandle_t, BaseType_t"
@@ -1948,7 +1968,7 @@ Function,-,setenv,int,"const char*, const char*, int"
 Function,-,setkey,void,const char*
 Function,-,setlinebuf,int,FILE*
 Function,-,setstate,char*,char*
-Function,+,setvbuf,int,"FILE*, char*, int, size_t"
+Function,-,setvbuf,int,"FILE*, char*, int, size_t"
 Function,+,sha256,void,"const unsigned char*, unsigned int, unsigned char[32]"
 Function,+,sha256_finish,void,"sha256_context*, unsigned char[32]"
 Function,+,sha256_process,void,sha256_context*
@@ -1962,11 +1982,11 @@ Function,-,sinh,double,double
 Function,-,sinhf,float,float
 Function,-,sinhl,long double,long double
 Function,-,sinl,long double,long double
-Function,+,siprintf,int,"char*, const char*, ..."
-Function,+,siscanf,int,"const char*, const char*, ..."
-Function,+,sniprintf,int,"char*, size_t, const char*, ..."
+Function,-,siprintf,int,"char*, const char*, ..."
+Function,-,siscanf,int,"const char*, const char*, ..."
+Function,-,sniprintf,int,"char*, size_t, const char*, ..."
 Function,+,snprintf,int,"char*, size_t, const char*, ..."
-Function,+,sprintf,int,"char*, const char*, ..."
+Function,-,sprintf,int,"char*, const char*, ..."
 Function,-,sqrt,double,double
 Function,-,sqrtf,float,float
 Function,-,sqrtl,long double,long double
@@ -2249,7 +2269,6 @@ Function,-,uxTaskPriorityGetFromISR,UBaseType_t,const TaskHandle_t
 Function,+,uxTaskResetEventItemValue,TickType_t,
 Function,-,uxTimerGetReloadMode,UBaseType_t,TimerHandle_t
 Function,-,uxTimerGetTimerNumber,UBaseType_t,TimerHandle_t
-Function,+,vApplicationStackOverflowHook,void,"TaskHandle_t, char*"
 Function,+,vListInitialise,void,List_t*
 Function,+,vListInitialiseItem,void,ListItem_t*
 Function,+,vListInsert,void,"List_t*, ListItem_t*"
@@ -2276,7 +2295,7 @@ Function,+,vTaskPlaceOnEventList,void,"List_t*, const TickType_t"
 Function,+,vTaskPlaceOnEventListRestricted,void,"List_t*, TickType_t, const BaseType_t"
 Function,+,vTaskPlaceOnUnorderedEventList,void,"List_t*, const TickType_t, const TickType_t"
 Function,+,vTaskPriorityDisinheritAfterTimeout,void,"const TaskHandle_t, UBaseType_t"
-Function,+,vTaskPrioritySet,void,"TaskHandle_t, UBaseType_t"
+Function,-,vTaskPrioritySet,void,"TaskHandle_t, UBaseType_t"
 Function,+,vTaskRemoveFromUnorderedEventList,void,"ListItem_t*, const TickType_t"
 Function,-,vTaskResume,void,TaskHandle_t
 Function,-,vTaskSetTaskNumber,void,"TaskHandle_t, const UBaseType_t"
@@ -2380,8 +2399,8 @@ Function,-,vprintf,int,"const char*, __gnuc_va_list"
 Function,-,vscanf,int,"const char*, __gnuc_va_list"
 Function,-,vsiprintf,int,"char*, const char*, __gnuc_va_list"
 Function,-,vsiscanf,int,"const char*, const char*, __gnuc_va_list"
-Function,+,vsniprintf,int,"char*, size_t, const char*, __gnuc_va_list"
-Function,+,vsnprintf,int,"char*, size_t, const char*, __gnuc_va_list"
+Function,-,vsniprintf,int,"char*, size_t, const char*, __gnuc_va_list"
+Function,-,vsnprintf,int,"char*, size_t, const char*, __gnuc_va_list"
 Function,-,vsprintf,int,"char*, const char*, __gnuc_va_list"
 Function,-,vsscanf,int,"const char*, const char*, __gnuc_va_list"
 Function,-,wcstombs,size_t,"char*, const wchar_t*, size_t"
