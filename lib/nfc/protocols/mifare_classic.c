@@ -780,6 +780,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
     // Read command
     while(!command_processed) {
         if(!is_encrypted) {
+            crypto1_reset(&emulator->crypto);
             memcpy(plain_data, tx_rx->rx_data, tx_rx->rx_bits / 8);
         } else {
             if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
