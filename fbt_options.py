@@ -78,6 +78,24 @@ FIRMWARE_APPS = {
         # Debug
         "debug_apps",
     ],
+    "komi": [
+        "crypto_start",
+        # Svc
+        "basic_services",
+        # Apps
+        "komi_apps",
+        "updater_app",
+        "storage_move_to_sd",
+        "archive",
+        # Settings
+        "passport",
+        "system_settings",
+        "about",
+        # Plugins
+        "basic_plugins",
+        # Debug
+        "debug_apps",
+    ],
     "unit_tests": [
         "basic_services",
         "updater_app",
