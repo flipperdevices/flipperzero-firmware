@@ -63,4 +63,5 @@ jobs:
 
       - name: 'Upload report to database'
         run: |
-          /usr/local/bin/amap_mariadb_insert.py artifacts/firmware.elf.map.all {{steps.names.outputs.suffix}}
+          /usr/local/bin/amap_mariadb_insert.py artifacts/firmware.elf.map.all ${{steps.names.outputs.suffix}}
+          echo "Table name: ${{steps.names.outputs.suffix}}"
