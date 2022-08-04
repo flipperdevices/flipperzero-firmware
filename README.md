@@ -8,7 +8,8 @@
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
 - TOFIX - SUBGHZ READ IN READ RAW & SEND CRASH
 - Added [Archive: fix null dereference #1531 #1532 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1532)
-
+- Updated [Add a Mifare Classic info screen to parser output #1504 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1504)
+  
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
   <tr> <td>
