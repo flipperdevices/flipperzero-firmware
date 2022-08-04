@@ -49,7 +49,7 @@ void furi_hal_subghz_init() {
         // FURI_LOG_I(TAG, "Using extended frequencies at own risk");
     } else {
         // FURI_LOG_I(TAG, "Keeping standard frequency ranges");
-    
+    }
     flipper_format_free(fff_data_file);
     furi_record_close("storage");
 	
