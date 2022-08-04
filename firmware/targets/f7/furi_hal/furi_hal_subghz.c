@@ -30,8 +30,8 @@ volatile FuriHalSubGhz furi_hal_subghz = {
     .state = SubGhzStateInit,
     .regulation = SubGhzRegulationTxRx,
     .preset = FuriHalSubGhzPresetIDLE,
-	.is_extended = false;
-	.is_allowed = false;
+	.is_extended = false,
+	.is_allowed = false,
 };
 
 void furi_hal_subghz_init() {
