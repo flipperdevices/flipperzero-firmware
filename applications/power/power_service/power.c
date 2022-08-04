@@ -95,7 +95,6 @@ Power* power_alloc() {
     // Records
     power->notification = furi_record_open(RECORD_NOTIFICATION);
     power->gui = furi_record_open(RECORD_GUI);
-
     // Pubsub
     power->event_pubsub = furi_pubsub_alloc();
 
@@ -176,10 +175,6 @@ static void power_check_charging_state(Power* power) {
 
 static bool power_update_info(Power* power) {
     PowerInfo info;
-    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-    LOAD_DESKTOP_SETTINGS(settings);
-    power->displayBatteryPercentage = settings->displayBatteryPercentage;
-    free(settings);
 
     info.gauge_is_ok = furi_hal_power_gauge_is_ok();
     info.charge = furi_hal_power_get_pct();
@@ -260,6 +255,11 @@ int32_t power_srv(void* p) {
     Power* power = power_alloc();
     power_update_info(power);
     furi_record_create(RECORD_POWER, power);
+	
+    DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+    LOAD_DESKTOP_SETTINGS(settings);
+    power->displayBatteryPercentage = settings->displayBatteryPercentage;
+    free(settings);
 
     while(1) {
         // Update data from gauge and charger
@@ -275,7 +275,13 @@ int32_t power_srv(void* p) {
         power_check_battery_level_change(power);
 
         // Update battery view port
-        if(need_refresh) view_port_update(power->battery_view_port);
+        if(need_refresh) {
+			DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+			LOAD_DESKTOP_SETTINGS(settings);
+			power->displayBatteryPercentage = settings->displayBatteryPercentage;
+			free(settings);
+			view_port_update(power->battery_view_port);
+		}
 
         // Check OTG status and disable it in case of fault
         if(furi_hal_power_is_otg_enabled()) {
