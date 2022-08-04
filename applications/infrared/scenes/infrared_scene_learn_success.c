@@ -102,7 +102,8 @@ bool infrared_scene_learn_success_on_event(void* context, SceneManagerEvent even
                     InfraredSceneLearnSuccess,
                     InfraredSceneLearnSuccessStateSending);
                 infrared_tx_start_received(infrared);
-                infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStartSend);
+                infrared_play_notification_message(
+                    infrared, InfraredNotificationMessageBlinkStartSend);
             }
             consumed = true;
         } else if(event.event == DialogExReleaseCenter) {
