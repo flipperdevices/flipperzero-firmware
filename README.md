@@ -116,7 +116,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
 - [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484)
 - [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
-- [Archive: fix null dereference #1531 #1532 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1532)
 
 </details>
 
