@@ -494,6 +494,27 @@ START_TEST(test_minmea_parse_gbs1)
 }
 END_TEST
 
+START_TEST(test_minmea_parse_gbs2)
+{
+    const char *sentence = "$GPGBS,015509.00,-0.031,-0.186,0.219,19,0.000,-0.354,6.972*4D";
+    struct minmea_sentence_gbs frame = {};
+    static const struct minmea_sentence_gbs expected = {
+        .time = { 1, 55, 9 },
+        .err_latitude = { -31, 1000 },
+        .err_longitude = { -186, 1000 },
+        .err_altitude = { 219, 1000 },
+        .svid = 19,
+        .prob = { 0, 1000 },
+        .bias = { -354, 1000 },
+        .stddev = { 6972, 1000 },
+    };
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
+    ck_assert(minmea_parse_gbs(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
 START_TEST(test_minmea_parse_rmc1)
 {
     const char *sentence = "$GPRMC,081836.75,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E";
@@ -1139,6 +1160,7 @@ static Suite *minmea_suite(void)
 
     TCase *tc_parse = tcase_create("minmea_parse");
     tcase_add_test(tc_parse, test_minmea_parse_gbs1);
+    tcase_add_test(tc_parse, test_minmea_parse_gbs2);
     tcase_add_test(tc_parse, test_minmea_parse_rmc1);
     tcase_add_test(tc_parse, test_minmea_parse_rmc2);
     tcase_add_test(tc_parse, test_minmea_parse_gga1);
