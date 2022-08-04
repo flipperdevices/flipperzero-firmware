@@ -43,9 +43,25 @@ jobs:
           cd artifacts/
           /Applications/amap/Contents/MacOS/amap -f firmware.elf.map
 
+      - name: 'Generate suffix'
+        id: names
+        run: |
+          REF=${{ github.ref }}
+          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
+            REF=${{ github.head_ref }}
+          fi
+          BRANCH_OR_TAG=${REF#refs/*/}
+          SHA=$(git rev-parse --short HEAD)
+
+          if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+            SUFFIX=${BRANCH_OR_TAG//\//_}
+          else
+            SUFFIX=${BRANCH_OR_TAG//\//_}-$(date +'%d%m%Y')-${SHA}
+          fi
+
+          echo "::set-output name=suffix::${SUFFIX}"
+
       - name: 'Upload report to database'
         run: |
-          echo "Comming soon"
-
-
-
+          /usr/local/bin/amap_mariadb_insert.py "{{ steps.names.outputs.suffix }}" "firmware.elf.map.all"
+          echo "Database name = {{ steps.names.outputs.suffix }}"
