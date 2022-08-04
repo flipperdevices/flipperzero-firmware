@@ -22,12 +22,16 @@ typedef struct {
     volatile SubGhzState state;
     volatile SubGhzRegulation regulation;
     volatile FuriHalSubGhzPreset preset;
+	bool is_extended;
+	bool is_allowed;
 } FuriHalSubGhz;
 
 volatile FuriHalSubGhz furi_hal_subghz = {
     .state = SubGhzStateInit,
     .regulation = SubGhzRegulationTxRx,
     .preset = FuriHalSubGhzPresetIDLE,
+	.is_extended = false;
+	.is_allowed = false;
 };
 
 void furi_hal_subghz_init() {
@@ -35,6 +39,18 @@ void furi_hal_subghz_init() {
     furi_hal_subghz.state = SubGhzStateIdle;
     furi_hal_subghz.preset = FuriHalSubGhzPresetIDLE;
 
+    Storage* storage = furi_record_open("storage");
+    FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
+    if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/extend_range.txt")) {
+        flipper_format_read_bool(fff_data_file, "ignore_default_tx_region", furi_hal_subghz.is_allowed, 1);{
+        flipper_format_read_bool(fff_data_file, "use_ext_range_at_own_risk", furi_hal_subghz.is_extended, 1);
+        // FURI_LOG_I(TAG, "Using extended frequencies at own risk");
+    } else {
+        // FURI_LOG_I(TAG, "Keeping standard frequency ranges");
+    
+    flipper_format_free(fff_data_file);
+    furi_record_close("storage");
+	
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
 
 #ifdef FURI_HAL_SUBGHZ_TX_GPIO
@@ -294,20 +310,7 @@ uint8_t furi_hal_subghz_get_lqi() {
 
 bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
     // FURI_LOG_I(TAG, "Checking if frequency is valid");
-    bool is_extended = false;
-
-    Storage* storage = furi_record_open("storage");
-    FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
-
-    if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/extend_range.txt")) {
-        flipper_format_read_bool(fff_data_file, "use_ext_range_at_own_risk", &is_extended, 1);
-        // FURI_LOG_I(TAG, "Using extended frequencies at own risk");
-    } else {
-        // FURI_LOG_I(TAG, "Keeping standard frequency ranges");
-    }
-
-    flipper_format_free(fff_data_file);
-    furi_record_close("storage");
+    bool is_extended = furi_hal_subghz.is_extended;
 
     // No flag - test original range, flag set, test extended range
     if(!(value >= 299999755 && value <= 348000335) &&
@@ -343,17 +346,7 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
 
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     //checking regional settings
-    bool is_allowed = false;
-
-    Storage* storage = furi_record_open("storage");
-    FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
-
-    if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/extend_range.txt")) {
-        flipper_format_read_bool(fff_data_file, "ignore_default_tx_region", &is_allowed, 1);
-    }
-
-    flipper_format_free(fff_data_file);
-    furi_record_close("storage");
+    bool is_allowed = furi_hal_subghz.is_allowed;
 
     switch(furi_hal_version_get_hw_region()) {
     case FuriHalVersionRegionEuRu:
