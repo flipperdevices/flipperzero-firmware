@@ -31,6 +31,7 @@
 #include "marantec.h"
 #include "bett.h"
 #include "doitrand.h"
+#include "phoenix_v2.h"
 
 /**
  * Registration by name SubGhzProtocol.
