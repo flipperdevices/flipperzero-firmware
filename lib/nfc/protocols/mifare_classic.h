@@ -100,11 +100,11 @@ void mf_classic_set_key_found(
     MfClassicKey key_type,
     uint64_t key);
 
-uint8_t mf_classic_get_found_keys(
+uint8_t mf_classic_get_previously_found_key(
     MfClassicData* data,
     uint64_t* key,
     MfClassicKey key_type,
-    uint8_t key_number);
+    uint8_t current_key_number);
 
 bool mf_classic_is_block_read(MfClassicData* data, uint8_t block_num);
 

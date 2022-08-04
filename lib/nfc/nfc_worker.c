@@ -451,8 +451,8 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker, MfClassicDictType 
                     (uint32_t)key);
                 if(!is_key_a_found) {
                     if(!tried_all_previous) {
-                        key_number_a =
-                            mf_classic_get_found_keys(data, &key, MfClassicKeyB, key_number_a);
+                        key_number_a = mf_classic_get_previously_found_key(
+                            data, &key, MfClassicKeyB, key_number_a);
                         if(key_number_a == 0) {
                             mf_classic_dict_rewind(dict);
                             tried_all_previous = true;
@@ -467,8 +467,8 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker, MfClassicDictType 
                 }
                 if(!is_key_b_found) {
                     if(!tried_all_previous) {
-                        key_number_b =
-                            mf_classic_get_found_keys(data, &key, MfClassicKeyB, key_number_b);
+                        key_number_b = mf_classic_get_previously_found_key(
+                            data, &key, MfClassicKeyB, key_number_b);
                         if(key_number_b == 0) {
                             mf_classic_dict_rewind(dict);
                             tried_all_previous = true;
