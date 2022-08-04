@@ -9,9 +9,9 @@ static const NotificationSequence* infrared_notification_sequences[] = {
     &sequence_reset_green,
     &sequence_solid_yellow,
     &sequence_reset_rgb,
-    &sequence_blink_hw_cyan_10,
-    &sequence_blink_hw_magenta_10,
-    &sequence_blink_hw_stop,
+    &sequence_blink_start_cyan,
+    &sequence_blink_start_magenta,
+    &sequence_blink_stop,
 };
 
 static void infrared_make_app_folder(Infrared* infrared) {

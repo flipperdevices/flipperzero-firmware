@@ -432,22 +432,50 @@ const NotificationSequence sequence_blink_white_100 = {
 };
 
 // Hardware blink
-const NotificationSequence sequence_blink_hw_stop = {
-    &message_blink_stop,
+const NotificationSequence sequence_blink_start_blue = {
+    &message_blink_start_10,
+    &message_blink_set_color_blue,
+    &message_do_not_reset,
     NULL,
 };
 
-const NotificationSequence sequence_blink_hw_cyan_10 = {
+const NotificationSequence sequence_blink_start_red = {
+    &message_blink_start_10,
+    &message_blink_set_color_red,
+    &message_do_not_reset,
+    NULL,
+};
+
+const NotificationSequence sequence_blink_start_green = {
+    &message_blink_start_10,
+    &message_blink_set_color_green,
+    &message_do_not_reset,
+    NULL,
+};
+
+const NotificationSequence sequence_blink_start_yellow = {
+    &message_blink_start_10,
+    &message_blink_set_color_yellow,
+    &message_do_not_reset,
+    NULL,
+};
+
+const NotificationSequence sequence_blink_start_cyan = {
     &message_blink_start_10,
     &message_blink_set_color_cyan,
     &message_do_not_reset,
     NULL,
 };
 
-const NotificationSequence sequence_blink_hw_magenta_10 = {
+const NotificationSequence sequence_blink_start_magenta = {
     &message_blink_start_10,
     &message_blink_set_color_magenta,
     &message_do_not_reset,
+    NULL,
+};
+
+const NotificationSequence sequence_blink_stop = {
+    &message_blink_stop,
     NULL,
 };
 
