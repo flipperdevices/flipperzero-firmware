@@ -24,7 +24,7 @@ target_include_directories(tests PUBLIC ${CHECK_INCLUDE_DIRS})
 target_compile_options(tests PUBLIC ${CHECK_CFLAGS_OTHER})
 
 add_test(NAME tests COMMAND $<TARGET_FILE:tests>)
-
+list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
 
 find_program(SCAN_FOUND scan-build)
 
