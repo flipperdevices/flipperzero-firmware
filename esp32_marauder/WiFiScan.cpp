@@ -418,6 +418,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   (currentScanMode == WIFI_SCAN_PWN) ||
   (currentScanMode == WIFI_SCAN_ESPRESSIF) ||
   (currentScanMode == WIFI_SCAN_EAPOL) ||
+  (currentScanMode == WIFI_SCAN_ACTIVE_EAPOL) ||
   (currentScanMode == WIFI_SCAN_ALL) ||
   (currentScanMode == WIFI_SCAN_DEAUTH) ||
   (currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
@@ -2428,9 +2429,10 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
       new_packet[21] = snifferPacket->payload[15];      
     
       // Send packet
+      //esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
+      //esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
       esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
-      esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
-      esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
+      delay(1);
     }
 
 
@@ -2464,18 +2466,18 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
       #endif
     #endif
     
-    for (int i = 0; i < len; i++) {
-      char hexCar[4];
-      sprintf(hexCar, "%02X", snifferPacket->payload[i]);
-      Serial.print(hexCar);
+//    for (int i = 0; i < len; i++) {
+//      char hexCar[4];
+//      sprintf(hexCar, "%02X", snifferPacket->payload[i]);
+//      Serial.print(hexCar);
       //Serial.print(snifferPacket->payload[i], HEX);
-      if ((i + 1) % 16 == 0)
-        Serial.print("\n");
-      else
-        Serial.print(" ");
-    }
+//      if ((i + 1) % 16 == 0)
+//        Serial.print("\n");
+//      else
+//        Serial.print(" ");
+//    }
   
-    Serial.print("\n");
+//    Serial.print("\n");
   }
 
   if (save_packet)
@@ -2505,6 +2507,8 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
   if (snifferPacket->payload[0] == 0x80) {    
     // Build packet
 
+    //Serial.println("Recieved beacon frame");
+
     uint8_t new_packet[26] = {
                               0xc0, 0x00, 0x3a, 0x01,
                               0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -2528,9 +2532,10 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
     new_packet[21] = snifferPacket->payload[15];      
   
     // Send packet
+    //esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
+    //esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
     esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
-    esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
-    esp_wifi_80211_tx(WIFI_IF_AP, new_packet, sizeof(new_packet), false);
+    delay(1);
   }
 
 
@@ -2539,18 +2544,18 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
     num_eapol++;
     Serial.println("Received EAPOL:");
 
-    for (int i = 0; i < len; i++) {
-      char hexCar[4];
-      sprintf(hexCar, "%02X", snifferPacket->payload[i]);
-      Serial.print(hexCar);
+//    for (int i = 0; i < len; i++) {
+//      char hexCar[3];
+//      snprintf(hexCar, 3, "%02X", snifferPacket->payload[i]);
+//      Serial.print(hexCar);
       //Serial.print(snifferPacket->payload[i], HEX);
-      if ((i + 1) % 16 == 0)
-        Serial.print("\n");
-      else
-        Serial.print(" ");
-    }
+//      if ((i + 1) % 16 == 0)
+//        Serial.print("\n");
+//      else
+//        Serial.print(" ");
+//    }
   
-    Serial.print("\n");
+//    Serial.print("\n");
   }
 
   if (save_packet)
