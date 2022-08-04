@@ -6,12 +6,8 @@
 <b>Latest Updates:</b>
 
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
-- Latest OFW updates: [#1524](https://github.com/flipperdevices/flipperzero-firmware/pull/1524), [#1492](https://github.com/flipperdevices/flipperzero-firmware/pull/1492), [#1496](https://github.com/flipperdevices/flipperzero-firmware/pull/1496), [#1520](https://github.com/flipperdevices/flipperzero-firmware/pull/1520), [#1523](https://github.com/flipperdevices/flipperzero-firmware/pull/1523), [#1513](https://github.com/flipperdevices/flipperzero-firmware/pull/1513), [#1462](https://github.com/flipperdevices/flipperzero-firmware/pull/1462), [#1528](https://github.com/flipperdevices/flipperzero-firmware/pull/1528) & [#1438](https://github.com/flipperdevices/flipperzero-firmware/pull/1438)
-- Excluded [App RPC Bug Fixes and redesign #1491](https://github.com/flipperdevices/flipperzero-firmware/pull/1491) since it breaks compile
-- Removed BadUSB: DUCKY_LANG keyword support [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)(Supports US, DE, FR, [HU by terzinnorbert](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/135), [BE By Bramard](https://github.com/v1nc/flipperzero-firmware/pull/4/files))
-- Added [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
-- Added ignore DUCKY_LANG cmd to retain compatibility with existing scripts [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
-- Readded [BadUSB: add SYSRQ keys #1460 (By rck)](https://github.com/flipperdevices/flipperzero-firmware/pull/1460)
+- TOFIX - SUBGHZ READ IN READ RAW & SEND CRASH
+- Added [Archive: fix null dereference #1531 #1532 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1532)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -119,6 +115,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
 - [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484)
 - [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
+- [Archive: fix null dereference #1531 #1532 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1532)
 
 </details>
 
