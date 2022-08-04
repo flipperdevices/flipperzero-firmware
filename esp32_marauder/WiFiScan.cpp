@@ -915,12 +915,34 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
     #endif
   #endif
 
-
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
-  //esp_wifi_set_mode(WIFI_MODE_NULL);
-  esp_wifi_set_mode(WIFI_AP_STA);
+  esp_wifi_set_mode(WIFI_MODE_AP);
+
+  esp_err_t err;
+  wifi_config_t conf;
+  err = esp_wifi_set_protocol(WIFI_IF_AP, WIFI_PROTOCOL_11B | WIFI_PROTOCOL_11G | WIFI_PROTOCOL_11N | WIFI_PROTOCOL_LR);
+  if (err != 0)
+  {
+    Serial.print("could not set protocol : err=0x");
+    Serial.println(err, HEX);
+  }
+
+  esp_wifi_get_config((wifi_interface_t)WIFI_IF_AP, &conf);
+  conf.ap.ssid[0] = '\0';
+  conf.ap.ssid_len = 0;
+  conf.ap.channel = this->set_channel;
+  conf.ap.ssid_hidden = 1;
+  conf.ap.max_connection = 0;
+  conf.ap.beacon_interval = 60000;
+
+  err = esp_wifi_set_config((wifi_interface_t)WIFI_IF_AP, &conf);
+  if (err != 0)
+  {
+    Serial.print("AP config set error, Maurauder SSID might visible : err=0x");
+    Serial.println(err, HEX);
+  }
+
   esp_wifi_start();
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_promiscuous_filter(&filt);
