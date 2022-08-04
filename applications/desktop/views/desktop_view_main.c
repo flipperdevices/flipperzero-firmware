@@ -16,6 +16,7 @@ struct DesktopMainView {
     DesktopMainViewCallback callback;
     void* context;
     TimerHandle_t poweroff_timer;
+	bool is_gamemode;
 };
 
 #define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 5000
@@ -50,12 +51,18 @@ View* desktop_main_get_view(DesktopMainView* main_view) {
 bool desktop_main_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
-
     DesktopMainView* main_view = context;
-
-    DesktopSettings* desktop_settings = malloc(sizeof(DesktopSettings));
-    LOAD_DESKTOP_SETTINGS(desktop_settings);
-    if(!desktop_settings->is_dumbmode) {
+	
+	// change to only check for game mode setting on keypress
+	if (event->type == InputTypeShort || event->type == InputTypeLong) {
+		main_view->is_gamemode = false;
+		DesktopSettings* desktop_settings = malloc(sizeof(DesktopSettings));
+		LOAD_DESKTOP_SETTINGS(desktop_settings);
+		if(desktop_settings->is_dumbmode) main_view->is_gamemode = true;
+		free(desktop_settings);
+	}
+	
+    if(!main_view->is_gamemode) {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
                 main_view->callback(DesktopMainEventOpenMenu, main_view->context);
@@ -151,7 +158,13 @@ bool desktop_main_input(InputEvent* event, void* context) {
 
 DesktopMainView* desktop_main_alloc() {
     DesktopMainView* main_view = malloc(sizeof(DesktopMainView));
-
+	
+    main_view->is_gamemode = false;
+    DesktopSettings* desktop_settings = malloc(sizeof(DesktopSettings));
+    LOAD_DESKTOP_SETTINGS(desktop_settings);
+    if(desktop_settings->is_dumbmode) main_view->is_gamemode = true;
+    free(desktop_settings);
+	
     main_view->view = view_alloc();
     view_allocate_model(main_view->view, ViewModelTypeLockFree, 1);
     view_set_context(main_view->view, main_view);
