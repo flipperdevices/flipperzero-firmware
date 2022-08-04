@@ -106,7 +106,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 
 
 <details>
-  <summary><B>Open PRs Checkedout & Not Merged In Main:</b></summary><br/>
+  <summary><B>Open PRs Checkedout & Not Merged In Main</b></summary><br/>
   
 - [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
 - [NFC: Display UL PWD_AUTH payload / ntag-pwd-capture (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
