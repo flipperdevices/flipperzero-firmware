@@ -66,7 +66,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         }
         snprintf(
             rollTime[0],
-			sizeof(rollTime[0]),
+            sizeof(rollTime[0]),
             "%.2d:%.2d:%.2d",
             state->datetime.hour,
             state->datetime.minute,
@@ -199,21 +199,25 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         } else {
             diceRoll = ((rand() % diceSelect) + 1);
             snprintf(diceType[0], sizeof(diceType[0]), "%s%d", "d", diceSelect);
-            snprintf(strings[0], sizeof(strings[0]), "%d%s at %s", diceQty, diceType[0], rollTime[0]);
+            snprintf(
+                strings[0], sizeof(strings[0]), "%d%s at %s", diceQty, diceType[0], rollTime[0]);
             if(diceQty == 1) {
                 snprintf(strings[1], sizeof(strings[1]), "%d", diceRoll);
             } else if(diceQty == 2) {
-                snprintf(strings[1], sizeof(strings[1]), "%d %d", diceRoll, ((rand() % diceSelect) + 1));
+                snprintf(
+                    strings[1], sizeof(strings[1]), "%d %d", diceRoll, ((rand() % diceSelect) + 1));
             } else if(diceQty == 3) {
                 snprintf(
-                    strings[1], sizeof(strings[1]),
+                    strings[1],
+                    sizeof(strings[1]),
                     "%d %d %d",
                     diceRoll,
                     ((rand() % diceSelect) + 1),
                     ((rand() % diceSelect) + 1));
             } else if(diceQty == 4) {
                 snprintf(
-                    strings[1], sizeof(strings[1]),
+                    strings[1],
+                    sizeof(strings[1]),
                     "%d %d %d %d",
                     diceRoll,
                     ((rand() % diceSelect) + 1),
@@ -221,7 +225,8 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                     ((rand() % diceSelect) + 1));
             } else if(diceQty == 5) {
                 snprintf(
-                    strings[1], sizeof(strings[1]),
+                    strings[1],
+                    sizeof(strings[1]),
                     "%d %d %d %d %d",
                     diceRoll,
                     ((rand() % diceSelect) + 1),
@@ -230,7 +235,8 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                     ((rand() % diceSelect) + 1));
             } else if(diceQty == 6) {
                 snprintf(
-                    strings[1], sizeof(strings[1]),
+                    strings[1],
+                    sizeof(strings[1]),
                     "%d %d %d %d %d %d",
                     diceRoll,
                     ((rand() % diceSelect) + 1),
@@ -260,7 +266,8 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         if(diceSelect == 231 && !(playerOneScore == 0 && playerTwoScore == 0)) {
             canvas_set_font(canvas, FontSecondary);
             snprintf(
-                theScores[0], sizeof(theScores[0]),
+                theScores[0],
+                sizeof(theScores[0]),
                 "%d                                   %d",
                 playerOneScore,
                 playerTwoScore);

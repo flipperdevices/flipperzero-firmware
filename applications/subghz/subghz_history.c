@@ -192,8 +192,7 @@ bool subghz_history_add_to_history(
             }
 
             break;
-        }
-        else if(!strcmp(string_get_cstr(instance->tmp_string), "KeeLoq")) {
+        } else if(!strcmp(string_get_cstr(instance->tmp_string), "KeeLoq")) {
             string_set_str(instance->tmp_string, "KL ");
             if(!flipper_format_read_string(item->flipper_string, "Manufacture", text)) {
                 FURI_LOG_E(TAG, "Missing Protocol");

@@ -101,10 +101,7 @@ void subghz_scene_read_raw_on_enter(void* context) {
     furi_assert(subghz->txrx->decoder_result);
 
     // make sure we're not in auto-detect mode, which is only meant for the Read app
-    subghz_protocol_decoder_raw_set_auto_mode(
-        subghz->txrx->decoder_result,
-        false
-    );
+    subghz_protocol_decoder_raw_set_auto_mode(subghz->txrx->decoder_result, false);
 
     //set filter RAW feed
     subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_RAW);
@@ -258,12 +255,20 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
             uint32_t date = LL_RTC_DATE_Get(RTC); // 0xWWDDMMYY
             char strings[1][25];
-            snprintf(strings[0], sizeof(strings[0]), "%s%.4d%.2d%.2d%.2d%.2d", "R"
-                , __LL_RTC_CONVERT_BCD2BIN((date >> 0) & 0xFF) + 2000 // YEAR
-                , __LL_RTC_CONVERT_BCD2BIN((date >> 8) & 0xFF) // MONTH
-                , __LL_RTC_CONVERT_BCD2BIN((date >> 16) & 0xFF) // DAY
-                , __LL_RTC_CONVERT_BCD2BIN((time >> 16) & 0xFF) // HOUR
-                , __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF)  // DAY
+            snprintf(
+                strings[0],
+                sizeof(strings[0]),
+                "%s%.4d%.2d%.2d%.2d%.2d",
+                "R",
+                __LL_RTC_CONVERT_BCD2BIN((date >> 0) & 0xFF) + 2000 // YEAR
+                ,
+                __LL_RTC_CONVERT_BCD2BIN((date >> 8) & 0xFF) // MONTH
+                ,
+                __LL_RTC_CONVERT_BCD2BIN((date >> 16) & 0xFF) // DAY
+                ,
+                __LL_RTC_CONVERT_BCD2BIN((time >> 16) & 0xFF) // HOUR
+                ,
+                __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF) // DAY
             );
 
             string_printf(
@@ -290,12 +295,20 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
                 uint32_t date = LL_RTC_DATE_Get(RTC); // 0xWWDDMMYY
                 char strings[1][25];
-                snprintf(strings[0], sizeof(strings[0]), "%s%.4d%.2d%.2d%.2d%.2d", "R"
-                    , __LL_RTC_CONVERT_BCD2BIN((date >> 0) & 0xFF) + 2000 // YEAR
-                    , __LL_RTC_CONVERT_BCD2BIN((date >> 8) & 0xFF) // MONTH
-                    , __LL_RTC_CONVERT_BCD2BIN((date >> 16) & 0xFF) // DAY
-                    , __LL_RTC_CONVERT_BCD2BIN((time >> 16) & 0xFF) // HOUR
-                    , __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF)  // DAY
+                snprintf(
+                    strings[0],
+                    sizeof(strings[0]),
+                    "%s%.4d%.2d%.2d%.2d%.2d",
+                    "R",
+                    __LL_RTC_CONVERT_BCD2BIN((date >> 0) & 0xFF) + 2000 // YEAR
+                    ,
+                    __LL_RTC_CONVERT_BCD2BIN((date >> 8) & 0xFF) // MONTH
+                    ,
+                    __LL_RTC_CONVERT_BCD2BIN((date >> 16) & 0xFF) // DAY
+                    ,
+                    __LL_RTC_CONVERT_BCD2BIN((time >> 16) & 0xFF) // HOUR
+                    ,
+                    __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF) // DAY
                 );
                 //subghz_get_preset_name(subghz, subghz->error_str);
                 if(subghz_protocol_raw_save_to_file_init(

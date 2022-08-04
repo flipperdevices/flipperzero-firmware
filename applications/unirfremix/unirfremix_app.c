@@ -40,8 +40,8 @@ typedef struct {
     string_t right_l;
     string_t down_l;
     string_t ok_l;
-	
-	string_t file_path;
+
+    string_t file_path;
 
     char* up_label;
     char* down_label;
@@ -353,7 +353,7 @@ void unirfremix_cfg_set_check(UniRFRemix* app, string_t file_name) {
 
     flipper_format_free(fff_data_file);
     furi_record_close("storage");
-	
+
     //File Existence Check
     //Check each file definition if not already set to "N/A"
 
@@ -698,9 +698,9 @@ void unirfremix_free(UniRFRemix* app) {
     string_clear(app->left_l);
     string_clear(app->right_l);
     string_clear(app->ok_l);
-	
-	string_clear(app->file_path);
-	
+
+    string_clear(app->file_path);
+
     gui_remove_view_port(app->gui, app->view_port);
     furi_record_close(RECORD_GUI);
     view_port_free(app->view_port);
@@ -713,7 +713,7 @@ void unirfremix_free(UniRFRemix* app) {
 }
 
 int32_t unirfremix_app(void* p) {
-	UNUSED(p);
+    UNUSED(p);
     UniRFRemix* app = unirfremix_alloc();
 
     string_init(app->file_path);
@@ -733,29 +733,20 @@ int32_t unirfremix_app(void* p) {
     string_init(app->ok_l);
 
     app->file_result = 3;
-	
-	string_set_str(app->file_path, UNIRFMAP_FOLDER);
 
-	DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
-	bool res = dialog_file_browser_show(
-		dialogs,
-		app->file_path,
-		app->file_path,
-		UNIRFMAP_EXTENSION,
-		true,
-		&I_sub1_10px,
-		false);
+    string_set_str(app->file_path, UNIRFMAP_FOLDER);
 
-	furi_record_close(RECORD_DIALOGS);
-	if(!res)
-	{
-		FURI_LOG_E(TAG, "No file selected");
-	}
-	else
-	{
-		//check map and population variables
-		unirfremix_cfg_set_check(app, app->file_path);
-	}
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+    bool res = dialog_file_browser_show(
+        dialogs, app->file_path, app->file_path, UNIRFMAP_EXTENSION, true, &I_sub1_10px, false);
+
+    furi_record_close(RECORD_DIALOGS);
+    if(!res) {
+        FURI_LOG_E(TAG, "No file selected");
+    } else {
+        //check map and population variables
+        unirfremix_cfg_set_check(app, app->file_path);
+    }
 
     bool exit_loop = false;
 
@@ -783,7 +774,8 @@ int32_t unirfremix_app(void* p) {
         //input detect loop start
         InputEvent input;
         while(1) {
-            furi_check(furi_message_queue_get(app->input_queue, &input, FuriWaitForever) == FuriStatusOk);
+            furi_check(
+                furi_message_queue_get(app->input_queue, &input, FuriWaitForever) == FuriStatusOk);
             FURI_LOG_I(
                 TAG,
                 "key: %s type: %s",
@@ -912,13 +904,14 @@ int32_t unirfremix_app(void* p) {
             furi_mutex_release(app->model_mutex);
             view_port_update(app->view_port);
         }
-    } else if (app->file_result == 1) {
+    } else if(app->file_result == 1) {
         //refresh screen to update variables before processing main screen or error screens
         view_port_update(app->view_port);
 
         InputEvent input;
         while(1) {
-            furi_check(furi_message_queue_get(app->input_queue, &input, FuriWaitForever) == FuriStatusOk);
+            furi_check(
+                furi_message_queue_get(app->input_queue, &input, FuriWaitForever) == FuriStatusOk);
             FURI_LOG_I(
                 TAG,
                 "key: %s type: %s",
@@ -951,11 +944,9 @@ int32_t unirfremix_app(void* p) {
             furi_mutex_release(app->model_mutex);
             view_port_update(app->view_port);
         }
+    } else {
+        furi_mutex_release(app->model_mutex);
     }
-	else
-	{
-		furi_mutex_release(app->model_mutex);
-	}
 
     // remove & free all stuff created by app
     unirfremix_free(app);

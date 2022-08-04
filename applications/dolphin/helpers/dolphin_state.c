@@ -107,36 +107,21 @@ uint64_t dolphin_state_timestamp() {
 }
 
 bool dolphin_state_is_levelup(uint32_t icounter) {
-    return (icounter == LEVEL2_THRESHOLD) 
-		|| (icounter == LEVEL3_THRESHOLD)
-		|| (icounter == LEVEL4_THRESHOLD)
-		|| (icounter == LEVEL5_THRESHOLD)
-		|| (icounter == LEVEL6_THRESHOLD)
-		|| (icounter == LEVEL7_THRESHOLD)
-		|| (icounter == LEVEL8_THRESHOLD)
-		|| (icounter == LEVEL9_THRESHOLD)
-		|| (icounter == LEVEL10_THRESHOLD)
-		|| (icounter == LEVEL11_THRESHOLD)
-		|| (icounter == LEVEL12_THRESHOLD)
-		|| (icounter == LEVEL13_THRESHOLD)
-		|| (icounter == LEVEL14_THRESHOLD)
-		|| (icounter == LEVEL15_THRESHOLD)
-		|| (icounter == LEVEL16_THRESHOLD)
-		|| (icounter == LEVEL17_THRESHOLD)
-		|| (icounter == LEVEL18_THRESHOLD)
-		|| (icounter == LEVEL19_THRESHOLD)
-		|| (icounter == LEVEL20_THRESHOLD)
-		|| (icounter == LEVEL21_THRESHOLD)
-		|| (icounter == LEVEL22_THRESHOLD)
-		|| (icounter == LEVEL23_THRESHOLD)
-		|| (icounter == LEVEL24_THRESHOLD)
-		|| (icounter == LEVEL25_THRESHOLD)
-		|| (icounter == LEVEL26_THRESHOLD)
-		|| (icounter == LEVEL27_THRESHOLD)
-		|| (icounter == LEVEL28_THRESHOLD)
-		|| (icounter == LEVEL29_THRESHOLD)
-		|| (icounter == LEVEL30_THRESHOLD)
-		;
+    return (icounter == LEVEL2_THRESHOLD) || (icounter == LEVEL3_THRESHOLD) ||
+           (icounter == LEVEL4_THRESHOLD) || (icounter == LEVEL5_THRESHOLD) ||
+           (icounter == LEVEL6_THRESHOLD) || (icounter == LEVEL7_THRESHOLD) ||
+           (icounter == LEVEL8_THRESHOLD) || (icounter == LEVEL9_THRESHOLD) ||
+           (icounter == LEVEL10_THRESHOLD) || (icounter == LEVEL11_THRESHOLD) ||
+           (icounter == LEVEL12_THRESHOLD) || (icounter == LEVEL13_THRESHOLD) ||
+           (icounter == LEVEL14_THRESHOLD) || (icounter == LEVEL15_THRESHOLD) ||
+           (icounter == LEVEL16_THRESHOLD) || (icounter == LEVEL17_THRESHOLD) ||
+           (icounter == LEVEL18_THRESHOLD) || (icounter == LEVEL19_THRESHOLD) ||
+           (icounter == LEVEL20_THRESHOLD) || (icounter == LEVEL21_THRESHOLD) ||
+           (icounter == LEVEL22_THRESHOLD) || (icounter == LEVEL23_THRESHOLD) ||
+           (icounter == LEVEL24_THRESHOLD) || (icounter == LEVEL25_THRESHOLD) ||
+           (icounter == LEVEL26_THRESHOLD) || (icounter == LEVEL27_THRESHOLD) ||
+           (icounter == LEVEL28_THRESHOLD) || (icounter == LEVEL29_THRESHOLD) ||
+           (icounter == LEVEL30_THRESHOLD);
 }
 
 uint8_t dolphin_get_level(uint32_t icounter) {

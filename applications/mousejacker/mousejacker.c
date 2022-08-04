@@ -74,7 +74,8 @@ static void mousejacker_state_init(PluginState* const plugin_state) {
 
 static void hexlify(uint8_t* in, uint8_t size, char* out) {
     memset(out, 0, size * 2);
-    for(int i = 0; i < size; i++) snprintf(out + strlen(out), sizeof(out + strlen(out)), "%02X", in[i]);
+    for(int i = 0; i < size; i++)
+        snprintf(out + strlen(out), sizeof(out + strlen(out)), "%02X", in[i]);
 }
 
 static bool open_ducky_script(Storage* storage, Stream* stream) {

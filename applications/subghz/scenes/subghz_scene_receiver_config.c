@@ -134,9 +134,9 @@ static void subghz_scene_receiver_config_set_detect_raw(VariableItem* item) {
     variable_item_set_current_value_text(item, detect_raw_text[index]);
     subghz_receiver_set_filter(subghz->txrx->receiver, detect_raw_value[index]);
     subghz_protocol_decoder_raw_set_auto_mode(
-        subghz_receiver_search_decoder_base_by_name(subghz->txrx->receiver, SUBGHZ_PROTOCOL_RAW_NAME),
-        (index == 1)
-    );
+        subghz_receiver_search_decoder_base_by_name(
+            subghz->txrx->receiver, SUBGHZ_PROTOCOL_RAW_NAME),
+        (index == 1));
 }
 
 static void subghz_scene_receiver_config_set_hopping_runing(VariableItem* item) {
@@ -236,7 +236,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         item, subghz_setting_get_preset_name(subghz->setting, value_index));
 
     if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
-        SubGhzCustomEventManagerSet) {
+       SubGhzCustomEventManagerSet) {
         item = variable_item_list_add(
             subghz->variable_item_list,
             "Detect Raw:",
@@ -244,7 +244,9 @@ void subghz_scene_receiver_config_on_enter(void* context) {
             subghz_scene_receiver_config_set_detect_raw,
             subghz);
         value_index = subghz_scene_receiver_config_detect_raw_value_index(
-            subghz_receiver_get_filter(subghz->txrx->receiver), detect_raw_value, DETECT_RAW_COUNT);
+            subghz_receiver_get_filter(subghz->txrx->receiver),
+            detect_raw_value,
+            DETECT_RAW_COUNT);
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, detect_raw_text[value_index]);
     }
