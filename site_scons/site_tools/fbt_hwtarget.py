@@ -56,7 +56,7 @@ class HardwareTargetLoader:
     def gatherSources(self):
         sources = [self.startup_script]
         seen_filenames = set()
-        print("Layers: ", self.layered_target_dirs)
+        # print("Layers: ", self.layered_target_dirs)
         for target_dir in self.layered_target_dirs:
             accepted_sources = list(
                 filter(
