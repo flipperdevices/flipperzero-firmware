@@ -7,6 +7,6 @@ env.Append(LINT_SOURCES=["firmware"])
 libenv = env.Clone(FW_LIB_NAME="flipper${TARGET_HW}")
 libenv.ApplyLibFlags()
 
-lib = libenv.StaticLibrary("${FW_LIB_NAME}", env.get("TARGET_CFG").sources)
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", env.get("TARGET_CFG").gatherSources())
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")

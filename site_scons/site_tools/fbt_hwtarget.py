@@ -17,7 +17,6 @@ class HardwareTargetLoader:
         self.linker_script_ram = None
         self.linker_script_app = None
         self._processTargetDefinitions(target_id)
-        self._gatherSources()
 
     def _getTargetDir(self, target_id):
         return self.target_scons_dir.Dir(f"f{target_id}")
@@ -31,7 +30,7 @@ class HardwareTargetLoader:
             return vals
 
     def _processTargetDefinitions(self, target_id):
-        self.layered_target_dirs.append(self._getTargetDir(target_id))
+        self.layered_target_dirs.append(f"targets/f{target_id}")
         config = self._loadDescription(target_id)
         if include_paths := config.get("include_paths", None):
             self.include_paths.extend(
@@ -48,15 +47,16 @@ class HardwareTargetLoader:
         for attr in attrs:
             if (val := config.get(attr, None)) and getattr(self, attr) is None:
                 setattr(
-                    self, attr, self.env.File(f"#/firmware/targets/f{target_id}/{val}")
+                    self, attr, self.env.File(f"firmware/targets/f{target_id}/{val}")
                 )
 
         if inherited_target := config.get("inherit", None):
             self._processTargetDefinitions(inherited_target)
 
-    def _gatherSources(self):
-        self.sources = [self.startup_script]
+    def gatherSources(self):
+        sources = [self.startup_script]
         seen_filenames = set()
+        print("Layers: ", self.layered_target_dirs)
         for target_dir in self.layered_target_dirs:
             accepted_sources = list(
                 filter(
@@ -65,7 +65,9 @@ class HardwareTargetLoader:
                 )
             )
             seen_filenames.update(f.name for f in accepted_sources)
-            self.sources.extend(accepted_sources)
+            sources.extend(accepted_sources)
+        # print(f"Found {len(sources)} sources: {list(f.name for f in sources)}")
+        return sources
 
 
 def ConfigureForTarget(env, target_id):
