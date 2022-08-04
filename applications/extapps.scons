@@ -6,7 +6,7 @@ from fbt.appmanifest import FlipperAppType
 appenv = ENV.Clone(tools=["fbt_extapps"])
 
 appenv.Replace(
-    LINKER_SCRIPT="application-ext",
+    LINKER_SCRIPT="${TARGET_CFG.linker_script_app}",
     STRIPFLAGS=[
         "--strip-debug",
         "--strip-unneeded",

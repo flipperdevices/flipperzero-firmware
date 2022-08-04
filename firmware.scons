@@ -13,6 +13,7 @@ env = ENV.Clone(
         ("compilation_db", {"COMPILATIONDB_COMSTR": "\tCDB\t${TARGET}"}),
         "fwbin",
         "fbt_apps",
+        "fbt_hwtarget",
     ],
     COMPILATIONDB_USE_ABSPATH=False,
     BUILD_DIR=fw_build_meta["build_dir"],
@@ -29,10 +30,6 @@ env = ENV.Clone(
     CPPPATH=[
         "#/furi",
         "#/applications",
-        "#/firmware/targets/f${TARGET_HW}/ble_glue",
-        "#/firmware/targets/f${TARGET_HW}/fatfs",
-        "#/firmware/targets/f${TARGET_HW}/furi_hal",
-        "#/firmware/targets/f${TARGET_HW}/Inc",
         "#/firmware/targets/furi_hal_include",
     ],
     # Specific flags for building libraries - always do optimized builds
@@ -61,20 +58,6 @@ env = ENV.Clone(
     },
 )
 
-
-def ApplyLibFlags(env):
-    flags_to_apply = env["FW_LIB_OPTS"].get(
-        env.get("FW_LIB_NAME"),
-        env["FW_LIB_OPTS"]["Default"],
-    )
-    # print("Flags for ", env.get("FW_LIB_NAME", "Default"), flags_to_apply)
-    env.MergeFlags(flags_to_apply)
-
-
-env.AddMethod(ApplyLibFlags)
-
-Export("env")
-
 if not env["VERBOSE"]:
     env.SetDefault(
         HEXCOMSTR="\tHEX\t${TARGET}",
@@ -96,6 +79,10 @@ else:
             "FURI_RAM_EXEC",
         ],
     )
+
+env.ConfigureForTarget(env.subst("${TARGET_HW}"))
+
+Export("env")
 
 # Invoke child SCopscripts to populate global `env` + build their own part of the code
 lib_targets = env.BuildModules(
