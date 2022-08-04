@@ -56,8 +56,9 @@ jobs:
           if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
             SUFFIX=${BRANCH_OR_TAG//\//_}
           else
-            SUFFIX=${BRANCH_OR_TAG//\//_}-$(date +'%d%m%Y')-${SHA}
+            SUFFIX=${BRANCH_OR_TAG//\//_}_$(date +'%d%m%Y')_${SHA}
           fi
+          SUFFIX=${SUFFIX//-/_}
 
           echo "::set-output name=suffix::${SUFFIX}"
 
