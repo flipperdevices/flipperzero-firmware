@@ -57,11 +57,12 @@ App(
         "GAME_2048",
 	    "GAME_Arkanoid",
 	    "GAME_Dice",
-	    "GAME_TicTacToe",
-        "GAME_VideoPoker",
 	    "GAME_FlappyBird",
         "GAME_Raycast",
+        "GAME_tamagotchi_p1",
         "GAME_Tetris",
+	    "GAME_TicTacToe",
+        "GAME_VideoPoker",
     ],
 )
 

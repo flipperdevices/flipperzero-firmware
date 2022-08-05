@@ -31,3 +31,6 @@
 [submodule "lib/cxxheaderparser"]
 	path = lib/cxxheaderparser
 	url = https://github.com/robotpy/cxxheaderparser.git
+[submodule "applications/tamagotchi_p1/tamalib"]
+	path = applications/tamagotchi_p1/tamalib
+	url = https://github.com/jcrona/tamalib.git

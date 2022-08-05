@@ -1,0 +1,11 @@
+App(
+    appid="GAME_tamagotchi_p1",
+    name="Tamagotchi",
+    apptype=FlipperAppType.GAME,
+    entry_point="tamagotchi_p1_app",
+    cdefines=["APP_TAMAGOTCHI_P1"],
+    requires=["gui", "storage"],
+    stack_size=1 * 1024,
+    icon="A_Plugins_14",
+    order=215,
+)

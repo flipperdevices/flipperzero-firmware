@@ -7,7 +7,10 @@
 
 - TOFIX - `FAP Loader`
 - Removed [New frequency analyzer #1501 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501)
-  
+- Added [Tamagochi (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1)
+- - Drop [this rom](https://wowroms.com/en/roms/mame/download-tamagotchi-usa/108517.html) IN `tama_p1` on SD to make it work.
+- Fixed Issue with 468Mhz Frequency shown in Frequency Analyzer
+
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
   <tr> <td>
@@ -133,6 +136,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - `FAP` [Mandelbrot Set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins) `HIDDEN "GAME_MandelbrotSet"`
 - `FAP` [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine)
 - `FAP` Snake [OFW]
+- [Tamagochi (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) requires [this rom](https://wowroms.com/en/roms/mame/download-tamagotchi-usa/108517.html) IN `tama_p1` on SD
 - `FAP` [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) `HIDDEN "GAME_Tanks"`
 - `FAP` [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
 - `FAP` [Tic Tac Toe (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
