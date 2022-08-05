@@ -5,10 +5,11 @@
 
 <b>Latest Updates:</b>
 
-- TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
-- SubGHz: Auto Detect Raw Replay Issue Fixed Via Send Removal [from perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/160)
-- Fix for loading settings on key press (doesn't seem to change the Loading "/int/.desktop.settings")
-- Updated to check desktop settings when a bettery refresh is needed or device boot; instead of constantly. Changing battery display type should now require a restart to take effect immediately
+- TOFIX - `FAP Loader`
+- Updated with fixes for UniRF from [Unleashed/Nano](https://github.com/Eng1n33r/flipperzero-firmware) 
+- Updated with subghz text updates from [Unleashed/Nano](https://github.com/Eng1n33r/flipperzero-firmware) 
+- Updated with subghz settings check moved from [Unleashed/Nano](https://github.com/Eng1n33r/flipperzero-firmware) 
+- Updated with new bug fixes for BadUSB from [Unleashed/Nano](https://github.com/Eng1n33r/flipperzero-firmware) 
   
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -18,16 +19,16 @@
 <details>
   <summary><B>HOW TOs</b></summary><br/>
   
-- [- HERE IS A GUIDE FOR INSTALL (BY PINGYWON)](https://flipper.pingywon.com/)
-- [- HERE IS A NOOB GUIDE TO FLASH AND UNLOCK (BY interestingsoup)](https://interestingsoup.com/n00b-guide-flashing-flipper-zero-to-rougemaster/)
-- [- How to install firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/HowToInstall.md)
-- [- How to build firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/HowToBuild.md)
-- [- Configure UniversalRF Remix App](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/UniRFRemix.md)
-- [- How to use: NRF24 plugins](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/NRF24.md)
-- [- How to use: SentrySafe plugin](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/SentrySafe.md)
-- [- Barcode Generator readme](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/BarcodeGenerator.md)
-- [- How to extend SubGHz frequency range](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/DangerousSettings.md)
-- [- How to add extra SubGHz frequencies](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/SubGHzSettings.md)
+- [HERE IS A GUIDE FOR INSTALL (BY PINGYWON)](https://flipper.pingywon.com/)
+- [HERE IS A NOOB GUIDE TO FLASH AND UNLOCK (BY interestingsoup)](https://interestingsoup.com/n00b-guide-flashing-flipper-zero-to-rougemaster/)
+- [How to install firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/HowToInstall.md)
+- [How to build firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/HowToBuild.md)
+- [Configure UniversalRF Remix App](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/UniRFRemix.md)
+- [How to use: NRF24 plugins](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/NRF24.md)
+- [How to use: SentrySafe plugin](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/SentrySafe.md)
+- [Barcode Generator readme](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/BarcodeGenerator.md)
+- [How to extend SubGHz frequency range](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/DangerousSettings.md)
+- [How to add extra SubGHz frequencies](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/SubGHzSettings.md)
 </details>
 
       
@@ -52,7 +53,7 @@ Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Fli
 $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
 $ cd flipperzero-firmware-wPlugins/
 $ ./fbt resources icons
-$ ./fbt --with-updater updater_package
+$ ./fbt updater_package
 
 # If building FAPS:
 $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
@@ -73,6 +74,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys and Tesla Charge Port
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
 - Assets: Running DolphinRestorer.fap on new install will auto-level to the end of Level 2.
+- BadUSB: Added ignore DUCKY_LANG cmd to retain compatibility with existing scripts [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Dolphin: Assigned profile pic for levels 1-10, 11-20 and 21-30 respectively from default lvl 1, 2 & 3
 - Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)

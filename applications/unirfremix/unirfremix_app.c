@@ -62,6 +62,7 @@ typedef struct {
     int button;
 
     int file_result;
+    bool tx_not_allowed;
     int file_blank;
 
     string_t signal;
@@ -476,10 +477,20 @@ static void unirfremix_send_signal(
     uint32_t frequency,
     string_t signal,
     string_t protocol) {
+    if(!furi_hal_subghz_is_tx_allowed(frequency)) {
+        printf(
+            "In your settings, only reception on this frequency (%lu) is allowed,\r\n"
+            "the actual operation of the unirf app is not possible\r\n ",
+            frequency);
+        app->tx_not_allowed = true;
+        unirfremix_end_send(app);
+        return;
+    } else {
+        app->tx_not_allowed = false;
+    }
     for(int x = 1; x <= app->repeat; x++) {
         frequency = frequency ? frequency : 433920000;
         FURI_LOG_E(TAG, "file to send: %s", string_get_cstr(signal));
-
         string_t flipper_format_string;
 
         if(strcmp(string_get_cstr(protocol), "RAW") == 0) {
@@ -501,21 +512,17 @@ static void unirfremix_send_signal(
         subghz_transmitter_deserialize(transmitter, flipper_format);
 
         furi_hal_subghz_reset();
-        furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok270Async);
+		furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
         furi_hal_subghz_set_frequency_and_path(frequency);
 
-        furi_hal_subghz_reset();
-        furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok270Async);
-        furi_hal_subghz_set_frequency_and_path(frequency);
-
-        printf("Transmitting at %lu, repeat %d.\r\n", frequency, x);
+        // printf("Transmitting at %lu, repeat %d.\r\n", frequency, x);
 
         furi_hal_power_suppress_charge_enter();
         furi_hal_subghz_start_async_tx(subghz_transmitter_yield, transmitter);
 
         while(!(furi_hal_subghz_is_async_tx_complete())) {
             notification_message(notification, &sequence_blink_magenta_10);
-            printf("Sending...");
+            // printf("Sending...");
             fflush(stdout);
             furi_delay_ms(333);
         }
@@ -588,6 +595,15 @@ static void render_callback(Canvas* canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 62, 5, AlignCenter, AlignTop, "Config is incorrect.");
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 62, 30, AlignCenter, AlignTop, "Please configure map.");
+        canvas_draw_str_aligned(canvas, 62, 60, AlignCenter, AlignBottom, "Hold Back to Exit.");
+    } else if(app->tx_not_allowed) {
+        canvas_clear(canvas);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 62, 5, AlignCenter, AlignTop, "Transmission is blocked.");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 62, 15, AlignCenter, AlignTop, "Frequency is outside of");
+        canvas_draw_str_aligned(canvas, 62, 25, AlignCenter, AlignTop, "default range.");
+        canvas_draw_str_aligned(canvas, 62, 35, AlignCenter, AlignTop, "Check docs.");
         canvas_draw_str_aligned(canvas, 62, 60, AlignCenter, AlignBottom, "Hold Back to Exit.");
     } else {
         //map found, draw all the things
