@@ -35,6 +35,20 @@ bool subghz_protocol_raw_save_to_file_init(
 void subghz_protocol_decoder_raw_set_auto_mode(void* context, bool auto_mode);
 
 /**
+ * Set RSSI threshold ("sensitivity" level).
+ * @param context Pointer to a SubGhzProtocolDecoderRAW instance
+ * @param rssi_threshold The desired RSSI threshold
+ */
+void subghz_protocol_decoder_raw_set_rssi_threshold(void* context, int rssi_threshold);
+
+/**
+ * Get RSSI threshold ("sensitivity" level).
+ * @param context Pointer to a SubGhzProtocolDecoderRAW instance
+ * @return rssi threshold in db
+ */
+int subghz_protocol_encoder_get_rssi_threshold(void* context);
+
+/**
  * Stop writing file to flash
  * @param instance Pointer to a SubGhzProtocolDecoderRAW instance
  */
