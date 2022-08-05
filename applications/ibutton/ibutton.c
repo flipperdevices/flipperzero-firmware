@@ -9,20 +9,6 @@
 
 #define TAG "iButtonApp"
 
-static const NotificationSequence sequence_blink_start_cyan = {
-    &message_blink_start_10,
-    &message_blink_set_color_cyan,
-    &message_do_not_reset,
-    NULL,
-};
-
-static const NotificationSequence sequence_blink_start_magenta = {
-    &message_blink_start_10,
-    &message_blink_set_color_magenta,
-    &message_do_not_reset,
-    NULL,
-};
-
 static const NotificationSequence sequence_blink_set_yellow = {
     &message_blink_set_color_yellow,
     NULL,
@@ -30,11 +16,6 @@ static const NotificationSequence sequence_blink_set_yellow = {
 
 static const NotificationSequence sequence_blink_set_magenta = {
     &message_blink_set_color_magenta,
-    NULL,
-};
-
-static const NotificationSequence sequence_blink_stop = {
-    &message_blink_stop,
     NULL,
 };
 
@@ -353,7 +334,7 @@ int32_t ibutton_app(void* p) {
     bool key_loaded = false;
     bool rpc_mode = false;
 
-    if(p) {
+    if(p && strlen(p)) {
         uint32_t rpc_ctx = 0;
         if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
             FURI_LOG_D(TAG, "Running in RPC mode");

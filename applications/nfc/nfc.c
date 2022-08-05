@@ -199,18 +199,6 @@ void nfc_text_store_clear(Nfc* nfc) {
     memset(nfc->text_store, 0, sizeof(nfc->text_store));
 }
 
-static const NotificationSequence sequence_blink_start_blue = {
-    &message_blink_start_10,
-    &message_blink_set_color_blue,
-    &message_do_not_reset,
-    NULL,
-};
-
-static const NotificationSequence sequence_blink_stop = {
-    &message_blink_stop,
-    NULL,
-};
-
 void nfc_blink_start(Nfc* nfc) {
     notification_message(nfc->notifications, &sequence_blink_start_blue);
 }
@@ -238,7 +226,7 @@ int32_t nfc_app(void* p) {
     char* args = p;
 
     // Check argument and run corresponding scene
-    if((*args != '\0')) {
+    if(args && strlen(args)) {
         nfc_device_set_loading_callback(nfc->dev, nfc_show_loading_popup, nfc);
         uint32_t rpc_ctx = 0;
         if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
