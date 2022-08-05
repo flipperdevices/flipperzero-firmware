@@ -41,7 +41,7 @@ class GitVersion:
             "GIT_COMMIT": commit,
             "GIT_BRANCH": "dev",
             "GIT_BRANCH_NUM": branch_num,
-            "VERSION": "0.63.4",
+            "VERSION": "0.63.5",
             "BUILD_DIRTY": 0,
         }
 
