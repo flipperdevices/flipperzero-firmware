@@ -6,6 +6,10 @@
 <b>Latest Updates:</b>
 
 - TOFIX - `FAP Loader`
+- Updated with fixes for UniRF from [Unleashed/Nano](https://github.com/Eng1n33r/flipperzero-firmware) 
+- Updated with subghz text updates from [Unleashed/Nano](https://github.com/Eng1n33r/flipperzero-firmware) 
+- Updated with subghz settings check moved from [Unleashed/Nano](https://github.com/Eng1n33r/flipperzero-firmware) 
+- Updated with new bug fixes for BadUSB from [Unleashed/Nano](https://github.com/Eng1n33r/flipperzero-firmware) 
 - Removed [New frequency analyzer #1501 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501)
 - Added [Tamagochi (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1)
 - - Drop [this rom](https://wowroms.com/en/roms/mame/download-tamagotchi-usa/108517.html) IN `tama_p1` on SD as `rom.bin` to make it work.
