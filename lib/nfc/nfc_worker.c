@@ -105,117 +105,13 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_mf_classic_dict_attack(nfc_worker, MfClassicDictTypeUser);
     } else if(nfc_worker->state == NfcWorkerStateMfClassicFlipperDictAttack) {
         nfc_worker_mf_classic_dict_attack(nfc_worker, MfClassicDictTypeFlipper);
-    } else if(nfc_worker->state == NfcWorkerStateReadMfUltralightAuthInfo) {
-        nfc_worker_mf_ul_read_auth_info(nfc_worker);
-    } else if(nfc_worker->state == NfcWorkerStateMfUltralightAuthAttack) {
-        nfc_worker_mf_ul_auth_attack(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateReadMfUltralightReadAuth) {
+        nfc_worker_mf_ul_read_auth(nfc_worker);
     }
     furi_hal_nfc_sleep();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
 
     return 0;
-}
-
-void nfc_worker_mf_ul_read_auth_info(NfcWorker* nfc_worker) {
-    furi_assert(nfc_worker);
-    furi_assert(nfc_worker->callback);
-
-    nfc_device_data_clear(nfc_worker->dev_data);
-    NfcDeviceData* dev_data = nfc_worker->dev_data;
-    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    FuriHalNfcTxRxContext tx_rx = {};
-    NfcWorkerEvent event = 0;
-    MfUltralightReader reader = {};
-    MfUltralightData data = {};
-
-    while(nfc_worker->state == NfcWorkerStateReadMfUltralightAuthInfo) {
-        if(furi_hal_nfc_detect(nfc_data, 300) && nfc_data->type == FuriHalNfcTypeA) {
-            if(mf_ul_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
-                nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
-
-                int16_t authlim = mf_ultralight_get_authlim(&tx_rx, &reader, &data);
-                if(authlim >= 0) {
-                    dev_data->mf_ul_data.curr_authlim = authlim;
-                    dev_data->mf_ul_data.has_auth = true;
-                    dev_data->mf_ul_data.auth_readable = true;
-                } else if(authlim == -1) {
-                    dev_data->mf_ul_data.has_auth = true;
-                    dev_data->mf_ul_data.auth_readable = false;
-                } else if(authlim == -2) {
-                    dev_data->mf_ul_data.has_auth = false;
-                }
-                event = NfcWorkerEventSuccess;
-                nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
-            } else {
-                nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
-            }
-        } else {
-            nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
-        }
-        furi_hal_nfc_sleep();
-        furi_delay_ms(100);
-    }
-    // Notify caller and exit
-    if(event > NfcWorkerEventReserved) {
-        nfc_worker->callback(event, nfc_worker->context);
-    }
-}
-
-void nfc_worker_mf_ul_auth_attack(NfcWorker* nfc_worker) {
-    furi_assert(nfc_worker);
-    furi_assert(nfc_worker->callback);
-
-    nfc_device_data_clear(nfc_worker->dev_data);
-    NfcDeviceData* dev_data = nfc_worker->dev_data;
-    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    FuriHalNfcTxRxContext tx_rx = {};
-    MfUltralightReader reader = {};
-
-    bool has_found_key = false;
-    uint32_t found_key = 0;
-    uint16_t pack = 0;
-    while(nfc_worker->state == NfcWorkerStateMfUltralightAuthAttack) {
-        if(furi_hal_nfc_detect(nfc_data, 300) && nfc_data->type == FuriHalNfcTypeA) {
-            if(mf_ul_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
-                nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
-                for(uint8_t i = 0; i < COUNT_OF(pwd_gens); i++) {
-                    furi_hal_nfc_sleep();
-                    furi_hal_nfc_activate_nfca(300, &nfc_data->cuid);
-
-                    uint32_t key = pwd_gens[i](nfc_data);
-                    if(mf_ultralight_authenticate(&tx_rx, key, &pack)) {
-                        has_found_key = true;
-                        found_key = key;
-                        break;
-                    }
-
-                    nfc_worker->callback(NfcWorkerEventNewAlgo, nfc_worker->context);
-                }
-
-                if(has_found_key) {
-                    mf_ul_read_card(&tx_rx, &reader, &dev_data->mf_ul_data);
-                    dev_data->mf_ul_data.has_auth = true;
-                    dev_data->mf_ul_data.auth_readable = true;
-                    MfUltralightConfigPages* config_pages =
-                        mf_ultralight_get_config_pages(&dev_data->mf_ul_data);
-                    if(config_pages != NULL) {
-                        config_pages->auth_data.pwd.value = REVERSE_BYTES_U32(found_key);
-                        config_pages->auth_data.pack.value = pack;
-                    }
-
-                    nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
-                    nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
-                } else {
-                    nfc_worker->callback(NfcWorkerEventFail, nfc_worker->context);
-                    nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
-                }
-            } else {
-                nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
-            }
-        } else {
-            nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
-        }
-    }
 }
 
 static bool nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
@@ -622,4 +518,61 @@ void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
     nfca_signal_free(nfca_signal);
 
     rfal_platform_spi_release();
+}
+
+void nfc_worker_mf_ul_read_auth(NfcWorker* nfc_worker) {
+    furi_assert(nfc_worker);
+    furi_assert(nfc_worker->callback);
+
+    nfc_device_data_clear(nfc_worker->dev_data);
+    NfcDeviceData* dev_data = nfc_worker->dev_data;
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    FuriHalNfcTxRxContext tx_rx = {};
+    MfUltralightReader reader = {};
+
+    bool has_found_key = false;
+    uint32_t found_key = 0;
+    uint16_t pack = 0;
+    while(nfc_worker->state == NfcWorkerStateReadMfUltralightReadAuth) {
+        if(furi_hal_nfc_detect(nfc_data, 300) && nfc_data->type == FuriHalNfcTypeA) {
+            if(mf_ul_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
+                nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
+                for(uint8_t i = 0; i < COUNT_OF(pwd_gens); i++) {
+                    furi_hal_nfc_sleep();
+                    furi_hal_nfc_activate_nfca(300, &nfc_data->cuid);
+
+                    uint32_t key = pwd_gens[i](nfc_data);
+                    if(mf_ultralight_authenticate(&tx_rx, key, &pack)) {
+                        has_found_key = true;
+                        found_key = key;
+                        break;
+                    }
+
+                    nfc_worker->callback(NfcWorkerEventNewAlgo, nfc_worker->context);
+                }
+
+                if(has_found_key) {
+                    mf_ul_read_card(&tx_rx, &reader, &dev_data->mf_ul_data);
+                    dev_data->mf_ul_data.has_auth = true;
+                    dev_data->mf_ul_data.auth_readable = true;
+                    MfUltralightConfigPages* config_pages =
+                        mf_ultralight_get_config_pages(&dev_data->mf_ul_data);
+                    if(config_pages != NULL) {
+                        config_pages->auth_data.pwd.value = REVERSE_BYTES_U32(found_key);
+                        config_pages->auth_data.pack.value = pack;
+                    }
+
+                    nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
+                    nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
+                } else {
+                    nfc_worker->callback(NfcWorkerEventFail, nfc_worker->context);
+                    nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
+                }
+            } else {
+                nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
+            }
+        } else {
+            nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
+        }
+    }
 }

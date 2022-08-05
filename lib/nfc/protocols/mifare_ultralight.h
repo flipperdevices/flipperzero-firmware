@@ -28,6 +28,12 @@
 
 #define MF_UL_NTAG203_COUNTER_PAGE (41)
 
+typedef enum {
+    MfUltralightAuthMethodManual,
+    MfUltralightAuthMethodAmeebo,
+    MfUltralightAuthMethodXiaomi,
+} MfUltralightAuthMethod;
+
 typedef uint32_t (*MfUlPwdGenerator)(FuriHalNfcDevData*);
 
 uint32_t pwdgen_default(FuriHalNfcDevData* data);
@@ -119,6 +125,7 @@ typedef struct {
     uint32_t counter[3];
     uint8_t tearing[3];
     bool has_auth;
+    MfUltralightAuthMethod auth_method;
     bool auth_readable;
     uint16_t curr_authlim;
     uint16_t data_size;
