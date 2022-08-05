@@ -158,6 +158,7 @@ bool subghz_protocol_encoder_princeton_deserialize(void* context, FlipperFormat*
             FURI_LOG_E(TAG, "Missing TE");
             break;
         }
+
         if(instance->generic.data_count_bit !=
            subghz_protocol_princeton_const.min_count_bit_for_found) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
@@ -355,6 +356,9 @@ void subghz_protocol_decoder_princeton_get_string(void* context, string_t output
 
     uint32_t code_found_reverse_lo = code_found_reverse & 0x00000000ffffffff;
 
+    int32_t serial = ((instance->generic.data >> 4) & 0xFFFFF);
+    int8_t  btn = (uint8_t)(instance->generic.data & 0x00000F);
+
     string_cat_printf(
         output,
         "%s %dbit\r\n"
@@ -366,7 +370,7 @@ void subghz_protocol_decoder_princeton_get_string(void* context, string_t output
         instance->generic.data_count_bit,
         code_found_lo,
         code_found_reverse_lo,
-        instance->generic.serial,
-        instance->generic.btn,
+        serial,
+        btn,
         instance->te);
 }
