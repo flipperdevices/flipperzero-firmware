@@ -41,6 +41,7 @@ struct SubGhzProtocolDecoderRAW {
     bool last_level;
     bool auto_mode;
     bool has_rssi_above_threshold;
+    int rssi_threshold;
     uint8_t postroll_frames;
 };
 
@@ -208,6 +209,18 @@ void subghz_protocol_raw_save_to_file_stop(SubGhzProtocolDecoderRAW* instance) {
     instance->file_is_open = RAWFileIsOpenClose;
 }
 
+void subghz_protocol_decoder_raw_set_rssi_threshold(void* context, int rssi_threshold)
+{
+    furi_assert(context);
+    SubGhzProtocolDecoderRAW* instance = context;
+
+    FURI_LOG_E(TAG, "RSSI set: (%d)", rssi_threshold);
+
+    instance->rssi_threshold = rssi_threshold;
+    
+    subghz_protocol_decoder_raw_reset(context);
+}
+
 void subghz_protocol_decoder_raw_set_auto_mode(void* context, bool auto_mode) {
     furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
@@ -295,7 +308,8 @@ void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t durati
     if(instance->upload_raw != NULL && duration > subghz_protocol_raw_const.te_short) {
         if(instance->auto_mode) {
             float rssi = furi_hal_subghz_get_rssi();
-            if(rssi >= SUBGHZ_AUTO_DETECT_RAW_THRESHOLD) {
+
+            if(rssi >= instance->rssi_threshold) {
                 subghz_protocol_decoder_raw_write_data(context, level, duration);
                 instance->has_rssi_above_threshold = true;
                 instance->postroll_frames = 0;
@@ -353,6 +367,14 @@ void* subghz_protocol_encoder_raw_alloc(SubGhzEnvironment* environment) {
     string_init(instance->file_name);
     instance->is_runing = false;
     return instance;
+}
+
+int subghz_protocol_encoder_get_rssi_threshold(void* context)
+{
+    furi_assert(context);
+    SubGhzProtocolDecoderRAW* instance = context;
+    
+    return instance->rssi_threshold;
 }
 
 void subghz_protocol_encoder_raw_stop(void* context) {
