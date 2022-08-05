@@ -18,7 +18,6 @@ typedef struct {
     char* text_buffer;
     size_t text_buffer_size;
     bool clear_default_text;
-    bool defualt_keyboard;
 
     TextInputCallback callback;
     void* callback_context;
@@ -231,7 +230,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
                     canvas_set_color(canvas, ColorBlack);
                 }
 
-                if(model->defualt_keyboard ||
+                if(model->clear_default_text ||
                    (text_length == 0 && char_is_lowercase(keys[column].text))) {
                     canvas_draw_glyph(
                         canvas,
@@ -302,10 +301,6 @@ static void text_input_handle_right(TextInput* text_input, TextInputModel* model
 static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, bool shift) {
     char selected = get_selected_char(model);
     uint8_t text_length = strlen(model->text_buffer);
-
-    if(model->defualt_keyboard) {
-        model->defualt_keyboard = false;
-    }
 
     if(shift) {
         selected = char_to_uppercase(selected);
@@ -486,7 +481,6 @@ void text_input_reset(TextInput* text_input) {
             model->selected_row = 0;
             model->selected_column = 0;
             model->clear_default_text = false;
-            model->defualt_keyboard = true;
             model->text_buffer = NULL;
             model->text_buffer_size = 0;
             model->callback = NULL;
