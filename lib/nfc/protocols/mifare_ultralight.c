@@ -1,6 +1,7 @@
 #include <limits.h>
 #include <mbedtls/sha1.h>
 #include "mifare_ultralight.h"
+#include "nfc_util.h"
 #include <furi.h>
 #include "furi_hal_nfc.h"
 #include <m-string.h>
@@ -168,11 +169,7 @@ bool mf_ultralight_authenticate(FuriHalNfcTxRxContext* tx_rx, uint32_t key, uint
     do {
         FURI_LOG_D(TAG, "Authenticating");
         tx_rx->tx_data[0] = MF_UL_AUTH;
-        tx_rx->tx_data[1] = (key >> 24) & 0xFF;
-        tx_rx->tx_data[2] = (key >> 16) & 0xFF;
-        tx_rx->tx_data[3] = (key >> 8) & 0xFF;
-        tx_rx->tx_data[4] = key & 0xFF;
-
+        nfc_util_num2bytes(key, 4, &tx_rx->tx_data[1]);
         tx_rx->tx_bits = 40;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
         if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
