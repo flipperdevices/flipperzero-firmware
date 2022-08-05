@@ -1,5 +1,5 @@
 V:0
-T:1659677350
+T:1659735351
 D:apps
 D:badusb
 D:dolphin
@@ -37,6 +37,7 @@ F:a60517d76095c3e1724b725dffb78c27:5844:apps/GAME_Tetris.fap
 F:03ed16659ac270401488cad3f1931f70:5796:apps/GAME_TicTacToe.fap
 F:90aaac24ff9591e0c7823b3b1a4c0aff:10216:apps/GAME_VideoPoker.fap
 D:badusb/layouts
+F:94e6080ea3efdac0a3a77d73f0ab59a5:29:badusb/.badusb.settings
 F:0e41ba26498b7511d7c9e6e6b5e3b149:1592:badusb/demo_macos.txt
 F:e538ad2ce5a06ec45e1b5b24824901b1:1552:badusb/demo_windows.txt
 F:1139810f61ec7f8c8fe0398d92578b31:256:badusb/layouts/da-DA.kl
@@ -328,7 +329,7 @@ F:ea81ac5f878e045581a2f5e2add46b0b:180:subghz/assets/extend_range.txt
 F:5e81e9809984ee74d426730c1afa4093:3232:subghz/assets/keeloq_mfcodes
 F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
-F:891be701cac63e7d88fe170b8ebe8900:2004:subghz/assets/setting_user
+F:ea1afa9c6d9da8cf5d923f0cdc8b94bd:1962:subghz/assets/setting_user
 D:u2f/assets
 F:7e11e688e39034bbb9d88410044795e1:365:u2f/assets/cert.der
 F:f60b88c20ed479ed9684e249f7134618:264:u2f/assets/cert_key.u2f
