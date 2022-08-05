@@ -29,9 +29,7 @@ bool infrared_scene_edit_delete_done_on_event(void* context, SceneManagerEvent e
             } else if(edit_target == InfraredEditTargetRemote) {
                 const uint32_t possible_scenes[] = {InfraredSceneStart, InfraredSceneRemoteList};
                 if(!scene_manager_search_and_switch_to_previous_scene_one_of(
-                       scene_manager,
-                       possible_scenes,
-                       sizeof(possible_scenes) / sizeof(uint32_t))) {
+                       scene_manager, possible_scenes, COUNT_OF(possible_scenes))) {
                     view_dispatcher_stop(infrared->view_dispatcher);
                 }
             } else {

@@ -32,9 +32,7 @@ bool ibutton_scene_write_success_on_event(void* context, SceneManagerEvent event
         if(event.event == iButtonCustomEventBack) {
             const uint32_t possible_scenes[] = {iButtonSceneReadKeyMenu, iButtonSceneStart};
             scene_manager_search_and_switch_to_previous_scene_one_of(
-                ibutton->scene_manager,
-                possible_scenes,
-                sizeof(possible_scenes) / sizeof(uint32_t));
+                ibutton->scene_manager, possible_scenes, COUNT_OF(possible_scenes));
         }
     }
 
