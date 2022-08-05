@@ -7,7 +7,7 @@
 
 - TOFIX - `FAP Loader`
 - Improvements to [New frequency analyzer #1501 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501)
-- Latest OFW Update: [Documentation: fixed outdated naming #1518 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1518)
+- Latest OFW Update: [Documentation: fixed outdated naming #1518 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1518) & [Fix unexpected behaviour when opening a remote from outside #1538 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1538)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
