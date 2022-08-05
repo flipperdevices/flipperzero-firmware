@@ -138,7 +138,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - `FAP` [Mandelbrot Set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins) `HIDDEN "GAME_MandelbrotSet"`
 - `FAP` [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine)
 - `FAP` Snake [OFW]
-- [Tamagochi (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) requires [this rom](https://wowroms.com/en/roms/mame/download-tamagotchi-usa/108517.html) IN `tama_p1` on SD
+- [Tamagochi (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) requires [this rom](https://wowroms.com/en/roms/mame/download-tamagotchi-usa/108517.html) IN `tama_p1` on SD as `rom.bin` to make it work.
 - `FAP` [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) `HIDDEN "GAME_Tanks"`
 - `FAP` [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
 - `FAP` [Tic Tac Toe (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
