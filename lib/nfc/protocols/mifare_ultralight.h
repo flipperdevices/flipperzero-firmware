@@ -34,13 +34,6 @@ typedef enum {
     MfUltralightAuthMethodXiaomi,
 } MfUltralightAuthMethod;
 
-typedef uint32_t (*MfUlPwdGenerator)(FuriHalNfcDevData*);
-
-uint32_t pwdgen_default(FuriHalNfcDevData* data);
-uint32_t pwdgen_xiaomi(FuriHalNfcDevData* data);
-uint32_t pwdgen_amiibo(FuriHalNfcDevData* data);
-extern MfUlPwdGenerator pwd_gens[3];
-
 // Important: order matters; some features are based on positioning in this enum
 typedef enum {
     MfUltralightTypeUnknown,
@@ -126,7 +119,8 @@ typedef struct {
     uint8_t tearing[3];
     bool has_auth;
     MfUltralightAuthMethod auth_method;
-    bool auth_readable;
+    uint8_t auth_key[4];
+    bool auth_success;
     uint16_t curr_authlim;
     uint16_t data_size;
     uint8_t data[MF_UL_MAX_DUMP_SIZE];
@@ -252,3 +246,7 @@ int16_t mf_ultralight_get_authlim(
     FuriHalNfcTxRxContext* tx_rx,
     MfUltralightReader* reader,
     MfUltralightData* data);
+
+uint32_t mf_ul_pwdgen_amiibo(FuriHalNfcDevData* data);
+
+uint32_t mf_ul_pwdgen_xiaomi(FuriHalNfcDevData* data);

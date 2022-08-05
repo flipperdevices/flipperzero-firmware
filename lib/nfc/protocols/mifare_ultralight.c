@@ -8,15 +8,8 @@
 
 #define TAG "MfUltralight"
 
-MfUlPwdGenerator pwd_gens[] = {pwdgen_default, pwdgen_xiaomi, pwdgen_amiibo};
-
-uint32_t pwdgen_default(FuriHalNfcDevData* data) {
-    UNUSED(data);
-    return 0xFFFFFFFF;
-}
-
 // Algorithms from: https://github.com/RfidResearchGroup/proxmark3/blob/0f6061c16f072372b7d4d381911f1542afbc3a69/common/generator.c#L110
-uint32_t pwdgen_xiaomi(FuriHalNfcDevData* data) {
+uint32_t mf_ul_pwdgen_xiaomi(FuriHalNfcDevData* data) {
     uint8_t hash[20];
     mbedtls_sha1(data->uid, data->uid_len, hash);
 
@@ -29,7 +22,7 @@ uint32_t pwdgen_xiaomi(FuriHalNfcDevData* data) {
     return pwd;
 }
 
-uint32_t pwdgen_amiibo(FuriHalNfcDevData* data) {
+uint32_t mf_ul_pwdgen_amiibo(FuriHalNfcDevData* data) {
     uint8_t* uid = data->uid;
 
     uint32_t pwd = 0;
@@ -184,9 +177,10 @@ bool mf_ultralight_authenticate(FuriHalNfcTxRxContext* tx_rx, uint32_t key, uint
         }
 
         if(pack != NULL) {
-            *pack = (tx_rx->rx_data[2] << 8) | tx_rx->rx_data[3];
+            *pack = (tx_rx->rx_data[0] << 8) | tx_rx->rx_data[1];
         }
 
+        FURI_LOG_I(TAG, "Auth success. Password: %08X. PACK: %04X", key, *pack);
         authenticated = true;
     } while(false);
 

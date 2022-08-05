@@ -46,6 +46,7 @@ typedef enum {
     NfcWorkerEventAborted,
     NfcWorkerEventCardDetected,
     NfcWorkerEventNoCardDetected,
+    NfcWorkerEventWrongCardDetected,
 
     // Mifare Classic events
     NfcWorkerEventNoDictFound,
@@ -54,7 +55,7 @@ typedef enum {
     NfcWorkerEventFoundKeyB,
 
     // Mifare Ultralight events
-    NfcWorkerEventNewAlgo,
+    NfcWorkerEventMfUltralightPassKey,
 } NfcWorkerEvent;
 
 typedef bool (*NfcWorkerCallback)(NfcWorkerEvent event, void* context);
