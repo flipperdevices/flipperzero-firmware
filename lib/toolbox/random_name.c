@@ -21,6 +21,17 @@ void set_random_name(char* name, uint8_t max_name_size) {
         "unnamable",
         "nameless",
         "my",
+        "concealed",
+        "forgotten",
+        "hidden",
+        "mysterious",
+        "obscure",
+        "random",
+        "remote",
+        "uncharted",
+        "undefined",
+        "untravelled",
+        "untold",
     };
 
     const char* suffix[] = {
@@ -32,6 +43,10 @@ void set_random_name(char* name, uint8_t max_name_size) {
         "entree",
         "opening",
         "crack",
+        "access",
+        "corridor",
+        "passage",
+        "port",
     };
     uint8_t prefix_i = rand() % COUNT_OF(prefix);
     uint8_t suffix_i = rand() % COUNT_OF(suffix);
