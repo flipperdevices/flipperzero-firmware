@@ -115,7 +115,7 @@ static bool
         level_duration_make(true, (uint32_t)subghz_protocol_phoenix_v2_const.te_short * 6);
     //Send key data
     for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
-        if(bit_read(instance->generic.data, i - 1)) {
+        if(!bit_read(instance->generic.data, i - 1)) {
             //send bit 1
             instance->encoder.upload[index++] =
                 level_duration_make(false, (uint32_t)subghz_protocol_phoenix_v2_const.te_long);
@@ -254,7 +254,7 @@ void subghz_protocol_decoder_phoenix_v2_feed(void* context, bool level, uint32_t
                 subghz_protocol_phoenix_v2_const.te_delta) &&
                (DURATION_DIFF(duration, subghz_protocol_phoenix_v2_const.te_long) <
                 subghz_protocol_phoenix_v2_const.te_delta * 3)) {
-                subghz_protocol_blocks_add_bit(&instance->decoder, 0);
+                subghz_protocol_blocks_add_bit(&instance->decoder, 1);
                 instance->decoder.parser_step = Phoenix_V2DecoderStepSaveDuration;
             } else if(
                 (DURATION_DIFF(
@@ -262,7 +262,7 @@ void subghz_protocol_decoder_phoenix_v2_feed(void* context, bool level, uint32_t
                  subghz_protocol_phoenix_v2_const.te_delta * 3) &&
                 (DURATION_DIFF(duration, subghz_protocol_phoenix_v2_const.te_short) <
                  subghz_protocol_phoenix_v2_const.te_delta)) {
-                subghz_protocol_blocks_add_bit(&instance->decoder, 1);
+                subghz_protocol_blocks_add_bit(&instance->decoder, 0);
                 instance->decoder.parser_step = Phoenix_V2DecoderStepSaveDuration;
             } else {
                 instance->decoder.parser_step = Phoenix_V2DecoderStepReset;
@@ -279,27 +279,11 @@ void subghz_protocol_decoder_phoenix_v2_feed(void* context, bool level, uint32_t
  * @param instance Pointer to a SubGhzBlockGeneric* instance
  */
 static void subghz_protocol_phoenix_v2_check_remote_controller(SubGhzBlockGeneric* instance) {
-    /* 
- *  Serial Key CNT
- * F0FBD7E 7F D7F0 
- * F0FBD7E 7F C6F7 
- * F0FBD7E 7F B672 
- * 
- * F0FBD7E BF 9E7E 
- * F0FBD7E BF 8F79 
- * F0FBD7E BF 3DBD 
- * 
- * F0FBD7E DF 5310
- * F0FBD7E DF 23EA
- * 
- * F0FBD7E EF 3292
- * F0FBD7E EF 4217
- * F0FBD7E EF 5310
- * 
-*/
-    instance->serial = (instance->data >> 24) & 0xFFFFFFF;
-    instance->cnt = instance->data & 0xFFFF;
-    instance->btn = (instance->data >> 20) & 0xF;
+    uint64_t data_rev =
+        subghz_protocol_blocks_reverse_key(instance->data, instance->data_count_bit + 4);
+    instance->serial = data_rev & 0xFFFFFFFF;
+    instance->cnt = (data_rev >> 40) & 0xFFFF;
+    instance->btn = (data_rev >> 32) & 0xF;
 }
 
 uint8_t subghz_protocol_decoder_phoenix_v2_get_hash_data(void* context) {
