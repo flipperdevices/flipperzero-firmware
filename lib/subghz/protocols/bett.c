@@ -249,6 +249,8 @@ void subghz_protocol_decoder_bett_feed(void* context, bool level, uint32_t durat
 
                     if(instance->base.callback)
                         instance->base.callback(&instance->base, instance->base.context);
+                } else {
+                    instance->decoder.parser_step = BETTDecoderStepReset;
                 }
                 instance->decoder.decode_data = 0;
                 instance->decoder.decode_count_bit = 0;
