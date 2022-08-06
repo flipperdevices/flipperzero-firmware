@@ -192,9 +192,34 @@ void CommandLine::runCommand(String input) {
 
   else if (cmd_args.get(0) == SETTINGS_CMD) {
     int ss_sw = this->argSearch(&cmd_args, "-s"); // Set setting
+    int re_sw = this->argSearch(&cmd_args, "-r"); // Reset setting
+    int en_sw = this->argSearch(&cmd_args, "enable"); // enable setting
+    int da_sw = this->argSearch(&cmd_args, "disable"); // disable setting
+
+    if (re_sw != -1) {
+      settings_obj.createDefaultSettings(SPIFFS);
+      return;
+    }
 
     if (ss_sw == -1) {
       settings_obj.printJsonSettings(settings_obj.getSettingsString());
+    }
+    else {
+      bool result = false;
+      String setting_name = cmd_args.get(ss_sw + 1);
+      if (en_sw != -1)
+        result = settings_obj.saveSetting<bool>(setting_name, true);
+      else if (da_sw != -1)
+        result = settings_obj.saveSetting<bool>(setting_name, false);
+      else {
+        Serial.println("You did not properly enable/disable this setting.");
+        return;
+      }
+
+      if (!result) {
+        Serial.println("Could not successfully update setting \"" + setting_name + "\"");
+        return;
+      }
     }
   }
 
@@ -442,9 +467,9 @@ void CommandLine::runCommand(String input) {
     if (ap_sw != -1) {
       for (int i = 0; i < access_points->size(); i++) {
         if (access_points->get(i).selected)
-          Serial.println("[" + (String)i + "] " + access_points->get(i).essid + " (selected)");
+          Serial.println("[" + (String)i + "] " + access_points->get(i).essid + " " + (String)access_points->get(i).rssi + " (selected)");
         else
-          Serial.println("[" + (String)i + "] " + access_points->get(i).essid);
+          Serial.println("[" + (String)i + "] " + access_points->get(i).essid + " " + (String)access_points->get(i).rssi);
       }
     }
     // List SSIDs

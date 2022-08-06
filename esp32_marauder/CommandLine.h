@@ -72,7 +72,7 @@ const char PROGMEM HELP_CLEARAP_CMD_B[] = "clearlist -s";
 const char PROGMEM HELP_REBOOT_CMD[] = "reboot";
 const char PROGMEM HELP_UPDATE_CMD_A[] = "update -s";
 const char PROGMEM HELP_UPDATE_CMD_B[] = "update -w";
-const char PROGMEM HELP_SETTINGS_CMD[] = "settings [-s <setting> <value>]";
+const char PROGMEM HELP_SETTINGS_CMD[] = "settings [-s <setting> enable/disable>]/[-r]";
 
 // WiFi sniff/scan
 const char PROGMEM HELP_SCANAP_CMD[] = "scanap";

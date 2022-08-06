@@ -92,6 +92,7 @@ struct AccessPoint {
   int bssid[6];
   bool selected;
   LinkedList<char>* beacon;
+  int rssi;
 };
 
 class WiFiScan

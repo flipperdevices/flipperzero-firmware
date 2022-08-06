@@ -19,8 +19,6 @@ class Settings {
 
   private:
     String json_settings_string;
-    
-    bool createDefaultSettings(fs::FS &fs);
 
   public:
     bool begin();
@@ -49,6 +47,7 @@ class Settings {
     //uint8_t loadSetting<uint8_t>(String key);
 
     String getSettingsString();
+    bool createDefaultSettings(fs::FS &fs);
     void printJsonSettings(String json_string);
     void main(uint32_t currentTime);
 };

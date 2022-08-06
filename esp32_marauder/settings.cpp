@@ -162,6 +162,7 @@ bool Settings::saveSetting<bool>(String key, bool value) {
       return true;
     }
   }
+  return false;
 }
 
 bool Settings::toggleSetting(String key) {
@@ -263,19 +264,19 @@ bool Settings::createDefaultSettings(fs::FS &fs) {
   //jsonBuffer["Settings"][1]["range"]["min"] = 1;
   //jsonBuffer["Settings"][1]["range"]["max"] = 10;
 
-  jsonBuffer["Settings"][0]["name"] = "Force PMKID";
+  jsonBuffer["Settings"][0]["name"] = "ForcePMKID";
   jsonBuffer["Settings"][0]["type"] = "bool";
   jsonBuffer["Settings"][0]["value"] = true;
   jsonBuffer["Settings"][0]["range"]["min"] = false;
   jsonBuffer["Settings"][0]["range"]["max"] = true;
 
-  jsonBuffer["Settings"][1]["name"] = "Force Probe";
+  jsonBuffer["Settings"][1]["name"] = "ForceProbe";
   jsonBuffer["Settings"][1]["type"] = "bool";
   jsonBuffer["Settings"][1]["value"] = true;
   jsonBuffer["Settings"][1]["range"]["min"] = false;
   jsonBuffer["Settings"][1]["range"]["max"] = true;
 
-  jsonBuffer["Settings"][2]["name"] = "Save PCAP";
+  jsonBuffer["Settings"][2]["name"] = "SavePCAP";
   jsonBuffer["Settings"][2]["type"] = "bool";
   jsonBuffer["Settings"][2]["value"] = true;
   jsonBuffer["Settings"][2]["range"]["min"] = false;

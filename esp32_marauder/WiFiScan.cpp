@@ -1540,6 +1540,8 @@ void WiFiScan::apSnifferCallbackFull(void* buf, wifi_promiscuous_pkt_type_t type
             Serial.print(" ");
         }
 
+        ap.rssi = snifferPacket->rx_ctrl.rssi;
+
         access_points->add(ap);
 
         Serial.print(access_points->size());
@@ -1662,8 +1664,8 @@ void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
                            snifferPacket->payload[14],
                            snifferPacket->payload[15]},
                           false,
-                          NULL};
-
+                          NULL,
+                          snifferPacket->rx_ctrl.rssi};
 
         access_points->add(ap);
 
