@@ -115,9 +115,6 @@ void move_ball(Canvas* canvas) {
             released = false;
             lives--;
 
-            snprintf(text, sizeof(text), "LIVES:%u", lives);
-            canvas_draw_str(canvas, 0, 90, text);
-
             // arduboy.tunes.tone(175, 250);
             if(rand_range(0, 2) == 0) {
                 dx = 1;
