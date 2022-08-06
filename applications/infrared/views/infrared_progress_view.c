@@ -1,14 +1,14 @@
 #include <core/check.h>
-#include "furi_hal_resources.h"
-#include "assets_icons.h"
-#include "gui/canvas.h"
-#include "gui/view.h"
-#include "input/input.h"
-#include "m-string.h"
+#include <furi_hal_resources.h>
+#include <assets_icons.h>
+#include <gui/canvas.h>
+#include <gui/view.h>
+#include <input/input.h>
+#include <m-string.h>
 #include <gui/elements.h>
 #include <furi.h>
 #include "infrared_progress_view.h"
-#include "gui/modules/button_panel.h"
+#include <gui/modules/button_panel.h>
 #include <stdint.h>
 
 struct InfraredProgressView {

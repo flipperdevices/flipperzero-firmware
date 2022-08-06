@@ -1,5 +1,5 @@
-#include "furi_hal_subghz.h"
-#include "furi_hal_subghz_configs.h"
+#include <furi_hal_subghz.h>
+#include <furi_hal_subghz_configs.h>
 
 #include <furi_hal_version.h>
 #include <furi_hal_rtc.h>
