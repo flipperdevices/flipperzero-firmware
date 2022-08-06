@@ -14,6 +14,7 @@
 - Fix for BadUSB from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - NULL pointer fixes from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - Added [Fix serial no and btn display for princeton encoding on scripts #1545 (By bkerler)](https://github.com/flipperdevices/flipperzero-firmware/pull/1545)
+- Added [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -124,6 +125,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484)
 - [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 - [Fix serial no and btn display for princeton encoding on scripts #1545 (By bkerler)](https://github.com/flipperdevices/flipperzero-firmware/pull/1545)
+- [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
 
 </details>
 
