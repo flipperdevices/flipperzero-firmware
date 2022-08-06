@@ -31,12 +31,15 @@ const SubGhzProtocolFlag detect_raw_value[DETECT_RAW_COUNT] = {
     SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_RAW,
 };
 
-#define RSSI_THRESHOLD_COUNT 4
+#define RSSI_THRESHOLD_COUNT 7
 const char* const rssi_threshold_text[RSSI_THRESHOLD_COUNT] = {
     "-72db",
     "-67db",
     "-62db",
     "-57db",
+    "-52db",
+    "-47db",
+    "-42db",
 };
 
 const int rssi_threshold_value[RSSI_THRESHOLD_COUNT] = {
@@ -44,6 +47,9 @@ const int rssi_threshold_value[RSSI_THRESHOLD_COUNT] = {
     -67,
     -62,
     -57,
+    -52,
+    -47,
+    -42,
 };
 
 uint8_t subghz_scene_receiver_config_next_frequency(const uint32_t value, void* context) {
