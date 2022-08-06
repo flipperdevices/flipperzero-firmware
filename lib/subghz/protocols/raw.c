@@ -253,6 +253,7 @@ void* subghz_protocol_decoder_raw_alloc(SubGhzEnvironment* environment) {
     instance->last_level = false;
     instance->file_is_open = RAWFileIsOpenClose;
     instance->postroll_frames = 0;
+    instance->rssi_threshold = SUBGHZ_AUTO_DETECT_RAW_THRESHOLD;
     string_init(instance->file_name);
 
     return instance;
