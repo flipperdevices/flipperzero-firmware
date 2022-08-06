@@ -10,6 +10,9 @@
 - Latest OFW Update: [Documentation: fixed outdated naming #1518 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1518) & [Fix unexpected behaviour when opening a remote from outside #1538 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1538)
 - Added [Add settings to subghz read functionality to allow setting RSSI threshold (raw only) (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/184)
 - Added [add score functionality for 2048 #186 (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/186)
+- Fix for Keeloq from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
+- Fix for BadUSB from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
+- NULL pointer fixes from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
