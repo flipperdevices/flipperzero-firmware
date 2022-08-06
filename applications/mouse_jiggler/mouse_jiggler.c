@@ -43,7 +43,7 @@ int32_t mouse_jiggler_app(void* p) {
     ViewPort* view_port = view_port_alloc();
 
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
-    furi_hal_usb_set_config(&usb_hid,NULL);
+    furi_hal_usb_set_config(&usb_hid, NULL);
 
     view_port_draw_callback_set(view_port, mouse_jiggler_render_callback, NULL);
     view_port_input_callback_set(view_port, mouse_jiggler_input_callback, event_queue);
@@ -63,7 +63,7 @@ int32_t mouse_jiggler_app(void* p) {
         furi_hal_hid_mouse_move(-MOUSE_MOVE_SHORT, 0);
         furi_delay_ms(500);
 
-        if(event_status == FuriStatusOk) { 
+        if(event_status == FuriStatusOk) {
             if(event.type == EventTypeInput) {
                 if(event.input.key == InputKeyBack) {
                     break;
