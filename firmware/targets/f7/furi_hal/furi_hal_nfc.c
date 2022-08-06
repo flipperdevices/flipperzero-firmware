@@ -341,13 +341,13 @@ void furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data) {
     if(nfc_data->uid_len == 4) {
         pt_memory[12] = nfc_data->sak & ~FURI_HAL_NFC_UID_INCOMPLETE;
     } else {
-        pt_memory[12] = nfc_data->sak | FURI_HAL_NFC_UID_INCOMPLETE;
+        pt_memory[12] = FURI_HAL_NFC_UID_INCOMPLETE;
     }
     pt_memory[13] = nfc_data->sak & ~FURI_HAL_NFC_UID_INCOMPLETE;
     pt_memory[14] = nfc_data->sak & ~FURI_HAL_NFC_UID_INCOMPLETE;
 
     st25r3916WritePTMem(pt_memory, sizeof(pt_memory));
-    // Go to sence
+    // Go to sense
     st25r3916ExecuteCommand(ST25R3916_CMD_GOTO_SENSE);
 }
 
