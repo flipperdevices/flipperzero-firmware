@@ -130,7 +130,7 @@ static void flappy_game_render_callback(Canvas* const canvas, void* ctx) {
     for(int i = 0; i < FLAPPY_PILAR_MAX; i++) {
         const PILAR* pilar = &game_state->pilars[i];
         if(pilar != NULL && pilar->visible) {
-            canvas_draw_dot(canvas, pilar->point.x, pilar->point.y + 10);
+            // canvas_draw_dot(canvas, pilar->point.x, pilar->point.y + 10);
             canvas_draw_frame(
                 canvas, pilar->point.x, pilar->point.y, FLAPPY_GAB_WIDTH, pilar->height);
 
@@ -181,6 +181,9 @@ static void flappy_game_update_timer_callback(FuriMessageQueue* event_queue) {
 }
 
 int32_t flappy_game_app(void* p) {
+    UNUSED(p);
+    int32_t return_code = 0;
+    
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(GameEvent));
 
     GameState* game_state = malloc(sizeof(GameState));
@@ -189,8 +192,8 @@ int32_t flappy_game_app(void* p) {
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, game_state, sizeof(GameState))) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
-        free(game_state);
-        return 255;
+        return_code = 255;
+        goto free_and_exit;
     }
 
     // Set system callbacks
@@ -248,11 +251,16 @@ int32_t flappy_game_app(void* p) {
         release_mutex(&state_mutex, game_state);
     }
 
+    furi_timer_free(timer);
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close("gui");
     view_port_free(view_port);
+    delete_mutex(&state_mutex);
+    
+free_and_exit:
+    free(game_state);
     furi_message_queue_free(event_queue);
 
-    return 0;
+    return return_code;
 }
