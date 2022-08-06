@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <gui/gui.h>
 #include <time.h>
+#include <math.h>
 
 #include "font.h"
 
@@ -17,22 +18,24 @@
  9  512
 10 1024
 11 2048
+12 4096
+...
  */
 typedef uint8_t cell_state;
 
 /* DirectionLeft <--
-+????++????++????++????+
-?    ??    ??    ??    ?
-+????++????++????++????+
-+????++????++????++????+
-?    ??    ??    ??    ?
-+????++????++????++????+
-+??+????+??++????++????+
-? 2? 2  ?  ??    ??    ?
-+??+????+??++????++????+
-+??+????++??+????++????+
-? 4? 4  ?? 2? 2  ??    ?
-+??+????++??+????++????+
+┌╌╌╌╌┐┌╌╌╌╌┐┌╌╌╌╌┐┌╌╌╌╌┐
+╎    ╎╎    ╎╎    ╎╎    ╎
+└╌╌╌╌┘└╌╌╌╌┘└╌╌╌╌┘└╌╌╌╌┘
+┌╌╌╌╌┐┌╌╌╌╌┐┌╌╌╌╌┐┌╌╌╌╌┐
+╎    ╎╎    ╎╎    ╎╎    ╎
+└╌╌╌╌┘└╌╌╌╌┘└╌╌╌╌┘└╌╌╌╌┘
+┌╌╌┌╌╌╌╌┐╌╌┐┌╌╌╌╌┐┌╌╌╌╌┐
+╎ 2╎ 2  ╎  ╎╎    ╎╎    ╎
+└╌╌└╌╌╌╌┘╌╌┘└╌╌╌╌┘└╌╌╌╌┘
+┌╌╌┌╌╌╌╌┐┌╌╌┌╌╌╌╌┐┌╌╌╌╌┐
+╎ 4╎ 4  ╎╎ 2╎ 2  ╎╎    ╎
+└╌╌└╌╌╌╌┘└╌╌└╌╌╌╌┘└╌╌╌╌┘
 */
 typedef enum {
     DirectionIdle,
@@ -57,6 +60,8 @@ typedef struct {
     uint8_t field[4][4];
 
     uint8_t next_field[4][4];
+
+    uint16_t score; // original scoring
 
     Direction direction;
     /*
@@ -96,6 +101,11 @@ static void game_2048_render_callback(Canvas* const canvas, ValueMutex* const vm
                 }
             }
         }
+
+        // display score
+        char buffer2[6];
+        snprintf(buffer2, sizeof(buffer2), "%u", game_state->score);
+        canvas_draw_str_aligned(canvas, 127, 8, AlignRight, AlignBottom, buffer2);
     } else { // if animation
         // for animation
         // (osKernelGetSysTimerCount() - game_state->animation_start_ticks) / osKernelGetSysTimerFreq();
@@ -222,6 +232,7 @@ static void game_2048_process_move(GameState* const game_state) {
 
                 if(field == game_state->next_field[next_y][x]) {
                     game_state->next_field[next_y][x]++;
+                    game_state->score += pow(2, game_state->next_field[next_y][x]);
                     next_y++;
                     continue;
                 }
@@ -249,6 +260,7 @@ static void game_2048_process_move(GameState* const game_state) {
 
                 if(field == game_state->next_field[y][next_x]) {
                     game_state->next_field[y][next_x]++;
+                    game_state->score += pow(2, game_state->next_field[y][next_x]);
                     next_x--;
                     continue;
                 }
@@ -276,6 +288,7 @@ static void game_2048_process_move(GameState* const game_state) {
 
                 if(field == game_state->next_field[next_y][x]) {
                     game_state->next_field[next_y][x]++;
+                    game_state->score += pow(2, game_state->next_field[next_y][x]);
                     next_y--;
                     continue;
                 }
@@ -306,6 +319,7 @@ static void game_2048_process_move(GameState* const game_state) {
 
                 if(field == game_state->next_field[y][next_x]) {
                     game_state->next_field[y][next_x]++;
+                    game_state->score += pow(2, game_state->next_field[y][next_x]);
                     next_x++;
                     continue;
                 }
@@ -331,6 +345,7 @@ static void game_2048_restart(GameState* const game_state) {
     }
 
     // start next game
+    game_state->score = 0;
     game_2048_set_new_number(game_state);
     game_2048_set_new_number(game_state);
 }
@@ -358,30 +373,30 @@ int32_t game_2048_app(void* p) {
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
+    
     game_state->direction = DirectionIdle;
-    game_2048_set_new_number(game_state);
-    game_2048_set_new_number(game_state);
+    game_2048_restart(game_state);
 
     /* <debug>
     game_state->field[0][0] = 0;
-    game_state->field[0][1] = 1;
-    game_state->field[0][2] = 2;
-    game_state->field[0][3] = 3;
+    game_state->field[0][1] = 0;
+    game_state->field[0][2] = 0;
+    game_state->field[0][3] = 0;
 
-    game_state->field[1][0] = 4;
-    game_state->field[1][1] = 5;
-    game_state->field[1][2] = 6;
-    game_state->field[1][3] = 7;
+    game_state->field[1][0] = 1;
+    game_state->field[1][1] = 2;
+    game_state->field[1][2] = 3;
+    game_state->field[1][3] = 4;
     
-    game_state->field[2][0] = 8;
-    game_state->field[2][1] = 9;
-    game_state->field[2][2] = 10;
-    game_state->field[2][3] = 11;
+    game_state->field[2][0] = 5;
+    game_state->field[2][1] = 6;
+    game_state->field[2][2] = 7;
+    game_state->field[2][3] = 8;
     
-    game_state->field[3][0] = 0;
-    game_state->field[3][1] = 0;
-    game_state->field[3][2] = 0;
-    game_state->field[3][3] = 0;
+    game_state->field[3][0] = 9;
+    game_state->field[3][1] = 10;
+    game_state->field[3][2] = 11;
+    game_state->field[3][3] = 12;
     </debug> */
 
     InputEvent event;
