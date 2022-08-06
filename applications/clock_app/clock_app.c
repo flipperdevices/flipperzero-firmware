@@ -39,43 +39,49 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     char strings[3][20];
     int curMin = (timerSecs / 60);
     int curSec = timerSecs - (curMin * 60);
-    sprintf(
+    snprintf(
         strings[0],
+		20,
         "%.4d-%.2d-%.2d",
         state->datetime.year,
         state->datetime.month,
         state->datetime.day);
-    sprintf(
+    snprintf(
         strings[1],
+		20,
         "%.2d:%.2d:%.2d",
         state->datetime.hour,
         state->datetime.minute,
         state->datetime.second);
-    sprintf(strings[2], "%.2d:%.2d", curMin, curSec);
+    snprintf(strings[2], 20, "%.2d:%.2d", curMin, curSec);
     release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
+    if(timerStarted) canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
+    if(!timerStarted) canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]);
+    if(timerStarted) canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]);
+    if(!timerStarted) canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]);
     // elements_button_left(canvas, "Alarms");
     // elements_button_right(canvas, "Settings");
     // elements_button_center(canvas, "Reset");
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]);
+    if(timerStarted) canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]);
     canvas_set_font(canvas, FontSecondary);
     if(timerStarted) {
         elements_button_center(canvas, "Stop");
     } else {
         elements_button_center(canvas, "Start");
     }
-    if(songSelect == 0) {
-        elements_button_right(canvas, "S:OFF");
-    } else if(songSelect == 1) {
-        elements_button_right(canvas, "S:PoRa");
-    } else if(songSelect == 2) {
-        elements_button_right(canvas, "S:Mario");
-    } else if(songSelect == 3) {
-        elements_button_right(canvas, "S:ByMin");
+    if(timerStarted) {
+		if(songSelect == 0) {
+			elements_button_right(canvas, "S:OFF");
+		} else if(songSelect == 1) {
+			elements_button_right(canvas, "S:PoRa");
+		} else if(songSelect == 2) {
+			elements_button_right(canvas, "S:Mario");
+		} else if(songSelect == 3) {
+			elements_button_right(canvas, "S:ByMin");
+		}
     }
 }
 
