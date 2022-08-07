@@ -41,6 +41,20 @@ bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
     return false;
 }
 
+void mf_ul_reset(MfUltralightData* data) {
+    furi_assert(data);
+    data->type = MfUltralightTypeUnknown;
+    memset(&data->version, 0, sizeof(MfUltralightVersion));
+    memset(data->signature, 0, sizeof(data->signature));
+    memset(data->counter, 0, sizeof(data->counter));
+    memset(data->tearing, 0, sizeof(data->tearing));
+    memset(data->data, 0, sizeof(data->data));
+    data->data_size = 0;
+    data->data_read = 0;
+    data->curr_authlim = 0;
+    data->has_auth = false;
+}
+
 static MfUltralightFeatures mf_ul_get_features(MfUltralightType type) {
     switch(type) {
     case MfUltralightTypeUL11:
@@ -592,11 +606,12 @@ bool mf_ultralight_read_pages(
             pages_read_cnt = valid_pages;
         }
         reader->pages_read += pages_read_cnt;
-        data->data_size = reader->pages_read * 4;
         memcpy(&data->data[i * 4], tx_rx->rx_data, pages_read_cnt * 4);
     }
+    data->data_size = reader->pages_to_read * 4;
+    data->data_read = reader->pages_read * 4;
 
-    return reader->pages_read == reader->pages_to_read;
+    return reader->pages_read > 0;
 }
 
 bool mf_ultralight_fast_read_pages(

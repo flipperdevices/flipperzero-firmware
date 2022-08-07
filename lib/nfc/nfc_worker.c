@@ -524,11 +524,11 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
     furi_assert(nfc_worker->callback);
 
-    nfc_device_data_clear(nfc_worker->dev_data);
     MfUltralightData* data = &nfc_worker->dev_data->mf_ul_data;
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     FuriHalNfcTxRxContext tx_rx = {};
     MfUltralightReader reader = {};
+    mf_ul_reset(data);
 
     uint32_t key = 0;
     uint16_t pack = 0;
@@ -549,9 +549,8 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
                 }
 
                 data->auth_success = mf_ultralight_authenticate(&tx_rx, key, &pack);
+                mf_ul_read_card(&tx_rx, &reader, data);
                 if(data->auth_success) {
-                    mf_ul_read_card(&tx_rx, &reader, data);
-                    data->auth_success = true;
                     MfUltralightConfigPages* config_pages = mf_ultralight_get_config_pages(data);
                     if(config_pages != NULL) {
                         config_pages->auth_data.pwd.value = REVERSE_BYTES_U32(key);

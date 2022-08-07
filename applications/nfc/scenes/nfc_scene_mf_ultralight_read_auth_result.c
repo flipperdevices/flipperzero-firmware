@@ -24,8 +24,13 @@ void nfc_scene_mf_ultralight_read_auth_result_on_enter(void* context) {
     string_t temp_str;
     string_init(temp_str);
 
-    widget_add_string_element(
-        widget, 64, 3, AlignCenter, AlignTop, FontPrimary, "All pages are unlocked!");
+    if((mf_ul_data->data_read == mf_ul_data->data_size) && (mf_ul_data->data_read > 0)) {
+        widget_add_string_element(
+            widget, 64, 0, AlignCenter, AlignTop, FontPrimary, "All pages are unlocked!");
+    } else {
+        widget_add_string_element(
+            widget, 64, 0, AlignCenter, AlignTop, FontPrimary, "Not all pages unlocked!");
+    }
     string_set_str(temp_str, "UID:");
     for(size_t i = 0; i < nfc_data->uid_len; i++) {
         string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
@@ -51,7 +56,7 @@ void nfc_scene_mf_ultralight_read_auth_result_on_enter(void* context) {
             widget, 0, 39, AlignLeft, AlignTop, FontSecondary, string_get_cstr(temp_str));
     }
     string_printf(
-        temp_str, "Pages Read: %d/%d", mf_ul_data->data_size / 2, mf_ul_data->data_size / 2);
+        temp_str, "Pages Read: %d/%d", mf_ul_data->data_read / 4, mf_ul_data->data_size / 4);
     widget_add_string_element(
         widget, 0, 50, AlignLeft, AlignTop, FontSecondary, string_get_cstr(temp_str));
     widget_add_button_element(

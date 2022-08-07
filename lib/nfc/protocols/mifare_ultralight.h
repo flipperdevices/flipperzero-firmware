@@ -124,6 +124,7 @@ typedef struct {
     uint16_t curr_authlim;
     uint16_t data_size;
     uint8_t data[MF_UL_MAX_DUMP_SIZE];
+    uint16_t data_read;
 } MfUltralightData;
 
 typedef struct __attribute__((packed)) {
@@ -192,6 +193,8 @@ typedef struct {
     bool ntag_i2c_plus_sector3_lockout;
     bool read_counter_incremented;
 } MfUltralightEmulator;
+
+void mf_ul_reset(MfUltralightData* data);
 
 bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
