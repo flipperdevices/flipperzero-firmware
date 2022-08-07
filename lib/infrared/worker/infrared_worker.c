@@ -1,5 +1,5 @@
-#include "furi/check.h"
-#include "furi/common_defines.h"
+#include <core/check.h>
+#include <core/common_defines.h>
 #include "sys/_stdint.h"
 #include "infrared_worker.h"
 #include <infrared.h>
@@ -167,7 +167,7 @@ static int32_t infrared_worker_rx_thread(void* thread_context) {
     TickType_t last_blink_time = 0;
 
     while(1) {
-        events = furi_thread_flags_wait(INFRARED_WORKER_ALL_RX_EVENTS, 0, osWaitForever);
+        events = furi_thread_flags_wait(INFRARED_WORKER_ALL_RX_EVENTS, 0, FuriWaitForever);
         furi_check(events & INFRARED_WORKER_ALL_RX_EVENTS); /* at least one caught */
 
         if(events & INFRARED_WORKER_RX_RECEIVED) {
@@ -236,7 +236,7 @@ InfraredWorker* infrared_worker_alloc() {
     instance->infrared_decoder = infrared_alloc_decoder();
     instance->infrared_encoder = infrared_alloc_encoder();
     instance->blink_enable = false;
-    instance->notification = furi_record_open("notification");
+    instance->notification = furi_record_open(RECORD_NOTIFICATION);
     instance->state = InfraredWorkerStateIdle;
 
     return instance;
@@ -246,7 +246,7 @@ void infrared_worker_free(InfraredWorker* instance) {
     furi_assert(instance);
     furi_assert(instance->state == InfraredWorkerStateIdle);
 
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
     infrared_free_decoder(instance->infrared_decoder);
     infrared_free_encoder(instance->infrared_encoder);
     vStreamBufferDelete(instance->stream);
@@ -506,7 +506,7 @@ static int32_t infrared_worker_tx_thread(void* thread_context) {
 
             break;
         case InfraredWorkerStateRunTx:
-            events = furi_thread_flags_wait(INFRARED_WORKER_ALL_TX_EVENTS, 0, osWaitForever);
+            events = furi_thread_flags_wait(INFRARED_WORKER_ALL_TX_EVENTS, 0, FuriWaitForever);
             furi_check(events & INFRARED_WORKER_ALL_TX_EVENTS); /* at least one caught */
 
             if(events & INFRARED_WORKER_EXIT) {

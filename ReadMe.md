@@ -23,17 +23,17 @@ Flipper Zero's firmware consists of two components:
 - Core2 firmware set - proprietary components by ST: FUS + radio stack. FUS is flashed at factory and you should never update it.
 - Core1 Firmware - HAL + OS + Drivers + Applications.
 
-They both must be flashed in order described.
+They both must be flashed in the order described.
 
 ## With offline update package
 
 With Flipper attached over USB:
 
-`./fbt --with-updater flash_usb`
+`./fbt flash_usb`
 
 Just building the package:
 
-`./fbt --with-updater updater_package`
+`./fbt updater_package`
 
 To update, copy the resulting directory to Flipper's SD card and navigate to `update.fuf` file in Archive app. 
 
@@ -155,7 +155,7 @@ Connect your device via ST-Link and run:
 
 - `applications`    - Applications and services used in firmware
 - `assets`          - Assets used by applications and services
-- `core`            - Furi Core: os level primitives and helpers
+- `furi`            - Furi Core: os level primitives and helpers
 - `debug`           - Debug tool: GDB-plugins, SVD-file and etc
 - `docker`          - Docker image sources (used for firmware build automation)
 - `documentation`   - Documentation generation system configs and input files
