@@ -17,6 +17,7 @@
 - Skipping [Extend random name generator #1551](https://github.com/flipperdevices/flipperzero-firmware/pull/1551) due to uselessness in comparison to date/timestamp
 - Added [Feature to read EEPROM of SFP Modules using I2C / Bugfix #198 (By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Stability updates for Arkanoid, Snake and TicTacToe from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
+- Added [badusb: show script errors on screen #200 (By CromFr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/200)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -82,6 +83,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
 - Assets: Running DolphinRestorer.fap on new install will auto-level to the end of Level 2.
 - BadUSB: Added ignore DUCKY_LANG cmd to retain compatibility with existing scripts [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
+- BadUSB: show script errors on screen [(By CromFr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/200)
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Dolphin: Assigned profile pic for levels 1-10, 11-20 and 21-30 respectively from default lvl 1, 2 & 3
 - Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)
@@ -89,7 +91,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Dolphin: Level animation sequence for level 3+ to be lvl1->2 for levels 1-20 and lvl2->3 for levels 21-30.
 - Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware)
 - Dolphin: SD dolphin manifest updated to weight animations differently
-- GPIO: Feature to read EEPROM of SFP Modules using I2C / Bugfix #198 [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
+- GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
 - Plugins: 2048, Arkanoid, Snake and Tetris show score. Thanks to [whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) and  [DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188) With changes by RogueMaster.
 - Plugins: Fixed sound decay issues on music player [Thanks to qqMajiKpp]
