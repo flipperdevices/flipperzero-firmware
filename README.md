@@ -88,7 +88,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware)
 - Dolphin: SD dolphin manifest updated to weight animations differently
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
-- NFC: Display UL PWD_AUTH payload / ntag-pwd-capture [(Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
 - Plugins: 2048, Arkanoid, Snake and Tetris show score. Thanks to [whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) and  [DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188) With changes by RogueMaster.
 - Plugins: Fixed sound decay issues on music player [Thanks to qqMajiKpp]
 - Plugins: Menu, Icons and Raycast exit [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
