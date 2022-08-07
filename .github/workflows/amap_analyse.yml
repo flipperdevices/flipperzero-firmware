@@ -47,14 +47,15 @@ jobs:
         run: |
           export SIZE_OUT="$(/opt/toolchain/x86_64-darwin/bin/arm-none-eabi-size build/latest/firmware.elf | tail -n 1)"
           export REF="${{github.ref}}"
-          export BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          export COMMIT_MSG="${{github.event.head_commit.message}}"
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
+            export COMMIT_MSG="$(git log --format=%B -n 1)"
             export PULL_ID="${{github.event.pull_request.number}}"
             export PULL_NAME="${{github.event.pull_request.title}}"
             export REF="${{github.head_ref}}"
           fi
-          export COMMIT_HASH="${REF#refs/*/}"
-          export COMMIT_MSG="${{github.event.head_commit.message}}"
+          export BRANCH_NAME="${REF#refs/*/}"
+          export COMMIT_HASH="$(git rev-parse --short HEAD)"
           export BSS_SIZE="$(awk '{print $3}' <<< $SIZE_OUT)"
           export TEXT_SIZE="$(awk '{print $1}' <<< $SIZE_OUT)"
           export
