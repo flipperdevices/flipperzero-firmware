@@ -18,6 +18,7 @@
 - Added [Feature to read EEPROM of SFP Modules using I2C / Bugfix #198 (By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Stability updates for Arkanoid, Snake and TicTacToe from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - Added [badusb: show script errors on screen #200 (By CromFr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/200)
+- Assets: Includes sample SubGHz asset for Unitree Go1 Robot Dog [Thanks to MAVProxyUser](https://github.com/MAVProxyUser/YushuTechUnitreeGo1)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -79,7 +80,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Assets: Includes a NFC Level 50 Link Amiibo
 - Assets: Includes a NFC Rick Roll link
 - Assets: Includes sample Music Player tunes
-- Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys and Tesla Charge Port
+- Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys, Tesla Charge Port and Unitree Go1 Robot Dog
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
 - Assets: Running DolphinRestorer.fap on new install will auto-level to the end of Level 2.
 - BadUSB: Added ignore DUCKY_LANG cmd to retain compatibility with existing scripts [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
