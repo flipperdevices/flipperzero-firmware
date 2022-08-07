@@ -7,6 +7,7 @@
 
 - TOFIX - `FAP Loader`
 - Added [SubGhz: add protocol BERNER / ELKA / TEDSEN / TELETASTER / Doitrand / Marantec / Phoenix V2 (static mode) / Phox (static mode), fix Princeton #1516 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1516)
+- Added [mouse jiggler improvements #194 (By mfulz)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/194)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
