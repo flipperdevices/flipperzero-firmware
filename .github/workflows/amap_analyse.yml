@@ -64,5 +64,14 @@ jobs:
 
       - name: 'Upload report to database'
         run: |
-          /usr/local/bin/amap_mariadb_insert.py artifacts/firmware.elf.map.all ${{steps.names.outputs.suffix}}
-          echo "Table name: ${{steps.names.outputs.suffix}}"
+          SIZE_OUT=$(/opt/toolchain/x86_64-darwin/bin/arm-none-eabi-size build/latest/firmware.elf | tail -n 1)
+          REF=${{ github.ref }}
+          if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+            PULL_ID=${{ github.event.pull_request.number }}
+            PULL_NAME=${{ github.event.pull_request.title }}
+            REF=${{ github.head_ref }}
+          fi
+          COMMIT_HASH=${REF#refs/*/}
+          BSS_SIZE=$(awk '{print $3}' <<< $SIZE_OUT)
+          TEXT_SIZE=$(awk '{print $1}' <<< $SIZE_OUT)
+          /usr/local/bin/amap_mariadb_insert.py artifacts/firmware.elf.map.all
