@@ -12,26 +12,10 @@ void set_random_name(char* name, uint8_t max_name_size) {
         rand_generator_inited = true;
     }
     const char* prefix[] = {
-        "ancient",
-        "hollow",
-        "strange",
-        "disappeared",
-        "unknown",
-        "unthinkable",
-        "unnamable",
-        "nameless",
-        "my",
-        "concealed",
-        "forgotten",
-        "hidden",
-        "mysterious",
-        "obscure",
-        "random",
-        "remote",
-        "uncharted",
-        "undefined",
-        "untravelled",
-        "untold",
+        "ancient",     "hollow",    "strange",    "disappeared", "unknown",
+        "unthinkable", "unnamable", "nameless",   "my",          "concealed",
+        "forgotten",   "hidden",    "mysterious", "obscure",     "random",
+        "remote",      "uncharted", "undefined",  "untravelled", "untold",
     };
 
     const char* suffix[] = {
