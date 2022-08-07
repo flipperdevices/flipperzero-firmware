@@ -229,7 +229,7 @@ int toFen(char* fen, Position* position) {
     fen[charCount - 1] = ' ';
 
     // ===== HALF MOVE CLOCK =====
-    sniprintf(&fen[charCount++], sizeof(&fen[charCount++]), "%d", position->halfmoveClock);
+    snprintf(&fen[charCount++], sizeof(&fen[charCount++]), "%d", position->halfmoveClock);
     if(position->halfmoveClock >= 10) {
         charCount++;
         if(position->halfmoveClock >= 100) {
