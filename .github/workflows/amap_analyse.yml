@@ -54,6 +54,7 @@ jobs:
             export REF="${{github.head_ref}}"
           fi
           export COMMIT_HASH="${REF#refs/*/}"
+          export COMMIT_MSG="${{github.event.head_commit.message}}"
           export BSS_SIZE="$(awk '{print $3}' <<< $SIZE_OUT)"
           export TEXT_SIZE="$(awk '{print $1}' <<< $SIZE_OUT)"
           export
