@@ -110,9 +110,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
   
 - [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
 - [NFC: Display UL PWD_AUTH payload / ntag-pwd-capture (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
-- [Add skylanders (/activision) mifare classic to identification procedure #1497 (By equipter)](https://github.com/flipperdevices/flipperzero-firmware/pull/1497)
 - [New frequency analyzer #1501 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501)
-- [Add a Mifare Classic info screen to parser output #1504 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1504)
 - [BadUSB: add SYSRQ keys #1460 (By rck)](https://github.com/flipperdevices/flipperzero-firmware/pull/1460)
 - [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
 - [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484)
