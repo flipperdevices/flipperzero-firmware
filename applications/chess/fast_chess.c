@@ -229,7 +229,7 @@ int toFen(char* fen, Position* position) {
     fen[charCount - 1] = ' ';
 
     // ===== HALF MOVE CLOCK =====
-    snprintf(&fen[charCount++], 2, "%d", position->halfmoveClock);
+    sniprintf(&fen[charCount++], sizeof(&fen[charCount++]), "%d", position->halfmoveClock);
     if(position->halfmoveClock >= 10) {
         charCount++;
         if(position->halfmoveClock >= 100) {
@@ -239,7 +239,7 @@ int toFen(char* fen, Position* position) {
     fen[charCount++] = ' ';
 
     // ===== FULL MOVE NUMBER =====
-    snprintf(&fen[charCount++], 2, "%d", position->fullmoveNumber);
+    snprintf(&fen[charCount++], sizeof(&fen[charCount++]), "%d", position->fullmoveNumber);
     if(position->fullmoveNumber >= 10) {
         charCount++;
         if(position->fullmoveNumber >= 100) {
