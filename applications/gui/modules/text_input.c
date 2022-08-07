@@ -130,8 +130,8 @@ static bool char_is_lowercase(char letter) {
     return (letter >= 0x61 && letter <= 0x7A);
 }
 
-static char char_to_uppercase(const char letter) {
-    if(letter == '_') {
+static char char_to_uppercase(TextInputModel* model, const char letter) {
+    if(letter == '_' && !model->clear_default_text) {
         return 0x20;
     } else if(isalpha(letter)) {
         return (letter - 0x20);
@@ -238,7 +238,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
                         canvas,
                         keyboard_origin_x + keys[column].x,
                         keyboard_origin_y + keys[column].y,
-                        char_to_uppercase(keys[column].text));
+                        char_to_uppercase(model, keys[column].text));
                 } else {
                     canvas_draw_glyph(
                         canvas,
@@ -305,7 +305,7 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, b
     uint8_t text_length = strlen(model->text_buffer);
 
     if(shift) {
-        selected = char_to_uppercase(selected);
+        selected = char_to_uppercase(model, selected);
     }
 
     if(selected == ENTER_KEY) {
@@ -324,7 +324,7 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, b
             text_length = 0;
         }
         if(text_length == 0 && char_is_lowercase(selected)) {
-            selected = char_to_uppercase(selected);
+            selected = char_to_uppercase(model, selected);
         }
         model->text_buffer[text_length] = selected;
         model->text_buffer[text_length + 1] = 0;
