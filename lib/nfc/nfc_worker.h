@@ -14,9 +14,8 @@ typedef enum {
     NfcWorkerStateUidEmulate,
     NfcWorkerStateMfUltralightEmulate,
     NfcWorkerStateMfClassicEmulate,
-    NfcWorkerStateMfClassicUserDictAttack,
-    NfcWorkerStateMfClassicFlipperDictAttack,
     NfcWorkerStateReadMfUltralightReadAuth,
+    NfcWorkerStateMfClassicDictAttack,
     // Debug
     NfcWorkerStateEmulateApdu,
     NfcWorkerStateField,
@@ -51,6 +50,7 @@ typedef enum {
     // Mifare Classic events
     NfcWorkerEventNoDictFound,
     NfcWorkerEventNewSector,
+    NfcWorkerEventNewDictKeyBatch,
     NfcWorkerEventFoundKeyA,
     NfcWorkerEventFoundKeyB,
 

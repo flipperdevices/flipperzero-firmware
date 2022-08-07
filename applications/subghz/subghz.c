@@ -5,18 +5,6 @@
 #include "subghz_i.h"
 #include <lib/toolbox/path.h>
 
-static const NotificationSequence sequence_blink_start_magenta = {
-    &message_blink_start_10,
-    &message_blink_set_color_magenta,
-    &message_do_not_reset,
-    NULL,
-};
-
-static const NotificationSequence sequence_blink_stop = {
-    &message_blink_stop,
-    NULL,
-};
-
 bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     SubGhz* subghz = context;
@@ -320,7 +308,7 @@ int32_t subghz_app(void* p) {
     subghz_environment_load_keystore(
         subghz->txrx->environment, EXT_PATH("subghz/assets/keeloq_mfcodes_user"));
     // Check argument and run corresponding scene
-    if(p) {
+    if(p && strlen(p)) {
         uint32_t rpc_ctx = 0;
         if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
             subghz->rpc_ctx = (void*)rpc_ctx;

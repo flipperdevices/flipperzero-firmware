@@ -9,20 +9,6 @@
 
 #define TAG "iButtonApp"
 
-static const NotificationSequence sequence_blink_start_cyan = {
-    &message_blink_start_10,
-    &message_blink_set_color_cyan,
-    &message_do_not_reset,
-    NULL,
-};
-
-static const NotificationSequence sequence_blink_start_magenta = {
-    &message_blink_start_10,
-    &message_blink_set_color_magenta,
-    &message_do_not_reset,
-    NULL,
-};
-
 static const NotificationSequence sequence_blink_set_yellow = {
     &message_blink_set_color_yellow,
     NULL,
@@ -30,11 +16,6 @@ static const NotificationSequence sequence_blink_set_yellow = {
 
 static const NotificationSequence sequence_blink_set_magenta = {
     &message_blink_set_color_magenta,
-    NULL,
-};
-
-static const NotificationSequence sequence_blink_stop = {
-    &message_blink_stop,
     NULL,
 };
 
@@ -324,22 +305,6 @@ void ibutton_text_store_clear(iButton* ibutton) {
     memset(ibutton->text_store, 0, IBUTTON_TEXT_STORE_SIZE);
 }
 
-void ibutton_switch_to_previous_scene_one_of(
-    iButton* ibutton,
-    const uint32_t* scene_ids,
-    size_t scene_ids_size) {
-    furi_assert(scene_ids_size);
-    SceneManager* scene_manager = ibutton->scene_manager;
-
-    for(size_t i = 0; i < scene_ids_size; ++i) {
-        const uint32_t scene_id = scene_ids[i];
-        if(scene_manager_has_previous_scene(scene_manager, scene_id)) {
-            scene_manager_search_and_switch_to_previous_scene(scene_manager, scene_id);
-            return;
-        }
-    }
-}
-
 void ibutton_notification_message(iButton* ibutton, uint32_t message) {
     furi_assert(message < sizeof(ibutton_notification_sequences) / sizeof(NotificationSequence*));
     notification_message(ibutton->notifications, ibutton_notification_sequences[message]);
@@ -353,7 +318,7 @@ int32_t ibutton_app(void* p) {
     bool key_loaded = false;
     bool rpc_mode = false;
 
-    if(p) {
+    if(p && strlen(p)) {
         uint32_t rpc_ctx = 0;
         if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
             FURI_LOG_D(TAG, "Running in RPC mode");
