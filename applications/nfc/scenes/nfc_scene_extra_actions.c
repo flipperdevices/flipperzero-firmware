@@ -23,7 +23,7 @@ void nfc_scene_extra_actions_on_enter(void* context) {
         nfc);
     submenu_add_item(
         submenu,
-        "Unlock NTAG/MF Ultralight",
+        "Unlock NTAG/Ultralight",
         SubmenuIndexMfUltralightUnlock,
         nfc_scene_extra_actions_submenu_callback,
         nfc);

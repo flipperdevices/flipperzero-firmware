@@ -539,6 +539,7 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
                 nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
                 if(data->auth_method == MfUltralightAuthMethodManual) {
                     nfc_worker->callback(NfcWorkerEventMfUltralightPassKey, nfc_worker->context);
+                    key = nfc_util_bytes2num(data->auth_key, 4);
                 } else if(data->auth_method == MfUltralightAuthMethodAmeebo) {
                     key = mf_ul_pwdgen_amiibo(nfc_data);
                 } else if(data->auth_method == MfUltralightAuthMethodXiaomi) {

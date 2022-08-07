@@ -1206,7 +1206,8 @@ void nfc_device_data_clear(NfcDeviceData* dev_data) {
     } else if(dev_data->protocol == NfcDeviceProtocolMifareClassic) {
         memset(&dev_data->mf_classic_data, 0, sizeof(MfClassicData));
     } else if(dev_data->protocol == NfcDeviceProtocolMifareUl) {
-        memset(&dev_data->mf_ul_data, 0, sizeof(MfUltralightData));
+        mf_ul_reset(&dev_data->mf_ul_data);
+        // memset(&dev_data->mf_ul_data, 0, sizeof(MfUltralightData));
     } else if(dev_data->protocol == NfcDeviceProtocolEMV) {
         memset(&dev_data->emv_data, 0, sizeof(EmvData));
     }
