@@ -159,7 +159,6 @@ bool nfc_device_load_mifare_ul_data(FlipperFormat* file, NfcDevice* dev) {
     do {
         // Read Mifare Ultralight format version
         if(!flipper_format_read_uint32(file, "Data format version", &data_format_version, 1)) {
-            // Load unread sectors with zero keys access for backward compatability
             if(!flipper_format_rewind(file)) break;
         }
 
@@ -1207,7 +1206,6 @@ void nfc_device_data_clear(NfcDeviceData* dev_data) {
         memset(&dev_data->mf_classic_data, 0, sizeof(MfClassicData));
     } else if(dev_data->protocol == NfcDeviceProtocolMifareUl) {
         mf_ul_reset(&dev_data->mf_ul_data);
-        // memset(&dev_data->mf_ul_data, 0, sizeof(MfUltralightData));
     } else if(dev_data->protocol == NfcDeviceProtocolEMV) {
         memset(&dev_data->emv_data, 0, sizeof(EmvData));
     }
