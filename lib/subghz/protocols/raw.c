@@ -209,15 +209,14 @@ void subghz_protocol_raw_save_to_file_stop(SubGhzProtocolDecoderRAW* instance) {
     instance->file_is_open = RAWFileIsOpenClose;
 }
 
-void subghz_protocol_decoder_raw_set_rssi_threshold(void* context, int rssi_threshold)
-{
+void subghz_protocol_decoder_raw_set_rssi_threshold(void* context, int rssi_threshold) {
     furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
 
     FURI_LOG_E(TAG, "RSSI set: (%d)", rssi_threshold);
 
     instance->rssi_threshold = rssi_threshold;
-    
+
     subghz_protocol_decoder_raw_reset(context);
 }
 
@@ -370,11 +369,10 @@ void* subghz_protocol_encoder_raw_alloc(SubGhzEnvironment* environment) {
     return instance;
 }
 
-int subghz_protocol_encoder_get_rssi_threshold(void* context)
-{
+int subghz_protocol_encoder_get_rssi_threshold(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
-    
+
     return instance->rssi_threshold;
 }
 

@@ -82,7 +82,7 @@ void furi_hal_init() {
     // FatFS driver initialization
     MX_FATFS_Init();
     FURI_LOG_I(TAG, "FATFS OK");
-	
+
     // Partial null pointer dereference protection
     LL_MPU_Disable();
     LL_MPU_ConfigRegion(

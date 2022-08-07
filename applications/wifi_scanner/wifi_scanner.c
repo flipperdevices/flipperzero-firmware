@@ -255,24 +255,35 @@ static void wifi_module_render_callback(Canvas* const canvas, void* ctx) {
             offsetY += fontHeight + 1;
 
             char string[15];
-            snprintf(string, sizeof(string), "RSSI: %d", app->m_currentAccesspointDescription.m_rssi);
+            snprintf(
+                string, sizeof(string), "RSSI: %d", app->m_currentAccesspointDescription.m_rssi);
             canvas_draw_str(canvas, offsetX, offsetY, string);
 
             offsetY += fontHeight + 1;
 
-            snprintf(string, sizeof(string), "CHNL: %d", app->m_currentAccesspointDescription.m_channel);
+            snprintf(
+                string, sizeof(string), "CHNL: %d", app->m_currentAccesspointDescription.m_channel);
             canvas_draw_str(canvas, offsetX, offsetY, string);
 
             offsetY += fontHeight + 1;
 
-            snprintf(string, sizeof(string), "ENCR: %s", string_get_cstr(app->m_currentAccesspointDescription.m_secType));
+            snprintf(
+                string,
+                sizeof(string),
+                "ENCR: %s",
+                string_get_cstr(app->m_currentAccesspointDescription.m_secType));
             canvas_draw_str(canvas, offsetX, offsetY, string);
 
             offsetY += fontHeight;
             offsetY -= fontHeight;
 
             u8g2_SetFont(&canvas->fb, u8g2_font_courB08_tn);
-            snprintf(string, sizeof(string), "%d/%d", app->m_currentIndexAccessPoint, app->m_totalAccessPoints);
+            snprintf(
+                string,
+                sizeof(string),
+                "%d/%d",
+                app->m_currentIndexAccessPoint,
+                app->m_totalAccessPoints);
             offsetX = u8g2_GetDisplayWidth(&canvas->fb) - canvas_string_width(canvas, string) - 5;
             canvas_draw_str(canvas, offsetX, offsetY, string);
 

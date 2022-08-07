@@ -373,7 +373,6 @@ int32_t game_2048_app(void* p) {
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    
     game_state->direction = DirectionIdle;
     game_2048_restart(game_state);
 

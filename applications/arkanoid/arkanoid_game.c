@@ -238,7 +238,8 @@ void draw_lives(Canvas* canvas) {
 
 void draw_score(Canvas* canvas) {
     snprintf(text, sizeof(text), "%u", score);
-    canvas_draw_str_aligned(canvas, FLIPPER_LCD_WIDTH - 2, FLIPPER_LCD_HEIGHT - 6, AlignRight, AlignBottom, text);
+    canvas_draw_str_aligned(
+        canvas, FLIPPER_LCD_WIDTH - 2, FLIPPER_LCD_HEIGHT - 6, AlignRight, AlignBottom, text);
 }
 
 void draw_ball(Canvas* canvas) {

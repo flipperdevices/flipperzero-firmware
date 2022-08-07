@@ -512,7 +512,7 @@ static void unirfremix_send_signal(
         subghz_transmitter_deserialize(transmitter, flipper_format);
 
         furi_hal_subghz_reset();
-		furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+        furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
         furi_hal_subghz_set_frequency_and_path(frequency);
 
         // printf("Transmitting at %lu, repeat %d.\r\n", frequency, x);

@@ -41,14 +41,14 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     int curSec = timerSecs - (curMin * 60);
     snprintf(
         strings[0],
-		20,
+        20,
         "%.4d-%.2d-%.2d",
         state->datetime.year,
         state->datetime.month,
         state->datetime.day);
     snprintf(
         strings[1],
-		20,
+        20,
         "%.2d:%.2d:%.2d",
         state->datetime.hour,
         state->datetime.minute,
@@ -57,7 +57,8 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontBigNumbers);
     if(timerStarted) canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
-    if(!timerStarted) canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]);
+    if(!timerStarted)
+        canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]);
     canvas_set_font(canvas, FontSecondary);
     if(timerStarted) canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]);
     if(!timerStarted) canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]);
@@ -73,15 +74,15 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         elements_button_center(canvas, "Start");
     }
     if(timerStarted) {
-		if(songSelect == 0) {
-			elements_button_right(canvas, "S:OFF");
-		} else if(songSelect == 1) {
-			elements_button_right(canvas, "S:PoRa");
-		} else if(songSelect == 2) {
-			elements_button_right(canvas, "S:Mario");
-		} else if(songSelect == 3) {
-			elements_button_right(canvas, "S:ByMin");
-		}
+        if(songSelect == 0) {
+            elements_button_right(canvas, "S:OFF");
+        } else if(songSelect == 1) {
+            elements_button_right(canvas, "S:PoRa");
+        } else if(songSelect == 2) {
+            elements_button_right(canvas, "S:Mario");
+        } else if(songSelect == 3) {
+            elements_button_right(canvas, "S:ByMin");
+        }
     }
 }
 

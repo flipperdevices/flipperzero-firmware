@@ -255,7 +255,7 @@ int32_t power_srv(void* p) {
     Power* power = power_alloc();
     power_update_info(power);
     furi_record_create(RECORD_POWER, power);
-	
+
     DesktopSettings* settings = malloc(sizeof(DesktopSettings));
     LOAD_DESKTOP_SETTINGS(settings);
     power->displayBatteryPercentage = settings->displayBatteryPercentage;
@@ -276,12 +276,12 @@ int32_t power_srv(void* p) {
 
         // Update battery view port
         if(need_refresh) {
-			DesktopSettings* settings = malloc(sizeof(DesktopSettings));
-			LOAD_DESKTOP_SETTINGS(settings);
-			power->displayBatteryPercentage = settings->displayBatteryPercentage;
-			free(settings);
-			view_port_update(power->battery_view_port);
-		}
+            DesktopSettings* settings = malloc(sizeof(DesktopSettings));
+            LOAD_DESKTOP_SETTINGS(settings);
+            power->displayBatteryPercentage = settings->displayBatteryPercentage;
+            free(settings);
+            view_port_update(power->battery_view_port);
+        }
 
         // Check OTG status and disable it in case of fault
         if(furi_hal_power_is_otg_enabled()) {

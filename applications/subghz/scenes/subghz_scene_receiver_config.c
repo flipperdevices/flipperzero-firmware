@@ -171,7 +171,7 @@ static void subghz_scene_receiver_config_set_rssi_threshold(VariableItem* item) 
     subghz_protocol_decoder_raw_set_rssi_threshold(
         subghz_receiver_search_decoder_base_by_name(
             subghz->txrx->receiver, SUBGHZ_PROTOCOL_RAW_NAME),
-            rssi_threshold_value[index]);
+        rssi_threshold_value[index]);
 }
 
 static void subghz_scene_receiver_config_set_detect_raw(VariableItem* item) {
@@ -180,10 +180,11 @@ static void subghz_scene_receiver_config_set_detect_raw(VariableItem* item) {
 
     variable_item_set_current_value_text(item, detect_raw_text[index]);
     subghz_receiver_set_filter(subghz->txrx->receiver, detect_raw_value[index]);
-      
-    subghz_protocol_decoder_raw_set_auto_mode(subghz_receiver_search_decoder_base_by_name(
+
+    subghz_protocol_decoder_raw_set_auto_mode(
+        subghz_receiver_search_decoder_base_by_name(
             subghz->txrx->receiver, SUBGHZ_PROTOCOL_RAW_NAME),
-            (index == 1));
+        (index == 1));
 }
 
 static void subghz_scene_receiver_config_set_hopping_runing(VariableItem* item) {

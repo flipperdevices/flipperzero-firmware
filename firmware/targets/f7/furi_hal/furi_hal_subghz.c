@@ -320,7 +320,7 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     //checking regional settings
     bool is_allowed = false;
     bool is_extended = false;
-	
+
     Storage* storage = furi_record_open("storage");
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/extend_range.txt")) {
@@ -388,7 +388,7 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
     // if(furi_hal_subghz_is_tx_allowed(value)) {
     furi_hal_subghz.regulation = SubGhzRegulationTxRx;
     // } else {
-        // furi_hal_subghz.regulation = SubGhzRegulationOnlyRx;
+    // furi_hal_subghz.regulation = SubGhzRegulationOnlyRx;
     // }
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);

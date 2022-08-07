@@ -183,7 +183,7 @@ static void flappy_game_update_timer_callback(FuriMessageQueue* event_queue) {
 int32_t flappy_game_app(void* p) {
     UNUSED(p);
     int32_t return_code = 0;
-    
+
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(GameEvent));
 
     GameState* game_state = malloc(sizeof(GameState));
@@ -257,7 +257,7 @@ int32_t flappy_game_app(void* p) {
     furi_record_close("gui");
     view_port_free(view_port);
     delete_mutex(&state_mutex);
-    
+
 free_and_exit:
     free(game_state);
     furi_message_queue_free(event_queue);
