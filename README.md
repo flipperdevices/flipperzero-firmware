@@ -12,8 +12,9 @@
 - OFW: [#1365 Mifare Ultralight authentication](https://github.com/flipperdevices/flipperzero-firmware/pull/1365)
 - OFW: [#1504 Add a Mifare Classic info screen to parser output](https://github.com/flipperdevices/flipperzero-firmware/pull/1504)
 - OFW: [#1553 NFC: Add Skylanders support](https://github.com/flipperdevices/flipperzero-firmware/pull/1553)
-- Skipping [Extend random name generator #1551](https://github.com/flipperdevices/flipperzero-firmware/pull/1551)
 - OFW: [SubGhz: add protocol BERNER / ELKA / TEDSEN / TELETASTER / Doitrand / Marantec / Phoenix V2 (static mode) / Phox (static mode), fix Princeton #1516 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1516)
+- OFW: [#1509 Added support for Samsung TVs using address 07](https://github.com/flipperdevices/flipperzero-firmware/pull/1509)
+- Skipping [Extend random name generator #1551](https://github.com/flipperdevices/flipperzero-firmware/pull/1551)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -88,9 +89,9 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Dolphin: SD dolphin manifest updated to weight animations differently
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
 - NFC: Display UL PWD_AUTH payload / ntag-pwd-capture [(Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
+- Plugins: 2048, Arkanoid, Snake and Tetris show score. Thanks to [whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) and  [DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188) With changes by RogueMaster.
 - Plugins: Fixed sound decay issues on music player [Thanks to qqMajiKpp]
 - Plugins: Menu, Icons and Raycast exit [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
-- Plugins: Snake and Tetris show score. [Thanks to whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) With changes by RogueMaster.
 - RFID: Direct Emulation from [(atomsmasha)](https://github.com/flipperdevices/flipperzero-firmware/pull/1371)
 - Settings: Actual PIN Lock [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop.c)
 - Settings: Auto-Lock Options Added: 10s+15s+90s [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/applications/desktop/desktop_settings/scenes/desktop_settings_scene_start.c)
