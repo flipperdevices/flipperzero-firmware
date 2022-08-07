@@ -20,22 +20,22 @@ jobs:
         run: |
           if [ -d .git ]
           then
-            git submodule status \
-              || git checkout `git rev-list --max-parents=0 HEAD | tail -n 1`
+          #git submodule status \
+          #    || git checkout `git rev-list --max-parents=0 HEAD | tail -n 1`
           fi
 
-      - name: 'Checkout code'
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+          #- name: 'Checkout code'
+          #uses: actions/checkout@v2
+          #with:
+          #fetch-depth: 0
 
       - name: 'Build the firmware'
         run: SET_GH_OUTPUT=1 FBT_TOOLCHAIN_PATH=/opt ./fbt
 
       - name: 'Make artifacts directory'
         run: |
-          rm -rf artifacts
-          mkdir artifacts
+          #rm -rf artifacts
+          #mkdir artifacts
 
       - name: 'Make amap report'
         run: |
