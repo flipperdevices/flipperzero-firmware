@@ -5,6 +5,6 @@ App(
     entry_point="raycast_game_app",
     cdefines=["APP_RAYCAST_GAME"],
     requires=["gui"],
-    stack_size=1 * 1024,
+    stack_size=4 * 1024,
     order=190,
 )
