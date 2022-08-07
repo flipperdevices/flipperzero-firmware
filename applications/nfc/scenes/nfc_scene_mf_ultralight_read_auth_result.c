@@ -76,6 +76,9 @@ bool nfc_scene_mf_ultralight_read_auth_result_on_event(void* context, SceneManag
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeRight) {
+            nfc->dev->format = NfcDeviceSaveFormatMifareUl;
+            // Clear device name
+            nfc_device_set_name(nfc->dev, "");
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
             consumed = true;
         }

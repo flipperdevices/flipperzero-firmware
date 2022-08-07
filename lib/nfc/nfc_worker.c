@@ -418,10 +418,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
         return;
     }
 
-    FURI_LOG_D(
-        TAG,
-        "Start Dictionary attack, Key Count %d",
-        mf_classic_dict_get_total_keys(dict));
+    FURI_LOG_D(TAG, "Start Dictionary attack, Key Count %d", mf_classic_dict_get_total_keys(dict));
     for(size_t i = 0; i < total_sectors; i++) {
         FURI_LOG_I(TAG, "Sector %d", i);
         nfc_worker->callback(NfcWorkerEventNewSector, nfc_worker->context);
@@ -464,20 +461,17 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     }
                 }
                 if(is_key_a_found && is_key_b_found) break;
-                if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack)
-                    break;
+                if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack) break;
             } else {
                 if(!card_removed_notified) {
                     nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
                     card_removed_notified = true;
                     card_found_notified = false;
                 }
-                if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack)
-                    break;
+                if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack) break;
             }
         }
-        if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack)
-            break;
+        if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack) break;
         mf_classic_read_sector(&tx_rx, data, i);
         mf_classic_dict_rewind(dict);
     }
