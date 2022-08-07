@@ -6,7 +6,7 @@
 <b>Latest Updates:</b>
 
 - TOFIX - `FAP Loader`
-- Added [SubGhz: add protocol BERNER / ELKA / TEDSEN / TELETASTER / Doitrand / Marantec / Phoenix V2 (static mode) / Phox (static mode), fix Princeton #1516 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1516)
+- Was Added [sk-SK maping keybord for BadUsb #1537 (By jaroslavmraz)](https://github.com/flipperdevices/flipperzero-firmware/pull/1537)
 - Added [mouse jiggler improvements #194 (By mfulz)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/194)
 - Removed [Add skylanders (/activision) mifare classic to identification procedure #1497 (By equipter)](https://github.com/flipperdevices/flipperzero-firmware/pull/1497) (they are adding their own implementation)
 - OFW: [#1365 Mifare Ultralight authentication](https://github.com/flipperdevices/flipperzero-firmware/pull/1365)
@@ -14,7 +14,8 @@
 - OFW: [#1553 NFC: Add Skylanders support](https://github.com/flipperdevices/flipperzero-firmware/pull/1553)
 - OFW: [SubGhz: add protocol BERNER / ELKA / TEDSEN / TELETASTER / Doitrand / Marantec / Phoenix V2 (static mode) / Phox (static mode), fix Princeton #1516 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1516)
 - OFW: [#1509 Added support for Samsung TVs using address 07](https://github.com/flipperdevices/flipperzero-firmware/pull/1509)
-- Skipping [Extend random name generator #1551](https://github.com/flipperdevices/flipperzero-firmware/pull/1551)
+- Skipping [Extend random name generator #1551](https://github.com/flipperdevices/flipperzero-firmware/pull/1551) due to uselessness in comparison to date/timestamp
+- Added [Feature to read EEPROM of SFP Modules using I2C / Bugfix #198 (By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -87,6 +88,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Dolphin: Level animation sequence for level 3+ to be lvl1->2 for levels 1-20 and lvl2->3 for levels 21-30.
 - Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware)
 - Dolphin: SD dolphin manifest updated to weight animations differently
+- GPIO: Feature to read EEPROM of SFP Modules using I2C / Bugfix #198 [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
 - Plugins: 2048, Arkanoid, Snake and Tetris show score. Thanks to [whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) and  [DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188) With changes by RogueMaster.
 - Plugins: Fixed sound decay issues on music player [Thanks to qqMajiKpp]
@@ -105,6 +107,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - SubGHz: Auto Detect Raw in READ action (Needs To Be Enabled In Read Settings) [from perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/152)
 - SubGHz: [Add settings to subghz read functionality to allow setting RSSI threshold (raw only) (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/184)
 - SubGHz: Extended ranges enabled through flag in /ext/subghz/assets/extend_range.txt [from tkerrby](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/116)
+- SubGHz: New frequency analyzer [(By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501)
 - SubGHz: Protocols An-Motors, BFT Mitto, Came Atomo, FAAC SLH (Spa), HCS101, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - SubGHz: Unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/extend_range.txt` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/extend_range.txt) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 
@@ -122,6 +125,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484)
 - [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 - [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
+- [sk-SK maping keybord for BadUsb #1537 (By jaroslavmraz)](https://github.com/flipperdevices/flipperzero-firmware/pull/1537)
 
 </details>
 
