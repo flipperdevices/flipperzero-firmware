@@ -318,8 +318,8 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
 
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     //checking regional settings
-    bool is_allowed = false;
     bool is_extended = false;
+    bool is_allowed = false;
 
     Storage* storage = furi_record_open("storage");
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
