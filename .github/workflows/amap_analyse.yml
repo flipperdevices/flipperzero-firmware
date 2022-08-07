@@ -43,25 +43,6 @@ jobs:
           cd artifacts/
           /Applications/amap/Contents/MacOS/amap -f firmware.elf.map
 
-      - name: 'Generate suffix'
-        id: names
-        run: |
-          REF=${{ github.ref }}
-          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-            REF=${{ github.head_ref }}
-          fi
-          BRANCH_OR_TAG=${REF#refs/*/}
-          SHA=$(git rev-parse --short HEAD)
-
-          if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
-            SUFFIX=${BRANCH_OR_TAG//\//_}
-          else
-            SUFFIX=${BRANCH_OR_TAG//\//_}_$(date +'%d%m%Y')_${SHA}
-          fi
-          SUFFIX=${SUFFIX//-/_}
-
-          echo "::set-output name=suffix::${SUFFIX}"
-
       - name: 'Upload report to database'
         run: |
           SIZE_OUT=$(/opt/toolchain/x86_64-darwin/bin/arm-none-eabi-size build/latest/firmware.elf | tail -n 1)
@@ -74,4 +55,5 @@ jobs:
           COMMIT_HASH=${REF#refs/*/}
           BSS_SIZE=$(awk '{print $3}' <<< $SIZE_OUT)
           TEXT_SIZE=$(awk '{print $1}' <<< $SIZE_OUT)
+          export
           /usr/local/bin/amap_mariadb_insert.py artifacts/firmware.elf.map.all
