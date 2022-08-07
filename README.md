@@ -16,6 +16,7 @@
 - OFW: [#1509 Added support for Samsung TVs using address 07](https://github.com/flipperdevices/flipperzero-firmware/pull/1509)
 - Skipping [Extend random name generator #1551](https://github.com/flipperdevices/flipperzero-firmware/pull/1551) due to uselessness in comparison to date/timestamp
 - Added [Feature to read EEPROM of SFP Modules using I2C / Bugfix #198 (By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
+- Stability updates for Arkanoid, Snake and TicTacToe from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
