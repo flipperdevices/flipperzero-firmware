@@ -1,5 +1,5 @@
 V:0
-T:1659888767
+T:1659914994
 D:apps
 D:badusb
 D:dolphin
@@ -317,6 +317,7 @@ F:94eab58ea7ba75e4a738c69fd8d92af3:12402:subghz/Handicap/handicap_push_door.sub
 F:cd402353b933de0d291230284383b2cb:20604:subghz/Handicap/ook650_315brute.sub
 D:subghz/Misc/Sextoy
 F:4486d3f4298f2edac5ba79bd81a6d008:157:subghz/Misc/Crosswalk_Unknown.sub
+F:77314ba48283b6540327d15a6448dbaf:170:subghz/Misc/Go1.sub
 F:c13ab464563dca4db217a4ff87a31db0:204:subghz/Misc/Sextoy/Sextoy1.sub
 F:19a9f11b8daf0a3cbf48da6280a17d9e:204:subghz/Misc/Sextoy/Sextoy2.sub
 F:1751fb75f2f2337304c47e4f1d96f638:204:subghz/Misc/Sextoy/Sextoy3.sub
