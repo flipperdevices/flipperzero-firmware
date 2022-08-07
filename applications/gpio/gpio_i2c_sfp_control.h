@@ -8,7 +8,7 @@
 #define FIRST_NON_RESERVED_I2C_ADDRESS 8
 #define HIGHEST_I2C_ADDRESS 127
 #define AVAILABLE_NONRESVERED_I2C_ADDRESSES 120
-#define SFP_I2C_ADDRESS = 0x50
+#define SFP_I2C_ADDRESS 0x50
 
 typedef struct {
     char vendor[32];
