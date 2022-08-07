@@ -99,6 +99,7 @@ Nfc* nfc_alloc() {
 
     // Generator
     nfc->generator = NULL;
+
     return nfc;
 }
 

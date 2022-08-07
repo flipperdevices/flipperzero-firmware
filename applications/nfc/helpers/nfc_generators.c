@@ -348,5 +348,4 @@ const NfcGenerator* const nfc_generators[] = {
     &ntag_i2c_plus_1k_generator,
     &ntag_i2c_plus_2k_generator,
     NULL,
-
 };
