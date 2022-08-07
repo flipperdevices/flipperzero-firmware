@@ -6,15 +6,6 @@
 <b>Latest Updates:</b>
 
 - TOFIX - `FAP Loader`
-- Improvements to [New frequency analyzer #1501 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501)
-- Latest OFW Update: [Documentation: fixed outdated naming #1518 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1518) & [Fix unexpected behaviour when opening a remote from outside #1538 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1538)
-- Added [Add settings to subghz read functionality to allow setting RSSI threshold (raw only) (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/184)
-- Added [add score functionality for 2048 #186 (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/186)
-- Fix for Keeloq from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
-- Fix for BadUSB from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
-- NULL pointer fixes from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
-- Added [Fix serial no and btn display for princeton encoding on scripts #1545 (By bkerler)](https://github.com/flipperdevices/flipperzero-firmware/pull/1545)
-- Added [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
 - Removed [Fix serial no and btn display for princeton encoding on scripts #1545 (By bkerler)](https://github.com/flipperdevices/flipperzero-firmware/pull/1545) and replace with Skorp fix from [1516]((https://github.com/flipperdevices/flipperzero-firmware/pull/1516))
 - Added [Fix to make sure initial RSSI value is set #189 (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/189)
 - Added [Arkanoid show score, lives. Fix NULL pointer dereference #188 (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188)
