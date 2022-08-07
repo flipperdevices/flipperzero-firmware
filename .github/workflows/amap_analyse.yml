@@ -47,7 +47,8 @@ jobs:
         run: |
           export SIZE_OUT=$(/opt/toolchain/x86_64-darwin/bin/arm-none-eabi-size build/latest/firmware.elf | tail -n 1)
           export REF=${{ github.ref }}
-          if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+          export BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
             export PULL_ID=${{ github.event.pull_request.number }}
             export PULL_NAME=${{ github.event.pull_request.title }}
             export REF=${{ github.head_ref }}
