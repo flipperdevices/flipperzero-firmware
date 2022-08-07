@@ -256,7 +256,7 @@ void furi_hal_subghz_rx() {
 }
 
 bool furi_hal_subghz_tx() {
-    if(furi_hal_subghz.regulation != SubGhzRegulationTxRx) return false;
+    // if(furi_hal_subghz.regulation != SubGhzRegulationTxRx) return false;
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_switch_to_tx(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
