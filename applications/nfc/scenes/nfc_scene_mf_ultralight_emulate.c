@@ -22,7 +22,7 @@ bool nfc_mf_ultralight_emulate_worker_callback(NfcWorkerEvent event, void* conte
 
     if(event == NfcWorkerEventSuccess)
         state |= NfcSceneMfUltralightEmulateStateDataChanged;
-    else if(event == NfcWorkerEventPwdAuth) {
+    else if(event == NfcWorkerEventMfUltralightPwdAuth) {
         // Don't update if we're exiting
         if(nfc_worker_get_state(nfc->worker) != NfcWorkerStateStop) {
             // Event data is only available for the duration of this callback, so we're updating the
