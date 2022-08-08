@@ -49,7 +49,7 @@ static bool archive_favorites_read_line(File* file, string_t str_result) {
 uint16_t archive_favorites_count(void* context) {
     furi_assert(context);
 
-    Storage* fs_api = furi_record_open("storage");
+    Storage* fs_api = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(fs_api);
 
     string_t buffer;
@@ -74,7 +74,7 @@ uint16_t archive_favorites_count(void* context) {
 
     string_clear(buffer);
     storage_file_free(file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return lines;
 }
@@ -82,7 +82,7 @@ uint16_t archive_favorites_count(void* context) {
 static bool archive_favourites_rescan() {
     string_t buffer;
     string_init(buffer);
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
 
     bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
@@ -115,7 +115,7 @@ static bool archive_favourites_rescan() {
     storage_common_remove(storage, ARCHIVE_FAV_TEMP_PATH);
 
     storage_file_free(file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return result;
 }
@@ -124,7 +124,7 @@ bool archive_favorites_read(void* context) {
     furi_assert(context);
 
     ArchiveBrowserView* browser = context;
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
 
     string_t buffer;
@@ -171,7 +171,7 @@ bool archive_favorites_read(void* context) {
     storage_file_close(file);
     string_clear(buffer);
     storage_file_free(file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     archive_set_item_count(browser, file_count);
 
@@ -191,7 +191,7 @@ bool archive_favorites_delete(const char* format, ...) {
     va_end(args);
 
     string_init(buffer);
-    Storage* fs_api = furi_record_open("storage");
+    Storage* fs_api = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(fs_api);
 
     bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
@@ -220,7 +220,7 @@ bool archive_favorites_delete(const char* format, ...) {
     storage_common_remove(fs_api, ARCHIVE_FAV_TEMP_PATH);
 
     storage_file_free(file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return result;
 }
@@ -234,7 +234,7 @@ bool archive_is_favorite(const char* format, ...) {
     va_end(args);
 
     string_init(buffer);
-    Storage* fs_api = furi_record_open("storage");
+    Storage* fs_api = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(fs_api);
 
     bool found = false;
@@ -259,7 +259,7 @@ bool archive_is_favorite(const char* format, ...) {
     string_clear(buffer);
     string_clear(filename);
     storage_file_free(file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return found;
 }
@@ -268,7 +268,7 @@ bool archive_favorites_rename(const char* src, const char* dst) {
     furi_assert(src);
     furi_assert(dst);
 
-    Storage* fs_api = furi_record_open("storage");
+    Storage* fs_api = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(fs_api);
 
     string_t path;
@@ -305,7 +305,7 @@ bool archive_favorites_rename(const char* src, const char* dst) {
     storage_common_remove(fs_api, ARCHIVE_FAV_TEMP_PATH);
 
     storage_file_free(file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return result;
 }
@@ -320,7 +320,7 @@ void archive_favorites_save(void* context) {
     furi_assert(context);
 
     ArchiveBrowserView* browser = context;
-    Storage* fs_api = furi_record_open("storage");
+    Storage* fs_api = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(fs_api);
 
     for(size_t i = 0; i < archive_file_get_array_size(browser); i++) {
@@ -333,5 +333,5 @@ void archive_favorites_save(void* context) {
     storage_common_remove(fs_api, ARCHIVE_FAV_TEMP_PATH);
 
     storage_file_free(file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 }

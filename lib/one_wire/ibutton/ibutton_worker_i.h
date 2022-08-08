@@ -39,7 +39,7 @@ struct iButtonWorker {
     OneWireDevice* device;
     iButtonWriter* writer;
     iButtonWorkerMode mode_index;
-    osMessageQueueId_t messages;
+    FuriMessageQueue* messages;
     FuriThread* thread;
 
     iButtonWorkerReadCallback read_cb;

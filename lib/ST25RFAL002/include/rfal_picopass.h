@@ -9,6 +9,7 @@
  */
 #include "platform.h"
 #include "rfal_rf.h"
+#include "rfal_crc.h"
 #include "st_errno.h"
 
 #define RFAL_PICOPASS_UID_LEN 8
@@ -49,10 +50,6 @@ typedef struct {
     uint8_t data[RFAL_PICOPASS_MAX_BLOCK_LEN];
     uint8_t crc[2];
 } rfalPicoPassReadBlockRes;
-
-typedef struct {
-    rfalPicoPassReadBlockRes block[4];
-} ApplicationArea;
 
 ReturnCode rfalPicoPassPollerInitialize(void);
 ReturnCode rfalPicoPassPollerCheckPresence(void);

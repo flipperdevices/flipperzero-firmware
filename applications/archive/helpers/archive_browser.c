@@ -2,8 +2,8 @@
 #include "archive_files.h"
 #include "archive_apps.h"
 #include "archive_browser.h"
-#include "furi/common_defines.h"
-#include "furi/log.h"
+#include <core/common_defines.h>
+#include <core/log.h>
 #include "gui/modules/file_browser_worker.h"
 #include "m-string.h"
 #include <math.h>
@@ -391,18 +391,18 @@ void archive_favorites_move_mode(ArchiveBrowserView* browser, bool active) {
 }
 
 static bool archive_is_dir_exists(string_t path) {
-    if(string_equal_str_p(path, "/any")) {
+    if(string_equal_str_p(path, STORAGE_ANY_PATH_PREFIX)) {
         return true;
     }
     bool state = false;
     FileInfo file_info;
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     if(storage_common_stat(storage, string_get_cstr(path), &file_info) == FSE_OK) {
         if(file_info.flags & FSF_DIRECTORY) {
             state = true;
         }
     }
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     return state;
 }
 

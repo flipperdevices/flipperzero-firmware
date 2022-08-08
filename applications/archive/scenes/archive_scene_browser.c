@@ -36,7 +36,7 @@ static void archive_loader_callback(const void* message, void* context) {
 
 static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selected) {
     UNUSED(browser);
-    Loader* loader = furi_record_open("loader");
+    Loader* loader = furi_record_open(RECORD_LOADER);
 
     LoaderStatus status;
     if(selected->is_app) {
@@ -54,7 +54,7 @@ static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selec
         FURI_LOG_E(TAG, "loader_start failed: %d", status);
     }
 
-    furi_record_close("loader");
+    furi_record_close(RECORD_LOADER);
 }
 
 void archive_scene_browser_callback(ArchiveBrowserEvent event, void* context) {
@@ -71,10 +71,10 @@ void archive_scene_browser_on_enter(void* context) {
     archive_update_focus(browser, archive->text_store);
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewBrowser);
 
-    Loader* loader = furi_record_open("loader");
+    Loader* loader = furi_record_open(RECORD_LOADER);
     archive->loader_stop_subscription =
         furi_pubsub_subscribe(loader_get_pubsub(loader), archive_loader_callback, archive);
-    furi_record_close("loader");
+    furi_record_close(RECORD_LOADER);
 
     uint32_t state = scene_manager_get_scene_state(archive->scene_manager, ArchiveAppSceneBrowser);
 
@@ -92,8 +92,6 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
     ArchiveBrowserView* browser = archive->browser;
     ArchiveFile_t* selected = archive_get_current_file(browser);
 
-    const char* name = archive_get_name(browser);
-    bool known_app = archive_is_known_app(selected->type);
     bool favorites = archive_get_tab(browser) == ArchiveTabFavorites;
     bool consumed = false;
 
@@ -108,18 +106,19 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuRun:
-            if(known_app) {
+            if(archive_is_known_app(selected->type)) {
                 archive_run_in_app(browser, selected);
                 archive_show_file_menu(browser, false);
             }
             consumed = true;
             break;
-        case ArchiveBrowserEventFileMenuPin:
+        case ArchiveBrowserEventFileMenuPin: {
+            const char* name = archive_get_name(browser);
             if(favorites) {
                 archive_favorites_delete(name);
                 archive_file_array_rm_selected(browser);
                 archive_show_file_menu(browser, false);
-            } else if(known_app) {
+            } else if(archive_is_known_app(selected->type)) {
                 if(archive_is_favorite("%s", name)) {
                     archive_favorites_delete("%s", name);
                 } else {
@@ -128,12 +127,12 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
                 archive_show_file_menu(browser, false);
             }
             consumed = true;
-            break;
+        } break;
 
         case ArchiveBrowserEventFileMenuRename:
             if(favorites) {
                 browser->callback(ArchiveBrowserEventEnterFavMove, browser->context);
-            } else if((known_app) && (selected->is_app == false)) {
+            } else if((archive_is_known_app(selected->type)) && (selected->is_app == false)) {
                 archive_show_file_menu(browser, false);
                 scene_manager_set_scene_state(
                     archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_NEED_REFRESH);
@@ -196,10 +195,10 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             if(!archive_is_home(browser)) {
                 archive_leave_dir(browser);
             } else {
-                Loader* loader = furi_record_open("loader");
+                Loader* loader = furi_record_open(RECORD_LOADER);
                 furi_pubsub_unsubscribe(
                     loader_get_pubsub(loader), archive->loader_stop_subscription);
-                furi_record_close("loader");
+                furi_record_close(RECORD_LOADER);
 
                 view_dispatcher_stop(archive->view_dispatcher);
             }
@@ -216,7 +215,7 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
 void archive_scene_browser_on_exit(void* context) {
     ArchiveApp* archive = (ArchiveApp*)context;
 
-    Loader* loader = furi_record_open("loader");
+    Loader* loader = furi_record_open(RECORD_LOADER);
     furi_pubsub_unsubscribe(loader_get_pubsub(loader), archive->loader_stop_subscription);
-    furi_record_close("loader");
+    furi_record_close(RECORD_LOADER);
 }

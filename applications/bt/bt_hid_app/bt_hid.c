@@ -70,13 +70,13 @@ BtHid* bt_hid_app_alloc() {
     BtHid* app = malloc(sizeof(BtHid));
 
     // Gui
-    app->gui = furi_record_open("gui");
+    app->gui = furi_record_open(RECORD_GUI);
 
     // Bt
-    app->bt = furi_record_open("bt");
+    app->bt = furi_record_open(RECORD_BT);
 
     // Notifications
-    app->notifications = furi_record_open("notification");
+    app->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     // View dispatcher
     app->view_dispatcher = view_dispatcher_alloc();
@@ -90,7 +90,7 @@ BtHid* bt_hid_app_alloc() {
     submenu_add_item(
         app->submenu, "Keyboard", BtHidSubmenuIndexKeyboard, bt_hid_submenu_callback, app);
     submenu_add_item(
-        app->submenu, "Media player", BtHidSubmenuIndexMedia, bt_hid_submenu_callback, app);
+        app->submenu, "Media Player", BtHidSubmenuIndexMedia, bt_hid_submenu_callback, app);
     submenu_add_item(app->submenu, "Mouse", BtHidSubmenuIndexMouse, bt_hid_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), bt_hid_exit);
     view_dispatcher_add_view(
@@ -103,7 +103,7 @@ BtHid* bt_hid_app_alloc() {
     dialog_ex_set_left_button_text(app->dialog, "Exit");
     dialog_ex_set_right_button_text(app->dialog, "Stay");
     dialog_ex_set_center_button_text(app->dialog, "Menu");
-    dialog_ex_set_header(app->dialog, "Close current app?", 16, 12, AlignLeft, AlignTop);
+    dialog_ex_set_header(app->dialog, "Close Current App?", 16, 12, AlignLeft, AlignTop);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewExitConfirm, dialog_ex_get_view(app->dialog));
 
@@ -161,11 +161,11 @@ void bt_hid_app_free(BtHid* app) {
     view_dispatcher_free(app->view_dispatcher);
 
     // Close records
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     app->gui = NULL;
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
     app->notifications = NULL;
-    furi_record_close("bt");
+    furi_record_close(RECORD_BT);
     app->bt = NULL;
 
     // Free rest

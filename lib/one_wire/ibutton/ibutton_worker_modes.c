@@ -22,7 +22,7 @@ void ibutton_worker_mode_write_stop(iButtonWorker* worker);
 
 const iButtonWorkerModeType ibutton_worker_modes[] = {
     {
-        .quant = osWaitForever,
+        .quant = FuriWaitForever,
         .start = ibutton_worker_mode_idle_start,
         .tick = ibutton_worker_mode_idle_tick,
         .stop = ibutton_worker_mode_idle_stop,
@@ -149,7 +149,7 @@ bool ibutton_worker_read_comparator(iButtonWorker* worker) {
 bool ibutton_worker_read_dallas(iButtonWorker* worker) {
     bool result = false;
     onewire_host_start(worker->host);
-    furi_hal_delay_ms(100);
+    furi_delay_ms(100);
     FURI_CRITICAL_ENTER();
     if(onewire_host_search(worker->host, worker->key_data, NORMAL_SEARCH)) {
         onewire_host_reset_search(worker->host);

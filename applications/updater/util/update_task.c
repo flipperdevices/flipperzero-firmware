@@ -196,7 +196,7 @@ static void update_task_worker_thread_cb(FuriThreadState state, void* context) {
     }
 
     if(furi_thread_get_return_code(update_task->thread) == UPDATE_TASK_NOERR) {
-        osDelay(UPDATE_DELAY_OPERATION_OK);
+        furi_delay_ms(UPDATE_DELAY_OPERATION_OK);
         furi_hal_power_reset();
     }
 }
@@ -210,7 +210,7 @@ UpdateTask* update_task_alloc() {
     string_init(update_task->state.status);
 
     update_task->manifest = update_manifest_alloc();
-    update_task->storage = furi_record_open("storage");
+    update_task->storage = furi_record_open(RECORD_STORAGE);
     update_task->file = storage_file_alloc(update_task->storage);
     update_task->status_change_cb = NULL;
     update_task->boot_mode = furi_hal_rtc_get_boot_mode();
@@ -245,7 +245,7 @@ void update_task_free(UpdateTask* update_task) {
     storage_file_free(update_task->file);
     update_manifest_free(update_task->manifest);
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     string_clear(update_task->update_path);
 
     free(update_task);

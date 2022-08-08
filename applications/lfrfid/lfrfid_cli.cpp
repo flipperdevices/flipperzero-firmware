@@ -94,7 +94,7 @@ static void lfrfid_cli_read(Cli* cli, string_t args) {
             printf("\r\n");
             break;
         }
-        furi_hal_delay_ms(100);
+        furi_delay_ms(100);
     }
 
     printf("Reading stopped\r\n");
@@ -107,7 +107,7 @@ static void lfrfid_cli_write(Cli* cli, string_t args) {
     UNUSED(cli);
     UNUSED(args);
     // TODO implement rfid write
-    printf("Not implemented :(\r\n");
+    printf("Not Implemented :(\r\n");
 }
 
 static void lfrfid_cli_emulate(Cli* cli, string_t args) {
@@ -144,7 +144,7 @@ static void lfrfid_cli_emulate(Cli* cli, string_t args) {
 
     printf("Emulating RFID...\r\nPress Ctrl+C to abort\r\n");
     while(!cli_cmd_interrupt_received(cli)) {
-        furi_hal_delay_ms(100);
+        furi_delay_ms(100);
     }
     printf("Emulation stopped\r\n");
     emulator.stop();
