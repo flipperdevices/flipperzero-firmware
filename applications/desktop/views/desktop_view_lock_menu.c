@@ -1,5 +1,6 @@
 #include <furi.h>
 #include <gui/elements.h>
+#include <dolphin/dolphin.h>
 
 #include "../desktop_i.h"
 #include "desktop_view_lock_menu.h"
@@ -65,7 +66,8 @@ static void lock_menu_callback(void* context, uint8_t index) {
                 return true;
             });
         desktop_view_lock_menu_dumbmode_changed(1);
-        furi_delay_us(500);
+		DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+        furi_delay_us(900);
         lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
         break;
     default: // wip message
