@@ -2,6 +2,7 @@
 #include <toolbox/protocols/protocol.h>
 #include <lfrfid/tools/fsk_demod.h>
 #include <lfrfid/tools/fsk_osc.h>
+#include "lfrfid_protocols.h"
 
 #define JITTER_TIME (20)
 #define MIN_TIME (64 - JITTER_TIME)
@@ -227,10 +228,6 @@ bool protocol_h10301_decoder_feed(ProtocolH10301* protocol, bool level, uint32_t
     return result;
 };
 
-void protocol_h10301_decoder_reset(ProtocolH10301* protocol) {
-    protocol_h10301_decoder_start(protocol);
-};
-
 static void protocol_h10301_write_raw_bit(bool bit, uint8_t position, uint32_t* card_data) {
     if(bit) {
         card_data[position / H10301_BIT_SIZE] |=
@@ -357,9 +354,25 @@ LevelDuration protocol_h10301_encoder_yield(ProtocolH10301* protocol) {
     return level_duration_make(level, duration);
 };
 
-void protocol_h10301_encoder_reset(ProtocolH10301* protocol) {
-    protocol_h10301_encoder_start(protocol);
+void protocol_h10301_render_data(ProtocolH10301* protocol, string_t result) {
+    uint8_t* data = protocol->data;
+    string_printf(
+        result,
+        "FC: %u\r\n"
+        "Card: %u",
+        data[0],
+        (uint16_t)((data[1] << 8) | (data[2])));
 };
+
+uint32_t protocol_h10301_get_features(void* protocol) {
+    UNUSED(protocol);
+    return LFRFIDFeatureASK;
+}
+
+uint32_t protocol_h10301_get_validate_count(void* protocol) {
+    UNUSED(protocol);
+    return 3;
+}
 
 const ProtocolBase protocol_h10301 = {
     .alloc = (ProtocolAlloc)protocol_h10301_alloc,
@@ -373,12 +386,13 @@ const ProtocolBase protocol_h10301 = {
         {
             .start = (ProtocolDecoderStart)protocol_h10301_decoder_start,
             .feed = (ProtocolDecoderFeed)protocol_h10301_decoder_feed,
-            .reset = (ProtocolDecoderReset)protocol_h10301_decoder_reset,
         },
     .encoder =
         {
             .start = (ProtocolEncoderStart)protocol_h10301_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_h10301_encoder_yield,
-            .reset = (ProtocolEncoderReset)protocol_h10301_encoder_reset,
         },
+    .render_data = (ProtocolRenderData)protocol_h10301_render_data,
+    .get_features = (ProtocolGetFeatures)protocol_h10301_get_features,
+    .get_validate_count = (ProtocolGetValidateCount)protocol_h10301_get_validate_count,
 };
