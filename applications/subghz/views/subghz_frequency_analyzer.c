@@ -73,7 +73,6 @@ void subghz_frequency_analyzer_draw_rssi(
     float trigger,
     uint8_t x,
     uint8_t y) {
-
     // Current RSSI
     if(rssi) {
         rssi = (rssi - RSSI_MIN) / RSSI_SCALE;
