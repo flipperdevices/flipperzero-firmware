@@ -8,7 +8,7 @@
 - Known Issues:`FAP Loader` & `Chess`
 - Added Assets: Includes Rukamon animation 2x and Agumon animation [By Syrius]
 - Update from [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
-- Stopwatch @ !:20 Alert enablels 3 EXP for a total of 90 EXP daily
+- Stopwatch @ 1:20 Alert enablels 3 EXP for a total of 90 EXP daily
 - Added: [Dolphin: Passport: Show EXP (By Dabolus)](https://github.com/Dabolus/flipperzero-firmware-rpg/)
 
 <table width="100%" border="0" cellspacing="0">
