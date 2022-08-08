@@ -1,5 +1,5 @@
 V:0
-T:1659914994
+T:1659930543
 D:apps
 D:badusb
 D:dolphin
@@ -58,6 +58,7 @@ F:6461e0e3897f295d59efecd70ca3a294:256:badusb/layouts/sk-SK.kl
 F:b62d559209e0d450b4d77f76e29ec1be:256:badusb/layouts/sv-SE.kl
 D:dolphin/L1_Boxing_128x64
 D:dolphin/L1_Cry_128x64
+D:dolphin/L1_Digi_rain_128x64
 D:dolphin/L1_Furippa1_128x64
 D:dolphin/L1_Laptop_128x51
 D:dolphin/L1_Leaving_sad_128x64
@@ -72,7 +73,7 @@ D:dolphin/L2_Soldering_128x64
 D:dolphin/L3_Furippa3_128x64
 D:dolphin/L3_Hijack_radio_128x64
 D:dolphin/L3_Lab_research_128x54
-F:800428568d7e242db936d027afa7c72d:1586:dolphin/manifest.txt
+F:a640f1e78db29a99869cce2261fe4805:1683:dolphin/manifest.txt
 F:d37be8444102ec5cde5fe3a85d55b57d:481:dolphin/L1_Boxing_128x64/frame_0.bm
 F:54fb07443bc153ded9589b74d23b4263:461:dolphin/L1_Boxing_128x64/frame_1.bm
 F:e007afe130d699c715b99ce8e5b407bd:531:dolphin/L1_Boxing_128x64/frame_2.bm
@@ -90,6 +91,15 @@ F:7703a7d9745d13b45d73ce4b86b4cdc8:940:dolphin/L1_Cry_128x64/frame_5.bm
 F:ee6de6a0ed903317c4948cb445e0a9a8:915:dolphin/L1_Cry_128x64/frame_6.bm
 F:a3892e45826c66f48d3d64fb81521446:934:dolphin/L1_Cry_128x64/frame_7.bm
 F:680b12cc4dad722d6583b7e710bfc297:516:dolphin/L1_Cry_128x64/meta.txt
+F:b2217745c8e63acefb1f9494a40811e4:249:dolphin/L1_Digi_rain_128x64/frame_0.bm
+F:84b3a17124b2225a9c68833ec7d0cc7e:249:dolphin/L1_Digi_rain_128x64/frame_1.bm
+F:b8f98f356f875bf78313d0d16e070dc8:246:dolphin/L1_Digi_rain_128x64/frame_2.bm
+F:1598552ad9d0250bfe784a7f63732e89:242:dolphin/L1_Digi_rain_128x64/frame_3.bm
+F:ecf58c030e7d60b8fc8f8b50cbb12f70:225:dolphin/L1_Digi_rain_128x64/frame_4.bm
+F:f12e0a009c090cf574c611e55231354a:219:dolphin/L1_Digi_rain_128x64/frame_5.bm
+F:95c860804ecbdd9d62c88fff16802a73:142:dolphin/L1_Digi_rain_128x64/frame_6.bm
+F:e509251663cf035e842b64dd8250330c:123:dolphin/L1_Digi_rain_128x64/frame_7.bm
+F:ce22a2a9e30ce678ee6c97d81d117825:529:dolphin/L1_Digi_rain_128x64/meta.txt
 F:4911eaa7cb84ced19e5dea2af51b91a5:294:dolphin/L1_Furippa1_128x64/frame_0.bm
 F:5669bee57c7b3d93a1665dd87fd5372a:325:dolphin/L1_Furippa1_128x64/frame_1.bm
 F:80b48a77682b853e6236cd1c89083e6f:465:dolphin/L1_Furippa1_128x64/frame_10.bm
@@ -271,6 +281,8 @@ F:f267f0654781049ca323b11bb4375519:581:dolphin/L3_Lab_research_128x54/frame_9.bm
 F:41106c0cbc5144f151b2b2d3daaa0527:727:dolphin/L3_Lab_research_128x54/meta.txt
 F:05e24c3e99c57e84b04a1451b7184d99:40:dolphin_restorer/.dolphin.state
 D:infrared/assets
+F:4f656979648633e248c0f7f7a37e3a8d:21271:infrared/assets/ac.ir
+F:a0ac7ed0629a93b234d1790bf8bfb4c6:26781:infrared/assets/audio.ir
 F:45d36ceeac6be64eea3a0615a612ccbc:107466:infrared/assets/tv.ir
 F:18acc61b64d25ca9d80c57821470a387:226:music_player/Contra.txt
 F:6e90d05ddbeb7b01da4a3c73e38c8233:252:music_player/Doom.txt
