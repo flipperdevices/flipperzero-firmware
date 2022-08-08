@@ -8,6 +8,7 @@
 ## WISH LIST ITEMS:
 - `Notepad` APP to allow taking quick notes and saving to SD.
 - - Also can possibly open/edit .md,.txt,.fmf and other text friendly formats
+- `UART` Move UART Echo app from Debug to GPIO section.
 - `Write URL to NFC` APP to allow creating URL NFC tags from only the flipper
 - - Also can possibly support larger URLs than the ones in samples (due to length limits on NFC types)
 - - Also can possibly create other types of tags, like WIFI configurations
@@ -25,8 +26,7 @@
 - `Bluetooth OpenHayStack` for Flipper, changes current bluetooth configuration to transmit Bluetooth Open Haystack packet as needed for the device to be findable when settings for Bluetooth is set to ON in settings and OpenHayStack is set to ON in settings.
 - - Not sure if could possiblt also serve to find devices
 - - Example resource of OpenHayStack as an alternative to Bluetooth On/Off: https://github.com/AlexStrNik/flipperzero-firmware/tree/dev
-- `Tamagochi` APP serves as a virtual pet
-- - Possible resource: https://learn.littlerobotfriends.com/downloads/
+- `Tamagochi` Save State
 - Skip to next or previous SubGHz scan file from emulation screen using UP/DOWN
 
 # 

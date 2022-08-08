@@ -1,0 +1,10 @@
+App(
+    appid="GAME_MontyHall",
+    name="Monty Hall",
+    apptype=FlipperAppType.GAME,
+    entry_point="montyhall_game_app",
+    cdefines=["APP_MONTYHALL_GAME"],
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=40,
+)
