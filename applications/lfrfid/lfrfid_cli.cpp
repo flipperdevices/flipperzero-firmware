@@ -9,14 +9,11 @@
 
 static void lfrfid_cli(Cli* cli, string_t args, void* context);
 
-extern "C" void lfrfid_cli_test(Cli* cli);
-
 // app cli function
 extern "C" void lfrfid_on_system_start() {
 #ifdef SRV_CLI
     Cli* cli = static_cast<Cli*>(furi_record_open("cli"));
     cli_add_command(cli, "rfid+", CliCommandFlagDefault, lfrfid_cli, NULL);
-    lfrfid_cli_test(cli);
     furi_record_close("cli");
 #else
     UNUSED(lfrfid_cli);
