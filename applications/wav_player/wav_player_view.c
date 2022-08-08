@@ -39,7 +39,7 @@ static void wav_player_view_draw_callback(Canvas* canvas, void* _model) {
     // play / pause
     x_pos = 58;
     y_pos = 55;
-    if(model->play) {
+    if(!model->play) {
         canvas_draw_line(canvas, x_pos, y_pos, x_pos + 8, y_pos + 4);
         canvas_draw_line(canvas, x_pos, y_pos + 8, x_pos + 8, y_pos + 4);
         canvas_draw_line(canvas, x_pos, y_pos + 8, x_pos, y_pos);
