@@ -7,6 +7,16 @@
 #include <storage/storage.h>
 #include <toolbox/stream/file_stream.h>
 
+#include <toolbox/varint.h>
+
+#include <toolbox/protocols/protocol_dict.h>
+#include <lfrfid/protocols/lfrfid_protocols.h>
+#include <toolbox/pulse_protocols/pulse_glue.h>
+
+#define RAW_HEADER "RFID RAW"
+
+#define FURI_SW_MEMBARRIER() asm volatile("" : : : "memory")
+
 static void lfrfid_cli(Cli* cli, string_t args, void* context);
 
 // app cli function
@@ -25,15 +35,110 @@ static void lfrfid_cli_print_usage() {
     printf("\tH10301, HID26 (3 bytes key_data)\r\n");
     printf("\tI40134, Indala (3 bytes key_data)\r\n");
     printf("\t<key_data> are hex-formatted\r\n");
-    printf("rfid raw_read <filename>\r\n");
+    printf("rfid raw_read <ask | psk> <filename>\r\n");
     printf("rfid raw_emulate <filename>\r\n");
 };
 
+typedef struct {
+    ProtocolId protocol;
+    osEventFlagsId_t event;
+} LFRFIDCliReadContext;
+
+static void lfrfid_cli_read_callback(LFRFIDWorkerReadResult result, ProtocolId proto, void* ctx) {
+    furi_assert(ctx);
+    LFRFIDCliReadContext* context = ctx;
+    if(result == LFRFIDWorkerReadDone) {
+        context->protocol = proto;
+        FURI_SW_MEMBARRIER();
+    }
+    osEventFlagsSet(context->event, 1 << result);
+}
+
 static void lfrfid_cli_read(Cli* cli, string_t args) {
-    UNUSED(cli);
-    UNUSED(args);
-    // TODO implement rfid read
-    printf("Not implemented :(\r\n");
+    string_t type_string;
+    string_init(type_string);
+    LFRFIDWorkerReadType type = LFRFIDWorkerReadTypeAuto;
+
+    if(args_read_string_and_trim(args, type_string)) {
+        if(string_cmp_str(type_string, "normal") == 0 || string_cmp_str(type_string, "ask") == 0) {
+            // ask
+            type = LFRFIDWorkerReadTypeASKOnly;
+        } else if(
+            string_cmp_str(type_string, "indala") == 0 ||
+            string_cmp_str(type_string, "psk") == 0) {
+            // psk
+            type = LFRFIDWorkerReadTypePSKOnly;
+        } else {
+            lfrfid_cli_print_usage();
+            string_clear(type_string);
+            return;
+        }
+    }
+    string_clear(type_string);
+
+    LFRFIDWorker* worker = lfrfid_worker_alloc();
+    LFRFIDCliReadContext context;
+    context.protocol = PROTOCOL_NO;
+    context.event = osEventFlagsNew(NULL);
+
+    lfrfid_worker_start_thread(worker);
+    lfrfid_worker_read_set_callback(worker, lfrfid_cli_read_callback, &context);
+
+    printf("Reading RFID...\r\nPress Ctrl+C to abort\r\n");
+
+    const uint32_t available_flags = (1 << LFRFIDWorkerReadSenseStart) |
+                                     (1 << LFRFIDWorkerReadSenseEnd) | (1 << LFRFIDWorkerReadDone);
+
+    lfrfid_worker_read_start(worker, type);
+
+    while(true) {
+        uint32_t flags = osEventFlagsWait(context.event, available_flags, osFlagsWaitAny, 100);
+
+        if(flags != osFlagsErrorTimeout) {
+            if(FURI_BIT(flags, LFRFIDWorkerReadSenseStart)) {
+                printf("Sense Start\r\n");
+            }
+
+            if(FURI_BIT(flags, LFRFIDWorkerReadSenseEnd)) {
+                printf("Sense End\r\n");
+            }
+
+            if(FURI_BIT(flags, LFRFIDWorkerReadDone)) {
+                break;
+            }
+        }
+
+        if(cli_cmd_interrupt_received(cli)) break;
+    }
+
+    lfrfid_worker_stop(worker);
+
+    if(context.protocol != PROTOCOL_NO) {
+        printf("%s ", lfrfid_worker_dict_get_name(worker, context.protocol));
+
+        size_t size = lfrfid_worker_dict_get_data_size(worker, context.protocol);
+        uint8_t* data = malloc(size);
+        lfrfid_worker_dict_get_data(worker, context.protocol, data, size);
+        for(size_t i = 0; i < size; i++) {
+            printf("%02X", data[i]);
+        }
+        printf("\r\n");
+        free(data);
+
+        string_t info;
+        string_init(info);
+        lfrfid_worker_dict_render(worker, context.protocol, info);
+        if(string_size(info) > 0) {
+            printf("%s\r\n", string_get_cstr(info));
+        }
+        string_clear(info);
+    }
+
+    printf("Reading stopped\r\n");
+    lfrfid_worker_stop_thread(worker);
+    lfrfid_worker_free(worker);
+
+    osEventFlagsDelete(context.event);
 }
 
 static void lfrfid_cli_write(Cli* cli, string_t args) {
@@ -50,21 +155,18 @@ static void lfrfid_cli_emulate(Cli* cli, string_t args) {
     printf("Not implemented :(\r\n");
 }
 
-#define RAW_HEADER "RFID RAW"
-#include <toolbox/varint.h>
-
-#include <toolbox/protocols/protocol_dict.h>
-#include <lfrfid/protocols/lfrfid_protocols.h>
-#include <toolbox/pulse_protocols/pulse_glue.h>
-
 static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
     UNUSED(cli);
-    string_t filepath;
+    string_t filepath, info_string;
     string_init(filepath);
+    string_init(info_string);
     Storage* storage = furi_record_open("storage");
     Stream* stream = file_stream_alloc(storage);
 
     do {
+        float frequency = 0;
+        float duty_cycle = 0;
+
         if(!args_read_probably_quoted_string_and_trim(args, filepath)) {
             lfrfid_cli_print_usage();
             break;
@@ -88,6 +190,18 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
         uint32_t max_buffer_size;
         size = stream_read(stream, (uint8_t*)&max_buffer_size, sizeof(uint32_t));
         if(size != sizeof(uint32_t)) {
+            printf("Invalid header\r\n");
+            break;
+        }
+
+        size = stream_read(stream, (uint8_t*)&frequency, sizeof(float));
+        if(size != sizeof(float) || frequency < 0.0f || frequency > 1000000.0f) {
+            printf("Invalid header\r\n");
+            break;
+        }
+
+        size = stream_read(stream, (uint8_t*)&duty_cycle, sizeof(float));
+        if(size != sizeof(float) || duty_cycle < 0.0f || duty_cycle > 1.0f) {
             printf("Invalid header\r\n");
             break;
         }
@@ -140,7 +254,11 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
                     warn = true;
                 }
 
-                printf("[%ld %ld]", pulse, duration);
+                string_printf(info_string, "[%ld %ld]", pulse, duration);
+                printf("%-16s", string_get_cstr(info_string));
+                string_printf(info_string, "[%ld %ld]", pulse, duration - pulse);
+                printf("%-16s", string_get_cstr(info_string));
+
                 if(warn) {
                     printf(" <<----");
                 }
@@ -161,9 +279,19 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
 
                 total_pulse += pulse;
                 total_duration += duration;
+
+                if(total_protocol != PROTOCOL_NO) {
+                    break;
+                }
+            }
+
+            if(total_protocol != PROTOCOL_NO) {
+                break;
             }
         }
 
+        printf("   Frequency: %f\r\n", (double)frequency);
+        printf("  Duty Cycle: %f\r\n", (double)duty_cycle);
         printf("       Warns: %ld\r\n", total_warns);
         printf("   Pulse sum: %ld\r\n", total_pulse);
         printf("Duration sum: %ld\r\n", total_duration);
@@ -184,6 +312,9 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
             }
             printf("]\r\n");
 
+            protocol_dict_set_data(dict, total_protocol, data, data_size);
+            protocol_dict_encoder_start(dict, total_protocol);
+
             free(data);
         } else {
             printf("not found\r\n");
@@ -196,10 +327,11 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
 
     stream_free(stream);
     string_clear(filepath);
+    string_clear(info_string);
     furi_record_close("storage");
 }
 
-static void lfrfid_worker_read_raw_callback(LFRFIDWorkerReadRawResult result, void* context) {
+static void lfrfid_cli_read_raw_callback(LFRFIDWorkerReadRawResult result, void* context) {
     furi_assert(context);
     osEventFlagsId_t event = context;
     osEventFlagsSet(event, 1 << result);
@@ -208,10 +340,28 @@ static void lfrfid_worker_read_raw_callback(LFRFIDWorkerReadRawResult result, vo
 static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
     UNUSED(cli);
 
-    string_t filepath;
+    string_t filepath, type_string;
     string_init(filepath);
+    string_init(type_string);
+    LFRFIDWorkerReadType type = LFRFIDWorkerReadTypeAuto;
 
     do {
+        if(args_read_string_and_trim(args, type_string)) {
+            if(string_cmp_str(type_string, "normal") == 0 ||
+               string_cmp_str(type_string, "ask") == 0) {
+                // ask
+                type = LFRFIDWorkerReadTypeASKOnly;
+            } else if(
+                string_cmp_str(type_string, "indala") == 0 ||
+                string_cmp_str(type_string, "psk") == 0) {
+                // psk
+                type = LFRFIDWorkerReadTypePSKOnly;
+            } else {
+                lfrfid_cli_print_usage();
+                break;
+            }
+        }
+
         if(!args_read_probably_quoted_string_and_trim(args, filepath)) {
             lfrfid_cli_print_usage();
             break;
@@ -221,7 +371,7 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
         osEventFlagsId_t event = osEventFlagsNew(NULL);
 
         lfrfid_worker_start_thread(worker);
-        lfrfid_worker_read_raw_set_callback(worker, lfrfid_worker_read_raw_callback, event);
+        lfrfid_worker_read_raw_set_callback(worker, lfrfid_cli_read_raw_callback, event);
 
         bool overrun = false;
 
@@ -229,7 +379,7 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
                                          (1 << LFRFIDWorkerReadRawOverrun) |
                                          (1 << LFRFIDWorkerReadRawDone);
 
-        lfrfid_worker_read_raw_start(worker, string_get_cstr(filepath));
+        lfrfid_worker_read_raw_start(worker, string_get_cstr(filepath), type);
         while(true) {
             uint32_t flags = osEventFlagsWait(event, available_flags, osFlagsWaitAny, 100);
 
@@ -255,7 +405,7 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
         }
 
         if(overrun) {
-            printf("An overrun occurred during emulation\r\n");
+            printf("An overrun occurred during read\r\n");
         }
 
         lfrfid_worker_stop(worker);
@@ -268,6 +418,7 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
     } while(false);
 
     string_clear(filepath);
+    string_clear(type_string);
 }
 
 static void

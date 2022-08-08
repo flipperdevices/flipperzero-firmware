@@ -269,7 +269,7 @@ MU_TEST(test_protocol_dict) {
     mu_assert_int_eq(true, level_duration_get_level(level));
     mu_assert_int_eq(100, level_duration_get_duration(level));
 
-    protocol_dict_encoder_reset(dict, protocol_id);
+    mu_check(protocol_dict_encoder_start(dict, protocol_id));
     level = protocol_dict_encoder_yield(dict, protocol_id);
     mu_assert_int_eq(true, level_duration_get_level(level));
     mu_assert_int_eq(100, level_duration_get_duration(level));
