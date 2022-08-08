@@ -3,6 +3,7 @@
 #include "protocol_fdx_b.h"
 #include <toolbox/manchester_decoder.h>
 #include <lfrfid/tools/bit_lib.h>
+#include "lfrfid_protocols.h"
 
 #define FDX_B_ENCODED_BIT_SIZE (128)
 #define FDX_B_ENCODED_BYTE_SIZE (((FDX_B_ENCODED_BIT_SIZE) / 8))
@@ -10,15 +11,15 @@
 #define FDX_B_PREAMBLE_BYTE_SIZE (2)
 #define FDX_B_ENCODED_BYTE_FULL_SIZE (FDX_B_ENCODED_BYTE_SIZE + FDX_B_PREAMBLE_BYTE_SIZE)
 
-typedef struct {
-    bool last_short;
-} ProtocolFDXBDecoder;
+#define FDXB_DECODED_DATA_SIZE (12)
 
 typedef struct {
-    ProtocolFDXBDecoder decoder;
+    bool last_short;
+    bool last_level;
+    size_t encoded_index;
     // ProtocolFDXBEncoder encoder;
     uint8_t encoded_data[FDX_B_ENCODED_BYTE_FULL_SIZE];
-    // uint8_t data[FDXB_DECODED_DATA_SIZE];
+    uint8_t data[FDXB_DECODED_DATA_SIZE];
 } ProtocolFDXB;
 
 ProtocolFDXB* protocol_fdx_b_alloc(void) {
@@ -58,9 +59,9 @@ const char* protocol_fdx_b_get_manufacturer(ProtocolFDXB* protocol) {
 };
 
 void protocol_fdx_b_decoder_start(ProtocolFDXB* protocol) {
-    // memset(protocol->data, 0, EM4100_DECODED_DATA_SIZE);
+    memset(protocol->data, 0, FDXB_DECODED_DATA_SIZE);
     memset(protocol->encoded_data, 0, FDX_B_ENCODED_BYTE_FULL_SIZE);
-    protocol->decoder.last_short = false;
+    protocol->last_short = false;
 };
 
 #define FDX_B_SHORT_TIME (128)
@@ -101,10 +102,34 @@ msb		lsb
         // check control bits
         if(!bit_lib_test_parity(protocol->encoded_data, 3, 13 * 9, BitLibParityAlways1, 9)) break;
 
+        // TODO check CRC16 checksum
+
         result = true;
     } while(false);
 
     return result;
+}
+
+static void string_push_uint64(uint64_t input, string_t output) {
+    const uint8_t base = 10;
+
+    do {
+        char c = input % base;
+        input /= base;
+
+        if(c < 10)
+            c += '0';
+        else
+            c += 'A' - 10;
+        string_push_back(output, c);
+    } while(input);
+
+    // reverse string
+    for(uint8_t i = 0; i < string_size(output) / 2; i++) {
+        char c = string_get_char(output, i);
+        string_set_char(output, i, string_get_char(output, string_size(output) - i - 1));
+        string_set_char(output, string_size(output) - i - 1, c);
+    }
 }
 
 void protocol_fdx_b_decode(ProtocolFDXB* protocol) {
@@ -141,9 +166,17 @@ void protocol_fdx_b_decode(ProtocolFDXB* protocol) {
     // 88 eeeeeeee	  eg. $123456.
     // 92 eeeeeeee
 
-    // TODO: 38 bits of national code
-    uint32_t national_code = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
-    bit_lib_reverse_bits((uint8_t*)&national_code, 0, 32);
+    // 38 pet id    -> 40 bit, 5 byte
+    // 10 country   -> 16 bit, 2 byte
+    // 16 bit flags -> 16 bit, 2 byte
+    // 24 extra     -> 24 bit, 3 byte
+    // total: 5 + 2 + 2 + 3 = 12 bytes
+
+    // 38 bits of national code
+    uint64_t national_code = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
+    national_code = national_code << 32;
+    national_code |= bit_lib_get_bits_32(protocol->encoded_data, 32, 6) << (32 - 6);
+    bit_lib_reverse_bits((uint8_t*)&national_code, 0, 64);
 
     // 10 bit of country code
     uint16_t country_code = bit_lib_get_bits_16(protocol->encoded_data, 38, 10) << 6;
@@ -164,9 +197,15 @@ void protocol_fdx_b_decode(ProtocolFDXB* protocol) {
     uint8_t ex_calc_parity = bit_lib_test_parity_u32(ex_temperature, BitLibParityOdd);
     bool ex_temperature_present = (ex_calc_parity == ex_parity) && !(extended & 0xe00);
 
+    string_t pet_id;
+    string_init(pet_id);
+    string_push_uint64(national_code, pet_id);
+
     printf("\r\n");
-    printf("National code: %ld\r\n", national_code);
-    printf("Country code: %d\r\n", country_code);
+    printf("Pet ID: %s\r\n", string_get_cstr(pet_id));
+    string_clear(pet_id);
+
+    printf("Country: %d\r\n", country_code);
     printf("Block status: %d\r\n", block_status);
     printf("Rudi bit: %d\r\n", rudi_bit);
     printf("Reserved: %d\r\n", reserved);
@@ -187,30 +226,30 @@ rfid raw_analyze /ext/fdxb.raw
 
 bool protocol_fdx_b_decoder_feed(ProtocolFDXB* protocol, bool level, uint32_t duration) {
     bool result = false;
-    UNUSED(protocol);
     UNUSED(level);
-    UNUSED(duration);
 
     bool pushed = false;
 
     // Bi-Phase Manchester decoding
     if(duration >= FDX_B_SHORT_TIME_LOW && duration <= FDX_B_SHORT_TIME_HIGH) {
-        if(protocol->decoder.last_short == false) {
-            protocol->decoder.last_short = true;
+        if(protocol->last_short == false) {
+            protocol->last_short = true;
         } else {
             pushed = true;
             bit_lib_push_bit(protocol->encoded_data, FDX_B_ENCODED_BYTE_FULL_SIZE, false);
-            protocol->decoder.last_short = false;
+            protocol->last_short = false;
         }
     } else if(duration >= FDX_B_LONG_TIME_LOW && duration <= FDX_B_LONG_TIME_HIGH) {
-        if(protocol->decoder.last_short == false) {
+        if(protocol->last_short == false) {
             pushed = true;
             bit_lib_push_bit(protocol->encoded_data, FDX_B_ENCODED_BYTE_FULL_SIZE, true);
         } else {
             // reset
+            protocol->last_short = false;
         }
     } else {
         // reset
+        protocol->last_short = false;
     }
 
     if(pushed && protocol_fdx_b_can_be_decoded(protocol)) {
@@ -221,23 +260,59 @@ bool protocol_fdx_b_decoder_feed(ProtocolFDXB* protocol, bool level, uint32_t du
     return result;
 };
 
-void protocol_fdx_b_decoder_reset(ProtocolFDXB* protocol) {
-    protocol_fdx_b_decoder_start(protocol);
-};
-
 bool protocol_fdx_b_encoder_start(ProtocolFDXB* protocol) {
-    UNUSED(protocol);
+    // TODO: encode data
+    protocol->encoded_index = 0;
+    protocol->last_short = false;
+    protocol->last_level = false;
     return true;
 };
 
 LevelDuration protocol_fdx_b_encoder_yield(ProtocolFDXB* protocol) {
-    UNUSED(protocol);
-    return level_duration_reset();
+    uint32_t duration;
+    protocol->last_level = !protocol->last_level;
+
+    bool bit = bit_lib_get_bit(protocol->encoded_data, protocol->encoded_index);
+
+    // Bi-Phase Manchester encoder
+    if(bit) {
+        // one long pulse for 1
+        duration = FDX_B_LONG_TIME / 8;
+        bit_lib_increment_index(protocol->encoded_index, FDX_B_ENCODED_BYTE_SIZE);
+    } else {
+        // two short pulses for 0
+        duration = FDX_B_SHORT_TIME / 8;
+        if(protocol->last_short) {
+            bit_lib_increment_index(protocol->encoded_index, FDX_B_ENCODED_BYTE_SIZE);
+            protocol->last_short = false;
+        } else {
+            protocol->last_short = true;
+        }
+    }
+
+    return level_duration_make(protocol->last_level, duration);
 };
 
-void protocol_fdx_b_encoder_reset(ProtocolFDXB* protocol) {
+void protocol_fdx_b_render_data(ProtocolFDXB* protocol, string_t result) {
     UNUSED(protocol);
+    UNUSED(result);
 };
+
+bool protocol_fdx_b_write_data(ProtocolFDXB* protocol, void* data) {
+    UNUSED(protocol);
+    UNUSED(data);
+    return false;
+};
+
+uint32_t protocol_fdx_b_get_features(void* protocol) {
+    UNUSED(protocol);
+    return LFRFIDFeatureASK;
+}
+
+uint32_t protocol_fdx_b_get_validate_count(void* protocol) {
+    UNUSED(protocol);
+    return 3;
+}
 
 const ProtocolBase protocol_fdx_b = {
     .alloc = (ProtocolAlloc)protocol_fdx_b_alloc,
@@ -251,12 +326,14 @@ const ProtocolBase protocol_fdx_b = {
         {
             .start = (ProtocolDecoderStart)protocol_fdx_b_decoder_start,
             .feed = (ProtocolDecoderFeed)protocol_fdx_b_decoder_feed,
-            .reset = (ProtocolDecoderReset)protocol_fdx_b_decoder_reset,
         },
     .encoder =
         {
             .start = (ProtocolEncoderStart)protocol_fdx_b_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_fdx_b_encoder_yield,
-            .reset = (ProtocolEncoderReset)protocol_fdx_b_encoder_reset,
         },
+    .render_data = (ProtocolRenderData)protocol_fdx_b_render_data,
+    .write_data = (ProtocolWriteData)protocol_fdx_b_write_data,
+    .get_features = (ProtocolGetFeatures)protocol_fdx_b_get_features,
+    .get_validate_count = (ProtocolGetValidateCount)protocol_fdx_b_get_validate_count,
 };
