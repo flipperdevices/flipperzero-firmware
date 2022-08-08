@@ -77,6 +77,9 @@ struct LFRFIDRawWorker {
     LFRFIDWorkerEmulateRawCallback emulate_callback;
     LFRFIDWorkerReadRawCallback read_callback;
     void* context;
+
+    float frequency;
+    float duty_cycle;
 };
 
 typedef enum {
@@ -107,11 +110,18 @@ void lfrfid_raw_worker_free(LFRFIDRawWorker* worker) {
     free(worker);
 }
 
-bool lfrfid_raw_worker_start_read(LFRFIDRawWorker* worker, const char* file_path) {
+bool lfrfid_raw_worker_start_read(
+    LFRFIDRawWorker* worker,
+    const char* file_path,
+    float freq,
+    float duty_cycle) {
     furi_check(furi_thread_get_state(worker->thread) == FuriThreadStateStopped);
 
     bool result = true;
     string_set(worker->file_path, file_path);
+
+    worker->frequency = freq;
+    worker->duty_cycle = duty_cycle;
 
     furi_thread_set_callback(worker->thread, lfrfid_raw_read_worker_thread);
 
@@ -280,12 +290,22 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
         if(size != sizeof(uint32_t)) {
             file_valid = false;
         }
+
+        size = stream_write(stream, (uint8_t*)&worker->frequency, sizeof(float));
+        if(size != sizeof(float)) {
+            file_valid = false;
+        }
+
+        size = stream_write(stream, (uint8_t*)&worker->duty_cycle, sizeof(float));
+        if(size != sizeof(float)) {
+            file_valid = false;
+        }
     }
 
     if(file_valid) {
         // setup carrier
         furi_hal_rfid_pins_read();
-        furi_hal_rfid_tim_read(125000, 0.5);
+        furi_hal_rfid_tim_read(worker->frequency, worker->duty_cycle);
         furi_hal_rfid_tim_read_start();
 
         // stabilize detector
@@ -473,6 +493,16 @@ static int32_t lfrfid_raw_emulate_worker_thread(void* thread_context) {
         uint32_t max_buffer_size;
         size = stream_read(data->stream, (uint8_t*)&max_buffer_size, sizeof(uint32_t));
         if(size != sizeof(uint32_t) || max_buffer_size != RFID_DATA_BUFFER_SIZE) {
+            file_valid = false;
+        }
+
+        size = stream_read(data->stream, (uint8_t*)&worker->frequency, sizeof(float));
+        if(size != sizeof(float) || worker->frequency < 0.0f || worker->frequency > 1000000.0f) {
+            file_valid = false;
+        }
+
+        size = stream_read(data->stream, (uint8_t*)&worker->duty_cycle, sizeof(float));
+        if(size != sizeof(float) || worker->duty_cycle < 0.0f || worker->duty_cycle > 1.0f) {
             file_valid = false;
         }
 
