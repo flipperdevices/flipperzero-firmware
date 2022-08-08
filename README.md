@@ -9,6 +9,7 @@
 - Added Assets: Includes Dolphin Matrix animation (By qqmajikqq)
 - WAV Player updates from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - IR: Universal AC & Audio from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)! TY Nano
+- Added [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -138,6 +139,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - `FAP` [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)
 - `FAP` [Game of Life (Updated to work by tgxn)(By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c) `HIDDEN "GAME_GameOfLife"`
 - `FAP` [Mandelbrot Set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins) `HIDDEN "GAME_MandelbrotSet"`
+- [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 - `FAP` [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine)
 - `FAP` Snake [OFW]
 - [Tamagochi (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) requires [this rom](https://wowroms.com/en/roms/mame/download-tamagotchi-usa/108517.html) IN `tama_p1` on SD as `rom.bin` to make it work.
