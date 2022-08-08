@@ -10,6 +10,7 @@
 - WAV Player updates from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - IR: Universal AC & Audio from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)! TY Nano
 - Added [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
+- Updates to [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/blob/unleashed/applications/flappy_bird/flappy_bird.c)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
