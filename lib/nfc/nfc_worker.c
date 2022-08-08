@@ -395,7 +395,7 @@ void nfc_worker_emulate_mf_ultralight(NfcWorker* nfc_worker) {
         if(emulator.auth_attempted) {
             nfc_worker->event_data = &emulator.auth_attempt;
             if(nfc_worker->callback) {
-                nfc_worker->callback(NfcWorkerEventPwdAuth, nfc_worker->context);
+                nfc_worker->callback(NfcWorkerEventMfUltralightPwdAuth, nfc_worker->context);
             }
             emulator.auth_attempted = false;
             nfc_worker->event_data = NULL;
