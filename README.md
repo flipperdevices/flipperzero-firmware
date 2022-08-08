@@ -5,7 +5,7 @@
 
 <b>Latest Updates:</b>
 
-- TOFIX - `FAP Loader`
+- Known Issues:`FAP Loader` & `Chess`
 - Added Assets: Includes Dolphin Matrix animation [By qqmajikqq]
 - WAV Player updates from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - IR: Universal AC & Audio from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)! TY Nano
