@@ -71,22 +71,9 @@ typedef struct {
 
 typedef struct {
     uint32_t cuid;
-    MfClassicKey access_key;
-    uint8_t block;
-    uint32_t nt;
-    uint32_t nr;
-    uint32_t ar;
-} MfClassicEmulatorNonce;
-
-typedef void (*MfClassicEmulatorKeyCallback)(MfClassicEmulatorNonce* data, void* context);
-
-typedef struct {
-    uint32_t cuid;
     Crypto1 crypto;
     MfClassicData data;
     bool data_changed;
-    MfClassicEmulatorKeyCallback nonce_callback;
-    void* context;
 } MfClassicEmulator;
 
 const char* mf_classic_get_type_str(MfClassicType type);
@@ -94,8 +81,6 @@ const char* mf_classic_get_type_str(MfClassicType type);
 bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
 MfClassicType mf_classic_get_classic_type(int8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
-
-bool mf_classic_get_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK, MfClassicReader* reader);
 
 uint8_t mf_classic_get_total_sectors_num(MfClassicType type);
 

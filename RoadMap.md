@@ -25,8 +25,7 @@
 - `Bluetooth OpenHayStack` for Flipper, changes current bluetooth configuration to transmit Bluetooth Open Haystack packet as needed for the device to be findable when settings for Bluetooth is set to ON in settings and OpenHayStack is set to ON in settings.
 - - Not sure if could possiblt also serve to find devices
 - - Example resource of OpenHayStack as an alternative to Bluetooth On/Off: https://github.com/AlexStrNik/flipperzero-firmware/tree/dev
-- `Tamagochi` APP serves as a virtual pet
-- - Possible resource: https://learn.littlerobotfriends.com/downloads/
+- `Tamagochi` Save State
 - Skip to next or previous SubGHz scan file from emulation screen using UP/DOWN
 
 # 

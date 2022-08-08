@@ -22,14 +22,7 @@ void nfc_scene_save_name_on_enter(void* context) {
     } else {
         nfc_text_store_set(nfc, nfc->dev->dev_name);
     }
-    const char* extension;
-    if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneMfClassicEmulate)) {
-        extension = NFC_APP_LOG_EXTENSION;
-        text_input_set_header_text(text_input, "Name the nonce file");
-    } else {
-        extension = NFC_APP_EXTENSION;
-        text_input_set_header_text(text_input, "Name the card");
-    }
+    text_input_set_header_text(text_input, "Name the card");
     text_input_set_result_callback(
         text_input,
         nfc_scene_save_name_text_input_callback,
@@ -41,14 +34,14 @@ void nfc_scene_save_name_on_enter(void* context) {
     string_t folder_path;
     string_init(folder_path);
 
-    if(string_end_with_str_p(nfc->dev->load_path, extension)) {
+    if(string_end_with_str_p(nfc->dev->load_path, NFC_APP_EXTENSION)) {
         path_extract_dirname(string_get_cstr(nfc->dev->load_path), folder_path);
     } else {
         string_set_str(folder_path, NFC_APP_FOLDER);
     }
 
-    ValidatorIsFile* validator_is_file =
-        validator_is_file_alloc_init(string_get_cstr(folder_path), extension, nfc->dev->dev_name);
+    ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
+        string_get_cstr(folder_path), NFC_APP_EXTENSION, nfc->dev->dev_name);
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextInput);
@@ -60,21 +53,8 @@ bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
     bool consumed = false;
 
-    if(event.type == SceneManagerEventTypeCustom && event.event == NfcCustomEventTextInputDone) {
-        if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneMfClassicEmulate)) {
-            NfcMfClassicEmulatorOutput* mf_classic_emulate =
-                &nfc->dev->dev_data.mf_classic_emulator_output;
-            string_t nonce_log;
-            string_move(nonce_log, mf_classic_emulate->nonce_log);
-            if(nfc_device_save_mf_classic_nonces(nfc->dev, nfc->text_store, nonce_log)) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
-                consumed = true;
-            } else {
-                consumed = scene_manager_search_and_switch_to_previous_scene(
-                    nfc->scene_manager, NfcSceneStart);
-            }
-            string_reset(nonce_log);
-        } else {
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == NfcCustomEventTextInputDone) {
             if(strcmp(nfc->dev->dev_name, "")) {
                 nfc_device_delete(nfc->dev, true);
             }

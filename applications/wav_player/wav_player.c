@@ -14,12 +14,14 @@
 
 #define TAG "WavPlayer"
 
-static bool open_wav_stream(Storage* storage, Stream* stream) {
+#define WAVPLAYER_FOLDER "/ext/wav_player"
+
+static bool open_wav_stream(Stream* stream) {
     DialogsApp* dialogs = furi_record_open("dialogs");
     bool result = false;
     string_t path;
     string_init(path);
-    string_set_str(path, "/ext/wav_player");
+    string_set_str(path, WAVPLAYER_FOLDER);
     bool ret = dialog_file_browser_show(dialogs, path, path, ".wav", true, &I_music_10px, false);
 
     furi_record_close("dialogs");
@@ -207,7 +209,7 @@ static void ctrl_callback(WavPlayerCtrl ctrl, void* ctx) {
 }
 
 static void app_run(WavPlayerApp* app) {
-    if(!open_wav_stream(app->storage, app->stream)) return;
+    if(!open_wav_stream(app->stream)) return;
     if(!wav_parser_parse(app->parser, app->stream)) return;
 
     wav_player_view_set_volume(app->view, app->volume);
@@ -254,19 +256,19 @@ static void app_run(WavPlayerApp* app) {
                         StreamOffsetFromStart);
                 }
             } else if(event.type == WavPlayerEventCtrlVolUp) {
-                if(app->volume < 9.9) app->volume += 0.2;
+                if(app->volume < 9.9) app->volume += 0.4;
                 wav_player_view_set_volume(app->view, app->volume);
             } else if(event.type == WavPlayerEventCtrlVolDn) {
-                if(app->volume > 0.01) app->volume -= 0.2;
+                if(app->volume > 0.01) app->volume -= 0.4;
                 wav_player_view_set_volume(app->view, app->volume);
             } else if(event.type == WavPlayerEventCtrlMoveL) {
                 int32_t seek = stream_tell(app->stream) - wav_parser_get_data_start(app->parser);
-                seek = MIN(seek, wav_parser_get_data_len(app->parser) / 100);
+                seek = MIN(seek, (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100));
                 stream_seek(app->stream, -seek, StreamOffsetFromCurrent);
                 wav_player_view_set_current(app->view, stream_tell(app->stream));
             } else if(event.type == WavPlayerEventCtrlMoveR) {
                 int32_t seek = wav_parser_get_data_end(app->parser) - stream_tell(app->stream);
-                seek = MIN(seek, wav_parser_get_data_len(app->parser) / 100);
+                seek = MIN(seek, (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100));
                 stream_seek(app->stream, seek, StreamOffsetFromCurrent);
                 wav_player_view_set_current(app->view, stream_tell(app->stream));
             } else if(event.type == WavPlayerEventCtrlOk) {
@@ -291,7 +293,15 @@ static void app_run(WavPlayerApp* app) {
 }
 
 int32_t wav_player_app(void* p) {
+    UNUSED(p);
     WavPlayerApp* app = app_alloc();
+
+    Storage* storage = furi_record_open("storage");
+    if(!storage_simply_mkdir(storage, WAVPLAYER_FOLDER)) {
+        FURI_LOG_E(TAG, "Could not create folder %s", WAVPLAYER_FOLDER);
+    }
+    furi_record_close("storage");
+
     app_run(app);
     app_free(app);
     return 0;
