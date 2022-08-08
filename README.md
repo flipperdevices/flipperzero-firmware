@@ -6,21 +6,7 @@
 <b>Latest Updates:</b>
 
 - TOFIX - `FAP Loader`
-- Was Added [sk-SK maping keybord for BadUsb #1537 (By jaroslavmraz)](https://github.com/flipperdevices/flipperzero-firmware/pull/1537)
-- Added [mouse jiggler improvements #194 (By mfulz)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/194)
-- Removed [Add skylanders (/activision) mifare classic to identification procedure #1497 (By equipter)](https://github.com/flipperdevices/flipperzero-firmware/pull/1497) (they are adding their own implementation)
-- OFW: [#1365 Mifare Ultralight authentication](https://github.com/flipperdevices/flipperzero-firmware/pull/1365)
-- OFW: [#1504 Add a Mifare Classic info screen to parser output](https://github.com/flipperdevices/flipperzero-firmware/pull/1504)
-- OFW: [#1553 NFC: Add Skylanders support](https://github.com/flipperdevices/flipperzero-firmware/pull/1553)
-- OFW: [SubGhz: add protocol BERNER / ELKA / TEDSEN / TELETASTER / Doitrand / Marantec / Phoenix V2 (static mode) / Phox (static mode), fix Princeton #1516 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1516)
-- OFW: [#1509 Added support for Samsung TVs using address 07](https://github.com/flipperdevices/flipperzero-firmware/pull/1509)
-- Skipping [Extend random name generator #1551](https://github.com/flipperdevices/flipperzero-firmware/pull/1551) due to uselessness in comparison to date/timestamp
-- Added [Feature to read EEPROM of SFP Modules using I2C / Bugfix #198 (By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
-- Stability updates for Arkanoid, Snake and TicTacToe from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
-- Added [badusb: show script errors on screen #200 (By CromFr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/200)
-- Assets: Includes sample SubGHz asset for Unitree Go1 Robot Dog [Thanks to MAVProxyUser](https://github.com/MAVProxyUser/YushuTechUnitreeGo1)
-- Fixed issue with SubGHz settings getting loaded from `extend_range.txt`
-- Removed [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484) due to draft state
+- Added [Assets: Includes Dolphin Matrix animation (By qqmajikqq)]
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -81,6 +67,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Animations: SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
 - Assets: Includes a NFC Level 50 Link Amiibo
 - Assets: Includes a NFC Rick Roll link
+- Assets: Includes Dolphin Matrix animation [By qqmajikqq]
 - Assets: Includes sample Music Player tunes
 - Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys, Tesla Charge Port and Unitree Go1 Robot Dog
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
