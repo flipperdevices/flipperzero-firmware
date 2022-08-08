@@ -97,12 +97,12 @@ bool ibutton_worker_read_comparator(iButtonWorker* worker) {
     furi_hal_rfid_comp_set_callback(ibutton_worker_comparator_callback, &read_context);
     furi_hal_rfid_comp_start();
 
-    uint32_t tick_start = osKernelGetTickCount();
+    uint32_t tick_start = furi_get_tick();
     while(true) {
         LevelDuration level;
         size_t ret = xStreamBufferReceive(read_context.stream, &level, sizeof(LevelDuration), 100);
 
-        if((osKernelGetTickCount() - tick_start) > 100) {
+        if((furi_get_tick() - tick_start) > 100) {
             break;
         }
 

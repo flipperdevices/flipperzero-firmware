@@ -190,8 +190,8 @@ static int32_t lfrfid_worker_thread(void* thread_context) {
     bool running = true;
 
     while(running) {
-        uint32_t flags = furi_thread_flags_wait(LFRFIDEventAll, osFlagsWaitAny, osWaitForever);
-        if(flags != osFlagsErrorTimeout) {
+        uint32_t flags = furi_thread_flags_wait(LFRFIDEventAll, FuriFlagWaitAny, FuriWaitForever);
+        if(flags != FuriFlagErrorTimeout) {
             // stop thread
             if(flags & LFRFIDEventStopThread) break;
 

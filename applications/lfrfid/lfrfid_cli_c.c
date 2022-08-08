@@ -41,7 +41,7 @@ static void lfrfid_cli_print_usage() {
 
 typedef struct {
     ProtocolId protocol;
-    osEventFlagsId_t event;
+    FuriEventFlag* event;
 } LFRFIDCliReadContext;
 
 static void lfrfid_cli_read_callback(LFRFIDWorkerReadResult result, ProtocolId proto, void* ctx) {
@@ -51,7 +51,7 @@ static void lfrfid_cli_read_callback(LFRFIDWorkerReadResult result, ProtocolId p
         context->protocol = proto;
         FURI_SW_MEMBARRIER();
     }
-    osEventFlagsSet(context->event, 1 << result);
+    furi_event_flag_set(context->event, 1 << result);
 }
 
 static void lfrfid_cli_read(Cli* cli, string_t args) {
@@ -79,7 +79,7 @@ static void lfrfid_cli_read(Cli* cli, string_t args) {
     LFRFIDWorker* worker = lfrfid_worker_alloc();
     LFRFIDCliReadContext context;
     context.protocol = PROTOCOL_NO;
-    context.event = osEventFlagsNew(NULL);
+    context.event = furi_event_flag_alloc();
 
     lfrfid_worker_start_thread(worker);
     lfrfid_worker_read_set_callback(worker, lfrfid_cli_read_callback, &context);
@@ -92,9 +92,10 @@ static void lfrfid_cli_read(Cli* cli, string_t args) {
     lfrfid_worker_read_start(worker, type);
 
     while(true) {
-        uint32_t flags = osEventFlagsWait(context.event, available_flags, osFlagsWaitAny, 100);
+        uint32_t flags =
+            furi_event_flag_wait(context.event, available_flags, FuriFlagWaitAny, 100);
 
-        if(flags != osFlagsErrorTimeout) {
+        if(flags != FuriFlagErrorTimeout) {
             if(FURI_BIT(flags, LFRFIDWorkerReadSenseStart)) {
                 printf("Sense Start\r\n");
             }
@@ -138,7 +139,7 @@ static void lfrfid_cli_read(Cli* cli, string_t args) {
     lfrfid_worker_stop_thread(worker);
     lfrfid_worker_free(worker);
 
-    osEventFlagsDelete(context.event);
+    furi_event_flag_free(context.event);
 }
 
 static void lfrfid_cli_write(Cli* cli, string_t args) {
@@ -331,10 +332,10 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
     furi_record_close("storage");
 }
 
-static void lfrfid_cli_read_raw_callback(LFRFIDWorkerReadRawResult result, void* context) {
+static void lfrfid_cli_raw_read_callback(LFRFIDWorkerReadRawResult result, void* context) {
     furi_assert(context);
-    osEventFlagsId_t event = context;
-    osEventFlagsSet(event, 1 << result);
+    FuriEventFlag* event = context;
+    furi_event_flag_set(event, 1 << result);
 }
 
 static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
@@ -368,10 +369,10 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
         }
 
         LFRFIDWorker* worker = lfrfid_worker_alloc();
-        osEventFlagsId_t event = osEventFlagsNew(NULL);
+        FuriEventFlag* event = furi_event_flag_alloc();
 
         lfrfid_worker_start_thread(worker);
-        lfrfid_worker_read_raw_set_callback(worker, lfrfid_cli_read_raw_callback, event);
+        lfrfid_worker_read_raw_set_callback(worker, lfrfid_cli_raw_read_callback, event);
 
         bool overrun = false;
 
@@ -381,9 +382,9 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
 
         lfrfid_worker_read_raw_start(worker, string_get_cstr(filepath), type);
         while(true) {
-            uint32_t flags = osEventFlagsWait(event, available_flags, osFlagsWaitAny, 100);
+            uint32_t flags = furi_event_flag_wait(event, available_flags, FuriFlagWaitAny, 100);
 
-            if(flags != osFlagsErrorTimeout) {
+            if(flags != FuriFlagErrorTimeout) {
                 if(FURI_BIT(flags, LFRFIDWorkerReadRawFileError)) {
                     printf("File is not RFID raw file\r\n");
                     break;
@@ -413,7 +414,7 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
         lfrfid_worker_stop_thread(worker);
         lfrfid_worker_free(worker);
 
-        osEventFlagsDelete(event);
+        furi_event_flag_free(event);
 
     } while(false);
 
@@ -421,11 +422,10 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
     string_clear(type_string);
 }
 
-static void
-    lfrfid_worker_emulate_raw_callback(LFRFIDWorkerEmulateRawResult result, void* context) {
+static void lfrfid_cli_raw_emulate_callback(LFRFIDWorkerEmulateRawResult result, void* context) {
     furi_assert(context);
-    osEventFlagsId_t event = context;
-    osEventFlagsSet(event, 1 << result);
+    FuriEventFlag* event = context;
+    furi_event_flag_set(event, 1 << result);
 }
 
 static void lfrfid_cli_raw_emulate(Cli* cli, string_t args) {
@@ -447,10 +447,10 @@ static void lfrfid_cli_raw_emulate(Cli* cli, string_t args) {
         }
 
         LFRFIDWorker* worker = lfrfid_worker_alloc();
-        osEventFlagsId_t event = osEventFlagsNew(NULL);
+        FuriEventFlag* event = furi_event_flag_alloc();
 
         lfrfid_worker_start_thread(worker);
-        lfrfid_worker_emulate_raw_set_callback(worker, lfrfid_worker_emulate_raw_callback, event);
+        lfrfid_worker_emulate_raw_set_callback(worker, lfrfid_cli_raw_emulate_callback, event);
 
         bool overrun = false;
 
@@ -460,9 +460,9 @@ static void lfrfid_cli_raw_emulate(Cli* cli, string_t args) {
 
         lfrfid_worker_emulate_raw_start(worker, string_get_cstr(filepath));
         while(true) {
-            uint32_t flags = osEventFlagsWait(event, available_flags, osFlagsWaitAny, 100);
+            uint32_t flags = furi_event_flag_wait(event, available_flags, FuriFlagWaitAny, 100);
 
-            if(flags != osFlagsErrorTimeout) {
+            if(flags != FuriFlagErrorTimeout) {
                 if(FURI_BIT(flags, LFRFIDWorkerEmulateRawFileError)) {
                     printf("File is not RFID raw file\r\n");
                     break;
@@ -492,7 +492,7 @@ static void lfrfid_cli_raw_emulate(Cli* cli, string_t args) {
         lfrfid_worker_stop_thread(worker);
         lfrfid_worker_free(worker);
 
-        osEventFlagsDelete(event);
+        furi_event_flag_free(event);
 
     } while(false);
 

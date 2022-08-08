@@ -1,5 +1,5 @@
 #include "bit_lib.h"
-#include <furi/check.h>
+#include <core/check.h>
 
 void bit_lib_push_bit(uint8_t* data, size_t data_size, bool bit) {
     size_t last_index = data_size - 1;

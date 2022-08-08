@@ -3,7 +3,7 @@
 #include "protocol_cyfral.h"
 
 #define CYFRAL_DATA_SIZE sizeof(uint16_t)
-#define CYFRAL_PERIOD (125 * furi_hal_delay_instructions_per_microsecond())
+#define CYFRAL_PERIOD (125 * furi_hal_cortex_instructions_per_microsecond())
 #define CYFRAL_0_LOW (CYFRAL_PERIOD * 0.66f)
 #define CYFRAL_0_HI (CYFRAL_PERIOD * 0.33f)
 #define CYFRAL_1_LOW (CYFRAL_PERIOD * 0.33f)
@@ -98,7 +98,7 @@ static void protocol_cyfral_decoder_start(ProtocolCyfral* proto) {
     cyfral->index = 0;
     cyfral->nibble = 0;
     cyfral->data_valid = true;
-    cyfral->max_period = CYFRAL_MAX_PERIOD_US * furi_hal_delay_instructions_per_microsecond();
+    cyfral->max_period = CYFRAL_MAX_PERIOD_US * furi_hal_cortex_instructions_per_microsecond();
 
     proto->data = 0;
 }

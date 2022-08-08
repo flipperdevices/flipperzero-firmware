@@ -4,8 +4,15 @@
 #include <stream_buffer.h>
 
 #define TAG "LFRFIDWorker"
+
+/**
+ * if READ_DEBUG_GPIO is defined:
+ *     gpio_ext_pa7 will repeat signal coming from the comparator
+ *     gpio_ext_pa6 will show load on the decoder
+ */
 #define LFRFID_WORKER_READ_DEBUG_GPIO 1
-#define LFRFID_WORKER_READ_SWITCH_TIME 3000
+
+#define LFRFID_WORKER_READ_SWITCH_TIME 2000
 
 void lfrfid_worker_mode_emulate_process(LFRFIDWorker* worker);
 void lfrfid_worker_mode_read_process(LFRFIDWorker* worker);
@@ -54,6 +61,7 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
 
 #ifdef LFRFID_WORKER_READ_DEBUG_GPIO
     furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeOutputPushPull);
+    furi_hal_gpio_init_simple(&gpio_ext_pa6, GpioModeOutputPushPull);
 #endif
 
     StreamBufferHandle_t stream =
@@ -68,13 +76,17 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
     uint8_t* last_data = malloc(last_size);
     uint8_t* protocol_data = malloc(last_size);
     size_t last_read_count = 0;
-    uint32_t switch_os_tick_last = osKernelGetTickCount();
+    uint32_t switch_os_tick_last = furi_get_tick();
 
     while(true) {
         if(lfrfid_worker_check_for_stop(worker)) break;
 
         LevelDuration level_duration;
         size_t size = xStreamBufferReceive(stream, &level_duration, sizeof(LevelDuration), 100);
+
+#ifdef LFRFID_WORKER_READ_DEBUG_GPIO
+        furi_hal_gpio_write(&gpio_ext_pa6, true);
+#endif
 
         if(size == 0) {
             continue;
@@ -102,12 +114,12 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
 
         if(protocol != PROTOCOL_NO) {
             // reset switch timer
-            switch_os_tick_last = osKernelGetTickCount();
+            switch_os_tick_last = furi_get_tick();
 
             size_t protocol_data_size = protocol_dict_get_data_size(worker->protocols, protocol);
             protocol_dict_get_data(worker->protocols, protocol, protocol_data, protocol_data_size);
 
-            FURI_LOG_I(
+            FURI_LOG_D(
                 TAG,
                 "%s, %d",
                 protocol_dict_get_name(worker->protocols, protocol),
@@ -132,11 +144,15 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
             }
         } else if(worker->read_type == LFRFIDWorkerReadTypeAuto) {
             // switch mode every 2 seconds
-            if((osKernelGetTickCount() - switch_os_tick_last) > LFRFID_WORKER_READ_SWITCH_TIME) {
-                switch_os_tick_last = osKernelGetTickCount();
+            if((furi_get_tick() - switch_os_tick_last) > LFRFID_WORKER_READ_SWITCH_TIME) {
+                switch_os_tick_last = furi_get_tick();
                 current_type_is_ask = !current_type_is_ask;
 
-                FURI_LOG_I(TAG, "switch to %s", current_type_is_ask ? "ASK" : "PSK");
+                FURI_LOG_D(TAG, "drop field");
+                furi_hal_rfid_change_read_config(1, 0);
+                furi_delay_ms(500);
+
+                FURI_LOG_D(TAG, "switch to %s", current_type_is_ask ? "ASK" : "PSK");
                 if(current_type_is_ask) {
                     furi_hal_rfid_change_read_config(125000, 0.5);
                 } else {
@@ -147,6 +163,10 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
                 xStreamBufferReset(stream);
             }
         }
+
+#ifdef LFRFID_WORKER_READ_DEBUG_GPIO
+        furi_hal_gpio_write(&gpio_ext_pa6, false);
+#endif
     }
 
     free(last_data);
@@ -159,6 +179,7 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
 
 #ifdef LFRFID_WORKER_READ_DEBUG_GPIO
     furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeAnalog);
+    furi_hal_gpio_init_simple(&gpio_ext_pa6, GpioModeAnalog);
 #endif
 }
 
@@ -166,7 +187,7 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
 
 void lfrfid_worker_mode_emulate_process(LFRFIDWorker* worker) {
     while(!lfrfid_worker_check_for_stop(worker)) {
-        furi_hal_delay_ms(100);
+        furi_delay_ms(100);
     }
 }
 
@@ -174,7 +195,7 @@ void lfrfid_worker_mode_emulate_process(LFRFIDWorker* worker) {
 
 void lfrfid_worker_mode_write_process(LFRFIDWorker* worker) {
     while(!lfrfid_worker_check_for_stop(worker)) {
-        furi_hal_delay_ms(100);
+        furi_delay_ms(100);
     }
 }
 
@@ -196,7 +217,7 @@ void lfrfid_worker_mode_read_raw_process(LFRFIDWorker* worker) {
     }
 
     while(!lfrfid_worker_check_for_stop(worker)) {
-        furi_hal_delay_ms(100);
+        furi_delay_ms(100);
     }
 
     lfrfid_raw_worker_stop(worker->raw_worker);
@@ -211,7 +232,7 @@ void lfrfid_worker_mode_emulate_raw_process(LFRFIDWorker* worker) {
     lfrfid_raw_worker_start_emulate(worker->raw_worker, worker->raw_filename);
 
     while(!lfrfid_worker_check_for_stop(worker)) {
-        furi_hal_delay_ms(100);
+        furi_delay_ms(100);
     }
 
     lfrfid_raw_worker_stop(worker->raw_worker);

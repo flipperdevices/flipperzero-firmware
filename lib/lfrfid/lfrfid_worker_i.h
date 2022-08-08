@@ -34,7 +34,7 @@ struct LFRFIDWorker {
     LFRFIDWorkerMode mode_index;
     void* mode_storage;
 
-    osEventFlagsId_t events;
+    FuriEventFlag* events;
     FuriThread* thread;
 
     LFRFIDWorkerReadType read_type;

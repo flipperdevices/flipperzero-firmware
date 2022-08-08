@@ -1,4 +1,3 @@
-#include <furi_hal_delay.h>
 #include <furi_hal_rfid.h>
 #include <toolbox/stream/file_stream.h>
 #include <toolbox/varint.h>
@@ -72,7 +71,7 @@ typedef struct {
 struct LFRFIDRawWorker {
     string_t file_path;
     FuriThread* thread;
-    osEventFlagsId_t events;
+    FuriEventFlag* events;
 
     LFRFIDWorkerEmulateRawCallback emulate_callback;
     LFRFIDWorkerReadRawCallback read_callback;
@@ -97,7 +96,7 @@ LFRFIDRawWorker* lfrfid_raw_worker_alloc() {
     furi_thread_set_context(worker->thread, worker);
     furi_thread_set_stack_size(worker->thread, 2048);
 
-    worker->events = osEventFlagsNew(NULL);
+    worker->events = furi_event_flag_alloc(NULL);
 
     string_init(worker->file_path);
     return worker;
@@ -105,7 +104,7 @@ LFRFIDRawWorker* lfrfid_raw_worker_alloc() {
 
 void lfrfid_raw_worker_free(LFRFIDRawWorker* worker) {
     furi_thread_free(worker->thread);
-    osEventFlagsDelete(worker->events);
+    furi_event_flag_free(worker->events);
     string_clear(worker->file_path);
     free(worker);
 }
@@ -144,7 +143,7 @@ bool lfrfid_raw_worker_start_emulate(LFRFIDRawWorker* worker, const char* file_p
 bool lfrfid_raw_worker_stop(LFRFIDRawWorker* worker) {
     bool result = true;
 
-    osEventFlagsSet(worker->events, 1 << LFRFIDRawWorkerEventStop);
+    furi_event_flag_set(worker->events, 1 << LFRFIDRawWorkerEventStop);
     furi_thread_join(worker->thread);
 
     return result;
@@ -309,7 +308,7 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
         furi_hal_rfid_tim_read_start();
 
         // stabilize detector
-        furi_hal_delay_ms(1500);
+        furi_delay_ms(1500);
 
         // start capture
         furi_hal_rfid_tim_read_capture_start(lfrfid_raw_worker_capture, &data->ctx);
@@ -353,7 +352,7 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
                 worker->read_callback(LFRFIDWorkerReadRawOverrun, worker->context);
             }
 
-            uint32_t flags = osEventFlagsGet(worker->events);
+            uint32_t flags = furi_event_flag_get(worker->events);
             if(FURI_BIT(flags, LFRFIDRawWorkerEventStop)) {
                 break;
             };
@@ -371,8 +370,8 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
     if(!file_valid) {
         const uint32_t available_flags = (1 << LFRFIDRawWorkerEventStop);
         while(true) {
-            uint32_t flags =
-                osEventFlagsWait(worker->events, available_flags, osFlagsWaitAny, osWaitForever);
+            uint32_t flags = furi_event_flag_wait(
+                worker->events, available_flags, FuriFlagWaitAny, FuriWaitForever);
 
             if(FURI_BIT(flags, LFRFIDRawWorkerEventStop)) {
                 break;
@@ -569,7 +568,7 @@ static int32_t lfrfid_raw_emulate_worker_thread(void* thread_context) {
                 worker->emulate_callback(LFRFIDWorkerEmulateRawOverrun, worker->context);
             }
 
-            uint32_t flags = osEventFlagsGet(worker->events);
+            uint32_t flags = furi_event_flag_get(worker->events);
             if(FURI_BIT(flags, LFRFIDRawWorkerEventStop)) {
                 break;
             };
@@ -581,8 +580,8 @@ static int32_t lfrfid_raw_emulate_worker_thread(void* thread_context) {
     if(!file_valid) {
         const uint32_t available_flags = (1 << LFRFIDRawWorkerEventStop);
         while(true) {
-            uint32_t flags =
-                osEventFlagsWait(worker->events, available_flags, osFlagsWaitAny, osWaitForever);
+            uint32_t flags = furi_event_flag_wait(
+                worker->events, available_flags, FuriFlagWaitAny, FuriWaitForever);
 
             if(FURI_BIT(flags, LFRFIDRawWorkerEventStop)) {
                 break;
