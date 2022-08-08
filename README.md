@@ -8,7 +8,7 @@
 - Known Issues:`FAP Loader` & `Chess`
 - Added Assets: Includes Rukamon animation 2x and Agumon animation [By Syrius]
 - Update from [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
-- Stopwatch @ 1:20 Alert enablels 3 EXP for a total of 90 EXP daily
+- Dolphin: Games Only Mode from Lock Menu OR Stopwatch @ 1:20 Alert = +3 EXP for a total of 90 EXP daily
 - Added: [Dolphin: Passport: Show EXP (By Dabolus)](https://github.com/Dabolus/flipperzero-firmware-rpg/)
 
 <table width="100%" border="0" cellspacing="0">
@@ -79,13 +79,13 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - BadUSB: show script errors on screen [(By CromFr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/200)
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Dolphin: Assigned profile pic for levels 1-10, 11-20 and 21-30 respectively from default lvl 1, 2 & 3
+- Dolphin: Games Only Mode from Lock Menu OR Stopwatch @ 1:20 Alert = +3 EXP for a total of 90 EXP daily
 - Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)
 - Dolphin: Internal manifest updated to have animations always available with max level 30
 - Dolphin: Level animation sequence for level 3+ to be lvl1->2 for levels 1-20 and lvl2->3 for levels 21-30.
 - Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware)
 - Dolphin: Passport: Show EXP [(By Dabolus)](https://github.com/Dabolus/flipperzero-firmware-rpg/)
 - Dolphin: SD dolphin manifest updated to weight animations differently
-- Dolphin: Stopwatch @ 1:20 Alert enablels 3 EXP for a total of 90 EXP daily
 - GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
 - IR: Universal AC & Audio from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
