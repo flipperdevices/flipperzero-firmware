@@ -102,6 +102,8 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
         scene_manager_next_scene(app->scene_manager, BadUsbSceneError);
     } else {
         if(!string_empty_p(app->file_path)) {
+            app->bad_usb_script = bad_usb_script_open(app->file_path);
+            bad_usb_script_set_keyboard_layout(app->bad_usb_script, app->keyboard_layout);
             scene_manager_next_scene(app->scene_manager, BadUsbScenePWork);
         } else {
             string_set_str(app->file_path, BAD_USB_APP_BASE_FOLDER);
