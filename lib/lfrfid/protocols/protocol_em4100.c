@@ -1,6 +1,7 @@
 #include <furi.h>
 #include <toolbox/protocols/protocol.h>
 #include <toolbox/manchester_decoder.h>
+#include "lfrfid_protocols.h"
 
 typedef uint64_t EM4100DecodedData;
 
@@ -201,10 +202,6 @@ bool protocol_em4100_decoder_feed(ProtocolEM4100* proto, bool level, uint32_t du
     return result;
 };
 
-void protocol_em4100_decoder_reset(ProtocolEM4100* proto) {
-    protocol_em4100_decoder_start(proto);
-};
-
 static void em4100_write_nibble(bool low_nibble, uint8_t data, EM4100DecodedData* encoded_data) {
     uint8_t parity_sum = 0;
     uint8_t start = 0;
@@ -268,10 +265,20 @@ LevelDuration protocol_em4100_encoder_yield(ProtocolEM4100* proto) {
     return level_duration_make(level, duration);
 };
 
-void protocol_em4100_encoder_reset(ProtocolEM4100* proto) {
-    proto->encoded_data_index = 0;
-    proto->encoded_polarity = true;
+void protocol_em4100_render_data(ProtocolEM4100* protocol, string_t result) {
+    uint8_t* data = protocol->data;
+    string_printf(result, "ID: %03u,%05u", data[2], (uint16_t)((data[3] << 8) | (data[4])));
 };
+
+uint32_t protocol_em4100_get_features(void* protocol) {
+    UNUSED(protocol);
+    return LFRFIDFeatureASK | LFRFIDFeaturePSK;
+}
+
+uint32_t protocol_em4100_get_validate_count(void* protocol) {
+    UNUSED(protocol);
+    return 3;
+}
 
 const ProtocolBase protocol_em4100 = {
     .alloc = (ProtocolAlloc)protocol_em4100_alloc,
@@ -285,12 +292,13 @@ const ProtocolBase protocol_em4100 = {
         {
             .start = (ProtocolDecoderStart)protocol_em4100_decoder_start,
             .feed = (ProtocolDecoderFeed)protocol_em4100_decoder_feed,
-            .reset = (ProtocolDecoderReset)protocol_em4100_decoder_reset,
         },
     .encoder =
         {
             .start = (ProtocolEncoderStart)protocol_em4100_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_em4100_encoder_yield,
-            .reset = (ProtocolEncoderReset)protocol_em4100_encoder_reset,
         },
+    .render_data = (ProtocolRenderData)protocol_em4100_render_data,
+    .get_features = (ProtocolGetFeatures)protocol_em4100_get_features,
+    .get_validate_count = (ProtocolGetValidateCount)protocol_em4100_get_validate_count,
 };
