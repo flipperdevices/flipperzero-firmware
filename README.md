@@ -19,6 +19,7 @@
 - Stability updates for Arkanoid, Snake and TicTacToe from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - Added [badusb: show script errors on screen #200 (By CromFr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/200)
 - Assets: Includes sample SubGHz asset for Unitree Go1 Robot Dog [Thanks to MAVProxyUser](https://github.com/MAVProxyUser/YushuTechUnitreeGo1)
+- Fixed issue with SubGHz settings getting loaded from `extend_range.txt`
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
