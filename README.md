@@ -6,9 +6,6 @@
 <b>Latest Updates:</b>
 
 - Known Issues:`FAP Loader` & `Chess`
-- Added Assets: Includes Dolphin Matrix animation [By qqmajikqq]
-- WAV Player updates from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
-- IR: Universal AC & Audio from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)! TY Nano
 - Added [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 - Updates to [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/blob/unleashed/applications/flappy_bird/flappy_bird.c)
 - Fixes for BadUSB from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
