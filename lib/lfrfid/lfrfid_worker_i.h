@@ -7,19 +7,15 @@
 #pragma once
 #include <furi.h>
 #include "lfrfid_worker.h"
-#include <toolbox/protocols/protocol_dict.h>
-#include "protocols/lfrfid_protocols.h"
 #include "lfrfid_raw_worker.h"
+#include "protocols/lfrfid_protocols.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct {
-    const uint32_t quant;
-    void (*const start)(LFRFIDWorker* worker);
-    void (*const tick)(LFRFIDWorker* worker);
-    void (*const stop)(LFRFIDWorker* worker);
+    void (*const process)(LFRFIDWorker* worker);
 } LFRFIDWorkerModeType;
 
 typedef enum {
@@ -32,16 +28,16 @@ typedef enum {
 } LFRFIDWorkerMode;
 
 struct LFRFIDWorker {
-    LFRFIDKey* key_p;
-    uint8_t* key_data;
     char* raw_filename;
     // LFRFIDWriter* writer;
 
     LFRFIDWorkerMode mode_index;
     void* mode_storage;
 
-    osMessageQueueId_t messages;
+    osEventFlagsId_t events;
     FuriThread* thread;
+
+    LFRFIDWorkerReadType read_type;
 
     LFRFIDWorkerReadCallback read_cb;
     LFRFIDWorkerWriteCallback write_cb;
@@ -59,7 +55,7 @@ struct LFRFIDWorker {
 
 extern const LFRFIDWorkerModeType lfrfid_worker_modes[];
 
-void lfrfid_worker_switch_mode(LFRFIDWorker* worker, LFRFIDWorkerMode mode);
+bool lfrfid_worker_check_for_stop(LFRFIDWorker* worker);
 
 #ifdef __cplusplus
 }
