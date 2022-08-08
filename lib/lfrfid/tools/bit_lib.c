@@ -188,3 +188,54 @@ uint8_t bit_lib_get_bit_count(uint32_t data) {
 #error Please, implement popcount for non-GCC compilers
 #endif
 }
+
+void bit_lib_print_bits(const uint8_t* data, size_t length) {
+    for(size_t i = 0; i < length; ++i) {
+        printf("%u", bit_lib_get_bit(data, i));
+    }
+}
+
+void bit_lib_print_regions(
+    const BitLibRegion* regions,
+    size_t region_count,
+    const uint8_t* data,
+    size_t length) {
+    // print data
+    bit_lib_print_bits(data, length);
+    printf("\r\n");
+
+    // print regions
+    for(size_t c = 0; c < length; ++c) {
+        bool print = false;
+
+        for(size_t i = 0; i < region_count; i++) {
+            if(regions[i].start <= c && c < regions[i].start + regions[i].length) {
+                print = true;
+                printf("%c", regions[i].mark);
+                break;
+            }
+        }
+
+        if(!print) {
+            printf(" ");
+        }
+    }
+    printf("\r\n");
+
+    // print regions data
+    for(size_t c = 0; c < length; ++c) {
+        bool print = false;
+
+        for(size_t i = 0; i < region_count; i++) {
+            if(regions[i].start <= c && c < regions[i].start + regions[i].length) {
+                print = true;
+                printf("%u", bit_lib_get_bit(data, c));
+                break;
+            }
+        }
+
+        if(!print) {
+            printf(" ");
+        }
+    }
+}

@@ -321,6 +321,20 @@ MU_TEST(test_bit_lib_remove_bit_every_nth) {
     mu_assert_mem_eq(data_o, data_i, 1);
 }
 
+MU_TEST(test_bit_lib_reverse_bits) {
+    uint8_t data_1_i[2] = {0b11001010, 0b00011111};
+    uint8_t data_1_o[2] = {0b11111000, 0b01010011};
+
+    bit_lib_reverse_bits(data_1_i, 0, 16);
+    mu_assert_mem_eq(data_1_o, data_1_i, 2);
+
+    uint8_t data_2_i[2] = {0b11001010, 0b00011111};
+    uint8_t data_2_o[2] = {0b11001000, 0b01011111};
+
+    bit_lib_reverse_bits(data_2_i, 4, 8);
+    mu_assert_mem_eq(data_2_o, data_2_i, 2);
+}
+
 MU_TEST_SUITE(test_bit_lib) {
     MU_RUN_TEST(test_bit_lib_increment_index);
     MU_RUN_TEST(test_bit_lib_is_set);
@@ -334,6 +348,7 @@ MU_TEST_SUITE(test_bit_lib) {
     MU_RUN_TEST(test_bit_lib_test_parity_u32);
     MU_RUN_TEST(test_bit_lib_test_parity);
     MU_RUN_TEST(test_bit_lib_remove_bit_every_nth);
+    MU_RUN_TEST(test_bit_lib_reverse_bits);
 }
 
 int run_minunit_test_bit_lib() {

@@ -82,15 +82,44 @@ uint32_t bit_lib_get_bits_32(const uint8_t* data, size_t position, uint8_t lengt
  */
 bool bit_lib_test_parity_u32(uint32_t bits, BitLibParity parity);
 
+/**
+ * @brief Test parity of bit array, check parity for every parity_length block from start
+ * 
+ * @param data Bit array
+ * @param position Start position
+ * @param length Bit count
+ * @param parity Parity to test against
+ * @param parity_length Parity block length
+ * @return true 
+ * @return false 
+ */
 bool bit_lib_test_parity(
-    const uint8_t* bits,
+    const uint8_t* data,
     size_t position,
     uint8_t length,
     BitLibParity parity,
     uint8_t parity_length);
 
+/**
+ * @brief Remove bit every n in array and shift array left. Useful to remove parity.
+ * 
+ * @param data Bit array
+ * @param position Start position
+ * @param length Bit count
+ * @param n every n bit will be removed
+ * @return size_t 
+ */
 size_t bit_lib_remove_bit_every_nth(uint8_t* data, size_t position, uint8_t length, uint8_t n);
 
+/**
+ * @brief Copy bits from source to destination.
+ * 
+ * @param data destination array
+ * @param position position in destination array
+ * @param length length of bits to copy
+ * @param source source array
+ * @param source_position position in source array
+ */
 void bit_lib_copy_bits(
     uint8_t* data,
     size_t position,
@@ -98,9 +127,50 @@ void bit_lib_copy_bits(
     const uint8_t* source,
     size_t source_position);
 
+/**
+ * @brief Reverse bits in bit array
+ * 
+ * @param data Bit array
+ * @param position start position
+ * @param length length of bits to reverse
+ */
 void bit_lib_reverse_bits(uint8_t* data, size_t position, uint8_t length);
 
+/**
+ * @brief Count 1 bits in data
+ * 
+ * @param data 
+ * @return uint8_t set bit count
+ */
 uint8_t bit_lib_get_bit_count(uint32_t data);
+
+/**
+ * @brief Print data as bit array
+ * 
+ * @param data 
+ * @param length 
+ */
+void bit_lib_print_bits(const uint8_t* data, size_t length);
+
+typedef struct {
+    const char mark;
+    const size_t start;
+    const size_t length;
+} BitLibRegion;
+
+/**
+ * @brief Print data as bit array and mark regions. Regions needs to be sorted by start position.
+ * 
+ * @param regions 
+ * @param region_count 
+ * @param data 
+ * @param length 
+ */
+void bit_lib_print_regions(
+    const BitLibRegion* regions,
+    size_t region_count,
+    const uint8_t* data,
+    size_t length);
 
 #ifdef __cplusplus
 }
