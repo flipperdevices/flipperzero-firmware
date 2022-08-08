@@ -6,13 +6,14 @@
 <b>Latest Updates:</b>
 
 - TOFIX - `FAP Loader`
-- Added Assets: Includes Dolphin Matrix animation (By qqmajikqq)
+- Added Assets: Includes Dolphin Matrix animation [By qqmajikqq]
 - WAV Player updates from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - IR: Universal AC & Audio from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)! TY Nano
 - Added [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 - Updates to [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/blob/unleashed/applications/flappy_bird/flappy_bird.c)
 - Fixes for BadUSB from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - Fixes for BadUSB keyboard from [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
+- Added Assets: Includes Dolphin Swim animation [By qqmajikqq]
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -74,6 +75,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Assets: Includes a NFC Level 50 Link Amiibo
 - Assets: Includes a NFC Rick Roll link
 - Assets: Includes Dolphin Matrix animation [By qqmajikqq]
+- Assets: Includes Dolphin Swim animation [By qqmajikqq]
 - Assets: Includes sample Music Player tunes
 - Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys, Tesla Charge Port and Unitree Go1 Robot Dog
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
