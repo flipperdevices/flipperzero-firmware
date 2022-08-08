@@ -9,17 +9,17 @@
 #include "math.h"
 
 #define MOODS_TOTAL 3
-#define BUTTHURT_MAX 3
+#define BUTTHURT_MAX 14
 
-static const Icon* const portrait_happy[BUTTHURT_MAX] = {
+static const Icon* const portrait_happy[MOODS_TOTAL] = {
     &I_passport_happy1_46x49,
     &I_passport_happy2_46x49,
     &I_passport_happy3_46x49};
-static const Icon* const portrait_ok[BUTTHURT_MAX] = {
+static const Icon* const portrait_ok[MOODS_TOTAL] = {
     &I_passport_okay1_46x49,
     &I_passport_okay2_46x49,
     &I_passport_okay3_46x49};
-static const Icon* const portrait_bad[BUTTHURT_MAX] = {
+static const Icon* const portrait_bad[MOODS_TOTAL] = {
     &I_passport_bad1_46x49,
     &I_passport_bad2_46x49,
     &I_passport_bad3_46x49};
