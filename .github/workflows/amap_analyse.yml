@@ -25,7 +25,7 @@ jobs:
 
       - name: 'Checkout code'
         uses: actions/checkout@v2
-          with:
+        with:
           fetch-depth: 0
 
       - name: 'Build the firmware'
