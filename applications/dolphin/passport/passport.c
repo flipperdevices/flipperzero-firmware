@@ -93,9 +93,9 @@ static void render_callback(Canvas* canvas, void* ctx) {
     if(stats->level > 10) tmpLvl = 1;
     if(stats->level > 20) tmpLvl = 2;
     canvas_draw_icon(canvas, 9, 5, portraits[mood][tmpLvl]);
-    canvas_draw_line(canvas, 58, 14, 123, 16);
-    canvas_draw_line(canvas, 58, 26, 123, 30);
-    canvas_draw_line(canvas, 58, 46, 123, 44);
+    canvas_draw_line(canvas, 58, 14, 123, 14);
+    canvas_draw_line(canvas, 58, 26, 123, 26);
+    canvas_draw_line(canvas, 58, 46, 123, 46);
 
     const char* my_name = furi_hal_version_get_name_ptr();
     snprintf(level_str, 12, "Level: %hu", stats->level);
