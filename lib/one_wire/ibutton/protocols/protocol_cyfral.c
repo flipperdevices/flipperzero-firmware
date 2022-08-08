@@ -147,8 +147,6 @@ static bool protocol_cyfral_decoder_process_bit(
     return result;
 }
 
-static void protocol_cyfral_decoder_reset(ProtocolCyfral* proto);
-
 static bool protocol_cyfral_decoder_feed(ProtocolCyfral* proto, bool level, uint32_t duration) {
     ProtocolCyfralDecoder* cyfral = &proto->decoder;
 
@@ -168,7 +166,7 @@ static bool protocol_cyfral_decoder_feed(ProtocolCyfral* proto, bool level, uint
                 }
             }
         } else {
-            protocol_cyfral_decoder_reset(proto);
+            protocol_cyfral_decoder_start(proto);
         }
 
         break;
@@ -211,7 +209,7 @@ static bool protocol_cyfral_decoder_feed(ProtocolCyfral* proto, bool level, uint
                 }
             }
         } else {
-            protocol_cyfral_decoder_reset(proto);
+            protocol_cyfral_decoder_start(proto);
         }
         break;
     case CYFRAL_READ_STOP_NIBBLE:
@@ -233,28 +231,24 @@ static bool protocol_cyfral_decoder_feed(ProtocolCyfral* proto, bool level, uint
                         if(cyfral->data_valid) {
                             decoded = true;
                         } else {
-                            protocol_cyfral_decoder_reset(proto);
+                            protocol_cyfral_decoder_start(proto);
                         }
                     } else {
-                        protocol_cyfral_decoder_reset(proto);
+                        protocol_cyfral_decoder_start(proto);
                     }
                     break;
                 default:
-                    protocol_cyfral_decoder_reset(proto);
+                    protocol_cyfral_decoder_start(proto);
                     break;
                 }
             }
         } else {
-            protocol_cyfral_decoder_reset(proto);
+            protocol_cyfral_decoder_start(proto);
         }
         break;
     }
 
     return decoded;
-}
-
-static void protocol_cyfral_decoder_reset(ProtocolCyfral* proto) {
-    protocol_cyfral_decoder_start(proto);
 }
 
 static uint32_t protocol_cyfral_encoder_encode(const uint16_t data) {
@@ -352,10 +346,6 @@ static LevelDuration protocol_cyfral_encoder_yield(ProtocolCyfral* proto) {
     return result;
 }
 
-static void protocol_cyfral_encoder_reset(ProtocolCyfral* proto) {
-    protocol_cyfral_encoder_start(proto);
-}
-
 const ProtocolBase protocol_cyfral = {
     .alloc = (ProtocolAlloc)protocol_cyfral_alloc,
     .free = (ProtocolFree)protocol_cyfral_free,
@@ -368,12 +358,10 @@ const ProtocolBase protocol_cyfral = {
         {
             .start = (ProtocolDecoderStart)protocol_cyfral_decoder_start,
             .feed = (ProtocolDecoderFeed)protocol_cyfral_decoder_feed,
-            .reset = (ProtocolDecoderReset)protocol_cyfral_decoder_reset,
         },
     .encoder =
         {
             .start = (ProtocolEncoderStart)protocol_cyfral_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_cyfral_encoder_yield,
-            .reset = (ProtocolEncoderReset)protocol_cyfral_encoder_reset,
         },
 };

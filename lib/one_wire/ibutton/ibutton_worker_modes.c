@@ -265,7 +265,7 @@ void ibutton_worker_emulate_timer_start(iButtonWorker* worker) {
     }
 
     protocol_dict_set_data(worker->protocols, worker->protocol_to_encode, key_id, key_size);
-    protocol_dict_encoder_reset(worker->protocols, worker->protocol_to_encode);
+    protocol_dict_encoder_start(worker->protocols, worker->protocol_to_encode);
 
     furi_hal_ibutton_start_drive();
     furi_hal_ibutton_emulate_start(0, ibutton_worker_emulate_timer_cb, worker);

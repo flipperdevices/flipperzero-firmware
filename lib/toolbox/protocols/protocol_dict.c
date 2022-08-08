@@ -34,7 +34,7 @@ void protocol_dict_set_data(
     size_t protocol_index,
     const uint8_t* data,
     size_t data_size) {
-    furi_check(protocol_index < dict->count);
+    furi_assert(protocol_index < dict->count);
     ProtocolSetData set_data = dict->base[protocol_index]->set_data;
 
     if(set_data) {
@@ -47,7 +47,7 @@ void protocol_dict_get_data(
     size_t protocol_index,
     uint8_t* data,
     size_t data_size) {
-    furi_check(protocol_index < dict->count);
+    furi_assert(protocol_index < dict->count);
     ProtocolGetData get_data = dict->base[protocol_index]->get_data;
 
     if(get_data) {
@@ -56,7 +56,7 @@ void protocol_dict_get_data(
 }
 
 size_t protocol_dict_get_data_size(ProtocolDict* dict, size_t protocol_index) {
-    furi_check(protocol_index < dict->count);
+    furi_assert(protocol_index < dict->count);
     ProtocolGetDataSize get_data_size = dict->base[protocol_index]->get_data_size;
     size_t data_size = 0;
 
@@ -84,7 +84,7 @@ size_t protocol_dict_get_max_data_size(ProtocolDict* dict) {
 }
 
 const char* protocol_dict_get_name(ProtocolDict* dict, size_t protocol_index) {
-    furi_check(protocol_index < dict->count);
+    furi_assert(protocol_index < dict->count);
     ProtocolGetName get_name = dict->base[protocol_index]->get_name;
     const char* name = "Unknown";
 
@@ -96,7 +96,7 @@ const char* protocol_dict_get_name(ProtocolDict* dict, size_t protocol_index) {
 }
 
 const char* protocol_dict_get_manufacturer(ProtocolDict* dict, size_t protocol_index) {
-    furi_check(protocol_index < dict->count);
+    furi_assert(protocol_index < dict->count);
     ProtocolGetManufacturer get_man = dict->base[protocol_index]->get_manufacturer;
     const char* name = "Unknown";
 
@@ -118,14 +118,18 @@ void protocol_dict_decoders_start(ProtocolDict* dict) {
 }
 
 ProtocolId protocol_dict_decoders_feed(ProtocolDict* dict, bool level, uint32_t duration) {
+    bool done = false;
     ProtocolId ready_protocol_id = PROTOCOL_NO;
+
     for(size_t i = 0; i < dict->count; i++) {
         ProtocolDecoderFeed fn = dict->base[i]->decoder.feed;
 
         if(fn) {
             if(fn(dict->data[i], level, duration)) {
-                ready_protocol_id = i;
-                break;
+                if(!done) {
+                    ready_protocol_id = i;
+                    done = true;
+                }
             }
         }
     }
@@ -133,18 +137,35 @@ ProtocolId protocol_dict_decoders_feed(ProtocolDict* dict, bool level, uint32_t 
     return ready_protocol_id;
 }
 
-void protocol_dict_decoders_reset(ProtocolDict* dict) {
-    for(size_t i = 0; i < dict->count; i++) {
-        ProtocolDecoderReset fn = dict->base[i]->decoder.reset;
+ProtocolId protocol_dict_decoders_feed_by_feature(
+    ProtocolDict* dict,
+    bool level,
+    uint32_t duration,
+    uint32_t feature) {
+    bool done = false;
+    ProtocolId ready_protocol_id = PROTOCOL_NO;
 
-        if(fn) {
-            fn(dict->data[i]);
+    for(size_t i = 0; i < dict->count; i++) {
+        uint32_t features = dict->base[i]->get_features(dict->data[i]);
+        if(features & feature) {
+            ProtocolDecoderFeed fn = dict->base[i]->decoder.feed;
+
+            if(fn) {
+                if(fn(dict->data[i], level, duration)) {
+                    if(!done) {
+                        ready_protocol_id = i;
+                        done = true;
+                    }
+                }
+            }
         }
     }
+
+    return ready_protocol_id;
 }
 
 bool protocol_dict_encoder_start(ProtocolDict* dict, size_t protocol_index) {
-    furi_check(protocol_index < dict->count);
+    furi_assert(protocol_index < dict->count);
     ProtocolEncoderStart fn = dict->base[protocol_index]->encoder.start;
 
     if(fn) {
@@ -155,7 +176,7 @@ bool protocol_dict_encoder_start(ProtocolDict* dict, size_t protocol_index) {
 }
 
 LevelDuration protocol_dict_encoder_yield(ProtocolDict* dict, size_t protocol_index) {
-    furi_check(protocol_index < dict->count);
+    furi_assert(protocol_index < dict->count);
     ProtocolEncoderYield fn = dict->base[protocol_index]->encoder.yield;
 
     if(fn) {
@@ -165,11 +186,19 @@ LevelDuration protocol_dict_encoder_yield(ProtocolDict* dict, size_t protocol_in
     }
 }
 
-void protocol_dict_encoder_reset(ProtocolDict* dict, size_t protocol_index) {
-    furi_check(protocol_index < dict->count);
-    ProtocolEncoderReset fn = dict->base[protocol_index]->encoder.reset;
+void protocol_dict_render_data(ProtocolDict* dict, string_t result, size_t protocol_index) {
+    furi_assert(protocol_index < dict->count);
+    ProtocolRenderData fn = dict->base[protocol_index]->render_data;
 
     if(fn) {
-        return fn(dict->data[protocol_index]);
+        return fn(dict->data[protocol_index], result);
     }
+}
+
+uint32_t protocol_dict_get_validate_count(ProtocolDict* dict, size_t protocol_index) {
+    furi_assert(protocol_index < dict->count);
+    ProtocolGetValidateCount fn = dict->base[protocol_index]->get_validate_count;
+
+    furi_assert(fn);
+    return fn(dict->data[protocol_index]);
 }

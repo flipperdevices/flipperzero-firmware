@@ -119,8 +119,6 @@ static bool metakom_parity_check(uint8_t data) {
     return result;
 }
 
-static void protocol_metakom_decoder_reset(ProtocolMetakom* proto);
-
 static bool metakom_process_bit(
     ProtocolMetakomDecoder* metakom,
     bool polarity,
@@ -183,7 +181,7 @@ static bool protocol_metakom_decoder_feed(ProtocolMetakom* proto, bool level, ui
             }
 
             if(metakom->tmp_counter > 40) {
-                protocol_metakom_decoder_reset(proto);
+                protocol_metakom_decoder_start(proto);
             }
         }
 
@@ -203,7 +201,7 @@ static bool protocol_metakom_decoder_feed(ProtocolMetakom* proto, bool level, ui
                     metakom->tmp_data = 0;
                     metakom->state = METAKOM_READ_WORD;
                 } else {
-                    protocol_metakom_decoder_reset(proto);
+                    protocol_metakom_decoder_start(proto);
                 }
             }
         }
@@ -229,11 +227,11 @@ static bool protocol_metakom_decoder_feed(ProtocolMetakom* proto, bool level, ui
                         if(high_time > metakom->period_time) {
                             metakom->state = METAKOM_READ_STOP_WORD;
                         } else {
-                            protocol_metakom_decoder_reset(proto);
+                            protocol_metakom_decoder_start(proto);
                         }
                     }
                 } else {
-                    protocol_metakom_decoder_reset(proto);
+                    protocol_metakom_decoder_start(proto);
                 }
             }
         }
@@ -251,7 +249,7 @@ static bool protocol_metakom_decoder_feed(ProtocolMetakom* proto, bool level, ui
                 if(metakom->tmp_data == 0b010) {
                     ready = true;
                 } else {
-                    protocol_metakom_decoder_reset(proto);
+                    protocol_metakom_decoder_start(proto);
                 }
             }
         }
@@ -259,10 +257,6 @@ static bool protocol_metakom_decoder_feed(ProtocolMetakom* proto, bool level, ui
     }
 
     return ready;
-}
-
-static void protocol_metakom_decoder_reset(ProtocolMetakom* proto) {
-    protocol_metakom_decoder_start(proto);
 }
 
 static bool protocol_metakom_encoder_start(ProtocolMetakom* proto) {
@@ -328,10 +322,6 @@ static LevelDuration protocol_metakom_encoder_yield(ProtocolMetakom* proto) {
     return result;
 }
 
-static void protocol_metakom_encoder_reset(ProtocolMetakom* proto) {
-    protocol_metakom_encoder_start(proto);
-}
-
 const ProtocolBase protocol_metakom = {
     .alloc = (ProtocolAlloc)protocol_metakom_alloc,
     .free = (ProtocolFree)protocol_metakom_free,
@@ -344,12 +334,10 @@ const ProtocolBase protocol_metakom = {
         {
             .start = (ProtocolDecoderStart)protocol_metakom_decoder_start,
             .feed = (ProtocolDecoderFeed)protocol_metakom_decoder_feed,
-            .reset = (ProtocolDecoderReset)protocol_metakom_decoder_reset,
         },
     .encoder =
         {
             .start = (ProtocolEncoderStart)protocol_metakom_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_metakom_encoder_yield,
-            .reset = (ProtocolEncoderReset)protocol_metakom_encoder_reset,
         },
 };

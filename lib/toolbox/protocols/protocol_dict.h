@@ -6,6 +6,7 @@ typedef struct ProtocolDict ProtocolDict;
 typedef int32_t ProtocolId;
 
 #define PROTOCOL_NO (-1)
+#define PROTOCOL_ALL_FEATURES (0xFFFFFFFF)
 
 ProtocolDict* protocol_dict_alloc(const ProtocolBase** protocols, size_t protocol_count);
 
@@ -35,10 +36,16 @@ void protocol_dict_decoders_start(ProtocolDict* dict);
 
 ProtocolId protocol_dict_decoders_feed(ProtocolDict* dict, bool level, uint32_t duration);
 
-void protocol_dict_decoders_reset(ProtocolDict* dict);
+ProtocolId protocol_dict_decoders_feed_by_feature(
+    ProtocolDict* dict,
+    bool level,
+    uint32_t duration,
+    uint32_t feature);
 
 bool protocol_dict_encoder_start(ProtocolDict* dict, size_t protocol_index);
 
 LevelDuration protocol_dict_encoder_yield(ProtocolDict* dict, size_t protocol_index);
 
-void protocol_dict_encoder_reset(ProtocolDict* dict, size_t protocol_index);
+void protocol_dict_render_data(ProtocolDict* dict, string_t result, size_t protocol_index);
+
+uint32_t protocol_dict_get_validate_count(ProtocolDict* dict, size_t protocol_index);

@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <lib/toolbox/level_duration.h>
+#include <mlib/m-string.h>
 
 typedef void* (*ProtocolAlloc)(void);
 typedef void (*ProtocolFree)(void* protocol);
@@ -14,22 +15,24 @@ typedef const char* (*ProtocolGetManufacturer)(void* protocol);
 
 typedef void (*ProtocolDecoderStart)(void* protocol);
 typedef bool (*ProtocolDecoderFeed)(void* protocol, bool level, uint32_t duration);
-typedef void (*ProtocolDecoderReset)(void* protocol);
 
 typedef bool (*ProtocolEncoderStart)(void* protocol);
 typedef LevelDuration (*ProtocolEncoderYield)(void* protocol);
-typedef void (*ProtocolEncoderReset)(void* protocol);
+
+typedef void (*ProtocolRenderData)(void* protocol, string_t result);
+typedef bool (*ProtocolWriteData)(void* protocol, void* data);
+
+typedef uint32_t (*ProtocolGetFeatures)(void* protocol);
+typedef uint32_t (*ProtocolGetValidateCount)(void* protocol);
 
 typedef struct {
     ProtocolDecoderStart start;
     ProtocolDecoderFeed feed;
-    ProtocolDecoderReset reset;
 } ProtocolDecoder;
 
 typedef struct {
     ProtocolEncoderStart start;
     ProtocolEncoderYield yield;
-    ProtocolEncoderReset reset;
 } ProtocolEncoder;
 
 typedef struct {
@@ -43,4 +46,9 @@ typedef struct {
 
     ProtocolDecoder decoder;
     ProtocolEncoder encoder;
+
+    ProtocolRenderData render_data;
+    ProtocolWriteData write_data;
+    ProtocolGetFeatures get_features;
+    ProtocolGetValidateCount get_validate_count;
 } ProtocolBase;
