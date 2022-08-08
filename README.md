@@ -6,7 +6,7 @@
 <b>Latest Updates:</b>
 
 - TOFIX - `FAP Loader`
-- Added [Assets: Includes Dolphin Matrix animation (By qqmajikqq)]
+- Added Assets: Includes Dolphin Matrix animation (By qqmajikqq)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
