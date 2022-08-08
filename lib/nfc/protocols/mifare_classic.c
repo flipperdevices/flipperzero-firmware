@@ -321,9 +321,11 @@ static bool mf_classic_is_allowed_access(
 }
 
 bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
+    UNUSED(ATQA1);
     if((ATQA0 == 0x44 || ATQA0 == 0x04) && (SAK == 0x08 || SAK == 0x88 || SAK == 0x09)) {
         return true;
-    } else if ((ATQA0 == 0x0F) && (ATQA1 == 0x01) && (SAK == 0x01)) { //skylanders identification handling
+    } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {
+        //skylanders support
         return true;
     } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
         return true;
@@ -333,30 +335,16 @@ bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
 }
 
 MfClassicType mf_classic_get_classic_type(int8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
+    UNUSED(ATQA1);
     if((ATQA0 == 0x44 || ATQA0 == 0x04) && (SAK == 0x08 || SAK == 0x88 || SAK == 0x09)) {
         return MfClassicType1k;
-    } else if ((ATQA0 == 0x0F) && (ATQA1 == 0x01) && (SAK == 0x01)) { //skylanders identification handling
+    } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {
+        //skylanders support
         return MfClassicType1k;
     } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
         return MfClassicType4k;
     }
     return MfClassicType1k;
-}
-
-bool mf_classic_get_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK, MfClassicReader* reader) {
-    furi_assert(reader);
-    memset(reader, 0, sizeof(MfClassicReader));
-
-    if((ATQA0 == 0x44 || ATQA0 == 0x04) && (SAK == 0x08 || SAK == 0x88 || SAK == 0x09)) {
-        reader->type = MfClassicType1k;
-    } else if ((ATQA0 == 0x0F) && (ATQA1 == 0x01) && (SAK == 0x01)) { //skylanders identification handling
-        reader->type = MfClassicType1k;
-    } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
-        reader->type = MfClassicType4k;
-    } else {
-        return false;
-    }
-    return true;
 }
 
 void mf_classic_reader_add_sector(
@@ -872,19 +860,6 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 FURI_LOG_T(TAG, "Wrong AUTH! %08X != %08X", cardRr, prng_successor(nonce, 64));
                 // Don't send NACK, as tag don't send it
                 command_processed = true;
-
-                // Collect nonce
-                if (emulator->nonce_callback) {
-                      MfClassicEmulatorNonce data = {
-                          .cuid = emulator->cuid,
-                          .access_key = access_key,
-                          .block = sector_trailer_block,
-                          .nt = nonce,
-                          .nr = nr,
-                          .ar = ar,
-                      };
-                      emulator->nonce_callback(&data, emulator->context);
-                }
                 break;
             }
 

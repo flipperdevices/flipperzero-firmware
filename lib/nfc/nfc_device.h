@@ -15,12 +15,10 @@
 #define NFC_DEV_NAME_MAX_LEN 22
 #define NFC_READER_DATA_MAX_SIZE 64
 #define NFC_DICT_KEY_BATCH_SIZE 50
-#define NFC_MAX_NONCE_COUNT 64
 
 #define NFC_APP_FOLDER ANY_PATH("nfc")
 #define NFC_APP_EXTENSION ".nfc"
 #define NFC_APP_SHADOW_EXTENSION ".shd"
-#define NFC_APP_LOG_EXTENSION ".txt"
 
 typedef void (*NfcLoadingCallback)(void* context, bool state);
 
@@ -50,17 +48,11 @@ typedef struct {
 } NfcMfClassicDictAttackData;
 
 typedef struct {
-    string_t nonce_log;
-    bool data_changed;
-} NfcMfClassicEmulatorOutput;
-
-typedef struct {
     FuriHalNfcDevData nfc_data;
     NfcProtocol protocol;
     union {
         NfcReaderRequestData reader_data;
         NfcMfClassicDictAttackData mf_classic_dict_attack_data;
-        NfcMfClassicEmulatorOutput mf_classic_emulator_output;
     };
     union {
         EmvData emv_data;
@@ -93,11 +85,6 @@ void nfc_device_set_name(NfcDevice* dev, const char* name);
 bool nfc_device_save(NfcDevice* dev, const char* dev_name);
 
 bool nfc_device_save_shadow(NfcDevice* dev, const char* dev_name);
-
-bool nfc_device_save_mf_classic_nonces(
-    NfcDevice* dev,
-    const char* name,
-    string_t nonces);
 
 bool nfc_device_load(NfcDevice* dev, const char* file_path, bool show_dialog);
 
