@@ -53,8 +53,9 @@ static void input_callback(InputEvent* input, void* ctx) {
 static void render_callback(Canvas* canvas, void* ctx) {
     DolphinStats* stats = ctx;
 
-    char level_str[20];
-    char mood_str[32];
+    char level_str[12];
+    char xp_str[12];
+    char mood_str[20];
     uint8_t mood = 0;
     snprintf(mood_str, 20, "Mood: %s", moods[stats->butthurt]);
     if(stats->butthurt <= 4) {
