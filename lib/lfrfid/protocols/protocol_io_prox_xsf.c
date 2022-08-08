@@ -3,6 +3,7 @@
 #include <lfrfid/tools/fsk_demod.h>
 #include <lfrfid/tools/fsk_osc.h>
 #include <lfrfid/tools/bit_lib.h>
+#include "lfrfid_protocols.h"
 
 #define JITTER_TIME (20)
 #define MIN_TIME (64 - JITTER_TIME)
@@ -197,10 +198,6 @@ bool protocol_io_prox_xsf_decoder_feed(ProtocolIOProxXSF* protocol, bool level, 
     return result;
 };
 
-void protocol_io_prox_xsf_decoder_reset(ProtocolIOProxXSF* protocol) {
-    protocol_io_prox_xsf_decoder_start(protocol);
-};
-
 static void protocol_io_prox_xsf_encode(const uint8_t* decoded_data, uint8_t* encoded_data) {
     // Packet to transmit:
     //
@@ -259,9 +256,27 @@ LevelDuration protocol_io_prox_xsf_encoder_yield(ProtocolIOProxXSF* protocol) {
     return level_duration_make(level, duration);
 };
 
-void protocol_io_prox_xsf_encoder_reset(ProtocolIOProxXSF* protocol) {
-    protocol_io_prox_xsf_encoder_start(protocol);
-};
+void protocol_io_prox_xsf_render_data(ProtocolIOProxXSF* protocol, string_t result) {
+    uint8_t* data = protocol->data;
+    string_printf(
+        result,
+        "FC: %u\r\n"
+        "VС: %u\r\n"
+        "Card: %u",
+        data[0],
+        data[1],
+        (uint16_t)((data[2] << 8) | (data[3])));
+}
+
+uint32_t protocol_io_prox_xsf_get_features(void* protocol) {
+    UNUSED(protocol);
+    return LFRFIDFeatureASK;
+}
+
+uint32_t protocol_io_prox_xsf_get_validate_count(void* protocol) {
+    UNUSED(protocol);
+    return 3;
+}
 
 const ProtocolBase protocol_io_prox_xsf = {
     .alloc = (ProtocolAlloc)protocol_io_prox_xsf_alloc,
@@ -275,12 +290,13 @@ const ProtocolBase protocol_io_prox_xsf = {
         {
             .start = (ProtocolDecoderStart)protocol_io_prox_xsf_decoder_start,
             .feed = (ProtocolDecoderFeed)protocol_io_prox_xsf_decoder_feed,
-            .reset = (ProtocolDecoderReset)protocol_io_prox_xsf_decoder_reset,
         },
     .encoder =
         {
             .start = (ProtocolEncoderStart)protocol_io_prox_xsf_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_io_prox_xsf_encoder_yield,
-            .reset = (ProtocolEncoderReset)protocol_io_prox_xsf_encoder_reset,
         },
+    .render_data = (ProtocolRenderData)protocol_io_prox_xsf_render_data,
+    .get_features = (ProtocolGetFeatures)protocol_io_prox_xsf_get_features,
+    .get_validate_count = (ProtocolGetValidateCount)protocol_io_prox_xsf_get_validate_count,
 };
