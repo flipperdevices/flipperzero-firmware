@@ -6,15 +6,8 @@
 <b>Latest Updates:</b>
 
 - Known Issues:`FAP Loader` & `Chess`
-- Added [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
-- Updates to [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/blob/unleashed/applications/flappy_bird/flappy_bird.c)
-- Fixes for BadUSB from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
-- Fixes for BadUSB keyboard from [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
-- Added Assets: Includes Dolphin Swim animation [By qqmajikqq]
-- Updated IR: Universal AC from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)! TY Nano & jaroslavmraz
-- Removed FAP assets for faster installs until the FAPs can return
-- Added [Dec/Hex Converter plugin (By theisolinearchip)](https://github.com/theisolinearchip)
 - Added Assets: Includes Rukamon animation 2x and Agumon animation [By Syrius]
+- Update from [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
