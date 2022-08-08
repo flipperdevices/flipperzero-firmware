@@ -860,19 +860,6 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 FURI_LOG_T(TAG, "Wrong AUTH! %08X != %08X", cardRr, prng_successor(nonce, 64));
                 // Don't send NACK, as tag don't send it
                 command_processed = true;
-
-                // Collect nonce
-                if (emulator->nonce_callback) {
-                      MfClassicEmulatorNonce data = {
-                          .cuid = emulator->cuid,
-                          .access_key = access_key,
-                          .block = sector_trailer_block,
-                          .nt = nonce,
-                          .nr = nr,
-                          .ar = ar,
-                      };
-                      emulator->nonce_callback(&data, emulator->context);
-                }
                 break;
             }
 

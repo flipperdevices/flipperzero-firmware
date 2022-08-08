@@ -20,6 +20,7 @@
 - Added [badusb: show script errors on screen #200 (By CromFr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/200)
 - Assets: Includes sample SubGHz asset for Unitree Go1 Robot Dog [Thanks to MAVProxyUser](https://github.com/MAVProxyUser/YushuTechUnitreeGo1)
 - Fixed issue with SubGHz settings getting loaded from `extend_range.txt`
+- Removed [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484) due to draft state
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -127,7 +128,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [New frequency analyzer #1501 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501)
 - [BadUSB: add SYSRQ keys #1460 (By rck)](https://github.com/flipperdevices/flipperzero-firmware/pull/1460)
 - [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
-- [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484)
 - [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 - [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
 - [sk-SK maping keybord for BadUsb #1537 (By jaroslavmraz)](https://github.com/flipperdevices/flipperzero-firmware/pull/1537)

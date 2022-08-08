@@ -1085,50 +1085,6 @@ bool nfc_device_save_shadow(NfcDevice* dev, const char* dev_name) {
     return nfc_device_save_file(dev, dev_name, NFC_APP_FOLDER, NFC_APP_SHADOW_EXTENSION, true);
 }
 
-bool nfc_device_save_mf_classic_nonces(
-    NfcDevice* dev,
-    const char* name,
-    string_t nonces
-) {
-    furi_assert(dev);
-    furi_assert(dev->format == NfcDeviceSaveFormatMifareClassic);
-
-    bool saved = false;
-    File* file = storage_file_alloc(dev->storage);
-    if(!file) {
-        return false;
-    }
-    string_t temp_str;
-    string_init(temp_str);
-
-    do {
-        if(!string_empty_p(dev->load_path)) {
-            // Get directory name
-            path_extract_dirname(string_get_cstr(dev->load_path), temp_str);
-        } else {
-            string_set_str(temp_str, NFC_APP_FOLDER);
-        }
-
-        // Create nfc directory if necessary
-        if(!storage_simply_mkdir(dev->storage, string_get_cstr(temp_str))) break;
-        // Make path to file to save
-        string_cat_printf(temp_str, "/%s%s", name, NFC_APP_LOG_EXTENSION);
-        // Open file
-        if(!storage_file_open(file, string_get_cstr(temp_str), FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) break;
-        // Write nonces
-        uint32_t line_len = string_size(nonces);
-        if(storage_file_write(file, string_get_cstr(nonces), line_len) != line_len) break;
-        saved = true;
-    } while(0);
-
-    if(!saved) {
-        dialog_message_show_storage_error(dev->dialogs, "Can not save\nnonces file");
-    }
-    string_clear(temp_str);
-    storage_file_free(file);
-    return saved;
-}
-
 static bool nfc_device_load_data(NfcDevice* dev, string_t path, bool show_dialog) {
     bool parsed = false;
     FlipperFormat* file = flipper_format_file_alloc(dev->storage);
