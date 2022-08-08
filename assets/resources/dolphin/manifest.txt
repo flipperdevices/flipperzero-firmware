@@ -22,6 +22,27 @@ Min level: 1
 Max level: 30
 Weight: 3
 
+Name: L1_Rukamon_128x64
+Min butthurt: 0
+Max butthurt: 10
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: L2_Rukamon_PC_128x64
+Min butthurt: 0
+Max butthurt: 10
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: L1_Agumon_128x64
+Min butthurt: 0
+Max butthurt: 10
+Min level: 1
+Max level: 30
+Weight: 3
+
 Name: L1_Laptop_128x51
 Min butthurt: 0
 Max butthurt: 10
