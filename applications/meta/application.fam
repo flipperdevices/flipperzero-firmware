@@ -37,6 +37,7 @@ App(
         "APPS_WAVPlayer",
         "APPS_SpectrumAnalyzer",
         "APPS_BluetoothRemote",
+        "APPS_dec_hex_converter",
         "APPS_DolphinRestorer",
         "APPS_DolphinBackup",
         "APPS_MusicPlayer",

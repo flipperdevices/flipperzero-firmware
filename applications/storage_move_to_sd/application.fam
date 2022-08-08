@@ -5,5 +5,5 @@ App(
     entry_point="storage_move_to_sd_app",
     requires=["gui", "storage"],
     stack_size=2 * 1024,
-    order=80,
+    order=85,
 )
