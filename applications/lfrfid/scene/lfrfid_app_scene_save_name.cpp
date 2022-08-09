@@ -15,7 +15,7 @@ void LfRfidAppSceneSaveName::on_enter(LfRfidApp* app, bool /* need_restore */) {
     }
 
     auto text_input = app->view_controller.get<TextInputVM>();
-    text_input->set_header_text("Name the card");
+    text_input->set_header_text("Name The Card");
 
     text_input->set_result_callback(
         save_callback,

@@ -49,7 +49,7 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
 
     string_t menu[MENU_ITEMS];
 
-    string_init_set_str(menu[0], "Run in app");
+    string_init_set_str(menu[0], "Run In App");
     string_init_set_str(menu[1], "Pin");
     string_init_set_str(menu[2], "Rename");
     string_init_set_str(menu[3], "Delete");
