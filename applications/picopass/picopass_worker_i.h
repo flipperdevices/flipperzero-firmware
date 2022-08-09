@@ -13,10 +13,6 @@
 #include <rfal_analogConfig.h>
 #include <rfal_rf.h>
 
-#include <mbedtls/des.h>
-#include <loclass/optimized_ikeys.h>
-#include <loclass/optimized_cipher.h>
-
 #include <platform.h>
 
 struct PicopassWorker {

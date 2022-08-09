@@ -7,6 +7,10 @@
 
 #include <rfal_picopass.h>
 
+#include <mbedtls/des.h>
+#include <loclass/optimized_ikeys.h>
+#include <loclass/optimized_cipher.h>
+
 #define PICOPASS_DEV_NAME_MAX_LEN 22
 #define PICOPASS_READER_DATA_MAX_SIZE 64
 #define PICOPASS_BLOCK_LEN 8
@@ -88,7 +92,12 @@ void picopass_device_data_clear(PicopassDeviceData* dev_data);
 
 void picopass_device_clear(PicopassDevice* dev);
 
+bool picopass_device_delete(PicopassDevice* dev, bool use_load_path);
+
 void picopass_device_set_loading_callback(
     PicopassDevice* dev,
     PicopassLoadingCallback callback,
     void* context);
+
+ReturnCode picopass_device_parse_credential(PicopassBlock* AA1, PicopassPacs* pacs);
+ReturnCode picopass_device_parse_wiegand(uint8_t* data, PicopassWiegandRecord* record);

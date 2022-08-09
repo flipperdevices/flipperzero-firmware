@@ -8,6 +8,9 @@
 static const char* picopass_file_header = "Flipper Picopass device";
 static const uint32_t picopass_file_version = 1;
 
+const uint8_t picopass_iclass_decryptionkey[] =
+    {0xb4, 0x21, 0x2c, 0xca, 0xb7, 0xed, 0x21, 0x0f, 0x7b, 0x93, 0xd4, 0x59, 0x39, 0xc7, 0xdd, 0x36};
+
 PicopassDevice* picopass_device_alloc() {
     PicopassDevice* picopass_dev = malloc(sizeof(PicopassDevice));
     picopass_dev->dev_data.pacs.legacy = false;
@@ -133,33 +136,29 @@ static bool picopass_device_load_data(PicopassDevice* dev, string_t path, bool s
     bool parsed = false;
     FlipperFormat* file = flipper_format_file_alloc(dev->storage);
     PicopassBlock* AA1 = dev->dev_data.AA1;
+    PicopassPacs* pacs = &dev->dev_data.pacs;
     string_t temp_str;
     string_init(temp_str);
     bool deprecated_version = false;
 
-    FURI_LOG_D(TAG, "picopass_device_load_data start");
     if(dev->loading_cb) {
         dev->loading_cb(dev->loading_cb_ctx, true);
     }
 
     do {
         if(!flipper_format_file_open_existing(file, string_get_cstr(path))) break;
-        FURI_LOG_D(TAG, "flipper_format_file_open_existing %s", string_get_cstr(path));
 
         // Read and verify file header
         uint32_t version = 0;
         if(!flipper_format_read_header(file, temp_str, &version)) break;
-        FURI_LOG_D(TAG, "flipper_format_read_header: %s %d", string_get_cstr(temp_str), version);
         if(string_cmp_str(temp_str, picopass_file_header) || (version != picopass_file_version)) {
             deprecated_version = true;
             break;
         }
 
-        FURI_LOG_D(TAG, "load blocks");
         // Parse header blocks
         bool block_read = true;
         for(size_t i = 0; i < 6; i++) {
-            FURI_LOG_D(TAG, "Loading block %d", i);
             string_printf(temp_str, "Block %d", i);
             if(!flipper_format_read_hex(
                    file, string_get_cstr(temp_str), AA1[i].data, PICOPASS_BLOCK_LEN)) {
@@ -170,7 +169,6 @@ static bool picopass_device_load_data(PicopassDevice* dev, string_t path, bool s
 
         size_t app_limit = AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[0];
         for(size_t i = 6; i < app_limit; i++) {
-            FURI_LOG_D(TAG, "Loading block %d", i);
             string_printf(temp_str, "Block %d", i);
             if(!flipper_format_read_hex(
                    file, string_get_cstr(temp_str), AA1[i].data, PICOPASS_BLOCK_LEN)) {
@@ -180,10 +178,12 @@ static bool picopass_device_load_data(PicopassDevice* dev, string_t path, bool s
         }
         if(!block_read) break;
 
+        if(picopass_device_parse_credential(AA1, pacs) != ERR_NONE) break;
+        if(picopass_device_parse_wiegand(pacs->credential, &pacs->record) != ERR_NONE) break;
+
         parsed = true;
     } while(false);
 
-    FURI_LOG_D(TAG, "stop loading callback");
     if(dev->loading_cb) {
         dev->loading_cb(dev->loading_cb_ctx, false);
     }
@@ -199,7 +199,6 @@ static bool picopass_device_load_data(PicopassDevice* dev, string_t path, bool s
     string_clear(temp_str);
     flipper_format_free(file);
 
-    FURI_LOG_D(TAG, "picopass_device_load_data end");
     return parsed;
 }
 
@@ -241,12 +240,9 @@ bool picopass_file_select(PicopassDevice* dev) {
         string_init(filename);
         path_extract_filename(dev->load_path, filename, true);
         strncpy(dev->dev_name, string_get_cstr(filename), PICOPASS_DEV_NAME_MAX_LEN);
-        FURI_LOG_D(TAG, "picopass_device_load_data filename: %s", string_get_cstr(dev->load_path));
         res = picopass_device_load_data(dev, dev->load_path, true);
-        FURI_LOG_D(TAG, "picopass_device_load_data res: %d", res);
         if(res) {
             picopass_device_set_name(dev, dev->dev_name);
-            FURI_LOG_D(TAG, "picopass name set");
         }
         string_clear(filename);
     }
@@ -263,6 +259,33 @@ void picopass_device_data_clear(PicopassDeviceData* dev_data) {
     dev_data->pacs.pin_length = 0;
 }
 
+bool picopass_device_delete(PicopassDevice* dev, bool use_load_path) {
+    furi_assert(dev);
+
+    bool deleted = false;
+    string_t file_path;
+    string_init(file_path);
+
+    do {
+        // Delete original file
+        if(use_load_path && !string_empty_p(dev->load_path)) {
+            string_set(file_path, dev->load_path);
+        } else {
+            string_printf(
+                file_path, "%s/%s%s", PICOPASS_APP_FOLDER, dev->dev_name, PICOPASS_APP_EXTENSION);
+        }
+        if(!storage_simply_remove(dev->storage, string_get_cstr(file_path))) break;
+        deleted = true;
+    } while(0);
+
+    if(!deleted) {
+        dialog_message_show_storage_error(dev->dialogs, "Can not remove file");
+    }
+
+    string_clear(file_path);
+    return deleted;
+}
+
 void picopass_device_set_loading_callback(
     PicopassDevice* dev,
     PicopassLoadingCallback callback,
@@ -271,4 +294,86 @@ void picopass_device_set_loading_callback(
 
     dev->loading_cb = callback;
     dev->loading_cb_ctx = context;
+}
+
+ReturnCode picopass_device_decrypt(uint8_t* enc_data, uint8_t* dec_data) {
+    uint8_t key[32] = {0};
+    memcpy(key, picopass_iclass_decryptionkey, sizeof(picopass_iclass_decryptionkey));
+    mbedtls_des3_context ctx;
+    mbedtls_des3_init(&ctx);
+    mbedtls_des3_set2key_dec(&ctx, key);
+    mbedtls_des3_crypt_ecb(&ctx, enc_data, dec_data);
+    mbedtls_des3_free(&ctx);
+    return ERR_NONE;
+}
+
+ReturnCode picopass_device_parse_credential(PicopassBlock* AA1, PicopassPacs* pacs) {
+    ReturnCode err;
+
+    // Thank you proxmark!
+    pacs->legacy = (memcmp(AA1[5].data, "\xff\xff\xff\xff\xff\xff\xff\xff", 8) == 0);
+    pacs->se_enabled = (memcmp(AA1[5].data, "\xff\xff\xff\x00\x06\xff\xff\xff", 8) == 0);
+
+    pacs->biometrics = AA1[6].data[4];
+    pacs->pin_length = AA1[6].data[6] & 0x0F;
+    pacs->encryption = AA1[6].data[7];
+
+    if(pacs->encryption == PicopassDeviceEncryption3DES) {
+        FURI_LOG_D(TAG, "3DES Encrypted");
+        err = picopass_device_decrypt(AA1[7].data, pacs->credential);
+        if(err != ERR_NONE) {
+            FURI_LOG_E(TAG, "decrypt error %d", err);
+            return err;
+        }
+
+        err = picopass_device_decrypt(AA1[8].data, pacs->pin0);
+        if(err != ERR_NONE) {
+            FURI_LOG_E(TAG, "decrypt error %d", err);
+            return err;
+        }
+
+        err = picopass_device_decrypt(AA1[9].data, pacs->pin1);
+        if(err != ERR_NONE) {
+            FURI_LOG_E(TAG, "decrypt error %d", err);
+            return err;
+        }
+    } else if(pacs->encryption == PicopassDeviceEncryptionNone) {
+        FURI_LOG_D(TAG, "No Encryption");
+        memcpy(pacs->credential, AA1[7].data, PICOPASS_BLOCK_LEN);
+        memcpy(pacs->pin0, AA1[8].data, PICOPASS_BLOCK_LEN);
+        memcpy(pacs->pin1, AA1[9].data, PICOPASS_BLOCK_LEN);
+    } else if(pacs->encryption == PicopassDeviceEncryptionDES) {
+        FURI_LOG_D(TAG, "DES Encrypted");
+    } else {
+        FURI_LOG_D(TAG, "Unknown encryption");
+    }
+
+    return ERR_NONE;
+}
+
+ReturnCode picopass_device_parse_wiegand(uint8_t* data, PicopassWiegandRecord* record) {
+    uint32_t* halves = (uint32_t*)data;
+    if(halves[0] == 0) {
+        uint8_t leading0s = __builtin_clz(REVERSE_BYTES_U32(halves[1]));
+        record->bitLength = 31 - leading0s;
+    } else {
+        uint8_t leading0s = __builtin_clz(REVERSE_BYTES_U32(halves[0]));
+        record->bitLength = 63 - leading0s;
+    }
+    FURI_LOG_D(TAG, "bitLength: %d", record->bitLength);
+
+    if(record->bitLength == 26) {
+        uint8_t* v4 = data + 4;
+        uint32_t bot = v4[3] | (v4[2] << 8) | (v4[1] << 16) | (v4[0] << 24);
+
+        record->CardNumber = (bot >> 1) & 0xFFFF;
+        record->FacilityCode = (bot >> 17) & 0xFF;
+        FURI_LOG_D(TAG, "FC:%u CN: %u\n", record->FacilityCode, record->CardNumber);
+        record->valid = true;
+    } else {
+        record->CardNumber = 0;
+        record->FacilityCode = 0;
+        record->valid = false;
+    }
+    return ERR_NONE;
 }
