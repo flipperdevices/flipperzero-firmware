@@ -1,5 +1,6 @@
 #include "bit_lib.h"
 #include <core/check.h>
+#include <stdio.h>
 
 void bit_lib_push_bit(uint8_t* data, size_t data_size, bool bit) {
     size_t last_index = data_size - 1;
@@ -77,7 +78,7 @@ uint32_t bit_lib_get_bits_32(const uint8_t* data, size_t position, uint8_t lengt
     return value;
 }
 
-bool bit_lib_test_parity_u32(uint32_t bits, BitLibParity parity) {
+bool bit_lib_test_parity_32(uint32_t bits, BitLibParity parity) {
 #if !defined __GNUC__
 #error Please, implement parity test for non-GCC compilers
 #else
@@ -107,7 +108,7 @@ bool bit_lib_test_parity(
         case BitLibParityEven:
         case BitLibParityOdd:
             parity_block = bit_lib_get_bits_32(bits, position + i * parity_length, parity_length);
-            if(!bit_lib_test_parity_u32(parity_block, parity)) {
+            if(!bit_lib_test_parity_32(parity_block, parity)) {
                 result = false;
             }
             break;
@@ -167,7 +168,6 @@ void bit_lib_copy_bits(
     }
 }
 
-#include <stdio.h>
 void bit_lib_reverse_bits(uint8_t* data, size_t position, uint8_t length) {
     size_t i = 0;
     size_t j = length - 1;
@@ -238,4 +238,53 @@ void bit_lib_print_regions(
             printf(" ");
         }
     }
+}
+
+uint16_t bit_lib_reverse_16_fast(uint16_t data) {
+    uint16_t result = 0;
+    result |= (data & 0x8000) >> 15;
+    result |= (data & 0x4000) >> 13;
+    result |= (data & 0x2000) >> 11;
+    result |= (data & 0x1000) >> 9;
+    result |= (data & 0x0800) >> 7;
+    result |= (data & 0x0400) >> 5;
+    result |= (data & 0x0200) >> 3;
+    result |= (data & 0x0100) >> 1;
+    result |= (data & 0x0080) << 1;
+    result |= (data & 0x0040) << 3;
+    result |= (data & 0x0020) << 5;
+    result |= (data & 0x0010) << 7;
+    result |= (data & 0x0008) << 9;
+    result |= (data & 0x0004) << 11;
+    result |= (data & 0x0002) << 13;
+    result |= (data & 0x0001) << 15;
+    return result;
+}
+
+uint16_t bit_lib_crc16(
+    uint8_t const* data,
+    size_t data_size,
+    uint16_t polynom,
+    uint16_t init,
+    bool ref_in,
+    bool ref_out,
+    uint16_t xor_out) {
+    uint16_t crc = init;
+
+    for(size_t i = 0; i < data_size; ++i) {
+        uint8_t byte = data[i];
+        if(ref_in) byte = bit_lib_reverse_16_fast(byte) >> 8;
+
+        for(size_t j = 0; j < 8; ++j) {
+            bool c15 = (crc >> 15 & 1);
+            bool bit = (byte >> (7 - j) & 1);
+            crc <<= 1;
+            if(c15 ^ bit) crc ^= polynom;
+        }
+    }
+
+    if(ref_out) crc = bit_lib_reverse_16_fast(crc);
+    crc ^= xor_out;
+
+    return crc;
 }

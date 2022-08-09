@@ -66,10 +66,6 @@ static bool protocol_0_decoder_feed(Protocol0Data* data, bool level, uint32_t du
     }
 }
 
-static void protocol_0_decoder_reset(Protocol0Data* data) {
-    data->data = 0;
-}
-
 static bool protocol_0_encoder_start(Protocol0Data* data) {
     data->encoder_counter = 0;
     return true;
@@ -78,10 +74,6 @@ static bool protocol_0_encoder_start(Protocol0Data* data) {
 static LevelDuration protocol_0_encoder_yield(Protocol0Data* data) {
     data->encoder_counter++;
     return level_duration_make(data->encoder_counter % 2, data->data);
-}
-
-static void protocol_0_encoder_reset(Protocol0Data* data) {
-    data->encoder_counter = 0;
 }
 
 /*********************** PROTOCOL 1 START ***********************/
@@ -141,10 +133,6 @@ static bool protocol_1_decoder_feed(Protocol1Data* data, bool level, uint32_t du
     }
 }
 
-static void protocol_1_decoder_reset(Protocol1Data* data) {
-    data->data = 0;
-}
-
 static bool protocol_1_encoder_start(Protocol1Data* data) {
     data->encoder_counter = 0;
     return true;
@@ -153,10 +141,6 @@ static bool protocol_1_encoder_start(Protocol1Data* data) {
 static LevelDuration protocol_1_encoder_yield(Protocol1Data* data) {
     data->encoder_counter++;
     return level_duration_make(!(data->encoder_counter % 2), 100);
-}
-
-static void protocol_1_encoder_reset(Protocol1Data* data) {
-    data->encoder_counter = 0;
 }
 
 /*********************** PROTOCOLS DESCRIPTION ***********************/
@@ -172,13 +156,11 @@ static const ProtocolBase protocol_0 = {
         {
             .start = (ProtocolDecoderStart)protocol_0_decoder_start,
             .feed = (ProtocolDecoderFeed)protocol_0_decoder_feed,
-            .reset = (ProtocolDecoderReset)protocol_0_decoder_reset,
         },
     .encoder =
         {
             .start = (ProtocolEncoderStart)protocol_0_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_0_encoder_yield,
-            .reset = (ProtocolEncoderReset)protocol_0_encoder_reset,
         },
 };
 
@@ -194,13 +176,11 @@ static const ProtocolBase protocol_1 = {
         {
             .start = (ProtocolDecoderStart)protocol_1_decoder_start,
             .feed = (ProtocolDecoderFeed)protocol_1_decoder_feed,
-            .reset = (ProtocolDecoderReset)protocol_1_decoder_reset,
         },
     .encoder =
         {
             .start = (ProtocolEncoderStart)protocol_1_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_1_encoder_yield,
-            .reset = (ProtocolEncoderReset)protocol_1_encoder_reset,
         },
 };
 
@@ -249,7 +229,7 @@ MU_TEST(test_protocol_dict) {
     protocol_dict_get_data(dict, protocol_id, data, data_size);
     mu_assert_mem_eq(&protocol_0_decoder_result, data, data_size);
 
-    protocol_dict_decoders_reset(dict);
+    protocol_dict_decoders_start(dict);
 
     protocol_id = TestDictProtocol0;
 

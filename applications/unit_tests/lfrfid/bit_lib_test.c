@@ -220,42 +220,42 @@ MU_TEST(test_bit_lib_get_bits_32) {
 
 MU_TEST(test_bit_lib_test_parity_u32) {
     // test even parity
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000000, BitLibParityEven), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000001, BitLibParityEven), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000010, BitLibParityEven), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000011, BitLibParityEven), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000100, BitLibParityEven), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000101, BitLibParityEven), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000110, BitLibParityEven), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000111, BitLibParityEven), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001000, BitLibParityEven), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001001, BitLibParityEven), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001010, BitLibParityEven), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001011, BitLibParityEven), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001100, BitLibParityEven), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001101, BitLibParityEven), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001110, BitLibParityEven), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001111, BitLibParityEven), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00010000, BitLibParityEven), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000000, BitLibParityEven), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000001, BitLibParityEven), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000010, BitLibParityEven), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000011, BitLibParityEven), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000100, BitLibParityEven), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000101, BitLibParityEven), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000110, BitLibParityEven), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000111, BitLibParityEven), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001000, BitLibParityEven), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001001, BitLibParityEven), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001010, BitLibParityEven), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001011, BitLibParityEven), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001100, BitLibParityEven), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001101, BitLibParityEven), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001110, BitLibParityEven), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001111, BitLibParityEven), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00010000, BitLibParityEven), 1);
 
     // test odd parity
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000000, BitLibParityOdd), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000001, BitLibParityOdd), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000010, BitLibParityOdd), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000011, BitLibParityOdd), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000100, BitLibParityOdd), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000101, BitLibParityOdd), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000110, BitLibParityOdd), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00000111, BitLibParityOdd), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001000, BitLibParityOdd), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001001, BitLibParityOdd), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001010, BitLibParityOdd), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001011, BitLibParityOdd), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001100, BitLibParityOdd), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001101, BitLibParityOdd), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001110, BitLibParityOdd), 0);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00001111, BitLibParityOdd), 1);
-    mu_assert_int_eq(bit_lib_test_parity_u32(0b00010000, BitLibParityOdd), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000000, BitLibParityOdd), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000001, BitLibParityOdd), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000010, BitLibParityOdd), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000011, BitLibParityOdd), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000100, BitLibParityOdd), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000101, BitLibParityOdd), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000110, BitLibParityOdd), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00000111, BitLibParityOdd), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001000, BitLibParityOdd), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001001, BitLibParityOdd), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001010, BitLibParityOdd), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001011, BitLibParityOdd), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001100, BitLibParityOdd), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001101, BitLibParityOdd), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001110, BitLibParityOdd), 0);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00001111, BitLibParityOdd), 1);
+    mu_assert_int_eq(bit_lib_test_parity_32(0b00010000, BitLibParityOdd), 0);
 }
 
 MU_TEST(test_bit_lib_test_parity) {
@@ -325,14 +325,126 @@ MU_TEST(test_bit_lib_reverse_bits) {
     uint8_t data_1_i[2] = {0b11001010, 0b00011111};
     uint8_t data_1_o[2] = {0b11111000, 0b01010011};
 
+    // reverse bits [0..15]
     bit_lib_reverse_bits(data_1_i, 0, 16);
     mu_assert_mem_eq(data_1_o, data_1_i, 2);
 
     uint8_t data_2_i[2] = {0b11001010, 0b00011111};
     uint8_t data_2_o[2] = {0b11001000, 0b01011111};
 
+    // reverse bits [4..11]
     bit_lib_reverse_bits(data_2_i, 4, 8);
     mu_assert_mem_eq(data_2_o, data_2_i, 2);
+}
+
+MU_TEST(test_bit_lib_copy_bits) {
+    uint8_t data_1_i[2] = {0b11001010, 0b00011111};
+    uint8_t data_1_o[2] = {0};
+
+    // data_1_o[0..15] = data_1_i[0..15]
+    bit_lib_copy_bits(data_1_o, 0, 16, data_1_i, 0);
+    mu_assert_mem_eq(data_1_i, data_1_o, 2);
+
+    memset(data_1_o, 0, 2);
+    // data_1_o[4..11] = data_1_i[0..7]
+    bit_lib_copy_bits(data_1_o, 4, 8, data_1_i, 0);
+    mu_assert_mem_eq(((uint8_t[]){0b00001100, 0b10100000}), data_1_o, 2);
+}
+
+MU_TEST(test_bit_lib_get_bit_count) {
+    mu_assert_int_eq(0, bit_lib_get_bit_count(0));
+    mu_assert_int_eq(1, bit_lib_get_bit_count(0b1));
+    mu_assert_int_eq(1, bit_lib_get_bit_count(0b10));
+    mu_assert_int_eq(2, bit_lib_get_bit_count(0b11));
+    mu_assert_int_eq(4, bit_lib_get_bit_count(0b11000011));
+    mu_assert_int_eq(6, bit_lib_get_bit_count(0b11000011000011));
+    mu_assert_int_eq(8, bit_lib_get_bit_count(0b11111111));
+    mu_assert_int_eq(16, bit_lib_get_bit_count(0b11111110000000000000000111111111));
+    mu_assert_int_eq(32, bit_lib_get_bit_count(0b11111111111111111111111111111111));
+}
+
+MU_TEST(test_bit_lib_reverse_16_fast) {
+    mu_assert_int_eq(0b0000000000000000, bit_lib_reverse_16_fast(0b0000000000000000));
+    mu_assert_int_eq(0b1000000000000000, bit_lib_reverse_16_fast(0b0000000000000001));
+    mu_assert_int_eq(0b1100000000000000, bit_lib_reverse_16_fast(0b0000000000000011));
+    mu_assert_int_eq(0b0000100000001001, bit_lib_reverse_16_fast(0b1001000000010000));
+}
+
+MU_TEST(test_bit_lib_crc16) {
+    uint8_t data[9] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
+    uint8_t data_size = 9;
+
+    // Algorithm
+    // Check	Poly	Init	RefIn	RefOut	XorOut
+    // CRC-16/CCITT-FALSE
+    // 0x29B1	0x1021	0xFFFF	false	false	0x0000
+    mu_assert_int_eq(0x29B1, bit_lib_crc16(data, data_size, 0x1021, 0xFFFF, false, false, 0x0000));
+    // CRC-16/ARC
+    // 0xBB3D	0x8005	0x0000	true	true	0x0000
+    mu_assert_int_eq(0xBB3D, bit_lib_crc16(data, data_size, 0x8005, 0x0000, true, true, 0x0000));
+    // CRC-16/AUG-CCITT
+    // 0xE5CC	0x1021	0x1D0F	false	false	0x0000
+    mu_assert_int_eq(0xE5CC, bit_lib_crc16(data, data_size, 0x1021, 0x1D0F, false, false, 0x0000));
+    // CRC-16/BUYPASS
+    // 0xFEE8	0x8005	0x0000	false	false	0x0000
+    mu_assert_int_eq(0xFEE8, bit_lib_crc16(data, data_size, 0x8005, 0x0000, false, false, 0x0000));
+    // CRC-16/CDMA2000
+    // 0x4C06	0xC867	0xFFFF	false	false	0x0000
+    mu_assert_int_eq(0x4C06, bit_lib_crc16(data, data_size, 0xC867, 0xFFFF, false, false, 0x0000));
+    // CRC-16/DDS-110
+    // 0x9ECF	0x8005	0x800D	false	false	0x0000
+    mu_assert_int_eq(0x9ECF, bit_lib_crc16(data, data_size, 0x8005, 0x800D, false, false, 0x0000));
+    // CRC-16/DECT-R
+    // 0x007E	0x0589	0x0000	false	false	0x0001
+    mu_assert_int_eq(0x007E, bit_lib_crc16(data, data_size, 0x0589, 0x0000, false, false, 0x0001));
+    // CRC-16/DECT-X
+    // 0x007F	0x0589	0x0000	false	false	0x0000
+    mu_assert_int_eq(0x007F, bit_lib_crc16(data, data_size, 0x0589, 0x0000, false, false, 0x0000));
+    // CRC-16/DNP
+    // 0xEA82	0x3D65	0x0000	true	true	0xFFFF
+    mu_assert_int_eq(0xEA82, bit_lib_crc16(data, data_size, 0x3D65, 0x0000, true, true, 0xFFFF));
+    // CRC-16/EN-13757
+    // 0xC2B7	0x3D65	0x0000	false	false	0xFFFF
+    mu_assert_int_eq(0xC2B7, bit_lib_crc16(data, data_size, 0x3D65, 0x0000, false, false, 0xFFFF));
+    // CRC-16/GENIBUS
+    // 0xD64E	0x1021	0xFFFF	false	false	0xFFFF
+    mu_assert_int_eq(0xD64E, bit_lib_crc16(data, data_size, 0x1021, 0xFFFF, false, false, 0xFFFF));
+    // CRC-16/MAXIM
+    // 0x44C2	0x8005	0x0000	true	true	0xFFFF
+    mu_assert_int_eq(0x44C2, bit_lib_crc16(data, data_size, 0x8005, 0x0000, true, true, 0xFFFF));
+    // CRC-16/MCRF4XX
+    // 0x6F91	0x1021	0xFFFF	true	true	0x0000
+    mu_assert_int_eq(0x6F91, bit_lib_crc16(data, data_size, 0x1021, 0xFFFF, true, true, 0x0000));
+    // CRC-16/RIELLO
+    // 0x63D0	0x1021	0xB2AA	true	true	0x0000
+    mu_assert_int_eq(0x63D0, bit_lib_crc16(data, data_size, 0x1021, 0xB2AA, true, true, 0x0000));
+    // CRC-16/T10-DIF
+    // 0xD0DB	0x8BB7	0x0000	false	false	0x0000
+    mu_assert_int_eq(0xD0DB, bit_lib_crc16(data, data_size, 0x8BB7, 0x0000, false, false, 0x0000));
+    // CRC-16/TELEDISK
+    // 0x0FB3	0xA097	0x0000	false	false	0x0000
+    mu_assert_int_eq(0x0FB3, bit_lib_crc16(data, data_size, 0xA097, 0x0000, false, false, 0x0000));
+    // CRC-16/TMS37157
+    // 0x26B1	0x1021	0x89EC	true	true	0x0000
+    mu_assert_int_eq(0x26B1, bit_lib_crc16(data, data_size, 0x1021, 0x89EC, true, true, 0x0000));
+    // CRC-16/USB
+    // 0xB4C8	0x8005	0xFFFF	true	true	0xFFFF
+    mu_assert_int_eq(0xB4C8, bit_lib_crc16(data, data_size, 0x8005, 0xFFFF, true, true, 0xFFFF));
+    // CRC-A
+    // 0xBF05	0x1021	0xC6C6	true	true	0x0000
+    mu_assert_int_eq(0xBF05, bit_lib_crc16(data, data_size, 0x1021, 0xC6C6, true, true, 0x0000));
+    // CRC-16/KERMIT
+    // 0x2189	0x1021	0x0000	true	true	0x0000
+    mu_assert_int_eq(0x2189, bit_lib_crc16(data, data_size, 0x1021, 0x0000, true, true, 0x0000));
+    // CRC-16/MODBUS
+    // 0x4B37	0x8005	0xFFFF	true	true	0x0000
+    mu_assert_int_eq(0x4B37, bit_lib_crc16(data, data_size, 0x8005, 0xFFFF, true, true, 0x0000));
+    // CRC-16/X-25
+    // 0x906E	0x1021	0xFFFF	true	true	0xFFFF
+    mu_assert_int_eq(0x906E, bit_lib_crc16(data, data_size, 0x1021, 0xFFFF, true, true, 0xFFFF));
+    // CRC-16/XMODEM
+    // 0x31C3	0x1021	0x0000	false	false	0x0000
+    mu_assert_int_eq(0x31C3, bit_lib_crc16(data, data_size, 0x1021, 0x0000, false, false, 0x0000));
 }
 
 MU_TEST_SUITE(test_bit_lib) {
@@ -348,7 +460,11 @@ MU_TEST_SUITE(test_bit_lib) {
     MU_RUN_TEST(test_bit_lib_test_parity_u32);
     MU_RUN_TEST(test_bit_lib_test_parity);
     MU_RUN_TEST(test_bit_lib_remove_bit_every_nth);
+    MU_RUN_TEST(test_bit_lib_copy_bits);
     MU_RUN_TEST(test_bit_lib_reverse_bits);
+    MU_RUN_TEST(test_bit_lib_get_bit_count);
+    MU_RUN_TEST(test_bit_lib_reverse_16_fast);
+    MU_RUN_TEST(test_bit_lib_crc16);
 }
 
 int run_minunit_test_bit_lib() {

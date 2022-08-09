@@ -62,16 +62,30 @@ void bit_lib_set_bits(uint8_t* data, size_t position, uint8_t byte, uint8_t leng
 bool bit_lib_get_bit(const uint8_t* data, size_t position);
 
 /**
- * @brief Get the bits of a byte.
- * @param data The byte to get the bits from.
+ * @brief Get the bits of a data, as uint8_t.
+ * @param data The data to get the bits from.
  * @param position The position of the first bit.
  * @param length The length of the bits.
  * @return The bits.
  */
 uint8_t bit_lib_get_bits(const uint8_t* data, size_t position, uint8_t length);
 
+/**
+ * @brief Get the bits of a data, as uint16_t.
+ * @param data The data to get the bits from.
+ * @param position The position of the first bit.
+ * @param length The length of the bits.
+ * @return The bits.
+ */
 uint16_t bit_lib_get_bits_16(const uint8_t* data, size_t position, uint8_t length);
 
+/**
+ * @brief Get the bits of a data, as uint32_t.
+ * @param data The data to get the bits from.
+ * @param position The position of the first bit.
+ * @param length The length of the bits.
+ * @return The bits.
+ */
 uint32_t bit_lib_get_bits_32(const uint8_t* data, size_t position, uint8_t length);
 
 /**
@@ -80,7 +94,7 @@ uint32_t bit_lib_get_bits_32(const uint8_t* data, size_t position, uint8_t lengt
  * @param parity Parity to test against
  * @return true if parity is correct, false otherwise
  */
-bool bit_lib_test_parity_u32(uint32_t bits, BitLibParity parity);
+bool bit_lib_test_parity_32(uint32_t bits, BitLibParity parity);
 
 /**
  * @brief Test parity of bit array, check parity for every parity_length block from start
@@ -171,6 +185,35 @@ void bit_lib_print_regions(
     size_t region_count,
     const uint8_t* data,
     size_t length);
+
+/**
+ * @brief Reverse bits in uint16_t, faster than generic bit_lib_reverse_bits.
+ * 
+ * @param data 
+ * @return uint16_t 
+ */
+uint16_t bit_lib_reverse_16_fast(uint16_t data);
+
+/**
+ * @brief Slow, but generic CRC16 implementation
+ * 
+ * @param data 
+ * @param data_size 
+ * @param polynom CRC polynom
+ * @param init init value
+ * @param ref_in true if the right bit is older
+ * @param ref_out true to reverse output
+ * @param xor_out xor output with this value
+ * @return uint16_t 
+ */
+uint16_t bit_lib_crc16(
+    uint8_t const* data,
+    size_t data_size,
+    uint16_t polynom,
+    uint16_t init,
+    bool ref_in,
+    bool ref_out,
+    uint16_t xor_out);
 
 #ifdef __cplusplus
 }

@@ -141,7 +141,7 @@ void protocol_awid_encode(const uint8_t* decoded_data, uint8_t* encoded_data) {
 
     for(size_t i = 0; i < 88 / 4; i++) {
         uint8_t value = bit_lib_get_bits(decoded_data, i * 3, 3) << 1;
-        value |= bit_lib_test_parity_u32(value, BitLibParityOdd);
+        value |= bit_lib_test_parity_32(value, BitLibParityOdd);
         bit_lib_set_bits(encoded_data, 8 + i * 4, value, 4);
     }
 };

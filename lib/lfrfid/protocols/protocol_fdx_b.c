@@ -13,11 +13,19 @@
 
 #define FDXB_DECODED_DATA_SIZE (12)
 
+#define FDX_B_SHORT_TIME (128)
+#define FDX_B_LONG_TIME (256)
+#define FDX_B_JITTER_TIME (60)
+
+#define FDX_B_SHORT_TIME_LOW (FDX_B_SHORT_TIME - FDX_B_JITTER_TIME)
+#define FDX_B_SHORT_TIME_HIGH (FDX_B_SHORT_TIME + FDX_B_JITTER_TIME)
+#define FDX_B_LONG_TIME_LOW (FDX_B_LONG_TIME - FDX_B_JITTER_TIME)
+#define FDX_B_LONG_TIME_HIGH (FDX_B_LONG_TIME + FDX_B_JITTER_TIME)
+
 typedef struct {
     bool last_short;
     bool last_level;
     size_t encoded_index;
-    // ProtocolFDXBEncoder encoder;
     uint8_t encoded_data[FDX_B_ENCODED_BYTE_FULL_SIZE];
     uint8_t data[FDXB_DECODED_DATA_SIZE];
 } ProtocolFDXB;
@@ -64,15 +72,6 @@ void protocol_fdx_b_decoder_start(ProtocolFDXB* protocol) {
     protocol->last_short = false;
 };
 
-#define FDX_B_SHORT_TIME (128)
-#define FDX_B_LONG_TIME (256)
-#define FDX_B_JITTER_TIME (60)
-
-#define FDX_B_SHORT_TIME_LOW (FDX_B_SHORT_TIME - FDX_B_JITTER_TIME)
-#define FDX_B_SHORT_TIME_HIGH (FDX_B_SHORT_TIME + FDX_B_JITTER_TIME)
-#define FDX_B_LONG_TIME_LOW (FDX_B_LONG_TIME - FDX_B_JITTER_TIME)
-#define FDX_B_LONG_TIME_HIGH (FDX_B_LONG_TIME + FDX_B_JITTER_TIME)
-
 static bool protocol_fdx_b_can_be_decoded(ProtocolFDXB* protocol) {
     bool result = false;
 
@@ -108,28 +107,6 @@ msb		lsb
     } while(false);
 
     return result;
-}
-
-static void string_push_uint64(uint64_t input, string_t output) {
-    const uint8_t base = 10;
-
-    do {
-        char c = input % base;
-        input /= base;
-
-        if(c < 10)
-            c += '0';
-        else
-            c += 'A' - 10;
-        string_push_back(output, c);
-    } while(input);
-
-    // reverse string
-    for(uint8_t i = 0; i < string_size(output) / 2; i++) {
-        char c = string_get_char(output, i);
-        string_set_char(output, i, string_get_char(output, string_size(output) - i - 1));
-        string_set_char(output, string_size(output) - i - 1, c);
-    }
 }
 
 void protocol_fdx_b_decode(ProtocolFDXB* protocol) {
@@ -189,22 +166,19 @@ void protocol_fdx_b_decode(ProtocolFDXB* protocol) {
     uint8_t replacement_number = bit_lib_get_bits(protocol->encoded_data, 60, 3);
     bool animal_flag = bit_lib_get_bit(protocol->encoded_data, 63);
 
+    uint16_t crc = bit_lib_get_bits(protocol->encoded_data, 64, 16);
+    bit_lib_reverse_bits((uint8_t*)&crc, 0, 16);
+
     uint32_t extended = bit_lib_get_bits_32(protocol->encoded_data, 80, 24) << 8;
     bit_lib_reverse_bits((uint8_t*)&extended, 0, 32);
 
     uint8_t ex_parity = (extended & 0x100) >> 8;
     uint8_t ex_temperature = extended & 0xff;
-    uint8_t ex_calc_parity = bit_lib_test_parity_u32(ex_temperature, BitLibParityOdd);
+    uint8_t ex_calc_parity = bit_lib_test_parity_32(ex_temperature, BitLibParityOdd);
     bool ex_temperature_present = (ex_calc_parity == ex_parity) && !(extended & 0xe00);
 
-    string_t pet_id;
-    string_init(pet_id);
-    string_push_uint64(national_code, pet_id);
-
     printf("\r\n");
-    printf("Pet ID: %s\r\n", string_get_cstr(pet_id));
-    string_clear(pet_id);
-
+    printf("Pet ID: %llu\r\n", national_code);
     printf("Country: %d\r\n", country_code);
     printf("Block status: %d\r\n", block_status);
     printf("Rudi bit: %d\r\n", rudi_bit);
