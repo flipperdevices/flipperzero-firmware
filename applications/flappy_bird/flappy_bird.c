@@ -2,6 +2,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
+#include <dolphin/dolphin.h>
 
 #include "bird.h"
 
@@ -235,6 +236,16 @@ static void flappy_game_render_callback(Canvas* const canvas, void* ctx) {
 
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 37, 31, "Game Over");
+
+        if(game_state->points>=10) {
+            DOLPHIN_DEED(DolphinDeedPluginAchivement);
+        }
+        if(game_state->points>=50) {
+            DOLPHIN_DEED(DolphinDeedPluginAchivement);
+        }
+        if(game_state->points>=100) {
+            DOLPHIN_DEED(DolphinDeedPluginAchivement);
+        }
 
         canvas_set_font(canvas, FontSecondary);
         char buffer[12];

@@ -4,6 +4,7 @@
 #include <gui/elements.h>
 #include <gui/gui.h>
 #include <input/input.h>
+#include <dolphin/dolphin.h>
 
 #define TAG "Dice Roller"
 
@@ -201,6 +202,8 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             snprintf(diceType[0], sizeof(diceType[0]), "%s%d", "d", diceSelect);
             snprintf(
                 strings[0], sizeof(strings[0]), "%d%s at %s", diceQty, diceType[0], rollTime[0]);
+            if(diceSelect>=20 && diceRoll==diceSelect) DOLPHIN_DEED(DolphinDeedPluginAchivement);
+            if(diceSelect>=20 && diceRoll==diceSelect-1) DOLPHIN_DEED(DolphinDeedPluginMinorAchivement);
             if(diceQty == 1) {
                 snprintf(strings[1], sizeof(strings[1]), "%d", diceRoll);
             } else if(diceQty == 2) {

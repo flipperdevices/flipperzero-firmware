@@ -7,6 +7,7 @@
 
 #include <nrf24.h>
 #include <toolbox/stream/file_stream.h>
+#include <dolphin/dolphin.h>
 
 #define LOGITECH_MAX_CHANNEL 85
 #define COUNT_THRESHOLD 4
@@ -216,6 +217,12 @@ static bool save_addr_to_file(Storage* storage, uint8_t* data, uint8_t size, Not
     notification_message(notification, &sequence_success);
 
     FURI_LOG_I(TAG, "Save successful!");
+
+    DOLPHIN_DEED(DolphinDeedPluginAchivement);
+    if(stream_write(stream, (uint8_t*)addrline, linesize) > 0) {
+        stream_free(stream);
+        FURI_LOG_I(TAG, "Found a new address: %s", addrline);
+    }
     stream_free(stream);
     return true;
 }
