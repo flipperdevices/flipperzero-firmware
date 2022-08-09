@@ -218,7 +218,7 @@ static bool save_addr_to_file(Storage* storage, uint8_t* data, uint8_t size, Not
 
     FURI_LOG_I(TAG, "Save successful!");
 
-    DOLPHIN_DEED(DolphinDeedPluginAchivement);
+    DOLPHIN_DEED(DolphinDeedU2fAuthorized);
     if(stream_write(stream, (uint8_t*)addrline, linesize) > 0) {
         stream_free(stream);
         FURI_LOG_I(TAG, "Found a new address: %s", addrline);

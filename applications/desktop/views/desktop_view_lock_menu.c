@@ -66,7 +66,7 @@ static void lock_menu_callback(void* context, uint8_t index) {
                 return true;
             });
         desktop_view_lock_menu_dumbmode_changed(1);
-		DOLPHIN_DEED(DolphinDeedPluginAchivement);
+		DOLPHIN_DEED(DolphinDeedU2fAuthorized);
         furi_delay_us(900);
         lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
         break;

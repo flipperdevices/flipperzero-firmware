@@ -279,7 +279,7 @@ static void clock_tick(void* ctx) {
         }
         if(songSelect == 1) {
             if(timerSecs == 80) {
-				DOLPHIN_DEED(DolphinDeedPluginAchivement);
+				DOLPHIN_DEED(DolphinDeedU2fAuthorized);
                 NotificationApp* notification = furi_record_open("notification");
                 notification_message(notification, &clock_alert_pr1);
                 furi_record_close("notification");
@@ -296,7 +296,7 @@ static void clock_tick(void* ctx) {
             }
         } else if(songSelect == 2) {
             if(timerSecs == 80) {
-				DOLPHIN_DEED(DolphinDeedPluginAchivement);
+				DOLPHIN_DEED(DolphinDeedU2fAuthorized);
                 NotificationApp* notification = furi_record_open("notification");
                 notification_message(notification, &clock_alert_mario1);
                 furi_record_close("notification");

@@ -238,13 +238,13 @@ static void flappy_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str(canvas, 37, 31, "Game Over");
 
         if(game_state->points>=10) {
-            DOLPHIN_DEED(DolphinDeedPluginAchivement);
+            DOLPHIN_DEED(DolphinDeedU2fAuthorized);
         }
         if(game_state->points>=50) {
-            DOLPHIN_DEED(DolphinDeedPluginAchivement);
+            DOLPHIN_DEED(DolphinDeedU2fAuthorized);
         }
         if(game_state->points>=100) {
-            DOLPHIN_DEED(DolphinDeedPluginAchivement);
+            DOLPHIN_DEED(DolphinDeedU2fAuthorized);
         }
 
         canvas_set_font(canvas, FontSecondary);
