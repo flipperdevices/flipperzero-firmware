@@ -25,7 +25,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite);
 
     submenu_set_header(
-        app->submenu, primary_favorite ? "Primary favorite app:" : "Secondary favorite app:");
+        app->submenu, primary_favorite ? "Primary Favorite App:" : "Secondary Favorite App:");
 
     if(primary_favorite) {
         submenu_set_selected_item(app->submenu, app->settings.favorite_primary);

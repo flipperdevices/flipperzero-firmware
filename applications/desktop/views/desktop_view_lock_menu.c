@@ -54,7 +54,7 @@ static void lock_menu_callback(void* context, uint8_t index) {
 }
 
 void desktop_lock_menu_render(Canvas* canvas, void* model) {
-    const char* Lockmenu_Items[LOCK_MENU_ITEMS_NB] = {"Lock", "Lock with PIN", "DUMB mode"};
+    const char* Lockmenu_Items[LOCK_MENU_ITEMS_NB] = {"Lock", "Lock With PIN", "DUMB Mode"};
 
     DesktopLockMenuViewModel* m = model;
     canvas_clear(canvas);
