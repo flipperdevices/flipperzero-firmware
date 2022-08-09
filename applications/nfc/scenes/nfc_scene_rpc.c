@@ -69,6 +69,11 @@ bool nfc_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             }
 
             rpc_system_app_confirm(nfc->rpc_ctx, RpcAppEventLoadFile, result);
+        } else if(event.event == NfcCustomEventDataReceived) {
+            const char* arg = rpc_system_app_get_data(nfc->rpc_ctx);
+            FURI_LOG_I("NfcRpc", "%s", arg);
+            bool result = true;
+            rpc_system_app_confirm(nfc->rpc_ctx, RpcAppEventDataReceived, result);
         }
     }
     return consumed;
