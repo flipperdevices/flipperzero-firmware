@@ -12,6 +12,7 @@
 - NRFSniff fixes [(By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/208)
 - Updates for [NFC: Display UL PWD_AUTH payload / ntag-pwd-capture (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
 - Added [Picopass load/info/delete #1562 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1562)
+- Added Dolphin: High Moods (By RogueMaster)
 - Added Dolphin: Plugin Achivement +3 EXP for a total of 90 EXP daily. Plugin Achivements are:
 - - Games Only Mode from Lock Menu
 - - Stopwatch @ 1:20 Alert
@@ -93,7 +94,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)
 - Dolphin: Internal manifest updated to have animations always available with max level 30
 - Dolphin: Level animation sequence for level 3+ to be lvl1->2 for levels 1-20 and lvl2->3 for levels 21-30.
-- Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware) (Changed to Mood Stays Less Than 6)
+- Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware), changed to Mood Stays Less Than 6 / Mood Stays High (By RogueMaster)
 - Dolphin: Passport: Show EXP [(By Dabolus)](https://github.com/Dabolus/flipperzero-firmware-rpg/)
 - Dolphin: Plugin Achivement +3 EXP for a total of 90 EXP daily. Plugin Achivements are:
 - - Games Only Mode from Lock Menu
