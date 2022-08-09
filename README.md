@@ -6,9 +6,6 @@
 <b>Latest Updates:</b>
 
 - Known Issues:`FAP Loader` & `Chess`
-- Added Assets: Includes Rukamon animation 2x and Agumon animation [By Syrius]
-- Update from [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
-- Added: [Dolphin: Passport: Show EXP (By Dabolus)](https://github.com/Dabolus/flipperzero-firmware-rpg/)
 - NRFSniff fixes [(By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/208)
 - Updates for [NFC: Display UL PWD_AUTH payload / ntag-pwd-capture (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
 - Added [Picopass load/info/delete #1562 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1562)
