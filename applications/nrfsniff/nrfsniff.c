@@ -207,24 +207,24 @@ static bool save_addr_to_file(Storage* storage, uint8_t* data, uint8_t size, Not
                 stream_free(stream);
                 return false;
             }
+			else
+			{
+				FURI_LOG_I(TAG, "Found a new address: %s", addrline);
+				FURI_LOG_I(TAG, "Save successful!");
+
+				notification_message(notification, &sequence_success);
+				
+				DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+				
+				stream_free(stream);
+				return true;
+			}
         }
     } else {
         FURI_LOG_I(TAG, "Cannot open file \"%s\"", filepath);
         stream_free(stream);
         return false;
     }
-
-    notification_message(notification, &sequence_success);
-
-    FURI_LOG_I(TAG, "Save successful!");
-
-    DOLPHIN_DEED(DolphinDeedU2fAuthorized);
-    if(stream_write(stream, (uint8_t*)addrline, linesize) > 0) {
-        stream_free(stream);
-        FURI_LOG_I(TAG, "Found a new address: %s", addrline);
-    }
-    stream_free(stream);
-    return true;
 }
 
 void alt_address(uint8_t* addr, uint8_t* altaddr) {
