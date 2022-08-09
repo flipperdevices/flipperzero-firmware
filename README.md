@@ -14,15 +14,15 @@ you can just flash the latest binary.
 I used a nodeMCU board. Wiring is simple. follow the wiring guide on https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module
 On mine I connected one G to ground, VIN to 5V, RX to U_TX, TX to U_RX.
 
-NodeMCU   FlipperZero
+NodeMCU---FlipperZero
 
-G         GND
+G---------GND
 
-VIN       5V
+VIN-------5V
 
-RX        U_TX
+RX--------U_TX
 
-TX        U_RX
+TX--------U_RX
 
 
 
@@ -31,13 +31,15 @@ https://youtu.be/_RFzZyPkeR0
 
 I installed this into Roguemaster to test.
 
-$ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
-$ cd flipperzero-firmware-wPlugins/
+git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
+
+cd flipperzero-firmware-wPlugins/
 
 copy folder into applications.
 add "APPS_wifi_deauther", to the meta/application.fam file.
 
 compile
 
-$ ./fbt resources icons
-$ ./fbt updater_package
+./fbt resources icons
+
+./fbt updater_package
