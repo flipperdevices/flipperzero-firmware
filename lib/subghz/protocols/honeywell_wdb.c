@@ -10,7 +10,7 @@
 
 /*
  * 
- * hhttps://github.com/klohner/honeywell-wireless-doorbell
+ * https://github.com/klohner/honeywell-wireless-doorbell
  *
  */
 
