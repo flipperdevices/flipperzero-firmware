@@ -305,21 +305,27 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
             response->command_id = request->command_id;
             response->which_content = PB_Main_storage_read_response_tag;
             response->command_status = PB_CommandStatus_OK;
-            response->content.storage_read_response.has_file = true;
-            response->content.storage_read_response.file.data =
-                malloc(PB_BYTES_ARRAY_T_ALLOCSIZE(MIN(size_left, MAX_DATA_SIZE)));
-            uint8_t* buffer = response->content.storage_read_response.file.data->bytes;
-            uint16_t* read_size_msg = &response->content.storage_read_response.file.data->size;
 
             size_t read_size = MIN(size_left, MAX_DATA_SIZE);
-            *read_size_msg = storage_file_read(file, buffer, read_size);
-            size_left -= read_size;
-            result = (*read_size_msg == read_size);
+            if(read_size) {
+                response->content.storage_read_response.has_file = true;
+                response->content.storage_read_response.file.data =
+                    malloc(PB_BYTES_ARRAY_T_ALLOCSIZE());
+                uint8_t* buffer = response->content.storage_read_response.file.data->bytes;
+                uint16_t* read_size_msg = &response->content.storage_read_response.file.data->size;
 
-            if(result) {
-                response->has_next = (size_left > 0);
-                rpc_send_and_release(session, response);
+                *read_size_msg = storage_file_read(file, buffer, read_size);
+                size_left -= read_size;
+                result = (*read_size_msg == read_size);
+
+                response->has_next = result && (size_left > 0);
+            } else {
+                response->content.storage_read_response.has_file = false;
+                response->has_next = false;
+                result = true;
             }
+
+            rpc_send_and_release(session, response);
         } while((size_left != 0) && result);
 
         if(!result) {
@@ -378,9 +384,12 @@ static void rpc_system_storage_write_process(const PB_Main* request, void* conte
     if(result) {
         uint8_t* buffer = request->content.storage_write_request.file.data->bytes;
         size_t buffer_size = request->content.storage_write_request.file.data->size;
-
-        uint16_t written_size = storage_file_write(file, buffer, buffer_size);
-        result = (written_size == buffer_size);
+        if(buffer_size) {
+            uint16_t written_size = storage_file_write(file, buffer, buffer_size);
+            result = (written_size == buffer_size);
+        } else {
+            result = true;
+        }
 
         if(result && !request->has_next) {
             rpc_send_and_release_empty(
