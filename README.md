@@ -7,7 +7,8 @@
 
 - Known Issues:`FAP Loader` & `Chess`
 - Updated custom deeds to use DolphinDeedU2fAuthorized instead of custom deeds to fix .dolphin.state issues
-- NRFSniff logs address found (By 0day)
+- NRFSniff logs address found (By 0day) and fix positioning [(By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/210)
+- OFW: [#1564](https://github.com/flipperdevices/flipperzero-firmware/pull/1564), [#1566](https://github.com/flipperdevices/flipperzero-firmware/pull/1566) & [#1563](https://github.com/flipperdevices/flipperzero-firmware/pull/1563)
 - Change NFC Key files so the people have their user dict back
 
 <table width="100%" border="0" cellspacing="0">
