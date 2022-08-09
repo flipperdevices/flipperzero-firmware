@@ -355,7 +355,7 @@ static void rpc_system_storage_write_process(const PB_Main* request, void* conte
     RpcSession* session = rpc_storage->session;
     furi_assert(session);
 
-    bool result = true;
+    bool fs_operation_success = true;
 
     if(!path_contains_only_ascii(request->content.storage_write_request.path)) {
         rpc_storage->current_command_id = request->command_id;
@@ -376,31 +376,32 @@ static void rpc_system_storage_write_process(const PB_Main* request, void* conte
         rpc_storage->current_command_id = request->command_id;
         rpc_storage->state = RpcStorageStateWriting;
         const char* path = request->content.storage_write_request.path;
-        result = storage_file_open(rpc_storage->file, path, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+        fs_operation_success =
+            storage_file_open(rpc_storage->file, path, FSAM_WRITE, FSOM_CREATE_ALWAYS);
     }
 
     File* file = rpc_storage->file;
+    bool send_response = false;
 
-    if(result) {
-        uint8_t* buffer = request->content.storage_write_request.file.data->bytes;
-        size_t buffer_size = request->content.storage_write_request.file.data->size;
-        if(buffer_size) {
+    if(fs_operation_success) {
+        if(request->content.storage_write_request.has_file) {
+            uint8_t* buffer = request->content.storage_write_request.file.data->bytes;
+            size_t buffer_size = request->content.storage_write_request.file.data->size;
             uint16_t written_size = storage_file_write(file, buffer, buffer_size);
-            result = (written_size == buffer_size);
-        } else {
-            result = true;
+            fs_operation_success = (written_size == buffer_size);
         }
 
-        if(result && !request->has_next) {
-            rpc_send_and_release_empty(
-                session, rpc_storage->current_command_id, PB_CommandStatus_OK);
-            rpc_system_storage_reset_state(rpc_storage, session, false);
-        }
+        send_response = !request->has_next;
     }
 
-    if(!result) {
-        rpc_send_and_release_empty(
-            session, rpc_storage->current_command_id, rpc_system_storage_get_file_error(file));
+    PB_CommandStatus command_status = PB_CommandStatus_OK;
+    if(!fs_operation_success) {
+        send_response = true;
+        command_status = rpc_system_storage_get_file_error(file);
+    }
+
+    if(send_response) {
+        rpc_send_and_release_empty(session, rpc_storage->current_command_id, command_status);
         rpc_system_storage_reset_state(rpc_storage, session, false);
     }
 }
