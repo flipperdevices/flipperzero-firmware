@@ -11,7 +11,7 @@
 #define FDX_B_PREAMBLE_BYTE_SIZE (2)
 #define FDX_B_ENCODED_BYTE_FULL_SIZE (FDX_B_ENCODED_BYTE_SIZE + FDX_B_PREAMBLE_BYTE_SIZE)
 
-#define FDXB_DECODED_DATA_SIZE (12)
+#define FDXB_DECODED_DATA_SIZE (11)
 
 #define FDX_B_SHORT_TIME (128)
 #define FDX_B_LONG_TIME (256)
@@ -39,21 +39,19 @@ void protocol_fdx_b_free(ProtocolFDXB* protocol) {
     free(protocol);
 };
 
-void protocol_fdx_b_set_data(ProtocolFDXB* protocol, const uint8_t* data, size_t data_size) {
-    UNUSED(protocol);
-    UNUSED(data);
-    UNUSED(data_size);
+void protocol_fdx_b_set_data(ProtocolFDXB* proto, const uint8_t* data, size_t data_size) {
+    furi_check(data_size >= FDXB_DECODED_DATA_SIZE);
+    memcpy(proto->data, data, FDXB_DECODED_DATA_SIZE);
 };
 
-void protocol_fdx_b_get_data(ProtocolFDXB* protocol, uint8_t* data, size_t data_size) {
-    UNUSED(protocol);
-    UNUSED(data);
-    UNUSED(data_size);
+void protocol_fdx_b_get_data(ProtocolFDXB* proto, uint8_t* data, size_t data_size) {
+    furi_check(data_size >= FDXB_DECODED_DATA_SIZE);
+    memcpy(data, proto->data, FDXB_DECODED_DATA_SIZE);
 };
 
 size_t protocol_fdx_b_get_data_size(ProtocolFDXB* protocol) {
     UNUSED(protocol);
-    return 11;
+    return FDXB_DECODED_DATA_SIZE;
 };
 
 const char* protocol_fdx_b_get_name(ProtocolFDXB* protocol) {
@@ -76,22 +74,22 @@ static bool protocol_fdx_b_can_be_decoded(ProtocolFDXB* protocol) {
     bool result = false;
 
     /*
-msb		lsb
-0   10000000000	  Header pattern. 11 bits.
-11    1nnnnnnnn	
-20    1nnnnnnnn	  38 bit (12 digit) National code.
-29    1nnnnnnnn	  eg. 000000001008 (decimal).
-38    1nnnnnnnn	
-47    1nnnnnncc	  10 bit (3 digit) Country code.
-56    1cccccccc	  eg. 999 (decimal).
-64    1s-------	  1 bit data block status flag.
-73    1-------a	  1 bit animal application indicator.
-82    1xxxxxxxx	  16 bit checksum.
-91    1xxxxxxxx	
-100   1eeeeeeee	  24 bits of extra data if present.
-109   1eeeeeeee	  eg. $123456.
-118   1eeeeeeee	
-*/
+    msb		lsb
+    0   10000000000	  Header pattern. 11 bits.
+    11    1nnnnnnnn	
+    20    1nnnnnnnn	  38 bit (12 digit) National code.
+    29    1nnnnnnnn	  eg. 000000001008 (decimal).
+    38    1nnnnnnnn	
+    47    1nnnnnncc	  10 bit (3 digit) Country code.
+    56    1cccccccc	  eg. 999 (decimal).
+    65    1s-------	  1 bit data block status flag.
+    74    1-------a	  1 bit animal application indicator.
+    83    1xxxxxxxx	  16 bit checksum.
+    92    1xxxxxxxx	
+    101   1eeeeeeee	  24 bits of extra data if present.
+    110   1eeeeeeee	  eg. $123456.
+    119   1eeeeeeee	
+    */
 
     do {
         // check 11 bits preamble
@@ -101,7 +99,20 @@ msb		lsb
         // check control bits
         if(!bit_lib_test_parity(protocol->encoded_data, 3, 13 * 9, BitLibParityAlways1, 9)) break;
 
-        // TODO check CRC16 checksum
+        // compute checksum
+        uint8_t crc_data[8];
+        for(size_t i = 0; i < 8; i++) {
+            bit_lib_copy_bits(crc_data, i * 8, 8, protocol->encoded_data, 12 + 9 * i);
+        }
+        uint16_t crc_res = bit_lib_crc16(crc_data, 8, 0x1021, 0x0000, false, false, 0x0000);
+
+        // read checksum
+        uint16_t crc_ex = 0;
+        bit_lib_copy_bits((uint8_t*)&crc_ex, 8, 8, protocol->encoded_data, 84);
+        bit_lib_copy_bits((uint8_t*)&crc_ex, 0, 8, protocol->encoded_data, 93);
+
+        // compare checksum
+        if(crc_res != crc_ex) break;
 
         result = true;
     } while(false);
@@ -110,30 +121,18 @@ msb		lsb
 }
 
 void protocol_fdx_b_decode(ProtocolFDXB* protocol) {
-    UNUSED(protocol);
-
-    printf("\r\n");
-    for(size_t i = 0; i < FDX_B_ENCODED_BIT_SIZE; i++) {
-        printf("%d", bit_lib_get_bit(protocol->encoded_data, i));
-        if((i % 8) == 7) printf(" ");
-    }
-
+    // remove parity
     bit_lib_remove_bit_every_nth(protocol->encoded_data, 3, 13 * 9, 9);
 
+    // remove header pattern
     for(size_t i = 0; i < 11; i++)
         bit_lib_push_bit(protocol->encoded_data, FDX_B_ENCODED_BYTE_FULL_SIZE, 0);
-
-    printf("\r\n");
-    for(size_t i = 0; i < FDX_B_ENCODED_BIT_SIZE; i++) {
-        printf("%d", bit_lib_get_bit(protocol->encoded_data, i));
-        if((i % 8) == 7) printf(" ");
-    }
 
     // 0  nnnnnnnn
     // 8  nnnnnnnn	  38 bit (12 digit) National code.
     // 16 nnnnnnnn	  eg. 000000001008 (decimal).
     // 24 nnnnnnnn
-    // 32 nnnnnnnn	  10 bit (3 digit) Country code.
+    // 32 nnnnnncc	  10 bit (3 digit) Country code.
     // 40 cccccccc	  eg. 999 (decimal).
     // 48 s-------	  1 bit data block status flag.
     // 56 -------a	  1 bit animal application indicator.
@@ -143,55 +142,30 @@ void protocol_fdx_b_decode(ProtocolFDXB* protocol) {
     // 88 eeeeeeee	  eg. $123456.
     // 92 eeeeeeee
 
-    // 38 pet id    -> 40 bit, 5 byte
-    // 10 country   -> 16 bit, 2 byte
-    // 16 bit flags -> 16 bit, 2 byte
-    // 24 extra     -> 24 bit, 3 byte
-    // total: 5 + 2 + 2 + 3 = 12 bytes
+    // copy data without checksum
+    bit_lib_copy_bits(protocol->data, 0, 64, protocol->encoded_data, 0);
+    bit_lib_copy_bits(protocol->data, 64, 24, protocol->encoded_data, 80);
 
-    // 38 bits of national code
-    uint64_t national_code = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
-    national_code = national_code << 32;
-    national_code |= bit_lib_get_bits_32(protocol->encoded_data, 32, 6) << (32 - 6);
-    bit_lib_reverse_bits((uint8_t*)&national_code, 0, 64);
+    // const BitLibRegion regions_encoded[] = {
+    //     {'n', 0, 38},
+    //     {'c', 38, 10},
+    //     {'b', 48, 16},
+    //     {'x', 64, 16},
+    //     {'e', 80, 24},
+    // };
 
-    // 10 bit of country code
-    uint16_t country_code = bit_lib_get_bits_16(protocol->encoded_data, 38, 10) << 6;
-    bit_lib_reverse_bits((uint8_t*)&country_code, 0, 16);
+    // bit_lib_print_regions(regions_encoded, 5, protocol->encoded_data, FDX_B_ENCODED_BIT_SIZE);
+    // printf("\r\n");
 
-    bool block_status = bit_lib_get_bit(protocol->encoded_data, 48);
-    bool rudi_bit = bit_lib_get_bit(protocol->encoded_data, 49);
-    uint8_t reserved = bit_lib_get_bits(protocol->encoded_data, 50, 5);
-    uint8_t user_info = bit_lib_get_bits(protocol->encoded_data, 55, 5);
-    uint8_t replacement_number = bit_lib_get_bits(protocol->encoded_data, 60, 3);
-    bool animal_flag = bit_lib_get_bit(protocol->encoded_data, 63);
+    // const BitLibRegion regions_decoded[] = {
+    //     {'n', 0, 38},
+    //     {'c', 38, 10},
+    //     {'b', 48, 16},
+    //     {'e', 64, 24},
+    // };
 
-    uint16_t crc = bit_lib_get_bits(protocol->encoded_data, 64, 16);
-    bit_lib_reverse_bits((uint8_t*)&crc, 0, 16);
-
-    uint32_t extended = bit_lib_get_bits_32(protocol->encoded_data, 80, 24) << 8;
-    bit_lib_reverse_bits((uint8_t*)&extended, 0, 32);
-
-    uint8_t ex_parity = (extended & 0x100) >> 8;
-    uint8_t ex_temperature = extended & 0xff;
-    uint8_t ex_calc_parity = bit_lib_test_parity_32(ex_temperature, BitLibParityOdd);
-    bool ex_temperature_present = (ex_calc_parity == ex_parity) && !(extended & 0xe00);
-
-    printf("\r\n");
-    printf("Pet ID: %llu\r\n", national_code);
-    printf("Country: %d\r\n", country_code);
-    printf("Block status: %d\r\n", block_status);
-    printf("Rudi bit: %d\r\n", rudi_bit);
-    printf("Reserved: %d\r\n", reserved);
-    printf("User info: %d\r\n", user_info);
-    printf("Replacement number: %d\r\n", replacement_number);
-    printf("Animal flag: %d\r\n", animal_flag);
-
-    if(ex_temperature_present) {
-        float temerature_f = 74 + ex_temperature * 0.2;
-        float temerature_c = (temerature_f - 32) / 1.8;
-        printf("Temperature: %.2f F / %.2f C\r\n", (double)temerature_f, (double)temerature_c);
-    }
+    // bit_lib_print_regions(regions_decoded, 4, protocol->data, FDXB_DECODED_DATA_SIZE * 8);
+    // printf("\r\n");
 }
 
 /*
@@ -268,8 +242,64 @@ LevelDuration protocol_fdx_b_encoder_yield(ProtocolFDXB* protocol) {
 };
 
 void protocol_fdx_b_render_data(ProtocolFDXB* protocol, string_t result) {
-    UNUSED(protocol);
-    UNUSED(result);
+    // 0  nnnnnnnn
+    // 8  nnnnnnnn	  38 bit (12 digit) National code.
+    // 16 nnnnnnnn	  eg. 000000001008 (decimal).
+    // 24 nnnnnnnn
+    // 32 nnnnnnnn	  10 bit (3 digit) Country code.
+    // 40 cccccccc	  eg. 999 (decimal).
+    // 48 s-------	  1 bit data block status flag.
+    // 56 -------a	  1 bit animal application indicator.
+    // 64 eeeeeeee	  24 bits of extra data if present.
+    // 72 eeeeeeee	  eg. $123456.
+    // 80 eeeeeeee
+
+    // 38 bits of national code
+    uint64_t national_code = bit_lib_get_bits_32(protocol->data, 0, 32);
+    national_code = national_code << 32;
+    national_code |= bit_lib_get_bits_32(protocol->data, 32, 6) << (32 - 6);
+    bit_lib_reverse_bits((uint8_t*)&national_code, 0, 64);
+
+    // 10 bit of country code
+    uint16_t country_code = bit_lib_get_bits_16(protocol->data, 38, 10) << 6;
+    bit_lib_reverse_bits((uint8_t*)&country_code, 0, 16);
+
+    bool block_status = bit_lib_get_bit(protocol->data, 48);
+    bool rudi_bit = bit_lib_get_bit(protocol->data, 49);
+    uint8_t reserved = bit_lib_get_bits(protocol->data, 50, 5);
+    uint8_t user_info = bit_lib_get_bits(protocol->data, 55, 5);
+    uint8_t replacement_number = bit_lib_get_bits(protocol->data, 60, 3);
+    bool animal_flag = bit_lib_get_bit(protocol->data, 63);
+
+    uint32_t extended = bit_lib_get_bits_32(protocol->data, 64, 24) << 8;
+    bit_lib_reverse_bits((uint8_t*)&extended, 0, 32);
+
+    uint8_t ex_parity = (extended & 0x100) >> 8;
+    uint8_t ex_temperature = extended & 0xff;
+    uint8_t ex_calc_parity = bit_lib_test_parity_32(ex_temperature, BitLibParityOdd);
+    bool ex_temperature_present = (ex_calc_parity == ex_parity) && !(extended & 0xe00);
+
+    string_printf(result, "PetID: %llu\r\n", national_code);
+    string_cat_printf(result, "Country: %d\r\n", country_code);
+    string_cat_printf(result, "Animal: %s\r\n", animal_flag ? "Yes" : "No");
+
+    string_cat_printf(
+        result,
+        "Bits: %d-%d-%d-%d-%d\r\n",
+        block_status,
+        rudi_bit,
+        reserved,
+        user_info,
+        replacement_number);
+
+    if(ex_temperature_present) {
+        float temerature_f = 74 + ex_temperature * 0.2;
+        float temerature_c = (temerature_f - 32) / 1.8;
+        string_cat_printf(
+            result, "Temp: %.2f F / %.2f C", (double)temerature_f, (double)temerature_c);
+    } else {
+        string_cat_printf(result, "Temp: unavailable");
+    }
 };
 
 bool protocol_fdx_b_write_data(ProtocolFDXB* protocol, void* data) {
@@ -285,7 +315,7 @@ uint32_t protocol_fdx_b_get_features(void* protocol) {
 
 uint32_t protocol_fdx_b_get_validate_count(void* protocol) {
     UNUSED(protocol);
-    return 3;
+    return 2;
 }
 
 const ProtocolBase protocol_fdx_b = {

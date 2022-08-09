@@ -12,7 +12,7 @@
  */
 #define LFRFID_WORKER_READ_DEBUG_GPIO 1
 
-#define LFRFID_WORKER_READ_SWITCH_TIME 2000
+#define LFRFID_WORKER_READ_SWITCH_TIME 3000
 
 void lfrfid_worker_mode_emulate_process(LFRFIDWorker* worker);
 void lfrfid_worker_mode_read_process(LFRFIDWorker* worker);
