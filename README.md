@@ -10,6 +10,8 @@
 - NRFSniff logs address found (By 0day) and fix positioning [(By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/210)
 - OFW: [#1564](https://github.com/flipperdevices/flipperzero-firmware/pull/1564), [#1566](https://github.com/flipperdevices/flipperzero-firmware/pull/1566) & [#1563](https://github.com/flipperdevices/flipperzero-firmware/pull/1563)
 - Change NFC Key files so the people have their user dict back
+- Updated BadUSB with fix from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & OFW PR [#1525](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
+- Updated AC.IR from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & updated asset by Svarich
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
