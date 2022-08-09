@@ -12,16 +12,15 @@
 - NRFSniff fixes [(By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/208)
 - Updates for [NFC: Display UL PWD_AUTH payload / ntag-pwd-capture (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
 - Added [Picopass load/info/delete #1562 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1562)
-- Added Dolphin: Plugin Achivement +3 EXP for a total of 90 EXP daily
-- - Plugin Achivements are:
-- - - Games Only Mode from Lock Menu
-- - - Stopwatch @ 1:20 Alert
-- - - Dice First Roll for d20+ = sides on dice (i.e. Nat 20 on d20)
-- - - Dice First Roll for d20+ = sides on dice - 1 (+1 EXP) (i.e. 19 on d20)
-- - - Tetris, Snake or Flappy Bird Score of 10 or more
-- - - Tetris, Snake or Flappy Bird Score of 50 or more
-- - - Tetris, Snake or Flappy Bird Score of 100 or more
-- - - NRFSniffer Found Address
+- Added Dolphin: Plugin Achivement +3 EXP for a total of 90 EXP daily. Plugin Achivements are:
+- - Games Only Mode from Lock Menu
+- - Stopwatch @ 1:20 Alert
+- - Dice First Roll for d20+ = sides on dice (i.e. Nat 20 on d20)
+- - Dice First Roll for d20+ = sides on dice - 1 (+1 EXP) (i.e. 19 on d20)
+- - Tetris, Snake or Flappy Bird Score of 10 or more
+- - Tetris, Snake or Flappy Bird Score of 50 or more
+- - Tetris, Snake or Flappy Bird Score of 100 or more
+- - NRFSniffer Found Address
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -96,16 +95,15 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Dolphin: Level animation sequence for level 3+ to be lvl1->2 for levels 1-20 and lvl2->3 for levels 21-30.
 - Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware) (Changed to Mood Stays Less Than 6)
 - Dolphin: Passport: Show EXP [(By Dabolus)](https://github.com/Dabolus/flipperzero-firmware-rpg/)
-- Dolphin: Plugin Achivement +3 EXP for a total of 90 EXP daily
-- - Plugin Achivements are:
-- - - Games Only Mode from Lock Menu
-- - - Stopwatch @ 1:20 Alert
-- - - Dice First Roll for d20+ = sides on dice (i.e. Nat 20 on d20)
-- - - Dice First Roll for d20+ = sides on dice - 1 (+1 EXP) (i.e. 19 on d20)
-- - - Tetris, Snake or Flappy Bird Score of 10 or more
-- - - Tetris, Snake or Flappy Bird Score of 50 or more
-- - - Tetris, Snake or Flappy Bird Score of 100 or more
-- - - NRFSniffer Found Address
+- Dolphin: Plugin Achivement +3 EXP for a total of 90 EXP daily. Plugin Achivements are:
+- - Games Only Mode from Lock Menu
+- - Stopwatch @ 1:20 Alert
+- - Dice First Roll for d20+ = sides on dice (i.e. Nat 20 on d20)
+- - Dice First Roll for d20+ = sides on dice - 1 (+1 EXP) (i.e. 19 on d20)
+- - Tetris, Snake or Flappy Bird Score of 10 or more
+- - Tetris, Snake or Flappy Bird Score of 50 or more
+- - Tetris, Snake or Flappy Bird Score of 100 or more
+- - NRFSniffer Found Address
 - Dolphin: SD dolphin manifest updated to weight animations differently
 - GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
