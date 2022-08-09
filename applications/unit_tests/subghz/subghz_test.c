@@ -407,10 +407,10 @@ MU_TEST(subghz_decoder_phoenix_v2_test) {
 MU_TEST(subghz_decoder_honeywell_wdb_test) {
     mu_assert(
         subghz_decoder_test(
-            EXT_PATH("unit_tests/subghz/honeywell_wdb_raw.sub"), SUBGHZ_PROTOCOL_HONEYWELL_WDB_NAME),
+            EXT_PATH("unit_tests/subghz/honeywell_wdb_raw.sub"),
+            SUBGHZ_PROTOCOL_HONEYWELL_WDB_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_HONEYWELL_WDB_NAME " error\r\n");
 }
-
 
 //test encoders
 MU_TEST(subghz_encoder_princeton_test) {
