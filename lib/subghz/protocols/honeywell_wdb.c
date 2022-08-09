@@ -26,6 +26,11 @@ struct SubGhzProtocolDecoderHoneywell_WDB {
 
     SubGhzBlockDecoder decoder;
     SubGhzBlockGeneric generic;
+    const char* device_type;
+    const char* alert;
+    uint8_t secret_knock;
+    uint8_t relay;
+    uint8_t lowbat;
 };
 
 struct SubGhzProtocolEncoderHoneywell_WDB {
@@ -227,8 +232,12 @@ void subghz_protocol_decoder_honeywell_wdb_feed(void* context, bool level, uint3
         if(level) { //save interval
             if(DURATION_DIFF(duration, subghz_protocol_honeywell_wdb_const.te_short * 3) <
                subghz_protocol_honeywell_wdb_const.te_delta) {
-                if(instance->decoder.decode_count_bit ==
-                   subghz_protocol_honeywell_wdb_const.min_count_bit_for_found) {
+                if((instance->decoder.decode_count_bit ==
+                    subghz_protocol_honeywell_wdb_const.min_count_bit_for_found) &&
+                   ((instance->decoder.decode_data & 0x01) ==
+                    subghz_protocol_blocks_get_parity(
+                        instance->decoder.decode_data >> 1,
+                        subghz_protocol_honeywell_wdb_const.min_count_bit_for_found - 1))) {
                     instance->generic.data = instance->decoder.decode_data;
                     instance->generic.data_count_bit = instance->decoder.decode_count_bit;
 
@@ -272,11 +281,11 @@ void subghz_protocol_decoder_honeywell_wdb_feed(void* context, bool level, uint3
 
 /** 
  * Analysis of received data
- * @param instance Pointer to a SubGhzBlockGeneric* instance
+ * @param instance Pointer to a SubGhzProtocolDecoderHoneywell_WDB* instance
  */
-static void subghz_protocol_honeywell_wdb_check_remote_controller(SubGhzBlockGeneric* instance) {
-
-/*
+static void subghz_protocol_honeywell_wdb_check_remote_controller(
+    SubGhzProtocolDecoderHoneywell_WDB* instance) {
+    /*
  *
  * Frame bits used in Honeywell RCWL300A, RCWL330A, Series 3, 5, 9 and all Decor Series Wireless Chimes
  * 0000 0000 1111 1111 2222 2222 3333 3333 4444 4444 5555 5555
@@ -294,12 +303,39 @@ static void subghz_protocol_honeywell_wdb_check_remote_controller(SubGhzBlockGen
  * .... .... .... .... .... .... .... .... .... .... .... ...X PARITY (LSB of count of set bits in previous 47 bits)
  * 
  */
-    UNUSED(instance);
-    // uint64_t data_rev =
-    //     subghz_protocol_blocks_reverse_key(instance->data, instance->data_count_bit + 4);
-    // instance->serial = data_rev & 0xFFFFFFFF;
-    // instance->cnt = (data_rev >> 40) & 0xFFFF;
-    // instance->btn = (data_rev >> 32) & 0xF;
+
+    instance->generic.serial = (instance->generic.data >> 28) & 0xFFFFF;
+    switch((instance->generic.data >> 20) & 0x3) {
+    case 0x02:
+        instance->device_type = "Doorbell";
+        break;
+    case 0x01:
+        instance->device_type = "PIR-Motion";
+        break;
+    default:
+        instance->device_type = "Unknown";
+        break;
+    }
+
+    switch((instance->generic.data >> 16) & 0x3) {
+    case 0x00:
+        instance->alert = "Normal";
+        break;
+    case 0x01:
+    case 0x02:
+        instance->alert = "High";
+        break;
+    case 0x03:
+        instance->alert = "Full";
+        break;
+    default:
+        instance->alert = "Unknown";
+        break;
+    }
+
+    instance->secret_knock = (uint8_t)((instance->generic.data >> 4) & 0x1);
+    instance->relay = (uint8_t)((instance->generic.data >> 3) & 0x1);
+    instance->lowbat = (uint8_t)((instance->generic.data >> 1) & 0x1);
 }
 
 uint8_t subghz_protocol_decoder_honeywell_wdb_get_hash_data(void* context) {
@@ -341,20 +377,23 @@ bool subghz_protocol_decoder_honeywell_wdb_deserialize(
 void subghz_protocol_decoder_honeywell_wdb_get_string(void* context, string_t output) {
     furi_assert(context);
     SubGhzProtocolDecoderHoneywell_WDB* instance = context;
-
-    // uint32_t code_found_lo = instance->generic.data & 0x00000000ffffffff;
-
-    // uint64_t code_found_reverse = subghz_protocol_blocks_reverse_key(
-    //     instance->generic.data, instance->generic.data_count_bit);
-
-    // uint32_t code_found_reverse_lo = code_found_reverse & 0x00000000ffffffff;
+    subghz_protocol_honeywell_wdb_check_remote_controller(instance);
 
     string_cat_printf(
         output,
         "%s %dbit\r\n"
-        "Key:0x%lX%08lX\r\n",
+        "Key:0x%lX%08lX\r\n"
+        "Sn:0x%05lX\r\n"
+        "DT:%s  Al:%s\r\n"
+        "SK:%01lX R:%01lX LBat:%01lX\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         (uint32_t)((instance->generic.data >> 32) & 0xFFFFFFFF),
-        (uint32_t)(instance->generic.data & 0xFFFFFFFF));
+        (uint32_t)(instance->generic.data & 0xFFFFFFFF),
+        instance->generic.serial,
+        instance->device_type,
+        instance->alert,
+        instance->secret_knock,
+        instance->relay,
+        instance->lowbat);
 }
