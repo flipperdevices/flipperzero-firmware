@@ -15,9 +15,13 @@ I used a nodeMCU board. Wiring is simple. follow the wiring guide on https://git
 On mine I connected one G to ground, VIN to 5V, RX to U_TX, TX to U_RX.
 
 NodeMCU   FlipperZero
+
 G         GND
+
 VIN       5V
-RX        U_TX, 
+
+RX        U_TX
+
 TX        U_RX
 
 
