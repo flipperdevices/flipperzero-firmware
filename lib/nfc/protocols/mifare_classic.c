@@ -769,18 +769,6 @@ void mf_crypto1_encrypt(
     }
 }
 
-bool send_nack(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx, bool is_encrypted) {
-    uint8_t nack = 0x04;
-    if(is_encrypted) {
-        mf_crypto1_encrypt(&emulator->crypto, NULL, &nack, 4, tx_rx->tx_data, tx_rx->tx_parity);
-    } else {
-        tx_rx->tx_data[0] = nack;
-    }
-    tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
-    tx_rx->tx_bits = 4;
-    return furi_hal_nfc_tx_rx(tx_rx, 300);
-}
-
 bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(emulator);
     furi_assert(tx_rx);
@@ -920,7 +908,16 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 if(!mf_classic_is_allowed_access(
                        emulator, block, access_key, MfClassicActionDataRead)) {
                     // Send NACK
-                    send_nack(emulator, tx_rx, is_encrypted);
+                    uint8_t nack = 0x04;
+                    if(is_encrypted) {
+                        mf_crypto1_encrypt(
+                            &emulator->crypto, NULL, &nack, 4, tx_rx->tx_data, tx_rx->tx_parity);
+                    } else {
+                        tx_rx->tx_data[0] = nack;
+                    }
+                    tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
+                    tx_rx->tx_bits = 4;
+                    furi_hal_nfc_tx_rx(tx_rx, 300);
                     break;
                 }
             }
