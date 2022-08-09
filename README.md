@@ -8,8 +8,8 @@
 - Known Issues:`FAP Loader` & `Chess`
 - Updated custom deeds to use DolphinDeedU2fAuthorized instead of custom deeds to fix .dolphin.state issues
 - NRFSniff logs address found (By 0day) and fix positioning [(By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/210)
-- [Fix building updater package from VSCode tasks #1564 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/1564)
-
+- OFW: [#1564](https://github.com/flipperdevices/flipperzero-firmware/pull/1564), [#1566](https://github.com/flipperdevices/flipperzero-firmware/pull/1566) & [#1563](https://github.com/flipperdevices/flipperzero-firmware/pull/1563)
+  
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
   <tr> <td>
