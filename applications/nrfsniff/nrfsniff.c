@@ -155,7 +155,11 @@ static void hexlify(uint8_t* in, uint8_t size, char* out) {
         snprintf(out + strlen(out), sizeof(out + strlen(out)), "%02X", in[i]);
 }
 
-static bool save_addr_to_file(Storage* storage, uint8_t* data, uint8_t size, NotificationApp* notification) {
+static bool save_addr_to_file(
+    Storage* storage,
+    uint8_t* data,
+    uint8_t size,
+    NotificationApp* notification) {
     size_t file_size = 0;
     uint8_t linesize = 0;
     char filepath[42] = {0};
@@ -206,19 +210,17 @@ static bool save_addr_to_file(Storage* storage, uint8_t* data, uint8_t size, Not
                 FURI_LOG_I(TAG, "Failed to write bytes to file stream.");
                 stream_free(stream);
                 return false;
-            }
-			else
-			{
-				FURI_LOG_I(TAG, "Found a new address: %s", addrline);
-				FURI_LOG_I(TAG, "Save successful!");
+            } else {
+                FURI_LOG_I(TAG, "Found a new address: %s", addrline);
+                FURI_LOG_I(TAG, "Save successful!");
 
-				notification_message(notification, &sequence_success);
-				
-				DOLPHIN_DEED(DolphinDeedU2fAuthorized);
-				
-				stream_free(stream);
-				return true;
-			}
+                notification_message(notification, &sequence_success);
+
+                DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+
+                stream_free(stream);
+                return true;
+            }
         }
     } else {
         FURI_LOG_I(TAG, "Cannot open file \"%s\"", filepath);
