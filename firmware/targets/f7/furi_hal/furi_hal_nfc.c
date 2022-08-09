@@ -269,6 +269,10 @@ void furi_hal_nfc_listen_sleep() {
     st25r3916ExecuteCommand(ST25R3916_CMD_GOTO_SLEEP);
 }
 
+void furi_hal_nfc_stop_cmd() {
+    st25r3916ExecuteCommand(ST25R3916_CMD_STOP);
+}
+
 bool furi_hal_nfc_listen_rx(FuriHalNfcTxRxContext* tx_rx, uint32_t timeout_ms) {
     furi_assert(tx_rx);
 

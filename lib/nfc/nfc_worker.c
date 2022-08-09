@@ -105,6 +105,8 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_mf_ultralight_read_auth(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateMfClassicDictAttack) {
         nfc_worker_mf_classic_dict_attack(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateDetectReader) {
+        nfc_worker_detect_reader(nfc_worker);
     }
     furi_hal_nfc_sleep();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
@@ -577,4 +579,27 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
             furi_delay_ms(10);
         }
     }
+}
+
+void nfc_worker_detect_reader(NfcWorker* nfc_worker) {
+
+    FuriHalNfcTxRxContext tx_rx = {};
+    Mfkey32v2Params mfkey_params = {};
+    uint64_t key_found = 0;
+
+    NfcaSignal* nfca_signal = nfca_signal_alloc();
+    tx_rx.nfca_signal = nfca_signal;
+
+    FURI_LOG_D(TAG, "Start reader attack");
+    while(nfc_worker->state == NfcWorkerStateDetectReader) {
+        if(mfkey32v2_collect(&tx_rx, &mfkey_params)) {
+            if(mfkey32v2_get_key(&mfkey_params, &key_found)) {
+                FURI_LOG_D(TAG, "Mfkey32v2 success");
+            }
+        } else {
+            FURI_LOG_D(TAG, "Collect failed");
+        }
+    }
+
+    nfca_signal_free(nfca_signal);
 }
