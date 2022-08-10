@@ -41,6 +41,7 @@ App(
         "APPS_DolphinRestorer",
         "APPS_DolphinBackup",
         "APPS_MusicPlayer",
+		"APPS_Paint",
         "APPS_SentrySafe",
         "APPS_BarcodeGenerator",
         "APPS_MouseJiggler",
