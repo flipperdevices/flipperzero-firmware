@@ -114,17 +114,6 @@ static void protocol_indala26_decoder_save(uint8_t* data_to, const uint8_t* data
 
     // bit_lib_print_bits(data_to, INDALA26_DECODED_BIT_SIZE);
     // printf("\r\n");
-
-    // printf(
-    //     "%02X%02X%02X%02X%02X%02X%02X%02X\r\n",
-    //     data_from[0],
-    //     data_from[1],
-    //     data_from[2],
-    //     data_from[3],
-    //     data_from[4],
-    //     data_from[5],
-    //     data_from[6],
-    //     data_from[7]);
 }
 
 bool protocol_indala26_decoder_feed(ProtocolIndala* protocol, bool level, uint32_t duration) {

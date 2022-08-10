@@ -6,6 +6,7 @@
 
 #pragma once
 #include <toolbox/protocols/protocol_dict.h>
+#include "protocols/lfrfid_protocols.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +26,8 @@ typedef enum {
 typedef enum {
     LFRFIDWorkerReadSenseStart, // TODO: not implemented
     LFRFIDWorkerReadSenseEnd, // TODO: not implemented
+    LFRFIDWorkerReadSenseCardStart,
+    LFRFIDWorkerReadSenseCardEnd,
     LFRFIDWorkerReadDone,
 } LFRFIDWorkerReadResult;
 
@@ -111,7 +114,7 @@ void lfrfid_worker_write_set_callback(
  * Start write mode
  * @param worker 
  */
-void lfrfid_worker_write_start(LFRFIDWorker* worker);
+void lfrfid_worker_write_start(LFRFIDWorker* worker, LFRFIDProtocol protocol);
 
 /**
  * Set "emulate event" callback
@@ -128,7 +131,7 @@ void lfrfid_worker_emulate_set_callback(
  * Start emulate mode
  * @param worker 
  */
-void lfrfid_worker_emulate_start(LFRFIDWorker* worker);
+void lfrfid_worker_emulate_start(LFRFIDWorker* worker, LFRFIDProtocol protocol);
 
 /**
  * Set "read raw event" callback
@@ -176,19 +179,19 @@ void lfrfid_worker_emulate_raw_start(LFRFIDWorker* worker, const char* filename)
  */
 void lfrfid_worker_stop(LFRFIDWorker* worker);
 
-size_t lfrfid_worker_dict_get_data_size(LFRFIDWorker* worker, ProtocolId protocol);
+size_t lfrfid_worker_dict_get_data_size(LFRFIDWorker* worker, LFRFIDProtocol protocol);
 
 void lfrfid_worker_dict_get_data(
     LFRFIDWorker* worker,
-    ProtocolId protocol,
+    LFRFIDProtocol protocol,
     uint8_t* data,
     size_t data_size);
 
-const char* lfrfid_worker_dict_get_name(LFRFIDWorker* worker, ProtocolId protocol);
+const char* lfrfid_worker_dict_get_name(LFRFIDWorker* worker, LFRFIDProtocol protocol);
 
-const char* lfrfid_worker_dict_get_manufacturer(LFRFIDWorker* worker, ProtocolId protocol);
+const char* lfrfid_worker_dict_get_manufacturer(LFRFIDWorker* worker, LFRFIDProtocol protocol);
 
-void lfrfid_worker_dict_render(LFRFIDWorker* worker, ProtocolId protocol, string_t result);
+void lfrfid_worker_dict_render(LFRFIDWorker* worker, LFRFIDProtocol protocol, string_t result);
 
 #ifdef __cplusplus
 }

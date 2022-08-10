@@ -86,8 +86,7 @@ static void lfrfid_cli_read(Cli* cli, string_t args) {
 
     printf("Reading RFID...\r\nPress Ctrl+C to abort\r\n");
 
-    const uint32_t available_flags = (1 << LFRFIDWorkerReadSenseStart) |
-                                     (1 << LFRFIDWorkerReadSenseEnd) | (1 << LFRFIDWorkerReadDone);
+    const uint32_t available_flags = (1 << LFRFIDWorkerReadDone);
 
     lfrfid_worker_read_start(worker, type);
 
@@ -96,14 +95,6 @@ static void lfrfid_cli_read(Cli* cli, string_t args) {
             furi_event_flag_wait(context.event, available_flags, FuriFlagWaitAny, 100);
 
         if(flags != FuriFlagErrorTimeout) {
-            if(FURI_BIT(flags, LFRFIDWorkerReadSenseStart)) {
-                printf("Sense Start\r\n");
-            }
-
-            if(FURI_BIT(flags, LFRFIDWorkerReadSenseEnd)) {
-                printf("Sense End\r\n");
-            }
-
             if(FURI_BIT(flags, LFRFIDWorkerReadDone)) {
                 break;
             }

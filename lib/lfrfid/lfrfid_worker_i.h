@@ -48,9 +48,7 @@ struct LFRFIDWorker {
     void* cb_ctx;
 
     ProtocolDict* protocols;
-    LFRFIDProtocol protocol_to_encode;
-
-    LFRFIDRawWorker* raw_worker;
+    LFRFIDProtocol protocol;
 };
 
 extern const LFRFIDWorkerModeType lfrfid_worker_modes[];
