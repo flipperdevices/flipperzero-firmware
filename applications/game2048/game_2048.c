@@ -2,9 +2,11 @@
 #include <gui/gui.h>
 #include <time.h>
 #include <math.h>
+#include <dolphin/dolphin.h>
 
 #include "font.h"
 
+#define DEBUG false
 /*
  0 empty
  1    2
@@ -51,6 +53,11 @@ typedef struct {
 } Point;
 
 typedef struct {
+    uint16_t gameScore;
+    uint16_t highScore;
+} Score;
+
+typedef struct {
     /*
     +----X
     |
@@ -61,7 +68,7 @@ typedef struct {
 
     uint8_t next_field[4][4];
 
-    uint16_t score; // original scoring
+    Score score; // original scoring
 
     Direction direction;
     /*
@@ -75,6 +82,8 @@ typedef struct {
     Point keyframe_from[4][4];
 
     Point keyframe_to[4][4];
+
+    bool debug;
 
 } GameState;
 
@@ -103,9 +112,15 @@ static void game_2048_render_callback(Canvas* const canvas, ValueMutex* const vm
         }
 
         // display score
-        char buffer2[6];
-        snprintf(buffer2, sizeof(buffer2), "%u", game_state->score);
-        canvas_draw_str_aligned(canvas, 127, 8, AlignRight, AlignBottom, buffer2);
+        char buffer[6];
+        snprintf(buffer, sizeof(buffer), "%u", game_state->score.gameScore);
+        canvas_draw_str_aligned(canvas, 126, 8, AlignRight, AlignBottom, buffer);
+
+        if(game_state->score.highScore > 0) {
+            char buffer2[6];
+            snprintf(buffer2, sizeof(buffer2), "%u", game_state->score.highScore);
+            canvas_draw_str_aligned(canvas, 126, 62, AlignRight, AlignBottom, buffer2);
+        }
     } else { // if animation
         // for animation
         // (osKernelGetSysTimerCount() - game_state->animation_start_ticks) / osKernelGetSysTimerFreq();
@@ -232,7 +247,8 @@ static void game_2048_process_move(GameState* const game_state) {
 
                 if(field == game_state->next_field[next_y][x]) {
                     game_state->next_field[next_y][x]++;
-                    game_state->score += pow(2, game_state->next_field[next_y][x]);
+                    game_state->score.gameScore += pow(2, game_state->next_field[next_y][x]);
+                    if(game_state->next_field[next_y][x] == 11 && !game_state->debug) {DOLPHIN_DEED(DolphinDeedU2fAuthorized);} // get some xp for making a 2048 tile
                     next_y++;
                     continue;
                 }
@@ -260,7 +276,8 @@ static void game_2048_process_move(GameState* const game_state) {
 
                 if(field == game_state->next_field[y][next_x]) {
                     game_state->next_field[y][next_x]++;
-                    game_state->score += pow(2, game_state->next_field[y][next_x]);
+                    game_state->score.gameScore += pow(2, game_state->next_field[y][next_x]);
+                    if(game_state->next_field[y][next_x] == 11 && !game_state->debug) {DOLPHIN_DEED(DolphinDeedU2fAuthorized);} // get some xp for making a 2048 tile
                     next_x--;
                     continue;
                 }
@@ -288,7 +305,8 @@ static void game_2048_process_move(GameState* const game_state) {
 
                 if(field == game_state->next_field[next_y][x]) {
                     game_state->next_field[next_y][x]++;
-                    game_state->score += pow(2, game_state->next_field[next_y][x]);
+                    game_state->score.gameScore += pow(2, game_state->next_field[next_y][x]);
+                    if(game_state->next_field[next_y][x] == 11 && !game_state->debug) {DOLPHIN_DEED(DolphinDeedU2fAuthorized);} // get some xp for making a 2048 tile
                     next_y--;
                     continue;
                 }
@@ -319,7 +337,8 @@ static void game_2048_process_move(GameState* const game_state) {
 
                 if(field == game_state->next_field[y][next_x]) {
                     game_state->next_field[y][next_x]++;
-                    game_state->score += pow(2, game_state->next_field[y][next_x]);
+                    game_state->score.gameScore += pow(2, game_state->next_field[y][next_x]);
+                    if(game_state->next_field[y][next_x] == 11 && !game_state->debug) {DOLPHIN_DEED(DolphinDeedU2fAuthorized);} // get some xp for making a 2048 tile
                     next_x++;
                     continue;
                 }
@@ -337,6 +356,13 @@ static void game_2048_process_move(GameState* const game_state) {
 }
 
 static void game_2048_restart(GameState* const game_state) {
+    game_state->debug = DEBUG;
+
+    // check score
+    if(game_state->score.gameScore > game_state->score.highScore) {
+        game_state->score.highScore = game_state->score.gameScore;
+    }
+
     // clear all cells
     for(uint8_t y = 0; y < 4; y++) {
         for(uint8_t x = 0; x < 4; x++) {
@@ -345,7 +371,7 @@ static void game_2048_restart(GameState* const game_state) {
     }
 
     // start next game
-    game_state->score = 0;
+    game_state->score.gameScore = 0;
     game_2048_set_new_number(game_state);
     game_2048_set_new_number(game_state);
 }
@@ -376,27 +402,27 @@ int32_t game_2048_app(void* p) {
     game_state->direction = DirectionIdle;
     game_2048_restart(game_state);
 
-    /* <debug>
-    game_state->field[0][0] = 0;
-    game_state->field[0][1] = 0;
-    game_state->field[0][2] = 0;
-    game_state->field[0][3] = 0;
+    if(game_state->debug) {
+        game_state->field[0][0] = 0;
+        game_state->field[0][1] = 0;
+        game_state->field[0][2] = 0;
+        game_state->field[0][3] = 0;
 
-    game_state->field[1][0] = 1;
-    game_state->field[1][1] = 2;
-    game_state->field[1][2] = 3;
-    game_state->field[1][3] = 4;
-    
-    game_state->field[2][0] = 5;
-    game_state->field[2][1] = 6;
-    game_state->field[2][2] = 7;
-    game_state->field[2][3] = 8;
-    
-    game_state->field[3][0] = 9;
-    game_state->field[3][1] = 10;
-    game_state->field[3][2] = 11;
-    game_state->field[3][3] = 12;
-    </debug> */
+        game_state->field[1][0] = 1;
+        game_state->field[1][1] = 2;
+        game_state->field[1][2] = 3;
+        game_state->field[1][3] = 4;
+        
+        game_state->field[2][0] = 5;
+        game_state->field[2][1] = 6;
+        game_state->field[2][2] = 7;
+        game_state->field[2][3] = 8;
+        
+        game_state->field[3][0] = 9;
+        game_state->field[3][1] = 10;
+        game_state->field[3][2] = 11;
+        game_state->field[3][3] = 12;
+    }
 
     InputEvent event;
     for(bool loop = true; loop;) {
