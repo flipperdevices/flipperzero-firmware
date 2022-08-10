@@ -61,7 +61,7 @@ const char* protocol_fdx_b_get_name(ProtocolFDXB* protocol) {
 
 const char* protocol_fdx_b_get_manufacturer(ProtocolFDXB* protocol) {
     UNUSED(protocol);
-    return "FDX-B";
+    return "ISO";
 };
 
 void protocol_fdx_b_decoder_start(ProtocolFDXB* protocol) {
@@ -155,7 +155,6 @@ void protocol_fdx_b_decode(ProtocolFDXB* protocol) {
     // };
 
     // bit_lib_print_regions(regions_encoded, 5, protocol->encoded_data, FDX_B_ENCODED_BIT_SIZE);
-    // printf("\r\n");
 
     // const BitLibRegion regions_decoded[] = {
     //     {'n', 0, 38},
@@ -165,12 +164,7 @@ void protocol_fdx_b_decode(ProtocolFDXB* protocol) {
     // };
 
     // bit_lib_print_regions(regions_decoded, 4, protocol->data, FDXB_DECODED_DATA_SIZE * 8);
-    // printf("\r\n");
 }
-
-/*
-rfid raw_analyze /ext/fdxb.raw
-*/
 
 bool protocol_fdx_b_decoder_feed(ProtocolFDXB* protocol, bool level, uint32_t duration) {
     bool result = false;
@@ -209,7 +203,23 @@ bool protocol_fdx_b_decoder_feed(ProtocolFDXB* protocol, bool level, uint32_t du
 };
 
 bool protocol_fdx_b_encoder_start(ProtocolFDXB* protocol) {
-    // TODO: encode data
+    memset(protocol->encoded_data, 0, FDX_B_ENCODED_BYTE_FULL_SIZE);
+    bit_lib_set_bit(protocol->encoded_data, 0, 1);
+    for(size_t i = 0; i < 13; i++) {
+        bit_lib_set_bit(protocol->encoded_data, 11 + 9 * i, 1);
+        if(i == 8 || i == 9) continue;
+
+        if(i < 8) {
+            bit_lib_copy_bits(protocol->encoded_data, 12 + 9 * i, 8, protocol->data, i * 8);
+        } else {
+            bit_lib_copy_bits(protocol->encoded_data, 12 + 9 * i, 8, protocol->data, (i - 2) * 8);
+        }
+    }
+
+    uint16_t crc_res = bit_lib_crc16(protocol->data, 8, 0x1021, 0x0000, false, false, 0x0000);
+    bit_lib_copy_bits(protocol->encoded_data, 84, 8, (uint8_t*)&crc_res, 8);
+    bit_lib_copy_bits(protocol->encoded_data, 93, 8, (uint8_t*)&crc_res, 0);
+
     protocol->encoded_index = 0;
     protocol->last_short = false;
     protocol->last_level = false;
@@ -226,12 +236,12 @@ LevelDuration protocol_fdx_b_encoder_yield(ProtocolFDXB* protocol) {
     if(bit) {
         // one long pulse for 1
         duration = FDX_B_LONG_TIME / 8;
-        bit_lib_increment_index(protocol->encoded_index, FDX_B_ENCODED_BYTE_SIZE);
+        bit_lib_increment_index(protocol->encoded_index, FDX_B_ENCODED_BIT_SIZE);
     } else {
         // two short pulses for 0
         duration = FDX_B_SHORT_TIME / 8;
         if(protocol->last_short) {
-            bit_lib_increment_index(protocol->encoded_index, FDX_B_ENCODED_BYTE_SIZE);
+            bit_lib_increment_index(protocol->encoded_index, FDX_B_ENCODED_BIT_SIZE);
             protocol->last_short = false;
         } else {
             protocol->last_short = true;
@@ -303,9 +313,21 @@ void protocol_fdx_b_render_data(ProtocolFDXB* protocol, string_t result) {
 };
 
 bool protocol_fdx_b_write_data(ProtocolFDXB* protocol, void* data) {
-    UNUSED(protocol);
-    UNUSED(data);
-    return false;
+    LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
+    bool result = false;
+
+    protocol_fdx_b_encoder_start(protocol);
+
+    if(request->write_type == LFRFIDWriteTypeT5577) {
+        request->t5577.block[0] = 0b00000000000010011000000010000000;
+        request->t5577.block[1] = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
+        request->t5577.block[2] = bit_lib_get_bits_32(protocol->encoded_data, 32, 32);
+        request->t5577.block[3] = bit_lib_get_bits_32(protocol->encoded_data, 64, 32);
+        request->t5577.block[4] = bit_lib_get_bits_32(protocol->encoded_data, 96, 32);
+        request->t5577.blocks_to_write = 5;
+        result = true;
+    }
+    return result;
 };
 
 uint32_t protocol_fdx_b_get_features(void* protocol) {
@@ -336,8 +358,8 @@ const ProtocolBase protocol_fdx_b = {
             .start = (ProtocolEncoderStart)protocol_fdx_b_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_fdx_b_encoder_yield,
         },
-    .render_data = (ProtocolRenderData)protocol_fdx_b_render_data,
     .write_data = (ProtocolWriteData)protocol_fdx_b_write_data,
+    .render_data = (ProtocolRenderData)protocol_fdx_b_render_data,
     .get_features = (ProtocolGetFeatures)protocol_fdx_b_get_features,
     .get_validate_count = (ProtocolGetValidateCount)protocol_fdx_b_get_validate_count,
 };
