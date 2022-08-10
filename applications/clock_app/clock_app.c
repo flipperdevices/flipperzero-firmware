@@ -3,7 +3,6 @@
 #include <gui/elements.h>
 #include <gui/gui.h>
 #include <input/input.h>
-#include <dolphin/dolphin.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
@@ -279,7 +278,6 @@ static void clock_tick(void* ctx) {
         }
         if(songSelect == 1) {
             if(timerSecs == 80) {
-                DOLPHIN_DEED(DolphinDeedU2fAuthorized);
                 NotificationApp* notification = furi_record_open("notification");
                 notification_message(notification, &clock_alert_pr1);
                 furi_record_close("notification");
@@ -296,7 +294,6 @@ static void clock_tick(void* ctx) {
             }
         } else if(songSelect == 2) {
             if(timerSecs == 80) {
-                DOLPHIN_DEED(DolphinDeedU2fAuthorized);
                 NotificationApp* notification = furi_record_open("notification");
                 notification_message(notification, &clock_alert_mario1);
                 furi_record_close("notification");
