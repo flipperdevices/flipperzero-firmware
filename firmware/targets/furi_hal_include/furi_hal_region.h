@@ -23,6 +23,14 @@ void furi_hal_region_set(FuriHalRegion* region);
 
 bool furi_hal_region_is_provisioned();
 
+const char* furi_hal_region_get_name();
+
+/** Сheck if transmission is allowed on this frequency for your flipper region
+ *
+ * @param      value  frequency in Hz
+ *
+ * @return     true if allowed
+ */
 bool furi_hal_region_is_frequency_allowed(uint32_t frequency);
 
 FuriHalRegionBand* furi_hal_region_get_band(uint32_t frequency);

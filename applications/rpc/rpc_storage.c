@@ -384,7 +384,9 @@ static void rpc_system_storage_write_process(const PB_Main* request, void* conte
     bool send_response = false;
 
     if(fs_operation_success) {
-        if(request->content.storage_write_request.has_file) {
+        if(request->content.storage_write_request.has_file &&
+           request->content.storage_write_request.file.data &&
+           request->content.storage_write_request.file.data->size) {
             uint8_t* buffer = request->content.storage_write_request.file.data->bytes;
             size_t buffer_size = request->content.storage_write_request.file.data->size;
             uint16_t written_size = storage_file_write(file, buffer, buffer_size);
