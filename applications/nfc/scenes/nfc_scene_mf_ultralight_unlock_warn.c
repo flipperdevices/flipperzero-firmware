@@ -13,7 +13,7 @@ void nfc_scene_mf_ultralight_unlock_warn_on_enter(void* context) {
     dialog_ex_set_context(dialog_ex, nfc);
     dialog_ex_set_result_callback(dialog_ex, nfc_scene_mf_ultralight_unlock_warn_dialog_callback);
 
-    dialog_ex_set_header(dialog_ex, "Risky function!", 64, 4, AlignCenter, AlignTop);
+    dialog_ex_set_header(dialog_ex, "Risky Function!", 64, 4, AlignCenter, AlignTop);
     dialog_ex_set_text(
         dialog_ex, "Wrong password\ncan block your\ncard.", 4, 18, AlignLeft, AlignTop);
     // dialog_ex_set_icon(dialog_ex, 73, 17, &I_DolphinFirstStart8_56x51);

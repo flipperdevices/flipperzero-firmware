@@ -40,17 +40,17 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
     switch(favorite) {
     case 0:
         add_favorite_submenu_item(app, submenu);
-        submenu_set_header(app->submenu, "Primary favorite app:");
+        submenu_set_header(app->submenu, "Primary Favorite App:");
         submenu_set_selected_item(app->submenu, app->settings.favorite_primary);
         break;
     case 1:
         add_favorite_submenu_item(app, submenu);
-        submenu_set_header(app->submenu, "Secondary favorite app:");
+        submenu_set_header(app->submenu, "Secondary Favorite App:");
         submenu_set_selected_item(app->submenu, app->settings.favorite_secondary);
         break;
     case 2:
         add_game_submenu_item(app, submenu);
-        submenu_set_header(app->submenu, "Favorite game:");
+        submenu_set_header(app->submenu, "Favorite Game:");
         submenu_set_selected_item(app->submenu, app->settings.favorite_game);
         break;
     default:
