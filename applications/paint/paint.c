@@ -2,8 +2,8 @@
 #include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
-#include <notification/notification.h>
-#include <notification/notification_messages.h>
+// #include <notification/notification.h>
+// #include <notification/notification_messages.h>
 #include <stdbool.h> // Header-file for boolean data-type.
 
 typedef struct selected_position {
@@ -69,7 +69,7 @@ int32_t paint_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    // NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     InputEvent event;
 
