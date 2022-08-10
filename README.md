@@ -12,6 +12,7 @@
 - Change NFC Key files so the people have their user dict back
 - Updated BadUSB with fix from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & OFW PR [#1525](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 - Updated AC.IR from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & updated asset by Svarich
+- Merging if put in OFW or not: [FIX: Fixed inconsistencies between texts #1569 (By zigad)](https://github.com/flipperdevices/flipperzero-firmware/pull/1569)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
