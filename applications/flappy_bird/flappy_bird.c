@@ -102,11 +102,9 @@ static void flappy_game_state_init(GameState* const game_state) {
     flappy_game_random_pilar(game_state);
 }
 
-static void flappy_game_reset(GameState* const game_state) {
-    FURI_LOG_I(TAG, "Reset Game State\r\n");
-    // Resetting State
-    
-}
+// static void flappy_game_reset(GameState* const game_state) {
+    // FURI_LOG_I(TAG, "Reset Game State\r\n"); // Resetting State  
+// }
 
 static void flappy_game_tick(GameState* const game_state) {
 
