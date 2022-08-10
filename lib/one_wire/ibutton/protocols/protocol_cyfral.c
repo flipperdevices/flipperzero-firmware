@@ -62,30 +62,8 @@ static void protocol_cyfral_free(ProtocolCyfral* proto) {
     free(proto);
 }
 
-static void
-    protocol_cyfral_set_data(ProtocolCyfral* proto, const uint8_t* data, size_t data_size) {
-    furi_check(data_size >= CYFRAL_DATA_SIZE);
-    memcpy(&proto->data, data, CYFRAL_DATA_SIZE);
-}
-
-static void protocol_cyfral_get_data(ProtocolCyfral* proto, uint8_t* data, size_t data_size) {
-    furi_check(data_size >= CYFRAL_DATA_SIZE);
-    memcpy(data, &proto->data, CYFRAL_DATA_SIZE);
-}
-
-static size_t protocol_cyfral_get_data_size(ProtocolCyfral* proto) {
-    UNUSED(proto);
-    return CYFRAL_DATA_SIZE;
-}
-
-static const char* protocol_cyfral_get_name(ProtocolCyfral* proto) {
-    UNUSED(proto);
-    return "Cyfral";
-}
-
-static const char* protocol_cyfral_get_manufacturer(ProtocolCyfral* proto) {
-    UNUSED(proto);
-    return "Cyfral";
+static uint8_t* protocol_cyfral_get_data(ProtocolCyfral* proto) {
+    return (uint8_t*)&proto->data;
 }
 
 static void protocol_cyfral_decoder_start(ProtocolCyfral* proto) {
@@ -347,13 +325,12 @@ static LevelDuration protocol_cyfral_encoder_yield(ProtocolCyfral* proto) {
 }
 
 const ProtocolBase protocol_cyfral = {
+    .name = "Cyfral",
+    .manufacturer = "Cyfral",
+    .data_size = CYFRAL_DATA_SIZE,
     .alloc = (ProtocolAlloc)protocol_cyfral_alloc,
     .free = (ProtocolFree)protocol_cyfral_free,
-    .set_data = (ProtocolSetData)protocol_cyfral_set_data,
     .get_data = (ProtocolGetData)protocol_cyfral_get_data,
-    .get_data_size = (ProtocolGetDataSize)protocol_cyfral_get_data_size,
-    .get_name = (ProtocolGetName)protocol_cyfral_get_name,
-    .get_manufacturer = (ProtocolGetManufacturer)protocol_cyfral_get_manufacturer,
     .decoder =
         {
             .start = (ProtocolDecoderStart)protocol_cyfral_decoder_start,

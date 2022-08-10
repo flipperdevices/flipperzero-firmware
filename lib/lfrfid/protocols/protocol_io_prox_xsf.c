@@ -44,32 +44,8 @@ void protocol_io_prox_xsf_free(ProtocolIOProxXSF* protocol) {
     free(protocol);
 };
 
-void protocol_io_prox_xsf_set_data(
-    ProtocolIOProxXSF* protocol,
-    const uint8_t* data,
-    size_t data_size) {
-    furi_check(data_size >= IOPROXXSF_DECODED_DATA_SIZE);
-    memcpy(protocol->data, data, IOPROXXSF_DECODED_DATA_SIZE);
-};
-
-void protocol_io_prox_xsf_get_data(ProtocolIOProxXSF* protocol, uint8_t* data, size_t data_size) {
-    furi_check(data_size >= IOPROXXSF_DECODED_DATA_SIZE);
-    memcpy(data, protocol->data, IOPROXXSF_DECODED_DATA_SIZE);
-};
-
-size_t protocol_io_prox_xsf_get_data_size(ProtocolIOProxXSF* protocol) {
-    UNUSED(protocol);
-    return IOPROXXSF_DECODED_DATA_SIZE;
-};
-
-const char* protocol_io_prox_xsf_get_name(ProtocolIOProxXSF* protocol) {
-    UNUSED(protocol);
-    return "IoProxXSF";
-};
-
-const char* protocol_io_prox_xsf_get_manufacturer(ProtocolIOProxXSF* protocol) {
-    UNUSED(protocol);
-    return "Kantech";
+uint8_t* protocol_io_prox_xsf_get_data(ProtocolIOProxXSF* protocol) {
+    return protocol->data;
 };
 
 void protocol_io_prox_xsf_decoder_start(ProtocolIOProxXSF* protocol) {
@@ -268,16 +244,6 @@ void protocol_io_prox_xsf_render_data(ProtocolIOProxXSF* protocol, string_t resu
         (uint16_t)((data[2] << 8) | (data[3])));
 }
 
-uint32_t protocol_io_prox_xsf_get_features(ProtocolIOProxXSF* protocol) {
-    UNUSED(protocol);
-    return LFRFIDFeatureASK;
-}
-
-uint32_t protocol_io_prox_xsf_get_validate_count(ProtocolIOProxXSF* protocol) {
-    UNUSED(protocol);
-    return 3;
-}
-
 bool protocol_io_prox_xsf_write_data(ProtocolIOProxXSF* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
     bool result = false;
@@ -296,13 +262,14 @@ bool protocol_io_prox_xsf_write_data(ProtocolIOProxXSF* protocol, void* data) {
 };
 
 const ProtocolBase protocol_io_prox_xsf = {
+    .name = "IoProxXSF",
+    .manufacturer = "Kantech",
+    .data_size = IOPROXXSF_DECODED_DATA_SIZE,
+    .features = LFRFIDFeatureASK,
+    .validate_count = 3,
     .alloc = (ProtocolAlloc)protocol_io_prox_xsf_alloc,
     .free = (ProtocolFree)protocol_io_prox_xsf_free,
-    .set_data = (ProtocolSetData)protocol_io_prox_xsf_set_data,
     .get_data = (ProtocolGetData)protocol_io_prox_xsf_get_data,
-    .get_data_size = (ProtocolGetDataSize)protocol_io_prox_xsf_get_data_size,
-    .get_name = (ProtocolGetName)protocol_io_prox_xsf_get_name,
-    .get_manufacturer = (ProtocolGetManufacturer)protocol_io_prox_xsf_get_manufacturer,
     .decoder =
         {
             .start = (ProtocolDecoderStart)protocol_io_prox_xsf_decoder_start,
@@ -315,6 +282,4 @@ const ProtocolBase protocol_io_prox_xsf = {
         },
     .render_data = (ProtocolRenderData)protocol_io_prox_xsf_render_data,
     .write_data = (ProtocolWriteData)protocol_io_prox_xsf_write_data,
-    .get_features = (ProtocolGetFeatures)protocol_io_prox_xsf_get_features,
-    .get_validate_count = (ProtocolGetValidateCount)protocol_io_prox_xsf_get_validate_count,
 };

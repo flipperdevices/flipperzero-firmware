@@ -41,29 +41,8 @@ void protocol_indala26_free(ProtocolIndala* protocol) {
     free(protocol);
 };
 
-void protocol_indala26_set_data(ProtocolIndala* protocol, const uint8_t* data, size_t data_size) {
-    furi_check(data_size >= INDALA26_DECODED_DATA_SIZE);
-    memcpy(protocol->data, data, INDALA26_DECODED_DATA_SIZE);
-};
-
-void protocol_indala26_get_data(ProtocolIndala* protocol, uint8_t* data, size_t data_size) {
-    furi_check(data_size >= INDALA26_DECODED_DATA_SIZE);
-    memcpy(data, protocol->data, INDALA26_DECODED_DATA_SIZE);
-};
-
-size_t protocol_indala26_get_data_size(ProtocolIndala* protocol) {
-    UNUSED(protocol);
-    return INDALA26_DECODED_DATA_SIZE;
-};
-
-const char* protocol_indala26_get_name(ProtocolIndala* protocol) {
-    UNUSED(protocol);
-    return "Indala26";
-};
-
-const char* protocol_indala26_get_manufacturer(ProtocolIndala* protocol) {
-    UNUSED(protocol);
-    return "Motorola";
+uint8_t* protocol_indala26_get_data(ProtocolIndala* protocol) {
+    return protocol->data;
 };
 
 void protocol_indala26_decoder_start(ProtocolIndala* protocol) {
@@ -309,24 +288,15 @@ bool protocol_indala26_write_data(ProtocolIndala* protocol, void* data) {
     return result;
 };
 
-uint32_t protocol_indala26_get_features(void* protocol) {
-    UNUSED(protocol);
-    return LFRFIDFeaturePSK;
-}
-
-uint32_t protocol_indala26_get_validate_count(void* protocol) {
-    UNUSED(protocol);
-    return 6;
-}
-
 const ProtocolBase protocol_indala26 = {
+    .name = "Indala 26",
+    .manufacturer = "Motorola",
+    .data_size = INDALA26_DECODED_DATA_SIZE,
+    .features = LFRFIDFeaturePSK,
+    .validate_count = 6,
     .alloc = (ProtocolAlloc)protocol_indala26_alloc,
     .free = (ProtocolFree)protocol_indala26_free,
-    .set_data = (ProtocolSetData)protocol_indala26_set_data,
     .get_data = (ProtocolGetData)protocol_indala26_get_data,
-    .get_data_size = (ProtocolGetDataSize)protocol_indala26_get_data_size,
-    .get_name = (ProtocolGetName)protocol_indala26_get_name,
-    .get_manufacturer = (ProtocolGetManufacturer)protocol_indala26_get_manufacturer,
     .decoder =
         {
             .start = (ProtocolDecoderStart)protocol_indala26_decoder_start,
@@ -339,6 +309,4 @@ const ProtocolBase protocol_indala26 = {
         },
     .write_data = (ProtocolWriteData)protocol_indala26_write_data,
     .render_data = (ProtocolRenderData)protocol_indala26_render_data,
-    .get_features = (ProtocolGetFeatures)protocol_indala26_get_features,
-    .get_validate_count = (ProtocolGetValidateCount)protocol_indala26_get_validate_count,
 };

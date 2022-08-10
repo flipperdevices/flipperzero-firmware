@@ -46,29 +46,8 @@ void protocol_h10301_free(ProtocolH10301* protocol) {
     free(protocol);
 };
 
-void protocol_h10301_set_data(ProtocolH10301* protocol, const uint8_t* data, size_t data_size) {
-    furi_check(data_size >= H10301_DECODED_DATA_SIZE);
-    memcpy(protocol->data, data, H10301_DECODED_DATA_SIZE);
-};
-
-void protocol_h10301_get_data(ProtocolH10301* protocol, uint8_t* data, size_t data_size) {
-    furi_check(data_size >= H10301_DECODED_DATA_SIZE);
-    memcpy(data, protocol->data, H10301_DECODED_DATA_SIZE);
-};
-
-size_t protocol_h10301_get_data_size(ProtocolH10301* protocol) {
-    UNUSED(protocol);
-    return H10301_DECODED_DATA_SIZE;
-};
-
-const char* protocol_h10301_get_name(ProtocolH10301* protocol) {
-    UNUSED(protocol);
-    return "H10301";
-};
-
-const char* protocol_h10301_get_manufacturer(ProtocolH10301* protocol) {
-    UNUSED(protocol);
-    return "HID";
+uint8_t* protocol_h10301_get_data(ProtocolH10301* protocol) {
+    return protocol->data;
 };
 
 void protocol_h10301_decoder_start(ProtocolH10301* protocol) {
@@ -382,24 +361,15 @@ void protocol_h10301_render_data(ProtocolH10301* protocol, string_t result) {
         (uint16_t)((data[1] << 8) | (data[2])));
 };
 
-uint32_t protocol_h10301_get_features(void* protocol) {
-    UNUSED(protocol);
-    return LFRFIDFeatureASK;
-}
-
-uint32_t protocol_h10301_get_validate_count(void* protocol) {
-    UNUSED(protocol);
-    return 3;
-}
-
 const ProtocolBase protocol_h10301 = {
+    .name = "H10301",
+    .manufacturer = "HID",
+    .data_size = H10301_DECODED_DATA_SIZE,
+    .features = LFRFIDFeatureASK,
+    .validate_count = 3,
     .alloc = (ProtocolAlloc)protocol_h10301_alloc,
     .free = (ProtocolFree)protocol_h10301_free,
-    .set_data = (ProtocolSetData)protocol_h10301_set_data,
     .get_data = (ProtocolGetData)protocol_h10301_get_data,
-    .get_data_size = (ProtocolGetDataSize)protocol_h10301_get_data_size,
-    .get_name = (ProtocolGetName)protocol_h10301_get_name,
-    .get_manufacturer = (ProtocolGetManufacturer)protocol_h10301_get_manufacturer,
     .decoder =
         {
             .start = (ProtocolDecoderStart)protocol_h10301_decoder_start,
@@ -412,6 +382,4 @@ const ProtocolBase protocol_h10301 = {
         },
     .render_data = (ProtocolRenderData)protocol_h10301_render_data,
     .write_data = (ProtocolWriteData)protocol_h10301_write_data,
-    .get_features = (ProtocolGetFeatures)protocol_h10301_get_features,
-    .get_validate_count = (ProtocolGetValidateCount)protocol_h10301_get_validate_count,
 };

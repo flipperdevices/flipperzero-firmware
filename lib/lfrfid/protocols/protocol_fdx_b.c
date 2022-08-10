@@ -39,29 +39,8 @@ void protocol_fdx_b_free(ProtocolFDXB* protocol) {
     free(protocol);
 };
 
-void protocol_fdx_b_set_data(ProtocolFDXB* proto, const uint8_t* data, size_t data_size) {
-    furi_check(data_size >= FDXB_DECODED_DATA_SIZE);
-    memcpy(proto->data, data, FDXB_DECODED_DATA_SIZE);
-};
-
-void protocol_fdx_b_get_data(ProtocolFDXB* proto, uint8_t* data, size_t data_size) {
-    furi_check(data_size >= FDXB_DECODED_DATA_SIZE);
-    memcpy(data, proto->data, FDXB_DECODED_DATA_SIZE);
-};
-
-size_t protocol_fdx_b_get_data_size(ProtocolFDXB* protocol) {
-    UNUSED(protocol);
-    return FDXB_DECODED_DATA_SIZE;
-};
-
-const char* protocol_fdx_b_get_name(ProtocolFDXB* protocol) {
-    UNUSED(protocol);
-    return "FDX-B";
-};
-
-const char* protocol_fdx_b_get_manufacturer(ProtocolFDXB* protocol) {
-    UNUSED(protocol);
-    return "ISO";
+uint8_t* protocol_fdx_b_get_data(ProtocolFDXB* proto) {
+    return proto->data;
 };
 
 void protocol_fdx_b_decoder_start(ProtocolFDXB* protocol) {
@@ -331,24 +310,15 @@ bool protocol_fdx_b_write_data(ProtocolFDXB* protocol, void* data) {
     return result;
 };
 
-uint32_t protocol_fdx_b_get_features(void* protocol) {
-    UNUSED(protocol);
-    return LFRFIDFeatureASK;
-}
-
-uint32_t protocol_fdx_b_get_validate_count(void* protocol) {
-    UNUSED(protocol);
-    return 2;
-}
-
 const ProtocolBase protocol_fdx_b = {
+    .name = "FDX-B",
+    .manufacturer = "ISO",
+    .data_size = FDXB_DECODED_DATA_SIZE,
+    .features = LFRFIDFeatureASK,
+    .validate_count = 3,
     .alloc = (ProtocolAlloc)protocol_fdx_b_alloc,
     .free = (ProtocolFree)protocol_fdx_b_free,
-    .set_data = (ProtocolSetData)protocol_fdx_b_set_data,
     .get_data = (ProtocolGetData)protocol_fdx_b_get_data,
-    .get_data_size = (ProtocolGetDataSize)protocol_fdx_b_get_data_size,
-    .get_name = (ProtocolGetName)protocol_fdx_b_get_name,
-    .get_manufacturer = (ProtocolGetManufacturer)protocol_fdx_b_get_manufacturer,
     .decoder =
         {
             .start = (ProtocolDecoderStart)protocol_fdx_b_decoder_start,
@@ -361,6 +331,4 @@ const ProtocolBase protocol_fdx_b = {
         },
     .render_data = (ProtocolRenderData)protocol_fdx_b_render_data,
     .write_data = (ProtocolWriteData)protocol_fdx_b_write_data,
-    .get_features = (ProtocolGetFeatures)protocol_fdx_b_get_features,
-    .get_validate_count = (ProtocolGetValidateCount)protocol_fdx_b_get_validate_count,
 };

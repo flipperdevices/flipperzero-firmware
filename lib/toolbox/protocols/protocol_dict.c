@@ -35,11 +35,11 @@ void protocol_dict_set_data(
     const uint8_t* data,
     size_t data_size) {
     furi_assert(protocol_index < dict->count);
-    ProtocolSetData set_data = dict->base[protocol_index]->set_data;
-
-    if(set_data) {
-        set_data(dict->data[protocol_index], data, data_size);
-    }
+    furi_assert(dict->base[protocol_index]->get_data != NULL);
+    uint8_t* protocol_data = dict->base[protocol_index]->get_data(dict->data[protocol_index]);
+    size_t protocol_data_size = dict->base[protocol_index]->data_size;
+    furi_check(data_size >= protocol_data_size);
+    memcpy(protocol_data, data, protocol_data_size);
 }
 
 void protocol_dict_get_data(
@@ -48,35 +48,24 @@ void protocol_dict_get_data(
     uint8_t* data,
     size_t data_size) {
     furi_assert(protocol_index < dict->count);
-    ProtocolGetData get_data = dict->base[protocol_index]->get_data;
-
-    if(get_data) {
-        get_data(dict->data[protocol_index], data, data_size);
-    }
+    furi_assert(dict->base[protocol_index]->get_data != NULL);
+    uint8_t* protocol_data = dict->base[protocol_index]->get_data(dict->data[protocol_index]);
+    size_t protocol_data_size = dict->base[protocol_index]->data_size;
+    furi_check(data_size >= protocol_data_size);
+    memcpy(data, protocol_data, protocol_data_size);
 }
 
 size_t protocol_dict_get_data_size(ProtocolDict* dict, size_t protocol_index) {
     furi_assert(protocol_index < dict->count);
-    ProtocolGetDataSize get_data_size = dict->base[protocol_index]->get_data_size;
-    size_t data_size = 0;
-
-    if(get_data_size) {
-        data_size = get_data_size(dict->data[protocol_index]);
-    }
-
-    return data_size;
+    return dict->base[protocol_index]->data_size;
 }
 
 size_t protocol_dict_get_max_data_size(ProtocolDict* dict) {
     size_t max_data_size = 0;
     for(size_t i = 0; i < dict->count; i++) {
-        ProtocolGetDataSize get_data_size = dict->base[i]->get_data_size;
-
-        if(get_data_size) {
-            size_t data_size = get_data_size(dict->data[i]);
-            if(data_size > max_data_size) {
-                max_data_size = data_size;
-            }
+        size_t data_size = dict->base[i]->data_size;
+        if(data_size > max_data_size) {
+            max_data_size = data_size;
         }
     }
 
@@ -85,26 +74,12 @@ size_t protocol_dict_get_max_data_size(ProtocolDict* dict) {
 
 const char* protocol_dict_get_name(ProtocolDict* dict, size_t protocol_index) {
     furi_assert(protocol_index < dict->count);
-    ProtocolGetName get_name = dict->base[protocol_index]->get_name;
-    const char* name = "Unknown";
-
-    if(get_name) {
-        name = get_name(dict->data[protocol_index]);
-    }
-
-    return name;
+    return dict->base[protocol_index]->name;
 }
 
 const char* protocol_dict_get_manufacturer(ProtocolDict* dict, size_t protocol_index) {
     furi_assert(protocol_index < dict->count);
-    ProtocolGetManufacturer get_man = dict->base[protocol_index]->get_manufacturer;
-    const char* name = "Unknown";
-
-    if(get_man) {
-        name = get_man(dict->data[protocol_index]);
-    }
-
-    return name;
+    return dict->base[protocol_index]->manufacturer;
 }
 
 void protocol_dict_decoders_start(ProtocolDict* dict) {
@@ -146,7 +121,7 @@ ProtocolId protocol_dict_decoders_feed_by_feature(
     ProtocolId ready_protocol_id = PROTOCOL_NO;
 
     for(size_t i = 0; i < dict->count; i++) {
-        uint32_t features = dict->base[i]->get_features(dict->data[i]);
+        uint32_t features = dict->base[i]->features;
         if(features & feature) {
             ProtocolDecoderFeed fn = dict->base[i]->decoder.feed;
 
@@ -197,10 +172,7 @@ void protocol_dict_render_data(ProtocolDict* dict, string_t result, size_t proto
 
 uint32_t protocol_dict_get_validate_count(ProtocolDict* dict, size_t protocol_index) {
     furi_assert(protocol_index < dict->count);
-    ProtocolGetValidateCount fn = dict->base[protocol_index]->get_validate_count;
-
-    furi_assert(fn);
-    return fn(dict->data[protocol_index]);
+    return dict->base[protocol_index]->validate_count;
 }
 
 ProtocolId protocol_dict_get_protocol_by_name(ProtocolDict* dict, const char* name) {

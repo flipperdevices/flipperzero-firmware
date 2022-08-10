@@ -45,29 +45,8 @@ void protocol_awid_free(ProtocolAwid* protocol) {
     free(protocol);
 };
 
-void protocol_awid_set_data(ProtocolAwid* protocol, const uint8_t* data, size_t data_size) {
-    furi_check(data_size >= AWID_DECODED_DATA_SIZE);
-    memcpy(protocol->data, data, AWID_DECODED_DATA_SIZE);
-};
-
-void protocol_awid_get_data(ProtocolAwid* protocol, uint8_t* data, size_t data_size) {
-    furi_check(data_size >= AWID_DECODED_DATA_SIZE);
-    memcpy(data, protocol->data, AWID_DECODED_DATA_SIZE);
-};
-
-size_t protocol_awid_get_data_size(ProtocolAwid* protocol) {
-    UNUSED(protocol);
-    return AWID_DECODED_DATA_SIZE;
-};
-
-const char* protocol_awid_get_name(ProtocolAwid* protocol) {
-    UNUSED(protocol);
-    return "AWID";
-};
-
-const char* protocol_awid_get_manufacturer(ProtocolAwid* protocol) {
-    UNUSED(protocol);
-    return "AWID";
+uint8_t* protocol_awid_get_data(ProtocolAwid* protocol) {
+    return protocol->data;
 };
 
 void protocol_awid_decoder_start(ProtocolAwid* protocol) {
@@ -217,24 +196,15 @@ bool protocol_awid_write_data(ProtocolAwid* protocol, void* data) {
     return result;
 };
 
-uint32_t protocol_awid_get_features(void* protocol) {
-    UNUSED(protocol);
-    return LFRFIDFeatureASK;
-}
-
-uint32_t protocol_awid_get_validate_count(void* protocol) {
-    UNUSED(protocol);
-    return 3;
-}
-
 const ProtocolBase protocol_awid = {
+    .name = "AWID",
+    .manufacturer = "AWIG",
+    .data_size = AWID_DECODED_DATA_SIZE,
+    .features = LFRFIDFeatureASK,
+    .validate_count = 3,
     .alloc = (ProtocolAlloc)protocol_awid_alloc,
     .free = (ProtocolFree)protocol_awid_free,
-    .set_data = (ProtocolSetData)protocol_awid_set_data,
     .get_data = (ProtocolGetData)protocol_awid_get_data,
-    .get_data_size = (ProtocolGetDataSize)protocol_awid_get_data_size,
-    .get_name = (ProtocolGetName)protocol_awid_get_name,
-    .get_manufacturer = (ProtocolGetManufacturer)protocol_awid_get_manufacturer,
     .decoder =
         {
             .start = (ProtocolDecoderStart)protocol_awid_decoder_start,
@@ -247,6 +217,4 @@ const ProtocolBase protocol_awid = {
         },
     .render_data = (ProtocolRenderData)protocol_awid_render_data,
     .write_data = (ProtocolWriteData)protocol_awid_write_data,
-    .get_features = (ProtocolGetFeatures)protocol_awid_get_features,
-    .get_validate_count = (ProtocolGetValidateCount)protocol_awid_get_validate_count,
 };

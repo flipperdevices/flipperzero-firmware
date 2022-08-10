@@ -60,30 +60,8 @@ static void protocol_metakom_free(ProtocolMetakom* proto) {
     free(proto);
 }
 
-static void
-    protocol_metakom_set_data(ProtocolMetakom* proto, const uint8_t* data, size_t data_size) {
-    furi_check(data_size >= METAKOM_DATA_SIZE);
-    memcpy(&proto->data, data, METAKOM_DATA_SIZE);
-}
-
-static void protocol_metakom_get_data(ProtocolMetakom* proto, uint8_t* data, size_t data_size) {
-    furi_check(data_size >= METAKOM_DATA_SIZE);
-    memcpy(data, &proto->data, METAKOM_DATA_SIZE);
-}
-
-static size_t protocol_metakom_get_data_size(ProtocolMetakom* proto) {
-    UNUSED(proto);
-    return METAKOM_DATA_SIZE;
-}
-
-static const char* protocol_metakom_get_name(ProtocolMetakom* proto) {
-    UNUSED(proto);
-    return "Metakom";
-}
-
-static const char* protocol_metakom_get_manufacturer(ProtocolMetakom* proto) {
-    UNUSED(proto);
-    return "Metakom";
+static uint8_t* protocol_metakom_get_data(ProtocolMetakom* proto) {
+    return (uint8_t*)&proto->data;
 }
 
 static void protocol_metakom_decoder_start(ProtocolMetakom* proto) {
@@ -323,13 +301,12 @@ static LevelDuration protocol_metakom_encoder_yield(ProtocolMetakom* proto) {
 }
 
 const ProtocolBase protocol_metakom = {
+    .name = "Metakom",
+    .manufacturer = "Metakom",
+    .data_size = METAKOM_DATA_SIZE,
     .alloc = (ProtocolAlloc)protocol_metakom_alloc,
     .free = (ProtocolFree)protocol_metakom_free,
-    .set_data = (ProtocolSetData)protocol_metakom_set_data,
     .get_data = (ProtocolGetData)protocol_metakom_get_data,
-    .get_data_size = (ProtocolGetDataSize)protocol_metakom_get_data_size,
-    .get_name = (ProtocolGetName)protocol_metakom_get_name,
-    .get_manufacturer = (ProtocolGetManufacturer)protocol_metakom_get_manufacturer,
     .decoder =
         {
             .start = (ProtocolDecoderStart)protocol_metakom_decoder_start,

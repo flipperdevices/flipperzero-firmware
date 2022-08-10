@@ -54,29 +54,8 @@ void protocol_em4100_free(ProtocolEM4100* proto) {
     free(proto);
 };
 
-void protocol_em4100_set_data(ProtocolEM4100* proto, const uint8_t* data, size_t data_size) {
-    furi_check(data_size >= EM4100_DECODED_DATA_SIZE);
-    memcpy(proto->data, data, EM4100_DECODED_DATA_SIZE);
-};
-
-void protocol_em4100_get_data(ProtocolEM4100* proto, uint8_t* data, size_t data_size) {
-    furi_check(data_size >= EM4100_DECODED_DATA_SIZE);
-    memcpy(data, proto->data, EM4100_DECODED_DATA_SIZE);
-};
-
-size_t protocol_em4100_get_data_size(ProtocolEM4100* proto) {
-    UNUSED(proto);
-    return EM4100_DECODED_DATA_SIZE;
-};
-
-const char* protocol_em4100_get_name(ProtocolEM4100* proto) {
-    UNUSED(proto);
-    return "EM4100";
-};
-
-const char* protocol_em4100_get_manufacturer(ProtocolEM4100* proto) {
-    UNUSED(proto);
-    return "EM-Marin";
+uint8_t* protocol_em4100_get_data(ProtocolEM4100* proto) {
+    return proto->data;
 };
 
 static void em4100_decode(
@@ -288,24 +267,15 @@ void protocol_em4100_render_data(ProtocolEM4100* protocol, string_t result) {
     string_printf(result, "ID: %03u,%05u", data[2], (uint16_t)((data[3] << 8) | (data[4])));
 };
 
-uint32_t protocol_em4100_get_features(void* protocol) {
-    UNUSED(protocol);
-    return LFRFIDFeatureASK | LFRFIDFeaturePSK;
-}
-
-uint32_t protocol_em4100_get_validate_count(void* protocol) {
-    UNUSED(protocol);
-    return 3;
-}
-
 const ProtocolBase protocol_em4100 = {
+    .name = "EM4100",
+    .manufacturer = "EM-Micro",
+    .data_size = EM4100_DECODED_DATA_SIZE,
+    .features = LFRFIDFeatureASK | LFRFIDFeaturePSK,
+    .validate_count = 3,
     .alloc = (ProtocolAlloc)protocol_em4100_alloc,
     .free = (ProtocolFree)protocol_em4100_free,
-    .set_data = (ProtocolSetData)protocol_em4100_set_data,
     .get_data = (ProtocolGetData)protocol_em4100_get_data,
-    .get_data_size = (ProtocolGetDataSize)protocol_em4100_get_data_size,
-    .get_name = (ProtocolGetName)protocol_em4100_get_name,
-    .get_manufacturer = (ProtocolGetManufacturer)protocol_em4100_get_manufacturer,
     .decoder =
         {
             .start = (ProtocolDecoderStart)protocol_em4100_decoder_start,
@@ -318,6 +288,4 @@ const ProtocolBase protocol_em4100 = {
         },
     .render_data = (ProtocolRenderData)protocol_em4100_render_data,
     .write_data = (ProtocolWriteData)protocol_em4100_write_data,
-    .get_features = (ProtocolGetFeatures)protocol_em4100_get_features,
-    .get_validate_count = (ProtocolGetValidateCount)protocol_em4100_get_validate_count,
 };
