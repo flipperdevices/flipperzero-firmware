@@ -67,14 +67,14 @@ MJDuckyKey mj_ducky_keys[] = {{" ", 44, 0},         {"!", 30, 2},          {"\""
                               {"F11", 68, 0},       {"F7", 64, 0},         {"UP", 82, 0},
                               {"LEFT", 80, 0}};
 
-static bool mj_ducky_get_number(const char* param, uint32_t* val) {
-    uint32_t value = 0;
-    if(sscanf(param, "%lu", &value) == 1) {
-        *val = value;
-        return true;
-    }
-    return false;
-}
+// static bool mj_ducky_get_number(const char* param, uint32_t* val) {
+    // uint32_t value = 0;
+    // if(sscanf(param, "%lu", &value) == 1) {
+        // *val = value;
+        // return true;
+    // }
+    // return false;
+// }
 
 static uint32_t mj_ducky_get_command_len(const char* line) {
     uint32_t len = strlen(line);
