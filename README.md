@@ -13,6 +13,9 @@
 - Updated BadUSB with fix from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & OFW PR [#1525](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 - Updated AC.IR from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & updated asset by Svarich
 - Merging if put in OFW or not: [FIX: Fixed inconsistencies between texts #1569 (By zigad)](https://github.com/flipperdevices/flipperzero-firmware/pull/1569)
+- Updates from mothball187 to [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) 
+- Updates from mothball187 to [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff)
+- Dolphin EXP for Mouse Jacker Ducky Run +3 EXP for a total of 90 Daily
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -96,6 +99,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - - Tetris, Snake or Flappy Bird Score of 50 or more
 - - Tetris, Snake or Flappy Bird Score of 100 or more
 - - NRFSniffer Found Address
+- - Mouse Jacker Ducky Run
 - Dolphin: SD dolphin manifest updated to weight animations differently
 - GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)

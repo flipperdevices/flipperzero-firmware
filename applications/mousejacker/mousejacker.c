@@ -8,6 +8,7 @@
 #include <furi_hal_spi.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
+#include <dolphin/dolphin.h>
 #include <nrf24.h>
 #include <toolbox/stream/file_stream.h>
 #include "mousejacker_ducky.h"
@@ -34,6 +35,8 @@ typedef struct {
 typedef struct {
     int x;
     int y;
+    bool ducky_err;
+    bool addr_err;
 } PluginState;
 
 uint8_t addrs_count = 0;
@@ -52,10 +55,26 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
 
     canvas_set_font(canvas, FontSecondary);
-    snprintf(target_text, sizeof(target_text), target_fmt_text, target_address_str);
-    canvas_draw_str_aligned(canvas, 10, 10, AlignLeft, AlignBottom, target_text);
-    canvas_draw_str_aligned(canvas, 10, 30, AlignLeft, AlignBottom, "Press Ok button to ");
-    canvas_draw_str_aligned(canvas, 10, 40, AlignLeft, AlignBottom, "browse for ducky script");
+    if(!plugin_state->addr_err && !plugin_state->ducky_err) {
+        snprintf(target_text, sizeof(target_text), target_fmt_text, target_address_str);
+        canvas_draw_str_aligned(canvas, 7, 10, AlignLeft, AlignBottom, target_text);
+        canvas_draw_str_aligned(canvas, 22, 20, AlignLeft, AlignBottom, "<- select address ->");
+        canvas_draw_str_aligned(canvas, 10, 30, AlignLeft, AlignBottom, "Press Ok button to ");
+        canvas_draw_str_aligned(canvas, 10, 40, AlignLeft, AlignBottom, "browse for ducky script");
+    } else if(plugin_state->addr_err) {
+        canvas_draw_str_aligned(
+            canvas, 10, 10, AlignLeft, AlignBottom, "Error: No nrfsniff folder");
+        canvas_draw_str_aligned(canvas, 10, 20, AlignLeft, AlignBottom, "or addresses.txt file");
+        canvas_draw_str_aligned(
+            canvas, 10, 30, AlignLeft, AlignBottom, "loading error / empty file");
+        canvas_draw_str_aligned(
+            canvas, 7, 40, AlignLeft, AlignBottom, "Run (NRF24: Sniff) app first!");
+    } else if(plugin_state->ducky_err) {
+        canvas_draw_str_aligned(
+            canvas, 10, 10, AlignLeft, AlignBottom, "Error: No mousejacker folder");
+        canvas_draw_str_aligned(canvas, 10, 20, AlignLeft, AlignBottom, "or duckyscript file");
+        canvas_draw_str_aligned(canvas, 10, 30, AlignLeft, AlignBottom, "loading error");
+    }
 
     release_mutex((ValueMutex*)ctx, plugin_state);
 }
@@ -78,7 +97,7 @@ static void hexlify(uint8_t* in, uint8_t size, char* out) {
         snprintf(out + strlen(out), sizeof(out + strlen(out)), "%02X", in[i]);
 }
 
-static bool open_ducky_script(Storage* storage, Stream* stream) {
+static bool open_ducky_script(Stream* stream) {
     DialogsApp* dialogs = furi_record_open("dialogs");
     bool result = false;
     string_t path;
@@ -99,7 +118,7 @@ static bool open_ducky_script(Storage* storage, Stream* stream) {
     return result;
 }
 
-static bool open_addrs_file(Storage* storage, Stream* stream) {
+static bool open_addrs_file(Stream* stream) {
     DialogsApp* dialogs = furi_record_open("dialogs");
     bool result = false;
     string_t path;
@@ -120,23 +139,24 @@ static bool open_addrs_file(Storage* storage, Stream* stream) {
     return result;
 }
 
-static bool process_ducky_file(
-    Storage* storage,
-    Stream* file_stream,
-    uint8_t* addr,
-    uint8_t addr_size,
-    uint8_t rate) {
+static bool
+    process_ducky_file(Stream* file_stream, uint8_t* addr, uint8_t addr_size, uint8_t rate) {
     size_t file_size = 0;
     size_t bytes_read = 0;
     uint8_t* file_buf;
     bool loaded = false;
     FURI_LOG_I(TAG, "opening ducky script");
-    if(open_ducky_script(storage, file_stream)) {
+    if(open_ducky_script(file_stream)) {
         file_size = stream_size(file_stream);
+        if(file_size == (size_t)0) {
+            FURI_LOG_I(TAG, "load failed. file_size: %d", file_size);
+            return loaded;
+        }
         file_buf = malloc(file_size);
         memset(file_buf, 0, file_size);
         bytes_read = stream_read(file_stream, file_buf, file_size);
         if(bytes_read == file_size) {
+            DOLPHIN_DEED(DolphinDeedU2fAuthorized);
             FURI_LOG_I(TAG, "executing ducky script");
             mj_process_ducky_script(nrf24_HANDLE, addr, addr_size, rate, (char*)file_buf);
             FURI_LOG_I(TAG, "finished execution");
@@ -149,7 +169,7 @@ static bool process_ducky_file(
     return loaded;
 }
 
-static bool load_addrs_file(Storage* storage, Stream* file_stream) {
+static bool load_addrs_file(Stream* file_stream) {
     size_t file_size = 0;
     size_t bytes_read = 0;
     uint8_t* file_buf;
@@ -163,8 +183,12 @@ static bool load_addrs_file(Storage* storage, Stream* file_stream) {
     bool loaded = false;
     FURI_LOG_I(TAG, "opening addrs file");
     addrs_count = 0;
-    if(open_addrs_file(storage, file_stream)) {
+    if(open_addrs_file(file_stream)) {
         file_size = stream_size(file_stream);
+        if(file_size == (size_t)0) {
+            FURI_LOG_I(TAG, "load failed. file_size: %d", file_size);
+            return loaded;
+        }
         file_buf = malloc(file_size);
         memset(file_buf, 0, file_size);
         bytes_read = stream_read(file_stream, file_buf, file_size);
@@ -197,13 +221,16 @@ static bool load_addrs_file(Storage* storage, Stream* file_stream) {
 }
 
 int32_t mousejacker_app(void* p) {
+    UNUSED(p);
     uint8_t addr_idx = 0;
+    bool ducky_ok = false;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
     mousejacker_state_init(plugin_state);
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
+        furi_message_queue_free(event_queue);
         FURI_LOG_E("mousejacker", "cannot create mutex\r\n");
         free(plugin_state);
         return 255;
@@ -223,9 +250,12 @@ int32_t mousejacker_app(void* p) {
     Stream* file_stream = file_stream_alloc(storage);
 
     // spawn load file dialog to choose sniffed addresses file
-    if(load_addrs_file(storage, file_stream)) {
+    if(load_addrs_file(file_stream)) {
         addr_idx = 0;
         hexlify(&loaded_addrs[addr_idx][1], 5, target_address_str);
+        plugin_state->addr_err = false;
+    } else {
+        plugin_state->addr_err = true;
     }
     stream_free(file_stream);
     nrf24_init();
@@ -245,33 +275,43 @@ int32_t mousejacker_app(void* p) {
                     case InputKeyDown:
                         break;
                     case InputKeyRight:
-                        addr_idx++;
-                        if(addr_idx > addrs_count) addr_idx = 0;
-                        hexlify(loaded_addrs[addr_idx] + 1, 5, target_address_str);
+                        if(!plugin_state->addr_err) {
+                            addr_idx++;
+                            if(addr_idx > addrs_count) addr_idx = 0;
+                            hexlify(loaded_addrs[addr_idx] + 1, 5, target_address_str);
+                        }
                         break;
                     case InputKeyLeft:
-                        addr_idx--;
-                        if(addr_idx < 0) addr_idx = addrs_count - 1;
-                        hexlify(loaded_addrs[addr_idx] + 1, 5, target_address_str);
+                        if(!plugin_state->addr_err) {
+                            addr_idx--;
+                            if(addr_idx == 0) addr_idx = addrs_count - 1;
+                            hexlify(loaded_addrs[addr_idx] + 1, 5, target_address_str);
+                        }
                         break;
                     case InputKeyOk:
-                        file_stream = file_stream_alloc(storage);
-                        nrf24_find_channel(
-                            nrf24_HANDLE,
-                            loaded_addrs[addr_idx] + 1,
-                            loaded_addrs[addr_idx] + 1,
-                            5,
-                            loaded_addrs[addr_idx][0],
-                            2,
-                            LOGITECH_MAX_CHANNEL,
-                            true);
-                        process_ducky_file(
-                            storage,
-                            file_stream,
-                            loaded_addrs[addr_idx] + 1,
-                            5,
-                            loaded_addrs[addr_idx][0]);
-                        stream_free(file_stream);
+                        if(!plugin_state->addr_err) {
+                            file_stream = file_stream_alloc(storage);
+                            nrf24_find_channel(
+                                nrf24_HANDLE,
+                                loaded_addrs[addr_idx] + 1,
+                                loaded_addrs[addr_idx] + 1,
+                                5,
+                                loaded_addrs[addr_idx][0],
+                                2,
+                                LOGITECH_MAX_CHANNEL,
+                                true);
+                            ducky_ok = process_ducky_file(
+                                file_stream,
+                                loaded_addrs[addr_idx] + 1,
+                                5,
+                                loaded_addrs[addr_idx][0]);
+                            if(!ducky_ok) {
+                                plugin_state->ducky_err = true;
+                            } else {
+                                plugin_state->ducky_err = false;
+                            }
+                            stream_free(file_stream);
+                        }
                         break;
                     case InputKeyBack:
                         processing = false;
@@ -280,7 +320,7 @@ int32_t mousejacker_app(void* p) {
                 }
             }
         } else {
-            FURI_LOG_D("mousejacker", "osMessageQueue: event timeout");
+            FURI_LOG_D("mousejacker", "furi_message_queue: event timeout");
             // event timeout
         }
 
