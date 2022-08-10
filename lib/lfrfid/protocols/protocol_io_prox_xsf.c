@@ -237,7 +237,7 @@ static void protocol_io_prox_xsf_encode(const uint8_t* decoded_data, uint8_t* en
 }
 
 bool protocol_io_prox_xsf_encoder_start(ProtocolIOProxXSF* protocol) {
-    protocol_io_prox_xsf_encode(protocol->data, (uint8_t*)protocol->encoded_data);
+    protocol_io_prox_xsf_encode(protocol->data, protocol->encoded_data);
     protocol->encoder.encoded_index = 0;
     fsk_osc_reset(protocol->encoder.fsk_osc);
     return true;
@@ -268,15 +268,31 @@ void protocol_io_prox_xsf_render_data(ProtocolIOProxXSF* protocol, string_t resu
         (uint16_t)((data[2] << 8) | (data[3])));
 }
 
-uint32_t protocol_io_prox_xsf_get_features(void* protocol) {
+uint32_t protocol_io_prox_xsf_get_features(ProtocolIOProxXSF* protocol) {
     UNUSED(protocol);
     return LFRFIDFeatureASK;
 }
 
-uint32_t protocol_io_prox_xsf_get_validate_count(void* protocol) {
+uint32_t protocol_io_prox_xsf_get_validate_count(ProtocolIOProxXSF* protocol) {
     UNUSED(protocol);
     return 3;
 }
+
+bool protocol_io_prox_xsf_write_data(ProtocolIOProxXSF* protocol, void* data) {
+    LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
+    bool result = false;
+
+    protocol_io_prox_xsf_encode(protocol->data, protocol->encoded_data);
+
+    if(request->write_type == LFRFIDWriteTypeT5577) {
+        request->t5577.block[0] = 0b00000000000101000111000001000000;
+        request->t5577.block[1] = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
+        request->t5577.block[2] = bit_lib_get_bits_32(protocol->encoded_data, 32, 32);
+        request->t5577.blocks_to_write = 3;
+        result = true;
+    }
+    return result;
+};
 
 const ProtocolBase protocol_io_prox_xsf = {
     .alloc = (ProtocolAlloc)protocol_io_prox_xsf_alloc,

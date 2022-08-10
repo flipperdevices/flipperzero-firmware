@@ -358,8 +358,8 @@ const ProtocolBase protocol_fdx_b = {
             .start = (ProtocolEncoderStart)protocol_fdx_b_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_fdx_b_encoder_yield,
         },
-    .write_data = (ProtocolWriteData)protocol_fdx_b_write_data,
     .render_data = (ProtocolRenderData)protocol_fdx_b_render_data,
+    .write_data = (ProtocolWriteData)protocol_fdx_b_write_data,
     .get_features = (ProtocolGetFeatures)protocol_fdx_b_get_features,
     .get_validate_count = (ProtocolGetValidateCount)protocol_fdx_b_get_validate_count,
 };

@@ -105,10 +105,7 @@ static bool protocol_awid_can_be_decoded(const uint8_t* data) {
 }
 
 static void protocol_awid_decode(uint8_t* encoded_data, uint8_t* decoded_data) {
-    size_t size = bit_lib_remove_bit_every_nth(encoded_data, 8, 88, 4);
-    if(size != 66) furi_crash("size != 66");
-
-    // (88 / 3) * 4 = 66
+    bit_lib_remove_bit_every_nth(encoded_data, 8, 88, 4);
     bit_lib_copy_bits(decoded_data, 0, 66, encoded_data, 8);
 }
 
@@ -133,7 +130,7 @@ bool protocol_awid_decoder_feed(ProtocolAwid* protocol, bool level, uint32_t dur
     return result;
 };
 
-void protocol_awid_encode(const uint8_t* decoded_data, uint8_t* encoded_data) {
+static void protocol_awid_encode(const uint8_t* decoded_data, uint8_t* encoded_data) {
     memset(encoded_data, 0, AWID_ENCODED_DATA_SIZE);
 
     // preamble
@@ -171,7 +168,7 @@ void protocol_awid_render_data(ProtocolAwid* protocol, string_t result) {
     // 0           10         20        30          40        50        60
     // |           |          |         |           |         |         |
     // 01234567 8 90123456 7890123456789012 3 456789012345678901234567890123456
-    // -----------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // 00011010 1 01110101 0000000010001110 1 000000000000000000000000000000000
     // bbbbbbbb w ffffffff cccccccccccccccc w xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     // |26 bit|   |-117--| |-----142------|
@@ -203,9 +200,20 @@ void protocol_awid_render_data(ProtocolAwid* protocol, string_t result) {
 };
 
 bool protocol_awid_write_data(ProtocolAwid* protocol, void* data) {
-    UNUSED(protocol);
-    UNUSED(data);
-    return false;
+    LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
+    bool result = false;
+
+    protocol_awid_encode(protocol->data, (uint8_t*)protocol->encoded_data);
+
+    if(request->write_type == LFRFIDWriteTypeT5577) {
+        request->t5577.block[0] = 0b00000000000100000111000001100000;
+        request->t5577.block[1] = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
+        request->t5577.block[2] = bit_lib_get_bits_32(protocol->encoded_data, 32, 32);
+        request->t5577.block[3] = bit_lib_get_bits_32(protocol->encoded_data, 64, 32);
+        request->t5577.blocks_to_write = 4;
+        result = true;
+    }
+    return result;
 };
 
 uint32_t protocol_awid_get_features(void* protocol) {
