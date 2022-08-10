@@ -12,10 +12,15 @@
  *     gpio_ext_pa6 will show load on the decoder
  */
 #define LFRFID_WORKER_READ_DEBUG_GPIO 1
+
+#ifdef LFRFID_WORKER_READ_DEBUG_GPIO
 #define LFRFID_WORKER_READ_DEBUG_GPIO_VALUE &gpio_ext_pa7
 #define LFRFID_WORKER_READ_DEBUG_GPIO_LOAD &gpio_ext_pa6
+#endif
 
 #define LFRFID_WORKER_READ_SWITCH_TIME 3000
+#define LFRFID_WORKER_READ_STREAM_SIZE 4096
+#define LFRFID_WORKER_EMULATE_BUFFER_SIZE 1024
 
 void lfrfid_worker_mode_emulate_process(LFRFIDWorker* worker);
 void lfrfid_worker_mode_read_process(LFRFIDWorker* worker);
@@ -67,8 +72,8 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
     furi_hal_gpio_init_simple(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, GpioModeOutputPushPull);
 #endif
 
-    StreamBufferHandle_t stream =
-        xStreamBufferCreate(sizeof(LevelDuration) * 4096, sizeof(LevelDuration));
+    StreamBufferHandle_t stream = xStreamBufferCreate(
+        sizeof(LevelDuration) * LFRFID_WORKER_READ_STREAM_SIZE, sizeof(LevelDuration));
     furi_hal_rfid_tim_read_capture_start(lfrfid_worker_read_capture, stream);
 
     ProtocolId protocol = PROTOCOL_NO;
@@ -79,6 +84,7 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
     uint8_t* last_data = malloc(last_size);
     uint8_t* protocol_data = malloc(last_size);
     size_t last_read_count = 0;
+
     uint32_t switch_os_tick_last = furi_get_tick();
 
     while(true) {
@@ -197,8 +203,6 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
 }
 
 /*********************** EMULATE ***********************/
-#define LFRFID_WORKER_EMULATE_BUFFER_SIZE 1024
-
 typedef struct {
     uint32_t duration[LFRFID_WORKER_EMULATE_BUFFER_SIZE];
     uint32_t pulse[LFRFID_WORKER_EMULATE_BUFFER_SIZE];

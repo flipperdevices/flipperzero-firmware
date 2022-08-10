@@ -265,6 +265,22 @@ LevelDuration protocol_em4100_encoder_yield(ProtocolEM4100* proto) {
     return level_duration_make(level, duration);
 };
 
+bool protocol_em4100_write_data(ProtocolEM4100* protocol, void* data) {
+    LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
+    bool result = false;
+
+    protocol_em4100_encoder_start(protocol);
+
+    if(request->write_type == LFRFIDWriteTypeT5577) {
+        request->t5577.block[0] = 0b00000000000101001000000001000000;
+        request->t5577.block[1] = protocol->encoded_data;
+        request->t5577.block[2] = protocol->encoded_data >> 32;
+        request->t5577.blocks_to_write = 3;
+        result = true;
+    }
+    return result;
+};
+
 void protocol_em4100_render_data(ProtocolEM4100* protocol, string_t result) {
     uint8_t* data = protocol->data;
     string_printf(result, "ID: %03u,%05u", data[2], (uint16_t)((data[3] << 8) | (data[4])));
@@ -299,6 +315,7 @@ const ProtocolBase protocol_em4100 = {
             .yield = (ProtocolEncoderYield)protocol_em4100_encoder_yield,
         },
     .render_data = (ProtocolRenderData)protocol_em4100_render_data,
+    .write_data = (ProtocolWriteData)protocol_em4100_write_data,
     .get_features = (ProtocolGetFeatures)protocol_em4100_get_features,
     .get_validate_count = (ProtocolGetValidateCount)protocol_em4100_get_validate_count,
 };

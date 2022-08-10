@@ -238,6 +238,7 @@ void bit_lib_print_regions(
             printf(" ");
         }
     }
+    printf("\r\n");
 }
 
 uint16_t bit_lib_reverse_16_fast(uint16_t data) {

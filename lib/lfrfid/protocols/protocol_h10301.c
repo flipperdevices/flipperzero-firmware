@@ -354,6 +354,23 @@ LevelDuration protocol_h10301_encoder_yield(ProtocolH10301* protocol) {
     return level_duration_make(level, duration);
 };
 
+bool protocol_h10301_write_data(ProtocolH10301* protocol, void* data) {
+    LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
+    bool result = false;
+
+    protocol_h10301_encoder_start(protocol);
+
+    if(request->write_type == LFRFIDWriteTypeT5577) {
+        request->t5577.block[0] = 0b00000000000100000111000001100000;
+        request->t5577.block[1] = protocol->encoded_data[0];
+        request->t5577.block[2] = protocol->encoded_data[1];
+        request->t5577.block[3] = protocol->encoded_data[2];
+        request->t5577.blocks_to_write = 4;
+        result = true;
+    }
+    return result;
+};
+
 void protocol_h10301_render_data(ProtocolH10301* protocol, string_t result) {
     uint8_t* data = protocol->data;
     string_printf(
@@ -393,6 +410,7 @@ const ProtocolBase protocol_h10301 = {
             .yield = (ProtocolEncoderYield)protocol_h10301_encoder_yield,
         },
     .render_data = (ProtocolRenderData)protocol_h10301_render_data,
+    .write_data = (ProtocolWriteData)protocol_h10301_write_data,
     .get_features = (ProtocolGetFeatures)protocol_h10301_get_features,
     .get_validate_count = (ProtocolGetValidateCount)protocol_h10301_get_validate_count,
 };

@@ -186,10 +186,7 @@ LevelDuration protocol_indala26_encoder_yield(ProtocolIndala* protocol) {
 
             encoder->last_bit = current_bit;
 
-            encoder->data_index++;
-            if(encoder->data_index >= INDALA26_ENCODED_BIT_SIZE) {
-                encoder->data_index = 0;
-            }
+            bit_lib_increment_index(encoder->data_index, INDALA26_ENCODED_BIT_SIZE);
         }
     }
 
@@ -295,6 +292,22 @@ void protocol_indala26_render_data(ProtocolIndala* protocol, string_t result) {
         (wiegand_correct ? "+" : "-"));
 }
 
+bool protocol_indala26_write_data(ProtocolIndala* protocol, void* data) {
+    LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
+    bool result = false;
+
+    protocol_indala26_encoder_start(protocol);
+
+    if(request->write_type == LFRFIDWriteTypeT5577) {
+        request->t5577.block[0] = 0b00000000000010000001000001000000;
+        request->t5577.block[1] = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
+        request->t5577.block[2] = bit_lib_get_bits_32(protocol->encoded_data, 32, 32);
+        request->t5577.blocks_to_write = 3;
+        result = true;
+    }
+    return result;
+};
+
 uint32_t protocol_indala26_get_features(void* protocol) {
     UNUSED(protocol);
     return LFRFIDFeaturePSK;
@@ -323,6 +336,7 @@ const ProtocolBase protocol_indala26 = {
             .start = (ProtocolEncoderStart)protocol_indala26_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_indala26_encoder_yield,
         },
+    .write_data = (ProtocolWriteData)protocol_indala26_write_data,
     .render_data = (ProtocolRenderData)protocol_indala26_render_data,
     .get_features = (ProtocolGetFeatures)protocol_indala26_get_features,
     .get_validate_count = (ProtocolGetValidateCount)protocol_indala26_get_validate_count,
