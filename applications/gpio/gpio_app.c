@@ -59,9 +59,7 @@ GpioApp* gpio_app_alloc() {
 
     app->gpio_i2c_sfp = gpio_i2c_sfp_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        GpioAppViewI2CSfp,
-        gpio_i2c_sfp_get_view(app->gpio_i2c_sfp));
+        app->view_dispatcher, GpioAppViewI2CSfp, gpio_i2c_sfp_get_view(app->gpio_i2c_sfp));
 
     app->widget = widget_alloc();
     view_dispatcher_add_view(

@@ -58,15 +58,14 @@ static void gpio_i2c_sfp_draw_callback(Canvas* canvas, void* _model) {
     canvas_draw_str(canvas, 2, 49, temp_str);
 
     // These values will be zero if not applicable..
-    if (model->sm_reach != 0) {
+    if(model->sm_reach != 0) {
         snprintf(temp_str, 280, "%u km (SM)", model->sm_reach);
         canvas_draw_str(canvas, 50, 49, temp_str);
     }
-    if (model->mm_reach_om3 != 0) {
+    if(model->mm_reach_om3 != 0) {
         snprintf(temp_str, 280, "%u m (MM OM3)", model->mm_reach_om3);
         canvas_draw_str(canvas, 50, 49, temp_str);
     }
-
 }
 
 static bool gpio_i2c_sfp_input_callback(InputEvent* event, void* context) {

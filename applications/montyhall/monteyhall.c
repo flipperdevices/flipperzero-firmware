@@ -20,7 +20,7 @@
 
 //void draw_goat(Canvas* canvas, int x, int y) { TODO }
 
-void draw_car(Canvas* canvas, int x, int y) { 
+void draw_car(Canvas* canvas, int x, int y) {
     // x -> leftmost pixel, y -> topmost pixel
     // could be in another file or a pixel array but idk how to so feel free to PR
 
@@ -176,7 +176,7 @@ void revealBadDoor(MontyState* monty_state) {
     int doorToReveal = getRandomDoorIndex();
     while(!monty_state->door_state.doors[doorToReveal].isOpen) {
         if(!(monty_state->door_state.doors[doorToReveal].isSelected ||
-         monty_state->door_state.doors[doorToReveal].isWinningDoor)) {
+             monty_state->door_state.doors[doorToReveal].isWinningDoor)) {
             monty_state->door_state.doors[doorToReveal].isOpen = true;
         } else {
             doorToReveal = getRandomDoorIndex();
@@ -189,7 +189,7 @@ void revealDoors_updateScore(MontyState* monty_state) {
         monty_state->door_state.doors[i].isOpen = true;
 
         if(monty_state->door_state.doors[i].isWinningDoor &&
-         monty_state->door_state.doors[i].isSelected) {
+           monty_state->door_state.doors[i].isSelected) {
             monty_state->score++;
         }
     }
@@ -201,12 +201,13 @@ static void draw_top(Canvas* canvas, const MontyState* monty_state) {
     canvas_draw_str_aligned(canvas, 2, 8, AlignLeft, AlignBottom, buffer);
 
     if(monty_state->game_state == RoundThree) {
-        canvas_draw_str_aligned(canvas, SCREEN_WIDTH - 5, 8, AlignRight, AlignBottom, "Opened a decoy door");
+        canvas_draw_str_aligned(
+            canvas, SCREEN_WIDTH - 5, 8, AlignRight, AlignBottom, "Opened a decoy door");
     }
 }
 
-static void draw_doors(Canvas* canvas, const MontyState* monty_state) { 
-  // {| 16 | <22> | 15 | <22> | 15 | <22> | 16 |} = SCREEN_WIDTH
+static void draw_doors(Canvas* canvas, const MontyState* monty_state) {
+    // {| 16 | <22> | 15 | <22> | 15 | <22> | 16 |} = SCREEN_WIDTH
     if(monty_state->door_state.doors[0].isOpen) {
         if(monty_state->door_state.doors[0].isWinningDoor) {
             canvas_draw_frame(canvas, 16, 12, 22, 35);
@@ -230,7 +231,7 @@ static void draw_doors(Canvas* canvas, const MontyState* monty_state) {
     } else {
         canvas_draw_icon(canvas, 53, 12, &I_DoorClosed_22x35);
     }
-    
+
     if(monty_state->door_state.doors[2].isOpen) {
         if(monty_state->door_state.doors[2].isWinningDoor) {
             canvas_draw_frame(canvas, 90, 12, 22, 35);
@@ -300,8 +301,7 @@ static void montyhall_render_callback(Canvas* const canvas, void* ctx) {
     release_mutex((ValueMutex*)ctx, monty_state);
 }
 
-static void
-    montyhall_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
+static void montyhall_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);

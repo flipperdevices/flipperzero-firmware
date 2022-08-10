@@ -74,7 +74,6 @@ int32_t paint_app(void* p) {
     InputEvent event;
 
     while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
-
         //break out of the loop if the back key is pressed
         if(event.type == InputTypeShort && event.key == InputKeyBack) {
             break;

@@ -40,11 +40,11 @@ static const char* const moods[BUTTHURT_MAX] = {
     "Sad",
     "Disappointed",
     "Annoyed"
-	// ,
+    // ,
     // "Upset",
     // "Angry",
     // "Furious"
-	};
+};
 
 static void input_callback(InputEvent* input, void* ctx) {
     FuriSemaphore* semaphore = ctx;
@@ -79,7 +79,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
     uint32_t xp_above_last_levelup = dolphin_state_xp_above_last_levelup(stats->icounter);
     uint32_t xp_for_current_level = xp_to_levelup + xp_above_last_levelup;
-	
+
     if(stats->level == 30) {
         xp_progress = 0;
     } else {
@@ -105,7 +105,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
     const char* my_name = furi_hal_version_get_name_ptr();
     snprintf(level_str, 12, "Level: %hu", stats->level);
-	snprintf(xp_str, 12, "%lu/%lu", xp_above_last_levelup, xp_for_current_level);
+    snprintf(xp_str, 12, "%lu/%lu", xp_above_last_levelup, xp_for_current_level);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 58, 12, my_name ? my_name : "Unknown");
     canvas_draw_str(canvas, 58, 24, mood_str);

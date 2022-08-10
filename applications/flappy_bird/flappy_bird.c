@@ -47,17 +47,16 @@ typedef struct {
 } PILAR;
 
 typedef enum {
-    GameStateLife,  
+    GameStateLife,
     GameStateGameOver,
 } State;
-
 
 typedef struct {
     BIRD bird;
     int points;
     int pilars_count;
     PILAR pilars[FLAPPY_PILAR_MAX];
-    bool debug; 
+    bool debug;
     State state;
 } GameState;
 
@@ -103,22 +102,21 @@ static void flappy_game_state_init(GameState* const game_state) {
 }
 
 // static void flappy_game_reset(GameState* const game_state) {
-    // FURI_LOG_I(TAG, "Reset Game State\r\n"); // Resetting State  
+// FURI_LOG_I(TAG, "Reset Game State\r\n"); // Resetting State
 // }
 
 static void flappy_game_tick(GameState* const game_state) {
-
-    if (game_state->state == GameStateLife) {
-        if (!game_state->debug) {
+    if(game_state->state == GameStateLife) {
+        if(!game_state->debug) {
             game_state->bird.gravity += FLAPPY_GRAVITY_TICK;
-            game_state->bird.point.y += game_state->bird.gravity; 
+            game_state->bird.point.y += game_state->bird.gravity;
         }
 
         // Checking the location of the last respawned pilar.
         PILAR* pilar = &game_state->pilars[game_state->pilars_count % FLAPPY_PILAR_MAX];
         if(pilar->point.x == (FLIPPER_LCD_WIDTH - FLAPPY_PILAR_DIST))
             flappy_game_random_pilar(game_state);
-    
+
         // Updating the position/status of the pilars (visiblity, posotion, game points)
         //        |  |      |  |  |
         //        |  |      |  |  |
@@ -126,43 +124,45 @@ static void flappy_game_tick(GameState* const game_state) {
         //   _____X         |      X_____
         //  |     |         |      |     |   // [Pos + Width of pilar] >= [Bird Pos]
         //  |_____|         |      |_____|
-        // X <---->         |     X <-> 
+        // X <---->         |     X <->
         // Bird Pos + Lenght of the  bird] >= [Pilar]
-        for (int i = 0; i < FLAPPY_PILAR_MAX; i++) {
-            PILAR * pilar = &game_state->pilars[i]; 
-            if (pilar != NULL && pilar->visible && game_state->state == GameStateLife) {
+        for(int i = 0; i < FLAPPY_PILAR_MAX; i++) {
+            PILAR* pilar = &game_state->pilars[i];
+            if(pilar != NULL && pilar->visible && game_state->state == GameStateLife) {
                 pilar->point.x--;
-                if (game_state->bird.point.x >= pilar->point.x + FLAPPY_GAB_WIDTH &&
-                    pilar->passed == false) {
+                if(game_state->bird.point.x >= pilar->point.x + FLAPPY_GAB_WIDTH &&
+                   pilar->passed == false) {
                     pilar->passed = true;
                     game_state->points++;
                 }
-                if (pilar->point.x < -FLAPPY_GAB_WIDTH) 
-                    pilar->visible = 0;  
-    
-                // Checking out of bounds 
-                if (game_state->bird.point.y < 0 - FLAPPY_BIRD_WIDTH  || game_state->bird.point.y > FLIPPER_LCD_HEIGHT) {
-                    game_state->state = GameStateGameOver; 
+                if(pilar->point.x < -FLAPPY_GAB_WIDTH) pilar->visible = 0;
+
+                // Checking out of bounds
+                if(game_state->bird.point.y < 0 - FLAPPY_BIRD_WIDTH ||
+                   game_state->bird.point.y > FLIPPER_LCD_HEIGHT) {
+                    game_state->state = GameStateGameOver;
                     break;
                 }
-                    
+
                 // Bird inbetween pipes
-                if ((game_state->bird.point.x + FLAPPY_BIRD_HEIGHT >= pilar->point.x) && (game_state->bird.point.x <= pilar->point.x + FLAPPY_GAB_WIDTH)) {
-                    // Bird below Bottom Pipe 
-                    if (game_state->bird.point.y + FLAPPY_BIRD_WIDTH - 2 >= pilar->height + FLAPPY_GAB_HEIGHT) {
-                        game_state->state = GameStateGameOver; 
-                        break;
-                    }
-                    
-                    // Bird above Upper Pipe 
-                    if (game_state->bird.point.y < pilar->height) {
+                if((game_state->bird.point.x + FLAPPY_BIRD_HEIGHT >= pilar->point.x) &&
+                   (game_state->bird.point.x <= pilar->point.x + FLAPPY_GAB_WIDTH)) {
+                    // Bird below Bottom Pipe
+                    if(game_state->bird.point.y + FLAPPY_BIRD_WIDTH - 2 >=
+                       pilar->height + FLAPPY_GAB_HEIGHT) {
                         game_state->state = GameStateGameOver;
                         break;
                     }
-                } 
+
+                    // Bird above Upper Pipe
+                    if(game_state->bird.point.y < pilar->height) {
+                        game_state->state = GameStateGameOver;
+                        break;
+                    }
+                }
             }
-        } 
-    } 
+        }
+    }
 }
 
 static void flappy_game_flap(GameState* const game_state) {
@@ -177,54 +177,57 @@ static void flappy_game_render_callback(Canvas* const canvas, void* ctx) {
 
     canvas_draw_frame(canvas, 0, 0, 128, 64);
 
-    if (game_state->state == GameStateLife) {
-        // Pilars 
-        for (int i = 0; i < FLAPPY_PILAR_MAX; i++) {
-            const PILAR * pilar = &game_state->pilars[i];
-            if (pilar != NULL && pilar->visible == 1) {  
+    if(game_state->state == GameStateLife) {
+        // Pilars
+        for(int i = 0; i < FLAPPY_PILAR_MAX; i++) {
+            const PILAR* pilar = &game_state->pilars[i];
+            if(pilar != NULL && pilar->visible == 1) {
+                canvas_draw_frame(
+                    canvas, pilar->point.x, pilar->point.y, FLAPPY_GAB_WIDTH, pilar->height);
 
-                canvas_draw_frame(canvas, pilar->point.x, pilar->point.y, 
-                                    FLAPPY_GAB_WIDTH, pilar->height);
-
-                canvas_draw_frame(canvas, pilar->point.x, pilar->point.y + pilar->height + FLAPPY_GAB_HEIGHT, 
-                                    FLAPPY_GAB_WIDTH, FLIPPER_LCD_HEIGHT - pilar->height - FLAPPY_GAB_HEIGHT);
+                canvas_draw_frame(
+                    canvas,
+                    pilar->point.x,
+                    pilar->point.y + pilar->height + FLAPPY_GAB_HEIGHT,
+                    FLAPPY_GAB_WIDTH,
+                    FLIPPER_LCD_HEIGHT - pilar->height - FLAPPY_GAB_HEIGHT);
             }
-        }   
+        }
         // Flappy
-        for (int h = 0; h < FLAPPY_BIRD_HEIGHT; h++) {
-            for (int w = 0; w < FLAPPY_BIRD_WIDTH; w++) { 
+        for(int h = 0; h < FLAPPY_BIRD_HEIGHT; h++) {
+            for(int w = 0; w < FLAPPY_BIRD_WIDTH; w++) {
                 // Switch animation
-                int bird = 0; 
-                if (game_state->bird.gravity < -0.5)
+                int bird = 0;
+                if(game_state->bird.gravity < -0.5)
                     bird = 1;
                 else
                     bird = 2;
 
                 // Draw bird pixels
-                if (bird_array[bird][h][w] == 1) {
-                    int x = game_state->bird.point.x + h; 
-                    int y = game_state->bird.point.y + w; 
+                if(bird_array[bird][h][w] == 1) {
+                    int x = game_state->bird.point.x + h;
+                    int y = game_state->bird.point.y + w;
 
                     canvas_draw_dot(canvas, x, y);
                 }
             }
         }
 
-        // Stats 
+        // Stats
 
         canvas_set_font(canvas, FontSecondary);
         char buffer[12];
         snprintf(buffer, sizeof(buffer), "Score: %u", game_state->points);
         canvas_draw_str_aligned(canvas, 100, 12, AlignCenter, AlignBottom, buffer);
-        
-        if (game_state->debug) { 
-            char coordinates[20]; 
-            snprintf(coordinates, sizeof(coordinates), "Y: %u", game_state->bird.point.y); 
+
+        if(game_state->debug) {
+            char coordinates[20];
+            snprintf(coordinates, sizeof(coordinates), "Y: %u", game_state->bird.point.y);
             canvas_draw_str_aligned(canvas, 1, 12, AlignCenter, AlignBottom, coordinates);
         }
     }
 
-    if (game_state->state == GameStateGameOver) {
+    if(game_state->state == GameStateGameOver) {
         // Screen is 128x64 px
         canvas_set_color(canvas, ColorWhite);
         canvas_draw_box(canvas, 34, 20, 62, 24);
@@ -235,13 +238,13 @@ static void flappy_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 37, 31, "Game Over");
 
-        if(game_state->points>=10) {
+        if(game_state->points >= 10) {
             DOLPHIN_DEED(DolphinDeedU2fAuthorized);
         }
-        if(game_state->points>=50) {
+        if(game_state->points >= 50) {
             DOLPHIN_DEED(DolphinDeedU2fAuthorized);
         }
-        if(game_state->points>=100) {
+        if(game_state->points >= 100) {
             DOLPHIN_DEED(DolphinDeedU2fAuthorized);
         }
 
@@ -322,9 +325,9 @@ int32_t flappy_game_app(void* p) {
                     case InputKeyOk:
                         if(game_state->state == GameStateGameOver) {
                             flappy_game_state_init(game_state);
-                        }  
+                        }
 
-                        if (game_state->state == GameStateLife) {
+                        if(game_state->state == GameStateLife) {
                             flappy_game_flap(game_state);
                         }
 

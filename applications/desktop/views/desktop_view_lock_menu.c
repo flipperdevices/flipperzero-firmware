@@ -65,9 +65,9 @@ static void lock_menu_callback(void* context, uint8_t index) {
                 model->hint_timeout = HINT_TIMEOUT;
                 return true;
             });
-		furi_delay_us(800);
+        furi_delay_us(800);
         desktop_view_lock_menu_dumbmode_changed(1);
-		DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+        DOLPHIN_DEED(DolphinDeedU2fAuthorized);
         lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
         break;
     default: // wip message

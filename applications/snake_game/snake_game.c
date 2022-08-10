@@ -114,13 +114,13 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 37, 31, "Game Over");
 
-        if(snake_state->len - 7>=10) {
+        if(snake_state->len - 7 >= 10) {
             DOLPHIN_DEED(DolphinDeedU2fAuthorized);
         }
-        if(snake_state->len - 7>=50) {
+        if(snake_state->len - 7 >= 50) {
             DOLPHIN_DEED(DolphinDeedU2fAuthorized);
         }
-        if(snake_state->len - 7>=100) {
+        if(snake_state->len - 7 >= 100) {
             DOLPHIN_DEED(DolphinDeedU2fAuthorized);
         }
 

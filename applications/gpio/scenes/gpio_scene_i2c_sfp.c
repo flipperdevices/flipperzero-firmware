@@ -1,7 +1,6 @@
 #include "../gpio_app_i.h"
 #include <furi_hal_gpio.h>
 
-
 static I2CSfpState* i2c_sfp_state;
 
 void gpio_scene_i2c_sfp_ok_callback(InputType type, void* context) {
@@ -20,8 +19,7 @@ void gpio_scene_i2c_sfp_on_enter(void* context) {
     GpioApp* app = context;
     i2c_sfp_state = malloc(sizeof(I2CSfpState));
 
-    gpio_i2c_sfp_set_ok_callback(
-        app->gpio_i2c_sfp, gpio_scene_i2c_sfp_ok_callback, app);
+    gpio_i2c_sfp_set_ok_callback(app->gpio_i2c_sfp, gpio_scene_i2c_sfp_ok_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, GpioAppViewI2CSfp);
 }
 
