@@ -231,7 +231,7 @@ void subghz_protocol_decoder_bett_feed(void* context, bool level, uint32_t durat
 
     switch(instance->decoder.parser_step) {
     case BETTDecoderStepReset:
-        if((!level) && (DURATION_DIFF(duration, subghz_protocol_bett_const.te_short * 42) <
+        if((!level) && (DURATION_DIFF(duration, subghz_protocol_bett_const.te_short * 44) <
                         (subghz_protocol_bett_const.te_delta * 15))) {
             //Found Preambula
             instance->decoder.parser_step = BETTDecoderStepCheckDuration;
@@ -239,7 +239,7 @@ void subghz_protocol_decoder_bett_feed(void* context, bool level, uint32_t durat
         break;
     case BETTDecoderStepSaveDuration:
         if(!level) {
-            if(DURATION_DIFF(duration, subghz_protocol_bett_const.te_short * 42) <
+            if(DURATION_DIFF(duration, subghz_protocol_bett_const.te_short * 44) <
                (subghz_protocol_bett_const.te_delta * 15)) {
                 instance->decoder.parser_step = BETTDecoderStepSaveDuration;
                 if(instance->decoder.decode_count_bit ==
