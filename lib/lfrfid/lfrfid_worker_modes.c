@@ -1,6 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include "lfrfid_worker_i.h"
+#include "tools/t55xx.h"
 #include <stream_buffer.h>
 #include <toolbox/pulse_protocols/pulse_glue.h>
 
@@ -317,9 +318,20 @@ void lfrfid_worker_mode_emulate_process(LFRFIDWorker* worker) {
 /*********************** WRITE ***********************/
 
 void lfrfid_worker_mode_write_process(LFRFIDWorker* worker) {
-    while(!lfrfid_worker_check_for_stop(worker)) {
-        furi_delay_ms(100);
+    LFRFIDProtocol protocol = worker->protocol;
+    LFRFIDWriteRequest* request = malloc(sizeof(LFRFIDWriteRequest));
+    request->write_type = LFRFIDWriteTypeT55XX;
+
+    bool can_be_written = protocol_dict_get_write_data(worker->protocols, protocol, request);
+
+    if(can_be_written) {
+        while(!lfrfid_worker_check_for_stop(worker)) {
+            t55xx_write(&request->t55xx);
+            furi_delay_ms(1000);
+        }
     }
+
+    free(request);
 }
 
 /*********************** READ RAW ***********************/

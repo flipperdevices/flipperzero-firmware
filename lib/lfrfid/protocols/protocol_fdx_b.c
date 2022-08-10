@@ -318,13 +318,13 @@ bool protocol_fdx_b_write_data(ProtocolFDXB* protocol, void* data) {
 
     protocol_fdx_b_encoder_start(protocol);
 
-    if(request->write_type == LFRFIDWriteTypeT5577) {
-        request->t5577.block[0] = 0b00000000000010011000000010000000;
-        request->t5577.block[1] = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
-        request->t5577.block[2] = bit_lib_get_bits_32(protocol->encoded_data, 32, 32);
-        request->t5577.block[3] = bit_lib_get_bits_32(protocol->encoded_data, 64, 32);
-        request->t5577.block[4] = bit_lib_get_bits_32(protocol->encoded_data, 96, 32);
-        request->t5577.blocks_to_write = 5;
+    if(request->write_type == LFRFIDWriteTypeT55XX) {
+        request->t55xx.block[0] = 0b00000000000010011000000010000000;
+        request->t55xx.block[1] = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
+        request->t55xx.block[2] = bit_lib_get_bits_32(protocol->encoded_data, 32, 32);
+        request->t55xx.block[3] = bit_lib_get_bits_32(protocol->encoded_data, 64, 32);
+        request->t55xx.block[4] = bit_lib_get_bits_32(protocol->encoded_data, 96, 32);
+        request->t55xx.blocks_to_write = 5;
         result = true;
     }
     return result;

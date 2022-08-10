@@ -271,11 +271,11 @@ bool protocol_em4100_write_data(ProtocolEM4100* protocol, void* data) {
 
     protocol_em4100_encoder_start(protocol);
 
-    if(request->write_type == LFRFIDWriteTypeT5577) {
-        request->t5577.block[0] = 0b00000000000101001000000001000000;
-        request->t5577.block[1] = protocol->encoded_data;
-        request->t5577.block[2] = protocol->encoded_data >> 32;
-        request->t5577.blocks_to_write = 3;
+    if(request->write_type == LFRFIDWriteTypeT55XX) {
+        request->t55xx.block[0] = 0b00000000000101001000000001000000;
+        request->t55xx.block[1] = protocol->encoded_data;
+        request->t55xx.block[2] = protocol->encoded_data >> 32;
+        request->t55xx.blocks_to_write = 3;
         result = true;
     }
     return result;

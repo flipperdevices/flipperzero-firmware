@@ -360,12 +360,12 @@ bool protocol_h10301_write_data(ProtocolH10301* protocol, void* data) {
 
     protocol_h10301_encoder_start(protocol);
 
-    if(request->write_type == LFRFIDWriteTypeT5577) {
-        request->t5577.block[0] = 0b00000000000100000111000001100000;
-        request->t5577.block[1] = protocol->encoded_data[0];
-        request->t5577.block[2] = protocol->encoded_data[1];
-        request->t5577.block[3] = protocol->encoded_data[2];
-        request->t5577.blocks_to_write = 4;
+    if(request->write_type == LFRFIDWriteTypeT55XX) {
+        request->t55xx.block[0] = 0b00000000000100000111000001100000;
+        request->t55xx.block[1] = protocol->encoded_data[0];
+        request->t55xx.block[2] = protocol->encoded_data[1];
+        request->t55xx.block[3] = protocol->encoded_data[2];
+        request->t55xx.blocks_to_write = 4;
         result = true;
     }
     return result;

@@ -211,3 +211,11 @@ ProtocolId protocol_dict_get_protocol_by_name(ProtocolDict* dict, const char* na
     }
     return PROTOCOL_NO;
 }
+
+bool protocol_dict_get_write_data(ProtocolDict* dict, size_t protocol_index, void* data) {
+    furi_assert(protocol_index < dict->count);
+    ProtocolWriteData fn = dict->base[protocol_index]->write_data;
+
+    furi_assert(fn);
+    return fn(dict->data[protocol_index], data);
+}

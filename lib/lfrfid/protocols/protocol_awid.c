@@ -205,12 +205,12 @@ bool protocol_awid_write_data(ProtocolAwid* protocol, void* data) {
 
     protocol_awid_encode(protocol->data, (uint8_t*)protocol->encoded_data);
 
-    if(request->write_type == LFRFIDWriteTypeT5577) {
-        request->t5577.block[0] = 0b00000000000100000111000001100000;
-        request->t5577.block[1] = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
-        request->t5577.block[2] = bit_lib_get_bits_32(protocol->encoded_data, 32, 32);
-        request->t5577.block[3] = bit_lib_get_bits_32(protocol->encoded_data, 64, 32);
-        request->t5577.blocks_to_write = 4;
+    if(request->write_type == LFRFIDWriteTypeT55XX) {
+        request->t55xx.block[0] = 0b00000000000100000111000001100000;
+        request->t55xx.block[1] = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
+        request->t55xx.block[2] = bit_lib_get_bits_32(protocol->encoded_data, 32, 32);
+        request->t55xx.block[3] = bit_lib_get_bits_32(protocol->encoded_data, 64, 32);
+        request->t55xx.blocks_to_write = 4;
         result = true;
     }
     return result;

@@ -51,3 +51,5 @@ void protocol_dict_render_data(ProtocolDict* dict, string_t result, size_t proto
 uint32_t protocol_dict_get_validate_count(ProtocolDict* dict, size_t protocol_index);
 
 ProtocolId protocol_dict_get_protocol_by_name(ProtocolDict* dict, const char* name);
+
+bool protocol_dict_get_write_data(ProtocolDict* dict, size_t protocol_index, void* data);
