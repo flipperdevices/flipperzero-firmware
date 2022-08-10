@@ -69,6 +69,7 @@ int32_t mouse_jiggler_app(void* p) {
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, plugin_state, sizeof(MouseJigglerState))) {
         FURI_LOG_E("MouseJiggler", "cannot create mutex\r\n");
+        furi_message_queue_free(event_queue);
         free(plugin_state);
         return 255;
     }

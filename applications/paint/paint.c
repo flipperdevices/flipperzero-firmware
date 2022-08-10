@@ -54,7 +54,8 @@ int32_t paint_app(void* p) {
     PaintData* paint_state = malloc(sizeof(PaintData));
     ValueMutex paint_state_mutex;
     if(!init_mutex(&paint_state_mutex, paint_state, sizeof(PaintData))) {
-        FURI_LOG_E("SnakeGame", "cannot create mutex\r\n");
+        FURI_LOG_E("Paint", "cannot create mutex\r\n");
+        furi_message_queue_free(event_queue);
         free(paint_state);
         return -1;
     }

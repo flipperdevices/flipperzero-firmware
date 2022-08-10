@@ -362,6 +362,7 @@ int32_t esp8266_deauth_app(void* p) {
     ValueMutex app_data_mutex;
     if(!init_mutex(&app_data_mutex, app, sizeof(SWiFiDeauthApp))) {
         DEAUTH_APP_LOG_E("cannot create mutex\r\n");
+        furi_message_queue_free(event_queue);
         free(app);
         return 255;
     }

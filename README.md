@@ -1,7 +1,7 @@
 <h2>
 
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
-#### Thank you to all the supporters; this firmware is a fork of [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & [the main Flipper Devices FW](https://github.com/flipperdevices/flipperzero-firmware)! I will try to keep active development and updates from both in this build along with any other projects that can be found to be useful to the community. I try to keep this FW build the most cutting edge with updates from both and updates from active community projects. All features and projects pulled are listed in expandable sections below. Please do [support us](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/SUPPORT.md), [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & [Flipper Devices](https://github.com/flipperdevices/flipperzero-firmware)! Everyone gives much of their free time to ensure the success of the Flipper Zero!
+#### Thank you to all the supporters; this firmware is a fork of [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & [the main Flipper Devices FW](https://github.com/flipperdevices/flipperzero-firmware)! I will try to keep active development and updates from both in this build along with any other projects that can be found to be useful to the community. I try to keep this FW build the most cutting edge with updates from both and updates from active community projects. All features and projects pulled are listed in expandable sections below. Please do [support us](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/SUPPORT.md), [xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & [Flipper Devices](https://github.com/flipperdevices/flipperzero-firmware)! Everyone gives much of their free time to ensure the success of the Flipper Zero!
 
 <b>Latest Updates:</b>
 
@@ -10,13 +10,14 @@
 - NRFSniff logs address found (By 0day) and fix positioning [(By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/210)
 - OFW: [#1564](https://github.com/flipperdevices/flipperzero-firmware/pull/1564), [#1566](https://github.com/flipperdevices/flipperzero-firmware/pull/1566) & [#1563](https://github.com/flipperdevices/flipperzero-firmware/pull/1563)
 - Change NFC Key files so the people have their user dict back
-- Updated BadUSB with fix from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & OFW PR [#1525](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
-- Updated AC.IR from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & updated asset by Svarich
+- Updated BadUSB with fix from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & OFW PR [#1525](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
+- Updated AC.IR from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & updated asset by Svarich
 - Merging if put in OFW or not: [FIX: Fixed inconsistencies between texts #1569 (By zigad)](https://github.com/flipperdevices/flipperzero-firmware/pull/1569)
 - Updates from mothball187 to [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) 
 - Updates from mothball187 to [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff)
 - Dolphin EXP for Mouse Jacker Ducky Run +3 EXP for a total of 90 Daily
 - Added [Paint (By insane <Elikaer>)]
+- Added furi_message_queue_free(event_queue); to a bunch of plugins, thanks [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>

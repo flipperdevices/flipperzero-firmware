@@ -670,6 +670,7 @@ int32_t wifi_scanner_app(void* p) {
     ValueMutex app_data_mutex;
     if(!init_mutex(&app_data_mutex, app, sizeof(SWiFiScannerApp))) {
         WIFI_APP_LOG_E("cannot create mutex\r\n");
+        furi_message_queue_free(event_queue);
         free(app);
         return 255;
     }

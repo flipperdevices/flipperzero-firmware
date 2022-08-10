@@ -115,6 +115,7 @@ int32_t game_of_life_app(void* p) {
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, _state, sizeof(State))) {
         printf("cannot create mutex\r\n");
+        furi_message_queue_free(event_queue);
         free(_state);
         return 255;
     }

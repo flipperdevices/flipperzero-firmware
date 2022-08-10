@@ -1544,7 +1544,8 @@ int32_t tanks_game_app(void* p) {
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, tanks_state, sizeof(TanksState))) {
-        // furi_log_print(FURI_LOG_ERROR, "cannot create mutex\r\n");
+        FURI_LOG_E("Tanks", "cannot create mutex\r\n");
+        furi_message_queue_free(event_queue);
         free(tanks_state);
         return 255;
     }

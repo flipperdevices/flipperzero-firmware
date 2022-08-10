@@ -226,6 +226,8 @@ int32_t jukebox_app(void* p) {
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(RemoteAppState))) {
         FURI_LOG_D(TAG, "cannot create mutex");
+        furi_message_queue_free(event_queue);
+        free(_state);
         return (0);
     }
 
@@ -269,8 +271,7 @@ int32_t jukebox_app(void* p) {
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
-
     furi_record_close("gui");
-
+    free(_state);
     return (0);
 }

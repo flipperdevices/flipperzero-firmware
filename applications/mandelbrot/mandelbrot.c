@@ -103,6 +103,7 @@ int32_t mandelbrot_app(void* p) {
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
         FURI_LOG_E("mandelbrot", "cannot create mutex\r\n");
+        furi_message_queue_free(event_queue);
         free(plugin_state);
         return 255;
     }
