@@ -284,11 +284,12 @@ bool protocol_io_prox_xsf_write_data(ProtocolIOProxXSF* protocol, void* data) {
 
     protocol_io_prox_xsf_encode(protocol->data, protocol->encoded_data);
 
-    if(request->write_type == LFRFIDWriteTypeT55XX) {
-        request->t55xx.block[0] = 0b00000000000101000111000001000000;
-        request->t55xx.block[1] = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
-        request->t55xx.block[2] = bit_lib_get_bits_32(protocol->encoded_data, 32, 32);
-        request->t55xx.blocks_to_write = 3;
+    if(request->write_type == LFRFIDWriteTypeT5577) {
+        request->t5577.block[0] = LFRFID_T5577_MODULATION_FSK2a | LFRFID_T5577_BITRATE_RF_64 |
+                                  (2 << LFRFID_T5577_MAXBLOCK_SHIFT);
+        request->t5577.block[1] = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
+        request->t5577.block[2] = bit_lib_get_bits_32(protocol->encoded_data, 32, 32);
+        request->t5577.blocks_to_write = 3;
         result = true;
     }
     return result;

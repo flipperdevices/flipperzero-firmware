@@ -1,6 +1,6 @@
 #pragma once
 #include <toolbox/protocols/protocol.h>
-#include "../tools/t55xx.h"
+#include "../tools/t5577.h"
 
 typedef enum {
     LFRFIDFeatureASK = 1 << 0,
@@ -21,12 +21,12 @@ typedef enum {
 extern const ProtocolBase* lfrfid_protocols[];
 
 typedef enum {
-    LFRFIDWriteTypeT55XX,
+    LFRFIDWriteTypeT5577,
 } LFRFIDWriteType;
 
 typedef struct {
     LFRFIDWriteType write_type;
     union {
-        LFRFIDT55XX t55xx;
+        LFRFIDT5577 t5577;
     };
 } LFRFIDWriteRequest;
