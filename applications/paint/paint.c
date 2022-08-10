@@ -2,7 +2,7 @@
 #include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
-// #include <notification/notification.h>
+#include <notification/notification.h>
 // #include <notification/notification_messages.h>
 #include <stdbool.h> // Header-file for boolean data-type.
 
