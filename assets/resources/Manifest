@@ -1,5 +1,5 @@
 V:0
-T:1659994826
+T:1660089574
 D:apps
 D:badusb
 D:dolphin
@@ -311,7 +311,7 @@ F:f267f0654781049ca323b11bb4375519:581:dolphin/L3_Lab_research_128x54/frame_9.bm
 F:41106c0cbc5144f151b2b2d3daaa0527:727:dolphin/L3_Lab_research_128x54/meta.txt
 F:05e24c3e99c57e84b04a1451b7184d99:40:dolphin_restorer/.dolphin.state
 D:infrared/assets
-F:a9b994a6e1453844bbe9d1a4080a4d30:59322:infrared/assets/ac.ir
+F:0620df2adc5e12f2a9d9c3ac29826ce3:60950:infrared/assets/ac.ir
 F:a0ac7ed0629a93b234d1790bf8bfb4c6:26781:infrared/assets/audio.ir
 F:45d36ceeac6be64eea3a0615a612ccbc:107466:infrared/assets/tv.ir
 F:18acc61b64d25ca9d80c57821470a387:226:music_player/Contra.txt
@@ -347,8 +347,7 @@ F:bc02f4b592f0c122335f8c49f92d2cad:3368:nfc/SmashAmiibo/Link50_SHARED.nfc
 F:81dc04c7b181f94b644079a71476dff4:4742:nfc/assets/aid.nfc
 F:86efbebdf41bb6bf15cc51ef88f069d5:2565:nfc/assets/country_code.nfc
 F:41b4f08774249014cb8d3dffa5f5c07d:1757:nfc/assets/currency_code.nfc
-F:c60e862919731b0bd538a1001bbc1098:17453:nfc/assets/mf_classic_dict.nfc
-F:7a8b1962f14d89b1a0c9845647a30060:30135:nfc/assets/mf_classic_dict_user.nfc
+F:195e012dbb626e0993656bac29c2a206:47589:nfc/assets/mf_classic_dict.nfc
 D:subghz/Handicap
 D:subghz/Misc
 D:subghz/Vehicles
