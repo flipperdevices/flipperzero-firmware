@@ -202,3 +202,12 @@ uint32_t protocol_dict_get_validate_count(ProtocolDict* dict, size_t protocol_in
     furi_assert(fn);
     return fn(dict->data[protocol_index]);
 }
+
+ProtocolId protocol_dict_get_protocol_by_name(ProtocolDict* dict, const char* name) {
+    for(size_t i = 0; i < dict->count; i++) {
+        if(strcmp(name, protocol_dict_get_name(dict, i)) == 0) {
+            return i;
+        }
+    }
+    return PROTOCOL_NO;
+}

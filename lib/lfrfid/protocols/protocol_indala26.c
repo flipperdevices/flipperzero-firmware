@@ -15,11 +15,21 @@
 #define INDALA26_DECODED_DATA_SIZE (4)
 
 #define INDALA26_US_PER_BIT (255)
+#define INDALA26_ENCODER_PULSES_PER_BIT (16)
+
+typedef struct {
+    uint8_t data_index;
+    uint8_t bit_clock_index;
+    bool last_bit;
+    bool current_polarity;
+    bool pulse_phase;
+} ProtocolIndalaEncoder;
 
 typedef struct {
     uint8_t encoded_data[INDALA26_ENCODED_DATA_SIZE];
     uint8_t negative_encoded_data[INDALA26_ENCODED_DATA_SIZE];
     uint8_t data[INDALA26_DECODED_DATA_SIZE];
+    ProtocolIndalaEncoder encoder;
 } ProtocolIndala;
 
 ProtocolIndala* protocol_indala26_alloc(void) {
@@ -136,13 +146,54 @@ bool protocol_indala26_decoder_feed(ProtocolIndala* protocol, bool level, uint32
 };
 
 bool protocol_indala26_encoder_start(ProtocolIndala* protocol) {
-    UNUSED(protocol);
+    memset(protocol->encoded_data, 0, INDALA26_ENCODED_DATA_SIZE);
+    *(uint32_t*)&protocol->encoded_data[0] = 0b00000000000000000000000010100000;
+    bit_lib_set_bit(protocol->encoded_data, 32, 1);
+    bit_lib_copy_bits(protocol->encoded_data, 33, 22, protocol->data, 0);
+    bit_lib_copy_bits(protocol->encoded_data, 56, 4, protocol->data, 22);
+    bit_lib_copy_bits(protocol->encoded_data, 62, 2, protocol->data, 26);
+
+    protocol->encoder.last_bit =
+        bit_lib_get_bit(protocol->encoded_data, INDALA26_ENCODED_BIT_SIZE - 1);
+    protocol->encoder.data_index = 0;
+    protocol->encoder.current_polarity = true;
+    protocol->encoder.pulse_phase = true;
+    protocol->encoder.bit_clock_index = 0;
+
     return true;
 };
 
 LevelDuration protocol_indala26_encoder_yield(ProtocolIndala* protocol) {
-    UNUSED(protocol);
-    return level_duration_reset();
+    LevelDuration level_duration;
+    ProtocolIndalaEncoder* encoder = &protocol->encoder;
+
+    if(encoder->pulse_phase) {
+        level_duration = level_duration_make(encoder->current_polarity, 1);
+        encoder->pulse_phase = false;
+    } else {
+        level_duration = level_duration_make(!encoder->current_polarity, 1);
+        encoder->pulse_phase = true;
+
+        encoder->bit_clock_index++;
+        if(encoder->bit_clock_index >= INDALA26_ENCODER_PULSES_PER_BIT) {
+            encoder->bit_clock_index = 0;
+
+            bool current_bit = bit_lib_get_bit(protocol->encoded_data, encoder->data_index);
+
+            if(current_bit != encoder->last_bit) {
+                encoder->current_polarity = !encoder->current_polarity;
+            }
+
+            encoder->last_bit = current_bit;
+
+            encoder->data_index++;
+            if(encoder->data_index >= INDALA26_ENCODED_BIT_SIZE) {
+                encoder->data_index = 0;
+            }
+        }
+    }
+
+    return level_duration;
 };
 
 // factory code

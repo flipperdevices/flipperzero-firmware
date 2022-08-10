@@ -49,3 +49,5 @@ LevelDuration protocol_dict_encoder_yield(ProtocolDict* dict, size_t protocol_in
 void protocol_dict_render_data(ProtocolDict* dict, string_t result, size_t protocol_index);
 
 uint32_t protocol_dict_get_validate_count(ProtocolDict* dict, size_t protocol_index);
+
+ProtocolId protocol_dict_get_protocol_by_name(ProtocolDict* dict, const char* name);

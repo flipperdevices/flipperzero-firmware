@@ -50,7 +50,6 @@ typedef enum {
 typedef void (
     *LFRFIDWorkerReadCallback)(LFRFIDWorkerReadResult result, ProtocolId protocol, void* context);
 typedef void (*LFRFIDWorkerWriteCallback)(LFRFIDWorkerWriteResult result, void* context);
-typedef void (*LFRFIDWorkerEmulateCallback)(LFRFIDWorkerEmulateResult result, void* context);
 
 typedef void (*LFRFIDWorkerReadRawCallback)(LFRFIDWorkerReadRawResult result, void* context);
 typedef void (*LFRFIDWorkerEmulateRawCallback)(LFRFIDWorkerEmulateRawResult result, void* context);
@@ -61,7 +60,7 @@ typedef struct LFRFIDWorker LFRFIDWorker;
  * Allocate LF-RFID worker
  * @return LFRFIDWorker* 
  */
-LFRFIDWorker* lfrfid_worker_alloc();
+LFRFIDWorker* lfrfid_worker_alloc(ProtocolDict* dict);
 
 /**
  * Free LF-RFID worker
@@ -117,17 +116,6 @@ void lfrfid_worker_write_set_callback(
 void lfrfid_worker_write_start(LFRFIDWorker* worker, LFRFIDProtocol protocol);
 
 /**
- * Set "emulate event" callback
- * @param worker 
- * @param callback 
- * @param context 
- */
-void lfrfid_worker_emulate_set_callback(
-    LFRFIDWorker* worker,
-    LFRFIDWorkerEmulateCallback callback,
-    void* context);
-
-/**
  * Start emulate mode
  * @param worker 
  */
@@ -178,20 +166,6 @@ void lfrfid_worker_emulate_raw_start(LFRFIDWorker* worker, const char* filename)
  * @param worker 
  */
 void lfrfid_worker_stop(LFRFIDWorker* worker);
-
-size_t lfrfid_worker_dict_get_data_size(LFRFIDWorker* worker, LFRFIDProtocol protocol);
-
-void lfrfid_worker_dict_get_data(
-    LFRFIDWorker* worker,
-    LFRFIDProtocol protocol,
-    uint8_t* data,
-    size_t data_size);
-
-const char* lfrfid_worker_dict_get_name(LFRFIDWorker* worker, LFRFIDProtocol protocol);
-
-const char* lfrfid_worker_dict_get_manufacturer(LFRFIDWorker* worker, LFRFIDProtocol protocol);
-
-void lfrfid_worker_dict_render(LFRFIDWorker* worker, LFRFIDProtocol protocol, string_t result);
 
 #ifdef __cplusplus
 }

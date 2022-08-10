@@ -18,12 +18,13 @@ typedef enum {
 
 static int32_t lfrfid_worker_thread(void* thread_context);
 
-LFRFIDWorker* lfrfid_worker_alloc() {
+LFRFIDWorker* lfrfid_worker_alloc(ProtocolDict* dict) {
+    furi_assert(dict);
+
     LFRFIDWorker* worker = malloc(sizeof(LFRFIDWorker));
     worker->mode_index = LFRFIDWorkerIdle;
     worker->read_cb = NULL;
     worker->write_cb = NULL;
-    worker->emulate_cb = NULL;
     worker->cb_ctx = NULL;
     worker->raw_filename = NULL;
     worker->mode_storage = NULL;
@@ -34,7 +35,7 @@ LFRFIDWorker* lfrfid_worker_alloc() {
     furi_thread_set_context(worker->thread, worker);
     furi_thread_set_stack_size(worker->thread, 2048);
 
-    worker->protocols = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
+    worker->protocols = dict;
 
     return worker;
 }
@@ -44,7 +45,6 @@ void lfrfid_worker_free(LFRFIDWorker* worker) {
         free(worker->raw_filename);
     }
 
-    protocol_dict_free(worker->protocols);
     furi_thread_free(worker->thread);
     free(worker);
 }
@@ -64,15 +64,6 @@ void lfrfid_worker_write_set_callback(
     void* context) {
     furi_check(worker->mode_index == LFRFIDWorkerIdle);
     worker->write_cb = callback;
-    worker->cb_ctx = context;
-}
-
-void lfrfid_worker_emulate_set_callback(
-    LFRFIDWorker* worker,
-    LFRFIDWorkerEmulateCallback callback,
-    void* context) {
-    furi_check(worker->mode_index == LFRFIDWorkerIdle);
-    worker->emulate_cb = callback;
     worker->cb_ctx = context;
 }
 
@@ -159,30 +150,6 @@ bool lfrfid_worker_check_for_stop(LFRFIDWorker* worker) {
 size_t lfrfid_worker_dict_get_data_size(LFRFIDWorker* worker, LFRFIDProtocol protocol) {
     furi_assert(worker->mode_index == LFRFIDWorkerIdle);
     return protocol_dict_get_data_size(worker->protocols, protocol);
-}
-
-void lfrfid_worker_dict_get_data(
-    LFRFIDWorker* worker,
-    LFRFIDProtocol protocol,
-    uint8_t* data,
-    size_t data_size) {
-    furi_assert(worker->mode_index == LFRFIDWorkerIdle);
-    protocol_dict_get_data(worker->protocols, protocol, data, data_size);
-}
-
-const char* lfrfid_worker_dict_get_name(LFRFIDWorker* worker, LFRFIDProtocol protocol) {
-    furi_assert(worker->mode_index == LFRFIDWorkerIdle);
-    return protocol_dict_get_name(worker->protocols, protocol);
-}
-
-const char* lfrfid_worker_dict_get_manufacturer(LFRFIDWorker* worker, LFRFIDProtocol protocol) {
-    furi_assert(worker->mode_index == LFRFIDWorkerIdle);
-    return protocol_dict_get_manufacturer(worker->protocols, protocol);
-}
-
-void lfrfid_worker_dict_render(LFRFIDWorker* worker, LFRFIDProtocol protocol, string_t result) {
-    furi_assert(worker->mode_index == LFRFIDWorkerIdle);
-    protocol_dict_render_data(worker->protocols, result, protocol);
 }
 
 static int32_t lfrfid_worker_thread(void* thread_context) {

@@ -2,6 +2,7 @@
 #include <furi_hal.h>
 #include "lfrfid_worker_i.h"
 #include <stream_buffer.h>
+#include <toolbox/pulse_protocols/pulse_glue.h>
 
 #define TAG "LFRFIDWorker"
 
@@ -11,6 +12,8 @@
  *     gpio_ext_pa6 will show load on the decoder
  */
 #define LFRFID_WORKER_READ_DEBUG_GPIO 1
+#define LFRFID_WORKER_READ_DEBUG_GPIO_VALUE &gpio_ext_pa7
+#define LFRFID_WORKER_READ_DEBUG_GPIO_LOAD &gpio_ext_pa6
 
 #define LFRFID_WORKER_READ_SWITCH_TIME 3000
 
@@ -32,7 +35,7 @@ const LFRFIDWorkerModeType lfrfid_worker_modes[] = {
 /*********************** READ ***********************/
 static void lfrfid_worker_read_capture(bool level, uint32_t duration, void* context) {
 #ifdef LFRFID_WORKER_READ_DEBUG_GPIO
-    furi_hal_gpio_write(&gpio_ext_pa7, level);
+    furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_VALUE, level);
 #endif
 
     StreamBufferHandle_t stream = context;
@@ -60,8 +63,8 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
     protocol_dict_decoders_start(worker->protocols);
 
 #ifdef LFRFID_WORKER_READ_DEBUG_GPIO
-    furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeOutputPushPull);
-    furi_hal_gpio_init_simple(&gpio_ext_pa6, GpioModeOutputPushPull);
+    furi_hal_gpio_init_simple(LFRFID_WORKER_READ_DEBUG_GPIO_VALUE, GpioModeOutputPushPull);
+    furi_hal_gpio_init_simple(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, GpioModeOutputPushPull);
 #endif
 
     StreamBufferHandle_t stream =
@@ -85,7 +88,7 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
         size_t size = xStreamBufferReceive(stream, &level_duration, sizeof(LevelDuration), 100);
 
 #ifdef LFRFID_WORKER_READ_DEBUG_GPIO
-        furi_hal_gpio_write(&gpio_ext_pa6, true);
+        furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, true);
 #endif
 
         if(size == 0) {
@@ -175,7 +178,7 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
         }
 
 #ifdef LFRFID_WORKER_READ_DEBUG_GPIO
-        furi_hal_gpio_write(&gpio_ext_pa6, false);
+        furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, false);
 #endif
     }
 
@@ -188,17 +191,123 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
     vStreamBufferDelete(stream);
 
 #ifdef LFRFID_WORKER_READ_DEBUG_GPIO
-    furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeAnalog);
-    furi_hal_gpio_init_simple(&gpio_ext_pa6, GpioModeAnalog);
+    furi_hal_gpio_init_simple(LFRFID_WORKER_READ_DEBUG_GPIO_VALUE, GpioModeAnalog);
+    furi_hal_gpio_init_simple(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, GpioModeAnalog);
 #endif
 }
 
 /*********************** EMULATE ***********************/
+#define LFRFID_WORKER_EMULATE_BUFFER_SIZE 1024
+
+typedef struct {
+    uint32_t duration[LFRFID_WORKER_EMULATE_BUFFER_SIZE];
+    uint32_t pulse[LFRFID_WORKER_EMULATE_BUFFER_SIZE];
+} LFRFIDWorkerEmulateBuffer;
+
+typedef enum {
+    HalfTransfer,
+    TransferComplete,
+} LFRFIDWorkerEmulateDMAEvent;
+
+static void lfrfid_worker_emulate_dma_isr(bool half, void* context) {
+    StreamBufferHandle_t stream = context;
+
+    if(half) {
+        uint32_t flag = HalfTransfer;
+        xStreamBufferSendFromISR(stream, &flag, sizeof(uint32_t), pdFALSE);
+    } else {
+        uint32_t flag = TransferComplete;
+        xStreamBufferSendFromISR(stream, &flag, sizeof(uint32_t), pdFALSE);
+    }
+}
 
 void lfrfid_worker_mode_emulate_process(LFRFIDWorker* worker) {
-    while(!lfrfid_worker_check_for_stop(worker)) {
-        furi_delay_ms(100);
+    LFRFIDWorkerEmulateBuffer* buffer = malloc(sizeof(LFRFIDWorkerEmulateBuffer));
+    StreamBufferHandle_t stream = xStreamBufferCreate(sizeof(uint32_t), sizeof(uint32_t));
+    LFRFIDProtocol protocol = worker->protocol;
+    PulseGlue* pulse_glue = pulse_glue_alloc();
+
+    protocol_dict_encoder_start(worker->protocols, protocol);
+
+    for(size_t i = 0; i < LFRFID_WORKER_EMULATE_BUFFER_SIZE; i++) {
+        bool pulse_pop = false;
+        while(!pulse_pop) {
+            LevelDuration level_duration =
+                protocol_dict_encoder_yield(worker->protocols, protocol);
+            pulse_pop = pulse_glue_push(
+                pulse_glue,
+                level_duration_get_level(level_duration),
+                level_duration_get_duration(level_duration));
+        }
+        uint32_t duration, pulse;
+        pulse_glue_pop(pulse_glue, &duration, &pulse);
+        buffer->duration[i] = duration - 1;
+        buffer->pulse[i] = pulse;
     }
+
+#ifdef LFRFID_WORKER_READ_DEBUG_GPIO
+    furi_hal_gpio_init_simple(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, GpioModeOutputPushPull);
+#endif
+
+    furi_hal_rfid_tim_emulate_dma_start(
+        buffer->duration,
+        buffer->pulse,
+        LFRFID_WORKER_EMULATE_BUFFER_SIZE,
+        lfrfid_worker_emulate_dma_isr,
+        stream);
+
+    while(true) {
+        uint32_t flag = 0;
+        size_t size = xStreamBufferReceive(stream, &flag, sizeof(uint32_t), 100);
+
+#ifdef LFRFID_WORKER_READ_DEBUG_GPIO
+        furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, true);
+#endif
+
+        if(size == sizeof(uint32_t)) {
+            size_t start = 0;
+
+            if(flag == HalfTransfer) {
+                start = 0;
+            } else if(flag == TransferComplete) {
+                start = (LFRFID_WORKER_EMULATE_BUFFER_SIZE / 2);
+            }
+
+            for(size_t i = 0; i < (LFRFID_WORKER_EMULATE_BUFFER_SIZE / 2); i++) {
+                bool pulse_pop = false;
+                while(!pulse_pop) {
+                    LevelDuration level_duration =
+                        protocol_dict_encoder_yield(worker->protocols, protocol);
+                    pulse_pop = pulse_glue_push(
+                        pulse_glue,
+                        level_duration_get_level(level_duration),
+                        level_duration_get_duration(level_duration));
+                }
+                uint32_t duration, pulse;
+                pulse_glue_pop(pulse_glue, &duration, &pulse);
+                buffer->duration[start + i] = duration - 1;
+                buffer->pulse[start + i] = pulse;
+            }
+        }
+
+        if(lfrfid_worker_check_for_stop(worker)) {
+            break;
+        }
+
+#ifdef LFRFID_WORKER_READ_DEBUG_GPIO
+        furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, false);
+#endif
+    }
+
+    furi_hal_rfid_tim_emulate_dma_stop();
+
+#ifdef LFRFID_WORKER_READ_DEBUG_GPIO
+    furi_hal_gpio_init_simple(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, GpioModeAnalog);
+#endif
+
+    free(buffer);
+    vStreamBufferDelete(stream);
+    pulse_glue_free(pulse_glue);
 }
 
 /*********************** WRITE ***********************/

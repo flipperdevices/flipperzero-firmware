@@ -30,11 +30,6 @@ static void lfrfid_cli_print_usage() {
     printf("Usage:\r\n");
     printf("rfid read <optional: normal | indala>\r\n");
     printf("rfid <write | emulate> <key_type> <key_data>\r\n");
-    printf("\t<key_type> choose from:\r\n");
-    printf("\tEM4100, EM-Marin (5 bytes key_data)\r\n");
-    printf("\tH10301, HID26 (3 bytes key_data)\r\n");
-    printf("\tI40134, Indala (3 bytes key_data)\r\n");
-    printf("\t<key_data> are hex-formatted\r\n");
     printf("rfid raw_read <ask | psk> <filename>\r\n");
     printf("rfid raw_emulate <filename>\r\n");
 };
@@ -76,7 +71,8 @@ static void lfrfid_cli_read(Cli* cli, string_t args) {
     }
     string_clear(type_string);
 
-    LFRFIDWorker* worker = lfrfid_worker_alloc();
+    ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
+    LFRFIDWorker* worker = lfrfid_worker_alloc(dict);
     LFRFIDCliReadContext context;
     context.protocol = PROTOCOL_NO;
     context.event = furi_event_flag_alloc();
@@ -104,13 +100,15 @@ static void lfrfid_cli_read(Cli* cli, string_t args) {
     }
 
     lfrfid_worker_stop(worker);
+    lfrfid_worker_stop_thread(worker);
+    lfrfid_worker_free(worker);
 
     if(context.protocol != PROTOCOL_NO) {
-        printf("%s ", lfrfid_worker_dict_get_name(worker, context.protocol));
+        printf("%s ", protocol_dict_get_name(dict, context.protocol));
 
-        size_t size = lfrfid_worker_dict_get_data_size(worker, context.protocol);
+        size_t size = protocol_dict_get_data_size(dict, context.protocol);
         uint8_t* data = malloc(size);
-        lfrfid_worker_dict_get_data(worker, context.protocol, data, size);
+        protocol_dict_get_data(dict, context.protocol, data, size);
         for(size_t i = 0; i < size; i++) {
             printf("%02X", data[i]);
         }
@@ -119,7 +117,7 @@ static void lfrfid_cli_read(Cli* cli, string_t args) {
 
         string_t info;
         string_init(info);
-        lfrfid_worker_dict_render(worker, context.protocol, info);
+        protocol_dict_render_data(dict, info, context.protocol);
         if(string_size(info) > 0) {
             printf("%s\r\n", string_get_cstr(info));
         }
@@ -127,8 +125,7 @@ static void lfrfid_cli_read(Cli* cli, string_t args) {
     }
 
     printf("Reading stopped\r\n");
-    lfrfid_worker_stop_thread(worker);
-    lfrfid_worker_free(worker);
+    protocol_dict_free(dict);
 
     furi_event_flag_free(context.event);
 }
@@ -143,8 +140,94 @@ static void lfrfid_cli_write(Cli* cli, string_t args) {
 static void lfrfid_cli_emulate(Cli* cli, string_t args) {
     UNUSED(cli);
     UNUSED(args);
-    // TODO implement rfid emulate
-    printf("Not implemented :(\r\n");
+
+    ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
+    ProtocolId protocol;
+
+    {
+        string_t protocol_name;
+        string_init(protocol_name);
+
+        string_t data_text;
+        string_init(data_text);
+
+        // load args
+        bool arg_error = false;
+        if(!args_read_string_and_trim(args, protocol_name)) {
+            lfrfid_cli_print_usage();
+            arg_error = true;
+        }
+
+        if(!arg_error && !args_read_string_and_trim(args, data_text)) {
+            lfrfid_cli_print_usage();
+            arg_error = true;
+        }
+
+        if(arg_error) {
+            string_clear(protocol_name);
+            string_clear(data_text);
+            protocol_dict_free(dict);
+            return;
+        }
+
+        // check protocol arg
+        protocol = protocol_dict_get_protocol_by_name(dict, string_get_cstr(protocol_name));
+        if(protocol == PROTOCOL_NO) {
+            printf(
+                "Unknown protocol: %s\r\n"
+                "Possible protocols:\r\n",
+                string_get_cstr(protocol_name));
+
+            for(ProtocolId i = 0; i < LFRFIDProtocolMax; i++) {
+                printf(
+                    "\t%s, %d bytes long\r\n",
+                    protocol_dict_get_name(dict, i),
+                    protocol_dict_get_data_size(dict, i));
+            }
+            string_clear(protocol_name);
+            string_clear(data_text);
+            protocol_dict_free(dict);
+            return;
+        }
+
+        // check data arg
+        size_t data_size = protocol_dict_get_data_size(dict, protocol);
+        uint8_t* data = malloc(data_size);
+        if(!args_read_hex_bytes(data_text, data, data_size)) {
+            printf(
+                "%s data needs to be %d bytes long\r\n",
+                protocol_dict_get_name(dict, protocol),
+                protocol_dict_get_data_size(dict, protocol));
+            free(data);
+            string_clear(protocol_name);
+            string_clear(data_text);
+            protocol_dict_free(dict);
+            return;
+        }
+
+        // load data to protocol
+        protocol_dict_set_data(dict, protocol, data, data_size);
+
+        string_clear(protocol_name);
+        string_clear(data_text);
+        free(data);
+    }
+
+    LFRFIDWorker* worker = lfrfid_worker_alloc(dict);
+
+    lfrfid_worker_start_thread(worker);
+    lfrfid_worker_emulate_start(worker, protocol);
+
+    printf("Emulating RFID...\r\nPress Ctrl+C to abort\r\n");
+    while(!cli_cmd_interrupt_received(cli)) {
+        furi_delay_ms(100);
+    }
+    printf("Emulation stopped\r\n");
+
+    lfrfid_worker_stop(worker);
+    lfrfid_worker_stop_thread(worker);
+    lfrfid_worker_free(worker);
+    protocol_dict_free(dict);
 }
 
 static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
@@ -359,7 +442,8 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
             break;
         }
 
-        LFRFIDWorker* worker = lfrfid_worker_alloc();
+        ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
+        LFRFIDWorker* worker = lfrfid_worker_alloc(dict);
         FuriEventFlag* event = furi_event_flag_alloc();
 
         lfrfid_worker_start_thread(worker);
@@ -404,6 +488,7 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
 
         lfrfid_worker_stop_thread(worker);
         lfrfid_worker_free(worker);
+        protocol_dict_free(dict);
 
         furi_event_flag_free(event);
 
@@ -437,7 +522,8 @@ static void lfrfid_cli_raw_emulate(Cli* cli, string_t args) {
             break;
         }
 
-        LFRFIDWorker* worker = lfrfid_worker_alloc();
+        ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
+        LFRFIDWorker* worker = lfrfid_worker_alloc(dict);
         FuriEventFlag* event = furi_event_flag_alloc();
 
         lfrfid_worker_start_thread(worker);
@@ -482,6 +568,7 @@ static void lfrfid_cli_raw_emulate(Cli* cli, string_t args) {
 
         lfrfid_worker_stop_thread(worker);
         lfrfid_worker_free(worker);
+        protocol_dict_free(dict);
 
         furi_event_flag_free(event);
 

@@ -41,7 +41,6 @@ struct LFRFIDWorker {
 
     LFRFIDWorkerReadCallback read_cb;
     LFRFIDWorkerWriteCallback write_cb;
-    LFRFIDWorkerEmulateCallback emulate_cb;
     LFRFIDWorkerReadRawCallback read_raw_cb;
     LFRFIDWorkerEmulateRawCallback emulate_raw_cb;
 
