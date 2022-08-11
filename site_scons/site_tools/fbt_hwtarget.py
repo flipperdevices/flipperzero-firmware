@@ -17,6 +17,7 @@ class HardwareTargetLoader:
         self.linker_script_ram = None
         self.linker_script_app = None
         self.linker_dependencies = []
+        self.excluded_sources = []
         self._processTargetDefinitions(target_id)
 
     def _getTargetDir(self, target_id):
@@ -37,6 +38,8 @@ class HardwareTargetLoader:
             self.include_paths.extend(
                 f"#/firmware/targets/f{target_id}/{p}" for p in include_paths
             )
+
+        self.excluded_sources.extend(config.get("excluded_sources", []))
 
         attrs = (
             "startup_script",
@@ -62,7 +65,7 @@ class HardwareTargetLoader:
 
     def gatherSources(self):
         sources = [self.startup_script]
-        seen_filenames = set()
+        seen_filenames = set(self.excluded_sources)
         # print("Layers: ", self.layered_target_dirs)
         for target_dir in self.layered_target_dirs:
             accepted_sources = list(
