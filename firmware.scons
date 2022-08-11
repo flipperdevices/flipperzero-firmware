@@ -161,7 +161,6 @@ fwenv.AppendUnique(
 # print(fwenv.Dump())
 
 # Full firmware definition
-
 fwelf = fwenv["FW_ELF"] = fwenv.Program(
     "${FIRMWARE_BUILD_CFG}",
     sources,

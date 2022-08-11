@@ -2,5 +2,26 @@
     "include_paths": [
         "furi_hal"
     ],
-    "inherit": "7"
+    "inherit": "7",
+    "linker_dependencies": [
+        "print",
+        "flipper18",
+        "furi",
+        "freertos",
+        "stm32cubewb",
+        "hwdrivers",
+        "fatfs",
+        "littlefs",
+        "flipperformat",
+        "toolbox",
+        "microtar",
+        "usb_stm32",
+        "appframe",
+        "assets",
+        "misc",
+        "mbedtls",
+        "loclass",
+        "flipperformat",
+        "toolbox"
+    ]
 }

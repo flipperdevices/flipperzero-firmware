@@ -47,10 +47,15 @@ class HardwareTargetLoader:
         )
 
         for attr in attrs:
-            if (val := config.get(attr, None)) and getattr(self, attr) is None:
-                setattr(
-                    self, attr, self.env.File(f"firmware/targets/f{target_id}/{val}")
-                )
+            if (val := config.get(attr, None)) and not getattr(self, attr):
+                if attr == "linker_dependencies":
+                    setattr(self, attr, val)
+                else:
+                    setattr(
+                        self,
+                        attr,
+                        self.env.File(f"firmware/targets/f{target_id}/{val}"),
+                    )
 
         if inherited_target := config.get("inherit", None):
             self._processTargetDefinitions(inherited_target)
