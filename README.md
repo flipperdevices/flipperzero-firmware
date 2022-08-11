@@ -8,6 +8,7 @@
 - Known Issues:`FAP Loader` & `Chess`
 - Added furi_message_queue_free(event_queue); to a bunch of plugins, thanks [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Fix qFlipper and other apps causes flipper crash while trying to interact with files - see commit from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
+- - Removal [[FL-2059] Storage fixes for handling empty files #1563 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1563)
 - Update universal ir audio & tv assets  from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Updated [New frequency analyzer #1557 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1557)
 - Getting 2048 in 2048 now grants 3XP for a total of 90 daily [(Thanks to DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/215)
