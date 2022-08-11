@@ -78,6 +78,20 @@ extern const GpioPin gpio_ext_pa4;
 extern const GpioPin gpio_ext_pa6;
 extern const GpioPin gpio_ext_pa7;
 
+extern const GpioPin gpio_ext_pc5;
+extern const GpioPin gpio_ext_pc4;
+extern const GpioPin gpio_ext_pa5;
+extern const GpioPin gpio_ext_pb9;
+extern const GpioPin gpio_ext_pa0;
+extern const GpioPin gpio_ext_pa1;
+extern const GpioPin gpio_ext_pa15;
+extern const GpioPin gpio_ext_pe4;
+extern const GpioPin gpio_ext_pa2;
+extern const GpioPin gpio_ext_pb4;
+extern const GpioPin gpio_ext_pb5;
+extern const GpioPin gpio_ext_pd0;
+extern const GpioPin gpio_ext_pb13;
+
 extern const GpioPin gpio_usart_tx;
 extern const GpioPin gpio_usart_rx;
 extern const GpioPin gpio_i2c_power_sda;

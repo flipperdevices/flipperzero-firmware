@@ -52,8 +52,6 @@ void furi_hal_init() {
 
     furi_hal_spi_config_init();
 
-    // furi_hal_ibutton_init();
-    // FURI_LOG_I(TAG, "iButton OK");
     furi_hal_speaker_init();
     FURI_LOG_I(TAG, "Speaker OK");
 
@@ -72,9 +70,6 @@ void furi_hal_init() {
     furi_hal_light_init();
 #ifndef FURI_RAM_EXEC
     furi_hal_vibro_init();
-    // furi_hal_subghz_init();
-    // furi_hal_nfc_init();
-    // furi_hal_rfid_init();
 #endif
     furi_hal_bt_init();
     furi_hal_compress_icon_init();

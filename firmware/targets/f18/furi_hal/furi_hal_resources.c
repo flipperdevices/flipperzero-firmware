@@ -7,16 +7,11 @@
 const GpioPin vibro_gpio = {.port = GPIOA, .pin = LL_GPIO_PIN_8};
 const GpioPin ibutton_gpio = {.port = GPIOB, .pin = LL_GPIO_PIN_14};
 
-const GpioPin gpio_cc1101_g0 = {.port = GPIOA, .pin = LL_GPIO_PIN_1};
-const GpioPin gpio_rf_sw_0 = {.port = GPIOC, .pin = LL_GPIO_PIN_4};
-
-const GpioPin gpio_subghz_cs = {.port = GPIOD, .pin = LL_GPIO_PIN_0};
 const GpioPin gpio_display_cs = {.port = GPIOC, .pin = LL_GPIO_PIN_11};
 const GpioPin gpio_display_rst_n = {.port = GPIOB, .pin = LL_GPIO_PIN_0};
 const GpioPin gpio_display_di = {.port = GPIOB, .pin = LL_GPIO_PIN_1};
 const GpioPin gpio_sdcard_cs = {.port = GPIOC, .pin = LL_GPIO_PIN_12};
 const GpioPin gpio_sdcard_cd = {.port = GPIOC, .pin = LL_GPIO_PIN_10};
-const GpioPin gpio_nfc_cs = {.port = GPIOE, .pin = LL_GPIO_PIN_4};
 
 const GpioPin gpio_button_up = {.port = GPIOB, .pin = LL_GPIO_PIN_10};
 const GpioPin gpio_button_down = {.port = GPIOC, .pin = LL_GPIO_PIN_6};
@@ -28,9 +23,6 @@ const GpioPin gpio_button_back = {.port = GPIOC, .pin = LL_GPIO_PIN_13};
 const GpioPin gpio_spi_d_miso = {.port = GPIOC, .pin = LL_GPIO_PIN_2};
 const GpioPin gpio_spi_d_mosi = {.port = GPIOB, .pin = LL_GPIO_PIN_15};
 const GpioPin gpio_spi_d_sck = {.port = GPIOD, .pin = LL_GPIO_PIN_1};
-const GpioPin gpio_spi_r_miso = {.port = GPIOB, .pin = LL_GPIO_PIN_4};
-const GpioPin gpio_spi_r_mosi = {.port = GPIOB, .pin = LL_GPIO_PIN_5};
-const GpioPin gpio_spi_r_sck = {.port = GPIOA, .pin = LL_GPIO_PIN_5};
 
 const GpioPin gpio_ext_pc0 = {.port = GPIOC, .pin = LL_GPIO_PIN_0};
 const GpioPin gpio_ext_pc1 = {.port = GPIOC, .pin = LL_GPIO_PIN_1};
@@ -41,13 +33,19 @@ const GpioPin gpio_ext_pa4 = {.port = GPIOA, .pin = LL_GPIO_PIN_4};
 const GpioPin gpio_ext_pa6 = {.port = GPIOA, .pin = LL_GPIO_PIN_6};
 const GpioPin gpio_ext_pa7 = {.port = GPIOA, .pin = LL_GPIO_PIN_7};
 
-const GpioPin gpio_nfc_irq_rfid_pull = {.port = GPIOA, .pin = LL_GPIO_PIN_2};
-const GpioPin gpio_rfid_carrier_out = {.port = GPIOB, .pin = LL_GPIO_PIN_13};
-const GpioPin gpio_rfid_data_in = {.port = GPIOC, .pin = LL_GPIO_PIN_5};
-const GpioPin gpio_rfid_carrier = {.port = GPIOA, .pin = LL_GPIO_PIN_15};
-
-const GpioPin gpio_infrared_rx = {.port = GPIOA, .pin = LL_GPIO_PIN_0};
-const GpioPin gpio_infrared_tx = {.port = GPIOB, .pin = LL_GPIO_PIN_9};
+const GpioPin gpio_ext_pc5 = {.port = GPIOC, .pin = LL_GPIO_PIN_5};
+const GpioPin gpio_ext_pc4 = {.port = GPIOC, .pin = LL_GPIO_PIN_4};
+const GpioPin gpio_ext_pa5 = {.port = GPIOA, .pin = LL_GPIO_PIN_5};
+const GpioPin gpio_ext_pb9 = {.port = GPIOB, .pin = LL_GPIO_PIN_9};
+const GpioPin gpio_ext_pa0 = {.port = GPIOA, .pin = LL_GPIO_PIN_0};
+const GpioPin gpio_ext_pa1 = {.port = GPIOA, .pin = LL_GPIO_PIN_1};
+const GpioPin gpio_ext_pa15 = {.port = GPIOA, .pin = LL_GPIO_PIN_15};
+const GpioPin gpio_ext_pe4 = {.port = GPIOE, .pin = LL_GPIO_PIN_4};
+const GpioPin gpio_ext_pa2 = {.port = GPIOA, .pin = LL_GPIO_PIN_2};
+const GpioPin gpio_ext_pb4 = {.port = GPIOB, .pin = LL_GPIO_PIN_4};
+const GpioPin gpio_ext_pb5 = {.port = GPIOB, .pin = LL_GPIO_PIN_5};
+const GpioPin gpio_ext_pd0 = {.port = GPIOD, .pin = LL_GPIO_PIN_0};
+const GpioPin gpio_ext_pb13 = {.port = GPIOB, .pin = LL_GPIO_PIN_13};
 
 const GpioPin gpio_usart_tx = {.port = GPIOB, .pin = LL_GPIO_PIN_6};
 const GpioPin gpio_usart_rx = {.port = GPIOB, .pin = LL_GPIO_PIN_7};
@@ -71,6 +69,20 @@ const GpioPinRecord gpio_pins[] = {
     {.pin = &gpio_ext_pc3, .name = "PC3", .debug = false},
     {.pin = &gpio_ext_pc1, .name = "PC1", .debug = false},
     {.pin = &gpio_ext_pc0, .name = "PC0", .debug = false},
+
+    {.pin = &gpio_ext_pc5, .name = "PC5", .debug = false},
+    {.pin = &gpio_ext_pc4, .name = "PC4", .debug = false},
+    {.pin = &gpio_ext_pa5, .name = "PA5", .debug = false},
+    {.pin = &gpio_ext_pb9, .name = "PB9", .debug = false},
+    {.pin = &gpio_ext_pa0, .name = "PA0", .debug = false},
+    {.pin = &gpio_ext_pa1, .name = "PA1", .debug = false},
+    {.pin = &gpio_ext_pa15, .name = "PA15", .debug = false},
+    {.pin = &gpio_ext_pe4, .name = "PE4", .debug = false},
+    {.pin = &gpio_ext_pa2, .name = "PA2", .debug = false},
+    {.pin = &gpio_ext_pb4, .name = "PB4", .debug = false},
+    {.pin = &gpio_ext_pb5, .name = "PB5", .debug = false},
+    {.pin = &gpio_ext_pd0, .name = "PD0", .debug = false},
+    {.pin = &gpio_ext_pb13, .name = "PB13", .debug = false},
 
     /* Dangerous pins, may damage hardware */
     {.pin = &gpio_usart_rx, .name = "PB7", .debug = true},
@@ -157,10 +169,6 @@ void furi_hal_resources_init() {
     furi_hal_gpio_init(&vibro_gpio, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     furi_hal_gpio_init(&ibutton_gpio, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-
-    furi_hal_gpio_init(&gpio_nfc_irq_rfid_pull, GpioModeInterruptRise, GpioPullNo, GpioSpeedLow);
-
-    furi_hal_gpio_init(&gpio_rf_sw_0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 
     NVIC_SetPriority(EXTI0_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
     NVIC_EnableIRQ(EXTI0_IRQn);

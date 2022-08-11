@@ -87,8 +87,6 @@ void furi_hal_spi_config_deinit_early() {
 }
 
 void furi_hal_spi_config_init() {
-    furi_hal_spi_bus_init(&furi_hal_spi_bus_r);
-
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_sd_fast);
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_sd_slow);
 
