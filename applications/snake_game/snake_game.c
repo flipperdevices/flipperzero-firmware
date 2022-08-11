@@ -2,6 +2,8 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
 
 typedef struct {
     //    +-----x
@@ -82,6 +84,13 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         p.x = p.x * 4 + 2;
         p.y = p.y * 4 + 2;
         canvas_draw_box(canvas, p.x, p.y, 4, 4);
+    }
+
+    // Show score on the game field
+    if(snake_state->state != GameStateGameOver) {
+        char buffer2[6];
+        snprintf(buffer2, sizeof(buffer2), "%u", snake_state->len - 7);
+        canvas_draw_str_aligned(canvas, 124, 10, AlignRight, AlignBottom, buffer2);
     }
 
     // Game Over banner
@@ -265,6 +274,11 @@ static void snake_game_process_game_step(SnakeState* const snake_state) {
 
     bool eatFruit = (next_step.x == snake_state->fruit.x) && (next_step.y == snake_state->fruit.y);
     if(eatFruit) {
+        NotificationApp* notification = furi_record_open("notification");
+        notification_message(notification, &sequence_single_vibro);
+        notification_message(notification, &sequence_blink_white_100);
+        furi_record_close("notification");
+
         snake_state->len++;
         if(snake_state->len >= MAX_SNAKE_LEN) {
             snake_state->state = GameStateGameOver;
