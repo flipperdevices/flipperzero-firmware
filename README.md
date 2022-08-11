@@ -192,5 +192,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 
 ## Conflicting PRs Not Merged:
 - [Fixed building for users with space in windows username #1437 (By SzymonLisowiec)](https://github.com/flipperdevices/flipperzero-firmware/pull/1437)
+- [[FL-2059] Storage fixes for handling empty files #1563 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1563)
 
 </td></tr></table>
