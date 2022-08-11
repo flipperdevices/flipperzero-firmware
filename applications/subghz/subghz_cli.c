@@ -793,7 +793,7 @@ static bool subghz_on_system_start_istream_decode_band(
 
     FURI_LOG_I(
         "SubGhzOnStart",
-        "Region band: start %d, stop %d, power_limit %d, duty_cycle %d",
+        "Add allowed band: start %dHz, stop %dHz, power_limit %ddBm, duty_cycle %d%%",
         band.start,
         band.end,
         band.power_limit,
@@ -816,11 +816,13 @@ void subghz_on_system_start() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
     FileInfo fileinfo = {0};
+    PB_Region pb_region = {0};
+    pb_region.bands.funcs.decode = subghz_on_system_start_istream_decode_band;
 
     do {
         if(storage_common_stat(storage, SUBGHZ_REGION_FILENAME, &fileinfo) != FSE_OK ||
            fileinfo.size == 0) {
-            FURI_LOG_E("SubGhzOnStart", "Region data is missing or empty");
+            FURI_LOG_W("SubGhzOnStart", "Region data is missing or empty");
             break;
         }
 
@@ -836,10 +838,7 @@ void subghz_on_system_start() {
             .bytes_left = fileinfo.size,
         };
 
-        PB_Region pb_region = {0};
-        pb_region.bands.funcs.decode = subghz_on_system_start_istream_decode_band;
         pb_region.bands.arg = malloc(sizeof(FuriHalRegion));
-
         if(!pb_decode(&istream, PB_Region_fields, &pb_region)) {
             FURI_LOG_E("SubGhzOnStart", "Invalid region data");
             free(pb_region.bands.arg);
@@ -847,10 +846,14 @@ void subghz_on_system_start() {
         }
 
         FuriHalRegion* region = pb_region.bands.arg;
-        memcpy(region->country_code, pb_region.country_code->bytes, 2);
+        memcpy(
+            region->country_code,
+            pb_region.country_code->bytes,
+            pb_region.country_code->size < 4 ? pb_region.country_code->size : 3);
         furi_hal_region_set(region);
     } while(0);
 
+    pb_release(PB_Region_fields, &pb_region);
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
 #else
