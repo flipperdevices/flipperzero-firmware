@@ -10,6 +10,7 @@
 - Fix qFlipper and other apps causes flipper crash while trying to interact with files - see commit from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Update universal ir audio & tv assets  from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Updated [New frequency analyzer #1557 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1557)
+- Getting 2048 in 2048 now grants 3XP for a total of 90 daily (Thanks to DevMilanIan)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -85,15 +86,16 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware), changed to Mood Stays Less Than 6 / Mood Stays High (By RogueMaster)
 - Dolphin: Passport: Show EXP [(By Dabolus)](https://github.com/Dabolus/flipperzero-firmware-rpg/)
 - Dolphin: Plugin Achivement +3 EXP for a total of 90 EXP daily. Plugin Achivements are:
-- - Games Only Mode from Lock Menu
-- - Stopwatch @ 1:20 Alert
 - - Dice First Roll for d20+ = sides on dice (i.e. Nat 20 on d20)
 - - Dice First Roll for d20+ = sides on dice - 1 (+1 EXP) (i.e. 19 on d20)
+- - Games Only Mode from Lock Menu
+- - Getting 2048 in 2048
+- - Mouse Jacker Ducky Run
+- - NRFSniffer Found Address
+- - Stopwatch @ 1:20 Alert
 - - Tetris, Snake or Flappy Bird Score of 10 or more
 - - Tetris, Snake or Flappy Bird Score of 50 or more
 - - Tetris, Snake or Flappy Bird Score of 100 or more
-- - NRFSniffer Found Address
-- - Mouse Jacker Ducky Run
 - Dolphin: SD dolphin manifest updated to weight animations differently
 - GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
