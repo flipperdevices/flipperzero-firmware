@@ -7,7 +7,17 @@
 
 - Known Issues:`FAP Loader` & `Chess`
 - [Update passport.c to fix XP bar #219 (By Kuronons)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/219)
-- Added [[FL-2059] Storage fixes for handling empty files #1563 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1563)
+- ReAdded [Storage fixes for handling empty files #1563 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1563)
+- OFW: [rpc: additional verification of message data (#1576)(By Hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1576)
+- OFW: [SubGhz: region provisioning (#1574)(By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1574)
+- OFW: [SubGhz: show region provisioning message (#1580)(By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1580)
+- OFW: [fix: typo badusb demo windows (#1579)(By vrifox)](https://github.com/flipperdevices/flipperzero-firmware/pull/1579)
+- OFW: [SubGhz: add protocol Honeywell_WDB / Doorbell (#1560)(By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1560)
+- OFW: [rpc: fixed missing read blocks (#1581)(By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1581)
+- OFW: [Skip empty lines in favorites.txt (#1571)(By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1571)
+- OFW: [SubGhz: fix bett decoder (#1573)(By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1573)
+- OFW: [RPC APP fixes #1568(By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1568)
+- OFW: [Scripts: add new region to otp generator (#1582)(By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1582)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
