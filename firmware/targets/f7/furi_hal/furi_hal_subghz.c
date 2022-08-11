@@ -1,6 +1,7 @@
 #include "furi_hal_subghz.h"
 #include "furi_hal_subghz_configs.h"
 
+#include <furi_hal_region.h>
 #include <furi_hal_version.h>
 #include <furi_hal_rtc.h>
 #include <furi_hal_gpio.h>
@@ -385,8 +386,10 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
 }
 
 uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
-    if(furi_hal_subghz_is_tx_allowed(value)) {
-		furi_hal_subghz.regulation = SubGhzRegulationTxRx;
+    if(furi_hal_region_is_frequency_allowed(value)) {
+        furi_hal_subghz.regulation = SubGhzRegulationTxRx;
+    } else if(furi_hal_subghz_is_tx_allowed(value)) {
+        furi_hal_subghz.regulation = SubGhzRegulationTxRx;
     } else {
 		furi_hal_subghz.regulation = SubGhzRegulationOnlyRx;
     }
