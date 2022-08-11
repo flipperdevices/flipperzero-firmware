@@ -16,6 +16,7 @@ class HardwareTargetLoader:
         self.linker_script_flash = None
         self.linker_script_ram = None
         self.linker_script_app = None
+        self.linker_dependencies = []
         self._processTargetDefinitions(target_id)
 
     def _getTargetDir(self, target_id):
@@ -42,6 +43,7 @@ class HardwareTargetLoader:
             "linker_script_flash",
             "linker_script_ram",
             "linker_script_app",
+            "linker_dependencies",
         )
 
         for attr in attrs:

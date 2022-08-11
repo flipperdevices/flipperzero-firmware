@@ -165,32 +165,7 @@ fwenv.AppendUnique(
 fwelf = fwenv["FW_ELF"] = fwenv.Program(
     "${FIRMWARE_BUILD_CFG}",
     sources,
-    LIBS=[
-        "print",
-        "flipper${TARGET_HW}",
-        "furi",
-        "freertos",
-        "stm32cubewb",
-        "hwdrivers",
-        "fatfs",
-        "littlefs",
-        "subghz",
-        "flipperformat",
-        "toolbox",
-        "nfc",
-        "microtar",
-        "usb_stm32",
-        "st25rfal002",
-        "infrared",
-        "appframe",
-        "assets",
-        "misc",
-        "mbedtls",
-        "loclass",
-        # 2nd round
-        "flipperformat",
-        "toolbox",
-    ],
+    LIBS=fwenv["TARGET_CFG"].linker_dependencies,
 )
 
 # Firmware depends on everything child builders returned
