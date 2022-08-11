@@ -324,12 +324,14 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
                 response->has_next = false;
                 fs_operation_success = true;
             }
+
+            if(fs_operation_success) {
+                rpc_send_and_release(session, response);
+            }
         } while((size_left != 0) && fs_operation_success);
     }
 
-    if(fs_operation_success) {
-        rpc_send_and_release(session, response);
-    } else {
+    if(!fs_operation_success) {
         rpc_send_and_release_empty(
             session, request->command_id, rpc_system_storage_get_file_error(file));
     }
