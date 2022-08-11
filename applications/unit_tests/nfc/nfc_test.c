@@ -2,7 +2,7 @@
 #include <furi_hal.h>
 #include <applications/storage/storage.h>
 #include <lib/flipper_format/flipper_format.h>
-#include <lib/nfc_protocols/nfca.h>
+#include <lib/nfc/protocols/nfca.h>
 #include <lib/digital_signal/digital_signal.h>
 
 #include <lib/flipper_format/flipper_format_i.h>
@@ -12,7 +12,7 @@
 
 #define TAG "NfcTest"
 
-#define NFC_TEST_RESOURCES_DIR "/ext/unit_tests/nfc/"
+#define NFC_TEST_RESOURCES_DIR EXT_PATH("unit_tests/nfc/")
 #define NFC_TEST_SIGNAL_SHORT_FILE "nfc_nfca_signal_short.nfc"
 #define NFC_TEST_SIGNAL_LONG_FILE "nfc_nfca_signal_long.nfc"
 
@@ -36,13 +36,13 @@ static NfcTest* nfc_test = NULL;
 static void nfc_test_alloc() {
     nfc_test = malloc(sizeof(NfcTest));
     nfc_test->signal = nfca_signal_alloc();
-    nfc_test->storage = furi_record_open("storage");
+    nfc_test->storage = furi_record_open(RECORD_STORAGE);
 }
 
 static void nfc_test_free() {
     furi_assert(nfc_test);
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     nfca_signal_free(nfc_test->signal);
     free(nfc_test);
     nfc_test = NULL;

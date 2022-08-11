@@ -27,7 +27,7 @@ static void signal_received_callback(void* context, InfraredWorkerSignal* receiv
 
     if(infrared_worker_signal_is_decoded(received_signal)) {
         const InfraredMessage* message = infrared_worker_get_decoded_signal(received_signal);
-        buf_cnt = sniprintf(
+        buf_cnt = snprintf(
             buf,
             sizeof(buf),
             "%s, A:0x%0*lX, C:0x%0*lX%s\r\n",
@@ -43,13 +43,13 @@ static void signal_received_callback(void* context, InfraredWorkerSignal* receiv
         size_t timings_cnt;
         infrared_worker_get_raw_signal(received_signal, &timings, &timings_cnt);
 
-        buf_cnt = sniprintf(buf, sizeof(buf), "RAW, %d samples:\r\n", timings_cnt);
+        buf_cnt = snprintf(buf, sizeof(buf), "RAW, %d samples:\r\n", timings_cnt);
         cli_write(cli, (uint8_t*)buf, buf_cnt);
         for(size_t i = 0; i < timings_cnt; ++i) {
-            buf_cnt = sniprintf(buf, sizeof(buf), "%lu ", timings[i]);
+            buf_cnt = snprintf(buf, sizeof(buf), "%lu ", timings[i]);
             cli_write(cli, (uint8_t*)buf, buf_cnt);
         }
-        buf_cnt = sniprintf(buf, sizeof(buf), "\r\n");
+        buf_cnt = snprintf(buf, sizeof(buf), "\r\n");
         cli_write(cli, (uint8_t*)buf, buf_cnt);
     }
 }
@@ -192,9 +192,9 @@ static void infrared_cli_start_ir(Cli* cli, string_t args, void* context) {
 }
 void infrared_on_system_start() {
 #ifdef SRV_CLI
-    Cli* cli = (Cli*)furi_record_open("cli");
+    Cli* cli = (Cli*)furi_record_open(RECORD_CLI);
     cli_add_command(cli, "ir", CliCommandFlagDefault, infrared_cli_start_ir, NULL);
-    furi_record_close("cli");
+    furi_record_close(RECORD_CLI);
 #else
     UNUSED(infrared_cli_start_ir);
 #endif

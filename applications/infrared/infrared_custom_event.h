@@ -14,6 +14,12 @@ enum InfraredCustomEventType {
     InfraredCustomEventTypePopupClosed,
     InfraredCustomEventTypeButtonSelected,
     InfraredCustomEventTypeBackPressed,
+
+    InfraredCustomEventTypeRpcLoad,
+    InfraredCustomEventTypeRpcExit,
+    InfraredCustomEventTypeRpcButtonPress,
+    InfraredCustomEventTypeRpcButtonRelease,
+    InfraredCustomEventTypeRpcSessionClose,
 };
 
 #pragma pack(push, 1)

@@ -64,14 +64,15 @@ const char* input_get_type_name(InputType type) {
     return "Unknown";
 }
 
-int32_t input_srv() {
+int32_t input_srv(void* p) {
+    UNUSED(p);
     input = malloc(sizeof(Input));
     input->thread_id = furi_thread_get_current_id();
     input->event_pubsub = furi_pubsub_alloc();
-    furi_record_create("input_events", input->event_pubsub);
+    furi_record_create(RECORD_INPUT_EVENTS, input->event_pubsub);
 
 #ifdef SRV_CLI
-    input->cli = furi_record_open("cli");
+    input->cli = furi_record_open(RECORD_CLI);
     if(input->cli) {
         cli_add_command(input->cli, "input", CliCommandFlagParallelSafe, input_cli, input);
     }

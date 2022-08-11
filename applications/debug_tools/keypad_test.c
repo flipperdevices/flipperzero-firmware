@@ -26,11 +26,11 @@ static void keypad_test_render_callback(Canvas* canvas, void* ctx) {
     canvas_clear(canvas);
     char strings[5][20];
 
-    sprintf(strings[0], "Ok: %d", state->ok);
-    sprintf(strings[1], "L: %d", state->left);
-    sprintf(strings[2], "R: %d", state->right);
-    sprintf(strings[3], "U: %d", state->up);
-    sprintf(strings[4], "D: %d", state->down);
+    snprintf(strings[0], 20, "Ok: %d", state->ok);
+    snprintf(strings[1], 20, "L: %d", state->left);
+    snprintf(strings[2], 20, "R: %d", state->right);
+    snprintf(strings[3], 20, "U: %d", state->up);
+    snprintf(strings[4], 20, "D: %d", state->down);
 
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 0, 10, "Keypad test");
@@ -78,7 +78,7 @@ int32_t keypad_test_app(void* p) {
     view_port_input_callback_set(view_port, keypad_test_input_callback, event_queue);
 
     // Open GUI and register view_port
-    Gui* gui = furi_record_open("gui");
+    Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     InputEvent event;
@@ -149,7 +149,7 @@ int32_t keypad_test_app(void* p) {
     furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
 
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
 
     return 0;
 }
