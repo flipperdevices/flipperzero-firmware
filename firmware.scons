@@ -168,7 +168,7 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
 )
 
 # Firmware depends on everything child builders returned
-Depends(fwelf, lib_targets)
+# Depends(fwelf, lib_targets)
 # Output extra details after building firmware
 AddPostAction(fwelf, fwenv["APPBUILD_DUMP"])
 AddPostAction(fwelf, Action("@$SIZECOM"))
