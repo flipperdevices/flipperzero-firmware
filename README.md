@@ -33,6 +33,8 @@ TX--------U_RX
 Video in action.
 https://youtu.be/_RFzZyPkeR0
 
+If you want to disable the built in WiFi access and web interface (only use flipper to serial send commands) then select "set webinterface false", "save settings" and "reboot". When it starts back up you wont see the pwned AP any more.
+
 I installed this into Roguemaster to test.
 
 git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
