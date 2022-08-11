@@ -1,6 +1,6 @@
 #include "../wifi_deauther_app_i.h"
 
-#define NUM_MENU_ITEMS (18)
+#define NUM_MENU_ITEMS (24)
 
 // For each command, define whether additional arguments are needed
 // (enabling text input to fill them out), and whether the console
@@ -34,6 +34,12 @@ const struct WifideautherItem MenuItems[NUM_MENU_ITEMS] = {
     {"attack probe", NO_ARGS, FOCUS_CONSOLE_END},
     {"sysinfo", NO_ARGS, FOCUS_CONSOLE_END},
     {"chicken", NO_ARGS, FOCUS_CONSOLE_END},
+    {"get settings", NO_ARGS, FOCUS_CONSOLE_END},
+    {"set webinterface false", INPUT_ARGS, FOCUS_CONSOLE_END},
+    {"set ssid: pwned", INPUT_ARGS, FOCUS_CONSOLE_END},
+    {"set password: deauther", INPUT_ARGS, FOCUS_CONSOLE_END},
+    {"reset", NO_ARGS, FOCUS_CONSOLE_END},
+    {"save settings", NO_ARGS, FOCUS_CONSOLE_END},
 };
 
 static void wifi_deauther_scene_start_var_list_enter_callback(void* context, uint32_t index) {
