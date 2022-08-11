@@ -4,28 +4,6 @@
 #include <furi_hal.h>
 #include <lib/toolbox/args.h>
 
-typedef struct {
-    const GpioPin* pin;
-    const char* name;
-    const bool debug;
-} CliCommandGpio;
-
-const CliCommandGpio cli_command_gpio_pins[] = {
-    {.pin = &gpio_ext_pc0, .name = "PC0", .debug = false},
-    {.pin = &gpio_ext_pc1, .name = "PC1", .debug = false},
-    {.pin = &gpio_ext_pc3, .name = "PC3", .debug = false},
-    {.pin = &gpio_ext_pb2, .name = "PB2", .debug = false},
-    {.pin = &gpio_ext_pb3, .name = "PB3", .debug = false},
-    {.pin = &gpio_ext_pa4, .name = "PA4", .debug = false},
-    {.pin = &gpio_ext_pa6, .name = "PA6", .debug = false},
-    {.pin = &gpio_ext_pa7, .name = "PA7", .debug = false},
-    /* Dangerous pins, may damage hardware */
-    {.pin = &gpio_infrared_rx, .name = "PA0", .debug = true},
-    {.pin = &gpio_usart_rx, .name = "PB7", .debug = true},
-    {.pin = &gpio_speaker, .name = "PB8", .debug = true},
-    {.pin = &gpio_infrared_tx, .name = "PB9", .debug = true},
-};
-
 void cli_command_gpio_print_usage() {
     printf("Usage:\r\n");
     printf("gpio <cmd> <args>\r\n");
@@ -38,9 +16,9 @@ void cli_command_gpio_print_usage() {
 static bool pin_name_to_int(string_t pin_name, size_t* result) {
     bool found = false;
     bool debug = furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
-    for(size_t i = 0; i < COUNT_OF(cli_command_gpio_pins); i++) {
-        if(!string_cmp(pin_name, cli_command_gpio_pins[i].name)) {
-            if(!cli_command_gpio_pins[i].debug || (cli_command_gpio_pins[i].debug && debug)) {
+    for(size_t i = 0; i < gpio_pins_count; i++) {
+        if(!string_cmp(pin_name, gpio_pins[i].name)) {
+            if(!gpio_pins[i].debug || (gpio_pins[i].debug && debug)) {
                 *result = i;
                 found = true;
                 break;
@@ -54,9 +32,9 @@ static bool pin_name_to_int(string_t pin_name, size_t* result) {
 static void gpio_print_pins(void) {
     printf("Wrong pin name. Available pins: ");
     bool debug = furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
-    for(size_t i = 0; i < COUNT_OF(cli_command_gpio_pins); i++) {
-        if(!cli_command_gpio_pins[i].debug || (cli_command_gpio_pins[i].debug && debug)) {
-            printf("%s ", cli_command_gpio_pins[i].name);
+    for(size_t i = 0; i < gpio_pins_count; i++) {
+        if(!gpio_pins[i].debug || (gpio_pins[i].debug && debug)) {
+            printf("%s ", gpio_pins[i].name);
         }
     }
 }
@@ -114,9 +92,9 @@ void cli_command_gpio_mode(Cli* cli, string_t args, void* context) {
         return;
     }
 
-    if(cli_command_gpio_pins[num].debug) {
+    if(gpio_pins[num].debug) {
         printf(
-            "Changeing this pin mode may damage hardware. Are you sure you want to continue? (y/n)?\r\n");
+            "Changing this pin mode may damage hardware. Are you sure you want to continue? (y/n)?\r\n");
         char c = cli_getc(cli);
         if(c != 'y' && c != 'Y') {
             printf("Cancelled.\r\n");
@@ -125,12 +103,12 @@ void cli_command_gpio_mode(Cli* cli, string_t args, void* context) {
     }
 
     if(value == 1) { // output
-        furi_hal_gpio_write(cli_command_gpio_pins[num].pin, false);
-        furi_hal_gpio_init_simple(cli_command_gpio_pins[num].pin, GpioModeOutputPushPull);
-        printf("Pin %s is now an output (low)", cli_command_gpio_pins[num].name);
+        furi_hal_gpio_write(gpio_pins[num].pin, false);
+        furi_hal_gpio_init_simple(gpio_pins[num].pin, GpioModeOutputPushPull);
+        printf("Pin %s is now an output (low)", gpio_pins[num].name);
     } else { // input
-        furi_hal_gpio_init_simple(cli_command_gpio_pins[num].pin, GpioModeInput);
-        printf("Pin %s is now an input", cli_command_gpio_pins[num].name);
+        furi_hal_gpio_init_simple(gpio_pins[num].pin, GpioModeInput);
+        printf("Pin %s is now an input", gpio_pins[num].name);
     }
 }
 
@@ -145,15 +123,14 @@ void cli_command_gpio_read(Cli* cli, string_t args, void* context) {
     }
 
     if(LL_GPIO_MODE_INPUT !=
-       LL_GPIO_GetPinMode(
-           cli_command_gpio_pins[num].pin->port, cli_command_gpio_pins[num].pin->pin)) {
-        printf("Err: pin %s is not set as an input.", cli_command_gpio_pins[num].name);
+       LL_GPIO_GetPinMode(gpio_pins[num].pin->port, gpio_pins[num].pin->pin)) {
+        printf("Err: pin %s is not set as an input.", gpio_pins[num].name);
         return;
     }
 
-    uint8_t val = !!furi_hal_gpio_read(cli_command_gpio_pins[num].pin);
+    uint8_t val = !!furi_hal_gpio_read(gpio_pins[num].pin);
 
-    printf("Pin %s <= %u", cli_command_gpio_pins[num].name, val);
+    printf("Pin %s <= %u", gpio_pins[num].name, val);
 }
 
 void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
@@ -175,14 +152,13 @@ void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
     }
 
     if(LL_GPIO_MODE_OUTPUT !=
-       LL_GPIO_GetPinMode(
-           cli_command_gpio_pins[num].pin->port, cli_command_gpio_pins[num].pin->pin)) {
-        printf("Err: pin %s is not set as an output.", cli_command_gpio_pins[num].name);
+       LL_GPIO_GetPinMode(gpio_pins[num].pin->port, gpio_pins[num].pin->pin)) {
+        printf("Err: pin %s is not set as an output.", gpio_pins[num].name);
         return;
     }
 
     // Extra check if debug pins used
-    if(cli_command_gpio_pins[num].debug) {
+    if(gpio_pins[num].debug) {
         printf(
             "Setting this pin may damage hardware. Are you sure you want to continue? (y/n)?\r\n");
         char c = cli_getc(cli);
@@ -192,8 +168,8 @@ void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
         }
     }
 
-    furi_hal_gpio_write(cli_command_gpio_pins[num].pin, !!value);
-    printf("Pin %s => %u", cli_command_gpio_pins[num].name, !!value);
+    furi_hal_gpio_write(gpio_pins[num].pin, !!value);
+    printf("Pin %s => %u", gpio_pins[num].name, !!value);
 }
 
 void cli_command_gpio(Cli* cli, string_t args, void* context) {

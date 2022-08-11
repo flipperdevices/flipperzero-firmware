@@ -21,5 +21,11 @@
         "misc",
         "flipperformat",
         "toolbox"
+    ],
+    "excluded_sources": [
+        "furi_hal_infrared.c",
+        "furi_hal_nfc.c",
+        "furi_hal_rfid.c",
+        "furi_hal_subghz.c"
     ]
 }

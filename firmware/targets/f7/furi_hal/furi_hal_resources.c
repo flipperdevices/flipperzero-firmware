@@ -73,6 +73,23 @@ const InputPin input_pins[] = {
 
 const size_t input_pins_count = sizeof(input_pins) / sizeof(InputPin);
 
+const GpioPinRecord gpio_pins[] = {
+    {.pin = &gpio_ext_pa7, .name = "PA7", .debug = false},
+    {.pin = &gpio_ext_pa6, .name = "PA6", .debug = false},
+    {.pin = &gpio_ext_pa4, .name = "PA4", .debug = false},
+    {.pin = &gpio_ext_pb3, .name = "PB3", .debug = false},
+    {.pin = &gpio_ext_pb2, .name = "PB2", .debug = false},
+    {.pin = &gpio_ext_pc3, .name = "PC3", .debug = false},
+    {.pin = &gpio_ext_pc1, .name = "PC1", .debug = false},
+    {.pin = &gpio_ext_pc0, .name = "PC0", .debug = false},
+
+    /* Dangerous pins, may damage hardware */
+    {.pin = &gpio_usart_rx, .name = "PB7", .debug = true},
+    {.pin = &gpio_speaker, .name = "PB8", .debug = true},
+};
+
+const size_t gpio_pins_count = sizeof(gpio_pins) / sizeof(GpioPinRecord);
+
 void furi_hal_resources_init_early() {
     furi_hal_gpio_init(&gpio_button_left, GpioModeInput, GpioPullUp, GpioSpeedLow);
 

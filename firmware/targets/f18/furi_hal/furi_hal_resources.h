@@ -37,8 +37,17 @@ typedef struct {
     const char* name;
 } InputPin;
 
+typedef struct {
+    const GpioPin* pin;
+    const char* name;
+    const bool debug;
+} GpioPinRecord;
+
 extern const InputPin input_pins[];
 extern const size_t input_pins_count;
+
+extern const GpioPinRecord gpio_pins[];
+extern const size_t gpio_pins_count;
 
 extern const GpioPin vibro_gpio;
 extern const GpioPin ibutton_gpio;
@@ -76,14 +85,6 @@ extern const GpioPin gpio_ext_pb3;
 extern const GpioPin gpio_ext_pa4;
 extern const GpioPin gpio_ext_pa6;
 extern const GpioPin gpio_ext_pa7;
-
-extern const GpioPin gpio_nfc_irq_rfid_pull;
-extern const GpioPin gpio_rfid_carrier_out;
-extern const GpioPin gpio_rfid_data_in;
-extern const GpioPin gpio_rfid_carrier;
-
-extern const GpioPin gpio_infrared_rx;
-extern const GpioPin gpio_infrared_tx;
 
 extern const GpioPin gpio_usart_tx;
 extern const GpioPin gpio_usart_rx;
