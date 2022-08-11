@@ -10,7 +10,6 @@ App(
     ],
     provides=[
         "lfrfid_start",
-        "lfrfid_c_start",
         "lfrfid_debug",
     ],
     icon="A_125khz_14",
@@ -22,14 +21,6 @@ App(
     appid="lfrfid_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="lfrfid_on_system_start",
-    requires=["lfrfid"],
-    order=50,
-)
-
-App(
-    appid="lfrfid_c_start",
-    apptype=FlipperAppType.STARTUP,
-    entry_point="lfrfid_c_on_system_start",
     requires=["lfrfid"],
     order=50,
 )
