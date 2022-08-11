@@ -7,6 +7,7 @@
 
 - Known Issues:`FAP Loader` & `Chess`
 - [Update passport.c to fix XP bar #219 (By Kuronons)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/219)
+- Added [[FL-2059] Storage fixes for handling empty files #1563 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1563)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -188,6 +189,5 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 
 ## Conflicting PRs Not Merged:
 - [Fixed building for users with space in windows username #1437 (By SzymonLisowiec)](https://github.com/flipperdevices/flipperzero-firmware/pull/1437)
-- [[FL-2059] Storage fixes for handling empty files #1563 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1563)
 
 </td></tr></table>
