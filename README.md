@@ -12,6 +12,7 @@
 - Update universal ir audio & tv assets  from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Updated [New frequency analyzer #1557 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1557)
 - Getting 2048 in 2048 now grants 3XP for a total of 90 daily [(Thanks to DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/215)
+- [Update passport.c to fix XP bar #219 (By Kuronons)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/219)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
