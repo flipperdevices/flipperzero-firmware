@@ -19,8 +19,6 @@
         "appframe",
         "assets",
         "misc",
-        "mbedtls",
-        "loclass",
         "flipperformat",
         "toolbox"
     ]
