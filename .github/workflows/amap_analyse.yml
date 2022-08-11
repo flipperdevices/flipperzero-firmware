@@ -44,7 +44,6 @@ jobs:
 
       - name: 'Upload report to database'
         run: |
-          export SIZE_OUT="$(/opt/toolchain/x86_64-darwin/bin/arm-none-eabi-size build/latest/firmware.elf | tail -n 1)"
           export REF="${{github.ref}}"
           export COMMIT_HASH="$(git rev-parse HEAD)"
           export COMMIT_MSG="${{github.event.head_commit.message}}"
@@ -56,7 +55,6 @@ jobs:
             export COMMIT_MSG="$(git log -2 --pretty=format:"%s" | tail -n 1)"
           fi
           export BRANCH_NAME="${REF#refs/*/}"
-          export BSS_SIZE="$(awk '{print $3}' <<< $SIZE_OUT)"
-          export TEXT_SIZE="$(awk '{print $1}' <<< $SIZE_OUT)"
-          export
+          export BSS_SIZE="$(/opt/toolchain/x86_64-darwin/bin/arm-none-eabi-size -A build/latest/firmware.elf | grep ".bss" | awk '{print $2}')"
+          export TEXT_SIZE="$(/opt/toolchain/x86_64-darwin/bin/arm-none-eabi-size -A build/latest/firmware.elf | grep ".text" | awk '{print $2}')"
           /usr/local/bin/amap_mariadb_insert.py artifacts/firmware.elf.map.all
