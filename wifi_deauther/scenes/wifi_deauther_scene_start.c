@@ -38,7 +38,7 @@ const struct WifideautherItem MenuItems[NUM_MENU_ITEMS] = {
     {"set webinterface false", INPUT_ARGS, FOCUS_CONSOLE_END},
     {"set ssid: pwned", INPUT_ARGS, FOCUS_CONSOLE_END},
     {"set password: deauther", INPUT_ARGS, FOCUS_CONSOLE_END},
-    {"reset", NO_ARGS, FOCUS_CONSOLE_END},
+    {"reboot", NO_ARGS, FOCUS_CONSOLE_END},
     {"save settings", NO_ARGS, FOCUS_CONSOLE_END},
 };
 
