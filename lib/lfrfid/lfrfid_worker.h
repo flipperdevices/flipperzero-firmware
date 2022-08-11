@@ -14,7 +14,9 @@ extern "C" {
 
 typedef enum {
     LFRFIDWorkerWriteOK,
-    LFRFIDWorkerWriteCannotWrite,
+    LFRFIDWorkerWriteProtocolCannotBeWritten,
+    LFRFIDWorkerWriteFobCannotBeWritten,
+    LFRFIDWorkerWriteTooLongToWrite,
 } LFRFIDWorkerWriteResult;
 
 typedef enum {
@@ -32,7 +34,7 @@ typedef enum {
 } LFRFIDWorkerReadResult;
 
 typedef enum {
-    LFRFIDWorkerEmulateSense,
+    LFRFIDWorkerEmulateSense, // TODO: not implemented
 } LFRFIDWorkerEmulateResult;
 
 typedef enum {

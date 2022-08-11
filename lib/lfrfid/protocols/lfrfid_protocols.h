@@ -3,8 +3,8 @@
 #include "../tools/t5577.h"
 
 typedef enum {
-    LFRFIDFeatureASK = 1 << 0,
-    LFRFIDFeaturePSK = 1 << 1,
+    LFRFIDFeatureASK = 1 << 0, /** ASK Demodulation */
+    LFRFIDFeaturePSK = 1 << 1, /** PSK Demodulation */
 } LFRFIDFeature;
 
 typedef enum {

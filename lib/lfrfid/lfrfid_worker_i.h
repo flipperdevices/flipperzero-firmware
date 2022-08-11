@@ -29,7 +29,6 @@ typedef enum {
 
 struct LFRFIDWorker {
     char* raw_filename;
-    // LFRFIDWriter* writer;
 
     LFRFIDWorkerMode mode_index;
     void* mode_storage;

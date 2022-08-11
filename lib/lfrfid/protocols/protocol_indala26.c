@@ -289,7 +289,7 @@ bool protocol_indala26_write_data(ProtocolIndala* protocol, void* data) {
 };
 
 const ProtocolBase protocol_indala26 = {
-    .name = "Indala 26",
+    .name = "Indala26",
     .manufacturer = "Motorola",
     .data_size = INDALA26_DECODED_DATA_SIZE,
     .features = LFRFIDFeaturePSK,

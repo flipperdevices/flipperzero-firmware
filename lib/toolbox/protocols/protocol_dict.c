@@ -92,6 +92,11 @@ void protocol_dict_decoders_start(ProtocolDict* dict) {
     }
 }
 
+uint32_t protocol_dict_get_features(ProtocolDict* dict, size_t protocol_index) {
+    furi_assert(protocol_index < dict->count);
+    return dict->base[protocol_index]->features;
+}
+
 ProtocolId protocol_dict_decoders_feed(ProtocolDict* dict, bool level, uint32_t duration) {
     bool done = false;
     ProtocolId ready_protocol_id = PROTOCOL_NO;
@@ -114,9 +119,9 @@ ProtocolId protocol_dict_decoders_feed(ProtocolDict* dict, bool level, uint32_t 
 
 ProtocolId protocol_dict_decoders_feed_by_feature(
     ProtocolDict* dict,
+    uint32_t feature,
     bool level,
-    uint32_t duration,
-    uint32_t feature) {
+    uint32_t duration) {
     bool done = false;
     ProtocolId ready_protocol_id = PROTOCOL_NO;
 
@@ -133,6 +138,25 @@ ProtocolId protocol_dict_decoders_feed_by_feature(
                     }
                 }
             }
+        }
+    }
+
+    return ready_protocol_id;
+}
+
+ProtocolId protocol_dict_decoders_feed_by_id(
+    ProtocolDict* dict,
+    size_t protocol_index,
+    bool level,
+    uint32_t duration) {
+    furi_assert(protocol_index < dict->count);
+
+    ProtocolId ready_protocol_id = PROTOCOL_NO;
+    ProtocolDecoderFeed fn = dict->base[protocol_index]->decoder.feed;
+
+    if(fn) {
+        if(fn(dict->data[protocol_index], level, duration)) {
+            ready_protocol_id = protocol_index;
         }
     }
 

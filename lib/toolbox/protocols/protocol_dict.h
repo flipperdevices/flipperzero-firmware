@@ -34,13 +34,21 @@ const char* protocol_dict_get_manufacturer(ProtocolDict* dict, size_t protocol_i
 
 void protocol_dict_decoders_start(ProtocolDict* dict);
 
+uint32_t protocol_dict_get_features(ProtocolDict* dict, size_t protocol_index);
+
 ProtocolId protocol_dict_decoders_feed(ProtocolDict* dict, bool level, uint32_t duration);
 
 ProtocolId protocol_dict_decoders_feed_by_feature(
     ProtocolDict* dict,
+    uint32_t feature,
     bool level,
-    uint32_t duration,
-    uint32_t feature);
+    uint32_t duration);
+
+ProtocolId protocol_dict_decoders_feed_by_id(
+    ProtocolDict* dict,
+    size_t protocol_index,
+    bool level,
+    uint32_t duration);
 
 bool protocol_dict_encoder_start(ProtocolDict* dict, size_t protocol_index);
 
