@@ -4,19 +4,19 @@
 #include <stm32wbxx_ll_rcc.h>
 #include <stm32wbxx_ll_pwr.h>
 
-const GpioPin vibro_gpio = {.port = VIBRO_GPIO_Port, .pin = VIBRO_Pin};
-const GpioPin ibutton_gpio = {.port = iBTN_GPIO_Port, .pin = iBTN_Pin};
+const GpioPin vibro_gpio = {.port = GPIOA, .pin = LL_GPIO_PIN_8};
+const GpioPin ibutton_gpio = {.port = GPIOB, .pin = LL_GPIO_PIN_14};
 
-const GpioPin gpio_cc1101_g0 = {.port = CC1101_G0_GPIO_Port, .pin = CC1101_G0_Pin};
-const GpioPin gpio_rf_sw_0 = {.port = RF_SW_0_GPIO_Port, .pin = RF_SW_0_Pin};
+const GpioPin gpio_cc1101_g0 = {.port = GPIOA, .pin = LL_GPIO_PIN_1};
+const GpioPin gpio_rf_sw_0 = {.port = GPIOC, .pin = LL_GPIO_PIN_4};
 
-const GpioPin gpio_subghz_cs = {.port = CC1101_CS_GPIO_Port, .pin = CC1101_CS_Pin};
-const GpioPin gpio_display_cs = {.port = DISPLAY_CS_GPIO_Port, .pin = DISPLAY_CS_Pin};
-const GpioPin gpio_display_rst_n = {.port = DISPLAY_RST_GPIO_Port, .pin = DISPLAY_RST_Pin};
-const GpioPin gpio_display_di = {.port = DISPLAY_DI_GPIO_Port, .pin = DISPLAY_DI_Pin};
-const GpioPin gpio_sdcard_cs = {.port = SD_CS_GPIO_Port, .pin = SD_CS_Pin};
-const GpioPin gpio_sdcard_cd = {.port = SD_CD_GPIO_Port, .pin = SD_CD_Pin};
-const GpioPin gpio_nfc_cs = {.port = NFC_CS_GPIO_Port, .pin = NFC_CS_Pin};
+const GpioPin gpio_subghz_cs = {.port = GPIOD, .pin = LL_GPIO_PIN_0};
+const GpioPin gpio_display_cs = {.port = GPIOC, .pin = LL_GPIO_PIN_11};
+const GpioPin gpio_display_rst_n = {.port = GPIOB, .pin = LL_GPIO_PIN_0};
+const GpioPin gpio_display_di = {.port = GPIOB, .pin = LL_GPIO_PIN_1};
+const GpioPin gpio_sdcard_cs = {.port = GPIOC, .pin = LL_GPIO_PIN_12};
+const GpioPin gpio_sdcard_cd = {.port = GPIOC, .pin = LL_GPIO_PIN_10};
+const GpioPin gpio_nfc_cs = {.port = GPIOE, .pin = LL_GPIO_PIN_4};
 
 const GpioPin gpio_button_up = {.port = GPIOB, .pin = LL_GPIO_PIN_10};
 const GpioPin gpio_button_down = {.port = GPIOC, .pin = LL_GPIO_PIN_6};
@@ -25,12 +25,12 @@ const GpioPin gpio_button_left = {.port = GPIOB, .pin = LL_GPIO_PIN_11};
 const GpioPin gpio_button_ok = {.port = GPIOH, .pin = LL_GPIO_PIN_3};
 const GpioPin gpio_button_back = {.port = GPIOC, .pin = LL_GPIO_PIN_13};
 
-const GpioPin gpio_spi_d_miso = {.port = SPI_D_MISO_GPIO_Port, .pin = SPI_D_MISO_Pin};
-const GpioPin gpio_spi_d_mosi = {.port = SPI_D_MOSI_GPIO_Port, .pin = SPI_D_MOSI_Pin};
-const GpioPin gpio_spi_d_sck = {.port = SPI_D_SCK_GPIO_Port, .pin = SPI_D_SCK_Pin};
-const GpioPin gpio_spi_r_miso = {.port = SPI_R_MISO_GPIO_Port, .pin = SPI_R_MISO_Pin};
-const GpioPin gpio_spi_r_mosi = {.port = SPI_R_MOSI_GPIO_Port, .pin = SPI_R_MOSI_Pin};
-const GpioPin gpio_spi_r_sck = {.port = SPI_R_SCK_GPIO_Port, .pin = SPI_R_SCK_Pin};
+const GpioPin gpio_spi_d_miso = {.port = GPIOC, .pin = LL_GPIO_PIN_2};
+const GpioPin gpio_spi_d_mosi = {.port = GPIOB, .pin = LL_GPIO_PIN_15};
+const GpioPin gpio_spi_d_sck = {.port = GPIOD, .pin = LL_GPIO_PIN_1};
+const GpioPin gpio_spi_r_miso = {.port = GPIOB, .pin = LL_GPIO_PIN_4};
+const GpioPin gpio_spi_r_mosi = {.port = GPIOB, .pin = LL_GPIO_PIN_5};
+const GpioPin gpio_spi_r_sck = {.port = GPIOA, .pin = LL_GPIO_PIN_5};
 
 const GpioPin gpio_ext_pc0 = {.port = GPIOC, .pin = LL_GPIO_PIN_0};
 const GpioPin gpio_ext_pc1 = {.port = GPIOC, .pin = LL_GPIO_PIN_1};
@@ -41,16 +41,16 @@ const GpioPin gpio_ext_pa4 = {.port = GPIOA, .pin = LL_GPIO_PIN_4};
 const GpioPin gpio_ext_pa6 = {.port = GPIOA, .pin = LL_GPIO_PIN_6};
 const GpioPin gpio_ext_pa7 = {.port = GPIOA, .pin = LL_GPIO_PIN_7};
 
-const GpioPin gpio_nfc_irq_rfid_pull = {.port = RFID_PULL_GPIO_Port, .pin = RFID_PULL_Pin};
-const GpioPin gpio_rfid_carrier_out = {.port = RFID_OUT_GPIO_Port, .pin = RFID_OUT_Pin};
-const GpioPin gpio_rfid_data_in = {.port = RFID_RF_IN_GPIO_Port, .pin = RFID_RF_IN_Pin};
-const GpioPin gpio_rfid_carrier = {.port = RFID_CARRIER_GPIO_Port, .pin = RFID_CARRIER_Pin};
+const GpioPin gpio_nfc_irq_rfid_pull = {.port = GPIOA, .pin = LL_GPIO_PIN_2};
+const GpioPin gpio_rfid_carrier_out = {.port = GPIOB, .pin = LL_GPIO_PIN_13};
+const GpioPin gpio_rfid_data_in = {.port = GPIOC, .pin = LL_GPIO_PIN_5};
+const GpioPin gpio_rfid_carrier = {.port = GPIOA, .pin = LL_GPIO_PIN_15};
 
-const GpioPin gpio_infrared_rx = {.port = IR_RX_GPIO_Port, .pin = IR_RX_Pin};
-const GpioPin gpio_infrared_tx = {.port = IR_TX_GPIO_Port, .pin = IR_TX_Pin};
+const GpioPin gpio_infrared_rx = {.port = GPIOA, .pin = LL_GPIO_PIN_0};
+const GpioPin gpio_infrared_tx = {.port = GPIOB, .pin = LL_GPIO_PIN_9};
 
-const GpioPin gpio_usart_tx = {.port = USART1_TX_Port, .pin = USART1_TX_Pin};
-const GpioPin gpio_usart_rx = {.port = USART1_RX_Port, .pin = USART1_RX_Pin};
+const GpioPin gpio_usart_tx = {.port = GPIOB, .pin = LL_GPIO_PIN_6};
+const GpioPin gpio_usart_rx = {.port = GPIOB, .pin = LL_GPIO_PIN_7};
 
 const GpioPin gpio_i2c_power_sda = {.port = GPIOA, .pin = LL_GPIO_PIN_10};
 const GpioPin gpio_i2c_power_scl = {.port = GPIOA, .pin = LL_GPIO_PIN_9};
@@ -103,8 +103,8 @@ void furi_hal_resources_init_early() {
     furi_hal_gpio_init_simple(&gpio_display_di, GpioModeOutputPushPull);
 
     // Alternative pull configuration for shutdown
-    SET_BIT(PWR->PUCRB, DISPLAY_RST_Pin);
-    CLEAR_BIT(PWR->PDCRB, DISPLAY_RST_Pin);
+    SET_BIT(PWR->PUCRB, LL_GPIO_PIN_0);
+    CLEAR_BIT(PWR->PDCRB, LL_GPIO_PIN_0);
     SET_BIT(PWR->CR3, PWR_CR3_APC);
 
     // Hard reset USB
