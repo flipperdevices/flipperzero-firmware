@@ -49,7 +49,7 @@ jobs:
             SECTION="$1";
             /opt/toolchain/x86_64-darwin/bin/arm-none-eabi-size \
               -A build/latest/firmware.elf \
-              | grep "$SECTION" | awk '{print $2}'
+              | grep "^$SECTION" | awk '{print $2}'
           }
           export REF="${{github.ref}}"
           export COMMIT_HASH="$(git rev-parse HEAD)"
