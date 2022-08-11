@@ -101,7 +101,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_draw_icon(canvas, 9, 5, portraits[mood][tmpLvl]);
     canvas_draw_line(canvas, 58, 14, 123, 14);
     canvas_draw_line(canvas, 58, 26, 123, 26);
-    canvas_draw_line(canvas, 58, 46, 123, 46);
+    canvas_draw_line(canvas, 59, 46, 122, 46);
 
     const char* my_name = furi_hal_version_get_name_ptr();
     snprintf(level_str, 12, "Level: %hu", stats->level);
@@ -116,9 +116,9 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontSecondary);
 
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, 123 - xp_progress, 50, xp_progress + 1, 3);
+    canvas_draw_box(canvas, 123 - xp_progress, 47, xp_progress + 1, 6);
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_line(canvas, 123, 50, 123, 52);
+    canvas_draw_line(canvas, 123, 47, 123, 52);
 }
 
 int32_t passport_app(void* p) {
