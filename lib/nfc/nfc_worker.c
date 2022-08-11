@@ -105,8 +105,8 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_mf_ultralight_read_auth(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateMfClassicDictAttack) {
         nfc_worker_mf_classic_dict_attack(nfc_worker);
-    } else if(nfc_worker->state == NfcWorkerStateDetectReader) {
-        nfc_worker_detect_reader(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateAnalizeReader) {
+        nfc_worker_analyze_reader(nfc_worker);
     }
     furi_hal_nfc_sleep();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
@@ -581,25 +581,42 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
     }
 }
 
-void nfc_worker_detect_reader(NfcWorker* nfc_worker) {
-
+void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
-    Mfkey32v2Params mfkey_params = {};
-    uint64_t key_found = 0;
 
     NfcaSignal* nfca_signal = nfca_signal_alloc();
     tx_rx.nfca_signal = nfca_signal;
+    ReaderAnalyzer* reader_analyzer = nfc_worker->dev_data->reader_analyzer;
+    FuriHalNfcDevData* nfc_data = reader_analyzer_get_nfc_data(reader_analyzer);
 
-    FURI_LOG_D(TAG, "Start reader attack");
-    while(nfc_worker->state == NfcWorkerStateDetectReader) {
-        if(mfkey32v2_collect(&tx_rx, &mfkey_params)) {
-            if(mfkey32v2_get_key(&mfkey_params, &key_found)) {
-                FURI_LOG_D(TAG, "Mfkey32v2 success");
+    rfal_platform_spi_acquire();
+
+    FURI_LOG_D(TAG, "Start reader analyzer");
+    while(nfc_worker->state == NfcWorkerStateAnalizeReader) {
+        furi_hal_nfc_stop_cmd();
+        furi_delay_ms(5);
+        furi_hal_nfc_listen_start(nfc_data);
+        if(furi_hal_nfc_listen_rx(&tx_rx, 300)) {
+            reader_analyzer_process(reader_analyzer, &tx_rx);
+            if(reader_analyzer_is_data_available(reader_analyzer)) {
+                nfc_worker->callback(
+                    NfcWorkerEventReaderDetectMfkeyCollected, nfc_worker->context);
             }
         } else {
-            FURI_LOG_D(TAG, "Collect failed");
+            FURI_LOG_D(TAG, "No data from reader");
+            continue;
         }
+
+        // if(mfkey32v2_collect(&tx_rx, &mfkey_params)) {
+        //     if(mfkey32v2_get_key(&mfkey_params, &key_found)) {
+        //         FURI_LOG_D(TAG, "Mfkey32v2 success");
+        //     }
+        // } else {
+        //     FURI_LOG_D(TAG, "Collect failed");
+        // }
     }
+
+    rfal_platform_spi_release();
 
     nfca_signal_free(nfca_signal);
 }

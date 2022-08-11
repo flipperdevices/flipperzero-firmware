@@ -74,7 +74,7 @@ void nfc_scene_detect_reader_on_enter(void* context) {
     memset(&nfc->dev->dev_data.reader_data, 0, sizeof(NfcReaderRequestData));
     nfc_worker_start(
         nfc->worker,
-        NfcWorkerStateDetectReader,
+        NfcWorkerStateAnalizeReader,
         &nfc->dev->dev_data,
         nfc_detect_reader_worker_callback,
         nfc);

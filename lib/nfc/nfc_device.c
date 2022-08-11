@@ -27,6 +27,7 @@ NfcDevice* nfc_device_alloc() {
     nfc_dev->dialogs = furi_record_open(RECORD_DIALOGS);
     string_init(nfc_dev->load_path);
     string_init(nfc_dev->dev_data.parsed_data);
+    nfc_dev->dev_data.reader_analyzer = reader_analyzer_alloc();
     return nfc_dev;
 }
 
@@ -37,6 +38,7 @@ void nfc_device_free(NfcDevice* nfc_dev) {
     furi_record_close(RECORD_DIALOGS);
     string_clear(nfc_dev->load_path);
     string_clear(nfc_dev->dev_data.parsed_data);
+    reader_analyzer_free(nfc_dev->dev_data.reader_analyzer);
     free(nfc_dev);
 }
 
@@ -1212,6 +1214,7 @@ void nfc_device_data_clear(NfcDeviceData* dev_data) {
     memset(&dev_data->nfc_data, 0, sizeof(FuriHalNfcDevData));
     dev_data->protocol = NfcDeviceProtocolUnknown;
     string_reset(dev_data->parsed_data);
+    reader_analyzer_reset(dev_data->reader_analyzer);
 }
 
 void nfc_device_clear(NfcDevice* dev) {

@@ -13,6 +13,7 @@
 #include <lib/nfc/protocols/mifare_desfire.h>
 #include <lib/nfc/protocols/nfca.h>
 #include <lib/nfc/protocols/mfkey32v2.h>
+#include <lib/nfc/helpers/reader_analyzer.h>
 
 #include "helpers/nfc_debug_pcap.h"
 
@@ -51,4 +52,4 @@ void nfc_worker_mf_ul_auth_attack(NfcWorker* nfc_worker);
 
 void nfc_worker_emulate_apdu(NfcWorker* nfc_worker);
 
-void nfc_worker_detect_reader(NfcWorker* nfc_worker);
+void nfc_worker_analyze_reader(NfcWorker* nfc_worker);
