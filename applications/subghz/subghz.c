@@ -170,7 +170,7 @@ SubGhz* subghz_alloc() {
 
     //init setting
     subghz->setting = subghz_setting_alloc();
-    subghz_setting_load(subghz->setting, EXT_PATH("subghz/assets/setting_user"));
+    subghz_setting_load(subghz->setting, EXT_PATH("subghz/assets/setting_user.txt"));
 
     //init Worker & Protocol & History & KeyBoard
     subghz->lock = SubGhzLockOff;
