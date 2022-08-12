@@ -64,7 +64,7 @@ uint16_t archive_favorites_count(void* context) {
                 break;
             }
             if(!string_size(buffer)) {
-                break;
+                continue; // Skip empty lines
             }
             ++lines;
         }
@@ -92,7 +92,7 @@ static bool archive_favourites_rescan() {
                 break;
             }
             if(!string_size(buffer)) {
-                break;
+                continue;
             }
 
             if(string_search(buffer, "/app:") == 0) {
@@ -144,7 +144,7 @@ bool archive_favorites_read(void* context) {
                 break;
             }
             if(!string_size(buffer)) {
-                break;
+                continue;
             }
 
             if(string_search(buffer, "/app:") == 0) {
@@ -202,7 +202,7 @@ bool archive_favorites_delete(const char* format, ...) {
                 break;
             }
             if(!string_size(buffer)) {
-                break;
+                continue;
             }
 
             if(string_search(buffer, filename)) {
@@ -246,7 +246,7 @@ bool archive_is_favorite(const char* format, ...) {
                 break;
             }
             if(!string_size(buffer)) {
-                break;
+                continue;
             }
             if(!string_search(buffer, filename)) {
                 found = true;
@@ -286,7 +286,7 @@ bool archive_favorites_rename(const char* src, const char* dst) {
                 break;
             }
             if(!string_size(buffer)) {
-                break;
+                continue;
             }
 
             archive_file_append(
