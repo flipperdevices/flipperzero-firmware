@@ -19,6 +19,7 @@
 - OFW: [RPC APP fixes #1568 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1568)
 - OFW: [Scripts: add new region to otp generator (#1582) (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1582)
 - Update for Snake capture notification to be silent.
+- V2: Updated with subghz header file
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
