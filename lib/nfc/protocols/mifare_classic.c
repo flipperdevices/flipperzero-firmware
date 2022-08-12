@@ -468,8 +468,6 @@ bool mf_classic_auth_attempt(
 
     if(need_halt) {
         furi_hal_nfc_sleep();
-        FURI_LOG_D("MFC", "Halting");
-        furi_hal_nfc_activate_nfca(300, &auth_ctx->cuid);
     }
 
     if(auth_ctx->key_b == MF_CLASSIC_NO_KEY) {
