@@ -139,7 +139,7 @@ fwenv.AppendUnique(
 # Depends on virtual value-only node, so it only gets rebuilt when set of apps changes
 apps_c = fwenv.ApplicationsC(
     "applications/applications.c",
-    Value(fwenv["APPS"]),
+    [Value(fwenv["APPS"]), Value(fwenv["LOADER_AUTOSTART"])],
 )
 # Adding dependency on manifest files so apps.c is rebuilt when any manifest is changed
 fwenv.Depends(apps_c, fwenv.GlobRecursive("*.fam", "#/applications"))

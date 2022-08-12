@@ -59,6 +59,8 @@ SVD_FILE = "debug/STM32WB55_CM4.svd"
 # Look for blackmagic probe on serial ports and local network
 BLACKMAGIC = "auto"
 
+LOADER_AUTOSTART = ""
+
 FIRMWARE_APPS = {
     "default": [
         "crypto_start",
