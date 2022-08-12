@@ -163,6 +163,14 @@ float furi_hal_subghz_get_rssi();
  */
 uint8_t furi_hal_subghz_get_lqi();
 
+/** Check if frequency is allowed
+ *
+ * @param      value  frequency in Hz
+ *
+ * @return     true if frequncy is valid, otherwise false
+ */
+bool furi_hal_subghz_is_tx_allowed(uint32_t value);
+
 /** Check if frequency is in valid range
  *
  * @param      value  frequency in Hz
