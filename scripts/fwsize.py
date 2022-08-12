@@ -20,7 +20,7 @@ class Main(App):
 
     def process_elf(self):
         all_sizes = subprocess.check_output(
-            ["arm-none-eabi-size", "-A", self.args.elfname], shell=True
+            ["arm-none-eabi-size", "-A", self.args.elfname], shell=False
         )
         all_sizes = all_sizes.splitlines()
 
