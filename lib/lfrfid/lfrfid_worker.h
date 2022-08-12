@@ -34,10 +34,6 @@ typedef enum {
 } LFRFIDWorkerReadResult;
 
 typedef enum {
-    LFRFIDWorkerEmulateSense, // TODO: not implemented
-} LFRFIDWorkerEmulateResult;
-
-typedef enum {
     LFRFIDWorkerReadRawFileError,
     LFRFIDWorkerReadRawOverrun,
     LFRFIDWorkerReadRawDone,
@@ -83,39 +79,32 @@ void lfrfid_worker_start_thread(LFRFIDWorker* worker);
 void lfrfid_worker_stop_thread(LFRFIDWorker* worker);
 
 /**
- * Set "read event" callback
+ * @brief Start read mode
+ * 
  * @param worker 
+ * @param type 
  * @param callback 
  * @param context 
  */
-void lfrfid_worker_read_set_callback(
+void lfrfid_worker_read_start(
     LFRFIDWorker* worker,
+    LFRFIDWorkerReadType type,
     LFRFIDWorkerReadCallback callback,
     void* context);
 
 /**
- * Start read mode
+ * @brief Start write mode
+ * 
  * @param worker 
- * @param type 
- */
-void lfrfid_worker_read_start(LFRFIDWorker* worker, LFRFIDWorkerReadType type);
-
-/**
- * Set "write event" callback
- * @param worker 
+ * @param protocol 
  * @param callback 
  * @param context 
  */
-void lfrfid_worker_write_set_callback(
+void lfrfid_worker_write_start(
     LFRFIDWorker* worker,
+    LFRFIDProtocol protocol,
     LFRFIDWorkerWriteCallback callback,
     void* context);
-
-/**
- * Start write mode
- * @param worker 
- */
-void lfrfid_worker_write_start(LFRFIDWorker* worker, LFRFIDProtocol protocol);
 
 /**
  * Start emulate mode
@@ -124,44 +113,33 @@ void lfrfid_worker_write_start(LFRFIDWorker* worker, LFRFIDProtocol protocol);
 void lfrfid_worker_emulate_start(LFRFIDWorker* worker, LFRFIDProtocol protocol);
 
 /**
- * Set "read raw event" callback
- * @param worker 
- * @param callback 
- * @param context 
- */
-void lfrfid_worker_read_raw_set_callback(
-    LFRFIDWorker* worker,
-    LFRFIDWorkerReadRawCallback callback,
-    void* context);
-
-/**
- * Start raw read mode
+ * @brief Start raw read mode
+ * 
  * @param worker 
  * @param filename 
  * @param type 
+ * @param callback 
+ * @param context 
  */
 void lfrfid_worker_read_raw_start(
     LFRFIDWorker* worker,
     const char* filename,
-    LFRFIDWorkerReadType type);
-
-/**
- * Set "emulate raw event" callback
- * @param worker 
- * @param callback 
- * @param context 
- */
-void lfrfid_worker_emulate_raw_set_callback(
-    LFRFIDWorker* worker,
-    LFRFIDWorkerEmulateRawCallback callback,
+    LFRFIDWorkerReadType type,
+    LFRFIDWorkerReadRawCallback callback,
     void* context);
 
 /**
  * Emulate raw read mode
  * @param worker 
  * @param filename 
+ * @param callback 
+ * @param context 
  */
-void lfrfid_worker_emulate_raw_start(LFRFIDWorker* worker, const char* filename);
+void lfrfid_worker_emulate_raw_start(
+    LFRFIDWorker* worker,
+    const char* filename,
+    LFRFIDWorkerEmulateRawCallback callback,
+    void* context);
 
 /**
  * Stop all modes

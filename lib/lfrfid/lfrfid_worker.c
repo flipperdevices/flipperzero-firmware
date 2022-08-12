@@ -49,51 +49,27 @@ void lfrfid_worker_free(LFRFIDWorker* worker) {
     free(worker);
 }
 
-void lfrfid_worker_read_set_callback(
+void lfrfid_worker_read_start(
     LFRFIDWorker* worker,
+    LFRFIDWorkerReadType type,
     LFRFIDWorkerReadCallback callback,
     void* context) {
-    furi_check(worker->mode_index == LFRFIDWorkerIdle);
-    worker->read_cb = callback;
-    worker->cb_ctx = context;
-}
-
-void lfrfid_worker_write_set_callback(
-    LFRFIDWorker* worker,
-    LFRFIDWorkerWriteCallback callback,
-    void* context) {
-    furi_check(worker->mode_index == LFRFIDWorkerIdle);
-    worker->write_cb = callback;
-    worker->cb_ctx = context;
-}
-
-void lfrfid_worker_read_raw_set_callback(
-    LFRFIDWorker* worker,
-    LFRFIDWorkerReadRawCallback callback,
-    void* context) {
-    furi_check(worker->mode_index == LFRFIDWorkerIdle);
-    worker->read_raw_cb = callback;
-    worker->cb_ctx = context;
-}
-
-void lfrfid_worker_emulate_raw_set_callback(
-    LFRFIDWorker* worker,
-    LFRFIDWorkerEmulateRawCallback callback,
-    void* context) {
-    furi_check(worker->mode_index == LFRFIDWorkerIdle);
-    worker->emulate_raw_cb = callback;
-    worker->cb_ctx = context;
-}
-
-void lfrfid_worker_read_start(LFRFIDWorker* worker, LFRFIDWorkerReadType type) {
     furi_assert(worker->mode_index == LFRFIDWorkerIdle);
     worker->read_type = type;
+    worker->read_cb = callback;
+    worker->cb_ctx = context;
     furi_thread_flags_set(furi_thread_get_id(worker->thread), LFRFIDEventRead);
 }
 
-void lfrfid_worker_write_start(LFRFIDWorker* worker, LFRFIDProtocol protocol) {
+void lfrfid_worker_write_start(
+    LFRFIDWorker* worker,
+    LFRFIDProtocol protocol,
+    LFRFIDWorkerWriteCallback callback,
+    void* context) {
     furi_assert(worker->mode_index == LFRFIDWorkerIdle);
     worker->protocol = protocol;
+    worker->write_cb = callback;
+    worker->cb_ctx = context;
     furi_thread_flags_set(furi_thread_get_id(worker->thread), LFRFIDEventWrite);
 }
 
@@ -114,16 +90,26 @@ void lfrfid_worker_set_filename(LFRFIDWorker* worker, const char* filename) {
 void lfrfid_worker_read_raw_start(
     LFRFIDWorker* worker,
     const char* filename,
-    LFRFIDWorkerReadType type) {
+    LFRFIDWorkerReadType type,
+    LFRFIDWorkerReadRawCallback callback,
+    void* context) {
     furi_assert(worker->mode_index == LFRFIDWorkerIdle);
     worker->read_type = type;
+    worker->read_raw_cb = callback;
+    worker->cb_ctx = context;
     lfrfid_worker_set_filename(worker, filename);
     furi_thread_flags_set(furi_thread_get_id(worker->thread), LFRFIDEventReadRaw);
 }
 
-void lfrfid_worker_emulate_raw_start(LFRFIDWorker* worker, const char* filename) {
+void lfrfid_worker_emulate_raw_start(
+    LFRFIDWorker* worker,
+    const char* filename,
+    LFRFIDWorkerEmulateRawCallback callback,
+    void* context) {
     furi_assert(worker->mode_index == LFRFIDWorkerIdle);
     lfrfid_worker_set_filename(worker, filename);
+    worker->emulate_raw_cb = callback;
+    worker->cb_ctx = context;
     furi_thread_flags_set(furi_thread_get_id(worker->thread), LFRFIDEventEmulateRaw);
 }
 

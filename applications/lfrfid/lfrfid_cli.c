@@ -78,13 +78,12 @@ static void lfrfid_cli_read(Cli* cli, string_t args) {
     context.event = furi_event_flag_alloc();
 
     lfrfid_worker_start_thread(worker);
-    lfrfid_worker_read_set_callback(worker, lfrfid_cli_read_callback, &context);
 
     printf("Reading RFID...\r\nPress Ctrl+C to abort\r\n");
 
     const uint32_t available_flags = (1 << LFRFIDWorkerReadDone);
 
-    lfrfid_worker_read_start(worker, type);
+    lfrfid_worker_read_start(worker, type, lfrfid_cli_read_callback, &context);
 
     while(true) {
         uint32_t flags =
@@ -205,8 +204,7 @@ static void lfrfid_cli_write(Cli* cli, string_t args) {
     FuriEventFlag* event = furi_event_flag_alloc();
 
     lfrfid_worker_start_thread(worker);
-    lfrfid_worker_write_set_callback(worker, lfrfid_cli_write_callback, event);
-    lfrfid_worker_write_start(worker, protocol);
+    lfrfid_worker_write_start(worker, protocol, lfrfid_cli_write_callback, event);
 
     printf("Writing RFID...\r\nPress Ctrl+C to abort\r\n");
     const uint32_t available_flags = (1 << LFRFIDWorkerWriteOK) |
@@ -483,7 +481,6 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
         FuriEventFlag* event = furi_event_flag_alloc();
 
         lfrfid_worker_start_thread(worker);
-        lfrfid_worker_read_raw_set_callback(worker, lfrfid_cli_raw_read_callback, event);
 
         bool overrun = false;
 
@@ -491,7 +488,8 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
                                          (1 << LFRFIDWorkerReadRawOverrun) |
                                          (1 << LFRFIDWorkerReadRawDone);
 
-        lfrfid_worker_read_raw_start(worker, string_get_cstr(filepath), type);
+        lfrfid_worker_read_raw_start(
+            worker, string_get_cstr(filepath), type, lfrfid_cli_raw_read_callback, event);
         while(true) {
             uint32_t flags = furi_event_flag_wait(event, available_flags, FuriFlagWaitAny, 100);
 
@@ -563,7 +561,6 @@ static void lfrfid_cli_raw_emulate(Cli* cli, string_t args) {
         FuriEventFlag* event = furi_event_flag_alloc();
 
         lfrfid_worker_start_thread(worker);
-        lfrfid_worker_emulate_raw_set_callback(worker, lfrfid_cli_raw_emulate_callback, event);
 
         bool overrun = false;
 
@@ -571,7 +568,8 @@ static void lfrfid_cli_raw_emulate(Cli* cli, string_t args) {
                                          (1 << LFRFIDWorkerEmulateRawOverrun) |
                                          (1 << LFRFIDWorkerEmulateRawDone);
 
-        lfrfid_worker_emulate_raw_start(worker, string_get_cstr(filepath));
+        lfrfid_worker_emulate_raw_start(
+            worker, string_get_cstr(filepath), lfrfid_cli_raw_emulate_callback, event);
         while(true) {
             uint32_t flags = furi_event_flag_wait(event, available_flags, FuriFlagWaitAny, 100);
 
