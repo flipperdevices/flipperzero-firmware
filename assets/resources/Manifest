@@ -1,5 +1,5 @@
 V:0
-T:1660290035
+T:1660339190
 D:apps
 D:badusb
 D:dolphin
@@ -372,7 +372,7 @@ F:ea81ac5f878e045581a2f5e2add46b0b:180:subghz/assets/extend_range.txt
 F:5e81e9809984ee74d426730c1afa4093:3232:subghz/assets/keeloq_mfcodes
 F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
-F:f4480aec4e49714a9df9e5edd6bd0db7:1934:subghz/assets/setting_user
+F:f4480aec4e49714a9df9e5edd6bd0db7:1934:subghz/assets/setting_user.txt
 D:u2f/assets
 F:7e11e688e39034bbb9d88410044795e1:365:u2f/assets/cert.der
 F:f60b88c20ed479ed9684e249f7134618:264:u2f/assets/cert_key.u2f
