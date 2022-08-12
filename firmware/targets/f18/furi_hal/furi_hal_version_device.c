@@ -5,7 +5,7 @@ bool furi_hal_version_do_i_belong_here() {
 }
 
 const char* furi_hal_version_get_model_name() {
-    return "Flipper Nano";
+    return "Komi";
 }
 
 const char* furi_hal_version_get_model_code() {

@@ -112,11 +112,11 @@ void furi_hal_resources_init_early() {
     // Display pins
     furi_hal_gpio_write(&gpio_display_rst_n, 1);
     furi_hal_gpio_init_simple(&gpio_display_rst_n, GpioModeOutputPushPull);
-    furi_hal_gpio_init_simple(&gpio_display_di, GpioModeOutputPushPull);
+    furi_hal_gpio_init(&gpio_display_di, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 
-    // Alternative pull configuration for shutdown
-    SET_BIT(PWR->PUCRB, LL_GPIO_PIN_0);
-    CLEAR_BIT(PWR->PDCRB, LL_GPIO_PIN_0);
+    // Pullup display reset pin for shutdown
+    SET_BIT(PWR->PUCRB, gpio_display_rst_n.pin);
+    CLEAR_BIT(PWR->PDCRB, gpio_display_rst_n.pin);
     SET_BIT(PWR->CR3, PWR_CR3_APC);
 
     // Hard reset USB
