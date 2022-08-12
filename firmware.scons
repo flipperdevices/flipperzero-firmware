@@ -210,7 +210,10 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
 Depends(fwelf, lib_targets)
 # Output extra details after building firmware
 AddPostAction(fwelf, fwenv["APPBUILD_DUMP"])
-AddPostAction(fwelf, Action("@$SIZECOM"))
+AddPostAction(
+    fwelf,
+    Action('${PYTHON3} "${ROOT_DIR}/scripts/fwsize.py" ${TARGET}', "Firmware size"),
+)
 
 # Produce extra firmware files
 fwhex = fwenv["FW_HEX"] = fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
