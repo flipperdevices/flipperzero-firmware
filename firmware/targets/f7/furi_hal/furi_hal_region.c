@@ -1,4 +1,5 @@
 #include <furi_hal_region.h>
+#include <furi_hal_subghz.h>
 #include <furi_hal_version.h>
 
 const FuriHalRegion furi_hal_region_zero = {
@@ -107,16 +108,18 @@ const char* furi_hal_region_get_name() {
 }
 
 bool furi_hal_region_is_frequency_allowed(uint32_t frequency) {
+    bool isAllowed=true;
     if(!furi_hal_region) {
-        return false;
+        isAllowed = false;
     }
-
     const FuriHalRegionBand* band = furi_hal_region_get_band(frequency);
     if(!band) {
-        return false;
+        isAllowed = false;
     }
-
-    return true;
+    if(!isAllowed) {
+        isAllowed = furi_hal_subghz_is_tx_allowed(frequency);
+    }
+    return isAllowed;
 }
 
 const FuriHalRegionBand* furi_hal_region_get_band(uint32_t frequency) {
