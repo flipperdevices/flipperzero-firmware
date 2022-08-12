@@ -5,6 +5,7 @@
 #include <gui/modules/empty_screen.h>
 #include <m-string.h>
 #include <furi_hal_version.h>
+#include <furi_hal_region.h>
 #include <furi_hal_bt.h>
 
 typedef DialogMessageButton (*AboutDialogScreen)(DialogsApp* dialogs, DialogMessage* message);
@@ -45,7 +46,7 @@ static DialogMessageButton compliance_screen(DialogsApp* dialogs, DialogMessage*
     DialogMessageButton result;
 
     const char* screen_text = "For all compliance\n"
-                              "certificates please visit\n"
+                              "certificates please visit:\n"
                               "www.flipp.dev/compliance";
 
     dialog_message_set_text(message, screen_text, 0, 0, AlignLeft, AlignTop);
@@ -83,21 +84,22 @@ static DialogMessageButton hw_version_screen(DialogsApp* dialogs, DialogMessage*
 
     string_cat_printf(
         buffer,
-        "%d.F%dB%dC%d %s %s\n",
+        "%d.F%dB%dC%d %s:%s %s\n",
         furi_hal_version_get_hw_version(),
         furi_hal_version_get_hw_target(),
         furi_hal_version_get_hw_body(),
         furi_hal_version_get_hw_connect(),
         furi_hal_version_get_hw_region_name(),
+        furi_hal_region_get_name(),
         my_name ? my_name : "Unknown");
 
-    string_cat_printf(buffer, "Serial number:\n");
+    string_cat_printf(buffer, "Serial Number:\n");
     const uint8_t* uid = furi_hal_version_uid();
     for(size_t i = 0; i < furi_hal_version_uid_size(); i++) {
         string_cat_printf(buffer, "%02X", uid[i]);
     }
 
-    dialog_message_set_header(message, "HW Version info:", 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_header(message, "HW Version Info:", 0, 0, AlignLeft, AlignTop);
     dialog_message_set_text(message, string_get_cstr(buffer), 0, 13, AlignLeft, AlignTop);
     result = dialog_message_show(dialogs, message);
     dialog_message_set_text(message, NULL, 0, 0, AlignLeft, AlignTop);
@@ -133,7 +135,7 @@ static DialogMessageButton fw_version_screen(DialogsApp* dialogs, DialogMessage*
             version_get_gitbranch(ver));
     }
 
-    dialog_message_set_header(message, "FW Version info:", 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_header(message, "FW Version Info:", 0, 0, AlignLeft, AlignTop);
     dialog_message_set_text(message, string_get_cstr(buffer), 0, 13, AlignLeft, AlignTop);
     result = dialog_message_show(dialogs, message);
     dialog_message_set_text(message, NULL, 0, 0, AlignLeft, AlignTop);
@@ -156,10 +158,10 @@ const size_t about_screens_count = sizeof(about_screens) / sizeof(AboutDialogScr
 
 int32_t about_settings_app(void* p) {
     UNUSED(p);
-    DialogsApp* dialogs = furi_record_open("dialogs");
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     DialogMessage* message = dialog_message_alloc();
 
-    Gui* gui = furi_record_open("gui");
+    Gui* gui = furi_record_open(RECORD_GUI);
     ViewDispatcher* view_dispatcher = view_dispatcher_alloc();
     EmptyScreen* empty_screen = empty_screen_alloc();
     const uint32_t empty_screen_index = 0;
@@ -198,12 +200,12 @@ int32_t about_settings_app(void* p) {
     }
 
     dialog_message_free(message);
-    furi_record_close("dialogs");
+    furi_record_close(RECORD_DIALOGS);
 
     view_dispatcher_remove_view(view_dispatcher, empty_screen_index);
     view_dispatcher_free(view_dispatcher);
     empty_screen_free(empty_screen);
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
 
     return 0;
 }

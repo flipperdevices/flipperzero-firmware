@@ -16,8 +16,13 @@
 #include <notification/notification_messages.h>
 #include <flipper_format/flipper_format_i.h>
 
+#include <flipper.pb.h>
+#include <pb_decode.h>
+
 #define SUBGHZ_FREQUENCY_RANGE_STR \
     "299999755...348000000 or 386999938...464000000 or 778999847...928000000"
+
+#define SUBGHZ_REGION_FILENAME "/int/.region_data"
 
 void subghz_cli_command_tx_carrier(Cli* cli, string_t args, void* context) {
     UNUSED(context);
@@ -51,7 +56,7 @@ void subghz_cli_command_tx_carrier(Cli* cli, string_t args, void* context) {
         printf("Transmitting at frequency %lu Hz\r\n", frequency);
         printf("Press CTRL+C to stop\r\n");
         while(!cli_cmd_interrupt_received(cli)) {
-            osDelay(250);
+            furi_delay_ms(250);
         }
     } else {
         printf("This frequency can only be used for RX in your region\r\n");
@@ -93,7 +98,7 @@ void subghz_cli_command_rx_carrier(Cli* cli, string_t args, void* context) {
     furi_hal_subghz_rx();
 
     while(!cli_cmd_interrupt_received(cli)) {
-        osDelay(250);
+        furi_delay_ms(250);
         printf("RSSI: %03.1fdbm\r", (double)furi_hal_subghz_get_rssi());
         fflush(stdout);
     }
@@ -172,7 +177,7 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     while(!(furi_hal_subghz_is_async_tx_complete() || cli_cmd_interrupt_received(cli))) {
         printf(".");
         fflush(stdout);
-        osDelay(333);
+        furi_delay_ms(333);
     }
     furi_hal_subghz_stop_async_tx();
     furi_hal_subghz_sleep();
@@ -245,11 +250,12 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     furi_check(instance->stream);
 
     SubGhzEnvironment* environment = subghz_environment_alloc();
-    subghz_environment_load_keystore(environment, "/ext/subghz/assets/keeloq_mfcodes");
+    subghz_environment_load_keystore(environment, EXT_PATH("subghz/assets/keeloq_mfcodes"));
+    subghz_environment_load_keystore(environment, EXT_PATH("subghz/assets/keeloq_mfcodes_user"));
     subghz_environment_set_came_atomo_rainbow_table_file_name(
-        environment, "/ext/subghz/assets/came_atomo");
+        environment, EXT_PATH("subghz/assets/came_atomo"));
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
-        environment, "/ext/subghz/assets/nice_flor_s");
+        environment, EXT_PATH("subghz/assets/nice_flor_s"));
 
     SubGhzReceiver* receiver = subghz_receiver_alloc_init(environment);
     subghz_receiver_set_filter(receiver, SubGhzProtocolFlag_Decodable);
@@ -303,9 +309,9 @@ void subghz_cli_command_decode_raw(Cli* cli, string_t args, void* context) {
     UNUSED(context);
     string_t file_name;
     string_init(file_name);
-    string_set_str(file_name, "/any/subghz/test.sub");
+    string_set_str(file_name, ANY_PATH("subghz/test.sub"));
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
     string_t temp_str;
     string_init(temp_str);
@@ -345,22 +351,30 @@ void subghz_cli_command_decode_raw(Cli* cli, string_t args, void* context) {
 
     string_clear(temp_str);
     flipper_format_free(fff_data_file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     if(check_file) {
         // Allocate context
         SubGhzCliCommandRx* instance = malloc(sizeof(SubGhzCliCommandRx));
 
         SubGhzEnvironment* environment = subghz_environment_alloc();
-        if(subghz_environment_load_keystore(environment, "/ext/subghz/assets/keeloq_mfcodes")) {
-            printf("SubGhz test: Load_keystore \033[0;32mOK\033[0m\r\n");
+        if(subghz_environment_load_keystore(
+               environment, EXT_PATH("subghz/assets/keeloq_mfcodes"))) {
+            printf("SubGhz decode_raw: Load_keystore keeloq_mfcodes \033[0;32mOK\033[0m\r\n");
         } else {
-            printf("SubGhz test: Load_keystore \033[0;31mERROR\033[0m\r\n");
+            printf("SubGhz decode_raw: Load_keystore keeloq_mfcodes \033[0;31mERROR\033[0m\r\n");
+        }
+        if(subghz_environment_load_keystore(
+               environment, EXT_PATH("subghz/assets/keeloq_mfcodes_user"))) {
+            printf("SubGhz decode_raw: Load_keystore keeloq_mfcodes_user \033[0;32mOK\033[0m\r\n");
+        } else {
+            printf(
+                "SubGhz decode_raw: Load_keystore keeloq_mfcodes_user \033[0;31mERROR\033[0m\r\n");
         }
         subghz_environment_set_came_atomo_rainbow_table_file_name(
-            environment, "/ext/subghz/assets/came_atomo");
+            environment, EXT_PATH("subghz/assets/came_atomo"));
         subghz_environment_set_nice_flor_s_rainbow_table_file_name(
-            environment, "/ext/subghz/assets/nice_flor_s");
+            environment, EXT_PATH("subghz/assets/nice_flor_s"));
 
         SubGhzReceiver* receiver = subghz_receiver_alloc_init(environment);
         subghz_receiver_set_filter(receiver, SubGhzProtocolFlag_Decodable);
@@ -369,7 +383,7 @@ void subghz_cli_command_decode_raw(Cli* cli, string_t args, void* context) {
         SubGhzFileEncoderWorker* file_worker_encoder = subghz_file_encoder_worker_alloc();
         if(subghz_file_encoder_worker_start(file_worker_encoder, string_get_cstr(file_name))) {
             //the worker needs a file in order to open and read part of the file
-            osDelay(100);
+            furi_delay_ms(100);
         }
 
         printf(
@@ -378,7 +392,7 @@ void subghz_cli_command_decode_raw(Cli* cli, string_t args, void* context) {
 
         LevelDuration level_duration;
         while(!cli_cmd_interrupt_received(cli)) {
-            furi_hal_delay_us(500); //you need to have time to read from the file from the SD card
+            furi_delay_us(500); //you need to have time to read from the file from the SD card
             level_duration = subghz_file_encoder_worker_get_level_duration(file_worker_encoder);
             if(!level_duration_is_reset(level_duration)) {
                 bool level = level_duration_get_level(level_duration);
@@ -524,7 +538,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
             return;
         }
     }
-    if(!furi_hal_subghz_is_tx_allowed(frequency)) {
+    if(!furi_hal_region_is_frequency_allowed(frequency)) {
         printf(
             "In your region, only reception on this frequency (%lu) is allowed,\r\n"
             "the actual operation of the application is not possible\r\n ",
@@ -561,7 +575,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
     bool exit = false;
     SubGhzChatEvent chat_event;
 
-    NotificationApp* notification = furi_record_open("notification");
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     string_printf(name, "\033[0;33m%s\033[0m: ", furi_hal_version_get_name_ptr());
     string_set(input, name);
@@ -608,7 +622,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                     subghz_chat,
                     (uint8_t*)string_get_cstr(input),
                     strlen(string_get_cstr(input)))) {
-                    furi_hal_delay_ms(10);
+                    furi_delay_ms(10);
                 }
 
                 string_printf(input, "%s", string_get_cstr(name));
@@ -660,13 +674,18 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                     subghz_chat,
                     (uint8_t*)string_get_cstr(sysmsg),
                     strlen(string_get_cstr(sysmsg)));
-                furi_hal_delay_ms(10);
+                furi_delay_ms(10);
                 exit = true;
                 break;
             default:
                 FURI_LOG_W("SubGhzChat", "Error event");
                 break;
             }
+        }
+        if(!cli_is_connected(cli)) {
+            printf("\r\n");
+            chat_event.event = SubGhzChatEventUserExit;
+            subghz_chat_worker_put_event_chat(subghz_chat, &chat_event);
         }
     }
 
@@ -675,7 +694,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
     string_clear(output);
     string_clear(sysmsg);
     furi_hal_power_suppress_charge_exit();
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
 
     if(subghz_chat_worker_is_running(subghz_chat)) {
         subghz_chat_worker_stop(subghz_chat);
@@ -742,13 +761,101 @@ static void subghz_cli_command(Cli* cli, string_t args, void* context) {
     string_clear(cmd);
 }
 
+static bool
+    subghz_on_system_start_istream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
+    File* file = istream->state;
+    uint16_t ret = storage_file_read(file, buf, count);
+    return (count == ret);
+}
+
+static bool subghz_on_system_start_istream_decode_band(
+    pb_istream_t* stream,
+    const pb_field_t* field,
+    void** arg) {
+    (void)field;
+    FuriHalRegion* region = *arg;
+
+    PB_Region_Band band = {0};
+    if(!pb_decode(stream, PB_Region_Band_fields, &band)) {
+        FURI_LOG_E("SubGhzOnStart", "PB Region band decode error: %s", PB_GET_ERROR(stream));
+        return false;
+    }
+
+    region->bands_count += 1;
+    region =
+        realloc(region, sizeof(FuriHalRegion) + sizeof(FuriHalRegionBand) * region->bands_count);
+    size_t pos = region->bands_count - 1;
+    region->bands[pos].start = band.start;
+    region->bands[pos].end = band.end;
+    region->bands[pos].power_limit = band.power_limit;
+    region->bands[pos].duty_cycle = band.duty_cycle;
+    *arg = region;
+
+    FURI_LOG_I(
+        "SubGhzOnStart",
+        "Add allowed band: start %dHz, stop %dHz, power_limit %ddBm, duty_cycle %d%%",
+        band.start,
+        band.end,
+        band.power_limit,
+        band.duty_cycle);
+    return true;
+}
+
 void subghz_on_system_start() {
 #ifdef SRV_CLI
-    Cli* cli = furi_record_open("cli");
+    Cli* cli = furi_record_open(RECORD_CLI);
 
     cli_add_command(cli, "subghz", CliCommandFlagDefault, subghz_cli_command, NULL);
 
-    furi_record_close("cli");
+    furi_record_close(RECORD_CLI);
+#else
+    UNUSED(subghz_cli_command);
+#endif
+
+#ifdef SRV_STORAGE
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
+    FileInfo fileinfo = {0};
+    PB_Region pb_region = {0};
+    pb_region.bands.funcs.decode = subghz_on_system_start_istream_decode_band;
+
+    do {
+        if(storage_common_stat(storage, SUBGHZ_REGION_FILENAME, &fileinfo) != FSE_OK ||
+           fileinfo.size == 0) {
+            FURI_LOG_W("SubGhzOnStart", "Region data is missing or empty");
+            break;
+        }
+
+        if(!storage_file_open(file, SUBGHZ_REGION_FILENAME, FSAM_READ, FSOM_OPEN_EXISTING)) {
+            FURI_LOG_E("SubGhzOnStart", "Unable to open region data");
+            break;
+        }
+
+        pb_istream_t istream = {
+            .callback = subghz_on_system_start_istream_read,
+            .state = file,
+            .errmsg = NULL,
+            .bytes_left = fileinfo.size,
+        };
+
+        pb_region.bands.arg = malloc(sizeof(FuriHalRegion));
+        if(!pb_decode(&istream, PB_Region_fields, &pb_region)) {
+            FURI_LOG_E("SubGhzOnStart", "Invalid region data");
+            free(pb_region.bands.arg);
+            break;
+        }
+
+        FuriHalRegion* region = pb_region.bands.arg;
+        memcpy(
+            region->country_code,
+            pb_region.country_code->bytes,
+            pb_region.country_code->size < 4 ? pb_region.country_code->size : 3);
+        furi_hal_region_set(region);
+    } while(0);
+
+    pb_release(PB_Region_fields, &pb_region);
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
 #else
     UNUSED(subghz_cli_command);
 #endif

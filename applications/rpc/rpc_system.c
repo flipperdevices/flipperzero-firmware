@@ -78,6 +78,8 @@ static void rpc_system_system_device_info_callback(
     furi_assert(value);
     RpcSystemContext* ctx = context;
 
+    furi_assert(key);
+    furi_assert(value);
     char* str_key = strdup(key);
     char* str_value = strdup(value);
 
@@ -193,9 +195,9 @@ static void
     RpcSession* session = (RpcSession*)context;
     furi_assert(session);
 
-    NotificationApp* notification = furi_record_open("notification");
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message(notification, &sequence_audiovisual_alert);
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
 
     rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_OK);
 }
@@ -232,6 +234,8 @@ static void rpc_system_system_power_info_callback(
     furi_assert(value);
     RpcSystemContext* ctx = context;
 
+    furi_assert(key);
+    furi_assert(value);
     char* str_key = strdup(key);
     char* str_value = strdup(value);
 

@@ -22,8 +22,8 @@ PowerSettingsApp* power_settings_app_alloc(uint32_t first_scene) {
     PowerSettingsApp* app = malloc(sizeof(PowerSettingsApp));
 
     // Records
-    app->gui = furi_record_open("gui");
-    app->power = furi_record_open("power");
+    app->gui = furi_record_open(RECORD_GUI);
+    app->power = furi_record_open(RECORD_POWER);
 
     // View dispatcher
     app->view_dispatcher = view_dispatcher_alloc();
@@ -69,14 +69,14 @@ void power_settings_app_free(PowerSettingsApp* app) {
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
     // Records
-    furi_record_close("power");
-    furi_record_close("gui");
+    furi_record_close(RECORD_POWER);
+    furi_record_close(RECORD_GUI);
     free(app);
 }
 
 int32_t power_settings_app(void* p) {
     uint32_t first_scene = PowerSettingsAppSceneStart;
-    if(p && !strcmp(p, "off")) {
+    if(p && strlen(p) && !strcmp(p, "off")) {
         first_scene = PowerSettingsAppScenePowerOff;
     }
     PowerSettingsApp* app = power_settings_app_alloc(first_scene);

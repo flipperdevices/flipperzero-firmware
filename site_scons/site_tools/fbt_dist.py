@@ -66,7 +66,36 @@ def AddOpenOCDFlashTarget(env, targetenv, **kw):
         **kw,
     )
     env.Alias(targetenv.subst("${FIRMWARE_BUILD_CFG}_flash"), openocd_target)
+    if env["FORCE"]:
+        env.AlwaysBuild(openocd_target)
     return openocd_target
+
+
+def AddJFlashTarget(env, targetenv, **kw):
+    jflash_target = env.JFlash(
+        "#build/jflash-${BUILD_CFG}-flash.flag",
+        targetenv["FW_BIN"],
+        JFLASHADDR=targetenv.subst("$IMAGE_BASE_ADDRESS"),
+        BUILD_CFG=targetenv.subst("${FIRMWARE_BUILD_CFG}"),
+        **kw,
+    )
+    env.Alias(targetenv.subst("${FIRMWARE_BUILD_CFG}_jflash"), jflash_target)
+    if env["FORCE"]:
+        env.AlwaysBuild(jflash_target)
+    return jflash_target
+
+
+def AddUsbFlashTarget(env, file_flag, extra_deps, **kw):
+    usb_update = env.UsbInstall(
+        file_flag,
+        (
+            env["DIST_DEPENDS"],
+            *extra_deps,
+        ),
+    )
+    if env["FORCE"]:
+        env.AlwaysBuild(usb_update)
+    return usb_update
 
 
 def DistCommand(env, name, source, **kw):
@@ -74,7 +103,7 @@ def DistCommand(env, name, source, **kw):
     command = env.Command(
         target,
         source,
-        '@${PYTHON3} ${ROOT_DIR.abspath}/scripts/sconsdist.py copy -p ${DIST_PROJECTS} -s "${DIST_SUFFIX}" ${DIST_EXTRA}',
+        '@${PYTHON3} "${ROOT_DIR.abspath}/scripts/sconsdist.py" copy -p ${DIST_PROJECTS} -s "${DIST_SUFFIX}" ${DIST_EXTRA}',
         **kw,
     )
     env.Pseudo(target)
@@ -86,6 +115,8 @@ def generate(env):
     env.AddMethod(AddFwProject)
     env.AddMethod(DistCommand)
     env.AddMethod(AddOpenOCDFlashTarget)
+    env.AddMethod(AddJFlashTarget)
+    env.AddMethod(AddUsbFlashTarget)
 
     env.SetDefault(
         COPRO_MCU_FAMILY="STM32WB5x",
@@ -96,7 +127,7 @@ def generate(env):
             "UsbInstall": Builder(
                 action=[
                     Action(
-                        "${PYTHON3} ${ROOT_DIR.abspath}/scripts/selfupdate.py dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}/update.fuf"
+                        '${PYTHON3} "${ROOT_DIR.abspath}/scripts/selfupdate.py" dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}/update.fuf'
                     ),
                     Touch("${TARGET}"),
                 ]
@@ -105,7 +136,7 @@ def generate(env):
                 action=Action(
                     [
                         Mkdir("$TARGET"),
-                        "${PYTHON3} ${ROOT_DIR.abspath}/scripts/assets.py "
+                        '${PYTHON3} "${ROOT_DIR.abspath}/scripts/assets.py" '
                         "copro ${COPRO_CUBE_DIR} "
                         "${TARGET} ${COPRO_MCU_FAMILY} "
                         "--cube_ver=${COPRO_CUBE_VERSION} "

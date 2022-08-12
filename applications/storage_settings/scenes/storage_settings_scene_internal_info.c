@@ -12,7 +12,8 @@ void storage_settings_scene_internal_info_on_enter(void* context) {
     StorageSettings* app = context;
     uint64_t total_space;
     uint64_t free_space;
-    FS_Error error = storage_common_fs_info(app->fs_api, "/int", &total_space, &free_space);
+    FS_Error error =
+        storage_common_fs_info(app->fs_api, STORAGE_INT_PATH_PREFIX, &total_space, &free_space);
     DialogEx* dialog_ex = app->dialog_ex;
 
     dialog_ex_set_context(dialog_ex, app);
@@ -20,7 +21,7 @@ void storage_settings_scene_internal_info_on_enter(void* context) {
 
     if(error != FSE_OK) {
         dialog_ex_set_header(
-            dialog_ex, "Internal storage error", 64, 10, AlignCenter, AlignCenter);
+            dialog_ex, "Internal Storage Error", 64, 10, AlignCenter, AlignCenter);
         dialog_ex_set_text(
             dialog_ex, storage_error_get_desc(error), 64, 32, AlignCenter, AlignCenter);
     } else {
