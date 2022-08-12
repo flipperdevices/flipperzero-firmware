@@ -11,6 +11,7 @@
 - OFW: hal: rtc: fix for CSS on BOR #1590 (By Hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1590)
 - OFW: Fix Null Pointer Dereference errors in IR #1583 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1583)
 - OFW: IR green LED fix #1591 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1591)
+- Fix for paint exit code (Thanks gana)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
