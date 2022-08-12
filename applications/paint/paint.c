@@ -135,6 +135,6 @@ int32_t paint_app(void* p) {
 
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
-
+    free(paint_state);
     return 0;
 }
