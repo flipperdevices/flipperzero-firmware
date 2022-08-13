@@ -5,7 +5,7 @@
 
 <b>Latest Updates:</b>
 
-- Known Issues:`FAP Loader` & `Chess`
+- Known Issues: `FAP Loader` & `Chess`
 - Bluetooth fix so Flipper goes Rogue
 - [Update index struct to include RSSI threshold #226 (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/226) / Keyboard Lock Fix
 
