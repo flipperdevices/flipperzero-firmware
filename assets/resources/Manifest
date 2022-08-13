@@ -1,5 +1,5 @@
 V:0
-T:1660339190
+T:1660370842
 D:apps
 D:badusb
 D:dolphin
@@ -44,6 +44,7 @@ D:dolphin/L1_Mad_fist_128x64
 D:dolphin/L1_MjkDolphin_128x64
 D:dolphin/L1_Read_books_128x64
 D:dolphin/L1_Recording_128x51
+D:dolphin/L1_Rickroll_128x64
 D:dolphin/L1_Rukamon_128x64
 D:dolphin/L1_Sleep_128x64
 D:dolphin/L1_Waves_128x50
@@ -54,7 +55,7 @@ D:dolphin/L2_Soldering_128x64
 D:dolphin/L3_Furippa3_128x64
 D:dolphin/L3_Hijack_radio_128x64
 D:dolphin/L3_Lab_research_128x54
-F:052a4e4dfbac0b6291848c26bb29d755:2068:dolphin/manifest.txt
+F:dde6b03bd76c13407fd79092aab37ef6:2164:dolphin/manifest.txt
 F:1c4c13b4cfe609e102bd630e32a5e929:564:dolphin/L1_Agumon_128x64/frame_0.bm
 F:3042b007eeb149f7729e6e00032b4c87:572:dolphin/L1_Agumon_128x64/frame_1.bm
 F:0f88d76bcaf5c3e79a78bd2fcb569192:568:dolphin/L1_Agumon_128x64/frame_10.bm
@@ -192,6 +193,11 @@ F:604a7cdac2491c9bc2e88b9e91c99dcc:626:dolphin/L1_Recording_128x51/frame_7.bm
 F:fc94649dc98244dd9a0ab7fe62721d3c:663:dolphin/L1_Recording_128x51/frame_8.bm
 F:b2475ab8ee26cbd9a403ee603520bd35:661:dolphin/L1_Recording_128x51/frame_9.bm
 F:a7c2b3b420706712149cc2426c68df4f:219:dolphin/L1_Recording_128x51/meta.txt
+F:04291b653483471831b171bf317bbd6e:409:dolphin/L1_Rickroll_128x64/frame_0.bm
+F:dfd1f714456c243e9e325dcb6b62a8c5:368:dolphin/L1_Rickroll_128x64/frame_1.bm
+F:3d9df3037d562504a5dec9f5dd824560:365:dolphin/L1_Rickroll_128x64/frame_2.bm
+F:04291b653483471831b171bf317bbd6e:409:dolphin/L1_Rickroll_128x64/frame_3.bm
+F:47d235d25b862d4029c89437343bd916:546:dolphin/L1_Rickroll_128x64/meta.txt
 F:47db2d8f05e95818df353dcdac04b4c0:108:dolphin/L1_Rukamon_128x64/frame_0.bm
 F:69abc588ac337770d0e6f3cb10151f92:234:dolphin/L1_Rukamon_128x64/frame_1.bm
 F:c6499f5612a621bf356e7abb9de3a4ae:361:dolphin/L1_Rukamon_128x64/frame_2.bm
