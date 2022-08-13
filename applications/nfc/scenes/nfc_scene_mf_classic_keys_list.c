@@ -1,5 +1,11 @@
 #include "../nfc_i.h"
 
+#include <m-array.h>
+
+ARRAY_DEF(MfClassicUserKeys, char*, M_PTR_OPLIST);
+
+static MfClassicUserKeys_t mfc_key_strs;
+
 void nfc_scene_mf_classic_keys_list_submenu_callback(void* context, uint32_t index) {
     Nfc* nfc = context;
 
@@ -12,16 +18,18 @@ void nfc_scene_mf_classic_keys_list_on_enter(void* context) {
     MfClassicDict* dict = mf_classic_dict_alloc(MfClassicDictTypeUser);
     uint32_t index = 0;
     string_t temp_key;
+    MfClassicUserKeys_init(mfc_key_strs);
     string_init(temp_key);
     if(dict) {
         mf_classic_dict_rewind(dict);
         while(mf_classic_dict_get_next_key_str(dict, temp_key)) {
-            string_t current_key;
-            string_init_set(current_key, temp_key);
-            FURI_LOG_D("ListKeys", "Key %d: %s", index, string_get_cstr(current_key));
+            char* current_key = (char*)malloc(sizeof(char) * 13);
+            strncpy(current_key, string_get_cstr(temp_key), 12);
+            MfClassicUserKeys_push_back(mfc_key_strs, current_key);
+            FURI_LOG_D("ListKeys", "Key %d: %s", index, current_key);
             submenu_add_item(
                 submenu,
-                string_get_cstr(current_key),
+                current_key,
                 index++,
                 nfc_scene_mf_classic_keys_list_submenu_callback,
                 nfc);
@@ -42,9 +50,11 @@ bool nfc_scene_mf_classic_keys_list_on_event(void* context, SceneManagerEvent ev
             mf_classic_dict_rewind(dict);
             if(mf_classic_dict_remove_key(dict, event.event)) {
                 if(mf_classic_dict_get_total_keys(dict) == 0) {
-                    scene_manager_set_scene_state(nfc->scene_manager, NfcSceneDeleteSuccess, NfcSceneMfClassicKeys);
+                    scene_manager_set_scene_state(
+                        nfc->scene_manager, NfcSceneDeleteSuccess, NfcSceneMfClassicKeys);
                 } else {
-                    scene_manager_set_scene_state(nfc->scene_manager, NfcSceneDeleteSuccess, NfcSceneMfClassicKeysList);
+                    scene_manager_set_scene_state(
+                        nfc->scene_manager, NfcSceneDeleteSuccess, NfcSceneMfClassicKeysList);
                 }
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDeleteSuccess);
             } else {
@@ -59,6 +69,12 @@ bool nfc_scene_mf_classic_keys_list_on_event(void* context, SceneManagerEvent ev
 
 void nfc_scene_mf_classic_keys_list_on_exit(void* context) {
     Nfc* nfc = context;
-    // TODO: Find some way to clear all those strings from submenu.
+
+    MfClassicUserKeys_it_t it;
+    for(MfClassicUserKeys_it(it, mfc_key_strs); !MfClassicUserKeys_end_p(it);
+        MfClassicUserKeys_next(it)) {
+        free(MfClassicUserKeys_ref(it));
+    }
+    MfClassicUserKeys_clear(mfc_key_strs);
     submenu_reset(nfc->submenu);
 }

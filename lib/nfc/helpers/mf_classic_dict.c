@@ -188,7 +188,6 @@ bool mf_classic_dict_remove_key(MfClassicDict* dict, uint32_t target) {
         key_removed = true;
     }
 
-
     string_clear(next_line);
     return key_removed;
 }
