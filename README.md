@@ -6,15 +6,7 @@
 <b>Latest Updates:</b>
 
 - Known Issues:`FAP Loader`, `Chess` & Lock Keyboard option when reading SubGHz
-- OFW: fbt: Fix SCons error if PYTHONPATH set on Windows #1585 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1585)
-- OFW: FuriHal, About, Desktop: show provisioned region #1589 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1589)
-- OFW: hal: rtc: fix for CSS on BOR #1590 (By Hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1590)
-- OFW: Fix Null Pointer Dereference errors in IR #1583 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1583)
-- OFW: IR green LED fix #1591 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1591)
-- Fix for paint exit code (Thanks gana)
-- SubGHz: Moved setting_user file to setting_user.txt! This makes it changable from IOS app. (By RogueMaster)
-- Fix for HID Analyzer Plugin By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Added RickRoll animation (Thanks to qqMajiKpp)
+- Bluetooth fix so Flipper goes Rogue
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
