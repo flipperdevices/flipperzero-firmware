@@ -277,8 +277,8 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     }
     U2F->user_present = false;
 
-    // The 4 byte counter is represented in big endian
-    be_u2f_counter = lfs_tobe32(U2F->counter);
+    // The 4 byte counter is represented in big endian. Increment it before use
+    be_u2f_counter = lfs_tobe32(U2F->counter + 1);
 
     // Generate hash
     sha256_start(&sha_ctx);
