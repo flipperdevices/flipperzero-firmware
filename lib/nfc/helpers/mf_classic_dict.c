@@ -145,6 +145,35 @@ bool mf_classic_dict_rewind(MfClassicDict* dict) {
     return stream_rewind(dict->stream);
 }
 
+bool mf_classic_dict_key_present(MfClassicDict* dict, uint8_t* key) {
+    furi_assert(dict);
+    furi_assert(dict->stream);
+
+    string_t key_str;
+    string_t next_line;
+    string_init(key_str);
+    string_init(next_line);
+
+    for(size_t i = 0; i < 6; i++) {
+        string_cat_printf(key_str, "%02X", key[i]);
+    }
+    string_cat_printf(key_str, "\n");
+
+    bool key_found = false;
+    stream_rewind(dict->stream);
+    while(!key_found) {
+        if(!stream_read_line(dict->stream, next_line)) break;
+        if(string_get_char(next_line, 0) == '#') continue;
+        if(string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
+        if(!string_equal_p(key_str, next_line)) continue;
+        key_found = true;
+    }
+
+    string_clear(key_str);
+    string_clear(next_line);
+    return key_found;
+}
+
 bool mf_classic_dict_add_key(MfClassicDict* dict, uint8_t* key) {
     furi_assert(dict);
     furi_assert(dict->stream);

@@ -1,31 +1,31 @@
 #include "../nfc_i.h"
 
-void nfc_scene_dict_not_found_popup_callback(void* context) {
+void nfc_scene_mf_classic_keys_warn_duplicate_popup_callback(void* context) {
     Nfc* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
 }
 
-void nfc_scene_dict_not_found_on_enter(void* context) {
+void nfc_scene_mf_classic_keys_warn_duplicate_on_enter(void* context) {
     Nfc* nfc = context;
 
     // Setup view
     Popup* popup = nfc->popup;
+    popup_set_icon(popup, 67, 12, &I_DolphinFirstStart7_61x51);
     popup_set_text(
         popup,
-        "Function requires\nan SD card with\nfresh databases.",
-        82,
-        24,
+        "Key already exists\nin user dictionary.\n(Duplicate entry)",
+        38,
+        35,
         AlignCenter,
-        AlignCenter);
-    popup_set_icon(popup, 6, 10, &I_SDQuestion_35x43);
-    popup_set_timeout(popup, 2500);
+        AlignBottom);
+    popup_set_timeout(popup, 5000);
     popup_set_context(popup, nfc);
-    popup_set_callback(popup, nfc_scene_dict_not_found_popup_callback);
+    popup_set_callback(popup, nfc_scene_mf_classic_keys_warn_duplicate_popup_callback);
     popup_enable_timeout(popup);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 }
 
-bool nfc_scene_dict_not_found_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_mf_classic_keys_warn_duplicate_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
     bool consumed = false;
 
@@ -33,13 +33,15 @@ bool nfc_scene_dict_not_found_on_event(void* context, SceneManagerEvent event) {
         if(event.event == NfcCustomEventViewExit) {
             consumed = scene_manager_search_and_switch_to_previous_scene(
                 nfc->scene_manager,
-                scene_manager_get_scene_state(nfc->scene_manager, NfcSceneDictNotFound));
+                scene_manager_get_scene_state(
+                    nfc->scene_manager, NfcSceneMfClassicKeysWarnDuplicate));
         }
     }
     return consumed;
 }
 
-void nfc_scene_dict_not_found_on_exit(void* context) {
+void nfc_scene_mf_classic_keys_warn_duplicate_on_exit(void* context) {
     Nfc* nfc = context;
+
     popup_reset(nfc->popup);
 }

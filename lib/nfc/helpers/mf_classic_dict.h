@@ -21,6 +21,8 @@ void mf_classic_dict_free(MfClassicDict* dict);
 
 uint32_t mf_classic_dict_get_total_keys(MfClassicDict* dict);
 
+bool mf_classic_dict_key_present(MfClassicDict* dict, uint8_t* key);
+
 bool mf_classic_dict_get_next_key(MfClassicDict* dict, uint64_t* key);
 
 bool mf_classic_dict_get_next_key_str(MfClassicDict* dict, string_t key);
