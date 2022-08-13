@@ -5,7 +5,7 @@
 
 <b>Latest Updates:</b>
 
-- Known Issues:`FAP Loader`, `Chess`, `HID Analyzer` & Lock Keyboard option when reading SubGHz
+- Known Issues:`FAP Loader`, `Chess` & Lock Keyboard option when reading SubGHz
 - OFW: fbt: Fix SCons error if PYTHONPATH set on Windows #1585 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1585)
 - OFW: FuriHal, About, Desktop: show provisioned region #1589 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1589)
 - OFW: hal: rtc: fix for CSS on BOR #1590 (By Hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1590)
