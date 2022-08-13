@@ -14,7 +14,7 @@
 - Fix for paint exit code (Thanks gana)
 - SubGHz: Moved setting_user file to setting_user.txt! This makes it changable from IOS app. (By RogueMaster)
 - Fix for HID Analyzer Plugin By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Added RickRoll animation (Thanks to qqMajiKpp
+- Added RickRoll animation (Thanks to qqMajiKpp)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
