@@ -5,9 +5,9 @@
 
 <b>Latest Updates:</b>
 
-- Known Issues:`FAP Loader`, `Chess` & Lock Keyboard option when reading SubGHz
+- Known Issues:`FAP Loader` & `Chess`
 - Bluetooth fix so Flipper goes Rogue
-- Lock Keyboard broken at 26cf8cdf4515c5ba314c0738dfd5edeb532d90ec, Lock Keyboard not broken at dd50903545ad95edf8acbc6e34e6fb728be752a4
+- [Update index struct to include RSSI threshold #226 (By PolymerPrints)](Update index struct to include RSSI threshold #226) / Keyboard Lock Fix
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
