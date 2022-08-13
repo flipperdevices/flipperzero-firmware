@@ -8,6 +8,7 @@
 - Known Issues: `FAP Loader` & `Chess`
 - Bluetooth fix so Flipper goes Rogue
 - [Update index struct to include RSSI threshold #226 (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/226) / Keyboard Lock Fix
+- Thank You, [UberGuidoZ](https://github.com/UberGuidoZ), for documentation updates!
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
