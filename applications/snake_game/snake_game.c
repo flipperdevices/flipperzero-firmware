@@ -282,6 +282,7 @@ static void snake_game_process_game_step(SnakeState* const snake_state, Notifica
             return;
         } else if(snake_state->state == GameStateLastChance) {
             snake_state->state = GameStateGameOver;
+            notification_message(notify, &sequence_single_vibro);
             return;
         }
     } else {
@@ -293,6 +294,7 @@ static void snake_game_process_game_step(SnakeState* const snake_state, Notifica
     crush = snake_game_collision_with_tail(snake_state, next_step);
     if(crush) {
         snake_state->state = GameStateGameOver;
+        notification_message(notify, &sequence_single_vibro);
         return;
     }
 
@@ -303,6 +305,7 @@ static void snake_game_process_game_step(SnakeState* const snake_state, Notifica
         snake_state->len++;
         if(snake_state->len >= MAX_SNAKE_LEN) {
             snake_state->state = GameStateGameOver;
+            notification_message(notify, &sequence_single_vibro);
             return;
         }
     }
