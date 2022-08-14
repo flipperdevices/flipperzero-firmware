@@ -1,3 +1,7 @@
+if(${CMAKE_VERSION} VERSION_LESS "3.16.0") 
+    message(WARNING "Current CMake verision is ${CMAKE_VERSION}. stm32-cmake requires CMake 3.16 or greater")
+endif()
+
 get_filename_component(STM32_CMAKE_DIR ${CMAKE_CURRENT_LIST_FILE} DIRECTORY)
 list(APPEND CMAKE_MODULE_PATH ${STM32_CMAKE_DIR})
 
