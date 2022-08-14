@@ -1,5 +1,5 @@
 V:0
-T:1660370842
+T:1660455394
 D:apps
 D:badusb
 D:dolphin
@@ -317,9 +317,9 @@ F:f267f0654781049ca323b11bb4375519:581:dolphin/L3_Lab_research_128x54/frame_9.bm
 F:41106c0cbc5144f151b2b2d3daaa0527:727:dolphin/L3_Lab_research_128x54/meta.txt
 F:05e24c3e99c57e84b04a1451b7184d99:40:dolphin_restorer/.dolphin.state
 D:infrared/assets
-F:0620df2adc5e12f2a9d9c3ac29826ce3:60950:infrared/assets/ac.ir
-F:fa918b31ef4e48d14e8c315da34c8ae9:25520:infrared/assets/audio.ir
-F:3823dc001b7ecfc0b3deb9d5f119a0bd:130987:infrared/assets/tv.ir
+F:cedef6d481ec8a10072168bfe82b9ec4:60995:infrared/assets/ac.ir
+F:1789fe307eda56f8370c671992aa1b97:25596:infrared/assets/audio.ir
+F:64c8728b5982614ef4b9e1d95e9b9210:124001:infrared/assets/tv.ir
 F:18acc61b64d25ca9d80c57821470a387:226:music_player/Contra.txt
 F:6e90d05ddbeb7b01da4a3c73e38c8233:252:music_player/Doom.txt
 F:6e45147681b5d612e79942763f80f031:413:music_player/Evangelion.txt
@@ -372,13 +372,13 @@ F:b877ff3fdb3c642d272d039e832f3bfb:204:subghz/Misc/Sextoy/Sextoy4.sub
 D:subghz/Vehicles/Tesla
 F:8b22aa0a2df0b22fc5791a3ecb4fa4fb:10991:subghz/Vehicles/Tesla/Tesla_charge_AM270.sub
 F:7ea28e3ce3c38b2d98ae99aecc45b7b9:11913:subghz/Vehicles/Tesla/Tesla_charge_AM650.sub
-F:b5380ddd37e6d35fd71a38c5690dd68b:1355:subghz/assets/README.md
+F:cccd43955a08a0f3c0e974fe6d09fb2e:1363:subghz/assets/README.md
 F:dda1ef895b8a25fde57c874feaaef997:650:subghz/assets/came_atomo
 F:ea81ac5f878e045581a2f5e2add46b0b:180:subghz/assets/extend_range.txt
 F:5e81e9809984ee74d426730c1afa4093:3232:subghz/assets/keeloq_mfcodes
 F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
-F:f4480aec4e49714a9df9e5edd6bd0db7:1934:subghz/assets/setting_user.txt
+F:2c73de390a4fb0ff1d31d66732a9b8db:2624:subghz/assets/setting_user.txt
 D:u2f/assets
 F:7e11e688e39034bbb9d88410044795e1:365:u2f/assets/cert.der
 F:f60b88c20ed479ed9684e249f7134618:264:u2f/assets/cert_key.u2f
