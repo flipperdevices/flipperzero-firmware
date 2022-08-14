@@ -59,18 +59,20 @@ void widget_element_text_scroll_add_line(WidgetElement* element, GuiTextScrollLi
 static void gui_text_scroll_fill_lines(Canvas* canvas, WidgetElement* element) {
     GuiTextScrollModel* model = element->model;
     GuiTextScrollLine line_tmp;
-    uint8_t line_width_max = 128 - model->x - model->width - 4;
     bool all_text_processed = false;
     string_init(line_tmp.text);
+    bool reached_new_line = true;
 
     while(!all_text_processed) {
-        // Set default line properties
-        line_tmp.font = FontSecondary;
-        line_tmp.horizontal = AlignLeft;
-        string_reset(line_tmp.text);
-        // Process control symbols
-        while(gui_text_scroll_process_ctrl_symbols(&line_tmp, model->text))
-            ;
+        if(reached_new_line) {
+            // Set default line properties
+            line_tmp.font = FontSecondary;
+            line_tmp.horizontal = AlignLeft;
+            string_reset(line_tmp.text);
+            // Process control symbols
+            while(gui_text_scroll_process_ctrl_symbols(&line_tmp, model->text))
+                ;
+        }
         // Set canvas font
         canvas_set_font(canvas, line_tmp.font);
 
@@ -79,18 +81,25 @@ static void gui_text_scroll_fill_lines(Canvas* canvas, WidgetElement* element) {
         while(true) {
             char next_char = string_get_char(model->text, char_i++);
             if(next_char == '\0') {
+                string_push_back(line_tmp.text, '\0');
                 widget_element_text_scroll_add_line(element, &line_tmp);
                 all_text_processed = true;
                 break;
             } else if(next_char == '\n') {
+                string_push_back(line_tmp.text, '\0');
                 widget_element_text_scroll_add_line(element, &line_tmp);
                 string_right(model->text, char_i);
+                reached_new_line = true;
                 break;
             } else {
                 line_width += canvas_glyph_width(canvas, next_char);
-                if(line_width > line_width_max) {
+                if(line_width > model->width) {
+                    string_push_back(line_tmp.text, '\0');
                     widget_element_text_scroll_add_line(element, &line_tmp);
                     string_right(model->text, char_i - 1);
+                    string_reset(line_tmp.text);
+                    reached_new_line = false;
+                    break;
                 } else {
                     string_push_back(line_tmp.text, next_char);
                 }
@@ -109,15 +118,22 @@ static void gui_text_scroll_draw(Canvas* canvas, WidgetElement* element) {
     }
 
     uint8_t y = model->y;
+    uint8_t x = model->x;
     if(GuiTextScrollLineArray_size(model->line_array)) {
         GuiTextScrollLineArray_it_t it;
         for(GuiTextScrollLineArray_it(it, model->line_array); !GuiTextScrollLineArray_end_p(it);
             GuiTextScrollLineArray_next(it)) {
             GuiTextScrollLine* line = GuiTextScrollLineArray_ref(it);
-            FURI_LOG_I(
-                TAG, "Text width: %d", canvas_string_width(canvas, string_get_cstr(line->text)));
+            canvas_set_font(canvas, line->font);
+            if(line->horizontal == AlignLeft) {
+                x = model->x;
+            } else if(line->horizontal == AlignCenter) {
+                x = (model->x + model->width) / 2;
+            } else if(line->horizontal == AlignRight) {
+                x = model->x + model->width;
+            }
             canvas_draw_str_aligned(
-                canvas, model->x, y, line->horizontal, AlignTop, string_get_cstr(line->text));
+                canvas, x, y, line->horizontal, AlignTop, string_get_cstr(line->text));
             // Rework with different fonts
             y += 11;
         }
@@ -170,7 +186,7 @@ WidgetElement* widget_element_text_scroll_create(
     GuiTextScrollModel* model = malloc(sizeof(GuiTextScrollModel));
     model->x = x;
     model->y = y;
-    model->width = width;
+    model->width = width - 4;
     model->height = height;
     model->current_line = 0;
     model->total_lines = 0; //CALCULATE
