@@ -44,7 +44,6 @@ uint8_t* protocol_fdx_b_get_data(ProtocolFDXB* proto) {
 };
 
 void protocol_fdx_b_decoder_start(ProtocolFDXB* protocol) {
-    memset(protocol->data, 0, FDXB_DECODED_DATA_SIZE);
     memset(protocol->encoded_data, 0, FDX_B_ENCODED_BYTE_FULL_SIZE);
     protocol->last_short = false;
 };
@@ -268,27 +267,26 @@ void protocol_fdx_b_render_data(ProtocolFDXB* protocol, string_t result) {
     uint8_t ex_calc_parity = bit_lib_test_parity_32(ex_temperature, BitLibParityOdd);
     bool ex_temperature_present = (ex_calc_parity == ex_parity) && !(extended & 0xe00);
 
-    string_printf(result, "PetID: %llu\r\n", national_code);
-    string_cat_printf(result, "Country: %d\r\n", country_code);
+    string_printf(result, "ID: %d-%llu\r\n", country_code, national_code);
     string_cat_printf(result, "Animal: %s\r\n", animal_flag ? "Yes" : "No");
-
-    string_cat_printf(
-        result,
-        "Bits: %d-%d-%d-%d-%d\r\n",
-        block_status,
-        rudi_bit,
-        reserved,
-        user_info,
-        replacement_number);
 
     if(ex_temperature_present) {
         float temerature_f = 74 + ex_temperature * 0.2;
         float temerature_c = (temerature_f - 32) / 1.8;
         string_cat_printf(
-            result, "Temp: %.2f F / %.2f C", (double)temerature_f, (double)temerature_c);
+            result, "Temp: %.2f F / %.2f C\r\n", (double)temerature_f, (double)temerature_c);
     } else {
-        string_cat_printf(result, "Temp: unavailable");
+        string_cat_printf(result, "Temp: unavailable\r\n");
     }
+
+    string_cat_printf(
+        result,
+        "Bits: %d-%d-%d-%d-%d",
+        block_status,
+        rudi_bit,
+        reserved,
+        user_info,
+        replacement_number);
 };
 
 bool protocol_fdx_b_write_data(ProtocolFDXB* protocol, void* data) {

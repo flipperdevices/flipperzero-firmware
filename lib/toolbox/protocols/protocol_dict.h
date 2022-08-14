@@ -1,6 +1,10 @@
 #pragma once
 #include "protocol.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct ProtocolDict ProtocolDict;
 
 typedef int32_t ProtocolId;
@@ -61,3 +65,7 @@ uint32_t protocol_dict_get_validate_count(ProtocolDict* dict, size_t protocol_in
 ProtocolId protocol_dict_get_protocol_by_name(ProtocolDict* dict, const char* name);
 
 bool protocol_dict_get_write_data(ProtocolDict* dict, size_t protocol_index, void* data);
+
+#ifdef __cplusplus
+}
+#endif

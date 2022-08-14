@@ -23,6 +23,13 @@
 #include "helpers/rfid_worker.h"
 #include "rpc/rpc_app.h"
 
+#include <toolbox/protocols/protocol_dict.h>
+#include <lfrfid/lfrfid_dict_file.h>
+#include <lfrfid/protocols/lfrfid_protocols.h>
+#include <lfrfid/lfrfid_worker.h>
+
+#define LFRFID_KEY_NAME_SIZE 22
+
 class LfRfidApp {
 public:
     enum class EventType : uint8_t {
@@ -32,7 +39,7 @@ public:
         Stay,
         Retry,
         Exit,
-        EmulateStart,
+        EmulateEvent,
         RpcLoadFile,
         RpcSessionClose,
     };
@@ -63,6 +70,7 @@ public:
     public:
         union {
             int32_t menu_index;
+            uint32_t payload;
         } payload;
 
         EventType type;
@@ -93,12 +101,20 @@ public:
     static const char* app_extension;
     static const char* app_filetype;
 
-    bool save_key(RfidKey* key);
+    bool save_key();
     bool load_key_from_file_select(bool need_restore);
-    bool delete_key(RfidKey* key);
+    bool delete_key();
 
-    bool load_key_data(string_t path, RfidKey* key, bool show_dialog);
-    bool save_key_data(string_t path, RfidKey* key);
+    bool load_key_data(string_t path, bool show_dialog);
+    bool save_key_data(string_t path);
 
     void make_app_folder();
+
+    ProtocolDict* dict;
+    LFRFIDWorker* lfworker;
+    string_t file_name;
+    ProtocolId protocol_id;
+
+    uint8_t* old_key_data;
+    uint8_t* new_key_data;
 };

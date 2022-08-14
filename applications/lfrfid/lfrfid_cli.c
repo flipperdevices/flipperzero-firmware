@@ -129,12 +129,6 @@ static void lfrfid_cli_read(Cli* cli, string_t args) {
     furi_event_flag_free(context.event);
 }
 
-static void lfrfid_cli_write_callback(LFRFIDWorkerWriteResult result, void* ctx) {
-    furi_assert(ctx);
-    FuriEventFlag* events = ctx;
-    furi_event_flag_set(events, 1 << result);
-}
-
 static bool lfrfid_cli_parse_args(string_t args, ProtocolDict* dict, ProtocolId* protocol) {
     bool result = false;
     string_t protocol_name, data_text;
@@ -189,6 +183,12 @@ static bool lfrfid_cli_parse_args(string_t args, ProtocolDict* dict, ProtocolId*
     string_clear(protocol_name);
     string_clear(data_text);
     return result;
+}
+
+static void lfrfid_cli_write_callback(LFRFIDWorkerWriteResult result, void* ctx) {
+    furi_assert(ctx);
+    FuriEventFlag* events = ctx;
+    furi_event_flag_set(events, 1 << result);
 }
 
 static void lfrfid_cli_write(Cli* cli, string_t args) {

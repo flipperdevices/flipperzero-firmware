@@ -20,7 +20,8 @@ void LfRfidAppSceneStart::on_enter(LfRfidApp* app, bool need_restore) {
     app->view_controller.switch_to<SubmenuVM>();
 
     // clear key
-    app->worker.key.clear();
+    string_reset(app->file_name);
+    app->protocol_id = PROTOCOL_NO;
 }
 
 bool LfRfidAppSceneStart::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
