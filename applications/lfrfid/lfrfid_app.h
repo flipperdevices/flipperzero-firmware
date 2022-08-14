@@ -20,7 +20,6 @@
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
 
-#include "helpers/rfid_worker.h"
 #include "rpc/rpc_app.h"
 
 #include <toolbox/protocols/protocol_dict.h>
@@ -39,7 +38,15 @@ public:
         Stay,
         Retry,
         Exit,
-        EmulateEvent,
+        ReadEventSenseStart,
+        ReadEventSenseEnd,
+        ReadEventSenseCardStart,
+        ReadEventSenseCardEnd,
+        ReadEventDone,
+        WriteEventOK,
+        WriteEventProtocolCannotBeWritten,
+        WriteEventFobCannotBeWritten,
+        WriteEventTooLongToWrite,
         RpcLoadFile,
         RpcSessionClose,
     };
@@ -69,8 +76,7 @@ public:
     class Event {
     public:
         union {
-            int32_t menu_index;
-            uint32_t payload;
+            int32_t signed_int;
         } payload;
 
         EventType type;
@@ -86,8 +92,6 @@ public:
     RecordController<NotificationApp> notification;
     RecordController<Storage> storage;
     RecordController<DialogsApp> dialogs;
-
-    RfidWorker worker;
 
     TextStore text_store;
 

@@ -26,8 +26,8 @@ bool LfRfidAppSceneSaveType::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
     bool consumed = false;
 
     if(event->type == LfRfidApp::EventType::MenuSelected) {
-        submenu_item_selected = event->payload.menu_index;
-        app->protocol_id = event->payload.menu_index;
+        submenu_item_selected = event->payload.signed_int;
+        app->protocol_id = event->payload.signed_int;
         app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::SaveData);
         consumed = true;
     }
@@ -47,7 +47,7 @@ void LfRfidAppSceneSaveType::submenu_callback(void* context, uint32_t index) {
     LfRfidApp::Event event;
 
     event.type = LfRfidApp::EventType::MenuSelected;
-    event.payload.menu_index = index;
+    event.payload.signed_int = index;
 
     app->view_controller.send_event(&event);
 }

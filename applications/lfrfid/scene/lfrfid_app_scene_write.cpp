@@ -4,8 +4,20 @@ static void lfrfid_write_callback(LFRFIDWorkerWriteResult result, void* ctx) {
     LfRfidApp* app = static_cast<LfRfidApp*>(ctx);
     LfRfidApp::Event event;
 
-    event.type = LfRfidApp::EventType::EmulateEvent;
-    event.payload.payload = result;
+    switch(result) {
+    case LFRFIDWorkerWriteOK:
+        event.type = LfRfidApp::EventType::WriteEventOK;
+        break;
+    case LFRFIDWorkerWriteProtocolCannotBeWritten:
+        event.type = LfRfidApp::EventType::WriteEventProtocolCannotBeWritten;
+        break;
+    case LFRFIDWorkerWriteFobCannotBeWritten:
+        event.type = LfRfidApp::EventType::WriteEventFobCannotBeWritten;
+        break;
+    case LFRFIDWorkerWriteTooLongToWrite:
+        event.type = LfRfidApp::EventType::WriteEventTooLongToWrite;
+        break;
+    }
 
     app->view_controller.send_event(&event);
 }
@@ -25,51 +37,41 @@ void LfRfidAppSceneWrite::on_enter(LfRfidApp* app, bool /* need_restore */) {
     app->view_controller.switch_to<PopupVM>();
     lfrfid_worker_write_start(
         app->lfworker, (LFRFIDProtocol)app->protocol_id, lfrfid_write_callback, app);
+    notification_message(app->notification, &sequence_blink_start_magenta);
 }
 
 bool LfRfidAppSceneWrite::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
-    bool consumed = false;
+    bool consumed = true;
+    auto popup = app->view_controller.get<PopupVM>();
 
-    if(event->type == LfRfidApp::EventType::EmulateEvent) {
-        consumed = true;
-        auto popup = app->view_controller.get<PopupVM>();
-
-        switch(event->payload.payload) {
-        case LFRFIDWorkerWriteOK:
-            notification_message(app->notification, &sequence_success);
-            app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::WriteSuccess);
-            break;
-        case LFRFIDWorkerWriteProtocolCannotBeWritten:
-            popup->set_icon(72, 14, &I_DolphinFirstStart8_56x51);
-            popup->set_header("Error", 64, 3, AlignCenter, AlignTop);
-            popup->set_text("This protocol\ncannot be written", 3, 17, AlignLeft, AlignTop);
-            notification_message(app->notification, &sequence_blink_yellow_10);
-            break;
-        case LFRFIDWorkerWriteTooLongToWrite:
-        case LFRFIDWorkerWriteFobCannotBeWritten:
-            popup->set_icon(72, 14, &I_DolphinFirstStart8_56x51);
-            popup->set_header("Still trying to write...", 64, 3, AlignCenter, AlignTop);
-            popup->set_text(
-                "Make sure this\ncard is writable\nand not\nprotected.",
-                3,
-                17,
-                AlignLeft,
-                AlignTop);
-            notification_message(app->notification, &sequence_blink_yellow_10);
-            break;
-        default:
-            consumed = false;
-        }
-    }
-
-    if(!consumed) {
-        notification_message(app->notification, &sequence_blink_magenta_10);
+    switch(event->type) {
+    case LfRfidApp::EventType::WriteEventOK:
+        notification_message(app->notification, &sequence_success);
+        app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::WriteSuccess);
+        break;
+    case LfRfidApp::EventType::WriteEventProtocolCannotBeWritten:
+        popup->set_icon(72, 14, &I_DolphinFirstStart8_56x51);
+        popup->set_header("Error", 64, 3, AlignCenter, AlignTop);
+        popup->set_text("This protocol\ncannot be written", 3, 17, AlignLeft, AlignTop);
+        notification_message(app->notification, &sequence_blink_start_red);
+        break;
+    case LfRfidApp::EventType::WriteEventFobCannotBeWritten:
+    case LfRfidApp::EventType::WriteEventTooLongToWrite:
+        popup->set_icon(72, 14, &I_DolphinFirstStart8_56x51);
+        popup->set_header("Still trying to write...", 64, 3, AlignCenter, AlignTop);
+        popup->set_text(
+            "Make sure this\ncard is writable\nand not\nprotected.", 3, 17, AlignLeft, AlignTop);
+        notification_message(app->notification, &sequence_blink_start_yellow);
+        break;
+    default:
+        consumed = false;
     }
 
     return consumed;
 }
 
 void LfRfidAppSceneWrite::on_exit(LfRfidApp* app) {
+    notification_message(app->notification, &sequence_blink_stop);
     app->view_controller.get<PopupVM>()->clean();
     lfrfid_worker_stop(app->lfworker);
 }
