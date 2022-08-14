@@ -105,6 +105,14 @@ void widget_add_text_box_element(
     const char* text,
     bool strip_to_dots);
 
+void widget_add_text_scroll_element(
+    Widget* widget,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height,
+    const char* text);
+
 /** Add Button Element
  *
  * @param      widget       Widget instance

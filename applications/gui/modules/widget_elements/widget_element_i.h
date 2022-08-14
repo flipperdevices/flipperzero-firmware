@@ -80,3 +80,10 @@ WidgetElement* widget_element_frame_create(
     uint8_t width,
     uint8_t height,
     uint8_t radius);
+
+WidgetElement* widget_element_text_scroll_create(
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    Font font,
+    const char* text);

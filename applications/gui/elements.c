@@ -756,3 +756,20 @@ void elements_text_box(
     }
     canvas_set_font(canvas, FontSecondary);
 }
+
+// void elements_text_scroll(
+//     Canvas* canvas,
+//     uint8_t x,
+//     uint8_t y,
+//     uint8_t width,
+//     uint8_t height,
+//     const char* text) {
+//     furi_assert(canvas);
+//     furi_assert(text);
+    
+//     if(width < 4) return;
+
+//     uint8_t text_width = width - 4;
+
+//     // 
+// }
