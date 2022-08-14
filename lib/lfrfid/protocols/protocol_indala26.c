@@ -271,6 +271,12 @@ void protocol_indala26_render_data(ProtocolIndala* protocol, string_t result) {
         (wiegand_correct ? "+" : "-"));
 }
 
+void protocol_indala26_render_brief_data(ProtocolIndala* protocol, string_t result) {
+    const uint8_t fc = get_fc(protocol->data);
+    const uint16_t card = get_cn(protocol->data);
+    string_printf(result, "FC: %u\r\nCard: %u", fc, card);
+}
+
 bool protocol_indala26_write_data(ProtocolIndala* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
     bool result = false;
@@ -307,6 +313,7 @@ const ProtocolBase protocol_indala26 = {
             .start = (ProtocolEncoderStart)protocol_indala26_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_indala26_encoder_yield,
         },
-    .write_data = (ProtocolWriteData)protocol_indala26_write_data,
     .render_data = (ProtocolRenderData)protocol_indala26_render_data,
+    .render_brief_data = (ProtocolRenderData)protocol_indala26_render_brief_data,
+    .write_data = (ProtocolWriteData)protocol_indala26_write_data,
 };

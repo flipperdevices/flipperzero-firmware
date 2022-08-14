@@ -244,6 +244,17 @@ void protocol_io_prox_xsf_render_data(ProtocolIOProxXSF* protocol, string_t resu
         (uint16_t)((data[2] << 8) | (data[3])));
 }
 
+void protocol_io_prox_xsf_render_brief_data(ProtocolIOProxXSF* protocol, string_t result) {
+    uint8_t* data = protocol->data;
+    string_printf(
+        result,
+        "FC: %u, VС: %u\r\n"
+        "Card: %u",
+        data[0],
+        data[1],
+        (uint16_t)((data[2] << 8) | (data[3])));
+}
+
 bool protocol_io_prox_xsf_write_data(ProtocolIOProxXSF* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
     bool result = false;
@@ -281,5 +292,6 @@ const ProtocolBase protocol_io_prox_xsf = {
             .yield = (ProtocolEncoderYield)protocol_io_prox_xsf_encoder_yield,
         },
     .render_data = (ProtocolRenderData)protocol_io_prox_xsf_render_data,
+    .render_brief_data = (ProtocolRenderData)protocol_io_prox_xsf_render_brief_data,
     .write_data = (ProtocolWriteData)protocol_io_prox_xsf_write_data,
 };

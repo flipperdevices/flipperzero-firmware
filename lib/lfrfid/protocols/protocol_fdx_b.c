@@ -229,28 +229,56 @@ LevelDuration protocol_fdx_b_encoder_yield(ProtocolFDXB* protocol) {
     return level_duration_make(protocol->last_level, duration);
 };
 
-void protocol_fdx_b_render_data(ProtocolFDXB* protocol, string_t result) {
-    // 0  nnnnnnnn
-    // 8  nnnnnnnn	  38 bit (12 digit) National code.
-    // 16 nnnnnnnn	  eg. 000000001008 (decimal).
-    // 24 nnnnnnnn
-    // 32 nnnnnnnn	  10 bit (3 digit) Country code.
-    // 40 cccccccc	  eg. 999 (decimal).
-    // 48 s-------	  1 bit data block status flag.
-    // 56 -------a	  1 bit animal application indicator.
-    // 64 eeeeeeee	  24 bits of extra data if present.
-    // 72 eeeeeeee	  eg. $123456.
-    // 80 eeeeeeee
+// 0  nnnnnnnn
+// 8  nnnnnnnn	  38 bit (12 digit) National code.
+// 16 nnnnnnnn	  eg. 000000001008 (decimal).
+// 24 nnnnnnnn
+// 32 nnnnnnnn	  10 bit (3 digit) Country code.
+// 40 cccccccc	  eg. 999 (decimal).
+// 48 s-------	  1 bit data block status flag.
+// 56 -------a	  1 bit animal application indicator.
+// 64 eeeeeeee	  24 bits of extra data if present.
+// 72 eeeeeeee	  eg. $123456.
+// 80 eeeeeeee
 
-    // 38 bits of national code
-    uint64_t national_code = bit_lib_get_bits_32(protocol->data, 0, 32);
+static uint64_t protocol_fdx_b_get_national_code(const uint8_t* data) {
+    uint64_t national_code = bit_lib_get_bits_32(data, 0, 32);
     national_code = national_code << 32;
-    national_code |= bit_lib_get_bits_32(protocol->data, 32, 6) << (32 - 6);
+    national_code |= bit_lib_get_bits_32(data, 32, 6) << (32 - 6);
     bit_lib_reverse_bits((uint8_t*)&national_code, 0, 64);
+    return national_code;
+}
+
+static uint16_t protocol_fdx_b_get_country_code(const uint8_t* data) {
+    uint16_t country_code = bit_lib_get_bits_16(data, 38, 10) << 6;
+    bit_lib_reverse_bits((uint8_t*)&country_code, 0, 16);
+    return country_code;
+}
+
+static bool protocol_fdx_b_get_temp(const uint8_t* data, float* temp) {
+    uint32_t extended = bit_lib_get_bits_32(data, 64, 24) << 8;
+    bit_lib_reverse_bits((uint8_t*)&extended, 0, 32);
+
+    uint8_t ex_parity = (extended & 0x100) >> 8;
+    uint8_t ex_temperature = extended & 0xff;
+    uint8_t ex_calc_parity = bit_lib_test_parity_32(ex_temperature, BitLibParityOdd);
+    bool ex_temperature_present = (ex_calc_parity == ex_parity) && !(extended & 0xe00);
+
+    if(ex_temperature_present) {
+        float temperature_f = 74 + ex_temperature * 0.2;
+        *temp = temperature_f;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void protocol_fdx_b_render_data(ProtocolFDXB* protocol, string_t result) {
+    // 38 bits of national code
+    uint64_t national_code = protocol_fdx_b_get_national_code(protocol->data);
 
     // 10 bit of country code
-    uint16_t country_code = bit_lib_get_bits_16(protocol->data, 38, 10) << 6;
-    bit_lib_reverse_bits((uint8_t*)&country_code, 0, 16);
+    uint16_t country_code = protocol_fdx_b_get_country_code(protocol->data);
 
     bool block_status = bit_lib_get_bit(protocol->data, 48);
     bool rudi_bit = bit_lib_get_bit(protocol->data, 49);
@@ -259,34 +287,47 @@ void protocol_fdx_b_render_data(ProtocolFDXB* protocol, string_t result) {
     uint8_t replacement_number = bit_lib_get_bits(protocol->data, 60, 3);
     bool animal_flag = bit_lib_get_bit(protocol->data, 63);
 
-    uint32_t extended = bit_lib_get_bits_32(protocol->data, 64, 24) << 8;
-    bit_lib_reverse_bits((uint8_t*)&extended, 0, 32);
-
-    uint8_t ex_parity = (extended & 0x100) >> 8;
-    uint8_t ex_temperature = extended & 0xff;
-    uint8_t ex_calc_parity = bit_lib_test_parity_32(ex_temperature, BitLibParityOdd);
-    bool ex_temperature_present = (ex_calc_parity == ex_parity) && !(extended & 0xe00);
-
     string_printf(result, "ID: %d-%llu\r\n", country_code, national_code);
-    string_cat_printf(result, "Animal: %s\r\n", animal_flag ? "Yes" : "No");
+    string_cat_printf(result, "Animal: %s, ", animal_flag ? "Yes" : "No");
 
-    if(ex_temperature_present) {
-        float temerature_f = 74 + ex_temperature * 0.2;
-        float temerature_c = (temerature_f - 32) / 1.8;
+    float temperature;
+    if(protocol_fdx_b_get_temp(protocol->data, &temperature)) {
+        float temperature_c = (temperature - 32) / 1.8;
         string_cat_printf(
-            result, "Temp: %.2f F / %.2f C\r\n", (double)temerature_f, (double)temerature_c);
+            result, "T: %.2fF, %.2fC\r\n", (double)temperature, (double)temperature_c);
     } else {
-        string_cat_printf(result, "Temp: unavailable\r\n");
+        string_cat_printf(result, "T: ---\r\n");
     }
 
     string_cat_printf(
         result,
-        "Bits: %d-%d-%d-%d-%d",
+        "Bits: %X-%X-%X-%X-%X",
         block_status,
         rudi_bit,
         reserved,
         user_info,
         replacement_number);
+};
+
+void protocol_fdx_b_render_brief_data(ProtocolFDXB* protocol, string_t result) {
+    // 38 bits of national code
+    uint64_t national_code = protocol_fdx_b_get_national_code(protocol->data);
+
+    // 10 bit of country code
+    uint16_t country_code = protocol_fdx_b_get_country_code(protocol->data);
+
+    bool animal_flag = bit_lib_get_bit(protocol->data, 63);
+
+    string_printf(result, "ID: %d-%llu\r\n", country_code, national_code);
+    string_cat_printf(result, "Animal: %s, ", animal_flag ? "Yes" : "No");
+
+    float temperature;
+    if(protocol_fdx_b_get_temp(protocol->data, &temperature)) {
+        float temperature_c = (temperature - 32) / 1.8;
+        string_cat_printf(result, "T: %.2fC", (double)temperature_c);
+    } else {
+        string_cat_printf(result, "T: ---");
+    }
 };
 
 bool protocol_fdx_b_write_data(ProtocolFDXB* protocol, void* data) {
@@ -328,5 +369,6 @@ const ProtocolBase protocol_fdx_b = {
             .yield = (ProtocolEncoderYield)protocol_fdx_b_encoder_yield,
         },
     .render_data = (ProtocolRenderData)protocol_fdx_b_render_data,
+    .render_brief_data = (ProtocolRenderData)protocol_fdx_b_render_brief_data,
     .write_data = (ProtocolWriteData)protocol_fdx_b_write_data,
 };

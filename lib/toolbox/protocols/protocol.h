@@ -29,7 +29,6 @@ typedef struct {
 } ProtocolEncoder;
 
 typedef struct {
-    // TODO: move data size, name, manufacturer to variables
     const size_t data_size;
     const char* name;
     const char* manufacturer;
@@ -42,5 +41,6 @@ typedef struct {
     ProtocolDecoder decoder;
     ProtocolEncoder encoder;
     ProtocolRenderData render_data;
+    ProtocolRenderData render_brief_data;
     ProtocolWriteData write_data;
 } ProtocolBase;

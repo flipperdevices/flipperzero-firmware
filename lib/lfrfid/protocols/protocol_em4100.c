@@ -287,5 +287,6 @@ const ProtocolBase protocol_em4100 = {
             .yield = (ProtocolEncoderYield)protocol_em4100_encoder_yield,
         },
     .render_data = (ProtocolRenderData)protocol_em4100_render_data,
+    .render_brief_data = (ProtocolRenderData)protocol_em4100_render_data,
     .write_data = (ProtocolWriteData)protocol_em4100_write_data,
 };

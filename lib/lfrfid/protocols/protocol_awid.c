@@ -178,6 +178,24 @@ void protocol_awid_render_data(ProtocolAwid* protocol, string_t result) {
     }
 };
 
+void protocol_awid_render_brief_data(ProtocolAwid* protocol, string_t result) {
+    uint8_t* decoded_data = protocol->data;
+    uint8_t format_length = decoded_data[0];
+
+    string_cat_printf(result, "Format: %d\r\n", format_length);
+    if(format_length == 26) {
+        uint8_t facility;
+        bit_lib_copy_bits(&facility, 0, 8, decoded_data, 9);
+
+        uint16_t card_id;
+        bit_lib_copy_bits((uint8_t*)&card_id, 8, 8, decoded_data, 17);
+        bit_lib_copy_bits((uint8_t*)&card_id, 0, 8, decoded_data, 25);
+        string_cat_printf(result, "ID: %03u,%05u", facility, card_id);
+    } else {
+        string_cat_printf(result, "Data: unknown");
+    }
+};
+
 bool protocol_awid_write_data(ProtocolAwid* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
     bool result = false;
@@ -216,5 +234,6 @@ const ProtocolBase protocol_awid = {
             .yield = (ProtocolEncoderYield)protocol_awid_encoder_yield,
         },
     .render_data = (ProtocolRenderData)protocol_awid_render_data,
+    .render_brief_data = (ProtocolRenderData)protocol_awid_render_brief_data,
     .write_data = (ProtocolWriteData)protocol_awid_write_data,
 };

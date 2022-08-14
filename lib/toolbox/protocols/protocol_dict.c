@@ -194,6 +194,15 @@ void protocol_dict_render_data(ProtocolDict* dict, string_t result, size_t proto
     }
 }
 
+void protocol_dict_render_brief_data(ProtocolDict* dict, string_t result, size_t protocol_index) {
+    furi_assert(protocol_index < dict->count);
+    ProtocolRenderData fn = dict->base[protocol_index]->render_brief_data;
+
+    if(fn) {
+        return fn(dict->data[protocol_index], result);
+    }
+}
+
 uint32_t protocol_dict_get_validate_count(ProtocolDict* dict, size_t protocol_index) {
     furi_assert(protocol_index < dict->count);
     return dict->base[protocol_index]->validate_count;

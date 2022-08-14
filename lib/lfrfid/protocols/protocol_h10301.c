@@ -381,5 +381,6 @@ const ProtocolBase protocol_h10301 = {
             .yield = (ProtocolEncoderYield)protocol_h10301_encoder_yield,
         },
     .render_data = (ProtocolRenderData)protocol_h10301_render_data,
+    .render_brief_data = (ProtocolRenderData)protocol_h10301_render_data,
     .write_data = (ProtocolWriteData)protocol_h10301_write_data,
 };
