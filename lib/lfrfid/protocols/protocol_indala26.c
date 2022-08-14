@@ -89,34 +89,34 @@ static void protocol_indala26_decoder_save(uint8_t* data_to, const uint8_t* data
     bit_lib_copy_bits(data_to, 0, 22, data_from, 33);
     bit_lib_copy_bits(data_to, 22, 4, data_from, 56);
     bit_lib_copy_bits(data_to, 26, 2, data_from, 62);
-
-    // Protocol debug sample
-    // BitLibRegion regions[] = {
-    //     {'a', 33, 22},
-    //     {'b', 56, 4},
-    //     {'c', 62, 2},
-    // };
-    // printf("\r\n");
-    // bit_lib_print_regions(
-    //     regions, 3, data_from, INDALA26_ENCODED_BIT_SIZE + INDALA26_PREAMBLE_BIT_SIZE);
-    // printf("\r\n");
-
-    // bit_lib_print_bits(data_to, INDALA26_DECODED_BIT_SIZE);
-    // printf("\r\n");
 }
 
 bool protocol_indala26_decoder_feed(ProtocolIndala* protocol, bool level, uint32_t duration) {
     bool result = false;
 
     if(duration > (INDALA26_US_PER_BIT / 2)) {
-        if(protocol_indala26_decoder_feed_internal(!level, duration, protocol->encoded_data)) {
-            protocol_indala26_decoder_save(protocol->data, protocol->encoded_data);
-            result = true;
-        }
-
         if(protocol_indala26_decoder_feed_internal(
                level, duration, protocol->negative_encoded_data)) {
             protocol_indala26_decoder_save(protocol->data, protocol->negative_encoded_data);
+            FURI_LOG_D("Indala26", "Negative");
+            result = true;
+        }
+    }
+
+    if(duration > (INDALA26_US_PER_BIT / 4)) {
+        // Try to decode wrong phase synced data
+        if(level) {
+            duration += 120;
+        } else {
+            if(duration > 120) {
+                duration -= 120;
+            }
+        }
+
+        if(protocol_indala26_decoder_feed_internal(!level, duration, protocol->encoded_data)) {
+            protocol_indala26_decoder_save(protocol->data, protocol->encoded_data);
+            FURI_LOG_D("Indala26", "Positive");
+
             result = true;
         }
     }

@@ -88,7 +88,6 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
         sizeof(LevelDuration) * LFRFID_WORKER_READ_STREAM_SIZE, sizeof(LevelDuration));
     furi_hal_rfid_tim_read_capture_start(lfrfid_worker_read_capture, stream);
 
-    ProtocolId protocol = PROTOCOL_NO;
     uint32_t tmp_duration = 0;
 
     ProtocolId last_protocol = PROTOCOL_NO;
@@ -117,6 +116,7 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
             continue;
         }
 
+        ProtocolId protocol = PROTOCOL_NO;
         if(size == sizeof(LevelDuration)) {
             uint32_t duration = level_duration_get_duration(level_duration);
 
@@ -162,11 +162,23 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
                 last_read_count = 0;
             }
 
+            string_t string_info;
+            string_init(string_info);
+            for(uint8_t i = 0; i < protocol_data_size; i++) {
+                if(i != 0) {
+                    string_cat_printf(string_info, " ");
+                }
+
+                string_cat_printf(string_info, "%02X", protocol_data[i]);
+            }
+
             FURI_LOG_D(
                 TAG,
-                "%s, %d",
+                "%s, %d, [%s]",
                 protocol_dict_get_name(worker->protocols, protocol),
-                last_read_count);
+                last_read_count,
+                string_get_cstr(string_info));
+            string_clear(string_info);
         }
 
         if((furi_get_tick() - switch_os_tick_last) > timeout) {
@@ -181,11 +193,12 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
     FURI_LOG_D(TAG, "Read stopped");
 
     if(last_protocol != PROTOCOL_NO && worker->read_cb) {
-        worker->read_cb(LFRFIDWorkerReadSenseCardEnd, protocol, worker->cb_ctx);
+        worker->read_cb(LFRFIDWorkerReadSenseCardEnd, last_protocol, worker->cb_ctx);
     }
 
     furi_hal_rfid_tim_read_capture_stop();
     furi_hal_rfid_tim_read_stop();
+    furi_hal_rfid_pins_reset();
 
     vStreamBufferDelete(stream);
     free(protocol_data);
@@ -231,11 +244,14 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
         }
     } else {
         while(1) {
-            state = lfrfid_worker_read_internal(worker, feature, UINT32_MAX, &read_result);
+            state = lfrfid_worker_read_internal(
+                worker, feature, LFRFID_WORKER_READ_SWITCH_TIME, &read_result);
 
             if(state == LFRFIDWorkerReadOK || state == LFRFIDWorkerReadExit) {
                 break;
             }
+
+            furi_delay_ms(LFRFID_WORKER_READ_DROP_TIME);
         }
     }
 
@@ -381,6 +397,7 @@ void lfrfid_worker_mode_write_process(LFRFIDWorker* worker) {
 
     if(can_be_written) {
         while(!lfrfid_worker_check_for_stop(worker)) {
+            FURI_LOG_D(TAG, "Data write");
             t5577_write(&request->t5577);
 
             ProtocolId read_result = PROTOCOL_NO;
