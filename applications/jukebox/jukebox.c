@@ -149,7 +149,7 @@ static void jukebox_render_callback(Canvas* canvas, void* ctx) {
         string_t protocol;
         string_init(protocol);
         string_set(file_name, string_get_cstr(signal));
-        Storage* storage = furi_record_open("storage");
+        Storage* storage = furi_record_open(RECORD_STORAGE);
         FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
         uint32_t frequency_str;
         flipper_format_file_open_existing(fff_data_file, string_get_cstr(file_name));
@@ -159,7 +159,7 @@ static void jukebox_render_callback(Canvas* canvas, void* ctx) {
             string_set(protocol, "RAW");
         }
         flipper_format_free(fff_data_file);
-        furi_record_close("storage");
+        furi_record_close(RECORD_STORAGE);
         FURI_LOG_D(TAG, "%lu", frequency_str);
         jukebox_send_signal(frequency_str, signal, protocol);
     }
@@ -189,7 +189,7 @@ int32_t jukebox_app(void* p) {
     string_t file_name;
     string_init(file_name);
     string_set(file_name, "/ext/subghz/assets/touchtunes_map.txt");
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
     if(!flipper_format_file_open_existing(fff_data_file, string_get_cstr(file_name))) {
         FURI_LOG_D(TAG, "Could not open file %s", string_get_cstr(file_name));
@@ -211,7 +211,7 @@ int32_t jukebox_app(void* p) {
         FURI_LOG_D(TAG, "Could not read OK string");
     }
     flipper_format_free(fff_data_file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     FURI_LOG_I(
         TAG,
         "%s %s %s %s %s ",
@@ -237,7 +237,7 @@ int32_t jukebox_app(void* p) {
     view_port_input_callback_set(view_port, jukebox_input_callback, event_queue);
 
     // Open GUI and register view_port
-    Gui* gui = furi_record_open("gui");
+    Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     InputEvent event;
@@ -271,7 +271,7 @@ int32_t jukebox_app(void* p) {
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     free(_state);
     return (0);
 }

@@ -24,7 +24,7 @@ static void wifi_deauther_app_tick_event_callback(void* context) {
 WifideautherApp* wifi_deauther_app_alloc() {
     WifideautherApp* app = malloc(sizeof(WifideautherApp));
 
-    app->gui = furi_record_open("gui");
+    app->gui = furi_record_open(RECORD_GUI);
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&wifi_deauther_scene_handlers, app);
@@ -79,7 +79,7 @@ void wifi_deauther_app_free(WifideautherApp* app) {
     wifi_deauther_uart_free(app->uart);
 
     // Close records
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
 
     free(app);
 }

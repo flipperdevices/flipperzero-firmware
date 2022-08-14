@@ -297,7 +297,7 @@ int32_t flappy_game_app(void* p) {
     furi_timer_start(timer, furi_kernel_get_tick_frequency() / 25);
 
     // Open GUI and register view_port
-    Gui* gui = furi_record_open("gui");
+    Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     GameEvent event;
@@ -352,7 +352,7 @@ int32_t flappy_game_app(void* p) {
     furi_timer_free(timer);
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     view_port_free(view_port);
     delete_mutex(&state_mutex);
 

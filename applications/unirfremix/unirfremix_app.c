@@ -157,7 +157,7 @@ static char* extract_filename(const char* name, int len) {
 */
 
 void unirfremix_cfg_set_check(UniRFRemix* app, string_t file_name) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
 
     app->file_result = 3;
@@ -353,7 +353,7 @@ void unirfremix_cfg_set_check(UniRFRemix* app, string_t file_name) {
     }
 
     flipper_format_free(fff_data_file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     //File Existence Check
     //Check each file definition if not already set to "N/A"
@@ -375,7 +375,7 @@ void unirfremix_cfg_set_check(UniRFRemix* app, string_t file_name) {
         //if button is still enabled, check that file exists
         if(app->up_enabled == 1) {
             string_set(file_name, app->up_file);
-            storage = furi_record_open("storage");
+            storage = furi_record_open(RECORD_STORAGE);
             fff_data_file = flipper_format_file_alloc(storage);
 
             if(!flipper_format_file_open_existing(fff_data_file, string_get_cstr(file_name))) {
@@ -389,12 +389,12 @@ void unirfremix_cfg_set_check(UniRFRemix* app, string_t file_name) {
 
             //close the file
             flipper_format_free(fff_data_file);
-            furi_record_close("storage");
+            furi_record_close(RECORD_STORAGE);
         }
 
         if(app->down_enabled == 1) {
             string_set(file_name, app->down_file);
-            storage = furi_record_open("storage");
+            storage = furi_record_open(RECORD_STORAGE);
             fff_data_file = flipper_format_file_alloc(storage);
 
             if(!flipper_format_file_open_existing(fff_data_file, string_get_cstr(file_name))) {
@@ -406,12 +406,12 @@ void unirfremix_cfg_set_check(UniRFRemix* app, string_t file_name) {
             }
 
             flipper_format_free(fff_data_file);
-            furi_record_close("storage");
+            furi_record_close(RECORD_STORAGE);
         }
 
         if(app->left_enabled == 1) {
             string_set(file_name, app->left_file);
-            storage = furi_record_open("storage");
+            storage = furi_record_open(RECORD_STORAGE);
             fff_data_file = flipper_format_file_alloc(storage);
 
             if(!flipper_format_file_open_existing(fff_data_file, string_get_cstr(file_name))) {
@@ -423,12 +423,12 @@ void unirfremix_cfg_set_check(UniRFRemix* app, string_t file_name) {
             }
 
             flipper_format_free(fff_data_file);
-            furi_record_close("storage");
+            furi_record_close(RECORD_STORAGE);
         }
 
         if(app->right_enabled == 1) {
             string_set(file_name, app->right_file);
-            storage = furi_record_open("storage");
+            storage = furi_record_open(RECORD_STORAGE);
             fff_data_file = flipper_format_file_alloc(storage);
 
             if(!flipper_format_file_open_existing(fff_data_file, string_get_cstr(file_name))) {
@@ -440,12 +440,12 @@ void unirfremix_cfg_set_check(UniRFRemix* app, string_t file_name) {
             }
 
             flipper_format_free(fff_data_file);
-            furi_record_close("storage");
+            furi_record_close(RECORD_STORAGE);
         }
 
         if(app->ok_enabled == 1) {
             string_set(file_name, app->ok_file);
-            storage = furi_record_open("storage");
+            storage = furi_record_open(RECORD_STORAGE);
             fff_data_file = flipper_format_file_alloc(storage);
 
             if(!flipper_format_file_open_existing(fff_data_file, string_get_cstr(file_name))) {
@@ -457,7 +457,7 @@ void unirfremix_cfg_set_check(UniRFRemix* app, string_t file_name) {
             }
 
             flipper_format_free(fff_data_file);
-            furi_record_close("storage");
+            furi_record_close(RECORD_STORAGE);
         }
 
         if(app->file_blank == 5) {
@@ -558,7 +558,7 @@ static void unirfremix_process_signal(UniRFRemix* app, string_t signal) {
 
         string_set(file_name, string_get_cstr(signal));
 
-        Storage* storage = furi_record_open("storage");
+        Storage* storage = furi_record_open(RECORD_STORAGE);
         FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
 
         flipper_format_file_open_existing(fff_data_file, string_get_cstr(file_name));
@@ -571,7 +571,7 @@ static void unirfremix_process_signal(UniRFRemix* app, string_t signal) {
         }
 
         flipper_format_free(fff_data_file);
-        furi_record_close("storage");
+        furi_record_close(RECORD_STORAGE);
 
         FURI_LOG_I(TAG, "%lu", frequency_str);
 

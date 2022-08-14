@@ -327,7 +327,7 @@ static RaycastGame* raycast_game_aloc() {
             return false;
         });
 
-    game->gui = furi_record_open("gui");
+    game->gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(game->view_dispatcher, game->gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_add_view(game->view_dispatcher, 0, game->view);
     view_dispatcher_switch_to_view(game->view_dispatcher, 0);
@@ -356,7 +356,7 @@ static void raycast_game_free(RaycastGame* game) {
     // NotificationApp* notifications = furi_record_open("notification");
     // notification_message(notifications, &sequence_display_unlock);
     // furi_record_close("notification");
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
 
     free(game);
 }

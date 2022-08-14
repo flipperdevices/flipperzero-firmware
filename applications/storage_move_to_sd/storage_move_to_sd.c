@@ -25,7 +25,7 @@ static const char* app_dirs[] = {
 };
 
 bool storage_move_to_sd_perform(void) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     string_t path_src;
     string_t path_dst;
     string_t new_path;
@@ -53,13 +53,13 @@ bool storage_move_to_sd_perform(void) {
     string_clear(path_src);
     string_clear(path_dst);
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return false;
 }
 
 static bool storage_move_to_sd_check(void) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
 
     FileInfo file_info;
     bool state = false;
@@ -78,7 +78,7 @@ static bool storage_move_to_sd_check(void) {
 
     string_clear(path);
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return state;
 }
@@ -109,7 +109,7 @@ static void storage_move_to_sd_unmount_callback(const void* message, void* conte
 static StorageMoveToSd* storage_move_to_sd_alloc() {
     StorageMoveToSd* app = malloc(sizeof(StorageMoveToSd));
 
-    app->gui = furi_record_open("gui");
+    app->gui = furi_record_open(RECORD_GUI);
     app->notifications = furi_record_open("notification");
 
     app->view_dispatcher = view_dispatcher_alloc();
@@ -131,18 +131,18 @@ static StorageMoveToSd* storage_move_to_sd_alloc() {
 
     scene_manager_next_scene(app->scene_manager, StorageMoveToSdConfirm);
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     app->sub = furi_pubsub_subscribe(
         storage_get_pubsub(storage), storage_move_to_sd_unmount_callback, app);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return app;
 }
 
 static void storage_move_to_sd_free(StorageMoveToSd* app) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     furi_pubsub_unsubscribe(storage_get_pubsub(storage), app->sub);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     furi_record_close("notification");
 
     view_dispatcher_remove_view(app->view_dispatcher, StorageMoveToSdViewWidget);
@@ -150,7 +150,7 @@ static void storage_move_to_sd_free(StorageMoveToSd* app) {
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
 
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
 
     free(app);
 }
@@ -184,10 +184,10 @@ static void storage_move_to_sd_mount_callback(const void* message, void* context
 
 int32_t storage_move_to_sd_start(void* p) {
     UNUSED(p);
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
 
     furi_pubsub_subscribe(storage_get_pubsub(storage), storage_move_to_sd_mount_callback, NULL);
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     return 0;
 }
