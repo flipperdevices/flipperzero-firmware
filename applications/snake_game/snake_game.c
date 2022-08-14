@@ -258,6 +258,9 @@ static void snake_game_process_game_step(SnakeState* const snake_state) {
             return;
         } else if(snake_state->state == GameStateLastChance) {
             snake_state->state = GameStateGameOver;
+            NotificationApp* notification = furi_record_open("notification");
+            notification_message(notification, &sequence_single_vibro);
+            furi_record_close("notification");
             return;
         }
     } else {
@@ -269,6 +272,9 @@ static void snake_game_process_game_step(SnakeState* const snake_state) {
     crush = snake_game_collision_with_tail(snake_state, next_step);
     if(crush) {
         snake_state->state = GameStateGameOver;
+        NotificationApp* notification = furi_record_open("notification");
+        notification_message(notification, &sequence_single_vibro);
+        furi_record_close("notification");
         return;
     }
 
@@ -282,6 +288,9 @@ static void snake_game_process_game_step(SnakeState* const snake_state) {
         snake_state->len++;
         if(snake_state->len >= MAX_SNAKE_LEN) {
             snake_state->state = GameStateGameOver;
+            NotificationApp* notification = furi_record_open("notification");
+            notification_message(notification, &sequence_single_vibro);
+            furi_record_close("notification");
             return;
         }
     }
