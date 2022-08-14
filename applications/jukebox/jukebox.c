@@ -59,7 +59,7 @@ static void jukebox_send_signal(uint32_t frequency, string_t signal, string_t pr
     } else {
         return;
     }
-    NotificationApp* notification = furi_record_open("notification");
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     FlipperFormat* flipper_format = flipper_format_string_alloc();
     Stream* stream = flipper_format_get_raw_stream(flipper_format);
     stream_clean(stream);
@@ -89,7 +89,7 @@ static void jukebox_send_signal(uint32_t frequency, string_t signal, string_t pr
     }
     notification_message(notification, &sequence_reset_vibro);
 
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
     furi_hal_subghz_stop_async_tx();
     furi_hal_subghz_sleep();
 

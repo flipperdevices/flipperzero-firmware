@@ -38,7 +38,7 @@ Chip8App* chip8_app_alloc() {
     Chip8App* app = malloc(sizeof(Chip8App));
 
     app->gui = furi_record_open(RECORD_GUI);
-    app->dialogs = furi_record_open("dialogs");
+    app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&chip8_scene_handlers, app);
 
@@ -75,7 +75,7 @@ void chip8_app_free(Chip8App* app) {
     scene_manager_free(app->scene_manager);
 
     furi_record_close(RECORD_GUI);
-    furi_record_close("dialogs");
+    furi_record_close(RECORD_DIALOGS);
 
     free(app);
 }

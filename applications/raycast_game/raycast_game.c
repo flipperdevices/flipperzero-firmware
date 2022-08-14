@@ -332,9 +332,9 @@ static RaycastGame* raycast_game_aloc() {
     view_dispatcher_add_view(game->view_dispatcher, 0, game->view);
     view_dispatcher_switch_to_view(game->view_dispatcher, 0);
 
-    // NotificationApp* notifications = furi_record_open("notification");
+    // NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
     // notification_message(notifications, &sequence_display_lock);
-    // furi_record_close("notification");
+    // furi_record_close(RECORD_NOTIFICATION);
 
     return game;
 }
@@ -353,9 +353,9 @@ static void raycast_game_free(RaycastGame* game) {
 
     furi_message_queue_free(game->queue);
 
-    // NotificationApp* notifications = furi_record_open("notification");
+    // NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
     // notification_message(notifications, &sequence_display_unlock);
-    // furi_record_close("notification");
+    // furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
 
     free(game);

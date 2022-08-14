@@ -92,7 +92,7 @@ static StorageMoveToSd* drestorer_alloc() {
     StorageMoveToSd* app = malloc(sizeof(StorageMoveToSd));
 
     app->gui = furi_record_open(RECORD_GUI);
-    app->notifications = furi_record_open("notification");
+    app->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&drestorer_scene_handlers, app);
@@ -124,7 +124,7 @@ static void drestorer_free(StorageMoveToSd* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     furi_pubsub_unsubscribe(storage_get_pubsub(storage), app->sub);
     furi_record_close(RECORD_STORAGE);
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
 
     view_dispatcher_remove_view(app->view_dispatcher, StorageMoveToSdViewWidget);
     widget_free(app->widget);

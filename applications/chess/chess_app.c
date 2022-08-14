@@ -637,7 +637,7 @@ int32_t chess_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    notification = furi_record_open("notification");
+    notification = furi_record_open(RECORD_NOTIFICATION);
 
     should_exit = false;
 

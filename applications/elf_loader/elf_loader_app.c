@@ -11,7 +11,7 @@
 
 int32_t elf_loader_app(void* p) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    DialogsApp* dialogs = furi_record_open("dialogs");
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     Gui* gui = furi_record_open(RECORD_GUI);
 
     string_t elf_name, error_message;
@@ -103,7 +103,7 @@ int32_t elf_loader_app(void* p) {
 
     string_clear(elf_name);
     furi_record_close(RECORD_GUI);
-    furi_record_close("dialogs");
+    furi_record_close(RECORD_DIALOGS);
     furi_record_close(RECORD_STORAGE);
     return 0;
 }

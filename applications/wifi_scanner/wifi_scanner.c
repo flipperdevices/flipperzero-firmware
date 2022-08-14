@@ -679,7 +679,7 @@ int32_t wifi_scanner_app(void* p) {
 
     app->m_rx_stream = xStreamBufferCreate(1 * 1024, 1);
 
-    app->m_notification = furi_record_open("notification");
+    app->m_notification = furi_record_open(RECORD_NOTIFICATION);
 
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, wifi_module_render_callback, &app_data_mutex);
@@ -833,7 +833,7 @@ int32_t wifi_scanner_app(void* p) {
 
     // Close gui record
     furi_record_close(RECORD_GUI);
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
     app->m_gui = NULL;
 
     view_port_free(view_port);

@@ -273,49 +273,49 @@ static void clock_tick(void* ctx) {
     if(timerStarted) {
         timerSecs = timerSecs + 1;
         if(timerSecs % 60 == 0 && songSelect != 0) {
-            NotificationApp* notification = furi_record_open("notification");
+            NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
             notification_message(notification, &clock_alert_perMin);
-            furi_record_close("notification");
+            furi_record_close(RECORD_NOTIFICATION);
         }
         if(songSelect == 1) {
             if(timerSecs == 80) {
                 DOLPHIN_DEED(DolphinDeedU2fAuthorized);
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_pr1);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
             if(timerSecs == 81) {
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_pr2);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
             if(timerSecs == 82) {
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_pr3);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
         } else if(songSelect == 2) {
             if(timerSecs == 80) {
                 DOLPHIN_DEED(DolphinDeedU2fAuthorized);
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_mario1);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
             if(timerSecs == 81) {
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_mario2);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
             if(timerSecs == 82) {
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_mario3);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
         } else {
             if(timerSecs == 80) {
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_silent);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
         }
     }
@@ -378,9 +378,9 @@ int32_t clock_app(void* p) {
                         break;
                     case InputKeyOk:
                         if(songSelect == 1 || songSelect == 2 || songSelect == 3) {
-                            NotificationApp* notification = furi_record_open("notification");
+                            NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                             notification_message(notification, &clock_alert_startStop);
-                            furi_record_close("notification");
+                            furi_record_close(RECORD_NOTIFICATION);
                         }
                         if(timerStarted) {
                             timerStarted = false;

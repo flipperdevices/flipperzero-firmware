@@ -98,7 +98,7 @@ static void hexlify(uint8_t* in, uint8_t size, char* out) {
 }
 
 static bool open_ducky_script(Stream* stream) {
-    DialogsApp* dialogs = furi_record_open("dialogs");
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     bool result = false;
     string_t path;
     string_init(path);
@@ -106,7 +106,7 @@ static bool open_ducky_script(Stream* stream) {
     bool ret = dialog_file_browser_show(
         dialogs, path, path, MOUSEJACKER_APP_PATH_EXTENSION, true, &I_badusb_10px, false);
 
-    furi_record_close("dialogs");
+    furi_record_close(RECORD_DIALOGS);
     if(ret) {
         if(!file_stream_open(stream, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
             FURI_LOG_I(TAG, "Cannot open file \"%s\"", (path));
@@ -119,7 +119,7 @@ static bool open_ducky_script(Stream* stream) {
 }
 
 static bool open_addrs_file(Stream* stream) {
-    DialogsApp* dialogs = furi_record_open("dialogs");
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     bool result = false;
     string_t path;
     string_init(path);
@@ -127,7 +127,7 @@ static bool open_addrs_file(Stream* stream) {
     bool ret = dialog_file_browser_show(
         dialogs, path, path, NRFSNIFF_APP_PATH_EXTENSION, true, &I_sub1_10px, false);
 
-    furi_record_close("dialogs");
+    furi_record_close(RECORD_DIALOGS);
     if(ret) {
         if(!file_stream_open(stream, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
             FURI_LOG_I(TAG, "Cannot open file \"%s\"", (path));

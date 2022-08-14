@@ -499,7 +499,7 @@ static void unirfremix_send_signal(
             unirfremix_end_send(app);
         }
 
-        NotificationApp* notification = furi_record_open("notification");
+        NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
         FlipperFormat* flipper_format = flipper_format_string_alloc();
         Stream* stream = flipper_format_get_raw_stream(flipper_format);
@@ -527,7 +527,7 @@ static void unirfremix_send_signal(
             furi_delay_ms(333);
         }
 
-        furi_record_close("notification");
+        furi_record_close(RECORD_NOTIFICATION);
 
         furi_hal_subghz_stop_async_tx();
         furi_hal_subghz_sleep();

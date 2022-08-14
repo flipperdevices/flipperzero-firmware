@@ -25,9 +25,9 @@ Sometimes duplicate cards will show up. there is a function to test this. I shou
 #define TAG "Video Poker"
 
 static void Shake(void) {
-    NotificationApp* notification = furi_record_open("notification");
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message(notification, &sequence_single_vibro);
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
 }
 
 typedef struct {
