@@ -1,6 +1,6 @@
 #include "../wifi_marauder_app_i.h"
 
-#define NUM_MENU_ITEMS (15)
+#define NUM_MENU_ITEMS (14)
 
 // For each command, define whether additional arguments are needed
 // (enabling text input to fill them out), and whether the console
@@ -13,26 +13,26 @@ struct WifiMarauderItem {
     const char* item_string;
     const char* options_menu[5];
     int num_options_menu;
+    const char* actual_commands[5];
     bool needs_keyboard;
     bool focus_console_start;
 };
 
 const struct WifiMarauderItem items[NUM_MENU_ITEMS] = {
-    { "View Log", {"(start)", "(end)"}, 2, NO_ARGS, FOCUS_CONSOLE_START },
-    { "attack -t beacon", {"-l", "-r", "-a"}, 3, NO_ARGS, FOCUS_CONSOLE_END },
-    { "attack -t", {"deauth", "probe", "rickroll"}, 3, NO_ARGS, FOCUS_CONSOLE_END },
-    { "channel", {}, 0, NO_ARGS, FOCUS_CONSOLE_END },
-    { "channel -s", {}, 0, INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "clearlist", {"-a", "-s"}, 2, NO_ARGS, FOCUS_CONSOLE_END },
-    { "help", {}, 0, NO_ARGS, FOCUS_CONSOLE_START },
-    { "list", {"-a", "-s"}, 2, NO_ARGS, FOCUS_CONSOLE_START },
-    { "reboot", {}, 0, NO_ARGS, FOCUS_CONSOLE_END },
-    { "scanap", {}, 0, NO_ARGS, FOCUS_CONSOLE_END },
-    { "select", {"-a", "-s"}, 2, INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "sniff", {"beacon", "deauth", "esp", "pmkid", "pwn"}, 5, NO_ARGS, FOCUS_CONSOLE_END },
-    { "sniffpmkid -c", {}, 0, INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "ssid", {"-a -g", "-a -n", "-r"}, 3, INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "update -w", {}, 0, NO_ARGS, FOCUS_CONSOLE_END },
+    { "View Log from", {"start", "end"}, 2, {}, NO_ARGS, FOCUS_CONSOLE_START },
+    { "Scan", {""}, 1, {"scanap"}, NO_ARGS, FOCUS_CONSOLE_END },
+    { "List", {"ap", "ssid"}, 2, {"list -a", "list -s"}, NO_ARGS, FOCUS_CONSOLE_START },
+    { "Select", {"ap", "ssid"}, 2, {"select -a", "select -s"}, INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "Clear List", {"ap", "ssid"}, 2, {"clearlist -a", "clearlist -s"}, NO_ARGS, FOCUS_CONSOLE_END },
+    { "SSID", {"add random", "add name", "remove"}, 3, {"ssid -a -g", "ssid -a -n", "ssid -r"}, INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "Attack", {"deauth", "probe", "rickroll"}, 3, {"attack -t deauth", "attack -t probe", "attack -t rickroll"}, NO_ARGS, FOCUS_CONSOLE_END },
+    { "Beacon Spam", {"list", "random", "ap"}, 3, {"attack -t beacon -l", "attack -t beacon -r", "attack -t beacon -a"}, NO_ARGS, FOCUS_CONSOLE_END },
+    { "Sniff", {"beacon", "deauth", "esp", "pmkid", "pwn"}, 5, {"sniffbeacon", "sniffdeauth", "sniffesp", "sniffpmkid", "sniffpwn"}, NO_ARGS, FOCUS_CONSOLE_END },
+    { "Sniff PMKID on channel", {""}, 1, {"sniffpmkid -c"}, INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "Channel", {"get", "set"}, 2, {"channel", "channel -s"}, NO_ARGS, FOCUS_CONSOLE_END },
+    { "Update", {""}, 1, {"update -w"}, NO_ARGS, FOCUS_CONSOLE_END },
+    { "Reboot", {""}, 1, {"reboot"}, NO_ARGS, FOCUS_CONSOLE_END },
+    { "Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START },
 };
 
 typedef struct WifiMarauderItem WifiMarauderItem;
