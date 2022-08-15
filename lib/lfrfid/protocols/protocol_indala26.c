@@ -28,6 +28,9 @@ typedef struct {
 typedef struct {
     uint8_t encoded_data[INDALA26_ENCODED_DATA_SIZE];
     uint8_t negative_encoded_data[INDALA26_ENCODED_DATA_SIZE];
+    uint8_t corrupted_encoded_data[INDALA26_ENCODED_DATA_SIZE];
+    uint8_t corrupted_negative_encoded_data[INDALA26_ENCODED_DATA_SIZE];
+
     uint8_t data[INDALA26_DECODED_DATA_SIZE];
     ProtocolIndalaEncoder encoder;
 } ProtocolIndala;
@@ -48,6 +51,8 @@ uint8_t* protocol_indala26_get_data(ProtocolIndala* protocol) {
 void protocol_indala26_decoder_start(ProtocolIndala* protocol) {
     memset(protocol->encoded_data, 0, INDALA26_ENCODED_DATA_SIZE);
     memset(protocol->negative_encoded_data, 0, INDALA26_ENCODED_DATA_SIZE);
+    memset(protocol->corrupted_encoded_data, 0, INDALA26_ENCODED_DATA_SIZE);
+    memset(protocol->corrupted_negative_encoded_data, 0, INDALA26_ENCODED_DATA_SIZE);
 };
 
 static bool protocol_indala26_check_preamble(uint8_t* data, size_t bit_index) {
@@ -95,11 +100,19 @@ bool protocol_indala26_decoder_feed(ProtocolIndala* protocol, bool level, uint32
     bool result = false;
 
     if(duration > (INDALA26_US_PER_BIT / 2)) {
+        if(protocol_indala26_decoder_feed_internal(level, duration, protocol->encoded_data)) {
+            protocol_indala26_decoder_save(protocol->data, protocol->encoded_data);
+            FURI_LOG_D("Indala26", "Positive");
+            result = true;
+            return result;
+        }
+
         if(protocol_indala26_decoder_feed_internal(
-               level, duration, protocol->negative_encoded_data)) {
+               !level, duration, protocol->negative_encoded_data)) {
             protocol_indala26_decoder_save(protocol->data, protocol->negative_encoded_data);
             FURI_LOG_D("Indala26", "Negative");
             result = true;
+            return result;
         }
     }
 
@@ -113,11 +126,23 @@ bool protocol_indala26_decoder_feed(ProtocolIndala* protocol, bool level, uint32
             }
         }
 
-        if(protocol_indala26_decoder_feed_internal(!level, duration, protocol->encoded_data)) {
-            protocol_indala26_decoder_save(protocol->data, protocol->encoded_data);
-            FURI_LOG_D("Indala26", "Positive");
+        if(protocol_indala26_decoder_feed_internal(
+               level, duration, protocol->corrupted_encoded_data)) {
+            protocol_indala26_decoder_save(protocol->data, protocol->corrupted_encoded_data);
+            FURI_LOG_D("Indala26", "Positive Corrupted");
 
             result = true;
+            return result;
+        }
+
+        if(protocol_indala26_decoder_feed_internal(
+               !level, duration, protocol->corrupted_negative_encoded_data)) {
+            protocol_indala26_decoder_save(
+                protocol->data, protocol->corrupted_negative_encoded_data);
+            FURI_LOG_D("Indala26", "Negative Corrupted");
+
+            result = true;
+            return result;
         }
     }
 
