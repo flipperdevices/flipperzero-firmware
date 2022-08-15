@@ -12,6 +12,8 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
 
+#define NUM_MENU_ITEMS (14)
+
 #define WIFI_MARAUDER_TEXT_BOX_STORE_SIZE (4096)
 #define WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE (512)
 
@@ -31,6 +33,7 @@ struct WifiMarauderApp {
 
     WifiMarauderUart* uart;
     int selected_menu_index;
+    int selected_option_index[NUM_MENU_ITEMS];
     const char* selected_tx_string;
     bool is_command;
     bool is_custom_tx_string;
