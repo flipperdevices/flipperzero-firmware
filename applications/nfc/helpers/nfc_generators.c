@@ -317,17 +317,22 @@ static void nfc_generate_ntag_i2c_plus_2k(NfcDeviceData* data) {
 static void nfc_generate_mf_classic_1k(NfcDeviceData* data, uint8_t uid_len) {
     nfc_generate_common_start(data);
     nfc_generate_mf_classic_common(data, uid_len, MfClassicType1k);
+
+    // Set the UID
     data->nfc_data.uid[0] = NXP_MANUFACTURER_ID;
     for(int i = 1; i < uid_len; i++) {
         data->nfc_data.uid[i] = data->mf_classic_data.block[0].value[i];
     }
+
     MfClassicData* mfc = &data->mf_classic_data;
     mf_classic_set_block_read(mfc, 0, &mfc->block[0]);
+
     // Set every block to 0xFF
     for(uint16_t i = 1; i < MF_CLASSIC_1K_TOTAL_SECTORS_NUM * 4; i += 1) {
         memset(&mfc->block[i].value, 0xFF, 16);
         mf_classic_set_block_read(mfc, i, &mfc->block[i]);
     }
+
     // Set every 4th block with the sector trailer
     for(uint16_t i = 3; i < MF_CLASSIC_1K_TOTAL_SECTORS_NUM * 4; i += 4) {
         nfc_generate_mf_classic_sector_trailer(mfc, i);
@@ -347,23 +352,29 @@ static void nfc_generate_mf_classic_1k_7b_uid(NfcDeviceData* data) {
 static void nfc_generate_mf_classic_4k(NfcDeviceData* data, uint8_t uid_len) {
     nfc_generate_common_start(data);
     nfc_generate_mf_classic_common(data, uid_len, MfClassicType4k);
+
+    // Set the UID
     data->nfc_data.uid[0] = NXP_MANUFACTURER_ID;
     for(int i = 1; i < uid_len; i++) {
         data->nfc_data.uid[i] = data->mf_classic_data.block[0].value[i];
     }
+
     MfClassicData* mfc = &data->mf_classic_data;
     mf_classic_set_block_read(mfc, 0, &mfc->block[0]);
-    // 1K & 2K PART -------
+
+    // 2K PART -------
     // Set every block to 0xFF
     for(uint16_t i = 1; i < MF_CLASSIC_1K_TOTAL_SECTORS_NUM * 8; i += 1) {
         memset(&mfc->block[i].value, 0xFF, 16);
         mf_classic_set_block_read(mfc, i, &mfc->block[i]);
     }
+
     // Set every 4th block with the sector trailer
     for(uint16_t i = 3; i < MF_CLASSIC_1K_TOTAL_SECTORS_NUM * 8; i += 4) {
         nfc_generate_mf_classic_sector_trailer(mfc, i);
         mf_classic_set_block_read(mfc, i, &mfc->block[i]);
     }
+
     // 4K PART -------
     // Here, every sector has 16 blocks, with the last block being the sector trailer
     for(uint16_t i = 128; i < 256; i += 1) {
