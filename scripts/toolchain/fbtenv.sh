@@ -10,12 +10,14 @@ FBT_TOOLCHAIN_PATH="${FBT_TOOLCHAIN_PATH:-$SCRIPT_PATH}";
 
 fbtenv_check_sourced()
 {
+    set +x;  # debug!
     case "${ZSH_EVAL_CONTEXT:-""}" in *:file:*)
         return 0;;
     esac
     case ${0##*/} in dash|-dash|bash|-bash|ksh|-ksh|sh|-sh)
         return 0;;
     esac
+    echo "Var is: ${0##*/}";
     if [ "$(basename $0)" = "fbt" ]; then
         return 0;
     fi
