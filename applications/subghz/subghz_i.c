@@ -220,16 +220,16 @@ void subghz_dialog_message_show_only_rx(SubGhz* subghz) {
     DialogMessage* message = dialog_message_alloc();
 
     const char* header_text = "Transmission is blocked";
-    const char* message_text = "This frequency\nis restricted to\nreceiving only\nin your region.";
+    const char* message_text = "Transmission on\nthis frequency is\nrestricted in\nyour region";
     if(!furi_hal_region_is_provisioned()) {
-        header_text = "Firmware Update needed";
+        header_text = "Firmware update needed";
         message_text = "Please update\nfirmware before\nusing this feature\nflipp.dev/upd";
     }
 
-    dialog_message_set_header(message, header_text, 0, 3, AlignLeft, AlignTop);
+    dialog_message_set_header(message, header_text, 63, 3, AlignCenter, AlignTop);
     dialog_message_set_text(message, message_text, 0, 17, AlignLeft, AlignTop);
 
-    dialog_message_set_icon(message, &I_DolphinFirstStart8_56x51, 72, 14);
+    dialog_message_set_icon(message, &I_DolphinCommon_56x48, 72, 17);
 
     dialog_message_show(dialogs, message);
     dialog_message_free(message);
