@@ -189,6 +189,7 @@ bool protocol_hid192_generic_write_data(ProtocolHID192* protocol, void* data) {
 };
 
 void protocol_hid192_generic_render_data(ProtocolHID192* protocol, string_t result) {
+    // TODO: parser and render functions
     UNUSED(protocol);
     string_printf(result, "Generic 192 bit HID\r\nData: Unknown");
 };

@@ -186,6 +186,7 @@ bool protocol_hid96_generic_write_data(ProtocolHID96* protocol, void* data) {
 };
 
 void protocol_hid96_generic_render_data(ProtocolHID96* protocol, string_t result) {
+    // TODO: parser and render functions
     UNUSED(protocol);
     string_printf(result, "Generic 96 bit HID\r\nData: Unknown");
 };
