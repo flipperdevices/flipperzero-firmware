@@ -16,6 +16,7 @@
 - Infrared: audio.ir updated from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Added CUSTOM_FLIPPER_NAME By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Updated Bluetooth fix so device name says zzRogue instead of Flipper or Rogue to test Android compatability
+- OFW: [SubGhz: update notification messages #1602 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1602)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
