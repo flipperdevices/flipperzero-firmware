@@ -48,7 +48,7 @@ class GitVersion:
                 "GIT_BRANCH": "dev",
                 "GIT_BRANCH_NUM": branch_num,
                 "FURI_CUSTOM_FLIPPER_NAME": custom_fz_name,
-                "VERSION": "0.64.3",
+                "VERSION": "0.64.5",
                 "BUILD_DIRTY": 0,
             }
         else:
