@@ -1,4 +1,4 @@
-# How to change Flipper name: [Feature By Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware/documentation/CustomFlipperName.md)
+# How to change Flipper name: [Feature & Documentation By Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware/documentation/CustomFlipperName.md)
 
 ## Instruction
 1. Read [How to build](https://github.com/RogueMaster/flipperzero-firmware/blob/dev/documentation/HowToBuild.md) and [How to install](https://github.com/RogueMaster/flipperzero-firmware/blob/dev/documentation/HowToInstall.md) to know how to build and install firmware
