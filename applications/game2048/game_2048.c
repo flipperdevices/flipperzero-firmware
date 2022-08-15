@@ -53,8 +53,8 @@ typedef struct {
 } Point;
 
 typedef struct {
-    uint16_t gameScore;
-    uint16_t highScore;
+    uint32_t gameScore;
+    uint32_t highScore;
 } Score;
 
 typedef struct {
@@ -112,14 +112,14 @@ static void game_2048_render_callback(Canvas* const canvas, ValueMutex* const vm
         }
 
         // display score
-        char buffer[6];
-        snprintf(buffer, sizeof(buffer), "%u", game_state->score.gameScore);
-        canvas_draw_str_aligned(canvas, 126, 8, AlignRight, AlignBottom, buffer);
+        char buffer[12];
+        snprintf(buffer, sizeof(buffer), "%lu", game_state->score.gameScore);
+        canvas_draw_str_aligned(canvas, 128, 8, AlignRight, AlignBottom, buffer);
 
         if(game_state->score.highScore > 0) {
-            char buffer2[6];
-            snprintf(buffer2, sizeof(buffer2), "%u", game_state->score.highScore);
-            canvas_draw_str_aligned(canvas, 126, 62, AlignRight, AlignBottom, buffer2);
+            char buffer2[12];
+            snprintf(buffer2, sizeof(buffer2), "%lu", game_state->score.highScore);
+            canvas_draw_str_aligned(canvas, 128, 62, AlignRight, AlignBottom, buffer2);
         }
     } else { // if animation
         // for animation

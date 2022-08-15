@@ -1,5 +1,5 @@
 V:0
-T:1660370842
+T:1660436572
 D:apps
 D:badusb
 D:dolphin
@@ -372,7 +372,7 @@ F:b877ff3fdb3c642d272d039e832f3bfb:204:subghz/Misc/Sextoy/Sextoy4.sub
 D:subghz/Vehicles/Tesla
 F:8b22aa0a2df0b22fc5791a3ecb4fa4fb:10991:subghz/Vehicles/Tesla/Tesla_charge_AM270.sub
 F:7ea28e3ce3c38b2d98ae99aecc45b7b9:11913:subghz/Vehicles/Tesla/Tesla_charge_AM650.sub
-F:b5380ddd37e6d35fd71a38c5690dd68b:1355:subghz/assets/README.md
+F:cccd43955a08a0f3c0e974fe6d09fb2e:1363:subghz/assets/README.md
 F:dda1ef895b8a25fde57c874feaaef997:650:subghz/assets/came_atomo
 F:ea81ac5f878e045581a2f5e2add46b0b:180:subghz/assets/extend_range.txt
 F:5e81e9809984ee74d426730c1afa4093:3232:subghz/assets/keeloq_mfcodes

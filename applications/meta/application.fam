@@ -66,6 +66,7 @@ App(
         "GAME_Tetris",
         "GAME_TicTacToe",
         "GAME_VideoPoker",
+        "GAME_Zombiez",
     ],
 )
 
@@ -125,5 +126,6 @@ App(
         "GAME_MandelbrotSet",
         "GAME_GameOfLife",
         "GAME_Tanks",
+        "GAME_Zombiez",
     ],
 )
