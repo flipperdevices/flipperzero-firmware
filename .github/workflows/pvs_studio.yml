@@ -29,9 +29,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 'Build firmware'
-        run: FBT_TOOLCHAIN_PATH=/opt ./fbt
-
+#     - name: 'Build firmware'
+#        run: FBT_TOOLCHAIN_PATH=/opt ./fbt
+#
       - name: 'Static code analysis'
         run: |
           FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
