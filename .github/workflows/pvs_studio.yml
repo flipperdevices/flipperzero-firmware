@@ -34,6 +34,7 @@ jobs:
 
       - name: 'Static code analysis'
         run: |
+          FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
           pvs-studio-analyzer analyze -l /opt/pvs_studio/PVS-Studio.lic -f build/latest/compile_commands.json -o PVS-Studio.log
 
       - name: 'Generate suffix and folder name'
