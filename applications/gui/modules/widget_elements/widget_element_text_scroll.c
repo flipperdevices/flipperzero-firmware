@@ -218,7 +218,6 @@ WidgetElement* widget_element_text_scroll_create(
     GuiTextScrollLineArray_init(model->line_array);
     string_init_set_str(model->text, text);
 
-    // Allocate and init Element
     WidgetElement* text_scroll = malloc(sizeof(WidgetElement));
     text_scroll->parent = NULL;
     text_scroll->draw = gui_text_scroll_draw;
