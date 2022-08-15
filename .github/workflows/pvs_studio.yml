@@ -62,6 +62,11 @@ jobs:
           echo "::set-output name=short-hash::${SHA}"
           echo "::set-output name=default-target::${DEFAULT_TARGET}"
 
+      - name: 'Make reports directory'
+        run: |
+          rm -rf reports/
+          mkdir reports
+
       - name: 'Convert PVS-Studio output to html page'
         run: plog-converter -t fullhtml PVS-Studio.log -o reports/${{steps.names.outputs.default-target}}-${{steps.names.outputs.suffix}}
 
