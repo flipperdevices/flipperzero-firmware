@@ -14,7 +14,7 @@
 - 2048 Score Fix [By DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/227)
 - Changed code to use RECORD defines like [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) did.
 - Infrared: audio.ir updated from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Added CUSTOM_FLIPPER_NAME By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
+- Added [Settings: Custom name with this compile: CUSTOM_FLIPPER_NAME=name ./fbt updater_package (By Unleashed/xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/CustomFlipperName.md)
 - Updated Bluetooth fix so device name says zzRogue instead of Flipper or Rogue to test Android compatability
 - OFW: [SubGhz: update notification messages #1602 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1602)
 
