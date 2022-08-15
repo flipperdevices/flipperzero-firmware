@@ -3,7 +3,7 @@
 #include <gui/elements.h>
 #include <m-array.h>
 
-#define TAG "TextScroll"
+#define WIDGET_ELEMENT_TEXT_SCROLL_BAR_OFFSET (4)
 
 typedef struct {
     Font font;
@@ -20,8 +20,8 @@ typedef struct {
     uint8_t width;
     uint8_t height;
     string_t text;
-    uint8_t total_lines;
-    uint8_t current_line;
+    uint8_t scroll_pos_total;
+    uint8_t scroll_pos_current;
     bool text_formatted;
 } GuiTextScrollModel;
 
@@ -62,6 +62,7 @@ static void gui_text_scroll_fill_lines(Canvas* canvas, WidgetElement* element) {
     bool all_text_processed = false;
     string_init(line_tmp.text);
     bool reached_new_line = true;
+    uint16_t total_height = 0;
 
     while(!all_text_processed) {
         if(reached_new_line) {
@@ -75,6 +76,11 @@ static void gui_text_scroll_fill_lines(Canvas* canvas, WidgetElement* element) {
         }
         // Set canvas font
         canvas_set_font(canvas, line_tmp.font);
+        CanvasFontParameters* params = canvas_get_font_params(canvas, line_tmp.font);
+        total_height += params->height;
+        if(total_height > model->height) {
+            model->scroll_pos_total++;
+        }
 
         uint8_t line_width = 0;
         uint16_t char_i = 0;
@@ -83,12 +89,14 @@ static void gui_text_scroll_fill_lines(Canvas* canvas, WidgetElement* element) {
             if(next_char == '\0') {
                 string_push_back(line_tmp.text, '\0');
                 widget_element_text_scroll_add_line(element, &line_tmp);
+                total_height += params->leading_default - params->height;
                 all_text_processed = true;
                 break;
             } else if(next_char == '\n') {
                 string_push_back(line_tmp.text, '\0');
                 widget_element_text_scroll_add_line(element, &line_tmp);
                 string_right(model->text, char_i);
+                total_height += params->leading_default - params->height;
                 reached_new_line = true;
                 break;
             } else {
@@ -98,6 +106,7 @@ static void gui_text_scroll_fill_lines(Canvas* canvas, WidgetElement* element) {
                     widget_element_text_scroll_add_line(element, &line_tmp);
                     string_right(model->text, char_i - 1);
                     string_reset(line_tmp.text);
+                    total_height += params->leading_default - params->height;
                     reached_new_line = false;
                     break;
                 } else {
@@ -119,11 +128,15 @@ static void gui_text_scroll_draw(Canvas* canvas, WidgetElement* element) {
 
     uint8_t y = model->y;
     uint8_t x = model->x;
+    uint16_t curr_line = 0;
     if(GuiTextScrollLineArray_size(model->line_array)) {
         GuiTextScrollLineArray_it_t it;
         for(GuiTextScrollLineArray_it(it, model->line_array); !GuiTextScrollLineArray_end_p(it);
-            GuiTextScrollLineArray_next(it)) {
+            GuiTextScrollLineArray_next(it), curr_line++) {
+            if(curr_line < model->scroll_pos_current) continue;
             GuiTextScrollLine* line = GuiTextScrollLineArray_ref(it);
+            CanvasFontParameters* params = canvas_get_font_params(canvas, line->font);
+            if(y + params->descender > model->y + model->height) break;
             canvas_set_font(canvas, line->font);
             if(line->horizontal == AlignLeft) {
                 x = model->x;
@@ -134,8 +147,17 @@ static void gui_text_scroll_draw(Canvas* canvas, WidgetElement* element) {
             }
             canvas_draw_str_aligned(
                 canvas, x, y, line->horizontal, AlignTop, string_get_cstr(line->text));
-            // Rework with different fonts
-            y += 11;
+            y += params->leading_default;
+        }
+        // Draw scroll bar
+        if(model->scroll_pos_total > 1) {
+            elements_scrollbar_pos(
+                canvas,
+                model->x + model->width + WIDGET_ELEMENT_TEXT_SCROLL_BAR_OFFSET,
+                model->y,
+                model->height,
+                model->scroll_pos_current,
+                model->scroll_pos_total);
         }
     }
 }
@@ -144,16 +166,19 @@ static bool gui_text_scroll_input(InputEvent* event, WidgetElement* element) {
     GuiTextScrollModel* model = element->model;
     bool consumed = false;
 
-    if(event->key == InputKeyUp) {
-        if(model->current_line > 0) {
-            model->current_line--;
+    if((event->type == InputTypeShort) || (event->type == InputTypeRepeat)) {
+        if(event->key == InputKeyUp) {
+            if(model->scroll_pos_current > 0) {
+                model->scroll_pos_current--;
+            }
+            consumed = true;
+        } else if(event->key == InputKeyDown) {
+            if((model->scroll_pos_total > 1) &&
+               (model->scroll_pos_current < model->scroll_pos_total - 1)) {
+                model->scroll_pos_current++;
+            }
+            consumed = true;
         }
-        consumed = true;
-    } else if(event->key == InputKeyDown) {
-        if(model->current_line < model->total_lines) {
-            model->current_line++;
-        }
-        consumed = true;
     }
 
     return consumed;
@@ -186,10 +211,10 @@ WidgetElement* widget_element_text_scroll_create(
     GuiTextScrollModel* model = malloc(sizeof(GuiTextScrollModel));
     model->x = x;
     model->y = y;
-    model->width = width - 4;
+    model->width = width - WIDGET_ELEMENT_TEXT_SCROLL_BAR_OFFSET;
     model->height = height;
-    model->current_line = 0;
-    model->total_lines = 0; //CALCULATE
+    model->scroll_pos_current = 0;
+    model->scroll_pos_total = 1;
     GuiTextScrollLineArray_init(model->line_array);
     string_init_set_str(model->text, text);
 
