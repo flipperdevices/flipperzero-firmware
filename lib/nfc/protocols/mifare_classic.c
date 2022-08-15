@@ -324,6 +324,9 @@ bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
     UNUSED(ATQA1);
     if((ATQA0 == 0x44 || ATQA0 == 0x04) && (SAK == 0x08 || SAK == 0x88 || SAK == 0x09)) {
         return true;
+    } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {
+        //skylanders support
+        return true;
     } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
         return true;
     } else {
@@ -335,25 +338,13 @@ MfClassicType mf_classic_get_classic_type(int8_t ATQA0, uint8_t ATQA1, uint8_t S
     UNUSED(ATQA1);
     if((ATQA0 == 0x44 || ATQA0 == 0x04) && (SAK == 0x08 || SAK == 0x88 || SAK == 0x09)) {
         return MfClassicType1k;
+    } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {
+        //skylanders support
+        return MfClassicType1k;
     } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
         return MfClassicType4k;
     }
     return MfClassicType1k;
-}
-
-bool mf_classic_get_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK, MfClassicReader* reader) {
-    UNUSED(ATQA1);
-    furi_assert(reader);
-    memset(reader, 0, sizeof(MfClassicReader));
-
-    if((ATQA0 == 0x44 || ATQA0 == 0x04) && (SAK == 0x08 || SAK == 0x88 || SAK == 0x09)) {
-        reader->type = MfClassicType1k;
-    } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
-        reader->type = MfClassicType4k;
-    } else {
-        return false;
-    }
-    return true;
 }
 
 void mf_classic_reader_add_sector(
@@ -780,6 +771,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
     // Read command
     while(!command_processed) {
         if(!is_encrypted) {
+            crypto1_reset(&emulator->crypto);
             memcpy(plain_data, tx_rx->rx_data, tx_rx->rx_bits / 8);
         } else {
             if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
@@ -812,7 +804,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 access_key = MfClassicKeyB;
             }
 
-            uint32_t nonce = prng_successor(DWT->CYCCNT, 32);
+            uint32_t nonce = prng_successor(DWT->CYCCNT, 32) ^ 0xAA;
             uint8_t nt[4];
             uint8_t nt_keystream[4];
             nfc_util_num2bytes(nonce, 4, nt);
@@ -867,7 +859,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             uint32_t cardRr = ar ^ crypto1_word(&emulator->crypto, 0, 0);
             if(cardRr != prng_successor(nonce, 64)) {
                 FURI_LOG_T(TAG, "Wrong AUTH! %08X != %08X", cardRr, prng_successor(nonce, 64));
-                // Don't send NACK, as tag don't send it
+                // Don't send NACK, as the tag doesn't send it
                 command_processed = true;
                 break;
             }
@@ -906,7 +898,18 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             } else {
                 if(!mf_classic_is_allowed_access(
                        emulator, block, access_key, MfClassicActionDataRead)) {
-                    memset(block_data, 0, 16);
+                    // Send NACK
+                    uint8_t nack = 0x04;
+                    if(is_encrypted) {
+                        mf_crypto1_encrypt(
+                            &emulator->crypto, NULL, &nack, 4, tx_rx->tx_data, tx_rx->tx_parity);
+                    } else {
+                        tx_rx->tx_data[0] = nack;
+                    }
+                    tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
+                    tx_rx->tx_bits = 4;
+                    furi_hal_nfc_tx_rx(tx_rx, 300);
+                    break;
                 }
             }
             nfca_append_crc16(block_data, 16);
