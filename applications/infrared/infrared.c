@@ -7,10 +7,12 @@ static const NotificationSequence* infrared_notification_sequences[] = {
     &sequence_success,
     &sequence_set_only_green_255,
     &sequence_reset_green,
-    &sequence_blink_cyan_10,
-    &sequence_blink_magenta_10,
     &sequence_solid_yellow,
-    &sequence_reset_rgb};
+    &sequence_reset_rgb,
+    &sequence_blink_start_cyan,
+    &sequence_blink_start_magenta,
+    &sequence_blink_stop,
+};
 
 static void infrared_make_app_folder(Infrared* infrared) {
     if(!storage_simply_mkdir(infrared->storage, INFRARED_APP_FOLDER)) {
@@ -44,6 +46,8 @@ static void infrared_rpc_command_callback(RpcAppSystemEvent event, void* context
     if(event == RpcAppEventSessionClose) {
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcSessionClose);
+        rpc_system_app_set_callback(infrared->rpc_ctx, NULL, NULL);
+        infrared->rpc_ctx = NULL;
     } else if(event == RpcAppEventAppExit) {
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcExit);
@@ -291,6 +295,13 @@ bool infrared_rename_current_remote(Infrared* infrared, const char* name) {
 }
 
 void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal) {
+    if(infrared->app_state.is_transmitting) {
+        FURI_LOG_D(INFRARED_LOG_TAG, "Transmitter is already active");
+        return;
+    } else {
+        infrared->app_state.is_transmitting = true;
+    }
+
     if(infrared_signal_is_raw(signal)) {
         InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
         infrared_worker_set_raw_signal(infrared->worker, raw->timings, raw->timings_size);
@@ -300,6 +311,10 @@ void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal) {
     }
 
     DOLPHIN_DEED(DolphinDeedIrSend);
+    infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStartSend);
+
+    infrared_worker_tx_set_get_signal_callback(
+        infrared->worker, infrared_worker_tx_get_signal_steady_callback, infrared);
     infrared_worker_tx_start(infrared->worker);
 }
 
@@ -310,14 +325,26 @@ void infrared_tx_start_button_index(Infrared* infrared, size_t button_index) {
     InfraredSignal* signal = infrared_remote_button_get_signal(button);
 
     infrared_tx_start_signal(infrared, signal);
+    infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStartSend);
 }
 
 void infrared_tx_start_received(Infrared* infrared) {
     infrared_tx_start_signal(infrared, infrared->received_signal);
+    infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStartSend);
 }
 
 void infrared_tx_stop(Infrared* infrared) {
+    if(!infrared->app_state.is_transmitting) {
+        FURI_LOG_D(INFRARED_LOG_TAG, "Transmitter is already stopped");
+        return;
+    } else {
+        infrared->app_state.is_transmitting = false;
+    }
+
     infrared_worker_tx_stop(infrared->worker);
+    infrared_worker_tx_set_get_signal_callback(infrared->worker, NULL, NULL);
+
+    infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStop);
 }
 
 void infrared_text_store_set(Infrared* infrared, uint32_t bank, const char* text, ...) {
@@ -352,12 +379,6 @@ void infrared_show_loading_popup(Infrared* infrared, bool show) {
         // Restore default timer priority
         vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
     }
-}
-
-void infrared_signal_sent_callback(void* context) {
-    furi_assert(context);
-    Infrared* infrared = context;
-    infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkSend);
 }
 
 void infrared_signal_received_callback(void* context, InfraredWorkerSignal* received_signal) {
@@ -405,7 +426,7 @@ int32_t infrared_app(void* p) {
     bool is_remote_loaded = false;
     bool is_rpc_mode = false;
 
-    if(p) {
+    if(p && strlen(p)) {
         uint32_t rpc_ctx = 0;
         if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
             infrared->rpc_ctx = (void*)rpc_ctx;
