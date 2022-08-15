@@ -249,7 +249,7 @@ uint8_t furi_hal_version_get_hw_connect() {
 }
 
 FuriHalVersionRegion furi_hal_version_get_hw_region() {
-    return FuriHalVersionRegionWorld;
+    return furi_hal_version.board_region;
 }
 
 const char* furi_hal_version_get_hw_region_name() {
