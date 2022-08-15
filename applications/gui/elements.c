@@ -766,10 +766,10 @@ void elements_text_box(
 //     const char* text) {
 //     furi_assert(canvas);
 //     furi_assert(text);
-    
+
 //     if(width < 4) return;
 
 //     uint8_t text_width = width - 4;
 
-//     // 
+//     //
 // }

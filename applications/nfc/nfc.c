@@ -258,7 +258,7 @@ int32_t nfc_app(void* p) {
     } else {
         view_dispatcher_attach_to_gui(
             nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
-        scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightInfo);
+        scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
     }
 
     view_dispatcher_run(nfc->view_dispatcher);
