@@ -179,6 +179,8 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
                 last_read_count,
                 string_get_cstr(string_info));
             string_clear(string_info);
+
+            protocol_dict_decoders_start(worker->protocols);
         }
 
         if((furi_get_tick() - switch_os_tick_last) > timeout) {

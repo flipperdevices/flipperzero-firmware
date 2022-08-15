@@ -14,6 +14,7 @@ typedef enum {
     LFRFIDProtocolIOProxXSF,
     LFRFIDProtocolAwid,
     LFRFIDProtocolFDXB,
+    LFRFIDProtocolHid12Generic,
 
     LFRFIDProtocolMax,
 } LFRFIDProtocol;
