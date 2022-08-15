@@ -61,12 +61,12 @@ void protocol_hid192_generic_decoder_start(ProtocolHID192* protocol) {
 
 static bool protocol_hid192_generic_can_be_decoded(const uint8_t* data) {
     // check preamble
-    if(data[0] != HID_PREAMBLE || data[24] != HID_PREAMBLE) {
+    if(data[0] != HID_PREAMBLE || data[HID_PREAMBLE_SIZE + HID_DATA_SIZE] != HID_PREAMBLE) {
         return false;
     }
 
     // check for manchester encoding
-    for(size_t i = 1; i < 24; i++) {
+    for(size_t i = HID_PREAMBLE_SIZE; i < (HID_PREAMBLE_SIZE + HID_DATA_SIZE); i++) {
         for(size_t n = 0; n < 4; n++) {
             uint8_t bit_pair = (data[i] >> (n * 2)) & 0b11;
             if(bit_pair == 0b11 || bit_pair == 0b00) {
@@ -80,7 +80,7 @@ static bool protocol_hid192_generic_can_be_decoded(const uint8_t* data) {
 
 static void protocol_hid192_generic_decode(const uint8_t* from, uint8_t* to) {
     size_t bit_index = 0;
-    for(size_t i = 1; i < HID_ENCODED_DATA_SIZE; i++) {
+    for(size_t i = HID_PREAMBLE_SIZE; i < (HID_PREAMBLE_SIZE + HID_DATA_SIZE); i++) {
         for(size_t n = 0; n < 4; n++) {
             uint8_t bit_pair = (from[i] >> (6 - (n * 2))) & 0b11;
             if(bit_pair == 0b01) {
@@ -199,7 +199,7 @@ const ProtocolBase protocol_hid192_generic = {
     .manufacturer = "Generic",
     .data_size = HID_DECODED_DATA_SIZE,
     .features = LFRFIDFeatureASK,
-    .validate_count = 6,
+    .validate_count = 3,
     .alloc = (ProtocolAlloc)protocol_hid192_generic_alloc,
     .free = (ProtocolFree)protocol_hid192_generic_free,
     .get_data = (ProtocolGetData)protocol_hid192_generic_get_data,

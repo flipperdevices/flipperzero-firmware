@@ -47,7 +47,6 @@ LfRfidApp::LfRfidApp()
     old_key_data = (uint8_t*)malloc(size);
 
     lfworker = lfrfid_worker_alloc(dict);
-    lfrfid_worker_start_thread(lfworker);
 }
 
 LfRfidApp::~LfRfidApp() {
@@ -55,8 +54,6 @@ LfRfidApp::~LfRfidApp() {
     string_clear(file_path);
     protocol_dict_free(dict);
 
-    lfrfid_worker_stop(lfworker);
-    lfrfid_worker_stop_thread(lfworker);
     lfrfid_worker_free(lfworker);
 
     if(rpc_ctx) {

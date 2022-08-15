@@ -32,6 +32,15 @@
 #define LFRFID_WORKER_READ_STREAM_SIZE 4096
 #define LFRFID_WORKER_EMULATE_BUFFER_SIZE 1024
 
+#define LFRFID_WORKER_DELAY_QUANT 50
+
+void lfrfid_worker_delay(LFRFIDWorker* worker, uint32_t milliseconds) {
+    for(uint32_t i = 0; i < (milliseconds / LFRFID_WORKER_DELAY_QUANT); i++) {
+        if(lfrfid_worker_check_for_stop(worker)) break;
+        furi_delay_ms(LFRFID_WORKER_DELAY_QUANT);
+    }
+}
+
 /**************************************************************************************************/
 /********************************************** READ **********************************************/
 /**************************************************************************************************/
@@ -75,7 +84,7 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
     furi_hal_rfid_tim_read_start();
 
     // stabilize detector
-    furi_delay_ms(LFRFID_WORKER_STABILIZE_TIME);
+    lfrfid_worker_delay(worker, LFRFID_WORKER_STABILIZE_TIME);
 
     protocol_dict_decoders_start(worker->protocols);
 
@@ -242,7 +251,7 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
                 feature = LFRFIDFeatureASK;
             }
 
-            furi_delay_ms(LFRFID_WORKER_READ_DROP_TIME);
+            lfrfid_worker_delay(worker, LFRFID_WORKER_READ_DROP_TIME);
         }
     } else {
         while(1) {
@@ -253,7 +262,7 @@ void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
                 break;
             }
 
-            furi_delay_ms(LFRFID_WORKER_READ_DROP_TIME);
+            lfrfid_worker_delay(worker, LFRFID_WORKER_READ_DROP_TIME);
         }
     }
 
@@ -438,7 +447,7 @@ void lfrfid_worker_mode_write_process(LFRFIDWorker* worker) {
                 }
             }
 
-            furi_delay_ms(LFRFID_WORKER_WRITE_DROP_TIME);
+            lfrfid_worker_delay(worker, LFRFID_WORKER_WRITE_DROP_TIME);
         }
     } else {
         if(worker->write_cb) {

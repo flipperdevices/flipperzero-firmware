@@ -36,6 +36,7 @@ void LfRfidAppSceneRead::on_enter(LfRfidApp* app, bool /* need_restore */) {
     popup->set_icon(0, 3, &I_RFIDDolphinReceive_97x61);
 
     app->view_controller.switch_to<PopupVM>();
+    lfrfid_worker_start_thread(app->lfworker);
     lfrfid_worker_read_start(app->lfworker, LFRFIDWorkerReadTypeAuto, lfrfid_read_callback, app);
 
     notification_message(app->notification, &sequence_blink_start_magenta);
@@ -72,4 +73,5 @@ void LfRfidAppSceneRead::on_exit(LfRfidApp* app) {
     notification_message(app->notification, &sequence_blink_stop);
     app->view_controller.get<PopupVM>()->clean();
     lfrfid_worker_stop(app->lfworker);
+    lfrfid_worker_stop_thread(app->lfworker);
 }

@@ -16,8 +16,8 @@ void LfRfidAppSceneEmulate::on_enter(LfRfidApp* app, bool /* need_restore */) {
     popup->set_icon(0, 3, &I_RFIDDolphinSend_97x61);
 
     app->view_controller.switch_to<PopupVM>();
+    lfrfid_worker_start_thread(app->lfworker);
     lfrfid_worker_emulate_start(app->lfworker, (LFRFIDProtocol)app->protocol_id);
-
     notification_message(app->notification, &sequence_blink_start_magenta);
 }
 
@@ -31,5 +31,6 @@ bool LfRfidAppSceneEmulate::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
 void LfRfidAppSceneEmulate::on_exit(LfRfidApp* app) {
     app->view_controller.get<PopupVM>()->clean();
     lfrfid_worker_stop(app->lfworker);
+    lfrfid_worker_stop_thread(app->lfworker);
     notification_message(app->notification, &sequence_blink_stop);
 }
