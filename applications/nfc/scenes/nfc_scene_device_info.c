@@ -129,37 +129,37 @@ void nfc_scene_device_info_on_enter(void* context) {
         widget_add_string_element(
             nfc->widget, 64, 17, AlignCenter, AlignBottom, FontSecondary, nfc->text_store);
     } else if(nfc->dev->format == NfcDeviceSaveFormatBankCard) {
-        EmvData* emv_data = &nfc->dev->dev_data.emv_data;
-        BankCard* bank_card = nfc->bank_card;
-        bank_card_set_name(bank_card, emv_data->name);
-        bank_card_set_number(bank_card, emv_data->number, emv_data->number_len);
-        bank_card_set_back_callback(bank_card, nfc_scene_device_info_bank_card_callback, nfc);
-        if(emv_data->exp_mon) {
-            bank_card_set_exp_date(bank_card, emv_data->exp_mon, emv_data->exp_year);
-        }
-        string_t display_str;
-        string_init(display_str);
-        if(emv_data->country_code) {
-            string_t country_name;
-            string_init(country_name);
-            if(nfc_emv_parser_get_country_name(
-                   nfc->dev->storage, emv_data->country_code, country_name)) {
-                string_printf(display_str, "Reg:%s", string_get_cstr(country_name));
-                bank_card_set_country_name(bank_card, string_get_cstr(display_str));
-            }
-            string_clear(country_name);
-        }
-        if(emv_data->currency_code) {
-            string_t currency_name;
-            string_init(currency_name);
-            if(nfc_emv_parser_get_currency_name(
-                   nfc->dev->storage, emv_data->country_code, currency_name)) {
-                string_printf(display_str, "Cur:%s", string_get_cstr(currency_name));
-                bank_card_set_currency_name(bank_card, string_get_cstr(display_str));
-            }
-            string_clear(currency_name);
-        }
-        string_clear(display_str);
+        // EmvData* emv_data = &nfc->dev->dev_data.emv_data;
+        // BankCard* bank_card = nfc->bank_card;
+        // bank_card_set_name(bank_card, emv_data->name);
+        // bank_card_set_number(bank_card, emv_data->number, emv_data->number_len);
+        // bank_card_set_back_callback(bank_card, nfc_scene_device_info_bank_card_callback, nfc);
+        // if(emv_data->exp_mon) {
+        //     bank_card_set_exp_date(bank_card, emv_data->exp_mon, emv_data->exp_year);
+        // }
+        // string_t display_str;
+        // string_init(display_str);
+        // if(emv_data->country_code) {
+        //     string_t country_name;
+        //     string_init(country_name);
+        //     if(nfc_emv_parser_get_country_name(
+        //            nfc->dev->storage, emv_data->country_code, country_name)) {
+        //         string_printf(display_str, "Reg:%s", string_get_cstr(country_name));
+        //         bank_card_set_country_name(bank_card, string_get_cstr(display_str));
+        //     }
+        //     string_clear(country_name);
+        // }
+        // if(emv_data->currency_code) {
+        //     string_t currency_name;
+        //     string_init(currency_name);
+        //     if(nfc_emv_parser_get_currency_name(
+        //            nfc->dev->storage, emv_data->country_code, currency_name)) {
+        //         string_printf(display_str, "Cur:%s", string_get_cstr(currency_name));
+        //         bank_card_set_currency_name(bank_card, string_get_cstr(display_str));
+        //     }
+        //     string_clear(currency_name);
+        // }
+        // string_clear(display_str);
     }
     scene_manager_set_scene_state(nfc->scene_manager, NfcSceneDeviceInfo, NfcSceneDeviceInfoUid);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
@@ -187,7 +187,7 @@ bool nfc_scene_device_info_on_event(void* context, SceneManagerEvent event) {
             } else if(nfc->dev->format == NfcDeviceSaveFormatBankCard) {
                 scene_manager_set_scene_state(
                     nfc->scene_manager, NfcSceneDeviceInfo, NfcSceneDeviceInfoData);
-                view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewBankCard);
+                // view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewBankCard);
                 consumed = true;
             } else if(nfc->dev->format == NfcDeviceSaveFormatMifareDesfire) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireData);

@@ -85,7 +85,6 @@ typedef enum {
     NfcViewByteInput,
     NfcViewTextBox,
     NfcViewWidget,
-    NfcViewBankCard,
     NfcViewDictAttack,
 } NfcView;
 
