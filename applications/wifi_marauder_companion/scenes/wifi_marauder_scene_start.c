@@ -1,6 +1,6 @@
 #include "../wifi_marauder_app_i.h"
 
-#define NUM_MENU_ITEMS (29)
+#define NUM_MENU_ITEMS (15)
 
 // For each command, define whether additional arguments are needed
 // (enabling text input to fill them out), and whether the console
@@ -11,47 +11,37 @@
 #define FOCUS_CONSOLE_END   (false)
 struct WifiMarauderItem {
     const char* item_string;
+    const char* options_menu[5];
+    int num_options_menu;
     bool needs_keyboard;
     bool focus_console_start;
 };
 
 const struct WifiMarauderItem items[NUM_MENU_ITEMS] = {
-    { "View Log (start)", NO_ARGS, FOCUS_CONSOLE_START },
-    { "View Log (end)", NO_ARGS, FOCUS_CONSOLE_END },
-    { "attack -t beacon -l", NO_ARGS, FOCUS_CONSOLE_END },
-    { "attack -t beacon -r", NO_ARGS, FOCUS_CONSOLE_END },
-    { "attack -t beacon -a", NO_ARGS, FOCUS_CONSOLE_END },
-    { "attack -t deauth", NO_ARGS, FOCUS_CONSOLE_END },
-    { "attack -t probe", NO_ARGS, FOCUS_CONSOLE_END },
-    { "attack -t rickroll", NO_ARGS, FOCUS_CONSOLE_END },
-    { "channel", NO_ARGS, FOCUS_CONSOLE_END },
-    { "channel -s", INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "clearlist -a", NO_ARGS, FOCUS_CONSOLE_END },
-    { "clearlist -s", NO_ARGS, FOCUS_CONSOLE_END },
-    { "help", NO_ARGS, FOCUS_CONSOLE_START },
-    { "list -a", NO_ARGS, FOCUS_CONSOLE_START },
-    { "list -s", NO_ARGS, FOCUS_CONSOLE_START },
-    { "reboot", NO_ARGS, FOCUS_CONSOLE_END },
-    { "scanap", NO_ARGS, FOCUS_CONSOLE_END },
-    { "select -a", INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "select -s", INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "sniffbeacon", NO_ARGS, FOCUS_CONSOLE_END },
-    { "sniffdeauth", NO_ARGS, FOCUS_CONSOLE_END },
-    { "sniffesp", NO_ARGS, FOCUS_CONSOLE_END },
-    { "sniffpmkid", NO_ARGS, FOCUS_CONSOLE_END },
-    { "sniffpmkid -c", INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "sniffpwn", NO_ARGS, FOCUS_CONSOLE_END },
-    { "ssid -a -g", INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "ssid -a -n", INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "ssid -r", INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "update -w", NO_ARGS, FOCUS_CONSOLE_END },
+    { "View Log", {"(start)", "(end)"}, 2, NO_ARGS, FOCUS_CONSOLE_START },
+    { "attack -t beacon", {"-l", "-r", "-a"}, 3, NO_ARGS, FOCUS_CONSOLE_END },
+    { "attack -t", {"deauth", "probe", "rickroll"}, 3, NO_ARGS, FOCUS_CONSOLE_END },
+    { "channel", {}, 0, NO_ARGS, FOCUS_CONSOLE_END },
+    { "channel -s", {}, 0, INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "clearlist", {"-a", "-s"}, 2, NO_ARGS, FOCUS_CONSOLE_END },
+    { "help", {}, 0, NO_ARGS, FOCUS_CONSOLE_START },
+    { "list", {"-a", "-s"}, 2, NO_ARGS, FOCUS_CONSOLE_START },
+    { "reboot", {}, 0, NO_ARGS, FOCUS_CONSOLE_END },
+    { "scanap", {}, 0, NO_ARGS, FOCUS_CONSOLE_END },
+    { "select", {"-a", "-s"}, 2, INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "sniff", {"beacon", "deauth", "esp", "pmkid", "pwn"}, 5, NO_ARGS, FOCUS_CONSOLE_END },
+    { "sniffpmkid -c", {}, 0, INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "ssid", {"-a -g", "-a -n", "-r"}, 3, INPUT_ARGS, FOCUS_CONSOLE_END },
+    { "update -w", {}, 0, NO_ARGS, FOCUS_CONSOLE_END },
 };
+
+typedef struct WifiMarauderItem WifiMarauderItem;
 
 static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     WifiMarauderApp* app = context;
     app->selected_tx_string = items[index].item_string;
-    app->is_command = (2 <= index);
+    app->is_command = (1 <= index);
     app->is_custom_tx_string = false;
     app->selected_menu_index = index;
     app->focus_console_start = items[index].focus_console_start;
@@ -62,6 +52,14 @@ static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uin
     }
 }
 
+static void wifi_marauder_scene_start_var_list_change_callback(VariableItem* item) {
+    WifiMarauderItem* menu_item = variable_item_get_context(item);
+    furi_assert(menu_item);
+    uint8_t item_index = variable_item_get_current_value_index(item);
+    furi_assert(item_index < menu_item->num_options_menu);
+    variable_item_set_current_value_text(item, menu_item->options_menu[item_index]);
+}
+
 void wifi_marauder_scene_start_on_enter(void* context) {
     WifiMarauderApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
@@ -69,9 +67,13 @@ void wifi_marauder_scene_start_on_enter(void* context) {
     variable_item_list_set_enter_callback(
         var_item_list, wifi_marauder_scene_start_var_list_enter_callback, app);
 
-    // TODO: organize menu
+    VariableItem* item;
     for (int i = 0; i < NUM_MENU_ITEMS; ++i) {
-        variable_item_list_add(var_item_list, items[i].item_string, 0, NULL, NULL);
+        item = variable_item_list_add(var_item_list, items[i].item_string, items[i].num_options_menu, wifi_marauder_scene_start_var_list_change_callback, (WifiMarauderItem*)&items[i]);
+        if (items[i].num_options_menu) {
+            variable_item_set_current_value_index(item, 0);
+            variable_item_set_current_value_text(item, items[i].options_menu[0]);
+        }
     }
 
     variable_item_list_set_selected_item(
