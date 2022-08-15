@@ -46,14 +46,14 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
     }
     string_cat_printf(temp_str, "\nATQA: %02X %02X ", nfc_data->atqa[0], nfc_data->atqa[1]);
-    string_cat_printf(temp_str, "SAK: %02X\n", nfc_data->sak);
+    string_cat_printf(temp_str, " SAK: %02X", nfc_data->sak);
 
     // Set application specific data
     if(protocol == NfcDeviceProtocolMifareDesfire) {
         MifareDesfireData* data = &dev_data->mf_df_data;
         uint32_t bytes_total = 1 << (data->version.sw_storage >> 1);
         uint32_t bytes_free = data->free_memory ? data->free_memory->bytes : 0;
-        string_cat_printf(temp_str, "%d", bytes_total);
+        string_cat_printf(temp_str, "\n%d", bytes_total);
         if(data->version.sw_storage & 1) {
             string_push_back(temp_str, '+');
         }
@@ -77,7 +77,8 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         }
     } else if(protocol == NfcDeviceProtocolMifareUl) {
         MfUltralightData* data = &dev_data->mf_ul_data;
-        string_cat_printf(temp_str, "Pages Read %d/%d", data->data_read / 4, data->data_size / 4);
+        string_cat_printf(
+            temp_str, "\nPages Read %d/%d", data->data_read / 4, data->data_size / 4);
         if(data->data_size > data->data_read) {
             string_cat_printf(temp_str, "\nPassword-protected");
         }
@@ -88,8 +89,8 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         uint8_t keys_found = 0;
         uint8_t sectors_read = 0;
         mf_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
-        string_cat_printf(temp_str, "Keys Found %d/%d\n", keys_found, keys_total);
-        string_cat_printf(temp_str, "Sectors Read %d/%d", sectors_read, sectors_total);
+        string_cat_printf(temp_str, "\nKeys Found %d/%d", keys_found, keys_total);
+        string_cat_printf(temp_str, "\nSectors Read %d/%d", sectors_read, sectors_total);
     }
 
     // Add text scroll widget
