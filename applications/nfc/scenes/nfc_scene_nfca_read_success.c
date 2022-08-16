@@ -31,7 +31,7 @@ void nfc_scene_nfca_read_success_on_enter(void* context) {
     for(size_t i = 0; i < data->uid_len; i++) {
         string_cat_printf(temp_str, " %02X", data->uid[i]);
     }
-    string_cat_printf(temp_str, "\nATQA: %02X %02X ", data->atqa[0], data->atqa[1]);
+    string_cat_printf(temp_str, "\nATQA: %02X %02X ", data->atqa[1], data->atqa[0]);
     string_cat_printf(temp_str, " SAK: %02X", data->sak);
 
     widget_add_text_scroll_element(widget, 0, 0, 128, 52, string_get_cstr(temp_str));

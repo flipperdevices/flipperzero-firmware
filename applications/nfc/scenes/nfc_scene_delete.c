@@ -59,7 +59,7 @@ void nfc_scene_delete_on_enter(void* context) {
     widget_add_string_element(nfc->widget, 118, 33, AlignRight, AlignTop, FontSecondary, "NFC-A");
     snprintf(temp_str, sizeof(temp_str), "SAK: %02X", data->sak);
     widget_add_string_element(nfc->widget, 10, 43, AlignLeft, AlignTop, FontSecondary, temp_str);
-    snprintf(temp_str, sizeof(temp_str), "ATQA: %02X%02X", data->atqa[0], data->atqa[1]);
+    snprintf(temp_str, sizeof(temp_str), "ATQA: %02X%02X", data->atqa[1], data->atqa[0]);
     widget_add_string_element(nfc->widget, 118, 43, AlignRight, AlignTop, FontSecondary, temp_str);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);

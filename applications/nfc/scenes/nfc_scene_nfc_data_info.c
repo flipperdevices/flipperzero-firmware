@@ -51,7 +51,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     for(size_t i = 0; i < nfc_data->uid_len; i++) {
         string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
     }
-    string_cat_printf(temp_str, "\nATQA: %02X %02X ", nfc_data->atqa[0], nfc_data->atqa[1]);
+    string_cat_printf(temp_str, "\nATQA: %02X %02X ", nfc_data->atqa[1], nfc_data->atqa[0]);
     string_cat_printf(temp_str, " SAK: %02X", nfc_data->sak);
 
     // Set application specific data
