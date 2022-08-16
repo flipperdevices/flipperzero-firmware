@@ -59,8 +59,8 @@ jobs:
             export PULL_ID="${{github.event.pull_request.number}}"
             export PULL_NAME="${{github.event.pull_request.title}}"
             export REF="${{github.head_ref}}"
-            export COMMIT_HASH="$(git log -2 --pretty=oneline | tail -n 1 | awk '{print $1}')"
-            export COMMIT_MSG="$(git log -2 --pretty=format:"%s" | tail -n 1)"
+            export COMMIT_HASH="$(git log -1 --pretty=oneline | awk '{print $1}')"
+            export COMMIT_MSG="$(git log -1 --pretty=format:"%s")"
           fi
           export BRANCH_NAME="${REF#refs/*/}"
           export BSS_SIZE="$(get_size ".bss")"
