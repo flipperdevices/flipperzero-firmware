@@ -114,6 +114,8 @@ static void widget_element_text_scroll_fill_lines(Canvas* canvas, WidgetElement*
             }
         }
     }
+
+    string_clear(line_tmp.text);
 }
 
 static void widget_element_text_scroll_draw(Canvas* canvas, WidgetElement* element) {
