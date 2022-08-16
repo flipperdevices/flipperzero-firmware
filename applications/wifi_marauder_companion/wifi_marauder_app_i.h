@@ -38,6 +38,7 @@ struct WifiMarauderApp {
     bool is_command;
     bool is_custom_tx_string;
     bool focus_console_start;
+    bool show_stopscan_tip;
 };
 
 // Supported commands:

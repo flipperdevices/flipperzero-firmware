@@ -15,6 +15,9 @@ typedef enum {
     FOCUS_CONSOLE_TOGGLE
 } FocusConsole;
 
+#define SHOW_STOPSCAN_TIP (true)
+#define NO_TIP (false)
+
 typedef struct {
     const char* item_string;
     const char* options_menu[5];
@@ -22,23 +25,24 @@ typedef struct {
     const char* actual_commands[5];
     InputArgs needs_keyboard;
     FocusConsole focus_console;
+    bool show_stopscan_tip;
 } WifiMarauderItem;
 
 const WifiMarauderItem items[NUM_MENU_ITEMS] = {
-    { "View Log from", {"start", "end"}, 2, {}, NO_ARGS, FOCUS_CONSOLE_TOGGLE },
-    { "Scan", {""}, 1, {"scanap"}, NO_ARGS, FOCUS_CONSOLE_END },
-    { "List", {"ap", "ssid"}, 2, {"list -a", "list -s"}, NO_ARGS, FOCUS_CONSOLE_START },
-    { "Select", {"ap", "ssid"}, 2, {"select -a", "select -s"}, INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "Clear List", {"ap", "ssid"}, 2, {"clearlist -a", "clearlist -s"}, NO_ARGS, FOCUS_CONSOLE_END },
-    { "SSID", {"add random", "add name", "remove"}, 3, {"ssid -a -g", "ssid -a -n", "ssid -r"}, INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "Attack", {"deauth", "probe", "rickroll"}, 3, {"attack -t deauth", "attack -t probe", "attack -t rickroll"}, NO_ARGS, FOCUS_CONSOLE_END },
-    { "Beacon Spam", {"ap", "ssid", "random"}, 3, {"attack -t beacon -a", "attack -t beacon -l", "attack -t beacon -r"}, NO_ARGS, FOCUS_CONSOLE_END },
-    { "Sniff", {"beacon", "deauth", "esp", "pmkid", "pwn"}, 5, {"sniffbeacon", "sniffdeauth", "sniffesp", "sniffpmkid", "sniffpwn"}, NO_ARGS, FOCUS_CONSOLE_END },
-    { "Sniff PMKID on channel", {""}, 1, {"sniffpmkid -c"}, INPUT_ARGS, FOCUS_CONSOLE_END },
-    { "Channel", {"get", "set"}, 2, {"channel", "channel -s"}, TOGGLE_ARGS, FOCUS_CONSOLE_END },
-    { "Update", {""}, 1, {"update -w"}, NO_ARGS, FOCUS_CONSOLE_END },
-    { "Reboot", {""}, 1, {"reboot"}, NO_ARGS, FOCUS_CONSOLE_END },
-    { "Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START },
+    { "View Log from", {"start", "end"}, 2, {}, NO_ARGS, FOCUS_CONSOLE_TOGGLE, NO_TIP },
+    { "Scan Access Points (AP)", {""}, 1, {"scanap"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
+    { "SSID", {"add random", "add name", "remove"}, 3, {"ssid -a -g", "ssid -a -n", "ssid -r"}, INPUT_ARGS, FOCUS_CONSOLE_START, NO_TIP },
+    { "List", {"ap", "ssid"}, 2, {"list -a", "list -s"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP },
+    { "Select", {"ap", "ssid"}, 2, {"select -a", "select -s"}, INPUT_ARGS, FOCUS_CONSOLE_END, NO_TIP },
+    { "Clear List", {"ap", "ssid"}, 2, {"clearlist -a", "clearlist -s"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP },
+    { "Attack", {"deauth", "probe", "rickroll"}, 3, {"attack -t deauth", "attack -t probe", "attack -t rickroll"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
+    { "Beacon Spam", {"ap list", "ssid list", "random"}, 3, {"attack -t beacon -a", "attack -t beacon -l", "attack -t beacon -r"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
+    { "Sniff", {"beacon", "deauth", "esp", "pmkid", "pwn"}, 5, {"sniffbeacon", "sniffdeauth", "sniffesp", "sniffpmkid", "sniffpwn"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
+    { "Sniff PMKID on channel", {""}, 1, {"sniffpmkid -c"}, INPUT_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
+    { "Channel", {"get", "set"}, 2, {"channel", "channel -s"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP },
+    { "Update", {""}, 1, {"update -w"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP },
+    { "Reboot", {""}, 1, {"reboot"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP },
+    { "Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP },
 };
 
 
@@ -52,6 +56,7 @@ static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uin
     app->is_custom_tx_string = false;
     app->selected_menu_index = index;
     app->focus_console_start = (items[index].focus_console == FOCUS_CONSOLE_TOGGLE) ? (app->selected_option_index[index] == 0) : items[index].focus_console;
+    app->show_stopscan_tip = items[index].show_stopscan_tip;
 
     bool needs_keyboard = (items[index].needs_keyboard == TOGGLE_ARGS) ? (app->selected_option_index[index] == 1) : items[index].needs_keyboard;
     if (needs_keyboard) {
