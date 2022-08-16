@@ -3,17 +3,9 @@
 // For each command, define whether additional arguments are needed
 // (enabling text input to fill them out), and whether the console
 // text box should focus at the start of the output or the end
-typedef enum {
-    NO_ARGS = 0,
-    INPUT_ARGS,
-    TOGGLE_ARGS
-} InputArgs;
+typedef enum { NO_ARGS = 0, INPUT_ARGS, TOGGLE_ARGS } InputArgs;
 
-typedef enum {
-    FOCUS_CONSOLE_END = 0,
-    FOCUS_CONSOLE_START,
-    FOCUS_CONSOLE_TOGGLE
-} FocusConsole;
+typedef enum { FOCUS_CONSOLE_END = 0, FOCUS_CONSOLE_START, FOCUS_CONSOLE_TOGGLE } FocusConsole;
 
 #define SHOW_STOPSCAN_TIP (true)
 #define NO_TIP (false)
@@ -31,23 +23,75 @@ typedef struct {
 
 // NUM_MENU_ITEMS defined in wifi_marauder_app_i.h - if you add an entry here, increment it!
 const WifiMarauderItem items[NUM_MENU_ITEMS] = {
-    { "View Log from", {"start", "end"}, 2, {"", ""}, NO_ARGS, FOCUS_CONSOLE_TOGGLE, NO_TIP },
-    { "Scan AP", {""}, 1, {"scanap"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
-    { "SSID", {"add random", "add name", "remove"}, 3, {"ssid -a -g", "ssid -a -n", "ssid -r"}, INPUT_ARGS, FOCUS_CONSOLE_START, NO_TIP },
-    { "List", {"ap", "ssid"}, 2, {"list -a", "list -s"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP },
-    { "Select", {"ap", "ssid"}, 2, {"select -a", "select -s"}, INPUT_ARGS, FOCUS_CONSOLE_END, NO_TIP },
-    { "Clear List", {"ap", "ssid"}, 2, {"clearlist -a", "clearlist -s"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP },
-    { "Attack", {"deauth", "probe", "rickroll"}, 3, {"attack -t deauth", "attack -t probe", "attack -t rickroll"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
-    { "Beacon Spam", {"ap list", "ssid list", "random"}, 3, {"attack -t beacon -a", "attack -t beacon -l", "attack -t beacon -r"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
-    { "Sniff", {"beacon", "deauth", "esp", "pmkid", "pwn"}, 5, {"sniffbeacon", "sniffdeauth", "sniffesp", "sniffpmkid", "sniffpwn"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
-    { "Sniff PMKID on channel", {""}, 1, {"sniffpmkid -c"}, INPUT_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
-    { "Channel", {"get", "set"}, 2, {"channel", "channel -s"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP },
-    { "Settings", {"display", "restore", "ForcePMKID", "ForceProbe", "SavePCAP", "other"}, 6, {"settings", "settings -r", "settings -s ForcePMKID enable", "settings -s ForceProbe enable", "settings -s SavePCAP enable", "settings -s"}, TOGGLE_ARGS, FOCUS_CONSOLE_START, NO_TIP },
-    { "Update", {""}, 1, {"update -w"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP },
-    { "Reboot", {""}, 1, {"reboot"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP },
-    { "Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP },
+    {"View Log from", {"start", "end"}, 2, {"", ""}, NO_ARGS, FOCUS_CONSOLE_TOGGLE, NO_TIP},
+    {"Scan AP", {""}, 1, {"scanap"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP},
+    {"SSID",
+     {"add random", "add name", "remove"},
+     3,
+     {"ssid -a -g", "ssid -a -n", "ssid -r"},
+     INPUT_ARGS,
+     FOCUS_CONSOLE_START,
+     NO_TIP},
+    {"List", {"ap", "ssid"}, 2, {"list -a", "list -s"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP},
+    {"Select", {"ap", "ssid"}, 2, {"select -a", "select -s"}, INPUT_ARGS, FOCUS_CONSOLE_END, NO_TIP},
+    {"Clear List",
+     {"ap", "ssid"},
+     2,
+     {"clearlist -a", "clearlist -s"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
+    {"Attack",
+     {"deauth", "probe", "rickroll"},
+     3,
+     {"attack -t deauth", "attack -t probe", "attack -t rickroll"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     SHOW_STOPSCAN_TIP},
+    {"Beacon Spam",
+     {"ap list", "ssid list", "random"},
+     3,
+     {"attack -t beacon -a", "attack -t beacon -l", "attack -t beacon -r"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     SHOW_STOPSCAN_TIP},
+    {"Sniff",
+     {"beacon", "deauth", "esp", "pmkid", "pwn"},
+     5,
+     {"sniffbeacon", "sniffdeauth", "sniffesp", "sniffpmkid", "sniffpwn"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     SHOW_STOPSCAN_TIP},
+    {"Sniff PMKID on channel",
+     {""},
+     1,
+     {"sniffpmkid -c"},
+     INPUT_ARGS,
+     FOCUS_CONSOLE_END,
+     SHOW_STOPSCAN_TIP},
+    {"Channel",
+     {"get", "set"},
+     2,
+     {"channel", "channel -s"},
+     TOGGLE_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
+    {"Settings",
+     {"display", "restore", "ForcePMKID", "ForceProbe", "SavePCAP", "other"},
+     6,
+     {"settings",
+      "settings -r",
+      "settings -s ForcePMKID enable",
+      "settings -s ForceProbe enable",
+      "settings -s SavePCAP enable",
+      "settings -s"},
+     TOGGLE_ARGS,
+     FOCUS_CONSOLE_START,
+     NO_TIP},
+    {"Update", {""}, 1, {"update -w"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
+    {"Reboot", {""}, 1, {"reboot"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
+    {"Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
 };
-
 
 static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
@@ -62,11 +106,14 @@ static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uin
     app->is_command = (1 <= index);
     app->is_custom_tx_string = false;
     app->selected_menu_index = index;
-    app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ? (selected_option_index == 0) : item->focus_console;
+    app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
+                                   (selected_option_index == 0) :
+                                   item->focus_console;
     app->show_stopscan_tip = item->show_stopscan_tip;
 
-    bool needs_keyboard = (item->needs_keyboard == TOGGLE_ARGS) ? (selected_option_index != 0) : item->needs_keyboard;
-    if (needs_keyboard) {
+    bool needs_keyboard = (item->needs_keyboard == TOGGLE_ARGS) ? (selected_option_index != 0) :
+                                                                  item->needs_keyboard;
+    if(needs_keyboard) {
         view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartKeyboard);
     } else {
         view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartConsole);
@@ -94,10 +141,16 @@ void wifi_marauder_scene_start_on_enter(void* context) {
         var_item_list, wifi_marauder_scene_start_var_list_enter_callback, app);
 
     VariableItem* item;
-    for (int i = 0; i < NUM_MENU_ITEMS; ++i) {
-        item = variable_item_list_add(var_item_list, items[i].item_string, items[i].num_options_menu, wifi_marauder_scene_start_var_list_change_callback, app);
+    for(int i = 0; i < NUM_MENU_ITEMS; ++i) {
+        item = variable_item_list_add(
+            var_item_list,
+            items[i].item_string,
+            items[i].num_options_menu,
+            wifi_marauder_scene_start_var_list_change_callback,
+            app);
         variable_item_set_current_value_index(item, app->selected_option_index[i]);
-        variable_item_set_current_value_text(item, items[i].options_menu[app->selected_option_index[i]]);
+        variable_item_set_current_value_text(
+            item, items[i].options_menu[app->selected_option_index[i]]);
     }
 
     variable_item_list_set_selected_item(
@@ -112,15 +165,17 @@ bool wifi_marauder_scene_start_on_event(void* context, SceneManagerEvent event) 
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if (event.event == WifiMarauderEventStartKeyboard) {
-            scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
+        if(event.event == WifiMarauderEventStartKeyboard) {
+            scene_manager_set_scene_state(
+                app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, WifiMarauderAppViewTextInput);
-        } else if (event.event == WifiMarauderEventStartConsole) {
-            scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
+        } else if(event.event == WifiMarauderEventStartConsole) {
+            scene_manager_set_scene_state(
+                app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, WifiMarauderAppViewConsoleOutput);
         }
         consumed = true;
-    } else if (event.type == SceneManagerEventTypeTick) {
+    } else if(event.type == SceneManagerEventTypeTick) {
         app->selected_menu_index = variable_item_list_get_selected_item_index(app->var_item_list);
         consumed = true;
     }
