@@ -118,9 +118,7 @@ bool wifi_marauder_scene_start_on_event(void* context, SceneManagerEvent event) 
             scene_manager_next_scene(app->scene_manager, WifiMarauderAppViewConsoleOutput);
         }
         consumed = true;
-    }
-    else
-    {
+    } else if (event.type == SceneManagerEventTypeTick) {
         app->selected_menu_index = variable_item_list_get_selected_item_index(app->var_item_list);
         consumed = true;
     }
