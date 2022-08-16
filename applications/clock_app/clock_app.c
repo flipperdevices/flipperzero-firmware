@@ -55,11 +55,9 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     canvas_set_font(canvas, FontBigNumbers);
     if(timerStarted || timerSecs!=0) {
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]);
-        canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]);
         canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]);
     } else {
         canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]);
         canvas_set_font(canvas, FontSecondary);
