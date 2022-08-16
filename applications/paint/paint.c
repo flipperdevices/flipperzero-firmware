@@ -3,7 +3,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification.h>
-// #include <notification/notification_messages.h>
+#include <notification/notification_messages.h>
 #include <stdbool.h> // Header-file for boolean data-type.
 
 typedef struct selected_position {
@@ -14,6 +14,7 @@ typedef struct selected_position {
 typedef struct {
     selected_position selected;
     bool board[32][16];
+    bool isDrawing;
 } PaintData;
 
 void paint_draw_callback(Canvas* canvas, void* ctx) {
@@ -54,8 +55,7 @@ int32_t paint_app(void* p) {
     PaintData* paint_state = malloc(sizeof(PaintData));
     ValueMutex paint_state_mutex;
     if(!init_mutex(&paint_state_mutex, paint_state, sizeof(PaintData))) {
-        FURI_LOG_E("Paint", "cannot create mutex\r\n");
-        furi_message_queue_free(event_queue);
+        FURI_LOG_E("paint", "cannot create mutex\r\n");
         free(paint_state);
         return -1;
     }
@@ -69,11 +69,12 @@ int32_t paint_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    // NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    //NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     InputEvent event;
 
     while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
+
         //break out of the loop if the back key is pressed
         if(event.type == InputTypeShort && event.key == InputKeyBack) {
             break;
@@ -102,6 +103,7 @@ int32_t paint_app(void* p) {
             default:
                 break;
             }
+            
 
             //check if cursor position is out of bounds and reset it to the closest position
             if(paint_state->selected.x < 0) {
@@ -116,9 +118,12 @@ int32_t paint_app(void* p) {
             if(paint_state->selected.y > 15) {
                 paint_state->selected.y = 15;
             }
+            if (paint_state->isDrawing == true) {
+                paint_state->board[paint_state->selected.x][paint_state->selected.y] = true;
+            }
             view_port_update(view_port);
         }
-        if(event.key == InputKeyOk && event.type == InputTypeLong) {
+        if(event.key == InputKeyBack && event.type == InputTypeLong) {
             paint_state->board[1][1] = true;
             for(int y = 0; y < 16; y++) {
                 for(int x = 0; x < 32; x++) {
@@ -127,14 +132,19 @@ int32_t paint_app(void* p) {
             }
             view_port_update(view_port);
         }
+        if(event.key == InputKeyOk && event.type == InputTypeLong) {
+            paint_state->isDrawing = !paint_state->isDrawing;
+            paint_state->board[paint_state->selected.x][paint_state->selected.y] = true;
+            view_port_update(view_port);
+        }
     }
 
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
-
+    free(paint_state);
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
-    free(paint_state);
+
     return 0;
 }
