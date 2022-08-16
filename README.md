@@ -11,6 +11,7 @@
 - Audio.IR updated and remote file updated By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Update Mifare Classic dict asset By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Added some extra checks for custom flipper names By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
+- Updated [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
