@@ -11,6 +11,7 @@ on:
 
 env:
   TARGETS: f7
+  DEFAULT_TARGET: f7
 
 jobs:
   analyse_c_cpp:
@@ -28,16 +29,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-
-#     - name: 'Build firmware'
-#        run: FBT_TOOLCHAIN_PATH=/opt ./fbt
-#
-      - name: 'Static code analysis'
-        run: |
-          FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
-          # pvs-studio-analyzer analyze -l /opt/pvs_studio/PVS-Studio.lic -f build/latest/compile_commands.json -o PVS-Studio.log
-          FBT_TOOLCHAIN_PATH=/opt pvs-studio-analyzer trace -- ./fbt
-          pvs-studio-analyzer analyze -j2 -l /opt/pvs_studio/PVS-Studio.lic -o PVS-Studio.log
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 'Generate suffix and folder name'
         id: names
@@ -62,10 +54,12 @@ jobs:
           echo "::set-output name=short-hash::${SHA}"
           echo "::set-output name=default-target::${DEFAULT_TARGET}"
 
-      - name: 'Make reports directory'
+      - name: 'Static code analysis'
         run: |
-          rm -rf reports/
-          mkdir reports
+          FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
+          # pvs-studio-analyzer analyze -l /opt/pvs_studio/PVS-Studio.lic -f build/latest/compile_commands.json -o PVS-Studio.log
+          FBT_TOOLCHAIN_PATH=/opt pvs-studio-analyzer trace -- ./fbt
+          pvs-studio-analyzer analyze -j2 -l /opt/pvs_studio/PVS-Studio.lic -o PVS-Studio.log
 
       - name: 'Convert PVS-Studio output to html page'
         run: plog-converter -t fullhtml PVS-Studio.log -o reports/${{steps.names.outputs.default-target}}-${{steps.names.outputs.suffix}}
