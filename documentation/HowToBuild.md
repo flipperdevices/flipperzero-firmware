@@ -19,7 +19,7 @@ $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlu
 
 # Build on Linux/macOS
 
-Check out `documentation/fbt.md` for details on building and flashing firmware. 
+Check out [documentation/fbt.md](documentation/fbt.md) for details on building and flashing firmware. 
 
 ### Compile everything for development
 
@@ -40,7 +40,7 @@ If compilation fails, make sure all submodules are all initialized. Either clone
 
 # Build on Linux/macOS
 
-Check out `documentation/fbt.md` for details on building and flashing firmware. 
+Check out [documentation/fbt.md](documentation/fbt.md) for details on building and flashing firmware. 
 
 ### Compile everything for development
 
