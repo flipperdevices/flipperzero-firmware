@@ -18,19 +18,21 @@ typedef enum {
 #define SHOW_STOPSCAN_TIP (true)
 #define NO_TIP (false)
 
+#define MAX_OPTIONS (6)
 typedef struct {
     const char* item_string;
-    const char* options_menu[5];
+    const char* options_menu[MAX_OPTIONS];
     int num_options_menu;
-    const char* actual_commands[5];
+    const char* actual_commands[MAX_OPTIONS];
     InputArgs needs_keyboard;
     FocusConsole focus_console;
     bool show_stopscan_tip;
 } WifiMarauderItem;
 
+// NUM_MENU_ITEMS defined in wifi_marauder_app_i.h - if you add an entry here, increment it!
 const WifiMarauderItem items[NUM_MENU_ITEMS] = {
     { "View Log from", {"start", "end"}, 2, {}, NO_ARGS, FOCUS_CONSOLE_TOGGLE, NO_TIP },
-    { "Scan Access Points (AP)", {""}, 1, {"scanap"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
+    { "Scan AP", {""}, 1, {"scanap"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
     { "SSID", {"add random", "add name", "remove"}, 3, {"ssid -a -g", "ssid -a -n", "ssid -r"}, INPUT_ARGS, FOCUS_CONSOLE_START, NO_TIP },
     { "List", {"ap", "ssid"}, 2, {"list -a", "list -s"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP },
     { "Select", {"ap", "ssid"}, 2, {"select -a", "select -s"}, INPUT_ARGS, FOCUS_CONSOLE_END, NO_TIP },
@@ -40,6 +42,7 @@ const WifiMarauderItem items[NUM_MENU_ITEMS] = {
     { "Sniff", {"beacon", "deauth", "esp", "pmkid", "pwn"}, 5, {"sniffbeacon", "sniffdeauth", "sniffesp", "sniffpmkid", "sniffpwn"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
     { "Sniff PMKID on channel", {""}, 1, {"sniffpmkid -c"}, INPUT_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
     { "Channel", {"get", "set"}, 2, {"channel", "channel -s"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP },
+    { "Settings", {"display", "restore", "ForcePMKID", "ForceProbe", "SavePCAP", "other"}, 6, {"settings", "settings -r", "settings -s ForcePMKID enable", "settings -s ForceProbe enable", "settings -s SavePCAP enable", "settings -s"}, TOGGLE_ARGS, FOCUS_CONSOLE_START, NO_TIP },
     { "Update", {""}, 1, {"update -w"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP },
     { "Reboot", {""}, 1, {"reboot"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP },
     { "Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP },
@@ -58,7 +61,7 @@ static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uin
     app->focus_console_start = (items[index].focus_console == FOCUS_CONSOLE_TOGGLE) ? (app->selected_option_index[index] == 0) : items[index].focus_console;
     app->show_stopscan_tip = items[index].show_stopscan_tip;
 
-    bool needs_keyboard = (items[index].needs_keyboard == TOGGLE_ARGS) ? (app->selected_option_index[index] == 1) : items[index].needs_keyboard;
+    bool needs_keyboard = (items[index].needs_keyboard == TOGGLE_ARGS) ? (app->selected_option_index[index] != 0) : items[index].needs_keyboard;
     if (needs_keyboard) {
         view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartKeyboard);
     } else {
