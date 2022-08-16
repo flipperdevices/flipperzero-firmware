@@ -8,7 +8,9 @@
 - Known Issues: `FAP Loader` & `Chess`
 - [Force Restart on Battery Display setting change #234 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/234)
 - Changed Bluetooth Name to be "Flipper" + Name instead of "Rogue" or "zzRogue" + Name (Due to an Android app bug)
-
+- Audio.IR updated and remote file updated By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
+- Update Mifare Classic dict asset By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
+- Added some extra checks for custom flipper names By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
