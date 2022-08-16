@@ -204,8 +204,10 @@ static void gui_text_scroll_free(WidgetElement* text_scroll) {
         GuiTextScrollLine* line = GuiTextScrollLineArray_ref(it);
         string_clear(line->text);
     }
+    GuiTextScrollLineArray_clear(model->line_array);
     string_clear(model->text);
     free(text_scroll->model);
+    furi_mutex_free(text_scroll->model_mutex);
     free(text_scroll);
 }
 
