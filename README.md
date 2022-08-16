@@ -6,17 +6,9 @@
 <b>Latest Updates:</b>
 
 - Known Issues: `FAP Loader` & `Chess`
-- Thank You, [UberGuidoZ](https://github.com/UberGuidoZ), for documentation updates!
-- Added two new frequencies used by Honda (Not that the Honda hack will work with the FW)
-- Updated for infrared assets from [UberGuidoZ](https://github.com/UberGuidoZ)
-- Removed [DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `HIDDEN "INTAPP_esp8266_deauth"` due to `Req: ESP8266`
-- Added [WiFi (Deauther) (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) (Inspired by WiFi (Marauder) (By 0xchocolate) and DSTIKE Deauther (By SequoiaSan)) `HIDDEN "INTAPP_esp8266_deauth"` due to `Req: ESP8266`
-- 2048 Score Fix [By DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/227)
-- Changed code to use RECORD defines like [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) did.
-- Infrared: audio.ir updated from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Added [Settings: Custom name with this compile: CUSTOM_FLIPPER_NAME=name ./fbt updater_package](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/CustomFlipperName.md) (By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware))
-- Updated Bluetooth fix so device name says zzRogue instead of Flipper or Rogue to test Android compatability
-- OFW: [SubGhz: update notification messages #1602 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1602)
+- [Force Restart on Battery Display setting change #234 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/234)
+- Changed Bluetooth Name to be "Flipper" + Name instead of "Rogue" or "zzRogue" + Name (Due to an Android app bug)
+
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -85,7 +77,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Assets: Running DolphinRestorer.fap on new install will auto-level to the end of Level 2.
 - BadUSB: Added ignore DUCKY_LANG cmd to retain compatibility with existing scripts [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
 - BadUSB: show script errors on screen [(By CromFr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/200)
-- Bluetooth: Bluetooth fix so device name says zzRogue instead of Flipper [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/firmware/targets/f7/furi_hal/furi_hal_version.c#L95)
+- Bluetooth: Bluetooth fix so device name says zzRogue instead of Flipper [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/firmware/targets/f7/furi_hal/furi_hal_version.c#L95) [REMOVED DUE TO ANDROID INCOMPATABILITY]
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Dolphin: Assigned profile pic for levels 1-10, 11-20 and 21-30 respectively from default lvl 1, 2 & 3
 - Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)

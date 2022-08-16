@@ -103,7 +103,7 @@ static void furi_hal_version_set_name(const char* name) {
             snprintf(
                 furi_hal_version.device_name,
                 FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-                "xzzRogue %s",
+                "xFlipper %s",
                 name);
         } else if(name != furi_hal_version.cname && furi_hal_version.cname!=NULL) {
             strlcpy(
@@ -113,7 +113,7 @@ static void furi_hal_version_set_name(const char* name) {
             snprintf(
                 furi_hal_version.device_name,
                 FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-                "xzzRogue %s",
+                "xFlipper %s",
                 furi_hal_version.name);
         } else {
             strlcpy(
@@ -123,11 +123,11 @@ static void furi_hal_version_set_name(const char* name) {
             snprintf(
                 furi_hal_version.device_name,
                 FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-                "xzzRogue %s",
+                "xFlipper %s",
                 furi_hal_version.name);
         }
     } else {
-        snprintf(furi_hal_version.device_name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH, "xzzRogue Dev");
+        snprintf(furi_hal_version.device_name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH, "xFlipper Dev");
     }
 
     furi_hal_version.device_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
