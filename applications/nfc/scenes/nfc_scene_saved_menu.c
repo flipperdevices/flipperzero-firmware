@@ -64,6 +64,7 @@ void nfc_scene_saved_menu_on_enter(void* context) {
 
 bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
+    NfcDeviceData* dev_data = &nfc->dev->dev_data;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -87,7 +88,18 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneDelete);
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);
+            bool application_info_present = false;
+            if(dev_data->protocol == NfcDeviceProtocolEMV) {
+                application_info_present = true;
+            } else if(dev_data->protocol == NfcDeviceProtocolMifareClassic) {
+                application_info_present = nfc_supported_card_verify_and_parse(dev_data);
+            }
+
+            if(application_info_present) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);
+            } else {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcDataInfo);
+            }
             consumed = true;
         } else if(event.event == SubmenuIndexRestoreOriginal) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRestoreOriginalConfirm);

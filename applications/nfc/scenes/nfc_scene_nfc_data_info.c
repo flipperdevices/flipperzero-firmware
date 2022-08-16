@@ -23,19 +23,25 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         text_scroll_height = 64;
     }
 
-    // Set tag type
     string_t temp_str;
+    string_init(temp_str);
+    // Set name if present
+    if(nfc->dev->dev_name[0] != '\0') {
+        string_printf(temp_str, "\ec%s\n", nfc->dev->dev_name);
+    }
+
+    // Set tag type
     if(protocol == NfcDeviceProtocolEMV) {
-        string_init_set(temp_str, "\e#EMV Bank Card\n");
+        string_cat_printf(temp_str, "\e#EMV Bank Card\n");
     } else if(protocol == NfcDeviceProtocolMifareUl) {
-        string_init_printf(temp_str, "\e#%s\n", nfc_mf_ul_type(dev_data->mf_ul_data.type, true));
+        string_cat_printf(temp_str, "\e#%s\n", nfc_mf_ul_type(dev_data->mf_ul_data.type, true));
     } else if(protocol == NfcDeviceProtocolMifareClassic) {
-        string_init_printf(
+        string_cat_printf(
             temp_str, "\e#%s\n", nfc_mf_classic_type(dev_data->mf_classic_data.type));
     } else if(protocol == NfcDeviceProtocolMifareDesfire) {
-        string_init_set(temp_str, "\e#MIFARE DESfire\n");
+        string_cat_printf(temp_str, "\e#MIFARE DESfire\n");
     } else {
-        string_init_set(temp_str, "\e#Unknown ISO tag\n");
+        string_cat_printf(temp_str, "\e#Unknown ISO tag\n");
     }
 
     // Set tag iso data
