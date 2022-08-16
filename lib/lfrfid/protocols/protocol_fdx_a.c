@@ -60,27 +60,7 @@ void protocol_fdx_a_decoder_start(ProtocolFDXA* protocol) {
     memset(protocol->encoded_data, 0, FDXA_ENCODED_DATA_SIZE);
 };
 
-static bool protocol_fdx_a_can_be_decoded(const uint8_t* data) {
-    // check preamble
-    if(data[0] != FDXA_PREAMBLE_0 || data[1] != FDXA_PREAMBLE_1 || data[12] != FDXA_PREAMBLE_0 ||
-       data[13] != FDXA_PREAMBLE_1) {
-        return false;
-    }
-
-    // check for manchester encoding
-    for(size_t i = FDXA_PREAMBLE_SIZE; i < (FDXA_PREAMBLE_SIZE + FDXA_DATA_SIZE); i++) {
-        for(size_t n = 0; n < 4; n++) {
-            uint8_t bit_pair = (data[i] >> (n * 2)) & 0b11;
-            if(bit_pair == 0b11 || bit_pair == 0b00) {
-                return false;
-            }
-        }
-    }
-
-    return true;
-}
-
-static void protocol_fdx_a_decode(const uint8_t* from, uint8_t* to) {
+static bool protocol_fdx_a_decode(const uint8_t* from, uint8_t* to) {
     size_t bit_index = 0;
     for(size_t i = FDXA_PREAMBLE_SIZE; i < (FDXA_PREAMBLE_SIZE + FDXA_DATA_SIZE); i++) {
         for(size_t n = 0; n < 4; n++) {
@@ -89,9 +69,37 @@ static void protocol_fdx_a_decode(const uint8_t* from, uint8_t* to) {
                 bit_lib_set_bit(to, bit_index, 0);
             } else if(bit_pair == 0b10) {
                 bit_lib_set_bit(to, bit_index, 1);
+            } else {
+                return false;
             }
             bit_index++;
         }
+    }
+
+    return true;
+}
+
+static bool protocol_fdx_a_can_be_decoded(const uint8_t* data) {
+    // check preamble
+    if(data[0] != FDXA_PREAMBLE_0 || data[1] != FDXA_PREAMBLE_1 || data[12] != FDXA_PREAMBLE_0 ||
+       data[13] != FDXA_PREAMBLE_1) {
+        return false;
+    }
+
+    // check for manchester encoding
+    uint8_t decoded_data[FDXA_DECODED_DATA_SIZE];
+    if(!protocol_fdx_a_decode(data, decoded_data)) return false;
+
+    uint8_t parity_sum = 0;
+    for(size_t i = 0; i < FDXA_DECODED_DATA_SIZE; i++) {
+        parity_sum += bit_lib_test_parity_32(decoded_data[i], BitLibParityOdd);
+        decoded_data[i] &= 0x7F;
+    }
+
+    if(parity_sum == 0) {
+        return true;
+    } else {
+        return false;
     }
 }
 
