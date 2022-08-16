@@ -8,7 +8,6 @@ void nfc_scene_nfc_data_info_widget_callback(GuiButtonType result, InputType typ
 }
 
 void nfc_scene_nfc_data_info_on_enter(void* context) {
-    UNUSED(context);
     Nfc* nfc = context;
     Widget* widget = nfc->widget;
     FuriHalNfcDevData* nfc_data = &nfc->dev->dev_data.nfc_data;
