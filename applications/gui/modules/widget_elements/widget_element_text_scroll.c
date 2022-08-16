@@ -9,12 +9,12 @@ typedef struct {
     Font font;
     Align horizontal;
     string_t text;
-} GuiTextScrollLine;
+} TextScrollLineArray;
 
-ARRAY_DEF(GuiTextScrollLineArray, GuiTextScrollLine, M_POD_OPLIST)
+ARRAY_DEF(TextScrollLineArray, TextScrollLineArray, M_POD_OPLIST)
 
 typedef struct {
-    GuiTextScrollLineArray_t line_array;
+    TextScrollLineArray_t line_array;
     uint8_t x;
     uint8_t y;
     uint8_t width;
@@ -23,9 +23,10 @@ typedef struct {
     uint8_t scroll_pos_total;
     uint8_t scroll_pos_current;
     bool text_formatted;
-} GuiTextScrollModel;
+} WidgetElementTextScrollModel;
 
-static bool gui_text_scroll_process_ctrl_symbols(GuiTextScrollLine* line, string_t text) {
+static bool
+    widget_element_text_scroll_process_ctrl_symbols(TextScrollLineArray* line, string_t text) {
     bool processed = false;
 
     do {
@@ -45,18 +46,18 @@ static bool gui_text_scroll_process_ctrl_symbols(GuiTextScrollLine* line, string
     return processed;
 }
 
-void widget_element_text_scroll_add_line(WidgetElement* element, GuiTextScrollLine* line) {
-    GuiTextScrollModel* model = element->model;
-    GuiTextScrollLine new_line;
+void widget_element_text_scroll_add_line(WidgetElement* element, TextScrollLineArray* line) {
+    WidgetElementTextScrollModel* model = element->model;
+    TextScrollLineArray new_line;
     new_line.font = line->font;
     new_line.horizontal = line->horizontal;
     string_init_set(new_line.text, line->text);
-    GuiTextScrollLineArray_push_back(model->line_array, new_line);
+    TextScrollLineArray_push_back(model->line_array, new_line);
 }
 
-static void gui_text_scroll_fill_lines(Canvas* canvas, WidgetElement* element) {
-    GuiTextScrollModel* model = element->model;
-    GuiTextScrollLine line_tmp;
+static void widget_element_text_scroll_fill_lines(Canvas* canvas, WidgetElement* element) {
+    WidgetElementTextScrollModel* model = element->model;
+    TextScrollLineArray line_tmp;
     bool all_text_processed = false;
     string_init(line_tmp.text);
     bool reached_new_line = true;
@@ -69,7 +70,7 @@ static void gui_text_scroll_fill_lines(Canvas* canvas, WidgetElement* element) {
             line_tmp.horizontal = AlignLeft;
             string_reset(line_tmp.text);
             // Process control symbols
-            while(gui_text_scroll_process_ctrl_symbols(&line_tmp, model->text))
+            while(widget_element_text_scroll_process_ctrl_symbols(&line_tmp, model->text))
                 ;
         }
         // Set canvas font
@@ -115,27 +116,27 @@ static void gui_text_scroll_fill_lines(Canvas* canvas, WidgetElement* element) {
     }
 }
 
-static void gui_text_scroll_draw(Canvas* canvas, WidgetElement* element) {
+static void widget_element_text_scroll_draw(Canvas* canvas, WidgetElement* element) {
     furi_assert(canvas);
     furi_assert(element);
 
     furi_mutex_acquire(element->model_mutex, FuriWaitForever);
 
-    GuiTextScrollModel* model = element->model;
+    WidgetElementTextScrollModel* model = element->model;
     if(!model->text_formatted) {
-        gui_text_scroll_fill_lines(canvas, element);
+        widget_element_text_scroll_fill_lines(canvas, element);
         model->text_formatted = true;
     }
 
     uint8_t y = model->y;
     uint8_t x = model->x;
     uint16_t curr_line = 0;
-    if(GuiTextScrollLineArray_size(model->line_array)) {
-        GuiTextScrollLineArray_it_t it;
-        for(GuiTextScrollLineArray_it(it, model->line_array); !GuiTextScrollLineArray_end_p(it);
-            GuiTextScrollLineArray_next(it), curr_line++) {
+    if(TextScrollLineArray_size(model->line_array)) {
+        TextScrollLineArray_it_t it;
+        for(TextScrollLineArray_it(it, model->line_array); !TextScrollLineArray_end_p(it);
+            TextScrollLineArray_next(it), curr_line++) {
             if(curr_line < model->scroll_pos_current) continue;
-            GuiTextScrollLine* line = GuiTextScrollLineArray_ref(it);
+            TextScrollLineArray* line = TextScrollLineArray_ref(it);
             CanvasFontParameters* params = canvas_get_font_params(canvas, line->font);
             if(y + params->descender > model->y + model->height) break;
             canvas_set_font(canvas, line->font);
@@ -165,13 +166,13 @@ static void gui_text_scroll_draw(Canvas* canvas, WidgetElement* element) {
     furi_mutex_release(element->model_mutex);
 }
 
-static bool gui_text_scroll_input(InputEvent* event, WidgetElement* element) {
+static bool widget_element_text_scroll_input(InputEvent* event, WidgetElement* element) {
     furi_assert(event);
     furi_assert(element);
 
     furi_mutex_acquire(element->model_mutex, FuriWaitForever);
 
-    GuiTextScrollModel* model = element->model;
+    WidgetElementTextScrollModel* model = element->model;
     bool consumed = false;
 
     if((event->type == InputTypeShort) || (event->type == InputTypeRepeat)) {
@@ -194,17 +195,17 @@ static bool gui_text_scroll_input(InputEvent* event, WidgetElement* element) {
     return consumed;
 }
 
-static void gui_text_scroll_free(WidgetElement* text_scroll) {
+static void widget_element_text_scroll_free(WidgetElement* text_scroll) {
     furi_assert(text_scroll);
 
-    GuiTextScrollModel* model = text_scroll->model;
-    GuiTextScrollLineArray_it_t it;
-    for(GuiTextScrollLineArray_it(it, model->line_array); !GuiTextScrollLineArray_end_p(it);
-        GuiTextScrollLineArray_next(it)) {
-        GuiTextScrollLine* line = GuiTextScrollLineArray_ref(it);
+    WidgetElementTextScrollModel* model = text_scroll->model;
+    TextScrollLineArray_it_t it;
+    for(TextScrollLineArray_it(it, model->line_array); !TextScrollLineArray_end_p(it);
+        TextScrollLineArray_next(it)) {
+        TextScrollLineArray* line = TextScrollLineArray_ref(it);
         string_clear(line->text);
     }
-    GuiTextScrollLineArray_clear(model->line_array);
+    TextScrollLineArray_clear(model->line_array);
     string_clear(model->text);
     free(text_scroll->model);
     furi_mutex_free(text_scroll->model_mutex);
@@ -220,21 +221,21 @@ WidgetElement* widget_element_text_scroll_create(
     furi_assert(text);
 
     // Allocate and init model
-    GuiTextScrollModel* model = malloc(sizeof(GuiTextScrollModel));
+    WidgetElementTextScrollModel* model = malloc(sizeof(WidgetElementTextScrollModel));
     model->x = x;
     model->y = y;
     model->width = width - WIDGET_ELEMENT_TEXT_SCROLL_BAR_OFFSET;
     model->height = height;
     model->scroll_pos_current = 0;
     model->scroll_pos_total = 1;
-    GuiTextScrollLineArray_init(model->line_array);
+    TextScrollLineArray_init(model->line_array);
     string_init_set_str(model->text, text);
 
     WidgetElement* text_scroll = malloc(sizeof(WidgetElement));
     text_scroll->parent = NULL;
-    text_scroll->draw = gui_text_scroll_draw;
-    text_scroll->input = gui_text_scroll_input;
-    text_scroll->free = gui_text_scroll_free;
+    text_scroll->draw = widget_element_text_scroll_draw;
+    text_scroll->input = widget_element_text_scroll_input;
+    text_scroll->free = widget_element_text_scroll_free;
     text_scroll->model = model;
     text_scroll->model_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 

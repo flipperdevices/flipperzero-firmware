@@ -86,5 +86,5 @@ WidgetElement* widget_element_text_scroll_create(
     uint8_t x,
     uint8_t y,
     uint8_t width,
-    Font font,
+    uint8_t height,
     const char* text);
