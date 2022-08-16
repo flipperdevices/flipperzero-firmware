@@ -31,9 +31,7 @@ static bool gui_text_scroll_process_ctrl_symbols(GuiTextScrollLine* line, string
     do {
         if(string_get_char(text, 0) != '\e') break;
         char ctrl_symbol = string_get_char(text, 1);
-        if(ctrl_symbol == 'l') {
-            line->horizontal = AlignLeft;
-        } else if(ctrl_symbol == 'c') {
+        if(ctrl_symbol == 'c') {
             line->horizontal = AlignCenter;
         } else if(ctrl_symbol == 'r') {
             line->horizontal = AlignRight;
@@ -120,6 +118,9 @@ static void gui_text_scroll_fill_lines(Canvas* canvas, WidgetElement* element) {
 static void gui_text_scroll_draw(Canvas* canvas, WidgetElement* element) {
     furi_assert(canvas);
     furi_assert(element);
+
+    furi_mutex_acquire(element->model_mutex, FuriWaitForever);
+
     GuiTextScrollModel* model = element->model;
     if(!model->text_formatted) {
         gui_text_scroll_fill_lines(canvas, element);
@@ -160,9 +161,16 @@ static void gui_text_scroll_draw(Canvas* canvas, WidgetElement* element) {
                 model->scroll_pos_total);
         }
     }
+
+    furi_mutex_release(element->model_mutex);
 }
 
 static bool gui_text_scroll_input(InputEvent* event, WidgetElement* element) {
+    furi_assert(event);
+    furi_assert(element);
+
+    furi_mutex_acquire(element->model_mutex, FuriWaitForever);
+
     GuiTextScrollModel* model = element->model;
     bool consumed = false;
 
@@ -180,6 +188,8 @@ static bool gui_text_scroll_input(InputEvent* event, WidgetElement* element) {
             consumed = true;
         }
     }
+
+    furi_mutex_release(element->model_mutex);
 
     return consumed;
 }
@@ -224,5 +234,7 @@ WidgetElement* widget_element_text_scroll_create(
     text_scroll->input = gui_text_scroll_input;
     text_scroll->free = gui_text_scroll_free;
     text_scroll->model = model;
+    text_scroll->model_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+
     return text_scroll;
 }

@@ -29,6 +29,7 @@ struct WidgetElement {
 
     // generic model holder
     void* model;
+    FuriMutex* model_mutex;
 
     // pointer to widget that hold our element
     Widget* parent;
