@@ -122,10 +122,8 @@ int32_t clock_app(void* p) {
                 if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
                     switch(event.input.key) {
                     case InputKeyUp:
-                        if(timerStarted) timerSecs = timerSecs + 5;
                         break;
                     case InputKeyDown:
-                        if(timerStarted) timerSecs = timerSecs - 5;
                         break;
                     case InputKeyRight:
                         break;
