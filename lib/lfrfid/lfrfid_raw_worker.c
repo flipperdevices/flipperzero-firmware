@@ -128,25 +128,16 @@ bool lfrfid_raw_worker_start_read(
     return result;
 }
 
-bool lfrfid_raw_worker_start_emulate(LFRFIDRawWorker* worker, const char* file_path) {
+void lfrfid_raw_worker_start_emulate(LFRFIDRawWorker* worker, const char* file_path) {
     furi_check(furi_thread_get_state(worker->thread) == FuriThreadStateStopped);
-
-    bool result = true;
     string_set(worker->file_path, file_path);
-
     furi_thread_set_callback(worker->thread, lfrfid_raw_emulate_worker_thread);
-
     furi_thread_start(worker->thread);
-    return result;
 }
 
-bool lfrfid_raw_worker_stop(LFRFIDRawWorker* worker) {
-    bool result = true;
-
+void lfrfid_raw_worker_stop(LFRFIDRawWorker* worker) {
     furi_event_flag_set(worker->events, 1 << LFRFIDRawWorkerEventStop);
     furi_thread_join(worker->thread);
-
-    return result;
 }
 
 void lfrfid_raw_worker_emulate_set_callback(
@@ -266,7 +257,7 @@ static void lfrfid_raw_worker_capture(bool level, uint32_t duration, void* conte
 static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
     LFRFIDRawWorker* worker = (LFRFIDRawWorker*)thread_context;
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     Stream* stream = file_stream_alloc(storage);
     const char* filename = string_get_cstr(worker->file_path);
     bool file_valid = file_stream_open(stream, filename, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS);
@@ -381,7 +372,7 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
 
     vStreamBufferDelete(data->ctx.stream);
     stream_free(stream);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     free(data);
 
     return 0;
@@ -390,18 +381,10 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
 static void rfid_emulate_dma_isr(bool half, void* context) {
     RfidEmulateCtx* ctx = context;
 
-    if(half) {
-        uint32_t flag = HalfTransfer;
-        size_t len = xStreamBufferSendFromISR(ctx->stream, &flag, sizeof(uint32_t), pdFALSE);
-        if(len != sizeof(uint32_t)) {
-            ctx->overrun_count++;
-        }
-    } else {
-        uint32_t flag = TransferComplete;
-        size_t len = xStreamBufferSendFromISR(ctx->stream, &flag, sizeof(uint32_t), pdFALSE);
-        if(len != sizeof(uint32_t)) {
-            ctx->overrun_count++;
-        }
+    uint32_t flag = half ? HalfTransfer : TransferComplete;
+    size_t len = xStreamBufferSendFromISR(ctx->stream, &flag, sizeof(uint32_t), pdFALSE);
+    if(len != sizeof(uint32_t)) {
+        ctx->overrun_count++;
     }
 }
 
@@ -464,7 +447,7 @@ static int32_t lfrfid_raw_emulate_worker_thread(void* thread_context) {
 
     LFRFIDRawWorkerEmulateData* data = malloc(sizeof(LFRFIDRawWorkerEmulateData));
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     data->stream = file_stream_alloc(storage);
     data->ctx.overrun_count = 0;
     data->ctx.stream = xStreamBufferCreate(sizeof(uint32_t), sizeof(uint32_t));
@@ -595,7 +578,7 @@ static int32_t lfrfid_raw_emulate_worker_thread(void* thread_context) {
 
     stream_free(data->stream);
     vStreamBufferDelete(data->ctx.stream);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     free(data);
 
     return 0;

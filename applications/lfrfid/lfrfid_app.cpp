@@ -33,9 +33,9 @@ const char* LfRfidApp::app_filetype = "Flipper RFID key";
 
 LfRfidApp::LfRfidApp()
     : scene_controller{this}
-    , notification{"notification"}
-    , storage{"storage"}
-    , dialogs{"dialogs"}
+    , notification{RECORD_NOTIFICATION}
+    , storage{RECORD_STORAGE}
+    , dialogs{RECORD_DIALOGS}
     , text_store(40) {
     string_init(file_name);
     string_init_set_str(file_path, app_folder);

@@ -31,8 +31,8 @@ bool archive_app_is_available(void* context, const char* path) {
         bool file_exists = false;
         Storage* storage = furi_record_open(RECORD_STORAGE);
 
-        if(storage_file_exists(storage, "/any/u2f/key.u2f")) {
-            file_exists = storage_file_exists(storage, "/any/u2f/cnt.u2f");
+        if(storage_file_exists(storage, ANY_PATH("u2f/key.u2f"))) {
+            file_exists = storage_file_exists(storage, ANY_PATH("u2f/cnt.u2f"));
         }
 
         furi_record_close(RECORD_STORAGE);

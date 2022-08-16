@@ -2,6 +2,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct FSKDemod FSKDemod;
 
 FSKDemod*
@@ -10,3 +14,7 @@ FSKDemod*
 void fsk_demod_free(FSKDemod* fsk_demod);
 
 void fsk_demod_feed(FSKDemod* demod, bool polarity, uint32_t time, bool* value, uint32_t* count);
+
+#ifdef __cplusplus
+}
+#endif

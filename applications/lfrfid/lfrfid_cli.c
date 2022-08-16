@@ -21,9 +21,9 @@ static void lfrfid_cli(Cli* cli, string_t args, void* context);
 
 // app cli function
 void lfrfid_on_system_start() {
-    Cli* cli = furi_record_open("cli");
+    Cli* cli = furi_record_open(RECORD_CLI);
     cli_add_command(cli, "rfid", CliCommandFlagDefault, lfrfid_cli, NULL);
-    furi_record_close("cli");
+    furi_record_close(RECORD_CLI);
 }
 
 static void lfrfid_cli_print_usage() {
@@ -269,7 +269,7 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
     string_t filepath, info_string;
     string_init(filepath);
     string_init(info_string);
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     Stream* stream = file_stream_alloc(storage);
 
     do {
@@ -437,7 +437,7 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
     stream_free(stream);
     string_clear(filepath);
     string_clear(info_string);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 }
 
 static void lfrfid_cli_raw_read_callback(LFRFIDWorkerReadRawResult result, void* context) {
@@ -543,7 +543,7 @@ static void lfrfid_cli_raw_emulate(Cli* cli, string_t args) {
 
     string_t filepath;
     string_init(filepath);
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
 
     do {
         if(!args_read_probably_quoted_string_and_trim(args, filepath)) {
@@ -608,7 +608,7 @@ static void lfrfid_cli_raw_emulate(Cli* cli, string_t args) {
 
     } while(false);
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     string_clear(filepath);
 }
 

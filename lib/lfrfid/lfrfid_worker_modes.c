@@ -287,14 +287,8 @@ typedef enum {
 
 static void lfrfid_worker_emulate_dma_isr(bool half, void* context) {
     StreamBufferHandle_t stream = context;
-
-    if(half) {
-        uint32_t flag = HalfTransfer;
-        xStreamBufferSendFromISR(stream, &flag, sizeof(uint32_t), pdFALSE);
-    } else {
-        uint32_t flag = TransferComplete;
-        xStreamBufferSendFromISR(stream, &flag, sizeof(uint32_t), pdFALSE);
-    }
+    uint32_t flag = half ? HalfTransfer : TransferComplete;
+    xStreamBufferSendFromISR(stream, &flag, sizeof(uint32_t), pdFALSE);
 }
 
 void lfrfid_worker_mode_emulate_process(LFRFIDWorker* worker) {

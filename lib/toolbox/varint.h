@@ -2,6 +2,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Pack uint32 to varint
  * @param value value from UINT32_MIN to UINT32_MAX
@@ -25,3 +29,7 @@ size_t varint_int32_pack(int32_t value, uint8_t* output);
 size_t varint_int32_unpack(int32_t* value, const uint8_t* input, size_t input_size);
 
 size_t varint_int32_length(int32_t value);
+
+#ifdef __cplusplus
+}
+#endif

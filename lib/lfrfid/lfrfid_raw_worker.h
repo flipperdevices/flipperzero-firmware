@@ -20,9 +20,9 @@ bool lfrfid_raw_worker_start_read(
     float frequency,
     float duty_cycle);
 
-bool lfrfid_raw_worker_start_emulate(LFRFIDRawWorker* worker, const char* file_path);
+void lfrfid_raw_worker_start_emulate(LFRFIDRawWorker* worker, const char* file_path);
 
-bool lfrfid_raw_worker_stop(LFRFIDRawWorker* worker);
+void lfrfid_raw_worker_stop(LFRFIDRawWorker* worker);
 
 void lfrfid_raw_worker_emulate_set_callback(
     LFRFIDRawWorker* worker,

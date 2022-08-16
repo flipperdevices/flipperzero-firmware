@@ -34,7 +34,7 @@ bool pulse_joiner_push_pulse(PulseJoiner* pulse_joiner, bool polarity, size_t pe
     furi_check((pulse_joiner->pulse_index + 1) < PULSE_MAX_COUNT);
 
     if(polarity == false && pulse_joiner->pulse_index == 0) {
-        // first negative pulse is ommited
+        // first negative pulse is omitted
 
     } else {
         pulse_joiner->pulses[pulse_joiner->pulse_index].polarity = polarity;
