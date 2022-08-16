@@ -54,6 +54,11 @@ jobs:
           echo "::set-output name=short-hash::${SHA}"
           echo "::set-output name=default-target::${DEFAULT_TARGET}"
 
+      - name: 'Make reports directory'
+        run: |
+          rm -rf reports/
+          mkdir reports
+
       - name: 'Static code analysis'
         run: |
           FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
