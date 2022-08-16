@@ -54,14 +54,14 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontBigNumbers);
     if(timerStarted || timerSecs!=0) {
-        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
-        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]);
+        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
+        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]);
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]); // DRAW DATE
     } else {
-        canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]);
+        canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]);
+        canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
     }
     if(timerStarted) {
         elements_button_center(canvas, "Stop");
