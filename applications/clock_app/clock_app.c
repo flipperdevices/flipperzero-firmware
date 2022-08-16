@@ -53,20 +53,24 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     snprintf(strings[2], 20, "%.2d:%.2d", curMin, curSec);
     release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontBigNumbers);
-    if(timerStarted) canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
-    if(!timerStarted)
+    if(timerStarted || timerSecs!=0) {
+        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]);
+        canvas_set_font(canvas, FontBigNumbers);
+        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]);
+        canvas_set_font(canvas, FontSecondary);
+    } else {
         canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]);
-    canvas_set_font(canvas, FontSecondary);
-    if(timerStarted) canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]);
-    if(!timerStarted) canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]);
-    canvas_set_font(canvas, FontBigNumbers);
-    if(timerStarted) canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]);
-    canvas_set_font(canvas, FontSecondary);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]);
+    }
     if(timerStarted) {
         elements_button_center(canvas, "Stop");
     } else {
         elements_button_center(canvas, "Start");
     }
+    elements_button_left(canvas, "Reset");
 }
 
 static void clock_state_init(ClockState* const state) {
@@ -126,11 +130,11 @@ int32_t clock_app(void* p) {
                     case InputKeyRight:
                         break;
                     case InputKeyLeft:
+                        timerSecs = 0;
                         break;
                     case InputKeyOk:
                         if(timerStarted) {
                             timerStarted = false;
-                            timerSecs = 0;
                         } else {
                             timerStarted = true;
                         }
