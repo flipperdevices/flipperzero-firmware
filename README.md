@@ -2,7 +2,9 @@
 Flipper Zero esp8266 deauther app.
 
 
-Based off the WiFi Marauder App in the Roguemaster repo.
+Based off the WiFi Marauder App from 0xchocolate.
+
+https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion
 
 https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/unleashed/applications/wifi_marauder_companion
 
