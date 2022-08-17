@@ -18,11 +18,11 @@ typedef struct {
 
 typedef struct {
     FuriHalRtcDateTime datetime;
-	uint32_t timerStartTime;
-	uint32_t timerLastRunTime;
-	bool timerStarted;
-	int timerSecs;
-	int timerTempSecs;
+    uint32_t timerStartTime;
+    uint32_t timerLastRunTime;
+    bool timerStarted;
+    int timerSecs;
+    int timerTempSecs;
 } ClockState;
 
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -35,9 +35,12 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
+    if(state == NULL) {
+        return;
+    }
     char strings[3][20];
-	state->timerTempSecs = state->timerSecs;
-	if(state->timerStarted) state->timerTempSecs = state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&state->datetime) - state->timerStartTime));
+    state->timerTempSecs = state->timerSecs;
+    if(state->timerStarted) state->timerTempSecs = state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&state->datetime) - state->timerStartTime));
     int curMin = (state->timerTempSecs / 60);
     int curSec = state->timerTempSecs - (curMin * 60);
     snprintf(
@@ -136,7 +139,7 @@ int32_t clock_app(void* p) {
                     case InputKeyOk:
                         if(plugin_state->timerStarted) {
                             plugin_state->timerStarted = false;
-							plugin_state->timerSecs = plugin_state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime) - plugin_state->timerStartTime));
+                            plugin_state->timerSecs = plugin_state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime) - plugin_state->timerStartTime));
                         } else {
                             plugin_state->timerStarted = true;
                             plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime);
@@ -162,7 +165,8 @@ int32_t clock_app(void* p) {
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
     view_port_free(view_port);
+    delete_mutex(&state_mutex);
+    free(plugin_state);
     furi_message_queue_free(event_queue);
-	free(plugin_state);
     return 0;
 }
