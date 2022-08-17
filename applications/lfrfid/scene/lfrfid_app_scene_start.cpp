@@ -4,6 +4,7 @@ typedef enum {
     SubmenuRead,
     SubmenuSaved,
     SubmenuAddManually,
+    SubmenuExtraActions,
 } SubmenuIndex;
 
 void LfRfidAppSceneStart::on_enter(LfRfidApp* app, bool need_restore) {
@@ -12,6 +13,7 @@ void LfRfidAppSceneStart::on_enter(LfRfidApp* app, bool need_restore) {
     submenu->add_item("Read", SubmenuRead, submenu_callback, app);
     submenu->add_item("Saved", SubmenuSaved, submenu_callback, app);
     submenu->add_item("Add Manually", SubmenuAddManually, submenu_callback, app);
+    submenu->add_item("Extra Actions", SubmenuExtraActions, submenu_callback, app);
 
     if(need_restore) {
         submenu->set_selected_item(submenu_item_selected);
@@ -22,6 +24,7 @@ void LfRfidAppSceneStart::on_enter(LfRfidApp* app, bool need_restore) {
     // clear key
     string_reset(app->file_name);
     app->protocol_id = PROTOCOL_NO;
+    app->read_type = LFRFIDWorkerReadTypeAuto;
 }
 
 bool LfRfidAppSceneStart::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
@@ -38,6 +41,9 @@ bool LfRfidAppSceneStart::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
             break;
         case SubmenuAddManually:
             app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::SaveType);
+            break;
+        case SubmenuExtraActions:
+            app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::ExtraActions);
             break;
         }
         consumed = true;

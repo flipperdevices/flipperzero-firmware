@@ -71,6 +71,7 @@ public:
         DeleteConfirm,
         DeleteSuccess,
         Rpc,
+        ExtraActions,
     };
 
     class Event {
@@ -118,6 +119,7 @@ public:
     LFRFIDWorker* lfworker;
     string_t file_name;
     ProtocolId protocol_id;
+    LFRFIDWorkerReadType read_type;
 
     uint8_t* old_key_data;
     uint8_t* new_key_data;

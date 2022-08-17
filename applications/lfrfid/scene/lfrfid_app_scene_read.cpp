@@ -37,7 +37,7 @@ void LfRfidAppSceneRead::on_enter(LfRfidApp* app, bool /* need_restore */) {
 
     app->view_controller.switch_to<PopupVM>();
     lfrfid_worker_start_thread(app->lfworker);
-    lfrfid_worker_read_start(app->lfworker, LFRFIDWorkerReadTypeAuto, lfrfid_read_callback, app);
+    lfrfid_worker_read_start(app->lfworker, app->read_type, lfrfid_read_callback, app);
 
     notification_message(app->notification, &sequence_blink_start_magenta);
 }
