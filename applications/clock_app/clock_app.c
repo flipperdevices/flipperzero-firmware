@@ -103,7 +103,6 @@ static void clock_state_init(ClockState* const state) {
 }
 
 const NotificationSequence clock_alert_silent = {
-    &message_force_vibro_setting_on,
     &message_vibro_on,
     &message_red_255,
     &message_green_255,
@@ -116,8 +115,6 @@ const NotificationSequence clock_alert_silent = {
     NULL,
 };
 const NotificationSequence clock_alert_pr1 = {
-    &message_force_speaker_volume_setting_1f,
-    &message_force_vibro_setting_on,
     &message_vibro_on,
     &message_red_255,
     &message_green_255,
@@ -140,8 +137,6 @@ const NotificationSequence clock_alert_pr1 = {
     NULL,
 };
 const NotificationSequence clock_alert_pr2 = {
-    &message_force_speaker_volume_setting_1f,
-    &message_force_vibro_setting_on,
     &message_vibro_on,
     &message_note_fs5,
     &message_delay_100,
@@ -163,7 +158,6 @@ const NotificationSequence clock_alert_pr2 = {
     NULL,
 };
 const NotificationSequence clock_alert_pr3 = {
-    &message_force_speaker_volume_setting_1f,
     &message_display_backlight_off,
     &message_note_g5,
     &message_delay_100,
@@ -178,8 +172,6 @@ const NotificationSequence clock_alert_pr3 = {
     NULL,
 };
 const NotificationSequence clock_alert_mario1 = {
-    &message_force_speaker_volume_setting_1f,
-    &message_force_vibro_setting_on,
     &message_vibro_on,
     &message_red_255,
     &message_green_255,
@@ -208,8 +200,6 @@ const NotificationSequence clock_alert_mario1 = {
     NULL,
 };
 const NotificationSequence clock_alert_mario2 = {
-    &message_force_speaker_volume_setting_1f,
-    &message_force_vibro_setting_on,
     &message_vibro_on,
     &message_display_backlight_off,
     &message_delay_100,
@@ -230,8 +220,6 @@ const NotificationSequence clock_alert_mario2 = {
     NULL,
 };
 const NotificationSequence clock_alert_mario3 = {
-    &message_force_speaker_volume_setting_1f,
-    &message_display_backlight_off,
     &message_note_g5,
     &message_delay_100,
     &message_delay_100,
@@ -253,7 +241,6 @@ const NotificationSequence clock_alert_mario3 = {
     NULL,
 };
 const NotificationSequence clock_alert_perMin = {
-    &message_force_speaker_volume_setting_1f,
     &message_note_g5,
     &message_delay_100,
     &message_delay_50,
@@ -267,7 +254,6 @@ const NotificationSequence clock_alert_perMin = {
     NULL,
 };
 const NotificationSequence clock_alert_startStop = {
-    &message_force_speaker_volume_setting_1f,
     &message_note_d6,
     &message_delay_100,
     &message_delay_10,
