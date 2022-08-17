@@ -71,23 +71,27 @@ bool plantain_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx
 
     MfClassicReader reader = {};
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    mf_classic_get_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak, &reader);
+    reader.type = mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
     for(size_t i = 0; i < COUNT_OF(plantain_keys_4k); i++) {
         mf_classic_reader_add_sector(
-            &reader, plantain_keys_4k[i].sector, plantain_keys_4k[i].key_a, plantain_keys_4k[i].key_b);
+            &reader,
+            plantain_keys_4k[i].sector,
+            plantain_keys_4k[i].key_a,
+            plantain_keys_4k[i].key_b);
         FURI_LOG_D("plant4k", "Added sector %d", plantain_keys_4k[i].sector);
     }
 
     return mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 40;
 }
 
-bool plantain_4k_parser_parse(NfcWorker* nfc_worker) {
-    MfClassicData* data = &nfc_worker->dev_data->mf_classic_data;
+bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
+    MfClassicData* data = &dev_data->mf_classic_data;
     // Point to block 0 of sector 4, value 0
     uint8_t* temp_ptr = &data->block[4 * 4].value[0];
     // Read first 4 bytes of block 0 of sector 4 from last to first and convert them to uint32_t
     // 38 18 00 00 becomes 00 00 18 38, and equals to 6200 decimal
-    uint32_t balance = ((temp_ptr[3] << 24) | (temp_ptr[2] << 16) | (temp_ptr[1] << 8) | temp_ptr[0]) / 100;
+    uint32_t balance =
+        ((temp_ptr[3] << 24) | (temp_ptr[2] << 16) | (temp_ptr[1] << 8) | temp_ptr[0]) / 100;
     // Read card number
     // Point to block 0 of sector 0, value 0
     temp_ptr = &data->block[0 * 4].value[0];
@@ -119,7 +123,7 @@ bool plantain_4k_parser_parse(NfcWorker* nfc_worker) {
     // string_t luhn_checksum_str;
     // string_init(luhn_checksum_str);
     // string_push_uint64(luhn_checksum, luhn_checksum_str);
-    
+
     string_cat_printf(card_number_suffix, "-");
     // FURI_LOG_D("plant4k", "Card checksum: %d", luhn_checksum);
     string_cat_printf(card_number_str, string_get_cstr(card_number_suffix));
@@ -128,10 +132,10 @@ bool plantain_4k_parser_parse(NfcWorker* nfc_worker) {
     // string_clear(luhn_checksum_str);
 
     string_printf(
-        nfc_worker->dev_data->parsed_data,
-        "Plantain Transport card\nBalance: %d rub\nN: %s",
-        balance,
-        string_get_cstr(card_number_str));
+        dev_data->parsed_data,
+        "\e#Plantain\nN:%s\nBalance:%d\n",
+        string_get_cstr(card_number_str),
+        balance);
     string_clear(card_number_str);
 
     return true;

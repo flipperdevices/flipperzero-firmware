@@ -46,7 +46,7 @@ bool plantain_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
 
     MfClassicReader reader = {};
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    mf_classic_get_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak, &reader);
+    reader.type = mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
     for(size_t i = 0; i < COUNT_OF(plantain_keys); i++) {
         mf_classic_reader_add_sector(
             &reader, plantain_keys[i].sector, plantain_keys[i].key_a, plantain_keys[i].key_b);
@@ -83,8 +83,8 @@ uint8_t plantain_calculate_luhn(uint64_t number) {
     return 0;
 }
 
-bool plantain_parser_parse(NfcWorker* nfc_worker) {
-    MfClassicData* data = &nfc_worker->dev_data->mf_classic_data;
+bool plantain_parser_parse(NfcDeviceData* dev_data) {
+    MfClassicData* data = &dev_data->mf_classic_data;
     // Point to block 0 of sector 4, value 0
     uint8_t* temp_ptr = &data->block[4 * 4].value[0];
     // Read first 4 bytes of block 0 of sector 4 from last to first and convert them to uint32_t
@@ -131,10 +131,10 @@ bool plantain_parser_parse(NfcWorker* nfc_worker) {
     // string_clear(luhn_checksum_str);
 
     string_printf(
-        nfc_worker->dev_data->parsed_data,
-        "Plantain Transport card\nBalance: %d rub\nN: %s",
-        balance,
-        string_get_cstr(card_number_str));
+        dev_data->parsed_data,
+        "\e#Plantain\nN:%s\nBalance:%d\n",
+        string_get_cstr(card_number_str),
+        balance);
     string_clear(card_number_str);
 
     return true;

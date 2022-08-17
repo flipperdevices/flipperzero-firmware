@@ -14,17 +14,14 @@
 #define ALL_IN_ONE_LAYOUT_E5 5
 #define ALL_IN_ONE_LAYOUT_2 6
 
-uint8_t all_in_one_get_layout(NfcWorker* nfc_worker) {
+uint8_t all_in_one_get_layout(NfcDeviceData* dev_data) {
     // I absolutely hate what's about to happen here.
 
     // Switch on the second half of the third byte of page 5
+    FURI_LOG_I("all_in_one", "Layout byte: %02x", dev_data->mf_ul_data.data[(4 * 5) + 2]);
     FURI_LOG_I(
-        "all_in_one", "Layout byte: %02x", nfc_worker->dev_data->mf_ul_data.data[(4 * 5) + 2]);
-    FURI_LOG_I(
-        "all_in_one",
-        "Layout half-byte: %02x",
-        nfc_worker->dev_data->mf_ul_data.data[(4 * 5) + 3] & 0x0F);
-    switch(nfc_worker->dev_data->mf_ul_data.data[(4 * 5) + 2] & 0x0F) {
+        "all_in_one", "Layout half-byte: %02x", dev_data->mf_ul_data.data[(4 * 5) + 3] & 0x0F);
+    switch(dev_data->mf_ul_data.data[(4 * 5) + 2] & 0x0F) {
     // If it is A, the layout type is a type A layout
     case 0x0A:
         return ALL_IN_ONE_LAYOUT_A;
@@ -36,7 +33,7 @@ uint8_t all_in_one_get_layout(NfcWorker* nfc_worker) {
         FURI_LOG_I(
             "all_in_one",
             "Unknown layout type: %d",
-            nfc_worker->dev_data->mf_ul_data.data[(4 * 5) + 2] & 0x0F);
+            dev_data->mf_ul_data.data[(4 * 5) + 2] & 0x0F);
         return ALL_IN_ONE_LAYOUT_UNKNOWN;
     }
 }
@@ -70,27 +67,27 @@ bool all_in_one_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx)
     }
 }
 
-bool all_in_one_parser_parse(NfcWorker* nfc_worker) {
+bool all_in_one_parser_parse(NfcDeviceData* dev_data) {
     // If the layout is a then the ride count is stored in the first byte of page 8
     uint8_t ride_count = 0;
     uint32_t serial = 0;
-    if(all_in_one_get_layout(nfc_worker) == ALL_IN_ONE_LAYOUT_A) {
-        ride_count = nfc_worker->dev_data->mf_ul_data.data[4 * 8];
-    } else if(all_in_one_get_layout(nfc_worker) == ALL_IN_ONE_LAYOUT_D) {
+    if(all_in_one_get_layout(dev_data) == ALL_IN_ONE_LAYOUT_A) {
+        ride_count = dev_data->mf_ul_data.data[4 * 8];
+    } else if(all_in_one_get_layout(dev_data) == ALL_IN_ONE_LAYOUT_D) {
         // If the layout is D, the ride count is stored in the second byte of page 9
-        ride_count = nfc_worker->dev_data->mf_ul_data.data[4 * 9 + 1];
+        ride_count = dev_data->mf_ul_data.data[4 * 9 + 1];
         // I hate this with a burning passion.
 
         // The number starts at the second half of the third byte on page 4, and is 32 bits long
         // So we get the second half of the third byte, then bytes 4-6, and then the first half of the 7th byte
         // B8 17 A2 A4 BD becomes 81 7A 2A 4B
-        serial = (nfc_worker->dev_data->mf_ul_data.data[4 * 4 + 2] & 0x0F) << 28 |
-                 nfc_worker->dev_data->mf_ul_data.data[4 * 4 + 3] << 20 |
-                 nfc_worker->dev_data->mf_ul_data.data[4 * 4 + 4] << 12 |
-                 nfc_worker->dev_data->mf_ul_data.data[4 * 4 + 5] << 4 |
-                 (nfc_worker->dev_data->mf_ul_data.data[4 * 4 + 6] >> 4);
+        serial = (dev_data->mf_ul_data.data[4 * 4 + 2] & 0x0F) << 28 |
+                 dev_data->mf_ul_data.data[4 * 4 + 3] << 20 |
+                 dev_data->mf_ul_data.data[4 * 4 + 4] << 12 |
+                 dev_data->mf_ul_data.data[4 * 4 + 5] << 4 |
+                 (dev_data->mf_ul_data.data[4 * 4 + 6] >> 4);
     } else {
-        FURI_LOG_I("all_in_one", "Unknown layout: %d", all_in_one_get_layout(nfc_worker));
+        FURI_LOG_I("all_in_one", "Unknown layout: %d", all_in_one_get_layout(dev_data));
         ride_count = 137;
     }
 
@@ -99,17 +96,13 @@ bool all_in_one_parser_parse(NfcWorker* nfc_worker) {
     // The number starts at the second half of the third byte on page 4, and is 32 bits long
     // So we get the second half of the third byte, then bytes 4-6, and then the first half of the 7th byte
     // B8 17 A2 A4 BD becomes 81 7A 2A 4B
-    serial = (nfc_worker->dev_data->mf_ul_data.data[4 * 4 + 2] & 0x0F) << 28 |
-             nfc_worker->dev_data->mf_ul_data.data[4 * 4 + 3] << 20 |
-             nfc_worker->dev_data->mf_ul_data.data[4 * 4 + 4] << 12 |
-             nfc_worker->dev_data->mf_ul_data.data[4 * 4 + 5] << 4 |
-             (nfc_worker->dev_data->mf_ul_data.data[4 * 4 + 6] >> 4);
+    serial =
+        (dev_data->mf_ul_data.data[4 * 4 + 2] & 0x0F) << 28 |
+        dev_data->mf_ul_data.data[4 * 4 + 3] << 20 | dev_data->mf_ul_data.data[4 * 4 + 4] << 12 |
+        dev_data->mf_ul_data.data[4 * 4 + 5] << 4 | (dev_data->mf_ul_data.data[4 * 4 + 6] >> 4);
 
     // Format string for rides count
     string_printf(
-        nfc_worker->dev_data->parsed_data,
-        "All-In-One Transport card\nNumber: %u\nRides left: %u",
-        serial,
-        ride_count);
+        dev_data->parsed_data, "\e#All-In-One\nNumber: %u\nRides left: %u", serial, ride_count);
     return true;
 }

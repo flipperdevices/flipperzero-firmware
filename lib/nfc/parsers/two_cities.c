@@ -71,18 +71,21 @@ bool two_cities_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx)
 
     MfClassicReader reader = {};
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    mf_classic_get_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak, &reader);
+    reader.type = mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
     for(size_t i = 0; i < COUNT_OF(two_cities_keys_4k); i++) {
         mf_classic_reader_add_sector(
-            &reader, two_cities_keys_4k[i].sector, two_cities_keys_4k[i].key_a, two_cities_keys_4k[i].key_b);
+            &reader,
+            two_cities_keys_4k[i].sector,
+            two_cities_keys_4k[i].key_a,
+            two_cities_keys_4k[i].key_b);
         FURI_LOG_D("2cities", "Added sector %d", two_cities_keys_4k[i].sector);
     }
 
     return mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 40;
 }
 
-bool two_cities_parser_parse(NfcWorker* nfc_worker) {
-    MfClassicData* data = &nfc_worker->dev_data->mf_classic_data;
+bool two_cities_parser_parse(NfcDeviceData* dev_data) {
+    MfClassicData* data = &dev_data->mf_classic_data;
 
     // =====
     // PLANTAIN
@@ -92,7 +95,8 @@ bool two_cities_parser_parse(NfcWorker* nfc_worker) {
     uint8_t* temp_ptr = &data->block[4 * 4].value[0];
     // Read first 4 bytes of block 0 of sector 4 from last to first and convert them to uint32_t
     // 38 18 00 00 becomes 00 00 18 38, and equals to 6200 decimal
-    uint32_t balance = ((temp_ptr[3] << 24) | (temp_ptr[2] << 16) | (temp_ptr[1] << 8) | temp_ptr[0]) / 100;
+    uint32_t balance =
+        ((temp_ptr[3] << 24) | (temp_ptr[2] << 16) | (temp_ptr[1] << 8) | temp_ptr[0]) / 100;
     // Read card number
     // Point to block 0 of sector 0, value 0
     temp_ptr = &data->block[0 * 4].value[0];
@@ -124,7 +128,7 @@ bool two_cities_parser_parse(NfcWorker* nfc_worker) {
     // string_t luhn_checksum_str;
     // string_init(luhn_checksum_str);
     // string_push_uint64(luhn_checksum, luhn_checksum_str);
-    
+
     string_cat_printf(card_number_suffix, "-");
     // FURI_LOG_D("plant4k", "Card checksum: %d", luhn_checksum);
     string_cat_printf(card_number_str, string_get_cstr(card_number_suffix));
@@ -149,12 +153,12 @@ bool two_cities_parser_parse(NfcWorker* nfc_worker) {
     troika_number >>= 4;
 
     string_printf(
-        nfc_worker->dev_data->parsed_data,
-        "Two Cities Transport card\nPlantain Balance: %d rub\nPN: %s\nTroika Balance: %d rub\nTroika Number: %d",
-        balance,
+        dev_data->parsed_data,
+        "\e#Troika+Plantain\nPN: %s\nPB: %d rur.\nTN: %d\nTB: %d rur.\n",
         string_get_cstr(card_number_str),
-        troika_balance,
-        troika_number);
+        balance,
+        troika_number,
+        troika_balance);
     string_clear(card_number_str);
 
     return true;

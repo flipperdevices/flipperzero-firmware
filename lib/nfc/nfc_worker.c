@@ -126,7 +126,7 @@ static bool nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker, FuriHalNfcTxRxC
                 if(nfc_supported_card[i].verify(nfc_worker, tx_rx)) {
                     if(nfc_supported_card[i].read(nfc_worker, tx_rx)) {
                         read_success = true;
-                        nfc_supported_card[i].parse(nfc_worker);
+                        nfc_supported_card[i].parse(nfc_worker->dev_data);
                     }
                 }
             }
