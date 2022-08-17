@@ -91,7 +91,7 @@ typedef struct {
 
 static FuriHalVersion furi_hal_version = {0};
 
-void furi_hal_version_set_name(const char* name) {
+static void furi_hal_version_set_name(const char* name) {
     furi_hal_version.cname = furi_hal_version_get_name_ptr();
     if (strlen(furi_hal_version.cname)<=0) furi_hal_version.cname=NULL;
     if(name != NULL) {
