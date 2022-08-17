@@ -20,13 +20,15 @@ typedef struct {
 } PluginEvent;
 
 typedef struct {
-    uint32_t timerStartTime;
-    uint32_t timerLastRunTime;
-    bool timerStarted;
-    int timerSecs;
-    int songSelect;
-    int timerTempSecs;
+    FuriHalRtcDateTime datetime;
 } ClockState;
+
+uint32_t timerStartTime;
+uint32_t timerLastRunTime;
+bool timerStarted;
+int timerSecs;
+int songSelect;
+int timerTempSecs;
 
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
@@ -35,37 +37,37 @@ static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* even
 }
 
 static void clock_render_callback(Canvas* const canvas, void* ctx) {
-    canvas_clear(canvas);
-    canvas_set_color(canvas, ColorBlack);
-    ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
+    ClockState* state = acquire_mutex((ValueMutex*)ctx, 25);
     if(state == NULL) {
+        FURI_LOG_E(TAG, "it null");
         return;
     }
+    canvas_clear(canvas);
+    canvas_set_color(canvas, ColorBlack);
     char strings[3][20];
-    state->timerTempSecs = state->timerSecs;
-    FuriHalRtcDateTime datetime;
-    furi_hal_rtc_get_datetime(&datetime);
-    if(state->timerStarted) state->timerTempSecs = state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&datetime) - state->timerStartTime));
-    int curMin = (state->timerTempSecs / 60);
-    int curSec = state->timerTempSecs - (curMin * 60);
+    timerTempSecs = timerSecs;
+    // FuriHalRtcDateTime datetime;
+    furi_hal_rtc_get_datetime(&state->datetime);
+    if(timerStarted) timerTempSecs = timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&state->datetime) - timerStartTime));
+    int curMin = (timerTempSecs / 60);
+    int curSec = timerTempSecs - (curMin * 60);
     snprintf(
         strings[0],
         20,
         "%.4d-%.2d-%.2d",
-        datetime.year,
-        datetime.month,
-        datetime.day);
+        state->datetime.year,
+        state->datetime.month,
+        state->datetime.day);
     snprintf(
         strings[1],
         20,
         "%.2d:%.2d:%.2d",
-        datetime.hour,
-        datetime.minute,
-        datetime.second);
+        state->datetime.hour,
+        state->datetime.minute,
+        state->datetime.second);
     snprintf(strings[2], 20, "%.2d:%.2d", curMin, curSec);
-    release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontBigNumbers);
-    if(state->timerStarted || state->timerTempSecs!=0) {
+    if(timerStarted || timerTempSecs!=0) {
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]);
         canvas_set_font(canvas, FontSecondary);
@@ -75,31 +77,33 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]);
     }
-    if(state->timerStarted) {
+    if(timerStarted) {
         elements_button_center(canvas, "Stop");
     } else {
         elements_button_center(canvas, "Start");
     }
-    if(state->timerTempSecs!=0) elements_button_left(canvas, "Reset");
-    if(state->timerStarted) {
-        if(state->songSelect == 0) {
+    if(timerTempSecs!=0) elements_button_left(canvas, "Reset");
+    if(timerStarted) {
+        if(songSelect == 0) {
             elements_button_right(canvas, "S:OFF");
-        } else if(state->songSelect == 1) {
+        } else if(songSelect == 1) {
             elements_button_right(canvas, "S:PoRa");
-        } else if(state->songSelect == 2) {
+        } else if(songSelect == 2) {
             elements_button_right(canvas, "S:Mario");
-        } else if(state->songSelect == 3) {
+        } else if(songSelect == 3) {
             elements_button_right(canvas, "S:ByMin");
         }
     }
+    release_mutex((ValueMutex*)ctx, state);
 }
 
 static void clock_state_init(ClockState* const state) {
-    state->timerStarted = false;
-    state->timerSecs = 0;
-    state->timerTempSecs = 0;
-    state->timerStartTime = 0;
-    state->songSelect = 2;
+    furi_hal_rtc_get_datetime(&state->datetime);
+    timerStarted = false;
+    timerSecs = 0;
+    timerTempSecs = 0;
+    timerStartTime = 0;
+    songSelect = 2;
 }
 
 const NotificationSequence clock_alert_silent = {
@@ -220,6 +224,7 @@ const NotificationSequence clock_alert_mario2 = {
     NULL,
 };
 const NotificationSequence clock_alert_mario3 = {
+    &message_display_backlight_off,
     &message_note_g5,
     &message_delay_100,
     &message_delay_100,
@@ -267,52 +272,57 @@ static void clock_tick(void* ctx) {
     furi_assert(ctx);
     ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
     if(state == NULL) {
+        FURI_LOG_D(TAG, "NULL ISSUE?");
         return;
     }
     FuriMessageQueue* event_queue = ctx;
     PluginEvent event = {.type = EventTypeTick};
-    if(state->timerStarted) {
-        if(state->timerTempSecs % 60 == 0 && state->songSelect != 0 && state->timerTempSecs!=state->timerSecs) {
+    if(timerStarted) {
+        if(timerTempSecs % 60 == 0 && songSelect != 0 && timerTempSecs!=timerSecs) {
+            FURI_LOG_D(TAG, "DO HOUR ALERT");
             NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
             notification_message(notification, &clock_alert_perMin);
             furi_record_close(RECORD_NOTIFICATION);
         }
-        if(state->songSelect == 1) {
-            if(state->timerTempSecs == 80) {
+        if(songSelect == 1) {
+            if(timerTempSecs == 80) {
+                FURI_LOG_D(TAG, "DO ALERT");
                 DOLPHIN_DEED(DolphinDeedU2fAuthorized);
                 NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_pr1);
                 furi_record_close(RECORD_NOTIFICATION);
             }
-            if(state->timerTempSecs == 81) {
+            if(timerTempSecs == 81) {
                 NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_pr2);
                 furi_record_close(RECORD_NOTIFICATION);
             }
-            if(state->timerTempSecs == 82) {
+            if(timerTempSecs == 82) {
                 NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_pr3);
                 furi_record_close(RECORD_NOTIFICATION);
             }
-        } else if(state->songSelect == 2) {
-            if(state->timerTempSecs == 80) {
+        } else if(songSelect == 2) {
+            if(timerTempSecs == 80) {
+                FURI_LOG_D(TAG, "DO ALERT");
                 DOLPHIN_DEED(DolphinDeedU2fAuthorized);
                 NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_mario1);
                 furi_record_close(RECORD_NOTIFICATION);
             }
-            if(state->timerTempSecs == 81) {
+            if(timerTempSecs == 81) {
                 NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_mario2);
                 furi_record_close(RECORD_NOTIFICATION);
             }
-            if(state->timerTempSecs == 82) {
+            if(timerTempSecs == 82) {
                 NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_mario3);
                 furi_record_close(RECORD_NOTIFICATION);
             }
         } else {
-            if(state->timerTempSecs == 80) {
+            if(timerTempSecs == 80) {
+                FURI_LOG_D(TAG, "DO ALERT");
                 NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_silent);
                 furi_record_close(RECORD_NOTIFICATION);
@@ -346,50 +356,49 @@ int32_t clock_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     // Main loop
     PluginEvent event;
-    FuriHalRtcDateTime datetime;
-    furi_hal_rtc_get_datetime(&datetime);
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         ClockState* plugin_state = (ClockState*)acquire_mutex_block(&state_mutex);
         if(event_status == FuriStatusOk) {
             // press events
             if(event.type == EventTypeKey) {
+                furi_hal_rtc_get_datetime(&plugin_state->datetime);
                 if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
                     switch(event.input.key) {
                     case InputKeyUp:
-                        if(plugin_state->timerStarted) plugin_state->timerSecs = plugin_state->timerSecs + 5;
+                        if(timerStarted) timerSecs = timerSecs + 5;
                         break;
                     case InputKeyDown:
-                        if(plugin_state->timerStarted) plugin_state->timerSecs = plugin_state->timerSecs - 5;
+                        if(timerStarted) timerSecs = timerSecs - 5;
                         break;
                     case InputKeyRight:
-                        if(plugin_state->songSelect == 0) {
-                            plugin_state->songSelect = 1;
-                        } else if(plugin_state->songSelect == 1) {
-                            plugin_state->songSelect = 2;
-                        } else if(plugin_state->songSelect == 2) {
-                            plugin_state->songSelect = 3;
+                        if(songSelect == 0) {
+                            songSelect = 1;
+                        } else if(songSelect == 1) {
+                            songSelect = 2;
+                        } else if(songSelect == 2) {
+                            songSelect = 3;
                         } else {
-                            plugin_state->songSelect = 0;
+                            songSelect = 0;
                         }
                         break;
                     case InputKeyLeft:
-                        plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(&datetime);
-                        plugin_state->timerSecs = 0;
-                        plugin_state->timerTempSecs = 0;
+                        timerStartTime = furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime);
+                        timerSecs = 0;
+                        timerTempSecs = 0;
                         break;
                     case InputKeyOk:
-                        if(plugin_state->songSelect == 1 || plugin_state->songSelect == 2 || plugin_state->songSelect == 3) {
+                        if(songSelect == 1 || songSelect == 2 || songSelect == 3) {
                             NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                             notification_message(notification, &clock_alert_startStop);
                             furi_record_close(RECORD_NOTIFICATION);
                         }
-                        if(plugin_state->timerStarted) {
-                            plugin_state->timerStarted = false;
-                            plugin_state->timerSecs = plugin_state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&datetime) - plugin_state->timerStartTime));
+                        if(timerStarted) {
+                            timerStarted = false;
+                            timerSecs = timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime) - timerStartTime));
                         } else {
-                            plugin_state->timerStarted = true;
-                            plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(&datetime);
+                            timerStarted = true;
+                            timerStartTime = furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime);
                         }
                         break;
                     case InputKeyBack:
@@ -399,7 +408,7 @@ int32_t clock_app(void* p) {
                     }
                 }
             } else if(event.type == EventTypeTick) {
-                furi_hal_rtc_get_datetime(&datetime);
+                furi_hal_rtc_get_datetime(&plugin_state->datetime);
             }
         } else {
             FURI_LOG_D(TAG, "osMessageQueue: event timeout");
@@ -413,8 +422,8 @@ int32_t clock_app(void* p) {
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
     view_port_free(view_port);
+    furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
     free(plugin_state);
-    furi_message_queue_free(event_queue);
     return 0;
 }
