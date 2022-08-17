@@ -327,10 +327,6 @@ const char* furi_hal_version_get_name_ptr() {
     } else {
         return *furi_hal_version.name == 0x00 ? NULL : furi_hal_version.name;
     }
-    // return "N4V1RUK4";
-    // return "N00BY";
-    // return "CH33CH";
-    // return "CH0NG";
 }
 
 const char* furi_hal_version_get_device_name_ptr() {
