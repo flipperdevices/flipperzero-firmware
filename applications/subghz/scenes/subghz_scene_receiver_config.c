@@ -188,7 +188,7 @@ static void subghz_scene_receiver_config_set_detect_raw(VariableItem* item) {
         (index == 1));
 }
 
-static void subghz_scene_receiver_config_set_hopping_runing(VariableItem* item) {
+static void subghz_scene_receiver_config_set_hopping_running(VariableItem* item) {
 
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
