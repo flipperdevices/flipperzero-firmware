@@ -66,7 +66,7 @@ jobs:
           pvs-studio-analyzer analyze \
               -j$(grep -c processor /proc/cpuinfo) \
               -l /opt/pvs_studio/PVS-Studio.lic \
-              -f build/f7-firmware-DC/compile_commands.json \
+              -f build/f7-firmware-D/compile_commands.json \
               -o PVS-Studio.log
 
       - name: 'Convert PVS-Studio output to html page'
