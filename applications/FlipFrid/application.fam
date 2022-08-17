@@ -7,5 +7,5 @@ App(
     requires=["gui"],
     stack_size=1 * 1024,
     icon="A_125khz_14",
-    order=30,
+    order=185,
 )
