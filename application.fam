@@ -1,0 +1,12 @@
+App(
+    appid="bc_demo",
+    name="Bluechip Demo",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="bc_demo",
+    cdefines=["APP_BC_DEMO"],
+    requires=[
+        "gui",
+    ],
+    stack_size=2 * 1024,
+    order=20,
+)
