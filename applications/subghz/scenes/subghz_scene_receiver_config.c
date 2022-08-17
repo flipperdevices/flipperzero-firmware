@@ -189,6 +189,7 @@ static void subghz_scene_receiver_config_set_detect_raw(VariableItem* item) {
 }
 
 static void subghz_scene_receiver_config_set_hopping_runing(VariableItem* item) {
+
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
@@ -264,7 +265,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
             subghz->variable_item_list,
             "Hopping:",
             HOPPING_COUNT,
-            subghz_scene_receiver_config_set_hopping_runing,
+            subghz_scene_receiver_config_set_hopping_running,
             subghz);
         value_index = subghz_scene_receiver_config_hopper_value_index(
             subghz->txrx->hopper_state, hopping_value, HOPPING_COUNT, subghz);
