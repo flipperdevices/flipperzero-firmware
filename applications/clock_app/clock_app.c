@@ -20,7 +20,6 @@ typedef struct {
 } PluginEvent;
 
 typedef struct {
-    FuriHalRtcDateTime datetime;
     uint32_t timerStartTime;
     uint32_t timerLastRunTime;
     bool timerStarted;
@@ -44,24 +43,26 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     }
     char strings[3][20];
     state->timerTempSecs = state->timerSecs;
-    if(state->timerStarted) state->timerTempSecs = state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&state->datetime) - state->timerStartTime));
+    FuriHalRtcDateTime datetime;
+    if(state->timerStarted) state->timerTempSecs = state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(datetime) - state->timerStartTime));
     int curMin = (state->timerTempSecs / 60);
     int curSec = state->timerTempSecs - (curMin * 60);
     snprintf(
         strings[0],
         20,
         "%.4d-%.2d-%.2d",
-        state->datetime.year,
-        state->datetime.month,
-        state->datetime.day);
+        datetime.year,
+        datetime.month,
+        datetime.day);
     snprintf(
         strings[1],
         20,
         "%.2d:%.2d:%.2d",
-        state->datetime.hour,
-        state->datetime.minute,
-        state->datetime.second);
+        datetime.hour,
+        datetime.minute,
+        datetime.second);
     snprintf(strings[2], 20, "%.2d:%.2d", curMin, curSec);
+    release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontBigNumbers);
     if(state->timerStarted || state->timerTempSecs!=0) {
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
@@ -90,11 +91,9 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             elements_button_right(canvas, "S:ByMin");
         }
     }
-    release_mutex((ValueMutex*)ctx, state);
 }
 
 static void clock_state_init(ClockState* const state) {
-    furi_hal_rtc_get_datetime(&state->datetime);
     state->timerStarted = false;
     state->timerSecs = 0;
     state->timerTempSecs = 0;
@@ -346,6 +345,7 @@ int32_t clock_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     // Main loop
     PluginEvent event;
+    FuriHalRtcDateTime datetime;
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         ClockState* plugin_state = (ClockState*)acquire_mutex_block(&state_mutex);
@@ -372,7 +372,7 @@ int32_t clock_app(void* p) {
                         }
                         break;
                     case InputKeyLeft:
-                        plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime);
+                        plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(datetime);
                         plugin_state->timerSecs = 0;
                         plugin_state->timerTempSecs = 0;
                         break;
@@ -384,10 +384,10 @@ int32_t clock_app(void* p) {
                         }
                         if(plugin_state->timerStarted) {
                             plugin_state->timerStarted = false;
-                            plugin_state->timerSecs = plugin_state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime) - plugin_state->timerStartTime));
+                            plugin_state->timerSecs = plugin_state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(datetime) - plugin_state->timerStartTime));
                         } else {
                             plugin_state->timerStarted = true;
-                            plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime);
+                            plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(datetime);
                         }
                         break;
                     case InputKeyBack:
@@ -397,7 +397,7 @@ int32_t clock_app(void* p) {
                     }
                 }
             } else if(event.type == EventTypeTick) {
-                furi_hal_rtc_get_datetime(&plugin_state->datetime);
+                furi_hal_rtc_get_datetime(datetime);
             }
         } else {
             FURI_LOG_D(TAG, "osMessageQueue: event timeout");
