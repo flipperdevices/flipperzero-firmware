@@ -40,7 +40,7 @@ if not version_depends:
 
 sources = libenv.GlobRecursive("*.c")
 
-libenv.Append(CPPPATH=["."])
+libenv.Append(CPPPATH=[libenv.Dir(".")])
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
