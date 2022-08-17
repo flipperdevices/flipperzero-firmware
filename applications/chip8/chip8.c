@@ -26,7 +26,7 @@ static int32_t chip8_worker(void* context) {
     Chip8Emulator* chip8 = context;
 
     FURI_LOG_I(WORKER_TAG, "Start furi record open");
-    Storage* furi_storage_record = furi_record_open("storage");
+    Storage* furi_storage_record = furi_record_open(RECORD_STORAGE);
     FURI_LOG_I(WORKER_TAG, "furi record opened");
 
     FURI_LOG_I(WORKER_TAG, "Start storage file alloc");

@@ -95,10 +95,10 @@ App(
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         "elf_loader",
+        "APPS_wifi_deauther",
+        "INTAPP_WiFiScanner",
         "INTAPP_HIDAnalyzer",
         "INTAPP_Picopass",
-        "INTAPP_WiFiScanner",
-        "INTAPP_esp8266_deauth",
         "INTAPP_Chip8",
         "APPS_TouchTunes",
         "APPS_WAVPlayer",

@@ -98,7 +98,7 @@ static void hexlify(uint8_t* in, uint8_t size, char* out) {
 }
 
 static bool open_ducky_script(Stream* stream) {
-    DialogsApp* dialogs = furi_record_open("dialogs");
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     bool result = false;
     string_t path;
     string_init(path);
@@ -106,7 +106,7 @@ static bool open_ducky_script(Stream* stream) {
     bool ret = dialog_file_browser_show(
         dialogs, path, path, MOUSEJACKER_APP_PATH_EXTENSION, true, &I_badusb_10px, false);
 
-    furi_record_close("dialogs");
+    furi_record_close(RECORD_DIALOGS);
     if(ret) {
         if(!file_stream_open(stream, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
             FURI_LOG_I(TAG, "Cannot open file \"%s\"", (path));
@@ -119,7 +119,7 @@ static bool open_ducky_script(Stream* stream) {
 }
 
 static bool open_addrs_file(Stream* stream) {
-    DialogsApp* dialogs = furi_record_open("dialogs");
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     bool result = false;
     string_t path;
     string_init(path);
@@ -127,7 +127,7 @@ static bool open_addrs_file(Stream* stream) {
     bool ret = dialog_file_browser_show(
         dialogs, path, path, NRFSNIFF_APP_PATH_EXTENSION, true, &I_sub1_10px, false);
 
-    furi_record_close("dialogs");
+    furi_record_close(RECORD_DIALOGS);
     if(ret) {
         if(!file_stream_open(stream, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
             FURI_LOG_I(TAG, "Cannot open file \"%s\"", (path));
@@ -242,10 +242,10 @@ int32_t mousejacker_app(void* p) {
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     // Open GUI and register view_port
-    Gui* gui = furi_record_open("gui");
+    Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     storage_common_mkdir(storage, MOUSEJACKER_APP_PATH_FOLDER);
     Stream* file_stream = file_stream_alloc(storage);
 
@@ -331,8 +331,8 @@ int32_t mousejacker_app(void* p) {
     furi_hal_spi_release(nrf24_HANDLE);
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
-    furi_record_close("gui");
-    furi_record_close("storage");
+    furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_STORAGE);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
 

@@ -634,10 +634,10 @@ int32_t chess_app(void* p) {
     view_port_input_callback_set(view_port, chess_input_callback, NULL);
 
     // Register view port in GUI
-    Gui* gui = furi_record_open("gui");
+    Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    notification = furi_record_open("notification");
+    notification = furi_record_open(RECORD_NOTIFICATION);
 
     should_exit = false;
 
@@ -674,7 +674,7 @@ int32_t chess_app(void* p) {
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
 
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
 
     free(game);
 

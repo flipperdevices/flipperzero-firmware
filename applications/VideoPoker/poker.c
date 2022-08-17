@@ -25,9 +25,9 @@ Sometimes duplicate cards will show up. there is a function to test this. I shou
 #define TAG "Video Poker"
 
 static void Shake(void) {
-    NotificationApp* notification = furi_record_open("notification");
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message(notification, &sequence_single_vibro);
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
 }
 
 typedef struct {
@@ -689,7 +689,7 @@ PokerPlayer* poker_player_alloc() {
 
     view_port_input_callback_set(poker_player->view_port, poker_input_callback, poker_player);
 
-    poker_player->gui = furi_record_open("gui");
+    poker_player->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(poker_player->gui, poker_player->view_port, GuiLayerFullscreen);
 
     return poker_player;
@@ -698,7 +698,7 @@ PokerPlayer* poker_player_alloc() {
 void poker_player_free(PokerPlayer* poker_player) {
     view_port_enabled_set(poker_player->view_port, false);
     gui_remove_view_port(poker_player->gui, poker_player->view_port);
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     view_port_free(poker_player->view_port);
     furi_message_queue_free(poker_player->event_queue);
     furi_mutex_free(poker_player->model_mutex);

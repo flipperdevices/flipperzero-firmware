@@ -114,12 +114,12 @@ static void game_2048_render_callback(Canvas* const canvas, ValueMutex* const vm
         // display score
         char buffer[12];
         snprintf(buffer, sizeof(buffer), "%lu", game_state->score.gameScore);
-        canvas_draw_str_aligned(canvas, 128, 8, AlignRight, AlignBottom, buffer);
+        canvas_draw_str_aligned(canvas, 127, 8, AlignRight, AlignBottom, buffer);
 
         if(game_state->score.highScore > 0) {
             char buffer2[12];
             snprintf(buffer2, sizeof(buffer2), "%lu", game_state->score.highScore);
-            canvas_draw_str_aligned(canvas, 128, 62, AlignRight, AlignBottom, buffer2);
+            canvas_draw_str_aligned(canvas, 127, 62, AlignRight, AlignBottom, buffer2);
         }
     } else { // if animation
         // for animation
@@ -396,7 +396,7 @@ int32_t game_2048_app(void* p) {
     view_port_input_callback_set(
         view_port, (ViewPortInputCallback)game_2048_input_callback, event_queue);
 
-    Gui* gui = furi_record_open("gui");
+    Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     game_state->direction = DirectionIdle;
@@ -412,12 +412,12 @@ int32_t game_2048_app(void* p) {
         game_state->field[1][1] = 2;
         game_state->field[1][2] = 3;
         game_state->field[1][3] = 4;
-        
+
         game_state->field[2][0] = 5;
         game_state->field[2][1] = 6;
         game_state->field[2][2] = 7;
         game_state->field[2][3] = 8;
-        
+
         game_state->field[3][0] = 9;
         game_state->field[3][1] = 10;
         game_state->field[3][2] = 11;
@@ -473,7 +473,7 @@ int32_t game_2048_app(void* p) {
 
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     view_port_free(view_port);
     delete_mutex(&state_mutex);
 

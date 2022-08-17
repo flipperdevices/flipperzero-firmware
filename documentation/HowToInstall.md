@@ -62,4 +62,4 @@ then select **`flipper-z-f7-full-(CURRENT VERSION).dfu`**
 - ### If you installed using .dfu - unpack files from archive `sd-card-(CURRENT VERSION).zip` to your microSD card
 <br>
 
-- ## [How To: Configure UniversalRF Remix App](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/documentation/UniRFRemix.md)
+- ## [How To: Configure UniversalRF Remix App](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/documentation/UniRFRemix.md)

@@ -57,23 +57,22 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     snprintf(strings[2], 20, "%.2d:%.2d", curMin, curSec);
     release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontBigNumbers);
-    if(timerStarted) canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
-    if(!timerStarted)
+    if(timerStarted || timerSecs!=0) {
+        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
+        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]);
+    } else {
         canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]);
-    canvas_set_font(canvas, FontSecondary);
-    if(timerStarted) canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]);
-    if(!timerStarted) canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]);
-    // elements_button_left(canvas, "Alarms");
-    // elements_button_right(canvas, "Settings");
-    // elements_button_center(canvas, "Reset");
-    canvas_set_font(canvas, FontBigNumbers);
-    if(timerStarted) canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]);
-    canvas_set_font(canvas, FontSecondary);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]);
+    }
     if(timerStarted) {
         elements_button_center(canvas, "Stop");
     } else {
         elements_button_center(canvas, "Start");
     }
+    elements_button_left(canvas, "Reset");
     if(timerStarted) {
         if(songSelect == 0) {
             elements_button_right(canvas, "S:OFF");
@@ -273,49 +272,49 @@ static void clock_tick(void* ctx) {
     if(timerStarted) {
         timerSecs = timerSecs + 1;
         if(timerSecs % 60 == 0 && songSelect != 0) {
-            NotificationApp* notification = furi_record_open("notification");
+            NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
             notification_message(notification, &clock_alert_perMin);
-            furi_record_close("notification");
+            furi_record_close(RECORD_NOTIFICATION);
         }
         if(songSelect == 1) {
             if(timerSecs == 80) {
                 DOLPHIN_DEED(DolphinDeedU2fAuthorized);
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_pr1);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
             if(timerSecs == 81) {
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_pr2);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
             if(timerSecs == 82) {
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_pr3);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
         } else if(songSelect == 2) {
             if(timerSecs == 80) {
                 DOLPHIN_DEED(DolphinDeedU2fAuthorized);
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_mario1);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
             if(timerSecs == 81) {
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_mario2);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
             if(timerSecs == 82) {
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_mario3);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
         } else {
             if(timerSecs == 80) {
-                NotificationApp* notification = furi_record_open("notification");
+                NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                 notification_message(notification, &clock_alert_silent);
-                furi_record_close("notification");
+                furi_record_close(RECORD_NOTIFICATION);
             }
         }
     }
@@ -345,7 +344,7 @@ int32_t clock_app(void* p) {
     FuriTimer* timer = furi_timer_alloc(clock_tick, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, furi_kernel_get_tick_frequency());
     // Open GUI and register view_port
-    Gui* gui = furi_record_open("gui");
+    Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     // Main loop
     PluginEvent event;
@@ -375,16 +374,16 @@ int32_t clock_app(void* p) {
                         }
                         break;
                     case InputKeyLeft:
+                        timerSecs = 0;
                         break;
                     case InputKeyOk:
                         if(songSelect == 1 || songSelect == 2 || songSelect == 3) {
-                            NotificationApp* notification = furi_record_open("notification");
+                            NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
                             notification_message(notification, &clock_alert_startStop);
-                            furi_record_close("notification");
+                            furi_record_close(RECORD_NOTIFICATION);
                         }
                         if(timerStarted) {
                             timerStarted = false;
-                            timerSecs = 0;
                         } else {
                             timerStarted = true;
                         }
@@ -408,7 +407,7 @@ int32_t clock_app(void* p) {
     furi_timer_free(timer);
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     return 0;
