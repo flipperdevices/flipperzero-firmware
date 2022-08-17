@@ -44,6 +44,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     char strings[3][20];
     state->timerTempSecs = state->timerSecs;
     FuriHalRtcDateTime datetime;
+    furi_hal_rtc_get_datetime(&datetime);
     if(state->timerStarted) state->timerTempSecs = state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&datetime) - state->timerStartTime));
     int curMin = (state->timerTempSecs / 60);
     int curSec = state->timerTempSecs - (curMin * 60);
@@ -346,6 +347,7 @@ int32_t clock_app(void* p) {
     // Main loop
     PluginEvent event;
     FuriHalRtcDateTime datetime;
+    furi_hal_rtc_get_datetime(&datetime);
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         ClockState* plugin_state = (ClockState*)acquire_mutex_block(&state_mutex);
@@ -397,7 +399,7 @@ int32_t clock_app(void* p) {
                     }
                 }
             } else if(event.type == EventTypeTick) {
-                furi_hal_rtc_get_datetime(datetime);
+                furi_hal_rtc_get_datetime(&datetime);
             }
         } else {
             FURI_LOG_D(TAG, "osMessageQueue: event timeout");
