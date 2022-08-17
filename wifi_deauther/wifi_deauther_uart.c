@@ -10,8 +10,8 @@ struct WifideautherUart {
     WifideautherApp* app;
     FuriThread* rx_thread;
     StreamBufferHandle_t rx_stream;
-    uint8_t rx_buf[RX_BUF_SIZE + 1];
-    void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context);
+    uint8_t rx_buf[RX_BUF_SIZE+1];
+    void (*handle_rx_data_cb)(uint8_t *buf, size_t len, void* context);
 };
 
 typedef enum {
@@ -19,9 +19,7 @@ typedef enum {
     WorkerEvtRxDone = (1 << 1),
 } WorkerEvtFlags;
 
-void wifi_deauther_uart_set_handle_rx_data_cb(
-    WifideautherUart* uart,
-    void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context)) {
+void wifi_deauther_uart_set_handle_rx_data_cb(WifideautherUart* uart, void (*handle_rx_data_cb)(uint8_t *buf, size_t len, void* context)) {
     furi_assert(uart);
     uart->handle_rx_data_cb = handle_rx_data_cb;
 }
@@ -50,9 +48,10 @@ static int32_t uart_worker(void* context) {
         furi_check((events & FuriFlagError) == 0);
         if(events & WorkerEvtStop) break;
         if(events & WorkerEvtRxDone) {
-            size_t len = xStreamBufferReceive(uart->rx_stream, uart->rx_buf, RX_BUF_SIZE, 0);
+            size_t len =
+                xStreamBufferReceive(uart->rx_stream, uart->rx_buf, RX_BUF_SIZE, 0);
             if(len > 0) {
-                if(uart->handle_rx_data_cb) uart->handle_rx_data_cb(uart->rx_buf, len, uart->app);
+                if (uart->handle_rx_data_cb) uart->handle_rx_data_cb(uart->rx_buf, len, uart->app);
             }
         }
     }
@@ -62,12 +61,12 @@ static int32_t uart_worker(void* context) {
     return 0;
 }
 
-void wifi_deauther_uart_tx(uint8_t* data, size_t len) {
+void wifi_deauther_uart_tx(uint8_t *data, size_t len) {
     furi_hal_uart_tx(UART_CH, data, len);
 }
 
 WifideautherUart* wifi_deauther_uart_init(WifideautherApp* app) {
-    WifideautherUart* uart = malloc(sizeof(WifideautherUart));
+    WifideautherUart *uart = malloc(sizeof(WifideautherUart));
 
     furi_hal_console_disable();
     furi_hal_uart_set_br(UART_CH, BAUDRATE);
