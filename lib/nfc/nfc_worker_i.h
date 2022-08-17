@@ -12,7 +12,6 @@
 #include <lib/nfc/protocols/mifare_classic.h>
 #include <lib/nfc/protocols/mifare_desfire.h>
 #include <lib/nfc/protocols/nfca.h>
-#include <lib/nfc/protocols/mfkey32v2.h>
 #include <lib/nfc/helpers/reader_analyzer.h>
 
 #include "helpers/nfc_debug_pcap.h"
@@ -30,6 +29,7 @@ struct NfcWorker {
     NfcWorkerState state;
 
     NfcDebugPcapWorker* debug_pcap_worker;
+    ReaderAnalyzer* reader_analyzer;
 };
 
 void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state);

@@ -7,7 +7,6 @@
 
 #include <furi_hal_nfc.h>
 #include <lib/nfc/helpers/mf_classic_dict.h>
-#include <lib/nfc/helpers/reader_analyzer.h>
 #include <lib/nfc/protocols/emv.h>
 #include <lib/nfc/protocols/mifare_ultralight.h>
 #include <lib/nfc/protocols/mifare_classic.h>
@@ -62,7 +61,6 @@ typedef struct {
         MifareDesfireData mf_df_data;
     };
     string_t parsed_data;
-    ReaderAnalyzer* reader_analyzer;
 } NfcDeviceData;
 
 typedef struct {

@@ -32,6 +32,8 @@ NfcWorker* nfc_worker_alloc() {
         nfc_worker->debug_pcap_worker = nfc_debug_pcap_alloc(nfc_worker->storage);
     }
 
+    nfc_worker->reader_analyzer = reader_analyzer_alloc(nfc_worker->storage);
+
     return nfc_worker;
 }
 
@@ -43,6 +45,8 @@ void nfc_worker_free(NfcWorker* nfc_worker) {
     furi_record_close(RECORD_STORAGE);
 
     if(nfc_worker->debug_pcap_worker) nfc_debug_pcap_free(nfc_worker->debug_pcap_worker);
+
+    reader_analyzer_free(nfc_worker->reader_analyzer);
 
     free(nfc_worker);
 }
@@ -584,10 +588,16 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
 void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
 
+    ReaderAnalyzer* reader_analyzer = nfc_worker->reader_analyzer;
+    FuriHalNfcDevData* nfc_data = reader_analyzer_get_nfc_data(reader_analyzer);
+    MfClassicEmulator emulator = {
+        .cuid = nfc_util_bytes2num(&nfc_data->uid[nfc_data->uid_len - 4], 4),
+        .data = nfc_worker->dev_data->mf_classic_data,
+        .data_changed = false,
+    };
     NfcaSignal* nfca_signal = nfca_signal_alloc();
     tx_rx.nfca_signal = nfca_signal;
-    ReaderAnalyzer* reader_analyzer = nfc_worker->dev_data->reader_analyzer;
-    FuriHalNfcDevData* nfc_data = reader_analyzer_get_nfc_data(reader_analyzer);
+    reader_analyzer_prepare_tx_rx(reader_analyzer, &tx_rx, true);
 
     rfal_platform_spi_acquire();
 
@@ -597,23 +607,15 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
         furi_delay_ms(5);
         furi_hal_nfc_listen_start(nfc_data);
         if(furi_hal_nfc_listen_rx(&tx_rx, 300)) {
-            reader_analyzer_process(reader_analyzer, &tx_rx);
-            if(reader_analyzer_is_data_available(reader_analyzer)) {
-                nfc_worker->callback(
-                    NfcWorkerEventReaderDetectMfkeyCollected, nfc_worker->context);
+            NfcProtocol protocol =
+                reader_analyzer_guess_protocol(reader_analyzer, tx_rx.rx_data, tx_rx.rx_bits / 8);
+            if(protocol == NfcDeviceProtocolMifareClassic) {
+                mf_classic_emulator(&emulator, &tx_rx);
             }
         } else {
             FURI_LOG_D(TAG, "No data from reader");
             continue;
         }
-
-        // if(mfkey32v2_collect(&tx_rx, &mfkey_params)) {
-        //     if(mfkey32v2_get_key(&mfkey_params, &key_found)) {
-        //         FURI_LOG_D(TAG, "Mfkey32v2 success");
-        //     }
-        // } else {
-        //     FURI_LOG_D(TAG, "Collect failed");
-        // }
     }
 
     rfal_platform_spi_release();
