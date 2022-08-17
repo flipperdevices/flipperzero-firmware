@@ -278,7 +278,7 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     U2F->user_present = false;
 
     // The 4 byte counter is represented in big endian. Increment it before use
-    be_u2f_counter = lfs_tobe32(U2F->counter + 1);
+    be_u2f_counter = lfs_tobe32(++U2F->counter);
 
     // Generate hash
     sha256_start(&sha_ctx);
@@ -319,7 +319,6 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     memcpy(resp->signature + signature_len, state_no_error, 2);
 
     FURI_LOG_D(TAG, "Counter: %lu", U2F->counter);
-    U2F->counter++;
     u2f_data_cnt_write(U2F->counter);
 
     if(U2F->callback != NULL) U2F->callback(U2fNotifyAuthSuccess, U2F->context);
