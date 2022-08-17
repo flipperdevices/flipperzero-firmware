@@ -39,6 +39,9 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
+    if(state == NULL) {
+        return;
+    }
     char strings[3][20];
     state->timerTempSecs = state->timerSecs;
     if(state->timerStarted) state->timerTempSecs = state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&state->datetime) - state->timerStartTime));
@@ -277,6 +280,9 @@ const NotificationSequence clock_alert_startStop = {
 static void clock_tick(void* ctx) {
     furi_assert(ctx);
     ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
+    if(state == NULL) {
+        return;
+    }
     FuriMessageQueue* event_queue = ctx;
     PluginEvent event = {.type = EventTypeTick};
     if(state->timerStarted) {
@@ -419,7 +425,8 @@ int32_t clock_app(void* p) {
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
     view_port_free(view_port);
-    furi_message_queue_free(event_queue);
+    delete_mutex(&state_mutex);
     free(plugin_state);
+    furi_message_queue_free(event_queue);
     return 0;
 }
