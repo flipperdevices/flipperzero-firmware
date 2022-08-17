@@ -44,7 +44,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     char strings[3][20];
     state->timerTempSecs = state->timerSecs;
     FuriHalRtcDateTime datetime;
-    if(state->timerStarted) state->timerTempSecs = state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(datetime) - state->timerStartTime));
+    if(state->timerStarted) state->timerTempSecs = state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&datetime) - state->timerStartTime));
     int curMin = (state->timerTempSecs / 60);
     int curSec = state->timerTempSecs - (curMin * 60);
     snprintf(
@@ -372,7 +372,7 @@ int32_t clock_app(void* p) {
                         }
                         break;
                     case InputKeyLeft:
-                        plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(datetime);
+                        plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(&datetime);
                         plugin_state->timerSecs = 0;
                         plugin_state->timerTempSecs = 0;
                         break;
@@ -384,10 +384,10 @@ int32_t clock_app(void* p) {
                         }
                         if(plugin_state->timerStarted) {
                             plugin_state->timerStarted = false;
-                            plugin_state->timerSecs = plugin_state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(datetime) - plugin_state->timerStartTime));
+                            plugin_state->timerSecs = plugin_state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&datetime) - plugin_state->timerStartTime));
                         } else {
                             plugin_state->timerStarted = true;
-                            plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(datetime);
+                            plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(&datetime);
                         }
                         break;
                     case InputKeyBack:
