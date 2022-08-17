@@ -21,45 +21,45 @@
 
 typedef struct {
     FSKDemod* fsk_demod;
-} ProtocolHID192Decoder;
+} ProtocolHIDExDecoder;
 
 typedef struct {
     FSKOsc* fsk_osc;
     uint8_t encoded_index;
     uint32_t pulse;
-} ProtocolHID192Encoder;
+} ProtocolHIDExEncoder;
 
 typedef struct {
-    ProtocolHID192Decoder decoder;
-    ProtocolHID192Encoder encoder;
+    ProtocolHIDExDecoder decoder;
+    ProtocolHIDExEncoder encoder;
     uint8_t encoded_data[HID_ENCODED_DATA_SIZE];
     uint8_t data[HID_DECODED_DATA_SIZE];
     size_t protocol_size;
-} ProtocolHID192;
+} ProtocolHIDEx;
 
-ProtocolHID192* protocol_hid192_generic_alloc(void) {
-    ProtocolHID192* protocol = malloc(sizeof(ProtocolHID192));
+ProtocolHIDEx* protocol_hid_ex_generic_alloc(void) {
+    ProtocolHIDEx* protocol = malloc(sizeof(ProtocolHIDEx));
     protocol->decoder.fsk_demod = fsk_demod_alloc(MIN_TIME, 6, MAX_TIME, 5);
     protocol->encoder.fsk_osc = fsk_osc_alloc(8, 10, 50);
 
     return protocol;
 };
 
-void protocol_hid192_generic_free(ProtocolHID192* protocol) {
+void protocol_hid_ex_generic_free(ProtocolHIDEx* protocol) {
     fsk_demod_free(protocol->decoder.fsk_demod);
     fsk_osc_free(protocol->encoder.fsk_osc);
     free(protocol);
 };
 
-uint8_t* protocol_hid192_generic_get_data(ProtocolHID192* protocol) {
+uint8_t* protocol_hid_ex_generic_get_data(ProtocolHIDEx* protocol) {
     return protocol->data;
 };
 
-void protocol_hid192_generic_decoder_start(ProtocolHID192* protocol) {
+void protocol_hid_ex_generic_decoder_start(ProtocolHIDEx* protocol) {
     memset(protocol->encoded_data, 0, HID_ENCODED_DATA_SIZE);
 };
 
-static bool protocol_hid192_generic_can_be_decoded(const uint8_t* data) {
+static bool protocol_hid_ex_generic_can_be_decoded(const uint8_t* data) {
     // check preamble
     if(data[0] != HID_PREAMBLE || data[HID_PREAMBLE_SIZE + HID_DATA_SIZE] != HID_PREAMBLE) {
         return false;
@@ -78,7 +78,7 @@ static bool protocol_hid192_generic_can_be_decoded(const uint8_t* data) {
     return true;
 }
 
-static void protocol_hid192_generic_decode(const uint8_t* from, uint8_t* to) {
+static void protocol_hid_ex_generic_decode(const uint8_t* from, uint8_t* to) {
     size_t bit_index = 0;
     for(size_t i = HID_PREAMBLE_SIZE; i < (HID_PREAMBLE_SIZE + HID_DATA_SIZE); i++) {
         for(size_t n = 0; n < 4; n++) {
@@ -93,7 +93,7 @@ static void protocol_hid192_generic_decode(const uint8_t* from, uint8_t* to) {
     }
 }
 
-bool protocol_hid192_generic_decoder_feed(ProtocolHID192* protocol, bool level, uint32_t duration) {
+bool protocol_hid_ex_generic_decoder_feed(ProtocolHIDEx* protocol, bool level, uint32_t duration) {
     bool value;
     uint32_t count;
     bool result = false;
@@ -102,8 +102,8 @@ bool protocol_hid192_generic_decoder_feed(ProtocolHID192* protocol, bool level, 
     if(count > 0) {
         for(size_t i = 0; i < count; i++) {
             bit_lib_push_bit(protocol->encoded_data, HID_ENCODED_DATA_SIZE, value);
-            if(protocol_hid192_generic_can_be_decoded(protocol->encoded_data)) {
-                protocol_hid192_generic_decode(protocol->encoded_data, protocol->data);
+            if(protocol_hid_ex_generic_can_be_decoded(protocol->encoded_data)) {
+                protocol_hid_ex_generic_decode(protocol->encoded_data, protocol->data);
                 result = true;
             }
         }
@@ -112,7 +112,7 @@ bool protocol_hid192_generic_decoder_feed(ProtocolHID192* protocol, bool level, 
     return result;
 };
 
-static void protocol_hid192_generic_encode(ProtocolHID192* protocol) {
+static void protocol_hid_ex_generic_encode(ProtocolHIDEx* protocol) {
     protocol->encoded_data[0] = HID_PREAMBLE;
 
     size_t bit_index = 0;
@@ -129,15 +129,15 @@ static void protocol_hid192_generic_encode(ProtocolHID192* protocol) {
     }
 }
 
-bool protocol_hid192_generic_encoder_start(ProtocolHID192* protocol) {
+bool protocol_hid_ex_generic_encoder_start(ProtocolHIDEx* protocol) {
     protocol->encoder.encoded_index = 0;
     protocol->encoder.pulse = 0;
-    protocol_hid192_generic_encode(protocol);
+    protocol_hid_ex_generic_encode(protocol);
 
     return true;
 };
 
-LevelDuration protocol_hid192_generic_encoder_yield(ProtocolHID192* protocol) {
+LevelDuration protocol_hid_ex_generic_encoder_yield(ProtocolHIDEx* protocol) {
     bool level = 0;
     uint32_t duration = 0;
 
@@ -167,11 +167,11 @@ LevelDuration protocol_hid192_generic_encoder_yield(ProtocolHID192* protocol) {
     return level_duration_make(level, duration);
 };
 
-bool protocol_hid192_generic_write_data(ProtocolHID192* protocol, void* data) {
+bool protocol_hid_ex_generic_write_data(ProtocolHIDEx* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
     bool result = false;
 
-    protocol_hid192_generic_encoder_start(protocol);
+    protocol_hid_ex_generic_encoder_start(protocol);
 
     if(request->write_type == LFRFIDWriteTypeT5577) {
         request->t5577.block[0] = LFRFID_T5577_MODULATION_FSK2a | LFRFID_T5577_BITRATE_RF_50 |
@@ -188,32 +188,32 @@ bool protocol_hid192_generic_write_data(ProtocolHID192* protocol, void* data) {
     return result;
 };
 
-void protocol_hid192_generic_render_data(ProtocolHID192* protocol, string_t result) {
+void protocol_hid_ex_generic_render_data(ProtocolHIDEx* protocol, string_t result) {
     // TODO: parser and render functions
     UNUSED(protocol);
-    string_printf(result, "Generic 192 bit HID\r\nData: Unknown");
+    string_printf(result, "Generic HID Extended\r\nData: Unknown");
 };
 
-const ProtocolBase protocol_hid192_generic = {
-    .name = "HID192",
+const ProtocolBase protocol_hid_ex_generic = {
+    .name = "HIDExt",
     .manufacturer = "Generic",
     .data_size = HID_DECODED_DATA_SIZE,
     .features = LFRFIDFeatureASK,
     .validate_count = 3,
-    .alloc = (ProtocolAlloc)protocol_hid192_generic_alloc,
-    .free = (ProtocolFree)protocol_hid192_generic_free,
-    .get_data = (ProtocolGetData)protocol_hid192_generic_get_data,
+    .alloc = (ProtocolAlloc)protocol_hid_ex_generic_alloc,
+    .free = (ProtocolFree)protocol_hid_ex_generic_free,
+    .get_data = (ProtocolGetData)protocol_hid_ex_generic_get_data,
     .decoder =
         {
-            .start = (ProtocolDecoderStart)protocol_hid192_generic_decoder_start,
-            .feed = (ProtocolDecoderFeed)protocol_hid192_generic_decoder_feed,
+            .start = (ProtocolDecoderStart)protocol_hid_ex_generic_decoder_start,
+            .feed = (ProtocolDecoderFeed)protocol_hid_ex_generic_decoder_feed,
         },
     .encoder =
         {
-            .start = (ProtocolEncoderStart)protocol_hid192_generic_encoder_start,
-            .yield = (ProtocolEncoderYield)protocol_hid192_generic_encoder_yield,
+            .start = (ProtocolEncoderStart)protocol_hid_ex_generic_encoder_start,
+            .yield = (ProtocolEncoderYield)protocol_hid_ex_generic_encoder_yield,
         },
-    .render_data = (ProtocolRenderData)protocol_hid192_generic_render_data,
-    .render_brief_data = (ProtocolRenderData)protocol_hid192_generic_render_data,
-    .write_data = (ProtocolWriteData)protocol_hid192_generic_write_data,
+    .render_data = (ProtocolRenderData)protocol_hid_ex_generic_render_data,
+    .render_brief_data = (ProtocolRenderData)protocol_hid_ex_generic_render_data,
+    .write_data = (ProtocolWriteData)protocol_hid_ex_generic_write_data,
 };

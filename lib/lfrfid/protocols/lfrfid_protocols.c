@@ -6,8 +6,8 @@
 #include "protocol_awid.h"
 #include "protocol_fdx_a.h"
 #include "protocol_fdx_b.h"
-#include "protocol_hid96_generic.h"
-#include "protocol_hid192_generic.h"
+#include "protocol_hid_generic.h"
+#include "protocol_hid_ex_generic.h"
 
 const ProtocolBase* lfrfid_protocols[] = {
     [LFRFIDProtocolEM4100] = &protocol_em4100,
@@ -17,6 +17,6 @@ const ProtocolBase* lfrfid_protocols[] = {
     [LFRFIDProtocolAwid] = &protocol_awid,
     [LFRFIDProtocolFDXA] = &protocol_fdx_a,
     [LFRFIDProtocolFDXB] = &protocol_fdx_b,
-    [LFRFIDProtocolHid96Generic] = &protocol_hid96_generic,
-    [LFRFIDProtocolHid192Generic] = &protocol_hid192_generic,
+    [LFRFIDProtocolHidGeneric] = &protocol_hid_generic,
+    [LFRFIDProtocolHidExGeneric] = &protocol_hid_ex_generic,
 };

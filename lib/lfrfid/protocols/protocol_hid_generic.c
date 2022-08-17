@@ -22,46 +22,46 @@
 
 typedef struct {
     FSKDemod* fsk_demod;
-} ProtocolHID96Decoder;
+} ProtocolHIDDecoder;
 
 typedef struct {
     FSKOsc* fsk_osc;
     uint8_t encoded_index;
     uint32_t pulse;
-} ProtocolHID96Encoder;
+} ProtocolHIDEncoder;
 
 typedef struct {
-    ProtocolHID96Decoder decoder;
-    ProtocolHID96Encoder encoder;
+    ProtocolHIDDecoder decoder;
+    ProtocolHIDEncoder encoder;
     uint8_t encoded_data[HID_ENCODED_DATA_SIZE];
     uint8_t data[HID_DECODED_DATA_SIZE];
     uint8_t protocol_size;
-} ProtocolHID96;
+} ProtocolHID;
 
-ProtocolHID96* protocol_hid96_generic_alloc(void) {
-    ProtocolHID96* protocol = malloc(sizeof(ProtocolHID96));
+ProtocolHID* protocol_hid_generic_alloc(void) {
+    ProtocolHID* protocol = malloc(sizeof(ProtocolHID));
     protocol->decoder.fsk_demod = fsk_demod_alloc(MIN_TIME, 6, MAX_TIME, 5);
     protocol->encoder.fsk_osc = fsk_osc_alloc(8, 10, 50);
 
     return protocol;
 };
 
-void protocol_hid96_generic_free(ProtocolHID96* protocol) {
+void protocol_hid_generic_free(ProtocolHID* protocol) {
     fsk_demod_free(protocol->decoder.fsk_demod);
     fsk_osc_free(protocol->encoder.fsk_osc);
     free(protocol);
 };
 
-uint8_t* protocol_hid96_generic_get_data(ProtocolHID96* protocol) {
+uint8_t* protocol_hid_generic_get_data(ProtocolHID* protocol) {
     return protocol->data;
 };
 
-void protocol_hid96_generic_decoder_start(ProtocolHID96* protocol) {
+void protocol_hid_generic_decoder_start(ProtocolHID* protocol) {
     memset(protocol->encoded_data, 0, HID_ENCODED_DATA_SIZE);
     protocol->protocol_size = HID_PROTOCOL_SIZE_UNKNOWN;
 };
 
-static bool protocol_hid96_generic_can_be_decoded(const uint8_t* data) {
+static bool protocol_hid_generic_can_be_decoded(const uint8_t* data) {
     // check preamble
     if(data[0] != HID_PREAMBLE || data[HID_PREAMBLE_SIZE + HID_DATA_SIZE] != HID_PREAMBLE) {
         return false;
@@ -80,7 +80,7 @@ static bool protocol_hid96_generic_can_be_decoded(const uint8_t* data) {
     return true;
 }
 
-static void protocol_hid96_generic_decode(const uint8_t* from, uint8_t* to, uint8_t* protocol_size) {
+static void protocol_hid_generic_decode(const uint8_t* from, uint8_t* to, uint8_t* protocol_size) {
     size_t bit_index = 0;
     for(size_t i = HID_PREAMBLE_SIZE; i < (HID_PREAMBLE_SIZE + HID_DATA_SIZE); i++) {
         for(size_t n = 0; n < 4; n++) {
@@ -116,7 +116,7 @@ static void protocol_hid96_generic_decode(const uint8_t* from, uint8_t* to, uint
     *protocol_size = size < 26 ? HID_PROTOCOL_SIZE_UNKNOWN : size;
 }
 
-bool protocol_hid96_generic_decoder_feed(ProtocolHID96* protocol, bool level, uint32_t duration) {
+bool protocol_hid_generic_decoder_feed(ProtocolHID* protocol, bool level, uint32_t duration) {
     bool value;
     uint32_t count;
     bool result = false;
@@ -125,8 +125,9 @@ bool protocol_hid96_generic_decoder_feed(ProtocolHID96* protocol, bool level, ui
     if(count > 0) {
         for(size_t i = 0; i < count; i++) {
             bit_lib_push_bit(protocol->encoded_data, HID_ENCODED_DATA_SIZE, value);
-            if(protocol_hid96_generic_can_be_decoded(protocol->encoded_data)) {
-                protocol_hid96_generic_decode(protocol->encoded_data, protocol->data, &protocol->protocol_size);
+            if(protocol_hid_generic_can_be_decoded(protocol->encoded_data)) {
+                protocol_hid_generic_decode(
+                    protocol->encoded_data, protocol->data, &protocol->protocol_size);
                 result = true;
             }
         }
@@ -135,7 +136,7 @@ bool protocol_hid96_generic_decoder_feed(ProtocolHID96* protocol, bool level, ui
     return result;
 };
 
-static void protocol_hid96_generic_encode(ProtocolHID96* protocol) {
+static void protocol_hid_generic_encode(ProtocolHID* protocol) {
     protocol->encoded_data[0] = HID_PREAMBLE;
 
     size_t bit_index = 0;
@@ -152,15 +153,15 @@ static void protocol_hid96_generic_encode(ProtocolHID96* protocol) {
     }
 }
 
-bool protocol_hid96_generic_encoder_start(ProtocolHID96* protocol) {
+bool protocol_hid_generic_encoder_start(ProtocolHID* protocol) {
     protocol->encoder.encoded_index = 0;
     protocol->encoder.pulse = 0;
-    protocol_hid96_generic_encode(protocol);
+    protocol_hid_generic_encode(protocol);
 
     return true;
 };
 
-LevelDuration protocol_hid96_generic_encoder_yield(ProtocolHID96* protocol) {
+LevelDuration protocol_hid_generic_encoder_yield(ProtocolHID* protocol) {
     bool level = 0;
     uint32_t duration = 0;
 
@@ -190,11 +191,11 @@ LevelDuration protocol_hid96_generic_encoder_yield(ProtocolHID96* protocol) {
     return level_duration_make(level, duration);
 };
 
-bool protocol_hid96_generic_write_data(ProtocolHID96* protocol, void* data) {
+bool protocol_hid_generic_write_data(ProtocolHID* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
     bool result = false;
 
-    protocol_hid96_generic_encoder_start(protocol);
+    protocol_hid_generic_encoder_start(protocol);
 
     if(request->write_type == LFRFIDWriteTypeT5577) {
         request->t5577.block[0] = LFRFID_T5577_MODULATION_FSK2a | LFRFID_T5577_BITRATE_RF_50 |
@@ -208,20 +209,21 @@ bool protocol_hid96_generic_write_data(ProtocolHID96* protocol, void* data) {
     return result;
 };
 
-static void protocol_hid96_generic_string_cat_protocol_bits(ProtocolHID96* protocol, string_t result) {
+static void protocol_hid_generic_string_cat_protocol_bits(ProtocolHID* protocol, string_t result) {
     // round up to the nearest nibble
     const uint8_t hex_character_count = (protocol->protocol_size + 3) / 4;
     const uint8_t protocol_bit_index = HID_DECODED_BIT_SIZE - protocol->protocol_size;
 
     for(size_t i = 0; i < hex_character_count; i++) {
-        uint8_t nibble = i == 0
-            ? bit_lib_get_bits(protocol->data, protocol_bit_index, protocol->protocol_size % 4 + 1)
-            : bit_lib_get_bits(protocol->data, protocol_bit_index + i * 4, 4);
+        uint8_t nibble =
+            i == 0 ? bit_lib_get_bits(
+                         protocol->data, protocol_bit_index, protocol->protocol_size % 4 + 1) :
+                     bit_lib_get_bits(protocol->data, protocol_bit_index + i * 4, 4);
         string_cat_printf(result, "%X", nibble & 0xF);
     }
 }
 
-void protocol_hid96_generic_render_data(ProtocolHID96* protocol, string_t result) {
+void protocol_hid_generic_render_data(ProtocolHID* protocol, string_t result) {
     if(protocol->protocol_size == HID_PROTOCOL_SIZE_UNKNOWN) {
         string_printf(
             result,
@@ -239,30 +241,30 @@ void protocol_hid96_generic_render_data(ProtocolHID96* protocol, string_t result
             "%hhu-bit HID Proximity\r\n"
             "Data: ",
             protocol->protocol_size);
-        protocol_hid96_generic_string_cat_protocol_bits(protocol, result);
+        protocol_hid_generic_string_cat_protocol_bits(protocol, result);
     }
 };
 
-const ProtocolBase protocol_hid96_generic = {
-    .name = "HID96",
+const ProtocolBase protocol_hid_generic = {
+    .name = "HIDProx",
     .manufacturer = "Generic",
     .data_size = HID_DECODED_DATA_SIZE,
     .features = LFRFIDFeatureASK,
     .validate_count = 6,
-    .alloc = (ProtocolAlloc)protocol_hid96_generic_alloc,
-    .free = (ProtocolFree)protocol_hid96_generic_free,
-    .get_data = (ProtocolGetData)protocol_hid96_generic_get_data,
+    .alloc = (ProtocolAlloc)protocol_hid_generic_alloc,
+    .free = (ProtocolFree)protocol_hid_generic_free,
+    .get_data = (ProtocolGetData)protocol_hid_generic_get_data,
     .decoder =
         {
-            .start = (ProtocolDecoderStart)protocol_hid96_generic_decoder_start,
-            .feed = (ProtocolDecoderFeed)protocol_hid96_generic_decoder_feed,
+            .start = (ProtocolDecoderStart)protocol_hid_generic_decoder_start,
+            .feed = (ProtocolDecoderFeed)protocol_hid_generic_decoder_feed,
         },
     .encoder =
         {
-            .start = (ProtocolEncoderStart)protocol_hid96_generic_encoder_start,
-            .yield = (ProtocolEncoderYield)protocol_hid96_generic_encoder_yield,
+            .start = (ProtocolEncoderStart)protocol_hid_generic_encoder_start,
+            .yield = (ProtocolEncoderYield)protocol_hid_generic_encoder_yield,
         },
-    .render_data = (ProtocolRenderData)protocol_hid96_generic_render_data,
-    .render_brief_data = (ProtocolRenderData)protocol_hid96_generic_render_data,
-    .write_data = (ProtocolWriteData)protocol_hid96_generic_write_data,
+    .render_data = (ProtocolRenderData)protocol_hid_generic_render_data,
+    .render_brief_data = (ProtocolRenderData)protocol_hid_generic_render_data,
+    .write_data = (ProtocolWriteData)protocol_hid_generic_write_data,
 };
