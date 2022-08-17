@@ -6,19 +6,7 @@
 <b>Latest Updates:</b>
 
 - Known Issues: `FAP Loader` & `Chess`
-- [Force Restart on Battery Display setting change #234 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/234)
-- Changed Bluetooth Name to be "Flipper" + Name instead of "Rogue" or "zzRogue" + Name (Due to an Android app bug)
-- Audio.IR updated and remote file updated By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Update Mifare Classic dict asset By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Added some extra checks for custom flipper names By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Updated [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
-- Updated [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `REQUIRES ESP32 WITH MARAUDER FLASHED`
-- Clock now has Stop/Reset functionality (again) and Code Clean up for Clock
-- [How to build firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/documentation/HowToBuild.md) updated [By non-bin](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/238)
-- Cruicial Fixes for [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `REQUIRES ESP32 WITH MARAUDER FLASHED`
-- Un-distorted music player fixes By [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Added [Zombiez (Reworked By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/240) [(Original By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
-- Updates for Clock to be more accurate and more stable
+- Clock sounds fixed [(By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/246)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
