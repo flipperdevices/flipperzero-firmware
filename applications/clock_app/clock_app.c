@@ -6,12 +6,6 @@
 
 #define TAG "Clock"
 
-uint32_t timerStartTime = 0;
-uint32_t timerLastRunTime = 0;
-bool timerStarted = false;
-int timerSecs = 0;
-int timerTempSecs = 0;
-
 typedef enum {
     EventTypeTick,
     EventTypeKey,
@@ -24,6 +18,11 @@ typedef struct {
 
 typedef struct {
     FuriHalRtcDateTime datetime;
+	uint32_t timerStartTime;
+	uint32_t timerLastRunTime;
+	bool timerStarted;
+	int timerSecs;
+	int timerTempSecs;
 } ClockState;
 
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -37,10 +36,10 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     canvas_set_color(canvas, ColorBlack);
     ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
     char strings[3][20];
-	timerTempSecs = timerSecs;
-	if(timerStarted) timerTempSecs = timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&state->datetime) - timerStartTime));
-    int curMin = (timerTempSecs / 60);
-    int curSec = timerTempSecs - (curMin * 60);
+	state->timerTempSecs = state->timerSecs;
+	if(state->timerStarted) state->timerTempSecs = state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&state->datetime) - state->timerStartTime));
+    int curMin = (state->timerTempSecs / 60);
+    int curSec = state->timerTempSecs - (curMin * 60);
     snprintf(
         strings[0],
         20,
@@ -56,9 +55,8 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         state->datetime.minute,
         state->datetime.second);
     snprintf(strings[2], 20, "%.2d:%.2d", curMin, curSec);
-    release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontBigNumbers);
-    if(timerStarted || timerTempSecs!=0) {
+    if(state->timerStarted || state->timerTempSecs!=0) {
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
         canvas_set_font(canvas, FontSecondary);
@@ -68,16 +66,21 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
     }
-    if(timerStarted) {
+    if(state->timerStarted) {
         elements_button_center(canvas, "Stop");
     } else {
         elements_button_center(canvas, "Start");
     }
-    if(timerTempSecs!=0) elements_button_left(canvas, "Reset");
+    if(state->timerTempSecs!=0) elements_button_left(canvas, "Reset");
+    release_mutex((ValueMutex*)ctx, state);
 }
 
 static void clock_state_init(ClockState* const state) {
     furi_hal_rtc_get_datetime(&state->datetime);
+    state->timerStarted = false;
+    state->timerSecs = 0;
+    state->timerTempSecs = 0;
+    state->timerStartTime = 0;
 }
 
 // Runs every 1000ms by default
@@ -85,9 +88,6 @@ static void clock_tick(void* ctx) {
     furi_assert(ctx);
     FuriMessageQueue* event_queue = ctx;
     PluginEvent event = {.type = EventTypeTick};
-    if(timerStarted) {
-        timerSecs = timerSecs + 1;
-    }
     furi_message_queue_put(event_queue, &event, 0);
 }
 
@@ -103,10 +103,6 @@ int32_t clock_app(void* p) {
         free(plugin_state);
         return 255;
     }
-    timerStarted = false;
-    timerSecs = 0;
-    timerTempSecs = 0;
-    timerStartTime = 0;
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, clock_render_callback, &state_mutex);
@@ -133,17 +129,17 @@ int32_t clock_app(void* p) {
                     case InputKeyRight:
                         break;
                     case InputKeyLeft:
-                        timerStartTime = furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime);
-                        timerSecs = 0;
-                        timerTempSecs = 0;
+                        plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime);
+                        plugin_state->timerSecs = 0;
+                        plugin_state->timerTempSecs = 0;
                         break;
                     case InputKeyOk:
-                        if(timerStarted) {
-                            timerStarted = false;
-							timerSecs = timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime) - timerStartTime));
+                        if(plugin_state->timerStarted) {
+                            plugin_state->timerStarted = false;
+							plugin_state->timerSecs = plugin_state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime) - plugin_state->timerStartTime));
                         } else {
-                            timerStarted = true;
-                            timerStartTime = furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime);
+                            plugin_state->timerStarted = true;
+                            plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime);
                         }
                         break;
                     case InputKeyBack:
@@ -167,5 +163,6 @@ int32_t clock_app(void* p) {
     furi_record_close(RECORD_GUI);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
+	free(plugin_state);
     return 0;
 }
