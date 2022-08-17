@@ -31,12 +31,12 @@ static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* even
 }
 
 static void clock_render_callback(Canvas* const canvas, void* ctx) {
-    canvas_clear(canvas);
-    canvas_set_color(canvas, ColorBlack);
     ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
     if(state == NULL) {
         return;
     }
+    canvas_clear(canvas);
+    canvas_set_color(canvas, ColorBlack);
     char strings[3][20];
     state->timerTempSecs = state->timerSecs;
     FuriHalRtcDateTime datetime;
@@ -87,9 +87,8 @@ static void clock_state_init(ClockState* const state) {
 }
 
 // Runs every 1000ms by default
-static void clock_tick(void* ctx) {
-    furi_assert(ctx);
-    FuriMessageQueue* event_queue = ctx;
+static void clock_tick(FuriMessageQueue* event_queue) {
+    furi_assert(event_queue);
     PluginEvent event = {.type = EventTypeTick};
     furi_message_queue_put(event_queue, &event, 0);
 }
@@ -116,15 +115,15 @@ int32_t clock_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     // Main loop
-    PluginEvent event;
     FuriHalRtcDateTime datetime;
-    furi_hal_rtc_get_datetime(&datetime);
+    PluginEvent event;
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         ClockState* plugin_state = (ClockState*)acquire_mutex_block(&state_mutex);
         if(event_status == FuriStatusOk) {
             // press events
             if(event.type == EventTypeKey) {
+                furi_hal_rtc_get_datetime(&datetime);
                 if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
                     switch(event.input.key) {
                     case InputKeyUp:
@@ -167,8 +166,8 @@ int32_t clock_app(void* p) {
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
     view_port_free(view_port);
+    furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
     free(plugin_state);
-    furi_message_queue_free(event_queue);
     return 0;
 }
