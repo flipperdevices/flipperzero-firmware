@@ -3,7 +3,7 @@
 #include <gui/modules/widget.h>
 #include <nfc_worker_i.h>
 
-static const MfClassicAuthContext troika_keys[] = {
+static const MfClassicAuthContext troyka_keys[] = {
     {.sector = 0, .key_a = 0xa0a1a2a3a4a5, .key_b = 0xfbf225dc5d58},
     {.sector = 1, .key_a = 0xa82607b01c0d, .key_b = 0x2910989b6880},
     {.sector = 2, .key_a = 0x2aa05ed1856f, .key_b = 0xeaac88e5dc99},
@@ -22,55 +22,58 @@ static const MfClassicAuthContext troika_keys[] = {
     {.sector = 15, .key_a = 0x2aa05ed1856f, .key_b = 0xeaac88e5dc99},
 };
 
-bool troika_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+bool troyka_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
-    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    UNUSED(nfc_worker);
 
     MfClassicAuthContext auth_ctx = {
         .key_a = MF_CLASSIC_NO_KEY,
         .key_b = MF_CLASSIC_NO_KEY,
         .sector = 8,
     };
-
-    if(mf_classic_auth_attempt(tx_rx, &auth_ctx, 0xa73f5dc1d333) &&
-       mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak) ==
-           MfClassicType1k) {
-        return true;
-    }
-    return false;
+    return mf_classic_auth_attempt(tx_rx, &auth_ctx, 0xa73f5dc1d333);
 }
 
-bool troika_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+bool troyka_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
 
     MfClassicReader reader = {};
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    mf_classic_get_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak, &reader);
-    for(size_t i = 0; i < COUNT_OF(troika_keys); i++) {
+    reader.type = mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
+
+    for(size_t i = 0; i < COUNT_OF(troyka_keys); i++) {
         mf_classic_reader_add_sector(
-            &reader, troika_keys[i].sector, troika_keys[i].key_a, troika_keys[i].key_b);
+            &reader, troyka_keys[i].sector, troyka_keys[i].key_a, troyka_keys[i].key_b);
     }
 
     return mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 16;
 }
 
-bool troika_parser_parse(NfcWorker* nfc_worker) {
-    MfClassicData* data = &nfc_worker->dev_data->mf_classic_data;
-    uint8_t* temp_ptr = &data->block[8 * 4 + 1].value[5];
-    uint16_t balance = ((temp_ptr[0] << 8) | temp_ptr[1]) / 25;
-    temp_ptr = &data->block[8 * 4].value[3];
-    uint32_t number = 0;
-    for(size_t i = 0; i < 4; i++) {
-        number <<= 8;
-        number |= temp_ptr[i];
-    }
-    number >>= 4;
+bool troyka_parser_parse(NfcDeviceData* dev_data) {
+    MfClassicData* data = &dev_data->mf_classic_data;
+    bool troyka_parsed = false;
 
-    string_printf(
-        nfc_worker->dev_data->parsed_data,
-        "Troika Transport card\nNumber: %ld\nBalance: %d rub",
-        number,
-        balance);
+    do {
+        // Verify key
+        MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, 8);
+        uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
+        if(key != troyka_keys[8].key_a) break;
 
-    return true;
+        // Parse data
+        uint8_t* temp_ptr = &data->block[8 * 4 + 1].value[5];
+        uint16_t balance = ((temp_ptr[0] << 8) | temp_ptr[1]) / 25;
+        temp_ptr = &data->block[8 * 4].value[3];
+        uint32_t number = 0;
+        for(size_t i = 0; i < 4; i++) {
+            number <<= 8;
+            number |= temp_ptr[i];
+        }
+        number >>= 4;
+
+        string_printf(
+            dev_data->parsed_data, "\e#Troyka\nNum: %ld\nBalance: %d rur.", number, balance);
+        troyka_parsed = true;
+    } while(false);
+
+    return troyka_parsed;
 }

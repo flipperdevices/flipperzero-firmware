@@ -25,7 +25,7 @@
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
 
-#include "rpc/rpc_app.h"
+#include <rpc/rpc_app.h>
 
 const char* LfRfidApp::app_folder = ANY_PATH("lfrfid");
 const char* LfRfidApp::app_extension = ".rfid";
@@ -48,38 +48,28 @@ LfRfidApp::~LfRfidApp() {
     }
 }
 
-static bool rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context) {
+static void rpc_command_callback(RpcAppSystemEvent rpc_event, void* context) {
     furi_assert(context);
     LfRfidApp* app = static_cast<LfRfidApp*>(context);
 
-    bool result = false;
-
-    if(event == RpcAppEventSessionClose) {
+    if(rpc_event == RpcAppEventSessionClose) {
+        LfRfidApp::Event event;
+        event.type = LfRfidApp::EventType::RpcSessionClose;
+        app->view_controller.send_event(&event);
+        // Detach RPC
         rpc_system_app_set_callback(app->rpc_ctx, NULL, NULL);
         app->rpc_ctx = NULL;
+    } else if(rpc_event == RpcAppEventAppExit) {
         LfRfidApp::Event event;
         event.type = LfRfidApp::EventType::Exit;
         app->view_controller.send_event(&event);
-        result = true;
-    } else if(event == RpcAppEventAppExit) {
+    } else if(rpc_event == RpcAppEventLoadFile) {
         LfRfidApp::Event event;
-        event.type = LfRfidApp::EventType::Exit;
+        event.type = LfRfidApp::EventType::RpcLoadFile;
         app->view_controller.send_event(&event);
-        result = true;
-    } else if(event == RpcAppEventLoadFile) {
-        if(arg) {
-            string_set_str(app->file_path, arg);
-            if(app->load_key_data(app->file_path, &(app->worker.key), false)) {
-                LfRfidApp::Event event;
-                event.type = LfRfidApp::EventType::EmulateStart;
-                app->view_controller.send_event(&event);
-                app->worker.start_emulate();
-                result = true;
-            }
-        }
+    } else {
+        rpc_system_app_confirm(app->rpc_ctx, rpc_event, false);
     }
-
-    return result;
 }
 
 void LfRfidApp::run(void* _args) {
@@ -87,22 +77,25 @@ void LfRfidApp::run(void* _args) {
 
     make_app_folder();
 
-    if(strlen(args)) {
+    if(args && strlen(args)) {
         uint32_t rpc_ctx_ptr = 0;
         if(sscanf(args, "RPC %lX", &rpc_ctx_ptr) == 1) {
             rpc_ctx = (RpcAppSystem*)rpc_ctx_ptr;
             rpc_system_app_set_callback(rpc_ctx, rpc_command_callback, this);
             rpc_system_app_send_started(rpc_ctx);
+            view_controller.attach_to_gui(ViewDispatcherTypeDesktop);
             scene_controller.add_scene(SceneType::Rpc, new LfRfidAppSceneRpc());
             scene_controller.process(100, SceneType::Rpc);
         } else {
             string_set_str(file_path, args);
             load_key_data(file_path, &worker.key, true);
+            view_controller.attach_to_gui(ViewDispatcherTypeFullscreen);
             scene_controller.add_scene(SceneType::Emulate, new LfRfidAppSceneEmulate());
             scene_controller.process(100, SceneType::Emulate);
         }
 
     } else {
+        view_controller.attach_to_gui(ViewDispatcherTypeFullscreen);
         scene_controller.add_scene(SceneType::Start, new LfRfidAppSceneStart());
         scene_controller.add_scene(SceneType::Read, new LfRfidAppSceneRead());
         scene_controller.add_scene(SceneType::RetryConfirm, new LfRfidAppSceneRetryConfirm());

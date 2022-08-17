@@ -82,7 +82,7 @@ static void storage_cli_format(Cli* cli, string_t path) {
     if(string_cmp_str(path, STORAGE_INT_PATH_PREFIX) == 0) {
         storage_cli_print_error(FSE_NOT_IMPLEMENTED);
     } else if(string_cmp_str(path, STORAGE_EXT_PATH_PREFIX) == 0) {
-        printf("Formatting SD card, all data will be lost. Are you sure (y/n)?\r\n");
+        printf("Formatting SD card, All data will be lost! Are you sure (y/n)?\r\n");
         char answer = cli_getc(cli);
         if(answer == 'y' || answer == 'Y') {
             Storage* api = furi_record_open(RECORD_STORAGE);
@@ -274,24 +274,26 @@ static void storage_cli_read_chunks(Cli* cli, string_t path, string_t args) {
     if(parsed_count == EOF || parsed_count != 1) {
         storage_cli_print_usage();
     } else if(storage_file_open(file, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-        uint8_t* data = malloc(buffer_size);
         uint64_t file_size = storage_file_size(file);
 
         printf("Size: %lu\r\n", (uint32_t)file_size);
 
-        while(file_size > 0) {
-            printf("\r\nReady?\r\n");
-            cli_getc(cli);
+        if(buffer_size) {
+            uint8_t* data = malloc(buffer_size);
+            while(file_size > 0) {
+                printf("\r\nReady?\r\n");
+                cli_getc(cli);
 
-            uint16_t read_size = storage_file_read(file, data, buffer_size);
-            for(uint16_t i = 0; i < read_size; i++) {
-                putchar(data[i]);
+                uint16_t read_size = storage_file_read(file, data, buffer_size);
+                for(uint16_t i = 0; i < read_size; i++) {
+                    putchar(data[i]);
+                }
+                file_size -= read_size;
             }
-            file_size -= read_size;
+            free(data);
         }
         printf("\r\n");
 
-        free(data);
     } else {
         storage_cli_print_error(storage_file_get_error(file));
     }
@@ -315,19 +317,21 @@ static void storage_cli_write_chunk(Cli* cli, string_t path, string_t args) {
         if(storage_file_open(file, string_get_cstr(path), FSAM_WRITE, FSOM_OPEN_APPEND)) {
             printf("Ready\r\n");
 
-            uint8_t* buffer = malloc(buffer_size);
+            if(buffer_size) {
+                uint8_t* buffer = malloc(buffer_size);
 
-            for(uint32_t i = 0; i < buffer_size; i++) {
-                buffer[i] = cli_getc(cli);
+                for(uint32_t i = 0; i < buffer_size; i++) {
+                    buffer[i] = cli_getc(cli);
+                }
+
+                uint16_t written_size = storage_file_write(file, buffer, buffer_size);
+
+                if(written_size != buffer_size) {
+                    storage_cli_print_error(storage_file_get_error(file));
+                }
+
+                free(buffer);
             }
-
-            uint16_t written_size = storage_file_write(file, buffer, buffer_size);
-
-            if(written_size != buffer_size) {
-                storage_cli_print_error(storage_file_get_error(file));
-            }
-
-            free(buffer);
         } else {
             storage_cli_print_error(storage_file_get_error(file));
         }
@@ -581,7 +585,7 @@ void storage_cli(Cli* cli, string_t args, void* context) {
 static void storage_cli_factory_reset(Cli* cli, string_t args, void* context) {
     UNUSED(args);
     UNUSED(context);
-    printf("All data will be lost. Are you sure (y/n)?\r\n");
+    printf("All data will be lost! Are you sure (y/n)?\r\n");
     char c = cli_getc(cli);
     if(c == 'y' || c == 'Y') {
         printf("Data will be wiped after reboot.\r\n");

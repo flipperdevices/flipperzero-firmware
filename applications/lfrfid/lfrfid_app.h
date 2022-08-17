@@ -33,6 +33,8 @@ public:
         Retry,
         Exit,
         EmulateStart,
+        RpcLoadFile,
+        RpcSessionClose,
     };
 
     enum class SceneType : uint8_t {
@@ -99,5 +101,4 @@ public:
     bool save_key_data(string_t path, RfidKey* key);
 
     void make_app_folder();
-    //bool rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context);
 };

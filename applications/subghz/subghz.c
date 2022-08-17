@@ -5,18 +5,6 @@
 #include "subghz_i.h"
 #include <lib/toolbox/path.h>
 
-static const NotificationSequence sequence_blink_start_magenta = {
-    &message_blink_start_10,
-    &message_blink_set_color_magenta,
-    &message_do_not_reset,
-    NULL,
-};
-
-static const NotificationSequence sequence_blink_stop = {
-    &message_blink_stop,
-    NULL,
-};
-
 bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     SubGhz* subghz = context;
@@ -35,57 +23,40 @@ void subghz_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(subghz->scene_manager);
 }
 
-static bool subghz_rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context) {
+static void subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
 
-    if(!subghz->rpc_ctx) {
-        return false;
-    }
-
-    bool result = false;
+    furi_assert(subghz->rpc_ctx);
 
     if(event == RpcAppEventSessionClose) {
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneRpcSessionClose);
         rpc_system_app_set_callback(subghz->rpc_ctx, NULL, NULL);
         subghz->rpc_ctx = NULL;
-        notification_message(subghz->notifications, &sequence_blink_stop);
-        view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneExit);
-        if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
-            subghz_tx_stop(subghz);
-            subghz_sleep(subghz);
-        }
-        result = true;
     } else if(event == RpcAppEventAppExit) {
         view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneExit);
-        if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
-            subghz_tx_stop(subghz);
-            subghz_sleep(subghz);
-        }
-        result = true;
     } else if(event == RpcAppEventLoadFile) {
-        if(arg) {
-            if(subghz_key_load(subghz, arg, false)) {
-                string_set_str(subghz->file_path, arg);
-                view_dispatcher_send_custom_event(
-                    subghz->view_dispatcher, SubGhzCustomEventSceneRpcLoad);
-                result = true;
-            }
-        }
+        view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneRpcLoad);
     } else if(event == RpcAppEventButtonPress) {
-        if(subghz->txrx->txrx_state == SubGhzTxRxStateSleep) {
-            notification_message(subghz->notifications, &sequence_blink_start_magenta);
-            result = subghz_tx_start(subghz, subghz->txrx->fff_data);
-        }
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneRpcButtonPress);
     } else if(event == RpcAppEventButtonRelease) {
-        if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
-            notification_message(subghz->notifications, &sequence_blink_stop);
-            subghz_tx_stop(subghz);
-            subghz_sleep(subghz);
-            result = true;
-        }
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneRpcButtonRelease);
+    } else {
+        rpc_system_app_confirm(subghz->rpc_ctx, event, false);
     }
+}
 
-    return result;
+void subghz_blink_start(SubGhz* instance) {
+    furi_assert(instance);
+    notification_message(instance->notifications, &sequence_blink_start_magenta);
+}
+
+void subghz_blink_stop(SubGhz* instance) {
+    furi_assert(instance);
+    notification_message(instance->notifications, &sequence_blink_stop);
 }
 
 SubGhz* subghz_alloc() {
@@ -237,7 +208,7 @@ void subghz_free(SubGhz* subghz) {
     if(subghz->rpc_ctx) {
         rpc_system_app_set_callback(subghz->rpc_ctx, NULL, NULL);
         rpc_system_app_send_exited(subghz->rpc_ctx);
-        notification_message(subghz->notifications, &sequence_blink_stop);
+        subghz_blink_stop(subghz);
         subghz->rpc_ctx = NULL;
     }
 
@@ -333,13 +304,19 @@ void subghz_free(SubGhz* subghz) {
 int32_t subghz_app(void* p) {
     SubGhz* subghz = subghz_alloc();
 
+    if(!furi_hal_region_is_provisioned()) {
+        subghz_dialog_message_show_only_rx(subghz);
+        subghz_free(subghz);
+        return 1;
+    }
+
     //Load database
     bool load_database = subghz_environment_load_keystore(
         subghz->txrx->environment, EXT_PATH("subghz/assets/keeloq_mfcodes"));
     subghz_environment_load_keystore(
         subghz->txrx->environment, EXT_PATH("subghz/assets/keeloq_mfcodes_user"));
     // Check argument and run corresponding scene
-    if(p) {
+    if(p && strlen(p)) {
         uint32_t rpc_ctx = 0;
         if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
             subghz->rpc_ctx = (void*)rpc_ctx;

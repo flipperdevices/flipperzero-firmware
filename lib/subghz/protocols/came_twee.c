@@ -250,7 +250,11 @@ bool subghz_protocol_encoder_came_twee_deserialize(void* context, FlipperFormat*
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
-
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_came_twee_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
         //optional parameter parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
@@ -427,7 +431,19 @@ bool subghz_protocol_decoder_came_twee_serialize(
 bool subghz_protocol_decoder_came_twee_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderCameTwee* instance = context;
-    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    bool ret = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            break;
+        }
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_came_twee_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
+        ret = true;
+    } while(false);
+    return ret;
 }
 
 void subghz_protocol_decoder_came_twee_get_string(void* context, string_t output) {
@@ -439,7 +455,7 @@ void subghz_protocol_decoder_came_twee_get_string(void* context, string_t output
 
     string_cat_printf(
         output,
-        "%s %dbit\r\n"
+        "%s %db\r\n"
         "Key:0x%lX%08lX\r\n"
         "Btn:%lX\r\n"
         "DIP:" DIP_PATTERN "\r\n",

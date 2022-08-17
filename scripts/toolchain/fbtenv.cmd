@@ -13,7 +13,7 @@ if not [%FBT_NOENV%] == [] (
     exit /b 0
 )
 
-set "FLIPPER_TOOLCHAIN_VERSION=3"
+set "FLIPPER_TOOLCHAIN_VERSION=8"
 set "FBT_TOOLCHAIN_ROOT=%FBT_ROOT%\toolchain\i686-windows"
 
 
@@ -31,6 +31,7 @@ if not "%REAL_TOOLCHAIN_VERSION%" == "%FLIPPER_TOOLCHAIN_VERSION%" (
 
 set "HOME=%USERPROFILE%"
 set "PYTHONHOME=%FBT_TOOLCHAIN_ROOT%\python"
+set "PYTHONPATH="
 set "PATH=%FBT_TOOLCHAIN_ROOT%\python;%FBT_TOOLCHAIN_ROOT%\bin;%FBT_TOOLCHAIN_ROOT%\protoc\bin;%FBT_TOOLCHAIN_ROOT%\openocd\bin;%PATH%"
 set "PROMPT=(fbt) %PROMPT%"
 
