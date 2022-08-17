@@ -6,11 +6,13 @@
 #include "../lfrfid/helpers/rfid_timer_emulator.h"
 #include "flipfrid.h"
 
-#define EMIT_STEPS 10
+#define NUMBER_OF_ATTACKS 2
+#define TIME_BETWEEN_CARDS \
+    5 // Emulate 2 cards per second : (5 * (configTICK_RATE_HZ_RAW/10)) == (5*(1000/10)) == (5*100) == (500)ms
 #define TAG "FLIPFRID"
 
 uint8_t id_list[12][5] = {
-    {0x00, 0x00, 0x00, 0x00, 0x00}, // Default uid
+    {0x00, 0x00, 0x00, 0x00, 0x00}, // Null bytes
     {0xFF, 0xFF, 0xFF, 0xFF, 0xFF}, // Only FF
     {0x11, 0x11, 0x11, 0x11, 0x11}, // Only 11
     {0x22, 0x22, 0x22, 0x22, 0x22}, // Only 22
@@ -23,6 +25,11 @@ uint8_t id_list[12][5] = {
     {0x99, 0x99, 0x99, 0x99, 0x99}, // Only 99
     {0x12, 0x34, 0x56, 0x78, 0x9A}, // Incremental UID
 };
+
+typedef enum {
+    DefaultKeys,
+    BruteForceCustomerId,
+} AttackType;
 
 typedef struct {
     LfrfidKeyType type;
@@ -43,9 +50,8 @@ typedef struct {
 // STRUCTS
 typedef struct {
     bool emitting;
-    LfrfidKeyType current_badge_type;
-    uint8_t current_uid;
-    uint8_t current_uid_repeat;
+    AttackType current_attack_type;
+    uint8_t* current_uid;
 } FlipFridState;
 
 static void flipfrid_draw_callback(Canvas* const canvas, void* ctx) {
@@ -67,55 +73,27 @@ static void flipfrid_draw_callback(Canvas* const canvas, void* ctx) {
 
     // Badge Type
     char uid[15];
-    char badge_type[12];
-    switch(flipfrid_state->current_badge_type) {
-    case LfrfidKeyType::KeyEM4100:
-        strcpy(badge_type, "  EM4100 >");
-        snprintf(
-            uid,
-            sizeof(uid),
-            "%X:%X:%X:%X:%X",
-            id_list[flipfrid_state->current_uid][0],
-            id_list[flipfrid_state->current_uid][1],
-            id_list[flipfrid_state->current_uid][2],
-            id_list[flipfrid_state->current_uid][3],
-            id_list[flipfrid_state->current_uid][4]);
+    char badge_type[19];
+    switch(flipfrid_state->current_attack_type) {
+    case AttackType::DefaultKeys:
+        strcpy(badge_type, "  Default Values >");
         break;
-    case LfrfidKeyType::KeyH10301:
-        strcpy(badge_type, "< HID26 >");
-        snprintf(
-            uid,
-            sizeof(uid),
-            "%X:%X:%X",
-            id_list[flipfrid_state->current_uid][0],
-            id_list[flipfrid_state->current_uid][1],
-            id_list[flipfrid_state->current_uid][2]);
-        break;
-    case LfrfidKeyType::KeyI40134:
-        strcpy(badge_type, "< Indala >");
-        snprintf(
-            uid,
-            sizeof(uid),
-            "%X:%X:%X",
-            id_list[flipfrid_state->current_uid][0],
-            id_list[flipfrid_state->current_uid][1],
-            id_list[flipfrid_state->current_uid][2]);
-        break;
-    case LfrfidKeyType::KeyIoProxXSF:
-        strcpy(badge_type, "< IoProxs  ");
-        snprintf(
-            uid,
-            sizeof(uid),
-            "%X:%X:%X:%X",
-            id_list[flipfrid_state->current_uid][0],
-            id_list[flipfrid_state->current_uid][1],
-            id_list[flipfrid_state->current_uid][2],
-            id_list[flipfrid_state->current_uid][3]);
+    case AttackType::BruteForceCustomerId:
+        strcpy(badge_type, "< BF Customer ID  ");
         break;
     default:
-
         break;
     }
+
+    snprintf(
+        uid,
+        sizeof(uid),
+        "%2X:%2X:%2X:%2X:%2X",
+        flipfrid_state->current_uid[0],
+        flipfrid_state->current_uid[1],
+        flipfrid_state->current_uid[2],
+        flipfrid_state->current_uid[3],
+        flipfrid_state->current_uid[4]);
 
     // Badge infos
     canvas_set_font(canvas, FontSecondary);
@@ -123,18 +101,6 @@ static void flipfrid_draw_callback(Canvas* const canvas, void* ctx) {
 
     if(flipfrid_state->emitting) {
         canvas_draw_str_aligned(canvas, 64, 42, AlignCenter, AlignCenter, uid);
-
-        // Progress bar
-        char progress[EMIT_STEPS + 2] = "";
-        strcat(progress, "[");
-        for(int i = 0; i < flipfrid_state->current_uid_repeat; i++) {
-            strcat(progress, "=");
-        }
-        for(int i = 0; i < (EMIT_STEPS - flipfrid_state->current_uid_repeat); i++) {
-            strcat(progress, "-");
-        }
-        strcat(progress, "]");
-        canvas_draw_str_aligned(canvas, 64, 58, AlignCenter, AlignBottom, progress);
     } else {
         canvas_draw_str_aligned(
             canvas, 64, 42, AlignCenter, AlignCenter, "Press OK to start/stop");
@@ -191,7 +157,7 @@ void FlipFridApp::run() {
     FURI_LOG_I(TAG, "Initializing timer");
     FuriTimer* timer =
         furi_timer_alloc(flipfrid_timer_callback, FuriTimerTypePeriodic, event_queue);
-    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 6); // configTICK_RATE_HZ_RAW 1000
+    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 10); // configTICK_RATE_HZ_RAW 1000
 
     // Register view port in GUI
     FURI_LOG_I(TAG, "Initializing gui");
@@ -201,21 +167,15 @@ void FlipFridApp::run() {
     // Init values
     FlipFridEvent event;
     flipfrid_state->emitting = false;
-    flipfrid_state->current_uid = 0;
-    flipfrid_state->current_uid_repeat = 0;
-    flipfrid_state->current_badge_type = LfrfidKeyType::KeyEM4100;
+    flipfrid_state->current_uid = id_list[0];
+    flipfrid_state->current_attack_type = AttackType::DefaultKeys;
     RfidTimerEmulator* emulator;
     emulator = new RfidTimerEmulator();
     RfidTimerEmulator em = *emulator;
 
-    uint8_t badge_type_index = 0;
-    LfrfidKeyType badges_types[] = {
-        LfrfidKeyType::KeyEM4100,
-        LfrfidKeyType::KeyH10301,
-        LfrfidKeyType::KeyI40134,
-        LfrfidKeyType::KeyIoProxXSF,
-    };
-
+    int menu_selected_item_index = 0;
+    uint8_t counter = 0;
+    uint8_t attack_state = 0;
     bool running = true;
     while(running) {
         // Get next event
@@ -223,6 +183,7 @@ void FlipFridApp::run() {
         if(event_status == FuriStatusOk) {
             if(event.evt_type == EventTypeKey) {
                 if(event.input_type == InputTypeShort) {
+                    counter = 0;
                     switch(event.key) {
                     case InputKeyUp:
                     case InputKeyDown:
@@ -231,28 +192,25 @@ void FlipFridApp::run() {
                     case InputKeyRight:
                         // Next badge type
                         flipfrid_state->emitting = false;
-                        if(badge_type_index <
-                           (sizeof(badges_types) / sizeof(badges_types[0]) - 1)) {
-                            badge_type_index++;
-                            flipfrid_state->current_badge_type = badges_types[badge_type_index];
+                        if(menu_selected_item_index < (NUMBER_OF_ATTACKS - 1)) {
+                            menu_selected_item_index++;
+                            flipfrid_state->current_attack_type =
+                                (AttackType)menu_selected_item_index;
                         }
                         break;
                     case InputKeyLeft:
                         // Previous badge type
                         flipfrid_state->emitting = false;
-                        if(badge_type_index > 0) {
-                            badge_type_index--;
-                            flipfrid_state->current_badge_type = badges_types[badge_type_index];
+                        if(menu_selected_item_index > 0) {
+                            menu_selected_item_index--;
+                            flipfrid_state->current_attack_type =
+                                (AttackType)menu_selected_item_index;
                         }
                         break;
                     case InputKeyOk:
                         if(flipfrid_state->emitting) {
                             flipfrid_state->emitting = false;
                         } else {
-                            flipfrid_state->current_uid_repeat = 0;
-                            flipfrid_state->current_uid = 0;
-                            flipfrid_state->current_badge_type =
-                                (LfrfidKeyType)((flipfrid_state->current_badge_type));
                             flipfrid_state->emitting = true;
                         }
                         break;
@@ -264,34 +222,55 @@ void FlipFridApp::run() {
                 }
             } else if(event.evt_type == EventTypeTick) {
                 // Emulate card
-
                 if(flipfrid_state->emitting) {
-                    
-                    if(flipfrid_state->current_uid_repeat == 0) {
-                        FURI_LOG_D(TAG, "Starting emulation %d", flipfrid_state->current_uid);
+                    if(1 == counter) {
+                        FURI_LOG_D(TAG, "Starting emulation ");
                         em.start(
-                            flipfrid_state->current_badge_type,
-                            id_list[flipfrid_state->current_uid],
-                            lfrfid_key_get_type_data_count(flipfrid_state->current_badge_type));
-                        flipfrid_state->current_uid_repeat++;
-                    } else if(flipfrid_state->current_uid_repeat == EMIT_STEPS) {
-                        FURI_LOG_D(TAG, "Stop emulation %d", flipfrid_state->current_uid);
-                        flipfrid_state->current_uid_repeat = 0;
+                            LfrfidKeyType::KeyEM4100,
+                            flipfrid_state->current_uid,
+                            lfrfid_key_get_type_data_count(LfrfidKeyType::KeyEM4100));
+                    } else if(0 == counter) {
                         em.stop();
-
-                        // Next uid
-                        flipfrid_state->current_uid++;
-                        if(flipfrid_state->current_uid == sizeof(id_list) / 5) {
-                            flipfrid_state->current_uid = 0;
+                        // set next value
+                        switch(flipfrid_state->current_attack_type) {
+                        case AttackType::DefaultKeys:
+                            flipfrid_state->current_uid = id_list[attack_state];
+                            FURI_LOG_D(
+                                TAG,
+                                "DefaultKeys %X:%X:%X:%X:%X",
+                                flipfrid_state->current_uid[0],
+                                flipfrid_state->current_uid[1],
+                                flipfrid_state->current_uid[2],
+                                flipfrid_state->current_uid[3],
+                                flipfrid_state->current_uid[4]);
+                            attack_state = attack_state + 1;
+                            if(attack_state >= sizeof(id_list) / sizeof(id_list[0])) {
+                                attack_state = 0;
+                            }
+                            break;
+                        case AttackType::BruteForceCustomerId:
+                            uint8_t candidate[] = {attack_state, 0x00, 0x00, 0x00, 0x00};
+                            FURI_LOG_D(
+                                TAG,
+                                "BruteForceCustomerId %X:%X:%X:%X:%X",
+                                candidate[0],
+                                candidate[1],
+                                candidate[2],
+                                candidate[3],
+                                candidate[4]);
+                            flipfrid_state->current_uid = candidate;
+                            attack_state = attack_state + 1;
+                            if(attack_state == 256) {
+                                attack_state = 0;
+                            }
+                            break;
                         }
+                    }
+                    FURI_LOG_D(TAG, "Counter %d", counter);
+                    if (counter > TIME_BETWEEN_CARDS) {
+                        counter = 0;
                     } else {
-                        furi_delay_ms(100);
-                        flipfrid_state->current_uid_repeat++;
-                        FURI_LOG_D(
-                            TAG,
-                            "Starting emulation %d/%d",
-                            flipfrid_state->current_uid_repeat,
-                            EMIT_STEPS);
+                        counter++;
                     }
                 }
                 view_port_update(view_port);
