@@ -8,6 +8,7 @@
 - Known Issues: `FAP Loader` & `Chess`
 - Clock sounds fixed [(By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/246)
 - More Clock Updates & some version updates to allow reference of furi_hal_version_set_name
+- Added [New NFC info screens #1605 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1605)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
