@@ -6,8 +6,11 @@
 
 #define TAG "Clock"
 
+uint32_t timerStartTime = 0;
+uint32_t timerLastRunTime = 0;
 bool timerStarted = false;
 int timerSecs = 0;
+int timerTempSecs = 0;
 
 typedef enum {
     EventTypeTick,
@@ -34,8 +37,10 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     canvas_set_color(canvas, ColorBlack);
     ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
     char strings[3][20];
-    int curMin = (timerSecs / 60);
-    int curSec = timerSecs - (curMin * 60);
+	timerTempSecs = timerSecs;
+	if(timerStarted) timerTempSecs = timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&state->datetime) - timerStartTime));
+    int curMin = (timerTempSecs / 60);
+    int curSec = timerTempSecs - (curMin * 60);
     snprintf(
         strings[0],
         20,
@@ -53,7 +58,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     snprintf(strings[2], 20, "%.2d:%.2d", curMin, curSec);
     release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontBigNumbers);
-    if(timerStarted || timerSecs!=0) {
+    if(timerStarted || timerTempSecs!=0) {
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
         canvas_set_font(canvas, FontSecondary);
@@ -68,7 +73,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     } else {
         elements_button_center(canvas, "Start");
     }
-    elements_button_left(canvas, "Reset");
+    if(timerTempSecs!=0) elements_button_left(canvas, "Reset");
 }
 
 static void clock_state_init(ClockState* const state) {
@@ -100,6 +105,8 @@ int32_t clock_app(void* p) {
     }
     timerStarted = false;
     timerSecs = 0;
+    timerTempSecs = 0;
+    timerStartTime = 0;
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, clock_render_callback, &state_mutex);
@@ -126,13 +133,17 @@ int32_t clock_app(void* p) {
                     case InputKeyRight:
                         break;
                     case InputKeyLeft:
+                        timerStartTime = furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime);
                         timerSecs = 0;
+                        timerTempSecs = 0;
                         break;
                     case InputKeyOk:
                         if(timerStarted) {
                             timerStarted = false;
+							timerSecs = timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime) - timerStartTime));
                         } else {
                             timerStarted = true;
+                            timerStartTime = furi_hal_rtc_datetime_to_timestamp(&plugin_state->datetime);
                         }
                         break;
                     case InputKeyBack:
