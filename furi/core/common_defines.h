@@ -54,6 +54,8 @@ extern "C" {
     } while(0)
 #endif
 
+#define FURI_SW_MEMBARRIER() asm volatile("" : : : "memory")
+
 #ifndef PLACE_IN_SECTION
 #define PLACE_IN_SECTION(x) __attribute__((section(x)))
 #endif

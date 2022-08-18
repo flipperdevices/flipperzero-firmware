@@ -4,6 +4,7 @@
 #include <toolbox/varint.h>
 #include <stream_buffer.h>
 #include "lfrfid_raw_worker.h"
+#include "lfrfid_raw_file.h"
 
 #define EMULATE_BUFFER_SIZE 1024
 #define RFID_DATA_BUFFER_SIZE 2048
@@ -13,21 +14,12 @@
 #define RAW_HEADER "RFID RAW"
 
 // emulate mode
-
-typedef struct {
-    size_t counter;
-    size_t size;
-    uint8_t data[RFID_DATA_BUFFER_SIZE];
-} RfidFileBuffer;
-
 typedef struct {
     size_t overrun_count;
     StreamBufferHandle_t stream;
 } RfidEmulateCtx;
 
 typedef struct {
-    Stream* stream;
-    RfidFileBuffer buffer;
     uint32_t emulate_buffer_arr[EMULATE_BUFFER_SIZE];
     uint32_t emulate_buffer_ccr[EMULATE_BUFFER_SIZE];
     RfidEmulateCtx ctx;
@@ -46,10 +38,6 @@ typedef struct {
     BufferStream* stream;
     size_t tmp_data_length;
     uint8_t tmp_data[READ_TEMP_DATA_SIZE];
-} RfidReadCtx;
-
-typedef struct {
-    RfidReadCtx ctx;
 } LFRFIDRawWorkerReadData;
 
 // main worker
@@ -143,7 +131,8 @@ void lfrfid_raw_worker_read_set_callback(
 }
 
 // pack varint into tmp_data
-static inline bool write_to_tmp_buffer(RfidReadCtx* ctx, bool level, uint32_t duration) {
+static inline bool
+    write_to_tmp_buffer(LFRFIDRawWorkerReadData* ctx, bool level, uint32_t duration) {
     bool result = false;
 
     if(level) {
@@ -166,7 +155,7 @@ static inline bool write_to_tmp_buffer(RfidReadCtx* ctx, bool level, uint32_t du
 }
 
 static void lfrfid_raw_worker_capture(bool level, uint32_t duration, void* context) {
-    RfidReadCtx* ctx = context;
+    LFRFIDRawWorkerReadData* ctx = context;
 
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
@@ -185,36 +174,18 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
     LFRFIDRawWorker* worker = (LFRFIDRawWorker*)thread_context;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    Stream* stream = file_stream_alloc(storage);
+    LFRFIDRawFile* file = lfrfid_raw_file_alloc(storage);
     const char* filename = string_get_cstr(worker->file_path);
-    bool file_valid = file_stream_open(stream, filename, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS);
+    bool file_valid = lfrfid_raw_file_open_write(file, filename);
 
     LFRFIDRawWorkerReadData* data = malloc(sizeof(LFRFIDRawWorkerReadData));
 
-    data->ctx.stream = buffer_stream_alloc(RFID_DATA_BUFFER_SIZE, READ_BUFFER_COUNT);
+    data->stream = buffer_stream_alloc(RFID_DATA_BUFFER_SIZE, READ_BUFFER_COUNT);
 
     if(file_valid) {
         // write header
-        size_t size = stream_write_cstring(stream, RAW_HEADER);
-        if(size != strlen(RAW_HEADER)) {
-            file_valid = false;
-        }
-
-        uint32_t max_buffer_size = RFID_DATA_BUFFER_SIZE;
-        size = stream_write(stream, (uint8_t*)&max_buffer_size, sizeof(uint32_t));
-        if(size != sizeof(uint32_t)) {
-            file_valid = false;
-        }
-
-        size = stream_write(stream, (uint8_t*)&worker->frequency, sizeof(float));
-        if(size != sizeof(float)) {
-            file_valid = false;
-        }
-
-        size = stream_write(stream, (uint8_t*)&worker->duty_cycle, sizeof(float));
-        if(size != sizeof(float)) {
-            file_valid = false;
-        }
+        file_valid = lfrfid_raw_file_write_header(
+            file, worker->frequency, worker->duty_cycle, RFID_DATA_BUFFER_SIZE);
     }
 
     if(file_valid) {
@@ -227,25 +198,14 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
         furi_delay_ms(1500);
 
         // start capture
-        furi_hal_rfid_tim_read_capture_start(lfrfid_raw_worker_capture, &data->ctx);
+        furi_hal_rfid_tim_read_capture_start(lfrfid_raw_worker_capture, data);
 
         while(1) {
-            Buffer* buffer = buffer_stream_receive(data->ctx.stream, 100);
+            Buffer* buffer = buffer_stream_receive(data->stream, 100);
 
             if(buffer != NULL) {
-                size_t size = 0;
-                size_t buffer_size = buffer_get_size(buffer);
-
-                size = stream_write(stream, (uint8_t*)&buffer_size, sizeof(size_t));
-                if(size != sizeof(size_t)) {
-                    file_valid = false;
-                }
-
-                size = stream_write(stream, buffer_get_data(buffer), buffer_size);
-                if(size != buffer_size) {
-                    file_valid = false;
-                }
-
+                file_valid = lfrfid_raw_file_write_buffer(
+                    file, buffer_get_data(buffer), buffer_get_size(buffer));
                 buffer_reset(buffer);
             }
 
@@ -257,7 +217,7 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
                 break;
             }
 
-            if(buffer_stream_get_overrun_count(data->ctx.stream) > 0 &&
+            if(buffer_stream_get_overrun_count(data->stream) > 0 &&
                worker->read_callback != NULL) {
                 // message overrun to worker
                 worker->read_callback(LFRFIDWorkerReadRawOverrun, worker->context);
@@ -290,8 +250,8 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
         }
     }
 
-    buffer_stream_free(data->ctx.stream);
-    stream_free(stream);
+    buffer_stream_free(data->stream);
+    lfrfid_raw_file_free(file);
     furi_record_close(RECORD_STORAGE);
     free(data);
 
@@ -308,58 +268,6 @@ static void rfid_emulate_dma_isr(bool half, void* context) {
     }
 }
 
-static bool read_pair(LFRFIDRawWorkerEmulateData* data, uint32_t* duration, uint32_t* pulse) {
-    RfidFileBuffer* buffer = &data->buffer;
-
-    size_t length = 0;
-    if(buffer->counter >= buffer->size) {
-        if(stream_eof(data->stream)) {
-            // rewind stream and pass header
-            stream_seek(
-                data->stream, strlen(RAW_HEADER) + sizeof(uint32_t), StreamOffsetFromStart);
-        }
-
-        length = stream_read(data->stream, (uint8_t*)&buffer->size, sizeof(size_t));
-        if(length != sizeof(size_t)) {
-            FURI_LOG_E(TAG_EMULATE, "read pair: failed to read size");
-            return false;
-        }
-
-        if(buffer->size > RFID_DATA_BUFFER_SIZE) {
-            FURI_LOG_E(TAG_EMULATE, "read pair: buffer size is too big");
-            return false;
-        }
-
-        length = stream_read(data->stream, buffer->data, buffer->size);
-        if(length != buffer->size) {
-            FURI_LOG_E(TAG_EMULATE, "read pair: failed to read data");
-            return false;
-        }
-
-        buffer->counter = 0;
-    }
-
-    uint32_t value1 = 0;
-    uint32_t value2 = 0;
-
-    buffer->counter += varint_uint32_unpack(
-        &value1, &buffer->data[buffer->counter], (size_t)(buffer->size - buffer->counter));
-
-    if(buffer->counter >= buffer->size) {
-        FURI_LOG_E(TAG_EMULATE, "read pair: buffer is too small");
-        return false;
-    }
-
-    buffer->counter += varint_uint32_unpack(
-        &value2, &buffer->data[buffer->counter], (size_t)(buffer->size - buffer->counter));
-
-    *duration = value2 / 8;
-    *duration -= 1;
-    *pulse = value1 / 8;
-
-    return true;
-}
-
 static int32_t lfrfid_raw_emulate_worker_thread(void* thread_context) {
     LFRFIDRawWorker* worker = thread_context;
 
@@ -368,55 +276,24 @@ static int32_t lfrfid_raw_emulate_worker_thread(void* thread_context) {
     LFRFIDRawWorkerEmulateData* data = malloc(sizeof(LFRFIDRawWorkerEmulateData));
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    data->stream = file_stream_alloc(storage);
     data->ctx.overrun_count = 0;
     data->ctx.stream = xStreamBufferCreate(sizeof(uint32_t), sizeof(uint32_t));
-    data->buffer.size = 0;
-    data->buffer.counter = 0;
+
+    LFRFIDRawFile* file = lfrfid_raw_file_alloc(storage);
 
     do {
-        const char* filename = string_get_cstr(worker->file_path);
-
-        if(!file_stream_open(data->stream, filename, FSAM_READ, FSOM_OPEN_EXISTING)) {
-            file_valid = false;
-            break;
-        }
-
-        // read header
-        char* header_text = malloc(strlen(RAW_HEADER) + 1);
-
-        size_t size = stream_read(data->stream, (uint8_t*)header_text, strlen(RAW_HEADER));
-        if(size != strlen(RAW_HEADER) || strcmp(header_text, RAW_HEADER) != 0) {
-            file_valid = false;
-        }
-
-        free(header_text);
-
-        uint32_t max_buffer_size;
-        size = stream_read(data->stream, (uint8_t*)&max_buffer_size, sizeof(uint32_t));
-        if(size != sizeof(uint32_t) || max_buffer_size != RFID_DATA_BUFFER_SIZE) {
-            file_valid = false;
-        }
-
-        size = stream_read(data->stream, (uint8_t*)&worker->frequency, sizeof(float));
-        if(size != sizeof(float) || worker->frequency < 0.0f || worker->frequency > 1000000.0f) {
-            file_valid = false;
-        }
-
-        size = stream_read(data->stream, (uint8_t*)&worker->duty_cycle, sizeof(float));
-        if(size != sizeof(float) || worker->duty_cycle < 0.0f || worker->duty_cycle > 1.0f) {
-            file_valid = false;
-        }
-
-        if(!file_valid) {
-            FURI_LOG_E(TAG_EMULATE, "Invalid file header");
-            break;
-        }
+        file_valid = lfrfid_raw_file_open_read(file, string_get_cstr(worker->file_path));
+        if(!file_valid) break;
+        file_valid = lfrfid_raw_file_read_header(file, &worker->frequency, &worker->duty_cycle);
+        if(!file_valid) break;
 
         for(size_t i = 0; i < EMULATE_BUFFER_SIZE; i++) {
-            file_valid =
-                read_pair(data, &data->emulate_buffer_arr[i], &data->emulate_buffer_ccr[i]);
+            file_valid = lfrfid_raw_file_read_pair(
+                file, &data->emulate_buffer_arr[i], &data->emulate_buffer_ccr[i], NULL);
             if(!file_valid) break;
+            data->emulate_buffer_arr[i] /= 8;
+            data->emulate_buffer_arr[i] -= 1;
+            data->emulate_buffer_ccr[i] /= 8;
         }
     } while(false);
 
@@ -440,19 +317,20 @@ static int32_t lfrfid_raw_emulate_worker_thread(void* thread_context) {
 
             if(size == sizeof(uint32_t)) {
                 size_t start = 0;
-
-                if(flag == HalfTransfer) {
-                    start = 0;
-                } else if(flag == TransferComplete) {
+                if(flag == TransferComplete) {
                     start = (EMULATE_BUFFER_SIZE / 2);
                 }
 
                 for(size_t i = 0; i < (EMULATE_BUFFER_SIZE / 2); i++) {
-                    file_valid = read_pair(
-                        data,
+                    file_valid = lfrfid_raw_file_read_pair(
+                        file,
                         &data->emulate_buffer_arr[start + i],
-                        &data->emulate_buffer_ccr[start + i]);
+                        &data->emulate_buffer_ccr[start + i],
+                        NULL);
                     if(!file_valid) break;
+                    data->emulate_buffer_arr[i] /= 8;
+                    data->emulate_buffer_arr[i] -= 1;
+                    data->emulate_buffer_ccr[i] /= 8;
                 }
             } else if(size != 0) {
                 data->ctx.overrun_count++;
@@ -496,8 +374,8 @@ static int32_t lfrfid_raw_emulate_worker_thread(void* thread_context) {
         FURI_LOG_E(TAG_EMULATE, "overruns: %lu", data->ctx.overrun_count);
     }
 
-    stream_free(data->stream);
     vStreamBufferDelete(data->ctx.stream);
+    lfrfid_raw_file_free(file);
     furi_record_close(RECORD_STORAGE);
     free(data);
 

@@ -11,11 +11,8 @@
 
 #include <toolbox/protocols/protocol_dict.h>
 #include <lfrfid/protocols/lfrfid_protocols.h>
+#include <lfrfid/lfrfid_raw_file.h>
 #include <toolbox/pulse_protocols/pulse_glue.h>
-
-#define RAW_HEADER "RFID RAW"
-
-#define FURI_SW_MEMBARRIER() asm volatile("" : : : "memory")
 
 static void lfrfid_cli(Cli* cli, string_t args, void* context);
 
@@ -270,7 +267,7 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
     string_init(filepath);
     string_init(info_string);
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    Stream* stream = file_stream_alloc(storage);
+    LFRFIDRawFile* file = lfrfid_raw_file_alloc(storage);
 
     do {
         float frequency = 0;
@@ -281,43 +278,17 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
             break;
         }
 
-        if(!file_stream_open(stream, string_get_cstr(filepath), FSAM_READ, FSOM_OPEN_EXISTING)) {
-            printf("Failed to open file: %s\r\n", string_get_cstr(filepath));
+        if(!lfrfid_raw_file_open_read(file, string_get_cstr(filepath))) {
+            printf("Failed to open file\r\n");
             break;
         }
 
-        char* header_text = malloc(strlen(RAW_HEADER) + 1);
-
-        size_t size = stream_read(stream, (uint8_t*)header_text, strlen(RAW_HEADER));
-        if(size != strlen(RAW_HEADER) || strcmp(header_text, RAW_HEADER) != 0) {
+        if(!lfrfid_raw_file_read_header(file, &frequency, &duty_cycle)) {
             printf("Invalid header\r\n");
             break;
         }
 
-        free(header_text);
-
-        uint32_t max_buffer_size;
-        size = stream_read(stream, (uint8_t*)&max_buffer_size, sizeof(uint32_t));
-        if(size != sizeof(uint32_t)) {
-            printf("Invalid header\r\n");
-            break;
-        }
-
-        size = stream_read(stream, (uint8_t*)&frequency, sizeof(float));
-        if(size != sizeof(float) || frequency < 0.0f || frequency > 1000000.0f) {
-            printf("Invalid header\r\n");
-            break;
-        }
-
-        size = stream_read(stream, (uint8_t*)&duty_cycle, sizeof(float));
-        if(size != sizeof(float) || duty_cycle < 0.0f || duty_cycle > 1.0f) {
-            printf("Invalid header\r\n");
-            break;
-        }
-
-        uint8_t* buffer = malloc(max_buffer_size);
-
-        bool file_valid = true;
+        bool file_end = false;
         uint32_t total_warns = 0;
         uint32_t total_duration = 0;
         uint32_t total_pulse = 0;
@@ -326,36 +297,10 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
         ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
         protocol_dict_decoders_start(dict);
 
-        while(!stream_eof(stream) && file_valid) {
-            size_t buffer_size = 0;
-            size_t buffer_counter = 0;
-
-            if(stream_read(stream, (uint8_t*)&buffer_size, sizeof(size_t)) != sizeof(size_t)) {
-                printf("Failed to read size\r\n");
-                break;
-            }
-
-            if(stream_read(stream, buffer, buffer_size) != buffer_size) {
-                printf("Failed to read data\r\n");
-                break;
-            }
-
-            while(buffer_counter < buffer_size && file_valid) {
-                uint32_t pulse = 0;
-                uint32_t duration = 0;
-
-                buffer_counter += varint_uint32_unpack(
-                    &pulse, &buffer[buffer_counter], (size_t)(buffer_size - buffer_counter));
-
-                if(buffer_counter >= buffer_size) {
-                    printf("buffer is too small\r\n");
-                    file_valid = false;
-                    break;
-                }
-
-                buffer_counter += varint_uint32_unpack(
-                    &duration, &buffer[buffer_counter], (size_t)(buffer_size - buffer_counter));
-
+        while(!file_end) {
+            uint32_t pulse = 0;
+            uint32_t duration = 0;
+            if(lfrfid_raw_file_read_pair(file, &duration, &pulse, &file_end)) {
                 bool warn = false;
 
                 if(pulse > duration || pulse <= 0 || duration <= 0) {
@@ -392,9 +337,8 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
                 if(total_protocol != PROTOCOL_NO) {
                     break;
                 }
-            }
-
-            if(total_protocol != PROTOCOL_NO) {
+            } else {
+                printf("Failed to read pair\r\n");
                 break;
             }
         }
@@ -421,8 +365,8 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
             }
             printf("]\r\n");
 
-            protocol_dict_set_data(dict, total_protocol, data, data_size);
-            protocol_dict_encoder_start(dict, total_protocol);
+            protocol_dict_render_data(dict, info_string, total_protocol);
+            printf("%s\r\n", string_get_cstr(info_string));
 
             free(data);
         } else {
@@ -430,13 +374,11 @@ static void lfrfid_cli_raw_analyze(Cli* cli, string_t args) {
         }
 
         protocol_dict_free(dict);
-        free(buffer);
-
     } while(false);
 
-    stream_free(stream);
     string_clear(filepath);
     string_clear(info_string);
+    lfrfid_raw_file_free(file);
     furi_record_close(RECORD_STORAGE);
 }
 
