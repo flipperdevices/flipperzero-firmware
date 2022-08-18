@@ -6,17 +6,6 @@
 <b>Latest Updates:</b>
 
 - Known Issues: `FAP Loader` & `Chess`
-- 🔥Updated main branch name from `unleashed` to `420`. This Flipper is obviously lit. 🔥 
-- Clock sounds fixed [(By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/246)
-- More Clock Updates & some version updates to allow reference of furi_hal_version_set_name
-- OFW: [New NFC info screens #1605 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1605)
-- OFW: [U2F: Change endianness in counter file #1604 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1604)
-- OFW: [Fix U2F counter endianness #1592 (By wdoekes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1592)
-- Added: [RFID Fuzzer (By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245)
-- OFW: [Increment U2F counter before authentication #1595 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1595)
-- OFW: [Fix typos in SubGHz #1588 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/1588)
-- Updated Universal remote assets (By Amec0e) from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Reverted some clock changes to make it stable again
 - OFW: [Add MFC 1/4K 4/7bUID to "Add Manually" #1584 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1584)
 
 <table width="100%" border="0" cellspacing="0">
