@@ -1,5 +1,6 @@
 #include <furi_hal_rfid.h>
 #include <toolbox/stream/file_stream.h>
+#include <toolbox/buffer_stream.h>
 #include <toolbox/varint.h>
 #include <stream_buffer.h>
 #include "lfrfid_raw_worker.h"
@@ -39,27 +40,12 @@ typedef enum {
 
 // read mode
 #define READ_BUFFER_COUNT 4
-
 #define READ_TEMP_DATA_SIZE 10
 
 typedef struct {
-    bool occupied;
-    size_t counter;
-    size_t size;
-    uint8_t data[RFID_DATA_BUFFER_SIZE];
-} RfidReadBuffer;
-
-typedef struct {
-    size_t overrun_count;
-    bool overrun;
-    StreamBufferHandle_t stream;
-
-    size_t buffers_counter;
-    RfidReadBuffer buffers[READ_BUFFER_COUNT];
-
+    BufferStream* stream;
     size_t tmp_data_length;
     uint8_t tmp_data[READ_TEMP_DATA_SIZE];
-
 } RfidReadCtx;
 
 typedef struct {
@@ -156,21 +142,8 @@ void lfrfid_raw_worker_read_set_callback(
     worker->context = context;
 }
 
-static inline int8_t get_free_buffer(RfidReadCtx* ctx) {
-    int8_t id = -1;
-    for(size_t i = 0; i < READ_BUFFER_COUNT; i++) {
-        if(ctx->buffers[i].occupied == false) {
-            id = i;
-            break;
-        }
-    }
-
-    return id;
-}
-
 // pack varint into tmp_data
-static inline bool
-    write_to_tmp_buffer(RfidReadCtx* ctx, bool level, uint32_t duration, bool* pair_error) {
+static inline bool write_to_tmp_buffer(RfidReadCtx* ctx, bool level, uint32_t duration) {
     bool result = false;
 
     if(level) {
@@ -178,7 +151,6 @@ static inline bool
             ctx->tmp_data_length = varint_uint32_pack(duration, ctx->tmp_data);
         } else {
             ctx->tmp_data_length = 0;
-            *pair_error = true;
         }
     } else {
         if(ctx->tmp_data_length > 0) {
@@ -187,7 +159,6 @@ static inline bool
             result = true;
         } else {
             ctx->tmp_data_length = 0;
-            *pair_error = true;
         }
     }
 
@@ -199,56 +170,12 @@ static void lfrfid_raw_worker_capture(bool level, uint32_t duration, void* conte
 
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    bool pair_error = false;
-    bool need_to_send = write_to_tmp_buffer(ctx, level, duration, &pair_error);
+    bool need_to_send = write_to_tmp_buffer(ctx, level, duration);
 
     if(need_to_send) {
-        bool overrun = true;
-        int8_t id = ctx->buffers_counter;
-
-        if((ctx->buffers[id].size + ctx->tmp_data_length) >= RFID_DATA_BUFFER_SIZE &&
-           ctx->buffers[id].occupied == false) {
-            // send
-            RfidReadBuffer* buffer_p = &ctx->buffers[id];
-
-            buffer_p->occupied = true;
-
-            size_t s = xStreamBufferSendFromISR(
-                ctx->stream, &buffer_p, sizeof(RfidReadBuffer*), &xHigherPriorityTaskWoken);
-
-            if(s != sizeof(RfidReadBuffer*)) {
-                ctx->overrun_count++;
-            }
-        }
-
-        if(!ctx->buffers[id].occupied) {
-            memcpy(
-                ctx->buffers[id].data + ctx->buffers[id].size,
-                ctx->tmp_data,
-                ctx->tmp_data_length);
-            ctx->buffers[id].size += ctx->tmp_data_length;
-            ctx->tmp_data_length = 0;
-
-            overrun = false;
-        } else {
-            id = get_free_buffer(ctx);
-
-            if(id != -1) {
-                memcpy(
-                    ctx->buffers[id].data + ctx->buffers[id].size,
-                    ctx->tmp_data,
-                    ctx->tmp_data_length);
-                ctx->buffers[id].size += ctx->tmp_data_length;
-                ctx->tmp_data_length = 0;
-                ctx->buffers_counter = id;
-
-                overrun = false;
-            }
-        }
-
-        if(overrun) {
-            ctx->overrun_count++;
-        }
+        buffer_stream_send_from_isr(
+            ctx->stream, ctx->tmp_data, ctx->tmp_data_length, &xHigherPriorityTaskWoken);
+        ctx->tmp_data_length = 0;
     }
 
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
@@ -264,9 +191,7 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
 
     LFRFIDRawWorkerReadData* data = malloc(sizeof(LFRFIDRawWorkerReadData));
 
-    data->ctx.overrun_count = 0;
-    data->ctx.stream =
-        xStreamBufferCreate(sizeof(RfidReadBuffer*) * READ_BUFFER_COUNT, sizeof(RfidReadBuffer*));
+    data->ctx.stream = buffer_stream_alloc(RFID_DATA_BUFFER_SIZE, READ_BUFFER_COUNT);
 
     if(file_valid) {
         // write header
@@ -304,30 +229,24 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
         // start capture
         furi_hal_rfid_tim_read_capture_start(lfrfid_raw_worker_capture, &data->ctx);
 
-        RfidReadBuffer* buffer_p = NULL;
         while(1) {
-            size_t size =
-                xStreamBufferReceive(data->ctx.stream, &buffer_p, sizeof(RfidReadBuffer*), 100);
+            Buffer* buffer = buffer_stream_receive(data->ctx.stream, 100);
 
-            if(size == sizeof(RfidReadBuffer*)) {
+            if(buffer != NULL) {
                 size_t size = 0;
+                size_t buffer_size = buffer_get_size(buffer);
 
-                size = stream_write(stream, (uint8_t*)&buffer_p->size, sizeof(size_t));
+                size = stream_write(stream, (uint8_t*)&buffer_size, sizeof(size_t));
                 if(size != sizeof(size_t)) {
                     file_valid = false;
                 }
 
-                size = stream_write(stream, buffer_p->data, buffer_p->size);
-                if(size != buffer_p->size) {
+                size = stream_write(stream, buffer_get_data(buffer), buffer_size);
+                if(size != buffer_size) {
                     file_valid = false;
                 }
 
-                buffer_p->size = 0;
-                __DMB();
-                buffer_p->occupied = false;
-                __DMB();
-            } else if(size != 0) {
-                data->ctx.overrun_count++;
+                buffer_reset(buffer);
             }
 
             if(!file_valid) {
@@ -338,7 +257,8 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
                 break;
             }
 
-            if(data->ctx.overrun_count > 0 && worker->read_callback != NULL) {
+            if(buffer_stream_get_overrun_count(data->ctx.stream) > 0 &&
+               worker->read_callback != NULL) {
                 // message overrun to worker
                 worker->read_callback(LFRFIDWorkerReadRawOverrun, worker->context);
             }
@@ -370,7 +290,7 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
         }
     }
 
-    vStreamBufferDelete(data->ctx.stream);
+    buffer_stream_free(data->ctx.stream);
     stream_free(stream);
     furi_record_close(RECORD_STORAGE);
     free(data);
