@@ -10,7 +10,7 @@
 - Added [.sub Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - OFW: [Browser worker fix, Device Info screen update #1620 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1620)
 - OFW: [disabled automatic poweroff for single-frame slideshows #1621 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1621)
-- Changing some apps such as `APPS_BarcodeGenerator`, `APPS_dec_hex_converter`, `APPS_SentrySafe`, `APPS_FlipFrid` and `GAME_Raycast` to be  `HIDDEN` in order to make space to update from SD.
+- V2: Changing some apps such as `APPS_BarcodeGenerator`, `APPS_dec_hex_converter`, `APPS_SentrySafe`, `APPS_FlipFrid` and `GAME_Raycast` to be  `HIDDEN` in order to make space to update from SD.
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
