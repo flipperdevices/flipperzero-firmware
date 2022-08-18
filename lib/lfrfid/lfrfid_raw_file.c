@@ -1,4 +1,5 @@
 #include "lfrfid_raw_file.h"
+#include "tools/varint_pair.h"
 #include <toolbox/stream/file_stream.h>
 #include <toolbox/varint.h>
 
@@ -129,26 +130,20 @@ bool lfrfid_raw_file_read_pair(
         file->buffer_counter = 0;
     }
 
-    uint32_t value1 = 0;
-    uint32_t value2 = 0;
-
-    file->buffer_counter += varint_uint32_unpack(
-        &value1,
+    size_t size = 0;
+    bool result = varint_pair_unpack(
         &file->buffer[file->buffer_counter],
-        (size_t)(file->buffer_size - file->buffer_counter));
+        (size_t)(file->buffer_size - file->buffer_counter),
+        pulse,
+        duration,
+        &size);
 
-    if(file->buffer_counter >= file->buffer_size) {
+    if(result) {
+        file->buffer_counter += size;
+    } else {
         FURI_LOG_E(TAG, "read pair: buffer is too small");
         return false;
     }
-
-    file->buffer_counter += varint_uint32_unpack(
-        &value2,
-        &file->buffer[file->buffer_counter],
-        (size_t)(file->buffer_size - file->buffer_counter));
-
-    *duration = value2;
-    *pulse = value1;
 
     return true;
 }

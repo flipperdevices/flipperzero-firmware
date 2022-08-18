@@ -39,6 +39,31 @@ bool varint_pair_pack(VarintPair* pair, bool first, uint32_t duration) {
     return result;
 }
 
+bool varint_pair_unpack(
+    uint8_t* data,
+    size_t data_length,
+    uint32_t* value_1,
+    uint32_t* value_2,
+    size_t* length) {
+    size_t size = 0;
+    uint32_t tmp_value_1;
+    uint32_t tmp_value_2;
+
+    size += varint_uint32_unpack(&tmp_value_1, &data[size], data_length);
+
+    if(size >= data_length) {
+        return false;
+    }
+
+    size += varint_uint32_unpack(&tmp_value_2, &data[size], (size_t)(data_length - size));
+
+    *value_1 = tmp_value_1;
+    *value_2 = tmp_value_2;
+    *length = size;
+
+    return true;
+}
+
 uint8_t* varint_pair_get_data(VarintPair* pair) {
     return pair->data;
 }

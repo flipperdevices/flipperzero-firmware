@@ -4,6 +4,8 @@
 #include "tools/t5577.h"
 #include <stream_buffer.h>
 #include <toolbox/pulse_protocols/pulse_glue.h>
+#include <toolbox/buffer_stream.h>
+#include "tools/varint_pair.h"
 
 #define TAG "LFRFIDWorker"
 
@@ -19,8 +21,8 @@
 #define LFRFID_WORKER_READ_DEBUG_GPIO_LOAD &gpio_ext_pa6
 #endif
 
-#define LFRFID_WORKER_READ_DROP_TIME 500
-#define LFRFID_WORKER_STABILIZE_TIME 1000
+#define LFRFID_WORKER_READ_DROP_TIME 10
+#define LFRFID_WORKER_STABILIZE_TIME 800
 #define LFRFID_WORKER_READ_SWITCH_TIME 2000
 
 #define LFRFID_WORKER_WRITE_VERIFY_TIME 2000
@@ -29,7 +31,9 @@
 #define LFRFID_WORKER_WRITE_TOO_LONG_TIME 10000
 #define LFRFID_WORKER_WRITE_MAX_UNSUCCESSFUL_READS 5
 
-#define LFRFID_WORKER_READ_STREAM_SIZE 4096
+#define LFRFID_WORKER_READ_BUFFER_SIZE 1024
+#define LFRFID_WORKER_READ_BUFFER_COUNT 4
+
 #define LFRFID_WORKER_EMULATE_BUFFER_SIZE 1024
 
 #define LFRFID_WORKER_DELAY_QUANT 50
@@ -45,17 +49,27 @@ void lfrfid_worker_delay(LFRFIDWorker* worker, uint32_t milliseconds) {
 /********************************************** READ **********************************************/
 /**************************************************************************************************/
 
+typedef struct {
+    BufferStream* stream;
+    VarintPair* pair;
+} LFRFIDWorkerReadContext;
+
 static void lfrfid_worker_read_capture(bool level, uint32_t duration, void* context) {
 #ifdef LFRFID_WORKER_READ_DEBUG_GPIO
     furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_VALUE, level);
 #endif
 
-    StreamBufferHandle_t stream = context;
-    LevelDuration level_duration = level_duration_make(level, duration);
+    LFRFIDWorkerReadContext* ctx = context;
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-
-    xStreamBufferSendFromISR(
-        stream, &level_duration, sizeof(LevelDuration), &xHigherPriorityTaskWoken);
+    bool need_to_send = varint_pair_pack(ctx->pair, level, duration);
+    if(need_to_send) {
+        buffer_stream_send_from_isr(
+            ctx->stream,
+            varint_pair_get_data(ctx->pair),
+            varint_pair_get_size(ctx->pair),
+            &xHigherPriorityTaskWoken);
+        varint_pair_reset(ctx->pair);
+    }
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
@@ -93,12 +107,14 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
     furi_hal_gpio_init_simple(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, GpioModeOutputPushPull);
 #endif
 
-    StreamBufferHandle_t stream = xStreamBufferCreate(
-        sizeof(LevelDuration) * LFRFID_WORKER_READ_STREAM_SIZE, sizeof(LevelDuration));
-    furi_hal_rfid_tim_read_capture_start(lfrfid_worker_read_capture, stream);
+    LFRFIDWorkerReadContext ctx;
+    ctx.pair = varint_pair_alloc();
+    ctx.stream =
+        buffer_stream_alloc(LFRFID_WORKER_READ_BUFFER_SIZE, LFRFID_WORKER_READ_BUFFER_COUNT);
 
-    uint32_t tmp_duration = 0;
+    furi_hal_rfid_tim_read_capture_start(lfrfid_worker_read_capture, &ctx);
 
+    *result_protocol = PROTOCOL_NO;
     ProtocolId last_protocol = PROTOCOL_NO;
     size_t last_size = protocol_dict_get_max_data_size(worker->protocols);
     uint8_t* last_data = malloc(last_size);
@@ -114,93 +130,118 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
             break;
         }
 
-        LevelDuration level_duration;
-        size_t size = xStreamBufferReceive(stream, &level_duration, sizeof(LevelDuration), 100);
+        Buffer* buffer = buffer_stream_receive(ctx.stream, 100);
 
 #ifdef LFRFID_WORKER_READ_DEBUG_GPIO
         furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, true);
 #endif
 
-        if(size == 0) {
+        if(buffer_stream_get_overrun_count(ctx.stream) > 0) {
+            FURI_LOG_E(TAG, "Read overrun, recovering");
+            buffer_stream_reset(ctx.stream);
             continue;
         }
 
-        ProtocolId protocol = PROTOCOL_NO;
-        if(size == sizeof(LevelDuration)) {
-            uint32_t duration = level_duration_get_duration(level_duration);
+        if(buffer == NULL) {
+            continue;
+        }
 
-            if(level_duration_get_level(level_duration)) {
-                tmp_duration = duration;
-                protocol = protocol_dict_decoders_feed_by_feature(
-                    worker->protocols, feature, true, tmp_duration);
+        size_t size = buffer_get_size(buffer);
+        uint8_t* data = buffer_get_data(buffer);
+        size_t index = 0;
+
+        while(index < size) {
+            uint32_t duration;
+            uint32_t pulse;
+            size_t tmp_size;
+
+            if(!varint_pair_unpack(&data[index], size - index, &pulse, &duration, &tmp_size)) {
+                FURI_LOG_E(TAG, "can't unpack varint pair");
+                break;
             } else {
-                tmp_duration = duration - tmp_duration;
+                index += tmp_size;
+
+                ProtocolId protocol = PROTOCOL_NO;
+
                 protocol = protocol_dict_decoders_feed_by_feature(
-                    worker->protocols, feature, false, tmp_duration);
-                tmp_duration = 0;
+                    worker->protocols, feature, true, pulse);
+                if(protocol == PROTOCOL_NO) {
+                    protocol = protocol_dict_decoders_feed_by_feature(
+                        worker->protocols, feature, false, duration - pulse);
+                }
+
+                if(protocol != PROTOCOL_NO) {
+                    // reset switch timer
+                    switch_os_tick_last = furi_get_tick();
+
+                    size_t protocol_data_size =
+                        protocol_dict_get_data_size(worker->protocols, protocol);
+                    protocol_dict_get_data(
+                        worker->protocols, protocol, protocol_data, protocol_data_size);
+
+                    // validate protocol
+                    if(protocol == last_protocol &&
+                       memcmp(last_data, protocol_data, protocol_data_size) == 0) {
+                        last_read_count = last_read_count + 1;
+
+                        size_t validation_count =
+                            protocol_dict_get_validate_count(worker->protocols, protocol);
+
+                        if(last_read_count >= validation_count) {
+                            state = LFRFIDWorkerReadOK;
+                            *result_protocol = protocol;
+                            break;
+                        }
+                    } else {
+                        if(last_protocol == PROTOCOL_NO && worker->read_cb) {
+                            worker->read_cb(
+                                LFRFIDWorkerReadSenseCardStart, protocol, worker->cb_ctx);
+                        }
+
+                        last_protocol = protocol;
+                        memcpy(last_data, protocol_data, protocol_data_size);
+                        last_read_count = 0;
+                    }
+
+                    string_t string_info;
+                    string_init(string_info);
+                    for(uint8_t i = 0; i < protocol_data_size; i++) {
+                        if(i != 0) {
+                            string_cat_printf(string_info, " ");
+                        }
+
+                        string_cat_printf(string_info, "%02X", protocol_data[i]);
+                    }
+
+                    FURI_LOG_D(
+                        TAG,
+                        "%s, %d, [%s]",
+                        protocol_dict_get_name(worker->protocols, protocol),
+                        last_read_count,
+                        string_get_cstr(string_info));
+                    string_clear(string_info);
+
+                    protocol_dict_decoders_start(worker->protocols);
+                }
             }
         }
 
-        if(protocol != PROTOCOL_NO) {
-            // reset switch timer
-            switch_os_tick_last = furi_get_tick();
+        buffer_reset(buffer);
 
-            size_t protocol_data_size = protocol_dict_get_data_size(worker->protocols, protocol);
-            protocol_dict_get_data(worker->protocols, protocol, protocol_data, protocol_data_size);
+#ifdef LFRFID_WORKER_READ_DEBUG_GPIO
+        furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, false);
+#endif
 
-            // validate protocol
-            if(protocol == last_protocol &&
-               memcmp(last_data, protocol_data, protocol_data_size) == 0) {
-                last_read_count = last_read_count + 1;
-
-                size_t validation_count =
-                    protocol_dict_get_validate_count(worker->protocols, protocol);
-
-                if(last_read_count >= validation_count) {
-                    state = LFRFIDWorkerReadOK;
-                    *result_protocol = protocol;
-                    break;
-                }
-            } else {
-                if(last_protocol == PROTOCOL_NO && worker->read_cb) {
-                    worker->read_cb(LFRFIDWorkerReadSenseCardStart, protocol, worker->cb_ctx);
-                }
-
-                last_protocol = protocol;
-                memcpy(last_data, protocol_data, protocol_data_size);
-                last_read_count = 0;
-            }
-
-            string_t string_info;
-            string_init(string_info);
-            for(uint8_t i = 0; i < protocol_data_size; i++) {
-                if(i != 0) {
-                    string_cat_printf(string_info, " ");
-                }
-
-                string_cat_printf(string_info, "%02X", protocol_data[i]);
-            }
-
-            FURI_LOG_D(
-                TAG,
-                "%s, %d, [%s]",
-                protocol_dict_get_name(worker->protocols, protocol),
-                last_read_count,
-                string_get_cstr(string_info));
-            string_clear(string_info);
-
-            protocol_dict_decoders_start(worker->protocols);
+        if(*result_protocol != PROTOCOL_NO) {
+            break;
         }
 
         if((furi_get_tick() - switch_os_tick_last) > timeout) {
             state = LFRFIDWorkerReadTimeout;
             break;
         }
-
-#ifdef LFRFID_WORKER_READ_DEBUG_GPIO
-        furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, false);
-#endif
     }
+
     FURI_LOG_D(TAG, "Read stopped");
 
     if(last_protocol != PROTOCOL_NO && worker->read_cb) {
@@ -211,7 +252,9 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
     furi_hal_rfid_tim_read_stop();
     furi_hal_rfid_pins_reset();
 
-    vStreamBufferDelete(stream);
+    varint_pair_free(ctx.pair);
+    buffer_stream_free(ctx.stream);
+
     free(protocol_data);
     free(last_data);
 
@@ -255,8 +298,12 @@ static void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
         }
     } else {
         while(1) {
-            state = lfrfid_worker_read_internal(
-                worker, feature, LFRFID_WORKER_READ_SWITCH_TIME, &read_result);
+            if(worker->read_type == LFRFIDWorkerReadTypeASKOnly) {
+                state = lfrfid_worker_read_internal(worker, feature, UINT32_MAX, &read_result);
+            } else {
+                state = lfrfid_worker_read_internal(
+                    worker, feature, LFRFID_WORKER_READ_SWITCH_TIME, &read_result);
+            }
 
             if(state == LFRFIDWorkerReadOK || state == LFRFIDWorkerReadExit) {
                 break;

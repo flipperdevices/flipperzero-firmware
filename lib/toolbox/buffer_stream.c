@@ -131,3 +131,15 @@ Buffer* buffer_stream_receive(BufferStream* buffer_stream, TickType_t timeout) {
 size_t buffer_stream_get_overrun_count(BufferStream* buffer_stream) {
     return buffer_stream->stream_overrun_count;
 }
+
+void buffer_stream_reset(BufferStream* buffer_stream) {
+    FURI_CRITICAL_ENTER();
+    BaseType_t xReturn = xStreamBufferReset(buffer_stream->stream);
+    furi_assert(xReturn == pdPASS);
+    UNUSED(xReturn);
+    buffer_stream->stream_overrun_count = 0;
+    for(size_t i = 0; i < buffer_stream->max_buffers_count; i++) {
+        buffer_reset(&buffer_stream->buffers[i]);
+    }
+    FURI_CRITICAL_EXIT();
+}

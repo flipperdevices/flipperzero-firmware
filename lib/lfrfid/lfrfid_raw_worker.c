@@ -39,7 +39,6 @@ typedef struct {
 } LFRFIDRawWorkerReadData;
 
 // main worker
-
 struct LFRFIDRawWorker {
     string_t file_path;
     FuriThread* thread;
