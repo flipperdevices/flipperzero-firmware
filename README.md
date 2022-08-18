@@ -6,6 +6,7 @@
 <b>Latest Updates:</b>
 
 - Known Issues: `FAP Loader` & `Chess`
+- 🔥Updated main branch name from `unleashed` to `420`. This Flipper is obviously lit. 🔥 
 - Clock sounds fixed [(By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/246)
 - More Clock Updates & some version updates to allow reference of furi_hal_version_set_name
 - OFW: [New NFC info screens #1605 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1605)
