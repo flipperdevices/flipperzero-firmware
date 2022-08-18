@@ -1,5 +1,5 @@
 App(
-    appid="Clock",
+    appid="clock",
     name="Clock",
     apptype=FlipperAppType.PLUGIN,
     entry_point="clock_app",
