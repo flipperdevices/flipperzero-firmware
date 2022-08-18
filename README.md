@@ -80,6 +80,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Assets: Running DolphinRestorer.fap on new install will auto-level to the end of Level 2.
 - BadUSB: Added ignore DUCKY_LANG cmd to retain compatibility with existing scripts [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
 - BadUSB: show script errors on screen [(By CromFr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/200)
+- BadUSB: sk-SK maping keybord for BadUsb [(By jaroslavmraz)](https://github.com/flipperdevices/flipperzero-firmware/pull/1537)
 - Bluetooth: Bluetooth fix so device name says zzRogue instead of Flipper [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/firmware/targets/f7/furi_hal/furi_hal_version.c#L95) [REMOVED DUE TO ANDROID INCOMPATABILITY]
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Dolphin: Assigned profile pic for levels 1-10, 11-20 and 21-30 respectively from default lvl 1, 2 & 3
@@ -138,7 +139,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
 - [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 - [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
-- [sk-SK maping keybord for BadUsb #1537 (By jaroslavmraz)](https://github.com/flipperdevices/flipperzero-firmware/pull/1537)
 - [Picopass load/info/delete #1562 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1562)
 
 </details>
