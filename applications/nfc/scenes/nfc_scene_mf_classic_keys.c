@@ -38,6 +38,7 @@ void nfc_scene_mf_classic_keys_on_enter(void* context) {
         nfc->widget, GuiButtonTypeCenter, "Add", nfc_scene_mf_classic_keys_widget_callback, nfc);
     widget_add_button_element(
         nfc->widget, GuiButtonTypeLeft, "Back", nfc_scene_mf_classic_keys_widget_callback, nfc);
+    widget_add_icon_element(nfc->widget, 90, 12, &I_Keychain);
     if(user_dict_keys_total > 0) {
         widget_add_button_element(
             nfc->widget,
