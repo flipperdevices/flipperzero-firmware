@@ -6,7 +6,7 @@
 #include <dolphin/dolphin.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-
+// THIS BUILD HAS OLD STOPWATCH NEW APP CODE, HAS ISSUES
 #define TAG "Clock"
 
 typedef enum {
