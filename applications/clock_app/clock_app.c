@@ -6,6 +6,9 @@
 
 #define TAG "Clock"
 
+bool timerStarted = false;
+int timerSecs = 0;
+
 typedef enum {
     EventTypeTick,
     EventTypeKey,
@@ -17,11 +20,7 @@ typedef struct {
 } PluginEvent;
 
 typedef struct {
-    uint32_t timerStartTime;
-    uint32_t timerLastRunTime;
-    bool timerStarted;
-    int timerSecs;
-    int timerTempSecs;
+    FuriHalRtcDateTime datetime;
 } ClockState;
 
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -31,36 +30,34 @@ static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* even
 }
 
 static void clock_render_callback(Canvas* const canvas, void* ctx) {
-    ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
-    if(state == NULL) {
-        return;
-    }
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
+    ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
+    if(state == NULL) {
+        FURI_LOG_E(TAG, "state was NULL\r\n");
+        return;
+    }
     char strings[3][20];
-    state->timerTempSecs = state->timerSecs;
-    FuriHalRtcDateTime datetime;
-    furi_hal_rtc_get_datetime(&datetime);
-    if(state->timerStarted) state->timerTempSecs = state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&datetime) - state->timerStartTime));
-    int curMin = (state->timerTempSecs / 60);
-    int curSec = state->timerTempSecs - (curMin * 60);
+    int curMin = (timerSecs / 60);
+    int curSec = timerSecs - (curMin * 60);
     snprintf(
         strings[0],
         20,
         "%.4d-%.2d-%.2d",
-        datetime.year,
-        datetime.month,
-        datetime.day);
+        state->datetime.year,
+        state->datetime.month,
+        state->datetime.day);
     snprintf(
         strings[1],
         20,
         "%.2d:%.2d:%.2d",
-        datetime.hour,
-        datetime.minute,
-        datetime.second);
+        state->datetime.hour,
+        state->datetime.minute,
+        state->datetime.second);
     snprintf(strings[2], 20, "%.2d:%.2d", curMin, curSec);
+    release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontBigNumbers);
-    if(state->timerStarted || state->timerTempSecs!=0) {
+    if(timerStarted || timerSecs!=0) {
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
         canvas_set_font(canvas, FontSecondary);
@@ -70,31 +67,34 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
     }
-    if(state->timerStarted) {
+    if(timerStarted) {
         elements_button_center(canvas, "Stop");
     } else {
         elements_button_center(canvas, "Start");
     }
-    if(state->timerTempSecs!=0) elements_button_left(canvas, "Reset");
-    release_mutex((ValueMutex*)ctx, state);
+    if(timerSecs!=0) elements_button_left(canvas, "Reset");
 }
 
 static void clock_state_init(ClockState* const state) {
-    state->timerStarted = false;
-    state->timerSecs = 0;
-    state->timerTempSecs = 0;
-    state->timerStartTime = 0;
+    furi_hal_rtc_get_datetime(&state->datetime);
 }
 
 // Runs every 1000ms by default
-static void clock_tick(FuriMessageQueue* event_queue) {
-    furi_assert(event_queue);
+static void clock_tick(void* ctx) {
+    furi_assert(ctx);
+    FuriMessageQueue* event_queue = ctx;
     PluginEvent event = {.type = EventTypeTick};
+    if(timerStarted) {
+        timerSecs = timerSecs + 1;
+    }
+    // It's OK to loose this event if system overloaded
     furi_message_queue_put(event_queue, &event, 0);
 }
 
 int32_t clock_app(void* p) {
     UNUSED(p);
+    timerStarted = false;
+    timerSecs = 0;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     ClockState* plugin_state = malloc(sizeof(ClockState));
     clock_state_init(plugin_state);
@@ -115,7 +115,6 @@ int32_t clock_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     // Main loop
-    FuriHalRtcDateTime datetime;
     PluginEvent event;
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
@@ -123,40 +122,30 @@ int32_t clock_app(void* p) {
         if(event_status == FuriStatusOk) {
             // press events
             if(event.type == EventTypeKey) {
-                furi_hal_rtc_get_datetime(&datetime);
                 if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
-                    switch(event.input.key) {
-                    case InputKeyUp:
-                        break;
-                    case InputKeyDown:
-                        break;
-                    case InputKeyRight:
-                        break;
-                    case InputKeyLeft:
-                        plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(&datetime);
-                        plugin_state->timerSecs = 0;
-                        plugin_state->timerTempSecs = 0;
-                        break;
-                    case InputKeyOk:
-                        if(plugin_state->timerStarted) {
-                            plugin_state->timerStarted = false;
-                            plugin_state->timerSecs = plugin_state->timerSecs + (int) ((furi_hal_rtc_datetime_to_timestamp(&datetime) - plugin_state->timerStartTime));
+					if (event.input.key == InputKeyOk) {
+						// START/STOP TIMER
+                        if(timerStarted) {
+                            timerStarted = false;
                         } else {
-                            plugin_state->timerStarted = true;
-                            plugin_state->timerStartTime = furi_hal_rtc_datetime_to_timestamp(&datetime);
+                            timerStarted = true;
                         }
-                        break;
-                    case InputKeyBack:
+					} else if (event.input.key == InputKeyLeft) {
+						// RESET TIMER
+                        timerSecs = 0;
+					} else if (event.input.key == InputKeyBack) {
                         // Exit the plugin
                         processing = false;
-                        break;
-                    }
+					} else {
+						// KEY NOT PROGRAMMED
+					}
                 }
             } else if(event.type == EventTypeTick) {
-                furi_hal_rtc_get_datetime(&datetime);
+                furi_hal_rtc_get_datetime(&plugin_state->datetime);
             }
         } else {
             FURI_LOG_D(TAG, "osMessageQueue: event timeout");
+            // event timeout
         }
         view_port_update(view_port);
         release_mutex(&state_mutex, plugin_state);
@@ -166,8 +155,8 @@ int32_t clock_app(void* p) {
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
     view_port_free(view_port);
-    furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
     free(plugin_state);
+    furi_message_queue_free(event_queue);
     return 0;
 }
