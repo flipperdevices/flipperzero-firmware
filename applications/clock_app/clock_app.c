@@ -76,7 +76,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     } else {
         elements_button_center(canvas, "Start");
     }
-    if(state->timerSecs!=0) elements_button_left(canvas, "Reset");
+    if(timerSecs!=0) elements_button_left(canvas, "Reset");
     if(timerStarted) {
         if(songSelect == 0) {
             elements_button_right(canvas, "S:OFF");
