@@ -1,5 +1,5 @@
 V:0
-T:1660455394
+T:1660804619
 D:apps
 D:badusb
 D:dolphin
@@ -318,8 +318,8 @@ F:41106c0cbc5144f151b2b2d3daaa0527:727:dolphin/L3_Lab_research_128x54/meta.txt
 F:05e24c3e99c57e84b04a1451b7184d99:40:dolphin_restorer/.dolphin.state
 D:infrared/assets
 F:cedef6d481ec8a10072168bfe82b9ec4:60995:infrared/assets/ac.ir
-F:1789fe307eda56f8370c671992aa1b97:25596:infrared/assets/audio.ir
-F:64c8728b5982614ef4b9e1d95e9b9210:124001:infrared/assets/tv.ir
+F:4f01142605f1529df9f3db7a632c0deb:47283:infrared/assets/audio.ir
+F:81c7047da749ec32d48b4e897e078dc7:127680:infrared/assets/tv.ir
 F:18acc61b64d25ca9d80c57821470a387:226:music_player/Contra.txt
 F:6e90d05ddbeb7b01da4a3c73e38c8233:252:music_player/Doom.txt
 F:6e45147681b5d612e79942763f80f031:413:music_player/Evangelion.txt
@@ -353,7 +353,7 @@ F:bc02f4b592f0c122335f8c49f92d2cad:3368:nfc/SmashAmiibo/Link50_SHARED.nfc
 F:81dc04c7b181f94b644079a71476dff4:4742:nfc/assets/aid.nfc
 F:86efbebdf41bb6bf15cc51ef88f069d5:2565:nfc/assets/country_code.nfc
 F:41b4f08774249014cb8d3dffa5f5c07d:1757:nfc/assets/currency_code.nfc
-F:195e012dbb626e0993656bac29c2a206:47589:nfc/assets/mf_classic_dict.nfc
+F:65fe9bca810119fadc46415b9199e690:51831:nfc/assets/mf_classic_dict.nfc
 D:subghz/Handicap
 D:subghz/Misc
 D:subghz/Vehicles
@@ -372,9 +372,9 @@ F:b877ff3fdb3c642d272d039e832f3bfb:204:subghz/Misc/Sextoy/Sextoy4.sub
 D:subghz/Vehicles/Tesla
 F:8b22aa0a2df0b22fc5791a3ecb4fa4fb:10991:subghz/Vehicles/Tesla/Tesla_charge_AM270.sub
 F:7ea28e3ce3c38b2d98ae99aecc45b7b9:11913:subghz/Vehicles/Tesla/Tesla_charge_AM650.sub
-F:cccd43955a08a0f3c0e974fe6d09fb2e:1363:subghz/assets/README.md
+F:cbaa3ee7a096800455f17769c0fecc49:1357:subghz/assets/README.md
 F:dda1ef895b8a25fde57c874feaaef997:650:subghz/assets/came_atomo
-F:ea81ac5f878e045581a2f5e2add46b0b:180:subghz/assets/extend_range.txt
+F:cc41559c4920838bf7bcb2a4b0fae79c:230:subghz/assets/extend_range.txt
 F:5e81e9809984ee74d426730c1afa4093:3232:subghz/assets/keeloq_mfcodes
 F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
