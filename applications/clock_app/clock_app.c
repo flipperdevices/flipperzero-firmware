@@ -275,7 +275,7 @@ static void clock_tick(void* ctx) {
     FuriMessageQueue* event_queue = ctx;
     PluginEvent event = {.type = EventTypeTick};
     if(state->timerStarted) {
-        timerSecs = timerSecs + 1;
+        state->timerSecs = state->timerSecs + 1;
         // if(state->timerTempSecs % 60 == 0 && state->songSelect != 0 && state->timerTempSecs!=state->timerSecs) {
         if(state->timerSecs % 60 == 0 && state->songSelect != 0 && state->timerSecs!=0) {
             NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
