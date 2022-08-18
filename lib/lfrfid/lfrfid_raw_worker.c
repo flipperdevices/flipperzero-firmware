@@ -87,7 +87,9 @@ bool lfrfid_raw_worker_start_read(
     LFRFIDRawWorker* worker,
     const char* file_path,
     float freq,
-    float duty_cycle) {
+    float duty_cycle,
+    LFRFIDWorkerReadRawCallback callback,
+    void* context) {
     furi_check(furi_thread_get_state(worker->thread) == FuriThreadStateStopped);
 
     bool result = true;
@@ -95,6 +97,8 @@ bool lfrfid_raw_worker_start_read(
 
     worker->frequency = freq;
     worker->duty_cycle = duty_cycle;
+    worker->read_callback = callback;
+    worker->context = context;
 
     furi_thread_set_callback(worker->thread, lfrfid_raw_read_worker_thread);
 
@@ -102,32 +106,26 @@ bool lfrfid_raw_worker_start_read(
     return result;
 }
 
-void lfrfid_raw_worker_start_emulate(LFRFIDRawWorker* worker, const char* file_path) {
+void lfrfid_raw_worker_start_emulate(
+    LFRFIDRawWorker* worker,
+    const char* file_path,
+    LFRFIDWorkerEmulateRawCallback callback,
+    void* context) {
     furi_check(furi_thread_get_state(worker->thread) == FuriThreadStateStopped);
     string_set(worker->file_path, file_path);
+    worker->emulate_callback = callback;
+    worker->context = context;
     furi_thread_set_callback(worker->thread, lfrfid_raw_emulate_worker_thread);
     furi_thread_start(worker->thread);
 }
 
 void lfrfid_raw_worker_stop(LFRFIDRawWorker* worker) {
+    worker->emulate_callback = NULL;
+    worker->context = NULL;
+    worker->read_callback = NULL;
+    worker->context = NULL;
     furi_event_flag_set(worker->events, 1 << LFRFIDRawWorkerEventStop);
     furi_thread_join(worker->thread);
-}
-
-void lfrfid_raw_worker_emulate_set_callback(
-    LFRFIDRawWorker* worker,
-    LFRFIDWorkerEmulateRawCallback callback,
-    void* context) {
-    worker->emulate_callback = callback;
-    worker->context = context;
-}
-
-void lfrfid_raw_worker_read_set_callback(
-    LFRFIDRawWorker* worker,
-    LFRFIDWorkerReadRawCallback callback,
-    void* context) {
-    worker->read_callback = callback;
-    worker->context = context;
 }
 
 // pack varint into tmp_data

@@ -18,21 +18,17 @@ bool lfrfid_raw_worker_start_read(
     LFRFIDRawWorker* worker,
     const char* file_path,
     float frequency,
-    float duty_cycle);
+    float duty_cycle,
+    LFRFIDWorkerReadRawCallback callback,
+    void* context);
 
-void lfrfid_raw_worker_start_emulate(LFRFIDRawWorker* worker, const char* file_path);
-
-void lfrfid_raw_worker_stop(LFRFIDRawWorker* worker);
-
-void lfrfid_raw_worker_emulate_set_callback(
+void lfrfid_raw_worker_start_emulate(
     LFRFIDRawWorker* worker,
+    const char* file_path,
     LFRFIDWorkerEmulateRawCallback callback,
     void* context);
 
-void lfrfid_raw_worker_read_set_callback(
-    LFRFIDRawWorker* worker,
-    LFRFIDWorkerReadRawCallback callback,
-    void* context);
+void lfrfid_raw_worker_stop(LFRFIDRawWorker* worker);
 
 #ifdef __cplusplus
 }
