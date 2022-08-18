@@ -7,7 +7,7 @@
 
 - Known Issues: `FAP Loader` & `Chess`
 - OFW: [Add MFC 1/4K 4/7bUID to "Add Manually" #1584 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1584)
-- AddedL [.sub Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
+- Added [.sub Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
