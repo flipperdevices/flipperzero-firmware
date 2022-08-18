@@ -7,6 +7,7 @@
 
 - Known Issues: `FAP Loader` & `Chess`
 - OFW: [Add MFC 1/4K 4/7bUID to "Add Manually" #1584 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1584)
+- AddedL [.sub Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -167,6 +168,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
   <summary><B>PLUGINS</b></summary><br/>
 
 - - PLUGINS `HIDDEN` if they have uncommon hardware dependancies
+- [.sub Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - `FAP` [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
 - `FAP` [Bluetooth Remote (By Cutch)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)

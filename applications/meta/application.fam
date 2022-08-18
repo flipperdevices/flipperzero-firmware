@@ -32,6 +32,7 @@ App(
     name="Basic applications for plug-in menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
+        "APPS_Sub_Playlist",
         "APPS_BarcodeGenerator",
         "APPS_BluetoothRemote",
         "APPS_dec_hex_converter",
