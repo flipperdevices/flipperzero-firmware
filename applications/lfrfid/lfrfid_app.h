@@ -42,6 +42,8 @@ public:
         ReadEventSenseEnd,
         ReadEventSenseCardStart,
         ReadEventSenseCardEnd,
+        ReadEventStartASK,
+        ReadEventStartPSK,
         ReadEventDone,
         WriteEventOK,
         WriteEventProtocolCannotBeWritten,

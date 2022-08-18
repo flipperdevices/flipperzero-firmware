@@ -30,6 +30,8 @@ typedef enum {
     LFRFIDWorkerReadSenseEnd, // TODO: not implemented
     LFRFIDWorkerReadSenseCardStart,
     LFRFIDWorkerReadSenseCardEnd,
+    LFRFIDWorkerReadStartASK,
+    LFRFIDWorkerReadStartPSK,
     LFRFIDWorkerReadDone,
 } LFRFIDWorkerReadResult;
 

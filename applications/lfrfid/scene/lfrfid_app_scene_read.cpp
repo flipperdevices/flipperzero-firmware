@@ -21,6 +21,12 @@ static void lfrfid_read_callback(LFRFIDWorkerReadResult result, ProtocolId proto
     case LFRFIDWorkerReadDone:
         event.type = LfRfidApp::EventType::ReadEventDone;
         break;
+    case LFRFIDWorkerReadStartASK:
+        event.type = LfRfidApp::EventType::ReadEventStartASK;
+        break;
+    case LFRFIDWorkerReadStartPSK:
+        event.type = LfRfidApp::EventType::ReadEventStartPSK;
+        break;
     }
 
     event.payload.signed_int = protocol;
@@ -32,7 +38,12 @@ void LfRfidAppSceneRead::on_enter(LfRfidApp* app, bool /* need_restore */) {
     auto popup = app->view_controller.get<PopupVM>();
 
     DOLPHIN_DEED(DolphinDeedRfidRead);
-    popup->set_header("Reading\nLF RFID", 89, 34, AlignCenter, AlignTop);
+    if(app->read_type == LFRFIDWorkerReadTypePSKOnly) {
+        popup->set_header("Reading\nLF RFID\nPSK", 89, 30, AlignCenter, AlignTop);
+    } else {
+        popup->set_header("Reading\nLF RFID\nASK", 89, 30, AlignCenter, AlignTop);
+    }
+
     popup->set_icon(0, 3, &I_RFIDDolphinReceive_97x61);
 
     app->view_controller.switch_to<PopupVM>();
@@ -44,6 +55,7 @@ void LfRfidAppSceneRead::on_enter(LfRfidApp* app, bool /* need_restore */) {
 
 bool LfRfidAppSceneRead::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
     bool consumed = true;
+    auto popup = app->view_controller.get<PopupVM>();
 
     switch(event->type) {
     case LfRfidApp::EventType::ReadEventSenseStart:
@@ -60,7 +72,12 @@ bool LfRfidAppSceneRead::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
         notification_message(app->notification, &sequence_success);
         app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::ReadSuccess);
         break;
-
+    case LfRfidApp::EventType::ReadEventStartPSK:
+        popup->set_header("Reading\nLF RFID\nPSK", 89, 30, AlignCenter, AlignTop);
+        break;
+    case LfRfidApp::EventType::ReadEventStartASK:
+        popup->set_header("Reading\nLF RFID\nASK", 89, 30, AlignCenter, AlignTop);
+        break;
     default:
         consumed = false;
         break;
