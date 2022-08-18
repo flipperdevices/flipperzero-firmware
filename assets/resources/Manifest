@@ -1,5 +1,5 @@
 V:0
-T:1660804619
+T:1660842429
 D:apps
 D:badusb
 D:dolphin
@@ -7,6 +7,7 @@ D:dolphin_restorer
 D:infrared
 D:music_player
 D:nfc
+D:playlist
 D:subghz
 D:u2f
 D:unirf
@@ -354,6 +355,7 @@ F:81dc04c7b181f94b644079a71476dff4:4742:nfc/assets/aid.nfc
 F:86efbebdf41bb6bf15cc51ef88f069d5:2565:nfc/assets/country_code.nfc
 F:41b4f08774249014cb8d3dffa5f5c07d:1757:nfc/assets/currency_code.nfc
 F:65fe9bca810119fadc46415b9199e690:51831:nfc/assets/mf_classic_dict.nfc
+F:2132f1809ce9443c2eb6b26aaf8ec22b:129:playlist/example_tesla.txt
 D:subghz/Handicap
 D:subghz/Misc
 D:subghz/Vehicles
