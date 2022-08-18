@@ -35,7 +35,6 @@ typedef struct {
     ProtocolHIDEncoder encoder;
     uint8_t encoded_data[HID_ENCODED_DATA_SIZE];
     uint8_t data[HID_DECODED_DATA_SIZE];
-    uint8_t protocol_size;
 } ProtocolHID;
 
 ProtocolHID* protocol_hid_generic_alloc(void) {
@@ -58,7 +57,6 @@ uint8_t* protocol_hid_generic_get_data(ProtocolHID* protocol) {
 
 void protocol_hid_generic_decoder_start(ProtocolHID* protocol) {
     memset(protocol->encoded_data, 0, HID_ENCODED_DATA_SIZE);
-    protocol->protocol_size = HID_PROTOCOL_SIZE_UNKNOWN;
 };
 
 static bool protocol_hid_generic_can_be_decoded(const uint8_t* data) {
@@ -80,7 +78,7 @@ static bool protocol_hid_generic_can_be_decoded(const uint8_t* data) {
     return true;
 }
 
-static void protocol_hid_generic_decode(const uint8_t* from, uint8_t* to, uint8_t* protocol_size) {
+static void protocol_hid_generic_decode(const uint8_t* from, uint8_t* to) {
     size_t bit_index = 0;
     for(size_t i = HID_PREAMBLE_SIZE; i < (HID_PREAMBLE_SIZE + HID_DATA_SIZE); i++) {
         for(size_t n = 0; n < 4; n++) {
@@ -93,27 +91,30 @@ static void protocol_hid_generic_decode(const uint8_t* from, uint8_t* to, uint8_
             bit_index++;
         }
     }
+}
 
-    // Decode size from the HID Proximity header:
-    // - The first six bits are ignored.
-    // - If the seventh bit is 0, the key is composed of the remaining 37 bits.
-    // - If the seventh bit is 1, the size header continues until the next 1
-    //   bit, and the key is composed of however many bits remain.
-    //
-    // HID Proximity keys are 26 bits at minimum. If the header implies a key
-    // size under 26 bits, the size is set to HID_PROTOCOL_SIZE_UNKNOWN.
-    if(!bit_lib_get_bit(to, 6)) {
-        *protocol_size = 37;
-        return;
+/**
+ * Decodes size from the HID Proximity header:
+ * - The first six bits are ignored.
+ * - If the seventh bit is 0, the key is composed of the remaining 37 bits.
+ * - If the seventh bit is 1, the size header continues until the next 1 bit,
+ *   and the key is composed of however many bits remain.
+ *
+ * HID Proximity keys are 26 bits at minimum. If the header implies a key size
+ * under 26 bits, this function returns HID_PROTOCOL_SIZE_UNKNOWN.
+ */
+static uint8_t protocol_hid_generic_decode_protocol_size(ProtocolHID* protocol) {
+    if(!bit_lib_get_bit(protocol->data, 6)) {
+        return 37;
     }
 
-    bit_index = 7;
+    size_t bit_index = 7;
     uint8_t size = 36;
-    while(!bit_lib_get_bit(to, bit_index) && size >= 26) {
+    while(!bit_lib_get_bit(protocol->data, bit_index) && size >= 26) {
         size--;
         bit_index++;
     }
-    *protocol_size = size < 26 ? HID_PROTOCOL_SIZE_UNKNOWN : size;
+    return size < 26 ? HID_PROTOCOL_SIZE_UNKNOWN : size;
 }
 
 bool protocol_hid_generic_decoder_feed(ProtocolHID* protocol, bool level, uint32_t duration) {
@@ -126,8 +127,7 @@ bool protocol_hid_generic_decoder_feed(ProtocolHID* protocol, bool level, uint32
         for(size_t i = 0; i < count; i++) {
             bit_lib_push_bit(protocol->encoded_data, HID_ENCODED_DATA_SIZE, value);
             if(protocol_hid_generic_can_be_decoded(protocol->encoded_data)) {
-                protocol_hid_generic_decode(
-                    protocol->encoded_data, protocol->data, &protocol->protocol_size);
+                protocol_hid_generic_decode(protocol->encoded_data, protocol->data);
                 result = true;
             }
         }
@@ -209,22 +209,24 @@ bool protocol_hid_generic_write_data(ProtocolHID* protocol, void* data) {
     return result;
 };
 
-static void protocol_hid_generic_string_cat_protocol_bits(ProtocolHID* protocol, string_t result) {
+static void protocol_hid_generic_string_cat_protocol_bits(ProtocolHID* protocol, uint8_t protocol_size, string_t result) {
     // round up to the nearest nibble
-    const uint8_t hex_character_count = (protocol->protocol_size + 3) / 4;
-    const uint8_t protocol_bit_index = HID_DECODED_BIT_SIZE - protocol->protocol_size;
+    const uint8_t hex_character_count = (protocol_size + 3) / 4;
+    const uint8_t protocol_bit_index = HID_DECODED_BIT_SIZE - protocol_size;
 
     for(size_t i = 0; i < hex_character_count; i++) {
         uint8_t nibble =
             i == 0 ? bit_lib_get_bits(
-                         protocol->data, protocol_bit_index, protocol->protocol_size % 4 + 1) :
+                         protocol->data, protocol_bit_index, protocol_size % 4 + 1) :
                      bit_lib_get_bits(protocol->data, protocol_bit_index + i * 4, 4);
         string_cat_printf(result, "%X", nibble & 0xF);
     }
 }
 
 void protocol_hid_generic_render_data(ProtocolHID* protocol, string_t result) {
-    if(protocol->protocol_size == HID_PROTOCOL_SIZE_UNKNOWN) {
+    const uint8_t protocol_size = protocol_hid_generic_decode_protocol_size(protocol);
+
+    if(protocol_size == HID_PROTOCOL_SIZE_UNKNOWN) {
         string_printf(
             result,
             "Generic HID Proximity\r\n"
@@ -240,8 +242,8 @@ void protocol_hid_generic_render_data(ProtocolHID* protocol, string_t result) {
             result,
             "%hhu-bit HID Proximity\r\n"
             "Data: ",
-            protocol->protocol_size);
-        protocol_hid_generic_string_cat_protocol_bits(protocol, result);
+            protocol_size);
+        protocol_hid_generic_string_cat_protocol_bits(protocol, protocol_size, result);
     }
 };
 
