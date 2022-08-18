@@ -18,18 +18,18 @@ void varint_pair_free(VarintPair* pair) {
     free(pair);
 }
 
-bool varint_pair_pack(VarintPair* pair, bool first, uint32_t duration) {
+bool varint_pair_pack(VarintPair* pair, bool first, uint32_t value) {
     bool result = false;
 
     if(first) {
         if(pair->data_length == 0) {
-            pair->data_length = varint_uint32_pack(duration, pair->data);
+            pair->data_length = varint_uint32_pack(value, pair->data);
         } else {
             pair->data_length = 0;
         }
     } else {
         if(pair->data_length > 0) {
-            pair->data_length += varint_uint32_pack(duration, pair->data + pair->data_length);
+            pair->data_length += varint_uint32_pack(value, pair->data + pair->data_length);
             result = true;
         } else {
             pair->data_length = 0;

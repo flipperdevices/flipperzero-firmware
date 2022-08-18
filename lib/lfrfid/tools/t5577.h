@@ -44,6 +44,11 @@ typedef struct {
     uint32_t blocks_to_write;
 } LFRFIDT5577;
 
+/**
+ * @brief Write T5577 tag data to tag
+ * 
+ * @param data 
+ */
 void t5577_write(LFRFIDT5577* data);
 
 #ifdef __cplusplus

@@ -51,6 +51,12 @@ struct LFRFIDWorker {
 
 extern const LFRFIDWorkerModeType lfrfid_worker_modes[];
 
+/**
+ * @brief Check for stop flag
+ * 
+ * @param worker 
+ * @return bool 
+ */
 bool lfrfid_worker_check_for_stop(LFRFIDWorker* worker);
 
 #ifdef __cplusplus

@@ -80,7 +80,7 @@ void lfrfid_raw_worker_free(LFRFIDRawWorker* worker) {
     free(worker);
 }
 
-bool lfrfid_raw_worker_start_read(
+void lfrfid_raw_worker_start_read(
     LFRFIDRawWorker* worker,
     const char* file_path,
     float freq,
@@ -89,7 +89,6 @@ bool lfrfid_raw_worker_start_read(
     void* context) {
     furi_check(furi_thread_get_state(worker->thread) == FuriThreadStateStopped);
 
-    bool result = true;
     string_set(worker->file_path, file_path);
 
     worker->frequency = freq;
@@ -100,7 +99,6 @@ bool lfrfid_raw_worker_start_read(
     furi_thread_set_callback(worker->thread, lfrfid_raw_read_worker_thread);
 
     furi_thread_start(worker->thread);
-    return result;
 }
 
 void lfrfid_raw_worker_start_emulate(
