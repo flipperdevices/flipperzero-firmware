@@ -85,7 +85,7 @@ void* subghz_protocol_encoder_intertechno_v3_alloc(SubGhzEnvironment* environmen
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
-    instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
+    instance->encoder.size_upload = 256;
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_running = false;
     return instance;
@@ -107,35 +107,43 @@ static bool subghz_protocol_encoder_intertechno_v3_get_upload(
     SubGhzProtocolEncoderIntertechno_V3* instance) {
     furi_assert(instance);
     size_t index = 0;
-    size_t size_upload = (instance->generic.data_count_bit * 2) + 2;
-    if(size_upload > instance->encoder.size_upload) {
-        FURI_LOG_E(TAG, "Size upload exceeds allocated encoder buffer.");
-        return false;
-    } else {
-        instance->encoder.size_upload = size_upload;
-    }
+
     //Send header
     instance->encoder.upload[index++] =
-        level_duration_make(false, (uint32_t)subghz_protocol_intertechno_v3_const.te_short * 36);
-    //Send start bit
+        level_duration_make(true, (uint32_t)subghz_protocol_intertechno_v3_const.te_short);
+    instance->encoder.upload[index++] =
+        level_duration_make(false, (uint32_t)subghz_protocol_intertechno_v3_const.te_short * 38);
+    //Send sync
     instance->encoder.upload[index++] =
         level_duration_make(true, (uint32_t)subghz_protocol_intertechno_v3_const.te_short);
+    instance->encoder.upload[index++] =
+        level_duration_make(false, (uint32_t)subghz_protocol_intertechno_v3_const.te_short * 10);
     //Send key data
     for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
         if(bit_read(instance->generic.data, i - 1)) {
             //send bit 1
             instance->encoder.upload[index++] =
+                level_duration_make(true, (uint32_t)subghz_protocol_intertechno_v3_const.te_short);
+            instance->encoder.upload[index++] =
                 level_duration_make(false, (uint32_t)subghz_protocol_intertechno_v3_const.te_long);
             instance->encoder.upload[index++] =
                 level_duration_make(true, (uint32_t)subghz_protocol_intertechno_v3_const.te_short);
+            instance->encoder.upload[index++] = level_duration_make(
+                false, (uint32_t)subghz_protocol_intertechno_v3_const.te_short);
+
         } else {
             //send bit 0
+            instance->encoder.upload[index++] =
+                level_duration_make(true, (uint32_t)subghz_protocol_intertechno_v3_const.te_short);
             instance->encoder.upload[index++] = level_duration_make(
                 false, (uint32_t)subghz_protocol_intertechno_v3_const.te_short);
             instance->encoder.upload[index++] =
-                level_duration_make(true, (uint32_t)subghz_protocol_intertechno_v3_const.te_long);
+                level_duration_make(true, (uint32_t)subghz_protocol_intertechno_v3_const.te_short);
+            instance->encoder.upload[index++] =
+                level_duration_make(false, (uint32_t)subghz_protocol_intertechno_v3_const.te_long);
         }
     }
+    instance->encoder.size_upload = index;
     return true;
 }
 
