@@ -5,13 +5,13 @@
 #include <stream_buffer.h>
 #include "lfrfid_raw_worker.h"
 #include "lfrfid_raw_file.h"
+#include "tools/varint_pair.h"
 
 #define EMULATE_BUFFER_SIZE 1024
 #define RFID_DATA_BUFFER_SIZE 2048
+#define READ_DATA_BUFFER_COUNT 4
 
 #define TAG_EMULATE "RAW EMULATE"
-
-#define RAW_HEADER "RFID RAW"
 
 // emulate mode
 typedef struct {
@@ -31,13 +31,11 @@ typedef enum {
 } LFRFIDRawEmulateDMAEvent;
 
 // read mode
-#define READ_BUFFER_COUNT 4
 #define READ_TEMP_DATA_SIZE 10
 
 typedef struct {
     BufferStream* stream;
-    size_t tmp_data_length;
-    uint8_t tmp_data[READ_TEMP_DATA_SIZE];
+    VarintPair* pair;
 } LFRFIDRawWorkerReadData;
 
 // main worker
@@ -128,41 +126,20 @@ void lfrfid_raw_worker_stop(LFRFIDRawWorker* worker) {
     furi_thread_join(worker->thread);
 }
 
-// pack varint into tmp_data
-static inline bool
-    write_to_tmp_buffer(LFRFIDRawWorkerReadData* ctx, bool level, uint32_t duration) {
-    bool result = false;
-
-    if(level) {
-        if(ctx->tmp_data_length == 0) {
-            ctx->tmp_data_length = varint_uint32_pack(duration, ctx->tmp_data);
-        } else {
-            ctx->tmp_data_length = 0;
-        }
-    } else {
-        if(ctx->tmp_data_length > 0) {
-            ctx->tmp_data_length +=
-                varint_uint32_pack(duration, ctx->tmp_data + ctx->tmp_data_length);
-            result = true;
-        } else {
-            ctx->tmp_data_length = 0;
-        }
-    }
-
-    return result;
-}
-
 static void lfrfid_raw_worker_capture(bool level, uint32_t duration, void* context) {
     LFRFIDRawWorkerReadData* ctx = context;
 
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    bool need_to_send = write_to_tmp_buffer(ctx, level, duration);
+    bool need_to_send = varint_pair_pack(ctx->pair, level, duration);
 
     if(need_to_send) {
         buffer_stream_send_from_isr(
-            ctx->stream, ctx->tmp_data, ctx->tmp_data_length, &xHigherPriorityTaskWoken);
-        ctx->tmp_data_length = 0;
+            ctx->stream,
+            varint_pair_get_data(ctx->pair),
+            varint_pair_get_size(ctx->pair),
+            &xHigherPriorityTaskWoken);
+        varint_pair_reset(ctx->pair);
     }
 
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
@@ -178,7 +155,8 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
 
     LFRFIDRawWorkerReadData* data = malloc(sizeof(LFRFIDRawWorkerReadData));
 
-    data->stream = buffer_stream_alloc(RFID_DATA_BUFFER_SIZE, READ_BUFFER_COUNT);
+    data->stream = buffer_stream_alloc(RFID_DATA_BUFFER_SIZE, READ_DATA_BUFFER_COUNT);
+    data->pair = varint_pair_alloc();
 
     if(file_valid) {
         // write header
@@ -248,6 +226,7 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
         }
     }
 
+    varint_pair_free(data->pair);
     buffer_stream_free(data->stream);
     lfrfid_raw_file_free(file);
     furi_record_close(RECORD_STORAGE);
