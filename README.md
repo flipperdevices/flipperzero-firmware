@@ -15,6 +15,7 @@
 - OFW: [Increment U2F counter before authentication #1595 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1595)
 - OFW: [Fix typos in SubGHz #1588 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/1588)
 - Updated Universal remote assets (By Amec0e) from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
+- Reverted some clock changes to make it stable again
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
