@@ -100,9 +100,10 @@ static bool browser_folder_check_and_switch(string_t path) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     bool is_root = false;
 
-    if(string_search_rchar(path, '/') == 0) {
-        is_root = true;
-    }
+    // THIS MAKES DOWN ON DESKTOP GO TO RFID NOT FAVORITES (BROKEN FROM OFW)
+    // if(string_search_rchar(path, '/') == 0) { 
+        // is_root = true;
+    // }
 
     while(1) {
         // Check if folder is existing and navigate back if not
