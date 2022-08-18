@@ -6,12 +6,6 @@
 <b>Latest Updates:</b>
 
 - Known Issues: `FAP Loader` & `Chess`
-- OFW: [Add MFC 1/4K 4/7bUID to "Add Manually" #1584 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1584)
-- Added [.sub Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
-- OFW: [Browser worker fix, Device Info screen update #1620 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1620)
-- OFW: [disabled automatic poweroff for single-frame slideshows #1621 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1621)
-- V3: Changing some apps such as `APPS_BarcodeGenerator`, `APPS_dec_hex_converter`, `APPS_SentrySafe`, `APPS_FlipFrid` and `GAME_Raycast` to be  `HIDDEN` in order to make space to update from SD.
-- - You may need to flash DFU to regain space to update from SD.
 - Added [keyboard_layout_file documentation](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/documentation/keyboard_layout_file.md) [(By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 
 <table width="100%" border="0" cellspacing="0">
