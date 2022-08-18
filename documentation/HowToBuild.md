@@ -62,6 +62,7 @@ FIRMWARE_APPS="{
 	'ext_apps': ['basic_services', 'external_apps']}"
 	# Map of (configuration_name->application_list)
 -c # Clean
+```
 
 Check `dist/` for build outputs.
 
