@@ -68,6 +68,11 @@ bool all_in_one_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx)
 }
 
 bool all_in_one_parser_parse(NfcDeviceData* dev_data) {
+    if(dev_data->mf_ul_data.data[4 * 4] != 0x45 || dev_data->mf_ul_data.data[4 * 4 + 1] != 0xD9) {
+        FURI_LOG_I("all_in_one", "Pass not verified");
+        return false;
+    }
+
     // If the layout is a then the ride count is stored in the first byte of page 8
     uint8_t ride_count = 0;
     uint32_t serial = 0;

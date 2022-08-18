@@ -128,10 +128,13 @@ static bool nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker, FuriHalNfcTxRxC
                         read_success = true;
                         nfc_supported_card[i].parse(nfc_worker->dev_data);
                     }
+                } else {
+                    furi_hal_nfc_sleep();
                 }
             }
         }
         if(read_success) break;
+        furi_hal_nfc_sleep();
 
         // Otherwise, try to read as usual
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200)) break;
@@ -288,10 +291,6 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
             if(nfc_data->type == FuriHalNfcTypeA) {
                 if(nfc_worker_read_nfca(nfc_worker, &tx_rx)) {
                     if(dev_data->protocol == NfcDeviceProtocolMifareUl) {
-                        if(dev_data->parsed_data) {
-                            event = NfcWorkerEventReadMfClassicDone;
-                            break;
-                        }
                         event = NfcWorkerEventReadMfUltralight;
                         break;
                     } else if(dev_data->protocol == NfcDeviceProtocolMifareClassic) {
