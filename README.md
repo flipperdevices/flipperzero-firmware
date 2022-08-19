@@ -167,7 +167,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 <details>
   <summary><B>PLUGINS</b></summary><br/>
 
-- - PLUGINS `HIDDEN` if they have uncommon hardware dependancies
+- - PLUGINS `HIDDEN` if they have uncommon hardware dependancies; can be added under [applications/meta/application.fam](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/meta/application.fam#L36)
 - [.sub Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - `FAP` [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator) `HIDDEN "APPS_BarcodeGenerator"`
 - `FAP` [Bluetooth Remote (By Cutch)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
