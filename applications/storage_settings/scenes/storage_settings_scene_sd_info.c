@@ -24,13 +24,13 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
             dialog_ex, "Try to reinsert\nor format SD\ncard.", 3, 19, AlignLeft, AlignTop);
         dialog_ex_set_center_button_text(dialog_ex, "Ok");
     } else {
-        const char unit_kb[] = "KB";
-        const char unit_mb[] = "MB";
-        const char unit_gb[] = "GB";
+        char unit_kb[] = "KB";
+        char unit_mb[] = "MB";
+        char unit_gb[] = "GB";
 
-        uint32_t sd_total_val;
+        double sd_total_val = 0.000;
         char* sd_total_unit = unit_kb;
-        uint32_t sd_free_val;
+        double sd_free_val = 0.000;
         char* sd_free_unit = unit_kb;
 
         if(sd_info.kb_total > 1024) {
@@ -53,13 +53,13 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
 
         string_printf(
             app->text_string,
-            "Label: %s\nType: %s\n%lu %s total\n%lu %s free\n%lu%% free",
+            "Label: %s\nType: %s\n%.3f %s total\n%.3f %s free\n%lu%% free",
             sd_info.label,
             sd_api_get_fs_type_text(sd_info.fs_type),
-            sd_total_val,
-            sd_total_unit,
             sd_free_val,
             sd_free_unit,
+            sd_total_val,
+            sd_total_unit,
             (sd_info.kb_free * 100) / sd_info.kb_total);
 
         dialog_ex_set_text(
