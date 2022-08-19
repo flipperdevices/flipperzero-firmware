@@ -8,9 +8,7 @@ typedef struct {
     uint32_t view_id;
 } SPIMemManager;
 
-enum {
-    SPIMemManagerViewSubmenu
-} SPIMemManagerView;
+enum { SPIMemManagerViewSubmenu } SPIMemManagerView;
 
 enum {
     SPIMemManagerSubmenuIndexRead,
