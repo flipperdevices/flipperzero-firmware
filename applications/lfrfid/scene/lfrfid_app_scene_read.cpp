@@ -70,6 +70,7 @@ bool LfRfidAppSceneRead::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
         app->protocol_id = event->payload.signed_int;
         DOLPHIN_DEED(DolphinDeedRfidReadSuccess);
         notification_message(app->notification, &sequence_success);
+        string_reset(app->file_name);
         app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::ReadSuccess);
         break;
     case LfRfidApp::EventType::ReadEventStartPSK:
