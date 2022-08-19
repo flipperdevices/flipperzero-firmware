@@ -566,8 +566,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_doitrand_test);
     MU_RUN_TEST(subghz_decoder_phoenix_v2_test);
     MU_RUN_TEST(subghz_decoder_honeywell_wdb_test);
-     MU_RUN_TEST(subghz_decoder_intertechno_v3_test);
-
+    MU_RUN_TEST(subghz_decoder_intertechno_v3_test);
 
     MU_RUN_TEST(subghz_encoder_princeton_test);
     MU_RUN_TEST(subghz_encoder_came_test);
