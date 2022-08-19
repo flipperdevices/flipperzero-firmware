@@ -28,7 +28,7 @@ void LfRfidAppSceneRawInfo::on_enter(LfRfidApp* app, bool /* need_restore */) {
         icon->set_icon(0, 0, &I_SDQuestion_35x43);
         auto line = container->add<StringElement>();
         line->set_text(
-            "No SD card or\napp data found.\nThis function will not\nwork without\nrequired files.",
+            "No SD card found.\nThis function will not\nwork without\nSD card.",
             81,
             4,
             0,
