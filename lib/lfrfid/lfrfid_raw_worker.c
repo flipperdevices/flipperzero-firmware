@@ -199,7 +199,7 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
             uint32_t flags = furi_event_flag_get(worker->events);
             if(FURI_BIT(flags, LFRFIDRawWorkerEventStop)) {
                 break;
-            };
+            }
         }
 
         furi_hal_rfid_tim_read_capture_stop();
@@ -219,7 +219,7 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
 
             if(FURI_BIT(flags, LFRFIDRawWorkerEventStop)) {
                 break;
-            };
+            }
         }
     }
 
