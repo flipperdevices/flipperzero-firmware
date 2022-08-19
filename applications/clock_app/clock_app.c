@@ -188,12 +188,13 @@ int32_t clock_app(void* p) {
             } else if(event.type == EventTypeTick) {
                 // Do nothing, just need to update viewport
             }
+
+            view_port_update(view_port);
+            furi_mutex_release(plugin_state->mutex);
         } else {
             // event timeout
             // FURI_LOG_D(TAG, "osMessageQueue: event timeout");
         }
-        view_port_update(view_port);
-        furi_mutex_release(plugin_state->mutex);
     }
 
     // Cleanup
