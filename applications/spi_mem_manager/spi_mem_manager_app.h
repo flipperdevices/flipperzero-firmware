@@ -5,10 +5,16 @@ typedef struct {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
+    SPIMemManagerRead* view_read;
     uint32_t view_id;
 } SPIMemManager;
 
-enum { SPIMemManagerViewSubmenu } SPIMemManagerView;
+enum {
+    SPIMemManagerViewSubmenu,
+    SPIMemManagerViewRead,
+    SPIMemManagerViewSaved,
+    SPIMemManagerViewChipInfo
+} SPIMemManagerView;
 
 enum {
     SPIMemManagerSubmenuIndexRead,

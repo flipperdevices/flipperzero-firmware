@@ -2,6 +2,7 @@
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
+#include "views/spi_mem_manager_read.h"
 #include "spi_mem_manager_app.h"
 
 #define TAG "SPIMemManager"
@@ -12,8 +13,11 @@ uint32_t spi_mem_manager_exit(void* context) {
 }
 
 void spi_mem_manager_submenu_callback(void* context, uint32_t index) {
-    UNUSED(context);
-    UNUSED(index);
+    SPIMemManager* instance = context;
+    if(index == SPIMemManagerSubmenuIndexRead) {
+        instance->view_id = SPIMemManagerViewRead;
+    }
+    view_dispatcher_switch_to_view(instance->view_dispatcher, instance->view_id);
 }
 
 void spi_mem_manager_add_submenu_items(SPIMemManager* instance) {
@@ -37,6 +41,21 @@ void spi_mem_manager_add_submenu_items(SPIMemManager* instance) {
         instance);
 }
 
+uint32_t spi_mem_manager_show_submenu(void* context) {
+    UNUSED(context);
+    return SPIMemManagerViewSubmenu;
+}
+
+void spi_mem_manager_add_views(SPIMemManager* instance) {
+    instance->view_read = spi_mem_manager_read_alloc();
+    view_set_previous_callback(
+        spi_mem_manager_read_get_view(instance->view_read), spi_mem_manager_show_submenu);
+    view_dispatcher_add_view(
+        instance->view_dispatcher,
+        SPIMemManagerViewRead,
+        spi_mem_manager_read_get_view(instance->view_read));
+}
+
 SPIMemManager* spi_mem_manager_alloc(void) {
     SPIMemManager* instance = malloc(sizeof(SPIMemManager));
     instance->gui = furi_record_open(RECORD_GUI);
@@ -46,10 +65,12 @@ SPIMemManager* spi_mem_manager_alloc(void) {
     view_dispatcher_attach_to_gui(
         instance->view_dispatcher, instance->gui, ViewDispatcherTypeFullscreen);
     spi_mem_manager_add_submenu_items(instance);
+    spi_mem_manager_add_views(instance);
     view_set_previous_callback(submenu_get_view(instance->submenu), spi_mem_manager_exit);
-    instance->view_id = SPIMemManagerViewSubmenu;
     view_dispatcher_add_view(
         instance->view_dispatcher, SPIMemManagerViewSubmenu, submenu_get_view(instance->submenu));
+    view_set_previous_callback(submenu_get_view(instance->submenu), spi_mem_manager_exit);
+    instance->view_id = SPIMemManagerViewSubmenu;
     view_dispatcher_switch_to_view(instance->view_dispatcher, instance->view_id);
     return instance;
 }
@@ -57,8 +78,10 @@ SPIMemManager* spi_mem_manager_alloc(void) {
 void spi_mem_manager_free(SPIMemManager* instance) {
     furi_record_close(RECORD_GUI);
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemManagerViewSubmenu);
+    view_dispatcher_remove_view(instance->view_dispatcher, SPIMemManagerViewRead);
     view_dispatcher_free(instance->view_dispatcher);
     submenu_free(instance->submenu);
+    spi_mem_manager_read_free(instance->view_read);
     free(instance);
 }
 
