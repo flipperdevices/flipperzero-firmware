@@ -95,7 +95,7 @@ bool buffer_stream_send_from_isr(
     if(!buffer_write(buffer, data, size)) {
         // if buffer is full - send it
         buffer->occupied = true;
-        // we always has space for buffer in stream
+        // we always have space for buffer in stream
         xStreamBufferSendFromISR(buffer_stream->stream, &buffer, sizeof(Buffer*), task_woken);
 
         // get new buffer from the pool

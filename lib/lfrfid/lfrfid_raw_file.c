@@ -59,11 +59,7 @@ bool lfrfid_raw_file_write_header(
         .max_buffer_size = max_buffer_size};
 
     size_t size = stream_write(file->stream, (uint8_t*)&header, sizeof(LFRFIDRawFileHeader));
-    if(size == sizeof(LFRFIDRawFileHeader)) {
-        return true;
-    } else {
-        return false;
-    }
+    return (size == sizeof(LFRFIDRawFileHeader));
 }
 
 bool lfrfid_raw_file_write_buffer(LFRFIDRawFile* file, uint8_t* buffer_data, size_t buffer_size) {

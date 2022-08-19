@@ -29,7 +29,7 @@ bool lfrfid_dict_file_save(ProtocolDict* dict, ProtocolId protocol, const char* 
 
         if(!flipper_format_write_hex(file, "Data", data, data_size)) break;
         result = true;
-    } while(0);
+    } while(false);
 
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
