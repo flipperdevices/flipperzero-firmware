@@ -59,7 +59,8 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
             sd_free_val,
             sd_free_unit,
             sd_total_val,
-            sd_total_unit);
+            sd_total_unit,
+            (sd_info.kb_free * 100) / sd_info.kb_total);
 
         dialog_ex_set_text(
             dialog_ex, string_get_cstr(app->text_string), 4, 4, AlignLeft, AlignTop);
