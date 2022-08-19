@@ -21,6 +21,7 @@ typedef struct {
 
 typedef struct {
     FuriHalRtcDateTime datetime;
+    bool militaryTime; // 24 hour
 } ClockState;
 
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -47,11 +48,18 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         state->datetime.year,
         state->datetime.month,
         state->datetime.day);
+
+    uint8_t hour = state->datetime.hour;
+    // bool pm = false;
+    if (!state->militaryTime && hour > 12) {
+        hour -= 12;
+        // pm = true;
+    }
     snprintf(
         strings[1],
         20,
         "%.2d:%.2d:%.2d",
-        state->datetime.hour,
+        hour,
         state->datetime.minute,
         state->datetime.second);
     snprintf(strings[2], 20, "%.2d:%.2d", curMin, curSec);
@@ -66,6 +74,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
+        elements_button_left(canvas, state->militaryTime ? "12h" : "24h");
     }
     if(timerStarted) {
         elements_button_center(canvas, "Stop");
@@ -77,6 +86,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
 
 static void clock_state_init(ClockState* const state) {
     furi_hal_rtc_get_datetime(&state->datetime);
+    state->militaryTime = true;
 }
 
 // Runs every 1000ms by default
@@ -131,8 +141,11 @@ int32_t clock_app(void* p) {
                             timerStarted = true;
                         }
 					} else if (event.input.key == InputKeyLeft) {
-						// RESET TIMER
-                        timerSecs = 0;
+                        if (timerStarted || timerSecs!=0) {
+                            timerSecs = 0;
+                        } else {
+                            plugin_state->militaryTime = !plugin_state->militaryTime;
+                        }
 					} else if (event.input.key == InputKeyBack) {
                         // Exit the plugin
                         processing = false;
