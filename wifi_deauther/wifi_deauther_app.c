@@ -87,6 +87,7 @@ void wifi_deauther_app_free(WifideautherApp* app) {
 }
 
 int32_t wifi_deauther_app(void* p) {
+    furi_hal_power_enable_otg();
     UNUSED(p);
     WifideautherApp* wifi_deauther_app = wifi_deauther_app_alloc();
 
@@ -95,6 +96,7 @@ int32_t wifi_deauther_app(void* p) {
     view_dispatcher_run(wifi_deauther_app->view_dispatcher);
 
     wifi_deauther_app_free(wifi_deauther_app);
+    furi_hal_power_disable_otg();
 
     return 0;
 }
