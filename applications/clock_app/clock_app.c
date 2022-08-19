@@ -48,10 +48,11 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     snprintf(strings[0], 20, "%.4d-%.2d-%.2d", curr_dt.year, curr_dt.month, curr_dt.day);
 
     uint8_t hour = curr_dt.hour;
-    // bool pm = false;
+    char strAMPM[3];
+    snprintf(strAMPM, sizeof(strAMPM),"%s","AM");
     if(!state->militaryTime && hour > 12) {
         hour -= 12;
-        // pm = true;
+		snprintf(strAMPM, sizeof(strAMPM),"%s","PM");
     }
     snprintf(strings[1], 20, "%.2d:%.2d:%.2d", hour, curr_dt.minute, curr_dt.second);
 
@@ -61,6 +62,10 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
 
     furi_mutex_release(state->mutex);
 
+	if(!state->militaryTime) {
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 67, 15, AlignCenter, AlignCenter, strAMPM);
+	}
     canvas_set_font(canvas, FontBigNumbers);
     if(timer_start_timestamp != 0) {
         int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
