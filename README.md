@@ -8,6 +8,7 @@
 - Known Issues: `FAP Loader` & `Chess`
 - Added [keyboard_layout_file documentation](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/documentation/keyboard_layout_file.md) [(By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 - Images optimized for space [thanks to CyberFlameGO](https://github.com/CyberFlameGO/flipperzero-firmware/tree/imgbot)
+- OFW: [Fix BT Remote 'stay' button bug on first plugin launch #1626 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1626)
 - Added [SD info dynamic units #252 (By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/252)
 
 <table width="100%" border="0" cellspacing="0">
