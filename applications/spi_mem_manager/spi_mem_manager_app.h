@@ -2,9 +2,20 @@
 #define _SPI_MEM_MANAGER_APP_H_
 
 typedef struct {
-    ViewPort* view_port;
     Gui* gui;
-    FuriMessageQueue* event_queue;
+    ViewDispatcher* view_dispatcher;
+    Submenu* submenu;
+    uint32_t view_id;
 } SPIMemManager;
+
+enum {
+    SPIMemManagerViewSubmenu
+} SPIMemManagerView;
+
+enum {
+    SPIMemManagerSubmenuIndexRead,
+    SPIMemManagerSubmenuIndexSaved,
+    SPIMemManagerSubmenuIndexChipInfo
+} SPIMemManagerSubmenuIndex;
 
 #endif // _SPI_MEM_MANAGER_APP_H_
