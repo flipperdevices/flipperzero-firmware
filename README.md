@@ -12,6 +12,8 @@
 - Added [SD info dynamic units #252 (By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/252)
 - Added [Archive: dont start browser worker on favourites tab #1628 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1628)
 - Added 24/12 Hr Clock Switch [(By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/254)
+- Added Clock Refactoring [thanks to GMMan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/256)
+- Added some fun stuff...  this version is pretty STABLE!
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
