@@ -46,7 +46,7 @@ void LfRfidAppSceneRawRead::on_enter(LfRfidApp* app, bool /* need_restore */) {
         lfrfid_read_callback,
         app);
 
-    notification_message(app->notification, &sequence_blink_start_magenta);
+    notification_message(app->notification, &sequence_blink_start_cyan);
 
     is_psk = false;
     error = false;

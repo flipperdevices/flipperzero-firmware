@@ -50,7 +50,7 @@ void LfRfidAppSceneRead::on_enter(LfRfidApp* app, bool /* need_restore */) {
     lfrfid_worker_start_thread(app->lfworker);
     lfrfid_worker_read_start(app->lfworker, app->read_type, lfrfid_read_callback, app);
 
-    notification_message(app->notification, &sequence_blink_start_magenta);
+    notification_message(app->notification, &sequence_blink_start_cyan);
 }
 
 bool LfRfidAppSceneRead::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
@@ -64,7 +64,7 @@ bool LfRfidAppSceneRead::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
         break;
     case LfRfidApp::EventType::ReadEventSenseEnd:
     case LfRfidApp::EventType::ReadEventSenseCardEnd:
-        notification_message(app->notification, &sequence_blink_start_magenta);
+        notification_message(app->notification, &sequence_blink_start_cyan);
         break;
     case LfRfidApp::EventType::ReadEventDone:
         app->protocol_id = event->payload.signed_int;
