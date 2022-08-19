@@ -62,10 +62,6 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
 
     furi_mutex_release(state->mutex);
 
-	if(!state->militaryTime) {
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 67, 15, AlignCenter, AlignCenter, strAMPM);
-	}
     canvas_set_font(canvas, FontBigNumbers);
     if(timer_start_timestamp != 0) {
         int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
@@ -74,11 +70,13 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
         canvas_set_font(canvas, FontSecondary);
+	    if(!state->militaryTime) canvas_draw_str_aligned(canvas, 118, 5, AlignCenter, AlignCenter, strAMPM);
         canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]); // DRAW DATE
         elements_button_left(canvas, "Reset");
     } else {
         canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
         canvas_set_font(canvas, FontSecondary);
+	    if(!state->militaryTime) canvas_draw_str_aligned(canvas, 67, 15, AlignCenter, AlignCenter, strAMPM);
         canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
         elements_button_left(canvas, state->militaryTime ? "12h" : "24h");
     }
