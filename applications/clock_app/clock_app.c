@@ -1,4 +1,3 @@
-// THIS BUILD HAS OLD APP CODE, NO ISSUES
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/elements.h>
@@ -26,6 +25,7 @@ typedef struct {
 
 typedef struct {
     FuriHalRtcDateTime datetime;
+    bool militaryTime; // 24 hour
 } ClockState;
 
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -44,6 +44,13 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     char strings[3][20];
     int curMin = (timerSecs / 60);
     int curSec = timerSecs - (curMin * 60);
+    uint8_t hour = state->datetime.hour;
+    char strAMPM[3];
+    snprintf(strAMPM, sizeof(strAMPM),"%s","AM");
+    if (!state->militaryTime && hour > 12) {
+        hour -= 12;
+        snprintf(strAMPM, sizeof(strAMPM),"%s","PM");
+    }
     snprintf(
         strings[0],
         20,
@@ -55,28 +62,37 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         strings[1],
         20,
         "%.2d:%.2d:%.2d",
-        state->datetime.hour,
+        hour,
         state->datetime.minute,
         state->datetime.second);
     snprintf(strings[2], 20, "%.2d:%.2d", curMin, curSec);
     release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontBigNumbers);
     if(timerStarted || timerSecs!=0) {
-        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]);
-        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]);
+        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
+        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
+        if(!state->militaryTime) {
+            canvas_set_font(canvas, FontBatteryPercent);
+            canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, strAMPM);
+        }
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]);
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]); // DRAW DATE
+        elements_button_left(canvas, "Reset");
     } else {
-        canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]);
+        canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
+        if(!state->militaryTime) {
+            canvas_set_font(canvas, FontBatteryPercent);
+            canvas_draw_str_aligned(canvas, 69, 15, AlignCenter, AlignCenter, strAMPM);
+        }
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]);
+        canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
+        elements_button_left(canvas, state->militaryTime ? "12h" : "24h");
     }
     if(timerStarted) {
         elements_button_center(canvas, "Stop");
     } else {
         elements_button_center(canvas, "Start");
     }
-    if(timerSecs!=0) elements_button_left(canvas, "Reset");
     if(timerStarted) {
         if(songSelect == 0) {
             elements_button_right(canvas, "S:OFF");
@@ -92,10 +108,10 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
 
 static void clock_state_init(ClockState* const state) {
     furi_hal_rtc_get_datetime(&state->datetime);
+    state->militaryTime = true;
 }
 
 const NotificationSequence clock_alert_silent = {
-    // &message_force_vibro_setting_on,
     &message_vibro_on,
     &message_red_255,
     &message_green_255,
@@ -108,8 +124,6 @@ const NotificationSequence clock_alert_silent = {
     NULL,
 };
 const NotificationSequence clock_alert_pr1 = {
-    // &message_force_speaker_volume_setting_1f,
-    // &message_force_vibro_setting_on,
     &message_vibro_on,
     &message_red_255,
     &message_green_255,
@@ -132,8 +146,6 @@ const NotificationSequence clock_alert_pr1 = {
     NULL,
 };
 const NotificationSequence clock_alert_pr2 = {
-    // &message_force_speaker_volume_setting_1f,
-    // &message_force_vibro_setting_on,
     &message_vibro_on,
     &message_note_fs5,
     &message_delay_100,
@@ -155,7 +167,6 @@ const NotificationSequence clock_alert_pr2 = {
     NULL,
 };
 const NotificationSequence clock_alert_pr3 = {
-    // &message_force_speaker_volume_setting_1f,
     &message_display_backlight_off,
     &message_note_g5,
     &message_delay_100,
@@ -170,8 +181,6 @@ const NotificationSequence clock_alert_pr3 = {
     NULL,
 };
 const NotificationSequence clock_alert_mario1 = {
-    // &message_force_speaker_volume_setting_1f,
-    &message_force_vibro_setting_on,
     &message_vibro_on,
     &message_red_255,
     &message_green_255,
@@ -200,8 +209,6 @@ const NotificationSequence clock_alert_mario1 = {
     NULL,
 };
 const NotificationSequence clock_alert_mario2 = {
-    // &message_force_speaker_volume_setting_1f,
-    &message_force_vibro_setting_on,
     &message_vibro_on,
     &message_display_backlight_off,
     &message_delay_100,
@@ -222,7 +229,6 @@ const NotificationSequence clock_alert_mario2 = {
     NULL,
 };
 const NotificationSequence clock_alert_mario3 = {
-    // &message_force_speaker_volume_setting_1f,
     &message_display_backlight_off,
     &message_note_g5,
     &message_delay_100,
@@ -245,7 +251,6 @@ const NotificationSequence clock_alert_mario3 = {
     NULL,
 };
 const NotificationSequence clock_alert_perMin = {
-    // &message_force_speaker_volume_setting_1f,
     &message_note_g5,
     &message_delay_100,
     &message_delay_50,
@@ -259,7 +264,6 @@ const NotificationSequence clock_alert_perMin = {
     NULL,
 };
 const NotificationSequence clock_alert_startStop = {
-    // &message_force_speaker_volume_setting_1f,
     &message_note_d6,
     &message_delay_100,
     &message_delay_10,
@@ -378,7 +382,11 @@ int32_t clock_app(void* p) {
                         }
                         break;
                     case InputKeyLeft:
-                        timerSecs = 0;
+                        if (timerStarted || timerSecs!=0) {
+                            timerSecs = 0;
+                        } else {
+                            plugin_state->militaryTime = !plugin_state->militaryTime;
+                        }
                         break;
                     case InputKeyOk:
                         if(songSelect == 1 || songSelect == 2 || songSelect == 3) {

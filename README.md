@@ -11,6 +11,7 @@
 - OFW: [Fix BT Remote 'stay' button bug on first plugin launch #1626 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1626)
 - Added [SD info dynamic units #252 (By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/252)
 - Added [Archive: dont start browser worker on favourites tab #1628 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1628)
+- Added 24/12 Hr Clock Switch [(By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/254)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -175,7 +176,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [.sub Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - `FAP` [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator) `HIDDEN "APPS_BarcodeGenerator"`
 - `FAP` [Bluetooth Remote (By Cutch)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
-- [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)
+- [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61) [12/24HR (By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/254)
 - [Dec/Hex Converter plugin (By theisolinearchip)](https://github.com/theisolinearchip) `HIDDEN "APPS_dec_hex_converter"`
 - `FAP` [Dolphin Backup (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Modified by RogueMaster
 - `FAP` [Dolphin Restorer (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Cloned by RogueMaster
