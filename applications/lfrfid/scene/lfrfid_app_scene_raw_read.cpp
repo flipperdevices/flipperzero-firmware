@@ -32,6 +32,7 @@ void LfRfidAppSceneRawRead::on_enter(LfRfidApp* app, bool /* need_restore */) {
     popup->set_icon(0, 3, &I_RFIDDolphinReceive_97x61);
     app->view_controller.switch_to<PopupVM>();
     lfrfid_worker_start_thread(app->lfworker);
+    app->make_app_folder();
 
     timer = furi_timer_alloc(timer_callback, FuriTimerTypeOnce, app);
     furi_timer_start(timer, RAW_READ_TIME);

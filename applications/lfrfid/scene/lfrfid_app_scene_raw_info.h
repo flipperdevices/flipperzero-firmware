@@ -9,5 +9,4 @@ public:
 
 private:
     string_t string_info;
-    static void ok_callback(void* context);
 };
