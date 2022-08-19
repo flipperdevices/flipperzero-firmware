@@ -38,13 +38,11 @@ typedef enum {
 typedef enum {
     LFRFIDWorkerReadRawFileError,
     LFRFIDWorkerReadRawOverrun,
-    LFRFIDWorkerReadRawDone,
 } LFRFIDWorkerReadRawResult;
 
 typedef enum {
     LFRFIDWorkerEmulateRawFileError,
     LFRFIDWorkerEmulateRawOverrun,
-    LFRFIDWorkerEmulateRawDone,
 } LFRFIDWorkerEmulateRawResult;
 
 typedef void (

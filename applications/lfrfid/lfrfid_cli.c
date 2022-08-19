@@ -427,8 +427,7 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
         bool overrun = false;
 
         const uint32_t available_flags = (1 << LFRFIDWorkerReadRawFileError) |
-                                         (1 << LFRFIDWorkerReadRawOverrun) |
-                                         (1 << LFRFIDWorkerReadRawDone);
+                                         (1 << LFRFIDWorkerReadRawOverrun);
 
         lfrfid_worker_read_raw_start(
             worker, string_get_cstr(filepath), type, lfrfid_cli_raw_read_callback, event);
@@ -446,10 +445,6 @@ static void lfrfid_cli_raw_read(Cli* cli, string_t args) {
                         printf("Overrun\r\n");
                         overrun = true;
                     }
-                }
-
-                if(FURI_BIT(flags, LFRFIDWorkerReadRawDone)) {
-                    // do nothing
                 }
             }
 
@@ -507,8 +502,7 @@ static void lfrfid_cli_raw_emulate(Cli* cli, string_t args) {
         bool overrun = false;
 
         const uint32_t available_flags = (1 << LFRFIDWorkerEmulateRawFileError) |
-                                         (1 << LFRFIDWorkerEmulateRawOverrun) |
-                                         (1 << LFRFIDWorkerEmulateRawDone);
+                                         (1 << LFRFIDWorkerEmulateRawOverrun);
 
         lfrfid_worker_emulate_raw_start(
             worker, string_get_cstr(filepath), lfrfid_cli_raw_emulate_callback, event);
@@ -526,10 +520,6 @@ static void lfrfid_cli_raw_emulate(Cli* cli, string_t args) {
                         printf("Overrun\r\n");
                         overrun = true;
                     }
-                }
-
-                if(FURI_BIT(flags, LFRFIDWorkerEmulateRawDone)) {
-                    // do nothing
                 }
             }
 

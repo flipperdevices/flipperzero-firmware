@@ -46,10 +46,3 @@ void LfRfidAppSceneSavedInfo::on_exit(LfRfidApp* app) {
     app->view_controller.get<ContainerVM>()->clean();
     string_clear(string_info);
 }
-
-void LfRfidAppSceneSavedInfo::back_callback(void* context) {
-    LfRfidApp* app = static_cast<LfRfidApp*>(context);
-    LfRfidApp::Event event;
-    event.type = LfRfidApp::EventType::Back;
-    app->view_controller.send_event(&event);
-}

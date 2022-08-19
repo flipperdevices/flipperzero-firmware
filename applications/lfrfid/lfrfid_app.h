@@ -45,6 +45,8 @@ public:
         ReadEventStartASK,
         ReadEventStartPSK,
         ReadEventDone,
+        ReadEventOverrun,
+        ReadEventError,
         WriteEventOK,
         WriteEventProtocolCannotBeWritten,
         WriteEventFobCannotBeWritten,
@@ -74,6 +76,10 @@ public:
         DeleteSuccess,
         Rpc,
         ExtraActions,
+        RawInfo,
+        RawName,
+        RawRead,
+        RawSuccess,
     };
 
     class Event {
@@ -105,6 +111,7 @@ public:
     void run(void* args);
 
     static const char* app_folder;
+    static const char* app_sd_folder;
     static const char* app_extension;
     static const char* app_filetype;
 
@@ -125,4 +132,6 @@ public:
 
     uint8_t* old_key_data;
     uint8_t* new_key_data;
+
+    string_t raw_file_name;
 };

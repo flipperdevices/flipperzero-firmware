@@ -22,6 +22,10 @@
 #include "scene/lfrfid_app_scene_delete_success.h"
 #include "scene/lfrfid_app_scene_rpc.h"
 #include "scene/lfrfid_app_scene_extra_actions.h"
+#include "scene/lfrfid_app_scene_raw_info.h"
+#include "scene/lfrfid_app_scene_raw_name.h"
+#include "scene/lfrfid_app_scene_raw_read.h"
+#include "scene/lfrfid_app_scene_raw_success.h"
 
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
@@ -29,6 +33,7 @@
 #include <rpc/rpc_app.h>
 
 const char* LfRfidApp::app_folder = ANY_PATH("lfrfid");
+const char* LfRfidApp::app_sd_folder = EXT_PATH("lfrfid");
 const char* LfRfidApp::app_extension = ".rfid";
 const char* LfRfidApp::app_filetype = "Flipper RFID key";
 
@@ -39,6 +44,7 @@ LfRfidApp::LfRfidApp()
     , dialogs{RECORD_DIALOGS}
     , text_store(40) {
     string_init(file_name);
+    string_init(raw_file_name);
     string_init_set_str(file_path, app_folder);
 
     dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
@@ -51,6 +57,7 @@ LfRfidApp::LfRfidApp()
 }
 
 LfRfidApp::~LfRfidApp() {
+    string_clear(raw_file_name);
     string_clear(file_name);
     string_clear(file_path);
     protocol_dict_free(dict);
@@ -133,6 +140,10 @@ void LfRfidApp::run(void* _args) {
         scene_controller.add_scene(SceneType::DeleteConfirm, new LfRfidAppSceneDeleteConfirm());
         scene_controller.add_scene(SceneType::DeleteSuccess, new LfRfidAppSceneDeleteSuccess());
         scene_controller.add_scene(SceneType::ExtraActions, new LfRfidAppSceneExtraActions());
+        scene_controller.add_scene(SceneType::RawInfo, new LfRfidAppSceneRawInfo());
+        scene_controller.add_scene(SceneType::RawName, new LfRfidAppSceneRawName());
+        scene_controller.add_scene(SceneType::RawRead, new LfRfidAppSceneRawRead());
+        scene_controller.add_scene(SceneType::RawSuccess, new LfRfidAppSceneRawSuccess());
         scene_controller.process(100);
     }
 }

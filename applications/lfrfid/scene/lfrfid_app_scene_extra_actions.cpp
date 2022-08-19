@@ -3,6 +3,7 @@
 typedef enum {
     SubmenuASK,
     SubmenuPSK,
+    SubmenuRAW,
 } SubmenuIndex;
 
 void LfRfidAppSceneExtraActions::on_enter(LfRfidApp* app, bool need_restore) {
@@ -11,15 +12,15 @@ void LfRfidAppSceneExtraActions::on_enter(LfRfidApp* app, bool need_restore) {
     submenu->add_item("Read ASK (Animal, Ordinary Card)", SubmenuASK, submenu_callback, app);
     submenu->add_item("Read PSK (Indala)", SubmenuPSK, submenu_callback, app);
 
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        submenu->add_item("Read RAW RFID data", SubmenuRAW, submenu_callback, app);
+    }
+
     if(need_restore) {
         submenu->set_selected_item(submenu_item_selected);
     }
 
     app->view_controller.switch_to<SubmenuVM>();
-
-    // clear key
-    string_reset(app->file_name);
-    app->protocol_id = PROTOCOL_NO;
 }
 
 bool LfRfidAppSceneExtraActions::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
@@ -30,12 +31,17 @@ bool LfRfidAppSceneExtraActions::on_event(LfRfidApp* app, LfRfidApp::Event* even
         switch(event->payload.signed_int) {
         case SubmenuASK:
             app->read_type = LFRFIDWorkerReadTypeASKOnly;
+            app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::Read);
             break;
         case SubmenuPSK:
             app->read_type = LFRFIDWorkerReadTypePSKOnly;
+            app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::Read);
+            break;
+        case SubmenuRAW:
+            app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::RawName);
             break;
         }
-        app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::Read);
+
         consumed = true;
     }
 
