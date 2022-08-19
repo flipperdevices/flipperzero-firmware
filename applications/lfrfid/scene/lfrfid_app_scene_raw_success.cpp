@@ -25,7 +25,8 @@ void LfRfidAppSceneRawSuccess::on_enter(LfRfidApp* app, bool /* need_restore */)
 bool LfRfidAppSceneRawSuccess::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
     bool consumed = false;
     if(event->type == LfRfidApp::EventType::Next) {
-        app->scene_controller.search_and_switch_to_previous_scene({LfRfidApp::SceneType::ExtraActions});
+        app->scene_controller.search_and_switch_to_previous_scene(
+            {LfRfidApp::SceneType::ExtraActions});
         consumed = true;
     }
     return consumed;
