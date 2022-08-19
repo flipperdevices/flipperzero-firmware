@@ -39,7 +39,7 @@
 <br>[`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 </td> <td>
 
-<img src="https://media.discordapp.net/stickers/1009755929715155006.png">
+<center><img src="https://media.discordapp.net/stickers/1009755929715155006.png"></center>
 <h2>DONATIONS ACCEPTED 😄🚀💸</h2>
 BTC: <B>3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a</B><br>
 ETH: <B>0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f</B>
