@@ -225,8 +225,12 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
 
     bool timer_running = state->timer_running;
     uint32_t songSelect = state->songSelect;
+    int alert_time = (int) state->alert_time;
     uint32_t timer_start_timestamp = state->timer_start_timestamp;
     uint32_t timer_stopped_seconds = state->timer_stopped_seconds;
+
+    char alertTime[4];
+    snprintf(alertTime, sizeof(alertTime),"%d", alert_time);
 
     furi_mutex_release(state->mutex);
 
@@ -239,6 +243,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
         canvas_set_font(canvas, FontSecondary);
         if(!state->militaryTime) canvas_draw_str_aligned(canvas, 118, 5, AlignCenter, AlignCenter, strAMPM);
+        canvas_draw_str_aligned(canvas, 118, 15, AlignCenter, AlignCenter, alertTime);
         canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]); // DRAW DATE
         elements_button_left(canvas, "Reset");
     } else {
@@ -440,6 +445,7 @@ int32_t clock_app(void* p) {
 						}
 					} else {
 						if(plugin_state->timerSecs == plugin_state->alert_time) {
+							DOLPHIN_DEED(DolphinDeedU2fAuthorized);
 							NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 							notification_message(notification, &clock_alert_silent);
 							furi_record_close(RECORD_NOTIFICATION);
