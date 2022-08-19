@@ -103,4 +103,5 @@ void LfRfidAppSceneRawRead::on_exit(LfRfidApp* app) {
     lfrfid_worker_stop(app->lfworker);
     lfrfid_worker_stop_thread(app->lfworker);
     furi_timer_free(timer);
+    string_clear(string_file_name);
 }
