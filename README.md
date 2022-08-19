@@ -10,6 +10,7 @@
 - Images optimized for space [thanks to CyberFlameGO](https://github.com/CyberFlameGO/flipperzero-firmware/tree/imgbot)
 - OFW: [Fix BT Remote 'stay' button bug on first plugin launch #1626 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1626)
 - Added [SD info dynamic units #252 (By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/252)
+- Added [Archive: dont start browser worker on favourites tab #1628 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1628)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -138,6 +139,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 - [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
 - [Picopass load/info/delete #1562 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1562)
+- [Archive: dont start browser worker on favourites tab #1628 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1628)
 
 </details>
 
