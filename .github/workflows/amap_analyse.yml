@@ -78,12 +78,12 @@ jobs:
 
       - name: 'Upload report to database'
         run: |
-          FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
+          # FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
           get_size()
           {
             SECTION="$1";
             arm-none-eabi-size \
-              -A build/latest/firmware.elf \
+              -A artifacts/flipper-z-f7-firmware-${{steps.names.outputs.suffix}}.elf \
               | grep "^$SECTION" | awk '{print $2}'
           }
           export COMMIT_HASH="${{steps.names.outputs.commit-hash}}"
