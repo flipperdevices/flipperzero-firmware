@@ -83,9 +83,7 @@ jobs:
         uses: ArminJo/arduino-test-compile@v3.0.0
         with:
           sketch-names: esp32_marauder.ino
-          #arduino-board-fqbn: esp32:esp32:esp32s2
+          arduino-board-fqbn: esp32:esp32:esp32s2
           platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
-          arduino-board-fqbn: ${{ matrix.arduino-board-fqbn }}
-          extra-arduino-cli-args: ${{ matrix.extra-arduino-cli-args }}
           #extra-arduino-cli-args: "-w"
           extra-arduino-lib-install-args: "-zmuldefs"
