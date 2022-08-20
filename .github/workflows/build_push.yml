@@ -85,7 +85,7 @@ jobs:
       - name: Show contents of platform.txt
         run: |
           echo "Chicken"
-          for i in $(/home/runner/.arduino15/packages/esp32/hardware/esp32/ -name "platform.txt"); do
+          for i in $(find /home/runner/.arduino15/packages/esp32/hardware/esp32/ -name "platform.txt"); do
             cat "$i" | grep compiler.c.elf.libs.
           done
           #find /home/runner/.arduino15/packages/esp32/hardware/esp32/ -name "platform.txt" -exec cat {} | grep 
