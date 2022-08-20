@@ -36,8 +36,8 @@ jobs:
           COMMIT_HASH="$(git rev-parse HEAD)"
           SHA="$(git rev-parse --short HEAD)"
           COMMIT_MSG="${{github.event.head_commit.message}}"
-          SUFFIX=${BRANCH_OR_TAG//\//_}-$(date +'%d%m%Y')-${SHA}
           BRANCH_NAME=${REF#refs/*/}
+          SUFFIX=${BRANCH_NAME//\//_}-$(date +'%d%m%Y')-${SHA}
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
             REF="${{github.head_ref}}"
             COMMIT_HASH="$(git log -1 --pretty=oneline | awk '{print $1}')"
@@ -46,7 +46,7 @@ jobs:
             PULL_NAME="${{github.event.pull_request.title}}"
           fi
           if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
-            SUFFIX=${BRANCH_OR_TAG//\//_}
+            SUFFIX=${BRANCH_NAME//\//_}
           fi
           echo "::set-output name=commit-hash::${COMMIT_HASH}"
           echo "::set-output name=commit-msg::${COMMIT_MSG}"
