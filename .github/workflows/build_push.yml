@@ -10,8 +10,8 @@ on:
 
 jobs:
   # This workflow contains a single job called "build"
-  install_libs:
-    name: Install Libraries
+  build:
+    name: Build Marauder Binaries
     
     runs-on: ubuntu-latest
     
@@ -74,75 +74,7 @@ jobs:
           repository: justcallmekoko/SwitchLib
           ref: main
           path: CustomSwitchLib
-          
-  build:
-    name: Build Marauder binaries
-    
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job        
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-#      - name: Checkout Code
-#        uses: actions/checkout@v3
-      
-#      - name: Install TFT_eSPI
-#        uses: actions/checkout@v2
-#        with:
-#          repository: justcallmekoko/TFT_eSPI
-#          ref: master
-#          path: CustomTFT_eSPI
-          
-#      - name: Install LinkedList
-#        uses: actions/checkout@v2
-#        with:
-#          repository: ivanseidel/LinkedList
-#          ref: master
-#          path: CustomLinkedList
-          
-#      - name: Install lv_arduino
-#        uses: actions/checkout@v2
-#        with:
-#          repository: lvgl/lv_arduino
-#          ref: master
-#          path: Customlv_arduino
-          
-#      - name: Install JPEGDecoder
-#        uses: actions/checkout@v2
-#        with:
-#          repository: Bodmer/JPEGDecoder
-#          ref: master
-#          path: CustomJPEGDecoder
-          
-#      - name: Install NimBLE-Arduino
-#        uses: actions/checkout@v2
-#        with:
-#          repository: h2zero/NimBLE-Arduino
-#          ref: master
-#          path: CustomNimBLE-Arduino
-          
-#      - name: Install Adafruit_NeoPixel
-#        uses: actions/checkout@v2
-#        with:
-#          repository: adafruit/Adafruit_NeoPixel
-#          ref: master
-#          path: CustomAdafruit_NeoPixel
-          
-#      - name: Install ArduinoJson
-#        uses: actions/checkout@v2
-#        with:
-#          repository: bblanchon/ArduinoJson
-#          ref: v6.18.2
-#          path: CustomArduinoJson
-          
-#      - name: Install SwitchLib
-#        uses: actions/checkout@v2
-#        with:
-#          repository: justcallmekoko/SwitchLib
-#          ref: main
-#          path: CustomSwitchLib
-          
+                    
       # Setup Test compile for Arduino
       - name: Build Marauder for Flipper Zero WiFi Dev Board
         uses: ArminJo/arduino-test-compile@v3.2.0
