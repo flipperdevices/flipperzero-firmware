@@ -75,6 +75,10 @@ jobs:
           ref: main
           path: CustomSwitchLib
           
+      - name: Show contents of platform.txt
+        run: |
+          echo "Chicken"
+          
       - name: Find and Replace
         uses: jacobtomlinson/gha-find-replace@v2
         with:
