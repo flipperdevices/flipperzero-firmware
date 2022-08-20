@@ -78,7 +78,8 @@ jobs:
       - name: Show contents of platform.txt
         run: |
           echo "Chicken"
-          cat /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/platform.txt | grep compiler.c.elf.libs.
+          find / -name "platform.txt"
+          #cat /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/platform.txt | grep compiler.c.elf.libs.
           
       - name: Find and Replace
         uses: jacobtomlinson/gha-find-replace@v2
