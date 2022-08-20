@@ -3,6 +3,8 @@ from SCons.Action import Action
 from SCons.Defaults import Touch
 import SCons
 
+import os
+
 __OPENOCD_BIN = "openocd"
 
 _oocd_action = Action(
@@ -12,6 +14,9 @@ _oocd_action = Action(
 
 
 def generate(env):
+    if env["OPENOCD_LOGS_SWO"]:
+        os.environ["OPENOCD_LOGS_OUTPUT"] = env["OPENOCD_LOGS_OUTPUT"]
+        env.Append(OPENOCD_OPTS=["-f", "debug/swo.cfg"])
     env.SetDefault(
         OPENOCD=__OPENOCD_BIN,
         OPENOCD_OPTS="",

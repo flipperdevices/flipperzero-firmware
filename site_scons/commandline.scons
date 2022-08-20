@@ -163,6 +163,18 @@ vars.Add(
 )
 
 vars.Add(
+    "OPENOCD_LOGS_SWO",
+    help="Configure OpenOCD to receive logs over SWO",
+    default=False,
+)
+
+vars.Add(
+    "OPENOCD_LOGS_OUTPUT",
+    help="Override logs destination when OPENOCD_LOGS_SWO is set (defaults to stdout)",
+    default="",
+)
+
+vars.Add(
     "BLACKMAGIC",
     help="Blackmagic probe location",
     default="auto",
