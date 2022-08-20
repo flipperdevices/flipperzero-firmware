@@ -71,7 +71,7 @@ jobs:
           ref: v6.18.2
           path: CustomArduinoJson
           
-      - name: Install SwitchLibe
+      - name: Install SwitchLib
         uses: actions/checkout@v2
         with:
           repository: justcallmekoko/SwitchLib
