@@ -103,4 +103,4 @@ jobs:
             ${{ secrets.AMAP_MARIADB_HOST }} \
             ${{ secrets.AMAP_MARIADB_PORT }} \
             ${{ secrets.AMAP_MARIADB_DATABASE }} \
-            artifacts/flipper-z-f7-firmware-${{steps.names.outputs.suffix}}.elf.map
+            artifacts/flipper-z-f7-firmware-${{steps.names.outputs.suffix}}.elf.map.all
