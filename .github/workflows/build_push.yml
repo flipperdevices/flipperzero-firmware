@@ -80,7 +80,7 @@ jobs:
           
       # Setup Test compile for Arduino
       - name: Build Marauder for Flipper Zero WiFi Dev Board
-        uses: ArminJo/arduino-test-compile@v3.0.0
+        uses: ArminJo/arduino-test-compile@v3.2.0
         with:
           sketch-names: esp32_marauder.ino
           arduino-board-fqbn: esp32:esp32:esp32s2
