@@ -68,12 +68,18 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: bblanchon/ArduinoJson
-          tag: v6.18.2
+          ref: v6.18.2
           path: CustomArduinoJson
+          
+      - name: Install SwitchLibe
+        uses: actions/checkout@v2
+        with:
+          repository: justcallmekoko/SwitchLib
+          ref: master
+          path: CustomSwitchLib
           
       # Setup Test compile for Arduino
       - name: Build Marauder for Flipper Zero WiFi Dev Board
         uses: ArminJo/arduino-test-compile@v3.0.0
         with:
           sketch-names: esp32_marauder/esp32_marauder.ino
-          required-libraries: SwitchLib
