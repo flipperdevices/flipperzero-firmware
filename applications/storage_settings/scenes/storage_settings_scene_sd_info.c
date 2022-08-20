@@ -56,10 +56,10 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
             "Label: %s\nType: %s\n%.3f %s total\n%.3f %s free\n%lu%% free",
             sd_info.label,
             sd_api_get_fs_type_text(sd_info.fs_type),
-            sd_free_val,
-            sd_free_unit,
             sd_total_val,
             sd_total_unit,
+            sd_free_val,
+            sd_free_unit,
             (sd_info.kb_free * 100) / sd_info.kb_total);
 
         dialog_ex_set_text(
