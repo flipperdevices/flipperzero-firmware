@@ -39,6 +39,7 @@ jobs:
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
             REF="${{github.head_ref}}"
             COMMIT_HASH="$(git log -1 --pretty=oneline | awk '{print $1}')"
+            SHA="$(cut -c -8 <<< "$COMMIT_HASH")"
             COMMIT_MSG="$(git log -1 --pretty=format:"%s")"
             PULL_ID="${{github.event.pull_request.number}}"
             PULL_NAME="${{github.event.pull_request.title}}"
