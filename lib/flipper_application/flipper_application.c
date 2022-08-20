@@ -3,6 +3,9 @@
 
 #define TAG "fapp"
 
+/* For debugger access to app state */
+FlipperApplication* last_loaded_app = NULL;
+
 FlipperApplication*
     flipper_application_alloc(Storage* storage, const ElfApiInterface* api_interface) {
     FlipperApplication* app = malloc(sizeof(FlipperApplication));
@@ -17,9 +20,10 @@ void flipper_application_free(FlipperApplication* app) {
         furi_thread_free(app->thread);
     }
 
-    if(app->state.entries) {
-        free(app->state.entries);
-        app->state.entries = NULL;
+    last_loaded_app = NULL;
+    if(app->state.mmap_entries) {
+        free(app->state.mmap_entries);
+        app->state.mmap_entries = NULL;
     }
 
     ELFSection_t* sections[] = {&app->text, &app->rodata, &app->data, &app->bss};
@@ -58,6 +62,7 @@ const FlipperApplicationManifest* flipper_application_get_manifest(FlipperApplic
 }
 
 FlipperApplicationLoadStatus flipper_application_map_to_memory(FlipperApplication* app) {
+    last_loaded_app = app;
     return flipper_application_load_sections(app);
 }
 

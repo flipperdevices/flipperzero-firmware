@@ -39,10 +39,8 @@ typedef struct {
 } FlipperApplicationMemoryMapEntry;
 
 typedef struct {
-    const char name[FAP_MANIFEST_MAX_APP_NAME_LENGTH];
-    uint32_t version;
-    FlipperApplicationMemoryMapEntry* entries;
     uint32_t mmap_entry_count;
+    FlipperApplicationMemoryMapEntry* mmap_entries;
 } FlipperApplicationState;
 
 FlipperApplication*

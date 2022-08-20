@@ -407,15 +407,15 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
         }
     }
 
-    e->state.entries =
+    e->state.mmap_entries =
         malloc(sizeof(FlipperApplicationMemoryMapEntry) * e->state.mmap_entry_count);
     uint32_t mmap_entry_idx = 0;
     for(size_t i = 0; i < COUNT_OF(sections); i++) {
         const void* data_ptr = sections[i].section->data;
         if(data_ptr) {
             FURI_LOG_I(TAG, "0x%X %s", (uint32_t)data_ptr, sections[i].name);
-            e->state.entries[mmap_entry_idx].address = (uint32_t)data_ptr;
-            e->state.entries[mmap_entry_idx].name = sections[i].name;
+            e->state.mmap_entries[mmap_entry_idx].address = (uint32_t)data_ptr;
+            e->state.mmap_entries[mmap_entry_idx].name = sections[i].name;
             mmap_entry_idx++;
         }
     }
