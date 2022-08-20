@@ -82,6 +82,6 @@ jobs:
       - name: Build Marauder for Flipper Zero WiFi Dev Board
         uses: ArminJo/arduino-test-compile@v3.0.0
         with:
-          sketch-names: esp32_marauder/esp32_marauder.ino
-          arduino-board-fqbn: esp32:esp32:esp32s2devmodule
+          sketch-names: esp32_marauder.ino
+          arduino-board-fqbn: esp32:esp32:esp32s2
           platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
