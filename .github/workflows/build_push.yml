@@ -17,6 +17,14 @@ jobs:
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
+    strategy:
+      matrix:
+        arduino-board-fqbn:
+        - esp32:esp32:esp32s2
+        include:
+          - arduino-boards-fqbn: esp32:esp32:esp32s2
+            extra-arduino-cli-args: "--warnings all -zmuldefs"
+        
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
@@ -83,6 +91,9 @@ jobs:
         uses: ArminJo/arduino-test-compile@v3.0.0
         with:
           sketch-names: esp32_marauder.ino
-          arduino-board-fqbn: esp32:esp32:esp32s2
+          #arduino-board-fqbn: esp32:esp32:esp32s2
           platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
-          extra-arduino-cli-args: "--warnings all -zmuldefs"
+          arduino-board-fqbn: ${{ matrix.arduino-board-fqbn }}
+          extra-arduino-cli-args: ${{ matrix.extra-arduino-cli-args }}
+          #extra-arduino-cli-args: "-w"
+          #extra-arduino-lib-install-args: "-zmuldefs"
