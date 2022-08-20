@@ -78,7 +78,7 @@ jobs:
       - name: Find and Replace
         uses: jacobtomlinson/gha-find-replace@v2
         with:
-          find: "justcallmekoko"
+          find: "ESP32 Marauder"
           replace: "compiler.c.elf.libs.esp32s2=-zmuldefs "
           regex: false
                     
