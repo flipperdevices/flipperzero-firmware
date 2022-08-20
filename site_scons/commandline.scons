@@ -198,9 +198,9 @@ vars.Add(
             "system_settings",
             "about",
             # Plugins
-            "basic_plugins",
+            # "basic_plugins",
             # Debug
-            "debug_apps",
+            # "debug_apps",
         )
     },
 )

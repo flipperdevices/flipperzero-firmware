@@ -170,6 +170,7 @@ plugin_dist = [
         f"#/dist/{dist_dir}/plugins", firmware_env["FW_EXTAPPS"]["compact"]
     ),
 ]
+Depends(plugin_dist, firmware_env["FW_EXTAPPS"]["validators"])
 Alias("plugin_dist", plugin_dist)
 # distenv.Default(plugin_dist)
 

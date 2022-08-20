@@ -29,7 +29,10 @@ def BuildAppElf(env, app):
     )
     env.Depends(app_elf_augmented, [env["SDK_DEFINITION"], env.Value(app)])
     env.Alias(app_alias, app_elf_augmented)
-    return (app_elf_augmented, app_elf_raw)
+
+    app_elf_import_validator = env.ValidateAppImports(app_elf_augmented)
+    env.AlwaysBuild(app_elf_import_validator)
+    return (app_elf_augmented, app_elf_raw, app_elf_import_validator)
 
 
 def prepare_app_metadata(target, source, env):
@@ -56,14 +59,14 @@ def prepare_app_metadata(target, source, env):
 def validate_app_imports(target, source, env):
     sdk_cache = SdkCache(env.subst("$SDK_DEFINITION"), load_version_only=False)
     app_syms = set()
-    with open(source[0].path + ".impsyms", "rt") as f:
+    with open(target[0].path, "rt") as f:
         for line in f:
             app_syms.add(line.split()[0])
     unresolved_syms = app_syms - sdk_cache.get_valid_names()
     if unresolved_syms:
         SCons.Warnings.warn(
             SCons.Warnings.LinkWarning,
-            f"{target[0].path}: app won't run. Unresolved symbols: {unresolved_syms}",
+            f"{source[0].path}: app won't run. Unresolved symbols: {unresolved_syms}",
         )
 
 
@@ -86,18 +89,24 @@ def generate(env, **kw):
                         "${SOURCES} ${TARGET}",
                         "$APPMETAEMBED_COMSTR",
                     ),
-                    Action(
-                        "${NM} -P -u ${SOURCE} > ${SOURCE}.impsyms",
-                        "$APPDUMP_COMSTR",
-                    ),
-                    Action(
-                        validate_app_imports,
-                        "$APPCHECK_COMSTR",
-                    ),
                 ],
                 suffix=".fap",
                 src_suffix=".elf",
-            )
+            ),
+            "ValidateAppImports": Builder(
+                action=[
+                    Action(
+                        "@${NM} -P -u ${SOURCE} > ${TARGET}",
+                        None,  # "$APPDUMP_COMSTR",
+                    ),
+                    Action(
+                        validate_app_imports,
+                        None,  # "$APPCHECK_COMSTR",
+                    ),
+                ],
+                suffix=".impsyms",
+                src_suffix=".fap",
+            ),
         }
     )
 

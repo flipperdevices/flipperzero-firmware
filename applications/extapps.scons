@@ -37,20 +37,22 @@ appenv.AppendUnique(
 )
 
 
-extapps = {
-    "compact": [],
-    "debug": [],
-}
+extapps = {"compact": [], "debug": [], "validators": []}
 
 
 def build_app_as_external(env, appdef):
-    compact_elf, debug_elf = env.BuildAppElf(appdef)
+    compact_elf, debug_elf, validator = env.BuildAppElf(appdef)
     extapps["compact"].append(compact_elf)
     extapps["debug"].append(debug_elf)
+    extapps["validators"].append(validator)
 
 
-for apptype in (FlipperAppType.PLUGIN, FlipperAppType.EXTERNAL):
-    for app in appenv["APPBUILD"].get_apps_of_type(apptype):
+for apptype in (
+    FlipperAppType.PLUGIN,
+    FlipperAppType.EXTERNAL,
+    # FlipperAppType.DEBUG,
+):
+    for app in appenv["APPBUILD"].get_apps_of_type(apptype, True):
         build_app_as_external(appenv, app)
 
 # Ugly access to global option

@@ -80,3 +80,9 @@ FuriThread* flipper_application_spawn(FlipperApplication* app, void* args) {
     furi_thread_start(app->thread);
     return app->thread;
 }
+
+void* flipper_application_resolve_symbol(FlipperApplication* app, const char* name) {
+    UNUSED(app);
+    UNUSED(name);
+    return NULL;
+}

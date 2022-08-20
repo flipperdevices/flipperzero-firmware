@@ -192,9 +192,12 @@ class AppBuildset:
             )
         return sdk_headers
 
-    def get_apps_of_type(self, apptype: FlipperAppType):
+    def get_apps_of_type(self, apptype: FlipperAppType, all_known: bool = False):
         return sorted(
-            filter(lambda app: app.apptype == apptype, self.apps),
+            filter(
+                lambda app: app.apptype == apptype,
+                self.appmgr.known_apps.values() if all_known else self.apps,
+            ),
             key=lambda app: app.order,
         )
 
