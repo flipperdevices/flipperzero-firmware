@@ -28,6 +28,9 @@ typedef enum {
     FlipperApplicationLoadStatusMissingImports,
 } FlipperApplicationLoadStatus;
 
+const char* flipper_application_preload_status_to_string(FlipperApplicationPreloadStatus status);
+const char* flipper_application_load_status_to_string(FlipperApplicationLoadStatus status);
+
 typedef struct FlipperApplication FlipperApplication;
 
 typedef struct {

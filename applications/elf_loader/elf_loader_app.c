@@ -46,24 +46,23 @@ int32_t elf_loader_app(void* p) {
         FlipperApplicationPreloadStatus preload_res =
             flipper_application_preload(app, string_get_cstr(elf_name));
         if(preload_res != FlipperApplicationPreloadStatusSuccess) {
-            string_printf(error_message, "preload failed: %d", preload_res);
+            const char* err_msg = flipper_application_preload_status_to_string(preload_res);
+            string_printf(error_message, "Preload failed: %s", err_msg);
             FURI_LOG_E(
-                TAG,
-                "ELF Loader failed to preload %s (code %d)",
-                string_get_cstr(elf_name),
-                preload_res);
+                TAG, "ELF Loader failed to preload %s: %s", string_get_cstr(elf_name), err_msg);
             break;
         }
 
         FURI_LOG_I(TAG, "ELF Loader is mapping");
         FlipperApplicationLoadStatus load_status = flipper_application_map_to_memory(app);
         if(load_status != FlipperApplicationLoadStatusSuccess) {
-            string_printf(error_message, "load failed: %d", load_status);
+            const char* err_msg = flipper_application_load_status_to_string(load_status);
+            string_printf(error_message, "Load failed: %s", err_msg);
             FURI_LOG_E(
                 TAG,
-                "ELF Loader failed to map to memory %s (code %d)",
+                "ELF Loader failed to map to memory %s: %s",
                 string_get_cstr(elf_name),
-                load_status);
+                err_msg);
             break;
         }
 

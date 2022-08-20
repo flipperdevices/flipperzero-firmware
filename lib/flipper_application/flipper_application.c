@@ -86,3 +86,33 @@ void* flipper_application_resolve_symbol(FlipperApplication* app, const char* na
     UNUSED(name);
     return NULL;
 }
+
+static const char* preload_status_strings[] = {
+    [FlipperApplicationPreloadStatusSuccess] = "Success",
+    [FlipperApplicationPreloadStatusUnspecifiedError] = "Unknown error",
+    [FlipperApplicationPreloadStatusInvalidFile] = "Invalid file",
+    [FlipperApplicationPreloadStatusInvalidManifest] = "Invalid file manifest",
+    [FlipperApplicationPreloadStatusApiMismatch] = "API version mismatch",
+    [FlipperApplicationPreloadStatusTargetMismatch] = "Hardware target mismatch",
+};
+
+static const char* load_status_strings[] = {
+    [FlipperApplicationLoadStatusSuccess] = "Success",
+    [FlipperApplicationLoadStatusUnspecifiedError] = "Unknown error",
+    [FlipperApplicationLoadStatusNoFreeMemory] = "Out of memory",
+    [FlipperApplicationLoadStatusMissingImports] = "Found unsatisfied imports",
+};
+
+const char* flipper_application_preload_status_to_string(FlipperApplicationPreloadStatus status) {
+    if(status >= COUNT_OF(preload_status_strings) || preload_status_strings[status] == NULL) {
+        return "Unknown error";
+    }
+    return preload_status_strings[status];
+}
+
+const char* flipper_application_load_status_to_string(FlipperApplicationLoadStatus status) {
+    if(status >= COUNT_OF(load_status_strings) || load_status_strings[status] == NULL) {
+        return "Unknown error";
+    }
+    return load_status_strings[status];
+}
