@@ -75,6 +75,11 @@ jobs:
           ref: main
           path: CustomSwitchLib
           
+      - name: Install ESP32 Boards
+        uses: ArminJo/arduino-test-compile@v3.2.0
+        with:
+          platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
+          
       - name: Show contents of platform.txt
         run: |
           echo "Chicken"
