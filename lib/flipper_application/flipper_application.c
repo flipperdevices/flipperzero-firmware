@@ -11,6 +11,7 @@ FlipperApplication*
     FlipperApplication* app = malloc(sizeof(FlipperApplication));
     app->api_interface = api_interface;
     app->fd = storage_file_alloc(storage);
+    app->thread = NULL;
     return app;
 }
 
@@ -82,14 +83,11 @@ FuriThread* flipper_application_spawn(FlipperApplication* app, void* args) {
     furi_thread_set_callback(app->thread, (entry_t*)app->entry);
     furi_thread_set_context(app->thread, args);
 
-    furi_thread_start(app->thread);
     return app->thread;
 }
 
-void* flipper_application_resolve_symbol(FlipperApplication* app, const char* name) {
-    UNUSED(app);
-    UNUSED(name);
-    return NULL;
+void const* flipper_application_get_entry_address(FlipperApplication* app) {
+    return (void*)app->entry;
 }
 
 static const char* preload_status_strings[] = {

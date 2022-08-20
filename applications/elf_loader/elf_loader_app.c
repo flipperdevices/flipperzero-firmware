@@ -69,6 +69,7 @@ int32_t elf_loader_app(void* p) {
         FURI_LOG_I(TAG, "ELF Loader is staring app");
 
         FuriThread* thread = flipper_application_spawn(app, NULL);
+        furi_thread_start(thread);
         furi_thread_join(thread);
 
         load_success = true;

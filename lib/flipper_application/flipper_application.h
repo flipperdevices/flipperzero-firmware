@@ -60,7 +60,7 @@ const FlipperApplicationState* flipper_application_get_state(FlipperApplication*
 
 FuriThread* flipper_application_spawn(FlipperApplication* app, void* args);
 
-void* flipper_application_resolve_symbol(FlipperApplication* app, const char* name);
+void const* flipper_application_get_entry_address(FlipperApplication* app);
 
 #ifdef __cplusplus
 }
