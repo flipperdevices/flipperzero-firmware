@@ -93,6 +93,15 @@ bool bit_lib_test_parity_32(uint32_t bits, BitLibParity parity) {
 #endif
 }
 
+uint8_t bit_lib_parity(const uint8_t bits, bool odd) {
+    uint8_t parity = 0;
+    for(size_t i = 0; i < 8; i++) {
+        parity += bit_lib_get_bit(&bits, i);
+    }
+    parity = (parity % 2) ^ odd;
+    return parity;
+}
+
 bool bit_lib_test_parity(
     const uint8_t* bits,
     size_t position,
@@ -166,6 +175,13 @@ void bit_lib_copy_bits(
     for(size_t i = 0; i < length; ++i) {
         bit_lib_set_bit(data, position + i, bit_lib_get_bit(source, source_position + i));
     }
+}
+
+uint8_t bit_lib_reverse_8(uint8_t byte) {
+   byte = (byte & 0xF0) >> 4 | (byte & 0x0F) << 4;
+   byte = (byte & 0xCC) >> 2 | (byte & 0x33) << 2;
+   byte = (byte & 0xAA) >> 1 | (byte & 0x55) << 1;
+   return byte;
 }
 
 void bit_lib_reverse_bits(uint8_t* data, size_t position, uint8_t length) {

@@ -89,6 +89,14 @@ uint16_t bit_lib_get_bits_16(const uint8_t* data, size_t position, uint8_t lengt
 uint32_t bit_lib_get_bits_32(const uint8_t* data, size_t position, uint8_t length);
 
 /**
+ * @brief Compute parity bit for a given byte
+ * @param bits Bits to compute the parity for
+ * @param odd Even or odd parity
+ * @return The parity bit
+ */
+uint8_t bit_lib_parity(const uint8_t bits, bool odd);
+
+/**
  * @brief Test parity of given bits
  * @param bits Bits to test parity of
  * @param parity Parity to test against
@@ -140,6 +148,14 @@ void bit_lib_copy_bits(
     size_t length,
     const uint8_t* source,
     size_t source_position);
+
+/**
+ * @brief Reverse bits in a byte
+ * 
+ * @param byte Byte
+ * @return uint8_t the reversed byte
+ */
+uint8_t bit_lib_reverse_8(uint8_t byte);
 
 /**
  * @brief Reverse bits in bit array
