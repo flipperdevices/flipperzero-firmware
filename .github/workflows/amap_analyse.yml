@@ -1,10 +1,19 @@
 name: 'Analyze .map file with Amap'
 
+#on:
+#  workflow_run:
+#    workflows: ['Build']
+#    types:
+#      - completed
+
 on:
-  workflow_run:
-    workflows: ['Build']
-    types:
-      - completed
+  push:
+    branches:
+      - dev
+      - "release*"
+    tags:
+      - '*'
+  pull_request:
 
 env:
   TARGETS: f7
