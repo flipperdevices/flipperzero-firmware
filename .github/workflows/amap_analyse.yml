@@ -78,7 +78,7 @@ jobs:
 
       - name: 'Upload report to database'
         run: |
-          # FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
+          FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
           get_size()
           {
             SECTION="$1";
@@ -96,6 +96,7 @@ jobs:
           export RODATA_SIZE="$(get_size ".rodata")"
           export DATA_SIZE="$(get_size ".data")"
           export FREE_FLASH_SIZE="$(get_size ".free_flash")"
+          python3 -m pip install mariadb
           python3 scripts/amap_mariadb_insert.py \
             ${{ secrets.AMAP_MARIADB_USER }} \
             ${{ secrets.AMAP_MARIADB_PASSWORD }} \
