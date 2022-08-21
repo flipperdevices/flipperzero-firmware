@@ -51,9 +51,13 @@ typedef enum {
     FuriHalVersionDisplayMgg = 0x02,
 } FuriHalVersionDisplay;
 
-/** Set Flipper name
+/** Set name Name
  */
-// void furi_hal_version_set_name();
+void furi_hal_version_set_name(const char* name);
+
+/** Set Custom Name
+ */
+void furi_hal_version_set_custom_name(const char* name);
 
 /** Init flipper version
  */

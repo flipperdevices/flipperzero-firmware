@@ -91,43 +91,73 @@ typedef struct {
 
 static FuriHalVersion furi_hal_version = {0};
 
-static void furi_hal_version_set_name(const char* name) {
-    furi_hal_version.cname = furi_hal_version_get_name_ptr();
-    if (strlen(furi_hal_version.cname)<=0) furi_hal_version.cname=NULL;
-    if(name != NULL) {
-        if(name != furi_hal_version.cname && furi_hal_version.cname==NULL) {
-            strlcpy(
-                furi_hal_version.name, 
-                name, 
-                FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
-            snprintf(
-                furi_hal_version.device_name,
-                FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-                "xFlipper %s",
-                name);
-        } else if(name != furi_hal_version.cname && furi_hal_version.cname!=NULL) {
-            strlcpy(
-                furi_hal_version.name, 
-                furi_hal_version.cname, 
-                FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
-            snprintf(
-                furi_hal_version.device_name,
-                FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-                "xFlipper %s",
-                furi_hal_version.name);
-        } else {
-            strlcpy(
-                furi_hal_version.name,
-                furi_hal_version.cname,
-                FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
-            snprintf(
-                furi_hal_version.device_name,
-                FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-                "xFlipper %s",
-                furi_hal_version.name);
-        }
-    } else {
-        snprintf(furi_hal_version.device_name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH, "xFlipper Dev");
+void furi_hal_version_set_custom_name(const char* name)
+{
+	if((name != NULL) && ((strlen(name) >= 1) && (strlen(name) <= 8)))
+	{
+		strlcpy(furi_hal_version.name, name, FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
+		snprintf(furi_hal_version.device_name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH, "xFlipper %s", name);
+
+		furi_hal_version.device_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
+	}
+}
+
+void furi_hal_version_set_name(const char* name) {
+	furi_hal_version.cname = version_get_custom_name(NULL);
+	
+    if((furi_hal_version.cname != NULL) && !((strlen(furi_hal_version.cname) >=1) && (strlen(furi_hal_version.cname) <= 8)))
+	{
+		furi_hal_version.cname = NULL;
+	}
+
+	if(name != NULL)
+	{
+		if(furi_hal_version.cname != NULL)
+		{
+			strlcpy(
+				furi_hal_version.name, 
+				furi_hal_version.cname, 
+				FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
+					
+			snprintf(
+				furi_hal_version.device_name,
+				FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
+				"xFlipper %s",
+				furi_hal_version.name);
+		}
+		else
+		{
+			strlcpy(
+				furi_hal_version.name,
+				name,
+				FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
+			
+			snprintf(
+				furi_hal_version.device_name,
+				FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
+				"xFlipper %s",
+				furi_hal_version.name);
+		}
+	}
+	else
+	{
+		if(furi_hal_version.cname != NULL)
+		{
+			strlcpy(
+				furi_hal_version.name, 
+				furi_hal_version.cname, 
+				FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
+					
+			snprintf(
+				furi_hal_version.device_name,
+				FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
+				"xFlipper %s",
+				furi_hal_version.name);
+		}
+		else
+		{
+			snprintf(furi_hal_version.device_name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH, "xFlipper Device");
+		}
     }
 
     furi_hal_version.device_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
@@ -321,12 +351,7 @@ uint32_t furi_hal_version_get_hw_timestamp() {
 }
 
 const char* furi_hal_version_get_name_ptr() {
-    furi_hal_version.cname = version_get_custom_name(NULL);
-    if (furi_hal_version.cname!=NULL && strlen(furi_hal_version.cname)>=1 && strlen(furi_hal_version.cname)<=8) {
-        return furi_hal_version.cname;
-    } else {
-        return *furi_hal_version.name == 0x00 ? NULL : furi_hal_version.name;
-    }
+    return *furi_hal_version.name == 0x00 ? NULL : furi_hal_version.name;
 }
 
 const char* furi_hal_version_get_device_name_ptr() {
