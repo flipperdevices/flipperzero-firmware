@@ -30,7 +30,9 @@ void subghz_protocol_encoder_paradox_wireless_free(void* context);
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-bool subghz_protocol_encoder_paradox_wireless_deserialize(void* context, FlipperFormat* flipper_format);
+bool subghz_protocol_encoder_paradox_wireless_deserialize(
+    void* context,
+    FlipperFormat* flipper_format);
 
 /**
  * Forced transmission stop.
@@ -97,7 +99,9 @@ bool subghz_protocol_decoder_paradox_wireless_serialize(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-bool subghz_protocol_decoder_paradox_wireless_deserialize(void* context, FlipperFormat* flipper_format);
+bool subghz_protocol_decoder_paradox_wireless_deserialize(
+    void* context,
+    FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.
