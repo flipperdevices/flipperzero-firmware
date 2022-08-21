@@ -273,7 +273,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
 
 static void clock_state_init(ClockState* const state) {
     memset(state, 0, sizeof(ClockState));
-    state->militaryTime = true;
+    state->militaryTime = false;
     state->songSelect = 2;
     state->timerSecs = 0;
     state->alert_time = 80;
