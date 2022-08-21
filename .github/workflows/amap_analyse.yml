@@ -21,8 +21,9 @@ jobs:
         id: wait-for-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: 'Build'
+          checkName: 'main'
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          intervalSeconds: 20
 
       - name: 'Check Build workflow status'
         if: steps.wait-for-build.outputs.conclusion == 'failure'
