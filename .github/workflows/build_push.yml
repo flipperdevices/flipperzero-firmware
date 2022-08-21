@@ -81,6 +81,7 @@ jobs:
           cp User_Setup_Select.h CustomTFT_eSPI/
           cp User_Setup_marauder_mini.h CustomTFT_eSPI/
           cp User_Setup_og_marauder.h CustomTFT_eSPI/
+          pwd
           ls -la
           ls -la CustomTFT_eSPI
           
@@ -114,8 +115,7 @@ jobs:
       - name: Configure TFT_eSPI and configs.h for OG Marauder
         run: |
           pwd
-          ls -la
-          ls -la CustomTFT_eSPI
+          find / -name "*TFT_eSPI*"          
           sed -i 's/^#include <User_Setup_marauder_mini.h>/\/\/#include <User_Setup_marauder_mini.h>/' CustomTFT_eSPI/User_Setup_Select.h
           sed -i 's/^\/\/#include <User_Setup_og_marauder.h>/#include <User_Setup_og_marauder.h>/' CustomTFT_eSPI/User_Setup_Select.h
           sed -i 's/^  #define MARAUDER_MINI/  \/\/#define MARAUDER_MINI/' esp32_marauder/configs.h
