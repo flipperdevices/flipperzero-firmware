@@ -20,7 +20,7 @@ jobs:
         uses: fountainhead/action-wait-for-check@v1.0.0
         id: wait-for-build
         with:
-          token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           checkName: 'Build'
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
