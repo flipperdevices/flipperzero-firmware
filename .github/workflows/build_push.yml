@@ -86,7 +86,7 @@ jobs:
         run: |
           echo "Chicken"
           for i in $(find /home/runner/.arduino15/packages/esp32/hardware/esp32/ -name "platform.txt"); do
-            cat "$i" | grep compiler.c.elf.libs.
+            sed -i 's/compiler.c.elf.libs.esp32s2=/compiler.c.elf.libs.esp32s2=-zmuldefs /' "$i"
           done
           #find /home/runner/.arduino15/packages/esp32/hardware/esp32/ -name "platform.txt" -exec cat {} | grep 
           #cat /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/platform.txt | grep compiler.c.elf.libs.
@@ -104,6 +104,6 @@ jobs:
         with:
           sketch-names: esp32_marauder.ino
           arduino-board-fqbn: esp32:esp32:esp32s2
-          platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
+          #platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
           extra-arduino-cli-args: "--warnings none"
           #extra-arduino-lib-install-args: "-zmuldefs"
