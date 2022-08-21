@@ -111,14 +111,14 @@ jobs:
           
       - name: Configure TFT_eSPI and configs.h for OG Marauder
         run: |
-          sed -i 's/^#include <User_Setup_marauder_mini.h>/\/\/#include <User_Setup_marauder_mini.h>/' esp32_marauder/configs.h
-          sed -i 's/^\/\/#include <User_Setup_og_marauder.h>/#include <User_Setup_og_marauder.h>/' esp32_marauder/configs.h
-          sed -i 's/^  #define MARAUDER_MINI/  \/\/#define MARAUDER_MINI/'
-          sed -i 's/^  \/\/#define MARAUDER_V4/  #define MARAUDER_V4/'
-          sed -i 's/^  #define MARAUDER_V6/  \/\/#define MARAUDER_V6/'
-          sed -i 's/^  #define MARAUDER_KIT/  \/\/#define MARAUDER_KIT/'
-          sed -i 's/^  #define GENERIC_ESP32/  \/\/#define GENERIC_ESP32/'
-          sed -i 's/^  #define MARAUDER_FLIPPER/  \/\/#define MARAUDER_FLIPPER/'
+          sed -i 's/^#include <User_Setup_marauder_mini.h>/\/\/#include <User_Setup_marauder_mini.h>/' CustomTFT_eSPI/User_Setup_Select.h
+          sed -i 's/^\/\/#include <User_Setup_og_marauder.h>/#include <User_Setup_og_marauder.h>/' CustomTFT_eSPI/User_Setup_Select.h
+          sed -i 's/^  #define MARAUDER_MINI/  \/\/#define MARAUDER_MINI/' esp32_marauder/configs.h
+          sed -i 's/^  \/\/#define MARAUDER_V4/  #define MARAUDER_V4/' esp32_marauder/configs.h
+          sed -i 's/^  #define MARAUDER_V6/  \/\/#define MARAUDER_V6/' esp32_marauder/configs.h
+          sed -i 's/^  #define MARAUDER_KIT/  \/\/#define MARAUDER_KIT/' esp32_marauder/configs.h
+          sed -i 's/^  #define GENERIC_ESP32/  \/\/#define GENERIC_ESP32/' esp32_marauder/configs.h
+          sed -i 's/^  #define MARAUDER_FLIPPER/  \/\/#define MARAUDER_FLIPPER/' esp32_marauder/configs.h
           
       - name: Build Marauder for OG Marauder
         uses: ArminJo/arduino-test-compile@v3.2.0
@@ -131,22 +131,29 @@ jobs:
           
       - name: Configure TFT_eSPI and configs.h for Marauder v6
         run: |
-          sed -i 's/^#include <User_Setup_marauder_mini.h>/\/\/#include <User_Setup_marauder_mini.h>/' esp32_marauder/configs.h
-          sed -i 's/^\/\/#include <User_Setup_og_marauder.h>/#include <User_Setup_og_marauder.h>/' esp32_marauder/configs.h
-          sed -i 's/^  #define MARAUDER_MINI/  \/\/#define MARAUDER_MINI/'
-          sed -i 's/^  #define MARAUDER_V4/  \/\/#define MARAUDER_V4/'
-          sed -i 's/^  \/\/#define MARAUDER_V6/  #define MARAUDER_V6/'
-          sed -i 's/^  #define MARAUDER_KIT/  \/\/#define MARAUDER_KIT/'
-          sed -i 's/^  #define GENERIC_ESP32/  \/\/#define GENERIC_ESP32/'
-          sed -i 's/^  #define MARAUDER_FLIPPER/  \/\/#define MARAUDER_FLIPPER/'
+          sed -i 's/^#include <User_Setup_marauder_mini.h>/\/\/#include <User_Setup_marauder_mini.h>/' CustomTFT_eSPI/User_Setup_Select.h
+          sed -i 's/^\/\/#include <User_Setup_og_marauder.h>/#include <User_Setup_og_marauder.h>/' CustomTFT_eSPI/User_Setup_Select.h
+          sed -i 's/^  #define MARAUDER_MINI/  \/\/#define MARAUDER_MINI/' esp32_marauder/configs.h
+          sed -i 's/^  #define MARAUDER_V4/  \/\/#define MARAUDER_V4/' esp32_marauder/configs.h
+          sed -i 's/^  \/\/#define MARAUDER_V6/  #define MARAUDER_V6/' esp32_marauder/configs.h
+          sed -i 's/^  #define MARAUDER_KIT/  \/\/#define MARAUDER_KIT/' esp32_marauder/configs.h
+          sed -i 's/^  #define GENERIC_ESP32/  \/\/#define GENERIC_ESP32/' esp32_marauder/configs.h
+          sed -i 's/^  #define MARAUDER_FLIPPER/  \/\/#define MARAUDER_FLIPPER/' esp32_marauder/configs.h
 
       - name: Display finished bins
         run: |
           find ./esp32_marauder/build -name "*.bin"
           
-      - name: 'Upload Artifact'
+      - name: 'Upload Flipper Artifact'
         uses: actions/upload-artifact@v3
         with:
-          name: esp32_marauder.ino.bin
+          name: esp32_marauder.flipper.bin
           path: ./esp32_marauder/build/esp32.esp32.esp32s2/esp32_marauder.ino.bin
+          retention-days: 5
+          
+      - name: 'Upload OG Artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: esp32_marauder.og.bin
+          path: ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.ino.bin
           retention-days: 5
