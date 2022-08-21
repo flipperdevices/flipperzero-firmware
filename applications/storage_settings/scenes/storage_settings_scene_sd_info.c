@@ -28,13 +28,13 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
         char unit_mb[] = "MB";
         char unit_gb[] = "GB";
 
-        double sd_total_val = 0.000;
+        float sd_total_val = (float)sd_info.kb_total;
         char* sd_total_unit = unit_kb;
-        double sd_free_val = 0.000;
+        float sd_free_val = (float)sd_info.kb_free;
         char* sd_free_unit = unit_kb;
 
-        if(sd_info.kb_total > 1024) {
-            sd_total_val = sd_info.kb_total / 1024;
+        if(sd_total_val  > 1024) {
+            sd_total_val /= 1024;
             sd_total_unit = unit_mb;
         }
         if(sd_total_val > 1024) {
@@ -42,8 +42,8 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
             sd_total_unit = unit_gb;
         }
 
-        if(sd_info.kb_free > 1024) {
-            sd_free_val = sd_info.kb_free / 1024;
+        if(sd_free_val > 1024) {
+            sd_free_val /= 1024;
             sd_free_unit = unit_mb;
         }
         if(sd_free_val > 1024) {
