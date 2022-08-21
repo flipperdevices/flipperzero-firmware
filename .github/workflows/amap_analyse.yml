@@ -1,10 +1,14 @@
 name: 'Analyze .map file with Amap'
 
 on:
-  workflow_run:
-    workflows: ['Build']
-    types:
-      - completed
+  push:
+    branches:
+      - dev
+      - "release*"
+    tags:
+      - '*'
+  pull_request:
+
 env:
   TARGETS: f7
 
@@ -12,6 +16,19 @@ jobs:
   amap_analyse:
     runs-on: [self-hosted,FlipperZeroMacShell]
     steps:
+      - name: 'Wait Build workflow'
+        uses: fountainhead/action-wait-for-check@v1.0.0
+        id: wait-for-build
+        with:
+          token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+          checkName: 'Build'
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: 'Check Build workflow status'
+        if: steps.wait-for-build.outputs.conclusion == 'failure'
+        run: |
+          exit 1
+
       - name: 'Decontaminate previous build leftovers'
         run: |
           if [ -d .git ]; then
