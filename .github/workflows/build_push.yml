@@ -81,6 +81,8 @@ jobs:
           cp User_Setup_Select.h CustomTFT_eSPI/
           cp User_Setup_marauder_mini.h CustomTFT_eSPI/
           cp User_Setup_og_marauder.h CustomTFT_eSPI/
+          ls -la
+          ls -la CustomTFT_eSPI
           
       - name: Install ESP32 Boards and Compile MarauderOTA
         uses: ArminJo/arduino-test-compile@v3.2.0
