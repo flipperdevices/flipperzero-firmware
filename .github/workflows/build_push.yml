@@ -251,3 +251,69 @@ jobs:
           name: esp32_marauder.mini.bin
           path: ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.mini.bin
           retention-days: 5
+          
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: true
+          prerelease: false
+          
+      - name: Upload Flipper Asset
+        id: upload-flipper-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./esp32_marauder/build/esp32.esp32.esp32s2/esp32_marauder.flipper.bin
+          asset_name: esp32_marauder.flipper.bin
+          asset_content_type: application/bin
+          
+      - name: Upload OG Asset
+        id: upload-og-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.og.bin
+          asset_name: esp32_marauder.og.bin
+          asset_content_type: application/bin
+          
+      - name: Upload v6 Asset
+        id: upload-v6-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.v6.bin
+          asset_name: esp32_marauder.v6.bin
+          asset_content_type: application/bin
+          
+      - name: Upload Kit Asset
+        id: upload-kit-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.kit.bin
+          asset_name: esp32_marauder.kit.bin
+          asset_content_type: application/bin
+          
+      - name: Upload Mini Asset
+        id: upload-mini-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.mini.bin
+          asset_name: esp32_marauder.mini.bin
+          asset_content_type: application/bin
