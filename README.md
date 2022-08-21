@@ -14,6 +14,8 @@
 - Added 24/12 Hr Clock Switch [(By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/254)
 - Added Clock Refactoring [thanks to GMMan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/256)
 - Added some fun stuff...  this version is pretty STABLE!
+- Awesome [Animations: RM FW Update image (Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/257)
+- Updated Clock to be 12HR mode by default
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
