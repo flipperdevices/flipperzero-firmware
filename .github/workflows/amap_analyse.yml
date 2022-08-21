@@ -85,12 +85,12 @@ jobs:
               ${{ secrets.RSYNC_DEPLOY_USER }}@${{ secrets.RSYNC_DEPLOY_HOST }}:"${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${{steps.names.outputs.branch-name}}/" artifacts/;
           rm ./deploy_key;
 
-      - name: 'Make amap report'
+      - name: 'Make .map file analyse'
         run: |
           cd artifacts/
           /Applications/amap/Contents/MacOS/amap -f flipper-z-f7-firmware-${{steps.names.outputs.suffix}}.elf.map
 
-      - name: 'Upload report to database'
+      - name: 'Upload report to DB'
         run: |
           FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
           get_size()
