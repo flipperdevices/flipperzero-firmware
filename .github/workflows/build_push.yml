@@ -105,3 +105,10 @@ jobs:
       - name: Display finished bins
         run: |
           find . -name "*.bin"
+          
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: esp32_marauder.ino.bin
+          path: ./esp32_marauder/build/esp32.esp32.esp32s2/esp32_marauder.ino.bin
+          retention-days: 5
