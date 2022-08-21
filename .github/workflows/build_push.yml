@@ -75,28 +75,22 @@ jobs:
           ref: main
           path: CustomSwitchLib
           
-      - name: Install ESP32 Boards
+      - name: Install ESP32 Boards and Compile MarauderOTA
         uses: ArminJo/arduino-test-compile@v3.2.0
         with:
           sketch-names: MarauderOTA.ino
           arduino-board-fqbn: esp32:esp32:esp32s2
           platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
           
-      - name: Show contents of platform.txt
+      - name: Modify platform.txt
         run: |
           echo "Chicken"
           for i in $(find /home/runner/.arduino15/packages/esp32/hardware/esp32/ -name "platform.txt"); do
             sed -i 's/compiler.c.elf.libs.esp32s2=/compiler.c.elf.libs.esp32s2=-zmuldefs /' "$i"
+            sed -i 's/compiler.c.elf.libs.esp32=/compiler.c.elf.libs.esp32=-zmuldefs /' "$i"
+            cat "$i" | grep compiler.c.elf.libs.esp32s2
+            cat "$i" | grep compiler.c.elf.libs.esp32
           done
-          #find /home/runner/.arduino15/packages/esp32/hardware/esp32/ -name "platform.txt" -exec cat {} | grep 
-          #cat /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/platform.txt | grep compiler.c.elf.libs.
-          
-      - name: Find and Replace
-        uses: jacobtomlinson/gha-find-replace@v2
-        with:
-          find: "ESP32 Marauder"
-          replace: "compiler.c.elf.libs.esp32s2=-zmuldefs "
-          regex: false
                     
       # Setup Test compile for Arduino
       - name: Build Marauder for Flipper Zero WiFi Dev Board
