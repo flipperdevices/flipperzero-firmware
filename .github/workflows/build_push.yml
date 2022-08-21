@@ -108,10 +108,41 @@ jobs:
           #platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
           extra-arduino-cli-args: "--warnings none"
           #extra-arduino-lib-install-args: "-zmuldefs"
+          
+      - name: Configure TFT_eSPI and configs.h for OG Marauder
+        run: |
+          sed -i 's/^#include <User_Setup_marauder_mini.h>/\/\/#include <User_Setup_marauder_mini.h>/' esp32_marauder/configs.h
+          sed -i 's/^\/\/#include <User_Setup_og_marauder.h>/#include <User_Setup_og_marauder.h>/' esp32_marauder/configs.h
+          sed -i 's/^  #define MARAUDER_MINI/  \/\/#define MARAUDER_MINI/'
+          sed -i 's/^  \/\/#define MARAUDER_V4/  #define MARAUDER_V4/'
+          sed -i 's/^  #define MARAUDER_V6/  \/\/#define MARAUDER_V6/'
+          sed -i 's/^  #define MARAUDER_KIT/  \/\/#define MARAUDER_KIT/'
+          sed -i 's/^  #define GENERIC_ESP32/  \/\/#define GENERIC_ESP32/'
+          sed -i 's/^  #define MARAUDER_FLIPPER/  \/\/#define MARAUDER_FLIPPER/'
+          
+      - name: Build Marauder for OG Marauder
+        uses: ArminJo/arduino-test-compile@v3.2.0
+        with:
+          sketch-names: esp32_marauder.ino
+          arduino-board-fqbn: esp32:esp32:d32:PartitionScheme=min_spiffs
+          #platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
+          extra-arduino-cli-args: "--warnings none"
+          #extra-arduino-lib-install-args: "-zmuldefs"
+          
+      - name: Configure TFT_eSPI and configs.h for Marauder v6
+        run: |
+          sed -i 's/^#include <User_Setup_marauder_mini.h>/\/\/#include <User_Setup_marauder_mini.h>/' esp32_marauder/configs.h
+          sed -i 's/^\/\/#include <User_Setup_og_marauder.h>/#include <User_Setup_og_marauder.h>/' esp32_marauder/configs.h
+          sed -i 's/^  #define MARAUDER_MINI/  \/\/#define MARAUDER_MINI/'
+          sed -i 's/^  #define MARAUDER_V4/  \/\/#define MARAUDER_V4/'
+          sed -i 's/^  \/\/#define MARAUDER_V6/  #define MARAUDER_V6/'
+          sed -i 's/^  #define MARAUDER_KIT/  \/\/#define MARAUDER_KIT/'
+          sed -i 's/^  #define GENERIC_ESP32/  \/\/#define GENERIC_ESP32/'
+          sed -i 's/^  #define MARAUDER_FLIPPER/  \/\/#define MARAUDER_FLIPPER/'
 
       - name: Display finished bins
         run: |
-          find . -name "*.bin"
+          find ./esp32_marauder/build -name "*.bin"
           
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v3
