@@ -97,7 +97,7 @@ jobs:
         uses: ArminJo/arduino-test-compile@v3.2.0
         with:
           sketch-names: esp32_marauder.ino
-          arduino-board-fqbn: esp32:esp32:esp32s2:PartitionScheme=minimalspiffs
+          arduino-board-fqbn: esp32:esp32:esp32s2:PartitionScheme=minimal_spiffs
           #platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
           extra-arduino-cli-args: "--warnings none"
           #extra-arduino-lib-install-args: "-zmuldefs"
