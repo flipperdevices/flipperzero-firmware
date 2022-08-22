@@ -40,14 +40,14 @@ static const DolphinDeedWeight dolphin_deed_weights[] = {
 };
 
 static uint8_t dolphin_deed_limits[] = {
-    45, // DolphinAppSubGhz
-    45, // DolphinAppRfid
-    45, // DolphinAppNfc
-    45, // DolphinAppIr
-    45, // DolphinAppIbutton
-    45, // DolphinAppBadusb
+    198, // DolphinAppSubGhz
+    198, // DolphinAppRfid
+    198, // DolphinAppNfc
+    198, // DolphinAppIr
+    198, // DolphinAppIbutton
+    198, // DolphinAppBadusb
     198, // DolphinAppU2f
-    // 90, // DolphinAppPlugin
+    // 198, // DolphinAppPlugin
 };
 
 _Static_assert(COUNT_OF(dolphin_deed_weights) == DolphinDeedMAX, "dolphin_deed_weights size error");

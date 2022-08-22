@@ -6,17 +6,20 @@
 <b>Latest Updates:</b>
 
 - Known Issues: `FAP Loader` & `Chess`
-- Added [keyboard_layout_file documentation](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/documentation/keyboard_layout_file.md) [(By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
-- Images optimized for space [thanks to CyberFlameGO](https://github.com/CyberFlameGO/flipperzero-firmware/tree/imgbot)
-- OFW: [Fix BT Remote 'stay' button bug on first plugin launch #1626 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1626)
-- Added [SD info dynamic units #252 (By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/252)
-- Added [Archive: dont start browser worker on favourites tab #1628 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1628)
-- Added 24/12 Hr Clock Switch [(By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/254)
-- Added Clock Refactoring [thanks to GMMan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/256)
-- Added some fun stuff...  this version is pretty STABLE!
 - Awesome [Animations: RM FW Update image (Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/257)
 - Updated Clock to be 12HR mode by default
+- Assets: Includes New Dolphin Animations: [Mew (By Arkaivos)]
+- Most of these new changes below are experimental... this may be an unstable build...
 - Settings: Rename from SD `dolphin/name.txt` [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
+- Settings:  "DUMB Mode" is now "Lock W PIN + Off" [(By RogueMaster)]
+- Reworked Clock notifications
+- Clock no longer displays StopWatch OR 12hr/24hr options in Game Mode
+- Clock only stop and reset on Left HOLD
+- Flipper is no longer Stoned in Game Mode
+- Did some TAMA P1 app renaming... 
+- Made exit code sequence state variable for Game Mode exit not a global variable.
+- Dolphin: Changed daily MAX to 198 on all 7 Deed Types. Testing random Deed Selection for MAX +3 EXP daily gain.
+- Zombiez: Changed to be hold back to exit and +3 EXP for every 20 Zombie kills
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -30,7 +33,7 @@
 - [HERE IS A NOOB GUIDE TO FLASH AND UNLOCK (BY interestingsoup)](https://interestingsoup.com/n00b-guide-flashing-flipper-zero-to-rougemaster/)
 - [How to install firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/documentation/HowToInstall.md)
 - [How to build firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/documentation/HowToBuild.md)
-- [How to change Flipper name](https://github.com/RogueMaster/flipperzero-firmware/blob/dev/documentation/CustomFlipperName.md)
+- [How to change Flipper name](https://github.com/RogueMaster/flipperzero-firmware/blob/420/documentation/CustomFlipperName.md)
 - [Configure UniversalRF Remix App](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/documentation/UniRFRemix.md)
 - [How to use: NRF24 plugins](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/documentation/NRF24.md)
 - [How to use: SentrySafe plugin](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/documentation/SentrySafe.md)
@@ -79,7 +82,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Animations: SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
 - Assets: Includes a NFC Level 50 Link Amiibo
 - Assets: Includes a NFC Rick Roll link
-- Assets: Includes New Dolphin Animations: [Rick Roll, Matrix & Swim animations (By qqMajiKpp)], [Rukamon 2x and Agumon animations (By Syrius)]
+- Assets: Includes New Dolphin Animations: [Rick Roll, Matrix & Swim animations (By qqMajiKpp)], [Rukamon 2x and Agumon animations (By Syrius)], [Mew (By Arkaivos)]
 - Assets: Includes sample Music Player tunes
 - Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys, Tesla Charge Port and Unitree Go1 Robot Dog
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
@@ -93,9 +96,10 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)
 - Dolphin: Internal manifest updated to have animations always available with max level 30
 - Dolphin: Level animation sequence for level 3+ to be lvl1->2 for levels 1-20 and lvl2->3 for levels 21-30.
-- Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware), changed to Mood Stays Less Than 6 / Mood Stays High (By RogueMaster)
+- Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware), changed to Mood Stays Less Than 6 / Mood Stays High (but not in game mode) (By RogueMaster)
 - Dolphin: Passport: Show EXP [(By Dabolus)](https://github.com/Dabolus/flipperzero-firmware-rpg/)
-- Dolphin: Plugin Achivement +3 EXP for a total of 90 EXP daily. Plugin Achivements are:
+- Dolphin: Changed daily MAX to 198 on all 7 Deed Types. Random Deed Selection used for MAX +3 EXP daily gain.
+- Dolphin: Plugin Achivement +3 EXP for a total of 198 EXP daily. Plugin Achivements are:
 - - Dice First Roll for d20+ = sides on dice (i.e. Nat 20 on d20)
 - - Dice First Roll for d20+ = sides on dice - 1 (+1 EXP) (i.e. 19 on d20)
 - - Games Only Mode from Lock Menu
@@ -106,6 +110,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - - Tetris, Snake or Flappy Bird Score of 10 or more
 - - Tetris, Snake or Flappy Bird Score of 50 or more
 - - Tetris, Snake or Flappy Bird Score of 100 or more
+- - Zombiez for every 20 Zombie kills
 - Dolphin: SD dolphin manifest updated to weight animations differently
 - GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
@@ -120,6 +125,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Settings: Custom name with this compile: CUSTOM_FLIPPER_NAME=name ./fbt updater_package [By Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Settings: Desktop => [Games Only Mode (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md) [(Thanks to Astrrra for Inverted Mode to Mimic)](https://github.com/wetox-team/flipperzero-firmware/commit/ce91582b7417c5d7a9d8416c17a102d3a5868238)
 - - [UP UP DOWN DOWN LEFT CENTER LEFT CENTER FOR MAIN MENU](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)<== FULL LIST OF GAMES ONLY CONTROLS
+- Settings:  "DUMB Mode" is now "Lock W PIN + Off" [(By RogueMaster)]
 - Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 - Settings: Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
 - Settings: LCD Timeout Options Added: 10s+90s+2min+5min+10min [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/notification/notification_settings_app.c)
@@ -168,7 +174,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 - `FAP` [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine) `HIDDEN "GAME_Raycast"`
 - `FAP` Snake [OFW]
-- [Tamagochi (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) requires [this rom](https://wowroms.com/en/roms/mame/download-tamagotchi-usa/108517.html) IN `tama_p1` on SD as `rom.bin` to make it work.
+- [TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` on SD as `rom.bin` to make it work.
 - `FAP` [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) `HIDDEN "GAME_Tanks"`
 - `FAP` [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
 - `FAP` [Tic Tac Toe (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)

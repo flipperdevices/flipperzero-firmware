@@ -1,6 +1,7 @@
 #include <gui/scene_manager.h>
 #include <applications.h>
 #include <furi_hal.h>
+#include <furi_hal_power.h>
 #include <toolbox/saved_struct.h>
 #include <stdbool.h>
 #include <loader/loader.h>
@@ -66,6 +67,22 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
                 }
             }
             consumed = true;
+            break;
+        case DesktopLockMenuEventPinLockShutdown:
+            if(desktop->settings.pin_code.length > 0) {
+                desktop_pin_lock(&desktop->settings);
+                desktop_lock(desktop);
+            } else {
+                LoaderStatus status =
+                    loader_start(desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
+                if(status == LoaderStatusOk) {
+                    scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 1);
+                } else {
+                    FURI_LOG_E(TAG, "Unable to start desktop settings");
+                }
+            }
+            consumed = true;
+			furi_hal_power_off();
             break;
         case DesktopLockMenuEventExit:
             scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);

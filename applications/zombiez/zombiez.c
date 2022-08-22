@@ -2,6 +2,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
+#include <dolphin/dolphin.h>
 
 //ORIGINAL REPO: https://github.com/Dooskington/flipperzero-zombiez
 //AUTHORS: https://github.com/Dooskington | https://github.com/DevMilanIan
@@ -225,6 +226,7 @@ static void tick(PluginState* const plugin_state) {
                             free(z);
                             plugin_state->zombies[i] = NULL;
                             plugin_state->score++;
+                            if(plugin_state->score % 20 == 0) DOLPHIN_DEED(DolphinDeedU2fAuthorized);
                         //}
                     } else if(z->position.x <= WALL_X && z->position.x > 0) { // zombie got to the wall
                         plugin_state->zombies_count -= 1;
@@ -331,7 +333,6 @@ int32_t zombiez_game_app(void* p) {
                         }
                         break;
                     case InputKeyBack: 
-                        isRunning = false;
                         break;
                     default:
                         break;
@@ -359,6 +360,8 @@ int32_t zombiez_game_app(void* p) {
                             plugin_state->projectiles_count = 0;
                             plugin_state->player.hp++;
                         }
+                    } else if(event.input.key == InputKeyBack) {
+                        isRunning = false;
                     }
                 }
             } else if(event.type == EventTypeTick) {

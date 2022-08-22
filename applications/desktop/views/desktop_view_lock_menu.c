@@ -52,12 +52,14 @@ static void lock_menu_callback(void* context, uint8_t index) {
     case 1: // lock
         lock_menu->callback(DesktopLockMenuEventPinLock, lock_menu->context);
         break;
-    case 2: // DUMB MODE
+    case 2: // DUMB MODE .. NOW LOCK AND SHUTDOWN
         with_view_model(
             lock_menu->view, (DesktopLockMenuViewModel * model) {
                 model->hint_timeout = HINT_TIMEOUT;
                 return true;
             });
+        furi_delay_us(800);
+        lock_menu->callback(DesktopLockMenuEventPinLockShutdown, lock_menu->context);
         break;
     case 3: // GAMES ONLY MODE
         with_view_model(
@@ -82,7 +84,7 @@ static void lock_menu_callback(void* context, uint8_t index) {
 
 void desktop_lock_menu_render(Canvas* canvas, void* model) {
     const char* Lockmenu_Items[LOCK_MENU_ITEMS_NB] = {
-        "Lock", "Lock With PIN", "DUMB Mode", "GAMES ONLY"};
+        "Lock", "Lock With PIN", "Lock W PIN + Off", "GAMES ONLY"};
 
     DesktopLockMenuViewModel* m = model;
     canvas_clear(canvas);
@@ -97,7 +99,7 @@ void desktop_lock_menu_render(Canvas* canvas, void* model) {
         if(i == 1 && !m->pin_set) str = "Set PIN";
 
         if(m->hint_timeout && m->idx == 2 && m->idx == i) {
-            str = "Not Implemented";
+            str = "Shutting Down...";
         } else if(m->hint_timeout && m->idx == 3 && m->idx == i) {
             str = "UUDDLCLC For Main";
         }

@@ -35,4 +35,4 @@ typedef struct {
 extern TamaApp* g_ctx;
 extern FuriMutex* g_state_mutex;
 
-void tamagotchi_p1_hal_init(hal_t* hal);
+void tama_p1_hal_init(hal_t* hal);

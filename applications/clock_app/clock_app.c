@@ -6,6 +6,7 @@
 #include <dolphin/dolphin.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include "desktop/desktop_settings/desktop_settings_app.h"
 
 #define TAG "Clock"
 
@@ -22,6 +23,7 @@ typedef struct {
 typedef struct {
     FuriMutex* mutex;
     FuriMessageQueue* event_queue;
+    DesktopSettingsApp* app;
     uint32_t timer_start_timestamp;
     uint32_t timer_stopped_seconds;
     uint32_t songSelect;
@@ -32,164 +34,164 @@ typedef struct {
 } ClockState;
 
 const NotificationSequence clock_alert_silent = {
-	&message_vibro_on,
-	&message_red_255,
-	&message_green_255,
-	&message_blue_255,
-	&message_display_backlight_on,
-	&message_vibro_off,
-	&message_display_backlight_off,
-	&message_delay_50,
-	&message_display_backlight_on,
-	NULL,
+    &message_vibro_on,
+    &message_red_255,
+    &message_green_255,
+    &message_blue_255,
+    &message_display_backlight_on,
+    &message_vibro_off,
+    &message_display_backlight_off,
+    &message_delay_50,
+    &message_display_backlight_on,
+    NULL,
 };
 const NotificationSequence clock_alert_pr1 = {
-	&message_vibro_on,
-	&message_red_255,
-	&message_green_255,
-	&message_blue_255,
-	&message_display_backlight_on,
-	&message_note_g5,
-	&message_delay_100,
-	&message_delay_100,
-	&message_delay_50,
-	&message_sound_off,
-	&message_vibro_off,
-	&message_display_backlight_off,
-	&message_delay_50,
-	&message_display_backlight_on,
-	&message_note_g5,
-	&message_delay_100,
-	&message_delay_100,
-	&message_delay_50,
-	&message_sound_off,
-	NULL,
+    &message_vibro_on,
+    &message_red_255,
+    &message_green_255,
+    &message_blue_255,
+    &message_display_backlight_on,
+    &message_note_g5,
+    &message_delay_100,
+    &message_delay_100,
+    &message_delay_50,
+    &message_sound_off,
+    &message_vibro_off,
+    &message_display_backlight_off,
+    &message_delay_50,
+    &message_display_backlight_on,
+    &message_note_g5,
+    &message_delay_100,
+    &message_delay_100,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
 };
 const NotificationSequence clock_alert_pr2 = {
-	&message_vibro_on,
-	&message_note_fs5,
-	&message_delay_100,
-	&message_delay_100,
-	&message_sound_off,
-	&message_display_backlight_off,
-	&message_vibro_off,
-	&message_delay_50,
-	&message_note_g5,
-	&message_delay_100,
-	&message_delay_100,
-	&message_sound_off,
-	&message_display_backlight_on,
-	&message_delay_50,
-	&message_note_a5,
-	&message_delay_100,
-	&message_delay_100,
-	&message_sound_off,
-	NULL,
+    &message_vibro_on,
+    &message_note_fs5,
+    &message_delay_100,
+    &message_delay_100,
+    &message_sound_off,
+    &message_display_backlight_off,
+    &message_vibro_off,
+    &message_delay_50,
+    &message_note_g5,
+    &message_delay_100,
+    &message_delay_100,
+    &message_sound_off,
+    &message_display_backlight_on,
+    &message_delay_50,
+    &message_note_a5,
+    &message_delay_100,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
 };
 const NotificationSequence clock_alert_pr3 = {
-	&message_display_backlight_off,
-	&message_note_g5,
-	&message_delay_100,
-	&message_delay_100,
-	&message_sound_off,
-	&message_delay_50,
-	&message_red_255,
-	&message_green_255,
-	&message_blue_255,
-	&message_display_backlight_on,
-	&message_delay_100,
-	NULL,
+    &message_display_backlight_off,
+    &message_note_g5,
+    &message_delay_100,
+    &message_delay_100,
+    &message_sound_off,
+    &message_delay_50,
+    &message_red_255,
+    &message_green_255,
+    &message_blue_255,
+    &message_display_backlight_on,
+    &message_delay_100,
+    NULL,
 };
 const NotificationSequence clock_alert_mario1 = {
-	&message_vibro_on,
-	&message_red_255,
-	&message_green_255,
-	&message_blue_255,
-	&message_display_backlight_on,
-	&message_note_e5,
-	&message_delay_100,
-	&message_delay_100,
-	&message_delay_50,
-	&message_sound_off,
-	&message_note_e5,
-	&message_delay_100,
-	&message_delay_100,
-	&message_delay_50,
-	&message_sound_off,
-	&message_vibro_off,
-	&message_display_backlight_off,
-	&message_delay_100,
-	&message_display_backlight_on,
-	&message_delay_100,
-	&message_note_e5,
-	&message_delay_100,
-	&message_delay_100,
-	&message_delay_50,
-	&message_sound_off,
-	NULL,
+    &message_vibro_on,
+    &message_red_255,
+    &message_green_255,
+    &message_blue_255,
+    &message_display_backlight_on,
+    &message_note_e5,
+    &message_delay_100,
+    &message_delay_100,
+    &message_delay_50,
+    &message_sound_off,
+    &message_note_e5,
+    &message_delay_100,
+    &message_delay_100,
+    &message_delay_50,
+    &message_sound_off,
+    &message_vibro_off,
+    &message_display_backlight_off,
+    &message_delay_100,
+    &message_display_backlight_on,
+    &message_delay_100,
+    &message_note_e5,
+    &message_delay_100,
+    &message_delay_100,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
 };
 const NotificationSequence clock_alert_mario2 = {
-	&message_vibro_on,
-	&message_display_backlight_off,
-	&message_delay_100,
-	&message_display_backlight_on,
-	&message_delay_100,
-	&message_note_c5,
-	&message_delay_100,
-	&message_delay_100,
-	&message_sound_off,
-	&message_display_backlight_off,
-	&message_vibro_off,
-	&message_delay_50,
-	&message_note_e5,
-	&message_delay_100,
-	&message_delay_100,
-	&message_sound_off,
-	&message_display_backlight_on,
-	NULL,
+    &message_vibro_on,
+    &message_display_backlight_off,
+    &message_delay_100,
+    &message_display_backlight_on,
+    &message_delay_100,
+    &message_note_c5,
+    &message_delay_100,
+    &message_delay_100,
+    &message_sound_off,
+    &message_display_backlight_off,
+    &message_vibro_off,
+    &message_delay_50,
+    &message_note_e5,
+    &message_delay_100,
+    &message_delay_100,
+    &message_sound_off,
+    &message_display_backlight_on,
+    NULL,
 };
 const NotificationSequence clock_alert_mario3 = {
-	&message_display_backlight_off,
-	&message_note_g5,
-	&message_delay_100,
-	&message_delay_100,
-	&message_delay_100,
-	&message_delay_100,
-	&message_sound_off,
-	&message_delay_50,
-	&message_red_255,
-	&message_green_255,
-	&message_blue_255,
-	&message_display_backlight_on,
-	&message_delay_100,
-	&message_note_g4,
-	&message_delay_100,
-	&message_delay_100,
-	&message_delay_100,
-	&message_delay_100,
-	&message_sound_off,
-	NULL,
+    &message_display_backlight_off,
+    &message_note_g5,
+    &message_delay_100,
+    &message_delay_100,
+    &message_delay_100,
+    &message_delay_100,
+    &message_sound_off,
+    &message_delay_50,
+    &message_red_255,
+    &message_green_255,
+    &message_blue_255,
+    &message_display_backlight_on,
+    &message_delay_100,
+    &message_note_g4,
+    &message_delay_100,
+    &message_delay_100,
+    &message_delay_100,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
 };
 const NotificationSequence clock_alert_perMin = {
-	&message_note_g5,
-	&message_delay_100,
-	&message_delay_50,
-	&message_sound_off,
-	&message_delay_10,
-	&message_note_g4,
-	&message_delay_50,
-	&message_delay_10,
-	&message_delay_10,
-	&message_sound_off,
-	NULL,
+    &message_note_g5,
+    &message_delay_100,
+    &message_delay_50,
+    &message_sound_off,
+    &message_delay_10,
+    &message_note_g4,
+    &message_delay_50,
+    &message_delay_10,
+    &message_delay_10,
+    &message_sound_off,
+    NULL,
 };
 const NotificationSequence clock_alert_startStop = {
-	&message_note_d6,
-	&message_delay_100,
-	&message_delay_10,
-	&message_delay_10,
-	&message_sound_off,
-	NULL,
+    &message_note_d6,
+    &message_delay_100,
+    &message_delay_10,
+    &message_delay_10,
+    &message_sound_off,
+    NULL,
 };
 
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -251,12 +253,14 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
         if(!state->militaryTime) canvas_draw_str_aligned(canvas, 67, 15, AlignCenter, AlignCenter, strAMPM);
         canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
-        elements_button_left(canvas, state->militaryTime ? "12h" : "24h");
+        if(!state->app->is_dumbmode) elements_button_left(canvas, state->militaryTime ? "12h" : "24h");
     }
-    if(timer_running) {
-        elements_button_center(canvas, "Stop");
-    } else {
-        elements_button_center(canvas, "Start");
+    if(!state->app->is_dumbmode) {
+        if(timer_running) {
+            elements_button_center(canvas, "Stop");
+        } else {
+            elements_button_center(canvas, "Start");
+        }
     }
     if(timer_running) {
         if(songSelect == 0) {
@@ -277,6 +281,8 @@ static void clock_state_init(ClockState* const state) {
     state->songSelect = 2;
     state->timerSecs = 0;
     state->alert_time = 80;
+    app = malloc(sizeof(DesktopSettingsApp));
+    LOAD_DESKTOP_SETTINGS(&app->settings);
 }
 
 // Runs every 1000ms by default
@@ -322,6 +328,7 @@ int32_t clock_app(void* p) {
     view_port_draw_callback_set(view_port, clock_render_callback, plugin_state);
     view_port_input_callback_set(view_port, clock_input_callback, plugin_state->event_queue);
 
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     // Open GUI and register view_port
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
@@ -356,102 +363,99 @@ int32_t clock_app(void* p) {
                         break;
                     case InputKeyLeft:
                         if(plugin_state->timer_start_timestamp != 0) {
+                            // START? TIMER
+                            FuriHalRtcDateTime curr_dt;
+                            furi_hal_rtc_get_datetime(&curr_dt);
+                            uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
                             // Reset seconds
-                            plugin_state->timer_running = false;
-                            plugin_state->timer_start_timestamp = 0;
+                            plugin_state->timer_start_timestamp = curr_ts;
                             plugin_state->timer_stopped_seconds = 0;
                             plugin_state->timerSecs = 0;
                         } else {
                             // Toggle 12/24 hours
-                            plugin_state->militaryTime = !plugin_state->militaryTime;
+                            if(!plugin_state->app->is_dumbmode) plugin_state->militaryTime = !plugin_state->militaryTime;
                         }
                         break;
                     case InputKeyOk:
-                        if(plugin_state->songSelect == 1 || plugin_state->songSelect == 2 || plugin_state->songSelect == 3) {
-                            NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-                            notification_message(notification, &clock_alert_startStop);
-                            furi_record_close(RECORD_NOTIFICATION);
-                        }
-                        // START/STOP TIMER
-                        FuriHalRtcDateTime curr_dt;
-                        furi_hal_rtc_get_datetime(&curr_dt);
-                        uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
-
-                        if(plugin_state->timer_running) {
-                            // Update stopped seconds
-                            plugin_state->timer_stopped_seconds =
-                                curr_ts - plugin_state->timer_start_timestamp;
-                        } else {
-                            if(plugin_state->timer_start_timestamp == 0) {
-                                // Set starting timestamp if this is first time
-                                plugin_state->timer_start_timestamp = curr_ts;
-                            } else {
-                                // Timer was already running, need to slightly readjust so we don't
-                                // count the intervening time
-                                plugin_state->timer_start_timestamp =
-                                    curr_ts - plugin_state->timer_stopped_seconds;
+                        if(!plugin_state->app->is_dumbmode) {
+                            if(plugin_state->songSelect == 1 || plugin_state->songSelect == 2 || plugin_state->songSelect == 3) {
+                                notification_message(notification, &clock_alert_startStop);
                             }
+                            // START/STOP TIMER
+                            FuriHalRtcDateTime curr_dt;
+                            furi_hal_rtc_get_datetime(&curr_dt);
+                            uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+
+                            if(plugin_state->timer_running) {
+                                // Update stopped seconds
+                                plugin_state->timer_stopped_seconds =
+                                    curr_ts - plugin_state->timer_start_timestamp;
+                            } else {
+                                if(plugin_state->timer_start_timestamp == 0) {
+                                    // Set starting timestamp if this is first time
+                                    plugin_state->timer_start_timestamp = curr_ts;
+                                } else {
+                                    // Timer was already running, need to slightly readjust so we don't
+                                    // count the intervening time
+                                    plugin_state->timer_start_timestamp =
+                                        curr_ts - plugin_state->timer_stopped_seconds;
+                                }
+                            }
+                            plugin_state->timer_running = !plugin_state->timer_running;
                         }
-                        plugin_state->timer_running = !plugin_state->timer_running;
                         break;
                     case InputKeyBack:
                         // Exit the plugin
                         processing = false;
                         break;
                     }
+                } else if(event.input.type == InputTypeLong) {
+                    if (event.input.key == InputKeyLeft) {
+                        if(plugin_state->timer_start_timestamp != 0) {
+                            // Reset seconds
+                            plugin_state->timer_running = false;
+                            plugin_state->timer_start_timestamp = 0;
+                            plugin_state->timer_stopped_seconds = 0;
+                            plugin_state->timerSecs = 0;
+                        }
+                    }
                 }
             } else if(event.type == EventTypeTick) {
                 // Do nothing, just need to update viewport
-				if(plugin_state->timer_running) {
-					plugin_state->timerSecs = plugin_state->timerSecs + 1;
-					if(plugin_state->timerSecs % 60 == 0 && plugin_state->timerSecs != 0) {
-						NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-						notification_message(notification, &clock_alert_perMin);
-						furi_record_close(RECORD_NOTIFICATION);
-					}
-					if(plugin_state->songSelect == 1) {
-						if(plugin_state->timerSecs == plugin_state->alert_time) {
-							DOLPHIN_DEED(DolphinDeedU2fAuthorized);
-							NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-							notification_message(notification, &clock_alert_pr1);
-							furi_record_close(RECORD_NOTIFICATION);
-						}
-						if(plugin_state->timerSecs == plugin_state->alert_time + 1) {
-							NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-							notification_message(notification, &clock_alert_pr2);
-							furi_record_close(RECORD_NOTIFICATION);
-						}
-						if(plugin_state->timerSecs == plugin_state->alert_time + 2) {
-							NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-							notification_message(notification, &clock_alert_pr3);
-							furi_record_close(RECORD_NOTIFICATION);
-						}
-					} else if(plugin_state->songSelect == 2) {
-						if(plugin_state->timerSecs == plugin_state->alert_time) {
-							DOLPHIN_DEED(DolphinDeedU2fAuthorized);
-							NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-							notification_message(notification, &clock_alert_mario1);
-							furi_record_close(RECORD_NOTIFICATION);
-						}
-						if(plugin_state->timerSecs == plugin_state->alert_time + 1) {
-							NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-							notification_message(notification, &clock_alert_mario2);
-							furi_record_close(RECORD_NOTIFICATION);
-						}
-						if(plugin_state->timerSecs == plugin_state->alert_time + 2) {
-							NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-							notification_message(notification, &clock_alert_mario3);
-							furi_record_close(RECORD_NOTIFICATION);
-						}
-					} else {
-						if(plugin_state->timerSecs == plugin_state->alert_time) {
-							DOLPHIN_DEED(DolphinDeedU2fAuthorized);
-							NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-							notification_message(notification, &clock_alert_silent);
-							furi_record_close(RECORD_NOTIFICATION);
-						}
-					}
-				}
+                if(plugin_state->timer_running) {
+                    plugin_state->timerSecs = plugin_state->timerSecs + 1;
+                    if(plugin_state->timerSecs % 60 == 0 && plugin_state->timerSecs != 0) {
+                        notification_message(notification, &clock_alert_perMin);
+                    }
+                    if(plugin_state->songSelect == 1) {
+                        if(plugin_state->timerSecs == plugin_state->alert_time) {
+                            DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+                            notification_message(notification, &clock_alert_pr1);
+                        }
+                        if(plugin_state->timerSecs == plugin_state->alert_time + 1) {
+                            notification_message(notification, &clock_alert_pr2);
+                        }
+                        if(plugin_state->timerSecs == plugin_state->alert_time + 2) {
+                            notification_message(notification, &clock_alert_pr3);
+                        }
+                    } else if(plugin_state->songSelect == 2) {
+                        if(plugin_state->timerSecs == plugin_state->alert_time) {
+                            DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+                            notification_message(notification, &clock_alert_mario1);
+                        }
+                        if(plugin_state->timerSecs == plugin_state->alert_time + 1) {
+                            notification_message(notification, &clock_alert_mario2);
+                        }
+                        if(plugin_state->timerSecs == plugin_state->alert_time + 2) {
+                            notification_message(notification, &clock_alert_mario3);
+                        }
+                    } else {
+                        if(plugin_state->timerSecs == plugin_state->alert_time) {
+                            DOLPHIN_DEED(getRandomDeed());
+                            notification_message(notification, &clock_alert_silent);
+                        }
+                    }
+                }
             }
             view_port_update(view_port);
             furi_mutex_release(plugin_state->mutex);
@@ -464,6 +468,7 @@ int32_t clock_app(void* p) {
     furi_timer_free(timer);
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
+    furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
     view_port_free(view_port);
     furi_message_queue_free(plugin_state->event_queue);

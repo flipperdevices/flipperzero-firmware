@@ -6,6 +6,7 @@
 #include <gui/gui.h>
 #include <furi_hal_version.h>
 #include "dolphin/dolphin.h"
+#include "desktop/desktop_settings/desktop_settings_app.h"
 #include "math.h"
 
 #define MOODS_TOTAL 3
@@ -26,7 +27,7 @@ static const Icon* const portrait_bad[MOODS_TOTAL] = {
 
 static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy, portrait_ok, portrait_bad};
 
-static const char* const moods[BUTTHURT_MAX] = {
+static const char* const moods[16] = {
     "Stoned",
     "Baked",
     "Ripped",
@@ -39,11 +40,10 @@ static const char* const moods[BUTTHURT_MAX] = {
     "Bored",
     "Sad",
     "Disappointed",
-    "Annoyed"
-    // ,
-    // "Upset",
-    // "Angry",
-    // "Furious"
+    "Annoyed",
+    "Upset",
+    "Angry",
+    "Furious"
 };
 
 static void input_callback(InputEvent* input, void* ctx) {
@@ -56,12 +56,16 @@ static void input_callback(InputEvent* input, void* ctx) {
 
 static void render_callback(Canvas* canvas, void* ctx) {
     DolphinStats* stats = ctx;
+    DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
+    LOAD_DESKTOP_SETTINGS(&app->settings);
 
     char level_str[12];
     char xp_str[12];
     char mood_str[20];
     uint8_t mood = 0;
-    snprintf(mood_str, 20, "Mood: %s", moods[stats->butthurt]);
+    uint8_t moodStrIndex = stats->butthurt;
+    if(desktop_settings->is_dumbmode) moodStrIndex = moodStrIndex + 4;
+    snprintf(mood_str, 20, "Mood: %s", moods[moodStrIndex]);
     if(stats->butthurt <= 4) {
         mood = 0;
         // snprintf(mood_str, 20, "Mood: Happy");

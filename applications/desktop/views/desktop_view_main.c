@@ -10,7 +10,6 @@
 #include "desktop_view_main.h"
 #include "desktop/desktop_settings/desktop_settings_app.h"
 
-uint32_t codeSequence = 0;
 
 struct DesktopMainView {
     View* view;
@@ -18,6 +17,7 @@ struct DesktopMainView {
     void* context;
     TimerHandle_t poweroff_timer;
     bool is_gamemode;
+    uint32_t codeSequence;
 };
 
 #define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 5000
@@ -92,39 +92,39 @@ bool desktop_main_input(InputEvent* event, void* context) {
     } else {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
-                if(codeSequence == 5 || codeSequence == 7) {
-                    codeSequence++;
+                if(main_view->codeSequence == 5 || main_view->codeSequence == 7) {
+                    main_view->codeSequence++;
                 } else {
-                    codeSequence = 0;
+                    main_view->codeSequence = 0;
                     main_view->callback(DesktopMainEventOpenGames, main_view->context);
                 }
             } else if(event->key == InputKeyUp) {
-                if(codeSequence == 0 || codeSequence == 1) {
-                    codeSequence++;
+                if(main_view->codeSequence == 0 || main_view->codeSequence == 1) {
+                    main_view->codeSequence++;
                 } else {
-                    codeSequence = 0;
+                    main_view->codeSequence = 0;
                     main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
                 }
             } else if(event->key == InputKeyDown) {
                 // PREFER TO OPEN GAMES MENU
-                if(codeSequence == 2 || codeSequence == 3) {
-                    codeSequence++;
+                if(main_view->codeSequence == 2 || main_view->codeSequence == 3) {
+                    main_view->codeSequence++;
                 } else {
-                    codeSequence = 0;
+                    main_view->codeSequence = 0;
                 }
             } else if(event->key == InputKeyLeft) {
-                if(codeSequence == 4 || codeSequence == 6) {
-                    codeSequence++;
+                if(main_view->codeSequence == 4 || main_view->codeSequence == 6) {
+                    main_view->codeSequence++;
                 } else {
-                    codeSequence = 0;
+                    main_view->codeSequence = 0;
                     main_view->callback(DesktopMainEventOpenClock, main_view->context);
                 }
             } else if(event->key == InputKeyRight) {
                 // GOES TO PASSPORT NO MATTER WHAT
             }
-            if(codeSequence == 8) {
+            if(main_view->codeSequence == 8) {
                 // UNLOCK!
-                codeSequence = 0;
+                main_view->codeSequence = 0;
                 desktop_view_main_dumbmode_changed(0);
                 main_view->callback(DesktopMainEventOpenMenu, main_view->context);
             }
@@ -159,7 +159,7 @@ bool desktop_main_input(InputEvent* event, void* context) {
 
 DesktopMainView* desktop_main_alloc() {
     DesktopMainView* main_view = malloc(sizeof(DesktopMainView));
-
+    main_view->codeSequence = 0;
     main_view->is_gamemode = false;
     DesktopSettings* desktop_settings = malloc(sizeof(DesktopSettings));
     LOAD_DESKTOP_SETTINGS(desktop_settings);
