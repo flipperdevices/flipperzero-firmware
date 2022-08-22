@@ -13,6 +13,11 @@ env.SetDefault(SDK_DEFINITION=env.File("./targets/f${TARGET_HW}/api_symbols.csv"
 
 
 libenv = env.Clone(FW_LIB_NAME="flipper${TARGET_HW}")
+libenv.Append(
+    CPPPATH=[
+        "#/lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl",
+    ]
+)
 libenv.ApplyLibFlags()
 
 
