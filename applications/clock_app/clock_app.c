@@ -281,6 +281,8 @@ static void clock_state_init(ClockState* const state) {
     memset(state, 0, sizeof(ClockState));
     state->militaryTime = false;
     state->songSelect = 2;
+	state->timer_start_timestamp = 0;
+	state->timer_stopped_seconds = 0;
     state->timerSecs = 0;
     state->alert_time = 80;
     state->desktop_settings = malloc(sizeof(DesktopSettings));
