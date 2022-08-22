@@ -300,9 +300,9 @@ static void clock_state_init(ClockState* const state) {
     memset(state, 0, sizeof(ClockState));
     state->militaryTime = false;
     state->songSelect = 2;
-	state->lastexp_timestamp = 0;
-	state->timer_start_timestamp = 0;
-	state->timer_stopped_seconds = 0;
+    state->lastexp_timestamp = 0;
+    state->timer_start_timestamp = 0;
+    state->timer_stopped_seconds = 0;
     state->timerSecs = 0;
     state->alert_time = 80;
     state->desktop_settings = malloc(sizeof(DesktopSettings));
@@ -458,9 +458,9 @@ int32_t clock_app(void* p) {
                             furi_hal_rtc_get_datetime(&curr_dt);
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
                             if(plugin_state->lastexp_timestamp+10 <= curr_ts) {
-								plugin_state->lastexp_timestamp = curr_ts;
-                                DOLPHIN_DEED(DolphinDeedNfcSave);
-							}
+                                plugin_state->lastexp_timestamp = curr_ts;
+                                DOLPHIN_DEED(DolphinDeedRfidReadSuccess);
+                            }
                             notification_message(notification, &clock_alert_pr1);
                         }
                         if(plugin_state->timerSecs == plugin_state->alert_time + 1) {
@@ -475,9 +475,9 @@ int32_t clock_app(void* p) {
                             furi_hal_rtc_get_datetime(&curr_dt);
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
                             if(plugin_state->lastexp_timestamp+10 <= curr_ts) {
-								plugin_state->lastexp_timestamp = curr_ts;
-                                DOLPHIN_DEED(DolphinDeedNfcSave);
-							}
+                                plugin_state->lastexp_timestamp = curr_ts;
+                                DOLPHIN_DEED(DolphinDeedRfidReadSuccess);
+                            }
                             notification_message(notification, &clock_alert_mario1);
                         }
                         if(plugin_state->timerSecs == plugin_state->alert_time + 1) {
@@ -492,9 +492,9 @@ int32_t clock_app(void* p) {
                             furi_hal_rtc_get_datetime(&curr_dt);
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
                             if(plugin_state->lastexp_timestamp+10 <= curr_ts) {
-								plugin_state->lastexp_timestamp = curr_ts;
+                                plugin_state->lastexp_timestamp = curr_ts;
                                 DOLPHIN_DEED(getRandomDeed());
-							}
+                            }
                             notification_message(notification, &clock_alert_silent);
                         }
                     }
