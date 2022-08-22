@@ -16,7 +16,7 @@
 - Clock no longer displays StopWatch OR 12hr/24hr options in Game Mode
 - Clock only stop and reset on Left HOLD
 - Flipper is no longer Stoned in Game Mode
-- Did some TAMA P1 app renaming... 
+- Did some TAMA P1 app renaming... sorry, you may need to delete/remove the old tamalib module
 - Made exit code sequence state variable for Game Mode exit not a global variable.
 - Dolphin: Changed daily MAX to 198 on all 7 Deed Types. Testing random Deed Selection for MAX +3 EXP daily gain.
 - Zombiez: Changed to be hold back to exit and +3 EXP for every 20 Zombie kills
