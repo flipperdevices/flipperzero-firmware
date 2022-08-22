@@ -40,13 +40,13 @@ static const DolphinDeedWeight dolphin_deed_weights[] = {
 };
 
 static uint8_t dolphin_deed_limits[] = {
-    30, // DolphinAppSubGhz
-    30, // DolphinAppRfid
-    30, // DolphinAppNfc
-    30, // DolphinAppIr
-    30, // DolphinAppIbutton
-    30, // DolphinAppBadusb
-    30, // DolphinAppU2f
+    100, // DolphinAppSubGhz
+    100, // DolphinAppRfid
+    100, // DolphinAppNfc
+    100, // DolphinAppIr
+    100, // DolphinAppIbutton
+    100, // DolphinAppBadusb
+    100, // DolphinAppU2f
     // 198, // DolphinAppPlugin
 };
 

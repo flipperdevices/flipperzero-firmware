@@ -196,20 +196,14 @@ const NotificationSequence clock_alert_startStop = {
 };
 
 DolphinDeed getRandomDeed() {
-    DolphinDeed returnGrp[7] = {DolphinDeedSubGhzSave
-                     ,DolphinDeedRfidReadSuccess
-                     ,DolphinDeedNfcReadSuccess
-                     ,DolphinDeedIrLearnSuccess
-                     ,DolphinDeedIbuttonReadSuccess
-                     ,DolphinDeedBadUsbPlayScript
-                     ,DolphinAppU2f};
+    DolphinDeed returnGrp[10] = {1,8,12,17,21,25,26,5,10,15};
     static bool rand_generator_inited = false;
     if(!rand_generator_inited) {
         srand(furi_get_tick());
         rand_generator_inited = true;
     }
-    uint8_t diceRoll = (rand() % 7); // JUST TO GET IT GOING? AND FIX BUG
-    diceRoll = (rand() % 7); 
+    uint8_t diceRoll = (rand() % COUNT_OF(returnGrp)); // JUST TO GET IT GOING? AND FIX BUG
+    diceRoll = (rand() % COUNT_OF(returnGrp)); 
     return returnGrp[diceRoll];
 }
 
@@ -459,7 +453,7 @@ int32_t clock_app(void* p) {
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
                             if(plugin_state->lastexp_timestamp+10 <= curr_ts) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                DOLPHIN_DEED(DolphinDeedRfidReadSuccess);
+                                DOLPHIN_DEED(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_pr1);
                         }
@@ -476,7 +470,7 @@ int32_t clock_app(void* p) {
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
                             if(plugin_state->lastexp_timestamp+10 <= curr_ts) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                DOLPHIN_DEED(DolphinDeedRfidReadSuccess);
+                                DOLPHIN_DEED(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_mario1);
                         }
