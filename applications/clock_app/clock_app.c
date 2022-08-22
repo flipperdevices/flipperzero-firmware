@@ -457,7 +457,7 @@ int32_t clock_app(void* p) {
                             FuriHalRtcDateTime curr_dt;
                             furi_hal_rtc_get_datetime(&curr_dt);
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
-                            if(plugin_state->lastexp_timestamp+10 =< curr_ts) {
+                            if(plugin_state->lastexp_timestamp+10 <= curr_ts) {
 								plugin_state->lastexp_timestamp = curr_ts;
                                 DOLPHIN_DEED(DolphinDeedNfcSave);
 							}
@@ -474,7 +474,7 @@ int32_t clock_app(void* p) {
                             FuriHalRtcDateTime curr_dt;
                             furi_hal_rtc_get_datetime(&curr_dt);
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
-                            if(plugin_state->lastexp_timestamp+10 =< curr_ts) {
+                            if(plugin_state->lastexp_timestamp+10 <= curr_ts) {
 								plugin_state->lastexp_timestamp = curr_ts;
                                 DOLPHIN_DEED(DolphinDeedNfcSave);
 							}
@@ -491,7 +491,7 @@ int32_t clock_app(void* p) {
                             FuriHalRtcDateTime curr_dt;
                             furi_hal_rtc_get_datetime(&curr_dt);
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
-                            if(plugin_state->lastexp_timestamp+10 =< curr_ts) {
+                            if(plugin_state->lastexp_timestamp+10 <= curr_ts) {
 								plugin_state->lastexp_timestamp = curr_ts;
                                 DOLPHIN_DEED(getRandomDeed());
 							}
