@@ -36,6 +36,7 @@ class Main(App):
                 file_idx += 1
             except Exception as e:
                 self.logger.error(e)
+                return 3
                 break
 
         widths = set(img.width for img in images)
