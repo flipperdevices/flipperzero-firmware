@@ -232,7 +232,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     uint32_t timer_stopped_seconds = state->timer_stopped_seconds;
 
     char alertTime[4];
-	
+    
     snprintf(alertTime, sizeof(alertTime),"%d", alert_time);
 
     furi_mutex_release(state->mutex);
@@ -254,7 +254,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
         if(!state->militaryTime) canvas_draw_str_aligned(canvas, 67, 15, AlignCenter, AlignCenter, strAMPM);
         canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
-		
+        
         if(!state->desktop_settings->is_dumbmode) elements_button_left(canvas, state->militaryTime ? "12h" : "24h");
     }
     if(!state->desktop_settings->is_dumbmode) {
@@ -283,7 +283,7 @@ static void clock_state_init(ClockState* const state) {
     state->songSelect = 2;
     state->timerSecs = 0;
     state->alert_time = 80;
-	state->desktop_settings = malloc(sizeof(DesktopSettings));
+    state->desktop_settings = malloc(sizeof(DesktopSettings));
 }
 
 // Runs every 1000ms by default
@@ -324,8 +324,8 @@ int32_t clock_app(void* p) {
         return 255;
     }
 
-	LOAD_DESKTOP_SETTINGS(plugin_state->desktop_settings);
-	
+    LOAD_DESKTOP_SETTINGS(&plugin_state->desktop_settings);
+    
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, clock_render_callback, plugin_state);
