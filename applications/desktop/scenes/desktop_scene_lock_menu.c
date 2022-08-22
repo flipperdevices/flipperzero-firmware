@@ -82,7 +82,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
                 }
             }
             consumed = true;
-			furi_hal_power_deep_sleep();
+			furi_hal_power_sleep();
             break;
         case DesktopLockMenuEventExit:
             scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
