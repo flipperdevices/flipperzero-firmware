@@ -1,7 +1,6 @@
 #include <gui/scene_manager.h>
 #include <applications.h>
 #include <furi_hal.h>
-#include <furi_hal_power.h>
 #include <toolbox/saved_struct.h>
 #include <stdbool.h>
 #include <loader/loader.h>
@@ -12,6 +11,7 @@
 #include "desktop_scene_i.h"
 #include "desktop_scene.h"
 #include "../helpers/pin_lock.h"
+#include <power/power_service/power.h>
 
 #define TAG "DesktopSceneLock"
 
@@ -82,7 +82,10 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
                 }
             }
             consumed = true;
-			furi_hal_power_sleep();
+            Power* power = furi_record_open(RECORD_POWER);
+            printf("It's now safe to disconnect USB from your flipper\r\n");
+            furi_delay_ms(666);
+            power_off(power);
             break;
         case DesktopLockMenuEventExit:
             scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
