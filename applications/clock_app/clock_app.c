@@ -434,7 +434,7 @@ int32_t clock_app(void* p) {
                     }
                     if(plugin_state->songSelect == 1) {
                         if(plugin_state->timerSecs == plugin_state->alert_time) {
-                            DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+                            DOLPHIN_DEED(getRandomDeed());
                             notification_message(notification, &clock_alert_pr1);
                         }
                         if(plugin_state->timerSecs == plugin_state->alert_time + 1) {
@@ -445,7 +445,7 @@ int32_t clock_app(void* p) {
                         }
                     } else if(plugin_state->songSelect == 2) {
                         if(plugin_state->timerSecs == plugin_state->alert_time) {
-                            DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+                            DOLPHIN_DEED(getRandomDeed());
                             notification_message(notification, &clock_alert_mario1);
                         }
                         if(plugin_state->timerSecs == plugin_state->alert_time + 1) {

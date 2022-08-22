@@ -358,12 +358,12 @@ void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
      * +46...... deeds accumulating --> -1 butthurt
      * -4 butthurt per day is maximum
      * */
-    uint8_t butthurt_icounter_level_old = dolphin_state->data.butthurt_daily_limit / 45 +
-                                          !!(dolphin_state->data.butthurt_daily_limit % 45);
+    uint8_t butthurt_icounter_level_old = dolphin_state->data.butthurt_daily_limit / 198 +
+                                          !!(dolphin_state->data.butthurt_daily_limit % 198);
     dolphin_state->data.butthurt_daily_limit =
         CLAMP(dolphin_state->data.butthurt_daily_limit + deed_weight, 46, 0);
-    uint8_t butthurt_icounter_level_new = dolphin_state->data.butthurt_daily_limit / 45 +
-                                          !!(dolphin_state->data.butthurt_daily_limit % 45);
+    uint8_t butthurt_icounter_level_new = dolphin_state->data.butthurt_daily_limit / 198 +
+                                          !!(dolphin_state->data.butthurt_daily_limit % 198);
     int32_t new_butthurt = ((int32_t)dolphin_state->data.butthurt) -
                            (butthurt_icounter_level_old != butthurt_icounter_level_new);
     new_butthurt = CLAMP(new_butthurt, BUTTHURT_MAX, BUTTHURT_MIN);
