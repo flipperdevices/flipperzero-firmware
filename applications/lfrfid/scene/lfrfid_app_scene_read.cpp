@@ -64,7 +64,7 @@ bool LfRfidAppSceneRead::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
         break;
     case LfRfidApp::EventType::ReadEventSenseCardStart:
         notification_message(app->notification, &sequence_blink_stop);
-        notification_message(app->notification, &sequence_blink_start_magenta);
+        notification_message(app->notification, &sequence_blink_start_green);
         break;
     case LfRfidApp::EventType::ReadEventSenseEnd:
     case LfRfidApp::EventType::ReadEventSenseCardEnd:
