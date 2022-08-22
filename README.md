@@ -20,6 +20,7 @@
 - Made exit code sequence state variable for Game Mode exit not a global variable.
 - Dolphin: Changed daily MAX to 198 on all 7 Deed Types. Testing random Deed Selection for MAX +3 EXP daily gain.
 - Zombiez: Changed to be hold back to exit and +3 EXP for every 20 Zombie kills
+- OFW: [#1628](https://github.com/flipperdevices/flipperzero-firmware/pull/1628), [#1636](https://github.com/flipperdevices/flipperzero-firmware/pull/1636), [#1606](https://github.com/flipperdevices/flipperzero-firmware/pull/1606), [#1609](https://github.com/flipperdevices/flipperzero-firmware/pull/1609), [#1610](https://github.com/flipperdevices/flipperzero-firmware/pull/1610), [#1615](https://github.com/flipperdevices/flipperzero-firmware/pull/1615), [#1624](https://github.com/flipperdevices/flipperzero-firmware/pull/1624), [#1637](https://github.com/flipperdevices/flipperzero-firmware/pull/1637) & [#1633](https://github.com/flipperdevices/flipperzero-firmware/pull/1633)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
