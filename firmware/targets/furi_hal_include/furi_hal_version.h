@@ -53,7 +53,7 @@ typedef enum {
 
 /** Set Flipper Name
  */
-void furi_hal_version_set_name(const char* name);
+//void furi_hal_version_set_name(const char* name);
 
 /** Set Custom Name
  */

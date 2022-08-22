@@ -87,6 +87,7 @@ typedef struct {
     char device_name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH]; /** device name for special needs */
     uint8_t ble_mac[6];
     const char* cname;
+    char cname2[FURI_HAL_VERSION_ARRAY_NAME_LENGTH];
 } FuriHalVersion;
 
 static FuriHalVersion furi_hal_version = {0};
@@ -95,30 +96,45 @@ void furi_hal_version_set_custom_name(const char* name)
 {
 	if((name != NULL) && ((strlen(name) >= 1) && (strlen(name) <= 8)))
 	{
-		strlcpy(furi_hal_version.name, name, FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
-		snprintf(furi_hal_version.device_name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH, "xFlipper %s", name);
+		strlcpy(
+			furi_hal_version.cname2, 
+			name, 
+			FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
 
+		snprintf(
+			furi_hal_version.device_name,
+			FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
+			"xFlipper %s",
+			furi_hal_version.cname2);
+			
 		furi_hal_version.device_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
+	}
+	else
+	{
+		strcpy(furi_hal_version.cname2,"");
 	}
 }
 
-void furi_hal_version_set_name(const char* name) {
-	furi_hal_version.cname = version_get_custom_name(NULL);
+static void furi_hal_version_set_name(const char* name)
+{
+	char tmpCname[FURI_HAL_VERSION_ARRAY_NAME_LENGTH];
 	
-    if((furi_hal_version.cname != NULL) && !((strlen(furi_hal_version.cname) >=1) && (strlen(furi_hal_version.cname) <= 8)))
+	strlcpy(tmpCname, furi_hal_version_get_name_ptr(), FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
+	
+    if(!((strlen(tmpCname) >=1) && (strlen(tmpCname) <= 8)))
 	{
-		furi_hal_version.cname = NULL;
+		strcpy(tmpCname, "");
 	}
 
 	if(name != NULL)
 	{
-		if(furi_hal_version.cname != NULL)
+		if(strcmp(tmpCname,"") != 0)
 		{
 			strlcpy(
 				furi_hal_version.name, 
-				furi_hal_version.cname, 
+				tmpCname, 
 				FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
-					
+
 			snprintf(
 				furi_hal_version.device_name,
 				FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
@@ -131,7 +147,7 @@ void furi_hal_version_set_name(const char* name) {
 				furi_hal_version.name,
 				name,
 				FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
-			
+
 			snprintf(
 				furi_hal_version.device_name,
 				FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
@@ -141,13 +157,13 @@ void furi_hal_version_set_name(const char* name) {
 	}
 	else
 	{
-		if(furi_hal_version.cname != NULL)
+		if(strcmp(tmpCname,"") != 0)
 		{
 			strlcpy(
 				furi_hal_version.name, 
-				furi_hal_version.cname, 
+				tmpCname, 
 				FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
-					
+
 			snprintf(
 				furi_hal_version.device_name,
 				FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
@@ -350,7 +366,21 @@ uint32_t furi_hal_version_get_hw_timestamp() {
     return furi_hal_version.timestamp;
 }
 
-const char* furi_hal_version_get_name_ptr() {
+const char* furi_hal_version_get_name_ptr()
+{
+    if((strcmp(furi_hal_version.cname2,"") != 0) && ((strlen(furi_hal_version.cname2) >=1) && (strlen(furi_hal_version.cname2) <= 8)))
+	{
+		return furi_hal_version.cname2;
+	}
+	
+	furi_hal_version.cname = version_get_custom_name(NULL);
+	
+    if((furi_hal_version.cname != NULL) && ((strlen(furi_hal_version.cname) >=1) && (strlen(furi_hal_version.cname) <= 8)))
+	{
+		strlcpy(furi_hal_version.cname2, furi_hal_version.cname, FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
+		return furi_hal_version.cname2;
+	}
+	
     return *furi_hal_version.name == 0x00 ? NULL : furi_hal_version.name;
 }
 
