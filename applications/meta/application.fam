@@ -125,7 +125,7 @@ App(
         "GAME_FlappyBird",
         "GAME_MontyHall",
         "GAME_Raycast",
-        "GAME_tama_p1",
+        # "GAME_tama_p1",
         "GAME_Tanks",
         "GAME_Tetris",
         "GAME_TicTacToe",
