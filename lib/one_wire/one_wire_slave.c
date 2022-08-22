@@ -27,6 +27,7 @@ typedef enum {
 } OneWireSlaveError;
 
 struct OneWireSlave {
+    const GpioPin* gpio_pin;
     OneWireSlaveError error;
     OneWireDevice* device;
     OneWireSlaveResultCallback result_cb;
@@ -43,7 +44,7 @@ uint32_t onewire_slave_wait_while_gpio_is(OneWireSlave* bus, uint32_t time, cons
 
     do {
         time_captured = DWT->CYCCNT;
-        if(furi_hal_ibutton_pin_get_level() != pin_value) {
+        if(furi_hal_onewire_pin_get_level(bus->gpio_pin) != pin_value) {
             uint32_t remaining_time = time_ticks - (time_captured - start);
             remaining_time /= furi_hal_cortex_instructions_per_microsecond();
             return remaining_time;
@@ -58,9 +59,9 @@ bool onewire_slave_show_presence(OneWireSlave* bus) {
     onewire_slave_wait_while_gpio_is(bus, OWS_PRESENCE_TIMEOUT, true);
 
     // show presence
-    furi_hal_ibutton_pin_low();
+    furi_hal_onewire_pin_low(bus->gpio_pin);
     furi_delay_us(OWS_PRESENCE_MIN);
-    furi_hal_ibutton_pin_high();
+    furi_hal_onewire_pin_high(bus->gpio_pin);
 
     // somebody also can show presence
     const uint32_t wait_low_time = OWS_PRESENCE_MAX - OWS_PRESENCE_MIN;
@@ -119,7 +120,7 @@ bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
 
     // choose write time
     if(write_zero) {
-        furi_hal_ibutton_pin_low();
+        furi_hal_onewire_pin_low(bus->gpio_pin);
         time = OWS_WRITE_ZERO;
     } else {
         time = OWS_READ_MAX;
@@ -127,7 +128,7 @@ bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
 
     // hold line for ZERO or ONE time
     furi_delay_us(time);
-    furi_hal_ibutton_pin_high();
+    furi_hal_onewire_pin_high(bus->gpio_pin);
 
     return true;
 }
@@ -185,7 +186,7 @@ bool onewire_slave_bus_start(OneWireSlave* bus) {
         result = false;
     } else {
         FURI_CRITICAL_ENTER();
-        furi_hal_ibutton_start_drive_in_isr();
+        furi_hal_onewire_start_drive_in_isr(bus->gpio_pin);
         bus->error = NO_ERROR;
 
         if(onewire_slave_show_presence(bus)) {
@@ -197,7 +198,7 @@ bool onewire_slave_bus_start(OneWireSlave* bus) {
             result = false;
         }
 
-        furi_hal_ibutton_start_interrupt_in_isr();
+        furi_hal_onewire_start_interrupt_in_isr(bus->gpio_pin);
         FURI_CRITICAL_EXIT();
     }
 
@@ -207,7 +208,7 @@ bool onewire_slave_bus_start(OneWireSlave* bus) {
 static void exti_cb(void* context) {
     OneWireSlave* bus = context;
 
-    volatile bool input_state = furi_hal_ibutton_pin_get_level();
+    volatile bool input_state = furi_hal_onewire_pin_get_level(bus->gpio_pin);
     static uint32_t pulse_start = 0;
 
     if(input_state) {
@@ -234,8 +235,9 @@ static void exti_cb(void* context) {
 
 /*********************** PUBLIC ***********************/
 
-OneWireSlave* onewire_slave_alloc() {
+OneWireSlave* onewire_slave_alloc(const GpioPin* gpio_pin) {
     OneWireSlave* bus = malloc(sizeof(OneWireSlave));
+    bus->gpio_pin = gpio_pin;
     bus->error = NO_ERROR;
     bus->device = NULL;
     bus->result_cb = NULL;
@@ -249,14 +251,14 @@ void onewire_slave_free(OneWireSlave* bus) {
 }
 
 void onewire_slave_start(OneWireSlave* bus) {
-    furi_hal_ibutton_add_interrupt(exti_cb, bus);
-    furi_hal_ibutton_start_interrupt();
+    furi_hal_onewire_add_interrupt(bus->gpio_pin, exti_cb, bus);
+    furi_hal_onewire_start_interrupt(bus->gpio_pin);
 }
 
 void onewire_slave_stop(OneWireSlave* bus) {
     UNUSED(bus);
-    furi_hal_ibutton_stop();
-    furi_hal_ibutton_remove_interrupt();
+    furi_hal_onewire_stop(bus->gpio_pin);
+    furi_hal_onewire_remove_interrupt(bus->gpio_pin);
 }
 
 void onewire_slave_attach(OneWireSlave* bus, OneWireDevice* device) {
@@ -282,7 +284,7 @@ void onewire_slave_set_result_callback(
 bool onewire_slave_send(OneWireSlave* bus, const uint8_t* address, const uint8_t data_length) {
     uint8_t bytes_sent = 0;
 
-    furi_hal_ibutton_pin_high();
+    furi_hal_onewire_pin_high(bus->gpio_pin);
 
     // bytes loop
     for(; bytes_sent < data_length; ++bytes_sent) {
@@ -304,7 +306,7 @@ bool onewire_slave_send(OneWireSlave* bus, const uint8_t* address, const uint8_t
 bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, const uint8_t data_length) {
     uint8_t bytes_received = 0;
 
-    furi_hal_ibutton_pin_high();
+    furi_hal_onewire_pin_high(bus->gpio_pin);
 
     for(; bytes_received < data_length; ++bytes_received) {
         uint8_t value = 0;

@@ -22,16 +22,23 @@ typedef struct OneWireHost OneWireHost;
 
 /**
  * Allocate onewire host bus
- * @param gpio 
+ * @param gpio_pin
  * @return OneWireHost* 
  */
-OneWireHost* onewire_host_alloc();
+OneWireHost* onewire_host_alloc(const GpioPin *gpio_pin);
 
 /**
  * Deallocate onewire host bus
  * @param host 
  */
 void onewire_host_free(OneWireHost* host);
+
+/**
+ * Get pointer to relevant pin
+ * @param host
+ * @return const GpioPin*
+ */
+const GpioPin* onewire_host_get_gpio_pin(OneWireHost* host);
 
 /**
  * Reset bus

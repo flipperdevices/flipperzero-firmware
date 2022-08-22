@@ -33,7 +33,7 @@ void AccessorApp::run(void) {
 
 AccessorApp::AccessorApp() {
     notification = static_cast<NotificationApp*>(furi_record_open(RECORD_NOTIFICATION));
-    onewire_host = onewire_host_alloc();
+    onewire_host = onewire_host_alloc(&ibutton_gpio);
     furi_hal_power_enable_otg();
 }
 

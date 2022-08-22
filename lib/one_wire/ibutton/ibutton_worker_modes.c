@@ -238,12 +238,14 @@ void ibutton_worker_emulate_timer_cb(void* context) {
     LevelDuration level =
         protocol_dict_encoder_yield(worker->protocols, worker->protocol_to_encode);
 
+    const GpioPin* gpio_pin = onewire_host_get_gpio_pin(worker->host);
+
     furi_hal_ibutton_emulate_set_next(level_duration_get_duration(level));
 
     if(level_duration_get_level(level)) {
-        furi_hal_ibutton_pin_high();
+        furi_hal_onewire_pin_high(gpio_pin);
     } else {
-        furi_hal_ibutton_pin_low();
+        furi_hal_onewire_pin_low(gpio_pin);
     }
 }
 
@@ -251,6 +253,8 @@ void ibutton_worker_emulate_timer_start(iButtonWorker* worker) {
     furi_assert(worker->key_p);
     const uint8_t* key_id = ibutton_key_get_data_p(worker->key_p);
     const uint8_t key_size = ibutton_key_get_max_size();
+
+    const GpioPin* gpio_pin;
 
     switch(ibutton_key_get_type(worker->key_p)) {
     case iButtonKeyDS1990:
@@ -267,7 +271,8 @@ void ibutton_worker_emulate_timer_start(iButtonWorker* worker) {
     protocol_dict_set_data(worker->protocols, worker->protocol_to_encode, key_id, key_size);
     protocol_dict_encoder_start(worker->protocols, worker->protocol_to_encode);
 
-    furi_hal_ibutton_start_drive();
+    gpio_pin = onewire_host_get_gpio_pin(worker->host);
+    furi_hal_onewire_start_drive(gpio_pin);
     furi_hal_ibutton_emulate_start(0, ibutton_worker_emulate_timer_cb, worker);
 }
 

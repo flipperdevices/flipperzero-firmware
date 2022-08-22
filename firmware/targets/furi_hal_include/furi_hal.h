@@ -31,6 +31,7 @@ template <unsigned int N> struct STOP_EXTERNING_ME {};
 #include "furi_hal_flash.h"
 #include "furi_hal_subghz.h"
 #include "furi_hal_vibro.h"
+#include "furi_hal_onewire.h"
 #include "furi_hal_ibutton.h"
 #include "furi_hal_rfid.h"
 #include "furi_hal_nfc.h"
