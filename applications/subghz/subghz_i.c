@@ -219,17 +219,17 @@ void subghz_dialog_message_show_only_rx(SubGhz* subghz) {
     DialogsApp* dialogs = subghz->dialogs;
     DialogMessage* message = dialog_message_alloc();
 
-    dialog_message_set_header(message, "Transmission is blocked", 63, 3, AlignCenter, AlignTop);
+    const char* header_text = "Transmission is blocked";
+    const char* message_text = "Transmission on\nthis frequency is\nrestricted in\nyour region";
+    if(!furi_hal_region_is_provisioned()) {
+        header_text = "Firmware update needed";
+        message_text = "Please update\nfirmware before\nusing this feature\nflipp.dev/upd";
+    }
 
-    dialog_message_set_text(
-        message,
-        "This frequency\nis restricted to\nreceiving only\nin your region.",
-        3,
-        17,
-        AlignLeft,
-        AlignTop);
+    dialog_message_set_header(message, header_text, 63, 3, AlignCenter, AlignTop);
+    dialog_message_set_text(message, message_text, 0, 17, AlignLeft, AlignTop);
 
-    dialog_message_set_icon(message, &I_DolphinFirstStart8_56x51, 72, 14);
+    dialog_message_set_icon(message, &I_DolphinCommon_56x48, 72, 17);
 
     dialog_message_show(dialogs, message);
     dialog_message_free(message);
@@ -296,7 +296,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
 
         if(!strcmp(string_get_cstr(temp_str), "FuriHalSubGhzPresetCustom")) {
             //Todo add Custom_preset_module
-            //delete peset if it already exists
+            //delete preset if it already exists
             subghz_setting_delete_custom_preset(
                 subghz->setting, string_get_cstr(subghz->txrx->preset->name));
             //load custom preset from file
