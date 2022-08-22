@@ -37,7 +37,6 @@ class Main(App):
             except Exception as e:
                 self.logger.error(e)
                 return 3
-                break
 
         widths = set(img.width for img in images)
         heights = set(img.height for img in images)
