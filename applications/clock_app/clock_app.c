@@ -281,7 +281,7 @@ static void clock_state_init(ClockState* const state) {
     state->songSelect = 2;
     state->timerSecs = 0;
     state->alert_time = 80;
-    app = malloc(sizeof(DesktopSettingsApp));
+    state->app = malloc(sizeof(DesktopSettingsApp));
     LOAD_DESKTOP_SETTINGS(&app->settings);
 }
 
