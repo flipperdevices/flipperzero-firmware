@@ -195,18 +195,6 @@ const NotificationSequence clock_alert_startStop = {
     NULL,
 };
 
-DolphinDeed getRandomDeed() {
-    DolphinDeed returnGrp[10] = {1,8,12,17,21,25,26,5,10,15};
-    static bool rand_generator_inited = false;
-    if(!rand_generator_inited) {
-        srand(furi_get_tick());
-        rand_generator_inited = true;
-    }
-    uint8_t diceRoll = (rand() % COUNT_OF(returnGrp)); // JUST TO GET IT GOING? AND FIX BUG
-    diceRoll = (rand() % COUNT_OF(returnGrp)); 
-    return returnGrp[diceRoll];
-}
-
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
     PluginEvent event = {.type = EventTypeKey, .input = *input_event};
