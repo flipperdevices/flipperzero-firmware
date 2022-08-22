@@ -267,6 +267,22 @@ static bool read_symbol(FlipperApplication* e, int n, Elf32_Sym* sym, char* name
     return success;
 }
 
+static bool
+    relocation_cache_get(RelocationAddressCache_t cache, int symEntry, Elf32_Addr* symAddr) {
+    Elf32_Addr* addr = RelocationAddressCache_get(cache, symEntry);
+    if(addr) {
+        *symAddr = *addr;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+static void
+    relocation_cache_put(RelocationAddressCache_t cache, int symEntry, Elf32_Addr symAddr) {
+    RelocationAddressCache_set_at(cache, symEntry, symAddr);
+}
+
 #define MAX_SYMBOL_NAME_LEN 128u
 
 static bool relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection_t* s) {
@@ -290,27 +306,31 @@ static bool relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection_t* s) {
                 return false;
             }
 
-            Elf32_Sym sym;
             Elf32_Addr symAddr;
 
             int symEntry = ELF32_R_SYM(rel.r_info);
             int relType = ELF32_R_TYPE(rel.r_info);
             Elf32_Addr relAddr = ((Elf32_Addr)s->data) + rel.r_offset;
 
-            if(!read_symbol(e, symEntry, &sym, symbol_name, MAX_SYMBOL_NAME_LEN)) {
-                FURI_LOG_E(TAG, "  symbol read fail");
-                return false;
+            if(!relocation_cache_get(e->relocation_cache, symEntry, &symAddr)) {
+                Elf32_Sym sym;
+                if(!read_symbol(e, symEntry, &sym, symbol_name, MAX_SYMBOL_NAME_LEN)) {
+                    FURI_LOG_E(TAG, "  symbol read fail");
+                    return false;
+                }
+
+                FURI_LOG_D(
+                    TAG,
+                    " %08X %08X %-16s %s",
+                    (unsigned int)rel.r_offset,
+                    (unsigned int)rel.r_info,
+                    type_to_str(relType),
+                    symbol_name);
+
+                symAddr = address_of(e, &sym, symbol_name);
+                relocation_cache_put(e->relocation_cache, symEntry, symAddr);
             }
 
-            FURI_LOG_D(
-                TAG,
-                " %08X %08X %-16s %s",
-                (unsigned int)rel.r_offset,
-                (unsigned int)rel.r_info,
-                type_to_str(relType),
-                symbol_name);
-
-            symAddr = address_of(e, &sym, symbol_name);
             if(symAddr != 0xffffffff) {
                 FURI_LOG_D(
                     TAG,
@@ -388,6 +408,9 @@ static bool flipper_application_relocate_section(FlipperApplication* e, ELFSecti
 
 FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplication* e) {
     FURI_LOG_I(TAG, "Load sections...");
+    FlipperApplicationLoadStatus status = FlipperApplicationLoadStatusSuccess;
+    RelocationAddressCache_init(e->relocation_cache);
+    size_t start = furi_get_tick();
 
     struct {
         ELFSection_t* section;
@@ -402,35 +425,43 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
     for(size_t i = 0; i < COUNT_OF(sections); i++) {
         if(!flipper_application_load_section_data(e, sections[i].section)) {
             FURI_LOG_E(TAG, "Error loading section '%s'", sections[i].name);
-            return FlipperApplicationLoadStatusUnspecifiedError;
+            status = FlipperApplicationLoadStatusUnspecifiedError;
         }
     }
 
-    for(size_t i = 0; i < COUNT_OF(sections); i++) {
-        if(!flipper_application_relocate_section(e, sections[i].section)) {
-            FURI_LOG_E(TAG, "Error relocating section '%s'", sections[i].name);
-            return FlipperApplicationLoadStatusMissingImports;
+    if(status == FlipperApplicationLoadStatusSuccess) {
+        for(size_t i = 0; i < COUNT_OF(sections); i++) {
+            if(!flipper_application_relocate_section(e, sections[i].section)) {
+                FURI_LOG_E(TAG, "Error relocating section '%s'", sections[i].name);
+                status = FlipperApplicationLoadStatusUnspecifiedError;
+            }
         }
     }
 
-    e->state.mmap_entries =
-        malloc(sizeof(FlipperApplicationMemoryMapEntry) * e->state.mmap_entry_count);
-    uint32_t mmap_entry_idx = 0;
-    for(size_t i = 0; i < COUNT_OF(sections); i++) {
-        const void* data_ptr = sections[i].section->data;
-        if(data_ptr) {
-            FURI_LOG_I(TAG, "0x%X %s", (uint32_t)data_ptr, sections[i].name);
-            e->state.mmap_entries[mmap_entry_idx].address = (uint32_t)data_ptr;
-            e->state.mmap_entries[mmap_entry_idx].name = sections[i].name;
-            mmap_entry_idx++;
+    if(status == FlipperApplicationLoadStatusSuccess) {
+        e->state.mmap_entries =
+            malloc(sizeof(FlipperApplicationMemoryMapEntry) * e->state.mmap_entry_count);
+        uint32_t mmap_entry_idx = 0;
+        for(size_t i = 0; i < COUNT_OF(sections); i++) {
+            const void* data_ptr = sections[i].section->data;
+            if(data_ptr) {
+                FURI_LOG_I(TAG, "0x%X %s", (uint32_t)data_ptr, sections[i].name);
+                e->state.mmap_entries[mmap_entry_idx].address = (uint32_t)data_ptr;
+                e->state.mmap_entries[mmap_entry_idx].name = sections[i].name;
+                mmap_entry_idx++;
+            }
         }
+        furi_check(mmap_entry_idx == e->state.mmap_entry_count);
+
+        /* Fixing entry point */
+        e->entry += (uint32_t)e->text.data;
     }
-    furi_check(mmap_entry_idx == e->state.mmap_entry_count);
 
-    /* Fixing entry point */
-    e->entry += (uint32_t)e->text.data;
+    FURI_LOG_I(TAG, "Relocation cache size: %u", RelocationAddressCache_size(e->relocation_cache));
+    RelocationAddressCache_clear(e->relocation_cache);
+    FURI_LOG_I(TAG, "Sections loaded in %ums", (size_t)(furi_get_tick() - start));
 
-    return FlipperApplicationLoadStatusSuccess;
+    return status;
 }
 
 void flipper_application_free_section(ELFSection_t* s) {

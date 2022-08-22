@@ -2,10 +2,13 @@
 
 #include "elf.h"
 #include "flipper_application.h"
+#include <m-dict.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+DICT_DEF2(RelocationAddressCache, int, M_DEFAULT_OPLIST, Elf32_Addr, M_DEFAULT_OPLIST)
 
 /**
  * Callable elf entry type
@@ -39,6 +42,7 @@ struct FlipperApplication {
     ELFSection_t bss;
 
     FuriThread* thread;
+    RelocationAddressCache_t relocation_cache;
 };
 
 typedef enum {
