@@ -85,6 +85,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             Power* power = furi_record_open(RECORD_POWER);
             furi_delay_ms(666);
             power_off(power);
+            furi_record_close(RECORD_POWER);
             break;
         case DesktopLockMenuEventExit:
             scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
