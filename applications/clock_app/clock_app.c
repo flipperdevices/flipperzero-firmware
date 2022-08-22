@@ -195,6 +195,24 @@ const NotificationSequence clock_alert_startStop = {
     NULL,
 };
 
+DolphinDeed getRandomDeed() {
+    DolphinDeed returnGrp[7] = {DolphinDeedSubGhzSave
+                     ,DolphinDeedRfidReadSuccess
+                     ,DolphinDeedNfcReadSuccess
+                     ,DolphinDeedIrLearnSuccess
+                     ,DolphinDeedIbuttonReadSuccess
+                     ,DolphinDeedBadUsbPlayScript
+                     ,DolphinAppU2f};
+    static bool rand_generator_inited = false;
+    if(!rand_generator_inited) {
+        srand(furi_get_tick());
+        rand_generator_inited = true;
+    }
+    uint8_t diceRoll = (rand() % 7); // JUST TO GET IT GOING? AND FIX BUG
+    diceRoll = (rand() % 7); 
+    return returnGrp[diceRoll];
+}
+
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
     PluginEvent event = {.type = EventTypeKey, .input = *input_event};
