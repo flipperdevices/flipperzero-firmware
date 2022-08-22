@@ -42,6 +42,7 @@ App(
         "APPS_MouseJiggler",
         "APPS_MouseJacker",
         "APPS_MusicPlayer",
+        "APPS_NameChanger",
         "APPS_NRFSniff",
         "APPS_Paint",
         "INTAPP_Picopass",
