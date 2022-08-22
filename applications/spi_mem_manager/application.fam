@@ -1,9 +1,9 @@
 App(
-    appid="spi_mem_manager",
+    appid="spi_mem",
     name="SPI Mem Manager",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="spi_mem_manager_app",
-    cdefines=["APP_SPI_MEM_MANAGER"],
+    entry_point="spi_mem_app",
+    cdefines=["APP_SPI_MEM"],
     requires=["gui"],
     stack_size=1 * 1024,
     icon="A_Plugins_14",
