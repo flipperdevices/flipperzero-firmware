@@ -59,11 +59,15 @@ jobs:
           rm -rf reports/
           mkdir reports
 
+      - name: 'Generate compile_comands.json'
+        run: |
+          FBT_TOOLCHAIN_PATH=/opt ./fbt COMPACT=1 version_json proto_ver icons firmware_cdb
+
       - name: 'Static code analysis'
         run: |
-          FBT_TOOLCHAIN_PATH=/opt ./fbt firmware_cdb
           FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
           pvs-studio-analyzer analyze \
+              @.pvsoptions \
               -j$(grep -c processor /proc/cpuinfo) \
               -l /opt/pvs_studio/PVS-Studio.lic \
               -f build/f7-firmware-D/compile_commands.json \
