@@ -28,9 +28,9 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
         char unit_mb[] = "MB";
         char unit_gb[] = "GB";
 
-        float sd_total_val = (float)sd_info.kb_total;
+        double sd_total_val = (double)sd_info.kb_total;
         char* sd_total_unit = unit_kb;
-        float sd_free_val = (float)sd_info.kb_free;
+        double sd_free_val = (double)sd_info.kb_free;
         char* sd_free_unit = unit_kb;
 
         if(sd_total_val > 1024) {
@@ -53,7 +53,7 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
 
         string_printf(
             app->text_string,
-            "Label: %s\nType: %s\n%.3f %s total\n%.3f %s free\n%lu%% free",
+            "Label: %s\nType: %s\n%.2f %s total\n%.2f %s free\n%lu%% free",
             sd_info.label,
             sd_api_get_fs_type_text(sd_info.fs_type),
             sd_total_val,
