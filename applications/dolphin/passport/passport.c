@@ -57,7 +57,7 @@ static void input_callback(InputEvent* input, void* ctx) {
 static void render_callback(Canvas* canvas, void* ctx) {
     DolphinStats* stats = ctx;
     DesktopSettings* desktop_settings = malloc(sizeof(DesktopSettings));
-    LOAD_DESKTOP_SETTINGS(&desktop_settings);
+    LOAD_DESKTOP_SETTINGS(desktop_settings);
 
     char level_str[12];
     char xp_str[12];
