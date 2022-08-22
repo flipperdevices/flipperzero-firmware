@@ -282,7 +282,7 @@ static void clock_state_init(ClockState* const state) {
     state->timerSecs = 0;
     state->alert_time = 80;
     state->app = malloc(sizeof(DesktopSettingsApp));
-    LOAD_DESKTOP_SETTINGS(&app->settings);
+    LOAD_DESKTOP_SETTINGS(&state->app->settings);
 }
 
 // Runs every 1000ms by default
