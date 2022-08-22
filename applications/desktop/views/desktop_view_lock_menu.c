@@ -69,7 +69,7 @@ static void lock_menu_callback(void* context, uint8_t index) {
             });
         furi_delay_us(800);
         desktop_view_lock_menu_dumbmode_changed(1);
-        DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+        DOLPHIN_DEED(getRandomDeed());
         lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
         break;
     default: // wip message
