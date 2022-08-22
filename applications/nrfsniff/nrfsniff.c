@@ -292,7 +292,7 @@ static void wrap_up(Storage* storage, NotificationApp* notification) {
             hexlify(addr, 5, top_address);
             save_addr_to_file(storage, addr, 5, notification);
             found_count++;
-            DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+            DOLPHIN_DEED(getRandomDeed());
             break;
         }
     }

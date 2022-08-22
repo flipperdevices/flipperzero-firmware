@@ -23,7 +23,7 @@ void dolphin_deed(Dolphin* dolphin, DolphinDeed deed) {
 }
 
 DolphinDeed getRandomDeed() {
-    DolphinDeed returnGrp[10] = {1,8,12,17,21,25,26,5,10,15};
+    DolphinDeed returnGrp[11] = {1,8,12,17,21,25,26,5,10,15,20};
     static bool rand_generator_inited = false;
     if(!rand_generator_inited) {
         srand(furi_get_tick());

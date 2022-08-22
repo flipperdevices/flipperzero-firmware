@@ -202,9 +202,9 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             snprintf(diceType[0], sizeof(diceType[0]), "%s%d", "d", diceSelect);
             snprintf(
                 strings[0], sizeof(strings[0]), "%d%s at %s", diceQty, diceType[0], rollTime[0]);
-            if(diceSelect >= 20 && diceRoll == diceSelect) DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+            if(diceSelect >= 20 && diceRoll == diceSelect) DOLPHIN_DEED(getRandomDeed());
             if(diceSelect >= 20 && diceRoll == diceSelect - 1)
-                DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+                DOLPHIN_DEED(getRandomDeed());
             if(diceQty == 1) {
                 snprintf(strings[1], sizeof(strings[1]), "%d", diceRoll);
             } else if(diceQty == 2) {

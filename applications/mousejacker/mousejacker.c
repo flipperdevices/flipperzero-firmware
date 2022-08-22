@@ -156,7 +156,7 @@ static bool
         memset(file_buf, 0, file_size);
         bytes_read = stream_read(file_stream, file_buf, file_size);
         if(bytes_read == file_size) {
-            DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+            DOLPHIN_DEED(getRandomDeed());
             FURI_LOG_I(TAG, "executing ducky script");
             mj_process_ducky_script(nrf24_HANDLE, addr, addr_size, rate, (char*)file_buf);
             FURI_LOG_I(TAG, "finished execution");

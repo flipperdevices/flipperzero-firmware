@@ -18,10 +18,11 @@
 - Flipper is no longer Stoned in Game Mode
 - Did some TAMA P1 app renaming... sorry, you may need to delete/remove the old tamalib module
 - Made exit code sequence state variable for Game Mode exit not a global variable.
-- Dolphin: Changed daily MAX to 100 on all 7 Deed Types. Testing random Deed Selection for MAX +3 EXP daily gain.
+- Dolphin: Changed daily MAX to 100 on all 7 Deed Types with random Deed selection for up to +3 EXP per deed and up to 700 EXP daily.
 - Zombiez: Changed to be hold back to exit and +3 EXP for every 20 Zombie kills
 - OFW: [#1628](https://github.com/flipperdevices/flipperzero-firmware/pull/1628), [#1636](https://github.com/flipperdevices/flipperzero-firmware/pull/1636), [#1606](https://github.com/flipperdevices/flipperzero-firmware/pull/1606), [#1609](https://github.com/flipperdevices/flipperzero-firmware/pull/1609), [#1610](https://github.com/flipperdevices/flipperzero-firmware/pull/1610), [#1615](https://github.com/flipperdevices/flipperzero-firmware/pull/1615), [#1624](https://github.com/flipperdevices/flipperzero-firmware/pull/1624), [#1637](https://github.com/flipperdevices/flipperzero-firmware/pull/1637) & [#1633](https://github.com/flipperdevices/flipperzero-firmware/pull/1633)
 - Switched these apps to  `HIDDEN` for compile space, they will be back. HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
+- Updated EXP gain for 2048, Dice, Flappy Bird, Mouse Jacker, NRFSniffer, Snake, Tetris and Zombiez.
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -101,17 +102,15 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware), changed to Mood Stays Less Than 6 / Mood Stays High (but not in game mode) (By RogueMaster)
 - Dolphin: Passport: Show EXP [(By Dabolus)](https://github.com/Dabolus/flipperzero-firmware-rpg/)
 - Dolphin: Changed daily MAX to 198 on all 7 Deed Types. Random Deed Selection used for MAX +3 EXP daily gain.
-- Dolphin: Plugin Achivement +3 EXP for a total of 198 EXP daily. Plugin Achivements are:
+- Dolphin: Plugin Achivement +3 EXP for a total of up to 700 EXP daily. Plugin Achivements are:
 - - Dice First Roll for d20+ = sides on dice (i.e. Nat 20 on d20)
 - - Dice First Roll for d20+ = sides on dice - 1 (+1 EXP) (i.e. 19 on d20)
 - - Games Only Mode from Lock Menu
 - - Getting 2048 in 2048
 - - Mouse Jacker Ducky Run
 - - NRFSniffer Found Address
-- - Stopwatch @ 1:20 Alert
-- - Tetris, Snake or Flappy Bird Score of 10 or more
-- - Tetris, Snake or Flappy Bird Score of 50 or more
-- - Tetris, Snake or Flappy Bird Score of 100 or more
+- - Stopwatch @ Alert
+- - Tetris, Snake or Flappy Bird Score For EXP
 - - Zombiez for every 20 Zombie kills
 - Dolphin: SD dolphin manifest updated to weight animations differently
 - GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
