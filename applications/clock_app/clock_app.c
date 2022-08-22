@@ -25,6 +25,7 @@ typedef struct {
     FuriMessageQueue* event_queue;
     DesktopSettings* desktop_settings;
     uint32_t timer_start_timestamp;
+    uint32_t lastexp_timestamp;
     uint32_t timer_stopped_seconds;
     uint32_t songSelect;
     uint32_t timerSecs;
@@ -281,6 +282,7 @@ static void clock_state_init(ClockState* const state) {
     memset(state, 0, sizeof(ClockState));
     state->militaryTime = false;
     state->songSelect = 2;
+	state->lastexp_timestamp = 0;
 	state->timer_start_timestamp = 0;
 	state->timer_stopped_seconds = 0;
     state->timerSecs = 0;
@@ -434,7 +436,13 @@ int32_t clock_app(void* p) {
                     }
                     if(plugin_state->songSelect == 1) {
                         if(plugin_state->timerSecs == plugin_state->alert_time) {
-                            DOLPHIN_DEED(getRandomDeed());
+                            FuriHalRtcDateTime curr_dt;
+                            furi_hal_rtc_get_datetime(&curr_dt);
+                            uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+                            if(plugin_state->lastexp_timestamp+10 =< curr_ts) {
+								plugin_state->lastexp_timestamp = curr_ts;
+                                DOLPHIN_DEED(DolphinDeedNfcSave);
+							}
                             notification_message(notification, &clock_alert_pr1);
                         }
                         if(plugin_state->timerSecs == plugin_state->alert_time + 1) {
@@ -445,7 +453,13 @@ int32_t clock_app(void* p) {
                         }
                     } else if(plugin_state->songSelect == 2) {
                         if(plugin_state->timerSecs == plugin_state->alert_time) {
-                            DOLPHIN_DEED(getRandomDeed());
+                            FuriHalRtcDateTime curr_dt;
+                            furi_hal_rtc_get_datetime(&curr_dt);
+                            uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+                            if(plugin_state->lastexp_timestamp+10 =< curr_ts) {
+								plugin_state->lastexp_timestamp = curr_ts;
+                                DOLPHIN_DEED(DolphinDeedNfcSave);
+							}
                             notification_message(notification, &clock_alert_mario1);
                         }
                         if(plugin_state->timerSecs == plugin_state->alert_time + 1) {
@@ -456,7 +470,13 @@ int32_t clock_app(void* p) {
                         }
                     } else {
                         if(plugin_state->timerSecs == plugin_state->alert_time) {
-                            DOLPHIN_DEED(getRandomDeed());
+                            FuriHalRtcDateTime curr_dt;
+                            furi_hal_rtc_get_datetime(&curr_dt);
+                            uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+                            if(plugin_state->lastexp_timestamp+10 =< curr_ts) {
+								plugin_state->lastexp_timestamp = curr_ts;
+                                DOLPHIN_DEED(getRandomDeed());
+							}
                             notification_message(notification, &clock_alert_silent);
                         }
                     }
