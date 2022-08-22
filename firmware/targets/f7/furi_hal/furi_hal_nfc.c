@@ -285,6 +285,9 @@ bool furi_hal_nfc_listen_rx(FuriHalNfcTxRxContext* tx_rx, uint32_t timeout_ms) {
             if(st25r3916GetInterrupt(ST25R3916_IRQ_MASK_RXE)) {
                 furi_hal_nfc_read_fifo(tx_rx->rx_data, &tx_rx->rx_bits);
                 data_received = true;
+                if(tx_rx->sniff_rx) {
+                    tx_rx->sniff_rx(tx_rx->rx_data, tx_rx->rx_bits, false, tx_rx->sniff_context);
+                }
                 break;
             }
             continue;
