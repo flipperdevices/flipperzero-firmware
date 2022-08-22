@@ -83,7 +83,6 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             }
             consumed = true;
             Power* power = furi_record_open(RECORD_POWER);
-            printf("It's now safe to disconnect USB from your flipper\r\n");
             furi_delay_ms(666);
             power_off(power);
             break;
