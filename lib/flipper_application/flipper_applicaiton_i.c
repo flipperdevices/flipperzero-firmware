@@ -36,14 +36,19 @@ static bool flipper_application_load_metadata(FlipperApplication* e, Elf32_Shdr*
         return false;
     }
 
-    if(!storage_file_seek(e->fd, sh->sh_offset, true) ||
-       storage_file_read(e->fd, &e->manifest, sh->sh_size) != sh->sh_size) {
-        return false;
-    }
-    return true;
+    return storage_file_seek(e->fd, sh->sh_offset, true) &&
+           storage_file_read(e->fd, &e->manifest, sh->sh_size) == sh->sh_size;
 }
 
-static int flipper_application_preload_section(
+static bool flipper_application_load_debug_link(FlipperApplication* e, Elf32_Shdr* sh) {
+    e->state.debug_link_size = sh->sh_size;
+    e->state.debug_link = malloc(sh->sh_size);
+
+    return storage_file_seek(e->fd, sh->sh_offset, true) &&
+           storage_file_read(e->fd, e->state.debug_link, sh->sh_size) == sh->sh_size;
+}
+
+static FindFlags_t flipper_application_preload_section(
     FlipperApplication* e,
     Elf32_Shdr* sh,
     const char* name,
@@ -82,11 +87,13 @@ static int flipper_application_preload_section(
         // Load metadata immediately
         if(flipper_application_load_metadata(e, sh)) {
             return FoundFappManifest;
-        } else {
-            return FoundERROR;
+        }
+    } else if(strcmp(name, ".gnu_debuglink") == 0) {
+        if(flipper_application_load_debug_link(e, sh)) {
+            return FoundDebugLink;
         }
     }
-    return 0;
+    return FoundERROR;
 }
 
 static bool
@@ -131,7 +138,7 @@ bool flipper_application_load_section_table(FlipperApplication* e) {
     furi_check(e->state.mmap_entry_count == 0);
 
     size_t n;
-    int found = 0;
+    FindFlags_t found = FoundERROR;
     FURI_LOG_I(TAG, "Scan ELF indexs...");
     for(n = 1; n < e->sections; n++) {
         Elf32_Shdr section_header;
@@ -147,7 +154,8 @@ bool flipper_application_load_section_table(FlipperApplication* e) {
         }
 
         FURI_LOG_D(TAG, "Examining section %d %s", n, name);
-        int section_flags = flipper_application_preload_section(e, &section_header, name, n);
+        FindFlags_t section_flags =
+            flipper_application_preload_section(e, &section_header, name, n);
         found |= section_flags;
         if((section_flags & FoundGdbSection) != 0) {
             e->state.mmap_entry_count++;
@@ -244,10 +252,12 @@ static Elf32_Addr address_of(FlipperApplication* e, Elf32_Sym* sym, const char* 
         }
     } else {
         ELFSection_t* symSec = section_of(e, sym->st_shndx);
-        if(symSec) return ((Elf32_Addr)symSec->data) + sym->st_value;
+        if(symSec) {
+            return ((Elf32_Addr)symSec->data) + sym->st_value;
+        }
     }
     FURI_LOG_D(TAG, "  Can not find address for symbol %s", sName);
-    return 0xffffffff;
+    return ELF_INVALID_ADDRESS;
 }
 
 static bool read_symbol(FlipperApplication* e, int n, Elf32_Sym* sym, char* name, size_t nlen) {
@@ -331,7 +341,7 @@ static bool relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection_t* s) {
                 relocation_cache_put(e->relocation_cache, symEntry, symAddr);
             }
 
-            if(symAddr != 0xffffffff) {
+            if(symAddr != ELF_INVALID_ADDRESS) {
                 FURI_LOG_D(
                     TAG,
                     "  symAddr=%08X relAddr=%08X",

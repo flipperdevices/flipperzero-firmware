@@ -34,17 +34,15 @@ class ElfManifestV1:
     app_version: int
     name: str = ""
     icon: bytes = field(default=b"")
-    orig_file_name: str = ""
 
     def as_bytes(self):
         return struct.pack(
-            "<hI32s?32s32s",
+            "<hI32s?32s",
             self.stack_size,
             self.app_version,
             bytes(self.name.encode("ascii")),
             bool(self.icon),
             self.icon,
-            bytes(self.orig_file_name.encode("ascii")),
         )
 
 
@@ -52,7 +50,6 @@ def assemble_manifest_data(
     app_manifest: FlipperApplication,
     hardware_target: int,
     sdk_version,
-    debug_file_name: str,
 ):
     image_data = b""
     if app_manifest.fapp_icon:
@@ -83,7 +80,6 @@ def assemble_manifest_data(
         app_version=app_version_as_int,
         name=app_manifest.name,
         icon=image_data,
-        orig_file_name=debug_file_name,
     ).as_bytes()
 
     return data

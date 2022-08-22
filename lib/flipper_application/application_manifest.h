@@ -11,7 +11,6 @@ extern "C" {
 
 #define FAP_MANIFEST_MAX_APP_NAME_LENGTH 32
 #define FAP_MANIFEST_MAX_ICON_SIZE 32 // TODO: reduce size?
-#define FAP_MANIFEST_MAX_DEBUG_FILE_NAME_LENGTH 32
 
 #pragma pack(push, 1)
 
@@ -35,7 +34,6 @@ typedef struct {
     char name[FAP_MANIFEST_MAX_APP_NAME_LENGTH];
     char has_icon;
     char icon[FAP_MANIFEST_MAX_ICON_SIZE];
-    char debug_file_name[FAP_MANIFEST_MAX_DEBUG_FILE_NAME_LENGTH];
 } FlipperApplicationManifestV1;
 
 typedef FlipperApplicationManifestV1 FlipperApplicationManifest;

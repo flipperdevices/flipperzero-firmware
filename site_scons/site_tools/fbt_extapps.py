@@ -52,7 +52,6 @@ def prepare_app_metadata(target, source, env):
                 app_manifest=app,
                 hardware_target=int(env.subst("$TARGET_HW")),
                 sdk_version=sdk_cache.version.as_int(),
-                debug_file_name=source[0].name,
             )
         )
 

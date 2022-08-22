@@ -22,9 +22,13 @@ void flipper_application_free(FlipperApplication* app) {
     }
 
     last_loaded_app = NULL;
+
+    if(app->state.debug_link_size) {
+        free(app->state.debug_link);
+    }
+
     if(app->state.mmap_entries) {
         free(app->state.mmap_entries);
-        app->state.mmap_entries = NULL;
     }
 
     ELFSection_t* sections[] = {&app->text, &app->rodata, &app->data, &app->bss};

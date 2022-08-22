@@ -41,6 +41,8 @@ typedef struct {
 typedef struct {
     uint32_t mmap_entry_count;
     FlipperApplicationMemoryMapEntry* mmap_entries;
+    uint32_t debug_link_size;
+    uint8_t* debug_link;
 } FlipperApplicationState;
 
 FlipperApplication*
