@@ -23,7 +23,7 @@ typedef struct {
 typedef struct {
     FuriMutex* mutex;
     FuriMessageQueue* event_queue;
-    DesktopSettingsApp* app;
+    DesktopSettings* desktop_settings;
     uint32_t timer_start_timestamp;
     uint32_t timer_stopped_seconds;
     uint32_t songSelect;
@@ -232,6 +232,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     uint32_t timer_stopped_seconds = state->timer_stopped_seconds;
 
     char alertTime[4];
+	
     snprintf(alertTime, sizeof(alertTime),"%d", alert_time);
 
     furi_mutex_release(state->mutex);
@@ -253,9 +254,10 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
         if(!state->militaryTime) canvas_draw_str_aligned(canvas, 67, 15, AlignCenter, AlignCenter, strAMPM);
         canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
-        if(!state->app->is_dumbmode) elements_button_left(canvas, state->militaryTime ? "12h" : "24h");
+		
+        if(!state->desktop_settings->is_dumbmode) elements_button_left(canvas, state->militaryTime ? "12h" : "24h");
     }
-    if(!state->app->is_dumbmode) {
+    if(!state->desktop_settings->is_dumbmode) {
         if(timer_running) {
             elements_button_center(canvas, "Stop");
         } else {
@@ -281,8 +283,7 @@ static void clock_state_init(ClockState* const state) {
     state->songSelect = 2;
     state->timerSecs = 0;
     state->alert_time = 80;
-    state->app = malloc(sizeof(DesktopSettingsApp));
-    LOAD_DESKTOP_SETTINGS(&state->app->settings);
+	state->desktop_settings = malloc(sizeof(DesktopSettings));
 }
 
 // Runs every 1000ms by default
@@ -323,6 +324,8 @@ int32_t clock_app(void* p) {
         return 255;
     }
 
+	LOAD_DESKTOP_SETTINGS(plugin_state->desktop_settings);
+	
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, clock_render_callback, plugin_state);
@@ -373,11 +376,11 @@ int32_t clock_app(void* p) {
                             plugin_state->timerSecs = 0;
                         } else {
                             // Toggle 12/24 hours
-                            if(!plugin_state->app->is_dumbmode) plugin_state->militaryTime = !plugin_state->militaryTime;
+                            if(!(plugin_state->desktop_settings->is_dumbmode)) plugin_state->militaryTime = !plugin_state->militaryTime;
                         }
                         break;
                     case InputKeyOk:
-                        if(!plugin_state->app->is_dumbmode) {
+                        if(!plugin_state->desktop_settings->is_dumbmode) {
                             if(plugin_state->songSelect == 1 || plugin_state->songSelect == 2 || plugin_state->songSelect == 3) {
                                 notification_message(notification, &clock_alert_startStop);
                             }
@@ -473,6 +476,7 @@ int32_t clock_app(void* p) {
     view_port_free(view_port);
     furi_message_queue_free(plugin_state->event_queue);
     furi_mutex_free(plugin_state->mutex);
+    free(plugin_state->desktop_settings);
     free(plugin_state);
     return 0;
 }
