@@ -1,5 +1,5 @@
 V:0
-T:1660842429
+T:1661156481
 D:apps
 D:badusb
 D:dolphin
@@ -42,6 +42,7 @@ D:dolphin/L1_Furippa1_128x64
 D:dolphin/L1_Laptop_128x51
 D:dolphin/L1_Leaving_sad_128x64
 D:dolphin/L1_Mad_fist_128x64
+D:dolphin/L1_Mew_128x64
 D:dolphin/L1_MjkDolphin_128x64
 D:dolphin/L1_Read_books_128x64
 D:dolphin/L1_Recording_128x51
@@ -56,7 +57,7 @@ D:dolphin/L2_Soldering_128x64
 D:dolphin/L3_Furippa3_128x64
 D:dolphin/L3_Hijack_radio_128x64
 D:dolphin/L3_Lab_research_128x54
-F:dde6b03bd76c13407fd79092aab37ef6:2164:dolphin/manifest.txt
+F:9749e1fecf16f44885ec6c2217a7fac3:2255:dolphin/manifest.txt
 F:1c4c13b4cfe609e102bd630e32a5e929:564:dolphin/L1_Agumon_128x64/frame_0.bm
 F:3042b007eeb149f7729e6e00032b4c87:572:dolphin/L1_Agumon_128x64/frame_1.bm
 F:0f88d76bcaf5c3e79a78bd2fcb569192:568:dolphin/L1_Agumon_128x64/frame_10.bm
@@ -166,6 +167,18 @@ F:0de4497a5fbf80cc93e523465c5e3122:515:dolphin/L1_Mad_fist_128x64/frame_7.bm
 F:32d8ddeb19bfa415fe283666b1e323a2:517:dolphin/L1_Mad_fist_128x64/frame_8.bm
 F:a42a0578c2d0411500fb3485a3beb536:526:dolphin/L1_Mad_fist_128x64/frame_9.bm
 F:10a521c78168a5928c859494e2a61cd2:349:dolphin/L1_Mad_fist_128x64/meta.txt
+F:ef212420e34af0b7cc1609e4d4adb5d4:260:dolphin/L1_Mew_128x64/frame_0.bm
+F:f6475f14828850619bea709ac051b891:260:dolphin/L1_Mew_128x64/frame_1.bm
+F:730330b1f0cfdf55118902494da1cd64:251:dolphin/L1_Mew_128x64/frame_10.bm
+F:b56f5c84ea46115cc921357ea6a01831:260:dolphin/L1_Mew_128x64/frame_2.bm
+F:314d7b4ff0a4d4d09f1f6140f6362b1f:294:dolphin/L1_Mew_128x64/frame_3.bm
+F:a0e07bea0603715f2711db9db07e2011:262:dolphin/L1_Mew_128x64/frame_4.bm
+F:40553c530d0f5685ee132b4e9d780fbe:230:dolphin/L1_Mew_128x64/frame_5.bm
+F:6818ba4dac847636113755055887fd52:284:dolphin/L1_Mew_128x64/frame_6.bm
+F:8c570f8ecaeed504158eabcc964359dd:261:dolphin/L1_Mew_128x64/frame_7.bm
+F:3d12665c4709d46e17d5e9a680548a6c:276:dolphin/L1_Mew_128x64/frame_8.bm
+F:a5358057d935ca6c5891eb3f6c520772:231:dolphin/L1_Mew_128x64/frame_9.bm
+F:af5d61db339146b21d18fe5602d7acfc:220:dolphin/L1_Mew_128x64/meta.txt
 F:cd97497bc7e049ae3ad1515b4e716b5e:205:dolphin/L1_MjkDolphin_128x64/frame_0.bm
 F:4a16d7b82105e131fc33625d3cefd754:189:dolphin/L1_MjkDolphin_128x64/frame_1.bm
 F:78a2e24897a135d28f1f145b8a9e834d:226:dolphin/L1_MjkDolphin_128x64/frame_2.bm
