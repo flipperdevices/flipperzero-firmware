@@ -14,7 +14,7 @@
  *     gpio_ext_pa7 will repeat signal coming from the comparator
  *     gpio_ext_pa6 will show load on the decoder
  */
-#define LFRFID_WORKER_READ_DEBUG_GPIO 1
+// #define LFRFID_WORKER_READ_DEBUG_GPIO 1
 
 #ifdef LFRFID_WORKER_READ_DEBUG_GPIO
 #define LFRFID_WORKER_READ_DEBUG_GPIO_VALUE &gpio_ext_pa7
