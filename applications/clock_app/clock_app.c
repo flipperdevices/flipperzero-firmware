@@ -326,7 +326,7 @@ int32_t clock_app(void* p) {
         return 255;
     }
 
-    LOAD_DESKTOP_SETTINGS(&plugin_state->desktop_settings);
+    LOAD_DESKTOP_SETTINGS(plugin_state->desktop_settings);
     
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
@@ -378,7 +378,7 @@ int32_t clock_app(void* p) {
                             plugin_state->timerSecs = 0;
                         } else {
                             // Toggle 12/24 hours
-                            if(!(plugin_state->desktop_settings->is_dumbmode)) plugin_state->militaryTime = !plugin_state->militaryTime;
+                            if(!plugin_state->desktop_settings->is_dumbmode) plugin_state->militaryTime = !plugin_state->militaryTime;
                         }
                         break;
                     case InputKeyOk:
