@@ -9,7 +9,6 @@
 - Awesome [Animations: RM FW Update image (Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/257)
 - Updated Clock to be 12HR mode by default
 - Assets: Includes New Dolphin Animations: [Mew (By Arkaivos)]
-- Most of these new changes below are experimental... this may be an unstable build...
 - Settings: Rename from SD `dolphin/name.txt` [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
 - Settings:  "DUMB Mode" is now "Lock W PIN + Off" [(By RogueMaster)]
 - Reworked Clock notifications
