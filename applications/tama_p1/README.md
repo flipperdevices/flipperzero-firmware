@@ -1,7 +1,7 @@
-Tamagotchi P1 Emulator for Flipper Zero
+Tama P1 Emulator for Flipper Zero
 =======================================
 
-This is a Tamagotchi P1 Emulator app for Flipper Zero, based on [TamaLIB](https://github.com/jcrona/tamalib/).
+This is a tama P1 Emulator app for Flipper Zero, based on [TamaLIB](https://github.com/jcrona/tamalib/).
 
 How to play
 -----------
@@ -14,7 +14,7 @@ Building
 --------
 Run the following to compile icons:
 ```
-scripts/assets.py icons applications/tamagotchi_p1/icons applications/tamagotchi_p1/compiled
+scripts/assets.py icons applications/tama_p1/icons applications/tama_p1/compiled
 ```
 
 Note: you may also need to add `-Wno-unused-parameter` to `CCFLAGS` in
