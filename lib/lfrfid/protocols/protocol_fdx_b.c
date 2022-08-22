@@ -287,7 +287,7 @@ void protocol_fdx_b_render_data(ProtocolFDXB* protocol, string_t result) {
     uint8_t replacement_number = bit_lib_get_bits(protocol->data, 60, 3);
     bool animal_flag = bit_lib_get_bit(protocol->data, 63);
 
-    string_printf(result, "ID: %d-%llu\r\n", country_code, national_code);
+    string_printf(result, "ID: %03u-%012llu\r\n", country_code, national_code);
     string_cat_printf(result, "Animal: %s, ", animal_flag ? "Yes" : "No");
 
     float temperature;
@@ -318,7 +318,7 @@ void protocol_fdx_b_render_brief_data(ProtocolFDXB* protocol, string_t result) {
 
     bool animal_flag = bit_lib_get_bit(protocol->data, 63);
 
-    string_printf(result, "ID: %d-%llu\r\n", country_code, national_code);
+    string_printf(result, "ID: %03u-%012llu\r\n", country_code, national_code);
     string_cat_printf(result, "Animal: %s, ", animal_flag ? "Yes" : "No");
 
     float temperature;
