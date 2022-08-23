@@ -5,8 +5,6 @@ void LfRfidAppSceneSaveData::on_enter(LfRfidApp* app, bool need_restore) {
     auto byte_input = app->view_controller.get<ByteInputVM>();
     size_t size = protocol_dict_get_data_size(app->dict, app->protocol_id);
 
-    if(need_restore) printf("restored\r\n");
-
     if(need_restore) {
         protocol_dict_set_data(app->dict, app->protocol_id, app->old_key_data, size);
     } else {
