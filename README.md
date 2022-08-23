@@ -7,14 +7,8 @@
 
 - Known Issues: `FAP Loader` & `Chess`
 - Switched these apps to  `HIDDEN` for compile space, *they will be back*. HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
-- Updated [WiFi (Deauther) (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) 
-- Removed [Dec/Hex Converter plugin (By theisolinearchip)](https://github.com/theisolinearchip) `HIDDEN "APPS_dec_hex_converter"`
-- Added [Multi Converter (By theisolinearchip)](https://github.com/theisolinearchip)
-- Fixed app folders for UniRF and .sub Playlist apps to be in subghz folder. Sorry, you may need to move your old folders.
-- Konami Code in Clock to Enter/Exit Game Mode *UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT*
-- Dice Refactored For No Globals
-- Dice Game Mode hides SEX/WEED dice.
-- New animation for [Eye of the Flipper (By Kuronons)] & animation weighting update
+- Adding OFW: [#1644](https://github.com/flipperdevices/flipperzero-firmware/pull/1644), [#1601](https://github.com/flipperdevices/flipperzero-firmware/pull/1601), [#1562](https://github.com/flipperdevices/flipperzero-firmware/pull/1562), [#1642](https://github.com/flipperdevices/flipperzero-firmware/pull/1642) & [#1526](https://github.com/flipperdevices/flipperzero-firmware/pull/1526)
+
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
