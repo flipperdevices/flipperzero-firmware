@@ -26,6 +26,8 @@ extern const NotificationMessage message_blue_0;
 
 // Led hardware blink control
 extern const NotificationMessage message_blink_start_10;
+extern const NotificationMessage message_blink_start_20;
+extern const NotificationMessage message_blink_start_50;
 extern const NotificationMessage message_blink_start_100;
 extern const NotificationMessage message_blink_stop;
 

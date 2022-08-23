@@ -2,10 +2,10 @@
 #include <gui/view.h>
 #include <view_modules/generic_view_module.h>
 
-class LfRfidViewTuneVM : public GenericViewModule {
+class RfidViewLFTuneVM : public GenericViewModule {
 public:
-    LfRfidViewTuneVM();
-    ~LfRfidViewTuneVM() final;
+    RfidViewLFTuneVM();
+    ~RfidViewLFTuneVM() final;
     View* get_view() final;
     void clean() final;
 

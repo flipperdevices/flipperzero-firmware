@@ -68,6 +68,20 @@ const NotificationMessage message_blink_start_10 = {
     .data.led_blink.period = 100,
 };
 
+const NotificationMessage message_blink_start_20 = {
+    .type = NotificationMessageTypeLedBlinkStart,
+    .data.led_blink.color = 0,
+    .data.led_blink.on_time = 20,
+    .data.led_blink.period = 200,
+};
+
+const NotificationMessage message_blink_start_50 = {
+    .type = NotificationMessageTypeLedBlinkStart,
+    .data.led_blink.color = 0,
+    .data.led_blink.on_time = 50,
+    .data.led_blink.period = 500,
+};
+
 const NotificationMessage message_blink_start_100 = {
     .type = NotificationMessageTypeLedBlinkStart,
     .data.led_blink.color = 0,

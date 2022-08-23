@@ -1,8 +1,8 @@
 App(
-    appid="lfrfid_debug",
-    name="LF-RFID Debug",
+    appid="rfid_debug",
+    name="RFID Debug",
     apptype=FlipperAppType.DEBUG,
-    entry_point="lfrfid_debug_app",
+    entry_point="rfid_debug_app",
     requires=[
         "gui",
         "lfrfid",
