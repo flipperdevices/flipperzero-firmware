@@ -196,8 +196,8 @@ const NotificationSequence clock_alert_startStop = {
     NULL,
 };
 
-static void desktop_view_main_dumbmode_changed(DesktopSettings settings) {
-    settings->is_dumbmode = !settings->is_dumbmode;
+static void desktop_view_main_dumbmode_changed(DesktopSettings* settings) {
+    settings.is_dumbmode = !settings.is_dumbmode;
     SAVE_DESKTOP_SETTINGS(settings);
 }
 
