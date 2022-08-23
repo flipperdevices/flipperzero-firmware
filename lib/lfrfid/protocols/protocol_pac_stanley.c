@@ -121,7 +121,7 @@ bool protocol_pac_stanley_decoder_feed(ProtocolPACStanley* protocol, bool level,
     if(duration > PAC_STANLEY_MAX_TIME) return false;
 
     uint8_t pulses = (uint8_t)round((float)duration / PAC_STANLEY_CYCLE_LENGTH);
-    //printf("%lu, %u\r\n", duration, pulses);
+
     // Handle last stopbit & preamble (1 sb, 8 bit preamble)
     if(pulses >= 9 && !protocol->got_preamble) {
         pulses = 8;
