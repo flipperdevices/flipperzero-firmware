@@ -66,10 +66,10 @@ jobs:
       - name: 'Static code analysis'
         run: |
           FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
+          pvs-studio-analyzer credentials ${{ secrets.PVS_STUDIO_CREDENTIALS }}
           pvs-studio-analyzer analyze \
               @.pvsoptions \
               -j$(grep -c processor /proc/cpuinfo) \
-              -l /opt/pvs_studio/PVS-Studio.lic \
               -f build/f7-firmware-DC/compile_commands.json \
               -o PVS-Studio.log
 
