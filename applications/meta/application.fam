@@ -40,7 +40,7 @@ App(
         # "INTAPP_HIDAnalyzer",
         "APPS_MouseJiggler",
         "APPS_MouseJacker",
-        "APPS_multi_conv";
+        "APPS_multi_conv",
         "APPS_MusicPlayer",
         "APPS_NameChanger",
         "APPS_NRFSniff",
@@ -114,7 +114,7 @@ App(
         "APPS_BarcodeGenerator",
         "APPS_MouseJiggler",
         "APPS_MouseJacker",
-        "APPS_multi_conv";
+        "APPS_multi_conv",
         "APPS_NRFSniff",
         "APPS_FlipFrid",
         "APPS_Sub_Playlist",
