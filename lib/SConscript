@@ -85,6 +85,7 @@ libs = env.BuildModules(
         "appframe",
         "misc",
         "loclass",
+        "lfrfid",
         "flipper_application",
     ],
 )
