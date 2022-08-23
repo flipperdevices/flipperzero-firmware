@@ -238,7 +238,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                     ((rand() % state->diceSelect) + 1),
                     ((rand() % state->diceSelect) + 1),
                     ((rand() % state->diceSelect) + 1));
-            } else if(diceQty == 5) {
+            } else if(state->diceQty == 5) {
                 snprintf(
                     state->strings[1],
                     sizeof(state->strings[1]),
