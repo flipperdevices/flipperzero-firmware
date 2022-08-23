@@ -86,6 +86,7 @@ libs = env.BuildModules(
         "misc",
         "loclass",
         "flipper_application",
+        "lfrfid",
     ],
 )
 
