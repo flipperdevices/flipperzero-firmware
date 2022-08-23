@@ -101,7 +101,7 @@ void desktop_lock_menu_render(Canvas* canvas, void* model) {
         if(m->hint_timeout && m->idx == 2 && m->idx == i) {
             str = "Shutting Down...";
         } else if(m->hint_timeout && m->idx == 3 && m->idx == i) {
-            str = "UUDDLCLC For Main";
+            str = "UUDDLRLR From Clock";
         }
         if(str != NULL) {
             canvas_draw_str_aligned(
