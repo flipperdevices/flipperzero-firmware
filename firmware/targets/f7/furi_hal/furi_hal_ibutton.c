@@ -89,15 +89,3 @@ void furi_hal_ibutton_emulate_stop() {
         furi_hal_ibutton->context = NULL;
     }
 }
-
-void furi_hal_ibutton_start_drive() {
-    furi_hal_onewire_start_drive(&ibutton_gpio);
-}
-
-void furi_hal_ibutton_stop() {
-    furi_hal_onewire_stop(&ibutton_gpio);
-}
-
-void furi_hal_ibutton_pin_low() {
-    furi_hal_onewire_pin_low(&ibutton_gpio);
-}
