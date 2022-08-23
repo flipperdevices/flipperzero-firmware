@@ -213,7 +213,7 @@ MU_TEST(test_lfrfid_protocol_em_read_simple) {
     ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
     mu_assert_int_eq(EM_TEST_DATA_SIZE, protocol_dict_get_data_size(dict, LFRFIDProtocolEM4100));
     mu_assert_string_eq("EM4100", protocol_dict_get_name(dict, LFRFIDProtocolEM4100));
-    mu_assert_string_eq("EM-Marin", protocol_dict_get_manufacturer(dict, LFRFIDProtocolEM4100));
+    mu_assert_string_eq("EM-Micro", protocol_dict_get_manufacturer(dict, LFRFIDProtocolEM4100));
 
     const uint8_t data[EM_TEST_DATA_SIZE] = EM_TEST_DATA;
 
@@ -256,7 +256,7 @@ MU_TEST(test_lfrfid_protocol_em_emulate_simple) {
     ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
     mu_assert_int_eq(EM_TEST_DATA_SIZE, protocol_dict_get_data_size(dict, LFRFIDProtocolEM4100));
     mu_assert_string_eq("EM4100", protocol_dict_get_name(dict, LFRFIDProtocolEM4100));
-    mu_assert_string_eq("EM-Marin", protocol_dict_get_manufacturer(dict, LFRFIDProtocolEM4100));
+    mu_assert_string_eq("EM-Micro", protocol_dict_get_manufacturer(dict, LFRFIDProtocolEM4100));
 
     const uint8_t data[EM_TEST_DATA_SIZE] = EM_TEST_DATA;
 
