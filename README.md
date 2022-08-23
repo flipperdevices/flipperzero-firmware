@@ -9,6 +9,9 @@
 - Switched these apps to  `HIDDEN` for compile space, *they will be back*. HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
 - OFW: [#1644](https://github.com/flipperdevices/flipperzero-firmware/pull/1644), [#1601](https://github.com/flipperdevices/flipperzero-firmware/pull/1601), [#1562](https://github.com/flipperdevices/flipperzero-firmware/pull/1562), [#1642](https://github.com/flipperdevices/flipperzero-firmware/pull/1642), [#1526](https://github.com/flipperdevices/flipperzero-firmware/pull/1526) & [#1645](https://github.com/flipperdevices/flipperzero-firmware/pull/1645)
 - Removed conflicting RFID: Direct Emulation from [(atomsmasha)](https://github.com/flipperdevices/flipperzero-firmware/pull/1371)
+- Added [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
+- APPS TO HIDE: NRF SNIFFER, MARAUDER, MOUSE JACKER. Will be for DEV space for FAPS. *they will be back* (Or Stick To 0.65.1-0823-RM)
+
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -137,6 +140,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
 - [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 - [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
+- [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 
 </details>
 
