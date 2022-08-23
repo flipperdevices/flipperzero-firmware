@@ -45,11 +45,13 @@ PowerSettingsApp* power_settings_app_alloc(uint32_t first_scene) {
         PowerSettingsAppViewBatteryInfo,
         battery_info_get_view(app->batery_info));
     app->submenu = submenu_alloc();
+    app->variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, PowerSettingsAppViewSubmenu, submenu_get_view(app->submenu));
     app->dialog = dialog_ex_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, PowerSettingsAppViewDialog, dialog_ex_get_view(app->dialog));
+    view_dispatcher_add_view(app->view_dispatcher, PowerSettingsAppViewVariableItemList, variable_item_list_get_view(app->variable_item_list));
 
     // Set first scene
     scene_manager_next_scene(app->scene_manager, first_scene);
@@ -63,8 +65,10 @@ void power_settings_app_free(PowerSettingsApp* app) {
     battery_info_free(app->batery_info);
     view_dispatcher_remove_view(app->view_dispatcher, PowerSettingsAppViewSubmenu);
     submenu_free(app->submenu);
+    variable_item_list_free(app->variable_item_list);
     view_dispatcher_remove_view(app->view_dispatcher, PowerSettingsAppViewDialog);
     dialog_ex_free(app->dialog);
+    view_dispatcher_remove_view(app->view_dispatcher, PowerSettingsAppViewVariableItemList);
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);

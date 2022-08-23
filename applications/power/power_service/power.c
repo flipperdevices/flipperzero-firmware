@@ -37,6 +37,65 @@ static ViewPort* power_battery_view_port_alloc(Power* power) {
     return battery_view_port;
 }
 
+static void power_start_auto_shutdown_timer(Power* power) {
+    furi_timer_start(power->auto_shutdown_timer, furi_ms_to_ticks(power->shutdown_idle_delay_ms));
+}
+
+static void power_stop_auto_shutdown_timer(Power* power) {
+    furi_timer_stop(power->auto_shutdown_timer);
+}
+
+static void power_input_event_callback(const void* value, void* context) {
+    furi_assert(value);
+    furi_assert(context);
+    const InputEvent* event = value;
+    Power* power = context;
+    if(event->type == InputTypePress) {
+        power_start_auto_shutdown_timer(power);
+    }
+}
+
+static void power_auto_shutdown_arm(Power* power) {
+    if(power->shutdown_idle_delay_ms) {
+        power->input_events_subscription =
+            furi_pubsub_subscribe(power->input_events_pubsub, power_input_event_callback, power);
+        power_start_auto_shutdown_timer(power);
+    }
+}
+
+static void power_auto_shutdown_inhibit(Power* power) {
+    power_stop_auto_shutdown_timer(power);
+    if(power->input_events_subscription) {
+        furi_pubsub_unsubscribe(power->input_events_pubsub, power->input_events_subscription);
+        power->input_events_subscription = NULL;
+    }
+}
+
+
+
+static void power_auto_shutdown_timer_callback(void* context) {
+    furi_assert(context);
+    Power* power = context;
+    power_auto_shutdown_inhibit(power);
+    power_off(power);
+}
+
+static void auto_shutdown_update(Power* power) {
+    uint32_t old_time = power->shutdown_idle_delay_ms;
+    LOAD_POWER_SETTINGS(&power->shutdown_idle_delay_ms);
+    if(power->shutdown_idle_delay_ms) {
+        if(power->shutdown_idle_delay_ms != old_time) {
+            if(old_time) {
+                power_start_auto_shutdown_timer(power);
+            } else {
+                power_auto_shutdown_arm(power);
+            }
+        }
+    }else if(old_time){
+        power_auto_shutdown_inhibit(power);
+    }
+}
+
 Power* power_alloc() {
     Power* power = malloc(sizeof(Power));
 
@@ -46,6 +105,9 @@ Power* power_alloc() {
 
     // Pubsub
     power->event_pubsub = furi_pubsub_alloc();
+
+    power->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
+    power->input_events_subscription = NULL;
 
     // State initialization
     power->state = PowerStateNotCharging;
@@ -69,6 +131,10 @@ Power* power_alloc() {
     power->battery_view_port = power_battery_view_port_alloc(power);
     power->show_low_bat_level_message = true;
 
+    //Auto shutdown timer
+    power->auto_shutdown_timer =
+        furi_timer_alloc(power_auto_shutdown_timer_callback, FuriTimerTypeOnce, power);
+
     return power;
 }
 
@@ -87,6 +153,12 @@ void power_free(Power* power) {
 
     // FuriPubSub
     furi_pubsub_free(power->event_pubsub);
+    furi_pubsub_free(power->input_events_pubsub);
+
+    if(power->input_events_subscription) {
+        furi_pubsub_unsubscribe(power->input_events_pubsub, power->input_events_subscription);
+        power->input_events_subscription = NULL;
+    }
 
     // Records
     furi_record_close(RECORD_NOTIFICATION);
@@ -202,10 +274,19 @@ static void power_check_battery_level_change(Power* power) {
 int32_t power_srv(void* p) {
     UNUSED(p);
     Power* power = power_alloc();
+    if(!LOAD_POWER_SETTINGS(&power->shutdown_idle_delay_ms)) {
+        memset(&power->shutdown_idle_delay_ms, 0, sizeof(uint32_t));
+        SAVE_POWER_SETTINGS(&power->shutdown_idle_delay_ms);
+    }
+    power_auto_shutdown_arm(power);
     power_update_info(power);
     furi_record_create(RECORD_POWER, power);
 
     while(1) {
+
+        //Check current setting for automatic shutdown
+        auto_shutdown_update(power);
+
         // Update data from gauge and charger
         bool need_refresh = power_update_info(power);
 
@@ -228,7 +309,7 @@ int32_t power_srv(void* p) {
 
         furi_delay_ms(1000);
     }
-
+    power_auto_shutdown_inhibit(power);
     power_free(power);
 
     return 0;
