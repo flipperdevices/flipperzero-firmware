@@ -9,6 +9,7 @@
 - Switched these apps to  `HIDDEN` for compile space, *they will be back*. HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
 - Updated [WiFi (Deauther) (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) 
 - Removed [Dec/Hex Converter plugin (By theisolinearchip)](https://github.com/theisolinearchip) `HIDDEN "APPS_dec_hex_converter"`
+- Added [Multi Converter (By theisolinearchip)](https://github.com/theisolinearchip)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -181,6 +182,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [HID Analyzer (By Ownasaurus)](https://github.com/Ownasaurus/flipperzero-firmware/tree/hid-analyzer/applications/hid_analyzer) `HIDDEN "INTAPP_HIDAnalyzer"`
 - `FAP` [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/mousejacker) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - `FAP` [Mouse Jiggler (By Jacob-Tate)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c) (Original By MuddleBox)
+- [Multi Converter (By theisolinearchip)](https://github.com/theisolinearchip)
 - `FAP` Music Player [OFW]
 - `FAP` [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e) `HIDDEN "APPS_Paint"`
