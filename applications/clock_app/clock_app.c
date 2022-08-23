@@ -196,11 +196,9 @@ const NotificationSequence clock_alert_startStop = {
     NULL,
 };
 
-static void desktop_view_main_dumbmode_changed(bool isThisGameMode) {
-    DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
-    LOAD_DESKTOP_SETTINGS(&app->settings);
-    app->settings.is_dumbmode = isThisGameMode;
-    SAVE_DESKTOP_SETTINGS(&app->settings);
+static void desktop_view_main_dumbmode_changed(DesktopSettings settings) {
+    settings->is_dumbmode = !settings->is_dumbmode;
+    SAVE_DESKTOP_SETTINGS(settings);
 }
 
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -419,6 +417,7 @@ int32_t clock_app(void* p) {
                         }
                         break;
                     case InputKeyOk:
+                        plugin_state->codeSequence = 0;
                         if(!plugin_state->desktop_settings->is_dumbmode) {
                             if(plugin_state->songSelect == 1 || plugin_state->songSelect == 2 ||
                                plugin_state->songSelect == 3) {
@@ -455,13 +454,7 @@ int32_t clock_app(void* p) {
                     if(plugin_state->codeSequence == 8) {
                         // UNLOCK!
                         plugin_state->codeSequence = 0;
-                        if(plugin_state->desktop_settings->is_dumbmode) {
-                            desktop_view_main_dumbmode_changed(0);
-                            plugin_state->desktop_settings->is_dumbmode = false;
-                        } else {
-                            desktop_view_main_dumbmode_changed(1);
-                            plugin_state->desktop_settings->is_dumbmode = true;
-                        }
+						desktop_view_main_dumbmode_changed(plugin_state->desktop_settings);
                     }
                 } else if(event.input.type == InputTypeLong) {
                     if(event.input.key == InputKeyLeft) {
