@@ -29,7 +29,7 @@ typedef struct {
     uint8_t diceRoll;
     uint8_t playerOneScore;
     uint8_t playerTwoScore;
-    char rollTime[1][12];
+    char rollTime[1][15];
     char diceType[1][8];
     char strings[5][45];
     char theScores[1][45];
@@ -73,13 +73,22 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             srand(furi_get_tick());
             rand_generator_inited = true;
         }
+        furi_hal_rtc_get_datetime(&state->datetime);
+        uint8_t hour = state->datetime.hour;
+        char strAMPM[3];
+        snprintf(strAMPM, sizeof(strAMPM), "%s", "AM");
+        if(hour > 12) {
+            hour -= 12;
+            snprintf(strAMPM, sizeof(strAMPM), "%s", "PM");
+        }
         snprintf(
             state->rollTime[0],
             sizeof(state->rollTime[0]),
-            "%.2d:%.2d:%.2d",
-            state->datetime.hour,
+            "%.2d:%.2d:%.2d %s",
+            hour,
             state->datetime.minute,
-            state->datetime.second);
+            state->datetime.second,
+            strAMPM);
         if(state->diceSelect == 229) {
             const char* eightBall[] = {
                 "It is certain",
