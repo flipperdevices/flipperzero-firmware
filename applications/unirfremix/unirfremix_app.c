@@ -15,7 +15,7 @@
 #include <lib/subghz/subghz_file_encoder_worker.h>*/
 #include <applications/subghz/subghz_i.h>
 
-#define UNIRFMAP_FOLDER "/any/unirf"
+#define UNIRFMAP_FOLDER "/any/subghz/unirf"
 #define UNIRFMAP_EXTENSION ".txt"
 
 #define TAG "UniRF Remix"

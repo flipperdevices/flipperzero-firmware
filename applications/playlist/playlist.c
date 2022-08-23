@@ -20,7 +20,7 @@
 #include "playlist_file.h"
 #include "canvas_helper.h"
 
-#define PLAYLIST_FOLDER "/ext/playlist"
+#define PLAYLIST_FOLDER "/ext/subghz/playlist"
 #define PLAYLIST_EXT ".txt"
 #define TAG "Playlist"
 
