@@ -51,7 +51,10 @@ PowerSettingsApp* power_settings_app_alloc(uint32_t first_scene) {
     app->dialog = dialog_ex_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, PowerSettingsAppViewDialog, dialog_ex_get_view(app->dialog));
-    view_dispatcher_add_view(app->view_dispatcher, PowerSettingsAppViewVariableItemList, variable_item_list_get_view(app->variable_item_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        PowerSettingsAppViewVariableItemList,
+        variable_item_list_get_view(app->variable_item_list));
 
     // Set first scene
     scene_manager_next_scene(app->scene_manager, first_scene);

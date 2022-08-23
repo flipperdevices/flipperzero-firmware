@@ -4,21 +4,13 @@
 #define SHUTDOWN_IDLE_DELAY_COUNT 8
 #define SCENE_EVENT_SELECT_SHUTDOWN_IDLE_DELAY 0
 
-const char* const shutdown_idle_delay_text[SHUTDOWN_IDLE_DELAY_COUNT] = {
-    "OFF",
-    "15min",
-    "30min",
-    "1h",
-    "6h",
-    "12h",
-    "24h",
-    "48h"
-};
+const char* const shutdown_idle_delay_text[SHUTDOWN_IDLE_DELAY_COUNT] =
+    {"OFF", "15min", "30min", "1h", "6h", "12h", "24h", "48h"};
 
 const uint32_t shutdown_idle_delay_value[SHUTDOWN_IDLE_DELAY_COUNT] =
     {0, 900000, 1800000, 3600000, 21600000, 43200000, 86400000, 172800000};
 
-    static void power_settings_scene_shutodwn_idle_callback(void* context, uint32_t index) {
+static void power_settings_scene_shutodwn_idle_callback(void* context, uint32_t index) {
     PowerSettingsApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
@@ -34,7 +26,7 @@ static void power_settings_scene_start_shutdown_idle_delay_changed(VariableItem*
 void power_settings_scene_shutdown_idle_on_enter(void* context) {
     PowerSettingsApp* app = context;
     LOAD_POWER_SETTINGS(&app->shutdown_idle_delay_ms);
-    VariableItemList* variable_item_list = app->variable_item_list; 
+    VariableItemList* variable_item_list = app->variable_item_list;
     VariableItem* item;
     uint8_t value_index;
 
@@ -44,7 +36,6 @@ void power_settings_scene_shutdown_idle_on_enter(void* context) {
         SHUTDOWN_IDLE_DELAY_COUNT,
         power_settings_scene_start_shutdown_idle_delay_changed,
         app);
-
 
     variable_item_list_set_enter_callback(
         variable_item_list, power_settings_scene_shutodwn_idle_callback, app);
@@ -62,10 +53,8 @@ bool power_settings_scene_shutdown_idle_on_event(void* context, SceneManagerEven
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        switch(event.event) {
-        case SCENE_EVENT_SELECT_SHUTDOWN_IDLE_DELAY:
+        if(event.event == SCENE_EVENT_SELECT_SHUTDOWN_IDLE_DELAY) {
             consumed = true;
-            break;
         }
     }
     return consumed;

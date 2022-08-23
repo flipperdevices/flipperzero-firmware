@@ -71,8 +71,6 @@ static void power_auto_shutdown_inhibit(Power* power) {
     }
 }
 
-
-
 static void power_auto_shutdown_timer_callback(void* context) {
     furi_assert(context);
     Power* power = context;
@@ -91,7 +89,7 @@ static void auto_shutdown_update(Power* power) {
                 power_auto_shutdown_arm(power);
             }
         }
-    }else if(old_time){
+    } else if(old_time) {
         power_auto_shutdown_inhibit(power);
     }
 }
@@ -277,7 +275,7 @@ int32_t power_srv(void* p) {
     UNUSED(p);
     Power* power = power_alloc();
     if(!LOAD_POWER_SETTINGS(&power->shutdown_idle_delay_ms)) {
-        memset(&power->shutdown_idle_delay_ms, 0, sizeof(uint32_t));
+        power->shutdown_idle_delay_ms = 0;
         SAVE_POWER_SETTINGS(&power->shutdown_idle_delay_ms);
     }
     power_auto_shutdown_arm(power);
@@ -285,7 +283,6 @@ int32_t power_srv(void* p) {
     furi_record_create(RECORD_POWER, power);
 
     while(1) {
-
         //Check current setting for automatic shutdown
         auto_shutdown_update(power);
 

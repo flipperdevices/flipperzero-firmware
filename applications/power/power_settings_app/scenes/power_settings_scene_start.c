@@ -35,7 +35,7 @@ void power_settings_scene_start_on_enter(void* context) {
         PowerSettingsSubmenuIndexOff,
         power_settings_scene_start_submenu_callback,
         app);
-        submenu_add_item(
+    submenu_add_item(
         submenu,
         "Shutdown on Idle",
         PowerSettingsSubmenuShutdownIdle,
@@ -58,7 +58,7 @@ bool power_settings_scene_start_on_event(void* context, SceneManagerEvent event)
             scene_manager_next_scene(app->scene_manager, PowerSettingsAppSceneReboot);
         } else if(event.event == PowerSettingsSubmenuIndexOff) {
             scene_manager_next_scene(app->scene_manager, PowerSettingsAppScenePowerOff);
-        }else if(event.event == PowerSettingsSubmenuShutdownIdle){
+        } else if(event.event == PowerSettingsSubmenuShutdownIdle) {
             scene_manager_next_scene(app->scene_manager, PowerSettingsAppSceneShutdownIdle);
         }
         scene_manager_set_scene_state(app->scene_manager, PowerSettingsAppSceneStart, event.event);

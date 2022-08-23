@@ -34,5 +34,3 @@ typedef enum {
     PowerSettingsAppViewDialog,
     PowerSettingsAppViewVariableItemList
 } PowerSettingsAppView;
-
-
