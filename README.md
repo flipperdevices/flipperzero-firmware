@@ -6,22 +6,9 @@
 <b>Latest Updates:</b>
 
 - Known Issues: `FAP Loader` & `Chess`
-- Awesome [Animations: RM FW Update image (Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/257)
-- Updated Clock to be 12HR mode by default
-- Assets: Includes New Dolphin Animations: [Mew (By Arkaivos)]
-- Settings: Rename from SD `dolphin/name.txt` [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
-- Settings:  "DUMB Mode" is now "Lock W PIN + Off" [(By RogueMaster)]
-- Reworked Clock notifications
-- Clock no longer displays StopWatch OR 12hr/24hr options in Game Mode
-- Clock only stop and reset on Left HOLD
-- Flipper is no longer Stoned in Game Mode
-- Did some TAMA P1 app renaming... sorry, you may need to delete/remove the old tamalib module
-- Made exit code sequence state variable for Game Mode exit not a global variable.
-- Dolphin: Changed daily MAX to 100 on all 7 Deed Types with random Deed selection for up to +3 EXP per deed and up to 700 EXP daily.
-- Zombiez: Changed to be hold back to exit and +3 EXP for every 20 Zombie kills
-- OFW: [#1628](https://github.com/flipperdevices/flipperzero-firmware/pull/1628), [#1636](https://github.com/flipperdevices/flipperzero-firmware/pull/1636), [#1606](https://github.com/flipperdevices/flipperzero-firmware/pull/1606), [#1609](https://github.com/flipperdevices/flipperzero-firmware/pull/1609), [#1610](https://github.com/flipperdevices/flipperzero-firmware/pull/1610), [#1615](https://github.com/flipperdevices/flipperzero-firmware/pull/1615), [#1624](https://github.com/flipperdevices/flipperzero-firmware/pull/1624), [#1637](https://github.com/flipperdevices/flipperzero-firmware/pull/1637) & [#1633](https://github.com/flipperdevices/flipperzero-firmware/pull/1633)
-- Switched these apps to  `HIDDEN` for compile space, they will be back. HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
-- Updated EXP gain for 2048, Dice, Flappy Bird, Mouse Jacker, NRFSniffer, Snake, Tetris and Zombiez.
+- Switched these apps to  `HIDDEN` for compile space, *they will be back*. HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
+
+
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
