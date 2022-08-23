@@ -11,6 +11,7 @@
 - Removed [Dec/Hex Converter plugin (By theisolinearchip)](https://github.com/theisolinearchip) `HIDDEN "APPS_dec_hex_converter"`
 - Added [Multi Converter (By theisolinearchip)](https://github.com/theisolinearchip)
 - Fixed app folders for UniRF and .sub Playlist apps to be in subghz folder. Sorry, you may need to move your old folders.
+- Konami Clock to Enter/Exit Game Mode
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
