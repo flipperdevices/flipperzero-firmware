@@ -27,30 +27,8 @@ static void protocol_0_free(Protocol0Data* data) {
     free(data);
 }
 
-static const char* protocol_0_get_name(Protocol0Data* data) {
-    UNUSED(data);
-    return "Protocol 0";
-}
-
-static const char* protocol_0_get_manufacturer(Protocol0Data* data) {
-    UNUSED(data);
-    return "Manufacturer 0";
-}
-
-static void protocol_0_set_data(Protocol0Data* data, const uint8_t* value, size_t data_size) {
-    furi_check(data_size <= 4);
-    data->data = 0;
-    memcpy(&data->data, value, data_size);
-}
-
-static void protocol_0_get_data(Protocol0Data* data, uint8_t* value, size_t data_size) {
-    furi_check(data_size >= 4);
-    memcpy(value, &data->data, data_size);
-}
-
-static size_t protocol_0_get_data_size(Protocol0Data* data) {
-    UNUSED(data);
-    return 4;
+static uint8_t* protocol_0_get_data(Protocol0Data* data) {
+    return (uint8_t*)&data->data;
 }
 
 static void protocol_0_decoder_start(Protocol0Data* data) {
@@ -94,30 +72,8 @@ static void protocol_1_free(Protocol1Data* data) {
     free(data);
 }
 
-static const char* protocol_1_get_name(Protocol1Data* data) {
-    UNUSED(data);
-    return "Protocol 1";
-}
-
-static const char* protocol_1_get_manufacturer(Protocol1Data* data) {
-    UNUSED(data);
-    return "Manufacturer 1";
-}
-
-static void protocol_1_set_data(Protocol1Data* data, const uint8_t* value, size_t data_size) {
-    furi_check(data_size <= 4);
-    data->data = 0;
-    memcpy(&data->data, value, data_size);
-}
-
-static void protocol_1_get_data(Protocol1Data* data, uint8_t* value, size_t data_size) {
-    furi_check(data_size >= 4);
-    memcpy(value, &data->data, data_size);
-}
-
-static size_t protocol_1_get_data_size(Protocol1Data* data) {
-    UNUSED(data);
-    return 8;
+static uint8_t* protocol_1_get_data(Protocol1Data* data) {
+    return (uint8_t*)&data->data;
 }
 
 static void protocol_1_decoder_start(Protocol1Data* data) {
@@ -145,13 +101,12 @@ static LevelDuration protocol_1_encoder_yield(Protocol1Data* data) {
 
 /*********************** PROTOCOLS DESCRIPTION ***********************/
 static const ProtocolBase protocol_0 = {
+    .name = "Protocol 0",
+    .manufacturer = "Manufacturer 0",
+    .data_size = 4,
     .alloc = (ProtocolAlloc)protocol_0_alloc,
     .free = (ProtocolFree)protocol_0_free,
-    .set_data = (ProtocolSetData)protocol_0_set_data,
     .get_data = (ProtocolGetData)protocol_0_get_data,
-    .get_data_size = (ProtocolGetDataSize)protocol_0_get_data_size,
-    .get_name = (ProtocolGetName)protocol_0_get_name,
-    .get_manufacturer = (ProtocolGetManufacturer)protocol_0_get_manufacturer,
     .decoder =
         {
             .start = (ProtocolDecoderStart)protocol_0_decoder_start,
@@ -165,13 +120,12 @@ static const ProtocolBase protocol_0 = {
 };
 
 static const ProtocolBase protocol_1 = {
+    .name = "Protocol 1",
+    .manufacturer = "Manufacturer 1",
+    .data_size = 8,
     .alloc = (ProtocolAlloc)protocol_1_alloc,
     .free = (ProtocolFree)protocol_1_free,
-    .set_data = (ProtocolSetData)protocol_1_set_data,
     .get_data = (ProtocolGetData)protocol_1_get_data,
-    .get_data_size = (ProtocolGetDataSize)protocol_1_get_data_size,
-    .get_name = (ProtocolGetName)protocol_1_get_name,
-    .get_manufacturer = (ProtocolGetManufacturer)protocol_1_get_manufacturer,
     .decoder =
         {
             .start = (ProtocolDecoderStart)protocol_1_decoder_start,
