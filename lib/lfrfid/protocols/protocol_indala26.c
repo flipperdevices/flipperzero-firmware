@@ -236,7 +236,7 @@ static uint16_t get_cn(const uint8_t* data) {
     return cn;
 }
 
-void protocol_indala26_render_data(ProtocolIndala* protocol, string_t result) {
+void protocol_indala26_render_data_internal(ProtocolIndala* protocol, string_t result, bool brief) {
     bool wiegand_correct = true;
     bool checksum_correct = true;
 
@@ -283,22 +283,32 @@ void protocol_indala26_render_data(ProtocolIndala* protocol, string_t result) {
     }
     if(odd_parity_sum % 2 != odd_parity) wiegand_correct = false;
 
-    string_printf(
-        result,
-        "FC: %u\r\n"
-        "Card: %u\r\n"
-        "Checksum: %s\r\n"
-        "W26 Parity: %s",
-        fc,
-        card,
-        (checksum_correct ? "+" : "-"),
-        (wiegand_correct ? "+" : "-"));
+    if(brief) {
+        string_printf(
+            result,
+            "FC: %u\r\nCard: %u, Parity:%s%s",
+            fc,
+            card,
+            (checksum_correct ? "+" : "-"),
+            (wiegand_correct ? "+" : "-"));
+    } else {
+        string_printf(
+            result,
+            "FC: %u\r\n"
+            "Card: %u\r\n"
+            "Checksum: %s\r\n"
+            "W26 Parity: %s",
+            fc,
+            card,
+            (checksum_correct ? "+" : "-"),
+            (wiegand_correct ? "+" : "-"));
+    }
 }
-
+void protocol_indala26_render_data(ProtocolIndala* protocol, string_t result) {
+    protocol_indala26_render_data_internal(protocol, result, false);
+}
 void protocol_indala26_render_brief_data(ProtocolIndala* protocol, string_t result) {
-    const uint8_t fc = get_fc(protocol->data);
-    const uint16_t card = get_cn(protocol->data);
-    string_printf(result, "FC: %u\r\nCard: %u", fc, card);
+    protocol_indala26_render_data_internal(protocol, result, true);
 }
 
 bool protocol_indala26_write_data(ProtocolIndala* protocol, void* data) {
