@@ -29,7 +29,7 @@ struct NameChanger {
     Storage* storage;
     DialogsApp* dialogs;
 
-    char text_store[NAMECHANGER_TEXT_STORE_SIZE+1];
+    char text_store[NAMECHANGER_TEXT_STORE_SIZE + 1];
 
     TextInput* text_input;
     Popup* popup;

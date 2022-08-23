@@ -43,8 +43,7 @@ static const char* const moods[16] = {
     "Annoyed",
     "Upset",
     "Angry",
-    "Furious"
-};
+    "Furious"};
 
 static void input_callback(InputEvent* input, void* ctx) {
     FuriSemaphore* semaphore = ctx;

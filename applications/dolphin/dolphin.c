@@ -23,14 +23,14 @@ void dolphin_deed(Dolphin* dolphin, DolphinDeed deed) {
 }
 
 DolphinDeed getRandomDeed() {
-    DolphinDeed returnGrp[11] = {1,8,12,17,21,25,26,5,10,15,20};
+    DolphinDeed returnGrp[11] = {1, 8, 12, 17, 21, 25, 26, 5, 10, 15, 20};
     static bool rand_generator_inited = false;
     if(!rand_generator_inited) {
         srand(furi_get_tick());
         rand_generator_inited = true;
     }
     uint8_t diceRoll = (rand() % COUNT_OF(returnGrp)); // JUST TO GET IT GOING? AND FIX BUG
-    diceRoll = (rand() % COUNT_OF(returnGrp)); 
+    diceRoll = (rand() % COUNT_OF(returnGrp));
     return returnGrp[diceRoll];
 }
 

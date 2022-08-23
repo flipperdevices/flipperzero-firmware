@@ -119,7 +119,7 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 37, 31, "Game Over");
 
-        if((snake_state->len - 7) % 20==0 && (snake_state->len - 7) != 0) {
+        if((snake_state->len - 7) % 20 == 0 && (snake_state->len - 7) != 0) {
             DOLPHIN_DEED(getRandomDeed());
         }
 

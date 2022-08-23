@@ -29,7 +29,8 @@ bool namechanger_scene_save_failed_on_event(void* context, SceneManagerEvent eve
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == NameChangerCustomEventBack) {
-            scene_manager_search_and_switch_to_previous_scene(namechanger->scene_manager, NameChangerSceneSaveName);
+            scene_manager_search_and_switch_to_previous_scene(
+                namechanger->scene_manager, NameChangerSceneSaveName);
         }
     }
 

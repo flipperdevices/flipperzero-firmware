@@ -4,22 +4,23 @@
 
 static void namechanger_scene_save_name_text_input_callback(void* context) {
     NameChanger* namechanger = context;
-    view_dispatcher_send_custom_event(namechanger->view_dispatcher, NameChangerCustomEventTextEditResult);
+    view_dispatcher_send_custom_event(
+        namechanger->view_dispatcher, NameChangerCustomEventTextEditResult);
 }
 
 void namechanger_scene_save_name_on_enter(void* context) {
     NameChanger* namechanger = context;
     TextInput* text_input = namechanger->text_input;
-	
-	bool file_exists = namechanger_name_read_write(namechanger, NULL, 2);
+
+    bool file_exists = namechanger_name_read_write(namechanger, NULL, 2);
 
     text_input_set_header_text(text_input, "Set Flipper Name");
     text_input_set_result_callback(
-		text_input,
-		namechanger_scene_save_name_text_input_callback,
-		namechanger,
+        text_input,
+        namechanger_scene_save_name_text_input_callback,
+        namechanger,
         namechanger->text_store,
-		NAMECHANGER_TEXT_STORE_SIZE,
+        NAMECHANGER_TEXT_STORE_SIZE,
         file_exists);
 
     view_dispatcher_switch_to_view(namechanger->view_dispatcher, NameChangerViewTextInput);

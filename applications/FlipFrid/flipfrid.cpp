@@ -267,7 +267,7 @@ void FlipFridApp::run() {
                         }
                     }
                     FURI_LOG_D(TAG, "Counter %d", counter);
-                    if (counter > TIME_BETWEEN_CARDS) {
+                    if(counter > TIME_BETWEEN_CARDS) {
                         counter = 0;
                     } else {
                         counter++;

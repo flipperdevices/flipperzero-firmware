@@ -33,7 +33,7 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
         double sd_free_val = (double)sd_info.kb_free;
         char* sd_free_unit = unit_kb;
 
-        if(sd_total_val  > 1024) {
+        if(sd_total_val > 1024) {
             sd_total_val /= 1024;
             sd_total_unit = unit_mb;
         }

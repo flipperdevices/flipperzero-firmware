@@ -30,26 +30,26 @@ typedef struct {
     InputEvent input;
 } PluginEvent;
 
-typedef enum { GameStatePlaying, GameStateGameOver} GameState;
+typedef enum { GameStatePlaying, GameStateGameOver } GameState;
 
 typedef struct {
     int x;
     int y;
 } Point;
 
-typedef struct { 
+typedef struct {
     Point position;
     int hp;
-} Player; 
+} Player;
 
-typedef struct { 
+typedef struct {
     Point position;
     int hp;
-} Zombie; 
+} Zombie;
 
-typedef struct { 
+typedef struct {
     Point position;
-} Projectile; 
+} Projectile;
 
 typedef struct {
     GameState game_state;
@@ -63,7 +63,7 @@ typedef struct {
 
     uint16_t score;
     bool input_shoot;
-} PluginState; 
+} PluginState;
 
 static void render_callback(Canvas* const canvas, void* ctx) {
     const PluginState* plugin_state = acquire_mutex((ValueMutex*)ctx, 25);
@@ -74,21 +74,27 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, plugin_state->player.position.x, plugin_state->player.position.y, AlignCenter, AlignCenter, "@");
+    canvas_draw_str_aligned(
+        canvas,
+        plugin_state->player.position.x,
+        plugin_state->player.position.y,
+        AlignCenter,
+        AlignCenter,
+        "@");
 
     canvas_draw_line(canvas, WALL_X, 0, WALL_X, 64);
     canvas_draw_line(canvas, WALL_X + 2, 4, WALL_X + 2, 59);
 
-    for (int i = 0; i < PROJECTILES_MAX; ++i) {
+    for(int i = 0; i < PROJECTILES_MAX; ++i) {
         Projectile* p = plugin_state->projectiles[i];
-        if (p != NULL) {
+        if(p != NULL) {
             canvas_draw_circle(canvas, p->position.x, p->position.y, 3);
         }
     }
 
-    for (int i = 0; i < ZOMBIES_MAX; ++i) {
+    for(int i = 0; i < ZOMBIES_MAX; ++i) {
         Zombie* z = plugin_state->zombies[i];
-        if (z != NULL) {
+        if(z != NULL) {
             for(int h = 0; h < ZOMBIES_HEIGHT; h++) {
                 for(int w = 0; w < ZOMBIES_WIDTH; w++) {
                     // Switch animation
@@ -125,7 +131,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     for(int h = 0; h < 5; h++) {
         for(int w = 0; w < 5; w++) {
             if(heart_array[heart][h][w] == 1) {
-                int x =  124 - w;
+                int x = 124 - w;
                 int y = 56 + h;
 
                 canvas_draw_dot(canvas, x, y);
@@ -136,13 +142,13 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     // buffer hp + score
     char hpBuffer[8];
     char scoreBuffer[14];
-    
+
     if(plugin_state->game_state == GameStatePlaying) {
         // display ammo / reload
-        if (plugin_state->projectiles_count >= PROJECTILES_MAX) {
+        if(plugin_state->projectiles_count >= PROJECTILES_MAX) {
             canvas_draw_str_aligned(canvas, 24, 10, AlignLeft, AlignCenter, "RELOAD");
         } else {
-            for(uint8_t i = 0; i < (PROJECTILES_MAX - plugin_state->projectiles_count) ; i++) {
+            for(uint8_t i = 0; i < (PROJECTILES_MAX - plugin_state->projectiles_count); i++) {
                 canvas_draw_box(canvas, 24 + (4 * i), 6, 2, 4);
             }
         }
@@ -179,13 +185,13 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
-    furi_assert(event_queue); 
+    furi_assert(event_queue);
     PluginEvent event = {.type = EventTypeKey, .input = *input_event};
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
 static void tick(PluginState* const plugin_state) {
-    if (plugin_state->input_shoot && (plugin_state->projectiles_count < PROJECTILES_MAX)) {
+    if(plugin_state->input_shoot && (plugin_state->projectiles_count < PROJECTILES_MAX)) {
         Projectile* p = (Projectile*)malloc(sizeof(Projectile));
         p->position.x = plugin_state->player.position.x;
         p->position.y = plugin_state->player.position.y;
@@ -193,11 +199,10 @@ static void tick(PluginState* const plugin_state) {
         size_t idx = plugin_state->projectiles_count;
         plugin_state->projectiles[idx] = p;
         plugin_state->projectiles_count += 1;
-    } 
+    }
 
-    
-    for (int i = 0; i < ZOMBIES_MAX; ++i) {
-        if (!plugin_state->zombies[i]) {
+    for(int i = 0; i < ZOMBIES_MAX; ++i) {
+        if(!plugin_state->zombies[i]) {
             Zombie* z = (Zombie*)malloc(sizeof(Zombie));
             //z->hp = 20;
             z->position.x = 126;
@@ -208,25 +213,26 @@ static void tick(PluginState* const plugin_state) {
         }
     }
 
-    for (int i = 0; i < PROJECTILES_MAX; ++i) {
+    for(int i = 0; i < PROJECTILES_MAX; ++i) {
         Projectile* p = plugin_state->projectiles[i];
-        if (p != NULL) {
+        if(p != NULL) {
             p->position.x += 2;
 
-            for (int i = 0; i < ZOMBIES_MAX; ++i) {
+            for(int i = 0; i < ZOMBIES_MAX; ++i) {
                 Zombie* z = plugin_state->zombies[i];
-                if (z != NULL) {
+                if(z != NULL) {
                     if( // projectile close enough to zombie
-                        (((z->position.x - p->position.x) <= 2) && ((z->position.y - p->position.y) <= 4)) &&
-                        (((p->position.x - z->position.x) <= 2) && ((p->position.y - z->position.y) <= 6))
-                      ) {
+                        (((z->position.x - p->position.x) <= 2) &&
+                         ((z->position.y - p->position.y) <= 4)) &&
+                        (((p->position.x - z->position.x) <= 2) &&
+                         ((p->position.y - z->position.y) <= 6))) {
                         //z->hp -= 5;
                         //if(z->hp <= 0) {
-                            plugin_state->zombies_count -= 1;
-                            free(z);
-                            plugin_state->zombies[i] = NULL;
-                            plugin_state->score++;
-                            if(plugin_state->score % 15 == 0) DOLPHIN_DEED(getRandomDeed());
+                        plugin_state->zombies_count -= 1;
+                        free(z);
+                        plugin_state->zombies[i] = NULL;
+                        plugin_state->score++;
+                        if(plugin_state->score % 15 == 0) DOLPHIN_DEED(getRandomDeed());
                         //}
                     } else if(z->position.x <= WALL_X && z->position.x > 0) { // zombie got to the wall
                         plugin_state->zombies_count -= 1;
@@ -243,7 +249,7 @@ static void tick(PluginState* const plugin_state) {
                 }
             }
 
-            if (p->position.x >= 128) {
+            if(p->position.x >= 128) {
                 free(p);
                 plugin_state->projectiles[i] = NULL;
             }
@@ -279,76 +285,81 @@ static void zombiez_state_init(PluginState* const plugin_state) {
 
     plugin_state->game_state = GameStatePlaying;
     plugin_state->input_shoot = false;
-} 
+}
 
-int32_t zombiez_game_app(void* p) { 
+int32_t zombiez_game_app(void* p) {
     UNUSED(p);
     uint32_t return_code = 0;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
-    
+
     PluginState* plugin_state = malloc(sizeof(PluginState));
     zombiez_state_init(plugin_state);
 
-    ValueMutex state_mutex; 
-    if (!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
+    ValueMutex state_mutex;
+    if(!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
         FURI_LOG_E("Zombiez", "cannot create mutex\r\n");
         return_code = 255;
         goto free_and_exit;
     }
 
     // Set system callbacks
-    ViewPort* view_port = view_port_alloc(); 
+    ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, &state_mutex);
     view_port_input_callback_set(view_port, input_callback, event_queue);
- 
+
     FuriTimer* timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, furi_kernel_get_tick_frequency() / 22);
 
     // Open GUI and register view_port
-    Gui* gui = furi_record_open(RECORD_GUI); 
-    gui_add_view_port(gui, view_port, GuiLayerFullscreen); 
+    Gui* gui = furi_record_open(RECORD_GUI);
+    gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    PluginEvent event; 
+    PluginEvent event;
     bool isRunning = true;
-    while(isRunning) { 
+    while(isRunning) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
         if(event_status == FuriStatusOk) {
             if(event.type == EventTypeKey) {
-                if(event.input.type == InputTypePress) {  
+                if(event.input.type == InputTypePress) {
                     switch(event.input.key) {
-                    case InputKeyUp: 
-                        if(plugin_state->player.position.y > MIN_Y && plugin_state->game_state == GameStatePlaying) {
+                    case InputKeyUp:
+                        if(plugin_state->player.position.y > MIN_Y &&
+                           plugin_state->game_state == GameStatePlaying) {
                             plugin_state->player.position.y--;
                         }
-                        break; 
-                    case InputKeyDown: 
-                        if(plugin_state->player.position.y < MAX_Y && plugin_state->game_state == GameStatePlaying) {
+                        break;
+                    case InputKeyDown:
+                        if(plugin_state->player.position.y < MAX_Y &&
+                           plugin_state->game_state == GameStatePlaying) {
                             plugin_state->player.position.y++;
                         }
-                        break; 
-                    case InputKeyOk: 
-                        if(plugin_state->projectiles_count < PROJECTILES_MAX && plugin_state->game_state == GameStatePlaying) {
+                        break;
+                    case InputKeyOk:
+                        if(plugin_state->projectiles_count < PROJECTILES_MAX &&
+                           plugin_state->game_state == GameStatePlaying) {
                             plugin_state->input_shoot = true;
                         }
                         break;
-                    case InputKeyBack: 
+                    case InputKeyBack:
                         break;
                     default:
                         break;
                     }
-                } else if(event.input.type == InputTypeRepeat && plugin_state->game_state == GameStatePlaying) {
+                } else if(
+                    event.input.type == InputTypeRepeat &&
+                    plugin_state->game_state == GameStatePlaying) {
                     switch(event.input.key) {
-                    case InputKeyUp: 
+                    case InputKeyUp:
                         if(plugin_state->player.position.y > (MIN_Y + 1)) {
                             plugin_state->player.position.y -= 2;
                         }
-                        break; 
-                    case InputKeyDown: 
+                        break;
+                    case InputKeyDown:
                         if(plugin_state->player.position.y < (MAX_Y - 1)) {
                             plugin_state->player.position.y += 2;
                         }
-                        break; 
+                        break;
                     default:
                         break;
                     }

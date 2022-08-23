@@ -22,15 +22,16 @@ void namechanger_scene_save_success_on_enter(void* context) {
 }
 
 bool namechanger_scene_save_success_on_event(void* context, SceneManagerEvent event) {
-	//UNUSED(context);
-	NameChanger* namechanger = context;
+    //UNUSED(context);
+    NameChanger* namechanger = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == NameChangerCustomEventBack) {
-            scene_manager_search_and_switch_to_previous_scene(namechanger->scene_manager, NameChangerSceneSaveName);
-			//furi_hal_power_reset();
+            scene_manager_search_and_switch_to_previous_scene(
+                namechanger->scene_manager, NameChangerSceneSaveName);
+            //furi_hal_power_reset();
         }
     }
 

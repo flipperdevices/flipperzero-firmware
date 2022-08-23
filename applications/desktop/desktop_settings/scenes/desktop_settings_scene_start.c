@@ -37,7 +37,7 @@ const char* const battery_view_count_text[BATTERY_VIEW_COUNT] = {
 };
 const uint32_t displayBatteryPercentage_value[BATTERY_VIEW_COUNT] = {0, 1, 2, 3, 4};
 
-uint8_t  origBattDisp_value = 0;
+uint8_t origBattDisp_value = 0;
 
 #define DUMBMODE_COUNT 2
 const char* const dumbmode_text[DUMBMODE_COUNT] = {
@@ -79,7 +79,7 @@ static void desktop_settings_scene_start_dumbmode_changed(VariableItem* item) {
 void desktop_settings_scene_start_on_enter(void* context) {
     DesktopSettingsApp* app = context;
     VariableItemList* variable_item_list = app->variable_item_list;
-	origBattDisp_value = app->settings.displayBatteryPercentage;
+    origBattDisp_value = app->settings.displayBatteryPercentage;
 
     VariableItem* item;
     uint8_t value_index;
@@ -177,9 +177,8 @@ void desktop_settings_scene_start_on_exit(void* context) {
     DesktopSettingsApp* app = context;
     variable_item_list_reset(app->variable_item_list);
     SAVE_DESKTOP_SETTINGS(&app->settings);
-	
-	if(app->settings.displayBatteryPercentage != origBattDisp_value)
-	{
-		furi_hal_power_reset();
-	}
+
+    if(app->settings.displayBatteryPercentage != origBattDisp_value) {
+        furi_hal_power_reset();
+    }
 }

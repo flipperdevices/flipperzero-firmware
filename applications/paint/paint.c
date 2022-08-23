@@ -74,7 +74,6 @@ int32_t paint_app(void* p) {
     InputEvent event;
 
     while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
-
         //break out of the loop if the back key is pressed
         if(event.type == InputTypeShort && event.key == InputKeyBack) {
             break;
@@ -103,7 +102,6 @@ int32_t paint_app(void* p) {
             default:
                 break;
             }
-            
 
             //check if cursor position is out of bounds and reset it to the closest position
             if(paint_state->selected.x < 0) {
@@ -118,7 +116,7 @@ int32_t paint_app(void* p) {
             if(paint_state->selected.y > 15) {
                 paint_state->selected.y = 15;
             }
-            if (paint_state->isDrawing == true) {
+            if(paint_state->isDrawing == true) {
                 paint_state->board[paint_state->selected.x][paint_state->selected.y] = true;
             }
             view_port_update(view_port);

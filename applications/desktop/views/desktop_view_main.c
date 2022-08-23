@@ -10,7 +10,6 @@
 #include "desktop_view_main.h"
 #include "desktop/desktop_settings/desktop_settings_app.h"
 
-
 struct DesktopMainView {
     View* view;
     DesktopMainViewCallback callback;

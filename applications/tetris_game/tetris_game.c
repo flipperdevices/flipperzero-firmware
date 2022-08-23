@@ -151,7 +151,7 @@ static void tetris_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 4, 63, "Game Over");
 
-        if(tetris_state->numLines % 8 == 0 && tetris_state->numLines!=0) {
+        if(tetris_state->numLines % 8 == 0 && tetris_state->numLines != 0) {
             DOLPHIN_DEED(getRandomDeed());
         }
 

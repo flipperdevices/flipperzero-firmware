@@ -219,22 +219,22 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
 
     uint8_t hour = curr_dt.hour;
     char strAMPM[3];
-    snprintf(strAMPM, sizeof(strAMPM),"%s","AM");
+    snprintf(strAMPM, sizeof(strAMPM), "%s", "AM");
     if(!state->militaryTime && hour > 12) {
         hour -= 12;
-        snprintf(strAMPM, sizeof(strAMPM),"%s","PM");
+        snprintf(strAMPM, sizeof(strAMPM), "%s", "PM");
     }
     snprintf(strings[1], 20, "%.2d:%.2d:%.2d", hour, curr_dt.minute, curr_dt.second);
 
     bool timer_running = state->timer_running;
     uint32_t songSelect = state->songSelect;
-    int alert_time = (int) state->alert_time;
+    int alert_time = (int)state->alert_time;
     uint32_t timer_start_timestamp = state->timer_start_timestamp;
     uint32_t timer_stopped_seconds = state->timer_stopped_seconds;
 
     char alertTime[4];
-    
-    snprintf(alertTime, sizeof(alertTime),"%d", alert_time);
+
+    snprintf(alertTime, sizeof(alertTime), "%d", alert_time);
 
     furi_mutex_release(state->mutex);
 
@@ -246,17 +246,20 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
         canvas_set_font(canvas, FontSecondary);
-        if(!state->militaryTime) canvas_draw_str_aligned(canvas, 118, 5, AlignCenter, AlignCenter, strAMPM);
+        if(!state->militaryTime)
+            canvas_draw_str_aligned(canvas, 118, 5, AlignCenter, AlignCenter, strAMPM);
         canvas_draw_str_aligned(canvas, 118, 15, AlignCenter, AlignCenter, alertTime);
         canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]); // DRAW DATE
         elements_button_left(canvas, "Reset");
     } else {
         canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
         canvas_set_font(canvas, FontSecondary);
-        if(!state->militaryTime) canvas_draw_str_aligned(canvas, 67, 15, AlignCenter, AlignCenter, strAMPM);
+        if(!state->militaryTime)
+            canvas_draw_str_aligned(canvas, 67, 15, AlignCenter, AlignCenter, strAMPM);
         canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
-        
-        if(!state->desktop_settings->is_dumbmode) elements_button_left(canvas, state->militaryTime ? "12h" : "24h");
+
+        if(!state->desktop_settings->is_dumbmode)
+            elements_button_left(canvas, state->militaryTime ? "12h" : "24h");
     }
     if(!state->desktop_settings->is_dumbmode) {
         if(timer_running) {
@@ -329,7 +332,7 @@ int32_t clock_app(void* p) {
     }
 
     LOAD_DESKTOP_SETTINGS(plugin_state->desktop_settings);
-    
+
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, clock_render_callback, plugin_state);
@@ -352,10 +355,12 @@ int32_t clock_app(void* p) {
                 if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
                     switch(event.input.key) {
                     case InputKeyUp:
-                        if(plugin_state->timer_running) plugin_state->alert_time = plugin_state->alert_time + 5;
+                        if(plugin_state->timer_running)
+                            plugin_state->alert_time = plugin_state->alert_time + 5;
                         break;
                     case InputKeyDown:
-                        if(plugin_state->timer_running) plugin_state->alert_time = plugin_state->alert_time - 5;
+                        if(plugin_state->timer_running)
+                            plugin_state->alert_time = plugin_state->alert_time - 5;
                         break;
                     case InputKeyRight:
                         if(plugin_state->songSelect == 0) {
@@ -380,12 +385,14 @@ int32_t clock_app(void* p) {
                             plugin_state->timerSecs = 0;
                         } else {
                             // Toggle 12/24 hours
-                            if(!plugin_state->desktop_settings->is_dumbmode) plugin_state->militaryTime = !plugin_state->militaryTime;
+                            if(!plugin_state->desktop_settings->is_dumbmode)
+                                plugin_state->militaryTime = !plugin_state->militaryTime;
                         }
                         break;
                     case InputKeyOk:
                         if(!plugin_state->desktop_settings->is_dumbmode) {
-                            if(plugin_state->songSelect == 1 || plugin_state->songSelect == 2 || plugin_state->songSelect == 3) {
+                            if(plugin_state->songSelect == 1 || plugin_state->songSelect == 2 ||
+                               plugin_state->songSelect == 3) {
                                 notification_message(notification, &clock_alert_startStop);
                             }
                             // START/STOP TIMER
@@ -417,7 +424,7 @@ int32_t clock_app(void* p) {
                         break;
                     }
                 } else if(event.input.type == InputTypeLong) {
-                    if (event.input.key == InputKeyLeft) {
+                    if(event.input.key == InputKeyLeft) {
                         if(plugin_state->timer_start_timestamp != 0) {
                             // Reset seconds
                             plugin_state->timer_running = false;
@@ -439,7 +446,7 @@ int32_t clock_app(void* p) {
                             FuriHalRtcDateTime curr_dt;
                             furi_hal_rtc_get_datetime(&curr_dt);
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
-                            if(plugin_state->lastexp_timestamp+10 <= curr_ts) {
+                            if(plugin_state->lastexp_timestamp + 10 <= curr_ts) {
                                 plugin_state->lastexp_timestamp = curr_ts;
                                 DOLPHIN_DEED(getRandomDeed());
                             }
@@ -456,7 +463,7 @@ int32_t clock_app(void* p) {
                             FuriHalRtcDateTime curr_dt;
                             furi_hal_rtc_get_datetime(&curr_dt);
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
-                            if(plugin_state->lastexp_timestamp+10 <= curr_ts) {
+                            if(plugin_state->lastexp_timestamp + 10 <= curr_ts) {
                                 plugin_state->lastexp_timestamp = curr_ts;
                                 DOLPHIN_DEED(getRandomDeed());
                             }
@@ -473,7 +480,7 @@ int32_t clock_app(void* p) {
                             FuriHalRtcDateTime curr_dt;
                             furi_hal_rtc_get_datetime(&curr_dt);
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
-                            if(plugin_state->lastexp_timestamp+10 <= curr_ts) {
+                            if(plugin_state->lastexp_timestamp + 10 <= curr_ts) {
                                 plugin_state->lastexp_timestamp = curr_ts;
                                 DOLPHIN_DEED(getRandomDeed());
                             }
