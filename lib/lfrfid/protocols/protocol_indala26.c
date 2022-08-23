@@ -67,7 +67,6 @@ static bool protocol_indala26_can_be_decoded(uint8_t* data) {
     if(!protocol_indala26_check_preamble(data, 64)) return false;
     if(bit_lib_get_bit(data, 61) != 0) return false;
     if(bit_lib_get_bit(data, 60) != 0) return false;
-    if(bit_lib_get_bit(data, 55) != 0) return false;
     return true;
 }
 
@@ -92,8 +91,8 @@ static bool protocol_indala26_decoder_feed_internal(bool polarity, uint32_t time
 
 static void protocol_indala26_decoder_save(uint8_t* data_to, const uint8_t* data_from) {
     bit_lib_copy_bits(data_to, 0, 22, data_from, 33);
-    bit_lib_copy_bits(data_to, 22, 4, data_from, 56);
-    bit_lib_copy_bits(data_to, 26, 2, data_from, 62);
+    bit_lib_copy_bits(data_to, 22, 5, data_from, 55);
+    bit_lib_copy_bits(data_to, 27, 2, data_from, 62);
 }
 
 bool protocol_indala26_decoder_feed(ProtocolIndala* protocol, bool level, uint32_t duration) {
@@ -154,8 +153,8 @@ bool protocol_indala26_encoder_start(ProtocolIndala* protocol) {
     *(uint32_t*)&protocol->encoded_data[0] = 0b00000000000000000000000010100000;
     bit_lib_set_bit(protocol->encoded_data, 32, 1);
     bit_lib_copy_bits(protocol->encoded_data, 33, 22, protocol->data, 0);
-    bit_lib_copy_bits(protocol->encoded_data, 56, 4, protocol->data, 22);
-    bit_lib_copy_bits(protocol->encoded_data, 62, 2, protocol->data, 26);
+    bit_lib_copy_bits(protocol->encoded_data, 55, 5, protocol->data, 22);
+    bit_lib_copy_bits(protocol->encoded_data, 62, 2, protocol->data, 27);
 
     protocol->encoder.last_bit =
         bit_lib_get_bit(protocol->encoded_data, INDALA26_ENCODED_BIT_SIZE - 1);
@@ -201,14 +200,14 @@ LevelDuration protocol_indala26_encoder_yield(ProtocolIndala* protocol) {
 static uint8_t get_fc(const uint8_t* data) {
     uint8_t fc = 0;
 
-    fc = fc << 1 | bit_lib_get_bit(data, 23);
+    fc = fc << 1 | bit_lib_get_bit(data, 24);
     fc = fc << 1 | bit_lib_get_bit(data, 16);
     fc = fc << 1 | bit_lib_get_bit(data, 11);
     fc = fc << 1 | bit_lib_get_bit(data, 14);
     fc = fc << 1 | bit_lib_get_bit(data, 15);
     fc = fc << 1 | bit_lib_get_bit(data, 20);
     fc = fc << 1 | bit_lib_get_bit(data, 6);
-    fc = fc << 1 | bit_lib_get_bit(data, 24);
+    fc = fc << 1 | bit_lib_get_bit(data, 25);
 
     return fc;
 }
@@ -229,8 +228,8 @@ static uint16_t get_cn(const uint8_t* data) {
     cn = cn << 1 | bit_lib_get_bit(data, 0);
     cn = cn << 1 | bit_lib_get_bit(data, 4);
     cn = cn << 1 | bit_lib_get_bit(data, 21);
-    cn = cn << 1 | bit_lib_get_bit(data, 22);
-    cn = cn << 1 | bit_lib_get_bit(data, 25);
+    cn = cn << 1 | bit_lib_get_bit(data, 23);
+    cn = cn << 1 | bit_lib_get_bit(data, 26);
     cn = cn << 1 | bit_lib_get_bit(data, 17);
     cn = cn << 1 | bit_lib_get_bit(data, 8);
 
@@ -244,8 +243,8 @@ void protocol_indala26_render_data(ProtocolIndala* protocol, string_t result) {
     const uint8_t fc = get_fc(protocol->data);
     const uint16_t card = get_cn(protocol->data);
     const uint32_t fc_and_card = fc << 16 | card;
-    const uint8_t checksum = bit_lib_get_bit(protocol->data, 26) << 1 |
-                             bit_lib_get_bit(protocol->data, 27);
+    const uint8_t checksum = bit_lib_get_bit(protocol->data, 27) << 1 |
+                             bit_lib_get_bit(protocol->data, 28);
     const bool even_parity = bit_lib_get_bit(protocol->data, 1);
     const bool odd_parity = bit_lib_get_bit(protocol->data, 5);
 

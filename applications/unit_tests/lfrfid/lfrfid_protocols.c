@@ -117,7 +117,7 @@ const int8_t ioprox_xsf_test_timings[IOPROX_XSF_TEST_EMULATION_TIMINGS_COUNT] = 
 
 #define INDALA26_EMULATION_TIMINGS_COUNT (1024 * 2)
 #define INDALA26_TEST_DATA \
-    { 0x3B, 0x73, 0x65, 0x50 }
+    { 0x3B, 0x73, 0x64, 0xA8 }
 #define INDALA26_TEST_DATA_SIZE 4
 
 const int8_t indala26_test_timings[INDALA26_EMULATION_TIMINGS_COUNT] = {
