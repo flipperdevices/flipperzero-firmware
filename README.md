@@ -7,7 +7,7 @@
 
 - Known Issues: `FAP Loader` & `Chess`
 - Switched these apps to  `HIDDEN` for compile space, *they will be back*. HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
-- Adding OFW: [#1644](https://github.com/flipperdevices/flipperzero-firmware/pull/1644), [#1601](https://github.com/flipperdevices/flipperzero-firmware/pull/1601), [#1562](https://github.com/flipperdevices/flipperzero-firmware/pull/1562), [#1642](https://github.com/flipperdevices/flipperzero-firmware/pull/1642) & [#1526](https://github.com/flipperdevices/flipperzero-firmware/pull/1526)
+- OFW: [#1644](https://github.com/flipperdevices/flipperzero-firmware/pull/1644), [#1601](https://github.com/flipperdevices/flipperzero-firmware/pull/1601), [#1562](https://github.com/flipperdevices/flipperzero-firmware/pull/1562), [#1642](https://github.com/flipperdevices/flipperzero-firmware/pull/1642) & [#1526](https://github.com/flipperdevices/flipperzero-firmware/pull/1526)
 - Removed conflicting RFID: Direct Emulation from [(atomsmasha)](https://github.com/flipperdevices/flipperzero-firmware/pull/1371)
 
 <table width="100%" border="0" cellspacing="0">
