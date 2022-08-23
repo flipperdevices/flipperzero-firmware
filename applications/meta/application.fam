@@ -38,12 +38,12 @@ App(
         "APPS_DolphinRestorer",
         "APPS_DolphinBackup",
         # "INTAPP_HIDAnalyzer",
-        "APPS_MouseJiggler",
-        "APPS_MouseJacker",
+        # "APPS_MouseJiggler",
+        # "APPS_MouseJacker",
         "APPS_multi_conv",
         "APPS_MusicPlayer",
         "APPS_NameChanger",
-        "APPS_NRFSniff",
+        # "APPS_NRFSniff",
         # "APPS_Paint",
         "INTAPP_Picopass",
         # "APPS_SentrySafe",
@@ -78,7 +78,7 @@ App(
     name="Wifi applications for plug-in menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "wifi_marauder",
+        # "wifi_marauder",
     ],
 )
 
