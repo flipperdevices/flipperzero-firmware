@@ -1,5 +1,5 @@
 V:0
-T:1661156481
+T:1661230318
 D:apps
 D:badusb
 D:dolphin
@@ -7,10 +7,8 @@ D:dolphin_restorer
 D:infrared
 D:music_player
 D:nfc
-D:playlist
 D:subghz
 D:u2f
-D:unirf
 D:update
 D:wav_player
 F:d41d8cd98f00b204e9800998ecf8427e:0:apps/faps_will_go_here.txt
@@ -368,11 +366,12 @@ F:81dc04c7b181f94b644079a71476dff4:4742:nfc/assets/aid.nfc
 F:86efbebdf41bb6bf15cc51ef88f069d5:2565:nfc/assets/country_code.nfc
 F:41b4f08774249014cb8d3dffa5f5c07d:1757:nfc/assets/currency_code.nfc
 F:65fe9bca810119fadc46415b9199e690:51831:nfc/assets/mf_classic_dict.nfc
-F:2132f1809ce9443c2eb6b26aaf8ec22b:129:playlist/example_tesla.txt
 D:subghz/Handicap
 D:subghz/Misc
 D:subghz/Vehicles
 D:subghz/assets
+D:subghz/playlist
+D:subghz/unirf
 F:0f7ee7c0f80064545d320a838721c7db:5544:subghz/Handicap/Handicap_button_1270.sub
 F:4ea73b964caa4f515ac18317deef0008:8222:subghz/Handicap/Handicap_button_1650.sub
 F:94eab58ea7ba75e4a738c69fd8d92af3:12402:subghz/Handicap/handicap_push_door.sub
@@ -394,10 +393,11 @@ F:5e81e9809984ee74d426730c1afa4093:3232:subghz/assets/keeloq_mfcodes
 F:9214f9c10463b746a27e82ce0b96e040:465:subghz/assets/keeloq_mfcodes_user
 F:653bd8d349055a41e1152e557d4a52d3:202:subghz/assets/nice_flor_s
 F:2c73de390a4fb0ff1d31d66732a9b8db:2624:subghz/assets/setting_user.txt
+F:2132f1809ce9443c2eb6b26aaf8ec22b:129:subghz/playlist/example_tesla.txt
+F:ce3a0d17d643925d5c51c9f569641c76:269:subghz/unirf/touchtunes_brute_map.txt
+F:193f5e3a68cb351dcbd8eeb91825b476:410:subghz/unirf/universal_rf_map.txt
 D:u2f/assets
 F:7e11e688e39034bbb9d88410044795e1:365:u2f/assets/cert.der
 F:f60b88c20ed479ed9684e249f7134618:264:u2f/assets/cert_key.u2f
-F:ce3a0d17d643925d5c51c9f569641c76:269:unirf/touchtunes_brute_map.txt
-F:193f5e3a68cb351dcbd8eeb91825b476:410:unirf/universal_rf_map.txt
 F:d41d8cd98f00b204e9800998ecf8427e:0:update/unzip_the_release_here.txt
 F:a9a90a7e7e60e3add602929e5b38e83b:94508:wav_player/sonicscrewdriver.wav
