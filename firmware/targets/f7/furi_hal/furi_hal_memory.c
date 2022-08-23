@@ -16,24 +16,21 @@ typedef struct {
 
 typedef struct {
     FuriHalMemoryRegion region[SRAM_MAX];
-    bool enabled;
 } FuriHalMemory;
 
-static FuriHalMemory* furi_hal_memory;
+static FuriHalMemory* furi_hal_memory = NULL;
 
 extern const void __sram2a_start__;
 extern const void __sram2a_free__;
 extern const void __sram2b_start__;
 
 void furi_hal_memory_init() {
-    FuriHalMemory* memory = malloc(sizeof(FuriHalMemory));
-    furi_hal_memory = memory;
-    memory->enabled = false;
-
     if(!ble_glue_wait_for_c2_start(FURI_HAL_BT_C2_START_TIMEOUT)) {
         FURI_LOG_E(TAG, "C2 start timeout");
         return;
     }
+
+    FuriHalMemory* memory = malloc(sizeof(FuriHalMemory));
 
     const BleGlueC2Info* c2_ver = ble_glue_get_c2_info();
     uint32_t sram2a_busy_size = (uint32_t)&__sram2a_free__ - (uint32_t)&__sram2a_start__;
@@ -70,17 +67,19 @@ void furi_hal_memory_init() {
             FURI_LOG_I(TAG, "SRAM2B clear");
             memset(memory->region[SRAM_B].start, 0, memory->region[SRAM_B].size);
         }
-        memory->enabled = true;
+        furi_hal_memory = memory;
         FURI_LOG_I(TAG, "Enabled");
     } else {
+        free(memory);
         FURI_LOG_E(TAG, "No SRAM2 available");
     }
 }
 
 void* furi_hal_memory_alloc(size_t size) {
-    if(!furi_hal_memory->enabled) {
+    if(furi_hal_memory == NULL) {
         return NULL;
     }
+
     for(int i = 0; i < SRAM_MAX; i++) {
         if(furi_hal_memory->region[i].size >= size) {
             void* ptr = furi_hal_memory->region[i].start;
