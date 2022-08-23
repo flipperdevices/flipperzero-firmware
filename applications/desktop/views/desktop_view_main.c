@@ -124,7 +124,6 @@ bool desktop_main_input(InputEvent* event, void* context) {
 
 DesktopMainView* desktop_main_alloc() {
     DesktopMainView* main_view = malloc(sizeof(DesktopMainView));
-    main_view->codeSequence = 0;
     main_view->is_gamemode = false;
     DesktopSettings* desktop_settings = malloc(sizeof(DesktopSettings));
     LOAD_DESKTOP_SETTINGS(desktop_settings);
