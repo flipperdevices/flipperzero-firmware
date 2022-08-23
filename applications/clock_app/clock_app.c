@@ -28,6 +28,7 @@ typedef struct {
     uint32_t lastexp_timestamp;
     uint32_t timer_stopped_seconds;
     uint32_t songSelect;
+    uint32_t codeSequence;
     uint32_t timerSecs;
     uint32_t alert_time;
     bool timer_running;
@@ -195,6 +196,13 @@ const NotificationSequence clock_alert_startStop = {
     NULL,
 };
 
+static void desktop_view_main_dumbmode_changed(bool isThisGameMode) {
+    DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
+    LOAD_DESKTOP_SETTINGS(&app->settings);
+    app->settings.is_dumbmode = isThisGameMode;
+    SAVE_DESKTOP_SETTINGS(&app->settings);
+}
+
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
     PluginEvent event = {.type = EventTypeKey, .input = *input_event};
@@ -285,6 +293,7 @@ static void clock_state_init(ClockState* const state) {
     memset(state, 0, sizeof(ClockState));
     state->militaryTime = false;
     state->songSelect = 2;
+    state->codeSequence = 0;
     state->lastexp_timestamp = 0;
     state->timer_start_timestamp = 0;
     state->timer_stopped_seconds = 0;
@@ -355,38 +364,58 @@ int32_t clock_app(void* p) {
                 if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
                     switch(event.input.key) {
                     case InputKeyUp:
-                        if(plugin_state->timer_running)
-                            plugin_state->alert_time = plugin_state->alert_time + 5;
+                        if(plugin_state->codeSequence == 0 || plugin_state->codeSequence == 1) {
+                            plugin_state->codeSequence++;
+                        } else {
+                            plugin_state->codeSequence = 0;
+                            if(plugin_state->timer_running)
+                                plugin_state->alert_time = plugin_state->alert_time + 5;
+                        }
                         break;
                     case InputKeyDown:
-                        if(plugin_state->timer_running)
-                            plugin_state->alert_time = plugin_state->alert_time - 5;
+                        if(plugin_state->codeSequence == 2 || plugin_state->codeSequence == 3) {
+                            plugin_state->codeSequence++;
+                        } else {
+                            plugin_state->codeSequence = 0;
+                            if(plugin_state->timer_running)
+                                plugin_state->alert_time = plugin_state->alert_time - 5;
+                        }
                         break;
                     case InputKeyRight:
-                        if(plugin_state->songSelect == 0) {
-                            plugin_state->songSelect = 1;
-                        } else if(plugin_state->songSelect == 1) {
-                            plugin_state->songSelect = 2;
-                        } else if(plugin_state->songSelect == 2) {
-                            plugin_state->songSelect = 3;
+                        if(plugin_state->codeSequence == 5 || plugin_state->codeSequence == 7) {
+                            plugin_state->codeSequence++;
                         } else {
-                            plugin_state->songSelect = 0;
+                            plugin_state->codeSequence = 0;
+                            if(plugin_state->songSelect == 0) {
+                                plugin_state->songSelect = 1;
+                            } else if(plugin_state->songSelect == 1) {
+                                plugin_state->songSelect = 2;
+                            } else if(plugin_state->songSelect == 2) {
+                                plugin_state->songSelect = 3;
+                            } else {
+                                plugin_state->songSelect = 0;
+                            }
                         }
                         break;
                     case InputKeyLeft:
-                        if(plugin_state->timer_start_timestamp != 0) {
-                            // START? TIMER
-                            FuriHalRtcDateTime curr_dt;
-                            furi_hal_rtc_get_datetime(&curr_dt);
-                            uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
-                            // Reset seconds
-                            plugin_state->timer_start_timestamp = curr_ts;
-                            plugin_state->timer_stopped_seconds = 0;
-                            plugin_state->timerSecs = 0;
+                        if(plugin_state->codeSequence == 4 || plugin_state->codeSequence == 6) {
+                            plugin_state->codeSequence++;
                         } else {
-                            // Toggle 12/24 hours
-                            if(!plugin_state->desktop_settings->is_dumbmode)
-                                plugin_state->militaryTime = !plugin_state->militaryTime;
+                            plugin_state->codeSequence = 0;
+                            if(plugin_state->timer_start_timestamp != 0) {
+                                // START? TIMER
+                                FuriHalRtcDateTime curr_dt;
+                                furi_hal_rtc_get_datetime(&curr_dt);
+                                uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+                                // Reset seconds
+                                plugin_state->timer_start_timestamp = curr_ts;
+                                plugin_state->timer_stopped_seconds = 0;
+                                plugin_state->timerSecs = 0;
+                            } else {
+                                // Toggle 12/24 hours
+                                if(!plugin_state->desktop_settings->is_dumbmode)
+                                    plugin_state->militaryTime = !plugin_state->militaryTime;
+                            }
                         }
                         break;
                     case InputKeyOk:
@@ -422,6 +451,17 @@ int32_t clock_app(void* p) {
                         // Exit the plugin
                         processing = false;
                         break;
+                    }
+                    if(plugin_state->codeSequence == 8) {
+                        // UNLOCK!
+                        plugin_state->codeSequence = 0;
+                        if(plugin_state->desktop_settings->is_dumbmode) {
+                            desktop_view_main_dumbmode_changed(0);
+                            plugin_state->desktop_settings->is_dumbmode = false;
+                        } else {
+                            desktop_view_main_dumbmode_changed(1);
+                            plugin_state->desktop_settings->is_dumbmode = true;
+                        }
                     }
                 } else if(event.input.type == InputTypeLong) {
                     if(event.input.key == InputKeyLeft) {
