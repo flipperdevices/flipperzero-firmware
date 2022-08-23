@@ -8,7 +8,8 @@
 #define PAC_STANLEY_ENCODED_BYTE_SIZE (((PAC_STANLEY_ENCODED_BIT_SIZE) / 8))
 #define PAC_STANLEY_PREAMBLE_BIT_SIZE (8)
 #define PAC_STANLEY_PREAMBLE_BYTE_SIZE (1)
-#define PAC_STANLEY_ENCODED_BYTE_FULL_SIZE (PAC_STANLEY_ENCODED_BYTE_SIZE + PAC_STANLEY_PREAMBLE_BYTE_SIZE)
+#define PAC_STANLEY_ENCODED_BYTE_FULL_SIZE \
+    (PAC_STANLEY_ENCODED_BYTE_SIZE + PAC_STANLEY_PREAMBLE_BYTE_SIZE)
 #define PAC_STANLEY_BYTE_LENGTH (10) // start bit, 7 data bits, parity bit, stop bit
 #define PAC_STANLEY_DATA_START_INDEX 8 + (3 * PAC_STANLEY_BYTE_LENGTH) + 1
 
@@ -42,31 +43,32 @@ uint8_t* protocol_pac_stanley_get_data(ProtocolPACStanley* protocol) {
 }
 
 static uint8_t char2int(uint8_t input) {
-  if(input >= '0' && input <= '9')
-    return input - '0';
-  if(input >= 'A' && input <= 'F')
-    return input - 'A' + 10;
-  if(input >= 'a' && input <= 'f')
-    return input - 'a' + 10;
-  return 0;
+    if(input >= '0' && input <= '9') return input - '0';
+    if(input >= 'A' && input <= 'F') return input - 'A' + 10;
+    if(input >= 'a' && input <= 'f') return input - 'a' + 10;
+    return 0;
 }
 
 static void hex2bin(const uint8_t* src, uint8_t* target) {
-  while(*src && src[1]) {
-    *(target++) = char2int(*src)*16 + char2int(src[1]);
-    src += 2;
-  }
+    while(*src && src[1]) {
+        *(target++) = char2int(*src) * 16 + char2int(src[1]);
+        src += 2;
+    }
 }
 
-static void bin2hex(const uint8_t *src, uint8_t *target, int length)  {
-    const char chars[]= "0123456789ABCDEF";
-    while (--length >= 0) target[length] = chars[(src[length>>1] >> ((1 - (length&1)) << 2)) & 0xF];
+static void bin2hex(const uint8_t* src, uint8_t* target, int length) {
+    const char chars[] = "0123456789ABCDEF";
+    while(--length >= 0)
+        target[length] = chars[(src[length >> 1] >> ((1 - (length & 1)) << 2)) & 0xF];
 }
 
 static void protocol_pac_stanley_decode(ProtocolPACStanley* protocol) {
     uint8_t asciiCardId[8];
-    for (size_t idx = 0; idx < 8; idx++) {
-        uint8_t byte = bit_lib_get_bits(protocol->encoded_data, PAC_STANLEY_DATA_START_INDEX + (PAC_STANLEY_BYTE_LENGTH * idx), 8);
+    for(size_t idx = 0; idx < 8; idx++) {
+        uint8_t byte = bit_lib_get_bits(
+            protocol->encoded_data,
+            PAC_STANLEY_DATA_START_INDEX + (PAC_STANLEY_BYTE_LENGTH * idx),
+            8);
         bit_lib_reverse_bits(&byte, 0, 8);
         asciiCardId[idx] = byte & 0x7F; // discard the parity bit
     }
@@ -91,16 +93,19 @@ static bool protocol_pac_stanley_can_be_decoded(ProtocolPACStanley* protocol) {
         // Checksum
         uint8_t checksum = 0;
         uint8_t stripped_byte;
-        for (size_t idx = 0; idx < 9; idx++) {
-            uint8_t byte = bit_lib_get_bits(protocol->encoded_data, PAC_STANLEY_DATA_START_INDEX + (PAC_STANLEY_BYTE_LENGTH * idx), 8);
+        for(size_t idx = 0; idx < 9; idx++) {
+            uint8_t byte = bit_lib_get_bits(
+                protocol->encoded_data,
+                PAC_STANLEY_DATA_START_INDEX + (PAC_STANLEY_BYTE_LENGTH * idx),
+                8);
             bit_lib_reverse_bits(&byte, 0, 8);
             stripped_byte = byte & 0x7F; // discard the parity bit
-            if (bit_lib_parity(stripped_byte, true) != (byte & 0x80) >> 7) {
+            if(bit_lib_parity(stripped_byte, true) != (byte & 0x80) >> 7) {
                 return false;
             }
-            if (idx < 8) checksum ^= stripped_byte;
+            if(idx < 8) checksum ^= stripped_byte;
         }
-        if (stripped_byte != checksum) break;
+        if(stripped_byte != checksum) break;
 
         result = true;
     } while(false);
@@ -135,7 +140,10 @@ bool protocol_pac_stanley_decoder_feed(ProtocolPACStanley* protocol, bool level,
 
     if(pulses) {
         for(uint8_t i = 0; i < pulses; i++) {
-            bit_lib_push_bit(protocol->encoded_data, PAC_STANLEY_ENCODED_BYTE_FULL_SIZE, level ^ protocol->inverted);
+            bit_lib_push_bit(
+                protocol->encoded_data,
+                PAC_STANLEY_ENCODED_BYTE_FULL_SIZE,
+                level ^ protocol->inverted);
         }
         pushed = true;
     }
@@ -158,22 +166,21 @@ bool protocol_pac_stanley_encoder_start(ProtocolPACStanley* protocol) {
     bin2hex(protocol->data, &idbytes[2], 8);
 
     // insert start and stop bits
-    for (size_t i = 0; i < 16; i++)
-        protocol->encoded_data[i] = 0x40 >> (i + 3) % 5 * 2;
+    for(size_t i = 0; i < 16; i++) protocol->encoded_data[i] = 0x40 >> (i + 3) % 5 * 2;
 
     protocol->encoded_data[0] = 0xFF; // mark + stop
     protocol->encoded_data[1] = 0x20; // start + reflect8(STX)
 
     uint8_t checksum = 0;
-    for (size_t i = 2; i < 13; i++) {
+    for(size_t i = 2; i < 13; i++) {
         uint8_t shift = 7 - (i + 3) % 4 * 2;
         uint8_t index = i + (i - 1) / 4;
 
         uint16_t pattern;
-        if (i < 12) {
+        if(i < 12) {
             pattern = bit_lib_reverse_8(idbytes[i - 2]);
             pattern |= bit_lib_parity(pattern, true);
-            if (i > 3) checksum ^= idbytes[i - 2];
+            if(i > 3) checksum ^= idbytes[i - 2];
         } else {
             pattern = (bit_lib_reverse_8(checksum) & 0xFE) | (bit_lib_parity(checksum, true));
         }
