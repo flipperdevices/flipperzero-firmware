@@ -20,14 +20,8 @@
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
 
+#include "helpers/rfid_worker.h"
 #include "rpc/rpc_app.h"
-
-#include <toolbox/protocols/protocol_dict.h>
-#include <lfrfid/lfrfid_dict_file.h>
-#include <lfrfid/protocols/lfrfid_protocols.h>
-#include <lfrfid/lfrfid_worker.h>
-
-#define LFRFID_KEY_NAME_SIZE 22
 
 class LfRfidApp {
 public:
@@ -38,19 +32,7 @@ public:
         Stay,
         Retry,
         Exit,
-        ReadEventSenseStart,
-        ReadEventSenseEnd,
-        ReadEventSenseCardStart,
-        ReadEventSenseCardEnd,
-        ReadEventStartASK,
-        ReadEventStartPSK,
-        ReadEventDone,
-        ReadEventOverrun,
-        ReadEventError,
-        WriteEventOK,
-        WriteEventProtocolCannotBeWritten,
-        WriteEventFobCannotBeWritten,
-        WriteEventTooLongToWrite,
+        EmulateStart,
         RpcLoadFile,
         RpcSessionClose,
     };
@@ -75,19 +57,12 @@ public:
         DeleteConfirm,
         DeleteSuccess,
         Rpc,
-        // EmuMenu,
-        // EmuData,
-        ExtraActions,
-        RawInfo,
-        RawName,
-        RawRead,
-        RawSuccess,
     };
 
     class Event {
     public:
         union {
-            int32_t signed_int;
+            int32_t menu_index;
         } payload;
 
         EventType type;
@@ -104,6 +79,8 @@ public:
     RecordController<Storage> storage;
     RecordController<DialogsApp> dialogs;
 
+    RfidWorker worker;
+
     TextStore text_store;
 
     string_t file_path;
@@ -113,27 +90,15 @@ public:
     void run(void* args);
 
     static const char* app_folder;
-    static const char* app_sd_folder;
     static const char* app_extension;
     static const char* app_filetype;
 
-    bool save_key();
+    bool save_key(RfidKey* key);
     bool load_key_from_file_select(bool need_restore);
-    bool delete_key();
+    bool delete_key(RfidKey* key);
 
-    bool load_key_data(string_t path, bool show_dialog);
-    bool save_key_data(string_t path);
+    bool load_key_data(string_t path, RfidKey* key, bool show_dialog);
+    bool save_key_data(string_t path, RfidKey* key);
 
     void make_app_folder();
-
-    ProtocolDict* dict;
-    LFRFIDWorker* lfworker;
-    string_t file_name;
-    ProtocolId protocol_id;
-    LFRFIDWorkerReadType read_type;
-
-    uint8_t* old_key_data;
-    uint8_t* new_key_data;
-
-    string_t raw_file_name;
 };

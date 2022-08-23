@@ -8,5 +8,8 @@ public:
     void on_exit(LfRfidApp* app) final;
 
 private:
-    string_t string_info;
+    static void back_callback(void* context);
+
+    string_t string_data;
+    string_t string_decrypted;
 };
