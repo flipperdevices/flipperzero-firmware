@@ -10,12 +10,12 @@ typedef enum {
 } SRAM;
 
 typedef struct {
-    uint8_t* start;
+    void* start;
     uint32_t size;
 } FuriHalMemoryRegion;
 
 typedef struct {
-    FuriHalMemoryRegion region[2];
+    FuriHalMemoryRegion region[SRAM_MAX];
     bool enabled;
 } FuriHalMemory;
 
@@ -67,7 +67,6 @@ void furi_hal_memory_init() {
             memset(memory->region[SRAM_A].start, 0, memory->region[SRAM_A].size);
         }
         if((memory->region[SRAM_B].size > 0)) {
-            LL_SYSCFG_DisableSRAMFetch();
             FURI_LOG_I(TAG, "SRAM2B clear");
             memset(memory->region[SRAM_B].start, 0, memory->region[SRAM_B].size);
         }
@@ -76,4 +75,19 @@ void furi_hal_memory_init() {
     } else {
         FURI_LOG_E(TAG, "No SRAM2 available");
     }
+}
+
+void* furi_hal_memory_alloc(size_t size) {
+    if(!furi_hal_memory->enabled) {
+        return NULL;
+    }
+    for(int i = 0; i < SRAM_MAX; i++) {
+        if(furi_hal_memory->region[i].size >= size) {
+            void* ptr = furi_hal_memory->region[i].start;
+            furi_hal_memory->region[i].start += size;
+            furi_hal_memory->region[i].size -= size;
+            return ptr;
+        }
+    }
+    return NULL;
 }
