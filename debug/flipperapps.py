@@ -3,12 +3,7 @@ from typing import Tuple, Dict
 import struct
 import posixpath
 
-
 import gdb
-
-
-def exec_gdb_command(command):
-    gdb.execute(command)
 
 
 @dataclass
@@ -49,7 +44,7 @@ class AppState:
         return self.entry_address == int(gdb_app["entry"])
 
     @staticmethod
-    def parse_debug_link_data(section_data) -> Tuple[str, int]:
+    def parse_debug_link_data(section_data: bytes) -> Tuple[str, int]:
         # Debug link format: a null-terminated string with debuggable file name
         # Padded with 0's to multiple of 4 bytes
         # Followed by 4 bytes of CRC32 checksum of that file
@@ -91,33 +86,32 @@ class FlipperAppDebugHelper:
         self.app_type_ptr = None
         self.current_app: AppState = None
 
-    def attach_fw(self):
+    def attach_fw(self) -> None:
         self.app_ptr = gdb.lookup_global_symbol("last_loaded_app")
         self.app_type_ptr = gdb.lookup_type("FlipperApplication").pointer()
         self._check_app_state()
 
-    def _check_app_state(self):
+    def _check_app_state(self) -> None:
         app_ptr_value = self.app_ptr.value()
         if not app_ptr_value and self.current_app:
             self._unload_debug_elf()
         elif app_ptr_value:
             loaded_app = app_ptr_value.cast(self.app_type_ptr).dereference()
-            if self.current_app:
-                if not self.current_app.is_loaded_in_gdb(loaded_app):
-                    self._unload_debug_elf()
-                    self._load_debug_elf(loaded_app)
+            if self.current_app and not self.current_app.is_loaded_in_gdb(loaded_app):
+                self._unload_debug_elf()
+                self._load_debug_elf(loaded_app)
             else:
                 self._load_debug_elf(loaded_app)
 
-    def _unload_debug_elf(self):
+    def _unload_debug_elf(self) -> None:
         gdb.execute(self.current_app.get_gdb_unload_command())
         self.current_app = None
 
-    def _load_debug_elf(self, app_object):
+    def _load_debug_elf(self, app_object) -> None:
         self.current_app = AppState.from_gdb(app_object)
         gdb.execute(self.current_app.get_gdb_load_command())
 
-    def handle_stop(self, event):
+    def handle_stop(self, event) -> None:
         self._check_app_state()
 
 

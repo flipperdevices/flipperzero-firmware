@@ -99,5 +99,17 @@
             "type": "shell",
             "command": "./fbt COMPACT=1 DEBUG=0 FORCE=1 flash_usb_full"
         },
+        {
+            "label": "[Debug] Build FAPs",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt plugin_dist"
+        },
+        {
+            "label": "[Release] Build FAPs",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt COMPACT=1 DEBUG=0 plugin_dist"
+        },
     ]
 }

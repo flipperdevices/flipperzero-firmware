@@ -59,6 +59,8 @@ distenv = coreenv.Clone(
         "-ex",
         "source debug/FreeRTOS/FreeRTOS.py",
         "-ex",
+        "source debug/flipperapps.py",
+        "-ex",
         "source debug/PyCortexMDebug/PyCortexMDebug.py",
         "-ex",
         "svd_load ${SVD_FILE}",
