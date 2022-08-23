@@ -21,8 +21,8 @@
 #include "scene/lfrfid_app_scene_delete_confirm.h"
 #include "scene/lfrfid_app_scene_delete_success.h"
 #include "scene/lfrfid_app_scene_rpc.h"
-#include "scene/lfrfid_app_scene_emu_menu.h"
-#include "scene/lfrfid_app_scene_emu_data.h"
+// #include "scene/lfrfid_app_scene_emu_menu.h"
+// #include "scene/lfrfid_app_scene_emu_data.h"
 #include "scene/lfrfid_app_scene_extra_actions.h"
 #include "scene/lfrfid_app_scene_raw_info.h"
 #include "scene/lfrfid_app_scene_raw_name.h"
@@ -141,8 +141,8 @@ void LfRfidApp::run(void* _args) {
         scene_controller.add_scene(SceneType::SavedInfo, new LfRfidAppSceneSavedInfo());
         scene_controller.add_scene(SceneType::DeleteConfirm, new LfRfidAppSceneDeleteConfirm());
         scene_controller.add_scene(SceneType::DeleteSuccess, new LfRfidAppSceneDeleteSuccess());
-        scene_controller.add_scene(SceneType::EmuMenu, new LfRfidAppSceneEmuMenu());
-        scene_controller.add_scene(SceneType::EmuData, new LfRfidAppSceneEmuData());
+        // scene_controller.add_scene(SceneType::EmuMenu, new LfRfidAppSceneEmuMenu());
+        // scene_controller.add_scene(SceneType::EmuData, new LfRfidAppSceneEmuData());
         scene_controller.add_scene(SceneType::ExtraActions, new LfRfidAppSceneExtraActions());
         scene_controller.add_scene(SceneType::RawInfo, new LfRfidAppSceneRawInfo());
         scene_controller.add_scene(SceneType::RawName, new LfRfidAppSceneRawName());
