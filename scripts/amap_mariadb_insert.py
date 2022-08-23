@@ -1,23 +1,32 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
+import argparse
 import mariadb
 import sys
 import os
 
-if len(sys.argv) < 7:
-    print(
-        "Usage: "
-        + sys.argv[0]
-        + " [db user] [db password] [db host] [db port] [db name] [report file]"
-    )
-    exit(1)
+
+def parseArgs():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("db_user", help="MariaDB user")
+    parser.add_argument("db_pass", help="MariaDB password")
+    parser.add_argument("db_host", help="MariaDB hostname")
+    parser.add_argument("db_port", type=int, help="MariaDB port")
+    parser.add_argument("db_name", help="MariaDB database")
+    parser.add_argument("report_file", help="Report file(.map.all)")
+    args = parser.parse_args()
+    return args
 
 
-def mariadbConnect(user, password, host, port, database):
+def mariadbConnect(args):
     try:
         conn = mariadb.connect(
-            user=user, password=password, host=host, port=int(port), database=database
+            user=args.db_user,
+            password=args.db_pass,
+            host=args.db_host,
+            port=args.db_port,
+            database=args.db_name,
         )
     except mariadb.Error as e:
         print(f"Error connecting to MariaDB: {e}")
@@ -112,10 +121,9 @@ def insertData(data, cur, conn):
 
 
 def main():
-    dbConn = mariadbConnect(
-        sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
-    )
-    reportFile = open(sys.argv[6], "r")
+    args = parseArgs()
+    dbConn = mariadbConnect(args)
+    reportFile = open(args.report_file)
     dbCurs = dbConn.cursor()
     createTables(dbCurs, dbConn)
     headerID = insertHeader(parseEnv(), dbCurs, dbConn)

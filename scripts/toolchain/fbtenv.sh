@@ -199,6 +199,7 @@ fbtenv_main()
     fbtenv_check_script_path || return 1;
     fbtenv_get_kernel_type || return 1;
     fbtenv_check_download_toolchain || return 1;
+    PS1="[FBT]$PS1";
     PATH="$TOOLCHAIN_ARCH_DIR/python/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/protobuf/bin:$PATH";
