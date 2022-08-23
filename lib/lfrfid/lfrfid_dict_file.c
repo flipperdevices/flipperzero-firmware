@@ -44,16 +44,17 @@ static void lfrfid_dict_protocol_indala_data(
     uint8_t* protocol_data,
     size_t protocol_data_size) {
     UNUSED(data_size);
-    UNUSED(protocol_data_size);
+    memset(protocol_data, 0, protocol_data_size);
+
     // fc
-    bit_lib_set_bit(protocol_data, 23, bit_lib_get_bit(data, 0));
+    bit_lib_set_bit(protocol_data, 24, bit_lib_get_bit(data, 0));
     bit_lib_set_bit(protocol_data, 16, bit_lib_get_bit(data, 1));
     bit_lib_set_bit(protocol_data, 11, bit_lib_get_bit(data, 2));
     bit_lib_set_bit(protocol_data, 14, bit_lib_get_bit(data, 3));
     bit_lib_set_bit(protocol_data, 15, bit_lib_get_bit(data, 4));
     bit_lib_set_bit(protocol_data, 20, bit_lib_get_bit(data, 5));
     bit_lib_set_bit(protocol_data, 6, bit_lib_get_bit(data, 6));
-    bit_lib_set_bit(protocol_data, 24, bit_lib_get_bit(data, 7));
+    bit_lib_set_bit(protocol_data, 25, bit_lib_get_bit(data, 7));
 
     // cn
     bit_lib_set_bit(protocol_data, 9, bit_lib_get_bit(data, 8 + 0));
@@ -68,8 +69,8 @@ static void lfrfid_dict_protocol_indala_data(
     bit_lib_set_bit(protocol_data, 0, bit_lib_get_bit(data, 8 + 9));
     bit_lib_set_bit(protocol_data, 4, bit_lib_get_bit(data, 8 + 10));
     bit_lib_set_bit(protocol_data, 21, bit_lib_get_bit(data, 8 + 11));
-    bit_lib_set_bit(protocol_data, 22, bit_lib_get_bit(data, 8 + 12));
-    bit_lib_set_bit(protocol_data, 25, bit_lib_get_bit(data, 8 + 13));
+    bit_lib_set_bit(protocol_data, 23, bit_lib_get_bit(data, 8 + 12));
+    bit_lib_set_bit(protocol_data, 26, bit_lib_get_bit(data, 8 + 13));
     bit_lib_set_bit(protocol_data, 17, bit_lib_get_bit(data, 8 + 14));
     bit_lib_set_bit(protocol_data, 8, bit_lib_get_bit(data, 8 + 15));
 
@@ -88,11 +89,11 @@ static void lfrfid_dict_protocol_indala_data(
     checksum_sum = checksum_sum & 0b1;
 
     if(checksum_sum) {
-        bit_lib_set_bit(protocol_data, 26, 0);
-        bit_lib_set_bit(protocol_data, 27, 1);
-    } else {
-        bit_lib_set_bit(protocol_data, 26, 1);
         bit_lib_set_bit(protocol_data, 27, 0);
+        bit_lib_set_bit(protocol_data, 28, 1);
+    } else {
+        bit_lib_set_bit(protocol_data, 27, 1);
+        bit_lib_set_bit(protocol_data, 28, 0);
     }
 
     // wiegand parity
