@@ -1,15 +1,39 @@
 #include "reader_analyzer.h"
 #include <stream_buffer.h>
 #include <lib/nfc/protocols/nfc_util.h>
+#include <lib/nfc/protocols/mifare_classic.h>
+#include <m-array.h>
 
 #define TAG "ReaderAnalyzer"
 
-#define READER_ANALYZER_LOG_PATH EXT_PATH("nfc/.detect_reader.log")
+#define READER_ANALYZER_LOG_PATH EXT_PATH("nfc/detect_reader.log")
 
 #define READER_ANALYZER_MAX_BUFF_SIZE (256)
 
 #define READER_ANALYZER_IS_PCD (0x0000)
 #define READER_ANALYZER_IS_PICC (0x0001)
+
+typedef struct {
+    uint32_t cuid;
+    uint8_t sector;
+    MfClassicKey key;
+    uint32_t nt0;
+    uint32_t nr0;
+    uint32_t ar0;
+    uint32_t nt1;
+    uint32_t nr1;
+    uint32_t ar1;
+} ReaderAnalyzerMfkey32;
+
+typedef struct {
+    uint8_t sector;
+    MfClassicKey key;
+    uint32_t nt;
+    uint32_t nr;
+    uint32_t ar;
+} ReaderAnalyzerMfkey32Nonce;
+
+ARRAY_DEF(ReaderAnalyzerMfkey32, ReaderAnalyzerMfkey32, M_POD_OPLIST);
 
 typedef struct {
     uint16_t is_picc;
@@ -34,12 +58,15 @@ struct ReaderAnalyzer {
 
     bool alive;
     Storage* storage;
-    File* file;
+    Stream* file_stream;
     StreamBufferHandle_t stream;
     FuriThread* thread;
 
     ReaderAnalyzerParseDataCallback callback;
     void* context;
+
+    ReaderAnalyzerMfkey32_t mfkey_params;
+    ReaderAnalyzerMfkey32Nonce mfkey_nonce;
 };
 
 const FuriHalNfcDevData reader_analyzer_nfc_data[] = {
@@ -53,13 +80,69 @@ const FuriHalNfcDevData reader_analyzer_nfc_data[] = {
          .cuid = 0x2A234F80},
 };
 
+static bool reader_analyzer_write_mfkey_params(
+    ReaderAnalyzer* reader_analyzer,
+    ReaderAnalyzerMfkey32* params) {
+    string_t str;
+    string_init_printf(
+        str,
+        "Sector %d key %c cuid %08x nt0 %08x nr0 %08x ar0 %08x nt1 %08x nr1 %08x ar1 %08x\n",
+        params->sector,
+        params->key == MfClassicKeyA ? 'A' : 'B',
+        params->cuid,
+        params->nt0,
+        params->nr0,
+        params->ar0,
+        params->nt1,
+        params->nr1,
+        params->ar1);
+    bool write_success = stream_write_string(reader_analyzer->file_stream, str);
+    string_clear(str);
+    return write_success;
+}
+
+static void reader_analyzer_add_mfkey_params(
+    ReaderAnalyzer* reader_analyzer,
+    ReaderAnalyzerMfkey32Nonce* nonce) {
+    bool nonce_added = false;
+    // Search if we partially collected params
+    if(ReaderAnalyzerMfkey32_size(reader_analyzer->mfkey_params)) {
+        ReaderAnalyzerMfkey32_it_t it;
+        for(ReaderAnalyzerMfkey32_it(it, reader_analyzer->mfkey_params);
+            !ReaderAnalyzerMfkey32_end_p(it);
+            ReaderAnalyzerMfkey32_next(it)) {
+            ReaderAnalyzerMfkey32* params = ReaderAnalyzerMfkey32_ref(it);
+            if((params->sector == nonce->sector) && (params->key == nonce->key)) {
+                params->nt1 = nonce->nt;
+                params->nr1 = nonce->nr;
+                params->ar1 = nonce->ar;
+                nonce_added = true;
+                FURI_LOG_D(
+                    TAG,
+                    "Params for sector %d key %c collected",
+                    params->sector,
+                    params->key == MfClassicKeyA ? 'A' : 'B');
+                // Write on sd card
+                reader_analyzer_write_mfkey_params(reader_analyzer, params);
+                ReaderAnalyzerMfkey32_remove(reader_analyzer->mfkey_params, it);
+            }
+        }
+    }
+    if(!nonce_added) {
+        ReaderAnalyzerMfkey32 params = {
+            .sector = nonce->sector,
+            .key = nonce->key,
+            .cuid = reader_analyzer->nfc_data.cuid,
+            .nt0 = nonce->nt,
+            .nr0 = nonce->nr,
+            .ar0 = nonce->ar,
+        };
+        ReaderAnalyzerMfkey32_push_back(reader_analyzer->mfkey_params, params);
+    }
+}
+
 void reader_analyzer_parse(ReaderAnalyzer* reader_analyzer, uint8_t* buffer, size_t size) {
     if(size < sizeof(ReaderAnalyzerHeader)) return;
-    // FURI_LOG_D(TAG, "RX");
-    // for(size_t i = 0; i < size; i++) {
-    //     printf("%02X ", buffer[i]);
-    // }
-    // printf("\r\n");
 
     size_t bytes_i = 0;
     while(bytes_i < size) {
@@ -69,27 +152,29 @@ void reader_analyzer_parse(ReaderAnalyzer* reader_analyzer, uint8_t* buffer, siz
         bytes_i += sizeof(ReaderAnalyzerHeader);
 
         if(buffer[bytes_i] == 0x60 || buffer[bytes_i] == 0x61) {
-            FURI_LOG_D(
-                TAG,
-                "Auth block %02X key %c",
-                buffer[bytes_i + 1],
-                buffer[bytes_i] == 0x60 ? 'A' : 'B');
+            if(buffer[bytes_i] == 0x60) {
+                reader_analyzer->mfkey_nonce.key = MfClassicKeyA;
+            } else {
+                reader_analyzer->mfkey_nonce.key = MfClassicKeyB;
+            }
+            reader_analyzer->mfkey_nonce.sector =
+                mf_classic_get_sector_by_block(buffer[bytes_i + 1]);
             reader_analyzer->state = ReaderAnalyzerStateMfClassicAuthReceived;
         } else if(reader_analyzer->state == ReaderAnalyzerStateMfClassicAuthReceived) {
             if(header->is_picc == READER_ANALYZER_IS_PICC) {
                 if(len == 4) {
-                    FURI_LOG_D(TAG, "Nt: %08X", nfc_util_bytes2num(&buffer[bytes_i], 4));
+                    reader_analyzer->mfkey_nonce.nt = nfc_util_bytes2num(&buffer[bytes_i], 4);
                     reader_analyzer->state = ReaderAnalyzerStateMfClassicNtSent;
                 }
             }
         } else if(reader_analyzer->state == ReaderAnalyzerStateMfClassicNtSent) {
             if(header->is_picc == READER_ANALYZER_IS_PCD) {
-                uint32_t nr = nfc_util_bytes2num(&buffer[bytes_i], 4);
-                uint32_t ar = nfc_util_bytes2num(&buffer[bytes_i + 4], 4);
-
                 if(len == 8) {
-                    FURI_LOG_D(TAG, "Nr: %08X Ar: %08X", nr, ar);
+                    reader_analyzer->mfkey_nonce.nr = nfc_util_bytes2num(&buffer[bytes_i], 4);
+                    reader_analyzer->mfkey_nonce.ar = nfc_util_bytes2num(&buffer[bytes_i + 4], 4);
                     reader_analyzer->state = ReaderAnalyzerStateMfClassicArNrReceived;
+                    reader_analyzer_add_mfkey_params(
+                        reader_analyzer, &reader_analyzer->mfkey_nonce);
                 }
             }
         }
@@ -116,19 +201,36 @@ ReaderAnalyzer* reader_analyzer_alloc(Storage* storage) {
     furi_assert(storage);
 
     ReaderAnalyzer* reader_analyzer = malloc(sizeof(ReaderAnalyzer));
-    reader_analyzer->state = ReaderAnalyzerIdle;
-    reader_analyzer->nfc_data = reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic];
     reader_analyzer->storage = storage;
-    reader_analyzer->alive = true;
-    reader_analyzer->stream = xStreamBufferCreate(1024, 1);
 
-    reader_analyzer->thread = furi_thread_alloc();
-    furi_thread_set_name(reader_analyzer->thread, "ReaderAnalyzerWorker");
-    furi_thread_set_stack_size(reader_analyzer->thread, 2048);
-    furi_thread_set_callback(reader_analyzer->thread, reader_analyzer_thread);
-    furi_thread_set_context(reader_analyzer->thread, reader_analyzer);
-    furi_thread_set_priority(reader_analyzer->thread, FuriThreadPriorityLow);
-    furi_thread_start(reader_analyzer->thread);
+    do {
+        reader_analyzer->file_stream = buffered_file_stream_alloc(reader_analyzer->storage);
+        if(!buffered_file_stream_open(
+               reader_analyzer->file_stream,
+               READER_ANALYZER_LOG_PATH,
+               FSAM_WRITE,
+               FSOM_OPEN_APPEND)) {
+            buffered_file_stream_close(reader_analyzer->file_stream);
+            stream_free(reader_analyzer->file_stream);
+            free(reader_analyzer);
+            reader_analyzer = NULL;
+            break;
+        }
+        reader_analyzer->state = ReaderAnalyzerIdle;
+        reader_analyzer->nfc_data = reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic];
+        reader_analyzer->alive = true;
+        reader_analyzer->stream = xStreamBufferCreate(1024, 1);
+        ReaderAnalyzerMfkey32_init(reader_analyzer->mfkey_params);
+
+        reader_analyzer->thread = furi_thread_alloc();
+        furi_thread_set_name(reader_analyzer->thread, "ReaderAnalyzerWorker");
+        furi_thread_set_stack_size(reader_analyzer->thread, 2048);
+        furi_thread_set_callback(reader_analyzer->thread, reader_analyzer_thread);
+        furi_thread_set_context(reader_analyzer->thread, reader_analyzer);
+        furi_thread_set_priority(reader_analyzer->thread, FuriThreadPriorityLow);
+        furi_thread_start(reader_analyzer->thread);
+
+    } while(false);
 
     return reader_analyzer;
 }
@@ -140,6 +242,9 @@ void reader_analyzer_free(ReaderAnalyzer* reader_analyzer) {
     furi_thread_join(reader_analyzer->thread);
     furi_thread_free(reader_analyzer->thread);
     vStreamBufferDelete(reader_analyzer->stream);
+    ReaderAnalyzerMfkey32_clear(reader_analyzer->mfkey_params);
+    buffered_file_stream_close(reader_analyzer->file_stream);
+    stream_free(reader_analyzer->file_stream);
     free(reader_analyzer);
 }
 
