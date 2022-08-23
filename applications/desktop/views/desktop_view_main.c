@@ -16,17 +16,9 @@ struct DesktopMainView {
     void* context;
     TimerHandle_t poweroff_timer;
     bool is_gamemode;
-    uint32_t codeSequence;
 };
 
 #define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 5000
-
-static void desktop_view_main_dumbmode_changed(bool isThisGameMode) {
-    DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
-    LOAD_DESKTOP_SETTINGS(&app->settings);
-    app->settings.is_dumbmode = isThisGameMode;
-    SAVE_DESKTOP_SETTINGS(&app->settings);
-}
 
 static void desktop_main_poweroff_timer_callback(TimerHandle_t timer) {
     DesktopMainView* main_view = pvTimerGetTimerID(timer);
@@ -91,41 +83,15 @@ bool desktop_main_input(InputEvent* event, void* context) {
     } else {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
-                if(main_view->codeSequence == 5 || main_view->codeSequence == 7) {
-                    main_view->codeSequence++;
-                } else {
-                    main_view->codeSequence = 0;
-                    main_view->callback(DesktopMainEventOpenGames, main_view->context);
-                }
+                main_view->callback(DesktopMainEventOpenGames, main_view->context);
             } else if(event->key == InputKeyUp) {
-                if(main_view->codeSequence == 0 || main_view->codeSequence == 1) {
-                    main_view->codeSequence++;
-                } else {
-                    main_view->codeSequence = 0;
-                    main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
-                }
+                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyDown) {
                 // PREFER TO OPEN GAMES MENU
-                if(main_view->codeSequence == 2 || main_view->codeSequence == 3) {
-                    main_view->codeSequence++;
-                } else {
-                    main_view->codeSequence = 0;
-                }
             } else if(event->key == InputKeyLeft) {
-                if(main_view->codeSequence == 4 || main_view->codeSequence == 6) {
-                    main_view->codeSequence++;
-                } else {
-                    main_view->codeSequence = 0;
-                    main_view->callback(DesktopMainEventOpenClock, main_view->context);
-                }
+                main_view->callback(DesktopMainEventOpenClock, main_view->context);
             } else if(event->key == InputKeyRight) {
                 // GOES TO PASSPORT NO MATTER WHAT
-            }
-            if(main_view->codeSequence == 8) {
-                // UNLOCK!
-                main_view->codeSequence = 0;
-                desktop_view_main_dumbmode_changed(0);
-                main_view->callback(DesktopMainEventOpenMenu, main_view->context);
             }
         } else if(event->type == InputTypeLong) {
             if(event->key == InputKeyOk) {
