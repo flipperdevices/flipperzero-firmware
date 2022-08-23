@@ -10,7 +10,9 @@
 #include "views/battery_info.h"
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
+#include <gui/modules/variable_item_list.h>
 
+#include "power/power_settings.h"
 #include "scenes/power_settings_scene.h"
 
 typedef struct {
@@ -22,10 +24,13 @@ typedef struct {
     Submenu* submenu;
     DialogEx* dialog;
     PowerInfo info;
+    VariableItemList* variable_item_list;
+    uint32_t shutdown_idle_delay_ms;
 } PowerSettingsApp;
 
 typedef enum {
     PowerSettingsAppViewBatteryInfo,
     PowerSettingsAppViewSubmenu,
     PowerSettingsAppViewDialog,
+    PowerSettingsAppViewVariableItemList
 } PowerSettingsAppView;
