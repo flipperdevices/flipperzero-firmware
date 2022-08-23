@@ -137,7 +137,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             uint8_t d1_i = rand() % COUNT_OF(diceOne);
             uint8_t d2_i = rand() % COUNT_OF(diceTwo);
             snprintf(state->strings[1], sizeof(state->strings[1]), "%s %s", diceOne[d1_i], diceTwo[d2_i]);
-        } else if(diceSelect == 231) {
+        } else if(state->diceSelect == 231) {
             const char* deckOne[] = {"2H", "2C", "2D", "2S", "3H", "3C",  "3D",  "3S",  "4H",
                                      "4C", "4D", "4S", "5H", "5C", "5D",  "5S",  "6H",  "6C",
                                      "6D", "6S", "7H", "7C", "7D", "7S",  "8H",  "8C",  "8D",
@@ -229,7 +229,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                     state->diceRoll,
                     ((rand() % state->diceSelect) + 1),
                     ((rand() % state->diceSelect) + 1));
-            } else if(diceQty == 4) {
+            } else if(state->diceQty == 4) {
                 snprintf(
                     state->strings[1],
                     sizeof(state->strings[1]),
