@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,7.2,,
+Version,+,7.3,,
 Header,+,applications/bt/bt_service/bt.h,,
 Header,+,applications/cli/cli.h,,
 Header,+,applications/cli/cli_vcp.h,,
@@ -1198,9 +1198,13 @@ Function,+,furi_hal_rfid_set_emulate_pulse,void,uint32_t
 Function,+,furi_hal_rfid_set_read_period,void,uint32_t
 Function,+,furi_hal_rfid_set_read_pulse,void,uint32_t
 Function,+,furi_hal_rfid_tim_emulate,void,float
+Function,+,furi_hal_rfid_tim_emulate_dma_start,void,"uint32_t*, uint32_t*, size_t, FuriHalRfidDMACallback, void*"
+Function,+,furi_hal_rfid_tim_emulate_dma_stop,void,
 Function,+,furi_hal_rfid_tim_emulate_start,void,"FuriHalRfidEmulateCallback, void*"
 Function,+,furi_hal_rfid_tim_emulate_stop,void,
 Function,+,furi_hal_rfid_tim_read,void,"float, float"
+Function,+,furi_hal_rfid_tim_read_capture_start,void,"FuriHalRfidReadCaptureCallback, void*"
+Function,+,furi_hal_rfid_tim_read_capture_stop,void,
 Function,+,furi_hal_rfid_tim_read_start,void,
 Function,+,furi_hal_rfid_tim_read_stop,void,
 Function,+,furi_hal_rfid_tim_reset,void,
@@ -2017,6 +2021,7 @@ Function,+,storage_error_get_desc,const char*,FS_Error
 Function,+,storage_file_alloc,File*,Storage*
 Function,+,storage_file_close,_Bool,File*
 Function,+,storage_file_eof,_Bool,File*
+Function,+,storage_file_exists,_Bool,"Storage*, const char*"
 Function,+,storage_file_free,void,File*
 Function,+,storage_file_get_error,FS_Error,File*
 Function,+,storage_file_get_error_desc,const char*,File*
@@ -2557,6 +2562,7 @@ Variable,+,I_KeyBackspace_16x9,const Icon,
 Variable,+,I_KeySaveSelected_24x11,const Icon,
 Variable,+,I_KeySave_24x11,const Icon,
 Variable,+,I_Keychain,const Icon,
+Variable,+,I_Left_mouse_icon_9x9,const Icon,
 Variable,+,I_Lock_7x8,const Icon,
 Variable,+,I_Lock_8x8,const Icon,
 Variable,+,I_MHz_25x11,const Icon,
@@ -2566,6 +2572,7 @@ Variable,+,I_Mute_hvr_25x27,const Icon,
 Variable,+,I_NFC_manual,const Icon,
 Variable,+,I_Nfc_10px,const Icon,
 Variable,+,I_Ok_btn_9x9,const Icon,
+Variable,+,I_Ok_btn_pressed_13x13,const Icon,
 Variable,+,I_Percent_10x14,const Icon,
 Variable,+,I_Pin_arrow_down_7x9,const Icon,
 Variable,+,I_Pin_arrow_left_9x7,const Icon,
@@ -2586,6 +2593,7 @@ Variable,+,I_RFIDDolphinSend_97x61,const Icon,
 Variable,+,I_RFIDDolphinSuccess_108x57,const Icon,
 Variable,+,I_Reader_detect,const Icon,
 Variable,+,I_Restoring,const Icon,
+Variable,+,I_Right_mouse_icon_9x9,const Icon,
 Variable,+,I_SDQuestion_35x43,const Icon,
 Variable,+,I_SDcardFail_11x8,const Icon,
 Variable,+,I_SDcardMounted_11x8,const Icon,
@@ -2594,6 +2602,8 @@ Variable,+,I_Smile_18x18,const Icon,
 Variable,+,I_Space_65x18,const Icon,
 Variable,+,I_Temperature_16x16,const Icon,
 Variable,+,I_Unlock_7x8,const Icon,
+Variable,+,I_Unplug_bg_bottom_128x10,const Icon,
+Variable,+,I_Unplug_bg_top_128x14,const Icon,
 Variable,+,I_Up_25x27,const Icon,
 Variable,+,I_Up_hvr_25x27,const Icon,
 Variable,+,I_Updating_32x40,const Icon,
