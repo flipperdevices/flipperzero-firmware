@@ -360,7 +360,7 @@ static void subghz_protocol_magellen_check_remote_controller(SubGhzBlockGeneric*
 *   0x1275EC =>  0x12-event codes, 0x75EC-serial (dec 117236)
 *
 *   event codes
-*   bit_0: 1-Open/Motion, 0-close
+*   bit_0: 1-Open/Motion, 0-close/ok
 *   bit_1: 1-Tamper On (alarm), 0-Tamper Off (ok)
 *   bit_2: ?
 *   bit_3: 1-power on
@@ -379,7 +379,8 @@ static void subghz_protocol_magellen_get_event_serialize(uint8_t event, string_t
     string_cat_printf(
         output,
         "%s%s%s%s%s%s%s%s",
-        ((event >> 4) & 0x1 ? (event & 0x1 ? " Open" : "Close") : (event & 0x1 ? " Motion" : "Ok")),
+        ((event >> 4) & 0x1 ? (event & 0x1 ? " Open" : " Close") :
+                              (event & 0x1 ? " Motion" : " Ok")),
         ((event >> 1) & 0x1 ? ", Tamper On (Alarm)" : ""),
         ((event >> 2) & 0x1 ? ", ?" : ""),
         ((event >> 3) & 0x1 ? ", Power On" : ""),
