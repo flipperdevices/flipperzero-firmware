@@ -26,7 +26,6 @@ struct SubGhzProtocolDecoderIntertechno_V3 {
 
     SubGhzBlockDecoder decoder;
     SubGhzBlockGeneric generic;
-    uint8_t dimm_state;
 };
 
 struct SubGhzProtocolEncoderIntertechno_V3 {
@@ -259,7 +258,6 @@ void subghz_protocol_decoder_intertechno_v3_feed(void* context, bool level, uint
             instance->decoder.parser_step = IntertechnoV3DecoderStepStartDuration;
             instance->decoder.decode_data = 0;
             instance->decoder.decode_count_bit = 0;
-            instance->dimm_state = 0;
         } else {
             instance->decoder.parser_step = IntertechnoV3DecoderStepReset;
         }
@@ -323,7 +321,6 @@ void subghz_protocol_decoder_intertechno_v3_feed(void* context, bool level, uint
                 (DURATION_DIFF(duration, subghz_protocol_intertechno_v3_const.te_short) <
                  subghz_protocol_intertechno_v3_const.te_delta) &&
                 (instance->decoder.decode_count_bit == 27)) {
-                instance->dimm_state = 1;
                 subghz_protocol_blocks_add_bit(&instance->decoder, 0);
                 instance->decoder.parser_step = IntertechnoV3DecoderStepEndDuration;
 
