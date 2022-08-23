@@ -46,6 +46,10 @@ WifideautherApp* wifi_deauther_app_alloc() {
         WifideautherAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
 
+    for (int i = 0; i < NUM_MENU_ITEMS; ++i) {
+        app->selected_option_index[i] = 0;
+    }
+
     app->text_box = text_box_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, WifideautherAppViewConsoleOutput, text_box_get_view(app->text_box));
@@ -94,7 +98,7 @@ int32_t wifi_deauther_app(void* p) {
     view_dispatcher_run(wifi_deauther_app->view_dispatcher);
 
     wifi_deauther_app_free(wifi_deauther_app);
-
     furi_hal_power_disable_otg();
+
     return 0;
 }
