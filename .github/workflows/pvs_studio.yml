@@ -74,7 +74,7 @@ jobs:
               -o PVS-Studio.log
 
       - name: 'Convert PVS-Studio output to html page'
-        run: plog-converter -t fullhtml PVS-Studio.log -o reports/${{steps.names.outputs.default-target}}-${{steps.names.outputs.suffix}}
+        run: plog-converter -a GA:1,2,3 -t fullhtml PVS-Studio.log -o reports/${{steps.names.outputs.default-target}}-${{steps.names.outputs.suffix}}
 
       - name: 'Upload artifacts to update server'
         if: ${{ !github.event.pull_request.head.repo.fork }}
