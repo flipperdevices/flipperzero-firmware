@@ -1,6 +1,7 @@
 #include <furi.h>
 #include <math.h>
 #include <toolbox/protocols/protocol.h>
+#include <toolbox/hex.h>
 #include <lfrfid/tools/bit_lib.h>
 #include "lfrfid_protocols.h"
 
@@ -42,38 +43,17 @@ uint8_t* protocol_pac_stanley_get_data(ProtocolPACStanley* protocol) {
     return protocol->data;
 }
 
-static uint8_t char2int(uint8_t input) {
-    if(input >= '0' && input <= '9') return input - '0';
-    if(input >= 'A' && input <= 'F') return input - 'A' + 10;
-    if(input >= 'a' && input <= 'f') return input - 'a' + 10;
-    return 0;
-}
-
-static void hex2bin(const uint8_t* src, uint8_t* target) {
-    while(*src && src[1]) {
-        *(target++) = char2int(*src) * 16 + char2int(src[1]);
-        src += 2;
-    }
-}
-
-static void bin2hex(const uint8_t* src, uint8_t* target, int length) {
-    const char chars[] = "0123456789ABCDEF";
-    while(--length >= 0)
-        target[length] = chars[(src[length >> 1] >> ((1 - (length & 1)) << 2)) & 0xF];
-}
-
 static void protocol_pac_stanley_decode(ProtocolPACStanley* protocol) {
     uint8_t asciiCardId[8];
     for(size_t idx = 0; idx < 8; idx++) {
-        uint8_t byte = bit_lib_get_bits(
+        uint8_t byte = bit_lib_reverse_8_fast(bit_lib_get_bits(
             protocol->encoded_data,
             PAC_STANLEY_DATA_START_INDEX + (PAC_STANLEY_BYTE_LENGTH * idx),
-            8);
-        bit_lib_reverse_bits(&byte, 0, 8);
+            8));
         asciiCardId[idx] = byte & 0x7F; // discard the parity bit
     }
 
-    hex2bin(asciiCardId, protocol->data);
+    hex_chars_to_uint8((char*)asciiCardId, protocol->data);
 }
 
 static bool protocol_pac_stanley_can_be_decoded(ProtocolPACStanley* protocol) {
@@ -94,13 +74,12 @@ static bool protocol_pac_stanley_can_be_decoded(ProtocolPACStanley* protocol) {
         uint8_t checksum = 0;
         uint8_t stripped_byte;
         for(size_t idx = 0; idx < 9; idx++) {
-            uint8_t byte = bit_lib_get_bits(
+            uint8_t byte = bit_lib_reverse_8_fast(bit_lib_get_bits(
                 protocol->encoded_data,
                 PAC_STANLEY_DATA_START_INDEX + (PAC_STANLEY_BYTE_LENGTH * idx),
-                8);
-            bit_lib_reverse_bits(&byte, 0, 8);
+                8));
             stripped_byte = byte & 0x7F; // discard the parity bit
-            if(bit_lib_parity(stripped_byte, true) != (byte & 0x80) >> 7) {
+            if(bit_lib_test_parity_32(stripped_byte, BitLibParityOdd) != (byte & 0x80) >> 7) {
                 return false;
             }
             if(idx < 8) checksum ^= stripped_byte;
@@ -163,7 +142,7 @@ bool protocol_pac_stanley_encoder_start(ProtocolPACStanley* protocol) {
     idbytes[0] = '2';
     idbytes[1] = '0';
 
-    bin2hex(protocol->data, &idbytes[2], 8);
+    uint8_to_hex_chars(protocol->data, &idbytes[2], 8);
 
     // insert start and stop bits
     for(size_t i = 0; i < 16; i++) protocol->encoded_data[i] = 0x40 >> (i + 3) % 5 * 2;
@@ -178,11 +157,12 @@ bool protocol_pac_stanley_encoder_start(ProtocolPACStanley* protocol) {
 
         uint16_t pattern;
         if(i < 12) {
-            pattern = bit_lib_reverse_8(idbytes[i - 2]);
-            pattern |= bit_lib_parity(pattern, true);
+            pattern = bit_lib_reverse_8_fast(idbytes[i - 2]);
+            pattern |= bit_lib_test_parity_32(pattern, BitLibParityOdd);
             if(i > 3) checksum ^= idbytes[i - 2];
         } else {
-            pattern = (bit_lib_reverse_8(checksum) & 0xFE) | (bit_lib_parity(checksum, true));
+            pattern = (bit_lib_reverse_8_fast(checksum) & 0xFE) |
+                      (bit_lib_test_parity_32(checksum, BitLibParityOdd));
         }
         pattern <<= shift;
 
