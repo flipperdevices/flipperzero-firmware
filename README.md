@@ -6,8 +6,8 @@
 <b>Latest Updates:</b>
 
 - Known Issues: `FAP Loader` & `Chess`
-- Switched these apps to  `HIDDEN` for compile space, *they will be back*. HID Analyzer, Paint, Flappy Bird, Monty Hall, TicTacToe & VideoPoker.
-- Switched these apps to  `HIDDEN` for compile space, *they will be back*. WiFi (Marauder), Mouse Jacker, Mouse Jiggler & NRF Sniffer. (Or Stick To 0.65.1-0823-RM)
+- Switched these apps to  `HIDDEN` for compile space, *they will be back*. HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
+- Switched these apps to  `HIDDEN` for compile space, *they will be back*. WiFi (Marauder), Mouse Jacker, Mouse Jiggler, NRF Sniffer & VideoPoker. (Or Stick To 0.65.1-0823-RM)
 - Removed conflicting RFID: Direct Emulation from [(atomsmasha)](https://github.com/flipperdevices/flipperzero-firmware/pull/1371)
 - Added [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 - New universal projector remote and assets update Thanks to [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
@@ -17,7 +17,6 @@
 - OFW: [LFRFID RC fixes #1652 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1652)
 - OFW: [SubGhz: fix CAME, Chamberlain potocol #1650 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1650)
 - Switched VideoPoker to be set to `HIDDEN "GAME_VideoPoker"`
-
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
