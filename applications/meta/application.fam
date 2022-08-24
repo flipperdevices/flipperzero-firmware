@@ -67,7 +67,7 @@ App(
         "GAME_tama_p1",
         "GAME_Tetris",
         # "GAME_TicTacToe",
-        "GAME_VideoPoker",
+        # "GAME_VideoPoker",
         "GAME_Zombiez",
     ],
 )

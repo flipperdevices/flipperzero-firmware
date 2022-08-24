@@ -6,7 +6,7 @@
 <b>Latest Updates:</b>
 
 - Known Issues: `FAP Loader` & `Chess`
-- Switched these apps to  `HIDDEN` for compile space, *they will be back*. HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
+- Switched these apps to  `HIDDEN` for compile space, *they will be back*. HID Analyzer, Paint, Flappy Bird, Monty Hall, TicTacToe & VideoPoker.
 - Switched these apps to  `HIDDEN` for compile space, *they will be back*. WiFi (Marauder), Mouse Jacker, Mouse Jiggler & NRF Sniffer. (Or Stick To 0.65.1-0823-RM)
 - Removed conflicting RFID: Direct Emulation from [(atomsmasha)](https://github.com/flipperdevices/flipperzero-firmware/pull/1371)
 - Added [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
@@ -16,6 +16,7 @@
 - Fix for Name Changer [(Thanks to Painkiller8818)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/269)
 - OFW: [LFRFID RC fixes #1652 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1652)
 - OFW: [SubGhz: fix CAME, Chamberlain potocol #1650 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1650)
+- Switched VideoPoker to be set to `HIDDEN "GAME_VideoPoker"`
 
 
 <table width="100%" border="0" cellspacing="0">
@@ -170,7 +171,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - `FAP` [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) `HIDDEN "GAME_Tanks"`
 - `FAP` [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
 - `FAP` [Tic Tac Toe (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins) `HIDDEN "GAME_TicTacToe"`
-- `FAP` [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
+- `FAP` [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c) `HIDDEN "GAME_VideoPoker"`
 - [Zombiez (Reworked By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/240) [(Original By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
 </details>
 
