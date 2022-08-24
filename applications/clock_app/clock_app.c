@@ -188,6 +188,9 @@ const NotificationSequence clock_alert_perMin = {
     NULL,
 };
 const NotificationSequence clock_alert_startStop = {
+    &message_red_255,
+    &message_green_255,
+    &message_blue_255,
     &message_note_d6,
     &message_delay_100,
     &message_delay_10,
@@ -467,6 +470,7 @@ int32_t clock_app(void* p) {
                         plugin_state->codeSequence = 0;
                         plugin_state->desktop_settings->is_dumbmode = true; // MAKE SURE IT'S ON SO IT GETS TURNED OFF
                         desktop_view_main_dumbmode_changed(plugin_state->desktop_settings);
+                        notification_message(notification, &clock_alert_startStop);
                         DOLPHIN_DEED(getRandomDeed());
                     }
                 } else if(event.input.type == InputTypeLong) {
