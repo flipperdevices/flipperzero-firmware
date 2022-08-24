@@ -49,7 +49,7 @@ App(
         # "APPS_SentrySafe",
         "APPS_SpectrumAnalyzer",
         "APPS_WAVPlayer",
-        # "APPS_FlipFrid",
+        "APPS_FlipFrid",
     ],
 )
 

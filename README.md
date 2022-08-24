@@ -10,7 +10,7 @@
 - Switched these apps to  `HIDDEN` for compile space, *they will be back*. WiFi (Marauder), Mouse Jacker, Mouse Jiggler & NRF Sniffer. (Or Stick To 0.65.1-0823-RM)
 - Removed conflicting RFID: Direct Emulation from [(atomsmasha)](https://github.com/flipperdevices/flipperzero-firmware/pull/1371)
 - Added [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
-
+- New universal projector remote and assets update Thanks to [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
