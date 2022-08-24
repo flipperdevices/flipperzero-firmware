@@ -25,6 +25,20 @@ void furi_hal_memory_init();
  */
 void* furi_hal_memory_alloc(size_t size);
 
+/**
+ * @brief Get free memory pool size
+ * 
+ * @return size_t 
+ */
+size_t furi_hal_memory_get_free();
+
+/**
+ * @brief Get max free block size from memory pool
+ * 
+ * @return size_t 
+ */
+size_t furi_hal_memory_max_pool_block();
+
 #ifdef __cplusplus
 }
 #endif
