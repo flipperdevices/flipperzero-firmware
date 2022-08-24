@@ -68,17 +68,4 @@ Check `dist/` for build outputs.
 
 Use **`flipper-z-{target}-full-{suffix}.dfu`** to flash your device.
 
-## Build with Docker
-
-### Prerequisites
-
-1. Install [Docker Engine and Docker Compose](https://www.docker.com/get-started)
-2. Prepare the container:
-
-```sh
-docker-compose up -d
-```
-
-3. Follow the linux build instructions
-
 If compilation fails, make sure all submodules are all initialized. Either clone with `--recursive` or use `git submodule update --init --recursive`.
