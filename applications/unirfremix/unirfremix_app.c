@@ -20,7 +20,7 @@
 #include <lib/subghz/protocols/keeloq.h>
 #include <lib/subghz/protocols/star_line.h>
 
-#define UNIRFMAP_FOLDER "/ext/unirf"
+#define UNIRFMAP_FOLDER "/ext/subghz/unirf"
 #define UNIRFMAP_EXTENSION ".txt"
 
 #define TAG "UniRF Remix"
