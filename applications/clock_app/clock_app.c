@@ -467,7 +467,7 @@ int32_t clock_app(void* p) {
                         plugin_state->codeSequence = 0;
                         plugin_state->desktop_settings->is_dumbmode = true; // MAKE SURE IT'S ON SO IT GETS TURNED OFF
                         desktop_view_main_dumbmode_changed(plugin_state->desktop_settings);
-                        // Surprise, now what?
+                        DOLPHIN_DEED(getRandomDeed());
                     }
                 } else if(event.input.type == InputTypeLong) {
                     if(event.input.key == InputKeyLeft) {
