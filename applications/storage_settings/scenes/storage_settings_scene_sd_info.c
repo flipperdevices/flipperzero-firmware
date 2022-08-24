@@ -53,7 +53,7 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
 
         string_printf(
             app->text_string,
-            "Label: %s\nType: %s\n%.3f %s total\n%.3f %s free\n%.2f%% free",
+            "Label: %s\nType: %s\n%.2f %s total\n%.2f %s free\n%.2f%% free",
             sd_info.label,
             sd_api_get_fs_type_text(sd_info.fs_type),
             sd_total_val,
