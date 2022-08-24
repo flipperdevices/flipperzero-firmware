@@ -68,21 +68,15 @@ uint64_t protocol_jablotron_card_id(uint8_t* bytes) {
 }
 
 static bool protocol_jablotron_can_be_decoded(ProtocolJablotron* protocol) {
-    bool result = false;
+    // check 11 bits preamble
+    if(bit_lib_get_bits_16(protocol->encoded_data, 0, 16) != 0b1111111111111111) return false;
+    // check next 11 bits preamble
+    if(bit_lib_get_bits_16(protocol->encoded_data, 64, 16) != 0b1111111111111111) return false;
 
-    do {
-        // check 11 bits preamble
-        if(bit_lib_get_bits_16(protocol->encoded_data, 0, 16) != 0b1111111111111111) break;
-        // check next 11 bits preamble
-        if(bit_lib_get_bits_16(protocol->encoded_data, 64, 16) != 0b1111111111111111) break;
+    uint8_t checksum = bit_lib_get_bits(protocol->encoded_data, 56, 8);
+    if(checksum != protocol_jablotron_checksum(protocol->encoded_data)) return false;
 
-        uint8_t checksum = bit_lib_get_bits(protocol->encoded_data, 56, 8);
-        if(checksum != protocol_jablotron_checksum(protocol->encoded_data)) break;
-
-        result = true;
-    } while(false);
-
-    return result;
+    return true;
 }
 
 void protocol_jablotron_decode(ProtocolJablotron* protocol) {
