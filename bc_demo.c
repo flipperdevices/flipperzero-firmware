@@ -44,7 +44,7 @@
 
 //+============================================================================ ========================================
 // OS Callback : Timer tick
-// We register this function to be called when the OS requests that the screen is redrawn
+// We register this function to be called when the OS signals a timer 'tick' event
 //
 static
 void  cbTimer (FuriMessageQueue* queue)
@@ -203,10 +203,12 @@ bool  evKey (eventMsg_t* msg,  state_t* state, Gui* gui)
 		case InputTypePress:   // Press   - after debounce
 			switch (msg->input.key) {
    				// Stop animations before moving
-				case InputKeyUp:     animateEn(state, false);  break ;
-				case InputKeyDown:   animateEn(state, false);  break ;
-				case InputKeyLeft:   animateEn(state, false);  break ;
-				case InputKeyRight:  animateEn(state, false);  break ;
+				case InputKeyUp:
+				case InputKeyDown:
+				case InputKeyLeft:
+				case InputKeyRight:
+					if (state->animate)  animateEn(state, false) ;
+					break;
 
 				// Ignore keys
 				case InputKeyOk:
