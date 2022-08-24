@@ -22,6 +22,7 @@ static const char* app_dirs[] = {
     ".dolphin.state",
     ".notification.settings",
     ".bt.keys",
+    ".power.settings",
 };
 
 bool storage_move_to_sd_perform(void) {

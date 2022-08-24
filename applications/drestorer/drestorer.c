@@ -16,6 +16,7 @@ static const char* app_dirs[] = {
     ".dolphin.state",
     ".notification.settings",
     ".bt.keys",
+    ".power.settings",
 };
 
 bool drestorer_perform(void) {
