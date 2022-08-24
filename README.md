@@ -15,6 +15,7 @@
 - New fixes & updates by [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Fix for Name Changer [(Thanks to Painkiller8818)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/269)
 - OFW: [LFRFID RC fixes #1652 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1652)
+- OFW: [SubGhz: fix CAME, Chamberlain potocol #1650 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1650)
 
 
 <table width="100%" border="0" cellspacing="0">
