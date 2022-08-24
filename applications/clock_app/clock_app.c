@@ -243,17 +243,20 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         snprintf(strings[2], 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
-        canvas_set_font(canvas, FontSecondary);
+        canvas_set_font(canvas, FontBatteryPercent);
         if(!state->militaryTime)
             canvas_draw_str_aligned(canvas, 118, 5, AlignCenter, AlignCenter, strAMPM);
         canvas_draw_str_aligned(canvas, 118, 15, AlignCenter, AlignCenter, alertTime);
+        canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]); // DRAW DATE
         elements_button_left(canvas, "Reset");
     } else {
         canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
-        canvas_set_font(canvas, FontSecondary);
-        if(!state->militaryTime)
+        if(!state->militaryTime) {
+            canvas_set_font(canvas, FontBatteryPercent);
             canvas_draw_str_aligned(canvas, 67, 15, AlignCenter, AlignCenter, strAMPM);
+        }
+        canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
 
         if(!state->desktop_settings->is_dumbmode)
@@ -449,6 +452,8 @@ int32_t clock_app(void* p) {
                     }
                     if(plugin_state->codeSequence == 10) {
                         plugin_state->codeSequence = 0;
+                        plugin_state->desktop_settings->is_dumbmode = true; // MAKE SURE IT'S ON SO IT GETS TURNED OFF
+                        desktop_view_main_dumbmode_changed(plugin_state->desktop_settings);
                         // Surprise, now what?
                     }
                 } else if(event.input.type == InputTypeLong) {
