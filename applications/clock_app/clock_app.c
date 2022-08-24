@@ -215,14 +215,11 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         furi_message_queue_put(state->event_queue, &event, 0);
         return;
     }
-
     FuriHalRtcDateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
     uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
-
     char strings[3][20];
     snprintf(strings[0], 20, "%.4d-%.2d-%.2d", curr_dt.year, curr_dt.month, curr_dt.day);
-
     uint8_t hour = curr_dt.hour;
     char strAMPM[3];
     snprintf(strAMPM, sizeof(strAMPM), "%s", "AM");
@@ -231,19 +228,14 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         snprintf(strAMPM, sizeof(strAMPM), "%s", "PM");
     }
     snprintf(strings[1], 20, "%.2d:%.2d:%.2d", hour, curr_dt.minute, curr_dt.second);
-
     bool timer_running = state->timer_running;
     uint32_t songSelect = state->songSelect;
     int alert_time = (int)state->alert_time;
     uint32_t timer_start_timestamp = state->timer_start_timestamp;
     uint32_t timer_stopped_seconds = state->timer_stopped_seconds;
-
     char alertTime[4];
-
     snprintf(alertTime, sizeof(alertTime), "%d", alert_time);
-
     furi_mutex_release(state->mutex);
-
     canvas_set_font(canvas, FontBigNumbers);
     if(timer_start_timestamp != 0) {
         int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
@@ -319,7 +311,6 @@ int32_t clock_app(void* p) {
         free(plugin_state);
         return 255;
     }
-
     plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(plugin_state->mutex == NULL) {
         FURI_LOG_E(TAG, "cannot create mutex\n");
@@ -327,7 +318,6 @@ int32_t clock_app(void* p) {
         free(plugin_state);
         return 255;
     }
-
     FuriTimer* timer =
         furi_timer_alloc(clock_tick, FuriTimerTypePeriodic, plugin_state->event_queue);
     if(timer == NULL) {
@@ -337,20 +327,16 @@ int32_t clock_app(void* p) {
         free(plugin_state);
         return 255;
     }
-
     LOAD_DESKTOP_SETTINGS(plugin_state->desktop_settings);
-
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, clock_render_callback, plugin_state);
     view_port_input_callback_set(view_port, clock_input_callback, plugin_state->event_queue);
-
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     // Open GUI and register view_port
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     furi_timer_start(timer, furi_kernel_get_tick_frequency());
-
     // Main loop
     PluginEvent event;
     for(bool processing = true; processing;) {
@@ -417,47 +403,57 @@ int32_t clock_app(void* p) {
                         }
                         break;
                     case InputKeyOk:
-                        plugin_state->codeSequence = 0;
-                        if(!plugin_state->desktop_settings->is_dumbmode) {
-                            if(plugin_state->songSelect == 1 || plugin_state->songSelect == 2 ||
-                               plugin_state->songSelect == 3) {
-                                notification_message(notification, &clock_alert_startStop);
-                            }
-                            // START/STOP TIMER
-                            FuriHalRtcDateTime curr_dt;
-                            furi_hal_rtc_get_datetime(&curr_dt);
-                            uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
-
-                            if(plugin_state->timer_running) {
-                                // Update stopped seconds
-                                plugin_state->timer_stopped_seconds =
-                                    curr_ts - plugin_state->timer_start_timestamp;
-                            } else {
-                                if(plugin_state->timer_start_timestamp == 0) {
-                                    // Set starting timestamp if this is first time
-                                    plugin_state->timer_start_timestamp = curr_ts;
-                                } else {
-                                    // Timer was already running, need to slightly readjust so we don't
-                                    // count the intervening time
-                                    plugin_state->timer_start_timestamp =
-                                        curr_ts - plugin_state->timer_stopped_seconds;
+                        if(plugin_state->codeSequence == 9) {
+                            plugin_state->codeSequence++;
+                        } else {
+                            plugin_state->codeSequence = 0;
+                            if(!plugin_state->desktop_settings->is_dumbmode) {
+                                if(plugin_state->songSelect == 1 || plugin_state->songSelect == 2 ||
+                                   plugin_state->songSelect == 3) {
+                                    notification_message(notification, &clock_alert_startStop);
                                 }
+                                // START/STOP TIMER
+                                FuriHalRtcDateTime curr_dt;
+                                furi_hal_rtc_get_datetime(&curr_dt);
+                                uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+                                if(plugin_state->timer_running) {
+                                    // Update stopped seconds
+                                    plugin_state->timer_stopped_seconds =
+                                        curr_ts - plugin_state->timer_start_timestamp;
+                                } else {
+                                    if(plugin_state->timer_start_timestamp == 0) {
+                                        // Set starting timestamp if this is first time
+                                        plugin_state->timer_start_timestamp = curr_ts;
+                                    } else {
+                                        // Timer was already running, need to slightly readjust so we don't
+                                        // count the intervening time
+                                        plugin_state->timer_start_timestamp =
+                                            curr_ts - plugin_state->timer_stopped_seconds;
+                                    }
+                                }
+                                plugin_state->timer_running = !plugin_state->timer_running;
                             }
-                            plugin_state->timer_running = !plugin_state->timer_running;
                         }
                         break;
                     case InputKeyBack:
-                        // Exit the plugin
-                        processing = false;
+                        if(plugin_state->codeSequence == 8) {
+                            plugin_state->codeSequence++;
+                        } else {
+                            // Exit the plugin
+                            processing = false;
+                        }
                         break;
                     }
                     if(plugin_state->codeSequence == 8) {
-                        // UNLOCK!
+                        desktop_view_main_dumbmode_changed(plugin_state->desktop_settings);
+                    }
+                    if(plugin_state->codeSequence == 10) {
                         plugin_state->codeSequence = 0;
-						desktop_view_main_dumbmode_changed(plugin_state->desktop_settings);
+                        // Surprise, now what?
                     }
                 } else if(event.input.type == InputTypeLong) {
                     if(event.input.key == InputKeyLeft) {
+                        plugin_state->codeSequence = 0;
                         if(plugin_state->timer_start_timestamp != 0) {
                             // Reset seconds
                             plugin_state->timer_running = false;
