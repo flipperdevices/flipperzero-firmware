@@ -32,6 +32,8 @@ static void subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) 
     if(event == RpcAppEventSessionClose) {
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventSceneRpcSessionClose);
+        rpc_system_app_set_callback(subghz->rpc_ctx, NULL, NULL);
+        subghz->rpc_ctx = NULL;
     } else if(event == RpcAppEventAppExit) {
         view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneExit);
     } else if(event == RpcAppEventLoadFile) {
@@ -301,6 +303,12 @@ void subghz_free(SubGhz* subghz) {
 
 int32_t subghz_app(void* p) {
     SubGhz* subghz = subghz_alloc();
+
+    if(!furi_hal_region_is_provisioned()) {
+        subghz_dialog_message_show_only_rx(subghz);
+        subghz_free(subghz);
+        return 1;
+    }
 
     //Load database
     bool load_database = subghz_environment_load_keystore(
