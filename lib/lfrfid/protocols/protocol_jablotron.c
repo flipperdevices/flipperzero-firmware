@@ -84,9 +84,7 @@ void protocol_jablotron_decode(ProtocolJablotron* protocol) {
 }
 
 bool protocol_jablotron_decoder_feed(ProtocolJablotron* protocol, bool level, uint32_t duration) {
-    bool result = false;
     UNUSED(level);
-
     bool pushed = false;
 
     // Bi-Phase Manchester decoding
@@ -113,15 +111,13 @@ bool protocol_jablotron_decoder_feed(ProtocolJablotron* protocol, bool level, ui
 
     if(pushed && protocol_jablotron_can_be_decoded(protocol)) {
         protocol_jablotron_decode(protocol);
-        result = true;
+        return true;
     }
 
-    return result;
+    return false;
 };
 
 bool protocol_jablotron_encoder_start(ProtocolJablotron* protocol) {
-    memset(protocol->encoded_data, 0, JABLOTRON_ENCODED_BYTE_FULL_SIZE);
-
     // preamble
     bit_lib_set_bits(protocol->encoded_data, 0, 0b11111111, 8);
     bit_lib_set_bits(protocol->encoded_data, 8, 0b11111111, 8);
