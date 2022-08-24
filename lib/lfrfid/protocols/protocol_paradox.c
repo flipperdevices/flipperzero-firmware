@@ -55,25 +55,19 @@ void protocol_paradox_decoder_start(ProtocolParadox* protocol) {
 };
 
 static bool protocol_paradox_can_be_decoded(ProtocolParadox* protocol) {
-    bool result = false;
+    // check preamble
+    if(protocol->encoded_data[0] != 0b00001111 ||
+       protocol->encoded_data[PARADOX_ENCODED_DATA_LAST] != 0b00001111)
+        return false;
 
-    do {
-        // check preamble
-        if(protocol->encoded_data[0] != 0b00001111 ||
-           protocol->encoded_data[PARADOX_ENCODED_DATA_LAST] != 0b00001111)
-            break;
-
-        for(uint32_t i = PARADOX_PREAMBLE_LENGTH; i < 96; i += 2) {
-            if(bit_lib_get_bit(protocol->encoded_data, i) ==
-               bit_lib_get_bit(protocol->encoded_data, i + 1)) {
-                return false;
-            }
+    for(uint32_t i = PARADOX_PREAMBLE_LENGTH; i < 96; i += 2) {
+        if(bit_lib_get_bit(protocol->encoded_data, i) ==
+           bit_lib_get_bit(protocol->encoded_data, i + 1)) {
+            return false;
         }
+    }
 
-        result = true;
-    } while(false);
-
-    return result;
+    return true;
 }
 
 static void protocol_paradox_decode(uint8_t* encoded_data, uint8_t* decoded_data) {
@@ -93,7 +87,6 @@ static void protocol_paradox_decode(uint8_t* encoded_data, uint8_t* decoded_data
 bool protocol_paradox_decoder_feed(ProtocolParadox* protocol, bool level, uint32_t duration) {
     bool value;
     uint32_t count;
-    bool result = false;
 
     fsk_demod_feed(protocol->decoder.fsk_demod, level, duration, &value, &count);
     if(count > 0) {
@@ -102,18 +95,15 @@ bool protocol_paradox_decoder_feed(ProtocolParadox* protocol, bool level, uint32
             if(protocol_paradox_can_be_decoded(protocol)) {
                 protocol_paradox_decode(protocol->encoded_data, protocol->data);
 
-                result = true;
-                break;
+                return true;
             }
         }
     }
 
-    return result;
+    return false;
 };
 
 static void protocol_paradox_encode(const uint8_t* decoded_data, uint8_t* encoded_data) {
-    memset(encoded_data, 0, PARADOX_ENCODED_DATA_SIZE);
-
     // preamble
     bit_lib_set_bits(encoded_data, 0, 0b00001111, 8);
 
