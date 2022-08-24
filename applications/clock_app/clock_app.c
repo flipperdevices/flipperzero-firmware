@@ -245,8 +245,8 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
         canvas_set_font(canvas, FontBatteryPercent);
         if(!state->militaryTime)
-            canvas_draw_str_aligned(canvas, 118, 5, AlignCenter, AlignCenter, strAMPM);
-        canvas_draw_str_aligned(canvas, 118, 15, AlignCenter, AlignCenter, alertTime);
+            canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, strAMPM);
+        canvas_draw_str_aligned(canvas, 117, 11, AlignCenter, AlignCenter, alertTime);
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]); // DRAW DATE
         elements_button_left(canvas, "Reset");
@@ -254,7 +254,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
         if(!state->militaryTime) {
             canvas_set_font(canvas, FontBatteryPercent);
-            canvas_draw_str_aligned(canvas, 67, 15, AlignCenter, AlignCenter, strAMPM);
+            canvas_draw_str_aligned(canvas, 69, 15, AlignCenter, AlignCenter, strAMPM);
         }
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
@@ -353,6 +353,8 @@ int32_t clock_app(void* p) {
                     case InputKeyUp:
                         if(plugin_state->codeSequence == 0 || plugin_state->codeSequence == 1) {
                             plugin_state->codeSequence++;
+                            if(plugin_state->timer_running)
+                                plugin_state->alert_time = plugin_state->alert_time + 5;
                         } else {
                             plugin_state->codeSequence = 0;
                             if(plugin_state->timer_running)
@@ -362,6 +364,8 @@ int32_t clock_app(void* p) {
                     case InputKeyDown:
                         if(plugin_state->codeSequence == 2 || plugin_state->codeSequence == 3) {
                             plugin_state->codeSequence++;
+                            if(plugin_state->timer_running)
+                                plugin_state->alert_time = plugin_state->alert_time - 5;
                         } else {
                             plugin_state->codeSequence = 0;
                             if(plugin_state->timer_running)
@@ -371,6 +375,15 @@ int32_t clock_app(void* p) {
                     case InputKeyRight:
                         if(plugin_state->codeSequence == 5 || plugin_state->codeSequence == 7) {
                             plugin_state->codeSequence++;
+                            if(plugin_state->songSelect == 0) {
+                                plugin_state->songSelect = 1;
+                            } else if(plugin_state->songSelect == 1) {
+                                plugin_state->songSelect = 2;
+                            } else if(plugin_state->songSelect == 2) {
+                                plugin_state->songSelect = 3;
+                            } else {
+                                plugin_state->songSelect = 0;
+                            }
                         } else {
                             plugin_state->codeSequence = 0;
                             if(plugin_state->songSelect == 0) {
