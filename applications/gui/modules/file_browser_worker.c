@@ -1,6 +1,6 @@
 #include "file_browser_worker.h"
-#include "furi/check.h"
-#include "furi/common_defines.h"
+#include <core/check.h>
+#include <core/common_defines.h>
 #include "m-string.h"
 #include "storage/filesystem_api_defines.h"
 #include <m-array.h>
@@ -13,7 +13,7 @@
 #define TAG "BrowserWorker"
 
 #define ASSETS_DIR "assets"
-#define BROWSER_ROOT "/any"
+#define BROWSER_ROOT STORAGE_ANY_PATH_PREFIX
 #define FILE_NAME_LEN_MAX 256
 #define LONG_LOAD_THRESHOLD 100
 
@@ -53,13 +53,13 @@ struct BrowserWorker {
 static bool browser_path_is_file(string_t path) {
     bool state = false;
     FileInfo file_info;
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     if(storage_common_stat(storage, string_get_cstr(path), &file_info) == FSE_OK) {
         if((file_info.flags & FSF_DIRECTORY) == 0) {
             state = true;
         }
     }
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     return state;
 }
 
@@ -97,8 +97,13 @@ static bool browser_filter_by_name(BrowserWorker* browser, string_t name, bool i
 
 static bool browser_folder_check_and_switch(string_t path) {
     FileInfo file_info;
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     bool is_root = false;
+
+    if(string_search_rchar(path, '/') == 0) {
+        is_root = true;
+    }
+
     while(1) {
         // Check if folder is existing and navigate back if not
         if(storage_common_stat(storage, string_get_cstr(path), &file_info) == FSE_OK) {
@@ -111,7 +116,7 @@ static bool browser_folder_check_and_switch(string_t path) {
         }
         is_root = browser_path_trim(path);
     }
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     return is_root;
 }
 
@@ -125,7 +130,7 @@ static bool browser_folder_init(
     FileInfo file_info;
     uint32_t total_files_cnt = 0;
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     File* directory = storage_file_alloc(storage);
 
     char name_temp[FILE_NAME_LEN_MAX];
@@ -167,7 +172,7 @@ static bool browser_folder_init(
     storage_dir_close(directory);
     storage_file_free(directory);
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return state;
 }
@@ -176,7 +181,7 @@ static bool
     browser_folder_load(BrowserWorker* browser, string_t path, uint32_t offset, uint32_t count) {
     FileInfo file_info;
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     File* directory = storage_file_alloc(storage);
 
     char name_temp[FILE_NAME_LEN_MAX];
@@ -241,7 +246,7 @@ static bool
     storage_dir_close(directory);
     storage_file_free(directory);
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return (items_cnt == count);
 }
@@ -262,8 +267,9 @@ static int32_t browser_worker(void* context) {
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtConfigChange);
 
     while(1) {
-        uint32_t flags = furi_thread_flags_wait(WORKER_FLAGS_ALL, osFlagsWaitAny, osWaitForever);
-        furi_assert((flags & osFlagsError) == 0);
+        uint32_t flags =
+            furi_thread_flags_wait(WORKER_FLAGS_ALL, FuriFlagWaitAny, FuriWaitForever);
+        furi_assert((flags & FuriFlagError) == 0);
 
         if(flags & WorkerEvtConfigChange) {
             // If start path is a path to the file - try finding index of this file in a folder

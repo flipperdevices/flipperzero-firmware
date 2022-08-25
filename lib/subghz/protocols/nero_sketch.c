@@ -79,7 +79,7 @@ void* subghz_protocol_encoder_nero_sketch_alloc(SubGhzEnvironment* environment) 
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 256;
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
     return instance;
 }
 
@@ -157,13 +157,17 @@ bool subghz_protocol_encoder_nero_sketch_deserialize(void* context, FlipperForma
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
-
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_nero_sketch_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
         //optional parameter parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         subghz_protocol_encoder_nero_sketch_get_upload(instance);
-        instance->encoder.is_runing = true;
+        instance->encoder.is_running = true;
 
         res = true;
     } while(false);
@@ -173,14 +177,14 @@ bool subghz_protocol_encoder_nero_sketch_deserialize(void* context, FlipperForma
 
 void subghz_protocol_encoder_nero_sketch_stop(void* context) {
     SubGhzProtocolEncoderNeroSketch* instance = context;
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
 }
 
 LevelDuration subghz_protocol_encoder_nero_sketch_yield(void* context) {
     SubGhzProtocolEncoderNeroSketch* instance = context;
 
-    if(instance->encoder.repeat == 0 || !instance->encoder.is_runing) {
-        instance->encoder.is_runing = false;
+    if(instance->encoder.repeat == 0 || !instance->encoder.is_running) {
+        instance->encoder.is_running = false;
         return level_duration_reset();
     }
 
@@ -271,7 +275,7 @@ void subghz_protocol_decoder_nero_sketch_feed(void* context, bool level, uint32_
                             subghz_protocol_nero_sketch_const.te_delta * 2)) {
                 //Found stop bit
                 instance->decoder.parser_step = NeroSketchDecoderStepReset;
-                if(instance->decoder.decode_count_bit >=
+                if(instance->decoder.decode_count_bit ==
                    subghz_protocol_nero_sketch_const.min_count_bit_for_found) {
                     instance->generic.data = instance->decoder.decode_data;
                     instance->generic.data_count_bit = instance->decoder.decode_count_bit;
@@ -327,17 +331,28 @@ uint8_t subghz_protocol_decoder_nero_sketch_get_hash_data(void* context) {
 bool subghz_protocol_decoder_nero_sketch_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset) {
+    SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderNeroSketch* instance = context;
-    return subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
 bool subghz_protocol_decoder_nero_sketch_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderNeroSketch* instance = context;
-    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    bool ret = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            break;
+        }
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_nero_sketch_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
+        ret = true;
+    } while(false);
+    return ret;
 }
 
 void subghz_protocol_decoder_nero_sketch_get_string(void* context, string_t output) {

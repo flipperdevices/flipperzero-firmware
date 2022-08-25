@@ -25,7 +25,7 @@ struct CliSession {
     void (*deinit)(void);
     size_t (*rx)(uint8_t* buffer, size_t size, uint32_t timeout);
     void (*tx)(const uint8_t* buffer, size_t size);
-    void (*tx_stdout)(void* _cookie, const char* data, size_t size);
+    void (*tx_stdout)(const char* data, size_t size);
     bool (*is_connected)(void);
 };
 
@@ -41,8 +41,8 @@ BPTREE_DEF2(
 
 struct Cli {
     CliCommandTree_t commands;
-    osMutexId_t mutex;
-    osSemaphoreId_t idle_sem;
+    FuriMutex* mutex;
+    FuriSemaphore* idle_sem;
     string_t last_line;
     string_t line;
     CliSession* session;

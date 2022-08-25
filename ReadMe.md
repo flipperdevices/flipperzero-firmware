@@ -29,11 +29,11 @@ They both must be flashed in the order described.
 
 With Flipper attached over USB:
 
-`./fbt --with-updater flash_usb`
+`./fbt flash_usb`
 
 Just building the package:
 
-`./fbt --with-updater updater_package`
+`./fbt updater_package`
 
 To update, copy the resulting directory to Flipper's SD card and navigate to `update.fuf` file in Archive app. 
 
@@ -60,29 +60,6 @@ One liner: `./fbt firmware_flash`
  - Release `← Left`
 
 3. Run `dfu-util -D full.dfu -a 0`
-
-# Build with Docker
-
-## Prerequisites
-
-1. Install [Docker Engine and Docker Compose](https://www.docker.com/get-started)
-2. Prepare the container:
-
- ```sh
- docker-compose up -d
- ```
-
-## Compile everything
-
-```sh
-docker-compose exec dev ./fbt
-```
-
-Check `dist/` for build outputs.
-
-Use **`flipper-z-{target}-full-{suffix}.dfu`** to flash your device.
-
-If compilation fails, make sure all submodules are all initialized. Either clone with `--recursive` or use `git submodule update --init --recursive`.
 
 # Build on Linux/macOS
 
@@ -155,9 +132,8 @@ Connect your device via ST-Link and run:
 
 - `applications`    - Applications and services used in firmware
 - `assets`          - Assets used by applications and services
-- `core`            - Furi Core: os level primitives and helpers
+- `furi`            - Furi Core: os level primitives and helpers
 - `debug`           - Debug tool: GDB-plugins, SVD-file and etc
-- `docker`          - Docker image sources (used for firmware build automation)
 - `documentation`   - Documentation generation system configs and input files
 - `firmware`        - Firmware source code
 - `lib`             - Our and 3rd party libraries, drivers and etc...

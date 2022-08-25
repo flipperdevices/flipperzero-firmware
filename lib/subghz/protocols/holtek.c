@@ -89,7 +89,7 @@ void* subghz_protocol_encoder_holtek_alloc(SubGhzEnvironment* environment) {
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 128;
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
     return instance;
 }
 
@@ -151,13 +151,17 @@ bool subghz_protocol_encoder_holtek_deserialize(void* context, FlipperFormat* fl
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
-
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_holtek_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
         //optional parameter parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         subghz_protocol_encoder_holtek_get_upload(instance);
-        instance->encoder.is_runing = true;
+        instance->encoder.is_running = true;
 
         res = true;
     } while(false);
@@ -167,14 +171,14 @@ bool subghz_protocol_encoder_holtek_deserialize(void* context, FlipperFormat* fl
 
 void subghz_protocol_encoder_holtek_stop(void* context) {
     SubGhzProtocolEncoderHoltek* instance = context;
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
 }
 
 LevelDuration subghz_protocol_encoder_holtek_yield(void* context) {
     SubGhzProtocolEncoderHoltek* instance = context;
 
-    if(instance->encoder.repeat == 0 || !instance->encoder.is_runing) {
-        instance->encoder.is_runing = false;
+    if(instance->encoder.repeat == 0 || !instance->encoder.is_running) {
+        instance->encoder.is_running = false;
         return level_duration_reset();
     }
 
@@ -322,17 +326,28 @@ uint8_t subghz_protocol_decoder_holtek_get_hash_data(void* context) {
 bool subghz_protocol_decoder_holtek_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset) {
+    SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderHoltek* instance = context;
-    return subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
 bool subghz_protocol_decoder_holtek_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderHoltek* instance = context;
-    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    bool ret = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            break;
+        }
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_holtek_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
+        ret = true;
+    } while(false);
+    return ret;
 }
 
 void subghz_protocol_decoder_holtek_get_string(void* context, string_t output) {
@@ -344,7 +359,7 @@ void subghz_protocol_decoder_holtek_get_string(void* context, string_t output) {
         output,
         "%s %dbit\r\n"
         "Key:0x%lX%08lX\r\n"
-        "Sn:0x%05lX BTN:%X ",
+        "Sn:0x%05lX Btn:%X ",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         (uint32_t)((instance->generic.data >> 32) & 0xFFFFFFFF),

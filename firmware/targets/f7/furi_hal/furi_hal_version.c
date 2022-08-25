@@ -6,7 +6,7 @@
 #include <stm32wbxx_ll_rtc.h>
 
 #include <stdio.h>
-#include "ble.h"
+#include <ble/ble.h>
 
 #define TAG "FuriHalVersion"
 
@@ -262,6 +262,8 @@ const char* furi_hal_version_get_hw_region_name() {
         return "R02";
     case FuriHalVersionRegionJp:
         return "R03";
+    case FuriHalVersionRegionWorld:
+        return "R04";
     }
     return "R??";
 }

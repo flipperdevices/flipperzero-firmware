@@ -43,11 +43,12 @@ void storage_settings_scene_formatting_on_enter(void* context) {
     dialog_ex_set_result_callback(dialog_ex, storage_settings_scene_formatting_dialog_callback);
 
     if(error != FSE_OK) {
-        dialog_ex_set_header(dialog_ex, "Cannot format SD Card", 64, 10, AlignCenter, AlignCenter);
+        dialog_ex_set_header(dialog_ex, "Cannot Format SD Card", 64, 10, AlignCenter, AlignCenter);
         dialog_ex_set_text(
             dialog_ex, storage_error_get_desc(error), 64, 32, AlignCenter, AlignCenter);
     } else {
-        dialog_ex_set_header(dialog_ex, "Format complete!", 64, 32, AlignCenter, AlignCenter);
+        dialog_ex_set_icon(dialog_ex, 72, 17, &I_DolphinCommon_56x48);
+        dialog_ex_set_header(dialog_ex, "Format\ncomplete!", 14, 15, AlignLeft, AlignTop);
     }
     dialog_ex_set_center_button_text(dialog_ex, "OK");
 }

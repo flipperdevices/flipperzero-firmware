@@ -1,5 +1,5 @@
-#include "furi/log.h"
-#include <furi/record.h>
+#include <core/log.h>
+#include <core/record.h>
 #include <m-string.h>
 #include "storage.h"
 #include "storage_i.h"
@@ -13,18 +13,20 @@
 
 #define TAG "StorageAPI"
 
-#define S_API_PROLOGUE                                      \
-    osSemaphoreId_t semaphore = osSemaphoreNew(1, 0, NULL); \
+#define S_API_PROLOGUE                                     \
+    FuriSemaphore* semaphore = furi_semaphore_alloc(1, 0); \
     furi_check(semaphore != NULL);
 
 #define S_FILE_API_PROLOGUE           \
     Storage* storage = file->storage; \
     furi_assert(storage);
 
-#define S_API_EPILOGUE                                                                         \
-    furi_check(osMessageQueuePut(storage->message_queue, &message, 0, osWaitForever) == osOK); \
-    osSemaphoreAcquire(semaphore, osWaitForever);                                              \
-    osSemaphoreDelete(semaphore);
+#define S_API_EPILOGUE                                                               \
+    furi_check(                                                                      \
+        furi_message_queue_put(storage->message_queue, &message, FuriWaitForever) == \
+        FuriStatusOk);                                                               \
+    furi_semaphore_acquire(semaphore, FuriWaitForever);                              \
+    furi_semaphore_free(semaphore);
 
 #define S_API_MESSAGE(_command)      \
     SAReturn return_data;            \
@@ -88,8 +90,8 @@ static void storage_file_close_callback(const void* message, void* context) {
     if(storage_event->type == StorageEventTypeFileClose ||
        storage_event->type == StorageEventTypeDirClose) {
         furi_assert(context);
-        osEventFlagsId_t event = context;
-        osEventFlagsSet(event, StorageEventFlagFileClose);
+        FuriEventFlag* event = context;
+        furi_event_flag_set(event, StorageEventFlagFileClose);
     }
 }
 
@@ -99,7 +101,7 @@ bool storage_file_open(
     FS_AccessMode access_mode,
     FS_OpenMode open_mode) {
     bool result;
-    osEventFlagsId_t event = osEventFlagsNew(NULL);
+    FuriEventFlag* event = furi_event_flag_alloc();
     FuriPubSubSubscription* subscription = furi_pubsub_subscribe(
         storage_get_pubsub(file->storage), storage_file_close_callback, event);
 
@@ -107,14 +109,15 @@ bool storage_file_open(
         result = storage_file_open_internal(file, path, access_mode, open_mode);
 
         if(!result && file->error_id == FSE_ALREADY_OPEN) {
-            osEventFlagsWait(event, StorageEventFlagFileClose, osFlagsWaitAny, osWaitForever);
+            furi_event_flag_wait(
+                event, StorageEventFlagFileClose, FuriFlagWaitAny, FuriWaitForever);
         } else {
             break;
         }
     } while(true);
 
     furi_pubsub_unsubscribe(storage_get_pubsub(file->storage), subscription);
-    osEventFlagsDelete(event);
+    furi_event_flag_free(event);
 
     FURI_LOG_T(
         TAG, "File %p - %p open (%s)", (uint32_t)file - SRAM_BASE, file->file_id - SRAM_BASE, path);
@@ -237,6 +240,18 @@ bool storage_file_eof(File* file) {
     return S_RETURN_BOOL;
 }
 
+bool storage_file_exists(Storage* storage, const char* path) {
+    bool exist = false;
+    FileInfo fileinfo;
+    FS_Error error = storage_common_stat(storage, path, &fileinfo);
+
+    if(error == FSE_OK && !(fileinfo.flags & FSF_DIRECTORY)) {
+        exist = true;
+    }
+
+    return exist;
+}
+
 /****************** DIR ******************/
 
 static bool storage_dir_open_internal(File* file, const char* path) {
@@ -258,7 +273,7 @@ static bool storage_dir_open_internal(File* file, const char* path) {
 
 bool storage_dir_open(File* file, const char* path) {
     bool result;
-    osEventFlagsId_t event = osEventFlagsNew(NULL);
+    FuriEventFlag* event = furi_event_flag_alloc();
     FuriPubSubSubscription* subscription = furi_pubsub_subscribe(
         storage_get_pubsub(file->storage), storage_file_close_callback, event);
 
@@ -266,14 +281,15 @@ bool storage_dir_open(File* file, const char* path) {
         result = storage_dir_open_internal(file, path);
 
         if(!result && file->error_id == FSE_ALREADY_OPEN) {
-            osEventFlagsWait(event, StorageEventFlagFileClose, osFlagsWaitAny, osWaitForever);
+            furi_event_flag_wait(
+                event, StorageEventFlagFileClose, FuriFlagWaitAny, FuriWaitForever);
         } else {
             break;
         }
     } while(true);
 
     furi_pubsub_unsubscribe(storage_get_pubsub(file->storage), subscription);
-    osEventFlagsDelete(event);
+    furi_event_flag_free(event);
 
     FURI_LOG_T(
         TAG, "Dir %p - %p open (%s)", (uint32_t)file - SRAM_BASE, file->file_id - SRAM_BASE, path);
@@ -443,17 +459,16 @@ static FS_Error
     storage_merge_recursive(Storage* storage, const char* old_path, const char* new_path) {
     FS_Error error = storage_common_mkdir(storage, new_path);
     DirWalk* dir_walk = dir_walk_alloc(storage);
-    string_t path;
-    string_t tmp_new_path;
-    string_t tmp_old_path;
+    string_t path, file_basename, tmp_new_path;
     FileInfo fileinfo;
     string_init(path);
+    string_init(file_basename);
     string_init(tmp_new_path);
-    string_init(tmp_old_path);
 
     do {
         if((error != FSE_OK) && (error != FSE_EXIST)) break;
 
+        dir_walk_set_recursive(dir_walk, false);
         if(!dir_walk_open(dir_walk, old_path)) {
             error = dir_walk_get_error(dir_walk);
             break;
@@ -468,30 +483,33 @@ static FS_Error
             } else if(res == DirWalkLast) {
                 break;
             } else {
-                string_set(tmp_old_path, path);
-                string_right(path, strlen(old_path));
-                string_printf(tmp_new_path, "%s%s", new_path, string_get_cstr(path));
+                path_extract_basename(string_get_cstr(path), file_basename);
+                path_concat(new_path, string_get_cstr(file_basename), tmp_new_path);
 
                 if(fileinfo.flags & FSF_DIRECTORY) {
                     if(storage_common_stat(storage, string_get_cstr(tmp_new_path), &fileinfo) ==
                        FSE_OK) {
                         if(fileinfo.flags & FSF_DIRECTORY) {
                             error = storage_common_mkdir(storage, string_get_cstr(tmp_new_path));
+                            if(error != FSE_OK) {
+                                break;
+                            }
                         }
                     }
-                } else {
-                    error = storage_common_merge(
-                        storage, string_get_cstr(tmp_old_path), string_get_cstr(tmp_new_path));
                 }
+                error = storage_common_merge(
+                    storage, string_get_cstr(path), string_get_cstr(tmp_new_path));
 
-                if(error != FSE_OK) break;
+                if(error != FSE_OK) {
+                    break;
+                }
             }
         }
 
     } while(false);
 
     string_clear(tmp_new_path);
-    string_clear(tmp_old_path);
+    string_clear(file_basename);
     string_clear(path);
     dir_walk_free(dir_walk);
     return error;

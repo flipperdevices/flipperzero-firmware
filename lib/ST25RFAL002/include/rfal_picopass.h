@@ -26,6 +26,7 @@ enum {
     RFAL_PICOPASS_CMD_READCHECK = 0x88,
     RFAL_PICOPASS_CMD_CHECK = 0x05,
     RFAL_PICOPASS_CMD_READ = 0x0C,
+    RFAL_PICOPASS_CMD_WRITE = 0x0C,
 };
 
 typedef struct {
@@ -51,10 +52,6 @@ typedef struct {
     uint8_t crc[2];
 } rfalPicoPassReadBlockRes;
 
-typedef struct {
-    rfalPicoPassReadBlockRes block[4];
-} ApplicationArea;
-
 ReturnCode rfalPicoPassPollerInitialize(void);
 ReturnCode rfalPicoPassPollerCheckPresence(void);
 ReturnCode rfalPicoPassPollerIdentify(rfalPicoPassIdentifyRes* idRes);
@@ -62,5 +59,6 @@ ReturnCode rfalPicoPassPollerSelect(uint8_t* csn, rfalPicoPassSelectRes* selRes)
 ReturnCode rfalPicoPassPollerReadCheck(rfalPicoPassReadCheckRes* rcRes);
 ReturnCode rfalPicoPassPollerCheck(uint8_t* mac, rfalPicoPassCheckRes* chkRes);
 ReturnCode rfalPicoPassPollerReadBlock(uint8_t blockNum, rfalPicoPassReadBlockRes* readRes);
+ReturnCode rfalPicoPassPollerWriteBlock(uint8_t blockNum, uint8_t data[8], uint8_t mac[4]);
 
 #endif /* RFAL_PICOPASS_H */

@@ -4,7 +4,7 @@
 
 struct TextInput {
     View* view;
-    osTimerId_t timer;
+    FuriTimer* timer;
 };
 
 typedef struct {
@@ -131,7 +131,9 @@ static bool char_is_lowercase(char letter) {
 }
 
 static char char_to_uppercase(const char letter) {
-    if(isalpha(letter)) {
+    if(letter == '_') {
+        return 0x20;
+    } else if(isalpha(letter)) {
         return (letter - 0x20);
     } else {
         return letter;
@@ -147,7 +149,7 @@ static void text_input_backspace_cb(TextInputModel* model) {
 
 static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     TextInputModel* model = _model;
-    uint8_t text_length = strlen(model->text_buffer);
+    uint8_t text_length = model->text_buffer ? strlen(model->text_buffer) : 0;
     uint8_t needed_string_width = canvas_width(canvas) - 8;
     uint8_t start_pos = 4;
 
@@ -310,7 +312,7 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, b
            (!model->validator_callback(
                model->text_buffer, model->validator_text, model->validator_callback_context))) {
             model->valadator_message_visible = true;
-            osTimerStart(text_input->timer, osKernelGetTickFreq() * 4);
+            furi_timer_start(text_input->timer, furi_kernel_get_tick_frequency() * 4);
         } else if(model->callback != 0 && text_length > 0) {
             model->callback(model->callback_context);
         }
@@ -438,7 +440,7 @@ TextInput* text_input_alloc() {
     view_set_draw_callback(text_input->view, text_input_view_draw_callback);
     view_set_input_callback(text_input->view, text_input_view_input_callback);
 
-    text_input->timer = osTimerNew(text_input_timer_callback, osTimerOnce, text_input, NULL);
+    text_input->timer = furi_timer_alloc(text_input_timer_callback, FuriTimerTypeOnce, text_input);
 
     with_view_model(
         text_input->view, (TextInputModel * model) {
@@ -460,11 +462,11 @@ void text_input_free(TextInput* text_input) {
         });
 
     // Send stop command
-    osTimerStop(text_input->timer);
+    furi_timer_stop(text_input->timer);
     // Wait till timer stop
-    while(osTimerIsRunning(text_input->timer)) osDelay(1);
+    while(furi_timer_is_running(text_input->timer)) furi_delay_tick(1);
     // Release allocated memory
-    osTimerDelete(text_input->timer);
+    furi_timer_free(text_input->timer);
 
     view_free(text_input->view);
 

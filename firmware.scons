@@ -9,7 +9,11 @@ from fbt.util import (
 
 # Building initial C environment for libs
 env = ENV.Clone(
-    tools=["compilation_db", "fwbin", "fbt_apps"],
+    tools=[
+        ("compilation_db", {"COMPILATIONDB_COMSTR": "\tCDB\t${TARGET}"}),
+        "fwbin",
+        "fbt_apps",
+    ],
     COMPILATIONDB_USE_ABSPATH=False,
     BUILD_DIR=fw_build_meta["build_dir"],
     IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",
@@ -23,7 +27,7 @@ env = ENV.Clone(
         "${LIB_DIST_DIR}",
     ],
     CPPPATH=[
-        "#/core",
+        "#/furi",
         "#/applications",
         "#/firmware/targets/f${TARGET_HW}/ble_glue",
         "#/firmware/targets/f${TARGET_HW}/fatfs",
@@ -45,7 +49,7 @@ env = ENV.Clone(
             # If they are present, they have precedence over Default
         },
         # for furi_check to respect build type
-        "core": {
+        "furi": {
             "CCFLAGS": [
                 "-Os",
             ],
@@ -76,7 +80,6 @@ if not env["VERBOSE"]:
         HEXCOMSTR="\tHEX\t${TARGET}",
         BINCOMSTR="\tBIN\t${TARGET}",
         DFUCOMSTR="\tDFU\t${TARGET}",
-        OPENOCDCOMSTR="\tFLASH\t${SOURCE}",
     )
 
 
@@ -94,13 +97,13 @@ else:
         ],
     )
 
-# Invoke child SCopscripts to populate global `env` + build their own part of the code
+# Invoke child SConscripts to populate global `env` + build their own part of the code
 lib_targets = env.BuildModules(
     [
         "lib",
         "assets",
         "firmware",
-        "core",
+        "furi",
     ],
 )
 
@@ -136,10 +139,10 @@ fwenv.AppendUnique(
 # Depends on virtual value-only node, so it only gets rebuilt when set of apps changes
 apps_c = fwenv.ApplicationsC(
     "applications/applications.c",
-    Value(fwenv["APPS"]),
+    [Value(fwenv["APPS"]), Value(fwenv["LOADER_AUTOSTART"])],
 )
 # Adding dependency on manifest files so apps.c is rebuilt when any manifest is changed
-fwenv.Depends(apps_c, fwenv.GlobRecursive("*.fam", "applications"))
+fwenv.Depends(apps_c, fwenv.GlobRecursive("*.fam", "#/applications"))
 
 sources = [apps_c]
 # Gather sources only from app folders in current configuration
@@ -161,9 +164,9 @@ fwenv.AppendUnique(
         "-Wl,--wrap,_free_r",
         "-Wl,--wrap,_calloc_r",
         "-Wl,--wrap,_realloc_r",
-        "-u",
-        "_printf_float",
         "-n",
+        "-Xlinker",
+        "-Map=${TARGET}.map",
     ],
 )
 
@@ -176,8 +179,9 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
     "${FIRMWARE_BUILD_CFG}",
     sources,
     LIBS=[
+        "print",
         "flipper${TARGET_HW}",
-        "core",
+        "furi",
         "freertos",
         "stm32cubewb",
         "hwdrivers",
@@ -186,6 +190,7 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
         "subghz",
         "flipperformat",
         "toolbox",
+        "nfc",
         "microtar",
         "usb_stm32",
         "st25rfal002",
@@ -195,22 +200,30 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
         "misc",
         "mbedtls",
         "loclass",
+        "lfrfid",
         # 2nd round
         "flipperformat",
         "toolbox",
     ],
 )
 
-# Make it depend on everything child builders returned
 # Firmware depends on everything child builders returned
 Depends(fwelf, lib_targets)
 # Output extra details after building firmware
 AddPostAction(fwelf, fwenv["APPBUILD_DUMP"])
-AddPostAction(fwelf, Action("@$SIZECOM"))
+AddPostAction(
+    fwelf,
+    Action('${PYTHON3} "${ROOT_DIR}/scripts/fwsize.py" elf ${TARGET}', "Firmware size"),
+)
 
 # Produce extra firmware files
 fwhex = fwenv["FW_HEX"] = fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
 fwbin = fwenv["FW_BIN"] = fwenv.BINBuilder("${FIRMWARE_BUILD_CFG}")
+AddPostAction(
+    fwbin,
+    Action('@${PYTHON3} "${ROOT_DIR}/scripts/fwsize.py" bin ${TARGET}'),
+)
+
 fwdfu = fwenv["FW_DFU"] = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_dfu", fwdfu)
 
@@ -231,7 +244,10 @@ if should_gen_cdb_and_link_dir(fwenv, BUILD_TARGETS):
     fwcdb = fwenv.CompilationDatabase()
     # without filtering, both updater & firmware commands would be generated
     fwenv.Replace(COMPILATIONDB_PATH_FILTER=fwenv.subst("*${FW_FLAVOR}*"))
-    Depends(fwcdb, fwelf)
+    AlwaysBuild(fwcdb)
+    Precious(fwcdb)
+    NoClean(fwcdb)
+    Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", fwcdb)
     fw_artifacts.append(fwcdb)
 
     # Adding as a phony target, so folder link is updated even if elf didn't change

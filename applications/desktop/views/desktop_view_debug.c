@@ -23,11 +23,12 @@ void desktop_debug_render(Canvas* canvas, void* model) {
     const Version* ver;
     char buffer[64];
 
-    static const char* headers[] = {"FW Version info:", "Dolphin info:"};
+    static const char* headers[] = {"Device Info:", "Dolphin Info:"};
 
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 9 + STATUS_BAR_Y_SHIFT, headers[m->screen]);
+    canvas_draw_str_aligned(
+        canvas, 64, 1 + STATUS_BAR_Y_SHIFT, AlignCenter, AlignTop, headers[m->screen]);
     canvas_set_font(canvas, FontSecondary);
 
     if(m->screen != DesktopViewStatsMeta) {
@@ -36,14 +37,15 @@ void desktop_debug_render(Canvas* canvas, void* model) {
         snprintf(
             buffer,
             sizeof(buffer),
-            "%d.F%dB%dC%d %s %s",
+            "%d.F%dB%dC%d %s:%s %s",
             furi_hal_version_get_hw_version(),
             furi_hal_version_get_hw_target(),
             furi_hal_version_get_hw_body(),
             furi_hal_version_get_hw_connect(),
             furi_hal_version_get_hw_region_name(),
+            furi_hal_region_get_name(),
             my_name ? my_name : "Unknown");
-        canvas_draw_str(canvas, 5, 19 + STATUS_BAR_Y_SHIFT, buffer);
+        canvas_draw_str(canvas, 0, 19 + STATUS_BAR_Y_SHIFT, buffer);
 
         ver = furi_hal_version_get_firmware_version();
         const BleGlueC2Info* c2_ver = NULL;
@@ -51,7 +53,7 @@ void desktop_debug_render(Canvas* canvas, void* model) {
         c2_ver = ble_glue_get_c2_info();
 #endif
         if(!ver) {
-            canvas_draw_str(canvas, 5, 29 + STATUS_BAR_Y_SHIFT, "No info");
+            canvas_draw_str(canvas, 0, 30 + STATUS_BAR_Y_SHIFT, "No info");
             return;
         }
 
@@ -61,7 +63,7 @@ void desktop_debug_render(Canvas* canvas, void* model) {
             "%s [%s]",
             version_get_version(ver),
             version_get_builddate(ver));
-        canvas_draw_str(canvas, 5, 28 + STATUS_BAR_Y_SHIFT, buffer);
+        canvas_draw_str(canvas, 0, 30 + STATUS_BAR_Y_SHIFT, buffer);
 
         snprintf(
             buffer,
@@ -71,34 +73,35 @@ void desktop_debug_render(Canvas* canvas, void* model) {
             version_get_githash(ver),
             version_get_gitbranchnum(ver),
             c2_ver ? c2_ver->StackTypeString : "<none>");
-        canvas_draw_str(canvas, 5, 39 + STATUS_BAR_Y_SHIFT, buffer);
+        canvas_draw_str(canvas, 0, 40 + STATUS_BAR_Y_SHIFT, buffer);
 
         snprintf(
             buffer, sizeof(buffer), "[%d] %s", version_get_target(ver), version_get_gitbranch(ver));
-        canvas_draw_str(canvas, 5, 50 + STATUS_BAR_Y_SHIFT, buffer);
+        canvas_draw_str(canvas, 0, 50 + STATUS_BAR_Y_SHIFT, buffer);
 
     } else {
-        char buffer[64];
-        Dolphin* dolphin = furi_record_open("dolphin");
+        Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
         DolphinStats stats = dolphin_stats(dolphin);
-        furi_record_close("dolphin");
+        furi_record_close(RECORD_DOLPHIN);
 
         uint32_t current_lvl = stats.level;
         uint32_t remaining = dolphin_state_xp_to_levelup(m->icounter);
 
         canvas_set_font(canvas, FontSecondary);
-        snprintf(buffer, 64, "Icounter: %ld  Butthurt %ld", m->icounter, m->butthurt);
+        snprintf(buffer, sizeof(buffer), "Icounter: %ld  Butthurt %ld", m->icounter, m->butthurt);
         canvas_draw_str(canvas, 5, 19 + STATUS_BAR_Y_SHIFT, buffer);
 
         snprintf(
             buffer,
-            64,
+            sizeof(buffer),
             "Level: %ld  To level up: %ld",
             current_lvl,
             (remaining == (uint32_t)(-1) ? remaining : 0));
         canvas_draw_str(canvas, 5, 29 + STATUS_BAR_Y_SHIFT, buffer);
 
-        snprintf(buffer, 64, "%s", asctime(localtime((const time_t*)&m->timestamp)));
+        // even if timestamp is uint64_t, it's safe to cast it to uint32_t, because furi_hal_rtc_datetime_to_timestamp only returns uint32_t
+        snprintf(buffer, sizeof(buffer), "%ld", (uint32_t)m->timestamp);
+
         canvas_draw_str(canvas, 5, 39 + STATUS_BAR_Y_SHIFT, buffer);
         canvas_draw_str(canvas, 0, 49 + STATUS_BAR_Y_SHIFT, "[< >] icounter value   [ok] save");
     }
@@ -175,7 +178,7 @@ void desktop_debug_free(DesktopDebugView* debug_view) {
 }
 
 void desktop_debug_get_dolphin_data(DesktopDebugView* debug_view) {
-    Dolphin* dolphin = furi_record_open("dolphin");
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
     with_view_model(
         debug_view->view, (DesktopDebugViewModel * model) {
@@ -185,7 +188,7 @@ void desktop_debug_get_dolphin_data(DesktopDebugView* debug_view) {
             return true;
         });
 
-    furi_record_close("dolphin");
+    furi_record_close(RECORD_DOLPHIN);
 }
 
 void desktop_debug_reset_screen_idx(DesktopDebugView* debug_view) {

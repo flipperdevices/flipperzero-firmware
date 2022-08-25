@@ -93,7 +93,7 @@ void* subghz_protocol_encoder_secplus_v2_alloc(SubGhzEnvironment* environment) {
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 256;
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
     return instance;
 }
 
@@ -514,7 +514,11 @@ bool subghz_protocol_encoder_secplus_v2_deserialize(void* context, FlipperFormat
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
-
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_secplus_v2_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
         uint8_t key_data[sizeof(uint64_t)] = {0};
         if(!flipper_format_read_hex(
                flipper_format, "Secplus_packet_1", key_data, sizeof(uint64_t))) {
@@ -551,7 +555,7 @@ bool subghz_protocol_encoder_secplus_v2_deserialize(void* context, FlipperFormat
             break;
         }
 
-        instance->encoder.is_runing = true;
+        instance->encoder.is_running = true;
 
         res = true;
     } while(false);
@@ -561,14 +565,14 @@ bool subghz_protocol_encoder_secplus_v2_deserialize(void* context, FlipperFormat
 
 void subghz_protocol_encoder_secplus_v2_stop(void* context) {
     SubGhzProtocolEncoderSecPlus_v2* instance = context;
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
 }
 
 LevelDuration subghz_protocol_encoder_secplus_v2_yield(void* context) {
     SubGhzProtocolEncoderSecPlus_v2* instance = context;
 
-    if(instance->encoder.repeat == 0 || !instance->encoder.is_runing) {
-        instance->encoder.is_runing = false;
+    if(instance->encoder.repeat == 0 || !instance->encoder.is_running) {
+        instance->encoder.is_running = false;
         return level_duration_reset();
     }
 
@@ -588,8 +592,7 @@ bool subghz_protocol_secplus_v2_create_data(
     uint32_t serial,
     uint8_t btn,
     uint32_t cnt,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset) {
+    SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolEncoderSecPlus_v2* instance = context;
     instance->generic.serial = serial;
@@ -598,8 +601,7 @@ bool subghz_protocol_secplus_v2_create_data(
     instance->generic.data_count_bit =
         (uint8_t)subghz_protocol_secplus_v2_const.min_count_bit_for_found;
     subghz_protocol_secplus_v2_encode(instance);
-    bool res =
-        subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    bool res = subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 
     uint8_t key_data[sizeof(uint64_t)] = {0};
     for(size_t i = 0; i < sizeof(uint64_t); i++) {
@@ -691,7 +693,7 @@ void subghz_protocol_decoder_secplus_v2_feed(void* context, bool level, uint32_t
             } else if(
                 duration >= (uint32_t)(subghz_protocol_secplus_v2_const.te_long * 2 +
                              subghz_protocol_secplus_v2_const.te_delta)) {
-                if(instance->decoder.decode_count_bit >=
+                if(instance->decoder.decode_count_bit ==
                    subghz_protocol_secplus_v2_const.min_count_bit_for_found) {
                     instance->generic.data = instance->decoder.decode_data;
                     instance->generic.data_count_bit = instance->decoder.decode_count_bit;
@@ -757,12 +759,10 @@ uint8_t subghz_protocol_decoder_secplus_v2_get_hash_data(void* context) {
 bool subghz_protocol_decoder_secplus_v2_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset) {
+    SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderSecPlus_v2* instance = context;
-    bool res =
-        subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    bool res = subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 
     uint8_t key_data[sizeof(uint64_t)] = {0};
     for(size_t i = 0; i < sizeof(uint64_t); i++) {
@@ -784,6 +784,11 @@ bool subghz_protocol_decoder_secplus_v2_deserialize(void* context, FlipperFormat
     do {
         if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
             FURI_LOG_E(TAG, "Deserialize error");
+            break;
+        }
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_secplus_v2_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
             break;
         }
         if(!flipper_format_rewind(flipper_format)) {

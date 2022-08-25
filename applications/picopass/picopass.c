@@ -39,12 +39,12 @@ Picopass* picopass_alloc() {
     picopass->dev = picopass_device_alloc();
 
     // Open GUI record
-    picopass->gui = furi_record_open("gui");
+    picopass->gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(
         picopass->view_dispatcher, picopass->gui, ViewDispatcherTypeFullscreen);
 
     // Open Notification record
-    picopass->notifications = furi_record_open("notification");
+    picopass->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     // Submenu
     picopass->submenu = submenu_alloc();
@@ -55,6 +55,11 @@ Picopass* picopass_alloc() {
     picopass->popup = popup_alloc();
     view_dispatcher_add_view(
         picopass->view_dispatcher, PicopassViewPopup, popup_get_view(picopass->popup));
+
+    // Loading
+    picopass->loading = loading_alloc();
+    view_dispatcher_add_view(
+        picopass->view_dispatcher, PicopassViewLoading, loading_get_view(picopass->loading));
 
     // Text Input
     picopass->text_input = text_input_alloc();
@@ -86,6 +91,10 @@ void picopass_free(Picopass* picopass) {
     view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewPopup);
     popup_free(picopass->popup);
 
+    // Loading
+    view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewLoading);
+    loading_free(picopass->loading);
+
     // TextInput
     view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewTextInput);
     text_input_free(picopass->text_input);
@@ -105,11 +114,11 @@ void picopass_free(Picopass* picopass) {
     scene_manager_free(picopass->scene_manager);
 
     // GUI
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     picopass->gui = NULL;
 
     // Notifications
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
     picopass->notifications = NULL;
 
     free(picopass);
@@ -146,6 +155,20 @@ void picopass_blink_start(Picopass* picopass) {
 
 void picopass_blink_stop(Picopass* picopass) {
     notification_message(picopass->notifications, &picopass_sequence_blink_stop);
+}
+
+void picopass_show_loading_popup(void* context, bool show) {
+    Picopass* picopass = context;
+    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
+
+    if(show) {
+        // Raise timer priority so that animations can play
+        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        view_dispatcher_switch_to_view(picopass->view_dispatcher, PicopassViewLoading);
+    } else {
+        // Restore default timer priority
+        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+    }
 }
 
 int32_t picopass_app(void* p) {

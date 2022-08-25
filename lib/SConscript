@@ -7,13 +7,14 @@ env.Append(
         "lib/drivers",
         "lib/flipper_format",
         "lib/infrared",
-        "lib/nfc_protocols",
+        "lib/nfc",
         "lib/one_wire",
         "lib/ST25RFAL002",
         "lib/subghz",
         "lib/toolbox",
         "lib/u8g2",
         "lib/update_util",
+        "lib/print",
     ]
 )
 
@@ -43,7 +44,7 @@ env.Append(
 #    fnv1a-hash
 #    micro-ecc
 #    microtar
-#    nfc_protocols
+#    nfc
 #    one_wire
 #    qrcode
 #    u8g2
@@ -60,6 +61,7 @@ libs = env.BuildModules(
     [
         "STM32CubeWB",
         "freertos",
+        "print",
         "microtar",
         "toolbox",
         "ST25RFAL002",
@@ -69,11 +71,13 @@ libs = env.BuildModules(
         "flipper_format",
         "infrared",
         "littlefs",
+        "mbedtls",
         "subghz",
+        "nfc",
         "appframe",
         "misc",
-        "mbedtls",
         "loclass",
+        "lfrfid",
     ],
 )
 

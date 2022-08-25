@@ -13,81 +13,23 @@ bool nfc_back_event_callback(void* context) {
     return scene_manager_handle_back_event(nfc->scene_manager);
 }
 
-void nfc_tick_event_callback(void* context) {
-    furi_assert(context);
-    Nfc* nfc = context;
-    scene_manager_handle_tick_event(nfc->scene_manager);
-}
-
-void nfc_rpc_exit_callback(Nfc* nfc) {
-    if(nfc->rpc_state == NfcRpcStateEmulating) {
-        // Stop worker
-        nfc_worker_stop(nfc->worker);
-    } else if(nfc->rpc_state == NfcRpcStateEmulated) {
-        // Stop worker
-        nfc_worker_stop(nfc->worker);
-        // Save data in shadow file
-        nfc_device_save_shadow(nfc->dev, nfc->dev->dev_name);
-    }
-    if(nfc->rpc_ctx) {
-        rpc_system_app_set_callback(nfc->rpc_ctx, NULL, NULL);
-        nfc->rpc_ctx = NULL;
-    }
-}
-
-static void nfc_rpc_emulate_callback(NfcWorkerEvent event, void* context) {
-    UNUSED(event);
-    Nfc* nfc = context;
-
-    nfc->rpc_state = NfcRpcStateEmulated;
-}
-
-static bool nfc_rpc_command_callback(RpcAppSystemEvent event, const char* arg, void* context) {
+static void nfc_rpc_command_callback(RpcAppSystemEvent event, void* context) {
     furi_assert(context);
     Nfc* nfc = context;
 
-    if(!nfc->rpc_ctx) {
-        return false;
-    }
-
-    bool result = false;
+    furi_assert(nfc->rpc_ctx);
 
     if(event == RpcAppEventSessionClose) {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcSessionClose);
         rpc_system_app_set_callback(nfc->rpc_ctx, NULL, NULL);
         nfc->rpc_ctx = NULL;
-        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
-        result = true;
     } else if(event == RpcAppEventAppExit) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
-        result = true;
     } else if(event == RpcAppEventLoadFile) {
-        if((arg) && (nfc->rpc_state == NfcRpcStateIdle)) {
-            if(nfc_device_load(nfc->dev, arg, false)) {
-                if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
-                    nfc_worker_start(
-                        nfc->worker,
-                        NfcWorkerStateEmulateMifareUltralight,
-                        &nfc->dev->dev_data,
-                        nfc_rpc_emulate_callback,
-                        nfc);
-                } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
-                    nfc_worker_start(
-                        nfc->worker,
-                        NfcWorkerStateEmulateMifareClassic,
-                        &nfc->dev->dev_data,
-                        nfc_rpc_emulate_callback,
-                        nfc);
-                } else {
-                    nfc_worker_start(
-                        nfc->worker, NfcWorkerStateEmulate, &nfc->dev->dev_data, NULL, nfc);
-                }
-                nfc->rpc_state = NfcRpcStateEmulating;
-                result = true;
-            }
-        }
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcLoad);
+    } else {
+        rpc_system_app_confirm(nfc->rpc_ctx, event, false);
     }
-
-    return result;
 }
 
 Nfc* nfc_alloc() {
@@ -100,17 +42,15 @@ Nfc* nfc_alloc() {
     view_dispatcher_set_event_callback_context(nfc->view_dispatcher, nfc);
     view_dispatcher_set_custom_event_callback(nfc->view_dispatcher, nfc_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(nfc->view_dispatcher, nfc_back_event_callback);
-    view_dispatcher_set_tick_event_callback(nfc->view_dispatcher, nfc_tick_event_callback, 100);
 
     // Nfc device
     nfc->dev = nfc_device_alloc();
 
     // Open GUI record
-    nfc->gui = furi_record_open("gui");
-    view_dispatcher_attach_to_gui(nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
+    nfc->gui = furi_record_open(RECORD_GUI);
 
     // Open Notification record
-    nfc->notifications = furi_record_open("notification");
+    nfc->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     // Submenu
     nfc->submenu = submenu_alloc();
@@ -149,12 +89,7 @@ Nfc* nfc_alloc() {
     nfc->widget = widget_alloc();
     view_dispatcher_add_view(nfc->view_dispatcher, NfcViewWidget, widget_get_view(nfc->widget));
 
-    // Bank Card
-    nfc->bank_card = bank_card_alloc();
-    view_dispatcher_add_view(
-        nfc->view_dispatcher, NfcViewBankCard, bank_card_get_view(nfc->bank_card));
-
-    // Dict Attack
+    // Mifare Classic Dict Attack
     nfc->dict_attack = dict_attack_alloc();
     view_dispatcher_add_view(
         nfc->view_dispatcher, NfcViewDictAttack, dict_attack_get_view(nfc->dict_attack));
@@ -167,6 +102,21 @@ Nfc* nfc_alloc() {
 
 void nfc_free(Nfc* nfc) {
     furi_assert(nfc);
+
+    if(nfc->rpc_state == NfcRpcStateEmulating) {
+        // Stop worker
+        nfc_worker_stop(nfc->worker);
+    } else if(nfc->rpc_state == NfcRpcStateEmulated) {
+        // Stop worker
+        nfc_worker_stop(nfc->worker);
+        // Save data in shadow file
+        nfc_device_save_shadow(nfc->dev, nfc->dev->dev_name);
+    }
+    if(nfc->rpc_ctx) {
+        rpc_system_app_send_exited(nfc->rpc_ctx);
+        rpc_system_app_set_callback(nfc->rpc_ctx, NULL, NULL);
+        nfc->rpc_ctx = NULL;
+    }
 
     // Nfc device
     nfc_device_free(nfc->dev);
@@ -204,11 +154,7 @@ void nfc_free(Nfc* nfc) {
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewWidget);
     widget_free(nfc->widget);
 
-    // Bank Card
-    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewBankCard);
-    bank_card_free(nfc->bank_card);
-
-    // Dict Attack
+    // Mifare Classic Dict Attack
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewDictAttack);
     dict_attack_free(nfc->dict_attack);
 
@@ -223,11 +169,11 @@ void nfc_free(Nfc* nfc) {
     scene_manager_free(nfc->scene_manager);
 
     // GUI
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     nfc->gui = NULL;
 
     // Notifications
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
     nfc->notifications = NULL;
 
     free(nfc);
@@ -245,18 +191,6 @@ void nfc_text_store_set(Nfc* nfc, const char* text, ...) {
 void nfc_text_store_clear(Nfc* nfc) {
     memset(nfc->text_store, 0, sizeof(nfc->text_store));
 }
-
-static const NotificationSequence sequence_blink_start_blue = {
-    &message_blink_start_10,
-    &message_blink_set_color_blue,
-    &message_do_not_reset,
-    NULL,
-};
-
-static const NotificationSequence sequence_blink_stop = {
-    &message_blink_stop,
-    NULL,
-};
 
 void nfc_blink_start(Nfc* nfc) {
     notification_message(nfc->notifications, &sequence_blink_start_blue);
@@ -285,27 +219,36 @@ int32_t nfc_app(void* p) {
     char* args = p;
 
     // Check argument and run corresponding scene
-    if((*args != '\0')) {
+    if(args && strlen(args)) {
         nfc_device_set_loading_callback(nfc->dev, nfc_show_loading_popup, nfc);
         uint32_t rpc_ctx = 0;
         if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
             nfc->rpc_ctx = (void*)rpc_ctx;
             rpc_system_app_set_callback(nfc->rpc_ctx, nfc_rpc_command_callback, nfc);
+            rpc_system_app_send_started(nfc->rpc_ctx);
+            view_dispatcher_attach_to_gui(
+                nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeDesktop);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRpc);
-        } else if(nfc_device_load(nfc->dev, p, true)) {
-            if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateMifareUl);
-            } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateMifareClassic);
-            } else {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
-            }
         } else {
-            // Exit app
-            view_dispatcher_stop(nfc->view_dispatcher);
+            view_dispatcher_attach_to_gui(
+                nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
+            if(nfc_device_load(nfc->dev, p, true)) {
+                if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
+                } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
+                } else {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
+                }
+            } else {
+                // Exit app
+                view_dispatcher_stop(nfc->view_dispatcher);
+            }
         }
         nfc_device_set_loading_callback(nfc->dev, NULL, nfc);
     } else {
+        view_dispatcher_attach_to_gui(
+            nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
         scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
     }
 

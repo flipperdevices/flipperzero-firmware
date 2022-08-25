@@ -9,6 +9,7 @@
 template <unsigned int N> struct STOP_EXTERNING_ME {};
 #endif
 
+#include "furi_hal_cortex.h"
 #include "furi_hal_clock.h"
 #include "furi_hal_crypto.h"
 #include "furi_hal_console.h"
@@ -17,11 +18,11 @@ template <unsigned int N> struct STOP_EXTERNING_ME {};
 #include "furi_hal_sd.h"
 #include "furi_hal_i2c.h"
 #include "furi_hal_resources.h"
+#include "furi_hal_region.h"
 #include "furi_hal_rtc.h"
 #include "furi_hal_speaker.h"
 #include "furi_hal_gpio.h"
 #include "furi_hal_light.h"
-#include "furi_hal_delay.h"
 #include "furi_hal_power.h"
 #include "furi_hal_interrupt.h"
 #include "furi_hal_version.h"
