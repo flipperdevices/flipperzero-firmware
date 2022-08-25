@@ -33,6 +33,7 @@ typedef struct {
     uint32_t alert_time;
     bool timer_running;
     bool militaryTime; // 24 hour
+    bool w_test;
 } ClockState;
 
 const NotificationSequence clock_alert_silent = {
@@ -250,29 +251,29 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         if(!state->militaryTime)
             canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, strAMPM);
         canvas_draw_str_aligned(canvas, 117, 11, AlignCenter, AlignCenter, alertTime);
+        if(!state->w_test) canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]); // DRAW DATE
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]); // DRAW DATE
-        elements_button_left(canvas, "Reset");
+        if(!state->w_test) elements_button_left(canvas, "Reset");
     } else {
         canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
         if(!state->militaryTime) {
             canvas_set_font(canvas, FontBatteryPercent);
             canvas_draw_str_aligned(canvas, 69, 15, AlignCenter, AlignCenter, strAMPM);
         }
+        if(!state->w_test) canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
 
-        if(!state->desktop_settings->is_dumbmode)
+        if(!state->desktop_settings->is_dumbmode && !state->w_test)
             elements_button_left(canvas, state->militaryTime ? "12h" : "24h");
     }
-    if(!state->desktop_settings->is_dumbmode) {
+    if(!state->desktop_settings->is_dumbmode && !state->w_test) {
         if(timer_running) {
             elements_button_center(canvas, "Stop");
         } else {
             elements_button_center(canvas, "Start");
         }
     }
-    if(timer_running) {
+    if(timer_running && !state->w_test) {
         if(songSelect == 0) {
             elements_button_right(canvas, "S:OFF");
         } else if(songSelect == 1) {
@@ -296,6 +297,7 @@ static void clock_state_init(ClockState* const state) {
     state->timerSecs = 0;
     state->alert_time = 80;
     state->desktop_settings = malloc(sizeof(DesktopSettings));
+    state->w_test = false;
 }
 
 // Runs every 1000ms by default
@@ -470,7 +472,11 @@ int32_t clock_app(void* p) {
                         plugin_state->codeSequence = 0;
                         plugin_state->desktop_settings->is_dumbmode = true; // MAKE SURE IT'S ON SO IT GETS TURNED OFF
                         desktop_view_main_dumbmode_changed(plugin_state->desktop_settings);
-                        notification_message(notification, &clock_alert_startStop);
+                        if(plugin_state->songSelect == 1 || plugin_state->songSelect == 2 ||
+                           plugin_state->songSelect == 3) {
+                            notification_message(notification, &clock_alert_startStop);
+                        }
+						plugin_state->w_test = true; // OH HEY NOW LETS GAIN EXP & MORE FUN
                         DOLPHIN_DEED(getRandomDeed());
                     }
                 } else if(event.input.type == InputTypeLong) {
@@ -499,7 +505,7 @@ int32_t clock_app(void* p) {
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                DOLPHIN_DEED(getRandomDeed());
+                                if(state->w_test) DOLPHIN_DEED(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_pr1);
                         }
@@ -516,7 +522,7 @@ int32_t clock_app(void* p) {
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                DOLPHIN_DEED(getRandomDeed());
+                                if(state->w_test) DOLPHIN_DEED(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_mario1);
                         }
@@ -533,7 +539,7 @@ int32_t clock_app(void* p) {
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                DOLPHIN_DEED(getRandomDeed());
+                                if(state->w_test) DOLPHIN_DEED(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_silent);
                         }
