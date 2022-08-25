@@ -201,7 +201,6 @@ fbtenv_clearing()
         rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/*.tar.gz";
         rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/*.part";
     fi
-    trap - 2;
     echo "done";
     return 0;
 }
@@ -245,6 +244,7 @@ fbtenv_check_download_toolchain()
 
 fbtenv_download_toolchain()
 {
+    trap clearing 2;
     fbtenv_check_tar || return 1;
     TOOLCHAIN_TAR="$(basename "$TOOLCHAIN_URL")";
     TOOLCHAIN_DIR="$(echo "$TOOLCHAIN_TAR" | sed "s/-$FBT_TOOLCHAIN_VERSION.tar.gz//g")";
@@ -255,28 +255,26 @@ fbtenv_download_toolchain()
     fbtenv_remove_old_tooclhain;
     fbtenv_unpack_toolchain || return 1;
     fbtenv_clearing;
+    trap - 2;
     return 0;
 }
 
 fbtenv_main()
 {
-    trap clearing 2;
     fbtenv_check_sourced || return 1;
-    fbtenv_get_kernel_type || { fbtenv_clearing && return 1; };
+    fbtenv_get_kernel_type || return 1;
     if [ "$1" = "--restore" ]; then
         fbtenv_restore_env;
-        fbtenv_clearing;
         return 0;
     fi
     fbtenv_chck_many_source;  # many source it's just a warning
     fbtenv_set_shell_prompt;
-    fbtenv_check_script_path || { fbtenv_clearing && return 1; };
-    fbtenv_check_download_toolchain || { fbtenv_clearing && return 1; };
+    fbtenv_check_script_path || return 1;
+    fbtenv_check_download_toolchain || return 1;
     PATH="$TOOLCHAIN_ARCH_DIR/python/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/protobuf/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/openocd/bin:$PATH";
-    fbtenv_clearing;
 }
 
 fbtenv_main "${1:-""}";
