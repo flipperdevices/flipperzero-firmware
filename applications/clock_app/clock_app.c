@@ -506,7 +506,7 @@ int32_t clock_app(void* p) {
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                if(state->w_test) DOLPHIN_DEED(getRandomDeed());
+                                if(plugin_state->w_test) DOLPHIN_DEED(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_pr1);
                         }
@@ -523,7 +523,7 @@ int32_t clock_app(void* p) {
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                if(state->w_test) DOLPHIN_DEED(getRandomDeed());
+                                if(plugin_state->w_test) DOLPHIN_DEED(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_mario1);
                         }
@@ -540,7 +540,7 @@ int32_t clock_app(void* p) {
                             uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                if(state->w_test) DOLPHIN_DEED(getRandomDeed());
+                                if(plugin_state->w_test) DOLPHIN_DEED(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_silent);
                         }
