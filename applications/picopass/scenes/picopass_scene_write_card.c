@@ -37,8 +37,6 @@ bool picopass_scene_write_card_on_event(void* context, SceneManagerEvent event) 
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteCardSuccess);
             consumed = true;
         }
-    } else if(event.type == SceneManagerEventTypeTick) {
-        consumed = true;
     }
     return consumed;
 }
