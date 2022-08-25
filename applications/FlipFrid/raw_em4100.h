@@ -2,7 +2,7 @@
 #include <toolbox/protocols/protocol.h>
 
 
-enum  FlipFridProtocol {
+enum FlipFridProtocol {
     CLEAN,
     BAD_CRC,
 };

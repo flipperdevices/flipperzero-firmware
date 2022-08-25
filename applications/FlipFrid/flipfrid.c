@@ -9,7 +9,7 @@
 
 #include "flipfrid.h"
 
-#define NUMBER_OF_ATTACKS 4
+#define NUMBER_OF_ATTACKS 3
 #define TIME_BETWEEN_CARDS \
     5 // Emulate 2 cards per second : (5 * (configTICK_RATE_HZ_RAW/10)) == (5*(1000/10)) == (5*100) == (500)ms
 #define TAG "FLIPFRID"
@@ -56,6 +56,7 @@ typedef struct {
     AttackType current_attack_type;
     uint8_t* current_uid;
     uint8_t meta_data;
+    NotificationApp* notify;
 } FlipFridState;
 
 static void flipfrid_draw_callback(Canvas* const canvas, void* ctx) {
@@ -79,22 +80,22 @@ static void flipfrid_draw_callback(Canvas* const canvas, void* ctx) {
     char uid[16];
     char badge_type[21];
     switch(flipfrid_state->current_attack_type) {
-    case AttackType::DefaultKeys:
+    case DefaultKeys:
         strcpy(badge_type, "   Default Values  >");
         break;
-    case AttackType::BruteForceCustomerId:
+    case BruteForceCustomerId:
         strcpy(badge_type, "<  BF Customer ID  >");
         break;
-    case AttackType::BadCrc:
+    case BadCrc:
         strcpy(badge_type, "<      Bad CRC      ");
         break;
     default:
         break;
     }
 
-    if(flipfrid_state->current_attack_type == AttackType::BruteForceCustomerId) {
+    if(flipfrid_state->current_attack_type == BruteForceCustomerId) {
         snprintf(uid, sizeof(uid), "    ID : %2X    ", flipfrid_state->current_uid[0]);
-    } else if (flipfrid_state->current_attack_type == AttackType::BadCrc) {
+    } else if(flipfrid_state->current_attack_type == BadCrc) {
         snprintf(uid, sizeof(uid), "Sending packets");
     } else {
         snprintf(
@@ -138,15 +139,10 @@ static void flipfrid_timer_callback(FuriMessageQueue* event_queue) {
     furi_message_queue_put(event_queue, &event, 25);
 }
 
-FlipFridApp::FlipFridApp(): notification{RECORD_NOTIFICATION} {
-}
-
-FlipFridApp::~FlipFridApp() {
-    notification_message(notification, &sequence_blink_stop);
-}
-
 // ENTRYPOINT
-void FlipFridApp::run() {
+int32_t flipfrid_start(void* p) {
+    UNUSED(p);
+
     // Input
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(FlipFridEvent));
     FlipFridState* flipfrid_state = (FlipFridState*)malloc(sizeof(FlipFridState));
@@ -176,8 +172,9 @@ void FlipFridApp::run() {
     FlipFridEvent event;
     flipfrid_state->emitting = false;
     flipfrid_state->current_uid = id_list[0];
-    flipfrid_state->current_attack_type = AttackType::DefaultKeys;
+    flipfrid_state->current_attack_type = DefaultKeys;
     flipfrid_state->meta_data = 0;
+    flipfrid_state->notify = furi_record_open(RECORD_NOTIFICATION);
 
     // RFID Configuration
     size_t data_size = 5; // Default EM4100 data size is 5 (1 customer id + 4 uid)
@@ -185,7 +182,7 @@ void FlipFridApp::run() {
     const ProtocolBase* lfrfid_protocol[] = {&protocol_raw_em4100, &protocol_raw_wrong_crc_em4100};
     ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocol, 2);
     worker = lfrfid_worker_alloc(dict);
-    FlipFridProtocol selectedProtocol = FlipFridProtocol::CLEAN;
+    uint8_t selectedProtocol = CLEAN;
 
     // Application state
     int menu_selected_item_index = 0; // Menu current item index
@@ -210,6 +207,8 @@ void FlipFridApp::run() {
                     case InputKeyRight:
                         // Next badge type
                         flipfrid_state->emitting = false;
+                        attack_state = 0;
+                        notification_message(flipfrid_state->notify, &sequence_blink_stop);
                         if(menu_selected_item_index < (NUMBER_OF_ATTACKS - 1)) {
                             menu_selected_item_index++;
                             flipfrid_state->current_attack_type =
@@ -219,6 +218,8 @@ void FlipFridApp::run() {
                     case InputKeyLeft:
                         // Previous badge type
                         flipfrid_state->emitting = false;
+                        attack_state = 0;
+                        notification_message(flipfrid_state->notify, &sequence_blink_stop);
                         if(menu_selected_item_index > 0) {
                             menu_selected_item_index--;
                             flipfrid_state->current_attack_type =
@@ -229,14 +230,18 @@ void FlipFridApp::run() {
                         if(flipfrid_state->emitting) {
                             flipfrid_state->emitting = false;
                             attack_state = 0;
-                            notification_message(notification, &sequence_blink_stop);
+                            // TODO FIX BLINK
+                            notification_message(flipfrid_state->notify, &sequence_blink_stop);
                         } else {
                             flipfrid_state->emitting = true;
                             attack_state = 0;
-                            notification_message(notification, &sequence_blink_start_magenta);
+                            // TODO FIX BLINK
+                            notification_message(
+                                flipfrid_state->notify, &sequence_blink_start_blue);
                         }
                         break;
                     case InputKeyBack:
+                        notification_message(flipfrid_state->notify, &sequence_blink_stop);
                         flipfrid_state->emitting = false;
                         running = false;
                         break;
@@ -256,8 +261,8 @@ void FlipFridApp::run() {
                         lfrfid_worker_stop_thread(worker);
                         // set next value
                         switch(flipfrid_state->current_attack_type) {
-                        case AttackType::DefaultKeys: {
-                            selectedProtocol = FlipFridProtocol::CLEAN;
+                        case DefaultKeys: {
+                            selectedProtocol = CLEAN;
                             data_size = 5;
                             flipfrid_state->current_uid = id_list[attack_state];
                             attack_state = attack_state + 1;
@@ -266,9 +271,9 @@ void FlipFridApp::run() {
                             }
                             break;
                         }
-                        case AttackType::BruteForceCustomerId: {
+                        case BruteForceCustomerId: {
                             data_size = 5;
-                            selectedProtocol = FlipFridProtocol::CLEAN;
+                            selectedProtocol = CLEAN;
                             candidate[0] = attack_state;
                             flipfrid_state->current_uid = candidate;
                             attack_state = attack_state + 1;
@@ -277,14 +282,14 @@ void FlipFridApp::run() {
                             }
                             break;
                         }
-                        case AttackType::BadCrc: {
-                            selectedProtocol = FlipFridProtocol::BAD_CRC;
+                        case BadCrc: {
+                            selectedProtocol = BAD_CRC;
                             data_size = 5;
-                            candidate[0] = {0xFF};
-                            candidate[1] = {0xDE};
-                            candidate[2] = {0xAD};
-                            candidate[3] = {0xBE};
-                            candidate[4] = {0xEF};
+                            candidate[0] = 0xFF;
+                            candidate[1] = 0xDE;
+                            candidate[2] = 0xAD;
+                            candidate[3] = 0xBE;
+                            candidate[4] = 0xEF;
                             flipfrid_state->current_uid = candidate;
                             break;
                         }
@@ -302,6 +307,7 @@ void FlipFridApp::run() {
     }
 
     // Cleanup
+    notification_message(flipfrid_state->notify, &sequence_blink_stop);
     lfrfid_worker_stop(worker);
     lfrfid_worker_stop_thread(worker);
     lfrfid_worker_free(worker);
@@ -313,4 +319,5 @@ void FlipFridApp::run() {
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     furi_record_close(RECORD_GUI);
+    return 0;
 }

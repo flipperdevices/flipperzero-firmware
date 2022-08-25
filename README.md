@@ -8,6 +8,7 @@
 - Known Issues: `FAP Loader` & `Chess`
 - Switched these apps to  `HIDDEN` for compile space, *they will be back*. HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
 - Switched these apps to  `HIDDEN` for compile space, *they will be back*. WiFi (Marauder), Mouse Jacker, Mouse Jiggler, NRF Sniffer & VideoPoker. (Or Stick To 0.65.1-0823-RM)
+- Updates to Keeloq protocol, TV Universal Remote, UniRFRemix and RFID Fuzzer from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
