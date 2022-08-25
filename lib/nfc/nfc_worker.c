@@ -425,6 +425,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
         FURI_LOG_I(TAG, "Sector %d", i);
         nfc_worker->callback(NfcWorkerEventNewSector, nfc_worker->context);
         uint8_t block_num = mf_classic_get_sector_trailer_block_num_by_sector(i);
+        uint8_t block_num_reuse;
         if(mf_classic_is_sector_read(data, i)) continue;
         bool is_key_a_found = mf_classic_is_key_found(data, i, MfClassicKeyA);
         bool is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
@@ -467,6 +468,21 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     if(mf_classic_authenticate(&tx_rx, block_num, key, MfClassicKeyA)) {
                         mf_classic_set_key_found(data, i, MfClassicKeyA, key);
                         nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
+                        for(size_t k = i+1; k < total_sectors; k++){
+                            FURI_LOG_D(
+                                TAG,
+                                "Try to auth to sector %d with reused key %04lx%08lx",
+                                k,
+                                (uint32_t)(key >> 32),
+                                (uint32_t)key);
+                            block_num_reuse = mf_classic_get_sector_trailer_block_num_by_sector(k);
+                            if(mf_classic_authenticate(&tx_rx, block_num_reuse, key, MfClassicKeyA)) {
+                                nfc_worker->callback(NfcWorkerEventNewSector, nfc_worker->context);
+                                mf_classic_set_key_found(data, k, MfClassicKeyA, key);
+                                nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
+                                furi_hal_nfc_sleep();
+                            }
+                        }
                     }
                     furi_hal_nfc_sleep();
                 }
@@ -483,6 +499,21 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     if(mf_classic_authenticate(&tx_rx, block_num, key, MfClassicKeyB)) {
                         mf_classic_set_key_found(data, i, MfClassicKeyB, key);
                         nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
+                        for(size_t k = i+1; k < total_sectors; k++) {
+                            FURI_LOG_D(
+                                TAG,
+                                "Try to auth to sector %d with reused key %04lx%08lx",
+                                k,
+                                (uint32_t)(key >> 32),
+                                (uint32_t)key);
+                            block_num_reuse = mf_classic_get_sector_trailer_block_num_by_sector(k);
+                            if(mf_classic_authenticate(&tx_rx, block_num_reuse, key, MfClassicKeyB)) {
+                                nfc_worker->callback(NfcWorkerEventNewSector, nfc_worker->context);
+                                mf_classic_set_key_found(data, k, MfClassicKeyB, key);
+                                nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
+                                furi_hal_nfc_sleep();
+                            }
+                        }
                     }
                 }
                 if(is_key_a_found && is_key_b_found) break;
