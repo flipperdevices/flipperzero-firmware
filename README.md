@@ -5,7 +5,7 @@
 
 <b>Latest Updates:</b>
 
-- Known Issues: `FAP Loader` & `Chess`
+- Known Issues:			`FAP Loader` & `Chess`
 - Switched these apps to  `HIDDEN` for compile space, *they will be back*.
 - - HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
 - - WiFi (Marauder), Mouse Jacker, Mouse Jiggler, NRF Sniffer & VideoPoker. (Or Stick To 0.65.1-0823-RM)
