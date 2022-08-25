@@ -254,7 +254,7 @@ static void
         session_register_page = 234;
         break;
     default:
-        furi_crash("new MFUL type values missing\n");
+        furi_crash("Unknown MFUL");
         break;
     }
 

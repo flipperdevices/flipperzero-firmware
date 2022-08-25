@@ -940,7 +940,7 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
         if(write_page >= 512) return true;
         break;
     default:
-        furi_crash("new MFUL type values missing\n");
+        furi_crash("Unknown MFUL");
         return true;
     }
 
@@ -967,7 +967,7 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
         else if(write_page == 41)
             shift = 12;
         else {
-            furi_crash("new MFUL type values missing\n");
+            furi_crash("Unknown MFUL");
         }
 
         break;
@@ -998,7 +998,7 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
             shift = (write_page - 16) / 32;
         break;
     default:
-        furi_crash("new MFUL type values missing\n");
+        furi_crash("Unknown MFUL");
         break;
     }
 
@@ -1175,7 +1175,7 @@ static void mf_ul_emulate_write(
                 block_lock_count = 8;
                 break;
             default:
-                furi_crash("new MFUL type values missing\n");
+                furi_crash("Unknown MFUL");
                 break;
             }
 
