@@ -387,15 +387,9 @@ int32_t clock_app(void* p) {
                     case InputKeyRight:
                         if(plugin_state->codeSequence == 5 || plugin_state->codeSequence == 7) {
                             plugin_state->codeSequence++;
-                            if(plugin_state->songSelect == 0) {
-                                plugin_state->songSelect = 1;
-                            } else if(plugin_state->songSelect == 1) {
-                                plugin_state->songSelect = 2;
-                            } else if(plugin_state->songSelect == 2) {
-                                plugin_state->songSelect = 3;
-                            } else {
-                                plugin_state->songSelect = 0;
-                            }
+							if(plugin_state->codeSequence == 8) {
+								desktop_view_main_dumbmode_changed(plugin_state->desktop_settings);
+							}
                         } else {
                             plugin_state->codeSequence = 0;
                             if(plugin_state->songSelect == 0) {
@@ -473,16 +467,13 @@ int32_t clock_app(void* p) {
 						}
                         break;
                     }
-                    if(plugin_state->codeSequence == 8) {
-                        desktop_view_main_dumbmode_changed(plugin_state->desktop_settings);
-                    }
                     if(plugin_state->codeSequence == 10) {
                         plugin_state->codeSequence = 0;
                         plugin_state->desktop_settings->is_dumbmode = true; // MAKE SURE IT'S ON SO IT GETS TURNED OFF
                         desktop_view_main_dumbmode_changed(plugin_state->desktop_settings);
                         if(plugin_state->songSelect == 1 || plugin_state->songSelect == 2 ||
                            plugin_state->songSelect == 3) {
-                            notification_message(notification, &clock_alert_startStop);
+                            notification_message(notification, &sequence_success);
                         }
 						plugin_state->militaryTime = true; // 24 HR TIME FOR THIS
 						plugin_state->w_test = true; // OH HEY NOW LETS GAIN EXP & MORE FUN
