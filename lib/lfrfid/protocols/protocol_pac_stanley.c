@@ -57,18 +57,15 @@ static void protocol_pac_stanley_decode(ProtocolPACStanley* protocol) {
 }
 
 static bool protocol_pac_stanley_can_be_decoded(ProtocolPACStanley* protocol) {
-    bool result = false;
-
-    do {
         // Check preamble
-        if(bit_lib_get_bits(protocol->encoded_data, 0, 8) != 0b11111111) break;
-        if(bit_lib_get_bit(protocol->encoded_data, 8) != 0) break;
-        if(bit_lib_get_bit(protocol->encoded_data, 9) != 0) break;
-        if(bit_lib_get_bit(protocol->encoded_data, 10) != 1) break;
-        if(bit_lib_get_bits(protocol->encoded_data, 11, 8) != 0b00000010) break;
+        if(bit_lib_get_bits(protocol->encoded_data, 0, 8) != 0b11111111) return false;
+        if(bit_lib_get_bit(protocol->encoded_data, 8) != 0) return false;
+        if(bit_lib_get_bit(protocol->encoded_data, 9) != 0) return false;
+        if(bit_lib_get_bit(protocol->encoded_data, 10) != 1) return false;
+        if(bit_lib_get_bits(protocol->encoded_data, 11, 8) != 0b00000010) return false;
 
         // Check next preamble
-        if(bit_lib_get_bits(protocol->encoded_data, 128, 8) != 0b11111111) break;
+        if(bit_lib_get_bits(protocol->encoded_data, 128, 8) != 0b11111111) return false;
 
         // Checksum
         uint8_t checksum = 0;
@@ -84,12 +81,8 @@ static bool protocol_pac_stanley_can_be_decoded(ProtocolPACStanley* protocol) {
             }
             if(idx < 8) checksum ^= stripped_byte;
         }
-        if(stripped_byte != checksum) break;
-
-        result = true;
-    } while(false);
-
-    return result;
+        if(stripped_byte != checksum) return false;
+    return true;
 }
 
 void protocol_pac_stanley_decoder_start(ProtocolPACStanley* protocol) {
@@ -99,7 +92,6 @@ void protocol_pac_stanley_decoder_start(ProtocolPACStanley* protocol) {
 }
 
 bool protocol_pac_stanley_decoder_feed(ProtocolPACStanley* protocol, bool level, uint32_t duration) {
-    bool result = false;
     bool pushed = false;
 
     if(duration > PAC_STANLEY_MAX_TIME) return false;
@@ -129,10 +121,10 @@ bool protocol_pac_stanley_decoder_feed(ProtocolPACStanley* protocol, bool level,
 
     if(pushed && protocol_pac_stanley_can_be_decoded(protocol)) {
         protocol_pac_stanley_decode(protocol);
-        result = true;
+        return true;
     }
 
-    return result;
+    return false;
 }
 
 bool protocol_pac_stanley_encoder_start(ProtocolPACStanley* protocol) {
