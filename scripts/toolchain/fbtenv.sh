@@ -40,6 +40,9 @@ fbtenv_restore_env()
     elif [ -n "${PROMPT:-""}" ]; then
         PROMPT="$(echo "$PROMPT" | sed 's/\[fbt\]//g')";
     fi
+    unset SCRIPT_PATH;
+    unset FBT_TOOLCHAIN_VERSION;
+    unset FBT_TOOLCHAIN_PATH;
 }
 
 fbtenv_check_sourced()
@@ -198,9 +201,6 @@ fbtenv_clearing()
         rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/*.tar.gz";
         rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/*.part";
     fi
-    unset SCRIPT_PATH;
-    unset FBT_TOOLCHAIN_VERSION;
-    unset FBT_TOOLCHAIN_PATH;
     trap - 2;
     echo "done";
     return 0;
