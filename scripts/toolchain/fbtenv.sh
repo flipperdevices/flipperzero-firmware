@@ -201,7 +201,7 @@ fbtenv_clearing()
     unset SCRIPT_PATH;
     unset FBT_TOOLCHAIN_VERSION;
     unset FBT_TOOLCHAIN_PATH;
-    trap - SIGINT;
+    trap - 2;
     echo "done";
     return 0;
 }
@@ -260,7 +260,7 @@ fbtenv_download_toolchain()
 
 fbtenv_main()
 {
-    trap clearing SIGINT;
+    trap clearing 2;
     fbtenv_check_sourced || return 1;
     fbtenv_get_kernel_type || { fbtenv_clearing && return 1; };
     if [ "$1" = "--restore" ]; then
