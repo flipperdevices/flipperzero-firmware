@@ -241,7 +241,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     snprintf(alertTime, sizeof(alertTime), "%d", alert_time);
     furi_mutex_release(state->mutex);
     canvas_set_font(canvas, FontBigNumbers);
-    if(timer_start_timestamp != 0) {
+    if(timer_start_timestamp != 0 && !state->w_test) {
         int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
                                                timer_stopped_seconds;
         snprintf(strings[2], 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
@@ -251,13 +251,20 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         if(!state->militaryTime)
             canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, strAMPM);
         canvas_draw_str_aligned(canvas, 117, 11, AlignCenter, AlignCenter, alertTime);
-        if(!state->w_test) canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]); // DRAW DATE
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]); // DRAW DATE
         canvas_set_font(canvas, FontSecondary);
-        if(!state->w_test) elements_button_left(canvas, "Reset");
+        elements_button_left(canvas, "Reset");
     } else {
+        if(state->w_test) canvas_set_font(canvas, FontBatteryPercent);
+        if(state->w_test && timer_start_timestamp != 0) {
+			int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
+												   timer_stopped_seconds;
+			snprintf(strings[2], 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
+			canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
+		}
         canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
+		canvas_set_font(canvas, FontBatteryPercent);
         if(!state->militaryTime) {
-            canvas_set_font(canvas, FontBatteryPercent);
             canvas_draw_str_aligned(canvas, 69, 15, AlignCenter, AlignCenter, strAMPM);
         }
         if(!state->w_test) canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
@@ -460,9 +467,10 @@ int32_t clock_app(void* p) {
                         if(plugin_state->codeSequence == 8) {
                             plugin_state->codeSequence++;
                         } else {
-                            // Exit the plugin
-                            processing = false;
-                        }
+							// Don't Exit the plugin
+							// processing = false;
+							plugin_state->w_test = false;
+						}
                         break;
                     }
                     if(plugin_state->codeSequence == 8) {
@@ -490,6 +498,9 @@ int32_t clock_app(void* p) {
                             plugin_state->timer_stopped_seconds = 0;
                             plugin_state->timerSecs = 0;
                         }
+                    } else if(event.input.key == InputKeyBack) {
+						// Exit the plugin
+						processing = false;
                     }
                 }
             } else if(event.type == EventTypeTick) {
