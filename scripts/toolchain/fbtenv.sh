@@ -48,6 +48,7 @@ fbtenv_restore_env()
 fbtenv_check_sourced()
 {
     case "${ZSH_EVAL_CONTEXT:-""}" in *:file:*)
+        setopt +o nomatch;  # disabling 'no match found' warning in zsh
         return 0;;
     esac
     if [ ${0##*/} = "fbtenv.sh" ]; then  # exluding script itself
@@ -198,8 +199,8 @@ fbtenv_clearing()
 {
     printf "Clearing..";
     if [ -n "${FBT_TOOLCHAIN_PATH:-""}" ]; then
-        rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/*.tar.gz";
-        rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/*.part";
+        rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/"*.tar.gz;
+        rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/"*.part;
     fi
     echo "done";
     trap - 2;
@@ -245,10 +246,10 @@ fbtenv_check_download_toolchain()
 
 fbtenv_download_toolchain()
 {
-    trap fbtenv_clearing 2;  # trap will be restored in fbtenv_clearing
     fbtenv_check_tar || return 1;
     TOOLCHAIN_TAR="$(basename "$TOOLCHAIN_URL")";
     TOOLCHAIN_DIR="$(echo "$TOOLCHAIN_TAR" | sed "s/-$FBT_TOOLCHAIN_VERSION.tar.gz//g")";
+    trap fbtenv_clearing 2;  # trap will be restored in fbtenv_clearing
     if ! fbtenv_check_downloaded_toolchain; then
         fbtenv_curl_wget_check || return 1;
         fbtenv_download_toolchain_tar || return 1;
@@ -268,9 +269,9 @@ fbtenv_main()
         return 0;
     fi
     fbtenv_chck_many_source;  # many source it's just a warning
-    fbtenv_set_shell_prompt;
     fbtenv_check_script_path || return 1;
     fbtenv_check_download_toolchain || return 1;
+    fbtenv_set_shell_prompt;
     PATH="$TOOLCHAIN_ARCH_DIR/python/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/protobuf/bin:$PATH";
