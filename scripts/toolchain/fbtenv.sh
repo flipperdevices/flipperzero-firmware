@@ -202,6 +202,7 @@ fbtenv_clearing()
         rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/*.part";
     fi
     echo "done";
+    trap - 2;
     return 0;
 }
 
@@ -244,7 +245,7 @@ fbtenv_check_download_toolchain()
 
 fbtenv_download_toolchain()
 {
-    trap clearing 2;
+    trap fbtenv_clearing 2;  # trap will be restored in fbtenv_clearing
     fbtenv_check_tar || return 1;
     TOOLCHAIN_TAR="$(basename "$TOOLCHAIN_URL")";
     TOOLCHAIN_DIR="$(echo "$TOOLCHAIN_TAR" | sed "s/-$FBT_TOOLCHAIN_VERSION.tar.gz//g")";
@@ -255,7 +256,6 @@ fbtenv_download_toolchain()
     fbtenv_remove_old_tooclhain;
     fbtenv_unpack_toolchain || return 1;
     fbtenv_clearing;
-    trap - 2;
     return 0;
 }
 
