@@ -2,7 +2,7 @@ App(
     appid="APPS_FlipFrid",
     name="RFID Fuzzer",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="flipfrid_app",
+    entry_point="flipfrid_start",
     cdefines=["APP_FLIP_FRID"],
     requires=["gui"],
     stack_size=1 * 1024,
