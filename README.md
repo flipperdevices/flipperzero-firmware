@@ -14,6 +14,7 @@
 - Frequency Analyzer feedback modes [feedback mode (by darmiel)](https://github.com/darmiel/flipper-playlist/tree/feat/stealth-frequency-analyzer)
 - RFID EM4100 Fuzzer plugin (by Ganapati & some fixes by xMasterX)
 - OFW: [nfc: Change furi_assert to furi_crash for default switch cases #1662 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1662)
+- Hold back to exit Clock
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
