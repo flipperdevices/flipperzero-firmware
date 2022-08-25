@@ -93,7 +93,7 @@ jobs:
             rm -rf artifacts/${BUNDLE_NAME}
           done
 
-      - name: "Check for uncommited changes"
+      - name: "Check for uncommitted changes"
         run: |
           git diff --exit-code
 
@@ -107,6 +107,10 @@ jobs:
         run: |
           FBT_TOOLCHAIN_PATH=/opt ./fbt copro_dist
           tar czpf artifacts/flipper-z-any-core2_firmware-${{steps.names.outputs.suffix}}.tgz -C assets core2_firmware
+
+      - name: 'Copy .map file'
+        run: |
+          cp build/f7-firmware-*/firmware.elf.map artifacts/flipper-z-f7-firmware-${{steps.names.outputs.suffix}}.elf.map
 
       - name: 'Upload artifacts to update server'
         if: ${{ !github.event.pull_request.head.repo.fork }}
