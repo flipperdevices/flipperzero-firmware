@@ -476,6 +476,7 @@ int32_t clock_app(void* p) {
                            plugin_state->songSelect == 3) {
                             notification_message(notification, &clock_alert_startStop);
                         }
+						plugin_state->militaryTime = true; // 24 HR TIME FOR THIS
 						plugin_state->w_test = true; // OH HEY NOW LETS GAIN EXP & MORE FUN
                         DOLPHIN_DEED(getRandomDeed());
                     }
