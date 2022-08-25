@@ -212,27 +212,36 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
     PicopassPacs* pacs = &dev_data->pacs;
     ReturnCode err;
 
+    PicopassWorkerEvent nextState = PicopassWorkerEventSuccess;
+
     while(picopass_worker->state == PicopassWorkerStateDetect) {
         if(picopass_detect_card(1000) == ERR_NONE) {
             // Process first found device
             err = picopass_read_card(AA1);
             if(err != ERR_NONE) {
                 FURI_LOG_E(TAG, "picopass_read_card error %d", err);
+                nextState = PicopassWorkerEventFail;
             }
 
-            err = picopass_device_parse_credential(AA1, pacs);
+            if(nextState == PicopassWorkerEventSuccess) {
+                err = picopass_device_parse_credential(AA1, pacs);
+            }
             if(err != ERR_NONE) {
                 FURI_LOG_E(TAG, "picopass_device_parse_credential error %d", err);
+                nextState = PicopassWorkerEventFail;
             }
 
-            err = picopass_device_parse_wiegand(pacs->credential, &pacs->record);
+            if(nextState == PicopassWorkerEventSuccess) {
+                err = picopass_device_parse_wiegand(pacs->credential, &pacs->record);
+            }
             if(err != ERR_NONE) {
                 FURI_LOG_E(TAG, "picopass_device_parse_wiegand error %d", err);
+                nextState = PicopassWorkerEventFail;
             }
 
             // Notify caller and exit
             if(picopass_worker->callback) {
-                picopass_worker->callback(PicopassWorkerEventSuccess, picopass_worker->context);
+                picopass_worker->callback(nextState, picopass_worker->context);
             }
             break;
         }
