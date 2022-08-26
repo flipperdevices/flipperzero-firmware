@@ -21,9 +21,10 @@ static void detect_reader_draw_callback(Canvas* canvas, void* model) {
 
     if(m->nonces == 0) {
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 54, 22, AlignLeft, AlignTop, "Emulating...");
+        canvas_draw_str_aligned(canvas, 52, 22, AlignLeft, AlignTop, "Emulating...");
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 54, 35, AlignLeft, AlignTop, "MIFARE Classic 4K");
+        canvas_draw_str_aligned(canvas, 52, 35, AlignLeft, AlignTop, "MIFARE Classic");
+        canvas_draw_icon(canvas, 0, 13, &I_Tap_reader_36x38);
     } else {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 54, 22, AlignLeft, AlignTop, "Collecting...");
@@ -31,6 +32,7 @@ static void detect_reader_draw_callback(Canvas* canvas, void* model) {
         snprintf(text, sizeof(text), "Nonces: %d", m->nonces);
         canvas_draw_str_aligned(canvas, 54, 35, AlignLeft, AlignTop, text);
         elements_button_right(canvas, "Next");
+        canvas_draw_icon(canvas, 6, 15, &I_ArrowC_1_36x36);
     }
 }
 
