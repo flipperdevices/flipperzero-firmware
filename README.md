@@ -9,13 +9,7 @@
 - Switched these apps to  `HIDDEN` for compile space, *they will be back*.
 - - HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
 - - WiFi (Marauder), Mouse Jacker, Mouse Jiggler, NRF Sniffer & VideoPoker. (Or Stick To 0.65.1-0823-RM)
-- Updates to Keeloq protocol, TV Universal Remote, UniRFRemix and RFID Fuzzer from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Updated UniRF (Sub-GHz Remote) [(All protocols support, long button press support thanks to darmiel & xMasterX)](https://github.com/darmiel/flipper-playlist/blob/feat/unirf-protocols/applications/unirfremix/unirfremix_app.c)
-- Frequency Analyzer feedback modes [feedback mode (by darmiel)](https://github.com/darmiel/flipper-playlist/tree/feat/stealth-frequency-analyzer)
-- RFID EM4100 Fuzzer plugin (by Ganapati & some fixes by xMasterX)
-- OFW: [nfc: Change furi_assert to furi_crash for default switch cases #1662 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1662)
-- Hold back to exit Clock
-- New UniRF Icon from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
+- Renamed bluetooth from "Flipper" to "zzRogue" now that Android app is patched [(thanks to Nikita/LionZXY)](https://github.com/flipperdevices/Flipper-Android-App/pull/340/).
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
