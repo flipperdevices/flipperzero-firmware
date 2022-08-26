@@ -99,7 +99,7 @@ void furi_hal_version_set_custom_name(const char* name) {
         snprintf(
             furi_hal_version.device_name,
             FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-            "xFlipper %s",
+            "xzzRogue %s",
             furi_hal_version.cname2);
 
         furi_hal_version.device_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
