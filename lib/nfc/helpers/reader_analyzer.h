@@ -9,9 +9,13 @@ typedef enum {
     ReaderAnalyzerModeDebugPcap = 0x04,
 } ReaderAnalyzerMode;
 
+typedef enum {
+    ReaderAnalyzerEventMfkeyCollected,
+} ReaderAnalyzerEvent;
+
 typedef struct ReaderAnalyzer ReaderAnalyzer;
 
-typedef void (*ReaderAnalyzerParseDataCallback)(string_t data_str, void* context);
+typedef void (*ReaderAnalyzerParseDataCallback)(ReaderAnalyzerEvent event, void* context);
 
 ReaderAnalyzer* reader_analyzer_alloc();
 

@@ -71,7 +71,7 @@ DetectReader* detect_reader_alloc() {
 
 void detect_reader_free(DetectReader* detect_reader) {
     furi_assert(detect_reader);
-    
+
     view_free(detect_reader->view);
     free(detect_reader);
 }

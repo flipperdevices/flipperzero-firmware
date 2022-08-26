@@ -115,6 +115,17 @@ ReaderAnalyzer* reader_analyzer_alloc() {
     return instance;
 }
 
+static void reader_analyzer_mfkey_callback(Mfkey32Event event, void* context) {
+    furi_assert(context);
+    ReaderAnalyzer* instance = context;
+
+    if(event == Mfkey32EventParamCollected) {
+        if(instance->callback) {
+            instance->callback(ReaderAnalyzerEventMfkeyCollected, instance->context);
+        }
+    }
+}
+
 void reader_analyzer_start(ReaderAnalyzer* instance, ReaderAnalyzerMode mode) {
     furi_assert(instance);
 
@@ -124,6 +135,9 @@ void reader_analyzer_start(ReaderAnalyzer* instance, ReaderAnalyzerMode mode) {
     }
     if(mode & ReaderAnalyzerModeMfkey) {
         instance->mfkey32 = mfkey32_alloc(instance->nfc_data.cuid);
+        if(instance->mfkey32) {
+            mfkey32_set_callback(instance->mfkey32, reader_analyzer_mfkey_callback, instance);
+        }
     }
     if(mode & ReaderAnalyzerModeDebugPcap) {
         instance->pcap = nfc_debug_pcap_alloc();

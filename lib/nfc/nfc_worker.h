@@ -56,7 +56,7 @@ typedef enum {
     NfcWorkerEventFoundKeyB,
 
     // Detect Reader events
-    NfcWorkerEventReaderDetectMfkeyCollected,
+    NfcWorkerEventDetectReaderMfkeyCollected,
 
     // Mifare Ultralight events
     NfcWorkerEventMfUltralightPassKey,

@@ -625,6 +625,17 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
     }
 }
 
+static void nfc_worker_reader_analyzer_callback(ReaderAnalyzerEvent event, void* context) {
+    furi_assert(context);
+    NfcWorker* nfc_worker = context;
+
+    if(event == ReaderAnalyzerEventMfkeyCollected) {
+        if(nfc_worker->callback) {
+            nfc_worker->callback(NfcWorkerEventDetectReaderMfkeyCollected, nfc_worker->context);
+        }
+    }
+}
+
 void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
 
@@ -639,6 +650,7 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
     tx_rx.nfca_signal = nfca_signal;
     reader_analyzer_prepare_tx_rx(reader_analyzer, &tx_rx, true);
     reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeMfkey);
+    reader_analyzer_set_callback(reader_analyzer, nfc_worker_reader_analyzer_callback, nfc_worker);
 
     rfal_platform_spi_acquire();
 
