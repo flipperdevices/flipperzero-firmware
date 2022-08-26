@@ -59,9 +59,6 @@ bool subghz_scene_more_raw_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             return true;
         } else if(event.event == SubmenuIndexDecode) {
-            //TODO:?
-            //scene_manager_set_scene_state(
-            //subghz->scene_manager, SubGhzSceneDecodeRAW, SubGhzCustomEventManagerNoSet);
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneMoreRAW, SubmenuIndexDecode);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneDecodeRAW);

@@ -79,7 +79,6 @@ static void subghz_scene_add_to_history_callback(
 
         subghz_history_get_text_item_menu(
             subghz->txrx->history, str_buff, subghz_history_get_item(subghz->txrx->history) - 1);
-        FURI_LOG_D(TAG, "Item: %s", string_get_cstr(str_buff));
         subghz_view_receiver_add_item_to_menu(
             subghz->subghz_receiver,
             string_get_cstr(str_buff),
@@ -166,12 +165,6 @@ void subghz_scene_decode_raw_on_enter(void* context) {
     string_t str_buff;
     string_init(str_buff);
 
-    //subghz->txrx->history
-    //subghz->txrx->environment
-    //subghz->txrx->receiver
-
-    FURI_LOG_D(TAG, "on_enter, state: %d", decode_raw_state);
-
     subghz_view_receiver_set_lock(subghz->subghz_receiver, subghz->lock);
     subghz_view_receiver_set_mode(subghz->subghz_receiver, SubGhzViewReceiverModeFile);
     subghz_view_receiver_set_callback(
@@ -211,8 +204,6 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
-        //TODO: remove debug log
-        FURI_LOG_D(TAG, "CustomEvent: %d", event.event);
         switch(event.event) {
         case SubGhzCustomEventViewReceiverBack:
             decode_raw_state = SubGhzDecodeRawStateStart;
@@ -271,8 +262,6 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
         default:
             break;
         }
-    } else if(event.type == SceneManagerEventTypeBack) {
-        FURI_LOG_D(TAG, "BackEvent");
     }
     return consumed;
 }
