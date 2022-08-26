@@ -598,6 +598,7 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
     NfcaSignal* nfca_signal = nfca_signal_alloc();
     tx_rx.nfca_signal = nfca_signal;
     reader_analyzer_prepare_tx_rx(reader_analyzer, &tx_rx, true);
+    reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeMfkey);
 
     rfal_platform_spi_acquire();
 
@@ -619,6 +620,8 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
     }
 
     rfal_platform_spi_release();
+
+    reader_analyzer_stop(nfc_worker->reader_analyzer);
 
     nfca_signal_free(nfca_signal);
 }

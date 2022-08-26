@@ -2,14 +2,6 @@
 
 #include <lib/nfc/protocols/mifare_classic.h>
 
-typedef struct {
-    uint8_t sector;
-    MfClassicKey key;
-    uint32_t nt;
-    uint32_t nr;
-    uint32_t ar;
-} Mfkey32Nonce;
-
 typedef struct Mfkey32 Mfkey32;
 
 typedef enum {
