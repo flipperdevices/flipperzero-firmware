@@ -12,7 +12,7 @@
 // [X] Make "Config" label optional in subghz_view_receiver_draw (../views/receiver.c)
 // [X] Make "Scanning..." label optional in subghz_view_receiver_draw (../views/receiver.c)
 // [ ] Add Decoding logo
-// [ ] Check progress in stream_buffer, instead of raw stream
+// [X] Check progress in stream_buffer, instead of raw stream
 // [X] Blink led while decoding
 // [X] Stop rx blink (blue, fast) on history item view
 // [X] Don't reparse file on back
