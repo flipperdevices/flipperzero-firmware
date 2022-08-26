@@ -11,7 +11,8 @@
 // [X] Decode in tick events instead of on_enter
 // [X] Make "Config" label optional in subghz_view_receiver_draw (../views/receiver.c)
 // [X] Make "Scanning..." label optional in subghz_view_receiver_draw (../views/receiver.c)
-// [ ] Add Decoding logo
+// [X] Add Decoding logo
+// [ ] Design nicer Decoding logo
 // [X] Check progress in stream_buffer, instead of raw stream
 // [X] Blink led while decoding
 // [X] Stop rx blink (blue, fast) on history item view
