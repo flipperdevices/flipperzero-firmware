@@ -19,10 +19,10 @@
 // [ ] Fix: RX animation+LED returning from decoded detail view
 // [ ] Find good value for SAMPLES_TO_READ_PER_TICK
 
-typedef enum{
-	SubGhzDecodeRawStateStart,
-	SubGhzDecodeRawStateLoading,
-	SubGhzDecodeRawStateLoaded,
+typedef enum {
+    SubGhzDecodeRawStateStart,
+    SubGhzDecodeRawStateLoading,
+    SubGhzDecodeRawStateLoaded,
 } SubGhzDecodeRawState;
 
 SubGhzDecodeRawState decode_raw_state = SubGhzDecodeRawStateStart;
@@ -79,7 +79,7 @@ static void subghz_scene_add_to_history_callback(
 
         subghz_history_get_text_item_menu(
             subghz->txrx->history, str_buff, subghz_history_get_item(subghz->txrx->history) - 1);
-		FURI_LOG_D(TAG, "Item: %s", string_get_cstr(str_buff));
+        FURI_LOG_D(TAG, "Item: %s", string_get_cstr(str_buff));
         subghz_view_receiver_add_item_to_menu(
             subghz->subghz_receiver,
             string_get_cstr(str_buff),
@@ -93,81 +93,75 @@ static void subghz_scene_add_to_history_callback(
 }
 
 bool subghz_scene_decode_raw_start(SubGhz* subghz) {
-	string_t file_name;
-	string_init(file_name);
-	bool success = false;
-	do {
-		if(!flipper_format_rewind(subghz->txrx->fff_data)) {
-			FURI_LOG_E(TAG, "Rewind error");
-			break;
-		}
+    string_t file_name;
+    string_init(file_name);
+    bool success = false;
+    do {
+        if(!flipper_format_rewind(subghz->txrx->fff_data)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
 
-		if(!flipper_format_read_string(subghz->txrx->fff_data, "File_name", file_name)) {
-			FURI_LOG_E(TAG, "Missing File_name");
-			break;
-		}
+        if(!flipper_format_read_string(subghz->txrx->fff_data, "File_name", file_name)) {
+            FURI_LOG_E(TAG, "Missing File_name");
+            break;
+        }
 
-		success = true;
-	} while(false);
+        success = true;
+    } while(false);
 
-	if(success) {
-		FURI_LOG_I(TAG,
-			"Listening at \033[0;33m%s\033[0m.",
-			string_get_cstr(file_name));
+    if(success) {
+        FURI_LOG_I(TAG, "Listening at \033[0;33m%s\033[0m.", string_get_cstr(file_name));
 
-		file_worker_encoder = subghz_file_encoder_worker_alloc();
-		if(subghz_file_encoder_worker_start(file_worker_encoder, string_get_cstr(file_name))) {
-			//the worker needs a file in order to open and read part of the file
-			furi_delay_ms(100);
-		} else {
-			success = false;
-		}
+        file_worker_encoder = subghz_file_encoder_worker_alloc();
+        if(subghz_file_encoder_worker_start(file_worker_encoder, string_get_cstr(file_name))) {
+            //the worker needs a file in order to open and read part of the file
+            furi_delay_ms(100);
+        } else {
+            success = false;
+        }
 
-		if(!success) {
-			subghz_file_encoder_worker_free(file_worker_encoder);
-		}
-	}
+        if(!success) {
+            subghz_file_encoder_worker_free(file_worker_encoder);
+        }
+    }
 
-	string_clear(file_name);
-	return success;
+    string_clear(file_name);
+    return success;
 }
 
 bool subghz_scene_decode_raw_next(SubGhz* subghz) {
-	LevelDuration level_duration;
-	FURI_LOG_D(TAG, "next %d samples", SAMPLES_TO_READ_PER_TICK);
+    LevelDuration level_duration;
+    FURI_LOG_D(TAG, "next %d samples", SAMPLES_TO_READ_PER_TICK);
 
-	for(uint32_t read=SAMPLES_TO_READ_PER_TICK; read>0; --read) {
-		level_duration = subghz_file_encoder_worker_get_level_duration(file_worker_encoder);
-		if(!level_duration_is_reset(level_duration)) {
-			bool level = level_duration_get_level(level_duration);
-			uint32_t duration = level_duration_get_duration(level_duration);
-			subghz_receiver_decode(subghz->txrx->receiver, level, duration);
-		} else {
-			if(subghz_file_encoder_worker_is_running(file_worker_encoder)) {
-				subghz_file_encoder_worker_stop(file_worker_encoder);
-			}
-			subghz_file_encoder_worker_free(file_worker_encoder);
-			decode_raw_state = SubGhzDecodeRawStateLoaded;
+    for(uint32_t read = SAMPLES_TO_READ_PER_TICK; read > 0; --read) {
+        level_duration = subghz_file_encoder_worker_get_level_duration(file_worker_encoder);
+        if(!level_duration_is_reset(level_duration)) {
+            bool level = level_duration_get_level(level_duration);
+            uint32_t duration = level_duration_get_duration(level_duration);
+            subghz_receiver_decode(subghz->txrx->receiver, level, duration);
+        } else {
+            if(subghz_file_encoder_worker_is_running(file_worker_encoder)) {
+                subghz_file_encoder_worker_stop(file_worker_encoder);
+            }
+            subghz_file_encoder_worker_free(file_worker_encoder);
+            decode_raw_state = SubGhzDecodeRawStateLoaded;
 
-            subghz_view_receiver_add_data_progress(
-                    subghz->subghz_receiver,
-                    "done");
-			return false; // No more samples available
-		}
-	}
+            subghz_view_receiver_add_data_progress(subghz->subghz_receiver, "done");
+            return false; // No more samples available
+        }
+    }
 
     // Update progress info
     string_t progress_str;
     string_init(progress_str);
     subghz_file_encoder_worker_get_text_progress(file_worker_encoder, progress_str);
 
-    subghz_view_receiver_add_data_progress(
-        subghz->subghz_receiver,
-        string_get_cstr(progress_str));
+    subghz_view_receiver_add_data_progress(subghz->subghz_receiver, string_get_cstr(progress_str));
 
     string_clear(progress_str);
 
-	return true; // More samples available
+    return true; // More samples available
 }
 
 void subghz_scene_decode_raw_on_enter(void* context) {
@@ -176,42 +170,42 @@ void subghz_scene_decode_raw_on_enter(void* context) {
     string_t str_buff;
     string_init(str_buff);
 
-	//subghz->txrx->history
-	//subghz->txrx->environment
-	//subghz->txrx->receiver
+    //subghz->txrx->history
+    //subghz->txrx->environment
+    //subghz->txrx->receiver
 
-	FURI_LOG_D(TAG, "on_enter, state: %d", decode_raw_state);
+    FURI_LOG_D(TAG, "on_enter, state: %d", decode_raw_state);
 
     subghz_view_receiver_set_lock(subghz->subghz_receiver, subghz->lock);
-	subghz_view_receiver_set_mode(subghz->subghz_receiver, SubGhzViewReceiverModeFile);
-	subghz_view_receiver_set_callback(
+    subghz_view_receiver_set_mode(subghz->subghz_receiver, SubGhzViewReceiverModeFile);
+    subghz_view_receiver_set_callback(
         subghz->subghz_receiver, subghz_scene_decode_raw_callback, subghz);
 
     subghz_scene_receiver_update_statusbar(subghz);
-	
-	subghz_receiver_set_rx_callback(
-		subghz->txrx->receiver, subghz_scene_add_to_history_callback, subghz);
 
-	if(decode_raw_state == SubGhzDecodeRawStateStart) {
-		//Decode RAW to history
-		subghz_history_reset(subghz->txrx->history);
-		if(subghz_scene_decode_raw_start(subghz)) {
-			decode_raw_state = SubGhzDecodeRawStateLoading;
-		}
-	} else {
-		//Load history to receiver
-		subghz_view_receiver_exit(subghz->subghz_receiver);
-		for(uint8_t i = 0; i < subghz_history_get_item(subghz->txrx->history); i++) {
-			string_reset(str_buff);
-			subghz_history_get_text_item_menu(subghz->txrx->history, str_buff, i);
-			subghz_view_receiver_add_item_to_menu(
-				subghz->subghz_receiver,
-				string_get_cstr(str_buff),
-				subghz_history_get_type_protocol(subghz->txrx->history, i));
-		}
-		string_clear(str_buff);
-		subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
-	}
+    subghz_receiver_set_rx_callback(
+        subghz->txrx->receiver, subghz_scene_add_to_history_callback, subghz);
+
+    if(decode_raw_state == SubGhzDecodeRawStateStart) {
+        //Decode RAW to history
+        subghz_history_reset(subghz->txrx->history);
+        if(subghz_scene_decode_raw_start(subghz)) {
+            decode_raw_state = SubGhzDecodeRawStateLoading;
+        }
+    } else {
+        //Load history to receiver
+        subghz_view_receiver_exit(subghz->subghz_receiver);
+        for(uint8_t i = 0; i < subghz_history_get_item(subghz->txrx->history); i++) {
+            string_reset(str_buff);
+            subghz_history_get_text_item_menu(subghz->txrx->history, str_buff, i);
+            subghz_view_receiver_add_item_to_menu(
+                subghz->subghz_receiver,
+                string_get_cstr(str_buff),
+                subghz_history_get_type_protocol(subghz->txrx->history, i));
+        }
+        string_clear(str_buff);
+        subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
+    }
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReceiver);
 }
@@ -220,16 +214,16 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
-		//TODO: remove debug log
-		FURI_LOG_D(TAG, "CustomEvent: %d", event.event);
+        //TODO: remove debug log
+        FURI_LOG_D(TAG, "CustomEvent: %d", event.event);
         switch(event.event) {
         case SubGhzCustomEventViewReceiverBack:
-			decode_raw_state = SubGhzDecodeRawStateStart;
+            decode_raw_state = SubGhzDecodeRawStateStart;
             subghz->txrx->idx_menu_chosen = 0;
             subghz_receiver_set_rx_callback(subghz->txrx->receiver, NULL, subghz);
 
-			scene_manager_search_and_switch_to_previous_scene(
-				subghz->scene_manager, SubGhzSceneMoreRAW);
+            scene_manager_search_and_switch_to_previous_scene(
+                subghz->scene_manager, SubGhzSceneMoreRAW);
             consumed = true;
             break;
         case SubGhzCustomEventViewReceiverOK:
@@ -239,7 +233,7 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case SubGhzCustomEventViewReceiverConfig:
-			FURI_LOG_I(TAG, "No config options");
+            FURI_LOG_I(TAG, "No config options");
             consumed = true;
             break;
         case SubGhzCustomEventViewReceiverOffDisplay:
@@ -253,17 +247,17 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
         default:
             break;
         }
-	} else if(event.type == SceneManagerEventTypeTick) {
-		switch(decode_raw_state) {
-		case SubGhzDecodeRawStateLoading:
-			subghz_scene_decode_raw_next(subghz);
-			break;
-		default:
-			break;
-		}
-	} else if(event.type == SceneManagerEventTypeBack) {
-		FURI_LOG_D(TAG, "BackEvent");
-	}
+    } else if(event.type == SceneManagerEventTypeTick) {
+        switch(decode_raw_state) {
+        case SubGhzDecodeRawStateLoading:
+            subghz_scene_decode_raw_next(subghz);
+            break;
+        default:
+            break;
+        }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        FURI_LOG_D(TAG, "BackEvent");
+    }
     return consumed;
 }
 

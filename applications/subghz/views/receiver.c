@@ -64,12 +64,14 @@ typedef struct {
     SubGhzViewReceiverMode mode;
 } SubGhzViewReceiverModel;
 
-void subghz_view_receiver_set_mode(SubGhzViewReceiver* subghz_receiver, SubGhzViewReceiverMode mode) {
+void subghz_view_receiver_set_mode(
+    SubGhzViewReceiver* subghz_receiver,
+    SubGhzViewReceiverMode mode) {
     with_view_model(
-            subghz_receiver->view, (SubGhzViewReceiverModel * model) {
+        subghz_receiver->view, (SubGhzViewReceiverModel * model) {
             model->mode = mode;
             return true;
-            });
+        });
 }
 
 void subghz_view_receiver_set_lock(SubGhzViewReceiver* subghz_receiver, SubGhzLock lock) {
@@ -166,7 +168,7 @@ void subghz_view_receiver_add_data_progress(
     furi_assert(subghz_receiver);
     with_view_model(
         subghz_receiver->view, (SubGhzViewReceiverModel * model) {
-        string_set_str(model->progress_str, progress_str);
+            string_set_str(model->progress_str, progress_str);
             return true;
         });
 }
@@ -190,10 +192,10 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
 
-	if(model->mode == SubGhzViewReceiverModeLive) {
-		elements_button_left(canvas, "Config");
-		canvas_draw_line(canvas, 46, 51, 125, 51);
-	}
+    if(model->mode == SubGhzViewReceiverModeLive) {
+        elements_button_left(canvas, "Config");
+        canvas_draw_line(canvas, 46, 51, 125, 51);
+    }
 
     bool scrollbar = model->history_item > 4;
     string_t str_buff;

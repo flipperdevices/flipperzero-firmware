@@ -1,7 +1,7 @@
 #include "../subghz_i.h"
 
 enum SubmenuIndex {
-	SubmenuIndexDecode,
+    SubmenuIndexDecode,
     SubmenuIndexEdit,
     SubmenuIndexDelete,
 };
@@ -14,12 +14,12 @@ void subghz_scene_more_raw_submenu_callback(void* context, uint32_t index) {
 void subghz_scene_more_raw_on_enter(void* context) {
     SubGhz* subghz = context;
 
-	submenu_add_item(
-		subghz->submenu,
-		"Decode",
-		SubmenuIndexDecode,
-		subghz_scene_more_raw_submenu_callback,
-		subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "Decode",
+        SubmenuIndexDecode,
+        subghz_scene_more_raw_submenu_callback,
+        subghz);
 
     submenu_add_item(
         subghz->submenu,
@@ -59,14 +59,14 @@ bool subghz_scene_more_raw_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             return true;
         } else if(event.event == SubmenuIndexDecode) {
-			//TODO:?
-			//scene_manager_set_scene_state(
-				//subghz->scene_manager, SubGhzSceneDecodeRAW, SubGhzCustomEventManagerNoSet);
-			scene_manager_set_scene_state(
-				subghz->scene_manager, SubGhzSceneMoreRAW, SubmenuIndexDecode);
-			scene_manager_next_scene(subghz->scene_manager, SubGhzSceneDecodeRAW);
-			return true;
-		}
+            //TODO:?
+            //scene_manager_set_scene_state(
+            //subghz->scene_manager, SubGhzSceneDecodeRAW, SubGhzCustomEventManagerNoSet);
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzSceneMoreRAW, SubmenuIndexDecode);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneDecodeRAW);
+            return true;
+        }
     }
     return false;
 }

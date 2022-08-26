@@ -82,6 +82,6 @@ struct SubGhzPresetDefinition {
 typedef struct SubGhzPresetDefinition SubGhzPresetDefinition;
 
 typedef enum {
-	SubGhzViewReceiverModeLive,
-	SubGhzViewReceiverModeFile,
+    SubGhzViewReceiverModeLive,
+    SubGhzViewReceiverModeFile,
 } SubGhzViewReceiverMode;

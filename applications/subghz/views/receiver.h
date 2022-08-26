@@ -8,7 +8,9 @@ typedef struct SubGhzViewReceiver SubGhzViewReceiver;
 
 typedef void (*SubGhzViewReceiverCallback)(SubGhzCustomEvent event, void* context);
 
-void subghz_view_receiver_set_mode(SubGhzViewReceiver* subghz_receiver, SubGhzViewReceiverMode mode);
+void subghz_view_receiver_set_mode(
+    SubGhzViewReceiver* subghz_receiver,
+    SubGhzViewReceiverMode mode);
 
 void subghz_view_receiver_set_lock(SubGhzViewReceiver* subghz_receiver, SubGhzLock keyboard);
 
