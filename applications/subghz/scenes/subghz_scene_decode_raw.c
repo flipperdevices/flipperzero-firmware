@@ -18,6 +18,7 @@
 // [X] Don't reparse file on back
 // [ ] Fix: RX animation+LED returning from decoded detail view
 // [ ] Find good value for SAMPLES_TO_READ_PER_TICK
+// [X] Fix: read errors (slow flash) after aborting decode read
 
 typedef enum {
     SubGhzDecodeRawStateStart,
@@ -132,7 +133,6 @@ bool subghz_scene_decode_raw_start(SubGhz* subghz) {
 
 bool subghz_scene_decode_raw_next(SubGhz* subghz) {
     LevelDuration level_duration;
-    FURI_LOG_D(TAG, "next %d samples", SAMPLES_TO_READ_PER_TICK);
 
     for(uint32_t read = SAMPLES_TO_READ_PER_TICK; read > 0; --read) {
         level_duration = subghz_file_encoder_worker_get_level_duration(file_worker_encoder);
@@ -141,10 +141,6 @@ bool subghz_scene_decode_raw_next(SubGhz* subghz) {
             uint32_t duration = level_duration_get_duration(level_duration);
             subghz_receiver_decode(subghz->txrx->receiver, level, duration);
         } else {
-            if(subghz_file_encoder_worker_is_running(file_worker_encoder)) {
-                subghz_file_encoder_worker_stop(file_worker_encoder);
-            }
-            subghz_file_encoder_worker_free(file_worker_encoder);
             decode_raw_state = SubGhzDecodeRawStateLoaded;
 
             subghz_view_receiver_add_data_progress(subghz->subghz_receiver, "done");
@@ -221,6 +217,11 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
             decode_raw_state = SubGhzDecodeRawStateStart;
             subghz->txrx->idx_menu_chosen = 0;
             subghz_receiver_set_rx_callback(subghz->txrx->receiver, NULL, subghz);
+
+            if(subghz_file_encoder_worker_is_running(file_worker_encoder)) {
+                subghz_file_encoder_worker_stop(file_worker_encoder);
+            }
+            subghz_file_encoder_worker_free(file_worker_encoder);
 
             scene_manager_search_and_switch_to_previous_scene(
                 subghz->scene_manager, SubGhzSceneMoreRAW);
