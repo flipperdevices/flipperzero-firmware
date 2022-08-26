@@ -4,7 +4,7 @@
 #include <lib/subghz/subghz_file_encoder_worker.h>
 
 #define TAG "SubGhzDecodeRaw"
-#define SAMPLES_TO_READ_PER_TICK 100
+#define SAMPLES_TO_READ_PER_TICK 400
 
 // TODO:
 // [X] Remember RAW file after decoding
@@ -17,7 +17,7 @@
 // [X] Stop rx blink (blue, fast) on history item view
 // [X] Don't reparse file on back
 // [X] Fix: RX animation+LED returning from decoded detail view
-// [ ] Find good value for SAMPLES_TO_READ_PER_TICK
+// [X] Find good value for SAMPLES_TO_READ_PER_TICK
 // [X] Fix: read errors (slow flash) after aborting decode read
 
 typedef enum {
