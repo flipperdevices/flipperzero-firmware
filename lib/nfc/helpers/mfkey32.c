@@ -4,7 +4,6 @@
 #include <storage/storage.h>
 #include <stream/stream.h>
 #include <stream/buffered_file_stream.h>
-#include <m-string.h>
 #include <m-array.h>
 
 #include <lib/nfc/protocols/mifare_classic.h>
@@ -198,4 +197,34 @@ void mfkey32_process_data(
     if(!data_processed) {
         instance->state = Mfkey32StateIdle;
     }
+}
+
+uint16_t mfkey32_get_auth_sectors(string_t data_str) {
+    furi_assert(data_str);
+
+    uint16_t nonces_num = 0;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    Stream* file_stream = buffered_file_stream_alloc(storage);
+    string_t temp_str;
+    string_init(temp_str);
+
+    do {
+        if(!buffered_file_stream_open(
+               file_stream, MFKEY32_LOGS_PATH, FSAM_READ, FSOM_OPEN_EXISTING))
+            break;
+        while(true) {
+            if(!stream_read_line(file_stream, temp_str)) break;
+            size_t uid_pos = string_search_str(temp_str, "cuid");
+            string_left(temp_str, uid_pos);
+            string_push_back(temp_str, '\n');
+            string_cat(data_str, temp_str);
+            nonces_num++;
+        }
+    } while(false);
+
+    buffered_file_stream_close(file_stream);
+    stream_free(file_stream);
+    string_clear(temp_str);
+
+    return nonces_num;
 }
