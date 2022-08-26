@@ -124,7 +124,7 @@ static void furi_hal_version_set_name(const char* name) {
             snprintf(
                 furi_hal_version.device_name,
                 FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-                "xFlipper %s",
+                "xzzRogue %s",
                 furi_hal_version.name);
         } else {
             strlcpy(furi_hal_version.name, name, FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
@@ -132,7 +132,7 @@ static void furi_hal_version_set_name(const char* name) {
             snprintf(
                 furi_hal_version.device_name,
                 FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-                "xFlipper %s",
+                "xzzRogue %s",
                 furi_hal_version.name);
         }
     } else {
@@ -142,13 +142,13 @@ static void furi_hal_version_set_name(const char* name) {
             snprintf(
                 furi_hal_version.device_name,
                 FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-                "xFlipper %s",
+                "xzzRogue %s",
                 furi_hal_version.name);
         } else {
             snprintf(
                 furi_hal_version.device_name,
                 FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-                "xFlipper Device");
+                "xzzRogue Dev");
         }
     }
 
