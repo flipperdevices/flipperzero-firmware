@@ -49,7 +49,7 @@ void canvas_commit(Canvas* canvas);
  *
  * @return     pointer to buffer
  */
-uint8_t* canvas_get_buffer(Canvas* canvas);
+// uint8_t* canvas_get_buffer(Canvas* canvas);
 
 /** Get canvas buffer size.
  *

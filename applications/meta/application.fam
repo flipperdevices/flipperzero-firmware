@@ -121,6 +121,7 @@ App(
         "GAME_2048",
         "GAME_Arkanoid",
         "GAME_Dice",
+        "GAME_DOOM",
         "GAME_FlappyBird",
         "GAME_MontyHall",
         "GAME_Raycast",

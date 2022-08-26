@@ -358,6 +358,9 @@ void canvas_draw_rbox(
     uint8_t height,
     uint8_t radius);
 
+uint8_t* canvas_get_buffer(Canvas* canvas);
+void canvas_draw_icon_bitmap(Canvas* canvas, uint8_t x, uint8_t y, int16_t w, int16_t h, const Icon* icon);
+
 #ifdef __cplusplus
 }
 #endif
