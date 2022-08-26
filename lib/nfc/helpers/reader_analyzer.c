@@ -4,6 +4,9 @@
 #include <lib/nfc/protocols/mifare_classic.h>
 #include <m-array.h>
 
+#include "mfkey32.h"
+#include "nfc_debug_pcap.h"
+
 #define TAG "ReaderAnalyzer"
 
 #define READER_ANALYZER_MAX_BUFF_SIZE (256)
@@ -30,6 +33,7 @@ struct ReaderAnalyzer {
 
     ReaderAnalyzerMode mode;
     Mfkey32* mfkey32;
+    NfcDebugPcap* pcap;
 };
 
 const FuriHalNfcDevData reader_analyzer_nfc_data[] = {
@@ -59,6 +63,10 @@ void reader_analyzer_parse(ReaderAnalyzer* instance, uint8_t* buffer, size_t siz
                 len,
                 header->reader_to_tag,
                 header->crc_dropped);
+        }
+        if(instance->pcap) {
+            nfc_debug_pcap_process_data(
+                instance->pcap, &buffer[bytes_i], len, header->reader_to_tag, header->crc_dropped);
         }
         bytes_i += len;
     }
@@ -102,6 +110,9 @@ void reader_analyzer_start(ReaderAnalyzer* instance, ReaderAnalyzerMode mode) {
     if(mode & ReaderAnalyzerModeMfkey) {
         instance->mfkey32 = mfkey32_alloc(instance->nfc_data.cuid);
     }
+    if(mode & ReaderAnalyzerModePcap) {
+        instance->pcap = nfc_debug_pcap_alloc();
+    }
     instance->alive = true;
     furi_thread_start(instance->thread);
 }
@@ -113,6 +124,10 @@ void reader_analyzer_stop(ReaderAnalyzer* instance) {
         mfkey32_free(instance->mfkey32);
         instance->mfkey32 = NULL;
     }
+    if(instance->pcap) {
+        nfc_debug_pcap_free(instance->pcap);
+    }
+
     instance->alive = false;
     furi_thread_join(instance->thread);
 }

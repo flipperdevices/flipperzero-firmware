@@ -3,8 +3,6 @@
 #include <stdint.h>
 #include <lib/nfc/nfc_device.h>
 
-#include "mfkey32.h"
-
 typedef enum {
     ReaderAnalyzerModePcap = 0x01,
     ReaderAnalyzerModeMfkey = 0x02,

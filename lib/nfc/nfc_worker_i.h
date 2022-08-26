@@ -14,8 +14,6 @@
 #include <lib/nfc/protocols/nfca.h>
 #include <lib/nfc/helpers/reader_analyzer.h>
 
-#include "helpers/nfc_debug_pcap.h"
-
 struct NfcWorker {
     FuriThread* thread;
     Storage* storage;
@@ -28,7 +26,6 @@ struct NfcWorker {
 
     NfcWorkerState state;
 
-    NfcDebugPcapWorker* debug_pcap_worker;
     ReaderAnalyzer* reader_analyzer;
 };
 

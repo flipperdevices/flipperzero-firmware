@@ -45,7 +45,6 @@ typedef struct {
 
 struct Mfkey32 {
     Mfkey32State state;
-    Storage* storage;
     Stream* file_stream;
     Mfkey32Params_t params_arr;
     Mfkey32Nonce nonce;
@@ -58,8 +57,8 @@ Mfkey32* mfkey32_alloc(uint32_t cuid) {
     Mfkey32* instance = malloc(sizeof(Mfkey32));
     instance->cuid = cuid;
     instance->state = Mfkey32StateIdle;
-    instance->storage = furi_record_open(RECORD_STORAGE);
-    instance->file_stream = buffered_file_stream_alloc(instance->storage);
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    instance->file_stream = buffered_file_stream_alloc(storage);
     if(!buffered_file_stream_open(
            instance->file_stream, MFKEY32_LOGS_PATH, FSAM_WRITE, FSOM_OPEN_APPEND)) {
         buffered_file_stream_close(instance->file_stream);

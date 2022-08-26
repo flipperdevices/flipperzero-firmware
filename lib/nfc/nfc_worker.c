@@ -28,10 +28,6 @@ NfcWorker* nfc_worker_alloc() {
     }
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
 
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        nfc_worker->debug_pcap_worker = nfc_debug_pcap_alloc(nfc_worker->storage);
-    }
-
     nfc_worker->reader_analyzer = reader_analyzer_alloc(nfc_worker->storage);
 
     return nfc_worker;
@@ -43,8 +39,6 @@ void nfc_worker_free(NfcWorker* nfc_worker) {
     furi_thread_free(nfc_worker->thread);
 
     furi_record_close(RECORD_STORAGE);
-
-    if(nfc_worker->debug_pcap_worker) nfc_debug_pcap_free(nfc_worker->debug_pcap_worker);
 
     reader_analyzer_free(nfc_worker->reader_analyzer);
 
@@ -123,7 +117,7 @@ static bool nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker, FuriHalNfcTxRxC
     MfUltralightReader reader = {};
     MfUltralightData data = {};
 
-    nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
+    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
     do {
         // Read card
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200)) break;
@@ -140,7 +134,7 @@ static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
     furi_assert(nfc_worker->callback);
     bool read_success = false;
 
-    nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
+    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
     do {
         // Try to read supported card
         FURI_LOG_I(TAG, "Try read supported card ...");
@@ -175,7 +169,7 @@ static bool nfc_worker_read_mf_desfire(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
     bool read_success = false;
     MifareDesfireData* data = &nfc_worker->dev_data->mf_df_data;
 
-    nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
+    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
     do {
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
         if(!mf_df_read_card(tx_rx, data)) break;
@@ -190,7 +184,7 @@ static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxConte
     EmvApplication emv_app = {};
     EmvData* result = &nfc_worker->dev_data->emv_data;
 
-    nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
+    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
     do {
         // Read card
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
@@ -326,7 +320,7 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
 
 void nfc_worker_emulate_uid(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
-    nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, &tx_rx, true);
+    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, &tx_rx, true);
     FuriHalNfcDevData* data = &nfc_worker->dev_data->nfc_data;
     NfcReaderRequestData* reader_data = &nfc_worker->dev_data->reader_data;
 
@@ -355,7 +349,7 @@ void nfc_worker_emulate_uid(NfcWorker* nfc_worker) {
 
 void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
-    nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, &tx_rx, true);
+    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, &tx_rx, true);
     FuriHalNfcDevData params = {
         .uid = {0xCF, 0x72, 0xd4, 0x40},
         .uid_len = 4,
@@ -490,7 +484,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
 
 void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
-    nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, &tx_rx, true);
+    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, &tx_rx, true);
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     MfClassicEmulator emulator = {
         .cuid = nfc_util_bytes2num(&nfc_data->uid[nfc_data->uid_len - 4], 4),
