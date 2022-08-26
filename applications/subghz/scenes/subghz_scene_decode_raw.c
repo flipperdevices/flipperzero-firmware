@@ -4,22 +4,26 @@
 #include <lib/subghz/subghz_file_encoder_worker.h>
 
 #define TAG "SubGhzDecodeRaw"
+#define SAMPLES_TO_READ_PER_TICK 100
 
 // TODO:
 // [X] Remember RAW file after decoding
-// [ ] Decode in tick events instead of on_enter
+// [X] Decode in tick events instead of on_enter
 // [ ] Make "Config" label optional in subghz_view_receiver_draw (../views/receiver.c)
 // [ ] Make "Scanning..." label optional in subghz_view_receiver_draw (../views/receiver.c)
 // [ ] Stop rx blink (blue, fast) on history item view
 // [X] Don't reparse file on back
+// [ ] Fix: RX animation+LED returning from decoded detail view
+// [ ] Find good value for SAMPLES_TO_READ_PER_TICK
 
 typedef enum{
-	SubGhzDecodeRawStateNew,
+	SubGhzDecodeRawStateStart,
 	SubGhzDecodeRawStateLoading,
 	SubGhzDecodeRawStateLoaded,
 } SubGhzDecodeRawState;
 
-SubGhzDecodeRawState decode_raw_state = SubGhzDecodeRawStateNew;
+SubGhzDecodeRawState decode_raw_state = SubGhzDecodeRawStateStart;
+SubGhzFileEncoderWorker* file_worker_encoder;
 
 static void subghz_scene_receiver_update_statusbar(void* context) {
     SubGhz* subghz = context;
@@ -85,7 +89,7 @@ static void subghz_scene_add_to_history_callback(
     string_clear(str_buff);
 }
 
-bool subghz_scene_decode_raw(SubGhz* subghz) {
+bool subghz_scene_decode_raw_start(SubGhz* subghz) {
 	string_t file_name;
 	string_init(file_name);
 	bool success = false;
@@ -103,41 +107,49 @@ bool subghz_scene_decode_raw(SubGhz* subghz) {
 		success = true;
 	} while(false);
 
-	if(!success) {
-		return false;
+	if(success) {
+		FURI_LOG_I(TAG,
+			"Listening at \033[0;33m%s\033[0m.",
+			string_get_cstr(file_name));
+
+		file_worker_encoder = subghz_file_encoder_worker_alloc();
+		if(subghz_file_encoder_worker_start(file_worker_encoder, string_get_cstr(file_name))) {
+			//the worker needs a file in order to open and read part of the file
+			furi_delay_ms(100);
+		} else {
+			success = false;
+		}
+
+		if(!success) {
+			subghz_file_encoder_worker_free(file_worker_encoder);
+		}
 	}
 
-	FURI_LOG_I(TAG,
-		"Listening at \033[0;33m%s\033[0m.",
-		string_get_cstr(file_name));
+	string_clear(file_name);
+	return success;
+}
 
-	SubGhzFileEncoderWorker* file_worker_encoder = subghz_file_encoder_worker_alloc();
-	if(subghz_file_encoder_worker_start(file_worker_encoder, string_get_cstr(file_name))) {
-		//the worker needs a file in order to open and read part of the file
-		furi_delay_ms(100);
-	}
-
+bool subghz_scene_decode_raw_next(SubGhz* subghz) {
 	LevelDuration level_duration;
-	while(true) { // TODO: allow interrupt
-		furi_delay_us(500); //you need to have time to read from the file from the SD card
+	FURI_LOG_D(TAG, "next %d samples", SAMPLES_TO_READ_PER_TICK);
+
+	for(uint32_t read=SAMPLES_TO_READ_PER_TICK; read>0; --read) {
 		level_duration = subghz_file_encoder_worker_get_level_duration(file_worker_encoder);
 		if(!level_duration_is_reset(level_duration)) {
 			bool level = level_duration_get_level(level_duration);
 			uint32_t duration = level_duration_get_duration(level_duration);
 			subghz_receiver_decode(subghz->txrx->receiver, level, duration);
 		} else {
+			if(subghz_file_encoder_worker_is_running(file_worker_encoder)) {
+				subghz_file_encoder_worker_stop(file_worker_encoder);
+			}
+			subghz_file_encoder_worker_free(file_worker_encoder);
 			decode_raw_state = SubGhzDecodeRawStateLoaded;
-			break;
+			return false; // No more samples available
 		}
 	}
 
-	if(subghz_file_encoder_worker_is_running(file_worker_encoder)) {
-		subghz_file_encoder_worker_stop(file_worker_encoder);
-	}
-	subghz_file_encoder_worker_free(file_worker_encoder);
-
-	string_clear(file_name);
-	return true;
+	return true; // More samples available
 }
 
 void subghz_scene_decode_raw_on_enter(void* context) {
@@ -161,11 +173,12 @@ void subghz_scene_decode_raw_on_enter(void* context) {
 	subghz_receiver_set_rx_callback(
 		subghz->txrx->receiver, subghz_scene_add_to_history_callback, subghz);
 
-	if(decode_raw_state == SubGhzDecodeRawStateNew) {
+	if(decode_raw_state == SubGhzDecodeRawStateStart) {
 		//Decode RAW to history
-		decode_raw_state = SubGhzDecodeRawStateLoading;
 		subghz_history_reset(subghz->txrx->history);
-		subghz_scene_decode_raw(subghz);
+		if(subghz_scene_decode_raw_start(subghz)) {
+			decode_raw_state = SubGhzDecodeRawStateLoading;
+		}
 	} else {
 		//Load history to receiver
 		subghz_view_receiver_exit(subghz->subghz_receiver);
@@ -192,7 +205,7 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
 		FURI_LOG_D(TAG, "CustomEvent: %d", event.event);
         switch(event.event) {
         case SubGhzCustomEventViewReceiverBack:
-			decode_raw_state = SubGhzDecodeRawStateNew;
+			decode_raw_state = SubGhzDecodeRawStateStart;
             subghz->txrx->idx_menu_chosen = 0;
             subghz_receiver_set_rx_callback(subghz->txrx->receiver, NULL, subghz);
 
@@ -222,7 +235,13 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
             break;
         }
 	} else if(event.type == SceneManagerEventTypeTick) {
-		//TODO: event loop, handle reading here and give status updates
+		switch(decode_raw_state) {
+		case SubGhzDecodeRawStateLoading:
+			subghz_scene_decode_raw_next(subghz);
+			break;
+		default:
+			break;
+		}
 	} else if(event.type == SceneManagerEventTypeBack) {
 		FURI_LOG_D(TAG, "BackEvent");
 	}
