@@ -10,6 +10,7 @@
 - - HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
 - - WiFi (Marauder), Mouse Jacker, Mouse Jiggler, NRF Sniffer & VideoPoker. (Or Stick To 0.65.1-0823-RM)
 - Renamed bluetooth from "Flipper" to "zzRogue" now that Android app is patched [(thanks to Nikita/LionZXY)](https://github.com/flipperdevices/Flipper-Android-App/pull/340/).
+- Coming... [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -152,6 +153,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - `FAP` [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188)
 - [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Crashes 1st load if FW <~750KB or every load on larger FW `HIDDEN "INTAPP_chess_game"`
 - [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge. Add SD folder `chip8`, [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/) `HIDDEN "INTAPP_Chip8"`
+- [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/
 - `FAP` [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c)
 - `FAP` [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird) `HIDDEN "GAME_FlappyBird"`
 - `FAP` [Game of Life (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c) `HIDDEN "GAME_GameOfLife"`
