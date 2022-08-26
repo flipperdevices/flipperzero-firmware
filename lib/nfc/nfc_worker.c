@@ -351,7 +351,6 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
 
 void nfc_worker_emulate_uid(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
-    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, &tx_rx, true);
     FuriHalNfcDevData* data = &nfc_worker->dev_data->nfc_data;
     NfcReaderRequestData* reader_data = &nfc_worker->dev_data->reader_data;
 
@@ -380,7 +379,6 @@ void nfc_worker_emulate_uid(NfcWorker* nfc_worker) {
 
 void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
-    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, &tx_rx, true);
     FuriHalNfcDevData params = {
         .uid = {0xCF, 0x72, 0xd4, 0x40},
         .uid_len = 4,
@@ -388,6 +386,11 @@ void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
         .sak = 0x20,
         .type = FuriHalNfcTypeA,
     };
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, &tx_rx, true);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
 
     while(nfc_worker->state == NfcWorkerStateEmulateApdu) {
         if(furi_hal_nfc_listen(params.uid, params.uid_len, params.atqa, params.sak, false, 300)) {
@@ -400,6 +403,10 @@ void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
         }
         furi_hal_nfc_sleep();
         furi_delay_ms(20);
+    }
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
     }
 }
 
@@ -515,7 +522,6 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
 
 void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
-    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, &tx_rx, true);
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     MfClassicEmulator emulator = {
         .cuid = nfc_util_bytes2num(&nfc_data->uid[nfc_data->uid_len - 4], 4),
@@ -555,6 +561,11 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
     MfUltralightReader reader = {};
     mf_ul_reset(data);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, &tx_rx, true);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
 
     uint32_t key = 0;
     uint16_t pack = 0;
@@ -607,6 +618,10 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
             nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
             furi_delay_ms(10);
         }
+    }
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
     }
 }
 

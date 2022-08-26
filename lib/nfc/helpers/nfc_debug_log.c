@@ -63,9 +63,6 @@ void nfc_debug_log_process_data(
 
     string_printf(instance->data_str, "%lu %c:", furi_get_tick(), reader_to_tag ? 'R' : 'T');
     uint16_t data_len = len;
-    // if(!crc_dropped && len > 3) {
-    //     data_len -= 2;
-    // }
     for(size_t i = 0; i < data_len; i++) {
         string_cat_printf(instance->data_str, " %02x", data[i]);
     }

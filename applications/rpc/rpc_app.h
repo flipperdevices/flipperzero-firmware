@@ -11,7 +11,6 @@ typedef enum {
     RpcAppEventLoadFile,
     RpcAppEventButtonPress,
     RpcAppEventButtonRelease,
-    RpcAppEventDataReceived,
 } RpcAppSystemEvent;
 
 typedef void (*RpcAppSystemCallback)(RpcAppSystemEvent event, void* context);
