@@ -6,9 +6,19 @@
 #define TAG "SubGhzDecodeRaw"
 
 // TODO:
+// [ ] Decode in tick events instead of on_enter
 // [ ] Make "Config" label optional in subghz_view_receiver_draw (../views/receiver.c)
+// [ ] Make "Scanning..." label optional in subghz_view_receiver_draw (../views/receiver.c)
 // [ ] Stop rx blink (blue, fast) on history item view
-// [ ] Don't reparse file on back
+// [X] Don't reparse file on back
+
+typedef enum{
+	SubGhzDecodeRawStateNew,
+	SubGhzDecodeRawStateLoading,
+	SubGhzDecodeRawStateLoaded,
+} SubGhzDecodeRawState;
+
+SubGhzDecodeRawState decode_raw_state = SubGhzDecodeRawStateNew;
 
 static void subghz_scene_receiver_update_statusbar(void* context) {
     SubGhz* subghz = context;
@@ -116,6 +126,7 @@ bool subghz_scene_decode_raw(SubGhz* subghz) {
 			uint32_t duration = level_duration_get_duration(level_duration);
 			subghz_receiver_decode(subghz->txrx->receiver, level, duration);
 		} else {
+			decode_raw_state = SubGhzDecodeRawStateLoaded;
 			break;
 		}
 	}
@@ -130,13 +141,16 @@ bool subghz_scene_decode_raw(SubGhz* subghz) {
 }
 
 void subghz_scene_decode_raw_on_enter(void* context) {
-	FURI_LOG_D(TAG, "on_enter. Load file");
     SubGhz* subghz = context;
+
+    string_t str_buff;
+    string_init(str_buff);
+
 	//subghz->txrx->history
 	//subghz->txrx->environment
 	//subghz->txrx->receiver
 
-	subghz_history_reset(subghz->txrx->history);
+	FURI_LOG_D(TAG, "on_enter, state: %d", decode_raw_state);
 
     subghz_view_receiver_set_lock(subghz->subghz_receiver, subghz->lock);
 	subghz_view_receiver_set_callback(
@@ -147,10 +161,26 @@ void subghz_scene_decode_raw_on_enter(void* context) {
 	subghz_receiver_set_rx_callback(
 		subghz->txrx->receiver, subghz_scene_add_to_history_callback, subghz);
 
-	//TODO: Is there an eventloop? Can we use that to decode without blocking UI?
-	subghz_scene_decode_raw(subghz);
-
-    subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
+	if(decode_raw_state == SubGhzDecodeRawStateNew) {
+		//Decode RAW to history
+		decode_raw_state = SubGhzDecodeRawStateLoading;
+		subghz_history_reset(subghz->txrx->history);
+		subghz_scene_decode_raw(subghz);
+	} else {
+		//Load history to receiver
+		subghz_view_receiver_exit(subghz->subghz_receiver);
+		for(uint8_t i = 0; i < subghz_history_get_item(subghz->txrx->history); i++) {
+			string_reset(str_buff);
+			subghz_history_get_text_item_menu(subghz->txrx->history, str_buff, i);
+			subghz_view_receiver_add_item_to_menu(
+				subghz->subghz_receiver,
+				string_get_cstr(str_buff),
+				subghz_history_get_type_protocol(subghz->txrx->history, i));
+			subghz->txrx->rx_key_state = SubGhzRxKeyStateAddKey;
+		}
+		string_clear(str_buff);
+		subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
+	}
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReceiver);
 }
@@ -163,7 +193,7 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
 		FURI_LOG_D(TAG, "CustomEvent: %d", event.event);
         switch(event.event) {
         case SubGhzCustomEventViewReceiverBack:
-			//TODO: don't clear loaded file from SubGhzSceneReadRAW on back
+			decode_raw_state = SubGhzDecodeRawStateNew;
             subghz->txrx->idx_menu_chosen = 0;
             subghz_receiver_set_rx_callback(subghz->txrx->receiver, NULL, subghz);
 
