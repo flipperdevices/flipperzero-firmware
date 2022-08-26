@@ -6,6 +6,7 @@
 #define TAG "SubGhzDecodeRaw"
 
 // TODO:
+// [X] Remember RAW file after decoding
 // [ ] Decode in tick events instead of on_enter
 // [ ] Make "Config" label optional in subghz_view_receiver_draw (../views/receiver.c)
 // [ ] Make "Scanning..." label optional in subghz_view_receiver_draw (../views/receiver.c)
@@ -82,7 +83,6 @@ static void subghz_scene_add_to_history_callback(
     }
     subghz_receiver_reset(receiver);
     string_clear(str_buff);
-    subghz->txrx->rx_key_state = SubGhzRxKeyStateAddKey;
 }
 
 bool subghz_scene_decode_raw(SubGhz* subghz) {
@@ -176,7 +176,6 @@ void subghz_scene_decode_raw_on_enter(void* context) {
 				subghz->subghz_receiver,
 				string_get_cstr(str_buff),
 				subghz_history_get_type_protocol(subghz->txrx->history, i));
-			subghz->txrx->rx_key_state = SubGhzRxKeyStateAddKey;
 		}
 		string_clear(str_buff);
 		subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
