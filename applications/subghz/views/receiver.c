@@ -195,6 +195,8 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
     if(model->mode == SubGhzViewReceiverModeLive) {
         elements_button_left(canvas, "Config");
         canvas_draw_line(canvas, 46, 51, 125, 51);
+    } else {
+        canvas_draw_str(canvas, 3, 62, string_get_cstr(model->progress_str));
     }
 
     bool scrollbar = model->history_item > 4;
@@ -235,7 +237,6 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str(canvas, 63, 46, "Decoding...");
             canvas_set_font(canvas, FontSecondary);
-            canvas_draw_str(canvas, 63, 55, string_get_cstr(model->progress_str));
         }
     }
 
@@ -366,6 +367,7 @@ void subghz_view_receiver_exit(void* context) {
             string_reset(model->frequency_str);
             string_reset(model->preset_str);
             string_reset(model->history_stat_str);
+
                 for
                     M_EACH(item_menu, model->history->data, SubGhzReceiverMenuItemArray_t) {
                         string_clear(item_menu->item_str);

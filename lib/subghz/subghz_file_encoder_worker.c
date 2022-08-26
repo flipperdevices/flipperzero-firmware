@@ -88,7 +88,7 @@ void subghz_file_encoder_worker_get_text_progress(
     size_t current_offset = stream_tell(stream);
     size_t buffer_avail = xStreamBufferBytesAvailable(instance->stream);
 
-    string_printf(output, "%02u/%02u", current_offset - buffer_avail, total_size);
+    string_printf(output, "%03u%%", 100 * (current_offset - buffer_avail) / total_size);
 }
 
 LevelDuration subghz_file_encoder_worker_get_level_duration(void* context) {

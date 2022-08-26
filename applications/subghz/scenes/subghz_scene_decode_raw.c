@@ -142,7 +142,7 @@ bool subghz_scene_decode_raw_next(SubGhz* subghz) {
             decode_raw_state = SubGhzDecodeRawStateLoaded;
             subghz->state_notifications = SubGhzNotificationStateIDLE;
 
-            subghz_view_receiver_add_data_progress(subghz->subghz_receiver, "done");
+            subghz_view_receiver_add_data_progress(subghz->subghz_receiver, "100%");
             return false; // No more samples available
         }
     }
@@ -170,8 +170,6 @@ void subghz_scene_decode_raw_on_enter(void* context) {
     subghz_view_receiver_set_callback(
         subghz->subghz_receiver, subghz_scene_decode_raw_callback, subghz);
 
-    subghz_scene_receiver_update_statusbar(subghz);
-
     subghz_receiver_set_rx_callback(
         subghz->txrx->receiver, subghz_scene_add_to_history_callback, subghz);
 
@@ -196,6 +194,8 @@ void subghz_scene_decode_raw_on_enter(void* context) {
         string_clear(str_buff);
         subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
     }
+
+    subghz_scene_receiver_update_statusbar(subghz);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReceiver);
 }
