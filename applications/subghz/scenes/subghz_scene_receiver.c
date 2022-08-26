@@ -1,7 +1,7 @@
 #include "../subghz_i.h"
 #include "../views/receiver.h"
 
-static const NotificationSequence subghs_sequence_rx = {
+const NotificationSequence subghs_sequence_rx = {
     &message_green_255,
 
     &message_vibro_on,
@@ -14,7 +14,7 @@ static const NotificationSequence subghs_sequence_rx = {
     NULL,
 };
 
-static const NotificationSequence subghs_sequence_rx_locked = {
+const NotificationSequence subghs_sequence_rx_locked = {
     &message_green_255,
 
     &message_display_backlight_on,
