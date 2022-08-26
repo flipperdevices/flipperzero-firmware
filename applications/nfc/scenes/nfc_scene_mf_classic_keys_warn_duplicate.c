@@ -10,14 +10,17 @@ void nfc_scene_mf_classic_keys_warn_duplicate_on_enter(void* context) {
 
     // Setup view
     Popup* popup = nfc->popup;
-    popup_set_icon(popup, 67, 12, &I_DolphinFirstStart7_61x51);
+    popup_set_icon(popup, 3, 22, &I_WarningDolphin_45x42);
     popup_set_text(
         popup,
-        "Key already exists\nin user dictionary.\n(Duplicate entry)",
-        38,
-        35,
-        AlignCenter,
-        AlignBottom);
+        "Key already\n"
+        "exists in\n"
+        "user dictionary.\n\n"
+        "(Duplicate entry)",
+        122,
+        4,
+        AlignRight,
+        AlignTop);
     popup_set_timeout(popup, 5000);
     popup_set_context(popup, nfc);
     popup_set_callback(popup, nfc_scene_mf_classic_keys_warn_duplicate_popup_callback);
