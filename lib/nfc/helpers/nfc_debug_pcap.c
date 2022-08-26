@@ -1,6 +1,8 @@
 #include "nfc_debug_pcap.h"
 
+#include <storage/storage.h>
 #include <stream/buffered_file_stream.h>
+#include <furi_hal_nfc.h>
 #include <furi_hal_rtc.h>
 
 #define TAG "NfcDebugPcap"

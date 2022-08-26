@@ -117,7 +117,11 @@ static bool nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker, FuriHalNfcTxRxC
     MfUltralightReader reader = {};
     MfUltralightData data = {};
 
-    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
+
     do {
         // Read card
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200)) break;
@@ -127,6 +131,10 @@ static bool nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker, FuriHalNfcTxRxC
         read_success = true;
     } while(false);
 
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
+
     return read_success;
 }
 
@@ -134,7 +142,11 @@ static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
     furi_assert(nfc_worker->callback);
     bool read_success = false;
 
-    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
+
     do {
         // Try to read supported card
         FURI_LOG_I(TAG, "Try read supported card ...");
@@ -162,6 +174,9 @@ static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
         }
     } while(false);
 
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
     return read_success;
 }
 
@@ -169,12 +184,20 @@ static bool nfc_worker_read_mf_desfire(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
     bool read_success = false;
     MifareDesfireData* data = &nfc_worker->dev_data->mf_df_data;
 
-    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
+
     do {
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
         if(!mf_df_read_card(tx_rx, data)) break;
         read_success = true;
     } while(false);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
 
     return read_success;
 }
@@ -184,7 +207,11 @@ static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxConte
     EmvApplication emv_app = {};
     EmvData* result = &nfc_worker->dev_data->emv_data;
 
-    // nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
+
     do {
         // Read card
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
@@ -210,6 +237,10 @@ static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxConte
         }
         read_success = true;
     } while(false);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
 
     return read_success;
 }

@@ -6,10 +6,11 @@
 
 #include "mfkey32.h"
 #include "nfc_debug_pcap.h"
+#include "nfc_debug_log.h"
 
 #define TAG "ReaderAnalyzer"
 
-#define READER_ANALYZER_MAX_BUFF_SIZE (256)
+#define READER_ANALYZER_MAX_BUFF_SIZE (1024)
 
 typedef struct {
     bool reader_to_tag;
@@ -33,6 +34,7 @@ struct ReaderAnalyzer {
 
     ReaderAnalyzerMode mode;
     Mfkey32* mfkey32;
+    NfcDebugLog* debug_log;
     NfcDebugPcap* pcap;
 };
 
@@ -68,6 +70,14 @@ void reader_analyzer_parse(ReaderAnalyzer* instance, uint8_t* buffer, size_t siz
             nfc_debug_pcap_process_data(
                 instance->pcap, &buffer[bytes_i], len, header->reader_to_tag, header->crc_dropped);
         }
+        if(instance->debug_log) {
+            nfc_debug_log_process_data(
+                instance->debug_log,
+                &buffer[bytes_i],
+                len,
+                header->reader_to_tag,
+                header->crc_dropped);
+        }
         bytes_i += len;
     }
 }
@@ -76,7 +86,7 @@ int32_t reader_analyzer_thread(void* context) {
     ReaderAnalyzer* reader_analyzer = context;
     uint8_t buffer[READER_ANALYZER_MAX_BUFF_SIZE] = {};
 
-    while(reader_analyzer->alive) {
+    while(reader_analyzer->alive || !xStreamBufferIsEmpty(reader_analyzer->stream)) {
         size_t ret = xStreamBufferReceive(
             reader_analyzer->stream, buffer, READER_ANALYZER_MAX_BUFF_SIZE, 50);
         if(ret) {
@@ -92,7 +102,8 @@ ReaderAnalyzer* reader_analyzer_alloc() {
 
     instance->nfc_data = reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic];
     instance->alive = false;
-    instance->stream = xStreamBufferCreate(1024, 1);
+    instance->stream =
+        xStreamBufferCreate(READER_ANALYZER_MAX_BUFF_SIZE, sizeof(ReaderAnalyzerHeader));
 
     instance->thread = furi_thread_alloc();
     furi_thread_set_name(instance->thread, "ReaderAnalyzerWorker");
@@ -107,12 +118,17 @@ ReaderAnalyzer* reader_analyzer_alloc() {
 void reader_analyzer_start(ReaderAnalyzer* instance, ReaderAnalyzerMode mode) {
     furi_assert(instance);
 
+    xStreamBufferReset(instance->stream);
+    if(mode & ReaderAnalyzerModeDebugLog) {
+        instance->debug_log = nfc_debug_log_alloc();
+    }
     if(mode & ReaderAnalyzerModeMfkey) {
         instance->mfkey32 = mfkey32_alloc(instance->nfc_data.cuid);
     }
-    if(mode & ReaderAnalyzerModePcap) {
+    if(mode & ReaderAnalyzerModeDebugPcap) {
         instance->pcap = nfc_debug_pcap_alloc();
     }
+
     instance->alive = true;
     furi_thread_start(instance->thread);
 }
@@ -120,6 +136,13 @@ void reader_analyzer_start(ReaderAnalyzer* instance, ReaderAnalyzerMode mode) {
 void reader_analyzer_stop(ReaderAnalyzer* instance) {
     furi_assert(instance);
 
+    instance->alive = false;
+    furi_thread_join(instance->thread);
+
+    if(instance->debug_log) {
+        nfc_debug_log_free(instance->debug_log);
+        instance->debug_log = NULL;
+    }
     if(instance->mfkey32) {
         mfkey32_free(instance->mfkey32);
         instance->mfkey32 = NULL;
@@ -127,9 +150,6 @@ void reader_analyzer_stop(ReaderAnalyzer* instance) {
     if(instance->pcap) {
         nfc_debug_pcap_free(instance->pcap);
     }
-
-    instance->alive = false;
-    furi_thread_join(instance->thread);
 }
 
 void reader_analyzer_free(ReaderAnalyzer* instance) {
@@ -180,22 +200,32 @@ static void reader_analyzer_write(
     bool crc_dropped) {
     ReaderAnalyzerHeader header = {
         .reader_to_tag = reader_to_tag, .crc_dropped = crc_dropped, .len = len};
-    xStreamBufferSend(instance->stream, &header, sizeof(ReaderAnalyzerHeader), FuriWaitForever);
-    xStreamBufferSend(instance->stream, data, len, FuriWaitForever);
+    size_t data_sent = 0;
+    data_sent = xStreamBufferSend(
+        instance->stream, &header, sizeof(ReaderAnalyzerHeader), FuriWaitForever);
+    if(data_sent != sizeof(ReaderAnalyzerHeader)) {
+        FURI_LOG_W(TAG, "Sent %d out of %d bytes", data_sent, sizeof(ReaderAnalyzerHeader));
+    }
+    data_sent = xStreamBufferSend(instance->stream, data, len, FuriWaitForever);
+    if(data_sent != len) {
+        FURI_LOG_W(TAG, "Sent %d out of %d bytes", data_sent, len);
+    }
 }
 
 static void
     reader_analyzer_write_rx(uint8_t* data, uint16_t bits, bool crc_dropped, void* context) {
     UNUSED(crc_dropped);
     ReaderAnalyzer* reader_analyzer = context;
-    reader_analyzer_write(reader_analyzer, data, bits / 8, false, crc_dropped);
+    uint16_t bytes = bits < 8 ? 1 : bits / 8;
+    reader_analyzer_write(reader_analyzer, data, bytes, false, crc_dropped);
 }
 
 static void
     reader_analyzer_write_tx(uint8_t* data, uint16_t bits, bool crc_dropped, void* context) {
     UNUSED(crc_dropped);
     ReaderAnalyzer* reader_analyzer = context;
-    reader_analyzer_write(reader_analyzer, data, bits / 8, true, crc_dropped);
+    uint16_t bytes = bits < 8 ? 1 : bits / 8;
+    reader_analyzer_write(reader_analyzer, data, bytes, true, crc_dropped);
 }
 
 void reader_analyzer_prepare_tx_rx(

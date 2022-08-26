@@ -4,8 +4,9 @@
 #include <lib/nfc/nfc_device.h>
 
 typedef enum {
-    ReaderAnalyzerModePcap = 0x01,
+    ReaderAnalyzerModeDebugLog = 0x01,
     ReaderAnalyzerModeMfkey = 0x02,
+    ReaderAnalyzerModeDebugPcap = 0x04,
 } ReaderAnalyzerMode;
 
 typedef struct ReaderAnalyzer ReaderAnalyzer;

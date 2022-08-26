@@ -1,7 +1,7 @@
 #pragma once
 
-#include <furi_hal_nfc.h>
-#include <storage/storage.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 typedef struct NfcDebugPcap NfcDebugPcap;
 
