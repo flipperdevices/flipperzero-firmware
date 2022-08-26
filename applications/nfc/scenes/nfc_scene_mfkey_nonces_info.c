@@ -1,7 +1,6 @@
 #include "../nfc_i.h"
 
 void nfc_scene_mfkey_nonces_info_callback(GuiButtonType result, InputType type, void* context) {
-    furi_assert(context);
     Nfc* nfc = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
@@ -23,9 +22,12 @@ bool nfc_scene_mfkey_nonces_info_on_event(void* context, SceneManagerEvent event
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeRight) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfkeyComplete);
             consumed = true;
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        consumed =
+            scene_manager_search_and_switch_to_previous_scene(nfc->scene_manager, NfcSceneStart);
     }
 
     return consumed;
