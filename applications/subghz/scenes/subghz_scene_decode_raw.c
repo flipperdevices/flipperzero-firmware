@@ -13,10 +13,10 @@
 // [X] Make "Scanning..." label optional in subghz_view_receiver_draw (../views/receiver.c)
 // [ ] Add Decoding logo
 // [ ] Check progress in stream_buffer, instead of raw stream
-// [ ] Blink led green while decoding
-// [ ] Stop rx blink (blue, fast) on history item view
+// [X] Blink led while decoding
+// [X] Stop rx blink (blue, fast) on history item view
 // [X] Don't reparse file on back
-// [ ] Fix: RX animation+LED returning from decoded detail view
+// [X] Fix: RX animation+LED returning from decoded detail view
 // [ ] Find good value for SAMPLES_TO_READ_PER_TICK
 // [X] Fix: read errors (slow flash) after aborting decode read
 
@@ -53,7 +53,6 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
     } else {
         subghz_view_receiver_add_data_statusbar(
             subghz->subghz_receiver, string_get_cstr(history_stat_str), "", "");
-        subghz->state_notifications = SubGhzNotificationStateIDLE;
     }
     string_clear(history_stat_str);
 }
@@ -142,6 +141,7 @@ bool subghz_scene_decode_raw_next(SubGhz* subghz) {
             subghz_receiver_decode(subghz->txrx->receiver, level, duration);
         } else {
             decode_raw_state = SubGhzDecodeRawStateLoaded;
+            subghz->state_notifications = SubGhzNotificationStateIDLE;
 
             subghz_view_receiver_add_data_progress(subghz->subghz_receiver, "done");
             return false; // No more samples available
@@ -187,6 +187,7 @@ void subghz_scene_decode_raw_on_enter(void* context) {
         subghz_history_reset(subghz->txrx->history);
         if(subghz_scene_decode_raw_start(subghz)) {
             decode_raw_state = SubGhzDecodeRawStateLoading;
+            subghz->state_notifications = SubGhzNotificationStateRx;
         }
     } else {
         //Load history to receiver
@@ -223,6 +224,7 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
             }
             subghz_file_encoder_worker_free(file_worker_encoder);
 
+            subghz->state_notifications = SubGhzNotificationStateIDLE;
             scene_manager_search_and_switch_to_previous_scene(
                 subghz->scene_manager, SubGhzSceneMoreRAW);
             consumed = true;
@@ -230,6 +232,7 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
         case SubGhzCustomEventViewReceiverOK:
             subghz->txrx->idx_menu_chosen =
                 subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
+            subghz->state_notifications = SubGhzNotificationStateIDLE;
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverInfo);
             consumed = true;
             break;
@@ -249,6 +252,18 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
             break;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
+        switch(subghz->state_notifications) {
+        case SubGhzNotificationStateRx:
+            notification_message(subghz->notifications, &sequence_blink_cyan_10);
+            break;
+        case SubGhzNotificationStateRxDone:
+            notification_message(subghz->notifications, &sequence_blink_green_100);
+            subghz->state_notifications = SubGhzNotificationStateRx;
+            break;
+        default:
+            break;
+        }
+
         switch(decode_raw_state) {
         case SubGhzDecodeRawStateLoading:
             subghz_scene_decode_raw_next(subghz);
