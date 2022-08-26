@@ -9,8 +9,11 @@
 // TODO:
 // [X] Remember RAW file after decoding
 // [X] Decode in tick events instead of on_enter
-// [ ] Make "Config" label optional in subghz_view_receiver_draw (../views/receiver.c)
-// [ ] Make "Scanning..." label optional in subghz_view_receiver_draw (../views/receiver.c)
+// [X] Make "Config" label optional in subghz_view_receiver_draw (../views/receiver.c)
+// [X] Make "Scanning..." label optional in subghz_view_receiver_draw (../views/receiver.c)
+// [ ] Add Decoding logo
+// [ ] Check progress in stream_buffer, instead of raw stream
+// [ ] Blink led green while decoding
 // [ ] Stop rx blink (blue, fast) on history item view
 // [X] Don't reparse file on back
 // [ ] Fix: RX animation+LED returning from decoded detail view
@@ -145,9 +148,24 @@ bool subghz_scene_decode_raw_next(SubGhz* subghz) {
 			}
 			subghz_file_encoder_worker_free(file_worker_encoder);
 			decode_raw_state = SubGhzDecodeRawStateLoaded;
+
+            subghz_view_receiver_add_data_progress(
+                    subghz->subghz_receiver,
+                    "done");
 			return false; // No more samples available
 		}
 	}
+
+    // Update progress info
+    string_t progress_str;
+    string_init(progress_str);
+    subghz_file_encoder_worker_get_text_progress(file_worker_encoder, progress_str);
+
+    subghz_view_receiver_add_data_progress(
+        subghz->subghz_receiver,
+        string_get_cstr(progress_str));
+
+    string_clear(progress_str);
 
 	return true; // More samples available
 }
@@ -165,6 +183,7 @@ void subghz_scene_decode_raw_on_enter(void* context) {
 	FURI_LOG_D(TAG, "on_enter, state: %d", decode_raw_state);
 
     subghz_view_receiver_set_lock(subghz->subghz_receiver, subghz->lock);
+	subghz_view_receiver_set_mode(subghz->subghz_receiver, SubGhzViewReceiverModeFile);
 	subghz_view_receiver_set_callback(
         subghz->subghz_receiver, subghz_scene_decode_raw_callback, subghz);
 
