@@ -994,7 +994,7 @@ int32_t doom_app() {
                       }        
                     }
                 }
-                if(event.input.key == InputKeyBack){
+                if(event.input.key == InputKeyBack && event.input.type == InputTypeLong){
                   processing = false;
 #ifdef SOUND
                   if(plugin_state->intro_sound){
