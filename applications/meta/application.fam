@@ -17,7 +17,7 @@ App(
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         "gpio",
-        "ibutton",
+        # "ibutton",
         "infrared",
         "lfrfid",
         "nfc",
