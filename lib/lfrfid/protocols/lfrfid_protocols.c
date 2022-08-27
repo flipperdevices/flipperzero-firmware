@@ -10,6 +10,7 @@
 #include "protocol_hid_ex_generic.h"
 #include "protocol_paradox.h"
 #include "protocol_viking.h"
+#include "protocol_jablotron.h"
 
 const ProtocolBase* lfrfid_protocols[] = {
     [LFRFIDProtocolEM4100] = &protocol_em4100,
@@ -23,4 +24,5 @@ const ProtocolBase* lfrfid_protocols[] = {
     [LFRFIDProtocolHidExGeneric] = &protocol_hid_ex_generic,
     [LFRFIDProtocolParadox] = &protocol_paradox,
     [LFRFIDProtocolViking] = &protocol_viking,
+    [LFRFIDProtocolJablotron] = &protocol_jablotron,
 };
