@@ -20,6 +20,7 @@
 - [Add support for Paradox tags #1655 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1655)
 - [Add support for Jablotron tags #1657 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1657)
 - [Add support for Viking tags #1668 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1668)
+- [SubGhz: add protocol Intertechno_V3 #1622 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1622)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -153,6 +154,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Add support for Paradox tags #1655 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1655)
 - [Add support for Jablotron tags #1657 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1657)
 - [Add support for Viking tags #1668 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1668)
+- [SubGhz: add protocol Intertechno_V3 #1622 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1622)
 
 </details>
 
