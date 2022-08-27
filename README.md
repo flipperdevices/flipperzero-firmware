@@ -14,6 +14,8 @@
 - [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/)
 - Sacrificed/`HIDDEN` for DOOM, until FAPS come: Arkanoid, Multi Converter & Picopass
 - Added hold back to exit for DOOM
+- Bugfix for universal remotes (by darmiel) from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
+- Updated universal remote assets (by Amec0e) from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
