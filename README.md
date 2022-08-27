@@ -16,6 +16,10 @@
 - Added hold back to exit for DOOM
 - Bugfix for universal remotes (by darmiel) from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Updated universal remote assets (by Amec0e) from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
+- [Add support for PAC/Stanley tags #1648 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1648)
+- [Add support for Paradox tags #1655 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1655)
+- [Add support for Jablotron tags #1657 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1657)
+- [Add support for Viking tags #1668 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1668)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -145,6 +149,10 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 - [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
 - [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
+- [Add support for PAC/Stanley tags #1648 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1648)
+- [Add support for Paradox tags #1655 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1655)
+- [Add support for Jablotron tags #1657 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1657)
+- [Add support for Viking tags #1668 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1668)
 
 </details>
 
