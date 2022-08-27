@@ -23,6 +23,8 @@
 - [Add support for Viking tags #1668 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1668)
 - [SubGhz: add protocol Intertechno_V3 #1622 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1622)
 - `HIDDEN` for protocols & dev space: iButton
+- OFW: [SubGhz: out debug data to external pin #1665 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1665)
+- OFW: [workflows and fbtenv improovements #1661 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1661)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
