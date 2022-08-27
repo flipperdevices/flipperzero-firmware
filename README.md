@@ -17,11 +17,11 @@
 - Added hold back to exit for DOOM
 - Bugfix for universal remotes (by darmiel) from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Updated universal remote assets (by Amec0e) from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- [Add support for PAC/Stanley tags #1648 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1648)
-- [Add support for Paradox tags #1655 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1655)
-- [Add support for Jablotron tags #1657 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1657)
-- [Add support for Viking tags #1668 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1668)
-- [SubGhz: add protocol Intertechno_V3 #1622 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1622)
+- Open PR: [Add support for PAC/Stanley tags #1648 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1648)
+- Open PR: [Add support for Paradox tags #1655 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1655)
+- Open PR: [Add support for Jablotron tags #1657 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1657)
+- Open PR: [Add support for Viking tags #1668 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1668)
+- Open PR: [SubGhz: add protocol Intertechno_V3 #1622 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1622)
 - `HIDDEN` for protocols & dev space: iButton
 - OFW: [SubGhz: out debug data to external pin #1665 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1665)
 - OFW: [workflows and fbtenv improovements #1661 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1661)
