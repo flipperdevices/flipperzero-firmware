@@ -46,7 +46,7 @@ WifideautherApp* wifi_deauther_app_alloc() {
         WifideautherAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
 
-    for (int i = 0; i < NUM_MENU_ITEMS; ++i) {
+    for(int i = 0; i < NUM_MENU_ITEMS; ++i) {
         app->selected_option_index[i] = 0;
     }
 

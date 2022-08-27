@@ -62,7 +62,7 @@ static bool desktop_view_slideshow_input(InputEvent* event, void* context) {
         } else if(event->type == InputTypeRelease) {
             furi_timer_stop(instance->timer);
             // if(!slideshow_is_one_page(model->slideshow)) {
-                // furi_timer_start(instance->timer, DESKTOP_SLIDESHOW_POWEROFF_LONG);
+            // furi_timer_start(instance->timer, DESKTOP_SLIDESHOW_POWEROFF_LONG);
             // }
         }
     }

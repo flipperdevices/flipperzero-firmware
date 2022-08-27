@@ -50,7 +50,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         furi_message_queue_put(state->event_queue, &event, 0);
         return;
     }
-    
+
     canvas_set_font(canvas, FontSecondary);
     if(state->diceSelect < 229) {
         if(state->diceQty == 1) {
@@ -111,9 +111,15 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "My sources say no",
                 "Very doubtful",
                 "My reply is no"};
-            state->diceRoll = ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
+            state->diceRoll =
+                ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
             snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s", "8BALL");
-            snprintf(state->strings[0], sizeof(state->strings[0]), "%s at %s", state->diceType[0], state->rollTime[0]);
+            snprintf(
+                state->strings[0],
+                sizeof(state->strings[0]),
+                "%s at %s",
+                state->diceType[0],
+                state->rollTime[0]);
             uint8_t d1_i = rand() % COUNT_OF(eightBall);
             snprintf(state->strings[1], sizeof(state->strings[1]), "%s", eightBall[d1_i]);
         } else if(state->diceSelect == 230) {
@@ -140,12 +146,23 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "Breasts",
                 "???",
                 "Genitals"};
-            state->diceRoll = ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
+            state->diceRoll =
+                ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
             snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s", "SEX?");
-            snprintf(state->strings[0], sizeof(state->strings[0]), "%s at %s", state->diceType[0], state->rollTime[0]);
+            snprintf(
+                state->strings[0],
+                sizeof(state->strings[0]),
+                "%s at %s",
+                state->diceType[0],
+                state->rollTime[0]);
             uint8_t d1_i = rand() % COUNT_OF(diceOne);
             uint8_t d2_i = rand() % COUNT_OF(diceTwo);
-            snprintf(state->strings[1], sizeof(state->strings[1]), "%s %s", diceOne[d1_i], diceTwo[d2_i]);
+            snprintf(
+                state->strings[1],
+                sizeof(state->strings[1]),
+                "%s %s",
+                diceOne[d1_i],
+                diceTwo[d2_i]);
         } else if(state->diceSelect == 231) {
             const char* deckOne[] = {"2H", "2C", "2D", "2S", "3H", "3C",  "3D",  "3S",  "4H",
                                      "4C", "4D", "4S", "5H", "5C", "5D",  "5S",  "6H",  "6C",
@@ -159,9 +176,15 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                                "8S", "9H", "9C", "9D", "9S", "10H", "10C", "10D", "10S",
                                "JH", "JC", "JD", "JS", "QH", "QC",  "QD",  "QS",  "KH",
                                "KC", "KD", "KS", "AH", "AC", "AD"}; // ONE LESS SINCE ONE WILL BE REMOVED
-            state->diceRoll = ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
+            state->diceRoll =
+                ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
             snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s", "WAR!");
-            snprintf(state->strings[0], sizeof(state->strings[0]), "%s at %s", state->diceType[0], state->rollTime[0]);
+            snprintf(
+                state->strings[0],
+                sizeof(state->strings[0]),
+                "%s at %s",
+                state->diceType[0],
+                state->rollTime[0]);
             uint8_t d1_i = rand() % COUNT_OF(deckOne);
             // INITIALIZE WITH PLACEHOLDERS TO AVOID MAYBE UNINITIALIZED ERROR
             for(int i = 0; i < COUNT_OF(deckOne); i++) {
@@ -174,10 +197,20 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             uint8_t d2_i = rand() % COUNT_OF(deckTwo);
             if(d1_i > d2_i) {
                 state->playerOneScore++;
-                snprintf(state->strings[1], sizeof(state->strings[1]), "%s > %s", deckOne[d1_i], deckTwo[d2_i]);
+                snprintf(
+                    state->strings[1],
+                    sizeof(state->strings[1]),
+                    "%s > %s",
+                    deckOne[d1_i],
+                    deckTwo[d2_i]);
             } else {
                 state->playerTwoScore++;
-                snprintf(state->strings[1], sizeof(state->strings[1]), "%s < %s", deckOne[d1_i], deckTwo[d2_i]);
+                snprintf(
+                    state->strings[1],
+                    sizeof(state->strings[1]),
+                    "%s < %s",
+                    deckOne[d1_i],
+                    deckTwo[d2_i]);
             }
         } else if(state->diceSelect == 232) {
             const char* diceOne[] = {
@@ -203,9 +236,15 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "with the player to your left",
                 "then sing a song",
                 "then do a dance"};
-            state->diceRoll = ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
+            state->diceRoll =
+                ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
             snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s", "WEED!");
-            snprintf(state->strings[0], sizeof(state->strings[0]), "%s at %s", state->diceType[0], state->rollTime[0]);
+            snprintf(
+                state->strings[0],
+                sizeof(state->strings[0]),
+                "%s at %s",
+                state->diceType[0],
+                state->rollTime[0]);
             uint8_t d1_i = rand() % COUNT_OF(diceOne);
             uint8_t d2_i = rand() % COUNT_OF(diceTwo);
             uint8_t d3_i = rand() % COUNT_OF(diceThree);
@@ -216,19 +255,27 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             snprintf(state->strings[4], sizeof(state->strings[4]), "%s", diceFour[d4_i]);
         } else {
             state->diceRoll = ((rand() % state->diceSelect) + 1);
-            snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s%d", "d", state->diceSelect);
             snprintf(
-                state->strings[0], sizeof(state->strings[0]), "%d%s at %s", state->diceQty, state->diceType[0], state->rollTime[0]);
-            if(state->diceSelect >= 20 && state->diceRoll == state->diceSelect) DOLPHIN_DEED(getRandomDeed());
-            if(state->diceSelect >= 20 && state->diceRoll == state->diceSelect - 1) DOLPHIN_DEED(getRandomDeed());
+                state->diceType[0], sizeof(state->diceType[0]), "%s%d", "d", state->diceSelect);
+            snprintf(
+                state->strings[0],
+                sizeof(state->strings[0]),
+                "%d%s at %s",
+                state->diceQty,
+                state->diceType[0],
+                state->rollTime[0]);
+            if(state->diceSelect >= 20 && state->diceRoll == state->diceSelect)
+                DOLPHIN_DEED(getRandomDeed());
+            if(state->diceSelect >= 20 && state->diceRoll == state->diceSelect - 1)
+                DOLPHIN_DEED(getRandomDeed());
             if(state->diceQty == 1) {
                 snprintf(state->strings[1], sizeof(state->strings[1]), "%d", state->diceRoll);
             } else if(state->diceQty == 2) {
                 snprintf(
-                    state->strings[1], 
-                    sizeof(state->strings[1]), 
-                    "%d %d", 
-                    state->diceRoll, 
+                    state->strings[1],
+                    sizeof(state->strings[1]),
+                    "%d %d",
+                    state->diceRoll,
                     ((rand() % state->diceSelect) + 1));
             } else if(state->diceQty == 3) {
                 snprintf(
@@ -287,7 +334,8 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             canvas_set_font(canvas, FontSecondary);
             canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, state->strings[0]);
         }
-        if(state->diceSelect == 231 && !(state->playerOneScore == 0 && state->playerTwoScore == 0)) {
+        if(state->diceSelect == 231 &&
+           !(state->playerOneScore == 0 && state->playerTwoScore == 0)) {
             canvas_set_font(canvas, FontSecondary);
             snprintf(
                 state->theScores[0],
@@ -377,7 +425,6 @@ int32_t dice_app(void* p) {
         return 255;
     }
 
-
     FuriTimer* timer =
         furi_timer_alloc(dice_tick, FuriTimerTypePeriodic, plugin_state->event_queue);
     if(timer == NULL) {
@@ -389,11 +436,11 @@ int32_t dice_app(void* p) {
     }
 
     LOAD_DESKTOP_SETTINGS(plugin_state->desktop_settings);
-    
+
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, dice_render_callback, plugin_state);
     view_port_input_callback_set(view_port, dice_input_callback, plugin_state->event_queue);
-    
+
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     furi_timer_start(timer, furi_kernel_get_tick_frequency());

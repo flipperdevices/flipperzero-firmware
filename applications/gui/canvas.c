@@ -391,7 +391,13 @@ CanvasOrientation canvas_get_orientation(const Canvas* canvas) {
     return canvas->orientation;
 }
 
-void canvas_draw_icon_bitmap(Canvas* canvas, uint8_t x, uint8_t y, int16_t w, int16_t h, const Icon* icon){
+void canvas_draw_icon_bitmap(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    int16_t w,
+    int16_t h,
+    const Icon* icon) {
     furi_assert(canvas);
     furi_assert(icon);
 
