@@ -122,7 +122,7 @@ static bool subghz_protocol_encoder_intertechno_v3_get_upload(
         level_duration_make(false, (uint32_t)subghz_protocol_intertechno_v3_const.te_short * 10);
     //Send key data
     for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
-        if((instance->generic.data_count_bit == INTERTECHNO_V3_DIMMING_COUNT_BIT) && (i == 27)) {
+        if((instance->generic.data_count_bit == INTERTECHNO_V3_DIMMING_COUNT_BIT) && (i == 9)) {
             //send bit dimm
             instance->encoder.upload[index++] =
                 level_duration_make(true, (uint32_t)subghz_protocol_intertechno_v3_const.te_short);
