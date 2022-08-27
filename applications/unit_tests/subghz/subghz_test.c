@@ -13,7 +13,7 @@
 #define CAME_ATOMO_DIR_NAME EXT_PATH("subghz/assets/came_atomo")
 #define NICE_FLOR_S_DIR_NAME EXT_PATH("subghz/assets/nice_flor_s")
 #define TEST_RANDOM_DIR_NAME EXT_PATH("unit_tests/subghz/test_random_raw.sub")
-#define TEST_RANDOM_COUNT_PARSE 200
+#define TEST_RANDOM_COUNT_PARSE 208
 #define TEST_TIMEOUT 10000
 
 static SubGhzEnvironment* environment_handler;
@@ -127,7 +127,7 @@ static bool subghz_decode_random_test(const char* path) {
         }
         subghz_file_encoder_worker_free(file_worker_encoder_handler);
     }
-    FURI_LOG_T(TAG, "\r\n Decoder count parse \033[0;33m%d\033[0m ", subghz_test_decoder_count);
+    FURI_LOG_D(TAG, "\r\n Decoder count parse \033[0;33m%d\033[0m ", subghz_test_decoder_count);
     if(furi_get_tick() - test_start > TEST_TIMEOUT * 10) {
         printf("\033[0;31mRandom test ERROR TimeOut\033[0m\r\n");
         return false;
