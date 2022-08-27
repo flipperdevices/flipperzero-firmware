@@ -11,21 +11,6 @@
 - - WiFi (Marauder), Mouse Jacker, Mouse Jiggler, NRF Sniffer & VideoPoker. (Or Stick To 0.65.1-0823-RM)
 - - Arkanoid, Multi Converter & Picopass (Or Stick To 0.65.3-0825-RM)
 - - iButton
-- Renamed bluetooth from "Flipper" to "zzRogue" now that Android app is patched [(thanks to Nikita/LionZXY)](https://github.com/flipperdevices/Flipper-Android-App/pull/340/).
-- [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/)
-- Sacrificed/`HIDDEN` for DOOM, until FAPS come: Arkanoid, Multi Converter & Picopass
-- Added hold back to exit for DOOM
-- Bugfix for universal remotes (by darmiel) from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Updated universal remote assets (by Amec0e) from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Open PR: [Add support for PAC/Stanley tags #1648 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1648)
-- Open PR: [Add support for Paradox tags #1655 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1655)
-- Open PR: [Add support for Jablotron tags #1657 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1657)
-- Open PR: [Add support for Viking tags #1668 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1668)
-- Open PR: [SubGhz: add protocol Intertechno_V3 #1622 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1622)
-- `HIDDEN` for protocols & dev space: iButton
-- OFW: [SubGhz: out debug data to external pin #1665 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1665)
-- OFW: [workflows and fbtenv improovements #1661 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/1661)
-- Open PR: [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
