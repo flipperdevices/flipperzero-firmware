@@ -11,6 +11,7 @@
 #include "protocol_paradox.h"
 #include "protocol_viking.h"
 #include "protocol_jablotron.h"
+#include "protocol_pac_stanley.h"
 
 const ProtocolBase* lfrfid_protocols[] = {
     [LFRFIDProtocolEM4100] = &protocol_em4100,
@@ -25,4 +26,5 @@ const ProtocolBase* lfrfid_protocols[] = {
     [LFRFIDProtocolParadox] = &protocol_paradox,
     [LFRFIDProtocolViking] = &protocol_viking,
     [LFRFIDProtocolJablotron] = &protocol_jablotron,
+    [LFRFIDProtocolPACStanley] = &protocol_pac_stanley,
 };
