@@ -165,7 +165,7 @@ bool protocol_viking_write_data(ProtocolViking* protocol, void* data) {
              (2 << LFRFID_T5577_MAXBLOCK_SHIFT));
         request->t5577.block[1] = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
         request->t5577.block[2] = bit_lib_get_bits_32(protocol->encoded_data, 32, 32);
-        request->t5577.blocks_to_write = 2;
+        request->t5577.blocks_to_write = 3;
         result = true;
     }
     return result;
