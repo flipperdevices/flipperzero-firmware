@@ -8,9 +8,10 @@
 #include "protocol_fdx_b.h"
 #include "protocol_hid_generic.h"
 #include "protocol_hid_ex_generic.h"
-#include "protocol_paradox.h"
+#include "protocol_pyramid.h"
 #include "protocol_viking.h"
 #include "protocol_jablotron.h"
+#include "protocol_paradox.h"
 #include "protocol_pac_stanley.h"
 
 const ProtocolBase* lfrfid_protocols[] = {
@@ -23,8 +24,9 @@ const ProtocolBase* lfrfid_protocols[] = {
     [LFRFIDProtocolFDXB] = &protocol_fdx_b,
     [LFRFIDProtocolHidGeneric] = &protocol_hid_generic,
     [LFRFIDProtocolHidExGeneric] = &protocol_hid_ex_generic,
-    [LFRFIDProtocolParadox] = &protocol_paradox,
+    [LFRFIDProtocolPyramid] = &protocol_pyramid,
     [LFRFIDProtocolViking] = &protocol_viking,
     [LFRFIDProtocolJablotron] = &protocol_jablotron,
+    [LFRFIDProtocolParadox] = &protocol_paradox,
     [LFRFIDProtocolPACStanley] = &protocol_pac_stanley,
 };
