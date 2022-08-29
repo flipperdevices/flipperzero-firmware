@@ -18,6 +18,7 @@ void nrf24_spi_trx(
     uint8_t* rx,
     uint8_t size,
     uint32_t timeout) {
+    UNUSED(timeout);
     furi_hal_gpio_write(handle->cs, false);
     furi_hal_spi_bus_trx(handle, tx, rx, size, nrf24_TIMEOUT);
     furi_hal_gpio_write(handle->cs, true);
@@ -349,17 +350,17 @@ void nrf24_init_promisc_mode(FuriHalSpiBusHandle* handle, uint8_t channel, uint8
     nrf24_flush_tx(handle);
     nrf24_write_reg(handle, REG_RF_CH, channel);
     nrf24_write_reg(handle, REG_RF_SETUP, rate);
-    furi_delay_ms(200);
 
     // prime for RX, no checksum
     nrf24_write_reg(handle, REG_CONFIG, 0x03); // PWR_UP and PRIM_RX, disable AA and CRC
     furi_hal_gpio_write(nrf24_CE_PIN, true);
-    furi_delay_ms(2000);
+    furi_delay_ms(100);
 }
 
 void hexlify(uint8_t* in, uint8_t size, char* out) {
     memset(out, 0, size * 2);
-    for(int i = 0; i < size; i++) sprintf(out + strlen(out), "%02X", in[i]);
+    for(int i = 0; i < size; i++)
+        snprintf(out + strlen(out), sizeof(out + strlen(out)), "%02X", in[i]);
 }
 
 uint64_t bytes_to_int64(uint8_t* bytes, uint8_t size, bool bigendian) {

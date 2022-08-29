@@ -25,3 +25,7 @@ void mj_process_ducky_script(
     uint8_t addr_size,
     uint8_t rate,
     char* script);
+
+#ifdef __cplusplus
+}
+#endif

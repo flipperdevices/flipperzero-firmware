@@ -67,14 +67,16 @@ MJDuckyKey mj_ducky_keys[] = {{" ", 44, 0},         {"!", 30, 2},          {"\""
                               {"F11", 68, 0},       {"F7", 64, 0},         {"UP", 82, 0},
                               {"LEFT", 80, 0}};
 
-// static bool mj_ducky_get_number(const char* param, uint32_t* val) {
-// uint32_t value = 0;
-// if(sscanf(param, "%lu", &value) == 1) {
-// *val = value;
-// return true;
-// }
-// return false;
-// }
+/*
+static bool mj_ducky_get_number(const char* param, uint32_t* val) {
+    uint32_t value = 0;
+    if(sscanf(param, "%lu", &value) == 1) {
+        *val = value;
+        return true;
+    }
+    return false;
+}
+*/
 
 static uint32_t mj_ducky_get_command_len(const char* line) {
     uint32_t len = strlen(line);
@@ -86,7 +88,7 @@ static uint32_t mj_ducky_get_command_len(const char* line) {
 
 static bool mj_get_ducky_key(char* key, size_t keylen, MJDuckyKey* dk) {
     //FURI_LOG_I(TAG, "looking up key %s with length %d", key, keylen);
-    for(int i = 0; i < sizeof(mj_ducky_keys) / sizeof(MJDuckyKey); i++) {
+    for(uint i = 0; i < sizeof(mj_ducky_keys) / sizeof(MJDuckyKey); i++) {
         if(!strncmp(mj_ducky_keys[i].name, key, keylen)) {
             memcpy(dk, &mj_ducky_keys[i], sizeof(MJDuckyKey));
             return true;
@@ -96,11 +98,11 @@ static bool mj_get_ducky_key(char* key, size_t keylen, MJDuckyKey* dk) {
     return false;
 }
 
-static void checksum(uint8_t* payload, size_t len) {
+static void checksum(uint8_t* payload, uint len) {
     // This is also from the KeyKeriki paper
     // Thanks Thorsten and Max!
     uint8_t cksum = 0xff;
-    for(int n = 0; n < len - 2; n++) cksum = (cksum - payload[n]) & 0xff;
+    for(uint n = 0; n < len - 2; n++) cksum = (cksum - payload[n]) & 0xff;
     cksum = (cksum + 1) & 0xff;
     payload[len - 1] = cksum;
 }
@@ -207,7 +209,7 @@ static bool mj_process_ducky_line(
                 rate,
                 hid_payload,
                 LOGITECH_HID_TEMPLATE_SIZE); // empty hid packet
-            for(int i = 0; i < delay_count; i++) {
+            for(uint32_t i = 0; i < delay_count; i++) {
                 inject_packet(
                     handle, addr, addr_size, rate, LOGITECH_KEEPALIVE, LOGITECH_KEEPALIVE_SIZE);
                 furi_delay_ms(10);
@@ -218,7 +220,7 @@ static bool mj_process_ducky_line(
     } else if(strncmp(line_tmp, ducky_cmd_string, strlen(ducky_cmd_string)) == 0) {
         // STRING
         line_tmp = &line_tmp[mj_ducky_get_command_len(line_tmp) + 1];
-        for(int i = 0; i < strlen(line_tmp); i++) {
+        for(size_t i = 0; i < strlen(line_tmp); i++) {
             if(!mj_get_ducky_key(&line_tmp[i], 1, &dk)) return false;
 
             send_hid_packet(handle, addr, addr_size, rate, dk.mod, dk.hid);
@@ -235,7 +237,7 @@ static bool mj_process_ducky_line(
         if(repeat_cnt < 2) return false;
 
         FURI_LOG_I(TAG, "repeating %s %d times", prev_line, repeat_cnt);
-        for(int i = 0; i < repeat_cnt; i++)
+        for(uint32_t i = 0; i < repeat_cnt; i++)
             mj_process_ducky_line(handle, addr, addr_size, rate, prev_line, NULL);
 
         return true;

@@ -1,5 +1,5 @@
 App(
-    appid="GAME_tama_p1",
+    appid="GAME_TAMA_P1",
     name="TAMA P1",
     apptype=FlipperAppType.GAME,
     entry_point="tama_p1_app",
