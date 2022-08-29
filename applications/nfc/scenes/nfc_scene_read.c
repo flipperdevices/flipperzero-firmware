@@ -25,7 +25,7 @@ void nfc_scene_read_set_state(Nfc* nfc, NfcSceneReadState state) {
         if(state == NfcSceneReadStateDetecting) {
             popup_reset(nfc->popup);
             popup_set_text(
-                nfc->popup, "Apply card to\nFlipper's back", 97, 24, AlignCenter, AlignTop);
+                nfc->popup, "Place Flipper\non the card\n with the\ndevice screen\nfacing up\n", 97, 6, AlignCenter, AlignTop);
             popup_set_icon(nfc->popup, 0, 8, &I_NFC_manual);
         } else if(state == NfcSceneReadStateReading) {
             popup_reset(nfc->popup);
