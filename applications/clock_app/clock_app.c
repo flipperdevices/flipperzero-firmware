@@ -465,9 +465,10 @@ int32_t clock_app(void* p) {
                         if(plugin_state->codeSequence == 8) {
                             plugin_state->codeSequence++;
                         } else {
-                            // Don't Exit the plugin
-                            // processing = false;
                             plugin_state->w_test = false;
+                            // Don't Exit the plugin
+                            plugin_state->codeSequence--;
+                            if(plugin_state->codeSequence < -1) processing = false;
                         }
                         break;
                     }
