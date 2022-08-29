@@ -8,6 +8,11 @@
 - Known Issues:			`FAP Loader`, `Chess` & `Chip8` (No Controls)
 - Apps `HIDDEN` for compile space can be found on Side B in the update folder.
 - Added tap back x2 to exit clock.
+- OFW: [Add support for PAC/Stanley tags #1648 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1648)
+- OFW: [Add support for Paradox tags #1655 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1655)
+- OFW: [Add support for Jablotron tags #1657 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1657)
+- OFW: [Remove execute permissions from *.c and *.h files #1651 (By wdoekes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1651)
+- OFW: [Add support for Pyramid tags #1676 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1676)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -137,10 +142,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 - [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
 - [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
-- [Add support for PAC/Stanley tags #1648 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1648)
-- [Add support for Paradox tags #1655 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1655)
-- [Add support for Jablotron tags #1657 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1657)
-- [Add support for Viking tags #1668 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1668)
 - [SubGhz: add protocol Intertechno_V3 #1622 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1622)
 - [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
 
