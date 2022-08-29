@@ -132,6 +132,8 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
 #ifdef LFRFID_WORKER_READ_DEBUG_GPIO
     furi_hal_gpio_init_simple(LFRFID_WORKER_READ_DEBUG_GPIO_VALUE, GpioModeOutputPushPull);
     furi_hal_gpio_init_simple(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, GpioModeOutputPushPull);
+    furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_VALUE, false);
+    furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, false);
 #endif
 
     LFRFIDWorkerReadContext ctx;
@@ -171,10 +173,16 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
         if(buffer_stream_get_overrun_count(ctx.stream) > 0) {
             FURI_LOG_E(TAG, "Read overrun, recovering");
             buffer_stream_reset(ctx.stream);
+#ifdef LFRFID_WORKER_READ_DEBUG_GPIO
+            furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, false);
+#endif
             continue;
         }
 
         if(buffer == NULL) {
+#ifdef LFRFID_WORKER_READ_DEBUG_GPIO
+            furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, false);
+#endif
             continue;
         }
 
@@ -321,6 +329,8 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
     free(last_data);
 
 #ifdef LFRFID_WORKER_READ_DEBUG_GPIO
+    furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_VALUE, false);
+    furi_hal_gpio_write(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, false);
     furi_hal_gpio_init_simple(LFRFID_WORKER_READ_DEBUG_GPIO_VALUE, GpioModeAnalog);
     furi_hal_gpio_init_simple(LFRFID_WORKER_READ_DEBUG_GPIO_LOAD, GpioModeAnalog);
 #endif
