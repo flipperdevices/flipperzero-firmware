@@ -246,7 +246,7 @@ void protocol_pyramid_render_data(ProtocolPyramid* protocol, string_t result) {
         uint16_t card_id;
         bit_lib_copy_bits((uint8_t*)&card_id, 8, 8, decoded_data, 16);
         bit_lib_copy_bits((uint8_t*)&card_id, 0, 8, decoded_data, 24);
-        string_cat_printf(result, "ID: %03u,%05u", facility, card_id);
+        string_cat_printf(result, "FC: %03u, Card: %05u", facility, card_id);
     } else {
         string_cat_printf(result, "Data: unknown");
     }
