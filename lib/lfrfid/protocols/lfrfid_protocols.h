@@ -18,6 +18,7 @@ typedef enum {
     LFRFIDProtocolHidGeneric,
     LFRFIDProtocolHidExGeneric,
     LFRFIDProtocolParadox,
+    LFRFIDProtocolPACStanley,
 
     LFRFIDProtocolMax,
 } LFRFIDProtocol;
