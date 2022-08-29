@@ -46,19 +46,17 @@ WifideautherApp* wifi_deauther_app_alloc() {
         WifideautherAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
 
-    for(int i = 0; i < NUM_MENU_ITEMS; ++i) {
+    for (int i = 0; i < NUM_MENU_ITEMS; ++i) {
         app->selected_option_index[i] = 0;
     }
 
     app->text_box = text_box_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, WifideautherAppViewConsoleOutput, text_box_get_view(app->text_box));
+    view_dispatcher_add_view(app->view_dispatcher, WifideautherAppViewConsoleOutput, text_box_get_view(app->text_box));
     string_init(app->text_box_store);
     string_reserve(app->text_box_store, WIFI_deauther_TEXT_BOX_STORE_SIZE);
 
     app->text_input = text_input_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, WifideautherAppViewTextInput, text_input_get_view(app->text_input));
+    view_dispatcher_add_view(app->view_dispatcher, WifideautherAppViewTextInput, text_input_get_view(app->text_input));
 
     scene_manager_next_scene(app->scene_manager, WifideautherSceneStart);
 
