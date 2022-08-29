@@ -129,24 +129,27 @@ class Main(App):
         return True
 
     def _apply_file_permissions(self, sources: list, dry_run: bool = False):
+        execute_permissions = 0o111
         pattern = re.compile(SOURCE_CODE_FILE_PATTERN)
         good = []
         bad = []
         # Check sources for unexpected execute permissions
         for source in sources:
             st = os.stat(source)
-            if st.st_mode & 0o0111:
-                bad.append((source, st.st_mode & ~0o0111))
+            perms_too_many = st.st_mode & execute_permissions
+            if perms_too_many:
+                good_perms = st.st_mode & ~perms_too_many
+                bad.append((source, oct(perms_too_many), good_perms))
             else:
                 good.append(source)
         # Notify or fix
         if dry_run:
             if len(bad) > 0:
                 self.logger.error(f"Found {len(bad)} incorrect permissions")
-                self.logger.info(bad)
+                self.logger.info([record[0:2] for record in bad])
                 return False
         else:
-            for source, new_perms in bad:
+            for source, perms_too_many, new_perms in bad:
                 os.chmod(source, new_perms)
         return True
 
