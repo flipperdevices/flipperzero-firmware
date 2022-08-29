@@ -35,7 +35,7 @@ void nfc_scene_mf_classic_keys_list_on_enter(void* context) {
                 nfc);
         }
     }
-    submenu_set_header(submenu, "Select key to remove");
+    submenu_set_header(submenu, "Select key to delete:");
     mf_classic_dict_free(dict);
     string_clear(temp_key);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
@@ -45,23 +45,9 @@ bool nfc_scene_mf_classic_keys_list_on_event(void* context, SceneManagerEvent ev
     Nfc* nfc = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
-        MfClassicDict* dict = mf_classic_dict_alloc(MfClassicDictTypeUser);
-        if(dict) {
-            mf_classic_dict_rewind(dict);
-            if(mf_classic_dict_remove_key(dict, event.event)) {
-                if(mf_classic_dict_get_total_keys(dict) == 0) {
-                    scene_manager_set_scene_state(
-                        nfc->scene_manager, NfcSceneDeleteSuccess, NfcSceneMfClassicKeys);
-                } else {
-                    scene_manager_set_scene_state(
-                        nfc->scene_manager, NfcSceneDeleteSuccess, NfcSceneMfClassicKeysList);
-                }
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneDeleteSuccess);
-            } else {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);
-            }
-        }
-        mf_classic_dict_free(dict);
+        scene_manager_set_scene_state(
+            nfc->scene_manager, NfcSceneMfClassicKeysDelete, event.event);
+        scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicKeysDelete);
         consumed = true;
     }
     return consumed;

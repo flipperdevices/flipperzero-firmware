@@ -32,7 +32,7 @@ bool nfc_scene_mf_classic_keys_add_on_event(void* context, SceneManagerEvent eve
             // bool key_added = false;
             MfClassicDict* dict = mf_classic_dict_alloc(MfClassicDictTypeUser);
             if(dict) {
-                if(mf_classic_dict_key_present(dict, nfc->byte_input_store)) {
+                if(mf_classic_dict_is_key_present(dict, nfc->byte_input_store)) {
                     scene_manager_set_scene_state(
                         nfc->scene_manager,
                         NfcSceneMfClassicKeysWarnDuplicate,
