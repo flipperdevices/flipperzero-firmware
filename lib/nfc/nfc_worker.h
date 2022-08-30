@@ -16,7 +16,7 @@ typedef enum {
     NfcWorkerStateMfClassicEmulate,
     NfcWorkerStateReadMfUltralightReadAuth,
     NfcWorkerStateMfClassicDictAttack,
-    NfcWorkerStateAnalizeReader,
+    NfcWorkerStateAnalyzeReader,
     // Debug
     NfcWorkerStateEmulateApdu,
     NfcWorkerStateField,

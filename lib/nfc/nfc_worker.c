@@ -103,7 +103,7 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_mf_ultralight_read_auth(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateMfClassicDictAttack) {
         nfc_worker_mf_classic_dict_attack(nfc_worker);
-    } else if(nfc_worker->state == NfcWorkerStateAnalizeReader) {
+    } else if(nfc_worker->state == NfcWorkerStateAnalyzeReader) {
         nfc_worker_analyze_reader(nfc_worker);
     }
     furi_hal_nfc_sleep();
@@ -652,7 +652,7 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
     rfal_platform_spi_acquire();
 
     FURI_LOG_D(TAG, "Start reader analyzer");
-    while(nfc_worker->state == NfcWorkerStateAnalizeReader) {
+    while(nfc_worker->state == NfcWorkerStateAnalyzeReader) {
         furi_hal_nfc_stop_cmd();
         furi_delay_ms(5);
         furi_hal_nfc_listen_start(nfc_data);

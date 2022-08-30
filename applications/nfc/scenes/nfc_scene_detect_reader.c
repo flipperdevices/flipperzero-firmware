@@ -22,7 +22,7 @@ void nfc_scene_detect_reader_on_enter(void* context) {
     detect_reader_set_callback(nfc->detect_reader, nfc_scene_detect_reader_callback, nfc);
     nfc_worker_start(
         nfc->worker,
-        NfcWorkerStateAnalizeReader,
+        NfcWorkerStateAnalyzeReader,
         &nfc->dev->dev_data,
         nfc_detect_reader_worker_callback,
         nfc);
