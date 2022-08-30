@@ -62,7 +62,7 @@ jobs:
           with urllib.request.urlopen(event['pull_request']['_links']['commits']['href']) as commit_file:
               commit_json = json.loads(commit_file.read().decode('utf-8'))
           commit_comment = shlex.quote(commit_json[-1]['commit']['message'])
-          commit_hash = commit_json[-1]['commit']['sha']
+          commit_hash = commit_json[-1]['sha']
           commit_sha = commit_hash[:8]
           ref = event['pull_request']['head']['ref']
           pull_id = event['pull_request']['number']
