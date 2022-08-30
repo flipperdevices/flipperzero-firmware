@@ -14,8 +14,9 @@
 - OFW: [Remove execute permissions from *.c and *.h files #1651 (By wdoekes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1651)
 - OFW: [Add support for Pyramid tags #1676 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1676)
 - New Dolphin Animations: [Shodan (By qqMajiKpp)]
-- Updated Side B to include GPIO
 - New Dolphin Animations: [Sirene & The Witch (By Haseo)]
+- Passport Updates [(Thanks to Kuronons)]
+- Updated Side B to include GPIO
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -92,6 +93,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Dolphin: Internal manifest updated to have animations always available with max level 30
 - Dolphin: Level animation sequence for level 3+ to be lvl1->2 for levels 1-20 and lvl2->3 for levels 21-30.
 - Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware), changed to Mood Stays Less Than 6 / Mood Stays High (but not in game mode) (By RogueMaster)
+- Dolphin: Passport: DB Themed [(Thanks to Kuronons)]
 - Dolphin: Passport: Show EXP [(By Dabolus)](https://github.com/Dabolus/flipperzero-firmware-rpg/)
 - Dolphin: Changed daily MAX to 198 on all 7 Deed Types. Random Deed Selection used for MAX +3 EXP daily gain.
 - Dolphin: Plugin Achivement +3 EXP for a total of up to 700 EXP daily. Plugin Achivements are:

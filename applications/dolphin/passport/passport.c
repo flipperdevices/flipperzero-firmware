@@ -9,23 +9,29 @@
 #include "desktop/desktop_settings/desktop_settings_app.h"
 #include "math.h"
 
-#define MOODS_TOTAL 3
+#define MOODS_TOTAL 1
 #define BUTTHURT_MAX 14
 
 static const Icon* const portrait_happy[MOODS_TOTAL] = {
     &I_passport_happy1_46x49,
     &I_passport_happy2_46x49,
-    &I_passport_happy3_46x49};
-static const Icon* const portrait_ok[MOODS_TOTAL] = {
-    &I_passport_okay1_46x49,
-    &I_passport_okay2_46x49,
-    &I_passport_okay3_46x49};
-static const Icon* const portrait_bad[MOODS_TOTAL] = {
-    &I_passport_bad1_46x49,
-    &I_passport_bad2_46x49,
-    &I_passport_bad3_46x49};
+    &I_passport_happy3_46x49,
+    &I_G0ku,
+    &I_g0ku_1,
+    &I_g0ku_2,
+    &I_g0ku_3
+	};
+// static const Icon* const portrait_ok[MOODS_TOTAL] = {
+    // &I_passport_okay1_46x49,
+    // &I_passport_okay2_46x49,
+    // &I_passport_okay3_46x49};
+// static const Icon* const portrait_bad[MOODS_TOTAL] = {
+    // &I_passport_bad1_46x49,
+    // &I_passport_bad2_46x49,
+    // &I_passport_bad3_46x49};
 
-static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy, portrait_ok, portrait_bad};
+// static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy, portrait_ok, portrait_bad};
+static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy};
 
 static const char* const moods[16] = {
     "Stoned",
@@ -35,15 +41,16 @@ static const char* const moods[16] = {
     "Happy",
     "Satisfied",
     "Relaxed",
+    "Nostalgic",
     "Okay",
     "Tired",
     "Bored",
     "Sad",
-    "Disappointed",
     "Annoyed",
     "Upset",
     "Angry",
-    "Furious"};
+    "Furious"
+};
 
 static void input_callback(InputEvent* input, void* ctx) {
     FuriSemaphore* semaphore = ctx;
@@ -65,18 +72,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     uint8_t moodStrIndex = stats->butthurt;
     if(desktop_settings->is_dumbmode) moodStrIndex = moodStrIndex + 4;
     snprintf(mood_str, 20, "Mood: %s", moods[moodStrIndex]);
-    if(stats->butthurt <= 4) {
-        mood = 0;
-        // snprintf(mood_str, 20, "Mood: Happy");
-    } else if(stats->butthurt <= 9) {
-        mood = 0;
-        // mood = 1;
-        // snprintf(mood_str, 20, "Mood: Ok");
-    } else {
-        mood = 0;
-        // mood = 2;
-        // snprintf(mood_str, 20, "Mood: Angry");
-    }
+    mood = 0; // DONT NEED DIFFERENT PICS BASED ON MOOD
 
     uint32_t xp_progress = 0;
     uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
@@ -90,39 +86,35 @@ static void render_callback(Canvas* canvas, void* ctx) {
     }
 
     // multipass
-    canvas_draw_icon(canvas, 0, 0, &I_passport_left_6x46);
-    canvas_draw_icon(canvas, 0, 46, &I_passport_bottom_128x18);
-    canvas_draw_line(canvas, 6, 0, 125, 0);
-    canvas_draw_line(canvas, 127, 2, 127, 47);
-    canvas_draw_dot(canvas, 126, 1);
-
+    canvas_draw_icon(canvas, 0, 0, &I_passport_DB);
+    
     // portrait
     furi_assert((stats->level > 0) && (stats->level <= 30));
     uint16_t tmpLvl = 0;
     if(stats->level > 10) tmpLvl = 1;
-    if(stats->level > 20) tmpLvl = 2;
-    canvas_draw_icon(canvas, 9, 5, portraits[mood][tmpLvl]);
-    canvas_draw_line(canvas, 58, 14, 123, 14);
-    canvas_draw_line(canvas, 58, 26, 123, 26);
-    canvas_draw_line(canvas, 59, 46, 122, 46);
-
+    if(stats->level > 15) tmpLvl = 2;
+    if(stats->level > 18) tmpLvl = 3;
+    if(stats->level > 21) tmpLvl = 4;
+    if(stats->level > 24) tmpLvl = 5;
+    if(stats->level > 27) tmpLvl = 6;
+    canvas_draw_icon(canvas, 11, 2, portraits[mood][tmpLvl]);
+   
     const char* my_name = furi_hal_version_get_name_ptr();
     snprintf(level_str, 12, "Level: %hu", stats->level);
     snprintf(xp_str, 12, "%lu/%lu", xp_above_last_levelup, xp_for_current_level);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 58, 12, my_name ? my_name : "Unknown");
-    canvas_draw_str(canvas, 58, 24, mood_str);
+    canvas_draw_str(canvas, 58, 10, my_name ? my_name : "Unknown");
+    canvas_draw_str(canvas, 58, 22, mood_str);
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_str(canvas, 58, 36, level_str);
+    canvas_draw_str(canvas, 58, 34, level_str);
     canvas_set_font(canvas, FontBatteryPercent);
-    canvas_draw_str(canvas, 58, 44, xp_str);
+    canvas_draw_str(canvas, 58, 42, xp_str);
     canvas_set_font(canvas, FontSecondary);
 
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, 123 - xp_progress, 47, xp_progress + 1, 6);
+    canvas_draw_box(canvas, 123 - xp_progress, 45, xp_progress + 1, 5);
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_line(canvas, 123, 47, 123, 52);
-}
+    }
 
 int32_t passport_app(void* p) {
     UNUSED(p);
