@@ -1,5 +1,5 @@
 #
-# Main Fipper Build System entry point
+# Main Flipper Build System entry point
 #
 # This file is evaluated by scons (the build system) every time fbt is invoked.
 # Scons constructs all referenced environments & their targets' dependency
