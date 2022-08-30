@@ -23,7 +23,7 @@ App(
         "nfc",
         "subghz",
         "bad_usb",
-        "u2f",
+        # "u2f",
     ],
 )
 
@@ -35,20 +35,22 @@ App(
         "APPS_Sub_Playlist",
         # "APPS_BarcodeGenerator",
         "APPS_BluetoothRemote",
-        "APPS_DolphinRestorer",
-        "APPS_DolphinBackup",
+        # "APPS_DolphinRestorer",
+        # "APPS_DolphinBackup",
         "APPS_FlipFrid",
         # "APPS_MouseJacker",
         # "APPS_MouseJiggler",
         # "APPS_multi_conv",
         "APPS_MusicPlayer",
-        "APPS_NameChanger",
+        # "APPS_NameChanger",
         # "APPS_NRFSniff",
         # "APPS_Paint",
         # "INTAPP_Picopass",
         # "APPS_SentrySafe",
         "APPS_SpectrumAnalyzer",
-        "APPS_WAVPlayer",
+        # "APPS_WAVPlayer",
+        "APPS_calculator",
+        
     ],
 )
 
@@ -58,7 +60,7 @@ App(
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         "GAME_2048",
-        # "GAME_Arkanoid",
+        "GAME_Arkanoid",
         # "INTAPP_Chess",
         # "INTAPP_Chip8",
         "GAME_Dice",
@@ -68,12 +70,12 @@ App(
         # "GAME_MandelbrotSet",
         # "GAME_MontyHall",
         "GAME_Snake",
-        "GAME_TAMA_P1",
+        # "GAME_TAMA_P1",
         # "GAME_Tanks",
         "GAME_Tetris",
         # "GAME_TicTacToe",
         # "GAME_VideoPoker",
-        "GAME_Zombiez",
+        # "GAME_Zombiez",
     ],
 )
 
@@ -103,8 +105,8 @@ App(
     name="Custom applications for main menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "ibutton",
-        "u2f",
+        # "ibutton",
+        # "u2f",
         "elf_loader",
         "wifi_marauder",
         "APPS_wifi_deauther",
@@ -143,5 +145,6 @@ App(
         "GAME_TicTacToe",
         "GAME_VideoPoker",
         "GAME_Zombiez",
+        "APPS_calculator",
     ],
 )

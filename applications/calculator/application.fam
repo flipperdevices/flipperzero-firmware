@@ -1,0 +1,10 @@
+App(
+    appid="APPS_calculator",
+    name="Calculator",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="calculator_app",
+    cdefines=["APP_CALCULATOR"],
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=10,
+)
