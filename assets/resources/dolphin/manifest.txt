@@ -22,6 +22,20 @@ Min level: 1
 Max level: 30
 Weight: 3
 
+Name: L1_Sirene_128x64
+Min butthurt: 0
+Max butthurt: 10
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: L1_The_Witch_128x64
+Min butthurt: 0
+Max butthurt: 10
+Min level: 1
+Max level: 30
+Weight: 3
+
 Name: L1_Shodan_128x64
 Min butthurt: 0
 Max butthurt: 10
