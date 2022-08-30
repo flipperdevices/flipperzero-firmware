@@ -45,54 +45,72 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 'Test'
-        run: |
-          cat '${{ github.event_path }}'
-
-      - name: 'Escape pull request title'
+      - name: 'Get commit details (PR)'
         if: github.event_name == 'pull_request'
         run: |
           import json
           import os
           import shlex
+          import re
+          from datetime import date
           import urllib.request
-          with open('${{ github.event_path }}') as fh:
-              event = json.load(fh)
-          pull_title = shlex.quote(event['pull_request']['title'])
-          comments_file = event['pull_request']['_links']['commits']['href']
-          urllib.request.urlretrieve(comments_file, "comments.json")
-          with open("comments.json", 'r') as com:
-              com_json = json.load(com)
-          commit_comment = com_json[-1]['commit']['message']
-          with open(os.environ['GITHUB_ENV'], 'a') as fh:
-              print(f'PULL_NAME={pull_title}', file=fh)
-              print(f'COMMIT_MSG={commit_comment}', file=fh)
+
+          current_time = date.today()
+          event_file = open('${{ github.event_path }}')
+          env_file = open(os.environ['GITHUB_ENV'], 'a')
+          event = json.load(event_file)
+          with urllib.request.urlopen(event['pull_request']['_links']['commits']['href']) as commit_file:
+              commit_json = json.loads(commit_file.read().decode('utf-8'))
+          commit_comment = shlex.quote(commit_json[-1]['commit']['message'])
+          commit_hash = commit_json[-1]['commit']['sha']
+          commit_sha = commit_hash[:8]
+          ref = event['pull_request']['head']['ref']
+          pull_id = event['pull_request']['number']
+          pull_name = shlex.quote(event['pull_request']['title'])
+          branch_name = re.sub("refs/\w+/", "", ref)
+          suffix = branch_name + "-" + current_time.strftime("%d%m%Y") + "-" + commit_sha
+          if ref.startswith("refs/tags/"):
+              suffix = branch_name.replace("/", "_")
+          print(f'COMMIT_MSG={commit_comment}', file=env_file)
+          print(f'COMMIT_HASH={commit_hash}', file=env_file)
+          print(f'COMMIT_SHA={commit_sha}', file=env_file)
+          print(f'SUFFIX={suffix}', file=env_file)
+          print(f'BRANCH_NAME={branch_name}', file=env_file)
+          print(f'PULL_ID={pull_id}', file=env_file)
+          print(f'PULL_NAME={pull_name}', file=env_file)
+          event_file.close()
+          env_file.close()
         shell: python3 {0}
 
-      - name: 'Generate prefixes by commit'
-        id: names
+      - name: 'Get commit details (Not in PR)'
+        if: github.event_name != 'pull_request'
         run: |
-          REF="${{github.ref}}"
-          COMMIT_HASH="$(git rev-parse HEAD)"
-          SHA="$(git rev-parse --short HEAD)"
-          COMMIT_MSG="${{github.event.head_commit.message}}"
-          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-            REF="${{github.head_ref}}"
-            COMMIT_HASH="$(git log -1 --pretty=oneline | awk '{print $1}')"
-            SHA="$(cut -c -8 <<< "$COMMIT_HASH")"
-            PULL_ID="${{github.event.pull_request.number}}"
-          fi
-          BRANCH_NAME=${REF#refs/*/}
-          SUFFIX=${BRANCH_NAME//\//_}-$(date +'%d%m%Y')-${SHA}
-          if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
-            SUFFIX=${BRANCH_NAME//\//_}
-          fi
-          echo "::set-output name=commit-hash::${COMMIT_HASH}"
-          echo "::set-output name=commit-msg::${COMMIT_MSG}"
-          echo "::set-output name=pull-id::${PULL_ID}"
-          echo "::set-output name=pull-name::${PULL_NAME}"
-          echo "::set-output name=branch-name::${BRANCH_NAME}"
-          echo "::set-output name=suffix::${SUFFIX}"
+          import json
+          import os
+          import shlex
+          import re
+          from datetime import date
+
+          current_time = date.today()
+          event_file = open('${{ github.event_path }}')
+          env_file = open(os.environ['GITHUB_ENV'], 'a')
+          event = json.load(event_file)
+          commit_comment = shlex.quote(event['commits'][-1]['message'])
+          commit_hash = event['commits'][-1]['id']
+          commit_sha = commit_hash[:8]
+          ref = event['ref']
+          branch_name = re.sub("refs/\w+/", "", ref)
+          suffix = branch_name + "-" + current_time.strftime("%d%m%Y") + "-" + commit_sha
+          if ref.startswith("refs/tags/"):
+              suffix = branch_name.replace("/", "_")
+          print(f'COMMIT_MSG={commit_comment}', file=env_file)
+          print(f'COMMIT_HASH={commit_hash}', file=env_file)
+          print(f'COMMIT_SHA={commit_sha}', file=env_file)
+          print(f'SUFFIX={suffix}', file=env_file)
+          print(f'BRANCH_NAME={branch_name}', file=env_file)
+          event_file.close()
+          env_file.close()
+        shell: python3 {0}
 
       - name: 'Make artifacts directory'
         run: |
@@ -105,13 +123,13 @@ jobs:
           chmod 600 ./deploy_key;
           rsync -avzP \
               -e 'ssh -p ${{ secrets.RSYNC_DEPLOY_PORT }} -i ./deploy_key' \
-              ${{ secrets.RSYNC_DEPLOY_USER }}@${{ secrets.RSYNC_DEPLOY_HOST }}:"${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${{steps.names.outputs.branch-name}}/" artifacts/;
+              ${{ secrets.RSYNC_DEPLOY_USER }}@${{ secrets.RSYNC_DEPLOY_HOST }}:"${{ secrets.RSYNC_DEPLOY_BASE_PATH }}$BRANCH_NAME/" artifacts/;
           rm ./deploy_key;
 
       - name: 'Make .map file analyze'
         run: |
           cd artifacts/
-          /Applications/amap/Contents/MacOS/amap -f flipper-z-f7-firmware-${{steps.names.outputs.suffix}}.elf.map
+          /Applications/amap/Contents/MacOS/amap -f flipper-z-f7-firmware-$SUFFIX.elf.map
 
       - name: 'Upload report to DB'
         run: |
@@ -120,20 +138,14 @@ jobs:
           {
             SECTION="$1";
             arm-none-eabi-size \
-              -A artifacts/flipper-z-f7-firmware-${{steps.names.outputs.suffix}}.elf \
+              -A artifacts/flipper-z-f7-firmware-$SUFFIX.elf \
               | grep "^$SECTION" | awk '{print $2}'
           }
-          export COMMIT_HASH="${{steps.names.outputs.commit-hash}}"
-          export COMMIT_MSG="${{steps.names.outputs.commit-msg}}"
-          export BRANCH_NAME="${{steps.names.outputs.branch-name}}"
           export BSS_SIZE="$(get_size ".bss")"
           export TEXT_SIZE="$(get_size ".text")"
           export RODATA_SIZE="$(get_size ".rodata")"
           export DATA_SIZE="$(get_size ".data")"
           export FREE_FLASH_SIZE="$(get_size ".free_flash")"
-          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-            export PULL_ID="${{steps.names.outputs.pull-id}}"
-          fi
           python3 -m pip install mariadb
           python3 scripts/amap_mariadb_insert.py \
             ${{ secrets.AMAP_MARIADB_USER }} \
@@ -141,4 +153,4 @@ jobs:
             ${{ secrets.AMAP_MARIADB_HOST }} \
             ${{ secrets.AMAP_MARIADB_PORT }} \
             ${{ secrets.AMAP_MARIADB_DATABASE }} \
-            artifacts/flipper-z-f7-firmware-${{steps.names.outputs.suffix}}.elf.map.all
+            artifacts/flipper-z-f7-firmware-$SUFFIX.elf.map.all
