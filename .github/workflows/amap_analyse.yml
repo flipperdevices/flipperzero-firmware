@@ -45,7 +45,11 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: escape pull request title
+      - name: 'Test'
+        run: |
+          cat '${{ github.event_path }}'
+
+      - name: 'Escape pull request title'
         if: github.event_name == 'pull_request'
         run: |
           import json
