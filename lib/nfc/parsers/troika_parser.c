@@ -59,6 +59,9 @@ bool troika_parser_parse(NfcDeviceData* dev_data) {
         uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
         if(key != troika_keys[8].key_a) break;
 
+        // Verify card type
+        if(data->type != MfClassicType1k) break;
+
         // Parse data
         uint8_t* temp_ptr = &data->block[8 * 4 + 1].value[5];
         uint16_t balance = ((temp_ptr[0] << 8) | temp_ptr[1]) / 25;

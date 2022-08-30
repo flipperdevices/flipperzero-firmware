@@ -91,6 +91,11 @@ bool plantain_parser_parse(NfcDeviceData* dev_data) {
     uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
     if(key != plantain_keys[4].key_a) return false;
 
+    // Verify that it's not a dual card
+    sec_tr = mf_classic_get_sector_trailer_by_sector(data, 8);
+    uint64_t key_dual = nfc_util_bytes2num(sec_tr->key_a, 6);
+    if(key_dual == 0xa73f5dc1d333) return false;
+
     // Point to block 0 of sector 4, value 0
     uint8_t* temp_ptr = &data->block[4 * 4].value[0];
     // Read first 4 bytes of block 0 of sector 4 from last to first and convert them to uint32_t

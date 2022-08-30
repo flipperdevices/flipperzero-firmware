@@ -81,6 +81,14 @@ bool troika_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) 
 
 bool troika_4k_parser_parse(NfcDeviceData* dev_data) {
     MfClassicData* data = &dev_data->mf_classic_data;
+    // Verify key
+    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, 4);
+    uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
+    if(key != troika_4k_keys[4].key_a) return false;
+
+    // Verify card type
+    if(data->type != MfClassicType4k) return false;
+
     uint8_t* temp_ptr = &data->block[8 * 4 + 1].value[5];
     uint16_t balance = ((temp_ptr[0] << 8) | temp_ptr[1]) / 25;
     temp_ptr = &data->block[8 * 4].value[3];
@@ -91,7 +99,8 @@ bool troika_4k_parser_parse(NfcDeviceData* dev_data) {
     }
     number >>= 4;
 
-    string_printf(dev_data->parsed_data, "\e#Troika\nNum: %ld\nBalance: %d rur.", number, balance);
+    string_printf(
+        dev_data->parsed_data, "\e#Troika 4K\nNum: %ld\nBalance: %d rur.", number, balance);
 
     return true;
 }
