@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: h2zero/NimBLE-Arduino
-          ref: master
+          ref: v1.2.0
           path: CustomNimBLE-Arduino
           
       - name: Install Adafruit_NeoPixel
