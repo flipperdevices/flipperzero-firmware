@@ -13,6 +13,7 @@
 - OFW: [Add support for Jablotron tags #1657 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1657)
 - OFW: [Remove execute permissions from *.c and *.h files #1651 (By wdoekes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1651)
 - OFW: [Add support for Pyramid tags #1676 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1676)
+- Added [Shodan (By qqMajiKpp)]
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -74,7 +75,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Animations: SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
 - Assets: Includes a NFC Level 50 Link Amiibo
 - Assets: Includes a NFC Rick Roll link
-- Assets: Includes New Dolphin Animations: [Rick Roll, Matrix & Swim animations (By qqMajiKpp)], [Rukamon 2x and Agumon animations (By Syrius)], [Mew (By Arkaivos)], [Eye of the Flipper (By Kuronons)]
+- Assets: Includes New Dolphin Animations: [Rick Roll, Matrix & Swim animations (By qqMajiKpp)], [Rukamon 2x and Agumon animations (By Syrius)], [Mew (By Arkaivos)], [Eye of the Flipper (By Kuronons)], [Shodan (By qqMajiKpp)]
 - Assets: Includes sample Music Player tunes
 - Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys, Tesla Charge Port and Unitree Go1 Robot Dog
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
@@ -104,7 +105,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Dolphin: SD dolphin manifest updated to weight animations differently
 - GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
-- IR: Universal AC & Audio from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
+- IR: Universal AC & Audio & Projectors from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - Plugins: 2048, Arkanoid, Snake and Tetris show score. Thanks to [whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) and [DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188) With position changes by RogueMaster. Also all + Tic Tac Toe updated by [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) for stability.
 - Plugins: Fixed sound decay issues on music player [Thanks to qqMajiKpp]
 - Plugins: Menu, Icons and Raycast exit [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
