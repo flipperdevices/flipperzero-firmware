@@ -3,7 +3,7 @@
 
 #define TAG "fapp-i"
 
-#define RESOLVER_THREAD_YIELD_STEP 20
+#define RESOLVER_THREAD_YIELD_STEP 180
 
 #define IS_FLAGS_SET(v, m) ((v & m) == m)
 #define SECTION_OFFSET(e, n) (e->section_table + n * sizeof(Elf32_Shdr))
@@ -308,6 +308,7 @@ static bool relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection_t* s) {
 
         for(relCount = 0; relCount < relEntries; relCount++) {
             if(relCount % RESOLVER_THREAD_YIELD_STEP == 0) {
+                FURI_LOG_E(TAG, "  reloc YIELD");
                 furi_delay_tick(1);
             }
 
@@ -443,7 +444,7 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
         for(size_t i = 0; i < COUNT_OF(sections); i++) {
             if(!flipper_application_relocate_section(e, sections[i].section)) {
                 FURI_LOG_E(TAG, "Error relocating section '%s'", sections[i].name);
-                status = FlipperApplicationLoadStatusUnspecifiedError;
+                status = FlipperApplicationLoadStatusMissingImports;
             }
         }
     }
