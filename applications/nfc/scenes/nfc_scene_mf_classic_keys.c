@@ -28,7 +28,7 @@ void nfc_scene_mf_classic_keys_on_enter(void* context) {
     }
 
     widget_add_string_element(
-        nfc->widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "MF Classic Keys");
+        nfc->widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "Mifare Classic Keys");
     char temp_str[32];
     snprintf(temp_str, sizeof(temp_str), "Flipper list: %ld", flipper_dict_keys_total);
     widget_add_string_element(nfc->widget, 0, 20, AlignLeft, AlignTop, FontSecondary, temp_str);
@@ -38,7 +38,7 @@ void nfc_scene_mf_classic_keys_on_enter(void* context) {
         nfc->widget, GuiButtonTypeCenter, "Add", nfc_scene_mf_classic_keys_widget_callback, nfc);
     widget_add_button_element(
         nfc->widget, GuiButtonTypeLeft, "Back", nfc_scene_mf_classic_keys_widget_callback, nfc);
-    widget_add_icon_element(nfc->widget, 87, 3, &I_Keychain_39x36);
+    widget_add_icon_element(nfc->widget, 87, 13, &I_Keychain_39x36);
     if(user_dict_keys_total > 0) {
         widget_add_button_element(
             nfc->widget,
