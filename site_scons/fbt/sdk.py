@@ -313,6 +313,8 @@ class ApiEntryState(Enum):
     PENDING = "?"
     APPROVED = "+"
     DISABLED = "-"
+    # Special value for API version entry so users have less incentive to edit it
+    VERSION_PENDING = "v"
 
 
 # Class that stores all known API entries, both enabled and disabled.
@@ -366,6 +368,8 @@ class SdkCache:
         if entry in self.disabled_entries:
             return ApiEntryState.DISABLED
         elif entry in self.new_entries:
+            if entry is self.sdk.version:
+                return ApiEntryState.VERSION_PENDING
             return ApiEntryState.PENDING
         else:
             return ApiEntryState.APPROVED
@@ -438,7 +442,7 @@ class SdkCache:
         entry = None
         if entry_class == SdkVersion.csv_type:
             self.version = SdkVersion.from_str(entry_name)
-            if entry_status == ApiEntryState.PENDING.value:
+            if entry_status == ApiEntryState.VERSION_PENDING.value:
                 self.loaded_dirty_version = True
         elif entry_class == ApiHeader.csv_type:
             self.sdk.headers.add(entry := ApiHeader(entry_name))
