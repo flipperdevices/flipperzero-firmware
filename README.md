@@ -7,16 +7,8 @@
 
 - Known Issues:			`FAP Loader`, `Chess` & `Chip8` (No Controls)
 - Apps `HIDDEN` for compile space can be found on Side B in the update folder.
-- Added tap back x2 to exit clock.
-- OFW: [Add support for PAC/Stanley tags #1648 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1648)
-- OFW: [Add support for Paradox tags #1655 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1655)
-- OFW: [Add support for Jablotron tags #1657 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1657)
-- OFW: [Remove execute permissions from *.c and *.h files #1651 (By wdoekes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1651)
-- OFW: [Add support for Pyramid tags #1676 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1676)
-- New Dolphin Animations: [Shodan (By qqMajiKpp)]
-- New Dolphin Animations: [Sirene & The Witch (By Haseo)]
-- Passport Updates [(Thanks to Kuronons)]
-- Updated Side B to include GPIO
+- Update for IR assets from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & [amec0e](https://github.com/amec0e)
+- Update for SubGHz ranges from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & [amec0e](https://github.com/amec0e)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -109,7 +101,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Dolphin: SD dolphin manifest updated to weight animations differently
 - GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
-- IR: Universal AC & Audio & Projectors from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
+- IR: Universal AC, Audio, Fans & Projectors from [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - Plugins: 2048, Arkanoid, Snake and Tetris show score. Thanks to [whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) and [DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188) With position changes by RogueMaster. Also all + Tic Tac Toe updated by [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) for stability.
 - Plugins: Fixed sound decay issues on music player [Thanks to qqMajiKpp]
 - Plugins: Menu, Icons and Raycast exit [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
