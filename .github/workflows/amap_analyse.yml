@@ -67,10 +67,10 @@ jobs:
           ref = event['pull_request']['head']['ref']
           pull_id = event['pull_request']['number']
           pull_name = shlex.quote(event['pull_request']['title'])
-          branch_name = re.sub("refs/\w+/", "", ref).replace("/", "_")
-          suffix = branch_name + "-" + current_time.strftime("%d%m%Y") + "-" + commit_sha
+          branch_name = re.sub("refs/\w+/", "", ref)
+          suffix = branch_name.replace("/", "_") + "-" + current_time.strftime("%d%m%Y") + "-" + commit_sha
           if ref.startswith("refs/tags/"):
-              suffix = branch_name
+              suffix = branch_name.replace("/", "_")
           print(f'COMMIT_MSG={commit_comment}', file=env_file)
           print(f'COMMIT_HASH={commit_hash}', file=env_file)
           print(f'COMMIT_SHA={commit_sha}', file=env_file)
@@ -100,7 +100,7 @@ jobs:
           commit_sha = commit_hash[:8]
           ref = event['ref']
           branch_name = re.sub("refs/\w+/", "", ref)
-          suffix = branch_name + "-" + current_time.strftime("%d%m%Y") + "-" + commit_sha
+          suffix = branch_name.replace("/", "_") + "-" + current_time.strftime("%d%m%Y") + "-" + commit_sha
           if ref.startswith("refs/tags/"):
               suffix = branch_name.replace("/", "_")
           print(f'COMMIT_MSG={commit_comment}', file=env_file)
