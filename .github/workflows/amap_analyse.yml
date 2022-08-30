@@ -129,6 +129,7 @@ jobs:
       - name: 'Make .map file analyze'
         run: |
           cd artifacts/
+          echo "flipper-z-f7-firmware-${SUFFIX}.elf.map"
           /Applications/amap/Contents/MacOS/amap -f "flipper-z-f7-firmware-${SUFFIX}.elf.map"
 
       - name: 'Upload report to DB'
