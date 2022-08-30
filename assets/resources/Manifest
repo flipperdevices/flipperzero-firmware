@@ -1,5 +1,5 @@
 V:0
-T:1661754321
+T:1661825747
 D:apps
 D:badusb
 D:dolphin
@@ -47,6 +47,7 @@ D:dolphin/L1_Read_books_128x64
 D:dolphin/L1_Recording_128x51
 D:dolphin/L1_Rickroll_128x64
 D:dolphin/L1_Rukamon_128x64
+D:dolphin/L1_Shodan_128x64
 D:dolphin/L1_Sleep_128x64
 D:dolphin/L1_Waves_128x50
 D:dolphin/L2_Furippa2_128x64
@@ -56,7 +57,7 @@ D:dolphin/L2_Soldering_128x64
 D:dolphin/L3_Furippa3_128x64
 D:dolphin/L3_Hijack_radio_128x64
 D:dolphin/L3_Lab_research_128x54
-F:89909cc84d71d9c382f08ddcdf556af8:2361:dolphin/manifest.txt
+F:15688a9c8aae34a772abcd31801e583a:2455:dolphin/manifest.txt
 F:348b1f678d29c260eb057d4a1c2052f4:238:dolphin/name.txt
 F:1c4c13b4cfe609e102bd630e32a5e929:564:dolphin/L1_Agumon_128x64/frame_0.bm
 F:3042b007eeb149f7729e6e00032b4c87:572:dolphin/L1_Agumon_128x64/frame_1.bm
@@ -286,6 +287,21 @@ F:7c95ca1e8a5c9a38e3995bf3efeb3b48:259:dolphin/L1_Rukamon_128x64/frame_6.bm
 F:47db2d8f05e95818df353dcdac04b4c0:108:dolphin/L1_Rukamon_128x64/frame_7.bm
 F:19fdc6265bda0ecd02705cdb1fcab82b:359:dolphin/L1_Rukamon_128x64/frame_8.bm
 F:1fae825bd1e1f8a26b898670a95e6ae4:211:dolphin/L1_Rukamon_128x64/meta.txt
+F:c71eae8d2110636c3713b319ce419cdf:723:dolphin/L1_Shodan_128x64/frame_0.bm
+F:ef80af6a996ee3e8243a775a34b39a86:843:dolphin/L1_Shodan_128x64/frame_1.bm
+F:03eec876589849076ab68adf9b5ea43e:854:dolphin/L1_Shodan_128x64/frame_10.bm
+F:60664e215defa88480d937fc95215b63:863:dolphin/L1_Shodan_128x64/frame_11.bm
+F:78ec819e92080b0bd1f73698a879fa07:870:dolphin/L1_Shodan_128x64/frame_12.bm
+F:fe0634039f7ba87962ae32489bd43f89:875:dolphin/L1_Shodan_128x64/frame_13.bm
+F:981b724d4d9781b9d0a5553161bf2be5:859:dolphin/L1_Shodan_128x64/frame_2.bm
+F:f589a97c3cf32615a52c5cedf5f32173:867:dolphin/L1_Shodan_128x64/frame_3.bm
+F:b2acd748cb1ae112e56359f5c882786d:851:dolphin/L1_Shodan_128x64/frame_4.bm
+F:811e492c1cbc080ffc8c1ec5aae3a56e:853:dolphin/L1_Shodan_128x64/frame_5.bm
+F:fdd9308bbe899636c02c0d2288625fef:854:dolphin/L1_Shodan_128x64/frame_6.bm
+F:533f84f026ab5a9df2fa5c3585eb5ba9:873:dolphin/L1_Shodan_128x64/frame_7.bm
+F:8765642f346cd9146db98e7080cbb22d:859:dolphin/L1_Shodan_128x64/frame_8.bm
+F:e73583b74503cc957fcff16571b70415:861:dolphin/L1_Shodan_128x64/frame_9.bm
+F:56cf19afc39b2f9136b788e75fa1756c:342:dolphin/L1_Shodan_128x64/meta.txt
 F:9858fd34b55cebcb9be50c5710212a13:580:dolphin/L1_Sleep_128x64/frame_0.bm
 F:e47ef8c846083b8fde028b1724861444:589:dolphin/L1_Sleep_128x64/frame_1.bm
 F:9749bd05b47fd07cc3a41ab201f86bf4:582:dolphin/L1_Sleep_128x64/frame_2.bm
