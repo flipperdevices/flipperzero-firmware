@@ -55,11 +55,17 @@ jobs:
           import json
           import os
           import shlex
+          import urllib.request
           with open('${{ github.event_path }}') as fh:
               event = json.load(fh)
-          escaped = shlex.quote(event['pull_request']['title'])
+          pull_title = shlex.quote(event['pull_request']['title'])
+          comments_file = event['pull_request']['_links']['commits']['href']
+          urllib.request.urlretrieve(comments_file, "comments.json")
+          with open("comments.json", 'r') as com:
+              commit_comment = com[-1]['commit']['message']
           with open(os.environ['GITHUB_ENV'], 'a') as fh:
-              print(f'PULL_NAME={escaped}', file=fh)
+              print(f'PULL_NAME={pull_title}', file=fh)
+              print(f'COMMIT_MSG={commit_comment}', file=fh)
         shell: python3 {0}
 
       - name: 'Generate prefixes by commit'
@@ -73,7 +79,6 @@ jobs:
             REF="${{github.head_ref}}"
             COMMIT_HASH="$(git log -1 --pretty=oneline | awk '{print $1}')"
             SHA="$(cut -c -8 <<< "$COMMIT_HASH")"
-            COMMIT_MSG="$(git log -1 --pretty=format:"%s")"
             PULL_ID="${{github.event.pull_request.number}}"
           fi
           BRANCH_NAME=${REF#refs/*/}
