@@ -62,7 +62,8 @@ jobs:
           comments_file = event['pull_request']['_links']['commits']['href']
           urllib.request.urlretrieve(comments_file, "comments.json")
           with open("comments.json", 'r') as com:
-              commit_comment = com[-1]['commit']['message']
+              com_json = json.load(com)
+          commit_comment = com_json[-1]['commit']['message']
           with open(os.environ['GITHUB_ENV'], 'a') as fh:
               print(f'PULL_NAME={pull_title}', file=fh)
               print(f'COMMIT_MSG={commit_comment}', file=fh)
