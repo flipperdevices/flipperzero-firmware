@@ -55,7 +55,7 @@ jobs:
               event = json.load(fh)
           escaped = shlex.quote(event['pull_request']['title'])
           with open(os.environ['GITHUB_ENV'], 'a') as fh:
-              print(f'PR_TITLE={escaped}', file=fh)
+              print(f'PULL_NAME={escaped}', file=fh)
         shell: python3 {0}
 
       - name: 'Generate prefixes by commit'
@@ -71,8 +71,6 @@ jobs:
             SHA="$(cut -c -8 <<< "$COMMIT_HASH")"
             COMMIT_MSG="$(git log -1 --pretty=format:"%s")"
             PULL_ID="${{github.event.pull_request.number}}"
-            PULL_NAME="${{github.event.pull_request.title}}"
-            PULL_NAME="$PR_TITLE"
           fi
           BRANCH_NAME=${REF#refs/*/}
           SUFFIX=${BRANCH_NAME//\//_}-$(date +'%d%m%Y')-${SHA}
@@ -125,7 +123,6 @@ jobs:
           export FREE_FLASH_SIZE="$(get_size ".free_flash")"
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
             export PULL_ID="${{steps.names.outputs.pull-id}}"
-            export PULL_NAME="${{steps.names.outputs.pull-name}}"
           fi
           python3 -m pip install mariadb
           python3 scripts/amap_mariadb_insert.py \
