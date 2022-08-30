@@ -15,7 +15,7 @@ DefaultEnvironment(tools=[])
 # Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
 
 
-# This environment is created only for loading options & validating file/dir existance
+# This environment is created only for loading options & validating file/dir existence
 fbt_variables = SConscript("site_scons/commandline.scons")
 cmd_environment = Environment(tools=[], variables=fbt_variables)
 Help(fbt_variables.GenerateHelpText(cmd_environment))
