@@ -35,7 +35,7 @@ static void nfc_scene_detect_reader_widget_config(Nfc* nfc, bool data_received) 
     Widget* widget = nfc->widget;
     widget_reset(widget);
 
-    widget_add_icon_element(widget, 0, 14, &I_Reader_detect);
+    widget_add_icon_element(widget, 0, 14, &I_Reader_detect_43x40);
     widget_add_string_element(
         widget, 64, 3, AlignCenter, AlignTop, FontSecondary, "Hold Near Reader");
     widget_add_string_element(widget, 55, 22, AlignLeft, AlignTop, FontPrimary, "Emulating...");
