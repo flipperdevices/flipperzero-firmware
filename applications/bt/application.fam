@@ -64,4 +64,5 @@ App(
         "gui",
     ],
     order=10,
+    fapp_icon="../../assets/icons/Archive/unknown_10px.png",
 )

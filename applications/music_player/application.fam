@@ -11,6 +11,7 @@ App(
     provides=["music_player_start"],
     stack_size=2 * 1024,
     order=20,
+    fapp_icon="../../assets/icons/Archive/music_10px.png",
 )
 
 App(
