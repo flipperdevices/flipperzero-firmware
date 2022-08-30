@@ -368,7 +368,7 @@ class SdkCache:
         if entry in self.disabled_entries:
             return ApiEntryState.DISABLED
         elif entry in self.new_entries:
-            if entry is self.sdk.version:
+            if isinstance(entry, SdkVersion):
                 return ApiEntryState.VERSION_PENDING
             return ApiEntryState.PENDING
         else:

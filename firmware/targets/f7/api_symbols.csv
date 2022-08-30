@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,7.3,,
+Version,+,7.4,,
 Header,+,applications/bt/bt_service/bt.h,,
 Header,+,applications/cli/cli.h,,
 Header,+,applications/cli/cli_vcp.h,,
@@ -63,6 +63,7 @@ Header,+,firmware/targets/furi_hal_include/furi_hal_ibutton.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_info.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_infrared.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_light.h,,
+Header,+,firmware/targets/furi_hal_include/furi_hal_memory.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_mpu.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_nfc.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_power.h,,
@@ -1114,6 +1115,10 @@ Function,+,furi_hal_light_blink_stop,void,
 Function,-,furi_hal_light_init,void,
 Function,+,furi_hal_light_sequence,void,const char*
 Function,+,furi_hal_light_set,void,"Light, uint8_t"
+Function,+,furi_hal_memory_alloc,void*,size_t
+Function,+,furi_hal_memory_get_free,size_t,
+Function,+,furi_hal_memory_init,void,
+Function,+,furi_hal_memory_max_pool_block,size_t,
 Function,+,furi_hal_mpu_disable,void,
 Function,+,furi_hal_mpu_enable,void,
 Function,-,furi_hal_mpu_init,void,
@@ -1376,6 +1381,7 @@ Function,+,furi_thread_get_return_code,int32_t,FuriThread*
 Function,+,furi_thread_get_stack_space,uint32_t,FuriThreadId
 Function,+,furi_thread_get_state,FuriThreadState,FuriThread*
 Function,+,furi_thread_join,_Bool,FuriThread*
+Function,+,furi_thread_mark_as_service,void,FuriThread*
 Function,+,furi_thread_set_callback,void,"FuriThread*, FuriThreadCallback"
 Function,+,furi_thread_set_context,void,"FuriThread*, void*"
 Function,+,furi_thread_set_name,void,"FuriThread*, const char*"
@@ -1587,6 +1593,7 @@ Function,+,memchr,void*,"const void*, int, size_t"
 Function,+,memcmp,int,"const void*, const void*, size_t"
 Function,+,memcpy,void*,"void*, const void*, size_t"
 Function,-,memmem,void*,"const void*, size_t, const void*, size_t"
+Function,+,memmgr_alloc_from_pool,void*,size_t
 Function,+,memmgr_get_free_heap,size_t,
 Function,+,memmgr_get_minimum_free_heap,size_t,
 Function,+,memmgr_get_total_heap,size_t,
@@ -1595,6 +1602,8 @@ Function,+,memmgr_heap_enable_thread_trace,void,FuriThreadId
 Function,+,memmgr_heap_get_max_free_block,size_t,
 Function,+,memmgr_heap_get_thread_memory,size_t,FuriThreadId
 Function,+,memmgr_heap_printf_free_blocks,void,
+Function,+,memmgr_pool_get_free,size_t,
+Function,+,memmgr_pool_get_max_block,size_t,
 Function,+,memmove,void*,"void*, const void*, size_t"
 Function,-,mempcpy,void*,"void*, const void*, size_t"
 Function,-,memrchr,void*,"const void*, int, size_t"
@@ -2291,6 +2300,8 @@ Function,-,uxTaskPriorityGetFromISR,UBaseType_t,const TaskHandle_t
 Function,+,uxTaskResetEventItemValue,TickType_t,
 Function,-,uxTimerGetReloadMode,UBaseType_t,TimerHandle_t
 Function,-,uxTimerGetTimerNumber,UBaseType_t,TimerHandle_t
+Function,+,vApplicationGetIdleTaskMemory,void,"StaticTask_t**, StackType_t**, uint32_t*"
+Function,+,vApplicationGetTimerTaskMemory,void,"StaticTask_t**, StackType_t**, uint32_t*"
 Function,+,vListInitialise,void,List_t*
 Function,+,vListInitialiseItem,void,ListItem_t*
 Function,+,vListInsert,void,"List_t*, ListItem_t*"
@@ -2447,6 +2458,7 @@ Function,-,xTaskCallApplicationTaskHook,BaseType_t,"TaskHandle_t, void*"
 Function,-,xTaskCatchUpTicks,BaseType_t,TickType_t
 Function,+,xTaskCheckForTimeOut,BaseType_t,"TimeOut_t*, TickType_t*"
 Function,+,xTaskCreate,BaseType_t,"TaskFunction_t, const char*, const uint16_t, void*, UBaseType_t, TaskHandle_t*"
+Function,+,xTaskCreateStatic,TaskHandle_t,"TaskFunction_t, const char*, const uint32_t, void*, UBaseType_t, StackType_t*, StaticTask_t*"
 Function,-,xTaskDelayUntil,BaseType_t,"TickType_t*, const TickType_t"
 Function,+,xTaskGenericNotify,BaseType_t,"TaskHandle_t, UBaseType_t, uint32_t, eNotifyAction, uint32_t*"
 Function,+,xTaskGenericNotifyFromISR,BaseType_t,"TaskHandle_t, UBaseType_t, uint32_t, eNotifyAction, uint32_t*, BaseType_t*"
@@ -2465,6 +2477,7 @@ Function,+,xTaskRemoveFromEventList,BaseType_t,const List_t*
 Function,+,xTaskResumeAll,BaseType_t,
 Function,-,xTaskResumeFromISR,BaseType_t,TaskHandle_t
 Function,+,xTimerCreate,TimerHandle_t,"const char*, const TickType_t, const UBaseType_t, void*, TimerCallbackFunction_t"
+Function,+,xTimerCreateStatic,TimerHandle_t,"const char*, const TickType_t, const UBaseType_t, void*, TimerCallbackFunction_t, StaticTimer_t*"
 Function,+,xTimerCreateTimerTask,BaseType_t,
 Function,+,xTimerGenericCommand,BaseType_t,"TimerHandle_t, const BaseType_t, const TickType_t, BaseType_t*, const TickType_t"
 Function,+,xTimerGetExpiryTime,TickType_t,TimerHandle_t
