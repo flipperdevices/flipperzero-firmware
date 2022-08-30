@@ -4,6 +4,11 @@
 
 #define FURI_HAL_BT_SERIAL_PACKET_SIZE_MAX SERIAL_SVC_DATA_LEN_MAX
 
+typedef enum {
+    FuriHalBtSerialRpcStatusNotActive,
+    FuriHalBtSerialRpcStatusActive,
+} FuriHalBtSerialRpcStatus;
+
 /** Serial service callback type */
 typedef SerialServiceEventCallback FuriHalBtSerialCallback;
 
@@ -25,6 +30,12 @@ void furi_hal_bt_serial_set_event_callback(
     uint16_t buff_size,
     FuriHalBtSerialCallback callback,
     void* context);
+
+/** Set BLE RPC status
+ *
+ * @param status        FuriHalBtSerialRpcStatus instance
+ */
+void furi_hal_bt_serial_set_rpc_status(FuriHalBtSerialRpcStatus status);
 
 /** Notify that application buffer is empty
  */
