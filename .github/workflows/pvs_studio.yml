@@ -87,6 +87,6 @@ jobs:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            **PVS-Studio report for commit `${COMMIT_SHA}`:**
-            - [Report](https://update.flipperzero.one/builds/firmware-pvs-studio-report/${BRANCH_NAME}/${DEFAULT_TARGET}-${SUFFIX}/index.html)
+            **PVS-Studio report for commit `${{COMMIT_SHA}}`:**
+            - [Report](https://update.flipperzero.one/builds/firmware-pvs-studio-report/${{BRANCH_NAME}}/${{DEFAULT_TARGET}}-${{SUFFIX}}/index.html)
           edit-mode: replace
