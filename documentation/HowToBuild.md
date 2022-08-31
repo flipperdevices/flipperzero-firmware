@@ -21,7 +21,7 @@ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugi
 
 ## Building
 
-Check out [documentation/fbt.md](documentation/fbt.md) for details on building and flashing firmware.
+Check out [documentation/fbt.md](fbt.md) for details on building and flashing firmware.
 
 ### Compile
 
@@ -47,7 +47,7 @@ Production standard Options
 	updater_package
 ```
 
-Usefull options, check `./fbt -h` and [fbt.md](documentation/fbt.md) for more
+Usefull options, check `./fbt -h` and [fbt.md](fbt.md) for more
 
 ```shell
 DEBUG=1 # Enable debug build
