@@ -43,8 +43,6 @@ jobs:
           else
             python3 scripts/get_env.py "--event_file=${{ github.event_path }}"
           fi
-          echo "WORKFLOW_BRANCH_OR_TAG=${BRANCH_NAME}" >> $GITHUB_ENV
-          echo "DIST_SUFFIX=${SUFFIX}" >> $GITHUB_ENV
 
       - name: 'Bundle scripts'
         if: ${{ !github.event.pull_request.head.repo.fork }}

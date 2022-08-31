@@ -65,7 +65,7 @@ jobs:
           chmod 600 ./deploy_key;
           rsync -avzP \
               -e 'ssh -p ${{ secrets.RSYNC_DEPLOY_PORT }} -i ./deploy_key' \
-              ${{ secrets.RSYNC_DEPLOY_USER }}@${{ secrets.RSYNC_DEPLOY_HOST }}:"${{ secrets.RSYNC_DEPLOY_BASE_PATH }}$BRANCH_NAME/" artifacts/;
+              ${{ secrets.RSYNC_DEPLOY_USER }}@${{ secrets.RSYNC_DEPLOY_HOST }}:"${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${BRANCH_NAME}/" artifacts/;
           rm ./deploy_key;
 
       - name: 'Make .map file analyze'
