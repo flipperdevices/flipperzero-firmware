@@ -223,7 +223,9 @@ bool ibutton_file_select(iButton* ibutton) {
         IBUTTON_APP_EXTENSION,
         true,
         &I_ibutt_10px,
-        true);
+        true,
+        NULL,
+        NULL);
 
     if(success) {
         success = ibutton_load_key_data(ibutton, ibutton->file_path, true);

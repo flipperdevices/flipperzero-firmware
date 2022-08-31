@@ -16,6 +16,8 @@ FlipperApplication*
 }
 
 void flipper_application_free(FlipperApplication* app) {
+    furi_assert(app);
+    
     if(app->thread) {
         furi_thread_join(app->thread);
         furi_thread_free(app->thread);

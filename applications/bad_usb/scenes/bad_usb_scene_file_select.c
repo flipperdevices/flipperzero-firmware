@@ -13,7 +13,9 @@ static bool bad_usb_file_select(BadUsbApp* bad_usb) {
         BAD_USB_APP_EXTENSION,
         true,
         &I_badusb_10px,
-        true);
+        true,
+        NULL,
+        NULL);
 
     return res;
 }

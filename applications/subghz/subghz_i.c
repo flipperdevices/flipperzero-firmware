@@ -469,7 +469,9 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
         SUBGHZ_APP_EXTENSION,
         true,
         &I_sub1_10px,
-        true);
+        true,
+        NULL,
+        NULL);
 
     if(res) {
         res = subghz_key_load(subghz, string_get_cstr(subghz->file_path), true);

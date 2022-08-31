@@ -313,7 +313,9 @@ int32_t music_player_app(void* p) {
                 MUSIC_PLAYER_APP_EXTENSION,
                 true,
                 &I_music_10px,
-                false);
+                false,
+                NULL,
+                NULL);
 
             furi_record_close(RECORD_DIALOGS);
             if(!res) {

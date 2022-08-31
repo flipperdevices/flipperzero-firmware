@@ -12,7 +12,9 @@ void infrared_scene_remote_list_on_enter(void* context) {
         INFRARED_APP_EXTENSION,
         true,
         &I_ir_10px,
-        true);
+        true,
+        NULL,
+        NULL);
 
     if(success) {
         view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);

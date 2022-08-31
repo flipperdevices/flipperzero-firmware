@@ -1182,7 +1182,15 @@ bool nfc_file_select(NfcDevice* dev) {
     string_t nfc_app_folder;
     string_init_set_str(nfc_app_folder, NFC_APP_FOLDER);
     bool res = dialog_file_browser_show(
-        dev->dialogs, dev->load_path, nfc_app_folder, NFC_APP_EXTENSION, true, &I_Nfc_10px, true);
+        dev->dialogs,
+        dev->load_path,
+        nfc_app_folder,
+        NFC_APP_EXTENSION,
+        true,
+        &I_Nfc_10px,
+        true,
+        NULL,
+        NULL);
     string_clear(nfc_app_folder);
     if(res) {
         string_t filename;

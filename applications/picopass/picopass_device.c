@@ -233,7 +233,9 @@ bool picopass_file_select(PicopassDevice* dev) {
         PICOPASS_APP_EXTENSION,
         true,
         &I_Nfc_10px,
-        true);
+        true,
+        NULL,
+        NULL);
     string_clear(picopass_app_folder);
     if(res) {
         string_t filename;

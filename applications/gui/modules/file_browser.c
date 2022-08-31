@@ -16,7 +16,9 @@
 #define FRAME_HEIGHT 12
 #define Y_OFFSET 3
 
-#define ITEM_LIST_LEN_MAX 100
+#define ITEM_LIST_LEN_MAX 50
+
+#define CUSTOM_ICON_MAX_SIZE 32
 
 typedef enum {
     BrowserItemTypeLoading,
@@ -28,25 +30,42 @@ typedef enum {
 typedef struct {
     string_t path;
     BrowserItemType type;
+    uint8_t* custom_icon_data;
 } BrowserItem_t;
 
 static void BrowserItem_t_init(BrowserItem_t* obj) {
     obj->type = BrowserItemTypeLoading;
     string_init(obj->path);
+    obj->custom_icon_data = NULL;
 }
 
 static void BrowserItem_t_init_set(BrowserItem_t* obj, const BrowserItem_t* src) {
     obj->type = src->type;
     string_init_set(obj->path, src->path);
+    if(src->custom_icon_data) {
+        obj->custom_icon_data = malloc(CUSTOM_ICON_MAX_SIZE);
+        memcpy(obj->custom_icon_data, src->custom_icon_data, CUSTOM_ICON_MAX_SIZE);
+    } else {
+        obj->custom_icon_data = NULL;
+    }
 }
 
 static void BrowserItem_t_set(BrowserItem_t* obj, const BrowserItem_t* src) {
     obj->type = src->type;
     string_set(obj->path, src->path);
+    if(src->custom_icon_data) {
+        obj->custom_icon_data = malloc(CUSTOM_ICON_MAX_SIZE);
+        memcpy(obj->custom_icon_data, src->custom_icon_data, CUSTOM_ICON_MAX_SIZE);
+    } else {
+        obj->custom_icon_data = NULL;
+    }
 }
 
 static void BrowserItem_t_clear(BrowserItem_t* obj) {
     string_clear(obj->path);
+    if(obj->custom_icon_data) {
+        free(obj->custom_icon_data);
+    }
 }
 
 ARRAY_DEF(
@@ -65,6 +84,9 @@ struct FileBrowser {
 
     FileBrowserCallback callback;
     void* context;
+
+    FileBrowserLoadIconCallback icon_callback;
+    void* icon_context;
 
     string_ptr result_path;
 };
@@ -184,6 +206,14 @@ void file_browser_stop(FileBrowser* browser) {
 void file_browser_set_callback(FileBrowser* browser, FileBrowserCallback callback, void* context) {
     browser->context = context;
     browser->callback = callback;
+}
+
+void file_browser_set_icon_callback(
+    FileBrowser* browser,
+    FileBrowserLoadIconCallback callback,
+    void* context) {
+    browser->icon_context = context;
+    browser->icon_callback = callback;
 }
 
 static bool browser_is_item_in_array(FileBrowserModel* model, uint32_t idx) {
@@ -306,16 +336,23 @@ static void browser_list_item_cb(void* context, string_t item_path, bool is_fold
     BrowserItem_t item;
 
     if(!is_last) {
-        BrowserItem_t_init(&item);
-        string_set(item.path, item_path);
-        item.type = (is_folder) ? BrowserItemTypeFolder : BrowserItemTypeFile;
-
+        string_init_set(item.path, item_path);
+        if(is_folder) {
+            item.type = BrowserItemTypeFolder;
+        } else {
+            item.type = BrowserItemTypeFile;
+            if(browser->icon_callback) {
+                item.custom_icon_data = browser->icon_callback(item_path, browser->icon_context);
+            } else {
+                item.custom_icon_data = NULL;
+            }
+        }
         with_view_model(
             browser->view, (FileBrowserModel * model) {
                 items_array_push_back(model->items, item);
                 return false;
             });
-        BrowserItem_t_clear(&item);
+        string_clear(item.path);
     } else {
         with_view_model(
             browser->view, (FileBrowserModel * model) {
@@ -372,6 +409,7 @@ static void browser_draw_list(Canvas* canvas, FileBrowserModel* model) {
         int32_t idx = CLAMP((uint32_t)(i + model->list_offset), model->item_cnt, 0u);
 
         BrowserItemType item_type = BrowserItemTypeLoading;
+        uint8_t* custom_icon_data = NULL;
 
         if(browser_is_item_in_array(model, idx)) {
             BrowserItem_t* item = items_array_get(
@@ -379,6 +417,9 @@ static void browser_draw_list(Canvas* canvas, FileBrowserModel* model) {
             item_type = item->type;
             path_extract_filename(
                 item->path, filename, (model->hide_ext) && (item_type == BrowserItemTypeFile));
+            if(item_type == BrowserItemTypeFile) {
+                custom_icon_data = item->custom_icon_data;
+            }
         } else {
             string_set_str(filename, "---");
         }
@@ -396,7 +437,11 @@ static void browser_draw_list(Canvas* canvas, FileBrowserModel* model) {
             canvas_set_color(canvas, ColorBlack);
         }
 
-        if((item_type == BrowserItemTypeFile) && (model->file_icon)) {
+        if(custom_icon_data) {
+            // Currently only 10*10 icons are supported
+            canvas_draw_bitmap(
+                canvas, 2, Y_OFFSET + 1 + i * FRAME_HEIGHT, 10, 10, custom_icon_data);
+        } else if((item_type == BrowserItemTypeFile) && (model->file_icon)) {
             canvas_draw_icon(canvas, 2, Y_OFFSET + 1 + i * FRAME_HEIGHT, model->file_icon);
         } else if(BrowserItemIcons[item_type] != NULL) {
             canvas_draw_icon(

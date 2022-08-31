@@ -12,7 +12,9 @@ bool dialog_file_browser_show(
     const char* extension,
     bool skip_assets,
     const Icon* icon,
-    bool hide_ext) {
+    bool hide_ext,
+    FileBrowserLoadIconCallback icon_loader_callback,
+    void* icon_loader_context) {
     FuriApiLock lock = API_LOCK_INIT_LOCKED();
     furi_check(lock != NULL);
 
@@ -24,6 +26,8 @@ bool dialog_file_browser_show(
             .hide_ext = hide_ext,
             .skip_assets = skip_assets,
             .preselected_filename = path,
+            .icon_callback = icon_loader_callback,
+            .icon_callback_context = icon_loader_context,
 
         }};
 

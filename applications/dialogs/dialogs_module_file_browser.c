@@ -39,6 +39,7 @@ bool dialogs_app_process_module_file_browser(const DialogsAppMessageDataFileBrow
         file_browser, dialogs_app_file_browser_callback, file_browser_context);
     file_browser_configure(
         file_browser, data->extension, data->skip_assets, data->file_icon, data->hide_ext);
+    file_browser_set_icon_callback(file_browser, data->icon_callback, data->icon_callback_context);
     file_browser_start(file_browser, data->preselected_filename);
 
     view_holder_set_view(view_holder, file_browser_get_view(file_browser));

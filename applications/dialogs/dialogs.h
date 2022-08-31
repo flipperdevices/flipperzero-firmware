@@ -2,6 +2,7 @@
 #include <furi.h>
 #include <gui/canvas.h>
 #include "m-string.h"
+#include <gui/modules/file_browser.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,7 +34,9 @@ bool dialog_file_browser_show(
     const char* extension,
     bool skip_assets,
     const Icon* icon,
-    bool hide_ext);
+    bool hide_ext,
+    FileBrowserLoadIconCallback icon_loader_callback,
+    void* icon_loader_context);
 
 /****************** MESSAGE ******************/
 
