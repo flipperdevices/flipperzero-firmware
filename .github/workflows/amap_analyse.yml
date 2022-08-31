@@ -45,72 +45,14 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 'Get commit details (PR)'
-        if: github.event_name == 'pull_request'
+      - name: 'Get commit details'
         run: |
-          import json
-          import os
-          import shlex
-          import re
-          from datetime import date
-          import urllib.request
-
-          current_time = date.today()
-          event_file = open('${{ github.event_path }}')
-          env_file = open(os.environ['GITHUB_ENV'], 'a')
-          event = json.load(event_file)
-          with urllib.request.urlopen(event['pull_request']['_links']['commits']['href']) as commit_file:
-              commit_json = json.loads(commit_file.read().decode('utf-8'))
-          commit_comment = shlex.quote(commit_json[-1]['commit']['message'])
-          commit_hash = commit_json[-1]['sha']
-          commit_sha = commit_hash[:8]
-          ref = event['pull_request']['head']['ref']
-          pull_id = event['pull_request']['number']
-          pull_name = shlex.quote(event['pull_request']['title'])
-          branch_name = re.sub("refs/\w+/", "", ref)
-          suffix = branch_name.replace("/", "_") + "-" + current_time.strftime("%d%m%Y") + "-" + commit_sha
-          if ref.startswith("refs/tags/"):
-              suffix = branch_name.replace("/", "_")
-          print(f'COMMIT_MSG={commit_comment}', file=env_file)
-          print(f'COMMIT_HASH={commit_hash}', file=env_file)
-          print(f'COMMIT_SHA={commit_sha}', file=env_file)
-          print(f'SUFFIX={suffix}', file=env_file)
-          print(f'BRANCH_NAME={branch_name}', file=env_file)
-          print(f'PULL_ID={pull_id}', file=env_file)
-          print(f'PULL_NAME={pull_name}', file=env_file)
-          event_file.close()
-          env_file.close()
-        shell: python3 {0}
-
-      - name: 'Get commit details (Not in PR)'
-        if: github.event_name != 'pull_request'
-        run: |
-          import json
-          import os
-          import shlex
-          import re
-          from datetime import date
-
-          current_time = date.today()
-          event_file = open('${{ github.event_path }}')
-          env_file = open(os.environ['GITHUB_ENV'], 'a')
-          event = json.load(event_file)
-          commit_comment = shlex.quote(event['commits'][-1]['message'])
-          commit_hash = event['commits'][-1]['id']
-          commit_sha = commit_hash[:8]
-          ref = event['ref']
-          branch_name = re.sub("refs/\w+/", "", ref)
-          suffix = branch_name.replace("/", "_") + "-" + current_time.strftime("%d%m%Y") + "-" + commit_sha
-          if ref.startswith("refs/tags/"):
-              suffix = branch_name.replace("/", "_")
-          print(f'COMMIT_MSG={commit_comment}', file=env_file)
-          print(f'COMMIT_HASH={commit_hash}', file=env_file)
-          print(f'COMMIT_SHA={commit_sha}', file=env_file)
-          print(f'SUFFIX={suffix}', file=env_file)
-          print(f'BRANCH_NAME={branch_name}', file=env_file)
-          event_file.close()
-          env_file.close()
-        shell: python3 {0}
+          FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
+          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
+            python3 scripts/grt_env.py "--event_file=${{ github.event_path }}" "--is_pull"
+          else
+            python3 scripts/grt_env.py "--event_file=${{ github.event_path }}"
+          fi
 
       - name: 'Make artifacts directory'
         run: |
