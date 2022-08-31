@@ -54,8 +54,7 @@ jobs:
           set -e
           for TARGET in ${TARGETS}; do
             FBT_TOOLCHAIN_PATH=/opt ./fbt TARGET_HW="$(echo "${TARGET}" | sed 's/f//')" \
-                updater_package ${{ startsWith(github.ref, 'refs/tags') \
-                && 'DEBUG=0 COMPACT=1' || '' }}
+                updater_package ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
           done
 
       - name: 'Move upload files'
