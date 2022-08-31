@@ -53,6 +53,10 @@ bool two_cities_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_r
     furi_assert(nfc_worker);
     UNUSED(nfc_worker);
 
+    if(nfc_worker->dev_data->mf_classic_data.type != MfClassicType4k) {
+        return false;
+    }
+
     MfClassicAuthContext auth_ctx = {
         .key_a = MF_CLASSIC_NO_KEY,
         .key_b = MF_CLASSIC_NO_KEY,

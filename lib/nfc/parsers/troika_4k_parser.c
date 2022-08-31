@@ -48,18 +48,19 @@ static const MfClassicAuthContext troika_4k_keys[] = {
 
 bool troika_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
-    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+
+    if(nfc_worker->dev_data->mf_classic_data.type != MfClassicType4k) {
+        return false;
+    }
 
     MfClassicAuthContext auth_ctx = {
         .key_a = MF_CLASSIC_NO_KEY,
         .key_b = MF_CLASSIC_NO_KEY,
-        .sector = 8,
+        .sector = 11,
     };
 
     FURI_LOG_D("troika4k", "Verifying sector %d", auth_ctx.sector);
-    if(mf_classic_auth_attempt(tx_rx, &auth_ctx, 0xa73f5dc1d333) &&
-       mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak) ==
-           MfClassicType4k) {
+    if(mf_classic_auth_attempt(tx_rx, &auth_ctx, 0x08b386463229)) {
         return true;
     }
     return false;

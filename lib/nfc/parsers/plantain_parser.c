@@ -27,14 +27,17 @@ static const MfClassicAuthContext plantain_keys[] = {
 bool plantain_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
     UNUSED(nfc_worker);
+    if(nfc_worker->dev_data->mf_classic_data.type != MfClassicType1k) {
+        return false;
+    }
 
     MfClassicAuthContext auth_ctx = {
         .key_a = MF_CLASSIC_NO_KEY,
         .key_b = MF_CLASSIC_NO_KEY,
-        .sector = 4,
+        .sector = 8,
     };
     FURI_LOG_D("plant", "Verifying sector %d", auth_ctx.sector);
-    if(mf_classic_auth_attempt(tx_rx, &auth_ctx, 0xE56AC127DD45)) {
+    if(mf_classic_auth_attempt(tx_rx, &auth_ctx, 0x26973ea74321)) {
         FURI_LOG_D("plant", "Sector %d verified", auth_ctx.sector);
         return true;
     }
@@ -89,12 +92,7 @@ bool plantain_parser_parse(NfcDeviceData* dev_data) {
     // Verify key
     MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, 4);
     uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
-    if(key != plantain_keys[4].key_a) return false;
-
-    // Verify that it's not a dual card
-    sec_tr = mf_classic_get_sector_trailer_by_sector(data, 8);
-    uint64_t key_dual = nfc_util_bytes2num(sec_tr->key_a, 6);
-    if(key_dual == 0xa73f5dc1d333) return false;
+    if(key != plantain_keys[8].key_a) return false;
 
     // Point to block 0 of sector 4, value 0
     uint8_t* temp_ptr = &data->block[4 * 4].value[0];
