@@ -7,16 +7,16 @@
 #include "elf_cpp/elf_hashtable.h"
 #include <flipper_application/flipper_application.h>
 
-#define TAG "elf_loader_app"
+#define TAG "fap_loader_app"
 
 typedef struct {
     FlipperApplication* app;
     Storage* storage;
-} ElfLoader;
+} FapLoader;
 
 static bool
-    elf_loader_icon_callback(string_t path, void* context, uint8_t** icon_ptr, string_t item_name) {
-    ElfLoader* loader = context;
+    fap_loader_icon_callback(string_t path, void* context, uint8_t** icon_ptr, string_t item_name) {
+    FapLoader* loader = context;
     furi_assert(loader);
 
     loader->app = flipper_application_alloc(loader->storage, &hashtable_api_interface);
@@ -34,7 +34,7 @@ static bool
         string_set_str(item_name, manifest->name);
         load_success = true;
     } else {
-        FURI_LOG_E(TAG, "ELF Loader failed to preload %s", string_get_cstr(path));
+        FURI_LOG_E(TAG, "FAP Loader failed to preload %s", string_get_cstr(path));
         load_success = false;
     }
 
@@ -42,13 +42,13 @@ static bool
     return load_success;
 }
 
-int32_t elf_loader_app(void* p) {
-    ElfLoader* loader = malloc(sizeof(ElfLoader));
-    loader->storage = furi_record_open("storage");
-    DialogsApp* dialogs = furi_record_open("dialogs");
-    Gui* gui = furi_record_open("gui");
+int32_t fap_loader_app(void* p) {
+    FapLoader* loader = malloc(sizeof(FapLoader));
+    loader->storage = furi_record_open(RECORD_STORAGE);
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+    Gui* gui = furi_record_open(RECORD_GUI);
 
-    string_t elf_name, error_message;
+    string_t fap_name, error_message;
 
     ViewDispatcher* view_dispatcher = view_dispatcher_alloc();
     Loading* loading = loading_alloc();
@@ -63,20 +63,20 @@ int32_t elf_loader_app(void* p) {
     bool show_error = true;
     do {
         if(p) {
-            string_init_set(elf_name, (const char*)p);
+            string_init_set(fap_name, (const char*)p);
         } else {
-            string_init_set(elf_name, EXT_PATH("apps"));
+            string_init_set(fap_name, EXT_PATH("apps"));
 
             const DialogsFileBrowserOptions browser_options = {
                 .extension = ".fap",
                 .skip_assets = true,
                 .icon = &I_badusb_10px,
                 .hide_ext = true,
-                .item_loader_callback = elf_loader_icon_callback,
+                .item_loader_callback = fap_loader_icon_callback,
                 .item_loader_context = loader,
             };
 
-            if(!dialog_file_browser_show(dialogs, elf_name, elf_name, &browser_options)) {
+            if(!dialog_file_browser_show(dialogs, fap_name, fap_name, &browser_options)) {
                 show_error = false;
                 break;
             }
@@ -86,32 +86,32 @@ int32_t elf_loader_app(void* p) {
 
         view_dispatcher_switch_to_view(view_dispatcher, 0);
 
-        FURI_LOG_I(TAG, "ELF Loader is loading %s", string_get_cstr(elf_name));
+        FURI_LOG_I(TAG, "FAP Loader is loading %s", string_get_cstr(fap_name));
 
         FlipperApplicationPreloadStatus preload_res =
-            flipper_application_preload(loader->app, string_get_cstr(elf_name));
+            flipper_application_preload(loader->app, string_get_cstr(fap_name));
         if(preload_res != FlipperApplicationPreloadStatusSuccess) {
             const char* err_msg = flipper_application_preload_status_to_string(preload_res);
             string_printf(error_message, "Preload failed: %s", err_msg);
             FURI_LOG_E(
-                TAG, "ELF Loader failed to preload %s: %s", string_get_cstr(elf_name), err_msg);
+                TAG, "FAP Loader failed to preload %s: %s", string_get_cstr(fap_name), err_msg);
             break;
         }
 
-        FURI_LOG_I(TAG, "ELF Loader is mapping");
+        FURI_LOG_I(TAG, "FAP Loader is mapping");
         FlipperApplicationLoadStatus load_status = flipper_application_map_to_memory(loader->app);
         if(load_status != FlipperApplicationLoadStatusSuccess) {
             const char* err_msg = flipper_application_load_status_to_string(load_status);
             string_printf(error_message, "Load failed: %s", err_msg);
             FURI_LOG_E(
                 TAG,
-                "ELF Loader failed to map to memory %s: %s",
-                string_get_cstr(elf_name),
+                "FAP Loader failed to map to memory %s: %s",
+                string_get_cstr(fap_name),
                 err_msg);
             break;
         }
 
-        FURI_LOG_I(TAG, "ELF Loader is staring app");
+        FURI_LOG_I(TAG, "FAP Loader is staring app");
 
         FuriThread* thread = flipper_application_spawn(loader->app, NULL);
         furi_thread_start(thread);
@@ -120,12 +120,12 @@ int32_t elf_loader_app(void* p) {
         show_error = false;
         int ret = furi_thread_get_return_code(thread);
 
-        FURI_LOG_I(TAG, "ELF app returned: %i", ret);
+        FURI_LOG_I(TAG, "FAP app returned: %i", ret);
     } while(0);
 
     if(show_error) {
         DialogMessage* message = dialog_message_alloc();
-        dialog_message_set_header(message, "ELF Loader", 64, 0, AlignCenter, AlignTop);
+        dialog_message_set_header(message, "FAP Loader", 64, 0, AlignCenter, AlignTop);
         dialog_message_set_buttons(message, NULL, NULL, NULL);
 
         string_t buffer;
@@ -148,10 +148,10 @@ int32_t elf_loader_app(void* p) {
     loading_free(loading);
     view_dispatcher_free(view_dispatcher);
 
-    string_clear(elf_name);
-    furi_record_close("gui");
-    furi_record_close("dialogs");
-    furi_record_close("storage");
+    string_clear(fap_name);
+    furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_DIALOGS);
+    furi_record_close(RECORD_STORAGE);
     free(loader);
     return 0;
 }
