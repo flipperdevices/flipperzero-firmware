@@ -7,7 +7,7 @@
 #include "furi_hal.h"
 
 static const MfClassicAuthContext plantain_keys_4k[] = {
-    {.sector = 0, .key_a = 0xa0a1a2a3a4a5, .key_b = 0xb0b1b2b3b4b5},
+    {.sector = 0, .key_a = 0xFFFFFFFFFFFF, .key_b = 0xFFFFFFFFFFFF},
     {.sector = 1, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
     {.sector = 2, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
     {.sector = 3, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
@@ -59,9 +59,9 @@ bool plantain_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_
 
     uint8_t sector = 8;
     uint8_t block = mf_classic_get_sector_trailer_block_num_by_sector(sector);
-    FURI_LOG_D("Plant", "Verifying sector %d", sector);
+    FURI_LOG_D("Plant4K", "Verifying sector %d", sector);
     if(mf_classic_authenticate(tx_rx, block, 0x26973ea74321, MfClassicKeyA)) {
-        FURI_LOG_D("Plant", "Sector %d verified", sector);
+        FURI_LOG_D("Plant4K", "Sector %d verified", sector);
         return true;
     }
     return false;
@@ -81,15 +81,19 @@ bool plantain_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx
             plantain_keys_4k[i].key_b);
         FURI_LOG_D("plant4k", "Added sector %d", plantain_keys_4k[i].sector);
     }
-
-    return mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 40;
+    for(int i = 0; i < 5; i++) {
+        if(mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 40) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
     MfClassicData* data = &dev_data->mf_classic_data;
 
     // Verify key
-    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, 4);
+    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, 8);
     uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
     if(key != plantain_keys_4k[8].key_a) return false;
 

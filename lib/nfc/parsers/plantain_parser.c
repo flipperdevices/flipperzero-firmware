@@ -87,7 +87,7 @@ bool plantain_parser_parse(NfcDeviceData* dev_data) {
     MfClassicData* data = &dev_data->mf_classic_data;
 
     // Verify key
-    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, 4);
+    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, 8);
     uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
     if(key != plantain_keys[8].key_a) return false;
 
