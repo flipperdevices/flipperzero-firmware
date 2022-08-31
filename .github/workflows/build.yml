@@ -20,8 +20,7 @@ jobs:
       - name: 'Decontaminate previous build leftovers'
         run: |
           if [ -d .git ]; then
-            git submodule status \
-              || git checkout `git rev-list --max-parents=0 HEAD | tail -n 1`
+            git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
           fi
 
       - name: 'Checkout code'
