@@ -4,6 +4,7 @@
 #include <infrared_worker.h>
 #include <furi_hal_infrared.h>
 #include <flipper_format.h>
+#include <toolbox/args.h>
 
 #include "infrared_signal.h"
 
@@ -167,29 +168,6 @@ static void infrared_cli_start_ir_tx(Cli* cli, string_t args) {
     infrared_signal_free(signal);
 }
 
-static bool infrared_cli_decode_parse_args(string_t args, string_t in, string_t out) {
-    // TODO: Support spaces in file names with quotes
-    string_set(in, args);
-    size_t pos = string_search_char(args, ' ');
-    if(pos != STRING_FAILURE) {
-        string_set(out, args);
-        string_left(in, pos);
-        string_right(out, pos);
-        string_strim(in);
-        string_strim(out);
-    }
-    return true;
-}
-
-static void infrared_cli_pretty_print_msg(const InfraredMessage* message) {
-    printf(
-        "Protocol: %s address: 0x%lX command: 0x%lX %s\r\n",
-        infrared_get_protocol_name(message->protocol),
-        message->address,
-        message->command,
-        (message->repeat ? "R" : ""));
-}
-
 static bool
     infrared_cli_save_signal(InfraredSignal* signal, FlipperFormat* file, const char* name) {
     bool ret = infrared_signal_save(signal, file, name);
@@ -214,7 +192,12 @@ static bool infrared_cli_decode_raw_signal(
 
         if(message) {
             is_decoded = true;
-            infrared_cli_pretty_print_msg(message);
+            printf(
+                "Protocol: %s address: 0x%lX command: 0x%lX %s\r\n",
+                infrared_get_protocol_name(message->protocol),
+                message->address,
+                message->command,
+                (message->repeat ? "R" : ""));
             if(output_file && !message->repeat) {
                 infrared_signal_set_message(signal, message);
                 if(!infrared_cli_save_signal(signal, output_file, signal_name)) break;
@@ -293,11 +276,12 @@ static void infrared_cli_process_decode(Cli* cli, string_t args) {
     string_init(output_path);
 
     do {
-        if(!infrared_cli_decode_parse_args(args, input_path, output_path)) {
+        if(!args_read_probably_quoted_string_and_trim(args, input_path)) {
             printf("Wrong command syntax\r\n");
             infrared_cli_print_usage();
             break;
         }
+        args_read_probably_quoted_string_and_trim(args, output_path);
         if(!flipper_format_buffered_file_open_existing(input_file, string_get_cstr(input_path))) {
             printf("Failed to open file for reading: \"%s\"\r\n", string_get_cstr(input_path));
             break;
