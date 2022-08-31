@@ -246,7 +246,7 @@ static bool infrared_cli_decode_file(FlipperFormat* input_file, FlipperFormat* o
                !infrared_cli_save_signal(signal, output_file, string_get_cstr(tmp))) {
                 break;
             } else {
-                printf("Skipping decoded signal...\r\n");
+                printf("Skipping decoded signal\r\n");
                 continue;
             }
         }
@@ -270,8 +270,10 @@ static void infrared_cli_process_decode(Cli* cli, string_t args) {
     FlipperFormat* input_file = flipper_format_buffered_file_alloc(storage);
     FlipperFormat* output_file = NULL;
 
-    string_t tmp, input_path, output_path;
+    uint32_t version;
+    string_t tmp, header, input_path, output_path;
     string_init(tmp);
+    string_init(header);
     string_init(input_path);
     string_init(output_path);
 
@@ -286,9 +288,8 @@ static void infrared_cli_process_decode(Cli* cli, string_t args) {
             printf("Failed to open file for reading: \"%s\"\r\n", string_get_cstr(input_path));
             break;
         }
-        uint32_t version;
-        if(!flipper_format_read_header(input_file, tmp, &version) ||
-           (string_cmp(tmp, INFRARED_CLI_FFF_HEADER)) || version != 1) {
+        if(!flipper_format_read_header(input_file, header, &version) ||
+           (!string_start_with_str_p(header, "IR")) || version != 1) {
             printf("Invalid or corrupted input file: \"%s\"\r\n", string_get_cstr(input_path));
             break;
         }
@@ -301,18 +302,18 @@ static void infrared_cli_process_decode(Cli* cli, string_t args) {
             printf("Failed to open file for writing: \"%s\"\r\n", string_get_cstr(output_path));
             break;
         }
-        if(output_file) {
-            string_set(tmp, INFRARED_CLI_FFF_HEADER);
-            if(!flipper_format_write_header(output_file, tmp, 1)) break;
-        }
-        if(!infrared_cli_decode_file(input_file, output_file)) {
-            // TODO: Error message
+        if(output_file && !flipper_format_write_header(output_file, header, version)) {
+            printf("Failed to write to the output file: \"%s\"\r\n", string_get_cstr(output_path));
             break;
         }
-        // TODO: Success message
+        if(!infrared_cli_decode_file(input_file, output_file)) {
+            break;
+        }
+        printf("File successfully decoded.\r\n");
     } while(false);
 
     string_clear(tmp);
+    string_clear(header);
     string_clear(input_path);
     string_clear(output_path);
 
