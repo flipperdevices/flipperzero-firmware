@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import ssl
 import json
 import os
 import shlex
@@ -22,8 +23,9 @@ def parse_args():
 
 
 def get_commit_json(event):
+    context = ssl._create_unverified_context()
     with urllib.request.urlopen(
-        event["pull_request"]["_links"]["commits"]["href"]
+        event["pull_request"]["_links"]["commits"]["href"], context=context
     ) as commit_file:
         commit_json = json.loads(commit_file.read().decode("utf-8"))
     return commit_json
