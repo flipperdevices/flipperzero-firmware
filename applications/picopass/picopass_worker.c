@@ -1,5 +1,7 @@
 #include "picopass_worker_i.h"
 
+#include <flipper_format/flipper_format.h>
+
 #define TAG "PicopassWorker"
 
 const uint8_t picopass_iclass_key[] = {0xaf, 0xa7, 0x85, 0xa7, 0xda, 0xb3, 0x33, 0x78};
@@ -112,7 +114,102 @@ ReturnCode picopass_detect_card(int timeout) {
     return ERR_NONE;
 }
 
-ReturnCode picopass_read_card(PicopassBlock* AA1) {
+ReturnCode picopass_check_elite_key(PicopassWorker* picopass_worker, uint8_t* key) {
+    UNUSED(picopass_worker);
+    rfalPicoPassIdentifyRes idRes;
+    rfalPicoPassSelectRes selRes;
+    rfalPicoPassReadCheckRes rcRes;
+    rfalPicoPassCheckRes chkRes;
+
+    ReturnCode err;
+
+    uint8_t div_key[8] = {0};
+    uint8_t mac[4] = {0};
+    uint8_t ccnr[12] = {0};
+
+    err = picopass_detect_card(0);
+    if(err != ERR_NONE) {
+        FURI_LOG_E(TAG, "picopass_detect_card error %d", err);
+        return err;
+    }
+
+    err = rfalPicoPassPollerIdentify(&idRes);
+    if(err != ERR_NONE) {
+        FURI_LOG_E(TAG, "rfalPicoPassPollerIdentify error %d", err);
+        return err;
+    }
+
+    err = rfalPicoPassPollerSelect(idRes.CSN, &selRes);
+    if(err != ERR_NONE) {
+        FURI_LOG_E(TAG, "rfalPicoPassPollerSelect error %d", err);
+        return err;
+    }
+
+    err = rfalPicoPassPollerReadCheck(&rcRes);
+    if(err != ERR_NONE) {
+        FURI_LOG_E(TAG, "rfalPicoPassPollerReadCheck error %d", err);
+        return err;
+    }
+    memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
+
+    loclass_iclass_calc_div_key(selRes.CSN, key, div_key, true);
+    loclass_opt_doReaderMAC(ccnr, div_key, mac);
+
+    err = rfalPicoPassPollerCheck(mac, &chkRes);
+    if(err != ERR_NONE) {
+        FURI_LOG_E(TAG, "rfalPicoPassPollerCheck error %d", err);
+        return err;
+    }
+
+    return ERR_NONE;
+}
+
+ReturnCode picopass_try_elite_keys(PicopassWorker* picopass_worker) {
+    size_t index = 0;
+    uint8_t key[PICOPASS_BLOCK_LEN] = {0};
+    ReturnCode err = ERR_PARAM;
+
+    if(!iclass_elite_dict_check_presence(IclassEliteDictTypeFlipper)) {
+        FURI_LOG_E(TAG, "Dictionary not found");
+        return ERR_PARAM;
+    }
+
+    IclassEliteDict* dict = iclass_elite_dict_alloc(IclassEliteDictTypeFlipper);
+    if(!dict) {
+        FURI_LOG_E(TAG, "Dictionary not allocated");
+        return ERR_PARAM;
+    }
+
+    FURI_LOG_D(
+        TAG, "Start Dictionary attack, Key Count %d", iclass_elite_dict_get_total_keys(dict));
+    while(iclass_elite_dict_get_next_key(dict, key)) {
+        FURI_LOG_D(
+            TAG,
+            "Try to auth with key %d %02x%02x%02x%02x%02x%02x%02x%02x",
+            index++,
+            key[0],
+            key[1],
+            key[2],
+            key[3],
+            key[4],
+            key[5],
+            key[6],
+            key[7]);
+
+        err = picopass_check_elite_key(picopass_worker, key);
+        if(err == ERR_NONE) {
+            break;
+        }
+    }
+
+    if(dict) {
+        iclass_elite_dict_free(dict);
+    }
+
+    return err;
+}
+
+ReturnCode picopass_read_card(PicopassWorker* picopass_worker, PicopassBlock* AA1) {
     rfalPicoPassIdentifyRes idRes;
     rfalPicoPassSelectRes selRes;
     rfalPicoPassReadCheckRes rcRes;
@@ -149,7 +246,10 @@ ReturnCode picopass_read_card(PicopassBlock* AA1) {
     err = rfalPicoPassPollerCheck(mac, &chkRes);
     if(err != ERR_NONE) {
         FURI_LOG_E(TAG, "rfalPicoPassPollerCheck error %d", err);
-        return err;
+        err = picopass_try_elite_keys(picopass_worker);
+        if(err != ERR_NONE) {
+            return err;
+        }
     }
 
     rfalPicoPassReadBlockRes csn;
@@ -163,26 +263,12 @@ ReturnCode picopass_read_card(PicopassBlock* AA1) {
     size_t app_limit = cfg.data[0] < PICOPASS_MAX_APP_LIMIT ? cfg.data[0] : PICOPASS_MAX_APP_LIMIT;
 
     for(size_t i = 2; i < app_limit; i++) {
-        FURI_LOG_D(TAG, "rfalPicoPassPollerReadBlock block %d", i);
         rfalPicoPassReadBlockRes block;
         err = rfalPicoPassPollerReadBlock(i, &block);
         if(err != ERR_NONE) {
             FURI_LOG_E(TAG, "rfalPicoPassPollerReadBlock error %d", err);
             return err;
         }
-
-        FURI_LOG_D(
-            TAG,
-            "rfalPicoPassPollerReadBlock %d %02x%02x%02x%02x%02x%02x%02x%02x",
-            i,
-            block.data[0],
-            block.data[1],
-            block.data[2],
-            block.data[3],
-            block.data[4],
-            block.data[5],
-            block.data[6],
-            block.data[7]);
 
         memcpy(AA1[i].data, block.data, sizeof(block.data));
     }
@@ -292,7 +378,7 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
     while(picopass_worker->state == PicopassWorkerStateDetect) {
         if(picopass_detect_card(1000) == ERR_NONE) {
             // Process first found device
-            err = picopass_read_card(AA1);
+            err = picopass_read_card(picopass_worker, AA1);
             if(err != ERR_NONE) {
                 FURI_LOG_E(TAG, "picopass_read_card error %d", err);
                 nextState = PicopassWorkerEventFail;
