@@ -59,8 +59,11 @@ bool troika_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx
         .sector = 11,
     };
 
-    FURI_LOG_D("troika4k", "Verifying sector %d", auth_ctx.sector);
-    if(mf_classic_auth_attempt(tx_rx, &auth_ctx, 0x08b386463229)) {
+    uint8_t sector = 11;
+    uint8_t block = mf_classic_get_sector_trailer_block_num_by_sector(sector);
+    FURI_LOG_D("Troika", "Verifying sector %d", sector);
+    if(mf_classic_authenticate(tx_rx, block, 0x08b386463229, MfClassicKeyA)) {
+        FURI_LOG_D("Troika", "Sector %d verified", sector);
         return true;
     }
     return false;

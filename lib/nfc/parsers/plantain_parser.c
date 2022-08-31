@@ -31,14 +31,11 @@ bool plantain_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx)
         return false;
     }
 
-    MfClassicAuthContext auth_ctx = {
-        .key_a = MF_CLASSIC_NO_KEY,
-        .key_b = MF_CLASSIC_NO_KEY,
-        .sector = 8,
-    };
-    FURI_LOG_D("plant", "Verifying sector %d", auth_ctx.sector);
-    if(mf_classic_auth_attempt(tx_rx, &auth_ctx, 0x26973ea74321)) {
-        FURI_LOG_D("plant", "Sector %d verified", auth_ctx.sector);
+    uint8_t sector = 8;
+    uint8_t block = mf_classic_get_sector_trailer_block_num_by_sector(sector);
+    FURI_LOG_D("Plant", "Verifying sector %d", sector);
+    if(mf_classic_authenticate(tx_rx, block, 0x26973ea74321, MfClassicKeyA)) {
+        FURI_LOG_D("Plant", "Sector %d verified", sector);
         return true;
     }
     return false;

@@ -57,14 +57,11 @@ bool two_cities_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_r
         return false;
     }
 
-    MfClassicAuthContext auth_ctx = {
-        .key_a = MF_CLASSIC_NO_KEY,
-        .key_b = MF_CLASSIC_NO_KEY,
-        .sector = 4,
-    };
-    FURI_LOG_D("2cities", "Verifying sector %d", auth_ctx.sector);
-    if(mf_classic_auth_attempt(tx_rx, &auth_ctx, 0xE56AC127DD45)) {
-        FURI_LOG_D("2cities", "Sector %d verified", auth_ctx.sector);
+    uint8_t sector = 4;
+    uint8_t block = mf_classic_get_sector_trailer_block_num_by_sector(sector);
+    FURI_LOG_D("2cities", "Verifying sector %d", sector);
+    if(mf_classic_authenticate(tx_rx, block, 0xe56ac127dd45, MfClassicKeyA)) {
+        FURI_LOG_D("2cities", "Sector %d verified", sector);
         return true;
     }
     return false;
@@ -82,7 +79,7 @@ bool two_cities_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx)
             two_cities_keys_4k[i].sector,
             two_cities_keys_4k[i].key_a,
             two_cities_keys_4k[i].key_b);
-        FURI_LOG_D("2cities", "Added sector %d", two_cities_keys_4k[i].sector);
+        FURI_LOG_T("2cities", "Added sector %d", two_cities_keys_4k[i].sector);
     }
 
     return mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 40;

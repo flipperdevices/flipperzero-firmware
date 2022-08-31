@@ -29,12 +29,14 @@ bool troika_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
         return false;
     }
 
-    MfClassicAuthContext auth_ctx = {
-        .key_a = MF_CLASSIC_NO_KEY,
-        .key_b = MF_CLASSIC_NO_KEY,
-        .sector = 11,
-    };
-    return mf_classic_auth_attempt(tx_rx, &auth_ctx, 0x08b386463229);
+    uint8_t sector = 11;
+    uint8_t block = mf_classic_get_sector_trailer_block_num_by_sector(sector);
+    FURI_LOG_D("Troika", "Verifying sector %d", sector);
+    if(mf_classic_authenticate(tx_rx, block, 0x08b386463229, MfClassicKeyA)) {
+        FURI_LOG_D("Troika", "Sector %d verified", sector);
+        return true;
+    }
+    return false;
 }
 
 bool troika_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
