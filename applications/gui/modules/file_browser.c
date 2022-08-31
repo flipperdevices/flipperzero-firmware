@@ -31,17 +31,20 @@ typedef struct {
     string_t path;
     BrowserItemType type;
     uint8_t* custom_icon_data;
+    string_t display_name;
 } BrowserItem_t;
 
 static void BrowserItem_t_init(BrowserItem_t* obj) {
     obj->type = BrowserItemTypeLoading;
     string_init(obj->path);
+    string_init(obj->display_name);
     obj->custom_icon_data = NULL;
 }
 
 static void BrowserItem_t_init_set(BrowserItem_t* obj, const BrowserItem_t* src) {
     obj->type = src->type;
     string_init_set(obj->path, src->path);
+    string_init_set(obj->display_name, src->display_name);
     if(src->custom_icon_data) {
         obj->custom_icon_data = malloc(CUSTOM_ICON_MAX_SIZE);
         memcpy(obj->custom_icon_data, src->custom_icon_data, CUSTOM_ICON_MAX_SIZE);
@@ -53,6 +56,7 @@ static void BrowserItem_t_init_set(BrowserItem_t* obj, const BrowserItem_t* src)
 static void BrowserItem_t_set(BrowserItem_t* obj, const BrowserItem_t* src) {
     obj->type = src->type;
     string_set(obj->path, src->path);
+    string_set(obj->display_name, src->display_name);
     if(src->custom_icon_data) {
         obj->custom_icon_data = malloc(CUSTOM_ICON_MAX_SIZE);
         memcpy(obj->custom_icon_data, src->custom_icon_data, CUSTOM_ICON_MAX_SIZE);
@@ -63,6 +67,7 @@ static void BrowserItem_t_set(BrowserItem_t* obj, const BrowserItem_t* src) {
 
 static void BrowserItem_t_clear(BrowserItem_t* obj) {
     string_clear(obj->path);
+    string_clear(obj->display_name);
     if(obj->custom_icon_data) {
         free(obj->custom_icon_data);
     }
@@ -81,12 +86,13 @@ struct FileBrowser {
     BrowserWorker* worker;
     const char* ext_filter;
     bool skip_assets;
+    bool hide_ext;
 
     FileBrowserCallback callback;
     void* context;
 
-    FileBrowserLoadIconCallback icon_callback;
-    void* icon_context;
+    FileBrowserLoadItemCallback item_callback;
+    void* item_context;
 
     string_ptr result_path;
 };
@@ -170,6 +176,7 @@ void file_browser_configure(
 
     browser->ext_filter = extension;
     browser->skip_assets = skip_assets;
+    browser->hide_ext = hide_ext;
 
     with_view_model(
         browser->view, (FileBrowserModel * model) {
@@ -208,12 +215,12 @@ void file_browser_set_callback(FileBrowser* browser, FileBrowserCallback callbac
     browser->callback = callback;
 }
 
-void file_browser_set_icon_callback(
+void file_browser_set_item_callback(
     FileBrowser* browser,
-    FileBrowserLoadIconCallback callback,
+    FileBrowserLoadItemCallback callback,
     void* context) {
-    browser->icon_context = context;
-    browser->icon_callback = callback;
+    browser->item_context = context;
+    browser->item_callback = callback;
 }
 
 static bool browser_is_item_in_array(FileBrowserModel* model, uint32_t idx) {
@@ -334,24 +341,41 @@ static void browser_list_item_cb(void* context, string_t item_path, bool is_fold
     FileBrowser* browser = (FileBrowser*)context;
 
     BrowserItem_t item;
+    item.custom_icon_data = NULL;
 
     if(!is_last) {
         string_init_set(item.path, item_path);
+        string_init(item.display_name);
         if(is_folder) {
             item.type = BrowserItemTypeFolder;
         } else {
             item.type = BrowserItemTypeFile;
-            if(browser->icon_callback) {
-                item.custom_icon_data = browser->icon_callback(item_path, browser->icon_context);
-            } else {
-                item.custom_icon_data = NULL;
+            if(browser->item_callback) {
+                item.custom_icon_data = malloc(CUSTOM_ICON_MAX_SIZE);
+                if(!browser->item_callback(
+                       item_path,
+                       browser->item_context,
+                       &item.custom_icon_data,
+                       item.display_name)) {
+                    free(item.custom_icon_data);
+                    item.custom_icon_data = NULL;
+                }
             }
         }
+
+        if(string_empty_p(item.display_name)) {
+            path_extract_filename(
+                item_path,
+                item.display_name,
+                (browser->hide_ext) && (item.type == BrowserItemTypeFile));
+        }
+
         with_view_model(
             browser->view, (FileBrowserModel * model) {
                 items_array_push_back(model->items, item);
                 return false;
             });
+        string_clear(item.display_name);
         string_clear(item.path);
     } else {
         with_view_model(
@@ -415,8 +439,7 @@ static void browser_draw_list(Canvas* canvas, FileBrowserModel* model) {
             BrowserItem_t* item = items_array_get(
                 model->items, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
             item_type = item->type;
-            path_extract_filename(
-                item->path, filename, (model->hide_ext) && (item_type == BrowserItemTypeFile));
+            string_set(filename, item->display_name);
             if(item_type == BrowserItemTypeFile) {
                 custom_icon_data = item->custom_icon_data;
             }

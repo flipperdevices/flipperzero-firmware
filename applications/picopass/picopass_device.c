@@ -226,16 +226,13 @@ bool picopass_file_select(PicopassDevice* dev) {
     // Input events and views are managed by file_browser
     string_t picopass_app_folder;
     string_init_set_str(picopass_app_folder, PICOPASS_APP_FOLDER);
+
+    DialogsFileBrowserOptions browser_options;
+    dialog_file_browser_set_basic_options(&browser_options, PICOPASS_APP_EXTENSION, &I_Nfc_10px);
+
     bool res = dialog_file_browser_show(
-        dev->dialogs,
-        dev->load_path,
-        picopass_app_folder,
-        PICOPASS_APP_EXTENSION,
-        true,
-        &I_Nfc_10px,
-        true,
-        NULL,
-        NULL);
+        dev->dialogs, dev->load_path, picopass_app_folder, &browser_options);
+
     string_clear(picopass_app_folder);
     if(res) {
         string_t filename;

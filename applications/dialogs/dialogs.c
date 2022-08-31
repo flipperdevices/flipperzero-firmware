@@ -4,6 +4,18 @@
 #include "dialogs_module_file_browser.h"
 #include "dialogs_module_message.h"
 
+void dialog_file_browser_set_basic_options(
+    DialogsFileBrowserOptions* options,
+    const char* extension,
+    const Icon* icon) {
+    options->extension = extension;
+    options->skip_assets = true;
+    options->icon = icon;
+    options->hide_ext = true;
+    options->item_loader_callback = NULL;
+    options->item_loader_context = NULL;
+}
+
 static DialogsApp* dialogs_app_alloc() {
     DialogsApp* app = malloc(sizeof(DialogsApp));
     app->message_queue = furi_message_queue_alloc(8, sizeof(DialogsAppMessage));

@@ -5,16 +5,11 @@ void infrared_scene_remote_list_on_enter(void* context) {
     SceneManager* scene_manager = infrared->scene_manager;
     ViewDispatcher* view_dispatcher = infrared->view_dispatcher;
 
+    DialogsFileBrowserOptions browser_options;
+    dialog_file_browser_set_basic_options(&browser_options, INFRARED_APP_EXTENSION, &I_ir_10px);
+
     bool success = dialog_file_browser_show(
-        infrared->dialogs,
-        infrared->file_path,
-        infrared->file_path,
-        INFRARED_APP_EXTENSION,
-        true,
-        &I_ir_10px,
-        true,
-        NULL,
-        NULL);
+        infrared->dialogs, infrared->file_path, infrared->file_path, &browser_options);
 
     if(success) {
         view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);

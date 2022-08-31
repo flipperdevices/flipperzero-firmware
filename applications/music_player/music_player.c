@@ -305,17 +305,13 @@ int32_t music_player_app(void* p) {
         } else {
             string_set_str(file_path, MUSIC_PLAYER_APP_PATH_FOLDER);
 
+            DialogsFileBrowserOptions browser_options;
+            dialog_file_browser_set_basic_options(
+                &browser_options, MUSIC_PLAYER_APP_EXTENSION, &I_music_10px);
+            browser_options.hide_ext = false;
+
             DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
-            bool res = dialog_file_browser_show(
-                dialogs,
-                file_path,
-                file_path,
-                MUSIC_PLAYER_APP_EXTENSION,
-                true,
-                &I_music_10px,
-                false,
-                NULL,
-                NULL);
+            bool res = dialog_file_browser_show(dialogs, file_path, file_path, &browser_options);
 
             furi_record_close(RECORD_DIALOGS);
             if(!res) {

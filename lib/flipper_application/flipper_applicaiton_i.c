@@ -53,7 +53,7 @@ static FindFlags_t flipper_application_preload_section(
     Elf32_Shdr* sh,
     const char* name,
     int n) {
-    FURI_LOG_I(TAG, "Name: %s", name);
+    FURI_LOG_D(TAG, "Name: %s", name);
 
     if(strcmp(name, ".symtab") == 0) {
         e->symbol_table = sh->sh_offset;
@@ -139,7 +139,7 @@ bool flipper_application_load_section_table(FlipperApplication* e) {
 
     size_t n;
     FindFlags_t found = FoundERROR;
-    FURI_LOG_I(TAG, "Scan ELF indexs...");
+    FURI_LOG_D(TAG, "Scan ELF indexs...");
     for(n = 1; n < e->sections; n++) {
         Elf32_Shdr section_header;
         char name[33] = {0};
@@ -153,7 +153,7 @@ bool flipper_application_load_section_table(FlipperApplication* e) {
             return false;
         }
 
-        FURI_LOG_D(TAG, "Examining section %d %s", n, name);
+        FURI_LOG_T(TAG, "Examining section %d %s", n, name);
         FindFlags_t section_flags =
             flipper_application_preload_section(e, &section_header, name, n);
         found |= section_flags;
@@ -165,7 +165,7 @@ bool flipper_application_load_section_table(FlipperApplication* e) {
         }
     }
 
-    FURI_LOG_I(TAG, "Load symbols done");
+    FURI_LOG_D(TAG, "Load symbols done");
     return IS_FLAGS_SET(found, FoundValid);
 }
 
@@ -308,7 +308,7 @@ static bool relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection_t* s) {
 
         for(relCount = 0; relCount < relEntries; relCount++) {
             if(relCount % RESOLVER_THREAD_YIELD_STEP == 0) {
-                FURI_LOG_E(TAG, "  reloc YIELD");
+                FURI_LOG_D(TAG, "  reloc YIELD");
                 furi_delay_tick(1);
             }
 

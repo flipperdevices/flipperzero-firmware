@@ -17,26 +17,48 @@ typedef struct DialogsApp DialogsApp;
 /****************** FILE BROWSER ******************/
 
 /**
- * Shows and processes the file browser dialog
- * @param context api pointer
- * @param result_path selected file path string pointer
- * @param path preselected file path string pointer
+ * File browser dialog extra options
  * @param extension file extension to be offered for selection
  * @param skip_assets true - do not show assets folders
  * @param icon file icon pointer, NULL for default icon
  * @param hide_ext true - hide extensions for files
+ * @param item_loader_callback callback function for providing custom icon & entry name
+ * @param hide_ext callback context
+ */
+typedef struct {
+    const char* extension;
+    bool skip_assets;
+    const Icon* icon;
+    bool hide_ext;
+    FileBrowserLoadItemCallback item_loader_callback;
+    void* item_loader_context;
+} DialogsFileBrowserOptions;
+
+/**
+ * Initialize file browser dialog options
+ * and set default values
+ * @param options pointer to options structure
+ * @param extension file extension to filter
+ * @param icon file icon pointer, NULL for default icon
+ */
+void dialog_file_browser_set_basic_options(
+    DialogsFileBrowserOptions* options,
+    const char* extension,
+    const Icon* icon);
+
+/**
+ * Shows and processes the file browser dialog
+ * @param context api pointer
+ * @param result_path selected file path string pointer
+ * @param path preselected file path string pointer
+ * @param options file browser dialog extra options, may be null
  * @return bool whether a file was selected
  */
 bool dialog_file_browser_show(
     DialogsApp* context,
     string_ptr result_path,
     string_ptr path,
-    const char* extension,
-    bool skip_assets,
-    const Icon* icon,
-    bool hide_ext,
-    FileBrowserLoadIconCallback icon_loader_callback,
-    void* icon_loader_context);
+    const DialogsFileBrowserOptions* options);
 
 /****************** MESSAGE ******************/
 

@@ -216,16 +216,11 @@ void ibutton_free(iButton* ibutton) {
 }
 
 bool ibutton_file_select(iButton* ibutton) {
+    DialogsFileBrowserOptions browser_options;
+    dialog_file_browser_set_basic_options(&browser_options, IBUTTON_APP_EXTENSION, &I_ibutt_10px);
+
     bool success = dialog_file_browser_show(
-        ibutton->dialogs,
-        ibutton->file_path,
-        ibutton->file_path,
-        IBUTTON_APP_EXTENSION,
-        true,
-        &I_ibutt_10px,
-        true,
-        NULL,
-        NULL);
+        ibutton->dialogs, ibutton->file_path, ibutton->file_path, &browser_options);
 
     if(success) {
         success = ibutton_load_key_data(ibutton, ibutton->file_path, true);

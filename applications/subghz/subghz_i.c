@@ -461,17 +461,12 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
     string_t file_path;
     string_init(file_path);
 
+    DialogsFileBrowserOptions browser_options;
+    dialog_file_browser_set_basic_options(&browser_options, SUBGHZ_APP_EXTENSION, &I_sub1_10px);
+
     // Input events and views are managed by file_select
     bool res = dialog_file_browser_show(
-        subghz->dialogs,
-        subghz->file_path,
-        subghz->file_path,
-        SUBGHZ_APP_EXTENSION,
-        true,
-        &I_sub1_10px,
-        true,
-        NULL,
-        NULL);
+        subghz->dialogs, subghz->file_path, subghz->file_path, &browser_options);
 
     if(res) {
         res = subghz_key_load(subghz, string_get_cstr(subghz->file_path), true);

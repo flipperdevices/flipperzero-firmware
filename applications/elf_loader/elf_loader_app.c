@@ -12,10 +12,10 @@
 typedef struct {
     FlipperApplication* app;
     Storage* storage;
-    uint8_t icon_temp[32];
 } ElfLoader;
 
-static uint8_t* elf_loader_icon_callback(string_t path, void* context) {
+static bool
+    elf_loader_icon_callback(string_t path, void* context, uint8_t** icon_ptr, string_t item_name) {
     ElfLoader* loader = context;
     furi_assert(loader);
 
@@ -24,20 +24,22 @@ static uint8_t* elf_loader_icon_callback(string_t path, void* context) {
     FlipperApplicationPreloadStatus preload_res =
         flipper_application_preload(loader->app, string_get_cstr(path));
 
-    uint8_t* ret = NULL;
+    bool load_success = false;
 
     if(preload_res == FlipperApplicationPreloadStatusSuccess) {
         const FlipperApplicationManifest* manifest = flipper_application_get_manifest(loader->app);
         if(manifest->has_icon) {
-            memcpy(loader->icon_temp, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
-            ret = loader->icon_temp;
+            memcpy(*icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
         }
+        string_set_str(item_name, manifest->name);
+        load_success = true;
     } else {
         FURI_LOG_E(TAG, "ELF Loader failed to preload %s", string_get_cstr(path));
+        load_success = false;
     }
 
     flipper_application_free(loader->app);
-    return ret;
+    return load_success;
 }
 
 int32_t elf_loader_app(void* p) {
@@ -64,16 +66,17 @@ int32_t elf_loader_app(void* p) {
             string_init_set(elf_name, (const char*)p);
         } else {
             string_init_set(elf_name, EXT_PATH("apps"));
-            if(!dialog_file_browser_show(
-                   dialogs,
-                   elf_name,
-                   elf_name,
-                   ".fap",
-                   true,
-                   NULL,
-                   false,
-                   elf_loader_icon_callback,
-                   loader)) {
+
+            const DialogsFileBrowserOptions browser_options = {
+                .extension = ".fap",
+                .skip_assets = true,
+                .icon = &I_badusb_10px,
+                .hide_ext = true,
+                .item_loader_callback = elf_loader_icon_callback,
+                .item_loader_context = loader,
+            };
+
+            if(!dialog_file_browser_show(dialogs, elf_name, elf_name, &browser_options)) {
                 show_error = false;
                 break;
             }

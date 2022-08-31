@@ -9,26 +9,20 @@ bool dialog_file_browser_show(
     DialogsApp* context,
     string_ptr result_path,
     string_ptr path,
-    const char* extension,
-    bool skip_assets,
-    const Icon* icon,
-    bool hide_ext,
-    FileBrowserLoadIconCallback icon_loader_callback,
-    void* icon_loader_context) {
+    const DialogsFileBrowserOptions* options) {
     FuriApiLock lock = API_LOCK_INIT_LOCKED();
     furi_check(lock != NULL);
 
     DialogsAppData data = {
         .file_browser = {
-            .extension = extension,
+            .extension = options ? options->extension : "",
             .result_path = result_path,
-            .file_icon = icon,
-            .hide_ext = hide_ext,
-            .skip_assets = skip_assets,
+            .file_icon = options ? options->icon : NULL,
+            .hide_ext = options ? options->hide_ext : true,
+            .skip_assets = options ? options->skip_assets : true,
             .preselected_filename = path,
-            .icon_callback = icon_loader_callback,
-            .icon_callback_context = icon_loader_context,
-
+            .item_callback = options ? options->item_loader_callback : NULL,
+            .item_callback_context = options ? options->item_loader_context : NULL,
         }};
 
     DialogsAppReturn return_data;
