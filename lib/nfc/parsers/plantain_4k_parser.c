@@ -79,7 +79,7 @@ bool plantain_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx
             plantain_keys_4k[i].sector,
             plantain_keys_4k[i].key_a,
             plantain_keys_4k[i].key_b);
-        FURI_LOG_D("plant4k", "Added sector %d", plantain_keys_4k[i].sector);
+        FURI_LOG_T("plant4k", "Added sector %d", plantain_keys_4k[i].sector);
     }
     for(int i = 0; i < 5; i++) {
         if(mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 40) {
