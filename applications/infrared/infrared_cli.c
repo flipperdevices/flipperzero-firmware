@@ -277,7 +277,7 @@ static void infrared_cli_process_decode(Cli* cli, string_t args) {
 
     do {
         if(!args_read_probably_quoted_string_and_trim(args, input_path)) {
-            printf("Wrong command syntax\r\n");
+            printf("Wrong arguments.\r\n");
             infrared_cli_print_usage();
             break;
         }
@@ -328,18 +328,15 @@ static void infrared_cli_start_ir(Cli* cli, string_t args, void* context) {
         return;
     }
 
+    string_t command;
+    string_init(command);
+    args_read_string_and_trim(args, command);
+
     size_t i = 0;
     for(; i < COUNT_OF(infrared_cli_commands); ++i) {
-        size_t size = strlen(infrared_cli_commands[i].cmd);
-        bool cmd_found = !strncmp(string_get_cstr(args), infrared_cli_commands[i].cmd, size);
-        if(cmd_found) {
-            if(string_size(args) == size) {
-                break;
-            }
-            if(string_get_cstr(args)[size] == ' ') {
-                string_right(args, size + 1);
-                break;
-            }
+        size_t cmd_len = strlen(infrared_cli_commands[i].cmd);
+        if(!strncmp(string_get_cstr(command), infrared_cli_commands[i].cmd, cmd_len)) {
+            break;
         }
     }
 
@@ -348,6 +345,8 @@ static void infrared_cli_start_ir(Cli* cli, string_t args, void* context) {
     } else {
         infrared_cli_print_usage();
     }
+
+    string_clear(command);
 }
 void infrared_on_system_start() {
 #ifdef SRV_CLI
