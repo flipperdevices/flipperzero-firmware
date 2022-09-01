@@ -11,6 +11,7 @@
 - Update for SubGHz ranges from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & [amec0e](https://github.com/amec0e)
 - OFW: [#1675](https://github.com/flipperdevices/flipperzero-firmware/pull/1675), [#1679](https://github.com/flipperdevices/flipperzero-firmware/pull/1679), [#1684](https://github.com/flipperdevices/flipperzero-firmware/pull/1684), [#1658](https://github.com/flipperdevices/flipperzero-firmware/pull/1658), [#1681](https://github.com/flipperdevices/flipperzero-firmware/pull/1681), [#1674](https://github.com/flipperdevices/flipperzero-firmware/pull/1674) & [#1622](https://github.com/flipperdevices/flipperzero-firmware/pull/1622)
 - Added [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
+- Added [Fix displaying LFRFID protocol names #1682 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1682)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -141,8 +142,8 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
 - [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
 - [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
-- [SubGhz: add protocol Intertechno_V3 #1622 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1622)
 - [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
+- [Fix displaying LFRFID protocol names #1682 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1682)
 
 </details>
 
