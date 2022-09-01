@@ -8,10 +8,13 @@
 - Known Issues:			`FAP Loader`, `Chess` & `Chip8` (No Controls)
 - Apps `HIDDEN` for compile space can be found on Side B in the update folder.
 - Update for IR assets from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & [amec0e](https://github.com/amec0e)
-- Update for SubGHz ranges from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & [amec0e](https://github.com/amec0e)
+- Update for SubGHz ranges from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - OFW: [#1675](https://github.com/flipperdevices/flipperzero-firmware/pull/1675), [#1679](https://github.com/flipperdevices/flipperzero-firmware/pull/1679), [#1684](https://github.com/flipperdevices/flipperzero-firmware/pull/1684), [#1658](https://github.com/flipperdevices/flipperzero-firmware/pull/1658), [#1681](https://github.com/flipperdevices/flipperzero-firmware/pull/1681), [#1674](https://github.com/flipperdevices/flipperzero-firmware/pull/1674) & [#1622](https://github.com/flipperdevices/flipperzero-firmware/pull/1622)
 - Added [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - Added [Fix displaying LFRFID protocol names #1682 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1682)
+- More IR audio updates from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & [amec0e](https://github.com/amec0e)
+- SubGHz updates and documentation updates from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
+- Fixes for NRFSniff and Spectrum Analyzer from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
