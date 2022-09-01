@@ -9,6 +9,7 @@
 - Apps `HIDDEN` for compile space can be found on Side B in the update folder.
 - Update for IR assets from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & [amec0e](https://github.com/amec0e)
 - Update for SubGHz ranges from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & [amec0e](https://github.com/amec0e)
+- OFW: [#1675](https://github.com/flipperdevices/flipperzero-firmware/pull/1675), [#1679](https://github.com/flipperdevices/flipperzero-firmware/pull/1679), [#1684](https://github.com/flipperdevices/flipperzero-firmware/pull/1684), [#1658](https://github.com/flipperdevices/flipperzero-firmware/pull/1658), [#1681](https://github.com/flipperdevices/flipperzero-firmware/pull/1681), [#1674](https://github.com/flipperdevices/flipperzero-firmware/pull/1674) & [#1622](https://github.com/flipperdevices/flipperzero-firmware/pull/1622)
 - Added [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 
 <table width="100%" border="0" cellspacing="0">
