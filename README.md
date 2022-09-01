@@ -15,6 +15,7 @@
 - More IR audio updates from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & [amec0e](https://github.com/amec0e)
 - SubGHz updates and documentation updates from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Fixes for NRFSniff and Spectrum Analyzer from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
+- Added two new BadUSB assets for Kiosk Evasion and Wifi Stealer
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -82,6 +83,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
 - Assets: Running DolphinRestorer.fap on new install will auto-level to the end of Level 2.
 - BadUSB: Added ignore DUCKY_LANG cmd to retain compatibility with existing scripts [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
+- BadUSB: Assets for Kiosk Evasion and Wifi Stealer
 - BadUSB: show script errors on screen [(By CromFr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/200)
 - BadUSB: sk-SK maping keybord for BadUsb [(By jaroslavmraz)](https://github.com/flipperdevices/flipperzero-firmware/pull/1619)
 - Bluetooth: Bluetooth fix so device name says zzRogue instead of Flipper [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/firmware/targets/f7/furi_hal/furi_hal_version.c#L95) [REMOVED DUE TO ANDROID INCOMPATABILITY]
