@@ -382,7 +382,7 @@ static bool flipper_application_load_section_data(FlipperApplication* e, ELFSect
         /* section is empty (.bss?) */
         /* no need to memset - allocator already did that */
         /* memset(s->data, 0, h->sh_size); */
-        FURI_LOG_I(TAG, "0x%X", s->data);
+        FURI_LOG_D(TAG, "0x%X", s->data);
         return true;
     }
 
@@ -393,7 +393,7 @@ static bool flipper_application_load_section_data(FlipperApplication* e, ELFSect
         return false;
     }
 
-    FURI_LOG_I(TAG, "0x%X", s->data);
+    FURI_LOG_D(TAG, "0x%X", s->data);
     return true;
 }
 
@@ -413,7 +413,6 @@ static bool flipper_application_relocate_section(FlipperApplication* e, ELFSecti
 }
 
 FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplication* e) {
-    FURI_LOG_I(TAG, "Load sections...");
     FlipperApplicationLoadStatus status = FlipperApplicationLoadStatusSuccess;
     RelocationAddressCache_init(e->relocation_cache);
     size_t start = furi_get_tick();
@@ -463,9 +462,9 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
         e->entry += (uint32_t)e->text.data;
     }
 
-    FURI_LOG_I(TAG, "Relocation cache size: %u", RelocationAddressCache_size(e->relocation_cache));
+    FURI_LOG_D(TAG, "Relocation cache size: %u", RelocationAddressCache_size(e->relocation_cache));
     RelocationAddressCache_clear(e->relocation_cache);
-    FURI_LOG_I(TAG, "Sections loaded in %ums", (size_t)(furi_get_tick() - start));
+    FURI_LOG_I(TAG, "Loaded in %ums", (size_t)(furi_get_tick() - start));
 
     return status;
 }

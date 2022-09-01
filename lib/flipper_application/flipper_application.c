@@ -17,7 +17,7 @@ FlipperApplication*
 
 void flipper_application_free(FlipperApplication* app) {
     furi_assert(app);
-    
+
     if(app->thread) {
         furi_thread_join(app->thread);
         furi_thread_free(app->thread);
@@ -89,6 +89,10 @@ FuriThread* flipper_application_spawn(FlipperApplication* app, void* args) {
     furi_thread_set_callback(app->thread, (entry_t*)app->entry);
     furi_thread_set_context(app->thread, args);
 
+    return app->thread;
+}
+
+FuriThread* flipper_application_get_thread(FlipperApplication* app) {
     return app->thread;
 }
 
