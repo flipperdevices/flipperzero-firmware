@@ -17,6 +17,7 @@
 - Fixes for NRFSniff and Spectrum Analyzer from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Added two new BadUSB assets for Kiosk Evasion and Wifi Stealer
 - Added [Add support for Keri tags #1689 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1689)
+- Added [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -151,6 +152,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
 - [Fix displaying LFRFID protocol names #1682 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1682)
 - [Add support for Keri tags #1689 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1689)
+- [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)
 
 </details>
 
