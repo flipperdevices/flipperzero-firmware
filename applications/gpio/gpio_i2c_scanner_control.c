@@ -1,5 +1,5 @@
 #include "gpio_i2c_scanner_control.h"
-#include <furi_hal.h>
+#include <furi.h>
 
 void gpio_i2c_scanner_run_once(I2CScannerState* i2c_scanner_state) {
     //Reset the number of items for rewriting the array
