@@ -70,10 +70,11 @@ if appenv["FORCE"]:
 
 Alias(appenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps["compact"].values())
 
-appenv.PhonyTarget(
-    "launch_app",
-    "${PYTHON3} scripts/runfap.py ${SOURCE}",
-    source=appenv.GetExtAppFromPath(appenv.subst("$APPSRC")),
-)
+if appsrc := appenv.subst("$APPSRC"):
+    appenv.PhonyTarget(
+        "launch_app",
+        "${PYTHON3} scripts/runfap.py ${SOURCE}",
+        source=appenv.GetExtAppFromPath(appsrc),
+    )
 
 Return("extapps")

@@ -28,7 +28,13 @@ def BuildAppElf(env, app):
         app_elf_raw,
         APP=app,
     )
+
     env.Depends(app_elf_augmented, [env["SDK_DEFINITION"], env.Value(app)])
+    if app.fapp_icon:
+        env.Depends(
+            app_elf_augmented,
+            env.File(f"{app._apppath}/{app.fapp_icon}"),
+        )
     env.Alias(app_alias, app_elf_augmented)
 
     app_elf_import_validator = env.ValidateAppImports(app_elf_augmented)
