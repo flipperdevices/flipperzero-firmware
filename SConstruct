@@ -166,16 +166,20 @@ distenv.Default(basic_dist)
 dist_dir = distenv.GetProjetDirName()
 plugin_dist = [
     distenv.Install(
-        f"#/dist/{dist_dir}/apps/debug", firmware_env["FW_EXTAPPS"]["debug"]
+        f"#/dist/{dist_dir}/apps/debug", firmware_env["FW_EXTAPPS"]["debug"].values()
     ),
-    distenv.Install(f"#/dist/{dist_dir}/apps", firmware_env["FW_EXTAPPS"]["compact"]),
+    distenv.Install(
+        f"#/dist/{dist_dir}/apps", firmware_env["FW_EXTAPPS"]["compact"].values()
+    ),
 ]
-Depends(plugin_dist, firmware_env["FW_EXTAPPS"]["validators"])
+Depends(plugin_dist, firmware_env["FW_EXTAPPS"]["validators"].values())
 Alias("plugin_dist", plugin_dist)
 # distenv.Default(plugin_dist)
 
 plugin_resources_dist = (
-    distenv.Install(f"#/assets/resources/apps", firmware_env["FW_EXTAPPS"]["compact"]),
+    distenv.Install(
+        f"#/assets/resources/apps", firmware_env["FW_EXTAPPS"]["compact"].values()
+    ),
 )
 distenv.Depends(firmware_env["FW_RESOURCES"], plugin_resources_dist)
 

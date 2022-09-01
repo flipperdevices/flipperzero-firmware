@@ -111,5 +111,17 @@
             "type": "shell",
             "command": "./fbt COMPACT=1 DEBUG=0 plugin_dist"
         },
+        {
+            "label": "[Debug] Launch App on Flipper",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt launch_app APPSRC=${relativeFileDirname}"
+        },
+        {
+            "label": "[Release] Launch App on Flipper",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt COMPACT=1 DEBUG=0 launch_app APPSRC=${relativeFileDirname}"
+        }
     ]
 }
