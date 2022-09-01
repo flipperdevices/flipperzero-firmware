@@ -83,7 +83,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Animations: SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
 - Assets: Includes a NFC Level 50 Link Amiibo
 - Assets: Includes a NFC Rick Roll link
-- Assets: Includes New Dolphin Animations: [Rick Roll, Matrix & Swim animations (By qqMajiKpp)], [Rukamon 2x and Agumon animations (By Syrius)], [Mew (By Arkaivos)], [Eye of the Flipper (By Kuronons)], [Shodan (By qqMajiKpp)], [Sirene & The Witch (By Haseo)]
+- Assets: Includes New Dolphin Animations: [Rick Roll, Matrix & Swim animations (By qqMajiKpp)], [Rukamon 2x and Agumon animations (By Syrius)], [Mew (By Arkaivos)], [Eye of the Flipper (By Kuronons)], [Shodan (By qqMajiKpp)], [Sirene & The Witch (By Haseo)], [The Mage, Dino & A New Hope (By Haseo)] & [Earth Arcadia (By Kuronons)]
 - Assets: Includes sample Music Player tunes
 - Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys, Tesla Charge Port and Unitree Go1 Robot Dog
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
