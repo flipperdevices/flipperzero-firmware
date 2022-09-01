@@ -9,7 +9,6 @@
 #include "infrared_signal.h"
 
 #define INFRARED_CLI_BUF_SIZE 10
-#define INFRARED_CLI_FFF_HEADER "IR signals file"
 
 static void infrared_cli_start_ir_rx(Cli* cli, string_t args);
 static void infrared_cli_start_ir_tx(Cli* cli, string_t args);
