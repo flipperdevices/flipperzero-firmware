@@ -72,7 +72,9 @@ def validate_app_imports(target, source, env):
 
 def generate(env, **kw):
     env.SetDefault(EXT_APPS_WORK_DIR=kw.get("EXT_APPS_WORK_DIR", ".extapps"))
-    env.VariantDir(env.subst("$EXT_APPS_WORK_DIR"), ".", duplicate=False)
+    env.VariantDir(
+        env.subst("$EXT_APPS_WORK_DIR"), env.Dir(".").srcnode(), duplicate=False
+    )
     env.AddMethod(BuildAppElf)
     env.Append(
         BUILDERS={
