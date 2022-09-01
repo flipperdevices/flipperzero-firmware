@@ -69,7 +69,7 @@ App(
         # "GAME_MandelbrotSet",
         # "GAME_MontyHall",
         "GAME_Snake",
-        "GAME_TAMA_P1",
+        # "GAME_TAMA_P1",
         # "GAME_Tanks",
         "GAME_Tetris",
         # "GAME_TicTacToe",

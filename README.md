@@ -20,6 +20,7 @@
 - Added [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)
 - Added [Add support for Gallagher tags #1680 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1680)
 - Added [NFC collect params for mfkey32 attack #1643 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1643)
+- `"GAME_TAMA_P1"` set to `HIDDEN`
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -178,7 +179,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203) `HIDDEN "GAME_MontyHall"`
 - [RayCast (Bt Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/raycast-game-engine) `HIDDEN "GAME_Raycast"`
 - Snake [OFW]
-- [TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` on SD as `rom.bin` to make it work.
+- [TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` on SD as `rom.bin` to make it work. `HIDDEN "GAME_TAMA_P1"`
 - [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) `HIDDEN "GAME_Tanks"`
 - [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
 - [Tic Tac Toe (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins) `HIDDEN "GAME_TicTacToe"`
