@@ -21,7 +21,7 @@
 - Added [Add support for Gallagher tags #1680 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1680)
 - Added [NFC collect params for mfkey32 attack #1643 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1643)
 - `"GAME_TAMA_P1"` set to `HIDDEN`
-- Assets: Includes New Dolphin Animations: [The Mage, Dino & A New Hope (By Haseo)] & [Earth Arcadia (By Kuronons)]
+- Assets: Includes New Dolphin Animations: [Dino & A New Hope (By Haseo)] & [Earth Arcadia (By Kuronons)]
 - Away for the weekend so no new updates till 9/6 (Unless it is PR'd)
 
 <table width="100%" border="0" cellspacing="0">
