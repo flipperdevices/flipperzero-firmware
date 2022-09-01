@@ -29,9 +29,6 @@ bool flipper_application_load_elf_headers(FlipperApplication* e, const char* pat
 }
 
 static bool flipper_application_load_metadata(FlipperApplication* e, Elf32_Shdr* sh) {
-    // if(sh->sh_type != SHT_FLIPPER_METADATA) {
-    //     return false;
-    // }
     if(sh->sh_size < sizeof(e->manifest)) {
         return false;
     }
@@ -53,7 +50,28 @@ static FindFlags_t flipper_application_preload_section(
     Elf32_Shdr* sh,
     const char* name,
     int n) {
-    FURI_LOG_D(TAG, "Name: %s", name);
+    FURI_LOG_D(TAG, "Processing: %s", name);
+
+    const struct {
+        const char* name;
+        uint16_t* ptr_section_idx;
+        FindFlags_t flags;
+    } lookup_sections[] = {
+        {".text", &e->text.sec_idx, FoundText},
+        {".rodata", &e->rodata.sec_idx, FoundRodata},
+        {".data", &e->data.sec_idx, FoundData},
+        {".bss", &e->bss.sec_idx, FoundBss},
+        {".rel.text", &e->text.rel_sec_idx, FoundRelText},
+        {".rel.rodata", &e->rodata.rel_sec_idx, FoundRelRodata},
+        {".rel.data", &e->data.rel_sec_idx, FoundRelData},
+    };
+
+    for(size_t i = 0; i < COUNT_OF(lookup_sections); i++) {
+        if(strcmp(name, lookup_sections[i].name) == 0) {
+            *lookup_sections[i].ptr_section_idx = n;
+            return lookup_sections[i].flags;
+        }
+    }
 
     if(strcmp(name, ".symtab") == 0) {
         e->symbol_table = sh->sh_offset;
@@ -62,27 +80,6 @@ static FindFlags_t flipper_application_preload_section(
     } else if(strcmp(name, ".strtab") == 0) {
         e->symbol_table_strings = sh->sh_offset;
         return FoundStrTab;
-    } else if(strcmp(name, ".text") == 0) {
-        e->text.sec_idx = n;
-        return FoundText;
-    } else if(strcmp(name, ".rodata") == 0) {
-        e->rodata.sec_idx = n;
-        return FoundRodata;
-    } else if(strcmp(name, ".data") == 0) {
-        e->data.sec_idx = n;
-        return FoundData;
-    } else if(strcmp(name, ".bss") == 0) {
-        e->bss.sec_idx = n;
-        return FoundBss;
-    } else if(strcmp(name, ".rel.text") == 0) {
-        e->text.rel_sec_idx = n;
-        return FoundRelText;
-    } else if(strcmp(name, ".rel.rodata") == 0) {
-        e->rodata.rel_sec_idx = n;
-        return FoundRelText;
-    } else if(strcmp(name, ".rel.data") == 0) {
-        e->data.rel_sec_idx = n;
-        return FoundRelText;
     } else if(strcmp(name, ".fapmeta") == 0) {
         // Load metadata immediately
         if(flipper_application_load_metadata(e, sh)) {
@@ -144,12 +141,10 @@ bool flipper_application_load_section_table(FlipperApplication* e) {
         Elf32_Shdr section_header;
         char name[33] = {0};
         if(!read_section_header(e, n, &section_header)) {
-            FURI_LOG_E(TAG, "Error reading section %d", n);
             return false;
         }
         if(section_header.sh_name &&
            !read_section_name(e, section_header.sh_name, name, sizeof(name))) {
-            FURI_LOG_E(TAG, "Error reading section name", n);
             return false;
         }
 
@@ -232,15 +227,15 @@ static bool relocate_symbol(Elf32_Addr relAddr, int type, Elf32_Addr symAddr) {
 }
 
 static ELFSection_t* section_of(FlipperApplication* e, int index) {
-#define IFSECTION(sec, i)                     \
-    do {                                      \
-        if((sec).sec_idx == i) return &(sec); \
-    } while(0)
-    IFSECTION(e->text, index);
-    IFSECTION(e->rodata, index);
-    IFSECTION(e->data, index);
-    IFSECTION(e->bss, index);
-#undef IFSECTION
+    if(e->text.sec_idx == index) {
+        return &e->text;
+    } else if(e->data.sec_idx == index) {
+        return &e->data;
+    } else if(e->bss.sec_idx == index) {
+        return &e->bss;
+    } else if(e->rodata.sec_idx == index) {
+        return &e->rodata;
+    }
     return NULL;
 }
 
@@ -376,7 +371,7 @@ static bool flipper_application_load_section_data(FlipperApplication* e, ELFSect
     }
 
     if(section_header.sh_size == 0) {
-        FURI_LOG_I(TAG, " No data for section");
+        FURI_LOG_I(TAG, "No data for section");
         return true;
     }
 
@@ -464,7 +459,7 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
         }
         furi_check(mmap_entry_idx == e->state.mmap_entry_count);
 
-        /* Fixing entry point */
+        /* Fixing up entry point */
         e->entry += (uint32_t)e->text.data;
     }
 
