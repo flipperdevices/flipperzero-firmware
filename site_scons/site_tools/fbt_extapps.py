@@ -4,6 +4,7 @@ from SCons.Errors import UserError
 import SCons.Warnings
 
 import os
+import pathlib
 from fbt.elfmanifest import assemble_manifest_data
 from fbt.sdk import SdkCache
 
@@ -70,12 +71,33 @@ def validate_app_imports(target, source, env):
         )
 
 
+def GetExtAppFromPath(env, app_dir):
+    if not app_dir:
+        raise Exception("APPSRC not set")
+
+    appmgr = env["APPMGR"]
+
+    app = None
+    for dir_part in reversed(pathlib.Path(app_dir).parts):
+        if app := appmgr.find_by_appdir(dir_part):
+            break
+    if not app:
+        raise Exception(f"Failed to resolve application for given APPSRC={app_dir}")
+
+    app_elf = env["_extapps"]["compact"].get(app.appid, None)
+    if not app_elf:
+        raise Exception(f"No external app found for {app.appid}")
+
+    return app_elf[0]
+
+
 def generate(env, **kw):
     env.SetDefault(EXT_APPS_WORK_DIR=kw.get("EXT_APPS_WORK_DIR", ".extapps"))
     env.VariantDir(
         env.subst("$EXT_APPS_WORK_DIR"), env.Dir(".").srcnode(), duplicate=False
     )
     env.AddMethod(BuildAppElf)
+    env.AddMethod(GetExtAppFromPath)
     env.Append(
         BUILDERS={
             "EmbedAppMetadata": Builder(

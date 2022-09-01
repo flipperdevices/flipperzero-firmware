@@ -2,8 +2,6 @@ Import("ENV")
 
 
 from fbt.appmanifest import FlipperAppType
-import pathlib
-
 
 appenv = ENV.Clone(tools=["fbt_extapps"])
 
@@ -39,7 +37,11 @@ appenv.AppendUnique(
 )
 
 
-extapps = {"compact": {}, "debug": {}, "validators": {}}
+extapps = appenv["_extapps"] = {
+    "compact": {},
+    "debug": {},
+    "validators": {},
+}
 
 
 def build_app_as_external(env, appdef):
@@ -68,35 +70,10 @@ if appenv["FORCE"]:
 
 Alias(appenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps["compact"].values())
 
-
-def launch_ext_app_for_srcdir(target, source, env, for_signature):
-    if for_signature:
-        return ""
-
-    app_dir = env.subst("$APPSRC")
-    if not app_dir:
-        raise Exception("APPSRC not set")
-
-    appmgr = appenv["APPMGR"]
-
-    app = None
-    for dir_part in reversed(pathlib.Path(app_dir).parts):
-        if app := appmgr.find_by_appdir(dir_part):
-            break
-    if not app:
-        raise Exception(f"Failed to resolve application for given APPSRC={app_dir}")
-
-    app_elf = extapps["compact"].get(app.appid, None)
-    if not app_elf:
-        raise Exception(f"No external app found for {app.appid}")
-
-    return "${PYTHON3} scripts/runfap.py " + app_elf[0].path
-
-
 appenv.PhonyTarget(
     "launch_app",
-    # "echo magic for ${APPSRC}",
-    Action(launch_ext_app_for_srcdir, generator=1),
+    "${PYTHON3} scripts/runfap.py ${SOURCE}",
+    source=appenv.GetExtAppFromPath(appenv.subst("$APPSRC")),
 )
 
 Return("extapps")
