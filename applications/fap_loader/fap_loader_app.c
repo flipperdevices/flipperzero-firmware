@@ -57,6 +57,8 @@ int32_t fap_loader_app(void* p) {
     view_dispatcher_attach_to_gui(view_dispatcher, gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_add_view(view_dispatcher, 0, loading_get_view(loading));
 
+    view_dispatcher_switch_to_view(view_dispatcher, 0);
+
     string_init_set(error_message, "unknown error");
 
     bool file_selected = false;
@@ -81,10 +83,9 @@ int32_t fap_loader_app(void* p) {
                 break;
             }
         }
+
         file_selected = true;
         loader->app = flipper_application_alloc(loader->storage, &hashtable_api_interface);
-
-        view_dispatcher_switch_to_view(view_dispatcher, 0);
 
         FURI_LOG_I(TAG, "FAP Loader is loading %s", string_get_cstr(fap_name));
 
