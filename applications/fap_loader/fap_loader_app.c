@@ -125,12 +125,13 @@ int32_t fap_loader_app(void* p) {
 
     if(show_error) {
         DialogMessage* message = dialog_message_alloc();
-        dialog_message_set_header(message, "FAP Loader", 64, 0, AlignCenter, AlignTop);
+        dialog_message_set_header(message, "Error", 64, 0, AlignCenter, AlignTop);
         dialog_message_set_buttons(message, NULL, NULL, NULL);
 
         string_t buffer;
         string_init(buffer);
-        string_printf(buffer, "Error: %s\n", string_get_cstr(error_message));
+        string_printf(buffer, "%s", string_get_cstr(error_message));
+        string_replace_str(buffer, ":", "\n");
         dialog_message_set_text(
             message, string_get_cstr(buffer), 64, 32, AlignCenter, AlignCenter);
 
