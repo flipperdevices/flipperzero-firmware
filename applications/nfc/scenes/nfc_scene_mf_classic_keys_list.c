@@ -1,11 +1,5 @@
 #include "../nfc_i.h"
 
-#include <m-array.h>
-
-ARRAY_DEF(MfClassicUserKeys, char*, M_PTR_OPLIST);
-
-static MfClassicUserKeys_t mfc_key_strs;
-
 void nfc_scene_mf_classic_keys_list_submenu_callback(void* context, uint32_t index) {
     Nfc* nfc = context;
 
@@ -15,17 +9,18 @@ void nfc_scene_mf_classic_keys_list_submenu_callback(void* context, uint32_t ind
 void nfc_scene_mf_classic_keys_list_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
+    // MfClassicUserKeys_t mfc_key_strs = nfc->mfc_key_strs;
     MfClassicDict* dict = mf_classic_dict_alloc(MfClassicDictTypeUser);
     uint32_t index = 0;
     string_t temp_key;
-    MfClassicUserKeys_init(mfc_key_strs);
+    MfClassicUserKeys_init(nfc->mfc_key_strs);
     string_init(temp_key);
     if(dict) {
         mf_classic_dict_rewind(dict);
         while(mf_classic_dict_get_next_key_str(dict, temp_key)) {
             char* current_key = (char*)malloc(sizeof(char) * 13);
             strncpy(current_key, string_get_cstr(temp_key), 12);
-            MfClassicUserKeys_push_back(mfc_key_strs, current_key);
+            MfClassicUserKeys_push_back(nfc->mfc_key_strs, current_key);
             FURI_LOG_D("ListKeys", "Key %d: %s", index, current_key);
             submenu_add_item(
                 submenu,
@@ -55,12 +50,13 @@ bool nfc_scene_mf_classic_keys_list_on_event(void* context, SceneManagerEvent ev
 
 void nfc_scene_mf_classic_keys_list_on_exit(void* context) {
     Nfc* nfc = context;
+    // MfClassicUserKeys_t mfc_key_strs = nfc->mfc_key_strs;
 
     MfClassicUserKeys_it_t it;
-    for(MfClassicUserKeys_it(it, mfc_key_strs); !MfClassicUserKeys_end_p(it);
+    for(MfClassicUserKeys_it(it, nfc->mfc_key_strs); !MfClassicUserKeys_end_p(it);
         MfClassicUserKeys_next(it)) {
-        free(MfClassicUserKeys_ref(it));
+        free(*MfClassicUserKeys_ref(it));
     }
-    MfClassicUserKeys_clear(mfc_key_strs);
+    MfClassicUserKeys_clear(nfc->mfc_key_strs);
     submenu_reset(nfc->submenu);
 }
