@@ -10,7 +10,6 @@ App(
     ],
     provides=[
         "lfrfid_start",
-        "lfrfid_debug",
     ],
     icon="A_125khz_14",
     stack_size=2 * 1024,
