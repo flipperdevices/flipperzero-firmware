@@ -3,7 +3,7 @@
 
 #define TAG "fapp-i"
 
-#define RESOLVER_THREAD_YIELD_STEP 180
+#define RESOLVER_THREAD_YIELD_STEP 30
 
 #define IS_FLAGS_SET(v, m) ((v & m) == m)
 #define SECTION_OFFSET(e, n) (e->section_table + n * sizeof(Elf32_Shdr))
