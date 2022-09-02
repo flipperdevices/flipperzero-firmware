@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,10.1,,
+Version,+,10.2,,
 Header,+,applications/bt/bt_service/bt.h,,
 Header,+,applications/cli/cli.h,,
 Header,+,applications/cli/cli_vcp.h,,
@@ -107,6 +107,7 @@ Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_tim.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_usart.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_utils.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_wwdg.h,,
+Header,+,lib/flipper_application/flipper_application.h,,
 Header,+,lib/flipper_format/flipper_format.h,,
 Header,+,lib/flipper_format/flipper_format_i.h,,
 Header,+,lib/micro-ecc/uECC.h,,
@@ -827,6 +828,17 @@ Function,-,finitef,int,float
 Function,-,finitel,int,long double
 Function,-,fiprintf,int,"FILE*, const char*, ..."
 Function,-,fiscanf,int,"FILE*, const char*, ..."
+Function,+,flipper_application_alloc,FlipperApplication*,"Storage*, const ElfApiInterface*"
+Function,+,flipper_application_free,void,FlipperApplication*
+Function,-,flipper_application_get_entry_address,const void*,FlipperApplication*
+Function,+,flipper_application_get_manifest,const FlipperApplicationManifest*,FlipperApplication*
+Function,-,flipper_application_get_state,const FlipperApplicationState*,FlipperApplication*
+Function,-,flipper_application_get_thread,FuriThread*,FlipperApplication*
+Function,+,flipper_application_load_status_to_string,const char*,FlipperApplicationLoadStatus
+Function,+,flipper_application_map_to_memory,FlipperApplicationLoadStatus,FlipperApplication*
+Function,+,flipper_application_preload,FlipperApplicationPreloadStatus,"FlipperApplication*, const char*"
+Function,-,flipper_application_preload_status_to_string,const char*,FlipperApplicationPreloadStatus
+Function,+,flipper_application_spawn,FuriThread*,"FlipperApplication*, void*"
 Function,+,flipper_format_buffered_file_alloc,FlipperFormat*,Storage*
 Function,+,flipper_format_buffered_file_close,_Bool,FlipperFormat*
 Function,+,flipper_format_buffered_file_open_existing,_Bool,"FlipperFormat*, const char*"

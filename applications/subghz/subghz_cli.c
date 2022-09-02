@@ -862,5 +862,7 @@ void subghz_on_system_start() {
     furi_record_close(RECORD_STORAGE);
 #else
     UNUSED(subghz_cli_command);
+    UNUSED(subghz_on_system_start_istream_decode_band);
+    UNUSED(subghz_on_system_start_istream_read);
 #endif
 }
