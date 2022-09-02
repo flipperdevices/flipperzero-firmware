@@ -12,7 +12,7 @@ From this menu (**and only this one**), you will find a new bluetooth device nam
 
 Pair your Phone/Tablet/Computer/... to this device and you're good to go for controlling your remote devices ! (I skip the doc on how to pair 2 bluetooth devices...)
 
-Once paired, the Pinball LED will remain blue/fixed throughout the session in the "Bluetooth Remote" menu. If you leave the menu, the led goes off/the Bluetooth connection disappears: The blue led is a good way to know if you are connected or not.
+Once paired, the Flipper LED will remain blue/fixed throughout the session in the "Bluetooth Remote" menu. If you leave the menu, the led goes off/the Bluetooth connection disappears: The blue led is a good way to know if you are connected or not.
 
 You will find in the main menu the different types of remote controls available
 
