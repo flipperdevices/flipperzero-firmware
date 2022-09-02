@@ -9,7 +9,6 @@ void nfc_scene_mf_classic_keys_list_submenu_callback(void* context, uint32_t ind
 void nfc_scene_mf_classic_keys_list_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
-    // MfClassicUserKeys_t mfc_key_strs = nfc->mfc_key_strs;
     MfClassicDict* dict = mf_classic_dict_alloc(MfClassicDictTypeUser);
     uint32_t index = 0;
     string_t temp_key;
@@ -50,7 +49,6 @@ bool nfc_scene_mf_classic_keys_list_on_event(void* context, SceneManagerEvent ev
 
 void nfc_scene_mf_classic_keys_list_on_exit(void* context) {
     Nfc* nfc = context;
-    // MfClassicUserKeys_t mfc_key_strs = nfc->mfc_key_strs;
 
     MfClassicUserKeys_it_t it;
     for(MfClassicUserKeys_it(it, nfc->mfc_key_strs); !MfClassicUserKeys_end_p(it);

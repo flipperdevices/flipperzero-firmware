@@ -61,7 +61,7 @@ struct Nfc {
     char text_store[NFC_TEXT_STORE_SIZE + 1];
     string_t text_box_store;
     uint8_t byte_input_store[6];
-    MfClassicUserKeys_t mfc_key_strs;
+    MfClassicUserKeys_t mfc_key_strs; // Used in MFC key listing
 
     void* rpc_ctx;
     NfcRpcState rpc_state;
