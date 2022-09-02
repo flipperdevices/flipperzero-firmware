@@ -9,7 +9,7 @@
 #include <gui/modules/submenu.h>
 #include "views/bt_carrier_test.h"
 #include "views/bt_packet_test.h"
-#include "../bt_settings.h"
+#include <bt/bt_settings.h>
 
 typedef struct {
     BtSettings settings;

@@ -11,7 +11,6 @@ App(
     provides=[
         "bt_start",
         "bt_settings",
-        "bt_debug",
     ],
     stack_size=1 * 1024,
     order=20,
@@ -36,20 +35,6 @@ App(
         "gui",
     ],
     order=10,
-)
-
-App(
-    appid="bt_debug",
-    name="Bluetooth Debug",
-    apptype=FlipperAppType.DEBUG,
-    entry_point="bt_debug_app",
-    stack_size=1 * 1024,
-    requires=[
-        "bt",
-        "gui",
-        "dialogs",
-    ],
-    order=110,
 )
 
 App(
