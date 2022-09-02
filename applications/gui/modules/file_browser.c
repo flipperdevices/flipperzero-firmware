@@ -373,7 +373,8 @@ static void browser_list_item_cb(void* context, string_t item_path, bool is_fold
         with_view_model(
             browser->view, (FileBrowserModel * model) {
                 items_array_push_back(model->items, item);
-                return false;
+                // TODO: calculate if element is visible
+                return true;
             });
         string_clear(item.display_name);
         string_clear(item.path);
