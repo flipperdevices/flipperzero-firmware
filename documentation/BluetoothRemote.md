@@ -12,7 +12,9 @@ From this menu (**and only this one**), you will find a new bluetooth device nam
 
 Pair your Phone/Tablet/Computer/... to this device and you're good to go for controlling your remote devices ! (I skip the doc on how to pair 2 bluetooth devices...)
 
-You will find the main menu with the different types of remote controls available
+Once paired, the Flipper LED will remain blue/fixed throughout the session in the "Bluetooth Remote" menu. If you leave the menu, the led goes off/the Bluetooth connection disappears: The blue led is a good way to know if you are connected or not.
+
+You will find in the main menu the different types of remote controls available
 
 ![Menu](https://user-images.githubusercontent.com/829842/187900725-791d2be5-75c5-45f5-8baf-19af0026e341.png)
 
@@ -53,4 +55,4 @@ To **exit** each menu, simply **long press the "back" button**, which gives you 
 
 ![Close](https://user-images.githubusercontent.com/829842/187904268-66bb2f50-10cb-4959-b0bb-7b30d18374e0.png)
 
-Doc by Foul (2002).
+Doc by Foul (2022).
