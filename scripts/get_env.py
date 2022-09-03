@@ -76,6 +76,8 @@ def add_envs(data, env_file, args):
     add_env("COMMIT_SHA", data["commit_sha"], env_file)
     add_env("SUFFIX", data["suffix"], env_file)
     add_env("BRANCH_NAME", data["branch_name"], env_file)
+    add_env("DIST_SUFFIX", data["suffix"], env_file)
+    add_env("WORKFLOW_BRANCH_OR_TAG", data["branch_name"], env_file)
     if args.is_pull:
         add_env("PULL_ID", data["pull_id"], env_file)
         add_env("PULL_NAME", data["pull_name"], env_file)
