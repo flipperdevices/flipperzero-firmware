@@ -42,6 +42,17 @@ struct SubGhzProtocolDecoderOregon2 {
     uint32_t var_data;
 };
 
+typedef struct SubGhzProtocolDecoderOregon2 SubGhzProtocolDecoderOregon2;
+
+//
+//struct SubGhzProtocolEncoderOregon2 {
+//    SubGhzProtocolEncoderBase base;
+//
+//    SubGhzProtocolBlockEncoder encoder;
+//    SubGhzBlockGeneric generic;
+//};
+//typedef struct SubGhzProtocolEncoderOregon2 SubGhzProtocolEncoderOregon2;
+
 
 typedef enum {
     Oregon2DecoderStepReset = 0,
@@ -50,28 +61,11 @@ typedef enum {
 } Oregon2DecoderStep;
 
 
-const SubGhzProtocolDecoder subghz_protocol_oregon2_decoder = {
-    .alloc = subghz_protocol_decoder_oregon2_alloc,
-    .free = subghz_protocol_decoder_oregon2_free,
-
-    .feed = subghz_protocol_decoder_oregon2_feed,
-    .reset = subghz_protocol_decoder_oregon2_reset,
-
-    .get_hash_data = subghz_protocol_decoder_oregon2_get_hash_data,
-    .serialize = subghz_protocol_decoder_oregon2_serialize,
-    .deserialize = subghz_protocol_decoder_oregon2_deserialize,
-    .get_string = subghz_protocol_decoder_oregon2_get_string,
-};
-
-
-const SubGhzProtocol subghz_protocol_oregon2 = {
-    .name = SUBGHZ_PROTOCOL_OREGON2_NAME,
-    .type = SubGhzProtocolTypeStatic,
-    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
-
-    .decoder = &subghz_protocol_oregon2_decoder,
-};
+//
+//void* subghz_protocol_encoder_oregon2_alloc(SubGhzEnvironment* environment) {
+//    UNUSED(environment);
+//    SubGhzProtocolEncod* instance = malloc(sizeof(SubGhzProtocolEncoderOregon2));
+//}
 
 
 void* subghz_protocol_decoder_oregon2_alloc(SubGhzEnvironment* environment) {
@@ -356,3 +350,34 @@ void subghz_protocol_decoder_oregon2_get_string(void* context, string_t output) 
         );
     }
 }
+
+
+const SubGhzProtocolDecoder subghz_protocol_oregon2_decoder = {
+    .alloc = subghz_protocol_decoder_oregon2_alloc,
+    .free = subghz_protocol_decoder_oregon2_free,
+
+    .feed = subghz_protocol_decoder_oregon2_feed,
+    .reset = subghz_protocol_decoder_oregon2_reset,
+
+    .get_hash_data = subghz_protocol_decoder_oregon2_get_hash_data,
+    .serialize = subghz_protocol_decoder_oregon2_serialize,
+    .deserialize = subghz_protocol_decoder_oregon2_deserialize,
+    .get_string = subghz_protocol_decoder_oregon2_get_string,
+};
+
+
+//const SubGhzProtocolEncoder subghz_protocol_oregon2_encoder = {
+//    .alloc = subghz_protocol_encoder_oregon2_alloc,
+//    .free = subghz_protocol_encoder_oregon2_free,
+//};
+
+
+const SubGhzProtocol subghz_protocol_oregon2 = {
+    .name = "Oregon2",
+    .type = SubGhzProtocolTypeStatic,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable |
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save, // | SubGhzProtocolFlag_Send,
+
+    .decoder = &subghz_protocol_oregon2_decoder,
+    //    .encoder = &subghz_protocol_oregon2_encoder,
+};
