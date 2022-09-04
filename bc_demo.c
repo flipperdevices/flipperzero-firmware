@@ -50,7 +50,7 @@ static
 void  cbTimer (FuriMessageQueue* queue)
 {
 	// Every function has an ENTER at the top, and a LEAVE before it returns
-	// ...these generate code flow messages if TRACE level messaging in enabled
+	// ...these generate code flow messages if TRACE level messaging is enabled
 	ENTER;
 
 	// Sanity checks
@@ -61,7 +61,9 @@ void  cbTimer (FuriMessageQueue* queue)
 
 	// Put a "tick" event message on the message queue
 	// furi_message_queue_put  |  furi/core/message_queue.*
-	eventMsg_t  message = {.id = EVID_TICK};
+	eventMsg_t  message = {
+		.id = EVID_TICK
+	};
 	furi_message_queue_put(queue, &message, 0);
 
 	LEAVE;
@@ -80,7 +82,10 @@ void  cbInput (InputEvent* event,  FuriMessageQueue* queue)
 	furi_assert(event);
 
 	// Put an "input" event message on the message queue
-	eventMsg_t  message = {.id = EVID_KEY,  .input = *event};
+	eventMsg_t  message = {
+		.id    = EVID_KEY,
+		.input = *event
+	};
 	furi_message_queue_put(queue, &message, FuriWaitForever);
 
 	LEAVE;
