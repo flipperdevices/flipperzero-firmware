@@ -27,7 +27,7 @@ static bool
     bool load_success = false;
 
     if(preload_res == FlipperApplicationPreloadStatusSuccess) {
-        const FlipperApplicationManifest* manifest = flipper_application_get_manifest(loader->app);
+        const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
         if(manifest->has_icon) {
             memcpy(*icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
         }
