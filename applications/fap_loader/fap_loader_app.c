@@ -19,10 +19,10 @@ static bool
     FapLoader* loader = context;
     furi_assert(loader);
 
-    loader->app = flipper_application_alloc(loader->storage, &hashtable_api_interface);
+    FlipperApplication* app = flipper_application_alloc(loader->storage, &hashtable_api_interface);
 
     FlipperApplicationPreloadStatus preload_res =
-        flipper_application_preload(loader->app, string_get_cstr(path));
+        flipper_application_preload(app, string_get_cstr(path));
 
     bool load_success = false;
 
@@ -38,7 +38,7 @@ static bool
         load_success = false;
     }
 
-    flipper_application_free(loader->app);
+    flipper_application_free(app);
     return load_success;
 }
 
