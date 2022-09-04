@@ -2,17 +2,17 @@
 
 All components of Flipper Zero firmware — services, user applications, system settings — are developed independently. Each component has a build system manifest file, named `application.fam`, describing basic properties of a components and its relations to other parts of the system.
 
-When building firmware, fbt collects all application manifests, processes their dependencies and builds only those components that are utilized in current build configuration. See [fbt docs](./fbt.md), section "Firmware application set", for details on build configurations.
+When building firmware, **`fbt`** collects all application manifests, processes their dependencies and builds only those components that are utilized in current build configuration. See [fbt docs](./fbt.md), section "Firmware application set", for details on build configurations.
 
 ## Application definition
 
 Properties of a firmware component are declared in a form of a Python code snippet, forming a call to App() function with various parameters. 
 
-Only 2 parameters are mandatoty: appid and apptype, others are optional and may be meaningful only for certail application types.
+Only 2 parameters are mandatoty: ***appid*** and ***apptype***, others are optional and may be meaningful only for certain application types.
 
 ### Keys
 
-* **appid**: string, application id within the fbt. Used in specifying which applications to include in build configuration and to resolve dependencies and conflicts.
+* **appid**: string, application id within the build system. Used for specifying which applications to include in build configuration and to resolve dependencies and conflicts.
 
 * **apptype**: member of FlipperAppType.* enumeration. Valid values are:
 
@@ -30,18 +30,22 @@ Only 2 parameters are mandatoty: appid and apptype, others are optional and may 
 | METAPACKAGE  | Does not define any code to be run, used for declaring dependencies and application bundles |
 
 * **name**: Name to show in menus.
-* **entry_point**: C function to be used as applicaiton entry point.
-* **flags**: internal flags for system apps. Do not use.
+* **entry_point**: C function to be used as applicaiton's entry point.
+* **flags**: Internal flags for system apps. Do not use.
 * **cdefines**: C preprocessor definitions to declare globally for other apps when current application is included in active build configuration.
 * **requires**: List of application IDs to also include in build configuration, when current application is referenced in list of applications to build.
-* **conflicts**: List of application IDs that current application conflicts with. If any of them is found in constructed application list, `fbt` will abort firmware build process.
+* **conflicts**: List of application IDs that current application conflicts with. If any of them is found in constructed application list, **`fbt`** will abort firmware build process.
 * **provides**: Functionally identical to ***requires*** field.
 * **stack_size**: Stack size, in bytes, to allocate for application on its startup. Note that allocating a stack too small for app to run will cause system crash due to stack overflow, and allocating too much stack will reduce usable heap memory size for app to process data. *Note: you can use `ps` and `free` CLI commands to profile you app's memory usage.*
 * **icon**: Animated icon name from built-in assets to be used when building app as a part of firmware.
 * **order**: Order of an application within its group when sorting entries in it. The lower the order is, the closer to the start of the list the items is located. Used for ordering startup hooks and menu entries. 
 * **sdk_headers**: List of C header files from this app's code to include in API definitions for external applicaions.
-* **version**: string, x.y, application version  to be embedded within .fap file.
+
+The following parameters are used only for [FAPs](./AppsOnSDCard.md):
+
+* **version**: string, 2 numbers in form of "x.y": application version to be embedded within .fap file.
 * **fapp_icon**: name of .png file, 1-bit color depth, 10x10px, to be embedded within .fap file.
+
 
 
 ## .fam file contents
