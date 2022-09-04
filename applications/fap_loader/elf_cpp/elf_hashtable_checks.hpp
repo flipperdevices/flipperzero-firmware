@@ -1,10 +1,5 @@
 /**
- * @file elf-hashtable-checks.hpp
- * @author https://github.com/hedger/
- * @version 1.0
- * @date 2021-12-21
- * 
- * 
+ * Check for multiple entries with the same hash value at compilation time.
  */
 
 #pragma once

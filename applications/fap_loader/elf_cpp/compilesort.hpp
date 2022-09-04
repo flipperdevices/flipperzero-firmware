@@ -1,3 +1,7 @@
+/**
+ * Implementation of compile-time sort for symbol table entries.
+ */
+
 #pragma once
 
 #include <iterator>

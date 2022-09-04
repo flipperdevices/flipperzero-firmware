@@ -66,14 +66,32 @@ typedef enum {
                FoundRelText | FoundRelRodata | FoundRelData | FoundRelBss | FoundDebugLink,
 } FindFlags_t;
 
+/**
+ * @brief Load and validate basic ELF file headers
+ * @param e Application instance
+ * @param path FS path to application file
+ * @return true if ELF file is valid 
+ */
 bool flipper_application_load_elf_headers(FlipperApplication* e, const char* path);
 
-/* Iterate over all sections and save related indexes */
+/**
+ * @brief Iterate over all sections and save related indexes
+ * @param e Application instance
+ * @return true if all required sections are found
+ */
 bool flipper_application_load_section_table(FlipperApplication* e);
 
-/* Actually load & relocate */
+/**
+ * @brief Load section data to memory and process relocations
+ * @param e Application instance 
+ * @return Status code
+ */
 FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplication* e);
 
+/**
+ * @brief Release section data
+ * @param s section pointer
+ */
 void flipper_application_free_section(ELFSection_t* s);
 
 #ifdef __cplusplus
