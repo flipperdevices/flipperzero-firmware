@@ -119,15 +119,9 @@ static ManchesterEvent level_and_duration_to_event(bool level, uint32_t duration
     }
 
     if (level)
-        if (is_long)
-            return ManchesterEventLongHigh;
-        else
-            return ManchesterEventShortHigh;
+        return is_long ? ManchesterEventLongHigh : ManchesterEventShortHigh;
     else
-        if (is_long)
-            return ManchesterEventLongLow;
-        else
-            return ManchesterEventShortLow;
+        return is_long ? ManchesterEventLongLow : ManchesterEventShortLow;
 }
 
 
@@ -175,16 +169,19 @@ void subghz_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t du
         }
     }
 
-    if (instance->decoder.parser_step == Oregon2DecoderStepReset) {
-        // check for preamble + sync bits
+    switch (instance->decoder.parser_step) {
+    case Oregon2DecoderStepReset:
+        // waiting for fixed oregon2 preamble
         if (instance->decoder.decode_count_bit >= OREGON2_PREAMBLE_BITS &&
-            ((instance->decoder.decode_data & OREGON2_PREAMBLE_MASK) == OREGON2_PREAMBLE))
+           ((instance->decoder.decode_data & OREGON2_PREAMBLE_MASK) == OREGON2_PREAMBLE))
         {
             instance->decoder.parser_step = Oregon2DecoderStepFoundPreamble;
             instance->decoder.decode_count_bit = 0;
             instance->decoder.decode_data = 0UL;
         }
-    } else if (instance->decoder.parser_step == Oregon2DecoderStepFoundPreamble) {
+        break;
+    case Oregon2DecoderStepFoundPreamble:
+        // waiting for fixed oregon2 data
         if (instance->decoder.decode_count_bit == 32) {
             instance->generic.data = instance->decoder.decode_data;
             instance->generic.data_count_bit = instance->decoder.decode_count_bit;
@@ -200,7 +197,7 @@ void subghz_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t du
             instance->var_bits = oregon2_sensor_id_var_bits(OREGON2_SENSOR_ID(instance->generic.data));
 
             if (!instance->var_bits) {
-                // sensor is not supported, stop decoding
+                // sensor is not supported, stop decoding, but showing the decoded fixed part
                 FURI_LOG_I(TAG, "Sensor is not supported");
                 instance->decoder.parser_step = Oregon2DecoderStepReset;
                 if(instance->base.callback)
@@ -209,8 +206,9 @@ void subghz_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t du
                 instance->decoder.parser_step = Oregon2DecoderStepVarData;
             }
         }
-    }
-    else if (instance->decoder.parser_step == Oregon2DecoderStepVarData) {
+        break;
+    case Oregon2DecoderStepVarData:
+        // waiting for variable (sensor-specific data)
         if (instance->decoder.decode_count_bit == instance->var_bits + OREGON2_CHECKSUM_BITS) {
             FURI_LOG_I(TAG, "Sensor is supported, got var bits %d", instance->decoder.decode_count_bit);
             instance->var_data = instance->decoder.decode_data & 0xFFFFFFFF;
@@ -225,6 +223,7 @@ void subghz_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t du
             if(instance->base.callback)
                 instance->base.callback(&instance->base, instance->base.context);
         }
+        break;
     }
 }
 
