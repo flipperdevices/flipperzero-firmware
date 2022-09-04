@@ -8,7 +8,8 @@ public:
     View* get_view() final;
     void clean() final;
 
-    template <typename T> T* add();
+    template <typename T>
+    T* add();
 
 private:
     View* view;

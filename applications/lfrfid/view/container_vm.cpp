@@ -15,7 +15,8 @@ public:
 
     std::list<GenericElement*> elements;
 
-    template <typename T> T add(const T element, View* view) {
+    template <typename T>
+    T add(const T element, View* view) {
         elements.push_back(element);
         element->set_parent_view(view);
         return element;
@@ -66,7 +67,8 @@ void ContainerVM::clean() {
     });
 }
 
-template <typename T> T* ContainerVM::add() {
+template <typename T>
+T* ContainerVM::add() {
     T* element = new T();
 
     with_view_model_cpp(view, ContainerVMModel, model, {

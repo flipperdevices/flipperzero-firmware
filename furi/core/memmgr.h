@@ -50,7 +50,6 @@ void* aligned_malloc(size_t size, size_t alignment);
  */
 void aligned_free(void* p);
 
-
 /**
  * @brief Allocate memory from separate memory pool. That memory can't be freed.
  * 
