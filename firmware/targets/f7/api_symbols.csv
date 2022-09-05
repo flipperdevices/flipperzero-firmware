@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,11.0,,
+Version,+,12.0,,
 Header,+,applications/bt/bt_service/bt.h,,
 Header,+,applications/cli/cli.h,,
 Header,+,applications/cli/cli_vcp.h,,
@@ -10,7 +10,6 @@ Header,+,applications/gui/gui.h,,
 Header,+,applications/gui/modules/button_menu.h,,
 Header,+,applications/gui/modules/button_panel.h,,
 Header,+,applications/gui/modules/byte_input.h,,
-Header,+,applications/gui/modules/dialog.h,,
 Header,+,applications/gui/modules/dialog_ex.h,,
 Header,+,applications/gui/modules/empty_screen.h,,
 Header,+,applications/gui/modules/file_browser.h,,
@@ -668,7 +667,6 @@ Function,+,crc32_calc_file,uint32_t,"File*, const FileCrcProgressCb, void*"
 Function,-,ctermid,char*,char*
 Function,-,cuserid,char*,char*
 Function,+,delete_mutex,_Bool,ValueMutex*
-Function,+,dialog_alloc,Dialog*,
 Function,+,dialog_ex_alloc,DialogEx*,
 Function,+,dialog_ex_disable_extended_events,void,DialogEx*
 Function,+,dialog_ex_enable_extended_events,void,DialogEx*
@@ -685,8 +683,6 @@ Function,+,dialog_ex_set_right_button_text,void,"DialogEx*, const char*"
 Function,+,dialog_ex_set_text,void,"DialogEx*, const char*, uint8_t, uint8_t, Align, Align"
 Function,+,dialog_file_browser_set_basic_options,void,"DialogsFileBrowserOptions*, const char*, const Icon*"
 Function,+,dialog_file_browser_show,_Bool,"DialogsApp*, string_ptr, string_ptr, const DialogsFileBrowserOptions*"
-Function,+,dialog_free,void,Dialog*
-Function,+,dialog_get_view,View*,Dialog*
 Function,+,dialog_message_alloc,DialogMessage*,
 Function,+,dialog_message_free,void,DialogMessage*
 Function,+,dialog_message_set_buttons,void,"DialogMessage*, const char*, const char*, const char*"
@@ -695,12 +691,6 @@ Function,+,dialog_message_set_icon,void,"DialogMessage*, const Icon*, uint8_t, u
 Function,+,dialog_message_set_text,void,"DialogMessage*, const char*, uint8_t, uint8_t, Align, Align"
 Function,+,dialog_message_show,DialogMessageButton,"DialogsApp*, const DialogMessage*"
 Function,+,dialog_message_show_storage_error,void,"DialogsApp*, const char*"
-Function,+,dialog_set_context,void,"Dialog*, void*"
-Function,+,dialog_set_header_text,void,"Dialog*, const char*"
-Function,+,dialog_set_left_button_text,void,"Dialog*, const char*"
-Function,+,dialog_set_result_callback,void,"Dialog*, DialogResultCallback"
-Function,+,dialog_set_right_button_text,void,"Dialog*, const char*"
-Function,+,dialog_set_text,void,"Dialog*, const char*"
 Function,-,digital_signal_alloc,DigitalSignal*,uint32_t
 Function,-,digital_signal_append,_Bool,"DigitalSignal*, DigitalSignal*"
 Function,-,digital_signal_free,void,DigitalSignal*

@@ -17,7 +17,6 @@ App(
         "view_stack.h",
         "modules/button_menu.h",
         "modules/byte_input.h",
-        "modules/dialog.h",
         "modules/popup.h",
         "modules/text_input.h",
         "modules/widget.h",
