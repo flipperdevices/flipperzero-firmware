@@ -7,7 +7,8 @@
 
 - Known Issues:			`FAP Loader`, `Chess` & `Chip8` (No Controls)
 - Apps `HIDDEN` for compile space can be found on Side B in the update folder.
-- OFW 11 New PR Updates
+- OFW: [#1680](https://github.com/flipperdevices/flipperzero-firmware/pull/1680), [#1689](https://github.com/flipperdevices/flipperzero-firmware/pull/1689), [#1696](https://github.com/flipperdevices/flipperzero-firmware/pull/1696), [#1685](https://github.com/flipperdevices/flipperzero-firmware/pull/1685), [#1698](https://github.com/flipperdevices/flipperzero-firmware/pull/1698), [#1692](https://github.com/flipperdevices/flipperzero-firmware/pull/1692), [#1643](https://github.com/flipperdevices/flipperzero-firmware/pull/1643), [#1699](https://github.com/flipperdevices/flipperzero-firmware/pull/1699), [#1697](https://github.com/flipperdevices/flipperzero-firmware/pull/1697) & [#1703](https://github.com/flipperdevices/flipperzero-firmware/pull/1703)
+- Changed Default Apps for Side A and Side B.
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
