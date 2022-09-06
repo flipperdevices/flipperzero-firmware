@@ -5,6 +5,8 @@
 #include <core/common_defines.h>
 #include <core/log.h>
 #include "furi_hal_resources.h"
+#include "m-string.h"
+#include "m-algo.h"
 #include <m-array.h>
 #include <gui/elements.h>
 #include <furi.h>
@@ -82,15 +84,18 @@ static int BrowserItem_t_cmp(const BrowserItem_t* a, const BrowserItem_t* b) {
     return string_cmp(a->path, b->path);
 }
 
-ARRAY_DEF(
-    items_array,
-    BrowserItem_t,
-    (INIT(API_2(BrowserItem_t_init)),
-     SET(API_6(BrowserItem_t_set)),
-     INIT_SET(API_6(BrowserItem_t_init_set)),
-     CLEAR(API_2(BrowserItem_t_clear)),
-     CMP(API_6(BrowserItem_t_cmp)),
-     SWAP(M_SWAP_DEFAULT)))
+#define M_OPL_BrowserItem_t()                 \
+    (INIT(API_2(BrowserItem_t_init)),         \
+     SET(API_6(BrowserItem_t_set)),           \
+     INIT_SET(API_6(BrowserItem_t_init_set)), \
+     CLEAR(API_2(BrowserItem_t_clear)),       \
+     CMP(API_6(BrowserItem_t_cmp)),           \
+     SWAP(M_SWAP_DEFAULT),                    \
+     EQUAL(API_6(M_EQUAL_DEFAULT)))
+
+ARRAY_DEF(items_array, BrowserItem_t)
+
+ALGO_DEF(items_array, ARRAY_OPLIST(items_array, M_OPL_BrowserItem_t()))
 
 struct FileBrowser {
     View* view;
@@ -404,7 +409,7 @@ static void
             browser->view,
             FileBrowserModel * model,
             {
-                items_array_special_sort(model->items, BrowserItem_t_cmp);
+                items_array_sort(model->items);
                 model->list_loading = false;
             },
             true);

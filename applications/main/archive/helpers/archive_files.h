@@ -2,6 +2,8 @@
 
 #include <m-array.h>
 #include <furi.h>
+#include <m-algo.h>
+#include <m-string.h>
 #include <storage/storage.h>
 
 #define FAP_MANIFEST_MAX_ICON_SIZE 32
@@ -84,21 +86,18 @@ static int ArchiveFile_t_cmp(const ArchiveFile_t* a, const ArchiveFile_t* b) {
     return string_cmp(a->path, b->path);
 }
 
-static void ArchiveFile_t_swap(ArchiveFile_t* a, ArchiveFile_t* b) {
-    ArchiveFile_t tmp = *a;
-    *a = *b;
-    *b = tmp;
-}
+#define M_OPL_ArchiveFile_t()                 \
+    (INIT(API_2(ArchiveFile_t_init)),         \
+     SET(API_6(ArchiveFile_t_set)),           \
+     INIT_SET(API_6(ArchiveFile_t_init_set)), \
+     CLEAR(API_2(ArchiveFile_t_clear)),       \
+     CMP(API_6(ArchiveFile_t_cmp)),           \
+     SWAP(M_SWAP_DEFAULT),                    \
+     EQUAL(API_6(M_EQUAL_DEFAULT)))
 
-ARRAY_DEF(
-    files_array,
-    ArchiveFile_t,
-    (INIT(API_2(ArchiveFile_t_init)),
-     SET(API_6(ArchiveFile_t_set)),
-     INIT_SET(API_6(ArchiveFile_t_init_set)),
-     CLEAR(API_2(ArchiveFile_t_clear)),
-     CMP(API_6(ArchiveFile_t_cmp)),
-     SWAP(API_6(ArchiveFile_t_swap))))
+ARRAY_DEF(files_array, ArchiveFile_t)
+
+ALGO_DEF(files_array, ARRAY_OPLIST(files_array, M_OPL_ArchiveFile_t()))
 
 void archive_set_file_type(ArchiveFile_t* file, const char* path, bool is_folder, bool is_app);
 bool archive_get_items(void* context, const char* path);

@@ -67,7 +67,7 @@ static void
             browser->view,
             ArchiveBrowserViewModel * model,
             {
-                files_array_special_sort(model->files, ArchiveFile_t_cmp);
+                files_array_sort(model->files);
                 model->list_loading = false;
             },
             true);
