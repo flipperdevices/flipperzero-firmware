@@ -18,7 +18,7 @@ struct DesktopMainView {
     bool is_gamemode;
 };
 
-#define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 5000
+#define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 2000
 
 static void desktop_main_poweroff_timer_callback(TimerHandle_t timer) {
     DesktopMainView* main_view = pvTimerGetTimerID(timer);
