@@ -148,10 +148,10 @@ void mf_classic_set_key_found(
     nfc_util_num2bytes(key, 6, key_arr);
     if(key_type == MfClassicKeyA) {
         memcpy(sec_trailer->key_a, key_arr, sizeof(sec_trailer->key_a));
-        FURI_BIT_SET(data->key_a_mask, (uint64_t)sector_num);
+        FURI_BIT_SET(data->key_a_mask, sector_num);
     } else if(key_type == MfClassicKeyB) {
         memcpy(sec_trailer->key_b, key_arr, sizeof(sec_trailer->key_b));
-        FURI_BIT_SET(data->key_b_mask, (uint64_t)sector_num);
+        FURI_BIT_SET(data->key_b_mask, sector_num);
     }
 }
 
