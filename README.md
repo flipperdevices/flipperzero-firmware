@@ -14,6 +14,7 @@
 - Set poweroff button timer to 2sec from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Bluetooth Remote documentation from [Foul](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/295)
 - Added [Kuronons Black Flags Collection (21 Animations)(By Kuronons)]
+- If you have any issue with something not listed in the "All Changes/Features" section, feel free to ask any questions you have in the main discord for Flipper Zero. They are a group, of free speech censoring GPL violators, that will surely ban you if you think diffrently than they want you to, and/or if you use their code in ways they have allowed under GPL. Unfortunately, the Flipper Zero community on the official Discord is toxic and will not grow unless a complete change of moderation is made.
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
