@@ -76,13 +76,29 @@ static void ArchiveFile_t_clear(ArchiveFile_t* obj) {
     furi_string_free(obj->custom_name);
 }
 
+static int ArchiveFile_t_cmp(const ArchiveFile_t* a, const ArchiveFile_t* b) {
+    if(a->type == ArchiveFileTypeFolder && b->type != ArchiveFileTypeFolder) {
+        return -1;
+    }
+
+    return string_cmp(a->path, b->path);
+}
+
+static void ArchiveFile_t_swap(ArchiveFile_t* a, ArchiveFile_t* b) {
+    ArchiveFile_t tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
 ARRAY_DEF(
     files_array,
     ArchiveFile_t,
     (INIT(API_2(ArchiveFile_t_init)),
      SET(API_6(ArchiveFile_t_set)),
      INIT_SET(API_6(ArchiveFile_t_init_set)),
-     CLEAR(API_2(ArchiveFile_t_clear))))
+     CLEAR(API_2(ArchiveFile_t_clear)),
+     CMP(API_6(ArchiveFile_t_cmp)),
+     SWAP(API_6(ArchiveFile_t_swap))))
 
 void archive_set_file_type(ArchiveFile_t* file, const char* path, bool is_folder, bool is_app);
 bool archive_get_items(void* context, const char* path);

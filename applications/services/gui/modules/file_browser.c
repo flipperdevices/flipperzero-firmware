@@ -71,13 +71,26 @@ static void BrowserItem_t_clear(BrowserItem_t* obj) {
     }
 }
 
+static int BrowserItem_t_cmp(const BrowserItem_t* a, const BrowserItem_t* b) {
+    // Back indicator comes before everything, then folders, then all other files.
+    if((a->type == BrowserItemTypeBack) ||
+       (a->type == BrowserItemTypeFolder && b->type != BrowserItemTypeFolder &&
+        b->type != BrowserItemTypeBack)) {
+        return -1;
+    }
+
+    return string_cmp(a->path, b->path);
+}
+
 ARRAY_DEF(
     items_array,
     BrowserItem_t,
     (INIT(API_2(BrowserItem_t_init)),
      SET(API_6(BrowserItem_t_set)),
      INIT_SET(API_6(BrowserItem_t_init_set)),
-     CLEAR(API_2(BrowserItem_t_clear))))
+     CLEAR(API_2(BrowserItem_t_clear)),
+     CMP(API_6(BrowserItem_t_cmp)),
+     SWAP(M_SWAP_DEFAULT)))
 
 struct FileBrowser {
     View* view;
@@ -388,7 +401,13 @@ static void
         }
     } else {
         with_view_model(
-            browser->view, FileBrowserModel * model, { model->list_loading = false; }, true);
+            browser->view,
+            FileBrowserModel * model,
+            {
+                items_array_special_sort(model->items, BrowserItem_t_cmp);
+                model->list_loading = false;
+            },
+            true);
     }
 }
 
