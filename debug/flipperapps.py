@@ -2,8 +2,15 @@ from dataclasses import dataclass
 from typing import Tuple, Dict
 import struct
 import posixpath
+import os
+import zlib
 
 import gdb
+
+
+def get_file_crc32(filename):
+    with open(filename, "rb") as f:
+        return zlib.crc32(f.read())
 
 
 @dataclass
@@ -19,14 +26,31 @@ class AppState:
         if self.other_sections is None:
             self.other_sections = {}
 
-    def get_gdb_load_command(
+    def get_original_elf_path(
         self, elf_path="build/latest/applications/.extapps"
     ) -> str:
-        load_path = (
+        return (
             posixpath.join(elf_path, self.debug_link_elf)
             if elf_path
             else self.debug_link_elf
         )
+
+    def is_debug_available(self) -> bool:
+        have_debug_info = bool(self.debug_link_elf and self.debug_link_crc)
+        if not have_debug_info:
+            print("No debug info available for this app")
+            return False
+        debug_elf_path = self.get_original_elf_path()
+        debug_elf_crc32 = get_file_crc32(debug_elf_path)
+        if self.debug_link_crc != debug_elf_crc32:
+            print(
+                f"Debug info CRC mismatch: {self.debug_link_crc:08x} != {debug_elf_crc32:08x}, rebuild app"
+            )
+            return False
+        return True
+
+    def get_gdb_load_command(self) -> str:
+        load_path = self.get_original_elf_path()
         load_command = (
             f"add-symbol-file -readnow {load_path} 0x{self.text_address:08x} "
         )
@@ -94,13 +118,18 @@ class FlipperAppDebugHelper:
     def _check_app_state(self) -> None:
         app_ptr_value = self.app_ptr.value()
         if not app_ptr_value and self.current_app:
+            # There is an ELF loaded in GDB, but nothing is running on the device
             self._unload_debug_elf()
         elif app_ptr_value:
+            # There is an app running on the device
             loaded_app = app_ptr_value.cast(self.app_type_ptr).dereference()
+
             if self.current_app and not self.current_app.is_loaded_in_gdb(loaded_app):
+                # Currently loaded ELF is not the one running on the device
                 self._unload_debug_elf()
-                self._load_debug_elf(loaded_app)
-            else:
+
+            if not self.current_app:
+                # Load ELF for the app running on the device
                 self._load_debug_elf(loaded_app)
 
     def _unload_debug_elf(self) -> None:
@@ -109,7 +138,9 @@ class FlipperAppDebugHelper:
 
     def _load_debug_elf(self, app_object) -> None:
         self.current_app = AppState.from_gdb(app_object)
-        gdb.execute(self.current_app.get_gdb_load_command())
+
+        if self.current_app.is_debug_available():
+            gdb.execute(self.current_app.get_gdb_load_command())
 
     def handle_stop(self, event) -> None:
         self._check_app_state()
