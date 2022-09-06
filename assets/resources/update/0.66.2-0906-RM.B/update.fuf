@@ -4,7 +4,7 @@ Info: RM420
 Target: 7
 Loader: flipper-z-f7-updater-RM420.bin
 # little-endian hex!
-Loader CRC: F5 22 F9 59
+Loader CRC: DB 7A 73 8E
 Firmware: flipper-z-f7-full-RM420.dfu
 Radio: stm32wb5x_BLE_Stack_light_fw.bin
 Radio address: 00 70 0D 08
