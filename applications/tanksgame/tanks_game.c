@@ -777,7 +777,7 @@ static void tanks_game_render_callback(Canvas* const canvas, void* ctx) {
     }
 
     // Field right border
-    canvas_draw_box(canvas, FIELD_WIDTH * CELL_LENGTH_PIXELS, 0, 2, SCREEN_HEIGHT);
+    canvas_draw_box(canvas, FIELD_WIDTH * CELL_LENGTH_PIXELS, 0, 2, SCREEN_HEIGHT_TANKS);
 
     // Cooperative client
     if(tanks_state->mode == ModeCooperative && !tanks_state->server) {

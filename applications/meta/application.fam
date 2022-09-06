@@ -1,3 +1,4 @@
+# THE NEW SIDE A
 App(
     appid="basic_services",
     name="Basic services",
@@ -17,7 +18,7 @@ App(
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         "gpio",
-        # "ibutton",
+        "ibutton",
         "infrared",
         "lfrfid",
         "nfc",
@@ -34,22 +35,22 @@ App(
     provides=[
         "APPS_Sub_Playlist",
         # "APPS_BarcodeGenerator",
-        "APPS_BluetoothRemote",
-        "APPS_Calculator",
+        # "APPS_BluetoothRemote",
+        # "APPS_Calculator",
         "APPS_DolphinRestorer",
         "APPS_DolphinBackup",
         "APPS_FlipFrid",
-        # "APPS_MouseJacker",
-        # "APPS_MouseJiggler",
+        "APPS_MouseJacker",
+        "APPS_MouseJiggler",
         # "APPS_multi_conv",
-        "APPS_MusicPlayer",
+        # "APPS_MusicPlayer",
         "APPS_NameChanger",
-        # "APPS_NRFSniff",
+        "APPS_NRFSniff",
         # "APPS_Paint",
-        # "INTAPP_Picopass",
-        # "APPS_SentrySafe",
+        "INTAPP_Picopass",
+        "APPS_SentrySafe",
         "APPS_SpectrumAnalyzer",
-        "APPS_WAVPlayer",
+        # "APPS_WAVPlayer",
     ],
 )
 
@@ -58,12 +59,12 @@ App(
     name="Custom applications for games menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "GAME_2048",
+        # "GAME_2048",
         # "GAME_Arkanoid",
         # "INTAPP_Chess",
         # "INTAPP_Chip8",
-        "GAME_Dice",
-        "GAME_DOOM",
+        # "GAME_Dice",
+        # "GAME_DOOM",
         # "GAME_FlappyBird",
         # "GAME_GameOfLife",
         # "GAME_MandelbrotSet",
@@ -71,7 +72,7 @@ App(
         "GAME_Snake",
         # "GAME_TAMA_P1",
         # "GAME_Tanks",
-        "GAME_Tetris",
+        # "GAME_Tetris",
         # "GAME_TicTacToe",
         # "GAME_VideoPoker",
         "GAME_Zombiez",
@@ -83,9 +84,9 @@ App(
     name="Wifi applications for plug-in menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        # "wifi_marauder",
-        # "APPS_wifi_deauther",
-        # "INTAPP_WiFiScanner",
+        "wifi_marauder",
+        "APPS_wifi_deauther",
+        "INTAPP_WiFiScanner",
     ],
 )
 

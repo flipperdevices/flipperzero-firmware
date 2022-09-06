@@ -1,8 +1,8 @@
 #ifndef FLIPPERZERO_FIRMWARE_CONSTANTS_H
 #define FLIPPERZERO_FIRMWARE_CONSTANTS_H
 
-const uint8_t SCREEN_WIDTH = 128;
-const uint8_t SCREEN_HEIGHT = 64;
+const uint8_t SCREEN_WIDTH_TANKS = 128;
+const uint8_t SCREEN_HEIGHT_TANKS = 64;
 
 const uint8_t FIELD_WIDTH = 16;
 const uint8_t FIELD_HEIGHT = 11;
