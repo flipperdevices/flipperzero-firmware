@@ -7,22 +7,7 @@
 
 - Known Issues:			`FAP Loader`, `Chess` & `Chip8` (No Controls)
 - Apps `HIDDEN` for compile space can be found on Side B in the update folder.
-- Update for IR assets from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & [amec0e](https://github.com/amec0e)
-- Update for SubGHz ranges from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- OFW: [#1675](https://github.com/flipperdevices/flipperzero-firmware/pull/1675), [#1679](https://github.com/flipperdevices/flipperzero-firmware/pull/1679), [#1684](https://github.com/flipperdevices/flipperzero-firmware/pull/1684), [#1658](https://github.com/flipperdevices/flipperzero-firmware/pull/1658), [#1681](https://github.com/flipperdevices/flipperzero-firmware/pull/1681), [#1674](https://github.com/flipperdevices/flipperzero-firmware/pull/1674) & [#1622](https://github.com/flipperdevices/flipperzero-firmware/pull/1622)
-- Added [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
-- Added [Fix displaying LFRFID protocol names #1682 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1682)
-- More IR audio updates from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & [amec0e](https://github.com/amec0e)
-- SubGHz updates and documentation updates from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Fixes for NRFSniff and Spectrum Analyzer from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Added two new BadUSB assets for Kiosk Evasion and Wifi Stealer
-- Added [Add support for Keri tags #1689 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1689)
-- Added [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)
-- Added [Add support for Gallagher tags #1680 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1680)
-- Added [NFC collect params for mfkey32 attack #1643 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1643)
-- `"GAME_TAMA_P1"` set to `HIDDEN`
-- Assets: Includes New Dolphin Animations: [Dino & A New Hope (By Haseo)] & [Earth Arcadia (By Kuronons)]
-- Away for the weekend so no new updates till 9/6 (Unless it is PR'd)
+- OFW 11 New PR Updates
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -156,10 +141,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 - [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
 - [Fix displaying LFRFID protocol names #1682 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1682)
-- [Add support for Keri tags #1689 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1689)
 - [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)
-- [Add support for Gallagher tags #1680 (By mauimauer)](https://github.com/flipperdevices/flipperzero-firmware/pull/1680)
-- [NFC collect params for mfkey32 attack #1643 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1643)
 
 </details>
 
