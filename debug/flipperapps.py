@@ -44,13 +44,14 @@ class AppState:
         debug_elf_crc32 = get_file_crc32(debug_elf_path)
         if self.debug_link_crc != debug_elf_crc32:
             print(
-                f"Debug info CRC mismatch: {self.debug_link_crc:08x} != {debug_elf_crc32:08x}, rebuild app"
+                f"Debug info ({debug_elf_path}) CRC mismatch: {self.debug_link_crc:08x} != {debug_elf_crc32:08x}, rebuild app"
             )
             return False
         return True
 
     def get_gdb_load_command(self) -> str:
         load_path = self.get_original_elf_path()
+        print(f"Loading debug information from {load_path}")
         load_command = (
             f"add-symbol-file -readnow {load_path} 0x{self.text_address:08x} "
         )
@@ -133,7 +134,10 @@ class FlipperAppDebugHelper:
                 self._load_debug_elf(loaded_app)
 
     def _unload_debug_elf(self) -> None:
-        gdb.execute(self.current_app.get_gdb_unload_command())
+        try:
+            gdb.execute(self.current_app.get_gdb_unload_command())
+        except gdb.error as e:
+            print(f"Failed to unload debug ELF: {e} (might not be an error)")
         self.current_app = None
 
     def _load_debug_elf(self, app_object) -> None:
@@ -147,7 +151,9 @@ class FlipperAppDebugHelper:
 
 
 helper = FlipperAppDebugHelper()
-helper.attach_fw()
-print("Support for Flipper external apps debug is enabled")
-
-gdb.events.stop.connect(helper.handle_stop)
+try:
+    helper.attach_fw()
+    print("Support for Flipper external apps debug is enabled")
+    gdb.events.stop.connect(helper.handle_stop)
+except gdb.error as e:
+    print(f"Support for Flipper external apps debug is not available: {e}")
