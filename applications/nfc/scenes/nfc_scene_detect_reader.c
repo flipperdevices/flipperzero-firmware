@@ -15,6 +15,22 @@ void nfc_scene_detect_reader_callback(void* context) {
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
 }
 
+// Add widget with device name or inform that data received
+static void nfc_scene_detect_reader_widget_config(Nfc* nfc, bool data_received) {
+    Widget* widget = nfc->widget;
+    widget_reset(widget);
+
+    widget_add_icon_element(widget, 0, 14, &I_Reader_detect_43x40);
+    widget_add_string_element(
+        widget, 64, 3, AlignCenter, AlignTop, FontSecondary, "Hold Near Reader");
+    widget_add_string_element(widget, 55, 22, AlignLeft, AlignTop, FontPrimary, "Emulating...");
+
+    if(data_received) {
+        widget_add_button_element(
+            widget, GuiButtonTypeCenter, "Log", nfc_scene_detect_reader_widget_callback, nfc);
+    }
+}
+
 void nfc_scene_detect_reader_on_enter(void* context) {
     Nfc* nfc = context;
     DOLPHIN_DEED(DolphinDeedNfcEmulate);
