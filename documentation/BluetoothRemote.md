@@ -8,7 +8,7 @@ Enter with the "middle" button and choose the "Bluetooth Remote" function
 
 ![BTRemote](https://user-images.githubusercontent.com/829842/187900232-493a33a1-b461-44fc-b91d-1fe17e65eaa1.png)
 
-From this menu (**and only this one**), you will find a new bluetooth device named _Remote "Flipper Name"_
+From this menu (**and only this one**), you will find a new bluetooth device named _Control "Flipper Name"_
 
 Pair your Phone/Tablet/Computer/... to this device and you're good to go for controlling your remote devices ! (I skip the doc on how to pair 2 bluetooth devices...)
 
