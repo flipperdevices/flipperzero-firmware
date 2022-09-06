@@ -12,7 +12,7 @@
 #define MOODS_TOTAL 1
 #define BUTTHURT_MAX 14
 
-static const Icon* const portrait_happy[MOODS_TOTAL] = {
+static const Icon* const portrait_happy[7] = {
     &I_passport_happy1_46x49,
     &I_passport_happy2_46x49,
     &I_passport_happy3_46x49,
