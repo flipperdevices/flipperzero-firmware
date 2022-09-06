@@ -14,6 +14,7 @@
 - Set poweroff button timer to 2sec from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Bluetooth Remote documentation from [Foul](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/295)
 - Added [Kuronons Black Flags Collection (21 Animations)(By Kuronons)]
+- Added [D.Va (By Haseo)]
 - If you have any issue with something not listed in the "All Changes/Features" section, feel free to ask any questions you have in the main discord for Flipper Zero. They are a group, of free speech censoring GPL violators, that will surely ban you if you think diffrently than they want you to, and/or if you use their code in ways they have allowed under GPL. Unfortunately, the Flipper Zero community on the official Discord is toxic and will not grow unless a complete change of moderation is made.
 
 <table width="100%" border="0" cellspacing="0">
@@ -76,7 +77,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Animations: SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
 - Assets: Includes a NFC Level 50 Link Amiibo
 - Assets: Includes a NFC Rick Roll link
-- Assets: Includes New Dolphin Animations: [Rick Roll, Matrix & Swim animations (By qqMajiKpp)], [Rukamon 2x and Agumon animations (By Syrius)], [Mew (By Arkaivos)], [Eye of the Flipper (By Kuronons)], [Shodan (By qqMajiKpp)], [Sirene & The Witch (By Haseo)], [Dino & A New Hope (By Haseo)], [Earth Arcadia (By Kuronons)] & [Kuronons Black Flags Collection (21 Animations)(By Kuronons)]
+- Assets: Includes New Dolphin Animations: [Rick Roll, Matrix & Swim animations (By qqMajiKpp)], [Rukamon 2x and Agumon animations (By Syrius)], [Mew (By Arkaivos)], [Eye of the Flipper (By Kuronons)], [Shodan (By qqMajiKpp)], [Sirene & The Witch (By Haseo)], [Dino & A New Hope (By Haseo)], [Earth Arcadia (By Kuronons)], [Kuronons Black Flags Collection (21 Animations)(By Kuronons)] & [D.Va (By Haseo)]
 - Assets: Includes sample Music Player tunes
 - Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys, Tesla Charge Port, and Unitree Go1 Robot Dog
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
