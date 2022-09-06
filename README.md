@@ -17,7 +17,6 @@
 - Added [Kuronons Black Flags Collection (21 Animations)(By Kuronons)]
 - Added [D.Va (By Haseo)]
 - Added [Fix Mifare Classic 4K reading of the last 8 sectors #1712 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1712)
-- Added [NFC user dict list, delete, and de-duplication. #1533 (By djsime1)](https://github.com/flipperdevices/flipperzero-firmware/pull/1533)
 - Added [Picopass: detect and show SE / SIO #1701 (By pcunning)](https://github.com/flipperdevices/flipperzero-firmware/pull/1701)
 
 <table width="100%" border="0" cellspacing="0">
@@ -154,7 +153,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Fix displaying LFRFID protocol names #1682 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1682)
 - [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)
 - [Fix Mifare Classic 4K reading of the last 8 sectors #1712 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1712)
-- [NFC user dict list, delete, and de-duplication. #1533 (By djsime1)](https://github.com/flipperdevices/flipperzero-firmware/pull/1533)
 - [Picopass: detect and show SE / SIO #1701 (By pcunning)](https://github.com/flipperdevices/flipperzero-firmware/pull/1701)
 
 </details>
