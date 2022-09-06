@@ -1,4 +1,4 @@
-#include "aeabi.h"
+#include <errno.h>
 
 #ifdef __cplusplus
 extern "C" {

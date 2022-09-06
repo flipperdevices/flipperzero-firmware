@@ -52,10 +52,10 @@ def assemble_manifest_data(
     sdk_version,
 ):
     image_data = b""
-    if app_manifest.fapp_icon:
+    if app_manifest.fap_icon:
         from flipper.assets.icon import file2image
 
-        image = file2image(os.path.join(app_manifest._apppath, app_manifest.fapp_icon))
+        image = file2image(os.path.join(app_manifest._apppath, app_manifest.fap_icon))
         if (image.width, image.height) != (10, 10):
             raise ValueError(
                 f"Flipper app icon must be 10x10 pixels, but {image.width}x{image.height} was given"

@@ -18,6 +18,7 @@ def BuildAppElf(env, app):
         app_original,
         env.GlobRecursive("*.c*", os.path.join(work_dir, app._appdir)),
         APP_ENTRY=app.entry_point,
+        LIBS=env["LIBS"] + app.fap_libs,
     )
 
     app_elf_dump = env.ObjDump(app_elf_raw)
@@ -30,10 +31,10 @@ def BuildAppElf(env, app):
     )
 
     env.Depends(app_elf_augmented, [env["SDK_DEFINITION"], env.Value(app)])
-    if app.fapp_icon:
+    if app.fap_icon:
         env.Depends(
             app_elf_augmented,
-            env.File(f"{app._apppath}/{app.fapp_icon}"),
+            env.File(f"{app._apppath}/{app.fap_icon}"),
         )
     env.Alias(app_alias, app_elf_augmented)
 

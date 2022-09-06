@@ -44,8 +44,8 @@ Only 2 parameters are mandatoty: ***appid*** and ***apptype***, others are optio
 The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 
 * **version**: string, 2 numbers in form of "x.y": application version to be embedded within .fap file.
-* **fapp_icon**: name of .png file, 1-bit color depth, 10x10px, to be embedded within .fap file.
-
+* **fap_icon**: name of .png file, 1-bit color depth, 10x10px, to be embedded within .fap file.
+* **fap_libs**: list of extra libraries to link application against. Provides access to extra functions that are not exported as a part of main firmware at expense of increased .fap file size and RAM consumption.
 
 
 ## .fam file contents
