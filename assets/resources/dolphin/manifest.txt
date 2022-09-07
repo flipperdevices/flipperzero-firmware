@@ -148,79 +148,86 @@ Min level: 1
 Max level: 30
 Weight: 2
 
+Name: L1_GITS_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 3
+
 Name: L1_Eye_of_the_Flipper_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 3
 
 Name: L1_DVA_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 5
 
 Name: L1_Mew_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 5
 
 Name: L1_Earth_Arcadia_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 3
 
 Name: L1_Dino2_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 3
 
 Name: L1_A_New_Hope_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 2
 
 Name: L1_Digi_rain_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 3
 
 Name: L1_Sirene_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 4
 
 Name: L1_The_Witch_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 3
 
 Name: L1_Shodan_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 3
 
 Name: L1_Rickroll_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 3
@@ -234,21 +241,21 @@ Weight: 1
 
 Name: L1_Rukamon_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 1
 
 Name: L2_Rukamon_PC_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 3
 
 Name: L1_Agumon_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 5
