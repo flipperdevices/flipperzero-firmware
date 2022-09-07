@@ -41,7 +41,7 @@ App(
         "APPS_DolphinBackup",
         # "APPS_FlipFrid",
         # "APPS_MouseJacker",
-        # "APPS_MouseJiggler",
+        "APPS_MouseJiggler",
         "APPS_multi_conv",
         "APPS_MusicPlayer",
         "APPS_NameChanger",
@@ -49,7 +49,7 @@ App(
         "APPS_Paint",
         # "INTAPP_Picopass",
         # "APPS_SentrySafe",
-        # "APPS_SpectrumAnalyzer",
+        "APPS_SpectrumAnalyzer",
         "APPS_WAVPlayer",
     ],
 )
