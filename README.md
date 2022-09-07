@@ -1,6 +1,6 @@
 <h2>
 
-[Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
+[Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe) & [support us if you like what you see](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md)! 😄🚀💸
 #### Thank you to all the supporters; this firmware is a fork of [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & the main Flipper Devices FW! I will try to keep active development and updates from both in this build along with any other projects that can be found to be useful to the community. I try to keep this FW build the most cutting edge with updates from both and updates from active community projects. All features and projects pulled are listed in expandable sections below. Please do [support us](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md) and/or [xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)! Everyone gives much of their uncompensated free time to ensure the success of the Flipper Zero!
 
 <b>Latest Updates:</b>
@@ -49,7 +49,7 @@ ETH: <B>0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f</B>
     <br> <br>
     
 Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Flipper DFU. I can do custom names too!
-<br><h2>[Join my Flipper/Amiibo Discord](https://discord.gg/gF2bBUzAFe)</h2>
+<br><h2>[Join my Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)</h2>
 <details>
   <summary><B>You should clone with</B></summary></br>
 
