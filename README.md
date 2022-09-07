@@ -12,7 +12,7 @@
 - Added [NRFSniff : Adds unique count display #56 (By Graf3x)](https://github.com/Eng1n33r/flipperzero-firmware/pull/56/) & Thanks to [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Assets: Includes New Dolphin Animations: [GITS (By Haseo)]
 - Assets: Includes a NFC Level 50 Gan0n Amiibo (Instead of Link)
-- Added [SubGhz Bruteforcer (By Ganapati)](https://github.com/ganapati/)
+- Added [SubGhz Bruteforcer (By Ganapati)](https://github.com/Ganapati/flipperzero-firmware)
 - Added [SubGhz: fix decoder kelooq #1719 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1719)
 
 <table width="100%" border="0" cellspacing="0">
