@@ -11,6 +11,7 @@
 - Minor update for PicoPass from Bettse
 - Added [NRFSniff : Adds unique count display #56 (By Graf3x)](https://github.com/Eng1n33r/flipperzero-firmware/pull/56/) & Thanks to [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Assets: Includes New Dolphin Animations: [GITS (By Haseo)]
+- Assets: Includes a NFC Level 50 Gan0n Amiibo (Instead of Link)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
