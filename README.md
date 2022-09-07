@@ -13,6 +13,7 @@
 - Assets: Includes New Dolphin Animations: [GITS (By Haseo)]
 - Assets: Includes a NFC Level 50 Gan0n Amiibo (Instead of Link)
 - Added [SubGhz Bruteforcer (By Ganapati)](https://github.com/ganapati/)
+- Added [SubGhz: fix decoder kelooq #1719 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1719)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -149,6 +150,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)
 - [Fix Mifare Classic 4K reading of the last 8 sectors #1712 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1712)
 - [Picopass: detect and show SE / SIO #1701 (By pcunning)](https://github.com/flipperdevices/flipperzero-firmware/pull/1701)
+- [SubGhz: fix decoder kelooq #1719 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1719)
 
 </details>
 
