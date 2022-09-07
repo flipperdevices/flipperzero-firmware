@@ -6,7 +6,7 @@
 <b>Latest Updates:</b>
 
 - Known Issues:			`FAP Loader`, `Chess` & `Chip8` (No Controls)
-- If you have any issue with something not listed in the "All Changes/Features" section, feel free to ask any questions you have in the main discord for Flipper Zero. They are a group, of free speech censoring GPL violators, that will surely ban you if you think diffrently than they want you to, and/or if you use their code in ways they have allowed under GPL. Unfortunately, the Flipper Zero community on the official Discord is toxic and will not grow unless a complete change of moderation is made.
+- If you have any issue with something not listed in the "All Changes/Features" section, feel free to ask any questions you have in the main discord for Flipper Zero.
 - Games/Apps `HIDDEN` for compile space can be found on Side B in the update folder.
 - Minor update for PicoPass from Bettse
 - Added [NRFSniff : Adds unique count display #56 (By Graf3x)](https://github.com/Eng1n33r/flipperzero-firmware/pull/56/) & Thanks to [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
