@@ -210,7 +210,7 @@ ReturnCode picopass_read_card(PicopassBlock* AA1) {
     }
 
     size_t app_limit = AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[0] < PICOPASS_MAX_APP_LIMIT ?
-                           AA1[PICOPASS_CSN_BLOCK_INDEX].data[0] :
+                           AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[0] :
                            PICOPASS_MAX_APP_LIMIT;
 
     for(size_t i = 2; i < app_limit; i++) {
