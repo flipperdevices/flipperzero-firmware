@@ -7,17 +7,8 @@
 
 - Known Issues:			`FAP Loader`, `Chess` & `Chip8` (No Controls)
 - If you have any issue with something not listed in the "All Changes/Features" section, feel free to ask any questions you have in the main discord for Flipper Zero. They are a group, of free speech censoring GPL violators, that will surely ban you if you think diffrently than they want you to, and/or if you use their code in ways they have allowed under GPL. Unfortunately, the Flipper Zero community on the official Discord is toxic and will not grow unless a complete change of moderation is made.
-- Apps `HIDDEN` for compile space can be found on Side B in the update folder.
-- OFW: [#1680](https://github.com/flipperdevices/flipperzero-firmware/pull/1680), [#1689](https://github.com/flipperdevices/flipperzero-firmware/pull/1689), [#1696](https://github.com/flipperdevices/flipperzero-firmware/pull/1696), [#1685](https://github.com/flipperdevices/flipperzero-firmware/pull/1685), [#1698](https://github.com/flipperdevices/flipperzero-firmware/pull/1698), [#1692](https://github.com/flipperdevices/flipperzero-firmware/pull/1692), [#1643](https://github.com/flipperdevices/flipperzero-firmware/pull/1643), [#1699](https://github.com/flipperdevices/flipperzero-firmware/pull/1699), [#1697](https://github.com/flipperdevices/flipperzero-firmware/pull/1697), [#1703](https://github.com/flipperdevices/flipperzero-firmware/pull/1703) & [#1706](https://github.com/flipperdevices/flipperzero-firmware/pull/1706)
-- Changed Default Apps for Side A and Side B.
-- Updates for RFID Fuzzer from [Ganapati](https://github.com/Ganapati/) and [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Updated Infrared Audio Remote from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Set poweroff button timer to 2sec from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Bluetooth Remote documentation from [Foul](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/295)
-- Added [Kuronons Black Flags Collection (21 Animations)(By Kuronons)]
-- Added [D.Va (By Haseo)]
-- Added [Fix Mifare Classic 4K reading of the last 8 sectors #1712 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1712)
-- Added [Picopass: detect and show SE / SIO #1701 (By pcunning)](https://github.com/flipperdevices/flipperzero-firmware/pull/1701)
+- Games/Apps `HIDDEN` for compile space can be found on Side B in the update folder.
+- Added [NRFSniff : Adds unique count display #56 (By Graf3x)](https://github.com/Eng1n33r/flipperzero-firmware/pull/56/) & Thanks to [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
