@@ -37,7 +37,7 @@ App(
         # "APPS_BarcodeGenerator",
         # "APPS_BluetoothRemote",
         # "APPS_Calculator",
-        "APPS_DolphinRestorer",
+        # "APPS_DolphinRestorer",
         # "APPS_DolphinBackup",
         "APPS_FlipFrid",
         "APPS_MouseJacker",
