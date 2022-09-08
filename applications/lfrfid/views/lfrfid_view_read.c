@@ -51,18 +51,6 @@ static void lfrfid_view_read_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 61, 56, "Don't move card");
-
-    UNUSED(model);
-}
-
-static bool lfrfid_view_read_input_callback(InputEvent* event, void* context) {
-    LfRfidReadView* read_view = context;
-    bool consumed = false;
-
-    UNUSED(event);
-    UNUSED(read_view);
-
-    return consumed;
 }
 
 void lfrfid_view_read_enter(void* context) {
@@ -97,7 +85,6 @@ LfRfidReadView* lfrfid_view_read_alloc() {
         });
 
     view_set_draw_callback(read_view->view, lfrfid_view_read_draw_callback);
-    view_set_input_callback(read_view->view, lfrfid_view_read_input_callback);
     view_set_enter_callback(read_view->view, lfrfid_view_read_enter);
     view_set_exit_callback(read_view->view, lfrfid_view_read_exit);
 
