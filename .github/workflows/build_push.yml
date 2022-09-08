@@ -13,6 +13,13 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        
+      - name: Pull arduino-esp32 v2.0.4
+        uses: actions/checkout@v2
+        with:
+          repository: espressif/arduino-esp32
+          ref: 2.0.4
+          path: 2.0.4arduino-esp32
       
       - name: Install TFT_eSPI
         uses: actions/checkout@v2
@@ -69,6 +76,10 @@ jobs:
           repository: justcallmekoko/SwitchLib
           ref: main
           path: CustomSwitchLib
+          
+      - name: Search for SD lib in arduino-esp32 v2.0.4
+        run: |
+          find /home/runner/work/ESP32Marauder/ESP32Marauder/2.0.4arduino-esp32 -name "SD"
           
       - name: Configure TFT_eSPI
         run: |
