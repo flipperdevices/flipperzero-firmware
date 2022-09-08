@@ -119,8 +119,14 @@ void setup()
   #ifdef HAS_SCREEN
     digitalWrite(TFT_CS, HIGH);
   #endif
+
+  pinMode(SD_CS, OUTPUT);
+
+  delay(10);
   
   digitalWrite(SD_CS, HIGH);
+
+  delay(10);
 
   Serial.begin(115200);
   

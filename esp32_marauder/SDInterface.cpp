@@ -15,6 +15,10 @@ bool SDInterface::initSD() {
       return false;
     }
   #endif
+
+  pinMode(SD_CS, OUTPUT);
+
+  delay(10);
   
   if (!SD.begin(SD_CS)) {
     Serial.println(F("Failed to mount SD Card"));
