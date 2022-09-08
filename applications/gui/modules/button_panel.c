@@ -8,6 +8,11 @@
 #include <gui/elements.h>
 #include <stdint.h>
 
+typedef enum {
+    GraphicElementTypeLabel,
+    GraphicElementTypeFrame,
+} GraphicElementType;
+
 typedef struct {
     // uint16_t to support multi-screen, wide button panel
     uint16_t x;
@@ -16,8 +21,26 @@ typedef struct {
     const char* str;
 } LabelElement;
 
-LIST_DEF(LabelList, LabelElement, M_POD_OPLIST)
-#define M_OPL_LabelList_t() LIST_OPLIST(LabelList)
+typedef struct {
+    uint16_t x;
+    uint16_t y;
+    uint16_t width;
+    uint16_t height;
+} FrameElement;
+
+typedef struct {
+    GraphicElementType type;
+    union {
+        LabelElement label;
+        FrameElement frame;
+    } element;
+} GraphicElement;
+
+LIST_DEF(GraphicList, GraphicElement, M_POD_OPLIST)
+#define M_OPL_GraphicList_t() LIST_OPLIST(GraphicList)
+
+// LIST_DEF(LabelList, LabelElement, M_POD_OPLIST)
+// #define M_OPL_LabelList_t() LIST_OPLIST(LabelList)
 
 typedef struct {
     uint16_t x;
@@ -44,7 +67,8 @@ struct ButtonPanel {
 
 typedef struct {
     ButtonMatrix_t button_matrix;
-    LabelList_t labels;
+//     LabelList_t labels;
+    GraphicList_t graphics;
     uint16_t reserve_x;
     uint16_t reserve_y;
     uint16_t selected_item_x;
@@ -76,7 +100,8 @@ ButtonPanel* button_panel_alloc() {
             model->selected_item_x = 0;
             model->selected_item_y = 0;
             ButtonMatrix_init(model->button_matrix);
-            LabelList_init(model->labels);
+//             LabelList_init(model->labels);
+            GraphicList_init(model->graphics);
             return true;
         });
 
@@ -98,7 +123,8 @@ void button_panel_reserve(ButtonPanel* button_panel, size_t reserve_x, size_t re
                 ButtonArray_reserve(*array, reserve_x);
                 // TODO: do we need to clear allocated memory of ptr-s to ButtonItem ??
             }
-            LabelList_init(model->labels);
+//             LabelList_init(model->labels);
+            GraphicList_init(model->graphics);
             return true;
         });
 }
@@ -110,7 +136,8 @@ void button_panel_free(ButtonPanel* button_panel) {
 
     with_view_model(
         button_panel->view, (ButtonPanelModel * model) {
-            LabelList_clear(model->labels);
+//             LabelList_clear(model->labels);
+            GraphicList_clear(model->graphics);
             ButtonMatrix_clear(model->button_matrix);
             return true;
         });
@@ -133,7 +160,8 @@ void button_panel_reset(ButtonPanel* button_panel) {
             }
             model->reserve_x = 0;
             model->reserve_y = 0;
-            LabelList_reset(model->labels);
+//             LabelList_reset(model->labels);
+            GraphicList_reset(model->graphics);
             ButtonMatrix_reset(model->button_matrix);
             return true;
         });
@@ -206,9 +234,16 @@ static void button_panel_view_draw_callback(Canvas* canvas, void* _model) {
     }
 
     for
-        M_EACH(label, model->labels, LabelList_t) {
-            canvas_set_font(canvas, label->font);
-            canvas_draw_str(canvas, label->x, label->y, label->str);
+        M_EACH(graphic, model->graphics, GraphicList_t) {
+            GraphicElementType type = graphic->type;
+            if(type == GraphicElementTypeLabel) {
+                LabelElement* label = &graphic->element.label;
+                canvas_set_font(canvas, label->font);
+                canvas_draw_str(canvas, label->x, label->y, label->str);
+            } else if(type == GraphicElementTypeFrame) {
+                FrameElement* frame = &graphic->element.frame;
+                canvas_draw_frame(canvas, frame->x, frame->y, frame->width, frame->height);
+            }
         }
 }
 
@@ -373,11 +408,34 @@ void button_panel_add_label(
 
     with_view_model(
         button_panel->view, (ButtonPanelModel * model) {
-            LabelElement* label = LabelList_push_raw(model->labels);
+            GraphicElement* graphic = GraphicList_push_raw(model->graphics);
+            graphic->type = GraphicElementTypeLabel;
+            LabelElement* label = &graphic->element.label;
             label->x = x;
             label->y = y;
             label->font = font;
             label->str = label_str;
+            return true;
+        });
+}
+
+void button_panel_add_frame(
+    ButtonPanel* button_panel,
+    uint16_t x,
+    uint16_t y,
+    uint16_t width,
+    uint16_t height) {
+    furi_assert(button_panel);
+
+    with_view_model(
+        button_panel->view, (ButtonPanelModel * model) {
+            GraphicElement* graphic = GraphicList_push_raw(model->graphics);
+            graphic->type = GraphicElementTypeFrame;
+            FrameElement* frame = &graphic->element.frame;
+            frame->x = x;
+            frame->y = y;
+            frame->width = width;
+            frame->height = height;
             return true;
         });
 }

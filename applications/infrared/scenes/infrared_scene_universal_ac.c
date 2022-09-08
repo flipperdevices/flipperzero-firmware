@@ -58,7 +58,8 @@ void infrared_scene_universal_ac_on_enter(void* context) {
     button_panel_add_label(button_panel, 6, 8, FontPrimary, "AC remote");
     button_panel_add_label(button_panel, 2, 20, FontSecondary, "Choose and set");
     button_panel_add_label(button_panel, 5, 30, FontSecondary, "temperature");
-    button_panel_add_label(button_panel, 10, 53, FontPrimary, "Set: 23 c");
+    button_panel_add_label(button_panel, 10, 53, FontPrimary, "Set: 23 C");
+    button_panel_add_frame(button_panel, 0, 36, 64, 26);
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);

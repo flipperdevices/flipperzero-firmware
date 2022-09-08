@@ -100,6 +100,22 @@ void button_panel_add_label(
     Font font,
     const char* label_str);
 
+/** Add frame to button_panel module.
+ *
+ * @param      button_panel  ButtonPanel instance
+ * @param      x             x-coordinate to place frame
+ * @param      y             y-coordinate to place frame
+ * @param      width         frame width
+ * @param      height        frame height
+ */
+void button_panel_add_frame(
+    ButtonPanel* button_panel,
+    uint16_t x,
+    uint16_t y,
+    uint16_t width,
+    uint16_t height
+);
+
 #ifdef __cplusplus
 }
 #endif
