@@ -43,7 +43,7 @@ void lfrfid_scene_read_success_on_enter(void* context) {
     string_cat_printf(tmp_string, "\r\n%s", string_get_cstr(render_data));
     string_clear(render_data);
 
-    widget_add_string_element(
+    widget_add_string_multiline_element(
         widget, 0, 16, AlignLeft, AlignTop, FontSecondary, string_get_cstr(tmp_string));
 
     notification_message_block(app->notifications, &sequence_set_green_255);
