@@ -32,10 +32,9 @@ static void nfc_rpc_command_callback(RpcAppSystemEvent event, void* context) {
     }
 }
 
-Nfc* nfc_alloc() {
+Nfc* nfc_min_alloc() {
     Nfc* nfc = malloc(sizeof(Nfc));
 
-    nfc->worker = nfc_worker_alloc();
     nfc->view_dispatcher = view_dispatcher_alloc();
     nfc->scene_manager = scene_manager_alloc(&nfc_scene_handlers, nfc);
     view_dispatcher_enable_queue(nfc->view_dispatcher);
@@ -43,14 +42,50 @@ Nfc* nfc_alloc() {
     view_dispatcher_set_custom_event_callback(nfc->view_dispatcher, nfc_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(nfc->view_dispatcher, nfc_back_event_callback);
 
-    // Nfc device
-    nfc->dev = nfc_device_alloc();
-
     // Open GUI record
     nfc->gui = furi_record_open(RECORD_GUI);
 
     // Open Notification record
     nfc->notifications = furi_record_open(RECORD_NOTIFICATION);
+
+    // Popup
+    nfc->popup = popup_alloc();
+    view_dispatcher_add_view(nfc->view_dispatcher, NfcViewPopup, popup_get_view(nfc->popup));
+
+    return nfc;
+}
+
+void nfc_min_free(Nfc* nfc) {
+    furi_assert(nfc);
+
+    // Popup
+    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewPopup);
+    popup_free(nfc->popup);
+
+    // View Dispatcher
+    view_dispatcher_free(nfc->view_dispatcher);
+
+    // Scene Manager
+    scene_manager_free(nfc->scene_manager);
+
+    // GUI
+    furi_record_close(RECORD_GUI);
+    nfc->gui = NULL;
+
+    // Notifications
+    furi_record_close(RECORD_NOTIFICATION);
+    nfc->notifications = NULL;
+
+    free(nfc);
+}
+
+Nfc* nfc_alloc() {
+    Nfc* nfc = nfc_min_alloc();
+
+    nfc->worker = nfc_worker_alloc();
+
+    // Nfc device
+    nfc->dev = nfc_device_alloc();
 
     // Submenu
     nfc->submenu = submenu_alloc();
@@ -60,10 +95,6 @@ Nfc* nfc_alloc() {
     nfc->dialog_ex = dialog_ex_alloc();
     view_dispatcher_add_view(
         nfc->view_dispatcher, NfcViewDialogEx, dialog_ex_get_view(nfc->dialog_ex));
-
-    // Popup
-    nfc->popup = popup_alloc();
-    view_dispatcher_add_view(nfc->view_dispatcher, NfcViewPopup, popup_get_view(nfc->popup));
 
     // Loading
     nfc->loading = loading_alloc();
@@ -134,10 +165,6 @@ void nfc_free(Nfc* nfc) {
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewDialogEx);
     dialog_ex_free(nfc->dialog_ex);
 
-    // Popup
-    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewPopup);
-    popup_free(nfc->popup);
-
     // Loading
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewLoading);
     loading_free(nfc->loading);
@@ -171,21 +198,7 @@ void nfc_free(Nfc* nfc) {
     nfc_worker_stop(nfc->worker);
     nfc_worker_free(nfc->worker);
 
-    // View Dispatcher
-    view_dispatcher_free(nfc->view_dispatcher);
-
-    // Scene Manager
-    scene_manager_free(nfc->scene_manager);
-
-    // GUI
-    furi_record_close(RECORD_GUI);
-    nfc->gui = NULL;
-
-    // Notifications
-    furi_record_close(RECORD_NOTIFICATION);
-    nfc->notifications = NULL;
-
-    free(nfc);
+    nfc_min_free(nfc);
 }
 
 void nfc_text_store_set(Nfc* nfc, const char* text, ...) {
@@ -224,6 +237,19 @@ void nfc_show_loading_popup(void* context, bool show) {
 }
 
 int32_t nfc_app(void* p) {
+    if(!furi_hal_nfc_is_init()) {
+        // No connection to the chip, show an error screen
+        Nfc* nfc = nfc_min_alloc();
+        view_dispatcher_attach_to_gui(
+            nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
+        scene_manager_next_scene(nfc->scene_manager, NfcSceneNotInit);
+        view_dispatcher_run(nfc->view_dispatcher);
+
+        nfc_min_free(nfc);
+
+        return 0;
+    }
+
     Nfc* nfc = nfc_alloc();
     char* args = p;
 
