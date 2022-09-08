@@ -1,6 +1,21 @@
 #include "../lfrfid_i.h"
 #include <dolphin/dolphin.h>
 
+static const NotificationSequence sequence_blink_set_yellow = {
+    &message_blink_set_color_yellow,
+    NULL,
+};
+
+static const NotificationSequence sequence_blink_set_green = {
+    &message_blink_set_color_green,
+    NULL,
+};
+
+static const NotificationSequence sequence_blink_set_cyan = {
+    &message_blink_set_color_cyan,
+    NULL,
+};
+
 static void
     lfrfid_read_callback(LFRFIDWorkerReadResult result, ProtocolId protocol, void* context) {
     LfRfid* app = context;
@@ -30,44 +45,37 @@ static void
 
 void lfrfid_scene_read_on_enter(void* context) {
     LfRfid* app = context;
-    Popup* popup = app->popup;
 
     DOLPHIN_DEED(DolphinDeedRfidRead);
     if(app->read_type == LFRFIDWorkerReadTypePSKOnly) {
-        popup_set_header(popup, "Reading\nLF RFID\nPSK", 89, 30, AlignCenter, AlignTop);
-    } else {
-        popup_set_header(popup, "Reading\nLF RFID\nASK", 89, 30, AlignCenter, AlignTop);
+        lfrfid_view_read_set_read_mode(app->read_view, LfRfidReadPskOnly);
+    } else if(app->read_type == LFRFIDWorkerReadTypeASKOnly) {
+        lfrfid_view_read_set_read_mode(app->read_view, LfRfidReadAskOnly);
     }
-
-    popup_set_icon(popup, 0, 3, &I_RFIDDolphinReceive_97x61);
 
     lfrfid_worker_start_thread(app->lfworker);
     lfrfid_worker_read_start(app->lfworker, app->read_type, lfrfid_read_callback, app);
 
     notification_message(app->notifications, &sequence_blink_start_cyan);
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewPopup);
+    view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewRead);
 }
 
 bool lfrfid_scene_read_on_event(void* context, SceneManagerEvent event) {
     LfRfid* app = context;
-    Popup* popup = app->popup;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == LfRfidEventReadSenseStart) {
-            notification_message(app->notifications, &sequence_blink_stop);
-            notification_message(app->notifications, &sequence_blink_start_yellow);
+            notification_message(app->notifications, &sequence_blink_set_yellow);
             consumed = true;
         } else if(event.event == LfRfidEventReadSenseCardStart) {
-            notification_message(app->notifications, &sequence_blink_stop);
-            notification_message(app->notifications, &sequence_blink_start_green);
+            notification_message(app->notifications, &sequence_blink_set_green);
             consumed = true;
         } else if(
             (event.event == LfRfidEventReadSenseEnd) ||
             (event.event == LfRfidEventReadSenseCardEnd)) {
-            notification_message(app->notifications, &sequence_blink_stop);
-            notification_message(app->notifications, &sequence_blink_start_cyan);
+            notification_message(app->notifications, &sequence_blink_set_cyan);
             consumed = true;
         } else if(event.event == LfRfidEventReadDone) {
             app->protocol_id = app->protocol_id_next;
@@ -77,10 +85,14 @@ bool lfrfid_scene_read_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(app->scene_manager, LfRfidSceneReadSuccess);
             consumed = true;
         } else if(event.event == LfRfidEventReadStartPSK) {
-            popup_set_header(popup, "Reading\nLF RFID\nPSK", 89, 30, AlignCenter, AlignTop);
+            if(app->read_type == LFRFIDWorkerReadTypeAuto) {
+                lfrfid_view_read_set_read_mode(app->read_view, LfRfidReadPsk);
+            }
             consumed = true;
         } else if(event.event == LfRfidEventReadStartASK) {
-            popup_set_header(popup, "Reading\nLF RFID\nASK", 89, 30, AlignCenter, AlignTop);
+            if(app->read_type == LFRFIDWorkerReadTypeAuto) {
+                lfrfid_view_read_set_read_mode(app->read_view, LfRfidReadAsk);
+            }
             consumed = true;
         }
     }

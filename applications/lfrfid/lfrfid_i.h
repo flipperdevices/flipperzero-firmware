@@ -19,6 +19,8 @@
 #include <gui/modules/byte_input.h>
 #include <gui/modules/widget.h>
 
+#include <lfrfid/views/lfrfid_view_read.h>
+
 #include <notification/notification_messages.h>
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
@@ -105,6 +107,9 @@ struct LfRfid {
     Popup* popup;
     TextInput* text_input;
     ByteInput* byte_input;
+
+    // Custom views
+    LfRfidReadView* read_view;
 };
 
 typedef enum {
@@ -114,6 +119,7 @@ typedef enum {
     LfRfidViewWidget,
     LfRfidViewTextInput,
     LfRfidViewByteInput,
+    LfRfidViewRead,
 } LfRfidView;
 
 bool lfrfid_save_key(LfRfid* app);

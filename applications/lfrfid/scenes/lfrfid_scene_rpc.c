@@ -32,7 +32,6 @@ bool lfrfid_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             view_dispatcher_stop(app->view_dispatcher);
         } else if(event.event == LfRfidEventRpcLoadFile) {
             const char* arg = rpc_system_app_get_data(app->rpc_ctx);
-            consumed = true;
             bool result = false;
             if(arg && (app->rpc_state == LfRfidRpcStateIdle)) {
                 string_set_str(app->file_path, arg);
