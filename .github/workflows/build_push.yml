@@ -98,6 +98,12 @@ jobs:
           arduino-board-fqbn: esp32:esp32:esp32s2
           platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
           
+      - name: Replace SD lib
+        run: |
+          rm -rf /home/running/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/libraries/SD
+          cp -R /home/runner/work/ESP32Marauder/ESP32Marauder/2.0.4arduino-esp32/libraries/SD /home/running/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/libraries/SD
+          ls -la /home/running/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/libraries/SD
+          
       - name: Modify platform.txt
         run: |
           echo "Chicken"
