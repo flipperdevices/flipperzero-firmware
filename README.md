@@ -14,6 +14,7 @@
 - Assets: Includes a NFC Level 50 Gan0n Amiibo (Instead of Link)
 - Added [SubGhz Bruteforcer (By Ganapati)](https://github.com/Ganapati/flipperzero-firmware)
 - Added [SubGhz: fix decoder kelooq #1719 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1719)
+- OFW: 4 UPDATES
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
