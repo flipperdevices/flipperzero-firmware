@@ -100,9 +100,9 @@ jobs:
           
       - name: Replace SD lib
         run: |
-          rm -rf /home/running/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/libraries/SD
-          cp -R /home/runner/work/ESP32Marauder/ESP32Marauder/2.0.4arduino-esp32/libraries/SD /home/running/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/libraries/SD
-          ls -la /home/running/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/libraries/SD
+          rm -rf /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/libraries/SD
+          cp -R /home/runner/work/ESP32Marauder/ESP32Marauder/2.0.4arduino-esp32/libraries/SD /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/libraries/SD
+          ls -la /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/libraries/SD
           
       - name: Modify platform.txt
         run: |
