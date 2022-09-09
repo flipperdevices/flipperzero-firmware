@@ -115,7 +115,6 @@ ReturnCode picopass_detect_card(int timeout) {
 ReturnCode picopass_read_preauth(PicopassBlock* AA1) {
     rfalPicoPassIdentifyRes idRes;
     rfalPicoPassSelectRes selRes;
-    rfalPicoPassReadCheckRes rcRes;
 
     ReturnCode err;
 
@@ -128,12 +127,6 @@ ReturnCode picopass_read_preauth(PicopassBlock* AA1) {
     err = rfalPicoPassPollerSelect(idRes.CSN, &selRes);
     if(err != ERR_NONE) {
         FURI_LOG_E(TAG, "rfalPicoPassPollerSelect error %d", err);
-        return err;
-    }
-
-    err = rfalPicoPassPollerReadCheck(&rcRes);
-    if(err != ERR_NONE) {
-        FURI_LOG_E(TAG, "rfalPicoPassPollerReadCheck error %d", err);
         return err;
     }
 
@@ -150,7 +143,7 @@ ReturnCode picopass_read_preauth(PicopassBlock* AA1) {
         AA1[PICOPASS_CSN_BLOCK_INDEX].data[6],
         AA1[PICOPASS_CSN_BLOCK_INDEX].data[7]);
 
-    rfalPicoPassReadBlockRes cfg;
+    rfalPicoPassReadBlockRes cfg = {0};
     err = rfalPicoPassPollerReadBlock(PICOPASS_CONFIG_BLOCK_INDEX, &cfg);
     memcpy(AA1[PICOPASS_CONFIG_BLOCK_INDEX].data, cfg.data, sizeof(cfg.data));
     FURI_LOG_D(
@@ -214,7 +207,6 @@ ReturnCode picopass_read_card(PicopassBlock* AA1) {
                            PICOPASS_MAX_APP_LIMIT;
 
     for(size_t i = 2; i < app_limit; i++) {
-        FURI_LOG_D(TAG, "rfalPicoPassPollerReadBlock block %d", i);
         rfalPicoPassReadBlockRes block;
         err = rfalPicoPassPollerReadBlock(i, &block);
         if(err != ERR_NONE) {
