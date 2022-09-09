@@ -6,24 +6,8 @@
 <b>Latest Updates:</b>
 
 - Known Issues:			`FAP Loader`, `Chess` & `Chip8` (No Controls)
-- If you have any issue with something not listed in the "All Changes/Features" section, feel free to ask any questions you have in the main discord for Flipper Zero.
-- Games/Apps `HIDDEN` for compile space can be found on Side B in the update folder.
-- Minor update for PicoPass from Bettse
-- Added [NRFSniff : Adds unique count display #56 (By Graf3x)](https://github.com/Eng1n33r/flipperzero-firmware/pull/56/) & Thanks to [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Assets: Includes New Dolphin Animations: [GITS (By Haseo)]
-- Assets: Includes a NFC Level 50 Gan0n Amiibo (Instead of Link)
-- Added [Sub-GHz Bruteforcer (By Ganapati)](https://github.com/Ganapati/flipperzero-firmware)
-- Added [SubGhz: fix decoder kelooq #1719 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1719)
-- OFW: [Furi: wait for timer wind down in destructor #1716 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1716)
-- OFW: [SubGhz: handle missing key in cryptostore. Lib: lower default display contrast. #1717 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/1717)
-- OFW: [SubGhz: fix decoder kelooq #1719 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1719)
-- OFW: [RFID app port to plain C #1710 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1710)
-- GUI Changes to LFRFID Fuzzer - Thanks to [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Updated SubGhz Bruteforce plugin (by @Ganapati & @xMasterX) (PR [#57](https://github.com/Eng1n33r/flipperzero-firmware/pull/57)) - saving functionality and many fixes by @xMasterX
-- Fix GUI and add new icon in LF-RFID App(icon by @Svaarich) - Thanks to [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Fix picopass plugin (revert OFW PR 1701) - Thanks to [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Updated universal remote assets (by @amec0e) & Thanks to [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Assets: Includes New Dolphin Animations: [Slayers (By qqMajiKpp)]
+- Assets: Includes New Dolphin Animations: [P0liwhirl (By Panzer00Z)]
+- A few more P0kem0n assets for RFID and iButton by @Panzer00Z
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -80,12 +64,13 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
   <summary><B>All Changes/Features</b></summary><br/>
   
 - Animations: Hold Center to change Flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
+- Animations: iButton and RFID P0kem0n images [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/)
 - Animations: Idle animations will show all animations regardless of level and butthurt [Thanks to qqMajiKpp]
 - Animations: RM FW Update image [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/257)
 - Animations: SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
 - Assets: Includes a NFC Level 50 Gan0n Amiibo
 - Assets: Includes a NFC Rick Roll link
-- Assets: Includes New Dolphin Animations: [Rick Roll, Matrix & Swim animations (By qqMajiKpp)], [Rukamon 2x and Agumon animations (By Syrius)], [Mew (By Arkaivos)], [Eye of the Flipper (By Kuronons)], [Shodan (By qqMajiKpp)], [Sirene & The Witch (By Haseo)], [Dino & A New Hope (By Haseo)], [Earth Arcadia (By Kuronons)], [Kuronons Black Flags Collection (21 Animations)(By Kuronons)], [D.Va (By Haseo)], [GITS (By Haseo)] & [Slayers (By qqMajiKpp)]
+- Assets: Includes New Dolphin Animations: [Rick Roll, Matrix & Swim animations (By qqMajiKpp)], [Rukamon 2x and Agumon animations (By Syrius)], [Mew (By Arkaivos)], [Eye of the Flipper (By Kuronons)], [Shodan (By qqMajiKpp)], [Sirene & The Witch (By Haseo)], [Dino & A New Hope (By Haseo)], [Earth Arcadia (By Kuronons)], [Kuronons Black Flags Collection (21 Animations)(By Kuronons)], [D.Va (By Haseo)], [GITS (By Haseo)], [Slayers (By qqMajiKpp)] & [P0liwhirl (By Panzer00Z)]
 - Assets: Includes sample Music Player tunes
 - Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys, Tesla Charge Port, and Unitree Go1 Robot Dog
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
