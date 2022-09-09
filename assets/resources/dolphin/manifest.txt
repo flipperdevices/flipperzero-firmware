@@ -148,12 +148,19 @@ Min level: 1
 Max level: 30
 Weight: 2
 
+Name: L1_Slayers_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 6
+
 Name: L1_GITS_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
 Max level: 30
-Weight: 3
+Weight: 4
 
 Name: L1_Eye_of_the_Flipper_128x64
 Min butthurt: 0
