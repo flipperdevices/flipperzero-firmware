@@ -19,7 +19,7 @@ void infrared_scene_universal_ac_on_enter(void* context) {
         0,
         0,
         3,
-        19,
+        22,
         &I_Off_25x27,
         &I_Off_hvr_25x27,
         infrared_scene_universal_common_item_callback,
@@ -31,7 +31,7 @@ void infrared_scene_universal_ac_on_enter(void* context) {
         1,
         0,
         36,
-        19,
+        22,
         &I_Dehumidify_25x27,
         &I_Dehumidify_hvr_25x27,
         infrared_scene_universal_common_item_callback,
@@ -43,7 +43,7 @@ void infrared_scene_universal_ac_on_enter(void* context) {
         0,
         1,
         3,
-        66,
+        59,
         &I_CoolHi_25x27,
         &I_CoolHi_hvr_25x27,
         infrared_scene_universal_common_item_callback,
@@ -55,7 +55,7 @@ void infrared_scene_universal_ac_on_enter(void* context) {
         1,
         1,
         36,
-        66,
+        59,
         &I_HeatHi_25x27,
         &I_HeatHi_hvr_25x27,
         infrared_scene_universal_common_item_callback,
@@ -67,7 +67,7 @@ void infrared_scene_universal_ac_on_enter(void* context) {
         0,
         2,
         3,
-        98,
+        91,
         &I_CoolLo_25x27,
         &I_CoolLo_hvr_25x27,
         infrared_scene_universal_common_item_callback,
@@ -79,14 +79,14 @@ void infrared_scene_universal_ac_on_enter(void* context) {
         1,
         2,
         36,
-        98,
+        91,
         &I_HeatLo_25x27,
         &I_HeatLo_hvr_25x27,
         infrared_scene_universal_common_item_callback,
         context);
     infrared_brute_force_add_record(brute_force, i++, "HEAT LO");
 
-    button_panel_add_label(button_panel, 6, 11, FontPrimary, "AC remote");
+    button_panel_add_label(button_panel, 6, 10, FontPrimary, "AC remote");
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
