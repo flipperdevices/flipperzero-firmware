@@ -50,6 +50,7 @@ App(
         # "INTAPP_Picopass",
         # "APPS_SentrySafe",
         "APPS_SpectrumAnalyzer",
+        # "APPS_SubBrute",
         "APPS_WAVPlayer",
     ],
 )
@@ -128,6 +129,7 @@ App(
         "INTAPP_Picopass",
         "APPS_SentrySafe",
         "APPS_SpectrumAnalyzer",
+        "APPS_SubBrute",
         "APPS_Sub_Playlist",
         "APPS_WAVPlayer",
         "GAME_2048",
