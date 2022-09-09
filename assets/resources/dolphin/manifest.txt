@@ -36,6 +36,69 @@ Min level: 1
 Max level: 30
 Weight: 3
 
+Name: Kuronons_BlackFlags_Boze_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 2
+
+Name: Kuronons_BlackFlags_ChrisMoody_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 2
+
+Name: Kuronons_BlackFlags_Condent_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 2
+
+Name: Kuronons_BlackFlags_Delahaye_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 2
+
+Name: Kuronons_BlackFlags_Lafitte_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 2
+
+Name: Kuronons_BlackFlags_Landolphe_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 2
+
+Name: Kuronons_BlackFlags_Quelch_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 2
+
+Name: Kuronons_BlackFlags_Teach_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 5
+
+Name: Kuronons_BlackFlags_WillMoody_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 2
+
 Name: Kuronons_BlackFlags_Angot_128x64
 Min butthurt: 0
 Max butthurt: 14
