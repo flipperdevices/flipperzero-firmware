@@ -17,6 +17,7 @@
 - Assets: Includes New Dolphin Animations: [Laughing Man (By Kuronons)]
 - Assets: Includes New Dolphin Animations: [B0ws3r (By Haseo)]
 - Assets: Includes New Dolphin Animations: [Kuronons Black Flags Collection VOL 2 (9 Animations)(By Kuronons)]
+- Additional 4 NFC Keys added by @Goul
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
