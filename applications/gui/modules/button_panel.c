@@ -67,7 +67,7 @@ struct ButtonPanel {
 
 typedef struct {
     ButtonMatrix_t button_matrix;
-//     LabelList_t labels;
+    //     LabelList_t labels;
     GraphicList_t graphics;
     uint16_t reserve_x;
     uint16_t reserve_y;
@@ -100,7 +100,7 @@ ButtonPanel* button_panel_alloc() {
             model->selected_item_x = 0;
             model->selected_item_y = 0;
             ButtonMatrix_init(model->button_matrix);
-//             LabelList_init(model->labels);
+            //             LabelList_init(model->labels);
             GraphicList_init(model->graphics);
             return true;
         });
@@ -123,7 +123,7 @@ void button_panel_reserve(ButtonPanel* button_panel, size_t reserve_x, size_t re
                 ButtonArray_reserve(*array, reserve_x);
                 // TODO: do we need to clear allocated memory of ptr-s to ButtonItem ??
             }
-//             LabelList_init(model->labels);
+            //             LabelList_init(model->labels);
             GraphicList_init(model->graphics);
             return true;
         });
@@ -136,7 +136,7 @@ void button_panel_free(ButtonPanel* button_panel) {
 
     with_view_model(
         button_panel->view, (ButtonPanelModel * model) {
-//             LabelList_clear(model->labels);
+            //             LabelList_clear(model->labels);
             GraphicList_clear(model->graphics);
             ButtonMatrix_clear(model->button_matrix);
             return true;
@@ -160,7 +160,7 @@ void button_panel_reset(ButtonPanel* button_panel) {
             }
             model->reserve_x = 0;
             model->reserve_y = 0;
-//             LabelList_reset(model->labels);
+            //             LabelList_reset(model->labels);
             GraphicList_reset(model->graphics);
             ButtonMatrix_reset(model->button_matrix);
             return true;
