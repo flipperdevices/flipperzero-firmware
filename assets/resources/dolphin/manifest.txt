@@ -8,6 +8,27 @@ Min level: 1
 Max level: 30
 Weight: 9
 
+Name: L1_NyanCat_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 6
+
+Name: L1_LaughingMan_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: Kuronons_L_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 3
+
 Name: Kuronons_BlackFlags_Angot_128x64
 Min butthurt: 0
 Max butthurt: 14
