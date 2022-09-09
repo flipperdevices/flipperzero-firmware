@@ -1,5 +1,5 @@
 V:0
-T:1662701130
+T:1662704619
 D:apps
 D:badusb
 D:dolphin
@@ -72,6 +72,7 @@ D:dolphin/L1_Leaving_sad_128x64
 D:dolphin/L1_Mad_fist_128x64
 D:dolphin/L1_Mew_128x64
 D:dolphin/L1_MjkDolphin_128x64
+D:dolphin/L1_P0liwhirl_128x51
 D:dolphin/L1_Read_books_128x64
 D:dolphin/L1_Recording_128x51
 D:dolphin/L1_Rickroll_128x64
@@ -89,7 +90,7 @@ D:dolphin/L2_Soldering_128x64
 D:dolphin/L3_Furippa3_128x64
 D:dolphin/L3_Hijack_radio_128x64
 D:dolphin/L3_Lab_research_128x54
-F:3d38ee1260f058502917013f45ca3492:5544:dolphin/manifest.txt
+F:14cde1f5714b6dfb4d9d94f56c26a45a:5641:dolphin/manifest.txt
 F:348b1f678d29c260eb057d4a1c2052f4:238:dolphin/name.txt
 F:f366a1cffefbbf4753bded24bddd4001:464:dolphin/Kuronons_BlackFlags_Angot_128x64/frame_0.bm
 F:c474bf74bfe3231bfa50579961fdf610:460:dolphin/Kuronons_BlackFlags_Angot_128x64/frame_1.bm
@@ -1395,6 +1396,19 @@ F:4a16d7b82105e131fc33625d3cefd754:189:dolphin/L1_MjkDolphin_128x64/frame_1.bm
 F:78a2e24897a135d28f1f145b8a9e834d:226:dolphin/L1_MjkDolphin_128x64/frame_2.bm
 F:1cfb613f71c7d495abe97a2e55271ec2:283:dolphin/L1_MjkDolphin_128x64/frame_3.bm
 F:b53218e7655d90c340ba527d3c4ff5f8:472:dolphin/L1_MjkDolphin_128x64/meta.txt
+F:414af2622d59ed0cda52d2391c97817d:770:dolphin/L1_P0liwhirl_128x51/frame_0.bm
+F:70206b1ca9da37dcc845d62048999607:754:dolphin/L1_P0liwhirl_128x51/frame_1.bm
+F:5a12cb96a30797e33136fdbced4046ce:741:dolphin/L1_P0liwhirl_128x51/frame_10.bm
+F:2a86d3e8b062e76a02eed85fc0b6405f:762:dolphin/L1_P0liwhirl_128x51/frame_11.bm
+F:acdc977709e8b4b1cd92f785a9092e62:744:dolphin/L1_P0liwhirl_128x51/frame_2.bm
+F:cb8a78dc24f2aeb225ffef55f8336b42:747:dolphin/L1_P0liwhirl_128x51/frame_3.bm
+F:bc090089cd15a43c8a87aa8a6e499786:728:dolphin/L1_P0liwhirl_128x51/frame_4.bm
+F:c6d20b81693e1de3d1cccef761bc233c:743:dolphin/L1_P0liwhirl_128x51/frame_5.bm
+F:14f86e020b65774153b202d62f16b54a:768:dolphin/L1_P0liwhirl_128x51/frame_6.bm
+F:5a12cb96a30797e33136fdbced4046ce:741:dolphin/L1_P0liwhirl_128x51/frame_7.bm
+F:2a86d3e8b062e76a02eed85fc0b6405f:762:dolphin/L1_P0liwhirl_128x51/frame_8.bm
+F:14f86e020b65774153b202d62f16b54a:768:dolphin/L1_P0liwhirl_128x51/frame_9.bm
+F:a7c2b3b420706712149cc2426c68df4f:219:dolphin/L1_P0liwhirl_128x51/meta.txt
 F:61565b7be9a69a60ce2dbae0273df347:653:dolphin/L1_Read_books_128x64/frame_0.bm
 F:cf5a2d423540e3af37e789d70c9c1fbf:653:dolphin/L1_Read_books_128x64/frame_1.bm
 F:c91935861979d024e6637b8810889878:650:dolphin/L1_Read_books_128x64/frame_2.bm
