@@ -23,7 +23,7 @@ const char* const time_format_text[TIME_FORMAT_COUNT] = {
     "24h",
 };
 
-const uint32_t time_format_value[TIME_FORMAT_COUNT] = {1, 2};
+const uint32_t time_format_value[TIME_FORMAT_COUNT] = {H12, H24};
 
 #define DATE_FORMAT_COUNT 2
 const char* const date_format_text[DATE_FORMAT_COUNT] = {
@@ -31,7 +31,7 @@ const char* const date_format_text[DATE_FORMAT_COUNT] = {
     "dd-mm", // RFC 5322
 };
 
-const ui date_format_value[DATE_FORMAT_COUNT] = {1, 2};
+const uint32_t date_format_value[DATE_FORMAT_COUNT] = {Iso, Rfc};
 
 
 static void clock_format_changed(VariableItem* item) {
@@ -62,14 +62,14 @@ static ClockAppSettings* alloc_settings() {
     item = variable_item_list_add(
         app->variable_item_list, "Clock format", TIME_FORMAT_COUNT, clock_format_changed, app);
     value_index = value_index_uint32(
-        app->clock_settings.time_format, time_format_value, TIME_FORMAT_COUNT);
+        (uint32_t) (app->clock_settings.time_format), time_format_value, TIME_FORMAT_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, time_format_text[value_index]);
 
     item = variable_item_list_add(
         app->variable_item_list, "Date format", DATE_FORMAT_COUNT, date_format_changed, app);
     value_index = value_index_uint32(
-        app->clock_settings.date_format, date_format_value, DATE_FORMAT_COUNT);
+        (uint32_t) (app->clock_settings.date_format), date_format_value, DATE_FORMAT_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, date_format_text[value_index]);
 

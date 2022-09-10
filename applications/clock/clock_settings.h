@@ -40,13 +40,13 @@ typedef enum {
 } TimeFormat;
 
 typedef enum {
-    Iso,
-    Rfc,
+    Iso, // ISO 8601: yyyy-mm-dd
+    Rfc, // RFC 5322: dd-mm-yyyy
 } DateFormat;
 
 typedef struct {
-    uint8_t TimeFormat;
-    uint8_t DateFormat;
+    TimeFormat time_format;
+    DateFormat date_format;
     uint8_t increment_precision;
     AlarmMode alarm_mode;
     uint8_t alarm_sound;
