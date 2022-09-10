@@ -11,6 +11,12 @@
 #define TAG "Clock"
 
 typedef enum {
+    Clock,
+    Timer,
+    Counter,
+} Functions;
+
+typedef enum {
     EventTypeTick,
     EventTypeKey,
 } EventType;
