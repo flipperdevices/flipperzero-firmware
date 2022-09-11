@@ -4,6 +4,7 @@
 #include <lib/toolbox/value_index.h>
 #include "clock_settings.h"
 
+#define TAG "Clock"
 
 typedef struct {
     ClockSettings clock_settings;
@@ -33,7 +34,6 @@ const char* const date_format_text[DATE_FORMAT_COUNT] = {
 
 const uint32_t date_format_value[DATE_FORMAT_COUNT] = {Iso, Rfc};
 
-
 static void clock_format_changed(VariableItem* item) {
     ClockAppSettings* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -50,8 +50,8 @@ static void date_format_changed(VariableItem* item) {
 
 static ClockAppSettings* alloc_settings() {
     ClockAppSettings* app = malloc(sizeof(ClockAppSettings));
+    LOAD_CLOCK_SETTINGS(&app->clock_settings);
     app->gui = furi_record_open(RECORD_GUI);
-
     app->variable_item_list = variable_item_list_alloc();
     View* view = variable_item_list_get_view(app->variable_item_list);
     view_set_previous_callback(view, clock_app_settings_exit);
@@ -62,14 +62,16 @@ static ClockAppSettings* alloc_settings() {
     item = variable_item_list_add(
         app->variable_item_list, "Clock format", TIME_FORMAT_COUNT, clock_format_changed, app);
     value_index = value_index_uint32(
-        (uint32_t) (app->clock_settings.time_format), time_format_value, TIME_FORMAT_COUNT);
+        (uint32_t)(app->clock_settings.time_format), time_format_value, TIME_FORMAT_COUNT);
+    FURI_LOG_T(TAG, "Clock format index: %u", value_index);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, time_format_text[value_index]);
 
     item = variable_item_list_add(
         app->variable_item_list, "Date format", DATE_FORMAT_COUNT, date_format_changed, app);
     value_index = value_index_uint32(
-        (uint32_t) (app->clock_settings.date_format), date_format_value, DATE_FORMAT_COUNT);
+        (uint32_t)(app->clock_settings.date_format), date_format_value, DATE_FORMAT_COUNT);
+    FURI_LOG_T(TAG, "Date format index: %u", value_index);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, date_format_text[value_index]);
 
@@ -87,15 +89,14 @@ static void free_settings(ClockAppSettings* app) {
     variable_item_list_free(app->variable_item_list);
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
+    SAVE_CLOCK_SETTINGS(&app->clock_settings);
     free(app);
 }
 
 extern int32_t clock_settings_app(void* p) {
     UNUSED(p);
     ClockAppSettings* app = alloc_settings();
-    LOAD_CLOCK_SETTINGS(&app->clock_settings);
     view_dispatcher_run(app->view_dispatcher);
-    SAVE_CLOCK_SETTINGS(&app->clock_settings);
     free_settings(app);
     return 0;
 }
