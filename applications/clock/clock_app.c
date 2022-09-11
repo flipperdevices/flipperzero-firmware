@@ -1,14 +1,17 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <gui/elements.h>
-
 #include <gui/gui.h>
+#include <gui/elements.h>
 #include <input/input.h>
 
+#include "clock_settings.h"
+
 #define TAG "Clock"
-#define CLOCK_DATE_FORMAT "%.4d-%.2d-%.2d"
+#define CLOCK_ISO_DATE_FORMAT "%.4d-%.2d-%.2d"
+#define CLOCK_RFC_DATE_FORMAT "%.2d-%.2d-%.4d"
 #define CLOCK_TIME_FORMAT "%.2d:%.2d:%.2d"
+#define MAX_LEN 20
 
 typedef enum {
     EventTypeTick,
@@ -22,6 +25,7 @@ typedef struct {
 
 typedef struct {
     FuriHalRtcDateTime datetime;
+    ClockSettings settings;
 } ClockState;
 
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -37,22 +41,45 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
 
     ClockState* state = (ClockState*)acquire_mutex((ValueMutex*)ctx, 25);
 
-    char strings[2][20];
 
-    snprintf(
+    char strings[2][MAX_LEN];
+
+    if (*(&state->settings.date_format) == Iso) {
+        snprintf(
         strings[0],
-        sizeof(strings[0]),
-        CLOCK_DATE_FORMAT,
+        MAX_LEN,
+        CLOCK_ISO_DATE_FORMAT,
         state->datetime.year,
         state->datetime.month,
         state->datetime.day);
-    snprintf(
+    } else {
+        snprintf(
+        strings[0],
+        MAX_LEN,
+        CLOCK_RFC_DATE_FORMAT,
+        state->datetime.day,
+        state->datetime.month,
+        state->datetime.year);
+    }
+
+
+    if (*(&state->settings.time_format) == H24) {
+        snprintf(
         strings[1],
-        sizeof(strings[1]),
+        MAX_LEN,
         CLOCK_TIME_FORMAT,
         state->datetime.hour,
         state->datetime.minute,
         state->datetime.second);
+    } else {
+        snprintf(
+        strings[1],
+        MAX_LEN,
+        CLOCK_TIME_FORMAT,
+        state->datetime.hour > 12 ? state->datetime.hour - 12 : state->datetime.hour,
+        state->datetime.minute,
+        state->datetime.second);
+    }
 
     release_mutex((ValueMutex*)ctx, state);
     canvas_set_font(canvas, FontBigNumbers);
@@ -62,6 +89,9 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
 }
 
 static void clock_state_init(ClockState* const state) {
+    LOAD_CLOCK_SETTINGS(&state->settings);
+    FURI_LOG_D(TAG, "Time format: %s", &state->settings.time_format == H12 ? "12h" : "24h");
+    FURI_LOG_D(TAG, "Date format: %s", &state->settings.date_format == Iso ? "ISO 8601" : "RFC 5322");
     furi_hal_rtc_get_datetime(&state->datetime);
 }
 
