@@ -29,19 +29,19 @@
         CLOCK_SETTINGS_VER)
 
 typedef enum {
-    SoundVibro,
-    VibroOnly,
-    Silent,
+    SoundVibro = 1,
+    VibroOnly = 2,
+    Silent = 3,
 } AlarmMode;
 
 typedef enum {
-    H12,
-    H24,
+    H12 = 1,
+    H24 = 2,
 } TimeFormat;
 
 typedef enum {
-    Iso, // ISO 8601: yyyy-mm-dd
-    Rfc, // RFC 5322: dd-mm-yyyy
+    Iso = 1, // ISO 8601: yyyy-mm-dd
+    Rfc = 2, // RFC 5322: dd-mm-yyyy
 } DateFormat;
 
 typedef struct {
