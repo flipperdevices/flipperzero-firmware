@@ -34,7 +34,7 @@ const char* const date_format_text[DATE_FORMAT_COUNT] = {
 
 const uint32_t date_format_value[DATE_FORMAT_COUNT] = {Iso, Rfc};
 
-static void clock_format_changed(VariableItem* item) {
+static void time_format_changed(VariableItem* item) {
     ClockAppSettings* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, time_format_text[index]);
@@ -60,10 +60,10 @@ static ClockAppSettings* alloc_settings() {
     uint8_t value_index;
 
     item = variable_item_list_add(
-        app->variable_item_list, "Clock format", TIME_FORMAT_COUNT, clock_format_changed, app);
+        app->variable_item_list, "Clock format", TIME_FORMAT_COUNT, time_format_changed, app);
     value_index = value_index_uint32(
         (uint32_t)(app->clock_settings.time_format), time_format_value, TIME_FORMAT_COUNT);
-    FURI_LOG_T(TAG, "Clock format index: %u", value_index);
+    FURI_LOG_T(TAG, "Time format index: %u", value_index);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, time_format_text[value_index]);
 
