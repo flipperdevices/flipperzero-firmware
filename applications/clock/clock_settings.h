@@ -29,8 +29,8 @@
         CLOCK_SETTINGS_VER)
 
 typedef enum {
-    SoundVibro = 1,
-    VibroOnly = 2,
+    Sound = 1,
+    Vibro = 2,
     Silent = 3,
 } AlarmMode;
 
