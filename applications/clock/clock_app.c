@@ -3,31 +3,8 @@
 
 #include <gui/gui.h>
 #include <gui/elements.h>
-#include <input/input.h>
 
-#include "clock_settings.h"
-
-#define TAG "Clock"
-#define CLOCK_ISO_DATE_FORMAT "%.4d-%.2d-%.2d"
-#define CLOCK_RFC_DATE_FORMAT "%.2d-%.2d-%.4d"
-#define CLOCK_TIME_FORMAT "%.2d:%.2d:%.2d"
-#define MAX_LEN 20
-
-typedef enum {
-    EventTypeTick,
-    EventTypeKey,
-} EventType;
-
-typedef struct {
-    EventType type;
-    InputEvent input;
-} PluginEvent;
-
-typedef struct {
-    ClockSettings settings;
-    FuriMutex* mutex;
-    FuriMessageQueue* event_queue;
-} ClockState;
+#include "clock_app.h"
 
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
@@ -47,45 +24,42 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         return;
     }
 
-    FuriHalRtcDateTime datetime;
-    furi_hal_rtc_get_datetime(&datetime);
-
     char strings[2][MAX_LEN];
 
-    if (*(&state->settings.date_format) == Iso) {
+    if(*(&state->settings.date_format) == Iso) {
         snprintf(
-        strings[0],
-        MAX_LEN,
-        CLOCK_ISO_DATE_FORMAT,
-        datetime.year,
-        datetime.month,
-        datetime.day);
+            strings[0],
+            MAX_LEN,
+            CLOCK_ISO_DATE_FORMAT,
+            state->datetime.year,
+            state->datetime.month,
+            state->datetime.day);
     } else {
         snprintf(
-        strings[0],
-        MAX_LEN,
-        CLOCK_RFC_DATE_FORMAT,
-        datetime.day,
-        datetime.month,
-        datetime.year);
+            strings[0],
+            MAX_LEN,
+            CLOCK_RFC_DATE_FORMAT,
+            state->datetime.day,
+            state->datetime.month,
+            state->datetime.year);
     }
 
-    if (*(&state->settings.time_format) == H24) {
+    if(*(&state->settings.time_format) == H24) {
         snprintf(
-        strings[1],
-        MAX_LEN,
-        CLOCK_TIME_FORMAT,
-        datetime.hour,
-        datetime.minute,
-        datetime.second);
+            strings[1],
+            MAX_LEN,
+            CLOCK_TIME_FORMAT,
+            state->datetime.hour,
+            state->datetime.minute,
+            state->datetime.second);
     } else {
         snprintf(
-        strings[1],
-        MAX_LEN,
-        CLOCK_TIME_FORMAT,
-        datetime.hour > 12 ? datetime.hour - 12 : datetime.hour,
-        datetime.minute,
-        datetime.second);
+            strings[1],
+            MAX_LEN,
+            CLOCK_TIME_FORMAT,
+            state->datetime.hour > 12 ? state->datetime.hour - 12 : state->datetime.hour,
+            state->datetime.minute,
+            state->datetime.second);
     }
 
     furi_mutex_release(state->mutex);
@@ -99,7 +73,9 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
 static void clock_state_init(ClockState* const state) {
     LOAD_CLOCK_SETTINGS(&state->settings);
     FURI_LOG_D(TAG, "Time format: %s", &state->settings.time_format == H12 ? "12h" : "24h");
-    FURI_LOG_D(TAG, "Date format: %s", &state->settings.date_format == Iso ? "ISO 8601" : "RFC 5322");
+    FURI_LOG_D(
+        TAG, "Date format: %s", &state->settings.date_format == Iso ? "ISO 8601" : "RFC 5322");
+    furi_hal_rtc_get_datetime(&state->datetime);
 }
 
 // Runs every 1000ms by default
@@ -114,14 +90,14 @@ static void clock_tick(void* ctx) {
 int32_t clock_app(void* p) {
     UNUSED(p);
     ClockState* plugin_state = malloc(sizeof(ClockState));
-    
+
     plugin_state->event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     if(plugin_state->event_queue == NULL) {
         FURI_LOG_E(TAG, "Cannot create event queue");
         free(plugin_state);
         return 255;
     }
-    
+
     plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(plugin_state->mutex == NULL) {
         FURI_LOG_E(TAG, "Cannot create mutex");
@@ -159,31 +135,29 @@ int32_t clock_app(void* p) {
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(plugin_state->event_queue, &event, 100);
 
-        if(event_status == FuriStatusOk) {
-            if(furi_mutex_acquire(plugin_state->mutex, FuriWaitForever) != FuriStatusOk) continue;
-            // press events
-            if(event.type == EventTypeKey) {
-                if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
-                    switch(event.input.key) {
-                    case InputKeyUp:
-                    case InputKeyDown:
-                    case InputKeyRight:
-                    case InputKeyLeft:
-                    case InputKeyOk:
-                        break;
-                    case InputKeyBack:
-                        // Exit the plugin
-                        processing = false;
-                        break;
-                    }
+        if(event_status != FuriStatusOk) continue;
+
+        if(furi_mutex_acquire(plugin_state->mutex, FuriWaitForever) != FuriStatusOk) continue;
+        // press events
+        if(event.type == EventTypeKey) {
+            if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
+                switch(event.input.key) {
+                case InputKeyUp:
+                case InputKeyDown:
+                case InputKeyRight:
+                case InputKeyLeft:
+                case InputKeyOk:
+                    break;
+                case InputKeyBack:
+                    // Exit the plugin
+                    processing = false;
+                    break;
                 }
-            } else if(event.type == EventTypeTick) {
-                //furi_hal_rtc_get_datetime(&plugin_state->datetime);
             }
-        } else {
-            // event timeout
-            FURI_LOG_D(TAG, "furi_message_queue: event timeout");
+        } else if(event.type == EventTypeTick) {
+            furi_hal_rtc_get_datetime(&plugin_state->datetime);
         }
+
         view_port_update(view_port);
         furi_mutex_release(plugin_state->mutex);
     }
