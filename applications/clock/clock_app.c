@@ -88,8 +88,8 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
 
 static void clock_state_init(ClockState* const state) {
     LOAD_CLOCK_SETTINGS(&state->settings);
-    FURI_LOG_D(TAG, "Time format: %s", state->settings.time_format == H12 ? "12h" : "24h");
-    FURI_LOG_D(
+    FURI_LOG_I(TAG, "Time format: %s", state->settings.time_format == H12 ? "12h" : "24h");
+    FURI_LOG_I(
         TAG, "Date format: %s", state->settings.date_format == Iso ? "ISO 8601" : "RFC 5322");
     furi_hal_rtc_get_datetime(&state->datetime);
 }
