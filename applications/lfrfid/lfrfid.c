@@ -225,14 +225,12 @@ bool lfrfid_save_key(LfRfid* app) {
 bool lfrfid_load_key_from_file_select(LfRfid* app) {
     furi_assert(app);
 
-    bool result = dialog_file_browser_show(
-        app->dialogs,
-        app->file_path,
-        app->file_path,
-        LFRFID_APP_EXTENSION,
-        true,
-        &I_125_10px,
-        true);
+    DialogsFileBrowserOptions browser_options;
+    dialog_file_browser_set_basic_options(&browser_options, LFRFID_APP_EXTENSION, &I_125_10px);
+
+    // Input events and views are managed by file_browser
+    bool result =
+        dialog_file_browser_show(app->dialogs, app->file_path, app->file_path, &browser_options);
 
     if(result) {
         result = lfrfid_load_key_data(app, app->file_path, true);
