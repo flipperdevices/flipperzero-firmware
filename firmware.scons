@@ -1,6 +1,6 @@
 Import("ENV", "fw_build_meta")
 
-import os
+import itertools
 
 from fbt.util import (
     should_gen_cdb_and_link_dir,
@@ -159,13 +159,20 @@ apps_c = fwenv.ApplicationsC(
     "applications/applications.c",
     [Value(fwenv["APPS"]), Value(fwenv["LOADER_AUTOSTART"])],
 )
+
 # Adding dependency on manifest files so apps.c is rebuilt when any manifest is changed
-fwenv.Depends(apps_c, fwenv.GlobRecursive("*.fam", "#/applications"))
+for app_dir in env["APPDIRS"].split(","):
+    app_dir_node = env.Dir("#").Dir(app_dir)
+    fwenv.Depends(apps_c, fwenv.GlobRecursive("*.fam", app_dir_node))
 
 sources = [apps_c]
 # Gather sources only from app folders in current configuration
-for app_folder in fwenv["APPBUILD"].get_builtin_app_folders():
-    sources += fwenv.GlobRecursive("*.c*", os.path.join("applications", app_folder))
+sources.extend(
+    itertools.chain.from_iterable(
+        fwenv.GlobRecursive(source_type, appdir.relpath)
+        for appdir, source_type in fwenv["APPBUILD"].get_builtin_app_folders()
+    )
+)
 
 
 fwenv.AppendUnique(

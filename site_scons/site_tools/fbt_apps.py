@@ -18,23 +18,25 @@ from fbt.appmanifest import (
 
 def LoadApplicationManifests(env):
     appmgr = env["APPMGR"] = AppManager()
-    for entry in env.Glob("#/applications/*", ondisk=True, source=True):
-        if isinstance(entry, SCons.Node.FS.Dir) and not str(entry).startswith("."):
-            try:
-                app_manifest_file_path = os.path.join(entry.abspath, "application.fam")
-                appmgr.load_manifest(app_manifest_file_path, entry.name)
-                env.Append(PY_LINT_SOURCES=[app_manifest_file_path])
-            except FlipperManifestException as e:
-                warn(WarningOnByDefault, str(e))
+    for app_dir in env["APPDIRS"].split(","):
+        app_dir_node = env.Dir("#").Dir(app_dir)
+
+        for entry in app_dir_node.glob("*", ondisk=True, source=True):
+            if isinstance(entry, SCons.Node.FS.Dir) and not str(entry).startswith("."):
+                try:
+                    app_manifest_file_path = os.path.join(
+                        entry.abspath, "application.fam"
+                    )
+                    appmgr.load_manifest(app_manifest_file_path, entry)
+                    env.Append(PY_LINT_SOURCES=[app_manifest_file_path])
+                except FlipperManifestException as e:
+                    warn(WarningOnByDefault, str(e))
 
 
 def PrepareApplicationsBuild(env):
     appbuild = env["APPBUILD"] = env["APPMGR"].filter_apps(env["APPS"])
     env.Append(
-        SDK_HEADERS=[
-            env.Dir("#applications/").File(header_path)
-            for header_path in appbuild.get_sdk_headers()
-        ]
+        SDK_HEADERS=appbuild.get_sdk_headers(),
     )
     env["APPBUILD_DUMP"] = env.Action(
         DumpApplicationConfig,

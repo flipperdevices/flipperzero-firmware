@@ -217,4 +217,10 @@ vars.Add(
     default="",
 )
 
+vars.Add(
+    "APPDIRS",
+    help="Directories to search for firmware components & external apps",
+    default="applications,applications_user",
+)
+
 Return("vars")

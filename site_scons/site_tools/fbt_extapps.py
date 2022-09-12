@@ -7,16 +7,23 @@ import os
 import pathlib
 from fbt.elfmanifest import assemble_manifest_data
 from fbt.sdk import SdkCache
+import itertools
 
 
 def BuildAppElf(env, app):
     work_dir = env.subst("$EXT_APPS_WORK_DIR")
 
     app_alias = f"{env['FIRMWARE_BUILD_CFG']}_{app.appid}"
-    app_original = os.path.join(work_dir, f"{app.appid}_d")
+    app_original_elf = os.path.join(work_dir, f"{app.appid}_d")
+    app_sources = list(
+        itertools.chain.from_iterable(
+            env.GlobRecursive(source_type, os.path.join(work_dir, app._appdir.relpath))
+            for source_type in app.sources
+        )
+    )
     app_elf_raw = env.Program(
-        app_original,
-        env.GlobRecursive("*.c*", os.path.join(work_dir, app._appdir)),
+        app_original_elf,
+        app_sources,
         APP_ENTRY=app.entry_point,
         LIBS=env["LIBS"] + app.fap_libs,
     )
@@ -100,9 +107,8 @@ def GetExtAppFromPath(env, app_dir):
 
 def generate(env, **kw):
     env.SetDefault(EXT_APPS_WORK_DIR=kw.get("EXT_APPS_WORK_DIR", ".extapps"))
-    env.VariantDir(
-        env.subst("$EXT_APPS_WORK_DIR"), env.Dir(".").srcnode(), duplicate=False
-    )
+    env.VariantDir(env.subst("$EXT_APPS_WORK_DIR"), env.Dir("#"), duplicate=False)
+    # print("set up app vdir to", env.subst("$EXT_APPS_WORK_DIR"))
     env.AddMethod(BuildAppElf)
     env.AddMethod(GetExtAppFromPath)
     env.Append(

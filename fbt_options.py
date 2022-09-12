@@ -91,3 +91,5 @@ FIRMWARE_APPS = {
 }
 
 FIRMWARE_APP_SET = "default"
+
+APPDIRS = "applications,applications_user"
