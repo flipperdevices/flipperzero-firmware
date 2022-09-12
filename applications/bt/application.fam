@@ -49,5 +49,5 @@ App(
         "gui",
     ],
     order=10,
-    fap_icon="../../assets/icons/Archive/unknown_10px.png",
+    fap_icon="bt_hid_app/bt_remote_10px.png",
 )
