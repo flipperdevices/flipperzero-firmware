@@ -11,8 +11,8 @@
 
 #include <dialogs/dialogs.h>
 #include <power/power_service/power.h>
-#include <applications/rpc/rpc.h>
-#include <applications/notification/notification.h>
+#include <rpc/rpc.h>
+#include <notification/notification.h>
 
 #include "../bt_settings.h"
 

@@ -7,9 +7,9 @@
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
+#include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <flipper_format/flipper_format.h>
-#include "../notification/notification.h"
 #include "views/receiver.h"
 
 #include <flipper_format/flipper_format_i.h>

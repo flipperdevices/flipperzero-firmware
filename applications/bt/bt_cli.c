@@ -1,6 +1,6 @@
 #include <furi.h>
 #include <furi_hal.h>
-#include <applications/cli/cli.h>
+#include <cli/cli.h>
 #include <lib/toolbox/args.h>
 
 #include <ble/ble.h>

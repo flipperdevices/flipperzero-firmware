@@ -1,6 +1,6 @@
 #include <furi.h>
 #include <furi_hal.h>
-#include <applications/storage/storage.h>
+#include <storage/storage.h>
 #include <lib/flipper_format/flipper_format.h>
 #include <lib/nfc/protocols/nfca.h>
 #include <lib/digital_signal/digital_signal.h>

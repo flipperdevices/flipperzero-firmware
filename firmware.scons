@@ -29,7 +29,7 @@ env = ENV.Clone(
     ],
     CPPPATH=[
         "#/furi",
-        "#/applications",
+        *(f"#/{app_dir}" for app_dir in ENV["APPDIRS"].split(",")),
         "#/firmware/targets/f${TARGET_HW}/ble_glue",
         "#/firmware/targets/f${TARGET_HW}/fatfs",
         "#/firmware/targets/f${TARGET_HW}/furi_hal",

@@ -1,6 +1,6 @@
 #include <furi.h>
 #include "validators.h"
-#include "applications/storage/storage.h"
+#include <storage/storage.h>
 
 struct ValidatorIsFile {
     char* app_path_folder;
