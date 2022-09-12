@@ -6,7 +6,6 @@ App(
     cdefines=["APP_SNAKE_GAME"],
     requires=["gui"],
     stack_size=1 * 1024,
-    icon="A_Plugins_14",
     order=30,
     fap_icon="../../assets/icons/Archive/unknown_10px.png",
 )
