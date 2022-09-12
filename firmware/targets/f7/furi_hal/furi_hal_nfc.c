@@ -642,6 +642,36 @@ uint16_t furi_hal_nfc_bitstream_to_data_and_parity(
     return curr_byte * 8;
 }
 
+bool furi_hal_nfc_tx(FuriHalNfcTxRxContext* tx_rx) {
+    st25r3916ClrRegisterBits(
+        ST25R3916_REG_TIMER_EMV_CONTROL, ST25R3916_REG_TIMER_EMV_CONTROL_mrt_step);
+    st25r3916WriteRegister(ST25R3916_REG_MASK_RX_TIMER, 0x02);
+    st25r3916ExecuteCommand(ST25R3916_CMD_CLEAR_FIFO);
+    uint32_t reg =
+        (ST25R3916_REG_ISO14443A_NFC_no_tx_par_off | ST25R3916_REG_ISO14443A_NFC_no_rx_par_off |
+         ST25R3916_REG_ISO14443A_NFC_nfc_f0_off);
+    st25r3916ChangeRegisterBits(
+        ST25R3916_REG_ISO14443A_NFC,
+        (ST25R3916_REG_ISO14443A_NFC_no_tx_par | ST25R3916_REG_ISO14443A_NFC_no_rx_par |
+         ST25R3916_REG_ISO14443A_NFC_nfc_f0),
+        reg);
+
+    /* Set the number of full bytes and bits to be transmitted */
+    st25r3916SetNumTxBits(tx_rx->tx_bits);
+    uint16_t tx_bytes = (tx_rx->tx_bits + 7) / 8;
+
+    /* Load FIFO with total length or FIFO's maximum */
+    st25r3916WriteFifo(tx_rx->tx_data, tx_bytes);
+
+    // Check field presence
+    if(!rfalIsExtFieldOn()) return false;
+
+    st25r3916ExecuteCommand(ST25R3916_CMD_TRANSMIT_WITHOUT_CRC);
+
+    return furi_hal_nfc_listen_rx(tx_rx, 200);
+
+}
+
 bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
     furi_assert(tx_rx);
 
@@ -654,6 +684,8 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
 
     if(tx_rx->tx_rx_type == FuriHalNfcTxRxTransparent) {
         return furi_hal_nfc_transparent_tx_rx(tx_rx, timeout_ms);
+    } else if(tx_rx->tx_rx_type == FuriHalNfcTxRxTypeFifoNoCrc) {
+        return furi_hal_nfc_tx(tx_rx);
     }
 
     // Prepare data for FIFO if necessary

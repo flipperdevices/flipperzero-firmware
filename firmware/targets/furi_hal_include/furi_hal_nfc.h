@@ -46,6 +46,7 @@ typedef enum {
     FuriHalNfcTxRxTypeRaw,
     FuriHalNfcTxRxTypeRxRaw,
     FuriHalNfcTxRxTransparent,
+    FuriHalNfcTxRxTypeFifoNoCrc,
 } FuriHalNfcTxRxType;
 
 typedef bool (*FuriHalNfcEmulateCallback)(

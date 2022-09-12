@@ -808,12 +808,8 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             if(!is_encrypted) {
                 crypto1_word(&emulator->crypto, emulator->cuid ^ nonce, 0);
                 memcpy(tx_rx->tx_data, nt, sizeof(nt));
-                tx_rx->tx_parity[0] = 0;
-                for(size_t i = 0; i < sizeof(nt); i++) {
-                    tx_rx->tx_parity[0] |= nfc_util_odd_parity8(nt[i]) << (7 - i);
-                }
                 tx_rx->tx_bits = sizeof(nt) * 8;
-                tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
+                tx_rx->tx_rx_type = FuriHalNfcTxRxTypeFifoNoCrc;
             } else {
                 crypto1_encrypt(
                     &emulator->crypto,
@@ -832,7 +828,13 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             }
 
             if(tx_rx->rx_bits != 64) {
-                FURI_LOG_W(TAG, "Incorrect nr + ar");
+                // FURI_LOG_W(TAG, "Incorrect nr + ar");
+                // FURI_LOG_I(TAG, "rx %d bits");
+                // for(int i = 0; i < (tx_rx->rx_bits + 7) / 8; i++) {
+                //     printf("%02X ", tx_rx->rx_data[i]);
+                // }
+                // printf("\r\n");
+                furi_hal_nfc_listen_sleep();
                 command_processed = true;
                 break;
             }
