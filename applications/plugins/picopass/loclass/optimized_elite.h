@@ -32,33 +32,27 @@
 // Flavio D. Garcia, Gerhard de Koning Gans, Roel Verdult and
 // Milosch Meriac in the paper "Dismantling IClass".
 //-----------------------------------------------------------------------------
-#ifndef CIPHERUTILS_H
-#define CIPHERUTILS_H
+#ifndef ELITE_CRACK_H
+#define ELITE_CRACK_H
+
 #include <stdint.h>
-#include <stdbool.h>
 #include <stdlib.h>
 
-typedef struct {
-    uint8_t *buffer;
-    uint8_t numbits;
-    uint8_t position;
-} LoclassBitstreamIn_t;
+void loclass_permutekey(const uint8_t key[8], uint8_t dest[8]);
+/**
+ * Permutes  a key from iclass specific format to NIST format
+ * @brief loclass_permutekey_rev
+ * @param key
+ * @param dest
+ */
+void loclass_permutekey_rev(const uint8_t key[8], uint8_t dest[8]);
+/**
+ * Hash1 takes CSN as input, and determines what bytes in the keytable will be used
+ * when constructing the K_sel.
+ * @param csn the CSN used
+ * @param k output
+ */
+void loclass_hash1(const uint8_t* csn, uint8_t* k);
+void loclass_hash2(uint8_t* key64, uint8_t* outp_keytable);
 
-typedef struct {
-    uint8_t *buffer;
-    uint8_t numbits;
-    uint8_t position;
-} LoclassBitstreamOut_t;
-
-bool loclass_headBit(LoclassBitstreamIn_t *stream);
-bool loclass_tailBit(LoclassBitstreamIn_t *stream);
-void loclass_pushBit(LoclassBitstreamOut_t *stream, bool bit);
-int loclass_bitsLeft(LoclassBitstreamIn_t *stream);
-
-void loclass_push6bits(LoclassBitstreamOut_t *stream, uint8_t bits);
-void loclass_x_num_to_bytes(uint64_t n, size_t len, uint8_t *dest);
-uint64_t loclass_x_bytes_to_num(uint8_t *src, size_t len);
-uint8_t loclass_reversebytes(uint8_t b);
-void loclass_reverse_arraybytes(uint8_t *arr, size_t len);
-void loclass_reverse_arraycopy(uint8_t *arr, uint8_t *dest, size_t len);
-#endif // CIPHERUTILS_H
+#endif

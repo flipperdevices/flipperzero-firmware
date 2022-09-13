@@ -4,7 +4,7 @@
 #include "picopass_worker.h"
 #include "picopass_device.h"
 
-#include <rfal_picopass.h>
+#include "rfal_picopass.h"
 
 #include <furi.h>
 #include <gui/gui.h>

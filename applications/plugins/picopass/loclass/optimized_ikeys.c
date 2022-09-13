@@ -61,13 +61,10 @@ From "Dismantling iclass":
 #include <mbedtls/des.h>
 #include "optimized_cipherutils.h"
 
-static const uint8_t loclass_pi[35] = {
-    0x0F, 0x17, 0x1B, 0x1D, 0x1E, 0x27, 0x2B, 0x2D,
-    0x2E, 0x33, 0x35, 0x39, 0x36, 0x3A, 0x3C, 0x47,
-    0x4B, 0x4D, 0x4E, 0x53, 0x55, 0x56, 0x59, 0x5A,
-    0x5C, 0x63, 0x65, 0x66, 0x69, 0x6A, 0x6C, 0x71,
-    0x72, 0x74, 0x78
-};
+static const uint8_t loclass_pi[35] = {0x0F, 0x17, 0x1B, 0x1D, 0x1E, 0x27, 0x2B, 0x2D, 0x2E,
+                                       0x33, 0x35, 0x39, 0x36, 0x3A, 0x3C, 0x47, 0x4B, 0x4D,
+                                       0x4E, 0x53, 0x55, 0x56, 0x59, 0x5A, 0x5C, 0x63, 0x65,
+                                       0x66, 0x69, 0x6A, 0x6C, 0x71, 0x72, 0x74, 0x78};
 
 /**
  * @brief The key diversification algorithm uses 6-bit bytes.
@@ -90,7 +87,7 @@ static uint8_t loclass_getSixBitByte(uint64_t c, int n) {
  * @param z the value to place there
  * @param n bitnumber.
  */
-static void loclass_pushbackSixBitByte(uint64_t *c, uint8_t z, int n) {
+static void loclass_pushbackSixBitByte(uint64_t* c, uint8_t z, int n) {
     //0x XXXX YYYY ZZZZ ZZZZ ZZZZ
     //             ^z0         ^z7
     //z0:  1111 1100 0000 0000
@@ -106,7 +103,6 @@ static void loclass_pushbackSixBitByte(uint64_t *c, uint8_t z, int n) {
     eraser = ~eraser;
     (*c) &= eraser;
     (*c) |= masked;
-
 }
 /**
  * @brief Swaps the z-values.
@@ -133,21 +129,21 @@ static uint64_t loclass_swapZvalues(uint64_t c) {
 * @return 4 six-bit bytes chunked into a uint64_t,as 00..00a0a1a2a3
 */
 static uint64_t loclass_ck(int i, int j, uint64_t z) {
-    if (i == 1 && j == -1) {
+    if(i == 1 && j == -1) {
         // loclass_ck(1, −1, z [0] . . . z [3] ) = z [0] . . . z [3]
         return z;
-    } else if (j == -1) {
+    } else if(j == -1) {
         // loclass_ck(i, −1, z [0] . . . z [3] ) = loclass_ck(i − 1, i − 2, z [0] . . . z [3] )
         return loclass_ck(i - 1, i - 2, z);
     }
 
-    if (loclass_getSixBitByte(z, i) == loclass_getSixBitByte(z, j)) {
+    if(loclass_getSixBitByte(z, i) == loclass_getSixBitByte(z, j)) {
         //loclass_ck(i, j − 1, z [0] . . . z [i] ← j . . . z [3] )
         uint64_t newz = 0;
         int c;
-        for (c = 0; c < 4; c++) {
+        for(c = 0; c < 4; c++) {
             uint8_t val = loclass_getSixBitByte(z, c);
-            if (c == i)
+            if(c == i)
                 loclass_pushbackSixBitByte(&newz, j, c);
             else
                 loclass_pushbackSixBitByte(&newz, val, c);
@@ -191,12 +187,16 @@ static uint64_t loclass_check(uint64_t z) {
     return ck1 | ck2 >> 24;
 }
 
-static void loclass_permute(LoclassBitstreamIn_t *p_in, uint64_t z, int l, int r, LoclassBitstreamOut_t *out) {
-    if (loclass_bitsLeft(p_in) == 0)
-        return;
+static void loclass_permute(
+    LoclassBitstreamIn_t* p_in,
+    uint64_t z,
+    int l,
+    int r,
+    LoclassBitstreamOut_t* out) {
+    if(loclass_bitsLeft(p_in) == 0) return;
 
     bool pn = loclass_tailBit(p_in);
-    if (pn) { // pn = 1
+    if(pn) { // pn = 1
         uint8_t zl = loclass_getSixBitByte(z, l);
 
         loclass_push6bits(out, zl + 1);
@@ -231,7 +231,7 @@ void loclass_hash0(uint64_t c, uint8_t k[8]) {
     uint8_t y = (c & 0x00FF000000000000) >> 48;
     uint64_t zP = 0;
 
-    for (int n = 0;  n < 4 ; n++) {
+    for(int n = 0; n < 4; n++) {
         uint8_t zn = loclass_getSixBitByte(c, n);
         uint8_t zn4 = loclass_getSixBitByte(c, n + 4);
         uint8_t _zn = (zn % (63 - n)) + n;
@@ -243,10 +243,10 @@ void loclass_hash0(uint64_t c, uint8_t k[8]) {
     uint64_t zCaret = loclass_check(zP);
     uint8_t p = loclass_pi[x % 35];
 
-    if (x & 1) //Check if x7 is 1
+    if(x & 1) //Check if x7 is 1
         p = ~p;
 
-    LoclassBitstreamIn_t p_in = { &p, 8, 0 };
+    LoclassBitstreamIn_t p_in = {&p, 8, 0};
     uint8_t outbuffer[] = {0, 0, 0, 0, 0, 0, 0, 0};
     LoclassBitstreamOut_t out = {outbuffer, 0, 0};
     loclass_permute(&p_in, zCaret, 0, 4, &out); //returns 48 bits? or 6 8-bytes
@@ -259,7 +259,7 @@ void loclass_hash0(uint64_t c, uint8_t k[8]) {
 
     zTilde >>= 16;
 
-    for (int i = 0; i < 8; i++) {
+    for(int i = 0; i < 8; i++) {
         // the key on index i is first a bit from y
         // then six bits from z,
         // then a bit from p
@@ -270,7 +270,7 @@ void loclass_hash0(uint64_t c, uint8_t k[8]) {
         //k[i] |= (y  << i) & 0x80 ;
 
         // First, place y(7-i) leftmost in k
-        k[i] |= (y  << (7 - i)) & 0x80 ;
+        k[i] |= (y << (7 - i)) & 0x80;
 
         uint8_t zTilde_i = loclass_getSixBitByte(zTilde, i);
         // zTildeI is now on the form 00XXXXXX
@@ -285,7 +285,7 @@ void loclass_hash0(uint64_t c, uint8_t k[8]) {
         //Shift bit i into rightmost location (mask only after complement)
         uint8_t p_i = p >> i & 0x1;
 
-        if (k[i]) { // yi = 1
+        if(k[i]) { // yi = 1
             k[i] |= ~zTilde_i & 0x7E;
             k[i] |= p_i & 1;
             k[i] += 1;
@@ -302,7 +302,7 @@ void loclass_hash0(uint64_t c, uint8_t k[8]) {
  * @param key
  * @param div_key
  */
-void loclass_diversifyKey(uint8_t *csn, const uint8_t *key, uint8_t *div_key) {
+void loclass_diversifyKey(uint8_t* csn, const uint8_t* key, uint8_t* div_key) {
     mbedtls_des_context loclass_ctx_enc;
 
     // Prepare the DES key
@@ -318,4 +318,3 @@ void loclass_diversifyKey(uint8_t *csn, const uint8_t *key, uint8_t *div_key) {
 
     loclass_hash0(c_csn, div_key);
 }
-

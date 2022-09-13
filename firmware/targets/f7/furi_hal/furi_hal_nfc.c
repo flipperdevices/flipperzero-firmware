@@ -738,3 +738,46 @@ void furi_hal_nfc_sleep() {
     rfalNfcDeactivate(false);
     rfalLowPowerModeStart();
 }
+
+FuriHalNfcReturn furi_hal_nfc_ll_set_mode(FuriHalNfcMode mode, FuriHalNfcBitrate txBR, FuriHalNfcBitrate rxBR) {
+    return rfalSetMode((rfalMode)mode, (rfalBitRate)txBR, (rfalBitRate)rxBR);
+}
+
+void furi_hal_nfc_ll_set_error_handling(FuriHalNfcErrorHandling eHandling) {
+    rfalSetErrorHandling((rfalEHandling)eHandling);
+}
+
+void furi_hal_nfc_ll_set_guard_time(uint32_t cycles) {
+    rfalSetGT(cycles);
+}
+
+void furi_hal_nfc_ll_set_fdt_listen(uint32_t cycles) {
+    rfalSetFDTListen(cycles);
+}
+
+void furi_hal_nfc_ll_set_fdt_poll(uint32_t FDTPoll) {
+    rfalSetFDTPoll(FDTPoll);
+}
+
+void furi_hal_nfc_ll_txrx_on() {
+    st25r3916TxRxOn();
+}
+
+void furi_hal_nfc_ll_txrx_off() {
+    st25r3916TxRxOff();
+}
+
+FuriHalNfcReturn furi_hal_nfc_ll_txrx(
+    uint8_t* txBuf,
+    uint16_t txBufLen,
+    uint8_t* rxBuf,
+    uint16_t rxBufLen,
+    uint16_t* actLen,
+    uint32_t flags,
+    uint32_t fwt) {
+    return rfalTransceiveBlockingTxRx(txBuf, txBufLen, rxBuf, rxBufLen, actLen, flags, fwt);
+}
+
+void furi_hal_nfc_ll_poll() {
+    rfalWorker();
+}

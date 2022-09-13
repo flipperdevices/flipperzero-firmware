@@ -4,12 +4,11 @@
 #include <stdbool.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
-
-#include <rfal_picopass.h>
-
 #include <mbedtls/des.h>
-#include <loclass/optimized_ikeys.h>
-#include <loclass/optimized_cipher.h>
+
+#include "rfal_picopass.h"
+#include "loclass/optimized_ikeys.h"
+#include "loclass/optimized_cipher.h"
 
 #define PICOPASS_DEV_NAME_MAX_LEN 22
 #define PICOPASS_READER_DATA_MAX_SIZE 64

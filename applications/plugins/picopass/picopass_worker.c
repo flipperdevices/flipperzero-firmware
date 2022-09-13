@@ -6,14 +6,14 @@ const uint8_t picopass_iclass_key[] = {0xaf, 0xa7, 0x85, 0xa7, 0xda, 0xb3, 0x33,
 const uint8_t picopass_factory_key[] = {0x76, 0x65, 0x54, 0x43, 0x32, 0x21, 0x10, 0x00};
 
 static void picopass_worker_enable_field() {
-    st25r3916TxRxOn();
-    rfalLowPowerModeStop();
-    rfalWorker();
+    furi_hal_nfc_ll_txrx_on();
+    furi_hal_nfc_exit_sleep();
+    furi_hal_nfc_ll_poll();
 }
 
 static ReturnCode picopass_worker_disable_field(ReturnCode rc) {
-    st25r3916TxRxOff();
-    rfalLowPowerModeStart();
+    furi_hal_nfc_ll_txrx_off();
+    furi_hal_nfc_start_sleep();
     return rc;
 }
 

@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,15.0,,
+Version,+,15.7,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1066,8 +1066,17 @@ Function,+,furi_hal_nfc_listen,_Bool,"uint8_t*, uint8_t, uint8_t*, uint8_t, _Boo
 Function,+,furi_hal_nfc_listen_rx,_Bool,"FuriHalNfcTxRxContext*, uint32_t"
 Function,+,furi_hal_nfc_listen_sleep,void,
 Function,+,furi_hal_nfc_listen_start,void,FuriHalNfcDevData*
+Function,+,furi_hal_nfc_ll_poll,void,
+Function,+,furi_hal_nfc_ll_set_error_handling,void,FuriHalNfcErrorHandling
+Function,+,furi_hal_nfc_ll_set_fdt_listen,void,uint32_t
+Function,+,furi_hal_nfc_ll_set_fdt_poll,void,uint32_t
+Function,+,furi_hal_nfc_ll_set_guard_time,void,uint32_t
+Function,+,furi_hal_nfc_ll_set_mode,FuriHalNfcReturn,"FuriHalNfcMode, FuriHalNfcBitrate, FuriHalNfcBitrate"
+Function,+,furi_hal_nfc_ll_txrx,FuriHalNfcReturn,"uint8_t*, uint16_t, uint8_t*, uint16_t, uint16_t*, uint32_t, uint32_t"
+Function,+,furi_hal_nfc_ll_txrx_off,void,
+Function,+,furi_hal_nfc_ll_txrx_on,void,
 Function,+,furi_hal_nfc_sleep,void,
-Function,-,furi_hal_nfc_start_sleep,void,
+Function,+,furi_hal_nfc_start_sleep,void,
 Function,+,furi_hal_nfc_stop,void,
 Function,+,furi_hal_nfc_stop_cmd,void,
 Function,+,furi_hal_nfc_tx_rx,_Bool,"FuriHalNfcTxRxContext*, uint16_t"

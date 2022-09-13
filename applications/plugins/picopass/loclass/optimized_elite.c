@@ -62,7 +62,7 @@
  */
 void loclass_permutekey(const uint8_t key[8], uint8_t dest[8]) {
     int i;
-    for (i = 0 ; i < 8 ; i++) {
+    for(i = 0; i < 8; i++) {
         dest[i] = (((key[7] & (0x80 >> i)) >> (7 - i)) << 7) |
                   (((key[6] & (0x80 >> i)) >> (7 - i)) << 6) |
                   (((key[5] & (0x80 >> i)) >> (7 - i)) << 5) |
@@ -81,7 +81,7 @@ void loclass_permutekey(const uint8_t key[8], uint8_t dest[8]) {
  */
 void loclass_permutekey_rev(const uint8_t key[8], uint8_t dest[8]) {
     int i;
-    for (i = 0 ; i < 8 ; i++) {
+    for(i = 0; i < 8; i++) {
         dest[7 - i] = (((key[0] & (0x80 >> i)) >> (7 - i)) << 7) |
                       (((key[1] & (0x80 >> i)) >> (7 - i)) << 6) |
                       (((key[2] & (0x80 >> i)) >> (7 - i)) << 5) |
@@ -153,12 +153,11 @@ Definition 14. Define the rotate key function loclass_rk : (F 82 ) 8 × N → (F
 loclass_rk(x [0] . . . x [7] , 0) = x [0] . . . x [7]
 loclass_rk(x [0] . . . x [7] , n + 1) = loclass_rk(loclass_rl(x [0] ) . . . loclass_rl(x [7] ), n)
 **/
-static void loclass_rk(uint8_t *key, uint8_t n, uint8_t *outp_key) {
+static void loclass_rk(uint8_t* key, uint8_t n, uint8_t* outp_key) {
     memcpy(outp_key, key, 8);
     uint8_t j;
-    while (n-- > 0) {
-        for (j = 0; j < 8 ; j++)
-            outp_key[j] = loclass_rl(outp_key[j]);
+    while(n-- > 0) {
+        for(j = 0; j < 8; j++) outp_key[j] = loclass_rl(outp_key[j]);
     }
     return;
 }
@@ -166,14 +165,14 @@ static void loclass_rk(uint8_t *key, uint8_t n, uint8_t *outp_key) {
 static mbedtls_des_context loclass_ctx_enc;
 static mbedtls_des_context loclass_ctx_dec;
 
-static void loclass_desdecrypt_iclass(uint8_t *iclass_key, uint8_t *input, uint8_t *output) {
+static void loclass_desdecrypt_iclass(uint8_t* iclass_key, uint8_t* input, uint8_t* output) {
     uint8_t key_std_format[8] = {0};
     loclass_permutekey_rev(iclass_key, key_std_format);
     mbedtls_des_setkey_dec(&loclass_ctx_dec, key_std_format);
     mbedtls_des_crypt_ecb(&loclass_ctx_dec, input, output);
 }
 
-static void loclass_desencrypt_iclass(uint8_t *iclass_key, uint8_t *input, uint8_t *output) {
+static void loclass_desencrypt_iclass(uint8_t* iclass_key, uint8_t* input, uint8_t* output) {
     uint8_t key_std_format[8] = {0};
     loclass_permutekey_rev(iclass_key, key_std_format);
     mbedtls_des_setkey_enc(&loclass_ctx_enc, key_std_format);
@@ -186,7 +185,7 @@ static void loclass_desencrypt_iclass(uint8_t *iclass_key, uint8_t *input, uint8
  * @param loclass_hash1 loclass_hash1
  * @param key_sel output key_sel=h[loclass_hash1[i]]
  */
-void hash2(uint8_t *key64, uint8_t *outp_keytable) {
+void hash2(uint8_t* key64, uint8_t* outp_keytable) {
     /**
      *Expected:
      * High Security Key Table
@@ -207,8 +206,7 @@ void hash2(uint8_t *key64, uint8_t *outp_keytable) {
 
     //calculate complement of key
     int i;
-    for (i = 0; i < 8; i++)
-        key64_negated[i] = ~key64[i];
+    for(i = 0; i < 8; i++) key64_negated[i] = ~key64[i];
 
     // Once again, key is on iclass-format
     loclass_desencrypt_iclass(key64, key64_negated, z[0]);
@@ -219,14 +217,14 @@ void hash2(uint8_t *key64, uint8_t *outp_keytable) {
     // Once again, key is on iclass-format
     loclass_desdecrypt_iclass(z[0], key64_negated, y[0]);
 
-    for (i = 1; i < 8; i++) {
+    for(i = 1; i < 8; i++) {
         loclass_rk(key64, i, temp_output);
         loclass_desdecrypt_iclass(temp_output, z[i - 1], z[i]);
         loclass_desencrypt_iclass(temp_output, y[i - 1], y[i]);
     }
 
-    if (outp_keytable != NULL) {
-        for (i = 0 ; i < 8 ; i++) {
+    if(outp_keytable != NULL) {
+        for(i = 0; i < 8; i++) {
             memcpy(outp_keytable + i * 16, y[i], 8);
             memcpy(outp_keytable + 8 + i * 16, z[i], 8);
         }

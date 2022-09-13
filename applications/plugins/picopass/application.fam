@@ -12,7 +12,6 @@ App(
     order=30,
     fap_icon="../../../assets/icons/Archive/125_10px.png",
     fap_libs=[
-        "loclass",
         "mbedtls",
     ],
 )

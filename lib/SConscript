@@ -84,7 +84,6 @@ libs = env.BuildModules(
         "nfc",
         "appframe",
         "misc",
-        "loclass",
         "lfrfid",
         "flipper_application",
     ],
