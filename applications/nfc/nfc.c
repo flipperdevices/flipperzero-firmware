@@ -223,7 +223,7 @@ void nfc_show_loading_popup(void* context, bool show) {
     }
 }
 
-int32_t nfc_app(void* p) {
+static bool nfc_is_hal_ready() {
     if(!furi_hal_nfc_is_init()) {
         // No connection to the chip, show an error screen
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
@@ -236,8 +236,16 @@ int32_t nfc_app(void* p) {
             AlignLeft,
             AlignTop);
         dialog_message_show(dialogs, message);
-        return 0;
+        dialog_message_free(message);
+        furi_record_close(RECORD_DIALOGS);
+        return false;
+    } else {
+        return true;
     }
+}
+
+int32_t nfc_app(void* p) {
+    if(!nfc_is_hal_ready()) return 0;
 
     Nfc* nfc = nfc_alloc();
     char* args = p;
