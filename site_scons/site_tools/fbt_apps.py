@@ -18,7 +18,7 @@ from fbt.appmanifest import (
 
 def LoadApplicationManifests(env):
     appmgr = env["APPMGR"] = AppManager()
-    for app_dir in env["APPDIRS"].split(","):
+    for app_dir, _ in env["APPDIRS"]:
         app_dir_node = env.Dir("#").Dir(app_dir)
 
         for entry in app_dir_node.glob("*", ondisk=True, source=True):

@@ -11,8 +11,6 @@ appenv.Replace(
 
 appenv.AppendUnique(
     CCFLAGS=[
-        # "-Os",
-        # "-Og",
         "-ggdb3",
         "-mword-relocations",
         "-mlong-calls",
@@ -29,14 +27,18 @@ appenv.AppendUnique(
         "-nostdlib",
         "-Wl,--gc-sections",
         "-Wl,--no-export-dynamic",
-        "-fvisibility=hidden",
+        # "-fvisibility=hidden",
         "-Wl,-e${APP_ENTRY}",
         "-Xlinker",
         "-Map=${TARGET}.map",
+        "-specs=nano.specs",
+        "-specs=nosys.specs",
     ],
     LIBS=[
         "m",
         "gcc",
+        "stdc++",
+        "supc++",
     ],
 )
 
@@ -58,7 +60,7 @@ def build_app_as_external(env, appdef):
 for apptype in (
     FlipperAppType.PLUGIN,
     FlipperAppType.EXTERNAL,
-    # FlipperAppType.DEBUG,
+    FlipperAppType.DEBUG,
 ):
     for app in appenv["APPBUILD"].get_apps_of_type(apptype, True):
         build_app_as_external(appenv, app)
