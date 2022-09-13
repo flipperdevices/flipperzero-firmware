@@ -33,8 +33,6 @@
 #include <nfc/scenes/nfc_scene.h>
 #include <nfc/helpers/nfc_custom_event.h>
 
-#include <dialogs/dialogs.h>
-
 #include "rpc/rpc_app.h"
 
 #define NFC_TEXT_STORE_SIZE 128
