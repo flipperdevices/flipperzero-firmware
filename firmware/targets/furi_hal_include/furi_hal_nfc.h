@@ -108,12 +108,6 @@ void furi_hal_nfc_init();
  */
 bool furi_hal_nfc_is_busy();
 
-/** Check if nfc is initialized
- *
- * @return     true if initialized
- */
- bool furi_hal_nfc_is_init();
-
 /** NFC field on
  */
 void furi_hal_nfc_field_on();

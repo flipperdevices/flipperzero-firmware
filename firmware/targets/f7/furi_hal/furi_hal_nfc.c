@@ -39,10 +39,6 @@ bool furi_hal_nfc_is_busy() {
     return rfalNfcGetState() != RFAL_NFC_STATE_IDLE;
 }
 
-bool furi_hal_nfc_is_init() {
-    return rfalNfcGetState() != RFAL_NFC_STATE_NOTINIT;
-}
-
 void furi_hal_nfc_field_on() {
     furi_hal_nfc_exit_sleep();
     st25r3916TxRxOn();
