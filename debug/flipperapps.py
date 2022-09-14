@@ -26,9 +26,7 @@ class AppState:
         if self.other_sections is None:
             self.other_sections = {}
 
-    def get_original_elf_path(
-        self, elf_path="build/latest/applications/.extapps"
-    ) -> str:
+    def get_original_elf_path(self, elf_path="build/latest/.extapps") -> str:
         return (
             posixpath.join(elf_path, self.debug_link_elf)
             if elf_path
