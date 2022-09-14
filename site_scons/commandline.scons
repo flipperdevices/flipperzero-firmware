@@ -68,6 +68,11 @@ vars.AddVariables(
             "7",
         ],
     ),
+    BoolVariable(
+        "DEBUG_TOOLS",
+        help="Enable debug tools to be built",
+        default=False,
+    ),
 )
 
 vars.Add(
