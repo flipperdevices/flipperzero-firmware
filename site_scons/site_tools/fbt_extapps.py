@@ -102,13 +102,13 @@ def GetExtAppFromPath(env, app_dir):
     if not app_elf:
         raise Exception(f"No external app found for {app.appid}")
 
-    return app_elf[0]
+    return (app, app_elf[0])
 
 
 def generate(env, **kw):
     env.SetDefault(EXT_APPS_WORK_DIR=kw.get("EXT_APPS_WORK_DIR", ".extapps"))
     env.VariantDir(env.subst("$EXT_APPS_WORK_DIR"), env.Dir("#"), duplicate=False)
-    # print("set up app vdir to", env.subst("$EXT_APPS_WORK_DIR"))
+
     env.AddMethod(BuildAppElf)
     env.AddMethod(GetExtAppFromPath)
     env.Append(

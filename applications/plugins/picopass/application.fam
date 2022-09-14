@@ -13,4 +13,5 @@ App(
     fap_libs=[
         "mbedtls",
     ],
+    fap_category="Tools",
 )

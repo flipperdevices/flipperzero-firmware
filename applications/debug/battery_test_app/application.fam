@@ -10,4 +10,5 @@ App(
     ],
     stack_size=1 * 1024,
     order=130,
+    fap_category="Debug",
 )

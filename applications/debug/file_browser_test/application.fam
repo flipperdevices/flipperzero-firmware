@@ -7,4 +7,5 @@ App(
     requires=["gui"],
     stack_size=2 * 1024,
     order=150,
+    fap_category="Debug",
 )

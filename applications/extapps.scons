@@ -49,6 +49,7 @@ extapps = appenv["_extapps"] = {
     "compact": {},
     "debug": {},
     "validators": {},
+    "dist": {},
 }
 
 
@@ -57,6 +58,7 @@ def build_app_as_external(env, appdef):
     extapps["compact"][appdef.appid] = compact_elf
     extapps["debug"][appdef.appid] = debug_elf
     extapps["validators"][appdef.appid] = validator
+    extapps["dist"][appdef.appid] = (appdef.fap_category, compact_elf)
 
 
 for apptype in (
@@ -79,10 +81,12 @@ if appenv["FORCE"]:
 Alias(appenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps["compact"].values())
 
 if appsrc := appenv.subst("$APPSRC"):
+    app_manifest, fap_file = appenv.GetExtAppFromPath(appsrc)
     appenv.PhonyTarget(
         "launch_app",
-        "${PYTHON3} scripts/runfap.py ${SOURCE}",
-        source=appenv.GetExtAppFromPath(appsrc),
+        '${PYTHON3} scripts/runfap.py ${SOURCE} --fap_dst_dir "/ext/apps/${FAP_CATEGORY}"',
+        source=fap_file,
+        FAP_CATEGORY=app_manifest.fap_category,
     )
 
 Return("extapps")

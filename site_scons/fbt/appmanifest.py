@@ -40,6 +40,7 @@ class FlipperApplication:
     sources: List[str] = field(default_factory=lambda: ["*.c*"])
     fap_icon: Optional[str] = None
     fap_libs: List[str] = field(default_factory=list)
+    fap_category: str = ""
     _appdir: Optional[object] = None
     _apppath: Optional[str] = None
 
