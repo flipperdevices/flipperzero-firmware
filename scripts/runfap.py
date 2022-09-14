@@ -62,6 +62,7 @@ class Main(App):
 
         try:
             fap_local_path = self.args.fap_src_path
+            self.args.fap_dst_dir = self.args.fap_dst_dir.rstrip("/\\")
 
             if not os.path.isfile(fap_local_path):
                 self.logger.error(f"Error: source .fap ({fap_local_path}) not found")
@@ -83,7 +84,7 @@ class Main(App):
                 self.logger.error(f"Error: upload failed: {storage.last_error}")
                 return -3
 
-            storage.send_and_wait_eol(f'loader open "App Loader" {fap_dst_path}\r')
+            storage.send_and_wait_eol(f'loader open "Applications" {fap_dst_path}\r')
             result = storage.read.until(storage.CLI_EOL)
             if len(result):
                 self.logger.error(f"Unexpected response: {result.decode('ascii')}")
