@@ -24,6 +24,19 @@ To build your application as a FAP, just create a folder with your app's source 
 
 With it, you can debug FAPs as if they were a part of main firmware — inspect variables, set breakpoints, step through the code, etc.
 
+### Setting up debugging environment
+
+Debugging support script looks up debugging information in latest firmware build dir (`build/latest`). That directory is symlinked by fbt to the latest firmware configuration (Debug or Release) build dir, when you run `./fbt` for chosen configuration. See [fbt docs](./fbt.md#nb) for details.
+
+So, to debug FAPs, do the following:
+1. Build firmware with `./fbt`
+2. Flash it with `./fbt flash`
+3. [Build your FAP](#how-to-set-up-an-application-to-be-built-as-a-fap) and run it on Flipper.
+
+After that, you can attach with `./fbt debug` or VSCode and use all debug features.
+
+It is **important** that firmware and application build type (debug/release) match, and that matching firmware folder is linked as `build/latest`. Otherwise, debugging will not work. 
+
 
 ## How Flipper runs an application from SD card
 
