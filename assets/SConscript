@@ -102,9 +102,11 @@ if assetsenv["IS_BASE_FIRMWARE"]:
             "${RESMANIFESTCOMSTR}",
         ),
     )
-    assetsenv.Precious(resources)
-    assetsenv.NoClean(resources)
     assetsenv.AlwaysBuild(resources)
+    assetsenv.Clean(
+        resources,
+        assetsenv.Dir("#/assets/resources/apps"),
+    )
 
     # Exporting resources node to external environment
     env["FW_RESOURCES"] = resources

@@ -11,13 +11,13 @@ Applications for factory testing the Flipper.
 - `battery_test_app`    - Battery debug app
 - `blink_test`          - LED blinker   
 - `bt_debug_app`        - BT test app. Requires full BT stack installed
-- `display_test`        - Various display tests & tweaks     
+- `display_test`        - Various display tests & tweaks
 - `file_browser_test`   - Test UI for file picker
 - `keypad_test`         - Keypad test
-- `lfrfid_debug`        - LF-RFID tests
+- `lfrfid_debug`        - LF RFID debug tool
 - `text_box_test`       - UI tests
 - `uart_echo`           - UART mode test 
-- `unit_tests`          - Unit tests   
+- `unit_tests`          - Unit tests
 - `usb_mouse`           - USB HID test
 - `usb_test`            - Other USB tests
 - `vibro_test`          - Vibro test
@@ -73,9 +73,13 @@ Background services providing system APIs to applications.
 Small applications providing configuration for basic firmware and its services.
 
 - `about`               - Small About application that shows flipper info
-- `debug_tools`         - Different tools that we use for debug
-- `lfrfid_debug`        - LF RFID debug tool
+- `bt_settings_app`     - Bluetooth options
+- `desktop_settings`    - Desktop configuration
+- `dolphin_passport`    - Dolphin passport app
+- `notification_settings` - LCD brightness, sound volume, etc configuration
+- `power_settings_app`  - Basic power options
 - `storage_settings`    - Storage settings app
+- `system`              - System settings
 
 
 ## system
@@ -84,4 +88,3 @@ Utility apps not visible in other menus.
 
 - `storage_move_to_sd`  - Data migration tool for internal storage
 - `updater`             - Update service & application
-
