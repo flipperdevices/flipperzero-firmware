@@ -125,8 +125,6 @@ static bool fap_loader_run_selected_app(FapLoader* loader) {
 }
 
 static bool fap_loader_select_app(FapLoader* loader) {
-    string_set(loader->fap_path, EXT_PATH("apps"));
-
     const DialogsFileBrowserOptions browser_options = {
         .extension = ".fap",
         .skip_assets = true,
@@ -145,7 +143,6 @@ int32_t fap_loader_app(void* p) {
     loader->storage = furi_record_open(RECORD_STORAGE);
     loader->dialogs = furi_record_open(RECORD_DIALOGS);
     loader->gui = furi_record_open(RECORD_GUI);
-    string_init(loader->fap_path);
 
     ViewDispatcher* view_dispatcher = view_dispatcher_alloc();
     Loading* loading = loading_alloc();
@@ -155,9 +152,11 @@ int32_t fap_loader_app(void* p) {
     view_dispatcher_add_view(view_dispatcher, 0, loading_get_view(loading));
 
     if(p) {
-        string_set(loader->fap_path, (const char*)p);
+        string_init_set(loader->fap_path, (const char*)p);
         fap_loader_run_selected_app(loader);
     } else {
+        string_init_set(loader->fap_path, EXT_PATH("apps"));
+
         while(fap_loader_select_app(loader)) {
             view_dispatcher_switch_to_view(view_dispatcher, 0);
             fap_loader_run_selected_app(loader);
