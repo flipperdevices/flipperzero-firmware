@@ -87,7 +87,7 @@ def validate_app_imports(target, source, env):
 
 def GetExtAppFromPath(env, app_dir):
     if not app_dir:
-        raise Exception("APPSRC not set")
+        raise UserError("APPSRC= not set")
 
     appmgr = env["APPMGR"]
 
@@ -96,11 +96,11 @@ def GetExtAppFromPath(env, app_dir):
         if app := appmgr.find_by_appdir(dir_part):
             break
     if not app:
-        raise Exception(f"Failed to resolve application for given APPSRC={app_dir}")
+        raise UserError(f"Failed to resolve application for given APPSRC={app_dir}")
 
     app_elf = env["_extapps"]["compact"].get(app.appid, None)
     if not app_elf:
-        raise Exception(f"No external app found for {app.appid}")
+        raise UserError(f"No external app found for {app.appid}")
 
     return (app, app_elf[0])
 
