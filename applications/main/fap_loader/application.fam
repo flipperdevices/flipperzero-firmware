@@ -1,6 +1,6 @@
 App(
     appid="fap_loader",
-    name="App Loader",
+    name="Applications",
     apptype=FlipperAppType.APP,
     entry_point="fap_loader_app",
     requires=[

@@ -11,7 +11,7 @@ FAPs do not depend on being ran on a specific firmware version. Compatibility is
 
 FAPs are created and developed the same way as internal applications that are part of the firmware. 
 
-To build your application as a FAP, just create a folder with your app's source code in `applications_user` folder, then write its code the way you'd do when creating a regular built-in application. Then configure its `application.fam` manifest - and set its *apptype* to FlipperAppType.EXTERNAL. See [Application Manifests](./AppManifests.md#application-definition) for more details. 
+To build your application as a FAP, just create a folder with your app's source code in `applications_user` folder, then write its code the way you'd do when creating a regular built-in application. Then configure its `application.fam` manifest — and set its *apptype* to FlipperAppType.EXTERNAL. See [Application Manifests](./AppManifests.md#application-definition) for more details. 
 
  * To build your application, run `./fbt firmware_{APPID}`, where APPID is your application's ID in its manifest.
  * To build your app, upload it over USB & run it on Flipper, run `./fbt launch_app APPSRC=applications/path/to/app`. This action is configured in default [VSCode profile](../.vscode/ReadMe.md) as "Launch App on Flipper" build action (Ctrl+Shift+B menu).
@@ -22,7 +22,7 @@ To build your application as a FAP, just create a folder with your app's source 
 
 **`fbt`** includes a script for gdb-py to provide debugging support for FAPs, `debug/flipperapps.py`. It is loaded in default debugging configurations by **`fbt`** and stock VSCode configurations.
 
-With it, you can debug FAPs as if they were a part of main firmware - inspect variables, set breakpoints, step through the code, etc.
+With it, you can debug FAPs as if they were a part of main firmware — inspect variables, set breakpoints, step through the code, etc.
 
 
 ## How Flipper runs an application from SD card

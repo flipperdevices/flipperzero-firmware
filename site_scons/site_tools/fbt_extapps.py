@@ -106,7 +106,7 @@ def GetExtAppFromPath(env, app_dir):
 
 
 def generate(env, **kw):
-    env.SetDefault(EXT_APPS_WORK_DIR=kw.get("EXT_APPS_WORK_DIR", ".extapps"))
+    env.SetDefault(EXT_APPS_WORK_DIR=kw.get("EXT_APPS_WORK_DIR"))
     env.VariantDir(env.subst("$EXT_APPS_WORK_DIR"), env.Dir("#"), duplicate=False)
 
     env.AddMethod(BuildAppElf)

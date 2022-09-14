@@ -144,7 +144,7 @@ fwenv.PrepareApplicationsBuild()
 
 # Build external apps
 extapps = fwenv["FW_EXTAPPS"] = SConscript(
-    "applications/extapps.scons", exports={"ENV": fwenv}
+    "site_scons/extapps.scons", exports={"ENV": fwenv}
 )
 
 

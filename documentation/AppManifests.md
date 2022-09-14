@@ -1,8 +1,8 @@
 # Flipper Application Manifests (.fam)
 
-All components of Flipper Zero firmware — services, user applications, system settings — are developed independently. Each component has a build system manifest file, named `application.fam`, describing basic properties of a components and its relations to other parts of the system.
+All components of Flipper Zero firmware — services, user applications, system settings — are developed independently. Each component has a build system manifest file, named `application.fam`, defining basic properties of a components and its relations to other parts of the system.
 
-When building firmware, **`fbt`** collects all application manifests, processes their dependencies and builds only those components that are utilized in current build configuration. See [fbt docs](./fbt.md), section "Firmware application set", for details on build configurations.
+When building firmware, **`fbt`** collects all application manifests, processes their dependencies and builds only those components that are utilized in current build configuration. See [fbt docs](./fbt.md#firmware-application-set) for details on build configurations.
 
 ## Application definition
 
@@ -52,7 +52,7 @@ The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 
 ## .fam file contents
 
-.fam file contains one or more Application definitions. For example, here's a part of `applications/bt/application.fam`:
+.fam file contains one or more Application definitions. For example, here's a part of `applications/service/bt/application.fam`:
 
 ```python
 App(
@@ -76,4 +76,4 @@ App(
 )
 ```
 
-See stock .fam files for more examples.
+For more examples, see application.fam files for basic firmware components.
