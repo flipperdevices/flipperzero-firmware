@@ -12,10 +12,13 @@
 typedef struct {
     FlipperApplication* app;
     Storage* storage;
+    DialogsApp* dialogs;
+    Gui* gui;
+    string_t fap_path;
 } FapLoader;
 
 static bool
-    fap_loader_icon_callback(string_t path, void* context, uint8_t** icon_ptr, string_t item_name) {
+    fap_loader_item_callback(string_t path, void* context, uint8_t** icon_ptr, string_t item_name) {
     FapLoader* loader = context;
     furi_assert(loader);
 
@@ -42,60 +45,31 @@ static bool
     return load_success;
 }
 
-int32_t fap_loader_app(void* p) {
-    FapLoader* loader = malloc(sizeof(FapLoader));
-    loader->storage = furi_record_open(RECORD_STORAGE);
-    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
-    Gui* gui = furi_record_open(RECORD_GUI);
+static bool fap_loader_run_selected_app(FapLoader* loader) {
+    furi_assert(loader);
 
-    string_t fap_name, error_message;
-
-    ViewDispatcher* view_dispatcher = view_dispatcher_alloc();
-    Loading* loading = loading_alloc();
-
-    view_dispatcher_enable_queue(view_dispatcher);
-    view_dispatcher_attach_to_gui(view_dispatcher, gui, ViewDispatcherTypeFullscreen);
-    view_dispatcher_add_view(view_dispatcher, 0, loading_get_view(loading));
-
-    view_dispatcher_switch_to_view(view_dispatcher, 0);
+    string_t error_message;
 
     string_init_set(error_message, "unknown error");
 
     bool file_selected = false;
     bool show_error = true;
     do {
-        if(p) {
-            string_init_set(fap_name, (const char*)p);
-        } else {
-            string_init_set(fap_name, EXT_PATH("apps"));
-
-            const DialogsFileBrowserOptions browser_options = {
-                .extension = ".fap",
-                .skip_assets = true,
-                .icon = &I_badusb_10px,
-                .hide_ext = true,
-                .item_loader_callback = fap_loader_icon_callback,
-                .item_loader_context = loader,
-            };
-
-            if(!dialog_file_browser_show(dialogs, fap_name, fap_name, &browser_options)) {
-                show_error = false;
-                break;
-            }
-        }
-
         file_selected = true;
         loader->app = flipper_application_alloc(loader->storage, &hashtable_api_interface);
 
-        FURI_LOG_I(TAG, "FAP Loader is loading %s", string_get_cstr(fap_name));
+        FURI_LOG_I(TAG, "FAP Loader is loading %s", string_get_cstr(loader->fap_path));
 
         FlipperApplicationPreloadStatus preload_res =
-            flipper_application_preload(loader->app, string_get_cstr(fap_name));
+            flipper_application_preload(loader->app, string_get_cstr(loader->fap_path));
         if(preload_res != FlipperApplicationPreloadStatusSuccess) {
             const char* err_msg = flipper_application_preload_status_to_string(preload_res);
             string_printf(error_message, "Preload failed: %s", err_msg);
             FURI_LOG_E(
-                TAG, "FAP Loader failed to preload %s: %s", string_get_cstr(fap_name), err_msg);
+                TAG,
+                "FAP Loader failed to preload %s: %s",
+                string_get_cstr(loader->fap_path),
+                err_msg);
             break;
         }
 
@@ -107,7 +81,7 @@ int32_t fap_loader_app(void* p) {
             FURI_LOG_E(
                 TAG,
                 "FAP Loader failed to map to memory %s: %s",
-                string_get_cstr(fap_name),
+                string_get_cstr(loader->fap_path),
                 err_msg);
             break;
         }
@@ -136,7 +110,7 @@ int32_t fap_loader_app(void* p) {
         dialog_message_set_text(
             message, string_get_cstr(buffer), 64, 32, AlignCenter, AlignCenter);
 
-        dialog_message_show(dialogs, message);
+        dialog_message_show(loader->dialogs, message);
         dialog_message_free(message);
         string_clear(buffer);
     }
@@ -146,11 +120,55 @@ int32_t fap_loader_app(void* p) {
     if(file_selected) {
         flipper_application_free(loader->app);
     }
+
+    return file_selected;
+}
+
+static bool fap_loader_select_app(FapLoader* loader) {
+    string_set(loader->fap_path, EXT_PATH("apps"));
+
+    const DialogsFileBrowserOptions browser_options = {
+        .extension = ".fap",
+        .skip_assets = true,
+        .icon = &I_badusb_10px,
+        .hide_ext = true,
+        .item_loader_callback = fap_loader_item_callback,
+        .item_loader_context = loader,
+    };
+
+    return dialog_file_browser_show(
+        loader->dialogs, loader->fap_path, loader->fap_path, &browser_options);
+}
+
+int32_t fap_loader_app(void* p) {
+    FapLoader* loader = malloc(sizeof(FapLoader));
+    loader->storage = furi_record_open(RECORD_STORAGE);
+    loader->dialogs = furi_record_open(RECORD_DIALOGS);
+    loader->gui = furi_record_open(RECORD_GUI);
+    string_init(loader->fap_path);
+
+    ViewDispatcher* view_dispatcher = view_dispatcher_alloc();
+    Loading* loading = loading_alloc();
+
+    view_dispatcher_enable_queue(view_dispatcher);
+    view_dispatcher_attach_to_gui(view_dispatcher, loader->gui, ViewDispatcherTypeFullscreen);
+    view_dispatcher_add_view(view_dispatcher, 0, loading_get_view(loading));
+
+    if(p) {
+        string_set(loader->fap_path, (const char*)p);
+        fap_loader_run_selected_app(loader);
+    } else {
+        while(fap_loader_select_app(loader)) {
+            view_dispatcher_switch_to_view(view_dispatcher, 0);
+            fap_loader_run_selected_app(loader);
+        };
+    }
+
     view_dispatcher_remove_view(view_dispatcher, 0);
     loading_free(loading);
     view_dispatcher_free(view_dispatcher);
 
-    string_clear(fap_name);
+    string_clear(loader->fap_path);
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_DIALOGS);
     furi_record_close(RECORD_STORAGE);
