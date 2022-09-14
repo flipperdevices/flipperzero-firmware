@@ -388,7 +388,7 @@ static void loader_build_menu() {
             loader_submenu_callback,
             (void*)LoaderMenuViewPlugins);
     }
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && (FLIPPER_DEBUG_APPS_COUNT > 0)) {
         menu_add_item(
             loader_instance->primary_menu,
             "Debug Tools",
