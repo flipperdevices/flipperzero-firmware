@@ -1,5 +1,7 @@
 import posixpath
 
+# For more details on these options, run 'fbt -h'
+
 
 # Default hardware target
 TARGET_HW = 7
@@ -59,24 +61,22 @@ SVD_FILE = "debug/STM32WB55_CM4.svd"
 # Look for blackmagic probe on serial ports and local network
 BLACKMAGIC = "auto"
 
+# Application to start on boot
+LOADER_AUTOSTART = ""
+
 FIRMWARE_APPS = {
     "default": [
-        "crypto_start",
         # Svc
         "basic_services",
         # Apps
-        "basic_apps",
-        "updater_app",
-        "storage_move_to_sd",
-        "archive",
+        "main_apps",
+        "system_apps",
         # Settings
-        "passport",
-        "system_settings",
-        "about",
+        "settings_apps",
         # Plugins
-        "basic_plugins",
+        # "basic_plugins",
         # Debug
-        "debug_apps",
+        # "debug_apps",
     ],
     "unit_tests": [
         "basic_services",

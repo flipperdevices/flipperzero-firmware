@@ -191,7 +191,7 @@ bool mf_ultralight_authenticate(FuriHalNfcTxRxContext* tx_rx, uint32_t key, uint
         }
 
         if(pack != NULL) {
-            *pack = (tx_rx->rx_data[0] << 8) | tx_rx->rx_data[1];
+            *pack = (tx_rx->rx_data[1] << 8) | tx_rx->rx_data[0];
         }
 
         FURI_LOG_I(TAG, "Auth success. Password: %08X. PACK: %04X", key, *pack);
@@ -697,48 +697,6 @@ bool mf_ultralight_read_counters(FuriHalNfcTxRxContext* tx_rx, MfUltralightData*
     return counter_read == (is_single_counter ? 1 : 3);
 }
 
-int16_t mf_ultralight_get_authlim(
-    FuriHalNfcTxRxContext* tx_rx,
-    MfUltralightReader* reader,
-    MfUltralightData* data) {
-    mf_ultralight_read_version(tx_rx, reader, data);
-    if(!(reader->supported_features & MfUltralightSupportAuth)) {
-        // No authentication
-        return -2;
-    }
-
-    uint8_t config_pages_index;
-    if(data->type >= MfUltralightTypeUL11 && data->type <= MfUltralightTypeNTAG216) {
-        config_pages_index = reader->pages_to_read - 4;
-    } else if(
-        data->type >= MfUltralightTypeNTAGI2CPlus1K &&
-        data->type <= MfUltralightTypeNTAGI2CPlus1K) {
-        config_pages_index = 0xe3;
-    } else {
-        // No config pages
-        return -2;
-    }
-
-    if(!mf_ultralight_read_pages_direct(tx_rx, config_pages_index, data->data)) {
-        // Config pages are not readable due to protection
-        return -1;
-    }
-
-    MfUltralightConfigPages* config_pages = (MfUltralightConfigPages*)&data->data;
-    if(config_pages->auth0 >= reader->pages_to_read) {
-        // Authentication is not configured
-        return -2;
-    }
-
-    int16_t authlim = config_pages->access.authlim;
-    if(authlim > 0 && data->type >= MfUltralightTypeNTAGI2CPlus1K &&
-       data->type <= MfUltralightTypeNTAGI2CPlus2K) {
-        authlim = 1 << authlim;
-    }
-
-    return authlim;
-}
-
 bool mf_ultralight_read_tearing_flags(FuriHalNfcTxRxContext* tx_rx, MfUltralightData* data) {
     uint8_t flag_read = 0;
 
@@ -982,7 +940,7 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
         if(write_page >= 512) return true;
         break;
     default:
-        furi_assert(false);
+        furi_crash("Unknown MFUL");
         return true;
     }
 
@@ -1009,8 +967,7 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
         else if(write_page == 41)
             shift = 12;
         else {
-            furi_assert(false);
-            shift = 0;
+            furi_crash("Unknown MFUL");
         }
 
         break;
@@ -1041,8 +998,7 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
             shift = (write_page - 16) / 32;
         break;
     default:
-        furi_assert(false);
-        shift = 0;
+        furi_crash("Unknown MFUL");
         break;
     }
 
@@ -1219,8 +1175,7 @@ static void mf_ul_emulate_write(
                 block_lock_count = 8;
                 break;
             default:
-                furi_assert(false);
-                block_lock_count = 0;
+                furi_crash("Unknown MFUL");
                 break;
             }
 

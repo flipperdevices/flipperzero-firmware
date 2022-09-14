@@ -15,16 +15,15 @@ jobs:
     steps:
       - name: 'Decontaminate previous build leftovers'
         run: |
-          if [ -d .git ]
-          then
-            git submodule status \
-              || git checkout `git rev-list --max-parents=0 HEAD | tail -n 1`
+          if [ -d .git ]; then
+            git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
           fi
 
       - name: 'Checkout code'
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 'Check code formatting'
         run: SET_GH_OUTPUT=1 FBT_TOOLCHAIN_PATH=/opt ./fbt lint_py

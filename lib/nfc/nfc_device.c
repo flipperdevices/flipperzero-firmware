@@ -195,6 +195,7 @@ bool nfc_device_load_mifare_ul_data(FlipperFormat* file, NfcDevice* dev) {
         }
         data->data_size = pages_total * 4;
         data->data_read = pages_read * 4;
+        if(data->data_size > MF_UL_MAX_DUMP_SIZE || data->data_read > MF_UL_MAX_DUMP_SIZE) break;
         bool pages_parsed = true;
         for(uint16_t i = 0; i < pages_total; i++) {
             string_printf(temp_str, "Page %d", i);
@@ -782,7 +783,7 @@ static void nfc_device_load_mifare_classic_block(
         char hi = string_get_char(block_str, 3 * i);
         char low = string_get_char(block_str, 3 * i + 1);
         uint8_t byte = 0;
-        if(hex_chars_to_uint8(hi, low, &byte)) {
+        if(hex_char_to_uint8(hi, low, &byte)) {
             block_tmp.value[i] = byte;
         } else {
             FURI_BIT_SET(block_unknown_bytes_mask, i);
@@ -1181,8 +1182,19 @@ bool nfc_file_select(NfcDevice* dev) {
     // Input events and views are managed by file_browser
     string_t nfc_app_folder;
     string_init_set_str(nfc_app_folder, NFC_APP_FOLDER);
-    bool res = dialog_file_browser_show(
-        dev->dialogs, dev->load_path, nfc_app_folder, NFC_APP_EXTENSION, true, &I_Nfc_10px, true);
+
+    const DialogsFileBrowserOptions browser_options = {
+        .extension = NFC_APP_EXTENSION,
+        .skip_assets = true,
+        .icon = &I_Nfc_10px,
+        .hide_ext = true,
+        .item_loader_callback = NULL,
+        .item_loader_context = NULL,
+    };
+
+    bool res =
+        dialog_file_browser_show(dev->dialogs, dev->load_path, nfc_app_folder, &browser_options);
+
     string_clear(nfc_app_folder);
     if(res) {
         string_t filename;
@@ -1217,6 +1229,7 @@ void nfc_device_data_clear(NfcDeviceData* dev_data) {
 void nfc_device_clear(NfcDevice* dev) {
     furi_assert(dev);
 
+    nfc_device_set_name(dev, "");
     nfc_device_data_clear(&dev->dev_data);
     dev->format = NfcDeviceSaveFormatUid;
     string_reset(dev->load_path);

@@ -18,18 +18,26 @@ from fbt.appmanifest import (
 
 def LoadApplicationManifests(env):
     appmgr = env["APPMGR"] = AppManager()
-    for entry in env.Glob("#/applications/*", ondisk=True, source=True):
-        if isinstance(entry, SCons.Node.FS.Dir) and not str(entry).startswith("."):
-            try:
-                app_manifest_file_path = os.path.join(entry.abspath, "application.fam")
-                appmgr.load_manifest(app_manifest_file_path, entry.name)
-                env.Append(PY_LINT_SOURCES=[app_manifest_file_path])
-            except FlipperManifestException as e:
-                warn(WarningOnByDefault, str(e))
+    for app_dir, _ in env["APPDIRS"]:
+        app_dir_node = env.Dir("#").Dir(app_dir)
+
+        for entry in app_dir_node.glob("*", ondisk=True, source=True):
+            if isinstance(entry, SCons.Node.FS.Dir) and not str(entry).startswith("."):
+                try:
+                    app_manifest_file_path = os.path.join(
+                        entry.abspath, "application.fam"
+                    )
+                    appmgr.load_manifest(app_manifest_file_path, entry)
+                    env.Append(PY_LINT_SOURCES=[app_manifest_file_path])
+                except FlipperManifestException as e:
+                    warn(WarningOnByDefault, str(e))
 
 
 def PrepareApplicationsBuild(env):
-    env["APPBUILD"] = env["APPMGR"].filter_apps(env["APPS"])
+    appbuild = env["APPBUILD"] = env["APPMGR"].filter_apps(env["APPS"])
+    env.Append(
+        SDK_HEADERS=appbuild.get_sdk_headers(),
+    )
     env["APPBUILD_DUMP"] = env.Action(
         DumpApplicationConfig,
         "\tINFO\t",
@@ -51,7 +59,7 @@ def DumpApplicationConfig(target, source, env):
 def build_apps_c(target, source, env):
     target_file_name = target[0].path
 
-    gen = ApplicationsCGenerator(env["APPBUILD"])
+    gen = ApplicationsCGenerator(env["APPBUILD"], env.subst("$LOADER_AUTOSTART"))
     with open(target_file_name, "w") as file:
         file.write(gen.generate())
 
