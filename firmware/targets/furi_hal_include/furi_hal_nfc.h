@@ -42,9 +42,7 @@ extern "C" {
 typedef enum {
     FuriHalNfcTxRxTypeDefault,
     FuriHalNfcTxRxTypeRxNoCrc,
-    FuriHalNfcTxRxTypeRxKeepPar,
     FuriHalNfcTxRxTypeRaw,
-    FuriHalNfcTxRxTypeRxRaw,
     FuriHalNfcTxRxTransparent,
     FuriHalNfcTxRxTypeFifoNoCrc,
 } FuriHalNfcTxRxType;

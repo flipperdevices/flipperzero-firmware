@@ -574,17 +574,10 @@ static uint32_t furi_hal_nfc_tx_rx_get_flag(FuriHalNfcTxRxType type) {
 
     if(type == FuriHalNfcTxRxTypeRxNoCrc) {
         flags = RFAL_TXRX_FLAGS_CRC_RX_KEEP;
-    } else if(type == FuriHalNfcTxRxTypeRxKeepPar) {
-        flags = RFAL_TXRX_FLAGS_CRC_TX_MANUAL | RFAL_TXRX_FLAGS_CRC_RX_KEEP |
-                RFAL_TXRX_FLAGS_PAR_RX_KEEP;
     } else if(type == FuriHalNfcTxRxTypeRaw) {
         flags = RFAL_TXRX_FLAGS_CRC_TX_MANUAL | RFAL_TXRX_FLAGS_CRC_RX_KEEP |
                 RFAL_TXRX_FLAGS_PAR_RX_KEEP | RFAL_TXRX_FLAGS_PAR_TX_NONE;
-    } else if(type == FuriHalNfcTxRxTypeRxRaw) {
-        flags = RFAL_TXRX_FLAGS_CRC_TX_MANUAL | RFAL_TXRX_FLAGS_CRC_RX_KEEP |
-                RFAL_TXRX_FLAGS_PAR_RX_KEEP | RFAL_TXRX_FLAGS_PAR_TX_NONE;
     }
-
     return flags;
 }
 
@@ -669,7 +662,6 @@ bool furi_hal_nfc_tx(FuriHalNfcTxRxContext* tx_rx) {
     st25r3916ExecuteCommand(ST25R3916_CMD_TRANSMIT_WITHOUT_CRC);
 
     return furi_hal_nfc_listen_rx(tx_rx, 200);
-
 }
 
 bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
@@ -726,8 +718,7 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
         furi_delay_tick(1);
     }
 
-    if(tx_rx->tx_rx_type == FuriHalNfcTxRxTypeRaw ||
-       tx_rx->tx_rx_type == FuriHalNfcTxRxTypeRxRaw) {
+    if(tx_rx->tx_rx_type == FuriHalNfcTxRxTypeRaw) {
         tx_rx->rx_bits = furi_hal_nfc_bitstream_to_data_and_parity(
             temp_rx_buff, *temp_rx_bits, tx_rx->rx_data, tx_rx->rx_parity);
     } else {
