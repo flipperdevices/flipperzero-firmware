@@ -4,10 +4,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct {
     uint32_t start;
     uint32_t end;
@@ -75,7 +71,3 @@ bool furi_hal_region_is_frequency_allowed(uint32_t frequency);
  * @return     { description_of_the_return_value }
  */
 const FuriHalRegionBand* furi_hal_region_get_band(uint32_t frequency);
-
-#ifdef __cplusplus
-}
-#endif

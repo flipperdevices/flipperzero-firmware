@@ -5,10 +5,6 @@
 #include "hid_usage_consumer.h"
 #include "hid_usage_led.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define HID_KEYBOARD_NONE 0x00
 // Remapping the colon key which is shift + ; to comma
 #define HID_KEYBOARD_COMMA HID_KEYBOARD_COLON
@@ -255,7 +251,3 @@ bool furi_hal_hid_consumer_key_press(uint16_t button);
  * @param      button  key code
  */
 bool furi_hal_hid_consumer_key_release(uint16_t button);
-
-#ifdef __cplusplus
-}
-#endif

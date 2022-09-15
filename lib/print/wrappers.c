@@ -1,10 +1,11 @@
-#include "wrappers.h"
-
+#include <stdio.h>
+#include <stdint.h>
 #include <stdbool.h>
 #include <stdarg.h>
 #include <furi/core/check.h>
 #include <furi/core/thread.h>
 #include <furi/core/common_defines.h>
+#include <string.h>
 #include "printf_tiny.h"
 
 void _putchar(char character) {

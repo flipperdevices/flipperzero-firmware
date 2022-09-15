@@ -31,10 +31,7 @@
             ],
             "postAttachCommands": [
                 // "attach 1",
-                // "compare-sections",
-                "source debug/flipperapps.py",
-                // "source debug/FreeRTOS/FreeRTOS.py",
-                // "svd_load debug/STM32WB55_CM4.svd"
+                "compare-sections",
             ]
             // "showDevDebugOutput": "raw",
         },
@@ -53,8 +50,7 @@
                 "attach 1",
                 "set confirm off",
                 "set mem inaccessible-by-default off",
-                "source debug/flipperapps.py",
-                // "compare-sections",
+                "compare-sections",
             ]
             // "showDevDebugOutput": "raw",
         },
@@ -69,9 +65,6 @@
             "device": "STM32WB55RG",
             "svdFile": "./debug/STM32WB55_CM4.svd",
             "rtos": "FreeRTOS",
-            "postAttachCommands": [
-                "source debug/flipperapps.py",
-            ]
             // "showDevDebugOutput": "raw",
         },
         {
@@ -80,7 +73,7 @@
             "request": "launch",
             "program": "./lib/scons/scripts/scons.py",
             "args": [
-                "plugin_dist"
+                "sdk"
             ]
         },
         {
