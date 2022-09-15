@@ -50,7 +50,7 @@ Extra apps for Plugins & App Loader menus.
 
 Background services providing system APIs to applications.
 
-- `application.h`       - Firmware application list header
+- `applications.h`      - Firmware application list header
 
 - `bt`                  - BLE service and application
 - `cli`                 - Console service and API
