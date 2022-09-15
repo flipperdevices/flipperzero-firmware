@@ -38,7 +38,7 @@ static void desktop_lock_icon_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, 0, 0, &I_Lock_8x8);
 }
 
-static void desktop_dumb_mode_icon_draw_callback(Canvas* canvas, void* context) {
+static void desktop_dummy_mode_icon_draw_callback(Canvas* canvas, void* context) {
     UNUSED(context);
     furi_assert(canvas);
     canvas_draw_icon(canvas, 0, 0, &I_GameMode_11x8);
@@ -141,10 +141,10 @@ void desktop_unlock(Desktop* desktop) {
     desktop_auto_lock_arm(desktop);
 }
 
-void desktop_set_dumb_mode_state(Desktop* desktop, bool enabled) {
-    view_port_enabled_set(desktop->dumb_mode_icon_viewport, enabled);
-    desktop_main_set_dumb_mode_state(desktop->main_view, enabled);
-    desktop->settings.dumb_mode = enabled;
+void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled) {
+    view_port_enabled_set(desktop->dummy_mode_icon_viewport, enabled);
+    desktop_main_set_dummy_mode_state(desktop->main_view, enabled);
+    desktop->settings.dummy_mode = enabled;
     DESKTOP_SETTINGS_SAVE(&desktop->settings);
 }
 
@@ -231,13 +231,13 @@ Desktop* desktop_alloc() {
     view_port_enabled_set(desktop->lock_icon_viewport, false);
     gui_add_view_port(desktop->gui, desktop->lock_icon_viewport, GuiLayerStatusBarLeft);
 
-    // Dumb mode icon
-    desktop->dumb_mode_icon_viewport = view_port_alloc();
-    view_port_set_width(desktop->dumb_mode_icon_viewport, icon_get_width(&I_GameMode_11x8));
+    // Dummy mode icon
+    desktop->dummy_mode_icon_viewport = view_port_alloc();
+    view_port_set_width(desktop->dummy_mode_icon_viewport, icon_get_width(&I_GameMode_11x8));
     view_port_draw_callback_set(
-        desktop->dumb_mode_icon_viewport, desktop_dumb_mode_icon_draw_callback, desktop);
-    view_port_enabled_set(desktop->dumb_mode_icon_viewport, false);
-    gui_add_view_port(desktop->gui, desktop->dumb_mode_icon_viewport, GuiLayerStatusBarLeft);
+        desktop->dummy_mode_icon_viewport, desktop_dummy_mode_icon_draw_callback, desktop);
+    view_port_enabled_set(desktop->dummy_mode_icon_viewport, false);
+    gui_add_view_port(desktop->gui, desktop->dummy_mode_icon_viewport, GuiLayerStatusBarLeft);
 
     // Special case: autostart application is already running
     desktop->loader = furi_record_open(RECORD_LOADER);
@@ -328,8 +328,8 @@ int32_t desktop_srv(void* p) {
         DESKTOP_SETTINGS_SAVE(&desktop->settings);
     }
 
-    view_port_enabled_set(desktop->dumb_mode_icon_viewport, desktop->settings.dumb_mode);
-    desktop_main_set_dumb_mode_state(desktop->main_view, desktop->settings.dumb_mode);
+    view_port_enabled_set(desktop->dummy_mode_icon_viewport, desktop->settings.dummy_mode);
+    desktop_main_set_dummy_mode_state(desktop->main_view, desktop->settings.dummy_mode);
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 

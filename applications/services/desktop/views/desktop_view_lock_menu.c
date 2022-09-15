@@ -7,7 +7,7 @@
 typedef enum {
     DesktopLockMenuIndexLock,
     DesktopLockMenuIndexPinLock,
-    DesktopLockMenuIndexDumb,
+    DesktopLockMenuIndexDummy,
 
     DesktopLockMenuIndexTotalCount
 } DesktopLockMenuIndex;
@@ -30,10 +30,10 @@ void desktop_lock_menu_set_pin_state(DesktopLockMenuView* lock_menu, bool pin_is
         });
 }
 
-void desktop_lock_menu_set_dumb_mode_state(DesktopLockMenuView* lock_menu, bool dumb_mode) {
+void desktop_lock_menu_set_dummy_mode_state(DesktopLockMenuView* lock_menu, bool dummy_mode) {
     with_view_model(
         lock_menu->view, (DesktopLockMenuViewModel * model) {
-            model->dumb_mode = dumb_mode;
+            model->dummy_mode = dummy_mode;
             return true;
         });
 }
@@ -66,11 +66,11 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             } else {
                 str = "Set PIN";
             }
-        } else if(i == DesktopLockMenuIndexDumb) {
-            if(m->dumb_mode) {
+        } else if(i == DesktopLockMenuIndexDummy) {
+            if(m->dummy_mode) {
                 str = "Brainiac Mode";
             } else {
-                str = "Dumb Mode";
+                str = "Dummy Mode";
             }
         }
 
@@ -94,7 +94,7 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
     DesktopLockMenuView* lock_menu = context;
     uint8_t idx = 0;
     bool consumed = false;
-    bool dumb_mode = false;
+    bool dummy_mode = false;
 
     with_view_model(
         lock_menu->view, (DesktopLockMenuViewModel * model) {
@@ -111,7 +111,7 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                 }
             }
             idx = model->idx;
-            dumb_mode = model->dumb_mode;
+            dummy_mode = model->dummy_mode;
             return ret;
         });
 
@@ -120,11 +120,11 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
             lock_menu->callback(DesktopLockMenuEventLock, lock_menu->context);
         } else if((idx == DesktopLockMenuIndexPinLock) && (event->type == InputTypeShort)) {
             lock_menu->callback(DesktopLockMenuEventPinLock, lock_menu->context);
-        } else if(idx == DesktopLockMenuIndexDumb) {
-            if((dumb_mode == false) && (event->type == InputTypeShort)) {
-                lock_menu->callback(DesktopLockMenuEventDumbModeOn, lock_menu->context);
-            } else if((dumb_mode == true) && (event->type == InputTypeShort)) {
-                lock_menu->callback(DesktopLockMenuEventDumbModeOff, lock_menu->context);
+        } else if(idx == DesktopLockMenuIndexDummy) {
+            if((dummy_mode == false) && (event->type == InputTypeShort)) {
+                lock_menu->callback(DesktopLockMenuEventDummyModeOn, lock_menu->context);
+            } else if((dummy_mode == true) && (event->type == InputTypeShort)) {
+                lock_menu->callback(DesktopLockMenuEventDummyModeOff, lock_menu->context);
             }
         }
         consumed = true;

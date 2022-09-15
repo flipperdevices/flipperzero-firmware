@@ -14,7 +14,7 @@ struct DesktopMainView {
     DesktopMainViewCallback callback;
     void* context;
     TimerHandle_t poweroff_timer;
-    bool dumb_mode;
+    bool dummy_mode;
 };
 
 #define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 5000
@@ -39,9 +39,9 @@ View* desktop_main_get_view(DesktopMainView* main_view) {
     return main_view->view;
 }
 
-void desktop_main_set_dumb_mode_state(DesktopMainView* main_view, bool dumb_mode) {
+void desktop_main_set_dummy_mode_state(DesktopMainView* main_view, bool dummy_mode) {
     furi_assert(main_view);
-    main_view->dumb_mode = dumb_mode;
+    main_view->dummy_mode = dummy_mode;
 }
 
 bool desktop_main_input_callback(InputEvent* event, void* context) {
@@ -50,7 +50,7 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
 
     DesktopMainView* main_view = context;
 
-    if(main_view->dumb_mode == false) {
+    if(main_view->dummy_mode == false) {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
                 main_view->callback(DesktopMainEventOpenMenu, main_view->context);
