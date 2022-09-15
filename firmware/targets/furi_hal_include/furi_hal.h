@@ -6,8 +6,7 @@
 #pragma once
 
 #ifdef __cplusplus
-template <unsigned int N>
-struct STOP_EXTERNING_ME {};
+template <unsigned int N> struct STOP_EXTERNING_ME {};
 #endif
 
 #include "furi_hal_cortex.h"

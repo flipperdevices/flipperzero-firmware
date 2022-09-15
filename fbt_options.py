@@ -66,17 +66,22 @@ LOADER_AUTOSTART = ""
 
 FIRMWARE_APPS = {
     "default": [
+        "crypto_start",
         # Svc
         "basic_services",
         # Apps
-        "main_apps",
-        "system_apps",
+        "basic_apps",
+        "updater_app",
+        "storage_move_to_sd",
+        "archive",
         # Settings
-        "settings_apps",
+        "passport",
+        "system_settings",
+        "about",
         # Plugins
-        # "basic_plugins",
+        "basic_plugins",
         # Debug
-        # "debug_apps",
+        "debug_apps",
     ],
     "unit_tests": [
         "basic_services",
