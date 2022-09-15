@@ -159,7 +159,7 @@ SECTIONS
   } >RAM1
 
   /* User_heap_stack section, used to check that there is enough RAM left */
-  ._user_heap_stack(DSECT) :
+  ._user_heap_stack :
   {
     . = ALIGN(8);
     __heap_start__ = .;
@@ -170,7 +170,7 @@ SECTIONS
   } >RAM1
 
   /* Free Flash space, that can be used for internal storage */
-  /*.free_flash(DSECT):
+  /*.free_flash(NOLOAD):
   {
     __free_flash_start__ = .;
     . = ORIGIN(FLASH) + LENGTH(FLASH);

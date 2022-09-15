@@ -12,8 +12,7 @@
  * @tparam TApp application class
  * @tparam TViewModules variadic list of ViewModules
  */
-template <typename TApp, typename... TViewModules>
-class ViewController {
+template <typename TApp, typename... TViewModules> class ViewController {
 public:
     ViewController() {
         event_queue = furi_message_queue_alloc(10, sizeof(typename TApp::Event));
@@ -45,8 +44,7 @@ public:
      * @tparam T Concrete ViewModule class
      * @return T* ViewModule pointer
      */
-    template <typename T>
-    T* get() {
+    template <typename T> T* get() {
         uint32_t view_index = ext::make_type_index<T>().hash_code();
         furi_check(holder.count(view_index) != 0);
         return static_cast<T*>(holder[view_index]);
@@ -58,8 +56,7 @@ public:
      * @tparam T Concrete ViewModule class
      * @return T* ViewModule pointer
      */
-    template <typename T>
-    operator T*() {
+    template <typename T> operator T*() {
         uint32_t view_index = ext::make_type_index<T>().hash_code();
         furi_check(holder.count(view_index) != 0);
         return static_cast<T*>(holder[view_index]);
@@ -71,8 +68,7 @@ public:
      * @tparam T Concrete ViewModule class
      * @return T* ViewModule pointer
      */
-    template <typename T>
-    void switch_to() {
+    template <typename T> void switch_to() {
         uint32_t view_index = ext::make_type_index<T>().hash_code();
         furi_check(holder.count(view_index) != 0);
         view_dispatcher_switch_to_view(view_dispatcher, view_index);

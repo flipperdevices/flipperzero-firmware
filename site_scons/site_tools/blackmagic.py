@@ -63,7 +63,7 @@ class BlackmagicResolver:
         if probe := self.get_serial() or self.get_networked():
             return probe
 
-        raise StopError("Please specify BLACKMAGIC=...")
+        raise Exception("Please specify BLACKMAGIC=...")
 
 
 def generate(env):
