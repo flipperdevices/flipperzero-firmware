@@ -86,6 +86,11 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
 
+        case DesktopMainEventOpenGames:
+            loader_show_game_menu();
+            consumed = true;
+            break;
+
         case DesktopMainEventOpenLockMenu:
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneLockMenu);
             consumed = true;
@@ -111,7 +116,10 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         }
-
+        case DesktopMainEventOpenClock:
+            loader_start(desktop->loader, FLIPPER_APPS[0].name, NULL);
+            consumed = true;
+            break;
         case DesktopMainEventOpenFavoritePrimary:
             LOAD_DESKTOP_SETTINGS(&desktop->settings);
             if(desktop->settings.favorite_primary < FLIPPER_APPS_COUNT) {
@@ -137,6 +145,19 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
                 }
             } else {
                 FURI_LOG_E(TAG, "Can't find secondary favorite application");
+            }
+            consumed = true;
+            break;
+        case DesktopMainEventOpenFavoriteGame:
+            LOAD_DESKTOP_SETTINGS(&desktop->settings);
+            if(desktop->settings.favorite_game < FLIPPER_GAMES_COUNT) {
+                LoaderStatus status = loader_start(
+                    desktop->loader, FLIPPER_GAMES[desktop->settings.favorite_game].name, NULL);
+                if(status != LoaderStatusOk) {
+                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                }
+            } else {
+                FURI_LOG_E(TAG, "Can't find game favorite application");
             }
             consumed = true;
             break;
