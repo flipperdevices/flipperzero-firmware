@@ -24,9 +24,6 @@
 `update/f7-update-(CURRENT VERSION)/update.fuf`
 - Update will start, wait for all stages, and when flipper started after update, you can upload any custom [IR libs](https://github.com/logickworkshop/Flipper-IRDB), and other stuff using qFlipper or directly into microSD card
 
-<br>
-<br>
-
 ## With qFlipper
 
 ### **Replace (CURRENT VERSION) with version that you downloaded from releases**
@@ -62,4 +59,3 @@ then select **`flipper-z-f7-full-(CURRENT VERSION).dfu`**
 - ### If you installed using .dfu - unpack files from archive `sd-card-(CURRENT VERSION).zip` to your microSD card
 <br>
 
-- ## [How To: Configure UniversalRF Remix App](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/documentation/UniRFRemix.md)
