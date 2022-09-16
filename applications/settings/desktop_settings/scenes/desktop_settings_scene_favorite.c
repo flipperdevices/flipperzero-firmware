@@ -18,17 +18,6 @@ void add_favorite_submenu_item(DesktopSettingsApp* app, Submenu* submenu) {
     }
 }
 
-void add_game_submenu_item(DesktopSettingsApp* app, Submenu* submenu) {
-    for(size_t i = 0; i < FLIPPER_GAMES_COUNT; i++) {
-        submenu_add_item(
-            submenu,
-            FLIPPER_GAMES[i].name,
-            i,
-            desktop_settings_scene_favorite_submenu_callback,
-            app);
-    }
-}
-
 void desktop_settings_scene_favorite_on_enter(void* context) {
     DesktopSettingsApp* app = context;
     Submenu* submenu = app->submenu;
@@ -47,11 +36,6 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         add_favorite_submenu_item(app, submenu);
         submenu_set_header(app->submenu, "Secondary Favorite App:");
         submenu_set_selected_item(app->submenu, app->settings.favorite_secondary);
-        break;
-    case 2:
-        add_game_submenu_item(app, submenu);
-        submenu_set_header(app->submenu, "Favorite Game:");
-        submenu_set_selected_item(app->submenu, app->settings.favorite_game);
         break;
     default:
         break;
@@ -74,9 +58,6 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
             break;
         case 1:
             app->settings.favorite_secondary = event.event;
-            break;
-        case 2:
-            app->settings.favorite_game = event.event;
             break;
         default:
             break;

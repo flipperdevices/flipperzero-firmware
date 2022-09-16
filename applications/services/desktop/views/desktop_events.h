@@ -6,7 +6,6 @@ typedef enum {
     DesktopMainEventOpenFavoritePrimary,
     DesktopMainEventOpenClock,
     DesktopMainEventOpenFavoriteSecondary,
-    DesktopMainEventOpenFavoriteGame,
     DesktopMainEventOpenMenu,
     DesktopMainEventOpenGames,
     DesktopMainEventOpenDebug,
