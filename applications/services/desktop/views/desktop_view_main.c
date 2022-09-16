@@ -8,7 +8,7 @@
 
 #include "../desktop_i.h"
 #include "desktop_view_main.h"
-#include <settings/desktop_settings/desktop_settings_app.h>
+#include "settings/desktop_settings/desktop_settings_app.h"
 
 struct DesktopMainView {
     View* view;
