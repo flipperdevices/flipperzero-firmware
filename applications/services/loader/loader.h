@@ -48,9 +48,6 @@ bool loader_is_locked(Loader* instance);
 /** Show primary loader */
 void loader_show_menu();
 
-/** Show games loader */
-void loader_show_game_menu();
-
 /** Show primary loader */
 void loader_update_menu();
 
