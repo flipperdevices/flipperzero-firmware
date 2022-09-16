@@ -80,10 +80,6 @@ const FlipperApplication* loader_find_application_by_name(const char* name) {
     application = loader_find_application_by_name_in_list(name, FLIPPER_APPS, FLIPPER_APPS_COUNT);
     if(!application) {
         application =
-            loader_find_application_by_name_in_list(name, FLIPPER_GAMES, FLIPPER_GAMES_COUNT);
-    }
-    if(!application) {
-        application =
             loader_find_application_by_name_in_list(name, FLIPPER_PLUGINS, FLIPPER_PLUGINS_COUNT);
     }
     if(!application) {
@@ -148,11 +144,6 @@ void loader_cli_list(Cli* cli, string_t args, Loader* instance) {
     printf("Applications:\r\n");
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_APPS[i].name);
-    }
-
-    printf("Games:\r\n");
-    for(size_t i = 0; i < FLIPPER_GAMES_COUNT; i++) {
-        printf("\t%s\r\n", FLIPPER_GAMES[i].name);
     }
 
     printf("Plugins:\r\n");
@@ -318,12 +309,6 @@ static Loader* loader_alloc() {
     view_set_previous_callback(menu_get_view(instance->primary_menu), loader_hide_menu);
     view_dispatcher_add_view(
         instance->view_dispatcher, LoaderMenuViewPrimary, menu_get_view(instance->primary_menu));
-    // Games menu
-    instance->games_menu = submenu_alloc();
-    view_set_context(submenu_get_view(instance->games_menu), instance->games_menu);
-    view_set_previous_callback(submenu_get_view(instance->games_menu), loader_hide_menu);
-    view_dispatcher_add_view(
-        instance->view_dispatcher, LoaderMenuViewGames, submenu_get_view(instance->games_menu));
     // Plugins menu
     instance->plugins_menu = submenu_alloc();
     view_set_context(submenu_get_view(instance->plugins_menu), instance->plugins_menu);
