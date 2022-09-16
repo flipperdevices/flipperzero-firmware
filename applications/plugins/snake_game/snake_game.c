@@ -294,7 +294,7 @@ static void snake_game_process_game_step(SnakeState* const snake_state, Notifica
 
     bool eatFruit = (next_step.x == snake_state->fruit.x) && (next_step.y == snake_state->fruit.y);
     if(eatFruit) {
-        notification_message(notify, &sequence_short_vibro_and_sound);
+        notification_message(notify, &sequence_short_vibro_and_rgb);
 
         snake_state->len++;
         if(snake_state->len >= MAX_SNAKE_LEN) {
