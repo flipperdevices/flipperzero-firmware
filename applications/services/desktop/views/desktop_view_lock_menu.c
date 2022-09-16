@@ -101,11 +101,19 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
             bool ret = false;
             if((event->type == InputTypeShort) || (event->type == InputTypeRepeat)) {
                 if(event->key == InputKeyUp) {
-                    model->idx = CLAMP(model->idx - 1, DesktopLockMenuIndexTotalCount - 1, 0);
+                    if (model->idx == 0) {
+                        model->idx = DesktopLockMenuIndexTotalCount - 1;
+                    } else {
+                        model->idx = CLAMP(model->idx - 1, DesktopLockMenuIndexTotalCount - 1, 0);
+                    }
                     ret = true;
                     consumed = true;
                 } else if(event->key == InputKeyDown) {
-                    model->idx = CLAMP(model->idx + 1, DesktopLockMenuIndexTotalCount - 1, 0);
+                    if (model->idx == DesktopLockMenuIndexTotalCount - 1) {
+                        model->idx = 0;
+                    } else {
+                        model->idx = CLAMP(model->idx + 1, DesktopLockMenuIndexTotalCount - 1, 0);
+                    }
                     ret = true;
                     consumed = true;
                 }

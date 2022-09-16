@@ -166,7 +166,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         }
         case DesktopMainEventOpenGameMenu: {
             LoaderStatus status =
-                loader_start(desktop->loader, "Applications", NULL); // TODO: open games folder
+                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/snake_game.fap"));
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
