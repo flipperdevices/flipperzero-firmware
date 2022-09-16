@@ -1,6 +1,6 @@
 #include "power_i.h"
 #include "views/power_off.h"
-#include "desktop/desktop_settings.h"
+#include "applications/services/desktop/desktop_settings.h"
 
 #include <furi.h>
 #include <furi_hal.h>
