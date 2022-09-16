@@ -468,7 +468,7 @@ int32_t clock_app(void* p) {
                             plugin_state->w_test = false;
                             // Don't Exit the plugin
                             plugin_state->codeSequence--;
-                            if(plugin_state->codeSequence < -1) processing = false;
+                            if(plugin_state->codeSequence < (uint32_t) -1) processing = false;
                         }
                         break;
                     }
