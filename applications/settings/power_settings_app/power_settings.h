@@ -1,6 +1,6 @@
 #include <toolbox/saved_struct.h>
 #include <storage/storage.h>
-#include <power/power_settings_filename.h>
+#include "power_settings_filename.h"
 
 #define POWER_SETTINGS_VER (1)
 
