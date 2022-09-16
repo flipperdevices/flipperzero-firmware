@@ -172,7 +172,7 @@ SubGhz* subghz_alloc() {
 
     //init setting
     subghz->setting = subghz_setting_alloc();
-    subghz_setting_load(subghz->setting, EXT_PATH("subghz/assets/setting_user"));
+    subghz_setting_load(subghz->setting, EXT_PATH("subghz/assets/setting_user.txt"));
 
     // Load last used values for Read, Read RAW, etc. or default
     subghz->last_setting = subghz_last_setting_alloc();

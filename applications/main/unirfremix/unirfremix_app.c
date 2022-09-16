@@ -20,7 +20,7 @@
 #include <lib/subghz/protocols/keeloq.h>
 #include <lib/subghz/protocols/star_line.h>
 
-#define UNIRFMAP_FOLDER "/ext/unirf"
+#define UNIRFMAP_FOLDER "/ext/subghz/unirf"
 #define UNIRFMAP_EXTENSION ".txt"
 
 #define TAG "UniRF Remix"
@@ -827,7 +827,7 @@ static void input_callback(InputEvent* input_event, void* ctx) {
 void unirfremix_subghz_alloc(UniRFRemix* app) {
     // load subghz presets
     app->setting = subghz_setting_alloc();
-    subghz_setting_load(app->setting, EXT_PATH("subghz/assets/setting_user"));
+    subghz_setting_load(app->setting, EXT_PATH("subghz/assets/setting_user.txt"));
 
     // load mfcodes
     app->environment = subghz_environment_alloc();
