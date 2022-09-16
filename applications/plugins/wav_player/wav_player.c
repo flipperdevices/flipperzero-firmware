@@ -22,7 +22,12 @@ static bool open_wav_stream(Stream* stream) {
     string_t path;
     string_init(path);
     string_set_str(path, WAVPLAYER_FOLDER);
-    bool ret = dialog_file_browser_show(dialogs, path, path, ".wav", true, &I_music_10px, false);
+
+    DialogsFileBrowserOptions browser_options;
+    dialog_file_browser_set_basic_options(&browser_options, ".wav", &I_music_10px);
+    browser_options.hide_ext = false;
+
+    bool ret = dialog_file_browser_show(dialogs, path, path, &browser_options);
 
     furi_record_close(RECORD_DIALOGS);
     if(ret) {
