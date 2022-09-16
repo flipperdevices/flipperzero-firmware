@@ -353,8 +353,8 @@ static void loader_free(Loader* instance) {
 
     menu_free(loader_instance->primary_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPrimary);
-    submenu_free(loader_instance->games_menu);
-    view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewGames);
+    // submenu_free(loader_instance->games_menu);
+    // view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewGames);
     submenu_free(loader_instance->plugins_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPlugins);
     submenu_free(loader_instance->debug_menu);
@@ -390,14 +390,14 @@ static void loader_build_menu() {
             loader_submenu_callback,
             (void*)LoaderMenuViewPlugins);
     }
-    if(FLIPPER_GAMES_COUNT != 0) {
-        menu_add_item(
-            loader_instance->primary_menu,
-            "Games",
-            &A_Games_14,
-            i++,
-            loader_submenu_callback,
-            (void*)LoaderMenuViewGames);
+    // if(FLIPPER_GAMES_COUNT != 0) {
+        // menu_add_item(
+            // loader_instance->primary_menu,
+            // "Games",
+            // &A_Games_14,
+            // i++,
+            // loader_submenu_callback,
+            // (void*)LoaderMenuViewGames);
     }
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         menu_add_item(
@@ -418,16 +418,16 @@ static void loader_build_menu() {
 }
 
 static void loader_build_submenu() {
-    FURI_LOG_I(TAG, "Building games menu");
-    size_t i;
-    for(i = 0; i < FLIPPER_GAMES_COUNT; i++) {
-        submenu_add_item(
-            loader_instance->games_menu,
-            FLIPPER_GAMES[i].name,
-            i,
-            loader_menu_callback,
-            (void*)&FLIPPER_GAMES[i]);
-    }
+    // FURI_LOG_I(TAG, "Building games menu");
+    // size_t i;
+    // for(i = 0; i < FLIPPER_GAMES_COUNT; i++) {
+        // submenu_add_item(
+            // loader_instance->games_menu,
+            // FLIPPER_GAMES[i].name,
+            // i,
+            // loader_menu_callback,
+            // (void*)&FLIPPER_GAMES[i]);
+    // }
 
     FURI_LOG_I(TAG, "Building plugins menu");
     for(i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
