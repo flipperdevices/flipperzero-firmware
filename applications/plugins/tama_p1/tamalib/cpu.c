@@ -669,7 +669,6 @@ static void set_rq(u12_t rq, u4_t v)
 /* Instructions */
 static void op_pset_cb(u8_t arg0, u8_t arg1)
 {
-	unused(arg1);
 	np = arg0;
 }
 
@@ -713,6 +712,7 @@ static void op_jp_nz_cb(u8_t arg0, u8_t arg1)
 
 static void op_jpba_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
 	unused(arg1);
 	next_pc = a | (b << 4) | (np << 8);
 }
@@ -743,6 +743,7 @@ static void op_calz_cb(u8_t arg0, u8_t arg1)
 
 static void op_ret_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
 	unused(arg1);
 	next_pc = M(sp) | (M(sp + 1) << 4) | (M(sp + 2) << 8) | (PCB << 12);
 	sp = (sp + 3) & 0xFF;
@@ -751,6 +752,7 @@ static void op_ret_cb(u8_t arg0, u8_t arg1)
 
 static void op_rets_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
 	unused(arg1);
 	next_pc = M(sp) | (M(sp + 1) << 4) | (M(sp + 2) << 8) | (PCB << 12);
 	sp = (sp + 3) & 0xFF;
@@ -1453,6 +1455,7 @@ static void op_fan_r_q_cb(u8_t arg0, u8_t arg1)
 
 static void op_rlc_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	u8_t tmp;
 
 	tmp = (RQ(arg0) << 1) | C;
@@ -1463,6 +1466,7 @@ static void op_rlc_cb(u8_t arg0, u8_t arg1)
 
 static void op_rrc_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	u8_t tmp;
 
 	tmp = (RQ(arg0) >> 1) | (C << 3);
@@ -1483,6 +1487,7 @@ static void op_inc_mn_cb(u8_t arg0, u8_t arg1)
 
 static void op_dec_mn_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	u8_t tmp;
 
 	tmp = M(arg0) - 1;
@@ -1493,6 +1498,7 @@ static void op_dec_mn_cb(u8_t arg0, u8_t arg1)
 
 static void op_acpx_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	u8_t tmp;
 
 	tmp = M(x) + RQ(arg0) + C;
@@ -1514,6 +1520,7 @@ static void op_acpx_cb(u8_t arg0, u8_t arg1)
 
 static void op_acpy_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	u8_t tmp;
 
 	tmp = M(y) + RQ(arg0) + C;
@@ -1535,6 +1542,7 @@ static void op_acpy_cb(u8_t arg0, u8_t arg1)
 
 static void op_scpx_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	u8_t tmp;
 
 	tmp = M(x) - RQ(arg0) - C;
@@ -1554,6 +1562,7 @@ static void op_scpx_cb(u8_t arg0, u8_t arg1)
 
 static void op_scpy_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	u8_t tmp;
 
 	tmp = M(y) - RQ(arg0) - C;
@@ -1573,6 +1582,7 @@ static void op_scpy_cb(u8_t arg0, u8_t arg1)
 
 static void op_not_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_RQ(arg0, ~RQ(arg0) & 0xF);
 	if (!RQ(arg0)) { SET_Z(); } else { CLEAR_Z(); }
 }
