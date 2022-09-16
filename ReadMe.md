@@ -6,10 +6,10 @@ To Be Added/To Verify Present:
 - [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game)
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
-- [Dolphin Backup (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Modified by RogueMaster
-- [Dolphin Restorer (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Cloned by RogueMaster
 - [Mouse Jiggler (By Jacob-Tate)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c) (Original By MuddleBox)
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
+- [Dolphin Restorer (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Cloned by RogueMaster
+- [Dolphin Backup (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Modified by RogueMaster
 - Assets: Running DolphinRestorer.fap on new install will auto-level to the end of Level 2.
 - GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Plugins: Menu, Icons, and Raycast exit [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
@@ -25,7 +25,6 @@ To Be Added/To Verify Present:
 - [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
 - [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)
 - [Keynote BT plugin: long press on OK to switch between Space and Retur… #1729 (By coded-with-claws)](https://github.com/flipperdevices/flipperzero-firmware/pull/1729)
-- [RFID: fix read info screen #1723 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1723)
 - [SubGhz: fix display information in the file if the frequenc… #1724 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1724)
 - [Show error popup when NFC chip is not init/disconnected #1722 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1722)
 - Fix Passport Pic Lvls Documentation
@@ -122,3 +121,4 @@ Implemented:
 - [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 - [Fix Mifare Classic 4K reading of the last 8 sectors #1712 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1712)
 - [Fix displaying LFRFID protocol names #1682 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1682)
+- [RFID: fix read info screen #1723 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1723)
