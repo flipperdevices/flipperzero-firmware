@@ -22,24 +22,14 @@ To Be Added/To Verify Present:
 - Settings: Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
 - Settings: Rename from SD `dolphin/name.txt` [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
 - Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
-- SubGHz: Auto Detect Raw in READ action (Needs To Be Enabled In Read Settings) [from perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/152)
 - SubGHz: [Add settings to subghz read functionality to allow setting RSSI threshold (raw only) (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/184)
 - [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Crashes 1st load if FW <~750KB or every load on larger FW `HIDDEN "INTAPP_chess_game"`
 - [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge. Add SD folder `chip8`, [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/) `HIDDEN "INTAPP_Chip8"` (Needs Controls Programmed)
 - [NFC: Display UL PWD_AUTH payload / ntag-pwd-capture (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
-- [New frequency analyzer #1557 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1557)
-- [BadUSB: add SYSRQ keys #1460 (By rck)](https://github.com/flipperdevices/flipperzero-firmware/pull/1460)
 - [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
-- [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
-- [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
-- [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 - [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
-- [Fix displaying LFRFID protocol names #1682 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1682)
 - [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)
-- [Fix Mifare Classic 4K reading of the last 8 sectors #1712 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1712)
-- [NFC Notifications fix #1731 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1731)
 - [Keynote BT plugin: long press on OK to switch between Space and Retur… #1729 (By coded-with-claws)](https://github.com/flipperdevices/flipperzero-firmware/pull/1729)
-- [Charging icon update fix #1733 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1733)
 - [RFID: fix read info screen #1723 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1723)
 - [SubGhz: fix display information in the file if the frequenc… #1724 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1724)
 - [Show error popup when NFC chip is not init/disconnected #1722 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1722)
@@ -92,6 +82,7 @@ Implemented:
 - - [UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT FROM CLOCK](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)<== FULL LIST OF GAMES ONLY CONTROLS
 - Settings:  "DUMB Mode" is now "Lock W PIN + Off" [(By RogueMaster)]
 - Settings: LCD Timeout Options Added: 10s+90s+2min+5min+10min [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/notification/notification_settings_app.c)
+- SubGHz: Auto Detect Raw in READ action (Needs To Be Enabled In Read Settings) [from perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/152)
 - SubGHz: Extended ranges enabled through flag in /ext/subghz/assets/extend_range.txt [from tkerrby](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/116)
 - SubGHz: Moved setting_user file to setting_user.txt! This makes it changable from IOS app. (By RogueMaster)
 - SubGHz: New frequency analyzer [(By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501) [feedback mode (by darmiel)](https://github.com/darmiel/flipper-playlist/tree/feat/stealth-frequency-analyzer)
@@ -123,3 +114,10 @@ Implemented:
 - [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 - [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `REQUIRES ESP32 WITH MARAUDER FLASHED`
 - [WiFi Scanner v.0.4 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `Req: ESP8266 or ESP32`
+- [New frequency analyzer #1557 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1557)
+- [BadUSB: add SYSRQ keys #1460 (By rck)](https://github.com/flipperdevices/flipperzero-firmware/pull/1460)
+- [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
+- [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
+- [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
+- [Fix Mifare Classic 4K reading of the last 8 sectors #1712 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1712)
+- [Fix displaying LFRFID protocol names #1682 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1682)
