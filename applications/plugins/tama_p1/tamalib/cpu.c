@@ -669,6 +669,7 @@ static void set_rq(u12_t rq, u4_t v)
 /* Instructions */
 static void op_pset_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	np = arg0;
 }
 
@@ -1477,6 +1478,7 @@ static void op_rrc_cb(u8_t arg0, u8_t arg1)
 
 static void op_inc_mn_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	u8_t tmp;
 
 	tmp = M(arg0) + 1;
