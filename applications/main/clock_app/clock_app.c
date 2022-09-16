@@ -6,7 +6,7 @@
 #include <dolphin/dolphin.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <desktop_settings/desktop_settings_app.h>
+#include "applications/settings/desktop_settings/desktop_settings_app.h"
 
 #define TAG "Clock"
 
