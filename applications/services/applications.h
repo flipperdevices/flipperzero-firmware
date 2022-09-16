@@ -38,6 +38,12 @@ extern const size_t FLIPPER_APPS_COUNT;
 extern const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[];
 extern const size_t FLIPPER_ON_SYSTEM_START_COUNT;
 
+/* Games list
+* Spawned by loader
+*/
+extern const FlipperApplication FLIPPER_GAMES[];
+extern const size_t FLIPPER_GAMES_COUNT;
+
 /* Plugins list
  * Spawned by loader
  */
