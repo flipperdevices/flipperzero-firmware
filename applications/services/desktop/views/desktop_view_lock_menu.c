@@ -4,7 +4,7 @@
 
 #include "../desktop_i.h"
 #include "desktop_view_lock_menu.h"
-#include "desktop/desktop_settings/desktop_settings_app.h"
+#include <desktop_settings/desktop_settings_app.h>
 
 #define LOCK_MENU_ITEMS_NB 4
 
