@@ -101,7 +101,7 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
             bool ret = false;
             if((event->type == InputTypeShort) || (event->type == InputTypeRepeat)) {
                 if(event->key == InputKeyUp) {
-                    if (model->idx == 0) {
+                    if(model->idx == 0) {
                         model->idx = DesktopLockMenuIndexTotalCount - 1;
                     } else {
                         model->idx = CLAMP(model->idx - 1, DesktopLockMenuIndexTotalCount - 1, 0);
@@ -109,7 +109,7 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                     ret = true;
                     consumed = true;
                 } else if(event->key == InputKeyDown) {
-                    if (model->idx == DesktopLockMenuIndexTotalCount - 1) {
+                    if(model->idx == DesktopLockMenuIndexTotalCount - 1) {
                         model->idx = 0;
                     } else {
                         model->idx = CLAMP(model->idx + 1, DesktopLockMenuIndexTotalCount - 1, 0);
