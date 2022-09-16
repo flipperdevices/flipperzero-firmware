@@ -1,40 +1,12 @@
 
 # Update firmware
 
-## [Get Latest Firmware from GitHub Releases](https://github.com/Eng1n33r/flipperzero-firmware/releases)
+## [Get Latest Firmware from GitHub Releases](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases)
 
 <br>
 <br>
 
 ### **If installing for first time - Update to the latest official firmware before proceeding**
-
-<br>
-<br>
-
-## With Web Updater
-
-- Be sure you updated to latest official release before(if installing for the first time), and verify that microSD card is installed
-- Open latest release page - [Releases](https://github.com/Eng1n33r/flipperzero-firmware/releases/latest)
-- Connect your device and select `Install via Web Updater`
-after that on web updater page - press `Connect` button
-- Press `Install` button
-
-- And wait, if all flashed successfully - you will have all needed assets pre installed
-- Done
-
-<br>
-<br>
-
-## With iOS mobile app
-
-- Be sure you updated to latest official release before(if installing for the first time), and verify that microSD card is installed
-- Open latest release page - [Releases](https://github.com/Eng1n33r/flipperzero-firmware/releases/latest)
-- Download `flipper-z-f7-update-(version).tgz`
-- Open downloads in ios Files app, select downloaded `.tgz` file, click Share, select Flipper App
-- In flipper app click green `Update` button, be sure it shows `Custom flipper-z-f7-update...` in Update Channel
-- Wait until update is finished
-- And if all flashed successfully - you will have all needed assets pre installed
-- Done
 
 <br>
 <br>
@@ -71,7 +43,7 @@ then select **`flipper-z-f7-full-(CURRENT VERSION).dfu`**
 
 ## With USB DFU 
 
-1. Download latest [Firmware](https://github.com/Eng1n33r/flipperzero-firmware/releases)
+1. Download latest [Firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases)
 
 2. Reboot Flipper to Bootloader
  - Press and hold `← Left` + `↩ Back` for reset 
@@ -87,7 +59,7 @@ then select **`flipper-z-f7-full-(CURRENT VERSION).dfu`**
 <br>
 
 # After install:
+- ### If you installed using .dfu - unpack files from archive `sd-card-(CURRENT VERSION).zip` to your microSD card
+<br>
 
-- ## [Read instructions how to use plugins and more](https://github.com/Eng1n33r/flipperzero-firmware#instructions)
-
-- ## [How To: Configure Sub-GHz Remote App](https://github.com/Eng1n33r/flipperzero-firmware/blob/dev/documentation/SubGHzRemotePlugin.md)
+- ## [How To: Configure UniversalRF Remix App](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/documentation/UniRFRemix.md)
