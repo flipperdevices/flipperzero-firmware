@@ -398,7 +398,7 @@ static void loader_build_menu() {
             // i++,
             // loader_submenu_callback,
             // (void*)LoaderMenuViewGames);
-    }
+    // }
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         menu_add_item(
             loader_instance->primary_menu,
