@@ -2,6 +2,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
+#include <dolphin/dolphin.h>
 
 #include "bird.h"
 
@@ -237,9 +238,9 @@ static void flappy_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 37, 31, "Game Over");
 
-        /*if(game_state->points != 0 && game_state->points % 5 == 0) {
+        if(game_state->points != 0 && game_state->points % 5 == 0) {
             DOLPHIN_DEED(getRandomDeed());
-        }*/
+        }
 
         canvas_set_font(canvas, FontSecondary);
         char buffer[12];
@@ -334,7 +335,7 @@ int32_t flappy_game_app(void* p) {
                 flappy_game_tick(game_state);
             }
         } else {
-            //FURI_LOG_D(TAG, "osMessageQueue: event timeout");
+            // FURI_LOG_D(TAG, "osMessageQueue: event timeout");
             // event timeout
         }
 

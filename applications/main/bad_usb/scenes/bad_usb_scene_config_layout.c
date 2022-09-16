@@ -14,13 +14,15 @@ static bool bad_usb_layout_select(BadUsbApp* bad_usb) {
         string_set_str(predefined_path, BAD_USB_APP_PATH_LAYOUT_FOLDER);
     }
 
-    DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(
-        &browser_options, BAD_USB_APP_LAYOUT_EXTENSION, &I_keyboard_10px);
-
     // Input events and views are managed by file_browser
     bool res = dialog_file_browser_show(
-        bad_usb->dialogs, bad_usb->keyboard_layout, predefined_path, &browser_options);
+        bad_usb->dialogs,
+        bad_usb->keyboard_layout,
+        predefined_path,
+        BAD_USB_APP_LAYOUT_EXTENSION,
+        true,
+        &I_keyboard_10px,
+        true);
 
     string_clear(predefined_path);
     return res;

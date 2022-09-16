@@ -26,6 +26,7 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
     elements_string_fit_width(canvas, disp_str, 128 - 2);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 8, string_get_cstr(disp_str));
+    string_reset(disp_str);
 
     if(strlen(model->layout) == 0) {
         string_set(disp_str, "(default)");
@@ -38,8 +39,6 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
     }
     elements_string_fit_width(canvas, disp_str, 128 - 2);
     canvas_draw_str(canvas, 2, 8 + canvas_current_font_height(canvas), string_get_cstr(disp_str));
-
-    string_reset(disp_str);
 
     canvas_draw_icon(canvas, 22, 24, &I_UsbTree_48x22);
 
@@ -73,6 +72,7 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str_aligned(
             canvas, 127, 46, AlignRight, AlignBottom, string_get_cstr(disp_str));
         string_reset(disp_str);
+        canvas_draw_str_aligned(canvas, 127, 56, AlignRight, AlignBottom, model->state.error);
     } else if(model->state.state == BadUsbStateIdle) {
         canvas_draw_icon(canvas, 4, 26, &I_Smile_18x18);
         canvas_set_font(canvas, FontBigNumbers);
@@ -188,6 +188,7 @@ void bad_usb_set_layout(BadUsb* bad_usb, const char* layout) {
             return true;
         });
 }
+
 void bad_usb_set_state(BadUsb* bad_usb, BadUsbState* st) {
     furi_assert(st);
     with_view_model(
