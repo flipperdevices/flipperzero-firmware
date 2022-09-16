@@ -34,9 +34,7 @@ bool nfc_scene_mf_classic_keys_warn_duplicate_on_event(void* context, SceneManag
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventViewExit) {
             consumed = scene_manager_search_and_switch_to_previous_scene(
-                nfc->scene_manager,
-                scene_manager_get_scene_state(
-                    nfc->scene_manager, NfcSceneMfClassicKeysWarnDuplicate));
+                nfc->scene_manager, NfcSceneMfClassicKeysAdd);
         }
     }
     return consumed;

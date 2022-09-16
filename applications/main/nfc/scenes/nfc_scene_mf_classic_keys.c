@@ -23,8 +23,6 @@ void nfc_scene_mf_classic_keys_on_enter(void* context) {
     if(dict) {
         user_dict_keys_total = mf_classic_dict_get_total_keys(dict);
         mf_classic_dict_free(dict);
-        scene_manager_set_scene_state(
-            nfc->scene_manager, NfcSceneMfClassicKeys, user_dict_keys_total);
     }
 
     widget_add_string_element(
@@ -62,9 +60,7 @@ bool nfc_scene_mf_classic_keys_on_event(void* context, SceneManagerEvent event) 
         } else if(event.event == GuiButtonTypeLeft) {
             scene_manager_previous_scene(nfc->scene_manager);
             consumed = true;
-        } else if(
-            event.event == GuiButtonTypeRight &&
-            (scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfClassicKeys) > 0)) {
+        } else if(event.event == GuiButtonTypeRight) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicKeysList);
             consumed = true;
         }
