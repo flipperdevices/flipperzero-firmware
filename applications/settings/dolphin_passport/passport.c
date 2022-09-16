@@ -6,7 +6,7 @@
 #include <gui/gui.h>
 #include <furi_hal_version.h>
 #include "dolphin/dolphin.h"
-#include "desktop/desktop_settings/desktop_settings_app.h"
+#include <desktop_settings/desktop_settings_app.h>
 #include "math.h"
 
 #define MOODS_TOTAL 1
