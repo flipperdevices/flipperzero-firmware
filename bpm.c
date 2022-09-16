@@ -1,4 +1,5 @@
 #include <furi.h>
+#include <furi_hal.h>
 #include <dialogs/dialogs.h>
 #include <gui/gui.h>
 #include <input/input.h>
@@ -16,9 +17,17 @@ typedef struct {
 
 typedef struct {
     int taps;
-    float interval;
     float bpm;
+    uint32_t last_stamp;
+    uint32_t interval;
 } BPMTapper;
+
+// TOO SLOW!
+//uint64_t dolphin_state_timestamp() {
+//    FuriHalRtcDateTime datetime;
+//    furi_hal_rtc_get_datetime(&datetime);
+//    return furi_hal_rtc_datetime_to_timestamp(&datetime);
+//}
 
 static void show_hello() {
 
@@ -58,15 +67,19 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontPrimary);
     char taps[8];
-    //sprintf(taps, "%d", bpm_state->taps);
     itoa(bpm_state->taps, taps, 10);
-    canvas_draw_str_aligned(canvas, 5, 5, AlignRight, AlignBottom, taps);
+    char interval[32];
+    itoa(bpm_state->interval, interval, 10);
+    canvas_draw_str_aligned(canvas, 15, 15, AlignRight, AlignBottom, taps);
+    canvas_draw_str_aligned(canvas, 40, 50, AlignRight, AlignBottom, interval);
     release_mutex((ValueMutex*)ctx, bpm_state);
 }
 
 static void bpm_state_init(BPMTapper* const plugin_state) {
   plugin_state->taps = 0; 
   plugin_state->bpm = 0.0;
+  plugin_state->last_stamp = 0;
+  plugin_state->interval = 0;
 }
 
 int32_t bpm_tapper_app(void* p) {
@@ -112,6 +125,9 @@ int32_t bpm_tapper_app(void* p) {
             case InputKeyLeft:
             case InputKeyOk:
               bpm_state->taps++;
+              uint32_t new_stamp = furi_get_tick();
+              bpm_state->interval = new_stamp - bpm_state->last_stamp;
+              bpm_state->last_stamp = new_stamp;
               break;
             case InputKeyBack:
                 // Exit the plugin
