@@ -669,16 +669,19 @@ static void set_rq(u12_t rq, u4_t v)
 /* Instructions */
 static void op_pset_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	np = arg0;
 }
 
 static void op_jp_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	next_pc = arg0 | (np << 8);
 }
 
 static void op_jp_c_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	if (flags & FLAG_C) {
 		next_pc = arg0 | (np << 8);
 	}
@@ -686,6 +689,7 @@ static void op_jp_c_cb(u8_t arg0, u8_t arg1)
 
 static void op_jp_nc_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	if (!(flags & FLAG_C)) {
 		next_pc = arg0 | (np << 8);
 	}
@@ -693,6 +697,7 @@ static void op_jp_nc_cb(u8_t arg0, u8_t arg1)
 
 static void op_jp_z_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	if (flags & FLAG_Z) {
 		next_pc = arg0 | (np << 8);
 	}
@@ -700,6 +705,7 @@ static void op_jp_z_cb(u8_t arg0, u8_t arg1)
 
 static void op_jp_nz_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	if (!(flags & FLAG_Z)) {
 		next_pc = arg0 | (np << 8);
 	}
@@ -707,11 +713,13 @@ static void op_jp_nz_cb(u8_t arg0, u8_t arg1)
 
 static void op_jpba_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	next_pc = a | (b << 4) | (np << 8);
 }
 
 static void op_call_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	pc = (pc + 1) & 0x1FFF; // This does not actually change the PC register
 	SET_M(sp - 1, PCP);
 	SET_M(sp - 2, PCSH);
@@ -723,6 +731,7 @@ static void op_call_cb(u8_t arg0, u8_t arg1)
 
 static void op_calz_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	pc = (pc + 1) & 0x1FFF; // This does not actually change the PC register
 	SET_M(sp - 1, PCP);
 	SET_M(sp - 2, PCSH);
@@ -734,6 +743,7 @@ static void op_calz_cb(u8_t arg0, u8_t arg1)
 
 static void op_ret_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	next_pc = M(sp) | (M(sp + 1) << 4) | (M(sp + 2) << 8) | (PCB << 12);
 	sp = (sp + 3) & 0xFF;
 	call_depth--;
@@ -741,6 +751,7 @@ static void op_ret_cb(u8_t arg0, u8_t arg1)
 
 static void op_rets_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	next_pc = M(sp) | (M(sp + 1) << 4) | (M(sp + 2) << 8) | (PCB << 12);
 	sp = (sp + 3) & 0xFF;
 	next_pc = (pc + 1) & 0x1FFF;
@@ -749,6 +760,7 @@ static void op_rets_cb(u8_t arg0, u8_t arg1)
 
 static void op_retd_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	next_pc = M(sp) | (M(sp + 1) << 4) | (M(sp + 2) << 8) | (PCB << 12);
 	sp = (sp + 3) & 0xFF;
 	SET_M(x, arg0 & 0xF);
@@ -759,99 +771,124 @@ static void op_retd_cb(u8_t arg0, u8_t arg1)
 
 static void op_nop5_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 }
 
 static void op_nop7_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 }
 
 static void op_halt_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	g_hal->halt();
 }
 
 static void op_inc_x_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	x = ((x + 1) & 0xFF) | (XP << 8);
 }
 
 static void op_inc_y_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	y = ((y + 1) & 0xFF) | (YP << 8);
 }
 
 static void op_ld_x_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	x = arg0 | (XP << 8);
 }
 
 static void op_ld_y_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	y = arg0 | (YP << 8);
 }
 
 static void op_ld_xp_r_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	x = XHL | (RQ(arg0) << 8);
 }
 
 static void op_ld_xh_r_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	x = XL | (RQ(arg0) << 4) | (XP << 8);
 }
 
 static void op_ld_xl_r_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	x = RQ(arg0) | (XH << 4) | (XP << 8);
 }
 
 static void op_ld_yp_r_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	y = YHL | (RQ(arg0) << 8);
 }
 
 static void op_ld_yh_r_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	y = YL | (RQ(arg0) << 4) | (YP << 8);
 }
 
 static void op_ld_yl_r_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	y = RQ(arg0) | (YH << 4) | (YP << 8);
 }
 
 static void op_ld_r_xp_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_RQ(arg0, XP);
 }
 
 static void op_ld_r_xh_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_RQ(arg0, XH);
 }
 
 static void op_ld_r_xl_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_RQ(arg0, XL);
 }
 
 static void op_ld_r_yp_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_RQ(arg0, YP);
 }
 
 static void op_ld_r_yh_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_RQ(arg0, YH);
 }
 
 static void op_ld_r_yl_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_RQ(arg0, YL);
 }
 
 static void op_adc_xh_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	u8_t tmp;
 
 	tmp = XH + arg0 + C;
@@ -862,6 +899,7 @@ static void op_adc_xh_cb(u8_t arg0, u8_t arg1)
 
 static void op_adc_xl_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	u8_t tmp;
 
 	tmp = XL + arg0 + C;
@@ -872,6 +910,7 @@ static void op_adc_xl_cb(u8_t arg0, u8_t arg1)
 
 static void op_adc_yh_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	u8_t tmp;
 
 	tmp = YH + arg0 + C;
@@ -882,6 +921,7 @@ static void op_adc_yh_cb(u8_t arg0, u8_t arg1)
 
 static void op_adc_yl_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	u8_t tmp;
 
 	tmp = YL + arg0 + C;
@@ -892,24 +932,28 @@ static void op_adc_yl_cb(u8_t arg0, u8_t arg1)
 
 static void op_cp_xh_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	if (XH < arg0) { SET_C(); } else { CLEAR_C(); }
 	if (XH == arg0) { SET_Z(); } else { CLEAR_Z(); }
 }
 
 static void op_cp_xl_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	if (XL < arg0) { SET_C(); } else { CLEAR_C(); }
 	if (XL == arg0) { SET_Z(); } else { CLEAR_Z(); }
 }
 
 static void op_cp_yh_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	if (YH < arg0) { SET_C(); } else { CLEAR_C(); }
 	if (YH == arg0) { SET_Z(); } else { CLEAR_Z(); }
 }
 
 static void op_cp_yl_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	if (YL < arg0) { SET_C(); } else { CLEAR_C(); }
 	if (YL == arg0) { SET_Z(); } else { CLEAR_Z(); }
 }
@@ -926,26 +970,31 @@ static void op_ld_r_q_cb(u8_t arg0, u8_t arg1)
 
 static void op_ld_a_mn_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	a = M(arg0);
 }
 
 static void op_ld_b_mn_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	b = M(arg0);
 }
 
 static void op_ld_mn_a_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_M(arg0, a);
 }
 
 static void op_ld_mn_b_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_M(arg0, b);
 }
 
 static void op_ldpx_mx_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_M(x, arg0);
 	x = ((x + 1) & 0xFF) | (XP << 8);
 }
@@ -958,6 +1007,7 @@ static void op_ldpx_r_cb(u8_t arg0, u8_t arg1)
 
 static void op_ldpy_my_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_M(y, arg0);
 	y = ((y + 1) & 0xFF) | (YP << 8);
 }
@@ -970,6 +1020,7 @@ static void op_ldpy_r_cb(u8_t arg0, u8_t arg1)
 
 static void op_lbpx_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_M(x, arg0 & 0xF);
 	SET_M(x + 1, (arg0 >> 4) & 0xF);
 	x = ((x + 2) & 0xFF) | (XP << 8);
@@ -977,177 +1028,234 @@ static void op_lbpx_cb(u8_t arg0, u8_t arg1)
 
 static void op_set_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	flags |= arg0;
 }
 
 static void op_rst_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	flags &= arg0;
 }
 
 static void op_scf_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	SET_C();
 }
 
 static void op_rcf_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	CLEAR_C();
 }
 
 static void op_szf_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	SET_Z();
 }
 
 static void op_rzf_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	CLEAR_Z();
 }
 
 static void op_sdf_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	SET_D();
 }
 
 static void op_rdf_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	CLEAR_D();
 }
 
 static void op_ei_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	SET_I();
 }
 
 static void op_di_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	CLEAR_I();
 }
 
 static void op_inc_sp_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	sp = (sp + 1) & 0xFF;
 }
 
 static void op_dec_sp_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	sp = (sp - 1) & 0xFF;
 }
 
 static void op_push_r_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	sp = (sp - 1) & 0xFF;
 	SET_M(sp, RQ(arg0));
 }
 
 static void op_push_xp_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	sp = (sp - 1) & 0xFF;
 	SET_M(sp, XP);
 }
 
 static void op_push_xh_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	sp = (sp - 1) & 0xFF;
 	SET_M(sp, XH);
 }
 
 static void op_push_xl_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	sp = (sp - 1) & 0xFF;
 	SET_M(sp, XL);
 }
 
 static void op_push_yp_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	sp = (sp - 1) & 0xFF;
 	SET_M(sp, YP);
 }
 
 static void op_push_yh_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	sp = (sp - 1) & 0xFF;
 	SET_M(sp, YH);
 }
 
 static void op_push_yl_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	sp = (sp - 1) & 0xFF;
 	SET_M(sp, YL);
 }
 
 static void op_push_f_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	sp = (sp - 1) & 0xFF;
 	SET_M(sp, flags);
 }
 
 static void op_pop_r_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_RQ(arg0, M(sp));
 	sp = (sp + 1) & 0xFF;
 }
 
 static void op_pop_xp_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	x = XL | (XH << 4)| (M(sp) << 8);
 	sp = (sp + 1) & 0xFF;
 }
 
 static void op_pop_xh_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	x = XL | (M(sp) << 4)| (XP << 8);
 	sp = (sp + 1) & 0xFF;
 }
 
 static void op_pop_xl_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	x = M(sp) | (XH << 4)| (XP << 8);
 	sp = (sp + 1) & 0xFF;
 }
 
 static void op_pop_yp_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	y = YL | (YH << 4)| (M(sp) << 8);
 	sp = (sp + 1) & 0xFF;
 }
 
 static void op_pop_yh_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	y = YL | (M(sp) << 4)| (YP << 8);
 	sp = (sp + 1) & 0xFF;
 }
 
 static void op_pop_yl_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	y = M(sp) | (YH << 4)| (YP << 8);
 	sp = (sp + 1) & 0xFF;
 }
 
 static void op_pop_f_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg0);
+	unused(arg1);
 	flags = M(sp);
 	sp = (sp + 1) & 0xFF;
 }
 
 static void op_ld_sph_r_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	sp = SPL | (RQ(arg0) << 4);
 }
 
 static void op_ld_spl_r_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	sp = RQ(arg0) | (SPH << 4);
 }
 
 static void op_ld_r_sph_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_RQ(arg0, SPH);
 }
 
 static void op_ld_r_spl_cb(u8_t arg0, u8_t arg1)
 {
+	unused(arg1);
 	SET_RQ(arg0, SPL);
 }
 
