@@ -8,7 +8,7 @@
 
 #include <gui/modules/popup.h>
 #include "views/power_off.h"
-// #include "power/power_settings.h"
+#include "applications/settings/power_settings_app/power_settings.h"
 #include "views/power_unplug_usb.h"
 
 #include <notification/notification_messages.h>

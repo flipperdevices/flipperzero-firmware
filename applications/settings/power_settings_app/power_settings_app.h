@@ -12,7 +12,7 @@
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/variable_item_list.h>
 
-// #include "power/power_settings.h"
+#include "power_settings.h"
 #include "scenes/power_settings_scene.h"
 
 typedef struct {
