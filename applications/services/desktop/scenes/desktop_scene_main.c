@@ -1,6 +1,6 @@
 #include <furi.h>
 #include <furi_hal.h>
-#include <applications.h>
+#include "applications/services/applications.h"
 #include <assets_icons.h>
 #include <loader/loader.h>
 
