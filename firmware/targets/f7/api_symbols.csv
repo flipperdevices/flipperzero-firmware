@@ -1133,7 +1133,6 @@ Function,+,furi_hal_power_get_battery_remaining_capacity,uint32_t,
 Function,+,furi_hal_power_get_battery_temperature,float,FuriHalPowerIC
 Function,+,furi_hal_power_get_battery_voltage,float,FuriHalPowerIC
 Function,+,furi_hal_power_get_pct,uint8_t,
-Function,-,furi_hal_power_get_system_voltage,float,
 Function,+,furi_hal_power_get_usb_voltage,float,
 Function,+,furi_hal_power_info_get,void,"FuriHalPowerInfoCallback, void*"
 Function,-,furi_hal_power_init,void,
