@@ -187,7 +187,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 state->rollTime[0]);
             uint8_t d1_i = rand() % COUNT_OF(deckOne);
             // INITIALIZE WITH PLACEHOLDERS TO AVOID MAYBE UNINITIALIZED ERROR
-            for(int i = 0; i < COUNT_OF(deckOne); i++) {
+            for(uint8_t i = 0; i < COUNT_OF(deckOne); i++) {
                 if(i < d1_i) {
                     snprintf(deckTwo[i], 8, "%s", deckOne[i]);
                 } else if(i > d1_i) {
