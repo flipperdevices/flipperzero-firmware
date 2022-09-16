@@ -1,5 +1,5 @@
 #include "../desktop_settings_app.h"
-#include "applications.h"
+#include <applications.h>
 #include "desktop_settings_scene.h"
 
 static void desktop_settings_scene_favorite_submenu_callback(void* context, uint32_t index) {
