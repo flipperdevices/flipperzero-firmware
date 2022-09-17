@@ -59,6 +59,13 @@ typedef enum {
     RAWFileIsOpenRead,
 } RAWFilIsOpen;
 
+
+void subghz_protocol_raw_file_encoder_worker_callback_end(void* context) {
+    furi_assert(context);
+    SubGhzProtocolRAW* instance = context;
+    if(instance->callback_end) instance->callback_end(instance->context_end);
+}
+
 const SubGhzProtocolDecoder subghz_protocol_raw_decoder = {
     .alloc = subghz_protocol_decoder_raw_alloc,
     .free = subghz_protocol_decoder_raw_free,
