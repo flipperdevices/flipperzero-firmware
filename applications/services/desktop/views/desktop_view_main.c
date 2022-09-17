@@ -77,9 +77,10 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
             if(event->key == InputKeyOk) {
                 main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
             } else if(event->key == InputKeyUp) {
-                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+                // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyDown) {
-                main_view->callback(DesktopMainEventOpenGames, main_view->context);
+                // main_view->callback(DesktopMainEventOpenGames, main_view->context);
+                main_view->callback(DesktopMainEventOpenDebug, main_view->context);
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
             } else if(event->key == InputKeyRight) {
@@ -89,11 +90,12 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
     } else if(main_view->is_gamemode == true) {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
-                main_view->callback(DesktopMainEventOpenGames, main_view->context);
+                // main_view->callback(DesktopMainEventOpenGames, main_view->context);
             } else if(event->key == InputKeyUp) {
-                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+                // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyDown) {
                 // PREFER TO OPEN GAMES MENU
+                // main_view->callback(DesktopMainEventOpenGameMenu, main_view->context);
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenClock, main_view->context);
             } else if(event->key == InputKeyRight) {
@@ -103,9 +105,10 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
             if(event->key == InputKeyOk) {
                 main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
             } else if(event->key == InputKeyUp) {
-                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+                // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyDown) {
-                main_view->callback(DesktopMainEventOpenGames, main_view->context);
+                // main_view->callback(DesktopMainEventOpenGames, main_view->context);
+                // main_view->callback(DesktopMainEventOpenGameMenu, main_view->context);
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenClock, main_view->context);
             } else if(event->key == InputKeyRight) {
