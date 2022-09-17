@@ -34,7 +34,7 @@ typedef struct {
 
 static void init_queue(queue *q) {
   q->size = 0;
-  q->max_size = 15;
+  q->max_size = 5;
   q->front = NULL;
   q->rear = NULL;
 }
@@ -57,10 +57,11 @@ static void queue_add(queue *q, int value) {
     // check if empty
     if (q->rear == NULL) {
       q->front = tmp;
+      q->rear = tmp;
     } else {
       q->rear->next = tmp;
+      q->rear = tmp;
     }
-    q->rear = tmp;
     q->size++;
 }
 
@@ -70,14 +71,14 @@ static float queue_avg(queue *q) {
       return avg;
     } else {
       node *tmp;
-      int sum = 0;
+      float sum = 0.0;
 
       tmp = q->front;
       while (tmp != NULL) {
           sum = sum + tmp->interval;
           tmp = tmp->next;
       } 
-      avg = (float)sum / q->size;
+      avg = sum / q->size;
       return avg;
     }
 }
@@ -141,6 +142,10 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     string_printf(tempStr, "Taps: %d", bpm_state->taps);
     canvas_draw_str_aligned(canvas, 5, 15, AlignLeft, AlignBottom, string_get_cstr(tempStr));
+    string_reset(tempStr);
+
+    string_printf(tempStr, "Queue: %d", bpm_state->tap_queue->size);
+    canvas_draw_str_aligned(canvas, 50, 15, AlignLeft, AlignBottom, string_get_cstr(tempStr));
     string_reset(tempStr);
 
     string_printf(tempStr, "Interval: %dms", bpm_state->interval);
@@ -214,8 +219,8 @@ int32_t bpm_tapper_app(void* p) {
               bpm_state->taps++;
               uint32_t new_stamp = furi_get_tick();
               bpm_state->interval = new_stamp - bpm_state->last_stamp;
-              queue_add(bpm_state->tap_queue, bpm_state->interval);
               bpm_state->last_stamp = new_stamp;
+              queue_add(bpm_state->tap_queue, bpm_state->interval);
               float avg = queue_avg(bpm_state->tap_queue);
               float bps = 1.0 / (avg / 1000.0);
               bpm_state->bpm = bps * 60.0;
