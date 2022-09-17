@@ -79,6 +79,9 @@ void flipper_application_free(FlipperApplication* app);
 FlipperApplicationPreloadStatus
     flipper_application_preload(FlipperApplication* app, const char* path);
 
+FlipperApplicationPreloadStatus
+    flipper_application_preload_manifest(FlipperApplication* app, const char* path);
+
 /**
  * @brief Get pointer to application manifest for preloaded application
  * @param app Application pointer

@@ -33,10 +33,7 @@ void flipper_application_free(FlipperApplication* app) {
         free(app->state.mmap_entries);
     }
 
-    ELFSection_t* sections[] = {&app->text, &app->rodata, &app->data, &app->bss};
-    for(size_t i = 0; i < COUNT_OF(sections); i++) {
-        flipper_application_free_section(sections[i]);
-    }
+    flipper_application_free_elf_data(&app->elf);
 
     storage_file_free(app->fd);
 
@@ -44,6 +41,27 @@ void flipper_application_free(FlipperApplication* app) {
 }
 
 /* Parse headers, load manifest */
+FlipperApplicationPreloadStatus
+    flipper_application_preload_manifest(FlipperApplication* app, const char* path) {
+    if(!flipper_application_load_elf_headers(app, path) ||
+       !flipper_application_load_manifest(app)) {
+        return FlipperApplicationPreloadStatusInvalidFile;
+    }
+
+    if((app->manifest.base.manifest_magic != FAP_MANIFEST_MAGIC) &&
+       (app->manifest.base.manifest_version == FAP_MANIFEST_SUPPORTED_VERSION)) {
+        return FlipperApplicationPreloadStatusInvalidManifest;
+    }
+
+    if(app->manifest.base.api_version.major != app->api_interface->api_version_major /* ||
+       app->manifest.base.api_version.minor > app->api_interface->api_version_minor */) {
+        return FlipperApplicationPreloadStatusApiMismatch;
+    }
+
+    return FlipperApplicationPreloadStatusSuccess;
+}
+
+/* Parse headers, load full file */
 FlipperApplicationPreloadStatus
     flipper_application_preload(FlipperApplication* app, const char* path) {
     if(!flipper_application_load_elf_headers(app, path) ||
@@ -86,7 +104,7 @@ FuriThread* flipper_application_spawn(FlipperApplication* app, void* args) {
     app->thread = furi_thread_alloc();
     furi_thread_set_stack_size(app->thread, manifest->stack_size);
     furi_thread_set_name(app->thread, manifest->name);
-    furi_thread_set_callback(app->thread, (entry_t*)app->entry);
+    furi_thread_set_callback(app->thread, flipper_application_get_entry_address(app));
     furi_thread_set_context(app->thread, args);
 
     return app->thread;
@@ -97,7 +115,7 @@ FuriThread* flipper_application_get_thread(FlipperApplication* app) {
 }
 
 void const* flipper_application_get_entry_address(FlipperApplication* app) {
-    return (void*)app->entry;
+    return (void*)app->elf.entry;
 }
 
 static const char* preload_status_strings[] = {
