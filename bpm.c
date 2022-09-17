@@ -34,7 +34,7 @@ typedef struct {
 
 static void init_queue(queue *q) {
   q->size = 0;
-  q->max_size = 5;
+  q->max_size = 8;
   q->front = NULL;
   q->rear = NULL;
 }
@@ -145,7 +145,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     string_reset(tempStr);
 
     string_printf(tempStr, "Queue: %d", bpm_state->tap_queue->size);
-    canvas_draw_str_aligned(canvas, 50, 15, AlignLeft, AlignBottom, string_get_cstr(tempStr));
+    canvas_draw_str_aligned(canvas, 70, 15, AlignLeft, AlignBottom, string_get_cstr(tempStr));
     string_reset(tempStr);
 
     string_printf(tempStr, "Interval: %dms", bpm_state->interval);
@@ -154,7 +154,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     string_printf(tempStr, "%.2f", bpm_state->bpm);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, 20, 50, AlignLeft, AlignBottom, string_get_cstr(tempStr));
+    canvas_draw_str_aligned(canvas, 64, 50, AlignCenter, AlignCenter, string_get_cstr(tempStr));
     string_reset(tempStr);
 
     string_clear(tempStr);
@@ -166,8 +166,8 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 static void bpm_state_init(BPMTapper* const plugin_state) {
   plugin_state->taps = 0; 
   plugin_state->bpm = 120.0;
-  plugin_state->last_stamp = furi_get_tick();
-  plugin_state->interval = 500;
+  plugin_state->last_stamp = 0;// furi_get_tick();
+  plugin_state->interval = 0;
   queue *q;
   q = malloc(sizeof(queue));
   init_queue(q);
@@ -218,6 +218,10 @@ int32_t bpm_tapper_app(void* p) {
             case InputKeyOk:
               bpm_state->taps++;
               uint32_t new_stamp = furi_get_tick();
+              if (bpm_state->last_stamp == 0) {
+                  bpm_state->last_stamp = new_stamp;
+                  break;
+              }
               bpm_state->interval = new_stamp - bpm_state->last_stamp;
               bpm_state->last_stamp = new_stamp;
               queue_add(bpm_state->tap_queue, bpm_state->interval);
