@@ -1,7 +1,7 @@
 #include "../subghz_i.h"
 #include "../views/receiver.h"
 
-const NotificationSequence subghs_sequence_rx = {
+const NotificationSequence subghz_sequence_rx = {
     &message_green_255,
 
     &message_vibro_on,
@@ -14,7 +14,7 @@ const NotificationSequence subghs_sequence_rx = {
     NULL,
 };
 
-const NotificationSequence subghs_sequence_rx_locked = {
+const NotificationSequence subghz_sequence_rx_locked = {
     &message_green_255,
 
     &message_display_backlight_on,
@@ -225,9 +225,9 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             break;
         case SubGhzNotificationStateRxDone:
             if(subghz->lock != SubGhzLockOn) {
-                notification_message(subghz->notifications, &subghs_sequence_rx);
+                notification_message(subghz->notifications, &subghz_sequence_rx);
             } else {
-                notification_message(subghz->notifications, &subghs_sequence_rx_locked);
+                notification_message(subghz->notifications, &subghz_sequence_rx_locked);
             }
             subghz->state_notifications = SubGhzNotificationStateRx;
             break;
