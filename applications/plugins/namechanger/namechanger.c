@@ -1,6 +1,6 @@
 #include "namechanger.h"
 #include "namechanger_i.h"
-#include "../namechanger/scenes/namechanger_scene.h"
+#include "namechanger/scenes/namechanger_scene.h"
 #include "m-string.h"
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
