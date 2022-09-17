@@ -6,7 +6,7 @@
 <b>Latest Updates:</b>
 
 - Known Issues:	 `Chess` & `Chip8` (No Controls)
-- Latest updates for OFW and Unleashed have been merged in along with the RogueMaster changes from prior builds
+- Latest updates for OFW and Unleashed have been merged in along with the RogueMaster changes from prior builds. The only changes not done are listed in the TO DO section below
 
 <details>
   <summary><B>TO DO</b></summary><br/>
