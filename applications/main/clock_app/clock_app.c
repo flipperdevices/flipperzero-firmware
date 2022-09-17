@@ -202,7 +202,7 @@ const NotificationSequence clock_alert_startStop = {
 
 static void desktop_view_main_dumbmode_changed(DesktopSettings* settings) {
     settings->is_dumbmode = !settings->is_dumbmode;
-    SAVE_DESKTOP_SETTINGS(settings);
+    DESKTOP_SETTINGS_SAVE(settings);
 }
 
 static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -345,7 +345,7 @@ int32_t clock_app(void* p) {
         free(plugin_state);
         return 255;
     }
-    LOAD_DESKTOP_SETTINGS(plugin_state->desktop_settings);
+    DESKTOP_SETTINGS_LOAD(plugin_state->desktop_settings);
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, clock_render_callback, plugin_state);

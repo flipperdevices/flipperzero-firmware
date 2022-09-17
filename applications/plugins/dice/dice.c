@@ -435,7 +435,7 @@ int32_t dice_app(void* p) {
         return 255;
     }
 
-    LOAD_DESKTOP_SETTINGS(plugin_state->desktop_settings);
+    DESKTOP_SETTINGS_LOAD(plugin_state->desktop_settings);
 
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, dice_render_callback, plugin_state);

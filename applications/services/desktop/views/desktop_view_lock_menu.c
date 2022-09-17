@@ -10,7 +10,7 @@
 
 static void desktop_view_lock_menu_dumbmode_changed(bool isThisGameMode) {
     DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
-    LOAD_DESKTOP_SETTINGS(&app->settings);
+    DESKTOP_SETTINGS_LOAD(&app->settings);
     app->settings.is_dumbmode = isThisGameMode;
     DESKTOP_SETTINGS_SAVE(&app->settings);
 }
