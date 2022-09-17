@@ -318,7 +318,7 @@ static void oregon2_append_check_sum(uint32_t fix_data, uint32_t var_data, strin
     if (sum == ref_sum)
         string_cat_printf(output, "Sum ok: 0x%hhX", ref_sum);
     else
-        string_cat_printf(output, "Sum mismatch: 0x%hhX vs calc 0x%hhX", ref_sum, sum);
+        string_cat_printf(output, "Sum err: 0x%hhX vs 0x%hhX", ref_sum, sum);
 }
 
 
@@ -329,8 +329,7 @@ void subghz_protocol_decoder_oregon2_get_string(void* context, string_t output) 
     string_cat_printf(
         output,
         "%s\r\n"
-        "ID: 0x%04lX, ch: %d%s\r\n"
-        "Rolling: 0x%02lX\r\n",
+        "ID: 0x%04lX, ch: %d%s, rc: 0x%02lX\r\n",
         instance->generic.protocol_name,
         (uint32_t)sensor_id,
         (uint32_t)(instance->generic.data >> 12) & 0xF,
