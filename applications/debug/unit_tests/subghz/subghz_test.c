@@ -434,6 +434,13 @@ MU_TEST(subghz_decoder_clemsa_test) {
         "Test decoder " SUBGHZ_PROTOCOL_CLEMSA_NAME " error\r\n");
 }
 
+MU_TEST(subghz_decoder_oregon2_test) {
+    mu_assert(
+        subghz_decoder_test(
+            EXT_PATH("unit_tests/subghz/oregon2_raw.sub"), SUBGHZ_PROTOCOL_OREGON2_NAME),
+        "Test decoder " SUBGHZ_PROTOCOL_OREGON2_NAME " error\r\n");
+}
+
 //test encoders
 MU_TEST(subghz_encoder_princeton_test) {
     mu_assert(
@@ -595,6 +602,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_magellen_test);
     MU_RUN_TEST(subghz_decoder_intertechno_v3_test);
     MU_RUN_TEST(subghz_decoder_clemsa_test);
+    MU_RUN_TEST(subghz_decoder_oregon2_test);
 
     MU_RUN_TEST(subghz_encoder_princeton_test);
     MU_RUN_TEST(subghz_encoder_came_test);

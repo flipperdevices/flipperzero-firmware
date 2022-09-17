@@ -365,18 +365,11 @@ const SubGhzProtocolDecoder subghz_protocol_oregon2_decoder = {
 };
 
 
-//const SubGhzProtocolEncoder subghz_protocol_oregon2_encoder = {
-//    .alloc = subghz_protocol_encoder_oregon2_alloc,
-//    .free = subghz_protocol_encoder_oregon2_free,
-//};
-
-
 const SubGhzProtocol subghz_protocol_oregon2 = {
-    .name = "Oregon2",
+    .name = SUBGHZ_PROTOCOL_OREGON2_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save, // | SubGhzProtocolFlag_Send,
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
 
     .decoder = &subghz_protocol_oregon2_decoder,
-    //    .encoder = &subghz_protocol_oregon2_encoder,
 };
