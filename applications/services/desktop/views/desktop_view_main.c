@@ -91,6 +91,7 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
                 // main_view->callback(DesktopMainEventOpenGames, main_view->context);
+                main_view->callback(DesktopMainEventOpenGameMenu, main_view->context); // OPENS SNAKE
             } else if(event->key == InputKeyUp) {
                 // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
                 main_view->callback(DesktopMainEventOpenGameMenu, main_view->context); // OPENS SNAKE
