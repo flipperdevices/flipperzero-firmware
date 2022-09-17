@@ -542,7 +542,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
             return;
         }
     }
-    if(!furi_hal_region_is_frequency_allowed(frequency)) {
+    if(!furi_hal_subghz_is_tx_allowed(frequency)) {
         printf(
             "In your settings, only reception on this frequency (%lu) is allowed,\r\n"
             "the actual operation of the application is not possible\r\n ",

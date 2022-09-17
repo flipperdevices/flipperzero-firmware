@@ -2,6 +2,8 @@
 
 #include <lib/subghz/protocols/raw.h>
 
+#define TAG "SubGhzSceneReceiverConfig"
+
 enum SubGhzSettingIndex {
     SubGhzSettingIndexFrequency,
     SubGhzSettingIndexHopping,
@@ -227,7 +229,8 @@ static void subghz_scene_receiver_config_set_hopping_running(VariableItem* item)
             subghz_setting_get_frequency_default_index(subghz->setting));
     }
 
-    subghz->txrx->hopper_state = subghz->last_setting->hopping = hopping_value[index];
+    subghz->txrx->hopper_state = hopping_value[index];
+    subghz->last_setting->hopping = hopping_value[index];
 }
 
 static void subghz_scene_receiver_config_var_list_enter_callback(void* context, uint32_t index) {
@@ -241,6 +244,9 @@ static void subghz_scene_receiver_config_var_list_enter_callback(void* context, 
 
 void subghz_scene_receiver_config_on_enter(void* context) {
     SubGhz* subghz = context;
+
+    subghz_last_setting_set_receiver_values(subghz->last_setting, subghz->txrx->receiver);
+
     VariableItem* item;
     uint8_t value_index;
 
@@ -264,20 +270,6 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         (subghz_setting_get_frequency(subghz->setting, value_index) % 1000000) / 10000);
     variable_item_set_current_value_text(item, text_buf);
 
-    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
-       SubGhzCustomEventManagerSet) {
-        item = variable_item_list_add(
-            subghz->variable_item_list,
-            "Hopping:",
-            HOPPING_COUNT,
-            subghz_scene_receiver_config_set_hopping_running,
-            subghz);
-        value_index = subghz_scene_receiver_config_hopper_value_index(
-            subghz->txrx->hopper_state, hopping_value, HOPPING_COUNT, subghz);
-        variable_item_set_current_value_index(item, value_index);
-        variable_item_set_current_value_text(item, hopping_text[value_index]);
-    }
-
     item = variable_item_list_add(
         subghz->variable_item_list,
         "Modulation:",
@@ -294,6 +286,17 @@ void subghz_scene_receiver_config_on_enter(void* context) {
        SubGhzCustomEventManagerSet) {
         item = variable_item_list_add(
             subghz->variable_item_list,
+            "Hopping:",
+            HOPPING_COUNT,
+            subghz_scene_receiver_config_set_hopping_running,
+            subghz);
+        value_index = subghz_scene_receiver_config_hopper_value_index(
+            subghz->txrx->hopper_state, hopping_value, HOPPING_COUNT, subghz);
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, hopping_text[value_index]);
+
+        item = variable_item_list_add(
+            subghz->variable_item_list,
             "Detect Raw:",
             DETECT_RAW_COUNT,
             subghz_scene_receiver_config_set_detect_raw,
@@ -304,10 +307,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
             DETECT_RAW_COUNT);
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, detect_raw_text[value_index]);
-    }
 
-    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
-       SubGhzCustomEventManagerSet) {
         item = variable_item_list_add(
             subghz->variable_item_list,
             "RSSI for Raw:",
@@ -321,10 +321,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
             RSSI_THRESHOLD_COUNT);
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, rssi_threshold_text[value_index]);
-    }
 
-    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
-       SubGhzCustomEventManagerSet) {
         variable_item_list_add(subghz->variable_item_list, "Lock Keyboard", 1, NULL, NULL);
         variable_item_list_set_enter_callback(
             subghz->variable_item_list,
