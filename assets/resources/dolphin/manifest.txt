@@ -26,7 +26,7 @@ Name: Kuronons_RMCFW_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 4
-Max level: 20
+Max level: 30
 Weight: 7
 
 Name: L3_Fireplace_128x64
