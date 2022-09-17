@@ -19,7 +19,7 @@ typedef enum {
     DesktopLockMenuIndexLock,
     DesktopLockMenuIndexPinLock,
     DesktopLockMenuIndexPinLockShutdown,
-    DesktopLockMenuIndexGameMode,
+    // DesktopLockMenuIndexGameMode,
     DesktopLockMenuIndexDummy,
 
     DesktopLockMenuIndexTotalCount
@@ -85,8 +85,8 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             } else {
                 str = "Set PIN + Off";
             }
-        } else if(i == DesktopLockMenuIndexGameMode) {
-            str = "Games Mode";
+        // } else if(i == DesktopLockMenuIndexGameMode) {
+            // str = "Games Mode";
         } else if(i == DesktopLockMenuIndexDummy) {
             if(m->dummy_mode) {
                 str = "Brainiac Mode";
@@ -151,11 +151,12 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
             lock_menu->callback(DesktopLockMenuEventPinLock, lock_menu->context);
         } else if((idx == DesktopLockMenuIndexPinLockShutdown) && (event->type == InputTypeShort)) {
             lock_menu->callback(DesktopLockMenuEventPinLockShutdown, lock_menu->context);
-        } else if((idx == DesktopLockMenuIndexGameMode) && (event->type == InputTypeShort)) {
-            desktop_view_lock_menu_dumbmode_changed(1);
-            DOLPHIN_DEED(getRandomDeed());
-            lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
+        // } else if((idx == DesktopLockMenuIndexGameMode) && (event->type == InputTypeShort)) {
+            // desktop_view_lock_menu_dumbmode_changed(1);
+            // DOLPHIN_DEED(getRandomDeed());
+            // lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
         } else if(idx == DesktopLockMenuIndexDummy) {
+            DOLPHIN_DEED(getRandomDeed());
             if((dummy_mode == false) && (event->type == InputTypeShort)) {
                 lock_menu->callback(DesktopLockMenuEventDummyModeOn, lock_menu->context);
             } else if((dummy_mode == true) && (event->type == InputTypeShort)) {
