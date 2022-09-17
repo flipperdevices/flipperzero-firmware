@@ -10,12 +10,13 @@
 <b>Latest Updates:</b>
 
 - Known Issues:	 `Chess` & `Chip8` (No Controls)
-- Latest updates for OFW and Unleashed have been merged in along with the RogueMaster changes from prior builds. The only changes not done are listed in the TO DO section below
+- Latest OFW 
+- Latest Unleashed 
+- RogueMaster build changes done
 
 <details>
   <summary><B>TO DO</b></summary><br/>
 
-- Settings: Rename from SD `dolphin/name.txt` [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
 - Lost To Faps: Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 - Lost To Faps: Settings: Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
 
