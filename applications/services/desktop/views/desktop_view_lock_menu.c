@@ -97,9 +97,9 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
 
         if(str)
             canvas_draw_str_aligned(
-                canvas, 64, 9 + (i * 13) + STATUS_BAR_Y_SHIFT, AlignCenter, AlignCenter, str);
+                canvas, 64, 9 + (i * 12) + STATUS_BAR_Y_SHIFT, AlignCenter, AlignCenter, str);
 
-        if(m->idx == i) elements_frame(canvas, 15, 1 + (i * 13) + STATUS_BAR_Y_SHIFT, 98, 15);
+        if(m->idx == i) elements_frame(canvas, 15, 1 + (i * 12) + STATUS_BAR_Y_SHIFT, 98, 15);
     }
 }
 
