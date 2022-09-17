@@ -1,5 +1,5 @@
 App(
-    appid="INTAPP_Chess",
+    appid="GAME_Chess",
     name="Chess",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="chess_app",
