@@ -185,6 +185,8 @@ typedef struct {
     bool sector_select_cmd_started;
     bool ntag_i2c_plus_sector3_lockout;
     bool read_counter_incremented;
+    bool auth_attempted;
+    MfUltralightAuth auth_attempt;
 } MfUltralightEmulator;
 
 void mf_ul_reset(MfUltralightData* data);
