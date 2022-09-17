@@ -8,5 +8,5 @@ App(
     stack_size=2 * 1024,
     order=85,
     fap_icon="bckupIcon.png",
-    fap_category="Misc",
+    fap_category="Tools",
 )
