@@ -17,6 +17,7 @@
 <details>
   <summary><B>TO DO</b></summary><br/>
 
+- Name Changer App and Backend
 - Lost To Faps: Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 - Lost To Faps: Settings: Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
 
