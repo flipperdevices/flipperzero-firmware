@@ -1533,7 +1533,7 @@ static void tanks_game_process_game_step(TanksState* const tanks_state) {
 }
 
 int32_t tanks_game_app(void* p) {
-	unused(p);
+	UNUSED(p);
     srand(DWT->CYCCNT);
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(TanksEvent));
