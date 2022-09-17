@@ -72,13 +72,13 @@ static float queue_avg(queue *q) {
     } else {
       node *tmp;
       float sum = 0.0;
-
       tmp = q->front;
       while (tmp != NULL) {
           sum = sum + tmp->interval;
           tmp = tmp->next;
       } 
       avg = sum / q->size;
+      FURI_LOG_D("BPM-Tapper", "Sum: %.2f Avg: %.2f", (double)sum, (double)avg);
       return avg;
     }
 }
@@ -166,7 +166,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 static void bpm_state_init(BPMTapper* const plugin_state) {
   plugin_state->taps = 0; 
   plugin_state->bpm = 120.0;
-  plugin_state->last_stamp = 0;
+  plugin_state->last_stamp = furi_get_tick();
   plugin_state->interval = 500;
   queue *q;
   q = malloc(sizeof(queue));
