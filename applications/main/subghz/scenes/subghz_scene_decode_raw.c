@@ -112,7 +112,7 @@ bool subghz_scene_decode_raw_start(SubGhz* subghz) {
     } while(false);
 
     if(success) {
-        // FURI_LOG_I(TAG, "Listening at \033[0;33m%s\033[0m.", string_get_cstr(file_name));
+        //FURI_LOG_I(TAG, "Listening at \033[0;33m%s\033[0m.", string_get_cstr(file_name));
 
         file_worker_encoder = subghz_file_encoder_worker_alloc();
         if(subghz_file_encoder_worker_start(file_worker_encoder, string_get_cstr(file_name))) {
@@ -182,7 +182,6 @@ void subghz_scene_decode_raw_on_enter(void* context) {
         false);
     subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_Decodable);
     
-	
     if(decode_raw_state == SubGhzDecodeRawStateStart) {
         //Decode RAW to history
         subghz_history_reset(subghz->txrx->history);

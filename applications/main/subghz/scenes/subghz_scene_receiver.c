@@ -1,6 +1,8 @@
 #include "../subghz_i.h"
 #include "../views/receiver.h"
 
+#define TAG "SubGhzSceneReceiver"
+
 const NotificationSequence subghz_sequence_rx = {
     &message_green_255,
 
@@ -98,6 +100,8 @@ static void subghz_scene_add_to_history_callback(
 void subghz_scene_receiver_on_enter(void* context) {
     SubGhz* subghz = context;
 
+    subghz_last_setting_set_receiver_values(subghz->last_setting, subghz->txrx->receiver);
+
     string_t str_buff;
     string_init(str_buff);
 
@@ -136,9 +140,11 @@ void subghz_scene_receiver_on_enter(void* context) {
     subghz->state_notifications = SubGhzNotificationStateRx;
     if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
         subghz_rx_end(subghz);
-    };
+    }
     if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
        (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
+        // Set values that can be reset after using DetectRAW Scene
+        subghz_last_setting_set_receiver_values(subghz->last_setting, subghz->txrx->receiver);
         subghz_begin(
             subghz,
             subghz_setting_get_preset_data_by_name(
@@ -157,15 +163,17 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case SubGhzCustomEventViewReceiverBack:
             // Check if return from config save values
-            if (subghz->current_scene == SubGhzSceneReceiverConfig) {
-                subghz_last_setting_save(subghz->last_setting, EXT_PATH("subghz/assets/last_used.txt"));
+            if(subghz->current_scene == SubGhzSceneReceiverConfig) {
+                //FURI_LOG_I(TAG, "Raw value: %d", subghz->last_setting->detect_raw);
+                subghz_last_setting_save(
+                    subghz->last_setting, EXT_PATH("subghz/assets/last_used.txt"));
             }
             // Stop CC1101 Rx
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);
-            };
+            }
             subghz->txrx->hopper_state = SubGhzHopperStateOFF;
             subghz->txrx->idx_menu_chosen = 0;
             subghz_receiver_set_rx_callback(subghz->txrx->receiver, NULL, subghz);
@@ -199,7 +207,10 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             subghz->txrx->idx_menu_chosen =
                 subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzViewIdReceiver, SubGhzCustomEventManagerSet);
             subghz->current_scene = SubGhzSceneReceiverConfig;
+            //FURI_LOG_I(TAG, "Raw value: %d", subghz->last_setting->detect_raw);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverConfig);
             consumed = true;
             break;
@@ -239,5 +250,8 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
 }
 
 void subghz_scene_receiver_on_exit(void* context) {
-    UNUSED(context);
+    SubGhz* subghz = context;
+
+    //filter restoration
+    subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_Decodable);
 }
