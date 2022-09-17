@@ -1,12 +1,12 @@
 App(
-    appid="subbrute",
+    appid="APPS_Subbrute",
     name="Sub-GHz Bruteforcer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="subbrute_start",
     cdefines=["APP_SUB_BRUTE"],
     requires=["gui","dialogs"],
     stack_size=2 * 1024,
-    order=11,
+    order=190,
     fap_icon="subbrute_10px.png",
     fap_category="Tools",
 )
