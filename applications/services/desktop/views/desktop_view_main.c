@@ -16,6 +16,7 @@ struct DesktopMainView {
     void* context;
     TimerHandle_t poweroff_timer;
     bool is_gamemode;
+    bool dummy_mode;
 };
 
 #define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 2000
@@ -40,7 +41,12 @@ View* desktop_main_get_view(DesktopMainView* main_view) {
     return main_view->view;
 }
 
-bool desktop_main_input(InputEvent* event, void* context) {
+void desktop_main_set_dummy_mode_state(DesktopMainView* main_view, bool dummy_mode) {
+    furi_assert(main_view);
+    main_view->dummy_mode = dummy_mode;
+}
+
+bool desktop_main_input_callback(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
     DesktopMainView* main_view = context;
@@ -54,7 +60,7 @@ bool desktop_main_input(InputEvent* event, void* context) {
         free(desktop_settings);
     }
 
-    if(!main_view->is_gamemode) {
+    if(main_view->is_gamemode == false && main_view->dummy_mode == false) {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
                 main_view->callback(DesktopMainEventOpenMenu, main_view->context);
@@ -71,22 +77,21 @@ bool desktop_main_input(InputEvent* event, void* context) {
             if(event->key == InputKeyOk) {
                 main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
             } else if(event->key == InputKeyUp) {
-                // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyDown) {
-                // main_view->callback(DesktopMainEventOpenGames, main_view->context);
-                main_view->callback(DesktopMainEventOpenDebug, main_view->context);
+                main_view->callback(DesktopMainEventOpenGames, main_view->context);
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
             } else if(event->key == InputKeyRight) {
                 // THIS DOESNT WORK
             }
         }
-    } else {
+    } else if(main_view->is_gamemode == true) {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
-                // main_view->callback(DesktopMainEventOpenGames, main_view->context);
+                main_view->callback(DesktopMainEventOpenGames, main_view->context);
             } else if(event->key == InputKeyUp) {
-                // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyDown) {
                 // PREFER TO OPEN GAMES MENU
             } else if(event->key == InputKeyLeft) {
@@ -98,16 +103,29 @@ bool desktop_main_input(InputEvent* event, void* context) {
             if(event->key == InputKeyOk) {
                 main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
             } else if(event->key == InputKeyUp) {
-                // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
             } else if(event->key == InputKeyDown) {
-                // main_view->callback(DesktopMainEventOpenGames, main_view->context);
+                main_view->callback(DesktopMainEventOpenGames, main_view->context);
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenClock, main_view->context);
             } else if(event->key == InputKeyRight) {
                 // THIS DOESNT WORK, PASSPORT WILL ONLY OPEN ON REGULAR RIGHT, NOTHING CAN GET ASSIGNED HERE
             }
         }
-    }
+	} else {
+        if(event->type == InputTypeShort) {
+            if(event->key == InputKeyOk) {
+                main_view->callback(DesktopMainEventOpenGameMenu, main_view->context);
+            } else if(event->key == InputKeyUp) {
+                main_view->callback(DesktopMainEventOpenLockMenu, main_view->context);
+            } else if(event->key == InputKeyDown) {
+                main_view->callback(DesktopMainEventOpenPassport, main_view->context);
+            } else if(event->key == InputKeyLeft) {
+                main_view->callback(DesktopMainEventOpenPassport, main_view->context);
+            }
+            // Right key is handled by animation manager
+        }
+	}
 
     if(event->key == InputKeyBack) {
         if(event->type == InputTypePress) {
@@ -134,7 +152,7 @@ DesktopMainView* desktop_main_alloc() {
     main_view->view = view_alloc();
     view_allocate_model(main_view->view, ViewModelTypeLockFree, 1);
     view_set_context(main_view->view, main_view);
-    view_set_input_callback(main_view->view, desktop_main_input);
+    view_set_input_callback(main_view->view, desktop_main_input_callback);
 
     main_view->poweroff_timer = xTimerCreate(
         NULL,

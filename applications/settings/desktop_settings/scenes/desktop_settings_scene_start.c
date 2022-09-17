@@ -176,7 +176,7 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent sme)
 void desktop_settings_scene_start_on_exit(void* context) {
     DesktopSettingsApp* app = context;
     variable_item_list_reset(app->variable_item_list);
-    SAVE_DESKTOP_SETTINGS(&app->settings);
+    DESKTOP_SETTINGS_SAVE(&app->settings);
 
     if(app->settings.displayBatteryPercentage != origBattDisp_value) {
         furi_hal_power_reset();
