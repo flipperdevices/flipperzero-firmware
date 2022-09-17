@@ -1,37 +1,37 @@
-#include "../storage_move_to_sd.h"
+#include "../storage_DolphinBackup.h"
 #include "gui/canvas.h"
 #include "gui/modules/widget_elements/widget_element_i.h"
 #include "storage/storage.h"
 
-static void storage_move_to_sd_scene_confirm_widget_callback(
+static void storage_DolphinBackup_scene_confirm_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context) {
-    StorageMoveToSd* app = context;
+    StorageDolphinBackup* app = context;
     furi_assert(app);
     if(type == InputTypeShort) {
         if(result == GuiButtonTypeRight) {
-            view_dispatcher_send_custom_event(app->view_dispatcher, MoveToSdCustomEventConfirm);
+            view_dispatcher_send_custom_event(app->view_dispatcher, DolphinBackupCustomEventConfirm);
         } else if(result == GuiButtonTypeLeft) {
-            view_dispatcher_send_custom_event(app->view_dispatcher, MoveToSdCustomEventExit);
+            view_dispatcher_send_custom_event(app->view_dispatcher, DolphinBackupCustomEventExit);
         }
     }
 }
 
-void storage_move_to_sd_scene_confirm_on_enter(void* context) {
-    StorageMoveToSd* app = context;
+void storage_DolphinBackup_scene_confirm_on_enter(void* context) {
+    StorageDolphinBackup* app = context;
 
     widget_add_button_element(
         app->widget,
         GuiButtonTypeLeft,
         "Cancel",
-        storage_move_to_sd_scene_confirm_widget_callback,
+        storage_DolphinBackup_scene_confirm_widget_callback,
         app);
     widget_add_button_element(
         app->widget,
         GuiButtonTypeRight,
         "Confirm",
-        storage_move_to_sd_scene_confirm_widget_callback,
+        storage_DolphinBackup_scene_confirm_widget_callback,
         app);
 
     widget_add_string_element(
@@ -45,18 +45,18 @@ void storage_move_to_sd_scene_confirm_on_enter(void* context) {
         FontSecondary,
         "Copy data from\ninternal storage to SD card?");
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, StorageMoveToSdViewWidget);
+    view_dispatcher_switch_to_view(app->view_dispatcher, StorageDolphinBackupViewWidget);
 }
 
-bool storage_move_to_sd_scene_confirm_on_event(void* context, SceneManagerEvent event) {
-    StorageMoveToSd* app = context;
+bool storage_DolphinBackup_scene_confirm_on_event(void* context, SceneManagerEvent event) {
+    StorageDolphinBackup* app = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == MoveToSdCustomEventConfirm) {
-            scene_manager_next_scene(app->scene_manager, StorageMoveToSdProgress);
+        if(event.event == DolphinBackupCustomEventConfirm) {
+            scene_manager_next_scene(app->scene_manager, StorageDolphinBackupProgress);
             consumed = true;
-        } else if(event.event == MoveToSdCustomEventExit) {
+        } else if(event.event == DolphinBackupCustomEventExit) {
             view_dispatcher_stop(app->view_dispatcher);
         }
     }
@@ -64,7 +64,7 @@ bool storage_move_to_sd_scene_confirm_on_event(void* context, SceneManagerEvent 
     return consumed;
 }
 
-void storage_move_to_sd_scene_confirm_on_exit(void* context) {
-    StorageMoveToSd* app = context;
+void storage_DolphinBackup_scene_confirm_on_exit(void* context) {
+    StorageDolphinBackup* app = context;
     widget_reset(app->widget);
 }

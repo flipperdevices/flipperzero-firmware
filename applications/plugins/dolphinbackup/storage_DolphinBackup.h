@@ -13,16 +13,16 @@
 #include <storage/storage.h>
 #include <storage/storage_sd_api.h>
 
-#include "scenes/storage_move_to_sd_scene.h"
+#include "scenes/storage_DolphinBackup_scene.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef enum {
-    MoveToSdCustomEventExit,
-    MoveToSdCustomEventConfirm,
-} MoveToSdCustomEvent;
+    DolphinBackupCustomEventExit,
+    DolphinBackupCustomEventConfirm,
+} DolphinBackupCustomEvent;
 
 typedef struct {
     // records
@@ -36,13 +36,13 @@ typedef struct {
 
     FuriPubSubSubscription* sub;
 
-} StorageMoveToSd;
+} StorageDolphinBackup;
 
 typedef enum {
-    StorageMoveToSdViewWidget,
-} StorageMoveToSdView;
+    StorageDolphinBackupViewWidget,
+} StorageDolphinBackupView;
 
-bool storage_move_to_sd_perform(void);
+bool storage_DolphinBackup_perform(void);
 
 #ifdef __cplusplus
 }
