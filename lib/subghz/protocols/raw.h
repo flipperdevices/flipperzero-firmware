@@ -146,7 +146,7 @@ void subghz_protocol_encoder_raw_stop(void* context);
  * Сallback on completion of file transfer.
  * @param context Pointer to a SubGhzProtocolEncoderRAW instance
  */
-void subghz_protocol_raw_file_encoder_worker_callback_end(void* context);
+// void subghz_protocol_raw_file_encoder_worker_callback_end(void* context);
 
 /**
  * Set callback on completion of file transfer.
