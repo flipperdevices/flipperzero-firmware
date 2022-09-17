@@ -88,7 +88,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Assets: Includes sample Music Player tunes
 - Assets: Includes sample SubGHz assets for Crosswalk, Handicap Doors, Sextoys, Tesla Charge Port, and Unitree Go1 Robot Dog
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
-- Assets: Running DolphinRestorer.fap on new install will auto-level to the end of Level 2.
+- Assets: Running DolphinRestorer.fap on new install will auto-level to Level 6.
 - BadUSB: Added ignore DUCKY_LANG cmd to retain compatibility with existing scripts [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
 - BadUSB: Assets for Kiosk Evasion and Wifi Stealer
 - BadUSB: show script errors on screen [(By CromFr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/200)
