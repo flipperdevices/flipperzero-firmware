@@ -18,12 +18,9 @@
 - Settings: Rename from SD `dolphin/name.txt` [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
 - Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
 - SubGHz: [Add settings to subghz read functionality to allow setting RSSI threshold (raw only) (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/184)
-- [NFC: Display UL PWD_AUTH payload / ntag-pwd-capture (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
 - [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
-- [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)
 - [Keynote BT plugin: long press on OK to switch between Space and Retur… #1729 (By coded-with-claws)](https://github.com/flipperdevices/flipperzero-firmware/pull/1729)
 - [SubGhz: fix display information in the file if the frequenc… #1724 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1724)
-- [Show error popup when NFC chip is not init/disconnected #1722 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1722)
 - Lost To Faps: Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 - Lost To Faps: Settings: Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
 
