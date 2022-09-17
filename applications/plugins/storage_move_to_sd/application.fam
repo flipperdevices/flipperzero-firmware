@@ -7,6 +7,6 @@ App(
     requires=["gui", "storage"],
     stack_size=2 * 1024,
     order=85,
-    fap_icon="restoreIcon.png",
+    fap_icon="bckupIcon.png",
     fap_category="Misc",
 )
