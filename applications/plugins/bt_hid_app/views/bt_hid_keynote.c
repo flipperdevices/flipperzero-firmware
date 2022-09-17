@@ -4,6 +4,12 @@
 #include <furi_hal_usb_hid.h>
 #include <gui/elements.h>
 
+const char* bt_hid_hold_exit = "Hold      : exit";
+const char* bt_hid_hold_space = "Hold      : space";
+const char* bt_hid_hold_enter = "Hold      : enter";
+const char* bt_hid_space_btn = "Space";
+const char* bt_hid_enter_btn = "Enter";
+
 struct BtHidKeynote {
     View* view;
 };
@@ -16,6 +22,7 @@ typedef struct {
     bool ok_pressed;
     bool back_pressed;
     bool connected;
+    bool switch_space_return;
 } BtHidKeynoteModel;
 
 static void bt_hid_keynote_draw_arrow(Canvas* canvas, uint8_t x, uint8_t y, CanvasDirection dir) {
@@ -44,9 +51,18 @@ static void bt_hid_keynote_draw_callback(Canvas* canvas, void* context) {
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, 17, 3, AlignLeft, AlignTop, "Keynote");
 
-    canvas_draw_icon(canvas, 68, 2, &I_Pin_back_arrow_10x8);
+    // Hold instructions
     canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text_aligned(canvas, 127, 3, AlignRight, AlignTop, "Hold to exit");
+    elements_multiline_text_aligned(canvas, 68, 3, AlignLeft, AlignTop, bt_hid_hold_exit);
+    canvas_draw_icon(canvas, 87, 2, &I_Pin_back_arrow_10x8);
+    const char* bt_hid_hold_btn;
+    if(!model->switch_space_return) {
+        bt_hid_hold_btn = bt_hid_hold_enter;
+    } else {
+        bt_hid_hold_btn = bt_hid_hold_space;
+    }
+    elements_multiline_text_aligned(canvas, 68, 12, AlignLeft, AlignTop, bt_hid_hold_btn);
+    canvas_draw_icon(canvas, 87, 11, &I_Ok_btn_9x9);
 
     // Up
     canvas_draw_icon(canvas, 21, 24, &I_Button_18x18);
@@ -91,7 +107,13 @@ static void bt_hid_keynote_draw_callback(Canvas* canvas, void* context) {
         canvas_set_color(canvas, ColorWhite);
     }
     canvas_draw_icon(canvas, 74, 29, &I_Ok_btn_9x9);
-    elements_multiline_text_aligned(canvas, 91, 36, AlignLeft, AlignBottom, "Space");
+    const char* bt_hid_btn;
+    if(!model->switch_space_return) {
+        bt_hid_btn = bt_hid_space_btn;
+    } else {
+        bt_hid_btn = bt_hid_enter_btn;
+    }
+    elements_multiline_text_aligned(canvas, 91, 36, AlignLeft, AlignBottom, bt_hid_btn);
     canvas_set_color(canvas, ColorBlack);
 
     // Back
@@ -122,7 +144,6 @@ static void bt_hid_keynote_process(BtHidKeynote* bt_hid_keynote, InputEvent* eve
                     furi_hal_bt_hid_kb_press(HID_KEYBOARD_RIGHT_ARROW);
                 } else if(event->key == InputKeyOk) {
                     model->ok_pressed = true;
-                    furi_hal_bt_hid_kb_press(HID_KEYBOARD_SPACEBAR);
                 } else if(event->key == InputKeyBack) {
                     model->back_pressed = true;
                 }
@@ -141,7 +162,6 @@ static void bt_hid_keynote_process(BtHidKeynote* bt_hid_keynote, InputEvent* eve
                     furi_hal_bt_hid_kb_release(HID_KEYBOARD_RIGHT_ARROW);
                 } else if(event->key == InputKeyOk) {
                     model->ok_pressed = false;
-                    furi_hal_bt_hid_kb_release(HID_KEYBOARD_SPACEBAR);
                 } else if(event->key == InputKeyBack) {
                     model->back_pressed = false;
                 }
@@ -151,6 +171,15 @@ static void bt_hid_keynote_process(BtHidKeynote* bt_hid_keynote, InputEvent* eve
                     furi_hal_bt_hid_kb_release(HID_KEYBOARD_DELETE);
                     furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_AC_BACK);
                     furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_AC_BACK);
+                }
+                if(event->key == InputKeyOk) {
+                    if(!model->switch_space_return) {
+                        furi_hal_bt_hid_kb_press(HID_KEYBOARD_SPACEBAR);
+                        furi_hal_bt_hid_kb_release(HID_KEYBOARD_SPACEBAR);
+                    } else {
+                        furi_hal_bt_hid_kb_press(HID_KEYBOARD_RETURN);
+                        furi_hal_bt_hid_kb_release(HID_KEYBOARD_RETURN);
+                    }
                 }
             }
             return true;
@@ -164,6 +193,12 @@ static bool bt_hid_keynote_input_callback(InputEvent* event, void* context) {
 
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
         furi_hal_bt_hid_kb_release_all();
+    } else if(event->type == InputTypeLong && event->key == InputKeyOk) {
+        with_view_model(
+            bt_hid_keynote->view, (BtHidKeynoteModel * model) {
+                model->switch_space_return = !model->switch_space_return;
+                return true;
+            });
     } else {
         bt_hid_keynote_process(bt_hid_keynote, event);
         consumed = true;
