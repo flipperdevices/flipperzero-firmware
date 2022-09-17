@@ -44,28 +44,12 @@ struct SubGhzProtocolDecoderOregon2 {
 
 typedef struct SubGhzProtocolDecoderOregon2 SubGhzProtocolDecoderOregon2;
 
-//
-//struct SubGhzProtocolEncoderOregon2 {
-//    SubGhzProtocolEncoderBase base;
-//
-//    SubGhzProtocolBlockEncoder encoder;
-//    SubGhzBlockGeneric generic;
-//};
-//typedef struct SubGhzProtocolEncoderOregon2 SubGhzProtocolEncoderOregon2;
-
 
 typedef enum {
     Oregon2DecoderStepReset = 0,
     Oregon2DecoderStepFoundPreamble,
     Oregon2DecoderStepVarData,
 } Oregon2DecoderStep;
-
-
-//
-//void* subghz_protocol_encoder_oregon2_alloc(SubGhzEnvironment* environment) {
-//    UNUSED(environment);
-//    SubGhzProtocolEncod* instance = malloc(sizeof(SubGhzProtocolEncoderOregon2));
-//}
 
 
 void* subghz_protocol_decoder_oregon2_alloc(SubGhzEnvironment* environment) {
@@ -100,7 +84,7 @@ void subghz_protocol_decoder_oregon2_reset(void* context) {
     instance->var_bits = 0;
 }
 
-// TODO: move this into generic subghz lib
+
 static ManchesterEvent level_and_duration_to_event(bool level, uint32_t duration) {
     bool is_long = false;
 
@@ -192,7 +176,6 @@ void subghz_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t du
 
             if (!instance->var_bits) {
                 // sensor is not supported, stop decoding, but showing the decoded fixed part
-                FURI_LOG_I(TAG, "Sensor is not supported");
                 instance->decoder.parser_step = Oregon2DecoderStepReset;
                 if(instance->base.callback)
                     instance->base.callback(&instance->base, instance->base.context);
@@ -204,7 +187,6 @@ void subghz_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t du
     case Oregon2DecoderStepVarData:
         // waiting for variable (sensor-specific data)
         if (instance->decoder.decode_count_bit == instance->var_bits + OREGON2_CHECKSUM_BITS) {
-            FURI_LOG_I(TAG, "Sensor is supported, got var bits %d", instance->decoder.decode_count_bit);
             instance->var_data = instance->decoder.decode_data & 0xFFFFFFFF;
 
             // reverse nibbles in var data
