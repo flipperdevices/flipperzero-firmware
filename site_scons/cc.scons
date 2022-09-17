@@ -28,6 +28,7 @@ ENV.AppendUnique(
         "-Wbuiltin-declaration-mismatch",
         "-Wredundant-decls",
         "-Wdouble-promotion",
+        "-Wchar-subscripts",
         "-fdata-sections",
         "-ffunction-sections",
         "-fsingle-precision-constant",
