@@ -1,5 +1,5 @@
 App(
-    appid="APPS_Sentry_Safe",
+    appid="APPS_GPIO_Sentry_Safe",
     name="[GPIO] Sentry Safe",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="sentry_safe_app",
