@@ -15,12 +15,10 @@
 <details>
   <summary><B>TO DO</b></summary><br/>
 
-- GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Settings: Rename from SD `dolphin/name.txt` [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
 - Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
 - SubGHz: [Add settings to subghz read functionality to allow setting RSSI threshold (raw only) (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/184)
 - [NFC: Display UL PWD_AUTH payload / ntag-pwd-capture (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
-- [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
 - [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
 - [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)
 - [Keynote BT plugin: long press on OK to switch between Space and Retur… #1729 (By coded-with-claws)](https://github.com/flipperdevices/flipperzero-firmware/pull/1729)
@@ -180,8 +178,8 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
   
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/186)
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188)
-- [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Crashes 1st load if FW <~750KB or every load on larger FW 
-- [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge. Add SD folder `chip8`, [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/) (Needs Controls Programmed)
+- [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Crashes 1st load if FW <~750KB or every load on larger FW  `Broken?`
+- [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge. Add SD folder `chip8`, [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/) (Needs Controls Programmed) `HIDDEN because its broken`
 - [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/)
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)

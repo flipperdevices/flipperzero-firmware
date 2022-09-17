@@ -26,7 +26,7 @@ void nfc_scene_mf_ultralight_unlock_menu_on_enter(void* context) {
         nfc);
     submenu_add_item(
         submenu,
-        "Auth As Am11bo",
+        "Auth As Ameebo",
         SubmenuIndexMfUlUnlockMenuAmeebo,
         nfc_scene_mf_ultralight_unlock_menu_submenu_callback,
         nfc);
