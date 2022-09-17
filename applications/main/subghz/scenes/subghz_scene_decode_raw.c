@@ -1,6 +1,5 @@
 #include "../subghz_i.h"
 #include "../views/receiver.h"
-#include <lib/subghz/protocols/raw.h>
 
 #include <lib/subghz/subghz_file_encoder_worker.h>
 
@@ -112,7 +111,7 @@ bool subghz_scene_decode_raw_start(SubGhz* subghz) {
     } while(false);
 
     if(success) {
-        //FURI_LOG_I(TAG, "Listening at \033[0;33m%s\033[0m.", string_get_cstr(file_name));
+        FURI_LOG_I(TAG, "Listening at \033[0;33m%s\033[0m.", string_get_cstr(file_name));
 
         file_worker_encoder = subghz_file_encoder_worker_alloc();
         if(subghz_file_encoder_worker_start(file_worker_encoder, string_get_cstr(file_name))) {
@@ -175,13 +174,6 @@ void subghz_scene_decode_raw_on_enter(void* context) {
     subghz_receiver_set_rx_callback(
         subghz->txrx->receiver, subghz_scene_add_to_history_callback, subghz);
 
-    // make sure we're not in auto-detect mode, which is only meant for the Read app
-    subghz_protocol_decoder_raw_set_auto_mode(
-        subghz_receiver_search_decoder_base_by_name(
-            subghz->txrx->receiver, SUBGHZ_PROTOCOL_RAW_NAME),
-        false);
-    subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_Decodable);
-    
     if(decode_raw_state == SubGhzDecodeRawStateStart) {
         //Decode RAW to history
         subghz_history_reset(subghz->txrx->history);
@@ -238,7 +230,7 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case SubGhzCustomEventViewReceiverConfig:
-            FURI_LOG_W(TAG, "No config options");
+            FURI_LOG_I(TAG, "No config options");
             consumed = true;
             break;
         case SubGhzCustomEventViewReceiverOffDisplay:
@@ -258,7 +250,7 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
             notification_message(subghz->notifications, &sequence_blink_cyan_10);
             break;
         case SubGhzNotificationStateRxDone:
-            notification_message(subghz->notifications, &subghz_sequence_rx);
+            notification_message(subghz->notifications, &subghs_sequence_rx);
             subghz->state_notifications = SubGhzNotificationStateRx;
             break;
         default:

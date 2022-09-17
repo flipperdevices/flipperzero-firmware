@@ -207,7 +207,7 @@ SubGhz* subghz_alloc() {
     subghz->txrx->receiver = subghz_receiver_alloc_init(subghz->txrx->environment);
 
     // Setup values
-    subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_Decodable);
+    subghz_last_setting_set_receiver_values(subghz->last_setting, subghz->txrx->receiver);
 
     subghz_worker_set_overrun_callback(
         subghz->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_receiver_reset);
@@ -330,6 +330,12 @@ void subghz_free(SubGhz* subghz) {
 
 int32_t subghz_app(void* p) {
     SubGhz* subghz = subghz_alloc();
+
+    if(!furi_hal_region_is_provisioned()) {
+        subghz_dialog_message_show_only_rx(subghz);
+        subghz_free(subghz);
+        return 1;
+    }
 
     //Load database
     bool load_database = subghz_environment_load_keystore(
