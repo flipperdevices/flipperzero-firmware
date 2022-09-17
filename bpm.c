@@ -3,6 +3,7 @@
 #include <dialogs/dialogs.h>
 #include <gui/gui.h>
 #include <input/input.h>
+#include <m-string.h>
 #include <stdlib.h>
 
 typedef enum {
@@ -17,7 +18,7 @@ typedef struct {
 
 typedef struct {
     int taps;
-    float bpm;
+    double bpm;
     uint32_t last_stamp;
     uint32_t interval;
 } BPMTapper;
@@ -59,6 +60,10 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
+    char taps[8];
+    char interval[32];
+    string_t bpm;
+
     const BPMTapper* bpm_state = acquire_mutex((ValueMutex*)ctx, 25);
     if (bpm_state == NULL) {
       return;
@@ -66,20 +71,30 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     // border
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontPrimary);
-    char taps[8];
+
     itoa(bpm_state->taps, taps, 10);
-    char interval[32];
     itoa(bpm_state->interval, interval, 10);
+
+    string_init(bpm);
+    string_printf(bpm, "%f", bpm_state->bpm);
+
     canvas_draw_str_aligned(canvas, 15, 15, AlignRight, AlignBottom, taps);
-    canvas_draw_str_aligned(canvas, 40, 50, AlignRight, AlignBottom, interval);
+    canvas_draw_str_aligned(canvas, 25, 35, AlignRight, AlignBottom, interval);
+    canvas_set_font(canvas, FontBigNumbers);
+    canvas_draw_str_aligned(canvas, 120, 50, AlignRight, AlignBottom, string_get_cstr(bpm));
+
+    string_reset(bpm);
+    string_clear(bpm);
+
     release_mutex((ValueMutex*)ctx, bpm_state);
 }
 
+
 static void bpm_state_init(BPMTapper* const plugin_state) {
   plugin_state->taps = 0; 
-  plugin_state->bpm = 0.0;
+  plugin_state->bpm = 420.69;
   plugin_state->last_stamp = 0;
-  plugin_state->interval = 0;
+  plugin_state->interval = 1000;
 }
 
 int32_t bpm_tapper_app(void* p) {
@@ -128,6 +143,8 @@ int32_t bpm_tapper_app(void* p) {
               uint32_t new_stamp = furi_get_tick();
               bpm_state->interval = new_stamp - bpm_state->last_stamp;
               bpm_state->last_stamp = new_stamp;
+              float bps = 1.0 / (bpm_state->interval / 1000.0);
+              bpm_state->bpm = bps * 60.0;
               break;
             case InputKeyBack:
                 // Exit the plugin
