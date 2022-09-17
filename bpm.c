@@ -60,31 +60,32 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    char taps[8];
-    char interval[32];
-    string_t bpm;
+    string_t tempStr;
 
     const BPMTapper* bpm_state = acquire_mutex((ValueMutex*)ctx, 25);
     if (bpm_state == NULL) {
       return;
     }
     // border
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
+    //canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontPrimary);
 
-    itoa(bpm_state->taps, taps, 10);
-    itoa(bpm_state->interval, interval, 10);
+    string_init(tempStr);
 
-    string_init(bpm);
-    string_printf(bpm, "%f", bpm_state->bpm);
+    string_printf(tempStr, "Taps: %d", bpm_state->taps);
+    canvas_draw_str_aligned(canvas, 5, 15, AlignLeft, AlignBottom, string_get_cstr(tempStr));
+    string_reset(tempStr);
 
-    canvas_draw_str_aligned(canvas, 15, 15, AlignRight, AlignBottom, taps);
-    canvas_draw_str_aligned(canvas, 25, 35, AlignRight, AlignBottom, interval);
+    string_printf(tempStr, "Interval: %dms", bpm_state->interval);
+    canvas_draw_str_aligned(canvas, 5, 25, AlignLeft, AlignBottom, string_get_cstr(tempStr));
+    string_reset(tempStr);
+
+    string_printf(tempStr, "%.2f", bpm_state->bpm);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, 120, 50, AlignRight, AlignBottom, string_get_cstr(bpm));
+    canvas_draw_str_aligned(canvas, 20, 50, AlignLeft, AlignBottom, string_get_cstr(tempStr));
+    string_reset(tempStr);
 
-    string_reset(bpm);
-    string_clear(bpm);
+    string_clear(tempStr);
 
     release_mutex((ValueMutex*)ctx, bpm_state);
 }
@@ -92,9 +93,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
 static void bpm_state_init(BPMTapper* const plugin_state) {
   plugin_state->taps = 0; 
-  plugin_state->bpm = 420.69;
+  plugin_state->bpm = 120.0;
   plugin_state->last_stamp = 0;
-  plugin_state->interval = 1000;
+  plugin_state->interval = 500;
 }
 
 int32_t bpm_tapper_app(void* p) {
