@@ -8,5 +8,5 @@ App(
     stack_size= 2 * 1024,
     order=90,
     fap_icon="restoreIcon.png",
-    fap_category="Tools",
+    fap_category="Misc",
 )
