@@ -16,12 +16,6 @@ typedef struct {
     InputEvent input;
 } PluginEvent;
 
-typedef struct {
-    int taps;
-    double bpm;
-    uint32_t last_stamp;
-    uint32_t interval;
-} BPMTapper;
 
 //QUEUE
 
@@ -59,16 +53,15 @@ static void queue_add(queue *q, int value) {
     tmp->next = NULL;
     if (q->size == q->max_size) {
       queue_remove(q);
+    } 
+    // check if empty
+    if (q->rear == NULL) {
+      q->front = tmp;
     } else {
-      // check if empty
-      if (q->rear == NULL) {
-        q->front = tmp;
-      } else {
-        q->rear->next = tmp;
-      }
-      q->rear = tmp;
-      q->size++;
+      q->rear->next = tmp;
     }
+    q->rear = tmp;
+    q->size++;
 }
 
 static float queue_avg(queue *q) {
@@ -95,6 +88,14 @@ static float queue_avg(queue *q) {
 //    furi_hal_rtc_get_datetime(&datetime);
 //    return furi_hal_rtc_datetime_to_timestamp(&datetime);
 //}
+//
+typedef struct {
+    int taps;
+    double bpm;
+    uint32_t last_stamp;
+    uint32_t interval;
+    queue *tap_queue;
+} BPMTapper;
 
 static void show_hello() {
 
@@ -162,6 +163,10 @@ static void bpm_state_init(BPMTapper* const plugin_state) {
   plugin_state->bpm = 120.0;
   plugin_state->last_stamp = 0;
   plugin_state->interval = 500;
+  queue *q;
+  q = malloc(sizeof(queue));
+  init_queue(q);
+  plugin_state->tap_queue = q;
 }
 
 int32_t bpm_tapper_app(void* p) {
@@ -209,8 +214,10 @@ int32_t bpm_tapper_app(void* p) {
               bpm_state->taps++;
               uint32_t new_stamp = furi_get_tick();
               bpm_state->interval = new_stamp - bpm_state->last_stamp;
+              queue_add(bpm_state->tap_queue, bpm_state->interval);
               bpm_state->last_stamp = new_stamp;
-              float bps = 1.0 / (bpm_state->interval / 1000.0);
+              float avg = queue_avg(bpm_state->tap_queue);
+              float bps = 1.0 / (avg / 1000.0);
               bpm_state->bpm = bps * 60.0;
               break;
             case InputKeyBack:
@@ -233,7 +240,9 @@ int32_t bpm_tapper_app(void* p) {
   view_port_free(view_port);
   furi_message_queue_free(event_queue);
   delete_mutex(&state_mutex);
-  //free(bpm_state);
+  queue *q = bpm_state->tap_queue;
+  free(q);
+  free(bpm_state);
 
   return 0;
 }
