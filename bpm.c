@@ -23,6 +23,72 @@ typedef struct {
     uint32_t interval;
 } BPMTapper;
 
+//QUEUE
+
+struct node {
+    int interval;
+    struct node *next;
+};
+typedef struct node node;
+
+typedef struct {
+    int size;
+    int max_size;
+    node *front;
+    node *rear;
+} queue;
+
+static void init_queue(queue *q) {
+  q->size = 0;
+  q->max_size = 15;
+  q->front = NULL;
+  q->rear = NULL;
+}
+
+static void queue_remove(queue *q) {
+    node *tmp;
+    tmp = q->front;
+    q->front = q->front->next;
+    q->size--;
+    free(tmp);
+}
+
+static void queue_add(queue *q, int value) {
+    node *tmp = malloc(sizeof(node));
+    tmp->interval = value;
+    tmp->next = NULL;
+    if (q->size == q->max_size) {
+      queue_remove(q);
+    } else {
+      // check if empty
+      if (q->rear == NULL) {
+        q->front = tmp;
+      } else {
+        q->rear->next = tmp;
+      }
+      q->rear = tmp;
+      q->size++;
+    }
+}
+
+static float queue_avg(queue *q) {
+    float avg = 0.0;
+    if (q->size == 0){
+      return avg;
+    } else {
+      node *tmp;
+      int sum = 0;
+
+      tmp = q->front;
+      while (tmp != NULL) {
+          sum = sum + tmp->interval;
+          tmp = tmp->next;
+      } 
+      avg = (float)sum / q->size;
+      return avg;
+    }
+}
+
 // TOO SLOW!
 //uint64_t dolphin_state_timestamp() {
 //    FuriHalRtcDateTime datetime;
