@@ -271,6 +271,51 @@ static void rpc_system_system_get_power_info_process(const PB_Main* request, voi
     free(response);
 }
 
+static void rpc_system_system_power_debug_callback(
+    const char* key,
+    const char* value,
+    bool last,
+    void* context) {
+    furi_assert(key);
+    furi_assert(value);
+    RpcSystemContext* ctx = context;
+    furi_assert(ctx);
+
+    furi_assert(key);
+    furi_assert(value);
+    char* str_key = strdup(key);
+    char* str_value = strdup(value);
+
+    ctx->response->has_next = !last;
+    ctx->response->content.system_device_info_response.key = str_key;
+    ctx->response->content.system_device_info_response.value = str_value;
+
+    rpc_send_and_release(ctx->session, ctx->response);
+}
+
+static void rpc_system_system_get_power_debug_process(const PB_Main* request, void* context) {
+    furi_assert(request);
+    furi_assert(request->which_content == PB_Main_system_power_debug_request_tag);
+
+    FURI_LOG_D(TAG, "GetPowerDebug");
+
+    RpcSession* session = (RpcSession*)context;
+    furi_assert(session);
+
+    PB_Main* response = malloc(sizeof(PB_Main));
+    response->command_id = request->command_id;
+    response->which_content = PB_Main_system_power_debug_response_tag;
+    response->command_status = PB_CommandStatus_OK;
+
+    RpcSystemContext power_debug_context = {
+        .session = session,
+        .response = response,
+    };
+    furi_hal_power_debug_get(rpc_system_system_power_debug_callback, &power_debug_context);
+
+    free(response);
+}
+
 #ifdef APP_UPDATER
 static void rpc_system_system_update_request_process(const PB_Main* request, void* context) {
     furi_assert(request);
@@ -333,6 +378,9 @@ void* rpc_system_system_alloc(RpcSession* session) {
 
     rpc_handler.message_handler = rpc_system_system_get_power_info_process;
     rpc_add_handler(session, PB_Main_system_power_info_request_tag, &rpc_handler);
+
+    rpc_handler.message_handler = rpc_system_system_get_power_debug_process;
+    rpc_add_handler(session, PB_Main_system_power_debug_request_tag, &rpc_handler);
 
 #ifdef APP_UPDATER
     rpc_handler.message_handler = rpc_system_system_update_request_process;
