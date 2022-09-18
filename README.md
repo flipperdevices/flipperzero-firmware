@@ -1,7 +1,7 @@
-# FlipperZero_plugin_howto  .. aka .. FlipperZero_FAP_howto
+# FlipperZero_plugin_howto
 A simple plugin for the FlipperZero written as a tutorial example [ie. excessive documentation &amp; error handling]
 
-If you wish to review this repository at the last point before the FAP update, use (this link)[https://github.com/csBlueChip/FlipperZero_plugin_howto/tree/21f2620035728cd04e1951c3f6a30de1cfe8a280]
+If you wish to review this repository at the last point before the FAP update, use [this link](https://github.com/csBlueChip/FlipperZero_plugin_howto/tree/21f2620035728cd04e1951c3f6a30de1cfe8a280)
 
 # FAP Support Has Arrived! :)
 Since the move to FAP, your "plugins" are now known as "applications"
@@ -28,10 +28,11 @@ git clone --recursive  https://github.com/flipperdevices/flipperzero-firmware.gi
 # Install the cutting-edge firmware on your Flipper
 `./fbt flash_usb_full`
 
-`flash_usb` is used to install JUST the firmware<br/>
-`flash_usb_full` also installs the "resources" (images and such)<br/>
+Note:
+* `flash_usb` is used to install JUST the firmware<br/>
+* `flash_usb_full` also installs the "resources" (images and such)<br/>
 
-Be aware that since the introdcution of FAP, Applications are Resources.
+Be aware that since the introdcution of FAP, Applications are Resources (in the same way that Images are Resources).
 
 # After the devkit is installed
 Assuming your devkit is in: `~/flipperZero/official/`<br/>
