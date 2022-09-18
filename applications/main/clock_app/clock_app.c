@@ -227,8 +227,8 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     uint8_t hour = curr_dt.hour;
     char strAMPM[3];
     snprintf(strAMPM, sizeof(strAMPM), "%s", "AM");
-    if(!state->militaryTime && hour > 12) {
-        hour -= 12;
+    if(!state->militaryTime && hour >= 12) {
+        if(hour > 12) hour -= 12;
         snprintf(strAMPM, sizeof(strAMPM), "%s", "PM");
     }
     snprintf(strings[1], 20, "%.2d:%.2d:%.2d", hour, curr_dt.minute, curr_dt.second);
