@@ -116,8 +116,21 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         }
+        case DesktopMainEventOpenSubRemote:
+            LoaderStatus status = loader_start(
+                desktop->loader, "Applications", EXT_PATH("/apps/Main/SubGHz_Remote.fap"));
+            if(status != LoaderStatusOk) {
+                FURI_LOG_E(TAG, "loader_start failed: %d", status);
+            }
+            consumed = true;
+            break;
         case DesktopMainEventOpenClock:
-            loader_start(desktop->loader, FLIPPER_APPS[0].name, NULL);
+            // loader_start(desktop->loader, FLIPPER_APPS[0].name, NULL);
+            LoaderStatus status = loader_start(
+                desktop->loader, "Applications", EXT_PATH("/apps/Main/Clock.fap"));
+            if(status != LoaderStatusOk) {
+                FURI_LOG_E(TAG, "loader_start failed: %d", status);
+            }
             consumed = true;
             break;
         case DesktopMainEventOpenFavoritePrimary:
@@ -178,6 +191,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
+            consumed = true;
             break;
         }
         case DesktopMainEventOpen2048: {
@@ -186,6 +200,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
+            consumed = true;
             break;
         }
         case DesktopMainEventOpenZombiez: {
@@ -194,6 +209,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
+            consumed = true;
             break;
         }
         case DesktopMainEventOpenTetris: {
@@ -202,6 +218,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
+            consumed = true;
             break;
         }
         case DesktopMainEventOpenDOOM: {
@@ -210,6 +227,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
+            consumed = true;
             break;
         }
         case DesktopMainEventOpenDice: {
@@ -218,6 +236,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
+            consumed = true;
             break;
         }
         case DesktopLockedEventUpdate:
