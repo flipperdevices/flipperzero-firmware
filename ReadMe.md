@@ -5,7 +5,7 @@
 
 #### Thank you to all the supporters; this firmware is a fork of [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) & the main Flipper Devices FW! I will try to keep active development and updates from both in this build along with any other projects that can be found to be useful to the community. I try to keep this FW build the most cutting edge with updates from both and updates from active community projects. All features and projects pulled are listed in expandable sections below. Please do [support us](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md) and/or [xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)! Everyone gives much of their uncompensated free time to ensure the success of the Flipper Zero!
 
-</td><td><center><img src="https://user-images.githubusercontent.com/10697207/186202043-26947e28-b1cc-459a-8f20-ffcc7fc0c71c.png" align="center" alt="fzCUSTOM" border="0" width="98%" height="98%"></center></td></tr></table>
+</td><td><center><a href="https://github.com/Eng1n33r/flipperzero-firmware" target="_blank"><img src="https://user-images.githubusercontent.com/10697207/186202043-26947e28-b1cc-459a-8f20-ffcc7fc0c71c.png" align="center" alt="fzCUSTOM" border="0" width="98%" height="98%"></a></center></td></tr></table>
 
 <b>Latest Updates:</b>
 
