@@ -9,7 +9,7 @@
 
 <b>Latest Updates:</b>
 
-- Known Issues:	 `Chess` & `Chip8` (No Controls)
+- Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
 - Latest OFW changes
 - Latest Unleashed changes (Many thanks to [Unleashed/@xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) as this is now a full fork of Unleashed
 - RogueMaster build changes added
