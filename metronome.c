@@ -1,6 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>
+#include <gui/elements.h>
 #include <input/input.h>
 #include <m-string.h>
 #include <stdlib.h>
@@ -51,8 +52,13 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     // draw BPM value
     string_printf(tempStr, "%.2f", metronome_state->bpm);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, string_get_cstr(tempStr));
+    canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, string_get_cstr(tempStr));
     string_reset(tempStr);
+
+    // draw button prompts
+    canvas_set_font(canvas, FontSecondary);
+    elements_button_left(canvas, "Slower");
+    elements_button_right(canvas, "Faster");
 
     string_clear(tempStr);
     release_mutex((ValueMutex*)ctx, metronome_state);
