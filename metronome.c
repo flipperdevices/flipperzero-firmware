@@ -91,11 +91,12 @@ static void timer_callback(void* ctx) {
 }
 
 
-static uint32_t bpm_to_sleep_ticks(double bpm) {
+static uint32_t state_to_sleep_ticks(MetronomeState* metronome_state) {
     // calculate time between beeps
     uint32_t tps = furi_kernel_get_tick_frequency();
-    double bps = (double)bpm / 60;
-    return (uint32_t)round(tps / bps) - ((BEEP_DELAY_MS/1000)*tps);
+    double multiplier = 4.0d/metronome_state->note_length;
+    double bps = (double)metronome_state->bpm / 60;
+    return (uint32_t)(round(tps / bps) - ((BEEP_DELAY_MS/1000)*tps)) * multiplier;
 }
 
 static void update_timer(MetronomeState* metronome_state) {
@@ -103,7 +104,7 @@ static void update_timer(MetronomeState* metronome_state) {
     furi_timer_stop(metronome_state->timer);
     furi_timer_start(
         metronome_state->timer, 
-        bpm_to_sleep_ticks(metronome_state->bpm)
+        state_to_sleep_ticks(metronome_state)
     );
   }
 }
@@ -129,6 +130,15 @@ static void cycle_beats_per_bar(MetronomeState* metronome_state) {
     if (metronome_state->beats_per_bar > metronome_state->note_length) {
       metronome_state->beats_per_bar = 1;
     }
+}
+
+static void cycle_note_length(MetronomeState* metronome_state) {
+    metronome_state->note_length *= 2;
+    if (metronome_state->note_length > 16) {
+      metronome_state->note_length = 2;
+      metronome_state->beats_per_bar = 1;
+    }
+    update_timer(metronome_state);
 }
 
 static void metronome_state_init(MetronomeState* const metronome_state) {
@@ -187,7 +197,7 @@ int32_t metronome_app() {
                     case InputKeyOk:
                         metronome_state->playing = !metronome_state->playing;
                         if (metronome_state->playing) {
-                          furi_timer_start(metronome_state->timer, bpm_to_sleep_ticks(metronome_state->bpm));
+                          furi_timer_start(metronome_state->timer, state_to_sleep_ticks(metronome_state));
                         } else {
                           furi_timer_stop(metronome_state->timer);
                         }
@@ -199,6 +209,7 @@ int32_t metronome_app() {
                 } else if (event.input.type == InputTypeLong) {
                     switch(event.input.key) {
                     case InputKeyUp:
+                        cycle_note_length(metronome_state);
                         break;
                     case InputKeyDown:
                         break;
