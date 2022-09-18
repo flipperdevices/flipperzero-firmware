@@ -10,22 +10,8 @@
 <b>Latest Updates:</b>
 
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
-- New [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) updates in changelog
-- Readded [SD info: Add dynamic units and free % #1634 (By non-bin)](https://github.com/flipperdevices/flipperzero-firmware/pull/1634)
-- Settings: Updated Dummy Mode mode to have access to 2048, Dice, Snake, Tetris & Zombiez [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf964fffdd2c1d730623673987a6de32a3f7c92f)
-- Settings: Updated GAMES ONLY mode to have access to 2048, Dice, Doom, Snake, Tetris & Zombiez [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf964fffdd2c1d730623673987a6de32a3f7c92f)
-- Settings: Updated HOLD UP to go to Primary Favorite [(By RogueMaster)]
-- Settings: Updated HOLD DOWN to go to Secondary Favorite [(By RogueMaster)]
-- Settings: Updated Left to go to Clock [(By RogueMaster)]
-- Settings: Updated HOLD LEFT to go to SubGhz Remote [(By RogueMaster)]
-- Added [faploader: more subsystem headers in API table #1742 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1742)
-- Moved Clock to FAP App
-- Moved Spectrum Analyzer to FAP App
-- Moved SubGHz Remote to FAP App (Not Working, So Reverted To Internal)
-- Moved iButton to FAP App (Someone please confirm functionality to me on Discord)
-- Moved U2F to FAP App (Someone please confirm functionality to me on Discord)
-- Moved GPIO to FAP App (Not Working, So Reverted To Internal)
-- Moved Infrared to FAP App (Not Working, So Reverted To Internal)
+- Fixed issue with Clock showing AM at noon
+- New frequencies added provided by [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
