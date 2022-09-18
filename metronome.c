@@ -5,7 +5,11 @@
 #include <m-string.h>
 #include <stdlib.h>
 
-#define BPM_STEP_SIZE 0.5d
+#define BPM_STEP_SIZE_FINE 0.5d
+#define BPM_STEP_SIZE_COARSE 10.0d
+#define BPM_BOUNDARY_LOW 10.0d
+#define BPM_BOUNDARY_HIGH 300.0d
+#define BEEP_DELAY_MS 50
 
 typedef enum {
     EventTypeTick,
@@ -64,7 +68,7 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 static void timer_callback() {
     //UNUSED(metronome_state);
     furi_hal_speaker_start(440.0f, 1.0f);
-    furi_delay_ms(40);
+    furi_delay_ms(BEEP_DELAY_MS);
     furi_hal_speaker_stop();
 }
 
@@ -72,6 +76,39 @@ static void metronome_state_init(MetronomeState* const metronome_state) {
     metronome_state->bpm = 120.0;
     metronome_state->playing = false;
     metronome_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, metronome_state);
+}
+
+static uint32_t bpm_to_sleep_ticks(double bpm) {
+    // calculate time between beeps
+    uint32_t tps = furi_kernel_get_tick_frequency();
+    double bps = (double)bpm / 60;
+    return (uint32_t)round(tps / bps) - ((BEEP_DELAY_MS/1000)*tps);
+}
+
+static void update_timer(MetronomeState* metronome_state) {
+  if (furi_timer_is_running(metronome_state->timer)) {
+    furi_timer_stop(metronome_state->timer);
+    furi_timer_start(
+        metronome_state->timer, 
+        bpm_to_sleep_ticks(metronome_state->bpm)
+    );
+  }
+}
+
+static void increase_bpm(MetronomeState* metronome_state, double amount) {
+  metronome_state->bpm += amount;
+  if(metronome_state->bpm > (double)BPM_BOUNDARY_HIGH) {
+    metronome_state->bpm = BPM_BOUNDARY_HIGH;
+  }
+  update_timer(metronome_state);
+}
+
+static void decrease_bpm(MetronomeState* metronome_state, double amount) {
+  metronome_state->bpm -= amount;
+  if(metronome_state->bpm < (double)BPM_BOUNDARY_LOW) {
+    metronome_state->bpm = BPM_BOUNDARY_LOW;
+  }
+  update_timer(metronome_state);
 }
 
 int32_t metronome_app() {
@@ -108,23 +145,21 @@ int32_t metronome_app() {
                 if(event.input.type == InputTypePress) {
                     switch(event.input.key) {
                     case InputKeyUp:
+                        increase_bpm(metronome_state, BPM_STEP_SIZE_COARSE);
                         break;
                     case InputKeyDown:
+                        decrease_bpm(metronome_state, BPM_STEP_SIZE_COARSE);
                         break;
                     case InputKeyRight:
-                        metronome_state->bpm += (double)BPM_STEP_SIZE;
+                        increase_bpm(metronome_state, BPM_STEP_SIZE_FINE);
                         break;
                     case InputKeyLeft:
-                        metronome_state->bpm -= (double)BPM_STEP_SIZE;
+                        decrease_bpm(metronome_state, BPM_STEP_SIZE_FINE);
                         break;
                     case InputKeyOk:
                         metronome_state->playing = !metronome_state->playing;
                         if (metronome_state->playing) {
-                            // calculate time between beeps
-                            uint32_t tps = furi_kernel_get_tick_frequency();
-                            double bps = (double)metronome_state->bpm / 60;
-                            uint32_t ticks_to_sleep = (uint32_t)round(tps / bps);
-                            furi_timer_start(metronome_state->timer, ticks_to_sleep);
+                            furi_timer_start(metronome_state->timer, bpm_to_sleep_ticks(metronome_state->bpm));
                         } else {
                           furi_timer_stop(metronome_state->timer);
                         }
