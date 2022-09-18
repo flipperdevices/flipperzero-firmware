@@ -308,7 +308,6 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
     } else if(event.type == SceneManagerEventTypeTick) {
         switch(subghz->state_notifications) {
         case SubGhzNotificationStateRx:
-            notification_message(subghz->notifications, &sequence_blink_cyan_10);
             subghz_read_raw_update_sample_write(
                 subghz->subghz_read_raw,
                 subghz_protocol_raw_get_sample_write(
