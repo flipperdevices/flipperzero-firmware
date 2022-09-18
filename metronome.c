@@ -27,6 +27,7 @@ typedef struct {
     bool playing;
     int beats_per_bar;
     int note_length;
+    int current_beat;
     FuriTimer* timer;
 } MetronomeState;
 
@@ -73,20 +74,22 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void timer_callback() {
-    //UNUSED(metronome_state);
-    furi_hal_speaker_start(440.0f, 1.0f);
+static void timer_callback(void* ctx) {
+    MetronomeState* metronome_state = acquire_mutex((ValueMutex*)ctx, 25);
+    if (metronome_state->current_beat == 1) {
+      furi_hal_speaker_start(440.0f, 1.0f);
+    } else {
+      furi_hal_speaker_start(220.0f, 1.0f);
+    };
+    metronome_state->current_beat++;
+    if (metronome_state->current_beat > metronome_state->beats_per_bar) {
+      metronome_state->current_beat = 1;
+    }
     furi_delay_ms(BEEP_DELAY_MS);
     furi_hal_speaker_stop();
+    release_mutex((ValueMutex*)ctx, metronome_state);
 }
 
-static void metronome_state_init(MetronomeState* const metronome_state) {
-    metronome_state->bpm = 120.0;
-    metronome_state->playing = false;
-    metronome_state->beats_per_bar = 4;
-    metronome_state->note_length = 4;
-    metronome_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, metronome_state);
-}
 
 static uint32_t bpm_to_sleep_ticks(double bpm) {
     // calculate time between beeps
@@ -128,6 +131,14 @@ static void cycle_beats_per_bar(MetronomeState* metronome_state) {
     }
 }
 
+static void metronome_state_init(MetronomeState* const metronome_state) {
+    metronome_state->bpm = 120.0;
+    metronome_state->playing = false;
+    metronome_state->beats_per_bar = 4;
+    metronome_state->note_length = 4;
+    metronome_state->current_beat = 1;
+}
+
 int32_t metronome_app() {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
@@ -145,6 +156,7 @@ int32_t metronome_app() {
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, &state_mutex);
     view_port_input_callback_set(view_port, input_callback, event_queue);
+    metronome_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, &state_mutex);
 
     // Open GUI and register view_port
     Gui* gui = furi_record_open("gui");
@@ -175,7 +187,7 @@ int32_t metronome_app() {
                     case InputKeyOk:
                         metronome_state->playing = !metronome_state->playing;
                         if (metronome_state->playing) {
-                            furi_timer_start(metronome_state->timer, bpm_to_sleep_ticks(metronome_state->bpm));
+                          furi_timer_start(metronome_state->timer, bpm_to_sleep_ticks(metronome_state->bpm));
                         } else {
                           furi_timer_stop(metronome_state->timer);
                         }
