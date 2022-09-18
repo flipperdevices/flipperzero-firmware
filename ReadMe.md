@@ -18,6 +18,7 @@
 - Settings: Updated HOLD DOWN to go to Secondary Favorite [(By RogueMaster)]
 - Settings: Updated Left to go to Clock [(By RogueMaster)]
 - Settings: Updated HOLD LEFT to go to SubGhz Remote [(By RogueMaster)]
+- Added [faploader: more subsystem headers in API table #1742 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1742)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
@@ -135,6 +136,10 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
 - Settings: Updated Dummy Mode mode to have access to 2048, Dice, Snake, Tetris & Zombiez [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf964fffdd2c1d730623673987a6de32a3f7c92f)
 - Settings: Updated GAMES ONLY mode to have access to 2048, Dice, Doom, Snake, Tetris & Zombiez [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf964fffdd2c1d730623673987a6de32a3f7c92f)
+- Settings: Updated HOLD UP to go to Primary Favorite [(By RogueMaster)]
+- Settings: Updated HOLD DOWN to go to Secondary Favorite [(By RogueMaster)]
+- Settings: Updated Left to go to Clock [(By RogueMaster)]
+- Settings: Updated HOLD LEFT to go to SubGhz Remote [(By RogueMaster)]
 - SubGHz: Auto Detect Raw in READ action (Needs To Be Enabled In Read Settings) [from perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/152)
 - SubGHz: [Add settings to subghz read functionality to allow setting RSSI threshold (raw only) (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/184)
 - SubGHz: Extended ranges enabled through flag in /ext/subghz/assets/extend_range.txt [from tkerrby](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/116)
@@ -167,6 +172,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [picopass se identify #1701 (By bettse/pcunning)](https://github.com/flipperdevices/flipperzero-firmware/pull/1701)
 - [Picopass plugin fixed #1742 (By bettse/pcunning)](https://github.com/flipperdevices/flipperzero-firmware/pull/1742)
 - [SD info: Add dynamic units and free % #1634 (By non-bin)](https://github.com/flipperdevices/flipperzero-firmware/pull/1634)
+- [faploader: more subsystem headers in API table #1742 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1742)
 
 </details>
 
