@@ -5,7 +5,7 @@ App(
     provides=[
         "gpio",
         # "ibutton",
-        # "infrared",
+        "infrared",
         "lfrfid",
         "nfc",
         "subghz",

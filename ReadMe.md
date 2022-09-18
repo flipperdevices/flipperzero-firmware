@@ -21,11 +21,11 @@
 - Added [faploader: more subsystem headers in API table #1742 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1742)
 - Moved Clock to FAP App
 - Moved Spectrum Analyzer to FAP App
-- Moved SubGHz Remote to FAP App (Not Working Yet, So Reverted To Internal)
+- Moved SubGHz Remote to FAP App (Not Working, So Reverted To Internal)
 - Moved iButton to FAP App (Someone please confirm functionality to me on Discord)
 - Moved U2F to FAP App (Someone please confirm functionality to me on Discord)
-- Moved GPIO to FAP App (Not Working Yet, So Reverted To Internal)
-- Moved Infrared to FAP App
+- Moved GPIO to FAP App (Not Working, So Reverted To Internal)
+- Moved Infrared to FAP App (Not Working, So Reverted To Internal)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
@@ -33,6 +33,9 @@
 - Settings: Rename from SD `dolphin/name.txt` [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
 - Lost To Faps: Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 - Lost To Faps: Settings: Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
+- Moved SubGHz Remote to FAP App (Not Working, So Reverted To Internal)
+- Moved GPIO to FAP App (Not Working, So Reverted To Internal)
+- Moved Infrared to FAP App (Not Working, So Reverted To Internal)
 
 </details>
 
