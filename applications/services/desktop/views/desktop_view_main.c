@@ -71,65 +71,66 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
             } else if(event->key == InputKeyRight) {
+                // Right key is handled by animation manager
+                // GOES TO PASSPORT NO MATTER WHAT
+                // THIS DOESNT WORK, PASSPORT WILL ONLY OPEN ON REGULAR RIGHT, NOTHING CAN GET ASSIGNED HERE
                 main_view->callback(DesktopMainEventOpenPassport, main_view->context);
             }
         } else if(event->type == InputTypeLong) {
             if(event->key == InputKeyOk) {
                 main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
             } else if(event->key == InputKeyUp) {
-                // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+                main_view->callback(DesktopMainEventOpenDOOM, main_view->context); // OPENS DOOM
             } else if(event->key == InputKeyDown) {
-                // main_view->callback(DesktopMainEventOpenGames, main_view->context);
-                main_view->callback(DesktopMainEventOpenDebug, main_view->context);
+                main_view->callback(DesktopMainEventOpenZombiez, main_view->context); // OPENS Zombiez
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
-            } else if(event->key == InputKeyRight) {
-                // THIS DOESNT WORK
             }
         }
     } else if(main_view->is_gamemode == true) {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
-                // main_view->callback(DesktopMainEventOpenGames, main_view->context);
-                main_view->callback(DesktopMainEventOpenGameMenu, main_view->context); // OPENS SNAKE
+                main_view->callback(DesktopMainEventOpenDice, main_view->context); // OPENS Dice
             } else if(event->key == InputKeyUp) {
-                // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
-                main_view->callback(DesktopMainEventOpenGameMenu, main_view->context); // OPENS SNAKE
+                main_view->callback(DesktopMainEventOpenSnake, main_view->context); // OPENS SNAKE
             } else if(event->key == InputKeyDown) {
                 // PREFER TO OPEN GAMES MENU
-                main_view->callback(DesktopMainEventOpenGameMenu, main_view->context); // OPENS SNAKE
+                main_view->callback(DesktopMainEventOpen2048, main_view->context); // OPENS 2048
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenClock, main_view->context);
-            } else if(event->key == InputKeyRight) {
-                // GOES TO PASSPORT NO MATTER WHAT
             }
         } else if(event->type == InputTypeLong) {
             if(event->key == InputKeyOk) {
                 main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
             } else if(event->key == InputKeyUp) {
-                // main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
-                main_view->callback(DesktopMainEventOpenGameMenu, main_view->context); // OPENS SNAKE
+                main_view->callback(DesktopMainEventOpenDOOM, main_view->context); // OPENS DOOM
             } else if(event->key == InputKeyDown) {
-                // main_view->callback(DesktopMainEventOpenGames, main_view->context);
-                main_view->callback(DesktopMainEventOpenGameMenu, main_view->context); // OPENS SNAKE
+                main_view->callback(DesktopMainEventOpenZombiez, main_view->context); // OPENS Zombiez
             } else if(event->key == InputKeyLeft) {
-                main_view->callback(DesktopMainEventOpenClock, main_view->context);
-            } else if(event->key == InputKeyRight) {
-                // THIS DOESNT WORK, PASSPORT WILL ONLY OPEN ON REGULAR RIGHT, NOTHING CAN GET ASSIGNED HERE
+                main_view->callback(DesktopMainEventOpenTetris, main_view->context); // OPENS TETRIS
             }
         }
 	} else {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
-                main_view->callback(DesktopMainEventOpenGameMenu, main_view->context); // OPENS SNAKE
+                main_view->callback(DesktopMainEventOpenDice, main_view->context); // OPENS Dice
             } else if(event->key == InputKeyUp) {
                 main_view->callback(DesktopMainEventOpenLockMenu, main_view->context);
             } else if(event->key == InputKeyDown) {
-                main_view->callback(DesktopMainEventOpenPassport, main_view->context);
+                main_view->callback(DesktopMainEventOpen2048, main_view->context); // OPENS 2048
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenPassport, main_view->context);
             }
-            // Right key is handled by animation manager
+        } else if(event->type == InputTypeLong) {
+            if(event->key == InputKeyOk) {
+                main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
+            } else if(event->key == InputKeyUp) {
+                main_view->callback(DesktopMainEventOpenSnake, main_view->context); // OPENS SNAKE
+            } else if(event->key == InputKeyDown) {
+                main_view->callback(DesktopMainEventOpenTetris, main_view->context); // OPENS TETRIS
+            } else if(event->key == InputKeyLeft) {
+                main_view->callback(DesktopMainEventOpenClock, main_view->context);
+            } 
         }
 	}
 

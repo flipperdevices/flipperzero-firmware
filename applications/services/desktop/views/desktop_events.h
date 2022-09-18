@@ -12,7 +12,12 @@ typedef enum {
     DesktopMainEventOpenPassport,
     DesktopMainEventOpenPowerOff,
 
-    DesktopMainEventOpenGameMenu,
+    DesktopMainEventOpenSnake,
+    DesktopMainEventOpen2048,
+    DesktopMainEventOpenZombiez,
+    DesktopMainEventOpenTetris,
+    DesktopMainEventOpenDOOM,
+    DesktopMainEventOpenDice,
 
     DesktopLockedEventUnlocked,
     DesktopLockedEventUpdate,

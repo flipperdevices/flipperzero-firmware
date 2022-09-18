@@ -172,9 +172,49 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             }
             break;
         }
-        case DesktopMainEventOpenGameMenu: {
+        case DesktopMainEventOpenSnake: {
             LoaderStatus status = loader_start(
                 desktop->loader, "Applications", EXT_PATH("/apps/Games/GAME_Snake.fap"));
+            if(status != LoaderStatusOk) {
+                FURI_LOG_E(TAG, "loader_start failed: %d", status);
+            }
+            break;
+        }
+        case DesktopMainEventOpen2048: {
+            LoaderStatus status = loader_start(
+                desktop->loader, "Applications", EXT_PATH("/apps/Games/GAME_2048.fap"));
+            if(status != LoaderStatusOk) {
+                FURI_LOG_E(TAG, "loader_start failed: %d", status);
+            }
+            break;
+        }
+        case DesktopMainEventOpenZombiez: {
+            LoaderStatus status = loader_start(
+                desktop->loader, "Applications", EXT_PATH("/apps/Games/GAME_Zombiez.fap"));
+            if(status != LoaderStatusOk) {
+                FURI_LOG_E(TAG, "loader_start failed: %d", status);
+            }
+            break;
+        }
+        case DesktopMainEventOpenTetris: {
+            LoaderStatus status = loader_start(
+                desktop->loader, "Applications", EXT_PATH("/apps/Games/GAME_Tetris.fap"));
+            if(status != LoaderStatusOk) {
+                FURI_LOG_E(TAG, "loader_start failed: %d", status);
+            }
+            break;
+        }
+        case DesktopMainEventOpenDOOM: {
+            LoaderStatus status = loader_start(
+                desktop->loader, "Applications", EXT_PATH("/apps/Games/GAME_DOOM.fap"));
+            if(status != LoaderStatusOk) {
+                FURI_LOG_E(TAG, "loader_start failed: %d", status);
+            }
+            break;
+        }
+        case DesktopMainEventOpenDice: {
+            LoaderStatus status = loader_start(
+                desktop->loader, "Applications", EXT_PATH("/apps/Games/GAME_Dice.fap"));
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
