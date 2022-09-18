@@ -25,6 +25,8 @@ typedef struct {
 typedef struct {
     double bpm;
     bool playing;
+    int beats_per_bar;
+    int note_length;
     FuriTimer* timer;
 } MetronomeState;
 
@@ -33,7 +35,6 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     if(metronome_state == NULL) {
         return;
     }
-//    char* play_state;
     string_t tempStr;
     string_init(tempStr);
 
@@ -41,14 +42,10 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontPrimary);
 
-//    // draw playing state
-//    if (metronome_state->playing) {
-//        play_state = "Playing";
-//    } else {
-//        play_state = "Paused";
-//    }
-//    canvas_draw_str_aligned(canvas, 5, 10, AlignLeft, AlignBottom, play_state);
-
+    // draw bars/beat
+    string_printf(tempStr, "%d/%d", metronome_state->beats_per_bar, metronome_state->note_length);
+    canvas_draw_str_aligned(canvas, 64, 16, AlignCenter, AlignCenter, string_get_cstr(tempStr));
+    string_reset(tempStr);
     // draw BPM value
     string_printf(tempStr, "%.2f", metronome_state->bpm);
     canvas_set_font(canvas, FontBigNumbers);
@@ -86,6 +83,8 @@ static void timer_callback() {
 static void metronome_state_init(MetronomeState* const metronome_state) {
     metronome_state->bpm = 120.0;
     metronome_state->playing = false;
+    metronome_state->beats_per_bar = 4;
+    metronome_state->note_length = 4;
     metronome_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, metronome_state);
 }
 
@@ -122,6 +121,13 @@ static void decrease_bpm(MetronomeState* metronome_state, double amount) {
   update_timer(metronome_state);
 }
 
+static void cycle_beats_per_bar(MetronomeState* metronome_state) {
+    metronome_state->beats_per_bar++;
+    if (metronome_state->beats_per_bar > metronome_state->note_length) {
+      metronome_state->beats_per_bar = 1;
+    }
+}
+
 int32_t metronome_app() {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
@@ -156,6 +162,7 @@ int32_t metronome_app() {
                 if(event.input.type == InputTypeShort) {
                     switch(event.input.key) {
                     case InputKeyUp:
+                        cycle_beats_per_bar(metronome_state);
                         break;
                     case InputKeyDown:
                         break;
