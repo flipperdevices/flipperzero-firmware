@@ -1,7 +1,7 @@
 App(
-    appid="ibutton",
+    appid="iButton",
     name="iButton",
-    apptype=FlipperAppType.APP,
+    apptype=FlipperAppType.EXTERNAL,
     entry_point="ibutton_app",
     cdefines=["APP_IBUTTON"],
     requires=[
@@ -9,9 +9,11 @@ App(
         "dialogs",
     ],
     provides=["ibutton_start"],
-    icon="A_iButton_14",
+    # icon="A_iButton_14",
     stack_size=2 * 1024,
     order=60,
+    fap_icon="iBIcon.png",
+    fap_category="Main",
 )
 
 App(
