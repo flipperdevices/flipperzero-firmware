@@ -12,10 +12,10 @@
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
 - New [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) updates in changelog
 - Readded [SD info: Add dynamic units and free % #1634 (By non-bin)](https://github.com/flipperdevices/flipperzero-firmware/pull/1634)
-- Updated Dummy Mode mode to have access to 2048, Dice, Snake & Tetris
-- Updated GAMES ONLY mode to have access to 2048, Dice, Doom, Snake, Tetris & Zombiez
-- Updated HOLD UP to go to Doom
-- Updated HOLD UP to go to Zombiez
+- Settings: Updated Dummy Mode mode to have access to 2048, Dice, Snake & Tetris [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf964fffdd2c1d730623673987a6de32a3f7c92f)
+- Settings: Updated GAMES ONLY mode to have access to 2048, Dice, Doom, Snake, Tetris & Zombiez [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf964fffdd2c1d730623673987a6de32a3f7c92f)
+- Settings: Updated HOLD UP to go to Doom [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf964fffdd2c1d730623673987a6de32a3f7c92f)
+- Settings: Updated HOLD UP to go to Zombiez [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf964fffdd2c1d730623673987a6de32a3f7c92f)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
@@ -131,6 +131,10 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - - [UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT FROM CLOCK](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)<== FULL LIST OF GAMES ONLY CONTROLS
 - Settings: LCD Timeout Options Added: 10s+90s+2min+5min+10min [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/notification/notification_settings_app.c)
 - Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
+- Settings: Updated Dummy Mode mode to have access to 2048, Dice, Snake & Tetris [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf964fffdd2c1d730623673987a6de32a3f7c92f)
+- Settings: Updated GAMES ONLY mode to have access to 2048, Dice, Doom, Snake, Tetris & Zombiez [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf964fffdd2c1d730623673987a6de32a3f7c92f)
+- Settings: Updated HOLD UP to go to Doom [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf964fffdd2c1d730623673987a6de32a3f7c92f)
+- Settings: Updated HOLD UP to go to Zombiez [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf964fffdd2c1d730623673987a6de32a3f7c92f)
 - SubGHz: Auto Detect Raw in READ action (Needs To Be Enabled In Read Settings) [from perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/152)
 - SubGHz: [Add settings to subghz read functionality to allow setting RSSI threshold (raw only) (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/184)
 - SubGHz: Extended ranges enabled through flag in /ext/subghz/assets/extend_range.txt [from tkerrby](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/116)
