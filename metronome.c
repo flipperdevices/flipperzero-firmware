@@ -1,10 +1,11 @@
 #include <furi.h>
+#include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <m-string.h>
 #include <stdlib.h>
 
-const double BPM_STEP_SIZE = 0.5;
+#define BPM_STEP_SIZE 0.5d
 
 typedef enum {
     EventTypeTick,
@@ -19,6 +20,7 @@ typedef struct {
 typedef struct {
     double bpm;
     bool playing;
+    FuriTimer* timer;
 } MetronomeState;
 
 static void render_callback(Canvas* const canvas, void* ctx) {
@@ -59,9 +61,17 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
+static void timer_callback() {
+    //UNUSED(metronome_state);
+    furi_hal_speaker_start(440.0f, 1.0f);
+    furi_delay_ms(40);
+    furi_hal_speaker_stop();
+}
+
 static void metronome_state_init(MetronomeState* const metronome_state) {
     metronome_state->bpm = 120.0;
     metronome_state->playing = false;
+    metronome_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, metronome_state);
 }
 
 int32_t metronome_app() {
@@ -102,13 +112,22 @@ int32_t metronome_app() {
                     case InputKeyDown:
                         break;
                     case InputKeyRight:
-                        metronome_state->bpm += BPM_STEP_SIZE;
+                        metronome_state->bpm += (double)BPM_STEP_SIZE;
                         break;
                     case InputKeyLeft:
-                        metronome_state->bpm -= BPM_STEP_SIZE;
+                        metronome_state->bpm -= (double)BPM_STEP_SIZE;
                         break;
                     case InputKeyOk:
                         metronome_state->playing = !metronome_state->playing;
+                        if (metronome_state->playing) {
+                            // calculate time between beeps
+                            uint32_t tps = furi_kernel_get_tick_frequency();
+                            double bps = (double)metronome_state->bpm / 60;
+                            uint32_t ticks_to_sleep = (uint32_t)round(tps / bps);
+                            furi_timer_start(metronome_state->timer, ticks_to_sleep);
+                        } else {
+                          furi_timer_stop(metronome_state->timer);
+                        }
                         break;
                     case InputKeyBack:
                         processing = false;
@@ -131,6 +150,7 @@ int32_t metronome_app() {
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
+    furi_timer_free(metronome_state->timer);
     free(metronome_state);
 
     return 0;
