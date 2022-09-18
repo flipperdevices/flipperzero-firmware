@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="subbrute_start",
     cdefines=["APP_SUB_BRUTE"],
-    requires=["gui","dialogs"],
+    requires=["storage", "gui", "dialogs", "subghz"],
     stack_size=2 * 1024,
     order=190,
     fap_icon="subbrute_10px.png",
