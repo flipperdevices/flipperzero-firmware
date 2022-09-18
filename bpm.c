@@ -141,20 +141,24 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     string_init(tempStr);
 
     string_printf(tempStr, "Taps: %d", bpm_state->taps);
-    canvas_draw_str_aligned(canvas, 5, 15, AlignLeft, AlignBottom, string_get_cstr(tempStr));
+    canvas_draw_str_aligned(canvas, 5, 10, AlignLeft, AlignBottom, string_get_cstr(tempStr));
     string_reset(tempStr);
 
     string_printf(tempStr, "Queue: %d", bpm_state->tap_queue->size);
-    canvas_draw_str_aligned(canvas, 70, 15, AlignLeft, AlignBottom, string_get_cstr(tempStr));
+    canvas_draw_str_aligned(canvas, 70, 10, AlignLeft, AlignBottom, string_get_cstr(tempStr));
     string_reset(tempStr);
 
     string_printf(tempStr, "Interval: %dms", bpm_state->interval);
-    canvas_draw_str_aligned(canvas, 5, 25, AlignLeft, AlignBottom, string_get_cstr(tempStr));
+    canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignBottom, string_get_cstr(tempStr));
+    string_reset(tempStr);
+
+    string_printf(tempStr, "x2 %.2f /2 %.2f", bpm_state->bpm*2, bpm_state->bpm/2);
+    canvas_draw_str_aligned(canvas, 64, 60, AlignCenter, AlignCenter, string_get_cstr(tempStr));
     string_reset(tempStr);
 
     string_printf(tempStr, "%.2f", bpm_state->bpm);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, 64, 50, AlignCenter, AlignCenter, string_get_cstr(tempStr));
+    canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, string_get_cstr(tempStr));
     string_reset(tempStr);
 
     string_clear(tempStr);
