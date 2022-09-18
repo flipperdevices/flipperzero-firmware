@@ -142,13 +142,11 @@ int32_t metronome_app() {
         if(event_status == FuriStatusOk) {
             // press events
             if(event.type == EventTypeKey) {
-                if(event.input.type == InputTypePress) {
+                if(event.input.type == InputTypeShort) {
                     switch(event.input.key) {
                     case InputKeyUp:
-                        increase_bpm(metronome_state, BPM_STEP_SIZE_COARSE);
                         break;
                     case InputKeyDown:
-                        decrease_bpm(metronome_state, BPM_STEP_SIZE_COARSE);
                         break;
                     case InputKeyRight:
                         increase_bpm(metronome_state, BPM_STEP_SIZE_FINE);
@@ -163,6 +161,42 @@ int32_t metronome_app() {
                         } else {
                           furi_timer_stop(metronome_state->timer);
                         }
+                        break;
+                    case InputKeyBack:
+                        processing = false;
+                        break;
+                    }
+                } else if (event.input.type == InputTypeLong) {
+                    switch(event.input.key) {
+                    case InputKeyUp:
+                        break;
+                    case InputKeyDown:
+                        break;
+                    case InputKeyRight:
+                        increase_bpm(metronome_state, BPM_STEP_SIZE_COARSE);
+                        break;
+                    case InputKeyLeft:
+                        decrease_bpm(metronome_state, BPM_STEP_SIZE_COARSE);
+                        break;
+                    case InputKeyOk:
+                        break;
+                    case InputKeyBack:
+                        processing = false;
+                        break;
+                    }
+                } else if (event.input.type == InputTypeRepeat) {
+                    switch(event.input.key) {
+                    case InputKeyUp:
+                        break;
+                    case InputKeyDown:
+                        break;
+                    case InputKeyRight:
+                        increase_bpm(metronome_state, BPM_STEP_SIZE_COARSE);
+                        break;
+                    case InputKeyLeft:
+                        decrease_bpm(metronome_state, BPM_STEP_SIZE_COARSE);
+                        break;
+                    case InputKeyOk:
                         break;
                     case InputKeyBack:
                         processing = false;
