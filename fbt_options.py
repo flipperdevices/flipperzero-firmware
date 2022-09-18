@@ -74,7 +74,7 @@ FIRMWARE_APPS = {
         # Settings
         "settings_apps",
         # Plugins
-        # "basic_plugins",
+        "basic_plugins",
         # Debug
         # "debug_apps",
     ],

@@ -1,6 +1,6 @@
 # Flipper Application Manifests (.fam)
 
-All components of Flipper Zero firmware — services, user applications, system settings — are developed independently. Each component has a build system manifest file, named `application.fam`, defining basic properties of a components and its relations to other parts of the system.
+All components of Flipper Zero firmware — services, user applications, system settings — are developed independently. Each component has a build system manifest file, named `application.fam`, defining basic properties of a component and its relations to other parts of the system.
 
 When building firmware, **`fbt`** collects all application manifests, processes their dependencies and builds only those components that are utilized in current build configuration. See [fbt docs](./fbt.md#firmware-application-set) for details on build configurations.
 
@@ -21,12 +21,12 @@ Only 2 parameters are mandatoty: ***appid*** and ***apptype***, others are optio
 | SERVICE      | System service, created at early startup  |
 | SYSTEM       | Application not being shown in any menus. Can be started by other apps or from CLI  |
 | APP          | Regular application for main menu |
-| PLUGIN       | Application to be built as .fap plugin |
+| PLUGIN       | Application to be built as a part of firmware an to be placed in Plugins menu |
 | DEBUG        | Application only visible in Debug menu with debug mode enabled |
 | ARCHIVE      | One and only Archive app |
 | SETTINGS     | Application to be placed in System settings menu |
-| STARTUP      | Callback function to run at system startup. Does not define a separate app |
-| EXTERNAL     | Application to be built as .fap plugin |
+| STARTUP      | Callback function to run at system startup. Does not define a standalone app |
+| EXTERNAL     | Application to be built as a .fap executable file |
 | METAPACKAGE  | Does not define any code to be run, used for declaring dependencies and application bundles |
 
 * **name**: Name to show in menus.
