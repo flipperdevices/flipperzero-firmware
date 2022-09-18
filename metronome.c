@@ -106,7 +106,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     // draw BPM value
     string_printf(tempStr, "%.2f", metronome_state->bpm);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, string_get_cstr(tempStr));
+    canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, string_get_cstr(tempStr));
     string_reset(tempStr);
 
     // draw button prompts
@@ -120,6 +120,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     }
     elements_button_top_left(canvas, "Push");
     elements_button_top_right(canvas, "Hold");
+
+    // draw progress bar
+    elements_progress_bar(canvas, 8, 36, 112, (float)metronome_state->current_beat/metronome_state->beats_per_bar);
 
     string_clear(tempStr);
     release_mutex((ValueMutex*)ctx, metronome_state);
