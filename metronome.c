@@ -33,7 +33,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     if(metronome_state == NULL) {
         return;
     }
-    char* play_state;
+//    char* play_state;
     string_t tempStr;
     string_init(tempStr);
 
@@ -41,13 +41,13 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontPrimary);
 
-    // draw playing state
-    if (metronome_state->playing) {
-        play_state = "Playing";
-    } else {
-        play_state = "Paused";
-    }
-    canvas_draw_str_aligned(canvas, 5, 10, AlignLeft, AlignBottom, play_state);
+//    // draw playing state
+//    if (metronome_state->playing) {
+//        play_state = "Playing";
+//    } else {
+//        play_state = "Paused";
+//    }
+//    canvas_draw_str_aligned(canvas, 5, 10, AlignLeft, AlignBottom, play_state);
 
     // draw BPM value
     string_printf(tempStr, "%.2f", metronome_state->bpm);
@@ -57,8 +57,13 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     // draw button prompts
     canvas_set_font(canvas, FontSecondary);
-    elements_button_left(canvas, "Slower");
-    elements_button_right(canvas, "Faster");
+    elements_button_left(canvas, "Slow");
+    elements_button_right(canvas, "Fast");
+    if (metronome_state->playing) {
+     elements_button_center(canvas, "Stop ");
+    } else {
+     elements_button_center(canvas, "Start");
+    }
 
     string_clear(tempStr);
     release_mutex((ValueMutex*)ctx, metronome_state);
