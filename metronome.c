@@ -9,6 +9,9 @@
 #include <gui/canvas.h>
 #include <gui/icon_i.h>
 
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
+
 #define BPM_STEP_SIZE_FINE 0.5d
 #define BPM_STEP_SIZE_COARSE 10.0d
 #define BPM_BOUNDARY_LOW 10.0d
@@ -32,6 +35,7 @@ typedef struct {
     int note_length;
     int current_beat;
     FuriTimer* timer;
+    NotificationApp* notifications;
 } MetronomeState;
 
 //lib can only do bottom left/right
@@ -137,17 +141,21 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 
 static void timer_callback(void* ctx) {
     MetronomeState* metronome_state = acquire_mutex((ValueMutex*)ctx, 25);
-    if (metronome_state->current_beat == 1) {
-      furi_hal_speaker_start(440.0f, 1.0f);
-    } else {
-      furi_hal_speaker_start(220.0f, 1.0f);
-    };
     metronome_state->current_beat++;
     if (metronome_state->current_beat > metronome_state->beats_per_bar) {
       metronome_state->current_beat = 1;
     }
+    if (metronome_state->current_beat == 1) {
+      notification_message(metronome_state->notifications, &sequence_set_only_red_255);
+      furi_hal_speaker_start(440.0f, 1.0f);
+    } else {
+      notification_message(metronome_state->notifications, &sequence_set_only_green_255);
+      furi_hal_speaker_start(220.0f, 1.0f);
+    };
     furi_delay_ms(BEEP_DELAY_MS);
+    notification_message(metronome_state->notifications, &sequence_reset_rgb);
     furi_hal_speaker_stop();
+
     release_mutex((ValueMutex*)ctx, metronome_state);
 }
 
@@ -207,7 +215,8 @@ static void metronome_state_init(MetronomeState* const metronome_state) {
     metronome_state->playing = false;
     metronome_state->beats_per_bar = 4;
     metronome_state->note_length = 4;
-    metronome_state->current_beat = 1;
+    metronome_state->current_beat = 0;
+    metronome_state->notifications = furi_record_open(RECORD_NOTIFICATION);
 }
 
 int32_t metronome_app() {
@@ -322,6 +331,7 @@ int32_t metronome_app() {
     furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
     furi_timer_free(metronome_state->timer);
+    furi_record_close(RECORD_NOTIFICATION);
     free(metronome_state);
 
     return 0;
