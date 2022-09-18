@@ -78,7 +78,7 @@ class AppState:
     @staticmethod
     def from_gdb(gdb_app: "AppState") -> "AppState":
         state = AppState(str(gdb_app["manifest"]["name"].string()))
-        state.entry_address = int(gdb_app["entry"])
+        state.entry_address = int(gdb_app["elf"]["entry"])
 
         app_state = gdb_app["state"]
         if debug_link_size := int(app_state["debug_link_size"]):
