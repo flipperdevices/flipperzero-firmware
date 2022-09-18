@@ -22,9 +22,9 @@
 - Moved Clock to FAP App
 - Moved Spectrum Analyzer to FAP App
 - Moved SubGHz Remote to FAP App (Not Working Yet, So Reverted To Internal)
-- Moved GPIO to FAP App (Not Working Yet, So Reverted To Internal)
 - Moved iButton to FAP App (Someone please confirm functionality to me on Discord)
 - Moved U2F to FAP App (Someone please confirm functionality to me on Discord)
+- Moved GPIO to FAP App (Not Working Yet, So Reverted To Internal)
 - Moved Infrared to FAP App
 
 <details>
