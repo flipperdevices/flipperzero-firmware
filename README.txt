@@ -5,6 +5,8 @@
 Resources
 	Meta-list of cool stuff. Includes forks with country restrictions removed
 		https://github.com/djsime1/awesome-flipperzero
+	Fliiper FAP notes
+		https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppsOnSDCard.md
 
 Local docs
 	You really should at least take a peek at the docs in this folder!
@@ -30,57 +32,54 @@ git clone --recursive  https://github.com/flipperdevices/flipperzero-firmware.gi
 # Do NOT interrupt this process! (it can't recover if a partial zip has been downloaded)
 ./fbt
 
+
  ,----------.
 (  Flashing  )
  `----------'
 
 # qv. documentation/fbt.md
-./fbt flash_usb
+./fbt flash_usb_full
 
 
- ,---------.
-(  Plugins  )
- `---------'
+ ,--------------.
+(  Applications  )
+ `--------------'
 
 This readme should exist in a directory called 'bc_demo'
 
-1. Move the bc_demo directory to applications/  [**]
+1. Move the bc_demo directory to applications_user/  [**]
 
 Eg.
 	/path/to/FlipperZero/
 	+-- official/
-	:   +-- applications/            <-- plugins etc.
-	:   |   +-- bc_demo/             <-- bc_demo has been added [**]
-	:   |   |   +-- README           <--   this file
-	:   |   |   +-- application.fam  <--   plugin ID file for OS
-	:   |   |   +-- bc_demo.c        <--   excessively documented plugin code
+	:   +-- applications/             <-- system applications
+	:	|
+	:   +-- applications_user/        <-- user applications
+	:   |   +-- bc_demo/              <-- bc_demo has been added [**]
+	:   |   |   +-- README            <--   this file
+	:   |   |   +-- CS.png            <--   plugin menu icon (10x10 pixels)
+	:   |   |   +-- application.fam   <--   plugin ID file for OS
+	:   |   |   +-- bc_demo.stripped  <-- 
+	:   |   |   +-- bc_demo.c         <--   excessively documented plugin code
 	:   |   |
-	:   |   +-- gui/                 <-- The GUI library
+	:   |   +-- gui/                  <-- The GUI library
 	:   |   |
-	:   |   +-- meta/                <-- System menu config file
-	:   |   :   +-- application.fam  <-- ...
+	:   |   +-- meta/                 <-- System menu config file
+	:   |   :   +-- application.fam   <-- ...
 	:   |
-	:   +-- documentation/           <-- Really, RTFMs, or at least skim them!  Not kidding!
+	:   +-- documentation/            <-- Really, RTFMs, or at least skim them!  Not kidding!
 	:   |   +-- KeyCombo.md
 	:   |   +-- OTA.md
 	:   |   +-- fbt.md
 	:   |   :
 	:   |   
-	:   +-- furi/                    <-- Flipper API
+	:   +-- furi/                     <-- Flipper API
 	:   :   +-- core/
 	:   :
 
-2. Add the plugin to the menu system
+2. Rebuild the application
 
-# Get plugin's "appid"
-grep  appid  ${FZTHIS}/applications/bc_demo/application.fam
-
-# Add it to the menu somewhere
-# ...if you can't work out how, probably best give up now :/
-edit ${FZTHIS}/applications/meta/application.fam
-
-3. Rebuild the firmware ...Sadly touching the meta/ folder triggers a rebuild of ALL appliations
-./fbt
+./fbt firmware_bc_demo
 
 
  ,---------.
@@ -91,6 +90,9 @@ The demo code is *EXTENSIVELY* documented
 
 --> application.fam
 	# This holds the details required by the toolchain to compile it in (as a plugin)
+	# And OPTIONALLY
+		# The Application Category (top level directory)
+		# The name of the menu icon (a 10x10 Black-on-White PNG)
 
 --> err.h
 	# Keep error numbers and strings tied together in a friendly way
@@ -206,3 +208,6 @@ The demo code is *EXTENSIVELY* documented
 	+ cbDraw()            [7b]
 		<- O/S <- bc_demo
 		# (Re-)Draw the whole canvas
+
+--> bc_demo.stripped
+	# Stripped (but not comment-free) version of bc_demo.c

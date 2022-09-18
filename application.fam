@@ -1,7 +1,7 @@
 App(
     appid="bc_demo",
     name="Bluechip Demo",
-    apptype=FlipperAppType.PLUGIN,
+    apptype=FlipperAppType.EXTERNAL,
     entry_point="bc_demo",
     cdefines=["APP_BC_DEMO"],
     requires=[
@@ -9,4 +9,6 @@ App(
     ],
     stack_size=2 * 1024,
     order=20,
+    fap_icon="CS.png",
+    fap_category="Cyborg Systems",
 )

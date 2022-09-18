@@ -1,5 +1,20 @@
-# FlipperZero_plugin_howto
+# FlipperZero_plugin_howto  .. aka .. FlipperZero_FAP_howto
 A simple plugin for the FlipperZero written as a tutorial example [ie. excessive documentation &amp; error handling]
+
+If you wish to review this repository at the last point before the FAP update, use (this link)[https://github.com/csBlueChip/FlipperZero_plugin_howto/tree/21f2620035728cd04e1951c3f6a30de1cfe8a280]
+
+# FAP Support Has Arrived! :)
+Since the move to FAP, your "plugins" are now known as "applications"
+* "Plugins" are 
+  * Compiled in to the kernel
+  * Flashed as part of the firmware in the main SoC
+  * Require the developer to edit/maintain `/applications/meta/applications.fam`
+* "Applications" are 
+  * Compiled as separate programs
+  * Live on the SDCard
+  * Do NOT require code edits outside their own directory
+
+The upshot is easier development, and (essentailly) unlimited features on your Flipper!
 
 # If you have not yet installed the FlipperZero devkit
 ```
@@ -10,11 +25,19 @@ git clone --recursive  https://github.com/flipperdevices/flipperzero-firmware.gi
 ```
 ...and wait while it downloads all the required tools and performs the first build of the code.
 
+# Install the cutting-edge firmware on your Flipper
+`./fbt flash_usb_full`
+
+`flash_usb` is used to install JUST the firmware<br/>
+`flash_usb_full` also installs the "resources" (images and such)<br/>
+
+Be aware that since the introdcution of FAP, Applications are Resources.
+
 # After the devkit is installed
 Assuming your devkit is in: `~/flipperZero/official/`<br/>
 ...checkout this demo with:
 ```
-cd ~/flipperZero/official//applications
+cd ~/flipperZero/official//applications_user
 mkdir bc_demo
 cd bc_demo
 git clone https://github.com/csBlueChip/FlipperZero_plugin_howto.git ./
@@ -24,14 +47,14 @@ git clone https://github.com/csBlueChip/FlipperZero_plugin_howto.git ./
 Compile with:
 ```
 cd ~/flipperZero/official/
-./fbt
+./fbt firmware_bc_demo
 ```
-...And/Or (Compile and) Flash with:
+...And/Or (Compile and) Upload with:
 ```
 cd ~/flipperZero/official/
-./fbt flash_usb
+./fbt launch_app APPSRC=applications/bc_demo/
 ```
-...Flashing will fail if the FlipperZero is running an app/plugin!
+...Flashing will fail if the FlipperZero is in the applications menu, or running an application!
 
 # About the bc_demo code & documentation
 * Review the `README.txt` file for an overview of the code, and how to get started.
@@ -39,11 +62,3 @@ cd ~/flipperZero/official/
 
 The code is all M.I.T. Licensed ...take it ...use it ...butcher it ...polish it ...whatever. <br/>
 ...If you do anything cool with it, I'd love to see your creation :)
-
-# Compiling the demo
-You will need to add bc_demo to the system menu by editing `~/flipperZero/official//applications/meta/application.fam` in accordance with the intructions in `README.txt (Plugins) #2`<br>
-...then simply use the same compile & flash command we used previously:
-```
-cd ~/flipperZero/official/
-./fbt flash_usb
-```
