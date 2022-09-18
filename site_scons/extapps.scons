@@ -64,7 +64,7 @@ def build_app_as_external(env, appdef):
 
 
 apps_to_build_as_faps = [
-    # FlipperAppType.PLUGIN,
+    FlipperAppType.PLUGIN,
     FlipperAppType.EXTERNAL,
 ]
 if appenv["DEBUG_TOOLS"]:
