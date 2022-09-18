@@ -1,5 +1,5 @@
 App(
-    appid="U2F",
+    appid="u2f",
     name="U2F",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="u2f_app",
