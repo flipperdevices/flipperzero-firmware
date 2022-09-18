@@ -161,6 +161,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [dummy mode #1739 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1739)
 - [picopass se identify #1701 (By bettse/pcunning)](https://github.com/flipperdevices/flipperzero-firmware/pull/1701)
 - [Picopass plugin fixed #1742 (By bettse/pcunning)](https://github.com/flipperdevices/flipperzero-firmware/pull/1742)
+- [SD info: Add dynamic units and free % #1634 (By non-bin)](https://github.com/flipperdevices/flipperzero-firmware/pull/1634)
 
 </details>
 
