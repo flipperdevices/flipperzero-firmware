@@ -2479,14 +2479,14 @@ Function,-,subghz_protocol_decoder_scher_khan_get_hash_data,uint8_t,void*
 Function,-,subghz_protocol_decoder_scher_khan_get_string,void,"void*, string_t"
 Function,-,subghz_protocol_decoder_scher_khan_reset,void,void*
 Function,-,subghz_protocol_decoder_scher_khan_serialize,_Bool,"void*, FlipperFormat*, SubGhzPresetDefinition*"
-Function,+,subghz_protocol_decoder_secplus_v1_alloc,void*,SubGhzEnvironment*
-Function,+,subghz_protocol_decoder_secplus_v1_deserialize,_Bool,"void*, FlipperFormat*"
-Function,+,subghz_protocol_decoder_secplus_v1_feed,void,"void*, _Bool, uint32_t"
-Function,+,subghz_protocol_decoder_secplus_v1_free,void,void*
-Function,+,subghz_protocol_decoder_secplus_v1_get_hash_data,uint8_t,void*
-Function,+,subghz_protocol_decoder_secplus_v1_get_string,void,"void*, string_t"
-Function,+,subghz_protocol_decoder_secplus_v1_reset,void,void*
-Function,+,subghz_protocol_decoder_secplus_v1_serialize,_Bool,"void*, FlipperFormat*, SubGhzPresetDefinition*"
+Function,-,subghz_protocol_decoder_secplus_v1_alloc,void*,SubGhzEnvironment*
+Function,-,subghz_protocol_decoder_secplus_v1_deserialize,_Bool,"void*, FlipperFormat*"
+Function,-,subghz_protocol_decoder_secplus_v1_feed,void,"void*, _Bool, uint32_t"
+Function,-,subghz_protocol_decoder_secplus_v1_free,void,void*
+Function,-,subghz_protocol_decoder_secplus_v1_get_hash_data,uint8_t,void*
+Function,-,subghz_protocol_decoder_secplus_v1_get_string,void,"void*, string_t"
+Function,-,subghz_protocol_decoder_secplus_v1_reset,void,void*
+Function,-,subghz_protocol_decoder_secplus_v1_serialize,_Bool,"void*, FlipperFormat*, SubGhzPresetDefinition*"
 Function,-,subghz_protocol_decoder_secplus_v2_alloc,void*,SubGhzEnvironment*
 Function,-,subghz_protocol_decoder_secplus_v2_deserialize,_Bool,"void*, FlipperFormat*"
 Function,-,subghz_protocol_decoder_secplus_v2_feed,void,"void*, _Bool, uint32_t"
@@ -2650,11 +2650,11 @@ Function,+,subghz_protocol_encoder_raw_deserialize,_Bool,"void*, FlipperFormat*"
 Function,+,subghz_protocol_encoder_raw_free,void,void*
 Function,+,subghz_protocol_encoder_raw_stop,void,void*
 Function,+,subghz_protocol_encoder_raw_yield,LevelDuration,void*
-Function,+,subghz_protocol_encoder_secplus_v1_alloc,void*,SubGhzEnvironment*
-Function,+,subghz_protocol_encoder_secplus_v1_deserialize,_Bool,"void*, FlipperFormat*"
-Function,+,subghz_protocol_encoder_secplus_v1_free,void,void*
-Function,+,subghz_protocol_encoder_secplus_v1_stop,void,void*
-Function,+,subghz_protocol_encoder_secplus_v1_yield,LevelDuration,void*
+Function,-,subghz_protocol_encoder_secplus_v1_alloc,void*,SubGhzEnvironment*
+Function,-,subghz_protocol_encoder_secplus_v1_deserialize,_Bool,"void*, FlipperFormat*"
+Function,-,subghz_protocol_encoder_secplus_v1_free,void,void*
+Function,-,subghz_protocol_encoder_secplus_v1_stop,void,void*
+Function,-,subghz_protocol_encoder_secplus_v1_yield,LevelDuration,void*
 Function,-,subghz_protocol_encoder_secplus_v2_alloc,void*,SubGhzEnvironment*
 Function,-,subghz_protocol_encoder_secplus_v2_deserialize,_Bool,"void*, FlipperFormat*"
 Function,-,subghz_protocol_encoder_secplus_v2_free,void,void*
@@ -2677,7 +2677,7 @@ Function,+,subghz_protocol_raw_save_to_file_stop,void,SubGhzProtocolDecoderRAW*
 Function,+,subghz_protocol_registry_count,size_t,
 Function,+,subghz_protocol_registry_get_by_index,const SubGhzProtocol*,size_t
 Function,+,subghz_protocol_registry_get_by_name,const SubGhzProtocol*,const char*
-Function,+,subghz_protocol_secplus_v1_check_fixed,_Bool,uint32_t
+Function,-,subghz_protocol_secplus_v1_check_fixed,_Bool,uint32_t
 Function,-,subghz_protocol_secplus_v2_create_data,_Bool,"void*, FlipperFormat*, uint32_t, uint8_t, uint32_t, SubGhzPresetDefinition*"
 Function,-,subghz_protocol_star_line_create_data,_Bool,"void*, FlipperFormat*, uint32_t, uint8_t, uint16_t, const char*, SubGhzPresetDefinition*"
 Function,+,subghz_receiver_alloc_init,SubGhzReceiver*,SubGhzEnvironment*
