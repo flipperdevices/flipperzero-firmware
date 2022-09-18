@@ -1,10 +1,13 @@
 #include <furi.h>
 #include <furi_hal.h>
-#include <gui/gui.h>
-#include <gui/elements.h>
 #include <input/input.h>
 #include <m-string.h>
 #include <stdlib.h>
+
+#include <gui/gui.h>
+#include <gui/elements.h>
+#include <gui/canvas.h>
+#include <gui/icon_i.h>
 
 #define BPM_STEP_SIZE_FINE 0.5d
 #define BPM_STEP_SIZE_COARSE 10.0d
@@ -31,6 +34,59 @@ typedef struct {
     FuriTimer* timer;
 } MetronomeState;
 
+//lib can only do bottom left/right
+static void elements_button_top_left(Canvas* canvas, const char* str) {
+    const uint8_t button_height = 12;
+    const uint8_t vertical_offset = 3;
+    const uint8_t horizontal_offset = 3;
+    const uint8_t string_width = canvas_string_width(canvas, str);
+    const Icon* icon = &I_ButtonUp_7x4;
+    const uint8_t icon_h_offset = 3;
+    const uint8_t icon_width_with_offset = icon->width + icon_h_offset;
+    const uint8_t icon_v_offset = icon->height + vertical_offset;
+    const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
+
+    const uint8_t x = 0;
+    const uint8_t y = 0 + button_height; 
+
+    canvas_draw_box(canvas, x, y - button_height, button_width, button_height);
+    canvas_draw_line(canvas, x + button_width + 0, y - button_height, x + button_width + 0, y - 1);
+    canvas_draw_line(canvas, x + button_width + 1, y - button_height, x + button_width + 1, y - 2);
+    canvas_draw_line(canvas, x + button_width + 2, y - button_height, x + button_width + 2, y - 3);
+
+    canvas_invert_color(canvas);
+    canvas_draw_icon(canvas, x + horizontal_offset, y - icon_v_offset, &I_ButtonUp_7x4);
+    canvas_draw_str(
+        canvas, x + horizontal_offset + icon_width_with_offset, y - vertical_offset, str);
+    canvas_invert_color(canvas);
+}
+
+void elements_button_top_right(Canvas* canvas, const char* str) {
+    const uint8_t button_height = 12;
+    const uint8_t vertical_offset = 3;
+    const uint8_t horizontal_offset = 3;
+    const uint8_t string_width = canvas_string_width(canvas, str);
+    const Icon* icon = &I_ButtonUp_7x4;
+    const uint8_t icon_h_offset = 3;
+    const uint8_t icon_width_with_offset = icon->width + icon_h_offset;
+    const uint8_t icon_v_offset = icon->height + vertical_offset;
+    const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
+
+    const uint8_t x = canvas_width(canvas);
+    const uint8_t y = 0 + button_height;
+
+    canvas_draw_box(canvas, x - button_width, y - button_height, button_width, button_height);
+    canvas_draw_line(canvas, x - button_width - 1, y - button_height, x - button_width - 1, y - 1);
+    canvas_draw_line(canvas, x - button_width - 2, y - button_height, x - button_width - 2, y -  2);
+    canvas_draw_line(canvas, x - button_width - 3, y - button_height, x - button_width - 3, y -  3);
+
+    canvas_invert_color(canvas);
+    canvas_draw_str(canvas, x - button_width + horizontal_offset, y - vertical_offset, str);
+    canvas_draw_icon(
+        canvas, x - horizontal_offset - icon->width, y - icon_v_offset, &I_ButtonUp_7x4);
+    canvas_invert_color(canvas);
+}
+
 static void render_callback(Canvas* const canvas, void* ctx) {
     const MetronomeState* metronome_state = acquire_mutex((ValueMutex*)ctx, 25);
     if(metronome_state == NULL) {
@@ -42,10 +98,10 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     // border around the edge of the screen
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontPrimary);
-
+    
     // draw bars/beat
     string_printf(tempStr, "%d/%d", metronome_state->beats_per_bar, metronome_state->note_length);
-    canvas_draw_str_aligned(canvas, 64, 16, AlignCenter, AlignCenter, string_get_cstr(tempStr));
+    canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, string_get_cstr(tempStr));
     string_reset(tempStr);
     // draw BPM value
     string_printf(tempStr, "%.2f", metronome_state->bpm);
@@ -62,6 +118,8 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     } else {
      elements_button_center(canvas, "Start");
     }
+    elements_button_top_left(canvas, "Push");
+    elements_button_top_right(canvas, "Hold");
 
     string_clear(tempStr);
     release_mutex((ValueMutex*)ctx, metronome_state);
