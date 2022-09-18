@@ -294,6 +294,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             elements_button_right(canvas, "S:ByMin");
         }
     }
+    if(state->w_test) canvas_draw_icon(canvas, 0, 0, &I_GameMode_11x8);
 }
 
 static void clock_state_init(ClockState* const state) {
@@ -468,7 +469,7 @@ int32_t clock_app(void* p) {
                             plugin_state->w_test = false;
                             // Don't Exit the plugin
                             plugin_state->codeSequence--;
-                            if(plugin_state->codeSequence < (uint32_t) -1) processing = false;
+                            if(plugin_state->codeSequence < (uint32_t)-1) processing = false;
                         }
                         break;
                     }
@@ -560,9 +561,6 @@ int32_t clock_app(void* p) {
             }
             view_port_update(view_port);
             furi_mutex_release(plugin_state->mutex);
-        } else {
-            // event timeout
-            // FURI_LOG_D(TAG, "osMessageQueue: event timeout");
         }
     }
     // Cleanup
