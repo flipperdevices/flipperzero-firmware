@@ -19,6 +19,11 @@
 - Settings: Updated Left to go to Clock [(By RogueMaster)]
 - Settings: Updated HOLD LEFT to go to SubGhz Remote [(By RogueMaster)]
 - Added [faploader: more subsystem headers in API table #1742 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1742)
+- Moved Clock to FAP App
+- Moved Spectrum Analyzer to FAP App
+- Moved SubGHz Remote to FAP App (Not Working Yet)
+- Moved iButton to FAP App (Someone please confirm functionality to me on Discord)
+- Moved U2F to FAP App (Someone please confirm functionality to me on Discord)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
