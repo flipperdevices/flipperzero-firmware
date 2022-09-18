@@ -140,8 +140,11 @@ static bool u2f_hid_parse_request(U2fHid* u2f_hid) {
 
     } else if(u2f_hid->packet.cmd == U2F_HID_MSG) { // MSG - U2F message
         if((u2f_hid->lock == true) && (u2f_hid->packet.cid != u2f_hid->lock_cid)) return false;
-        uint16_t resp_len =
-            u2f_msg_parse(u2f_hid->u2f_instance, u2f_hid->packet.payload, u2f_hid->packet.len);
+        uint16_t resp_len = u2f_msg_parse(
+            u2f_hid->u2f_instance,
+            u2f_hid->packet.payload,
+            u2f_hid->packet.len,
+            u2f_hid->packet.payload);
         if(resp_len > 0) {
             u2f_hid->packet.len = resp_len;
             u2f_hid_send_response(u2f_hid);
