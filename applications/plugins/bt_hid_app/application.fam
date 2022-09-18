@@ -1,7 +1,7 @@
 App(
     appid="APPS_BluetoothRemote",
     name="Bluetooth Remote",
-    apptype=FlipperAppType.PLUGIN,
+    apptype=FlipperAppType.EXTERNAL,
     entry_point="bt_hid_app",
     stack_size=1 * 1024,
     cdefines=["APP_BLE_HID"],
