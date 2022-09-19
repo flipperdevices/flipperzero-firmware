@@ -139,31 +139,79 @@ static Elf32_Addr elf_address_of(FlipperApplication* e, Elf32_Sym* sym, const ch
 }
 
 static void elf_relocate_jmp_call(Elf32_Addr relAddr, int type, Elf32_Addr symAddr) {
+    // UNUSED(type);
+    // uint16_t upper_insn = ((uint16_t*)relAddr)[0];
+    // uint16_t lower_insn = ((uint16_t*)relAddr)[1];
+    // uint32_t S = (upper_insn >> 10) & 1;
+    // uint32_t J1 = (lower_insn >> 13) & 1;
+    // uint32_t J2 = (lower_insn >> 11) & 1;
+
+    // int32_t offset = (S << 24) | /* S     -> offset[24] */
+    //                  ((~(J1 ^ S) & 1) << 23) | /* J1    -> offset[23] */
+    //                  ((~(J2 ^ S) & 1) << 22) | /* J2    -> offset[22] */
+    //                  ((upper_insn & 0x03ff) << 12) | /* imm10 -> offset[12:21] */
+    //                  ((lower_insn & 0x07ff) << 1); /* imm11 -> offset[1:11] */
+    // if(offset & 0x01000000) offset -= 0x02000000;
+
+    // offset += symAddr - relAddr;
+
+    // S = (offset >> 24) & 1;
+    // J1 = S ^ (~(offset >> 23) & 1);
+    // J2 = S ^ (~(offset >> 22) & 1);
+
+    // upper_insn = ((upper_insn & 0xf800) | (S << 10) | ((offset >> 12) & 0x03ff));
+    // ((uint16_t*)relAddr)[0] = upper_insn;
+
+    // lower_insn = ((lower_insn & 0xd000) | (J1 << 13) | (J2 << 11) | ((offset >> 1) & 0x07ff));
+    // ((uint16_t*)relAddr)[1] = lower_insn;
+
     UNUSED(type);
-    uint16_t upper_insn = ((uint16_t*)relAddr)[0];
-    uint16_t lower_insn = ((uint16_t*)relAddr)[1];
-    uint32_t S = (upper_insn >> 10) & 1;
-    uint32_t J1 = (lower_insn >> 13) & 1;
-    uint32_t J2 = (lower_insn >> 11) & 1;
+    int x, hi, lo, s, j1, j2, i1, i2, imm10, imm11;
+    int to_thumb, is_call, blx_bit = 1 << 12;
 
-    int32_t offset = (S << 24) | /* S     -> offset[24] */
-                     ((~(J1 ^ S) & 1) << 23) | /* J1    -> offset[23] */
-                     ((~(J2 ^ S) & 1) << 22) | /* J2    -> offset[22] */
-                     ((upper_insn & 0x03ff) << 12) | /* imm10 -> offset[12:21] */
-                     ((lower_insn & 0x07ff) << 1); /* imm11 -> offset[1:11] */
-    if(offset & 0x01000000) offset -= 0x02000000;
+    /* Get initial offset */
+    hi = ((uint16_t*)relAddr)[0];
+    lo = ((uint16_t*)relAddr)[1];
+    s = (hi >> 10) & 1;
+    j1 = (lo >> 13) & 1;
+    j2 = (lo >> 11) & 1;
+    i1 = (j1 ^ s) ^ 1;
+    i2 = (j2 ^ s) ^ 1;
+    imm10 = hi & 0x3ff;
+    imm11 = lo & 0x7ff;
+    x = (s << 24) | (i1 << 23) | (i2 << 22) | (imm10 << 12) | (imm11 << 1);
+    if(x & 0x01000000) x -= 0x02000000;
 
-    offset += symAddr - relAddr;
+    to_thumb = symAddr & 1;
+    is_call = (type == R_ARM_THM_PC22);
 
-    S = (offset >> 24) & 1;
-    J1 = S ^ (~(offset >> 23) & 1);
-    J2 = S ^ (~(offset >> 22) & 1);
+    /* Compute final offset */
+    x += symAddr - relAddr;
+    if(!to_thumb && is_call) {
+        blx_bit = 0; /* bl -> blx */
+        x = (x + 3) & -4; /* Compute offset from aligned PC */
+    }
 
-    upper_insn = ((upper_insn & 0xf800) | (S << 10) | ((offset >> 12) & 0x03ff));
-    ((uint16_t*)relAddr)[0] = upper_insn;
+    /* Check that relocation is possible
+    * offset must not be out of range
+    * if target is to be entered in arm mode:
+        - bit 1 must not set
+        - instruction must be a call (bl) or a jump to PLT */
+    if(!to_thumb || x >= 0x1000000 || x < -0x1000000)
+        if(to_thumb || (symAddr & 2) || (!is_call))
+            FURI_LOG_E(TAG, "can't relocate value at %x, %d", relAddr, type);
 
-    lower_insn = ((lower_insn & 0xd000) | (J1 << 13) | (J2 << 11) | ((offset >> 1) & 0x07ff));
-    ((uint16_t*)relAddr)[1] = lower_insn;
+    /* Compute and store final offset */
+    s = (x >> 24) & 1;
+    i1 = (x >> 23) & 1;
+    i2 = (x >> 22) & 1;
+    j1 = s ^ (i1 ^ 1);
+    j2 = s ^ (i2 ^ 1);
+    imm10 = (x >> 12) & 0x3ff;
+    imm11 = (x >> 1) & 0x7ff;
+    (*(uint16_t*)relAddr) = (uint16_t)((hi & 0xf800) | (s << 10) | imm10);
+    (*(uint16_t*)(relAddr + 2)) =
+        (uint16_t)((lo & 0xc000) | (j1 << 13) | blx_bit | (j2 << 11) | imm11);
 }
 
 static bool elf_relocate_symbol(Elf32_Addr relAddr, int type, Elf32_Addr symAddr) {
@@ -578,6 +626,7 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
     ELFSectionDict_it_t it;
     for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it); ELFSectionDict_next(it)) {
         ELFSectionDict_itref_t* itref = ELFSectionDict_ref(it);
+        FURI_LOG_I(TAG, "Loading section '%s'", string_get_cstr(itref->key));
         if(!flipper_application_load_section_data(fap, &itref->value)) {
             FURI_LOG_E(TAG, "Error loading section '%s'", string_get_cstr(itref->key));
             status = FlipperApplicationLoadStatusUnspecifiedError;
@@ -588,6 +637,7 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
         for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it);
             ELFSectionDict_next(it)) {
             ELFSectionDict_itref_t* itref = ELFSectionDict_ref(it);
+            FURI_LOG_I(TAG, "Relocating section '%s'", string_get_cstr(itref->key));
             if(!flipper_application_relocate_section(fap, &itref->value)) {
                 FURI_LOG_E(TAG, "Error relocating section '%s'", string_get_cstr(itref->key));
                 status = FlipperApplicationLoadStatusMissingImports;
