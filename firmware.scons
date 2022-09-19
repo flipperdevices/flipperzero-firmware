@@ -2,7 +2,7 @@ Import("ENV", "fw_build_meta")
 
 import itertools
 
-from fbt.util import (
+from fbt_extra.util import (
     should_gen_cdb_and_link_dir,
     link_elf_dir_as_latest,
 )
