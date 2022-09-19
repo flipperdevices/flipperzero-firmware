@@ -480,6 +480,7 @@ static ReturnCode rfalNfcaPollerGetSingleCollisionResolutionStatus(void) {
 
 /*******************************************************************************/
 ReturnCode rfalNfcaPollerInitialize(void) {
+    
     ReturnCode ret;
 
     EXIT_ON_ERR(ret, rfalSetMode(RFAL_MODE_POLL_NFCA, RFAL_BR_106, RFAL_BR_106));

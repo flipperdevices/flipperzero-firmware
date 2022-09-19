@@ -68,6 +68,7 @@
 #include "st_errno.h"
 #include "rfal_rf.h"
 #include "rfal_t1t.h"
+// #include <furi_hal_nfc.h>
 
 /*
  ******************************************************************************
