@@ -33,6 +33,8 @@
 #include <nfc/scenes/nfc_scene.h>
 #include <nfc/helpers/nfc_custom_event.h>
 
+#include <dialogs/dialogs.h>
+
 #include "rpc/rpc_app.h"
 
 #define NFC_TEXT_STORE_SIZE 128
@@ -98,7 +100,11 @@ void nfc_text_store_set(Nfc* nfc, const char* text, ...);
 
 void nfc_text_store_clear(Nfc* nfc);
 
-void nfc_blink_start(Nfc* nfc);
+void nfc_blink_read_start(Nfc* nfc);
+
+void nfc_blink_emulate_start(Nfc* nfc);
+
+void nfc_blink_detect_start(Nfc* nfc);
 
 void nfc_blink_stop(Nfc* nfc);
 
