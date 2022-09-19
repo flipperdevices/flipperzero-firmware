@@ -19,6 +19,20 @@
 #define BPM_BOUNDARY_HIGH 300.0d
 #define BEEP_DELAY_MS 50
 
+#define wave_bitmap_left_width 4
+#define wave_bitmap_left_height 14
+static uint8_t wave_bitmap_left_bits[] = {
+    0x08, 0x0C, 0x06, 0x06, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x06, 0x06, 
+      0x0C, 0x08
+};
+
+#define wave_bitmap_right_width 4
+#define wave_bitmap_right_height 14
+static uint8_t wave_bitmap_right_bits[] = {
+    0x01, 0x03, 0x06, 0x06, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x06, 0x06, 
+      0x03, 0x01
+};
+
 typedef enum {
   EventTypeTick,
   EventTypeKey,
@@ -70,6 +84,18 @@ static void render_callback(Canvas* const canvas, void* ctx) {
   canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, string_get_cstr(tempStr));
   string_reset(tempStr);
 
+  // draw volume indicator
+  // always draw first waves
+  canvas_draw_xbm(canvas, 20, 17, wave_bitmap_left_width, wave_bitmap_left_height, wave_bitmap_left_bits);
+  canvas_draw_xbm(canvas, canvas_width(canvas)-20-wave_bitmap_right_width, 17, wave_bitmap_right_width, wave_bitmap_right_height, wave_bitmap_right_bits);
+  if (metronome_state->output_mode < Silent) {
+    canvas_draw_xbm(canvas, 16, 17, wave_bitmap_left_width, wave_bitmap_left_height, wave_bitmap_left_bits);
+    canvas_draw_xbm(canvas, canvas_width(canvas)-16-wave_bitmap_right_width, 17, wave_bitmap_right_width, wave_bitmap_right_height, wave_bitmap_right_bits);
+  }
+  if (metronome_state->output_mode < Vibro) {
+    canvas_draw_xbm(canvas, 12, 17, wave_bitmap_left_width, wave_bitmap_left_height, wave_bitmap_left_bits);
+    canvas_draw_xbm(canvas, canvas_width(canvas)-12-wave_bitmap_right_width, 17, wave_bitmap_right_width, wave_bitmap_right_height, wave_bitmap_right_bits);
+  }
   // draw button prompts
   canvas_set_font(canvas, FontSecondary);
   elements_button_left(canvas, "Slow");
