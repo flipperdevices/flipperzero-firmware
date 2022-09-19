@@ -3,6 +3,8 @@
 # Code reuse from
 # https://github.com/UberGuidoZ/Flipper/blob/main/Sub-GHz/Garages/CAME_brute_force/12Bit/433.92Mhz/CAMEbruteforcer433.py
 # and https://github.com/UberGuidoZ/Flipper/blob/main/Sub-GHz/Garages/CAME_brute_force/12Bit/868.35Mhz/CAMEbruteforcer868.py
+# and also, for the protocol NICE:
+# https://github.com/tobiabocchi/flipperzero-bruteforce/blob/main/flipperzero-bruteforce.py
 
 import os
 
@@ -31,7 +33,16 @@ protocols = {
             "0": "-{} {} ",
             "1": "-{} {} ",
         }
-    }
+    },
+    "NICE": {
+        "signal": 700,
+        "H": "2*{}",
+        "transposition_table": {
+            "0": "-{} {} ",
+            "1": "-{} {} ",
+        }
+    },
+
 }
 
 for key_dec in combos:
