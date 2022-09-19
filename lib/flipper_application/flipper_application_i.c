@@ -142,6 +142,7 @@ static const char* elf_reloc_type_to_str(int symt) {
         return #name;
     switch(symt) {
         STRCASE(R_ARM_NONE)
+        STRCASE(R_ARM_TARGET1)
         STRCASE(R_ARM_ABS32)
         STRCASE(R_ARM_THM_PC22)
         STRCASE(R_ARM_THM_JUMP24)
@@ -245,6 +246,7 @@ static void elf_relocate_jmp_call(ELFFile* elf, Elf32_Addr relAddr, int type, El
 
 static bool elf_relocate_symbol(ELFFile* elf, Elf32_Addr relAddr, int type, Elf32_Addr symAddr) {
     switch(type) {
+    case R_ARM_TARGET1:
     case R_ARM_ABS32:
         *((uint32_t*)relAddr) += symAddr;
         FURI_LOG_D(TAG, "  R_ARM_ABS32 relocated is 0x%08X", (unsigned int)*((uint32_t*)relAddr));
@@ -256,7 +258,7 @@ static bool elf_relocate_symbol(ELFFile* elf, Elf32_Addr relAddr, int type, Elf3
             TAG, "  R_ARM_THM_CALL/JMP relocated is 0x%08X", (unsigned int)*((uint32_t*)relAddr));
         break;
     default:
-        FURI_LOG_D(TAG, "  Undefined relocation %d", type);
+        FURI_LOG_E(TAG, "  Undefined relocation %d", type);
         return false;
     }
     return true;
@@ -323,7 +325,7 @@ static bool elf_relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection* s) {
                     relocate_result = false;
                 }
             } else {
-                FURI_LOG_D(TAG, "  No symbol address of %s", symbol_name);
+                FURI_LOG_E(TAG, "  No symbol address of %s", string_get_cstr(symbol_name));
                 relocate_result = false;
             }
         }
@@ -362,12 +364,15 @@ typedef enum {
     SectionTypeRelBss = (1 << 10),
     SectionTypeFappManifest = (1 << 11),
     SectionTypeDebugLink = (1 << 12),
-    SectionTypeUnused = (1 << 13),
+    SectionTypeInitArray = (1 << 13),
+    SectionTypeRelInitArray = (1 << 14),
+    SectionTypeUnused = (1 << 15),
     // TODO add more section types to validate
     SectionTypeValid = SectionTypeSymTab | SectionTypeStrTab | SectionTypeFappManifest,
     SectionTypeRelocate = SectionTypeRelText | SectionTypeRelRodata | SectionTypeRelData |
-                          SectionTypeRelBss,
-    SectionTypeGdbSection = SectionTypeText | SectionTypeRodata | SectionTypeData | SectionTypeBss,
+                          SectionTypeRelBss | SectionTypeRelInitArray,
+    SectionTypeGdbSection = SectionTypeText | SectionTypeRodata | SectionTypeData |
+                            SectionTypeBss | SectionTypeInitArray,
 } SectionType;
 
 static bool
@@ -406,9 +411,11 @@ static SectionType flipper_application_preload_section(
         {".rodata", SectionTypeRodata},
         {".data", SectionTypeData},
         {".bss", SectionTypeBss},
+        {".init_array", SectionTypeInitArray},
         {".rel.text", SectionTypeRelText},
         {".rel.rodata", SectionTypeRelRodata},
         {".rel.data", SectionTypeRelData},
+        {".rel.init_array", SectionTypeRelInitArray},
     };
 
     for(size_t i = 0; i < COUNT_OF(lookup_sections); i++) {
@@ -655,7 +662,9 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
         state->mmap_entries =
             malloc(sizeof(FlipperApplicationMemoryMapEntry) * state->mmap_entry_count);
         uint32_t mmap_entry_idx = 0;
-        uint32_t text_p = 0;
+        const void* text_p = 0;
+        const void* init_array_p = 0;
+        size_t init_array_size = 0;
 
         for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it);
             ELFSectionDict_next(it)) {
@@ -671,17 +680,41 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
 
             if(string_cmp(itref->key, ".text") == 0) {
                 FURI_LOG_D(TAG, "Found .text section at 0x%X", (uint32_t)data_ptr);
-                text_p = (uint32_t)data_ptr;
+                text_p = data_ptr;
+            }
+
+            if(string_cmp(itref->key, ".init_array") == 0) {
+                FURI_LOG_D(TAG, "Found .init_array section at 0x%X", (uint32_t)data_ptr);
+                init_array_p = data_ptr;
+
+                Elf32_Shdr section_header;
+                if(!elf_read_section_header(fap, itref->value.sec_idx, &section_header)) {
+                    FURI_LOG_E(TAG, "Error reading .init_array section header");
+                } else {
+                    init_array_size = section_header.sh_size;
+                }
             }
         }
 
         furi_check(mmap_entry_idx == state->mmap_entry_count);
 
         /* Fixing up entry point */
-        fap->elf.entry += text_p;
+        fap->elf.entry += (uint32_t)text_p;
+
+        /* Call init_array */
+        if(init_array_p && init_array_size) {
+            const uint32_t* init_array = init_array_p;
+            const uint32_t* init_array_end = init_array_p + init_array_size;
+            while(init_array < init_array_end) {
+                FURI_LOG_D(TAG, "Calling init routine at 0x%X", *init_array);
+                ((void (*)(void))(*init_array))();
+                init_array++;
+            }
+        }
     }
 
     FURI_LOG_D(TAG, "Relocation cache size: %u", AddressCache_size(fap->elf.relocation_cache));
+    FURI_LOG_D(TAG, "Trampoline cache size: %u", AddressCache_size(fap->elf.trampoline_cache));
     AddressCache_clear(fap->elf.relocation_cache);
     FURI_LOG_I(TAG, "Loaded in %ums", (size_t)(furi_get_tick() - start));
 
