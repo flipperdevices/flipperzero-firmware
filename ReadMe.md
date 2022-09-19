@@ -11,7 +11,7 @@
 
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
 - Last Synched changes from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-09-19 20:45 GMT`
-- To avoid Application errors, delete /ext/apps before doing the RM firmware update
+- To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 
 <details>
   <summary><B>TO DO</b></summary><br/>
