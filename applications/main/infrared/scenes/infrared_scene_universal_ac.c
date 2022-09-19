@@ -24,7 +24,7 @@ void infrared_scene_universal_ac_on_enter(void* context) {
         &I_Off_hvr_25x27,
         infrared_scene_universal_common_item_callback,
         context);
-    infrared_brute_force_add_record(brute_force, i++, "OFF");
+    infrared_brute_force_add_record(brute_force, i++, "Off");
     button_panel_add_item(
         button_panel,
         i,
@@ -36,7 +36,7 @@ void infrared_scene_universal_ac_on_enter(void* context) {
         &I_Dehumidify_hvr_25x27,
         infrared_scene_universal_common_item_callback,
         context);
-    infrared_brute_force_add_record(brute_force, i++, "DH");
+    infrared_brute_force_add_record(brute_force, i++, "Dh");
     button_panel_add_item(
         button_panel,
         i,
@@ -48,7 +48,7 @@ void infrared_scene_universal_ac_on_enter(void* context) {
         &I_CoolHi_hvr_25x27,
         infrared_scene_universal_common_item_callback,
         context);
-    infrared_brute_force_add_record(brute_force, i++, "COOL HI");
+    infrared_brute_force_add_record(brute_force, i++, "Cool_hi");
     button_panel_add_item(
         button_panel,
         i,
@@ -60,7 +60,7 @@ void infrared_scene_universal_ac_on_enter(void* context) {
         &I_HeatHi_hvr_25x27,
         infrared_scene_universal_common_item_callback,
         context);
-    infrared_brute_force_add_record(brute_force, i++, "HEAT HI");
+    infrared_brute_force_add_record(brute_force, i++, "Heat_hi");
     button_panel_add_item(
         button_panel,
         i,
@@ -72,7 +72,7 @@ void infrared_scene_universal_ac_on_enter(void* context) {
         &I_CoolLo_hvr_25x27,
         infrared_scene_universal_common_item_callback,
         context);
-    infrared_brute_force_add_record(brute_force, i++, "COOL LO");
+    infrared_brute_force_add_record(brute_force, i++, "Cool_lo");
     button_panel_add_item(
         button_panel,
         i,
@@ -84,7 +84,7 @@ void infrared_scene_universal_ac_on_enter(void* context) {
         &I_HeatLo_hvr_25x27,
         infrared_scene_universal_common_item_callback,
         context);
-    infrared_brute_force_add_record(brute_force, i++, "HEAT LO");
+    infrared_brute_force_add_record(brute_force, i++, "Heat_lo");
 
     button_panel_add_label(button_panel, 6, 10, FontPrimary, "AC remote");
 
