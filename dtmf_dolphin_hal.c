@@ -2,8 +2,8 @@
 
 void dtmf_dolphin_speaker_init() {
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
-    TIM_InitStruct.Prescaler = 4;
-    TIM_InitStruct.Autoreload = 255;
+    TIM_InitStruct.Prescaler = DTMF_DOLPHIN_HAL_DMA_PRESCALER;
+    TIM_InitStruct.Autoreload = DTMF_DOLPHIN_HAL_DMA_AUTORELOAD;
     LL_TIM_Init(FURI_HAL_SPEAKER_TIMER, &TIM_InitStruct);
 
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};

@@ -3,12 +3,18 @@
 typedef enum {
     DTMFDolphinEventVolumeUp = 0,
     DTMFDolphinEventVolumeDown,
-    DTMFDolphinBlueboxOkCB,
+    DTMFDolphinDialerOkCB,
     DTMFDolphinEventStartDialer,
     DTMFDolphinEventStartBluebox,
-    DTMFDolphinEventStartRedbox,
+    DTMFDolphinEventStartRedboxUS,
+    DTMFDolphinEventStartRedboxUK,
+    DTMFDolphinEventStartMisc,
     DTMFDolphinEventPlayTones,
     DTMFDolphinEventStopTones,
-    DTMFDolphinPlayerEventHalfTransfer,
-    DTMFDolphinPlayerEventFullTransfer,
+    DTMFDolphinEventDMAHalfTransfer,
+    DTMFDolphinEventDMAFullTransfer,
 } DTMFDolphinEvent;
+
+typedef struct {
+    DTMFDolphinEvent type;
+} DTMFDolphinCustomEvent;
