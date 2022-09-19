@@ -10,8 +10,8 @@
 <b>Latest Updates:</b>
 
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
-- Last Synched changes from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) in changelog: 2022-09-19 20:45 GMT 
-- Last Synched changes from [OFW](https://github.com/flipperdevices/flipperzero-firmware): 2022-09-19 20:45 GMT 
+- Last Synched changes from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) in changelog: `2022-09-19 20:45 GMT`
+- Last Synched changes from [OFW](https://github.com/flipperdevices/flipperzero-firmware): `2022-09-19 20:45 GMT`
 - Fixed issue with Clock showing AM at noon
 - New frequencies added provided by [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 - Added [Metronome (By panki27)](https://github.com/panki27/Metronome)
