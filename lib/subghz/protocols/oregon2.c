@@ -9,7 +9,6 @@
 
 #define TAG "SubGhzProtocolOregon2"
 
-
 static const SubGhzBlockConst oregon2_const = {
     .te_long = 1000,
     .te_short = 500,
@@ -18,7 +17,7 @@ static const SubGhzBlockConst oregon2_const = {
 };
 
 #define OREGON2_PREAMBLE_BITS 19
-#define OREGON2_PREAMBLE_MASK ((1 << (OREGON2_PREAMBLE_BITS+1)) - 1)
+#define OREGON2_PREAMBLE_MASK ((1 << (OREGON2_PREAMBLE_BITS + 1)) - 1)
 #define OREGON2_SENSOR_ID(d) (((d) >> 16) & 0xFFFF)
 #define OREGON2_CHECKSUM_BITS 8
 
@@ -27,7 +26,6 @@ static const SubGhzBlockConst oregon2_const = {
 
 // bit indicating the low battery
 #define OREGON2_FLAG_BAT_LOW 0x4
-
 
 struct SubGhzProtocolDecoderOregon2 {
     SubGhzProtocolDecoderBase base;
@@ -44,13 +42,11 @@ struct SubGhzProtocolDecoderOregon2 {
 
 typedef struct SubGhzProtocolDecoderOregon2 SubGhzProtocolDecoderOregon2;
 
-
 typedef enum {
     Oregon2DecoderStepReset = 0,
     Oregon2DecoderStepFoundPreamble,
     Oregon2DecoderStepVarData,
 } Oregon2DecoderStep;
-
 
 void* subghz_protocol_decoder_oregon2_alloc(SubGhzEnvironment* environment) {
     UNUSED(environment);
@@ -60,13 +56,11 @@ void* subghz_protocol_decoder_oregon2_alloc(SubGhzEnvironment* environment) {
     return instance;
 }
 
-
 void subghz_protocol_decoder_oregon2_free(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderOregon2* instance = context;
     free(instance);
 }
-
 
 void subghz_protocol_decoder_oregon2_reset(void* context) {
     furi_assert(context);
@@ -75,41 +69,34 @@ void subghz_protocol_decoder_oregon2_reset(void* context) {
     instance->decoder.decode_data = 0UL;
     instance->decoder.decode_count_bit = 0;
     manchester_advance(
-        instance->manchester_state,
-        ManchesterEventReset,
-        &instance->manchester_state,
-        NULL);
+        instance->manchester_state, ManchesterEventReset, &instance->manchester_state, NULL);
     instance->have_bit = false;
     instance->var_data = 0;
     instance->var_bits = 0;
 }
 
-
 static ManchesterEvent level_and_duration_to_event(bool level, uint32_t duration) {
     bool is_long = false;
 
-    if (DURATION_DIFF(duration, oregon2_const.te_long) < oregon2_const.te_delta) {
+    if(DURATION_DIFF(duration, oregon2_const.te_long) < oregon2_const.te_delta) {
         is_long = true;
-    } else if (DURATION_DIFF(duration, oregon2_const.te_short) < oregon2_const.te_delta) {
+    } else if(DURATION_DIFF(duration, oregon2_const.te_short) < oregon2_const.te_delta) {
         is_long = false;
     } else {
         return ManchesterEventReset;
     }
 
-    if (level)
+    if(level)
         return is_long ? ManchesterEventLongHigh : ManchesterEventShortHigh;
     else
         return is_long ? ManchesterEventLongLow : ManchesterEventShortLow;
 }
 
-
 // From sensor id code return amount of bits in variable section
 static uint8_t oregon2_sensor_id_var_bits(uint16_t sensor_id) {
-    if (sensor_id == 0xEC40)
-        return 16;
+    if(sensor_id == 0xEC40) return 16;
     return 0;
 }
-
 
 void subghz_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t duration) {
     furi_assert(context);
@@ -119,19 +106,14 @@ void subghz_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t du
     bool data;
 
     // low-level bit sequence decoding
-    if (event == ManchesterEventReset) {
+    if(event == ManchesterEventReset) {
         instance->decoder.parser_step = Oregon2DecoderStepReset;
         instance->have_bit = false;
         instance->decoder.decode_data = 0UL;
         instance->decoder.decode_count_bit = 0;
     }
-    if (manchester_advance(
-        instance->manchester_state,
-        event,
-        &instance->manchester_state,
-        &data))
-    {
-        if (instance->have_bit) {
+    if(manchester_advance(instance->manchester_state, event, &instance->manchester_state, &data)) {
+        if(instance->have_bit) {
             if(!instance->prev_bit && data) {
                 subghz_protocol_blocks_add_bit(&instance->decoder, 1);
             } else if(instance->prev_bit && !data) {
@@ -140,19 +122,17 @@ void subghz_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t du
                 subghz_protocol_decoder_oregon2_reset(context);
             }
             instance->have_bit = false;
-        }
-        else {
+        } else {
             instance->prev_bit = data;
             instance->have_bit = true;
         }
     }
 
-    switch (instance->decoder.parser_step) {
+    switch(instance->decoder.parser_step) {
     case Oregon2DecoderStepReset:
         // waiting for fixed oregon2 preamble
-        if (instance->decoder.decode_count_bit >= OREGON2_PREAMBLE_BITS &&
-           ((instance->decoder.decode_data & OREGON2_PREAMBLE_MASK) == OREGON2_PREAMBLE))
-        {
+        if(instance->decoder.decode_count_bit >= OREGON2_PREAMBLE_BITS &&
+           ((instance->decoder.decode_data & OREGON2_PREAMBLE_MASK) == OREGON2_PREAMBLE)) {
             instance->decoder.parser_step = Oregon2DecoderStepFoundPreamble;
             instance->decoder.decode_count_bit = 0;
             instance->decoder.decode_data = 0UL;
@@ -160,7 +140,7 @@ void subghz_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t du
         break;
     case Oregon2DecoderStepFoundPreamble:
         // waiting for fixed oregon2 data
-        if (instance->decoder.decode_count_bit == 32) {
+        if(instance->decoder.decode_count_bit == 32) {
             instance->generic.data = instance->decoder.decode_data;
             instance->generic.data_count_bit = instance->decoder.decode_count_bit;
             instance->decoder.decode_data = 0UL;
@@ -172,9 +152,10 @@ void subghz_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t du
             instance->generic.data = (instance->generic.data & 0x33333333) << 2 |
                                      (instance->generic.data & 0xCCCCCCCC) >> 2;
 
-            instance->var_bits = oregon2_sensor_id_var_bits(OREGON2_SENSOR_ID(instance->generic.data));
+            instance->var_bits =
+                oregon2_sensor_id_var_bits(OREGON2_SENSOR_ID(instance->generic.data));
 
-            if (!instance->var_bits) {
+            if(!instance->var_bits) {
                 // sensor is not supported, stop decoding, but showing the decoded fixed part
                 instance->decoder.parser_step = Oregon2DecoderStepReset;
                 if(instance->base.callback)
@@ -186,7 +167,7 @@ void subghz_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t du
         break;
     case Oregon2DecoderStepVarData:
         // waiting for variable (sensor-specific data)
-        if (instance->decoder.decode_count_bit == instance->var_bits + OREGON2_CHECKSUM_BITS) {
+        if(instance->decoder.decode_count_bit == instance->var_bits + OREGON2_CHECKSUM_BITS) {
             instance->var_data = instance->decoder.decode_data & 0xFFFFFFFF;
 
             // reverse nibbles in var data
@@ -203,7 +184,6 @@ void subghz_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t du
     }
 }
 
-
 uint8_t subghz_protocol_decoder_oregon2_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderOregon2* instance = context;
@@ -211,30 +191,28 @@ uint8_t subghz_protocol_decoder_oregon2_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-
 bool subghz_protocol_decoder_oregon2_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderOregon2* instance = context;
-    if (!subghz_block_generic_serialize(&instance->generic, flipper_format, preset))
-        return false;
+    if(!subghz_block_generic_serialize(&instance->generic, flipper_format, preset)) return false;
     uint32_t temp = instance->var_bits;
-    if (!flipper_format_write_uint32(flipper_format, "VarBits", &temp, 1)) {
+    if(!flipper_format_write_uint32(flipper_format, "VarBits", &temp, 1)) {
         FURI_LOG_E(TAG, "Error adding VarBits");
         return false;
     }
-    if (!flipper_format_write_hex(
-           flipper_format, "VarData",
-           (const uint8_t*)&instance->var_data, sizeof(instance->var_data)))
-    {
+    if(!flipper_format_write_hex(
+           flipper_format,
+           "VarData",
+           (const uint8_t*)&instance->var_data,
+           sizeof(instance->var_data))) {
         FURI_LOG_E(TAG, "Error adding VarData");
         return false;
     }
     return true;
 }
-
 
 bool subghz_protocol_decoder_oregon2_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
@@ -245,15 +223,16 @@ bool subghz_protocol_decoder_oregon2_deserialize(void* context, FlipperFormat* f
         if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
             break;
         }
-        if (!flipper_format_read_uint32(flipper_format, "VarBits", &temp_data, 1)) {
+        if(!flipper_format_read_uint32(flipper_format, "VarBits", &temp_data, 1)) {
             FURI_LOG_E(TAG, "Missing VarLen");
             break;
         }
         instance->var_bits = (uint8_t)temp_data;
-        if (!flipper_format_read_hex(
-               flipper_format, "VarData",
-               (uint8_t*)&instance->var_data, sizeof(instance->var_data)))
-        {
+        if(!flipper_format_read_hex(
+               flipper_format,
+               "VarData",
+               (uint8_t*)&instance->var_data,
+               sizeof(instance->var_data))) {
             FURI_LOG_E(TAG, "Missing VarData");
             break;
         }
@@ -266,30 +245,28 @@ bool subghz_protocol_decoder_oregon2_deserialize(void* context, FlipperFormat* f
     return ret;
 }
 
-
 // append string of the variable data
-static void oregon2_var_data_append_string(uint16_t sensor_id, uint32_t var_data, string_t output) {
+static void
+    oregon2_var_data_append_string(uint16_t sensor_id, uint32_t var_data, string_t output) {
     uint32_t val;
 
-    if (sensor_id == 0xEC40) {
+    if(sensor_id == 0xEC40) {
         val = ((var_data >> 4) & 0xF) * 10 + ((var_data >> 8) & 0xF);
         string_cat_printf(
             output,
             "Temp: %s%d.%d C\r\n",
             (var_data & 0xF) ? "-" : "+",
             val,
-            (uint32_t)(var_data >> 12) & 0xF
-        );
+            (uint32_t)(var_data >> 12) & 0xF);
     }
 }
-
 
 static void oregon2_append_check_sum(uint32_t fix_data, uint32_t var_data, string_t output) {
     uint8_t sum = fix_data & 0xF;
     uint8_t ref_sum = var_data & 0xFF;
     var_data >>= 8;
 
-    for (uint8_t i = 1; i < 8; i++) {
+    for(uint8_t i = 1; i < 8; i++) {
         fix_data >>= 4;
         var_data >>= 4;
         sum += (fix_data & 0xF) + (var_data & 0xF);
@@ -297,12 +274,11 @@ static void oregon2_append_check_sum(uint32_t fix_data, uint32_t var_data, strin
 
     // swap calculated sum nibbles
     sum = (((sum >> 4) & 0xF) | (sum << 4)) & 0xFF;
-    if (sum == ref_sum)
+    if(sum == ref_sum)
         string_cat_printf(output, "Sum ok: 0x%hhX", ref_sum);
     else
         string_cat_printf(output, "Sum err: 0x%hhX vs 0x%hhX", ref_sum, sum);
 }
-
 
 void subghz_protocol_decoder_oregon2_get_string(void* context, string_t output) {
     furi_assert(context);
@@ -316,22 +292,14 @@ void subghz_protocol_decoder_oregon2_get_string(void* context, string_t output) 
         (uint32_t)sensor_id,
         (uint32_t)(instance->generic.data >> 12) & 0xF,
         ((instance->generic.data & OREGON2_FLAG_BAT_LOW) ? ", low bat" : ""),
-        (uint32_t)(instance->generic.data >> 4) & 0xFF
-    );
+        (uint32_t)(instance->generic.data >> 4) & 0xFF);
 
-    if (instance->var_bits > 0) {
+    if(instance->var_bits > 0) {
         oregon2_var_data_append_string(
-            sensor_id,
-            instance->var_data >> OREGON2_CHECKSUM_BITS,
-            output);
-        oregon2_append_check_sum(
-            (uint32_t)instance->generic.data,
-            instance->var_data,
-            output
-        );
+            sensor_id, instance->var_data >> OREGON2_CHECKSUM_BITS, output);
+        oregon2_append_check_sum((uint32_t)instance->generic.data, instance->var_data, output);
     }
 }
-
 
 const SubGhzProtocolDecoder subghz_protocol_oregon2_decoder = {
     .alloc = subghz_protocol_decoder_oregon2_alloc,
@@ -345,7 +313,6 @@ const SubGhzProtocolDecoder subghz_protocol_oregon2_decoder = {
     .deserialize = subghz_protocol_decoder_oregon2_deserialize,
     .get_string = subghz_protocol_decoder_oregon2_get_string,
 };
-
 
 const SubGhzProtocol subghz_protocol_oregon2 = {
     .name = SUBGHZ_PROTOCOL_OREGON2_NAME,
