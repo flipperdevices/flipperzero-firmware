@@ -33,6 +33,8 @@
 #include <nfc/scenes/nfc_scene.h>
 #include <nfc/helpers/nfc_custom_event.h>
 
+#include <dialogs/dialogs.h>
+
 #include "rpc/rpc_app.h"
 
 #include <m-array.h>
