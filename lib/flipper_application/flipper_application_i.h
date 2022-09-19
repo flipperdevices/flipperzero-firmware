@@ -35,6 +35,7 @@ typedef struct {
     ELFSectionDict_t sections;
 
     RelocationAddressCache_t relocation_cache;
+    RelocationAddressCache_t trampoline_cache;
 } ELFFile;
 
 struct FlipperApplication {

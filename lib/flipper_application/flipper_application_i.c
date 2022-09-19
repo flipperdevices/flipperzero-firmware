@@ -9,11 +9,10 @@
 #define RESOLVER_THREAD_YIELD_STEP 30
 
 /**************************************************************************************************/
-/**************************************** Relocation Cache ****************************************/
+/********************************************* Caches *********************************************/
 /**************************************************************************************************/
 
-static bool
-    relocation_cache_get(RelocationAddressCache_t cache, int symEntry, Elf32_Addr* symAddr) {
+static bool address_cache_get(RelocationAddressCache_t cache, int symEntry, Elf32_Addr* symAddr) {
     Elf32_Addr* addr = RelocationAddressCache_get(cache, symEntry);
     if(addr) {
         *symAddr = *addr;
@@ -23,8 +22,7 @@ static bool
     }
 }
 
-static void
-    relocation_cache_put(RelocationAddressCache_t cache, int symEntry, Elf32_Addr symAddr) {
+static void address_cache_put(RelocationAddressCache_t cache, int symEntry, Elf32_Addr symAddr) {
     RelocationAddressCache_set_at(cache, symEntry, symAddr);
 }
 
@@ -138,101 +136,6 @@ static Elf32_Addr elf_address_of(FlipperApplication* e, Elf32_Sym* sym, const ch
     return ELF_INVALID_ADDRESS;
 }
 
-static void elf_relocate_jmp_call(Elf32_Addr relAddr, int type, Elf32_Addr symAddr) {
-    // UNUSED(type);
-    // uint16_t upper_insn = ((uint16_t*)relAddr)[0];
-    // uint16_t lower_insn = ((uint16_t*)relAddr)[1];
-    // uint32_t S = (upper_insn >> 10) & 1;
-    // uint32_t J1 = (lower_insn >> 13) & 1;
-    // uint32_t J2 = (lower_insn >> 11) & 1;
-
-    // int32_t offset = (S << 24) | /* S     -> offset[24] */
-    //                  ((~(J1 ^ S) & 1) << 23) | /* J1    -> offset[23] */
-    //                  ((~(J2 ^ S) & 1) << 22) | /* J2    -> offset[22] */
-    //                  ((upper_insn & 0x03ff) << 12) | /* imm10 -> offset[12:21] */
-    //                  ((lower_insn & 0x07ff) << 1); /* imm11 -> offset[1:11] */
-    // if(offset & 0x01000000) offset -= 0x02000000;
-
-    // offset += symAddr - relAddr;
-
-    // S = (offset >> 24) & 1;
-    // J1 = S ^ (~(offset >> 23) & 1);
-    // J2 = S ^ (~(offset >> 22) & 1);
-
-    // upper_insn = ((upper_insn & 0xf800) | (S << 10) | ((offset >> 12) & 0x03ff));
-    // ((uint16_t*)relAddr)[0] = upper_insn;
-
-    // lower_insn = ((lower_insn & 0xd000) | (J1 << 13) | (J2 << 11) | ((offset >> 1) & 0x07ff));
-    // ((uint16_t*)relAddr)[1] = lower_insn;
-
-    UNUSED(type);
-    int x, hi, lo, s, j1, j2, i1, i2, imm10, imm11;
-    int to_thumb, is_call, blx_bit = 1 << 12;
-
-    /* Get initial offset */
-    hi = ((uint16_t*)relAddr)[0];
-    lo = ((uint16_t*)relAddr)[1];
-    s = (hi >> 10) & 1;
-    j1 = (lo >> 13) & 1;
-    j2 = (lo >> 11) & 1;
-    i1 = (j1 ^ s) ^ 1;
-    i2 = (j2 ^ s) ^ 1;
-    imm10 = hi & 0x3ff;
-    imm11 = lo & 0x7ff;
-    x = (s << 24) | (i1 << 23) | (i2 << 22) | (imm10 << 12) | (imm11 << 1);
-    if(x & 0x01000000) x -= 0x02000000;
-
-    to_thumb = symAddr & 1;
-    is_call = (type == R_ARM_THM_PC22);
-
-    /* Compute final offset */
-    x += symAddr - relAddr;
-    if(!to_thumb && is_call) {
-        blx_bit = 0; /* bl -> blx */
-        x = (x + 3) & -4; /* Compute offset from aligned PC */
-    }
-
-    /* Check that relocation is possible
-    * offset must not be out of range
-    * if target is to be entered in arm mode:
-        - bit 1 must not set
-        - instruction must be a call (bl) or a jump to PLT */
-    if(!to_thumb || x >= 0x1000000 || x < -0x1000000)
-        if(to_thumb || (symAddr & 2) || (!is_call))
-            FURI_LOG_E(TAG, "can't relocate value at %x, %d", relAddr, type);
-
-    /* Compute and store final offset */
-    s = (x >> 24) & 1;
-    i1 = (x >> 23) & 1;
-    i2 = (x >> 22) & 1;
-    j1 = s ^ (i1 ^ 1);
-    j2 = s ^ (i2 ^ 1);
-    imm10 = (x >> 12) & 0x3ff;
-    imm11 = (x >> 1) & 0x7ff;
-    (*(uint16_t*)relAddr) = (uint16_t)((hi & 0xf800) | (s << 10) | imm10);
-    (*(uint16_t*)(relAddr + 2)) =
-        (uint16_t)((lo & 0xc000) | (j1 << 13) | blx_bit | (j2 << 11) | imm11);
-}
-
-static bool elf_relocate_symbol(Elf32_Addr relAddr, int type, Elf32_Addr symAddr) {
-    switch(type) {
-    case R_ARM_ABS32:
-        *((uint32_t*)relAddr) += symAddr;
-        FURI_LOG_D(TAG, "  R_ARM_ABS32 relocated is 0x%08X", (unsigned int)*((uint32_t*)relAddr));
-        break;
-    case R_ARM_THM_PC22:
-    case R_ARM_THM_JUMP24:
-        elf_relocate_jmp_call(relAddr, type, symAddr);
-        FURI_LOG_D(
-            TAG, "  R_ARM_THM_CALL/JMP relocated is 0x%08X", (unsigned int)*((uint32_t*)relAddr));
-        break;
-    default:
-        FURI_LOG_D(TAG, "  Undefined relocation %d", type);
-        return false;
-    }
-    return true;
-}
-
 static const char* elf_reloc_type_to_str(int symt) {
 #define STRCASE(name) \
     case name:        \
@@ -246,6 +149,117 @@ static const char* elf_reloc_type_to_str(int symt) {
         return "R_<unknow>";
     }
 #undef STRCASE
+}
+
+#define TRAMPOLINE_CODE_SIZE 6
+
+/**
+ldr r12, [pc, #2]
+bx r12
+*/
+const uint8_t trampoline_code_little_endian[TRAMPOLINE_CODE_SIZE] =
+    {0xdf, 0xf8, 0x02, 0xc0, 0x60, 0x47};
+
+typedef struct {
+    uint8_t code[TRAMPOLINE_CODE_SIZE];
+    uint32_t addr;
+} __attribute__((packed)) JMPTrampoline;
+
+static JMPTrampoline* elf_create_trampoline(Elf32_Addr addr) {
+    JMPTrampoline* trampoline = malloc(sizeof(JMPTrampoline));
+    memcpy(trampoline->code, trampoline_code_little_endian, TRAMPOLINE_CODE_SIZE);
+    trampoline->addr = addr;
+    return trampoline;
+}
+
+static void elf_relocate_jmp_call(ELFFile* elf, Elf32_Addr relAddr, int type, Elf32_Addr symAddr) {
+    int offset, hi, lo, s, j1, j2, i1, i2, imm10, imm11;
+    int to_thumb, is_call, blx_bit = 1 << 12;
+
+    /* Get initial offset */
+    hi = ((uint16_t*)relAddr)[0];
+    lo = ((uint16_t*)relAddr)[1];
+    s = (hi >> 10) & 1;
+    j1 = (lo >> 13) & 1;
+    j2 = (lo >> 11) & 1;
+    i1 = (j1 ^ s) ^ 1;
+    i2 = (j2 ^ s) ^ 1;
+    imm10 = hi & 0x3ff;
+    imm11 = lo & 0x7ff;
+    offset = (s << 24) | (i1 << 23) | (i2 << 22) | (imm10 << 12) | (imm11 << 1);
+    if(offset & 0x01000000) offset -= 0x02000000;
+
+    to_thumb = symAddr & 1;
+    is_call = (type == R_ARM_THM_PC22);
+
+    /* Store offset */
+    int offset_copy = offset;
+
+    /* Compute final offset */
+    offset += symAddr - relAddr;
+    if(!to_thumb && is_call) {
+        blx_bit = 0; /* bl -> blx */
+        offset = (offset + 3) & -4; /* Compute offset from aligned PC */
+    }
+
+    /* Check that relocation is possible
+    * offset must not be out of range
+    * if target is to be entered in arm mode:
+        - bit 1 must not set
+        - instruction must be a call (bl) or a jump to PLT */
+    if(!to_thumb || offset >= 0x1000000 || offset < -0x1000000) {
+        if(to_thumb || (symAddr & 2) || (!is_call)) {
+            FURI_LOG_D(
+                TAG,
+                "can't relocate value at %x, %s, doing trampoline",
+                relAddr,
+                elf_reloc_type_to_str(type));
+
+            Elf32_Addr addr;
+            if(!address_cache_get(elf->trampoline_cache, symAddr, &addr)) {
+                addr = (Elf32_Addr)elf_create_trampoline(symAddr);
+                address_cache_put(elf->trampoline_cache, symAddr, addr);
+            }
+
+            offset = offset_copy;
+            offset += (int)addr - relAddr;
+            if(!to_thumb && is_call) {
+                blx_bit = 0; /* bl -> blx */
+                offset = (offset + 3) & -4; /* Compute offset from aligned PC */
+            }
+        }
+    }
+
+    /* Compute and store final offset */
+    s = (offset >> 24) & 1;
+    i1 = (offset >> 23) & 1;
+    i2 = (offset >> 22) & 1;
+    j1 = s ^ (i1 ^ 1);
+    j2 = s ^ (i2 ^ 1);
+    imm10 = (offset >> 12) & 0x3ff;
+    imm11 = (offset >> 1) & 0x7ff;
+    (*(uint16_t*)relAddr) = (uint16_t)((hi & 0xf800) | (s << 10) | imm10);
+    (*(uint16_t*)(relAddr + 2)) =
+        (uint16_t)((lo & 0xc000) | (j1 << 13) | blx_bit | (j2 << 11) | imm11);
+}
+
+static bool elf_relocate_symbol(ELFFile* elf, Elf32_Addr relAddr, int type, Elf32_Addr symAddr) {
+    switch(type) {
+    case R_ARM_ABS32:
+        *((uint32_t*)relAddr) += symAddr;
+        FURI_LOG_D(TAG, "  R_ARM_ABS32 relocated is 0x%08X", (unsigned int)*((uint32_t*)relAddr));
+        break;
+    case R_ARM_THM_PC22:
+    case R_ARM_THM_JUMP24:
+        elf_relocate_jmp_call(elf, relAddr, type, symAddr);
+        FURI_LOG_D(
+            TAG, "  R_ARM_THM_CALL/JMP relocated is 0x%08X", (unsigned int)*((uint32_t*)relAddr));
+        break;
+    default:
+        FURI_LOG_D(TAG, "  Undefined relocation %d", type);
+        return false;
+    }
+    return true;
 }
 
 static bool elf_relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection* s) {
@@ -278,7 +292,7 @@ static bool elf_relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection* s) {
             int relType = ELF32_R_TYPE(rel.r_info);
             Elf32_Addr relAddr = ((Elf32_Addr)s->data) + rel.r_offset;
 
-            if(!relocation_cache_get(e->elf.relocation_cache, symEntry, &symAddr)) {
+            if(!address_cache_get(e->elf.relocation_cache, symEntry, &symAddr)) {
                 Elf32_Sym sym;
                 string_reset(symbol_name);
                 if(!elf_read_symbol(e, symEntry, &sym, symbol_name)) {
@@ -296,7 +310,7 @@ static bool elf_relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection* s) {
                     string_get_cstr(symbol_name));
 
                 symAddr = elf_address_of(e, &sym, string_get_cstr(symbol_name));
-                relocation_cache_put(e->elf.relocation_cache, symEntry, symAddr);
+                address_cache_put(e->elf.relocation_cache, symEntry, symAddr);
             }
 
             if(symAddr != ELF_INVALID_ADDRESS) {
@@ -305,7 +319,7 @@ static bool elf_relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection* s) {
                     "  symAddr=%08X relAddr=%08X",
                     (unsigned int)symAddr,
                     (unsigned int)relAddr);
-                if(!elf_relocate_symbol(relAddr, relType, symAddr)) {
+                if(!elf_relocate_symbol(&e->elf, relAddr, relType, symAddr)) {
                     relocate_result = false;
                 }
             } else {
@@ -542,6 +556,7 @@ bool flipper_application_load_manifest(FlipperApplication* fap) {
     string_t name;
     string_init(name);
     ELFSectionDict_init(elf->sections);
+    RelocationAddressCache_init(elf->trampoline_cache);
 
     FURI_LOG_D(TAG, "Looking for manifest section");
     for(size_t section_idx = 1; section_idx < elf->sections_count; section_idx++) {
@@ -573,6 +588,7 @@ bool flipper_application_load_section_table(FlipperApplication* fap) {
     string_t name;
     string_init(name);
     ELFSectionDict_init(elf->sections);
+    RelocationAddressCache_init(elf->trampoline_cache);
 
     fap->state.mmap_entry_count = 0;
 
@@ -685,13 +701,28 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
 }
 
 void flipper_application_free_elf_data(ELFFile* elf) {
-    ELFSectionDict_it_t it;
-    for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it); ELFSectionDict_next(it)) {
-        const ELFSectionDict_itref_t* itref = ELFSectionDict_cref(it);
-        if(itref->value.data) {
-            aligned_free(itref->value.data);
+    {
+        ELFSectionDict_it_t it;
+        for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it);
+            ELFSectionDict_next(it)) {
+            const ELFSectionDict_itref_t* itref = ELFSectionDict_cref(it);
+            if(itref->value.data) {
+                aligned_free(itref->value.data);
+            }
         }
+
+        ELFSectionDict_clear(elf->sections);
     }
 
-    ELFSectionDict_clear(elf->sections);
+    {
+        RelocationAddressCache_it_t it;
+        for(RelocationAddressCache_it(it, elf->trampoline_cache);
+            !RelocationAddressCache_end_p(it);
+            RelocationAddressCache_next(it)) {
+            const RelocationAddressCache_itref_t* itref = RelocationAddressCache_cref(it);
+            free((void*)itref->value);
+        }
+
+        RelocationAddressCache_clear(elf->trampoline_cache);
+    }
 }
