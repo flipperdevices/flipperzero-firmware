@@ -1,16 +1,16 @@
 # Flipper Application Manifests (.fam)
 
-All components of Flipper Zero firmware — services, user applications, system settings — are developed independently. Each component has a build system manifest file, named `application.fam`, defining basic properties of a component and its relations to other parts of the system.
+All components of Flipper Zero firmware — services, user applications, system settings — are developed independently. Each component has a build system manifest file, named `application.fam`, which defines basic properties of that component and its relations to other parts of the system.
 
-When building firmware, **`fbt`** collects all application manifests, processes their dependencies and builds only those components that are utilized in current build configuration. See [fbt docs](./fbt.md#firmware-application-set) for details on build configurations.
+When building firmware, **`fbt`** collects all application manifests and processes their dependencies. Then it builds only those components that are referenced in the current build configuration. See [fbt docs](./fbt.md#firmware-application-set) for details on build configurations.
 
 ## Application definition
 
 Properties of a firmware component are declared in a form of a Python code snippet, forming a call to App() function with various parameters. 
 
-Only 2 parameters are mandatory: ***appid*** and ***apptype***, others are optional and may be meaningful only for certain application types.
+Only 2 parameters are mandatory: ***appid*** and ***apptype***, others are optional and may only be meaningful for certain application types.
 
-### Keys
+### Parameters
 
 * **appid**: string, application id within the build system. Used for specifying which applications to include in build configuration and to resolve dependencies and conflicts.
 
@@ -29,25 +29,28 @@ Only 2 parameters are mandatory: ***appid*** and ***apptype***, others are optio
 | EXTERNAL     | Application to be built as a .fap executable file |
 | METAPACKAGE  | Does not define any code to be run, used for declaring dependencies and application bundles |
 
-* **name**: Name to show in menus.
-* **entry_point**: C function to be used as application's  entry point.
+* **name**: Name that is displayed in menus.
+* **entry_point**: C function to be used as application's entry point.
 * **flags**: Internal flags for system apps. Do not use.
 * **cdefines**: C preprocessor definitions to declare globally for other apps when current application is included in active build configuration.
 * **requires**: List of application IDs to also include in build configuration, when current application is referenced in list of applications to build.
 * **conflicts**: List of application IDs that current application conflicts with. If any of them is found in constructed application list, **`fbt`** will abort firmware build process.
 * **provides**: Functionally identical to ***requires*** field.
-* **stack_size**: Stack size, in bytes, to allocate for application on its startup. Note that allocating a stack too small for app to run will cause system crash due to stack overflow, and allocating too much stack will reduce usable heap memory size for app to process data. *Note: you can use `ps` and `free` CLI commands to profile you app's memory usage.*
+* **stack_size**: Stack size, in bytes, to allocate for application on its startup. Note that allocating a stack that is too small for an app to run will cause system crash due to stack overflow, and allocating too much stack space will reduce usable heap memory size for apps to process data. *Note: you can use `ps` and `free` CLI commands to profile your app's memory usage.*
 * **icon**: Animated icon name from built-in assets to be used when building app as a part of firmware.
-* **order**: Order of an application within its group when sorting entries in it. The lower the order is, the closer to the start of the list the items is located. Used for ordering startup hooks and menu entries. 
+* **order**: Order of an application within its group when sorting entries in it. The lower the order is, the closer to the start of the list the item is placed. *Used for ordering startup hooks and menu entries.* 
 * **sdk_headers**: List of C header files from this app's code to include in API definitions for external applications.
 
 The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 
 * **sources**: list of file name masks, used for gathering sources within app folder. Default value of ["\*.c\*"] includes C and CPP source files.
-* **version**: string, 2 numbers in form of "x.y": application version to be embedded within .fap file.
-* **fap_icon**: name of .png file, 1-bit color depth, 10x10px, to be embedded within .fap file.
+* **fap_version**: string, 2 numbers in form of "x.y": application version to be embedded within .fap file.
+* **fap_icon**: name of a .png file, 1-bit color depth, 10x10px, to be embedded within .fap file.
 * **fap_libs**: list of extra libraries to link application against. Provides access to extra functions that are not exported as a part of main firmware at expense of increased .fap file size and RAM consumption.
 * **fap_category**: string, may be empty. App subcategory, also works as path of FAP within apps folder in the file system.
+* **fap_description**: string, may be empty. Short application descriotion.
+* **fap_author**: string, may be empty. Application's author.
+* **fap_weburl**: string, may be empty. Application's homepage.
 
 
 ## .fam file contents
@@ -75,18 +78,5 @@ App(
     order=10,
 )
 
-```
-App(
-    appid="example_app", => App id, used in fbt app lists only, like applications\meta
-    name="My Plugin", => App name in menu
-    apptype=FlipperAppType.PLUGIN, => App type APP / PLUGIN / GAME (or service)
-    entry_point="my_example_app", => App entry point / main function
-    cdefines=["APP_MYEXAMPLE"], => C style define that will be used in generated file
-    requires=[
-        "gui",
-        "dialogs",
-    ], => Requirements (other app id's that required for this app)
-    stack_size=2 * 1024, => Memory stack size
-    order=60, => App order in menu
-)
-```
+
+For more examples, see .fam files from various firmware parts.
