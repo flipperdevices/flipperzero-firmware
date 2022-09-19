@@ -28,18 +28,16 @@ combos = [2218,  # 100010101010
 protocols = {
     "CAME": {
         "signal": 250,
-        "H": "2*{}",
         "transposition_table": {
-            "0": "-{} {} ",
-            "1": "-{} {} ",
+            "0": "-250 500 ",
+            "1": "-500 250 ",
         }
     },
     "NICE": {
         "signal": 700,
-        "H": "2*{}",
         "transposition_table": {
-            "0": "-{} {} ",
-            "1": "-{} {} ",
+            "0": "-700 1400 ",
+            "1": "-1400 700 ",
         }
     },
 
@@ -51,10 +49,7 @@ for key_dec in combos:
 
     for proto in protocols:
         signal = protocols[proto]["signal"]
-        H = int(eval(protocols[proto]["H"].format(signal)))
         transposition_table = protocols[proto]["transposition_table"]
-        transposition_table["0"] = transposition_table["0"].format(signal, H)
-        transposition_table["1"] = transposition_table["1"].format(H, signal)
         Pilot = -36*signal
         pilot_period = f"{Pilot} {signal} "
         key_str = pilot_period
