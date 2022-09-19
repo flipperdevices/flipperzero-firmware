@@ -17,6 +17,12 @@
 #define DATE_LEN 14
 #define MERIDIAN_LEN 3
 
+#define DEFAULT_SETTINGS                                                                       \
+    (ClockSettings) {                                                                          \
+        .time_format = H12, .date_format = Iso, .increment_precision = 5, .alarm_mode = Sound, \
+        .alarm_sound = 0                                                                       \
+    }
+
 typedef enum {
     EventTypeTick,
     EventTypeKey,
