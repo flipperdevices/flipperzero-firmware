@@ -1,5 +1,5 @@
 App(
-    appid="APPS_DolphinRestorer",
+    appid="DolphinRestorer",
     name="Dolphin Restorer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="drestorer_app",

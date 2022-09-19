@@ -1,5 +1,5 @@
 App(
-    appid="GAME_Zombiez",
+    appid="Zombiez",
     name="Zombiez",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="zombiez_game_app",

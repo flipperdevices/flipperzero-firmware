@@ -1,5 +1,5 @@
 App(
-    appid="APPS_Calculator",
+    appid="Calculator",
     name="Calculator",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="calculator_app",

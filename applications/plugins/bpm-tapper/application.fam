@@ -1,5 +1,5 @@
 App(
-    appid="bpm_tapper",
+    appid="BPM_Tapper",
     name="BPM Tapper",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="bpm_tapper_app",

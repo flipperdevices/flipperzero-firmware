@@ -1,5 +1,5 @@
 App(
-    appid="APPS_DolphinBackup",
+    appid="DolphinBackup",
     name="Dolphin Backup",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="storage_DolphinBackup_app",

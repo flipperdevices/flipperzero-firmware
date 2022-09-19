@@ -1,5 +1,5 @@
 App(
-    appid="GAME_Arkanoid",
+    appid="Arkanoid",
     name="Arkanoid",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="arkanoid_game_app",
