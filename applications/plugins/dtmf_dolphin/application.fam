@@ -1,5 +1,5 @@
 App(
-    appid="dtmf_dolphin",
+    appid="DTMF_Dolphin",
     name="DTMF Dolphin",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="dtmf_dolphin_app",
@@ -10,4 +10,6 @@ App(
     ],
     stack_size=8 * 1024,
     order=20,
+    fap_icon="dtmf_10px.png",
+    fap_category="Misc",
 )
