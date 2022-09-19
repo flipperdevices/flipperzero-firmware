@@ -8,7 +8,7 @@ When building firmware, **`fbt`** collects all application manifests, processes 
 
 Properties of a firmware component are declared in a form of a Python code snippet, forming a call to App() function with various parameters. 
 
-Only 2 parameters are mandatoty: ***appid*** and ***apptype***, others are optional and may be meaningful only for certain application types.
+Only 2 parameters are mandatory: ***appid*** and ***apptype***, others are optional and may be meaningful only for certain application types.
 
 ### Keys
 
@@ -30,7 +30,7 @@ Only 2 parameters are mandatoty: ***appid*** and ***apptype***, others are optio
 | METAPACKAGE  | Does not define any code to be run, used for declaring dependencies and application bundles |
 
 * **name**: Name to show in menus.
-* **entry_point**: C function to be used as applicaiton's entry point.
+* **entry_point**: C function to be used as application's  entry point.
 * **flags**: Internal flags for system apps. Do not use.
 * **cdefines**: C preprocessor definitions to declare globally for other apps when current application is included in active build configuration.
 * **requires**: List of application IDs to also include in build configuration, when current application is referenced in list of applications to build.
@@ -39,7 +39,7 @@ Only 2 parameters are mandatoty: ***appid*** and ***apptype***, others are optio
 * **stack_size**: Stack size, in bytes, to allocate for application on its startup. Note that allocating a stack too small for app to run will cause system crash due to stack overflow, and allocating too much stack will reduce usable heap memory size for app to process data. *Note: you can use `ps` and `free` CLI commands to profile you app's memory usage.*
 * **icon**: Animated icon name from built-in assets to be used when building app as a part of firmware.
 * **order**: Order of an application within its group when sorting entries in it. The lower the order is, the closer to the start of the list the items is located. Used for ordering startup hooks and menu entries. 
-* **sdk_headers**: List of C header files from this app's code to include in API definitions for external applicaions.
+* **sdk_headers**: List of C header files from this app's code to include in API definitions for external applications.
 
 The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 
