@@ -11,6 +11,7 @@
 
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
 - Last Synched changes from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-09-19 20:45 GMT`
+- To avoid Application errors, delete /ext/apps before doing the RM firmware update
 
 <details>
   <summary><B>TO DO</b></summary><br/>
@@ -47,6 +48,7 @@
 </details>
 
       
+- To avoid Application errors, delete /ext/apps before doing the RM firmware update
 - To install new FW, extract the [latest release zip file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases) to a folder, put the folder in the update folder on your SD card, and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your extend_range.txt file. **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!** On any update, you may need to update this file and your unirf map file, so keep backups. 😄
     - [<h2>GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT IN CLOCK</h2>](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)
 <br>[FLIPPER PROJECT WISH LIST](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/RoadMap.md) - [SAMPLE EDUCATIONAL PROJECTS 😄](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/RoadMap.md)
