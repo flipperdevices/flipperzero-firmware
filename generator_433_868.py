@@ -1,0 +1,69 @@
+# CAME generator for given 12bits keys
+#
+# Code reuse from
+# https://github.com/UberGuidoZ/Flipper/blob/main/Sub-GHz/Garages/CAME_brute_force/12Bit/433.92Mhz/CAMEbruteforcer433.py
+# and https://github.com/UberGuidoZ/Flipper/blob/main/Sub-GHz/Garages/CAME_brute_force/12Bit/868.35Mhz/CAMEbruteforcer868.py
+
+import os
+
+# Script settings:
+repetition = 3
+n_bits = 12
+file_header = """
+Filetype: Flipper SubGhz RAW File
+Version: 1
+Frequency: {}
+Preset: FuriHalSubGhzPresetOok650Async
+Protocol: RAW
+"""
+file_header_433 = file_header.format("433920000")
+file_header_868 = file_header.format("868350000")
+
+# Protocol settings: https://phreakerclub.com/447
+combos = [2218,  # 100010101010
+        1361] # 010101010001
+
+protocols = {
+    "CAME": {
+        "signal": 250,
+        "H": "2*{}",
+        "transposition_table": {
+            "0": "-{} {} ",
+            "1": "-{} {} ",
+        }
+    }
+}
+
+for key_dec in combos:
+    key_bin = f"{key_dec:0{n_bits}b}"  # format as 12 digits bin
+    print(f"keybin = {key_bin}")
+
+    for proto in protocols:
+        signal = protocols[proto]["signal"]
+        H = int(eval(protocols[proto]["H"].format(signal)))
+        transposition_table = protocols[proto]["transposition_table"]
+        transposition_table["0"] = transposition_table["0"].format(signal, H)
+        transposition_table["1"] = transposition_table["1"].format(H, signal)
+        Pilot = -36*signal
+        pilot_period = f"{Pilot} {signal} "
+        key_str = pilot_period
+
+        for bit in key_bin:
+            key_str += transposition_table[bit]
+        joined = "".join(key_str)
+        key_str = key_str * repetition
+
+        # 433
+        filename = f"{proto}_433_{key_dec}.sub"
+        with open(filename, "w") as f:
+            f.write(file_header_433)
+        with open(filename, "a") as f:
+            f.write("RAW_Data: " + key_str + "\n")
+
+        # 868
+        filename = f"{proto}_868_{key_dec}.sub"
+        with open(filename, "w") as f:
+            f.write(file_header_868)
+        with open(filename, "a") as f:
+            f.write("RAW_Data: " + key_str + "\n")
+
