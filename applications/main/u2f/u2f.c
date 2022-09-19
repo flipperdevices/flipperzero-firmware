@@ -78,6 +78,7 @@ static const uint8_t state_no_error[] = {0x90, 0x00};
 static const uint8_t state_not_supported[] = {0x6D, 0x00};
 static const uint8_t state_user_missing[] = {0x69, 0x85};
 static const uint8_t state_wrong_data[] = {0x6A, 0x80};
+static const uint8_t state_app_not_found[] = {0x6A, 0x82};
 
 struct U2fData {
     uint8_t device_key[32];
@@ -346,7 +347,7 @@ uint16_t u2f_applet_selection(const uint8_t* in_buf, uint8_t* out_buf) {
     uint8_t* data = apdu_command_data(cmd);
 
     if(cmd->len[0] != 8 || memcmp(rid_ac_ax, data, 8) != 0) {
-        memcpy(&out_buf[0], state_not_supported, 2);
+        memcpy(&out_buf[0], state_app_not_found, 2);
         return 2;
     }
 

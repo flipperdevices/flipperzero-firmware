@@ -26,12 +26,19 @@ static bool u2f_nfc_callback(
     U2fNfc* u2f_nfc = context;
     *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
 
+    uint8_t pcb = buff_rx[0];
+    if(pcb == 0xC2) {
+        memcpy(buff_tx, buff_rx, buff_rx_len);
+        *buff_tx_len = buff_rx_len;
+        return true;
+    }
+
     if(buff_rx_len < 24) {
-        FURI_LOG_D(TAG, "Unknown short message");
+        FURI_LOG_D(
+            TAG, "Unknown short message 0x%02x 0x%02x 0x%02x", buff_rx[0], buff_rx[1], buff_rx[2]);
         return false;
     }
 
-    uint8_t pcb = buff_rx[0];
     if((pcb & ~0x03) != 0) {
         buff_tx[0] = 0x02;
         buff_tx[1] = 0x68;
@@ -41,21 +48,76 @@ static bool u2f_nfc_callback(
         return true;
     }
 
+    if(buff_rx[1] == 0xC0) {
+        if(u2f_nfc->payload_len == 0) {
+            FURI_LOG_D(TAG, "requested block but not chaining");
+            buff_tx[0] = 0x02;
+            buff_tx[1] = 0x69;
+            buff_tx[2] = 0x00;
+            *buff_tx_len = 8 * 3;
+            return true;
+        }
+
+        FURI_LOG_D(TAG, "continued chaining %d/%d", u2f_nfc->payload_cursor, u2f_nfc->payload_len);
+
+        buff_tx[0] = 0x02;
+        uint16_t max_resp_len = buff_rx[6 + buff_rx[5]];
+        if(max_resp_len == 0) {
+            max_resp_len = 256;
+        }
+
+        uint16_t remaining_len = u2f_nfc->payload_len - u2f_nfc->payload_cursor;
+        if(remaining_len > max_resp_len) {
+            memcpy(&buff_tx[1], &u2f_nfc->payload[u2f_nfc->payload_cursor], max_resp_len);
+            remaining_len -= max_resp_len;
+            buff_tx[max_resp_len + 1] = 0x61;
+            if(remaining_len >= 256) {
+                buff_tx[max_resp_len + 2] = 0x00;
+            } else {
+                buff_tx[max_resp_len + 2] = remaining_len - 2;
+            }
+            *buff_tx_len = (max_resp_len + 2 + 1) * 8;
+            u2f_nfc->payload_cursor += max_resp_len;
+        } else {
+            memcpy(&buff_tx[1], &u2f_nfc->payload[u2f_nfc->payload_cursor], remaining_len);
+            *buff_tx_len = (remaining_len + 1) * 8;
+            u2f_nfc->payload_len = 0;
+        }
+
+        return true;
+    }
+
     // Presence is implied by touching the NFC devices.
     u2f_confirm_user_present(u2f_nfc->u2f_instance);
 
     u2f_nfc->payload_len =
         u2f_msg_parse(u2f_nfc->u2f_instance, &buff_rx[1], (buff_rx_len / 8) - 1, u2f_nfc->payload);
 
+    uint16_t max_resp_len = 256;
+
+    if(u2f_nfc->payload_len - 2 <= max_resp_len) {
+        buff_tx[0] = 0x02;
+        memcpy(&buff_tx[1], u2f_nfc->payload, u2f_nfc->payload_len);
+        *buff_tx_len = (u2f_nfc->payload_len + 1) * 8;
+        u2f_nfc->payload_len = 0;
+        FURI_LOG_D(TAG, "single response");
+        return true;
+    }
+
     buff_tx[0] = 0x02;
-    memcpy(&buff_tx[1], u2f_nfc->payload, u2f_nfc->payload_len);
-    *buff_tx_len = (u2f_nfc->payload_len + 1) * 8;
+    memcpy(&buff_tx[1], u2f_nfc->payload, max_resp_len);
+    buff_tx[max_resp_len + 1] = 0x61;
+    uint16_t remaining_len = (u2f_nfc->payload_len - 2) - max_resp_len;
+    if(remaining_len >= 256) {
+        buff_tx[max_resp_len + 2] = 0x00;
+    } else {
+        buff_tx[max_resp_len + 2] = remaining_len;
+    }
+    *buff_tx_len = (max_resp_len + 1 + 2) * 8;
+    u2f_nfc->payload_cursor = max_resp_len;
+    FURI_LOG_D(TAG, "started chaining %d/%d", u2f_nfc->payload_cursor, u2f_nfc->payload_len);
 
-    // TODO: chaining
-
-    FURI_LOG_D(TAG, "payload_len=%d buff_tx_len=%d", u2f_nfc->payload_len, *buff_tx_len);
-
-    return buff_rx_len > 0;
+    return true;
 }
 
 static int32_t u2f_nfc_worker(void* context) {
@@ -75,7 +137,7 @@ static int32_t u2f_nfc_worker(void* context) {
     furi_hal_nfc_exit_sleep();
     FURI_LOG_D(TAG, "Start");
     while(1) {
-        uint32_t flags = furi_thread_flags_wait(WorkerEvtStop, FuriFlagWaitAny, 10);
+        uint32_t flags = furi_thread_flags_wait(WorkerEvtStop, FuriFlagWaitAny, 1);
         if(flags != FuriFlagErrorTimeout) {
             furi_check((flags & FuriFlagError) == 0);
             if(flags & WorkerEvtStop) break;
@@ -88,7 +150,7 @@ static int32_t u2f_nfc_worker(void* context) {
                nfc_data.sak,
                u2f_nfc_callback,
                u2f_nfc,
-               5000)) {
+               1000)) {
             FURI_LOG_T(TAG, "No device found");
         }
     }
