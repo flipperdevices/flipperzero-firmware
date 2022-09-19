@@ -1,5 +1,6 @@
 #include "wifi_deauther_app_i.h"
 
+#include <furi_hal_power.h>
 #include <furi.h>
 #include <furi_hal.h>
 
