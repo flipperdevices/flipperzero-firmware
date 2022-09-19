@@ -8,9 +8,11 @@ A metronome for the [Flipper Zero](https://flipperzero.one/) device. Goes along 
 
 - BPM adjustable, fine and coarse (hold pressed)
 - Selectable amount of beats per bar
-- First bar is pronounced
 - Selectable note length
+- First beat is pronounced
+- Progress indicator
 - LED flashes accordingly
+- 3 different settings: Beep, Vibrate, Silent (push Down to change)
 
 ## Compiling
 
