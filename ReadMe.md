@@ -14,6 +14,10 @@ You should clone with
 $ git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git
 ```
 
+# Read the Docs
+
+Check out details on [how to build firmware](documentation/fbt.md), [write applications](documentation/AppsOnSDCard.md), [un-brick your device](documentation/KeyCombo.md) and more in `documentation` folder. 
+
 # Update firmware
 
 [Get Latest Firmware from Update Server](https://update.flipperzero.one/)
@@ -74,19 +78,7 @@ brew bundle --verbose
 
 ## Linux Prerequisites
 
-### gcc-arm-none-eabi
-
-```sh
-toolchain="gcc-arm-none-eabi-10.3-2021.10"
-toolchain_package="$toolchain-$(uname -m)-linux"
-
-wget -P /opt "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/$toolchain_package.tar.bz2"
-
-tar xjf /opt/$toolchain_package.tar.bz2 -C /opt
-rm /opt/$toolchain_package.tar.bz2
-
-for file in /opt/$toolchain/bin/* ; do ln -s "${file}" "/usr/bin/$(basename ${file})" ; done
-```
+The FBT tool handles everything, only `git` is required.
 
 ### Optional dependencies
 

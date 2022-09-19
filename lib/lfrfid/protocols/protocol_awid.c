@@ -53,7 +53,7 @@ void protocol_awid_decoder_start(ProtocolAwid* protocol) {
     memset(protocol->encoded_data, 0, AWID_ENCODED_DATA_SIZE);
 };
 
-static bool protocol_awid_can_be_decoded(const uint8_t* data) {
+static bool protocol_awid_can_be_decoded(uint8_t* data) {
     bool result = false;
 
     // Index map
@@ -77,6 +77,12 @@ static bool protocol_awid_can_be_decoded(const uint8_t* data) {
         bool parity_error = bit_lib_test_parity(data, 8, 88, BitLibParityOdd, 4);
         if(parity_error) break;
 
+        bit_lib_remove_bit_every_nth(data, 8, 88, 4);
+
+        // Avoid detection for invalid formats
+        uint8_t len = bit_lib_get_bits(data, 8, 8);
+        if(len != 26 && len != 50 && len != 37 && len != 34) break;
+
         result = true;
     } while(false);
 
@@ -84,7 +90,6 @@ static bool protocol_awid_can_be_decoded(const uint8_t* data) {
 }
 
 static void protocol_awid_decode(uint8_t* encoded_data, uint8_t* decoded_data) {
-    bit_lib_remove_bit_every_nth(encoded_data, 8, 88, 4);
     bit_lib_copy_bits(decoded_data, 0, 66, encoded_data, 8);
 }
 
@@ -199,6 +204,10 @@ void protocol_awid_render_brief_data(ProtocolAwid* protocol, string_t result) {
 bool protocol_awid_write_data(ProtocolAwid* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
     bool result = false;
+
+    // Correct protocol data by redecoding
+    protocol_awid_encode(protocol->data, (uint8_t*)protocol->encoded_data);
+    protocol_awid_decode(protocol->encoded_data, protocol->data);
 
     protocol_awid_encode(protocol->data, (uint8_t*)protocol->encoded_data);
 
