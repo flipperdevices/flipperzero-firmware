@@ -18,7 +18,7 @@ Self-update package (update from microSD) - `flipper-z-f7-update-(version).zip` 
 DFU for update using qFlipper is no longer included in releases to avoid issues with assets - Use Web Updater or self-update package!
 
 
-## Support unleashed so we can buy equipment and develop new features
+## Support unleashed (Not RogueMaster) so unleashed team can buy equipment and develop new features
 * ETH/BSC/ERC20-Tokens: `0xFebF1bBc8229418FF2408C07AF6Afa49152fEc6a`
 * BTC: `bc1q0np836jk9jwr4dd7p6qv66d04vamtqkxrecck9`
 * DOGE: `D6R6gYgBn5LwTNmPyvAQR6bZ9EtGgFCpvv`
