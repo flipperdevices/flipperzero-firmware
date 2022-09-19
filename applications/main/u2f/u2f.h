@@ -6,6 +6,14 @@ extern "C" {
 
 #include <furi.h>
 
+typedef struct {
+    uint8_t cla;
+    uint8_t ins;
+    uint8_t p1;
+    uint8_t p2;
+    uint8_t len[];
+} __attribute__((packed)) U2fApduCommand;
+
 typedef enum {
     U2fNotifyRegister,
     U2fNotifyAuth,

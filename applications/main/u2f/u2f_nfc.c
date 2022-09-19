@@ -1,5 +1,6 @@
 #include "u2f_nfc.h"
 #include "furi_hal.h"
+#include "u2f.h"
 
 #define TAG "U2F_NFC"
 
@@ -48,9 +49,10 @@ static bool u2f_nfc_callback(
         return true;
     }
 
-    if(buff_rx[1] == 0xC0) {
+    U2fApduCommand* cmd = (U2fApduCommand*)&buff_rx[1];
+    if(cmd->ins == 0xC0) {
         if(u2f_nfc->payload_len == 0) {
-            FURI_LOG_D(TAG, "requested block but not chaining");
+            FURI_LOG_E(TAG, "requested block but not chaining");
             buff_tx[0] = 0x02;
             buff_tx[1] = 0x69;
             buff_tx[2] = 0x00;
@@ -58,15 +60,15 @@ static bool u2f_nfc_callback(
             return true;
         }
 
-        FURI_LOG_D(TAG, "continued chaining %d/%d", u2f_nfc->payload_cursor, u2f_nfc->payload_len);
+        FURI_LOG_T(TAG, "continued chaining %d/%d", u2f_nfc->payload_cursor, u2f_nfc->payload_len);
 
         buff_tx[0] = 0x02;
-        uint16_t max_resp_len = buff_rx[6 + buff_rx[5]];
+        uint16_t max_resp_len = cmd->len[0];
         if(max_resp_len == 0) {
             max_resp_len = 256;
         }
 
-        uint16_t remaining_len = u2f_nfc->payload_len - u2f_nfc->payload_cursor;
+        uint16_t remaining_len = (u2f_nfc->payload_len - 2) - u2f_nfc->payload_cursor;
         if(remaining_len > max_resp_len) {
             memcpy(&buff_tx[1], &u2f_nfc->payload[u2f_nfc->payload_cursor], max_resp_len);
             remaining_len -= max_resp_len;
@@ -74,12 +76,12 @@ static bool u2f_nfc_callback(
             if(remaining_len >= 256) {
                 buff_tx[max_resp_len + 2] = 0x00;
             } else {
-                buff_tx[max_resp_len + 2] = remaining_len - 2;
+                buff_tx[max_resp_len + 2] = remaining_len;
             }
             *buff_tx_len = (max_resp_len + 2 + 1) * 8;
             u2f_nfc->payload_cursor += max_resp_len;
         } else {
-            memcpy(&buff_tx[1], &u2f_nfc->payload[u2f_nfc->payload_cursor], remaining_len);
+            memcpy(&buff_tx[1], &u2f_nfc->payload[u2f_nfc->payload_cursor], u2f_nfc->payload_len - u2f_nfc->payload_cursor);
             *buff_tx_len = (remaining_len + 1) * 8;
             u2f_nfc->payload_len = 0;
         }
@@ -95,27 +97,36 @@ static bool u2f_nfc_callback(
 
     uint16_t max_resp_len = 256;
 
-    if(u2f_nfc->payload_len - 2 <= max_resp_len) {
+    if((u2f_nfc->payload_len - 2) <= max_resp_len) {
         buff_tx[0] = 0x02;
         memcpy(&buff_tx[1], u2f_nfc->payload, u2f_nfc->payload_len);
         *buff_tx_len = (u2f_nfc->payload_len + 1) * 8;
         u2f_nfc->payload_len = 0;
-        FURI_LOG_D(TAG, "single response");
+        FURI_LOG_T(TAG, "single response");
         return true;
     }
 
-    buff_tx[0] = 0x02;
-    memcpy(&buff_tx[1], u2f_nfc->payload, max_resp_len);
-    buff_tx[max_resp_len + 1] = 0x61;
-    uint16_t remaining_len = (u2f_nfc->payload_len - 2) - max_resp_len;
-    if(remaining_len >= 256) {
-        buff_tx[max_resp_len + 2] = 0x00;
+    bool u2f_chaining = true;
+    if (u2f_chaining) {
+        buff_tx[0] = 0x02;
+        memcpy(&buff_tx[1], u2f_nfc->payload, max_resp_len);
+        buff_tx[max_resp_len + 1] = 0x61;
+        uint16_t remaining_len = (u2f_nfc->payload_len - 2) - max_resp_len;
+        if(remaining_len >= 256) {
+            buff_tx[max_resp_len + 2] = 0x00;
+        } else {
+            buff_tx[max_resp_len + 2] = remaining_len;
+        }
+        *buff_tx_len = (max_resp_len + 1 + 2) * 8;
+        u2f_nfc->payload_cursor = max_resp_len;
+        FURI_LOG_T(TAG, "started u2f chaining %d/%d", u2f_nfc->payload_cursor, u2f_nfc->payload_len);
     } else {
-        buff_tx[max_resp_len + 2] = remaining_len;
+        buff_tx[0] = 0b00010010;
+        memcpy(&buff_tx[1], u2f_nfc->payload, max_resp_len);
+        *buff_tx_len = (max_resp_len + 1) * 8;
+        u2f_nfc->payload_cursor = max_resp_len;
+        FURI_LOG_T(TAG, "started nfc chaining %d/%d", u2f_nfc->payload_cursor, u2f_nfc->payload_len);
     }
-    *buff_tx_len = (max_resp_len + 1 + 2) * 8;
-    u2f_nfc->payload_cursor = max_resp_len;
-    FURI_LOG_D(TAG, "started chaining %d/%d", u2f_nfc->payload_cursor, u2f_nfc->payload_len);
 
     return true;
 }

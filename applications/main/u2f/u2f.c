@@ -38,14 +38,6 @@ typedef struct {
 } __attribute__((packed)) U2fKeyHandle;
 
 typedef struct {
-    uint8_t cla;
-    uint8_t ins;
-    uint8_t p1;
-    uint8_t p2;
-    uint8_t len[];
-} __attribute__((packed)) U2fApduCommand;
-
-typedef struct {
     uint8_t challenge[32];
     uint8_t app_id[32];
 } __attribute__((packed)) U2fRegisterReq;
