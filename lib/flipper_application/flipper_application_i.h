@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-DICT_DEF2(RelocationAddressCache, int, M_DEFAULT_OPLIST, Elf32_Addr, M_DEFAULT_OPLIST)
+DICT_DEF2(AddressCache, int, M_DEFAULT_OPLIST, Elf32_Addr, M_DEFAULT_OPLIST)
 
 /**
  * Callable elf entry type
@@ -34,8 +34,8 @@ typedef struct {
     off_t entry;
     ELFSectionDict_t sections;
 
-    RelocationAddressCache_t relocation_cache;
-    RelocationAddressCache_t trampoline_cache;
+    AddressCache_t relocation_cache;
+    AddressCache_t trampoline_cache;
 } ELFFile;
 
 struct FlipperApplication {

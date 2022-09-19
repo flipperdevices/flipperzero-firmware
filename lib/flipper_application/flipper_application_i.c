@@ -12,8 +12,8 @@
 /********************************************* Caches *********************************************/
 /**************************************************************************************************/
 
-static bool address_cache_get(RelocationAddressCache_t cache, int symEntry, Elf32_Addr* symAddr) {
-    Elf32_Addr* addr = RelocationAddressCache_get(cache, symEntry);
+static bool address_cache_get(AddressCache_t cache, int symEntry, Elf32_Addr* symAddr) {
+    Elf32_Addr* addr = AddressCache_get(cache, symEntry);
     if(addr) {
         *symAddr = *addr;
         return true;
@@ -22,8 +22,8 @@ static bool address_cache_get(RelocationAddressCache_t cache, int symEntry, Elf3
     }
 }
 
-static void address_cache_put(RelocationAddressCache_t cache, int symEntry, Elf32_Addr symAddr) {
-    RelocationAddressCache_set_at(cache, symEntry, symAddr);
+static void address_cache_put(AddressCache_t cache, int symEntry, Elf32_Addr symAddr) {
+    AddressCache_set_at(cache, symEntry, symAddr);
 }
 
 /**************************************************************************************************/
@@ -556,7 +556,7 @@ bool flipper_application_load_manifest(FlipperApplication* fap) {
     string_t name;
     string_init(name);
     ELFSectionDict_init(elf->sections);
-    RelocationAddressCache_init(elf->trampoline_cache);
+    AddressCache_init(elf->trampoline_cache);
 
     FURI_LOG_D(TAG, "Looking for manifest section");
     for(size_t section_idx = 1; section_idx < elf->sections_count; section_idx++) {
@@ -588,7 +588,7 @@ bool flipper_application_load_section_table(FlipperApplication* fap) {
     string_t name;
     string_init(name);
     ELFSectionDict_init(elf->sections);
-    RelocationAddressCache_init(elf->trampoline_cache);
+    AddressCache_init(elf->trampoline_cache);
 
     fap->state.mmap_entry_count = 0;
 
@@ -619,30 +619,19 @@ bool flipper_application_load_section_table(FlipperApplication* fap) {
     string_clear(name);
     FURI_LOG_D(TAG, "Load symbols done");
 
-    ELFSectionDict_it_t it;
-    for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it); ELFSectionDict_next(it)) {
-        const ELFSectionDict_itref_t* itref = ELFSectionDict_cref(it);
-        FURI_LOG_D(
-            TAG,
-            "%s: %d %d",
-            string_get_cstr(itref->key),
-            itref->value.sec_idx,
-            itref->value.rel_sec_idx);
-    }
-
     return IS_FLAGS_SET(loaded_sections, SectionTypeValid);
 }
 
 FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplication* fap) {
     ELFFile* elf = &fap->elf;
     FlipperApplicationLoadStatus status = FlipperApplicationLoadStatusSuccess;
-    RelocationAddressCache_init(fap->elf.relocation_cache);
+    AddressCache_init(fap->elf.relocation_cache);
     size_t start = furi_get_tick();
 
     ELFSectionDict_it_t it;
     for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it); ELFSectionDict_next(it)) {
         ELFSectionDict_itref_t* itref = ELFSectionDict_ref(it);
-        FURI_LOG_I(TAG, "Loading section '%s'", string_get_cstr(itref->key));
+        FURI_LOG_D(TAG, "Loading section '%s'", string_get_cstr(itref->key));
         if(!flipper_application_load_section_data(fap, &itref->value)) {
             FURI_LOG_E(TAG, "Error loading section '%s'", string_get_cstr(itref->key));
             status = FlipperApplicationLoadStatusUnspecifiedError;
@@ -653,7 +642,7 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
         for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it);
             ELFSectionDict_next(it)) {
             ELFSectionDict_itref_t* itref = ELFSectionDict_ref(it);
-            FURI_LOG_I(TAG, "Relocating section '%s'", string_get_cstr(itref->key));
+            FURI_LOG_D(TAG, "Relocating section '%s'", string_get_cstr(itref->key));
             if(!flipper_application_relocate_section(fap, &itref->value)) {
                 FURI_LOG_E(TAG, "Error relocating section '%s'", string_get_cstr(itref->key));
                 status = FlipperApplicationLoadStatusMissingImports;
@@ -674,14 +663,14 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
 
             const void* data_ptr = itref->value.data;
             if(data_ptr) {
-                FURI_LOG_I(TAG, "0x%X %s", (uint32_t)data_ptr, string_get_cstr(itref->key));
+                FURI_LOG_D(TAG, "0x%X %s", (uint32_t)data_ptr, string_get_cstr(itref->key));
                 state->mmap_entries[mmap_entry_idx].address = (uint32_t)data_ptr;
                 state->mmap_entries[mmap_entry_idx].name = string_get_cstr(itref->key);
                 mmap_entry_idx++;
             }
 
             if(string_cmp(itref->key, ".text") == 0) {
-                FURI_LOG_I(TAG, "Found .text section at 0x%X", (uint32_t)data_ptr);
+                FURI_LOG_D(TAG, "Found .text section at 0x%X", (uint32_t)data_ptr);
                 text_p = (uint32_t)data_ptr;
             }
         }
@@ -692,9 +681,8 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
         fap->elf.entry += text_p;
     }
 
-    FURI_LOG_D(
-        TAG, "Relocation cache size: %u", RelocationAddressCache_size(fap->elf.relocation_cache));
-    RelocationAddressCache_clear(fap->elf.relocation_cache);
+    FURI_LOG_D(TAG, "Relocation cache size: %u", AddressCache_size(fap->elf.relocation_cache));
+    AddressCache_clear(fap->elf.relocation_cache);
     FURI_LOG_I(TAG, "Loaded in %ums", (size_t)(furi_get_tick() - start));
 
     return status;
@@ -702,6 +690,7 @@ FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplicatio
 
 void flipper_application_free_elf_data(ELFFile* elf) {
     {
+        // free sections data
         ELFSectionDict_it_t it;
         for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it);
             ELFSectionDict_next(it)) {
@@ -715,14 +704,14 @@ void flipper_application_free_elf_data(ELFFile* elf) {
     }
 
     {
-        RelocationAddressCache_it_t it;
-        for(RelocationAddressCache_it(it, elf->trampoline_cache);
-            !RelocationAddressCache_end_p(it);
-            RelocationAddressCache_next(it)) {
-            const RelocationAddressCache_itref_t* itref = RelocationAddressCache_cref(it);
+        // free trampoline data
+        AddressCache_it_t it;
+        for(AddressCache_it(it, elf->trampoline_cache); !AddressCache_end_p(it);
+            AddressCache_next(it)) {
+            const AddressCache_itref_t* itref = AddressCache_cref(it);
             free((void*)itref->value);
         }
 
-        RelocationAddressCache_clear(elf->trampoline_cache);
+        AddressCache_clear(elf->trampoline_cache);
     }
 }
