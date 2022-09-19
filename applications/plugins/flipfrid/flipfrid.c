@@ -6,7 +6,7 @@
 #include "scene/flipfrid_scene_run_attack.h"
 #include "scene/flipfrid_scene_load_custom_uids.h"
 
-#define RFIDFUZZER_APP_FOLDER "/ext/rfidfuzzer"
+#define RFIDFUZZER_APP_FOLDER "/ext/lrfid/rfidfuzzer"
 
 static void flipfrid_draw_callback(Canvas* const canvas, void* ctx) {
     FlipFridState* flipfrid_state = (FlipFridState*)acquire_mutex((ValueMutex*)ctx, 100);
