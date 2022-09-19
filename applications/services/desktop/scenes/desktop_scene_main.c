@@ -180,7 +180,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         }
         case DesktopMainEventOpenSnake: {
             LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/GAME_Snake.fap"));
+                desktop->loader, "Applications", EXT_PATH("/apps/Games/Snake.fap"));
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
@@ -189,7 +189,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         }
         case DesktopMainEventOpen2048: {
             LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/GAME_2048.fap"));
+                desktop->loader, "Applications", EXT_PATH("/apps/Games/2048.fap"));
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
@@ -198,7 +198,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         }
         case DesktopMainEventOpenZombiez: {
             LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/GAME_Zombiez.fap"));
+                desktop->loader, "Applications", EXT_PATH("/apps/Games/Zombiez.fap"));
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
@@ -207,7 +207,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         }
         case DesktopMainEventOpenTetris: {
             LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/GAME_Tetris.fap"));
+                desktop->loader, "Applications", EXT_PATH("/apps/Games/Tetris.fap"));
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
@@ -216,7 +216,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         }
         case DesktopMainEventOpenDOOM: {
             LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/GAME_DOOM.fap"));
+                desktop->loader, "Applications", EXT_PATH("/apps/Games/DOOM.fap"));
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
@@ -225,7 +225,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         }
         case DesktopMainEventOpenDice: {
             LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/GAME_Dice.fap"));
+                desktop->loader, "Applications", EXT_PATH("/apps/Games/Dice.fap"));
             if(status != LoaderStatusOk) {
                 FURI_LOG_E(TAG, "loader_start failed: %d", status);
             }
