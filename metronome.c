@@ -29,12 +29,19 @@ typedef struct {
   InputEvent input;
 } PluginEvent;
 
+enum OutputMode {
+  Loud,
+  Vibro,
+  Silent
+};
+
 typedef struct {
   double bpm;
   bool playing;
   int beats_per_bar;
   int note_length;
   int current_beat;
+  enum OutputMode output_mode;
   FuriTimer* timer;
   NotificationApp* notifications;
 } MetronomeState;
@@ -48,7 +55,6 @@ static void render_callback(Canvas* const canvas, void* ctx) {
   string_t tempStr;
   string_init(tempStr);
 
-  // border around the edge of the screen
   canvas_draw_frame(canvas, 0, 0, 128, 64);
 
   canvas_set_font(canvas, FontPrimary);
@@ -57,6 +63,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
   string_printf(tempStr, "%d/%d", metronome_state->beats_per_bar, metronome_state->note_length);
   canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, string_get_cstr(tempStr));
   string_reset(tempStr);
+
   // draw BPM value
   string_printf(tempStr, "%.2f", metronome_state->bpm);
   canvas_set_font(canvas, FontBigNumbers);
@@ -78,6 +85,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
   // draw progress bar
   elements_progress_bar(canvas, 8, 36, 112, (float)metronome_state->current_beat/metronome_state->beats_per_bar);
 
+  // cleanup
   string_clear(tempStr);
   release_mutex((ValueMutex*)ctx, metronome_state);
 }
@@ -90,21 +98,60 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 }
 
 static void timer_callback(void* ctx) {
+  // this is where we go BEEP!
   MetronomeState* metronome_state = acquire_mutex((ValueMutex*)ctx, 25);
   metronome_state->current_beat++;
   if (metronome_state->current_beat > metronome_state->beats_per_bar) {
     metronome_state->current_beat = 1;
   }
   if (metronome_state->current_beat == 1) {
+    // pronounced beat
     notification_message(metronome_state->notifications, &sequence_set_only_red_255);
-    furi_hal_speaker_start(440.0f, 1.0f);
+    switch(metronome_state->output_mode) {
+      case Loud:
+        furi_hal_speaker_start(440.0f, 1.0f);
+        break;
+      case Vibro:
+        notification_message(metronome_state->notifications, &sequence_set_vibro_on);
+        break;
+      case Silent:
+        break;
+    }
   } else {
+    // unpronounced beat
     notification_message(metronome_state->notifications, &sequence_set_only_green_255);
-    furi_hal_speaker_start(220.0f, 1.0f);
+    switch(metronome_state->output_mode) {
+      case Loud:
+        furi_hal_speaker_start(220.0f, 1.0f);
+        break;
+      case Vibro:
+        notification_message(metronome_state->notifications, &sequence_set_vibro_on);
+        break;
+      case Silent:
+        break;
+    }
   };
-  furi_delay_ms(BEEP_DELAY_MS);
+
+  // this is a bit of a kludge... if we are on vibro and unpronounced, stop vibro after half the usual duration
+  switch(metronome_state->output_mode) {
+    case Loud:
+      furi_delay_ms(BEEP_DELAY_MS);
+      furi_hal_speaker_stop();
+      break;
+    case Vibro:
+      if (metronome_state->current_beat == 1) {
+        furi_delay_ms(BEEP_DELAY_MS);
+        notification_message(metronome_state->notifications, &sequence_reset_vibro);
+      } else {
+        furi_delay_ms((int)BEEP_DELAY_MS/2);
+        notification_message(metronome_state->notifications, &sequence_reset_vibro);
+        furi_delay_ms((int)BEEP_DELAY_MS/2);
+      }
+      break;
+    case Silent:
+      break;
+  }
   notification_message(metronome_state->notifications, &sequence_reset_rgb);
-  furi_hal_speaker_stop();
 
   release_mutex((ValueMutex*)ctx, metronome_state);
 }
@@ -159,12 +206,20 @@ static void cycle_note_length(MetronomeState* metronome_state) {
   update_timer(metronome_state);
 }
 
+static void cycle_output_mode(MetronomeState* metronome_state) {
+    metronome_state->output_mode++;
+    if (metronome_state->output_mode > Silent) {
+      metronome_state->output_mode = Loud;
+    }
+}
+
 static void metronome_state_init(MetronomeState* const metronome_state) {
   metronome_state->bpm = 120.0;
   metronome_state->playing = false;
   metronome_state->beats_per_bar = 4;
   metronome_state->note_length = 4;
   metronome_state->current_beat = 0;
+  metronome_state->output_mode = Loud;
   metronome_state->notifications = furi_record_open(RECORD_NOTIFICATION);
 }
 
@@ -198,14 +253,15 @@ int32_t metronome_app() {
     MetronomeState* metronome_state = (MetronomeState*)acquire_mutex_block(&state_mutex);
 
     if(event_status == FuriStatusOk) {
-      // press events
       if(event.type == EventTypeKey) {
         if(event.input.type == InputTypeShort) {
+          // push events
           switch(event.input.key) {
             case InputKeyUp:
               cycle_beats_per_bar(metronome_state);
               break;
             case InputKeyDown:
+                cycle_output_mode(metronome_state);
                 break;
             case InputKeyRight:
                 increase_bpm(metronome_state, BPM_STEP_SIZE_FINE);
@@ -226,6 +282,7 @@ int32_t metronome_app() {
                 break;
           }
         } else if (event.input.type == InputTypeLong) {
+          // hold events
           switch(event.input.key) {
             case InputKeyUp:
               cycle_note_length(metronome_state);
@@ -245,6 +302,7 @@ int32_t metronome_app() {
               break;
           }
         } else if (event.input.type == InputTypeRepeat) {
+          // repeat events
           switch(event.input.key) {
             case InputKeyUp:
               break;
