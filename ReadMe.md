@@ -13,6 +13,8 @@
 - Last Synched changes from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-09-19 20:45 GMT`
 - To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - Archive: FAPs are now launchable from Archive [By RogueMaster], thanks @xMasterX for the suggestion
+- Updated [Metronome (By panki27)](https://github.com/panki27/Metronome)
+- Added [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
@@ -201,6 +203,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App)) `Req: ESP8266`
 - [Dolphin Backup (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Modified by RogueMaster
 - [Dolphin Restorer (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Cloned by RogueMaster
+- [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 - [Metronome (By panki27)](https://github.com/panki27/Metronome)
 - [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/mousejacker) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [Mouse Jiggler (By Jacob-Tate)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c) (Original By MuddleBox)
