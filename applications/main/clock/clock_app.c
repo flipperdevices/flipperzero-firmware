@@ -81,13 +81,16 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_str_aligned(canvas, 64, 42, AlignCenter, AlignTop, date_string);
 
     if(state->settings.time_format == H12)
-            canvas_draw_str_aligned(canvas, 65, 12, AlignCenter, AlignCenter, meridian_string);
+        canvas_draw_str_aligned(canvas, 65, 12, AlignCenter, AlignCenter, meridian_string);
 
     FURI_LOG_T(TAG, "clock_render_callback - end");
 }
 
 static void clock_state_init(ClockState* const state) {
-    LOAD_CLOCK_SETTINGS(&state->settings);
+    bool load_success = LOAD_CLOCK_SETTINGS(&state->settings);
+    if(!load_success) {
+        state->settings = DEFAULT_SETTINGS;
+    }
     FURI_LOG_I(TAG, "Time format: %s", state->settings.time_format == H12 ? "12h" : "24h");
     FURI_LOG_I(
         TAG, "Date format: %s", state->settings.date_format == Iso ? "ISO 8601" : "RFC 5322");
@@ -133,7 +136,6 @@ int32_t clock_app(void* p) {
 
     FuriTimer* timer =
         furi_timer_alloc(clock_tick, FuriTimerTypePeriodic, plugin_state->event_queue);
-
 
     if(timer == NULL) {
         FURI_LOG_E(TAG, "Cannot create timer");
