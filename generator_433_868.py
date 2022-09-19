@@ -1,9 +1,9 @@
 # CAME generator for given 12bits keys
 #
-# Code reuse from
+# Code reuse for CAME protocol from
 # https://github.com/UberGuidoZ/Flipper/blob/main/Sub-GHz/Garages/CAME_brute_force/12Bit/433.92Mhz/CAMEbruteforcer433.py
 # and https://github.com/UberGuidoZ/Flipper/blob/main/Sub-GHz/Garages/CAME_brute_force/12Bit/868.35Mhz/CAMEbruteforcer868.py
-# and also, for the protocol NICE:
+# and also, for the other protocols:
 # https://github.com/tobiabocchi/flipperzero-bruteforce/blob/main/flipperzero-bruteforce.py
 
 import os
