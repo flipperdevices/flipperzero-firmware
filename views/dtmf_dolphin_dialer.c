@@ -9,9 +9,12 @@ typedef struct DTMFDolphinDialer {
 } DTMFDolphinDialer;
 
 typedef struct {
+    DTMFDolphinToneSection section;
     uint8_t row;
     uint8_t col;
-    float *freq;
+    float freq1;
+    float freq2;
+    DTMFDolphinAudio player;
 } DTMFDolphinDialerModel;
 
 static bool dtmf_dolphin_dialer_process_up(DTMFDolphinDialer* dtmf_dolphin_dialer);
@@ -31,7 +34,7 @@ void draw_button(Canvas* canvas, uint8_t row, uint8_t col, bool invert) {
         (row * DTMF_DOLPHIN_BUTTON_HEIGHT);
         // (row * DTMF_DOLPHIN_BUTTON_PADDING);
 
-    uint8_t span = dtmf_dolphin_get_tone_span(row, col, DTMF_DOLPHIN_TONE_BLOCK_DIALER);
+    uint8_t span = dtmf_dolphin_get_tone_span(row, col);
 
     canvas_set_color(canvas, ColorBlack);
     
@@ -57,7 +60,7 @@ void draw_button(Canvas* canvas, uint8_t row, uint8_t col, bool invert) {
         top + (int) (DTMF_DOLPHIN_BUTTON_HEIGHT / 2),
         AlignCenter,
         AlignCenter,
-        dtmf_dolphin_get_tone_name(row, col, DTMF_DOLPHIN_TONE_BLOCK_DIALER));
+        dtmf_dolphin_data_get_tone_name(row, col));
 
     if (invert)
         canvas_invert_color(canvas);
@@ -68,7 +71,7 @@ void draw_dialer(Canvas* canvas, void* _model) {
     uint8_t max_rows;
     uint8_t max_cols;
     uint8_t max_span;
-    dtmf_dolphin_tone_get_max_pos(&max_rows, &max_cols, &max_span, DTMF_DOLPHIN_TONE_BLOCK_DIALER);
+    dtmf_dolphin_tone_get_max_pos(&max_rows, &max_cols, &max_span);
 
     canvas_set_font(canvas, FontSecondary);
 
@@ -83,18 +86,19 @@ void draw_dialer(Canvas* canvas, void* _model) {
 }
 
 void update_frequencies(DTMFDolphinDialerModel *model) {
-    dtmf_dolphin_get_tone_frequencies(model->freq, model->row, model->col, DTMF_DOLPHIN_TONE_BLOCK_DIALER);
+    dtmf_dolphin_data_get_tone_frequencies(&model->freq1, &model->freq2, model->row, model->col);
 }
 
 static void dtmf_dolphin_dialer_draw_callback(Canvas* canvas, void* _model) {
     DTMFDolphinDialerModel* model = _model;
+    update_frequencies(model);
     uint8_t max_rows;
     uint8_t max_cols;
     uint8_t max_span;
-    dtmf_dolphin_tone_get_max_pos(&max_rows, &max_cols, &max_span, DTMF_DOLPHIN_TONE_BLOCK_DIALER);
+    dtmf_dolphin_tone_get_max_pos(&max_rows, &max_cols, &max_span);
 
     canvas_set_font(canvas, FontPrimary);
-    elements_multiline_text(canvas, 2, 10, "Dialer");
+    elements_multiline_text(canvas, 2, 10, dtmf_dolphin_data_get_current_section_name());
     canvas_draw_line(canvas,
         (max_span * DTMF_DOLPHIN_BUTTON_WIDTH) + 1, 0,
         (max_span * DTMF_DOLPHIN_BUTTON_WIDTH) + 1, canvas_height(canvas));
@@ -110,8 +114,8 @@ static void dtmf_dolphin_dialer_draw_callback(Canvas* canvas, void* _model) {
     string_cat_printf(
         output,
         "F1: %u Hz\nF2: %u Hz",
-        model->freq[0] ? (unsigned int) model->freq[0] : 0,
-        model->freq[1] ? (unsigned int) model->freq[1] : 0);
+        model->freq1 ? (unsigned int) model->freq1 : 0,
+        model->freq2 ? (unsigned int) model->freq2 : 0);
 
     canvas_set_font(canvas, FontSecondary);
     canvas_set_color(canvas, ColorBlack);
@@ -148,7 +152,6 @@ static bool dtmf_dolphin_dialer_process_up(DTMFDolphinDialer* dtmf_dolphin_diale
         dtmf_dolphin_dialer->view, (DTMFDolphinDialerModel * model) {
             if(model->row > 0) {
                 model->row--;
-                update_frequencies(model);
             }
             return true;
         });
@@ -159,13 +162,12 @@ static bool dtmf_dolphin_dialer_process_down(DTMFDolphinDialer* dtmf_dolphin_dia
     uint8_t max_rows = 0;
     uint8_t max_cols = 0;
     uint8_t max_span = 0;
-    dtmf_dolphin_tone_get_max_pos(&max_rows, &max_cols, &max_span, DTMF_DOLPHIN_TONE_BLOCK_DIALER);
+    dtmf_dolphin_tone_get_max_pos(&max_rows, &max_cols, &max_span);
 
     with_view_model(
         dtmf_dolphin_dialer->view, (DTMFDolphinDialerModel * model) {
             if(model->row < max_rows - 1) {
                 model->row++;
-                update_frequencies(model);
             }
             return true;
         });
@@ -177,7 +179,6 @@ static bool dtmf_dolphin_dialer_process_left(DTMFDolphinDialer* dtmf_dolphin_dia
         dtmf_dolphin_dialer->view, (DTMFDolphinDialerModel * model) {
             if(model->col > 0) {
                 model->col--;
-                update_frequencies(model);
             }
             return true;
         });
@@ -188,13 +189,12 @@ static bool dtmf_dolphin_dialer_process_right(DTMFDolphinDialer* dtmf_dolphin_di
     uint8_t max_rows = 0;
     uint8_t max_cols = 0;
     uint8_t max_span = 0;
-    dtmf_dolphin_tone_get_max_pos(&max_rows, &max_cols, &max_span, DTMF_DOLPHIN_TONE_BLOCK_DIALER);
+    dtmf_dolphin_tone_get_max_pos(&max_rows, &max_cols, &max_span);
 
     with_view_model(
         dtmf_dolphin_dialer->view, (DTMFDolphinDialerModel * model) {
             if(model->col < max_cols - 1) {
                 model->col++;
-                update_frequencies(model);
             }
             return true;
         });
@@ -207,9 +207,9 @@ static bool dtmf_dolphin_dialer_process_ok(DTMFDolphinDialer* dtmf_dolphin_diale
     with_view_model(
         dtmf_dolphin_dialer->view, (DTMFDolphinDialerModel * model) {
             if (event->type == InputTypePress) {
-                dtmf_dolphin_player_play_tones(model->freq);
+                dtmf_dolphin_audio_play_tones(model->freq1, model->freq2);
             } else if (event->type == InputTypeRelease) {
-                dtmf_dolphin_player_stop_tones();
+                dtmf_dolphin_audio_stop_tones();
             }
 
             return true;
@@ -228,8 +228,9 @@ DTMFDolphinDialer* dtmf_dolphin_dialer_alloc() {
         dtmf_dolphin_dialer->view, (DTMFDolphinDialerModel * model) {
             model->col = 0;
             model->row = 0;
-            model->freq = malloc(sizeof(float) * 2);
-            update_frequencies(model);
+            model->section = 0;
+            model->freq1 = 0.0;
+            model->freq2 = 0.0;
             return true;
         }
     );
@@ -243,12 +244,6 @@ DTMFDolphinDialer* dtmf_dolphin_dialer_alloc() {
 
 void dtmf_dolphin_dialer_free(DTMFDolphinDialer* dtmf_dolphin_dialer) {
     furi_assert(dtmf_dolphin_dialer);
-    with_view_model(
-        dtmf_dolphin_dialer->view, (DTMFDolphinDialerModel * model) {
-            free(model->freq);
-            return true;
-        }
-    );
     view_free(dtmf_dolphin_dialer->view);
     free(dtmf_dolphin_dialer);
 }

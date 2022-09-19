@@ -1,8 +1,6 @@
 #pragma once
 
 #include <gui/view.h>
-#include "../dtmf_dolphin_event.h"
-#include "../dtmf_dolphin_tone.h"
 #include "dtmf_dolphin_common.h"
 
 typedef struct DTMFDolphinDialer DTMFDolphinDialer;
