@@ -64,7 +64,7 @@ DTMFDolphinSceneData DTMFDolphinSceneDataBluebox = {
         {"0",     1300.0, 1500.0, {3, 1, 1}, 0, 0, 0},
         {"KP",    1100.0, 1700.0, {0, 3, 2}, 0, 0, 0},
         {"ST",    1500.0, 1700.0, {1, 3, 2}, 0, 0, 0},
-        {"2600",  2600.0,    0.0, {3, 3, 2}, 0, 0, 0},
+        {"2600",  2600.0,    0.0, {3, 2, 3}, 0, 0, 0},
     }
 };
 
@@ -73,10 +73,10 @@ DTMFDolphinSceneData DTMFDolphinSceneDataRedboxUS = {
     .block = DTMF_DOLPHIN_TONE_BLOCK_REDBOX_US,
     .tone_count = 4,
     .tones = {
-        {"Nickel",  1700.0, 2200.0, {0, 0, 4}, 1, 66, 0},
-        {"Dime",    1700.0, 2200.0, {1, 0, 4}, 2, 66, 66},
-        {"Quarter", 1700.0, 2200.0, {2, 0, 4}, 5, 33, 33},
-        {"Dollar",  1700.0, 2200.0, {3, 0, 4}, 1, 650, 0},
+        {"Nickel",  1700.0, 2200.0, {0, 0, 5}, 1, 66, 0},
+        {"Dime",    1700.0, 2200.0, {1, 0, 5}, 2, 66, 66},
+        {"Quarter", 1700.0, 2200.0, {2, 0, 5}, 5, 33, 33},
+        {"Dollar",  1700.0, 2200.0, {3, 0, 5}, 1, 650, 0},
     }
 };
 
@@ -95,9 +95,9 @@ DTMFDolphinSceneData DTMFDolphinSceneDataMisc = {
     .block = DTMF_DOLPHIN_TONE_BLOCK_MISC,
     .tone_count = 3,
     .tones = {
-        {"CCITT 11",   700.0, 1700.0, {0, 0, 4}, 0, 0, 0},
-        {"CCITT 12",   900.0, 1700.0, {1, 0, 4}, 0, 0, 0},
-        {"CCITT KP2", 1300.0, 1700.0, {2, 0, 4}, 0, 0, 0},
+        {"CCITT 11",   700.0, 1700.0, {0, 0, 5}, 0, 0, 0},
+        {"CCITT 12",   900.0, 1700.0, {1, 0, 5}, 0, 0, 0},
+        {"CCITT KP2", 1300.0, 1700.0, {2, 0, 5}, 0, 0, 0},
     }
 };
 
@@ -179,7 +179,7 @@ void dtmf_dolphin_tone_get_max_pos(uint8_t* max_rows, uint8_t* max_cols, uint8_t
         }
         tmp_rowspan[tones.pos.row] += tones.pos.span;
         if (tmp_rowspan[tones.pos.row] > max_span[0])
-            max_span[0] = max_span[tones.pos.row];
+            max_span[0] = tmp_rowspan[tones.pos.row];
     }
     max_rows[0]++;
     max_cols[0]++;

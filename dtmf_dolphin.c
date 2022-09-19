@@ -19,7 +19,6 @@ static void dtmf_dolphin_app_tick_event_callback(void* context) {
     furi_assert(context);
     DTMFDolphinApp* app = context;
 
-    // dtmf_dolphin_audio_handle_tick();
     scene_manager_handle_tick_event(app->scene_manager);
 }
 

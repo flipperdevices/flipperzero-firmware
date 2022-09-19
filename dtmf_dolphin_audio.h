@@ -10,8 +10,7 @@
 typedef struct {
     float cached_freq;
     size_t period;
-    size_t buffer_length;
-    float* sample_buffer;
+    float* lookup_table;
     uint16_t offset;
 } DTMFDolphinOsc;
 
@@ -21,7 +20,6 @@ typedef struct {
     uint8_t *buffer_buffer;
     uint16_t *sample_buffer;
     float volume;
-    bool playing;
     FuriMessageQueue *queue;
     DTMFDolphinOsc *osc1;
     DTMFDolphinOsc *osc2;

@@ -27,52 +27,66 @@ void dtmf_dolphin_audio_clear_samples(DTMFDolphinAudio* player) {
 }
 
 DTMFDolphinOsc* dtmf_dolphin_osc_alloc() {
-    DTMFDolphinOsc *osc = { 0 };
+    DTMFDolphinOsc *osc = malloc(sizeof(DTMFDolphinOsc));
     osc->cached_freq = 0;
     osc->offset = 0;
     osc->period = 0;
+    osc->lookup_table = NULL;
     return osc;
 }
 
 DTMFDolphinAudio* dtmf_dolphin_audio_alloc() {
-    DTMFDolphinAudio player;
-    player.buffer_length = SAMPLE_BUFFER_LENGTH;
-    player.half_buffer_length = SAMPLE_BUFFER_LENGTH / 2;
-    player.buffer_buffer = malloc(sizeof(uint8_t) * player.buffer_length);
-    player.sample_buffer = malloc(sizeof(uint16_t) * player.buffer_length);
-    player.osc1 = dtmf_dolphin_osc_alloc();
-    player.osc2 = dtmf_dolphin_osc_alloc();
-    player.playing = false;
-    player.volume = 2.0f;
-    player.queue = furi_message_queue_alloc(10, sizeof(DTMFDolphinCustomEvent));
-    dtmf_dolphin_audio_clear_samples(&player);
+    DTMFDolphinAudio *player = malloc(sizeof(DTMFDolphinAudio));
+    player->buffer_length = SAMPLE_BUFFER_LENGTH;
+    player->half_buffer_length = SAMPLE_BUFFER_LENGTH / 2;
+    player->sample_buffer = malloc(sizeof(uint16_t) * player->buffer_length);
+    player->osc1 = dtmf_dolphin_osc_alloc();
+    player->osc2 = dtmf_dolphin_osc_alloc();
+    player->volume = 1.0f;
+    player->queue = furi_message_queue_alloc(10, sizeof(DTMFDolphinCustomEvent));
+    dtmf_dolphin_audio_clear_samples(player);
 
-    return false;
+    return player;
 }
 
 size_t calc_waveform_period(float freq) {
     if (!freq) {
         return 0;
     }
-    // DMA Rate constant, thanks to Dr_Zlo
+    // DMA Rate calculation, thanks to Dr_Zlo
     float dma_rate = CPU_CLOCK_FREQ \
         / 2 \
         / DTMF_DOLPHIN_HAL_DMA_PRESCALER \
         / (DTMF_DOLPHIN_HAL_DMA_AUTORELOAD + 1);
 
-    return (uint16_t) (dma_rate / freq);
+    // Using a constant scaling modifier, which likely represents
+    // the combined system overhead and isr latency.
+    return (uint16_t) dma_rate * 2 / freq * 0.801923;
 }
 
-float sample_frame(DTMFDolphinOsc* osc, float freq) {
+void osc_generate_lookup_table(DTMFDolphinOsc* osc, float freq) {
+    if (osc->lookup_table != NULL) {
+        free(osc->lookup_table);
+    }
+    osc->offset = 0;
+    osc->cached_freq = freq;
+    osc->period = calc_waveform_period(freq);
+    if (!osc->period) {
+        osc->lookup_table = NULL;
+        return;
+    }
+    osc->lookup_table = malloc(sizeof(float) * osc->period);
+
+    for (size_t i = 0; i < osc->period; i++) {
+        osc->lookup_table[i] = sin(i * PERIOD_2_PI / osc->period) + 1;
+    }
+}
+
+float sample_frame(DTMFDolphinOsc* osc) {
     float frame = 0.0;
 
-    if (freq != osc->cached_freq || !osc->period) {
-        osc->cached_freq = freq;
-        osc->period = calc_waveform_period(freq);
-        osc->offset = 0;
-    }
     if (osc->period) {
-        frame = tanhf(sin(osc->offset * PERIOD_2_PI / osc->period) + 1);
+        frame = osc->lookup_table[osc->offset];
         osc->offset = (osc->offset + 1) % osc->period;
     }
 
@@ -83,20 +97,30 @@ void dtmf_dolphin_audio_free(DTMFDolphinAudio* player) {
     furi_message_queue_free(player->queue);
     dtmf_dolphin_osc_free(player->osc1);
     dtmf_dolphin_osc_free(player->osc2);
-    free(player->buffer_buffer);
     free(player->sample_buffer);
+    free(player);
+    current_player = NULL;
 }
 
 void dtmf_dolphin_osc_free(DTMFDolphinOsc* osc) {
-    UNUSED(osc);
-    // Nothing to free now, but keeping this here in case I reimplement caching
+    if (osc->lookup_table != NULL) {
+        free(osc->lookup_table);
+    }
+    free(osc);
 }
 
-bool generate_waveform(DTMFDolphinAudio* player, float freq1, float freq2, uint16_t buffer_index) {
+bool generate_waveform(DTMFDolphinAudio* player, uint16_t buffer_index) {
     uint16_t* sample_buffer_start = &player->sample_buffer[buffer_index];
 
     for (size_t i = 0; i < player->half_buffer_length; i++) {
-        float data = (sample_frame(player->osc1, freq1) / 2) + (sample_frame(player->osc2, freq2) / 2);
+        float data = 0;
+        if (player->osc2->period) {
+            data = \
+                (sample_frame(player->osc1) / 2) + \
+                (sample_frame(player->osc2) / 2);
+        } else {
+            data = (sample_frame(player->osc1));
+        }
         data *= player->volume;
         data *= UINT8_MAX / 2;  // scale -128..127
         data += UINT8_MAX / 2;  // to unsigned
@@ -109,7 +133,6 @@ bool generate_waveform(DTMFDolphinAudio* player, float freq1, float freq2, uint1
             data = 255;
         }
 
-        player->buffer_buffer[i] = data;
         sample_buffer_start[i] = data;
     }
 
@@ -119,8 +142,11 @@ bool generate_waveform(DTMFDolphinAudio* player, float freq1, float freq2, uint1
 bool dtmf_dolphin_audio_play_tones(float freq1, float freq2) {
     current_player = dtmf_dolphin_audio_alloc();
 
-    generate_waveform(current_player, freq1, freq2, 0);
-    generate_waveform(current_player, freq1, freq2, current_player->half_buffer_length);
+    osc_generate_lookup_table(current_player->osc1, freq1);
+    osc_generate_lookup_table(current_player->osc2, freq2);
+
+    generate_waveform(current_player, 0);
+    generate_waveform(current_player, current_player->half_buffer_length);
 
     dtmf_dolphin_speaker_init();
     dtmf_dolphin_dma_init((uint32_t)current_player->sample_buffer, current_player->buffer_length);
@@ -129,13 +155,10 @@ bool dtmf_dolphin_audio_play_tones(float freq1, float freq2) {
 
     dtmf_dolphin_dma_start();
     dtmf_dolphin_speaker_start();
-
     return true;
 }
 
 bool dtmf_dolphin_audio_stop_tones() {
-    current_player->playing = false;
-
     dtmf_dolphin_speaker_stop();
     dtmf_dolphin_dma_stop();
 
@@ -147,24 +170,19 @@ bool dtmf_dolphin_audio_stop_tones() {
 }
 
 bool dtmf_dolphin_audio_handle_tick() {
-    DTMFDolphinCustomEvent event;
+    bool handled = false;
 
-    if(furi_message_queue_get(current_player->queue, &event, FuriWaitForever) == FuriStatusOk) {
-        if(event.type == DTMFDolphinEventDMAHalfTransfer) {
-            generate_waveform(
-                current_player, 
-                (double) current_player->osc1->cached_freq, 
-                (double) current_player->osc2->cached_freq, 
-                0);
-            return true;
-        } else if (event.type == DTMFDolphinEventDMAFullTransfer) {
-            generate_waveform(
-                current_player, 
-                (double) current_player->osc1->cached_freq, 
-                (double) current_player->osc2->cached_freq, 
-                current_player->half_buffer_length);
-            return true;
+    if (current_player) {
+        DTMFDolphinCustomEvent event;
+        if(furi_message_queue_get(current_player->queue, &event, 250) == FuriStatusOk) {
+            if(event.type == DTMFDolphinEventDMAHalfTransfer) {
+                generate_waveform(current_player, 0);
+                handled = true;
+            } else if (event.type == DTMFDolphinEventDMAFullTransfer) {
+                generate_waveform(current_player, current_player->half_buffer_length);
+                handled = true;
+            }
         }
     }
-    return false;
+    return handled;
 }
