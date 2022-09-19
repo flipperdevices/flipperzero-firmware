@@ -17,6 +17,7 @@
 - Added latest changes to [faploader: more subsystem headers in API table #1742 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1742)
 - Latest changes from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) in changelog
 - Latest changes from OFW added too
+- 2045GMT Latest changes from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) in changelog
 
 <details>
   <summary><B>TO DO</b></summary><br/>
