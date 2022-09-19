@@ -165,15 +165,8 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
 - [Fix displaying LFRFID protocol names #1682 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1682)
 - [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)
-- [Fix Mifare Classic 4K reading of the last 8 sectors #1712 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1712)
 - [Keynote BT plugin: long press on OK to switch between Space and Retur… #1729 (By coded-with-claws)](https://github.com/flipperdevices/flipperzero-firmware/pull/1729)
-- [RFID: fix read info screen #1723 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1723)
-- [Show error popup when NFC chip is not init/disconnected #1722 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1722)
-- [dummy mode #1739 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1739)
-- [picopass se identify #1701 (By bettse/pcunning)](https://github.com/flipperdevices/flipperzero-firmware/pull/1701)
-- [Picopass plugin fixed #1742 (By bettse/pcunning)](https://github.com/flipperdevices/flipperzero-firmware/pull/1742)
 - [SD info: Add dynamic units and free % #1634 (By non-bin)](https://github.com/flipperdevices/flipperzero-firmware/pull/1634)
-- [faploader: more subsystem headers in API table #1742 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/1742)
 
 </details>
 
