@@ -25,8 +25,9 @@
   */
 
   .syntax unified
-	.cpu cortex-m4
-	.fpu softvfp
+	.arch armv7e-m
+	.arch_extension fp
+	.fpu vfpv4
 	.thumb
 
 .global	g_pfnVectors
