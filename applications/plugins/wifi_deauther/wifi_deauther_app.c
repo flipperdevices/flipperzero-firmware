@@ -1,5 +1,6 @@
 #include "wifi_deauther_app_i.h"
 
+#include <furi_hal_power.h>
 #include <furi.h>
 #include <furi_hal.h>
 
@@ -88,6 +89,7 @@ void wifi_deauther_app_free(WifideautherApp* app) {
 
 int32_t wifi_deauther_app(void* p) {
     furi_hal_power_enable_otg();
+    furi_delay_ms(600);
     UNUSED(p);
     WifideautherApp* wifi_deauther_app = wifi_deauther_app_alloc();
 
