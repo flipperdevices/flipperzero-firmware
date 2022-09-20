@@ -1,7 +1,5 @@
 ![Image](assets/dialer.jpg)
 
-| 
-
 ## DTMF Dolphin
 
 DTMF (Dual-Tone Multi-Frequency) dialer, Bluebox, and future Redbox.
