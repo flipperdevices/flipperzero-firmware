@@ -463,11 +463,10 @@ bool furi_hal_nfc_emulate_nfca(
                 if(callback) {
                     callback(buff_rx, buff_rx_len, buff_tx, &buff_tx_len, &data_type, context);
                 }
+                if(!rfalIsExtFieldOn()) {
+                    break;
+                }
                 if(buff_tx_len) {
-                    if(!rfalIsExtFieldOn()) {
-                        FURI_LOG_E(TAG, "Transmit requested but no external field present");
-                        break;
-                    }
                     if(buff_tx_len == UINT16_MAX) buff_tx_len = 0;
 
                     ReturnCode ret = rfalTransceiveBitsBlockingTx(
