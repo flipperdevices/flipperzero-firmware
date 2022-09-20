@@ -8,7 +8,7 @@
 
 #define TAG "MfClassicDict"
 
-#define NFC_MF_CLASSIC_KEY_LEN (13)
+#define NFC_MF_CLASSIC_KEY_LEN (12)
 
 struct MfClassicDict {
     Stream* stream;
@@ -56,7 +56,13 @@ MfClassicDict* mf_classic_dict_alloc(MfClassicDictType dict_type) {
         string_t next_line;
         string_init(next_line);
         while(true) {
-            if(!stream_read_line(dict->stream, next_line)) break;
+            if(!stream_read_line(dict->stream, next_line)) {
+                FURI_LOG_T(TAG, "No keys left in dict");
+                break;
+            }
+            string_strim(next_line);
+            FURI_LOG_T(
+                TAG, "Read line: %s, len: %d", string_get_cstr(next_line), string_size(next_line));
             if(string_get_char(next_line, 0) == '#') continue;
             if(string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
             dict->total_keys++;
