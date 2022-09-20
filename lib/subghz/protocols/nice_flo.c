@@ -149,8 +149,7 @@ bool subghz_protocol_encoder_nice_flo_deserialize(void* context, FlipperFormat* 
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        if (!subghz_protocol_encoder_nice_flo_get_upload(instance))
-            break;
+        if(!subghz_protocol_encoder_nice_flo_get_upload(instance)) break;
         instance->encoder.is_running = true;
 
         res = true;

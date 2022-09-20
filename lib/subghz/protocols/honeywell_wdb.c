@@ -162,8 +162,7 @@ bool subghz_protocol_encoder_honeywell_wdb_deserialize(
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        if (!subghz_protocol_encoder_honeywell_wdb_get_upload(instance))
-            break;
+        if(!subghz_protocol_encoder_honeywell_wdb_get_upload(instance)) break;
         instance->encoder.is_running = true;
 
         res = true;
