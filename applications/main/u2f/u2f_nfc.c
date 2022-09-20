@@ -91,7 +91,7 @@ static uint16_t
         memcpy(buff_tx, u2f_nfc->payload, max_resp_len);
         buff_tx[max_resp_len] = 0x61;
         uint16_t remaining_len = (u2f_nfc->payload_len - 2) - max_resp_len;
-        if(remaining_len >= 256) {
+        if(remaining_len >= max_resp_len) {
             buff_tx[max_resp_len + 1] = 0x00;
         } else {
             buff_tx[max_resp_len + 1] = remaining_len;
@@ -135,7 +135,7 @@ static bool nfc_callback(
         return true;
     }
 
-    uint16_t mtu = 256;
+    uint16_t mtu = 256 - 3; // 1 for PCB, 2 for EDC
 
     if(pcb == 0xA2 || pcb == 0xA3) {
         if(u2f_nfc->nfc_payload_len == 0) {
@@ -147,15 +147,15 @@ static bool nfc_callback(
             buff_tx[0] = 0x02 + u2f_nfc->nfc_block_number;
             u2f_nfc->nfc_payload_len = 0;
         } else {
-            buff_tx[0] = 0b0001001 + u2f_nfc->nfc_block_number;
+            buff_tx[0] = 0b00010010 + u2f_nfc->nfc_block_number;
         }
         memcpy(&buff_tx[1], &u2f_nfc->nfc_payload[u2f_nfc->nfc_payload_cursor], mtu);
         *buff_tx_len = (mtu + 1) * 8;
         u2f_nfc->nfc_payload_cursor += mtu;
+        u2f_nfc->nfc_block_number = !u2f_nfc->nfc_block_number;
         return true;
     }
 
-    u2f_nfc->nfc_block_number = !u2f_nfc->nfc_block_number;
     u2f_nfc->nfc_payload_len =
         u2f_callback(u2f_nfc, &buff_rx[1], (buff_rx_len - 1) / 8, u2f_nfc->nfc_payload);
 
@@ -172,6 +172,8 @@ static bool nfc_callback(
         *buff_tx_len = (u2f_nfc->nfc_payload_len + 1) * 8;
         u2f_nfc->nfc_payload_len = 0;
     }
+
+    u2f_nfc->nfc_block_number = !u2f_nfc->nfc_block_number;
 
     return true;
 }
