@@ -3,8 +3,10 @@ App(
     name="Basic applications for main menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
+        "clock_loader",
         "gpio",
         # "ibutton",
+        "ibutton_loader",
         "infrared",
         "lfrfid",
         "nfc",
