@@ -66,22 +66,18 @@ LOADER_AUTOSTART = ""
 
 FIRMWARE_APPS = {
     "default": [
-        "crypto_start",
         # Svc
         "basic_services",
         # Apps
-        "basic_apps",
-        "updater_app",
-        "storage_move_to_sd",
-        "archive",
+        "main_apps",
+        "system_apps",
         # Settings
-        "passport",
-        "system_settings",
-        "about",
-        # Plugins
-        "basic_plugins",
+        "settings_apps",
+        # Stock plugins - no longer built into fw, now they're .faps
+        # Yet you can still build them as a part of fw
+        # "basic_plugins",
         # Debug
-        "debug_apps",
+        # "debug_apps",
     ],
     "unit_tests": [
         "basic_services",
