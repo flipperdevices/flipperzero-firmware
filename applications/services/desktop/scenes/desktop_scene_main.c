@@ -86,11 +86,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
 
-        // case DesktopMainEventOpenGames:
-            // loader_show_game_menu();
-            // consumed = true;
-            // break;
-
         case DesktopMainEventOpenLockMenu:
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneLockMenu);
             consumed = true;
@@ -117,12 +112,8 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpenClock: {
-            // loader_start(desktop->loader, FLIPPER_APPS[0].name, NULL);
-            LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Main/Clock.fap"));
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
+			// it has its own error
+            LoaderStatus status = loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Main/Clock.fap"));
             consumed = true;
             break;
         }
@@ -233,12 +224,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpenSubRemote: {
-            loader_start(desktop->loader, FLIPPER_APPS[1].name, NULL);
-            // LoaderStatus status = loader_start(
-                // desktop->loader, "Applications", EXT_PATH("/apps/Main/SubGHz_Remote.fap"));
-            // if(status != LoaderStatusOk) {
-                // FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            // }
+            loader_start(desktop->loader, FLIPPER_APPS[2].name, NULL);
             consumed = true;
             break;
         }

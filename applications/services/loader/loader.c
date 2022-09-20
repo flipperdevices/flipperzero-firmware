@@ -1,7 +1,9 @@
 #include "applications.h"
 #include <furi.h>
+#include <furi_hal.h>
 #include "loader/loader.h"
 #include "loader_i.h"
+#include "applications/services/desktop/desktop_i.h"
 
 #define TAG "LoaderSrv"
 
@@ -53,6 +55,16 @@ static void loader_submenu_callback(void* context, uint32_t index) {
     UNUSED(index);
     uint32_t view_id = (uint32_t)context;
     view_dispatcher_switch_to_view(loader_instance->view_dispatcher, view_id);
+}
+
+static void loader_clock_callback(void* context, uint32_t index) {
+    UNUSED(index);
+	Desktop* desktop = desktop_alloc();
+	LoaderStatus status = loader_start(
+		desktop->loader, "Applications", EXT_PATH("/apps/Main/Clock.fap"));
+	if(status != LoaderStatusOk) {
+		FURI_LOG_E(TAG, "loader_start failed: %d", status);
+	}
 }
 
 static void loader_cli_print_usage() {
@@ -372,7 +384,14 @@ static void loader_free(Loader* instance) {
 static void loader_build_menu() {
     FURI_LOG_I(TAG, "Building main menu");
     size_t i;
-    for(i = 0; i < FLIPPER_APPS_COUNT; i++) {
+	menu_add_item(
+		loader_instance->primary_menu,
+		"Clock",
+		&A_Clock_14,
+		0,
+		loader_clock_callback,
+		(void*)LoaderMenuViewPlugins);
+    for(i = 1; i < FLIPPER_APPS_COUNT; i++) {
         menu_add_item(
             loader_instance->primary_menu,
             FLIPPER_APPS[i].name,
