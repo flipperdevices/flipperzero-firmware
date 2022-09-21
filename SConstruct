@@ -236,9 +236,18 @@ distenv.PhonyTarget(
 distenv.PhonyTarget(
     "debug_other",
     "${GDBPYCOM}",
-    GDBPYOPTS='-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" ',
+    GDBOPTS="${GDBOPTS_BASE}",
     GDBREMOTE="${OPENOCD_GDB_PIPE}",
+    GDBPYOPTS='-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" ',
 )
+
+distenv.PhonyTarget(
+    "debug_other_blackmagic",
+    "${GDBPYCOM}",
+    GDBOPTS="${GDBOPTS_BASE}  ${GDBOPTS_BLACKMAGIC}",
+    GDBREMOTE="$${BLACKMAGIC_ADDR}",
+)
+
 
 # Just start OpenOCD
 distenv.PhonyTarget(
