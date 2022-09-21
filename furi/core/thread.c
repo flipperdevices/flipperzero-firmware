@@ -535,5 +535,5 @@ void furi_thread_resume(FuriThreadId thread_id) {
 
 bool furi_thread_is_suspended(FuriThreadId thread_id) {
     TaskHandle_t hTask = (TaskHandle_t)thread_id;
-    return prvTaskIsTaskSuspended(hTask) == pdTRUE;
+    return eTaskGetState(hTask) == eSuspended;
 }
