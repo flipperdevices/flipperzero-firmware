@@ -425,11 +425,11 @@ int32_t calculator_app(void* p) {
 
             view_port_update(view_port);
         }
-    
+
         if(event.type == InputTypeLong) {
             switch(event.key) {
             case InputKeyOk:
-                if (calculator_state->position.x == 0 && calculator_state->position.y == 4) {
+                if(calculator_state->position.x == 0 && calculator_state->position.y == 4) {
                     if(calculator_state->textLength < MAX_TEXT_LENGTH) {
                         calculator_state->text[calculator_state->textLength++] = ')';
                         calculator_state->text[calculator_state->textLength] = '\0';

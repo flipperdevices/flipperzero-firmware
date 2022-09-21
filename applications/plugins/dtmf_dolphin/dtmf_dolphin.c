@@ -83,10 +83,10 @@ static void app_free(DTMFDolphinApp* app) {
     free(app);
 }
 
-int32_t dtmf_dolphin_app(void *p) {
+int32_t dtmf_dolphin_app(void* p) {
     UNUSED(p);
     DTMFDolphinApp* app = app_alloc();
-    
+
     view_dispatcher_run(app->view_dispatcher);
 
     app_free(app);

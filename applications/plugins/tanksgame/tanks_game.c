@@ -1181,7 +1181,7 @@ static void tanks_game_init_game(TanksState* const tanks_state, GameState type) 
 
 static bool
     tanks_game_collision(Point const next_step, bool shoot, TanksState const* const tanks_state) {
-    if((int8_t) next_step.x < 0 || (int8_t)  next_step.y < 0) {
+    if((int8_t)next_step.x < 0 || (int8_t)next_step.y < 0) {
         return true;
     }
 
@@ -1533,7 +1533,7 @@ static void tanks_game_process_game_step(TanksState* const tanks_state) {
 }
 
 int32_t tanks_game_app(void* p) {
-	UNUSED(p);
+    UNUSED(p);
     srand(DWT->CYCCNT);
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(TanksEvent));

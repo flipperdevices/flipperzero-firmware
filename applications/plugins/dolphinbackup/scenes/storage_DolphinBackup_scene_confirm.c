@@ -11,7 +11,8 @@ static void storage_DolphinBackup_scene_confirm_widget_callback(
     furi_assert(app);
     if(type == InputTypeShort) {
         if(result == GuiButtonTypeRight) {
-            view_dispatcher_send_custom_event(app->view_dispatcher, DolphinBackupCustomEventConfirm);
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, DolphinBackupCustomEventConfirm);
         } else if(result == GuiButtonTypeLeft) {
             view_dispatcher_send_custom_event(app->view_dispatcher, DolphinBackupCustomEventExit);
         }

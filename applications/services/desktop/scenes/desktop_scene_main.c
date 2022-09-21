@@ -112,7 +112,8 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpenClock: {
-            LoaderStatus status = loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Main/Clock.fap"));
+            LoaderStatus status =
+                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Main/Clock.fap"));
             consumed = true;
             break;
         }
@@ -169,38 +170,38 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpenSnake: {
-            LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/Snake.fap"));
+            LoaderStatus status =
+                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/Snake.fap"));
             consumed = true;
             break;
         }
         case DesktopMainEventOpen2048: {
-            LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/2048.fap"));
+            LoaderStatus status =
+                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/2048.fap"));
             consumed = true;
             break;
         }
         case DesktopMainEventOpenZombiez: {
-            LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/Zombiez.fap"));
+            LoaderStatus status =
+                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/Zombiez.fap"));
             consumed = true;
             break;
         }
         case DesktopMainEventOpenTetris: {
-            LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/Tetris.fap"));
+            LoaderStatus status =
+                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/Tetris.fap"));
             consumed = true;
             break;
         }
         case DesktopMainEventOpenDOOM: {
-            LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/DOOM.fap"));
+            LoaderStatus status =
+                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/DOOM.fap"));
             consumed = true;
             break;
         }
         case DesktopMainEventOpenDice: {
-            LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/Dice.fap"));
+            LoaderStatus status =
+                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/Dice.fap"));
             consumed = true;
             break;
         }

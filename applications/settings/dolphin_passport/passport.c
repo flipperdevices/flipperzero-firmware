@@ -19,16 +19,15 @@ static const Icon* const portrait_happy[7] = {
     &I_G0ku,
     &I_g0ku_1,
     &I_g0ku_2,
-    &I_g0ku_3
-	};
+    &I_g0ku_3};
 // static const Icon* const portrait_ok[MOODS_TOTAL] = {
-    // &I_passport_okay1_46x49,
-    // &I_passport_okay2_46x49,
-    // &I_passport_okay3_46x49};
+// &I_passport_okay1_46x49,
+// &I_passport_okay2_46x49,
+// &I_passport_okay3_46x49};
 // static const Icon* const portrait_bad[MOODS_TOTAL] = {
-    // &I_passport_bad1_46x49,
-    // &I_passport_bad2_46x49,
-    // &I_passport_bad3_46x49};
+// &I_passport_bad1_46x49,
+// &I_passport_bad2_46x49,
+// &I_passport_bad3_46x49};
 
 // static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy, portrait_ok, portrait_bad};
 static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy};
@@ -49,8 +48,7 @@ static const char* const moods[16] = {
     "Annoyed",
     "Upset",
     "Angry",
-    "Furious"
-};
+    "Furious"};
 
 static void input_callback(InputEvent* input, void* ctx) {
     FuriSemaphore* semaphore = ctx;
@@ -87,7 +85,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
     // multipass
     canvas_draw_icon(canvas, 0, 0, &I_passport_DB);
-    
+
     // portrait
     furi_assert((stats->level > 0) && (stats->level <= 30));
     uint16_t tmpLvl = 0;
@@ -98,7 +96,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     if(stats->level > 24) tmpLvl = 5;
     if(stats->level > 27) tmpLvl = 6;
     canvas_draw_icon(canvas, 11, 2, portraits[mood][tmpLvl]);
-   
+
     const char* my_name = furi_hal_version_get_name_ptr();
     snprintf(level_str, 12, "Level: %hu", stats->level);
     snprintf(xp_str, 12, "%lu/%lu", xp_above_last_levelup, xp_for_current_level);
@@ -114,7 +112,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 123 - xp_progress, 45, xp_progress + 1, 5);
     canvas_set_color(canvas, ColorBlack);
-    }
+}
 
 int32_t passport_app(void* p) {
     UNUSED(p);

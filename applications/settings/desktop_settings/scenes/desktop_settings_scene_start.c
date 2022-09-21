@@ -151,10 +151,10 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent sme)
             consumed = true;
             break;
         // case SCENE_EVENT_SELECT_FAVORITE_GAME:
-            // scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, 2);
-            // scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
-            // consumed = true;
-            // break;
+        // scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, 2);
+        // scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+        // consumed = true;
+        // break;
         case SCENE_EVENT_SELECT_PIN_SETUP:
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinMenu);
             consumed = true;
