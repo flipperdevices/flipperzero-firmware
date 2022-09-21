@@ -1,7 +1,6 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/elements.h>
-#include <storage/storage.h>
 
 #include "desktop_view_slideshow.h"
 #include "../desktop_i.h"
@@ -30,12 +29,6 @@ static void desktop_view_slideshow_draw(Canvas* canvas, void* model) {
     if(slideshow_is_loaded(m->slideshow)) {
         slideshow_draw(m->slideshow, canvas, 0, 0);
     }
-}
-
-static void desktop_view_slideshow_delete() {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_common_remove(storage, SLIDESHOW_FS_PATH);
-    furi_record_close(RECORD_STORAGE);
 }
 
 static bool desktop_view_slideshow_input(InputEvent* event, void* context) {
@@ -102,8 +95,6 @@ static void desktop_view_slideshow_enter(void* context) {
 
 static void desktop_view_slideshow_exit(void* context) {
     DesktopSlideshowView* instance = context;
-
-    desktop_view_slideshow_delete();
 
     furi_timer_stop(instance->timer);
     furi_timer_free(instance->timer);
