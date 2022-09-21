@@ -10,11 +10,11 @@ typedef enum {
 
 typedef struct {
     const FuriThreadCallback app;
-    char* name;
+    const char* name;
     const size_t stack_size;
     const Icon* icon;
     const FlipperApplicationFlag flags;
-    char* link;
+    const char* link;
 } FlipperApplication;
 
 typedef void (*FlipperOnStartHook)(void);
