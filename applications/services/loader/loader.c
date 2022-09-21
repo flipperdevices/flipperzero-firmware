@@ -150,7 +150,12 @@ void loader_cli_list(Cli* cli, string_t args, Loader* instance) {
     printf("Applications:\r\n");
     //printf("\t%s\r\n", "Clock");
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        printf("\t%s\r\n", FLIPPER_APPS[i].name);
+        if(strcmp(FLIPPER_APPS[i].link, "NULL") != 0) {
+            printf(
+                "\tFor %s, Use: Applications %s\r\n", FLIPPER_APPS[i].name, FLIPPER_APPS[i].link);
+        } else {
+            printf("\t%s\r\n", FLIPPER_APPS[i].name);
+        }
     }
 
     printf("Plugins:\r\n");
