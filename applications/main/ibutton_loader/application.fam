@@ -10,4 +10,5 @@ App(
     stack_size=int(1.5 * 1024),
     icon="A_iButton_14",
     order=60,
+	link="/ext/apps/Main/ibutton.fap",
 )

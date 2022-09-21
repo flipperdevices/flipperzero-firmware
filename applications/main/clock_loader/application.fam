@@ -7,4 +7,5 @@ App(
     stack_size=int(1.5 * 1024),
     icon="A_Clock_14",
     order=9,
+	link="/ext/apps/Main/Clock.fap",
 )
