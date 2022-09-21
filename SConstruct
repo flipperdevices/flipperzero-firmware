@@ -44,6 +44,8 @@ distenv = coreenv.Clone(
         "target extended-remote ${GDBREMOTE}",
         "-ex",
         "set confirm off",
+        "-ex",
+        "set pagination off",
     ],
     GDBOPTS_BLACKMAGIC=[
         "-ex",
