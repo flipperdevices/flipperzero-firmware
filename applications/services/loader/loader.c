@@ -58,13 +58,21 @@ static void loader_submenu_callback(void* context, uint32_t index) {
 }
 
 static void loader_clock_callback(void* context, uint32_t index) {
+    UNUSED(context);
     UNUSED(index);
-	Desktop* desktop = desktop_alloc();
-	LoaderStatus status = loader_start(
-		desktop->loader, "Applications", EXT_PATH("/apps/Main/Clock.fap"));
-	if(status != LoaderStatusOk) {
-		FURI_LOG_E(TAG, "loader_start failed: %d", status);
-	}
+    LoaderStatus status = loader_start(NULL, "Applications", EXT_PATH("/apps/Main/Clock.fap"));
+}
+
+static void loader_ibutton_callback(void* context, uint32_t index) {
+    UNUSED(context);
+    UNUSED(index);
+    LoaderStatus status = loader_start(NULL, "Applications", EXT_PATH("/apps/Main/ibutton.fap"));
+}
+
+static void loader_u2f_callback(void* context, uint32_t index) {
+    UNUSED(context);
+    UNUSED(index);
+    LoaderStatus status = loader_start(NULL, "Applications", EXT_PATH("/apps/Main/u2f.fap"));
 }
 
 static void loader_cli_print_usage() {
@@ -384,14 +392,14 @@ static void loader_free(Loader* instance) {
 static void loader_build_menu() {
     FURI_LOG_I(TAG, "Building main menu");
     size_t i;
-	menu_add_item(
-		loader_instance->primary_menu,
-		"Clock",
-		&A_Clock_14,
-		0,
-		loader_clock_callback,
-		(void*)LoaderMenuViewPlugins);
-    for(i = 1; i < FLIPPER_APPS_COUNT; i++) {
+    menu_add_item(
+        loader_instance->primary_menu,
+        "Clock",
+        &A_Clock_14,
+        0,
+        loader_clock_callback,
+        (void*)NULL);
+    for(i = 0; i < FLIPPER_APPS_COUNT; i++) {
         menu_add_item(
             loader_instance->primary_menu,
             FLIPPER_APPS[i].name,
@@ -409,6 +417,20 @@ static void loader_build_menu() {
             loader_submenu_callback,
             (void*)LoaderMenuViewPlugins);
     }
+    menu_add_item(
+        loader_instance->primary_menu,
+        "iButton",
+        &A_iButton_14,
+        i++,
+        loader_ibutton_callback,
+        (void*)NULL);
+    menu_add_item(
+        loader_instance->primary_menu,
+        "U2F",
+        &A_U2F_14,
+        i++,
+        loader_u2f_callback,
+        (void*)NULL);
     // if(FLIPPER_GAMES_COUNT != 0) {
         // menu_add_item(
             // loader_instance->primary_menu,
