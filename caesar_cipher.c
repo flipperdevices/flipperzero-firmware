@@ -25,16 +25,34 @@ typedef struct {
   TextInput* text_input;
   TextBox* text_box;
   char input[TEXT_BUFFER_SIZE];
+  char upper[TEXT_BUFFER_SIZE];
 } CaesarState;
 
+static void string_to_uppercase(const char* input, char* upper) {
+  int i;
+  for (i=0; input[i] != '\0'; i++) {
+    if (input[i] >= 'a' && input[i] <= 'z') {
+      upper[i] = input[i] - 32;
+    } else {
+      upper[i] = input[i];
+    }
+  }
+  upper[i] = '\0';
+}
+
 static void text_input_callback(void* ctx) {
-    const CaesarState* caesar_state = acquire_mutex((ValueMutex*)ctx, 25);
+    CaesarState* caesar_state = acquire_mutex((ValueMutex*)ctx, 25);
     FURI_LOG_D("caesar_cipher", "Input text: %s", caesar_state->input);
-    text_box_set_text(caesar_state->text_box, caesar_state->input);
+    // this is where we build the output.
+    //char upper[TEXT_BUFFER_SIZE];
+    string_to_uppercase(caesar_state->input, caesar_state->upper);
+    FURI_LOG_D("caesar_cipher", "Upper text: %s", caesar_state->upper);
+    text_box_set_text(caesar_state->text_box, caesar_state->upper);
     view_dispatcher_switch_to_view(caesar_state->view_dispatcher, 1);
 
     release_mutex((ValueMutex*)ctx, caesar_state);
 }
+
 
 static bool back_event_callback(void* ctx) {
     const CaesarState* caesar_state = acquire_mutex((ValueMutex*)ctx, 25);
