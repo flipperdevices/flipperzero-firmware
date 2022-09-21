@@ -9,10 +9,10 @@
 
 <b>Latest Updates:</b>
 
+- To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
 - Last Synched changes from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-09-21 06:54 GMT`
 - Last Synched changes from [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-09-21 18:12 GMT`
-- To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - Fixed crash without SD
 - Updated to [Quiet Frequency Analyzer (By Himura2la)](https://github.com/ClusterM/flipperzero-firmware/pull/1)
 - Clock.FAP, iButton.FAP and U2F.FAP loader apps and available as Favorites [Thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/336)
