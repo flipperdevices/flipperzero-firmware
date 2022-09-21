@@ -45,6 +45,8 @@ typedef enum {
 typedef struct {
   Field minefield[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
   TileType playfield[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
+  int cursor_cell_x;
+  int cursor_cell_y;
 } Minesweeper;
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -62,6 +64,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_set_font(canvas, FontPrimary);
     for (int y = 0; y < PLAYFIELD_HEIGHT; y++) {
       for (int x = 0; x < PLAYFIELD_WIDTH; x++) {
+        if ( x == minesweeper_state->cursor_cell_x && y == minesweeper_state->cursor_cell_y) {
+          canvas_invert_color(canvas);
+        }
         canvas_draw_xbm(
             canvas,
             x*TILE_HEIGHT, // x
@@ -69,15 +74,18 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             TILE_WIDTH,
             TILE_HEIGHT, 
             tile_uncleared_bits);
+        if ( x == minesweeper_state->cursor_cell_x && y == minesweeper_state->cursor_cell_y) {
+          canvas_invert_color(canvas);
+        }
       }
     }
     release_mutex((ValueMutex*)ctx, minesweeper_state);
 }
 
 
-//static void minesweeper_state_init(Minesweeper* const plugin_state) {
-//  
-//}
+static void minesweeper_state_init(Minesweeper* const plugin_state) {
+    plugin_state->cursor_cell_x = plugin_state->cursor_cell_y = 0;  
+}
 
 int32_t minesweeper_app(void* p) {
   UNUSED(p);
@@ -86,7 +94,7 @@ int32_t minesweeper_app(void* p) {
   
   Minesweeper* minesweeper_state = malloc(sizeof(Minesweeper));
   // setup
-  //minesweeper_state_init(minesweeper_state);
+  minesweeper_state_init(minesweeper_state);
   
   ValueMutex state_mutex;
   if (!init_mutex(&state_mutex, minesweeper_state, sizeof(minesweeper_state))) {
@@ -115,9 +123,29 @@ int32_t minesweeper_app(void* p) {
         if(event.input.type == InputTypePress) {  
           switch(event.input.key) {
             case InputKeyUp:
+              minesweeper_state->cursor_cell_y--;
+              if(minesweeper_state->cursor_cell_y < 0) {
+                 minesweeper_state->cursor_cell_y = 0;
+              }
+              break;
             case InputKeyDown:
+              minesweeper_state->cursor_cell_y++;
+              if(minesweeper_state->cursor_cell_y > PLAYFIELD_HEIGHT) {
+                 minesweeper_state->cursor_cell_y = PLAYFIELD_HEIGHT;
+              }
+              break;
             case InputKeyRight:
+              minesweeper_state->cursor_cell_x++;
+              if(minesweeper_state->cursor_cell_x > PLAYFIELD_WIDTH) {
+                 minesweeper_state->cursor_cell_x = PLAYFIELD_WIDTH;
+              }
+              break;
             case InputKeyLeft:
+              minesweeper_state->cursor_cell_x--;
+              if(minesweeper_state->cursor_cell_x < 0) {
+                 minesweeper_state->cursor_cell_x = 0;
+              }
+              break;
             case InputKeyOk:
               break;
             case InputKeyBack:
