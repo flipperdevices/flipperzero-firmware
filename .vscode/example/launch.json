@@ -13,7 +13,7 @@
                 "env": {
                     "PATH": "${workspaceFolder};${env:PATH}"
                 },
-                "command": "fbt get_blackmagic",
+                "command": "./fbt get_blackmagic",
                 "description": "Get Blackmagic device",
             }
         }
