@@ -54,7 +54,7 @@ void nfc_scene_mf_classic_keys_list_on_enter(void* context) {
                 AlignTop);
             popup_set_callback(nfc->popup, nfc_scene_mf_classic_keys_list_popup_callback);
             popup_set_context(nfc->popup, nfc);
-            popup_set_timeout(nfc->popup, 1500);
+            popup_set_timeout(nfc->popup, 3000);
             popup_enable_timeout(nfc->popup);
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
         }
@@ -64,7 +64,7 @@ void nfc_scene_mf_classic_keys_list_on_enter(void* context) {
             nfc->popup, "Failed to load dictionary", 64, 32, AlignCenter, AlignCenter);
         popup_set_callback(nfc->popup, nfc_scene_mf_classic_keys_list_popup_callback);
         popup_set_context(nfc->popup, nfc);
-        popup_set_timeout(nfc->popup, 1500);
+        popup_set_timeout(nfc->popup, 3000);
         popup_enable_timeout(nfc->popup);
         view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
     }

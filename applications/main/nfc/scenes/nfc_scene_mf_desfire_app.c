@@ -38,7 +38,7 @@ void nfc_scene_mf_desfire_app_on_enter(void* context) {
         popup_set_header(nfc->popup, "Empty card!", 55, 12, AlignLeft, AlignBottom);
         popup_set_callback(nfc->popup, nfc_scene_mf_desfire_popup_callback);
         popup_set_context(nfc->popup, nfc);
-        popup_set_timeout(nfc->popup, 1500);
+        popup_set_timeout(nfc->popup, 3000);
         popup_enable_timeout(nfc->popup);
         popup_set_text(nfc->popup, "No application\nfound.", 55, 15, AlignLeft, AlignTop);
         view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
