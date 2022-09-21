@@ -1,9 +1,7 @@
 #include "applications.h"
 #include <furi.h>
-#include <furi_hal.h>
 #include "loader/loader.h"
 #include "loader_i.h"
-#include "applications/services/desktop/desktop_i.h"
 
 #define TAG "LoaderSrv"
 
@@ -373,8 +371,6 @@ static void loader_free(Loader* instance) {
 
     menu_free(loader_instance->primary_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPrimary);
-    // submenu_free(loader_instance->games_menu);
-    // view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewGames);
     submenu_free(loader_instance->plugins_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPlugins);
     submenu_free(loader_instance->debug_menu);
@@ -431,16 +427,7 @@ static void loader_build_menu() {
         i++,
         loader_u2f_callback,
         (void*)NULL);
-    // if(FLIPPER_GAMES_COUNT != 0) {
-        // menu_add_item(
-            // loader_instance->primary_menu,
-            // "Games",
-            // &A_Games_14,
-            // i++,
-            // loader_submenu_callback,
-            // (void*)LoaderMenuViewGames);
-    // }
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && FLIPPER_DEBUG_APPS_COUNT != 0) {
         menu_add_item(
             loader_instance->primary_menu,
             "Debug Tools",
@@ -459,16 +446,7 @@ static void loader_build_menu() {
 }
 
 static void loader_build_submenu() {
-    // FURI_LOG_I(TAG, "Building games menu");
     size_t i;
-    // for(i = 0; i < FLIPPER_GAMES_COUNT; i++) {
-        // submenu_add_item(
-            // loader_instance->games_menu,
-            // FLIPPER_GAMES[i].name,
-            // i,
-            // loader_menu_callback,
-            // (void*)&FLIPPER_GAMES[i]);
-    // }
 
     FURI_LOG_I(TAG, "Building plugins menu");
     for(i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
@@ -505,13 +483,6 @@ void loader_show_menu() {
     furi_assert(loader_instance);
     furi_thread_flags_set(loader_instance->loader_thread, LOADER_THREAD_FLAG_SHOW_MENU);
 }
-
-// void loader_show_game_menu() {
-    // furi_assert(loader_instance);
-    // menu_set_selected_item(loader_instance->primary_menu, 10);
-    // view_dispatcher_switch_to_view(loader_instance->view_dispatcher, LoaderMenuViewGames);
-    // view_dispatcher_run(loader_instance->view_dispatcher);
-// }
 
 void loader_update_menu() {
     menu_reset(loader_instance->primary_menu);
