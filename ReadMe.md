@@ -19,6 +19,7 @@
 - Assets: Includes New Dolphin Animations: [Akira & Mad Scientist (By qqMajiKpp)]
 - Assets: Includes New Dolphin Animations: [Sharingan (By Haseo)]
 - Added [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
+- Assets: Includes New Dolphin Animations: [Lions Roar (By qqMajiKpp)]
 
 <details>
   <summary><B>TO DO</b></summary><br/>
