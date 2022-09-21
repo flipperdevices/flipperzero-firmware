@@ -17,10 +17,11 @@
 - Updated [Metronome (By panki27)](https://github.com/panki27/Metronome)
 - Added [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 - Updated [WiFi (Deauther) (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2)
-- Fixed delay issue for launching FAP from Main Menu
-- Added Clock.FAP Launching From Main Menu [By RogueMaster]
-- Added ibutton.FAP Launching From Main Menu [By RogueMaster]
-- Added u2f.FAP Launching From Main Menu [By RogueMaster]
+- Fixed delay issue for launching FAP from Main Menu 
+- Fixed SubGHz not showing
+- Added Clock.FAP Launching From Main Menu [By RogueMaster](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6dd38fac0d392f8b7588475c6fa9875f1d364a86)
+- Added ibutton.FAP Launching From Main Menu [By RogueMaster](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6dd38fac0d392f8b7588475c6fa9875f1d364a86)
+- Added u2f.FAP Launching From Main Menu [By RogueMaster](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6dd38fac0d392f8b7588475c6fa9875f1d364a86)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
