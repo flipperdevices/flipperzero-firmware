@@ -18,6 +18,7 @@
 - Clock.FAP, iButton.FAP and U2F.FAP loader apps and available as Favorites [Thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/336)
 - Assets: Includes New Dolphin Animations: [Akira & Mad Scientist (By qqMajiKpp)]
 - Assets: Includes New Dolphin Animations: [Sharingan (By Haseo)]
+- Added [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
@@ -203,6 +204,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - - With: [Keynote BT plugin: long press on OK to switch between Space and Retur… #1729 (By coded-with-claws)]
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
+- [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61) [12/24HR (By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/254) [Refactoring (By GMMan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/256)
 - [DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App)) `Req: ESP8266`
 - [Dolphin Backup (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Modified by RogueMaster
