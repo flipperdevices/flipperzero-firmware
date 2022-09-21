@@ -37,7 +37,7 @@ const WifideautherItem MenuItems[NUM_MENU_ITEMS] = {
     { "Scan", {"All", "SSIDs", "Stations"}, 3, {"scan", "scan aps", "scan stations"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP },
     { "Select", {"All", "SSIDs", "Stations"}, 3, {"select all", "select aps", "select stations"}, INPUT_ARGS, FOCUS_CONSOLE_END, NO_TIP },
     { "Deselect", {"All", "SSIDs", "Stations"}, 3, {"deselect all", "deselect aps", "deselect stations"}, INPUT_ARGS, FOCUS_CONSOLE_END, NO_TIP },
-    { "Show", {"All", "Selected"}, 2, {"show all", "show selected"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP },
+    { "Show", {"SSIDs", "Stations", "All", "Selected"}, 4, {"show ap", "show station", "show all", "show selected"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP },
     { "Attack", {"deauth", "deauthall", "beacon", "probe"}, 4, {"attack deauth", "attack deauthall", "attack beacon", "attack probe"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP },
     { "Settings", {"Get", "Remove AP", "Set SSID", "Set Pass", "Save"}, 5, {"get settings", "set webinterface false", "set ssid: pwned", "set password: deauther", "save settings"}, INPUT_ARGS, FOCUS_CONSOLE_END, NO_TIP },
     { "Sysinfo", {""}, 1, {"sysinfo"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP },

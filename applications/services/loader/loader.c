@@ -2,6 +2,7 @@
 #include <furi.h>
 #include "loader/loader.h"
 #include "loader_i.h"
+#include "applications/services/desktop/desktop_i.h"
 
 #define TAG "LoaderSrv"
 
@@ -53,6 +54,24 @@ static void loader_submenu_callback(void* context, uint32_t index) {
     UNUSED(index);
     uint32_t view_id = (uint32_t)context;
     view_dispatcher_switch_to_view(loader_instance->view_dispatcher, view_id);
+}
+
+static void loader_clock_callback(void* context, uint32_t index) {
+    UNUSED(context);
+    UNUSED(index);
+    LoaderStatus status = loader_start(NULL, "Applications", EXT_PATH("/apps/Main/Clock.fap"));
+}
+
+static void loader_ibutton_callback(void* context, uint32_t index) {
+    UNUSED(context);
+    UNUSED(index);
+    LoaderStatus status = loader_start(NULL, "Applications", EXT_PATH("/apps/Main/ibutton.fap"));
+}
+
+static void loader_u2f_callback(void* context, uint32_t index) {
+    UNUSED(context);
+    UNUSED(index);
+    LoaderStatus status = loader_start(NULL, "Applications", EXT_PATH("/apps/Main/u2f.fap"));
 }
 
 static void loader_cli_print_usage() {
@@ -142,6 +161,7 @@ void loader_cli_list(Cli* cli, string_t args, Loader* instance) {
     UNUSED(args);
     UNUSED(instance);
     printf("Applications:\r\n");
+    printf("\t%s\r\n", "Clock");
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_APPS[i].name);
     }
@@ -150,8 +170,10 @@ void loader_cli_list(Cli* cli, string_t args, Loader* instance) {
     for(size_t i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_PLUGINS[i].name);
     }
+    printf("\t%s\r\n", "iButton");
+    printf("\t%s\r\n", "U2F");
 
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && FLIPPER_DEBUG_APPS_COUNT!=0) {
         printf("Debug:\r\n");
         for(size_t i = 0; i < FLIPPER_DEBUG_APPS_COUNT; i++) {
             printf("\t%s\r\n", FLIPPER_DEBUG_APPS[i].name);
@@ -353,8 +375,6 @@ static void loader_free(Loader* instance) {
 
     menu_free(loader_instance->primary_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPrimary);
-    // submenu_free(loader_instance->games_menu);
-    // view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewGames);
     submenu_free(loader_instance->plugins_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPlugins);
     submenu_free(loader_instance->debug_menu);
@@ -372,6 +392,13 @@ static void loader_free(Loader* instance) {
 static void loader_build_menu() {
     FURI_LOG_I(TAG, "Building main menu");
     size_t i;
+    menu_add_item(
+        loader_instance->primary_menu,
+        "Clock",
+        &A_Clock_14,
+        0,
+        loader_clock_callback,
+        (void*)NULL);
     for(i = 0; i < FLIPPER_APPS_COUNT; i++) {
         menu_add_item(
             loader_instance->primary_menu,
@@ -390,16 +417,21 @@ static void loader_build_menu() {
             loader_submenu_callback,
             (void*)LoaderMenuViewPlugins);
     }
-    // if(FLIPPER_GAMES_COUNT != 0) {
-        // menu_add_item(
-            // loader_instance->primary_menu,
-            // "Games",
-            // &A_Games_14,
-            // i++,
-            // loader_submenu_callback,
-            // (void*)LoaderMenuViewGames);
-    // }
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+    menu_add_item(
+        loader_instance->primary_menu,
+        "iButton",
+        &A_iButton_14,
+        i++,
+        loader_ibutton_callback,
+        (void*)NULL);
+    menu_add_item(
+        loader_instance->primary_menu,
+        "U2F",
+        &A_U2F_14,
+        i++,
+        loader_u2f_callback,
+        (void*)NULL);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && FLIPPER_DEBUG_APPS_COUNT != 0) {
         menu_add_item(
             loader_instance->primary_menu,
             "Debug Tools",
@@ -418,16 +450,7 @@ static void loader_build_menu() {
 }
 
 static void loader_build_submenu() {
-    // FURI_LOG_I(TAG, "Building games menu");
     size_t i;
-    // for(i = 0; i < FLIPPER_GAMES_COUNT; i++) {
-        // submenu_add_item(
-            // loader_instance->games_menu,
-            // FLIPPER_GAMES[i].name,
-            // i,
-            // loader_menu_callback,
-            // (void*)&FLIPPER_GAMES[i]);
-    // }
 
     FURI_LOG_I(TAG, "Building plugins menu");
     for(i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
@@ -464,13 +487,6 @@ void loader_show_menu() {
     furi_assert(loader_instance);
     furi_thread_flags_set(loader_instance->loader_thread, LOADER_THREAD_FLAG_SHOW_MENU);
 }
-
-// void loader_show_game_menu() {
-    // furi_assert(loader_instance);
-    // menu_set_selected_item(loader_instance->primary_menu, 10);
-    // view_dispatcher_switch_to_view(loader_instance->view_dispatcher, LoaderMenuViewGames);
-    // view_dispatcher_run(loader_instance->view_dispatcher);
-// }
 
 void loader_update_menu() {
     menu_reset(loader_instance->primary_menu);
