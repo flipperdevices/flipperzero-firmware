@@ -13,15 +13,7 @@
 - Last Synched changes from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-09-21 06:55 GMT`
 - Last Synched changes from [OFW](https://github.com/flipperdevices/flipperzero-firmware): `2022-09-21 06:55 GMT`
 - To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
-- Archive: FAPs are now launchable from Archive [By RogueMaster], thanks @xMasterX for the suggestion
-- Updated [Metronome (By panki27)](https://github.com/panki27/Metronome)
-- Added [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
-- Updated [WiFi (Deauther) (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2)
-- Fixed delay issue for launching FAP from Main Menu 
-- Fixed SubGHz not showing
-- Added Clock.FAP Launching From Main Menu [By RogueMaster](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6dd38fac0d392f8b7588475c6fa9875f1d364a86)
-- Added ibutton.FAP Launching From Main Menu [By RogueMaster](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6dd38fac0d392f8b7588475c6fa9875f1d364a86)
-- Added u2f.FAP Launching From Main Menu [By RogueMaster](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6dd38fac0d392f8b7588475c6fa9875f1d364a86)
+- Attempting fix for crash without SD
 
 <details>
   <summary><B>TO DO</b></summary><br/>
