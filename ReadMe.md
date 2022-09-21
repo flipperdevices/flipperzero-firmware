@@ -10,8 +10,8 @@
 <b>Latest Updates:</b>
 
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
-- Last Synched changes from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-09-20 22:55 GMT`
-- Last Synched changes from [OFW](https://github.com/flipperdevices/flipperzero-firmware): `2022-09-20 22:55 GMT`
+- Last Synched changes from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware) in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-09-21 06:55 GMT`
+- Last Synched changes from [OFW](https://github.com/flipperdevices/flipperzero-firmware): `2022-09-21 06:55 GMT`
 - To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - Archive: FAPs are now launchable from Archive [By RogueMaster], thanks @xMasterX for the suggestion
 - Updated [Metronome (By panki27)](https://github.com/panki27/Metronome)
