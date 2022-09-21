@@ -25,19 +25,36 @@ typedef struct {
   TextInput* text_input;
   TextBox* text_box;
   char input[TEXT_BUFFER_SIZE];
-  char upper[TEXT_BUFFER_SIZE];
+  char output[(TEXT_BUFFER_SIZE*26) + (26)]; // linebreaks
 } CaesarState;
 
-static void string_to_uppercase(const char* input, char* upper) {
+static void string_to_uppercase(char* input) {
   int i;
   for (i=0; input[i] != '\0'; i++) {
     if (input[i] >= 'a' && input[i] <= 'z') {
-      upper[i] = input[i] - 32;
+      input[i] = input[i] - 32;
     } else {
-      upper[i] = input[i];
+      input[i] = input[i];
     }
   }
-  upper[i] = '\0';
+}
+
+static void build_output(char* input, char* output) {
+  int out = 0;
+  for ( int rot = 1; rot < 26; rot++) {
+    int in;
+    for(in = 0; input[in] != '\0'; in++){
+      if (input[in] >= 'A' && input[in] <= 'Z') {
+        output[out] = 65 + ( ((input[in] - 65) + rot ) % 26);
+      } else {
+        output[out] = input[in];
+      }
+      out++;
+    }
+    output[out]= '\n';
+    out++;
+  }
+  output[out]='\0';
 }
 
 static void text_input_callback(void* ctx) {
@@ -45,9 +62,10 @@ static void text_input_callback(void* ctx) {
     FURI_LOG_D("caesar_cipher", "Input text: %s", caesar_state->input);
     // this is where we build the output.
     //char upper[TEXT_BUFFER_SIZE];
-    string_to_uppercase(caesar_state->input, caesar_state->upper);
-    FURI_LOG_D("caesar_cipher", "Upper text: %s", caesar_state->upper);
-    text_box_set_text(caesar_state->text_box, caesar_state->upper);
+    string_to_uppercase(caesar_state->input);
+    FURI_LOG_D("caesar_cipher", "Upper text: %s", caesar_state->input);
+    build_output(caesar_state->input, caesar_state->output);
+    text_box_set_text(caesar_state->text_box, caesar_state->output);
     view_dispatcher_switch_to_view(caesar_state->view_dispatcher, 1);
 
     release_mutex((ValueMutex*)ctx, caesar_state);
