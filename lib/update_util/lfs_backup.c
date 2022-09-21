@@ -6,7 +6,7 @@
 #include <bt/bt_service/bt_keys_filename.h>
 #include <dolphin/helpers/dolphin_state_filename.h>
 #include <desktop/helpers/slideshow_filename.h>
-#include <desktop/desktop_settings/desktop_settings_filename.h>
+#include <desktop/desktop_settings_filename.h>
 #include <notification/notification_settings_filename.h>
 
 #define LFS_BACKUP_DEFAULT_LOCATION EXT_PATH(LFS_BACKUP_DEFAULT_FILENAME)
@@ -42,8 +42,7 @@ bool lfs_backup_create(Storage* storage, const char* destination) {
 
 bool lfs_backup_exists(Storage* storage, const char* source) {
     const char* final_source = source && strlen(source) ? source : LFS_BACKUP_DEFAULT_LOCATION;
-    FileInfo fi;
-    return storage_common_stat(storage, final_source, &fi) == FSE_OK;
+    return storage_common_stat(storage, final_source, NULL) == FSE_OK;
 }
 
 bool lfs_backup_unpack(Storage* storage, const char* source) {

@@ -34,6 +34,9 @@
 #include "phoenix_v2.h"
 #include "honeywell_wdb.h"
 #include "magellen.h"
+#include "intertechno_v3.h"
+#include "clemsa.h"
+#include "oregon2.h"
 
 /**
  * Registration by name SubGhzProtocol.
