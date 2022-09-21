@@ -148,7 +148,6 @@ void loader_cli_list(Cli* cli, string_t args, Loader* instance) {
     UNUSED(args);
     UNUSED(instance);
     printf("Applications:\r\n");
-    //printf("\t%s\r\n", "Clock");
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         if(strcmp(FLIPPER_APPS[i].link, "NULL") != 0) {
             printf(
@@ -162,8 +161,6 @@ void loader_cli_list(Cli* cli, string_t args, Loader* instance) {
     for(size_t i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_PLUGINS[i].name);
     }
-    //printf("\t%s\r\n", "iButton");
-    //printf("\t%s\r\n", "U2F");
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && FLIPPER_DEBUG_APPS_COUNT != 0) {
         printf("Debug:\r\n");
