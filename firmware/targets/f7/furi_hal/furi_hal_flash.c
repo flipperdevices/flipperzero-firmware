@@ -296,26 +296,29 @@ bool furi_hal_flash_erase(uint8_t page) {
     return true;
 }
 
-static inline bool furi_hal_flash_write_dword_internal(size_t address, uint64_t* data) {
+static inline void furi_hal_flash_write_dword_internal_async(size_t address, uint64_t* data) {
     /* Program first word */
     *(uint32_t*)address = (uint32_t)*data;
 
-    // Barrier to ensure programming is performed in 2 steps, in right order
-    // (independently of compiler optimization behavior)
+    /* Barrier to ensure programming is performed in 2 steps, in right order
+     (independently of compiler optimization behavior) */
     __ISB();
 
     /* Program second word */
     *(uint32_t*)(address + 4U) = (uint32_t)(*data >> 32U);
+}
+
+static inline void furi_hal_flash_write_dword_internal(size_t address, uint64_t* data) {
+    furi_hal_flash_write_dword_internal_async(address, data);
 
     /* Wait for last operation to be completed */
     furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT));
-    return true;
 }
 
 bool furi_hal_flash_write_dword(size_t address, uint64_t data) {
     furi_hal_flash_begin(false);
 
-    // Ensure that controller state is valid
+    /* Ensure that controller state is valid */
     furi_check(FLASH->SR == 0);
 
     /* Check the parameters */
@@ -326,7 +329,7 @@ bool furi_hal_flash_write_dword(size_t address, uint64_t data) {
     SET_BIT(FLASH->CR, FLASH_CR_PG);
 
     /* Do the thing */
-    furi_check(furi_hal_flash_write_dword_internal(address, &data));
+    furi_hal_flash_write_dword_internal(address, &data);
 
     /* If the program operation is completed, disable the PG or FSTPG Bit */
     CLEAR_BIT(FLASH->CR, FLASH_CR_PG);
@@ -350,32 +353,53 @@ bool furi_hal_flash_program_page(const uint8_t page, const uint8_t* data, uint16
 
     furi_hal_flash_begin(false);
 
-    // Ensure that controller state is valid
+    /* Ensure that controller state is valid */
     furi_check(FLASH->SR == 0);
 
     size_t page_start_address = furi_hal_flash_get_page_address(page);
+    size_t i_dwords = 0;
+
+    const uint16_t FAST_PROG_BLOCK_SIZE = 512;
+    const uint8_t DWORD_PROG_BLOCK_SIZE = 8;
+
+    SET_BIT(FLASH->CR, FLASH_CR_FSTPG);
+    /* Write as much data as we can in fast mode */
+    while(i_dwords <
+          (length / FAST_PROG_BLOCK_SIZE * FAST_PROG_BLOCK_SIZE / DWORD_PROG_BLOCK_SIZE)) {
+        /* Write single block data */
+        furi_hal_flash_write_dword_internal_async(
+            page_start_address + i_dwords * DWORD_PROG_BLOCK_SIZE,
+            (uint64_t*)(data + i_dwords * DWORD_PROG_BLOCK_SIZE));
+
+        if(++i_dwords % (FAST_PROG_BLOCK_SIZE / DWORD_PROG_BLOCK_SIZE) == 0) {
+            /* Wait for last operation to be completed */
+            furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT));
+        }
+    }
+    CLEAR_BIT(FLASH->CR, FLASH_CR_FSTPG);
 
     /* Set PG bit */
     SET_BIT(FLASH->CR, FLASH_CR_PG);
-    size_t i_dwords = 0;
-    for(i_dwords = 0; i_dwords < (length / 8); ++i_dwords) {
-        /* Do the thing */
-        size_t data_offset = i_dwords * 8;
-        furi_check(furi_hal_flash_write_dword_internal(
-            page_start_address + data_offset, (uint64_t*)&data[data_offset]));
+    if((length % FAST_PROG_BLOCK_SIZE) != 0) {
+        /* Write tail with dwords */
+        for(; i_dwords < (length / DWORD_PROG_BLOCK_SIZE); ++i_dwords) {
+            size_t data_offset = i_dwords * DWORD_PROG_BLOCK_SIZE;
+            furi_hal_flash_write_dword_internal(
+                page_start_address + data_offset, (uint64_t*)&data[data_offset]);
+        }
     }
-    if((length % 8) != 0) {
+
+    if((length % DWORD_PROG_BLOCK_SIZE) != 0) {
         /* there are more bytes, not fitting into dwords */
         uint64_t tail_data = 0;
-        size_t data_offset = i_dwords * 8;
-        for(int32_t tail_i = 0; tail_i < (length % 8); ++tail_i) {
-            tail_data |= (((uint64_t)data[data_offset + tail_i]) << (tail_i * 8));
+        size_t data_offset = i_dwords * DWORD_PROG_BLOCK_SIZE;
+        for(int32_t tail_i = 0; tail_i < (length % DWORD_PROG_BLOCK_SIZE); ++tail_i) {
+            tail_data |=
+                (((uint64_t)data[data_offset + tail_i]) << (tail_i * DWORD_PROG_BLOCK_SIZE));
         }
 
-        furi_check(
-            furi_hal_flash_write_dword_internal(page_start_address + data_offset, &tail_data));
+        furi_hal_flash_write_dword_internal(page_start_address + data_offset, &tail_data);
     }
-
     /* If the program operation is completed, disable the PG or FSTPG Bit */
     CLEAR_BIT(FLASH->CR, FLASH_CR_PG);
 
