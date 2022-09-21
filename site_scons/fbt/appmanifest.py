@@ -35,6 +35,7 @@ class FlipperApplication:
     stack_size: int = 2048
     icon: Optional[str] = None
     order: int = 0
+    link: Optional[str] = ""
     sdk_headers: List[str] = field(default_factory=list)
     # .fap-specific
     sources: List[str] = field(default_factory=lambda: ["*.c*"])
@@ -255,6 +256,7 @@ class ApplicationsCGenerator:
      .name = "{app.name}",
      .stack_size = {app.stack_size},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
+     .link = "{f"{app.link}" if app.link else "NULL"}",
      .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)} }}"""
 
     def generate(self):

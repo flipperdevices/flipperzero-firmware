@@ -41,37 +41,24 @@ static void loader_menu_callback(void* _ctx, uint32_t index) {
 
     furi_assert(application->app);
     furi_assert(application->name);
+    furi_assert(application->link);
 
-    if(!loader_lock(loader_instance)) {
-        FURI_LOG_E(TAG, "Loader is locked");
-        return;
+    if(strcmp(application->link, "NULL") != 0) {
+        LoaderStatus status = loader_start(NULL, "Applications", application->link);
+    } else {
+        if(!loader_lock(loader_instance)) {
+            FURI_LOG_E(TAG, "Loader is locked");
+            return;
+        }
+
+        loader_start_application(application, NULL);
     }
-
-    loader_start_application(application, NULL);
 }
 
 static void loader_submenu_callback(void* context, uint32_t index) {
     UNUSED(index);
     uint32_t view_id = (uint32_t)context;
     view_dispatcher_switch_to_view(loader_instance->view_dispatcher, view_id);
-}
-
-static void loader_clock_callback(void* context, uint32_t index) {
-    UNUSED(context);
-    UNUSED(index);
-    LoaderStatus status = loader_start(NULL, "Applications", EXT_PATH("/apps/Main/Clock.fap"));
-}
-
-static void loader_ibutton_callback(void* context, uint32_t index) {
-    UNUSED(context);
-    UNUSED(index);
-    LoaderStatus status = loader_start(NULL, "Applications", EXT_PATH("/apps/Main/ibutton.fap"));
-}
-
-static void loader_u2f_callback(void* context, uint32_t index) {
-    UNUSED(context);
-    UNUSED(index);
-    LoaderStatus status = loader_start(NULL, "Applications", EXT_PATH("/apps/Main/u2f.fap"));
 }
 
 static void loader_cli_print_usage() {
@@ -161,19 +148,24 @@ void loader_cli_list(Cli* cli, string_t args, Loader* instance) {
     UNUSED(args);
     UNUSED(instance);
     printf("Applications:\r\n");
-    printf("\t%s\r\n", "Clock");
+    //printf("\t%s\r\n", "Clock");
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        printf("\t%s\r\n", FLIPPER_APPS[i].name);
+        if(strcmp(FLIPPER_APPS[i].link, "NULL") != 0) {
+            printf(
+                "\tFor %s, Use: Applications %s\r\n", FLIPPER_APPS[i].name, FLIPPER_APPS[i].link);
+        } else {
+            printf("\t%s\r\n", FLIPPER_APPS[i].name);
+        }
     }
 
     printf("Plugins:\r\n");
     for(size_t i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_PLUGINS[i].name);
     }
-    printf("\t%s\r\n", "iButton");
-    printf("\t%s\r\n", "U2F");
+    //printf("\t%s\r\n", "iButton");
+    //printf("\t%s\r\n", "U2F");
 
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && FLIPPER_DEBUG_APPS_COUNT!=0) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && FLIPPER_DEBUG_APPS_COUNT != 0) {
         printf("Debug:\r\n");
         for(size_t i = 0; i < FLIPPER_DEBUG_APPS_COUNT; i++) {
             printf("\t%s\r\n", FLIPPER_DEBUG_APPS[i].name);
@@ -392,13 +384,6 @@ static void loader_free(Loader* instance) {
 static void loader_build_menu() {
     FURI_LOG_I(TAG, "Building main menu");
     size_t i;
-    menu_add_item(
-        loader_instance->primary_menu,
-        "Clock",
-        &A_Clock_14,
-        0,
-        loader_clock_callback,
-        (void*)NULL);
     for(i = 0; i < FLIPPER_APPS_COUNT; i++) {
         menu_add_item(
             loader_instance->primary_menu,
@@ -417,20 +402,6 @@ static void loader_build_menu() {
             loader_submenu_callback,
             (void*)LoaderMenuViewPlugins);
     }
-    menu_add_item(
-        loader_instance->primary_menu,
-        "iButton",
-        &A_iButton_14,
-        i++,
-        loader_ibutton_callback,
-        (void*)NULL);
-    menu_add_item(
-        loader_instance->primary_menu,
-        "U2F",
-        &A_U2F_14,
-        i++,
-        loader_u2f_callback,
-        (void*)NULL);
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && FLIPPER_DEBUG_APPS_COUNT != 0) {
         menu_add_item(
             loader_instance->primary_menu,
