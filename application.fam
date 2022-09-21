@@ -8,5 +8,7 @@ App(
         "gui",
     ],
     stack_size=2 * 1024,
+    fap_icon="caesar_cipher_icon",
+    fap_category="Misc",
     order=20,
 )
