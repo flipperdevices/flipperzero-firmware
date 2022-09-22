@@ -17,7 +17,6 @@
 - Added [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - Assets: Includes New Dolphin Animations: [Lions Roar (By qqMajiKpp)]
 - Actually updated to [Quiet Frequency Analyzer (By Himura2la)](https://github.com/ClusterM/flipperzero-firmware/pull/1)
-- Added PR [NFC Fix Mifare Classic #1769 (By alsacchi)](https://github.com/flipperdevices/flipperzero-firmware/pull/1769)
 - Added PR [Remove unused headers (In power.c) #1751 (By kowalski7cc)](https://github.com/flipperdevices/flipperzero-firmware/pull/1751)
 
 <details>
