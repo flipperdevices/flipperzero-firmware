@@ -11,6 +11,8 @@
 #define TILE_WIDTH 8
 #define TILE_HEIGHT 8
 
+#define MINECOUNT 27
+
 typedef enum {
     EventTypeTick,
     EventTypeKey,
@@ -22,7 +24,7 @@ typedef struct {
 } PluginEvent;
 
 typedef enum {
-    TileTypeUncleared,
+    TileTypeUncleared, // this HAS to be the first element so it gets assigned 0 for easier init :)
     TileTypeCleared,
     TileType0,
     TileType1,
@@ -38,8 +40,8 @@ typedef enum {
 } TileType;
 
 typedef enum {
-    FieldMine,
-    FieldEmpty
+    FieldEmpty, // <-- same goes for this
+    FieldMine
 } Field;
 
 typedef struct {
@@ -47,6 +49,7 @@ typedef struct {
   TileType playfield[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
   int cursor_cell_x;
   int cursor_cell_y;
+  bool game_started;
 } Minesweeper;
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -67,13 +70,23 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         if ( x == minesweeper_state->cursor_cell_x && y == minesweeper_state->cursor_cell_y) {
           canvas_invert_color(canvas);
         }
-        canvas_draw_xbm(
-            canvas,
-            x*TILE_HEIGHT, // x
-            8 + (y * TILE_WIDTH), // y
-            TILE_WIDTH,
-            TILE_HEIGHT, 
-            tile_uncleared_bits);
+        if (minesweeper_state->minefield[x][y] == FieldMine) {
+          canvas_draw_xbm(
+              canvas,
+              x*TILE_HEIGHT, // x
+              8 + (y * TILE_WIDTH), // y
+              TILE_WIDTH,
+              TILE_HEIGHT, 
+              tile_mine_bits);
+        } else {
+          canvas_draw_xbm(
+              canvas,
+              x*TILE_HEIGHT, // x
+              8 + (y * TILE_WIDTH), // y
+              TILE_WIDTH,
+              TILE_HEIGHT, 
+              tile_uncleared_bits);
+        }
         if ( x == minesweeper_state->cursor_cell_x && y == minesweeper_state->cursor_cell_y) {
           canvas_invert_color(canvas);
         }
@@ -82,9 +95,31 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     release_mutex((ValueMutex*)ctx, minesweeper_state);
 }
 
+static void setup_playfield(Minesweeper* minesweeper_state) {
+  int mines_left = MINECOUNT;
+  while(mines_left > 0) {
+    int rand_x = rand() % PLAYFIELD_WIDTH;
+    int rand_y = rand() % PLAYFIELD_HEIGHT;
+    // make sure first guess isn't a mine
+    if (minesweeper_state->minefield[rand_x][rand_y] == FieldEmpty &&
+       (minesweeper_state->cursor_cell_x != rand_x && minesweeper_state->cursor_cell_y != rand_y )) { 
+       minesweeper_state->minefield[rand_x][rand_y] = FieldMine;
+       mines_left--;
+    }
+  }
+}
 
 static void minesweeper_state_init(Minesweeper* const plugin_state) {
     plugin_state->cursor_cell_x = plugin_state->cursor_cell_y = 0;  
+    plugin_state->game_started = false;
+    for (int y = 0; y < PLAYFIELD_HEIGHT; y++) {
+      for (int x = 0; x < PLAYFIELD_WIDTH; x++){
+          plugin_state->minefield[x][y] = FieldEmpty;
+          plugin_state->playfield[x][y] = TileTypeUncleared;
+      }
+    }
+    //plugin_state->minefield = {0};
+    //plugin_state->playfield = {0};
 }
 
 int32_t minesweeper_app(void* p) {
@@ -147,6 +182,10 @@ int32_t minesweeper_app(void* p) {
               }
               break;
             case InputKeyOk:
+              if (!minesweeper_state->game_started) {
+                setup_playfield(minesweeper_state);
+                minesweeper_state->game_started = true;
+              }
               break;
             case InputKeyBack:
               // Exit the plugin
