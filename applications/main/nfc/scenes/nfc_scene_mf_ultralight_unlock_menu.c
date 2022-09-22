@@ -2,7 +2,7 @@
 
 enum SubmenuIndex {
     SubmenuIndexMfUlUnlockMenuManual,
-    SubmenuIndexMfUlUnlockMenuAmeebo,
+    SubmenuIndexMfUlUnlockMenuAmiibo,
     SubmenuIndexMfUlUnlockMenuXiaomi,
 };
 
@@ -20,19 +20,19 @@ void nfc_scene_mf_ultralight_unlock_menu_on_enter(void* context) {
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfUltralightUnlockMenu);
     submenu_add_item(
         submenu,
-        "Enter Password Manually",
+        "Enter PWD Manually",
         SubmenuIndexMfUlUnlockMenuManual,
         nfc_scene_mf_ultralight_unlock_menu_submenu_callback,
         nfc);
     submenu_add_item(
         submenu,
-        "Auth As Ameebo",
-        SubmenuIndexMfUlUnlockMenuAmeebo,
+        "Read Amiibo Figure",
+        SubmenuIndexMfUlUnlockMenuAmiibo,
         nfc_scene_mf_ultralight_unlock_menu_submenu_callback,
         nfc);
     submenu_add_item(
         submenu,
-        "Auth As Xiaomi",
+        "Read Xaomi Air Filter",
         SubmenuIndexMfUlUnlockMenuXiaomi,
         nfc_scene_mf_ultralight_unlock_menu_submenu_callback,
         nfc);
@@ -49,8 +49,8 @@ bool nfc_scene_mf_ultralight_unlock_menu_on_event(void* context, SceneManagerEve
             nfc->dev->dev_data.mf_ul_data.auth_method = MfUltralightAuthMethodManual;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightKeyInput);
             consumed = true;
-        } else if(event.event == SubmenuIndexMfUlUnlockMenuAmeebo) {
-            nfc->dev->dev_data.mf_ul_data.auth_method = MfUltralightAuthMethodAmeebo;
+        } else if(event.event == SubmenuIndexMfUlUnlockMenuAmiibo) {
+            nfc->dev->dev_data.mf_ul_data.auth_method = MfUltralightAuthMethodAmiibo;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockWarn);
             consumed = true;
         } else if(event.event == SubmenuIndexMfUlUnlockMenuXiaomi) {

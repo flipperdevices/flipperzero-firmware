@@ -30,7 +30,7 @@
 
 typedef enum {
     MfUltralightAuthMethodManual,
-    MfUltralightAuthMethodAmeebo,
+    MfUltralightAuthMethodAmiibo,
     MfUltralightAuthMethodXiaomi,
 } MfUltralightAuthMethod;
 
