@@ -18,6 +18,7 @@
 - Assets: Includes New Dolphin Animations: [Lions Roar (By qqMajiKpp)]
 - Actually updated to [Quiet Frequency Analyzer (By Himura2la)](https://github.com/ClusterM/flipperzero-firmware/pull/1)
 - Added PR [NFC Fix Mifare Classic #1769 (By alsacchi)](https://github.com/flipperdevices/flipperzero-firmware/pull/1769)
+- Added PR [Remove unused headers (In power.c) #1751 (By kowalski7cc)](https://github.com/flipperdevices/flipperzero-firmware/pull/1751)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
