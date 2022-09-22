@@ -11,8 +11,8 @@
 
 - To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
-- Last Synched/Checked [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-09-22 17:15 GMT`
-- Last Synched/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-09-22 17:15 GMT`
+- Last Synched/Checked [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-09-22 17:15 GMT`/`2022-09-22 17:50 GMT`
+- Last Synched/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-09-22 17:15 GMT`/`2022-09-22 17:50 GMT`
 - Assets: Includes New Dolphin Animations: [Sharingan (By Haseo)]
 - Added [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - Assets: Includes New Dolphin Animations: [Lions Roar (By qqMajiKpp)]
