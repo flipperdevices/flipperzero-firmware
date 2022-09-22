@@ -100,7 +100,7 @@ static void mf_classic_dict_str_to_int(string_t key_str, uint64_t* key_int) {
     for(uint8_t i = 0; i < 12; i += 2) {
         args_char_to_hex(
             string_get_char(key_str, i), string_get_char(key_str, i + 1), &key_byte_tmp);
-        *key_int |= (uint8_t)key_byte_tmp << 8 * (5 - i / 2);
+        *key_int |= (uint64_t)key_byte_tmp << 8 * (5 - i / 2);
     }
 }
 
