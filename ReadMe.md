@@ -17,6 +17,7 @@
 - Added [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - Assets: Includes New Dolphin Animations: [Lions Roar (By qqMajiKpp)]
 - Actually updated to [Quiet Frequency Analyzer (By Himura2la)](https://github.com/ClusterM/flipperzero-firmware/pull/1)
+- Added PR [NFC Fix Mifare Classic #1769 (By alsacchi)](https://github.com/flipperdevices/flipperzero-firmware/pull/1769)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
@@ -169,6 +170,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)(https://github.com/flipperdevices/flipperzero-firmware/pull/1729)
 - [SD info: Add dynamic units and free % #1634 (By non-bin)](https://github.com/flipperdevices/flipperzero-firmware/pull/1634)
 - [SubGhz: fix config menu #1748 (By skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1748)
+- [NFC Fix Mifare Classic #1769 (By alsacchi)](https://github.com/flipperdevices/flipperzero-firmware/pull/1769)
 
 </details>
 
