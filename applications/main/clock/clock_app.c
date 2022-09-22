@@ -192,6 +192,6 @@ int32_t clock_app(void* p) {
     view_port_free(view_port);
     furi_message_queue_free(plugin_state->event_queue);
     furi_mutex_free(plugin_state->mutex);
-
+    free(plugin_state);
     return 0;
 }
