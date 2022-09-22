@@ -201,6 +201,15 @@ static void setup_playfield(Minesweeper* minesweeper_state) {
   }
 }
 
+static void place_flag(Minesweeper* minesweeper_state) {
+  if (minesweeper_state->playfield[minesweeper_state->cursor_x][minesweeper_state->cursor_y] == TileTypeUncleared) {
+    minesweeper_state->playfield[minesweeper_state->cursor_x][minesweeper_state->cursor_y] = TileTypeFlag;
+  } else if (minesweeper_state->playfield[minesweeper_state->cursor_x][minesweeper_state->cursor_y] == TileTypeFlag) {
+    minesweeper_state->playfield[minesweeper_state->cursor_x][minesweeper_state->cursor_y] = TileTypeUncleared;
+  }
+}
+
+
 static void play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y) {
   if (minesweeper_state->playfield[cursor_x][cursor_y] != TileTypeUncleared) {
       // we're on an already uncovered field
@@ -237,7 +246,6 @@ static void play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y
             continue;
           }
           if ( auto_x >= 0 && auto_x < PLAYFIELD_WIDTH && auto_y >= 0 && auto_y < PLAYFIELD_HEIGHT) {
-
             if (minesweeper_state->playfield[auto_x][auto_y] == TileTypeUncleared) {
               play_move(minesweeper_state, auto_x, auto_y);
             }
@@ -333,6 +341,21 @@ int32_t minesweeper_app(void* p) {
               processing = false;
               break;
           }
+        } else if (event.input.type == InputTypeLong) {
+          // hold events
+          switch(event.input.key) {
+            case InputKeyUp:
+            case InputKeyDown:
+            case InputKeyRight:
+            case InputKeyLeft:
+              break;
+            case InputKeyOk:
+              place_flag(minesweeper_state);
+              break;
+            case InputKeyBack:
+              processing = false;
+              break;
+          } 
         }
       } 
     } else {
