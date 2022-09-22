@@ -18,18 +18,6 @@
 #define RSSI_SCALE 2
 #define TRIGGER_STEP 1
 
-static const NotificationSequence sequence_hw_blink = {
-    &message_blink_start_10,
-    &message_blink_set_color_cyan,
-    &message_do_not_reset,
-    NULL,
-};
-
-static const NotificationSequence sequence_hw_blink_stop = {
-    &message_blink_stop,
-    NULL,
-};
-
 typedef enum {
     SubGhzFrequencyAnalyzerStatusIDLE,
 } SubGhzFrequencyAnalyzerStatus;
@@ -40,11 +28,9 @@ struct SubGhzFrequencyAnalyzer {
     SubGhzFrequencyAnalyzerCallback callback;
     void* context;
     bool locked;
-    uint8_t feedback_level; // 0 - no feedback, 1 - vibro only, 2 - vibro and sound
     float rssi_last;
     uint32_t frequency_last;
     uint32_t frequency_last_vis;
-    NotificationApp* notifications;
 };
 
 typedef struct {
@@ -53,7 +39,6 @@ typedef struct {
     float rssi;
     float rssi_last;
     float trigger;
-    uint8_t feedback_level;
 } SubGhzFrequencyAnalyzerModel;
 
 void subghz_frequency_analyzer_set_callback(
@@ -143,21 +128,6 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel
     }
     canvas_draw_str(canvas, 9, 42, buffer);
 
-    switch(model->feedback_level) {
-    case 2:
-        canvas_draw_icon(canvas, 128 - 8 - 1, 1, &I_Volup_8x6);
-        break;
-    case 1:
-        canvas_draw_icon(canvas, 128 - 8 - 1, 1, &I_Voldwn_6x6);
-        break;
-    case 0:
-        canvas_draw_icon(canvas, 128 - 8 - 1, 1, &I_Voldwn_6x6);
-        canvas_set_color(canvas, ColorWhite);
-        canvas_draw_box(canvas, 128 - 2 - 1 - 2, 1, 2, 6);
-        canvas_set_color(canvas, ColorBlack);
-        break;
-    }
-
     // Buttons hint
     elements_button_left(canvas, "T-");
     elements_button_right(canvas, "T+");
@@ -191,16 +161,6 @@ bool subghz_frequency_analyzer_input(InputEvent* event, void* context) {
         need_redraw = true;
     }
 
-    if(event->type == InputTypePress && event->key == InputKeyDown) {
-        if(instance->feedback_level == 0) {
-            instance->feedback_level = 2;
-        } else {
-            instance->feedback_level--;
-        }
-        FURI_LOG_D(TAG, "feedback_level = %d", instance->feedback_level);
-        need_redraw = true;
-    }
-
     if(need_redraw) {
         SubGhzFrequencyAnalyzer* instance = context;
         with_view_model(
@@ -209,7 +169,6 @@ bool subghz_frequency_analyzer_input(InputEvent* event, void* context) {
                 model->frequency_last = instance->frequency_last;
                 model->trigger =
                     subghz_frequency_analyzer_worker_get_trigger_level(instance->worker);
-                model->feedback_level = instance->feedback_level;
                 return true;
             });
     }
@@ -234,8 +193,14 @@ void subghz_frequency_analyzer_pair_callback(void* context, uint32_t frequency, 
     SubGhzFrequencyAnalyzer* instance = context;
 
     if((rssi == 0.f) && (instance->locked)) {
-        notification_message(instance->notifications, &sequence_hw_blink);
+        if(instance->callback) {
+            instance->callback(SubGhzCustomEventSceneAnalyzerUnlock, instance->context);
+        }
         instance->frequency_last_vis = instance->frequency_last;
+    } else if((rssi != 0.f) && (!instance->locked)) {
+        if(instance->callback) {
+            instance->callback(SubGhzCustomEventSceneAnalyzerLock, instance->context);
+        }
     }
 
     if((rssi != 0.f) && (frequency != 0)) {
@@ -245,19 +210,6 @@ void subghz_frequency_analyzer_pair_callback(void* context, uint32_t frequency, 
         if(!instance->locked) {
             // Triggered!
             instance->rssi_last = rssi;
-            notification_message(instance->notifications, &sequence_hw_blink_stop);
-
-            switch(instance->feedback_level) {
-            case 1: // 1 - only vibro
-                notification_message(instance->notifications, &sequence_single_vibro);
-                break;
-            case 2: // 2 - vibro and beep
-                notification_message(instance->notifications, &sequence_success);
-                break;
-            default: // 0 - no feedback
-                break;
-            }
-
             FURI_LOG_D(TAG, "triggered");
         }
         // Update values
@@ -275,7 +227,6 @@ void subghz_frequency_analyzer_pair_callback(void* context, uint32_t frequency, 
             model->frequency = frequency;
             model->frequency_last = instance->frequency_last_vis;
             model->trigger = subghz_frequency_analyzer_worker_get_trigger_level(instance->worker);
-            model->feedback_level = instance->feedback_level;
             return true;
         });
 }
@@ -283,10 +234,6 @@ void subghz_frequency_analyzer_pair_callback(void* context, uint32_t frequency, 
 void subghz_frequency_analyzer_enter(void* context) {
     furi_assert(context);
     SubGhzFrequencyAnalyzer* instance = context;
-
-    // Notifications
-    instance->notifications = furi_record_open(RECORD_NOTIFICATION);
-    notification_message(instance->notifications, &sequence_hw_blink);
 
     //Start worker
     instance->worker = subghz_frequency_analyzer_worker_alloc(instance->context);
@@ -318,23 +265,22 @@ void subghz_frequency_analyzer_exit(void* context) {
     furi_assert(context);
     SubGhzFrequencyAnalyzer* instance = context;
 
-    // Stop blinking
-    notification_message(instance->notifications, &sequence_hw_blink_stop);
-
-    // Stop worker
+    //Stop worker
     if(subghz_frequency_analyzer_worker_is_running(instance->worker)) {
         subghz_frequency_analyzer_worker_stop(instance->worker);
     }
     subghz_frequency_analyzer_worker_free(instance->worker);
 
-    furi_record_close(RECORD_NOTIFICATION);
+    with_view_model(
+        instance->view, (SubGhzFrequencyAnalyzerModel * model) {
+            model->rssi = 0;
+            return true;
+        });
 }
 
 SubGhzFrequencyAnalyzer* subghz_frequency_analyzer_alloc() {
     SubGhzFrequencyAnalyzer* instance = malloc(sizeof(SubGhzFrequencyAnalyzer));
     furi_assert(instance);
-
-    instance->feedback_level = 2;
 
     // View allocation and configuration
     instance->view = view_alloc();
@@ -345,6 +291,12 @@ SubGhzFrequencyAnalyzer* subghz_frequency_analyzer_alloc() {
     view_set_input_callback(instance->view, subghz_frequency_analyzer_input);
     view_set_enter_callback(instance->view, subghz_frequency_analyzer_enter);
     view_set_exit_callback(instance->view, subghz_frequency_analyzer_exit);
+
+    with_view_model(
+        instance->view, (SubGhzFrequencyAnalyzerModel * model) {
+            model->rssi = 0;
+            return true;
+        });
 
     return instance;
 }
