@@ -240,6 +240,7 @@ static void setup_playfield(Minesweeper* minesweeper_state) {
     minesweeper_state->flags_set = 0;
     minesweeper_state->game_started_tick = furi_get_tick();
     minesweeper_state->game_started = false;
+    minesweeper_state->showing_dialog = false;
   }
 }
 
@@ -275,7 +276,6 @@ static bool game_lost(Minesweeper* minesweeper_state) {
 
   DialogMessageButton choice = dialog_message_show(dialogs, message);
   dialog_message_free(message);
-  minesweeper_state->showing_dialog = false;
   furi_record_close(RECORD_NOTIFICATION);
 
   return choice == DialogMessageButtonCenter;
@@ -307,7 +307,7 @@ static bool game_won(Minesweeper* minesweeper_state) {
 
   DialogMessageButton choice = dialog_message_show(dialogs, message);
   dialog_message_free(message);
-  minesweeper_state->showing_dialog = false;
+  //minesweeper_state->showing_dialog = false;
   string_clear(tempStr);
   string_reset(tempStr);
   furi_record_close(RECORD_DIALOGS);
@@ -404,6 +404,12 @@ int32_t minesweeper_app(void* p) {
   for (bool processing = true; processing;) {
     FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
     Minesweeper* minesweeper_state = (Minesweeper*)acquire_mutex_block(&state_mutex);
+    if (minesweeper_state->showing_dialog) {
+      // this should not happen.
+      //release_mutex(&state_mutex, minesweeper_state);
+      processing = false;
+      //continue;
+    }
     if(event_status == FuriStatusOk) {
       // press events
       if(event.type == EventTypeKey) {
