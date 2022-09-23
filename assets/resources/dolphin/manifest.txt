@@ -239,6 +239,13 @@ Min level: 1
 Max level: 30
 Weight: 2
 
+Name: L1_Dino3_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 2
+
 Name: Kuronons_Cyberdyne_128x64
 Min butthurt: 0
 Max butthurt: 14
@@ -485,13 +492,6 @@ Max level: 30
 Weight: 1
 
 Name: Kuronons_BlackFlags_You_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 1
-
-Name: L1_Dino2_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
