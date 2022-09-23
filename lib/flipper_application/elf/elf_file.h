@@ -23,6 +23,7 @@ typedef struct {
     uint32_t mmap_entry_count;
     ELFMemoryMapEntry* mmap_entries;
     ELFDebugLinkInfo debug_link_info;
+    off_t entry;
 } ELFDebugInfo;
 
 typedef enum {
@@ -49,8 +50,6 @@ void elf_file_pre_run(ELFFile* elf);
 int32_t elf_file_run(ELFFile* elf_file, void* args);
 
 void elf_file_post_run(ELFFile* elf);
-
-off_t elf_file_get_entry(ELFFile* elf_file);
 
 const ElfApiInterface* elf_file_get_api_interface(ELFFile* elf_file);
 

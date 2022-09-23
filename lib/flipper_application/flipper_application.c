@@ -8,7 +8,6 @@ struct FlipperApplication {
     FlipperApplicationManifest manifest;
     ELFFile* elf;
     FuriThread* thread;
-    off_t entry;
 };
 
 /* For debugger access to app state */
@@ -81,7 +80,6 @@ FlipperApplicationLoadStatus flipper_application_map_to_memory(FlipperApplicatio
 
     switch(status) {
     case ELFFileLoadStatusSuccess:
-        app->entry = elf_file_get_entry(app->elf);
         elf_file_init_debug_info(app->elf, &app->state);
         return FlipperApplicationLoadStatusSuccess;
     case ELFFileLoadStatusNoFreeMemory:

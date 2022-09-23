@@ -745,15 +745,14 @@ void elf_file_post_run(ELFFile* elf) {
     elf_file_call_section_list(elf, ".fini_array", true);
 }
 
-off_t elf_file_get_entry(ELFFile* elf) {
-    return elf->entry;
-}
-
 const ElfApiInterface* elf_file_get_api_interface(ELFFile* elf_file) {
     return elf_file->api_interface;
 }
 
 void elf_file_init_debug_info(ELFFile* elf, ELFDebugInfo* debug_info) {
+    // set entry
+    debug_info->entry = elf->entry;
+
     // copy debug info
     memcpy(&debug_info->debug_link_info, &elf->debug_link_info, sizeof(ELFDebugLinkInfo));
 
