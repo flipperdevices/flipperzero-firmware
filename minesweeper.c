@@ -57,6 +57,7 @@ typedef struct {
   int flags_set;
   bool game_started;
   bool showing_dialog;
+  uint32_t game_started_tick;
 } Minesweeper;
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -81,7 +82,18 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, string_get_cstr(tempStr));
     string_clear(tempStr);
-    
+    int seconds = 0;
+    int minutes = 0; 
+    if (minesweeper_state->game_started) {
+      uint32_t ticks_elapsed = furi_get_tick() - minesweeper_state->game_started_tick;
+      seconds = (int) ticks_elapsed / furi_kernel_get_tick_frequency();
+      minutes = (int) seconds / 60;
+      seconds = seconds % 60;
+    }
+    string_printf(tempStr, "%01d:%02d", minutes, seconds);
+    canvas_draw_str_aligned(canvas, 128, 0, AlignRight, AlignTop, string_get_cstr(tempStr));
+    string_clear(tempStr);
+
     for (int y = 0; y < PLAYFIELD_HEIGHT; y++) {
       for (int x = 0; x < PLAYFIELD_WIDTH; x++) {
         if ( x == minesweeper_state->cursor_x && y == minesweeper_state->cursor_y) {
@@ -226,6 +238,7 @@ static void setup_playfield(Minesweeper* minesweeper_state) {
     minesweeper_state->mines_left = MINECOUNT;
     minesweeper_state->fields_cleared = 0;
     minesweeper_state->flags_set = 0;
+    minesweeper_state->game_started_tick = furi_get_tick();
   }
 }
 
