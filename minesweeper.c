@@ -6,6 +6,7 @@
 
 #include <notification/notification_messages.h>
 #include <dialogs/dialogs.h>
+#include <m-string.h>
 
 #include "assets.h"
 
@@ -14,7 +15,7 @@
 #define TILE_WIDTH 8
 #define TILE_HEIGHT 8
 
-#define MINECOUNT 12
+#define MINECOUNT 24
 
 typedef enum {
     EventTypeTick,
@@ -27,7 +28,7 @@ typedef struct {
 } PluginEvent;
 
 typedef enum {
-  TileType0, // this HAS to be in order, then 
+  TileType0, // this HAS to be in order, for hint assignment to be ez pz
   TileType1,
   TileType2,
   TileType3,
@@ -51,9 +52,10 @@ typedef struct {
   TileType playfield[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
   int cursor_x;
   int cursor_y;
-  bool game_started;
   int mines_left;
   int fields_cleared;
+  int flags_set;
+  bool game_started;
   bool showing_dialog;
 } Minesweeper;
 
@@ -73,7 +75,13 @@ static void render_callback(Canvas* const canvas, void* ctx) {
       release_mutex((ValueMutex*)ctx, minesweeper_state);
       return;
     }
-    canvas_set_font(canvas, FontPrimary);
+    string_t tempStr;
+    string_init(tempStr);
+    string_printf(tempStr, "Mines: %d", MINECOUNT - minesweeper_state->flags_set);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, string_get_cstr(tempStr));
+    string_clear(tempStr);
+    
     for (int y = 0; y < PLAYFIELD_HEIGHT; y++) {
       for (int x = 0; x < PLAYFIELD_WIDTH; x++) {
         if ( x == minesweeper_state->cursor_x && y == minesweeper_state->cursor_y) {
@@ -194,6 +202,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         }
       }
     }
+    string_clear(tempStr);
     release_mutex((ValueMutex*)ctx, minesweeper_state);
 }
 
@@ -216,14 +225,17 @@ static void setup_playfield(Minesweeper* minesweeper_state) {
     }
     minesweeper_state->mines_left = MINECOUNT;
     minesweeper_state->fields_cleared = 0;
+    minesweeper_state->flags_set = 0;
   }
 }
 
 static void place_flag(Minesweeper* minesweeper_state) {
   if (minesweeper_state->playfield[minesweeper_state->cursor_x][minesweeper_state->cursor_y] == TileTypeUncleared) {
     minesweeper_state->playfield[minesweeper_state->cursor_x][minesweeper_state->cursor_y] = TileTypeFlag;
+    minesweeper_state->flags_set++;
   } else if (minesweeper_state->playfield[minesweeper_state->cursor_x][minesweeper_state->cursor_y] == TileTypeFlag) {
     minesweeper_state->playfield[minesweeper_state->cursor_x][minesweeper_state->cursor_y] = TileTypeUncleared;
+    minesweeper_state->flags_set--;
   }
 }
 
