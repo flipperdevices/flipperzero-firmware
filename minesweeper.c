@@ -281,15 +281,25 @@ static bool game_lost(Minesweeper* minesweeper_state) {
 }
 
 static bool game_won(Minesweeper* minesweeper_state) {
-  NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION); 
   DialogsApp *dialogs = furi_record_open(RECORD_DIALOGS);
+
+  minesweeper_state->showing_dialog = true;
+
+  string_t tempStr;
+  string_init(tempStr);
+
+  int seconds = 0;
+  int minutes = 0; 
+  uint32_t ticks_elapsed = furi_get_tick() - minesweeper_state->game_started_tick;
+  seconds = (int) ticks_elapsed / furi_kernel_get_tick_frequency();
+  minutes = (int) seconds / 60;
+  seconds = seconds % 60;
 
   DialogMessage* message = dialog_message_alloc();
   const char* header_text = "Game won!";
-  const char* message_text = "You cleared the minefield!";
-
+  string_printf(tempStr, "Minefield cleared in %01d:%02d", minutes, seconds);
   dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
-  dialog_message_set_text(message, message_text, 64, 32, AlignCenter, AlignCenter);
+  dialog_message_set_text(message, string_get_cstr(tempStr), 64, 32, AlignCenter, AlignCenter);
   dialog_message_set_buttons(message, NULL, "Play again", NULL);
   // TODO: create icon
   dialog_message_set_icon(message, NULL, 72, 17);
@@ -297,8 +307,9 @@ static bool game_won(Minesweeper* minesweeper_state) {
   DialogMessageButton choice = dialog_message_show(dialogs, message);
   dialog_message_free(message);
   minesweeper_state->showing_dialog = false;
-  notification_message(notifications, &sequence_reset_vibro);
-  furi_record_close(RECORD_NOTIFICATION);
+  string_clear(tempStr);
+  string_reset(tempStr);
+  furi_record_close(RECORD_DIALOGS);
   return choice == DialogMessageButtonCenter; 
 }
 
