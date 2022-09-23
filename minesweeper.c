@@ -15,7 +15,7 @@
 #define TILE_WIDTH 8
 #define TILE_HEIGHT 8
 
-#define MINECOUNT 24
+#define MINECOUNT 20
 
 typedef enum {
     EventTypeTick,
@@ -239,6 +239,7 @@ static void setup_playfield(Minesweeper* minesweeper_state) {
     minesweeper_state->fields_cleared = 0;
     minesweeper_state->flags_set = 0;
     minesweeper_state->game_started_tick = furi_get_tick();
+    minesweeper_state->game_started = false;
   }
 }
 
@@ -265,8 +266,8 @@ static bool game_lost(Minesweeper* minesweeper_state) {
   dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
   dialog_message_set_text(message, message_text, 64, 32, AlignCenter, AlignCenter);
   dialog_message_set_buttons(message, NULL, "Play again", NULL);
-  // TODO: create icon
-  dialog_message_set_icon(message, NULL, 72, 17);
+
+  dialog_message_set_icon(message, NULL, 0, 10);
 
   notification_message(notifications, &sequence_set_vibro_on);
   furi_delay_ms(200);
