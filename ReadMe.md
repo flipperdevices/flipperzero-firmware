@@ -22,6 +22,7 @@
 - Assets: Includes New Dolphin Animations: [Calcifier & Last Unicorn (By NeonKodama)]
 - Assets: Includes New Dolphin Animations: [Jiji Milk (By NeonKodama)]
 - Assets: Includes New Dolphin Animations: [Kam3Ham3Ha (By RogueMaster)]
+- Assets: Includes New Dolphin Animations: [M3gamanZ3r0 (By RogueMaster)]
 
 <details>
   <summary><B>TO DO</b></summary><br/>
