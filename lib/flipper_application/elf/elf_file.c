@@ -1,12 +1,28 @@
-#include "flipper_application_i.h"
-#include <furi.h>
+#include <elf.h>
+#include "elf_file.h"
+#include "elf_file_i.h"
+#include "elf_api_interface.h"
 
-#define TAG "fapp-i"
+#define TAG "elf"
 
 #define ELF_NAME_BUFFER_LEN 32
-#define SECTION_OFFSET(e, n) (e.section_table + n * sizeof(Elf32_Shdr))
+#define SECTION_OFFSET(e, n) (e->section_table + n * sizeof(Elf32_Shdr))
 #define IS_FLAGS_SET(v, m) ((v & m) == m)
 #define RESOLVER_THREAD_YIELD_STEP 30
+
+#define TRAMPOLINE_CODE_SIZE 6
+
+/**
+ldr r12, [pc, #2]
+bx r12
+*/
+const uint8_t trampoline_code_little_endian[TRAMPOLINE_CODE_SIZE] =
+    {0xdf, 0xf8, 0x02, 0xc0, 0x60, 0x47};
+
+typedef struct {
+    uint8_t code[TRAMPOLINE_CODE_SIZE];
+    uint32_t addr;
+} __attribute__((packed)) JMPTrampoline;
 
 /**************************************************************************************************/
 /********************************************* Caches *********************************************/
@@ -30,81 +46,75 @@ static void address_cache_put(AddressCache_t cache, int symEntry, Elf32_Addr sym
 /********************************************** ELF ***********************************************/
 /**************************************************************************************************/
 
-static bool elf_read_string_from_offset(FlipperApplication* fap, off_t offset, string_t name) {
+static bool elf_read_string_from_offset(ELFFile* elf, off_t offset, string_t name) {
     bool result = false;
 
-    off_t old = storage_file_tell(fap->fd);
+    off_t old = storage_file_tell(elf->fd);
 
     do {
-        if(!storage_file_seek(fap->fd, offset, true)) break;
+        if(!storage_file_seek(elf->fd, offset, true)) break;
 
         char buffer[ELF_NAME_BUFFER_LEN + 1];
         buffer[ELF_NAME_BUFFER_LEN] = 0;
 
         while(true) {
-            uint16_t read = storage_file_read(fap->fd, buffer, ELF_NAME_BUFFER_LEN);
+            uint16_t read = storage_file_read(elf->fd, buffer, ELF_NAME_BUFFER_LEN);
             string_cat_str(name, buffer);
             if(strlen(buffer) < ELF_NAME_BUFFER_LEN) {
                 result = true;
                 break;
             }
 
-            if(storage_file_get_error(fap->fd) != FSE_OK || read == 0) break;
+            if(storage_file_get_error(elf->fd) != FSE_OK || read == 0) break;
         }
 
     } while(false);
-    storage_file_seek(fap->fd, old, true);
+    storage_file_seek(elf->fd, old, true);
 
     return result;
 }
 
-static bool elf_read_section_name(FlipperApplication* fap, off_t offset, string_t name) {
-    return elf_read_string_from_offset(fap, fap->elf.section_table_strings + offset, name);
+static bool elf_read_section_name(ELFFile* elf, off_t offset, string_t name) {
+    return elf_read_string_from_offset(elf, elf->section_table_strings + offset, name);
 }
 
-static bool elf_read_symbol_name(FlipperApplication* fap, off_t offset, string_t name) {
-    return elf_read_string_from_offset(fap, fap->elf.symbol_table_strings + offset, name);
+static bool elf_read_symbol_name(ELFFile* elf, off_t offset, string_t name) {
+    return elf_read_string_from_offset(elf, elf->symbol_table_strings + offset, name);
 }
 
-static bool elf_read_section_header(
-    FlipperApplication* fap,
-    size_t section_idx,
-    Elf32_Shdr* section_header) {
-    off_t offset = SECTION_OFFSET(fap->elf, section_idx);
-    return storage_file_seek(fap->fd, offset, true) &&
-           storage_file_read(fap->fd, section_header, sizeof(Elf32_Shdr)) == sizeof(Elf32_Shdr);
+static bool elf_read_section_header(ELFFile* elf, size_t section_idx, Elf32_Shdr* section_header) {
+    off_t offset = SECTION_OFFSET(elf, section_idx);
+    return storage_file_seek(elf->fd, offset, true) &&
+           storage_file_read(elf->fd, section_header, sizeof(Elf32_Shdr)) == sizeof(Elf32_Shdr);
 }
 
-static bool elf_read_section(
-    FlipperApplication* fap,
-    size_t section_idx,
-    Elf32_Shdr* section_header,
-    string_t name) {
-    if(!elf_read_section_header(fap, section_idx, section_header)) {
+static bool
+    elf_read_section(ELFFile* elf, size_t section_idx, Elf32_Shdr* section_header, string_t name) {
+    if(!elf_read_section_header(elf, section_idx, section_header)) {
         return false;
     }
 
-    if(section_header->sh_name && !elf_read_section_name(fap, section_header->sh_name, name)) {
+    if(section_header->sh_name && !elf_read_section_name(elf, section_header->sh_name, name)) {
         return false;
     }
 
     return true;
 }
 
-static bool elf_read_symbol(FlipperApplication* e, int n, Elf32_Sym* sym, string_t name) {
+static bool elf_read_symbol(ELFFile* elf, int n, Elf32_Sym* sym, string_t name) {
     bool success = false;
-    off_t old = storage_file_tell(e->fd);
-    off_t pos = e->elf.symbol_table + n * sizeof(Elf32_Sym);
-    if(storage_file_seek(e->fd, pos, true) &&
-       storage_file_read(e->fd, sym, sizeof(Elf32_Sym)) == sizeof(Elf32_Sym)) {
+    off_t old = storage_file_tell(elf->fd);
+    off_t pos = elf->symbol_table + n * sizeof(Elf32_Sym);
+    if(storage_file_seek(elf->fd, pos, true) &&
+       storage_file_read(elf->fd, sym, sizeof(Elf32_Sym)) == sizeof(Elf32_Sym)) {
         if(sym->st_name)
-            success = elf_read_symbol_name(e, sym->st_name, name);
+            success = elf_read_symbol_name(elf, sym->st_name, name);
         else {
             Elf32_Shdr shdr;
-            success = elf_read_section(e, sym->st_shndx, &shdr, name);
+            success = elf_read_section(elf, sym->st_shndx, &shdr, name);
         }
     }
-    storage_file_seek(e->fd, old, true);
+    storage_file_seek(elf->fd, old, true);
     return success;
 }
 
@@ -120,14 +130,14 @@ static ELFSection* elf_section_of(ELFFile* elf, int index) {
     return NULL;
 }
 
-static Elf32_Addr elf_address_of(FlipperApplication* e, Elf32_Sym* sym, const char* sName) {
+static Elf32_Addr elf_address_of(ELFFile* elf, Elf32_Sym* sym, const char* sName) {
     if(sym->st_shndx == SHN_UNDEF) {
         Elf32_Addr addr = 0;
-        if(e->api_interface->resolver_callback(sName, &addr)) {
+        if(elf->api_interface->resolver_callback(sName, &addr)) {
             return addr;
         }
     } else {
-        ELFSection* symSec = elf_section_of(&e->elf, sym->st_shndx);
+        ELFSection* symSec = elf_section_of(elf, sym->st_shndx);
         if(symSec) {
             return ((Elf32_Addr)symSec->data) + sym->st_value;
         }
@@ -151,20 +161,6 @@ static const char* elf_reloc_type_to_str(int symt) {
     }
 #undef STRCASE
 }
-
-#define TRAMPOLINE_CODE_SIZE 6
-
-/**
-ldr r12, [pc, #2]
-bx r12
-*/
-const uint8_t trampoline_code_little_endian[TRAMPOLINE_CODE_SIZE] =
-    {0xdf, 0xf8, 0x02, 0xc0, 0x60, 0x47};
-
-typedef struct {
-    uint8_t code[TRAMPOLINE_CODE_SIZE];
-    uint32_t addr;
-} __attribute__((packed)) JMPTrampoline;
 
 static JMPTrampoline* elf_create_trampoline(Elf32_Addr addr) {
     JMPTrampoline* trampoline = malloc(sizeof(JMPTrampoline));
@@ -264,12 +260,12 @@ static bool elf_relocate_symbol(ELFFile* elf, Elf32_Addr relAddr, int type, Elf3
     return true;
 }
 
-static bool elf_relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection* s) {
+static bool elf_relocate(ELFFile* elf, Elf32_Shdr* h, ELFSection* s) {
     if(s->data) {
         Elf32_Rel rel;
         size_t relEntries = h->sh_size / sizeof(rel);
         size_t relCount;
-        (void)storage_file_seek(e->fd, h->sh_offset, true);
+        (void)storage_file_seek(elf->fd, h->sh_offset, true);
         FURI_LOG_D(TAG, " Offset   Info     Type             Name");
 
         int relocate_result = true;
@@ -282,7 +278,7 @@ static bool elf_relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection* s) {
                 furi_delay_tick(1);
             }
 
-            if(storage_file_read(e->fd, &rel, sizeof(Elf32_Rel)) != sizeof(Elf32_Rel)) {
+            if(storage_file_read(elf->fd, &rel, sizeof(Elf32_Rel)) != sizeof(Elf32_Rel)) {
                 FURI_LOG_E(TAG, "  reloc read fail");
                 string_clear(symbol_name);
                 return false;
@@ -294,10 +290,10 @@ static bool elf_relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection* s) {
             int relType = ELF32_R_TYPE(rel.r_info);
             Elf32_Addr relAddr = ((Elf32_Addr)s->data) + rel.r_offset;
 
-            if(!address_cache_get(e->elf.relocation_cache, symEntry, &symAddr)) {
+            if(!address_cache_get(elf->relocation_cache, symEntry, &symAddr)) {
                 Elf32_Sym sym;
                 string_reset(symbol_name);
-                if(!elf_read_symbol(e, symEntry, &sym, symbol_name)) {
+                if(!elf_read_symbol(elf, symEntry, &sym, symbol_name)) {
                     FURI_LOG_E(TAG, "  symbol read fail");
                     string_clear(symbol_name);
                     return false;
@@ -311,8 +307,8 @@ static bool elf_relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection* s) {
                     elf_reloc_type_to_str(relType),
                     string_get_cstr(symbol_name));
 
-                symAddr = elf_address_of(e, &sym, string_get_cstr(symbol_name));
-                address_cache_put(e->elf.relocation_cache, symEntry, symAddr);
+                symAddr = elf_address_of(elf, &sym, string_get_cstr(symbol_name));
+                address_cache_put(elf->relocation_cache, symEntry, symAddr);
             }
 
             if(symAddr != ELF_INVALID_ADDRESS) {
@@ -321,7 +317,7 @@ static bool elf_relocate(FlipperApplication* e, Elf32_Shdr* h, ELFSection* s) {
                     "  symAddr=%08X relAddr=%08X",
                     (unsigned int)symAddr,
                     (unsigned int)relAddr);
-                if(!elf_relocate_symbol(&e->elf, relAddr, relType, symAddr)) {
+                if(!elf_relocate_symbol(elf, relAddr, relType, symAddr)) {
                     relocate_result = false;
                 }
             } else {
@@ -352,96 +348,95 @@ bool cstr_prefix(const char* prefix, const char* string) {
 /**************************************************************************************************/
 typedef enum {
     SectionTypeERROR = 0,
-    SectionTypeSymTab = (1 << 0),
-    SectionTypeStrTab = (1 << 2),
-    SectionTypeText = (1 << 3),
-    SectionTypeRodata = (1 << 4),
-    SectionTypeData = (1 << 5),
-    SectionTypeBss = (1 << 6),
-    SectionTypeRelText = (1 << 7),
-    SectionTypeRelRodata = (1 << 8),
-    SectionTypeRelData = (1 << 9),
-    SectionTypeRelBss = (1 << 10),
-    SectionTypeFappManifest = (1 << 11),
-    SectionTypeDebugLink = (1 << 12),
-    SectionTypeInitArray = (1 << 13),
-    SectionTypeRelInitArray = (1 << 14),
-    SectionTypeUnused = (1 << 15),
-    // TODO add more section types to validate
-    SectionTypeValid = SectionTypeSymTab | SectionTypeStrTab | SectionTypeFappManifest,
-    SectionTypeRelocate = SectionTypeRelText | SectionTypeRelRodata | SectionTypeRelData |
-                          SectionTypeRelBss | SectionTypeRelInitArray,
-    SectionTypeGdbSection = SectionTypeText | SectionTypeRodata | SectionTypeData |
-                            SectionTypeBss | SectionTypeInitArray,
+    SectionTypeUnused = 1 << 0,
+    SectionTypeData = 1 << 1,
+    SectionTypeRelData = 1 << 2,
+    SectionTypeSymTab = 1 << 3,
+    SectionTypeStrTab = 1 << 4,
+    SectionTypeManifest = 1 << 5,
+    SectionTypeDebugLink = 1 << 6,
+
+    SectionTypeValid = SectionTypeSymTab | SectionTypeStrTab | SectionTypeManifest,
 } SectionType;
 
-static bool
-    flipper_application_load_metadata(FlipperApplication* fap, Elf32_Shdr* section_header) {
-    if(section_header->sh_size < sizeof(fap->manifest)) {
+static bool elf_load_metadata(
+    ELFFile* elf,
+    Elf32_Shdr* section_header,
+    FlipperApplicationManifest* manifest) {
+    if(section_header->sh_size < sizeof(FlipperApplicationManifest)) {
         return false;
     }
 
-    return storage_file_seek(fap->fd, section_header->sh_offset, true) &&
-           storage_file_read(fap->fd, &fap->manifest, section_header->sh_size) ==
+    if(manifest == NULL) {
+        return true;
+    }
+
+    return storage_file_seek(elf->fd, section_header->sh_offset, true) &&
+           storage_file_read(elf->fd, manifest, section_header->sh_size) ==
                section_header->sh_size;
 }
 
-static bool
-    flipper_application_load_debug_link(FlipperApplication* fap, Elf32_Shdr* section_header) {
-    fap->state.debug_link_size = section_header->sh_size;
-    fap->state.debug_link = malloc(section_header->sh_size);
+static bool elf_load_debug_link(ELFFile* elf, Elf32_Shdr* section_header) {
+    elf->debug_link_info.debug_link_size = section_header->sh_size;
+    elf->debug_link_info.debug_link = malloc(section_header->sh_size);
 
-    return storage_file_seek(fap->fd, section_header->sh_offset, true) &&
-           storage_file_read(fap->fd, fap->state.debug_link, section_header->sh_size) ==
+    return storage_file_seek(elf->fd, section_header->sh_offset, true) &&
+           storage_file_read(elf->fd, elf->debug_link_info.debug_link, section_header->sh_size) ==
                section_header->sh_size;
 }
 
-static SectionType flipper_application_preload_section(
-    FlipperApplication* fap,
+static SectionType elf_preload_section(
+    ELFFile* elf,
     size_t section_idx,
     Elf32_Shdr* section_header,
-    string_t name_string) {
+    string_t name_string,
+    FlipperApplicationManifest* manifest) {
     const char* name = string_get_cstr(name_string);
 
     const struct {
         const char* prefix;
         SectionType type;
     } lookup_sections[] = {
-        {".text", SectionTypeText},
-        {".rodata", SectionTypeRodata},
+        {".text", SectionTypeData},
+        {".rodata", SectionTypeData},
         {".data", SectionTypeData},
-        {".bss", SectionTypeBss},
-        {".init_array", SectionTypeInitArray},
-        {".rel.text", SectionTypeRelText},
-        {".rel.rodata", SectionTypeRelRodata},
+        {".bss", SectionTypeData},
+        {".preinit_array", SectionTypeData},
+        {".init_array", SectionTypeData},
+        {".fini_array", SectionTypeData},
+        {".rel.text", SectionTypeRelData},
+        {".rel.rodata", SectionTypeRelData},
         {".rel.data", SectionTypeRelData},
-        {".rel.init_array", SectionTypeRelInitArray},
+        {".rel.preinit_array", SectionTypeRelData},
+        {".rel.init_array", SectionTypeRelData},
+        {".rel.fini_array", SectionTypeRelData},
     };
 
     for(size_t i = 0; i < COUNT_OF(lookup_sections); i++) {
         if(cstr_prefix(lookup_sections[i].prefix, name)) {
             FURI_LOG_D(TAG, "Found section %s", lookup_sections[i].prefix);
 
-            if((lookup_sections[i].type & SectionTypeRelocate) != 0) {
+            if(lookup_sections[i].type == SectionTypeRelData) {
                 name = name + strlen(".rel");
             }
 
             string_t key;
             string_init_set(key, name);
-            ELFSection* section_p = ELFSectionDict_get(fap->elf.sections, key);
+            ELFSection* section_p = ELFSectionDict_get(elf->sections, key);
             if(!section_p) {
                 ELFSection section = {
                     .data = NULL,
                     .sec_idx = 0,
                     .rel_sec_idx = 0,
+                    .size = 0,
                 };
 
-                ELFSectionDict_set_at(fap->elf.sections, key, section);
-                section_p = ELFSectionDict_get(fap->elf.sections, key);
+                ELFSectionDict_set_at(elf->sections, key, section);
+                section_p = ELFSectionDict_get(elf->sections, key);
             }
             string_clear(key);
 
-            if((lookup_sections[i].type & SectionTypeRelocate) != 0) {
+            if(lookup_sections[i].type == SectionTypeRelData) {
                 section_p->rel_sec_idx = section_idx;
             } else {
                 section_p->sec_idx = section_idx;
@@ -453,23 +448,23 @@ static SectionType flipper_application_preload_section(
 
     if(strcmp(name, ".symtab") == 0) {
         FURI_LOG_D(TAG, "Found .symtab section");
-        fap->elf.symbol_table = section_header->sh_offset;
-        fap->elf.symbol_count = section_header->sh_size / sizeof(Elf32_Sym);
+        elf->symbol_table = section_header->sh_offset;
+        elf->symbol_count = section_header->sh_size / sizeof(Elf32_Sym);
         return SectionTypeSymTab;
     } else if(strcmp(name, ".strtab") == 0) {
         FURI_LOG_D(TAG, "Found .strtab section");
-        fap->elf.symbol_table_strings = section_header->sh_offset;
+        elf->symbol_table_strings = section_header->sh_offset;
         return SectionTypeStrTab;
     } else if(strcmp(name, ".fapmeta") == 0) {
         FURI_LOG_D(TAG, "Found .fapmeta section");
-        if(flipper_application_load_metadata(fap, section_header)) {
-            return SectionTypeFappManifest;
+        if(elf_load_metadata(elf, section_header, manifest)) {
+            return SectionTypeManifest;
         } else {
             return SectionTypeERROR;
         }
     } else if(strcmp(name, ".gnu_debuglink") == 0) {
         FURI_LOG_D(TAG, "Found .gnu_debuglink section");
-        if(flipper_application_load_debug_link(fap, section_header)) {
+        if(elf_load_debug_link(elf, section_header)) {
             return SectionTypeDebugLink;
         } else {
             return SectionTypeERROR;
@@ -479,14 +474,14 @@ static SectionType flipper_application_preload_section(
     return SectionTypeUnused;
 }
 
-static bool flipper_application_load_section_data(FlipperApplication* fap, ELFSection* section) {
+static bool elf_load_section_data(ELFFile* elf, ELFSection* section) {
     Elf32_Shdr section_header;
     if(section->sec_idx == 0) {
         FURI_LOG_I(TAG, "Section is not present");
         return true;
     }
 
-    if(!elf_read_section_header(fap, section->sec_idx, &section_header)) {
+    if(!elf_read_section_header(elf, section->sec_idx, &section_header)) {
         return false;
     }
 
@@ -496,18 +491,16 @@ static bool flipper_application_load_section_data(FlipperApplication* fap, ELFSe
     }
 
     section->data = aligned_malloc(section_header.sh_size, section_header.sh_addralign);
-    // e->state.mmap_entry_count++;
+    section->size = section_header.sh_size;
 
     if(section_header.sh_type == SHT_NOBITS) {
         /* section is empty (.bss?) */
         /* no need to memset - allocator already did that */
-        /* memset(s->data, 0, h->sh_size); */
-        FURI_LOG_D(TAG, "0x%X", section->data);
         return true;
     }
 
-    if((!storage_file_seek(fap->fd, section_header.sh_offset, true)) ||
-       (storage_file_read(fap->fd, section->data, section_header.sh_size) !=
+    if((!storage_file_seek(elf->fd, section_header.sh_offset, true)) ||
+       (storage_file_read(elf->fd, section->data, section_header.sh_size) !=
         section_header.sh_size)) {
         FURI_LOG_E(TAG, "    seek/read fail");
         return false;
@@ -517,12 +510,12 @@ static bool flipper_application_load_section_data(FlipperApplication* fap, ELFSe
     return true;
 }
 
-static bool flipper_application_relocate_section(FlipperApplication* fap, ELFSection* section) {
+static bool elf_relocate_section(ELFFile* elf, ELFSection* section) {
     Elf32_Shdr section_header;
     if(section->rel_sec_idx) {
         FURI_LOG_D(TAG, "Relocating section");
-        if(elf_read_section_header(fap, section->rel_sec_idx, &section_header))
-            return elf_relocate(fap, &section_header, section);
+        if(elf_read_section_header(elf, section->rel_sec_idx, &section_header))
+            return elf_relocate(elf, &section_header, section);
         else {
             FURI_LOG_E(TAG, "Error reading section header");
             return false;
@@ -533,20 +526,88 @@ static bool flipper_application_relocate_section(FlipperApplication* fap, ELFSec
     return true;
 }
 
+static void elf_file_call_section_list(ELFFile* elf, const char* name, bool reverse_order) {
+    string_t section_name;
+    string_init_set(section_name, name);
+    ELFSection* section = ELFSectionDict_get(elf->sections, section_name);
+
+    if(section && section->size) {
+        const uint32_t* start = section->data;
+        const uint32_t* end = section->data + section->size;
+
+        if(reverse_order) {
+            while(end > start) {
+                end--;
+                ((void (*)(void))(*end))();
+            }
+        } else {
+            while(start < end) {
+                ((void (*)(void))(*start))();
+                start++;
+            }
+        }
+    }
+
+    string_clear(section_name);
+}
+
 /**************************************************************************************************/
-/************************************ External FAP interfaces *************************************/
+/********************************************* Public *********************************************/
 /**************************************************************************************************/
 
-bool flipper_application_load_elf_headers(FlipperApplication* fap, const char* path) {
+ELFFile* elf_file_alloc(Storage* storage, const ElfApiInterface* api_interface) {
+    ELFFile* elf = malloc(sizeof(ELFFile));
+    elf->fd = storage_file_alloc(storage);
+    elf->api_interface = api_interface;
+    ELFSectionDict_init(elf->sections);
+    AddressCache_init(elf->trampoline_cache);
+    return elf;
+}
+
+void elf_file_free(ELFFile* elf) {
+    // free sections data
+    {
+        ELFSectionDict_it_t it;
+        for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it);
+            ELFSectionDict_next(it)) {
+            const ELFSectionDict_itref_t* itref = ELFSectionDict_cref(it);
+            if(itref->value.data) {
+                aligned_free(itref->value.data);
+            }
+        }
+
+        ELFSectionDict_clear(elf->sections);
+    }
+
+    // free trampoline data
+    {
+        AddressCache_it_t it;
+        for(AddressCache_it(it, elf->trampoline_cache); !AddressCache_end_p(it);
+            AddressCache_next(it)) {
+            const AddressCache_itref_t* itref = AddressCache_cref(it);
+            free((void*)itref->value);
+        }
+
+        AddressCache_clear(elf->trampoline_cache);
+    }
+
+    if(elf->debug_link_info.debug_link) {
+        free(elf->debug_link_info.debug_link);
+    }
+
+    storage_file_free(elf->fd);
+    free(elf);
+}
+
+bool elf_file_open(ELFFile* elf, const char* path) {
     Elf32_Ehdr h;
     Elf32_Shdr sH;
-    ELFFile* elf = &fap->elf;
 
-    if(!storage_file_open(fap->fd, path, FSAM_READ, FSOM_OPEN_EXISTING) ||
-       !storage_file_seek(fap->fd, 0, true) ||
-       storage_file_read(fap->fd, &h, sizeof(h)) != sizeof(h) ||
-       !storage_file_seek(fap->fd, h.e_shoff + h.e_shstrndx * sizeof(sH), true) ||
-       storage_file_read(fap->fd, &sH, sizeof(Elf32_Shdr)) != sizeof(Elf32_Shdr)) {
+    if(!storage_file_open(elf->fd, path, FSAM_READ, FSOM_OPEN_EXISTING) ||
+       !storage_file_seek(elf->fd, 0, true) ||
+       storage_file_read(elf->fd, &h, sizeof(h)) != sizeof(h) ||
+       !storage_file_seek(elf->fd, h.e_shoff + h.e_shstrndx * sizeof(sH), true) ||
+       storage_file_read(elf->fd, &sH, sizeof(Elf32_Shdr)) != sizeof(Elf32_Shdr)) {
         return false;
     }
 
@@ -557,25 +618,22 @@ bool flipper_application_load_elf_headers(FlipperApplication* fap, const char* p
     return true;
 }
 
-bool flipper_application_load_manifest(FlipperApplication* fap) {
+bool elf_file_load_manifest(ELFFile* elf, FlipperApplicationManifest* manifest) {
     bool result = false;
-    ELFFile* elf = &fap->elf;
     string_t name;
     string_init(name);
-    ELFSectionDict_init(elf->sections);
-    AddressCache_init(elf->trampoline_cache);
 
     FURI_LOG_D(TAG, "Looking for manifest section");
     for(size_t section_idx = 1; section_idx < elf->sections_count; section_idx++) {
         Elf32_Shdr section_header;
 
         string_reset(name);
-        if(!elf_read_section(fap, section_idx, &section_header, name)) {
+        if(!elf_read_section(elf, section_idx, &section_header, name)) {
             break;
         }
 
         if(string_cmp(name, ".fapmeta") == 0) {
-            if(flipper_application_load_metadata(fap, &section_header)) {
+            if(elf_load_metadata(elf, &section_header, manifest)) {
                 FURI_LOG_D(TAG, "Load manifest done");
                 result = true;
                 break;
@@ -589,33 +647,25 @@ bool flipper_application_load_manifest(FlipperApplication* fap) {
     return result;
 }
 
-bool flipper_application_load_section_table(FlipperApplication* fap) {
+bool elf_file_load_section_table(ELFFile* elf, FlipperApplicationManifest* manifest) {
     SectionType loaded_sections = SectionTypeERROR;
-    ELFFile* elf = &fap->elf;
     string_t name;
     string_init(name);
-    ELFSectionDict_init(elf->sections);
-    AddressCache_init(elf->trampoline_cache);
-
-    fap->state.mmap_entry_count = 0;
 
     FURI_LOG_D(TAG, "Scan ELF indexs...");
     for(size_t section_idx = 1; section_idx < elf->sections_count; section_idx++) {
         Elf32_Shdr section_header;
 
         string_reset(name);
-        if(!elf_read_section(fap, section_idx, &section_header, name)) {
-            return false;
+        if(!elf_read_section(elf, section_idx, &section_header, name)) {
+            loaded_sections = SectionTypeERROR;
+            break;
         }
 
         FURI_LOG_D(TAG, "Preloading data for section #%d %s", section_idx, string_get_cstr(name));
         SectionType section_type =
-            flipper_application_preload_section(fap, section_idx, &section_header, name);
+            elf_preload_section(elf, section_idx, &section_header, name, manifest);
         loaded_sections |= section_type;
-
-        if((section_type & SectionTypeGdbSection) != 0) {
-            fap->state.mmap_entry_count++;
-        }
 
         if(section_type == SectionTypeERROR) {
             loaded_sections = SectionTypeERROR;
@@ -629,122 +679,111 @@ bool flipper_application_load_section_table(FlipperApplication* fap) {
     return IS_FLAGS_SET(loaded_sections, SectionTypeValid);
 }
 
-FlipperApplicationLoadStatus flipper_application_load_sections(FlipperApplication* fap) {
-    ELFFile* elf = &fap->elf;
-    FlipperApplicationLoadStatus status = FlipperApplicationLoadStatusSuccess;
-    AddressCache_init(fap->elf.relocation_cache);
+ELFFileLoadStatus elf_file_load_sections(ELFFile* elf) {
+    ELFFileLoadStatus status = ELFFileLoadStatusSuccess;
+    ELFSectionDict_it_t it;
+
+    AddressCache_init(elf->relocation_cache);
     size_t start = furi_get_tick();
 
-    ELFSectionDict_it_t it;
     for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it); ELFSectionDict_next(it)) {
         ELFSectionDict_itref_t* itref = ELFSectionDict_ref(it);
         FURI_LOG_D(TAG, "Loading section '%s'", string_get_cstr(itref->key));
-        if(!flipper_application_load_section_data(fap, &itref->value)) {
+        if(!elf_load_section_data(elf, &itref->value)) {
             FURI_LOG_E(TAG, "Error loading section '%s'", string_get_cstr(itref->key));
-            status = FlipperApplicationLoadStatusUnspecifiedError;
+            status = ELFFileLoadStatusUnspecifiedError;
         }
     }
 
-    if(status == FlipperApplicationLoadStatusSuccess) {
+    if(status == ELFFileLoadStatusSuccess) {
         for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it);
             ELFSectionDict_next(it)) {
             ELFSectionDict_itref_t* itref = ELFSectionDict_ref(it);
             FURI_LOG_D(TAG, "Relocating section '%s'", string_get_cstr(itref->key));
-            if(!flipper_application_relocate_section(fap, &itref->value)) {
+            if(!elf_relocate_section(elf, &itref->value)) {
                 FURI_LOG_E(TAG, "Error relocating section '%s'", string_get_cstr(itref->key));
-                status = FlipperApplicationLoadStatusMissingImports;
+                status = ELFFileLoadStatusMissingImports;
             }
         }
     }
 
-    if(status == FlipperApplicationLoadStatusSuccess) {
-        FlipperApplicationState* state = &fap->state;
-        state->mmap_entries =
-            malloc(sizeof(FlipperApplicationMemoryMapEntry) * state->mmap_entry_count);
-        uint32_t mmap_entry_idx = 0;
-        const void* text_p = 0;
-        const void* init_array_p = 0;
-        size_t init_array_size = 0;
+    /* Fixing up entry point */
+    if(status == ELFFileLoadStatusSuccess) {
+        string_t text_name;
+        string_init_set(text_name, ".text");
+        ELFSection* text_section = ELFSectionDict_get(elf->sections, text_name);
 
-        for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it);
-            ELFSectionDict_next(it)) {
-            const ELFSectionDict_itref_t* itref = ELFSectionDict_cref(it);
-
-            const void* data_ptr = itref->value.data;
-            if(data_ptr) {
-                FURI_LOG_D(TAG, "0x%X %s", (uint32_t)data_ptr, string_get_cstr(itref->key));
-                state->mmap_entries[mmap_entry_idx].address = (uint32_t)data_ptr;
-                state->mmap_entries[mmap_entry_idx].name = string_get_cstr(itref->key);
-                mmap_entry_idx++;
-            }
-
-            if(string_cmp(itref->key, ".text") == 0) {
-                FURI_LOG_D(TAG, "Found .text section at 0x%X", (uint32_t)data_ptr);
-                text_p = data_ptr;
-            }
-
-            if(string_cmp(itref->key, ".init_array") == 0) {
-                FURI_LOG_D(TAG, "Found .init_array section at 0x%X", (uint32_t)data_ptr);
-                init_array_p = data_ptr;
-
-                Elf32_Shdr section_header;
-                if(!elf_read_section_header(fap, itref->value.sec_idx, &section_header)) {
-                    FURI_LOG_E(TAG, "Error reading .init_array section header");
-                } else {
-                    init_array_size = section_header.sh_size;
-                }
-            }
+        if(text_section == NULL) {
+            FURI_LOG_E(TAG, "No .text section found");
+            status = ELFFileLoadStatusUnspecifiedError;
+        } else {
+            elf->entry += (uint32_t)text_section->data;
         }
-
-        furi_check(mmap_entry_idx == state->mmap_entry_count);
-
-        /* Fixing up entry point */
-        fap->elf.entry += (uint32_t)text_p;
-
-        /* Call init_array */
-        if(init_array_p && init_array_size) {
-            const uint32_t* init_array = init_array_p;
-            const uint32_t* init_array_end = init_array_p + init_array_size;
-            while(init_array < init_array_end) {
-                FURI_LOG_D(TAG, "Calling init routine at 0x%X", *init_array);
-                ((void (*)(void))(*init_array))();
-                init_array++;
-            }
-        }
+        string_clear(text_name);
     }
 
-    FURI_LOG_D(TAG, "Relocation cache size: %u", AddressCache_size(fap->elf.relocation_cache));
-    FURI_LOG_D(TAG, "Trampoline cache size: %u", AddressCache_size(fap->elf.trampoline_cache));
-    AddressCache_clear(fap->elf.relocation_cache);
+    FURI_LOG_D(TAG, "Relocation cache size: %u", AddressCache_size(elf->relocation_cache));
+    FURI_LOG_D(TAG, "Trampoline cache size: %u", AddressCache_size(elf->trampoline_cache));
+    AddressCache_clear(elf->relocation_cache);
     FURI_LOG_I(TAG, "Loaded in %ums", (size_t)(furi_get_tick() - start));
 
     return status;
 }
 
-void flipper_application_free_elf_data(ELFFile* elf) {
-    {
-        // free sections data
-        ELFSectionDict_it_t it;
-        for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it);
-            ELFSectionDict_next(it)) {
-            const ELFSectionDict_itref_t* itref = ELFSectionDict_cref(it);
-            if(itref->value.data) {
-                aligned_free(itref->value.data);
-            }
-        }
+void elf_file_pre_run(ELFFile* elf) {
+    elf_file_call_section_list(elf, ".preinit_array", false);
+    elf_file_call_section_list(elf, ".init_array", false);
+}
 
-        ELFSectionDict_clear(elf->sections);
+int32_t elf_file_run(ELFFile* elf, void* args) {
+    int32_t result;
+    result = ((int32_t(*)(void*))elf->entry)(args);
+    return result;
+}
+
+void elf_file_post_run(ELFFile* elf) {
+    elf_file_call_section_list(elf, ".fini_array", true);
+}
+
+off_t elf_file_get_entry(ELFFile* elf) {
+    return elf->entry;
+}
+
+const ElfApiInterface* elf_file_get_api_interface(ELFFile* elf_file) {
+    return elf_file->api_interface;
+}
+
+void elf_file_init_debug_info(ELFFile* elf, ELFDebugInfo* debug_info) {
+    // copy debug info
+    memcpy(&debug_info->debug_link_info, &elf->debug_link_info, sizeof(ELFDebugLinkInfo));
+
+    // init mmap
+    debug_info->mmap_entry_count = ELFSectionDict_size(elf->sections);
+    debug_info->mmap_entries = malloc(sizeof(ELFMemoryMapEntry) * debug_info->mmap_entry_count);
+    uint32_t mmap_entry_idx = 0;
+
+    ELFSectionDict_it_t it;
+    for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it); ELFSectionDict_next(it)) {
+        const ELFSectionDict_itref_t* itref = ELFSectionDict_cref(it);
+
+        const void* data_ptr = itref->value.data;
+        if(data_ptr) {
+            debug_info->mmap_entries[mmap_entry_idx].address = (uint32_t)data_ptr;
+            debug_info->mmap_entries[mmap_entry_idx].name = string_get_cstr(itref->key);
+            mmap_entry_idx++;
+        }
+    }
+}
+
+void elf_file_clear_debug_info(ELFDebugInfo* debug_info) {
+    // clear debug info
+    memset(&debug_info->debug_link_info, 0, sizeof(ELFDebugLinkInfo));
+
+    // clear mmap
+    if(debug_info->mmap_entries) {
+        free(debug_info->mmap_entries);
+        debug_info->mmap_entries = NULL;
     }
 
-    {
-        // free trampoline data
-        AddressCache_it_t it;
-        for(AddressCache_it(it, elf->trampoline_cache); !AddressCache_end_p(it);
-            AddressCache_next(it)) {
-            const AddressCache_itref_t* itref = AddressCache_cref(it);
-            free((void*)itref->value);
-        }
-
-        AddressCache_clear(elf->trampoline_cache);
-    }
+    debug_info->mmap_entry_count = 0;
 }

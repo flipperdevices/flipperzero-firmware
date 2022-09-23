@@ -1,6 +1,8 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
+#include "elf/elf_api_interface.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,6 +41,12 @@ typedef struct {
 typedef FlipperApplicationManifestV1 FlipperApplicationManifest;
 
 #pragma pack(pop)
+
+bool flipper_application_manifest_is_valid(const FlipperApplicationManifest* manifest);
+
+bool flipper_application_manifest_is_compatible(
+    const FlipperApplicationManifest* manifest,
+    const ElfApiInterface* api_interface);
 
 #ifdef __cplusplus
 }
