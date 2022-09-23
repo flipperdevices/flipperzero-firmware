@@ -4,6 +4,8 @@
 #include <input/input.h>
 #include <stdlib.h>
 
+#include <notification/notification_messages.h>
+
 #include "assets.h"
 
 #define PLAYFIELD_WIDTH 16
@@ -209,6 +211,13 @@ static void place_flag(Minesweeper* minesweeper_state) {
   }
 }
 
+static void game_lost() {
+   NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION); 
+   notification_message(notifications, &sequence_set_vibro_on);
+   furi_delay_ms(200);
+   notification_message(notifications, &sequence_reset_vibro);
+   furi_record_close(RECORD_NOTIFICATION);
+}
 
 static void play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y) {
   if (minesweeper_state->playfield[cursor_x][cursor_y] != TileTypeUncleared) {
@@ -217,6 +226,8 @@ static void play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y
   }
   if (minesweeper_state->minefield[cursor_x][cursor_y] == FieldMine) {
       // TODO: player loses!
+      minesweeper_state->playfield[cursor_x][cursor_y] = TileTypeMine;
+      game_lost();
       return; 
   } else {
     // get number of surrounding mines.
