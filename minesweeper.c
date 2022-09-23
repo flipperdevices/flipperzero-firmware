@@ -311,7 +311,7 @@ int32_t minesweeper_app(void* p) {
     if(event_status == FuriStatusOk) {
       // press events
       if(event.type == EventTypeKey) {
-        if(event.input.type == InputTypePress) {  
+        if(event.input.type == InputTypeShort) {  
           switch(event.input.key) {
             case InputKeyUp:
               minesweeper_state->cursor_y--;
@@ -343,8 +343,8 @@ int32_t minesweeper_app(void* p) {
                 minesweeper_state->game_started = true;
               }
               play_move(
-                minesweeper_state, 
-                minesweeper_state->cursor_x, 
+                minesweeper_state,
+                minesweeper_state->cursor_x,
                 minesweeper_state->cursor_y);
               break;
             case InputKeyBack:
@@ -354,6 +354,7 @@ int32_t minesweeper_app(void* p) {
           }
         } else if (event.input.type == InputTypeLong) {
           // hold events
+          FURI_LOG_D("Minesweeper", "Got a long press!");
           switch(event.input.key) {
             case InputKeyUp:
             case InputKeyDown:
@@ -361,6 +362,7 @@ int32_t minesweeper_app(void* p) {
             case InputKeyLeft:
               break;
             case InputKeyOk:
+              FURI_LOG_D("Minesweeper", "Toggling flag");
               place_flag(minesweeper_state);
               break;
             case InputKeyBack:
@@ -370,8 +372,8 @@ int32_t minesweeper_app(void* p) {
         }
       } 
     } else {
-      FURI_LOG_D("Minesweeper", "FuriMessageQueue: event timeout");
-    // event timeout
+      // event timeout
+      ;
     }
     view_port_update(view_port);
     release_mutex(&state_mutex, minesweeper_state);
