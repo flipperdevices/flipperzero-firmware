@@ -47,18 +47,12 @@ static void address_cache_put(AddressCache_t cache, int symEntry, Elf32_Addr sym
 /**************************************************************************************************/
 
 ELFSection* elf_file_get_section(ELFFile* elf, const char* name) {
-    string_t key;
-    string_init_set_str(key, name);
-    ELFSection* section = ELFSectionDict_get(elf->sections, key);
-    string_clear(key);
-    return section;
+    return ELFSectionDict_get(elf->sections, name);
+    ;
 }
 
 void elf_file_put_section(ELFFile* elf, const char* name, ELFSection* section) {
-    string_t key;
-    string_init_set_str(key, name);
-    ELFSectionDict_set_at(elf->sections, key, *section);
-    string_clear(key);
+    ELFSectionDict_set_at(elf->sections, strdup(name), *section);
 }
 
 static bool elf_read_string_from_offset(ELFFile* elf, off_t offset, string_t name) {
@@ -582,6 +576,7 @@ void elf_file_free(ELFFile* elf) {
             if(itref->value.data) {
                 aligned_free(itref->value.data);
             }
+            free((void*)itref->key);
         }
 
         ELFSectionDict_clear(elf->sections);
@@ -696,9 +691,9 @@ ELFFileLoadStatus elf_file_load_sections(ELFFile* elf) {
 
     for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it); ELFSectionDict_next(it)) {
         ELFSectionDict_itref_t* itref = ELFSectionDict_ref(it);
-        FURI_LOG_D(TAG, "Loading section '%s'", string_get_cstr(itref->key));
+        FURI_LOG_D(TAG, "Loading section '%s'", itref->key);
         if(!elf_load_section_data(elf, &itref->value)) {
-            FURI_LOG_E(TAG, "Error loading section '%s'", string_get_cstr(itref->key));
+            FURI_LOG_E(TAG, "Error loading section '%s'", itref->key);
             status = ELFFileLoadStatusUnspecifiedError;
         }
     }
@@ -707,9 +702,9 @@ ELFFileLoadStatus elf_file_load_sections(ELFFile* elf) {
         for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it);
             ELFSectionDict_next(it)) {
             ELFSectionDict_itref_t* itref = ELFSectionDict_ref(it);
-            FURI_LOG_D(TAG, "Relocating section '%s'", string_get_cstr(itref->key));
+            FURI_LOG_D(TAG, "Relocating section '%s'", itref->key);
             if(!elf_relocate_section(elf, &itref->value)) {
-                FURI_LOG_E(TAG, "Error relocating section '%s'", string_get_cstr(itref->key));
+                FURI_LOG_E(TAG, "Error relocating section '%s'", itref->key);
                 status = ELFFileLoadStatusMissingImports;
             }
         }
@@ -773,7 +768,7 @@ void elf_file_init_debug_info(ELFFile* elf, ELFDebugInfo* debug_info) {
         const void* data_ptr = itref->value.data;
         if(data_ptr) {
             debug_info->mmap_entries[mmap_entry_idx].address = (uint32_t)data_ptr;
-            debug_info->mmap_entries[mmap_entry_idx].name = string_get_cstr(itref->key);
+            debug_info->mmap_entries[mmap_entry_idx].name = itref->key;
             mmap_entry_idx++;
         }
     }

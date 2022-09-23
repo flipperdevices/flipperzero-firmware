@@ -20,7 +20,7 @@ typedef struct {
     Elf32_Word size;
 } ELFSection;
 
-DICT_DEF2(ELFSectionDict, string_t, STRING_OPLIST, ELFSection, M_POD_OPLIST)
+DICT_DEF2(ELFSectionDict, const char*, M_CSTR_OPLIST, ELFSection, M_POD_OPLIST)
 
 struct ELFFile {
     size_t sections_count;
