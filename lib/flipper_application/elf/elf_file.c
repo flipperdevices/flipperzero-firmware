@@ -46,6 +46,21 @@ static void address_cache_put(AddressCache_t cache, int symEntry, Elf32_Addr sym
 /********************************************** ELF ***********************************************/
 /**************************************************************************************************/
 
+ELFSection* elf_file_get_section(ELFFile* elf, const char* name) {
+    string_t key;
+    string_init_set_str(key, name);
+    ELFSection* section = ELFSectionDict_get(elf->sections, key);
+    string_clear(key);
+    return section;
+}
+
+void elf_file_put_section(ELFFile* elf, const char* name, ELFSection* section) {
+    string_t key;
+    string_init_set_str(key, name);
+    ELFSectionDict_set_at(elf->sections, key, *section);
+    string_clear(key);
+}
+
 static bool elf_read_string_from_offset(ELFFile* elf, off_t offset, string_t name) {
     bool result = false;
 
@@ -420,9 +435,7 @@ static SectionType elf_preload_section(
                 name = name + strlen(".rel");
             }
 
-            string_t key;
-            string_init_set(key, name);
-            ELFSection* section_p = ELFSectionDict_get(elf->sections, key);
+            ELFSection* section_p = elf_file_get_section(elf, name);
             if(!section_p) {
                 ELFSection section = {
                     .data = NULL,
@@ -431,10 +444,9 @@ static SectionType elf_preload_section(
                     .size = 0,
                 };
 
-                ELFSectionDict_set_at(elf->sections, key, section);
-                section_p = ELFSectionDict_get(elf->sections, key);
+                elf_file_put_section(elf, name, &section);
+                section_p = elf_file_get_section(elf, name);
             }
-            string_clear(key);
 
             if(lookup_sections[i].type == SectionTypeRelData) {
                 section_p->rel_sec_idx = section_idx;
@@ -527,9 +539,7 @@ static bool elf_relocate_section(ELFFile* elf, ELFSection* section) {
 }
 
 static void elf_file_call_section_list(ELFFile* elf, const char* name, bool reverse_order) {
-    string_t section_name;
-    string_init_set(section_name, name);
-    ELFSection* section = ELFSectionDict_get(elf->sections, section_name);
+    ELFSection* section = elf_file_get_section(elf, name);
 
     if(section && section->size) {
         const uint32_t* start = section->data;
@@ -547,8 +557,6 @@ static void elf_file_call_section_list(ELFFile* elf, const char* name, bool reve
             }
         }
     }
-
-    string_clear(section_name);
 }
 
 /**************************************************************************************************/
@@ -709,9 +717,7 @@ ELFFileLoadStatus elf_file_load_sections(ELFFile* elf) {
 
     /* Fixing up entry point */
     if(status == ELFFileLoadStatusSuccess) {
-        string_t text_name;
-        string_init_set(text_name, ".text");
-        ELFSection* text_section = ELFSectionDict_get(elf->sections, text_name);
+        ELFSection* text_section = elf_file_get_section(elf, ".text");
 
         if(text_section == NULL) {
             FURI_LOG_E(TAG, "No .text section found");
@@ -719,7 +725,6 @@ ELFFileLoadStatus elf_file_load_sections(ELFFile* elf) {
         } else {
             elf->entry += (uint32_t)text_section->data;
         }
-        string_clear(text_name);
     }
 
     FURI_LOG_D(TAG, "Relocation cache size: %u", AddressCache_size(elf->relocation_cache));
