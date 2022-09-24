@@ -233,11 +233,14 @@ bool furi_hal_nfc_listen(
         .notifyCb = NULL,
         .activate_after_sak = activate_after_sak,
     };
+    /*
     if(FURI_BIT(sak, 5)) {
         params.compMode = RFAL_COMPLIANCE_MODE_EMV;
     } else {
         params.compMode = RFAL_COMPLIANCE_MODE_NFC;
     }
+    */
+    params.compMode = RFAL_COMPLIANCE_MODE_ISO;
     params.lmConfigPA.nfcidLen = uid_len;
     memcpy(params.lmConfigPA.nfcid, uid, uid_len);
     params.lmConfigPA.SENS_RES[0] = atqa[0];
