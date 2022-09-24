@@ -15,6 +15,20 @@ Min level: 18
 Max level: 30
 Weight: 0
 
+Name: RM_Hexadecimal_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 7
+
+Name: RM_Init_D_Water_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 7
+
 Name: RM_Kirbs_Confused_128x64
 Min butthurt: 0
 Max butthurt: 14

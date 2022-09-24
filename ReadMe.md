@@ -27,6 +27,8 @@
 - Assets: Includes New Dolphin Animations: [Kirbs (By RogueMaster)]
 - Assets: Includes New Dolphin Animations: [Kirbs Confused (By RogueMaster)]
 - Assets: Includes New Dolphin Animations: [Z3lda 0h (By RogueMaster)]
+- Assets: Includes New Dolphin Animations: [Init D Water (By RogueMaster)]
+- Assets: Includes New Dolphin Animations: [Hexadecimal (By RogueMaster)]
 
 <details>
   <summary><B>TO DO</b></summary><br/>
