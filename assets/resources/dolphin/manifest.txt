@@ -15,20 +15,6 @@ Min level: 18
 Max level: 30
 Weight: 0
 
-Name: RM_Halloween_128_64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
-Name: RM_Hexadecimal_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
 Name: RM_Init_D_Water_128x64
 Min butthurt: 0
 Max butthurt: 14
@@ -71,7 +57,28 @@ Min level: 1
 Max level: 30
 Weight: 7
 
-Name: L1_NyanCat_128x64
+Name: RM_Halloween_128_64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 5
+
+Name: RM_Hexadecimal_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 5
+
+Name: On3_Pi3ce_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 7
+
+Name: Sharingan_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
@@ -92,14 +99,7 @@ Min level: 1
 Max level: 30
 Weight: 7
 
-Name: On3_Pi3ce_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
-Name: Sharingan_128x64
+Name: L1_NyanCat_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
@@ -323,20 +323,6 @@ Min level: 1
 Max level: 30
 Weight: 2
 
-Name: Kuronons_Cyberdyne_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 1
-
-Name: Kuronons_Tyrell_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 1
-
 Name: MjK_Trioptimum_128x64
 Min butthurt: 0
 Max butthurt: 14
@@ -344,21 +330,42 @@ Min level: 1
 Max level: 30
 Weight: 1
 
-Name: Kuronons_Weyland_128x64
+Name: Kuronons_SFlogo_Cyberdyne_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 1
 
-Name: Kuronons_OCP_128x64
+Name: Kuronons_SFlogo_OCP_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 1
 
-Name: Kuronons_Skynet_128x64
+Name: Kuronons_SFlogo_Rekall_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 1
+
+Name: Kuronons_SFlogo_Skynet_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 1
+
+Name: Kuronons_SFlogo_Tyrell_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 1
+
+Name: Kuronons_SFlogo_Weyland_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
