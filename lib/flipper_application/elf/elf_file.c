@@ -10,6 +10,13 @@
 #define IS_FLAGS_SET(v, m) ((v & m) == m)
 #define RESOLVER_THREAD_YIELD_STEP 30
 
+// #define ELF_DEBUG_LOG 1
+
+#ifndef ELF_DEBUG_LOG
+#undef FURI_LOG_D
+#define FURI_LOG_D(...)
+#endif
+
 #define TRAMPOLINE_CODE_SIZE 6
 
 /**
@@ -155,7 +162,7 @@ static Elf32_Addr elf_address_of(ELFFile* elf, Elf32_Sym* sym, const char* sName
     return ELF_INVALID_ADDRESS;
 }
 
-static const char* elf_reloc_type_to_str(int symt) {
+__attribute__((unused)) static const char* elf_reloc_type_to_str(int symt) {
 #define STRCASE(name) \
     case name:        \
         return #name;
@@ -338,7 +345,7 @@ static bool elf_relocate(ELFFile* elf, Elf32_Shdr* h, ELFSection* s) {
 
         return relocate_result;
     } else {
-        FURI_LOG_I(TAG, "Section not loaded");
+        FURI_LOG_D(TAG, "Section not loaded");
     }
 
     return false;
@@ -483,7 +490,7 @@ static SectionType elf_preload_section(
 static bool elf_load_section_data(ELFFile* elf, ELFSection* section) {
     Elf32_Shdr section_header;
     if(section->sec_idx == 0) {
-        FURI_LOG_I(TAG, "Section is not present");
+        FURI_LOG_D(TAG, "Section is not present");
         return true;
     }
 
@@ -492,7 +499,7 @@ static bool elf_load_section_data(ELFFile* elf, ELFSection* section) {
     }
 
     if(section_header.sh_size == 0) {
-        FURI_LOG_I(TAG, "No data for section");
+        FURI_LOG_D(TAG, "No data for section");
         return true;
     }
 
