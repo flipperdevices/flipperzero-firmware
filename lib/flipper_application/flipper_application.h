@@ -1,3 +1,7 @@
+/**
+ * @file flipper_application.h
+ * Flipper application
+ */
 #pragma once
 
 #include "application_manifest.h"
@@ -79,6 +83,11 @@ void flipper_application_free(FlipperApplication* app);
 FlipperApplicationPreloadStatus
     flipper_application_preload(FlipperApplication* app, const char* path);
 
+/**
+ * @brief Validate elf file and load application manifest 
+ * @param app Application pointer
+ * @return Preload result code
+ */
 FlipperApplicationPreloadStatus
     flipper_application_preload_manifest(FlipperApplication* app, const char* path);
 

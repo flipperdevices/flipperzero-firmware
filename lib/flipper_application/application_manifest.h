@@ -1,3 +1,7 @@
+/**
+ * @file application_manifest.h
+ * Flipper application manifest
+ */
 #pragma once
 
 #include <stdint.h>
@@ -42,8 +46,21 @@ typedef FlipperApplicationManifestV1 FlipperApplicationManifest;
 
 #pragma pack(pop)
 
+/**
+ * @brief Check if manifest is valid
+ * 
+ * @param manifest 
+ * @return bool 
+ */
 bool flipper_application_manifest_is_valid(const FlipperApplicationManifest* manifest);
 
+/**
+ * @brief Check if manifest is compatible with current ELF API interface
+ * 
+ * @param manifest 
+ * @param api_interface 
+ * @return bool 
+ */
 bool flipper_application_manifest_is_compatible(
     const FlipperApplicationManifest* manifest,
     const ElfApiInterface* api_interface);

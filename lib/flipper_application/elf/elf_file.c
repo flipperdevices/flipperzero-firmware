@@ -53,12 +53,12 @@ static void address_cache_put(AddressCache_t cache, int symEntry, Elf32_Addr sym
 /********************************************** ELF ***********************************************/
 /**************************************************************************************************/
 
-ELFSection* elf_file_get_section(ELFFile* elf, const char* name) {
+static ELFSection* elf_file_get_section(ELFFile* elf, const char* name) {
     return ELFSectionDict_get(elf->sections, name);
     ;
 }
 
-void elf_file_put_section(ELFFile* elf, const char* name, ELFSection* section) {
+static void elf_file_put_section(ELFFile* elf, const char* name, ELFSection* section) {
     ELFSectionDict_set_at(elf->sections, strdup(name), *section);
 }
 
@@ -355,7 +355,7 @@ static bool elf_relocate(ELFFile* elf, Elf32_Shdr* h, ELFSection* s) {
 /********************************************* MISC ***********************************************/
 /**************************************************************************************************/
 
-bool cstr_prefix(const char* prefix, const char* string) {
+static bool cstr_prefix(const char* prefix, const char* string) {
     return strncmp(prefix, string, strlen(prefix)) == 0;
 }
 
