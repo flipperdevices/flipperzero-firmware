@@ -120,13 +120,6 @@ Min level: 4
 Max level: 30
 Weight: 6
 
-Name: Sasquach_StickFight_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 5
-
 Name: MjK_Starfield_128x64
 Min butthurt: 0
 Max butthurt: 14
