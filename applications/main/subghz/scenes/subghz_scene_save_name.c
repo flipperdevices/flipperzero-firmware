@@ -19,7 +19,7 @@ void subghz_scene_save_name_get_timefilename(string_t name, uint32_t frequency) 
     furi_hal_rtc_get_datetime(&datetime);
     string_printf(
         name,
-        "%.4d%.2d%.2d-%.2d%.2d%.2d-RAW-%d.%.2dMHz",
+        "R_%.4d.%.2d.%.2d-%.2d.%.2d.%.2d-%d.%.2dMHz",
         datetime.year,
         datetime.month,
         datetime.day,
