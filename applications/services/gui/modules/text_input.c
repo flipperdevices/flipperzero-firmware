@@ -232,13 +232,12 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
                     canvas_set_color(canvas, ColorBlack);
                 }
 
-                if(model->clear_default_text ||
-                   (text_length == 0 && char_is_lowercase(keys[column].text))) {
+                if(text_length == 0 && char_is_lowercase(keys[column].text)) {
                     canvas_draw_glyph(
                         canvas,
                         keyboard_origin_x + keys[column].x,
                         keyboard_origin_y + keys[column].y,
-                        char_to_uppercase(model, keys[column].text));
+                        char_to_uppercase(keys[column].text));
                 } else {
                     canvas_draw_glyph(
                         canvas,
@@ -305,7 +304,7 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, b
     uint8_t text_length = strlen(model->text_buffer);
 
     if(shift) {
-        selected = char_to_uppercase(model, selected);
+        selected = char_to_uppercase(selected);
     }
 
     if(selected == ENTER_KEY) {
