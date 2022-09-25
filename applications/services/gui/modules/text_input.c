@@ -130,8 +130,8 @@ static bool char_is_lowercase(char letter) {
     return (letter >= 0x61 && letter <= 0x7A);
 }
 
-static char char_to_uppercase(TextInputModel* model, const char letter) {
-    if(letter == '_' && !model->clear_default_text) {
+static char char_to_uppercase(const char letter) {
+    if(letter == '_') {
         return 0x20;
     } else if(isalpha(letter)) {
         return (letter - 0x20);
