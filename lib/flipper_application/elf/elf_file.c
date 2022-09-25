@@ -55,7 +55,6 @@ static void address_cache_put(AddressCache_t cache, int symEntry, Elf32_Addr sym
 
 static ELFSection* elf_file_get_section(ELFFile* elf, const char* name) {
     return ELFSectionDict_get(elf->sections, name);
-    ;
 }
 
 static void elf_file_put_section(ELFFile* elf, const char* name, ELFSection* section) {
