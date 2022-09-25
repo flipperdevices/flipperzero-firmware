@@ -38,22 +38,23 @@ To run cleanup (think of `make clean`) for specified targets, add `-c` option.
 
 ## FBT targets
 
-FBT keeps track of internal dependencies, so you only need to build the highest-level target you need, and FBT will make sure everything they depend on is up-to-date.
+**`fbt`** keeps track of internal dependencies, so you only need to build the highest-level target you need, and **`fbt`** will make sure everything they depend on is up-to-date.
 
 ### High-level (what you most likely need)
  
 - `fw_dist` - build & publish firmware to `dist` folder. This is a default target, when no other are specified
+- `plugin_dist` - build external plugins & publish to `dist` folder  
 - `updater_package`, `updater_minpackage` - build self-update package. Minimal version only inclues firmware's DFU file; full version also includes radio stack & resources for SD card
 - `copro_dist` - bundle Core2 FUS+stack binaries for qFlipper
 - `flash` - flash attached device with OpenOCD over ST-Link
 - `flash_usb`, `flash_usb_full` - build, upload and install update package to device over USB. See details on `updater_package`, `updater_minpackage` 
 - `debug` - build and flash firmware, then attach with gdb with firmware's .elf loaded
-- `debug_other` - attach gdb without loading any .elf. Allows to manually add external elf files with `add-symbol-file` in gdb
+- `debug_other`, `debug_other_blackmagic` - attach gdb without loading any .elf. Allows to manually add external elf files with `add-symbol-file` in gdb
 - `updater_debug` - attach gdb with updater's .elf loaded
 - `blackmagic` - debug firmware with Blackmagic probe (WiFi dev board)
 - `openocd` - just start OpenOCD
 - `get_blackmagic` - output blackmagic address in gdb remote format. Useful for IDE integration
-- `lint`, `format` - run clang-tidy on C source code to check and reformat it according to `.clang-format` specs
+- `lint`, `format` - run clang-format on C source code to check and reformat it according to `.clang-format` specs
 - `lint_py`, `format_py` - run [black](https://black.readthedocs.io/en/stable/index.html) on Python source code, build system files & application manifests 
 
 ### Firmware targets
@@ -82,7 +83,7 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 ## Command-line parameters
 
 - `--options optionfile.py` (default value `fbt_options.py`) - load file with multiple configuration values
-- `--with-updater` - enables updater-related targets and dependency tracking. Enabling this option introduces extra startup time costs, so use it when bundling update packages. _Explicily enabling this should no longer be required, fbt now has specific handling for updater-related targets_
+- `--with-updater` - enables updater-related targets and dependency tracking. Enabling this option introduces extra startup time costs, so use it when bundling update packages. _Explicily enabling this should no longer be required, **`fbt`** now has specific handling for updater-related targets_
 - `--extra-int-apps=app1,app2,appN` - forces listed apps to be built as internal with `firmware` target
 - `--extra-ext-apps=app1,app2,appN` - forces listed apps to be built as external with `firmware_extapps` target
 
