@@ -1,5 +1,4 @@
 #include "bq25896.h"
-#include "bq25896_reg.h"
 
 #include <stddef.h>
 
