@@ -368,9 +368,9 @@ void furi_hal_flash_program_page(const uint8_t page, const uint8_t* data, uint16
 
     /* Write as much data as we can in fast mode */
     if(length >= FAST_PROG_BLOCK_SIZE) {
+        taskENTER_CRITICAL();
         /* Enable fast flash programming mode */
         SET_BIT(FLASH->CR, FLASH_CR_FSTPG);
-        taskENTER_CRITICAL();
 
         while(length_written < (length / FAST_PROG_BLOCK_SIZE * FAST_PROG_BLOCK_SIZE)) {
             /* No context switch in the middle of the operation */
@@ -383,8 +383,8 @@ void furi_hal_flash_program_page(const uint8_t page, const uint8_t* data, uint16
                 furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT));
             }
         }
-        taskEXIT_CRITICAL();
         CLEAR_BIT(FLASH->CR, FLASH_CR_FSTPG);
+        taskEXIT_CRITICAL();
     }
 
     /* Enable regular (dword) programming mode */
