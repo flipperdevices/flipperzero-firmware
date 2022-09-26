@@ -370,10 +370,10 @@ void furi_hal_flash_program_page(const uint8_t page, const uint8_t* data, uint16
     if(length >= FAST_PROG_BLOCK_SIZE) {
         /* Enable fast flash programming mode */
         SET_BIT(FLASH->CR, FLASH_CR_FSTPG);
+        taskENTER_CRITICAL();
 
         while(length_written < (length / FAST_PROG_BLOCK_SIZE * FAST_PROG_BLOCK_SIZE)) {
             /* No context switch in the middle of the operation */
-            taskENTER_CRITICAL();
             furi_hal_flash_write_dword_internal_nowait(
                 page_start_address + length_written, (uint64_t*)(data + length_written));
             length_written += DWORD_PROG_BLOCK_SIZE;
@@ -382,8 +382,8 @@ void furi_hal_flash_program_page(const uint8_t page, const uint8_t* data, uint16
                 /* Wait for block operation to be completed */
                 furi_check(furi_hal_flash_wait_last_operation(FURI_HAL_FLASH_TIMEOUT));
             }
-            taskEXIT_CRITICAL();
         }
+        taskEXIT_CRITICAL();
         CLEAR_BIT(FLASH->CR, FLASH_CR_FSTPG);
     }
 
@@ -492,6 +492,7 @@ static const FuriHalFlashObMapping furi_hal_flash_ob_reg_map[FURI_HAL_FLASH_OB_T
     OB_REG_DEF(FuriHalFlashObRegisterSecureFlash, (NULL)),
     OB_REG_DEF(FuriHalFlashObRegisterC2Opts, (NULL)),
 };
+#undef OB_REG_DEF
 
 void furi_hal_flash_ob_apply() {
     furi_hal_flash_ob_unlock();
