@@ -37,6 +37,7 @@ for lib in libs_recurse:
 libs_plain = [
     "heatshrink",
     "nanopb",
+    "mlib",
 ]
 
 for lib in libs_plain:
