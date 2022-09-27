@@ -11,7 +11,7 @@
 
 #define LFS_BACKUP_DEFAULT_LOCATION EXT_PATH(LFS_BACKUP_DEFAULT_FILENAME)
 
-static void backup_name_converter(string_t filename) {
+static void backup_name_converter(FuriString* filename) {
     if(string_empty_p(filename) || (string_get_char(filename, 0) == '.')) {
         return;
     }
@@ -27,8 +27,8 @@ static void backup_name_converter(string_t filename) {
     };
 
     for(size_t i = 0; i < COUNT_OF(names); i++) {
-        if(string_equal_str_p(filename, &names[i][1])) {
-            string_set_str(filename, names[i]);
+        if(furi_string_equal(filename, &names[i][1])) {
+            furi_string_set(filename, names[i]);
             return;
         }
     }

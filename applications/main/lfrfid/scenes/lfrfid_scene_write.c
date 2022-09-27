@@ -23,7 +23,7 @@ void lfrfid_scene_write_on_enter(void* context) {
 
     popup_set_header(popup, "Writing", 89, 30, AlignCenter, AlignTop);
     if(!string_empty_p(app->file_name)) {
-        popup_set_text(popup, string_get_cstr(app->file_name), 89, 43, AlignCenter, AlignTop);
+        popup_set_text(popup, furi_string_get_cstr(app->file_name), 89, 43, AlignCenter, AlignTop);
     } else {
         popup_set_text(
             popup,

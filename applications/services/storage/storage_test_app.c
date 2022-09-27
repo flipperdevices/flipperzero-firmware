@@ -224,13 +224,13 @@ static void do_dir_test(Storage* api, const char* path) {
 }
 
 static void do_test_start(Storage* api, const char* path) {
-    string_t str_path;
+    FuriString* str_path;
     string_init_printf(str_path, "%s/test-folder", path);
 
     FURI_LOG_I(TAG, "--------- START \"%s\" ---------", path);
 
     // mkdir
-    FS_Error result = storage_common_mkdir(api, string_get_cstr(str_path));
+    FS_Error result = storage_common_mkdir(api, furi_string_get_cstr(str_path));
 
     if(result == FSE_OK) {
         FURI_LOG_I(TAG, "mkdir ok");
@@ -240,7 +240,7 @@ static void do_test_start(Storage* api, const char* path) {
 
     // stat
     FileInfo fileinfo;
-    result = storage_common_stat(api, string_get_cstr(str_path), &fileinfo);
+    result = storage_common_stat(api, furi_string_get_cstr(str_path), &fileinfo);
 
     if(result == FSE_OK) {
         if(fileinfo.flags & FSF_DIRECTORY) {
@@ -252,14 +252,14 @@ static void do_test_start(Storage* api, const char* path) {
         FURI_LOG_E(TAG, "stat #1, %s", storage_error_get_desc(result));
     }
 
-    string_clear(str_path);
+    furi_string_free(str_path);
 }
 
 static void do_test_end(Storage* api, const char* path) {
     uint64_t total_space;
     uint64_t free_space;
-    string_t str_path_1;
-    string_t str_path_2;
+    FuriString* str_path_1;
+    FuriString* str_path_2;
     string_init_printf(str_path_1, "%s/test-folder", path);
     string_init_printf(str_path_2, "%s/test-folder2", path);
 
@@ -277,7 +277,8 @@ static void do_test_end(Storage* api, const char* path) {
     }
 
     // rename #1
-    result = storage_common_rename(api, string_get_cstr(str_path_1), string_get_cstr(str_path_2));
+    result = storage_common_rename(
+        api, furi_string_get_cstr(str_path_1), furi_string_get_cstr(str_path_2));
     if(result == FSE_OK) {
         FURI_LOG_I(TAG, "rename #1 ok");
     } else {
@@ -285,7 +286,7 @@ static void do_test_end(Storage* api, const char* path) {
     }
 
     // remove #1
-    result = storage_common_remove(api, string_get_cstr(str_path_2));
+    result = storage_common_remove(api, furi_string_get_cstr(str_path_2));
     if(result == FSE_OK) {
         FURI_LOG_I(TAG, "remove #1 ok");
     } else {
@@ -293,10 +294,11 @@ static void do_test_end(Storage* api, const char* path) {
     }
 
     // rename #2
-    string_printf(str_path_1, "%s/test.txt", path);
-    string_printf(str_path_2, "%s/test2.txt", path);
+    furi_string_printf(str_path_1, "%s/test.txt", path);
+    furi_string_printf(str_path_2, "%s/test2.txt", path);
 
-    result = storage_common_rename(api, string_get_cstr(str_path_1), string_get_cstr(str_path_2));
+    result = storage_common_rename(
+        api, furi_string_get_cstr(str_path_1), furi_string_get_cstr(str_path_2));
     if(result == FSE_OK) {
         FURI_LOG_I(TAG, "rename #2 ok");
     } else {
@@ -304,15 +306,15 @@ static void do_test_end(Storage* api, const char* path) {
     }
 
     // remove #2
-    result = storage_common_remove(api, string_get_cstr(str_path_2));
+    result = storage_common_remove(api, furi_string_get_cstr(str_path_2));
     if(result == FSE_OK) {
         FURI_LOG_I(TAG, "remove #2 ok");
     } else {
         FURI_LOG_E(TAG, "remove #2, %s", storage_error_get_desc(result));
     }
 
-    string_clear(str_path_1);
-    string_clear(str_path_2);
+    furi_string_free(str_path_1);
+    furi_string_free(str_path_2);
 }
 
 int32_t storage_test_app(void* p) {

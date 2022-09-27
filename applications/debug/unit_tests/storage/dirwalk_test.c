@@ -83,15 +83,15 @@ static StorageTestPathDict_t*
     StorageTestPathDict_init(*data);
 
     for(size_t i = 0; i < paths_count; i++) {
-        string_t key;
-        string_init_set(key, paths[i].path);
+        FuriString* key;
+        key = furi_string_alloc_set_cstr(paths[i].path);
         StorageTestPath value = {
             .is_dir = paths[i].is_dir,
             .visited = false,
         };
 
         StorageTestPathDict_set_at(*data, key, value);
-        string_clear(key);
+        furi_string_free(key);
     }
 
     return data;
@@ -102,7 +102,7 @@ static void storage_test_paths_free(StorageTestPathDict_t* data) {
     free(data);
 }
 
-static bool storage_test_paths_mark(StorageTestPathDict_t* data, string_t path, bool is_dir) {
+static bool storage_test_paths_mark(StorageTestPathDict_t* data, FuriString* path, bool is_dir) {
     bool found = false;
 
     StorageTestPath* record = StorageTestPathDict_get(*data, path);
@@ -148,27 +148,27 @@ static bool write_file_13DA(Storage* storage, const char* path) {
 }
 
 static void storage_dirs_create(Storage* storage, const char* base) {
-    string_t path;
-    string_init(path);
+    FuriString* path;
+    path = furi_string_alloc();
 
     storage_common_mkdir(storage, base);
 
     for(size_t i = 0; i < COUNT_OF(storage_test_dirwalk_paths); i++) {
-        string_printf(path, "%s/%s", base, storage_test_dirwalk_paths[i]);
-        storage_common_mkdir(storage, string_get_cstr(path));
+        furi_string_printf(path, "%s/%s", base, storage_test_dirwalk_paths[i]);
+        storage_common_mkdir(storage, furi_string_get_cstr(path));
     }
 
     for(size_t i = 0; i < COUNT_OF(storage_test_dirwalk_files); i++) {
-        string_printf(path, "%s/%s", base, storage_test_dirwalk_files[i]);
-        write_file_13DA(storage, string_get_cstr(path));
+        furi_string_printf(path, "%s/%s", base, storage_test_dirwalk_files[i]);
+        write_file_13DA(storage, furi_string_get_cstr(path));
     }
 
-    string_clear(path);
+    furi_string_free(path);
 }
 
 MU_TEST_1(test_dirwalk_full, Storage* storage) {
-    string_t path;
-    string_init(path);
+    FuriString* path;
+    path = furi_string_alloc();
     FileInfo fileinfo;
 
     StorageTestPathDict_t* paths =
@@ -183,7 +183,7 @@ MU_TEST_1(test_dirwalk_full, Storage* storage) {
     }
 
     dir_walk_free(dir_walk);
-    string_clear(path);
+    furi_string_free(path);
 
     mu_check(storage_test_paths_check(paths) == false);
 
@@ -191,8 +191,8 @@ MU_TEST_1(test_dirwalk_full, Storage* storage) {
 }
 
 MU_TEST_1(test_dirwalk_no_recursive, Storage* storage) {
-    string_t path;
-    string_init(path);
+    FuriString* path;
+    path = furi_string_alloc();
     FileInfo fileinfo;
 
     StorageTestPathDict_t* paths = storage_test_paths_alloc(
@@ -208,7 +208,7 @@ MU_TEST_1(test_dirwalk_no_recursive, Storage* storage) {
     }
 
     dir_walk_free(dir_walk);
-    string_clear(path);
+    furi_string_free(path);
 
     mu_check(storage_test_paths_check(paths) == false);
 
@@ -230,8 +230,8 @@ static bool test_dirwalk_filter_no_folder_ext(const char* name, FileInfo* filein
 }
 
 MU_TEST_1(test_dirwalk_filter, Storage* storage) {
-    string_t path;
-    string_init(path);
+    FuriString* path;
+    path = furi_string_alloc();
     FileInfo fileinfo;
 
     StorageTestPathDict_t* paths = storage_test_paths_alloc(
@@ -247,7 +247,7 @@ MU_TEST_1(test_dirwalk_filter, Storage* storage) {
     }
 
     dir_walk_free(dir_walk);
-    string_clear(path);
+    furi_string_free(path);
 
     mu_check(storage_test_paths_check(paths) == false);
 

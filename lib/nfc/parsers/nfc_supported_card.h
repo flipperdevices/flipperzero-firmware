@@ -4,7 +4,7 @@
 #include "../nfc_worker.h"
 #include "../nfc_device.h"
 
-#include <m-string.h>
+#include <core/furi_string.h>
 
 typedef enum {
     NfcSupportedCardTypePlantain,

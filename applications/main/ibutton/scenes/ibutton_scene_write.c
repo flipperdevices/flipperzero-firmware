@@ -1,5 +1,5 @@
 #include "../ibutton_i.h"
-#include "m-string.h"
+#include <core/furi_string.h>
 #include "toolbox/path.h"
 
 typedef enum {
@@ -20,8 +20,8 @@ void ibutton_scene_write_on_enter(void* context) {
 
     const uint8_t* key_data = ibutton_key_get_data_p(key);
 
-    string_t key_name;
-    string_init(key_name);
+    FuriString* key_name;
+    key_name = furi_string_alloc();
     if(string_end_with_str_p(ibutton->file_path, IBUTTON_APP_EXTENSION)) {
         path_extract_filename(ibutton->file_path, key_name, true);
     }
@@ -30,7 +30,7 @@ void ibutton_scene_write_on_enter(void* context) {
 
     // check that stored key has name
     if(!string_empty_p(key_name)) {
-        ibutton_text_store_set(ibutton, "writing\n%s", string_get_cstr(key_name));
+        ibutton_text_store_set(ibutton, "writing\n%s", furi_string_get_cstr(key_name));
         line_count = 2;
     } else {
         // if not, show key data
@@ -85,7 +85,7 @@ void ibutton_scene_write_on_enter(void* context) {
     ibutton_worker_write_set_callback(worker, ibutton_scene_write_callback, ibutton);
     ibutton_worker_write_start(worker, key);
 
-    string_clear(key_name);
+    furi_string_free(key_name);
 
     ibutton_notification_message(ibutton, iButtonNotificationMessageEmulateStart);
 }

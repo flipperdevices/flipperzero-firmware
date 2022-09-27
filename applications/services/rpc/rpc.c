@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stream_buffer.h>
-#include <m-string.h>
+#include <core/furi_string.h>
 #include <m-dict.h>
 
 #define TAG "RpcSrv"

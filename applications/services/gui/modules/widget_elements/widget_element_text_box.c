@@ -1,5 +1,5 @@
 #include "widget_element_i.h"
-#include <m-string.h>
+#include <core/furi_string.h>
 #include <gui/elements.h>
 
 typedef struct {
@@ -9,7 +9,7 @@ typedef struct {
     uint8_t height;
     Align horizontal;
     Align vertical;
-    string_t text;
+    FuriString* text;
     bool strip_to_dots;
 } GuiTextBoxModel;
 
@@ -18,7 +18,7 @@ static void gui_text_box_draw(Canvas* canvas, WidgetElement* element) {
     furi_assert(element);
     GuiTextBoxModel* model = element->model;
 
-    if(string_size(model->text)) {
+    if(furi_string_size(model->text)) {
         elements_text_box(
             canvas,
             model->x,
@@ -27,7 +27,7 @@ static void gui_text_box_draw(Canvas* canvas, WidgetElement* element) {
             model->height,
             model->horizontal,
             model->vertical,
-            string_get_cstr(model->text),
+            furi_string_get_cstr(model->text),
             model->strip_to_dots);
     }
 }
@@ -36,7 +36,7 @@ static void gui_text_box_free(WidgetElement* gui_string) {
     furi_assert(gui_string);
 
     GuiTextBoxModel* model = gui_string->model;
-    string_clear(model->text);
+    furi_string_free(model->text);
     free(gui_string->model);
     free(gui_string);
 }
@@ -60,7 +60,7 @@ WidgetElement* widget_element_text_box_create(
     model->height = height;
     model->horizontal = horizontal;
     model->vertical = vertical;
-    string_init_set_str(model->text, text);
+    model->text = furi_string_alloc_set(text);
     model->strip_to_dots = strip_to_dots;
 
     // Allocate and init Element

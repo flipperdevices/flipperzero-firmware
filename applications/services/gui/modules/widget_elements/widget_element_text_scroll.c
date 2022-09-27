@@ -1,5 +1,5 @@
 #include "widget_element_i.h"
-#include <m-string.h>
+#include <core/furi_string.h>
 #include <gui/elements.h>
 #include <m-array.h>
 
@@ -8,7 +8,7 @@
 typedef struct {
     Font font;
     Align horizontal;
-    string_t text;
+    FuriString* text;
 } TextScrollLineArray;
 
 ARRAY_DEF(TextScrollLineArray, TextScrollLineArray, M_POD_OPLIST)
@@ -19,14 +19,14 @@ typedef struct {
     uint8_t y;
     uint8_t width;
     uint8_t height;
-    string_t text;
+    FuriString* text;
     uint8_t scroll_pos_total;
     uint8_t scroll_pos_current;
     bool text_formatted;
 } WidgetElementTextScrollModel;
 
 static bool
-    widget_element_text_scroll_process_ctrl_symbols(TextScrollLineArray* line, string_t text) {
+    widget_element_text_scroll_process_ctrl_symbols(TextScrollLineArray* line, FuriString* text) {
     bool processed = false;
 
     do {
@@ -51,7 +51,7 @@ void widget_element_text_scroll_add_line(WidgetElement* element, TextScrollLineA
     TextScrollLineArray new_line;
     new_line.font = line->font;
     new_line.horizontal = line->horizontal;
-    string_init_set(new_line.text, line->text);
+    new_line.text = furi_string_alloc_set_cstr(line->text);
     TextScrollLineArray_push_back(model->line_array, new_line);
 }
 
@@ -59,7 +59,7 @@ static void widget_element_text_scroll_fill_lines(Canvas* canvas, WidgetElement*
     WidgetElementTextScrollModel* model = element->model;
     TextScrollLineArray line_tmp;
     bool all_text_processed = false;
-    string_init(line_tmp.text);
+    line_tmp.text = furi_string_alloc();
     bool reached_new_line = true;
     uint16_t total_height = 0;
 
@@ -68,7 +68,7 @@ static void widget_element_text_scroll_fill_lines(Canvas* canvas, WidgetElement*
             // Set default line properties
             line_tmp.font = FontSecondary;
             line_tmp.horizontal = AlignLeft;
-            string_reset(line_tmp.text);
+            furi_string_reset(line_tmp.text);
             // Process control symbols
             while(widget_element_text_scroll_process_ctrl_symbols(&line_tmp, model->text))
                 ;
@@ -86,13 +86,13 @@ static void widget_element_text_scroll_fill_lines(Canvas* canvas, WidgetElement*
         while(true) {
             char next_char = string_get_char(model->text, char_i++);
             if(next_char == '\0') {
-                string_push_back(line_tmp.text, '\0');
+                furi_string_push_back(line_tmp.text, '\0');
                 widget_element_text_scroll_add_line(element, &line_tmp);
                 total_height += params->leading_default - params->height;
                 all_text_processed = true;
                 break;
             } else if(next_char == '\n') {
-                string_push_back(line_tmp.text, '\0');
+                furi_string_push_back(line_tmp.text, '\0');
                 widget_element_text_scroll_add_line(element, &line_tmp);
                 string_right(model->text, char_i);
                 total_height += params->leading_default - params->height;
@@ -101,21 +101,21 @@ static void widget_element_text_scroll_fill_lines(Canvas* canvas, WidgetElement*
             } else {
                 line_width += canvas_glyph_width(canvas, next_char);
                 if(line_width > model->width) {
-                    string_push_back(line_tmp.text, '\0');
+                    furi_string_push_back(line_tmp.text, '\0');
                     widget_element_text_scroll_add_line(element, &line_tmp);
                     string_right(model->text, char_i - 1);
-                    string_reset(line_tmp.text);
+                    furi_string_reset(line_tmp.text);
                     total_height += params->leading_default - params->height;
                     reached_new_line = false;
                     break;
                 } else {
-                    string_push_back(line_tmp.text, next_char);
+                    furi_string_push_back(line_tmp.text, next_char);
                 }
             }
         }
     }
 
-    string_clear(line_tmp.text);
+    furi_string_free(line_tmp.text);
 }
 
 static void widget_element_text_scroll_draw(Canvas* canvas, WidgetElement* element) {
@@ -150,7 +150,7 @@ static void widget_element_text_scroll_draw(Canvas* canvas, WidgetElement* eleme
                 x = model->x + model->width;
             }
             canvas_draw_str_aligned(
-                canvas, x, y, line->horizontal, AlignTop, string_get_cstr(line->text));
+                canvas, x, y, line->horizontal, AlignTop, furi_string_get_cstr(line->text));
             y += params->leading_default;
         }
         // Draw scroll bar
@@ -205,10 +205,10 @@ static void widget_element_text_scroll_free(WidgetElement* text_scroll) {
     for(TextScrollLineArray_it(it, model->line_array); !TextScrollLineArray_end_p(it);
         TextScrollLineArray_next(it)) {
         TextScrollLineArray* line = TextScrollLineArray_ref(it);
-        string_clear(line->text);
+        furi_string_free(line->text);
     }
     TextScrollLineArray_clear(model->line_array);
-    string_clear(model->text);
+    furi_string_free(model->text);
     free(text_scroll->model);
     furi_mutex_free(text_scroll->model_mutex);
     free(text_scroll);
@@ -231,7 +231,7 @@ WidgetElement* widget_element_text_scroll_create(
     model->scroll_pos_current = 0;
     model->scroll_pos_total = 1;
     TextScrollLineArray_init(model->line_array);
-    string_init_set_str(model->text, text);
+    model->text = furi_string_alloc_set(text);
 
     WidgetElement* text_scroll = malloc(sizeof(WidgetElement));
     text_scroll->parent = NULL;

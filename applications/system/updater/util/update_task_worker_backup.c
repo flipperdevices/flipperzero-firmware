@@ -21,19 +21,22 @@
 
 static bool update_task_pre_update(UpdateTask* update_task) {
     bool success = false;
-    string_t backup_file_path;
-    string_init(backup_file_path);
+    FuriString* backup_file_path;
+    backup_file_path = furi_string_alloc();
     path_concat(
-        string_get_cstr(update_task->update_path), LFS_BACKUP_DEFAULT_FILENAME, backup_file_path);
+        furi_string_get_cstr(update_task->update_path),
+        LFS_BACKUP_DEFAULT_FILENAME,
+        backup_file_path);
 
     update_task_set_progress(update_task, UpdateTaskStageLfsBackup, 0);
     /* to avoid bootloops */
     furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeNormal);
-    if((success = lfs_backup_create(update_task->storage, string_get_cstr(backup_file_path)))) {
+    if((success =
+            lfs_backup_create(update_task->storage, furi_string_get_cstr(backup_file_path)))) {
         furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeUpdate);
     }
 
-    string_clear(backup_file_path);
+    furi_string_free(backup_file_path);
     return success;
 }
 
@@ -57,17 +60,19 @@ static bool update_task_resource_unpack_cb(const char* name, bool is_directory, 
 static bool update_task_post_update(UpdateTask* update_task) {
     bool success = false;
 
-    string_t file_path;
-    string_init(file_path);
+    FuriString* file_path;
+    file_path = furi_string_alloc();
 
     TarArchive* archive = tar_archive_alloc(update_task->storage);
     do {
         path_concat(
-            string_get_cstr(update_task->update_path), LFS_BACKUP_DEFAULT_FILENAME, file_path);
+            furi_string_get_cstr(update_task->update_path),
+            LFS_BACKUP_DEFAULT_FILENAME,
+            file_path);
 
         update_task_set_progress(update_task, UpdateTaskStageLfsRestore, 0);
 
-        CHECK_RESULT(lfs_backup_unpack(update_task->storage, string_get_cstr(file_path)));
+        CHECK_RESULT(lfs_backup_unpack(update_task->storage, furi_string_get_cstr(file_path)));
 
         if(update_task->state.groups & UpdateTaskStageGroupResources) {
             TarUnpackProgress progress = {
@@ -78,13 +83,13 @@ static bool update_task_post_update(UpdateTask* update_task) {
             update_task_set_progress(update_task, UpdateTaskStageResourcesUpdate, 0);
 
             path_concat(
-                string_get_cstr(update_task->update_path),
-                string_get_cstr(update_task->manifest->resource_bundle),
+                furi_string_get_cstr(update_task->update_path),
+                furi_string_get_cstr(update_task->manifest->resource_bundle),
                 file_path);
 
             tar_archive_set_file_callback(archive, update_task_resource_unpack_cb, &progress);
             CHECK_RESULT(
-                tar_archive_open(archive, string_get_cstr(file_path), TAR_OPEN_MODE_READ));
+                tar_archive_open(archive, furi_string_get_cstr(file_path), TAR_OPEN_MODE_READ));
 
             progress.total_files = tar_archive_get_entries_count(archive);
             if(progress.total_files > 0) {
@@ -94,23 +99,23 @@ static bool update_task_post_update(UpdateTask* update_task) {
 
         if(update_task->state.groups & UpdateTaskStageGroupSplashscreen) {
             update_task_set_progress(update_task, UpdateTaskStageSplashscreenInstall, 0);
-            string_t tmp_path;
-            string_init_set(tmp_path, update_task->update_path);
-            path_append(tmp_path, string_get_cstr(update_task->manifest->splash_file));
+            FuriString* tmp_path;
+            tmp_path = furi_string_alloc_set_cstr(update_task->update_path);
+            path_append(tmp_path, furi_string_get_cstr(update_task->manifest->splash_file));
             if(storage_common_copy(
                    update_task->storage,
-                   string_get_cstr(tmp_path),
+                   furi_string_get_cstr(tmp_path),
                    INT_PATH(SLIDESHOW_FILE_NAME)) != FSE_OK) {
                 // actually, not critical
             }
-            string_clear(tmp_path);
+            furi_string_free(tmp_path);
             update_task_set_progress(update_task, UpdateTaskStageSplashscreenInstall, 100);
         }
         success = true;
     } while(false);
 
     tar_archive_free(archive);
-    string_clear(file_path);
+    furi_string_free(file_path);
     return success;
 }
 

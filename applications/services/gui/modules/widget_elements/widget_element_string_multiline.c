@@ -1,5 +1,5 @@
 #include "widget_element_i.h"
-#include <m-string.h>
+#include <core/furi_string.h>
 #include <gui/elements.h>
 
 typedef struct {
@@ -8,7 +8,7 @@ typedef struct {
     Align horizontal;
     Align vertical;
     Font font;
-    string_t text;
+    FuriString* text;
 } GuiStringMultiLineModel;
 
 static void gui_string_multiline_draw(Canvas* canvas, WidgetElement* element) {
@@ -16,7 +16,7 @@ static void gui_string_multiline_draw(Canvas* canvas, WidgetElement* element) {
     furi_assert(element);
     GuiStringMultiLineModel* model = element->model;
 
-    if(string_size(model->text)) {
+    if(furi_string_size(model->text)) {
         canvas_set_font(canvas, model->font);
         elements_multiline_text_aligned(
             canvas,
@@ -24,7 +24,7 @@ static void gui_string_multiline_draw(Canvas* canvas, WidgetElement* element) {
             model->y,
             model->horizontal,
             model->vertical,
-            string_get_cstr(model->text));
+            furi_string_get_cstr(model->text));
     }
 }
 
@@ -32,7 +32,7 @@ static void gui_string_multiline_free(WidgetElement* gui_string) {
     furi_assert(gui_string);
 
     GuiStringMultiLineModel* model = gui_string->model;
-    string_clear(model->text);
+    furi_string_free(model->text);
     free(gui_string->model);
     free(gui_string);
 }
@@ -53,7 +53,7 @@ WidgetElement* widget_element_string_multiline_create(
     model->horizontal = horizontal;
     model->vertical = vertical;
     model->font = font;
-    string_init_set_str(model->text, text);
+    model->text = furi_string_alloc_set(text);
 
     // Allocate and init Element
     WidgetElement* gui_string = malloc(sizeof(WidgetElement));

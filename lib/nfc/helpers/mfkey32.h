@@ -1,7 +1,7 @@
 #pragma once
 
 #include <lib/nfc/protocols/mifare_classic.h>
-#include <m-string.h>
+#include <core/furi_string.h>
 
 typedef struct Mfkey32 Mfkey32;
 
@@ -24,4 +24,4 @@ void mfkey32_process_data(
 
 void mfkey32_set_callback(Mfkey32* instance, Mfkey32ParseDataCallback callback, void* context);
 
-uint16_t mfkey32_get_auth_sectors(string_t string);
+uint16_t mfkey32_get_auth_sectors(FuriString* string);

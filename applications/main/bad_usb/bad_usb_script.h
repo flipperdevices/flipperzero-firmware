@@ -5,7 +5,7 @@ extern "C" {
 #endif
 
 #include <furi.h>
-#include <m-string.h>
+#include <core/furi_string.h>
 
 typedef struct BadUsbScript BadUsbScript;
 
@@ -28,7 +28,7 @@ typedef struct {
     uint16_t error_line;
 } BadUsbState;
 
-BadUsbScript* bad_usb_script_open(string_t file_path);
+BadUsbScript* bad_usb_script_open(FuriString* file_path);
 
 void bad_usb_script_close(BadUsbScript* bad_usb);
 

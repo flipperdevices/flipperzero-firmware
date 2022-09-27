@@ -1,14 +1,14 @@
 #include "dialogs/dialogs_message.h"
 #include "dialogs_i.h"
 #include "dialogs_api_lock.h"
-#include "m-string.h"
+#include <core/furi_string.h>
 
 /****************** File browser ******************/
 
 bool dialog_file_browser_show(
     DialogsApp* context,
-    string_ptr result_path,
-    string_ptr path,
+    FuriString* result_path,
+    FuriString* path,
     const DialogsFileBrowserOptions* options) {
     FuriApiLock lock = API_LOCK_INIT_LOCKED();
     furi_check(lock != NULL);

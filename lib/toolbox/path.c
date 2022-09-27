@@ -1,9 +1,9 @@
 #include "path.h"
-#include "m-string.h"
+#include <core/furi_string.h>
 #include <stddef.h>
 
-void path_extract_filename_no_ext(const char* path, string_t filename) {
-    string_set(filename, path);
+void path_extract_filename_no_ext(const char* path, FuriString* filename) {
+    furi_string_set(filename, path);
 
     size_t start_position = string_search_rchar(filename, '/');
     size_t end_position = string_search_rchar(filename, '.');
@@ -15,17 +15,17 @@ void path_extract_filename_no_ext(const char* path, string_t filename) {
     }
 
     if(end_position == STRING_FAILURE) {
-        end_position = string_size(filename);
+        end_position = furi_string_size(filename);
     }
 
     string_mid(filename, start_position, end_position - start_position);
 }
 
-void path_extract_filename(string_t path, string_t name, bool trim_ext) {
+void path_extract_filename(FuriString* path, FuriString* name, bool trim_ext) {
     size_t filename_start = string_search_rchar(path, '/');
     if(filename_start > 0) {
         filename_start++;
-        string_set_n(name, path, filename_start, string_size(path) - filename_start);
+        string_set_n(name, path, filename_start, furi_string_size(path) - filename_start);
     }
     if(trim_ext) {
         size_t dot = string_search_rchar(name, '.');
@@ -35,24 +35,24 @@ void path_extract_filename(string_t path, string_t name, bool trim_ext) {
     }
 }
 
-void path_extract_extension(string_t path, char* ext, size_t ext_len_max) {
+void path_extract_extension(FuriString* path, char* ext, size_t ext_len_max) {
     size_t dot = string_search_rchar(path, '.');
     size_t filename_start = string_search_rchar(path, '/');
 
     if((dot > 0) && (filename_start < dot)) {
-        strlcpy(ext, &(string_get_cstr(path))[dot], ext_len_max);
+        strlcpy(ext, &(furi_string_get_cstr(path))[dot], ext_len_max);
     }
 }
 
-static inline void path_cleanup(string_t path) {
+static inline void path_cleanup(FuriString* path) {
     string_strim(path);
     while(string_end_with_str_p(path, "/")) {
-        string_left(path, string_size(path) - 1);
+        string_left(path, furi_string_size(path) - 1);
     }
 }
 
-void path_extract_basename(const char* path, string_t basename) {
-    string_set(basename, path);
+void path_extract_basename(const char* path, FuriString* basename) {
+    furi_string_set(basename, path);
     path_cleanup(basename);
     size_t pos = string_search_rchar(basename, '/');
     if(pos != STRING_FAILURE) {
@@ -60,8 +60,8 @@ void path_extract_basename(const char* path, string_t basename) {
     }
 }
 
-void path_extract_dirname(const char* path, string_t dirname) {
-    string_set(dirname, path);
+void path_extract_dirname(const char* path, FuriString* dirname) {
+    furi_string_set(dirname, path);
     path_cleanup(dirname);
     size_t pos = string_search_rchar(dirname, '/');
     if(pos != STRING_FAILURE) {
@@ -69,18 +69,18 @@ void path_extract_dirname(const char* path, string_t dirname) {
     }
 }
 
-void path_append(string_t path, const char* suffix) {
+void path_append(FuriString* path, const char* suffix) {
     path_cleanup(path);
-    string_t suffix_str;
-    string_init_set(suffix_str, suffix);
+    FuriString* suffix_str;
+    suffix_str = furi_string_alloc_set_cstr(suffix);
     string_strim(suffix_str);
     string_strim(suffix_str, "/");
-    string_cat_printf(path, "/%s", string_get_cstr(suffix_str));
-    string_clear(suffix_str);
+    furi_string_cat_printf(path, "/%s", furi_string_get_cstr(suffix_str));
+    furi_string_free(suffix_str);
 }
 
-void path_concat(const char* path, const char* suffix, string_t out_path) {
-    string_set(out_path, path);
+void path_concat(const char* path, const char* suffix, FuriString* out_path) {
+    furi_string_set(out_path, path);
     path_append(out_path, suffix);
 }
 

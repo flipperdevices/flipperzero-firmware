@@ -100,15 +100,15 @@ static inline bool infrared_signal_save_raw(InfraredRawSignal* raw, FlipperForma
 }
 
 static inline bool infrared_signal_read_message(InfraredSignal* signal, FlipperFormat* ff) {
-    string_t buf;
-    string_init(buf);
+    FuriString* buf;
+    buf = furi_string_alloc();
     bool success = false;
 
     do {
         if(!flipper_format_read_string(ff, "protocol", buf)) break;
 
         InfraredMessage message;
-        message.protocol = infrared_get_protocol_by_name(string_get_cstr(buf));
+        message.protocol = infrared_get_protocol_by_name(furi_string_get_cstr(buf));
 
         success = flipper_format_read_hex(ff, "address", (uint8_t*)&message.address, 4) &&
                   flipper_format_read_hex(ff, "command", (uint8_t*)&message.command, 4) &&
@@ -119,7 +119,7 @@ static inline bool infrared_signal_read_message(InfraredSignal* signal, FlipperF
         infrared_signal_set_message(signal, &message);
     } while(0);
 
-    string_clear(buf);
+    furi_string_free(buf);
     return success;
 }
 
@@ -226,14 +226,14 @@ bool infrared_signal_save(InfraredSignal* signal, FlipperFormat* ff, const char*
     }
 }
 
-bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, string_t name) {
-    string_t buf;
-    string_init(buf);
+bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, FuriString* name) {
+    FuriString* buf;
+    buf = furi_string_alloc();
     bool success = false;
 
     do {
         if(!flipper_format_read_string(ff, "name", buf)) break;
-        string_set(name, buf);
+        furi_string_set(name, buf);
         if(!flipper_format_read_string(ff, "type", buf)) break;
         if(!string_cmp_str(buf, "raw")) {
             success = infrared_signal_read_raw(signal, ff);
@@ -244,7 +244,7 @@ bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, string_t na
         }
     } while(0);
 
-    string_clear(buf);
+    furi_string_free(buf);
     return success;
 }
 

@@ -8,7 +8,7 @@
 
 #include <task.h>
 #include "log.h"
-#include <m-string.h>
+#include <core/furi_string.h>
 #include <furi_hal_rtc.h>
 #include <furi_hal_console.h>
 
@@ -18,7 +18,7 @@ typedef struct FuriThreadStdout FuriThreadStdout;
 
 struct FuriThreadStdout {
     FuriThreadStdoutWriteCallback write_callback;
-    string_t buffer;
+    FuriString* buffer;
 };
 
 struct FuriThread {
@@ -105,7 +105,7 @@ static void furi_thread_body(void* context) {
 
 FuriThread* furi_thread_alloc() {
     FuriThread* thread = malloc(sizeof(FuriThread));
-    string_init(thread->output.buffer);
+    thread->output.buffer = furi_string_alloc();
     thread->is_service = false;
     return thread;
 }
@@ -115,7 +115,7 @@ void furi_thread_free(FuriThread* thread) {
     furi_assert(thread->state == FuriThreadStateStopped);
 
     if(thread->name) free((void*)thread->name);
-    string_clear(thread->output.buffer);
+    furi_string_free(thread->output.buffer);
 
     free(thread);
 }
@@ -473,11 +473,11 @@ static size_t __furi_thread_stdout_write(FuriThread* thread, const char* data, s
 }
 
 static int32_t __furi_thread_stdout_flush(FuriThread* thread) {
-    string_ptr buffer = thread->output.buffer;
-    size_t size = string_size(buffer);
+    FuriString* buffer = thread->output.buffer;
+    size_t size = furi_string_size(buffer);
     if(size > 0) {
-        __furi_thread_stdout_write(thread, string_get_cstr(buffer), size);
-        string_reset(buffer);
+        __furi_thread_stdout_write(thread, furi_string_get_cstr(buffer), size);
+        furi_string_reset(buffer);
     }
     return 0;
 }
@@ -504,7 +504,7 @@ size_t furi_thread_stdout_write(const char* data, size_t size) {
         } else {
             // string_cat doesn't work here because we need to write the exact size data
             for(size_t i = 0; i < size; i++) {
-                string_push_back(thread->output.buffer, data[i]);
+                furi_string_push_back(thread->output.buffer, data[i]);
                 if(data[i] == '\n') {
                     __furi_thread_stdout_flush(thread);
                 }

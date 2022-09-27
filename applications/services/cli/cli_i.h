@@ -47,8 +47,8 @@ struct Cli {
     CliCommandTree_t commands;
     FuriMutex* mutex;
     FuriSemaphore* idle_sem;
-    string_t last_line;
-    string_t line;
+    FuriString* last_line;
+    FuriString* line;
     CliSession* session;
 
     size_t cursor_position;

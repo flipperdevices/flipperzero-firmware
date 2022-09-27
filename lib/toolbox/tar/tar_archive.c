@@ -183,14 +183,14 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
         return 0;
     }
 
-    string_t full_extracted_fname;
+    FuriString* full_extracted_fname;
     if(header->type == MTAR_TDIR) {
-        string_init(full_extracted_fname);
+        full_extracted_fname = furi_string_alloc();
         path_concat(op_params->work_dir, header->name, full_extracted_fname);
 
         bool create_res =
-            storage_simply_mkdir(archive->storage, string_get_cstr(full_extracted_fname));
-        string_clear(full_extracted_fname);
+            storage_simply_mkdir(archive->storage, furi_string_get_cstr(full_extracted_fname));
+        furi_string_free(full_extracted_fname);
         return create_res ? 0 : -1;
     }
 
@@ -199,15 +199,15 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
         return 0;
     }
 
-    string_init(full_extracted_fname);
+    full_extracted_fname = furi_string_alloc();
 
-    string_t converted_fname;
-    string_init_set(converted_fname, header->name);
+    FuriString* converted_fname;
+    converted_fname = furi_string_alloc_set_cstr(header->name);
     if(op_params->converter) {
         op_params->converter(converted_fname);
     }
-    path_concat(op_params->work_dir, string_get_cstr(converted_fname), full_extracted_fname);
-    string_clear(converted_fname);
+    path_concat(op_params->work_dir, furi_string_get_cstr(converted_fname), full_extracted_fname);
+    furi_string_free(converted_fname);
 
     FURI_LOG_D(TAG, "Extracting %d bytes to '%s'", header->size, header->name);
     File* out_file = storage_file_alloc(archive->storage);
@@ -219,7 +219,7 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
         while(n_tries-- > 0) {
             if(storage_file_open(
                    out_file,
-                   string_get_cstr(full_extracted_fname),
+                   furi_string_get_cstr(full_extracted_fname),
                    FSAM_WRITE,
                    FSOM_CREATE_ALWAYS)) {
                 break;
@@ -227,7 +227,7 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
             FURI_LOG_W(
                 TAG,
                 "Failed to open '%s', reties: %d",
-                string_get_cstr(full_extracted_fname),
+                furi_string_get_cstr(full_extracted_fname),
                 n_tries);
             storage_file_close(out_file);
             furi_delay_ms(FILE_OPEN_RETRY_DELAY);
@@ -249,7 +249,7 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
 
     storage_file_free(out_file);
     free(readbuf);
-    string_clear(full_extracted_fname);
+    furi_string_free(full_extracted_fname);
     return failed ? -1 : 0;
 }
 
@@ -332,32 +332,33 @@ bool tar_archive_add_dir(TarArchive* archive, const char* fs_full_path, const ch
                 break;
             }
 
-            string_t element_name, element_fs_abs_path;
-            string_init(element_name);
-            string_init(element_fs_abs_path);
+            FuriString *element_name, element_fs_abs_path;
+            element_name = furi_string_alloc();
+            element_fs_abs_path = furi_string_alloc();
 
             path_concat(fs_full_path, name, element_fs_abs_path);
             if(strlen(path_prefix)) {
                 path_concat(path_prefix, name, element_name);
             } else {
-                string_init_set(element_name, name);
+                element_name = furi_string_alloc_set_cstr(name);
             }
 
             if(file_info.flags & FSF_DIRECTORY) {
-                success = tar_archive_dir_add_element(archive, string_get_cstr(element_name)) &&
-                          tar_archive_add_dir(
-                              archive,
-                              string_get_cstr(element_fs_abs_path),
-                              string_get_cstr(element_name));
+                success =
+                    tar_archive_dir_add_element(archive, furi_string_get_cstr(element_name)) &&
+                    tar_archive_add_dir(
+                        archive,
+                        furi_string_get_cstr(element_fs_abs_path),
+                        furi_string_get_cstr(element_name));
             } else {
                 success = tar_archive_add_file(
                     archive,
-                    string_get_cstr(element_fs_abs_path),
-                    string_get_cstr(element_name),
+                    furi_string_get_cstr(element_fs_abs_path),
+                    furi_string_get_cstr(element_name),
                     file_info.size);
             }
-            string_clear(element_name);
-            string_clear(element_fs_abs_path);
+            furi_string_free(element_name);
+            furi_string_free(element_fs_abs_path);
 
             if(!success) {
                 break;

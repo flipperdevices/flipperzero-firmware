@@ -2,7 +2,7 @@
 #include <core/check.h>
 #include <core/log.h>
 #include "furi_hal.h"
-#include "m-string.h"
+#include <core/furi_string.h>
 
 #define DEFAULT_PATH "/"
 #define EXTENSION "*"
