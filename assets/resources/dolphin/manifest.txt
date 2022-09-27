@@ -15,12 +15,19 @@ Min level: 18
 Max level: 30
 Weight: 0
 
-Name: Haseo_Nud3_128x64
+Name: RM_Reb00t_128x64
 Min butthurt: 0
 Max butthurt: 14
-Min level: 18
+Min level: 1
 Max level: 30
-Weight: 0
+Weight: 7
+
+Name: RM_Tardi5_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 7
 
 Name: Haseo_Lufy_128x64
 Min butthurt: 0
