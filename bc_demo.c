@@ -465,8 +465,8 @@ bool  stateInit (state_t* const state,  const Gui* gui)
 	}
 
 	//! use of "gui->canvas" is a hack!
-	state->cnvW       = canvas_width(gui->canvas);
-	state->cnvH       = canvas_height(gui->canvas);
+	state->cnvW       = 128;//canvas_width(gui->canvas);
+	state->cnvH       = 64;//canvas_height(gui->canvas);
 
 	state->ballR      = 5;  // radius
 	animateSet(state->animID, state, gui);
