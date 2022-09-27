@@ -134,19 +134,19 @@ Min level: 1
 Max level: 30
 Weight: 7
 
-Name: L3_Fireplace_128x64
-Min butthurt: 0
-Max butthurt: 13
-Min level: 10
-Max level: 30
-Weight: 8
-
 Name: Kuronons_RMCFW_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 4
 Max level: 30
 Weight: 6
+
+Name: Haseo_80s_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 5
 
 Name: Sasquach_StickFight_128x64
 Min butthurt: 0
@@ -159,6 +159,13 @@ Name: MjK_Starfield_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
+Max level: 30
+Weight: 5
+
+Name: L3_Fireplace_128x64
+Min butthurt: 0
+Max butthurt: 13
+Min level: 10
 Max level: 30
 Weight: 5
 
