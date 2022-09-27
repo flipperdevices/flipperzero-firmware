@@ -13,12 +13,6 @@
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-09-27 04:47 GMT`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-09-27 04:47 GMT`
-- Assets: Includes New Dolphin Animations: [Shar!ngan (By Haseo)]
-- Added [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
-- Assets: Includes New Dolphin Animations: [Lions Roar (By qqMajiKpp)]
-- Actually updated to [Quiet Frequency Analyzer (By Himura2la)](https://github.com/ClusterM/flipperzero-firmware/pull/1)
-- Added PR [Remove unused headers (In power.c) #1751 (By kowalski7cc)](https://github.com/flipperdevices/flipperzero-firmware/pull/1751)
-- Assets: Includes New Dolphin Animations: [0ne Pi3ce (By Haseo)]
 - Assets: Includes New Dolphin Animations: [Calcifier & Last Unicorn (By NeonKodama)]
 - Assets: Includes New Dolphin Animations: [Jiji Milk (By NeonKodama)]
 - Assets: Includes New Dolphin Animations: [Kam3Ham3Ha (By RogueMaster)]
@@ -31,6 +25,8 @@
 - Assets: Includes New Dolphin Animations: [Hexadecimal (By RogueMaster)]
 - Assets: Includes New Dolphin Animations: [Halloween (By RogueMaster)]
 - Assets: Includes New Dolphin Animations: [Rekall (By Kuronons)]
+- Restored iButton CLI [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/346)
+- Corrected MiFare Classic Dictionary [thanks to bernouilli](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/347)
 - Assets: Includes New Dolphin Animations: [Stick Fight (By Sasquach)]
 - Assets: Includes New Dolphin Animations: [G0ku, Lufy & Mug1wara (By Haseo)]
 - Assets: Includes New Dolphin Animations: [Tardi5 (By RogueMaster)]
@@ -182,9 +178,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
 - [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 - [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
-- [Add new card parsers #1503 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1503)(https://github.com/flipperdevices/flipperzero-firmware/pull/1729)
 - [SD info: Add dynamic units and free % #1634 (By non-bin)](https://github.com/flipperdevices/flipperzero-firmware/pull/1634)
-- [SubGhz: fix config menu #1748 (By skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1748)
 
 </details>
 
