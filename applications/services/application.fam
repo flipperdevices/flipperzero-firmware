@@ -10,5 +10,6 @@ App(
         "loader",
         "power",
 		"ibuttonsrv",
+        "namechangersrv",
     ],
 )
