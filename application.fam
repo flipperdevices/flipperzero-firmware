@@ -1,3 +1,5 @@
+# qv. https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppManifests.md
+
 App(
     appid="bc_demo",
     name="Bluechip Demo",

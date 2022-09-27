@@ -9,6 +9,7 @@
 
 // FlipperZero libs
 #include  <furi.h>         // Core API
+#include  <furi_hal.h>     // hardware abstraction layer (eg. speaker)
 #include  <gui/gui.h>      // GUI (screen/keyboard) API
 #include  <input/input.h>  // GUI Input extensions
 
@@ -164,7 +165,7 @@ void  cbDraw (Canvas* const canvas,  void* ctx)
 // If we want the code in a sane order, we need to "prototype" [forward declare] these functions
 static void  animateSet (animID_t,  state_t* const,  const Gui*) ;
 static void  animateEn  (state_t*,  bool on) ;
-static void  animate    (state_t*) ;
+static int   animate    (state_t*) ;
 static bool  move       (state_t*,  dir_t) ;
 
 //+============================================================================ ========================================
@@ -177,7 +178,13 @@ void  evTick (state_t* state)
 	ENTER;
 	furi_assert(state);
 
-	animate(state);
+	if (animate(state)) {  // true if edge of screen tapped
+		// https://pages.mtu.edu/~suits/notefreqs.html
+		int  penta[5] = {554, 622, 740, 831, 932};  // notes in c# pentatonic scale
+		furi_hal_speaker_start(penta[rand() %5], 0.5);
+	} else {
+		furi_hal_speaker_stop();
+	}
 
 	LEAVE;
 	return;
@@ -396,15 +403,18 @@ void  animateEn (state_t* state,  bool on)
 
 //+============================================================================ ========================================
 // Animate the logo
+// Returns 'true' is the edge of the screen was tapped
 //
 static
-void  animate (state_t* state)
+int  animate (state_t* state)
 {
 	ENTER;
 	furi_assert(state);
 
+	dir_t  old = state->dir;
+
 	// Animations are disabled ?
-	if (!state->animate)  return ;
+	if (!state->animate)  return false ;
 
 	// UP/DOWN requested?
 	if (state->dir & DIR_U) {
@@ -422,7 +432,7 @@ void  animate (state_t* state)
 	}
 
 	LEAVE;
-	return;
+	return (old != state->dir) ;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
