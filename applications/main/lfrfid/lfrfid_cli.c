@@ -115,7 +115,7 @@ static void lfrfid_cli_read(Cli* cli, FuriString* args) {
         FuriString* info;
         info = furi_string_alloc();
         protocol_dict_render_data(dict, info, context.protocol);
-        if(!string_empty_p(info)) {
+        if(!furi_string_empty_p(info)) {
             printf("%s\r\n", furi_string_get_cstr(info));
         }
         furi_string_free(info);
@@ -129,7 +129,7 @@ static void lfrfid_cli_read(Cli* cli, FuriString* args) {
 
 static bool lfrfid_cli_parse_args(FuriString* args, ProtocolDict* dict, ProtocolId* protocol) {
     bool result = false;
-    FuriString *protocol_name, data_text;
+    FuriString *protocol_name, *data_text;
     protocol_name = furi_string_alloc();
     data_text = furi_string_alloc();
     size_t data_size = protocol_dict_get_max_data_size(dict);
@@ -264,7 +264,7 @@ static void lfrfid_cli_emulate(Cli* cli, FuriString* args) {
 
 static void lfrfid_cli_raw_analyze(Cli* cli, FuriString* args) {
     UNUSED(cli);
-    FuriString *filepath, info_string;
+    FuriString *filepath, *info_string;
     filepath = furi_string_alloc();
     info_string = furi_string_alloc();
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -392,7 +392,7 @@ static void lfrfid_cli_raw_read_callback(LFRFIDWorkerReadRawResult result, void*
 static void lfrfid_cli_raw_read(Cli* cli, FuriString* args) {
     UNUSED(cli);
 
-    FuriString *filepath, type_string;
+    FuriString *filepath, *type_string;
     filepath = furi_string_alloc();
     type_string = furi_string_alloc();
     LFRFIDWorkerReadType type = LFRFIDWorkerReadTypeAuto;

@@ -30,8 +30,8 @@ static bool
     bool processed = false;
 
     do {
-        if(string_get_char(text, 0) != '\e') break;
-        char ctrl_symbol = string_get_char(text, 1);
+        if(furi_string_get_char(text, 0) != '\e') break;
+        char ctrl_symbol = furi_string_get_char(text, 1);
         if(ctrl_symbol == 'c') {
             line->horizontal = AlignCenter;
         } else if(ctrl_symbol == 'r') {
@@ -39,7 +39,7 @@ static bool
         } else if(ctrl_symbol == '#') {
             line->font = FontPrimary;
         }
-        string_right(text, 2);
+        furi_string_right(text, 2);
         processed = true;
     } while(false);
 
@@ -51,7 +51,7 @@ void widget_element_text_scroll_add_line(WidgetElement* element, TextScrollLineA
     TextScrollLineArray new_line;
     new_line.font = line->font;
     new_line.horizontal = line->horizontal;
-    new_line.text = furi_string_alloc_set_cstr(line->text);
+    new_line.text = furi_string_alloc_set(line->text);
     TextScrollLineArray_push_back(model->line_array, new_line);
 }
 
@@ -84,7 +84,7 @@ static void widget_element_text_scroll_fill_lines(Canvas* canvas, WidgetElement*
         uint8_t line_width = 0;
         uint16_t char_i = 0;
         while(true) {
-            char next_char = string_get_char(model->text, char_i++);
+            char next_char = furi_string_get_char(model->text, char_i++);
             if(next_char == '\0') {
                 furi_string_push_back(line_tmp.text, '\0');
                 widget_element_text_scroll_add_line(element, &line_tmp);
@@ -94,7 +94,7 @@ static void widget_element_text_scroll_fill_lines(Canvas* canvas, WidgetElement*
             } else if(next_char == '\n') {
                 furi_string_push_back(line_tmp.text, '\0');
                 widget_element_text_scroll_add_line(element, &line_tmp);
-                string_right(model->text, char_i);
+                furi_string_right(model->text, char_i);
                 total_height += params->leading_default - params->height;
                 reached_new_line = true;
                 break;
@@ -103,7 +103,7 @@ static void widget_element_text_scroll_fill_lines(Canvas* canvas, WidgetElement*
                 if(line_width > model->width) {
                     furi_string_push_back(line_tmp.text, '\0');
                     widget_element_text_scroll_add_line(element, &line_tmp);
-                    string_right(model->text, char_i - 1);
+                    furi_string_right(model->text, char_i - 1);
                     furi_string_reset(line_tmp.text);
                     total_height += params->leading_default - params->height;
                     reached_new_line = false;

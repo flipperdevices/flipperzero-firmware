@@ -74,7 +74,7 @@ static bool elf_read_string_from_offset(ELFFile* elf, off_t offset, FuriString* 
 
         while(true) {
             uint16_t read = storage_file_read(elf->fd, buffer, ELF_NAME_BUFFER_LEN);
-            string_cat_str(name, buffer);
+            furi_string_cat(name, buffer);
             if(strlen(buffer) < ELF_NAME_BUFFER_LEN) {
                 result = true;
                 break;
@@ -686,7 +686,7 @@ bool elf_file_load_manifest(ELFFile* elf, FlipperApplicationManifest* manifest) 
             break;
         }
 
-        if(string_cmp(name, ".fapmeta") == 0) {
+        if(furi_string_cmp(name, ".fapmeta") == 0) {
             if(elf_load_metadata(elf, &section_header, manifest)) {
                 FURI_LOG_D(TAG, "Load manifest done");
                 result = true;

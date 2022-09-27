@@ -19,8 +19,8 @@ bool validator_is_file_callback(const char* text, FuriString* error, void* conte
     }
 
     bool ret = true;
-    FuriString* path;
-    string_init_printf(path, "%s/%s%s", instance->app_path_folder, text, instance->app_extension);
+    FuriString* path = furi_string_alloc_printf(
+        "%s/%s%s", instance->app_path_folder, text, instance->app_extension);
     Storage* storage = furi_record_open(RECORD_STORAGE);
     if(storage_common_stat(storage, furi_string_get_cstr(path), NULL) == FSE_OK) {
         ret = false;

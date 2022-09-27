@@ -148,9 +148,7 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
         te,
         repeat);
 
-    FuriString* flipper_format_string;
-    string_init_printf(
-        flipper_format_string,
+    FuriString* flipper_format_string = furi_string_alloc_printf(
         "Protocol: Princeton\n"
         "Bit: 24\n"
         "Key: 00 00 00 00 00 %02X %02X %02X\n"
@@ -598,20 +596,20 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
                 break;
             } else if(
                 (chat_event.c == CliSymbolAsciiBackspace) || (chat_event.c == CliSymbolAsciiDel)) {
-                size_t len = string_length_u(input);
-                if(len > string_length_u(name)) {
+                size_t len = furi_string_unicode_length(input);
+                if(len > furi_string_unicode_length(name)) {
                     printf("%s", "\e[D\e[1P");
                     fflush(stdout);
                     //delete 1 char UTF
                     const char* str = furi_string_get_cstr(input);
                     size_t size = 0;
-                    m_str1ng_utf8_state_e s = M_STRING_UTF8_STARTING;
-                    string_unicode_t u = 0;
+                    FuriStringUTF8State s = M_STRING_UTF8_STARTING;
+                    FuriStringUnicodeValue u = 0;
                     furi_string_reset(sysmsg);
                     while(*str) {
-                        m_str1ng_utf8_decode(*str, &s, &u);
+                        furi_string_unicode_utf8_decode(*str, &s, &u);
                         if((s == M_STRING_UTF8_ERROR) || s == M_STRING_UTF8_STARTING) {
-                            string_push_u(sysmsg, u);
+                            furi_string_unicode_push(sysmsg, u);
                             if(++size >= len - 1) break;
                             s = M_STRING_UTF8_STARTING;
                         }
@@ -625,7 +623,7 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
                 furi_string_push_back(input, '\n');
                 while(!subghz_chat_worker_write(
                     subghz_chat,
-                    (uint8_t*)string_get_cstr(input),
+                    (uint8_t*)furi_string_get_cstr(input),
                     strlen(furi_string_get_cstr(input)))) {
                     furi_delay_ms(10);
                 }
@@ -669,7 +667,7 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
                     furi_hal_version_get_name_ptr());
                 subghz_chat_worker_write(
                     subghz_chat,
-                    (uint8_t*)string_get_cstr(sysmsg),
+                    (uint8_t*)furi_string_get_cstr(sysmsg),
                     strlen(furi_string_get_cstr(sysmsg)));
                 break;
             case SubGhzChatEventUserExit:
@@ -677,7 +675,7 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
                     sysmsg, "\033[0;31m%s left chat.\033[0m\r\n", furi_hal_version_get_name_ptr());
                 subghz_chat_worker_write(
                     subghz_chat,
-                    (uint8_t*)string_get_cstr(sysmsg),
+                    (uint8_t*)furi_string_get_cstr(sysmsg),
                     strlen(furi_string_get_cstr(sysmsg)));
                 furi_delay_ms(10);
                 exit = true;

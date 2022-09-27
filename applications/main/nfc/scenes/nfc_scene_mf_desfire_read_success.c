@@ -20,8 +20,7 @@ void nfc_scene_mf_desfire_read_success_on_enter(void* context) {
     Widget* widget = nfc->widget;
 
     // Prepare string for data display
-    FuriString* temp_str;
-    string_init_printf(temp_str, "\e#MIFARE DESfire\n");
+    FuriString* temp_str = furi_string_alloc_printf("\e#MIFARE DESfire\n");
     furi_string_cat_printf(temp_str, "UID:");
     for(size_t i = 0; i < nfc_data->uid_len; i++) {
         furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);

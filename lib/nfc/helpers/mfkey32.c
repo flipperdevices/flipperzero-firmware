@@ -91,9 +91,7 @@ void mfkey32_set_callback(Mfkey32* instance, Mfkey32ParseDataCallback callback, 
 }
 
 static bool mfkey32_write_params(Mfkey32* instance, Mfkey32Params* params) {
-    FuriString* str;
-    string_init_printf(
-        str,
+    FuriString* str = furi_string_alloc_printf(
         "Sector %d key %c cuid %08x nt0 %08x nr0 %08x ar0 %08x nt1 %08x nr1 %08x ar1 %08x\n",
         params->sector,
         params->key == MfClassicKeyA ? 'A' : 'B',
@@ -215,9 +213,9 @@ uint16_t mfkey32_get_auth_sectors(FuriString* data_str) {
         while(true) {
             if(!stream_read_line(file_stream, temp_str)) break;
             size_t uid_pos = furi_string_search(temp_str, "cuid");
-            string_left(temp_str, uid_pos);
+            furi_string_left(temp_str, uid_pos);
             furi_string_push_back(temp_str, '\n');
-            string_cat(data_str, temp_str);
+            furi_string_cat(data_str, temp_str);
             nonces_num++;
         }
     } while(false);

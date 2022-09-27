@@ -39,7 +39,7 @@ static bool pin_name_to_int(FuriString* pin_name, size_t* result) {
     bool found = false;
     bool debug = furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
     for(size_t i = 0; i < COUNT_OF(cli_command_gpio_pins); i++) {
-        if(!string_cmp(pin_name, cli_command_gpio_pins[i].name)) {
+        if(!furi_string_cmp(pin_name, cli_command_gpio_pins[i].name)) {
             if(!cli_command_gpio_pins[i].debug || (cli_command_gpio_pins[i].debug && debug)) {
                 *result = i;
                 found = true;
@@ -67,14 +67,14 @@ static GpioParseError gpio_command_parse(FuriString* args, size_t* pin_num, uint
     FuriString* pin_name;
     pin_name = furi_string_alloc();
 
-    size_t ws = string_search_char(args, ' ');
+    size_t ws = furi_string_search_char(args, ' ');
     if(ws == STRING_FAILURE) {
         return ERR_CMD_SYNTAX;
     }
 
-    string_set_n(pin_name, args, 0, ws);
-    string_right(args, ws);
-    string_strim(args);
+    furi_string_set_n(pin_name, args, 0, ws);
+    furi_string_right(args, ws);
+    furi_string_strim(args);
 
     if(!pin_name_to_int(pin_name, pin_num)) {
         furi_string_free(pin_name);
@@ -83,9 +83,9 @@ static GpioParseError gpio_command_parse(FuriString* args, size_t* pin_num, uint
 
     furi_string_free(pin_name);
 
-    if(!string_cmp(args, "0")) {
+    if(!furi_string_cmp(args, "0")) {
         *value = 0;
-    } else if(!string_cmp(args, "1")) {
+    } else if(!furi_string_cmp(args, "1")) {
         *value = 1;
     } else {
         return ERR_VALUE;

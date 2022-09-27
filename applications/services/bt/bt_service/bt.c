@@ -77,7 +77,7 @@ static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     notification_message(bt->notification, &sequence_display_backlight_on);
     FuriString* pin_str;
     dialog_message_set_icon(bt->dialog_message, &I_BLE_Pairing_128x64, 0, 0);
-    string_init_printf(pin_str, "Verify code\n%06d", pin);
+    pin_str = furi_string_alloc_printf("Verify code\n%06d", pin);
     dialog_message_set_text(
         bt->dialog_message, furi_string_get_cstr(pin_str), 64, 4, AlignCenter, AlignTop);
     dialog_message_set_buttons(bt->dialog_message, "Cancel", "OK", NULL);

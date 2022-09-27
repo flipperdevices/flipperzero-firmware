@@ -100,7 +100,7 @@ static bool update_task_post_update(UpdateTask* update_task) {
         if(update_task->state.groups & UpdateTaskStageGroupSplashscreen) {
             update_task_set_progress(update_task, UpdateTaskStageSplashscreenInstall, 0);
             FuriString* tmp_path;
-            tmp_path = furi_string_alloc_set_cstr(update_task->update_path);
+            tmp_path = furi_string_alloc_set(update_task->update_path);
             path_append(tmp_path, furi_string_get_cstr(update_task->manifest->splash_file));
             if(storage_common_copy(
                    update_task->storage,

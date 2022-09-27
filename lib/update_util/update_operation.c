@@ -107,7 +107,7 @@ bool update_operation_get_current_package_manifest_path(Storage* storage, FuriSt
         } while(0);
         furi_string_free(rtcpath);
     }
-    return !string_empty_p(out_path);
+    return !furi_string_empty_p(out_path);
 }
 
 static bool update_operation_persist_manifest_path(Storage* storage, const char* manifest_path) {

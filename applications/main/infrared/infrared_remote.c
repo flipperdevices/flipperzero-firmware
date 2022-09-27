@@ -151,7 +151,7 @@ bool infrared_remote_load(InfraredRemote* remote, FuriString* path) {
     if(success) {
         uint32_t version;
         success = flipper_format_read_header(ff, buf, &version) &&
-                  !string_cmp_str(buf, "IR signals file") && (version == 1);
+                  !furi_string_cmp(buf, "IR signals file") && (version == 1);
     }
 
     if(success) {

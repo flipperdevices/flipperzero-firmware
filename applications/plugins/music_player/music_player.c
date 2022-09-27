@@ -301,7 +301,7 @@ int32_t music_player_app(void* p) {
 
     do {
         if(p && strlen(p)) {
-            string_cat_str(file_path, p);
+            furi_string_cat(file_path, p);
         } else {
             furi_string_set(file_path, MUSIC_PLAYER_APP_PATH_FOLDER);
 

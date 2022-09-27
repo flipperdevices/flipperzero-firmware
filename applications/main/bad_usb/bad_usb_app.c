@@ -64,7 +64,7 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
         app->error = BadUsbAppErrorCloseRpc;
         scene_manager_next_scene(app->scene_manager, BadUsbSceneError);
     } else {
-        if(!string_empty_p(app->file_path)) {
+        if(!furi_string_empty_p(app->file_path)) {
             scene_manager_next_scene(app->scene_manager, BadUsbSceneWork);
         } else {
             furi_string_set(app->file_path, BAD_USB_APP_PATH_FOLDER);

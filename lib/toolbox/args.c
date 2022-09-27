@@ -2,7 +2,7 @@
 #include "hex.h"
 
 size_t args_get_first_word_length(FuriString* args) {
-    size_t ws = string_search_char(args, ' ');
+    size_t ws = furi_string_search_char(args, ' ');
     if(ws == STRING_FAILURE) {
         ws = furi_string_size(args);
     }
@@ -22,8 +22,8 @@ bool args_read_int_and_trim(FuriString* args, int* value) {
     }
 
     if(sscanf(furi_string_get_cstr(args), "%d", value) == 1) {
-        string_right(args, cmd_length);
-        string_strim(args);
+        furi_string_right(args, cmd_length);
+        furi_string_strim(args);
         return true;
     }
 
@@ -37,24 +37,24 @@ bool args_read_string_and_trim(FuriString* args, FuriString* word) {
         return false;
     }
 
-    string_set_n(word, args, 0, cmd_length);
-    string_right(args, cmd_length);
-    string_strim(args);
+    furi_string_set_n(word, args, 0, cmd_length);
+    furi_string_right(args, cmd_length);
+    furi_string_strim(args);
 
     return true;
 }
 
 bool args_read_probably_quoted_string_and_trim(FuriString* args, FuriString* word) {
-    if(furi_string_size(args) > 1 && string_get_char(args, 0) == '\"') {
-        size_t second_quote_pos = string_search_char(args, '\"', 1);
+    if(furi_string_size(args) > 1 && furi_string_get_char(args, 0) == '\"') {
+        size_t second_quote_pos = furi_string_search_char(args, '\"', 1);
 
         if(second_quote_pos == 0) {
             return false;
         }
 
-        string_set_n(word, args, 1, second_quote_pos - 1);
-        string_right(args, second_quote_pos + 1);
-        string_strim(args);
+        furi_string_set_n(word, args, 1, second_quote_pos - 1);
+        furi_string_right(args, second_quote_pos + 1);
+        furi_string_strim(args);
         return true;
     } else {
         return args_read_string_and_trim(args, word);

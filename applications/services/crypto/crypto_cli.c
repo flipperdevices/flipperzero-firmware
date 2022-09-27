@@ -54,7 +54,7 @@ void crypto_cli_encrypt(Cli* cli, FuriString* args) {
                 furi_string_push_back(input, c);
             } else if(c == CliSymbolAsciiCR) {
                 printf("\r\n");
-                string_cat_str(input, "\r\n");
+                furi_string_cat(input, "\r\n");
             }
         }
 
@@ -66,9 +66,10 @@ void crypto_cli_encrypt(Cli* cli, FuriString* args) {
             if(remain) {
                 size = size - remain + 16;
             }
-            string_reserve(input, size);
+            furi_string_reserve(input, size);
             uint8_t* output = malloc(size);
-            if(!furi_hal_crypto_encrypt((const uint8_t*)string_get_cstr(input), output, size)) {
+            if(!furi_hal_crypto_encrypt(
+                   (const uint8_t*)furi_string_get_cstr(input), output, size)) {
                 printf("Failed to encrypt input");
             } else {
                 printf("Hex-encoded encrypted data:\r\n");
@@ -131,7 +132,7 @@ void crypto_cli_decrypt(Cli* cli, FuriString* args) {
             }
         }
 
-        string_strim(hex_input);
+        furi_string_strim(hex_input);
         size_t hex_size = furi_string_size(hex_input);
         if(hex_size > 0 && hex_size % 2 == 0) {
             size_t size = hex_size / 2;

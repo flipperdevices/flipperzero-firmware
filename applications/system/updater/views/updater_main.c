@@ -105,7 +105,7 @@ UpdaterMainView* updater_main_alloc() {
 
     with_view_model(
         main_view->view, (UpdaterProgressModel * model) {
-            model->status = furi_string_alloc_set_cstr("Waiting for SD card");
+            model->status = furi_string_alloc_set("Waiting for SD card");
             return true;
         });
 

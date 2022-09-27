@@ -43,8 +43,8 @@ static void BrowserItem_t_init(BrowserItem_t* obj) {
 
 static void BrowserItem_t_init_set(BrowserItem_t* obj, const BrowserItem_t* src) {
     obj->type = src->type;
-    obj->path = furi_string_alloc_set_cstr(src->path);
-    obj->display_name = furi_string_alloc_set_cstr(src->display_name);
+    obj->path = furi_string_alloc_set(src->path);
+    obj->display_name = furi_string_alloc_set(src->display_name);
     if(src->custom_icon_data) {
         obj->custom_icon_data = malloc(CUSTOM_ICON_MAX_SIZE);
         memcpy(obj->custom_icon_data, src->custom_icon_data, CUSTOM_ICON_MAX_SIZE);
@@ -346,7 +346,7 @@ static void
     item.custom_icon_data = NULL;
 
     if(!is_last) {
-        item.path = furi_string_alloc_set_cstr(item_path);
+        item.path = furi_string_alloc_set(item_path);
         item.display_name = furi_string_alloc();
         if(is_folder) {
             item.type = BrowserItemTypeFolder;
@@ -365,7 +365,7 @@ static void
             }
         }
 
-        if(string_empty_p(item.display_name)) {
+        if(furi_string_empty_p(item.display_name)) {
             path_extract_filename(
                 item_path,
                 item.display_name,

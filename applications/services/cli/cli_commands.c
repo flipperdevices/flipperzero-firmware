@@ -165,11 +165,11 @@ void cli_command_log(Cli* cli, FuriString* args, void* context) {
 void cli_command_vibro(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
     UNUSED(context);
-    if(!string_cmp(args, "0")) {
+    if(!furi_string_cmp(args, "0")) {
         NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
         notification_message_block(notification, &sequence_reset_vibro);
         furi_record_close(RECORD_NOTIFICATION);
-    } else if(!string_cmp(args, "1")) {
+    } else if(!furi_string_cmp(args, "1")) {
         NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
         notification_message_block(notification, &sequence_set_vibro_on);
         furi_record_close(RECORD_NOTIFICATION);
@@ -181,11 +181,11 @@ void cli_command_vibro(Cli* cli, FuriString* args, void* context) {
 void cli_command_debug(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
     UNUSED(context);
-    if(!string_cmp(args, "0")) {
+    if(!furi_string_cmp(args, "0")) {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
         loader_update_menu();
         printf("Debug disabled.");
-    } else if(!string_cmp(args, "1")) {
+    } else if(!furi_string_cmp(args, "1")) {
         furi_hal_rtc_set_flag(FuriHalRtcFlagDebug);
         loader_update_menu();
         printf("Debug enabled.");
@@ -201,24 +201,24 @@ void cli_command_led(Cli* cli, FuriString* args, void* context) {
     NotificationMessage notification_led_message;
     FuriString* light_name;
     light_name = furi_string_alloc();
-    size_t ws = string_search_char(args, ' ');
+    size_t ws = furi_string_search_char(args, ' ');
     if(ws == STRING_FAILURE) {
         cli_print_usage("led", "<r|g|b|bl> <0-255>", furi_string_get_cstr(args));
         furi_string_free(light_name);
         return;
     } else {
-        string_set_n(light_name, args, 0, ws);
-        string_right(args, ws);
-        string_strim(args);
+        furi_string_set_n(light_name, args, 0, ws);
+        furi_string_right(args, ws);
+        furi_string_strim(args);
     }
     // Check light name
-    if(!string_cmp(light_name, "r")) {
+    if(!furi_string_cmp(light_name, "r")) {
         notification_led_message.type = NotificationMessageTypeLedRed;
-    } else if(!string_cmp(light_name, "g")) {
+    } else if(!furi_string_cmp(light_name, "g")) {
         notification_led_message.type = NotificationMessageTypeLedGreen;
-    } else if(!string_cmp(light_name, "b")) {
+    } else if(!furi_string_cmp(light_name, "b")) {
         notification_led_message.type = NotificationMessageTypeLedBlue;
-    } else if(!string_cmp(light_name, "bl")) {
+    } else if(!furi_string_cmp(light_name, "bl")) {
         notification_led_message.type = NotificationMessageTypeLedDisplayBacklight;
     } else {
         cli_print_usage("led", "<r|g|b|bl> <0-255>", furi_string_get_cstr(args));

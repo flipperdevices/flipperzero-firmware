@@ -24,12 +24,12 @@ void nfc_scene_emv_read_success_on_enter(void* context) {
         nfc->widget, GuiButtonTypeRight, "More", nfc_scene_emv_read_success_widget_callback, nfc);
 
     FuriString* temp_str;
-    string_init_printf(temp_str, "\e#%s\n", emv_data->name);
+    temp_str = furi_string_alloc_printf("\e#%s\n", emv_data->name);
     for(uint8_t i = 0; i < emv_data->number_len; i += 2) {
         furi_string_cat_printf(
             temp_str, "%02X%02X ", emv_data->number[i], emv_data->number[i + 1]);
     }
-    string_strim(temp_str);
+    furi_string_strim(temp_str);
 
     // Add expiration date
     if(emv_data->exp_mon) {

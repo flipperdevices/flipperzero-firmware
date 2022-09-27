@@ -46,9 +46,9 @@ void power_cli_debug(Cli* cli, FuriString* args) {
 
 void power_cli_5v(Cli* cli, FuriString* args) {
     UNUSED(cli);
-    if(!string_cmp(args, "0")) {
+    if(!furi_string_cmp(args, "0")) {
         furi_hal_power_disable_otg();
-    } else if(!string_cmp(args, "1")) {
+    } else if(!furi_string_cmp(args, "1")) {
         furi_hal_power_enable_otg();
     } else {
         cli_print_usage("power_otg", "<1|0>", furi_string_get_cstr(args));
@@ -57,9 +57,9 @@ void power_cli_5v(Cli* cli, FuriString* args) {
 
 void power_cli_3v3(Cli* cli, FuriString* args) {
     UNUSED(cli);
-    if(!string_cmp(args, "0")) {
+    if(!furi_string_cmp(args, "0")) {
         furi_hal_power_disable_external_3_3v();
-    } else if(!string_cmp(args, "1")) {
+    } else if(!furi_string_cmp(args, "1")) {
         furi_hal_power_enable_external_3_3v();
     } else {
         cli_print_usage("power_ext", "<1|0>", furi_string_get_cstr(args));

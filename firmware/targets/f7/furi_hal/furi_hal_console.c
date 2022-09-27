@@ -93,7 +93,7 @@ void furi_hal_console_printf(const char format[], ...) {
     va_start(args, format);
     string = furi_string_alloc_vprintf(format, args);
     va_end(args);
-    furi_hal_console_tx((const uint8_t*)string_get_cstr(string), furi_string_size(string));
+    furi_hal_console_tx((const uint8_t*)furi_string_get_cstr(string), furi_string_size(string));
     furi_string_free(string);
 }
 

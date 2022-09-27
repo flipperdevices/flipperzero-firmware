@@ -102,9 +102,9 @@ static DirWalkResult
 
                 storage_dir_close(dir_walk->file);
 
-                size_t last_char = string_search_rchar(dir_walk->path, '/');
+                size_t last_char = furi_string_search_rchar(dir_walk->path, '/');
                 if(last_char != STRING_FAILURE) {
-                    string_left(dir_walk->path, last_char);
+                    furi_string_left(dir_walk->path, last_char);
                 }
 
                 storage_dir_open(dir_walk->file, furi_string_get_cstr(dir_walk->path));

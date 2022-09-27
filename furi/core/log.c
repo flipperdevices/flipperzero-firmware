@@ -68,7 +68,7 @@ void furi_log_print_format(FuriLogLevel level, const char* tag, const char* form
 
         va_list args;
         va_start(args, format);
-        string_vprintf(string, format, args);
+        furi_string_vprintf(string, format, args);
         va_end(args);
 
         furi_log.puts(furi_string_get_cstr(string));

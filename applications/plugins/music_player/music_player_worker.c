@@ -400,7 +400,7 @@ bool music_player_worker_load_rtttl_from_file(MusicPlayerWorker* instance, const
             }
         } while(ret > 0);
 
-        string_strim(content);
+        furi_string_strim(content);
         if(!furi_string_size(content)) {
             FURI_LOG_E(TAG, "Empty file");
             break;

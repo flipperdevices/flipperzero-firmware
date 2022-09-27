@@ -28,7 +28,7 @@ bool storage_move_to_sd_perform(void) {
     dir_walk_set_recursive(dir_walk, false);
     dir_walk_set_filter_cb(dir_walk, storage_move_to_sd_check_entry, NULL);
 
-    FuriString *path_src, path_dst;
+    FuriString *path_src, *path_dst;
 
     path_dst = furi_string_alloc();
     path_src = furi_string_alloc();
@@ -36,7 +36,7 @@ bool storage_move_to_sd_perform(void) {
     if(dir_walk_open(dir_walk, STORAGE_INT_PATH_PREFIX)) {
         while(dir_walk_read(dir_walk, path_src, NULL) == DirWalkOK) {
             furi_string_set(path_dst, path_src);
-            string_replace_at(
+            furi_string_replace_at(
                 path_dst, 0, strlen(STORAGE_INT_PATH_PREFIX), STORAGE_EXT_PATH_PREFIX);
 
             storage_common_merge(

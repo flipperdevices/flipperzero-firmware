@@ -79,7 +79,7 @@ static bool string_stream_seek(StringStream* stream, int32_t offset, StreamOffse
         }
         break;
     case StreamOffsetFromEnd:
-        if(((int32_t)string_size(stream->string) + offset) >= 0) {
+        if(((int32_t)furi_string_size(stream->string) + offset) >= 0) {
             stream->index = furi_string_size(stream->string) + offset;
         } else {
             result = false;
@@ -145,16 +145,16 @@ static bool string_stream_delete_and_insert(
         remain_size = MIN(delete_size, remain_size);
 
         if(remain_size != 0) {
-            string_replace_at(stream->string, stream->index, remain_size, "");
+            furi_string_replace_at(stream->string, stream->index, remain_size, "");
         }
     }
 
     if(write_callback) {
         FuriString* right;
-        right = furi_string_alloc_set_cstr(&string_get_cstr(stream->string)[stream->index]);
-        string_left(stream->string, string_stream_tell(stream));
+        right = furi_string_alloc_set(&furi_string_get_cstr(stream->string)[stream->index]);
+        furi_string_left(stream->string, string_stream_tell(stream));
         result &= write_callback((Stream*)stream, ctx);
-        string_cat(stream->string, right);
+        furi_string_cat(stream->string, right);
         furi_string_free(right);
     }
 
@@ -171,7 +171,7 @@ static size_t string_stream_write_char(StringStream* stream, char c) {
     if(string_stream_eof(stream)) {
         furi_string_push_back(stream->string, c);
     } else {
-        string_set_char(stream->string, stream->index, c);
+        furi_string_set_char(stream->string, stream->index, c);
     }
     stream->index++;
 

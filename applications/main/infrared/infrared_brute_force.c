@@ -14,8 +14,8 @@ typedef struct {
 
 DICT_DEF2(
     InfraredBruteForceRecordDict,
-    string_t,
-    STRING_OPLIST,
+    FuriString*,
+    FURI_STRING_OPLIST,
     InfraredBruteForceRecord,
     M_POD_OPLIST);
 
@@ -132,7 +132,7 @@ bool infrared_brute_force_send_next(InfraredBruteForce* brute_force) {
 
     do {
         success = infrared_signal_read(signal, brute_force->ff, signal_name);
-    } while(success && !string_equal_p(brute_force->current_record_name, signal_name));
+    } while(success && !furi_string_equal(brute_force->current_record_name, signal_name));
 
     if(success) {
         infrared_signal_transmit(signal);

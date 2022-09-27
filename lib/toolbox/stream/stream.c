@@ -114,7 +114,8 @@ size_t stream_write_char(Stream* stream, char c) {
 
 size_t stream_write_string(Stream* stream, FuriString* string) {
     furi_assert(stream);
-    return stream_write(stream, (const uint8_t*)string_get_cstr(string), furi_string_size(string));
+    return stream_write(
+        stream, (const uint8_t*)furi_string_get_cstr(string), furi_string_size(string));
 }
 
 size_t stream_write_cstring(Stream* stream, const char* string) {
@@ -187,7 +188,7 @@ bool stream_delete_and_insert_char(Stream* stream, size_t delete_size, char c) {
 bool stream_delete_and_insert_string(Stream* stream, size_t delete_size, FuriString* string) {
     furi_assert(stream);
     StreamWriteData write_data = {
-        .data = (uint8_t*)string_get_cstr(string), .size = furi_string_size(string)};
+        .data = (uint8_t*)furi_string_get_cstr(string), .size = furi_string_size(string)};
     return stream_delete_and_insert(stream, delete_size, stream_write_struct, &write_data);
 }
 
@@ -216,7 +217,7 @@ bool stream_delete_and_insert_vaformat(
     FuriString* data;
     data = furi_string_alloc_vprintf(format, args);
     StreamWriteData write_data = {
-        .data = (uint8_t*)string_get_cstr(data), .size = furi_string_size(data)};
+        .data = (uint8_t*)furi_string_get_cstr(data), .size = furi_string_size(data)};
     bool result = stream_delete_and_insert(stream, delete_size, stream_write_struct, &write_data);
     furi_string_free(data);
 

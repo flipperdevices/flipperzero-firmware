@@ -59,29 +59,29 @@ static void input_cli_send(Cli* cli, FuriString* args, Input* input) {
         if(!args_read_string_and_trim(args, key_str)) {
             break;
         }
-        if(!string_cmp(key_str, "up")) {
+        if(!furi_string_cmp(key_str, "up")) {
             event.key = InputKeyUp;
-        } else if(!string_cmp(key_str, "down")) {
+        } else if(!furi_string_cmp(key_str, "down")) {
             event.key = InputKeyDown;
-        } else if(!string_cmp(key_str, "left")) {
+        } else if(!furi_string_cmp(key_str, "left")) {
             event.key = InputKeyLeft;
-        } else if(!string_cmp(key_str, "right")) {
+        } else if(!furi_string_cmp(key_str, "right")) {
             event.key = InputKeyRight;
-        } else if(!string_cmp(key_str, "ok")) {
+        } else if(!furi_string_cmp(key_str, "ok")) {
             event.key = InputKeyOk;
-        } else if(!string_cmp(key_str, "back")) {
+        } else if(!furi_string_cmp(key_str, "back")) {
             event.key = InputKeyBack;
         } else {
             break;
         }
         // Parse Type
-        if(!string_cmp(args, "press")) {
+        if(!furi_string_cmp(args, "press")) {
             event.type = InputTypePress;
-        } else if(!string_cmp(args, "release")) {
+        } else if(!furi_string_cmp(args, "release")) {
             event.type = InputTypeRelease;
-        } else if(!string_cmp(args, "short")) {
+        } else if(!furi_string_cmp(args, "short")) {
             event.type = InputTypeShort;
-        } else if(!string_cmp(args, "long")) {
+        } else if(!furi_string_cmp(args, "long")) {
             event.type = InputTypeLong;
         } else {
             break;

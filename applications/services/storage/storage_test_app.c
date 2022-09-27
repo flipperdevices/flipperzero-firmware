@@ -224,8 +224,7 @@ static void do_dir_test(Storage* api, const char* path) {
 }
 
 static void do_test_start(Storage* api, const char* path) {
-    FuriString* str_path;
-    string_init_printf(str_path, "%s/test-folder", path);
+    FuriString* str_path = furi_string_alloc_printf("%s/test-folder", path);
 
     FURI_LOG_I(TAG, "--------- START \"%s\" ---------", path);
 
@@ -258,10 +257,8 @@ static void do_test_start(Storage* api, const char* path) {
 static void do_test_end(Storage* api, const char* path) {
     uint64_t total_space;
     uint64_t free_space;
-    FuriString* str_path_1;
-    FuriString* str_path_2;
-    string_init_printf(str_path_1, "%s/test-folder", path);
-    string_init_printf(str_path_2, "%s/test-folder2", path);
+    FuriString* str_path_1 = furi_string_alloc_printf("%s/test-folder", path);
+    FuriString* str_path_2 = furi_string_alloc_printf("%s/test-folder2", path);
 
     FURI_LOG_I(TAG, "--------- END \"%s\" ---------", path);
 

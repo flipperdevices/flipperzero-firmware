@@ -233,15 +233,15 @@ void animation_storage_free_storage_animation(StorageAnimation** storage_animati
 }
 
 static bool animation_storage_cast_align(FuriString* align_str, Align* align) {
-    if(!string_cmp_str(align_str, "Bottom")) {
+    if(!furi_string_cmp(align_str, "Bottom")) {
         *align = AlignBottom;
-    } else if(!string_cmp_str(align_str, "Top")) {
+    } else if(!furi_string_cmp(align_str, "Top")) {
         *align = AlignTop;
-    } else if(!string_cmp_str(align_str, "Left")) {
+    } else if(!furi_string_cmp(align_str, "Left")) {
         *align = AlignLeft;
-    } else if(!string_cmp_str(align_str, "Right")) {
+    } else if(!furi_string_cmp(align_str, "Right")) {
         *align = AlignRight;
-    } else if(!string_cmp_str(align_str, "Center")) {
+    } else if(!furi_string_cmp(align_str, "Center")) {
         *align = AlignCenter;
     } else {
         return false;
@@ -401,7 +401,7 @@ static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFo
             if(!flipper_format_read_string(ff, "Text", str)) break;
             if(furi_string_size(str) > 100) break;
 
-            string_replace_all_str(str, "\\n", "\n");
+            furi_string_replace_all(str, "\\n", "\n");
 
             FURI_CONST_ASSIGN_PTR(bubble->bubble.text, malloc(furi_string_size(str) + 1));
             strcpy((char*)bubble->bubble.text, furi_string_get_cstr(str));

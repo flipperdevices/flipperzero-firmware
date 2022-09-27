@@ -34,7 +34,7 @@ void picopass_scene_save_name_on_enter(void* context) {
     FuriString* folder_path;
     folder_path = furi_string_alloc();
 
-    if(string_end_with_str_p(picopass->dev->load_path, PICOPASS_APP_EXTENSION)) {
+    if(furi_string_end_with(picopass->dev->load_path, PICOPASS_APP_EXTENSION)) {
         path_extract_dirname(furi_string_get_cstr(picopass->dev->load_path), folder_path);
     } else {
         furi_string_set(folder_path, PICOPASS_APP_FOLDER);

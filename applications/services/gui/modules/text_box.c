@@ -187,7 +187,7 @@ void text_box_set_text(TextBox* text_box, const char* text) {
         text_box->view, (TextBoxModel * model) {
             model->text = text;
             furi_string_reset(model->text_formatted);
-            string_reserve(model->text_formatted, strlen(text));
+            furi_string_reserve(model->text_formatted, strlen(text));
             model->formatted = false;
             return true;
         });

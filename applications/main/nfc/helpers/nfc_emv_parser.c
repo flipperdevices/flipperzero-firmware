@@ -57,7 +57,7 @@ bool nfc_emv_parser_get_country_name(
     FuriString* country_name) {
     bool parsed = false;
     FuriString* key;
-    string_init_printf(key, "%04X", country_code);
+    key = furi_string_alloc_printf("%04X", country_code);
     if(nfc_emv_parser_search_data(
            storage, EXT_PATH("nfc/assets/country_code.nfc"), key, country_name)) {
         parsed = true;
@@ -72,7 +72,7 @@ bool nfc_emv_parser_get_currency_name(
     FuriString* currency_name) {
     bool parsed = false;
     FuriString* key;
-    string_init_printf(key, "%04X", currency_code);
+    key = furi_string_alloc_printf("%04X", currency_code);
     if(nfc_emv_parser_search_data(
            storage, EXT_PATH("nfc/assets/currency_code.nfc"), key, currency_name)) {
         parsed = true;

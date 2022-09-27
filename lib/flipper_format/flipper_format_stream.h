@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <toolbox/stream/stream.h>
-#include <mlib/m-string.h>
+#include <core/furi_string.h>
 
 #ifdef __cplusplus
 extern "C" {

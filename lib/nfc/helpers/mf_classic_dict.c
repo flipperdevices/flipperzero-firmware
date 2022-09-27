@@ -70,7 +70,7 @@ MfClassicDict* mf_classic_dict_alloc(MfClassicDictType dict_type) {
         next_line = furi_string_alloc();
         while(true) {
             if(!stream_read_line(dict->stream, next_line)) break;
-            if(string_get_char(next_line, 0) == '#') continue;
+            if(furi_string_get_char(next_line, 0) == '#') continue;
             if(furi_string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
             dict->total_keys++;
         }
@@ -112,7 +112,7 @@ static void mf_classic_dict_str_to_int(FuriString* key_str, uint64_t* key_int) {
     *key_int = 0ULL;
     for(uint8_t i = 0; i < 12; i += 2) {
         args_char_to_hex(
-            string_get_char(key_str, i), string_get_char(key_str, i + 1), &key_byte_tmp);
+            furi_string_get_char(key_str, i), furi_string_get_char(key_str, i + 1), &key_byte_tmp);
         *key_int |= (uint64_t)key_byte_tmp << 8 * (5 - i / 2);
     }
 }
@@ -138,9 +138,9 @@ bool mf_classic_dict_get_next_key_str(MfClassicDict* dict, FuriString* key) {
     furi_string_reset(key);
     while(!key_read) {
         if(!stream_read_line(dict->stream, key)) break;
-        if(string_get_char(key, 0) == '#') continue;
+        if(furi_string_get_char(key, 0) == '#') continue;
         if(furi_string_size(key) != NFC_MF_CLASSIC_KEY_LEN) continue;
-        string_left(key, 12);
+        furi_string_left(key, 12);
         key_read = true;
     }
 
@@ -172,10 +172,10 @@ bool mf_classic_dict_is_key_present_str(MfClassicDict* dict, FuriString* key) {
     stream_rewind(dict->stream);
     while(!key_found) {
         if(!stream_read_line(dict->stream, next_line)) break;
-        if(string_get_char(next_line, 0) == '#') continue;
+        if(furi_string_get_char(next_line, 0) == '#') continue;
         if(furi_string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
-        string_left(next_line, 12);
-        if(!string_equal_p(key, next_line)) continue;
+        furi_string_left(next_line, 12);
+        if(!furi_string_equal(key, next_line)) continue;
         key_found = true;
     }
 
@@ -207,7 +207,7 @@ bool mf_classic_dict_add_key_str(MfClassicDict* dict, FuriString* key) {
         key_added = true;
     } while(false);
 
-    string_left(key, 12);
+    furi_string_left(key, 12);
     return key_added;
 }
 
@@ -236,10 +236,10 @@ bool mf_classic_dict_get_key_at_index_str(MfClassicDict* dict, FuriString* key, 
     bool key_found = false;
     while(!key_found) {
         if(!stream_read_line(dict->stream, next_line)) break;
-        if(string_get_char(next_line, 0) == '#') continue;
+        if(furi_string_get_char(next_line, 0) == '#') continue;
         if(furi_string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
         if(index++ != target) continue;
-        string_set_n(key, next_line, 0, 12);
+        furi_string_set_n(key, next_line, 0, 12);
         key_found = true;
     }
 
@@ -273,10 +273,10 @@ bool mf_classic_dict_find_index_str(MfClassicDict* dict, FuriString* key, uint32
     stream_rewind(dict->stream);
     while(!key_found) {
         if(!stream_read_line(dict->stream, next_line)) break;
-        if(string_get_char(next_line, 0) == '#') continue;
+        if(furi_string_get_char(next_line, 0) == '#') continue;
         if(furi_string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
-        string_left(next_line, 12);
-        if(!string_equal_p(key, next_line)) continue;
+        furi_string_left(next_line, 12);
+        if(!furi_string_equal(key, next_line)) continue;
         key_found = true;
         *target = index;
     }
@@ -309,7 +309,7 @@ bool mf_classic_dict_delete_index(MfClassicDict* dict, uint32_t target) {
     bool key_removed = false;
     while(!key_removed) {
         if(!stream_read_line(dict->stream, next_line)) break;
-        if(string_get_char(next_line, 0) == '#') continue;
+        if(furi_string_get_char(next_line, 0) == '#') continue;
         if(furi_string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
         if(index++ != target) continue;
         stream_seek(dict->stream, -NFC_MF_CLASSIC_KEY_LEN, StreamOffsetFromCurrent);

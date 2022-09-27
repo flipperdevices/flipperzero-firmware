@@ -200,7 +200,7 @@ MU_TEST(mf_classic_dict_test) {
         mf_classic_dict_get_key_at_index_str(instance, temp_str, 0),
         "mf_classic_dict_get_key_at_index_str == true assert failed\r\n");
     mu_assert(
-        string_cmp(temp_str, "2196FAD8115B") == 0,
+        furi_string_cmp(temp_str, "2196FAD8115B") == 0,
         "string_cmp(temp_str, \"2196FAD8115B\") == 0 assert failed\r\n");
 
     mu_assert(mf_classic_dict_rewind(instance), "mf_classic_dict_rewind == 1 assert failed\r\n");

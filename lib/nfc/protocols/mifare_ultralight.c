@@ -1020,7 +1020,7 @@ static void mf_ul_make_ascii_mirror(MfUltralightEmulator* emulator, FuriString* 
             if(mirror_conf == MfUltralightMirrorUid) return;
             // NTAG21x has the peculiar behavior when UID+counter selected, if UID does not fit but
             // counter will fit, it will actually mirror the counter
-            string_cat_str(str, "              ");
+            furi_string_cat(str, "              ");
         } else {
             for(int i = 0; i < 3; ++i) {
                 furi_string_cat_printf(str, "%02X", emulator->data.data[i]);
@@ -1049,7 +1049,7 @@ static void mf_ul_make_ascii_mirror(MfUltralightEmulator* emulator, FuriString* 
             if(mirror_page == last_user_page_index - 1 && mirror_byte > 2) return;
 
             if(mirror_conf == MfUltralightMirrorUidCounter)
-                string_cat_str(str, uid_printed ? "x" : " ");
+                furi_string_cat(str, uid_printed ? "x" : " ");
 
             furi_string_cat_printf(str, "%06X", emulator->data.counter[2]);
         }
@@ -1272,7 +1272,7 @@ bool mf_ul_prepare_emulation_response(
     for(int i = 0; i < (buff_rx_len + 7) / 8; ++i) {
         furi_string_cat_printf(debug_buf, "%02x ", buff_rx[i]);
     }
-    string_strim(debug_buf);
+    furi_string_strim(debug_buf);
     FURI_LOG_T(TAG, "Emu RX (%d): %s", buff_rx_len, furi_string_get_cstr(debug_buf));
     furi_string_reset(debug_buf);
 #endif
@@ -1328,7 +1328,7 @@ bool mf_ul_prepare_emulation_response(
                             uint8_t src_page = start_page;
                             uint8_t last_page_plus_one = start_page + 4;
                             uint8_t pwd_page = emulator->page_num - 2;
-                            FuriString* ascii_mirror;
+                            FuriString* ascii_mirror = NULL;
                             size_t ascii_mirror_len = 0;
                             const char* ascii_mirror_cptr = NULL;
                             uint8_t ascii_mirror_curr_page = 0;
@@ -1355,7 +1355,7 @@ bool mf_ul_prepare_emulation_response(
                                    start_page <= ascii_mirror_curr_page + 6) {
                                     ascii_mirror = furi_string_alloc();
                                     mf_ul_make_ascii_mirror(emulator, ascii_mirror);
-                                    ascii_mirror_len = string_length_u(ascii_mirror);
+                                    ascii_mirror_len = furi_string_unicode_length(ascii_mirror);
                                     ascii_mirror_cptr = furi_string_get_cstr(ascii_mirror);
                                     // Move pointer to where it should be to start copying
                                     if(ascii_mirror_len > 0 &&
@@ -1414,7 +1414,7 @@ bool mf_ul_prepare_emulation_response(
                                 ++src_page;
                                 if(src_page >= last_page_plus_one) src_page = 0;
                             }
-                            if(ascii_mirror_cptr != NULL) {
+                            if(ascii_mirror != NULL) {
                                 furi_string_free(ascii_mirror);
                             }
                             *data_type = FURI_HAL_NFC_TXRX_DEFAULT;
@@ -1515,7 +1515,8 @@ bool mf_ul_prepare_emulation_response(
                                         FuriString* ascii_mirror;
                                         ascii_mirror = furi_string_alloc();
                                         mf_ul_make_ascii_mirror(emulator, ascii_mirror);
-                                        size_t ascii_mirror_len = string_length_u(ascii_mirror);
+                                        size_t ascii_mirror_len =
+                                            furi_string_unicode_length(ascii_mirror);
                                         const char* ascii_mirror_cptr =
                                             furi_string_get_cstr(ascii_mirror);
                                         int16_t mirror_start_offset =
@@ -1853,7 +1854,7 @@ bool mf_ul_prepare_emulation_response(
         for(int i = 0; i < count; ++i) {
             furi_string_cat_printf(debug_buf, "%02x ", buff_tx[i]);
         }
-        string_strim(debug_buf);
+        furi_string_strim(debug_buf);
         FURI_LOG_T(TAG, "Emu TX (%d): %s", *buff_tx_len, furi_string_get_cstr(debug_buf));
         furi_string_free(debug_buf);
     } else {

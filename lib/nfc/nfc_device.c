@@ -318,8 +318,9 @@ bool nfc_device_load_mifare_df_key_settings(
 
 static bool nfc_device_save_mifare_df_app(FlipperFormat* file, MifareDesfireApplication* app) {
     bool saved = false;
-    FuriString *prefix, key;
-    string_init_printf(prefix, "Application %02x%02x%02x", app->id[0], app->id[1], app->id[2]);
+    FuriString *prefix, *key;
+    prefix =
+        furi_string_alloc_printf("Application %02x%02x%02x", app->id[0], app->id[1], app->id[2]);
     key = furi_string_alloc();
     uint8_t* tmp = NULL;
 
@@ -425,8 +426,9 @@ static bool nfc_device_save_mifare_df_app(FlipperFormat* file, MifareDesfireAppl
 
 bool nfc_device_load_mifare_df_app(FlipperFormat* file, MifareDesfireApplication* app) {
     bool parsed = false;
-    FuriString *prefix, key;
-    string_init_printf(prefix, "Application %02x%02x%02x", app->id[0], app->id[1], app->id[2]);
+    FuriString *prefix, *key;
+    prefix =
+        furi_string_alloc_printf("Application %02x%02x%02x", app->id[0], app->id[1], app->id[2]);
     key = furi_string_alloc();
     uint8_t* tmp = NULL;
     MifareDesfireFile* f = NULL;
@@ -744,7 +746,7 @@ static void nfc_device_write_mifare_classic_block(
             }
         }
     }
-    string_strim(block_str);
+    furi_string_strim(block_str);
 }
 
 static bool nfc_device_save_mifare_classic_data(FlipperFormat* file, NfcDevice* dev) {
@@ -795,16 +797,16 @@ static void nfc_device_load_mifare_classic_block(
     FuriString* block_str,
     MfClassicData* data,
     uint8_t block_num) {
-    string_strim(block_str);
+    furi_string_strim(block_str);
     MfClassicBlock block_tmp = {};
     bool is_sector_trailer = mf_classic_is_sector_trailer(block_num);
     uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
     uint16_t block_unknown_bytes_mask = 0;
 
-    string_strim(block_str);
+    furi_string_strim(block_str);
     for(size_t i = 0; i < MF_CLASSIC_BLOCK_SIZE; i++) {
-        char hi = string_get_char(block_str, 3 * i);
-        char low = string_get_char(block_str, 3 * i + 1);
+        char hi = furi_string_get_char(block_str, 3 * i);
+        char low = furi_string_get_char(block_str, 3 * i + 1);
         uint8_t byte = 0;
         if(hex_char_to_uint8(hi, low, &byte)) {
             block_tmp.value[i] = byte;
@@ -856,10 +858,10 @@ static bool nfc_device_load_mifare_classic_data(FlipperFormat* file, NfcDevice* 
     do {
         // Read Mifare Classic type
         if(!flipper_format_read_string(file, "Mifare Classic type", temp_str)) break;
-        if(!string_cmp_str(temp_str, "1K")) {
+        if(!furi_string_cmp(temp_str, "1K")) {
             data->type = MfClassicType1k;
             data_blocks = 64;
-        } else if(!string_cmp_str(temp_str, "4K")) {
+        } else if(!furi_string_cmp(temp_str, "4K")) {
             data->type = MfClassicType4k;
             data_blocks = 256;
         } else {
@@ -981,9 +983,9 @@ bool nfc_device_load_key_cache(NfcDevice* dev) {
         if(furi_string_cmp_str(temp_str, nfc_keys_file_header)) break;
         if(version != nfc_keys_file_version) break;
         if(!flipper_format_read_string(file, "Mifare Classic type", temp_str)) break;
-        if(!string_cmp_str(temp_str, "1K")) {
+        if(!furi_string_cmp(temp_str, "1K")) {
             data->type = MfClassicType1k;
-        } else if(!string_cmp_str(temp_str, "4K")) {
+        } else if(!furi_string_cmp(temp_str, "4K")) {
             data->type = MfClassicType4k;
         } else {
             break;
@@ -1025,7 +1027,7 @@ static void nfc_device_get_path_without_ext(FuriString* orig_path, FuriString* s
     // TODO: this won't work if there is ".nfc" anywhere in the path other than
     // at the end
     size_t ext_start = furi_string_search(orig_path, NFC_APP_EXTENSION);
-    string_set_n(shadow_path, orig_path, 0, ext_start);
+    furi_string_set_n(shadow_path, orig_path, 0, ext_start);
 }
 
 static void nfc_device_get_shadow_path(FuriString* orig_path, FuriString* shadow_path) {
@@ -1048,7 +1050,7 @@ static bool nfc_device_save_file(
     temp_str = furi_string_alloc();
 
     do {
-        if(use_load_path && !string_empty_p(dev->load_path)) {
+        if(use_load_path && !furi_string_empty_p(dev->load_path)) {
             // Get directory name
             path_extract_dirname(furi_string_get_cstr(dev->load_path), temp_str);
             // Create nfc directory if necessary
@@ -1268,7 +1270,7 @@ bool nfc_device_delete(NfcDevice* dev, bool use_load_path) {
 
     do {
         // Delete original file
-        if(use_load_path && !string_empty_p(dev->load_path)) {
+        if(use_load_path && !furi_string_empty_p(dev->load_path)) {
             furi_string_set(file_path, dev->load_path);
         } else {
             furi_string_printf(
@@ -1277,7 +1279,7 @@ bool nfc_device_delete(NfcDevice* dev, bool use_load_path) {
         if(!storage_simply_remove(dev->storage, furi_string_get_cstr(file_path))) break;
         // Delete shadow file if it exists
         if(dev->shadow_file_exist) {
-            if(use_load_path && !string_empty_p(dev->load_path)) {
+            if(use_load_path && !furi_string_empty_p(dev->load_path)) {
                 nfc_device_get_shadow_path(dev->load_path, file_path);
             } else {
                 furi_string_printf(
@@ -1306,7 +1308,7 @@ bool nfc_device_restore(NfcDevice* dev, bool use_load_path) {
     path = furi_string_alloc();
 
     do {
-        if(use_load_path && !string_empty_p(dev->load_path)) {
+        if(use_load_path && !furi_string_empty_p(dev->load_path)) {
             nfc_device_get_shadow_path(dev->load_path, path);
         } else {
             furi_string_printf(
@@ -1314,7 +1316,7 @@ bool nfc_device_restore(NfcDevice* dev, bool use_load_path) {
         }
         if(!storage_simply_remove(dev->storage, furi_string_get_cstr(path))) break;
         dev->shadow_file_exist = false;
-        if(use_load_path && !string_empty_p(dev->load_path)) {
+        if(use_load_path && !furi_string_empty_p(dev->load_path)) {
             furi_string_set(path, dev->load_path);
         } else {
             furi_string_printf(path, "%s/%s%s", NFC_APP_FOLDER, dev->dev_name, NFC_APP_EXTENSION);

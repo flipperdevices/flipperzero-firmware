@@ -36,8 +36,8 @@ struct CliSession {
 BPTREE_DEF2(
     CliCommandTree,
     CLI_COMMANDS_TREE_RANK,
-    string_t,
-    STRING_OPLIST,
+    FuriString*,
+    FURI_STRING_OPLIST,
     CliCommand,
     M_POD_OPLIST)
 

@@ -400,7 +400,7 @@ static FS_Error
                 break;
             } else {
                 furi_string_set(tmp_old_path, path);
-                string_right(path, strlen(old_path));
+                furi_string_right(path, strlen(old_path));
                 furi_string_printf(tmp_new_path, "%s%s", new_path, furi_string_get_cstr(path));
 
                 if(fileinfo.flags & FSF_DIRECTORY) {
@@ -461,7 +461,7 @@ static FS_Error
     storage_merge_recursive(Storage* storage, const char* old_path, const char* new_path) {
     FS_Error error = storage_common_mkdir(storage, new_path);
     DirWalk* dir_walk = dir_walk_alloc(storage);
-    FuriString *path, file_basename, tmp_new_path;
+    FuriString *path, *file_basename, *tmp_new_path;
     FileInfo fileinfo;
     path = furi_string_alloc();
     file_basename = furi_string_alloc();
@@ -736,7 +736,7 @@ bool storage_simply_remove_recursive(Storage* storage, const char* path) {
                 break;
             }
 
-            string_init_printf(fullname, "%s/%s", furi_string_get_cstr(cur_dir), name);
+            fullname = furi_string_alloc_printf("%s/%s", furi_string_get_cstr(cur_dir), name);
             FS_Error error = storage_common_remove(storage, furi_string_get_cstr(fullname));
             furi_check(error == FSE_OK);
             furi_string_free(fullname);
@@ -751,10 +751,10 @@ bool storage_simply_remove_recursive(Storage* storage, const char* path) {
         FS_Error error = storage_common_remove(storage, furi_string_get_cstr(cur_dir));
         furi_check(error == FSE_OK);
 
-        if(string_cmp(cur_dir, path)) {
-            size_t last_char = string_search_rchar(cur_dir, '/');
+        if(furi_string_cmp(cur_dir, path)) {
+            size_t last_char = furi_string_search_rchar(cur_dir, '/');
             furi_assert(last_char != STRING_FAILURE);
-            string_left(cur_dir, last_char);
+            furi_string_left(cur_dir, last_char);
         } else {
             result = true;
             break;
@@ -789,7 +789,7 @@ void storage_get_next_filename(
     FuriString* temp_str;
     uint16_t num = 0;
 
-    string_init_printf(temp_str, "%s/%s%s", dirname, filename, fileextension);
+    temp_str = furi_string_alloc_printf("%s/%s%s", dirname, filename, fileextension);
 
     while(storage_common_stat(storage, furi_string_get_cstr(temp_str), NULL) == FSE_OK) {
         num++;

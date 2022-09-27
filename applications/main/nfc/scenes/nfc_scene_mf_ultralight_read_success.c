@@ -35,9 +35,9 @@ void nfc_scene_mf_ultralight_read_success_on_enter(void* context) {
 
     FuriString* temp_str;
     if(furi_string_size(nfc->dev->dev_data.parsed_data)) {
-        temp_str = furi_string_alloc_set_cstr(nfc->dev->dev_data.parsed_data);
+        temp_str = furi_string_alloc_set(nfc->dev->dev_data.parsed_data);
     } else {
-        string_init_printf(temp_str, "\e#%s\n", nfc_mf_ul_type(mf_ul_data->type, true));
+        temp_str = furi_string_alloc_printf("\e#%s\n", nfc_mf_ul_type(mf_ul_data->type, true));
         furi_string_cat_printf(temp_str, "UID:");
         for(size_t i = 0; i < data->uid_len; i++) {
             furi_string_cat_printf(temp_str, " %02X", data->uid[i]);

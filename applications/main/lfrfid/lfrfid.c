@@ -210,9 +210,9 @@ bool lfrfid_save_key(LfRfid* app) {
 
     lfrfid_make_app_folder(app);
 
-    if(string_end_with_str_p(app->file_path, LFRFID_APP_EXTENSION)) {
-        size_t filename_start = string_search_rchar(app->file_path, '/');
-        string_left(app->file_path, filename_start);
+    if(furi_string_end_with(app->file_path, LFRFID_APP_EXTENSION)) {
+        size_t filename_start = furi_string_search_rchar(app->file_path, '/');
+        furi_string_left(app->file_path, filename_start);
     }
 
     furi_string_cat_printf(

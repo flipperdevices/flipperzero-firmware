@@ -56,7 +56,7 @@ static bool fap_loader_run_selected_app(FapLoader* loader) {
 
     FuriString* error_message;
 
-    error_message = furi_string_alloc_set_cstr("unknown error");
+    error_message = furi_string_alloc_set("unknown error");
 
     bool file_selected = false;
     bool show_error = true;
@@ -112,7 +112,7 @@ static bool fap_loader_run_selected_app(FapLoader* loader) {
         FuriString* buffer;
         buffer = furi_string_alloc();
         furi_string_printf(buffer, "%s", furi_string_get_cstr(error_message));
-        string_replace_str(buffer, ":", "\n");
+        furi_string_replace_str(buffer, ":", "\n");
         dialog_message_set_text(
             message, furi_string_get_cstr(buffer), 64, 32, AlignCenter, AlignCenter);
 
@@ -158,10 +158,10 @@ int32_t fap_loader_app(void* p) {
     view_dispatcher_add_view(loader->view_dispatcher, 0, loading_get_view(loader->loading));
 
     if(p) {
-        loader->fap_path = furi_string_alloc_set_cstr((const char*)p);
+        loader->fap_path = furi_string_alloc_set((const char*)p);
         fap_loader_run_selected_app(loader);
     } else {
-        loader->fap_path = furi_string_alloc_set_cstr(EXT_PATH("apps"));
+        loader->fap_path = furi_string_alloc_set(EXT_PATH("apps"));
 
         while(fap_loader_select_app(loader)) {
             view_dispatcher_switch_to_view(loader->view_dispatcher, 0);

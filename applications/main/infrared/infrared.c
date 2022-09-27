@@ -71,9 +71,9 @@ static void infrared_find_vacant_remote_name(FuriString* name, const char* path)
     FuriString* base_path;
     base_path = furi_string_alloc_set(path);
 
-    if(string_end_with_str_p(base_path, INFRARED_APP_EXTENSION)) {
-        size_t filename_start = string_search_rchar(base_path, '/');
-        string_left(base_path, filename_start);
+    if(furi_string_end_with(base_path, INFRARED_APP_EXTENSION)) {
+        size_t filename_start = furi_string_search_rchar(base_path, '/');
+        furi_string_left(base_path, filename_start);
     }
 
     furi_string_printf(
@@ -83,8 +83,8 @@ static void infrared_find_vacant_remote_name(FuriString* name, const char* path)
 
     if(status == FSE_OK) {
         /* If the suggested name is occupied, try another one (name2, name3, etc) */
-        size_t dot = string_search_rchar(base_path, '.');
-        string_left(base_path, dot);
+        size_t dot = furi_string_search_rchar(base_path, '.');
+        furi_string_left(base_path, dot);
 
         FuriString* path_temp;
         path_temp = furi_string_alloc();
@@ -244,7 +244,7 @@ bool infrared_add_remote_with_button(
     InfraredSignal* signal) {
     InfraredRemote* remote = infrared->remote;
 
-    FuriString *new_name, new_path;
+    FuriString *new_name, *new_path;
     new_name = furi_string_alloc_set(INFRARED_DEFAULT_REMOTE_NAME);
     new_path = furi_string_alloc_set(INFRARED_APP_FOLDER);
 
@@ -275,10 +275,10 @@ bool infrared_rename_current_remote(Infrared* infrared, const char* name) {
     infrared_find_vacant_remote_name(new_name, remote_path);
 
     FuriString* new_path;
-    new_path = furi_string_alloc_set_cstr(infrared_remote_get_path(remote));
-    if(string_end_with_str_p(new_path, INFRARED_APP_EXTENSION)) {
-        size_t filename_start = string_search_rchar(new_path, '/');
-        string_left(new_path, filename_start);
+    new_path = furi_string_alloc_set(infrared_remote_get_path(remote));
+    if(furi_string_end_with(new_path, INFRARED_APP_EXTENSION)) {
+        size_t filename_start = furi_string_search_rchar(new_path, '/');
+        furi_string_left(new_path, filename_start);
     }
     furi_string_cat_printf(
         new_path, "/%s%s", furi_string_get_cstr(new_name), INFRARED_APP_EXTENSION);

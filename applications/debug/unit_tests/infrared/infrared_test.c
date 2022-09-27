@@ -76,7 +76,7 @@ static bool infrared_test_load_raw_signal(
     do {
         bool is_name_found = false;
         for(; !is_name_found && flipper_format_read_string(ff, "name", buf);
-            is_name_found = !string_cmp_str(buf, signal_name))
+            is_name_found = !furi_string_cmp(buf, signal_name))
             ;
 
         if(!is_name_found) break;
@@ -129,7 +129,7 @@ static bool infrared_test_load_messages(
     do {
         bool is_name_found = false;
         for(; !is_name_found && flipper_format_read_string(ff, "name", buf);
-            is_name_found = !string_cmp_str(buf, signal_name))
+            is_name_found = !furi_string_cmp(buf, signal_name))
             ;
 
         if(!is_name_found) break;

@@ -39,7 +39,7 @@ static size_t rpc_debug_print_file_msg(
 void rpc_debug_print_data(const char* prefix, uint8_t* buffer, size_t size) {
     FuriString* str;
     str = furi_string_alloc();
-    string_reserve(str, 100 + size * 5);
+    furi_string_reserve(str, 100 + size * 5);
 
     furi_string_cat_printf(str, "\r\n%s DEC(%d): {", prefix, size);
     for(size_t i = 0; i < size; ++i) {
@@ -49,7 +49,7 @@ void rpc_debug_print_data(const char* prefix, uint8_t* buffer, size_t size) {
 
     printf("%s", furi_string_get_cstr(str));
     furi_string_reset(str);
-    string_reserve(str, 100 + size * 3);
+    furi_string_reserve(str, 100 + size * 3);
 
     furi_string_cat_printf(str, "%s HEX(%d): {", prefix, size);
     for(size_t i = 0; i < size; ++i) {

@@ -121,7 +121,7 @@ void loader_cli_open(Cli* cli, FuriString* args, Loader* instance) {
             break;
         }
 
-        string_strim(args);
+        furi_string_strim(args);
         if(!loader_start_application(application, furi_string_get_cstr(args))) {
             printf("Can't start, furi application is running");
             return;

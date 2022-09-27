@@ -202,7 +202,7 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
     full_extracted_fname = furi_string_alloc();
 
     FuriString* converted_fname;
-    converted_fname = furi_string_alloc_set_cstr(header->name);
+    converted_fname = furi_string_alloc_set(header->name);
     if(op_params->converter) {
         op_params->converter(converted_fname);
     }
@@ -332,15 +332,14 @@ bool tar_archive_add_dir(TarArchive* archive, const char* fs_full_path, const ch
                 break;
             }
 
-            FuriString *element_name, element_fs_abs_path;
-            element_name = furi_string_alloc();
-            element_fs_abs_path = furi_string_alloc();
+            FuriString* element_name = furi_string_alloc();
+            FuriString* element_fs_abs_path = furi_string_alloc();
 
             path_concat(fs_full_path, name, element_fs_abs_path);
             if(strlen(path_prefix)) {
                 path_concat(path_prefix, name, element_name);
             } else {
-                element_name = furi_string_alloc_set_cstr(name);
+                furi_string_set(element_name, name);
             }
 
             if(file_info.flags & FSF_DIRECTORY) {

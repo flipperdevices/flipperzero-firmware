@@ -71,9 +71,10 @@ void string_push_uint64(uint64_t input, FuriString* output) {
 
     // reverse string
     for(uint8_t i = 0; i < furi_string_size(output) / 2; i++) {
-        char c = string_get_char(output, i);
-        string_set_char(output, i, string_get_char(output, furi_string_size(output) - i - 1));
-        string_set_char(output, furi_string_size(output) - i - 1, c);
+        char c = furi_string_get_char(output, i);
+        furi_string_set_char(
+            output, i, furi_string_get_char(output, furi_string_size(output) - i - 1));
+        furi_string_set_char(output, furi_string_size(output) - i - 1, c);
     }
 }
 

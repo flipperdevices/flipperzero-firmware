@@ -31,8 +31,7 @@ static const uint8_t dev_info_rpc_version_uuid[] =
 
 void dev_info_svc_start() {
     dev_info_svc = malloc(sizeof(DevInfoSvc));
-    string_init_printf(
-        dev_info_svc->version_string,
+    dev_info_svc->version_string = furi_string_alloc_printf(
         "%s %s %s %s",
         version_get_githash(NULL),
         version_get_gitbranch(NULL),
@@ -162,7 +161,7 @@ void dev_info_svc_start() {
         dev_info_svc->software_rev_char_handle,
         0,
         furi_string_size(dev_info_svc->version_string),
-        (uint8_t*)string_get_cstr(dev_info_svc->version_string));
+        (uint8_t*)furi_string_get_cstr(dev_info_svc->version_string));
     if(status) {
         FURI_LOG_E(TAG, "Failed to update software revision char: %d", status);
     }

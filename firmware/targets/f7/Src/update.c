@@ -59,7 +59,7 @@ static bool flipper_update_load_stage(const FuriString* work_dir, UpdateManifest
     FILINFO stat;
 
     FuriString* loader_img_path;
-    loader_img_path = furi_string_alloc_set_cstr(work_dir);
+    loader_img_path = furi_string_alloc_set(work_dir);
     path_append(loader_img_path, furi_string_get_cstr(manifest->staged_loader_file));
 
     if((f_stat(furi_string_get_cstr(loader_img_path), &stat) != FR_OK) ||
@@ -130,10 +130,10 @@ static bool flipper_update_get_manifest_path(FuriString* out_path) {
             break;
         }
         furi_string_set(out_path, manifest_name_buf);
-        string_right(out_path, strlen(STORAGE_EXT_PATH_PREFIX));
+        furi_string_right(out_path, strlen(STORAGE_EXT_PATH_PREFIX));
     } while(0);
     f_close(&file);
-    return !string_empty_p(out_path);
+    return !furi_string_empty_p(out_path);
 }
 
 static UpdateManifest* flipper_update_process_manifest(const FuriString* manifest_path) {
@@ -178,9 +178,9 @@ void flipper_boot_update_exec() {
         return;
     }
 
-    FuriString *work_dir, manifest_path;
-    work_dir = furi_string_alloc();
-    manifest_path = furi_string_alloc();
+    FuriString* work_dir = furi_string_alloc();
+    FuriString* manifest_path = furi_string_alloc();
+
     do {
         if(!flipper_update_get_manifest_path(manifest_path)) {
             break;

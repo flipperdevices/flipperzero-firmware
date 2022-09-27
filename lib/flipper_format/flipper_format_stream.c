@@ -301,7 +301,7 @@ bool flipper_format_stream_write_value_line(Stream* stream, FlipperStreamWriteDa
                 }
 
                 if((size_t)(i + 1) < write_data->data_size) {
-                    string_cat(value, " ");
+                    furi_string_cat(value, " ");
                 }
 
                 if(!flipper_format_stream_write(
@@ -357,8 +357,8 @@ bool flipper_format_stream_read_value_line(
                         if(furi_string_size(value) >= 2) {
                             // sscanf "%02X" does not work here
                             if(hex_char_to_uint8(
-                                   string_get_char(value, 0),
-                                   string_get_char(value, 1),
+                                   furi_string_get_char(value, 0),
+                                   furi_string_get_char(value, 1),
                                    &data[i])) {
                                 scan_values = 1;
                             }
@@ -395,7 +395,7 @@ bool flipper_format_stream_read_value_line(
                     }; break;
                     case FlipperStreamValueBool: {
                         bool* data = _data;
-                        data[i] = !string_cmpi_str(value, "true");
+                        data[i] = !furi_string_cmpi(value, "true");
                         scan_values = 1;
                     }; break;
                     default:

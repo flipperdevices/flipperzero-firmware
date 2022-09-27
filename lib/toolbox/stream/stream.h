@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <mlib/m-string.h>
+#include <core/furi_string.h>
 #include <storage/storage.h>
 
 #ifdef __cplusplus

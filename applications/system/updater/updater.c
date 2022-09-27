@@ -36,7 +36,7 @@ Updater* updater_alloc(const char* arg) {
     Updater* updater = malloc(sizeof(Updater));
     if(arg && strlen(arg)) {
         updater->startup_arg = furi_string_alloc_set(arg);
-        string_replace_str(updater->startup_arg, ANY_PATH(""), EXT_PATH(""));
+        furi_string_replace_str(updater->startup_arg, ANY_PATH(""), EXT_PATH(""));
     } else {
         updater->startup_arg = furi_string_alloc();
     }

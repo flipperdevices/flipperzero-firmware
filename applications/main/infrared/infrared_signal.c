@@ -235,9 +235,9 @@ bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, FuriString*
         if(!flipper_format_read_string(ff, "name", buf)) break;
         furi_string_set(name, buf);
         if(!flipper_format_read_string(ff, "type", buf)) break;
-        if(!string_cmp_str(buf, "raw")) {
+        if(!furi_string_cmp(buf, "raw")) {
             success = infrared_signal_read_raw(signal, ff);
-        } else if(!string_cmp_str(buf, "parsed")) {
+        } else if(!furi_string_cmp(buf, "parsed")) {
             success = infrared_signal_read_message(signal, ff);
         } else {
             FURI_LOG_E(TAG, "Unknown type of signal (allowed - raw/parsed) ");

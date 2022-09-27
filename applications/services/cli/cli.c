@@ -144,7 +144,7 @@ void cli_prompt(Cli* cli) {
 
 void cli_reset(Cli* cli) {
     // cli->last_line is cleared and cli->line's buffer moved to cli->last_line
-    string_move(cli->last_line, cli->line);
+    furi_string_move(cli->last_line, cli->line);
     // Reiniting cli->line
     cli->line = furi_string_alloc();
     cli->cursor_position = 0;
@@ -159,12 +159,12 @@ static void cli_handle_backspace(Cli* cli) {
         // Our side
         FuriString* temp;
         temp = furi_string_alloc();
-        string_reserve(temp, furi_string_size(cli->line) - 1);
-        string_set_strn(temp, furi_string_get_cstr(cli->line), cli->cursor_position - 1);
-        string_cat_str(temp, furi_string_get_cstr(cli->line) + cli->cursor_position);
+        furi_string_reserve(temp, furi_string_size(cli->line) - 1);
+        furi_string_set_strn(temp, furi_string_get_cstr(cli->line), cli->cursor_position - 1);
+        furi_string_cat(temp, furi_string_get_cstr(cli->line) + cli->cursor_position);
 
         // cli->line is cleared and temp's buffer moved to cli->line
-        string_move(cli->line, temp);
+        furi_string_move(cli->line, temp);
         // NO MEMORY LEAK, STOP REPORTING IT
 
         cli->cursor_position--;
@@ -174,7 +174,7 @@ static void cli_handle_backspace(Cli* cli) {
 }
 
 static void cli_normalize_line(Cli* cli) {
-    string_strim(cli->line);
+    furi_string_strim(cli->line);
     cli->cursor_position = furi_string_size(cli->line);
 }
 
@@ -220,13 +220,13 @@ static void cli_handle_enter(Cli* cli) {
     args = furi_string_alloc();
 
     // Split command and args
-    size_t ws = string_search_char(cli->line, ' ');
+    size_t ws = furi_string_search_char(cli->line, ' ');
     if(ws == STRING_FAILURE) {
         furi_string_set(command, cli->line);
     } else {
-        string_set_n(command, cli->line, 0, ws);
-        string_set_n(args, cli->line, ws, furi_string_size(cli->line));
-        string_strim(args);
+        furi_string_set_n(command, cli->line, 0, ws);
+        furi_string_set_n(args, cli->line, ws, furi_string_size(cli->line));
+        furi_string_strim(args);
     }
 
     // Search for command
@@ -272,7 +272,7 @@ static void cli_handle_autocomplete(Cli* cli) {
     for
         M_EACH(cli_command, cli->commands, CliCommandTree_t) {
             // Process only if starts with line buffer
-            if(string_start_with_string_p(*cli_command->key_ptr, cli->line)) {
+            if(furi_string_start_with(*cli_command->key_ptr, cli->line)) {
                 // Show autocomplete option
                 printf("%s\r\n", furi_string_get_cstr(*cli_command->key_ptr));
                 // Process common base for autocomplete
@@ -284,14 +284,14 @@ static void cli_handle_autocomplete(Cli* cli) {
                     size_t i = 0;
                     while(i < min_size) {
                         // Stop when do not match
-                        if(string_get_char(*cli_command->key_ptr, i) !=
-                           string_get_char(common, i)) {
+                        if(furi_string_get_char(*cli_command->key_ptr, i) !=
+                           furi_string_get_char(common, i)) {
                             break;
                         }
                         i++;
                     }
                     // Cut right part if any
-                    string_left(common, i);
+                    furi_string_left(common, i);
                 } else {
                     // Start with something
                     furi_string_set(common, *cli_command->key_ptr);
@@ -312,7 +312,7 @@ static void cli_handle_autocomplete(Cli* cli) {
 static void cli_handle_escape(Cli* cli, char c) {
     if(c == 'A') {
         // Use previous command if line buffer is empty
-        if(furi_string_size(cli->line) == 0 && string_cmp(cli->line, cli->last_line) != 0) {
+        if(furi_string_size(cli->line) == 0 && furi_string_cmp(cli->line, cli->last_line) != 0) {
             // Set line buffer and cursor position
             furi_string_set(cli->line, cli->last_line);
             cli->cursor_position = furi_string_size(cli->line);
@@ -369,13 +369,13 @@ void cli_process_input(Cli* cli) {
             // ToDo: better way?
             FuriString* temp;
             temp = furi_string_alloc();
-            string_reserve(temp, furi_string_size(cli->line) + 1);
-            string_set_strn(temp, furi_string_get_cstr(cli->line), cli->cursor_position);
+            furi_string_reserve(temp, furi_string_size(cli->line) + 1);
+            furi_string_set_strn(temp, furi_string_get_cstr(cli->line), cli->cursor_position);
             furi_string_push_back(temp, in_chr);
-            string_cat_str(temp, furi_string_get_cstr(cli->line) + cli->cursor_position);
+            furi_string_cat(temp, furi_string_get_cstr(cli->line) + cli->cursor_position);
 
             // cli->line is cleared and temp's buffer moved to cli->line
-            string_move(cli->line, temp);
+            furi_string_move(cli->line, temp);
             // NO MEMORY LEAK, STOP REPORTING IT
 
             // Print character in replace mode
@@ -396,11 +396,11 @@ void cli_add_command(
     void* context) {
     FuriString* name_str;
     name_str = furi_string_alloc_set(name);
-    string_strim(name_str);
+    furi_string_strim(name_str);
 
     size_t name_replace;
     do {
-        name_replace = string_replace_str(name_str, " ", "_");
+        name_replace = furi_string_replace_str(name_str, " ", "_");
     } while(name_replace != STRING_FAILURE);
 
     CliCommand c;
@@ -418,11 +418,11 @@ void cli_add_command(
 void cli_delete_command(Cli* cli, const char* name) {
     FuriString* name_str;
     name_str = furi_string_alloc_set(name);
-    string_strim(name_str);
+    furi_string_strim(name_str);
 
     size_t name_replace;
     do {
-        name_replace = string_replace_str(name_str, " ", "_");
+        name_replace = furi_string_replace_str(name_str, " ", "_");
     } while(name_replace != STRING_FAILURE);
 
     furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);

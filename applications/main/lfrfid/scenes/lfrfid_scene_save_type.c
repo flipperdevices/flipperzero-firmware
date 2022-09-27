@@ -20,14 +20,13 @@ void lfrfid_scene_save_type_on_enter(void* context) {
         if(strcmp(
                protocol_dict_get_manufacturer(app->dict, i),
                protocol_dict_get_name(app->dict, i)) != 0) {
-            string_init_printf(
-                state->menu_item_name[i],
+            state->menu_item_name[i] = furi_string_alloc_printf(
                 "%s %s",
                 protocol_dict_get_manufacturer(app->dict, i),
                 protocol_dict_get_name(app->dict, i));
         } else {
-            string_init_printf(
-                state->menu_item_name[i], "%s", protocol_dict_get_name(app->dict, i));
+            state->menu_item_name[i] =
+                furi_string_alloc_printf("%s", protocol_dict_get_name(app->dict, i));
         }
         submenu_add_item(
             submenu,

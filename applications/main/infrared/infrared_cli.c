@@ -272,7 +272,7 @@ static void infrared_cli_process_decode(Cli* cli, FuriString* args) {
     FlipperFormat* output_file = NULL;
 
     uint32_t version;
-    FuriString *tmp, header, input_path, output_path;
+    FuriString *tmp, *header, *input_path, *output_path;
     tmp = furi_string_alloc();
     header = furi_string_alloc();
     input_path = furi_string_alloc();
@@ -297,7 +297,7 @@ static void infrared_cli_process_decode(Cli* cli, FuriString* args) {
                 "Invalid or corrupted input file: \"%s\"\r\n", furi_string_get_cstr(input_path));
             break;
         }
-        if(!string_empty_p(output_path)) {
+        if(!furi_string_empty_p(output_path)) {
             printf("Writing output to file: \"%s\"\r\n", furi_string_get_cstr(output_path));
             output_file = flipper_format_file_alloc(storage);
         }

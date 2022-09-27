@@ -14,7 +14,7 @@ void storage_file_init_set(StorageFile* obj, const StorageFile* src) {
     obj->file = src->file;
     obj->type = src->type;
     obj->file_data = src->file_data;
-    obj->path = furi_string_alloc_set_cstr(src->path);
+    obj->path = furi_string_alloc_set(src->path);
 }
 
 void storage_file_set(StorageFile* obj, const StorageFile* src) {
@@ -109,7 +109,7 @@ bool storage_path_already_open(FuriString* path, StorageFileList_t array) {
     for(StorageFileList_it(it, array); !StorageFileList_end_p(it); StorageFileList_next(it)) {
         const StorageFile* storage_file = StorageFileList_cref(it);
 
-        if(string_cmp(storage_file->path, path) == 0) {
+        if(furi_string_cmp(storage_file->path, path) == 0) {
             open = true;
             break;
         }

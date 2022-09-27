@@ -69,7 +69,7 @@ static void updater_cli_ep(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
     FuriString* subcommand;
     subcommand = furi_string_alloc();
-    if(!args_read_string_and_trim(args, subcommand) || string_empty_p(args)) {
+    if(!args_read_string_and_trim(args, subcommand) || furi_string_empty_p(args)) {
         updater_cli_help(args);
         furi_string_free(subcommand);
         return;

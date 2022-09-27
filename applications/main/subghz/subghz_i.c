@@ -474,7 +474,7 @@ bool subghz_rename_file(SubGhz* subghz) {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    if(string_cmp(subghz->file_path_tmp, subghz->file_path)) {
+    if(furi_string_cmp(subghz->file_path_tmp, subghz->file_path)) {
         FS_Error fs_result = storage_common_rename(
             storage,
             furi_string_get_cstr(subghz->file_path_tmp),
@@ -509,7 +509,7 @@ void subghz_file_name_clear(SubGhz* subghz) {
 }
 
 bool subghz_path_is_file(FuriString* path) {
-    return string_end_with_str_p(path, SUBGHZ_APP_EXTENSION);
+    return furi_string_end_with(path, SUBGHZ_APP_EXTENSION);
 }
 
 uint32_t subghz_random_serial(void) {

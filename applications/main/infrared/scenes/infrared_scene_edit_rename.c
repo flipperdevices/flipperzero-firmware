@@ -32,7 +32,7 @@ void infrared_scene_edit_rename_on_enter(void* context) {
         FuriString* folder_path;
         folder_path = furi_string_alloc();
 
-        if(string_end_with_str_p(infrared->file_path, INFRARED_APP_EXTENSION)) {
+        if(furi_string_end_with(infrared->file_path, INFRARED_APP_EXTENSION)) {
             path_extract_dirname(furi_string_get_cstr(infrared->file_path), folder_path);
         }
 

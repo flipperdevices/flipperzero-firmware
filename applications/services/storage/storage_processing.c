@@ -74,16 +74,16 @@ static void storage_path_change_to_real_storage(FuriString* path, StorageType re
        0) {
         switch(real_storage) {
         case ST_EXT:
-            string_set_char(path, 0, STORAGE_EXT_PATH_PREFIX[0]);
-            string_set_char(path, 1, STORAGE_EXT_PATH_PREFIX[1]);
-            string_set_char(path, 2, STORAGE_EXT_PATH_PREFIX[2]);
-            string_set_char(path, 3, STORAGE_EXT_PATH_PREFIX[3]);
+            furi_string_set_char(path, 0, STORAGE_EXT_PATH_PREFIX[0]);
+            furi_string_set_char(path, 1, STORAGE_EXT_PATH_PREFIX[1]);
+            furi_string_set_char(path, 2, STORAGE_EXT_PATH_PREFIX[2]);
+            furi_string_set_char(path, 3, STORAGE_EXT_PATH_PREFIX[3]);
             break;
         case ST_INT:
-            string_set_char(path, 0, STORAGE_INT_PATH_PREFIX[0]);
-            string_set_char(path, 1, STORAGE_INT_PATH_PREFIX[1]);
-            string_set_char(path, 2, STORAGE_INT_PATH_PREFIX[2]);
-            string_set_char(path, 3, STORAGE_INT_PATH_PREFIX[3]);
+            furi_string_set_char(path, 0, STORAGE_INT_PATH_PREFIX[0]);
+            furi_string_set_char(path, 1, STORAGE_INT_PATH_PREFIX[1]);
+            furi_string_set_char(path, 2, STORAGE_INT_PATH_PREFIX[2]);
+            furi_string_set_char(path, 3, STORAGE_INT_PATH_PREFIX[3]);
             break;
         default:
             break;
@@ -109,7 +109,7 @@ bool storage_process_file_open(
     } else {
         storage = storage_get_storage_by_type(app, type);
         FuriString* real_path;
-        real_path = furi_string_alloc_set_cstr(path);
+        real_path = furi_string_alloc_set(path);
         storage_path_change_to_real_storage(real_path, type);
 
         if(storage_path_already_open(real_path, storage->files)) {
@@ -268,7 +268,7 @@ bool storage_process_dir_open(Storage* app, File* file, const char* path) {
     } else {
         storage = storage_get_storage_by_type(app, type);
         FuriString* real_path;
-        real_path = furi_string_alloc_set_cstr(path);
+        real_path = furi_string_alloc_set(path);
         storage_path_change_to_real_storage(real_path, type);
 
         if(storage_path_already_open(real_path, storage->files)) {
@@ -352,7 +352,7 @@ static FS_Error storage_process_common_remove(Storage* app, const char* path) {
     StorageType type = storage_get_type_by_path(app, path);
 
     FuriString* real_path;
-    real_path = furi_string_alloc_set_cstr(path);
+    real_path = furi_string_alloc_set(path);
     storage_path_change_to_real_storage(real_path, type);
 
     do {

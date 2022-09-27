@@ -19,7 +19,7 @@ MU_TEST_1(stream_composite_subtest, Stream* stream) {
     const size_t data_size = 128;
     uint8_t data[data_size];
     FuriString* string_lee;
-    string_lee = furi_string_alloc_set_cstr("lee");
+    string_lee = furi_string_alloc_set("lee");
 
     // test that stream is empty
     // "" -> ""
@@ -478,13 +478,13 @@ MU_TEST(stream_buffered_large_file_test) {
     FuriString* tmp;
     tmp = furi_string_alloc();
     while(stream_read_line(stream, tmp)) {
-        string_cat(output_data, tmp);
+        furi_string_cat(output_data, tmp);
     }
     furi_string_free(tmp);
 
     // check against generated data
     mu_assert_int_eq(furi_string_size(input_data), furi_string_size(output_data));
-    mu_check(string_equal_p(input_data, output_data));
+    mu_check(furi_string_equal(input_data, output_data));
     mu_check(stream_eof(stream));
 
     stream_free(stream);

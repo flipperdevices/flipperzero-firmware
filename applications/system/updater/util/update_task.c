@@ -69,19 +69,19 @@ static const UpdateTaskStageGroupMap update_task_stage_progress[] = {
 static UpdateTaskStageGroup update_task_get_task_groups(UpdateTask* update_task) {
     UpdateTaskStageGroup ret = UpdateTaskStageGroupPreUpdate | UpdateTaskStageGroupPostUpdate;
     UpdateManifest* manifest = update_task->manifest;
-    if(!string_empty_p(manifest->radio_image)) {
+    if(!furi_string_empty_p(manifest->radio_image)) {
         ret |= UpdateTaskStageGroupRadio;
     }
     if(update_manifest_has_obdata(manifest)) {
         ret |= UpdateTaskStageGroupOptionBytes;
     }
-    if(!string_empty_p(manifest->firmware_dfu_image)) {
+    if(!furi_string_empty_p(manifest->firmware_dfu_image)) {
         ret |= UpdateTaskStageGroupFirmware;
     }
-    if(!string_empty_p(manifest->resource_bundle)) {
+    if(!furi_string_empty_p(manifest->resource_bundle)) {
         ret |= UpdateTaskStageGroupResources;
     }
-    if(!string_empty_p(manifest->splash_file)) {
+    if(!furi_string_empty_p(manifest->splash_file)) {
         ret |= UpdateTaskStageGroupSplashscreen;
     }
     return ret;
@@ -168,7 +168,7 @@ static void update_task_close_file(UpdateTask* update_task) {
 static bool update_task_check_file_exists(UpdateTask* update_task, FuriString* filename) {
     furi_assert(update_task);
     FuriString* tmp_path;
-    tmp_path = furi_string_alloc_set_cstr(update_task->update_path);
+    tmp_path = furi_string_alloc_set(update_task->update_path);
     path_append(tmp_path, furi_string_get_cstr(filename));
     bool exists = storage_file_exists(update_task->storage, furi_string_get_cstr(tmp_path));
     furi_string_free(tmp_path);
@@ -180,7 +180,7 @@ bool update_task_open_file(UpdateTask* update_task, FuriString* filename) {
     update_task_close_file(update_task);
 
     FuriString* tmp_path;
-    tmp_path = furi_string_alloc_set_cstr(update_task->update_path);
+    tmp_path = furi_string_alloc_set(update_task->update_path);
     path_append(tmp_path, furi_string_get_cstr(filename));
     bool open_success = storage_file_open(
         update_task->file, furi_string_get_cstr(tmp_path), FSAM_READ, FSOM_OPEN_EXISTING);

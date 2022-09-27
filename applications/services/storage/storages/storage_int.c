@@ -341,7 +341,8 @@ static bool storage_int_file_open(
         FuriString* filename;
         filename = furi_string_alloc();
         path_extract_basename(path, filename);
-        bool is_dot_file = (!string_empty_p(filename) && (string_get_char(filename, 0) == '.'));
+        bool is_dot_file =
+            (!furi_string_empty_p(filename) && (furi_string_get_char(filename, 0) == '.'));
         furi_string_free(filename);
 
         /* Restrict write & creation access to all non-dot files */

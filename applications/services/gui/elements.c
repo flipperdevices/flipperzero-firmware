@@ -191,7 +191,7 @@ static size_t
     size_t text_size = end - text;
     FuriString* str;
     str = furi_string_alloc_set(text);
-    string_left(str, text_size);
+    furi_string_left(str, text_size);
     size_t result = 0;
 
     uint16_t len_px = canvas_string_width(canvas, furi_string_get_cstr(str));
@@ -261,11 +261,11 @@ void elements_multiline_text_aligned(
         size_t chars_fit = elements_get_max_chars_to_fit(canvas, horizontal, start, x);
 
         if((start[chars_fit] == '\n') || (start[chars_fit] == 0)) {
-            string_init_printf(line, "%.*s", chars_fit, start);
+            line = furi_string_alloc_printf("%.*s", chars_fit, start);
         } else if((y + font_height) > canvas_height(canvas)) {
-            string_init_printf(line, "%.*s...\n", chars_fit, start);
+            line = furi_string_alloc_printf("%.*s...\n", chars_fit, start);
         } else {
-            string_init_printf(line, "%.*s-\n", chars_fit, start);
+            line = furi_string_alloc_printf("%.*s-\n", chars_fit, start);
         }
         canvas_draw_str_aligned(canvas, x, y, horizontal, vertical, furi_string_get_cstr(line));
         furi_string_free(line);
@@ -291,7 +291,7 @@ void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, const char* t
     do {
         end = strchr(start, '\n');
         if(end) {
-            string_set_strn(str, start, end - start);
+            furi_string_set_strn(str, start, end - start);
         } else {
             furi_string_set(str, start);
         }
@@ -541,10 +541,10 @@ void elements_string_fit_width(Canvas* canvas, FuriString* string, uint8_t width
     if(len_px > width) {
         width -= canvas_string_width(canvas, "...");
         do {
-            string_left(string, furi_string_size(string) - 1);
+            furi_string_left(string, furi_string_size(string) - 1);
             len_px = canvas_string_width(canvas, furi_string_get_cstr(string));
         } while(len_px > width);
-        string_cat(string, "...");
+        furi_string_cat(string, "...");
     }
 }
 

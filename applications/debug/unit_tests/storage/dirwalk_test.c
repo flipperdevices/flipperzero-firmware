@@ -84,7 +84,7 @@ static StorageTestPathDict_t*
 
     for(size_t i = 0; i < paths_count; i++) {
         FuriString* key;
-        key = furi_string_alloc_set_cstr(paths[i].path);
+        key = furi_string_alloc_set(paths[i].path);
         StorageTestPath value = {
             .is_dir = paths[i].is_dir,
             .visited = false,
@@ -178,7 +178,7 @@ MU_TEST_1(test_dirwalk_full, Storage* storage) {
     mu_check(dir_walk_open(dir_walk, EXT_PATH("dirwalk")));
 
     while(dir_walk_read(dir_walk, path, &fileinfo) == DirWalkOK) {
-        string_right(path, strlen(EXT_PATH("dirwalk/")));
+        furi_string_right(path, strlen(EXT_PATH("dirwalk/")));
         mu_check(storage_test_paths_mark(paths, path, (fileinfo.flags & FSF_DIRECTORY)));
     }
 
@@ -203,7 +203,7 @@ MU_TEST_1(test_dirwalk_no_recursive, Storage* storage) {
     mu_check(dir_walk_open(dir_walk, EXT_PATH("dirwalk")));
 
     while(dir_walk_read(dir_walk, path, &fileinfo) == DirWalkOK) {
-        string_right(path, strlen(EXT_PATH("dirwalk/")));
+        furi_string_right(path, strlen(EXT_PATH("dirwalk/")));
         mu_check(storage_test_paths_mark(paths, path, (fileinfo.flags & FSF_DIRECTORY)));
     }
 
@@ -242,7 +242,7 @@ MU_TEST_1(test_dirwalk_filter, Storage* storage) {
     mu_check(dir_walk_open(dir_walk, EXT_PATH("dirwalk")));
 
     while(dir_walk_read(dir_walk, path, &fileinfo) == DirWalkOK) {
-        string_right(path, strlen(EXT_PATH("dirwalk/")));
+        furi_string_right(path, strlen(EXT_PATH("dirwalk/")));
         mu_check(storage_test_paths_mark(paths, path, (fileinfo.flags & FSF_DIRECTORY)));
     }
 

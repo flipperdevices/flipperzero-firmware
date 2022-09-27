@@ -240,13 +240,13 @@ bool ibutton_save_key(iButton* ibutton, const char* key_name) {
 
     do {
         // Check if we has old key
-        if(string_end_with_str_p(ibutton->file_path, IBUTTON_APP_EXTENSION)) {
+        if(furi_string_end_with(ibutton->file_path, IBUTTON_APP_EXTENSION)) {
             // First remove old key
             ibutton_delete_key(ibutton);
 
             // Remove old key name from path
-            size_t filename_start = string_search_rchar(ibutton->file_path, '/');
-            string_left(ibutton->file_path, filename_start);
+            size_t filename_start = furi_string_search_rchar(ibutton->file_path, '/');
+            furi_string_left(ibutton->file_path, filename_start);
         }
 
         furi_string_cat_printf(ibutton->file_path, "/%s%s", key_name, IBUTTON_APP_EXTENSION);

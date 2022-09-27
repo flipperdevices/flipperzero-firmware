@@ -16,9 +16,9 @@ void nfc_scene_generate_info_on_enter(void* context) {
     dialog_ex_set_right_button_text(dialog_ex, "More");
 
     // Create info text
-    FuriString* info_str;
-    string_init_printf(
-        info_str, "%s\n%s\nUID:", nfc->generator->name, nfc_get_dev_type(data->type));
+    FuriString* info_str = furi_string_alloc_printf(
+        "%s\n%s\nUID:", nfc->generator->name, nfc_get_dev_type(data->type));
+
     // Append UID
     for(int i = 0; i < data->uid_len; ++i) {
         furi_string_cat_printf(info_str, " %02X", data->uid[i]);
