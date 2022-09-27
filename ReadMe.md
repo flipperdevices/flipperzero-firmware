@@ -16,6 +16,7 @@
 - Assets: Includes New Dolphin Animations: [80s (By Haseo)]
 - Added: [Minesweeper (By panki27)](https://github.com/panki27/minesweeper) Thank you @Panki27
 - Added: [USB Keyboard (By huuck)](https://github.com/huuck/FlipperZeroUSBKeyboard)
+- Many animations removed, they can all be found [here](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin) and these [made the cut](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/assets/resources/dolphin).
 
 <details>
   <summary><B>TO DO</b></summary><br/>
