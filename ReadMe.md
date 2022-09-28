@@ -15,6 +15,7 @@
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-09-28 17:55 GMT`
 - Settings: Rename from SD `dolphin/name.txt` [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
 - New animations from stop_oxy: School Days, Whistper of the Heart and The Legend of Zelda
+- Added: [TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
@@ -220,6 +221,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
 - [Sub-GHz Bruteforcer (By Ganapati & xMasterX)](https://github.com/Eng1n33r/flipperzero-firmware/pull/57)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
+- [TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
 - [UPC-A Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
 - [USB Keyboard (By huuck)](https://github.com/huuck/FlipperZeroUSBKeyboard)
 - [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work

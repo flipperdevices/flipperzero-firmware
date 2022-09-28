@@ -1,0 +1,9 @@
+#ifndef _TOTP_UI_CONSTANTS_H_
+#define _TOTP_UI_CONSTANTS_H_
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define SCREEN_WIDTH_CENTER 64
+#define SCREEN_HEIGHT_CENTER 32
+
+#endif
