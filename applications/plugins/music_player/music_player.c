@@ -8,8 +8,6 @@
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
 
-#include <core/furi_string.h>
-
 #define TAG "MusicPlayer"
 
 #define MUSIC_PLAYER_APP_PATH_FOLDER ANY_PATH("music_player")

@@ -5,10 +5,10 @@
 #include "check.h"
 #include "common_defines.h"
 #include "mutex.h"
+#include "furi_string.h"
 
 #include <task.h>
 #include "log.h"
-#include <core/furi_string.h>
 #include <furi_hal_rtc.h>
 #include <furi_hal_console.h>
 

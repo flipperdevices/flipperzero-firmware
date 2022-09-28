@@ -7,7 +7,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <core/furi_string.h>
 
 #ifdef __cplusplus
 extern "C" {

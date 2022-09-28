@@ -2,7 +2,6 @@
 
 #include <storage/storage.h>
 
-#include <core/furi_string.h>
 #include <stdbool.h>
 #include <stdint.h>
 

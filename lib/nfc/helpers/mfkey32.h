@@ -1,7 +1,6 @@
 #pragma once
 
 #include <lib/nfc/protocols/mifare_classic.h>
-#include <core/furi_string.h>
 
 typedef struct Mfkey32 Mfkey32;
 

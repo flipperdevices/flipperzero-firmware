@@ -5,7 +5,6 @@
 #include "../blocks/math.h"
 #include <lib/toolbox/manchester_decoder.h>
 #include <lib/flipper_format/flipper_format_i.h>
-#include <core/furi_string.h>
 
 #define TAG "SubGhzProtocolOregon2"
 

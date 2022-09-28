@@ -1,6 +1,5 @@
 #include "nfc_device.h"
 #include "assets_icons.h"
-#include <core/furi_string.h>
 #include "nfc_types.h"
 
 #include <lib/toolbox/path.h>

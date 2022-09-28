@@ -1,5 +1,4 @@
 #include "../ibutton_i.h"
-#include <core/furi_string.h>
 #include <lib/toolbox/random_name.h>
 #include <toolbox/path.h>
 

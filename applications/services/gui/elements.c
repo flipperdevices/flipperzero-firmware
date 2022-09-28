@@ -8,7 +8,6 @@
 #include <gui/icon_i.h>
 #include <gui/icon_animation_i.h>
 
-#include <core/furi_string.h>
 #include <furi.h>
 #include "canvas_i.h"
 

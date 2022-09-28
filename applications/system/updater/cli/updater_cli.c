@@ -1,7 +1,6 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <core/furi_string.h>
 #include <cli/cli.h>
 #include <storage/storage.h>
 #include <loader/loader.h>

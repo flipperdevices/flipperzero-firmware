@@ -4,7 +4,6 @@
 #include <st25r3916_irq.h>
 #include <rfal_rf.h>
 #include <furi.h>
-#include <core/furi_string.h>
 
 #include <lib/digital_signal/digital_signal.h>
 #include <furi_hal_spi.h>

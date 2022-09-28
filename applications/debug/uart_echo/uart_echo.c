@@ -1,5 +1,4 @@
 #include <furi.h>
-#include <core/furi_string.h>
 #include <gui/gui.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>

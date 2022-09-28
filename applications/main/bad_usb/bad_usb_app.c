@@ -1,5 +1,4 @@
 #include "bad_usb_app_i.h"
-#include <core/furi_string.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>

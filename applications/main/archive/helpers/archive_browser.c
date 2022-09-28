@@ -5,7 +5,6 @@
 #include <core/common_defines.h>
 #include <core/log.h>
 #include "gui/modules/file_browser_worker.h"
-#include <core/furi_string.h>
 #include <math.h>
 
 static void

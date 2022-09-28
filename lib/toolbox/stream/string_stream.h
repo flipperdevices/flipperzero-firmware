@@ -1,6 +1,5 @@
 #pragma once
 #include <stdlib.h>
-#include <core/furi_string.h>
 #include "stream.h"
 
 #ifdef __cplusplus

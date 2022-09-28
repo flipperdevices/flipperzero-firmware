@@ -1,6 +1,5 @@
 #include "../file_browser_app_i.h"
-#include "furi_hal.h"
-#include <core/furi_string.h>
+#include <furi.h>
 
 void file_browser_scene_result_ok_callback(InputType type, void* context) {
     furi_assert(context);

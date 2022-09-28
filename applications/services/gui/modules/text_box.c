@@ -1,6 +1,5 @@
 #include "text_box.h"
 #include "gui/canvas.h"
-#include <core/furi_string.h>
 #include <furi.h>
 #include <gui/elements.h>
 #include <stdint.h>

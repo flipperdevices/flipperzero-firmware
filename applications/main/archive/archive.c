@@ -1,5 +1,4 @@
 #include "archive_i.h"
-#include <core/furi_string.h>
 
 bool archive_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);

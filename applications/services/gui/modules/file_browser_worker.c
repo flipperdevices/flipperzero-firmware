@@ -1,7 +1,6 @@
 #include "file_browser_worker.h"
 #include <core/check.h>
 #include <core/common_defines.h>
-#include <core/furi_string.h>
 #include "storage/filesystem_api_defines.h"
 #include <m-array.h>
 #include <stdbool.h>

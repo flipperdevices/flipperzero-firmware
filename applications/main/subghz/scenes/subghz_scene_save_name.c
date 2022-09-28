@@ -1,5 +1,4 @@
 #include "../subghz_i.h"
-#include <core/furi_string.h>
 #include "subghz/types.h"
 #include <lib/toolbox/random_name.h>
 #include "../helpers/subghz_custom_event.h"

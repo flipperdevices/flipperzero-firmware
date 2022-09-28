@@ -1,6 +1,5 @@
 #include "dict_attack.h"
 
-#include <core/furi_string.h>
 #include <gui/elements.h>
 
 typedef enum {

@@ -1,4 +1,3 @@
-#include <core/furi_string.h>
 #include <cli/cli.h>
 #include <infrared.h>
 #include <infrared_worker.h>

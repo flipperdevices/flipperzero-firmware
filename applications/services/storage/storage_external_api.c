@@ -1,6 +1,5 @@
 #include <core/log.h>
 #include <core/record.h>
-#include <core/furi_string.h>
 #include "storage.h"
 #include "storage_i.h"
 #include "storage_message.h"

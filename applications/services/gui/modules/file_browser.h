@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <core/furi_string.h>
 #include <gui/view.h>
 
 #ifdef __cplusplus

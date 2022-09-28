@@ -4,7 +4,6 @@
  */
 
 #pragma once
-
 #include <core/furi_string.h>
 
 #ifdef __cplusplus

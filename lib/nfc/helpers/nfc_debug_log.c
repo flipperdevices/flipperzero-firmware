@@ -1,6 +1,5 @@
 #include "nfc_debug_log.h"
 
-#include <core/furi_string.h>
 #include <storage/storage.h>
 #include <stream/buffered_file_stream.h>
 

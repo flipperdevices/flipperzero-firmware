@@ -2,7 +2,6 @@
 #include "keeloq_common.h"
 
 #include "../subghz_keystore.h"
-#include <core/furi_string.h>
 #include <m-array.h>
 
 #include "../blocks/const.h"

@@ -1,7 +1,6 @@
 #include "infrared_remote_button.h"
 
 #include <stdlib.h>
-#include <core/furi_string.h>
 
 struct InfraredRemoteButton {
     FuriString* name;

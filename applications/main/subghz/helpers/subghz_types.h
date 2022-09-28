@@ -1,6 +1,5 @@
 #pragma once
 
-#include <core/furi_string.h>
 #include <furi.h>
 #include <furi_hal.h>
 

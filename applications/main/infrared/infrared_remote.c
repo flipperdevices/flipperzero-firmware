@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <core/furi_string.h>
 #include <m-array.h>
 #include <toolbox/path.h>
 #include <storage/storage.h>

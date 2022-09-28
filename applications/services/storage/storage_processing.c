@@ -1,7 +1,6 @@
 #include "storage_processing.h"
 #include <m-list.h>
 #include <m-dict.h>
-#include <core/furi_string.h>
 
 #define FS_CALL(_storage, _fn)   \
     storage_data_lock(_storage); \

@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 #include <m-dict.h>
-#include <core/furi_string.h>
 #include <flipper_format/flipper_format.h>
 
 #include "infrared_signal.h"

@@ -3,7 +3,6 @@
 #include <ble/ble.h>
 
 #include <furi.h>
-#include <core/furi_string.h>
 #include <protobuf_version.h>
 #include <lib/toolbox/version.h>
 

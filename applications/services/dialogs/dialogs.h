@@ -1,7 +1,6 @@
 #pragma once
 #include <furi.h>
 #include <gui/canvas.h>
-#include <core/furi_string.h>
 #include <gui/modules/file_browser.h>
 
 #ifdef __cplusplus

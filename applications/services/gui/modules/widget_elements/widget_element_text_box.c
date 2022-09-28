@@ -1,5 +1,4 @@
 #include "widget_element_i.h"
-#include <core/furi_string.h>
 #include <gui/elements.h>
 
 typedef struct {

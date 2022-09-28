@@ -4,7 +4,6 @@
 #include "../helpers/archive_apps.h"
 #include "../helpers/archive_browser.h"
 #include "toolbox/path.h"
-#include <core/furi_string.h>
 
 #define SCENE_DELETE_CUSTOM_EVENT (0UL)
 #define MAX_TEXT_INPUT_LEN 22

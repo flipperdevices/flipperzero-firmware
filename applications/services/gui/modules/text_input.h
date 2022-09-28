@@ -7,7 +7,6 @@
 
 #include <gui/view.h>
 #include "validators.h"
-#include <core/furi_string.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,4 +1,3 @@
-#include <core/furi_string.h>
 #include <lib/toolbox/random_name.h>
 #include "../lfrfid_i.h"
 

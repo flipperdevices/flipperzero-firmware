@@ -5,7 +5,6 @@ extern "C" {
 #endif
 
 #include <furi.h>
-#include <core/furi_string.h>
 
 typedef struct BadUsbScript BadUsbScript;
 

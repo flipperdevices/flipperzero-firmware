@@ -1,6 +1,5 @@
 #include "widget_element_i.h"
 #include <gui/elements.h>
-#include <core/furi_string.h>
 
 typedef struct {
     GuiButtonType button_type;

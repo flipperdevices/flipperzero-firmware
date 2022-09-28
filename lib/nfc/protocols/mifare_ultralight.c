@@ -4,7 +4,6 @@
 #include "nfc_util.h"
 #include <furi.h>
 #include "furi_hal_nfc.h"
-#include <core/furi_string.h>
 
 #define TAG "MfUltralight"
 

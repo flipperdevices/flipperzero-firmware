@@ -94,7 +94,6 @@
 
 #pragma once
 #include <stdint.h>
-#include <core/furi_string.h>
 #include <storage/storage.h>
 
 #ifdef __cplusplus

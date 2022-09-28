@@ -2,7 +2,6 @@
 
 #include <furi.h>
 #include "filesystem_api_internal.h"
-#include <core/furi_string.h>
 #include <m-list.h>
 
 #ifdef __cplusplus

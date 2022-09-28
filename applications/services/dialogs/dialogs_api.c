@@ -1,7 +1,6 @@
 #include "dialogs/dialogs_message.h"
 #include "dialogs_i.h"
 #include "dialogs_api_lock.h"
-#include <core/furi_string.h>
 
 /****************** File browser ******************/
 

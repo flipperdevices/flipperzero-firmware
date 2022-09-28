@@ -3,7 +3,6 @@
 #include <lib/subghz/protocols/came.h>
 
 #include <furi.h>
-#include <core/furi_string.h>
 
 #define SUBGHZ_HISTORY_MAX 50
 #define TAG "SubGhzHistory"

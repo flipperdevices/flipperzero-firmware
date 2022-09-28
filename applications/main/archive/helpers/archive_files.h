@@ -1,7 +1,7 @@
 #pragma once
 
 #include <m-array.h>
-#include <core/furi_string.h>
+#include <furi.h>
 #include <storage/storage.h>
 
 typedef enum {

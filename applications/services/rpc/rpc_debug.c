@@ -1,5 +1,4 @@
 #include "rpc_i.h"
-#include <core/furi_string.h>
 
 static size_t rpc_debug_print_file_msg(
     FuriString* str,

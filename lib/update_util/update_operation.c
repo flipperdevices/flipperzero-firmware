@@ -4,7 +4,6 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <core/furi_string.h>
 #include <loader/loader.h>
 #include <lib/toolbox/path.h>
 #include <lib/toolbox/crc32_calc.h>

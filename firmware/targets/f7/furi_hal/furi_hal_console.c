@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stm32wbxx_ll_gpio.h>
 #include <stm32wbxx_ll_usart.h>
-#include <core/furi_string.h>
 
 #include <utilities_conf.h>
 

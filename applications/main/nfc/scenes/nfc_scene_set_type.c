@@ -1,5 +1,4 @@
 #include "../nfc_i.h"
-#include <core/furi_string.h>
 #include "../helpers/nfc_generators.h"
 
 enum SubmenuIndex {

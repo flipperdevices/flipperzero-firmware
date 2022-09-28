@@ -1,5 +1,4 @@
 #include "../ibutton_i.h"
-#include <core/furi_string.h>
 #include "toolbox/path.h"
 
 typedef enum {

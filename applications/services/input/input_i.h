@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <furi.h>
 #include <cli/cli.h>
-#include <core/furi_string.h>
 #include <furi_hal_gpio.h>
 
 #define INPUT_DEBOUNCE_TICKS_HALF (INPUT_DEBOUNCE_TICKS / 2)

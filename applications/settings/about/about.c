@@ -3,7 +3,6 @@
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/empty_screen.h>
-#include <core/furi_string.h>
 #include <furi_hal_version.h>
 #include <furi_hal_region.h>
 #include <furi_hal_bt.h>

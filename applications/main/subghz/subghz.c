@@ -1,6 +1,5 @@
 /* Abandon hope, all ye who enter here. */
 
-#include <core/furi_string.h>
 #include "subghz/types.h"
 #include "subghz_i.h"
 #include <lib/toolbox/path.h>

@@ -1,5 +1,4 @@
 #include "path.h"
-#include <core/furi_string.h>
 #include <stddef.h>
 
 void path_extract_filename_no_ext(const char* path, FuriString* filename) {

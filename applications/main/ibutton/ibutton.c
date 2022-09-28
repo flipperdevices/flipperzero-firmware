@@ -2,7 +2,6 @@
 #include "assets_icons.h"
 #include "ibutton_i.h"
 #include "ibutton/scenes/ibutton_scene.h"
-#include <core/furi_string.h>
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
 #include <rpc/rpc_app.h>

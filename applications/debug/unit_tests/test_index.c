@@ -1,5 +1,3 @@
-#include <core/furi_string.h>
-
 #include <stdio.h>
 #include <furi.h>
 #include <furi_hal.h>
