@@ -1,5 +1,4 @@
 #include "../subghz_i.h"
-#include "../views/subghz_frequency_analyzer.h"
 #include <dolphin/dolphin.h>
 
 void subghz_scene_frequency_analyzer_callback(SubGhzCustomEvent event, void* context) {
@@ -18,16 +17,16 @@ void subghz_scene_frequency_analyzer_on_enter(void* context) {
 
 bool subghz_scene_frequency_analyzer_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
-    if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubGhzCustomEventSceneAnalyzerLock) {
-            notification_message(subghz->notifications, &sequence_set_green_255);
-            notification_message(subghz->notifications, &sequence_set_vibro_on);
-            return true;
-        } else if(event.event == SubGhzCustomEventSceneAnalyzerUnlock) {
-            notification_message(subghz->notifications, &sequence_reset_rgb);
-            notification_message(subghz->notifications, &sequence_reset_vibro);
-            return true;
+    if(event.type == SceneManagerEventTypeCustom &&
+       event.event == SubGhzCustomEventViewReceiverOK) {
+        uint32_t frequency =
+            subghz_frequency_analyzer_get_frequency_to_save(subghz->subghz_frequency_analyzer);
+        if(frequency > 0) {
+            subghz->last_settings->frequency = frequency;
+            subghz_last_settings_save(subghz->last_settings);
         }
+
+        return true;
     }
     return false;
 }
