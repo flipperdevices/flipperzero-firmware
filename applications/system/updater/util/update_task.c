@@ -69,19 +69,19 @@ static const UpdateTaskStageGroupMap update_task_stage_progress[] = {
 static UpdateTaskStageGroup update_task_get_task_groups(UpdateTask* update_task) {
     UpdateTaskStageGroup ret = UpdateTaskStageGroupPreUpdate | UpdateTaskStageGroupPostUpdate;
     UpdateManifest* manifest = update_task->manifest;
-    if(!furi_string_empty_p(manifest->radio_image)) {
+    if(!furi_string_empty(manifest->radio_image)) {
         ret |= UpdateTaskStageGroupRadio;
     }
     if(update_manifest_has_obdata(manifest)) {
         ret |= UpdateTaskStageGroupOptionBytes;
     }
-    if(!furi_string_empty_p(manifest->firmware_dfu_image)) {
+    if(!furi_string_empty(manifest->firmware_dfu_image)) {
         ret |= UpdateTaskStageGroupFirmware;
     }
-    if(!furi_string_empty_p(manifest->resource_bundle)) {
+    if(!furi_string_empty(manifest->resource_bundle)) {
         ret |= UpdateTaskStageGroupResources;
     }
-    if(!furi_string_empty_p(manifest->splash_file)) {
+    if(!furi_string_empty(manifest->splash_file)) {
         ret |= UpdateTaskStageGroupSplashscreen;
     }
     return ret;

@@ -115,7 +115,7 @@ static void lfrfid_cli_read(Cli* cli, FuriString* args) {
         FuriString* info;
         info = furi_string_alloc();
         protocol_dict_render_data(dict, info, context.protocol);
-        if(!furi_string_empty_p(info)) {
+        if(!furi_string_empty(info)) {
             printf("%s\r\n", furi_string_get_cstr(info));
         }
         furi_string_free(info);

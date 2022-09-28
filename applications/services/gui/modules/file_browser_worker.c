@@ -66,7 +66,7 @@ static bool browser_path_trim(FuriString* path) {
     bool is_root = false;
     size_t filename_start = furi_string_search_rchar(path, '/');
     furi_string_left(path, filename_start);
-    if((furi_string_empty_p(path)) || (filename_start == FURI_STRING_FAILURE)) {
+    if((furi_string_empty(path)) || (filename_start == FURI_STRING_FAILURE)) {
         furi_string_set(path, BROWSER_ROOT);
         is_root = true;
     }
@@ -83,7 +83,7 @@ static bool browser_filter_by_name(BrowserWorker* browser, FuriString* name, boo
         }
     } else {
         // Filter files by extension
-        if((furi_string_empty_p(browser->filter_extension)) ||
+        if((furi_string_empty(browser->filter_extension)) ||
            (furi_string_cmp_str(browser->filter_extension, "*") == 0)) {
             return true;
         }
@@ -149,7 +149,7 @@ static bool browser_folder_init(
                 total_files_cnt++;
                 furi_string_set(name_str, name_temp);
                 if(browser_filter_by_name(browser, name_str, (file_info.flags & FSF_DIRECTORY))) {
-                    if(!furi_string_empty_p(filename)) {
+                    if(!furi_string_empty(filename)) {
                         if(furi_string_cmp(name_str, filename) == 0) {
                             *file_idx = *item_cnt;
                         }

@@ -364,7 +364,7 @@ static void
             }
         }
 
-        if(furi_string_empty_p(item.display_name)) {
+        if(furi_string_empty(item.display_name)) {
             path_extract_filename(
                 item_path,
                 item.display_name,

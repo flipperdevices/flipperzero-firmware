@@ -6,7 +6,7 @@ void lfrfid_scene_raw_name_on_enter(void* context) {
 
     const char* key_name = furi_string_get_cstr(app->raw_file_name);
 
-    bool key_name_is_empty = furi_string_empty_p(app->file_name);
+    bool key_name_is_empty = furi_string_empty(app->file_name);
     if(key_name_is_empty) {
         lfrfid_text_store_set(app, "RfidRecord");
     } else {

@@ -1049,7 +1049,7 @@ static bool nfc_device_save_file(
     temp_str = furi_string_alloc();
 
     do {
-        if(use_load_path && !furi_string_empty_p(dev->load_path)) {
+        if(use_load_path && !furi_string_empty(dev->load_path)) {
             // Get directory name
             path_extract_dirname(furi_string_get_cstr(dev->load_path), temp_str);
             // Create nfc directory if necessary
@@ -1269,7 +1269,7 @@ bool nfc_device_delete(NfcDevice* dev, bool use_load_path) {
 
     do {
         // Delete original file
-        if(use_load_path && !furi_string_empty_p(dev->load_path)) {
+        if(use_load_path && !furi_string_empty(dev->load_path)) {
             furi_string_set(file_path, dev->load_path);
         } else {
             furi_string_printf(
@@ -1278,7 +1278,7 @@ bool nfc_device_delete(NfcDevice* dev, bool use_load_path) {
         if(!storage_simply_remove(dev->storage, furi_string_get_cstr(file_path))) break;
         // Delete shadow file if it exists
         if(dev->shadow_file_exist) {
-            if(use_load_path && !furi_string_empty_p(dev->load_path)) {
+            if(use_load_path && !furi_string_empty(dev->load_path)) {
                 nfc_device_get_shadow_path(dev->load_path, file_path);
             } else {
                 furi_string_printf(
@@ -1307,7 +1307,7 @@ bool nfc_device_restore(NfcDevice* dev, bool use_load_path) {
     path = furi_string_alloc();
 
     do {
-        if(use_load_path && !furi_string_empty_p(dev->load_path)) {
+        if(use_load_path && !furi_string_empty(dev->load_path)) {
             nfc_device_get_shadow_path(dev->load_path, path);
         } else {
             furi_string_printf(
@@ -1315,7 +1315,7 @@ bool nfc_device_restore(NfcDevice* dev, bool use_load_path) {
         }
         if(!storage_simply_remove(dev->storage, furi_string_get_cstr(path))) break;
         dev->shadow_file_exist = false;
-        if(use_load_path && !furi_string_empty_p(dev->load_path)) {
+        if(use_load_path && !furi_string_empty(dev->load_path)) {
             furi_string_set(path, dev->load_path);
         } else {
             furi_string_printf(path, "%s/%s%s", NFC_APP_FOLDER, dev->dev_name, NFC_APP_EXTENSION);

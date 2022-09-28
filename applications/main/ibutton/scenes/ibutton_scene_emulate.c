@@ -30,7 +30,7 @@ void ibutton_scene_emulate_on_enter(void* context) {
     DOLPHIN_DEED(DolphinDeedIbuttonEmulate);
 
     // check that stored key has name
-    if(!furi_string_empty_p(key_name)) {
+    if(!furi_string_empty(key_name)) {
         ibutton_text_store_set(ibutton, "emulating\n%s", furi_string_get_cstr(key_name));
         line_count = 2;
     } else {

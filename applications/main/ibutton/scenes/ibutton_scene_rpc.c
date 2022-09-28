@@ -29,7 +29,7 @@ bool ibutton_scene_rpc_on_event(void* context, SceneManagerEvent event) {
         if(event.event == iButtonCustomEventRpcLoad) {
             const char* arg = rpc_system_app_get_data(ibutton->rpc_ctx);
             bool result = false;
-            if(arg && (furi_string_empty_p(ibutton->file_path))) {
+            if(arg && (furi_string_empty(ibutton->file_path))) {
                 furi_string_set(ibutton->file_path, arg);
                 if(ibutton_load_key_data(ibutton, ibutton->file_path, false)) {
                     ibutton_worker_emulate_start(ibutton->key_worker, ibutton->key);
@@ -39,7 +39,7 @@ bool ibutton_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                         path_extract_filename(ibutton->file_path, key_name, true);
                     }
 
-                    if(!furi_string_empty_p(key_name)) {
+                    if(!furi_string_empty(key_name)) {
                         ibutton_text_store_set(
                             ibutton, "emulating\n%s", furi_string_get_cstr(key_name));
                     } else {

@@ -133,7 +133,7 @@ static bool flipper_update_get_manifest_path(FuriString* out_path) {
         furi_string_right(out_path, strlen(STORAGE_EXT_PATH_PREFIX));
     } while(0);
     f_close(&file);
-    return !furi_string_empty_p(out_path);
+    return !furi_string_empty(out_path);
 }
 
 static UpdateManifest* flipper_update_process_manifest(const FuriString* manifest_path) {

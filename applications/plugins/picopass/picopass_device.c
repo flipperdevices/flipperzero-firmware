@@ -44,7 +44,7 @@ static bool picopass_device_save_file(
     temp_str = furi_string_alloc();
 
     do {
-        if(use_load_path && !furi_string_empty_p(dev->load_path)) {
+        if(use_load_path && !furi_string_empty(dev->load_path)) {
             // Get directory name
             path_extract_dirname(furi_string_get_cstr(dev->load_path), temp_str);
             // Create picopass directory if necessary
@@ -268,7 +268,7 @@ bool picopass_device_delete(PicopassDevice* dev, bool use_load_path) {
 
     do {
         // Delete original file
-        if(use_load_path && !furi_string_empty_p(dev->load_path)) {
+        if(use_load_path && !furi_string_empty(dev->load_path)) {
             furi_string_set(file_path, dev->load_path);
         } else {
             furi_string_printf(

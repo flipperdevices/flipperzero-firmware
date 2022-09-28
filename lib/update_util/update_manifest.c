@@ -114,9 +114,9 @@ static bool
             flipper_file, MANIFEST_KEY_SPLASH_FILE, update_manifest->splash_file);
 
         update_manifest->valid =
-            (!furi_string_empty_p(update_manifest->firmware_dfu_image) ||
-             !furi_string_empty_p(update_manifest->radio_image) ||
-             !furi_string_empty_p(update_manifest->resource_bundle));
+            (!furi_string_empty(update_manifest->firmware_dfu_image) ||
+             !furi_string_empty(update_manifest->radio_image) ||
+             !furi_string_empty(update_manifest->resource_bundle));
     }
 
     return update_manifest->valid;

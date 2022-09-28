@@ -7,7 +7,7 @@ void lfrfid_scene_save_name_on_enter(void* context) {
     FuriString* folder_path;
     folder_path = furi_string_alloc();
 
-    bool key_name_is_empty = furi_string_empty_p(app->file_name);
+    bool key_name_is_empty = furi_string_empty(app->file_name);
     if(key_name_is_empty) {
         furi_string_set(app->file_path, LFRFID_APP_FOLDER);
         set_random_name(app->text_store, LFRFID_TEXT_STORE_SIZE);
@@ -47,7 +47,7 @@ bool lfrfid_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == LfRfidEventNext) {
             consumed = true;
-            if(!furi_string_empty_p(app->file_name)) {
+            if(!furi_string_empty(app->file_name)) {
                 lfrfid_delete_key(app);
             }
 

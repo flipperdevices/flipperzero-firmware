@@ -17,7 +17,7 @@ void ibutton_scene_save_name_on_enter(void* context) {
         path_extract_filename(ibutton->file_path, key_name, true);
     }
 
-    const bool key_name_is_empty = furi_string_empty_p(key_name);
+    const bool key_name_is_empty = furi_string_empty(key_name);
     if(key_name_is_empty) {
         set_random_name(ibutton->text_store, IBUTTON_TEXT_STORE_SIZE);
     } else {

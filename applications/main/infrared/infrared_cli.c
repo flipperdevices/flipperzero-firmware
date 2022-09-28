@@ -296,7 +296,7 @@ static void infrared_cli_process_decode(Cli* cli, FuriString* args) {
                 "Invalid or corrupted input file: \"%s\"\r\n", furi_string_get_cstr(input_path));
             break;
         }
-        if(!furi_string_empty_p(output_path)) {
+        if(!furi_string_empty(output_path)) {
             printf("Writing output to file: \"%s\"\r\n", furi_string_get_cstr(output_path));
             output_file = flipper_format_file_alloc(storage);
         }

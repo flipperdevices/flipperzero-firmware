@@ -73,9 +73,7 @@ void furi_string_reset(FuriString* s) {
 }
 
 void furi_string_swap(FuriString* v1, FuriString* v2) {
-    FuriString* c = v1;
-    v1 = v2;
-    v2 = c;
+    string_swap(v1->string, v2->string);
 }
 
 void furi_string_move(FuriString* v1, FuriString* v2) {
@@ -180,7 +178,7 @@ int furi_string_cat_vprintf(FuriString* v, const char format[], va_list args) {
     return ret;
 }
 
-bool furi_string_empty_p(const FuriString* v) {
+bool furi_string_empty(const FuriString* v) {
     return string_empty_p(v->string);
 }
 

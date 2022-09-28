@@ -14,122 +14,414 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Furi string failure constant.
+ */
 #define FURI_STRING_FAILURE ((size_t)-1)
 
+/**
+ * @brief Furi string primitive.
+ */
 typedef struct FuriString FuriString;
 
+//---------------------------------------------------------------------------
+//                               Constructors
+//---------------------------------------------------------------------------
+
+/**
+ * @brief Allocate new FuriString.
+ * @return FuriString* 
+ */
 FuriString* furi_string_alloc();
 
-FuriString* furi_string_alloc_set(const FuriString* s);
+/**
+ * @brief Allocate new FuriString and set it to string.
+ * Allocate & Set the string a to the string.
+ * @param source 
+ * @return FuriString* 
+ */
+FuriString* furi_string_alloc_set(const FuriString* source);
 
-FuriString* furi_string_alloc_set_str(const char cstr[]);
+/**
+ * @brief Allocate new FuriString and set it to C string.
+ * Allocate & Set the string a to the C string.
+ * @param cstr_source 
+ * @return FuriString* 
+ */
+FuriString* furi_string_alloc_set_str(const char cstr_source[]);
 
+/**
+ * @brief Allocate new FuriString and printf to it.
+ * Initialize and set a string to the given formatted value.
+ * @param format 
+ * @param ... 
+ * @return FuriString* 
+ */
 FuriString* furi_string_alloc_printf(const char format[], ...);
 
+/**
+ * @brief Allocate new FuriString and printf to it.
+ * Initialize and set a string to the given formatted value.
+ * @param format 
+ * @param args 
+ * @return FuriString* 
+ */
 FuriString* furi_string_alloc_vprintf(const char format[], va_list args);
 
-FuriString* furi_string_alloc_move(FuriString* s);
+/**
+ * @brief Allocate new FuriString and move source string content to it.
+ * Allocate the string, set it to the other one, and destroy the other one.
+ * @param source 
+ * @return FuriString* 
+ */
+FuriString* furi_string_alloc_move(FuriString* source);
 
-void furi_string_free(FuriString* s);
+//---------------------------------------------------------------------------
+//                               Destructors
+//---------------------------------------------------------------------------
 
-void furi_string_reserve(FuriString* s, size_t alloc);
+/**
+ * @brief Free FuriString.
+ * @param string 
+ */
+void furi_string_free(FuriString* string);
 
-void furi_string_reset(FuriString* s);
+//---------------------------------------------------------------------------
+//                         String memory management
+//---------------------------------------------------------------------------
 
-void furi_string_swap(FuriString* v1, FuriString* v2);
+/**
+ * @brief Reserve memory for string.
+ * Modify the string capacity to be able to handle at least 'alloc' characters (including final nul char).
+ * @param string 
+ * @param size 
+ */
+void furi_string_reserve(FuriString* string, size_t size);
 
-void furi_string_move(FuriString* v1, FuriString* v2);
+/**
+ * @brief Reset string.
+ * Make the string empty.
+ * @param s 
+ */
+void furi_string_reset(FuriString* string);
 
-size_t furi_string_hash(const FuriString* v);
+/**
+ * @brief Swap two strings.
+ * Swap the two strings string_1 and string_2.
+ * @param string_1 
+ * @param string_2 
+ */
+void furi_string_swap(FuriString* string_1, FuriString* string_2);
 
-char furi_string_get_char(const FuriString* v, size_t index);
+/**
+ * @brief Move string_2 content to string_1.
+ * Set the string to the other one, and destroy the other one.
+ * @param string_1 
+ * @param string_2 
+ */
+void furi_string_move(FuriString* string_1, FuriString* string_2);
 
-const char* furi_string_get_cstr(const FuriString* s);
+/**
+ * @brief Compute a hash for the string.
+ * @param string 
+ * @return size_t 
+ */
+size_t furi_string_hash(const FuriString* string);
 
-void furi_string_set(FuriString* s, FuriString* source);
+/**
+ * @brief Get string size (usually length, but not for UTF-8)
+ * @param string 
+ * @return size_t 
+ */
+size_t furi_string_size(const FuriString* string);
 
-void furi_string_set_str(FuriString* s, const char cstr[]);
+/**
+ * @brief Check that string is empty or not
+ * @param string 
+ * @return bool
+ */
+bool furi_string_empty(const FuriString* string);
 
-/* Set the string to the n first characters of the C string str */
-void furi_string_set_strn(FuriString* s, const char str[], size_t n);
+//---------------------------------------------------------------------------
+//                               Getters
+//---------------------------------------------------------------------------
 
-void furi_string_set_char(FuriString* s, size_t index, const char c);
+/**
+ * @brief Get the character at the given index.
+ * Return the selected character of the string.
+ * @param string 
+ * @param index 
+ * @return char 
+ */
+char furi_string_get_char(const FuriString* string, size_t index);
 
-int furi_string_cmp(const FuriString* s1, const FuriString* s2);
+/**
+ * @brief Return the string view a classic C string.
+ * @param string 
+ * @return const char* 
+ */
+const char* furi_string_get_cstr(const FuriString* string);
 
-int furi_string_cmp_str(const FuriString* s1, const char str[]);
+//---------------------------------------------------------------------------
+//                               Setters
+//---------------------------------------------------------------------------
 
-/* Test if the string is equal to the other string 
-   (case insentive according to the current locale)
-   Note: doesn't work with UTF-8 strings.
-*/
-int furi_string_cmpi(const FuriString* v1, const FuriString* v2);
+/**
+ * @brief Set the string to the other string.
+ * Set the string to the source string.
+ * @param string 
+ * @param source 
+ */
+void furi_string_set(FuriString* string, FuriString* source);
 
-/* Test if the string is equal to the C string 
-   (case insentive according to the current locale)
-   Note: doesn't work with UTF-8 strings.
-*/
-int furi_string_cmpi_str(const FuriString* v1, const char p2[]);
+/**
+ * @brief Set the string to the other C string.
+ * Set the string to the source C string.
+ * @param string 
+ * @param source 
+ */
+void furi_string_set_str(FuriString* string, const char source[]);
 
-size_t furi_string_search(const FuriString* v, const FuriString* needle, size_t start);
+/**
+ * @brief Set the string to the n first characters of the C string.
+ * @param string 
+ * @param source 
+ * @param length 
+ */
+void furi_string_set_strn(FuriString* string, const char source[], size_t length);
 
-size_t furi_string_search_str(const FuriString* v, const char needle[], size_t start);
+/**
+ * @brief Set the character at the given index.
+ * @param string 
+ * @param index 
+ * @param c 
+ */
+void furi_string_set_char(FuriString* string, size_t index, const char c);
 
-bool furi_string_equal(const FuriString* v1, const FuriString* v2);
+/**
+ * @brief Set the string to the n first characters of other one.
+ * @param string 
+ * @param source 
+ * @param offset 
+ * @param length 
+ */
+void furi_string_set_n(FuriString* string, const FuriString* source, size_t offset, size_t length);
 
-bool furi_string_equal_str(const FuriString* v1, const char v2[]);
+/**
+ * @brief Format in the string the given printf format
+ * @param string 
+ * @param format 
+ * @param ... 
+ * @return int 
+ */
+int furi_string_printf(FuriString* string, const char format[], ...);
 
-void furi_string_push_back(FuriString* v, char c);
+/**
+ * @brief Format in the string the given printf format
+ * @param string 
+ * @param format 
+ * @param args 
+ * @return int 
+ */
+int furi_string_vprintf(FuriString* string, const char format[], va_list args);
 
-size_t furi_string_size(const FuriString* s);
+//---------------------------------------------------------------------------
+//                               Appending
+//---------------------------------------------------------------------------
 
-int furi_string_printf(FuriString* v, const char format[], ...);
+/**
+ * @brief Append a character to the string.
+ * @param string 
+ * @param c 
+ */
+void furi_string_push_back(FuriString* string, char c);
 
-int furi_string_vprintf(FuriString* v, const char format[], va_list args);
+/**
+ * @brief Append a string to the string.
+ * Concatene the string with the other string.
+ * @param string_1 
+ * @param string_2 
+ */
+void furi_string_cat(FuriString* string_1, const FuriString* string_2);
 
-int furi_string_cat_printf(FuriString* v, const char format[], ...);
+/**
+ * @brief Append a C string to the string.
+ * Concatene the string with the C string.
+ * @param string_1 
+ * @param cstring_2 
+ */
+void furi_string_cat_str(FuriString* string_1, const char cstring_2[]);
 
-int furi_string_cat_vprintf(FuriString* v, const char format[], va_list args);
+/**
+ * @brief Append to the string the formatted string of the given printf format.
+ * @param string 
+ * @param format 
+ * @param ... 
+ * @return int 
+ */
+int furi_string_cat_printf(FuriString* string, const char format[], ...);
 
-bool furi_string_empty_p(const FuriString* v);
+/**
+ * @brief Append to the string the formatted string of the given printf format.
+ * @param string 
+ * @param format 
+ * @param args 
+ * @return int 
+ */
+int furi_string_cat_vprintf(FuriString* string, const char format[], va_list args);
+
+//---------------------------------------------------------------------------
+//                               Comparators
+//---------------------------------------------------------------------------
+
+/**
+ * @brief Compare two strings and return the sort order.
+ * @param string_1 
+ * @param string_2 
+ * @return int 
+ */
+int furi_string_cmp(const FuriString* string_1, const FuriString* string_2);
+
+/**
+ * @brief Compare string with C string and return the sort order.
+ * @param string_1 
+ * @param cstring_2 
+ * @return int 
+ */
+int furi_string_cmp_str(const FuriString* string_1, const char cstring_2[]);
+
+/**
+ * @brief Compare two strings (case insentive according to the current locale) and return the sort order.
+ * Note: doesn't work with UTF-8 strings.
+ * @param string_1 
+ * @param string_2 
+ * @return int 
+ */
+int furi_string_cmpi(const FuriString* string_1, const FuriString* string_2);
+
+/**
+ * @brief Compare string with C string (case insentive according to the current locale) and return the sort order.
+ * Note: doesn't work with UTF-8 strings.
+ * @param string_1 
+ * @param cstring_2 
+ * @return int 
+ */
+int furi_string_cmpi_str(const FuriString* string_1, const char cstring_2[]);
+
+//---------------------------------------------------------------------------
+//                                 Search
+//---------------------------------------------------------------------------
+
+/**
+ * @brief Search the first occurence of the needle in the string from the position start.
+ * Return STRING_FAILURE if not found.
+ * By default, start is zero.
+ * @param string 
+ * @param needle 
+ * @param start 
+ * @return size_t 
+ */
+size_t furi_string_search(const FuriString* string, const FuriString* needle, size_t start);
+
+/**
+ * @brief Search the first occurence of the needle in the string from the position start.
+ * Return STRING_FAILURE if not found.
+ * @param string 
+ * @param needle 
+ * @param start 
+ * @return size_t 
+ */
+size_t furi_string_search_str(const FuriString* string, const char needle[], size_t start);
+
+/**
+ * @brief Search for the position of the character c from the position start (include) in the string.
+ * Return STRING_FAILURE if not found.
+ * By default, start is zero.
+ * @param string 
+ * @param c 
+ * @param start 
+ * @return size_t 
+ */
+size_t furi_string_search_char(const FuriString* string, char c, size_t start);
+
+/**
+ * @brief Reverse search for the position of the character c from the position start (include) in the string.
+ * Return STRING_FAILURE if not found.
+ * By default, start is zero.
+ * @param string 
+ * @param c 
+ * @param start 
+ * @return size_t 
+ */
+size_t furi_string_search_rchar(const FuriString* string, char c, size_t start);
+
+//---------------------------------------------------------------------------
+//                                Equality
+//---------------------------------------------------------------------------
+
+/**
+ * @brief Test if two strings are equal.
+ * @param string_1 
+ * @param string_2 
+ * @return bool 
+ */
+bool furi_string_equal(const FuriString* string_1, const FuriString* string_2);
+
+/**
+ * @brief Test if the string is equal to the C string.
+ * @param string_1 
+ * @param cstring_2 
+ * @return bool 
+ */
+bool furi_string_equal_str(const FuriString* string_1, const char cstring_2[]);
+
+//---------------------------------------------------------------------------
+//                                Replace
+//---------------------------------------------------------------------------
 
 /* Replace in the string the sub-string at position 'pos' for 'len' bytes into the C string str2. */
-void furi_string_replace_at(FuriString* v, size_t pos, size_t len, const char str2[]);
+void furi_string_replace_at(FuriString* string, size_t pos, size_t len, const char replace[]);
 
-size_t furi_string_replace_str(FuriString* v, const char str1[], const char str2[], size_t start);
+size_t furi_string_replace_str(
+    FuriString* string,
+    const char needle[],
+    const char replace[],
+    size_t start);
 
-void furi_string_replace_all_str(FuriString* v, const char str1[], const char str2[]);
+void furi_string_replace_all_str(FuriString* string, const char needle[], const char replace[]);
 
-void furi_string_replace_all(FuriString* v, const FuriString* str1, const FuriString* str2);
+void furi_string_replace_all(
+    FuriString* string,
+    const FuriString* needle,
+    const FuriString* replace);
 
-bool furi_string_start_with(const FuriString* v, const FuriString* v2);
+//---------------------------------------------------------------------------
+//                            Start / End tests
+//---------------------------------------------------------------------------
 
-bool furi_string_start_with_str(const FuriString* v, const char str[]);
+bool furi_string_start_with(const FuriString* string, const FuriString* start);
 
-bool furi_string_end_with(const FuriString* v, const FuriString* v2);
+bool furi_string_start_with_str(const FuriString* string, const char start[]);
 
-bool furi_string_end_with_str(const FuriString* v, const char str[]);
+bool furi_string_end_with(const FuriString* string, const FuriString* v2);
 
-size_t furi_string_search_char(const FuriString* v, char c, size_t start);
+bool furi_string_end_with_str(const FuriString* string, const char str[]);
 
-size_t furi_string_search_rchar(const FuriString* v, char c, size_t start);
+//---------------------------------------------------------------------------
+//                                Misc
+//---------------------------------------------------------------------------
 
-void furi_string_left(FuriString* v, size_t index);
+void furi_string_left(FuriString* string, size_t index);
 
-void furi_string_right(FuriString* v, size_t index);
+void furi_string_right(FuriString* string, size_t index);
 
-void furi_string_mid(FuriString* v, size_t index, size_t size);
+void furi_string_mid(FuriString* string, size_t index, size_t size);
 
-void furi_string_strim(FuriString* v, const char charac[]);
+void furi_string_strim(FuriString* string, const char chars[]);
 
-/* Concatene the string with the other string */
-void furi_string_cat(FuriString* v, const FuriString* v2);
-
-/* Concatene the string with the C string */
-void furi_string_cat_str(FuriString* v, const char str[]);
-
-/* Set the string to the n first characters of other one */
-void furi_string_set_n(FuriString* v, const FuriString* ref, size_t offset, size_t length);
+//---------------------------------------------------------------------------
+//                                UTF8
+//---------------------------------------------------------------------------
 
 /* An unicode value */
 typedef unsigned int FuriStringUnicodeValue;
@@ -222,7 +514,7 @@ void furi_string_unicode_utf8_decode(
      MOVE(furi_string_move),            \
      SWAP(furi_string_swap),            \
      RESET(furi_string_reset),          \
-     EMPTY_P(furi_string_empty_p),      \
+     EMPTY_P(furi_string_empty),        \
      CLEAR(furi_string_free),           \
      HASH(furi_string_hash),            \
      EQUAL(furi_string_equal),          \
