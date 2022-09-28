@@ -1,0 +1,103 @@
+name: 'Static C/C++ analysis with PVS-Studio'
+
+on:
+  push:
+    branches:
+      - dev
+      - "release*"
+    tags:
+      - '*'
+  pull_request:
+
+env:
+  TARGETS: f7
+  DEFAULT_TARGET: f7
+
+jobs:
+  analyse_c_cpp:
+    if: ${{ !github.event.pull_request.head.repo.fork }}
+    runs-on: [self-hosted, FlipperZeroShell]
+    steps:
+      - name: 'Decontaminate previous build leftovers'
+        run: |
+          if [ -d .git ]; then
+            git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
+          fi
+
+      - name: 'Checkout code'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 'Get commit details'
+        run: |
+          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
+            TYPE="pull"
+          elif [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+            TYPE="tag"
+          else
+            TYPE="other"
+          fi
+          python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE"
+
+      - name: 'Generate suffixes for comment'
+        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request }}
+        id: names
+        run: |
+          echo "::set-output name=branch_name::${BRANCH_NAME}"
+          echo "::set-output name=commit_sha::${COMMIT_SHA}"
+          echo "::set-output name=default_target::${DEFAULT_TARGET}"
+          echo "::set-output name=suffix::${SUFFIX}"
+
+      - name: 'Make reports directory'
+        run: |
+          rm -rf reports/
+          mkdir reports
+
+      - name: 'Generate compile_comands.json'
+        run: |
+          FBT_TOOLCHAIN_PATH=/opt ./fbt COMPACT=1 version_json proto_ver icons firmware_cdb dolphin_internal dolphin_blocking
+
+      - name: 'Static code analysis'
+        run: |
+          FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
+          pvs-studio-analyzer credentials ${{ secrets.PVS_STUDIO_CREDENTIALS }}
+          pvs-studio-analyzer analyze \
+              @.pvsoptions \
+              -j$(grep -c processor /proc/cpuinfo) \
+              -f build/f7-firmware-DC/compile_commands.json \
+              -o PVS-Studio.log
+
+      - name: 'Convert PVS-Studio output to html page'
+        run: plog-converter -a GA:1,2,3 -t fullhtml PVS-Studio.log -o reports/${DEFAULT_TARGET}-${SUFFIX}
+
+      - name: 'Upload artifacts to update server'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: |
+          echo "${{ secrets.RSYNC_DEPLOY_KEY }}" > deploy_key;
+          chmod 600 ./deploy_key;
+          rsync -avrzP --mkpath \
+              -e 'ssh -p ${{ secrets.RSYNC_DEPLOY_PORT }} -i ./deploy_key' \
+              reports/ ${{ secrets.RSYNC_DEPLOY_USER }}@${{ secrets.RSYNC_DEPLOY_HOST }}:/home/data/firmware-pvs-studio-report/"${BRANCH_NAME}/";
+          rm ./deploy_key;
+
+      - name: 'Find Previous Comment'
+        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request }}
+        uses: peter-evans/find-comment@v1
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: 'PVS-Studio report for commit'
+
+      - name: 'Create or update comment'
+        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request}}
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            **PVS-Studio report for commit `${{steps.names.outputs.commit_sha}}`:**
+            - [Report](https://update.flipperzero.one/builds/firmware-pvs-studio-report/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/index.html)
+          edit-mode: replace

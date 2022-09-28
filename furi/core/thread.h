@@ -73,6 +73,13 @@ void furi_thread_free(FuriThread* thread);
  */
 void furi_thread_set_name(FuriThread* thread, const char* name);
 
+/** Mark thread as service
+ * The service cannot be stopped or removed, and cannot exit from the thread body
+ * 
+ * @param thread 
+ */
+void furi_thread_mark_as_service(FuriThread* thread);
+
 /** Set FuriThread stack size
  *
  * @param      thread      FuriThread instance
@@ -228,6 +235,25 @@ size_t furi_thread_stdout_write(const char* data, size_t size);
  * @return int32_t error code
  */
 int32_t furi_thread_stdout_flush();
+
+/** Suspend thread
+ * 
+ * @param thread_id thread id
+ */
+void furi_thread_suspend(FuriThreadId thread_id);
+
+/** Resume thread
+ * 
+ * @param thread_id thread id
+ */
+void furi_thread_resume(FuriThreadId thread_id);
+
+/** Get thread suspended state
+ * 
+ * @param thread_id thread id
+ * @return true if thread is suspended
+ */
+bool furi_thread_is_suspended(FuriThreadId thread_id);
 
 #ifdef __cplusplus
 }
