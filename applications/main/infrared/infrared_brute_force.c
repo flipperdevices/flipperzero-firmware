@@ -40,6 +40,7 @@ InfraredBruteForce* infrared_brute_force_alloc() {
 }
 
 void infrared_brute_force_clear_records(InfraredBruteForce* brute_force) {
+    furi_assert(!brute_force->is_started);
     InfraredBruteForceRecordDict_reset(brute_force->records);
 }
 
