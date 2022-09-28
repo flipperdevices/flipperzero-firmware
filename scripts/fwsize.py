@@ -38,12 +38,12 @@ class Main(App):
         return 0
 
     def process_bin(self):
-        BT_STACK_START =  int('0x080D7000', 16)
+        BT_STACK_START = int("0x080D7000", 16)
         BT_STACK_NAME = "stm32wb5x_BLE_Stack_light_fw"
         BT_STACK_VER = "V1.13.3"
         KB_SIZE = 1024
         FLASH_SIZE = KB_SIZE * KB_SIZE
-        FLASH_START = int('0x08000000', 16)
+        FLASH_START = int("0x08000000", 16)
         BT_STACK_SIZE = FLASH_START + FLASH_SIZE - BT_STACK_START
         PAGE_SIZE = 4096
         binsize = os.path.getsize(self.args.binname)
