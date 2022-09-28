@@ -85,7 +85,6 @@ static void furi_thread_body(void* context) {
     }
 
     furi_assert(thread->state == FuriThreadStateRunning);
-    furi_thread_set_state(thread, FuriThreadStateStopped);
 
     if(thread->is_service) {
         FURI_LOG_E(
@@ -99,7 +98,14 @@ static void furi_thread_body(void* context) {
     furi_assert(pvTaskGetThreadLocalStoragePointer(NULL, 0) != NULL);
     vTaskSetThreadLocalStoragePointer(NULL, 0, NULL);
 
-    vTaskDelete(thread->task_handle);
+    // Copy task handle on stack, because thread pointer can be freed by thread->state_callback
+    volatile TaskHandle_t task_handle_on_stack = thread->task_handle;
+    FURI_SW_MEMBARRIER();
+
+    // from here we can't use thread pointer
+    furi_thread_set_state(thread, FuriThreadStateStopped);
+
+    vTaskDelete(task_handle_on_stack);
     furi_thread_catch();
 }
 
@@ -205,7 +211,7 @@ void furi_thread_start(FuriThread* thread) {
 bool furi_thread_join(FuriThread* thread) {
     furi_assert(thread);
 
-    while(thread->state != FuriThreadStateStopped) {
+    while(eTaskGetState(thread->task_handle) != eDeleted) {
         furi_delay_ms(10);
     }
 
