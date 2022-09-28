@@ -22,7 +22,7 @@ DICT_DEF2(
 struct InfraredBruteForce {
     FlipperFormat* ff;
     const char* db_filename;
-    string_t current_record_name;
+    FuriString* current_record_name;
     InfraredSignal* current_signal;
     InfraredBruteForceRecordDict_t records;
     bool is_started;
@@ -34,7 +34,7 @@ InfraredBruteForce* infrared_brute_force_alloc() {
     brute_force->db_filename = NULL;
     brute_force->current_signal = NULL;
     brute_force->is_started = false;
-    string_init(brute_force->current_record_name);
+    brute_force->current_record_name = furi_string_alloc();
     InfraredBruteForceRecordDict_init(brute_force->records);
     return brute_force;
 }
@@ -118,7 +118,7 @@ bool infrared_brute_force_is_started(InfraredBruteForce* brute_force) {
 
 void infrared_brute_force_stop(InfraredBruteForce* brute_force) {
     furi_assert(brute_force->is_started);
-    string_reset(brute_force->current_record_name);
+    furi_string_reset(brute_force->current_record_name);
     infrared_signal_free(brute_force->current_signal);
     flipper_format_free(brute_force->ff);
     brute_force->current_signal = NULL;

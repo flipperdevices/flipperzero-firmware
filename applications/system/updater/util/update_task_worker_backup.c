@@ -82,12 +82,12 @@ static void
                     /* For this stage, first 30% of progress = cleanup */
                     (n_processed_files++ * 30) / (n_approx_file_entries + 1));
 
-                string_t file_path;
-                string_init(file_path);
-                path_concat(STORAGE_EXT_PATH_PREFIX, string_get_cstr(entry_ptr->name), file_path);
-                FURI_LOG_D(TAG, "Removing %s", string_get_cstr(file_path));
-                storage_simply_remove(update_task->storage, string_get_cstr(file_path));
-                string_clear(file_path);
+                FuriString* file_path = furi_string_alloc();
+                path_concat(
+                    STORAGE_EXT_PATH_PREFIX, furi_string_get_cstr(entry_ptr->name), file_path);
+                FURI_LOG_D(TAG, "Removing %s", furi_string_get_cstr(file_path));
+                storage_simply_remove(update_task->storage, furi_string_get_cstr(file_path));
+                furi_string_free(file_path);
             }
         }
     } while(false);

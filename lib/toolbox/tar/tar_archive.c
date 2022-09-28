@@ -238,19 +238,19 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
 
     FURI_LOG_D(TAG, "Extracting %d bytes to '%s'", header->size, header->name);
 
-    FuriString* converted_fname;
-    converted_fname = furi_string_alloc_set(header->name);
+    FuriString* converted_fname = furi_string_alloc_set(header->name);
     if(op_params->converter) {
         op_params->converter(converted_fname);
     }
 
-    string_init(full_extracted_fname);
-    path_concat(op_params->work_dir, string_get_cstr(converted_fname), full_extracted_fname);
+    full_extracted_fname = furi_string_alloc();
+    path_concat(op_params->work_dir, furi_string_get_cstr(converted_fname), full_extracted_fname);
 
-    bool success = archive_extract_current_file(archive, string_get_cstr(full_extracted_fname));
+    bool success =
+        archive_extract_current_file(archive, furi_string_get_cstr(full_extracted_fname));
 
-    string_clear(converted_fname);
-    string_clear(full_extracted_fname);
+    furi_string_free(converted_fname);
+    furi_string_free(full_extracted_fname);
     return success ? 0 : -1;
 }
 

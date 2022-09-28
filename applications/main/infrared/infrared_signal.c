@@ -147,22 +147,22 @@ static inline bool infrared_signal_read_raw(InfraredSignal* signal, FlipperForma
 }
 
 static bool infrared_signal_read_body(InfraredSignal* signal, FlipperFormat* ff) {
-    string_t tmp;
-    string_init(tmp);
+    FuriString* tmp = furi_string_alloc();
+
     bool success = false;
 
     do {
         if(!flipper_format_read_string(ff, "type", tmp)) break;
-        if(string_equal_p(tmp, "raw")) {
+        if(furi_string_equal(tmp, "raw")) {
             success = infrared_signal_read_raw(signal, ff);
-        } else if(string_equal_p(tmp, "parsed")) {
+        } else if(furi_string_equal(tmp, "parsed")) {
             success = infrared_signal_read_message(signal, ff);
         } else {
             FURI_LOG_E(TAG, "Unknown signal type");
         }
     } while(false);
 
-    string_clear(tmp);
+    furi_string_free(tmp);
     return success;
 }
 
@@ -246,34 +246,33 @@ bool infrared_signal_save(InfraredSignal* signal, FlipperFormat* ff, const char*
     }
 }
 
-bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, string_t name) {
-    string_t tmp;
-    string_init(tmp);
+bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, FuriString* name) {
+    FuriString* tmp = furi_string_alloc();
+
     bool success = false;
 
     do {
         if(!flipper_format_read_string(ff, "name", tmp)) break;
-        string_set(name, tmp);
+        furi_string_set(name, tmp);
         if(!infrared_signal_read_body(signal, ff)) break;
         success = true;
     } while(0);
 
-    string_clear(tmp);
+    furi_string_free(tmp);
     return success;
 }
 
 bool infrared_signal_search_and_read(
     InfraredSignal* signal,
     FlipperFormat* ff,
-    const string_t name) {
+    const FuriString* name) {
     bool success = false;
-    string_t tmp;
-    string_init(tmp);
+    FuriString* tmp = furi_string_alloc();
 
     do {
         bool is_name_found = false;
         while(flipper_format_read_string(ff, "name", tmp)) {
-            is_name_found = string_equal_p(name, tmp);
+            is_name_found = furi_string_equal(name, tmp);
             if(is_name_found) break;
         }
         if(!is_name_found) break;
@@ -281,7 +280,7 @@ bool infrared_signal_search_and_read(
         success = true;
     } while(false);
 
-    string_clear(tmp);
+    furi_string_free(tmp);
     return success;
 }
 
