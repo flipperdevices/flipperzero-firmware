@@ -98,14 +98,10 @@ static void furi_thread_body(void* context) {
     furi_assert(pvTaskGetThreadLocalStoragePointer(NULL, 0) != NULL);
     vTaskSetThreadLocalStoragePointer(NULL, 0, NULL);
 
-    // Copy task handle on stack, because thread pointer can be freed by thread->state_callback
-    volatile TaskHandle_t task_handle_on_stack = thread->task_handle;
-    FURI_SW_MEMBARRIER();
-
     // from here we can't use thread pointer
     furi_thread_set_state(thread, FuriThreadStateStopped);
 
-    vTaskDelete(task_handle_on_stack);
+    vTaskDelete(NULL);
     furi_thread_catch();
 }
 
