@@ -328,7 +328,7 @@ int32_t subghz_app(void* p) {
             view_dispatcher_attach_to_gui(
                 subghz->view_dispatcher, subghz->gui, ViewDispatcherTypeFullscreen);
             if(subghz_key_load(subghz, p, true)) {
-                furi_string_set(subghz->file_path, p);
+                furi_string_set(subghz->file_path, (const char*)p);
 
                 if((!strcmp(subghz->txrx->decoder_result->protocol->name, "RAW"))) {
                     //Load Raw TX

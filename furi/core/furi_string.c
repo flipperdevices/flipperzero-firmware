@@ -11,7 +11,7 @@ struct FuriString {
 #undef furi_string_cmpi
 #undef furi_string_search
 #undef furi_string_equal
-#undef furi_string_replace_str
+#undef furi_string_replace
 #undef furi_string_replace_all
 #undef furi_string_start_with
 #undef furi_string_end_with
@@ -184,6 +184,11 @@ bool furi_string_empty(const FuriString* v) {
 
 void furi_string_replace_at(FuriString* v, size_t pos, size_t len, const char str2[]) {
     string_replace_at(v->string, pos, len, str2);
+}
+
+size_t
+    furi_string_replace(FuriString* string, FuriString* needle, FuriString* replace, size_t start) {
+    return string_replace(string->string, needle->string, replace->string, start);
 }
 
 size_t furi_string_replace_str(FuriString* v, const char str1[], const char str2[], size_t start) {

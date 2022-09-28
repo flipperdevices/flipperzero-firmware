@@ -379,60 +379,159 @@ bool furi_string_equal_str(const FuriString* string_1, const char cstring_2[]);
 //                                Replace
 //---------------------------------------------------------------------------
 
-/* Replace in the string the sub-string at position 'pos' for 'len' bytes into the C string str2. */
+/**
+ * @brief Replace in the string the sub-string at position 'pos' for 'len' bytes into the C string 'replace'.
+ * @param string 
+ * @param pos 
+ * @param len 
+ * @param replace 
+ */
 void furi_string_replace_at(FuriString* string, size_t pos, size_t len, const char replace[]);
 
+/**
+ * @brief Replace a tring 'needle' to string 'replace' in a string from 'start' position.
+ * By default, start is zero.
+ * Return STRING_FAILURE if 'needle' not found or replace position.
+ * @param string 
+ * @param needle 
+ * @param replace 
+ * @param start 
+ * @return size_t 
+ */
+size_t
+    furi_string_replace(FuriString* string, FuriString* needle, FuriString* replace, size_t start);
+
+/**
+ * @brief Replace a C string 'needle' to C string 'replace' in a string from 'start' position.
+ * By default, start is zero.
+ * Return STRING_FAILURE if 'needle' not found or replace position.
+ * @param string 
+ * @param needle 
+ * @param replace 
+ * @param start 
+ * @return size_t 
+ */
 size_t furi_string_replace_str(
     FuriString* string,
     const char needle[],
     const char replace[],
     size_t start);
 
-void furi_string_replace_all_str(FuriString* string, const char needle[], const char replace[]);
-
+/**
+ * @brief Replace all occurences of 'needle' string into 'replace' string.
+ * @param string 
+ * @param needle 
+ * @param replace 
+ */
 void furi_string_replace_all(
     FuriString* string,
     const FuriString* needle,
     const FuriString* replace);
 
+/**
+ * @brief Replace all occurences of 'needle' C string into 'replace' C string.
+ * @param string 
+ * @param needle 
+ * @param replace 
+ */
+void furi_string_replace_all_str(FuriString* string, const char needle[], const char replace[]);
+
 //---------------------------------------------------------------------------
 //                            Start / End tests
 //---------------------------------------------------------------------------
 
+/**
+ * @brief Test if the string starts with the given string.
+ * @param string 
+ * @param start 
+ * @return bool 
+ */
 bool furi_string_start_with(const FuriString* string, const FuriString* start);
 
+/**
+ * @brief Test if the string starts with the given C string.
+ * @param string 
+ * @param start 
+ * @return bool 
+ */
 bool furi_string_start_with_str(const FuriString* string, const char start[]);
 
-bool furi_string_end_with(const FuriString* string, const FuriString* v2);
+/**
+ * @brief Test if the string ends with the given string.
+ * @param string 
+ * @param end 
+ * @return bool 
+ */
+bool furi_string_end_with(const FuriString* string, const FuriString* end);
 
-bool furi_string_end_with_str(const FuriString* string, const char str[]);
+/**
+ * @brief Test if the string ends with the given C string.
+ * @param string 
+ * @param end 
+ * @return bool 
+ */
+bool furi_string_end_with_str(const FuriString* string, const char end[]);
 
 //---------------------------------------------------------------------------
-//                                Misc
+//                                Trim
 //---------------------------------------------------------------------------
 
+/**
+ * @brief Trim the string left to the first 'index' bytes.
+ * @param string 
+ * @param index 
+ */
 void furi_string_left(FuriString* string, size_t index);
 
+/**
+ * @brief Trim the string right from the 'index' position to the last position.
+ * @param string 
+ * @param index 
+ */
 void furi_string_right(FuriString* string, size_t index);
 
+/**
+ * @brief Trim the string from position index to size bytes.
+ * See also furi_string_set_n.
+ * @param string 
+ * @param index 
+ * @param size 
+ */
 void furi_string_mid(FuriString* string, size_t index, size_t size);
 
+/**
+ * @brief Trim a string from the given set of characters (default is " \n\r\t").
+ * @param string 
+ * @param chars 
+ */
 void furi_string_strim(FuriString* string, const char chars[]);
 
 //---------------------------------------------------------------------------
 //                                UTF8
 //---------------------------------------------------------------------------
 
-/* An unicode value */
+/**
+ * @brief An unicode value.
+ */
 typedef unsigned int FuriStringUnicodeValue;
 
-/* Compute the length in UTF8 characters in the string */
-size_t furi_string_unicode_length(FuriString* str);
+/**
+ * @brief Compute the length in UTF8 characters in the string.
+ * @param string 
+ * @return size_t 
+ */
+size_t furi_string_unicode_length(FuriString* string);
 
-/* Push unicode into string, encoding it in UTF8 */
-void furi_string_unicode_push(FuriString* str, FuriStringUnicodeValue u);
+/**
+ * @brief Push unicode into string, encoding it in UTF8.
+ * @param string 
+ * @param unicode 
+ */
+void furi_string_unicode_push(FuriString* string, FuriStringUnicodeValue unicode);
 
-/* State of the UTF8 decoding machine state */
+/**
+ * @brief State of the UTF8 decoding machine state.
+ */
 typedef enum {
     FuriStringUTF8StateStarting = 0,
     FuriStringUTF8StateDecoding1 = 8,
@@ -441,50 +540,99 @@ typedef enum {
     FuriStringUTF8StateError = 32
 } FuriStringUTF8State;
 
-/* Main generic UTF8 decoder
-   It shall be (nearly) branchless on any CPU.
-   It takes a character, and the previous state and the previous value of the unicode value.
-   It updates the state and the decoded unicode value.
-   A decoded unicoded value is valid only when the state is STARTING.
+/**
+ * @brief Main generic UTF8 decoder.
+ * It takes a character, and the previous state and the previous value of the unicode value.
+ * It updates the state and the decoded unicode value.
+ * A decoded unicoded value is valid only when the state is FuriStringUTF8StateStarting.
+ * @param c 
+ * @param state 
+ * @param unicode 
  */
 void furi_string_unicode_utf8_decode(
     char c,
     FuriStringUTF8State* state,
     FuriStringUnicodeValue* unicode);
 
-/* 
+//---------------------------------------------------------------------------
+//                Lasciate ogne speranza, voi ch’entrate
+//---------------------------------------------------------------------------
+
+/**
+ *
  * Select either the string function or the str function depending on
  * the b operade to the function.
  * func1 is the string function / func2 is the str function.
  */
+
+/**
+ * @brief Select for 1 argument 
+ */
 #define FURI_STRING_SELECT1(func1, func2, a) \
-    _Generic((a), char* : func2, const char* : func2, default : func1)(a)
+    _Generic((a), char* : func2, const char* : func2, FuriString* : func1, const FuriString* : func1)(a)
 
+/**
+ * @brief Select for 2 arguments
+ */
 #define FURI_STRING_SELECT2(func1, func2, a, b) \
-    _Generic((b), char* : func2, const char* : func2, default : func1)(a, b)
+    _Generic((b), char* : func2, const char* : func2, FuriString* : func1, const FuriString* : func1)(a, b)
 
+/**
+ * @brief Select for 3 arguments
+ */
 #define FURI_STRING_SELECT3(func1, func2, a, b, c) \
-    _Generic((b), char* : func2, const char* : func2, default : func1)(a, b, c)
+    _Generic((b), char* : func2, const char* : func2, FuriString* : func1, const FuriString* : func1)(a, b, c)
 
-/* Init & Set the string a to the string (or C string) b (constructor) */
+/**
+ * @brief Select for 4 arguments
+ */
+#define FURI_STRING_SELECT4(func1, func2, a, b, c, d) \
+    _Generic((b), char* : func2, const char* : func2, FuriString* : func1, const FuriString* : func1)(a, b, c, d)
+
+/**
+ * @brief Allocate new FuriString and set it content to string (or C string).
+ * ([c]string)
+ */
 #define furi_string_alloc_set(a) \
     FURI_STRING_SELECT1(furi_string_alloc_set, furi_string_alloc_set_str, a)
 
-/* Set the string a to the string (or C string) b */
+/**
+ * @brief Set the string content to string (or C string).
+ * (string, [c]string)
+ */
 #define furi_string_set(a, b) FURI_STRING_SELECT2(furi_string_set, furi_string_set_str, a, b)
 
+/**
+ * @brief Compare string with string (or C string) and return the sort order.
+ * Note: doesn't work with UTF-8 strings.
+ * (string, [c]string)
+ */
 #define furi_string_cmp(a, b) FURI_STRING_SELECT2(furi_string_cmp, furi_string_cmp_str, a, b)
 
+/**
+ * @brief Compare string with string (or C string) (case insentive according to the current locale) and return the sort order.
+ * Note: doesn't work with UTF-8 strings.
+ * (string, [c]string)
+ */
+#define furi_string_cmpi(a, b) FURI_STRING_SELECT2(furi_string_cmpi, furi_string_cmpi_str, a, b)
+
+/**
+ * @brief Test if the string is equal to the string (or C string).
+ * (string, [c]string)
+ */
 #define furi_string_equal(a, b) FURI_STRING_SELECT2(furi_string_equal, furi_string_equal_str, a, b)
 
-#define furi_string_search(a, b) \
-    FURI_STRING_SELECT2(furi_string_search, furi_string_search_str, a, b)
-
+/**
+ * @brief Replace all occurences of string into string (or C string to another C string) in a string.
+ * (string, [c]string, [c]string)
+ */
 #define furi_string_replace_all(a, b, c) \
     FURI_STRING_SELECT3(furi_string_replace_all, furi_string_replace_all_str, a, b, c)
 
-#undef furi_string_search
-/* Search for a string in a string (or C string) (string, string[, start=0]) */
+/**
+ * @brief Search for a string (or C string) in a string
+ * (string, [c]string[, start=0])
+ */
 #define furi_string_search(v, ...) \
     M_APPLY(                       \
         FURI_STRING_SELECT3,       \
@@ -493,19 +641,72 @@ void furi_string_unicode_utf8_decode(
         v,                         \
         M_IF_DEFAULT1(0, __VA_ARGS__))
 
-#define furi_string_cmpi(a, b) FURI_STRING_SELECT2(furi_string_cmpi, furi_string_cmpi_str, a, b)
-
+/**
+ * @brief Test if the string starts with the given string (or C string).
+ * (string, [c]string)
+ */
 #define furi_string_start_with(a, b) \
     FURI_STRING_SELECT2(furi_string_start_with, furi_string_start_with_str, a, b)
 
+/**
+ * @brief Test if the string ends with the given string (or C string).
+ * (string, [c]string)
+ */
 #define furi_string_end_with(a, b) \
     FURI_STRING_SELECT2(furi_string_end_with, furi_string_end_with_str, a, b)
 
+/**
+ * @brief Append a string (or C string) to the string.
+ * (string, [c]string)
+ */
 #define furi_string_cat(a, b) FURI_STRING_SELECT2(furi_string_cat, furi_string_cat_str, a, b)
 
+/**
+ * @brief Trim a string from the given set of characters (default is " \n\r\t").
+ * (string[, set=" \n\r\t"])
+ */
+#define furi_string_strim(...) M_APPLY(furi_string_strim, M_IF_DEFAULT1("  \n\r\t", __VA_ARGS__))
+
+/**
+ * @brief Search for a character in a string.
+ * (string, character[, start=0])
+ */
+#define furi_string_search_char(v, ...) \
+    M_APPLY(furi_string_search_char, v, M_IF_DEFAULT1(0, __VA_ARGS__))
+
+/**
+ * @brief Reverse Search for a character in a string.
+ * (string, character[, start=0])
+ */
+#define furi_string_search_rchar(v, ...) \
+    M_APPLY(furi_string_search_rchar, v, M_IF_DEFAULT1(0, __VA_ARGS__))
+
+/**
+ * @brief Replace a string to another string (or C string to another C string) in a string.
+ * (string, [c]string, [c]string[, start=0])
+ */
+#define furi_string_replace(a, b, ...) \
+    M_APPLY(                           \
+        FURI_STRING_SELECT4,           \
+        furi_string_replace,           \
+        furi_string_replace_str,       \
+        a,                             \
+        b,                             \
+        M_IF_DEFAULT1(0, __VA_ARGS__))
+
+/**
+ * @brief INIT OPLIST for FuriString.
+ */
 #define F_STR_INIT(a) ((a) = furi_string_alloc())
+
+/**
+ * @brief INIT SET OPLIST for FuriString.
+ */
 #define F_STR_INIT_SET(a, b) ((a) = furi_string_alloc_set(b))
 
+/**
+ * @brief OPLIST for FuriString.
+ */
 #define FURI_STRING_OPLIST              \
     (INIT(F_STR_INIT),                  \
      INIT_SET(F_STR_INIT_SET),          \
@@ -520,21 +721,6 @@ void furi_string_unicode_utf8_decode(
      EQUAL(furi_string_equal),          \
      CMP(furi_string_cmp),              \
      TYPE(FuriString*))
-
-/* Strim a string from the given set of characters (default is " \n\r\t") */
-#define furi_string_strim(...) M_APPLY(furi_string_strim, M_IF_DEFAULT1("  \n\r\t", __VA_ARGS__))
-
-/* Search for a character in a string (string, character[, start=0]) */
-#define furi_string_search_char(v, ...) \
-    M_APPLY(furi_string_search_char, v, M_IF_DEFAULT1(0, __VA_ARGS__))
-
-/* Reverse Search for a character in a string (string, character[, start=0]) */
-#define furi_string_search_rchar(v, ...) \
-    M_APPLY(furi_string_search_rchar, v, M_IF_DEFAULT1(0, __VA_ARGS__))
-
-/* Replace a C string to another C string in a string (string, c_src_string, c_dst_string, [, start=0]) */
-#define furi_string_replace_str(v, s1, ...) \
-    M_APPLY(furi_string_replace_str, v, s1, M_IF_DEFAULT1(0, __VA_ARGS__))
 
 #ifdef __cplusplus
 }

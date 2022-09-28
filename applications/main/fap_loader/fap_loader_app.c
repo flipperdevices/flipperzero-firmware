@@ -112,7 +112,7 @@ static bool fap_loader_run_selected_app(FapLoader* loader) {
         FuriString* buffer;
         buffer = furi_string_alloc();
         furi_string_printf(buffer, "%s", furi_string_get_cstr(error_message));
-        furi_string_replace_str(buffer, ":", "\n");
+        furi_string_replace(buffer, ":", "\n");
         dialog_message_set_text(
             message, furi_string_get_cstr(buffer), 64, 32, AlignCenter, AlignCenter);
 

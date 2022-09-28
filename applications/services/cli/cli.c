@@ -400,7 +400,7 @@ void cli_add_command(
 
     size_t name_replace;
     do {
-        name_replace = furi_string_replace_str(name_str, " ", "_");
+        name_replace = furi_string_replace(name_str, " ", "_");
     } while(name_replace != FURI_STRING_FAILURE);
 
     CliCommand c;
@@ -422,7 +422,7 @@ void cli_delete_command(Cli* cli, const char* name) {
 
     size_t name_replace;
     do {
-        name_replace = furi_string_replace_str(name_str, " ", "_");
+        name_replace = furi_string_replace(name_str, " ", "_");
     } while(name_replace != FURI_STRING_FAILURE);
 
     furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
