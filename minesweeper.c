@@ -377,7 +377,7 @@ int32_t minesweeper_app(void* p) {
 
   DialogMessage* message = dialog_message_alloc();
   const char* header_text = "Minesweeper";
-  const char* message_text = "Hold OK pressed to toggle flags.\nDon't spam buttons, or I will\ncrash!";
+  const char* message_text = "Hold OK pressed to toggle flags.\ngithub.com/panki27";
 
   dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
   dialog_message_set_text(message, message_text, 64, 32, AlignCenter, AlignCenter);
