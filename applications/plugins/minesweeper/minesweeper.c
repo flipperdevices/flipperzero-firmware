@@ -50,15 +50,22 @@ typedef enum {
 typedef struct {
   Field minefield[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
   TileType playfield[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
+  FuriTimer* timer;
   int cursor_x;
   int cursor_y;
   int mines_left;
   int fields_cleared;
   int flags_set;
   bool game_started;
-  bool showing_dialog;
   uint32_t game_started_tick;
 } Minesweeper;
+
+static void timer_callback(void* ctx) {
+  UNUSED(ctx);
+  NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+  notification_message(notification, &sequence_reset_vibro);
+  furi_record_close(RECORD_NOTIFICATION);
+}
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue); 
@@ -70,10 +77,6 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 static void render_callback(Canvas* const canvas, void* ctx) {
     const Minesweeper* minesweeper_state = acquire_mutex((ValueMutex*)ctx, 25);
     if (minesweeper_state == NULL) {
-      return;
-    }
-    if (minesweeper_state->showing_dialog) {
-      release_mutex((ValueMutex*)ctx, minesweeper_state);
       return;
     }
     string_t tempStr;
@@ -235,13 +238,12 @@ static void setup_playfield(Minesweeper* minesweeper_state) {
        minesweeper_state->minefield[rand_x][rand_y] = FieldMine;
        mines_left--;
     }
-    minesweeper_state->mines_left = MINECOUNT;
-    minesweeper_state->fields_cleared = 0;
-    minesweeper_state->flags_set = 0;
-    minesweeper_state->game_started_tick = furi_get_tick();
-    minesweeper_state->game_started = false;
-    minesweeper_state->showing_dialog = false;
   }
+  minesweeper_state->mines_left = MINECOUNT;
+  minesweeper_state->fields_cleared = 0;
+  minesweeper_state->flags_set = 0;
+  minesweeper_state->game_started_tick = furi_get_tick();
+  minesweeper_state->game_started = false;
 }
 
 static void place_flag(Minesweeper* minesweeper_state) {
@@ -256,8 +258,6 @@ static void place_flag(Minesweeper* minesweeper_state) {
 
 static bool game_lost(Minesweeper* minesweeper_state) {
   // returns true if the player wants to restart, otherwise false
-  minesweeper_state->showing_dialog = true;
-  NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION); 
   DialogsApp *dialogs = furi_record_open(RECORD_DIALOGS);
 
   DialogMessage* message = dialog_message_alloc();
@@ -269,22 +269,21 @@ static bool game_lost(Minesweeper* minesweeper_state) {
   dialog_message_set_buttons(message, NULL, "Play again", NULL);
 
   dialog_message_set_icon(message, NULL, 0, 10);
-
+  
+  NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
   notification_message(notifications, &sequence_set_vibro_on);
-  furi_delay_ms(200);
-  notification_message(notifications, &sequence_reset_vibro);
+  furi_record_close(RECORD_NOTIFICATION);
+  furi_timer_start(minesweeper_state->timer, (uint32_t) furi_kernel_get_tick_frequency() * 0.2);
 
   DialogMessageButton choice = dialog_message_show(dialogs, message);
   dialog_message_free(message);
-  furi_record_close(RECORD_NOTIFICATION);
+  furi_record_close(RECORD_DIALOGS);
 
   return choice == DialogMessageButtonCenter;
 }
 
 static bool game_won(Minesweeper* minesweeper_state) {
   DialogsApp *dialogs = furi_record_open(RECORD_DIALOGS);
-
-  minesweeper_state->showing_dialog = true;
 
   string_t tempStr;
   string_init(tempStr);
@@ -307,7 +306,6 @@ static bool game_won(Minesweeper* minesweeper_state) {
 
   DialogMessageButton choice = dialog_message_show(dialogs, message);
   dialog_message_free(message);
-  //minesweeper_state->showing_dialog = false;
   string_clear(tempStr);
   string_reset(tempStr);
   furi_record_close(RECORD_DIALOGS);
@@ -366,7 +364,6 @@ static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y
 static void minesweeper_state_init(Minesweeper* const minesweeper_state) {
     minesweeper_state->cursor_x = minesweeper_state->cursor_y = 0;  
     minesweeper_state->game_started = false;
-    minesweeper_state->showing_dialog = false;
     for (int y = 0; y < PLAYFIELD_HEIGHT; y++) {
       for (int x = 0; x < PLAYFIELD_WIDTH; x++){
           minesweeper_state->playfield[x][y] = TileTypeUncleared;
@@ -376,6 +373,21 @@ static void minesweeper_state_init(Minesweeper* const minesweeper_state) {
 
 int32_t minesweeper_app(void* p) {
   UNUSED(p);
+  DialogsApp *dialogs = furi_record_open(RECORD_DIALOGS);
+
+  DialogMessage* message = dialog_message_alloc();
+  const char* header_text = "Minesweeper";
+  const char* message_text = "Hold OK pressed to toggle flags.\ngithub.com/panki27";
+
+  dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
+  dialog_message_set_text(message, message_text, 64, 32, AlignCenter, AlignCenter);
+  dialog_message_set_buttons(message, NULL, "Play", NULL);
+
+  dialog_message_set_icon(message, NULL, 0, 10);
+
+  dialog_message_show(dialogs, message);
+  dialog_message_free(message);
+  furi_record_close(RECORD_DIALOGS);
 
   FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
   
@@ -395,6 +407,7 @@ int32_t minesweeper_app(void* p) {
   ViewPort* view_port = view_port_alloc(); 
   view_port_draw_callback_set(view_port, render_callback, &state_mutex);
   view_port_input_callback_set(view_port, input_callback, event_queue);
+  minesweeper_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypeOnce, &state_mutex); 
   
   // Open GUI and register view_port
   Gui* gui = furi_record_open("gui"); 
@@ -404,12 +417,6 @@ int32_t minesweeper_app(void* p) {
   for (bool processing = true; processing;) {
     FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
     Minesweeper* minesweeper_state = (Minesweeper*)acquire_mutex_block(&state_mutex);
-    if (minesweeper_state->showing_dialog) {
-      // this should not happen.
-      //release_mutex(&state_mutex, minesweeper_state);
-      processing = false;
-      //continue;
-    }
     if(event_status == FuriStatusOk) {
       // press events
       if(event.type == EventTypeKey) {
@@ -502,8 +509,8 @@ int32_t minesweeper_app(void* p) {
   view_port_free(view_port);
   furi_message_queue_free(event_queue);
   delete_mutex(&state_mutex);
+  furi_timer_free(minesweeper_state->timer);
   free(minesweeper_state);
 
   return 0;
 }
-
