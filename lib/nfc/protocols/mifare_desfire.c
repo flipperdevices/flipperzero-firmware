@@ -209,8 +209,24 @@ void mf_df_cat_file(MifareDesfireFile* file, FuriString* out) {
     uint8_t* data = file->contents;
     if(data) {
         for(int rec = 0; rec < num; rec++) {
-            for(int ch = 0; ch < size; ch++) {
-                furi_string_cat_printf(out, "%02x", data[rec * size + ch]);
+            furi_string_cat_printf(out, "record %d\n", rec);
+            for(int ch = 0; ch < size; ch += 4) {
+                furi_string_cat_printf(out, "%03x|", ch);
+                for(int i = 0; i < 4; i++) {
+                    if(ch + i < size) {
+                        furi_string_cat_printf(out, "%02x ", data[rec * size + ch + i]);
+                    } else {
+                        furi_string_cat_printf(out, "   ");
+                    }
+                }
+                for(int i = 0; i < 4 && ch + i < size; i++) {
+                    if(isprint(data[rec * size + ch + i])) {
+                        furi_string_cat_printf(out, "%c", data[rec * size + ch + i]);
+                    } else {
+                        furi_string_cat_printf(out, ".");
+                    }
+                }
+                furi_string_cat_printf(out, "\n");
             }
             furi_string_cat_printf(out, " \n");
         }

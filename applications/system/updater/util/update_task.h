@@ -10,7 +10,7 @@ extern "C" {
 #include <stdbool.h>
 #include <core/furi_string.h>
 
-#define UPDATE_DELAY_OPERATION_OK 300
+#define UPDATE_DELAY_OPERATION_OK 10
 #define UPDATE_DELAY_OPERATION_ERROR INT_MAX
 
 typedef enum {

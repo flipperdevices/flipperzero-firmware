@@ -146,6 +146,26 @@ static inline bool infrared_signal_read_raw(InfraredSignal* signal, FlipperForma
     return success;
 }
 
+static bool infrared_signal_read_body(InfraredSignal* signal, FlipperFormat* ff) {
+    string_t tmp;
+    string_init(tmp);
+    bool success = false;
+
+    do {
+        if(!flipper_format_read_string(ff, "type", tmp)) break;
+        if(string_equal_p(tmp, "raw")) {
+            success = infrared_signal_read_raw(signal, ff);
+        } else if(string_equal_p(tmp, "parsed")) {
+            success = infrared_signal_read_message(signal, ff);
+        } else {
+            FURI_LOG_E(TAG, "Unknown signal type");
+        }
+    } while(false);
+
+    string_clear(tmp);
+    return success;
+}
+
 InfraredSignal* infrared_signal_alloc() {
     InfraredSignal* signal = malloc(sizeof(InfraredSignal));
 
@@ -226,25 +246,42 @@ bool infrared_signal_save(InfraredSignal* signal, FlipperFormat* ff, const char*
     }
 }
 
-bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, FuriString* name) {
-    FuriString* buf;
-    buf = furi_string_alloc();
+bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, string_t name) {
+    string_t tmp;
+    string_init(tmp);
     bool success = false;
 
     do {
-        if(!flipper_format_read_string(ff, "name", buf)) break;
-        furi_string_set(name, buf);
-        if(!flipper_format_read_string(ff, "type", buf)) break;
-        if(!furi_string_cmp(buf, "raw")) {
-            success = infrared_signal_read_raw(signal, ff);
-        } else if(!furi_string_cmp(buf, "parsed")) {
-            success = infrared_signal_read_message(signal, ff);
-        } else {
-            FURI_LOG_E(TAG, "Unknown type of signal (allowed - raw/parsed) ");
-        }
+        if(!flipper_format_read_string(ff, "name", tmp)) break;
+        string_set(name, tmp);
+        if(!infrared_signal_read_body(signal, ff)) break;
+        success = true;
     } while(0);
 
-    furi_string_free(buf);
+    string_clear(tmp);
+    return success;
+}
+
+bool infrared_signal_search_and_read(
+    InfraredSignal* signal,
+    FlipperFormat* ff,
+    const string_t name) {
+    bool success = false;
+    string_t tmp;
+    string_init(tmp);
+
+    do {
+        bool is_name_found = false;
+        while(flipper_format_read_string(ff, "name", tmp)) {
+            is_name_found = string_equal_p(name, tmp);
+            if(is_name_found) break;
+        }
+        if(!is_name_found) break;
+        if(!infrared_signal_read_body(signal, ff)) break;
+        success = true;
+    } while(false);
+
+    string_clear(tmp);
     return success;
 }
 
