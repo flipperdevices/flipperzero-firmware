@@ -209,7 +209,7 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
     path_concat(op_params->work_dir, string_get_cstr(converted_fname), full_extracted_fname);
     string_clear(converted_fname);
 
-    FURI_LOG_I(TAG, "Extracting %d bytes to '%s'", header->size, header->name);
+    FURI_LOG_D(TAG, "Extracting %d bytes to '%s'", header->size, header->name);
     File* out_file = storage_file_alloc(archive->storage);
     uint8_t* readbuf = malloc(FILE_BLOCK_SIZE);
 
@@ -294,6 +294,7 @@ bool tar_archive_add_file(
             break;
         }
 
+        success = true; // if file is empty, that's not an error
         uint16_t bytes_read = 0;
         while((bytes_read = storage_file_read(src_file, file_buffer, FILE_BLOCK_SIZE))) {
             success = tar_archive_file_add_data_block(archive, file_buffer, bytes_read);
