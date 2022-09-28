@@ -202,7 +202,7 @@ void cli_command_led(Cli* cli, FuriString* args, void* context) {
     FuriString* light_name;
     light_name = furi_string_alloc();
     size_t ws = furi_string_search_char(args, ' ');
-    if(ws == STRING_FAILURE) {
+    if(ws == FURI_STRING_FAILURE) {
         cli_print_usage("led", "<r|g|b|bl> <0-255>", furi_string_get_cstr(args));
         furi_string_free(light_name);
         return;

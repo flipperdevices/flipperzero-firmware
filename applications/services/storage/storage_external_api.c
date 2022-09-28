@@ -753,7 +753,7 @@ bool storage_simply_remove_recursive(Storage* storage, const char* path) {
 
         if(furi_string_cmp(cur_dir, path)) {
             size_t last_char = furi_string_search_rchar(cur_dir, '/');
-            furi_assert(last_char != STRING_FAILURE);
+            furi_assert(last_char != FURI_STRING_FAILURE);
             furi_string_left(cur_dir, last_char);
         } else {
             result = true;

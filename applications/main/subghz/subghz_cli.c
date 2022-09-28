@@ -603,15 +603,15 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
                     //delete 1 char UTF
                     const char* str = furi_string_get_cstr(input);
                     size_t size = 0;
-                    FuriStringUTF8State s = M_STRING_UTF8_STARTING;
+                    FuriStringUTF8State s = FuriStringUTF8StateStarting;
                     FuriStringUnicodeValue u = 0;
                     furi_string_reset(sysmsg);
                     while(*str) {
                         furi_string_unicode_utf8_decode(*str, &s, &u);
-                        if((s == M_STRING_UTF8_ERROR) || s == M_STRING_UTF8_STARTING) {
+                        if((s == FuriStringUTF8StateError) || s == FuriStringUTF8StateStarting) {
                             furi_string_unicode_push(sysmsg, u);
                             if(++size >= len - 1) break;
-                            s = M_STRING_UTF8_STARTING;
+                            s = FuriStringUTF8StateStarting;
                         }
                         str++;
                     }

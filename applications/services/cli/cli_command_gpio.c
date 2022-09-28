@@ -68,7 +68,7 @@ static GpioParseError gpio_command_parse(FuriString* args, size_t* pin_num, uint
     pin_name = furi_string_alloc();
 
     size_t ws = furi_string_search_char(args, ' ');
-    if(ws == STRING_FAILURE) {
+    if(ws == FURI_STRING_FAILURE) {
         return ERR_CMD_SYNTAX;
     }
 

@@ -221,7 +221,7 @@ static void cli_handle_enter(Cli* cli) {
 
     // Split command and args
     size_t ws = furi_string_search_char(cli->line, ' ');
-    if(ws == STRING_FAILURE) {
+    if(ws == FURI_STRING_FAILURE) {
         furi_string_set(command, cli->line);
     } else {
         furi_string_set_n(command, cli->line, 0, ws);
@@ -401,7 +401,7 @@ void cli_add_command(
     size_t name_replace;
     do {
         name_replace = furi_string_replace_str(name_str, " ", "_");
-    } while(name_replace != STRING_FAILURE);
+    } while(name_replace != FURI_STRING_FAILURE);
 
     CliCommand c;
     c.callback = callback;
@@ -423,7 +423,7 @@ void cli_delete_command(Cli* cli, const char* name) {
     size_t name_replace;
     do {
         name_replace = furi_string_replace_str(name_str, " ", "_");
-    } while(name_replace != STRING_FAILURE);
+    } while(name_replace != FURI_STRING_FAILURE);
 
     furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
     CliCommandTree_erase(cli->commands, name_str);

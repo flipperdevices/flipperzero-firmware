@@ -3,7 +3,7 @@
 
 size_t args_get_first_word_length(FuriString* args) {
     size_t ws = furi_string_search_char(args, ' ');
-    if(ws == STRING_FAILURE) {
+    if(ws == FURI_STRING_FAILURE) {
         ws = furi_string_size(args);
     }
 

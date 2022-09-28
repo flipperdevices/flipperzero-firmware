@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-#define STRING_FAILURE ((size_t)-1)
+#define FURI_STRING_FAILURE ((size_t)-1)
 
 typedef struct FuriString FuriString;
 
@@ -28,11 +28,11 @@ FuriString* furi_string_alloc_printf(const char format[], ...);
 
 FuriString* furi_string_alloc_vprintf(const char format[], va_list args);
 
-void furi_string_alloc_move(FuriString* v1, FuriString* v2);
+FuriString* furi_string_alloc_move(FuriString* s);
 
 void furi_string_free(FuriString* s);
 
-void furi_string_reserve(FuriString* v, size_t alloc);
+void furi_string_reserve(FuriString* s, size_t alloc);
 
 void furi_string_reset(FuriString* s);
 
@@ -89,6 +89,8 @@ int furi_string_vprintf(FuriString* v, const char format[], va_list args);
 
 int furi_string_cat_printf(FuriString* v, const char format[], ...);
 
+int furi_string_cat_vprintf(FuriString* v, const char format[], va_list args);
+
 bool furi_string_empty_p(const FuriString* v);
 
 /* Replace in the string the sub-string at position 'pos' for 'len' bytes into the C string str2. */
@@ -140,11 +142,11 @@ void furi_string_unicode_push(FuriString* str, FuriStringUnicodeValue u);
 
 /* State of the UTF8 decoding machine state */
 typedef enum {
-    M_STRING_UTF8_STARTING = 0,
-    M_STRING_UTF8_DECODING_1 = 8,
-    M_STRING_UTF8_DECODING_2 = 16,
-    M_STRING_UTF8_DOCODING_3 = 24,
-    M_STRING_UTF8_ERROR = 32
+    FuriStringUTF8StateStarting = 0,
+    FuriStringUTF8StateDecoding1 = 8,
+    FuriStringUTF8StateDecoding2 = 16,
+    FuriStringUTF8StateDecoding3 = 24,
+    FuriStringUTF8StateError = 32
 } FuriStringUTF8State;
 
 /* Main generic UTF8 decoder

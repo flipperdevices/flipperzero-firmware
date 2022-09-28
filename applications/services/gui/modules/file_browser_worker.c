@@ -67,7 +67,7 @@ static bool browser_path_trim(FuriString* path) {
     bool is_root = false;
     size_t filename_start = furi_string_search_rchar(path, '/');
     furi_string_left(path, filename_start);
-    if((furi_string_empty_p(path)) || (filename_start == STRING_FAILURE)) {
+    if((furi_string_empty_p(path)) || (filename_start == FURI_STRING_FAILURE)) {
         furi_string_set(path, BROWSER_ROOT);
         is_root = true;
     }

@@ -8,13 +8,13 @@ void path_extract_filename_no_ext(const char* path, FuriString* filename) {
     size_t start_position = furi_string_search_rchar(filename, '/');
     size_t end_position = furi_string_search_rchar(filename, '.');
 
-    if(start_position == STRING_FAILURE) {
+    if(start_position == FURI_STRING_FAILURE) {
         start_position = 0;
     } else {
         start_position += 1;
     }
 
-    if(end_position == STRING_FAILURE) {
+    if(end_position == FURI_STRING_FAILURE) {
         end_position = furi_string_size(filename);
     }
 
@@ -55,7 +55,7 @@ void path_extract_basename(const char* path, FuriString* basename) {
     furi_string_set(basename, path);
     path_cleanup(basename);
     size_t pos = furi_string_search_rchar(basename, '/');
-    if(pos != STRING_FAILURE) {
+    if(pos != FURI_STRING_FAILURE) {
         furi_string_right(basename, pos + 1);
     }
 }
@@ -64,7 +64,7 @@ void path_extract_dirname(const char* path, FuriString* dirname) {
     furi_string_set(dirname, path);
     path_cleanup(dirname);
     size_t pos = furi_string_search_rchar(dirname, '/');
-    if(pos != STRING_FAILURE) {
+    if(pos != FURI_STRING_FAILURE) {
         furi_string_left(dirname, pos);
     }
 }

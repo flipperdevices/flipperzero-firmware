@@ -75,7 +75,7 @@ typedef struct {
     bool visited;
 } StorageTestPath;
 
-DICT_DEF2(StorageTestPathDict, string_t, STRING_OPLIST, StorageTestPath, M_POD_OPLIST)
+DICT_DEF2(StorageTestPathDict, FuriString*, FURI_STRING_OPLIST, StorageTestPath, M_POD_OPLIST)
 
 static StorageTestPathDict_t*
     storage_test_paths_alloc(const StorageTestPathDesc paths[], size_t paths_count) {
