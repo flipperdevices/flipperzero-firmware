@@ -37,7 +37,15 @@ def BuildAppElf(env, app):
         APP=app,
     )
 
-    env.Depends(app_elf_augmented, [env["SDK_DEFINITION"], env.Value(app)])
+    manifest_vals = vars(app)
+    manifest_vals = {
+        k: v for k, v in manifest_vals.items() if k not in ("_appdir", "_apppath")
+    }
+
+    env.Depends(
+        app_elf_augmented,
+        [env["SDK_DEFINITION"], env.Value(manifest_vals)],
+    )
     if app.fap_icon:
         env.Depends(
             app_elf_augmented,
