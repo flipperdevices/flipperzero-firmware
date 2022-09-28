@@ -207,6 +207,8 @@ void furi_thread_start(FuriThread* thread) {
 bool furi_thread_join(FuriThread* thread) {
     furi_assert(thread);
 
+    furi_check(furi_thread_get_current() != thread);
+
     while(eTaskGetState(thread->task_handle) != eDeleted) {
         furi_delay_ms(10);
     }
