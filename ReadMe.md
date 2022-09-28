@@ -11,8 +11,8 @@
 
 - To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-09-27 04:47 GMT`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-09-27 22:03 GMT`
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-09-28 01:26 GMT`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-09-28 01:26 GMT`
 - Assets: Includes New Dolphin Animations: [80s (By Haseo)]
 - Added: [Minesweeper (By panki27)](https://github.com/panki27/minesweeper) Thank you @Panki27
 - Added: [USB Keyboard (By huuck)](https://github.com/huuck/FlipperZeroUSBKeyboard)
