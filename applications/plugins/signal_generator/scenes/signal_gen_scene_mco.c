@@ -7,23 +7,24 @@ typedef enum {
 
 static const char* const mco_source_names[] = {
     "32768",
-    "100KHz",
-    "200KHz",
-    "400KHz",
-    "800KHz",
-    "1MHz",
-    "2MHz",
-    "4MHz",
-    "8MHz",
-    "16MHz",
-    "24MHz",
-    "32MHz",
-    "48MHz",
     "64MHz",
+    "~100K",
+    "~200K",
+    "~400K",
+    "~800K",
+    "~1MHz",
+    "~2MHz",
+    "~4MHz",
+    "~8MHz",
+    "~16MHz",
+    "~24MHz",
+    "~32MHz",
+    "~48MHz",
 };
 
 static const FuriHalClockMcoSourceId mco_sources[] = {
     FuriHalClockMcoLse,
+    FuriHalClockMcoSysclk,
     FuriHalClockMcoMsi100k,
     FuriHalClockMcoMsi200k,
     FuriHalClockMcoMsi400k,
@@ -36,7 +37,6 @@ static const FuriHalClockMcoSourceId mco_sources[] = {
     FuriHalClockMcoMsi24m,
     FuriHalClockMcoMsi32m,
     FuriHalClockMcoMsi48m,
-    FuriHalClockMcoSysclk,
 };
 
 static const char* const mco_divisor_names[] = {
@@ -102,6 +102,8 @@ void signal_gen_scene_mco_on_enter(void* context) {
     app->mco_src = FuriHalClockMcoLse;
     app->mco_div = FuriHalClockMcoDiv1;
     furi_hal_clock_mco_enable(app->mco_src, app->mco_div);
+    furi_hal_gpio_init_ex(
+        &gpio_usart_tx, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedVeryHigh, GpioAltFn0MCO);
 }
 
 bool signal_gen_scene_mco_on_event(void* context, SceneManagerEvent event) {
@@ -120,5 +122,11 @@ bool signal_gen_scene_mco_on_event(void* context, SceneManagerEvent event) {
 void signal_gen_scene_mco_on_exit(void* context) {
     SignalGenApp* app = context;
     variable_item_list_reset(app->var_item_list);
+    furi_hal_gpio_init_ex(
+        &gpio_usart_tx,
+        GpioModeAltFunctionPushPull,
+        GpioPullUp,
+        GpioSpeedVeryHigh,
+        GpioAltFn7USART1);
     furi_hal_clock_mco_disable();
 }
