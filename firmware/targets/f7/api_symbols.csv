@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,1.9,,
+Version,+,1.13,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -42,6 +42,7 @@ Header,+,firmware/targets/f7/furi_hal/furi_hal_i2c_types.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_idle_timer.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_interrupt.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_os.h,,
+Header,+,firmware/targets/f7/furi_hal/furi_hal_pwm.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_resources.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_spi_config.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_spi_types.h,,
@@ -433,8 +434,8 @@ Function,-,acoshl,long double,long double
 Function,-,acosl,long double,long double
 Function,+,acquire_mutex,void*,"ValueMutex*, uint32_t"
 Function,-,aligned_alloc,void*,"size_t, size_t"
-Function,-,aligned_free,void,void*
-Function,-,aligned_malloc,void*,"size_t, size_t"
+Function,+,aligned_free,void,void*
+Function,+,aligned_malloc,void*,"size_t, size_t"
 Function,-,arc4random,__uint32_t,
 Function,-,arc4random_buf,void,"void*, size_t"
 Function,-,arc4random_uniform,__uint32_t,__uint32_t
@@ -779,13 +780,13 @@ Function,-,fiprintf,int,"FILE*, const char*, ..."
 Function,-,fiscanf,int,"FILE*, const char*, ..."
 Function,+,flipper_application_alloc,FlipperApplication*,"Storage*, const ElfApiInterface*"
 Function,+,flipper_application_free,void,FlipperApplication*
-Function,-,flipper_application_get_entry_address,const void*,FlipperApplication*
 Function,+,flipper_application_get_manifest,const FlipperApplicationManifest*,FlipperApplication*
-Function,-,flipper_application_get_state,const FlipperApplicationState*,FlipperApplication*
-Function,-,flipper_application_get_thread,FuriThread*,FlipperApplication*
 Function,+,flipper_application_load_status_to_string,const char*,FlipperApplicationLoadStatus
+Function,+,flipper_application_manifest_is_compatible,_Bool,"const FlipperApplicationManifest*, const ElfApiInterface*"
+Function,+,flipper_application_manifest_is_valid,_Bool,const FlipperApplicationManifest*
 Function,+,flipper_application_map_to_memory,FlipperApplicationLoadStatus,FlipperApplication*
 Function,+,flipper_application_preload,FlipperApplicationPreloadStatus,"FlipperApplication*, const char*"
+Function,+,flipper_application_preload_manifest,FlipperApplicationPreloadStatus,"FlipperApplication*, const char*"
 Function,-,flipper_application_preload_status_to_string,const char*,FlipperApplicationPreloadStatus
 Function,+,flipper_application_spawn,FuriThread*,"FlipperApplication*, void*"
 Function,+,flipper_format_buffered_file_alloc,FlipperFormat*,Storage*
@@ -954,6 +955,8 @@ Function,+,furi_hal_cdc_set_callbacks,void,"uint8_t, CdcCallbacks*, void*"
 Function,+,furi_hal_clock_deinit_early,void,
 Function,-,furi_hal_clock_init,void,
 Function,-,furi_hal_clock_init_early,void,
+Function,+,furi_hal_clock_mco_disable,void,
+Function,+,furi_hal_clock_mco_enable,void,"FuriHalClockMcoSourceId, FuriHalClockMcoDivisorId"
 Function,-,furi_hal_clock_resume_tick,void,
 Function,-,furi_hal_clock_suspend_tick,void,
 Function,-,furi_hal_clock_switch_to_hsi,void,
@@ -986,7 +989,7 @@ Function,+,furi_hal_crypto_verify_key,_Bool,uint8_t
 Function,+,furi_hal_debug_disable,void,
 Function,+,furi_hal_debug_enable,void,
 Function,-,furi_hal_deinit_early,void,
-Function,-,furi_hal_flash_erase,_Bool,uint8_t
+Function,-,furi_hal_flash_erase,void,uint8_t
 Function,-,furi_hal_flash_get_base,size_t,
 Function,-,furi_hal_flash_get_cycles_count,size_t,
 Function,-,furi_hal_flash_get_free_end_address,const void*,
@@ -1001,8 +1004,8 @@ Function,-,furi_hal_flash_init,void,
 Function,-,furi_hal_flash_ob_apply,void,
 Function,-,furi_hal_flash_ob_get_raw_ptr,const FuriHalFlashRawOptionByteData*,
 Function,-,furi_hal_flash_ob_set_word,_Bool,"size_t, const uint32_t"
-Function,-,furi_hal_flash_program_page,_Bool,"const uint8_t, const uint8_t*, uint16_t"
-Function,-,furi_hal_flash_write_dword,_Bool,"size_t, uint64_t"
+Function,-,furi_hal_flash_program_page,void,"const uint8_t, const uint8_t*, uint16_t"
+Function,-,furi_hal_flash_write_dword,void,"size_t, uint64_t"
 Function,+,furi_hal_gpio_add_int_callback,void,"const GpioPin*, GpioExtiCallback, void*"
 Function,+,furi_hal_gpio_disable_int_callback,void,const GpioPin*
 Function,+,furi_hal_gpio_enable_int_callback,void,const GpioPin*
@@ -1141,6 +1144,7 @@ Function,+,furi_hal_power_insomnia_enter,void,
 Function,+,furi_hal_power_insomnia_exit,void,
 Function,-,furi_hal_power_insomnia_level,uint16_t,
 Function,+,furi_hal_power_is_charging,_Bool,
+Function,+,furi_hal_power_is_charging_done,_Bool,
 Function,+,furi_hal_power_is_otg_enabled,_Bool,
 Function,+,furi_hal_power_off,void,
 Function,+,furi_hal_power_reset,void,
@@ -1149,6 +1153,9 @@ Function,+,furi_hal_power_sleep,void,
 Function,+,furi_hal_power_sleep_available,_Bool,
 Function,+,furi_hal_power_suppress_charge_enter,void,
 Function,+,furi_hal_power_suppress_charge_exit,void,
+Function,+,furi_hal_pwm_set_params,void,"FuriHalPwmOutputId, uint32_t, uint8_t"
+Function,+,furi_hal_pwm_start,void,"FuriHalPwmOutputId, uint32_t, uint8_t"
+Function,+,furi_hal_pwm_stop,void,FuriHalPwmOutputId
 Function,+,furi_hal_random_fill_buf,void,"uint8_t*, uint32_t"
 Function,+,furi_hal_random_get,uint32_t,
 Function,+,furi_hal_region_get,const FuriHalRegion*,
@@ -2262,6 +2269,7 @@ Function,+,tar_archive_get_entries_count,int32_t,TarArchive*
 Function,+,tar_archive_open,_Bool,"TarArchive*, const char*, TarOpenMode"
 Function,+,tar_archive_set_file_callback,void,"TarArchive*, tar_unpack_file_cb, void*"
 Function,+,tar_archive_store_data,_Bool,"TarArchive*, const char*, const uint8_t*, const int32_t"
+Function,+,tar_archive_unpack_file,_Bool,"TarArchive*, const char*, const char*"
 Function,+,tar_archive_unpack_to,_Bool,"TarArchive*, const char*, Storage_name_converter"
 Function,-,tempnam,char*,"const char*, const char*"
 Function,+,text_box_alloc,TextBox*,
@@ -2664,6 +2672,8 @@ Variable,+,I_SDQuestion_35x43,const Icon,
 Variable,+,I_SDcardFail_11x8,const Icon,
 Variable,+,I_SDcardMounted_11x8,const Icon,
 Variable,+,I_Scanning_123x52,const Icon,
+Variable,+,I_SmallArrowDown_4x7,const Icon,
+Variable,+,I_SmallArrowUp_4x7,const Icon,
 Variable,+,I_Smile_18x18,const Icon,
 Variable,+,I_Space_65x18,const Icon,
 Variable,+,I_Tap_reader_36x38,const Icon,
