@@ -1,5 +1,5 @@
 App(
-    appid="NRF_Sniff",
+    appid="NRF24_Sniffer",
     name="[NRF24] Sniffer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="nrfsniff_app",
