@@ -642,6 +642,13 @@ void furi_string_unicode_utf8_decode(
         M_IF_DEFAULT1(0, __VA_ARGS__))
 
 /**
+ * @brief Search for a C string in a string
+ * (string, cstring[, start=0])
+ */
+#define furi_string_search_str(v, ...) \
+    M_APPLY(furi_string_search_str, v, M_IF_DEFAULT1(0, __VA_ARGS__))
+
+/**
  * @brief Test if the string starts with the given string (or C string).
  * (string, [c]string)
  */
