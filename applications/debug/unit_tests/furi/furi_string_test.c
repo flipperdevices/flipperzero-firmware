@@ -306,6 +306,26 @@ MU_TEST(mu_test_furi_string_search) {
     furi_string_free(needle);
 }
 
+MU_TEST(mu_test_furi_string_equality) {
+    FuriString* string = furi_string_alloc_set("test");
+    FuriString* string_eq = furi_string_alloc_set("test");
+    FuriString* string_neq = furi_string_alloc_set("test2");
+
+    // test furi_string_equal
+    mu_check(furi_string_equal(string, string_eq));
+    mu_check(!furi_string_equal(string, string_neq));
+
+    // test furi_string_equal_str
+    mu_check(furi_string_equal_str(string, "test"));
+    mu_check(!furi_string_equal_str(string, "test2"));
+    mu_check(furi_string_equal_str(string_neq, "test2"));
+    mu_check(!furi_string_equal_str(string_neq, "test"));
+
+    furi_string_free(string);
+    furi_string_free(string_eq);
+    furi_string_free(string_neq);
+}
+
 MU_TEST_SUITE(test_suite) {
     MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
 
@@ -316,6 +336,7 @@ MU_TEST_SUITE(test_suite) {
     MU_RUN_TEST(mu_test_furi_string_appends);
     MU_RUN_TEST(mu_test_furi_string_compare);
     MU_RUN_TEST(mu_test_furi_string_search);
+    MU_RUN_TEST(mu_test_furi_string_equality);
 }
 
 int run_minunit_test_furi_string() {
