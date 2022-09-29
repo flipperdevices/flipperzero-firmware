@@ -151,7 +151,7 @@ def generate(env, **kw):
                     ),
                     Action(
                         validate_app_imports,
-                        None,  # "$APPCHECK_COMSTR",
+                        "$APPCHECK_COMSTR",
                     ),
                 ],
                 suffix=".impsyms",
