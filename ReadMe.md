@@ -78,7 +78,7 @@ brew bundle --verbose
 
 ## Linux Prerequisites
 
-The FBT tool handles everything, only `git` is required.
+The FBT tool handles everything, only `git` is required. NixOS users can run `nix-shell` to drop into a development shell.
 
 ### Optional dependencies
 
