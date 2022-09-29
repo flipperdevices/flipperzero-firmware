@@ -55,6 +55,7 @@ def BuildAppElf(env, app):
 
     app_elf_import_validator = env.ValidateAppImports(app_elf_augmented)
     env.AlwaysBuild(app_elf_import_validator)
+    env.Alias(app_alias, app_elf_import_validator)
     return (app_elf_augmented, app_elf_raw, app_elf_import_validator)
 
 
@@ -108,9 +109,13 @@ def GetExtAppFromPath(env, app_dir):
 
     app_elf = env["_extapps"]["compact"].get(app.appid, None)
     if not app_elf:
-        raise UserError(f"No external app found for {app.appid}")
+        raise UserError(
+            f"Application {app.appid} is not configured for building as external"
+        )
 
-    return (app, app_elf[0])
+    app_validator = env["_extapps"]["validators"].get(app.appid, None)
+
+    return (app, app_elf[0], app_validator[0])
 
 
 def generate(env, **kw):
