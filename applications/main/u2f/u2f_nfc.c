@@ -106,12 +106,15 @@ static int32_t u2f_nfc_worker(void* context) {
     }
     FuriHalNfcDevData params = {
         // TODO: Randomize this or something?
-        .uid = {0x50, 0x3F, 0xA2, 0xE6},
+        .uid = {0xCF, 0x72, 0xd4, 0x40},
         .uid_len = 4,
-        .atqa = {0x04, 0x00},
+        .atqa = {0x00, 0x04},
         .sak = 0x20,
         .type = FuriHalNfcTypeA,
+        .interface = FuriHalNfcInterfaceIsoDep,
     };
+
+    furi_hal_nfc_exit_sleep();
 
     FURI_LOG_D(TAG, "Start");
 
@@ -121,29 +124,29 @@ static int32_t u2f_nfc_worker(void* context) {
             furi_check((flags & FuriFlagError) == 0);
             if(flags & WorkerEvtStop) break;
         }
-        furi_hal_nfc_exit_sleep();
-        if(!furi_hal_nfc_listen(params.uid, params.uid_len, params.atqa, params.sak, false, 300)) {
-            furi_hal_nfc_sleep();
+        if(!furi_hal_nfc_listen(&params, false, 200)) {
+            FURI_LOG_T(TAG, "wtf");
             continue;
         }
         FuriHalNfcTxRxContext tx_rx = {};
         tx_rx.tx_bits = 0;
         tx_rx.tx_rx_type = FuriHalNfcTxRxTypeDefault;
         if(!furi_hal_nfc_tx_rx(&tx_rx, 300)) continue;
-        if (tx_rx.rx_bits == 0) continue;
+        if(tx_rx.rx_bits == 0) continue;
         u2f_nfc->payload_len = 0;
         u2f_nfc->payload_cursor = 0;
-        while (true) {
-            uint16_t payload_len = u2f_callback(u2f_nfc, tx_rx.rx_data, tx_rx.rx_bits / 8, tx_rx.tx_data);
+        while(true) {
+            uint16_t payload_len =
+                u2f_callback(u2f_nfc, tx_rx.rx_data, tx_rx.rx_bits / 8, tx_rx.tx_data);
             tx_rx.rx_bits = 0;
             FURI_LOG_T(TAG, "payload_len=%d", payload_len);
-            if (payload_len == 0) {
+            if(payload_len == 0) {
                 break;
             } else {
                 tx_rx.tx_bits = payload_len * 8;
                 tx_rx.tx_rx_type = FuriHalNfcTxRxTypeDefault;
                 if(!furi_hal_nfc_tx_rx(&tx_rx, 300)) break;
-                if (tx_rx.rx_bits == 0) break;
+                if(tx_rx.rx_bits == 0) break;
             }
         }
     }

@@ -24,8 +24,6 @@ static uint8_t nfca_default_ats[] = {0x05, 0x78, 0x80, 0x80, 0x00};
 
 static uint8_t nfca_sleep_req[] = {0x50, 0x00};
 
-static uint16_t fsdi_to_fsd[] = {16, 24, 32, 40, 48, 64, 96, 128, 256, 0, 0, 0, 0, 0, 0, 0, 0};
-
 uint16_t nfca_get_crc16(uint8_t* buff, uint16_t len) {
     uint16_t crc = NFCA_CRC_INIT;
     uint8_t byte = 0;
@@ -60,11 +58,6 @@ bool nfca_emulation_handler(
     } else if(rx_bytes == sizeof(nfca_cmd_rats) && buff_rx[0] == NFCA_CMD_RATS) {
         memcpy(buff_tx, nfca_default_ats, sizeof(nfca_default_ats));
         *buff_tx_len = sizeof(nfca_default_ats) * 8;
-
-        uint16_t fsd = fsdi_to_fsd[buff_rx[1] >> 4];
-        uint16_t fsi = fsdi_to_fsd[nfca_default_ats[1] & 0b1111];
-        uint16_t mtu = fsd < fsi ? fsd : fsi;
-        FURI_LOG_D("NFCA", "mtu=%d", mtu);
     }
 
     return sleep;

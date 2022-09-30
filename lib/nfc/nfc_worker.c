@@ -379,7 +379,7 @@ void nfc_worker_emulate_uid(NfcWorker* nfc_worker) {
     // Need to save ATS to support ISO-14443A-4 emulation
 
     while(nfc_worker->state == NfcWorkerStateUidEmulate) {
-        if(furi_hal_nfc_listen(data->uid, data->uid_len, data->atqa, data->sak, false, 100)) {
+        if(furi_hal_nfc_listen(data, false, 100)) {
             if(furi_hal_nfc_tx_rx(&tx_rx, 100)) {
                 reader_data->size = tx_rx.rx_bits / 8;
                 if(reader_data->size > 0) {
@@ -411,7 +411,7 @@ void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
     }
 
     while(nfc_worker->state == NfcWorkerStateEmulateApdu) {
-        if(furi_hal_nfc_listen(params.uid, params.uid_len, params.atqa, params.sak, false, 300)) {
+        if(furi_hal_nfc_listen(&params, false, 300)) {
             FURI_LOG_D(TAG, "POS terminal detected");
             if(emv_card_emulation(&tx_rx)) {
                 FURI_LOG_D(TAG, "EMV card emulated");

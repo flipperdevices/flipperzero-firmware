@@ -338,7 +338,18 @@ uint16_t u2f_applet_selection(const uint8_t* in_buf, uint8_t* out_buf) {
     U2fApduCommand* cmd = (U2fApduCommand*)in_buf;
     uint8_t* data = apdu_command_data(cmd);
 
-    FURI_LOG_D(TAG, "len=%d %02x%02x%02x%02x%02x%02x%02x%02x", cmd->len[0], data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+    FURI_LOG_D(
+        TAG,
+        "len=%d %02x%02x%02x%02x%02x%02x%02x%02x",
+        cmd->len[0],
+        data[0],
+        data[1],
+        data[2],
+        data[3],
+        data[4],
+        data[5],
+        data[6],
+        data[7]);
 
     if(cmd->len[0] != 8 || memcmp(rid_ac_ax, data, 8) != 0) {
         memcpy(&out_buf[0], state_app_not_found, 2);

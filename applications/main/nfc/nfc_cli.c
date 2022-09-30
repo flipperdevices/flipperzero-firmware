@@ -67,7 +67,7 @@ static void nfc_cli_emulate(Cli* cli, string_t args) {
     };
 
     while(!cli_cmd_interrupt_received(cli)) {
-        if(furi_hal_nfc_listen(params.uid, params.uid_len, params.atqa, params.sak, false, 100)) {
+        if(furi_hal_nfc_listen(&params, false, 100)) {
             printf("Reader detected\r\n");
             furi_hal_nfc_sleep();
         }

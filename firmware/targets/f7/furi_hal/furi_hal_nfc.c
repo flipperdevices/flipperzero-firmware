@@ -207,10 +207,7 @@ bool furi_hal_nfc_activate_nfca(uint32_t timeout, uint32_t* cuid) {
 }
 
 bool furi_hal_nfc_listen(
-    uint8_t* uid,
-    uint8_t uid_len,
-    uint8_t* atqa,
-    uint8_t sak,
+    FuriHalNfcDevData* nfc_data,
     bool activate_after_sak,
     uint32_t timeout) {
     rfalNfcState state = rfalNfcGetState();
@@ -233,19 +230,18 @@ bool furi_hal_nfc_listen(
         .notifyCb = NULL,
         .activate_after_sak = activate_after_sak,
     };
-    /*
-    if(FURI_BIT(sak, 5)) {
+    if (nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
+        params.compMode = RFAL_COMPLIANCE_MODE_ISO;
+    } else if(FURI_BIT(nfc_data->sak, 5)) {
         params.compMode = RFAL_COMPLIANCE_MODE_EMV;
     } else {
         params.compMode = RFAL_COMPLIANCE_MODE_NFC;
     }
-    */
-    params.compMode = RFAL_COMPLIANCE_MODE_ISO;
-    params.lmConfigPA.nfcidLen = uid_len;
-    memcpy(params.lmConfigPA.nfcid, uid, uid_len);
-    params.lmConfigPA.SENS_RES[0] = atqa[0];
-    params.lmConfigPA.SENS_RES[1] = atqa[1];
-    params.lmConfigPA.SEL_RES = sak;
+    params.lmConfigPA.nfcidLen = nfc_data->uid_len;
+    memcpy(params.lmConfigPA.nfcid, nfc_data->uid, nfc_data->uid_len);
+    params.lmConfigPA.SENS_RES[0] = nfc_data->atqa[0];
+    params.lmConfigPA.SENS_RES[1] = nfc_data->atqa[1];
+    params.lmConfigPA.SEL_RES = nfc_data->sak;
     rfalNfcDiscover(&params);
 
     uint32_t start = DWT->CYCCNT;
