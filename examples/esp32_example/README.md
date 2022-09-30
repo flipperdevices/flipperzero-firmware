@@ -17,9 +17,7 @@ Note: In addition, to steps mentioned above, `esp_loader_change_baudrate`  is ca
 
 ## SPI pin initialization
 
-In majority of cases `ESP_LOADER_CONNECT_DEFAULT` helper macro is used in order to initialize `loader_connect_args_t` data structure passed to `esp_loader_connect`. Helper macro sets `spi_pin_config` field of the data structure to zero, thus, default SPI pins are used to connect to FLASH memory. In special cases, such as custom design in which FLASH is connected to different pins, `spi_pin_config` field has to be set accordingly. For more detailed information refer to [serial protocol](https://github.com/espressif/esptool/wiki/Serial-Protocol).
-
-When programming ESP32-PICO-V4 (SiP), `ESP_LOADER_SPI_CONFIG_ESP32PICOD4` macro can be used to initialize `spi_pin_config`, due to special connection between ESP32 and SPI FLASH chip.
+In majority of cases `ESP_LOADER_CONNECT_DEFAULT` helper macro is used in order to initialize `loader_connect_args_t` data structure passed to `esp_loader_connect`. Helper macro sets `spi_pin_config` field of the data structure to zero, thus, default SPI pins are used to connect to FLASH memory. In special cases, such as custom design in which FLASH is connected to different pins, `spi_pin_config` field has to be set accordingly. For more detailed information refer to [serial protocol](https://docs.espressif.com/projects/esptool/en/latest/esp32s3/advanced-topics/serial-protocol.html).
 
 ## Hardware Required
 
