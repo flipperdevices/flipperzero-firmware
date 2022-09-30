@@ -57,6 +57,16 @@ static const char* test_data_win = "Filetype: Flipper File test\r\n"
                                    "Hex data: DE AD BE";
 
 #define READ_TEST_FLP "ff_flp.test"
+#define READ_TEST_ODD "ff_oddities.test"
+static const char* test_data_odd = "Filetype: Flipper File test\n"
+                                   "Version: 666\t\t\n" // Tabs before newline
+                                   "# This is comment\n"
+                                   "String data: String\r\n" // Windows newline in a UNIX file
+                                   "Int32 data: 1234 -6345 7813 0 \n" // Trailing whitespace
+                                   "Uint32 data:   1234  0   5678   9098  7654321  \n" // Extra whitespace
+                                   "Float data: 1.5\t \t1000.0\n" // Mixed whitespace
+                                   "Bool data:\t\ttrue   false\n" // Leading tabs after key
+                                   "Hex data: DE AD BE\t    "; // Mixed trailing whitespace
 
 // data created by user on linux machine
 static const char* test_file_linux = TEST_DIR READ_TEST_NIX;
@@ -64,6 +74,8 @@ static const char* test_file_linux = TEST_DIR READ_TEST_NIX;
 static const char* test_file_windows = TEST_DIR READ_TEST_WIN;
 // data created by flipper itself
 static const char* test_file_flipper = TEST_DIR READ_TEST_FLP;
+// data containing odd user input
+static const char* test_file_oddities = TEST_DIR READ_TEST_ODD;
 
 static bool storage_write_string(const char* path, const char* data) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -503,6 +515,11 @@ MU_TEST(flipper_format_multikey_test) {
     mu_assert(test_read_multikey(TEST_DIR "ff_multiline.test"), "Multikey read test error");
 }
 
+MU_TEST(flipper_format_oddities_test) {
+    mu_assert(storage_write_string(test_file_oddities, test_data_odd), "Write test error [Oddities]");
+    mu_assert(test_read(test_file_linux), "Read test error [Oddities]");
+}
+
 MU_TEST_SUITE(flipper_format) {
     tests_setup();
     MU_RUN_TEST(flipper_format_write_test);
@@ -516,6 +533,7 @@ MU_TEST_SUITE(flipper_format) {
     MU_RUN_TEST(flipper_format_update_2_test);
     MU_RUN_TEST(flipper_format_update_2_result_test);
     MU_RUN_TEST(flipper_format_multikey_test);
+    MU_RUN_TEST(flipper_format_oddities_test);
     tests_teardown();
 }
 
