@@ -8,7 +8,7 @@
 
 #define TAG "MfClassicDict"
 
-#define NFC_MF_CLASSIC_KEY_LEN (12)
+#define NFC_MF_CLASSIC_KEY_LEN (13)
 
 struct MfClassicDict {
     Stream* stream;
@@ -64,7 +64,7 @@ MfClassicDict* mf_classic_dict_alloc(MfClassicDictType dict_type) {
             FURI_LOG_T(
                 TAG, "Read line: %s, len: %d", string_get_cstr(next_line), string_size(next_line));
             if(string_get_char(next_line, 0) == '#') continue;
-            if(string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
+            if(string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN - 1) continue;
             dict->total_keys++;
         }
         string_clear(next_line);
@@ -106,7 +106,7 @@ static void mf_classic_dict_str_to_int(string_t key_str, uint64_t* key_int) {
     for(uint8_t i = 0; i < 12; i += 2) {
         args_char_to_hex(
             string_get_char(key_str, i), string_get_char(key_str, i + 1), &key_byte_tmp);
-        *key_int |= (uint8_t)key_byte_tmp << 8 * (5 - i / 2);
+        *key_int |= (uint64_t)key_byte_tmp << 8 * (5 - i / 2);
     }
 }
 

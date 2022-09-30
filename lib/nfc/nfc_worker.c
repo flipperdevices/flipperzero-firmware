@@ -484,6 +484,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
         bool is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
         uint16_t key_index = 0;
         while(mf_classic_dict_get_next_key(dict, &key)) {
+            FURI_LOG_D(TAG, "Key %d", key_index);
             if(++key_index % NFC_DICT_KEY_BATCH_SIZE == 0) {
                 nfc_worker->callback(NfcWorkerEventNewDictKeyBatch, nfc_worker->context);
             }
