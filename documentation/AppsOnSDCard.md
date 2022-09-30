@@ -22,7 +22,7 @@ To build your application as a FAP, just create a folder with your app's source 
 
 FAPs can include static and animated images as private assets. They will be automatically compiled alongide application sources and can be referenced the same way as the assets from main firmware.
 
-For that, put your images in a subfolder inside your application's folder, then reference it in your application's manifest in `fap_assets` field. See [Application Manifests](./AppManifests.md#application-definition) for more details.
+For that, put your images in a subfolder inside your application's folder, then reference it in your application's manifest in `fap_icons` field. See [Application Manifests](./AppManifests.md#application-definition) for more details.
 
 To use these assets in your application, put `#include "{APPID}_icons.h"` in your application's source code, where `{APPID}` is the `appid` value field from your application's manifest. Then you can use all icons from your application's assets the same way as if they were a part of `assets_icons.h` of the main firmware.
 

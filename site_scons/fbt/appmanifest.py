@@ -47,7 +47,7 @@ class FlipperApplication:
     fap_description: str = ""
     fap_author: str = ""
     fap_weburl: str = ""
-    fap_assets: Optional[str] = None
+    fap_icons: Optional[str] = None
     # Internally used by fbt
     _appdir: Optional[object] = None
     _apppath: Optional[str] = None

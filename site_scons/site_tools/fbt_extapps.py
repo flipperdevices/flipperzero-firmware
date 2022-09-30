@@ -22,10 +22,10 @@ def BuildAppElf(env, app):
     app_alias = f"{env['FIRMWARE_BUILD_CFG']}_{app.appid}"
     app_original_elf = os.path.join(app_work_dir, f"{app.appid}_d")
 
-    if app.fap_assets:
+    if app.fap_icons:
         env.CompileIcons(
             env.Dir(app_work_dir),
-            app._appdir.Dir(app.fap_assets),
+            app._appdir.Dir(app.fap_icons),
             icon_bundle_name=f"{app.appid}_icons",
         )
 

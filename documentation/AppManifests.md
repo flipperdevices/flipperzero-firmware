@@ -51,7 +51,7 @@ The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 * **fap_description**: string, may be empty. Short application description.
 * **fap_author**: string, may be empty. Application's author.
 * **fap_weburl**: string, may be empty. Application's homepage.
-* **fap_assets**: string. If present, defines a folder name to be used for gathering assets for this application. These assets will be preprocessed and built alongside the application. See [FAP assets](./AppsOnSDCard.md#fap-assets) for details.
+* **fap_icons**: string. If present, defines a folder name to be used for gathering image assets for this application. These images will be preprocessed and built alongside the application. See [FAP assets](./AppsOnSDCard.md#fap-assets) for details.
 
 
 ## .fam file contents
