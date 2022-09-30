@@ -60,7 +60,7 @@ static void subghz_frequency_analyzer_history_frequency_draw(
     SubGhzFrequencyAnalyzerModel* model) {
     char buffer[64];
     uint8_t x = 70;
-    uint8_t y = 41;
+    uint8_t y = 43;
 
     for(uint8_t i = 0; i < 3; i++) {
         if(model->history_frequency[i]) {
