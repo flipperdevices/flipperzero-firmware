@@ -358,17 +358,9 @@ void cli_process_input(Cli* cli) {
             furi_string_push_back(cli->line, in_chr);
             cli_putc(cli, in_chr);
         } else {
-            // ToDo: better way?
-            FuriString* temp;
-            temp = furi_string_alloc();
-            furi_string_reserve(temp, furi_string_size(cli->line) + 1);
-            furi_string_set_strn(temp, furi_string_get_cstr(cli->line), cli->cursor_position);
-            furi_string_push_back(temp, in_chr);
-            furi_string_cat(temp, furi_string_get_cstr(cli->line) + cli->cursor_position);
-
-            // cli->line is cleared and temp's buffer moved to cli->line
-            furi_string_move(cli->line, temp);
-            // NO MEMORY LEAK, STOP REPORTING IT
+            // Insert character to line buffer
+            const char in_str[2] = {in_chr, 0};
+            furi_string_replace_at(cli->line, cli->cursor_position, 0, in_str);
 
             // Print character in replace mode
             printf("\e[4h%c\e[4l", in_chr);
