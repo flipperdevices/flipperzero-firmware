@@ -3,7 +3,16 @@
 #include <task.h>
 #include <timers.h>
 
-#if defined STM32H7
+#if defined STM32F1
+    #include <stm32f1xx_hal.h>
+
+    // STM32VL-Discovery green led - PC9
+    #define LED_PORT                GPIOC
+    #define LED_PIN                 GPIO_PIN_9
+    // STM32VL-Discovery blue led - PC8
+    //#define LED_PIN                 GPIO_PIN_8
+    #define LED_PORT_CLK_ENABLE     __HAL_RCC_GPIOC_CLK_ENABLE
+#elif defined STM32H7
     #include <stm32h7xx_hal.h>
 
     // STM32H743ZI blue LED
@@ -54,7 +63,7 @@ int main(void)
     SystemInit();
     blinky::init();
     
-    xTaskCreate(blinky::blinkTask, "blinky", configMINIMAL_STACK_SIZE * 4, NULL, tskIDLE_PRIORITY + 1, NULL);
+    xTaskCreate(blinky::blinkTask, "blinky", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
     
     vTaskStartScheduler();
     for (;;);
