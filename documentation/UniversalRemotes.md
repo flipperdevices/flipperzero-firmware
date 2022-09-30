@@ -32,5 +32,9 @@ Finally, record the `Off` signal:
 
 The resulting remote file should now contain 6 signals. Any of them can be omitted, but that will mean that this functionality will not be used.
 Test the file against the actual device. Every signal must do what it's supposed to.
-If everything checks out, add these signals to the [A/C universal remote file](/assets/resources/infrared/assets/ac.ir)
-and open a pull request.
+
+If everything checks out, append these signals **to the end** of the [A/C universal remote file](/assets/resources/infrared/assets/ac.ir).
+
+The order of signals is not important, but they must be preceded by a following comment: `# Model: <Your model name>` in order to keep the library organised.
+
+When done, open a pull request containing the changed file.
