@@ -44,7 +44,7 @@ void path_extract_extension(FuriString* path, char* ext, size_t ext_len_max) {
 }
 
 static inline void path_cleanup(FuriString* path) {
-    furi_string_strim(path);
+    furi_string_trim(path);
     while(furi_string_end_with(path, "/")) {
         furi_string_left(path, furi_string_size(path) - 1);
     }
@@ -72,8 +72,8 @@ void path_append(FuriString* path, const char* suffix) {
     path_cleanup(path);
     FuriString* suffix_str;
     suffix_str = furi_string_alloc_set(suffix);
-    furi_string_strim(suffix_str);
-    furi_string_strim(suffix_str, "/");
+    furi_string_trim(suffix_str);
+    furi_string_trim(suffix_str, "/");
     furi_string_cat_printf(path, "/%s", furi_string_get_cstr(suffix_str));
     furi_string_free(suffix_str);
 }

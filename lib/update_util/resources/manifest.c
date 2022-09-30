@@ -56,7 +56,7 @@ ResourceManifestEntry* resource_manifest_reader_next(ResourceManifestReader* res
         }
 
         /* Trim end of line */
-        furi_string_strim(resource_manifest->linebuf);
+        furi_string_trim(resource_manifest->linebuf);
 
         char type_code = furi_string_get_char(resource_manifest->linebuf, 0);
         switch(type_code) {

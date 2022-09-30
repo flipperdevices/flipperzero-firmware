@@ -19,7 +19,7 @@ struct FuriString {
 #undef furi_string_end_with
 #undef furi_string_search_char
 #undef furi_string_search_rchar
-#undef furi_string_strim
+#undef furi_string_trim
 #undef furi_string_cat
 
 FuriString* furi_string_alloc() {
@@ -241,7 +241,7 @@ void furi_string_mid(FuriString* v, size_t index, size_t size) {
     string_mid(v->string, index, size);
 }
 
-void furi_string_strim(FuriString* v, const char charac[]) {
+void furi_string_trim(FuriString* v, const char charac[]) {
     string_strim(v->string, charac);
 }
 
@@ -257,11 +257,11 @@ void furi_string_set_n(FuriString* v, const FuriString* ref, size_t offset, size
     string_set_n(v->string, ref->string, offset, length);
 }
 
-size_t furi_string_unicode_length(FuriString* str) {
+size_t furi_string_utf8_length(FuriString* str) {
     return string_length_u(str->string);
 }
 
-void furi_string_unicode_push(FuriString* str, FuriStringUnicodeValue u) {
+void furi_string_utf8_push(FuriString* str, FuriStringUnicodeValue u) {
     string_push_u(str->string, u);
 }
 
@@ -295,10 +295,7 @@ static FuriStringUTF8State state_to_furi_state(m_str1ng_utf8_state_e state) {
     }
 }
 
-void furi_string_unicode_utf8_decode(
-    char c,
-    FuriStringUTF8State* state,
-    FuriStringUnicodeValue* unicode) {
+void furi_string_utf8_decode(char c, FuriStringUTF8State* state, FuriStringUnicodeValue* unicode) {
     m_str1ng_utf8_state_e m_state = furi_state_to_state(*state);
     m_str1ng_utf8_decode(c, &m_state, unicode);
     *state = state_to_furi_state(m_state);

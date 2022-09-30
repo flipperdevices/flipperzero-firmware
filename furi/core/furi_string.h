@@ -504,7 +504,7 @@ void furi_string_mid(FuriString* string, size_t index, size_t size);
  * @param string 
  * @param chars 
  */
-void furi_string_strim(FuriString* string, const char chars[]);
+void furi_string_trim(FuriString* string, const char chars[]);
 
 //---------------------------------------------------------------------------
 //                                UTF8
@@ -520,14 +520,14 @@ typedef unsigned int FuriStringUnicodeValue;
  * @param string 
  * @return size_t 
  */
-size_t furi_string_unicode_length(FuriString* string);
+size_t furi_string_utf8_length(FuriString* string);
 
 /**
  * @brief Push unicode into string, encoding it in UTF8.
  * @param string 
  * @param unicode 
  */
-void furi_string_unicode_push(FuriString* string, FuriStringUnicodeValue unicode);
+void furi_string_utf8_push(FuriString* string, FuriStringUnicodeValue unicode);
 
 /**
  * @brief State of the UTF8 decoding machine state.
@@ -549,10 +549,7 @@ typedef enum {
  * @param state 
  * @param unicode 
  */
-void furi_string_unicode_utf8_decode(
-    char c,
-    FuriStringUTF8State* state,
-    FuriStringUnicodeValue* unicode);
+void furi_string_utf8_decode(char c, FuriStringUTF8State* state, FuriStringUnicodeValue* unicode);
 
 //---------------------------------------------------------------------------
 //                Lasciate ogne speranza, voi ch’entrate
@@ -672,7 +669,7 @@ void furi_string_unicode_utf8_decode(
  * @brief Trim a string from the given set of characters (default is " \n\r\t").
  * (string[, set=" \n\r\t"])
  */
-#define furi_string_strim(...) M_APPLY(furi_string_strim, M_IF_DEFAULT1("  \n\r\t", __VA_ARGS__))
+#define furi_string_trim(...) M_APPLY(furi_string_trim, M_IF_DEFAULT1("  \n\r\t", __VA_ARGS__))
 
 /**
  * @brief Search for a character in a string.

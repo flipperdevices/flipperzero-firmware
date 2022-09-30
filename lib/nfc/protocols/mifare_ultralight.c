@@ -1271,7 +1271,7 @@ bool mf_ul_prepare_emulation_response(
     for(int i = 0; i < (buff_rx_len + 7) / 8; ++i) {
         furi_string_cat_printf(debug_buf, "%02x ", buff_rx[i]);
     }
-    furi_string_strim(debug_buf);
+    furi_string_trim(debug_buf);
     FURI_LOG_T(TAG, "Emu RX (%d): %s", buff_rx_len, furi_string_get_cstr(debug_buf));
     furi_string_reset(debug_buf);
 #endif
@@ -1354,7 +1354,7 @@ bool mf_ul_prepare_emulation_response(
                                    start_page <= ascii_mirror_curr_page + 6) {
                                     ascii_mirror = furi_string_alloc();
                                     mf_ul_make_ascii_mirror(emulator, ascii_mirror);
-                                    ascii_mirror_len = furi_string_unicode_length(ascii_mirror);
+                                    ascii_mirror_len = furi_string_utf8_length(ascii_mirror);
                                     ascii_mirror_cptr = furi_string_get_cstr(ascii_mirror);
                                     // Move pointer to where it should be to start copying
                                     if(ascii_mirror_len > 0 &&
@@ -1515,7 +1515,7 @@ bool mf_ul_prepare_emulation_response(
                                         ascii_mirror = furi_string_alloc();
                                         mf_ul_make_ascii_mirror(emulator, ascii_mirror);
                                         size_t ascii_mirror_len =
-                                            furi_string_unicode_length(ascii_mirror);
+                                            furi_string_utf8_length(ascii_mirror);
                                         const char* ascii_mirror_cptr =
                                             furi_string_get_cstr(ascii_mirror);
                                         int16_t mirror_start_offset =
@@ -1853,7 +1853,7 @@ bool mf_ul_prepare_emulation_response(
         for(int i = 0; i < count; ++i) {
             furi_string_cat_printf(debug_buf, "%02x ", buff_tx[i]);
         }
-        furi_string_strim(debug_buf);
+        furi_string_trim(debug_buf);
         FURI_LOG_T(TAG, "Emu TX (%d): %s", *buff_tx_len, furi_string_get_cstr(debug_buf));
         furi_string_free(debug_buf);
     } else {

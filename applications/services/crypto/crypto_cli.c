@@ -132,7 +132,7 @@ void crypto_cli_decrypt(Cli* cli, FuriString* args) {
             }
         }
 
-        furi_string_strim(hex_input);
+        furi_string_trim(hex_input);
         size_t hex_size = furi_string_size(hex_input);
         if(hex_size > 0 && hex_size % 2 == 0) {
             size_t size = hex_size / 2;

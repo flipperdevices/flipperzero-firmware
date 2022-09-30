@@ -74,7 +74,7 @@ static GpioParseError gpio_command_parse(FuriString* args, size_t* pin_num, uint
 
     furi_string_set_n(pin_name, args, 0, ws);
     furi_string_right(args, ws);
-    furi_string_strim(args);
+    furi_string_trim(args);
 
     if(!pin_name_to_int(pin_name, pin_num)) {
         furi_string_free(pin_name);

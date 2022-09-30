@@ -1390,11 +1390,11 @@ Function,+,furi_string_set_strn,void,"FuriString*, const char[], size_t"
 Function,+,furi_string_size,size_t,const FuriString*
 Function,+,furi_string_start_with,_Bool,"const FuriString*, const FuriString*"
 Function,+,furi_string_start_with_str,_Bool,"const FuriString*, const char[]"
-Function,+,furi_string_strim,void,"FuriString*, const char[]"
 Function,+,furi_string_swap,void,"FuriString*, FuriString*"
-Function,+,furi_string_unicode_length,size_t,FuriString*
-Function,+,furi_string_unicode_push,void,"FuriString*, FuriStringUnicodeValue"
-Function,+,furi_string_unicode_utf8_decode,void,"char, FuriStringUTF8State*, FuriStringUnicodeValue*"
+Function,+,furi_string_trim,void,"FuriString*, const char[]"
+Function,+,furi_string_utf8_decode,void,"char, FuriStringUTF8State*, FuriStringUnicodeValue*"
+Function,+,furi_string_utf8_length,size_t,FuriString*
+Function,+,furi_string_utf8_push,void,"FuriString*, FuriStringUnicodeValue"
 Function,+,furi_string_vprintf,int,"FuriString*, const char[], va_list"
 Function,+,furi_thread_alloc,FuriThread*,
 Function,+,furi_thread_catch,void,

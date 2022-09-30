@@ -29,7 +29,7 @@ void nfc_scene_emv_read_success_on_enter(void* context) {
         furi_string_cat_printf(
             temp_str, "%02X%02X ", emv_data->number[i], emv_data->number[i + 1]);
     }
-    furi_string_strim(temp_str);
+    furi_string_trim(temp_str);
 
     // Add expiration date
     if(emv_data->exp_mon) {

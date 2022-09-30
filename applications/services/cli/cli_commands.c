@@ -209,7 +209,7 @@ void cli_command_led(Cli* cli, FuriString* args, void* context) {
     } else {
         furi_string_set_n(light_name, args, 0, ws);
         furi_string_right(args, ws);
-        furi_string_strim(args);
+        furi_string_trim(args);
     }
     // Check light name
     if(!furi_string_cmp(light_name, "r")) {

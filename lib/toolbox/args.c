@@ -23,7 +23,7 @@ bool args_read_int_and_trim(FuriString* args, int* value) {
 
     if(sscanf(furi_string_get_cstr(args), "%d", value) == 1) {
         furi_string_right(args, cmd_length);
-        furi_string_strim(args);
+        furi_string_trim(args);
         return true;
     }
 
@@ -39,7 +39,7 @@ bool args_read_string_and_trim(FuriString* args, FuriString* word) {
 
     furi_string_set_n(word, args, 0, cmd_length);
     furi_string_right(args, cmd_length);
-    furi_string_strim(args);
+    furi_string_trim(args);
 
     return true;
 }
@@ -54,7 +54,7 @@ bool args_read_probably_quoted_string_and_trim(FuriString* args, FuriString* wor
 
         furi_string_set_n(word, args, 1, second_quote_pos - 1);
         furi_string_right(args, second_quote_pos + 1);
-        furi_string_strim(args);
+        furi_string_trim(args);
         return true;
     } else {
         return args_read_string_and_trim(args, word);

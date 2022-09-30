@@ -745,7 +745,7 @@ static void nfc_device_write_mifare_classic_block(
             }
         }
     }
-    furi_string_strim(block_str);
+    furi_string_trim(block_str);
 }
 
 static bool nfc_device_save_mifare_classic_data(FlipperFormat* file, NfcDevice* dev) {
@@ -796,13 +796,13 @@ static void nfc_device_load_mifare_classic_block(
     FuriString* block_str,
     MfClassicData* data,
     uint8_t block_num) {
-    furi_string_strim(block_str);
+    furi_string_trim(block_str);
     MfClassicBlock block_tmp = {};
     bool is_sector_trailer = mf_classic_is_sector_trailer(block_num);
     uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
     uint16_t block_unknown_bytes_mask = 0;
 
-    furi_string_strim(block_str);
+    furi_string_trim(block_str);
     for(size_t i = 0; i < MF_CLASSIC_BLOCK_SIZE; i++) {
         char hi = furi_string_get_char(block_str, 3 * i);
         char low = furi_string_get_char(block_str, 3 * i + 1);

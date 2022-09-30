@@ -140,7 +140,7 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
         size_t stream_free_byte = xStreamBufferSpacesAvailable(instance->stream);
         if((stream_free_byte / sizeof(int32_t)) >= SUBGHZ_FILE_ENCODER_LOAD) {
             if(stream_read_line(stream, instance->str_data)) {
-                furi_string_strim(instance->str_data);
+                furi_string_trim(instance->str_data);
                 if(!subghz_file_encoder_worker_data_parse(
                        instance, furi_string_get_cstr(instance->str_data))) {
                     //to stop DMA correctly

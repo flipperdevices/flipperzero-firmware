@@ -174,7 +174,7 @@ static void cli_handle_backspace(Cli* cli) {
 }
 
 static void cli_normalize_line(Cli* cli) {
-    furi_string_strim(cli->line);
+    furi_string_trim(cli->line);
     cli->cursor_position = furi_string_size(cli->line);
 }
 
@@ -226,7 +226,7 @@ static void cli_handle_enter(Cli* cli) {
     } else {
         furi_string_set_n(command, cli->line, 0, ws);
         furi_string_set_n(args, cli->line, ws, furi_string_size(cli->line));
-        furi_string_strim(args);
+        furi_string_trim(args);
     }
 
     // Search for command
@@ -396,7 +396,7 @@ void cli_add_command(
     void* context) {
     FuriString* name_str;
     name_str = furi_string_alloc_set(name);
-    furi_string_strim(name_str);
+    furi_string_trim(name_str);
 
     size_t name_replace;
     do {
@@ -418,7 +418,7 @@ void cli_add_command(
 void cli_delete_command(Cli* cli, const char* name) {
     FuriString* name_str;
     name_str = furi_string_alloc_set(name);
-    furi_string_strim(name_str);
+    furi_string_trim(name_str);
 
     size_t name_replace;
     do {

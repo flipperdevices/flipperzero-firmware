@@ -405,12 +405,12 @@ MU_TEST(mu_test_furi_string_trim) {
     furi_string_mid(string, 1, 2);
     mu_assert_string_eq("on", furi_string_get_cstr(string));
 
-    // test furi_string_strim
+    // test furi_string_trim
     furi_string_set(string, "   \n\r\tbiglongstring \n\r\t  ");
-    furi_string_strim(string);
+    furi_string_trim(string);
     mu_assert_string_eq("biglongstring", furi_string_get_cstr(string));
     furi_string_set(string, "aaaabaaaabbaaabaaaabbtestaaaaaabbaaabaababaa");
-    furi_string_strim(string, "ab");
+    furi_string_trim(string, "ab");
     mu_assert_string_eq("test", furi_string_get_cstr(string));
 
     furi_string_free(string);
@@ -419,27 +419,27 @@ MU_TEST(mu_test_furi_string_trim) {
 MU_TEST(mu_test_furi_string_utf8) {
     FuriString* utf8_string = furi_string_alloc_set("イルカ");
 
-    // test furi_string_unicode_length
+    // test furi_string_utf8_length
     mu_assert_int_eq(9, furi_string_size(utf8_string));
-    mu_assert_int_eq(3, furi_string_unicode_length(utf8_string));
+    mu_assert_int_eq(3, furi_string_utf8_length(utf8_string));
 
-    // test furi_string_unicode_utf8_decode
+    // test furi_string_utf8_decode
     const uint8_t dolphin_emoji_array[4] = {0xF0, 0x9F, 0x90, 0xAC};
     FuriStringUTF8State state = FuriStringUTF8StateStarting;
     FuriStringUnicodeValue value = 0;
-    furi_string_unicode_utf8_decode(dolphin_emoji_array[0], &state, &value);
+    furi_string_utf8_decode(dolphin_emoji_array[0], &state, &value);
     mu_assert_int_eq(FuriStringUTF8StateDecoding3, state);
-    furi_string_unicode_utf8_decode(dolphin_emoji_array[1], &state, &value);
+    furi_string_utf8_decode(dolphin_emoji_array[1], &state, &value);
     mu_assert_int_eq(FuriStringUTF8StateDecoding2, state);
-    furi_string_unicode_utf8_decode(dolphin_emoji_array[2], &state, &value);
+    furi_string_utf8_decode(dolphin_emoji_array[2], &state, &value);
     mu_assert_int_eq(FuriStringUTF8StateDecoding1, state);
-    furi_string_unicode_utf8_decode(dolphin_emoji_array[3], &state, &value);
+    furi_string_utf8_decode(dolphin_emoji_array[3], &state, &value);
     mu_assert_int_eq(FuriStringUTF8StateStarting, state);
     mu_assert_int_eq(0x1F42C, value);
 
-    // test furi_string_unicode_push
+    // test furi_string_utf8_push
     furi_string_set(utf8_string, "");
-    furi_string_unicode_push(utf8_string, value);
+    furi_string_utf8_push(utf8_string, value);
     mu_assert_string_eq("🐬", furi_string_get_cstr(utf8_string));
 
     furi_string_free(utf8_string);

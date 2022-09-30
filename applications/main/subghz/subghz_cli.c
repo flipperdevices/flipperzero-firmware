@@ -596,8 +596,8 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
                 break;
             } else if(
                 (chat_event.c == CliSymbolAsciiBackspace) || (chat_event.c == CliSymbolAsciiDel)) {
-                size_t len = furi_string_unicode_length(input);
-                if(len > furi_string_unicode_length(name)) {
+                size_t len = furi_string_utf8_length(input);
+                if(len > furi_string_utf8_length(name)) {
                     printf("%s", "\e[D\e[1P");
                     fflush(stdout);
                     //delete 1 char UTF
@@ -607,9 +607,9 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
                     FuriStringUnicodeValue u = 0;
                     furi_string_reset(sysmsg);
                     while(*str) {
-                        furi_string_unicode_utf8_decode(*str, &s, &u);
+                        furi_string_utf8_decode(*str, &s, &u);
                         if((s == FuriStringUTF8StateError) || s == FuriStringUTF8StateStarting) {
-                            furi_string_unicode_push(sysmsg, u);
+                            furi_string_utf8_push(sysmsg, u);
                             if(++size >= len - 1) break;
                             s = FuriStringUTF8StateStarting;
                         }
