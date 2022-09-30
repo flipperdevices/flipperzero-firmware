@@ -702,6 +702,13 @@ void furi_string_unicode_utf8_decode(
         M_IF_DEFAULT1(0, __VA_ARGS__))
 
 /**
+ * @brief Replace a C string to another C string in a string.
+ * (string, cstring, cstring[, start=0])
+ */
+#define furi_string_replace_str(a, b, ...) \
+    M_APPLY(furi_string_replace_str, a, b, M_IF_DEFAULT1(0, __VA_ARGS__))
+
+/**
  * @brief INIT OPLIST for FuriString.
  */
 #define F_STR_INIT(a) ((a) = furi_string_alloc())

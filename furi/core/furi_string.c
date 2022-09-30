@@ -10,8 +10,10 @@ struct FuriString {
 #undef furi_string_cmp
 #undef furi_string_cmpi
 #undef furi_string_search
+#undef furi_string_search_str
 #undef furi_string_equal
 #undef furi_string_replace
+#undef furi_string_replace_str
 #undef furi_string_replace_all
 #undef furi_string_start_with
 #undef furi_string_end_with

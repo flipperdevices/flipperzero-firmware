@@ -326,6 +326,44 @@ MU_TEST(mu_test_furi_string_equality) {
     furi_string_free(string_neq);
 }
 
+MU_TEST(mu_test_furi_string_replace) {
+    FuriString* needle = furi_string_alloc_set("test");
+    FuriString* replace = furi_string_alloc_set("replace");
+    FuriString* string = furi_string_alloc_set("test123test");
+
+    // test furi_string_replace_at
+    furi_string_replace_at(string, 4, 3, "!biglongword!");
+    mu_assert_string_eq("test!biglongword!test", furi_string_get_cstr(string));
+
+    // test furi_string_replace
+    mu_assert_int_eq(17, furi_string_replace(string, needle, replace, 1));
+    mu_assert_string_eq("test!biglongword!replace", furi_string_get_cstr(string));
+    mu_assert_int_eq(0, furi_string_replace(string, needle, replace));
+    mu_assert_string_eq("replace!biglongword!replace", furi_string_get_cstr(string));
+    mu_assert_int_eq(FURI_STRING_FAILURE, furi_string_replace(string, needle, replace));
+    mu_assert_string_eq("replace!biglongword!replace", furi_string_get_cstr(string));
+
+    // test furi_string_replace_str
+    mu_assert_int_eq(20, furi_string_replace_str(string, "replace", "test", 1));
+    mu_assert_string_eq("replace!biglongword!test", furi_string_get_cstr(string));
+    mu_assert_int_eq(0, furi_string_replace_str(string, "replace", "test"));
+    mu_assert_string_eq("test!biglongword!test", furi_string_get_cstr(string));
+    mu_assert_int_eq(FURI_STRING_FAILURE, furi_string_replace_str(string, "replace", "test"));
+    mu_assert_string_eq("test!biglongword!test", furi_string_get_cstr(string));
+
+    // test furi_string_replace_all
+    furi_string_replace_all(string, needle, replace);
+    mu_assert_string_eq("replace!biglongword!replace", furi_string_get_cstr(string));
+
+    // test furi_string_replace_all_str
+    furi_string_replace_all_str(string, "replace", "test");
+    mu_assert_string_eq("test!biglongword!test", furi_string_get_cstr(string));
+
+    furi_string_free(string);
+    furi_string_free(needle);
+    furi_string_free(replace);
+}
+
 MU_TEST_SUITE(test_suite) {
     MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
 
@@ -337,6 +375,7 @@ MU_TEST_SUITE(test_suite) {
     MU_RUN_TEST(mu_test_furi_string_compare);
     MU_RUN_TEST(mu_test_furi_string_search);
     MU_RUN_TEST(mu_test_furi_string_equality);
+    MU_RUN_TEST(mu_test_furi_string_replace);
 }
 
 int run_minunit_test_furi_string() {
