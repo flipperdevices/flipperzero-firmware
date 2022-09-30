@@ -26,7 +26,7 @@ def BuildAppElf(env, app):
         env.CompileIcons(
             env.Dir(app_work_dir),
             app._appdir.Dir(app.fap_assets),
-            icon_bundle_name=f"icons_{app.appid}",
+            icon_bundle_name=f"{app.appid}_icons",
         )
 
     app_sources = list(
