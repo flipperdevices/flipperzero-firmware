@@ -283,6 +283,8 @@ void st25r3916IRQCallbackSet(void (*cb)(void));
  */
 void st25r3916IRQCallbackRestore(void);
 
+void rfal_isr_received(void);
+
 #endif /* ST25R3916_IRQ_H */
 
 /**

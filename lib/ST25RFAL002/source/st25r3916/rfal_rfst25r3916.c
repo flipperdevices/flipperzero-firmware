@@ -50,6 +50,8 @@
 #include "rfal_iso15693_2.h"
 #include "rfal_crc.h"
 
+#include <furi/furi.h>
+
 /*
  ******************************************************************************
  * ENABLE SWITCHS
@@ -215,6 +217,7 @@ typedef struct {
     rfalNfcvWorkingData nfcvData; /*!< RFAL's working data when performing NFC-V     */
 #endif /* RFAL_FEATURE_NFCV */
 
+    FuriEventFlag* event_flag;
 } rfal;
 
 /*! Felica's command set */
@@ -626,6 +629,10 @@ ReturnCode rfalInitialize(void) {
     /* Perform Automatic Calibration (if configured to do so).                     *
      * Registers set by rfalSetAnalogConfig will tell rfalCalibrate what to perform*/
     rfalCalibrate();
+
+    if(gRFAL.event_flag == NULL) {
+        gRFAL.event_flag = furi_event_flag_alloc();
+    }
 
     return ERR_NONE;
 }
@@ -1707,9 +1714,18 @@ ReturnCode rfalGetTransceiveRSSI(uint16_t* rssi) {
     return ERR_NONE;
 }
 
+void rfal_isr_received() {
+    furi_event_flag_set(gRFAL.event_flag, 1);
+}
+
 /*******************************************************************************/
 void rfalWorker(void) {
     platformProtectWorker(); /* Protect RFAL Worker/Task/Process */
+
+    uint32_t flags = furi_event_flag_wait(gRFAL.event_flag, 1, FuriFlagWaitAny, FuriWaitForever);
+    if(flags == 1) {
+        st25r3916Isr();
+    }
 
     switch(gRFAL.state) {
     case RFAL_STATE_TXRX:
