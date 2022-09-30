@@ -38,24 +38,12 @@ class Main(App):
         return 0
 
     def process_bin(self):
-        BT_STACK_START = int("0x080D7000", 16)
-        BT_STACK_NAME = "stm32wb5x_BLE_Stack_light_fw"
-        BT_STACK_VER = "V1.13.3"
-        KB_SIZE = 1024
-        FLASH_SIZE = KB_SIZE * KB_SIZE
-        FLASH_START = int("0x08000000", 16)
-        BT_STACK_SIZE = FLASH_START + FLASH_SIZE - BT_STACK_START
         PAGE_SIZE = 4096
         binsize = os.path.getsize(self.args.binname)
         pages = math.ceil(binsize / PAGE_SIZE)
         last_page_state = (binsize % PAGE_SIZE) * 100 / PAGE_SIZE
         print(
             f"{os.path.basename(self.args.binname):<11}: {pages:>4} flash pages (last page {last_page_state:.02f}% full)"
-        )
-        free_size = FLASH_SIZE - binsize - BT_STACK_SIZE
-        print(f"With {BT_STACK_NAME} {BT_STACK_VER}:")
-        print(
-            f"{free_size:>21} bytes free, {free_size/KB_SIZE:.02f} K, {free_size/PAGE_SIZE:.0f} pages"
         )
         return 0
 
