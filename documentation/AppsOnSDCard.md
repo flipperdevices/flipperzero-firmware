@@ -53,13 +53,13 @@ App loader allocates memory for the application and copies it to RAM, processing
 
 Not all parts of firmware are available for external applications. A subset of available functions and variables is defined in "api_symbols.csv" file, which is a part of firmware target definition in `firmware/targets/` directory. 
 
-**`fbt`** uses semantic versioning for API versioning. Major version is incremented when there are breaking changes in the API, minor version is incremented when there are new features added. 
+**`fbt`** uses semantic versioning for API. Major version is incremented when there are breaking changes in the API, minor version is incremented when there new features are added. 
 
 Breaking changes include:
 - removal of a function or a global variable;
 - changing the signature of a function.
 
-API versioning is mostly automated by **`fbt`**. When rebuilding the firmware, **`fbt`** checks if there are any changes in the API exposed by headers gathered from `SDK_HEADERS`. If there are, it stops the build, adjusts the API version and asks the user to go through the changes in .csv file. New entries are marked with "`?`" mark, and the user is supposed to change the mark to "`+`" for the entry to be exposed for FAPs, "`-`" for it to be unavailable.
+API versioning is mostly automated by **`fbt`**. When rebuilding the firmware, **`fbt`** checks if there are any changes in the API exposed by headers gathered from `SDK_HEADERS`. If so, it stops the build, adjusts the API version and asks the user to go through the changes in .csv file. New entries are marked with "`?`" mark, and the user is supposed to change the mark to "`+`" for the entry to be exposed for FAPs, "`-`" for it to be unavailable.
 
 **`fbt`** will not allow building a firmware until all "`?`" entries are changed to "`+`" or "`-`".
 

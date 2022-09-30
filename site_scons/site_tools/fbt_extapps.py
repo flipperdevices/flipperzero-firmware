@@ -6,6 +6,7 @@ import SCons.Warnings
 import os
 import pathlib
 from fbt.elfmanifest import assemble_manifest_data
+from fbt.appmanifest import FlipperManifestException
 from fbt.sdk import SdkCache
 import itertools
 
@@ -15,12 +16,20 @@ def BuildAppElf(env, app):
 
     app_alias = f"{env['FIRMWARE_BUILD_CFG']}_{app.appid}"
     app_original_elf = os.path.join(work_dir, f"{app.appid}_d")
+
     app_sources = list(
         itertools.chain.from_iterable(
             env.GlobRecursive(source_type, os.path.join(work_dir, app._appdir.relpath))
             for source_type in app.sources
         )
     )
+
+    if app.fap_assets:
+        # app_sources +=
+        env.CompileIcons(
+            env.Dir("."), env.Dir(app.fap_assets), icon_bundle_name=f"icons_{app.appid}"
+        )
+
     app_elf_raw = env.Program(
         app_original_elf,
         app_sources,
@@ -101,9 +110,15 @@ def GetExtAppFromPath(env, app_dir):
     appmgr = env["APPMGR"]
 
     app = None
-    for dir_part in reversed(pathlib.Path(app_dir).parts):
-        if app := appmgr.find_by_appdir(dir_part):
-            break
+    try:
+        # Maybe used passed an appid?
+        app = appmgr.get(app_dir)
+    except FlipperManifestException as _:
+        # Look up path components in known app dits
+        for dir_part in reversed(pathlib.Path(app_dir).parts):
+            if app := appmgr.find_by_appdir(dir_part):
+                break
+
     if not app:
         raise UserError(f"Failed to resolve application for given APPSRC={app_dir}")
 

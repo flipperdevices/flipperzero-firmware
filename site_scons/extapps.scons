@@ -4,7 +4,17 @@ Import("ENV")
 from fbt.appmanifest import FlipperAppType
 
 appenv = ENV.Clone(
-    tools=[("fbt_extapps", {"EXT_APPS_WORK_DIR": ENV.subst("${BUILD_DIR}/.extapps")})]
+    tools=[
+        (
+            "fbt_extapps",
+            {
+                "EXT_APPS_WORK_DIR": ENV.subst(
+                    "${BUILD_DIR}/.extapps",
+                )
+            },
+        ),
+        "fbt_assets",
+    ]
 )
 
 appenv.Replace(
