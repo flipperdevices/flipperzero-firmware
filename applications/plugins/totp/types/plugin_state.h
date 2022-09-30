@@ -3,14 +3,18 @@
 
 #include <notification/notification.h>
 #include <gui/gui.h>
+#include <dialogs/dialogs.h>
 #include "../lib/list/list.h"
 #include "../scenes/totp_scenes_enum.h"
+
+#define TOTP_IV_SIZE 16
 
 typedef struct {
     Scene current_scene;
     void* current_scene_state;
     bool changing_scene;
     NotificationApp* notification;
+    DialogsApp* dialogs;
     Gui* gui;
 
     float timezone_offset;
@@ -20,8 +24,8 @@ typedef struct {
 
     uint8_t* crypto_verify_data;
     uint8_t crypto_verify_data_length;
-    uint8_t iv[16];
-    uint8_t base_iv[16];
+    uint8_t iv[TOTP_IV_SIZE];
+    uint8_t base_iv[TOTP_IV_SIZE];
 } PluginState;
 
 #endif

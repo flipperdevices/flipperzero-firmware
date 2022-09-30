@@ -2,6 +2,7 @@
 #include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
+#include <dialogs/dialogs.h>
 #include <stdlib.h>
 #include <flipper_format/flipper_format.h>
 #include <notification/notification.h>
@@ -37,6 +38,7 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 static void totp_state_init(PluginState* const plugin_state) {
     plugin_state->gui = furi_record_open(RECORD_GUI);
     plugin_state->notification = furi_record_open(RECORD_NOTIFICATION);
+    plugin_state->dialogs = furi_record_open(RECORD_DIALOGS);
     totp_config_file_load_base(plugin_state);
 
     totp_scene_director_init_scenes(plugin_state);
@@ -50,6 +52,7 @@ static void dispose_plugin_state(PluginState* plugin_state) {
 
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
+    furi_record_close(RECORD_DIALOGS);
 
     ListNode* node = plugin_state->tokens_list;
     ListNode* tmp;

@@ -63,14 +63,12 @@ bool totp_scene_token_menu_handle_event(PluginEvent* const event, PluginState* p
                             break;
                         }
                         case DeleteToken: {
-                            DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
                             DialogMessage* message = dialog_message_alloc();
                             dialog_message_set_buttons(message, "No", NULL, "Yes");
                             dialog_message_set_header(message, "Confirmation", 0, 0, AlignLeft, AlignTop);
                             dialog_message_set_text(message, "Are you sure want to delete?", SCREEN_WIDTH_CENTER, SCREEN_HEIGHT_CENTER, AlignCenter, AlignCenter);
-                            DialogMessageButton dialog_result = dialog_message_show(dialogs, message);
+                            DialogMessageButton dialog_result = dialog_message_show(plugin_state->dialogs, message);
                             dialog_message_free(message);
-                            furi_record_close(RECORD_DIALOGS);
                             if (dialog_result == DialogMessageButtonRight) {
                                 uint8_t i = 0;
 

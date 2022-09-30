@@ -3,7 +3,8 @@
 #include "../../types/common.h"
 #include "../../types/token_info.h"
 
-#define CONFIG_FILE_PATH "/ext/apps/Misc/totp.conf"
+#define CONFIG_FILE_DIRECTORY_PATH "/ext/apps/Misc"
+#define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/totp.conf"
 #define CONFIG_FILE_HEADER "Flipper TOTP plugin config file"
 #define CONFIG_FILE_VERSION 1
 
@@ -19,12 +20,22 @@ FlipperFormat* totp_open_config_file(Storage* storage) {
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
 
     if (storage_common_stat(storage, CONFIG_FILE_PATH, NULL) == FSE_OK) {
+        FURI_LOG_D(LOGGING_TAG, "Config file %s found", CONFIG_FILE_PATH);
         if(!flipper_format_file_open_existing(fff_data_file, CONFIG_FILE_PATH)) {
             FURI_LOG_E(LOGGING_TAG, "Error opening existing file %s", CONFIG_FILE_PATH);
             totp_close_config_file(fff_data_file);
             return NULL;
         }
     } else {
+        FURI_LOG_D(LOGGING_TAG, "Config file %s is not found. Will create new.", CONFIG_FILE_PATH);
+        if (storage_common_stat(storage, CONFIG_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
+            FURI_LOG_D(LOGGING_TAG, "Directory %s doesn't exist. Will create new.", CONFIG_FILE_DIRECTORY_PATH);
+            if (!storage_simply_mkdir(storage, CONFIG_FILE_DIRECTORY_PATH)) {
+                FURI_LOG_E(LOGGING_TAG, "Error creating directory %s", CONFIG_FILE_DIRECTORY_PATH);
+                return NULL;
+            }
+        }
+
         if (!flipper_format_file_open_new(fff_data_file, CONFIG_FILE_PATH)) {
             totp_close_config_file(fff_data_file);
             FURI_LOG_E(LOGGING_TAG, "Error creating new file %s", CONFIG_FILE_PATH);
@@ -50,7 +61,7 @@ void totp_full_save_config_file(PluginState* const plugin_state) {
 
     flipper_format_file_open_always(fff_data_file, CONFIG_FILE_PATH);
     flipper_format_write_header_cstr(fff_data_file, CONFIG_FILE_HEADER, CONFIG_FILE_VERSION);
-    flipper_format_write_hex(fff_data_file, TOTP_CONFIG_KEY_BASE_IV, &plugin_state->base_iv[0], 16);
+    flipper_format_write_hex(fff_data_file, TOTP_CONFIG_KEY_BASE_IV, &plugin_state->base_iv[0], TOTP_IV_SIZE);
     flipper_format_write_hex(fff_data_file, TOTP_CONFIG_KEY_CRYPTO_VERIFY, plugin_state->crypto_verify_data, plugin_state->crypto_verify_data_length);
     flipper_format_write_float(fff_data_file, TOTP_CONFIG_KEY_TIMEZONE, &plugin_state->timezone_offset, 1);
     ListNode* node = plugin_state->tokens_list;
@@ -80,7 +91,7 @@ void totp_config_file_load_base(PluginState* const plugin_state) {
         return;
     }
 
-    if (!flipper_format_read_hex(fff_data_file, TOTP_CONFIG_KEY_BASE_IV, &plugin_state->base_iv[0], 16)) {
+    if (!flipper_format_read_hex(fff_data_file, TOTP_CONFIG_KEY_BASE_IV, &plugin_state->base_iv[0], TOTP_IV_SIZE)) {
         FURI_LOG_D(LOGGING_TAG, "Missing base IV");
     }
 

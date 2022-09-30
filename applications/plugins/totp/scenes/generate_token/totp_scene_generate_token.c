@@ -5,7 +5,6 @@
 #include "../../types/token_info.h"
 #include "../../types/common.h"
 #include "../../lib/ui/icons.h"
-#include "../../lib/ui/canvas_extensions.h"
 #include "../../lib/ui/constants.h"
 #include "../../lib/totp/totp.h"
 #include "../../lib/config/config.h"
@@ -152,8 +151,8 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
         BAR_HEIGHT);
 
     if (plugin_state->tokens_count > 1) {
-        canvas_draw_dots(canvas, 0, SCREEN_HEIGHT_CENTER - 24, 8, 9, ICON_ARROW_LEFT_8x9);
-        canvas_draw_dots(canvas, SCREEN_WIDTH - 9, SCREEN_HEIGHT_CENTER - 24, 8, 9, ICON_ARROW_RIGHT_8x9);
+        canvas_draw_xbm(canvas, 0, SCREEN_HEIGHT_CENTER - 24, ICON_ARROW_LEFT_8x9_WIDTH, ICON_ARROW_LEFT_8x9_HEIGHT, &ICON_ARROW_LEFT_8x9[0]);
+        canvas_draw_xbm(canvas, SCREEN_WIDTH - 9, SCREEN_HEIGHT_CENTER - 24, ICON_ARROW_RIGHT_8x9_WIDTH, ICON_ARROW_RIGHT_8x9_HEIGHT, &ICON_ARROW_RIGHT_8x9[0]);
     }
 }
 
