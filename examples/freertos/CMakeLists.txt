@@ -130,7 +130,7 @@ set(INCLUDE_DIRS
 )
 
 if(FREERTOS_F100RB_EXAMPLE)
-    set(TARGET_NAME ${PROJ_NAME}-f100)
+    set(TARGET_NAME ${PROJ_NAME}-f100rb)
     add_executable(${TARGET_NAME})
 
     target_sources(${TARGET_NAME} PRIVATE ${PROJECT_SOURCES})
