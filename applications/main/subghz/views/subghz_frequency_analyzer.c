@@ -7,6 +7,7 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 #include "../helpers/subghz_frequency_analyzer_worker.h"
+#include <gui/elements.h>
 
 #include <assets_icons.h>
 
@@ -25,6 +26,7 @@ struct SubGhzFrequencyAnalyzer {
 typedef struct {
     uint32_t frequency;
     float rssi;
+    uint32_t history_frequency[3];
 } SubGhzFrequencyAnalyzerModel;
 
 void subghz_frequency_analyzer_set_callback(
@@ -38,8 +40,8 @@ void subghz_frequency_analyzer_set_callback(
 }
 
 void subghz_frequency_analyzer_draw_rssi(Canvas* canvas, float rssi) {
-    uint8_t x = 48;
-    uint8_t y = 56;
+    uint8_t x = 25;
+    uint8_t y = 51;
     uint8_t column_number = 0;
     if(rssi) {
         rssi = (rssi + 90) / 3;
@@ -53,6 +55,28 @@ void subghz_frequency_analyzer_draw_rssi(Canvas* canvas, float rssi) {
     }
 }
 
+static void subghz_frequency_analyzer_history_frequency_draw(
+    Canvas* canvas,
+    SubGhzFrequencyAnalyzerModel* model) {
+    char buffer[64];
+    uint8_t x = 70;
+    uint8_t y = 41;
+
+    for(uint8_t i = 0; i < 3; i++) {
+        if(model->history_frequency[i]) {
+            snprintf(
+                buffer,
+                sizeof(buffer),
+                "%03ld.%03ld MHz",
+                model->history_frequency[i] / 1000000 % 1000,
+                model->history_frequency[i] / 1000 % 1000);
+            canvas_draw_str(canvas, x, y + i * 10, buffer);
+        } else {
+            canvas_draw_str(canvas, x, y + i * 10, "---.---MHz");
+        }
+    }
+}
+
 void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel* model) {
     char buffer[64];
 
@@ -60,8 +84,11 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 20, 8, "Frequency Analyzer");
 
-    canvas_draw_str(canvas, 28, 60, "RSSI");
+    canvas_draw_str(canvas, 5, 55, "RSSI");
     subghz_frequency_analyzer_draw_rssi(canvas, model->rssi);
+
+    subghz_frequency_analyzer_history_frequency_draw(canvas, model);
+    //elements_multiline_text(canvas, 70, 41, "RSSI\nRSSI\nRSSI\n");
 
     //Frequency
     canvas_set_font(canvas, FontBigNumbers);
@@ -71,8 +98,8 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel
         "%03ld.%03ld",
         model->frequency / 1000000 % 1000,
         model->frequency / 1000 % 1000);
-    canvas_draw_str(canvas, 8, 35, buffer);
-    canvas_draw_icon(canvas, 96, 24, &I_MHz_25x11);
+    canvas_draw_str(canvas, 8, 30, buffer);
+    canvas_draw_icon(canvas, 96, 19, &I_MHz_25x11);
 }
 
 bool subghz_frequency_analyzer_input(InputEvent* event, void* context) {
@@ -91,6 +118,20 @@ void subghz_frequency_analyzer_pair_callback(void* context, uint32_t frequency, 
         if(instance->callback) {
             instance->callback(SubGhzCustomEventSceneAnalyzerUnlock, instance->context);
         }
+        //update history
+        with_view_model(
+            instance->view, (SubGhzFrequencyAnalyzerModel * model) {
+                model->history_frequency[2] = model->history_frequency[1];
+                model->history_frequency[1] = model->history_frequency[0];
+                model->history_frequency[0] = model->frequency;
+                FURI_LOG_I(
+                    "an",
+                    "%d ,%d ,%d ",
+                    model->history_frequency[0],
+                    model->history_frequency[1],
+                    model->history_frequency[2]);
+                return false;
+            });
     } else if((rssi != 0.f) && (!instance->locked)) {
         if(instance->callback) {
             instance->callback(SubGhzCustomEventSceneAnalyzerLock, instance->context);
@@ -124,6 +165,9 @@ void subghz_frequency_analyzer_enter(void* context) {
         instance->view, (SubGhzFrequencyAnalyzerModel * model) {
             model->rssi = 0;
             model->frequency = 0;
+            model->history_frequency[2] = 0;
+            model->history_frequency[1] = 0;
+            model->history_frequency[0] = 0;
             return true;
         });
 }
