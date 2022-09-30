@@ -364,6 +364,32 @@ MU_TEST(mu_test_furi_string_replace) {
     furi_string_free(replace);
 }
 
+MU_TEST(mu_test_furi_string_start_end) {
+    FuriString* string = furi_string_alloc_set("start_end");
+    FuriString* start = furi_string_alloc_set("start");
+    FuriString* end = furi_string_alloc_set("end");
+
+    // test furi_string_start_with
+    mu_check(furi_string_start_with(string, start));
+    mu_check(!furi_string_start_with(string, end));
+
+    // test furi_string_start_with_str
+    mu_check(furi_string_start_with_str(string, "start"));
+    mu_check(!furi_string_start_with_str(string, "end"));
+
+    // test furi_string_end_with
+    mu_check(furi_string_end_with(string, end));
+    mu_check(!furi_string_end_with(string, start));
+
+    // test furi_string_end_with_str
+    mu_check(furi_string_end_with_str(string, "end"));
+    mu_check(!furi_string_end_with_str(string, "start"));
+
+    furi_string_free(string);
+    furi_string_free(start);
+    furi_string_free(end);
+}
+
 MU_TEST_SUITE(test_suite) {
     MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
 
@@ -376,6 +402,7 @@ MU_TEST_SUITE(test_suite) {
     MU_RUN_TEST(mu_test_furi_string_search);
     MU_RUN_TEST(mu_test_furi_string_equality);
     MU_RUN_TEST(mu_test_furi_string_replace);
+    MU_RUN_TEST(mu_test_furi_string_start_end);
 }
 
 int run_minunit_test_furi_string() {
