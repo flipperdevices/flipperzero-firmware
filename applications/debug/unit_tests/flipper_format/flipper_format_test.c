@@ -59,14 +59,21 @@ static const char* test_data_win = "Filetype: Flipper File test\r\n"
 #define READ_TEST_FLP "ff_flp.test"
 #define READ_TEST_ODD "ff_oddities.test"
 static const char* test_data_odd = "Filetype: Flipper File test\n"
-                                   "Version: 666\t\t\n" // Tabs before newline
+                                   // Tabs before newline
+                                   "Version: 666\t\t\n"
                                    "# This is comment\n"
-                                   "String data: String\r\n" // Windows newline in a UNIX file
-                                   "Int32 data: 1234 -6345 7813 0 \n" // Trailing whitespace
-                                   "Uint32 data:   1234  0   5678   9098  7654321  \n" // Extra whitespace
-                                   "Float data: 1.5\t \t1000.0\n" // Mixed whitespace
-                                   "Bool data:\t\ttrue   false\n" // Leading tabs after key
-                                   "Hex data: DE AD BE\t    "; // Mixed trailing whitespace
+                                   // Windows newline in a UNIX file
+                                   "String data: String\r\n"
+                                   // Trailing whitespace
+                                   "Int32 data: 1234 -6345 7813 0 \n"
+                                   // Extra whitespace
+                                   "Uint32 data:   1234  0   5678   9098  7654321  \n"
+                                   // Mixed whitespace
+                                   "Float data: 1.5\t \t1000.0\n"
+                                   // Leading tabs after key
+                                   "Bool data:\t\ttrue   false\n"
+                                   // Mixed trailing whitespace
+                                   "Hex data: DE AD BE\t    ";
 
 // data created by user on linux machine
 static const char* test_file_linux = TEST_DIR READ_TEST_NIX;
@@ -516,7 +523,8 @@ MU_TEST(flipper_format_multikey_test) {
 }
 
 MU_TEST(flipper_format_oddities_test) {
-    mu_assert(storage_write_string(test_file_oddities, test_data_odd), "Write test error [Oddities]");
+    mu_assert(
+        storage_write_string(test_file_oddities, test_data_odd), "Write test error [Oddities]");
     mu_assert(test_read(test_file_linux), "Read test error [Oddities]");
 }
 
