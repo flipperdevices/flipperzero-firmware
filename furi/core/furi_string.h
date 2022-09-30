@@ -533,11 +533,11 @@ void furi_string_unicode_push(FuriString* string, FuriStringUnicodeValue unicode
  * @brief State of the UTF8 decoding machine state.
  */
 typedef enum {
-    FuriStringUTF8StateStarting = 0,
-    FuriStringUTF8StateDecoding1 = 8,
-    FuriStringUTF8StateDecoding2 = 16,
-    FuriStringUTF8StateDecoding3 = 24,
-    FuriStringUTF8StateError = 32
+    FuriStringUTF8StateStarting,
+    FuriStringUTF8StateDecoding1,
+    FuriStringUTF8StateDecoding2,
+    FuriStringUTF8StateDecoding3,
+    FuriStringUTF8StateError
 } FuriStringUTF8State;
 
 /**

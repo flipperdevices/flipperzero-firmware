@@ -416,6 +416,35 @@ MU_TEST(mu_test_furi_string_trim) {
     furi_string_free(string);
 }
 
+MU_TEST(mu_test_furi_string_utf8) {
+    FuriString* utf8_string = furi_string_alloc_set("イルカ");
+
+    // test furi_string_unicode_length
+    mu_assert_int_eq(9, furi_string_size(utf8_string));
+    mu_assert_int_eq(3, furi_string_unicode_length(utf8_string));
+
+    // test furi_string_unicode_utf8_decode
+    const uint8_t dolphin_emoji_array[4] = {0xF0, 0x9F, 0x90, 0xAC};
+    FuriStringUTF8State state = FuriStringUTF8StateStarting;
+    FuriStringUnicodeValue value = 0;
+    furi_string_unicode_utf8_decode(dolphin_emoji_array[0], &state, &value);
+    mu_assert_int_eq(FuriStringUTF8StateDecoding3, state);
+    furi_string_unicode_utf8_decode(dolphin_emoji_array[1], &state, &value);
+    mu_assert_int_eq(FuriStringUTF8StateDecoding2, state);
+    furi_string_unicode_utf8_decode(dolphin_emoji_array[2], &state, &value);
+    mu_assert_int_eq(FuriStringUTF8StateDecoding1, state);
+    furi_string_unicode_utf8_decode(dolphin_emoji_array[3], &state, &value);
+    mu_assert_int_eq(FuriStringUTF8StateStarting, state);
+    mu_assert_int_eq(0x1F42C, value);
+
+    // test furi_string_unicode_push
+    furi_string_set(utf8_string, "");
+    furi_string_unicode_push(utf8_string, value);
+    mu_assert_string_eq("🐬", furi_string_get_cstr(utf8_string));
+
+    furi_string_free(utf8_string);
+}
+
 MU_TEST_SUITE(test_suite) {
     MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
 
@@ -430,6 +459,7 @@ MU_TEST_SUITE(test_suite) {
     MU_RUN_TEST(mu_test_furi_string_replace);
     MU_RUN_TEST(mu_test_furi_string_start_end);
     MU_RUN_TEST(mu_test_furi_string_trim);
+    MU_RUN_TEST(mu_test_furi_string_utf8);
 }
 
 int run_minunit_test_furi_string() {
