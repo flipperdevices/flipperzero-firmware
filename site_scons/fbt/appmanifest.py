@@ -23,6 +23,8 @@ class FlipperAppType(Enum):
 
 @dataclass
 class FlipperApplication:
+    PRIVATE_FIELD_PREFIX = "_"
+
     appid: str
     apptype: FlipperAppType
     name: Optional[str] = ""

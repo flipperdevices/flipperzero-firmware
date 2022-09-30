@@ -9,15 +9,6 @@ assetsenv = env.Clone(
 )
 assetsenv.ApplyLibFlags()
 
-if not assetsenv["VERBOSE"]:
-    assetsenv.SetDefault(
-        ICONSCOMSTR="\tICONS\t${TARGET}",
-        PROTOCOMSTR="\tPROTO\t${SOURCE}",
-        DOLPHINCOMSTR="\tDOLPHIN\t${DOLPHIN_RES_TYPE}",
-        RESMANIFESTCOMSTR="\tMANIFEST\t${TARGET}",
-        PBVERCOMSTR="\tPBVER\t${TARGET}",
-    )
-
 icons = assetsenv.CompileIcons(
     assetsenv.Dir("compiled"), assetsenv.Dir("#/assets/icons")
 )

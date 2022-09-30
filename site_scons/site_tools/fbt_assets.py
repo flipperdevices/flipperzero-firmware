@@ -120,6 +120,15 @@ def generate(env):
     )
     env.AddMethod(CompileIcons)
 
+    if not env["VERBOSE"]:
+        env.SetDefault(
+            ICONSCOMSTR="\tICONS\t${TARGET}",
+            PROTOCOMSTR="\tPROTO\t${SOURCE}",
+            DOLPHINCOMSTR="\tDOLPHIN\t${DOLPHIN_RES_TYPE}",
+            RESMANIFESTCOMSTR="\tMANIFEST\t${TARGET}",
+            PBVERCOMSTR="\tPBVER\t${TARGET}",
+        )
+
     env.Append(
         BUILDERS={
             "IconBuilder": Builder(

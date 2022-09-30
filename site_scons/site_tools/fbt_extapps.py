@@ -10,61 +10,76 @@ from fbt.appmanifest import FlipperManifestException
 from fbt.sdk import SdkCache
 import itertools
 
+from site_scons.fbt.appmanifest import FlipperApplication
+
 
 def BuildAppElf(env, app):
-    work_dir = env.subst("$EXT_APPS_WORK_DIR")
+    apps_work_dir = env.subst("$EXT_APPS_WORK_DIR")
+    app_work_dir = os.path.join(apps_work_dir, app.appid)
+
+    env.VariantDir(app_work_dir, app._appdir, duplicate=False)
 
     app_alias = f"{env['FIRMWARE_BUILD_CFG']}_{app.appid}"
-    app_original_elf = os.path.join(work_dir, f"{app.appid}_d")
+    app_original_elf = os.path.join(app_work_dir, f"{app.appid}_d")
+
+    if app.fap_assets:
+        env.CompileIcons(
+            env.Dir(app_work_dir),
+            app._appdir.Dir(app.fap_assets),
+            icon_bundle_name=f"icons_{app.appid}",
+        )
 
     app_sources = list(
         itertools.chain.from_iterable(
-            env.GlobRecursive(source_type, os.path.join(work_dir, app._appdir.relpath))
+            env.GlobRecursive(
+                source_type,
+                app_work_dir,
+            )
             for source_type in app.sources
         )
     )
 
-    if app.fap_assets:
-        # app_sources +=
-        env.CompileIcons(
-            env.Dir("."), env.Dir(app.fap_assets), icon_bundle_name=f"icons_{app.appid}"
-        )
+    app_env = env.Clone()
+    app_env.Append(
+        LIBS=app.fap_libs,
+        CPPPATH=env.Dir(app_work_dir),
+    )
 
-    app_elf_raw = env.Program(
+    app_elf_raw = app_env.Program(
         app_original_elf,
         app_sources,
         APP_ENTRY=app.entry_point,
-        LIBS=env["LIBS"] + app.fap_libs,
     )
 
-    app_elf_dump = env.ObjDump(app_elf_raw)
-    env.Alias(f"{app_alias}_list", app_elf_dump)
+    app_elf_dump = app_env.ObjDump(app_elf_raw)
+    app_env.Alias(f"{app_alias}_list", app_elf_dump)
 
-    app_elf_augmented = env.EmbedAppMetadata(
-        os.path.join(env.subst("$PLUGIN_ELF_DIR"), app.appid),
+    app_elf_augmented = app_env.EmbedAppMetadata(
+        os.path.join(app_env.subst("$PLUGIN_ELF_DIR"), app.appid),
         app_elf_raw,
         APP=app,
     )
 
-    manifest_vals = vars(app)
     manifest_vals = {
-        k: v for k, v in manifest_vals.items() if k not in ("_appdir", "_apppath")
+        k: v
+        for k, v in vars(app).items()
+        if k.startswith(FlipperApplication.PRIVATE_FIELD_PREFIX)
     }
 
-    env.Depends(
+    app_env.Depends(
         app_elf_augmented,
-        [env["SDK_DEFINITION"], env.Value(manifest_vals)],
+        [app_env["SDK_DEFINITION"], app_env.Value(manifest_vals)],
     )
     if app.fap_icon:
-        env.Depends(
+        app_env.Depends(
             app_elf_augmented,
-            env.File(f"{app._apppath}/{app.fap_icon}"),
+            app_env.File(f"{app._apppath}/{app.fap_icon}"),
         )
-    env.Alias(app_alias, app_elf_augmented)
+    app_env.Alias(app_alias, app_elf_augmented)
 
-    app_elf_import_validator = env.ValidateAppImports(app_elf_augmented)
-    env.AlwaysBuild(app_elf_import_validator)
-    env.Alias(app_alias, app_elf_import_validator)
+    app_elf_import_validator = app_env.ValidateAppImports(app_elf_augmented)
+    app_env.AlwaysBuild(app_elf_import_validator)
+    app_env.Alias(app_alias, app_elf_import_validator)
     return (app_elf_augmented, app_elf_raw, app_elf_import_validator)
 
 
@@ -135,7 +150,7 @@ def GetExtAppFromPath(env, app_dir):
 
 def generate(env, **kw):
     env.SetDefault(EXT_APPS_WORK_DIR=kw.get("EXT_APPS_WORK_DIR"))
-    env.VariantDir(env.subst("$EXT_APPS_WORK_DIR"), env.Dir("#"), duplicate=False)
+    # env.VariantDir(env.subst("$EXT_APPS_WORK_DIR"), env.Dir("#"), duplicate=False)
 
     env.AddMethod(BuildAppElf)
     env.AddMethod(GetExtAppFromPath)
