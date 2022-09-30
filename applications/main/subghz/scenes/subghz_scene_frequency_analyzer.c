@@ -21,6 +21,7 @@ bool subghz_scene_frequency_analyzer_on_event(void* context, SceneManagerEvent e
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubGhzCustomEventSceneAnalyzerLock) {
             notification_message(subghz->notifications, &sequence_set_green_255);
+            notification_message(subghz->notifications, &sequence_single_vibro);
             return true;
         } else if(event.event == SubGhzCustomEventSceneAnalyzerUnlock) {
             notification_message(subghz->notifications, &sequence_reset_rgb);

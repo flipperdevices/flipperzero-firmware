@@ -40,8 +40,8 @@ void subghz_frequency_analyzer_set_callback(
 }
 
 void subghz_frequency_analyzer_draw_rssi(Canvas* canvas, float rssi) {
-    uint8_t x = 25;
-    uint8_t y = 51;
+    uint8_t x = 20;
+    uint8_t y = 64;
     uint8_t column_number = 0;
     if(rssi) {
         rssi = (rssi + 90) / 3;
@@ -84,7 +84,7 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 20, 8, "Frequency Analyzer");
 
-    canvas_draw_str(canvas, 5, 55, "RSSI");
+    canvas_draw_str(canvas, 0, 64, "RSSI");
     subghz_frequency_analyzer_draw_rssi(canvas, model->rssi);
 
     subghz_frequency_analyzer_history_frequency_draw(canvas, model);
