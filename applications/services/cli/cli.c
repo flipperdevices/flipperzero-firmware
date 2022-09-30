@@ -157,15 +157,7 @@ static void cli_handle_backspace(Cli* cli) {
         printf("\e[D\e[1P");
         fflush(stdout);
         // Our side
-        FuriString* temp;
-        temp = furi_string_alloc();
-        furi_string_reserve(temp, furi_string_size(cli->line) - 1);
-        furi_string_set_strn(temp, furi_string_get_cstr(cli->line), cli->cursor_position - 1);
-        furi_string_cat(temp, furi_string_get_cstr(cli->line) + cli->cursor_position);
-
-        // cli->line is cleared and temp's buffer moved to cli->line
-        furi_string_move(cli->line, temp);
-        // NO MEMORY LEAK, STOP REPORTING IT
+        furi_string_replace_at(cli->line, cli->cursor_position - 1, 1, "");
 
         cli->cursor_position--;
     } else {
