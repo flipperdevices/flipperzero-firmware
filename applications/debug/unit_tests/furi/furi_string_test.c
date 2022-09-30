@@ -390,6 +390,32 @@ MU_TEST(mu_test_furi_string_start_end) {
     furi_string_free(end);
 }
 
+MU_TEST(mu_test_furi_string_trim) {
+    FuriString* string = furi_string_alloc_set("biglongstring");
+
+    // test furi_string_left
+    furi_string_left(string, 7);
+    mu_assert_string_eq("biglong", furi_string_get_cstr(string));
+
+    // test furi_string_right
+    furi_string_right(string, 3);
+    mu_assert_string_eq("long", furi_string_get_cstr(string));
+
+    // test furi_string_mid
+    furi_string_mid(string, 1, 2);
+    mu_assert_string_eq("on", furi_string_get_cstr(string));
+
+    // test furi_string_strim
+    furi_string_set(string, "   \n\r\tbiglongstring \n\r\t  ");
+    furi_string_strim(string);
+    mu_assert_string_eq("biglongstring", furi_string_get_cstr(string));
+    furi_string_set(string, "aaaabaaaabbaaabaaaabbtestaaaaaabbaaabaababaa");
+    furi_string_strim(string, "ab");
+    mu_assert_string_eq("test", furi_string_get_cstr(string));
+
+    furi_string_free(string);
+}
+
 MU_TEST_SUITE(test_suite) {
     MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
 
@@ -403,6 +429,7 @@ MU_TEST_SUITE(test_suite) {
     MU_RUN_TEST(mu_test_furi_string_equality);
     MU_RUN_TEST(mu_test_furi_string_replace);
     MU_RUN_TEST(mu_test_furi_string_start_end);
+    MU_RUN_TEST(mu_test_furi_string_trim);
 }
 
 int run_minunit_test_furi_string() {
