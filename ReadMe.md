@@ -16,6 +16,7 @@
 - Settings: Rename from SD `dolphin/name.txt` [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
 - New animations from stop_oxy: School Days, Whistper of the Heart and The Legend of Zelda
 - Added: [TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
+- Updated [TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
