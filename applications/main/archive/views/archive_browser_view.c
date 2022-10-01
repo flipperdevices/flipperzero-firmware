@@ -4,6 +4,10 @@
 #include "../archive_i.h"
 #include "archive_browser_view.h"
 #include "../helpers/archive_browser.h"
+#include "../../fap_loader/elf_cpp/elf_hashtable.h"
+#include <flipper_application/flipper_application.h>
+
+#define CUSTOM_ICON_MAX_SIZE 32
 
 static const char* ArchiveTabNames[] = {
     [ArchiveTabFavorites] = "Favorites",
@@ -113,6 +117,27 @@ static void archive_draw_loading(Canvas* canvas, ArchiveBrowserViewModel* model)
     canvas_draw_icon(canvas, x, y, &A_Loading_24);
 }
 
+static void get_fap_icon(string_t file_path, uint8_t* icon_ptr) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperApplication* app = flipper_application_alloc(storage, &hashtable_api_interface);
+
+    FlipperApplicationPreloadStatus preload_res =
+        flipper_application_preload_manifest(app, string_get_cstr(file_path));
+    if(preload_res == FlipperApplicationPreloadStatusSuccess) {
+        const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
+        if(manifest->has_icon) {
+            memcpy(icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
+        } else {
+            // ?
+        }
+    } else {
+        // log error
+    }
+
+    flipper_application_free(app);
+    furi_record_close(RECORD_STORAGE);
+}
+
 static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
     furi_assert(model);
 
@@ -126,10 +151,12 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
         uint8_t x_offset = (model->move_fav && model->item_idx == idx) ? MOVE_OFFSET : 0;
 
         ArchiveFileTypeEnum file_type = ArchiveFileTypeLoading;
+        string_t file_path;
 
         if(archive_is_item_in_array(model, idx)) {
             ArchiveFile_t* file = files_array_get(
                 model->files, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
+            string_init_set(file_path, file->path);
             path_extract_filename(file->path, str_buf, archive_is_known_app(file->type));
             file_type = file->type;
         } else {
@@ -145,9 +172,18 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
             canvas_set_color(canvas, ColorBlack);
         }
 
-        canvas_draw_icon(canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file_type]);
+        if(file_type == ArchiveFileTypeApplication) {
+            uint8_t* custom_icon_data = malloc(CUSTOM_ICON_MAX_SIZE);
+            get_fap_icon(file_path, custom_icon_data);
+            canvas_draw_bitmap(
+                canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, 10, 10, custom_icon_data);
+            free(custom_icon_data);
+        } else {
+            canvas_draw_icon(canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file_type]);
+        }
         canvas_draw_str(canvas, 15 + x_offset, 24 + i * FRAME_HEIGHT, string_get_cstr(str_buf));
 
+        string_clear(file_path);
         string_clear(str_buf);
     }
 
