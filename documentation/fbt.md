@@ -83,9 +83,9 @@ To run cleanup (think of `make clean`) for specified targets, add `-c` option.
 ## Command-line parameters
 
 - `--options optionfile.py` (default value `fbt_options.py`) - load file with multiple configuration values
-- `--with-updater` - enables updater-related targets and dependency tracking. Enabling this option introduces extra startup time costs, so use it when bundling update packages. _Explicily enabling this should no longer be required, **`fbt`** now has specific handling for updater-related targets_
 - `--extra-int-apps=app1,app2,appN` - forces listed apps to be built as internal with `firmware` target
 - `--extra-ext-apps=app1,app2,appN` - forces listed apps to be built as external with `firmware_extapps` target
+- `--proxy-env=VAR1,VAR2` - additional environment variables to expose to subprocesses spawned by `fbt`. By default, `fbt` sanitizes execution environment and doesn't forward all inherited environment variables. You can find list of variables that are always forwarded in `environ.scons` file. 
 
 
 ## Configuration 
