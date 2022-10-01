@@ -27,6 +27,7 @@ typedef struct {
     uint32_t frequency;
     float rssi;
     uint32_t history_frequency[3];
+    bool signal;
 } SubGhzFrequencyAnalyzerModel;
 
 void subghz_frequency_analyzer_set_callback(
@@ -88,7 +89,6 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel
     subghz_frequency_analyzer_draw_rssi(canvas, model->rssi);
 
     subghz_frequency_analyzer_history_frequency_draw(canvas, model);
-    //elements_multiline_text(canvas, 70, 41, "RSSI\nRSSI\nRSSI\n");
 
     //Frequency
     canvas_set_font(canvas, FontBigNumbers);
@@ -98,6 +98,12 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel
         "%03ld.%03ld",
         model->frequency / 1000000 % 1000,
         model->frequency / 1000 % 1000);
+    if(model->signal) {
+        canvas_draw_box(canvas, 5, 15, 119, 16);
+        canvas_set_color(canvas, ColorWhite);
+    } else {
+    }
+
     canvas_draw_str(canvas, 8, 30, buffer);
     canvas_draw_icon(canvas, 96, 19, &I_MHz_25x11);
 }
@@ -112,7 +118,11 @@ bool subghz_frequency_analyzer_input(InputEvent* event, void* context) {
     return true;
 }
 
-void subghz_frequency_analyzer_pair_callback(void* context, uint32_t frequency, float rssi) {
+void subghz_frequency_analyzer_pair_callback(
+    void* context,
+    uint32_t frequency,
+    float rssi,
+    bool signal) {
     SubGhzFrequencyAnalyzer* instance = context;
     if((rssi == 0.f) && (instance->locked)) {
         if(instance->callback) {
@@ -124,12 +134,6 @@ void subghz_frequency_analyzer_pair_callback(void* context, uint32_t frequency, 
                 model->history_frequency[2] = model->history_frequency[1];
                 model->history_frequency[1] = model->history_frequency[0];
                 model->history_frequency[0] = model->frequency;
-                FURI_LOG_I(
-                    "an",
-                    "%d ,%d ,%d ",
-                    model->history_frequency[0],
-                    model->history_frequency[1],
-                    model->history_frequency[2]);
                 return false;
             });
     } else if((rssi != 0.f) && (!instance->locked)) {
@@ -143,6 +147,7 @@ void subghz_frequency_analyzer_pair_callback(void* context, uint32_t frequency, 
         instance->view, (SubGhzFrequencyAnalyzerModel * model) {
             model->rssi = rssi;
             model->frequency = frequency;
+            model->signal = signal;
             return true;
         });
 }
