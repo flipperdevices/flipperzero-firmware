@@ -347,7 +347,7 @@ endif()
 
 if(NOT (TARGET STM32::Nano::FloatScan))
     add_library(STM32::Nano::FloatScan INTERFACE IMPORTED)
-    target_link_options(STM32::Nano::FloatPrint INTERFACE
+    target_link_options(STM32::Nano::FloatScan INTERFACE
         $<$<C_COMPILER_ID:GNU>:-Wl,--undefined,_scanf_float>
     )
 endif()
