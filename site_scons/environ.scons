@@ -19,6 +19,8 @@ for env_value_name in (
     "APPDATA",
     "PYTHONHOME",
     "PYTHONNOUSERSITE",
+    "TMP",
+    "TEMP",
 ):
     if environ_value := os.environ.get(env_value_name, None):
         forward_os_env[env_value_name] = environ_value

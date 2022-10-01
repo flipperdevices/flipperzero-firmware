@@ -19,19 +19,37 @@ def BuildAppElf(env, app):
 
     env.VariantDir(app_work_dir, app._appdir, duplicate=False)
 
-    app_alias = f"{env['FIRMWARE_BUILD_CFG']}_{app.appid}"
+    app_env = env.Clone(APP_DIR=app._appdir, FAP_WORK_DIR=app_work_dir)
+
+    app_alias = f"{app_env['FIRMWARE_BUILD_CFG']}_{app.appid}"
     app_original_elf = os.path.join(app_work_dir, f"{app.appid}_d")
 
+    externally_built = []
+    if app.fap_extbuild:
+        for target, command in app.fap_extbuild:
+            externally_built.append(target)
+            app_env.Alias(app_alias, target)
+            app_env.AlwaysBuild(
+                app_env.Command(
+                    target,
+                    None,
+                    Action(
+                        command,
+                        "" if app_env["VERBOSE"] else "\tEXTCMD\t${TARGET}",
+                    ),
+                )
+            )
+
     if app.fap_icons:
-        env.CompileIcons(
-            env.Dir(app_work_dir),
+        app_env.CompileIcons(
+            app_env.Dir(app_work_dir),
             app._appdir.Dir(app.fap_icons),
             icon_bundle_name=f"{app.appid}_icons",
         )
 
     app_sources = list(
         itertools.chain.from_iterable(
-            env.GlobRecursive(
+            app_env.GlobRecursive(
                 source_type,
                 app_work_dir,
             )
@@ -39,7 +57,6 @@ def BuildAppElf(env, app):
         )
     )
 
-    app_env = env.Clone()
     app_env.Append(
         LIBS=app.fap_libs,
         CPPPATH=env.Dir(app_work_dir),
@@ -50,6 +67,8 @@ def BuildAppElf(env, app):
         app_sources,
         APP_ENTRY=app.entry_point,
     )
+
+    app_env.Clean(app_elf_raw, [externally_built, app_env.Dir(app_work_dir)])
 
     app_elf_dump = app_env.ObjDump(app_elf_raw)
     app_env.Alias(f"{app_alias}_list", app_elf_dump)
@@ -63,7 +82,7 @@ def BuildAppElf(env, app):
     manifest_vals = {
         k: v
         for k, v in vars(app).items()
-        if k.startswith(FlipperApplication.PRIVATE_FIELD_PREFIX)
+        if not k.startswith(FlipperApplication.PRIVATE_FIELD_PREFIX)
     }
 
     app_env.Depends(
