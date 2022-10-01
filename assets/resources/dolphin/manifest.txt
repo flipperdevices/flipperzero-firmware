@@ -106,6 +106,20 @@ Min level: 1
 Max level: 30
 Weight: 7
 
+Name: Sasquach_RMCF_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 2
+Max level: 30
+Weight: 7
+
+Name: Kuronons_RMCFW_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 2
+Max level: 30
+Weight: 7
+
 Name: L1_B0ws3r_128x64
 Min butthurt: 0
 Max butthurt: 14
@@ -126,13 +140,6 @@ Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 5
-
-Name: Kuronons_RMCFW_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 4
-Max level: 30
-Weight: 7
 
 Name: Haseo_80s_128x64
 Min butthurt: 0
@@ -183,6 +190,20 @@ Min level: 1
 Max level: 30
 Weight: 5
 
+Name: L1_P0liwhirl_128x51
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 4
+
+Name: L1_Slayers_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 4
+
 Name: L1_DJ_128x64
 Min butthurt: 0
 Max butthurt: 14
@@ -196,20 +217,6 @@ Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 3
-
-Name: L1_Slayers_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 3
-
-Name: L1_P0liwhirl_128x51
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 4
 
 Name: L1_Mew_128x64
 Min butthurt: 0
@@ -307,7 +314,7 @@ Min butthurt: 0
 Max butthurt: 10
 Min level: 2
 Max level: 30
-Weight: 5
+Weight: 4
 
 Name: L1_Waves_128x50
 Min butthurt: 0

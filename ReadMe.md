@@ -13,10 +13,7 @@
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-09-30 23:00 GMT`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-09-30 23:00 GMT`
-- Settings: Rename from SD `dolphin/name.txt` [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
-- New animations from stop_oxy: School Days, Whistper of the Heart and The Legend of Zelda
-- Added: [TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
-- Updated [TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
+- Assets: Includes New Dolphin Animations: [Rogue Master Custom Firmware (By Sasquach)]
 
 <details>
   <summary><B>TO DO</b></summary><br/>
