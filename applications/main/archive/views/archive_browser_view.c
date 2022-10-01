@@ -179,7 +179,8 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
                 canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, 10, 10, custom_icon_data);
             free(custom_icon_data);
         } else {
-            canvas_draw_icon(canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file_type]);
+            canvas_draw_icon(
+                canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file_type]);
         }
         canvas_draw_str(canvas, 15 + x_offset, 24 + i * FRAME_HEIGHT, string_get_cstr(str_buf));
 
