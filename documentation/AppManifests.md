@@ -41,6 +41,9 @@ Only 2 parameters are mandatory: ***appid*** and ***apptype***, others are optio
 * **order**: Order of an application within its group when sorting entries in it. The lower the order is, the closer to the start of the list the item is placed. *Used for ordering startup hooks and menu entries.* 
 * **sdk_headers**: List of C header files from this app's code to include in API definitions for external applications.
 
+
+#### Parameters for external applications
+
 The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 
 * **sources**: list of strings, file name masks, used for gathering sources within app folder. Default value of `["*.c*"]` includes C and CPP source files.
@@ -52,6 +55,20 @@ The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 * **fap_author**: string, may be empty. Application's author.
 * **fap_weburl**: string, may be empty. Application's homepage.
 * **fap_icons**: string. If present, defines a folder name to be used for gathering image assets for this application. These images will be preprocessed and built alongside the application. See [FAP assets](./AppsOnSDCard.md#fap-assets) for details.
+* **fap_extbuild**: provides support for parts of application sources to be build by external tools. Contains a list of (file name, shell command) tuples. **`fbt`** will run the specified command for each file in the list.
+Note that commands are executed at the firmware root folder's root, and all intermediate files must be placed in a application's temporary build folder. For that, you can use pattern expansion by **`fbt`**: `${FAP_WORK_DIR}` will be replaced with the path to the application's temporary build folder, and `${FAP_SRC_DIR}` will be replaced with the path to the application's source folder. You can also use other variables defined internally by **`fbt`**. 
+
+Example for building an app from Rust sources:
+
+```python
+    sources=["target/thumbv7em-none-eabihf/release/libhello_rust.a"],
+    fap_extbuild=(
+        (
+            "${FAP_WORK_DIR}/target/thumbv7em-none-eabihf/release/libhello_rust.a",
+            "cargo build --release --verbose --target thumbv7em-none-eabihf --target-dir ${FAP_WORK_DIR}/target --manifest-path ${FAP_SRC_DIR}/Cargo.toml",
+        ),
+    ),
+```
 
 
 ## .fam file contents

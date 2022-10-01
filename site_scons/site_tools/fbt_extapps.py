@@ -19,7 +19,7 @@ def BuildAppElf(env, app):
 
     env.VariantDir(app_work_dir, app._appdir, duplicate=False)
 
-    app_env = env.Clone(APP_DIR=app._appdir, FAP_WORK_DIR=app_work_dir)
+    app_env = env.Clone(FAP_SRC_DIR=app._appdir, FAP_WORK_DIR=app_work_dir)
 
     app_alias = f"{app_env['FIRMWARE_BUILD_CFG']}_{app.appid}"
     app_original_elf = os.path.join(app_work_dir, f"{app.appid}_d")
