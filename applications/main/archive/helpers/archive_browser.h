@@ -17,6 +17,7 @@ static const char* tab_default_paths[] = {
     [ArchiveTabBadUsb] = ANY_PATH("badusb"),
     [ArchiveTabU2f] = "/app:u2f",
     [ArchiveTabBrowser] = STORAGE_ANY_PATH_PREFIX,
+    [ArchiveTabApplications] = ANY_PATH("apps"),
 };
 
 static const char* known_ext[] = {
@@ -30,6 +31,7 @@ static const char* known_ext[] = {
     [ArchiveFileTypeUpdateManifest] = ".fuf",
     [ArchiveFileTypeFolder] = "?",
     [ArchiveFileTypeUnknown] = "*",
+    [ArchiveFileTypeApplication] = ".fap",
 };
 
 static const ArchiveFileTypeEnum known_type[] = {
@@ -42,6 +44,7 @@ static const ArchiveFileTypeEnum known_type[] = {
     [ArchiveTabBadUsb] = ArchiveFileTypeBadUsb,
     [ArchiveTabU2f] = ArchiveFileTypeU2f,
     [ArchiveTabBrowser] = ArchiveFileTypeUnknown,
+    [ArchiveTabApplications] = ArchiveFileTypeApplication,
 };
 
 static inline ArchiveFileTypeEnum archive_get_tab_filetype(ArchiveTabEnum tab) {

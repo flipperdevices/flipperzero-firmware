@@ -15,6 +15,7 @@ static const char* ArchiveTabNames[] = {
     [ArchiveTabBadUsb] = "Bad USB",
     [ArchiveTabU2f] = "U2F",
     [ArchiveTabBrowser] = "Browser",
+    [ArchiveTabApplications] = "Applications",
 };
 
 static const Icon* ArchiveItemIcons[] = {
@@ -29,6 +30,7 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeFolder] = &I_dir_10px,
     [ArchiveFileTypeUnknown] = &I_unknown_10px,
     [ArchiveFileTypeLoading] = &I_loading_10px,
+    [ArchiveFileTypeApplication] = &A_Plugins_14,
 };
 
 void archive_browser_set_callback(
