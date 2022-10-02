@@ -22,6 +22,7 @@ DesktopSettingsApp* desktop_settings_app_alloc() {
     DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
 
     app->gui = furi_record_open(RECORD_GUI);
+    app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&desktop_settings_scene_handlers, app);
     view_dispatcher_enable_queue(app->view_dispatcher);
