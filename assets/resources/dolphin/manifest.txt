@@ -134,6 +134,13 @@ Min level: 1
 Max level: 30
 Weight: 5
 
+Name: FelixTwoTone_Veemon_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 3
+Max level: 30
+Weight: 5
+
 Name: L1_NyanCat_128x64
 Min butthurt: 0
 Max butthurt: 14
