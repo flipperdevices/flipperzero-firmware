@@ -4,8 +4,7 @@
 #include "../archive_i.h"
 #include "archive_browser_view.h"
 #include "../helpers/archive_browser.h"
-#include "../../fap_loader/elf_cpp/elf_hashtable.h"
-#include <flipper_application/flipper_application.h>
+#include "../../fap_loader/fap_loader_app.h"
 
 #define CUSTOM_ICON_MAX_SIZE 32
 
@@ -117,25 +116,18 @@ static void archive_draw_loading(Canvas* canvas, ArchiveBrowserViewModel* model)
     canvas_draw_icon(canvas, x, y, &A_Loading_24);
 }
 
-static void get_fap_icon(string_t file_path, uint8_t* icon_ptr) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperApplication* app = flipper_application_alloc(storage, &hashtable_api_interface);
-
-    FlipperApplicationPreloadStatus preload_res =
-        flipper_application_preload_manifest(app, string_get_cstr(file_path));
-    if(preload_res == FlipperApplicationPreloadStatusSuccess) {
-        const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
-        if(manifest->has_icon) {
-            memcpy(icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
-        } else {
-            // ?
-        }
-    } else {
-        // log error
-    }
-
-    flipper_application_free(app);
+static bool get_fap_icon(string_t file_path, uint8_t* icon_ptr) {
+    FapLoader* loader = malloc(sizeof(FapLoader));
+    bool success = false;
+    string_t fap_name;
+    string_init(fap_name);
+    loader->storage = furi_record_open(RECORD_STORAGE);
+    if(fap_loader_item_callback(file_path, loader, &icon_ptr, fap_name))
+        success = true;
+    string_clear(fap_name);
     furi_record_close(RECORD_STORAGE);
+    free(loader);
+    return success;
 }
 
 static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
@@ -143,6 +135,7 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
 
     size_t array_size = files_array_size(model->files);
     bool scrollbar = model->item_cnt > 4;
+    uint8_t* custom_icon_data = malloc(CUSTOM_ICON_MAX_SIZE);
 
     for(uint32_t i = 0; i < MIN(model->item_cnt, MENU_ITEMS); ++i) {
         string_t str_buf;
@@ -172,12 +165,9 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
             canvas_set_color(canvas, ColorBlack);
         }
 
-        if(file_type == ArchiveFileTypeApplication) {
-            uint8_t* custom_icon_data = malloc(CUSTOM_ICON_MAX_SIZE);
-            get_fap_icon(file_path, custom_icon_data);
+        if(file_type == ArchiveFileTypeApplication && get_fap_icon(file_path, custom_icon_data)) {
             canvas_draw_bitmap(
                 canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, 10, 10, custom_icon_data);
-            free(custom_icon_data);
         } else {
             canvas_draw_icon(
                 canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file_type]);
@@ -195,6 +185,7 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
     if(model->menu) {
         render_item_menu(canvas, model);
     }
+    free(custom_icon_data);
 }
 
 static void archive_render_status_bar(Canvas* canvas, ArchiveBrowserViewModel* model) {

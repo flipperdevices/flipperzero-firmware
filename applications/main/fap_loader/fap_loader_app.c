@@ -4,24 +4,11 @@
 #include <gui/modules/loading.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
+#include "fap_loader_app.h"
 #include "elf_cpp/elf_hashtable.h"
 #include <flipper_application/flipper_application.h>
 
-#define TAG "fap_loader_app"
-
-typedef struct {
-    FlipperApplication* app;
-    Storage* storage;
-    DialogsApp* dialogs;
-    Gui* gui;
-    string_t fap_path;
-
-    ViewDispatcher* view_dispatcher;
-    Loading* loading;
-} FapLoader;
-
-static bool
-    fap_loader_item_callback(string_t path, void* context, uint8_t** icon_ptr, string_t item_name) {
+bool fap_loader_item_callback(string_t path, void* context, uint8_t** icon_ptr, string_t item_name) {
     FapLoader* loader = context;
     furi_assert(loader);
 
