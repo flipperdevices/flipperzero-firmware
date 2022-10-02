@@ -116,14 +116,11 @@ static void archive_draw_loading(Canvas* canvas, ArchiveBrowserViewModel* model)
     canvas_draw_icon(canvas, x, y, &A_Loading_24);
 }
 
-static bool get_fap_icon(string_t file_path, uint8_t* icon_ptr) {
+static bool get_fap_meta(string_t file_path, string_t fap_name, uint8_t* icon_ptr) {
     FapLoader* loader = malloc(sizeof(FapLoader));
     loader->storage = furi_record_open(RECORD_STORAGE);
     bool success = false;
-    string_t fap_name;  // unused, just for fap_loader_item_callback
-    string_init(fap_name);
     if(fap_loader_item_callback(file_path, loader, &icon_ptr, fap_name)) success = true;
-    string_clear(fap_name);
     furi_record_close(RECORD_STORAGE);
     free(loader);
     return success;
@@ -149,8 +146,9 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
             ArchiveFile_t* file = files_array_get(
                 model->files, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
             string_init_set(file_path, file->path);
-            path_extract_filename(file->path, str_buf, archive_is_known_app(file->type));
             file_type = file->type;
+            if(file_type != ArchiveFileTypeApplication)
+                path_extract_filename(file->path, str_buf, archive_is_known_app(file->type));
         } else {
             string_set_str(str_buf, "---");
         }
@@ -164,7 +162,8 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
             canvas_set_color(canvas, ColorBlack);
         }
 
-        if(file_type == ArchiveFileTypeApplication && get_fap_icon(file_path, custom_icon_data)) {
+        if(file_type == ArchiveFileTypeApplication &&
+           get_fap_meta(file_path, str_buf, custom_icon_data)) {
             canvas_draw_bitmap(
                 canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, 10, 10, custom_icon_data);
         } else {
