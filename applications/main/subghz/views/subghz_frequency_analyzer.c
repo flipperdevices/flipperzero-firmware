@@ -7,7 +7,6 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 #include "../helpers/subghz_frequency_analyzer_worker.h"
-#include <gui/elements.h>
 
 #include <assets_icons.h>
 
@@ -99,7 +98,7 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel
         model->frequency / 1000000 % 1000,
         model->frequency / 1000 % 1000);
     if(model->signal) {
-        canvas_draw_box(canvas, 5, 15, 119, 16);
+        canvas_draw_box(canvas, 4, 12, 121, 22);
         canvas_set_color(canvas, ColorWhite);
     } else {
     }
