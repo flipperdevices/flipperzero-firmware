@@ -20,4 +20,4 @@ typedef struct {
 
 bool fap_loader_item_callback(string_t path, void* context, uint8_t** icon_ptr, string_t item_name);
 
-#endif  // FAP_LPADER_APP_H
+#endif // FAP_LPADER_APP_H

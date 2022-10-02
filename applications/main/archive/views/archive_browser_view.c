@@ -122,8 +122,7 @@ static bool get_fap_icon(string_t file_path, uint8_t* icon_ptr) {
     string_t fap_name;
     string_init(fap_name);
     loader->storage = furi_record_open(RECORD_STORAGE);
-    if(fap_loader_item_callback(file_path, loader, &icon_ptr, fap_name))
-        success = true;
+    if(fap_loader_item_callback(file_path, loader, &icon_ptr, fap_name)) success = true;
     string_clear(fap_name);
     furi_record_close(RECORD_STORAGE);
     free(loader);

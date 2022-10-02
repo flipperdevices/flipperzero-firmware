@@ -1,12 +1,9 @@
 #include <furi.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
-#include <gui/modules/loading.h>
 #include <storage/storage.h>
-#include <dialogs/dialogs.h>
 #include "fap_loader_app.h"
 #include "elf_cpp/elf_hashtable.h"
-#include <flipper_application/flipper_application.h>
 
 bool fap_loader_item_callback(string_t path, void* context, uint8_t** icon_ptr, string_t item_name) {
     FapLoader* loader = context;
