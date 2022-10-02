@@ -165,7 +165,9 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
         if(file_type == ArchiveFileTypeApplication &&
            get_fap_meta(file_path, str_buf, custom_icon_data)) {
             canvas_draw_bitmap(
-                canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, 10, 10, custom_icon_data);
+                canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, 11, 10, custom_icon_data);
+        } else if(file_type == ArchiveFileTypeApplication) {
+            path_extract_filename(file_path, str_buf, archive_is_known_app(file_type));
         } else {
             canvas_draw_icon(
                 canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file_type]);
