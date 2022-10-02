@@ -1712,7 +1712,7 @@ void rfalWorker(void) {
     platformProtectWorker(); /* Protect RFAL Worker/Task/Process */
 
     if(gRFAL.state > RFAL_STATE_MODE_SET) {
-        RfalEvent event = rfal_event_wait(100);
+        RfalEvent event = rfal_event_wait(5);
         if(event == RfalEventInterruptReceived) {
             st25r3916Isr();
         }

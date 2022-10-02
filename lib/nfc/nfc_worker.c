@@ -334,7 +334,7 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     return card_read;
 }
 
-void _nfc_worker_read(NfcWorker* nfc_worker) {
+void nfc_worker_read(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
     furi_assert(nfc_worker->callback);
 
@@ -366,7 +366,7 @@ void _nfc_worker_read(NfcWorker* nfc_worker) {
     }
 }
 
-void nfc_worker_read(NfcWorker* nfc_worker) {
+void _nfc_worker_read(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
     furi_assert(nfc_worker->callback);
 

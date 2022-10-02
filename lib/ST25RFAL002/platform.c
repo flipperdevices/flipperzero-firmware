@@ -19,21 +19,8 @@ static volatile RfalPlatform rfal_platform = {
 
 void nfc_isr(void* _ctx) {
     UNUSED(_ctx);
-    if(rfal_platform.callback && platformGpioIsHigh(ST25R_INT_PORT, ST25R_INT_PIN)) {
+    if(platformGpioIsHigh(ST25R_INT_PORT, ST25R_INT_PIN)) {
         rfal_event_interrupt_received();
-        // rfal_isr_received();
-        // furi_thread_flags_set(furi_thread_get_id(rfal_platform.thread), 0x1);
-    }
-}
-
-int32_t rfal_platform_irq_thread(void* context) {
-    UNUSED(context);
-
-    while(1) {
-        uint32_t flags = furi_thread_flags_wait(0x1, FuriFlagWaitAny, FuriWaitForever);
-        if(flags & 0x1) {
-            rfal_platform.callback();
-        }
     }
 }
 
@@ -48,14 +35,7 @@ void platformDisableIrqCallback() {
 }
 
 void platformSetIrqCallback(PlatformIrqCallback callback) {
-    rfal_platform.callback = callback;
-    rfal_platform.thread = furi_thread_alloc();
-
-    furi_thread_set_name(rfal_platform.thread, "RfalIrqDriver");
-    furi_thread_set_callback(rfal_platform.thread, rfal_platform_irq_thread);
-    furi_thread_set_stack_size(rfal_platform.thread, 1024);
-    furi_thread_set_priority(rfal_platform.thread, FuriThreadPriorityIsr);
-    furi_thread_start(rfal_platform.thread);
+    UNUSED(callback);
 
     furi_hal_gpio_add_int_callback(&gpio_nfc_irq_rfid_pull, nfc_isr, NULL);
     // Disable interrupt callback as the pin is shared between 2 apps
