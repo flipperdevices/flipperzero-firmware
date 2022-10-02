@@ -17,6 +17,7 @@
 - Added PR [FFF trailing space fix #1811 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1811)
 - Added PR [Fix-read-in-readraw-crash #80 (By derskythe)](https://github.com/Eng1n33r/flipperzero-firmware/pull/80)
 - Assets: Includes New Dolphin Animations: [Veemon (By felix-two-tone)]
+- Assets: Includes New Dolphin Animations: [G0ku (By Sasquach)]
 
 <details>
   <summary><B>TO DO</b></summary><br/>
