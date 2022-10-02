@@ -3,6 +3,7 @@
 #include <furi.h>
 #include <furi_hal_spi.h>
 #include <st25r3916_irq.h>
+#include <rfal_event.h>
 
 typedef struct {
     FuriThread* thread;
@@ -19,7 +20,8 @@ static volatile RfalPlatform rfal_platform = {
 void nfc_isr(void* _ctx) {
     UNUSED(_ctx);
     if(rfal_platform.callback && platformGpioIsHigh(ST25R_INT_PORT, ST25R_INT_PIN)) {
-        rfal_isr_received();
+        rfal_event_interrupt_received();
+        // rfal_isr_received();
         // furi_thread_flags_set(furi_thread_get_id(rfal_platform.thread), 0x1);
     }
 }

@@ -45,6 +45,7 @@
 #include "st25r3916_led.h"
 #include "st25r3916.h"
 #include "utils.h"
+#include "rfal_event.h"
 
 /*
  ******************************************************************************
@@ -160,6 +161,10 @@ uint32_t st25r3916WaitForInterruptsTimed(uint32_t mask, uint16_t tmo) {
 
     tmrDelay = platformTimerCreate(tmo);
 
+    RfalEvent event = rfal_event_wait(tmo);
+    if(event == RfalEventInterruptReceived) {
+        st25r3916Isr();
+    }
     /* Run until specific interrupt has happen or the timer has expired */
     do {
         status = (st25r3916interrupt.status & mask);

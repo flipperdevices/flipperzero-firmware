@@ -2,6 +2,7 @@
 #include "furi_hal_nfc.h"
 #include <st25r3916.h>
 #include <st25r3916_irq.h>
+#include <rfal_event.h>
 #include <rfal_rf.h>
 #include <furi.h>
 
@@ -24,6 +25,7 @@ FuriEventFlag* event = NULL;
 #define FURI_HAL_NFC_UID_INCOMPLETE (0x04)
 
 void furi_hal_nfc_init() {
+    rfal_event_init();
     ReturnCode ret = rfalNfcInitialize();
     if(ret == ERR_NONE) {
         furi_hal_nfc_start_sleep();
@@ -87,7 +89,8 @@ bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout) {
     params.GBLen = RFAL_NFCDEP_GB_MAX_LEN;
     params.notifyCb = NULL;
 
-    uint32_t start = DWT->CYCCNT;
+    // uint32_t start = DWT->CYCCNT;
+    UNUSED(timeout);
     rfalNfcDiscover(&params);
     while(true) {
         rfalNfcWorker();
@@ -101,17 +104,17 @@ bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout) {
             break;
         }
         if(state == RFAL_NFC_STATE_POLL_ACTIVATION) {
-            start = DWT->CYCCNT;
+            // start = DWT->CYCCNT;
             continue;
         }
         if(state == RFAL_NFC_STATE_POLL_SELECT) {
             rfalNfcSelect(0);
         }
-        if(DWT->CYCCNT - start > timeout * clocks_in_ms) {
-            rfalNfcDeactivate(true);
-            FURI_LOG_T(TAG, "Timeout");
-            break;
-        }
+        // if(DWT->CYCCNT - start > timeout * clocks_in_ms) {
+        //     rfalNfcDeactivate(true);
+        //     FURI_LOG_T(TAG, "Timeout");
+        //     break;
+        // }
         furi_delay_tick(1);
     }
     rfalNfcGetDevicesFound(&dev_list, &dev_cnt);
