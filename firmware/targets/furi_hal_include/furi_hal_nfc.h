@@ -393,6 +393,8 @@ void furi_hal_nfc_ll_set_fdt_listen(uint32_t cycles);
 
 void furi_hal_nfc_ll_set_fdt_poll(uint32_t FDTPoll);
 
+FuriHalNfcReturn furi_hal_nfc_ll_field_on();
+
 void furi_hal_nfc_ll_txrx_on();
 
 void furi_hal_nfc_ll_txrx_off();

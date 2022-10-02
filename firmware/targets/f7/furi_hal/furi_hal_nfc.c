@@ -793,6 +793,10 @@ void furi_hal_nfc_ll_set_fdt_poll(uint32_t FDTPoll) {
     rfalSetFDTPoll(FDTPoll);
 }
 
+FuriHalNfcReturn furi_hal_nfc_ll_field_on() {
+    return rfalFieldOnAndStartGT();
+}
+
 void furi_hal_nfc_ll_txrx_on() {
     st25r3916TxRxOn();
 }
