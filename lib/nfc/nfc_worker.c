@@ -647,7 +647,8 @@ static void nfc_worker_reader_analyzer_callback(ReaderAnalyzerEvent event, void*
     furi_assert(context);
     NfcWorker* nfc_worker = context;
 
-    if(event == ReaderAnalyzerEventMfkeyCollected) {
+    if((nfc_worker->state == NfcWorkerStateAnalyzeReader) &&
+       (event == ReaderAnalyzerEventMfkeyCollected)) {
         if(nfc_worker->callback) {
             nfc_worker->callback(NfcWorkerEventDetectReaderMfkeyCollected, nfc_worker->context);
         }
@@ -694,7 +695,7 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
             }
         } else {
             reader_no_data_received_cnt++;
-            if(!reader_no_data_notified && (reader_no_data_received_cnt > 10)) {
+            if(!reader_no_data_notified && (reader_no_data_received_cnt > 5)) {
                 nfc_worker->callback(NfcWorkerEventDetectReaderLost, nfc_worker->context);
                 reader_no_data_received_cnt = 0;
                 reader_no_data_notified = true;

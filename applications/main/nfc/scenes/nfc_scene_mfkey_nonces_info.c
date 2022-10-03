@@ -23,7 +23,7 @@ void nfc_scene_mfkey_nonces_info_on_enter(void* context) {
         nfc->widget, 0, 12, AlignLeft, AlignTop, FontSecondary, "Authenticated sectors:");
 
     widget_add_button_element(
-        nfc->widget, GuiButtonTypeRight, "Next", nfc_scene_mfkey_nonces_info_callback, nfc);
+        nfc->widget, GuiButtonTypeCenter, "OK", nfc_scene_mfkey_nonces_info_callback, nfc);
 
     string_clear(temp_str);
 
@@ -35,7 +35,7 @@ bool nfc_scene_mfkey_nonces_info_on_event(void* context, SceneManagerEvent event
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == GuiButtonTypeRight) {
+        if(event.event == GuiButtonTypeCenter) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfkeyComplete);
             consumed = true;
         }

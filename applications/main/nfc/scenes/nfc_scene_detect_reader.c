@@ -1,7 +1,7 @@
 #include "../nfc_i.h"
 #include <dolphin/dolphin.h>
 
-#define NFC_SCENE_DETECT_READER_NONCES_MAX (10U)
+#define NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX (10U)
 
 bool nfc_detect_reader_worker_callback(NfcWorkerEvent event, void* context) {
     UNUSED(event);
@@ -22,10 +22,11 @@ void nfc_scene_detect_reader_on_enter(void* context) {
     DOLPHIN_DEED(DolphinDeedNfcEmulate);
 
     detect_reader_set_callback(nfc->detect_reader, nfc_scene_detect_reader_callback, nfc);
-    detect_reader_set_nonces_max(nfc->detect_reader, NFC_SCENE_DETECT_READER_NONCES_MAX);
+    detect_reader_set_nonces_max(nfc->detect_reader, NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX);
 
     // Store number of collected nonces in scene state
     scene_manager_set_scene_state(nfc->scene_manager, NfcSceneDetectReader, 0);
+    notification_message(nfc->notifications, &sequence_solid_yellow);
 
     nfc_worker_start(
         nfc->worker,
@@ -34,8 +35,6 @@ void nfc_scene_detect_reader_on_enter(void* context) {
         nfc_detect_reader_worker_callback,
         nfc);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewDetectReader);
-
-    nfc_blink_read_start(nfc);
 }
 
 bool nfc_scene_detect_reader_on_event(void* context, SceneManagerEvent event) {
@@ -50,20 +49,29 @@ bool nfc_scene_detect_reader_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfkeyNoncesInfo);
             consumed = true;
         } else if(event.event == NfcWorkerEventDetectReaderMfkeyCollected) {
-            if(nonces_collected < NFC_SCENE_DETECT_READER_NONCES_MAX) {
-                nonces_collected++;
-                scene_manager_set_scene_state(
-                    nfc->scene_manager, NfcSceneDetectReader, nonces_collected);
-                detect_reader_set_nonces_collected(nfc->detect_reader, nonces_collected);
-            } else {
-                nfc_worker_stop(nfc->worker);
+            nonces_collected += 2;
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneDetectReader, nonces_collected);
+            detect_reader_set_nonces_collected(nfc->detect_reader, nonces_collected);
+            if(nonces_collected >= NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX) {
                 detect_reader_set_state(nfc->detect_reader, DetectReaderStateDone);
+                nfc_blink_stop(nfc);
+                notification_message(nfc->notifications, &sequence_success);
+                nfc_worker_stop(nfc->worker);
             }
             consumed = true;
         } else if(event.event == NfcWorkerEventDetectReaderDetected) {
-            detect_reader_set_state(nfc->detect_reader, DetectReaderStateReaderDetected);
+            if(nonces_collected < NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX) {
+                nfc_blink_stop(nfc);
+                notification_message(nfc->notifications, &sequence_blink_start_magenta);
+                detect_reader_set_state(nfc->detect_reader, DetectReaderStateReaderDetected);
+            }
         } else if(event.event == NfcWorkerEventDetectReaderLost) {
-            detect_reader_set_state(nfc->detect_reader, DetectReaderStateReaderLost);
+            if(nonces_collected < NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX) {
+                nfc_blink_stop(nfc);
+                notification_message(nfc->notifications, &sequence_solid_yellow);
+                detect_reader_set_state(nfc->detect_reader, DetectReaderStateReaderLost);
+            }
         }
     }
 

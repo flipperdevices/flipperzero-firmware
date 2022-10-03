@@ -19,18 +19,16 @@ static void detect_reader_draw_callback(Canvas* canvas, void* model) {
     char text[32] = {};
 
     // Draw header and icon
+    canvas_draw_icon(canvas, 0, 16, &I_Modern_reader_18x34);
     if(m->state == DetectReaderStateStart) {
         snprintf(text, sizeof(text), "Touch the reader");
-        canvas_draw_icon(canvas, 0, 0, &I_Tap_reader_36x38);
+        canvas_draw_icon(canvas, 21, 13, &I_Move_flipper_26x39);
     } else if(m->state == DetectReaderStateReaderDetected) {
         snprintf(text, sizeof(text), "Move the Flipper away");
-        canvas_draw_icon(canvas, 0, 0, &I_Tap_reader_36x38);
+        canvas_draw_icon(canvas, 24, 25, &I_Release_arrow_18x15);
     } else if(m->state == DetectReaderStateReaderLost) {
         snprintf(text, sizeof(text), "Touch the reader again");
-        canvas_draw_icon(canvas, 0, 0, &I_Tap_reader_36x38);
-    } else if(m->state == DetectReaderStateDone) {
-        snprintf(text, sizeof(text), "Collection done!");
-        canvas_draw_icon(canvas, 0, 0, &I_Tap_reader_36x38);
+        canvas_draw_icon(canvas, 21, 13, &I_Move_flipper_26x39);
     }
 
     canvas_draw_str_aligned(canvas, 64, 0, AlignCenter, AlignTop, text);
@@ -38,17 +36,21 @@ static void detect_reader_draw_callback(Canvas* canvas, void* model) {
     // Draw collected nonces
     if(m->state == DetectReaderStateStart) {
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 52, 22, AlignLeft, AlignTop, "Emulating...");
+        canvas_draw_str_aligned(canvas, 51, 22, AlignLeft, AlignTop, "Emulating...");
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 52, 35, AlignLeft, AlignTop, "MIFARE MFkey32");
+        canvas_draw_str_aligned(canvas, 51, 35, AlignLeft, AlignTop, "MIFARE MFkey32");
     } else {
-        canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 52, 22, AlignLeft, AlignTop, "Collecting...");
+        if(m->state == DetectReaderStateDone) {
+            canvas_set_font(canvas, FontPrimary);
+            canvas_draw_str_aligned(canvas, 51, 22, AlignLeft, AlignTop, "Completed!");
+        } else {
+            canvas_set_font(canvas, FontPrimary);
+            canvas_draw_str_aligned(canvas, 51, 22, AlignLeft, AlignTop, "Collecting...");
+        }
         canvas_set_font(canvas, FontSecondary);
-        snprintf(text, sizeof(text), "Nonces: %d/%d", m->nonces, m->nonces_max);
-        canvas_draw_str_aligned(canvas, 52, 35, AlignLeft, AlignTop, text);
+        snprintf(text, sizeof(text), "Nonce pairs: %d/%d", m->nonces, m->nonces_max);
+        canvas_draw_str_aligned(canvas, 51, 35, AlignLeft, AlignTop, text);
     }
-
     // Draw button
     if(m->nonces > 0) {
         elements_button_center(canvas, "Done");
