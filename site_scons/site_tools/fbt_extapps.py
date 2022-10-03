@@ -40,10 +40,10 @@ def BuildAppElf(env, app):
                 )
             )
 
-    if app.fap_icons:
+    if app.fap_icon_assets:
         app_env.CompileIcons(
             app_env.Dir(app_work_dir),
-            app._appdir.Dir(app.fap_icons),
+            app._appdir.Dir(app.fap_icon_assets),
             icon_bundle_name=f"{app.appid}_icons",
         )
 

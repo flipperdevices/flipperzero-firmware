@@ -47,7 +47,7 @@ class FlipperApplication:
     fap_description: str = ""
     fap_author: str = ""
     fap_weburl: str = ""
-    fap_icons: Optional[str] = None
+    fap_icon_assets: Optional[str] = None
     fap_extbuild: List[Tuple[str, str]] = field(default_factory=list)
     # Internally used by fbt
     _appdir: Optional[object] = None
