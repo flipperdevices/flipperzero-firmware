@@ -259,18 +259,18 @@ fw_artifacts = fwenv["FW_ARTIFACTS"] = [
     fwenv["FW_VERSION_JSON"],
 ]
 
+
+fwcdb = fwenv.CompilationDatabase()
+# without filtering, both updater & firmware commands would be generated in same file
+fwenv.Replace(COMPILATIONDB_PATH_FILTER=fwenv.subst("*${FW_FLAVOR}*"))
+AlwaysBuild(fwcdb)
+Precious(fwcdb)
+NoClean(fwcdb)
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", fwcdb)
+
 # If current configuration was explicitly requested, generate compilation database
 # and link its directory as build/latest
 if should_gen_cdb_and_link_dir(fwenv, BUILD_TARGETS):
-    fwcdb = fwenv.CompilationDatabase()
-    # without filtering, both updater & firmware commands would be generated
-    fwenv.Replace(COMPILATIONDB_PATH_FILTER=fwenv.subst("*${FW_FLAVOR}*"))
-    AlwaysBuild(fwcdb)
-    Precious(fwcdb)
-    NoClean(fwcdb)
-    Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", fwcdb)
-    AlwaysBuild(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", fwcdb)
-    Alias(fwcdb, "")
     fw_artifacts.append(fwcdb)
 
     # Adding as a phony target, so folder link is updated even if elf didn't change
