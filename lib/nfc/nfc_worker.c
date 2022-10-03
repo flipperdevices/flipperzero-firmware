@@ -685,9 +685,11 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
         furi_delay_ms(5);
         furi_hal_nfc_listen_start(nfc_data);
         if(furi_hal_nfc_listen_rx(&tx_rx, 300)) {
+            if(reader_no_data_notified) {
+                nfc_worker->callback(NfcWorkerEventDetectReaderDetected, nfc_worker->context);
+            }
             reader_no_data_received_cnt = 0;
             reader_no_data_notified = false;
-            nfc_worker->callback(NfcWorkerEventDetectReaderDetected, nfc_worker->context);
             NfcProtocol protocol =
                 reader_analyzer_guess_protocol(reader_analyzer, tx_rx.rx_data, tx_rx.rx_bits / 8);
             if(protocol == NfcDeviceProtocolMifareClassic) {
