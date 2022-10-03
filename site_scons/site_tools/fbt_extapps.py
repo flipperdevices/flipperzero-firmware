@@ -21,13 +21,22 @@ def BuildAppElf(env, app):
 
     app_env = env.Clone(FAP_SRC_DIR=app._appdir, FAP_WORK_DIR=app_work_dir)
 
-    app_alias = f"{app_env['FIRMWARE_BUILD_CFG']}_{app.appid}"
+    app_alias = f"fap_{app.appid}"
     app_original_elf = os.path.join(app_work_dir, f"{app.appid}_d")
 
-    externally_built = []
+    legacy_app_taget_name = f"{app_env['FIRMWARE_BUILD_CFG']}_{app.appid}"
+
+    def legacy_app_build_stub(**kw):
+        raise UserError(
+            f"Target name '{legacy_app_taget_name}' is deprecated, use '{app_alias}' instead"
+        )
+
+    app_env.PhonyTarget(legacy_app_taget_name, Action(legacy_app_build_stub, None))
+
+    externally_built_files = []
     if app.fap_extbuild:
         for target, command in app.fap_extbuild:
-            externally_built.append(target)
+            externally_built_files.append(target)
             app_env.Alias(app_alias, target)
             app_env.AlwaysBuild(
                 app_env.Command(
@@ -68,7 +77,7 @@ def BuildAppElf(env, app):
         APP_ENTRY=app.entry_point,
     )
 
-    app_env.Clean(app_elf_raw, [externally_built, app_env.Dir(app_work_dir)])
+    app_env.Clean(app_elf_raw, [*externally_built_files, app_env.Dir(app_work_dir)])
 
     app_elf_dump = app_env.ObjDump(app_elf_raw)
     app_env.Alias(f"{app_alias}_list", app_elf_dump)
@@ -94,7 +103,7 @@ def BuildAppElf(env, app):
             app_elf_augmented,
             app_env.File(f"{app._apppath}/{app.fap_icon}"),
         )
-    app_env.Alias(app_alias, app_elf_augmented)
+    # app_env.Alias(app_alias, app_elf_augmented)
 
     app_elf_import_validator = app_env.ValidateAppImports(app_elf_augmented)
     app_env.AlwaysBuild(app_elf_import_validator)
