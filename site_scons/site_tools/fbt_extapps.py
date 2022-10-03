@@ -14,15 +14,14 @@ from site_scons.fbt.appmanifest import FlipperApplication
 
 
 def BuildAppElf(env, app):
-    apps_work_dir = env.subst("$EXT_APPS_WORK_DIR")
-    app_work_dir = os.path.join(apps_work_dir, app.appid)
+    ext_apps_work_dir = env.subst("$EXT_APPS_WORK_DIR")
+    app_work_dir = os.path.join(ext_apps_work_dir, app.appid)
 
     env.VariantDir(app_work_dir, app._appdir, duplicate=False)
 
     app_env = env.Clone(FAP_SRC_DIR=app._appdir, FAP_WORK_DIR=app_work_dir)
 
     app_alias = f"fap_{app.appid}"
-    app_original_elf = os.path.join(app_work_dir, f"{app.appid}_d")
 
     legacy_app_taget_name = f"{app_env['FIRMWARE_BUILD_CFG']}_{app.appid}"
 
@@ -72,7 +71,7 @@ def BuildAppElf(env, app):
     )
 
     app_elf_raw = app_env.Program(
-        app_original_elf,
+        os.path.join(app_work_dir, f"{app.appid}_d"),
         app_sources,
         APP_ENTRY=app.entry_point,
     )
@@ -83,7 +82,7 @@ def BuildAppElf(env, app):
     app_env.Alias(f"{app_alias}_list", app_elf_dump)
 
     app_elf_augmented = app_env.EmbedAppMetadata(
-        os.path.join(app_env.subst("$PLUGIN_ELF_DIR"), app.appid),
+        os.path.join(ext_apps_work_dir, app.appid),
         app_elf_raw,
         APP=app,
     )
