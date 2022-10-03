@@ -30,7 +30,7 @@ void ibutton_scene_emulate_on_enter(void* context) {
 
     // check that stored key has name
     if(!furi_string_empty(key_name)) {
-        ibutton_text_store_set(ibutton, "%s", string_get_cstr(key_name));
+        ibutton_text_store_set(ibutton, "%s", furi_string_get_cstr(key_name));
     } else {
         // if not, show key data
         switch(ibutton_key_get_type(key)) {
