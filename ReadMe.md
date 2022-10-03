@@ -18,7 +18,7 @@
 - Added PR [Fix-read-in-readraw-crash #80 (By derskythe)](https://github.com/Eng1n33r/flipperzero-firmware/pull/80)
 - Assets: Includes New Dolphin Animations: [Veemon (By felix-two-tone)]
 - Assets: Includes New Dolphin Animations: [G0ku (By Sasquach)]
-- Assets: Includes New Dolphin Animations: [Aika Zer0, Aika Zer0 2 & P3ach Run (By RogueMaster)] (hidden)
+- Assets: Includes New Dolphin Animations: [Aika Zer0, Aika Zer0 2, Kaz0ku Haha & P3ach Run (By RogueMaster)] (hidden)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
