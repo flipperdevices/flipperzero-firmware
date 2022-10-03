@@ -20,16 +20,16 @@ static void detect_reader_draw_callback(Canvas* canvas, void* model) {
 
     // Draw header and icon
     if(m->state == DetectReaderStateStart) {
-        sniprintf(text, sizeof(text), "Touch the reader");
+        snprintf(text, sizeof(text), "Touch the reader");
         canvas_draw_icon(canvas, 0, 0, &I_Tap_reader_36x38);
     } else if(m->state == DetectReaderStateReaderDetected) {
-        sniprintf(text, sizeof(text), "Move the Flipper away");
+        snprintf(text, sizeof(text), "Move the Flipper away");
         canvas_draw_icon(canvas, 0, 0, &I_Tap_reader_36x38);
-    } else if(m->state == DetectReaderStateReaderNotDetected) {
-        sniprintf(text, sizeof(text), "Touch the reader again");
+    } else if(m->state == DetectReaderStateReaderLost) {
+        snprintf(text, sizeof(text), "Touch the reader again");
         canvas_draw_icon(canvas, 0, 0, &I_Tap_reader_36x38);
     } else if(m->state == DetectReaderStateDone) {
-        sniprintf(text, sizeof(text), "Collection done!");
+        snprintf(text, sizeof(text), "Collection done!");
         canvas_draw_icon(canvas, 0, 0, &I_Tap_reader_36x38);
     }
 

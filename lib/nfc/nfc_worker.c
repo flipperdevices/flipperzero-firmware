@@ -655,6 +655,8 @@ static void nfc_worker_reader_analyzer_callback(ReaderAnalyzerEvent event, void*
 }
 
 void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
+    furi_assert(nfc_worker->callback);
+
     FuriHalNfcTxRxContext tx_rx = {};
 
     ReaderAnalyzer* reader_analyzer = nfc_worker->reader_analyzer;
@@ -673,17 +675,30 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
     rfal_platform_spi_acquire();
 
     FURI_LOG_D(TAG, "Start reader analyzer");
+
+    uint8_t reader_no_data_received_cnt = 0;
+    bool reader_no_data_notified = true;
+
     while(nfc_worker->state == NfcWorkerStateAnalyzeReader) {
         furi_hal_nfc_stop_cmd();
         furi_delay_ms(5);
         furi_hal_nfc_listen_start(nfc_data);
         if(furi_hal_nfc_listen_rx(&tx_rx, 300)) {
+            reader_no_data_received_cnt = 0;
+            reader_no_data_notified = false;
+            nfc_worker->callback(NfcWorkerEventDetectReaderDetected, nfc_worker->context);
             NfcProtocol protocol =
                 reader_analyzer_guess_protocol(reader_analyzer, tx_rx.rx_data, tx_rx.rx_bits / 8);
             if(protocol == NfcDeviceProtocolMifareClassic) {
                 mf_classic_emulator(&emulator, &tx_rx);
             }
         } else {
+            reader_no_data_received_cnt++;
+            if(!reader_no_data_notified && (reader_no_data_received_cnt > 10)) {
+                nfc_worker->callback(NfcWorkerEventDetectReaderLost, nfc_worker->context);
+                reader_no_data_received_cnt = 0;
+                reader_no_data_notified = true;
+            }
             FURI_LOG_D(TAG, "No data from reader");
             continue;
         }

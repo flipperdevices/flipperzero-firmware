@@ -8,7 +8,7 @@ typedef struct DetectReader DetectReader;
 typedef enum {
     DetectReaderStateStart,
     DetectReaderStateReaderDetected,
-    DetectReaderStateReaderNotDetected,
+    DetectReaderStateReaderLost,
     DetectReaderStateDone,
 } DetectReaderState;
 
