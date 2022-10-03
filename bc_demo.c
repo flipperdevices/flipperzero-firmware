@@ -181,8 +181,12 @@ void  evTick (state_t* state)
 	if (animate(state)) {  // true if edge of screen tapped
 		// https://pages.mtu.edu/~suits/notefreqs.html
 		int  penta[5] = {554, 622, 740, 831, 932};  // notes in c# pentatonic scale
-		furi_hal_speaker_start(penta[rand() %5], 0.5);
+		furi_hal_speaker_start(penta[rand() %5], 0.5);  // start playing a random note (from the list)
+
 	} else {
+		// The are 12 (state->fps) event ticks each second
+		// 1.000 / 12 = ~83mS  ...That's a good length of time for a beep
+		//   So we wil ljust turn the speaker OFF the tick after it starts
 		furi_hal_speaker_stop();
 	}
 
@@ -731,5 +735,5 @@ bail:
 
 	INFO("CLEAN EXIT ... Exit code: %d", error);
 	LEAVE;
-	return (int32_t)(error ? 255 : 0);  // It *seems* that the options are 0 for success, or 255 for failure
+	return (int32_t)error;
 }
