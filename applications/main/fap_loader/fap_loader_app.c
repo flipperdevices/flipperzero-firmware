@@ -2,8 +2,23 @@
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <storage/storage.h>
-#include "fap_loader_app.h"
+#include <gui/modules/loading.h>
+#include <dialogs/dialogs.h>
+#include <flipper_application/flipper_application.h>
 #include "elf_cpp/elf_hashtable.h"
+#include "fap_loader_app.h"
+
+#define TAG "fap_loader_app"
+
+struct FapLoader {
+    FlipperApplication* app;
+    Storage* storage;
+    DialogsApp* dialogs;
+    Gui* gui;
+    string_t fap_path;
+    ViewDispatcher* view_dispatcher;
+    Loading* loading;
+};
 
 bool fap_loader_item_callback(string_t path, void* context, uint8_t** icon_ptr, string_t item_name) {
     FapLoader* loader = context;
@@ -125,19 +140,41 @@ static bool fap_loader_select_app(FapLoader* loader) {
         loader->dialogs, loader->fap_path, loader->fap_path, &browser_options);
 }
 
-int32_t fap_loader_app(void* p) {
+FapLoader* fap_loader_alloc_minimal() {
     FapLoader* loader = malloc(sizeof(FapLoader));
     loader->storage = furi_record_open(RECORD_STORAGE);
+    return loader;
+}
+
+static FapLoader* fap_loader_alloc_full() {
+    FapLoader* loader = fap_loader_alloc_minimal();
     loader->dialogs = furi_record_open(RECORD_DIALOGS);
     loader->gui = furi_record_open(RECORD_GUI);
-
     loader->view_dispatcher = view_dispatcher_alloc();
     loader->loading = loading_alloc();
-
     view_dispatcher_attach_to_gui(
         loader->view_dispatcher, loader->gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_add_view(loader->view_dispatcher, 0, loading_get_view(loader->loading));
+    return loader;
+}
 
+void fap_loader_free_minimal(FapLoader* loader) {
+    furi_record_close(RECORD_STORAGE);
+    free(loader);
+}
+
+static void fap_loader_free_full(FapLoader* loader) {
+    view_dispatcher_remove_view(loader->view_dispatcher, 0);
+    loading_free(loader->loading);
+    view_dispatcher_free(loader->view_dispatcher);
+    string_clear(loader->fap_path);
+    furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_DIALOGS);
+    fap_loader_free_minimal(loader);
+}
+
+int32_t fap_loader_app(void* p) {
+    FapLoader* loader = fap_loader_alloc_full();
     if(p) {
         string_init_set(loader->fap_path, (const char*)p);
         fap_loader_run_selected_app(loader);
@@ -149,15 +186,6 @@ int32_t fap_loader_app(void* p) {
             fap_loader_run_selected_app(loader);
         };
     }
-
-    view_dispatcher_remove_view(loader->view_dispatcher, 0);
-    loading_free(loader->loading);
-    view_dispatcher_free(loader->view_dispatcher);
-
-    string_clear(loader->fap_path);
-    furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_DIALOGS);
-    furi_record_close(RECORD_STORAGE);
-    free(loader);
+    fap_loader_free_full(loader);
     return 0;
 }

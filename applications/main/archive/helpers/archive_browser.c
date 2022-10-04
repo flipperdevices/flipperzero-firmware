@@ -5,7 +5,7 @@
 #include <core/common_defines.h>
 #include <core/log.h>
 #include "gui/modules/file_browser_worker.h"
-#include "../../fap_loader/fap_loader_app.h"
+#include <fap_loader/fap_loader_app.h>
 #include "m-string.h"
 #include <math.h>
 
@@ -353,12 +353,10 @@ void archive_add_app_item(ArchiveBrowserView* browser, const char* name) {
 }
 
 static bool archive_get_fap_meta(string_t file_path, string_t fap_name, uint8_t** icon_ptr) {
-    FapLoader* loader = malloc(sizeof(FapLoader));
-    loader->storage = furi_record_open(RECORD_STORAGE);
+    FapLoader* loader = fap_loader_alloc_minimal();
     bool success = false;
     if(fap_loader_item_callback(file_path, loader, icon_ptr, fap_name)) success = true;
-    furi_record_close(RECORD_STORAGE);
-    free(loader);
+    fap_loader_free_minimal(loader);
     return success;
 }
 
@@ -367,20 +365,17 @@ void archive_add_file_item(ArchiveBrowserView* browser, bool is_folder, const ch
     furi_assert(name);
 
     ArchiveFile_t item;
-    item.custom_icon_data = NULL;
-
     ArchiveFile_t_init(&item);
-    string_init_set_str(item.path, name);
-    string_init(item.display_name);
+
+    string_set_str(item.path, name);
     archive_set_file_type(&item, string_get_cstr(browser->path), is_folder, false);
     if(item.type == ArchiveFileTypeApplication) {
-        item.custom_icon_data = malloc(CUSTOM_ICON_MAX_SIZE);
-        if(!archive_get_fap_meta(item.path, item.display_name, &item.custom_icon_data)) {
+        item.custom_icon_data = malloc(FAP_MANIFEST_MAX_ICON_SIZE);
+        if(!archive_get_fap_meta(item.path, item.custom_name, &item.custom_icon_data)) {
             free(item.custom_icon_data);
             item.custom_icon_data = NULL;
         }
     }
-
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
             files_array_push_back(model->files, item);

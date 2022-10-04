@@ -118,7 +118,7 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
 
     size_t array_size = files_array_size(model->files);
     bool scrollbar = model->item_cnt > 4;
-    uint8_t* custom_icon_data = malloc(CUSTOM_ICON_MAX_SIZE);
+    uint8_t* custom_icon_data = malloc(FAP_MANIFEST_MAX_ICON_SIZE);
 
     for(uint32_t i = 0; i < MIN(model->item_cnt, MENU_ITEMS); ++i) {
         string_t str_buf;
@@ -136,7 +136,7 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
             if(file_type == ArchiveFileTypeApplication) {
                 if(file->custom_icon_data) {
                     custom_icon_data = file->custom_icon_data;
-                    string_set(str_buf, file->display_name);
+                    string_set(str_buf, file->custom_name);
                 } else {
                     file_type = ArchiveFileTypeUnknown;
                     path_extract_filename(file->path, str_buf, archive_is_known_app(file->type));
