@@ -11,8 +11,8 @@
 
 - To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-04 00:42 GMT`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-04 00:42 GMT`
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-04 22:32 GMT`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-04 22:32 GMT`
 - Assets: Includes New Dolphin Animations: [Rogue Master Custom Firmware (By Sasquach)]
 - Added PR [FFF trailing space fix #1811 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1811)
 - Added PR [Fix-read-in-readraw-crash #80 (By derskythe)](https://github.com/Eng1n33r/flipperzero-firmware/pull/80)
@@ -20,6 +20,7 @@
 - Assets: Includes New Dolphin Animations: [G0ku (By Sasquach)]
 - Assets: Includes New Dolphin Animations: [Aika Zer0, Aika Zer0 2, Kaz0ku Haha & P3ach Run (By RogueMaster)] (hidden)
 - Assets: Includes New Dolphin Animations: [CloudG0ku (By Sasquach)]
+- Desktop: Hidden top bar thanks to @ESurge, this provides an unobstructed view of the animations.
 
 <details>
   <summary><B>TO DO</b></summary><br/>
@@ -106,6 +107,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - BadUSB: show script errors on screen [(By CromFr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/200)
 - BadUSB: sk-SK maping keybord for BadUsb [(By jaroslavmraz)](https://github.com/flipperdevices/flipperzero-firmware/pull/1619)
 - Clock.fap, iButton.fap and U2F.fap loader apps and available as Favorites [Thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/336)
+- Desktop: Hidden top bar [Thanks to ESurge](https://github.com/ESurge/)
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Dolphin: Assigned profile pic for levels 1-10 (Happy Lvl 1 Dolphin), 11-15 (Happy Lvl 2 Dolphin), 16-18 (Happy Lvl 3 Dolphin), 19-21 (Kid G0ku), 22-24 (Adult G0ku), 25-27 (SSJ G0ku) and 28-30 (SSJ3 G0ku)
 - Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)
