@@ -60,6 +60,8 @@ typedef enum {
     NfcWorkerEventMfUltralightPwdAuth, // Reader sent auth command
 
     // Detect Reader events
+    NfcWorkerEventDetectReaderDetected,
+    NfcWorkerEventDetectReaderLost,
     NfcWorkerEventDetectReaderMfkeyCollected,
 
 } NfcWorkerEvent;
