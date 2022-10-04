@@ -11,8 +11,8 @@
 
 - To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-04 22:32 GMT`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-04 22:32 GMT`
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-04 23:29 GMT`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-04 23:29 GMT`
 - Assets: Includes New Dolphin Animations: [Rogue Master Custom Firmware (By Sasquach)]
 - Added PR [FFF trailing space fix #1811 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1811)
 - Added PR [Fix-read-in-readraw-crash #80 (By derskythe)](https://github.com/Eng1n33r/flipperzero-firmware/pull/80)
@@ -21,6 +21,8 @@
 - Assets: Includes New Dolphin Animations: [Aika Zer0, Aika Zer0 2, Kaz0ku Haha & P3ach Run (By RogueMaster)] (hidden)
 - Assets: Includes New Dolphin Animations: [CloudG0ku (By Sasquach)]
 - Desktop: Hidden top bar thanks to @ESurge, this provides an unobstructed view of the animations.
+- Assets: Includes New Dolphin Animations: [BulmFlash, G0ku Pat Pat and Sail0rM00n (By RogueMaster)] (hidden)
+- Assets: Includes New Dolphin Animations: [ChiChi, G0ku Pew and R0shi (By RogueMaster)]
 
 <details>
   <summary><B>TO DO</b></summary><br/>
