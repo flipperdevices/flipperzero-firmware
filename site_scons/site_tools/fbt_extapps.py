@@ -80,15 +80,10 @@ def BuildAppElf(env, app):
         private_lib_env.AppendUnique(
             CCFLAGS=[
                 *lib_def.cflags,
-                # Required for lib to be linkable with .faps
-                # "-mword-relocations",
-                # "-mlong-calls",
             ],
             CPPDEFINES=lib_def.cdefines,
             CPPPATH=list(
                 os.path.join(app._appdir.path, cinclude)
-                # cinclude
-                # app_env.Dir(cinclude).srcnode()
                 for cinclude in lib_def.cincludes
             ),
         )
@@ -112,6 +107,7 @@ def BuildAppElf(env, app):
 
     app_env.Append(
         LIBS=[*app.fap_libs, *private_libs],
+        CPPPATH=env.Dir(app_work_dir),
     )
 
     app_elf_raw = app_env.Program(
