@@ -165,7 +165,7 @@ apps_c = fwenv.ApplicationsC(
 # Adding dependency on manifest files so apps.c is rebuilt when any manifest is changed
 for app_dir, _ in env["APPDIRS"]:
     app_dir_node = env.Dir("#").Dir(app_dir)
-    fwenv.Depends(apps_c, fwenv.GlobRecursive("*.fam", app_dir_node))
+    fwenv.Depends(apps_c, app_dir_node.glob("*/application.fam"))
 
 # Sanity check - certain external apps are using features that are not available in base firmware
 if advanced_faps := list(
