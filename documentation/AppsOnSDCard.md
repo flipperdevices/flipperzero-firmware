@@ -2,7 +2,7 @@
 
 [fbt](./fbt.md) has support for building applications as FAP files. FAP are essentially .elf executables with extra metadata and resources bundled in.
 
-FAPs are built with `firmware_extapps` (or `plugin_dist`) **`fbt`** targets.
+FAPs are built with `faps` **`fbt`** target. They can also be deployed to `dist` folder with `plugin_dist` **`fbt`** target.
 
 FAPs do not depend on being run on a specific firmware version. Compatibility is determined by the FAP's metadata, which includes the required [API version](#api-versioning).
 

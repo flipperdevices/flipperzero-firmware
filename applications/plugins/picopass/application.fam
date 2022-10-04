@@ -10,8 +10,19 @@ App(
     stack_size=4 * 1024,
     order=30,
     fap_icon="../../../assets/icons/Archive/125_10px.png",
-    fap_libs=[
-        "mbedtls",
-    ],
     fap_category="Tools",
+    fap_private_libs=[
+        Lib(
+            name="mbedtls",
+            fap_include_paths=["include"],
+            sources=[
+                "library/des.c",
+                "library/sha1.c",
+                "library/platform_util.c",
+            ],
+        ),
+        Lib(
+            name="loclass",
+        ),
+    ],
 )

@@ -23,6 +23,7 @@ def BuildAppElf(env, app):
 
     app_alias = f"fap_{app.appid}"
 
+    # Deprecation stub
     legacy_app_taget_name = f"{app_env['FIRMWARE_BUILD_CFG']}_{app.appid}"
 
     def legacy_app_build_stub(**kw):
@@ -34,15 +35,15 @@ def BuildAppElf(env, app):
 
     externally_built_files = []
     if app.fap_extbuild:
-        for target, command in app.fap_extbuild:
-            externally_built_files.append(target)
-            app_env.Alias(app_alias, target)
+        for external_file_def in app.fap_extbuild:
+            externally_built_files.append(external_file_def.path)
+            app_env.Alias(app_alias, external_file_def.path)
             app_env.AlwaysBuild(
                 app_env.Command(
-                    target,
+                    external_file_def.path,
                     None,
                     Action(
-                        command,
+                        external_file_def.command,
                         "" if app_env["VERBOSE"] else "\tEXTCMD\t${TARGET}",
                     ),
                 )
@@ -55,19 +56,62 @@ def BuildAppElf(env, app):
             icon_bundle_name=f"{app.appid}_icons",
         )
 
+    private_libs = []
+
+    for lib_def in app.fap_private_libs:
+        lib_src_root_path = os.path.join(app_work_dir, "lib", lib_def.name)
+        app_env.AppendUnique(
+            CPPPATH=list(
+                app_env.Dir(lib_src_root_path).Dir(incpath).srcnode()
+                for incpath in lib_def.fap_include_paths
+            ),
+        )
+
+        lib_sources = list(
+            itertools.chain.from_iterable(
+                app_env.GlobRecursive(source_type, lib_src_root_path)
+                for source_type in lib_def.sources
+            )
+        )
+        if len(lib_sources) == 0:
+            raise UserError(f"No sources gathered for private library {lib_def}")
+
+        private_lib_env = app_env.Clone()
+        private_lib_env.AppendUnique(
+            CCFLAGS=[
+                *lib_def.cflags,
+                # Required for lib to be linkable with .faps
+                # "-mword-relocations",
+                # "-mlong-calls",
+            ],
+            CPPDEFINES=lib_def.cdefines,
+            CPPPATH=list(
+                os.path.join(app._appdir.path, cinclude)
+                # cinclude
+                # app_env.Dir(cinclude).srcnode()
+                for cinclude in lib_def.cincludes
+            ),
+        )
+
+        lib = private_lib_env.StaticLibrary(
+            os.path.join(app_work_dir, lib_def.name),
+            lib_sources,
+        )
+        private_libs.append(lib)
+
     app_sources = list(
         itertools.chain.from_iterable(
             app_env.GlobRecursive(
                 source_type,
                 app_work_dir,
+                exclude="lib",
             )
             for source_type in app.sources
         )
     )
 
     app_env.Append(
-        LIBS=app.fap_libs,
-        CPPPATH=env.Dir(app_work_dir),
+        LIBS=[*app.fap_libs, *private_libs],
     )
 
     app_elf_raw = app_env.Program(
@@ -102,7 +146,6 @@ def BuildAppElf(env, app):
             app_elf_augmented,
             app_env.File(f"{app._apppath}/{app.fap_icon}"),
         )
-    # app_env.Alias(app_alias, app_elf_augmented)
 
     app_elf_import_validator = app_env.ValidateAppImports(app_elf_augmented)
     app_env.AlwaysBuild(app_elf_import_validator)

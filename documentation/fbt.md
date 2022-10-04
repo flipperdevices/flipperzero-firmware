@@ -59,10 +59,11 @@ To run cleanup (think of `make clean`) for specified targets, add `-c` option.
 
 ### Firmware targets
 
-- `firmware_extapps` - build all plug-ins as separate .elf files
-    - `firmware_snake_game`, etc - build single plug-in as .elf by its name
-    - Check out `--extra-ext-apps` for force adding extra apps to external build 
-    - `firmware_snake_game_list`, etc - generate source + assembler listing for app's .elf
+- `faps` - build all external & plugin apps as [.faps](./AppsOnSDCard.md#fap-flipper-application-package). 
+- **`fbt`** also defines per-app targets. For example, for an app with `appid=snake_game` target names are:
+    - `fap_snake_game`, etc - build single app as .fap by its application ID.
+    - Check out [`--extra-ext-apps`](#command-line-parameters) for force adding extra apps to external build
+    - `fap_snake_game_list`, etc - generate source + assembler listing for app's .fap
 - `flash`, `firmware_flash` - flash current version to attached device with OpenOCD over ST-Link
 - `jflash` - flash current version to attached device with JFlash using J-Link probe. JFlash executable must be on your $PATH
 - `flash_blackmagic` - flash current version to attached device with Blackmagic probe
