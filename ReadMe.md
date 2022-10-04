@@ -170,12 +170,10 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [BadUSB: add SYSRQ keys #1460 (By rck)](https://github.com/flipperdevices/flipperzero-firmware/pull/1460)
 - [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
 - [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
-- [Change default keyboard to Uppercase #1548 (By DrEverr)](https://github.com/flipperdevices/flipperzero-firmware/pull/1548)
 - [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 - [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
 - [SD info: Add dynamic units and free % #1634 (By non-bin)](https://github.com/flipperdevices/flipperzero-firmware/pull/1634)
 - [FFF trailing space fix #1811 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1811)
-- [Fix-read-in-readraw-crash #80 (By derskythe)](https://github.com/Eng1n33r/flipperzero-firmware/pull/80)
 
 </details>
 
