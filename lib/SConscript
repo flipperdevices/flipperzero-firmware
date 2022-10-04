@@ -79,6 +79,7 @@ libs = env.BuildModules(
         "flipper_format",
         "infrared",
         "littlefs",
+        "mbedtls",
         "subghz",
         "nfc",
         "appframe",
