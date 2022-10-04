@@ -4,8 +4,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 
-// #include "assets_icons.h"
-#include "sample_images_icons.h"
+#include "example_images_icons.h"
 
 typedef struct {
     uint8_t x, y;
@@ -28,7 +27,7 @@ static void app_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
-int32_t sample_images_main(void* p) {
+int32_t example_images_main(void* p) {
     UNUSED(p);
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
