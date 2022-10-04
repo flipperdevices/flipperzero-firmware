@@ -4,6 +4,8 @@
 #include <m-string.h>
 #include <storage/storage.h>
 
+#define CUSTOM_ICON_MAX_SIZE 32
+
 typedef enum {
     ArchiveFileTypeIButton,
     ArchiveFileTypeNFC,
@@ -22,33 +24,56 @@ typedef enum {
 typedef struct {
     string_t path;
     ArchiveFileTypeEnum type;
+    uint8_t* custom_icon_data;
+    string_t display_name;
     bool fav;
     bool is_app;
 } ArchiveFile_t;
 
 static void ArchiveFile_t_init(ArchiveFile_t* obj) {
-    obj->type = ArchiveFileTypeUnknown;
-    obj->is_app = false;
-    obj->fav = false;
     string_init(obj->path);
+    obj->type = ArchiveFileTypeUnknown;
+    obj->custom_icon_data = NULL;
+    string_init(obj->display_name);
+    obj->fav = false;
+    obj->is_app = false;
 }
 
 static void ArchiveFile_t_init_set(ArchiveFile_t* obj, const ArchiveFile_t* src) {
-    obj->type = src->type;
-    obj->is_app = src->is_app;
-    obj->fav = src->fav;
     string_init_set(obj->path, src->path);
+    obj->type = src->type;
+    if(src->custom_icon_data) {
+        obj->custom_icon_data = malloc(CUSTOM_ICON_MAX_SIZE);
+        memcpy(obj->custom_icon_data, src->custom_icon_data, CUSTOM_ICON_MAX_SIZE);
+    } else {
+        obj->custom_icon_data = NULL;
+    }
+    string_init_set(obj->display_name, src->display_name);
+    obj->fav = src->fav;
+    obj->is_app = src->is_app;
 }
 
 static void ArchiveFile_t_set(ArchiveFile_t* obj, const ArchiveFile_t* src) {
-    obj->type = src->type;
-    obj->is_app = src->is_app;
-    obj->fav = src->fav;
     string_set(obj->path, src->path);
+    obj->type = src->type;
+    if(src->custom_icon_data) {
+        obj->custom_icon_data = malloc(CUSTOM_ICON_MAX_SIZE);
+        memcpy(obj->custom_icon_data, src->custom_icon_data, CUSTOM_ICON_MAX_SIZE);
+    } else {
+        obj->custom_icon_data = NULL;
+    }
+    string_set(obj->display_name, src->display_name);
+    obj->fav = src->fav;
+    obj->is_app = src->is_app;
 }
 
 static void ArchiveFile_t_clear(ArchiveFile_t* obj) {
     string_clear(obj->path);
+    if(obj->custom_icon_data) {
+        free(obj->custom_icon_data);
+        obj->custom_icon_data = NULL;
+    }
+    string_clear(obj->display_name);
 }
 
 ARRAY_DEF(

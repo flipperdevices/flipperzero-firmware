@@ -115,7 +115,7 @@ static bool fap_loader_select_app(FapLoader* loader) {
     const DialogsFileBrowserOptions browser_options = {
         .extension = ".fap",
         .skip_assets = true,
-        .icon = &I_badusb_10px,
+        .icon = &I_unknown_10px,
         .hide_ext = true,
         .item_loader_callback = fap_loader_item_callback,
         .item_loader_context = loader,
