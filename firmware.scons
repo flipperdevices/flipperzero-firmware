@@ -1,5 +1,6 @@
 Import("ENV", "fw_build_meta")
 
+from SCons.Errors import UserError
 import itertools
 
 from fbt.util import (
@@ -166,11 +167,23 @@ for app_dir, _ in env["APPDIRS"]:
     app_dir_node = env.Dir("#").Dir(app_dir)
     fwenv.Depends(apps_c, fwenv.GlobRecursive("*.fam", app_dir_node))
 
+# Sanity check - certain external apps are using features that are not available in base firmware
+if advanced_faps := list(
+    filter(
+        lambda app: app.fap_extbuild or app.fap_private_libs or app.fap_icon_assets,
+        fwenv["APPBUILD"].get_builtin_apps(),
+    )
+):
+    raise UserError(
+        "An Application that is using fap-specific features cannot be built into base firmware."
+        f" Offending app(s): {', '.join(app.appid for app in advanced_faps)}"
+    )
+
 sources = [apps_c]
 # Gather sources only from app folders in current configuration
 sources.extend(
     itertools.chain.from_iterable(
-        fwenv.GlobRecursive(source_type, appdir.relpath)
+        fwenv.GlobRecursive(source_type, appdir.relpath, exclude="lib")
         for appdir, source_type in fwenv["APPBUILD"].get_builtin_app_folders()
     )
 )
