@@ -3,6 +3,13 @@
 
 #define NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX (10U)
 
+static const NotificationSequence sequence_detect_reader = {
+    &message_green_255,
+    &message_blue_255,
+    &message_do_not_reset,
+    NULL,
+};
+
 bool nfc_detect_reader_worker_callback(NfcWorkerEvent event, void* context) {
     UNUSED(event);
     furi_assert(context);
@@ -26,7 +33,7 @@ void nfc_scene_detect_reader_on_enter(void* context) {
 
     // Store number of collected nonces in scene state
     scene_manager_set_scene_state(nfc->scene_manager, NfcSceneDetectReader, 0);
-    notification_message(nfc->notifications, &sequence_solid_yellow);
+    notification_message(nfc->notifications, &sequence_detect_reader);
 
     nfc_worker_start(
         nfc->worker,
@@ -56,20 +63,20 @@ bool nfc_scene_detect_reader_on_event(void* context, SceneManagerEvent event) {
             if(nonces_collected >= NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX) {
                 detect_reader_set_state(nfc->detect_reader, DetectReaderStateDone);
                 nfc_blink_stop(nfc);
-                notification_message(nfc->notifications, &sequence_success);
+                notification_message(nfc->notifications, &sequence_single_vibro);
+                notification_message(nfc->notifications, &sequence_set_green_255);
                 nfc_worker_stop(nfc->worker);
             }
             consumed = true;
         } else if(event.event == NfcWorkerEventDetectReaderDetected) {
             if(nonces_collected < NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX) {
-                nfc_blink_stop(nfc);
-                notification_message(nfc->notifications, &sequence_blink_start_magenta);
+                notification_message(nfc->notifications, &sequence_blink_start_cyan);
                 detect_reader_set_state(nfc->detect_reader, DetectReaderStateReaderDetected);
             }
         } else if(event.event == NfcWorkerEventDetectReaderLost) {
             if(nonces_collected < NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX) {
                 nfc_blink_stop(nfc);
-                notification_message(nfc->notifications, &sequence_solid_yellow);
+                notification_message(nfc->notifications, &sequence_detect_reader);
                 detect_reader_set_state(nfc->detect_reader, DetectReaderStateReaderLost);
             }
         }
@@ -87,5 +94,7 @@ void nfc_scene_detect_reader_on_exit(void* context) {
     // Clear view
     detect_reader_reset(nfc->detect_reader);
 
+    // Stop notifications
     nfc_blink_stop(nfc);
+    notification_message(nfc->notifications, &sequence_reset_green);
 }
