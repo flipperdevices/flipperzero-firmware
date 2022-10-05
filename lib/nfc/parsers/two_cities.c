@@ -126,19 +126,10 @@ bool two_cities_parser_parse(NfcDeviceData* dev_data) {
     FuriString* card_number_suffix;
     card_number_suffix = furi_string_alloc();
 
-    // The number to calculate the checksum on doesn't fit into uint64_t, idk
-    //uint8_t luhn_checksum = two_cities_calculate_luhn(card_number);
-
-    // // Convert luhn checksum to string
-    // string_t luhn_checksum_str;
-    // string_init(luhn_checksum_str);
-
     furi_string_cat_printf(card_number_suffix, "-");
-    // FURI_LOG_D("plant4k", "Card checksum: %d", luhn_checksum);
     furi_string_cat_printf(card_number_str, furi_string_get_cstr(card_number_suffix));
     // Free all not needed strings
     furi_string_free(card_number_suffix);
-    // furi_string_free(luhn_checksum_str);
 
     // =====
     // --PLANTAIN--
