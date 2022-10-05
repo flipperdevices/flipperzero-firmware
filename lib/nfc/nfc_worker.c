@@ -453,7 +453,7 @@ void nfc_worker_emulate_mf_ultralight(NfcWorker* nfc_worker) {
     }
 }
 
-void nfc_worker_mf_classic_key_attack(
+static void nfc_worker_mf_classic_key_attack(
     NfcWorker* nfc_worker,
     uint64_t key,
     FuriHalNfcTxRxContext* tx_rx,
