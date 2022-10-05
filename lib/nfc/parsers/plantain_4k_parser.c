@@ -1,5 +1,5 @@
 #include "nfc_supported_card.h"
-#include "plantain_parser.h" // For luhn and string_push_uint64
+#include "plantain_parser.h" // For luhn
 
 #include <gui/modules/widget.h>
 #include <nfc_worker_i.h>
@@ -121,8 +121,7 @@ bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
     string_t card_number_str;
     string_init(card_number_str);
     // Should look like "361301047292848684"
-    // %llu doesn't work for some reason in sprintf, so we use string_push_uint64 instead
-    string_push_uint64(card_number, card_number_str);
+    string_printf(card_number_str, "%llu", card_number);
     // Add suffix with luhn checksum (1 digit) to the card number string
     string_t card_number_suffix;
     string_init(card_number_suffix);
@@ -133,7 +132,6 @@ bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
     // // Convert luhn checksum to string
     // string_t luhn_checksum_str;
     // string_init(luhn_checksum_str);
-    // string_push_uint64(luhn_checksum, luhn_checksum_str);
 
     string_cat_printf(card_number_suffix, "-");
     // FURI_LOG_D("plant4k", "Card checksum: %d", luhn_checksum);
