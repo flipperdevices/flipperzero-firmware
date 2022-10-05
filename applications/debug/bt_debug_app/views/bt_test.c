@@ -3,7 +3,6 @@
 #include <gui/canvas.h>
 #include <gui/elements.h>
 #include <m-array.h>
-#include <core/furi-string.h>
 #include <furi.h>
 #include <stdint.h>
 
