@@ -453,14 +453,20 @@ void nfc_worker_emulate_mf_ultralight(NfcWorker* nfc_worker) {
     }
 }
 
-void nfc_worker_mf_classic_key_attack(NfcWorker* nfc_worker, uint64_t key, FuriHalNfcTxRxContext* tx_rx) {
+void nfc_worker_mf_classic_key_attack(
+    NfcWorker* nfc_worker,
+    uint64_t key,
+    FuriHalNfcTxRxContext* tx_rx,
+    uint16_t start_sector) {
     furi_assert(nfc_worker);
 
     MfClassicData* data = &nfc_worker->dev_data->mf_classic_data;
     uint32_t total_sectors = mf_classic_get_total_sectors_num(data->type);
 
+    furi_assert(start_sector < total_sectors);
+
     // Check every sector's A and B keys with the given key
-    for(size_t i = 0; i < total_sectors; i++) {
+    for(size_t i = start_sector; i < total_sectors; i++) {
         uint8_t block_num = mf_classic_get_sector_trailer_block_num_by_sector(i);
         if(mf_classic_is_sector_read(data, i)) continue;
         if(!mf_classic_is_key_found(data, i, MfClassicKeyA)) {
@@ -481,7 +487,6 @@ void nfc_worker_mf_classic_key_attack(NfcWorker* nfc_worker, uint64_t key, FuriH
         mf_classic_read_sector(tx_rx, data, i);
     }
 }
-
 
 void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
@@ -537,7 +542,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     if(mf_classic_authenticate(&tx_rx, block_num, key, MfClassicKeyA)) {
                         mf_classic_set_key_found(data, i, MfClassicKeyA, key);
                         nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
-                        nfc_worker_mf_classic_key_attack(nfc_worker, key, &tx_rx);
+                        nfc_worker_mf_classic_key_attack(nfc_worker, key, &tx_rx, i + 1);
                     }
                     furi_hal_nfc_sleep();
                 }
@@ -546,7 +551,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     if(mf_classic_authenticate(&tx_rx, block_num, key, MfClassicKeyB)) {
                         mf_classic_set_key_found(data, i, MfClassicKeyB, key);
                         nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
-                        nfc_worker_mf_classic_key_attack(nfc_worker, key, &tx_rx);
+                        nfc_worker_mf_classic_key_attack(nfc_worker, key, &tx_rx, i + 1);
                     }
                 }
                 if(is_key_a_found && is_key_b_found) break;
