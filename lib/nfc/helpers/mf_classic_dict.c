@@ -73,12 +73,12 @@ MfClassicDict* mf_classic_dict_alloc(MfClassicDictType dict_type) {
                 FURI_LOG_T(TAG, "No keys left in dict");
                 break;
             }
-            furi_string_strim(next_line);
+            furi_string_trim(next_line);
             FURI_LOG_T(
                 TAG,
                 "Read line: %s, len: %d",
                 furi_string_get_cstr(next_line),
-                string_size(next_line));
+                furi_string_size(next_line));
             if(furi_string_get_char(next_line, 0) == '#') continue;
             if(furi_string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN - 1) continue;
             dict->total_keys++;
