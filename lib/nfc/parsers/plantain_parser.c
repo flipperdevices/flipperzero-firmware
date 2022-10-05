@@ -93,7 +93,7 @@ bool plantain_parser_parse(NfcDeviceData* dev_data) {
     FuriString* card_number_str;
     card_number_str = furi_string_alloc();
     // Should look like "361301047292848684"
-    string_printf(card_number_str, "%llu", card_number);
+    furi_string_printf(card_number_str, "%llu", card_number);
     // Add suffix with luhn checksum (1 digit) to the card number string
     FuriString* card_number_suffix;
     card_number_suffix = furi_string_alloc();
