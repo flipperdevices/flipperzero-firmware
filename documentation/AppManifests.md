@@ -93,14 +93,17 @@ Example for building an app with a private library:
                     "library/sha1.c",
                     "library/platform_util.c",
                 ],
+                cdefines=["MBEDTLS_ERROR_C"],
             ),
             Lib(
                 name="loclass",
+                cflags=["-Wno-error"],
             ),
         ],
 ```
 
-For that snippet, **`fbt`** will build 2 libraries: one from sources in `lib/mbedtls` folder, and another from sources in `lib/loclass` folder. For `mbedtls` library, **`fbt`** will add `lib/mbedtls/include` to the list of include paths for the application and compile only the files specified in `sources` list. For `loclass` library, **`fbt`** will add `lib/loclass` to the list of include paths for the application and build all sources in that folder.
+For that snippet, **`fbt`** will build 2 libraries: one from sources in `lib/mbedtls` folder, and another from sources in `lib/loclass` folder. For `mbedtls` library, **`fbt`** will add `lib/mbedtls/include` to the list of include paths for the application and compile only the files specified in `sources` list. Additionally, **`fbt`** will enable `MBEDTLS_ERROR_C` preprocessor definition for `mbedtls` sources. 
+For `loclass` library, **`fbt`** will add `lib/loclass` to the list of include paths for the application and build all sources in that folder. Also **`fbt`** will disable treating compiler warnings as errors for `loclass` library specifically - that can be useful when compiling large 3rd-party codebases.
 
 Both libraries will be linked into the application.
 
