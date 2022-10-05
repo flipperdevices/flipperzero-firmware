@@ -1165,6 +1165,7 @@ Function,+,furi_hal_nfc_listen,_Bool,"uint8_t*, uint8_t, uint8_t*, uint8_t, _Boo
 Function,+,furi_hal_nfc_listen_rx,_Bool,"FuriHalNfcTxRxContext*, uint32_t"
 Function,+,furi_hal_nfc_listen_sleep,void,
 Function,+,furi_hal_nfc_listen_start,void,FuriHalNfcDevData*
+Function,+,furi_hal_nfc_ll_field_on,FuriHalNfcReturn,
 Function,+,furi_hal_nfc_ll_poll,void,
 Function,+,furi_hal_nfc_ll_set_error_handling,void,FuriHalNfcErrorHandling
 Function,+,furi_hal_nfc_ll_set_fdt_listen,void,uint32_t

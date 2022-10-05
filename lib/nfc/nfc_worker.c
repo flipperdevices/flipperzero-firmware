@@ -133,25 +133,25 @@ static bool nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker, FuriHalNfcTxRxC
 
     do {
         // Try to read supported card
-        FURI_LOG_I(TAG, "Trying to read a supported card ...");
-        for(size_t i = 0; i < NfcSupportedCardTypeEnd; i++) {
-            if(nfc_supported_card[i].protocol == NfcDeviceProtocolMifareUl) {
-                if(nfc_supported_card[i].verify(nfc_worker, tx_rx)) {
-                    if(nfc_supported_card[i].read(nfc_worker, tx_rx)) {
-                        read_success = true;
-                        nfc_supported_card[i].parse(nfc_worker->dev_data);
-                        break;
-                    }
-                } else {
-                    furi_hal_nfc_sleep();
-                }
-            }
-        }
-        if(read_success) break;
-        furi_hal_nfc_sleep();
+        // FURI_LOG_I(TAG, "Trying to read a supported card ...");
+        // for(size_t i = 0; i < NfcSupportedCardTypeEnd; i++) {
+        //     if(nfc_supported_card[i].protocol == NfcDeviceProtocolMifareUl) {
+        //         if(nfc_supported_card[i].verify(nfc_worker, tx_rx)) {
+        //             if(nfc_supported_card[i].read(nfc_worker, tx_rx)) {
+        //                 read_success = true;
+        //                 nfc_supported_card[i].parse(nfc_worker->dev_data);
+        //                 break;
+        //             }
+        //         } else {
+        //             furi_hal_nfc_sleep();
+        //         }
+        //     }
+        // }
+        // if(read_success) break;
+        // furi_hal_nfc_sleep();
 
-        // Otherwise, try to read as usual
-        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200)) break;
+        // // Otherwise, try to read as usual
+        // if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200)) break;
         if(!mf_ul_read_card(tx_rx, &reader, &data)) break;
         // Copy data
         nfc_worker->dev_data->mf_ul_data = data;
@@ -359,9 +359,9 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
             data->nfc_data.atqa[0] = dev.sensRes.anticollisionInfo;
             data->nfc_data.atqa[1] = dev.sensRes.platformInfo;
             data->nfc_data.sak = dev.selRes.sak;
-            nfc_worker->callback(NfcWorkerEventReadUidNfcA, nfc_worker->context);
+            // nfc_worker->callback(NfcWorkerEventReadUidNfcA, nfc_worker->context);
             FURI_LOG_I(TAG, "Success");
-            break;
+            bool card_read = nfc_worker_read_mf_ultralight(nfc_worker, tx_rx);
         }
     }
 }
