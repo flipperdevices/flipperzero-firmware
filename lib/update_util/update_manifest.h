@@ -6,7 +6,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <core/furi_string.h>
+#include <furi.h>
 #include <furi_hal_flash.h>
 
 /* Paths don't include /ext -- because at startup SD card is mounted as FS root */

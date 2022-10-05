@@ -1,5 +1,5 @@
 #pragma once
-#include <core/furi_string.h>
+#include <furi.h>
 
 #ifdef __cplusplus
 extern "C" {

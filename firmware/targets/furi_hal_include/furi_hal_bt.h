@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <core/furi_string.h>
+#include <furi.h>
 #include <stdbool.h>
 #include <gap.h>
 #include <serial_service.h>

@@ -1,5 +1,5 @@
 /**
- * @file furi_string.h
+ * @file string.h
  * Furi string primitive
  */
 #pragma once
@@ -92,7 +92,7 @@ void furi_string_free(FuriString* string);
 
 /**
  * @brief Reserve memory for string.
- * Modify the string capacity to be able to handle at least 'alloc' characters (including final nul char).
+ * Modify the string capacity to be able to handle at least 'alloc' characters (including final null char).
  * @param string 
  * @param size 
  */
@@ -238,7 +238,7 @@ void furi_string_push_back(FuriString* string, char c);
 
 /**
  * @brief Append a string to the string.
- * Concatene the string with the other string.
+ * Concatenate the string with the other string.
  * @param string_1 
  * @param string_2 
  */
@@ -246,7 +246,7 @@ void furi_string_cat(FuriString* string_1, const FuriString* string_2);
 
 /**
  * @brief Append a C string to the string.
- * Concatene the string with the C string.
+ * Concatenate the string with the C string.
  * @param string_1 
  * @param cstring_2 
  */
@@ -291,7 +291,7 @@ int furi_string_cmp(const FuriString* string_1, const FuriString* string_2);
 int furi_string_cmp_str(const FuriString* string_1, const char cstring_2[]);
 
 /**
- * @brief Compare two strings (case insentive according to the current locale) and return the sort order.
+ * @brief Compare two strings (case insensitive according to the current locale) and return the sort order.
  * Note: doesn't work with UTF-8 strings.
  * @param string_1 
  * @param string_2 
@@ -300,7 +300,7 @@ int furi_string_cmp_str(const FuriString* string_1, const char cstring_2[]);
 int furi_string_cmpi(const FuriString* string_1, const FuriString* string_2);
 
 /**
- * @brief Compare string with C string (case insentive according to the current locale) and return the sort order.
+ * @brief Compare string with C string (case insensitive according to the current locale) and return the sort order.
  * Note: doesn't work with UTF-8 strings.
  * @param string_1 
  * @param cstring_2 
@@ -313,7 +313,7 @@ int furi_string_cmpi_str(const FuriString* string_1, const char cstring_2[]);
 //---------------------------------------------------------------------------
 
 /**
- * @brief Search the first occurence of the needle in the string from the position start.
+ * @brief Search the first occurrence of the needle in the string from the position start.
  * Return STRING_FAILURE if not found.
  * By default, start is zero.
  * @param string 
@@ -324,7 +324,7 @@ int furi_string_cmpi_str(const FuriString* string_1, const char cstring_2[]);
 size_t furi_string_search(const FuriString* string, const FuriString* needle, size_t start);
 
 /**
- * @brief Search the first occurence of the needle in the string from the position start.
+ * @brief Search the first occurrence of the needle in the string from the position start.
  * Return STRING_FAILURE if not found.
  * @param string 
  * @param needle 
@@ -389,7 +389,7 @@ bool furi_string_equal_str(const FuriString* string_1, const char cstring_2[]);
 void furi_string_replace_at(FuriString* string, size_t pos, size_t len, const char replace[]);
 
 /**
- * @brief Replace a tring 'needle' to string 'replace' in a string from 'start' position.
+ * @brief Replace a string 'needle' to string 'replace' in a string from 'start' position.
  * By default, start is zero.
  * Return STRING_FAILURE if 'needle' not found or replace position.
  * @param string 
@@ -418,7 +418,7 @@ size_t furi_string_replace_str(
     size_t start);
 
 /**
- * @brief Replace all occurences of 'needle' string into 'replace' string.
+ * @brief Replace all occurrences of 'needle' string into 'replace' string.
  * @param string 
  * @param needle 
  * @param replace 
@@ -429,7 +429,7 @@ void furi_string_replace_all(
     const FuriString* replace);
 
 /**
- * @brief Replace all occurences of 'needle' C string into 'replace' C string.
+ * @brief Replace all occurrences of 'needle' C string into 'replace' C string.
  * @param string 
  * @param needle 
  * @param replace 
@@ -544,7 +544,7 @@ typedef enum {
  * @brief Main generic UTF8 decoder.
  * It takes a character, and the previous state and the previous value of the unicode value.
  * It updates the state and the decoded unicode value.
- * A decoded unicoded value is valid only when the state is FuriStringUTF8StateStarting.
+ * A decoded unicode encoded value is valid only when the state is FuriStringUTF8StateStarting.
  * @param c 
  * @param state 
  * @param unicode 
@@ -558,7 +558,7 @@ void furi_string_utf8_decode(char c, FuriStringUTF8State* state, FuriStringUnico
 /**
  *
  * Select either the string function or the str function depending on
- * the b operade to the function.
+ * the b operand to the function.
  * func1 is the string function / func2 is the str function.
  */
 
@@ -607,7 +607,7 @@ void furi_string_utf8_decode(char c, FuriStringUTF8State* state, FuriStringUnico
 #define furi_string_cmp(a, b) FURI_STRING_SELECT2(furi_string_cmp, furi_string_cmp_str, a, b)
 
 /**
- * @brief Compare string with string (or C string) (case insentive according to the current locale) and return the sort order.
+ * @brief Compare string with string (or C string) (case insensitive according to the current locale) and return the sort order.
  * Note: doesn't work with UTF-8 strings.
  * (string, [c]string)
  */
@@ -620,7 +620,7 @@ void furi_string_utf8_decode(char c, FuriStringUTF8State* state, FuriStringUnico
 #define furi_string_equal(a, b) FURI_STRING_SELECT2(furi_string_equal, furi_string_equal_str, a, b)
 
 /**
- * @brief Replace all occurences of string into string (or C string to another C string) in a string.
+ * @brief Replace all occurrences of string into string (or C string to another C string) in a string.
  * (string, [c]string, [c]string)
  */
 #define furi_string_replace_all(a, b, c) \

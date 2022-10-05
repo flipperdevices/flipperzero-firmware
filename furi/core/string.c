@@ -1,4 +1,4 @@
-#include "furi_string.h"
+#include "string.h"
 #include <m-string.h>
 
 struct FuriString {

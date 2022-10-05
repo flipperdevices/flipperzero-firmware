@@ -5,7 +5,7 @@
 #include <furi_hal_crypto.h>
 
 #include <interface/patterns/ble_thread/shci/shci.h>
-#include <core/furi_string.h>
+#include <furi.h>
 #include <protobuf_version.h>
 
 void furi_hal_info_get(FuriHalInfoValueCallback out, void* context) {

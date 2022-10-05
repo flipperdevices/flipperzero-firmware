@@ -17,7 +17,7 @@
 #include <core/thread.h>
 #include <core/timer.h>
 #include <core/valuemutex.h>
-#include <core/furi_string.h>
+#include <core/string.h>
 
 #include <furi_hal_gpio.h>
 

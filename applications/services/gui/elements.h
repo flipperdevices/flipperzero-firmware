@@ -9,7 +9,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <core/furi_string.h>
+#include <furi.h>
 #include "canvas.h"
 
 #ifdef __cplusplus

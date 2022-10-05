@@ -5,7 +5,7 @@
 #include "check.h"
 #include "common_defines.h"
 #include "mutex.h"
-#include "furi_string.h"
+#include "string.h"
 
 #include <task.h>
 #include "log.h"

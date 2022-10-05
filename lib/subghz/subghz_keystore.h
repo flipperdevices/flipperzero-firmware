@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/furi_string.h>
+#include <furi.h>
 #include <m-array.h>
 #include <stdint.h>
 
