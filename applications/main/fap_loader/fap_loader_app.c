@@ -20,11 +20,14 @@ struct FapLoader {
     Loading* loading;
 };
 
-bool fap_loader_item_callback(string_t path, void* context, uint8_t** icon_ptr, string_t item_name) {
-    FapLoader* loader = context;
-    furi_assert(loader);
+bool fap_loader_load_name_and_icon(
+    string_t path,
+    Storage* storage,
+    uint8_t** icon_ptr,
+    string_t item_name) {
+    furi_assert(storage);
 
-    FlipperApplication* app = flipper_application_alloc(loader->storage, &hashtable_api_interface);
+    FlipperApplication* app = flipper_application_alloc(storage, &hashtable_api_interface);
 
     FlipperApplicationPreloadStatus preload_res =
         flipper_application_preload_manifest(app, string_get_cstr(path));
@@ -45,6 +48,13 @@ bool fap_loader_item_callback(string_t path, void* context, uint8_t** icon_ptr, 
 
     flipper_application_free(app);
     return load_success;
+}
+
+static bool
+    fap_loader_item_callback(string_t path, void* context, uint8_t** icon_ptr, string_t item_name) {
+    FapLoader* fap_loader = context;
+    furi_assert(fap_loader);
+    return fap_loader_load_name_and_icon(path, fap_loader->storage, icon_ptr, item_name);
 }
 
 static bool fap_loader_run_selected_app(FapLoader* loader) {
@@ -140,14 +150,9 @@ static bool fap_loader_select_app(FapLoader* loader) {
         loader->dialogs, loader->fap_path, loader->fap_path, &browser_options);
 }
 
-FapLoader* fap_loader_alloc_minimal() {
+static FapLoader* fap_loader_alloc_full() {
     FapLoader* loader = malloc(sizeof(FapLoader));
     loader->storage = furi_record_open(RECORD_STORAGE);
-    return loader;
-}
-
-static FapLoader* fap_loader_alloc_full() {
-    FapLoader* loader = fap_loader_alloc_minimal();
     loader->dialogs = furi_record_open(RECORD_DIALOGS);
     loader->gui = furi_record_open(RECORD_GUI);
     loader->view_dispatcher = view_dispatcher_alloc();
@@ -158,11 +163,6 @@ static FapLoader* fap_loader_alloc_full() {
     return loader;
 }
 
-void fap_loader_free_minimal(FapLoader* loader) {
-    furi_record_close(RECORD_STORAGE);
-    free(loader);
-}
-
 static void fap_loader_free_full(FapLoader* loader) {
     view_dispatcher_remove_view(loader->view_dispatcher, 0);
     loading_free(loader->loading);
@@ -170,7 +170,8 @@ static void fap_loader_free_full(FapLoader* loader) {
     string_clear(loader->fap_path);
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_DIALOGS);
-    fap_loader_free_minimal(loader);
+    furi_record_close(RECORD_STORAGE);
+    free(loader);
 }
 
 int32_t fap_loader_app(void* p) {

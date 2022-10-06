@@ -1,10 +1,27 @@
-#ifndef FAP_LOADER_APP_H
-#define FAP_LPADER_APP_H
+#pragma once
+#include <storage/storage.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct FapLoader FapLoader;
 
-bool fap_loader_item_callback(string_t path, void* context, uint8_t** icon_ptr, string_t item_name);
-FapLoader* fap_loader_alloc_minimal();
-void fap_loader_free_minimal(FapLoader* loader);
+/**
+ * @brief Load name and icon from FAP file.
+ * 
+ * @param path Path to FAP file.
+ * @param storage Storage instance.
+ * @param icon_ptr Icon pointer.
+ * @param item_name Application name.
+ * @return true if icon and name were loaded successfully.
+ */
+bool fap_loader_load_name_and_icon(
+    string_t path,
+    Storage* storage,
+    uint8_t** icon_ptr,
+    string_t item_name);
 
-#endif // FAP_LOADER_APP_H
+#ifdef __cplusplus
+}
+#endif

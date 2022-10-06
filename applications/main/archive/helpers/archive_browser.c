@@ -353,10 +353,12 @@ void archive_add_app_item(ArchiveBrowserView* browser, const char* name) {
 }
 
 static bool archive_get_fap_meta(string_t file_path, string_t fap_name, uint8_t** icon_ptr) {
-    FapLoader* loader = fap_loader_alloc_minimal();
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     bool success = false;
-    if(fap_loader_item_callback(file_path, loader, icon_ptr, fap_name)) success = true;
-    fap_loader_free_minimal(loader);
+    if(fap_loader_load_name_and_icon(file_path, storage, icon_ptr, fap_name)) {
+        success = true;
+    }
+    furi_record_close(RECORD_STORAGE);
     return success;
 }
 
