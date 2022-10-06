@@ -375,13 +375,13 @@ static void subghz_protocol_magellen_check_remote_controller(SubGhzBlockGeneric*
     instance->btn = (data_rev >> 16) & 0xFF;
 }
 
-static void subghz_protocol_magellen_get_event_serialize(uint8_t event, string_t output) {
-    string_cat_printf(
+static void subghz_protocol_magellen_get_event_serialize(uint8_t event, FuriString* output) {
+    furi_string_cat_printf(
         output,
         "%s%s%s%s%s%s%s%s",
         ((event >> 4) & 0x1 ? (event & 0x1 ? " Open" : " Close") :
                               (event & 0x1 ? " Motion" : " Ok")),
-        ((event >> 1) & 0x1 ? ", Tamper On (Alarm)" : ""),
+        ((event >> 1) & 0x1 ? ", Tamper On\n(Alarm)" : ""),
         ((event >> 2) & 0x1 ? ", ?" : ""),
         ((event >> 3) & 0x1 ? ", Power On" : ""),
         ((event >> 4) & 0x1 ? ", MT:Wireless_Reed" : ""),
@@ -424,11 +424,11 @@ bool subghz_protocol_decoder_magellen_deserialize(void* context, FlipperFormat* 
     return ret;
 }
 
-void subghz_protocol_decoder_magellen_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_magellen_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderMagellen* instance = context;
     subghz_protocol_magellen_check_remote_controller(&instance->generic);
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
         "Key:0x%08lX\r\n"

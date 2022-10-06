@@ -109,10 +109,7 @@ static int storage_int_device_prog(
 
     int ret = 0;
     while(size > 0) {
-        if(!furi_hal_flash_write_dword(address, *(uint64_t*)buffer)) {
-            ret = -1;
-            break;
-        }
+        furi_hal_flash_write_dword(address, *(uint64_t*)buffer);
         address += c->prog_size;
         buffer += c->prog_size;
         size -= c->prog_size;
@@ -127,16 +124,13 @@ static int storage_int_device_erase(const struct lfs_config* c, lfs_block_t bloc
 
     FURI_LOG_D(TAG, "Device erase: page %d, translated page: %x", block, page);
 
-    if(furi_hal_flash_erase(page)) {
-        return 0;
-    } else {
-        return -1;
-    }
+    furi_hal_flash_erase(page);
+    return 0;
 }
 
 static int storage_int_device_sync(const struct lfs_config* c) {
     UNUSED(c);
-    FURI_LOG_D(TAG, "Device sync: skipping, cause ");
+    FURI_LOG_D(TAG, "Device sync: skipping");
     return 0;
 }
 
@@ -344,11 +338,12 @@ static bool storage_int_file_open(
     storage_set_storage_file_data(file, handle, storage);
 
     if(!enough_free_space) {
-        string_t filename;
-        string_init(filename);
+        FuriString* filename;
+        filename = furi_string_alloc();
         path_extract_basename(path, filename);
-        bool is_dot_file = (!string_empty_p(filename) && (string_get_char(filename, 0) == '.'));
-        string_clear(filename);
+        bool is_dot_file =
+            (!furi_string_empty(filename) && (furi_string_get_char(filename, 0) == '.'));
+        furi_string_free(filename);
 
         /* Restrict write & creation access to all non-dot files */
         if(!is_dot_file && (flags & (LFS_O_CREAT | LFS_O_WRONLY))) {
