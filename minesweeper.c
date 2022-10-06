@@ -81,7 +81,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     }
     FuriString* tempStr;
     tempStr = furi_string_alloc();
-    furi_string_cat_printf(tempStr, "Mines: %d", MINECOUNT - minesweeper_state->flags_set);
+    furi_string_printf(tempStr, "Mines: %d", MINECOUNT - minesweeper_state->flags_set);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, furi_string_get_cstr(tempStr));
     furi_string_free(tempStr);
@@ -93,7 +93,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
       minutes = (int) seconds / 60;
       seconds = seconds % 60;
     }
-    furi_string_cat_printf(tempStr, "%01d:%02d", minutes, seconds);
+    furi_string_printf(tempStr, "%01d:%02d", minutes, seconds);
     canvas_draw_str_aligned(canvas, 128, 0, AlignRight, AlignTop, furi_string_get_cstr(tempStr));
     furi_string_free(tempStr);
 
