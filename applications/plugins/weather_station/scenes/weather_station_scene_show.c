@@ -1,19 +1,45 @@
 #include "../weather_station_app_i.h"
 
-void get_string(string_t output) {
-    string_cat_printf(
-        output,
-        "%s %dbit\r\n"
-        "Key:0x%08lX\r\n"
-        "Ch:%d \r\n"
-        "T:%d.%dC  H:%d%\r\n",
-        "TermoPRO",
-        24,
-        0x1122AA,
-        1,
-        21,
-        13,
-        52);
+// void get_string(string_t output) {
+//     string_cat_printf(
+//         output,
+//         "%s %dbit\r\n"
+//         "Key:0x%08lX\r\n"
+//         "Ch:%d \r\n"
+//         "T:%d.%dC  H:%d%\r\n",
+//         "TermoPRO",
+//         24,
+//         0x1122AA,
+//         1,
+//         21,
+//         13,
+//         52);
+// }
+
+
+
+static void weather_station_scene_show_callback(
+    SubGhzReceiver* receiver,
+    SubGhzProtocolDecoderBase* decoder_base,
+    void* context) {
+    furi_assert(context);
+    WeatherStationApp* app = context;
+    UNUSED(app);
+    //string_t str_buff;
+    // string_init(str_buff);
+
+    // subghz_protocol_decoder_base_get_string(decoder_base, str_buff);
+    // weather_station_show_add_data_to_show(app->weather_station_show, string_get_cstr(str_buff));
+
+    // subghz_receiver_reset(receiver);
+    // string_clear(str_buff);
+
+    string_t text;
+    string_init(text);
+    subghz_protocol_decoder_base_get_string(decoder_base, text);
+    subghz_receiver_reset(receiver);
+    printf("%s", string_get_cstr(text));
+    string_clear(text);
 }
 
 void weather_station_scene_show_on_enter(void* context) {
@@ -23,8 +49,8 @@ void weather_station_scene_show_on_enter(void* context) {
 
     string_t key_str;
     string_init(key_str);
-    get_string(key_str);
-    weather_station_show_add_data_to_show(app->weather_station_show, string_get_cstr(key_str));
+    //get_string(key_str);
+    //weather_station_show_add_data_to_show(app->weather_station_show, string_get_cstr(key_str));
 
     string_clear(key_str);
 
@@ -36,6 +62,10 @@ void weather_station_scene_show_on_enter(void* context) {
         weather_station_begin(app, app->txrx->preset->preset);
         weather_station_rx(app, app->txrx->preset->frequency);
     }
+
+    subghz_receiver_set_filter(app->txrx->receiver, SubGhzProtocolFlag_Decodable);
+    subghz_receiver_set_rx_callback(
+        app->txrx->receiver, weather_station_scene_show_callback, app);
 }
 
 bool weather_station_scene_show_on_event(void* context, SceneManagerEvent event) {

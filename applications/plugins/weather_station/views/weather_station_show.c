@@ -27,7 +27,24 @@ typedef struct {
 //     weather_station_show->context = context;
 // }
 
-void weather_station_show_add_data_to_show(WeatherStationShow* weather_station_show, const char* key_str) {
+// void weather_station_show_update(
+//     SubGhzReceiver* receiver,
+//     SubGhzProtocolDecoderBase* decoder_base,
+//     void* context) {
+//     WeatherStationShow* app = context;
+
+//     with_view_model(
+//         weather_station_show->view, (WeatherStationShowModel * model) {
+//             subghz_protocol_decoder_base_get_string(decoder_base, model->key_str);
+//             subghz_receiver_reset(receiver);
+
+//             return true;
+//         });
+// }
+
+void weather_station_show_add_data_to_show(
+    WeatherStationShow* weather_station_show,
+    const char* key_str) {
     furi_assert(weather_station_show);
     with_view_model(
         weather_station_show->view, (WeatherStationShowModel * model) {
@@ -44,7 +61,7 @@ void weather_station_show_draw(Canvas* canvas, WeatherStationShowModel* model) {
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 20, 8, "Weather Station");
-    
+
     canvas_set_font(canvas, FontKeyboard);
     elements_multiline_text(canvas, 0, 20, string_get_cstr(model->key_str));
     // canvas_draw_str(canvas, 78, 8, string_get_cstr(model->frequency_str));
@@ -76,9 +93,11 @@ WeatherStationShow* weather_station_show_alloc() {
 
     // View allocation and configuration
     weather_station_show->view = view_alloc();
-    view_allocate_model(weather_station_show->view, ViewModelTypeLocking, sizeof(WeatherStationShowModel));
+    view_allocate_model(
+        weather_station_show->view, ViewModelTypeLocking, sizeof(WeatherStationShowModel));
     view_set_context(weather_station_show->view, weather_station_show);
-    view_set_draw_callback(weather_station_show->view, (ViewDrawCallback)weather_station_show_draw);
+    view_set_draw_callback(
+        weather_station_show->view, (ViewDrawCallback)weather_station_show_draw);
     view_set_input_callback(weather_station_show->view, weather_station_show_input);
     view_set_enter_callback(weather_station_show->view, weather_station_show_enter);
     view_set_exit_callback(weather_station_show->view, weather_station_show_exit);

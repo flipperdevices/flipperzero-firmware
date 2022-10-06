@@ -2,6 +2,7 @@
 
 #include <gui/view.h>
 
+
 typedef struct WeatherStationShow WeatherStationShow;
 
 //typedef void (*WeatherStationShowCallback)(SubGhzCustomEvent event, void* context);
@@ -9,6 +10,12 @@ typedef struct WeatherStationShow WeatherStationShow;
 // void weather_station_show_set_callback(
 //     WeatherStationShow* weather_station_show,
 //     WeatherStationShowCallback callback,
+//     void* context);
+
+
+// void weather_station_show_update(
+//     SubGhzReceiver* receiver,
+//     SubGhzProtocolDecoderBase* decoder_base,
 //     void* context);
 
 WeatherStationShow* weather_station_show_alloc();
