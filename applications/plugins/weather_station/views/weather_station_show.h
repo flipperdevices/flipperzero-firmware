@@ -12,12 +12,6 @@ typedef struct WeatherStationShow WeatherStationShow;
 //     WeatherStationShowCallback callback,
 //     void* context);
 
-
-// void weather_station_show_update(
-//     SubGhzReceiver* receiver,
-//     SubGhzProtocolDecoderBase* decoder_base,
-//     void* context);
-
 WeatherStationShow* weather_station_show_alloc();
 
 void weather_station_show_free(WeatherStationShow* weather_station_show);

@@ -11,7 +11,6 @@ env.Append(
         File("#/lib/subghz/subghz_tx_rx_worker.h"),
         File("#/lib/subghz/transmitter.h"),
         File("#/lib/subghz/protocols/raw.h"),
-        File("#/lib/subghz/protocols/base.h"),
     ],
 )
 

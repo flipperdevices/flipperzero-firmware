@@ -1,7 +1,5 @@
 #include "weather_station_app_i.h"
 
-
-
 #define TAG "WeatherStation"
 
 void weather_station_init(

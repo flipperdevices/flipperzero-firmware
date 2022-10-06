@@ -27,21 +27,6 @@ typedef struct {
 //     weather_station_show->context = context;
 // }
 
-// void weather_station_show_update(
-//     SubGhzReceiver* receiver,
-//     SubGhzProtocolDecoderBase* decoder_base,
-//     void* context) {
-//     WeatherStationShow* app = context;
-
-//     with_view_model(
-//         weather_station_show->view, (WeatherStationShowModel * model) {
-//             subghz_protocol_decoder_base_get_string(decoder_base, model->key_str);
-//             subghz_receiver_reset(receiver);
-
-//             return true;
-//         });
-// }
-
 void weather_station_show_add_data_to_show(
     WeatherStationShow* weather_station_show,
     const char* key_str) {
