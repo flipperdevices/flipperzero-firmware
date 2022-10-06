@@ -12,6 +12,7 @@ App(
     fap_description="Tamagotchi P1 emulator",
     fap_author="cyanic",
     fap_weburl="https://github.com/GMMan/flipperzero-tamagotch-p1",
+    fap_icon_assets="icons",
     fap_private_libs=[
         Lib(
             name="tamalib",
