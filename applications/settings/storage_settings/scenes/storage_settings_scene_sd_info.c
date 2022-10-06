@@ -54,6 +54,7 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
         string_printf(
             app->text_string,
             "Label: %s\nType: %s\n%.2f %s total\n%.2f %s free\n%.2f%% free",
+
             sd_info.label,
             sd_api_get_fs_type_text(sd_info.fs_type),
             sd_total_val,
@@ -63,7 +64,7 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
             (double)(((int)sd_info.kb_free * 100.0) / (int)sd_info.kb_total));
 
         dialog_ex_set_text(
-            dialog_ex, string_get_cstr(app->text_string), 4, 4, AlignLeft, AlignTop);
+            dialog_ex, furi_string_get_cstr(app->text_string), 4, 4, AlignLeft, AlignTop);
     }
 
     view_dispatcher_switch_to_view(app->view_dispatcher, StorageSettingsViewDialogEx);
@@ -101,5 +102,5 @@ void storage_settings_scene_sd_info_on_exit(void* context) {
 
     dialog_ex_reset(dialog_ex);
 
-    string_reset(app->text_string);
+    furi_string_reset(app->text_string);
 }
