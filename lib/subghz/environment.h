@@ -3,7 +3,6 @@
 #include <furi.h>
 
 #include "subghz_keystore.h"
-//#include "registry.h"
 
 #ifdef __cplusplus
 extern "C" {

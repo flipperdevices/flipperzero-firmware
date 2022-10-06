@@ -10,6 +10,9 @@
 #define bit_write(value, bit, bitvalue) (bitvalue ? bit_set(value, bit) : bit_clear(value, bit))
 #define DURATION_DIFF(x, y) ((x < y) ? (y - x) : (x - y))
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /**
  * Flip the data bitwise.
  * @param key In data
@@ -25,3 +28,7 @@ uint64_t subghz_protocol_blocks_reverse_key(uint64_t key, uint8_t count_bit);
  * @return parity
  */
 uint8_t subghz_protocol_blocks_get_parity(uint64_t key, uint8_t count_bit);
+
+#ifdef __cplusplus
+}
+#endif

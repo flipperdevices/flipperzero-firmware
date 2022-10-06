@@ -14,6 +14,7 @@
 #include <lib/subghz/subghz_worker.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
+#include <lib/subghz/registry.h>
 
 typedef struct WeatherStationApp WeatherStationApp;
 

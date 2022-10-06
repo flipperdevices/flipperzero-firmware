@@ -2,6 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include "protocols/protocol_items.h"
 
 static bool weather_station_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -66,6 +67,8 @@ WeatherStationApp* weather_station_app_alloc() {
     //app->txrx->fff_data = flipper_format_string_alloc();
 
     app->txrx->environment = subghz_environment_alloc();
+    subghz_environment_set_protocol_registry(
+        app->txrx->environment, (void*)&weather_station_protocol_registry);
     //todo set protocol_registry
     app->txrx->receiver = subghz_receiver_alloc_init(app->txrx->environment);
     subghz_receiver_set_filter(app->txrx->receiver, SubGhzProtocolFlag_Decodable);
