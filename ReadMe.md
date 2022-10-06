@@ -13,16 +13,7 @@
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-04 23:29 GMT`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-04 23:29 GMT`
-- Assets: Includes New Dolphin Animations: [Rogue Master Custom Firmware (By Sasquach)]
-- Added PR [FFF trailing space fix #1811 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1811)
-- Added PR [Fix-read-in-readraw-crash #80 (By derskythe)](https://github.com/Eng1n33r/flipperzero-firmware/pull/80)
-- Assets: Includes New Dolphin Animations: [Veemon (By felix-two-tone)]
-- Assets: Includes New Dolphin Animations: [G0ku (By Sasquach)]
-- Assets: Includes New Dolphin Animations: [Aika Zer0, Aika Zer0 2, Kaz0ku Haha & P3ach Run (By RogueMaster)] (hidden)
-- Assets: Includes New Dolphin Animations: [CloudG0ku (By Sasquach)]
-- Desktop: Hidden top bar thanks to @ESurge, this provides an unobstructed view of the animations.
-- Assets: Includes New Dolphin Animations: [BulmFlash, G0ku Pat Pat and Sail0rM00n (By RogueMaster)] (hidden)
-- Assets: Includes New Dolphin Animations: [ChiChi, G0ku Pew and R0shi (By RogueMaster)]
+- BadUSB: nb-NO Added norwegian keyboard layout [(By jd-raymaker)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/357)
 
 <details>
   <summary><B>TO DO</b></summary><br/>
@@ -106,6 +97,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Assets: Running DolphinRestorer.fap on new install will auto-level to Level 7.
 - BadUSB: Added ignore DUCKY_LANG cmd to retain compatibility with existing scripts [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
 - BadUSB: Assets for Kiosk Evasion and Wifi Stealer
+- BadUSB: nb-NO Added norwegian keyboard layout [(By jd-raymaker)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/357)
 - BadUSB: show script errors on screen [(By CromFr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/200)
 - BadUSB: sk-SK maping keybord for BadUsb [(By jaroslavmraz)](https://github.com/flipperdevices/flipperzero-firmware/pull/1619)
 - Clock.fap, iButton.fap and U2F.fap loader apps and available as Favorites [Thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/336)
