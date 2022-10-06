@@ -4,6 +4,7 @@
 #include "subghz/types.h"
 #include "subghz_i.h"
 #include <lib/toolbox/path.h>
+#include <lib/subghz/protocols/protocol_items.h>
 
 bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -187,6 +188,7 @@ SubGhz* subghz_alloc() {
         subghz->txrx->environment, EXT_PATH("subghz/assets/came_atomo"));
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
         subghz->txrx->environment, EXT_PATH("subghz/assets/nice_flor_s"));
+    subghz_environment_set_protocol_registry(subghz->txrx->environment, (void*)&subghz_protocol_registry);
     subghz->txrx->receiver = subghz_receiver_alloc_init(subghz->txrx->environment);
     subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_Decodable);
 

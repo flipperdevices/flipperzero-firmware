@@ -1,8 +1,9 @@
 #include "environment.h"
+#include "registry.h"
 
 struct SubGhzEnvironment {
     SubGhzKeystore* keystore;
-    //const SubGhzProtocolRegistry* protocol_registry;
+    const SubGhzProtocolRegistry* protocol_registry;
     const char* came_atomo_rainbow_table_file_name;
     const char* nice_flor_s_rainbow_table_file_name;
 };
@@ -11,7 +12,7 @@ SubGhzEnvironment* subghz_environment_alloc() {
     SubGhzEnvironment* instance = malloc(sizeof(SubGhzEnvironment));
 
     instance->keystore = subghz_keystore_alloc();
-    //instance->protocol_registry = NULL;
+    instance->protocol_registry = NULL;
     instance->came_atomo_rainbow_table_file_name = NULL;
     instance->nice_flor_s_rainbow_table_file_name = NULL;
 
@@ -21,7 +22,7 @@ SubGhzEnvironment* subghz_environment_alloc() {
 void subghz_environment_free(SubGhzEnvironment* instance) {
     furi_assert(instance);
 
-    //instance->protocol_registry = NULL;
+    instance->protocol_registry = NULL;
     instance->came_atomo_rainbow_table_file_name = NULL;
     instance->nice_flor_s_rainbow_table_file_name = NULL;
     subghz_keystore_free(instance->keystore);
@@ -71,17 +72,14 @@ const char*
     return instance->nice_flor_s_rainbow_table_file_name;
 }
 
-// void subghz_environment_set_protocol_registry(
-//     SubGhzEnvironment* instance,
-//     const SubGhzProtocolRegistry* protocol_registry) {
-//     furi_assert(instance);
+void subghz_environment_set_protocol_registry(SubGhzEnvironment* instance, void* protocol_registry_items) {
+    furi_assert(instance);
+    const SubGhzProtocolRegistry* protocol_registry = protocol_registry_items;
+    instance->protocol_registry = protocol_registry;
+}
 
-//     instance->protocol_registry = protocol_registry;
-// }
-
-// const SubGhzProtocolRegistry*
-//     subghz_environment_get_protocol_registry(SubGhzEnvironment* instance) {
-//     furi_assert(instance);
-
-//     return instance->protocol_registry;
-// }
+void* subghz_environment_get_protocol_registry(SubGhzEnvironment* instance) {
+    furi_assert(instance);
+    furi_assert(instance->protocol_registry);
+    return (void*)instance->protocol_registry;
+}
