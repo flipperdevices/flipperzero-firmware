@@ -1,7 +1,7 @@
 #pragma once
 
 #include <m-array.h>
-#include <m-string.h>
+#include <furi.h>
 #include <storage/storage.h>
 
 #define FAP_MANIFEST_MAX_ICON_SIZE 32
@@ -22,25 +22,25 @@ typedef enum {
 } ArchiveFileTypeEnum;
 
 typedef struct {
-    string_t path;
+    FuriString* path;
     ArchiveFileTypeEnum type;
     uint8_t* custom_icon_data;
-    string_t custom_name;
+    FuriString* custom_name;
     bool fav;
     bool is_app;
 } ArchiveFile_t;
 
 static void ArchiveFile_t_init(ArchiveFile_t* obj) {
-    string_init(obj->path);
+    obj->path = furi_string_alloc();
     obj->type = ArchiveFileTypeUnknown;
     obj->custom_icon_data = NULL;
-    string_init(obj->custom_name);
+    obj->custom_name = furi_string_alloc();
     obj->fav = false;
     obj->is_app = false;
 }
 
 static void ArchiveFile_t_init_set(ArchiveFile_t* obj, const ArchiveFile_t* src) {
-    string_init_set(obj->path, src->path);
+    furi_string_init_set(obj->path, src->path);
     obj->type = src->type;
     if(src->custom_icon_data) {
         obj->custom_icon_data = malloc(FAP_MANIFEST_MAX_ICON_SIZE);
@@ -48,13 +48,13 @@ static void ArchiveFile_t_init_set(ArchiveFile_t* obj, const ArchiveFile_t* src)
     } else {
         obj->custom_icon_data = NULL;
     }
-    string_init_set(obj->custom_name, src->custom_name);
+    furi_string_init_set(obj->custom_name, src->custom_name);
     obj->fav = src->fav;
     obj->is_app = src->is_app;
 }
 
 static void ArchiveFile_t_set(ArchiveFile_t* obj, const ArchiveFile_t* src) {
-    string_set(obj->path, src->path);
+    furi_string_set(obj->path, src->path);
     obj->type = src->type;
     if(src->custom_icon_data) {
         obj->custom_icon_data = malloc(FAP_MANIFEST_MAX_ICON_SIZE);
@@ -62,18 +62,18 @@ static void ArchiveFile_t_set(ArchiveFile_t* obj, const ArchiveFile_t* src) {
     } else {
         obj->custom_icon_data = NULL;
     }
-    string_set(obj->custom_name, src->custom_name);
+    furi_string_set(obj->custom_name, src->custom_name);
     obj->fav = src->fav;
     obj->is_app = src->is_app;
 }
 
 static void ArchiveFile_t_clear(ArchiveFile_t* obj) {
-    string_clear(obj->path);
+    furi_string_free(obj->path);
     if(obj->custom_icon_data) {
         free(obj->custom_icon_data);
         obj->custom_icon_data = NULL;
     }
-    string_clear(obj->custom_name);
+    furi_string_free(obj->custom_name);
 }
 
 ARRAY_DEF(
