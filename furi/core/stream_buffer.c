@@ -1,3 +1,4 @@
+#include "base.h"
 #include "stream_buffer.h"
 #include "common_defines.h"
 #include <FreeRTOS.h>
@@ -9,6 +10,10 @@ FuriStreamBuffer* furi_stream_buffer_alloc(size_t size, size_t trigger_level) {
 
 void furi_stream_buffer_free(FuriStreamBuffer* stream_buffer) {
     vStreamBufferDelete(stream_buffer);
+};
+
+bool furi_stream_set_trigger_level(FuriStreamBuffer* stream_buffer, size_t trigger_level) {
+    return xStreamBufferSetTriggerLevel(stream_buffer, trigger_level) == pdTRUE;
 };
 
 size_t furi_stream_buffer_send(
@@ -47,6 +52,26 @@ size_t furi_stream_buffer_receive(
     return ret;
 }
 
+size_t furi_stream_buffer_bytes_available(FuriStreamBuffer* stream_buffer) {
+    return xStreamBufferBytesAvailable(stream_buffer);
+};
+
 size_t furi_stream_buffer_spaces_available(FuriStreamBuffer* stream_buffer) {
     return xStreamBufferSpacesAvailable(stream_buffer);
 };
+
+bool furi_stream_buffer_is_full(FuriStreamBuffer* stream_buffer) {
+    return xStreamBufferIsFull(stream_buffer) == pdTRUE;
+};
+
+bool furi_stream_buffer_is_empty(FuriStreamBuffer* stream_buffer) {
+    return (xStreamBufferIsEmpty(stream_buffer) == pdTRUE);
+};
+
+FuriStatus furi_stream_buffer_reset(FuriStreamBuffer* stream_buffer) {
+    if(xStreamBufferReset(stream_buffer) == pdPASS) {
+        return FuriStatusOk;
+    } else {
+        return FuriStatusError;
+    }
+}
