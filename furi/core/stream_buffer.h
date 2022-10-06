@@ -1,6 +1,15 @@
 /**
  * @file stream_buffer.h
- * Furi stream buffer primitive
+ * Furi stream buffer primitive.
+ * 
+ * Stream buffers are used to send a continuous stream of data from one task or
+ * interrupt to another.  Their implementation is light weight, making them
+ * particularly suited for interrupt to task and core to core communication
+ * scenarios.
+ * 
+ * ***NOTE***: Stream buffer implementation assumes there is only one task or
+ * interrupt that will write to the buffer (the writer), and only one task or
+ * interrupt that will read from the buffer (the reader).
  */
 #pragma once
 #include <stdint.h>
@@ -16,7 +25,7 @@ typedef void FuriStreamBuffer;
  * @brief Allocate stream buffer instance.
  * Stream buffer implementation assumes there is only one task or
  * interrupt that will write to the buffer (the writer), and only one task or
- * interrupt that will read from the buffer (the reader)
+ * interrupt that will read from the buffer (the reader).
  * 
  * @param size The total number of bytes the stream buffer will be able to hold at any one time.
  * @param trigger_level The number of bytes that must be in the stream buffer 
