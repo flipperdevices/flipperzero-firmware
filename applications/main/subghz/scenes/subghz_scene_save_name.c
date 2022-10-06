@@ -13,10 +13,10 @@ void subghz_scene_save_name_text_input_callback(void* context) {
     view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneSaveName);
 }
 
-void subghz_scene_save_name_get_timefilename(string_t name) {
+void subghz_scene_save_name_get_timefilename(FuriString* name) {
     FuriHalRtcDateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
-    string_printf(
+    furi_string_printf(
         name,
         "RAW-%.4d%.2d%.2d-%.2d%.2d%.2d",
         datetime.year,
