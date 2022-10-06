@@ -118,7 +118,6 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
 
     size_t array_size = files_array_size(model->files);
     bool scrollbar = model->item_cnt > 4;
-    uint8_t* custom_icon_data = malloc(FAP_MANIFEST_MAX_ICON_SIZE);
 
     for(uint32_t i = 0; i < MIN(model->item_cnt, MENU_ITEMS); ++i) {
         FuriString* str_buf;
@@ -177,7 +176,6 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
     if(model->menu) {
         render_item_menu(canvas, model);
     }
-    free(custom_icon_data);
 }
 
 static void archive_render_status_bar(Canvas* canvas, ArchiveBrowserViewModel* model) {
