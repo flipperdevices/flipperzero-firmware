@@ -136,7 +136,7 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
             if(file_type == ArchiveFileTypeApplication) {
                 if(file->custom_icon_data) {
                     custom_icon_data = file->custom_icon_data;
-                    string_set(str_buf, file->custom_name);
+                    furi_string_set(str_buf, file->custom_name);
                 } else {
                     file_type = ArchiveFileTypeUnknown;
                     path_extract_filename(file->path, str_buf, archive_is_known_app(file->type));

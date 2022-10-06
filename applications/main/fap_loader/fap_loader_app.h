@@ -17,10 +17,10 @@ typedef struct FapLoader FapLoader;
  * @return true if icon and name were loaded successfully.
  */
 bool fap_loader_load_name_and_icon(
-    string_t path,
+    FuriString* path,
     Storage* storage,
     uint8_t** icon_ptr,
-    string_t item_name);
+    FuriString* item_name);
 
 #ifdef __cplusplus
 }

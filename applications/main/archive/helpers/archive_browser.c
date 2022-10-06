@@ -352,7 +352,7 @@ void archive_add_app_item(ArchiveBrowserView* browser, const char* name) {
     ArchiveFile_t_clear(&item);
 }
 
-static bool archive_get_fap_meta(string_t file_path, string_t fap_name, uint8_t** icon_ptr) {
+static bool archive_get_fap_meta(FuriString* file_path, FuriString* fap_name, uint8_t** icon_ptr) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     bool success = false;
     if(fap_loader_load_name_and_icon(file_path, storage, icon_ptr, fap_name)) {

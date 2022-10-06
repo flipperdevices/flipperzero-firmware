@@ -20,7 +20,7 @@ struct FapLoader {
     Loading* loading;
 };
 
-static bool fap_loader_load_name_and_icon(
+bool fap_loader_load_name_and_icon(
     FuriString* path,
     Storage* storage,
     uint8_t** icon_ptr,
@@ -52,7 +52,7 @@ static bool fap_loader_item_callback(
     FuriString* path,
     void* context,
     uint8_t** icon_ptr,
-    string_t item_name) {
+    FuriString* item_name) {
     FapLoader* fap_loader = context;
     furi_assert(fap_loader);
     return fap_loader_load_name_and_icon(path, fap_loader->storage, icon_ptr, item_name);

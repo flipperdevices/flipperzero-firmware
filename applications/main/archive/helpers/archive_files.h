@@ -40,7 +40,7 @@ static void ArchiveFile_t_init(ArchiveFile_t* obj) {
 }
 
 static void ArchiveFile_t_init_set(ArchiveFile_t* obj, const ArchiveFile_t* src) {
-    furi_string_init_set(obj->path, src->path);
+    obj->path = furi_string_alloc_set(src->path);
     obj->type = src->type;
     if(src->custom_icon_data) {
         obj->custom_icon_data = malloc(FAP_MANIFEST_MAX_ICON_SIZE);
@@ -48,7 +48,7 @@ static void ArchiveFile_t_init_set(ArchiveFile_t* obj, const ArchiveFile_t* src)
     } else {
         obj->custom_icon_data = NULL;
     }
-    furi_string_init_set(obj->custom_name, src->custom_name);
+    obj->custom_name = furi_string_alloc_set(src->custom_name);
     obj->fav = src->fav;
     obj->is_app = src->is_app;
 }
