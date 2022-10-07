@@ -101,7 +101,7 @@ static int32_t chip8_worker(void* context) {
     return 0;
 }
 
-Chip8Emulator* chip8_make_emulator(string_t file_path) {
+Chip8Emulator* chip8_make_emulator(FuriString* file_path) {
     furi_assert(file_path);
     FURI_LOG_I("CHIP8", "make emulator, file_path=", furi_string_get_cstr(file_path));
 

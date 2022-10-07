@@ -165,7 +165,7 @@ void namechanger_on_system_start() {
                 furi_string_free(name);
             } else {
                 //set name from file
-                furi_hal_version_set_custom_name(string_get_cstr(data));
+                furi_hal_version_set_custom_name(furi_string_get_cstr(data));
             }
         }
 

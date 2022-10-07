@@ -25,7 +25,7 @@ typedef struct {
     t_chip8_state* t_chip8_state;
 } Chip8State;
 
-Chip8Emulator* chip8_make_emulator(string_t file_path);
+Chip8Emulator* chip8_make_emulator(FuriString* file_path);
 
 void chip8_close_emulator(Chip8Emulator* chip8);
 void chip8_set_back_pressed(Chip8Emulator* chip8);
