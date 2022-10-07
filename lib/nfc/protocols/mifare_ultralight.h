@@ -110,7 +110,6 @@ typedef struct {
     uint8_t signature[32];
     uint32_t counter[3];
     uint8_t tearing[3];
-    bool has_auth;
     MfUltralightAuthMethod auth_method;
     uint8_t auth_key[4];
     bool auth_success;

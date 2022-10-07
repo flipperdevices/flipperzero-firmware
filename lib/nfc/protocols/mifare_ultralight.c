@@ -51,7 +51,7 @@ void mf_ul_reset(MfUltralightData* data) {
     data->data_size = 0;
     data->data_read = 0;
     data->curr_authlim = 0;
-    data->has_auth = false;
+    data->auth_success = false;
 }
 
 static MfUltralightFeatures mf_ul_get_features(MfUltralightType type) {
