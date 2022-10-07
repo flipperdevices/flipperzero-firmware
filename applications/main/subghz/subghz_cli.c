@@ -796,7 +796,7 @@ static bool subghz_on_system_start_istream_decode_band(
 
     FURI_LOG_I(
         "SubGhzOnStart",
-        "Add allowed band: start %dHz, stop %dHz, power_limit %ddBm, duty_cycle %d%%",
+        "Add allowed band: start %ldHz, stop %ldHz, power_limit %ddBm, duty_cycle %d%%",
         band.start,
         band.end,
         band.power_limit,

@@ -277,7 +277,7 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
 static void bt_on_key_storage_change_callback(uint8_t* addr, uint16_t size, void* context) {
     furi_assert(context);
     Bt* bt = context;
-    FURI_LOG_I(TAG, "Changed addr start: %08lX, size changed: %d", addr, size);
+    FURI_LOG_I(TAG, "Changed addr start: %p, size changed: %d", addr, size);
     BtMessage message = {.type = BtMessageTypeKeysStorageUpdated};
     furi_check(
         furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);

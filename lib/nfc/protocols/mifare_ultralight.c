@@ -193,7 +193,7 @@ bool mf_ultralight_authenticate(FuriHalNfcTxRxContext* tx_rx, uint32_t key, uint
             *pack = (tx_rx->rx_data[1] << 8) | tx_rx->rx_data[0];
         }
 
-        FURI_LOG_I(TAG, "Auth success. Password: %08X. PACK: %04X", key, *pack);
+        FURI_LOG_I(TAG, "Auth success. Password: %08lX. PACK: %04X", key, *pack);
         authenticated = true;
     } while(false);
 
