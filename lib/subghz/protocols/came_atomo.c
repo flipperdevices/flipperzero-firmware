@@ -325,7 +325,7 @@ bool subghz_protocol_decoder_came_atomo_deserialize(void* context, FlipperFormat
     return ret;
 }
 
-void subghz_protocol_decoder_came_atomo_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_came_atomo_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderCameAtomo* instance = context;
     subghz_protocol_came_atomo_remote_controller(
@@ -333,12 +333,12 @@ void subghz_protocol_decoder_came_atomo_get_string(void* context, string_t outpu
     uint32_t code_found_hi = instance->generic.data >> 32;
     uint32_t code_found_lo = instance->generic.data & 0x00000000ffffffff;
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %db\r\n"
         "Key:0x%lX%08lX\r\n"
         "Sn:0x%08lX  Btn:0x%01X\r\n"
-        "Cnt:0x%03X\r\n",
+        "Cnt:0x%03lX\r\n",
 
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
