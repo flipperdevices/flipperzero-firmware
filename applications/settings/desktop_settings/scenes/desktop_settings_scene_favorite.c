@@ -3,6 +3,19 @@
 #include "desktop_settings_scene.h"
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
+#include <fap_loader/fap_loader_app.h>
+
+static bool favorite_fap_selector_item_callback(
+    FuriString* file_path,
+    void* context,
+    uint8_t** icon_ptr,
+    FuriString* item_name) {
+    UNUSED(context);
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    bool success = fap_loader_load_name_and_icon(file_path, storage, icon_ptr, item_name);
+    furi_record_close(RECORD_STORAGE);
+    return success;
+}
 
 static void desktop_settings_scene_favorite_submenu_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
@@ -14,6 +27,9 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
     Submenu* submenu = app->submenu;
     submenu_reset(submenu);
 
+    uint32_t primary_favorite =
+        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite);
+
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         submenu_add_item(
             submenu,
@@ -21,27 +37,19 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
             i,
             desktop_settings_scene_favorite_submenu_callback,
             app);
+        // Set selected item to favorite again?
     }
-
-    uint32_t primary_favorite =
-        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite);
 
     submenu_set_header(
         app->submenu, primary_favorite ? "Primary favorite app:" : "Secondary favorite app:");
 
-    // if(primary_favorite) {
-    //     submenu_set_selected_item(app->submenu, app->settings.favorite_primary);
-    // } else {
-    //     submenu_set_selected_item(app->submenu, app->settings.favorite_secondary);
-    // }
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewMenu);
 }
 
 bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent event) {
     DesktopSettingsApp* app = context;
     bool consumed = false;
-    string_t temp_path;
-    string_init_set_str(temp_path, EXT_PATH("apps"));
+    FuriString* temp_path = furi_string_alloc_set_str(EXT_PATH("apps"));
 
     uint32_t primary_favorite =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite);
@@ -64,8 +72,11 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
         } else {
             const DialogsFileBrowserOptions browser_options = {
                 .extension = ".fap",
+                .icon = &I_unknown_10px,
                 .skip_assets = true,
                 .hide_ext = true,
+                .item_loader_callback = favorite_fap_selector_item_callback,
+                .item_loader_context = app,
             };
 
             while(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
@@ -73,13 +84,13 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
                     app->settings.favorite_primary.is_external = true;
                     strncpy(
                         app->settings.favorite_primary.name_or_path,
-                        string_get_cstr(temp_path),
+                        furi_string_get_cstr(temp_path),
                         MAX_APP_LENGTH);
                 } else {
                     app->settings.favorite_secondary.is_external = true;
                     strncpy(
                         app->settings.favorite_secondary.name_or_path,
-                        string_get_cstr(temp_path),
+                        furi_string_get_cstr(temp_path),
                         MAX_APP_LENGTH);
                 }
             }
@@ -88,7 +99,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
         consumed = true;
     }
 
-    string_clear(temp_path);
+    furi_string_free(temp_path);
     return consumed;
 }
 
