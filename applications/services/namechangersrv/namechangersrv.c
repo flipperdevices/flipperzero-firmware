@@ -107,7 +107,7 @@ void namechanger_on_system_start() {
 
             furi_string_free(name);
         } else {
-            string_strim(data);
+            furi_string_trim(data);
             FURI_LOG_I(TAG, "data: %s", data);
 
             if(!furi_string_size(data)) {
