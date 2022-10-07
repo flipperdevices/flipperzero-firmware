@@ -6,6 +6,7 @@
 
 #include <notification/notification_messages.h>
 #include <dialogs/dialogs.h>
+#include <m-string.h>
 
 #include "assets.h"
 
@@ -80,7 +81,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     }
     FuriString* tempStr;
     tempStr = furi_string_alloc();
-    furi_string_printf(tempStr, "Mines: %d", MINECOUNT - minesweeper_state->flags_set);
+    furi_string_cat_printf(tempStr, "Mines: %d", MINECOUNT - minesweeper_state->flags_set);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, furi_string_get_cstr(tempStr));
     furi_string_free(tempStr);
@@ -92,7 +93,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
       minutes = (int) seconds / 60;
       seconds = seconds % 60;
     }
-    furi_string_printf(tempStr, "%01d:%02d", minutes, seconds);
+    furi_string_cat_printf(tempStr, "%01d:%02d", minutes, seconds);
     canvas_draw_str_aligned(canvas, 128, 0, AlignRight, AlignTop, furi_string_get_cstr(tempStr));
     furi_string_free(tempStr);
 
@@ -296,7 +297,7 @@ static bool game_won(Minesweeper* minesweeper_state) {
 
   DialogMessage* message = dialog_message_alloc();
   const char* header_text = "Game won!";
-  furi_string_printf(tempStr, "Minefield cleared in %01d:%02d", minutes, seconds);
+  furi_string_cat_printf(tempStr, "Minefield cleared in %01d:%02d", minutes, seconds);
   dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
   dialog_message_set_text(message, furi_string_get_cstr(tempStr), 64, 32, AlignCenter, AlignCenter);
   dialog_message_set_buttons(message, NULL, "Play again", NULL);
@@ -306,7 +307,6 @@ static bool game_won(Minesweeper* minesweeper_state) {
   DialogMessageButton choice = dialog_message_show(dialogs, message);
   dialog_message_free(message);
   furi_string_free(tempStr);
-  furi_string_reset(tempStr);
   furi_record_close(RECORD_DIALOGS);
   return choice == DialogMessageButtonCenter; 
 }
@@ -513,3 +513,4 @@ int32_t minesweeper_app(void* p) {
 
   return 0;
 }
+
