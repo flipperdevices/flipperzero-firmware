@@ -57,21 +57,19 @@ static ELFSection* elf_file_get_section(ELFFile* elf, const char* name) {
     return ELFSectionDict_get(elf->sections, name);
 }
 
-static void elf_file_put_section(ELFFile* elf, const char* name, ELFSection* section) {
-    ELFSectionDict_set_at(elf->sections, strdup(name), *section);
-}
-
 static ELFSection* elf_file_get_or_put_section(ELFFile* elf, const char* name) {
     ELFSection* section_p = elf_file_get_section(elf, name);
     if(!section_p) {
-        ELFSection section = {
-            .data = NULL,
-            .sec_idx = 0,
-            .rel_sec_idx = 0,
-            .size = 0,
-        };
-
-        elf_file_put_section(elf, name, &section);
+        ELFSectionDict_set_at(
+            elf->sections,
+            strdup(name),
+            (ELFSection){
+                .data = NULL,
+                .sec_idx = 0,
+                .size = 0,
+                .relocate_entry_count = 0,
+                .relocate_entry_offset = 0,
+            });
         section_p = elf_file_get_section(elf, name);
     }
 
@@ -337,12 +335,12 @@ static bool elf_relocate_symbol(ELFFile* elf, Elf32_Addr relAddr, int type, Elf3
     return true;
 }
 
-static bool elf_relocate(ELFFile* elf, Elf32_Shdr* h, ELFSection* s) {
+static bool elf_relocate(ELFFile* elf, ELFSection* s) {
     if(s->data) {
         Elf32_Rel rel;
-        size_t relEntries = h->sh_size / sizeof(rel);
+        size_t relEntries = s->relocate_entry_count;
         size_t relCount;
-        (void)storage_file_seek(elf->fd, h->sh_offset, true);
+        (void)storage_file_seek(elf->fd, s->relocate_entry_offset, true);
         FURI_LOG_D(TAG, " Offset   Info     Type             Name");
 
         int relocate_result = true;
@@ -466,6 +464,15 @@ static SectionType elf_preload_section(
     if(section_header->sh_flags & SHF_ALLOC) {
         ELFSection* section_p = elf_file_get_or_put_section(elf, name);
         section_p->sec_idx = section_idx;
+
+        if(section_header->sh_type == SHT_PREINIT_ARRAY) {
+            elf->preinit_array = section_p;
+        } else if(section_header->sh_type == SHT_INIT_ARRAY) {
+            elf->init_array = section_p;
+        } else if(section_header->sh_type == SHT_FINI_ARRAY) {
+            elf->fini_array = section_p;
+        }
+
         return SectionTypeData;
     }
 
@@ -473,7 +480,8 @@ static SectionType elf_preload_section(
     if(section_header->sh_flags & SHF_INFO_LINK) {
         name = name + strlen(".rel");
         ELFSection* section_p = elf_file_get_or_put_section(elf, name);
-        section_p->rel_sec_idx = section_idx;
+        section_p->relocate_entry_count = section_header->sh_size / sizeof(Elf32_Rel);
+        section_p->relocate_entry_offset = section_header->sh_offset;
         return SectionTypeRelData;
     }
 
@@ -552,24 +560,16 @@ static bool elf_load_section_data(ELFFile* elf, ELFSection* section) {
 }
 
 static bool elf_relocate_section(ELFFile* elf, ELFSection* section) {
-    Elf32_Shdr section_header;
-    if(section->rel_sec_idx) {
+    if(section->relocate_entry_count) {
         FURI_LOG_D(TAG, "Relocating section");
-        if(elf_read_section_header(elf, section->rel_sec_idx, &section_header))
-            return elf_relocate(elf, &section_header, section);
-        else {
-            FURI_LOG_E(TAG, "Error reading section header");
-            return false;
-        }
+        return elf_relocate(elf, section);
     } else {
         FURI_LOG_D(TAG, "No relocation index"); /* Not an error */
     }
     return true;
 }
 
-static void elf_file_call_section_list(ELFFile* elf, const char* name, bool reverse_order) {
-    ELFSection* section = elf_file_get_section(elf, name);
-
+static void elf_file_call_section_list(ELFSection* section, bool reverse_order) {
     if(section && section->size) {
         const uint32_t* start = section->data;
         const uint32_t* end = section->data + section->size;
@@ -767,8 +767,8 @@ ELFFileLoadStatus elf_file_load_sections(ELFFile* elf) {
 }
 
 void elf_file_pre_run(ELFFile* elf) {
-    elf_file_call_section_list(elf, ".preinit_array", false);
-    elf_file_call_section_list(elf, ".init_array", false);
+    elf_file_call_section_list(elf->preinit_array, false);
+    elf_file_call_section_list(elf->init_array, false);
 }
 
 int32_t elf_file_run(ELFFile* elf, void* args) {
@@ -778,7 +778,7 @@ int32_t elf_file_run(ELFFile* elf, void* args) {
 }
 
 void elf_file_post_run(ELFFile* elf) {
-    elf_file_call_section_list(elf, ".fini_array", true);
+    elf_file_call_section_list(elf->fini_array, true);
 }
 
 const ElfApiInterface* elf_file_get_api_interface(ELFFile* elf_file) {
