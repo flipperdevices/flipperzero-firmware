@@ -108,6 +108,10 @@ MusicPlayerWorker* music_player_worker_alloc() {
     return instance;
 }
 
+void music_player_worker_clear(MusicPlayerWorker* instance) {
+    NoteBlockArray_reset(instance->notes);
+}
+
 void music_player_worker_free(MusicPlayerWorker* instance) {
     furi_assert(instance);
     furi_thread_free(instance->thread);
