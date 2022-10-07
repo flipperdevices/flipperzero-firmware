@@ -1,4 +1,3 @@
-#include <lib/nfc/protocols/mifare_ultralight.h>
 #include "../nfc_i.h"
 
 enum SubmenuIndex {
