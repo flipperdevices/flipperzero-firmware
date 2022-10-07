@@ -452,6 +452,31 @@ static bool elf_load_debug_link(ELFFile* elf, Elf32_Shdr* section_header) {
                section_header->sh_size;
 }
 
+static bool elf_load_section_data(ELFFile* elf, ELFSection* section, Elf32_Shdr* section_header) {
+    if(section_header->sh_size == 0) {
+        FURI_LOG_D(TAG, "No data for section");
+        return true;
+    }
+
+    section->data = aligned_malloc(section_header->sh_size, section_header->sh_addralign);
+    section->size = section_header->sh_size;
+
+    if(section_header->sh_type == SHT_NOBITS) {
+        // BSS section, no data to load
+        return true;
+    }
+
+    if((!storage_file_seek(elf->fd, section_header->sh_offset, true)) ||
+       (storage_file_read(elf->fd, section->data, section_header->sh_size) !=
+        section_header->sh_size)) {
+        FURI_LOG_E(TAG, "    seek/read fail");
+        return false;
+    }
+
+    FURI_LOG_D(TAG, "0x%X", section->data);
+    return true;
+}
+
 static SectionType elf_preload_section(
     ELFFile* elf,
     size_t section_idx,
@@ -460,7 +485,7 @@ static SectionType elf_preload_section(
     FlipperApplicationManifest* manifest) {
     const char* name = furi_string_get_cstr(name_string);
 
-    // Load alloc section
+    // Load allocable section
     if(section_header->sh_flags & SHF_ALLOC) {
         ELFSection* section_p = elf_file_get_or_put_section(elf, name);
         section_p->sec_idx = section_idx;
@@ -473,7 +498,12 @@ static SectionType elf_preload_section(
             elf->fini_array = section_p;
         }
 
-        return SectionTypeData;
+        if(!elf_load_section_data(elf, section_p, section_header)) {
+            FURI_LOG_E(TAG, "Error loading section '%s'", name);
+            return SectionTypeERROR;
+        } else {
+            return SectionTypeData;
+        }
     }
 
     // Load link info section
@@ -521,42 +551,6 @@ static SectionType elf_preload_section(
     }
 
     return SectionTypeUnused;
-}
-
-static bool elf_load_section_data(ELFFile* elf, ELFSection* section) {
-    Elf32_Shdr section_header;
-    if(section->sec_idx == 0) {
-        FURI_LOG_D(TAG, "Section is not present");
-        return true;
-    }
-
-    if(!elf_read_section_header(elf, section->sec_idx, &section_header)) {
-        return false;
-    }
-
-    if(section_header.sh_size == 0) {
-        FURI_LOG_D(TAG, "No data for section");
-        return true;
-    }
-
-    section->data = aligned_malloc(section_header.sh_size, section_header.sh_addralign);
-    section->size = section_header.sh_size;
-
-    if(section_header.sh_type == SHT_NOBITS) {
-        /* section is empty (.bss?) */
-        /* no need to memset - allocator already did that */
-        return true;
-    }
-
-    if((!storage_file_seek(elf->fd, section_header.sh_offset, true)) ||
-       (storage_file_read(elf->fd, section->data, section_header.sh_size) !=
-        section_header.sh_size)) {
-        FURI_LOG_E(TAG, "    seek/read fail");
-        return false;
-    }
-
-    FURI_LOG_D(TAG, "0x%X", section->data);
-    return true;
 }
 
 static bool elf_relocate_section(ELFFile* elf, ELFSection* section) {
@@ -713,7 +707,6 @@ bool elf_file_load_section_table(ELFFile* elf, FlipperApplicationManifest* manif
     }
 
     furi_string_free(name);
-    FURI_LOG_D(TAG, "Load symbols done");
 
     return IS_FLAGS_SET(loaded_sections, SectionTypeValid);
 }
@@ -723,16 +716,6 @@ ELFFileLoadStatus elf_file_load_sections(ELFFile* elf) {
     ELFSectionDict_it_t it;
 
     AddressCache_init(elf->relocation_cache);
-    size_t start = furi_get_tick();
-
-    for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it); ELFSectionDict_next(it)) {
-        ELFSectionDict_itref_t* itref = ELFSectionDict_ref(it);
-        FURI_LOG_D(TAG, "Loading section '%s'", itref->key);
-        if(!elf_load_section_data(elf, &itref->value)) {
-            FURI_LOG_E(TAG, "Error loading section '%s'", itref->key);
-            status = ELFFileLoadStatusUnspecifiedError;
-        }
-    }
 
     if(status == ELFFileLoadStatusSuccess) {
         for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it);
@@ -761,7 +744,6 @@ ELFFileLoadStatus elf_file_load_sections(ELFFile* elf) {
     FURI_LOG_D(TAG, "Relocation cache size: %u", AddressCache_size(elf->relocation_cache));
     FURI_LOG_D(TAG, "Trampoline cache size: %u", AddressCache_size(elf->trampoline_cache));
     AddressCache_clear(elf->relocation_cache);
-    FURI_LOG_I(TAG, "Loaded in %ums", (size_t)(furi_get_tick() - start));
 
     return status;
 }
