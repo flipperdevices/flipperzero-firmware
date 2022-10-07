@@ -2,6 +2,8 @@
 #include <gui/view.h>
 #include "spi_mem_chipinfo.h"
 
+#include "spi_mem_manager_icons.h"
+
 View* spi_mem_chipinfo_get_view(SPIMemChipinfo* instance) {
     return instance->view;
 }
