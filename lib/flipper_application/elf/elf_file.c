@@ -61,6 +61,23 @@ static void elf_file_put_section(ELFFile* elf, const char* name, ELFSection* sec
     ELFSectionDict_set_at(elf->sections, strdup(name), *section);
 }
 
+static ELFSection* elf_file_get_or_put_section(ELFFile* elf, const char* name) {
+    ELFSection* section_p = elf_file_get_section(elf, name);
+    if(!section_p) {
+        ELFSection section = {
+            .data = NULL,
+            .sec_idx = 0,
+            .rel_sec_idx = 0,
+            .size = 0,
+        };
+
+        elf_file_put_section(elf, name, &section);
+        section_p = elf_file_get_section(elf, name);
+    }
+
+    return section_p;
+}
+
 static bool elf_read_string_from_offset(ELFFile* elf, off_t offset, FuriString* name) {
     bool result = false;
 
@@ -396,14 +413,6 @@ static bool elf_relocate(ELFFile* elf, Elf32_Shdr* h, ELFSection* s) {
 }
 
 /**************************************************************************************************/
-/********************************************* MISC ***********************************************/
-/**************************************************************************************************/
-
-static bool cstr_prefix(const char* prefix, const char* string) {
-    return strncmp(prefix, string, strlen(prefix)) == 0;
-}
-
-/**************************************************************************************************/
 /************************************ Internal FAP interfaces *************************************/
 /**************************************************************************************************/
 typedef enum {
@@ -453,73 +462,48 @@ static SectionType elf_preload_section(
     FlipperApplicationManifest* manifest) {
     const char* name = furi_string_get_cstr(name_string);
 
-    const struct {
-        const char* prefix;
-        SectionType type;
-    } lookup_sections[] = {
-        {".text", SectionTypeData},
-        {".rodata", SectionTypeData},
-        {".data", SectionTypeData},
-        {".bss", SectionTypeData},
-        {".preinit_array", SectionTypeData},
-        {".init_array", SectionTypeData},
-        {".fini_array", SectionTypeData},
-        {".rel.text", SectionTypeRelData},
-        {".rel.rodata", SectionTypeRelData},
-        {".rel.data", SectionTypeRelData},
-        {".rel.preinit_array", SectionTypeRelData},
-        {".rel.init_array", SectionTypeRelData},
-        {".rel.fini_array", SectionTypeRelData},
-    };
-
-    for(size_t i = 0; i < COUNT_OF(lookup_sections); i++) {
-        if(cstr_prefix(lookup_sections[i].prefix, name)) {
-            FURI_LOG_D(TAG, "Found section %s", lookup_sections[i].prefix);
-
-            if(lookup_sections[i].type == SectionTypeRelData) {
-                name = name + strlen(".rel");
-            }
-
-            ELFSection* section_p = elf_file_get_section(elf, name);
-            if(!section_p) {
-                ELFSection section = {
-                    .data = NULL,
-                    .sec_idx = 0,
-                    .rel_sec_idx = 0,
-                    .size = 0,
-                };
-
-                elf_file_put_section(elf, name, &section);
-                section_p = elf_file_get_section(elf, name);
-            }
-
-            if(lookup_sections[i].type == SectionTypeRelData) {
-                section_p->rel_sec_idx = section_idx;
-            } else {
-                section_p->sec_idx = section_idx;
-            }
-
-            return lookup_sections[i].type;
-        }
+    // Load alloc section
+    if(section_header->sh_flags & SHF_ALLOC) {
+        ELFSection* section_p = elf_file_get_or_put_section(elf, name);
+        section_p->sec_idx = section_idx;
+        return SectionTypeData;
     }
 
+    // Load link info section
+    if(section_header->sh_flags & SHF_INFO_LINK) {
+        name = name + strlen(".rel");
+        ELFSection* section_p = elf_file_get_or_put_section(elf, name);
+        section_p->rel_sec_idx = section_idx;
+        return SectionTypeRelData;
+    }
+
+    // Load symbol table
     if(strcmp(name, ".symtab") == 0) {
         FURI_LOG_D(TAG, "Found .symtab section");
         elf->symbol_table = section_header->sh_offset;
         elf->symbol_count = section_header->sh_size / sizeof(Elf32_Sym);
         return SectionTypeSymTab;
-    } else if(strcmp(name, ".strtab") == 0) {
+    }
+
+    // Load string table
+    if(strcmp(name, ".strtab") == 0) {
         FURI_LOG_D(TAG, "Found .strtab section");
         elf->symbol_table_strings = section_header->sh_offset;
         return SectionTypeStrTab;
-    } else if(strcmp(name, ".fapmeta") == 0) {
+    }
+
+    // Load manifest section
+    if(strcmp(name, ".fapmeta") == 0) {
         FURI_LOG_D(TAG, "Found .fapmeta section");
         if(elf_load_metadata(elf, section_header, manifest)) {
             return SectionTypeManifest;
         } else {
             return SectionTypeERROR;
         }
-    } else if(strcmp(name, ".gnu_debuglink") == 0) {
+    }
+
+    // Load debug link section
+    if(strcmp(name, ".gnu_debuglink") == 0) {
         FURI_LOG_D(TAG, "Found .gnu_debuglink section");
         if(elf_load_debug_link(elf, section_header)) {
             return SectionTypeDebugLink;
