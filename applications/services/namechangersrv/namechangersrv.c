@@ -105,7 +105,7 @@ void namechanger_on_system_start() {
                 FURI_LOG_E(TAG, "Save failed.");
             }
 
-            string_clear(name);
+            furi_string_free(name);
         } else {
             string_strim(data);
             FURI_LOG_I(TAG, "data: %s", data);
@@ -162,17 +162,17 @@ void namechanger_on_system_start() {
                     FURI_LOG_E(TAG, "Save failed.");
                 }
 
-                string_clear(name);
+                furi_string_free(name);
             } else {
                 //set name from file
                 furi_hal_version_set_custom_name(string_get_cstr(data));
             }
         }
 
-        string_clear(data);
+        furi_string_free(data);
     }
 
-    string_clear(filepath);
-    string_clear(folderpath);
+    furi_string_free(filepath);
+    furi_string_free(folderpath);
     furi_record_close(RECORD_STORAGE);
 }
