@@ -133,6 +133,7 @@ static bool is_space(const char c) {
 
 static size_t extract_number(const char* string, uint32_t* number) {
     size_t ret = 0;
+    *number = 0;
     while(is_digit(*string)) {
         *number *= 10;
         *number += (*string - '0');
@@ -144,6 +145,7 @@ static size_t extract_number(const char* string, uint32_t* number) {
 
 static size_t extract_dots(const char* string, uint32_t* number) {
     size_t ret = 0;
+    *number = 0;
     while(*string == '.') {
         *number += 1;
         string++;
