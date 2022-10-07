@@ -215,6 +215,7 @@ bool nfc_device_load_mifare_ul_data(FlipperFormat* file, NfcDevice* dev) {
             auth_counter = 0;
         data->curr_authlim = auth_counter;
 
+        data->has_auth = mf_ul_is_full_capture(data);
 
         parsed = true;
     } while(false);
