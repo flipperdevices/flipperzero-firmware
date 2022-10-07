@@ -35,7 +35,7 @@ void namechanger_on_system_start() {
                 break;
             }
 
-            if(furi_string_cmp_strdata, furi_string_get_cstr(NAMEHEADER)) != 0) {
+            if(furi_string_cmp_str(data, furi_string_get_cstr(NAMEHEADER)) != 0) {
                 break;
             }
 
