@@ -36,6 +36,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
 
     uint32_t primary_favorite =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite);
+    uint32_t pre_select_item = 0;
 
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         submenu_add_item(
@@ -49,19 +50,20 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
             if((app->settings.favorite_primary.is_external &&
                 !strcmp(FLIPPER_APPS[i].name, FAP_LOADER_APP_NAME)) ||
                (!strcmp(FLIPPER_APPS[i].name, app->settings.favorite_primary.name_or_path))) {
-                submenu_set_selected_item(submenu, i);
+                pre_select_item = i;
             }
         } else {
             if((app->settings.favorite_secondary.is_external &&
                 !strcmp(FLIPPER_APPS[i].name, FAP_LOADER_APP_NAME)) ||
                (!strcmp(FLIPPER_APPS[i].name, app->settings.favorite_secondary.name_or_path))) {
-                submenu_set_selected_item(submenu, i);
+                pre_select_item = i;
             }
         }
     }
 
     submenu_set_header(
-        app->submenu, primary_favorite ? "Primary favorite app:" : "Secondary favorite app:");
+        submenu, primary_favorite ? "Primary favorite app:" : "Secondary favorite app:");
+    submenu_set_selected_item(submenu, pre_select_item); // If set during loop, visual glitch.
 
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewMenu);
 }
