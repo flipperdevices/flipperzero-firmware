@@ -453,6 +453,54 @@ void nfc_worker_emulate_mf_ultralight(NfcWorker* nfc_worker) {
     }
 }
 
+static void nfc_worker_mf_classic_key_attack(
+    NfcWorker* nfc_worker,
+    uint64_t key,
+    FuriHalNfcTxRxContext* tx_rx,
+    uint16_t start_sector) {
+    furi_assert(nfc_worker);
+
+    MfClassicData* data = &nfc_worker->dev_data->mf_classic_data;
+    uint32_t total_sectors = mf_classic_get_total_sectors_num(data->type);
+
+    furi_assert(start_sector < total_sectors);
+
+    // Check every sector's A and B keys with the given key
+    for(size_t i = start_sector; i < total_sectors; i++) {
+        uint8_t block_num = mf_classic_get_sector_trailer_block_num_by_sector(i);
+        if(mf_classic_is_sector_read(data, i)) continue;
+        if(!mf_classic_is_key_found(data, i, MfClassicKeyA)) {
+            FURI_LOG_D(
+                TAG,
+                "Trying A key for sector %d, key: %04lx%08lx",
+                i,
+                (uint32_t)(key >> 32),
+                (uint32_t)key);
+            if(mf_classic_authenticate(tx_rx, block_num, key, MfClassicKeyA)) {
+                mf_classic_set_key_found(data, i, MfClassicKeyA, key);
+                FURI_LOG_D(TAG, "Key found");
+                nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
+            }
+        }
+        if(!mf_classic_is_key_found(data, i, MfClassicKeyB)) {
+            FURI_LOG_D(
+                TAG,
+                "Trying B key for sector %d, key: %04lx%08lx",
+                i,
+                (uint32_t)(key >> 32),
+                (uint32_t)key);
+            if(mf_classic_authenticate(tx_rx, block_num, key, MfClassicKeyB)) {
+                mf_classic_set_key_found(data, i, MfClassicKeyB, key);
+                FURI_LOG_D(TAG, "Key found");
+                nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
+            }
+        }
+        if(mf_classic_is_sector_read(data, i)) continue;
+        mf_classic_read_sector(tx_rx, data, i);
+        if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack) break;
+    }
+}
+
 void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
     furi_assert(nfc_worker->callback);
@@ -484,6 +532,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
         bool is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
         uint16_t key_index = 0;
         while(mf_classic_dict_get_next_key(dict, &key)) {
+            FURI_LOG_T(TAG, "Key %d", key_index);
             if(++key_index % NFC_DICT_KEY_BATCH_SIZE == 0) {
                 nfc_worker->callback(NfcWorkerEventNewDictKeyBatch, nfc_worker->context);
             }
@@ -505,15 +554,19 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     is_key_a_found = mf_classic_is_key_found(data, i, MfClassicKeyA);
                     if(mf_classic_authenticate(&tx_rx, block_num, key, MfClassicKeyA)) {
                         mf_classic_set_key_found(data, i, MfClassicKeyA, key);
+                        FURI_LOG_D(TAG, "Key found");
                         nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
+                        nfc_worker_mf_classic_key_attack(nfc_worker, key, &tx_rx, i + 1);
                     }
                     furi_hal_nfc_sleep();
                 }
                 if(!is_key_b_found) {
                     is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
                     if(mf_classic_authenticate(&tx_rx, block_num, key, MfClassicKeyB)) {
+                        FURI_LOG_D(TAG, "Key found");
                         mf_classic_set_key_found(data, i, MfClassicKeyB, key);
                         nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
+                        nfc_worker_mf_classic_key_attack(nfc_worker, key, &tx_rx, i + 1);
                     }
                 }
                 if(is_key_a_found && is_key_b_found) break;
@@ -647,7 +700,8 @@ static void nfc_worker_reader_analyzer_callback(ReaderAnalyzerEvent event, void*
     furi_assert(context);
     NfcWorker* nfc_worker = context;
 
-    if(event == ReaderAnalyzerEventMfkeyCollected) {
+    if((nfc_worker->state == NfcWorkerStateAnalyzeReader) &&
+       (event == ReaderAnalyzerEventMfkeyCollected)) {
         if(nfc_worker->callback) {
             nfc_worker->callback(NfcWorkerEventDetectReaderMfkeyCollected, nfc_worker->context);
         }
@@ -655,6 +709,9 @@ static void nfc_worker_reader_analyzer_callback(ReaderAnalyzerEvent event, void*
 }
 
 void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
+    furi_assert(nfc_worker);
+    furi_assert(nfc_worker->callback);
+
     FuriHalNfcTxRxContext tx_rx = {};
 
     ReaderAnalyzer* reader_analyzer = nfc_worker->reader_analyzer;
@@ -673,17 +730,32 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
     rfal_platform_spi_acquire();
 
     FURI_LOG_D(TAG, "Start reader analyzer");
+
+    uint8_t reader_no_data_received_cnt = 0;
+    bool reader_no_data_notified = true;
+
     while(nfc_worker->state == NfcWorkerStateAnalyzeReader) {
         furi_hal_nfc_stop_cmd();
         furi_delay_ms(5);
         furi_hal_nfc_listen_start(nfc_data);
         if(furi_hal_nfc_listen_rx(&tx_rx, 300)) {
+            if(reader_no_data_notified) {
+                nfc_worker->callback(NfcWorkerEventDetectReaderDetected, nfc_worker->context);
+            }
+            reader_no_data_received_cnt = 0;
+            reader_no_data_notified = false;
             NfcProtocol protocol =
                 reader_analyzer_guess_protocol(reader_analyzer, tx_rx.rx_data, tx_rx.rx_bits / 8);
             if(protocol == NfcDeviceProtocolMifareClassic) {
                 mf_classic_emulator(&emulator, &tx_rx);
             }
         } else {
+            reader_no_data_received_cnt++;
+            if(!reader_no_data_notified && (reader_no_data_received_cnt > 5)) {
+                nfc_worker->callback(NfcWorkerEventDetectReaderLost, nfc_worker->context);
+                reader_no_data_received_cnt = 0;
+                reader_no_data_notified = true;
+            }
             FURI_LOG_D(TAG, "No data from reader");
             continue;
         }
