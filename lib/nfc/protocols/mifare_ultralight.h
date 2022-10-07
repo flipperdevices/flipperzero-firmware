@@ -243,3 +243,5 @@ bool mf_ul_prepare_emulation_response(
 uint32_t mf_ul_pwdgen_amiibo(FuriHalNfcDevData* data);
 
 uint32_t mf_ul_pwdgen_xiaomi(FuriHalNfcDevData* data);
+
+bool mf_ul_is_full_capture(MfUltralightData* data);

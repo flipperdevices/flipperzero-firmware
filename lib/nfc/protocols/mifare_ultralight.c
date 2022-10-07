@@ -1871,3 +1871,14 @@ bool mf_ul_prepare_emulation_response(
 
     return tx_bits > 0;
 }
+
+bool mf_ul_is_full_capture(MfUltralightData* data) {
+    if(data->data_read != data->data_size) return false;
+
+    // Having read all the pages doesn't mean that we've got everything.
+    // By default PWD is 0xFFFFFFFF, but if read back it is always 0x00000000,
+    // so a default read on an auth-supported NTAG is never complete.
+    if(!(mf_ul_get_features(data->type) & MfUltralightSupportAuth)) return true;
+    MfUltralightConfigPages* config = mf_ultralight_get_config_pages(data);
+    return config->auth_data.pwd.value != 0 || config->auth_data.pack.value != 0;
+}
