@@ -56,7 +56,7 @@ bool furi_stream_set_trigger_level(FuriStreamBuffer* stream_buffer, size_t trigg
 
 /**
  * @brief Sends bytes to a stream buffer. The bytes are copied into the stream buffer.
- * Wokes up task waiting for data to become available if called from ISR.
+ * Wakes up task waiting for data to become available if called from ISR.
  * 
  * @param stream_buffer The stream buffer instance.
  * @param data A pointer to the data that is to be copied into the stream buffer.
@@ -76,7 +76,7 @@ size_t furi_stream_buffer_send(
 
 /**
  * @brief Receives bytes from a stream buffer.
- * Wokes up task waiting for space to become available if called from ISR.
+ * Wakes up task waiting for space to become available if called from ISR.
  * 
  * @param stream_buffer The stream buffer instance.
  * @param data A pointer to the buffer into which the received bytes will be
