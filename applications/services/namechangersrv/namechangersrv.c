@@ -110,7 +110,7 @@ void namechanger_on_system_start() {
             string_strim(data);
             FURI_LOG_I(TAG, "data: %s", data);
 
-            if(!string_size(data)) {
+            if(!furi_string_size(data)) {
                 //Empty file - get default name and write to file.
                 FlipperFormat* file = flipper_format_file_alloc(storage);
 
