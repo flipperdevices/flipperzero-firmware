@@ -14,7 +14,7 @@ static void spi_mem_chipinfo_draw_info(Canvas* canvas) {
     canvas_draw_str(canvas, 60, 8, "Chip info");
     canvas_draw_str(canvas, 45, 17, "Atmel");
     canvas_draw_str(canvas, 45, 26, "AT25DF16");
-    canvas_draw_str(canvas, 45, 35, "65536 KB");
+    canvas_draw_str(canvas, 45, 35, "65536 KiB");
 }
 
 static bool spi_mem_chipinfo_input_callback(InputEvent* event, void* context) {
