@@ -158,7 +158,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
     furi_string_reset(tempStr);
 
-    string_clear(tempStr);
+    furi_string_free(tempStr);
 
     release_mutex((ValueMutex*)ctx, bpm_state);
 }

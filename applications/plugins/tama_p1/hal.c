@@ -56,7 +56,7 @@ static void tama_p1_hal_log(log_level_t level, char* buff, ...) {
         break;
     }
 
-    string_clear(string);
+    furi_string_free(string);
 }
 
 static void tama_p1_hal_sleep_until(timestamp_t ts) {

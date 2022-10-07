@@ -115,7 +115,7 @@ void totp_config_file_load_base(PluginState* const plugin_state) {
         FURI_LOG_D(LOGGING_TAG, "Missing timezone offset information, defaulting to 0");
     }
 
-    string_clear(temp_str);
+    furi_string_free(temp_str);
     totp_close_config_file(fff_data_file);
     totp_close_storage();
 }
@@ -184,7 +184,7 @@ void totp_config_file_load_tokens(PluginState* const plugin_state) {
 
     FURI_LOG_D(LOGGING_TAG, "Found %d tokens", index);
 
-    string_clear(temp_str);
+    furi_string_free(temp_str);
     totp_close_config_file(fff_data_file);
     totp_close_storage();
 

@@ -72,7 +72,7 @@ void nfc_scene_mf_ultralight_emulate_widget_config(Nfc* nfc, bool auth_attempted
 
     widget_add_string_multiline_element(
         widget, 56, 31, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(info_str));
-    string_clear(info_str);
+    furi_string_free(info_str);
     if(auth_attempted) {
         widget_add_button_element(
             widget,

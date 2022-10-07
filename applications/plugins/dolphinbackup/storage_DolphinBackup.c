@@ -36,7 +36,7 @@ bool storage_DolphinBackup_perform(void) {
 
     furi_string_printf(new_path, "%s/dolphin_restorer", MOVE_DST);
     storage_common_mkdir(storage, furi_string_get_cstr(new_path));
-    string_clear(new_path);
+    furi_string_free(new_path);
     for(uint32_t i = 0; i < COUNT_OF(app_dirsDolphinBackup); i++) {
         if(i > 5) {
             furi_string_printf(path_src, "%s/%s", MOVE_SRC, app_dirsDolphinBackup[i]);
@@ -51,8 +51,8 @@ bool storage_DolphinBackup_perform(void) {
         }
     }
 
-    string_clear(path_src);
-    string_clear(path_dst);
+    furi_string_free(path_src);
+    furi_string_free(path_dst);
 
     furi_record_close(RECORD_STORAGE);
 
@@ -77,7 +77,7 @@ static bool storage_DolphinBackup_check(void) {
         }
     }
 
-    string_clear(path);
+    furi_string_free(path);
 
     furi_record_close(RECORD_STORAGE);
 

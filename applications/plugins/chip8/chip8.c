@@ -139,7 +139,7 @@ void chip8_close_emulator(Chip8Emulator* chip8) {
     furi_thread_flags_set(furi_thread_get_id(chip8->thread), WorkerEvtEnd);
     furi_thread_join(chip8->thread);
     furi_thread_free(chip8->thread);
-    string_clear(chip8->file_path);
+    furi_string_free(chip8->file_path);
     free(chip8);
     FURI_LOG_I("chip_8_close_emulator", "end");
 }

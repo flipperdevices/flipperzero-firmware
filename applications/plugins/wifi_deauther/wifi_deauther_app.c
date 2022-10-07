@@ -74,7 +74,7 @@ void wifi_deauther_app_free(WifideautherApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, WifideautherAppViewConsoleOutput);
     view_dispatcher_remove_view(app->view_dispatcher, WifideautherAppViewTextInput);
     text_box_free(app->text_box);
-    string_clear(app->text_box_store);
+    furi_string_free(app->text_box_store);
     text_input_free(app->text_input);
 
     // View dispatcher

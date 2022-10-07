@@ -151,7 +151,7 @@ static void dtmf_dolphin_dialer_draw_callback(Canvas* canvas, void* _model) {
     elements_multiline_text(
         canvas, (max_span * DTMF_DOLPHIN_BUTTON_WIDTH) + 4, 21, furi_string_get_cstr(output));
 
-    string_clear(output);
+    furi_string_free(output);
 }
 
 static bool dtmf_dolphin_dialer_input_callback(InputEvent* event, void* context) {

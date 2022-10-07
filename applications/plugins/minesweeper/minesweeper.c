@@ -83,7 +83,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     furi_string_printf(tempStr, "Mines: %d", MINECOUNT - minesweeper_state->flags_set);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, furi_string_get_cstr(tempStr));
-    string_clear(tempStr);
+    furi_string_free(tempStr);
     int seconds = 0;
     int minutes = 0; 
     if (minesweeper_state->game_started) {
@@ -94,7 +94,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     }
     furi_string_printf(tempStr, "%01d:%02d", minutes, seconds);
     canvas_draw_str_aligned(canvas, 128, 0, AlignRight, AlignTop, furi_string_get_cstr(tempStr));
-    string_clear(tempStr);
+    furi_string_free(tempStr);
 
     for (int y = 0; y < PLAYFIELD_HEIGHT; y++) {
       for (int x = 0; x < PLAYFIELD_WIDTH; x++) {
@@ -216,7 +216,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         }
       }
     }
-    string_clear(tempStr);
+    furi_string_free(tempStr);
     release_mutex((ValueMutex*)ctx, minesweeper_state);
 }
 
@@ -305,7 +305,7 @@ static bool game_won(Minesweeper* minesweeper_state) {
 
   DialogMessageButton choice = dialog_message_show(dialogs, message);
   dialog_message_free(message);
-  string_clear(tempStr);
+  furi_string_free(tempStr);
   furi_string_reset(tempStr);
   furi_record_close(RECORD_DIALOGS);
   return choice == DialogMessageButtonCenter; 

@@ -71,7 +71,7 @@ void chip8_scene_work_on_enter(void* context) {
 
     app->chip8 = chip8_make_emulator(file_tmp);
 
-    string_clear(file_tmp);
+    furi_string_free(file_tmp);
 
     chip8_set_state(app->chip8_view, chip8_get_state(app->chip8));
 

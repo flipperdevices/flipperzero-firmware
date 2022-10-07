@@ -33,8 +33,8 @@ bool drestorer_perform(void) {
         storage_common_copy(storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
     }
 
-    string_clear(path_src);
-    string_clear(path_dst);
+    furi_string_free(path_src);
+    furi_string_free(path_dst);
 
     furi_record_close(RECORD_STORAGE);
 
@@ -59,7 +59,7 @@ static bool drestorer_check(void) {
         }
     }
 
-    string_clear(path);
+    furi_string_free(path);
 
     furi_record_close(RECORD_STORAGE);
 

@@ -125,7 +125,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         canvas, 8, 36, 112, (float)metronome_state->current_beat / metronome_state->beats_per_bar);
 
     // cleanup
-    string_clear(tempStr);
+    furi_string_free(tempStr);
     release_mutex((ValueMutex*)ctx, metronome_state);
 }
 
