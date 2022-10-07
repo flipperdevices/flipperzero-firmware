@@ -344,6 +344,8 @@ int32_t snake_game_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
+    notification_message_block(notification, &sequence_display_backlight_enforce_on);
+
     SnakeEvent event;
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
@@ -388,8 +390,8 @@ int32_t snake_game_app(void* p) {
         release_mutex(&state_mutex, snake_state);
     }
 
-    // Wait for all notifications to be played
-    furi_delay_ms(100);
+    // Wait for all notifications to be played and return backlight to normal state
+    notification_message_block(notification, &sequence_display_backlight_enforce_auto);
 
     furi_timer_free(timer);
     view_port_enabled_set(view_port, false);
