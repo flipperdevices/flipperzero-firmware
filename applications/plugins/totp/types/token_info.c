@@ -5,6 +5,13 @@
 #include "common.h"
 #include "../lib/base32/base32.h"
 
+TokenInfo* token_info_alloc() {
+    TokenInfo* tokenInfo = malloc(sizeof(TokenInfo));
+    tokenInfo->algo = SHA1;
+    tokenInfo->digits = TOTP_6_DIGITS;
+    return tokenInfo;
+}
+
 void token_info_free(TokenInfo* token_info) {
     if (token_info == NULL) return;
     free(token_info->name);
@@ -35,4 +42,13 @@ void token_info_set_secret(TokenInfo* token_info, const char* base32_token_secre
 
     memset(plain_secret, 0, token_info->token_length);
     free(plain_secret);
+}
+
+uint8_t token_info_get_digits_count(TokenInfo* token_info) {
+    switch (token_info->digits) {
+        case TOTP_6_DIGITS: return 6;
+        case TOTP_8_DIGITS: return 8;
+    }
+
+    return 6;
 }

@@ -10,9 +10,16 @@
 #include "../../lib/ui/ui_controls.h"
 #include "../generate_token/totp_scene_generate_token.h"
 
+#define TOKEN_ALGO_LIST_LENGTH 3
+char* TOKEN_ALGO_LIST[] = { "SHA1", "SHA256", "SHA512" };
+#define TOKEN_DIGITS_LIST_LENGTH 2
+char* TOKEN_DIGITS_LIST[] = { "6 digits", "8 digits" };
+
 typedef enum {
     TokenNameTextBox,
     TokenSecretTextBox,
+    TokenAlgoSelect,
+    TokenLengthSelect,
     ConfirmButton,
 } Control;
 
@@ -28,6 +35,9 @@ typedef struct {
     InputTextSceneState* input_state;
     uint32_t input_started_at;
     int current_token_index;
+    int32_t screen_y_offset;
+    TokenHashAlgo algo;
+    TokenDigitsCount digits_count;
 } SceneState;
 
 void totp_scene_add_new_token_init(PluginState* plugin_state) {
@@ -70,6 +80,8 @@ void totp_scene_add_new_token_activate(PluginState* plugin_state, const TokenAdd
     scene_state->token_secret_input_context->callback_data = scene_state;
     scene_state->token_secret_input_context->callback = on_token_secret_user_comitted;
 
+    scene_state->screen_y_offset = 0;
+
     scene_state->input_state = NULL;
 
     if (context == NULL) {
@@ -86,13 +98,26 @@ void totp_scene_add_new_token_render(Canvas* const canvas, PluginState* plugin_s
         return;
     }
 
+    ui_control_text_box_render(canvas, 10 - scene_state->screen_y_offset, scene_state->token_name, scene_state->selected_control == TokenNameTextBox);
+    ui_control_text_box_render(canvas, 27 - scene_state->screen_y_offset, scene_state->token_secret, scene_state->selected_control == TokenSecretTextBox);
+    ui_control_select_render(canvas, 44 - scene_state->screen_y_offset, TOKEN_ALGO_LIST[scene_state->algo], scene_state->selected_control == TokenAlgoSelect);
+    ui_control_select_render(canvas, 63 - scene_state->screen_y_offset, TOKEN_DIGITS_LIST[scene_state->digits_count], scene_state->selected_control == TokenLengthSelect);
+    ui_control_button_render(canvas, SCREEN_WIDTH_CENTER - 24, 85 - scene_state->screen_y_offset, 48, 13, "Confirm", scene_state->selected_control == ConfirmButton);
+
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, 0, 0, SCREEN_WIDTH, 10);
+    canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "Add new token");
-
     canvas_set_font(canvas, FontSecondary);
-    ui_control_text_box_render(canvas, 10, scene_state->token_name, scene_state->selected_control == TokenNameTextBox);
-    ui_control_text_box_render(canvas, 27, scene_state->token_secret, scene_state->selected_control == TokenSecretTextBox);
-    ui_control_button_render(canvas, SCREEN_WIDTH_CENTER - 24, 48, 48, 13, "Confirm", scene_state->selected_control == ConfirmButton);
+}
+
+void update_screen_y_offset(SceneState* scene_state) {
+    if (scene_state->selected_control > TokenAlgoSelect) {
+        scene_state->screen_y_offset = 35;
+    } else {
+        scene_state->screen_y_offset = 0;
+    }
 }
 
 bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState* plugin_state) {
@@ -109,16 +134,46 @@ bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState
                 case InputKeyUp:
                     if (scene_state->selected_control > TokenNameTextBox) {
                         scene_state->selected_control--;
+                        update_screen_y_offset(scene_state);
                     }
                     break;
                 case InputKeyDown:
                     if (scene_state->selected_control < ConfirmButton) {
                         scene_state->selected_control++;
+                        update_screen_y_offset(scene_state);
                     }
                     break;
                 case InputKeyRight:
+                    if (scene_state->selected_control == TokenAlgoSelect) {
+                        if (scene_state->algo < SHA512) {
+                            scene_state->algo++;
+                        } else {
+                            scene_state->algo = SHA1;
+                        }
+                    }
+                    else if (scene_state->selected_control == TokenLengthSelect) {
+                        if (scene_state->digits_count < TOTP_8_DIGITS) {
+                            scene_state->digits_count++;
+                        } else {
+                            scene_state->digits_count = TOTP_6_DIGITS;
+                        }
+                    }
                     break;
                 case InputKeyLeft:
+                    if (scene_state->selected_control == TokenAlgoSelect) {
+                        if (scene_state->algo > SHA1) {
+                            scene_state->algo--;
+                        } else {
+                            scene_state->algo = SHA512;
+                        }
+                    }
+                    else if (scene_state->selected_control == TokenLengthSelect) {
+                        if (scene_state->digits_count > TOTP_6_DIGITS) {
+                            scene_state->digits_count--;
+                        } else {
+                            scene_state->digits_count = TOTP_8_DIGITS;
+                        }
+                    }
                     break;
                 case InputKeyOk:
                     switch (scene_state->selected_control) {
@@ -136,12 +191,19 @@ bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState
                             scene_state->input_state = totp_input_text_activate(scene_state->token_secret_input_context);
                             scene_state->input_started_at = furi_get_tick();
                             break;
+                        case TokenAlgoSelect:
+                            break;
+                        case TokenLengthSelect:
+                            break;
                         case ConfirmButton: {
-                            TokenInfo* tokenInfo = malloc(sizeof(TokenInfo));
+                            TokenInfo* tokenInfo = token_info_alloc();
                             tokenInfo->name = malloc(scene_state->token_name_length + 1);
                             strcpy(tokenInfo->name, scene_state->token_name);
 
                             token_info_set_secret(tokenInfo, scene_state->token_secret, scene_state->token_secret_length, &plugin_state->iv[0]);
+
+                            tokenInfo->algo = scene_state->algo;
+                            tokenInfo->digits = scene_state->digits_count;
                             
                             if (plugin_state->tokens_list == NULL) {
                                 plugin_state->tokens_list = list_init_head(tokenInfo);
@@ -154,8 +216,7 @@ bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState
                             FlipperFormat* cfg_file = totp_open_config_file(cfg_storage);
 
                             flipper_format_seek_to_end(cfg_file);
-                            flipper_format_write_string_cstr(cfg_file, TOTP_CONFIG_KEY_TOKEN_NAME, tokenInfo->name);
-                            flipper_format_write_hex(cfg_file, TOTP_CONFIG_KEY_TOKEN_SECRET, tokenInfo->token, tokenInfo->token_length);
+                            totp_config_file_save_new_token(cfg_file, tokenInfo);
 
                             totp_close_config_file(cfg_file);
                             totp_close_storage();

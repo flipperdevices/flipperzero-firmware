@@ -7,7 +7,8 @@ App(
     requires=[
         "gui",
         "cli",
-        "dialogs"
+        "dialogs",
+        "storage"
     ],
     provides=["totp_start"],
     stack_size=2 * 1024,

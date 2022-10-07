@@ -12,10 +12,11 @@
 #include "../token_menu/totp_scene_token_menu.h"
 
 #define TOKEN_LIFETIME 30
+#define DIGIT_TO_CHAR(digit) ((digit) + '0')
 
 typedef struct {
     uint8_t current_token_index;
-    char last_code[7];
+    char last_code[9];
     char* last_code_name;
     bool need_token_update;
     uint32_t last_token_gen_time;
@@ -32,9 +33,19 @@ static const NotificationSequence sequence_short_vibro_and_sound = {
     NULL,
 };
 
-static void i_token_to_str(uint32_t i_token_code, char* str) {
-    str[6] = '\0';
-    if (i_token_code == 0 || i_token_code > 999999) {
+static void i_token_to_str(uint32_t i_token_code, char* str, TokenDigitsCount len) {
+    if (len == TOTP_8_DIGITS) {
+        str[8] = '\0';
+    } else if (len == TOTP_6_DIGITS) {
+        str[6] = '\0';
+    }
+
+    if (i_token_code == 0) {
+        if (len > TOTP_6_DIGITS) {
+            str[7] = '-';
+            str[6] = '-';
+        }
+
         str[5] = '-';
         str[4] = '-';
         str[3] = '-';
@@ -42,20 +53,37 @@ static void i_token_to_str(uint32_t i_token_code, char* str) {
         str[1] = '-';
         str[0] = '-';
     } else {
-        str[5] = i_token_code % 10 + 0x30;
-        str[4] = (i_token_code = i_token_code / 10) % 10 + 0x30;
-        str[3] = (i_token_code = i_token_code / 10) % 10 + 0x30;
-        str[2] = (i_token_code = i_token_code / 10) % 10 + 0x30;
-        str[1] = (i_token_code = i_token_code / 10) % 10 + 0x30;
-        str[0] = (i_token_code = i_token_code / 10) % 10 + 0x30;
+        if (len == TOTP_8_DIGITS) {
+            str[7] = DIGIT_TO_CHAR(i_token_code % 10);
+            str[6] = DIGIT_TO_CHAR((i_token_code = i_token_code / 10) % 10);
+            str[5] = DIGIT_TO_CHAR((i_token_code = i_token_code / 10) % 10);
+        } else if (len == TOTP_6_DIGITS) {
+            str[5] = DIGIT_TO_CHAR(i_token_code % 10);
+        }
+        
+        str[4] = DIGIT_TO_CHAR((i_token_code = i_token_code / 10) % 10);
+        str[3] = DIGIT_TO_CHAR((i_token_code = i_token_code / 10) % 10);
+        str[2] = DIGIT_TO_CHAR((i_token_code = i_token_code / 10) % 10);
+        str[1] = DIGIT_TO_CHAR((i_token_code = i_token_code / 10) % 10);
+        str[0] = DIGIT_TO_CHAR((i_token_code = i_token_code / 10) % 10);
     }
+}
+
+TOTP_ALGO get_totp_algo_impl(TokenHashAlgo algo) {
+    switch (algo) {
+        case SHA1: return TOTP_ALGO_SHA1;
+        case SHA256: return TOTP_ALGO_SHA256;
+        case SHA512: return TOTP_ALGO_SHA512;
+    }
+
+    return NULL;
 }
 
 void update_totp_params(PluginState* const plugin_state) {
     SceneState* scene_state = (SceneState *)plugin_state->current_scene_state;
 
     if (scene_state->current_token_index < plugin_state->tokens_count) {
-        TokenInfo* tokenInfo = (TokenInfo*)(list_element_at(plugin_state->tokens_list, scene_state->current_token_index)->data);
+        TokenInfo* tokenInfo = (TokenInfo *)(list_element_at(plugin_state->tokens_list, scene_state->current_token_index)->data);
 
         scene_state->need_token_update = true;
         scene_state->last_code_name = tokenInfo->name;
@@ -64,7 +92,6 @@ void update_totp_params(PluginState* const plugin_state) {
 
 void totp_scene_generate_token_init(PluginState* plugin_state) {
     UNUSED(plugin_state);
-    totp_setup(TOKEN_LIFETIME);
 }
 
 void totp_scene_generate_token_activate(PluginState* plugin_state, const GenerateTokenSceneContext* context) {
@@ -79,7 +106,6 @@ void totp_scene_generate_token_activate(PluginState* plugin_state, const Generat
     }
     scene_state->need_token_update = true;
     plugin_state->current_scene_state = scene_state;
-    totp_set_timezone(plugin_state->timezone_offset);
     FURI_LOG_D(LOGGING_TAG, "Timezone set to: %f", (double)plugin_state->timezone_offset);
     update_totp_params(plugin_state);
 }
@@ -113,7 +139,7 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
         furi_hal_crypto_decrypt(tokenInfo->token, key, tokenInfo->token_length);
         furi_hal_crypto_store_unload_key(CRYPTO_KEY_SLOT);
 
-        i_token_to_str(totp_get_code_from_timestamp(key, tokenInfo->token_length, curr_ts), scene_state->last_code);
+        i_token_to_str(totp_at(get_totp_algo_impl(tokenInfo->algo), token_info_get_digits_count(tokenInfo), key, tokenInfo->token_length, curr_ts, plugin_state->timezone_offset, TOKEN_LIFETIME), scene_state->last_code, tokenInfo->digits);
         memset(key, 0, tokenInfo->token_length);
         free(key);
 
