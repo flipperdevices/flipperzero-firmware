@@ -281,7 +281,7 @@ static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const c
             if(music_player_worker_add_note(instance, semitone, duration, dots)) {
                 FURI_LOG_D(
                     TAG,
-                    "Added note: %c%c%u.%u = %u %u",
+                    "Added note: %c%c%u.%u = %u %lu",
                     note_char == '\0' ? '_' : note_char,
                     sharp_char == '\0' ? '_' : sharp_char,
                     octave,
@@ -291,7 +291,7 @@ static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const c
             } else {
                 FURI_LOG_E(
                     TAG,
-                    "Invalid note: %c%c%u.%u = %u %u",
+                    "Invalid note: %c%c%u.%u = %u %lu",
                     note_char == '\0' ? '_' : note_char,
                     sharp_char == '\0' ? '_' : sharp_char,
                     octave,
