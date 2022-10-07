@@ -1050,7 +1050,7 @@ static void mf_ul_make_ascii_mirror(MfUltralightEmulator* emulator, FuriString* 
             if(mirror_conf == MfUltralightMirrorUidCounter)
                 furi_string_cat(str, uid_printed ? "x" : " ");
 
-            furi_string_cat_printf(str, "%06X", emulator->data.counter[2]);
+            furi_string_cat_printf(str, "%06lX", emulator->data.counter[2]);
         }
     }
 }

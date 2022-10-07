@@ -152,8 +152,8 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
         "Protocol: Princeton\n"
         "Bit: 24\n"
         "Key: 00 00 00 00 00 %02X %02X %02X\n"
-        "TE: %d\n"
-        "Repeat: %d\n",
+        "TE: %ld\n"
+        "Repeat: %ld\n",
         (uint8_t)((key >> 16) & 0xFF),
         (uint8_t)((key >> 8) & 0xFF),
         (uint8_t)(key & 0xFF),
