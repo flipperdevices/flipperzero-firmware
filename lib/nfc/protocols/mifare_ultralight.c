@@ -758,6 +758,17 @@ bool mf_ul_read_card(
         data->curr_authlim = 0;
     }
 
+    if(reader->pages_read != reader->pages_to_read) {
+        if(reader->supported_features & MfUltralightSupportAuth) {
+            // Probably password protected, fix AUTH0 and PROT so before AUTH0
+            // can be written and since AUTH0 won't be readable, like on the
+            // original card
+            MfUltralightConfigPages* config = mf_ultralight_get_config_pages(data);
+            config->auth0 = reader->pages_read;
+            config->access.prot = true;
+        }
+    }
+
     return card_read;
 }
 
