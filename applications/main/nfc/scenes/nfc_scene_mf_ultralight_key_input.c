@@ -9,7 +9,6 @@ void nfc_scene_mf_ultralight_key_input_byte_input_callback(void* context) {
 void nfc_scene_mf_ultralight_key_input_on_enter(void* context) {
     Nfc* nfc = context;
 
-    memset(nfc->byte_input_store, 0xFF, 4); // Default to 0xFFFFFFFF
     // Setup view
     ByteInput* byte_input = nfc->byte_input;
     byte_input_set_header_text(byte_input, "Enter the password in hex");
