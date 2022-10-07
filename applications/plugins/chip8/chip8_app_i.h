@@ -21,7 +21,7 @@ struct Chip8App {
     SceneManager* scene_manager;
     DialogsApp* dialogs;
 
-    string_t file_name;
+    FuriString* file_name;
     uint8_t** backup_screen;
     Chip8View* chip8_view;
     Chip8Emulator* chip8;

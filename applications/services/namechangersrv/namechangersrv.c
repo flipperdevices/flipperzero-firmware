@@ -7,24 +7,24 @@ void namechanger_on_system_start() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
 
-    string_t NAMEHEADER;
-    string_init_set_str(NAMEHEADER, "Flipper Name File");
+    FuriString* NAMEHEADER;
+    NAMEHEADER = furi_string_alloc_set( "Flipper Name File");
 
-    string_t folderpath;
-    string_init_set_str(folderpath, "/ext/dolphin");
+    FuriString* folderpath;
+    folderpath = furi_string_alloc_set( "/ext/dolphin");
 
-    string_t filepath;
-    string_init_set_str(filepath, "/ext/dolphin/name.txt");
+    FuriString* filepath;
+    filepath = furi_string_alloc_set( "/ext/dolphin/name.txt");
 
     //Make dir if doesn't exist
-    if(storage_simply_mkdir(storage, string_get_cstr(folderpath))) {
+    if(storage_simply_mkdir(storage, furi_string_get_cstr(folderpath))) {
         bool result = false;
 
-        string_t data;
-        string_init(data);
+        FuriString* data;
+        data = furi_string_alloc();
 
         do {
-            if(!flipper_format_file_open_existing(file, string_get_cstr(filepath))) {
+            if(!flipper_format_file_open_existing(file, furi_string_get_cstr(filepath))) {
                 break;
             }
 
@@ -35,7 +35,7 @@ void namechanger_on_system_start() {
                 break;
             }
 
-            if(string_cmp_str(data, string_get_cstr(NAMEHEADER)) != 0) {
+            if(furi_string_cmp_strdata, furi_string_get_cstr(NAMEHEADER)) != 0) {
                 break;
             }
 
@@ -59,17 +59,17 @@ void namechanger_on_system_start() {
 
             bool res = false;
 
-            string_t name;
-            string_init_set_str(name, furi_hal_version_get_name_ptr());
+            FuriString* name;
+            name = furi_string_alloc_set( furi_hal_version_get_name_ptr());
 
             do {
                 // Open file for write
-                if(!flipper_format_file_open_always(file, string_get_cstr(filepath))) {
+                if(!flipper_format_file_open_always(file, furi_string_get_cstr(filepath))) {
                     break;
                 }
 
                 // Write header
-                if(!flipper_format_write_header_cstr(file, string_get_cstr(NAMEHEADER), 1)) {
+                if(!flipper_format_write_header_cstr(file, furi_string_get_cstr(NAMEHEADER), 1)) {
                     break;
                 }
 
@@ -92,7 +92,7 @@ void namechanger_on_system_start() {
                 }
 
                 //Write name
-                if(!flipper_format_write_string_cstr(file, "Name", string_get_cstr(name))) {
+                if(!flipper_format_write_string_cstr(file, "Name", furi_string_get_cstr(name))) {
                     break;
                 }
 
@@ -116,17 +116,17 @@ void namechanger_on_system_start() {
 
                 bool res = false;
 
-                string_t name;
-                string_init_set_str(name, furi_hal_version_get_name_ptr());
+                FuriString* name;
+                name = furi_string_alloc_set( furi_hal_version_get_name_ptr());
 
                 do {
                     // Open file for write
-                    if(!flipper_format_file_open_always(file, string_get_cstr(filepath))) {
+                    if(!flipper_format_file_open_always(file, furi_string_get_cstr(filepath))) {
                         break;
                     }
 
                     // Write header
-                    if(!flipper_format_write_header_cstr(file, string_get_cstr(NAMEHEADER), 1)) {
+                    if(!flipper_format_write_header_cstr(file, furi_string_get_cstr(NAMEHEADER), 1)) {
                         break;
                     }
 
@@ -149,7 +149,7 @@ void namechanger_on_system_start() {
                     }
 
                     //Write name
-                    if(!flipper_format_write_string_cstr(file, "Name", string_get_cstr(name))) {
+                    if(!flipper_format_write_string_cstr(file, "Name", furi_string_get_cstr(name))) {
                         break;
                     }
 

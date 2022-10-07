@@ -27,27 +27,27 @@ static const char* app_dirsDolphinBackup[] = {
 
 bool storage_DolphinBackup_perform(void) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    string_t path_src;
-    string_t path_dst;
-    string_t new_path;
-    string_init(path_src);
-    string_init(path_dst);
-    string_init(new_path);
+    FuriString* path_src;
+    FuriString* path_dst;
+    FuriString* new_path;
+    path_src = furi_string_alloc();
+    path_dst = furi_string_alloc();
+    new_path = furi_string_alloc();
 
-    string_printf(new_path, "%s/dolphin_restorer", MOVE_DST);
-    storage_common_mkdir(storage, string_get_cstr(new_path));
+    furi_string_printf(new_path, "%s/dolphin_restorer", MOVE_DST);
+    storage_common_mkdir(storage, furi_string_get_cstr(new_path));
     string_clear(new_path);
     for(uint32_t i = 0; i < COUNT_OF(app_dirsDolphinBackup); i++) {
         if(i > 5) {
-            string_printf(path_src, "%s/%s", MOVE_SRC, app_dirsDolphinBackup[i]);
-            string_printf(path_dst, "%s/dolphin_restorer/%s", MOVE_DST, app_dirsDolphinBackup[i]);
-            storage_simply_remove_recursive(storage, string_get_cstr(path_dst));
-            storage_common_copy(storage, string_get_cstr(path_src), string_get_cstr(path_dst));
+            furi_string_printf(path_src, "%s/%s", MOVE_SRC, app_dirsDolphinBackup[i]);
+            furi_string_printf(path_dst, "%s/dolphin_restorer/%s", MOVE_DST, app_dirsDolphinBackup[i]);
+            storage_simply_remove_recursive(storage, furi_string_get_cstr(path_dst));
+            storage_common_copy(storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
         } else {
-            string_printf(path_src, "%s/%s", MOVE_SRC, app_dirsDolphinBackup[i]);
-            string_printf(path_dst, "%s/%s", MOVE_DST, app_dirsDolphinBackup[i]);
-            storage_common_merge(storage, string_get_cstr(path_src), string_get_cstr(path_dst));
-            storage_simply_remove_recursive(storage, string_get_cstr(path_src));
+            furi_string_printf(path_src, "%s/%s", MOVE_SRC, app_dirsDolphinBackup[i]);
+            furi_string_printf(path_dst, "%s/%s", MOVE_DST, app_dirsDolphinBackup[i]);
+            storage_common_merge(storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
+            storage_simply_remove_recursive(storage, furi_string_get_cstr(path_src));
         }
     }
 
@@ -64,12 +64,12 @@ static bool storage_DolphinBackup_check(void) {
 
     FileInfo file_info;
     bool state = false;
-    string_t path;
-    string_init(path);
+    FuriString* path;
+    path = furi_string_alloc();
 
     for(uint32_t i = 0; i < COUNT_OF(app_dirsDolphinBackup); i++) {
-        string_printf(path, "%s/%s", MOVE_SRC, app_dirsDolphinBackup[i]);
-        if(storage_common_stat(storage, string_get_cstr(path), &file_info) == FSE_OK) {
+        furi_string_printf(path, "%s/%s", MOVE_SRC, app_dirsDolphinBackup[i]);
+        if(storage_common_stat(storage, furi_string_get_cstr(path), &file_info) == FSE_OK) {
             // if((file_info.flags & FSF_DIRECTORY) != 0) {
             state = true;
             break;

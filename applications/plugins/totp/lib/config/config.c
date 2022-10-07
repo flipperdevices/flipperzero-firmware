@@ -82,9 +82,9 @@ void totp_config_file_load_base(PluginState* const plugin_state) {
 
     plugin_state->timezone_offset = 0;
 
-    string_t temp_str;
+    FuriString* temp_str;
     uint32_t temp_data32;
-    string_init(temp_str);
+    temp_str = furi_string_alloc();
 
     if(!flipper_format_read_header(fff_data_file, temp_str, &temp_data32)) {
         FURI_LOG_E(LOGGING_TAG, "Missing or incorrect header");
@@ -124,9 +124,9 @@ void totp_config_file_load_tokens(PluginState* const plugin_state) {
     Storage* storage = totp_open_storage();
     FlipperFormat* fff_data_file = totp_open_config_file(storage);
 
-    string_t temp_str;
+    FuriString* temp_str;
     uint32_t temp_data32;
-    string_init(temp_str);
+    temp_str = furi_string_alloc();
 
     if(!flipper_format_read_header(fff_data_file, temp_str, &temp_data32)) {
         FURI_LOG_E(LOGGING_TAG, "Missing or incorrect header");
@@ -142,7 +142,7 @@ void totp_config_file_load_tokens(PluginState* const plugin_state) {
         
         TokenInfo* tokenInfo = malloc(sizeof(TokenInfo));
 
-        const char* temp_cstr = string_get_cstr(temp_str);
+        const char* temp_cstr = furi_string_get_cstr(temp_str);
         tokenInfo->name = (char *)malloc(strlen(temp_cstr) + 1);
         strcpy(tokenInfo->name, temp_cstr);
 
@@ -156,7 +156,7 @@ void totp_config_file_load_tokens(PluginState* const plugin_state) {
                 continue;
             }
 
-            temp_cstr = string_get_cstr(temp_str);
+            temp_cstr = furi_string_get_cstr(temp_str);
             token_info_set_secret(tokenInfo, temp_cstr, strlen(temp_cstr), &plugin_state->iv[0]);
             has_any_plain_secret = true;
             FURI_LOG_W(LOGGING_TAG, "Found token with plain secret");

@@ -5,7 +5,6 @@ extern "C" {
 #endif
 
 #include <furi.h>
-#include <m-string.h>
 #include <storage/storage.h>
 #include "emulator_core/flipper_chip.h"
 

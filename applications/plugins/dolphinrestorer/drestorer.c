@@ -21,16 +21,16 @@ static const char* app_dirs[] = {
 
 bool drestorer_perform(void) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    string_t path_src;
-    string_t path_dst;
-    string_init(path_src);
-    string_init(path_dst);
+    FuriString* path_src;
+    FuriString* path_dst;
+    path_src = furi_string_alloc();
+    path_dst = furi_string_alloc();
 
     for(uint32_t i = 0; i < COUNT_OF(app_dirs); i++) {
-        string_printf(path_src, "%s/%s", MOVE_SRC, app_dirs[i]);
-        string_printf(path_dst, "%s/%s", MOVE_DST, app_dirs[i]);
-        storage_simply_remove_recursive(storage, string_get_cstr(path_dst));
-        storage_common_copy(storage, string_get_cstr(path_src), string_get_cstr(path_dst));
+        furi_string_printf(path_src, "%s/%s", MOVE_SRC, app_dirs[i]);
+        furi_string_printf(path_dst, "%s/%s", MOVE_DST, app_dirs[i]);
+        storage_simply_remove_recursive(storage, furi_string_get_cstr(path_dst));
+        storage_common_copy(storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
     }
 
     string_clear(path_src);
@@ -46,12 +46,12 @@ static bool drestorer_check(void) {
 
     FileInfo file_info;
     bool state = false;
-    string_t path;
-    string_init(path);
+    FuriString* path;
+    path = furi_string_alloc();
 
     for(uint32_t i = 0; i < COUNT_OF(app_dirs); i++) {
-        string_printf(path, "%s/%s", MOVE_SRC, app_dirs[i]);
-        if(storage_common_stat(storage, string_get_cstr(path), &file_info) == FSE_OK) {
+        furi_string_printf(path, "%s/%s", MOVE_SRC, app_dirs[i]);
+        if(storage_common_stat(storage, furi_string_get_cstr(path), &file_info) == FSE_OK) {
             // if((file_info.flags & FSF_DIRECTORY) != 0) {
             state = true;
             break;

@@ -133,23 +133,23 @@ static void dtmf_dolphin_dialer_draw_callback(Canvas* canvas, void* _model) {
 
     draw_dialer(canvas, model);
 
-    string_t output;
-    string_init(output);
+    FuriString* output;
+    output = furi_string_alloc();
 
     if(model->freq1 && model->freq2) {
-        string_cat_printf(
+        furi_string_cat_printf(
             output,
             "Dual Tone\nF1: %u Hz\nF2: %u Hz\n",
             (unsigned int)model->freq1,
             (unsigned int)model->freq2);
     } else if(model->freq1) {
-        string_cat_printf(output, "Single Tone\nF: %u Hz\n", (unsigned int)model->freq1);
+        furi_string_cat_printf(output, "Single Tone\nF: %u Hz\n", (unsigned int)model->freq1);
     }
 
     canvas_set_font(canvas, FontSecondary);
     canvas_set_color(canvas, ColorBlack);
     elements_multiline_text(
-        canvas, (max_span * DTMF_DOLPHIN_BUTTON_WIDTH) + 4, 21, string_get_cstr(output));
+        canvas, (max_span * DTMF_DOLPHIN_BUTTON_WIDTH) + 4, 21, furi_string_get_cstr(output));
 
     string_clear(output);
 }

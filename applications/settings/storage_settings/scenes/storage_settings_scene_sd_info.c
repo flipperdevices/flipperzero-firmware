@@ -51,7 +51,7 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
             sd_free_unit = unit_gb;
         }
 
-        string_printf(
+        furi_string_printf(
             app->text_string,
             "Label: %s\nType: %s\n%.2f %s total\n%.2f %s free\n%.2f%% free",
 

@@ -239,8 +239,8 @@ static uint16_t ducky_get_keycode(BadUsbScript* bad_usb, const char* param, bool
 
 static int32_t
     ducky_parse_line(BadUsbScript* bad_usb, FuriString* line, char* error, size_t error_len) {
-    uint32_t line_len = string_size(line);
-    const char* line_tmp = string_get_cstr(line);
+    uint32_t line_len = furi_string_size(line);
+    const char* line_tmp = furi_string_get_cstr(line);
     bool state = false;
 
     for(uint32_t i = 0; i < line_len; i++) {

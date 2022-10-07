@@ -18,7 +18,7 @@ typedef enum {
 
 struct Chip8Emulator {
     Chip8State st;
-    string_t file_path;
+    FuriString* file_path;
     FuriThread* thread;
 };
 
@@ -32,7 +32,7 @@ static int32_t chip8_worker(void* context) {
     FURI_LOG_I(WORKER_TAG, "Start storage file alloc");
     File* rom_file = storage_file_alloc(furi_storage_record);
     FURI_LOG_I(
-        WORKER_TAG, "Start storage file open, path = %s", string_get_cstr(chip8->file_path));
+        WORKER_TAG, "Start storage file open, path = %s", furi_string_get_cstr(chip8->file_path));
 
     uint8_t* rom_data = malloc(4096);
     FURI_LOG_I(WORKER_TAG, "4096 array gotten");
@@ -45,7 +45,7 @@ static int32_t chip8_worker(void* context) {
 
         if(chip8->st.worker_state == WorkerStateLoadingRom) {
             bool is_file_opened = storage_file_open(
-                rom_file, string_get_cstr(chip8->file_path), FSAM_READ, FSOM_OPEN_EXISTING);
+                rom_file, furi_string_get_cstr(chip8->file_path), FSAM_READ, FSOM_OPEN_EXISTING);
 
             if(!is_file_opened) {
                 FURI_LOG_I(WORKER_TAG, "Cannot open storage");
@@ -103,10 +103,10 @@ static int32_t chip8_worker(void* context) {
 
 Chip8Emulator* chip8_make_emulator(string_t file_path) {
     furi_assert(file_path);
-    FURI_LOG_I("CHIP8", "make emulator, file_path=", string_get_cstr(file_path));
+    FURI_LOG_I("CHIP8", "make emulator, file_path=", furi_string_get_cstr(file_path));
 
     Chip8Emulator* chip8 = malloc(sizeof(Chip8Emulator));
-    string_init(chip8->file_path);
+    chip8->file_path = furi_string_alloc();
     string_set(chip8->file_path, file_path);
     chip8->st.worker_state = WorkerStateLoadingRom;
     chip8->st.t_chip8_state = t_chip8_init(malloc);
