@@ -7,7 +7,6 @@
 #include <time.h>
 #include <notification/notification_messages.h>
 #include <loader/loader.h>
-#include <stream_buffer.h>
 
 // Close to ISO, `date +'%Y-%m-%d %H:%M:%S %u'`
 #define CLI_DATE_FORMAT "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %d"
@@ -140,26 +139,57 @@ void cli_command_date(Cli* cli, FuriString* args, void* context) {
 #define CLI_COMMAND_LOG_BUFFER_SIZE 64
 
 void cli_command_log_tx_callback(const uint8_t* buffer, size_t size, void* context) {
-    xStreamBufferSend(context, buffer, size, 0);
+    furi_stream_buffer_send(context, buffer, size, 0);
+}
+
+void cli_command_log_level_set_from_string(FuriString* level) {
+    if(furi_string_cmpi_str(level, "default") == 0) {
+        furi_log_set_level(FuriLogLevelDefault);
+    } else if(furi_string_cmpi_str(level, "none") == 0) {
+        furi_log_set_level(FuriLogLevelNone);
+    } else if(furi_string_cmpi_str(level, "error") == 0) {
+        furi_log_set_level(FuriLogLevelError);
+    } else if(furi_string_cmpi_str(level, "warn") == 0) {
+        furi_log_set_level(FuriLogLevelWarn);
+    } else if(furi_string_cmpi_str(level, "info") == 0) {
+        furi_log_set_level(FuriLogLevelInfo);
+    } else if(furi_string_cmpi_str(level, "debug") == 0) {
+        furi_log_set_level(FuriLogLevelDebug);
+    } else if(furi_string_cmpi_str(level, "trace") == 0) {
+        furi_log_set_level(FuriLogLevelTrace);
+    } else {
+        printf("Unknown log level\r\n");
+    }
 }
 
 void cli_command_log(Cli* cli, FuriString* args, void* context) {
-    UNUSED(args);
     UNUSED(context);
-    StreamBufferHandle_t ring = xStreamBufferCreate(CLI_COMMAND_LOG_RING_SIZE, 1);
+    FuriStreamBuffer* ring = furi_stream_buffer_alloc(CLI_COMMAND_LOG_RING_SIZE, 1);
     uint8_t buffer[CLI_COMMAND_LOG_BUFFER_SIZE];
+    FuriLogLevel previous_level = furi_log_get_level();
+    bool restore_log_level = false;
+
+    if(furi_string_size(args) > 0) {
+        cli_command_log_level_set_from_string(args);
+        restore_log_level = true;
+    }
 
     furi_hal_console_set_tx_callback(cli_command_log_tx_callback, ring);
 
     printf("Press CTRL+C to stop...\r\n");
     while(!cli_cmd_interrupt_received(cli)) {
-        size_t ret = xStreamBufferReceive(ring, buffer, CLI_COMMAND_LOG_BUFFER_SIZE, 50);
+        size_t ret = furi_stream_buffer_receive(ring, buffer, CLI_COMMAND_LOG_BUFFER_SIZE, 50);
         cli_write(cli, buffer, ret);
     }
 
     furi_hal_console_set_tx_callback(NULL, NULL);
 
-    vStreamBufferDelete(ring);
+    if(restore_log_level) {
+        // There will be strange behaviour if log level is set from settings while log command is running
+        furi_log_set_level(previous_level);
+    }
+
+    furi_stream_buffer_free(ring);
 }
 
 void cli_command_vibro(Cli* cli, FuriString* args, void* context) {
