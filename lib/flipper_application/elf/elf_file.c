@@ -67,8 +67,8 @@ static ELFSection* elf_file_get_or_put_section(ELFFile* elf, const char* name) {
                 .data = NULL,
                 .sec_idx = 0,
                 .size = 0,
-                .relocate_entry_count = 0,
-                .relocate_entry_offset = 0,
+                .rel_count = 0,
+                .rel_offset = 0,
             });
         section_p = elf_file_get_section(elf, name);
     }
@@ -338,9 +338,9 @@ static bool elf_relocate_symbol(ELFFile* elf, Elf32_Addr relAddr, int type, Elf3
 static bool elf_relocate(ELFFile* elf, ELFSection* s) {
     if(s->data) {
         Elf32_Rel rel;
-        size_t relEntries = s->relocate_entry_count;
+        size_t relEntries = s->rel_count;
         size_t relCount;
-        (void)storage_file_seek(elf->fd, s->relocate_entry_offset, true);
+        (void)storage_file_seek(elf->fd, s->rel_offset, true);
         FURI_LOG_D(TAG, " Offset   Info     Type             Name");
 
         int relocate_result = true;
@@ -510,8 +510,8 @@ static SectionType elf_preload_section(
     if(section_header->sh_flags & SHF_INFO_LINK) {
         name = name + strlen(".rel");
         ELFSection* section_p = elf_file_get_or_put_section(elf, name);
-        section_p->relocate_entry_count = section_header->sh_size / sizeof(Elf32_Rel);
-        section_p->relocate_entry_offset = section_header->sh_offset;
+        section_p->rel_count = section_header->sh_size / sizeof(Elf32_Rel);
+        section_p->rel_offset = section_header->sh_offset;
         return SectionTypeRelData;
     }
 
@@ -554,7 +554,7 @@ static SectionType elf_preload_section(
 }
 
 static bool elf_relocate_section(ELFFile* elf, ELFSection* section) {
-    if(section->relocate_entry_count) {
+    if(section->rel_count) {
         FURI_LOG_D(TAG, "Relocating section");
         return elf_relocate(elf, section);
     } else {
