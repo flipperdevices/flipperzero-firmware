@@ -281,7 +281,7 @@ static void
             return;
         } else if(snake_state->state == GameStateLastChance) {
             snake_state->state = GameStateGameOver;
-            notification_message(notification, &sequence_fail);
+            notification_message_block(notification, &sequence_fail);
             return;
         }
     } else {
@@ -293,7 +293,7 @@ static void
     crush = snake_game_collision_with_tail(snake_state, next_step);
     if(crush) {
         snake_state->state = GameStateGameOver;
-        notification_message(notification, &sequence_fail);
+        notification_message_block(notification, &sequence_fail);
         return;
     }
 
@@ -302,7 +302,7 @@ static void
         snake_state->len++;
         if(snake_state->len >= MAX_SNAKE_LEN) {
             snake_state->state = GameStateGameOver;
-            notification_message(notification, &sequence_fail);
+            notification_message_block(notification, &sequence_fail);
             return;
         }
     }
@@ -387,6 +387,9 @@ int32_t snake_game_app(void* p) {
         view_port_update(view_port);
         release_mutex(&state_mutex, snake_state);
     }
+
+    // Wait for all notifications to be played
+    furi_delay_ms(100);
 
     furi_timer_free(timer);
     view_port_enabled_set(view_port, false);
