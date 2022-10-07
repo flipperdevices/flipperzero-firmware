@@ -17,6 +17,13 @@ static bool favorite_fap_selector_item_callback(
     return success;
 }
 
+static bool favorite_fap_selector_file_exists(char* file_path) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    bool exists = storage_file_exists(storage, file_path);
+    furi_record_close(RECORD_STORAGE);
+    return exists;
+}
+
 static void desktop_settings_scene_favorite_submenu_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
@@ -37,7 +44,20 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
             i,
             desktop_settings_scene_favorite_submenu_callback,
             app);
-        // Set selected item to favorite again?
+
+        if(primary_favorite) { // Select favorite item in submenu
+            if((app->settings.favorite_primary.is_external &&
+                !strcmp(FLIPPER_APPS[i].name, FAP_LOADER_APP_NAME)) ||
+               (!strcmp(FLIPPER_APPS[i].name, app->settings.favorite_primary.name_or_path))) {
+                submenu_set_selected_item(submenu, i);
+            }
+        } else {
+            if((app->settings.favorite_secondary.is_external &&
+                !strcmp(FLIPPER_APPS[i].name, FAP_LOADER_APP_NAME)) ||
+               (!strcmp(FLIPPER_APPS[i].name, app->settings.favorite_secondary.name_or_path))) {
+                submenu_set_selected_item(submenu, i);
+            }
+        }
     }
 
     submenu_set_header(
@@ -79,7 +99,19 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
                 .item_loader_context = app,
             };
 
-            while(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
+            if(primary_favorite) { // Select favorite fap in file browser
+                if(favorite_fap_selector_file_exists(
+                       app->settings.favorite_primary.name_or_path)) {
+                    furi_string_set_str(temp_path, app->settings.favorite_primary.name_or_path);
+                }
+            } else {
+                if(favorite_fap_selector_file_exists(
+                       app->settings.favorite_secondary.name_or_path)) {
+                    furi_string_set_str(temp_path, app->settings.favorite_secondary.name_or_path);
+                }
+            }
+
+            if(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
                 if(primary_favorite) {
                     app->settings.favorite_primary.is_external = true;
                     strncpy(
