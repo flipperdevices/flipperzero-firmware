@@ -13,12 +13,10 @@ typedef enum {
 
 static void gps_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
     GpsUart* gps_uart = (GpsUart*)context;
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     if(ev == UartIrqEventRXNE) {
-        xStreamBufferSendFromISR(gps_uart->rx_stream, &data, 1, &xHigherPriorityTaskWoken);
+        furi_stream_buffer_send(gps_uart->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(gps_uart->thread), WorkerEvtRxDone);
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
 }
 
@@ -52,7 +50,7 @@ static void gps_uart_parse_nmea(GpsUart* gps_uart, char* line)
 static int32_t gps_uart_worker(void* context) {
     GpsUart* gps_uart = (GpsUart*)context;
 
-    gps_uart->rx_stream = xStreamBufferCreate(RX_BUF_SIZE * 5, 1);
+    gps_uart->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE * 5, 1);
     size_t rx_offset = 0;
 
     gps_uart_serial_init(gps_uart);
@@ -65,8 +63,8 @@ static int32_t gps_uart_worker(void* context) {
         if(events & WorkerEvtRxDone) {
             size_t len = 0;
             do {
-                len = xStreamBufferReceive(gps_uart->rx_stream, gps_uart->rx_buf + rx_offset,
-                                           RX_BUF_SIZE - 1 - rx_offset, 0);
+                len = furi_stream_buffer_receive(gps_uart->rx_stream, gps_uart->rx_buf + rx_offset,
+                                                 RX_BUF_SIZE - 1 - rx_offset, 0);
                 if(len > 0) {
                     rx_offset += len;
                     gps_uart->rx_buf[rx_offset] = '\0';
@@ -97,7 +95,7 @@ static int32_t gps_uart_worker(void* context) {
 
     gps_uart_serial_deinit(gps_uart);
 
-    vStreamBufferDelete(gps_uart->rx_stream);
+    furi_stream_buffer_free(gps_uart->rx_stream);
 
     return 0;
 }

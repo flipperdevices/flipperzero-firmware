@@ -1,7 +1,6 @@
 #pragma once
 
 #include <furi_hal.h>
-#include <stream_buffer.h>
 
 #define GPS_BAUDRATE 9600
 #define RX_BUF_SIZE 1024
@@ -13,7 +12,7 @@ typedef struct {
 
 typedef struct {
     FuriThread* thread;
-    StreamBufferHandle_t rx_stream;
+    FuriStreamBuffer* rx_stream;
     uint8_t rx_buf[RX_BUF_SIZE];
 
     GpsStatus status;
