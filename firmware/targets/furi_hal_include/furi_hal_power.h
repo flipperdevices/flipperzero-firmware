@@ -7,7 +7,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <m-string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -85,6 +84,12 @@ uint8_t furi_hal_power_get_bat_health_pct();
  */
 bool furi_hal_power_is_charging();
 
+/** Get charge complete status
+ *
+ * @return     true if done charging and connected to charger
+ */
+bool furi_hal_power_is_charging_done();
+
 /** Switch MCU to SHUTDOWN */
 void furi_hal_power_shutdown();
 
@@ -155,12 +160,6 @@ float furi_hal_power_get_battery_current(FuriHalPowerIC ic);
  * @return     temperature in C
  */
 float furi_hal_power_get_battery_temperature(FuriHalPowerIC ic);
-
-/** Get System voltage in V
- *
- * @return     voltage in V
- */
-float furi_hal_power_get_system_voltage();
 
 /** Get USB voltage in V
  *

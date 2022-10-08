@@ -83,13 +83,13 @@ uint8_t subghz_protocol_decoder_power_smart_get_hash_data(void* context);
  * Serialize data SubGhzProtocolDecoderPowerSmart.
  * @param context Pointer to a SubGhzProtocolDecoderPowerSmart instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @param preset The modulation on which the signal was received, SubGhzPesetDefinition
+ * @param preset The modulation on which the signal was received, SubGhzPresetDefinition
  * @return true On success
  */
 bool subghz_protocol_decoder_power_smart_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPesetDefinition* preset);
+    SubGhzPresetDefinition* preset);
 
 /**
  * Deserialize data SubGhzProtocolDecoderPowerSmart.
@@ -104,4 +104,4 @@ bool subghz_protocol_decoder_power_smart_deserialize(void* context, FlipperForma
  * @param context Pointer to a SubGhzProtocolDecoderPowerSmart instance
  * @param output Resulting text
  */
-void subghz_protocol_decoder_power_smart_get_string(void* context, string_t output);
+void subghz_protocol_decoder_power_smart_get_string(void* context, FuriString* output);

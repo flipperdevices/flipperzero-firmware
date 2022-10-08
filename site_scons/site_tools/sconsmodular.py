@@ -1,5 +1,6 @@
 import posixpath
 import os
+from SCons.Errors import UserError
 
 
 def BuildModule(env, module):
@@ -8,9 +9,9 @@ def BuildModule(env, module):
     if not os.path.exists(module_sconscript):
         module_sconscript = posixpath.join(src_dir, f"{module}.scons")
         if not os.path.exists(module_sconscript):
-            print(f"Cannot build module {module}: scons file not found")
-            Exit(2)
+            raise UserError(f"Cannot build module {module}: scons file not found")
 
+    env.Append(PY_LINT_SOURCES=[module_sconscript])
     return env.SConscript(
         module_sconscript,
         variant_dir=posixpath.join(env.subst("$BUILD_DIR"), module),
@@ -39,10 +40,15 @@ def PhonyTarget(env, name, action, source=None, **kw):
     return command
 
 
+def ChangeFileExtension(env, fnode, ext):
+    return env.File(f"#{os.path.splitext(fnode.path)[0]}{ext}")
+
+
 def generate(env):
     env.AddMethod(BuildModule)
     env.AddMethod(BuildModules)
     env.AddMethod(PhonyTarget)
+    env.AddMethod(ChangeFileExtension)
 
 
 def exists(env):

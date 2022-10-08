@@ -14,7 +14,7 @@ extern uint32_t SystemCoreClock;
 #define configENABLE_MPU 0
 
 #define configUSE_PREEMPTION 1
-#define configSUPPORT_STATIC_ALLOCATION 0
+#define configSUPPORT_STATIC_ALLOCATION 1
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
 #define configUSE_IDLE_HOOK 0
 #define configUSE_TICK_HOOK 0
@@ -32,7 +32,7 @@ extern uint32_t SystemCoreClock;
 #define configUSE_16_BIT_TICKS 0
 #define configUSE_MUTEXES 1
 #define configQUEUE_REGISTRY_SIZE 0
-#define configCHECK_FOR_STACK_OVERFLOW 2
+#define configCHECK_FOR_STACK_OVERFLOW 0
 #define configUSE_RECURSIVE_MUTEXES 1
 #define configUSE_COUNTING_SEMAPHORES 1
 #define configENABLE_BACKWARD_COMPATIBILITY 0
@@ -76,19 +76,8 @@ to exclude the API function. */
 #define INCLUDE_xTaskGetSchedulerState 1
 #define INCLUDE_xTimerPendFunctionCall 1
 
-/* CMSIS-RTOS V2 flags */
-#define configUSE_OS2_THREAD_SUSPEND_RESUME 1
-#define configUSE_OS2_THREAD_ENUMERATE 1
-#define configUSE_OS2_THREAD_FLAGS 1
-#define configUSE_OS2_TIMER 1
-#define configUSE_OS2_MUTEX 1
-
-// NEVER TO BE USED, because of their hard realtime nature
-// #define configUSE_OS2_EVENTFLAGS_FROM_ISR 1
-
-/* CMSIS-RTOS */
+/* Furi-specific */
 #define configTASK_NOTIFICATION_ARRAY_ENTRIES 2
-#define CMSIS_TASK_NOTIFY_INDEX 1
 
 extern __attribute__((__noreturn__)) void furi_thread_catch();
 #define configTASK_RETURN_ADDRESS (furi_thread_catch + 2)
@@ -145,3 +134,7 @@ standard names. */
 #define USE_CUSTOM_SYSTICK_HANDLER_IMPLEMENTATION 1
 #define configOVERRIDE_DEFAULT_TICK_CONFIGURATION \
     1 /* required only for Keil but does not hurt otherwise */
+
+#define traceTASK_SWITCHED_IN()                                     \
+    extern void furi_hal_mpu_set_stack_protection(uint32_t* stack); \
+    furi_hal_mpu_set_stack_protection((uint32_t*)pxCurrentTCB->pxStack)

@@ -25,19 +25,19 @@ struct SubGhzBlockGeneric {
  * @param preset_name name preset
  * @param preset_str Output name preset
  */
-void subghz_block_generic_get_preset_name(const char* preset_name, string_t preset_str);
+void subghz_block_generic_get_preset_name(const char* preset_name, FuriString* preset_str);
 
 /**
  * Serialize data SubGhzBlockGeneric.
  * @param instance Pointer to a SubGhzBlockGeneric instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @param preset The modulation on which the signal was received, SubGhzPesetDefinition
+ * @param preset The modulation on which the signal was received, SubGhzPresetDefinition
  * @return true On success
  */
 bool subghz_block_generic_serialize(
     SubGhzBlockGeneric* instance,
     FlipperFormat* flipper_format,
-    SubGhzPesetDefinition* preset);
+    SubGhzPresetDefinition* preset);
 
 /**
  * Deserialize data SubGhzBlockGeneric.

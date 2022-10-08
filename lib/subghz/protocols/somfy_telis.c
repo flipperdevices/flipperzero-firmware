@@ -339,7 +339,7 @@ uint8_t subghz_protocol_decoder_somfy_telis_get_hash_data(void* context) {
 bool subghz_protocol_decoder_somfy_telis_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPesetDefinition* preset) {
+    SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyTelis* instance = context;
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
@@ -348,21 +348,33 @@ bool subghz_protocol_decoder_somfy_telis_serialize(
 bool subghz_protocol_decoder_somfy_telis_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyTelis* instance = context;
-    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    bool ret = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            break;
+        }
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_somfy_telis_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
+        ret = true;
+    } while(false);
+    return ret;
 }
 
-void subghz_protocol_decoder_somfy_telis_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_somfy_telis_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyTelis* instance = context;
 
     subghz_protocol_somfy_telis_check_remote_controller(&instance->generic);
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %db\r\n"
         "Key:0x%lX%08lX\r\n"
         "Sn:0x%06lX \r\n"
-        "Cnt:0x%04X\r\n"
+        "Cnt:0x%04lX\r\n"
         "Btn:%s\r\n",
 
         instance->generic.protocol_name,

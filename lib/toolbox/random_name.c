@@ -12,15 +12,10 @@ void set_random_name(char* name, uint8_t max_name_size) {
         rand_generator_inited = true;
     }
     const char* prefix[] = {
-        "ancient",
-        "hollow",
-        "strange",
-        "disappeared",
-        "unknown",
-        "unthinkable",
-        "unnamable",
-        "nameless",
-        "my",
+        "ancient",     "hollow",    "strange",    "disappeared", "unknown",
+        "unthinkable", "unnamable", "nameless",   "my",          "concealed",
+        "forgotten",   "hidden",    "mysterious", "obscure",     "random",
+        "remote",      "uncharted", "undefined",  "untravelled", "untold",
     };
 
     const char* suffix[] = {
@@ -32,11 +27,15 @@ void set_random_name(char* name, uint8_t max_name_size) {
         "entree",
         "opening",
         "crack",
+        "access",
+        "corridor",
+        "passage",
+        "port",
     };
     uint8_t prefix_i = rand() % COUNT_OF(prefix);
     uint8_t suffix_i = rand() % COUNT_OF(suffix);
 
-    sniprintf(name, max_name_size, "%s_%s", prefix[prefix_i], suffix[suffix_i]);
+    snprintf(name, max_name_size, "%s_%s", prefix[prefix_i], suffix[suffix_i]);
     // Set first symbol to upper case
     name[0] = name[0] - 0x20;
 }

@@ -14,8 +14,9 @@ typedef enum {
     NfcWorkerStateUidEmulate,
     NfcWorkerStateMfUltralightEmulate,
     NfcWorkerStateMfClassicEmulate,
-    NfcWorkerStateMfClassicUserDictAttack,
-    NfcWorkerStateMfClassicFlipperDictAttack,
+    NfcWorkerStateReadMfUltralightReadAuth,
+    NfcWorkerStateMfClassicDictAttack,
+    NfcWorkerStateAnalyzeReader,
     // Debug
     NfcWorkerStateEmulateApdu,
     NfcWorkerStateField,
@@ -45,12 +46,23 @@ typedef enum {
     NfcWorkerEventAborted,
     NfcWorkerEventCardDetected,
     NfcWorkerEventNoCardDetected,
+    NfcWorkerEventWrongCardDetected,
 
     // Mifare Classic events
     NfcWorkerEventNoDictFound,
     NfcWorkerEventNewSector,
+    NfcWorkerEventNewDictKeyBatch,
     NfcWorkerEventFoundKeyA,
     NfcWorkerEventFoundKeyB,
+
+    // Detect Reader events
+    NfcWorkerEventDetectReaderDetected,
+    NfcWorkerEventDetectReaderLost,
+    NfcWorkerEventDetectReaderMfkeyCollected,
+
+    // Mifare Ultralight events
+    NfcWorkerEventMfUltralightPassKey,
+
 } NfcWorkerEvent;
 
 typedef bool (*NfcWorkerCallback)(NfcWorkerEvent event, void* context);

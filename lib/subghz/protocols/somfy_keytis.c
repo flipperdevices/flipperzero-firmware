@@ -382,7 +382,7 @@ uint8_t subghz_protocol_decoder_somfy_keytis_get_hash_data(void* context) {
 bool subghz_protocol_decoder_somfy_keytis_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPesetDefinition* preset) {
+    SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyKeytis* instance = context;
     bool res = subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
@@ -403,6 +403,11 @@ bool subghz_protocol_decoder_somfy_keytis_deserialize(void* context, FlipperForm
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_somfy_keytis_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
             break;
@@ -421,18 +426,18 @@ bool subghz_protocol_decoder_somfy_keytis_deserialize(void* context, FlipperForm
     return res;
 }
 
-void subghz_protocol_decoder_somfy_keytis_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_somfy_keytis_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyKeytis* instance = context;
 
     subghz_protocol_somfy_keytis_check_remote_controller(&instance->generic);
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %db\r\n"
         "%lX%08lX%06lX\r\n"
         "Sn:0x%06lX \r\n"
-        "Cnt:0x%04X\r\n"
+        "Cnt:0x%04lX\r\n"
         "Btn:%s\r\n",
 
         instance->generic.protocol_name,

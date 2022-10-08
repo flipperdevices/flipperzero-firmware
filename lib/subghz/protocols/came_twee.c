@@ -112,7 +112,7 @@ void* subghz_protocol_encoder_came_twee_alloc(SubGhzEnvironment* environment) {
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 1536; //max upload 92*14 = 1288 !!!!
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
     return instance;
 }
 
@@ -250,14 +250,18 @@ bool subghz_protocol_encoder_came_twee_deserialize(void* context, FlipperFormat*
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
-
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_came_twee_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
         //optional parameter parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         subghz_protocol_came_twee_remote_controller(&instance->generic);
         subghz_protocol_encoder_came_twee_get_upload(instance);
-        instance->encoder.is_runing = true;
+        instance->encoder.is_running = true;
 
         res = true;
     } while(false);
@@ -267,14 +271,14 @@ bool subghz_protocol_encoder_came_twee_deserialize(void* context, FlipperFormat*
 
 void subghz_protocol_encoder_came_twee_stop(void* context) {
     SubGhzProtocolEncoderCameTwee* instance = context;
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
 }
 
 LevelDuration subghz_protocol_encoder_came_twee_yield(void* context) {
     SubGhzProtocolEncoderCameTwee* instance = context;
 
-    if(instance->encoder.repeat == 0 || !instance->encoder.is_runing) {
-        instance->encoder.is_runing = false;
+    if(instance->encoder.repeat == 0 || !instance->encoder.is_running) {
+        instance->encoder.is_running = false;
         return level_duration_reset();
     }
 
@@ -418,7 +422,7 @@ uint8_t subghz_protocol_decoder_came_twee_get_hash_data(void* context) {
 bool subghz_protocol_decoder_came_twee_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPesetDefinition* preset) {
+    SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderCameTwee* instance = context;
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
@@ -427,21 +431,33 @@ bool subghz_protocol_decoder_came_twee_serialize(
 bool subghz_protocol_decoder_came_twee_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderCameTwee* instance = context;
-    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    bool ret = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            break;
+        }
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_came_twee_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
+        ret = true;
+    } while(false);
+    return ret;
 }
 
-void subghz_protocol_decoder_came_twee_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_came_twee_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderCameTwee* instance = context;
     subghz_protocol_came_twee_remote_controller(&instance->generic);
     uint32_t code_found_hi = instance->generic.data >> 32;
     uint32_t code_found_lo = instance->generic.data & 0x00000000ffffffff;
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
-        "%s %dbit\r\n"
+        "%s %db\r\n"
         "Key:0x%lX%08lX\r\n"
-        "Btn:%lX\r\n"
+        "Btn:%X\r\n"
         "DIP:" DIP_PATTERN "\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,

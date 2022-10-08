@@ -2,11 +2,15 @@
 
 #include <furi_hal_nfc.h>
 #include "../nfc_worker.h"
-
-#include <m-string.h>
+#include "../nfc_device.h"
 
 typedef enum {
-    NfcSupportedCardTypeTroyka,
+    NfcSupportedCardTypePlantain,
+    NfcSupportedCardTypeTroika,
+    NfcSupportedCardTypePlantain4K,
+    NfcSupportedCardTypeTroika4K,
+    NfcSupportedCardTypeTwoCities,
+    NfcSupportedCardTypeAllInOne,
 
     NfcSupportedCardTypeEnd,
 } NfcSupportedCardType;
@@ -15,7 +19,7 @@ typedef bool (*NfcSupportedCardVerify)(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
 
 typedef bool (*NfcSupportedCardRead)(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx);
 
-typedef bool (*NfcSupportedCardParse)(NfcWorker* nfc_worker);
+typedef bool (*NfcSupportedCardParse)(NfcDeviceData* dev_data);
 
 typedef struct {
     NfcProtocol protocol;
@@ -25,3 +29,5 @@ typedef struct {
 } NfcSupportedCard;
 
 extern NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd];
+
+bool nfc_supported_card_verify_and_parse(NfcDeviceData* dev_data);

@@ -101,7 +101,7 @@ void* subghz_protocol_encoder_secplus_v1_alloc(SubGhzEnvironment* environment) {
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 128;
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
     return instance;
 }
 
@@ -273,7 +273,11 @@ bool subghz_protocol_encoder_secplus_v1_deserialize(void* context, FlipperFormat
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
-
+        if(instance->generic.data_count_bit !=
+           2 * subghz_protocol_secplus_v1_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
         //optional parameter parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
@@ -294,7 +298,7 @@ bool subghz_protocol_encoder_secplus_v1_deserialize(void* context, FlipperFormat
             break;
         }
 
-        instance->encoder.is_runing = true;
+        instance->encoder.is_running = true;
 
         res = true;
     } while(false);
@@ -304,14 +308,14 @@ bool subghz_protocol_encoder_secplus_v1_deserialize(void* context, FlipperFormat
 
 void subghz_protocol_encoder_secplus_v1_stop(void* context) {
     SubGhzProtocolEncoderSecPlus_v1* instance = context;
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
 }
 
 LevelDuration subghz_protocol_encoder_secplus_v1_yield(void* context) {
     SubGhzProtocolEncoderSecPlus_v1* instance = context;
 
-    if(instance->encoder.repeat == 0 || !instance->encoder.is_runing) {
-        instance->encoder.is_runing = false;
+    if(instance->encoder.repeat == 0 || !instance->encoder.is_running) {
+        instance->encoder.is_running = false;
         return level_duration_reset();
     }
 
@@ -515,7 +519,7 @@ uint8_t subghz_protocol_decoder_secplus_v1_get_hash_data(void* context) {
 bool subghz_protocol_decoder_secplus_v1_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPesetDefinition* preset) {
+    SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderSecPlus_v1* instance = context;
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
@@ -524,7 +528,19 @@ bool subghz_protocol_decoder_secplus_v1_serialize(
 bool subghz_protocol_decoder_secplus_v1_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderSecPlus_v1* instance = context;
-    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    bool ret = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            break;
+        }
+        if(instance->generic.data_count_bit !=
+           2 * subghz_protocol_secplus_v1_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
+        ret = true;
+    } while(false);
+    return ret;
 }
 
 bool subghz_protocol_secplus_v1_check_fixed(uint32_t fixed) {
@@ -539,7 +555,7 @@ bool subghz_protocol_secplus_v1_check_fixed(uint32_t fixed) {
     return true;
 }
 
-void subghz_protocol_decoder_secplus_v1_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_secplus_v1_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderSecPlus_v1* instance = context;
 
@@ -551,7 +567,7 @@ void subghz_protocol_decoder_secplus_v1_get_string(void* context, string_t outpu
     uint8_t id1 = (fixed / 9) % 3;
     uint16_t pin = 0;
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %db\r\n"
         "Key:0x%lX%08lX\r\n"
@@ -571,9 +587,9 @@ void subghz_protocol_decoder_secplus_v1_get_string(void* context, string_t outpu
         pin = (fixed / 59049) % 19683;
 
         if(pin <= 9999) {
-            string_cat_printf(output, " pin:%d", pin);
+            furi_string_cat_printf(output, " pin:%d", pin);
         } else if(10000 <= pin && pin <= 11029) {
-            string_cat_printf(output, " pin:enter");
+            furi_string_cat_printf(output, " pin:enter");
         }
 
         int pin_suffix = 0;
@@ -581,16 +597,16 @@ void subghz_protocol_decoder_secplus_v1_get_string(void* context, string_t outpu
         pin_suffix = (fixed / 1162261467) % 3;
 
         if(pin_suffix == 1) {
-            string_cat_printf(output, " #\r\n");
+            furi_string_cat_printf(output, " #\r\n");
         } else if(pin_suffix == 2) {
-            string_cat_printf(output, " *\r\n");
+            furi_string_cat_printf(output, " *\r\n");
         } else {
-            string_cat_printf(output, "\r\n");
+            furi_string_cat_printf(output, "\r\n");
         }
-        string_cat_printf(
+        furi_string_cat_printf(
             output,
             "Sn:0x%08lX\r\n"
-            "Cnt:0x%03X\r\n"
+            "Cnt:0x%03lX\r\n"
             "Sw_id:0x%X\r\n",
             instance->generic.serial,
             instance->generic.cnt,
@@ -599,17 +615,17 @@ void subghz_protocol_decoder_secplus_v1_get_string(void* context, string_t outpu
         //id = fixed / 27;
         instance->generic.serial = fixed / 27;
         if(instance->generic.btn == 1) {
-            string_cat_printf(output, " Btn:left\r\n");
+            furi_string_cat_printf(output, " Btn:left\r\n");
         } else if(instance->generic.btn == 0) {
-            string_cat_printf(output, " Btn:middle\r\n");
+            furi_string_cat_printf(output, " Btn:middle\r\n");
         } else if(instance->generic.btn == 2) {
-            string_cat_printf(output, " Btn:right\r\n");
+            furi_string_cat_printf(output, " Btn:right\r\n");
         }
 
-        string_cat_printf(
+        furi_string_cat_printf(
             output,
             "Sn:0x%08lX\r\n"
-            "Cnt:0x%03X\r\n"
+            "Cnt:0x%03lX\r\n"
             "Sw_id:0x%X\r\n",
             instance->generic.serial,
             instance->generic.cnt,

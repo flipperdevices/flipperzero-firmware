@@ -11,9 +11,6 @@
  *
  */
 #define KEELOQ_NLF 0x3A5C742E
-#define bit(x, n) (((x) >> (n)) & 1)
-#define g5(x, a, b, c, d, e) \
-    (bit(x, a) + bit(x, b) * 2 + bit(x, c) * 4 + bit(x, d) * 8 + bit(x, e) * 16)
 
 /*
  * KeeLoq learning types
@@ -24,6 +21,7 @@
 #define KEELOQ_LEARNING_NORMAL 2u
 #define KEELOQ_LEARNING_SECURE 3u
 #define KEELOQ_LEARNING_MAGIC_XOR_TYPE_1 4u
+#define KEELOQ_LEARNING_MAGIC_SERIAL_TYPE_1 5u
 
 /**
  * Simple Learning Encrypt
@@ -66,3 +64,11 @@ uint64_t
  * @return manufacture for this serial number (64bit)
  */
 uint64_t subghz_protocol_keeloq_common_magic_xor_type1_learning(uint32_t data, uint64_t xor);
+
+/** Magic_serial_type1 Learning
+ * @param data - serial number (28bit)
+ * @param man - magic man (64bit)
+ * @return manufacture for this serial number (64bit)
+ */
+
+uint64_t subghz_protocol_keeloq_common_magic_serial_type1_learning(uint32_t data, uint64_t man);

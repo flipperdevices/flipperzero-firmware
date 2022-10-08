@@ -182,7 +182,7 @@ uint8_t subghz_protocol_decoder_ido_get_hash_data(void* context) {
 bool subghz_protocol_decoder_ido_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPesetDefinition* preset) {
+    SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderIDo* instance = context;
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
@@ -191,10 +191,21 @@ bool subghz_protocol_decoder_ido_serialize(
 bool subghz_protocol_decoder_ido_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderIDo* instance = context;
-    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    bool ret = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            break;
+        }
+        if(instance->generic.data_count_bit != subghz_protocol_ido_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
+        ret = true;
+    } while(false);
+    return ret;
 }
 
-void subghz_protocol_decoder_ido_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_ido_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderIDo* instance = context;
 
@@ -204,13 +215,13 @@ void subghz_protocol_decoder_ido_get_string(void* context, string_t output) {
     uint32_t code_fix = code_found_reverse & 0xFFFFFF;
     uint32_t code_hop = (code_found_reverse >> 24) & 0xFFFFFF;
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
         "Key:0x%lX%08lX\r\n"
         "Fix:%06lX \r\n"
         "Hop:%06lX \r\n"
-        "Sn:%05lX Btn:%lX\r\n",
+        "Sn:%05lX Btn:%X\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         (uint32_t)(instance->generic.data >> 32),

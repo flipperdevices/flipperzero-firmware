@@ -92,6 +92,7 @@
 #include "string.h"
 #include "stdio.h"
 #include <furi_hal.h>
+#include "sector_cache.h"
 
 /** @addtogroup BSP
   * @{
@@ -331,6 +332,10 @@ void SD_SPI_Bus_To_Normal_State() {
   * @{
   */
 
+uint8_t BSP_SD_MaxMountRetryCount() {
+    return 10;
+}
+
 /**
   * @brief  Initializes the SD/SD communication.
   * @param  None
@@ -372,6 +377,8 @@ uint8_t BSP_SD_Init(bool reset_card) {
 
     furi_hal_sd_spi_handle = NULL;
     furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_slow);
+
+    sector_cache_init();
 
     /* SD initialized and set to SPI mode properly */
     return res;
@@ -423,9 +430,15 @@ uint8_t
     uint32_t offset = 0;
     uint32_t addr;
     uint8_t retr = BSP_SD_ERROR;
-    uint8_t* ptr = NULL;
     SD_CmdAnswer_typedef response;
     uint16_t BlockSize = 512;
+    uint8_t* cached_data;
+
+    bool single_sector_read = (NumOfBlocks == 1);
+    if(single_sector_read && (cached_data = sector_cache_get(ReadAddr))) {
+        memcpy(pData, cached_data, BlockSize);
+        return BSP_SD_OK;
+    }
 
     /* Send CMD16 (SD_CMD_SET_BLOCKLEN) to set the size of the block and 
      Check if the SD acknowledged the set block length command: R1 response (0x00: no errors) */
@@ -435,12 +448,6 @@ uint8_t
     if(response.r1 != SD_R1_NO_ERROR) {
         goto error;
     }
-
-    ptr = malloc(sizeof(uint8_t) * BlockSize);
-    if(ptr == NULL) {
-        goto error;
-    }
-    memset(ptr, SD_DUMMY_BYTE, sizeof(uint8_t) * BlockSize);
 
     /* Initialize the address */
     addr = (ReadAddr * ((flag_SDHC == 1) ? 1 : BlockSize));
@@ -457,7 +464,7 @@ uint8_t
         /* Now look for the data token to signify the start of the data */
         if(SD_WaitData(SD_TOKEN_START_DATA_SINGLE_BLOCK_READ) == BSP_SD_OK) {
             /* Read the SD block data : read NumByteToRead data */
-            SD_IO_WriteReadData(ptr, (uint8_t*)pData + offset, BlockSize);
+            SD_IO_WriteReadData(NULL, (uint8_t*)pData + offset, BlockSize);
 
             /* Set next read address*/
             offset += BlockSize;
@@ -475,13 +482,16 @@ uint8_t
         SD_IO_WriteByte(SD_DUMMY_BYTE);
     }
 
+    if(single_sector_read) {
+        sector_cache_put(ReadAddr, (uint8_t*)pData);
+    }
+
     retr = BSP_SD_OK;
 
 error:
     /* Send dummy byte: 8 Clock pulses of delay */
     SD_IO_CSState(1);
     SD_IO_WriteByte(SD_DUMMY_BYTE);
-    if(ptr != NULL) free(ptr);
 
     /* Return the reponse */
     return retr;
@@ -505,9 +515,9 @@ uint8_t BSP_SD_WriteBlocks(
     uint32_t offset = 0;
     uint32_t addr;
     uint8_t retr = BSP_SD_ERROR;
-    uint8_t* ptr = NULL;
     SD_CmdAnswer_typedef response;
     uint16_t BlockSize = 512;
+    sector_cache_invalidate_range(WriteAddr, WriteAddr + NumOfBlocks);
 
     /* Send CMD16 (SD_CMD_SET_BLOCKLEN) to set the size of the block and 
      Check if the SD acknowledged the set block length command: R1 response (0x00: no errors) */
@@ -515,11 +525,6 @@ uint8_t BSP_SD_WriteBlocks(
     SD_IO_CSState(1);
     SD_IO_WriteByte(SD_DUMMY_BYTE);
     if(response.r1 != SD_R1_NO_ERROR) {
-        goto error;
-    }
-
-    ptr = malloc(sizeof(uint8_t) * BlockSize);
-    if(ptr == NULL) {
         goto error;
     }
 
@@ -543,7 +548,7 @@ uint8_t BSP_SD_WriteBlocks(
         SD_IO_WriteByte(SD_TOKEN_START_DATA_SINGLE_BLOCK_WRITE);
 
         /* Write the block data to SD */
-        SD_IO_WriteReadData((uint8_t*)pData + offset, ptr, BlockSize);
+        SD_IO_WriteReadData((uint8_t*)pData + offset, NULL, BlockSize);
 
         /* Set next write address */
         offset += BlockSize;
@@ -565,7 +570,7 @@ uint8_t BSP_SD_WriteBlocks(
     retr = BSP_SD_OK;
 
 error:
-    if(ptr != NULL) free(ptr);
+
     /* Send dummy byte: 8 Clock pulses of delay */
     SD_IO_CSState(1);
     SD_IO_WriteByte(SD_DUMMY_BYTE);

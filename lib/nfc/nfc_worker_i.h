@@ -12,9 +12,7 @@
 #include <lib/nfc/protocols/mifare_classic.h>
 #include <lib/nfc/protocols/mifare_desfire.h>
 #include <lib/nfc/protocols/nfca.h>
-
-#include "helpers/mf_classic_dict.h"
-#include "helpers/nfc_debug_pcap.h"
+#include <lib/nfc/helpers/reader_analyzer.h>
 
 struct NfcWorker {
     FuriThread* thread;
@@ -28,7 +26,7 @@ struct NfcWorker {
 
     NfcWorkerState state;
 
-    NfcDebugPcapWorker* debug_pcap_worker;
+    ReaderAnalyzer* reader_analyzer;
 };
 
 void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state);
@@ -43,6 +41,12 @@ void nfc_worker_emulate_mf_ultralight(NfcWorker* nfc_worker);
 
 void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker);
 
-void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker, MfClassicDictType type);
+void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker);
+
+void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker);
+
+void nfc_worker_mf_ul_auth_attack(NfcWorker* nfc_worker);
 
 void nfc_worker_emulate_apdu(NfcWorker* nfc_worker);
+
+void nfc_worker_analyze_reader(NfcWorker* nfc_worker);

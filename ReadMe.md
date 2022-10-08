@@ -14,13 +14,17 @@ You should clone with
 $ git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git
 ```
 
+# Read the Docs
+
+Check out details on [how to build firmware](documentation/fbt.md), [write applications](documentation/AppsOnSDCard.md), [un-brick your device](documentation/KeyCombo.md) and more in `documentation` folder. 
+
 # Update firmware
 
 [Get Latest Firmware from Update Server](https://update.flipperzero.one/)
 
 Flipper Zero's firmware consists of two components:
 
-- Core2 firmware set - proprietary components by ST: FUS + radio stack. FUS is flashed at factory and you should never update it.
+- Core2 firmware set - proprietary components by ST: FUS + radio stack. FUS is flashed at factory, and you should never update it.
 - Core1 Firmware - HAL + OS + Drivers + Applications.
 
 They both must be flashed in the order described.
@@ -29,11 +33,11 @@ They both must be flashed in the order described.
 
 With Flipper attached over USB:
 
-`./fbt --with-updater flash_usb`
+`./fbt flash_usb`
 
 Just building the package:
 
-`./fbt --with-updater updater_package`
+`./fbt updater_package`
 
 To update, copy the resulting directory to Flipper's SD card and navigate to `update.fuf` file in Archive app. 
 
@@ -48,7 +52,7 @@ Prerequisites:
 - [arm-gcc-none-eabi](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
 - openocd
 
-One liner: `./fbt firmware_flash`
+One-liner: `./fbt firmware_flash`
 
 ## With USB DFU 
 
@@ -60,29 +64,6 @@ One liner: `./fbt firmware_flash`
  - Release `← Left`
 
 3. Run `dfu-util -D full.dfu -a 0`
-
-# Build with Docker
-
-## Prerequisites
-
-1. Install [Docker Engine and Docker Compose](https://www.docker.com/get-started)
-2. Prepare the container:
-
- ```sh
- docker-compose up -d
- ```
-
-## Compile everything
-
-```sh
-docker-compose exec dev ./fbt
-```
-
-Check `dist/` for build outputs.
-
-Use **`flipper-z-{target}-full-{suffix}.dfu`** to flash your device.
-
-If compilation fails, make sure all submodules are all initialized. Either clone with `--recursive` or use `git submodule update --init --recursive`.
 
 # Build on Linux/macOS
 
@@ -97,19 +78,7 @@ brew bundle --verbose
 
 ## Linux Prerequisites
 
-### gcc-arm-none-eabi
-
-```sh
-toolchain="gcc-arm-none-eabi-10.3-2021.10"
-toolchain_package="$toolchain-$(uname -m)-linux"
-
-wget -P /opt "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/$toolchain_package.tar.bz2"
-
-tar xjf /opt/$toolchain_package.tar.bz2 -C /opt
-rm /opt/$toolchain_package.tar.bz2
-
-for file in /opt/$toolchain/bin/* ; do ln -s "${file}" "/usr/bin/$(basename ${file})" ; done
-```
+The FBT tool handles everything, only `git` is required.
 
 ### Optional dependencies
 
@@ -157,10 +126,9 @@ Connect your device via ST-Link and run:
 - `assets`          - Assets used by applications and services
 - `furi`            - Furi Core: os level primitives and helpers
 - `debug`           - Debug tool: GDB-plugins, SVD-file and etc
-- `docker`          - Docker image sources (used for firmware build automation)
 - `documentation`   - Documentation generation system configs and input files
 - `firmware`        - Firmware source code
-- `lib`             - Our and 3rd party libraries, drivers and etc...
+- `lib`             - Our and 3rd party libraries, drivers, etc.
 - `scripts`         - Supplementary scripts and python libraries home
 
-Also pay attention to `ReadMe.md` files inside of those directories.
+Also pay attention to `ReadMe.md` files inside those directories.

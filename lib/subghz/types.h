@@ -31,15 +31,17 @@ typedef void* (*SubGhzAlloc)(SubGhzEnvironment* environment);
 typedef void (*SubGhzFree)(void* context);
 
 // Serialize and Deserialize
-typedef bool (
-    *SubGhzSerialize)(void* context, FlipperFormat* flipper_format, SubGhzPesetDefinition* preset);
+typedef bool (*SubGhzSerialize)(
+    void* context,
+    FlipperFormat* flipper_format,
+    SubGhzPresetDefinition* preset);
 typedef bool (*SubGhzDeserialize)(void* context, FlipperFormat* flipper_format);
 
 // Decoder specific
 typedef void (*SubGhzDecoderFeed)(void* decoder, bool level, uint32_t duration);
 typedef void (*SubGhzDecoderReset)(void* decoder);
 typedef uint8_t (*SubGhzGetHashData)(void* decoder);
-typedef void (*SubGhzGetString)(void* decoder, string_t output);
+typedef void (*SubGhzGetString)(void* decoder, FuriString* output);
 
 // Encoder specific
 typedef void (*SubGhzEncoderStop)(void* encoder);

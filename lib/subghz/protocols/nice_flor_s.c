@@ -237,7 +237,7 @@ void subghz_protocol_decoder_nice_flor_s_feed(void* context, bool level, uint32_
                subghz_protocol_nice_flor_s_const.te_delta) {
                 //Found STOP bit
                 instance->decoder.parser_step = NiceFlorSDecoderStepReset;
-                if(instance->decoder.decode_count_bit >=
+                if(instance->decoder.decode_count_bit ==
                    subghz_protocol_nice_flor_s_const.min_count_bit_for_found) {
                     instance->generic.data = instance->decoder.decode_data;
                     instance->generic.data_count_bit = instance->decoder.decode_count_bit;
@@ -330,7 +330,7 @@ uint8_t subghz_protocol_decoder_nice_flor_s_get_hash_data(void* context) {
 bool subghz_protocol_decoder_nice_flor_s_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPesetDefinition* preset) {
+    SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderNiceFlorS* instance = context;
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
@@ -339,10 +339,22 @@ bool subghz_protocol_decoder_nice_flor_s_serialize(
 bool subghz_protocol_decoder_nice_flor_s_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderNiceFlorS* instance = context;
-    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    bool ret = false;
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            break;
+        }
+        if(instance->generic.data_count_bit !=
+           subghz_protocol_nice_flor_s_const.min_count_bit_for_found) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            break;
+        }
+        ret = true;
+    } while(false);
+    return ret;
 }
 
-void subghz_protocol_decoder_nice_flor_s_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_nice_flor_s_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderNiceFlorS* instance = context;
 
@@ -351,12 +363,12 @@ void subghz_protocol_decoder_nice_flor_s_get_string(void* context, string_t outp
     uint32_t code_found_hi = instance->generic.data >> 32;
     uint32_t code_found_lo = instance->generic.data & 0x00000000ffffffff;
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
         "Key:0x%lX%08lX\r\n"
         "Sn:%05lX\r\n"
-        "Cnt:%04X Btn:%02lX\r\n",
+        "Cnt:%04lX Btn:%02X\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         code_found_hi,
