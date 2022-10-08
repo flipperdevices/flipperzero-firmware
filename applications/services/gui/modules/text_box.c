@@ -20,21 +20,25 @@ typedef struct {
 } TextBoxModel;
 
 static void text_box_process_down(TextBox* text_box) {
-    with_view_model(
-        text_box->view, (TextBoxModel * model) {
+    with_niew_model(
+        text_box->view,
+        TextBoxModel * model,
+        {
             if(model->scroll_pos < model->scroll_num - 1) {
                 model->scroll_pos++;
                 // Search next line start
                 while(*model->text_pos++ != '\n')
                     ;
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static void text_box_process_up(TextBox* text_box) {
-    with_view_model(
-        text_box->view, (TextBoxModel * model) {
+    with_niew_model(
+        text_box->view,
+        TextBoxModel * model,
+        {
             if(model->scroll_pos > 0) {
                 model->scroll_pos--;
                 // Reach last symbol of previous line
@@ -46,8 +50,8 @@ static void text_box_process_up(TextBox* text_box) {
                     model->text_pos++;
                 }
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static void text_box_insert_endline(Canvas* canvas, TextBoxModel* model) {
@@ -136,14 +140,16 @@ TextBox* text_box_alloc() {
     view_set_draw_callback(text_box->view, text_box_view_draw_callback);
     view_set_input_callback(text_box->view, text_box_view_input_callback);
 
-    with_view_model(
-        text_box->view, (TextBoxModel * model) {
+    with_niew_model(
+        text_box->view,
+        TextBoxModel * model,
+        {
             model->text = NULL;
             model->text_formatted = furi_string_alloc_set("");
             model->formatted = false;
             model->font = TextBoxFontText;
-            return true;
-        });
+        },
+        true);
 
     return text_box;
 }
@@ -151,11 +157,8 @@ TextBox* text_box_alloc() {
 void text_box_free(TextBox* text_box) {
     furi_assert(text_box);
 
-    with_view_model(
-        text_box->view, (TextBoxModel * model) {
-            furi_string_free(model->text_formatted);
-            return true;
-        });
+    with_niew_model(
+        text_box->view, TextBoxModel * model, { furi_string_free(model->text_formatted); }, true);
     view_free(text_box->view);
     free(text_box);
 }
@@ -168,46 +171,44 @@ View* text_box_get_view(TextBox* text_box) {
 void text_box_reset(TextBox* text_box) {
     furi_assert(text_box);
 
-    with_view_model(
-        text_box->view, (TextBoxModel * model) {
+    with_niew_model(
+        text_box->view,
+        TextBoxModel * model,
+        {
             model->text = NULL;
             furi_string_set(model->text_formatted, "");
             model->font = TextBoxFontText;
             model->focus = TextBoxFocusStart;
-            return true;
-        });
+        },
+        true);
 }
 
 void text_box_set_text(TextBox* text_box, const char* text) {
     furi_assert(text_box);
     furi_assert(text);
 
-    with_view_model(
-        text_box->view, (TextBoxModel * model) {
+    with_niew_model(
+        text_box->view,
+        TextBoxModel * model,
+        {
             model->text = text;
             furi_string_reset(model->text_formatted);
             furi_string_reserve(model->text_formatted, strlen(text));
             model->formatted = false;
-            return true;
-        });
+        },
+        true);
 }
 
 void text_box_set_font(TextBox* text_box, TextBoxFont font) {
     furi_assert(text_box);
 
-    with_view_model(
-        text_box->view, (TextBoxModel * model) {
-            model->font = font;
-            return true;
-        });
+    with_niew_model(
+        text_box->view, TextBoxModel * model, { model->font = font; }, true);
 }
 
 void text_box_set_focus(TextBox* text_box, TextBoxFocus focus) {
     furi_assert(text_box);
 
-    with_view_model(
-        text_box->view, (TextBoxModel * model) {
-            model->focus = focus;
-            return true;
-        });
+    with_niew_model(
+        text_box->view, TextBoxModel * model, { model->focus = focus; }, true);
 }

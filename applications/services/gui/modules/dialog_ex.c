@@ -89,13 +89,15 @@ static bool dialog_ex_view_input_callback(InputEvent* event, void* context) {
     const char* center_text = NULL;
     const char* right_text = NULL;
 
-    with_view_model(
-        dialog_ex->view, (DialogExModel * model) {
+    with_niew_model(
+        dialog_ex->view,
+        DialogExModel * model,
+        {
             left_text = model->left_text;
             center_text = model->center_text;
             right_text = model->right_text;
-            return true;
-        });
+        },
+        true);
 
     if(dialog_ex->callback) {
         if(event->type == InputTypeShort) {
@@ -148,8 +150,10 @@ DialogEx* dialog_ex_alloc() {
     view_allocate_model(dialog_ex->view, ViewModelTypeLockFree, sizeof(DialogExModel));
     view_set_draw_callback(dialog_ex->view, dialog_ex_view_draw_callback);
     view_set_input_callback(dialog_ex->view, dialog_ex_view_input_callback);
-    with_view_model(
-        dialog_ex->view, (DialogExModel * model) {
+    with_niew_model(
+        dialog_ex->view,
+        DialogExModel * model,
+        {
             model->header.text = NULL;
             model->header.x = 0;
             model->header.y = 0;
@@ -169,9 +173,8 @@ DialogEx* dialog_ex_alloc() {
             model->left_text = NULL;
             model->center_text = NULL;
             model->right_text = NULL;
-
-            return true;
-        });
+        },
+        true);
     dialog_ex->enable_extended_events = false;
     return dialog_ex;
 }
@@ -205,15 +208,17 @@ void dialog_ex_set_header(
     Align horizontal,
     Align vertical) {
     furi_assert(dialog_ex);
-    with_view_model(
-        dialog_ex->view, (DialogExModel * model) {
+    with_niew_model(
+        dialog_ex->view,
+        DialogExModel * model,
+        {
             model->header.text = text;
             model->header.x = x;
             model->header.y = y;
             model->header.horizontal = horizontal;
             model->header.vertical = vertical;
-            return true;
-        });
+        },
+        true);
 }
 
 void dialog_ex_set_text(
@@ -224,53 +229,48 @@ void dialog_ex_set_text(
     Align horizontal,
     Align vertical) {
     furi_assert(dialog_ex);
-    with_view_model(
-        dialog_ex->view, (DialogExModel * model) {
+    with_niew_model(
+        dialog_ex->view,
+        DialogExModel * model,
+        {
             model->text.text = text;
             model->text.x = x;
             model->text.y = y;
             model->text.horizontal = horizontal;
             model->text.vertical = vertical;
-            return true;
-        });
+        },
+        true);
 }
 
 void dialog_ex_set_icon(DialogEx* dialog_ex, uint8_t x, uint8_t y, const Icon* icon) {
     furi_assert(dialog_ex);
-    with_view_model(
-        dialog_ex->view, (DialogExModel * model) {
+    with_niew_model(
+        dialog_ex->view,
+        DialogExModel * model,
+        {
             model->icon.x = x;
             model->icon.y = y;
             model->icon.icon = icon;
-            return true;
-        });
+        },
+        true);
 }
 
 void dialog_ex_set_left_button_text(DialogEx* dialog_ex, const char* text) {
     furi_assert(dialog_ex);
-    with_view_model(
-        dialog_ex->view, (DialogExModel * model) {
-            model->left_text = text;
-            return true;
-        });
+    with_niew_model(
+        dialog_ex->view, DialogExModel * model, { model->left_text = text; }, true);
 }
 
 void dialog_ex_set_center_button_text(DialogEx* dialog_ex, const char* text) {
     furi_assert(dialog_ex);
-    with_view_model(
-        dialog_ex->view, (DialogExModel * model) {
-            model->center_text = text;
-            return true;
-        });
+    with_niew_model(
+        dialog_ex->view, DialogExModel * model, { model->center_text = text; }, true);
 }
 
 void dialog_ex_set_right_button_text(DialogEx* dialog_ex, const char* text) {
     furi_assert(dialog_ex);
-    with_view_model(
-        dialog_ex->view, (DialogExModel * model) {
-            model->right_text = text;
-            return true;
-        });
+    with_niew_model(
+        dialog_ex->view, DialogExModel * model, { model->right_text = text; }, true);
 }
 
 void dialog_ex_reset(DialogEx* dialog_ex) {
@@ -278,16 +278,18 @@ void dialog_ex_reset(DialogEx* dialog_ex) {
     TextElement clean_text_el = {
         .text = NULL, .x = 0, .y = 0, .horizontal = AlignLeft, .vertical = AlignLeft};
     IconElement clean_icon_el = {.icon = NULL, .x = 0, .y = 0};
-    with_view_model(
-        dialog_ex->view, (DialogExModel * model) {
+    with_niew_model(
+        dialog_ex->view,
+        DialogExModel * model,
+        {
             model->header = clean_text_el;
             model->text = clean_text_el;
             model->icon = clean_icon_el;
             model->left_text = NULL;
             model->center_text = NULL;
             model->right_text = NULL;
-            return true;
-        });
+        },
+        true);
     dialog_ex->context = NULL;
     dialog_ex->callback = NULL;
 }

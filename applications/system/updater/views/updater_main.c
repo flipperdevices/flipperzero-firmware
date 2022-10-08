@@ -28,22 +28,22 @@ void updater_main_model_set_state(
     const char* message,
     uint8_t progress,
     bool failed) {
-    with_view_model(
-        main_view->view, (UpdaterProgressModel * model) {
-            model->failed = failed;
-            model->progress = progress;
-            if(furi_string_cmp_str(model->status, message)) {
-                furi_string_set(model->status, message);
-                model->rendered_progress = progress;
-                return true;
-            }
-            if((model->rendered_progress > progress) ||
-               ((progress - model->rendered_progress) > PROGRESS_RENDER_STEP)) {
-                model->rendered_progress = progress;
-                return true;
-            }
-            return false;
-        });
+    // We cannot use with_niew_model here, because sometimes we need to update model
+    UpdaterProgressModel* model = view_get_model(main_view->view);
+    bool update = false;
+    model->failed = failed;
+    model->progress = progress;
+    if(furi_string_cmp_str(model->status, message)) {
+        furi_string_set(model->status, message);
+        model->rendered_progress = progress;
+        update = true;
+    } else if(
+        (model->rendered_progress > progress) ||
+        ((progress - model->rendered_progress) > PROGRESS_RENDER_STEP)) {
+        model->rendered_progress = progress;
+        update = true;
+    }
+    view_commit_model(main_view->view, update);
 }
 
 View* updater_main_get_view(UpdaterMainView* main_view) {
@@ -103,11 +103,11 @@ UpdaterMainView* updater_main_alloc() {
     main_view->view = view_alloc();
     view_allocate_model(main_view->view, ViewModelTypeLocking, sizeof(UpdaterProgressModel));
 
-    with_view_model(
-        main_view->view, (UpdaterProgressModel * model) {
-            model->status = furi_string_alloc_set("Waiting for SD card");
-            return true;
-        });
+    with_niew_model(
+        main_view->view,
+        UpdaterProgressModel * model,
+        { model->status = furi_string_alloc_set("Waiting for SD card"); },
+        true);
 
     view_set_context(main_view->view, main_view);
     view_set_input_callback(main_view->view, updater_main_input);
@@ -118,11 +118,8 @@ UpdaterMainView* updater_main_alloc() {
 
 void updater_main_free(UpdaterMainView* main_view) {
     furi_assert(main_view);
-    with_view_model(
-        main_view->view, (UpdaterProgressModel * model) {
-            furi_string_free(model->status);
-            return false;
-        });
+    with_niew_model(
+        main_view->view, UpdaterProgressModel * model, { furi_string_free(model->status); }, false);
     view_free(main_view->view);
     free(main_view);
 }

@@ -35,8 +35,10 @@ static bool gui_widget_view_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
 
     // Call all Widget Elements input handlers
-    with_view_model(
-        widget->view, (GuiWidgetModel * model) {
+    with_niew_model(
+        widget->view,
+        GuiWidgetModel * model,
+        {
             ElementArray_it_t it;
             ElementArray_it(it, model->element);
             while(!ElementArray_end_p(it)) {
@@ -46,8 +48,8 @@ static bool gui_widget_view_input_callback(InputEvent* event, void* context) {
                 }
                 ElementArray_next(it);
             }
-            return true;
-        });
+        },
+        true);
 
     return consumed;
 }
@@ -60,11 +62,8 @@ Widget* widget_alloc() {
     view_set_draw_callback(widget->view, gui_widget_view_draw_callback);
     view_set_input_callback(widget->view, gui_widget_view_input_callback);
 
-    with_view_model(
-        widget->view, (GuiWidgetModel * model) {
-            ElementArray_init(model->element);
-            return true;
-        });
+    with_niew_model(
+        widget->view, GuiWidgetModel * model, { ElementArray_init(model->element); }, true);
 
     return widget;
 }
@@ -72,8 +71,10 @@ Widget* widget_alloc() {
 void widget_reset(Widget* widget) {
     furi_assert(widget);
 
-    with_view_model(
-        widget->view, (GuiWidgetModel * model) {
+    with_niew_model(
+        widget->view,
+        GuiWidgetModel * model,
+        {
             ElementArray_it_t it;
             ElementArray_it(it, model->element);
             while(!ElementArray_end_p(it)) {
@@ -83,8 +84,8 @@ void widget_reset(Widget* widget) {
                 ElementArray_next(it);
             }
             ElementArray_reset(model->element);
-            return true;
-        });
+        },
+        true);
 }
 
 void widget_free(Widget* widget) {
@@ -92,11 +93,8 @@ void widget_free(Widget* widget) {
     // Free all elements
     widget_reset(widget);
     // Free elements container
-    with_view_model(
-        widget->view, (GuiWidgetModel * model) {
-            ElementArray_clear(model->element);
-            return true;
-        });
+    with_niew_model(
+        widget->view, GuiWidgetModel * model, { ElementArray_clear(model->element); }, true);
 
     view_free(widget->view);
     free(widget);
@@ -111,12 +109,14 @@ static void widget_add_element(Widget* widget, WidgetElement* element) {
     furi_assert(widget);
     furi_assert(element);
 
-    with_view_model(
-        widget->view, (GuiWidgetModel * model) {
+    with_niew_model(
+        widget->view,
+        GuiWidgetModel * model,
+        {
             element->parent = widget;
             ElementArray_push_back(model->element, element);
-            return true;
-        });
+        },
+        true);
 }
 
 void widget_add_string_multiline_element(

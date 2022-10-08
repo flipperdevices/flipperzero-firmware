@@ -233,3 +233,10 @@ void view_commit_model(View* view, bool update);
         view_commit_model(view, update);                          \
     }
 #endif
+
+#define with_niew_model(view, type, action, update) \
+    {                                                   \
+        type = view_get_model(view);                    \
+        {action};                                       \
+        view_commit_model(view, update);                \
+    }
