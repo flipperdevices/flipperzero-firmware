@@ -7,17 +7,11 @@
 	- GND: 18
 
 ## RPI 0 W
-- Through UART (must have bluetooth disabled)
+- Through UART (full or mini)
 	- 5v: 5v
 	- Tx: GPIO 14
 	- Rx: GPIO 15
 	- GND: 6
-
-##### Disable Bluetooth
-In /boot/config.txt add:
-```
-dt-overlay=disable-bt
-```
 
 ## Interface
 | Flipper | Jumpers | RPI    |
