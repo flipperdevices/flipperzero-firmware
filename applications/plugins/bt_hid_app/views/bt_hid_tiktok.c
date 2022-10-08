@@ -17,19 +17,6 @@ typedef struct {
     bool connected;
 } BtHidTikTokModel;
 
-static void bt_hid_tiktok_draw_arrow(Canvas* canvas, uint8_t x, uint8_t y, CanvasDirection dir) {
-    canvas_draw_triangle(canvas, x, y, 5, 3, dir);
-    if(dir == CanvasDirectionBottomToTop) {
-        canvas_draw_dot(canvas, x, y - 1);
-    } else if(dir == CanvasDirectionTopToBottom) {
-        canvas_draw_dot(canvas, x, y + 1);
-    } else if(dir == CanvasDirectionRightToLeft) {
-        canvas_draw_dot(canvas, x - 1, y);
-    } else if(dir == CanvasDirectionLeftToRight) {
-        canvas_draw_dot(canvas, x + 1, y);
-    }
-}
-
 static void bt_hid_tiktok_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     BtHidTikTokModel* model = context;
@@ -41,7 +28,7 @@ static void bt_hid_tiktok_draw_callback(Canvas* canvas, void* context) {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
     }
     canvas_set_font(canvas, FontPrimary);
-    elements_multiline_text_aligned(canvas, 17, 3, AlignLeft, AlignTop, "Media");
+    elements_multiline_text_aligned(canvas, 17, 3, AlignLeft, AlignTop, "TikTok");
     canvas_set_font(canvas, FontSecondary);
 
     // Keypad circles
@@ -54,7 +41,7 @@ static void bt_hid_tiktok_draw_callback(Canvas* canvas, void* context) {
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 96, 12, &I_Volup_8x6);
+    canvas_draw_icon(canvas, 96, 11, &I_Arr_up_7x9);
     canvas_set_color(canvas, ColorBlack);
 
     // Down
@@ -64,7 +51,7 @@ static void bt_hid_tiktok_draw_callback(Canvas* canvas, void* context) {
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 96, 45, &I_Voldwn_6x6);
+    canvas_draw_icon(canvas, 96, 44, &I_Arr_dwn_7x9);
     canvas_set_color(canvas, ColorBlack);
 
     // Left
@@ -74,8 +61,7 @@ static void bt_hid_tiktok_draw_callback(Canvas* canvas, void* context) {
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    bt_hid_tiktok_draw_arrow(canvas, 82, 31, CanvasDirectionRightToLeft);
-    bt_hid_tiktok_draw_arrow(canvas, 86, 31, CanvasDirectionRightToLeft);
+    canvas_draw_icon(canvas, 81, 29, &I_Voldwn_6x6);
     canvas_set_color(canvas, ColorBlack);
 
     // Right
@@ -85,20 +71,15 @@ static void bt_hid_tiktok_draw_callback(Canvas* canvas, void* context) {
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    bt_hid_tiktok_draw_arrow(canvas, 112, 31, CanvasDirectionLeftToRight);
-    bt_hid_tiktok_draw_arrow(canvas, 116, 31, CanvasDirectionLeftToRight);
+    canvas_draw_icon(canvas, 111, 29, &I_Volup_8x6);
     canvas_set_color(canvas, ColorBlack);
 
     // Ok
     if(model->ok_pressed) {
-        canvas_draw_icon(canvas, 93, 25, &I_Pressed_Button_13x13);
-        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_icon(canvas, 91, 23, &I_Like_pressed_17x17);
+    } else {
+        canvas_draw_icon(canvas, 94, 27, &I_Like_def_11x9);
     }
-    bt_hid_tiktok_draw_arrow(canvas, 96, 31, CanvasDirectionLeftToRight);
-    canvas_draw_line(canvas, 100, 29, 100, 33);
-    canvas_draw_line(canvas, 102, 29, 102, 33);
-    canvas_set_color(canvas, ColorBlack);
-
     // Exit
     canvas_draw_icon(canvas, 0, 54, &I_Pin_back_arrow_10x8);
     canvas_set_font(canvas, FontSecondary);
