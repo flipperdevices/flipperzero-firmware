@@ -68,7 +68,7 @@ static void timer_callback(void* ctx) {
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
-    furi_assert(event_queue); 
+    furi_assert(event_queue);
 
     PluginEvent event = {.type = EventTypeKey, .input = *input_event};
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
@@ -86,7 +86,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, string_get_cstr(tempStr));
     string_clear(tempStr);
     int seconds = 0;
-    int minutes = 0; 
+    int minutes = 0;
     if (minesweeper_state->game_started) {
       uint32_t ticks_elapsed = furi_get_tick() - minesweeper_state->game_started_tick;
       seconds = (int) ticks_elapsed / furi_kernel_get_tick_frequency();
@@ -109,7 +109,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 x*TILE_HEIGHT, // x
                 8 + (y * TILE_WIDTH), // y
                 TILE_WIDTH,
-                TILE_HEIGHT, 
+                TILE_HEIGHT,
                 tile_0_bits);
             break;
           case TileType1:
@@ -118,7 +118,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 x*TILE_HEIGHT, // x
                 8 + (y * TILE_WIDTH), // y
                 TILE_WIDTH,
-                TILE_HEIGHT, 
+                TILE_HEIGHT,
                 tile_1_bits);
             break;
           case TileType2:
@@ -127,7 +127,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 x*TILE_HEIGHT, // x
                 8 + (y * TILE_WIDTH), // y
                 TILE_WIDTH,
-                TILE_HEIGHT, 
+                TILE_HEIGHT,
                 tile_2_bits);
             break;
           case TileType3:
@@ -136,7 +136,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 x*TILE_HEIGHT, // x
                 8 + (y * TILE_WIDTH), // y
                 TILE_WIDTH,
-                TILE_HEIGHT, 
+                TILE_HEIGHT,
                 tile_3_bits);
             break;
           case TileType4:
@@ -145,7 +145,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 x*TILE_HEIGHT, // x
                 8 + (y * TILE_WIDTH), // y
                 TILE_WIDTH,
-                TILE_HEIGHT, 
+                TILE_HEIGHT,
                 tile_4_bits);
             break;
           case TileType5:
@@ -154,7 +154,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 x*TILE_HEIGHT, // x
                 8 + (y * TILE_WIDTH), // y
                 TILE_WIDTH,
-                TILE_HEIGHT, 
+                TILE_HEIGHT,
                 tile_5_bits);
             break;
           case TileType6:
@@ -163,7 +163,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 x*TILE_HEIGHT, // x
                 8 + (y * TILE_WIDTH), // y
                 TILE_WIDTH,
-                TILE_HEIGHT, 
+                TILE_HEIGHT,
                 tile_6_bits);
             break;
           case TileType7:
@@ -172,7 +172,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 x*TILE_HEIGHT, // x
                 8 + (y * TILE_WIDTH), // y
                 TILE_WIDTH,
-                TILE_HEIGHT, 
+                TILE_HEIGHT,
                 tile_7_bits);
             break;
           case TileType8:
@@ -181,7 +181,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 x*TILE_HEIGHT, // x
                 8 + (y * TILE_WIDTH), // y
                 TILE_WIDTH,
-                TILE_HEIGHT, 
+                TILE_HEIGHT,
                 tile_8_bits);
             break;
           case TileTypeFlag:
@@ -190,7 +190,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 x*TILE_HEIGHT, // x
                 8 + (y * TILE_WIDTH), // y
                 TILE_WIDTH,
-                TILE_HEIGHT, 
+                TILE_HEIGHT,
                 tile_flag_bits);
             break;
           case TileTypeUncleared:
@@ -199,7 +199,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 x*TILE_HEIGHT, // x
                 8 + (y * TILE_WIDTH), // y
                 TILE_WIDTH,
-                TILE_HEIGHT, 
+                TILE_HEIGHT,
                 tile_uncleared_bits);
             break;
           case TileTypeMine:
@@ -208,7 +208,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 x*TILE_HEIGHT, // x
                 8 + (y * TILE_WIDTH), // y
                 TILE_WIDTH,
-                TILE_HEIGHT, 
+                TILE_HEIGHT,
                 tile_mine_bits);
             break;
         }
@@ -234,7 +234,7 @@ static void setup_playfield(Minesweeper* minesweeper_state) {
     int rand_y = rand() % PLAYFIELD_HEIGHT;
     // make sure first guess isn't a mine
     if (minesweeper_state->minefield[rand_x][rand_y] == FieldEmpty &&
-       (minesweeper_state->cursor_x != rand_x && minesweeper_state->cursor_y != rand_y )) { 
+       (minesweeper_state->cursor_x != rand_x && minesweeper_state->cursor_y != rand_y )) {
        minesweeper_state->minefield[rand_x][rand_y] = FieldMine;
        mines_left--;
     }
@@ -269,7 +269,7 @@ static bool game_lost(Minesweeper* minesweeper_state) {
   dialog_message_set_buttons(message, NULL, "Play again", NULL);
 
   dialog_message_set_icon(message, NULL, 0, 10);
-  
+
   NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
   notification_message(notifications, &sequence_set_vibro_on);
   furi_record_close(RECORD_NOTIFICATION);
@@ -289,7 +289,7 @@ static bool game_won(Minesweeper* minesweeper_state) {
   string_init(tempStr);
 
   int seconds = 0;
-  int minutes = 0; 
+  int minutes = 0;
   uint32_t ticks_elapsed = furi_get_tick() - minesweeper_state->game_started_tick;
   seconds = (int) ticks_elapsed / furi_kernel_get_tick_frequency();
   minutes = (int) seconds / 60;
@@ -309,10 +309,45 @@ static bool game_won(Minesweeper* minesweeper_state) {
   string_clear(tempStr);
   string_reset(tempStr);
   furi_record_close(RECORD_DIALOGS);
-  return choice == DialogMessageButtonCenter; 
+  return choice == DialogMessageButtonCenter;
 }
 
 static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y) {
+  if (minesweeper_state->playfield[cursor_x][cursor_y] >= TileType1 && minesweeper_state->playfield[cursor_x][cursor_y] <= TileType8) {
+    // click on an cleared cell with a number
+    // count the flags around
+    int flags = 0;
+    for (int y = cursor_y-1; y <= cursor_y+1; y++) {
+      for (int x = cursor_x-1; x <= cursor_x+1; x++) {
+        if ( x == cursor_x && y == cursor_y ) {
+          // we're on the cell the user selected, so ignore.
+          continue;
+        }
+        // make sure we don't go OOB
+        if ( x >= 0 && x < PLAYFIELD_WIDTH && y >= 0 && y < PLAYFIELD_HEIGHT) {
+          if (minesweeper_state->playfield[x][y] == TileTypeFlag) {
+              flags ++;
+          }
+        }
+      }
+    }
+    int mines = minesweeper_state->playfield[cursor_x][cursor_y];   // ¯\_(ツ)_/¯
+    if (flags == mines) {
+      // auto uncover all non-flags around (to win faster ;)
+      for (int auto_y = cursor_y-1; auto_y <= cursor_y+1; auto_y++) {
+        for (int auto_x = cursor_x-1; auto_x <= cursor_x+1; auto_x++) {
+          if ( auto_x == cursor_x && auto_y == cursor_y ) {
+            continue;
+          }
+          if ( auto_x >= 0 && auto_x < PLAYFIELD_WIDTH && auto_y >= 0 && auto_y < PLAYFIELD_HEIGHT) {
+            if (minesweeper_state->playfield[auto_x][auto_y] == TileTypeUncleared) {
+              play_move(minesweeper_state, auto_x, auto_y);
+            }
+          }
+        }
+      }
+    }
+  }
   if (minesweeper_state->playfield[cursor_x][cursor_y] != TileTypeUncleared) {
       // we're on an already uncovered field
       return true;
@@ -362,7 +397,7 @@ static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y
 }
 
 static void minesweeper_state_init(Minesweeper* const minesweeper_state) {
-    minesweeper_state->cursor_x = minesweeper_state->cursor_y = 0;  
+    minesweeper_state->cursor_x = minesweeper_state->cursor_y = 0;
     minesweeper_state->game_started = false;
     for (int y = 0; y < PLAYFIELD_HEIGHT; y++) {
       for (int x = 0; x < PLAYFIELD_WIDTH; x++){
@@ -390,11 +425,11 @@ int32_t minesweeper_app(void* p) {
   furi_record_close(RECORD_DIALOGS);
 
   FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
-  
+
   Minesweeper* minesweeper_state = malloc(sizeof(Minesweeper));
   // setup
   minesweeper_state_init(minesweeper_state);
-  
+
   ValueMutex state_mutex;
   if (!init_mutex(&state_mutex, minesweeper_state, sizeof(minesweeper_state))) {
       FURI_LOG_E("Minesweeper", "cannot create mutex\r\n");
@@ -404,13 +439,13 @@ int32_t minesweeper_app(void* p) {
   // BEGIN IMPLEMENTATION
 
   // Set system callbacks
-  ViewPort* view_port = view_port_alloc(); 
+  ViewPort* view_port = view_port_alloc();
   view_port_draw_callback_set(view_port, render_callback, &state_mutex);
   view_port_input_callback_set(view_port, input_callback, event_queue);
-  minesweeper_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypeOnce, &state_mutex); 
-  
+  minesweeper_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypeOnce, &state_mutex);
+
   // Open GUI and register view_port
-  Gui* gui = furi_record_open("gui"); 
+  Gui* gui = furi_record_open("gui");
   gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
   PluginEvent event;
@@ -420,7 +455,7 @@ int32_t minesweeper_app(void* p) {
     if(event_status == FuriStatusOk) {
       // press events
       if(event.type == EventTypeKey) {
-        if(event.input.type == InputTypeShort) {  
+        if(event.input.type == InputTypeShort) {
           switch(event.input.key) {
             case InputKeyUp:
               minesweeper_state->cursor_y--;
@@ -458,7 +493,7 @@ int32_t minesweeper_app(void* p) {
                   setup_playfield(minesweeper_state);
                 } else {
                   // player wants to exit :(
-                  processing = false; 
+                  processing = false;
                 }
               } else {
                 // check win condition.
@@ -466,7 +501,7 @@ int32_t minesweeper_app(void* p) {
                   if (game_won(minesweeper_state)) {
                     //player wants to restart
                     setup_playfield(minesweeper_state);
-                  } else { 
+                  } else {
                     processing = false;
                   }
                 }
@@ -493,9 +528,9 @@ int32_t minesweeper_app(void* p) {
             case InputKeyBack:
               processing = false;
               break;
-          } 
+          }
         }
-      } 
+      }
     } else {
       // event timeout
       ;
