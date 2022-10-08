@@ -34,7 +34,7 @@ void subghz_view_transmitter_add_data_to_show(
     const char* preset_str,
     uint8_t show_button) {
     furi_assert(subghz_transmitter);
-    with_niew_model(
+    with_view_model(
         subghz_transmitter->view,
         SubGhzViewTransmitterModel * model,
         {
@@ -96,7 +96,7 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
     bool can_be_sent = false;
 
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
-        with_niew_model(
+        with_view_model(
             subghz_transmitter->view,
             SubGhzViewTransmitterModel * model,
             {
@@ -109,7 +109,7 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
         return false;
     }
 
-    with_niew_model(
+    with_view_model(
         subghz_transmitter->view,
         SubGhzViewTransmitterModel * model,
         {
@@ -154,7 +154,7 @@ SubGhzViewTransmitter* subghz_view_transmitter_alloc() {
     view_set_enter_callback(subghz_transmitter->view, subghz_view_transmitter_enter);
     view_set_exit_callback(subghz_transmitter->view, subghz_view_transmitter_exit);
 
-    with_niew_model(
+    with_view_model(
         subghz_transmitter->view,
         SubGhzViewTransmitterModel * model,
         {
@@ -169,7 +169,7 @@ SubGhzViewTransmitter* subghz_view_transmitter_alloc() {
 void subghz_view_transmitter_free(SubGhzViewTransmitter* subghz_transmitter) {
     furi_assert(subghz_transmitter);
 
-    with_niew_model(
+    with_view_model(
         subghz_transmitter->view,
         SubGhzViewTransmitterModel * model,
         {

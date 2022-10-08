@@ -617,12 +617,12 @@ static bool byte_input_view_input_callback(InputEvent* event, void* context) {
     if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
         switch(event->key) {
         case InputKeyLeft:
-            with_niew_model(
+            with_view_model(
                 byte_input->view, ByteInputModel * model, { byte_input_handle_left(model); }, true);
             consumed = true;
             break;
         case InputKeyRight:
-            with_niew_model(
+            with_view_model(
                 byte_input->view,
                 ByteInputModel * model,
                 { byte_input_handle_right(model); },
@@ -630,17 +630,17 @@ static bool byte_input_view_input_callback(InputEvent* event, void* context) {
             consumed = true;
             break;
         case InputKeyUp:
-            with_niew_model(
+            with_view_model(
                 byte_input->view, ByteInputModel * model, { byte_input_handle_up(model); }, true);
             consumed = true;
             break;
         case InputKeyDown:
-            with_niew_model(
+            with_view_model(
                 byte_input->view, ByteInputModel * model, { byte_input_handle_down(model); }, true);
             consumed = true;
             break;
         case InputKeyOk:
-            with_niew_model(
+            with_view_model(
                 byte_input->view, ByteInputModel * model, { byte_input_handle_ok(model); }, true);
             consumed = true;
             break;
@@ -651,7 +651,7 @@ static bool byte_input_view_input_callback(InputEvent* event, void* context) {
 
     if((event->type == InputTypeLong || event->type == InputTypeRepeat) &&
        event->key == InputKeyBack) {
-        with_niew_model(
+        with_view_model(
             byte_input->view,
             ByteInputModel * model,
             { byte_input_clear_selected_byte(model); },
@@ -690,7 +690,7 @@ ByteInput* byte_input_alloc() {
     view_set_draw_callback(byte_input->view, byte_input_view_draw_callback);
     view_set_input_callback(byte_input->view, byte_input_view_input_callback);
 
-    with_niew_model(
+    with_view_model(
         byte_input->view,
         ByteInputModel * model,
         {
@@ -744,7 +744,7 @@ void byte_input_set_result_callback(
     void* callback_context,
     uint8_t* bytes,
     uint8_t bytes_count) {
-    with_niew_model(
+    with_view_model(
         byte_input->view,
         ByteInputModel * model,
         {
@@ -765,6 +765,6 @@ void byte_input_set_result_callback(
  * @param text text to be shown
  */
 void byte_input_set_header_text(ByteInput* byte_input, const char* text) {
-    with_niew_model(
+    with_view_model(
         byte_input->view, ByteInputModel * model, { model->header = text; }, true);
 }

@@ -79,7 +79,7 @@ DictAttack* dict_attack_alloc() {
     view_set_draw_callback(dict_attack->view, dict_attack_draw_callback);
     view_set_input_callback(dict_attack->view, dict_attack_input_callback);
     view_set_context(dict_attack->view, dict_attack);
-    with_niew_model(
+    with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
         { model->header = furi_string_alloc(); },
@@ -89,7 +89,7 @@ DictAttack* dict_attack_alloc() {
 
 void dict_attack_free(DictAttack* dict_attack) {
     furi_assert(dict_attack);
-    with_niew_model(
+    with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
         { furi_string_free(model->header); },
@@ -100,7 +100,7 @@ void dict_attack_free(DictAttack* dict_attack) {
 
 void dict_attack_reset(DictAttack* dict_attack) {
     furi_assert(dict_attack);
-    with_niew_model(
+    with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
         {
@@ -134,7 +134,7 @@ void dict_attack_set_header(DictAttack* dict_attack, const char* header) {
     furi_assert(dict_attack);
     furi_assert(header);
 
-    with_niew_model(
+    with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
         { furi_string_set(model->header, header); },
@@ -143,7 +143,7 @@ void dict_attack_set_header(DictAttack* dict_attack, const char* header) {
 
 void dict_attack_set_card_detected(DictAttack* dict_attack, MfClassicType type) {
     furi_assert(dict_attack);
-    with_niew_model(
+    with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
         {
@@ -156,7 +156,7 @@ void dict_attack_set_card_detected(DictAttack* dict_attack, MfClassicType type) 
 
 void dict_attack_set_card_removed(DictAttack* dict_attack) {
     furi_assert(dict_attack);
-    with_niew_model(
+    with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
         { model->state = DictAttackStateCardRemoved; },
@@ -165,19 +165,19 @@ void dict_attack_set_card_removed(DictAttack* dict_attack) {
 
 void dict_attack_set_sector_read(DictAttack* dict_attack, uint8_t sec_read) {
     furi_assert(dict_attack);
-    with_niew_model(
+    with_view_model(
         dict_attack->view, DictAttackViewModel * model, { model->sectors_read = sec_read; }, true);
 }
 
 void dict_attack_set_keys_found(DictAttack* dict_attack, uint8_t keys_found) {
     furi_assert(dict_attack);
-    with_niew_model(
+    with_view_model(
         dict_attack->view, DictAttackViewModel * model, { model->keys_found = keys_found; }, true);
 }
 
 void dict_attack_set_current_sector(DictAttack* dict_attack, uint8_t curr_sec) {
     furi_assert(dict_attack);
-    with_niew_model(
+    with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
         {
@@ -189,7 +189,7 @@ void dict_attack_set_current_sector(DictAttack* dict_attack, uint8_t curr_sec) {
 
 void dict_attack_inc_current_sector(DictAttack* dict_attack) {
     furi_assert(dict_attack);
-    with_niew_model(
+    with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
         {
@@ -203,7 +203,7 @@ void dict_attack_inc_current_sector(DictAttack* dict_attack) {
 
 void dict_attack_inc_keys_found(DictAttack* dict_attack) {
     furi_assert(dict_attack);
-    with_niew_model(
+    with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
         {
@@ -216,7 +216,7 @@ void dict_attack_inc_keys_found(DictAttack* dict_attack) {
 
 void dict_attack_set_total_dict_keys(DictAttack* dict_attack, uint16_t dict_keys_total) {
     furi_assert(dict_attack);
-    with_niew_model(
+    with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
         { model->dict_keys_total = dict_keys_total; },
@@ -225,7 +225,7 @@ void dict_attack_set_total_dict_keys(DictAttack* dict_attack, uint16_t dict_keys
 
 void dict_attack_inc_current_dict_key(DictAttack* dict_attack, uint16_t keys_tried) {
     furi_assert(dict_attack);
-    with_niew_model(
+    with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
         {

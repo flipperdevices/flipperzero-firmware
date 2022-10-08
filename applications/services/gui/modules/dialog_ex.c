@@ -89,7 +89,7 @@ static bool dialog_ex_view_input_callback(InputEvent* event, void* context) {
     const char* center_text = NULL;
     const char* right_text = NULL;
 
-    with_niew_model(
+    with_view_model(
         dialog_ex->view,
         DialogExModel * model,
         {
@@ -150,7 +150,7 @@ DialogEx* dialog_ex_alloc() {
     view_allocate_model(dialog_ex->view, ViewModelTypeLockFree, sizeof(DialogExModel));
     view_set_draw_callback(dialog_ex->view, dialog_ex_view_draw_callback);
     view_set_input_callback(dialog_ex->view, dialog_ex_view_input_callback);
-    with_niew_model(
+    with_view_model(
         dialog_ex->view,
         DialogExModel * model,
         {
@@ -208,7 +208,7 @@ void dialog_ex_set_header(
     Align horizontal,
     Align vertical) {
     furi_assert(dialog_ex);
-    with_niew_model(
+    with_view_model(
         dialog_ex->view,
         DialogExModel * model,
         {
@@ -229,7 +229,7 @@ void dialog_ex_set_text(
     Align horizontal,
     Align vertical) {
     furi_assert(dialog_ex);
-    with_niew_model(
+    with_view_model(
         dialog_ex->view,
         DialogExModel * model,
         {
@@ -244,7 +244,7 @@ void dialog_ex_set_text(
 
 void dialog_ex_set_icon(DialogEx* dialog_ex, uint8_t x, uint8_t y, const Icon* icon) {
     furi_assert(dialog_ex);
-    with_niew_model(
+    with_view_model(
         dialog_ex->view,
         DialogExModel * model,
         {
@@ -257,19 +257,19 @@ void dialog_ex_set_icon(DialogEx* dialog_ex, uint8_t x, uint8_t y, const Icon* i
 
 void dialog_ex_set_left_button_text(DialogEx* dialog_ex, const char* text) {
     furi_assert(dialog_ex);
-    with_niew_model(
+    with_view_model(
         dialog_ex->view, DialogExModel * model, { model->left_text = text; }, true);
 }
 
 void dialog_ex_set_center_button_text(DialogEx* dialog_ex, const char* text) {
     furi_assert(dialog_ex);
-    with_niew_model(
+    with_view_model(
         dialog_ex->view, DialogExModel * model, { model->center_text = text; }, true);
 }
 
 void dialog_ex_set_right_button_text(DialogEx* dialog_ex, const char* text) {
     furi_assert(dialog_ex);
-    with_niew_model(
+    with_view_model(
         dialog_ex->view, DialogExModel * model, { model->right_text = text; }, true);
 }
 
@@ -278,7 +278,7 @@ void dialog_ex_reset(DialogEx* dialog_ex) {
     TextElement clean_text_el = {
         .text = NULL, .x = 0, .y = 0, .horizontal = AlignLeft, .vertical = AlignLeft};
     IconElement clean_icon_el = {.icon = NULL, .x = 0, .y = 0};
-    with_niew_model(
+    with_view_model(
         dialog_ex->view,
         DialogExModel * model,
         {

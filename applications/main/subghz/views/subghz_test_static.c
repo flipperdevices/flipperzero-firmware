@@ -76,7 +76,7 @@ bool subghz_test_static_input(InputEvent* event, void* context) {
         return false;
     }
 
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzTestStaticModel * model,
         {
@@ -147,7 +147,7 @@ void subghz_test_static_enter(void* context) {
     furi_hal_gpio_write(&gpio_cc1101_g0, false);
     instance->status_tx = SubGhzTestStaticStatusIDLE;
 
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzTestStaticModel * model,
         {

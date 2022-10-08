@@ -276,7 +276,7 @@ static void bt_hid_keyboard_get_select_key(BtHidKeyboardModel* model, BtHidKeybo
 }
 
 static void bt_hid_keyboard_process(BtHidKeyboard* bt_hid_keyboard, InputEvent* event) {
-    with_niew_model(
+    with_view_model(
         bt_hid_keyboard->view,
         BtHidKeyboardModel * model,
         {
@@ -383,6 +383,6 @@ View* bt_hid_keyboard_get_view(BtHidKeyboard* bt_hid_keyboard) {
 
 void bt_hid_keyboard_set_connected_status(BtHidKeyboard* bt_hid_keyboard, bool connected) {
     furi_assert(bt_hid_keyboard);
-    with_niew_model(
+    with_view_model(
         bt_hid_keyboard->view, BtHidKeyboardModel * model, { model->connected = connected; }, true);
 }

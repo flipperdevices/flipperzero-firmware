@@ -66,14 +66,14 @@ void subghz_view_receiver_set_lock(SubGhzViewReceiver* subghz_receiver, SubGhzLo
     subghz_receiver->lock_count = 0;
     if(lock == SubGhzLockOn) {
         subghz_receiver->lock = lock;
-        with_niew_model(
+        with_view_model(
             subghz_receiver->view,
             SubGhzViewReceiverModel * model,
             { model->bar_show = SubGhzViewReceiverBarShowLock; },
             true);
         furi_timer_start(subghz_receiver->timer, pdMS_TO_TICKS(1000));
     } else {
-        with_niew_model(
+        with_view_model(
             subghz_receiver->view,
             SubGhzViewReceiverModel * model,
             { model->bar_show = SubGhzViewReceiverBarShowDefault; },
@@ -94,7 +94,7 @@ void subghz_view_receiver_set_callback(
 static void subghz_view_receiver_update_offset(SubGhzViewReceiver* subghz_receiver) {
     furi_assert(subghz_receiver);
 
-    with_niew_model(
+    with_view_model(
         subghz_receiver->view,
         SubGhzViewReceiverModel * model,
         {
@@ -118,7 +118,7 @@ void subghz_view_receiver_add_item_to_menu(
     const char* name,
     uint8_t type) {
     furi_assert(subghz_receiver);
-    with_niew_model(
+    with_view_model(
         subghz_receiver->view,
         SubGhzViewReceiverModel * model,
         {
@@ -143,7 +143,7 @@ void subghz_view_receiver_add_data_statusbar(
     const char* preset_str,
     const char* history_stat_str) {
     furi_assert(subghz_receiver);
-    with_niew_model(
+    with_view_model(
         subghz_receiver->view,
         SubGhzViewReceiverModel * model,
         {
@@ -244,7 +244,7 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
 static void subghz_view_receiver_timer_callback(void* context) {
     furi_assert(context);
     SubGhzViewReceiver* subghz_receiver = context;
-    with_niew_model(
+    with_view_model(
         subghz_receiver->view,
         SubGhzViewReceiverModel * model,
         { model->bar_show = SubGhzViewReceiverBarShowDefault; },
@@ -264,7 +264,7 @@ bool subghz_view_receiver_input(InputEvent* event, void* context) {
     SubGhzViewReceiver* subghz_receiver = context;
 
     if(subghz_receiver->lock == SubGhzLockOn) {
-        with_niew_model(
+        with_view_model(
             subghz_receiver->view,
             SubGhzViewReceiverModel * model,
             { model->bar_show = SubGhzViewReceiverBarShowToUnlockPress; },
@@ -278,7 +278,7 @@ bool subghz_view_receiver_input(InputEvent* event, void* context) {
         if(subghz_receiver->lock_count >= UNLOCK_CNT) {
             // subghz_receiver->callback(
             //     SubGhzCustomEventViewReceiverUnlock, subghz_receiver->context);
-            with_niew_model(
+            with_view_model(
                 subghz_receiver->view,
                 SubGhzViewReceiverModel * model,
                 { model->bar_show = SubGhzViewReceiverBarShowUnlock; },
@@ -295,7 +295,7 @@ bool subghz_view_receiver_input(InputEvent* event, void* context) {
     } else if(
         event->key == InputKeyUp &&
         (event->type == InputTypeShort || event->type == InputTypeRepeat)) {
-        with_niew_model(
+        with_view_model(
             subghz_receiver->view,
             SubGhzViewReceiverModel * model,
             {
@@ -305,7 +305,7 @@ bool subghz_view_receiver_input(InputEvent* event, void* context) {
     } else if(
         event->key == InputKeyDown &&
         (event->type == InputTypeShort || event->type == InputTypeRepeat)) {
-        with_niew_model(
+        with_view_model(
             subghz_receiver->view,
             SubGhzViewReceiverModel * model,
             {
@@ -315,7 +315,7 @@ bool subghz_view_receiver_input(InputEvent* event, void* context) {
     } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
         subghz_receiver->callback(SubGhzCustomEventViewReceiverConfig, subghz_receiver->context);
     } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
-        with_niew_model(
+        with_view_model(
             subghz_receiver->view,
             SubGhzViewReceiverModel * model,
             {
@@ -339,7 +339,7 @@ void subghz_view_receiver_enter(void* context) {
 void subghz_view_receiver_exit(void* context) {
     furi_assert(context);
     SubGhzViewReceiver* subghz_receiver = context;
-    with_niew_model(
+    with_view_model(
         subghz_receiver->view,
         SubGhzViewReceiverModel * model,
         {
@@ -376,7 +376,7 @@ SubGhzViewReceiver* subghz_view_receiver_alloc() {
     view_set_enter_callback(subghz_receiver->view, subghz_view_receiver_enter);
     view_set_exit_callback(subghz_receiver->view, subghz_view_receiver_exit);
 
-    with_niew_model(
+    with_view_model(
         subghz_receiver->view,
         SubGhzViewReceiverModel * model,
         {
@@ -396,7 +396,7 @@ SubGhzViewReceiver* subghz_view_receiver_alloc() {
 void subghz_view_receiver_free(SubGhzViewReceiver* subghz_receiver) {
     furi_assert(subghz_receiver);
 
-    with_niew_model(
+    with_view_model(
         subghz_receiver->view,
         SubGhzViewReceiverModel * model,
         {
@@ -425,14 +425,14 @@ View* subghz_view_receiver_get_view(SubGhzViewReceiver* subghz_receiver) {
 uint16_t subghz_view_receiver_get_idx_menu(SubGhzViewReceiver* subghz_receiver) {
     furi_assert(subghz_receiver);
     uint32_t idx = 0;
-    with_niew_model(
+    with_view_model(
         subghz_receiver->view, SubGhzViewReceiverModel * model, { idx = model->idx; }, false);
     return idx;
 }
 
 void subghz_view_receiver_set_idx_menu(SubGhzViewReceiver* subghz_receiver, uint16_t idx) {
     furi_assert(subghz_receiver);
-    with_niew_model(
+    with_view_model(
         subghz_receiver->view,
         SubGhzViewReceiverModel * model,
         {

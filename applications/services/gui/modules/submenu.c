@@ -127,7 +127,7 @@ Submenu* submenu_alloc() {
     view_set_draw_callback(submenu->view, submenu_view_draw_callback);
     view_set_input_callback(submenu->view, submenu_view_input_callback);
 
-    with_niew_model(
+    with_view_model(
         submenu->view,
         SubmenuModel * model,
         {
@@ -144,7 +144,7 @@ Submenu* submenu_alloc() {
 void submenu_free(Submenu* submenu) {
     furi_assert(submenu);
 
-    with_niew_model(
+    with_view_model(
         submenu->view, SubmenuModel * model, { SubmenuItemArray_clear(model->items); }, true);
     view_free(submenu->view);
     free(submenu);
@@ -165,7 +165,7 @@ void submenu_add_item(
     furi_assert(label);
     furi_assert(submenu);
 
-    with_niew_model(
+    with_view_model(
         submenu->view,
         SubmenuModel * model,
         {
@@ -181,7 +181,7 @@ void submenu_add_item(
 void submenu_reset(Submenu* submenu) {
     furi_assert(submenu);
 
-    with_niew_model(
+    with_view_model(
         submenu->view,
         SubmenuModel * model,
         {
@@ -194,7 +194,7 @@ void submenu_reset(Submenu* submenu) {
 }
 
 void submenu_set_selected_item(Submenu* submenu, uint32_t index) {
-    with_niew_model(
+    with_view_model(
         submenu->view,
         SubmenuModel * model,
         {
@@ -235,7 +235,7 @@ void submenu_set_selected_item(Submenu* submenu, uint32_t index) {
 }
 
 void submenu_process_up(Submenu* submenu) {
-    with_niew_model(
+    with_view_model(
         submenu->view,
         SubmenuModel * model,
         {
@@ -257,7 +257,7 @@ void submenu_process_up(Submenu* submenu) {
 }
 
 void submenu_process_down(Submenu* submenu) {
-    with_niew_model(
+    with_view_model(
         submenu->view,
         SubmenuModel * model,
         {
@@ -280,7 +280,7 @@ void submenu_process_down(Submenu* submenu) {
 void submenu_process_ok(Submenu* submenu) {
     SubmenuItem* item = NULL;
 
-    with_niew_model(
+    with_view_model(
         submenu->view,
         SubmenuModel * model,
         {
@@ -298,6 +298,6 @@ void submenu_process_ok(Submenu* submenu) {
 void submenu_set_header(Submenu* submenu, const char* header) {
     furi_assert(submenu);
 
-    with_niew_model(
+    with_view_model(
         submenu->view, SubmenuModel * model, { model->header = header; }, true);
 }

@@ -144,7 +144,7 @@ View* bad_usb_get_view(BadUsb* bad_usb) {
 void bad_usb_set_ok_callback(BadUsb* bad_usb, BadUsbOkCallback callback, void* context) {
     furi_assert(bad_usb);
     furi_assert(callback);
-    with_niew_model(
+    with_view_model(
         bad_usb->view,
         BadUsbModel * model,
         {
@@ -157,7 +157,7 @@ void bad_usb_set_ok_callback(BadUsb* bad_usb, BadUsbOkCallback callback, void* c
 
 void bad_usb_set_file_name(BadUsb* bad_usb, const char* name) {
     furi_assert(name);
-    with_niew_model(
+    with_view_model(
         bad_usb->view,
         BadUsbModel * model,
         { strlcpy(model->file_name, name, MAX_NAME_LEN); },
@@ -166,7 +166,7 @@ void bad_usb_set_file_name(BadUsb* bad_usb, const char* name) {
 
 void bad_usb_set_state(BadUsb* bad_usb, BadUsbState* st) {
     furi_assert(st);
-    with_niew_model(
+    with_view_model(
         bad_usb->view,
         BadUsbModel * model,
         {

@@ -47,7 +47,7 @@ static bool gpio_test_input_callback(InputEvent* event, void* context) {
 }
 
 static bool gpio_test_process_left(GpioTest* gpio_test) {
-    with_niew_model(
+    with_view_model(
         gpio_test->view,
         GpioTestModel * model,
         {
@@ -60,7 +60,7 @@ static bool gpio_test_process_left(GpioTest* gpio_test) {
 }
 
 static bool gpio_test_process_right(GpioTest* gpio_test) {
-    with_niew_model(
+    with_view_model(
         gpio_test->view,
         GpioTestModel * model,
         {
@@ -75,7 +75,7 @@ static bool gpio_test_process_right(GpioTest* gpio_test) {
 static bool gpio_test_process_ok(GpioTest* gpio_test, InputEvent* event) {
     bool consumed = false;
 
-    with_niew_model(
+    with_view_model(
         gpio_test->view,
         GpioTestModel * model,
         {
@@ -127,7 +127,7 @@ View* gpio_test_get_view(GpioTest* gpio_test) {
 void gpio_test_set_ok_callback(GpioTest* gpio_test, GpioTestOkCallback callback, void* context) {
     furi_assert(gpio_test);
     furi_assert(callback);
-    with_niew_model(
+    with_view_model(
         gpio_test->view,
         GpioTestModel * model,
         {

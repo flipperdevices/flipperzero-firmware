@@ -35,7 +35,7 @@ static bool gui_widget_view_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
 
     // Call all Widget Elements input handlers
-    with_niew_model(
+    with_view_model(
         widget->view,
         GuiWidgetModel * model,
         {
@@ -62,7 +62,7 @@ Widget* widget_alloc() {
     view_set_draw_callback(widget->view, gui_widget_view_draw_callback);
     view_set_input_callback(widget->view, gui_widget_view_input_callback);
 
-    with_niew_model(
+    with_view_model(
         widget->view, GuiWidgetModel * model, { ElementArray_init(model->element); }, true);
 
     return widget;
@@ -71,7 +71,7 @@ Widget* widget_alloc() {
 void widget_reset(Widget* widget) {
     furi_assert(widget);
 
-    with_niew_model(
+    with_view_model(
         widget->view,
         GuiWidgetModel * model,
         {
@@ -93,7 +93,7 @@ void widget_free(Widget* widget) {
     // Free all elements
     widget_reset(widget);
     // Free elements container
-    with_niew_model(
+    with_view_model(
         widget->view, GuiWidgetModel * model, { ElementArray_clear(model->element); }, true);
 
     view_free(widget->view);
@@ -109,7 +109,7 @@ static void widget_add_element(Widget* widget, WidgetElement* element) {
     furi_assert(widget);
     furi_assert(element);
 
-    with_niew_model(
+    with_view_model(
         widget->view,
         GuiWidgetModel * model,
         {

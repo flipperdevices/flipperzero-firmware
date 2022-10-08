@@ -428,7 +428,7 @@ void text_input_timer_callback(void* context) {
     furi_assert(context);
     TextInput* text_input = context;
 
-    with_niew_model(
+    with_view_model(
         text_input->view,
         TextInputModel * model,
         { model->valadator_message_visible = false; },
@@ -445,7 +445,7 @@ TextInput* text_input_alloc() {
 
     text_input->timer = furi_timer_alloc(text_input_timer_callback, FuriTimerTypeOnce, text_input);
 
-    with_niew_model(
+    with_view_model(
         text_input->view,
         TextInputModel * model,
         { model->validator_text = furi_string_alloc(); },
@@ -458,7 +458,7 @@ TextInput* text_input_alloc() {
 
 void text_input_free(TextInput* text_input) {
     furi_assert(text_input);
-    with_niew_model(
+    with_view_model(
         text_input->view,
         TextInputModel * model,
         { furi_string_free(model->validator_text); },
@@ -476,7 +476,7 @@ void text_input_free(TextInput* text_input) {
 
 void text_input_reset(TextInput* text_input) {
     furi_assert(text_input);
-    with_niew_model(
+    with_view_model(
         text_input->view,
         TextInputModel * model,
         {
@@ -509,7 +509,7 @@ void text_input_set_result_callback(
     char* text_buffer,
     size_t text_buffer_size,
     bool clear_default_text) {
-    with_niew_model(
+    with_view_model(
         text_input->view,
         TextInputModel * model,
         {
@@ -531,7 +531,7 @@ void text_input_set_validator(
     TextInput* text_input,
     TextInputValidatorCallback callback,
     void* callback_context) {
-    with_niew_model(
+    with_view_model(
         text_input->view,
         TextInputModel * model,
         {
@@ -543,7 +543,7 @@ void text_input_set_validator(
 
 TextInputValidatorCallback text_input_get_validator_callback(TextInput* text_input) {
     TextInputValidatorCallback validator_callback = NULL;
-    with_niew_model(
+    with_view_model(
         text_input->view,
         TextInputModel * model,
         { validator_callback = model->validator_callback; },
@@ -553,7 +553,7 @@ TextInputValidatorCallback text_input_get_validator_callback(TextInput* text_inp
 
 void* text_input_get_validator_callback_context(TextInput* text_input) {
     void* validator_callback_context = NULL;
-    with_niew_model(
+    with_view_model(
         text_input->view,
         TextInputModel * model,
         { validator_callback_context = model->validator_callback_context; },
@@ -562,6 +562,6 @@ void* text_input_get_validator_callback_context(TextInput* text_input) {
 }
 
 void text_input_set_header_text(TextInput* text_input, const char* text) {
-    with_niew_model(
+    with_view_model(
         text_input->view, TextInputModel * model, { model->header = text; }, true);
 }

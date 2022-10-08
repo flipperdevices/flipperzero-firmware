@@ -109,7 +109,7 @@ static bool view_display_test_input_callback(InputEvent* event, void* context) {
 
     bool consumed = false;
     if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
-        with_niew_model(
+        with_view_model(
             instance->view,
             ViewDisplayTestModel * model,
             {
@@ -150,7 +150,7 @@ static void view_display_test_exit(void* context) {
 
 static void view_display_test_timer_callback(void* context) {
     ViewDisplayTest* instance = context;
-    with_niew_model(
+    with_view_model(
         instance->view, ViewDisplayTestModel * model, { model->counter++; }, true);
 }
 

@@ -123,7 +123,7 @@ bool desktop_debug_input(InputEvent* event, void* context) {
     }
 
     DesktopViewStatsScreens current = 0;
-    with_niew_model(
+    with_view_model(
         debug_view->view,
         DesktopDebugViewModel * model,
         {
@@ -181,7 +181,7 @@ void desktop_debug_free(DesktopDebugView* debug_view) {
 void desktop_debug_get_dolphin_data(DesktopDebugView* debug_view) {
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
-    with_niew_model(
+    with_view_model(
         debug_view->view,
         DesktopDebugViewModel * model,
         {
@@ -195,6 +195,6 @@ void desktop_debug_get_dolphin_data(DesktopDebugView* debug_view) {
 }
 
 void desktop_debug_reset_screen_idx(DesktopDebugView* debug_view) {
-    with_niew_model(
+    with_view_model(
         debug_view->view, DesktopDebugViewModel * model, { model->screen = 0; }, true);
 }

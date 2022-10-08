@@ -88,7 +88,7 @@ bool subghz_test_carrier_input(InputEvent* event, void* context) {
         return false;
     }
 
-    with_niew_model(
+    with_view_model(
         subghz_test_carrier->view,
         SubGhzTestCarrierModel * model,
         {
@@ -142,7 +142,7 @@ void subghz_test_carrier_enter(void* context) {
 
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
-    with_niew_model(
+    with_view_model(
         subghz_test_carrier->view,
         SubGhzTestCarrierModel * model,
         {
@@ -174,7 +174,7 @@ void subghz_test_carrier_rssi_timer_callback(void* context) {
     furi_assert(context);
     SubGhzTestCarrier* subghz_test_carrier = context;
 
-    with_niew_model(
+    with_view_model(
         subghz_test_carrier->view,
         SubGhzTestCarrierModel * model,
         {

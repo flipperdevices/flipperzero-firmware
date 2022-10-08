@@ -91,7 +91,7 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
 }
 
 void variable_item_list_set_selected_item(VariableItemList* variable_item_list, uint8_t index) {
-    with_niew_model(
+    with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
         {
@@ -181,7 +181,7 @@ static bool variable_item_list_input_callback(InputEvent* event, void* context) 
 }
 
 void variable_item_list_process_up(VariableItemList* variable_item_list) {
-    with_niew_model(
+    with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
         {
@@ -203,7 +203,7 @@ void variable_item_list_process_up(VariableItemList* variable_item_list) {
 }
 
 void variable_item_list_process_down(VariableItemList* variable_item_list) {
-    with_niew_model(
+    with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
         {
@@ -243,7 +243,7 @@ VariableItem* variable_item_list_get_selected_item(VariableItemListModel* model)
 }
 
 void variable_item_list_process_left(VariableItemList* variable_item_list) {
-    with_niew_model(
+    with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
         {
@@ -259,7 +259,7 @@ void variable_item_list_process_left(VariableItemList* variable_item_list) {
 }
 
 void variable_item_list_process_right(VariableItemList* variable_item_list) {
-    with_niew_model(
+    with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
         {
@@ -275,7 +275,7 @@ void variable_item_list_process_right(VariableItemList* variable_item_list) {
 }
 
 void variable_item_list_process_ok(VariableItemList* variable_item_list) {
-    with_niew_model(
+    with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
         {
@@ -295,7 +295,7 @@ VariableItemList* variable_item_list_alloc() {
     view_set_draw_callback(variable_item_list->view, variable_item_list_draw_callback);
     view_set_input_callback(variable_item_list->view, variable_item_list_input_callback);
 
-    with_niew_model(
+    with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
         {
@@ -311,7 +311,7 @@ VariableItemList* variable_item_list_alloc() {
 void variable_item_list_free(VariableItemList* variable_item_list) {
     furi_assert(variable_item_list);
 
-    with_niew_model(
+    with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
         {
@@ -330,7 +330,7 @@ void variable_item_list_free(VariableItemList* variable_item_list) {
 void variable_item_list_reset(VariableItemList* variable_item_list) {
     furi_assert(variable_item_list);
 
-    with_niew_model(
+    with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
         {
@@ -359,7 +359,7 @@ VariableItem* variable_item_list_add(
     furi_assert(label);
     furi_assert(variable_item_list);
 
-    with_niew_model(
+    with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
         {
@@ -381,7 +381,7 @@ void variable_item_list_set_enter_callback(
     VariableItemListEnterCallback callback,
     void* context) {
     furi_assert(callback);
-    with_niew_model(
+    with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
         {

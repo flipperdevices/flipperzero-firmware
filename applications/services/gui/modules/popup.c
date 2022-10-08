@@ -123,7 +123,7 @@ Popup* popup_alloc() {
     view_set_enter_callback(popup->view, popup_start_timer);
     view_set_exit_callback(popup->view, popup_stop_timer);
 
-    with_niew_model(
+    with_view_model(
         popup->view,
         PopupModel * model,
         {
@@ -177,7 +177,7 @@ void popup_set_header(
     Align horizontal,
     Align vertical) {
     furi_assert(popup);
-    with_niew_model(
+    with_view_model(
         popup->view,
         PopupModel * model,
         {
@@ -198,7 +198,7 @@ void popup_set_text(
     Align horizontal,
     Align vertical) {
     furi_assert(popup);
-    with_niew_model(
+    with_view_model(
         popup->view,
         PopupModel * model,
         {
@@ -213,7 +213,7 @@ void popup_set_text(
 
 void popup_set_icon(Popup* popup, uint8_t x, uint8_t y, const Icon* icon) {
     furi_assert(popup);
-    with_niew_model(
+    with_view_model(
         popup->view,
         PopupModel * model,
         {
@@ -240,7 +240,7 @@ void popup_disable_timeout(Popup* popup) {
 void popup_reset(Popup* popup) {
     furi_assert(popup);
 
-    with_niew_model(
+    with_view_model(
         popup->view,
         PopupModel * model,
         {

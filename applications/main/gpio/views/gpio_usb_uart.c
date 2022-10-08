@@ -128,7 +128,7 @@ void gpio_usb_uart_set_callback(GpioUsbUart* usb_uart, GpioUsbUartCallback callb
     furi_assert(usb_uart);
     furi_assert(callback);
 
-    with_niew_model(
+    with_view_model(
         usb_uart->view,
         GpioUsbUartModel * model,
         {
@@ -144,7 +144,7 @@ void gpio_usb_uart_update_state(GpioUsbUart* instance, UsbUartConfig* cfg, UsbUa
     furi_assert(cfg);
     furi_assert(st);
 
-    with_niew_model(
+    with_view_model(
         instance->view,
         GpioUsbUartModel * model,
         {

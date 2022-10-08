@@ -106,7 +106,7 @@ static void bt_hid_media_draw_callback(Canvas* canvas, void* context) {
 }
 
 static void bt_hid_media_process_press(BtHidMedia* bt_hid_media, InputEvent* event) {
-    with_niew_model(
+    with_view_model(
         bt_hid_media->view,
         BtHidMediaModel * model,
         {
@@ -131,7 +131,7 @@ static void bt_hid_media_process_press(BtHidMedia* bt_hid_media, InputEvent* eve
 }
 
 static void bt_hid_media_process_release(BtHidMedia* bt_hid_media, InputEvent* event) {
-    with_niew_model(
+    with_view_model(
         bt_hid_media->view,
         BtHidMediaModel * model,
         {
@@ -199,6 +199,6 @@ View* bt_hid_media_get_view(BtHidMedia* bt_hid_media) {
 
 void bt_hid_media_set_connected_status(BtHidMedia* bt_hid_media, bool connected) {
     furi_assert(bt_hid_media);
-    with_niew_model(
+    with_view_model(
         bt_hid_media->view, BtHidMediaModel * model, { model->connected = connected; }, true);
 }

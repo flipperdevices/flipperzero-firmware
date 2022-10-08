@@ -158,7 +158,7 @@ static int32_t uart_echo_worker(void* context) {
                 length = furi_stream_buffer_receive(app->rx_stream, data, 64, 0);
                 if(length > 0) {
                     furi_hal_uart_tx(FuriHalUartIdUSART1, data, length);
-                    with_niew_model(
+                    with_view_model(
                         app->view,
                         UartDumpModel * model,
                         {
@@ -171,7 +171,7 @@ static int32_t uart_echo_worker(void* context) {
             } while(length > 0);
 
             notification_message(app->notification, &sequence_notification);
-            with_niew_model(
+            with_view_model(
                 app->view, UartDumpModel * model, { UNUSED(model); }, true);
         }
     }
@@ -198,7 +198,7 @@ static UartEchoApp* uart_echo_app_alloc() {
     view_set_draw_callback(app->view, uart_echo_view_draw_callback);
     view_set_input_callback(app->view, uart_echo_view_input_callback);
     view_allocate_model(app->view, ViewModelTypeLocking, sizeof(UartDumpModel));
-    with_niew_model(
+    with_view_model(
         app->view,
         UartDumpModel * model,
         {
@@ -242,7 +242,7 @@ static void uart_echo_app_free(UartEchoApp* app) {
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, 0);
 
-    with_niew_model(
+    with_view_model(
         app->view,
         UartDumpModel * model,
         {

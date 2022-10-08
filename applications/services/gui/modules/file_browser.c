@@ -138,7 +138,7 @@ FileBrowser* file_browser_alloc(FuriString* result_path) {
 
     browser->result_path = result_path;
 
-    with_niew_model(
+    with_view_model(
         browser->view, FileBrowserModel * model, { items_array_init(model->items); }, false);
 
     return browser;
@@ -147,7 +147,7 @@ FileBrowser* file_browser_alloc(FuriString* result_path) {
 void file_browser_free(FileBrowser* browser) {
     furi_assert(browser);
 
-    with_niew_model(
+    with_view_model(
         browser->view, FileBrowserModel * model, { items_array_clear(model->items); }, false);
 
     view_free(browser->view);
@@ -171,7 +171,7 @@ void file_browser_configure(
     browser->skip_assets = skip_assets;
     browser->hide_ext = hide_ext;
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         FileBrowserModel * model,
         {
@@ -194,7 +194,7 @@ void file_browser_start(FileBrowser* browser, FuriString* path) {
 void file_browser_stop(FileBrowser* browser) {
     furi_assert(browser);
     file_browser_worker_free(browser->worker);
-    with_niew_model(
+    with_view_model(
         browser->view,
         FileBrowserModel * model,
         {
@@ -254,7 +254,7 @@ static bool browser_is_list_load_required(FileBrowserModel* model) {
 static void browser_update_offset(FileBrowser* browser) {
     furi_assert(browser);
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         FileBrowserModel * model,
         {
@@ -283,7 +283,7 @@ static void
 
     int32_t load_offset = 0;
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         FileBrowserModel * model,
         {
@@ -319,7 +319,7 @@ static void browser_list_load_cb(void* context, uint32_t list_load_offset) {
     BrowserItem_t_init(&back_item);
     back_item.type = BrowserItemTypeBack;
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         FileBrowserModel * model,
         {
@@ -373,7 +373,7 @@ static void
                 (browser->hide_ext) && (item.type == BrowserItemTypeFile));
         }
 
-        with_niew_model(
+        with_view_model(
             browser->view,
             FileBrowserModel * model,
             {
@@ -387,7 +387,7 @@ static void
             free(item.custom_icon_data);
         }
     } else {
-        with_niew_model(
+        with_view_model(
             browser->view, FileBrowserModel * model, { model->list_loading = false; }, true);
     }
 }
@@ -396,7 +396,7 @@ static void browser_long_load_cb(void* context) {
     furi_assert(context);
     FileBrowser* browser = (FileBrowser*)context;
 
-    with_niew_model(
+    with_view_model(
         browser->view, FileBrowserModel * model, { model->folder_loading = true; }, true);
 }
 
@@ -506,14 +506,14 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
     bool is_loading = false;
 
-    with_niew_model(
+    with_view_model(
         browser->view, FileBrowserModel * model, { is_loading = model->folder_loading; }, false);
 
     if(is_loading) {
         return false;
     } else if(event->key == InputKeyUp || event->key == InputKeyDown) {
         if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
-            with_niew_model(
+            with_view_model(
                 browser->view,
                 FileBrowserModel * model,
                 {
@@ -550,7 +550,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
         if(event->type == InputTypeShort) {
             BrowserItem_t* selected_item = NULL;
             int32_t select_index = 0;
-            with_niew_model(
+            with_view_model(
                 browser->view,
                 FileBrowserModel * model,
                 {
@@ -583,7 +583,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
     } else if(event->key == InputKeyLeft) {
         if(event->type == InputTypeShort) {
             bool is_root = false;
-            with_niew_model(
+            with_view_model(
                 browser->view, FileBrowserModel * model, { is_root = model->is_root; }, false);
             if(!is_root) {
                 file_browser_worker_folder_exit(browser->worker);

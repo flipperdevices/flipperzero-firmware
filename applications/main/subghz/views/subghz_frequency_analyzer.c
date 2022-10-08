@@ -131,7 +131,7 @@ void subghz_frequency_analyzer_pair_callback(
             instance->callback(SubGhzCustomEventSceneAnalyzerUnlock, instance->context);
         }
         //update history
-        with_niew_model(
+        with_view_model(
             instance->view,
             SubGhzFrequencyAnalyzerModel * model,
             {
@@ -147,7 +147,7 @@ void subghz_frequency_analyzer_pair_callback(
     }
 
     instance->locked = (rssi != 0.f);
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzFrequencyAnalyzerModel * model,
         {
@@ -172,7 +172,7 @@ void subghz_frequency_analyzer_enter(void* context) {
 
     subghz_frequency_analyzer_worker_start(instance->worker);
 
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzFrequencyAnalyzerModel * model,
         {
@@ -195,7 +195,7 @@ void subghz_frequency_analyzer_exit(void* context) {
     }
     subghz_frequency_analyzer_worker_free(instance->worker);
 
-    with_niew_model(
+    with_view_model(
         instance->view, SubGhzFrequencyAnalyzerModel * model, { model->rssi = 0; }, true);
 }
 
@@ -212,7 +212,7 @@ SubGhzFrequencyAnalyzer* subghz_frequency_analyzer_alloc() {
     view_set_enter_callback(instance->view, subghz_frequency_analyzer_enter);
     view_set_exit_callback(instance->view, subghz_frequency_analyzer_exit);
 
-    with_niew_model(
+    with_view_model(
         instance->view, SubGhzFrequencyAnalyzerModel * model, { model->rssi = 0; }, true);
 
     return instance;

@@ -43,7 +43,7 @@ static void pwm_set_config(SignalGenPwm* pwm) {
     uint32_t freq;
     uint8_t duty;
 
-    with_niew_model(
+    with_view_model(
         pwm->view,
         SignalGenPwmViewModel * model,
         {
@@ -189,7 +189,7 @@ static bool signal_gen_pwm_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
     bool need_update = false;
 
-    with_niew_model(
+    with_view_model(
         pwm->view,
         SignalGenPwmViewModel * model,
         {
@@ -282,7 +282,7 @@ void signal_gen_pwm_set_callback(
     furi_assert(pwm);
     furi_assert(callback);
 
-    with_niew_model(
+    with_view_model(
         pwm->view,
         SignalGenPwmViewModel * model,
         {
@@ -294,7 +294,7 @@ void signal_gen_pwm_set_callback(
 }
 
 void signal_gen_pwm_set_params(SignalGenPwm* pwm, uint8_t channel_id, uint32_t freq, uint8_t duty) {
-    with_niew_model(
+    with_view_model(
         pwm->view,
         SignalGenPwmViewModel * model,
         {

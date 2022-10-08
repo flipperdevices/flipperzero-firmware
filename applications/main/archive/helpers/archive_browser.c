@@ -20,7 +20,7 @@ static void
     if((item_cnt == 0) && (archive_is_home(browser)) && (tab != ArchiveTabBrowser)) {
         archive_switch_tab(browser, browser->last_tab_switch_dir);
     } else if(!furi_string_start_with_str(browser->path, "/app:")) {
-        with_niew_model(
+        with_view_model(
             browser->view,
             ArchiveBrowserViewModel * model,
             {
@@ -45,7 +45,7 @@ static void archive_list_load_cb(void* context, uint32_t list_load_offset) {
     furi_assert(context);
     ArchiveBrowserView* browser = (ArchiveBrowserView*)context;
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         {
@@ -63,7 +63,7 @@ static void
     if(!is_last) {
         archive_add_file_item(browser, is_folder, furi_string_get_cstr(item_path));
     } else {
-        with_niew_model(
+        with_view_model(
             browser->view, ArchiveBrowserViewModel * model, { model->list_loading = false; }, true);
     }
 }
@@ -72,7 +72,7 @@ static void archive_long_load_cb(void* context) {
     furi_assert(context);
     ArchiveBrowserView* browser = (ArchiveBrowserView*)context;
 
-    with_niew_model(
+    with_view_model(
         browser->view, ArchiveBrowserViewModel * model, { model->folder_loading = true; }, true);
 }
 
@@ -110,7 +110,7 @@ bool archive_is_item_in_array(ArchiveBrowserViewModel* model, uint32_t idx) {
 void archive_update_offset(ArchiveBrowserView* browser) {
     furi_assert(browser);
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         {
@@ -138,7 +138,7 @@ void archive_update_focus(ArchiveBrowserView* browser, const char* target) {
     if(!archive_file_get_array_size(browser) && archive_is_home(browser)) {
         archive_switch_tab(browser, TAB_RIGHT);
     } else {
-        with_niew_model(
+        with_view_model(
             browser->view,
             ArchiveBrowserViewModel * model,
             {
@@ -162,7 +162,7 @@ size_t archive_file_get_array_size(ArchiveBrowserView* browser) {
     furi_assert(browser);
 
     uint16_t size = 0;
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         { size = files_array_size(model->files); },
@@ -173,7 +173,7 @@ size_t archive_file_get_array_size(ArchiveBrowserView* browser) {
 void archive_set_item_count(ArchiveBrowserView* browser, uint32_t count) {
     furi_assert(browser);
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         {
@@ -188,7 +188,7 @@ void archive_file_array_rm_selected(ArchiveBrowserView* browser) {
     furi_assert(browser);
     uint32_t items_cnt = 0;
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         {
@@ -212,7 +212,7 @@ void archive_file_array_rm_selected(ArchiveBrowserView* browser) {
 void archive_file_array_swap(ArchiveBrowserView* browser, int8_t dir) {
     furi_assert(browser);
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         {
@@ -240,7 +240,7 @@ void archive_file_array_swap(ArchiveBrowserView* browser, int8_t dir) {
 void archive_file_array_rm_all(ArchiveBrowserView* browser) {
     furi_assert(browser);
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         { files_array_reset(model->files); },
@@ -252,7 +252,7 @@ void archive_file_array_load(ArchiveBrowserView* browser, int8_t dir) {
 
     int32_t offset_new = 0;
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         {
@@ -281,7 +281,7 @@ ArchiveFile_t* archive_get_current_file(ArchiveBrowserView* browser) {
     furi_assert(browser);
 
     ArchiveFile_t* selected = NULL;
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         {
@@ -298,7 +298,7 @@ ArchiveFile_t* archive_get_file_at(ArchiveBrowserView* browser, size_t idx) {
 
     ArchiveFile_t* selected = NULL;
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         {
@@ -313,7 +313,7 @@ ArchiveTabEnum archive_get_tab(ArchiveBrowserView* browser) {
     furi_assert(browser);
 
     ArchiveTabEnum tab_id = 0;
-    with_niew_model(
+    with_view_model(
         browser->view, ArchiveBrowserViewModel * model, { tab_id = model->tab_idx; }, false);
     return tab_id;
 }
@@ -337,7 +337,7 @@ const char* archive_get_name(ArchiveBrowserView* browser) {
 void archive_set_tab(ArchiveBrowserView* browser, ArchiveTabEnum tab) {
     furi_assert(browser);
 
-    with_niew_model(
+    with_view_model(
         browser->view, ArchiveBrowserViewModel * model, { model->tab_idx = tab; }, false);
 }
 
@@ -350,7 +350,7 @@ void archive_add_app_item(ArchiveBrowserView* browser, const char* name) {
     furi_string_set(item.path, name);
     archive_set_file_type(&item, name, false, true);
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         {
@@ -387,7 +387,7 @@ void archive_add_file_item(ArchiveBrowserView* browser, bool is_folder, const ch
             item.custom_icon_data = NULL;
         }
     }
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         { files_array_push_back(model->files, item); },
@@ -397,7 +397,7 @@ void archive_add_file_item(ArchiveBrowserView* browser, bool is_folder, const ch
 
 void archive_show_file_menu(ArchiveBrowserView* browser, bool show) {
     furi_assert(browser);
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         {
@@ -421,7 +421,7 @@ void archive_show_file_menu(ArchiveBrowserView* browser, bool show) {
 void archive_favorites_move_mode(ArchiveBrowserView* browser, bool active) {
     furi_assert(browser);
 
-    with_niew_model(
+    with_view_model(
         browser->view, ArchiveBrowserViewModel * model, { model->move_fav = active; }, true);
 }
 
@@ -482,7 +482,7 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     if((tab_empty) && (tab != ArchiveTabBrowser)) {
         archive_switch_tab(browser, key);
     } else {
-        with_niew_model(
+        with_view_model(
             browser->view,
             ArchiveBrowserViewModel * model,
             {
@@ -501,7 +501,7 @@ void archive_enter_dir(ArchiveBrowserView* browser, FuriString* path) {
 
     int32_t idx_temp = 0;
 
-    with_niew_model(
+    with_view_model(
         browser->view, ArchiveBrowserViewModel * model, { idx_temp = model->item_idx; }, false);
 
     furi_string_set(browser->path, path);
@@ -519,7 +519,7 @@ void archive_refresh_dir(ArchiveBrowserView* browser) {
 
     int32_t idx_temp = 0;
 
-    with_niew_model(
+    with_view_model(
         browser->view, ArchiveBrowserViewModel * model, { idx_temp = model->item_idx; }, false);
     file_browser_worker_folder_refresh(browser->worker, idx_temp);
 }

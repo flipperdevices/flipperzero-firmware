@@ -69,7 +69,7 @@ ButtonPanel* button_panel_alloc() {
     view_set_draw_callback(button_panel->view, button_panel_view_draw_callback);
     view_set_input_callback(button_panel->view, button_panel_view_input_callback);
 
-    with_niew_model(
+    with_view_model(
         button_panel->view,
         ButtonPanelModel * model,
         {
@@ -89,7 +89,7 @@ void button_panel_reserve(ButtonPanel* button_panel, size_t reserve_x, size_t re
     furi_check(reserve_x > 0);
     furi_check(reserve_y > 0);
 
-    with_niew_model(
+    with_view_model(
         button_panel->view,
         ButtonPanelModel * model,
         {
@@ -112,7 +112,7 @@ void button_panel_free(ButtonPanel* button_panel) {
 
     button_panel_reset(button_panel);
 
-    with_niew_model(
+    with_view_model(
         button_panel->view,
         ButtonPanelModel * model,
         {
@@ -128,7 +128,7 @@ void button_panel_free(ButtonPanel* button_panel) {
 void button_panel_reset(ButtonPanel* button_panel) {
     furi_assert(button_panel);
 
-    with_niew_model(
+    with_view_model(
         button_panel->view,
         ButtonPanelModel * model,
         {
@@ -172,7 +172,7 @@ void button_panel_add_item(
     void* callback_context) {
     furi_assert(button_panel);
 
-    with_niew_model(
+    with_view_model(
         button_panel->view,
         ButtonPanelModel * model,
         {
@@ -225,7 +225,7 @@ static void button_panel_view_draw_callback(Canvas* canvas, void* _model) {
 }
 
 static void button_panel_process_down(ButtonPanel* button_panel) {
-    with_niew_model(
+    with_view_model(
         button_panel->view,
         ButtonPanelModel * model,
         {
@@ -252,7 +252,7 @@ static void button_panel_process_down(ButtonPanel* button_panel) {
 }
 
 static void button_panel_process_up(ButtonPanel* button_panel) {
-    with_niew_model(
+    with_view_model(
         button_panel->view,
         ButtonPanelModel * model,
         {
@@ -279,7 +279,7 @@ static void button_panel_process_up(ButtonPanel* button_panel) {
 }
 
 static void button_panel_process_left(ButtonPanel* button_panel) {
-    with_niew_model(
+    with_view_model(
         button_panel->view,
         ButtonPanelModel * model,
         {
@@ -306,7 +306,7 @@ static void button_panel_process_left(ButtonPanel* button_panel) {
 }
 
 static void button_panel_process_right(ButtonPanel* button_panel) {
-    with_niew_model(
+    with_view_model(
         button_panel->view,
         ButtonPanelModel * model,
         {
@@ -335,7 +335,7 @@ static void button_panel_process_right(ButtonPanel* button_panel) {
 void button_panel_process_ok(ButtonPanel* button_panel) {
     ButtonItem* button_item = NULL;
 
-    with_niew_model(
+    with_view_model(
         button_panel->view,
         ButtonPanelModel * model,
         {
@@ -392,7 +392,7 @@ void button_panel_add_label(
     const char* label_str) {
     furi_assert(button_panel);
 
-    with_niew_model(
+    with_view_model(
         button_panel->view,
         ButtonPanelModel * model,
         {

@@ -102,7 +102,7 @@ static void bt_hid_mouse_draw_callback(Canvas* canvas, void* context) {
 }
 
 static void bt_hid_mouse_process(BtHidMouse* bt_hid_mouse, InputEvent* event) {
-    with_niew_model(
+    with_view_model(
         bt_hid_mouse->view,
         BtHidMouseModel * model,
         {
@@ -212,6 +212,6 @@ View* bt_hid_mouse_get_view(BtHidMouse* bt_hid_mouse) {
 
 void bt_hid_mouse_set_connected_status(BtHidMouse* bt_hid_mouse, bool connected) {
     furi_assert(bt_hid_mouse);
-    with_niew_model(
+    with_view_model(
         bt_hid_mouse->view, BtHidMouseModel * model, { model->connected = connected; }, true);
 }

@@ -102,7 +102,7 @@ static bool menu_input_callback(InputEvent* event, void* context) {
 
 static void menu_enter(void* context) {
     Menu* menu = context;
-    with_niew_model(
+    with_view_model(
         menu->view,
         MenuModel * model,
         {
@@ -116,7 +116,7 @@ static void menu_enter(void* context) {
 
 static void menu_exit(void* context) {
     Menu* menu = context;
-    with_niew_model(
+    with_view_model(
         menu->view,
         MenuModel * model,
         {
@@ -138,7 +138,7 @@ Menu* menu_alloc() {
     view_set_enter_callback(menu->view, menu_enter);
     view_set_exit_callback(menu->view, menu_exit);
 
-    with_niew_model(
+    with_view_model(
         menu->view,
         MenuModel * model,
         {
@@ -173,7 +173,7 @@ void menu_add_item(
     furi_assert(label);
 
     MenuItem* item = NULL;
-    with_niew_model(
+    with_view_model(
         menu->view,
         MenuModel * model,
         {
@@ -190,7 +190,7 @@ void menu_add_item(
 
 void menu_reset(Menu* menu) {
     furi_assert(menu);
-    with_niew_model(
+    with_view_model(
         menu->view,
         MenuModel * model,
         {
@@ -207,7 +207,7 @@ void menu_reset(Menu* menu) {
 }
 
 void menu_set_selected_item(Menu* menu, uint32_t index) {
-    with_niew_model(
+    with_view_model(
         menu->view,
         MenuModel * model,
         {
@@ -219,7 +219,7 @@ void menu_set_selected_item(Menu* menu, uint32_t index) {
 }
 
 static void menu_process_up(Menu* menu) {
-    with_niew_model(
+    with_view_model(
         menu->view,
         MenuModel * model,
         {
@@ -243,7 +243,7 @@ static void menu_process_up(Menu* menu) {
 }
 
 static void menu_process_down(Menu* menu) {
-    with_niew_model(
+    with_view_model(
         menu->view,
         MenuModel * model,
         {
@@ -268,7 +268,7 @@ static void menu_process_down(Menu* menu) {
 
 static void menu_process_ok(Menu* menu) {
     MenuItem* item = NULL;
-    with_niew_model(
+    with_view_model(
         menu->view,
         MenuModel * model,
         {

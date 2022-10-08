@@ -262,7 +262,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
 
     bool in_menu;
     bool move_fav_mode;
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         {
@@ -274,7 +274,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
     if(in_menu) {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyUp || event->key == InputKeyDown) {
-                with_niew_model(
+                with_view_model(
                     browser->view,
                     ArchiveBrowserViewModel * model,
                     {
@@ -289,7 +289,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
 
             if(event->key == InputKeyOk) {
                 uint8_t idx;
-                with_niew_model(
+                with_view_model(
                     browser->view,
                     ArchiveBrowserViewModel * model,
                     { idx = model->menu_idx; },
@@ -316,7 +316,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
 
         if((event->key == InputKeyUp || event->key == InputKeyDown) &&
            (event->type == InputTypeShort || event->type == InputTypeRepeat)) {
-            with_niew_model(
+            with_view_model(
                 browser->view,
                 ArchiveBrowserViewModel * model,
                 {
@@ -388,7 +388,7 @@ ArchiveBrowserView* browser_alloc() {
 
     browser->path = furi_string_alloc_set(archive_get_default_path(TAB_DEFAULT));
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         {
@@ -407,7 +407,7 @@ void browser_free(ArchiveBrowserView* browser) {
         file_browser_worker_free(browser->worker);
     }
 
-    with_niew_model(
+    with_view_model(
         browser->view,
         ArchiveBrowserViewModel * model,
         { files_array_clear(model->files); },

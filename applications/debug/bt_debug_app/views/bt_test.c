@@ -153,7 +153,7 @@ static bool bt_test_input_callback(InputEvent* event, void* context) {
 }
 
 void bt_test_process_up(BtTest* bt_test) {
-    with_niew_model(
+    with_view_model(
         bt_test->view,
         BtTestModel * model,
         {
@@ -175,7 +175,7 @@ void bt_test_process_up(BtTest* bt_test) {
 }
 
 void bt_test_process_down(BtTest* bt_test) {
-    with_niew_model(
+    with_view_model(
         bt_test->view,
         BtTestModel * model,
         {
@@ -216,7 +216,7 @@ BtTestParam* bt_test_get_selected_param(BtTestModel* model) {
 
 void bt_test_process_left(BtTest* bt_test) {
     BtTestParam* param;
-    with_niew_model(
+    with_view_model(
         bt_test->view,
         BtTestModel * model,
         {
@@ -240,7 +240,7 @@ void bt_test_process_left(BtTest* bt_test) {
 
 void bt_test_process_right(BtTest* bt_test) {
     BtTestParam* param;
-    with_niew_model(
+    with_view_model(
         bt_test->view,
         BtTestModel * model,
         {
@@ -264,7 +264,7 @@ void bt_test_process_right(BtTest* bt_test) {
 
 void bt_test_process_ok(BtTest* bt_test) {
     BtTestState state;
-    with_niew_model(
+    with_view_model(
         bt_test->view,
         BtTestModel * model,
         {
@@ -287,7 +287,7 @@ void bt_test_process_ok(BtTest* bt_test) {
 }
 
 void bt_test_process_back(BtTest* bt_test) {
-    with_niew_model(
+    with_view_model(
         bt_test->view,
         BtTestModel * model,
         {
@@ -310,7 +310,7 @@ BtTest* bt_test_alloc() {
     view_set_draw_callback(bt_test->view, bt_test_draw_callback);
     view_set_input_callback(bt_test->view, bt_test_input_callback);
 
-    with_niew_model(
+    with_view_model(
         bt_test->view,
         BtTestModel * model,
         {
@@ -331,7 +331,7 @@ BtTest* bt_test_alloc() {
 void bt_test_free(BtTest* bt_test) {
     furi_assert(bt_test);
 
-    with_niew_model(
+    with_view_model(
         bt_test->view,
         BtTestModel * model,
         {
@@ -362,7 +362,7 @@ BtTestParam* bt_test_param_add(
     furi_assert(label);
     furi_assert(bt_test);
 
-    with_niew_model(
+    with_view_model(
         bt_test->view,
         BtTestModel * model,
         {
@@ -381,19 +381,19 @@ BtTestParam* bt_test_param_add(
 
 void bt_test_set_rssi(BtTest* bt_test, float rssi) {
     furi_assert(bt_test);
-    with_niew_model(
+    with_view_model(
         bt_test->view, BtTestModel * model, { model->rssi = rssi; }, true);
 }
 
 void bt_test_set_packets_tx(BtTest* bt_test, uint32_t packets_num) {
     furi_assert(bt_test);
-    with_niew_model(
+    with_view_model(
         bt_test->view, BtTestModel * model, { model->packets_num_tx = packets_num; }, true);
 }
 
 void bt_test_set_packets_rx(BtTest* bt_test, uint32_t packets_num) {
     furi_assert(bt_test);
-    with_niew_model(
+    with_view_model(
         bt_test->view, BtTestModel * model, { model->packets_num_rx = packets_num; }, true);
 }
 

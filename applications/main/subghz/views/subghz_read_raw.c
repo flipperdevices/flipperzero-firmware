@@ -44,7 +44,7 @@ void subghz_read_raw_add_data_statusbar(
     const char* frequency_str,
     const char* preset_str) {
     furi_assert(instance);
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzReadRAWModel * model,
         {
@@ -64,7 +64,7 @@ void subghz_read_raw_add_data_rssi(SubGhzReadRAW* instance, float rssi) {
         u_rssi = (uint8_t)((rssi + 90) / 2.7);
     }
 
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzReadRAWModel * model,
         {
@@ -80,7 +80,7 @@ void subghz_read_raw_add_data_rssi(SubGhzReadRAW* instance, float rssi) {
 void subghz_read_raw_update_sample_write(SubGhzReadRAW* instance, size_t sample) {
     furi_assert(instance);
 
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzReadRAWModel * model,
         { furi_string_printf(model->sample_write, "%d spl.", sample); },
@@ -90,7 +90,7 @@ void subghz_read_raw_update_sample_write(SubGhzReadRAW* instance, size_t sample)
 void subghz_read_raw_stop_send(SubGhzReadRAW* instance) {
     furi_assert(instance);
 
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzReadRAWModel * model,
         {
@@ -117,7 +117,7 @@ void subghz_read_raw_stop_send(SubGhzReadRAW* instance) {
 
 void subghz_read_raw_update_sin(SubGhzReadRAW* instance) {
     furi_assert(instance);
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzReadRAWModel * model,
         {
@@ -295,7 +295,7 @@ bool subghz_read_raw_input(InputEvent* event, void* context) {
         return false;
     } else if(event->key == InputKeyOk && event->type == InputTypePress) {
         uint8_t ret = false;
-        with_niew_model(
+        with_view_model(
             instance->view,
             SubGhzReadRAWModel * model,
             {
@@ -327,7 +327,7 @@ bool subghz_read_raw_input(InputEvent* event, void* context) {
             },
             ret);
     } else if(event->key == InputKeyOk && event->type == InputTypeRelease) {
-        with_niew_model(
+        with_view_model(
             instance->view,
             SubGhzReadRAWModel * model,
             {
@@ -341,7 +341,7 @@ bool subghz_read_raw_input(InputEvent* event, void* context) {
             },
             false);
     } else if(event->key == InputKeyBack && event->type == InputTypeShort) {
-        with_niew_model(
+        with_view_model(
             instance->view,
             SubGhzReadRAWModel * model,
             {
@@ -374,7 +374,7 @@ bool subghz_read_raw_input(InputEvent* event, void* context) {
             },
             true);
     } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
-        with_niew_model(
+        with_view_model(
             instance->view,
             SubGhzReadRAWModel * model,
             {
@@ -395,7 +395,7 @@ bool subghz_read_raw_input(InputEvent* event, void* context) {
             },
             true);
     } else if(event->key == InputKeyRight && event->type == InputTypeShort) {
-        with_niew_model(
+        with_view_model(
             instance->view,
             SubGhzReadRAWModel * model,
             {
@@ -409,7 +409,7 @@ bool subghz_read_raw_input(InputEvent* event, void* context) {
             },
             true);
     } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
-        with_niew_model(
+        with_view_model(
             instance->view,
             SubGhzReadRAWModel * model,
             {
@@ -438,7 +438,7 @@ void subghz_read_raw_set_status(
 
     switch(status) {
     case SubGhzReadRAWStatusStart:
-        with_niew_model(
+        with_view_model(
             instance->view,
             SubGhzReadRAWModel * model,
             {
@@ -451,14 +451,14 @@ void subghz_read_raw_set_status(
             true);
         break;
     case SubGhzReadRAWStatusIDLE:
-        with_niew_model(
+        with_view_model(
             instance->view,
             SubGhzReadRAWModel * model,
             { model->status = SubGhzReadRAWStatusIDLE; },
             true);
         break;
     case SubGhzReadRAWStatusLoadKeyTX:
-        with_niew_model(
+        with_view_model(
             instance->view,
             SubGhzReadRAWModel * model,
             {
@@ -471,7 +471,7 @@ void subghz_read_raw_set_status(
             true);
         break;
     case SubGhzReadRAWStatusSaveKey:
-        with_niew_model(
+        with_view_model(
             instance->view,
             SubGhzReadRAWModel * model,
             {
@@ -501,7 +501,7 @@ void subghz_read_raw_exit(void* context) {
     furi_assert(context);
     SubGhzReadRAW* instance = context;
 
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzReadRAWModel * model,
         {
@@ -527,7 +527,7 @@ SubGhzReadRAW* subghz_read_raw_alloc() {
     view_set_enter_callback(instance->view, subghz_read_raw_enter);
     view_set_exit_callback(instance->view, subghz_read_raw_exit);
 
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzReadRAWModel * model,
         {
@@ -545,7 +545,7 @@ SubGhzReadRAW* subghz_read_raw_alloc() {
 void subghz_read_raw_free(SubGhzReadRAW* instance) {
     furi_assert(instance);
 
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzReadRAWModel * model,
         {

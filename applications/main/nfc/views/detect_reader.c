@@ -63,7 +63,7 @@ static bool detect_reader_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
 
     uint8_t nonces = 0;
-    with_niew_model(
+    with_view_model(
         detect_reader->view, DetectReaderViewModel * model, { nonces = model->nonces; }, false);
 
     if(event->type == InputTypeShort) {
@@ -99,7 +99,7 @@ void detect_reader_free(DetectReader* detect_reader) {
 void detect_reader_reset(DetectReader* detect_reader) {
     furi_assert(detect_reader);
 
-    with_niew_model(
+    with_view_model(
         detect_reader->view,
         DetectReaderViewModel * model,
         {
@@ -130,7 +130,7 @@ void detect_reader_set_callback(
 void detect_reader_set_nonces_max(DetectReader* detect_reader, uint16_t nonces_max) {
     furi_assert(detect_reader);
 
-    with_niew_model(
+    with_view_model(
         detect_reader->view,
         DetectReaderViewModel * model,
         { model->nonces_max = nonces_max; },
@@ -140,7 +140,7 @@ void detect_reader_set_nonces_max(DetectReader* detect_reader, uint16_t nonces_m
 void detect_reader_set_nonces_collected(DetectReader* detect_reader, uint16_t nonces_collected) {
     furi_assert(detect_reader);
 
-    with_niew_model(
+    with_view_model(
         detect_reader->view,
         DetectReaderViewModel * model,
         { model->nonces = nonces_collected; },
@@ -149,6 +149,6 @@ void detect_reader_set_nonces_collected(DetectReader* detect_reader, uint16_t no
 
 void detect_reader_set_state(DetectReader* detect_reader, DetectReaderState state) {
     furi_assert(detect_reader);
-    with_niew_model(
+    with_view_model(
         detect_reader->view, DetectReaderViewModel * model, { model->state = state; }, true);
 }

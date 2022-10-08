@@ -118,7 +118,7 @@ View* battery_info_get_view(BatteryInfo* battery_info) {
 void battery_info_set_data(BatteryInfo* battery_info, BatteryInfoModel* data) {
     furi_assert(battery_info);
     furi_assert(data);
-    with_niew_model(
+    with_view_model(
         battery_info->view,
         BatteryInfoModel * model,
         { memcpy(model, data, sizeof(BatteryInfoModel)); },

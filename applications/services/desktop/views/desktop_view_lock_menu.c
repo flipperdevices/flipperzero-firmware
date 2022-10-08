@@ -23,7 +23,7 @@ void desktop_lock_menu_set_callback(
 }
 
 void desktop_lock_menu_set_pin_state(DesktopLockMenuView* lock_menu, bool pin_is_set) {
-    with_niew_model(
+    with_view_model(
         lock_menu->view,
         DesktopLockMenuViewModel * model,
         { model->pin_is_set = pin_is_set; },
@@ -31,7 +31,7 @@ void desktop_lock_menu_set_pin_state(DesktopLockMenuView* lock_menu, bool pin_is
 }
 
 void desktop_lock_menu_set_dummy_mode_state(DesktopLockMenuView* lock_menu, bool dummy_mode) {
-    with_niew_model(
+    with_view_model(
         lock_menu->view,
         DesktopLockMenuViewModel * model,
         { model->dummy_mode = dummy_mode; },
@@ -40,7 +40,7 @@ void desktop_lock_menu_set_dummy_mode_state(DesktopLockMenuView* lock_menu, bool
 
 void desktop_lock_menu_set_idx(DesktopLockMenuView* lock_menu, uint8_t idx) {
     furi_assert(idx < DesktopLockMenuIndexTotalCount);
-    with_niew_model(
+    with_view_model(
         lock_menu->view, DesktopLockMenuViewModel * model, { model->idx = idx; }, true);
 }
 
@@ -94,7 +94,7 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
     bool dummy_mode = false;
     bool update = false;
 
-    with_niew_model(
+    with_view_model(
         lock_menu->view,
         DesktopLockMenuViewModel * model,
         {

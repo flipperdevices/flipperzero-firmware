@@ -67,7 +67,7 @@ static void subghz_test_packet_rssi_timer_callback(void* context) {
     furi_assert(context);
     SubGhzTestPacket* instance = context;
 
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzTestPacketModel * model,
         {
@@ -138,7 +138,7 @@ static bool subghz_test_packet_input(InputEvent* event, void* context) {
         return false;
     }
 
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzTestPacketModel * model,
         {
@@ -196,7 +196,7 @@ void subghz_test_packet_enter(void* context) {
     furi_hal_subghz_reset();
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
 
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzTestPacketModel * model,
         {
@@ -221,7 +221,7 @@ void subghz_test_packet_exit(void* context) {
     furi_timer_stop(instance->timer);
 
     // Reinitialize IC to default state
-    with_niew_model(
+    with_view_model(
         instance->view,
         SubGhzTestPacketModel * model,
         {

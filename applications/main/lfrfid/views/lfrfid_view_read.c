@@ -55,13 +55,13 @@ static void lfrfid_view_read_draw_callback(Canvas* canvas, void* _model) {
 
 void lfrfid_view_read_enter(void* context) {
     LfRfidReadView* read_view = context;
-    with_niew_model(
+    with_view_model(
         read_view->view, LfRfidReadViewModel * model, { icon_animation_start(model->icon); }, true);
 }
 
 void lfrfid_view_read_exit(void* context) {
     LfRfidReadView* read_view = context;
-    with_niew_model(
+    with_view_model(
         read_view->view, LfRfidReadViewModel * model, { icon_animation_stop(model->icon); }, false);
 }
 
@@ -71,7 +71,7 @@ LfRfidReadView* lfrfid_view_read_alloc() {
     view_set_context(read_view->view, read_view);
     view_allocate_model(read_view->view, ViewModelTypeLocking, sizeof(LfRfidReadViewModel));
 
-    with_niew_model(
+    with_view_model(
         read_view->view,
         LfRfidReadViewModel * model,
         {
@@ -88,7 +88,7 @@ LfRfidReadView* lfrfid_view_read_alloc() {
 }
 
 void lfrfid_view_read_free(LfRfidReadView* read_view) {
-    with_niew_model(
+    with_view_model(
         read_view->view, LfRfidReadViewModel * model, { icon_animation_free(model->icon); }, false);
 
     view_free(read_view->view);
@@ -100,7 +100,7 @@ View* lfrfid_view_read_get_view(LfRfidReadView* read_view) {
 }
 
 void lfrfid_view_read_set_read_mode(LfRfidReadView* read_view, LfRfidReadViewMode mode) {
-    with_niew_model(
+    with_view_model(
         read_view->view,
         LfRfidReadViewModel * model,
         {
