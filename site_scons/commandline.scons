@@ -81,6 +81,11 @@ vars.AddVariables(
         help="Enable debug tools to be built",
         default=False,
     ),
+    BoolVariable(
+        "FAP_EXAMPLES",
+        help="Enable example applications to be built",
+        default=False,
+    ),
 )
 
 vars.Add(
@@ -238,7 +243,6 @@ vars.Add(
         ("applications/system", False),
         ("applications/debug", False),
         ("applications/plugins", False),
-        ("applications/examples", False),
         ("applications_user", False),
     ],
 )

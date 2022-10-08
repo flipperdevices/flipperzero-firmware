@@ -13,14 +13,18 @@ forward_os_env = {
 }
 # Proxying CI environment to child processes & scripts
 variables_to_forward = [
+    # CI/CD variables
     "WORKFLOW_BRANCH_OR_TAG",
     "DIST_SUFFIX",
+    # Python & other tools
     "HOME",
     "APPDATA",
     "PYTHONHOME",
     "PYTHONNOUSERSITE",
     "TMP",
     "TEMP",
+    # Colors for tools
+    "TERM",
 ]
 if proxy_env := GetOption("proxy_env"):
     variables_to_forward.extend(proxy_env.split(","))

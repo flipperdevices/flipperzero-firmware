@@ -7,7 +7,6 @@
 # construction of certain targets behind command-line options.
 
 import os
-import subprocess
 
 DefaultEnvironment(tools=[])
 

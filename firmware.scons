@@ -141,6 +141,10 @@ else:
 if extra_int_apps := GetOption("extra_int_apps"):
     fwenv.Append(APPS=extra_int_apps.split(","))
 
+
+if fwenv["FAP_EXAMPLES"]:
+    fwenv.Append(APPDIRS=[("applications/examples", False)])
+
 fwenv.LoadApplicationManifests()
 fwenv.PrepareApplicationsBuild()
 
