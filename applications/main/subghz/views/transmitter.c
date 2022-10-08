@@ -34,14 +34,16 @@ void subghz_view_transmitter_add_data_to_show(
     const char* preset_str,
     uint8_t show_button) {
     furi_assert(subghz_transmitter);
-    with_view_model(
-        subghz_transmitter->view, (SubGhzViewTransmitterModel * model) {
+    with_niew_model(
+        subghz_transmitter->view,
+        SubGhzViewTransmitterModel * model,
+        {
             furi_string_set(model->key_str, key_str);
             furi_string_set(model->frequency_str, frequency_str);
             furi_string_set(model->preset_str, preset_str);
             model->show_button = show_button;
-            return true;
-        });
+        },
+        true);
 }
 
 static void subghz_view_transmitter_button_right(Canvas* canvas, const char* str) {
@@ -94,24 +96,28 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
     bool can_be_sent = false;
 
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
-        with_view_model(
-            subghz_transmitter->view, (SubGhzViewTransmitterModel * model) {
+        with_niew_model(
+            subghz_transmitter->view,
+            SubGhzViewTransmitterModel * model,
+            {
                 furi_string_reset(model->frequency_str);
                 furi_string_reset(model->preset_str);
                 furi_string_reset(model->key_str);
                 model->show_button = 0;
-                return false;
-            });
+            },
+            false);
         return false;
     }
 
-    with_view_model(
-        subghz_transmitter->view, (SubGhzViewTransmitterModel * model) {
+    with_niew_model(
+        subghz_transmitter->view,
+        SubGhzViewTransmitterModel * model,
+        {
             if(model->show_button) {
                 can_be_sent = true;
             }
-            return true;
-        });
+        },
+        true);
 
     if(can_be_sent && event->key == InputKeyOk && event->type == InputTypePress) {
         subghz_transmitter->callback(
@@ -148,26 +154,30 @@ SubGhzViewTransmitter* subghz_view_transmitter_alloc() {
     view_set_enter_callback(subghz_transmitter->view, subghz_view_transmitter_enter);
     view_set_exit_callback(subghz_transmitter->view, subghz_view_transmitter_exit);
 
-    with_view_model(
-        subghz_transmitter->view, (SubGhzViewTransmitterModel * model) {
+    with_niew_model(
+        subghz_transmitter->view,
+        SubGhzViewTransmitterModel * model,
+        {
             model->frequency_str = furi_string_alloc();
             model->preset_str = furi_string_alloc();
             model->key_str = furi_string_alloc();
-            return true;
-        });
+        },
+        true);
     return subghz_transmitter;
 }
 
 void subghz_view_transmitter_free(SubGhzViewTransmitter* subghz_transmitter) {
     furi_assert(subghz_transmitter);
 
-    with_view_model(
-        subghz_transmitter->view, (SubGhzViewTransmitterModel * model) {
+    with_niew_model(
+        subghz_transmitter->view,
+        SubGhzViewTransmitterModel * model,
+        {
             furi_string_free(model->frequency_str);
             furi_string_free(model->preset_str);
             furi_string_free(model->key_str);
-            return true;
-        });
+        },
+        true);
     view_free(subghz_transmitter->view);
     free(subghz_transmitter);
 }

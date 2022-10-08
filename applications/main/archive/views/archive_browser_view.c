@@ -262,34 +262,38 @@ static bool archive_view_input(InputEvent* event, void* context) {
 
     bool in_menu;
     bool move_fav_mode;
-    with_view_model(
-        browser->view, (ArchiveBrowserViewModel * model) {
+    with_niew_model(
+        browser->view,
+        ArchiveBrowserViewModel * model,
+        {
             in_menu = model->menu;
             move_fav_mode = model->move_fav;
-            return false;
-        });
+        },
+        false);
 
     if(in_menu) {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyUp || event->key == InputKeyDown) {
-                with_view_model(
-                    browser->view, (ArchiveBrowserViewModel * model) {
+                with_niew_model(
+                    browser->view,
+                    ArchiveBrowserViewModel * model,
+                    {
                         if(event->key == InputKeyUp) {
                             model->menu_idx = ((model->menu_idx - 1) + MENU_ITEMS) % MENU_ITEMS;
                         } else if(event->key == InputKeyDown) {
                             model->menu_idx = (model->menu_idx + 1) % MENU_ITEMS;
                         }
-                        return true;
-                    });
+                    },
+                    true);
             }
 
             if(event->key == InputKeyOk) {
                 uint8_t idx;
-                with_view_model(
-                    browser->view, (ArchiveBrowserViewModel * model) {
-                        idx = model->menu_idx;
-                        return false;
-                    });
+                with_niew_model(
+                    browser->view,
+                    ArchiveBrowserViewModel * model,
+                    { idx = model->menu_idx; },
+                    false);
                 browser->callback(file_menu_actions[idx], browser->context);
             } else if(event->key == InputKeyBack) {
                 browser->callback(ArchiveBrowserEventFileMenuClose, browser->context);
@@ -312,8 +316,10 @@ static bool archive_view_input(InputEvent* event, void* context) {
 
         if((event->key == InputKeyUp || event->key == InputKeyDown) &&
            (event->type == InputTypeShort || event->type == InputTypeRepeat)) {
-            with_view_model(
-                browser->view, (ArchiveBrowserViewModel * model) {
+            with_niew_model(
+                browser->view,
+                ArchiveBrowserViewModel * model,
+                {
                     if(event->key == InputKeyUp) {
                         model->item_idx =
                             ((model->item_idx - 1) + model->item_cnt) % model->item_cnt;
@@ -334,9 +340,8 @@ static bool archive_view_input(InputEvent* event, void* context) {
                             browser->callback(ArchiveBrowserEventFavMoveDown, browser->context);
                         }
                     }
-
-                    return true;
-                });
+                },
+                true);
             archive_update_offset(browser);
         }
 
@@ -383,12 +388,14 @@ ArchiveBrowserView* browser_alloc() {
 
     browser->path = furi_string_alloc_set(archive_get_default_path(TAB_DEFAULT));
 
-    with_view_model(
-        browser->view, (ArchiveBrowserViewModel * model) {
+    with_niew_model(
+        browser->view,
+        ArchiveBrowserViewModel * model,
+        {
             files_array_init(model->files);
             model->tab_idx = TAB_DEFAULT;
-            return true;
-        });
+        },
+        true);
 
     return browser;
 }
@@ -400,11 +407,11 @@ void browser_free(ArchiveBrowserView* browser) {
         file_browser_worker_free(browser->worker);
     }
 
-    with_view_model(
-        browser->view, (ArchiveBrowserViewModel * model) {
-            files_array_clear(model->files);
-            return false;
-        });
+    with_niew_model(
+        browser->view,
+        ArchiveBrowserViewModel * model,
+        { files_array_clear(model->files); },
+        false);
 
     furi_string_free(browser->path);
 

@@ -84,19 +84,18 @@ View* u2f_view_get_view(U2fView* u2f) {
 void u2f_view_set_ok_callback(U2fView* u2f, U2fOkCallback callback, void* context) {
     furi_assert(u2f);
     furi_assert(callback);
-    with_view_model(
-        u2f->view, (U2fModel * model) {
+    with_niew_model(
+        u2f->view,
+        U2fModel * model,
+        {
             UNUSED(model);
             u2f->callback = callback;
             u2f->context = context;
-            return false;
-        });
+        },
+        false);
 }
 
 void u2f_view_set_state(U2fView* u2f, U2fViewMsg msg) {
-    with_view_model(
-        u2f->view, (U2fModel * model) {
-            model->display_msg = msg;
-            return true;
-        });
+    with_niew_model(
+        u2f->view, U2fModel * model, { model->display_msg = msg; }, true);
 }

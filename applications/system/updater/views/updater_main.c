@@ -28,22 +28,25 @@ void updater_main_model_set_state(
     const char* message,
     uint8_t progress,
     bool failed) {
-    // We cannot use with_niew_model here, because sometimes we need to update model
-    UpdaterProgressModel* model = view_get_model(main_view->view);
     bool update = false;
-    model->failed = failed;
-    model->progress = progress;
-    if(furi_string_cmp_str(model->status, message)) {
-        furi_string_set(model->status, message);
-        model->rendered_progress = progress;
-        update = true;
-    } else if(
-        (model->rendered_progress > progress) ||
-        ((progress - model->rendered_progress) > PROGRESS_RENDER_STEP)) {
-        model->rendered_progress = progress;
-        update = true;
-    }
-    view_commit_model(main_view->view, update);
+    with_niew_model(
+        main_view->view,
+        UpdaterProgressModel * model,
+        {
+            model->failed = failed;
+            model->progress = progress;
+            if(furi_string_cmp_str(model->status, message)) {
+                furi_string_set(model->status, message);
+                model->rendered_progress = progress;
+                update = true;
+            } else if(
+                (model->rendered_progress > progress) ||
+                ((progress - model->rendered_progress) > PROGRESS_RENDER_STEP)) {
+                model->rendered_progress = progress;
+                update = true;
+            }
+        },
+        update);
 }
 
 View* updater_main_get_view(UpdaterMainView* main_view) {

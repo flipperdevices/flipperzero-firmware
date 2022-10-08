@@ -67,8 +67,10 @@ static void subghz_test_packet_rssi_timer_callback(void* context) {
     furi_assert(context);
     SubGhzTestPacket* instance = context;
 
-    with_view_model(
-        instance->view, (SubGhzTestPacketModel * model) {
+    with_niew_model(
+        instance->view,
+        SubGhzTestPacketModel * model,
+        {
             if(model->status == SubGhzTestPacketModelStatusRx) {
                 model->rssi = furi_hal_subghz_get_rssi();
                 model->packets = instance->packet_rx;
@@ -77,8 +79,8 @@ static void subghz_test_packet_rssi_timer_callback(void* context) {
                     SUBGHZ_TEST_PACKET_COUNT -
                     subghz_encoder_princeton_for_testing_get_repeat_left(instance->encoder);
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static void subghz_test_packet_draw(Canvas* canvas, SubGhzTestPacketModel* model) {
@@ -136,8 +138,10 @@ static bool subghz_test_packet_input(InputEvent* event, void* context) {
         return false;
     }
 
-    with_view_model(
-        instance->view, (SubGhzTestPacketModel * model) {
+    with_niew_model(
+        instance->view,
+        SubGhzTestPacketModel * model,
+        {
             if(model->status == SubGhzTestPacketModelStatusRx) {
                 furi_hal_subghz_stop_async_rx();
             } else if(model->status == SubGhzTestPacketModelStatusTx) {
@@ -179,9 +183,8 @@ static bool subghz_test_packet_input(InputEvent* event, void* context) {
                     instance->callback(SubGhzTestPacketEventOnlyRx, instance->context);
                 }
             }
-
-            return true;
-        });
+        },
+        true);
 
     return true;
 }
@@ -193,16 +196,18 @@ void subghz_test_packet_enter(void* context) {
     furi_hal_subghz_reset();
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
 
-    with_view_model(
-        instance->view, (SubGhzTestPacketModel * model) {
+    with_niew_model(
+        instance->view,
+        SubGhzTestPacketModel * model,
+        {
             model->frequency = subghz_frequencies_433_92_testing;
             model->real_frequency =
                 furi_hal_subghz_set_frequency(subghz_frequencies_testing[model->frequency]);
             model->path = FuriHalSubGhzPathIsolate; // isolate
             model->rssi = 0.0f;
             model->status = SubGhzTestPacketModelStatusRx;
-            return true;
-        });
+        },
+        true);
 
     furi_hal_subghz_start_async_rx(subghz_test_packet_rx_callback, instance);
 
@@ -216,16 +221,18 @@ void subghz_test_packet_exit(void* context) {
     furi_timer_stop(instance->timer);
 
     // Reinitialize IC to default state
-    with_view_model(
-        instance->view, (SubGhzTestPacketModel * model) {
+    with_niew_model(
+        instance->view,
+        SubGhzTestPacketModel * model,
+        {
             if(model->status == SubGhzTestPacketModelStatusRx) {
                 furi_hal_subghz_stop_async_rx();
             } else if(model->status == SubGhzTestPacketModelStatusTx) {
                 subghz_encoder_princeton_for_testing_stop(instance->encoder, furi_get_tick());
                 furi_hal_subghz_stop_async_tx();
             }
-            return true;
-        });
+        },
+        true);
     furi_hal_subghz_sleep();
 }
 

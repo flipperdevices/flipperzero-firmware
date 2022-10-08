@@ -123,17 +123,18 @@ bool desktop_debug_input(InputEvent* event, void* context) {
     }
 
     DesktopViewStatsScreens current = 0;
-    with_view_model(
-        debug_view->view, (DesktopDebugViewModel * model) {
-
+    with_niew_model(
+        debug_view->view,
+        DesktopDebugViewModel * model,
+        {
 #ifdef SRV_DOLPHIN_STATE_DEBUG
             if((event->key == InputKeyDown) || (event->key == InputKeyUp)) {
                 model->screen = !model->screen;
             }
 #endif
             current = model->screen;
-            return true;
-        });
+        },
+        true);
 
     size_t count = (event->type == InputTypeRepeat) ? 10 : 1;
     if(current == DesktopViewStatsMeta) {
@@ -180,21 +181,20 @@ void desktop_debug_free(DesktopDebugView* debug_view) {
 void desktop_debug_get_dolphin_data(DesktopDebugView* debug_view) {
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
-    with_view_model(
-        debug_view->view, (DesktopDebugViewModel * model) {
+    with_niew_model(
+        debug_view->view,
+        DesktopDebugViewModel * model,
+        {
             model->icounter = stats.icounter;
             model->butthurt = stats.butthurt;
             model->timestamp = stats.timestamp;
-            return true;
-        });
+        },
+        true);
 
     furi_record_close(RECORD_DOLPHIN);
 }
 
 void desktop_debug_reset_screen_idx(DesktopDebugView* debug_view) {
-    with_view_model(
-        debug_view->view, (DesktopDebugViewModel * model) {
-            model->screen = 0;
-            return true;
-        });
+    with_niew_model(
+        debug_view->view, DesktopDebugViewModel * model, { model->screen = 0; }, true);
 }

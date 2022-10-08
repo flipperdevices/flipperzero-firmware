@@ -102,8 +102,10 @@ static void bt_hid_mouse_draw_callback(Canvas* canvas, void* context) {
 }
 
 static void bt_hid_mouse_process(BtHidMouse* bt_hid_mouse, InputEvent* event) {
-    with_view_model(
-        bt_hid_mouse->view, (BtHidMouseModel * model) {
+    with_niew_model(
+        bt_hid_mouse->view,
+        BtHidMouseModel * model,
+        {
             if(event->key == InputKeyBack) {
                 if(event->type == InputTypeShort) {
                     furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_RIGHT);
@@ -167,8 +169,8 @@ static void bt_hid_mouse_process(BtHidMouse* bt_hid_mouse, InputEvent* event) {
                     model->up_pressed = false;
                 }
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static bool bt_hid_mouse_input_callback(InputEvent* event, void* context) {
@@ -210,9 +212,6 @@ View* bt_hid_mouse_get_view(BtHidMouse* bt_hid_mouse) {
 
 void bt_hid_mouse_set_connected_status(BtHidMouse* bt_hid_mouse, bool connected) {
     furi_assert(bt_hid_mouse);
-    with_view_model(
-        bt_hid_mouse->view, (BtHidMouseModel * model) {
-            model->connected = connected;
-            return true;
-        });
+    with_niew_model(
+        bt_hid_mouse->view, BtHidMouseModel * model, { model->connected = connected; }, true);
 }

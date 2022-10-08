@@ -153,8 +153,10 @@ static bool bt_test_input_callback(InputEvent* event, void* context) {
 }
 
 void bt_test_process_up(BtTest* bt_test) {
-    with_view_model(
-        bt_test->view, (BtTestModel * model) {
+    with_niew_model(
+        bt_test->view,
+        BtTestModel * model,
+        {
             uint8_t params_on_screen = 3;
             if(model->position > 0) {
                 model->position--;
@@ -168,13 +170,15 @@ void bt_test_process_up(BtTest* bt_test) {
                     model->window_position = model->position - (params_on_screen - 1);
                 }
             }
-            return true;
-        });
+        },
+        true);
 }
 
 void bt_test_process_down(BtTest* bt_test) {
-    with_view_model(
-        bt_test->view, (BtTestModel * model) {
+    with_niew_model(
+        bt_test->view,
+        BtTestModel * model,
+        {
             uint8_t params_on_screen = 3;
             if(model->position < (BtTestParamArray_size(model->params) - 1)) {
                 model->position++;
@@ -187,8 +191,8 @@ void bt_test_process_down(BtTest* bt_test) {
                 model->position = 0;
                 model->window_position = 0;
             }
-            return true;
-        });
+        },
+        true);
 }
 
 BtTestParam* bt_test_get_selected_param(BtTestModel* model) {
@@ -212,8 +216,10 @@ BtTestParam* bt_test_get_selected_param(BtTestModel* model) {
 
 void bt_test_process_left(BtTest* bt_test) {
     BtTestParam* param;
-    with_view_model(
-        bt_test->view, (BtTestModel * model) {
+    with_niew_model(
+        bt_test->view,
+        BtTestModel * model,
+        {
             param = bt_test_get_selected_param(model);
             if(param->current_value_index > 0) {
                 param->current_value_index--;
@@ -225,8 +231,8 @@ void bt_test_process_left(BtTest* bt_test) {
                     model->packets_num_tx = 0;
                 }
             }
-            return true;
-        });
+        },
+        true);
     if(param->change_callback) {
         param->change_callback(param);
     }
@@ -234,8 +240,10 @@ void bt_test_process_left(BtTest* bt_test) {
 
 void bt_test_process_right(BtTest* bt_test) {
     BtTestParam* param;
-    with_view_model(
-        bt_test->view, (BtTestModel * model) {
+    with_niew_model(
+        bt_test->view,
+        BtTestModel * model,
+        {
             param = bt_test_get_selected_param(model);
             if(param->current_value_index < (param->values_count - 1)) {
                 param->current_value_index++;
@@ -247,8 +255,8 @@ void bt_test_process_right(BtTest* bt_test) {
                     model->packets_num_tx = 0;
                 }
             }
-            return true;
-        });
+        },
+        true);
     if(param->change_callback) {
         param->change_callback(param);
     }
@@ -256,8 +264,10 @@ void bt_test_process_right(BtTest* bt_test) {
 
 void bt_test_process_ok(BtTest* bt_test) {
     BtTestState state;
-    with_view_model(
-        bt_test->view, (BtTestModel * model) {
+    with_niew_model(
+        bt_test->view,
+        BtTestModel * model,
+        {
             if(model->state == BtTestStateStarted) {
                 model->state = BtTestStateStopped;
                 model->message = BT_TEST_START_MESSAGE;
@@ -269,22 +279,24 @@ void bt_test_process_ok(BtTest* bt_test) {
                 model->message = BT_TEST_STOP_MESSAGE;
             }
             state = model->state;
-            return true;
-        });
+        },
+        true);
     if(bt_test->change_state_callback) {
         bt_test->change_state_callback(state, bt_test->context);
     }
 }
 
 void bt_test_process_back(BtTest* bt_test) {
-    with_view_model(
-        bt_test->view, (BtTestModel * model) {
+    with_niew_model(
+        bt_test->view,
+        BtTestModel * model,
+        {
             model->state = BtTestStateStopped;
             model->rssi = 0.0f;
             model->packets_num_rx = 0;
             model->packets_num_tx = 0;
-            return false;
-        });
+        },
+        false);
     if(bt_test->back_callback) {
         bt_test->back_callback(bt_test->context);
     }
@@ -298,8 +310,10 @@ BtTest* bt_test_alloc() {
     view_set_draw_callback(bt_test->view, bt_test_draw_callback);
     view_set_input_callback(bt_test->view, bt_test_input_callback);
 
-    with_view_model(
-        bt_test->view, (BtTestModel * model) {
+    with_niew_model(
+        bt_test->view,
+        BtTestModel * model,
+        {
             model->state = BtTestStateStopped;
             model->message = "Ok - Start";
             BtTestParamArray_init(model->params);
@@ -308,8 +322,8 @@ BtTest* bt_test_alloc() {
             model->rssi = 0.0f;
             model->packets_num_tx = 0;
             model->packets_num_rx = 0;
-            return true;
-        });
+        },
+        true);
 
     return bt_test;
 }
@@ -317,16 +331,18 @@ BtTest* bt_test_alloc() {
 void bt_test_free(BtTest* bt_test) {
     furi_assert(bt_test);
 
-    with_view_model(
-        bt_test->view, (BtTestModel * model) {
+    with_niew_model(
+        bt_test->view,
+        BtTestModel * model,
+        {
             BtTestParamArray_it_t it;
             for(BtTestParamArray_it(it, model->params); !BtTestParamArray_end_p(it);
                 BtTestParamArray_next(it)) {
                 furi_string_free(BtTestParamArray_ref(it)->current_value_text);
             }
             BtTestParamArray_clear(model->params);
-            return false;
-        });
+        },
+        false);
     view_free(bt_test->view);
     free(bt_test);
 }
@@ -346,8 +362,10 @@ BtTestParam* bt_test_param_add(
     furi_assert(label);
     furi_assert(bt_test);
 
-    with_view_model(
-        bt_test->view, (BtTestModel * model) {
+    with_niew_model(
+        bt_test->view,
+        BtTestModel * model,
+        {
             param = BtTestParamArray_push_new(model->params);
             param->label = label;
             param->values_count = values_count;
@@ -355,37 +373,28 @@ BtTestParam* bt_test_param_add(
             param->context = context;
             param->current_value_index = 0;
             param->current_value_text = furi_string_alloc();
-            return true;
-        });
+        },
+        true);
 
     return param;
 }
 
 void bt_test_set_rssi(BtTest* bt_test, float rssi) {
     furi_assert(bt_test);
-    with_view_model(
-        bt_test->view, (BtTestModel * model) {
-            model->rssi = rssi;
-            return true;
-        });
+    with_niew_model(
+        bt_test->view, BtTestModel * model, { model->rssi = rssi; }, true);
 }
 
 void bt_test_set_packets_tx(BtTest* bt_test, uint32_t packets_num) {
     furi_assert(bt_test);
-    with_view_model(
-        bt_test->view, (BtTestModel * model) {
-            model->packets_num_tx = packets_num;
-            return true;
-        });
+    with_niew_model(
+        bt_test->view, BtTestModel * model, { model->packets_num_tx = packets_num; }, true);
 }
 
 void bt_test_set_packets_rx(BtTest* bt_test, uint32_t packets_num) {
     furi_assert(bt_test);
-    with_view_model(
-        bt_test->view, (BtTestModel * model) {
-            model->packets_num_rx = packets_num;
-            return true;
-        });
+    with_niew_model(
+        bt_test->view, BtTestModel * model, { model->packets_num_rx = packets_num; }, true);
 }
 
 void bt_test_set_change_state_callback(BtTest* bt_test, BtTestChangeStateCallback callback) {
