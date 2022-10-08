@@ -313,6 +313,15 @@ static bool game_won(Minesweeper* minesweeper_state) {
 }
 
 static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y) {
+  if (minesweeper_state->playfield[cursor_x][cursor_y] == TileTypeFlag) {
+    // we're on an flagged field, do nothing
+    return true;
+  }
+  if (minesweeper_state->minefield[cursor_x][cursor_y] == FieldMine) {
+    // TODO: player loses!
+    minesweeper_state->playfield[cursor_x][cursor_y] = TileTypeMine;
+    return false;
+  }
   if (minesweeper_state->playfield[cursor_x][cursor_y] >= TileType1 && minesweeper_state->playfield[cursor_x][cursor_y] <= TileType8) {
     // click on an cleared cell with a number
     // count the flags around
@@ -341,7 +350,10 @@ static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y
           }
           if ( auto_x >= 0 && auto_x < PLAYFIELD_WIDTH && auto_y >= 0 && auto_y < PLAYFIELD_HEIGHT) {
             if (minesweeper_state->playfield[auto_x][auto_y] == TileTypeUncleared) {
-              play_move(minesweeper_state, auto_x, auto_y);
+              if(!play_move(minesweeper_state, auto_x, auto_y)) {
+                // flags were wrong, we got a mine!
+                return false;
+              }
             }
           }
         }
@@ -352,48 +364,42 @@ static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y
       // we're on an already uncovered field
       return true;
   }
-  if (minesweeper_state->minefield[cursor_x][cursor_y] == FieldMine) {
-      // TODO: player loses!
-      minesweeper_state->playfield[cursor_x][cursor_y] = TileTypeMine;
-      return false;
-  } else {
-    // get number of surrounding mines.
-    int hint = 0;
-    for (int y = cursor_y-1; y <= cursor_y+1; y++) {
-      for (int x = cursor_x-1; x <= cursor_x+1; x++) {
-        if ( x == cursor_x && y == cursor_y ) {
-          // we're on the cell the user selected, so ignore.
+  // get number of surrounding mines.
+  int hint = 0;
+  for (int y = cursor_y-1; y <= cursor_y+1; y++) {
+    for (int x = cursor_x-1; x <= cursor_x+1; x++) {
+      if ( x == cursor_x && y == cursor_y ) {
+        // we're on the cell the user selected, so ignore.
+        continue;
+      }
+      // make sure we don't go OOB
+      if ( x >= 0 && x < PLAYFIELD_WIDTH && y >= 0 && y < PLAYFIELD_HEIGHT) {
+        if(minesweeper_state->minefield[x][y] == FieldMine) {
+            hint ++;
+        }
+      }
+    }
+  }
+  // 〜(￣▽￣〜) don't judge me (〜￣▽￣)〜
+  minesweeper_state->playfield[cursor_x][cursor_y] = hint;
+  minesweeper_state->fields_cleared++;
+  FURI_LOG_D("Minesweeper", "Setting %d,%d to %d", cursor_x, cursor_y, hint);
+  if (hint == 0) {
+    // auto open surrounding fields.
+    for (int auto_y = cursor_y-1; auto_y <= cursor_y+1; auto_y++) {
+      for (int auto_x = cursor_x-1; auto_x <= cursor_x+1; auto_x++) {
+        if ( auto_x == cursor_x && auto_y == cursor_y ) {
           continue;
         }
-        // make sure we don't go OOB
-        if ( x >= 0 && x < PLAYFIELD_WIDTH && y >= 0 && y < PLAYFIELD_HEIGHT) {
-          if(minesweeper_state->minefield[x][y] == FieldMine) {
-              hint ++;
+        if ( auto_x >= 0 && auto_x < PLAYFIELD_WIDTH && auto_y >= 0 && auto_y < PLAYFIELD_HEIGHT) {
+          if (minesweeper_state->playfield[auto_x][auto_y] == TileTypeUncleared) {
+            play_move(minesweeper_state, auto_x, auto_y);
           }
         }
       }
     }
-    // 〜(￣▽￣〜) don't judge me (〜￣▽￣)〜
-    minesweeper_state->playfield[cursor_x][cursor_y] = hint;
-    minesweeper_state->fields_cleared++;
-    FURI_LOG_D("Minesweeper", "Setting %d,%d to %d", cursor_x, cursor_y, hint);
-    if (hint == 0) {
-      // auto open surrounding fields.
-      for (int auto_y = cursor_y-1; auto_y <= cursor_y+1; auto_y++) {
-        for (int auto_x = cursor_x-1; auto_x <= cursor_x+1; auto_x++) {
-          if ( auto_x == cursor_x && auto_y == cursor_y ) {
-            continue;
-          }
-          if ( auto_x >= 0 && auto_x < PLAYFIELD_WIDTH && auto_y >= 0 && auto_y < PLAYFIELD_HEIGHT) {
-            if (minesweeper_state->playfield[auto_x][auto_y] == TileTypeUncleared) {
-              play_move(minesweeper_state, auto_x, auto_y);
-            }
-          }
-        }
-      }
-    }
-    return true;
   }
+  return true;
 }
 
 static void minesweeper_state_init(Minesweeper* const minesweeper_state) {
