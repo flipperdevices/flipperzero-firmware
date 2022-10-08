@@ -138,11 +138,8 @@ FileBrowser* file_browser_alloc(FuriString* result_path) {
 
     browser->result_path = result_path;
 
-    with_view_model(
-        browser->view, (FileBrowserModel * model) {
-            items_array_init(model->items);
-            return false;
-        });
+    with_niew_model(
+        browser->view, FileBrowserModel * model, { items_array_init(model->items); }, false);
 
     return browser;
 }
@@ -150,11 +147,8 @@ FileBrowser* file_browser_alloc(FuriString* result_path) {
 void file_browser_free(FileBrowser* browser) {
     furi_assert(browser);
 
-    with_view_model(
-        browser->view, (FileBrowserModel * model) {
-            items_array_clear(model->items);
-            return false;
-        });
+    with_niew_model(
+        browser->view, FileBrowserModel * model, { items_array_clear(model->items); }, false);
 
     view_free(browser->view);
     free(browser);
@@ -177,12 +171,14 @@ void file_browser_configure(
     browser->skip_assets = skip_assets;
     browser->hide_ext = hide_ext;
 
-    with_view_model(
-        browser->view, (FileBrowserModel * model) {
+    with_niew_model(
+        browser->view,
+        FileBrowserModel * model,
+        {
             model->file_icon = file_icon;
             model->hide_ext = hide_ext;
-            return false;
-        });
+        },
+        false);
 }
 
 void file_browser_start(FileBrowser* browser, FuriString* path) {
@@ -198,15 +194,17 @@ void file_browser_start(FileBrowser* browser, FuriString* path) {
 void file_browser_stop(FileBrowser* browser) {
     furi_assert(browser);
     file_browser_worker_free(browser->worker);
-    with_view_model(
-        browser->view, (FileBrowserModel * model) {
+    with_niew_model(
+        browser->view,
+        FileBrowserModel * model,
+        {
             items_array_reset(model->items);
             model->item_cnt = 0;
             model->item_idx = 0;
             model->array_offset = 0;
             model->list_offset = 0;
-            return false;
-        });
+        },
+        false);
 }
 
 void file_browser_set_callback(FileBrowser* browser, FileBrowserCallback callback, void* context) {
@@ -256,8 +254,10 @@ static bool browser_is_list_load_required(FileBrowserModel* model) {
 static void browser_update_offset(FileBrowser* browser) {
     furi_assert(browser);
 
-    with_view_model(
-        browser->view, (FileBrowserModel * model) {
+    with_niew_model(
+        browser->view,
+        FileBrowserModel * model,
+        {
             uint16_t bounds = model->item_cnt > (LIST_ITEMS - 1) ? 2 : model->item_cnt;
 
             if((model->item_cnt > (LIST_ITEMS - 1)) &&
@@ -272,9 +272,8 @@ static void browser_update_offset(FileBrowser* browser) {
                 model->list_offset =
                     CLAMP(model->item_idx - 1, (int32_t)model->item_cnt - bounds, 0);
             }
-
-            return false;
-        });
+        },
+        false);
 }
 
 static void
@@ -284,8 +283,10 @@ static void
 
     int32_t load_offset = 0;
 
-    with_view_model(
-        browser->view, (FileBrowserModel * model) {
+    with_niew_model(
+        browser->view,
+        FileBrowserModel * model,
+        {
             items_array_reset(model->items);
             if(is_root) {
                 model->item_cnt = item_cnt;
@@ -303,8 +304,8 @@ static void
             model->is_root = is_root;
             model->list_loading = true;
             model->folder_loading = false;
-            return true;
-        });
+        },
+        true);
     browser_update_offset(browser);
 
     file_browser_worker_load(browser->worker, load_offset, ITEM_LIST_LEN_MAX);
@@ -318,8 +319,10 @@ static void browser_list_load_cb(void* context, uint32_t list_load_offset) {
     BrowserItem_t_init(&back_item);
     back_item.type = BrowserItemTypeBack;
 
-    with_view_model(
-        browser->view, (FileBrowserModel * model) {
+    with_niew_model(
+        browser->view,
+        FileBrowserModel * model,
+        {
             items_array_reset(model->items);
             model->array_offset = list_load_offset;
             if(!model->is_root) {
@@ -329,8 +332,8 @@ static void browser_list_load_cb(void* context, uint32_t list_load_offset) {
                     model->array_offset += 1;
                 }
             }
-            return false;
-        });
+        },
+        true);
 
     BrowserItem_t_clear(&back_item);
 }
@@ -370,23 +373,22 @@ static void
                 (browser->hide_ext) && (item.type == BrowserItemTypeFile));
         }
 
-        with_view_model(
-            browser->view, (FileBrowserModel * model) {
+        with_niew_model(
+            browser->view,
+            FileBrowserModel * model,
+            {
                 items_array_push_back(model->items, item);
                 // TODO: calculate if element is visible
-                return true;
-            });
+            },
+            true);
         furi_string_free(item.display_name);
         furi_string_free(item.path);
         if(item.custom_icon_data) {
             free(item.custom_icon_data);
         }
     } else {
-        with_view_model(
-            browser->view, (FileBrowserModel * model) {
-                model->list_loading = false;
-                return true;
-            });
+        with_niew_model(
+            browser->view, FileBrowserModel * model, { model->list_loading = false; }, true);
     }
 }
 
@@ -394,11 +396,8 @@ static void browser_long_load_cb(void* context) {
     furi_assert(context);
     FileBrowser* browser = (FileBrowser*)context;
 
-    with_view_model(
-        browser->view, (FileBrowserModel * model) {
-            model->folder_loading = true;
-            return true;
-        });
+    with_niew_model(
+        browser->view, FileBrowserModel * model, { model->folder_loading = true; }, true);
 }
 
 static void browser_draw_frame(Canvas* canvas, uint16_t idx, bool scrollbar) {
@@ -507,18 +506,17 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
     bool is_loading = false;
 
-    with_view_model(
-        browser->view, (FileBrowserModel * model) {
-            is_loading = model->folder_loading;
-            return false;
-        });
+    with_niew_model(
+        browser->view, FileBrowserModel * model, { is_loading = model->folder_loading; }, false);
 
     if(is_loading) {
         return false;
     } else if(event->key == InputKeyUp || event->key == InputKeyDown) {
         if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
-            with_view_model(
-                browser->view, (FileBrowserModel * model) {
+            with_niew_model(
+                browser->view,
+                FileBrowserModel * model,
+                {
                     if(event->key == InputKeyUp) {
                         model->item_idx =
                             ((model->item_idx - 1) + model->item_cnt) % model->item_cnt;
@@ -543,8 +541,8 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                                 browser->worker, load_offset, ITEM_LIST_LEN_MAX);
                         }
                     }
-                    return true;
-                });
+                },
+                true);
             browser_update_offset(browser);
             consumed = true;
         }
@@ -552,8 +550,10 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
         if(event->type == InputTypeShort) {
             BrowserItem_t* selected_item = NULL;
             int32_t select_index = 0;
-            with_view_model(
-                browser->view, (FileBrowserModel * model) {
+            with_niew_model(
+                browser->view,
+                FileBrowserModel * model,
+                {
                     if(browser_is_item_in_array(model, model->item_idx)) {
                         selected_item =
                             items_array_get(model->items, model->item_idx - model->array_offset);
@@ -562,8 +562,8 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                             select_index -= 1;
                         }
                     }
-                    return false;
-                });
+                },
+                false);
 
             if(selected_item) {
                 if(selected_item->type == BrowserItemTypeBack) {
@@ -583,11 +583,8 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
     } else if(event->key == InputKeyLeft) {
         if(event->type == InputTypeShort) {
             bool is_root = false;
-            with_view_model(
-                browser->view, (FileBrowserModel * model) {
-                    is_root = model->is_root;
-                    return false;
-                });
+            with_niew_model(
+                browser->view, FileBrowserModel * model, { is_root = model->is_root; }, false);
             if(!is_root) {
                 file_browser_worker_folder_exit(browser->worker);
             }

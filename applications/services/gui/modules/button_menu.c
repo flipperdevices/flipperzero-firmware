@@ -147,29 +147,33 @@ static void button_menu_view_draw_callback(Canvas* canvas, void* _model) {
 static void button_menu_process_up(ButtonMenu* button_menu) {
     furi_assert(button_menu);
 
-    with_view_model(
-        button_menu->view, (ButtonMenuModel * model) {
+    with_niew_model(
+        button_menu->view,
+        ButtonMenuModel * model,
+        {
             if(model->position > 0) {
                 model->position--;
             } else {
                 model->position = ButtonMenuItemArray_size(model->items) - 1;
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static void button_menu_process_down(ButtonMenu* button_menu) {
     furi_assert(button_menu);
 
-    with_view_model(
-        button_menu->view, (ButtonMenuModel * model) {
+    with_niew_model(
+        button_menu->view,
+        ButtonMenuModel * model,
+        {
             if(model->position < (ButtonMenuItemArray_size(model->items) - 1)) {
                 model->position++;
             } else {
                 model->position = 0;
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static void button_menu_process_ok(ButtonMenu* button_menu, InputType type) {
@@ -177,13 +181,15 @@ static void button_menu_process_ok(ButtonMenu* button_menu, InputType type) {
 
     ButtonMenuItem* item = NULL;
 
-    with_view_model(
-        button_menu->view, (ButtonMenuModel * model) {
+    with_niew_model(
+        button_menu->view,
+        ButtonMenuModel * model,
+        {
             if(model->position < (ButtonMenuItemArray_size(model->items))) {
                 item = ButtonMenuItemArray_get(model->items, model->position);
             }
-            return false;
-        });
+        },
+        false);
 
     if(item) {
         if(item->type == ButtonMenuItemTypeControl) {
@@ -247,23 +253,22 @@ View* button_menu_get_view(ButtonMenu* button_menu) {
 void button_menu_reset(ButtonMenu* button_menu) {
     furi_assert(button_menu);
 
-    with_view_model(
-        button_menu->view, (ButtonMenuModel * model) {
+    with_niew_model(
+        button_menu->view,
+        ButtonMenuModel * model,
+        {
             ButtonMenuItemArray_reset(model->items);
             model->position = 0;
             model->header = NULL;
-            return true;
-        });
+        },
+        true);
 }
 
 void button_menu_set_header(ButtonMenu* button_menu, const char* header) {
     furi_assert(button_menu);
 
-    with_view_model(
-        button_menu->view, (ButtonMenuModel * model) {
-            model->header = header;
-            return true;
-        });
+    with_niew_model(
+        button_menu->view, ButtonMenuModel * model, { model->header = header; }, true);
 }
 
 ButtonMenuItem* button_menu_add_item(
@@ -277,16 +282,18 @@ ButtonMenuItem* button_menu_add_item(
     furi_assert(label);
     furi_assert(button_menu);
 
-    with_view_model(
-        button_menu->view, (ButtonMenuModel * model) {
+    with_niew_model(
+        button_menu->view,
+        ButtonMenuModel * model,
+        {
             item = ButtonMenuItemArray_push_new(model->items);
             item->label = label;
             item->index = index;
             item->type = type;
             item->callback = callback;
             item->callback_context = callback_context;
-            return true;
-        });
+        },
+        true);
 
     return item;
 }
@@ -300,13 +307,15 @@ ButtonMenu* button_menu_alloc(void) {
     view_set_draw_callback(button_menu->view, button_menu_view_draw_callback);
     view_set_input_callback(button_menu->view, button_menu_view_input_callback);
 
-    with_view_model(
-        button_menu->view, (ButtonMenuModel * model) {
+    with_niew_model(
+        button_menu->view,
+        ButtonMenuModel * model,
+        {
             ButtonMenuItemArray_init(model->items);
             model->position = 0;
             model->header = NULL;
-            return true;
-        });
+        },
+        true);
 
     button_menu->freeze_input = false;
     return button_menu;
@@ -315,11 +324,11 @@ ButtonMenu* button_menu_alloc(void) {
 void button_menu_free(ButtonMenu* button_menu) {
     furi_assert(button_menu);
 
-    with_view_model(
-        button_menu->view, (ButtonMenuModel * model) {
-            ButtonMenuItemArray_clear(model->items);
-            return true;
-        });
+    with_niew_model(
+        button_menu->view,
+        ButtonMenuModel * model,
+        { ButtonMenuItemArray_clear(model->items); },
+        true);
     view_free(button_menu->view);
     free(button_menu);
 }
@@ -327,8 +336,10 @@ void button_menu_free(ButtonMenu* button_menu) {
 void button_menu_set_selected_item(ButtonMenu* button_menu, uint32_t index) {
     furi_assert(button_menu);
 
-    with_view_model(
-        button_menu->view, (ButtonMenuModel * model) {
+    with_niew_model(
+        button_menu->view,
+        ButtonMenuModel * model,
+        {
             uint8_t item_position = 0;
             ButtonMenuItemArray_it_t it;
             for(ButtonMenuItemArray_it(it, model->items); !ButtonMenuItemArray_end_p(it);
@@ -338,6 +349,6 @@ void button_menu_set_selected_item(ButtonMenu* button_menu, uint32_t index) {
                     break;
                 }
             }
-            return true;
-        });
+        },
+        true);
 }
