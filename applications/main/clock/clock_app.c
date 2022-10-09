@@ -18,9 +18,6 @@ static void clock_app_render_callback(Canvas* const canvas, void* ctx) {
 
     ClockState* state = ctx;
     if(furi_mutex_acquire(state->mutex, 200) != FuriStatusOk) {
-        FURI_LOG_D(TAG, "Can't obtain mutex, requeue render");
-        PluginEvent event = {.type = EventTypeTick};
-        furi_message_queue_put(state->event_queue, &event, 0);
         return;
     }
 
@@ -70,9 +67,6 @@ static void clock_app_render_callback(Canvas* const canvas, void* ctx) {
             state->datetime.month,
             state->datetime.year);
     }
-
-    furi_mutex_release(state->mutex);
-
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(canvas, 64, 28, AlignCenter, AlignCenter, time_string);
     canvas_set_font(canvas, FontSecondary);
@@ -80,6 +74,8 @@ static void clock_app_render_callback(Canvas* const canvas, void* ctx) {
 
     if(state->settings.time_format == H12)
         canvas_draw_str_aligned(canvas, 65, 12, AlignCenter, AlignCenter, meridian_string);
+
+    furi_mutex_release(state->mutex);
 }
 
 static void clock_app_state_init(ClockState* const state) {
@@ -93,7 +89,6 @@ static void clock_app_state_init(ClockState* const state) {
     furi_hal_rtc_get_datetime(&state->datetime);
 }
 
-// Runs every 1000ms by default
 static void clock_app_tick(void* ctx) {
     furi_assert(ctx);
     FuriMessageQueue* event_queue = ctx;
@@ -127,7 +122,7 @@ int32_t clock_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    furi_timer_start(timer, furi_kernel_get_tick_frequency());
+    furi_timer_start(timer, 500);
     FURI_LOG_D(TAG, "Timer started");
 
     // Main loop
@@ -135,10 +130,8 @@ int32_t clock_app(void* p) {
     for(bool processing = true; processing;) {
         FuriStatus event_status =
             furi_message_queue_get(plugin_state->event_queue, &event, FuriWaitForever);
-
-        furi_check(event_status);
-
-        if(furi_mutex_acquire(plugin_state->mutex, FuriWaitForever) != FuriStatusOk) continue;
+        furi_check(event_status == FuriStatusOk);
+        furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
         // press events
         if(event.type == EventTypeKey) {
             if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
