@@ -305,7 +305,6 @@ static bool game_won(Minesweeper* minesweeper_state) {
   dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
   dialog_message_set_text(message, furi_string_get_cstr(tempStr), 64, 32, AlignCenter, AlignCenter);
   dialog_message_set_buttons(message, NULL, "Play again", NULL);
-  // TODO: create icon
   dialog_message_set_icon(message, NULL, 72, 17);
 
   DialogMessageButton choice = dialog_message_show(dialogs, message);
@@ -317,7 +316,6 @@ static bool game_won(Minesweeper* minesweeper_state) {
 
 // returns false if the move loses the game - otherwise true
 static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y) {
-  TileType tile = minesweeper_state->playfield[cursor_x][cursor_y] 
   if (minesweeper_state->playfield[cursor_x][cursor_y] == TileTypeFlag) {
     // we're on a flagged field, do nothing
     return true;
@@ -363,16 +361,13 @@ static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y
             }
           }
         }
-      } 
+      }
       // we're done without hitting a mine - so return
       return true;
     }
   }
-  //if (minesweeper_state->playfield[cursor_x][cursor_y] != TileTypeUncleared) {
-  //    // we're on an already uncovered field
-  //    return true;
-  //}
-  // get number of surrounding mines.
+
+  // calculate number of surrounding mines.
   int hint = 0;
   for (int y = cursor_y-1; y <= cursor_y+1; y++) {
     for (int x = cursor_x-1; x <= cursor_x+1; x++) {
@@ -393,6 +388,7 @@ static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y
   minesweeper_state->fields_cleared++;
   FURI_LOG_D("Minesweeper", "Setting %d,%d to %d", cursor_x, cursor_y, hint);
   if (hint == 0) {
+    // the field is "empty"
     // auto open surrounding fields.
     for (int auto_y = cursor_y-1; auto_y <= cursor_y+1; auto_y++) {
       for (int auto_x = cursor_x-1; auto_x <= cursor_x+1; auto_x++) {
