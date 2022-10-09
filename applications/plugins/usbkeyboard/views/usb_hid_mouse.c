@@ -25,11 +25,11 @@ static void usb_hid_mouse_draw_callback(Canvas* canvas, void* context) {
     UsbHidMouseModel* model = context;
 
     // Header
-    if(model->connected) {
+    /*if(model->connected) {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
     } else {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
-    }
+    }*/
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, 17, 3, AlignLeft, AlignTop, "Mouse");
     canvas_set_font(canvas, FontSecondary);
@@ -102,7 +102,9 @@ static void usb_hid_mouse_draw_callback(Canvas* canvas, void* context) {
 
 static void usb_hid_mouse_process(UsbHidMouse* usb_hid_mouse, InputEvent* event) {
     with_view_model(
-        usb_hid_mouse->view, (UsbHidMouseModel * model) {
+        usb_hid_mouse->view,
+        UsbHidMouseModel * model,
+        {
             if(event->key == InputKeyBack) {
                 if(event->type == InputTypeShort) {
                     furi_hal_hid_mouse_press(HID_MOUSE_BTN_RIGHT);
@@ -166,8 +168,8 @@ static void usb_hid_mouse_process(UsbHidMouse* usb_hid_mouse, InputEvent* event)
                     model->up_pressed = false;
                 }
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static bool usb_hid_mouse_input_callback(InputEvent* event, void* context) {
@@ -176,8 +178,8 @@ static bool usb_hid_mouse_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
 
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
-		furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
-		furi_hal_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
+        furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
+        furi_hal_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
     } else {
         usb_hid_mouse_process(usb_hid_mouse, event);
         consumed = true;
@@ -193,12 +195,9 @@ UsbHidMouse* usb_hid_mouse_alloc() {
     view_allocate_model(usb_hid_mouse->view, ViewModelTypeLocking, sizeof(UsbHidMouseModel));
     view_set_draw_callback(usb_hid_mouse->view, usb_hid_mouse_draw_callback);
     view_set_input_callback(usb_hid_mouse->view, usb_hid_mouse_input_callback);
-	
-	with_view_model(
-		usb_hid_mouse->view, (UsbHidMouseModel* model) {
-		model->connected = true;
-		return true;
-	});
+
+    with_view_model(
+        usb_hid_mouse->view, UsbHidMouseModel * model, { model->connected = true; }, true);
 
     return usb_hid_mouse;
 }
@@ -213,4 +212,3 @@ View* usb_hid_mouse_get_view(UsbHidMouse* usb_hid_mouse) {
     furi_assert(usb_hid_mouse);
     return usb_hid_mouse->view;
 }
-

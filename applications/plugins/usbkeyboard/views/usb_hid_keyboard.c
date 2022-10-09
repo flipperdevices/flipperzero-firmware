@@ -241,7 +241,9 @@ static uint8_t usb_hid_keyboard_get_selected_key(UsbHidKeyboardModel* model) {
         return key.value;
 }
 
-static void usb_hid_keyboard_get_select_key(UsbHidKeyboardModel* model, UsbHidKeyboardPoint delta) {
+
+static void
+    usb_hid_keyboard_get_select_key(UsbHidKeyboardModel* model, UsbHidKeyboardPoint delta) {
     // Keep going until a valid spot is found, this allows for nulls and zero width keys in the map
     do {
         if(((int8_t)model->y) + delta.y < 0)
@@ -261,7 +263,9 @@ static void usb_hid_keyboard_get_select_key(UsbHidKeyboardModel* model, UsbHidKe
 
 static void usb_hid_keyboard_process(UsbHidKeyboard* usb_hid_keyboard, InputEvent* event) {
     with_view_model(
-        usb_hid_keyboard->view, (UsbHidKeyboardModel * model) {
+        usb_hid_keyboard->view,
+        UsbHidKeyboardModel * model,
+        {
             if(event->key == InputKeyOk) {
                 if(event->type == InputTypePress) {
                     model->ok_pressed = true;
@@ -322,8 +326,8 @@ static void usb_hid_keyboard_process(UsbHidKeyboard* usb_hid_keyboard, InputEven
                     usb_hid_keyboard_get_select_key(model, (UsbHidKeyboardPoint){.x = 1, .y = 0});
                 }
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static bool usb_hid_keyboard_input_callback(InputEvent* event, void* context) {
@@ -343,18 +347,13 @@ static bool usb_hid_keyboard_input_callback(InputEvent* event, void* context) {
 
 UsbHidKeyboard* usb_hid_keyboard_alloc() {
     UsbHidKeyboard* usb_hid_keyboard = malloc(sizeof(UsbHidKeyboard));
-	
     usb_hid_keyboard->view = view_alloc();
     view_set_context(usb_hid_keyboard->view, usb_hid_keyboard);
     view_allocate_model(usb_hid_keyboard->view, ViewModelTypeLocking, sizeof(UsbHidKeyboardModel));
     view_set_draw_callback(usb_hid_keyboard->view, usb_hid_keyboard_draw_callback);
     view_set_input_callback(usb_hid_keyboard->view, usb_hid_keyboard_input_callback);
-
-	with_view_model(
-	usb_hid_keyboard->view, (UsbHidKeyboardModel * model) {
-		model->connected = true;
-		return true;
-	});
+    with_view_model(
+        usb_hid_keyboard->view, UsbHidKeyboardModel * model, { model->connected = true; }, true);
 
     return usb_hid_keyboard;
 }

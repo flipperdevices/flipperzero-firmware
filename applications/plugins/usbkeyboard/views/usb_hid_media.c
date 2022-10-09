@@ -100,7 +100,9 @@ static void usb_hid_media_draw_callback(Canvas* canvas, void* context) {
 
 static void usb_hid_media_process_press(UsbHidMedia* usb_hid_media, InputEvent* event) {
     with_view_model(
-        usb_hid_media->view, (UsbHidMediaModel * model) {
+        usb_hid_media->view,
+        UsbHidMediaModel * model,
+        {
             if(event->key == InputKeyUp) {
                 model->up_pressed = true;
                 furi_hal_hid_consumer_key_press(HID_CONSUMER_VOLUME_INCREMENT);
@@ -117,13 +119,15 @@ static void usb_hid_media_process_press(UsbHidMedia* usb_hid_media, InputEvent* 
                 model->ok_pressed = true;
                 furi_hal_hid_consumer_key_press(HID_CONSUMER_PLAY_PAUSE);
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static void hid_media_process_release(UsbHidMedia* usb_hid_media, InputEvent* event) {
     with_view_model(
-        usb_hid_media->view, (UsbHidMediaModel * model) {
+        usb_hid_media->view,
+        UsbHidMediaModel * model,
+        {
             if(event->key == InputKeyUp) {
                 model->up_pressed = false;
                 furi_hal_hid_consumer_key_release(HID_CONSUMER_VOLUME_INCREMENT);
@@ -140,8 +144,8 @@ static void hid_media_process_release(UsbHidMedia* usb_hid_media, InputEvent* ev
                 model->ok_pressed = false;
                 furi_hal_hid_consumer_key_release(HID_CONSUMER_PLAY_PAUSE);
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static bool usb_hid_media_input_callback(InputEvent* event, void* context) {
@@ -172,11 +176,8 @@ UsbHidMedia* usb_hid_media_alloc() {
     view_set_draw_callback(usb_hid_media->view, usb_hid_media_draw_callback);
     view_set_input_callback(usb_hid_media->view, usb_hid_media_input_callback);
 
-	with_view_model(
-		usb_hid_media->view, (UsbHidMediaModel* model) {
-		model->connected = true;
-		return true;
-	});
+    with_view_model(
+        usb_hid_media->view, UsbHidMediaModel * model, { model->connected = true; }, true);
 
     return usb_hid_media;
 }
@@ -195,8 +196,5 @@ View* usb_hid_media_get_view(UsbHidMedia* usb_hid_media) {
 void usb_hid_media_set_connected_status(UsbHidMedia* usb_hid_media, bool connected) {
     furi_assert(usb_hid_media);
     with_view_model(
-        usb_hid_media->view, (UsbHidMediaModel * model) {
-            model->connected = connected;
-            return true;
-        });
+        usb_hid_media->view, UsbHidMediaModel * model, { model->connected = connected; }, true);
 }

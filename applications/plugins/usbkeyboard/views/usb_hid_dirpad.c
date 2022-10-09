@@ -99,7 +99,9 @@ static void usb_hid_dirpad_draw_callback(Canvas* canvas, void* context) {
 
 static void usb_hid_dirpad_process(UsbHidDirpad* usb_hid_dirpad, InputEvent* event) {
     with_view_model(
-        usb_hid_dirpad->view, (UsbHidDirpadModel * model) {
+        usb_hid_dirpad->view,
+        UsbHidDirpadModel * model,
+        {
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
                     model->up_pressed = true;
@@ -146,8 +148,8 @@ static void usb_hid_dirpad_process(UsbHidDirpad* usb_hid_dirpad, InputEvent* eve
                     furi_hal_hid_consumer_key_release(HID_CONSUMER_AC_BACK);
                 }
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static bool usb_hid_dirpad_input_callback(InputEvent* event, void* context) {
@@ -190,8 +192,5 @@ View* usb_hid_dirpad_get_view(UsbHidDirpad* usb_hid_dirpad) {
 void usb_hid_dirpad_set_connected_status(UsbHidDirpad* usb_hid_dirpad, bool connected) {
     furi_assert(usb_hid_dirpad);
     with_view_model(
-        usb_hid_dirpad->view, (UsbHidDirpadModel * model) {
-            model->connected = connected;
-            return true;
-        });
+        usb_hid_dirpad->view, UsbHidDirpadModel * model, { model->connected = connected; }, true);
 }

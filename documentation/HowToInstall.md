@@ -28,11 +28,11 @@
 <br>
 <br>
 
-## With qFlipper (1.2.0)
+## With qFlipper (1.2.0+)
 
-- Download qFlipper that allows `.tgz` installation [Download qFlipper 1.2.0 (official link)](https://update.flipperzero.one/builds/qFlipper/1.2.0/)
+- Download qFlipper that allows `.tgz` installation [Download qFlipper 1.2.1 (official link)](https://update.flipperzero.one/builds/qFlipper/1.2.1/)
 - Be sure you updated to latest official release before(only if installing for the first time), and verify that microSD card is installed
-- Open latest release page - [Releases](https://github.com/Eng1n33r/flipperzero-firmware/releases/latest)
+- Open latest release page - [Releases](https://github.com/DarkFlippers/unleashed-firmware/releases/latest)
 - Download `flipper-z-f7-update-(version).tgz`
 - Launch qFlipper
 - Connect your device and select `Install from file`
@@ -69,3 +69,6 @@
 - ### If you installed using .dfu - unpack files from archive `sd-card-(CURRENT VERSION).zip` to your microSD card
 <br>
 
+- ## [Read instructions how to use plugins and more](https://github.com/DarkFlippers/unleashed-firmware#instructions)
+
+- ## [How To: Configure Sub-GHz Remote App](https://github.com/DarkFlippers/unleashed-firmware/blob/dev/documentation/SubGHzRemotePlugin.md)

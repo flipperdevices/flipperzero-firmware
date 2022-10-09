@@ -128,7 +128,9 @@ static void bt_hid_keynote_draw_callback(Canvas* canvas, void* context) {
 
 static void bt_hid_keynote_process(BtHidKeynote* bt_hid_keynote, InputEvent* event) {
     with_view_model(
-        bt_hid_keynote->view, (BtHidKeynoteModel * model) {
+        bt_hid_keynote->view,
+        BtHidKeynoteModel * model,
+        {
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
                     model->up_pressed = true;
@@ -182,8 +184,8 @@ static void bt_hid_keynote_process(BtHidKeynote* bt_hid_keynote, InputEvent* eve
                     }
                 }
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static bool bt_hid_keynote_input_callback(InputEvent* event, void* context) {
@@ -232,8 +234,5 @@ View* bt_hid_keynote_get_view(BtHidKeynote* bt_hid_keynote) {
 void bt_hid_keynote_set_connected_status(BtHidKeynote* bt_hid_keynote, bool connected) {
     furi_assert(bt_hid_keynote);
     with_view_model(
-        bt_hid_keynote->view, (BtHidKeynoteModel * model) {
-            model->connected = connected;
-            return true;
-        });
+        bt_hid_keynote->view, BtHidKeynoteModel * model, { model->connected = connected; }, true);
 }
