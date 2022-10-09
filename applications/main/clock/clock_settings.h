@@ -13,41 +13,24 @@
 #define CLOCK_SETTINGS_MAGIC (0xC1)
 
 #define SAVE_CLOCK_SETTINGS(x) \
-    saved_struct_save(           \
-        CLOCK_SETTINGS_PATH,   \
-        (x),                     \
-        sizeof(ClockSettings), \
-        CLOCK_SETTINGS_MAGIC,  \
-        CLOCK_SETTINGS_VER)
+    saved_struct_save(         \
+        CLOCK_SETTINGS_PATH, (x), sizeof(ClockSettings), CLOCK_SETTINGS_MAGIC, CLOCK_SETTINGS_VER)
 
 #define LOAD_CLOCK_SETTINGS(x) \
-    saved_struct_load(           \
-        CLOCK_SETTINGS_PATH,   \
-        (x),                     \
-        sizeof(ClockSettings), \
-        CLOCK_SETTINGS_MAGIC,  \
-        CLOCK_SETTINGS_VER)
+    saved_struct_load(         \
+        CLOCK_SETTINGS_PATH, (x), sizeof(ClockSettings), CLOCK_SETTINGS_MAGIC, CLOCK_SETTINGS_VER)
 
 typedef enum {
-    Sound = 1,
-    Vibro = 2,
-    Silent = 3,
-} AlarmMode;
-
-typedef enum {
-    H12 = 1,
-    H24 = 2,
+    H12 = 0,
+    H24 = 1,
 } TimeFormat;
 
 typedef enum {
-    Iso = 1, // ISO 8601: yyyy-mm-dd
-    Rfc = 2, // RFC 5322: dd-mm-yyyy
+    Iso = 0, // ISO 8601: yyyy-mm-dd
+    Rfc = 1, // RFC 5322: dd-mm-yyyy
 } DateFormat;
 
 typedef struct {
     TimeFormat time_format;
     DateFormat date_format;
-    uint8_t increment_precision;
-    AlarmMode alarm_mode;
-    uint8_t alarm_sound;
 } ClockSettings;
