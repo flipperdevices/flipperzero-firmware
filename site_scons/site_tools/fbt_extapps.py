@@ -180,7 +180,7 @@ def validate_app_imports(target, source, env):
     if unresolved_syms:
         SCons.Warnings.warn(
             SCons.Warnings.LinkWarning,
-            f"{source[0].path}: app won't run. Unresolved symbols: {unresolved_syms}",
+            f"\033[93m{source[0].path}: app won't run. Unresolved symbols: \033[95m{unresolved_syms}\033[0m",
         )
 
 

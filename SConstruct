@@ -17,8 +17,12 @@ EnsurePythonVersion(3, 8)
 
 # This environment is created only for loading options & validating file/dir existence
 fbt_variables = SConscript("site_scons/commandline.scons")
-cmd_environment = Environment(tools=[], variables=fbt_variables)
-Help(fbt_variables.GenerateHelpText(cmd_environment))
+cmd_environment = Environment(
+    tools=[
+        ("fbt_help", {"vars": fbt_variables}),
+    ],
+    variables=fbt_variables,
+)
 
 # Building basic environment - tools, utility methods, cross-compilation
 # settings, gcc flags for Cortex-M4, basic builders and more
@@ -165,7 +169,7 @@ basic_dist = distenv.DistCommand("fw_dist", distenv["DIST_DEPENDS"])
 distenv.Default(basic_dist)
 
 dist_dir = distenv.GetProjetDirName()
-plugin_dist = [
+fap_dist = [
     distenv.Install(
         f"#/dist/{dist_dir}/apps/debug_elf",
         firmware_env["FW_EXTAPPS"]["debug"].values(),
@@ -175,9 +179,9 @@ plugin_dist = [
         for dist_entry in firmware_env["FW_EXTAPPS"]["dist"].values()
     ),
 ]
-Depends(plugin_dist, firmware_env["FW_EXTAPPS"]["validators"].values())
-Alias("plugin_dist", plugin_dist)
-# distenv.Default(plugin_dist)
+Depends(fap_dist, firmware_env["FW_EXTAPPS"]["validators"].values())
+Alias("fap_dist", fap_dist)
+# distenv.Default(fap_dist)
 
 plugin_resources_dist = list(
     distenv.Install(f"#/assets/resources/apps/{dist_entry[0]}", dist_entry[1])
