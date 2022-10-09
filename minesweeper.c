@@ -79,12 +79,12 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     if (minesweeper_state == NULL) {
       return;
     }
-    string_t tempStr;
-    string_init(tempStr);
-    string_printf(tempStr, "Mines: %d", MINECOUNT - minesweeper_state->flags_set);
+    FuriString* tempStr;
+    tempStr = furi_string_alloc();
+    furi_string_printf(tempStr, "Mines: %d", MINECOUNT - minesweeper_state->flags_set);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, string_get_cstr(tempStr));
-    string_clear(tempStr);
+    canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, furi_string_get_cstr(tempStr));
+    furi_string_free(tempStr);
     int seconds = 0;
     int minutes = 0; 
     if (minesweeper_state->game_started) {
@@ -93,9 +93,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
       minutes = (int) seconds / 60;
       seconds = seconds % 60;
     }
-    string_printf(tempStr, "%01d:%02d", minutes, seconds);
-    canvas_draw_str_aligned(canvas, 128, 0, AlignRight, AlignTop, string_get_cstr(tempStr));
-    string_clear(tempStr);
+    furi_string_printf(tempStr, "%01d:%02d", minutes, seconds);
+    canvas_draw_str_aligned(canvas, 128, 0, AlignRight, AlignTop, furi_string_get_cstr(tempStr));
+    furi_string_free(tempStr);
 
     for (int y = 0; y < PLAYFIELD_HEIGHT; y++) {
       for (int x = 0; x < PLAYFIELD_WIDTH; x++) {
@@ -217,7 +217,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         }
       }
     }
-    string_clear(tempStr);
+    furi_string_free(tempStr);
     release_mutex((ValueMutex*)ctx, minesweeper_state);
 }
 
@@ -285,8 +285,8 @@ static bool game_lost(Minesweeper* minesweeper_state) {
 static bool game_won(Minesweeper* minesweeper_state) {
   DialogsApp *dialogs = furi_record_open(RECORD_DIALOGS);
 
-  string_t tempStr;
-  string_init(tempStr);
+  FuriString* tempStr;
+  tempStr = furi_string_alloc();
 
   int seconds = 0;
   int minutes = 0; 
@@ -297,17 +297,16 @@ static bool game_won(Minesweeper* minesweeper_state) {
 
   DialogMessage* message = dialog_message_alloc();
   const char* header_text = "Game won!";
-  string_printf(tempStr, "Minefield cleared in %01d:%02d", minutes, seconds);
+  furi_string_cat_printf(tempStr, "Minefield cleared in %01d:%02d", minutes, seconds);
   dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
-  dialog_message_set_text(message, string_get_cstr(tempStr), 64, 32, AlignCenter, AlignCenter);
+  dialog_message_set_text(message, furi_string_get_cstr(tempStr), 64, 32, AlignCenter, AlignCenter);
   dialog_message_set_buttons(message, NULL, "Play again", NULL);
   // TODO: create icon
   dialog_message_set_icon(message, NULL, 72, 17);
 
   DialogMessageButton choice = dialog_message_show(dialogs, message);
   dialog_message_free(message);
-  string_clear(tempStr);
-  string_reset(tempStr);
+  furi_string_free(tempStr);
   furi_record_close(RECORD_DIALOGS);
   return choice == DialogMessageButtonCenter; 
 }
@@ -514,4 +513,3 @@ int32_t minesweeper_app(void* p) {
 
   return 0;
 }
-
