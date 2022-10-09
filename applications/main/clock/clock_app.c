@@ -122,7 +122,7 @@ int32_t clock_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    furi_timer_start(timer, 500);
+    furi_timer_start(timer, 100);
     FURI_LOG_D(TAG, "Timer started");
 
     // Main loop
