@@ -93,19 +93,16 @@ static void bt_hid_tiktok_process_press(BtHidTikTok* bt_hid_tiktok, InputEvent* 
         {
             if(event->key == InputKeyUp) {
                 model->up_pressed = true;
-                furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_INCREMENT);
             } else if(event->key == InputKeyDown) {
                 model->down_pressed = true;
-                furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_DECREMENT);
             } else if(event->key == InputKeyLeft) {
                 model->left_pressed = true;
-                furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_SCAN_PREVIOUS_TRACK);
+                furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_DECREMENT);
             } else if(event->key == InputKeyRight) {
                 model->right_pressed = true;
-                furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_SCAN_NEXT_TRACK);
+                furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_INCREMENT);
             } else if(event->key == InputKeyOk) {
                 model->ok_pressed = true;
-                furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_PLAY_PAUSE);
             }
         },
         true);
@@ -118,19 +115,16 @@ static void bt_hid_tiktok_process_release(BtHidTikTok* bt_hid_tiktok, InputEvent
         {
             if(event->key == InputKeyUp) {
                 model->up_pressed = false;
-                furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_INCREMENT);
             } else if(event->key == InputKeyDown) {
                 model->down_pressed = false;
-                furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_DECREMENT);
             } else if(event->key == InputKeyLeft) {
                 model->left_pressed = false;
-                furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_SCAN_PREVIOUS_TRACK);
+                furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_DECREMENT);
             } else if(event->key == InputKeyRight) {
                 model->right_pressed = false;
-                furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_SCAN_NEXT_TRACK);
+                furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_INCREMENT);
             } else if(event->key == InputKeyOk) {
                 model->ok_pressed = false;
-                furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_PLAY_PAUSE);
             }
         },
         true);
@@ -148,7 +142,20 @@ static bool bt_hid_tiktok_input_callback(InputEvent* event, void* context) {
         bt_hid_tiktok_process_release(bt_hid_tiktok, event);
         consumed = true;
     } else if(event->type == InputTypeShort) {
-        if(event->key == InputKeyBack) {
+        if(event->key == InputKeyOk) {
+            furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_LEFT);
+            furi_hal_bt_hid_mouse_release(HID_MOUSE_BTN_LEFT);
+            furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_LEFT);
+            furi_hal_bt_hid_mouse_release(HID_MOUSE_BTN_LEFT);
+        } else if(event->key == InputKeyUp) {
+            furi_hal_bt_hid_mouse_scroll(-80);
+            furi_hal_bt_hid_mouse_scroll(-80);
+            furi_hal_bt_hid_mouse_scroll(-30);
+        } else if(event->key == InputKeyDown) {
+            furi_hal_bt_hid_mouse_scroll(80);
+            furi_hal_bt_hid_mouse_scroll(80);
+            furi_hal_bt_hid_mouse_scroll(30);
+        } else if(event->key == InputKeyBack) {
             furi_hal_bt_hid_consumer_key_release_all();
         }
     }

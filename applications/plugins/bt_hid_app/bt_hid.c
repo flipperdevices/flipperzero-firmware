@@ -68,6 +68,7 @@ void bt_hid_connection_status_changed_callback(BtStatus status, void* context) {
     bt_hid_keyboard_set_connected_status(bt_hid->bt_hid_keyboard, connected);
     bt_hid_media_set_connected_status(bt_hid->bt_hid_media, connected);
     bt_hid_mouse_set_connected_status(bt_hid->bt_hid_mouse, connected);
+    bt_hid_tiktok_set_connected_status(bt_hid->bt_hid_tiktok, connected);
 }
 
 BtHid* bt_hid_app_alloc() {
