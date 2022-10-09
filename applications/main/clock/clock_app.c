@@ -137,9 +137,10 @@ int32_t clock_app(void* p) {
     // Main loop
     PluginEvent event;
     for(bool processing = true; processing;) {
-        FuriStatus event_status = furi_message_queue_get(plugin_state->event_queue, &event, 100);
+        FuriStatus event_status =
+            furi_message_queue_get(plugin_state->event_queue, &event, FuriWaitForever);
 
-        if(event_status != FuriStatusOk) continue;
+        furi_check(event_status);
 
         if(furi_mutex_acquire(plugin_state->mutex, FuriWaitForever) != FuriStatusOk) continue;
         // press events
