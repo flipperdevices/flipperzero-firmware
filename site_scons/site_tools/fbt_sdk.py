@@ -13,6 +13,27 @@ import pathlib
 from fbt.sdk import SdkCollector, SdkCache
 
 
+def ProcessSdkDepends(env, filename):
+    try:
+        with open(filename, "r") as fin:
+            lines = LogicalLines(fin).readlines()
+    except IOError:
+        return []
+
+    _, depends = lines[0].split(":", 1)
+    depends = depends.split()
+    depends.pop(0)  # remove the .c file
+    depends = list(
+        # Don't create dependency on non-existing files
+        # (e.g. when they were renamed since last build)
+        filter(
+            lambda file: file.exists(),
+            (env.File(f"#{path}") for path in depends),
+        )
+    )
+    return depends
+
+
 def prebuild_sdk_emitter(target, source, env):
     target.append(env.ChangeFileExtension(target[0], ".d"))
     target.append(env.ChangeFileExtension(target[0], ".i.c"))
@@ -165,6 +186,7 @@ def generate_sdk_symbols(source, target, env):
 
 
 def generate(env, **kw):
+    env.AddMethod(ProcessSdkDepends)
     env.Append(
         BUILDERS={
             "SDKPrebuilder": Builder(
