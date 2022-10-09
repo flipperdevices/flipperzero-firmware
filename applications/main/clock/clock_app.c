@@ -111,20 +111,9 @@ int32_t clock_app(void* p) {
     ClockState* plugin_state = malloc(sizeof(ClockState));
 
     plugin_state->event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
-    if(plugin_state->event_queue == NULL) {
-        FURI_LOG_E(TAG, "Cannot create event queue");
-        free(plugin_state);
-        return 255;
-    }
     FURI_LOG_D(TAG, "Event queue created");
 
     plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    if(plugin_state->mutex == NULL) {
-        FURI_LOG_E(TAG, "Cannot create mutex");
-        furi_message_queue_free(plugin_state->event_queue);
-        free(plugin_state);
-        return 255;
-    }
     FURI_LOG_D(TAG, "Mutex created");
 
     clock_state_init(plugin_state);
@@ -136,14 +125,6 @@ int32_t clock_app(void* p) {
 
     FuriTimer* timer =
         furi_timer_alloc(clock_tick, FuriTimerTypePeriodic, plugin_state->event_queue);
-
-    if(timer == NULL) {
-        FURI_LOG_E(TAG, "Cannot create timer");
-        furi_mutex_free(plugin_state->mutex);
-        furi_message_queue_free(plugin_state->event_queue);
-        free(plugin_state);
-        return 255;
-    }
     FURI_LOG_D(TAG, "Timer created");
 
     // Open GUI and register view_port
