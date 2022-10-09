@@ -35,7 +35,7 @@
  
  Donate if you want to support author ![ua](https://icons.iconarchive.com/icons/wikipedia/flags/16/UA-Ukraine-Flag-icon.png)
  
- [DeStream](https://destream.net/live/SequoiaSan/donate) or [Buy Me a Coffee](https://www.buymeacoffee.com/sequoiasan)
+ **[SUPPORT](https://github.com/SequoiaSan/SequoiaSan/blob/main/README.md)**
  
  # What do you need
 
