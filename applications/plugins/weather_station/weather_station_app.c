@@ -64,12 +64,9 @@ WeatherStationApp* weather_station_app_alloc() {
     weather_station_init(app, "AM650", 433920000, FuriHalSubGhzPresetOok650Async);
 
     app->txrx->worker = subghz_worker_alloc();
-    //app->txrx->fff_data = flipper_format_string_alloc();
-
     app->txrx->environment = subghz_environment_alloc();
     subghz_environment_set_protocol_registry(
         app->txrx->environment, (void*)&weather_station_protocol_registry);
-    //todo set protocol_registry
     app->txrx->receiver = subghz_receiver_alloc_init(app->txrx->environment);
     subghz_receiver_set_filter(app->txrx->receiver, SubGhzProtocolFlag_Decodable);
 
@@ -78,6 +75,8 @@ WeatherStationApp* weather_station_app_alloc() {
     subghz_worker_set_pair_callback(
         app->txrx->worker, (SubGhzWorkerPairCallback)subghz_receiver_decode);
     subghz_worker_set_context(app->txrx->worker, app->txrx->receiver);
+
+    furi_hal_power_suppress_charge_enter();
 
     scene_manager_next_scene(app->scene_manager, WeatherStationSceneStart);
 
@@ -104,8 +103,7 @@ void weather_station_app_free(WeatherStationApp* app) {
     subghz_receiver_free(app->txrx->receiver);
     subghz_environment_free(app->txrx->environment);
     subghz_worker_free(app->txrx->worker);
-    //flipper_format_free(app->txrx->fff_data);
-    //subghz_history_free(app->txrx->history);
+
     string_clear(app->txrx->preset->name);
     free(app->txrx->preset);
     free(app->txrx);
@@ -116,6 +114,8 @@ void weather_station_app_free(WeatherStationApp* app) {
 
     // Close records
     furi_record_close(RECORD_GUI);
+
+    furi_hal_power_suppress_charge_exit();
 
     free(app);
 }

@@ -39,6 +39,8 @@ void weather_station_scene_show_on_enter(void* context) {
     subghz_receiver_set_filter(app->txrx->receiver, SubGhzProtocolFlag_Decodable);
     subghz_receiver_set_rx_callback(
         app->txrx->receiver, weather_station_scene_show_callback, app);
+
+    //tx(app);
 }
 
 bool weather_station_scene_show_on_event(void* context, SceneManagerEvent event) {

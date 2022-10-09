@@ -1,7 +1,7 @@
 #include "protocol_items.h"
 
 const SubGhzProtocol* weather_station_protocol_registry_items[] = {
-    &subghz_protocol_princeton,
+    &ws_protocol_infactory,
 };
 
 const SubGhzProtocolRegistry weather_station_protocol_registry = {

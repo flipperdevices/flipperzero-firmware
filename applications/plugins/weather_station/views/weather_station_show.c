@@ -71,6 +71,12 @@ void weather_station_show_enter(void* context) {
 
 void weather_station_show_exit(void* context) {
     furi_assert(context);
+    WeatherStationShow* weather_station_show = context;
+    with_view_model(
+        weather_station_show->view, (WeatherStationShowModel * model) {
+            string_reset(model->key_str);
+            return true;
+        });
 }
 
 WeatherStationShow* weather_station_show_alloc() {

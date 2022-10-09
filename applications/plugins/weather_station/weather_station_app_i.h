@@ -100,5 +100,7 @@ void weather_station_idle(WeatherStationApp* app);
 void weather_station_rx_end(WeatherStationApp* app);
 void weather_station_sleep(WeatherStationApp* app);
 
+void tx(WeatherStationApp* app);
+
 
 

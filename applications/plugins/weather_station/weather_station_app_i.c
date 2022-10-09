@@ -1,6 +1,7 @@
 #include "weather_station_app_i.h"
 
 #define TAG "WeatherStation"
+#include <flipper_format/flipper_format_i.h>
 
 void weather_station_init(
     void* context,
@@ -66,4 +67,41 @@ void weather_station_sleep(WeatherStationApp* app) {
     furi_assert(app);
     furi_hal_subghz_sleep();
     app->txrx->txrx_state = WeatherStationTxRxStateSleep;
+}
+
+void tx(WeatherStationApp* app) {
+    string_t flipper_format_string;
+    string_init_printf(
+        flipper_format_string,
+        "Protocol: Princeton\n"
+        "Bit: 24\n"
+        "Key: 00 00 00 00 00 15 15 AA\n"
+        "TE: 400\n"
+        "Repeat: 20\n");
+    FlipperFormat* flipper_format = flipper_format_string_alloc();
+    Stream* stream = flipper_format_get_raw_stream(flipper_format);
+    stream_clean(stream);
+    stream_write_cstring(stream, string_get_cstr(flipper_format_string));
+
+    SubGhzTransmitter* transmitter =
+        subghz_transmitter_alloc_init(app->txrx->environment, "Princeton");
+    subghz_transmitter_deserialize(transmitter, flipper_format);
+    weather_station_begin(app, FuriHalSubGhzPresetOok650Async);
+
+    furi_hal_subghz_set_frequency_and_path(433920000);
+    furi_hal_power_suppress_charge_enter();
+    furi_hal_subghz_start_async_tx(subghz_transmitter_yield, transmitter);
+
+    while(!(furi_hal_subghz_is_async_tx_complete())) {
+        printf(".");
+        fflush(stdout);
+        furi_delay_ms(333);
+    }
+    furi_hal_subghz_stop_async_tx();
+    furi_hal_subghz_sleep();
+
+    furi_hal_power_suppress_charge_exit();
+
+    flipper_format_free(flipper_format);
+    subghz_transmitter_free(transmitter);
 }
