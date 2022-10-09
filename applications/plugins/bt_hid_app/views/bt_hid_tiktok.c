@@ -147,6 +147,7 @@ static bool bt_hid_tiktok_input_callback(InputEvent* event, void* context) {
             furi_hal_bt_hid_mouse_release(HID_MOUSE_BTN_LEFT);
             furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_LEFT);
             furi_hal_bt_hid_mouse_release(HID_MOUSE_BTN_LEFT);
+            consumed = true;
         } else if(event->key == InputKeyUp) {
             // Emulate up swipe
             furi_hal_bt_hid_mouse_scroll(-6);
@@ -154,6 +155,7 @@ static bool bt_hid_tiktok_input_callback(InputEvent* event, void* context) {
             furi_hal_bt_hid_mouse_scroll(-19);
             furi_hal_bt_hid_mouse_scroll(-12);
             furi_hal_bt_hid_mouse_scroll(-6);
+            consumed = true;
         } else if(event->key == InputKeyDown) {
             // Emulate down swipe
             furi_hal_bt_hid_mouse_scroll(6);
@@ -161,8 +163,10 @@ static bool bt_hid_tiktok_input_callback(InputEvent* event, void* context) {
             furi_hal_bt_hid_mouse_scroll(19);
             furi_hal_bt_hid_mouse_scroll(12);
             furi_hal_bt_hid_mouse_scroll(6);
+            consumed = true;
         } else if(event->key == InputKeyBack) {
             furi_hal_bt_hid_consumer_key_release_all();
+            consumed = true;
         }
     }
 

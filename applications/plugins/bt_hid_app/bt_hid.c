@@ -141,7 +141,8 @@ BtHid* bt_hid_app_alloc() {
 
     // TikTok view
     app->bt_hid_tiktok = bt_hid_tiktok_alloc();
-    view_set_previous_callback(bt_hid_mouse_get_view(app->bt_hid_mouse), bt_hid_exit_confirm_view);
+    view_set_previous_callback(
+        bt_hid_tiktok_get_view(app->bt_hid_tiktok), bt_hid_exit_confirm_view);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewTikTok, bt_hid_tiktok_get_view(app->bt_hid_tiktok));
 
