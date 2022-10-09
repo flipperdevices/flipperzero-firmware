@@ -368,7 +368,7 @@ static bool ducky_set_usb_id(BadUsbScript* bad_usb, const char* line) {
         }
         FURI_LOG_D(
             WORKER_TAG,
-            "set id: %04X:%04X mfr:%s product:%s",
+            "set id: %04lX:%04lX mfr:%s product:%s",
             bad_usb->hid_cfg.vid,
             bad_usb->hid_cfg.pid,
             bad_usb->hid_cfg.manuf,
@@ -434,7 +434,7 @@ static int32_t ducky_script_execute_next(BadUsbScript* bad_usb, File* script_fil
             return 0;
         } else if(delay_val < 0) { // Script error
             bad_usb->st.error_line = bad_usb->st.line_cur - 1;
-            FURI_LOG_E(WORKER_TAG, "Unknown command at line %lu", bad_usb->st.line_cur - 1);
+            FURI_LOG_E(WORKER_TAG, "Unknown command at line %u", bad_usb->st.line_cur - 1);
             return SCRIPT_STATE_ERROR;
         } else {
             return (delay_val + bad_usb->defdelay);

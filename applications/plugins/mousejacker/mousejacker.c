@@ -119,7 +119,7 @@ static bool open_ducky_script(Stream* stream, PluginState* plugin_state) {
     furi_record_close("dialogs");
     if(ret) {
         if(!file_stream_open(stream, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-            FURI_LOG_D(TAG, "Cannot open file \"%s\"", (path));
+            FURI_LOG_D(TAG, "Cannot open file \"%s\"", furi_string_get_cstr(path));
         } else {
             result = true;
         }
@@ -148,7 +148,7 @@ static bool open_addrs_file(Stream* stream) {
     furi_record_close("dialogs");
     if(ret) {
         if(!file_stream_open(stream, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-            FURI_LOG_D(TAG, "Cannot open file \"%s\"", (path));
+            FURI_LOG_D(TAG, "Cannot open file \"%s\"", furi_string_get_cstr(path));
         } else {
             result = true;
         }
