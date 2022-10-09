@@ -9,4 +9,9 @@ App(
     fap_icon="images/Dip8_10px.png",
     fap_category="Tools",
     fap_icon_assets="images",
+    fap_private_libs=[
+        Lib(
+            name="spi",
+        ),
+    ],
 )

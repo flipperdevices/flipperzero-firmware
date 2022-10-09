@@ -18,9 +18,13 @@ SPIMemApp* spi_mem_alloc(void) {
     SPIMemApp* instance = malloc(sizeof(SPIMemApp));
 
     instance->gui = furi_record_open(RECORD_GUI);
+    instance->notifications = furi_record_open(RECORD_NOTIFICATION);
     instance->view_dispatcher = view_dispatcher_alloc();
     instance->scene_manager = scene_manager_alloc(&spi_mem_scene_handlers, instance);
     instance->submenu = submenu_alloc();
+    instance->dialog_ex = dialog_ex_alloc();
+    instance->popup = popup_alloc();
+    instance->worker = spi_mem_worker_alloc();
 
     view_dispatcher_enable_queue(instance->view_dispatcher);
     view_dispatcher_set_event_callback_context(instance->view_dispatcher, instance);
@@ -32,15 +36,26 @@ SPIMemApp* spi_mem_alloc(void) {
         instance->view_dispatcher, instance->gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_add_view(
         instance->view_dispatcher, SPIMemViewSubmenu, submenu_get_view(instance->submenu));
+    view_dispatcher_add_view(
+        instance->view_dispatcher, SPIMemViewDialogEx, dialog_ex_get_view(instance->dialog_ex));
+    view_dispatcher_add_view(
+        instance->view_dispatcher, SPIMemViewPopup, popup_get_view(instance->popup));
+
     scene_manager_next_scene(instance->scene_manager, SPIMemSceneStart);
     return instance;
 }
 
 void spi_mem_free(SPIMemApp* instance) {
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewSubmenu);
+    view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewDialogEx);
+    view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewPopup);
     submenu_free(instance->submenu);
+    dialog_ex_free(instance->dialog_ex);
+    popup_free(instance->popup);
     view_dispatcher_free(instance->view_dispatcher);
     scene_manager_free(instance->scene_manager);
+    spi_mem_worker_free(instance->worker);
+    furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
     free(instance);
 }

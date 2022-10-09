@@ -8,7 +8,6 @@ typedef enum {
 
 static void spi_mem_scene_start_submenu_callback(void* context, uint32_t index) {
     SPIMemApp* app = context;
-
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
@@ -39,13 +38,15 @@ void spi_mem_scene_start_on_enter(void* context) {
 
 bool spi_mem_scene_start_on_event(void* context, SceneManagerEvent event) {
     SPIMemApp* app = context;
-    UNUSED(app);
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SPIMemSceneStartSubmenuIndexRead) {
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetect);
             consumed = true;
         } else if(event.event == SPIMemSceneStartSubmenuIndexSaved) {
+            consumed = true;
+        } else if(event.event == SPIMemSceneStartSubmenuIndexChipInfo) {
             consumed = true;
         }
         scene_manager_set_scene_state(app->scene_manager, SPIMemSceneStart, event.event);
@@ -56,6 +57,5 @@ bool spi_mem_scene_start_on_event(void* context, SceneManagerEvent event) {
 
 void spi_mem_scene_start_on_exit(void* context) {
     SPIMemApp* app = context;
-
     submenu_reset(app->submenu);
 }
