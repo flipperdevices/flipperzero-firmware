@@ -9,7 +9,7 @@ typedef enum {
     LineIndexTotalCount
 } LineIndex;
 
-static const char* const pwm_ch_names[] = {"TIM1(2)", "LPTIM2(4)"};
+static const char* const pwm_ch_names[] = {"2(A7)", "4(A4)"};
 
 struct SignalGenPwm {
     View* view;
@@ -31,8 +31,8 @@ typedef struct {
 #define ITEM_H 64 / 3
 #define ITEM_W 128
 
-#define VALUE_X 95
-#define VALUE_W 55
+#define VALUE_X 100
+#define VALUE_W 45
 
 #define FREQ_VALUE_X 62
 #define FREQ_MAX 1000000UL
@@ -44,12 +44,14 @@ static void pwm_set_config(SignalGenPwm* pwm) {
     uint8_t duty;
 
     with_view_model(
-        pwm->view, (SignalGenPwmViewModel * model) {
+        pwm->view,
+        SignalGenPwmViewModel * model,
+        {
             channel = model->channel_id;
             freq = model->freq;
             duty = model->duty;
-            return false;
-        });
+        },
+        false);
 
     furi_assert(pwm->callback);
     pwm->callback(channel, freq, duty, pwm->context);
@@ -126,11 +128,11 @@ static void signal_gen_pwm_draw_callback(Canvas* canvas, void* _model) {
 
     for(uint8_t line = 0; line < LineIndexTotalCount; line++) {
         if(line == LineIndexChannel) {
-            line_label = "PWM Channel";
+            line_label = "GPIO Pin";
         } else if(line == LineIndexFrequency) {
             line_label = "Frequency";
         } else if(line == LineIndexDuty) {
-            line_label = "Duty Cycle";
+            line_label = "Pulse width";
         }
 
         canvas_set_color(canvas, ColorBlack);
@@ -162,9 +164,9 @@ static void signal_gen_pwm_draw_callback(Canvas* canvas, void* _model) {
             canvas_set_font(canvas, FontSecondary);
 
             if(model->edit_mode) {
-                uint8_t icon_x = (FREQ_VALUE_X - 1) + (FREQ_DIGITS_NB - model->edit_digit - 1) * 6;
-                canvas_draw_icon(canvas, icon_x, text_y - 9, &I_SmallArrowUp_4x7);
-                canvas_draw_icon(canvas, icon_x, text_y + 4, &I_SmallArrowDown_4x7);
+                uint8_t icon_x = (FREQ_VALUE_X) + (FREQ_DIGITS_NB - model->edit_digit - 1) * 6;
+                canvas_draw_icon(canvas, icon_x, text_y - 9, &I_SmallArrowUp_3x5);
+                canvas_draw_icon(canvas, icon_x, text_y + 5, &I_SmallArrowDown_3x5);
             }
         } else if(line == LineIndexDuty) {
             snprintf(val_text, sizeof(val_text), "%d%%", model->duty);
@@ -188,7 +190,9 @@ static bool signal_gen_pwm_input_callback(InputEvent* event, void* context) {
     bool need_update = false;
 
     with_view_model(
-        pwm->view, (SignalGenPwmViewModel * model) {
+        pwm->view,
+        SignalGenPwmViewModel * model,
+        {
             if(model->edit_mode == false) {
                 if((event->type == InputTypeShort) || (event->type == InputTypeRepeat)) {
                     if(event->key == InputKeyUp) {
@@ -238,8 +242,8 @@ static bool signal_gen_pwm_input_callback(InputEvent* event, void* context) {
                     }
                 }
             }
-            return true;
-        });
+        },
+        true);
 
     if(need_update) {
         pwm_set_config(pwm);
@@ -279,22 +283,26 @@ void signal_gen_pwm_set_callback(
     furi_assert(callback);
 
     with_view_model(
-        pwm->view, (SignalGenPwmViewModel * model) {
+        pwm->view,
+        SignalGenPwmViewModel * model,
+        {
             UNUSED(model);
             pwm->callback = callback;
             pwm->context = context;
-            return false;
-        });
+        },
+        false);
 }
 
 void signal_gen_pwm_set_params(SignalGenPwm* pwm, uint8_t channel_id, uint32_t freq, uint8_t duty) {
     with_view_model(
-        pwm->view, (SignalGenPwmViewModel * model) {
+        pwm->view,
+        SignalGenPwmViewModel * model,
+        {
             model->channel_id = channel_id;
             model->freq = freq;
             model->duty = duty;
-            return true;
-        });
+        },
+        true);
 
     furi_assert(pwm->callback);
     pwm->callback(channel_id, freq, duty, pwm->context);

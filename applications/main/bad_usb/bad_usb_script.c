@@ -109,6 +109,7 @@ static const char ducky_cmd_string[] = {"STRING "};
 static const char ducky_cmd_defdelay_1[] = {"DEFAULT_DELAY "};
 static const char ducky_cmd_defdelay_2[] = {"DEFAULTDELAY "};
 static const char ducky_cmd_repeat[] = {"REPEAT "};
+static const char ducky_cmd_sysrq[] = {"SYSRQ "};
 
 static const char ducky_cmd_altchar[] = {"ALTCHAR "};
 static const char ducky_cmd_altstr_1[] = {"ALTSTRING "};
@@ -292,6 +293,14 @@ static int32_t ducky_parse_line(BadUsbScript* bad_usb, FuriString* line) {
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
         state = ducky_get_number(line_tmp, &bad_usb->repeat_cnt);
         return (state) ? (0) : SCRIPT_STATE_ERROR;
+    } else if(strncmp(line_tmp, ducky_cmd_sysrq, strlen(ducky_cmd_sysrq)) == 0) {
+        // SYSRQ
+        line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
+        uint16_t key = ducky_get_keycode(line_tmp, true);
+        furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
+        furi_hal_hid_kb_press(key);
+        furi_hal_hid_kb_release_all();
+        return (0);
     } else {
         // Special keys + modifiers
         uint16_t key = ducky_get_keycode(line_tmp, false);
@@ -323,7 +332,7 @@ static bool ducky_set_usb_id(BadUsbScript* bad_usb, const char* line) {
         }
         FURI_LOG_D(
             WORKER_TAG,
-            "set id: %04X:%04X mfr:%s product:%s",
+            "set id: %04lX:%04lX mfr:%s product:%s",
             bad_usb->hid_cfg.vid,
             bad_usb->hid_cfg.pid,
             bad_usb->hid_cfg.manuf,
@@ -388,7 +397,7 @@ static int32_t ducky_script_execute_next(BadUsbScript* bad_usb, File* script_fil
             return 0;
         } else if(delay_val < 0) { // Script error
             bad_usb->st.error_line = bad_usb->st.line_cur - 1;
-            FURI_LOG_E(WORKER_TAG, "Unknown command at line %lu", bad_usb->st.line_cur - 1);
+            FURI_LOG_E(WORKER_TAG, "Unknown command at line %u", bad_usb->st.line_cur - 1);
             return SCRIPT_STATE_ERROR;
         } else {
             return (delay_val + bad_usb->defdelay);
@@ -420,7 +429,7 @@ static int32_t ducky_script_execute_next(BadUsbScript* bad_usb, File* script_fil
                 delay_val = ducky_parse_line(bad_usb, bad_usb->line);
                 if(delay_val < 0) {
                     bad_usb->st.error_line = bad_usb->st.line_cur;
-                    FURI_LOG_E(WORKER_TAG, "Unknown command at line %lu", bad_usb->st.line_cur);
+                    FURI_LOG_E(WORKER_TAG, "Unknown command at line %u", bad_usb->st.line_cur);
                     return SCRIPT_STATE_ERROR;
                 } else {
                     return (delay_val + bad_usb->defdelay);

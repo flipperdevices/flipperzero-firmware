@@ -108,6 +108,10 @@ MusicPlayerWorker* music_player_worker_alloc() {
     return instance;
 }
 
+void music_player_worker_clear(MusicPlayerWorker* instance) {
+    NoteBlockArray_reset(instance->notes);
+}
+
 void music_player_worker_free(MusicPlayerWorker* instance) {
     furi_assert(instance);
     furi_thread_free(instance->thread);
@@ -129,6 +133,7 @@ static bool is_space(const char c) {
 
 static size_t extract_number(const char* string, uint32_t* number) {
     size_t ret = 0;
+    *number = 0;
     while(is_digit(*string)) {
         *number *= 10;
         *number += (*string - '0');
@@ -140,6 +145,7 @@ static size_t extract_number(const char* string, uint32_t* number) {
 
 static size_t extract_dots(const char* string, uint32_t* number) {
     size_t ret = 0;
+    *number = 0;
     while(*string == '.') {
         *number += 1;
         string++;
@@ -258,7 +264,7 @@ static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const c
             if(!is_valid) {
                 FURI_LOG_E(
                     TAG,
-                    "Invalid note: %u%c%c%u.%u",
+                    "Invalid note: %lu%c%c%lu.%lu",
                     duration,
                     note_char == '\0' ? '_' : note_char,
                     sharp_char == '\0' ? '_' : sharp_char,
@@ -281,7 +287,7 @@ static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const c
             if(music_player_worker_add_note(instance, semitone, duration, dots)) {
                 FURI_LOG_D(
                     TAG,
-                    "Added note: %c%c%u.%u = %u %u",
+                    "Added note: %c%c%lu.%lu = %u %lu",
                     note_char == '\0' ? '_' : note_char,
                     sharp_char == '\0' ? '_' : sharp_char,
                     octave,
@@ -291,7 +297,7 @@ static bool music_player_worker_parse_notes(MusicPlayerWorker* instance, const c
             } else {
                 FURI_LOG_E(
                     TAG,
-                    "Invalid note: %c%c%u.%u = %u %u",
+                    "Invalid note: %c%c%lu.%lu = %u %lu",
                     note_char == '\0' ? '_' : note_char,
                     sharp_char == '\0' ? '_' : sharp_char,
                     octave,
