@@ -213,7 +213,7 @@ static bool emv_select_ppse(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
 }
 
 static bool emv_select_app(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
-    app->aid_found = false;
+    app->app_started = false;
     const uint8_t emv_select_header[] = {
         0x00,
         0xA4, // SELECT application
@@ -236,7 +236,7 @@ static bool emv_select_app(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
     if(furi_hal_nfc_tx_rx(tx_rx, 300)) {
         emv_trace(tx_rx, "Start application answer:");
         if(emv_decode_response(tx_rx->rx_data, tx_rx->rx_bits / 8, app)) {
-            app->aid_found = true;
+            app->app_started = true;
         } else {
             FURI_LOG_E(TAG, "Failed to read PAN or PDOL");
         }
@@ -244,7 +244,7 @@ static bool emv_select_app(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
         FURI_LOG_E(TAG, "Failed to start application");
     }
 
-    return app->aid_found;
+    return app->app_started;
 }
 
 static uint16_t emv_prepare_pdol(APDU* dest, APDU* src) {

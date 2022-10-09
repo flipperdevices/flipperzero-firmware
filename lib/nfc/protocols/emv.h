@@ -45,7 +45,7 @@ typedef struct {
     uint8_t priority;
     uint8_t aid[16];
     uint8_t aid_len;
-    bool aid_found;
+    bool app_started;
     char name[32];
     bool name_found;
     uint8_t card_number[10];
