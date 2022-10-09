@@ -84,6 +84,7 @@ void desktop_settings_app_free(DesktopSettingsApp* app) {
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
     // Records
+    furi_record_close(RECORD_DIALOGS);
     furi_record_close(RECORD_GUI);
     free(app);
 }
