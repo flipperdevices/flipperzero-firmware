@@ -311,18 +311,21 @@ static bool game_won(Minesweeper* minesweeper_state) {
   return choice == DialogMessageButtonCenter;
 }
 
+// returns false if the move loses the game - otherwise true
 static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y) {
+  TileType tile = minesweeper_state->playfield[cursor_x][cursor_y] 
   if (minesweeper_state->playfield[cursor_x][cursor_y] == TileTypeFlag) {
-    // we're on an flagged field, do nothing
+    // we're on a flagged field, do nothing
     return true;
   }
   if (minesweeper_state->minefield[cursor_x][cursor_y] == FieldMine) {
-    // TODO: player loses!
+    // player loses - draw mine
     minesweeper_state->playfield[cursor_x][cursor_y] = TileTypeMine;
     return false;
   }
+
   if (minesweeper_state->playfield[cursor_x][cursor_y] >= TileType1 && minesweeper_state->playfield[cursor_x][cursor_y] <= TileType8) {
-    // click on an cleared cell with a number
+    // click on a cleared cell with a number
     // count the flags around
     int flags = 0;
     for (int y = cursor_y-1; y <= cursor_y+1; y++) {
@@ -356,13 +359,15 @@ static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y
             }
           }
         }
-      }
+      } 
+      // we're done without hitting a mine - so return
+      return true;
     }
   }
-  if (minesweeper_state->playfield[cursor_x][cursor_y] != TileTypeUncleared) {
-      // we're on an already uncovered field
-      return true;
-  }
+  //if (minesweeper_state->playfield[cursor_x][cursor_y] != TileTypeUncleared) {
+  //    // we're on an already uncovered field
+  //    return true;
+  //}
   // get number of surrounding mines.
   int hint = 0;
   for (int y = cursor_y-1; y <= cursor_y+1; y++) {
