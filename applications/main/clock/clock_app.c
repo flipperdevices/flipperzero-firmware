@@ -6,15 +6,13 @@
 
 #include "clock_app.h"
 
-static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
+static void clock_app_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
     PluginEvent event = {.type = EventTypeKey, .input = *input_event};
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void clock_render_callback(Canvas* const canvas, void* ctx) {
-    FURI_LOG_T(TAG, "clock_render_callback - start");
-
+static void clock_app_render_callback(Canvas* const canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
@@ -82,14 +80,12 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
 
     if(state->settings.time_format == H12)
         canvas_draw_str_aligned(canvas, 65, 12, AlignCenter, AlignCenter, meridian_string);
-
-    FURI_LOG_T(TAG, "clock_render_callback - end");
 }
 
-static void clock_state_init(ClockState* const state) {
+static void clock_app_state_init(ClockState* const state) {
     bool load_success = LOAD_CLOCK_SETTINGS(&state->settings);
     if(!load_success) {
-        state->settings = DEFAULT_SETTINGS;
+        FURI_LOG_D(TAG, "No setting file");
     }
     FURI_LOG_I(TAG, "Time format: %s", state->settings.time_format == H12 ? "12h" : "24h");
     FURI_LOG_I(
@@ -98,7 +94,7 @@ static void clock_state_init(ClockState* const state) {
 }
 
 // Runs every 1000ms by default
-static void clock_tick(void* ctx) {
+static void clock_app_tick(void* ctx) {
     furi_assert(ctx);
     FuriMessageQueue* event_queue = ctx;
     PluginEvent event = {.type = EventTypeTick};
@@ -116,15 +112,15 @@ int32_t clock_app(void* p) {
     plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     FURI_LOG_D(TAG, "Mutex created");
 
-    clock_state_init(plugin_state);
+    clock_app_state_init(plugin_state);
 
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, clock_render_callback, plugin_state);
-    view_port_input_callback_set(view_port, clock_input_callback, plugin_state->event_queue);
+    view_port_draw_callback_set(view_port, clock_app_render_callback, plugin_state);
+    view_port_input_callback_set(view_port, clock_app_input_callback, plugin_state->event_queue);
 
     FuriTimer* timer =
-        furi_timer_alloc(clock_tick, FuriTimerTypePeriodic, plugin_state->event_queue);
+        furi_timer_alloc(clock_app_tick, FuriTimerTypePeriodic, plugin_state->event_queue);
     FURI_LOG_D(TAG, "Timer created");
 
     // Open GUI and register view_port
