@@ -1,5 +1,6 @@
 #include "../subghz_i.h"
 #include <lib/subghz/protocols/keeloq.h>
+#include <lib/subghz/protocols/faac_slh.h>
 #include <lib/subghz/protocols/secplus_v1.h>
 #include <lib/subghz/protocols/secplus_v2.h>
 #include <lib/subghz/blocks/math.h>
@@ -68,43 +69,67 @@ void subghz_scene_set_type_on_enter(void* context) {
 
     submenu_add_item(
         subghz->submenu,
-        "Princeton_433",
+        "Faac SLH 868MHz",
+        SubmenuIndexFaacSLH_868,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "Faac SLH 433MHz",
+        SubmenuIndexFaacSLH_433,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "BFT Mitto 433MHz",
+        SubmenuIndexBFT,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "Princeton 433MHz",
         SubmenuIndexPricenton,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "Nice Flo 12bit_433",
+        "Nice Flo 12bit 433MHz",
         SubmenuIndexNiceFlo12bit,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "Nice Flo 24bit_433",
+        "Nice Flo 24bit 433MHz",
         SubmenuIndexNiceFlo24bit,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "CAME 12bit_433",
+        "CAME 12bit 433MHz",
         SubmenuIndexCAME12bit,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "CAME 24bit_433",
+        "CAME 24bit 433MHz",
         SubmenuIndexCAME24bit,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "Linear_300",
+        "BETT 433MHz",
+        SubmenuIndexBETT_433,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "Linear 300MHz",
         SubmenuIndexLinear_300_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "CAME TWEE",
+        "CAME TWEE 433MHz",
         SubmenuIndexCAMETwee,
         subghz_scene_set_type_submenu_callback,
         subghz);
@@ -114,49 +139,49 @@ void subghz_scene_set_type_on_enter(void* context) {
     //     subghz->submenu, "Nero Radio", SubmenuIndexNeroRadio, subghz_scene_set_type_submenu_callback, subghz);
     submenu_add_item(
         subghz->submenu,
-        "Gate TX_433",
+        "Gate TX 433MHz",
         SubmenuIndexGateTX,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "DoorHan_315",
+        "DoorHan 315MHz",
         SubmenuIndexDoorHan_315_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "DoorHan_433",
+        "DoorHan 433MHz",
         SubmenuIndexDoorHan_433_92,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "LiftMaster_315",
+        "Security+1.0 315MHz",
         SubmenuIndexLiftMaster_315_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "LiftMaster_390",
+        "Security+1.0 390MHz",
         SubmenuIndexLiftMaster_390_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "Security+2.0_310",
+        "Security+2.0 310MHz",
         SubmenuIndexSecPlus_v2_310_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "Security+2.0_315",
+        "Security+2.0 315MHz",
         SubmenuIndexSecPlus_v2_315_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "Security+2.0_390",
+        "Security+2.0 390MHz",
         SubmenuIndexSecPlus_v2_390_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
@@ -175,6 +200,15 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
         //ToDo Fix
         uint32_t key = subghz_random_serial();
         switch(event.event) {
+        case SubmenuIndexFaacSLH_868:
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSetFixFaac868);
+            break;
+        case SubmenuIndexFaacSLH_433:
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSetFixFaac433);
+            break;
+        case SubmenuIndexBFT:
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSetFixBft);
+            break;
         case SubmenuIndexPricenton:
             key = (key & 0x00FFFFF0) | 0x4; //btn 0x1, 0x2, 0x4, 0x8
             if(subghz_scene_set_type_submenu_gen_data_protocol(
@@ -216,6 +250,13 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
             key = (key & 0x3FF);
             if(subghz_scene_set_type_submenu_gen_data_protocol(
                    subghz, SUBGHZ_PROTOCOL_LINEAR_NAME, key, 10, 300000000, "AM650")) {
+                generated_protocol = true;
+            }
+            break;
+        case SubmenuIndexBETT_433:
+            key = (key & 0x0000FFF0);
+            if(subghz_scene_set_type_submenu_gen_data_protocol(
+                   subghz, SUBGHZ_PROTOCOL_BETT_NAME, key, 18, 433920000, "AM650")) {
                 generated_protocol = true;
             }
             break;

@@ -79,10 +79,18 @@ FIRMWARE_APPS = {
         # Debug
         # "debug_apps",
     ],
-    "unit_tests": [
+    "debug_pack": [
+        # Svc
         "basic_services",
-        "updater_app",
-        "unit_tests",
+        # Apps
+        "main_apps_default",
+        "system_apps",
+        # Settings
+        "settings_apps",
+        # Plugins
+        # "basic_plugins",
+        # Debug
+        # "debug_apps",
     ],
 }
 

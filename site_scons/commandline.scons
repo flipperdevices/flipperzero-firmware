@@ -90,6 +90,12 @@ vars.Add(
 )
 
 vars.Add(
+    "CUSTOM_FLIPPER_NAME",
+    help="Replaces OTP flipper name with custom string of 8 chars",
+    default="",
+)
+
+vars.Add(
     "UPDATE_VERSION_STRING",
     help="Version string for updater package",
     default="${DIST_SUFFIX}",
@@ -238,7 +244,7 @@ vars.Add(
         ("applications/system", False),
         ("applications/debug", False),
         ("applications/plugins", False),
-        ("applications/examples", False),
+        #("applications/examples", False),
         ("applications_user", False),
     ],
 )

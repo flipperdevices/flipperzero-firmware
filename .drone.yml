@@ -1,0 +1,70 @@
+---
+kind: pipeline
+type: docker
+name: "Build and release"
+
+steps:
+  - name: "Update submodules"
+    image: alpine/git
+    commands:
+      - git submodule sync
+      - git -c protocol.version=2 submodule update --init --force --recursive
+      - git submodule foreach git config --local gc.auto 0
+      - git log -1 --format='%H'
+
+  - name: "Compile and build"
+    image: pieceofsys/fztools
+    commands:
+      - export DIST_SUFFIX=${DRONE_TAG}
+      - export WORKFLOW_BRANCH_OR_TAG=dev-cfw
+      - ./fbt COMPACT=1 DEBUG=0 updater_package
+      - mkdir artifacts-default
+      - mv dist/f7-C/* artifacts-default/
+      - ls -laS artifacts-default
+      - ls -laS artifacts-default/f7-update-${DRONE_TAG}
+      - sed -i 's/(version)/'${DRONE_TAG}'/g' CHANGELOG.md
+      - echo '# [Install via Web Updater](https://my.flipp.dev/?url=https://b12abf54-1d92-4e84-bd69-b99d1c280f71.selcdn.net/flipper/flipper-z-f7-update-'${DRONE_TAG}'.tgz&channel=dev-cfw&version='${DRONE_TAG}')' >> CHANGELOG.md
+
+  - name: "Bundle self-update packages"
+    image: kramos/alpine-zip
+    commands:
+      - tar czpf artifacts-default/flipper-z-f7-update-${DRONE_TAG}.tgz -C artifacts-default f7-update-${DRONE_TAG}
+      - cp artifacts-default/flipper-z-f7-update-${DRONE_TAG}.tgz .
+      - zip -r artifacts-default/flipper-z-f7-update-${DRONE_TAG}.zip artifacts-default/f7-update-${DRONE_TAG}
+      - rm -rf artifacts-default/f7-update-${DRONE_TAG}
+      - ls -laS artifacts-default
+
+  - name: "Upload artifacts"
+    image: appleboy/drone-scp
+    settings:
+      host:
+        from_secret: dep_host
+      username:
+        from_secret: dep_user
+      password:
+        from_secret: dep_passwd
+      port:
+        from_secret: dep_port
+      target:
+        from_secret: dep_target
+      source: flipper-z-f7-update-${DRONE_TAG}.tgz
+
+  - name: "Do Github release"
+    image: plugins/github-release
+    settings:
+      github_url: https://github.com
+      api_key:
+        from_secret: github_apikey
+      files:
+        - artifacts-default/*.tgz
+        - artifacts-default/*.zip
+      title: ${DRONE_TAG}
+      note: CHANGELOG.md
+      checksum:
+        - md5
+        - sha1
+        - crc32
+
+trigger:
+  event:
+    - tag

@@ -710,7 +710,6 @@ static void nfc_worker_reader_analyzer_callback(ReaderAnalyzerEvent event, void*
 }
 
 void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
-    furi_assert(nfc_worker);
     furi_assert(nfc_worker->callback);
 
     FuriHalNfcTxRxContext tx_rx = {};

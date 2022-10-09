@@ -7,10 +7,11 @@
 #include "views/subghz_frequency_analyzer.h"
 #include "views/subghz_read_raw.h"
 
-#include "views/subghz_test_static.h"
 #include "views/subghz_test_carrier.h"
+#if FURI_DEBUG
+#include "views/subghz_test_static.h"
 #include "views/subghz_test_packet.h"
-
+#endif
 // #include <furi.h>
 // #include <furi_hal.h>
 #include <gui/gui.h>
@@ -21,17 +22,21 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/byte_input.h>
 #include <gui/modules/widget.h>
 
 #include <subghz/scenes/subghz_scene.h>
 
 #include <lib/subghz/subghz_worker.h>
 
+#include <lib/subghz/subghz_file_encoder_worker.h>
+
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
 
 #include "subghz_history.h"
 #include "subghz_setting.h"
+#include "subghz_last_settings.h"
 
 #include <gui/modules/variable_item_list.h>
 #include <lib/toolbox/path.h>
@@ -39,6 +44,18 @@
 #include "rpc/rpc_app.h"
 
 #define SUBGHZ_MAX_LEN_NAME 64
+
+typedef struct {
+    uint8_t fix[4];
+    uint8_t cnt[3];
+    uint8_t seed[4];
+} SecureData;
+
+typedef enum {
+    SubGhzDecodeRawStateStart,
+    SubGhzDecodeRawStateLoading,
+    SubGhzDecodeRawStateLoaded,
+} SubGhzDecodeRawState;
 
 struct SubGhzTxRx {
     SubGhzWorker* worker;
@@ -48,6 +65,7 @@ struct SubGhzTxRx {
     SubGhzTransmitter* transmitter;
     SubGhzProtocolDecoderBase* decoder_result;
     FlipperFormat* fff_data;
+    SecureData* secure_data;
 
     SubGhzPresetDefinition* preset;
     SubGhzHistory* history;
@@ -73,6 +91,7 @@ struct SubGhz {
     Submenu* submenu;
     Popup* popup;
     TextInput* text_input;
+    ByteInput* byte_input;
     Widget* widget;
     DialogsApp* dialogs;
     FuriString* file_path;
@@ -86,12 +105,22 @@ struct SubGhz {
 
     SubGhzFrequencyAnalyzer* subghz_frequency_analyzer;
     SubGhzReadRAW* subghz_read_raw;
-    SubGhzTestStatic* subghz_test_static;
+    bool raw_send_only;
     SubGhzTestCarrier* subghz_test_carrier;
+#if FURI_DEBUG
+    SubGhzTestStatic* subghz_test_static;
     SubGhzTestPacket* subghz_test_packet;
+#endif
     FuriString* error_str;
     SubGhzSetting* setting;
+    SubGhzLastSettings* last_settings;
     SubGhzLock lock;
+
+    bool in_decoder_scene;
+    bool in_decoder_scene_skip;
+
+    SubGhzDecodeRawState decode_raw_state;
+    SubGhzFileEncoderWorker* decode_raw_file_worker_encoder;
 
     void* rpc_ctx;
 };
@@ -128,3 +157,6 @@ void subghz_file_name_clear(SubGhz* subghz);
 bool subghz_path_is_file(FuriString* path);
 uint32_t subghz_random_serial(void);
 void subghz_hopper_update(SubGhz* subghz);
+
+extern const NotificationSequence subghz_sequence_rx;
+extern const NotificationSequence subghz_sequence_rx_locked;

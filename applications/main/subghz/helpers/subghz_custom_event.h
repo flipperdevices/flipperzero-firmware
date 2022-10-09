@@ -6,11 +6,15 @@ typedef enum {
     SubGhzCustomEventManagerSetRAW,
 
     //SubmenuIndex
+    SubmenuIndexFaacSLH_433,
+    SubmenuIndexFaacSLH_868,
+    SubmenuIndexBFT,
     SubmenuIndexPricenton,
     SubmenuIndexNiceFlo12bit,
     SubmenuIndexNiceFlo24bit,
     SubmenuIndexCAME12bit,
     SubmenuIndexCAME24bit,
+    SubmenuIndexBETT_433,
     SubmenuIndexCAMETwee,
     SubmenuIndexNeroSketch,
     SubmenuIndexNeroRadio,
@@ -72,4 +76,6 @@ typedef enum {
     SubGhzCustomEventViewTransmitterSendStart,
     SubGhzCustomEventViewTransmitterSendStop,
     SubGhzCustomEventViewTransmitterError,
+
+    SubGhzCustomEventByteInputDone,
 } SubGhzCustomEvent;

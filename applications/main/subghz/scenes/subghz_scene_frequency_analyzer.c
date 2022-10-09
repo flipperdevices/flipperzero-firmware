@@ -1,6 +1,7 @@
 #include "../subghz_i.h"
-#include "../views/subghz_frequency_analyzer.h"
 #include <dolphin/dolphin.h>
+
+#define TAG "SubGhzSceneFrequencyAnalyzer"
 
 void subghz_scene_frequency_analyzer_callback(SubGhzCustomEvent event, void* context) {
     furi_assert(context);
@@ -19,13 +20,21 @@ void subghz_scene_frequency_analyzer_on_enter(void* context) {
 bool subghz_scene_frequency_analyzer_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubGhzCustomEventSceneAnalyzerLock) {
-            notification_message(subghz->notifications, &sequence_set_green_255);
-            notification_message(subghz->notifications, &sequence_single_vibro);
-            notification_message(subghz->notifications, &sequence_display_backlight_on);
+        if(event.event == SubGhzCustomEventViewReceiverOK) {
+            uint32_t frequency =
+                subghz_frequency_analyzer_get_frequency_to_save(subghz->subghz_frequency_analyzer);
+            if(frequency > 0) {
+                subghz->last_settings->frequency = frequency;
+                subghz_last_settings_save(subghz->last_settings);
+            }
+
             return true;
-        } else if(event.event == SubGhzCustomEventSceneAnalyzerUnlock) {
-            notification_message(subghz->notifications, &sequence_reset_rgb);
+        } else if(event.event == SubGhzCustomEventViewReceiverUnlock) {
+            // Don't need to save, we already saved on short event
+#ifdef FURI_DEBUG
+            FURI_LOG_W(TAG, "Goto next scene!");
+#endif
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiver);
             return true;
         }
     }

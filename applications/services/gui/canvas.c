@@ -12,6 +12,7 @@ const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
     [FontSecondary] = {.leading_default = 11, .leading_min = 9, .height = 7, .descender = 2},
     [FontKeyboard] = {.leading_default = 11, .leading_min = 9, .height = 7, .descender = 2},
     [FontBigNumbers] = {.leading_default = 18, .leading_min = 16, .height = 15, .descender = 0},
+    [FontBatteryPercent] = {.leading_default = 11, .leading_min = 9, .height = 6, .descender = 0},
 };
 
 Canvas* canvas_init() {
@@ -132,6 +133,8 @@ void canvas_set_font(Canvas* canvas, Font font) {
         u8g2_SetFont(&canvas->fb, u8g2_font_profont11_mr);
     } else if(font == FontBigNumbers) {
         u8g2_SetFont(&canvas->fb, u8g2_font_profont22_tn);
+    } else if(font == FontBatteryPercent) {
+        u8g2_SetFont(&canvas->fb, u8g2_font_5x7_tf); //u8g2_font_micro_tr);
     } else {
         furi_crash(NULL);
     }
@@ -362,6 +365,23 @@ void canvas_draw_glyph(Canvas* canvas, uint8_t x, uint8_t y, uint16_t ch) {
     x += canvas->offset_x;
     y += canvas->offset_y;
     u8g2_DrawGlyph(&canvas->fb, x, y, ch);
+}
+
+void canvas_draw_icon_bitmap(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    int16_t w,
+    int16_t h,
+    const Icon* icon) {
+    furi_assert(canvas);
+    furi_assert(icon);
+
+    x += canvas->offset_x;
+    y += canvas->offset_y;
+    uint8_t* icon_data = NULL;
+    furi_hal_compress_icon_decode(icon_get_data(icon), &icon_data);
+    u8g2_DrawXBM(&canvas->fb, x, y, w, h, icon_data);
 }
 
 void canvas_set_bitmap_mode(Canvas* canvas, bool alpha) {

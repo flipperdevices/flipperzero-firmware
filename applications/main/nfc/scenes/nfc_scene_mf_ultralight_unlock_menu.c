@@ -20,13 +20,13 @@ void nfc_scene_mf_ultralight_unlock_menu_on_enter(void* context) {
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfUltralightUnlockMenu);
     submenu_add_item(
         submenu,
-        "Enter Password Manually",
+        "Enter PWD Manually",
         SubmenuIndexMfUlUnlockMenuManual,
         nfc_scene_mf_ultralight_unlock_menu_submenu_callback,
         nfc);
     submenu_add_item(
         submenu,
-        "Auth As Ameebo",
+        "Auth As Am11bo",
         SubmenuIndexMfUlUnlockMenuAmeebo,
         nfc_scene_mf_ultralight_unlock_menu_submenu_callback,
         nfc);
