@@ -167,7 +167,7 @@ bool subghz_protocol_encoder_princeton_deserialize(void* context, FlipperFormat*
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        subghz_protocol_encoder_princeton_get_upload(instance);
+        if(!subghz_protocol_encoder_princeton_get_upload(instance)) break;
         instance->encoder.is_running = true;
 
         res = true;
@@ -351,20 +351,20 @@ bool subghz_protocol_decoder_princeton_deserialize(void* context, FlipperFormat*
     return res;
 }
 
-void subghz_protocol_decoder_princeton_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_princeton_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderPrinceton* instance = context;
     subghz_protocol_princeton_check_remote_controller(&instance->generic);
     uint32_t data_rev = subghz_protocol_blocks_reverse_key(
         instance->generic.data, instance->generic.data_count_bit);
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
         "Key:0x%08lX\r\n"
         "Yek:0x%08lX\r\n"
         "Sn:0x%05lX Btn:%01X\r\n"
-        "Te:%dus\r\n",
+        "Te:%ldus\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         (uint32_t)(instance->generic.data & 0xFFFFFF),

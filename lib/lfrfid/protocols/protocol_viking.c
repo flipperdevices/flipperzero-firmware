@@ -157,6 +157,10 @@ bool protocol_viking_write_data(ProtocolViking* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
     bool result = false;
 
+    // Correct protocol data by redecoding
+    protocol_viking_encoder_start(protocol);
+    protocol_viking_decode(protocol);
+
     protocol_viking_encoder_start(protocol);
 
     if(request->write_type == LFRFIDWriteTypeT5577) {
@@ -171,9 +175,9 @@ bool protocol_viking_write_data(ProtocolViking* protocol, void* data) {
     return result;
 };
 
-void protocol_viking_render_data(ProtocolViking* protocol, string_t result) {
+void protocol_viking_render_data(ProtocolViking* protocol, FuriString* result) {
     uint32_t id = bit_lib_get_bits_32(protocol->data, 0, 32);
-    string_printf(result, "ID: %08lX\r\n", id);
+    furi_string_printf(result, "ID: %08lX\r\n", id);
 };
 
 const ProtocolBase protocol_viking = {
