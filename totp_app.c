@@ -7,9 +7,9 @@
 #include <flipper_format/flipper_format.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include "lib/base32/base32.h"
-#include "lib/list/list.h"
-#include "lib/config/config.h"
+#include "services/base32/base32.h"
+#include "services/list/list.h"
+#include "services/config/config.h"
 #include "types/plugin_state.h"
 #include "types/token_info.h"
 #include "types/plugin_event.h"

@@ -1,5 +1,4 @@
-#ifndef _TOTP_SCENE_AUTHENTICATE_H_
-#define _TOTP_SCENE_AUTHENTICATE_H_
+#pragma once
 
 #include <gui/gui.h>
 #include <furi.h>
@@ -13,5 +12,3 @@ void totp_scene_authenticate_render(Canvas* const canvas, PluginState* plugin_st
 bool totp_scene_authenticate_handle_event(PluginEvent* const event, PluginState* plugin_state);
 void totp_scene_authenticate_deactivate(PluginState* plugin_state);
 void totp_scene_authenticate_free(PluginState* plugin_state);
-
-#endif

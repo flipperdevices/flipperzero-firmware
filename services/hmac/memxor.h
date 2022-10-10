@@ -18,8 +18,7 @@
 /* Written by Simon Josefsson.  The interface was inspired by memxor
    in Niels Möller's Nettle. */
 
-#ifndef MEMXOR_H
-# define MEMXOR_H
+#pragma once
 
 #include <stddef.h>
 
@@ -27,5 +26,3 @@
    the result in DEST, of length N bytes.  Returns a pointer to
    DEST. */
 void *memxor (void */*restrict*/ dest, const void */*restrict*/ src, size_t n);
-
-#endif /* MEMXOR_H */

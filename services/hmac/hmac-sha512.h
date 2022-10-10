@@ -1,5 +1,4 @@
-#ifndef HMAC_SHA512_H
-#define HMAC_SHA512_H
+#pragma once
 
 #include <stddef.h>
 
@@ -10,5 +9,3 @@
    output to pre-allocated 64 byte minimum RESBUF buffer.  Return 0 on
    success.  */
 int hmac_sha512 (const void *key, size_t keylen, const void *in, size_t inlen, void *restrict resbuf);
-
-#endif /* HMAC_SHA512_H */

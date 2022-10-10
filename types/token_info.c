@@ -3,7 +3,7 @@
 #include "token_info.h"
 #include "stdlib.h"
 #include "common.h"
-#include "../lib/base32/base32.h"
+#include "../services/base32/base32.h"
 
 TokenInfo* token_info_alloc() {
     TokenInfo* tokenInfo = malloc(sizeof(TokenInfo));

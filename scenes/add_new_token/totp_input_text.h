@@ -1,5 +1,4 @@
-#ifndef _TOTP_INPUT_TEXT_H_
-#define _TOTP_INPUT_TEXT_H_
+#pragma once
 
 #include <gui/gui.h>
 #include <gui/view.h>
@@ -37,5 +36,3 @@ InputTextSceneState* totp_input_text_activate(InputTextSceneContext* context);
 void totp_input_text_render(Canvas* const canvas, InputTextSceneState* text_input_state);
 bool totp_input_text_handle_event(PluginEvent* const event, InputTextSceneState* text_input_state);
 void totp_input_text_free(InputTextSceneState* state);
-
-#endif

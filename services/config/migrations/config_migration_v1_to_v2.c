@@ -7,8 +7,7 @@
 bool totp_config_migrate_v1_to_v2(FlipperFormat* fff_data_file, FlipperFormat* fff_backup_data_file) {
     flipper_format_write_header_cstr(fff_data_file, CONFIG_FILE_HEADER, NEW_VERSION);
 
-    string_t temp_str;
-    string_init(temp_str);
+    FuriString* temp_str = furi_string_alloc();
 
     if (flipper_format_read_string(fff_backup_data_file, TOTP_CONFIG_KEY_BASE_IV, temp_str)) {
         flipper_format_write_string(fff_data_file, TOTP_CONFIG_KEY_BASE_IV, temp_str);
@@ -37,6 +36,6 @@ bool totp_config_migrate_v1_to_v2(FlipperFormat* fff_data_file, FlipperFormat* f
         flipper_format_write_uint32(fff_data_file, TOTP_CONFIG_KEY_TOKEN_DIGITS, &default_digits, 1);
     }
 
-    string_clear(temp_str);
+    furi_string_free(temp_str);
     return true;
 }

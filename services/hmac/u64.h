@@ -17,6 +17,8 @@
 
 /* Written by Paul Eggert.  */
 
+#pragma once
+
 #include <stdint.h>
 
 #ifndef _GL_U64_INLINE

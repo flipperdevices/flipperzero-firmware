@@ -1,6 +1,7 @@
 #include "config.h"
 #include <stdlib.h>
 #include <string.h>
+#include "../list/list.h"
 #include "../../types/common.h"
 #include "../../types/token_info.h"
 #include "migrations/config_migration_v1_to_v2.h"
@@ -39,12 +40,12 @@ char* token_info_get_algo_as_cstr(TokenInfo* token_info) {
     return NULL;
 }
 
-void token_info_set_algo_from_str(TokenInfo* token_info, string_t str) {
-    if (string_cmpi_str(str, TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME) == 0) {
+void token_info_set_algo_from_str(TokenInfo* token_info, FuriString* str) {
+    if (furi_string_cmpi_str(str, TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME) == 0) {
         token_info->algo = SHA1;
-    } else if (string_cmpi_str(str, TOTP_CONFIG_TOKEN_ALGO_SHA256_NAME)) {
+    } else if (furi_string_cmpi_str(str, TOTP_CONFIG_TOKEN_ALGO_SHA256_NAME)) {
         token_info->algo = SHA256;
-    } else if (string_cmpi_str(str, TOTP_CONFIG_TOKEN_ALGO_SHA512_NAME)) {
+    } else if (furi_string_cmpi_str(str, TOTP_CONFIG_TOKEN_ALGO_SHA512_NAME)) {
         token_info->algo = SHA512;
     }
 }
@@ -88,37 +89,36 @@ FlipperFormat* totp_open_config_file(Storage* storage) {
         flipper_format_write_comment_cstr(fff_data_file, " ");
         flipper_format_write_comment_cstr(fff_data_file, "Timezone offset in hours. Important note: do not put '+' sign for positive values");
         flipper_format_write_float(fff_data_file, TOTP_CONFIG_KEY_TIMEZONE, &tmp_tz, 1);
-        string_t temp_str;
-        string_init(temp_str);
+        FuriString* temp_str = furi_string_alloc();
         
         flipper_format_write_comment_cstr(fff_data_file, " ");
         flipper_format_write_comment_cstr(fff_data_file, "=== TOKEN SAMPLE BEGIN ===");
         flipper_format_write_comment_cstr(fff_data_file, " ");
         flipper_format_write_comment_cstr(fff_data_file, "# Token name which will be visible in the UI.");
-        string_printf(temp_str, "%s: Sample token name", TOTP_CONFIG_KEY_TOKEN_NAME);
+        furi_string_printf(temp_str, "%s: Sample token name", TOTP_CONFIG_KEY_TOKEN_NAME);
         flipper_format_write_comment(fff_data_file, temp_str);
         flipper_format_write_comment_cstr(fff_data_file, " ");
 
         flipper_format_write_comment_cstr(fff_data_file, "# Plain token secret without spaces, dashes and etc, just pure alpha-numeric characters. Important note: plain token will be encrypted and replaced by TOTP app");
-        string_printf(temp_str, "%s: plaintokensecret", TOTP_CONFIG_KEY_TOKEN_SECRET);
+        furi_string_printf(temp_str, "%s: plaintokensecret", TOTP_CONFIG_KEY_TOKEN_SECRET);
         flipper_format_write_comment(fff_data_file, temp_str);
         flipper_format_write_comment_cstr(fff_data_file, " ");
 
-        string_printf(temp_str, " # Token hashing algorithm to use during code generation. Supported options are %s, %s and %s. If you are not use which one to use - use %s", TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME, TOTP_CONFIG_TOKEN_ALGO_SHA256_NAME, TOTP_CONFIG_TOKEN_ALGO_SHA512_NAME, TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME);
+        furi_string_printf(temp_str, " # Token hashing algorithm to use during code generation. Supported options are %s, %s and %s. If you are not use which one to use - use %s", TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME, TOTP_CONFIG_TOKEN_ALGO_SHA256_NAME, TOTP_CONFIG_TOKEN_ALGO_SHA512_NAME, TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME);
         flipper_format_write_comment(fff_data_file, temp_str);
-        string_printf(temp_str, "%s: %s", TOTP_CONFIG_KEY_TOKEN_ALGO, TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME);
+        furi_string_printf(temp_str, "%s: %s", TOTP_CONFIG_KEY_TOKEN_ALGO, TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME);
         flipper_format_write_comment(fff_data_file, temp_str);
         flipper_format_write_comment_cstr(fff_data_file, " ");
 
         flipper_format_write_comment_cstr(fff_data_file, "# How many digits there should be in generated code. Available options are 6 and 8. Majority websites requires 6 digits code, however some rare websites wants to get 8 digits code. If you are not sure which one to use - use 6");
-        string_printf(temp_str, "%s: 6", TOTP_CONFIG_KEY_TOKEN_DIGITS);
+        furi_string_printf(temp_str, "%s: 6", TOTP_CONFIG_KEY_TOKEN_DIGITS);
         flipper_format_write_comment(fff_data_file, temp_str);
         flipper_format_write_comment_cstr(fff_data_file, " ");
 
         flipper_format_write_comment_cstr(fff_data_file, "=== TOKEN SAMPLE END ===");
         flipper_format_write_comment_cstr(fff_data_file, " ");
 
-        string_clear(temp_str);
+        furi_string_free(temp_str);
         if(!flipper_format_rewind(fff_data_file)) {
             totp_close_config_file(fff_data_file);
             FURI_LOG_E(LOGGING_TAG, "Rewind error");
@@ -163,13 +163,12 @@ void totp_config_file_load_base(PluginState* const plugin_state) {
 
     plugin_state->timezone_offset = 0;
 
-    string_t temp_str;
-    string_init(temp_str);
+    FuriString* temp_str = furi_string_alloc();
 
     uint32_t file_version;
     if(!flipper_format_read_header(fff_data_file, temp_str, &file_version)) {
         FURI_LOG_E(LOGGING_TAG, "Missing or incorrect header");
-        string_clear(temp_str);
+        furi_string_free(temp_str);
         return;
     }
 
@@ -227,7 +226,7 @@ void totp_config_file_load_base(PluginState* const plugin_state) {
         FURI_LOG_D(LOGGING_TAG, "Missing timezone offset information, defaulting to 0");
     }
 
-    string_clear(temp_str);
+    furi_string_free(temp_str);
     totp_close_config_file(fff_data_file);
     totp_close_storage();
 }
@@ -236,13 +235,12 @@ void totp_config_file_load_tokens(PluginState* const plugin_state) {
     Storage* storage = totp_open_storage();
     FlipperFormat* fff_data_file = totp_open_config_file(storage);
 
-    string_t temp_str;
+    FuriString* temp_str = furi_string_alloc();
     uint32_t temp_data32;
-    string_init(temp_str);
 
     if(!flipper_format_read_header(fff_data_file, temp_str, &temp_data32)) {
         FURI_LOG_E(LOGGING_TAG, "Missing or incorrect header");
-        string_clear(temp_str);
+        furi_string_free(temp_str);
         return;
     }
 
@@ -256,7 +254,7 @@ void totp_config_file_load_tokens(PluginState* const plugin_state) {
         
         TokenInfo* tokenInfo = token_info_alloc();
 
-        const char* temp_cstr = string_get_cstr(temp_str);
+        const char* temp_cstr = furi_string_get_cstr(temp_str);
         tokenInfo->name = (char *)malloc(strlen(temp_cstr) + 1);
         strcpy(tokenInfo->name, temp_cstr);
 
@@ -272,7 +270,7 @@ void totp_config_file_load_tokens(PluginState* const plugin_state) {
                 continue;
             }
 
-            temp_cstr = string_get_cstr(temp_str);
+            temp_cstr = furi_string_get_cstr(temp_str);
             token_info_set_secret(tokenInfo, temp_cstr, strlen(temp_cstr), &plugin_state->iv[0]);
             has_any_plain_secret = true;
             FURI_LOG_W(LOGGING_TAG, "Found token with plain secret");
@@ -315,7 +313,7 @@ void totp_config_file_load_tokens(PluginState* const plugin_state) {
 
     FURI_LOG_D(LOGGING_TAG, "Found %d tokens", index);
 
-    string_clear(temp_str);
+    furi_string_free(temp_str);
     totp_close_config_file(fff_data_file);
     totp_close_storage();
 

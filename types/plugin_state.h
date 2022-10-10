@@ -1,10 +1,9 @@
-#ifndef _TOTP_PLUGIN_STATE_H_
-#define _TOTP_PLUGIN_STATE_H_
+#pragma once
 
 #include <notification/notification.h>
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
-#include "../lib/list/list.h"
+#include "../services/list/list.h"
 #include "../scenes/totp_scenes_enum.h"
 
 #define TOTP_IV_SIZE 16
@@ -27,5 +26,3 @@ typedef struct {
     uint8_t iv[TOTP_IV_SIZE];
     uint8_t base_iv[TOTP_IV_SIZE];
 } PluginState;
-
-#endif

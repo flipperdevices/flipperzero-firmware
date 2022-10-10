@@ -1,5 +1,4 @@
-#ifndef _TOTP_H_
-#define _TOTP_H_
+#pragma once
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -40,5 +39,3 @@ extern const TOTP_ALGO TOTP_ALGO_SHA512;
         0 otherwise
 */
 uint32_t totp_at(TOTP_ALGO algo, uint8_t digits, const uint8_t* plain_secret, uint8_t plain_secret_length, uint64_t for_time, float timezone, uint8_t interval);
-
-#endif

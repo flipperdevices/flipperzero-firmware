@@ -1,11 +1,11 @@
 #include "totp_scene_token_menu.h"
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
-#include "../../lib/ui/ui_controls.h"
-#include "../../lib/ui/constants.h"
+#include "../../services/ui/ui_controls.h"
+#include "../../services/ui/constants.h"
 #include "../scene_director.h"
-#include "../../lib/config/config.h"
-#include "../../lib/list/list.h"
+#include "../../services/config/config.h"
+#include "../../services/list/list.h"
 #include "../../types/token_info.h"
 #include "../generate_token/totp_scene_generate_token.h"
 #include "../add_new_token/totp_scene_add_new_token.h"

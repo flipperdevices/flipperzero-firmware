@@ -1,5 +1,4 @@
-#ifndef _TOTP_CONFIG_CONSTANTS_FILE_H_
-#define _TOTP_CONFIG_CONSTANTS_FILE_H_
+#pragma once
 
 #define CONFIG_FILE_HEADER "Flipper TOTP plugin config file"
 #define CONFIG_FILE_ACTUAL_VERSION 2
@@ -15,5 +14,3 @@
 #define TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME "sha1"
 #define TOTP_CONFIG_TOKEN_ALGO_SHA256_NAME "sha256"
 #define TOTP_CONFIG_TOKEN_ALGO_SHA512_NAME "sha512"
-
-#endif

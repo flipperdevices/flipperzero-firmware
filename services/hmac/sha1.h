@@ -16,8 +16,7 @@
    You should have received a copy of the GNU Lesser General Public License
    along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
-#ifndef SHA1_H
-# define SHA1_H 1
+#pragma once
 
 # include <stdio.h>
 # include <stdint.h>
@@ -104,8 +103,6 @@ extern int sha1_stream (FILE *stream, void *resblock);
 # ifdef __cplusplus
 }
 # endif
-
-#endif
 
 /*
  * Hey Emacs!

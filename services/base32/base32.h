@@ -25,8 +25,7 @@
 // All functions return the number of output bytes or -1 on error. If the
 // output buffer is too small, the result will silently be truncated.
 
-#ifndef _BASE32_H_
-#define _BASE32_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -35,5 +34,3 @@ int base32_decode(const uint8_t *encoded, uint8_t *result, int bufSize)
 int base32_encode(const uint8_t *data, int length, uint8_t *result,
                   int bufSize)
     __attribute__((visibility("hidden")));
-
-#endif /* _BASE32_H_ */

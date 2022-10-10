@@ -1,5 +1,4 @@
-#ifndef _TOTP_TOKEN_INFO_H_
-#define _TOTP_TOKEN_INFO_H_
+#pragma once
 
 #include <inttypes.h>
 
@@ -26,5 +25,3 @@ TokenInfo* token_info_alloc();
 void token_info_free(TokenInfo* token_info);
 void token_info_set_secret(TokenInfo* token_info, const char* base32_token_secret, uint8_t token_secret_length, uint8_t* iv);
 uint8_t token_info_get_digits_count(TokenInfo* token_info);
-
-#endif
