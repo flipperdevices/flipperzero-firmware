@@ -2,7 +2,7 @@
 
 By default Flipper Authenticator will store all its settings in [`/ext/apps/Misc/totp.conf`](https://github.com/akopachov/flipper-zero_authenticator/blob/master/totp/services/config/config.c#:~:text=%23define%20CONFIG_FILE_DIRECTORY_PATH,totp.conf%22) file.
 
-File format is standard for Flipper Zero device. Each line has one seeting identified by Key, where key and value are separated by `:` symbol.
+File format is standard for Flipper Zero device. Each line has one setting identified by key, where key and value are separated by `:` symbol.
 
 ## Available keys
 
