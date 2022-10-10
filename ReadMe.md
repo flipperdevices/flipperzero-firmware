@@ -14,6 +14,8 @@
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-10 21:17 GMT`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-10 07:00 GMT`
 - Updated [TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
+- Assets: Includes New Dolphin Animations: [Blaster (By Sasquach)]
+- Assets: Includes New Dolphin Animations: [Flipper City (By Svaarich)]
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
