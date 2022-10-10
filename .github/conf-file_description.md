@@ -28,7 +28,8 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 **Default value:** none
 
-**Description:** Initialization vector (IV) which is getting generated randomly at first app start. It is used to setup encryption subsytem. Should not be updated manually. **Important note: changing or loosing this value will lead to incorrect decryption of all the encrypted data in the application and as a result it will not be possible to generate valid TOTP tokens**
+**Description:** Initialization vector (IV) which is getting generated randomly at first app start. It is used to setup encryption subsytem. Should not be updated manually.
+**Important note: changing or loosing this value will lead to incorrect decryption of all the encrypted data in the application and as a result it will not be possible to generate valid TOTP tokens**
 
 ### Crypto
 
@@ -36,7 +37,8 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 **Default value:** none
 
-**Description:** Used internally to verify user's PIN. Should not be changed manually. **Important note: changing or loosing this value will lead to incorrect PIN verification and it will not be possible to signin into app**
+**Description:** Used internally to verify user's PIN. Should not be changed manually.
+**Important note: changing or loosing this value will lead to incorrect PIN verification and it will not be possible to signin into app**
 
 ### Timezone
 
@@ -44,7 +46,8 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 **Default value:** 0.000000
 
-**Description:** Timezone offset **in hours**. Need to be modified manually. Because of Flipper Zero API doesn't provide an access to timezone offset it is necessary to set it manually for correct TOTP tokens generation. You may find you timezone offset (or another name is "UTC offset") [here](https://www.timeanddate.com/time/zone/timezone/utc) or on any other website found in google. **Important note: if you timezone offset is negative, use negative sign, like this `-2.0`, however if you timezone offset is positive DO NOT use explicit positive sign, just put offset without any sign like this `2.0`**
+**Description:** Timezone offset **in hours**. Need to be modified manually. Because of Flipper Zero API doesn't provide an access to timezone offset it is necessary to set it manually for correct TOTP tokens generation. You may find you timezone offset (or another name is "UTC offset") [here](https://www.timeanddate.com/time/zone/timezone/utc) or on any other website found in google.
+**Important note: if you timezone offset is negative, use negative sign, like this `-2.0`, however if you timezone offset is positive DO NOT use explicit positive sign, just put offset without any sign like this `2.0`**
 
 ### TokenName
 
@@ -60,7 +63,8 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 **Default value:** none
 
-**Description:** Token secret. It can be either an array of encrypted bytes OR pure unencrypted token secret. **Important note: if app finds pure unencrypted token in config file app will encrypt it and replace in a config file for security purposes**
+**Description:** Token secret. It can be either an array of encrypted bytes OR pure unencrypted token secret.
+**Important note: if app finds pure unencrypted token in config file app will encrypt it and replace in a config file for security purposes**
 
 ### TokenAlgo
 
