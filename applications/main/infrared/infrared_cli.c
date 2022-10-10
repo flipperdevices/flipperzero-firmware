@@ -6,12 +6,15 @@
 #include <toolbox/args.h>
 
 #include "infrared_signal.h"
+#include "infrared_i.h"
+#include "infrared_brute_force.h"
 
 #define INFRARED_CLI_BUF_SIZE 10
 
 static void infrared_cli_start_ir_rx(Cli* cli, FuriString* args);
 static void infrared_cli_start_ir_tx(Cli* cli, FuriString* args);
 static void infrared_cli_process_decode(Cli* cli, FuriString* args);
+static void infrared_cli_process_remote(Cli* cli, FuriString* args);
 
 static const struct {
     const char* cmd;
@@ -20,6 +23,7 @@ static const struct {
     {.cmd = "rx", .process_function = infrared_cli_start_ir_rx},
     {.cmd = "tx", .process_function = infrared_cli_start_ir_tx},
     {.cmd = "decode", .process_function = infrared_cli_process_decode},
+    {.cmd = "remote", .process_function = infrared_cli_process_remote},
 };
 
 static void signal_received_callback(void* context, InfraredWorkerSignal* received_signal) {
@@ -90,6 +94,7 @@ static void infrared_cli_print_usage(void) {
         INFRARED_MIN_FREQUENCY,
         INFRARED_MAX_FREQUENCY);
     printf("\tir decode <input_file> [<output_file>]\r\n");
+    printf("\tir remote <power/cup/cdown/vup/vdown\r\n");
 }
 
 static bool infrared_cli_parse_message(const char* str, InfraredSignal* signal) {
@@ -326,6 +331,43 @@ static void infrared_cli_process_decode(Cli* cli, FuriString* args) {
     flipper_format_free(input_file);
     if(output_file) flipper_format_free(output_file);
     furi_record_close(RECORD_STORAGE);
+}
+
+static void infrared_cli_process_remote(Cli* cli, FuriString* args) {
+    UNUSED(cli);
+
+    Infrared* infrared = malloc(sizeof(Infrared));
+    infrared->brute_force = infrared_brute_force_alloc();
+
+    FuriString* command;
+    command = furi_string_alloc();
+    args_read_string_and_trim(args, command);
+
+    if(furi_string_empty(command)) {
+        infrared_cli_print_usage();
+    } else {
+        printf("Bruteforcing: %s\r\n", furi_string_get_cstr(command));
+        infrared_brute_force_set_db_filename(
+            infrared->brute_force, EXT_PATH("infrared/assets/tv.ir"));
+
+        uint32_t i = 0;
+        if(strncmp(furi_string_get_cstr(command), "power", 5) == 0) {
+            infrared_brute_force_add_record(infrared->brute_force, i++, "POWER");
+        }
+
+        bool success = infrared_brute_force_calculate_messages(infrared->brute_force);
+        if(success) {
+            printf("Sending codes to tv...");
+            infrared_brute_force_start(infrared->brute_force, 0, &i);
+            infrared_brute_force_send_next(infrared->brute_force);
+        }
+
+        infrared_brute_force_stop(infrared->brute_force);
+        infrared_brute_force_free(infrared->brute_force);
+    }
+
+    printf("DEBUG: Finished!\r\n");
+    furi_string_free(command);
 }
 
 static void infrared_cli_start_ir(Cli* cli, FuriString* args, void* context) {
