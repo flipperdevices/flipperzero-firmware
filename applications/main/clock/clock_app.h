@@ -28,8 +28,12 @@ typedef struct {
 } PluginEvent;
 
 typedef struct {
-    ClockSettings settings;
     FuriHalRtcDateTime datetime;
+} ClockState;
+
+typedef struct {
+    ClockSettings settings;
     FuriMutex* mutex;
     FuriMessageQueue* event_queue;
-} ClockState;
+    ClockState* clock_state;
+} ClockApp;

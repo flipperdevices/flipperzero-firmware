@@ -16,16 +16,18 @@ static void clock_app_render_callback(Canvas* const canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
-    ClockState* state = ctx;
-    if(furi_mutex_acquire(state->mutex, 200) != FuriStatusOk) {
+    ClockApp* clock_app = ctx;
+    if(furi_mutex_acquire(clock_app->mutex, 200) != FuriStatusOk) {
         return;
     }
+
+    ClockState* state = clock_app->clock_state;
 
     char time_string[TIME_LEN];
     char date_string[DATE_LEN];
     char meridian_string[MERIDIAN_LEN];
 
-    if(state->settings.time_format == H24) {
+    if(clock_app->settings.time_format == H24) {
         snprintf(
             time_string,
             TIME_LEN,
@@ -50,7 +52,7 @@ static void clock_app_render_callback(Canvas* const canvas, void* ctx) {
             pm ? MERIDIAN_STRING_PM : MERIDIAN_STRING_AM);
     }
 
-    if(state->settings.date_format == Iso) {
+    if(clock_app->settings.date_format == Iso) {
         snprintf(
             date_string,
             DATE_LEN,
@@ -72,21 +74,21 @@ static void clock_app_render_callback(Canvas* const canvas, void* ctx) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 64, 42, AlignCenter, AlignTop, date_string);
 
-    if(state->settings.time_format == H12)
+    if(clock_app->settings.time_format == H12)
         canvas_draw_str_aligned(canvas, 65, 12, AlignCenter, AlignCenter, meridian_string);
 
-    furi_mutex_release(state->mutex);
+    furi_mutex_release(clock_app->mutex);
 }
 
-static void clock_app_state_init(ClockState* const state) {
-    bool load_success = LOAD_CLOCK_SETTINGS(&state->settings);
+static void clock_app_state_init(ClockApp* const clock_app) {
+    bool load_success = LOAD_CLOCK_SETTINGS(&clock_app->settings);
     if(!load_success) {
         FURI_LOG_D(TAG, "No setting file");
     }
-    FURI_LOG_I(TAG, "Time format: %s", state->settings.time_format == H12 ? "12h" : "24h");
+    FURI_LOG_I(TAG, "Time format: %s", clock_app->settings.time_format == H12 ? "12h" : "24h");
     FURI_LOG_I(
-        TAG, "Date format: %s", state->settings.date_format == Iso ? "ISO 8601" : "RFC 5322");
-    furi_hal_rtc_get_datetime(&state->datetime);
+        TAG, "Date format: %s", clock_app->settings.date_format == Iso ? "ISO 8601" : "RFC 5322");
+    furi_hal_rtc_get_datetime(&clock_app->clock_state->datetime);
 }
 
 static void clock_app_tick(void* ctx) {
@@ -99,23 +101,24 @@ static void clock_app_tick(void* ctx) {
 
 int32_t clock_app(void* p) {
     UNUSED(p);
-    ClockState* plugin_state = malloc(sizeof(ClockState));
+    ClockApp* clock_app = malloc(sizeof(ClockApp));
+    clock_app->clock_state = malloc(sizeof(ClockState));
 
-    plugin_state->event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
+    clock_app->event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     FURI_LOG_D(TAG, "Event queue created");
 
-    plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    clock_app->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     FURI_LOG_D(TAG, "Mutex created");
 
-    clock_app_state_init(plugin_state);
+    clock_app_state_init(clock_app);
 
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, clock_app_render_callback, plugin_state);
-    view_port_input_callback_set(view_port, clock_app_input_callback, plugin_state->event_queue);
+    view_port_draw_callback_set(view_port, clock_app_render_callback, clock_app);
+    view_port_input_callback_set(view_port, clock_app_input_callback, clock_app->event_queue);
 
     FuriTimer* timer =
-        furi_timer_alloc(clock_app_tick, FuriTimerTypePeriodic, plugin_state->event_queue);
+        furi_timer_alloc(clock_app_tick, FuriTimerTypePeriodic, clock_app->event_queue);
     FURI_LOG_D(TAG, "Timer created");
 
     // Open GUI and register view_port
@@ -129,9 +132,9 @@ int32_t clock_app(void* p) {
     PluginEvent event;
     for(bool processing = true; processing;) {
         FuriStatus event_status =
-            furi_message_queue_get(plugin_state->event_queue, &event, FuriWaitForever);
+            furi_message_queue_get(clock_app->event_queue, &event, FuriWaitForever);
         furi_check(event_status == FuriStatusOk);
-        furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
+        furi_mutex_acquire(clock_app->mutex, FuriWaitForever);
         // press events
         if(event.type == EventTypeKey) {
             if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
@@ -149,10 +152,10 @@ int32_t clock_app(void* p) {
                 }
             }
         } else if(event.type == EventTypeTick) {
-            furi_hal_rtc_get_datetime(&plugin_state->datetime);
+            furi_hal_rtc_get_datetime(&clock_app->clock_state->datetime);
         }
 
-        furi_mutex_release(plugin_state->mutex);
+        furi_mutex_release(clock_app->mutex);
         view_port_update(view_port);
     }
 
@@ -161,8 +164,9 @@ int32_t clock_app(void* p) {
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
     view_port_free(view_port);
-    furi_message_queue_free(plugin_state->event_queue);
-    furi_mutex_free(plugin_state->mutex);
-    free(plugin_state);
+    furi_message_queue_free(clock_app->event_queue);
+    furi_mutex_free(clock_app->mutex);
+    free(clock_app->clock_state);
+    free(clock_app);
     return 0;
 }
