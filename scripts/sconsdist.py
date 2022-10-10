@@ -60,10 +60,13 @@ class Main(App):
         obj_directory = join("build", project.dir)
 
         for filetype in ("elf", "bin", "dfu", "json", "zip"):
-            shutil.copyfile(
-                join(obj_directory, f"{project.project}.{filetype}"),
-                self.get_dist_filepath(self.get_project_filename(project, filetype)),
-            )
+            if exists(src_file := join(obj_directory, f"{project.project}.{filetype}")):
+                shutil.copyfile(
+                    src_file,
+                    self.get_dist_filepath(
+                        self.get_project_filename(project, filetype)
+                    ),
+                )
 
     def copy(self):
         self.projects = dict(
