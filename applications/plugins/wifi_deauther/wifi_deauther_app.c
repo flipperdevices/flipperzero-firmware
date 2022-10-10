@@ -55,7 +55,7 @@ WifideautherApp* wifi_deauther_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, WifideautherAppViewConsoleOutput, text_box_get_view(app->text_box));
     app->text_box_store = furi_string_alloc();
-    string_reserve(app->text_box_store, WIFI_deauther_TEXT_BOX_STORE_SIZE);
+    furi_string_reserve(app->text_box_store, WIFI_deauther_TEXT_BOX_STORE_SIZE);
 
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
