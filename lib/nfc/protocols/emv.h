@@ -57,6 +57,11 @@ typedef struct {
     APDU afl;
 } EmvApplication;
 
+typedef struct {
+    uint8_t aid[16];
+    uint8_t aid_len;
+} IdApplication;
+
 /** Read bank card data
  * @note Search EMV Application, start it, try to read AID, PAN, card name,
  * expiration date, currency and country codes
@@ -67,6 +72,8 @@ typedef struct {
  * @return true on success
  */
 bool emv_read_bank_card(FuriHalNfcTxRxContext* tx_rx, EmvApplication* emv_app);
+
+bool read_id_card(FuriHalNfcTxRxContext* tx_rx, IdApplication* id_app);
 
 /** Search for EMV Application
  *
