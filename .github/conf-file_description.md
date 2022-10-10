@@ -1,0 +1,101 @@
+# Flipper Authenticator config file description
+
+By default Flipper Authenticator will store all its settings in [`/ext/apps/Misc/totp.conf`](https://github.com/akopachov/flipper-zero_authenticator/blob/master/totp/services/config/config.c#:~:text=%23define%20CONFIG_FILE_DIRECTORY_PATH,totp.conf%22) file.
+
+File format is standard for Flipper Zero device. Each line has one seeting identified by Key, where key and value are separated by `:` symbol.
+
+## Available keys
+
+### Filetype
+
+**Type:** const string
+
+**Default value:** `Flipper TOTP plugin config file`
+
+**Description:** File type definition. Used internally. Should not be updated manually
+
+### Version
+
+**Type:** const unsigned int
+
+**Default value:** `2`
+
+**Description:** File version. Used internally. Should not be updated manually.
+
+### BaseIV
+
+**Type:** array of bytes
+
+**Default value:** none
+
+**Description:** Initialization vector (IV) which is getting generated randomly at first app start. It is used to setup encryption subsytem. Should not be updated manually. **Important note: changing or loosing this value will lead to incorrect decryption of all the encrypted data in the application and as a result it will not be possible to generate valid TOTP tokens**
+
+### Crypto
+
+**Type:** array of bytes
+
+**Default value:** none
+
+**Description:** Used internally to verify user's PIN. Should not be changed manually. **Important note: changing or loosing this value will lead to incorrect PIN verification and it will not be possible to signin into app**
+
+### Timezone
+
+**Type:** float
+
+**Default value:** 0.000000
+
+**Description:** Timezone offset **in hours**. Need to be modified manually. Because of Flipper Zero API doesn't provide an access to timezone offset it is necessary to set it manually for correct TOTP tokens generation. You may find you timezone offset (or another name is "UTC offset") [here](https://www.timeanddate.com/time/zone/timezone/utc) or on any other website found in google. **Important note: if you timezone offset is negative, use negative sign, like this `-2.0`, however if you timezone offset is positive DO NOT use explicit positive sign, just put offset without any sign like this `2.0`**
+
+### TokenName
+
+**Type:** string
+
+**Default value:** none
+
+**Description:** Token name which will be visible in the UI and used just to let user identify token. Can be modified manually.
+
+### TokenSecret
+
+**Type:** array of bytes OR string
+
+**Default value:** none
+
+**Description:** Token secret. It can be either an array of encrypted bytes OR pure unencrypted token secret. **Important note: if app finds pure unencrypted token in config file app will encrypt it and replace in a config file for security purposes**
+
+### TokenAlgo
+
+**Type:** enum (available options are: `sha1`, `sha256`, `sha512`)
+
+**Default value:** `sha1`
+
+**Description:** Token hashing algorithm to be used to generate TOTP code. If you don't know which to use - use `sha1`.
+
+### TokenDigits
+
+**Type:** enum (available options are `6` and `8`)
+
+**Default value:** `6`
+
+**Description:** Defines TOTP code length. If you don;t know which to use - use `6` as majority of websites requires 6-digits code.
+
+## Example config file
+
+```text
+Filetype: Flipper TOTP plugin config file
+Version: 2
+BaseIV: AD F2 DE F3 31 92 C8 77 4B EB BF FE 7D E1 27 51
+Crypto: FE CC 38 99 28 A9 28 6B BC E1 E3 92 B9 02 8A DF
+Timezone: 2.000000
+TokenName: Test plain
+TokenSecret: 95 6B CE 3E 2F 01 AF 29 B2 9A DE CA E7 EF F5 B1
+TokenAlgo: sha1
+TokenDigits: 6
+TokenName: Verifyr sha256
+TokenSecret: SSECIUHGRYRCRBCNKKXPUQBLBGEQZ3PKNA7TA7TQV6IL5WDFU62TNNT3NHKVWRCQWF4QTSE4IGLG4S7RGY3LDMVDZVMAGB2ARPG7XYQ
+TokenAlgo: sha256
+TokenDigits: 6
+TokenName: Verifyr sha512 8
+TokenSecret: 3KKGABEJ4CKS5AHBZBDHFFNKUZHN6D7TKUGI3T7SHEUBAMIAPBUBWQNCMEEGEJX2LF23PYAFUCSRNVQ2ENOQWLHISCOJQCU2SCND4CI
+TokenAlgo: sha512
+TokenDigits: 8
+```
