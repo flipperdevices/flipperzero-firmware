@@ -184,6 +184,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
                 loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/Snake.fap"));
             consumed = true;
             break;
+		}
         case DesktopMainEventOpenGameMenu: {
             LoaderStatus status = loader_start(
                 desktop->loader, FAP_LOADER_APP_NAME, EXT_PATH("/apps/Games/Snake.fap"));
