@@ -357,11 +357,19 @@ static void infrared_cli_process_remote(Cli* cli, FuriString* args) {
             printf("Sending codes to tv...\r\n");
 
             uint32_t record_count;
-            infrared_brute_force_start(brute_force, 0, &record_count);
-            infrared_brute_force_send_next(brute_force);
+            uint32_t index = 0;
+
+            bool running = infrared_brute_force_start(brute_force, index, &record_count);
+
+            while(running) {
+                running = infrared_brute_force_send_next(brute_force);
+            }
+
+            infrared_brute_force_stop(brute_force);
         }
     }
 
+    infrared_brute_force_free(brute_force);
     furi_string_free(command);
 }
 
