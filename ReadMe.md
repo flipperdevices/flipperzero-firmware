@@ -164,7 +164,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 <details>
   <summary><B>Open PRs Checked Out & Not Merged In Main</b></summary><br/>
   
-- [NFC: Display UL PWD_AUTH payload / ntag-pwd-capture (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
+- [NFC: Display UL PWD_AUTH payload / ntag-pwd-capture #1471 (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
 - [New frequency analyzer #1557 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1557)
 - [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 - [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
