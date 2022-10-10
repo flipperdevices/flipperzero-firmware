@@ -1,8 +1,5 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Telegram
-    url: https://t.me/flipperzero_unofficial
-    about: Unofficial Telegram chat
   - name: Discord
-    url: https://discord.unleashedflip.com
-    about: Unofficial Discord Community
+    url: https://discord.gg/gF2bBUzAFe
+    about: Flipper Uncensored Discord Community
