@@ -27,13 +27,13 @@ void weather_station_scene_show_on_enter(void* context) {
 
     string_clear(key_str);
 
-    if(app->txrx->txrx_state == WeatherStationTxRxStateRx) {
-        weather_station_rx_end(app);
+    if(app->txrx->txrx_state == WSTxRxStateRx) {
+        ws_rx_end(app);
     };
-    if((app->txrx->txrx_state == WeatherStationTxRxStateIDLE) ||
-       (app->txrx->txrx_state == WeatherStationTxRxStateSleep)) {
-        weather_station_begin(app, app->txrx->preset->preset);
-        weather_station_rx(app, app->txrx->preset->frequency);
+    if((app->txrx->txrx_state == WSTxRxStateIDLE) ||
+       (app->txrx->txrx_state == WSTxRxStateSleep)) {
+        ws_begin(app, NULL);
+        ws_rx(app, app->txrx->preset->frequency);
     }
 
     subghz_receiver_set_filter(app->txrx->receiver, SubGhzProtocolFlag_Decodable);
@@ -63,8 +63,8 @@ bool weather_station_scene_show_on_event(void* context, SceneManagerEvent event)
 
 void weather_station_scene_show_on_exit(void* context) {
     WeatherStationApp* app = context;
-    if(app->txrx->txrx_state == WeatherStationTxRxStateRx) {
-        weather_station_rx_end(app);
+    if(app->txrx->txrx_state == WSTxRxStateRx) {
+        ws_rx_end(app);
     };
     //variable_item_list_reset(app->var_item_list);
     //furi_hal_pwm_stop(app->pwm_ch);

@@ -1,0 +1,75 @@
+#pragma once
+
+typedef enum {
+    WSCustomEventManagerNoSet = 0,
+    WSCustomEventManagerSet,
+    WSCustomEventManagerSetRAW,
+
+    //SubmenuIndex
+    SubmenuIndexPricenton,
+    SubmenuIndexNiceFlo12bit,
+    SubmenuIndexNiceFlo24bit,
+    SubmenuIndexCAME12bit,
+    SubmenuIndexCAME24bit,
+    SubmenuIndexCAMETwee,
+    SubmenuIndexNeroSketch,
+    SubmenuIndexNeroRadio,
+    SubmenuIndexGateTX,
+    SubmenuIndexDoorHan_315_00,
+    SubmenuIndexDoorHan_433_92,
+    SubmenuIndexLinear_300_00,
+    SubmenuIndexLiftMaster_315_00,
+    SubmenuIndexLiftMaster_390_00,
+    SubmenuIndexSecPlus_v2_310_00,
+    SubmenuIndexSecPlus_v2_315_00,
+    SubmenuIndexSecPlus_v2_390_00,
+
+    //WSCustomEvent
+    WSCustomEventSceneDeleteSuccess = 100,
+    WSCustomEventSceneDelete,
+    WSCustomEventSceneDeleteRAW,
+    WSCustomEventSceneDeleteRAWBack,
+
+    WSCustomEventSceneReceiverInfoTxStart,
+    WSCustomEventSceneReceiverInfoTxStop,
+    WSCustomEventSceneReceiverInfoSave,
+    WSCustomEventSceneSaveName,
+    WSCustomEventSceneSaveSuccess,
+    WSCustomEventSceneShowErrorBack,
+    WSCustomEventSceneShowErrorOk,
+    WSCustomEventSceneShowErrorSub,
+    WSCustomEventSceneShowOnlyRX,
+    WSCustomEventSceneAnalyzerLock,
+    WSCustomEventSceneAnalyzerUnlock,
+    WSCustomEventSceneSettingLock,
+
+    WSCustomEventSceneExit,
+    WSCustomEventSceneStay,
+
+    WSCustomEventSceneRpcLoad,
+    WSCustomEventSceneRpcButtonPress,
+    WSCustomEventSceneRpcButtonRelease,
+    WSCustomEventSceneRpcSessionClose,
+
+    WSCustomEventViewReceiverOK,
+    WSCustomEventViewReceiverConfig,
+    WSCustomEventViewReceiverBack,
+    WSCustomEventViewReceiverOffDisplay,
+    WSCustomEventViewReceiverUnlock,
+
+    WSCustomEventViewReadRAWBack,
+    WSCustomEventViewReadRAWIDLE,
+    WSCustomEventViewReadRAWREC,
+    WSCustomEventViewReadRAWConfig,
+    WSCustomEventViewReadRAWErase,
+    WSCustomEventViewReadRAWSendStart,
+    WSCustomEventViewReadRAWSendStop,
+    WSCustomEventViewReadRAWSave,
+    WSCustomEventViewReadRAWTXRXStop,
+    WSCustomEventViewReadRAWMore,
+
+    WSCustomEventViewTransmitterBack,
+    WSCustomEventViewTransmitterSendStart,
+    WSCustomEventViewTransmitterSendStop,
+    WSCustomEventViewTransmitterError,
+} WSCustomEvent;

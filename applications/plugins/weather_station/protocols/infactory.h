@@ -8,7 +8,7 @@
 #include <lib/subghz/blocks/generic.h>
 #include <lib/subghz/blocks/math.h>
 
-#define WS_PROTOCOL_INFACTORY_NAME "Infactory"
+#define WS_PROTOCOL_INFACTORY_NAME "inFactory-TH"
 
 typedef struct WSProtocolDecoderInfactory WSProtocolDecoderInfactory;
 typedef struct WSProtocolEncoderInfactory WSProtocolEncoderInfactory;

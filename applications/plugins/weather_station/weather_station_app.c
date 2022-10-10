@@ -57,19 +57,28 @@ WeatherStationApp* weather_station_app_alloc() {
         WeatherStationViewShow,
         weather_station_show_get_view(app->weather_station_show));
 
-    //init Worker & Protocol
-    app->txrx = malloc(sizeof(WeatherStationTxRx));
-    app->txrx->preset = malloc(sizeof(WeatherStationPresetDefinition));
-    string_init(app->txrx->preset->name);
-    weather_station_init(app, "AM650", 433920000, FuriHalSubGhzPresetOok650Async);
+    // Receiver
+    app->ws_receiver = ws_view_receiver_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        WeatherStationViewReceiver,
+        ws_view_receiver_get_view(app->ws_receiver));
 
+    //init Worker & Protocol & History
+    app->lock = WSLockOff;
+    app->txrx = malloc(sizeof(WeatherStationTxRx));
+    app->txrx->preset = malloc(sizeof(SubGhzPresetDefinition));
+    string_init(app->txrx->preset->name);
+    ws_preset_init(app, "AM650", 433920000, NULL, 0);
+
+    app->txrx->history = ws_history_alloc();
     app->txrx->worker = subghz_worker_alloc();
     app->txrx->environment = subghz_environment_alloc();
     subghz_environment_set_protocol_registry(
         app->txrx->environment, (void*)&weather_station_protocol_registry);
     app->txrx->receiver = subghz_receiver_alloc_init(app->txrx->environment);
-    subghz_receiver_set_filter(app->txrx->receiver, SubGhzProtocolFlag_Decodable);
 
+    subghz_receiver_set_filter(app->txrx->receiver, SubGhzProtocolFlag_Decodable);
     subghz_worker_set_overrun_callback(
         app->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_receiver_reset);
     subghz_worker_set_pair_callback(
@@ -87,21 +96,27 @@ void weather_station_app_free(WeatherStationApp* app) {
     furi_assert(app);
 
     //CC1101 off
-    weather_station_sleep(app);
+    ws_sleep(app);
 
     // Views
     // view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewVarItemList);
     view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewSubmenu);
-    view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewShow);
 
     submenu_free(app->submenu);
+
+    view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewShow);
     weather_station_show_free(app->weather_station_show);
+
+    // Receiver
+    view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewReceiver);
+    ws_view_receiver_free(app->ws_receiver);
     // variable_item_list_free(app->var_item_list);
     //weather_station_pwm_free(app->pwm_view);
 
-    //Worker & Protocol
+    //Worker & Protocol & History
     subghz_receiver_free(app->txrx->receiver);
     subghz_environment_free(app->txrx->environment);
+    ws_history_free(app->txrx->history);
     subghz_worker_free(app->txrx->worker);
 
     string_clear(app->txrx->preset->name);

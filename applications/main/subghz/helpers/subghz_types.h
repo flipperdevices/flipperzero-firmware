@@ -71,11 +71,11 @@ typedef enum {
     SubGhzViewIdTestPacket,
 } SubGhzViewId;
 
-struct SubGhzPresetDefinition {
-    string_t name;
-    uint32_t frequency;
-    uint8_t* data;
-    size_t data_size;
-};
+// struct SubGhzPresetDefinition {
+//     string_t name;
+//     uint32_t frequency;
+//     uint8_t* data;
+//     size_t data_size;
+// };
 
-typedef struct SubGhzPresetDefinition SubGhzPresetDefinition;
+// typedef struct SubGhzPresetDefinition SubGhzPresetDefinition;

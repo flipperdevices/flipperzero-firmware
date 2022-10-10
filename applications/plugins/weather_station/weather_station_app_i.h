@@ -1,8 +1,8 @@
 #pragma once
 
-#include "scenes/weather_station_scene.h"
-#include "m-string.h"
+ #include "helpers/weather_station_types.h"
 
+#include "scenes/weather_station_scene.h"
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
@@ -10,31 +10,28 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/submenu.h>
 #include "views/weather_station_show.h"
+#include "views/weather_station_receiver.h"
 
 #include <lib/subghz/subghz_worker.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/registry.h>
 
+#include "weather_station_history.h"
+
 typedef struct WeatherStationApp WeatherStationApp;
 
-struct WeatherStationPresetDefinition {
-    string_t name;
-    uint32_t frequency;
-    FuriHalSubGhzPreset preset;
-    //uint8_t* data;
-    //size_t data_size;
-};
+// struct WeatherStationPresetDefinition {
+//     string_t name;
+//     uint32_t frequency;
+//     FuriHalSubGhzPreset preset;
+//     //uint8_t* data;
+//     //size_t data_size;
+// };
 
-typedef struct WeatherStationPresetDefinition WeatherStationPresetDefinition;
+// typedef struct WeatherStationPresetDefinition WeatherStationPresetDefinition;
+// //TODO  SubGhzPresetDefinition
 
-/** WeatherStationTxRx state */
-typedef enum {
-    WeatherStationTxRxStateIDLE,
-    WeatherStationTxRxStateRx,
-    WeatherStationTxRxStateTx,
-    WeatherStationTxRxStateSleep,
-} WeatherStationTxRxState;
 
 struct WeatherStationTxRx {
     SubGhzWorker* worker;
@@ -45,11 +42,11 @@ struct WeatherStationTxRx {
     //SubGhzProtocolDecoderBase* decoder_result;
     //FlipperFormat* fff_data;
 
-    WeatherStationPresetDefinition* preset;
+    SubGhzPresetDefinition* preset;
 
-    //SubGhzHistory* history;
-    //uint16_t idx_menu_chosen;
-    WeatherStationTxRxState txrx_state;
+    WSHistory* history;
+    uint16_t idx_menu_chosen;
+    WSTxRxState txrx_state;
     //SubGhzHopperState hopper_state;
     //uint8_t hopper_timeout;
     //uint8_t hopper_idx_frequency;
@@ -67,6 +64,8 @@ struct WeatherStationApp {
     // VariableItemList* var_item_list;
     Submenu* submenu;
     WeatherStationShow* weather_station_show;
+    WSReceiver* ws_receiver;
+    WSLock lock;
 
     // FuriHalClockMcoSourceId mco_src;
     // FuriHalClockMcoDivisorId mco_div;
@@ -77,28 +76,19 @@ struct WeatherStationApp {
     // uint8_t pwm_duty;
 };
 
-typedef enum {
-    //WeatherStationViewVarItemList,
-    WeatherStationViewSubmenu,
-    WeatherStationViewShow,
-} WeatherStationView;
-
-// typedef enum {
-//     //WeatherStationMcoEventUpdate,
-//     //WeatherStationPwmEventUpdate,
-//     //WeatherStationPwmEventChannelChange,
-// } WeatherStationCustomEvent;
-
-void weather_station_init(
+void ws_preset_init(
     void* context,
     const char* preset_name,
     uint32_t frequency,
-    FuriHalSubGhzPreset preset);
-void weather_station_begin(WeatherStationApp* app, FuriHalSubGhzPreset preset);
-uint32_t weather_station_rx(WeatherStationApp* app, uint32_t frequency);
-void weather_station_idle(WeatherStationApp* app);
-void weather_station_rx_end(WeatherStationApp* app);
-void weather_station_sleep(WeatherStationApp* app);
+    uint8_t* preset_data,
+    size_t preset_data_size);
+bool ws_set_preset(WeatherStationApp* app, const char* preset);
+void ws_get_frequency_modulation(WeatherStationApp* app, string_t frequency, string_t modulation);
+void ws_begin(WeatherStationApp* app, uint8_t* preset_data);
+uint32_t ws_rx(WeatherStationApp* app, uint32_t frequency);
+void ws_idle(WeatherStationApp* app);
+void ws_rx_end(WeatherStationApp* app);
+void ws_sleep(WeatherStationApp* app);
 
 void tx(WeatherStationApp* app);
 
