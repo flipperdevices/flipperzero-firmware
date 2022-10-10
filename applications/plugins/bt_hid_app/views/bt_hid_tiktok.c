@@ -144,8 +144,11 @@ static bool bt_hid_tiktok_input_callback(InputEvent* event, void* context) {
     } else if(event->type == InputTypeShort) {
         if(event->key == InputKeyOk) {
             furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_LEFT);
+            furi_delay_ms(50);
             furi_hal_bt_hid_mouse_release(HID_MOUSE_BTN_LEFT);
+            furi_delay_ms(50);
             furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_LEFT);
+            furi_delay_ms(50);
             furi_hal_bt_hid_mouse_release(HID_MOUSE_BTN_LEFT);
             consumed = true;
         } else if(event->key == InputKeyUp) {
