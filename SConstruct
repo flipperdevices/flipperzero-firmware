@@ -37,7 +37,13 @@ coreenv["ROOT_DIR"] = Dir(".")
 
 # Create a separate "dist" environment and add construction envs to it
 distenv = coreenv.Clone(
-    tools=["fbt_dist", "fbt_debugopts", "openocd", "blackmagic", "jflash"],
+    tools=[
+        "fbt_dist",
+        "fbt_debugopts",
+        "openocd",
+        "blackmagic",
+        "jflash",
+    ],
     ENV=os.environ,
 )
 

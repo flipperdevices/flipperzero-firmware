@@ -45,8 +45,12 @@ class Main(App):
     def get_project_filename(self, project, filetype):
         #  Temporary fix
         project_name = project.project
-        if project_name == "firmware" and filetype != "elf":
-            project_name = "full"
+        if project_name == "firmware":
+            if filetype == "zip":
+                project_name = "sdk"
+            elif filetype != "elf":
+                project_name = "full"
+
         return f"flipper-z-{self.target}-{project_name}-{self.args.suffix}.{filetype}"
 
     def get_dist_filepath(self, filename):
@@ -55,7 +59,7 @@ class Main(App):
     def copy_single_project(self, project):
         obj_directory = join("build", project.dir)
 
-        for filetype in ("elf", "bin", "dfu", "json"):
+        for filetype in ("elf", "bin", "dfu", "json", "zip"):
             shutil.copyfile(
                 join(obj_directory, f"{project.project}.{filetype}"),
                 self.get_dist_filepath(self.get_project_filename(project, filetype)),

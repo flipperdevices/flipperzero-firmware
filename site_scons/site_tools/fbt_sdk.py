@@ -102,13 +102,17 @@ class SdkTreeBuilder:
         actions = [
             Delete(self.sdk_deploy_dir),
             Mkdir(self.sdk_deploy_dir),
+            Copy(
+                self.sdk_deploy_dir.File("api_symbols.csv").path,
+                self.env["SDK_DEFINITION"],
+            ),
         ]
         actions += [Mkdir(d) for d in dirs_to_create]
 
         actions += [
-            Copy(
-                self.sdk_deploy_dir.File(h).path,
-                h,
+            Action(
+                Copy(self.sdk_deploy_dir.File(h).path, h),
+                f"Copy {h} to {self.sdk_deploy_dir}",
             )
             for h in self.header_depends
         ]
