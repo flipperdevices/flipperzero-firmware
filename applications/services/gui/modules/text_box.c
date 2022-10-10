@@ -1,6 +1,5 @@
 #include "text_box.h"
 #include "gui/canvas.h"
-#include <m-string.h>
 #include <furi.h>
 #include <gui/elements.h>
 #include <stdint.h>
@@ -12,7 +11,7 @@ struct TextBox {
 typedef struct {
     const char* text;
     char* text_pos;
-    string_t text_formatted;
+    FuriString* text_formatted;
     int32_t scroll_pos;
     int32_t scroll_num;
     TextBoxFont font;
@@ -22,20 +21,24 @@ typedef struct {
 
 static void text_box_process_down(TextBox* text_box) {
     with_view_model(
-        text_box->view, (TextBoxModel * model) {
+        text_box->view,
+        TextBoxModel * model,
+        {
             if(model->scroll_pos < model->scroll_num - 1) {
                 model->scroll_pos++;
                 // Search next line start
                 while(*model->text_pos++ != '\n')
                     ;
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static void text_box_process_up(TextBox* text_box) {
     with_view_model(
-        text_box->view, (TextBoxModel * model) {
+        text_box->view,
+        TextBoxModel * model,
+        {
             if(model->scroll_pos > 0) {
                 model->scroll_pos--;
                 // Reach last symbol of previous line
@@ -47,8 +50,8 @@ static void text_box_process_up(TextBox* text_box) {
                     model->text_pos++;
                 }
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static void text_box_insert_endline(Canvas* canvas, TextBoxModel* model) {
@@ -66,17 +69,17 @@ static void text_box_insert_endline(Canvas* canvas, TextBoxModel* model) {
             if(line_width + glyph_width > text_width) {
                 line_num++;
                 line_width = 0;
-                string_push_back(model->text_formatted, '\n');
+                furi_string_push_back(model->text_formatted, '\n');
             }
             line_width += glyph_width;
         } else {
             line_num++;
             line_width = 0;
         }
-        string_push_back(model->text_formatted, symb);
+        furi_string_push_back(model->text_formatted, symb);
     }
     line_num++;
-    model->text = string_get_cstr(model->text_formatted);
+    model->text = furi_string_get_cstr(model->text_formatted);
     model->text_pos = (char*)model->text;
     if(model->focus == TextBoxFocusEnd && line_num > 5) {
         // Set text position to 5th line from the end
@@ -138,13 +141,15 @@ TextBox* text_box_alloc() {
     view_set_input_callback(text_box->view, text_box_view_input_callback);
 
     with_view_model(
-        text_box->view, (TextBoxModel * model) {
+        text_box->view,
+        TextBoxModel * model,
+        {
             model->text = NULL;
-            string_init_set_str(model->text_formatted, "");
+            model->text_formatted = furi_string_alloc_set("");
             model->formatted = false;
             model->font = TextBoxFontText;
-            return true;
-        });
+        },
+        true);
 
     return text_box;
 }
@@ -153,10 +158,7 @@ void text_box_free(TextBox* text_box) {
     furi_assert(text_box);
 
     with_view_model(
-        text_box->view, (TextBoxModel * model) {
-            string_clear(model->text_formatted);
-            return true;
-        });
+        text_box->view, TextBoxModel * model, { furi_string_free(model->text_formatted); }, true);
     view_free(text_box->view);
     free(text_box);
 }
@@ -170,13 +172,15 @@ void text_box_reset(TextBox* text_box) {
     furi_assert(text_box);
 
     with_view_model(
-        text_box->view, (TextBoxModel * model) {
+        text_box->view,
+        TextBoxModel * model,
+        {
             model->text = NULL;
-            string_set_str(model->text_formatted, "");
+            furi_string_set(model->text_formatted, "");
             model->font = TextBoxFontText;
             model->focus = TextBoxFocusStart;
-            return true;
-        });
+        },
+        true);
 }
 
 void text_box_set_text(TextBox* text_box, const char* text) {
@@ -184,31 +188,27 @@ void text_box_set_text(TextBox* text_box, const char* text) {
     furi_assert(text);
 
     with_view_model(
-        text_box->view, (TextBoxModel * model) {
+        text_box->view,
+        TextBoxModel * model,
+        {
             model->text = text;
-            string_reset(model->text_formatted);
-            string_reserve(model->text_formatted, strlen(text));
+            furi_string_reset(model->text_formatted);
+            furi_string_reserve(model->text_formatted, strlen(text));
             model->formatted = false;
-            return true;
-        });
+        },
+        true);
 }
 
 void text_box_set_font(TextBox* text_box, TextBoxFont font) {
     furi_assert(text_box);
 
     with_view_model(
-        text_box->view, (TextBoxModel * model) {
-            model->font = font;
-            return true;
-        });
+        text_box->view, TextBoxModel * model, { model->font = font; }, true);
 }
 
 void text_box_set_focus(TextBox* text_box, TextBoxFocus focus) {
     furi_assert(text_box);
 
     with_view_model(
-        text_box->view, (TextBoxModel * model) {
-            model->focus = focus;
-            return true;
-        });
+        text_box->view, TextBoxModel * model, { model->focus = focus; }, true);
 }
