@@ -16,6 +16,7 @@
 - BadUSB: nb-NO Added norwegian keyboard layout [(By jd-raymaker)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/357)
 - Updated [TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
 - Finally worked in all the new changes...
+- Assets: Includes New Dolphin Animations: [Narut0 (By Sasquach)]
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
