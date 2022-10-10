@@ -5,8 +5,6 @@ typedef enum {
     GpioStartEventOtgOn,
     GpioStartEventManualControl,
     GpioStartEventUsbUart,
-    GpioStartEventI2CScanner,
-    GpioStartEventI2CSfp,
 
     GpioCustomEventErrorBack,
 
