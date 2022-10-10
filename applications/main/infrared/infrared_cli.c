@@ -6,7 +6,6 @@
 #include <toolbox/args.h>
 
 #include "infrared_signal.h"
-#include "infrared_i.h"
 #include "infrared_brute_force.h"
 
 #define INFRARED_CLI_BUF_SIZE 10
@@ -336,8 +335,7 @@ static void infrared_cli_process_decode(Cli* cli, FuriString* args) {
 static void infrared_cli_process_remote(Cli* cli, FuriString* args) {
     UNUSED(cli);
 
-    Infrared* infrared = malloc(sizeof(Infrared));
-    infrared->brute_force = infrared_brute_force_alloc();
+    InfraredBruteForce* brute_force = infrared_brute_force_alloc();
 
     FuriString* command;
     command = furi_string_alloc();
@@ -347,26 +345,23 @@ static void infrared_cli_process_remote(Cli* cli, FuriString* args) {
         infrared_cli_print_usage();
     } else {
         printf("Bruteforcing: %s\r\n", furi_string_get_cstr(command));
-        infrared_brute_force_set_db_filename(
-            infrared->brute_force, EXT_PATH("infrared/assets/tv.ir"));
+        infrared_brute_force_set_db_filename(brute_force, EXT_PATH("infrared/assets/tv.ir"));
 
         uint32_t i = 0;
         if(strncmp(furi_string_get_cstr(command), "power", 5) == 0) {
-            infrared_brute_force_add_record(infrared->brute_force, i++, "POWER");
+            infrared_brute_force_add_record(brute_force, i++, "POWER");
         }
 
-        bool success = infrared_brute_force_calculate_messages(infrared->brute_force);
+        bool success = infrared_brute_force_calculate_messages(brute_force);
         if(success) {
-            printf("Sending codes to tv...");
-            infrared_brute_force_start(infrared->brute_force, 0, &i);
-            infrared_brute_force_send_next(infrared->brute_force);
-        }
+            printf("Sending codes to tv...\r\n");
 
-        infrared_brute_force_stop(infrared->brute_force);
-        infrared_brute_force_free(infrared->brute_force);
+            uint32_t record_count;
+            infrared_brute_force_start(brute_force, 0, &record_count);
+            infrared_brute_force_send_next(brute_force);
+        }
     }
 
-    printf("DEBUG: Finished!\r\n");
     furi_string_free(command);
 }
 
