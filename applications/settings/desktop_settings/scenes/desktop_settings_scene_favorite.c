@@ -1,5 +1,5 @@
 #include "../desktop_settings_app.h"
-#include <applications.h>
+#include "applications.h"
 #include "desktop_settings_scene.h"
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
@@ -73,7 +73,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
     bool consumed = false;
     FuriString* temp_path = furi_string_alloc_set_str(EXT_PATH("apps"));
 
-    uint32_t favorite =
+    uint32_t primary_favorite =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite);
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -129,6 +129,8 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
                 }
             }
         }
+        scene_manager_previous_scene(app->scene_manager);
+        consumed = true;
     }
 
     furi_string_free(temp_path);
