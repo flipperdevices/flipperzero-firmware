@@ -13,9 +13,6 @@ static void clock_app_input_callback(InputEvent* input_event, FuriMessageQueue* 
 }
 
 static void clock_app_render_callback(Canvas* const canvas, void* ctx) {
-    canvas_clear(canvas);
-    canvas_set_color(canvas, ColorBlack);
-
     ClockApp* clock_app = ctx;
     if(furi_mutex_acquire(clock_app->mutex, 200) != FuriStatusOk) {
         return;
@@ -69,6 +66,9 @@ static void clock_app_render_callback(Canvas* const canvas, void* ctx) {
             state->datetime.month,
             state->datetime.year);
     }
+
+    canvas_clear(canvas);
+    canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(canvas, 64, 28, AlignCenter, AlignCenter, time_string);
     canvas_set_font(canvas, FontSecondary);
