@@ -19,6 +19,7 @@
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
 
+- [Keynote BT plugin: long press on OK to switch between Space and Retur… #1729 (By coded-with-claws)]
 - GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - Settings: Rename from App [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
 - Lost To Faps: Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
@@ -199,7 +200,6 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
   <summary><B>PLUGINS</b></summary><br/>
 
 - [Bluetooth Remote (By Cutch)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
-- - With: [Keynote BT plugin: long press on OK to switch between Space and Retur… #1729 (By coded-with-claws)]
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
