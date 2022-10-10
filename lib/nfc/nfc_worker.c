@@ -295,6 +295,7 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
 
     bool card_read = false;
+    bool found_protocol = false;
     furi_hal_nfc_sleep();
     if(mf_ul_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
         FURI_LOG_I(TAG, "Mifare Ultralight / NTAG detected");
@@ -316,17 +317,20 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
         card_read = true;
     } else if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
         FURI_LOG_I(TAG, "ISO14443-4 card detected");
-        nfc_worker->dev_data->protocol = NfcDeviceProtocolEMV;
-        if(!nfc_worker_read_bank_card(nfc_worker, tx_rx) &&
-           !nfc_worker_read_id_card(nfc_worker, tx_rx)) {
+        if(nfc_worker_read_bank_card(nfc_worker, tx_rx)) {
+            nfc_worker->dev_data->protocol = NfcDeviceProtocolEMV;
+            found_protocol = true;
+        }
+        if(nfc_worker_read_id_card(nfc_worker, tx_rx)) {
+            nfc_worker->dev_data->protocol = NfcDeviceProtocolID;
+            found_protocol = true;
+        }
+        if(!found_protocol) {
             FURI_LOG_I(TAG, "Unknown card. Save UID");
             nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
         }
-        card_read = true;
-    } else {
-        nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
-        card_read = true;
     }
+    card_read = true;
 
     return card_read;
 }
