@@ -93,7 +93,7 @@ static void infrared_cli_print_usage(void) {
         INFRARED_MIN_FREQUENCY,
         INFRARED_MAX_FREQUENCY);
     printf("\tir decode <input_file> [<output_file>]\r\n");
-    printf("\tir remote <power/cup/cdown/vup/vdown\r\n");
+    printf("\tir remote <power/mute/cup/cdown/vup/vdown\r\n");
 }
 
 static bool infrared_cli_parse_message(const char* str, InfraredSignal* signal) {
@@ -350,6 +350,26 @@ static void infrared_cli_process_remote(Cli* cli, FuriString* args) {
         uint32_t i = 0;
         if(strncmp(furi_string_get_cstr(command), "power", 5) == 0) {
             infrared_brute_force_add_record(brute_force, i++, "POWER");
+        }
+
+        if(strncmp(furi_string_get_cstr(command), "mute", 4) == 0) {
+            infrared_brute_force_add_record(brute_force, i++, "MUTE");
+        }
+
+        if(strncmp(furi_string_get_cstr(command), "vup", 3) == 0) {
+            infrared_brute_force_add_record(brute_force, i++, "VOL+");
+        }
+
+        if(strncmp(furi_string_get_cstr(command), "vdown", 3) == 0) {
+            infrared_brute_force_add_record(brute_force, i++, "VOL-");
+        }
+
+        if(strncmp(furi_string_get_cstr(command), "cup", 3) == 0) {
+            infrared_brute_force_add_record(brute_force, i++, "CH+");
+        }
+
+        if(strncmp(furi_string_get_cstr(command), "cdown", 3) == 0) {
+            infrared_brute_force_add_record(brute_force, i++, "CH-");
         }
 
         bool success = infrared_brute_force_calculate_messages(brute_force);
