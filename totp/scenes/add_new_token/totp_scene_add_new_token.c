@@ -1,13 +1,13 @@
 #include "totp_scene_add_new_token.h"
 #include "../../types/common.h"
-#include "../../lib/ui/constants.h"
+#include "../../services/ui/constants.h"
 #include "../scene_director.h"
 #include "totp_input_text.h"
 #include "../../types/token_info.h"
-#include "../../lib/list/list.h"
-#include "../../lib/base32/base32.h"
-#include "../../lib/config/config.h"
-#include "../../lib/ui/ui_controls.h"
+#include "../../services/list/list.h"
+#include "../../services/base32/base32.h"
+#include "../../services/config/config.h"
+#include "../../services/ui/ui_controls.h"
 #include "../generate_token/totp_scene_generate_token.h"
 
 #define TOKEN_ALGO_LIST_LENGTH 3

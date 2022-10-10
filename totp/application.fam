@@ -8,13 +8,15 @@ App(
         "gui",
         "cli",
         "dialogs",
-        "storage"
+        "storage",
+        "input", 
+        "notification"
     ],
     provides=["totp_start"],
     stack_size=2 * 1024,
     order=20,
     fap_category="Misc",
-    fap_icon="totp_10px.png",
+    fap_icon="totp_10px.png"
 )
 
 App(

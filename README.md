@@ -13,7 +13,7 @@ If you don't want to build the app yourself then just pull FAP file from [latest
 
 ## How to build it?
 
-Just pull the repo with recursive submodule initialization and then run `fbt firmware_totp` command to build the app. Once done FAP file will be available here `flipperzero-firmware\build\latest\totp.fap`
+Just pull the repo with recursive submodule initialization and then run `./build.ps1` command to build the app. Once done FAP files will be available in the `build` directory.
 
 ## Support
 * [Buy me a coffee](https://buycoffee.to/akopachov)

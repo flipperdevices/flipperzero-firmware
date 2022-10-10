@@ -1,5 +1,4 @@
-#ifndef _TOTP_SCENE_GENERATE_TOKEN_H_
-#define _TOTP_SCENE_GENERATE_TOKEN_H_
+#pragma once
 
 #include <gui/gui.h>
 #include <furi.h>
@@ -17,5 +16,3 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
 bool totp_scene_generate_token_handle_event(PluginEvent* const event, PluginState* plugin_state);
 void totp_scene_generate_token_deactivate(PluginState* plugin_state);
 void totp_scene_generate_token_free(PluginState* plugin_state);
-
-#endif

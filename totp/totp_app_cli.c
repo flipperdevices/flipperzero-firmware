@@ -11,7 +11,7 @@ void totp_cli_print_usage() {
     printf("\reset\t - Reset app to default (reset PIN and removes all tokens)\r\n");
 };
 
-static void totp_cli(Cli* cli, string_t args, void* context) {
+static void totp_cli(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
     UNUSED(args);
     UNUSED(context);

@@ -1,9 +1,8 @@
-#ifndef _TOTP_SCENES_ENUM_H_
-#define _TOTP_SCENES_ENUM_H_
+#pragma once
+
 typedef enum {
     TotpSceneAuthentication,
     TotpSceneGenerateToken,
     TotpSceneAddNewToken,
     TotpSceneTokenMenu
 } Scene;
-#endif
