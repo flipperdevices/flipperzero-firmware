@@ -12,6 +12,12 @@
 - Assets: Includes New Dolphin Animations: [Narut0 (By Sasquach)]
 
 
+## REPOSITORIES FOR OTHER ANIMATION CREATORS:
+## [Kuronons Flipper Animations](https://github.com/Kuronons/FZ_graphics)
+## [Haseo Flipper Animations](https://github.com/Haseosama/FZ_Animations)
+## [Talking-Sasquach Flipper Animations](https://github.com/skizzophrenic/Talking-Sasquach)
+
+
 ## Some Previews Provided By Creators:
 
 
