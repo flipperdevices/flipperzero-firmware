@@ -79,23 +79,25 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     if (minesweeper_state == NULL) {
       return;
     }
-    FuriString* tempStr;
-    tempStr = furi_string_alloc();
-    furi_string_cat_printf(tempStr, "Mines: %d", MINECOUNT - minesweeper_state->flags_set);
+    FuriString* mineStr;
+    FuriString* timeStr;
+    mineStr = furi_string_alloc();
+    timeStr = furi_string_alloc();
+
+    furi_string_printf(mineStr, "Mines: %d", MINECOUNT - minesweeper_state->flags_set);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, furi_string_get_cstr(tempStr));
-    furi_string_free(tempStr);
+    canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, furi_string_get_cstr(mineStr));
+
     int seconds = 0;
-    int minutes = 0; 
+    int minutes = 0;
     if (minesweeper_state->game_started) {
       uint32_t ticks_elapsed = furi_get_tick() - minesweeper_state->game_started_tick;
       seconds = (int) ticks_elapsed / furi_kernel_get_tick_frequency();
       minutes = (int) seconds / 60;
       seconds = seconds % 60;
     }
-    furi_string_cat_printf(tempStr, "%01d:%02d", minutes, seconds);
-    canvas_draw_str_aligned(canvas, 128, 0, AlignRight, AlignTop, furi_string_get_cstr(tempStr));
-    furi_string_free(tempStr);
+    furi_string_printf(timeStr, "%01d:%02d", minutes, seconds);
+    canvas_draw_str_aligned(canvas, 128, 0, AlignRight, AlignTop, furi_string_get_cstr(timeStr));
 
     for (int y = 0; y < PLAYFIELD_HEIGHT; y++) {
       for (int x = 0; x < PLAYFIELD_WIDTH; x++) {
@@ -217,7 +219,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         }
       }
     }
-    furi_string_free(tempStr);
+
+    furi_string_free(mineStr);
+    furi_string_free(timeStr);
     release_mutex((ValueMutex*)ctx, minesweeper_state);
 }
 
@@ -513,4 +517,3 @@ int32_t minesweeper_app(void* p) {
 
   return 0;
 }
-
