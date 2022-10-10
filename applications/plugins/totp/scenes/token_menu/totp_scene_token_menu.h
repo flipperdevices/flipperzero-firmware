@@ -1,5 +1,4 @@
-#ifndef _TOTP_SCENE_TOKEN_MENU_H_
-#define _TOTP_SCENE_TOKEN_MENU_H_
+#pragma once
 
 #include <gui/gui.h>
 #include <furi.h>
@@ -17,5 +16,3 @@ void totp_scene_token_menu_render(Canvas* const canvas, PluginState* plugin_stat
 bool totp_scene_token_menu_handle_event(PluginEvent* const event, PluginState* plugin_state);
 void totp_scene_token_menu_deactivate(PluginState* plugin_state);
 void totp_scene_token_menu_free(PluginState* plugin_state);
-
-#endif

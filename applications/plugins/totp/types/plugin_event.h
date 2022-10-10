@@ -1,5 +1,4 @@
-#ifndef _TOTP_PLUGIN_EVENT_H_
-#define _TOTP_PLUGIN_EVENT_H_
+#pragma once
 
 #include <inttypes.h>
 #include <input/input.h>
@@ -9,5 +8,3 @@ typedef struct {
     EventType type;
     InputEvent input;
 } PluginEvent;
-
-#endif

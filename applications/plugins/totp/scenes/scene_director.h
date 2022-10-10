@@ -1,5 +1,4 @@
-#ifndef _SCENE_DIRECTOR_H_
-#define _SCENE_DIRECTOR_H_
+#pragma once
 
 #include <gui/gui.h>
 #include "../types/plugin_state.h"
@@ -12,5 +11,3 @@ void totp_scene_director_init_scenes(PluginState* const plugin_state);
 void totp_scene_director_render(Canvas* const canvas, PluginState* const plugin_state);
 void totp_scene_director_dispose(PluginState* const plugin_state);
 bool totp_scene_director_handle_event(PluginEvent* const event, PluginState* const plugin_state);
-
-#endif
