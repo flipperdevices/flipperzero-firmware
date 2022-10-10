@@ -348,7 +348,6 @@ static void infrared_cli_process_remote(Cli* cli, FuriString* args) {
         infrared_brute_force_set_db_filename(brute_force, EXT_PATH("infrared/assets/tv.ir"));
 
         uint32_t i = 0;
-        const char* cmd = furi_string_get_cstr(command);
 
         if(strncmp(furi_string_get_cstr(command), "power", 5) == 0) {
             infrared_brute_force_add_record(brute_force, i++, "POWER");
