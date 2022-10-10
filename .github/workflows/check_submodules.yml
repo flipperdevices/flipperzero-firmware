@@ -17,6 +17,8 @@ jobs:
         run: |
           if [ -d .git ]; then
             git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
+          else
+            exit 1;
           fi
 
       - name: 'Checkout code'
@@ -27,6 +29,7 @@ jobs:
 
       - name: 'Check protobuf branch'
         run: |
+          git submodule update --init
           SUB_PATH="assets/protobuf";
           SUB_BRANCH="dev";
           SUB_COMMITS_MIN=40;

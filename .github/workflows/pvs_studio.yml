@@ -57,12 +57,11 @@ jobs:
 
       - name: 'Generate compile_comands.json'
         run: |
-          FBT_PRESERVE_OLD_TOOLCHAIN=1 FBT_TOOLCHAIN_PATH=/runner/_work ./fbt \
-              COMPACT=1 version_json proto_ver icons firmware_cdb dolphin_internal dolphin_blocking
+          FBT_TOOLCHAIN_PATH=/runner/_work ./fbt COMPACT=1 version_json proto_ver icons firmware_cdb dolphin_internal dolphin_blocking
 
       - name: 'Static code analysis'
         run: |
-          FBT_PRESERVE_OLD_TOOLCHAIN=1 FBT_TOOLCHAIN_PATH=/runner/_work source scripts/toolchain/fbtenv.sh
+          FBT_TOOLCHAIN_PATH=/runner/_work source scripts/toolchain/fbtenv.sh
           pvs-studio-analyzer credentials ${{ secrets.PVS_STUDIO_CREDENTIALS }}
           pvs-studio-analyzer analyze \
               @.pvsoptions \
