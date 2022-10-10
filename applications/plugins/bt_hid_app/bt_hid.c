@@ -8,8 +8,8 @@ enum BtDebugSubmenuIndex {
     BtHidSubmenuIndexKeynote,
     BtHidSubmenuIndexKeyboard,
     BtHidSubmenuIndexMedia,
-    BtHidSubmenuIndexMouse,
     BtHidSubmenuIndexTikTok,
+    BtHidSubmenuIndexMouse,
 };
 
 void bt_hid_submenu_callback(void* context, uint32_t index) {
@@ -95,9 +95,9 @@ BtHid* bt_hid_app_alloc() {
     submenu_add_item(
         app->submenu, "Keyboard", BtHidSubmenuIndexKeyboard, bt_hid_submenu_callback, app);
     submenu_add_item(app->submenu, "Media", BtHidSubmenuIndexMedia, bt_hid_submenu_callback, app);
-    submenu_add_item(app->submenu, "Mouse", BtHidSubmenuIndexMouse, bt_hid_submenu_callback, app);
     submenu_add_item(
         app->submenu, "TikTok controller", BtHidSubmenuIndexTikTok, bt_hid_submenu_callback, app);
+    submenu_add_item(app->submenu, "Mouse", BtHidSubmenuIndexMouse, bt_hid_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), bt_hid_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewSubmenu, submenu_get_view(app->submenu));
@@ -133,18 +133,18 @@ BtHid* bt_hid_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewMedia, bt_hid_media_get_view(app->bt_hid_media));
 
-    // Mouse view
-    app->bt_hid_mouse = bt_hid_mouse_alloc();
-    view_set_previous_callback(bt_hid_mouse_get_view(app->bt_hid_mouse), bt_hid_exit_confirm_view);
-    view_dispatcher_add_view(
-        app->view_dispatcher, BtHidViewMouse, bt_hid_mouse_get_view(app->bt_hid_mouse));
-
     // TikTok view
     app->bt_hid_tiktok = bt_hid_tiktok_alloc();
     view_set_previous_callback(
         bt_hid_tiktok_get_view(app->bt_hid_tiktok), bt_hid_exit_confirm_view);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewTikTok, bt_hid_tiktok_get_view(app->bt_hid_tiktok));
+
+    // Mouse view
+    app->bt_hid_mouse = bt_hid_mouse_alloc();
+    view_set_previous_callback(bt_hid_mouse_get_view(app->bt_hid_mouse), bt_hid_exit_confirm_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, BtHidViewMouse, bt_hid_mouse_get_view(app->bt_hid_mouse));
 
     // TODO switch to menu after Media is done
     app->view_id = BtHidViewSubmenu;
