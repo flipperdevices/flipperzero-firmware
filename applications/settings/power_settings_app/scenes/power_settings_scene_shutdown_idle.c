@@ -63,5 +63,6 @@ bool power_settings_scene_shutdown_idle_on_event(void* context, SceneManagerEven
 void power_settings_scene_shutdown_idle_on_exit(void* context) {
     PowerSettingsApp* app = context;
     SAVE_POWER_SETTINGS(&app->shutdown_idle_delay_ms);
+    furi_pubsub_publish(app->settings_events, &app->shutdown_idle_delay_ms);
     variable_item_list_reset(app->variable_item_list);
 }

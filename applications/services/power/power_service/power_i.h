@@ -30,6 +30,7 @@ struct Power {
     Gui* gui;
     NotificationApp* notification;
     FuriPubSub* event_pubsub;
+    FuriPubSub* settings_events;
     FuriPubSub* input_events_pubsub;
     FuriPubSubSubscription* input_events_subscription;
     PowerEvent event;

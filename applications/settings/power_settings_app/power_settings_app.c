@@ -25,6 +25,9 @@ PowerSettingsApp* power_settings_app_alloc(uint32_t first_scene) {
     app->gui = furi_record_open(RECORD_GUI);
     app->power = furi_record_open(RECORD_POWER);
 
+    //PubSub
+    app->settings_events = power_get_settings_events_pubsub(app->power);
+
     // View dispatcher
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&power_settings_scene_handlers, app);
