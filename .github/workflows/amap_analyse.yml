@@ -76,7 +76,7 @@ jobs:
 
       - name: 'Upload report to DB'
         run: |
-          FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
+          FBT_PRESERVE_OLD_TOOLCHAIN=1 FBT_TOOLCHAIN_PATH=/runner/_work source scripts/toolchain/fbtenv.sh
           get_size()
           {
             SECTION="$1";

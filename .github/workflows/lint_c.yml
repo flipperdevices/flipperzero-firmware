@@ -14,7 +14,7 @@ env:
 
 jobs:
   lint_c_cpp:
-    runs-on: [self-hosted,FlipperZeroShell]
+    runs-on: [self-hosted,FlipperZeroK8s]
     steps:
       - name: 'Decontaminate previous build leftovers'
         run: |
@@ -30,7 +30,7 @@ jobs:
 
       - name: 'Check code formatting'
         id: syntax_check
-        run: SET_GH_OUTPUT=1 FBT_TOOLCHAIN_PATH=/opt ./fbt lint
+        run: SET_GH_OUTPUT=1 FBT_PRESERVE_OLD_TOOLCHAIN=1 FBT_TOOLCHAIN_PATH=/runner/_work ./fbt lint
 
       - name: Report code formatting errors
         if: failure() && steps.syntax_check.outputs.errors && github.event.pull_request
