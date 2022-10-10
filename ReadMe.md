@@ -13,10 +13,7 @@
 - Known Issues:	 `Chess`, `Tanks` & `Chip8` (No Controls)
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-10 07:00 GMT`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-10 07:00 GMT`
-- BadUSB: nb-NO Added norwegian keyboard layout [(By jd-raymaker)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/357)
 - Updated [TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
-- Assets: Includes New Dolphin Animations: [Narut0 (By Sasquach)]
-- Updated [Minesweeper (By panki27)](https://github.com/panki27/minesweeper)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
