@@ -1,12 +1,12 @@
 #include "mrtd_helpers.h"
 
-uint8_t mrtd_bac_check_digit(const uint8_t* input, const size_t length) {
-    const size_t num_weights = 3;
+uint8_t mrtd_bac_check_digit(const uint8_t* input, const uint8_t length) {
+    const uint8_t num_weights = 3;
     uint8_t weights[] = {7, 3, 1};
     uint8_t check_digit = 0;
     uint8_t idx;
 
-    for(size_t i=0; i<length; ++i) {
+    for(uint8_t i=0; i<length; ++i) {
         uint8_t c = input[i];
         if(c >= 'A' && c <= 'Z') {
             idx = c - 'A' + 10;
@@ -37,10 +37,10 @@ void mrtd_print_date(uint8_t* output, MrtdDate* date) {
 // - DOCNR of size <9
 // - DOCNR of size >9
 // - DOCNR of size MRTD_DOCNR_MAX_LENGTH
-bool mrtd_bac_get_kmrz(MrtdAuthData* auth, uint8_t* output, size_t output_size) {
-    size_t idx = 0;
-    size_t docnr_length = strlen(auth->doc_number);
-    size_t cd_idx = 0;
+bool mrtd_bac_get_kmrz(MrtdAuthData* auth, uint8_t* output, uint8_t output_size) {
+    uint8_t idx = 0;
+    uint8_t docnr_length = strlen(auth->doc_number);
+    uint8_t cd_idx = 0;
     if(output_size < docnr_length + 16) {
         return false;
     }

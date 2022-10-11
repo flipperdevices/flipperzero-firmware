@@ -1,12 +1,15 @@
 #include <stdio.h>
+#include <mbedtls/sha1.h>
 
 #include "lib/nfc/protocols/mrtd_helpers.h"
+
+// gcc -o test_mrtd_helpers -Ilib/mbedtls/include lib/nfc/protocols/mrtd_helpers.c lib/mbedtls/library/sha1.c lib/mbedtls/library/platform_util.c test_mrtd_helpers.c
 
 #define COLOR_RED "\033[0;31m"
 #define COLOR_GREEN "\033[0;32m"
 #define COLOR_RESET "\033[0;0m"
 
-void test_mrtd_bac_check_digit(const uint8_t* input, uint8_t exp_output) {
+void test_mrtd_bac_check_digit(const uint8_t* input, const uint8_t exp_output) {
     uint8_t output = mrtd_bac_check_digit(input, strlen(input));
     if(output != exp_output) {
         printf(COLOR_RED "FAILED  - mrtd_bac_check_digit for %s is not %d, but %d\n" COLOR_RESET,
@@ -18,11 +21,11 @@ void test_mrtd_bac_check_digit(const uint8_t* input, uint8_t exp_output) {
             input, output);
 }
 
-void test_bac_get_kmrz(MrtdAuthData* auth, uint8_t* exp_output) {
+void test_bac_get_kmrz(MrtdAuthData* auth, const uint8_t* exp_output) {
     bool result;
-    uint8_t buffer[1000];
+    uint8_t buffer[255];
 
-    result = mrtd_bac_get_kmrz(auth, buffer, 1000);
+    result = mrtd_bac_get_kmrz(auth, buffer, 255);
     if(!result) {
         printf(COLOR_RED "FAILED  - mrtd_bac_get_kmrz returned FALSE for" COLOR_RESET);
         return;
@@ -36,6 +39,26 @@ void test_bac_get_kmrz(MrtdAuthData* auth, uint8_t* exp_output) {
 
     printf(COLOR_GREEN "SUCCESS - mrtd_bac_get_kmrz is: %s\n" COLOR_RESET,
         buffer);
+}
+
+void test_sha1(const uint8_t* data, const uint8_t* exp_output) {
+    uint8_t hash[20];
+    mbedtls_sha1(data, strlen(data), hash);
+
+    if(memcmp(hash, exp_output, 20)) {
+        printf(COLOR_RED "FAILED  - sha1 of %s, expected:\n", data);
+        for(uint8_t i=0; i<20; ++i) {
+            printf("%02X", exp_output[i]);
+        }
+        printf(", result:\n");
+    } else {
+        printf(COLOR_GREEN "SUCCESS - sha1 of %s is: ", data);
+    }
+
+    for(uint8_t i=0; i<20; ++i) {
+        printf("%02X", hash[i]);
+    }
+    printf("\n" COLOR_RESET);
 }
 
 int main(int argc, char** argv) {
@@ -54,6 +77,8 @@ int main(int argc, char** argv) {
         .birth_date = {69, 8, 6},
         .expiry_date = {94, 6, 23},
     }, "L898902C<369080619406236");
+
+    test_sha1("L898902C<369080619406236", "\x23\x9a\xb9\xcb\x28\x2d\xaf\x66\x23\x1d\xc5\xa4\xdf\x6b\xfb\xae\xdf\x47\x75\x65");
 
     return 0;
 }

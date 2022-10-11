@@ -30,8 +30,8 @@ typedef struct {
     //TODO: PACE
 } MrtdAuthData;
 
-uint8_t mrtd_bac_check_digit(const uint8_t* input, const size_t length);
+uint8_t mrtd_bac_check_digit(const uint8_t* input, const uint8_t length);
 
 void mrtd_print_date(uint8_t* output, MrtdDate* date);
 
-bool mrtd_bac_get_kmrz(MrtdAuthData* auth, uint8_t* output, size_t output_size);
+bool mrtd_bac_get_kmrz(MrtdAuthData* auth, uint8_t* output, uint8_t output_size);
