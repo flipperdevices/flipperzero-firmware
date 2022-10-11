@@ -47,29 +47,31 @@ uint16_t mrtd_decode_response(uint8_t* buffer, size_t len) {
     return (buffer[len-2] << 8) | buffer[len-1];
 }
 
+EFFile EFNone        = {.name = NULL,  .file_id = 0x0000, .short_id = 0x00, .tag = 0x00 };
+
 struct EFFormat EF = {
-    .ATR          = {.file_id = 0x2F01, .short_id = 0x01 },
-    .DIR          = {.file_id = 0x2F00, .short_id = 0x1E },
-    .CardAccess   = {.file_id = 0x011C, .short_id = 0x1C },
-    .CardSecurity = {.file_id = 0x011D, .short_id = 0x1D },
-    .COM          = {.file_id = 0x011E, .short_id = 0x1E, .tag = 0x60 },
-    .SOD          = {.file_id = 0X011D, .short_id = 0X1D, .tag = 0x77 },
-    .DG1          = {.file_id = 0X0101, .short_id = 0X01, .tag = 0x61 },
-    .DG2          = {.file_id = 0X0102, .short_id = 0X02, .tag = 0x75 },
-    .DG3          = {.file_id = 0X0103, .short_id = 0X03, .tag = 0x63 },
-    .DG4          = {.file_id = 0X0104, .short_id = 0X04, .tag = 0x76 },
-    .DG5          = {.file_id = 0X0105, .short_id = 0X05, .tag = 0x65 },
-    .DG6          = {.file_id = 0X0106, .short_id = 0X06, .tag = 0x66 },
-    .DG7          = {.file_id = 0X0107, .short_id = 0X07, .tag = 0x67 },
-    .DG8          = {.file_id = 0X0108, .short_id = 0X08, .tag = 0x68 },
-    .DG9          = {.file_id = 0X0109, .short_id = 0X09, .tag = 0x69 },
-    .DG10         = {.file_id = 0X010A, .short_id = 0X0A, .tag = 0x6a },
-    .DG11         = {.file_id = 0X010B, .short_id = 0X0B, .tag = 0x6b },
-    .DG12         = {.file_id = 0X010C, .short_id = 0X0C, .tag = 0x6c },
-    .DG13         = {.file_id = 0X010D, .short_id = 0X0D, .tag = 0x6d },
-    .DG14         = {.file_id = 0X010E, .short_id = 0X0E, .tag = 0x6e },
-    .DG15         = {.file_id = 0X010F, .short_id = 0X0F, .tag = 0x6f },
-    .DG16         = {.file_id = 0X0110, .short_id = 0X10, .tag = 0x70 },
+    .ATR          = {.name = "ATR", .file_id = 0x2F01, .short_id = 0x01 },
+    .DIR          = {.name = "DIR", .file_id = 0x2F00, .short_id = 0x1E },
+    .CardAccess   = {.name = "CardAccess", .file_id = 0x011C, .short_id = 0x1C },
+    .CardSecurity = {.name = "CardSecurity", .file_id = 0x011D, .short_id = 0x1D },
+    .COM          = {.name = "COM", .file_id = 0x011E, .short_id = 0x1E, .tag = 0x60 },
+    .SOD          = {.name = "SOD", .file_id = 0X011D, .short_id = 0X1D, .tag = 0x77 },
+    .DG1          = {.name = "DG1", .file_id = 0X0101, .short_id = 0X01, .tag = 0x61 },
+    .DG2          = {.name = "DG2", .file_id = 0X0102, .short_id = 0X02, .tag = 0x75 },
+    .DG3          = {.name = "DG3", .file_id = 0X0103, .short_id = 0X03, .tag = 0x63 },
+    .DG4          = {.name = "DG4", .file_id = 0X0104, .short_id = 0X04, .tag = 0x76 },
+    .DG5          = {.name = "DG5", .file_id = 0X0105, .short_id = 0X05, .tag = 0x65 },
+    .DG6          = {.name = "DG6", .file_id = 0X0106, .short_id = 0X06, .tag = 0x66 },
+    .DG7          = {.name = "DG7", .file_id = 0X0107, .short_id = 0X07, .tag = 0x67 },
+    .DG8          = {.name = "DG8", .file_id = 0X0108, .short_id = 0X08, .tag = 0x68 },
+    .DG9          = {.name = "DG9", .file_id = 0X0109, .short_id = 0X09, .tag = 0x69 },
+    .DG10         = {.name = "DG10", .file_id = 0X010A, .short_id = 0X0A, .tag = 0x6a },
+    .DG11         = {.name = "DG11", .file_id = 0X010B, .short_id = 0X0B, .tag = 0x6b },
+    .DG12         = {.name = "DG12", .file_id = 0X010C, .short_id = 0X0C, .tag = 0x6c },
+    .DG13         = {.name = "DG13", .file_id = 0X010D, .short_id = 0X0D, .tag = 0x6d },
+    .DG14         = {.name = "DG14", .file_id = 0X010E, .short_id = 0X0E, .tag = 0x6e },
+    .DG15         = {.name = "DG15", .file_id = 0X010F, .short_id = 0X0F, .tag = 0x6f },
+    .DG16         = {.name = "DG16", .file_id = 0X0110, .short_id = 0X10, .tag = 0x70 },
 };
 
 struct AIDSet AID = {
@@ -79,6 +81,32 @@ struct AIDSet AID = {
     .AdditionalBiometrics = {0xA0, 0x00, 0x00, 0x02, 0x47, 0x20, 0x03},
 };
 
+EFFile* mrtd_tag_to_file(uint8_t tag) {
+    //TODO: generate this code with macros?
+    switch(tag) {
+        case 0x60: return &EF.COM;
+        case 0x77: return &EF.SOD;
+        case 0x61: return &EF.DG1;
+        case 0x75: return &EF.DG2;
+        case 0x63: return &EF.DG3;
+        case 0x76: return &EF.DG4;
+        case 0x65: return &EF.DG5;
+        case 0x66: return &EF.DG6;
+        case 0x67: return &EF.DG7;
+        case 0x68: return &EF.DG8;
+        case 0x69: return &EF.DG9;
+        case 0x6a: return &EF.DG10;
+        case 0x6b: return &EF.DG11;
+        case 0x6c: return &EF.DG12;
+        case 0x6d: return &EF.DG13;
+        case 0x6e: return &EF.DG14;
+        case 0x6f: return &EF.DG15;
+        case 0x70: return &EF.DG16;
+        default:
+           furi_assert(false);
+           return &EFNone;
+    }
+};
 
 //TODO: rename to transceive?
 bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t lc, const void* data, int16_t le, uint8_t* output) {

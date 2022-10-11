@@ -48,6 +48,7 @@ typedef struct {
 } MrtdData;
 
 typedef struct {
+    const char* name;
     const uint8_t short_id;
     const uint16_t file_id;
     const uint8_t tag;
@@ -82,6 +83,13 @@ struct EFFormat {
 };
 
 extern struct EFFormat EF;
+
+#define MAX_EFCOM_TAGS 18
+typedef struct {
+    uint16_t lds_version; // xxyy => xx.yy (major.minor)
+    uint32_t unicode_version; // aabbcc => aa.bb.cc (major.minor.release)
+    uint8_t tag_list[MAX_EFCOM_TAGS];
+} EFComFormat;
 
 //TODO: description
 MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx);
