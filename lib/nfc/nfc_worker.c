@@ -350,6 +350,11 @@ static bool nfc_worker_read_nfcb(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
             found_protocol = true;
         }
         furi_hal_nfc_sleep();
+        if(nfc_worker_read_bank_card(nfc_worker, tx_rx)) {
+            nfc_worker->dev_data->protocol = NfcDeviceProtocolEMV;
+            found_protocol = true;
+        }
+        furi_hal_nfc_sleep();
         if(!found_protocol) {
             FURI_LOG_I(TAG, "Unknown card. Save UID");
             nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
