@@ -4,7 +4,7 @@
 
 #include "lib/nfc/protocols/mrtd_helpers.h"
 
-// gcc -o test_mrtd_helpers -Wall -Ilib/mbedtls/include lib/nfc/protocols/mrtd_helpers.c lib/mbedtls/library/sha1.c lib/mbedtls/library/des.c lib/mbedtls/library/platform_util.c test_mrtd_helpers.c
+// gcc -o test_mrtd_helpers -Wall -Ilib/mbedtls/include -Itoolchain/x86_64-linux/arm-none-eabi/include/ lib/nfc/protocols/mrtd_helpers.c lib/mbedtls/library/sha1.c lib/mbedtls/library/des.c lib/mbedtls/library/platform_util.c test_mrtd_helpers.c
 
 #define COLOR_RED "\033[0;31m"
 #define COLOR_GREEN "\033[0;32m"
@@ -152,7 +152,7 @@ void test_mrtd_bac_encrypt(uint8_t* data, size_t data_length, uint8_t* key, uint
 void test_mrtd_bac_padded_mac(uint8_t* data, size_t data_length, uint8_t* key, uint8_t* exp_output, size_t exp_output_length) {
     uint8_t mac[8];
     if(!mrtd_bac_padded_mac(data, data_length, key, mac)) {
-        printf("ERROR BAC MAC");
+        printf("ERROR BAC MAC\n");
         return;
     }
 
@@ -161,11 +161,51 @@ void test_mrtd_bac_padded_mac(uint8_t* data, size_t data_length, uint8_t* key, u
         print_hex(exp_output, exp_output_length);
         printf(" is:\n");
         print_hex(mac, 8);
+        printf(COLOR_RESET "\n");
         return;
     } else {
         printf(COLOR_GREEN "SUCCESS - mrtd_bac_padded_mac output: ");
         print_hex(mac, 8);
         printf(COLOR_RESET "\n");
+    }
+}
+
+void test_mrtd_bac_mac_calls(uint8_t* data, size_t data_length, uint8_t* key, uint8_t* exp_output, size_t exp_output_length) {
+    mrtd_bac_mac_ctx ctx;
+
+    for(int break_at=0; break_at<data_length; break_at += 3) {
+        if(!mrtd_bac_mac_init(&ctx, key)) {
+            printf("ERROR mrtd_bac_mac_init (break_at: %d)\n", break_at);
+            return;
+        }
+
+        uint8_t mac[8];
+
+        if(!mrtd_bac_mac_update(&ctx, data, break_at)) {
+            printf("ERROR mrtd_bac_mac_update 1 (break_at: %d)\n", break_at);
+        }
+
+        if(!mrtd_bac_mac_update(&ctx, data + break_at, data_length - break_at)) {
+            printf("ERROR mrtd_bac_mac_update 2 (break_at: %d)\n", break_at);
+        }
+
+        if(!mrtd_bac_mac_finalize(&ctx, mac)) {
+            printf("ERROR mrtd_bac_mac_finalize (break_at: %d)\n", break_at);
+            return;
+        }
+
+        if(memcmp(exp_output, mac, exp_output_length)) {
+            printf(COLOR_RED "FAILED  - mrtd_bac_mac calls (break_at: %d), expected output:\n", break_at);
+            print_hex(exp_output, exp_output_length);
+            printf(" is:\n");
+            print_hex(mac, 8);
+            printf(COLOR_RESET "\n");
+            return;
+        } else {
+            printf(COLOR_GREEN "SUCCESS - mrtd_bac_mac calls (break_at: %d) output: ", break_at);
+            print_hex(mac, 8);
+            printf(COLOR_RESET "\n");
+        }
     }
 }
 
@@ -200,6 +240,30 @@ void test_mrtd_ssc_from_data(const uint8_t* rnd_ic, const uint8_t* rnd_ifd, uint
     }
 
     printf(COLOR_GREEN "SUCCESS - mrtd_ssc_from_data output: %016lx\n" COLOR_RESET, ssc_long);
+}
+
+void test_mrtd_protect_apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t lc, const void* data, int16_t le, uint8_t* ks_enc, uint8_t* ks_mac, uint64_t ssc, uint8_t* exp_output, size_t exp_output_length) {
+    uint8_t buffer[4096];
+
+    size_t ret = mrtd_protect_apdu(cla, ins, p1, p2, lc, data, le, ks_enc, ks_mac, ssc, buffer);
+
+    if(!ret) {
+        printf(COLOR_RED "FAILED - mrtd_protect_apdu returned an error\n" COLOR_RESET);
+        return;
+    }
+
+    if(memcmp(buffer, exp_output, ret)) {
+        printf(COLOR_RED "FAILED - mrtd_protect_apdu, expected output:\n" COLOR_RESET);
+        print_hex(exp_output, exp_output_length);
+        printf(" is:\n");
+        print_hex(buffer, ret);
+        return;
+    }
+
+    printf(COLOR_GREEN "SUCCESS - mrtd_protect_apdu output: ");
+    print_hex(buffer, ret);
+    printf("\n" COLOR_RESET);
+    //TODO: hexdump
 }
 
 int main(int argc, char** argv) {
@@ -253,6 +317,14 @@ int main(int argc, char** argv) {
         /*exp_output_size*/ 8
     );
 
+    test_mrtd_bac_mac_calls(
+        /*input*/ (uint8_t*)"\x72\xC2\x9C\x23\x71\xCC\x9B\xDB\x65\xB7\x79\xB8\xE8\xD3\x7B\x29\xEC\xC1\x54\xAA\x56\xA8\x79\x9F\xAE\x2F\x49\x8F\x76\xED\x92\xF2",
+        /*size*/  32,
+        /*key*/  (uint8_t*)"\x79\x62\xD9\xEC\xE0\x3D\x1A\xCD\x4C\x76\x08\x9D\xCE\x13\x15\x43",
+        /*exp output*/ (uint8_t*)"\x5F\x14\x48\xEE\xA8\xAD\x90\xA7",
+        /*exp_output_size*/ 8
+    );
+
     test_mrtd_bac_decrypt_verify(
         /*input*/ (uint8_t*)"\x46\xB9\x34\x2A\x41\x39\x6C\xD7\x38\x6B\xF5\x80\x31\x04\xD7\xCE\xDC\x12\x2B\x91\x32\x13\x9B\xAF\x2E\xED\xC9\x4E\xE1\x78\x53\x4F\x2F\x2D\x23\x5D\x07\x4D\x74\x49",
         /*size*/  40,
@@ -265,16 +337,21 @@ int main(int argc, char** argv) {
 
     //TODO: test that does not verify
 
+    uint8_t* ks_enc = (uint8_t*)"\x97\x9E\xC1\x3B\x1C\xBF\xE9\xDC\xD0\x1A\xB0\xFE\xD3\x07\xEA\xE5";
+    uint8_t* ks_mac = (uint8_t*)"\xF1\xCB\x1F\x1F\xB5\xAD\xF2\x08\x80\x6B\x89\xDC\x57\x9D\xC1\xF8";
+
     test_mrtd_bac_keys_from_seed(
         (uint8_t*)"\x00\x36\xD2\x72\xF5\xC3\x50\xAC\xAC\x50\xC3\xF5\x72\xD2\x36\x00",
-        (uint8_t*)"\x97\x9E\xC1\x3B\x1C\xBF\xE9\xDC\xD0\x1A\xB0\xFE\xD3\x07\xEA\xE5",
-        (uint8_t*)"\xF1\xCB\x1F\x1F\xB5\xAD\xF2\x08\x80\x6B\x89\xDC\x57\x9D\xC1\xF8"
+        ks_enc,
+        ks_mac
     );
 
     uint8_t* rnd_ic = (uint8_t*)"\x46\x08\xF9\x19\x88\x70\x22\x12";
     uint8_t* rnd_ifd = (uint8_t*)"\x78\x17\x23\x86\x0C\x06\xC2\x26";
 
     test_mrtd_ssc_from_data(rnd_ic, rnd_ifd, 0x887022120C06C226);
+
+    test_mrtd_protect_apdu(0x00, 0xA4, 0x02, 0x0C, 0x02, "\x01\x1e", -1, ks_enc, ks_mac, 0x887022120C06C227, (uint8_t*)"\x0C\xA4\x02\x0C\x15\x87\x09\x01\x63\x75\x43\x29\x08\xC0\x44\xF6\x8E\x08\xBF\x8B\x92\xD6\x35\xFF\x24\xF8\x00", 27);
 
     return 0;
 }

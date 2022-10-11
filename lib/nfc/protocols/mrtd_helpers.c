@@ -1,6 +1,7 @@
 #include "mrtd_helpers.h"
 
 #include <stdio.h> //TODO: remove
+#include <stdlib.h>
 
 #include <mbedtls/sha1.h>
 #include <mbedtls/des.h>
@@ -169,6 +170,96 @@ bool mrtd_bac_decrypt_verify(const uint8_t* data, size_t data_length, uint8_t* k
     return true;
 }
 
+bool mrtd_bac_mac_init(mrtd_bac_mac_ctx* ctx, uint8_t key[16]) {
+    mbedtls_des_init(&ctx->des);
+    mbedtls_des_setkey_enc(&ctx->des, key);
+    memset(ctx->mac, 0, 8);
+    ctx->idx_in = 0;
+    memcpy(ctx->key, key, 16);
+    return true;
+}
+
+bool mrtd_bac_mac_update(mrtd_bac_mac_ctx* ctx, const uint8_t* data, size_t data_length) {
+    size_t data_idx = 0;
+    //uint8_t* xormac = ctx->xormac;
+
+    if(ctx->idx_in != 0) {
+        uint8_t buff_add = 8 - ctx->idx_in;
+        if(data_length < buff_add) {
+            buff_add = data_length;
+        }
+        memcpy(ctx->buffer_in + ctx->idx_in, data, buff_add);
+        ctx->idx_in = (ctx->idx_in + buff_add) % 8;
+        data_idx += buff_add;
+
+        if(ctx->idx_in == 0) { // buffer_in filled
+            for(uint8_t j=0; j<8; ++j) {
+                ctx->xormac[j] = ctx->mac[j] ^ ctx->buffer_in[j];
+            }
+            mbedtls_des_crypt_ecb(&ctx->des, ctx->xormac, ctx->mac);
+
+            printf("DES1: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+                ctx->buffer_in[0], ctx->buffer_in[1], ctx->buffer_in[2], ctx->buffer_in[3],
+                ctx->buffer_in[4], ctx->buffer_in[5], ctx->buffer_in[6], ctx->buffer_in[7]);
+
+            //printf("DES1: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+                //xormac[0], xormac[1], xormac[2], xormac[3],
+                //xormac[4], xormac[5], xormac[6], xormac[7]);
+        }
+    }
+
+    while(true) {
+        if(data_idx + 8 > data_length) {
+            // Not a full block
+            break;
+        }
+        for(uint8_t j=0; j<8; ++j) {
+            ctx->xormac[j] = ctx->mac[j] ^ data[data_idx++];
+        }
+
+        mbedtls_des_crypt_ecb(&ctx->des, ctx->xormac, ctx->mac);
+        printf("DES1: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+            data[data_idx - 8 + 0], data[data_idx - 8 + 1], data[data_idx - 8 + 2], data[data_idx - 8 + 3],
+            data[data_idx - 8 + 4], data[data_idx - 8 + 5], data[data_idx - 8 + 6], data[data_idx - 8 + 7]);
+
+        //printf("DES1: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+            //xormac[0], xormac[1], xormac[2], xormac[3],
+            //xormac[4], xormac[5], xormac[6], xormac[7]);
+    }
+
+    if(data_idx < data_length) {
+        ctx->idx_in = data_length - data_idx;
+        memcpy(ctx->buffer_in, data + data_idx, ctx->idx_in);
+    }
+
+    return true;
+}
+
+bool mrtd_bac_mac_pad(mrtd_bac_mac_ctx* ctx) {
+    memset(ctx->buffer_in + ctx->idx_in, 0x00, 8 - ctx->idx_in);
+    ctx->buffer_in[ctx->idx_in] = 0x80;
+    ctx->idx_in = 8;
+
+    mrtd_bac_mac_update(ctx, NULL, 0); // Force processing the buffer_in
+    return true;
+}
+
+bool mrtd_bac_mac_finalize(mrtd_bac_mac_ctx* ctx, uint8_t output[8]) {
+    mrtd_bac_mac_pad(ctx);
+
+    uint8_t tmp[8];
+    mbedtls_des_init(&ctx->des);
+    mbedtls_des_setkey_dec(&ctx->des, ctx->key+8);
+    mbedtls_des_crypt_ecb(&ctx->des, ctx->mac, tmp);
+
+    mbedtls_des_init(&ctx->des);
+    mbedtls_des_setkey_enc(&ctx->des, ctx->key);
+    mbedtls_des_crypt_ecb(&ctx->des, tmp, output);
+
+    mbedtls_des_free(&ctx->des);
+    return true;
+}
+
 bool mrtd_bac_mac(const uint8_t* data, size_t data_length, uint8_t* key, uint8_t* output) {
     // MAC
     uint8_t mac[8];
@@ -184,7 +275,11 @@ bool mrtd_bac_mac(const uint8_t* data, size_t data_length, uint8_t* key, uint8_t
         for(uint8_t j=0; j<8; ++j) {
             xormac[j] = mac[j] ^ data[i * 8 + j];
         }
+
         mbedtls_des_crypt_ecb(&ctx, xormac, mac);
+        printf("DES1: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+            xormac[0], xormac[1], xormac[2], xormac[3],
+            xormac[4], xormac[5], xormac[6], xormac[7]);
     }
 
     mbedtls_des_init(&ctx);
@@ -201,6 +296,7 @@ bool mrtd_bac_mac(const uint8_t* data, size_t data_length, uint8_t* key, uint8_t
 }
 
 bool mrtd_bac_padded_mac(const uint8_t* data, size_t data_length, uint8_t* key, uint8_t* output) {
+    //TODO: bufferless padding should be possible with 3DES
     size_t newlength = ((data_length+8)/8)*8; // TODO: return this value too?
     uint8_t padded[newlength]; //TODO: input parameter
     memset(padded, 0, newlength);
@@ -214,3 +310,75 @@ bool mrtd_bac_padded_mac(const uint8_t* data, size_t data_length, uint8_t* key, 
     return true;
 }
 
+size_t mrtd_protect_apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t lc, const void* data, int16_t le, uint8_t* key_enc, uint8_t* key_mac, uint64_t ssc, uint8_t* output) {
+    //TODO: max size on output?
+    size_t idx = 0;
+
+    // CC = MAC( SSC || CmdHeader || DO'87 )
+    mrtd_bac_mac_ctx mac_ctx;
+    mrtd_bac_mac_init(&mac_ctx, key_mac);
+    uint64_t ssc_n = htonll(ssc);
+    mrtd_bac_mac_update(&mac_ctx, (uint8_t*)&ssc_n, 8);
+
+    // Mask cla
+    output[idx++] = cla | 0x0c;
+    output[idx++] = ins;
+    output[idx++] = p1;
+    output[idx++] = p2;
+
+    // Pad Header
+    mrtd_bac_mac_update(&mac_ctx, output, idx);
+    mrtd_bac_mac_pad(&mac_ctx);
+
+    size_t idx_lc = idx;
+    output[idx++] = 0xff; // place holder for Lc
+
+    // Build DO'87
+    // TODO: condition on data presence
+    {
+        size_t newlength = ((lc+8)/8)*8;
+        uint8_t padded[newlength];
+        size_t idx_do87 = idx;
+
+        output[idx++] = 0x87; // Header
+        output[idx++] = newlength + 1;  // Length
+        output[idx++] = 0x01; //TODO: check this value
+
+        memset(padded, 0, newlength);
+        memcpy(padded, data, lc);
+        padded[lc] = 0x80;
+
+        mrtd_bac_encrypt(padded, newlength, key_enc, output + idx);
+        idx += newlength;
+     
+        mrtd_bac_mac_update(&mac_ctx, output + idx_do87, idx - idx_do87);
+    }
+
+    // Build DO'8E
+    // TODO: conditions?
+    {
+        output[idx++] = 0x8E; // Header
+        output[idx++] = 0x08; // Length
+
+        printf("idx: %d\n", idx);
+
+        uint8_t mac[8];
+        mrtd_bac_mac_finalize(&mac_ctx, output + idx);
+        idx += 8;
+        printf("MAC: ");
+        for(uint8_t i=0; i<8; ++i) {
+            printf("%02X ", mac[i]);
+        }
+        printf("\n");
+    }
+
+    output[idx_lc] = idx - idx_lc - 1; // Set Lc
+
+    output[idx++] = 0x00;
+
+    if(le) {
+        //TODO: le?
+    }
+
+    return idx;
+}

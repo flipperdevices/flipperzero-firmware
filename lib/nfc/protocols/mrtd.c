@@ -100,21 +100,29 @@ struct AIDSet AID = {
 
 bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t lc, const void* data, int16_t le) {
     FuriHalNfcTxRxContext* tx_rx = app->tx_rx;
+    size_t idx = 0;
 
     FURI_LOG_D(TAG, "Send APDU, lc: %d, le: %d", lc, le);
 
-    size_t idx = 0;
-    tx_rx->tx_data[idx++] = cla;
-    tx_rx->tx_data[idx++] = ins;
-    tx_rx->tx_data[idx++] = p1;
-    tx_rx->tx_data[idx++] = p2;
-    if(lc > 0) {
-        tx_rx->tx_data[idx++] = lc;
-        memcpy(tx_rx->tx_data + idx, data, lc);
-        idx += lc;
-    }
-    if(le >= 0) {
-        tx_rx->tx_data[idx++] = le&0xff;
+    if(app->secure_messaging) {
+        FURI_LOG_D(TAG, "Protect APDU");
+
+        app->ssc_long++;
+        idx = mrtd_protect_apdu(cla, ins, p1, p2, lc, data, le, app->ksenc, app->ksmac, app->ssc_long, tx_rx->tx_data);
+
+    } else {
+        tx_rx->tx_data[idx++] = cla;
+        tx_rx->tx_data[idx++] = ins;
+        tx_rx->tx_data[idx++] = p1;
+        tx_rx->tx_data[idx++] = p2;
+        if(lc > 0) {
+            tx_rx->tx_data[idx++] = lc;
+            memcpy(tx_rx->tx_data + idx, data, lc);
+            idx += lc;
+        }
+        if(le >= 0) {
+            tx_rx->tx_data[idx++] = le&0xff;
+        }
     }
 
     tx_rx->tx_bits = idx * 8;
@@ -208,6 +216,7 @@ size_t mrtd_read_binary(MrtdApplication* app, uint8_t* buffer, size_t bufsize, s
 
 void mrtd_read_dump(MrtdApplication* app, EFFile file, const char* descr) {
     FURI_LOG_D(TAG, "Read and dump %s:", descr);
+
     if(!mrtd_select_file(app, file)) {
         return;
     }
@@ -258,12 +267,22 @@ void parse_ef_dir(EF_DIR_contents* EF_DIR, const uint8_t* data, size_t length) {
     }
 }
 
+void parse_ef_com(EF_COM_contents* EF_COM, const uint8_t* data, size_t length) {
+    UNUSED(EF_COM); //TODO
+    UNUSED(length); //TODO
+    size_t offset = 0;
+
+    TlvInfo tlv = iso7816_tlv_parse(data + offset);
+    UNUSED(tlv); //TODO
+}
+
 //TODO: remove testing function
 void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data) {
     FuriHalNfcTxRxContext* tx_rx = app->tx_rx;
 
     FURI_LOG_D(TAG, "Mrtd Test");
     mrtd_read_dump(app, EF.ATR, "EF.ATR");
+    mrtd_read_dump(app, EF.COM, "EF.COM");
     mrtd_read_dump(app, EF.DIR, "EF.DIR");
     parse_ef_dir(&app->files.EF_DIR, tx_rx->rx_data, tx_rx->rx_bits / 8 - 2); // bits to bytes, and exclude the 2 byte return code
     mrtd_read_dump(app, EF.CardAccess, "EF.CardAccess");
@@ -294,6 +313,12 @@ void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data) {
         default:
             break;
     }
+
+    if(!mrtd_data->auth_success) {
+        return;
+    }
+
+    mrtd_read_dump(app, EF.COM, "EF.COM");
 }
 
 MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx) {
@@ -387,6 +412,8 @@ bool mrtd_bac(MrtdApplication* app, MrtdAuthData* auth) {
 
     app->ssc_long = mrtd_ssc_from_data(rnd_ic, rnd_ifd);
     FURI_LOG_D(TAG, "SSC: %01llX", app->ssc_long);
+
+    app->secure_messaging = true;
 
     return true;
 }

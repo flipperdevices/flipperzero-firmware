@@ -23,11 +23,19 @@ typedef struct {
 } EF_DIR_contents;
 
 typedef struct {
+    uint16_t lds_version;
+    uint16_t unicode_version;
+    //TODO: taglist
+} EF_COM_contents;
+
+typedef struct {
     FuriHalNfcTxRxContext* tx_rx;
     uint16_t file_offset;
     uint8_t ksenc[16];
     uint8_t ksmac[16];
-    uint64_t ssc_long;
+    uint64_t ssc_long; // TODO: rename without _long
+
+    bool secure_messaging;
 
     struct {
         EF_DIR_contents EF_DIR;
