@@ -91,6 +91,8 @@ int32_t nfc_worker_task(void* context) {
 
     if(nfc_worker->state == NfcWorkerStateRead) {
         nfc_worker_read(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateReadMrtdAuth) {
+        nfc_worker_read_mrtd_auth(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateUidEmulate) {
         nfc_worker_emulate_uid(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateEmulateApdu) {
@@ -283,8 +285,9 @@ static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, MrtdData* mrtd_data, Fur
         //mrtd_select(mrtd_app, EF.DIR);
         //mrtd_select_efcardaccess(mrtd_app);
         //mrtd_select_efdir(mrtd_app);
-        mrtd_test(mrtd_app, mrtd_data);
         if(!mrtd_select_app(mrtd_app, AID.eMRTDApplication)) break;
+
+        mrtd_test(mrtd_app, mrtd_data);
 
         //TODO: read general informatie
         //TODO: after auth scene, do auth (BAC / PACE)
@@ -314,6 +317,22 @@ static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, MrtdData* mrtd_data, Fur
     } while(false);
 
     return read_success;
+}
+
+bool nfc_worker_read_mrtd_auth(NfcWorker* nfc_worker) {
+    MrtdData* mrtd_data = &nfc_worker->dev_data->mrtd_data;
+    FuriHalNfcTxRxContext tx_rx = {};
+    MrtdApplication* mrtd_app = mrtd_alloc_init(&tx_rx);
+
+    do {
+        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
+
+        if(!mrtd_select_app(mrtd_app, AID.eMRTDApplication)) break;
+
+        if(!mrtd_bac(mrtd_app, &mrtd_data->auth)) break;
+    } while(false);
+
+    return false;
 }
 
 static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {

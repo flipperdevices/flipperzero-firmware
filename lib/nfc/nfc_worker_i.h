@@ -36,6 +36,8 @@ int32_t nfc_worker_task(void* context);
 
 void nfc_worker_read(NfcWorker* nfc_worker);
 
+bool nfc_worker_read_mrtd_auth(NfcWorker* nfc_worker);
+
 void nfc_worker_emulate_uid(NfcWorker* nfc_worker);
 
 void nfc_worker_emulate_mf_ultralight(NfcWorker* nfc_worker);
