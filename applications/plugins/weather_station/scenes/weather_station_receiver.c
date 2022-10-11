@@ -10,7 +10,7 @@ static void weather_station_scene_receiver_update_statusbar(void* context) {
         FuriString* modulation_str;
 
         frequency_str = furi_string_alloc();
-        modulation_str= furi_string_alloc();
+        modulation_str = furi_string_alloc();
 
         ws_get_frequency_modulation(app, frequency_str, modulation_str);
 

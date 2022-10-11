@@ -11,7 +11,8 @@ static void weather_station_scene_show_callback(
     str_buff = furi_string_alloc();
 
     subghz_protocol_decoder_base_get_string(decoder_base, str_buff);
-    weather_station_show_add_data_to_show(app->weather_station_show, furi_string_get_cstr(str_buff));
+    weather_station_show_add_data_to_show(
+        app->weather_station_show, furi_string_get_cstr(str_buff));
 
     subghz_receiver_reset(receiver);
     furi_string_free(str_buff);
@@ -31,7 +32,11 @@ void weather_station_scene_show_on_enter(void* context) {
         ws_rx_end(app);
     };
     if((app->txrx->txrx_state == WSTxRxStateIDLE) || (app->txrx->txrx_state == WSTxRxStateSleep)) {
-        ws_begin(app, NULL);
+        ws_begin(
+            app,
+            subghz_setting_get_preset_data_by_name(
+                app->setting, furi_string_get_cstr(app->txrx->preset->name)));
+
         ws_rx(app, app->txrx->preset->frequency);
     }
 

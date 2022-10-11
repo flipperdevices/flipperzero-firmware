@@ -1,8 +1,11 @@
 #pragma once
 
-#include "m-string.h"
+//#include "m-string.h"
 #include <furi.h>
 #include <furi_hal.h>
+
+#define WS_KEY_FILE_VERSION 1
+#define WS_KEY_FILE_TYPE "Flipper Weather Station Key File"
 
 // /** SubGhzNotification state */
 // typedef enum {
@@ -20,10 +23,6 @@
 //     SubGhzTxRxStateTx,
 //     SubGhzTxRxStateSleep,
 // } SubGhzTxRxState;
-
-
-
-
 
 // /** SubGhzLoadKeyState state */
 // typedef enum {

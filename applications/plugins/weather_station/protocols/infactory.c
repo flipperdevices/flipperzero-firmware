@@ -49,22 +49,22 @@ struct WSProtocolDecoderInfactory {
     SubGhzProtocolDecoderBase base;
 
     SubGhzBlockDecoder decoder;
-    SubGhzBlockGeneric generic;
+    WSBlockGeneric generic;
 
     uint16_t header_count;
 
-    uint8_t id;
-    uint8_t battery_low;
-    uint8_t humidity;
-    uint8_t channel;
-    float temp;
+    // uint8_t id;
+    // uint8_t battery_low;
+    // uint8_t humidity;
+    // uint8_t channel;
+    // float temp;
 };
 
 struct WSProtocolEncoderInfactory {
     SubGhzProtocolEncoderBase base;
 
     SubGhzProtocolBlockEncoder encoder;
-    SubGhzBlockGeneric generic;
+    WSBlockGeneric generic;
 };
 
 typedef enum {
@@ -141,6 +141,20 @@ static bool ws_protocol_infactory_check_crc(WSProtocolDecoderInfactory* instance
     return (crc == ((instance->decoder.decode_data >> 28) & 0x0F));
 }
 
+/**
+ * Analysis of received data
+ * @param instance Pointer to a WSBlockGeneric* instance
+ */
+static void ws_protocol_infactory_remote_controller(WSBlockGeneric* instance) {
+    instance->id = instance->data >> 32;
+    instance->battery_low = (instance->data >> 26) & 1;
+    instance->temp = ws_block_generic_fahrenheit_to_celsius(
+        (float)(((instance->data >> 12) & 0x0FFF) - 900) / 10.0f);
+    instance->humidity =
+        (((instance->data >> 8) & 0x0F) * 10) + ((instance->data >> 4) & 0x0F); // BCD, 'A0'=100%rH
+    instance->channel = instance->data & 0x03;
+}
+
 void ws_protocol_decoder_infactory_feed(void* context, bool level, uint32_t duration) {
     furi_assert(context);
     WSProtocolDecoderInfactory* instance = context;
@@ -200,7 +214,7 @@ void ws_protocol_decoder_infactory_feed(void* context, bool level, uint32_t dura
                    ws_protocol_infactory_check_crc(instance)) {
                     instance->generic.data = instance->decoder.decode_data;
                     instance->generic.data_count_bit = instance->decoder.decode_count_bit;
-
+                    ws_protocol_infactory_remote_controller(&instance->generic);
                     if(instance->base.callback)
                         instance->base.callback(&instance->base, instance->base.context);
                 }
@@ -232,23 +246,6 @@ void ws_protocol_decoder_infactory_feed(void* context, bool level, uint32_t dura
     }
 }
 
-static float fahrenheit_to_celsius(float fahrenheit) {
-    return (fahrenheit - 32.0f) / 1.8f;
-}
-/**
- * Analysis of received data
- * @param instance Pointer to a WSProtocolDecoderInfactory* instance
- */
-static void ws_protocol_infactory_remote_controller(WSProtocolDecoderInfactory* instance) {
-    instance->id = instance->generic.data >> 32;
-    instance->battery_low = (instance->generic.data >> 26) & 1;
-    instance->temp =
-        fahrenheit_to_celsius((float)(((instance->generic.data >> 12) & 0x0FFF) - 900) / 10.0f);
-    instance->humidity = (((instance->generic.data >> 8) & 0x0F) * 10) +
-                         ((instance->generic.data >> 4) & 0x0F); // BCD, 'A0'=100%rH
-    instance->channel = instance->generic.data & 0x03;
-}
-
 uint8_t ws_protocol_decoder_infactory_get_hash_data(void* context) {
     furi_assert(context);
     WSProtocolDecoderInfactory* instance = context;
@@ -262,7 +259,7 @@ bool ws_protocol_decoder_infactory_serialize(
     SubGhzPresetDefinition* preset) {
     furi_assert(context);
     WSProtocolDecoderInfactory* instance = context;
-    return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
+    return ws_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
 bool ws_protocol_decoder_infactory_deserialize(void* context, FlipperFormat* flipper_format) {
@@ -270,7 +267,7 @@ bool ws_protocol_decoder_infactory_deserialize(void* context, FlipperFormat* fli
     WSProtocolDecoderInfactory* instance = context;
     bool ret = false;
     do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+        if(!ws_block_generic_deserialize(&instance->generic, flipper_format)) {
             break;
         }
         if(instance->generic.data_count_bit !=
@@ -286,23 +283,21 @@ bool ws_protocol_decoder_infactory_deserialize(void* context, FlipperFormat* fli
 void ws_protocol_decoder_infactory_get_string(void* context, FuriString* output) {
     furi_assert(context);
     WSProtocolDecoderInfactory* instance = context;
-
-    ws_protocol_infactory_remote_controller(instance);
-
+    //ws_protocol_infactory_remote_controller(&instance->generic);
     furi_string_printf(
         output,
         "%s %dbit\r\n"
         "Key:0x%lX%08lX\r\n"
-        "Sn:0x%X Ch:%d  Bat:%d\r\n"
+        "Sn:0x%lX Ch:%d  Bat:%d\r\n"
         "Temp:%d.%d C Hum:%d%%",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         (uint32_t)(instance->generic.data >> 32),
         (uint32_t)(instance->generic.data),
-        instance->id,
-        instance->channel,
-        instance->battery_low,
-        (uint16_t)instance->temp,
-        ((uint16_t)(instance->temp * 10) - (((uint16_t)instance->temp) * 10)),
-        instance->humidity);
+        instance->generic.id,
+        instance->generic.channel,
+        instance->generic.battery_low,
+        (uint16_t)instance->generic.temp,
+        ((uint16_t)(instance->generic.temp * 10) - (((uint16_t)instance->generic.temp) * 10)),
+        instance->generic.humidity);
 }

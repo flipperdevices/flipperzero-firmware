@@ -27,10 +27,7 @@ void ws_view_receiver_add_data_statusbar(
     const char* preset_str,
     const char* history_stat_str);
 
-void ws_view_receiver_add_item_to_menu(
-    WSReceiver* ws_receiver,
-    const char* name,
-    uint8_t type);
+void ws_view_receiver_add_item_to_menu(WSReceiver* ws_receiver, const char* name, uint8_t type);
 
 uint16_t ws_view_receiver_get_idx_menu(WSReceiver* ws_receiver);
 

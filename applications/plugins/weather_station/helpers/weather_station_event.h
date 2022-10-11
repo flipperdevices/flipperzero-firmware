@@ -73,5 +73,4 @@ typedef enum {
     // WSCustomEventViewTransmitterSendStart,
     // WSCustomEventViewTransmitterSendStop,
     // WSCustomEventViewTransmitterError,
-}
-WSCustomEvent;
+} WSCustomEvent;

@@ -1,4 +1,6 @@
 #include "weather_station_history.h"
+#include <flipper_format/flipper_format_i.h>
+#include <lib/toolbox/stream/stream.h>
 #include <lib/subghz/receiver.h>
 
 #include <furi.h>
@@ -11,6 +13,7 @@ typedef struct {
     FuriString* item_str;
     FlipperFormat* flipper_string;
     uint8_t type;
+    uint32_t id;
     SubGhzPresetDefinition* preset;
 } WSHistoryItem;
 
@@ -152,61 +155,99 @@ bool ws_history_add_to_history(WSHistory* instance, void* context, SubGhzPresetD
     instance->code_last_hash_data = subghz_protocol_decoder_base_get_hash_data(decoder_base);
     instance->last_update_timestamp = furi_get_tick();
 
-    FuriString* text;
-    text = furi_string_alloc();
-    WSHistoryItem* item = WSHistoryItemArray_push_raw(instance->history->data);
-    item->preset = malloc(sizeof(SubGhzPresetDefinition));
-    item->type = decoder_base->protocol->type;
-    item->preset->frequency = preset->frequency;
-    item->preset->name = furi_string_alloc();
-    furi_string_set(item->preset->name, preset->name);
-    item->preset->data = preset->data;
-    item->preset->data_size = preset->data_size;
-
-    item->item_str = furi_string_alloc();
-    item->flipper_string = flipper_format_string_alloc();
-    subghz_protocol_decoder_base_serialize(decoder_base, item->flipper_string, preset);
+    FlipperFormat* fff = flipper_format_string_alloc();
+    uint32_t id = 0;
+    subghz_protocol_decoder_base_serialize(decoder_base, fff, preset);
+    //Stream* fff_stream = flipper_format_get_raw_stream(fff);
+    //stream_dump_data(fff_stream);
 
     do {
-        if(!flipper_format_rewind(item->flipper_string)) {
+        if(!flipper_format_rewind(fff)) {
             FURI_LOG_E(TAG, "Rewind error");
             break;
         }
-        if(!flipper_format_read_string(item->flipper_string, "Protocol", instance->tmp_string)) {
-            FURI_LOG_E(TAG, "Missing Protocol");
+        if(!flipper_format_read_uint32(fff, "Id", (uint32_t*)&id, 1)) {
+            FURI_LOG_E(TAG, "Missing Id");
             break;
-        }
-
-        if(!flipper_format_rewind(item->flipper_string)) {
-            FURI_LOG_E(TAG, "Rewind error");
-            break;
-        }
-        uint8_t key_data[sizeof(uint64_t)] = {0};
-        if(!flipper_format_read_hex(item->flipper_string, "Key", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(TAG, "Missing Key");
-            break;
-        }
-        uint64_t data = 0;
-        for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
-            data = (data << 8) | key_data[i];
-        }
-        if(!(uint32_t)(data >> 32)) {
-            furi_string_printf(
-                item->item_str,
-                "%s %lX",
-                furi_string_get_cstr(instance->tmp_string),
-                (uint32_t)(data & 0xFFFFFFFF));
-        } else {
-            furi_string_printf(
-                item->item_str,
-                "%s %lX%08lX",
-                furi_string_get_cstr(instance->tmp_string),
-                (uint32_t)(data >> 32),
-                (uint32_t)(data & 0xFFFFFFFF));
         }
     } while(false);
+    flipper_format_free(fff);
 
-    furi_string_free(text);
-    instance->last_index_write++;
+    //FURI_LOG_E(TAG, "ID 0x%lx", id);
+
+    //Update record if found
+    bool sensor_found = false;
+    for(size_t i = 0; i < WSHistoryItemArray_size(instance->history->data); i++) {
+        WSHistoryItem* item = WSHistoryItemArray_get(instance->history->data, i);
+        //FURI_LOG_E(TAG, "---ID 0x%lx", item->id);
+        if(item->id == id) {
+            //FURI_LOG_E(TAG, "---ID 0x%lx OK", item->id);
+            sensor_found = true;
+            Stream* flipper_string_stream = flipper_format_get_raw_stream(item->flipper_string);
+            //stream_dump_data(flipper_string_stream);
+            stream_clean(flipper_string_stream);
+            subghz_protocol_decoder_base_serialize(decoder_base, item->flipper_string, preset);
+            //stream_dump_data(flipper_string_stream);
+            return false;
+        }
+    }
+
+    // or add new record
+    if(!sensor_found) {
+        WSHistoryItem* item = WSHistoryItemArray_push_raw(instance->history->data);
+        item->preset = malloc(sizeof(SubGhzPresetDefinition));
+        item->type = decoder_base->protocol->type;
+        item->preset->frequency = preset->frequency;
+        item->preset->name = furi_string_alloc();
+        furi_string_set(item->preset->name, preset->name);
+        item->preset->data = preset->data;
+        item->preset->data_size = preset->data_size;
+        item->id = id;
+
+        item->item_str = furi_string_alloc();
+        item->flipper_string = flipper_format_string_alloc();
+        subghz_protocol_decoder_base_serialize(decoder_base, item->flipper_string, preset);
+
+        do {
+            if(!flipper_format_rewind(item->flipper_string)) {
+                FURI_LOG_E(TAG, "Rewind error");
+                break;
+            }
+            if(!flipper_format_read_string(
+                   item->flipper_string, "Protocol", instance->tmp_string)) {
+                FURI_LOG_E(TAG, "Missing Protocol");
+                break;
+            }
+
+            if(!flipper_format_rewind(item->flipper_string)) {
+                FURI_LOG_E(TAG, "Rewind error");
+                break;
+            }
+            uint8_t key_data[sizeof(uint64_t)] = {0};
+            if(!flipper_format_read_hex(item->flipper_string, "Key", key_data, sizeof(uint64_t))) {
+                FURI_LOG_E(TAG, "Missing Key");
+                break;
+            }
+            uint64_t data = 0;
+            for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
+                data = (data << 8) | key_data[i];
+            }
+            if(!(uint32_t)(data >> 32)) {
+                furi_string_printf(
+                    item->item_str,
+                    "%s %lX",
+                    furi_string_get_cstr(instance->tmp_string),
+                    (uint32_t)(data & 0xFFFFFFFF));
+            } else {
+                furi_string_printf(
+                    item->item_str,
+                    "%s %lX%08lX",
+                    furi_string_get_cstr(instance->tmp_string),
+                    (uint32_t)(data >> 32),
+                    (uint32_t)(data & 0xFFFFFFFF));
+            }
+        } while(false);
+        instance->last_index_write++;
+    }
     return true;
 }

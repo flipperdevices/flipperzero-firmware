@@ -91,10 +91,7 @@ bool ws_history_get_text_space_left(WSHistory* instance, FuriString* output);
  * @param preset    - SubGhzPresetDefinition preset
  * @return bool;
  */
-bool ws_history_add_to_history(
-    WSHistory* instance,
-    void* context,
-    SubGhzPresetDefinition* preset);
+bool ws_history_add_to_history(WSHistory* instance, void* context, SubGhzPresetDefinition* preset);
 
 /** Get SubGhzProtocolCommonLoad to load into the protocol decoder bin data
  * 
