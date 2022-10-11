@@ -432,7 +432,7 @@ void subghz_protocol_decoder_magellan_get_string(void* context, string_t output)
         output,
         "%s %dbit\r\n"
         "Key:0x%08lX\r\n"
-        "Sn:%03d%03d, Event:0x%02X\r\n"
+        "Sn:%03ld%03ld, Event:0x%02X\r\n"
         "Stat:",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,

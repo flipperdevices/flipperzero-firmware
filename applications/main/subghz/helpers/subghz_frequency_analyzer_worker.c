@@ -71,6 +71,8 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
         .frequency_coarse = 0, .rssi_coarse = 0, .frequency_fine = 0, .rssi_fine = 0};
     float rssi = 0;
     uint32_t frequency = 0;
+    float rssi_temp = 0;
+    uint32_t frequency_temp = 0;
     CC1101Status status;
 
     //Start CC1101
@@ -147,7 +149,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
 
         FURI_LOG_T(
             TAG,
-            "RSSI: avg %f, max %f at %u, min %f",
+            "RSSI: avg %f, max %f at %lu, min %f",
             (double)(rssi_avg / rssi_avg_samples),
             (double)frequency_rssi.rssi_coarse,
             frequency_rssi.frequency_coarse,
@@ -178,7 +180,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
 
                     rssi = furi_hal_subghz_get_rssi();
 
-                    FURI_LOG_T(TAG, "#:%u:%f", frequency, (double)rssi);
+                    FURI_LOG_T(TAG, "#:%lu:%f", frequency, (double)rssi);
 
                     if(frequency_rssi.rssi_fine < rssi) {
                         frequency_rssi.rssi_fine = rssi;
@@ -191,9 +193,12 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
         // Deliver results fine
         if(frequency_rssi.rssi_fine > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
             FURI_LOG_D(
-                TAG, "=:%u:%f", frequency_rssi.frequency_fine, (double)frequency_rssi.rssi_fine);
+                TAG, "=:%lu:%f", frequency_rssi.frequency_fine, (double)frequency_rssi.rssi_fine);
 
             instance->sample_hold_counter = 20;
+            rssi_temp = frequency_rssi.rssi_fine;
+            frequency_temp = frequency_rssi.frequency_fine;
+
             if(instance->filVal) {
                 frequency_rssi.frequency_fine =
                     subghz_frequency_analyzer_worker_expRunningAverageAdaptive(
@@ -202,18 +207,23 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
             // Deliver callback
             if(instance->pair_callback) {
                 instance->pair_callback(
-                    instance->context, frequency_rssi.frequency_fine, frequency_rssi.rssi_fine);
+                    instance->context,
+                    frequency_rssi.frequency_fine,
+                    frequency_rssi.rssi_fine,
+                    true);
             }
         } else if( // Deliver results coarse
             (frequency_rssi.rssi_coarse > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) &&
             (instance->sample_hold_counter < 10)) {
             FURI_LOG_D(
                 TAG,
-                "~:%u:%f",
+                "~:%lu:%f",
                 frequency_rssi.frequency_coarse,
                 (double)frequency_rssi.rssi_coarse);
 
             instance->sample_hold_counter = 20;
+            rssi_temp = frequency_rssi.rssi_coarse;
+            frequency_temp = frequency_rssi.frequency_coarse;
             if(instance->filVal) {
                 frequency_rssi.frequency_coarse =
                     subghz_frequency_analyzer_worker_expRunningAverageAdaptive(
@@ -224,14 +234,22 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
                 instance->pair_callback(
                     instance->context,
                     frequency_rssi.frequency_coarse,
-                    frequency_rssi.rssi_coarse);
+                    frequency_rssi.rssi_coarse,
+                    true);
             }
         } else {
             if(instance->sample_hold_counter > 0) {
                 instance->sample_hold_counter--;
+                if(instance->sample_hold_counter == 18) {
+                    if(instance->pair_callback) {
+                        instance->pair_callback(
+                            instance->context, frequency_temp, rssi_temp, false);
+                    }
+                }
             } else {
                 instance->filVal = 0;
-                if(instance->pair_callback) instance->pair_callback(instance->context, 0, 0);
+                if(instance->pair_callback)
+                    instance->pair_callback(instance->context, 0, 0, false);
             }
         }
     }

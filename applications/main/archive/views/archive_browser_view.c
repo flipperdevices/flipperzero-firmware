@@ -14,6 +14,7 @@ static const char* ArchiveTabNames[] = {
     [ArchiveTabInfrared] = "Infrared",
     [ArchiveTabBadUsb] = "Bad USB",
     [ArchiveTabU2f] = "U2F",
+    [ArchiveTabApplications] = "Apps",
     [ArchiveTabBrowser] = "Browser",
 };
 
@@ -29,6 +30,7 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeFolder] = &I_dir_10px,
     [ArchiveFileTypeUnknown] = &I_unknown_10px,
     [ArchiveFileTypeLoading] = &I_loading_10px,
+    [ArchiveFileTypeApplication] = &I_unknown_10px,
 };
 
 void archive_browser_set_callback(
@@ -47,35 +49,35 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
     canvas_set_color(canvas, ColorBlack);
     elements_slightly_rounded_frame(canvas, 70, 16, 58, 48);
 
-    string_t menu[MENU_ITEMS];
+    FuriString* menu[MENU_ITEMS];
 
-    string_init_set_str(menu[0], "Run in app");
-    string_init_set_str(menu[1], "Pin");
-    string_init_set_str(menu[2], "Rename");
-    string_init_set_str(menu[3], "Delete");
+    menu[0] = furi_string_alloc_set("Run in app");
+    menu[1] = furi_string_alloc_set("Pin");
+    menu[2] = furi_string_alloc_set("Rename");
+    menu[3] = furi_string_alloc_set("Delete");
 
     ArchiveFile_t* selected = files_array_get(model->files, model->item_idx - model->array_offset);
 
     if((selected->fav) || (model->tab_idx == ArchiveTabFavorites)) {
-        string_set_str(menu[1], "Unpin");
+        furi_string_set(menu[1], "Unpin");
     }
 
     if(!archive_is_known_app(selected->type)) {
-        string_set_str(menu[0], "---");
-        string_set_str(menu[1], "---");
-        string_set_str(menu[2], "---");
+        furi_string_set(menu[0], "---");
+        furi_string_set(menu[1], "---");
+        furi_string_set(menu[2], "---");
     } else {
         if(model->tab_idx == ArchiveTabFavorites) {
-            string_set_str(menu[2], "Move");
-            string_set_str(menu[3], "---");
+            furi_string_set(menu[2], "Move");
+            furi_string_set(menu[3], "---");
         } else if(selected->is_app) {
-            string_set_str(menu[2], "---");
+            furi_string_set(menu[2], "---");
         }
     }
 
     for(size_t i = 0; i < MENU_ITEMS; i++) {
-        canvas_draw_str(canvas, 82, 27 + i * 11, string_get_cstr(menu[i]));
-        string_clear(menu[i]);
+        canvas_draw_str(canvas, 82, 27 + i * 11, furi_string_get_cstr(menu[i]));
+        furi_string_free(menu[i]);
     }
 
     canvas_draw_icon(canvas, 74, 20 + model->menu_idx * 11, &I_ButtonRight_4x7);
@@ -118,20 +120,31 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
     bool scrollbar = model->item_cnt > 4;
 
     for(uint32_t i = 0; i < MIN(model->item_cnt, MENU_ITEMS); ++i) {
-        string_t str_buf;
-        string_init(str_buf);
+        FuriString* str_buf;
+        str_buf = furi_string_alloc();
         int32_t idx = CLAMP((uint32_t)(i + model->list_offset), model->item_cnt, 0u);
         uint8_t x_offset = (model->move_fav && model->item_idx == idx) ? MOVE_OFFSET : 0;
 
         ArchiveFileTypeEnum file_type = ArchiveFileTypeLoading;
+        uint8_t* custom_icon_data = NULL;
 
         if(archive_is_item_in_array(model, idx)) {
             ArchiveFile_t* file = files_array_get(
                 model->files, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
-            path_extract_filename(file->path, str_buf, archive_is_known_app(file->type));
             file_type = file->type;
+            if(file_type == ArchiveFileTypeApplication) {
+                if(file->custom_icon_data) {
+                    custom_icon_data = file->custom_icon_data;
+                    furi_string_set(str_buf, file->custom_name);
+                } else {
+                    file_type = ArchiveFileTypeUnknown;
+                    path_extract_filename(file->path, str_buf, archive_is_known_app(file->type));
+                }
+            } else {
+                path_extract_filename(file->path, str_buf, archive_is_known_app(file->type));
+            }
         } else {
-            string_set_str(str_buf, "---");
+            furi_string_set(str_buf, "---");
         }
 
         elements_string_fit_width(
@@ -143,10 +156,17 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
             canvas_set_color(canvas, ColorBlack);
         }
 
-        canvas_draw_icon(canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file_type]);
-        canvas_draw_str(canvas, 15 + x_offset, 24 + i * FRAME_HEIGHT, string_get_cstr(str_buf));
+        if(custom_icon_data) {
+            canvas_draw_bitmap(
+                canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, 11, 10, custom_icon_data);
+        } else {
+            canvas_draw_icon(
+                canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file_type]);
+        }
+        canvas_draw_str(
+            canvas, 15 + x_offset, 24 + i * FRAME_HEIGHT, furi_string_get_cstr(str_buf));
 
-        string_clear(str_buf);
+        furi_string_free(str_buf);
     }
 
     if(scrollbar) {
@@ -243,33 +263,37 @@ static bool archive_view_input(InputEvent* event, void* context) {
     bool in_menu;
     bool move_fav_mode;
     with_view_model(
-        browser->view, (ArchiveBrowserViewModel * model) {
+        browser->view,
+        ArchiveBrowserViewModel * model,
+        {
             in_menu = model->menu;
             move_fav_mode = model->move_fav;
-            return false;
-        });
+        },
+        false);
 
     if(in_menu) {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyUp || event->key == InputKeyDown) {
                 with_view_model(
-                    browser->view, (ArchiveBrowserViewModel * model) {
+                    browser->view,
+                    ArchiveBrowserViewModel * model,
+                    {
                         if(event->key == InputKeyUp) {
                             model->menu_idx = ((model->menu_idx - 1) + MENU_ITEMS) % MENU_ITEMS;
                         } else if(event->key == InputKeyDown) {
                             model->menu_idx = (model->menu_idx + 1) % MENU_ITEMS;
                         }
-                        return true;
-                    });
+                    },
+                    true);
             }
 
             if(event->key == InputKeyOk) {
                 uint8_t idx;
                 with_view_model(
-                    browser->view, (ArchiveBrowserViewModel * model) {
-                        idx = model->menu_idx;
-                        return false;
-                    });
+                    browser->view,
+                    ArchiveBrowserViewModel * model,
+                    { idx = model->menu_idx; },
+                    false);
                 browser->callback(file_menu_actions[idx], browser->context);
             } else if(event->key == InputKeyBack) {
                 browser->callback(ArchiveBrowserEventFileMenuClose, browser->context);
@@ -293,7 +317,9 @@ static bool archive_view_input(InputEvent* event, void* context) {
         if((event->key == InputKeyUp || event->key == InputKeyDown) &&
            (event->type == InputTypeShort || event->type == InputTypeRepeat)) {
             with_view_model(
-                browser->view, (ArchiveBrowserViewModel * model) {
+                browser->view,
+                ArchiveBrowserViewModel * model,
+                {
                     if(event->key == InputKeyUp) {
                         model->item_idx =
                             ((model->item_idx - 1) + model->item_cnt) % model->item_cnt;
@@ -314,9 +340,8 @@ static bool archive_view_input(InputEvent* event, void* context) {
                             browser->callback(ArchiveBrowserEventFavMoveDown, browser->context);
                         }
                     }
-
-                    return true;
-                });
+                },
+                true);
             archive_update_offset(browser);
         }
 
@@ -361,14 +386,16 @@ ArchiveBrowserView* browser_alloc() {
     view_set_draw_callback(browser->view, archive_view_render);
     view_set_input_callback(browser->view, archive_view_input);
 
-    string_init_set_str(browser->path, archive_get_default_path(TAB_DEFAULT));
+    browser->path = furi_string_alloc_set(archive_get_default_path(TAB_DEFAULT));
 
     with_view_model(
-        browser->view, (ArchiveBrowserViewModel * model) {
+        browser->view,
+        ArchiveBrowserViewModel * model,
+        {
             files_array_init(model->files);
             model->tab_idx = TAB_DEFAULT;
-            return true;
-        });
+        },
+        true);
 
     return browser;
 }
@@ -381,12 +408,12 @@ void browser_free(ArchiveBrowserView* browser) {
     }
 
     with_view_model(
-        browser->view, (ArchiveBrowserViewModel * model) {
-            files_array_clear(model->files);
-            return false;
-        });
+        browser->view,
+        ArchiveBrowserViewModel * model,
+        { files_array_clear(model->files); },
+        false);
 
-    string_clear(browser->path);
+    furi_string_free(browser->path);
 
     view_free(browser->view);
     free(browser);
