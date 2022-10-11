@@ -32,7 +32,7 @@ static void mrtd_trace(MrtdApplication* app) {
         for(size_t i = 0; i < tx_rx->tx_bits / 8; i++) {
             printf("%02X ", tx_rx->tx_data[i]);
         }
-        printf("\r\nRX: ", tx_rx->rx_data);
+        printf("\r\nRX: ");
         for(size_t i = 0; i < tx_rx->rx_bits / 8; i++) {
             printf("%02X ", tx_rx->rx_data[i]);
         }
