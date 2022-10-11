@@ -179,9 +179,7 @@ static bool nfc_worker_read_mf_desfire(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
     return read_success;
 }
 
-//TODO: remove unused attribute
-static bool __attribute__((unused))
-nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     bool read_success = false;
     EmvApplication emv_app = {};
     EmvData* result = &nfc_worker->dev_data->emv_data;
@@ -279,17 +277,24 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
         card_read = true;
     } else if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
         FURI_LOG_I(TAG, "ISO14443-4 card detected");
-        //TODO: EMV read on MRTD results in states: 0, 10, 11, 13, 30, 33?
-        /*if(nfc_worker_read_bank_card(nfc_worker, tx_rx)) {
-			nfc_worker->dev_data->protocol = NfcDeviceProtocolEMV;
-        } else*/
-        if(nfc_worker_read_mrtd(nfc_worker, tx_rx)) {
-            FURI_LOG_I(TAG, "MRTD reading");
-            nfc_worker->dev_data->protocol = NfcDeviceProtocolMRTD;
-        } else {
+        //TODO: thoughts on improving logic/readability here?
+        do {
+            FURI_LOG_D(TAG, "Try reading EMV");
+            if(nfc_worker_read_bank_card(nfc_worker, tx_rx)) {
+                nfc_worker->dev_data->protocol = NfcDeviceProtocolEMV;
+                break;
+            }
+
+            furi_hal_nfc_sleep(); // Needed between checks
+            FURI_LOG_D(TAG, "Try reading MRTD");
+            if(nfc_worker_read_mrtd(nfc_worker, tx_rx)) {
+                nfc_worker->dev_data->protocol = NfcDeviceProtocolMRTD;
+                break;
+            }
+
             FURI_LOG_I(TAG, "Unknown card. Save UID");
             nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
-        }
+        } while(false);
         card_read = true;
     } else {
         nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
