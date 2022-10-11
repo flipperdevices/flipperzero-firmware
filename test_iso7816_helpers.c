@@ -1,10 +1,13 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "lib/nfc/helpers/iso7816.h"
 
 #define COLOR_RED "\033[0;31m"
 #define COLOR_GREEN "\033[0;32m"
 #define COLOR_RESET "\033[0;0m"
+
+#define num_elements(A) (sizeof(A)/sizeof(A[0]))
 
 //TODO: do something with ISO7816-4 Table 9 — Interindustry data objects for tag allocation authority
 //0x06 Object identifier (encoding specified in ISO/IEC 8825-1, see examples in annex A)
@@ -22,6 +25,24 @@ void print_tlv(char* fmt, TlvInfo tlv) {
     printf("%s Tag: %x, Length: %ld, Value: ", fmt, tlv.tag, tlv.length);
     print_hex(tlv.value, tlv.length);
     printf("\n");
+}
+
+int tlv_number(TlvInfo tlv) {
+    //TODO: negative numbers?
+    const char* str = tlv.value;
+    size_t length = tlv.length;
+
+    int value = 0;
+    while(length--) {
+        char c = *(str++);
+
+        if(c >= '0' && c <= '9') {
+            value = value * 10 + (c - '0');
+        } else {
+            //TODO: warning? return? crash?
+        }
+    }
+    return value;
 }
 
 void test_iso7816_tlv_parse(const uint8_t* input, size_t input_size, uint16_t exp_tag, size_t exp_length) {
@@ -185,12 +206,56 @@ int main(int argc, char** argv) {
     size_t ef_com_data_len = 24;
     describe_tlv(ef_com_data, ef_com_data_len, 0);
 
+    uint16_t lds_tag_path[] = {0x60, 0x5f01};
+    uint16_t unicode_tag_path[] = {0x60, 0x5f36};
+    uint16_t tags_tag_path[] = {0x60, 0x5c};
+
+    TlvInfo tlv_lds_version = iso7816_tlv_select(ef_com_data, ef_com_data_len, lds_tag_path, num_elements(lds_tag_path));
+    if(tlv_lds_version.tag) {
+        int tlv_version = tlv_number(tlv_lds_version);
+        printf("LDS Version: %d.%d (%.4s)\n", tlv_version/100, tlv_version%100, tlv_lds_version.value);
+    } else {
+        printf("Error, LDS info not found!\n");
+    }
+
+    TlvInfo tlv_unicode_version = iso7816_tlv_select(ef_com_data, ef_com_data_len, unicode_tag_path, num_elements(unicode_tag_path));
+    if(tlv_unicode_version.tag) {
+        int unicode_version = tlv_number(tlv_unicode_version);
+        printf("Unicode Version: %d.%d.%d (%.6s)\n", unicode_version/10000, unicode_version/100%100, unicode_version%100, tlv_unicode_version.value);
+    } else {
+        printf("Error, Unicode info not found!\n");
+    }
+
+    TlvInfo tlv_tag_list = iso7816_tlv_select(ef_com_data, ef_com_data_len, tags_tag_path, num_elements(tags_tag_path));
+    if(tlv_tag_list.tag) {
+        printf("Tag List:\n");
+        for(size_t i=0; i<tlv_tag_list.length; ++i) {
+            printf("- %02x\n", tlv_tag_list.value[i]);
+        }
+    } else {
+        printf("Error, Tag List not found!\n");
+    }
+
     printf("====\n");
 
-    TlvInfo tlv = iso7816_tlv_select(ef_com_data, ef_com_data_len, (uint16_t[]){0x60, 0x5f36}, 2);
-    print_tlv("0x60, 0x5f36:", tlv);
-
     test_iso7816_tlv_select(ef_com_data, ef_com_data_len, (uint16_t[]){0x60, 0x5f36}, 2, 0x5f36, "\x30\x34\x30\x30\x30\x30", 6);
+
+
+    //TlvInfo tlv = iso7816_tlv_select(ef_dir_data, ef_dir_data_len, (uint16_t[]){0x61, 0x4f}, 2);
+    //print_tlv("4F-0:", tlv);
+    //tlv = iso7816_tlv_select(tlv.next, tlv.next - ef_dir_data + ef_dir_data_len, (uint16_t[]){0x61, 0x4f}, 2);
+    //print_tlv("4F-1:", tlv);
+
+    TlvInfo tlv;
+    const uint8_t* data = ef_dir_data;
+    size_t len = ef_dir_data_len;
+    for(uint8_t i=0;;++i) {
+        tlv = iso7816_tlv_select(data, ef_dir_data - data + len, (uint16_t[]){0x61, 0x4f}, 2);
+        if(!tlv.tag) break;
+        printf("4F-%d", i);
+        print_tlv(":", tlv);
+        data = tlv.next;
+    }
 
 	return 0;
 }
