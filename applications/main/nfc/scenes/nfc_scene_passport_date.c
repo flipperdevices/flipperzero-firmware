@@ -110,7 +110,7 @@ bool nfc_scene_passport_date_on_event(void* context, SceneManagerEvent event) {
             //TODO: handle invalid date (returned false)
 
             consumed = scene_manager_search_and_switch_to_previous_scene(
-                nfc->scene_manager, NfcScenePassportBac);
+                nfc->scene_manager, NfcScenePassportAuth);
         }
     }
     return consumed;

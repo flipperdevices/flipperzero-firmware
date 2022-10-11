@@ -52,7 +52,7 @@ bool nfc_scene_passport_read_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRetryConfirm);
             consumed = true;
         } else if(event.event == GuiButtonTypeCenter) {
-            scene_manager_next_scene(nfc->scene_manager, NfcScenePassportBac);
+            scene_manager_next_scene(nfc->scene_manager, NfcScenePassportAuth);
             consumed = true;
         } else if(event.event == GuiButtonTypeRight) {
             scene_manager_next_scene(nfc->scene_manager, NfcScenePassportMenu);

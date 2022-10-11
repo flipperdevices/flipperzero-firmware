@@ -1,6 +1,6 @@
 #include "../nfc_i.h"
 
-#define TAG "PassportBac"
+#define TAG "PassportAuth"
 
 #define MRTD_AUTH_METHOD_COUNT 2
 // Indexes must match MrtdAuthMethod (lib/nfc/protocols/mrtd.h)
@@ -17,19 +17,19 @@ typedef enum {
     NfcScenePassportAuthSelectAuth,
 } NfcScenePassportAuthSelect;
 
-void nfc_scene_passport_bac_var_list_enter_callback(void* context, uint32_t index) {
+void nfc_scene_passport_auth_var_list_enter_callback(void* context, uint32_t index) {
     Nfc* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
-void nfc_scene_passport_bac_auth_method_changed(VariableItem* item) {
+void nfc_scene_passport_auth_method_changed(VariableItem* item) {
     Nfc* nfc = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     nfc->dev->dev_data.mrtd_data.auth.method = index;
     variable_item_set_current_value_text(item, mrtd_auth_method_text[index]);
 }
 
-void nfc_scene_passport_bac_on_enter(void* context) {
+void nfc_scene_passport_auth_on_enter(void* context) {
     Nfc* nfc = context;
 
     VariableItemList* variable_item_list = nfc->variable_item_list;
@@ -73,7 +73,7 @@ void nfc_scene_passport_bac_on_enter(void* context) {
         variable_item_list,
         "Method",
         MRTD_AUTH_METHOD_COUNT,
-        nfc_scene_passport_bac_auth_method_changed,
+        nfc_scene_passport_auth_method_changed,
         nfc);
 
     value_index = nfc->dev->dev_data.mrtd_data.auth.method;
@@ -83,11 +83,11 @@ void nfc_scene_passport_bac_on_enter(void* context) {
     variable_item_list_add(variable_item_list, "Authenticate and read", 1, NULL, NULL);
 
     variable_item_list_set_enter_callback(
-        variable_item_list, nfc_scene_passport_bac_var_list_enter_callback, nfc);
+        variable_item_list, nfc_scene_passport_auth_var_list_enter_callback, nfc);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewVarItemList);
 }
 
-bool nfc_scene_passport_bac_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_passport_auth_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
     bool consumed = false;
 
@@ -125,7 +125,7 @@ bool nfc_scene_passport_bac_on_event(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void nfc_scene_passport_bac_on_exit(void* context) {
+void nfc_scene_passport_auth_on_exit(void* context) {
     Nfc* nfc = context;
 
     // Clear view

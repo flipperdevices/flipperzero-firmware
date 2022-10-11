@@ -54,7 +54,7 @@ bool nfc_scene_passport_docnr_on_event(void* context, SceneManagerEvent event) {
             nfc_scene_passport_docnr_save(nfc);
 
             consumed = scene_manager_search_and_switch_to_previous_scene(
-                nfc->scene_manager, NfcScenePassportBac);
+                nfc->scene_manager, NfcScenePassportAuth);
         }
     }
     return consumed;
