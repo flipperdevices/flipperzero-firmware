@@ -1,8 +1,8 @@
 #include "../nfc_i.h"
 
 enum SubmenuIndex {
-    SubmenuIndexBac,
-    SubmenuIndexPace,
+    SubmenuIndexSave,
+    SubmenuIndexInfo,
 };
 
 void nfc_scene_passport_menu_submenu_callback(void* context, uint32_t index) {
@@ -15,13 +15,10 @@ void nfc_scene_passport_menu_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
 
-    //TODO: enable/disable available methods
-
     submenu_add_item(
-        submenu, "BAC", SubmenuIndexBac, nfc_scene_passport_menu_submenu_callback, nfc);
+        submenu, "Save", SubmenuIndexSave, nfc_scene_passport_menu_submenu_callback, nfc);
     submenu_add_item(
-        submenu, "PACE", SubmenuIndexPace, nfc_scene_passport_menu_submenu_callback, nfc);
-
+        submenu, "Info", SubmenuIndexInfo, nfc_scene_passport_menu_submenu_callback, nfc);
     submenu_set_selected_item(
         nfc->submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcScenePassportMenu));
 
@@ -33,14 +30,15 @@ bool nfc_scene_passport_menu_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexBac) {
+        if(event.event == SubmenuIndexSave) {
+            //TODO: save more than just UID
             nfc->dev->format = NfcDeviceSaveFormatUid;
             // Clear device name
             nfc_device_set_name(nfc->dev, "");
-            scene_manager_next_scene(nfc->scene_manager, NfcScenePassportBac);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
             consumed = true;
-        } else if(event.event == SubmenuIndexPace) {
-            //scene_manager_next_scene(nfc->scene_manager, NfcScenePassportPace);
+        } else if(event.event == SubmenuIndexInfo) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcDataInfo);
             consumed = true;
         }
         scene_manager_set_scene_state(nfc->scene_manager, NfcScenePassportMenu, event.event);
