@@ -18,7 +18,7 @@ struct UpdaterMainView {
 static const uint8_t PROGRESS_RENDER_STEP = 1; /* percent, to limit rendering rate */
 
 typedef struct {
-    string_t status;
+    FuriString* status;
     uint8_t progress, rendered_progress;
     bool failed;
 } UpdaterProgressModel;
@@ -28,22 +28,25 @@ void updater_main_model_set_state(
     const char* message,
     uint8_t progress,
     bool failed) {
+    bool update = false;
     with_view_model(
-        main_view->view, (UpdaterProgressModel * model) {
+        main_view->view,
+        UpdaterProgressModel * model,
+        {
             model->failed = failed;
             model->progress = progress;
-            if(string_cmp_str(model->status, message)) {
-                string_set(model->status, message);
+            if(furi_string_cmp_str(model->status, message)) {
+                furi_string_set(model->status, message);
                 model->rendered_progress = progress;
-                return true;
-            }
-            if((model->rendered_progress > progress) ||
-               ((progress - model->rendered_progress) > PROGRESS_RENDER_STEP)) {
+                update = true;
+            } else if(
+                (model->rendered_progress > progress) ||
+                ((progress - model->rendered_progress) > PROGRESS_RENDER_STEP)) {
                 model->rendered_progress = progress;
-                return true;
+                update = true;
             }
-            return false;
-        });
+        },
+        update);
 }
 
 View* updater_main_get_view(UpdaterMainView* main_view) {
@@ -80,7 +83,7 @@ static void updater_main_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str_aligned(canvas, 42, 16, AlignLeft, AlignTop, "Update Failed!");
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(
-            canvas, 42, 32, AlignLeft, AlignTop, string_get_cstr(model->status));
+            canvas, 42, 32, AlignLeft, AlignTop, furi_string_get_cstr(model->status));
 
         canvas_draw_icon(canvas, 7, 16, &I_Warning_30x23);
         canvas_draw_str_aligned(
@@ -91,7 +94,7 @@ static void updater_main_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str_aligned(canvas, 55, 14, AlignLeft, AlignTop, "UPDATING");
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(
-            canvas, 64, 51, AlignCenter, AlignTop, string_get_cstr(model->status));
+            canvas, 64, 51, AlignCenter, AlignTop, furi_string_get_cstr(model->status));
         canvas_draw_icon(canvas, 4, 5, &I_Updating_32x40);
         elements_progress_bar(canvas, 42, 29, 80, (float)model->progress / 100);
     }
@@ -104,10 +107,10 @@ UpdaterMainView* updater_main_alloc() {
     view_allocate_model(main_view->view, ViewModelTypeLocking, sizeof(UpdaterProgressModel));
 
     with_view_model(
-        main_view->view, (UpdaterProgressModel * model) {
-            string_init_set(model->status, "Waiting for SD card");
-            return true;
-        });
+        main_view->view,
+        UpdaterProgressModel * model,
+        { model->status = furi_string_alloc_set("Waiting for SD card"); },
+        true);
 
     view_set_context(main_view->view, main_view);
     view_set_input_callback(main_view->view, updater_main_input);
@@ -119,10 +122,7 @@ UpdaterMainView* updater_main_alloc() {
 void updater_main_free(UpdaterMainView* main_view) {
     furi_assert(main_view);
     with_view_model(
-        main_view->view, (UpdaterProgressModel * model) {
-            string_clear(model->status);
-            return false;
-        });
+        main_view->view, UpdaterProgressModel * model, { furi_string_free(model->status); }, false);
     view_free(main_view->view);
     free(main_view);
 }
