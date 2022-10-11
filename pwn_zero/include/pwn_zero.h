@@ -60,3 +60,12 @@ void pwn_zero_screen_flush(Canvas* canvas, void* context);
  * @param eventQueue Queue to add inputEvent
  */
 void input_callback(InputEvent* inputEvent, FuriMessageQueue* eventQueue);
+
+/**
+ * @brief Callback to read rx data into queue
+ * 
+ * @param event Event received
+ * @param data Data from rx
+ * @param context Pwnagotchi device
+ */
+void pwn_uart_rx_cb(UartIrqEvent event, uint8_t data, void* context);

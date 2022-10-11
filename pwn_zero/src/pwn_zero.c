@@ -61,6 +61,31 @@ void input_callback(InputEvent* inputEvent, FuriMessageQueue* eventQueue) {
     furi_message_queue_put(eventQueue, &inputEvent, FuriWaitForever);
 }
 
+void pwn_uart_rx_cb(UartIrqEvent event, uint8_t data, void* context) {
+    furi_assert(context);
+
+    Pwnagotchi* pwn = ((PwnZero*)context)->pwnagotchi;
+
+    if (event == UartIrqEventRXNE) {
+        // Manage the queue
+        if (pwn->byteIdx >= PWNAGOTCHI_PROTOCOL_BYTE_LEN) {
+            pwn->byteIdx = 0;
+            pwn->queueIdx++;
+        }
+
+        // Make sure queueIdx isn't exceeding
+        if (pwn->queueIdx >= PWNAGOTCHI_PROTOCOL_QUEUE_SIZE) {
+            pwn->queueIdx = PWNAGOTCHI_PROTOCOL_QUEUE_SIZE - 1;
+            pwn->byteIdx = 0;
+        }
+
+        // Now add it in
+        pwn->messageQueue[pwn->queueIdx][pwn->byteIdx] = data;
+
+    }
+
+}
+
 int32_t pwn_zero_app(void* p) {
     UNUSED(p);
     
@@ -79,25 +104,35 @@ int32_t pwn_zero_app(void* p) {
     // Setup gui state and viewport
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, pwn_zero_screen_flush, &pwnMutex);
-    view_port_input_callback_set(view_port, input_callback, eventQueue);    
+    view_port_input_callback_set(view_port, input_callback, eventQueue);  
+
+    // Set rx callback
+    furi_hal_uart_set_irq_cb(pwnZero->pwnagotchi->channel, pwn_uart_rx_cb, pwnZero); 
 
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     /// Body will go here
-    InputEvent event;
     for (int ii = 0; ii < FLIPPER_SCREEN_HEIGHT; ii++) {
-        furi_message_queue_get(eventQueue, &event, FuriWaitForever);
+        // Loop until message
+        size_t queueIdx = 0;
+        do {
+        PwnZero* tmp = (PwnZero*) acquire_mutex_block(&pwnMutex);
+        queueIdx = tmp->pwnagotchi->queueIdx;
 
+        release_mutex(&pwnMutex, tmp);
+        } while (queueIdx != 0);
+
+        PwnZero* pwnZero = (PwnZero*) acquire_mutex_block(&pwnMutex);
         for (int jj = 0; jj < FLIPPER_SCREEN_WIDTH; jj++) {
-            PwnZero* pwnZero = (PwnZero*) acquire_mutex_block(&pwnMutex);
 
             pwn_zero_screen_set(pwnZero, ii, jj, true);
 
-            view_port_update(view_port);
 
-            release_mutex(&pwnMutex, pwnZero);
         }
+        view_port_update(view_port);
+        release_mutex(&pwnMutex, pwnZero);
+
     }
 
     view_port_enabled_set(view_port, false);
