@@ -107,6 +107,7 @@ jobs:
       - name: 'Upload artifacts to update server'
         if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
+          mkdir -p ~/.ssh
           ssh-keyscan -p ${{ secrets.RSYNC_DEPLOY_PORT }} -H ${{ secrets.RSYNC_DEPLOY_HOST }} > ~/.ssh/known_hosts
           echo "${{ secrets.RSYNC_DEPLOY_KEY }}" > deploy_key;
           chmod 600 ./deploy_key;
