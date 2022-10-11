@@ -1,8 +1,7 @@
 #include "../include/pwnagotchi.h"
 
-#include "../include/constants.h"
-
 #include <stdlib.h>
+#include <string.h>
 
 Pwnagotchi* pwnagotchi_alloc() {
     Pwnagotchi* pwn = malloc(sizeof(Pwnagotchi));
@@ -11,6 +10,9 @@ Pwnagotchi* pwnagotchi_alloc() {
     pwn->baudRate = PWNAGOTCHI_UART_BAUD;
 
     furi_hal_uart_init(pwn->channel, pwn->baudRate);
+
+    // Turn off all pixels in screen array
+    memset(pwn->screen, 0, sizeof(pwn->screen));
 
     return pwn;
 }
