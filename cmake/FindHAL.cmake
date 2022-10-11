@@ -236,16 +236,30 @@ endforeach()
 list(REMOVE_DUPLICATES HAL_DRIVERS)
 list(REMOVE_DUPLICATES HAL_LL_DRIVERS)
 
+################################################################################
+# Checking the parameters provided to the find_package(HAL ...) call
+# The expected parameters are families and or drivers
+################################################################################
+#Checking all the requested families before looking for drivers
 foreach(COMP ${HAL_FIND_COMPONENTS})
-    string(TOLOWER ${COMP} COMP_L)
     string(TOUPPER ${COMP} COMP_U)
-    
     string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP_U ${COMP_U})
-    if(CMAKE_MATCH_1)
+    if(CMAKE_MATCH_1) #Matches the family part of the provided STM32<FAMILY>[..] component
         list(APPEND HAL_FIND_COMPONENTS_FAMILIES ${COMP})
         message(TRACE "FindHAL: append COMP ${COMP} to HAL_FIND_COMPONENTS_FAMILIES")
-        continue()
+    else()
+        list(APPEND HAL_FIND_COMPONENTS_UNHANDLED ${COMP})
     endif()
+endforeach()
+
+if(NOT HAL_FIND_COMPONENTS_FAMILIES)
+    set(HAL_FIND_COMPONENTS_FAMILIES ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
+endif()
+
+#Checkinf all the requested drivers
+foreach(COMP ${HAL_FIND_COMPONENTS_UNHANDLED})
+    string(TOLOWER ${COMP} COMP_L)
+    
     if(${COMP_L} IN_LIST HAL_DRIVERS)
         list(APPEND HAL_FIND_COMPONENTS_DRIVERS ${COMP})
         message(TRACE "FindHAL: append COMP ${COMP} to HAL_FIND_COMPONENTS_DRIVERS")
@@ -260,9 +274,6 @@ foreach(COMP ${HAL_FIND_COMPONENTS})
     message(FATAL_ERROR "FindHAL: unknown HAL component: ${COMP}")
 endforeach()
 
-if(NOT HAL_FIND_COMPONENTS_FAMILIES)
-    set(HAL_FIND_COMPONENTS_FAMILIES ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
-endif()
 
 if(STM32H7 IN_LIST HAL_FIND_COMPONENTS_FAMILIES)
     list(REMOVE_ITEM HAL_FIND_COMPONENTS_FAMILIES STM32H7)
