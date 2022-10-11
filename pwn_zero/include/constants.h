@@ -13,3 +13,9 @@
 
 /// Width of flipper screen
 #define FLIPPER_SCREEN_WIDTH 128
+
+/// Length of the protocol transmission in bytes
+#define PWNAGOTCHI_PROTOCOL_BYTE_LEN 5
+
+/// Number or messages that can be stored in the queue at one time
+#define PWNAGOTCHI_PROTOCOL_QUEUE_SIZE 5
