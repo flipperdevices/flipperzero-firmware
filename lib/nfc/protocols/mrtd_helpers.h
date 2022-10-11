@@ -165,3 +165,5 @@ static __inline uint64_t mrtd_ssc_from_data(const uint8_t* rnd_ic, const uint8_t
 size_t mrtd_protect_apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t lc, const void* data, int16_t le, const uint8_t* key_enc, const uint8_t* key_mac, uint64_t ssc, uint8_t* output);
 
 int tlv_number(TlvInfo tlv);
+
+const EFFile* mrtd_tag_to_file(uint8_t tag);

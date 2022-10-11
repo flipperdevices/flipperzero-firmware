@@ -164,11 +164,7 @@ bool mrtd_external_authenticate(MrtdApplication* app, uint8_t* cmd_data, size_t 
 bool mrtd_select_file(MrtdApplication* app, EFFile file) {
     uint8_t data[] = {file.file_id >> 8, file.file_id & 0xff};
     FURI_LOG_D(TAG, "Send select EF: %s (0x%04X)", file.name, file.file_id);
-    uint8_t buffer[100];
-    size_t buffer_written = 0;
-    if(!mrtd_send_apdu(app, 0x00, 0xA4, 0x02, 0x0C, 0x02, data, -1, buffer, &buffer_written)) {
-        FURI_LOG_D(TAG, "Buffer_written: %d", buffer_written);
-        hexdump(FuriLogLevelDebug, "Buffer:", buffer, buffer_written);
+    if(!mrtd_send_apdu(app, 0x00, 0xA4, 0x02, 0x0C, 0x02, data, -1, NULL, NULL)) {
         FURI_LOG_E(TAG, "Failed select EF 0x%04X", file.file_id);
         return false;
     }

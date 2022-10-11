@@ -26,6 +26,28 @@ void nfc_scene_passport_read_auth_on_enter(void* context) {
     uint32_t unicode_version = mrtd_data->files.EF_COM.unicode_version;
     string_cat_printf(temp_str, "Unicode version: %d.%d.%d\n", unicode_version/10000, unicode_version/100%100, unicode_version%100);
 
+    string_cat_printf(temp_str, "Avail.files: ");
+    for(size_t i=0; i<MAX_EFCOM_TAGS; ++i) {
+        uint8_t tag = mrtd_data->files.EF_COM.tag_list[i];
+        const EFFile* file = mrtd_tag_to_file(tag);
+        if(file->tag) {
+            if(i > 0) string_cat_printf(temp_str, ", ");
+            string_cat_printf(temp_str, "%s", file->name);
+        }
+    }
+    string_cat_printf(temp_str, "\n");
+
+    EF_DIR_contents* EF_DIR = &mrtd_data->files.EF_DIR;
+    if(EF_DIR->applications_count > 0) {
+        string_cat_printf(temp_str, "Apps:\n");
+        for(uint8_t i=0; i<EF_DIR->applications_count; ++i) {
+            for(uint8_t n=0; n<sizeof(AIDValue); ++n) {
+                string_cat_printf(temp_str, "%02X ", EF_DIR->applications[i][n]);
+            }
+            string_cat_printf(temp_str, "\n");
+        }
+    }
+
     /*
     char iso_type = FURI_BIT(data->sak, 5) ? '4' : '3';
     //TODO: NFC-B?
