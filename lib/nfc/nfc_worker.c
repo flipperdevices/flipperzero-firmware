@@ -316,6 +316,10 @@ static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, MrtdData* mrtd_data, Fur
         read_success = true;
     } while(false);
 
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
+
     return read_success;
 }
 
