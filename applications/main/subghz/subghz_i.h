@@ -30,7 +30,6 @@
 
 #include "subghz_history.h"
 
-
 #include <gui/modules/variable_item_list.h>
 #include <lib/toolbox/path.h>
 

@@ -72,7 +72,9 @@ const char*
     return instance->nice_flor_s_rainbow_table_file_name;
 }
 
-void subghz_environment_set_protocol_registry(SubGhzEnvironment* instance, void* protocol_registry_items) {
+void subghz_environment_set_protocol_registry(
+    SubGhzEnvironment* instance,
+    void* protocol_registry_items) {
     furi_assert(instance);
     const SubGhzProtocolRegistry* protocol_registry = protocol_registry_items;
     instance->protocol_registry = protocol_registry;

@@ -74,7 +74,9 @@ const char*
  * @param instance Pointer to a SubGhzEnvironment instance
  * @param protocol_registry_items Pointer to a SubGhzProtocolRegistry
  */
-void subghz_environment_set_protocol_registry(SubGhzEnvironment* instance, void* protocol_registry_items);
+void subghz_environment_set_protocol_registry(
+    SubGhzEnvironment* instance,
+    void* protocol_registry_items);
 
 /**
  * Get list of protocols to work.
