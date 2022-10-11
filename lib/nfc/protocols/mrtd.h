@@ -36,6 +36,7 @@ typedef struct {
 
 typedef struct {
     MrtdAuthData auth;
+    bool auth_success;
 } MrtdData;
 
 typedef struct {

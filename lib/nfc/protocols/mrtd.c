@@ -279,12 +279,13 @@ void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data) {
     */
 
     MrtdAuthMethod method = mrtd_data->auth.method;
+    mrtd_data->auth_success = false;
     FURI_LOG_D(TAG, "Auth method: %d", method);
     switch(method) {
         case MrtdAuthMethodAny:
             //TODO: try PACE, then BAC
         case MrtdAuthMethodBac:
-            mrtd_bac(app, &mrtd_data->auth);
+            mrtd_data->auth_success = mrtd_bac(app, &mrtd_data->auth);
             break;
         case MrtdAuthMethodPace:
             FURI_LOG_E(TAG, "Auth method PACE not implemented");

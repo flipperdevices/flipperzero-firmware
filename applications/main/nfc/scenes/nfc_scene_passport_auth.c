@@ -1,5 +1,7 @@
 #include "../nfc_i.h"
 
+#include "../test_bac_creds.h" //TODO: remove
+
 #define TAG "PassportAuth"
 
 #define MRTD_AUTH_METHOD_COUNT 4
@@ -33,11 +35,18 @@ void nfc_scene_passport_auth_method_changed(VariableItem* item) {
 
 void nfc_scene_passport_auth_on_enter(void* context) {
     Nfc* nfc = context;
+    MrtdData* mrtd_data = &nfc->dev->dev_data.mrtd_data;
 
     // By entering the Auth menu, we default to Auth: Any
-    MrtdAuthMethod* auth_method = &nfc->dev->dev_data.mrtd_data.auth.method;
+    MrtdAuthMethod* auth_method = &mrtd_data->auth.method;
     if(*auth_method == MrtdAuthMethodNone) {
         *auth_method = MrtdAuthMethodAny;
+
+        //TODO: remove testing credentials:
+        mrtd_data->auth.birth_date = TODO_REMOVE_ID_DOB;
+        mrtd_data->auth.expiry_date = TODO_REMOVE_ID_DOE;
+        memcpy(mrtd_data->auth.doc_number, TODO_REMOVE_ID_DOC, 9);
+        //TODO: remove testing credentials ^^
     }
 
     VariableItemList* variable_item_list = nfc->variable_item_list;
@@ -48,24 +57,24 @@ void nfc_scene_passport_auth_on_enter(void* context) {
     const size_t temp_str_size = 15;
     char temp_str[temp_str_size];
     snprintf(temp_str, temp_str_size, "%02u%02u%02u",
-        nfc->dev->dev_data.mrtd_data.auth.birth_date.year,
-        nfc->dev->dev_data.mrtd_data.auth.birth_date.month,
-        nfc->dev->dev_data.mrtd_data.auth.birth_date.day);
+        mrtd_data->auth.birth_date.year,
+        mrtd_data->auth.birth_date.month,
+        mrtd_data->auth.birth_date.day);
 
     item = variable_item_list_add(variable_item_list, "Birth Date", 1, NULL, NULL);
     variable_item_set_current_value_text(item, temp_str);
 
     snprintf(temp_str, temp_str_size, "%02u%02u%02u",
-        nfc->dev->dev_data.mrtd_data.auth.expiry_date.year,
-        nfc->dev->dev_data.mrtd_data.auth.expiry_date.month,
-        nfc->dev->dev_data.mrtd_data.auth.expiry_date.day);
+        mrtd_data->auth.expiry_date.year,
+        mrtd_data->auth.expiry_date.month,
+        mrtd_data->auth.expiry_date.day);
 
     item = variable_item_list_add(variable_item_list, "Expiry Date", 1, NULL, NULL);
     variable_item_set_current_value_text(item, temp_str);
 
     item = variable_item_list_add(variable_item_list, "Document Nr.", 1, NULL, NULL);
 
-    strncpy(temp_str, nfc->dev->dev_data.mrtd_data.auth.doc_number, temp_str_size);
+    strncpy(temp_str, mrtd_data->auth.doc_number, temp_str_size);
     temp_str[temp_str_size] = '\x00';
     if(strlen(temp_str) > 8) {
         temp_str[8] = '.';
