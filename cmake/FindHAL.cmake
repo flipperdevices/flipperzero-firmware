@@ -236,6 +236,35 @@ endforeach()
 list(REMOVE_DUPLICATES HAL_DRIVERS)
 list(REMOVE_DUPLICATES HAL_LL_DRIVERS)
 
+# This function gets a list of hal_driver using a given prefix and suffix
+#
+# out_list_hal_drivers   list of hal_drivers foud
+# hal_drivers_path       path to the hal's drivers
+# hal_driver_type        hal_driver type to find (hal/ll/ex)
+function(get_list_hal_drivers out_list_hal_drivers hal_drivers_path hal_driver_type)
+    #The pattern to retrieve a driver from a file name depends on the hal_driver_type field
+    if(${hal_driver_type} STREQUAL "hal" OR ${hal_driver_type} STREQUAL "ll")
+        #This regex match and capture a driver type (stm32xx_hal_(rcc).c => catches rcc) 
+        set(file_pattern ".+_${hal_driver_type}_([a-z0-9]+)\\.c$")
+    elseif(${hal_driver_type} STREQUAL "ex")
+        #This regex match and capture a driver type (stm32xx_hal_(rcc)_ex.c => catches rcc) 
+        set(file_pattern ".+_hal_([a-z0-9]+)_ex\\.c$")
+    else()
+        message(FATAL_ERROR "the inputed hal_driver_type(${hal_driver_type}) is not valid.")
+    endif()
+
+    #Retrieving all the .c files from hal_drivers_path
+    file(GLOB filtered_files
+        RELATIVE "${hal_drivers_path}/Src"
+        "${hal_drivers_path}/Src/*.c")
+    # For all matched .c files keep only those with a driver name pattern (e.g. stm32xx_hal_rcc.c)
+    list(FILTER filtered_files INCLUDE REGEX ${file_pattern})
+    # Retrieve the driver type using the regex's first parenthesis match
+    list(TRANSFORM filtered_files REPLACE ${file_pattern} "\\1")
+    #Making a return by reference by seting the output variable to PARENT_SCOPE
+    set(${out_list_hal_drivers} ${filtered_files} PARENT_SCOPE)
+endfunction()
+
 ################################################################################
 # Checking the parameters provided to the find_package(HAL ...) call
 # The expected parameters are families and or drivers
