@@ -17,8 +17,14 @@ void nfc_scene_passport_read_auth_on_enter(void* context) {
     // Setup Custom Widget view
     string_t temp_str;
     string_init_printf(temp_str, "\e#Passport\n");
-    string_cat_printf(temp_str, "Authenticated: %d", mrtd_data->auth_success);
+    string_cat_printf(temp_str, "Authenticated: %d\n", mrtd_data->auth_success);
     // TODO: indicate BAC / PACE used
+
+    uint16_t lds_version = mrtd_data->files.EF_COM.lds_version;
+    string_cat_printf(temp_str, "LDS version: %d.%d\n", lds_version/100, lds_version%100);
+
+    uint32_t unicode_version = mrtd_data->files.EF_COM.unicode_version;
+    string_cat_printf(temp_str, "Unicode version: %d.%d.%d\n", unicode_version/10000, unicode_version/100%100, unicode_version%100);
 
     /*
     char iso_type = FURI_BIT(data->sak, 5) ? '4' : '3';

@@ -17,6 +17,8 @@
 
 //TODO: idea - generalize ISO7816 reading. List available apps
 
+#define num_elements(A) (sizeof(A)/sizeof(A[0]))
+
 static void hexdump(FuriLogLevel level, char* prefix, void* data, size_t length) {
     if(furi_log_get_level() >= level) {
         printf("%s ", prefix);
@@ -47,69 +49,9 @@ uint16_t mrtd_decode_response(uint8_t* buffer, size_t len) {
     return (buffer[len-2] << 8) | buffer[len-1];
 }
 
-EFFile EFNone        = {.name = NULL,  .file_id = 0x0000, .short_id = 0x00, .tag = 0x00 };
-
-struct EFFormat EF = {
-    .ATR          = {.name = "ATR", .file_id = 0x2F01, .short_id = 0x01 },
-    .DIR          = {.name = "DIR", .file_id = 0x2F00, .short_id = 0x1E },
-    .CardAccess   = {.name = "CardAccess", .file_id = 0x011C, .short_id = 0x1C },
-    .CardSecurity = {.name = "CardSecurity", .file_id = 0x011D, .short_id = 0x1D },
-    .COM          = {.name = "COM", .file_id = 0x011E, .short_id = 0x1E, .tag = 0x60 },
-    .SOD          = {.name = "SOD", .file_id = 0X011D, .short_id = 0X1D, .tag = 0x77 },
-    .DG1          = {.name = "DG1", .file_id = 0X0101, .short_id = 0X01, .tag = 0x61 },
-    .DG2          = {.name = "DG2", .file_id = 0X0102, .short_id = 0X02, .tag = 0x75 },
-    .DG3          = {.name = "DG3", .file_id = 0X0103, .short_id = 0X03, .tag = 0x63 },
-    .DG4          = {.name = "DG4", .file_id = 0X0104, .short_id = 0X04, .tag = 0x76 },
-    .DG5          = {.name = "DG5", .file_id = 0X0105, .short_id = 0X05, .tag = 0x65 },
-    .DG6          = {.name = "DG6", .file_id = 0X0106, .short_id = 0X06, .tag = 0x66 },
-    .DG7          = {.name = "DG7", .file_id = 0X0107, .short_id = 0X07, .tag = 0x67 },
-    .DG8          = {.name = "DG8", .file_id = 0X0108, .short_id = 0X08, .tag = 0x68 },
-    .DG9          = {.name = "DG9", .file_id = 0X0109, .short_id = 0X09, .tag = 0x69 },
-    .DG10         = {.name = "DG10", .file_id = 0X010A, .short_id = 0X0A, .tag = 0x6a },
-    .DG11         = {.name = "DG11", .file_id = 0X010B, .short_id = 0X0B, .tag = 0x6b },
-    .DG12         = {.name = "DG12", .file_id = 0X010C, .short_id = 0X0C, .tag = 0x6c },
-    .DG13         = {.name = "DG13", .file_id = 0X010D, .short_id = 0X0D, .tag = 0x6d },
-    .DG14         = {.name = "DG14", .file_id = 0X010E, .short_id = 0X0E, .tag = 0x6e },
-    .DG15         = {.name = "DG15", .file_id = 0X010F, .short_id = 0X0F, .tag = 0x6f },
-    .DG16         = {.name = "DG16", .file_id = 0X0110, .short_id = 0X10, .tag = 0x70 },
-};
-
-struct AIDSet AID = {
-    .eMRTDApplication     = {0xA0, 0x00, 0x00, 0x02, 0x47, 0x10, 0x01},
-    .TravelRecords        = {0xA0, 0x00, 0x00, 0x02, 0x47, 0x20, 0x01},
-    .VisaRecords          = {0xA0, 0x00, 0x00, 0x02, 0x47, 0x20, 0x02},
-    .AdditionalBiometrics = {0xA0, 0x00, 0x00, 0x02, 0x47, 0x20, 0x03},
-};
-
-EFFile* mrtd_tag_to_file(uint8_t tag) {
-    //TODO: generate this code with macros?
-    switch(tag) {
-        case 0x60: return &EF.COM;
-        case 0x77: return &EF.SOD;
-        case 0x61: return &EF.DG1;
-        case 0x75: return &EF.DG2;
-        case 0x63: return &EF.DG3;
-        case 0x76: return &EF.DG4;
-        case 0x65: return &EF.DG5;
-        case 0x66: return &EF.DG6;
-        case 0x67: return &EF.DG7;
-        case 0x68: return &EF.DG8;
-        case 0x69: return &EF.DG9;
-        case 0x6a: return &EF.DG10;
-        case 0x6b: return &EF.DG11;
-        case 0x6c: return &EF.DG12;
-        case 0x6d: return &EF.DG13;
-        case 0x6e: return &EF.DG14;
-        case 0x6f: return &EF.DG15;
-        case 0x70: return &EF.DG16;
-        default:
-           furi_assert(false);
-           return &EFNone;
-    }
-};
-
 //TODO: rename to transceive?
-bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t lc, const void* data, int16_t le, uint8_t* output) {
+//TODO: PRIO output and output written writing seems to crash flipper, sometimes
+bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t lc, const void* data, int16_t le, uint8_t* output, size_t* output_written) {
     FuriHalNfcTxRxContext* tx_rx = app->tx_rx;
     size_t idx = 0;
 
@@ -120,6 +62,8 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
 
         app->ssc_long++;
         idx = mrtd_protect_apdu(cla, ins, p1, p2, lc, data, le, app->ksenc, app->ksmac, app->ssc_long, tx_rx->tx_data);
+
+        FURI_LOG_D(TAG, "Protect APDU - done");
 
     } else {
         tx_rx->tx_data[idx++] = cla;
@@ -139,22 +83,25 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
     tx_rx->tx_bits = idx * 8;
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
 
+    FURI_LOG_D(TAG, "Sending...");
     //TODO: timeout as param?
     if(furi_hal_nfc_tx_rx(tx_rx, 300)) {
         mrtd_trace(app);
+        FURI_LOG_D(TAG, "Sending - done");
         uint16_t ret_code = mrtd_decode_response(tx_rx->rx_data, tx_rx->rx_bits / 8);
 
         if(app->secure_messaging && ret_code == 0x9000) {
             app->ssc_long++;
-            mrtd_bac_decrypt_verify_sm(tx_rx->rx_data, tx_rx->rx_bits / 8 - 2,
-                app->ksenc, app->ksmac, app->ssc_long, output, &ret_code);
+            ret_code = mrtd_bac_decrypt_verify_sm(tx_rx->rx_data, tx_rx->rx_bits / 8 - 2,
+                app->ksenc, app->ksmac, app->ssc_long, output, output_written);
+            //ret_code = 0x1337; //TODO: remove PRIO
         }
 
         //TODO: handle other return codes?
         if(ret_code == 0x9000) {
             if(!app->secure_messaging && le > 0) {
                 // Secure Messaging sets output while decrypting
-                memcpy(output, tx_rx->rx_data, le);
+                output_written = memcpy(output, tx_rx->rx_data, le);
             }
             return true;
         } else {
@@ -173,6 +120,8 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
 
             return false;
         }
+    } else {
+        FURI_LOG_D(TAG, "Sending - failed");
     }
     return false;
 }
@@ -181,7 +130,7 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
 bool mrtd_select_app(MrtdApplication* app, AIDValue aid) {
     FURI_LOG_D(TAG, "Send select App: %02X %02X %02X %02X %02X %02X %02X",
         aid[0], aid[1], aid[2], aid[3], aid[4], aid[5], aid[6]);
-    if(!mrtd_send_apdu(app, 0x00, 0xA4, 0x04, 0x0C, 0x07, aid, -1, NULL)) {
+    if(!mrtd_send_apdu(app, 0x00, 0xA4, 0x04, 0x0C, 0x07, aid, -1, NULL, NULL)) {
         FURI_LOG_W(TAG, "Failed select App");
         return false;
     }
@@ -190,7 +139,8 @@ bool mrtd_select_app(MrtdApplication* app, AIDValue aid) {
 
 bool mrtd_get_challenge(MrtdApplication* app, uint8_t challenge[8]) {
     FURI_LOG_D(TAG, "Send Get Challenge");
-    if(!mrtd_send_apdu(app, 0x00, 0x84, 0x00, 0x00, 0x00, NULL, 0x08, challenge)) {
+    size_t chal_size;
+    if(!mrtd_send_apdu(app, 0x00, 0x84, 0x00, 0x00, 0x00, NULL, 0x08, challenge, &chal_size)) {
         FURI_LOG_W(TAG, "Failed get challenge");
         return false;
     }
@@ -203,7 +153,7 @@ bool mrtd_external_authenticate(MrtdApplication* app, uint8_t* cmd_data, size_t 
     furi_assert(out_size >= 0x28);
 
     FURI_LOG_D(TAG, "Send External Authenticate");
-    if(!mrtd_send_apdu(app, 0x00, 0x82, 0x00, 0x00, cmd_size, cmd_data, 0x28, out_data)) {
+    if(!mrtd_send_apdu(app, 0x00, 0x82, 0x00, 0x00, cmd_size, cmd_data, 0x28, out_data, &out_size)) {
         FURI_LOG_W(TAG, "Failed External Authenticate");
         return false;
     }
@@ -213,8 +163,12 @@ bool mrtd_external_authenticate(MrtdApplication* app, uint8_t* cmd_data, size_t 
 
 bool mrtd_select_file(MrtdApplication* app, EFFile file) {
     uint8_t data[] = {file.file_id >> 8, file.file_id & 0xff};
-    FURI_LOG_D(TAG, "Send select EF: 0x%04X", file.file_id);
-    if(!mrtd_send_apdu(app, 0x00, 0xA4, 0x02, 0x0C, 0x02, data, -1, NULL)) {
+    FURI_LOG_D(TAG, "Send select EF: %s (0x%04X)", file.name, file.file_id);
+    uint8_t buffer[100];
+    size_t buffer_written = 0;
+    if(!mrtd_send_apdu(app, 0x00, 0xA4, 0x02, 0x0C, 0x02, data, -1, buffer, &buffer_written)) {
+        FURI_LOG_D(TAG, "Buffer_written: %d", buffer_written);
+        hexdump(FuriLogLevelDebug, "Buffer:", buffer, buffer_written);
         FURI_LOG_E(TAG, "Failed select EF 0x%04X", file.file_id);
         return false;
     }
@@ -222,7 +176,6 @@ bool mrtd_select_file(MrtdApplication* app, EFFile file) {
     return true;
 }
 
-//TODO: use out parameter to point to rx_data buffer instead of require allocating another
 size_t mrtd_read_binary(MrtdApplication* app, uint8_t* buffer, size_t bufsize, size_t offset) {
     UNUSED(buffer);
     UNUSED(bufsize);
@@ -231,15 +184,15 @@ size_t mrtd_read_binary(MrtdApplication* app, uint8_t* buffer, size_t bufsize, s
     //TODO: read first 4 bytes, determine length, iterate through file
     //TODO: limit reading/buffer fill to max bufsize
 
-    int16_t max_read = 0; // 0 = 'everything', -1 = 'nothing'
-    if(!mrtd_send_apdu(app, 0x00, 0xB0, offset>>8, offset&0xff, 0x00, NULL, max_read, buffer)) {
+    //TODO: test with max_read = bufsize (value !0, > file size)
+    int16_t max_read = 0; // 0 = 'everything', -1 = 'nothing', >0 = amount of bytes
+    size_t buf_written;
+    if(!mrtd_send_apdu(app, 0x00, 0xB0, offset>>8, offset&0xff, 0x00, NULL, max_read, buffer, &buf_written)) {
         FURI_LOG_E(TAG, "Failed to read");
         return 0;
     }
 
-    //TODO: return read amount
-
-    return 0;
+    return buf_written;
 }
 
 //TODO: use short id to read, because it's mandatory for eMRTD
@@ -258,7 +211,7 @@ void mrtd_read_dump(MrtdApplication* app, EFFile file, const char* descr) {
     } while(read > 0);
 }
 
-void parse_ef_dir(EF_DIR_contents* EF_DIR, const uint8_t* data, size_t length) {
+bool parse_ef_dir(EF_DIR_contents* EF_DIR, const uint8_t* data, size_t length) {
     size_t offset = 0;
     uint8_t app_idx = 0;
 
@@ -270,13 +223,13 @@ void parse_ef_dir(EF_DIR_contents* EF_DIR, const uint8_t* data, size_t length) {
 
         if(tlv.tag != 0x61 || tlv.length != 0x09) {
             FURI_LOG_E(TAG, "Invalid EF.DIR, tag at offset %d must be '61' and length 9. Got '%02X' and %d", offset, tlv.tag, tlv.length);
-            return;
+            return false;
         }
 
         tlv = iso7816_tlv_parse(tlv.value);
         if(tlv.tag != 0x4F || tlv.length != 0x07) {
             FURI_LOG_E(TAG, "Invalid EF.DIR, subtag at offset %d must be '4F' and length 7", offset);
-            return;
+            return false;
         }
 
         memcpy(EF_DIR->applications[app_idx], tlv.value, tlv.length);
@@ -296,26 +249,89 @@ void parse_ef_dir(EF_DIR_contents* EF_DIR, const uint8_t* data, size_t length) {
             printf("\r\n");
         }
     }
+
+    return true;
 }
 
-void parse_ef_com(EF_COM_contents* EF_COM, const uint8_t* data, size_t length) {
-    UNUSED(EF_COM); //TODO
-    UNUSED(length); //TODO
-    size_t offset = 0;
+bool parse_ef_com(EF_COM_contents* EF_COM, const uint8_t* data, size_t length) {
+    uint16_t lds_tag_path[] = {0x60, 0x5f01};
+    uint16_t unicode_tag_path[] = {0x60, 0x5f36};
+    uint16_t tags_tag_path[] = {0x60, 0x5c};
 
-    TlvInfo tlv = iso7816_tlv_parse(data + offset);
-    UNUSED(tlv); //TODO
+    TlvInfo tlv_lds_version = iso7816_tlv_select(data, length, lds_tag_path, num_elements(lds_tag_path));
+    if(tlv_lds_version.tag) {
+        EF_COM->lds_version = tlv_number(tlv_lds_version);
+    } else {
+        FURI_LOG_W(TAG, "EF.COM LDS version not found");
+        return false;
+    }
+
+    TlvInfo tlv_unicode_version = iso7816_tlv_select(data, length, unicode_tag_path, num_elements(unicode_tag_path));
+    if(tlv_unicode_version.tag) {
+        EF_COM->unicode_version = tlv_number(tlv_unicode_version);
+    } else {
+        FURI_LOG_W(TAG, "EF.COM Unicode info not found!");
+        return false;
+    }
+
+    TlvInfo tlv_tag_list = iso7816_tlv_select(data, length, tags_tag_path, num_elements(tags_tag_path));
+    if(tlv_tag_list.tag) {
+        for(size_t i=0; i<MAX_EFCOM_TAGS; ++i) {
+            EF_COM->tag_list[i] = (i < tlv_tag_list.length) ? tlv_tag_list.value[i] : 0x00;
+        }
+    } else {
+        FURI_LOG_W(TAG, "EF.CO Tag List not found!");
+        return false;
+    }
+
+    return true;
+}
+
+bool mrtd_read_parse_file(MrtdApplication* app, MrtdData* mrtd_data, EFFile file) {
+    uint8_t buffer[100];
+    size_t buf_len;
+
+    FURI_LOG_D(TAG, "Read and parse %s (%04X)", file.name, file.file_id);
+
+    if(!mrtd_select_file(app, file)) {
+        FURI_LOG_E(TAG, "Could not select %s", file.name);
+        return false;
+    }
+
+    FURI_LOG_D(TAG, "Selected %s", file.name);
+
+    buf_len = mrtd_read_binary(app, buffer, num_elements(buffer), 0);
+
+    if(!buf_len) {
+        FURI_LOG_E(TAG, "Could not read %s", file.name);
+        return false;
+    }
+
+    FURI_LOG_D(TAG, "Read %s", file.name);
+
+    bool result = false;
+
+    if(file.file_id == EF.COM.file_id) {
+        result = parse_ef_com(&mrtd_data->files.EF_COM, buffer, buf_len);
+        FURI_LOG_D(TAG, "Parsed EF.COM");
+    } else if(file.file_id == EF.DIR.file_id) {
+        result = parse_ef_dir(&mrtd_data->files.EF_DIR, buffer, buf_len);
+        FURI_LOG_D(TAG, "Parsed EF.DIR");
+    } else {
+        FURI_LOG_W(TAG, "Don't know how to parse file with id 0x%04X", file.file_id);
+    }
+
+    return result;
 }
 
 //TODO: remove testing function
 void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data) {
-    FuriHalNfcTxRxContext* tx_rx = app->tx_rx;
+    //FuriHalNfcTxRxContext* tx_rx = app->tx_rx;
 
     FURI_LOG_D(TAG, "Mrtd Test");
     mrtd_read_dump(app, EF.ATR, "EF.ATR");
     mrtd_read_dump(app, EF.COM, "EF.COM");
     mrtd_read_dump(app, EF.DIR, "EF.DIR");
-    parse_ef_dir(&app->files.EF_DIR, tx_rx->rx_data, tx_rx->rx_bits / 8 - 2); // bits to bytes, and exclude the 2 byte return code
     mrtd_read_dump(app, EF.CardAccess, "EF.CardAccess");
     mrtd_read_dump(app, EF.CardSecurity, "EF.CardSecurity");
 
@@ -349,7 +365,8 @@ void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data) {
         return;
     }
 
-    mrtd_read_dump(app, EF.COM, "EF.COM");
+    mrtd_read_parse_file(app, mrtd_data, EF.COM);
+    mrtd_read_parse_file(app, mrtd_data, EF.DIR);
 }
 
 MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx) {

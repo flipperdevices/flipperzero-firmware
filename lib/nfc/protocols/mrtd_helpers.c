@@ -129,7 +129,7 @@ bool mrtd_bac_keys(MrtdAuthData* auth, uint8_t ksenc[16], uint8_t ksmac[16]) {
 }
 
 //NOTE: output size will be ((data_length+8)/8)*8
-bool mrtd_bac_encrypt(const uint8_t* data, size_t data_length, uint8_t* key, uint8_t* output) {
+bool mrtd_bac_encrypt(const uint8_t* data, size_t data_length, const uint8_t* key, uint8_t* output) {
     uint8_t IV[8] = "\x00\x00\x00\x00\x00\x00\x00\x00";
 
     mbedtls_des3_context ctx;
@@ -173,38 +173,49 @@ bool mrtd_bac_decrypt_verify(const uint8_t* data, size_t data_length, uint8_t* k
     return true;
 }
 
-bool mrtd_bac_decrypt_verify_sm(const uint8_t* data, size_t data_length, uint8_t* key_enc, uint8_t* key_mac, uint64_t ssc, uint8_t* output, uint16_t* ret_code) {
+// If output or output_written are NULL-pointers, no output is written
+// Otherwise, and if DO'87 is present, data is written to *output
+// output should have enough room for additional padding (rounded up by 8 bytes)
+// output_written will be the length without padding
+uint16_t mrtd_bac_decrypt_verify_sm(const uint8_t* data, size_t data_length, uint8_t* key_enc, uint8_t* key_mac, uint64_t ssc, uint8_t* output, size_t* output_written) {
     // Message: [DO'85 or DO'87] || [DO'99] || DO'8E
     // Lengths:      Var            1+1+2=4    1+1+8=10
 
-    *ret_code = data[data_length - 10 - 2] <<8 | data[data_length - 10 - 1];
+    //TODO: check for DO'99 presence, instead of assuming
+    uint16_t ret_code = data[data_length - 10 - 2] <<8 | data[data_length - 10 - 1];
     //ntohs(data + data_length - 10 - 2);
 
     if(data[0] == 0x87) {
-        uint8_t do87_length = data[1] - 1;
-        mrtd_bac_decrypt(data + 3, do87_length, key_enc, output);
-        printf("Decrypted: "); for(uint8_t i=0; i<do87_length; ++i) printf("%02X ", output[i]); printf("\r\n");
+        if(output_written != NULL && output != NULL) {
+            uint8_t do87_length = data[1] - 1;
+            mrtd_bac_decrypt(data + 3, do87_length, key_enc, output);
+            printf("Decrypted: "); for(uint8_t i=0; i<do87_length; ++i) printf("%02X ", output[i]); printf("\r\n");
 
-        //TODO: mrtd_bac_unpad
-        int padidx;
-        for(padidx=do87_length-1; padidx>=0; --padidx) {
-            if(output[padidx] == 0x00) {
-                continue;
-            } else if(output[padidx] == 0x80) {
-                break;
-            } else {
-                printf("Invalid padding\r\n");
-                return false;
+            //TODO: function mrtd_bac_unpad?
+            int padidx;
+            for(padidx=do87_length-1; padidx>=0; --padidx) {
+                if(output[padidx] == 0x00) {
+                    continue;
+                } else if(output[padidx] == 0x80) {
+                    break;
+                } else {
+                    printf("Invalid padding\r\n");
+                    return 0xff01;
+                }
             }
-        }
-        printf("           ");
-        for(int i=0; i<padidx; ++i) {
-            printf("   ");
-        }
-        printf("^^\r\n");
-        printf("Pad starts at: %d\r\n", padidx);
+            printf("           ");
+            for(int i=0; i<padidx; ++i) {
+                printf("   ");
+            }
+            printf("^^\r\n");
+            printf("Pad starts at: %d\r\n", padidx);
 
-        //TODO: return padidx-1 as output length
+            *output_written = padidx-1;
+        }
+    } else {
+        if(output_written != NULL) {
+            *output_written = 0;
+        }
     }
 
     mrtd_bac_mac_ctx ctx;
@@ -216,16 +227,16 @@ bool mrtd_bac_decrypt_verify_sm(const uint8_t* data, size_t data_length, uint8_t
     mrtd_bac_mac_finalize(&ctx, mac_calc);
 
     if(memcmp(mac_calc, data + data_length - 8, 8)) {
-        printf( "SM MAC failed\r\n");
+        printf("SM MAC failed\r\n");
         for(uint8_t i=0; i<8; ++i) {
             printf("%02X <=> %02X\r\n", mac_calc[i], data[data_length - 8 + i]);
         }
-        return false;
+        return 0xff02;
     }
-    return true;
+    return ret_code;
 }
 
-bool mrtd_bac_mac_init(mrtd_bac_mac_ctx* ctx, uint8_t key[16]) {
+bool mrtd_bac_mac_init(mrtd_bac_mac_ctx* ctx, const uint8_t key[16]) {
     mbedtls_des_init(&ctx->des);
     mbedtls_des_setkey_enc(&ctx->des, key);
     memset(ctx->mac, 0, 8);
@@ -316,7 +327,7 @@ bool mrtd_bac_mac_finalize(mrtd_bac_mac_ctx* ctx, uint8_t output[8]) {
     return true;
 }
 
-bool mrtd_bac_mac(const uint8_t* data, size_t data_length, uint8_t* key, uint8_t* output) {
+bool mrtd_bac_mac(const uint8_t* data, size_t data_length, const uint8_t* key, uint8_t* output) {
     // MAC
     uint8_t mac[8];
     uint8_t xormac[8];
@@ -366,7 +377,7 @@ bool mrtd_bac_padded_mac(const uint8_t* data, size_t data_length, uint8_t* key, 
     return true;
 }
 
-size_t mrtd_protect_apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t lc, const void* data, int16_t le, uint8_t* key_enc, uint8_t* key_mac, uint64_t ssc, uint8_t* output) {
+size_t mrtd_protect_apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t lc, const void* data, int16_t le, const uint8_t* key_enc, const uint8_t* key_mac, uint64_t ssc, uint8_t* output) {
     //TODO: max size on output?
     size_t idx = 0;
 
@@ -374,7 +385,7 @@ size_t mrtd_protect_apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8
     mrtd_bac_mac_ctx mac_ctx;
     mrtd_bac_mac_init(&mac_ctx, key_mac);
     uint64_t ssc_n = htonll(ssc);
-    printf("ssc: %016llx\r\n", ssc);
+    //printf("ssc: %016llx\r\n", ssc);
     //printf("ssc_n: "); print_hex(ssc_n, 8); printf("\n");
     mrtd_bac_mac_update(&mac_ctx, (uint8_t*)&ssc_n, 8);
 
@@ -439,9 +450,83 @@ size_t mrtd_protect_apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8
 
     output[idx++] = 0x00;
 
-    if(le) {
-        //TODO: le?
-    }
-
     return idx;
+}
+
+EFFile EFNone        = {.name = NULL,  .file_id = 0x0000, .short_id = 0x00, .tag = 0x00 };
+
+const struct EFFormat EF = {
+    .ATR          = {.name = "ATR", .file_id = 0x2F01, .short_id = 0x01 },
+    .DIR          = {.name = "DIR", .file_id = 0x2F00, .short_id = 0x1E },
+    .CardAccess   = {.name = "CardAccess", .file_id = 0x011C, .short_id = 0x1C },
+    .CardSecurity = {.name = "CardSecurity", .file_id = 0x011D, .short_id = 0x1D },
+    .COM          = {.name = "COM", .file_id = 0x011E, .short_id = 0x1E, .tag = 0x60 },
+    .SOD          = {.name = "SOD", .file_id = 0X011D, .short_id = 0X1D, .tag = 0x77 },
+    .DG1          = {.name = "DG1", .file_id = 0X0101, .short_id = 0X01, .tag = 0x61 },
+    .DG2          = {.name = "DG2", .file_id = 0X0102, .short_id = 0X02, .tag = 0x75 },
+    .DG3          = {.name = "DG3", .file_id = 0X0103, .short_id = 0X03, .tag = 0x63 },
+    .DG4          = {.name = "DG4", .file_id = 0X0104, .short_id = 0X04, .tag = 0x76 },
+    .DG5          = {.name = "DG5", .file_id = 0X0105, .short_id = 0X05, .tag = 0x65 },
+    .DG6          = {.name = "DG6", .file_id = 0X0106, .short_id = 0X06, .tag = 0x66 },
+    .DG7          = {.name = "DG7", .file_id = 0X0107, .short_id = 0X07, .tag = 0x67 },
+    .DG8          = {.name = "DG8", .file_id = 0X0108, .short_id = 0X08, .tag = 0x68 },
+    .DG9          = {.name = "DG9", .file_id = 0X0109, .short_id = 0X09, .tag = 0x69 },
+    .DG10         = {.name = "DG10", .file_id = 0X010A, .short_id = 0X0A, .tag = 0x6a },
+    .DG11         = {.name = "DG11", .file_id = 0X010B, .short_id = 0X0B, .tag = 0x6b },
+    .DG12         = {.name = "DG12", .file_id = 0X010C, .short_id = 0X0C, .tag = 0x6c },
+    .DG13         = {.name = "DG13", .file_id = 0X010D, .short_id = 0X0D, .tag = 0x6d },
+    .DG14         = {.name = "DG14", .file_id = 0X010E, .short_id = 0X0E, .tag = 0x6e },
+    .DG15         = {.name = "DG15", .file_id = 0X010F, .short_id = 0X0F, .tag = 0x6f },
+    .DG16         = {.name = "DG16", .file_id = 0X0110, .short_id = 0X10, .tag = 0x70 },
+};
+
+struct AIDSet AID = {
+    .eMRTDApplication     = {0xA0, 0x00, 0x00, 0x02, 0x47, 0x10, 0x01},
+    .TravelRecords        = {0xA0, 0x00, 0x00, 0x02, 0x47, 0x20, 0x01},
+    .VisaRecords          = {0xA0, 0x00, 0x00, 0x02, 0x47, 0x20, 0x02},
+    .AdditionalBiometrics = {0xA0, 0x00, 0x00, 0x02, 0x47, 0x20, 0x03},
+};
+
+const EFFile* mrtd_tag_to_file(uint8_t tag) {
+    //TODO: generate this code with macros?
+    switch(tag) {
+        case 0x60: return &EF.COM;
+        case 0x77: return &EF.SOD;
+        case 0x61: return &EF.DG1;
+        case 0x75: return &EF.DG2;
+        case 0x63: return &EF.DG3;
+        case 0x76: return &EF.DG4;
+        case 0x65: return &EF.DG5;
+        case 0x66: return &EF.DG6;
+        case 0x67: return &EF.DG7;
+        case 0x68: return &EF.DG8;
+        case 0x69: return &EF.DG9;
+        case 0x6a: return &EF.DG10;
+        case 0x6b: return &EF.DG11;
+        case 0x6c: return &EF.DG12;
+        case 0x6d: return &EF.DG13;
+        case 0x6e: return &EF.DG14;
+        case 0x6f: return &EF.DG15;
+        case 0x70: return &EF.DG16;
+        default:
+           return &EFNone;
+    }
+};
+
+int tlv_number(TlvInfo tlv) {
+    //TODO: negative numbers?
+    const uint8_t* str = tlv.value;
+    size_t length = tlv.length;
+
+    int value = 0;
+    while(length--) {
+        char c = *(str++);
+
+        if(c >= '0' && c <= '9') {
+            value = value * 10 + (c - '0');
+        } else {
+            //TODO: warning? return? crash?
+        }
+    }
+    return value;
 }

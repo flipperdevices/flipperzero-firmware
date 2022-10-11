@@ -281,18 +281,14 @@ void test_mrtd_bac_decrypt_verify(const uint8_t* data, size_t data_length, uint8
     printf(COLOR_RESET "\n");
 }
 
-void test_mrtd_bac_decrypt_verify_sm(const uint8_t* data, size_t data_length, uint8_t* key_enc, uint8_t* key_mac, uint64_t ssc, uint8_t* exp_output, size_t exp_output_length, bool should_verify) {
+void test_mrtd_bac_decrypt_verify_sm(const uint8_t* data, size_t data_length, uint8_t* key_enc, uint8_t* key_mac, uint64_t ssc, uint8_t* exp_output, size_t exp_output_length, uint16_t exp_code) {
     uint8_t buffer[256];
     uint16_t ret_code;
+    size_t buffer_len;
 
-    bool result = mrtd_bac_decrypt_verify_sm(data, data_length, key_enc, key_mac, ssc, buffer, &ret_code);
-    if(result != should_verify) {
-        printf(COLOR_RED "FAILED  - mrtd_bac_decrypt_verify_sm, expected verify: %d, but is: %d\n" COLOR_RESET, should_verify, result);
-        return;
-    }
-
-    if(ret_code != 0x9000) {
-        printf(COLOR_RED "FAILED  - mrtd_bac_decrypt_verify_sm, expected ret_code: %04X, but is: %04X\n" COLOR_RESET, 0x9000, ret_code);
+    ret_code = mrtd_bac_decrypt_verify_sm(data, data_length, key_enc, key_mac, ssc, buffer, &buffer_len);
+    if(ret_code != exp_code) {
+        printf(COLOR_RED "FAILED  - mrtd_bac_decrypt_verify_sm, expected ret_code: %04X, but is: %04X\n" COLOR_RESET, exp_code, ret_code);
         return;
     }
 
@@ -438,7 +434,7 @@ int main(int argc, char** argv) {
 
     ssc++; // Increment for decrypt, verify
 
-    test_mrtd_bac_decrypt_verify_sm((uint8_t*)"\x99\x02\x90\x00\x8E\x08\xFA\x85\x5A\x5D\x4C\x50\xA8\xED", 14, ks_enc, ks_mac, ssc, NULL, 0, 1);
+    test_mrtd_bac_decrypt_verify_sm((uint8_t*)"\x99\x02\x90\x00\x8E\x08\xFA\x85\x5A\x5D\x4C\x50\xA8\xED", 14, ks_enc, ks_mac, ssc, NULL, 0, 0x9000);
 
     ssc++; // Increment for encrypt, sign
 
@@ -446,7 +442,7 @@ int main(int argc, char** argv) {
 
     ssc++; // Increment for decrypt, verify
 
-    test_mrtd_bac_decrypt_verify_sm((uint8_t*)"\x87\x09\x01\x9F\xF0\xEC\x34\xF9\x92\x26\x51\x99\x02\x90\x00\x8E\x08\xAD\x55\xCC\x17\x14\x0B\x2D\xED", 25, ks_enc, ks_mac, ssc, (uint8_t*)"\x60\x14\x5F\x01", 4, 1);
+    test_mrtd_bac_decrypt_verify_sm((uint8_t*)"\x87\x09\x01\x9F\xF0\xEC\x34\xF9\x92\x26\x51\x99\x02\x90\x00\x8E\x08\xAD\x55\xCC\x17\x14\x0B\x2D\xED", 25, ks_enc, ks_mac, ssc, (uint8_t*)"\x60\x14\x5F\x01", 4, 0x9000);
 
     ssc++; // Increment for encrypt, sign
 

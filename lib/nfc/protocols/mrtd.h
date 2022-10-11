@@ -4,30 +4,6 @@
 
 #include "mrtd_helpers.h"
 
-#define MAX_EFDIR_APPS 4
-
-typedef uint8_t AIDValue[7];
-
-struct AIDSet {
-    AIDValue eMRTDApplication;
-    AIDValue TravelRecords;
-    AIDValue VisaRecords;
-    AIDValue AdditionalBiometrics;
-};
-
-extern struct AIDSet AID;
-
-typedef struct {
-    AIDValue applications[MAX_EFDIR_APPS];
-    uint8_t applications_count;
-} EF_DIR_contents;
-
-typedef struct {
-    uint16_t lds_version;
-    uint16_t unicode_version;
-    //TODO: taglist
-} EF_COM_contents;
-
 typedef struct {
     FuriHalNfcTxRxContext* tx_rx;
     uint16_t file_offset;
@@ -36,60 +12,17 @@ typedef struct {
     uint64_t ssc_long; // TODO: rename without _long
 
     bool secure_messaging;
-
-    struct {
-        EF_DIR_contents EF_DIR;
-    } files;
 } MrtdApplication;
 
 typedef struct {
     MrtdAuthData auth;
     bool auth_success;
+
+    struct {
+        EF_DIR_contents EF_DIR;
+        EF_COM_contents EF_COM;
+    } files;
 } MrtdData;
-
-typedef struct {
-    const char* name;
-    const uint8_t short_id;
-    const uint16_t file_id;
-    const uint8_t tag;
-} EFFile;
-
-struct EFFormat {
-    // Under Master File (MF)
-    EFFile ATR;
-    EFFile DIR;
-    EFFile CardAccess;
-    EFFile CardSecurity;
-
-    // Under LDS1 eMRTD Application
-    EFFile COM;
-    EFFile SOD;
-    EFFile DG1;
-    EFFile DG2;
-    EFFile DG3;
-    EFFile DG4;
-    EFFile DG5;
-    EFFile DG6;
-    EFFile DG7;
-    EFFile DG8;
-    EFFile DG9;
-    EFFile DG10;
-    EFFile DG11;
-    EFFile DG12;
-    EFFile DG13;
-    EFFile DG14;
-    EFFile DG15;
-    EFFile DG16;
-};
-
-extern struct EFFormat EF;
-
-#define MAX_EFCOM_TAGS 18
-typedef struct {
-    uint16_t lds_version; // xxyy => xx.yy (major.minor)
-    uint32_t unicode_version; // aabbcc => aa.bb.cc (major.minor.release)
-    uint8_t tag_list[MAX_EFCOM_TAGS];
-} EFComFormat;
 
 //TODO: description
 MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx);

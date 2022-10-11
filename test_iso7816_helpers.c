@@ -27,24 +27,6 @@ void print_tlv(char* fmt, TlvInfo tlv) {
     printf("\n");
 }
 
-int tlv_number(TlvInfo tlv) {
-    //TODO: negative numbers?
-    const char* str = tlv.value;
-    size_t length = tlv.length;
-
-    int value = 0;
-    while(length--) {
-        char c = *(str++);
-
-        if(c >= '0' && c <= '9') {
-            value = value * 10 + (c - '0');
-        } else {
-            //TODO: warning? return? crash?
-        }
-    }
-    return value;
-}
-
 void test_iso7816_tlv_parse(const uint8_t* input, size_t input_size, uint16_t exp_tag, size_t exp_length) {
 	TlvInfo tlv = iso7816_tlv_parse(input);
 
