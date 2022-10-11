@@ -3,7 +3,13 @@
 #include <furi_hal_uart.h>
 
 /// Defines the channel that the pwnagotchi uses
-const FuriHalUartId PWNAGOTCHI_UART_CHANNEL = FuriHalUartIdUSART1;
+#define PWNAGOTCHI_UART_CHANNEL FuriHalUartIdUSART1
 
 /// Defines the baudrate that the pwnagotchi will use
-const uint32_t PWNAGOTCHI_UART_BAUD = 57600;
+#define PWNAGOTCHI_UART_BAUD 57600
+
+/// Height of flipper screen
+#define FLIPPER_SCREEN_HEIGHT 64
+
+/// Width of flipper screen
+#define FLIPPER_SCREEN_WIDTH 128
