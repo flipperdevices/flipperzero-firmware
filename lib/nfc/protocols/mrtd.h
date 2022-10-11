@@ -7,7 +7,6 @@
 typedef struct {
     FuriHalNfcTxRxContext* tx_rx;
     uint16_t file_offset;
-    uint8_t* kmrz;
     uint8_t ksenc[16];
     uint8_t ksmac[16];
     uint64_t ssc_long;

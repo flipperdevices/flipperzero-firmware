@@ -1,5 +1,8 @@
 #include "mrtd_helpers.h"
 
+#include <mbedtls/sha1.h>
+#include <mbedtls/des.h>
+
 uint8_t mrtd_bac_check_digit(const uint8_t* input, const uint8_t length) {
     const uint8_t num_weights = 3;
     uint8_t weights[] = {7, 3, 1};
@@ -31,12 +34,6 @@ void mrtd_print_date(uint8_t* output, MrtdDate* date) {
     output[5] = (date->day % 10) + '0';
 }
 
-// Safe size: MRTD_DOCNR_MAX_LENGTH + 1 (CD) + 6 (DOB) + 1 (CD) + 6 (DOE) + 1 (CD) + 1 (0x00)
-// Test with:
-// - DOCNR of size 9
-// - DOCNR of size <9
-// - DOCNR of size >9
-// - DOCNR of size MRTD_DOCNR_MAX_LENGTH
 bool mrtd_bac_get_kmrz(MrtdAuthData* auth, uint8_t* output, uint8_t output_size) {
     uint8_t idx = 0;
     uint8_t docnr_length = strlen(auth->doc_number);
@@ -66,5 +63,37 @@ bool mrtd_bac_get_kmrz(MrtdAuthData* auth, uint8_t* output, uint8_t output_size)
     output[idx++] = mrtd_bac_check_digit(output+cd_idx, 6) + '0';
 
     output[idx++] = '\x00';
+    return true;
+}
+
+bool mrtd_bac_keys(const uint8_t kseed[16], uint8_t ksenc[16], uint8_t ksmac[16]) {
+    uint8_t hash[20];
+    mbedtls_sha1_context ctx;
+    mbedtls_sha1_init(&ctx);
+
+    do {
+        for(uint8_t i=1; i<=2; ++i) {
+            if(mbedtls_sha1_starts(&ctx)) break;
+            if(mbedtls_sha1_update(&ctx, kseed, 16)) break;
+            if(mbedtls_sha1_update(&ctx, "\x00\x00\x00", 3)) break;
+            if(mbedtls_sha1_update(&ctx, &i, 1)) break;
+            if(mbedtls_sha1_finish(&ctx, hash)) break;
+
+            switch(i) {
+                case 1:
+                    memcpy(ksenc, hash, 16);
+                    mbedtls_des_key_set_parity(ksenc);
+                    mbedtls_des_key_set_parity(ksenc+8);
+                    break;
+                case 2:
+                    memcpy(ksmac, hash, 16);
+                    mbedtls_des_key_set_parity(ksmac);
+                    mbedtls_des_key_set_parity(ksmac+8);
+                    break;
+            }
+        }
+    } while(false);
+
+    mbedtls_sha1_free(&ctx);
     return true;
 }
