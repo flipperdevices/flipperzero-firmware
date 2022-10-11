@@ -216,16 +216,19 @@ static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxConte
 
 static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     bool read_success = false;
-    MrtdApplication mrtd_app = {};
+    MrtdApplication* mrtd_app = mrtd_alloc_init(tx_rx);
     //EmvData* result = &nfc_worker->dev_data->emv_data;
 
     nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
     do {
         // Read passport
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
-        mrtd_select_efcardaccess(tx_rx, &mrtd_app);
-        mrtd_select_efdir(tx_rx, &mrtd_app);
-        if(!mrtd_select_lds1(tx_rx, &mrtd_app)) break;
+        //mrtd_select(mrtd_app, EF.CardAccess);
+        //mrtd_select(mrtd_app, EF.DIR);
+        //mrtd_select_efcardaccess(mrtd_app);
+        //mrtd_select_efdir(mrtd_app);
+        mrtd_test(mrtd_app);
+        if(!mrtd_select_lds1(mrtd_app)) break;
 
         /*
         // Copy data
