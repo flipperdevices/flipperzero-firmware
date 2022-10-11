@@ -187,10 +187,10 @@ static bool id_decode_response(uint8_t* buff, uint16_t len) {
         return false;
     }
     bool success = false;
-    if(buff[1] == 69 && buff[2] == 82) {
+    if(buff[0] == 0x69 && buff[1] == 0x82) {
         success = true;
     }
-    if(buff[1] == 90 && buff[2] == 00) {
+    if(buff[0] == 0x90 && buff[1] == 0x00) {
         success = true;
     }
     return success;
@@ -273,7 +273,7 @@ bool id_select_app(FuriHalNfcTxRxContext* tx_rx, IdApplication* app) {
     // Copy header
     memcpy(tx_rx->tx_data, id_select_header, size);
     // Copy AID
-    tx_rx->tx_data[size++] = app->aid_len;
+    // tx_rx->tx_data[size++] = app->aid_len;
     memcpy(&tx_rx->tx_data[size], app->aid, app->aid_len);
     size += app->aid_len;
     tx_rx->tx_data[size++] = 0x00;
@@ -281,8 +281,7 @@ bool id_select_app(FuriHalNfcTxRxContext* tx_rx, IdApplication* app) {
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
 
     FURI_LOG_D(TAG, "Start application");
-    if(furi_hal_nfc_tx_rx(tx_rx, 300)) {
-        emv_trace(tx_rx, "Start application answer:");
+    if(furi_hal_nfc_tx_rx(tx_rx, 800)) {
         if(id_decode_response(tx_rx->rx_data, tx_rx->rx_bits / 8)) {
             select_app_success = true;
         } else {
@@ -446,7 +445,6 @@ bool read_id_card(FuriHalNfcTxRxContext* tx_rx, IdApplication* id_app) {
     furi_assert(tx_rx);
     furi_assert(id_app);
     bool card_num_read = false;
-    memset(id_app, 0, sizeof(IdApplication));
 
     do {
         if(!id_select_app(tx_rx, id_app)) break;

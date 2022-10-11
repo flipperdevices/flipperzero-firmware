@@ -32,6 +32,11 @@ typedef struct {
 } EmvData;
 
 typedef struct {
+    uint8_t aid[16];
+    uint16_t aid_len;
+} IdData;
+
+typedef struct {
     uint16_t tag;
     uint8_t data[];
 } PDOLValue;

@@ -268,7 +268,7 @@ static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxConte
 
 static bool nfc_worker_read_id_card(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     bool read_success = false;
-    IdApplication id_app = {{0x07, 0xA0, 0x00, 0x00, 0x02, 0x47, 0x10, 0x01}, 7};
+    IdApplication id_app = {.aid = {0x07, 0xA0, 0x00, 0x00, 0x02, 0x47, 0x10, 0x01}, .aid_len = 8};
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
@@ -277,7 +277,7 @@ static bool nfc_worker_read_id_card(NfcWorker* nfc_worker, FuriHalNfcTxRxContext
 
     do {
         // Read card
-        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
+        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 1000)) break;
         if(!read_id_card(tx_rx, &id_app)) break;
         // Copy data
         // TODO Set EmvData to reader or like in mifare ultralight!
@@ -321,10 +321,12 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
             nfc_worker->dev_data->protocol = NfcDeviceProtocolEMV;
             found_protocol = true;
         }
+        furi_hal_nfc_sleep();
         if(nfc_worker_read_id_card(nfc_worker, tx_rx)) {
             nfc_worker->dev_data->protocol = NfcDeviceProtocolID;
             found_protocol = true;
         }
+        furi_hal_nfc_sleep();
         if(!found_protocol) {
             FURI_LOG_I(TAG, "Unknown card. Save UID");
             nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
@@ -364,6 +366,9 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
                         break;
                     } else if(dev_data->protocol == NfcDeviceProtocolEMV) {
                         event = NfcWorkerEventReadBankCard;
+                        break;
+                    } else if(dev_data->protocol == NfcDeviceProtocolID) {
+                        event = NfcWorkerEventReadIDcard;
                         break;
                     } else if(dev_data->protocol == NfcDeviceProtocolUnknown) {
                         event = NfcWorkerEventReadUidNfcA;

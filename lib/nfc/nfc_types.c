@@ -23,6 +23,8 @@ const char* nfc_guess_protocol(NfcProtocol protocol) {
         return "Mifare Classic";
     } else if(protocol == NfcDeviceProtocolMifareDesfire) {
         return "Mifare DESFire";
+    } else if(protocol == NfcDeviceProtocolID) {
+        return "Passport or ID card";
     } else {
         return "Unrecognized";
     }
