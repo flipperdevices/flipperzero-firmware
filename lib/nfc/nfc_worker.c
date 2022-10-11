@@ -91,8 +91,6 @@ int32_t nfc_worker_task(void* context) {
 
     if(nfc_worker->state == NfcWorkerStateRead) {
         nfc_worker_read(nfc_worker);
-    } else if(nfc_worker->state == NfcWorkerStateReadMrtdAuth) {
-        nfc_worker_read_mrtd_auth(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateUidEmulate) {
         nfc_worker_emulate_uid(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateEmulateApdu) {
@@ -318,22 +316,6 @@ static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     }
 
     return read_success;
-}
-
-bool nfc_worker_read_mrtd_auth(NfcWorker* nfc_worker) {
-    MrtdData* mrtd_data = &nfc_worker->dev_data->mrtd_data;
-    FuriHalNfcTxRxContext tx_rx = {};
-    MrtdApplication* mrtd_app = mrtd_alloc_init(&tx_rx);
-
-    do {
-        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
-
-        if(!mrtd_select_app(mrtd_app, AID.eMRTDApplication)) break;
-
-        if(!mrtd_bac(mrtd_app, &mrtd_data->auth)) break;
-    } while(false);
-
-    return false;
 }
 
 static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {

@@ -11,7 +11,6 @@ typedef enum {
     NfcWorkerStateReady,
     // Main worker states
     NfcWorkerStateRead,
-    NfcWorkerStateReadMrtdAuth,
     NfcWorkerStateUidEmulate,
     NfcWorkerStateMfUltralightEmulate,
     NfcWorkerStateMfClassicEmulate,
