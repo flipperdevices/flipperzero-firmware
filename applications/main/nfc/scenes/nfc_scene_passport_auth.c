@@ -34,6 +34,12 @@ void nfc_scene_passport_auth_method_changed(VariableItem* item) {
 void nfc_scene_passport_auth_on_enter(void* context) {
     Nfc* nfc = context;
 
+    // By entering the Auth menu, we default to Auth: Any
+    MrtdAuthMethod* auth_method = &nfc->dev->dev_data.mrtd_data.auth.method;
+    if(*auth_method == MrtdAuthMethodNone) {
+        *auth_method = MrtdAuthMethodAny;
+    }
+
     VariableItemList* variable_item_list = nfc->variable_item_list;
 
     VariableItem* item;
@@ -78,10 +84,7 @@ void nfc_scene_passport_auth_on_enter(void* context) {
         nfc_scene_passport_auth_method_changed,
         nfc);
 
-    value_index = nfc->dev->dev_data.mrtd_data.auth.method;
-    if(value_index == MrtdAuthMethodNone) {
-        value_index = MrtdAuthMethodAny;
-    }
+    value_index = *auth_method;
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, mrtd_auth_method_text[value_index]);
 

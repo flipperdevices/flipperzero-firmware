@@ -268,10 +268,10 @@ static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxConte
     return read_success;
 }
 
-static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, MrtdData* mrtd_data, FuriHalNfcTxRxContext* tx_rx) {
+static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     bool read_success = false;
     MrtdApplication* mrtd_app = mrtd_alloc_init(tx_rx);
-    //EmvData* result = &nfc_worker->dev_data->emv_data;
+    MrtdData* mrtd_data = &nfc_worker->dev_data->mrtd_data;
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
@@ -281,10 +281,7 @@ static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, MrtdData* mrtd_data, Fur
     do {
         // Read passport
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
-        //mrtd_select(mrtd_app, EF.CardAccess);
-        //mrtd_select(mrtd_app, EF.DIR);
-        //mrtd_select_efcardaccess(mrtd_app);
-        //mrtd_select_efdir(mrtd_app);
+
         if(!mrtd_select_app(mrtd_app, AID.eMRTDApplication)) break;
 
         mrtd_test(mrtd_app, mrtd_data);
@@ -375,7 +372,7 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
             furi_hal_nfc_sleep(); // Needed between checks
             FURI_LOG_D(TAG, "Try reading MRTD");
             //TODO: support NFC-B?
-            if(nfc_worker_read_mrtd(nfc_worker, &nfc_worker->dev_data->mrtd_data, tx_rx)) {
+            if(nfc_worker_read_mrtd(nfc_worker, tx_rx)) {
                 nfc_worker->dev_data->protocol = NfcDeviceProtocolMRTD;
                 break;
             }
