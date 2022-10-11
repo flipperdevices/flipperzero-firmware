@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <furi/core/check.h>
+
 Pwnagotchi* pwnagotchi_alloc() {
     Pwnagotchi* pwn = malloc(sizeof(Pwnagotchi));
 
@@ -13,6 +15,9 @@ Pwnagotchi* pwnagotchi_alloc() {
 
     // Turn off all pixels in screen array
     memset(pwn->screen, 0, sizeof(pwn->screen));
+
+    pwn->queueIdx = 0;
+    pwn->byteIdx = 0;
 
     return pwn;
 }

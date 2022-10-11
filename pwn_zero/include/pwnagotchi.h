@@ -14,6 +14,13 @@ typedef struct {
     /// Screen representation
     bool screen[FLIPPER_SCREEN_HEIGHT][FLIPPER_SCREEN_WIDTH];
 
+    /// Message queue
+    uint8_t messageQueue[PWNAGOTCHI_PROTOCOL_QUEUE_SIZE][PWNAGOTCHI_PROTOCOL_BYTE_LEN];
+    /// Index of currently saving queue number
+    size_t queueIdx;
+    /// The current position in the given protocol message
+    size_t byteIdx;
+
 } Pwnagotchi;
 
 /**
