@@ -1,5 +1,6 @@
 #include "weather_station_receiver.h"
 #include "../weather_station_app_i.h"
+#include "weather_station_icons.h"
 #include <math.h>
 
 #include <input/input.h>
@@ -29,7 +30,7 @@ struct WSReceiverHistory {
 typedef struct WSReceiverHistory WSReceiverHistory;
 
 static const Icon* ReceiverItemIcons[] = {
-    [SubGhzProtocolTypeUnknown] = &I_Quest_7x8,
+    [SubGhzProtocolTypeUnknown] =&I_station_icon, //&I_Quest_7x8,
     [SubGhzProtocolTypeStatic] = &I_Unlock_7x8,
     [SubGhzProtocolTypeDynamic] = &I_Lock_7x8,
 };
