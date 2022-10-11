@@ -37,7 +37,7 @@ void nfc_scene_passport_bac_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
-    const size_t temp_str_size = 10;
+    const size_t temp_str_size = 15;
     char temp_str[temp_str_size];
     snprintf(temp_str, temp_str_size, "%02u%02u%02u",
         nfc->dev->dev_data.mrtd_data.auth.birth_date.year,
@@ -55,8 +55,19 @@ void nfc_scene_passport_bac_on_enter(void* context) {
     item = variable_item_list_add(variable_item_list, "Expiry Date", 1, NULL, NULL);
     variable_item_set_current_value_text(item, temp_str);
 
-    variable_item_list_add(variable_item_list, "Document Nr.", 1, NULL, NULL);
-    //TODO: add scene to enter docnr, based on nfc_scene_passport_date.c
+    item = variable_item_list_add(variable_item_list, "Document Nr.", 1, NULL, NULL);
+
+    strncpy(temp_str, nfc->dev->dev_data.mrtd_data.auth.doc_number, temp_str_size);
+    temp_str[temp_str_size] = '\x00';
+    if(strlen(temp_str) > 8) {
+        temp_str[8] = '.';
+        temp_str[9] = '.';
+        temp_str[10] = '.';
+        temp_str[11] = '\x00';
+    }
+    variable_item_set_current_value_text(
+        item,
+        temp_str);
 
     item = variable_item_list_add(
         variable_item_list,
@@ -94,6 +105,7 @@ bool nfc_scene_passport_bac_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case NfcScenePassportAuthSelectDocNr:
+            scene_manager_next_scene(nfc->scene_manager, NfcScenePassportDocNr);
             consumed = true;
             break;
         case NfcScenePassportAuthSelectMethod:

@@ -39,6 +39,7 @@ ADD_SCENE(nfc, passport_read, PassportReadSuccess)
 ADD_SCENE(nfc, passport_menu, PassportMenu)
 ADD_SCENE(nfc, passport_bac, PassportBac) //TODO: rename to Auth
 ADD_SCENE(nfc, passport_date, PassportDate)
+ADD_SCENE(nfc, passport_docnr, PassportDocNr)
 ADD_SCENE(nfc, passport_pace_todo, PassportPaceTodo)
 ADD_SCENE(nfc, emulate_apdu_sequence, EmulateApduSequence)
 ADD_SCENE(nfc, device_info, DeviceInfo)
