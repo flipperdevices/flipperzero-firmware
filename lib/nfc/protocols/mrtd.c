@@ -323,10 +323,12 @@ bool parse_ef_dg1(EF_DG1_contents* DG1, const uint8_t* data, size_t length) {
             mrzcpy(DG1->docnr, mrz, &idx, 9);
             idx += 1; // docnr check digit
             idx += 15; // optional data
-            mrzcpy(DG1->birth_date, mrz, &idx, 6);
+            mrtd_parse_date(&DG1->birth_date, mrz + idx);
+            idx += 6; // birth_date
             idx += 1; // birth date check digit
             mrzcpy(DG1->sex, mrz, &idx, 1);
-            mrzcpy(DG1->expiry_date, mrz, &idx, 6);
+            mrtd_parse_date(&DG1->expiry_date, mrz + idx);
+            idx += 6; // expiry_date
             idx += 1; // expiry date check digit
             mrzcpy(DG1->nationality, mrz, &idx, 3);
             idx += 11; // optional data
@@ -342,10 +344,12 @@ bool parse_ef_dg1(EF_DG1_contents* DG1, const uint8_t* data, size_t length) {
             mrzcpy(DG1->docnr, mrz, &idx, 9);
             idx += 1; // docnr check digit
             mrzcpy(DG1->nationality, mrz, &idx, 3);
-            mrzcpy(DG1->birth_date, mrz, &idx, 6);
+            mrtd_parse_date(&DG1->birth_date, mrz + idx);
+            idx += 6; // birth_date
             idx += 1; // birth date check digit
             mrzcpy(DG1->sex, mrz, &idx, 1);
-            mrzcpy(DG1->expiry_date, mrz, &idx, 6);
+            mrtd_parse_date(&DG1->expiry_date, mrz + idx);
+            idx += 6; // expiry_date
             idx += 1; // expiry date check digit
             idx += 7; // optional data
             idx += 1; // check digit
@@ -359,10 +363,12 @@ bool parse_ef_dg1(EF_DG1_contents* DG1, const uint8_t* data, size_t length) {
             mrzcpy(DG1->docnr, mrz, &idx, 9);
             idx += 1; // docnr check digit
             mrzcpy(DG1->nationality, mrz, &idx, 3);
-            mrzcpy(DG1->birth_date, mrz, &idx, 6);
+            mrtd_parse_date(&DG1->birth_date, mrz + idx);
             idx += 1; // birth date check digit
+            idx += 6; // birth_date
             mrzcpy(DG1->sex, mrz, &idx, 1);
-            mrzcpy(DG1->expiry_date, mrz, &idx, 6);
+            mrtd_parse_date(&DG1->expiry_date, mrz + idx);
+            idx += 6; // expiry_date
             idx += 1; // expiry date check digit
             idx += 14; // optional data
             idx += 1; //  check digit
@@ -453,9 +459,9 @@ void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data) {
 
     mrtd_read_parse_file(app, mrtd_data, EF.DG1);
 
-    mrtd_read_dump(app, EF.DG2);
-    mrtd_read_dump(app, EF.DG14);
-    mrtd_read_dump(app, EF.DG15);
+    //mrtd_read_dump(app, EF.DG2);
+    //mrtd_read_dump(app, EF.DG14);
+    //mrtd_read_dump(app, EF.DG15);
 }
 
 MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx) {

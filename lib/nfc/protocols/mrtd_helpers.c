@@ -40,6 +40,19 @@ void mrtd_print_date(char* output, MrtdDate* date) {
     output[5] = (date->day % 10) + '0';
 }
 
+uint8_t charval(char c) {
+    if(c >= '0' && c <= '9') {
+        return c - '0';
+    }
+    return 0;
+}
+
+void mrtd_parse_date(MrtdDate* date, const unsigned char* input) {
+    date->year = charval(input[0]) * 10 + charval(input[1]);
+    date->month = charval(input[2]) * 10 + charval(input[3]);
+    date->day = charval(input[4]) * 10 + charval(input[5]);
+}
+
 bool mrtd_bac_get_kmrz(MrtdAuthData* auth, char* output, uint8_t output_size) {
     uint8_t idx = 0;
     uint8_t docnr_length = strlen(auth->doc_number);

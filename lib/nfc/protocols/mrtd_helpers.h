@@ -122,17 +122,19 @@ typedef struct {
     uint8_t doctype[3];
     uint8_t issuing_state[4];
     uint8_t name[40];
+    MrtdDate birth_date;
     uint8_t docnr[10];
     uint8_t nationality[4];
-    uint8_t birth_date[7];
     uint8_t sex[2];
-    uint8_t expiry_date[7];
+    MrtdDate expiry_date;
 } EF_DG1_contents;
 
 uint8_t mrtd_bac_check_digit(const char* input, const uint8_t length);
 
 //TODO: swap order, all other functions have output last
 void mrtd_print_date(char* output, MrtdDate* date);
+
+void mrtd_parse_date(MrtdDate* date, const unsigned char* input);
 
 bool mrtd_bac_get_kmrz(MrtdAuthData* auth, char* output, uint8_t output_size);
 

@@ -1,6 +1,22 @@
 #include "../nfc_i.h"
 #include <dolphin/dolphin.h>
 
+const char months[13][4] = {
+    "---",
+    "JAN",
+    "FEB",
+    "MAR",
+    "APR",
+    "MAY",
+    "JUN",
+    "JUL",
+    "AUG",
+    "SEP",
+    "OCT",
+    "NOV",
+    "DEC",
+};
+
 void nfc_scene_passport_read_auth_widget_callback(GuiButtonType result, InputType type, void* context) {
     Nfc* nfc = context;
     if(type == InputTypeShort) {
@@ -55,9 +71,9 @@ void nfc_scene_passport_read_auth_on_enter(void* context) {
     string_cat_printf(temp_str, "Name: %s\n", DG1->name);
     string_cat_printf(temp_str, "DocNr: %s\n", DG1->docnr);
     string_cat_printf(temp_str, "Nationality: %s\n", DG1->nationality);
-    string_cat_printf(temp_str, "Birth Date: %s\n", DG1->birth_date);
+    string_cat_printf(temp_str, "Birth Date: %02d %s %02d\n", DG1->birth_date.day, months[DG1->birth_date.month], DG1->birth_date.year);
     string_cat_printf(temp_str, "Sex: %s\n", DG1->sex);
-    string_cat_printf(temp_str, "Expiry Date: %s\n", DG1->expiry_date);
+    string_cat_printf(temp_str, "Expiry Date: %02d %s %02d\n", DG1->expiry_date.day, months[DG1->expiry_date.month], DG1->expiry_date.year);
 
     /*
     char iso_type = FURI_BIT(data->sak, 5) ? '4' : '3';
