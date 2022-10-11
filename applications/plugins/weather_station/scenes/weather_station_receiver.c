@@ -69,8 +69,7 @@ void weather_station_scene_receiver_on_enter(void* context) {
     string_init(str_buff);
 
     if(app->txrx->rx_key_state == WSRxKeyStateIDLE) {
-        ws_preset_init(
-        app, "AM650", subghz_setting_get_default_frequency(app->setting), NULL, 0);
+        ws_preset_init(app, "AM650", subghz_setting_get_default_frequency(app->setting), NULL, 0);
         ws_history_reset(app->txrx->history);
         app->txrx->rx_key_state = WSRxKeyStateStart;
     }
@@ -86,16 +85,14 @@ void weather_station_scene_receiver_on_enter(void* context) {
             app->ws_receiver,
             string_get_cstr(str_buff),
             ws_history_get_type_protocol(app->txrx->history, i));
-       app->txrx->rx_key_state = WSRxKeyStateAddKey;
+        app->txrx->rx_key_state = WSRxKeyStateAddKey;
     }
     string_clear(str_buff);
     weather_station_scene_receiver_update_statusbar(app);
 
-    ws_view_receiver_set_callback(
-        app->ws_receiver, weather_station_scene_receiver_callback, app);
+    ws_view_receiver_set_callback(app->ws_receiver, weather_station_scene_receiver_callback, app);
     subghz_receiver_set_rx_callback(
         app->txrx->receiver, weather_station_scene_add_to_history_callback, app);
-
 
     //app->state_notifications = SubGhzNotificationStateRx;
     if(app->txrx->txrx_state == WSTxRxStateRx) {
@@ -126,7 +123,7 @@ bool weather_station_scene_receiver_on_event(void* context, SceneManagerEvent ev
                 ws_rx_end(app);
                 ws_sleep(app);
             };
-            //app->txrx->hopper_state = SubGhzHopperStateOFF;
+            app->txrx->hopper_state = WSHopperStateOFF;
             app->txrx->idx_menu_chosen = 0;
             subghz_receiver_set_rx_callback(app->txrx->receiver, NULL, app);
 
@@ -136,11 +133,7 @@ bool weather_station_scene_receiver_on_event(void* context, SceneManagerEvent ev
             // } else {
             app->txrx->rx_key_state = WSRxKeyStateIDLE;
             ws_preset_init(
-                    app,
-                    "AM650",
-                    subghz_setting_get_default_frequency(app->setting),
-                    NULL,
-                    0);
+                app, "AM650", subghz_setting_get_default_frequency(app->setting), NULL, 0);
             scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, WeatherStationSceneStart);
             //}
@@ -154,8 +147,7 @@ bool weather_station_scene_receiver_on_event(void* context, SceneManagerEvent ev
         //     break;
         case WSCustomEventViewReceiverConfig:
             //subghz->state_notifications = SubGhzNotificationStateIDLE;
-            app->txrx->idx_menu_chosen =
-                ws_view_receiver_get_idx_menu(app->ws_receiver);
+            app->txrx->idx_menu_chosen = ws_view_receiver_get_idx_menu(app->ws_receiver);
             scene_manager_next_scene(app->scene_manager, WeatherStationSceneReceiverConfig);
             consumed = true;
             break;
@@ -171,10 +163,10 @@ bool weather_station_scene_receiver_on_event(void* context, SceneManagerEvent ev
             break;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
-        //if(app->txrx->hopper_state != SubGhzHopperStateOFF) {
-        //subghz_hopper_update(subghz);
-        weather_station_scene_receiver_update_statusbar(app);
-        // }
+        if(app->txrx->hopper_state != WSHopperStateOFF) {
+            ws_hopper_update(app);
+            weather_station_scene_receiver_update_statusbar(app);
+        }
         // switch(subghz->state_notifications) {
         // case SubGhzNotificationStateRx:
         //     notification_message(subghz->notifications, &sequence_blink_cyan_10);

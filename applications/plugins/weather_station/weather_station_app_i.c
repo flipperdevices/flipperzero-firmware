@@ -119,73 +119,57 @@ void ws_sleep(WeatherStationApp* app) {
     app->txrx->txrx_state = WSTxRxStateSleep;
 }
 
+void ws_hopper_update(WeatherStationApp* app) {
+    furi_assert(app);
 
+    switch(app ->txrx->hopper_state) {
+    case WSHopperStateOFF:
+        return;
+        break;
+    case WSHopperStatePause:
+        return;
+        break;
+    case WSHopperStateRSSITimeOut:
+        if(app ->txrx->hopper_timeout != 0) {
+            app ->txrx->hopper_timeout--;
+            return;
+        }
+        break;
+    default:
+        break;
+    }
+    float rssi = -127.0f;
+    if(app ->txrx->hopper_state != WSHopperStateRSSITimeOut) {
+        // See RSSI Calculation timings in CC1101 17.3 RSSI
+        rssi = furi_hal_subghz_get_rssi();
 
-// void weather_station_init(
-//     void* context,
-//     const char* preset_name,
-//     uint32_t frequency,
-//     FuriHalSubGhzPreset preset) {
-//     furi_assert(context);
-//     WeatherStationApp* app = context;
-//     string_set(app->txrx->preset->name, preset_name);
-//     app->txrx->preset->frequency = frequency;
-//     app->txrx->preset->preset = preset;
-// }
+        // Stay if RSSI is high enough
+        if(rssi > -90.0f) {
+            app ->txrx->hopper_timeout = 10;
+            app ->txrx->hopper_state = WSHopperStateRSSITimeOut;
+            return;
+        }
+    } else {
+        app ->txrx->hopper_state = WSHopperStateRunnig;
+    }
+    // Select next frequency
+    if(app ->txrx->hopper_idx_frequency <
+       subghz_setting_get_hopper_frequency_count(app ->setting) - 1) {
+        app ->txrx->hopper_idx_frequency++;
+    } else {
+        app ->txrx->hopper_idx_frequency = 0;
+    }
 
-// void weather_station_begin(WeatherStationApp* app, FuriHalSubGhzPreset preset) {
-//     furi_assert(app);
-//     furi_hal_subghz_reset();
-//     furi_hal_subghz_idle();
-//     furi_hal_subghz_load_preset(preset);
-//     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
-//     app->txrx->txrx_state = WSTxRxStateIDLE;
-// }
-
-// uint32_t weather_station_rx(WeatherStationApp* app, uint32_t frequency) {
-//     furi_assert(app);
-//     if(!furi_hal_subghz_is_frequency_valid(frequency)) {
-//         furi_crash("WeatherStation: Incorrect RX frequency.");
-//     }
-//     furi_assert(
-//         app->txrx->txrx_state != WSTxRxStateRx &&
-//         app->txrx->txrx_state != WSTxRxStateSleep);
-
-//     furi_hal_subghz_idle();
-//     uint32_t value = furi_hal_subghz_set_frequency_and_path(frequency);
-//     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
-//     furi_hal_subghz_flush_rx();
-//     furi_hal_subghz_rx();
-
-//     furi_hal_subghz_start_async_rx(subghz_worker_rx_callback, app->txrx->worker);
-//     subghz_worker_start(app->txrx->worker);
-//     app->txrx->txrx_state = WSTxRxStateRx;
-//     return value;
-// }
-
-// void weather_station_idle(WeatherStationApp* app) {
-//     furi_assert(app);
-//     furi_assert(app->txrx->txrx_state != WSTxRxStateSleep);
-//     furi_hal_subghz_idle();
-//     app->txrx->txrx_state = WSTxRxStateIDLE;
-// }
-
-// void weather_station_rx_end(WeatherStationApp* app) {
-//     furi_assert(app);
-//     furi_assert(app->txrx->txrx_state == WSTxRxStateRx);
-//     if(subghz_worker_is_running(app->txrx->worker)) {
-//         subghz_worker_stop(app->txrx->worker);
-//         furi_hal_subghz_stop_async_rx();
-//     }
-//     furi_hal_subghz_idle();
-//     app->txrx->txrx_state = WSTxRxStateIDLE;
-// }
-
-// void weather_station_sleep(WeatherStationApp* app) {
-//     furi_assert(app);
-//     furi_hal_subghz_sleep();
-//     app->txrx->txrx_state = WSTxRxStateSleep;
-// }
+    if(app ->txrx->txrx_state == WSTxRxStateRx) {
+        ws_rx_end(app);
+    };
+    if(app ->txrx->txrx_state == WSTxRxStateIDLE) {
+        subghz_receiver_reset(app ->txrx->receiver);
+        app ->txrx->preset->frequency = subghz_setting_get_hopper_frequency(
+            app ->setting, app ->txrx->hopper_idx_frequency);
+        ws_rx(app, app ->txrx->preset->frequency);
+    }
+}
 
 // void tx(WeatherStationApp* app) {
 //     string_t flipper_format_string;

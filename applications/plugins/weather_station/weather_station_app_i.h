@@ -37,8 +37,8 @@ struct WeatherStationTxRx {
     uint16_t idx_menu_chosen;
     WSTxRxState txrx_state;
     WSHopperState hopper_state;
-    //uint8_t hopper_timeout;
-    //uint8_t hopper_idx_frequency;
+    uint8_t hopper_timeout;
+    uint8_t hopper_idx_frequency;
     WSRxKeyState rx_key_state;
 };
 
@@ -80,8 +80,9 @@ uint32_t ws_rx(WeatherStationApp* app, uint32_t frequency);
 void ws_idle(WeatherStationApp* app);
 void ws_rx_end(WeatherStationApp* app);
 void ws_sleep(WeatherStationApp* app);
+void ws_hopper_update(WeatherStationApp* app);
 
-void tx(WeatherStationApp* app);
+//void tx(WeatherStationApp* app);
 
 
 
