@@ -100,6 +100,9 @@ bool nfc_scene_passport_bac_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case NfcScenePassportAuthSelectAuth:
+            if(nfc->dev->dev_data.mrtd_data.auth.method == MrtdAuthMethodPace) {
+                scene_manager_next_scene(nfc->scene_manager, NfcScenePassportPaceTodo);
+            }
             consumed = true;
             break;
         }
