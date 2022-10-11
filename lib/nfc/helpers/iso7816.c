@@ -6,8 +6,6 @@
 TlvInfo iso7816_tlv_parse(const uint8_t* data) {
 	TlvInfo tlv;
 
-	const uint8_t* org = data;
-
 	// Simple-TLV: tag can be any value from 1 to 254 (not '00' or 'FF')
 	// BER-TLV: TODO describe
 	// 00000 - 11110 => 0 - 30 (single byte)

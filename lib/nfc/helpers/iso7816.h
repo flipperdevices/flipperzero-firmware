@@ -5,8 +5,23 @@
 #include <stddef.h>
 #include <string.h>
 
+#define BER_CLASS_UNIVERSAL 0x0
+#define BER_CLASS_APPLICATION 0x1
+#define BER_CLASS_CONTEXT 0x2
+#define BER_CLASS_PRIVATE 0x3
+
 typedef struct {
-	uint16_t tag;
+    union {
+        uint16_t tag;
+        struct {
+            // LSB
+            uint8_t tag : 5;
+            uint8_t constructed : 1;
+            uint8_t class : 2;
+            // MSB
+        } ber;
+        //TODO: currently only works for 1-byte tags
+    };
 	size_t length;
 	const uint8_t* value;
 
