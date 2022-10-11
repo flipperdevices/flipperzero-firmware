@@ -55,16 +55,11 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
     FuriHalNfcTxRxContext* tx_rx = app->tx_rx;
     size_t idx = 0;
 
-    FURI_LOG_D(TAG, "Send APDU, lc: %d, le: %d", lc, le);
+    FURI_LOG_T(TAG, "Send APDU, lc: %d, le: %d", lc, le);
 
     if(app->secure_messaging) {
-        FURI_LOG_D(TAG, "Protect APDU");
-
         app->ssc_long++;
         idx = mrtd_protect_apdu(cla, ins, p1, p2, lc, data, le, app->ksenc, app->ksmac, app->ssc_long, tx_rx->tx_data);
-
-        FURI_LOG_D(TAG, "Protect APDU - done");
-
     } else {
         tx_rx->tx_data[idx++] = cla;
         tx_rx->tx_data[idx++] = ins;
@@ -83,11 +78,9 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
     tx_rx->tx_bits = idx * 8;
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
 
-    FURI_LOG_D(TAG, "Sending...");
     //TODO: timeout as param?
     if(furi_hal_nfc_tx_rx(tx_rx, 300)) {
         mrtd_trace(app);
-        FURI_LOG_D(TAG, "Sending - done");
         uint16_t ret_code = mrtd_decode_response(tx_rx->rx_data, tx_rx->rx_bits / 8);
 
         if(app->secure_messaging && ret_code == 0x9000) {
@@ -182,11 +175,12 @@ size_t mrtd_read_binary(MrtdApplication* app, uint8_t* buffer, size_t bufsize, s
 
     //TODO: test with max_read = bufsize (value !0, > file size)
     int16_t max_read = 0; // 0 = 'everything', -1 = 'nothing', >0 = amount of bytes
-    size_t buf_written;
+    size_t buf_written = 0;
     if(!mrtd_send_apdu(app, 0x00, 0xB0, offset>>8, offset&0xff, 0x00, NULL, max_read, buffer, &buf_written)) {
         FURI_LOG_E(TAG, "Failed to read");
         return 0;
     }
+    FURI_LOG_D(TAG, "buf_written: %d\n", buf_written);
 
     return buf_written;
 }
@@ -194,16 +188,21 @@ size_t mrtd_read_binary(MrtdApplication* app, uint8_t* buffer, size_t bufsize, s
 //TODO: use short id to read, because it's mandatory for eMRTD
 //TODO: check for support of extended length in EF.ATR/INFO, see ISO7816-4
 
-void mrtd_read_dump(MrtdApplication* app, EFFile file, const char* descr) {
-    FURI_LOG_D(TAG, "Read and dump %s:", descr);
+void mrtd_read_dump(MrtdApplication* app, EFFile file) {
+    FURI_LOG_D(TAG, "Read and dump %s:", file.name);
 
     if(!mrtd_select_file(app, file)) {
         return;
     }
+
     uint8_t data[2048];
     size_t read = 0;
+    size_t offset = 0;
     do {
-        read = mrtd_read_binary(app, data + read, sizeof(data) - read, read);
+        read = mrtd_read_binary(app, data, sizeof(data), offset);
+        offset += read;
+
+        hexdump(FuriLogLevelDebug, "Data:", data, read);
     } while(read > 0);
 }
 
@@ -322,23 +321,14 @@ bool mrtd_read_parse_file(MrtdApplication* app, MrtdData* mrtd_data, EFFile file
 
 //TODO: remove testing function
 void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data) {
-    //FuriHalNfcTxRxContext* tx_rx = app->tx_rx;
-
     FURI_LOG_D(TAG, "Mrtd Test");
-    mrtd_read_dump(app, EF.ATR, "EF.ATR");
-    mrtd_read_dump(app, EF.COM, "EF.COM");
-    mrtd_read_dump(app, EF.DIR, "EF.DIR");
-    mrtd_read_dump(app, EF.CardAccess, "EF.CardAccess");
-    mrtd_read_dump(app, EF.CardSecurity, "EF.CardSecurity");
+    mrtd_read_dump(app, EF.ATR);
+    mrtd_read_dump(app, EF.COM);
+    mrtd_read_dump(app, EF.DIR);
+    mrtd_read_dump(app, EF.CardAccess);
+    mrtd_read_dump(app, EF.CardSecurity);
 
     mrtd_select_app(app, AID.eMRTDApplication);
-
-    //TODO: remove details
-    /*
-    mrtd_data->auth.birth_date = (MrtdDate){.year=69, .month=8, .day=6};
-    mrtd_data->auth.expiry_date = (MrtdDate){.year=94, .month=6, .day=23};
-    memcpy(mrtd_data->auth.doc_number, "L898902C<", 9);
-    */
 
     MrtdAuthMethod method = mrtd_data->auth.method;
     mrtd_data->auth_success = false;
@@ -362,7 +352,10 @@ void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data) {
     }
 
     mrtd_read_parse_file(app, mrtd_data, EF.COM);
-    mrtd_read_parse_file(app, mrtd_data, EF.DIR);
+    //mrtd_read_parse_file(app, mrtd_data, EF.DIR);
+
+    mrtd_read_dump(app, EF.DG1);
+    mrtd_read_dump(app, EF.DG2);
 }
 
 MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx) {
@@ -449,7 +442,7 @@ bool mrtd_bac(MrtdApplication* app, MrtdAuthData* auth) {
     uint8_t kseed[16];
     for(uint8_t i=0; i<16; ++i) {
         kseed[i] = k_ifd[i] ^ kic[i];
-        printf("seed %2d = %02X ^ %02X = %02X\r\n", i, k_ifd[i], kic[i], kseed[i]);
+        //printf("seed %2d = %02X ^ %02X = %02X\r\n", i, k_ifd[i], kic[i], kseed[i]);
     }
 
     hexdump(FuriLogLevelDebug, "kseed:", kseed, 16);

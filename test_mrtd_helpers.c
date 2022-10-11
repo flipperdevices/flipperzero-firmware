@@ -450,7 +450,6 @@ int main(int argc, char** argv) {
 
     // Verify working against mrtdreader
 
-    /*
     printf("=====================================\n\n");
 
     //TODO: set auth data
@@ -468,9 +467,9 @@ int main(int argc, char** argv) {
     uint8_t buffer[32]; // RND.IC || RND.IFD || KIC
 
     //TODO: set challenge rx
-    mrtd_bac_decrypt_verify((uint8_t*)"\x3F\xD4\x6B\xA9\xFF\x29\x4B\xF6\x77\x4E\x8F\x1E\xEC\xAE\x2E\x67\xDB\xE7\x70\x53\xB3\xAD\x9C\xDC\xED\x6E\xED\xD6\x04\x2E\xB7\x6B\x74\xDE\x2A\xFB\x4B\xC0\xF7\x24", 40, kenc, kmac, buffer);
+    mrtd_bac_decrypt_verify((uint8_t*)"\x11\x0e\x51\x83\xbe\x78\x94\xcf\x43\x40\x8e\xea\xfe\x99\x54\xbb\x17\x97\x27\x65\xf8\xb4\x51\xa4\x94\x0d\xb2\x5b\xad\x1b\xe3\x64\x16\x53\x2a\xff\xad\xee\x29\xcf", 40, kenc, kmac, buffer);
     //TODO: set kifd
-    uint8_t *kifd = "\x9F\x10\x40\xEA\x7F\xAE\xF8\xC3\x09\x6E\xAE\x07\x66\x95\x3F\xDC";
+    uint8_t *kifd = (uint8_t*)"\xe0\x01\xf4\x4c\x09\xb1\xb3\x16\x63\xab\x3a\x11\x8d\xa3\x17\xcc";
 
     printf("buffer: "); print_hex(buffer, 32); printf("\n");
     // 8F763C0B1CDF9F9D|0983F7C136155248|7A705FD193C6A6328C42264A3804002C
@@ -492,16 +491,29 @@ int main(int argc, char** argv) {
     printf("ks_enc: "); print_hex(ks_enc, 16); printf("\n");
     printf("ks_mac: "); print_hex(ks_mac, 16); printf("\n");
 
-    printf("rnd_ic: "); print_hex(rnd_ic, 16); printf("\n");
-    printf("rnd_ifd: "); print_hex(rnd_ifd, 16); printf("\n");
-    uint64_t ssc = mrtd_ssc_from_data(rnd_ic, rnd_ifd);
-    printf("ssc: %016lx", ssc);
+    printf("rnd_ic: "); print_hex(rnd_ic, 8); printf("\n");
+    printf("rnd_ifd: "); print_hex(rnd_ifd, 8); printf("\n");
+    ssc = mrtd_ssc_from_data(rnd_ic, rnd_ifd);
+    printf("ssc: %016lx\n", ssc);
 
     ssc++;
 
+    ssc+=6;
+
+    //test_mrtd_protect_
+
     //TODO: set challenge TX for verification
-    test_mrtd_protect_apdu(0x00, 0xA4, 0x02, 0x0C, 0x02, "\x01\x1e", -1, ks_enc, ks_mac, ssc,
-            (uint8_t*)"\x0C\xA4\x02\x0C\x15\x87\x09\x01\xC5\x4E\x76\x3A\xD1\x89\xF0\xFA\x8E\x08\x1F\x03\xC2\xB6\xCE\x8A\xE1\x53\x00", 27);
+    test_mrtd_protect_apdu(0x00, 0xA4, 0x02, 0x0C, 0x02, "\x01\x01", -1, ks_enc, ks_mac, ssc,
+            (uint8_t*)"\x0c\xa4\x02\x0c\x15\x87\x09\x01\xc8\xcc\x50\x6f\x50\xae\x10\xc7\x8e\x08\xaf\xec\x2e\x03\x90\x26\x8f\xa5\x00", 27);
+
+    /*
+    uint8_t* select_ef_com = "\x0C\xA4\x02\x0C\x15\x87\x09\x01\xE2\x94\xA2\x9A\xF3\x73\xFD\x20\x8E\x08\x7E\x3B\xA9\xAA\x7C\xB9\x07\x0C\x00";
+    uint8_t* select_ef_dg1 = "\x0C\xA4\x02\x0C\x15\x87\x09\x01\x9C\xD7\x89\x94\x97\x05\xB8\xF3\x8E\x08\x6C\xA2\xC1\x48\xA7\x47\xBA\x96\x00";
+    uint8_t buffer2[256];
+
+    mrtd_bac_decrypt(select_ef_dg1 + 8, 8, ks_enc, buffer2);
+    printf("Decrypted: ");
+    print_hex(buffer2, 8);
     */
 
     return 0;

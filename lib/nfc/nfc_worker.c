@@ -280,34 +280,14 @@ static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
         // Read passport
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
 
-        if(!mrtd_select_app(mrtd_app, AID.eMRTDApplication)) break;
+        //TODO: if(!mrtd_select_app(mrtd_app, AID.eMRTDApplication)) break;
 
-        mrtd_test(mrtd_app, mrtd_data);
+        mrtd_test(mrtd_app, mrtd_data); // Some EFs are only available before Select App
+        //TODO: try select eMRTDApp first, but when PACE, read CardAccess first!
 
         //TODO: read general informatie
         //TODO: after auth scene, do auth (BAC / PACE)
 
-        /*
-        // Copy data
-        // TODO Set EmvData to reader or like in mifare ultralight!
-        result->number_len = emv_app.card_number_len;
-        memcpy(result->number, emv_app.card_number, result->number_len);
-        result->aid_len = emv_app.aid_len;
-        memcpy(result->aid, emv_app.aid, result->aid_len);
-        if(emv_app.name_found) {
-            memcpy(result->name, emv_app.name, sizeof(emv_app.name));
-        }
-        if(emv_app.exp_month) {
-            result->exp_mon = emv_app.exp_month;
-            result->exp_year = emv_app.exp_year;
-        }
-        if(emv_app.country_code) {
-            result->country_code = emv_app.country_code;
-        }
-        if(emv_app.currency_code) {
-            result->currency_code = emv_app.currency_code;
-        }
-		*/
         read_success = true;
     } while(false);
 
