@@ -11,9 +11,10 @@
 #define USB_CDC_BIT_DTR (1 << 0)
 #define USB_CDC_BIT_RTS (1 << 1)
 
-static const GpioPin* flow_pins[][2] = {
+static const GpioPin* flow_pins[][3] = {
     {&gpio_ext_pa7, &gpio_ext_pa6}, // 2, 3
     {&gpio_ext_pb2, &gpio_ext_pc3}, // 6, 7
+    {&gpio_ext_pc0, &gpio_ext_pc1}, // 0, 1
 };
 
 typedef enum {
