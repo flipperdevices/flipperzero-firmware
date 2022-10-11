@@ -109,6 +109,14 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
                     FURI_LOG_I(TAG, "'secure messaging data objects are incorrect'");
                     app->secure_messaging = false;
                     break;
+                case 0xff01:
+                    //CUSTOM ERROR CODE from mrtd_helpers.c
+                    FURI_LOG_I(TAG, "'invalid padding'");
+                    break;
+                case 0xff02:
+                    //CUSTOM ERROR CODE from mrtd_helpers.c
+                    FURI_LOG_I(TAG, "'verify failed'");
+                    break;
             }
 
             return false;
@@ -254,29 +262,116 @@ bool parse_ef_com(EF_COM_contents* EF_COM, const uint8_t* data, size_t length) {
     uint16_t tags_tag_path[] = {0x60, 0x5c};
 
     TlvInfo tlv_lds_version = iso7816_tlv_select(data, length, lds_tag_path, num_elements(lds_tag_path));
-    if(tlv_lds_version.tag) {
-        EF_COM->lds_version = tlv_number(tlv_lds_version);
-    } else {
+    if(!tlv_lds_version.tag) {
         FURI_LOG_W(TAG, "EF.COM LDS version not found");
         return false;
     }
 
+    EF_COM->lds_version = tlv_number(tlv_lds_version);
+
     TlvInfo tlv_unicode_version = iso7816_tlv_select(data, length, unicode_tag_path, num_elements(unicode_tag_path));
-    if(tlv_unicode_version.tag) {
-        EF_COM->unicode_version = tlv_number(tlv_unicode_version);
-    } else {
+    if(!tlv_unicode_version.tag) {
         FURI_LOG_W(TAG, "EF.COM Unicode info not found!");
         return false;
     }
 
+    EF_COM->unicode_version = tlv_number(tlv_unicode_version);
+
     TlvInfo tlv_tag_list = iso7816_tlv_select(data, length, tags_tag_path, num_elements(tags_tag_path));
-    if(tlv_tag_list.tag) {
-        for(size_t i=0; i<MAX_EFCOM_TAGS; ++i) {
-            EF_COM->tag_list[i] = (i < tlv_tag_list.length) ? tlv_tag_list.value[i] : 0x00;
-        }
-    } else {
+    if(!tlv_tag_list.tag) {
         FURI_LOG_W(TAG, "EF.CO Tag List not found!");
         return false;
+    }
+
+    for(size_t i=0; i<MAX_EFCOM_TAGS; ++i) {
+        EF_COM->tag_list[i] = (i < tlv_tag_list.length) ? tlv_tag_list.value[i] : 0x00;
+    }
+
+    return true;
+}
+
+void mrzcpy(uint8_t* dest, const uint8_t* src, size_t* idx, size_t n) {
+    //FURI_LOG_D(TAG, "mrzcpy %d: %.*s", n, n, src + *idx);
+    //memcpy(dest, src + *idx, n);
+    for(size_t i=0; i<n; ++i) {
+        uint8_t c = src[i + *idx];
+        if(c == '<') {
+            c = ' ';
+        }
+        dest[i] = c;
+    }
+    dest[n] = 0x00;
+    *idx += n;
+}
+
+bool parse_ef_dg1(EF_DG1_contents* DG1, const uint8_t* data, size_t length) {
+    TlvInfo tlv_mrz = iso7816_tlv_select(data, length, (uint16_t[]){0x61, 0x5f1f}, 2);
+
+    if(!tlv_mrz.tag) {
+        FURI_LOG_W(TAG, "DG1, unexpected content. Could not find tag 0x61, 0x5f1f");
+        return false;
+    }
+
+    const uint8_t* mrz = tlv_mrz.value;
+    size_t idx = 0;
+
+    switch(tlv_mrz.length) {
+        case 90:
+            DG1->type = MrtdTypeTD1;
+            mrzcpy(DG1->doctype, mrz, &idx, 2);
+            mrzcpy(DG1->issuing_state, mrz, &idx, 3);
+            mrzcpy(DG1->docnr, mrz, &idx, 9);
+            idx += 1; // docnr check digit
+            idx += 15; // optional data
+            mrzcpy(DG1->birth_date, mrz, &idx, 6);
+            idx += 1; // birth date check digit
+            mrzcpy(DG1->sex, mrz, &idx, 1);
+            mrzcpy(DG1->expiry_date, mrz, &idx, 6);
+            idx += 1; // expiry date check digit
+            mrzcpy(DG1->nationality, mrz, &idx, 3);
+            idx += 11; // optional data
+            idx += 1; // check digit
+            mrzcpy(DG1->name, mrz, &idx, 30);
+            // 30 + 30 + 30
+            break;
+        case 72:
+            DG1->type = MrtdTypeTD2;
+            mrzcpy(DG1->doctype, mrz, &idx, 2);
+            mrzcpy(DG1->issuing_state, mrz, &idx, 3);
+            mrzcpy(DG1->name, mrz, &idx, 31);
+            mrzcpy(DG1->docnr, mrz, &idx, 9);
+            idx += 1; // docnr check digit
+            mrzcpy(DG1->nationality, mrz, &idx, 3);
+            mrzcpy(DG1->birth_date, mrz, &idx, 6);
+            idx += 1; // birth date check digit
+            mrzcpy(DG1->sex, mrz, &idx, 1);
+            mrzcpy(DG1->expiry_date, mrz, &idx, 6);
+            idx += 1; // expiry date check digit
+            idx += 7; // optional data
+            idx += 1; // check digit
+            // 36 + 36
+            break;
+        case 88:
+            DG1->type = MrtdTypeTD3;
+            mrzcpy(DG1->doctype, mrz, &idx, 2);
+            mrzcpy(DG1->issuing_state, mrz, &idx, 3);
+            mrzcpy(DG1->name, mrz, &idx, 39);
+            mrzcpy(DG1->docnr, mrz, &idx, 9);
+            idx += 1; // docnr check digit
+            mrzcpy(DG1->nationality, mrz, &idx, 3);
+            mrzcpy(DG1->birth_date, mrz, &idx, 6);
+            idx += 1; // birth date check digit
+            mrzcpy(DG1->sex, mrz, &idx, 1);
+            mrzcpy(DG1->expiry_date, mrz, &idx, 6);
+            idx += 1; // expiry date check digit
+            idx += 14; // optional data
+            idx += 1; //  check digit
+            idx += 1; // check digit
+            // 44 + 44
+            break;
+        default:
+            FURI_LOG_W(TAG, "Unexpected MRZ length in DG1: %d. TD1=90, TD2=72, TD3=88.", tlv_mrz.length);
+            return false;
     }
 
     return true;
@@ -312,6 +407,8 @@ bool mrtd_read_parse_file(MrtdApplication* app, MrtdData* mrtd_data, EFFile file
     } else if(file.file_id == EF.DIR.file_id) {
         result = parse_ef_dir(&mrtd_data->files.EF_DIR, buffer, buf_len);
         FURI_LOG_D(TAG, "Parsed EF.DIR");
+    } else if(file.file_id == EF.DG1.file_id) {
+        result = parse_ef_dg1(&mrtd_data->files.DG1, buffer, buf_len);
     } else {
         FURI_LOG_W(TAG, "Don't know how to parse file with id 0x%04X", file.file_id);
     }
@@ -322,11 +419,11 @@ bool mrtd_read_parse_file(MrtdApplication* app, MrtdData* mrtd_data, EFFile file
 //TODO: remove testing function
 void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data) {
     FURI_LOG_D(TAG, "Mrtd Test");
-    mrtd_read_dump(app, EF.ATR);
-    mrtd_read_dump(app, EF.COM);
-    mrtd_read_dump(app, EF.DIR);
-    mrtd_read_dump(app, EF.CardAccess);
-    mrtd_read_dump(app, EF.CardSecurity);
+    //mrtd_read_dump(app, EF.ATR);
+    //mrtd_read_dump(app, EF.COM);
+    //mrtd_read_dump(app, EF.DIR);
+    //mrtd_read_dump(app, EF.CardAccess);
+    //mrtd_read_dump(app, EF.CardSecurity);
 
     mrtd_select_app(app, AID.eMRTDApplication);
 
@@ -354,8 +451,11 @@ void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data) {
     mrtd_read_parse_file(app, mrtd_data, EF.COM);
     //mrtd_read_parse_file(app, mrtd_data, EF.DIR);
 
-    mrtd_read_dump(app, EF.DG1);
+    mrtd_read_parse_file(app, mrtd_data, EF.DG1);
+
     mrtd_read_dump(app, EF.DG2);
+    mrtd_read_dump(app, EF.DG14);
+    mrtd_read_dump(app, EF.DG15);
 }
 
 MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx) {

@@ -25,6 +25,13 @@ typedef enum {
     MrtdAuthMethodPace,
 } MrtdAuthMethod;
 
+typedef enum {
+    MrtdTypeUnknown,
+    MrtdTypeTD1,
+    MrtdTypeTD2,
+    MrtdTypeTD3,
+} MrtdType;
+
 typedef struct {
     MrtdAuthMethod method;
 
@@ -108,6 +115,19 @@ typedef struct {
     uint32_t unicode_version; // aabbcc => aa.bb.cc (major.minor.release)
     uint8_t tag_list[MAX_EFCOM_TAGS];
 } EF_COM_contents;
+
+typedef struct {
+    MrtdType type;
+    // ICAO9303 max sizes + 1 for 0-byte
+    uint8_t doctype[3];
+    uint8_t issuing_state[4];
+    uint8_t name[40];
+    uint8_t docnr[10];
+    uint8_t nationality[4];
+    uint8_t birth_date[7];
+    uint8_t sex[2];
+    uint8_t expiry_date[7];
+} EF_DG1_contents;
 
 uint8_t mrtd_bac_check_digit(const char* input, const uint8_t length);
 

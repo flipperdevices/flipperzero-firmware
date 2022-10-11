@@ -48,6 +48,17 @@ void nfc_scene_passport_read_auth_on_enter(void* context) {
         }
     }
 
+    EF_DG1_contents* DG1 = &mrtd_data->files.DG1;
+    string_cat_printf(temp_str, "\e#DG1\n");
+    string_cat_printf(temp_str, "Doc Type: %s\n", DG1->doctype);
+    string_cat_printf(temp_str, "Issuing State: %s\n", DG1->issuing_state);
+    string_cat_printf(temp_str, "Name: %s\n", DG1->name);
+    string_cat_printf(temp_str, "DocNr: %s\n", DG1->docnr);
+    string_cat_printf(temp_str, "Nationality: %s\n", DG1->nationality);
+    string_cat_printf(temp_str, "Birth Date: %s\n", DG1->birth_date);
+    string_cat_printf(temp_str, "Sex: %s\n", DG1->sex);
+    string_cat_printf(temp_str, "Expiry Date: %s\n", DG1->expiry_date);
+
     /*
     char iso_type = FURI_BIT(data->sak, 5) ? '4' : '3';
     //TODO: NFC-B?

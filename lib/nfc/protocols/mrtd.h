@@ -21,6 +21,7 @@ typedef struct {
     struct {
         EF_DIR_contents EF_DIR;
         EF_COM_contents EF_COM;
+        EF_DG1_contents DG1;
     } files;
 } MrtdData;
 
