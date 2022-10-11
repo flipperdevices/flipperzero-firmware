@@ -2,6 +2,8 @@
 
 #include <furi_hal_nfc.h>
 
+#include "mrtd_helpers.h"
+
 typedef struct {
     FuriHalNfcTxRxContext* tx_rx;
     uint16_t file_offset;
@@ -10,31 +12,6 @@ typedef struct {
     uint8_t ksmac[16];
     uint64_t ssc_long;
 } MrtdApplication;
-
-typedef struct {
-    uint8_t year;
-    uint8_t month;
-    uint8_t day;
-} MrtdDate;
-
-// NULL terminated document ID
-#define MRTD_DOCNR_MAX_LENGTH 21
-
-typedef enum {
-    MrtdAuthMethodBac,
-    MrtdAuthMethodPace,
-} MrtdAuthMethod;
-
-typedef struct {
-    MrtdAuthMethod method;
-
-    // BAC input fields
-    MrtdDate birth_date;
-    MrtdDate expiry_date;
-    char doc_number[MRTD_DOCNR_MAX_LENGTH];
-
-    //TODO: PACE
-} MrtdAuthData;
 
 typedef struct {
     MrtdAuthData auth;

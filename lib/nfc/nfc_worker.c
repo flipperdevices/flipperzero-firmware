@@ -292,6 +292,7 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
 
             furi_hal_nfc_sleep(); // Needed between checks
             FURI_LOG_D(TAG, "Try reading MRTD");
+            //TODO: support NFC-B?
             if(nfc_worker_read_mrtd(nfc_worker, tx_rx)) {
                 nfc_worker->dev_data->protocol = NfcDeviceProtocolMRTD;
                 break;
