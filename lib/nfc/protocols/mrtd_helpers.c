@@ -177,14 +177,34 @@ bool mrtd_bac_decrypt_verify_sm(const uint8_t* data, size_t data_length, uint8_t
     // Message: [DO'85 or DO'87] || [DO'99] || DO'8E
     // Lengths:      Var            1+1+2=4    1+1+8=10
 
-    printf("ret_code: %02X %02X\n", data[data_length - 10 - 2], data[data_length - 10 - 2 + 1]);
     *ret_code = data[data_length - 10 - 2] <<8 | data[data_length - 10 - 1];
     //ntohs(data + data_length - 10 - 2);
-    printf("set to: %04X\n", *ret_code);
 
     if(data[0] == 0x87) {
         uint8_t do87_length = data[1] - 1;
         mrtd_bac_decrypt(data + 3, do87_length, key_enc, output);
+        printf("Decrypted: "); for(uint8_t i=0; i<do87_length; ++i) printf("%02X ", output[i]); printf("\r\n");
+
+        //TODO: mrtd_bac_unpad
+        int padidx;
+        for(padidx=do87_length-1; padidx>=0; --padidx) {
+            if(output[padidx] == 0x00) {
+                continue;
+            } else if(output[padidx] == 0x80) {
+                break;
+            } else {
+                printf("Invalid padding\r\n");
+                return false;
+            }
+        }
+        printf("           ");
+        for(int i=0; i<padidx; ++i) {
+            printf("   ");
+        }
+        printf("^^\r\n");
+        printf("Pad starts at: %d\r\n", padidx);
+
+        //TODO: return padidx-1 as output length
     }
 
     mrtd_bac_mac_ctx ctx;

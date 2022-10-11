@@ -50,6 +50,7 @@ typedef struct {
 typedef struct {
     const uint8_t short_id;
     const uint16_t file_id;
+    const uint8_t tag;
 } EFFile;
 
 struct EFFormat {

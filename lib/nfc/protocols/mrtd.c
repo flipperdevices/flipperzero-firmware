@@ -15,6 +15,8 @@
 //- PACE (CONDITIONAL)
 //- BAC (CONDITIONAL)
 
+//TODO: idea - generalize ISO7816 reading. List available apps
+
 static void hexdump(FuriLogLevel level, char* prefix, void* data, size_t length) {
     if(furi_log_get_level() >= level) {
         printf("%s ", prefix);
@@ -50,24 +52,24 @@ struct EFFormat EF = {
     .DIR          = {.file_id = 0x2F00, .short_id = 0x1E },
     .CardAccess   = {.file_id = 0x011C, .short_id = 0x1C },
     .CardSecurity = {.file_id = 0x011D, .short_id = 0x1D },
-    .COM          = {.file_id = 0x011E, .short_id = 0x1E },
-    .SOD          = {.file_id = 0X011D, .short_id = 0X1D },
-    .DG1          = {.file_id = 0X0101, .short_id = 0X01 },
-    .DG2          = {.file_id = 0X0102, .short_id = 0X02 },
-    .DG3          = {.file_id = 0X0103, .short_id = 0X03 },
-    .DG4          = {.file_id = 0X0104, .short_id = 0X04 },
-    .DG5          = {.file_id = 0X0105, .short_id = 0X05 },
-    .DG6          = {.file_id = 0X0106, .short_id = 0X06 },
-    .DG7          = {.file_id = 0X0107, .short_id = 0X07 },
-    .DG8          = {.file_id = 0X0108, .short_id = 0X08 },
-    .DG9          = {.file_id = 0X0109, .short_id = 0X09 },
-    .DG10         = {.file_id = 0X010A, .short_id = 0X0A },
-    .DG11         = {.file_id = 0X010B, .short_id = 0X0B },
-    .DG12         = {.file_id = 0X010C, .short_id = 0X0C },
-    .DG13         = {.file_id = 0X010D, .short_id = 0X0D },
-    .DG14         = {.file_id = 0X010E, .short_id = 0X0E },
-    .DG15         = {.file_id = 0X010F, .short_id = 0X0F },
-    .DG16         = {.file_id = 0X0110, .short_id = 0X10 },
+    .COM          = {.file_id = 0x011E, .short_id = 0x1E, .tag = 0x60 },
+    .SOD          = {.file_id = 0X011D, .short_id = 0X1D, .tag = 0x77 },
+    .DG1          = {.file_id = 0X0101, .short_id = 0X01, .tag = 0x61 },
+    .DG2          = {.file_id = 0X0102, .short_id = 0X02, .tag = 0x75 },
+    .DG3          = {.file_id = 0X0103, .short_id = 0X03, .tag = 0x63 },
+    .DG4          = {.file_id = 0X0104, .short_id = 0X04, .tag = 0x76 },
+    .DG5          = {.file_id = 0X0105, .short_id = 0X05, .tag = 0x65 },
+    .DG6          = {.file_id = 0X0106, .short_id = 0X06, .tag = 0x66 },
+    .DG7          = {.file_id = 0X0107, .short_id = 0X07, .tag = 0x67 },
+    .DG8          = {.file_id = 0X0108, .short_id = 0X08, .tag = 0x68 },
+    .DG9          = {.file_id = 0X0109, .short_id = 0X09, .tag = 0x69 },
+    .DG10         = {.file_id = 0X010A, .short_id = 0X0A, .tag = 0x6a },
+    .DG11         = {.file_id = 0X010B, .short_id = 0X0B, .tag = 0x6b },
+    .DG12         = {.file_id = 0X010C, .short_id = 0X0C, .tag = 0x6c },
+    .DG13         = {.file_id = 0X010D, .short_id = 0X0D, .tag = 0x6d },
+    .DG14         = {.file_id = 0X010E, .short_id = 0X0E, .tag = 0x6e },
+    .DG15         = {.file_id = 0X010F, .short_id = 0X0F, .tag = 0x6f },
+    .DG16         = {.file_id = 0X0110, .short_id = 0X10, .tag = 0x70 },
 };
 
 struct AIDSet AID = {
@@ -198,8 +200,11 @@ size_t mrtd_read_binary(MrtdApplication* app, uint8_t* buffer, size_t bufsize, s
     UNUSED(bufsize);
     // 00 B0 offst -
     FURI_LOG_D(TAG, "Read binary, offset: %d", offset);
+    //TODO: read first 4 bytes, determine length, iterate through file
     //TODO: limit reading/buffer fill to max bufsize
-    if(!mrtd_send_apdu(app, 0x00, 0xB0, offset>>8, offset&0xff, 0x00, NULL, 0, buffer)) {
+
+    int16_t max_read = 0; // 0 = 'everything', -1 = 'nothing'
+    if(!mrtd_send_apdu(app, 0x00, 0xB0, offset>>8, offset&0xff, 0x00, NULL, max_read, buffer)) {
         FURI_LOG_E(TAG, "Failed to read");
         return 0;
     }
