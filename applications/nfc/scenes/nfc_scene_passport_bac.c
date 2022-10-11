@@ -37,10 +37,23 @@ void nfc_scene_passport_bac_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
-    variable_item_list_add(variable_item_list, "Birth Date", 1, NULL, NULL);
-    //TODO: show dates in menu?
+    const size_t temp_str_size = 10;
+    char temp_str[temp_str_size];
+    snprintf(temp_str, temp_str_size, "%02u%02u%02u",
+        nfc->dev->dev_data.mrtd_data.auth.bac.birth_date.year,
+        nfc->dev->dev_data.mrtd_data.auth.bac.birth_date.month,
+        nfc->dev->dev_data.mrtd_data.auth.bac.birth_date.day);
 
-    variable_item_list_add(variable_item_list, "Expiry Date", 1, NULL, NULL);
+    item = variable_item_list_add(variable_item_list, "Birth Date", 1, NULL, NULL);
+    variable_item_set_current_value_text(item, temp_str);
+
+    snprintf(temp_str, temp_str_size, "%02u%02u%02u",
+        nfc->dev->dev_data.mrtd_data.auth.bac.expiry_date.year,
+        nfc->dev->dev_data.mrtd_data.auth.bac.expiry_date.month,
+        nfc->dev->dev_data.mrtd_data.auth.bac.expiry_date.day);
+
+    item = variable_item_list_add(variable_item_list, "Expiry Date", 1, NULL, NULL);
+    variable_item_set_current_value_text(item, temp_str);
 
     variable_item_list_add(variable_item_list, "Document Nr.", 1, NULL, NULL);
     //TODO: add scene to enter docnr, based on nfc_scene_passport_date.c

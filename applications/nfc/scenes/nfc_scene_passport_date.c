@@ -43,13 +43,17 @@ void nfc_scene_passport_date_on_enter(void* context) {
         nfc_text_store_set(nfc, "YYMMDD");
         date_empty = true;
     } else {
+        char temp_str[10];
         snprintf(
-            nfc->text_store,
-            DATE_LENGTH + 1,
+            temp_str,
+            10,
             "%02u%02u%02u",
-            date_value.year % 100,
-            date_value.month % 112,
-            date_value.day % 31); // incl. '\x00'
+            date_value.year,
+            date_value.month,
+            date_value.day);
+
+        memcpy(nfc->text_store, temp_str, DATE_LENGTH);
+        nfc->text_store[DATE_LENGTH] = '\x00';
     }
 
     text_input_set_result_callback(
@@ -66,8 +70,6 @@ void nfc_scene_passport_date_on_enter(void* context) {
 }
 
 bool nfc_scene_passport_date_save(Nfc* nfc) {
-    FURI_LOG_D(TAG, "Value2: %s", nfc->text_store);
-
     int year;
     int month;
     int day;
@@ -104,8 +106,6 @@ bool nfc_scene_passport_date_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventTextInputDone) {
-            FURI_LOG_D(TAG, "Value: %s", nfc->text_store);
-
             nfc_scene_passport_date_save(nfc);
             //TODO: handle invalid date (returned false)
 
