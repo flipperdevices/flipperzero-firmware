@@ -4,7 +4,7 @@ bool nfc_scene_mf_ultralight_unlock_auto_worker_callback(NfcWorkerEvent event, v
     Nfc* nfc = context;
 
     if(event == NfcWorkerEventMfUltralightPwdAuth) {
-        MfUltralightAuth* auth = nfc_worker_get_event_data(nfc->worker);
+        MfUltralightAuth* auth = &nfc->dev->dev_data.mf_ul_auth;
         memcpy(nfc->byte_input_store, auth->pwd.raw, sizeof(auth->pwd.raw));
         nfc->dev->dev_data.mf_ul_data.auth_method = MfUltralightAuthMethodManual;
     }
