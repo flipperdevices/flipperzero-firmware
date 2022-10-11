@@ -163,10 +163,10 @@ bool weather_station_scene_receiver_on_event(void* context, SceneManagerEvent ev
         //     notification_message(app->notifications, &sequence_display_backlight_off);
         //     consumed = true;
         //     break;
-        // case WSCustomEventViewReceiverUnlock:
-        //     app->lock = SubGhzLockOff;
-        //     consumed = true;
-        //     break;
+        case WSCustomEventViewReceiverUnlock:
+            app->lock = WSLockOff;
+            consumed = true;
+            break;
         default:
             break;
         }
@@ -180,7 +180,7 @@ bool weather_station_scene_receiver_on_event(void* context, SceneManagerEvent ev
         //     notification_message(subghz->notifications, &sequence_blink_cyan_10);
         //     break;
         // case SubGhzNotificationStateRxDone:
-        //     if(subghz->lock != SubGhzLockOn) {
+        //     if(subghz->lock != WSLockOn) {
         //         notification_message(subghz->notifications, &subghs_sequence_rx);
         //     } else {
         //         notification_message(subghz->notifications, &subghs_sequence_rx_locked);
