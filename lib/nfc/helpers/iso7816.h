@@ -11,17 +11,12 @@
 #define BER_CLASS_PRIVATE 0x3
 
 typedef struct {
-    union {
+    uint16_t tag; // TODO: use define/typedef for this data format?
+    struct {
         uint16_t tag;
-        struct {
-            // LSB
-            uint8_t tag : 5;
-            uint8_t constructed : 1;
-            uint8_t class : 2;
-            // MSB
-        } ber;
-        //TODO: currently only works for 1-byte tags
-    };
+        uint8_t constructed : 1;
+        uint8_t class : 2;
+    } ber;
 	size_t length;
 	const uint8_t* value;
 
@@ -31,3 +26,5 @@ typedef struct {
 // ISO7816-5 §5.2
 // Simple-TLV and BER-TLV parsing
 TlvInfo iso7816_tlv_parse(const uint8_t* data);
+
+TlvInfo iso7816_tlv_select(const uint8_t* data, size_t length, const uint16_t tags[], size_t num_tags);
