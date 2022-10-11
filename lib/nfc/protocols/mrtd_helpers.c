@@ -3,6 +3,8 @@
 #include <mbedtls/sha1.h>
 #include <mbedtls/des.h>
 
+static inline unsigned char *ucstr(const char *str) { return (unsigned char *)str; }
+
 uint8_t mrtd_bac_check_digit(const uint8_t* input, const uint8_t length) {
     const uint8_t num_weights = 3;
     uint8_t weights[] = {7, 3, 1};
@@ -75,7 +77,7 @@ bool mrtd_bac_keys(const uint8_t kseed[16], uint8_t ksenc[16], uint8_t ksmac[16]
         for(uint8_t i=1; i<=2; ++i) {
             if(mbedtls_sha1_starts(&ctx)) break;
             if(mbedtls_sha1_update(&ctx, kseed, 16)) break;
-            if(mbedtls_sha1_update(&ctx, "\x00\x00\x00", 3)) break;
+            if(mbedtls_sha1_update(&ctx, ucstr("\x00\x00\x00"), 3)) break;
             if(mbedtls_sha1_update(&ctx, &i, 1)) break;
             if(mbedtls_sha1_finish(&ctx, hash)) break;
 

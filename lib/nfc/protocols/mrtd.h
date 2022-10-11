@@ -51,18 +51,19 @@ struct EFFormat {
 
 extern struct EFFormat EF;
 
+typedef uint8_t AIDValue[7];
+
+struct AIDSet {
+    AIDValue eMRTDApplication;
+    AIDValue TravelRecords;
+    AIDValue VisaRecords;
+    AIDValue AdditionalBiometrics;
+};
+
+extern struct AIDSet AID;
+
 //TODO: description
 MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx);
-bool mrtd_select(MrtdApplication* app, EFFile file);
-bool mrtd_select_efcardaccess(MrtdApplication* mrtd_app);
-bool mrtd_select_efdir(MrtdApplication* mrtd_app);
+bool mrtd_select_app(MrtdApplication* app, AIDValue aid);
+bool mrtd_select_file(MrtdApplication* app, EFFile file);
 void mrtd_test(MrtdApplication* app);
-
-/** Select the LDS1 eMRTD application
- * @note Can be used to detect presence of Passport/ID-card
- *
- * @param emv_app   MrtdApplication instance
- * 
- * @return true on success
- */
-bool mrtd_select_lds1(MrtdApplication* mrtd_app);

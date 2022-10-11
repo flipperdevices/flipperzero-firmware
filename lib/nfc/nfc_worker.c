@@ -228,7 +228,10 @@ static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
         //mrtd_select_efcardaccess(mrtd_app);
         //mrtd_select_efdir(mrtd_app);
         mrtd_test(mrtd_app);
-        if(!mrtd_select_lds1(mrtd_app)) break;
+        if(!mrtd_select_app(mrtd_app, AID.eMRTDApplication)) break;
+
+        //TODO: read general informatie
+        //TODO: after auth scene, do auth (BAC / PACE)
 
         /*
         // Copy data
